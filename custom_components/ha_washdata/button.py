@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Button platform for WashData."""
 
 from __future__ import annotations
@@ -27,6 +43,8 @@ async def async_setup_entry(
         WashDataTerminateButton(manager, entry),
         WashDataPauseCycleButton(manager, entry),
         WashDataResumeCycleButton(manager, entry),
+        WashDataRecordStartButton(manager, entry),
+        WashDataRecordStopButton(manager, entry),
     ])
 
 
@@ -142,3 +160,90 @@ class WashDataResumeCycleButton(ButtonEntity):
     async def async_press(self) -> None:
         """Handle the button press."""
         await self._manager.async_resume_cycle()
+
+
+class WashDataRecordStartButton(ButtonEntity):
+    """Button to start manually recording a clean cycle."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "record_start"
+    _attr_icon = "mdi:record-circle-outline"
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        """Initialize the button."""
+        self._manager = manager
+        self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_record_start"
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, entry.entry_id)},
+            "name": entry.title,
+            "manufacturer": "WashData",
+        }
+
+    async def async_added_to_hass(self) -> None:
+        """Register callbacks."""
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass,
+                SIGNAL_WASHER_UPDATE.format(self._entry.entry_id),
+                self._update_callback,
+            )
+        )
+
+    @callback
+    def _update_callback(self) -> None:
+        self.async_write_ha_state()
+
+    @property
+    def available(self) -> bool:
+        """Only available when not already recording and no active cycle is running."""
+        return (
+            not self._manager.recorder.is_recording
+            and self._manager.detector.state == "off"
+        )
+
+    async def async_press(self) -> None:
+        """Handle the button press."""
+        await self._manager.async_start_recording()
+
+
+class WashDataRecordStopButton(ButtonEntity):
+    """Button to stop manual recording."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "record_stop"
+    _attr_icon = "mdi:stop-circle"
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        """Initialize the button."""
+        self._manager = manager
+        self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_record_stop"
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, entry.entry_id)},
+            "name": entry.title,
+            "manufacturer": "WashData",
+        }
+
+    async def async_added_to_hass(self) -> None:
+        """Register callbacks."""
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass,
+                SIGNAL_WASHER_UPDATE.format(self._entry.entry_id),
+                self._update_callback,
+            )
+        )
+
+    @callback
+    def _update_callback(self) -> None:
+        self.async_write_ha_state()
+
+    @property
+    def available(self) -> bool:
+        """Only available while a recording is active."""
+        return self._manager.recorder.is_recording
+
+    async def async_press(self) -> None:
+        """Handle the button press."""
+        await self._manager.async_stop_recording()

@@ -1,0 +1,76 @@
+{
+  "cycles": [
+    {
+      "id": "cyc-001",
+      "start_time": "2026-07-10T08:15:00+00:00",
+      "end_time":   "2026-07-10T10:05:00+00:00",
+      "duration": 6600,
+      "profile_name": "Cotton 40°C",
+      "matched_profile": "Cotton 40°C",
+      "status": "completed",
+      "energy_kwh": 0.85,
+      "cycle_anomaly": null,
+      "energy_anomaly": null,
+      "ml_review": null,
+      "artifacts": []
+    },
+    {
+      "id": "cyc-002",
+      "start_time": "2026-07-09T09:00:00+00:00",
+      "end_time":   "2026-07-09T10:35:00+00:00",
+      "duration": 5700,
+      "profile_name": "Eco 60°C",
+      "matched_profile": "Eco 60°C",
+      "status": "completed",
+      "energy_kwh": 1.12,
+      "cycle_anomaly": null,
+      "energy_anomaly": null,
+      "ml_review": null,
+      "artifacts": []
+    },
+    {
+      "id": "cyc-003",
+      "start_time": "2026-07-08T19:30:00+00:00",
+      "end_time":   "2026-07-08T20:15:00+00:00",
+      "duration": 2700,
+      "profile_name": null,
+      "matched_profile": null,
+      "status": "completed",
+      "energy_kwh": 0.31,
+      "cycle_anomaly": "underrun",
+      "energy_anomaly": null,
+      "ml_review": { "label": "uncertain", "reviewed_at": null },
+      "artifacts": []
+    },
+    {
+      "id": "cyc-004",
+      "start_time": "2026-07-07T11:00:00+00:00",
+      "end_time":   "2026-07-07T13:20:00+00:00",
+      "duration": 8400,
+      "profile_name": "Quick 30°C",
+      "matched_profile": "Quick 30°C",
+      "status": "completed",
+      "energy_kwh": 0.22,
+      "cycle_anomaly": null,
+      "energy_anomaly": "energy_low",
+      "ml_review": null,
+      "artifacts": [{"type": "pause", "start_s": 1200, "end_s": 1260, "severity": "warning"}]
+    },
+    {
+      "id": "cyc-005",
+      "start_time": "2026-07-06T14:00:00+00:00",
+      "end_time":   "2026-07-06T15:50:00+00:00",
+      "duration": 6600,
+      "profile_name": "Cotton 40°C",
+      "matched_profile": "Cotton 40°C",
+      "status": "completed",
+      "energy_kwh": 0.82,
+      "cycle_anomaly": null,
+      "energy_anomaly": null,
+      "ml_review": { "label": "good", "reviewed_at": "2026-07-07T09:00:00+00:00" },
+      "artifacts": []
+    }
+  ],
+  "total": 5,
+  "has_more": false
+}

@@ -24,994 +24,64 @@
           "profile_name": "配置文件名称（可选）",
           "manual_duration": "预计持续时间（分钟）"
         }
+      },
+      "reconfigure": {
+        "title": "重新配置 WashData",
+        "description": "更新设备名称、设备类型或功率传感器。",
+        "data": {
+          "name": "设备名称",
+          "device_type": "设备类型",
+          "power_sensor": "功率传感器",
+          "min_power": "最小功率阈值（W）"
+        }
       }
     },
     "error": {
       "cannot_connect": "连接失败",
       "invalid_auth": "验证无效",
-      "unknown": "意外错误"
+      "unknown": "意外错误",
+      "invalid_power": "功率阈值必须大于 0"
     },
     "abort": {
-      "already_configured": "设备已配置"
+      "already_configured": "设备已配置",
+      "reconfigure_successful": "重新配置成功"
     }
   },
   "options": {
     "step": {
       "init": {
-        "menu_options": {
-          "learning_feedbacks": "查看学习反馈",
-          "settings": "设置",
-          "notifications": "通知",
-          "manage_cycles": "管理周期",
-          "manage_profiles": "管理个人资料",
-          "manage_phase_catalog": "管理阶段目录",
-          "record_cycle": "记录周期（手动）",
-          "diagnostics": "诊断与维护"
-        }
-      },
-      "apply_suggestions": {
-        "title": "复制建议值",
-        "description": "这会将当前建议值复制到您保存的设置中。这是一次性操作，不会启用自动覆盖。\n\n建议复制的值：\n{suggested}",
+        "title": "WashData 设置",
+        "description": "所有设置——检测、匹配、计时、通知、配置文件和周期——都可以在 WashData 面板中使用。仅使用此表单来更改功率传感器、设备类型或待机阈值。",
         "data": {
-          "confirm": "确认复制操作"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "查看建议的更改",
-        "description": "WashData 发现 **{pending_count}** 要应用的建议值。\n\n变化：\n{changes}\n\n✅ 选中下面的框并单击 **提交** 以立即应用并保存这些更改。\n❌ 不勾选并点击**提交**取消并返回。",
-        "data": {
-          "confirm_apply_suggestions": "应用并保存这些更改"
-        }
-      },
-      "settings": {
-        "title": "设置",
-        "description": "{deprecation_warning}调整检测阈值、学习和高级行为。默认值适用于大多数设置。\n\n当前可用的建议设置：{suggestions_count}。\n如果该值大于 0，请打开高级设置并使用“应用建议值”查看建议。",
-        "data": {
-          "apply_suggestions": "应用建议值",
+          "name": "设备名称",
           "device_type": "设备类型",
-          "power_sensor": "功率传感器实体",
-          "min_power": "最小功率（瓦）",
-          "off_delay": "周期结束延迟（秒）",
-          "notify_actions": "通知操作",
-          "notify_people": "延迟送货，直到这些人回家",
-          "notify_only_when_home": "延迟通知，直到选定的人在家",
-          "notify_fire_events": "触发自动化事件",
-          "notify_start_services": "周期开始 - 通知目标",
-          "notify_finish_services": "周期完成 - 通知目标",
-          "notify_live_services": "实时进展 - 通知目标",
-          "notify_before_end_minutes": "预完成通知（结束前几分钟）",
-          "notify_title": "通知标题",
-          "notify_icon": "通知图标",
-          "notify_start_message": "启动消息格式",
-          "notify_finish_message": "完成消息格式",
-          "notify_pre_complete_message": "预完成消息格式",
-          "show_advanced": "编辑高级设置（下一步）"
-        },
-        "data_description": {
-          "apply_suggestions": "选中此框可将学习算法建议的值复制到表单中。保存前检查。\n\n建议（来自学习）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "选择设备类型（洗衣机、烘干机、洗碗机、咖啡机、电动汽车）。该标签随每个周期一起存储，以便更好地组织。",
-          "power_sensor": "传感器实体报告实时功率（以瓦为单位）。您可以随时更改此设置，而不会丢失历史数据 - 如果您更换智能插头，这很有用。",
-          "min_power": "功率读数高于此阈值（以瓦为单位）表明设备正在运行。大多数设备从 2W 开始。",
-          "off_delay": "平滑功率必须保持低于停止阈值的秒数才能标记完成。默认值：120 秒。",
-          "notify_actions": "用于运行通知的可选 Home Assistant 操作序列（脚本、通知、TTS 等）。如果设置，操作将在回退通知服务之前运行。",
-          "notify_people": "用于存在门控的人员实体。启用后，通知发送会延迟，直到至少一名选定的人在家。",
-          "notify_only_when_home": "如果启用，则延迟通知，直到至少一个选定的人在家。",
-          "notify_fire_events": "如果启用，则触发循环开始和结束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_ended）以驱动自动化。",
-          "notify_start_services": "一个或多个通知服务在周期开始时发出警报。留空以跳过开始通知。",
-          "notify_finish_services": "一个或多个通知服务在周期完成或接近完成时发出警报。留空以跳过完成通知。",
-          "notify_live_services": "一项或多项通知服务在周期运行时接收实时进度更新（仅限移动配套应用程序）。留空以跳过实时更新。",
-          "notify_before_end_minutes": "触发通知的预计周期结束前的分钟数。设置为 0 以禁用。默认值：0。",
-          "notify_title": "通知的自定义标题。支持 {device} 占位符。",
-          "notify_icon": "用于通知的图标（例如 mdi：洗衣机）。留空以不发送图标。",
-          "notify_start_message": "循环开始时发送的消息。支持 {device} 占位符。",
-          "notify_finish_message": "循环结束时发送的消息。支持 {device}、{duration}、{program}, {energy_kwh}, {cost} 占位符。",
-          "notify_pre_complete_message": "循环运行时，循环实时进度的文本会更新。支持 {device}、{minutes}、{program} 占位符。"
-        }
-      },
-      "notifications": {
-        "title": "通知",
-        "description": "配置通知渠道、模板和可选的实时移动进度更新。",
-        "data": {
-          "notify_actions": "通知操作",
-          "notify_people": "延迟送货，直到这些人回家",
-          "notify_only_when_home": "延迟通知，直到选定的人在家",
-          "notify_fire_events": "触发自动化事件",
-          "notify_start_services": "周期开始 - 通知目标",
-          "notify_finish_services": "周期完成 - 通知目标",
-          "notify_live_services": "实时进展 - 通知目标",
-          "notify_before_end_minutes": "预完成通知（结束前几分钟）",
-          "notify_live_interval_seconds": "实时更新间隔（秒）",
-          "notify_live_overrun_percent": "实时更新超限容限 (%)",
-          "notify_live_chronometer": "天文台倒计时器",
-          "notify_title": "通知标题",
-          "notify_icon": "通知图标",
-          "notify_start_message": "启动消息格式",
-          "notify_finish_message": "完成消息格式",
-          "notify_pre_complete_message": "预完成消息格式",
-          "energy_price_entity": "能源价格 - 实体（可选）",
-          "energy_price_static": "能源价格 - 静态值（可选）",
-          "go_back": "不保存并返回",
-          "notify_reminder_message": "提醒消息格式",
-          "notify_timeout_seconds": "自动关闭后（秒）",
-          "notify_channel": "通知通道（状态/实时/提醒）",
-          "notify_finish_channel": "完成通知通道"
-        },
-        "data_description": {
-          "go_back": "勾选此项并点击提交，以放弃上述任何更改并返回主菜单。",
-          "notify_actions": "用于运行通知的可选 Home Assistant 操作序列（脚本、通知、TTS 等）。如果设置，操作将在回退通知服务之前运行。",
-          "notify_people": "用于存在门控的人员实体。启用后，通知发送会延迟，直到至少一名选定的人在家。",
-          "notify_only_when_home": "如果启用，则延迟通知，直到至少一个选定的人在家。",
-          "notify_fire_events": "如果启用，则触发循环开始和结束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_ended）以驱动自动化。",
-          "notify_start_services": "一个或多个通知服务在周期开始时发出警报（例如notify.mobile_app_my_phone）。留空以跳过开始通知。",
-          "notify_finish_services": "一个或多个通知服务在周期完成或接近完成时发出警报。留空以跳过完成通知。",
-          "notify_live_services": "一项或多项通知服务在周期运行时接收实时进度更新（仅限移动配套应用程序）。留空以跳过实时更新。",
-          "notify_before_end_minutes": "触发通知的预计周期结束前的分钟数。设置为 0 以禁用。默认值：0。",
-          "notify_live_interval_seconds": "运行时发送进度更新的频率。值越低，响应速度越快，但会消耗更多通知。强制执行至少 30 秒 - 低于 30 秒的值将自动四舍五入为 30 秒。",
-          "notify_live_overrun_percent": "安全裕度高于长/超出周期的估计更新计数（例如 20% 允许 1.2 倍估计更新）。",
-          "notify_live_chronometer": "启用后，每次实时更新都会包含预计完成时间的计时器倒计时。更新之间，通知计时器会在设备上自动计时（仅限 Android 配套应用程序）。",
-          "notify_title": "通知的自定义标题。支持 {device} 占位符。",
-          "notify_icon": "用于通知的图标（例如 mdi：洗衣机）。留空以不发送图标。",
-          "notify_start_message": "循环开始时发送的消息。支持 {device} 占位符。",
-          "notify_finish_message": "循环结束时发送的消息。支持 {device}、{duration}、{program}, {energy_kwh}, {cost} 占位符。",
-          "energy_price_entity": "选择保存当前电价的数字实体（例如sensor.electricity_price、input_number.energy_rate）。设置后，启用 {cost} 占位符。如果两者都配置了，则优先于静态值。",
-          "energy_price_static": "每千瓦时固定电价。设置后，启用 {cost} 占位符。如果上面配置了实体，则忽略。在消息模板中添加您的货币符号，例如{cost} 欧元。",
-          "notify_reminder_message": "一次性提醒文本在预计结束前发送配置的分钟数。与上面的定期实时更新不同。支持 {device}、{minutes}、{program} 占位符。",
-          "notify_timeout_seconds": "在这么多秒后自动关闭通知（作为配套应用程序“超时”转发）。设置为 0 以保留它们直到被解雇。默认值：0。",
-          "notify_channel": "Android 配套应用通知渠道，用于显示状态、实时进度和提醒通知。频道的声音和重要性是在第一次使用频道名称时在配套应用程序中配置的 - WashData 仅设置频道名称。对于应用程序默认值，将其留空。",
-          "notify_finish_channel": "单独的 Android 通道用于已完成的警报（也由提醒和洗衣等待小车使用），以便它可以有自己的声音。留空以重复使用上面的通道。",
-          "notify_pre_complete_message": "循环运行时，循环实时进度的文本会更新。支持 {device}、{minutes}、{program} 占位符。"
-        }
-      },
-      "advanced_settings": {
-        "title": "高级设置",
-        "description": "调整检测阈值、学习和高级行为。默认值适用于大多数设置。",
-        "sections": {
-          "suggestions_section": {
-            "name": "建议设置",
-            "description": "{suggestions_count} 条已学习的建议可用。勾选应用建议值以在保存前查看建议的更改。",
-            "data": {
-              "apply_suggestions": "应用建议值"
-            },
-            "data_description": {
-              "apply_suggestions": "选中此框可打开学习算法建议值的检查步骤。没有任何内容会自动保存。\n\n建议（来自学习）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
-            }
-          },
-          "detection_section": {
-            "name": "检测与功率阈值",
-            "description": "设备在何时被视为开启或关闭、能量门限以及状态转换的时序。",
-            "data": {
-              "start_duration_threshold": "开始去抖持续时间（秒）",
-              "start_energy_threshold": "启动能量门（Wh）",
-              "completion_min_seconds": "完成最短运行时间（秒）",
-              "start_threshold_w": "启动阈值（W）",
-              "stop_threshold_w": "停止阈值（W）",
-              "end_energy_threshold": "最终能量门（Wh）",
-              "running_dead_zone": "运行死区（秒）",
-              "end_repeat_count": "结束重复计数",
-              "min_off_gap": "周期之间的最小间隙（秒）",
-              "sampling_interval": "采样间隔（秒）"
-            },
-            "data_description": {
-              "start_duration_threshold": "忽略短于此持续时间（秒）的短暂功率峰值。在实际周期开始之前过滤掉启动尖峰（例如 60W 持续 2 秒）。默认值：5 秒。",
-              "start_energy_threshold": "循环必须在启动阶段积累至少这么多的能量 (Wh) 才能得到确认。默认值：0.005 瓦时。",
-              "completion_min_seconds": "比这短的周期即使自然结束也会被标记为“中断”。默认值：600 秒。",
-              "start_threshold_w": "功率必须上升到该阈值以上才能开始一个周期。设置高于待机功率。默认值：min_power + 1 W。",
-              "stop_threshold_w": "功率必须低于该阈值才能结束一个周期。设置略高于零以避免噪音触发错误结束。默认值：0.6 * min_power。",
-              "end_energy_threshold": "仅当最后一个关闭延迟窗口中的能量低于该值 (Wh) 时，循环才会结束。如果功率波动接近于零，可防止错误结束。默认值：0.05 瓦时。",
-              "running_dead_zone": "周期开始后，忽略如此多秒的功率骤降，以防止初始旋转阶段期间的错误结束检测。设置为 0 以禁用。默认值：0 秒。",
-              "end_repeat_count": "在结束周期之前必须连续满足结束条件（功率低于 off_delay 阈值）的次数。较高的值可防止暂停期间出现错误结束。默认值：1。",
-              "min_off_gap": "如果一个周期在前一个周期结束后的这么多秒内开始，它们将被合并为一个周期。",
-              "sampling_interval": "最小采样间隔（以秒为单位）。超过此速率的更新将被忽略。默认值：30 秒（洗衣机、洗衣干衣机和洗碗机为 2 秒）。"
-            }
-          },
-          "matching_section": {
-            "name": "配置文件匹配与学习",
-            "description": "WashData 以多积极的方式将运行中的周期与已学习的配置文件进行匹配，以及何时请求反馈。",
-            "data": {
-              "profile_match_min_duration_ratio": "配置文件匹配最短持续时间比率（0.1-1.0）",
-              "profile_match_interval": "配置文件匹配间隔（秒）",
-              "profile_match_threshold": "配置文件匹配阈值",
-              "profile_unmatch_threshold": "配置文件不匹配阈值",
-              "auto_label_confidence": "自动标记置信度 (0-1)",
-              "learning_confidence": "反馈请求置信度 (0-1)",
-              "suppress_feedback_notifications": "抑制反馈通知",
-              "duration_tolerance": "持续时间容差（0-0.5）",
-              "smoothing_window": "平滑窗口（样本）",
-              "profile_duration_tolerance": "配置文件匹配持续时间容差 (0-0.5)"
-            },
-            "data_description": {
-              "profile_match_min_duration_ratio": "配置文件匹配的最小持续时间比率。运行周期必须至少是配置文件持续时间的这一部分才能匹配。较低 = 较早匹配。默认值：0.50 (50%)。",
-              "profile_match_interval": "在一个周期内尝试配置文件匹配的频率（以秒为单位）。较低的值可提供更快的检测速度，但会使用更多的 CPU。默认值：300 秒（5 分钟）。",
-              "profile_match_threshold": "将配置文件视为匹配所需的最低 DTW 相似度分数 (0.0–1.0)。越高=匹配越严格，误报越少。默认值：0.4。",
-              "profile_unmatch_threshold": "DTW 相似性得分 (0.0–1.0)，低于该得分的先前匹配的配置文件将被拒绝。应低于匹配阈值以防止闪烁。默认值：0.35。",
-              "auto_label_confidence": "完成时自动标记等于或高于此置信度的循环 (0.0–1.0)。",
-              "learning_confidence": "通过事件请求用户验证的最低置信度 (0.0–1.0)。",
-              "suppress_feedback_notifications": "启用后，WashData 仍将在内部跟踪和请求反馈，但不会显示要求您确认周期的持续通知。当循环总是被正确检测到并且您发现提示分散注意力时很有用。",
-              "duration_tolerance": "运行期间剩余时间估计的容差（0.0–0.5 对应于 0–50%）。",
-              "smoothing_window": "用于移动平均平滑的最近功率读数的数量。",
-              "profile_duration_tolerance": "配置文件匹配所使用的总持续时间方差的容差 (0.0–0.5)。默认行为：±25%。"
-            }
-          },
-          "timing_section": {
-            "name": "时序、维护与调试",
-            "description": "看门狗、进度重置、自动维护以及调试实体的公开。",
-            "data": {
-              "watchdog_interval": "看门狗间隔（秒）",
-              "no_update_active_timeout": "无更新超时（秒）",
-              "progress_reset_delay": "进度重置延迟（秒）",
-              "auto_maintenance": "启用自动维护",
-              "expose_debug_entities": "公开调试实体",
-              "save_debug_traces": "保存调试跟踪"
-            },
-            "data_description": {
-              "watchdog_interval": "运行时看门狗检查之间的秒数。默认值：5 秒。警告：确保该值高于传感器的更新间隔，以避免错误停止（例如，如果传感器每 60 秒更新一次，则使用 65 秒以上）。",
-              "no_update_active_timeout": "对于更改发布传感器：只有在这么多秒内没有更新到达时才强制结束 ACTIVE 周期。低功耗完成仍然使用关闭延迟。",
-              "progress_reset_delay": "一个周期完成 (100%) 后，等待这么多秒的空闲时间，然后再将进度重置为 0%。 Default: 300s.",
-              "auto_maintenance": "启用自动维护（修复样本、合并片段）。",
-              "expose_debug_entities": "显示高级传感器（置信度、相位、模糊度）以进行调试。",
-              "save_debug_traces": "在历史记录中存储详细的排名和电量跟踪数据（增加存储使用量）。"
-            }
-          },
-          "anti_wrinkle_section": {
-            "name": "防皱保护（烘干机）",
-            "description": "忽略周期结束后的滚筒转动，以防止幽灵周期。仅适用于烘干机 / 洗烘一体机。",
-            "data": {
-              "anti_wrinkle_enabled": "抗皱护罩（仅限烘干机）",
-              "anti_wrinkle_max_power": "抗皱最大功率(W)",
-              "anti_wrinkle_max_duration": "抗皱最大持续时间（秒）",
-              "anti_wrinkle_exit_power": "抗皱退出功率（W）"
-            },
-            "data_description": {
-              "anti_wrinkle_enabled": "循环结束后忽略短暂的低功率滚筒旋转，以防止幽灵循环（仅限烘干机/洗衣烘干机）。",
-              "anti_wrinkle_max_power": "等于或低于该功率的爆发被视为抗皱旋转而不是新的循环。仅在启用抗皱护罩时适用。",
-              "anti_wrinkle_max_duration": "视为抗皱旋转的最大爆破长度。仅在启用抗皱护罩时适用。",
-              "anti_wrinkle_exit_power": "如果功率低于此水平，请立即退出抗皱（真正关闭）。仅在启用抗皱护罩时适用。"
-            }
-          },
-          "delay_start_section": {
-            "name": "延迟启动检测",
-            "description": "在周期真正开始之前，将持续的低功耗待机视为“等待启动”。",
-            "data": {
-              "delay_start_detect_enabled": "启用延迟启动检测",
-              "delay_confirm_seconds": "延迟启动：待机确认时间（秒）",
-              "delay_timeout_hours": "延迟启动：最长等待时间 (h)"
-            },
-            "data_description": {
-              "delay_start_detect_enabled": "启用后，会检测到短暂的低功耗峰值，然后持续待机功耗，作为延迟启动。延迟期间状态传感器显示“等待启动”。在周期实际开始之前，不会跟踪计划时间或进度。要求将 start_threshold_w 设置为高于漏极尖峰功率。",
-              "delay_confirm_seconds": "在 WashData 进入“等待启动”之前，功率必须在停止阈值 (W) 和启动阈值 (W) 之间保持这么多秒。可过滤短暂的菜单导航峰值。默认值：60 秒。",
-              "delay_timeout_hours": "安全超时：如果经过这么多小时机器仍处于“等待启动”状态，WashData 将重置为“关闭”。默认值：8 小时。"
-            }
-          },
-          "external_triggers_section": {
-            "name": "外部触发、门控与暂停",
-            "description": "可选的外部结束触发传感器、用于暂停/洁净检测的门传感器，以及暂停断电开关。",
-            "data": {
-              "external_end_trigger_enabled": "启用外部循环结束触发器",
-              "external_end_trigger": "外部循环结束传感器",
-              "external_end_trigger_inverted": "反转触发逻辑（触发关闭）",
-              "door_sensor_entity": "门磁",
-              "pause_cuts_power": "暂停时切断电源",
-              "switch_entity": "开关实体（用于暂停断电）",
-              "notify_unload_delay_minutes": "洗衣等待通知延迟（分钟）"
-            },
-            "data_description": {
-              "external_end_trigger_enabled": "启用对外部二进制传感器的监控以触发循环完成。",
-              "external_end_trigger": "选择二进制传感器实体。当该传感器触发时，当前周期将以“已完成”状态结束。",
-              "external_end_trigger_inverted": "默认情况下，当传感器打开时触发器会触发。选中此框以在传感器关闭时触发。",
-              "door_sensor_entity": "用于机器门的可选二进制传感器（开=打开，关=关闭）。当门在活动周期期间打开时，WashData 将确认该周期是有意暂停的。循环结束后，如果门仍然关闭，则状态更改为“清洁”，直到门打开。注意：关上门不会自动恢复暂停的循环 - 必须通过“恢复循环”按钮或服务手动触发恢复。",
-              "pause_cuts_power": "通过“暂停循环”按钮或服务暂停时，还要关闭配置的开关实体。仅当为该设备配置了交换实体时才生效。",
-              "switch_entity": "暂停或恢复时要切换的开关实体。启用“暂停时切断电源”时需要。",
-              "notify_unload_delay_minutes": "循环结束且门在这么多分钟内未打开后，通过完成通知通道发送通知（需要门传感器）。设置为 0 以禁用。默认值：60 分钟"
-            }
-          },
-          "pump_section": {
-            "name": "泵监控",
-            "description": "仅适用于泵设备类型。如果泵周期运行超过此时长，则触发事件。",
-            "data": {
-              "pump_stuck_duration": "泵卡住警报阈值（仅限泵）"
-            },
-            "data_description": {
-              "pump_stuck_duration": "如果泵循环在这么多秒后仍在运行，则会触发一次 ha_washdata_pump_stuck 事件。用它来检测堵塞的电机（典型的污水泵运行时间低于 60 秒）。默认值：1800 秒（30 分钟）。仅限泵设备类型。"
-            }
-          },
-          "device_link_section": {
-            "name": "设备链接",
-            "description": "（可选）将此 WashData 设备链接到现有的 Home Assistant 设备（例如智能插头或设备本身）。然后，WashData 设备将显示为“通过该设备连接”。留空可将 WashData 保留为独立设备。",
-            "data": {
-              "linked_device": "链接设备"
-            },
-            "data_description": {
-              "linked_device": "选择要连接 WashData 的设备。这会在设备注册表中添加“连接方式”引用； WashData保留自己的设备卡和实体。清除选择以删除链接。"
-            }
-          }
-        }
-      },
-      "diagnostics": {
-        "title": "诊断与维护",
-        "description": "运行维护操作，例如合并碎片周期或迁移存储的数据。\n\n**存储使用情况**\n\n- 文件大小：{file_size_kb} KB\n- 周期：{cycle_count}\n- 个人资料：{profile_count}\n- 调试跟踪：{debug_count}",
-        "menu_options": {
-          "reprocess_history": "维护：重新处理和优化数据",
-          "clear_debug_data": "清除调试数据（释放空间）",
-          "wipe_history": "擦除该设备的所有数据（不可逆）",
-          "export_import": "使用设置导出/导入 JSON（复制/粘贴）",
-          "menu_back": "← 返回"
-        }
-      },
-      "clear_debug_data": {
-        "title": "清除调试数据",
-        "description": "您确定要删除所有存储的调试跟踪吗？这将释放空间，但会删除过去周期中的详细排名信息。"
-      },
-      "manage_cycles": {
-        "title": "管理周期",
-        "description": "最近的周期：\n{recent_cycles}",
-        "menu_options": {
-          "auto_label_cycles": "自动标记旧自行车",
-          "select_cycle_to_label": "标签特定周期",
-          "select_cycle_to_delete": "删除循环",
-          "interactive_editor": "合并/拆分交互式编辑器",
-          "trim_cycle_select": "修剪周期数据",
-          "menu_back": "← 返回"
-        }
-      },
-      "manage_cycles_empty": {
-        "title": "管理周期",
-        "description": "尚未记录任何周期。",
-        "menu_options": {
-          "auto_label_cycles": "自动标记旧自行车",
-          "menu_back": "← 返回"
-        }
-      },
-      "manage_profiles": {
-        "title": "管理个人资料",
-        "description": "简介摘要：\n{profile_summary}",
-        "menu_options": {
-          "create_profile": "创建新的个人资料",
-          "edit_profile": "编辑/重命名配置文件",
-          "delete_profile_select": "删除个人资料",
-          "profile_stats": "个人资料统计",
-          "cleanup_profile": "清理历史记录 - 图表和删除",
-          "assign_profile_phases_select": "分配相位范围",
-          "menu_back": "← 返回"
-        }
-      },
-      "manage_profiles_empty": {
-        "title": "管理个人资料",
-        "description": "尚未创建配置文件。",
-        "menu_options": {
-          "create_profile": "创建新的个人资料",
-          "menu_back": "← 返回"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "管理阶段目录",
-        "description": "阶段目录（该设备的默认值+自定义阶段）：\n{phase_summary}",
-        "menu_options": {
-          "phase_catalog_create": "创建新阶段",
-          "phase_catalog_edit_select": "编辑阶段",
-          "phase_catalog_delete": "删除阶段",
-          "menu_back": "← 返回"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "创建自定义阶段",
-        "description": "创建自定义阶段名称和描述，然后选择其适用的设备类型。",
-        "data": {
-          "target_device_type": "目标设备类型",
-          "phase_name": "阶段名称",
-          "phase_description": "阶段描述"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "编辑自定义阶段",
-        "description": "选择要编辑的自定义阶段。",
-        "data": {
-          "phase_name": "定制阶段"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "编辑自定义阶段",
-        "description": "编辑阶段：{phase_name}",
-        "data": {
-          "phase_name": "阶段名称",
-          "phase_description": "阶段描述"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "删除自定义阶段",
-        "description": "选择要删除的自定义阶段。使用此阶段的任何指定范围都将被删除。",
-        "data": {
-          "phase_name": "定制阶段"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "分配相位范围",
-        "description": "配置文件的阶段预览：**{profile_name}**\n\n{timeline_svg}\n\n**当前范围：**\n{current_ranges}\n\n使用以下操作来添加、编辑、删除或保存范围。",
-        "menu_options": {
-          "assign_profile_phases_add": "添加相位范围",
-          "assign_profile_phases_edit_select": "编辑相位范围",
-          "assign_profile_phases_delete": "删除相位范围",
-          "phase_ranges_clear": "清除所有范围",
-          "assign_profile_phases_auto_detect": "自动检测相位",
-          "phase_ranges_save": "保存并返回",
-          "menu_back": "← 返回"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "添加相位范围",
-        "description": "在当前草稿中添加一个阶段范围。",
-        "data": {
-          "phase_name": "阶段",
-          "start_min": "开始时间",
-          "end_min": "结束分钟"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "编辑相位范围",
-        "description": "选择要编辑的范围。",
-        "data": {
-          "range_index": "相位范围"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "编辑相位范围",
-        "description": "更新选定的相位范围。",
-        "data": {
-          "phase_name": "阶段",
-          "start_min": "开始时间",
-          "end_min": "结束分钟"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "删除相位范围",
-        "description": "选择要从草稿中删除的范围。",
-        "data": {
-          "range_index": "相位范围"
-        }
-      },
-      "assign_profile_phases_auto_detect": {
-        "title": "自动检测阶段",
-        "description": "个人资料：***{profile_name}**\n\n{timeline_svg}\n\n**自动检测到 {detected_count} 个阶段。** 选择下面的操作。",
-        "data": {
-          "action": "行动"
-        }
-      },
-      "assign_profile_phases_auto_detect_name": {
-        "title": "命名检测到的阶段",
-        "description": "个人资料：***{profile_name}**\n\n**检测到{detected_count}相：**\n{ranges_summary}\n\n为每个阶段指定一个名称。"
-      },
-      "assign_profile_phases_select": {
-        "title": "分配相位范围",
-        "description": "选择一个配置文件来配置相位范围。",
-        "data": {
-          "profile": "轮廓"
-        }
-      },
-      "profile_stats": {
-        "title": "个人资料统计",
-        "description": "{stats_table}"
-      },
-      "create_profile": {
-        "title": "创建新的个人资料",
-        "description": "手动或从过去的周期创建新的配置文件。\n\n配置文件名称示例：“Delicates”、“Heavy Duty”、“Quick Wash”",
-        "data": {
-          "profile_name": "个人资料名称",
-          "reference_cycle": "参考周期（可选）",
-          "manual_duration": "手动持续时间（分钟）"
-        }
-      },
-      "edit_profile": {
-        "title": "编辑个人资料",
-        "description": "选择要重命名的配置文件",
-        "data": {
-          "profile": "轮廓"
-        }
-      },
-      "rename_profile": {
-        "title": "编辑个人资料详细信息",
-        "description": "当前个人资料：{current_name}",
-        "data": {
-          "new_name": "个人资料名称",
-          "manual_duration": "手动持续时间（分钟）"
-        }
-      },
-      "delete_profile_select": {
-        "title": "删除个人资料",
-        "description": "选择要删除的配置文件",
-        "data": {
-          "profile": "轮廓"
-        }
-      },
-      "delete_profile_confirm": {
-        "title": "确认删除个人资料",
-        "description": "⚠️ 这将永久删除个人资料：{profile_name}",
-        "data": {
-          "unlabel_cycles": "使用此配置文件从循环中删除标签"
-        }
-      },
-      "auto_label_cycles": {
-        "title": "自动标记旧自行车",
-        "description": "共找到 {total_count} 个周期。个人资料：{profiles}",
-        "data": {
-          "confidence_threshold": "最低置信度 (0.50-0.95)"
-        }
-      },
-      "select_cycle_to_label": {
-        "title": "选择循环标签",
-        "description": "✓ = 已完成，⚠ = 已恢复，✗ = 已中断",
-        "data": {
-          "cycle_id": "循环"
-        }
-      },
-      "select_cycle_to_delete": {
-        "title": "删除循环",
-        "description": "⚠️这将永久删除所选周期",
-        "data": {
-          "cycle_id": "循环删除"
-        }
-      },
-      "label_cycle": {
-        "title": "标签周期",
-        "description": "{cycle_info}",
-        "data": {
-          "profile_name": "轮廓",
-          "new_profile_name": "新配置文件名称（如果创建）"
-        }
-      },
-      "post_process": {
-        "title": "流程历史记录（合并/拆分）",
-        "description": "通过合并碎片运行并在时间窗口内拆分错误合并的周期来清理周期历史记录。输入要回顾的小时数（全部使用 999999）。",
-        "data": {
-          "time_range": "回顾窗口（小时）",
-          "gap_seconds": "合并/拆分间隙（秒）"
-        },
-        "data_description": {
-          "time_range": "扫描要合并的碎片周期的小时数。使用999999处理所有历史数据。",
-          "gap_seconds": "决定拆分还是合并的阈值。比这更短的间隙将被合并。比这更长的间隙被分开。降低此值可强制对错误合并的循环进行拆分。"
-        }
-      },
-      "cleanup_profile": {
-        "title": "清理历史记录 - 选择配置文件",
-        "description": "选择要可视化的配置文件。这将生成一个图表，显示该配置文件的所有过去周期，以帮助识别异常值。",
-        "data": {
-          "profile": "轮廓"
-        }
-      },
-      "cleanup_select": {
-        "title": "清理历史记录 - 图表和删除",
-        "description": "![图表]({graph_url})\n\n**可视化{profile_name}**\n\n该图将各个周期显示为彩色线。识别异常值（远离该组的线）并在下面的列表中匹配它们的颜色以将其删除。\n\n**选择要永久删除的周期：**",
-        "data": {
-          "cycles_to_delete": "循环删除（检查匹配颜色）"
-        }
-      },
-      "interactive_editor": {
-        "title": "合并/拆分交互式编辑器",
-        "description": "选择要对您的周期历史记录执行的手动操作。",
-        "menu_options": {
-          "editor_split": "分割一个周期（查找间隙）",
-          "editor_merge": "合并循环（连接片段）",
-          "editor_delete": "删除周期",
-          "menu_back": "← 返回"
-        }
-      },
-      "editor_select": {
-        "title": "选择周期",
-        "description": "选择要处理的周期。\n\n{info_text}",
-        "data": {
-          "selected_cycles": "周期"
-        }
-      },
-      "editor_configure": {
-        "title": "配置和应用",
-        "description": "{preview_md}",
-        "data": {
-          "confirm_action": "行动",
-          "merged_profile": "生成的配置文件",
-          "new_profile_name": "新配置文件名称",
-          "confirm_commit": "是的，我确认此操作",
-          "segment_0_profile": "第 1 段简介",
-          "segment_1_profile": "2 段简介",
-          "segment_2_profile": "第 3 段简介",
-          "segment_3_profile": "第 4 段简介",
-          "segment_4_profile": "5 段简介",
-          "segment_5_profile": "6 段简介",
-          "segment_6_profile": "7 段简介",
-          "segment_7_profile": "8 段简介",
-          "segment_8_profile": "9 段简介",
-          "segment_9_profile": "10 段简介"
-        }
-      },
-      "editor_split_params": {
-        "title": "分体配置",
-        "description": "调整分割此循环的灵敏度。任何超过此长度的空闲间隙都会导致分裂。",
-        "data": {
-          "split_mode": "分割方式"
-        }
-      },
-      "editor_split_auto_params": {
-        "title": "自动分段配置",
-        "description": "调整拆分此周期的灵敏度。任何长于此值的空闲间隔都会触发拆分。",
-        "data": {
-          "min_gap_seconds": "分段间隔阈值（秒）"
-        }
-      },
-      "editor_split_manual_params": {
-        "title": "手动分段时间戳",
-        "description": "{preview_md}周期窗口：**{cycle_start_wallclock} → {cycle_end_wallclock}**，日期为 {cycle_date}。\n\n输入一个或多个分段时间戳（`HH:MM` 或 `HH:MM:SS`），每行一个。周期将在每个时间戳处被切开 — N 个时间戳会产生 N+1 个片段。",
-        "data": {
-          "split_timestamps": "分割时间戳"
-        }
-      },
-      "reprocess_history": {
-        "title": "维护：重新处理和优化数据",
-        "description": "对历史数据进行深度清理：\n1. 调整零功率读数（静音）。\n2. 修复循环时间/持续时间。\n3. 重新计算所有统计模型（包络线）。\n\n**运行此命令可以修复数据问题或应用新算法。**"
-      },
-      "wipe_history": {
-        "title": "擦除历史记录（仅测试）",
-        "description": "⚠️ 这将永久删除该设备的所有存储周期和配置文件。这无法撤销！"
-      },
-      "export_import": {
-        "title": "导出/导入 JSON",
-        "description": "复制/粘贴该设备的周期、配置文件和设置。下面导出或粘贴 JSON 进行导入。",
-        "data": {
-          "mode": "行动",
-          "json_payload": "完整配置 JSON"
-        },
-        "data_description": {
-          "mode": "选择“导出”以复制当前数据和设置，或选择“导入”以粘贴从另一个 WashData 设备导出的数据。",
-          "json_payload": "对于导出：复制此 JSON（包括周期、配置文件和所有微调设置）。对于导入：粘贴从 WashData 导出的 JSON。"
-        }
-      },
-      "record_cycle": {
-        "title": "记录周期",
-        "description": "手动记录一个周期以创建无干扰的干净轮廓。\n\n状态：***{status}**\n持续时间：{duration}秒\n样本：{samples}",
-        "menu_options": {
-          "record_refresh": "刷新状态",
-          "record_stop": "停止录制（保存并处理）",
-          "record_start": "开始新录音",
-          "record_process": "处理最后的录音（修剪和保存）",
-          "record_discard": "放弃最后的录音",
-          "menu_back": "← 返回"
-        }
-      },
-      "record_process": {
-        "title": "过程记录",
-        "description": "![图表]({graph_url})\n\n**图表显示原始记录。**蓝色 = 保留，红色 = 建议的修剪。\n*图表是静态的，不会随着表单更改而更新。*\n\n录音停止了。修剪与检测到的采样率 (~{sampling_rate}s) 对齐。\n\n原始持续时间：{duration} 秒\n样本：{samples}",
-        "data": {
-          "head_trim": "修剪开始（秒）",
-          "tail_trim": "修剪结束（秒）",
-          "save_mode": "保存目的地",
-          "profile_name": "个人资料名称"
-        }
-      },
-      "learning_feedbacks": {
-        "title": "学习反馈",
-        "description": "待处理反馈：{count}\n\n{pending_table}\n\n选择要处理的周期审核请求。",
-        "menu_options": {
-          "learning_feedbacks_pick": "查看待处理反馈",
-          "learning_feedbacks_dismiss_all": "忽略所有待处理反馈",
-          "menu_back": "← 返回"
-        }
-      },
-      "learning_feedbacks_pick": {
-        "title": "选择要查看的反馈",
-        "description": "选择要打开的周期复查请求。",
-        "data": {
-          "selected_feedback": "选择要查看的周期"
-        }
-      },
-      "learning_feedbacks_empty": {
-        "title": "学习反馈",
-        "description": "未找到待处理的反馈请求。",
-        "menu_options": {
-          "menu_back": "← 返回"
-        }
-      },
-      "learning_feedbacks_dismiss_all": {
-        "title": "忽略所有待处理反馈",
-        "description": "您即将忽略 **{count}** 个待处理反馈请求。被忽略的周期会保留在您的历史记录中，但不会贡献新的学习信号。此操作无法撤销。\n\n✅ 选中下面的框并单击 **提交** 以忽略全部。\n❌ 不勾选并点击 **提交** 以取消并返回。",
-        "data": {
-          "confirm_dismiss_all": "确认：忽略所有待处理的反馈请求"
-        }
-      },
-      "resolve_feedback": {
-        "title": "解决反馈",
-        "description": "{comparison_img}{candidates_table}\n**检测到的配置文件**：{detected_profile} ({confidence_pct}%)\n**预计持续时间**：{est_duration_min} 分钟\n**实际持续时间**：{act_duration_min} 分钟\n\n__选择以下操作：__",
-        "data": {
-          "action": "你想做什么？",
-          "corrected_profile": "正确的程序（如果更正）",
-          "corrected_duration": "正确持续时间（以秒为单位）（如果进行更正）"
-        }
-      },
-      "trim_cycle_select": {
-        "title": "修剪周期 - 选择周期",
-        "description": "选择要修剪的周期。 ✓ = 已完成，⚠ = 已恢复，✗ = 已中断",
-        "data": {
-          "cycle_id": "循环"
-        }
-      },
-      "trim_cycle": {
-        "title": "修剪周期",
-        "description": "当前窗口：{trim_summary}\n\n{trim_svg}",
-        "data": {
-          "action": "行动"
-        }
-      },
-      "trim_cycle_start": {
-        "title": "设置修剪开始",
-        "description": "循环窗口：{cycle_start_wallclock} → {cycle_end_wallclock}\n\n当前开始时间：**{current_wallclock}**（距周期开始时间+{current_offset_min} 分钟）\n\n使用下面的时钟选择器选择新的开始时间。",
-        "data": {
-          "trim_start_time": "新的开始时间",
-          "trim_start_min": "新的开始（周期开始后的分钟数）"
-        }
-      },
-      "trim_cycle_end": {
-        "title": "设置修剪结束",
-        "description": "循环窗口：{cycle_start_wallclock} → {cycle_end_wallclock}\n\n当前结束：**{current_wallclock}**（距离周期开始+{current_offset_min} 分钟）\n\n使用下面的时钟选择器选择新的结束时间。",
-        "data": {
-          "trim_end_time": "新的结束时间",
-          "trim_end_min": "新的结束（距离周期开始的分钟数）"
+          "power_sensor": "功率传感器",
+          "min_power": "最小功率阈值（W）"
         }
       }
     },
     "error": {
-      "import_failed": "导入失败。请粘贴有效的 WashData 导出 JSON。",
-      "select_exactly_one": "请仅为此操作选择 1 个周期。",
-      "select_at_least_one": "请至少为此操作选择 1 个周期。",
-      "select_at_least_two": "请至少为此操作选择 2 个周期。",
-      "profile_exists": "同名的配置文件已存在",
-      "rename_failed": "无法重命名配置文件。配置文件可能不存在或新名称已被使用。",
-      "assignment_failed": "无法将配置文件分配给循环",
-      "duplicate_phase": "具有此名称的阶段已存在。",
-      "phase_not_found": "未找到所选相。",
-      "invalid_phase_name": "阶段名称不能为空。",
-      "phase_name_too_long": "相名太长。",
-      "invalid_phase_range": "相位范围无效。结束必须大于开始。",
-      "invalid_phase_timestamp": "时间戳无效。使用 YYYY-MM-DD HH:MM 或 HH:MM 格式。",
-      "overlapping_phase_ranges": "相位范围重叠。调整范围并重试。",
-      "incomplete_phase_row": "每个阶段行必须包含一个阶段以及所选模式的完整开始/结束值。",
-      "timestamp_mode_cycle_required": "使用时间戳模式时请选择源周期。",
-      "no_phase_ranges": "尚无可用于该操作的阶段范围。",
-      "feedback_notification_title": "WashData：验证周期 ({device})",
-      "feedback_notification_message": "**设备**：{device}\n**程序**：{program}（{confidence}% 置信度）\n**时间**：{time}\n\nWashData 需要您的帮助来验证检测到的此周期。\n\n请转至 **设置 > 设备和服务 > WashData > 配置 > 学习反馈** 以确认或更正此结果。",
-      "suggestions_ready_notification_title": "WashData：建议设置已就绪 ({device})",
-      "suggestions_ready_notification_message": "**建议设置**传感器现在报告 **{count}** 可操作的建议。\n\n要查看并应用它们：**设置 > 设备和服务 > WashData > 配置 > 高级设置 > 应用建议值**。\n\n建议是可选的，并会在您保存之前显示以供审核。",
-      "trim_range_invalid": "开始必须在结束之前。请调整您的修剪点。",
-      "trim_failed": "修剪失败。周期可能已不存在或窗口为空。",
-      "invalid_split_timestamp": "时间戳无效或超出周期时间窗口。请在周期时间窗口内使用 HH:MM 或 HH:MM:SS。",
-      "no_split_segments_found": "无法根据这些时间戳生成有效片段。请确保每个时间戳都在周期时间窗口内，且各片段至少为 1 分钟。",
-      "auto_tune_suggestion": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。",
-      "auto_tune_title": "WashData 自动调整",
-      "auto_tune_fallback": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。"
-    },
-    "abort": {
-      "no_cycles_found": "没有找到循环",
-      "no_split_segments_found": "在所选周期中未找到可分割的片段。",
-      "cycle_not_found": "无法加载所选周期。",
-      "no_power_data": "所选周期没有可用的功率跟踪数据。",
-      "no_profiles_found": "未找到配置文件。首先创建一个配置文件。",
-      "no_profiles_for_matching": "没有可用于匹配的配置文件。首先创建配置文件。",
-      "no_unlabeled_cycles": "所有周期均已标记",
-      "no_suggestions": "尚无可用的建议值。运行几个周期并重试。",
-      "no_predictions": "没有预测",
-      "no_custom_phases": "未找到自定义阶段。",
-      "reprocess_success": "已成功重新处理 {count} 个周期。",
-      "debug_data_cleared": "已成功清除 {count} 个周期的调试数据。"
+      "timer_default_message": "{device}：{minutes} 分钟定时器",
+      "timer_pause_action_title": "恢复周期",
+      "timer_pause_body_suffix": "周期已暂停。打开 WashData 面板以恢复。",
+      "notify_live_waiting_message": "{device}：尚未匹配到配置文件。",
+      "vs_typical_longer": "比平常长 {pct}%",
+      "vs_typical_shorter": "比平常短 {pct}%",
+      "invalid_power": "功率阈值必须大于 0"
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "循环开始",
-        "cycle_finish": "循环完成",
-        "cycle_live": "实时进展"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "（未标记）",
-        "create_new_profile": "创建新的个人资料",
-        "remove_label": "移除标签",
-        "no_reference_cycle": "（无参考周期）",
-        "all_device_types": "所有设备类型",
-        "current_suffix": "（当前的）",
-        "editor_select_info": "选择 1 个循环进行拆分，或选择 2 个以上循环进行合并。",
-        "editor_select_info_split": "选择 1 个要拆分的周期。",
-        "editor_select_info_merge": "选择 2 个或更多要合并的周期。",
-        "editor_select_info_delete": "选择 1 个或更多要删除的周期。",
-        "no_cycles_recorded": "尚未记录任何周期。",
-        "profile_summary_line": "- **{name}**：{count} 个周期，平均 {avg} 分钟",
-        "no_profiles_created": "尚未创建配置文件。",
-        "phase_preview": "阶段预览",
-        "phase_preview_no_curve": "平均轮廓曲线尚不可用。为此配置文件运行/标记更多周期。",
-        "average_power_curve": "平均功率曲线",
-        "unit_min": "分钟",
-        "profile_option_fmt": "{name}（{count} 个周期，平均 ~{duration}m）",
-        "profile_option_short_fmt": "{name}（{count} 个周期，~{duration} 分钟）",
-        "deleted_cycles_from_profile": "已从 {profile} 中删除 {count} 个周期。",
-        "not_enough_data_graph": "数据不足，无法生成图表。",
-        "no_profiles_found": "未找到配置文件。",
-        "cycle_info_fmt": "周期：{start}，{duration}米，电流：{label}",
-        "top_candidates_header": "### 最佳候选人",
-        "tbl_profile": "轮廓",
-        "tbl_confidence": "信心",
-        "tbl_correlation": "相关性",
-        "tbl_duration_match": "持续时间匹配",
-        "detected_profile": "检测到的配置文件",
-        "estimated_duration": "预计持续时间",
-        "actual_duration": "实际持续时间",
-        "choose_action": "__选择以下操作：__",
-        "tbl_count": "数数",
-        "tbl_avg": "平均",
-        "tbl_min": "最小",
-        "tbl_max": "最大限度",
-        "tbl_energy_avg": "能量（平均）",
-        "tbl_energy_total": "能量（总计）",
-        "tbl_consistency": "组成。",
-        "tbl_last_run": "最后一次运行",
-        "graph_legend_title": "图例",
-        "graph_legend_body": "蓝色带代表观察到的最小和最大功率消耗范围。该线显示平均功率曲线。",
-        "recording_preview": "录音预览",
-        "trim_start": "修剪开始",
-        "trim_end": "修剪末端",
-        "split_preview_title": "分割预览",
-        "split_preview_found_fmt": "找到 {count} 个分段。",
-        "split_preview_confirm_fmt": "单击“确认”将此周期拆分为 {count} 个单独的周期。",
-        "merge_preview_title": "合并预览",
-        "merge_preview_joining_fmt": "加入 {count} 个周期。间隙将用 0W 读数填充。",
-        "editor_delete_preview_title": "删除预览",
-        "editor_delete_preview_intro": "所选周期将被永久删除：",
-        "editor_delete_preview_confirm": "点击确认以永久删除这些周期记录。",
-        "no_power_preview": "*没有可供预览的功率数据。*",
-        "profile_comparison": "简介比较",
-        "actual_cycle_label": "本周期（实际）",
-        "storage_usage_header": "存储使用情况",
-        "storage_file_size": "文件大小",
-        "storage_cycles": "周期",
-        "storage_profiles": "型材",
-        "storage_debug_traces": "调试跟踪",
-        "overview_suffix": "概述",
-        "phase_preview_for_profile": "配置文件的阶段预览",
-        "current_ranges_header": "电流范围",
-        "assign_phases_help": "使用以下操作来添加、编辑、删除或保存范围。",
-        "profile_summary_header": "简介摘要",
-        "recent_cycles_header": "最近的周期",
-        "trim_cycle_preview_title": "循环修剪预览",
-        "trim_cycle_preview_no_data": "此周期没有可用的功率数据。",
-        "trim_cycle_preview_kept_suffix": "保留",
-        "table_program": "程序",
-        "table_when": "时间",
-        "table_length": "时长",
-        "table_match": "匹配",
-        "table_profile": "轮廓",
-        "table_cycles": "周期",
-        "table_avg_length": "平均时长",
-        "table_last_run": "最后一次运行",
-        "table_avg_energy": "平均能耗",
-        "table_detected_program": "检测到的程序",
-        "table_confidence": "信心",
-        "table_reported": "已报告",
-        "phase_builtin_suffix": "（内置）",
-        "phase_none_available": "没有可用的阶段。",
-        "settings_deprecation_warning": "⚠️ **已弃用的设备类型：** {device_type} 计划在未来版本中删除。 WashData 的匹配管道不会为此类设备生成可靠的结果。您的集成在弃用期内继续有效；要消除此警告，请将下面的**设备类型**切换为受支持的类型之一（洗衣机、烘干机、洗衣干衣机组合、洗碗机、空气炸锅、面包机或泵），或者如果您的设备与任何受支持的类型不匹配，则切换为**其他（高级）**。 **其他（高级）** 故意提供通用默认值，未针对任何特定设备进行调整，因此您需要自己配置阈值、超时和匹配参数；切换时，所有现有设置都会保留。",
-        "phase_other_device_types": "其他设备类型："
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "分割一个周期（查找间隙）",
-        "merge": "合并循环（连接片段）",
-        "delete": "删除周期"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "自动检测空闲间隔",
-        "manual": "手动时间戳"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "维护：重新处理和优化数据",
-        "clear_debug_data": "清除调试数据（释放空间）",
-        "wipe_history": "擦除该设备的所有数据（不可逆）",
-        "export_import": "使用设置导出/导入 JSON（复制/粘贴）"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "导出所有数据",
-        "import": "导入/合并数据"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "自动标记旧自行车",
-        "select_cycle_to_label": "标签特定周期",
-        "select_cycle_to_delete": "删除循环",
-        "interactive_editor": "合并/拆分交互式编辑器",
-        "trim_cycle": "修剪周期数据"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "创建新的个人资料",
-        "edit_profile": "编辑/重命名配置文件",
-        "delete_profile": "删除个人资料",
-        "profile_stats": "个人资料统计",
-        "cleanup_profile": "清理历史记录 - 图表和删除",
-        "assign_phases": "分配相位范围"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "创建新阶段",
-        "edit_custom_phase": "编辑阶段",
-        "delete_custom_phase": "删除阶段"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "添加相位范围",
-        "edit_range": "编辑相位范围",
-        "delete_range": "删除相位范围",
-        "clear_ranges": "清除所有范围",
-        "auto_detect_ranges": "自动检测相位",
-        "save_ranges": "保存并返回"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "刷新状态",
-        "stop_recording": "停止录制（保存并处理）",
-        "start_recording": "开始新录音",
-        "process_recording": "处理最后的录音（修剪和保存）",
-        "discard_recording": "放弃最后的录音"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "创建新的个人资料",
-        "existing_profile": "添加到现有配置文件",
-        "discard": "放弃录音"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "确认-检测正确",
-        "correct": "正确 - 选择项目/持续时间",
-        "ignore": "忽略 - 误报/噪声循环",
-        "delete": "删除 - 从历史记录中删除"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "命名和应用阶段",
-        "cancel": "不做任何修改返回"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "设置起点",
-        "set_end": "设置终点",
-        "reset": "重置为完整持续时间",
-        "apply": "应用修剪",
-        "cancel": "取消"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "洗衣机",
         "dryer": "烘干机",
         "washer_dryer": "洗衣机烘干机组合",
         "dishwasher": "洗碗机",
-        "coffee_machine": "咖啡机（已弃用）",
-        "ev": "电动汽车（已弃用）",
         "air_fryer": "空气炸锅",
-        "heat_pump": "热泵（已弃用）",
         "bread_maker": "面包机",
         "pump": "泵/污水泵",
-        "oven": "烤箱（已弃用）",
-        "other": "其他（高级）"
+        "generic": "其他（高级）",
+        "other": "阈值装置"
       }
     }
   },
@@ -1044,7 +114,7 @@
         },
         "profile_name": {
           "name": "个人资料名称",
-          "description": "新配置文件的名称（例如“重型”、“熟食”）。"
+          "description": "新配置文件的名称（例如“重型”、“精细洗涤”）。"
         },
         "reference_cycle_id": {
           "name": "参考周期 ID",
@@ -1066,12 +136,12 @@
         },
         "unlabel_cycles": {
           "name": "取消标签循环",
-          "description": "使用此轮廓从循环中删除轮廓标签。"
+          "description": "使用此配置文件从循环中删除配置文件标签。"
         }
       }
     },
     "auto_label_cycles": {
-      "name": "自动标记旧自行车",
+      "name": "自动标记旧周期",
       "description": "使用配置文件匹配追溯标记未标记的循环。",
       "fields": {
         "device_id": {
@@ -1093,7 +163,7 @@
           "description": "洗衣机装置出口。"
         },
         "path": {
-          "name": "小路",
+          "name": "路径",
           "description": "可选的要写入的绝对文件路径（默认为 /config/ha_washdata_export_{entry}.json）。"
         }
       }
@@ -1107,7 +177,7 @@
           "description": "洗衣机装置导入。"
         },
         "path": {
-          "name": "小路",
+          "name": "路径",
           "description": "要导入的导出 JSON 文件的绝对路径。"
         }
       }
@@ -1133,7 +203,7 @@
           "description": "如果检测到的程序正确，则设置为 true。"
         },
         "corrected_profile": {
-          "name": "修正后的轮廓",
+          "name": "修正后的配置文件",
           "description": "如果未确认，请提供正确的配置文件/程序名称。"
         },
         "corrected_duration": {
@@ -1162,7 +232,7 @@
       "fields": {
         "device_id": {
           "name": "设备",
-          "description": "洗衣机装置停止录音。"
+          "description": "洗衣机装置停止记录。"
         }
       }
     },
@@ -1207,12 +277,22 @@
           "description": "WashData 设备恢复。"
         }
       }
+    },
+    "trigger_ml_training": {
+      "name": "触发 ML 训练",
+      "description": "根据该设备自己的标记周期手动重新训练设备上的 ML 模型（实验）。",
+      "fields": {
+        "device_id": {
+          "name": "设备",
+          "description": "要重新训练模型的 WashData 设备。"
+        }
+      }
     }
   },
   "entity": {
     "binary_sensor": {
       "running": {
-        "name": "跑步"
+        "name": "运行中"
       },
       "match_ambiguity": {
         "name": "匹配歧义"
@@ -1222,21 +302,21 @@
       "washer_state": {
         "name": "状态",
         "state": {
-          "off": "离开",
-          "idle": "闲置的",
+          "off": "关闭",
+          "idle": "空闲",
           "starting": "开始",
-          "running": "跑步",
+          "running": "运行中",
           "paused": "已暂停",
           "user_paused": "用户已暂停",
           "ending": "结束",
-          "finished": "完成的",
+          "finished": "已完成",
           "anti_wrinkle": "抗皱",
-          "delay_wait": "等待开始",
           "interrupted": "被打断",
           "force_stopped": "强制停止",
           "rinse": "冲洗",
           "unknown": "未知",
-          "clean": "干净的"
+          "clean": "干净的",
+          "delay_wait": "等待开始"
         }
       },
       "washer_program": {
@@ -1249,7 +329,7 @@
         "name": "总持续时间"
       },
       "cycle_progress": {
-        "name": "进步"
+        "name": "进度"
       },
       "current_power": {
         "name": "当前功率"
@@ -1261,7 +341,7 @@
         "name": "调试信息"
       },
       "match_confidence": {
-        "name": "比赛信心"
+        "name": "匹配置信度"
       },
       "top_candidates": {
         "name": "最佳候选人",
@@ -1269,11 +349,11 @@
           "none": "没有任何"
         }
       },
+      "ambiguity": {
+        "name": "歧义评分"
+      },
       "current_phase": {
         "name": "当前阶段"
-      },
-      "wash_phase": {
-        "name": "阶段"
       },
       "profile_cycle_count": {
         "name": "配置文件 {profile_name} 计数",
@@ -1287,11 +367,14 @@
       },
       "cycle_count": {
         "name": "循环计数"
+      },
+      "energy_total": {
+        "name": "总能耗"
       }
     },
     "select": {
       "program_select": {
-        "name": "循环计划",
+        "name": "程序选择",
         "state": {
           "auto_detect": "自动检测"
         }
@@ -1306,6 +389,12 @@
       },
       "resume_cycle": {
         "name": "恢复周期"
+      },
+      "record_start": {
+        "name": "开始记录循环"
+      },
+      "record_stop": {
+        "name": "停止记录循环"
       }
     }
   },
@@ -1336,6 +425,24 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s必须大于trim_start_s。"
+    },
+    "no_active_cycle": {
+      "message": "没有可暂停或恢复的活动周期。"
+    },
+    "path_not_allowed": {
+      "message": "路径不被允许：{path}。请将其目录添加到 configuration.yaml 中的 'allowlist_external_dirs'。"
+    },
+    "create_profile_failed": {
+      "message": "无法创建配置文件：{error}"
+    },
+    "export_path_exists": {
+      "message": "导出目标已存在：{path}。请选择其他路径，或先移除现有文件。"
+    },
+    "export_write_failed": {
+      "message": "无法将导出写入 {path}：{error}"
+    },
+    "assign_profile_failed": {
+      "message": "无法分配配置文件：{error}"
     }
   }
 }

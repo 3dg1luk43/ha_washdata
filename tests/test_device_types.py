@@ -1,15 +1,31 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import pytest
 from unittest.mock import Mock
 from datetime import datetime, timedelta, timezone
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
 from custom_components.ha_washdata.const import (
-    DEVICE_TYPE_DRYER, DEVICE_TYPE_COFFEE_MACHINE,
+    DEVICE_TYPE_DRYER,
     DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_WASHER_DRYER, DEVICE_TYPE_DISHWASHER,
-    STATE_RUNNING, STATE_OFF, STATE_PAUSED,
-    DEFAULT_OFF_DELAY, DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
-    DEVICE_COMPLETION_THRESHOLDS,
+    DEVICE_TYPE_GENERIC, DEVICE_TYPE_OTHER,
+    STATE_RUNNING, DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
+    DEVICE_COMPLETION_THRESHOLDS, DEVICE_TYPES,
     DEFAULT_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL_BY_DEVICE,
+    DEVICE_SMOOTHING_THRESHOLDS,
 )
 
 def dt(seconds):
@@ -69,59 +85,39 @@ def test_dryer_thresholds():
     cycle_data = callbacks["on_cycle_end"].call_args[0][0]
     assert cycle_data["status"] == "interrupted"
 
-def test_coffee_thresholds():
-    # Verify defaults
-    start_thresh = DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE[DEVICE_TYPE_COFFEE_MACHINE] # 0.05
-    completion_min = DEVICE_COMPLETION_THRESHOLDS[DEVICE_TYPE_COFFEE_MACHINE] # 60
-    
+
+def test_generic_device_type_in_device_types():
+    """The generic type is a first-class device type with a display name."""
+    assert DEVICE_TYPE_GENERIC in DEVICE_TYPES
+    assert DEVICE_TYPE_OTHER in DEVICE_TYPES
+    assert DEVICE_TYPES[DEVICE_TYPE_GENERIC] == "Other (Advanced)"
+    assert DEVICE_TYPES[DEVICE_TYPE_OTHER] == "Threshold Device"
+
+
+def test_generic_device_type_smoothing_threshold():
+    """The generic type has a defined smoothing threshold (not falling back to None)."""
+    assert DEVICE_TYPE_GENERIC in DEVICE_SMOOTHING_THRESHOLDS
+    # Neutral middle-ground value
+    assert DEVICE_SMOOTHING_THRESHOLDS[DEVICE_TYPE_GENERIC] == 3.0
+
+
+def test_generic_device_type_runs_cycles():
+    """The generic device type detects cycles like any other type (no hidden exclusions)."""
     config = CycleDetectorConfig(
-        device_type=DEVICE_TYPE_COFFEE_MACHINE,
+        device_type=DEVICE_TYPE_GENERIC,
         min_power=5.0,
-        off_delay=30,
-        start_energy_threshold=start_thresh,
-        completion_min_seconds=completion_min,
-        interrupted_min_seconds=10, 
+        off_delay=60,
     )
-    
     callbacks = {"on_state_change": Mock(), "on_cycle_end": Mock()}
     detector = CycleDetector(config, callbacks["on_state_change"], callbacks["on_cycle_end"])
-    
-    # 1. Start with very small energy (0.06 Wh)
-    # 1000W for > 5s (Default start_duration_threshold)
-    detector.process_reading(1000.0, dt(0))
-    for i in range(1, 7):
-        detector.process_reading(1000.0, dt(i))
-        
-    assert detector.state == STATE_RUNNING
-    
-    # 2. Run for 70s -> Completed
-    detector.process_reading(100.0, dt(70))
-    detector.process_reading(0.0, dt(71))
-    flush_buffer(detector, 71)
-    
+
+    # Drive a simple cycle
+    for t in range(0, 800, 10):
+        detector.process_reading(200.0, dt(t))
+    detector.process_reading(0.0, dt(800))
+    flush_buffer(detector, 800)
+
     assert callbacks["on_cycle_end"].called
     cycle_data = callbacks["on_cycle_end"].call_args[0][0]
     assert cycle_data["status"] == "completed"
 
-def test_coffee_very_short():
-    # 30s run -> Interrupted (if 60s min)
-    start_thresh = 0.05
-    completion_min = 60
-    config = CycleDetectorConfig(
-        device_type=DEVICE_TYPE_COFFEE_MACHINE,
-        min_power=5.0,
-        off_delay=30,
-        start_energy_threshold=start_thresh,
-        completion_min_seconds=completion_min,
-    )
-    callbacks = {"on_state_change": Mock(), "on_cycle_end": Mock()}
-    detector = CycleDetector(config, callbacks["on_state_change"], callbacks["on_cycle_end"])
-    
-    detector.process_reading(1000.0, dt(0))
-    detector.process_reading(1000.0, dt(30))
-    detector.process_reading(0.0, dt(31))
-    flush_buffer(detector, 31)
-    
-    cycle_data = callbacks["on_cycle_end"].call_args[0][0]
-    # If completion_min_seconds is 60, then 30s is interrupted.
-    assert cycle_data["status"] == "interrupted"

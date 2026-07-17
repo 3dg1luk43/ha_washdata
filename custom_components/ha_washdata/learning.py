@@ -1,42 +1,45 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Learning and self-tuning logic for WashData."""
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Optional, TYPE_CHECKING, cast
+from collections.abc import Callable
+from typing import Any, Optional, TYPE_CHECKING
 
 import numpy as np
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import translation
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 import homeassistant.util.dt as dt_util
 
 from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
-    CONF_END_ENERGY_THRESHOLD,
     CONF_LEARNING_CONFIDENCE,
-    CONF_MIN_OFF_GAP,
-    CONF_MIN_POWER,
-    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_OFF_DELAY,
-    CONF_PROFILE_DURATION_TOLERANCE,
-    CONF_PROFILE_MATCH_INTERVAL,
-    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_RUNNING_DEAD_ZONE,
-    CONF_SAMPLING_INTERVAL,
-    CONF_START_THRESHOLD_W,
-    CONF_STOP_THRESHOLD_W,
-    CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
-    CONF_WATCHDOG_INTERVAL,
+    CONF_PROFILE_MIN_WARMUP_CYCLES,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
     DEFAULT_LEARNING_CONFIDENCE,
-    DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
-    DOMAIN,
-    SIGNAL_WASHER_UPDATE,
+    MIN_SUGGESTION_COOLDOWN_CYCLES,
+    MIN_SUGGESTION_REL_DELTA,
+    ML_QUALITY_SUSPICIOUS_THRESHOLD,
 )
 from .suggestion_engine import SuggestionEngine
 from .log_utils import DeviceLoggerAdapter
@@ -46,6 +49,25 @@ if TYPE_CHECKING:
 
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _suggestion_min_abs_delta(key: str) -> float:
+    """Return the minimum absolute change that makes a suggestion worth surfacing.
+
+    Both this threshold AND MIN_SUGGESTION_REL_DELTA must be missed for a
+    suggestion to be suppressed — either one passing is enough to keep it.
+    """
+    if key.endswith(("_w", "_power")):
+        return 0.3      # Watts: sub-0.3 W changes are below sensor noise
+    if key.endswith(("_interval", "_timeout", "_delay", "_gap", "_duration", "_seconds", "_duration_threshold")):
+        return 5.0      # Seconds: 5 s is imperceptible to the detector
+    if key.endswith(("_ratio", "_tolerance")):
+        return 0.02     # Unitless ratio: 0.02 is the minimum meaningful step
+    if key.endswith(("_confidence", "_threshold")):
+        return 0.02     # Probability (0–1): 0.02 is the minimum meaningful step
+    if key.endswith(("_count", "_window", "_repeat")):
+        return 1.0      # Integer count: less than 1 is a no-op
+    return 0.05
 
 
 class StatisticalModel:
@@ -120,35 +142,23 @@ class LearningManager:
         self._last_batch_simulation_count: int = 0  # track when to re-run batch
 
     def _apply_suggestions_and_notify(self, suggestions: dict[str, Any]) -> None:
-        """Apply suggestions and notify once when they become actionable."""
+        """Apply suggestions that pass quality gates."""
         if not suggestions:
             return
 
-        _actionable_keys = (
-            CONF_MIN_POWER,
-            CONF_OFF_DELAY,
-            CONF_WATCHDOG_INTERVAL,
-            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-            CONF_SAMPLING_INTERVAL,
-            CONF_PROFILE_MATCH_INTERVAL,
-            CONF_AUTO_LABEL_CONFIDENCE,
-            CONF_DURATION_TOLERANCE,
-            CONF_PROFILE_DURATION_TOLERANCE,
-            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-            CONF_MIN_OFF_GAP,
-            CONF_STOP_THRESHOLD_W,
-            CONF_START_THRESHOLD_W,
-            CONF_END_ENERGY_THRESHOLD,
-            CONF_RUNNING_DEAD_ZONE,
-        )
-
-        # Drop suggestions whose value already matches the current config - so
-        # that applied suggestions don't immediately reappear on the next cycle.
+        # Quality gate: drop or suppress suggestions that are not worth surfacing.
         entry = self.hass.config_entries.async_get_entry(self.entry_id)
         current_options: dict[str, Any] = {}
         if entry:
             current_options = {**entry.data, **entry.options}
+
+        # Cooldown: how many cycles have elapsed since the user last applied suggestions?
+        past_cycles = self.profile_store.get_past_cycles()
+        last_apply_count = self.profile_store.get_suggestion_apply_cycle_count()
+        cooldown_active = (
+            last_apply_count > 0
+            and (len(past_cycles) - last_apply_count) < MIN_SUGGESTION_COOLDOWN_CYCLES
+        )
 
         filtered_suggestions: dict[str, Any] = {}
         for key, data in suggestions.items():
@@ -157,9 +167,28 @@ class LearningManager:
                 suggested_val = data["value"]
                 if current_val is not None and suggested_val is not None:
                     try:
-                        if float(current_val) == float(suggested_val):
+                        cv, sv = float(current_val), float(suggested_val)
+                        abs_delta = abs(sv - cv)
+
+                        # Gate 1: exact equality → stale, delete so it doesn't linger.
+                        if abs_delta < 1e-9:
                             self.profile_store.delete_suggestion(key)
-                            continue  # already applied, remove stale entry
+                            continue
+
+                        # Gate 2: change too small to be meaningful → delete (noise).
+                        rel_delta = abs_delta / max(abs(cv), 1e-3)
+                        if (rel_delta < MIN_SUGGESTION_REL_DELTA
+                                and abs_delta < _suggestion_min_abs_delta(key)):
+                            self.profile_store.delete_suggestion(key)
+                            continue
+
+                        # Gate 3: cooldown active → skip update without deleting.
+                        # After the user applies suggestions, wait for a few more
+                        # cycles before surfacing new ones (avoids immediately
+                        # re-suggesting a slightly-different value on the next cycle).
+                        if cooldown_active:
+                            continue
+
                     except (TypeError, ValueError):
                         pass
             filtered_suggestions[key] = data
@@ -167,25 +196,7 @@ class LearningManager:
         if not filtered_suggestions:
             return
 
-        def _count_actionable(s: dict) -> int:
-            return sum(
-                1 for k in _actionable_keys
-                if isinstance(s.get(k), dict) and s[k].get("value") is not None
-            )
-
-        current = self.profile_store.get_suggestions()
-        before_count = _count_actionable(current) if isinstance(current, dict) else 0
-
         self.suggestion_engine.apply_suggestions(filtered_suggestions)
-
-        updated = self.profile_store.get_suggestions()
-        after_count = _count_actionable(updated) if isinstance(updated, dict) else 0
-
-        if before_count == 0 and after_count > 0:
-            device_title = entry.title if entry else DOMAIN
-            self.hass.async_create_task(
-                self._async_send_suggestions_ready_notification(device_title, after_count)
-            )
 
     def process_power_reading(
         self, _power: float, now: datetime, last_reading_time: datetime | None
@@ -232,7 +243,10 @@ class LearningManager:
         )
 
         # 3. Update model-based suggestions (durations etc)
-        self._update_model_suggestions(dt_util.now())
+        self._update_model_suggestions()
+
+        # 3b. Update statistical detection suggestions (thresholds, gates, etc.)
+        self._update_detection_suggestions()
 
         # 4. Run multi-cycle batch simulation when enough new labeled cycles have accumulated
         self._maybe_run_batch_simulation()
@@ -258,9 +272,9 @@ class LearningManager:
             return
 
         self._last_batch_simulation_count = current_count
-        self.hass.async_create_task(self._async_run_batch_simulation(labeled_cycles, current_count))
+        self.hass.async_create_task(self._async_run_batch_simulation(labeled_cycles))
 
-    async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]], expected_count: int) -> None:
+    async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]]) -> None:
         """Run multi-cycle batch simulation asynchronously."""
         try:
             new_suggestions = await self.hass.async_add_executor_job(
@@ -291,7 +305,13 @@ class LearningManager:
             self._logger.error("Background simulation failed: %s", e)
 
     def _update_operational_suggestions(self, now: datetime) -> None:
-        """Generate suggestions for operational parameters (intervals, timeouts)."""
+        """Generate suggestions for operational parameters (intervals, timeouts).
+
+        The cadence stats (p95/median) are read on the event loop and captured as
+        immutable snapshots; the historical-trace scan inside
+        ``generate_operational_suggestions`` is offloaded to an executor thread by
+        ``_dispatch_scan_and_apply`` so it never runs on the loop.
+        """
         if self._sample_interval_model.count < 20:
             return
 
@@ -301,76 +321,121 @@ class LearningManager:
         if p95 is None or median is None:
             return
 
-        suggestions = self.suggestion_engine.generate_operational_suggestions(p95, median)
-        self._apply_suggestions_and_notify(suggestions)
+        # Throttle before dispatching so repeated readings within the window do
+        # not schedule overlapping passes.
         self._last_suggestion_update = now
+        self._dispatch_scan_and_apply(
+            lambda: self.suggestion_engine.generate_operational_suggestions(p95, median),
+            "Operational",
+        )
 
-    def _update_model_suggestions(self, now: datetime) -> None:
-        """Generate suggestions for model parameters (tolerances, ratios)."""
-        suggestions = self.suggestion_engine.generate_model_suggestions()
-        self._apply_suggestions_and_notify(suggestions)
+    def _update_model_suggestions(self) -> None:
+        """Generate suggestions for model parameters (tolerances, ratios).
 
-    async def _async_send_suggestions_ready_notification(
-        self, device_title: str, suggestions_count: int
+        The historical-cycle scan inside ``generate_model_suggestions`` is
+        offloaded to an executor thread by ``_dispatch_scan_and_apply``.
+        """
+        self._dispatch_scan_and_apply(
+            self.suggestion_engine.generate_model_suggestions,
+            "Model",
+        )
+
+    def _dispatch_scan_and_apply(
+        self, generate: Callable[[], dict[str, Any]], label: str
     ) -> None:
-        """Send a one-time persistent notification when suggestions become available."""
+        """Run a heavy suggestion scan off the event loop, then apply results.
+
+        ``generate`` is a pure suggestion-engine call that scans historical power
+        traces (up to ~100-200 cycles) and is too heavy to run on the event loop.
+        When a running loop is present (normal operation) the scan is offloaded to
+        an executor thread and the resulting suggestions are applied back on the
+        loop. In a synchronous context with no running loop (unit tests / direct
+        callers) it runs inline so results are observable immediately. ``generate``
+        must only read shared state and return suggestions — the state mutation
+        (``_apply_suggestions_and_notify``) always runs on the loop.
+        """
         try:
-            notification_id = f"ha_washdata_suggestions_ready_{self.entry_id}"
+            asyncio.get_running_loop()
+        except RuntimeError:
+            # No running event loop: run inline (synchronous callers / unit tests).
+            try:
+                suggestions = generate()
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                self._logger.error("%s suggestion pass failed: %s", label, e)
+                return
+            if suggestions:
+                self._apply_suggestions_and_notify(suggestions)
+            return
+        self.hass.async_create_task(self._async_scan_and_apply(generate, label))
 
-            translations = await translation.async_get_translations(
-                self.hass, self.hass.config.language, "options", {DOMAIN}
+    async def _async_scan_and_apply(
+        self, generate: Callable[[], dict[str, Any]], label: str
+    ) -> None:
+        """Offload ``generate`` to an executor thread, then apply on the loop."""
+        try:
+            suggestions = await self.hass.async_add_executor_job(generate)
+            if suggestions:
+                self._apply_suggestions_and_notify(suggestions)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("%s suggestion pass failed: %s", label, e)
+
+    def _update_detection_suggestions(self) -> None:
+        """Generate statistical detection suggestions from clean cycles.
+
+        Offloaded to an executor because it scans power traces across up to 200
+        cycles for the clean-cycle health checks.
+        """
+        self.hass.async_create_task(self._async_run_detection_suggestions())
+
+    async def _async_run_detection_suggestions(self) -> None:
+        """Run the detection-suggestion pass off the event loop."""
+        try:
+            new_suggestions = await self.hass.async_add_executor_job(
+                self.suggestion_engine.generate_detection_suggestions
             )
+            if new_suggestions:
+                self._apply_suggestions_and_notify(new_suggestions)
+                self._logger.debug(
+                    "Detection suggestions produced: %s", list(new_suggestions.keys())
+                )
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("Detection suggestion pass failed: %s", e)
 
-            default_title = "WashData: Suggested Settings Ready ({device})"
-            default_msg = (
-                "The **Suggested Settings** sensor now reports **{count}** actionable recommendations.\n\n"
-                "To review and apply them: **Settings > Devices & Services > WashData > Configure > "
-                "Advanced Settings > Apply Suggested Values**.\n\n"
-                "Suggestions are optional and shown for review before you save."
+    async def async_run_full_analysis(self) -> dict[str, int]:
+        """Run every suggestion pass now (manual trigger from the panel).
+
+        Runs the operational (cadence), model, detection and batch-simulation
+        passes over the accumulated cycle history and reconciles the result.
+        Returns ``{"count": <actionable suggestions>}``.
+        """
+        self._logger.info("Manual suggestion analysis requested")
+        try:
+            model = self._sample_interval_model
+            if model.count >= 20 and model.p95 is not None and model.median is not None:
+                p95, median = model.p95, model.median
+                op = await self.hass.async_add_executor_job(
+                    self.suggestion_engine.generate_operational_suggestions, p95, median
+                )
+                if op:
+                    self._apply_suggestions_and_notify(op)
+            model_sug = await self.hass.async_add_executor_job(
+                self.suggestion_engine.generate_model_suggestions
             )
-
-            title_template = translations.get(
-                f"component.{DOMAIN}.options.error.suggestions_ready_notification_title",
-                default_title,
+            if model_sug:
+                self._apply_suggestions_and_notify(model_sug)
+            await self._async_run_detection_suggestions()
+            # Snapshot the live cycles list before handing it to the executor.
+            cycles = list(self.profile_store.get_past_cycles())
+            batch = await self.hass.async_add_executor_job(
+                self.suggestion_engine.run_batch_simulation, cycles
             )
-            msg_template = translations.get(
-                f"component.{DOMAIN}.options.error.suggestions_ready_notification_message",
-                default_msg,
-            )
-
-            title = title_template.format(device=device_title)
-            message = msg_template.format(count=suggestions_count)
-
-            await self.hass.services.async_call(
-                "persistent_notification",
-                "create",
-                {
-                    "message": message,
-                    "title": title,
-                    "notification_id": notification_id,
-                },
-            )
-        except Exception:  # pylint: disable=broad-exception-caught
-            self._logger.exception("Failed to create suggestions-ready notification")
-
-    def _set_suggestion(self, key: str, value: Any, reason: str) -> None:
-        """Persist a suggested setting."""
-        current: Any = self.profile_store.get_suggestions().get(key, {})
-        if isinstance(current, dict):
-            current_dict = cast(dict[str, Any], current)
-            if current_dict.get("value") == value:
-                return  # No change
-
-        self.profile_store.set_suggestion(key, value, reason=reason)
-        # We fire a background save task if possible, or rely on next periodic save.
-        # Since learning manager doesn't hold reference to hass task creation easily,
-        # we can just rely on ProfileStore's periodic save or trigger one if referenced.
-        # Ideally ProfileStore handles dirtiness.
-        # But wait, Manager calls save periodically. We should just mark it dirty?
-        # ProfileStore.async_save() is needed.
-        # We'll just trigger it via hass if available.
-        if self.hass:
-            self.hass.async_create_task(self.profile_store.async_save())
+            if batch:
+                self._apply_suggestions_and_notify(batch)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("Manual suggestion analysis failed: %s", e)
+        count = len(self.profile_store.get_suggestions() or {})
+        self._logger.info("Manual suggestion analysis complete: %d suggestion(s)", count)
+        return {"count": count}
 
     def _maybe_request_feedback(
         self,
@@ -410,24 +475,93 @@ class LearningManager:
             CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE
         )
 
-        # Auto-label if very high confidence
+        # A4: Warmup mode — profiles with fewer than CONF_PROFILE_MIN_WARMUP_CYCLES labeled
+        # cycles skip auto-labeling entirely and always request user confirmation.
+        # Only applied when confidence would otherwise trigger auto-labeling; cycles
+        # already below the learning threshold follow the normal skip path unchanged.
+        warmup_request = False
+        # ``route_conf`` drives the auto-label/skip routing only; ``confidence``
+        # remains the real match score that gets displayed and persisted, so warmup
+        # clamping never fabricates the value shown to the user.
+        route_conf = confidence
         if confidence >= auto_label_conf:
-            labeled = self.auto_label_high_confidence(
-                cycle_id=cycle_id,
-                profile_name=detected_profile,
-                confidence=confidence,
-                confidence_threshold=auto_label_conf,
+            _wm_count = self.profile_store.get_profile_labeled_count(detected_profile)
+            # Imported reference profiles are trusted downloaded templates: the user
+            # expects to match immediately, so they skip the local warm-up gate.
+            _imported = self.profile_store.profile_has_reference_cycles(detected_profile)
+            _is_warmup = (
+                not _imported
+                and isinstance(_wm_count, int)
+                and _wm_count < CONF_PROFILE_MIN_WARMUP_CYCLES
             )
-            if labeled:
-                # Rebuild envelope first, then persist (issue #131)
-                self.hass.async_create_task(
-                    self._async_rebuild_and_save_profile(detected_profile)
+            if _is_warmup:
+                self._logger.info(
+                    "Profile '%s' in warmup mode (%d/%d cycles); requiring manual confirmation.",
+                    detected_profile, _wm_count, CONF_PROFILE_MIN_WARMUP_CYCLES,
                 )
-                self._logger.debug("Auto-labeled high-confidence cycle %s", cycle_id)
-            return
+                # A warmup cycle must always request confirmation: never auto-label,
+                # and never silently skip — even under a misconfigured inverted
+                # (learning_conf >= auto_label_conf) threshold pair.
+                warmup_request = True
+                # Clamp the ROUTING confidence just below auto_label so we fall through
+                # to the feedback-request path, but stay above learning_conf to request
+                # (not skip). Only raise toward learning_conf when there is room below
+                # auto_label_conf; otherwise an inverted config would push it back to/above
+                # auto_label_conf and silently bypass the warmup guard.
+                route_conf = auto_label_conf - 0.001
+                if learning_conf + 0.001 < auto_label_conf:
+                    route_conf = max(route_conf, learning_conf + 0.001)
 
-        # Skip low-confidence matches below learning threshold
-        if confidence < learning_conf:
+        # Auto-label if very high confidence — but skip auto-labeling when the ML
+        # quality model flagged this cycle as suspicious (P(problem) >= threshold),
+        # even if the matcher was confident.  Downgrade to a feedback request so
+        # the user can verify the match; this catches confident but wrong labels.
+        ml_quality = cycle_data.get("ml_quality_score")
+        ml_suspicious = (
+            isinstance(ml_quality, float)
+            and ml_quality >= ML_QUALITY_SUSPICIOUS_THRESHOLD
+        )
+        # Also downgrade when the cycle's power trace is mostly outside the
+        # profile envelope band (low conformance = the shape matched but the
+        # actual power levels are inconsistent with the profile).
+        _conformance = cycle_data.get("envelope_conformance")
+        envelope_suspicious = (
+            isinstance(_conformance, float)
+            and _conformance < 0.40
+        )
+        if route_conf >= auto_label_conf:
+            if ml_suspicious or envelope_suspicious:
+                if ml_suspicious:
+                    self._logger.info(
+                        "ML quality model flagged cycle %s as suspicious (score=%.3f >= %.2f); "
+                        "downgrading auto-label to feedback request.",
+                        cycle_id, ml_quality, ML_QUALITY_SUSPICIOUS_THRESHOLD,
+                    )
+                if envelope_suspicious:
+                    self._logger.info(
+                        "Envelope conformance for cycle %s is low (%.2f < 0.40); "
+                        "downgrading auto-label to feedback request.",
+                        cycle_id, _conformance,
+                    )
+                # Fall through to feedback-request path below.
+            else:
+                labeled = self.auto_label_high_confidence(
+                    cycle_id=cycle_id,
+                    profile_name=detected_profile,
+                    confidence=confidence,
+                    confidence_threshold=auto_label_conf,
+                )
+                if labeled:
+                    # Rebuild envelope first, then persist (issue #131)
+                    self.hass.async_create_task(
+                        self._async_rebuild_and_save_profile(detected_profile)
+                    )
+                    self._logger.debug("Auto-labeled high-confidence cycle %s", cycle_id)
+                return
+
+        # Skip low-confidence matches below learning threshold — but a warmup cycle
+        # always requests confirmation, even if the thresholds are misconfigured.
+        if route_conf < learning_conf and not warmup_request:
             self._logger.debug(
                 "Skipping feedback for low-confidence match (conf=%.2f < %.2f)",
                 confidence,
@@ -448,101 +582,10 @@ class LearningManager:
             match_result=match_result,
         )
 
-        # Persist pending feedback request so it survives restart
+        # Persist pending feedback request so it survives restart.
+        # The pending review is surfaced in the panel's Cycles review queue;
+        # WashData intentionally does not raise a persistent notification here.
         self.hass.async_create_task(self.profile_store.async_save())
-
-        # Create user-visible notification (skipped when suppressed via option).
-        # Use `is True` so that un-configured mock objects in tests don't
-        # accidentally suppress notifications by being truthy.
-        suppress = entry.options.get(
-            CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
-            DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
-        ) is True
-        if not suppress:
-            self.hass.async_create_task(
-                self._async_send_feedback_notification(
-                    entry.title, cycle_data, detected_profile, confidence
-                )
-            )
-
-    async def _async_send_feedback_notification(
-        self, device_title: str, cycle_data: dict[str, Any], profile: str, confidence: float
-    ) -> None:
-        """Send a persistent notification for feedback (Async with translation)."""
-        try:
-            cycle_id = cycle_data.get("id", "unknown")
-            start_ts = cycle_data.get("start_time")
-            end_ts = dt_util.now() # Approximate, or pass actual end time
-
-            # Format times
-            t_str = ""
-            if start_ts:
-                try:
-                    s_dt = datetime.fromisoformat(str(start_ts)) if isinstance(start_ts, str) else start_ts
-                    s_local = dt_util.as_local(s_dt)
-                    e_local = dt_util.as_local(end_ts)
-                    t_str = f"{s_local.strftime('%H:%M')} - {e_local.strftime('%H:%M')}"
-                except Exception:
-                    t_str = "Just now"
-
-            notification_id = f"ha_washdata_feedback_{self.entry_id}_{cycle_id}"
-
-            # Load translations (from en.json / localization files)
-            # We use "options" category to access the error keys where we stored these strings
-            translations = await translation.async_get_translations(
-                self.hass, self.hass.config.language, "options", {DOMAIN}
-            )
-
-            # Default templates
-            default_title = "WashData: Verify Cycle ({device})"
-            default_msg = (
-                 "**Device**: {device}\n"
-                 "**Program**: {program} ({confidence}% confidence)\n"
-                 "**Time**: {time}\n\n"
-                 "WashData needs your help to verify this detected cycle.\n\n"
-                 "Please go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
-            )
-
-            title_template = translations.get(
-                f"component.{DOMAIN}.options.error.feedback_notification_title", default_title
-            )
-            msg_template = translations.get(
-                f"component.{DOMAIN}.options.error.feedback_notification_message", default_msg
-            )
-
-            # Confidence as percentage
-            conf_pct = int(confidence * 100)
-
-            title = title_template.format(device=device_title)
-            message = msg_template.format(
-                device=device_title,
-                program=profile,
-                confidence=conf_pct,
-                time=t_str
-            )
-
-            # Use standard service call
-            await self.hass.services.async_call(
-                "persistent_notification",
-                "create",
-                {
-                    "message": message,
-                    "title": title,
-                    "notification_id": notification_id,
-                },
-            )
-        except Exception:  # pylint: disable=broad-exception-caught
-            self._logger.exception("Failed to create feedback notification")
-
-    def _send_feedback_notification(
-        self, device_title: str, cycle_data: dict[str, Any], profile: str, confidence: float
-    ) -> None:
-        """Deprecated sync wrapper."""
-        self.hass.async_create_task(
-            self._async_send_feedback_notification(
-                device_title, cycle_data, profile, confidence
-            )
-        )
 
     def request_cycle_verification(
         self,
@@ -621,7 +664,7 @@ class LearningManager:
 
         # Verify it was labeled (cycle found)
         cycles = self.profile_store.get_past_cycles()
-        cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+        cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
 
         return bool(cycle and cycle.get("auto_labeled"))
 
@@ -677,7 +720,7 @@ class LearningManager:
                 self._auto_label_cycle(cycle_id, profile_name, duration_sec)
                 if duration_sec is not None:
                     cycles = self.profile_store.get_past_cycles()
-                    confirmed_cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+                    confirmed_cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
                     if confirmed_cycle:
                         confirmed_cycle["duration"] = duration_sec
                 profiles_to_rebuild.add(profile_name)
@@ -703,7 +746,7 @@ class LearningManager:
                 # explicitly provided - apply it directly to the cycle so the value
                 # is never silently dropped.
                 cycles = self.profile_store.get_past_cycles()
-                cycle_to_fix = next((c for c in cycles if c["id"] == cycle_id), None)
+                cycle_to_fix = next((c for c in cycles if c.get("id") == cycle_id), None)
                 if cycle_to_fix:
                     cycle_to_fix["duration"] = duration_sec
                     cycle_to_fix["manual_duration"] = duration_sec
@@ -737,7 +780,7 @@ class LearningManager:
 
     def _auto_label_cycle(self, cycle_id: str, profile_name: str, manual_duration: float | None = None) -> None:
         cycles = self.profile_store.get_past_cycles()
-        cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+        cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
         if cycle:
             cycle["profile_name"] = profile_name
             cycle["auto_labeled"] = True
@@ -759,7 +802,7 @@ class LearningManager:
         self._auto_label_cycle(cycle_id, corrected_profile, corrected_duration)
         if corrected_duration is not None:
             cycles = self.profile_store.get_past_cycles()
-            cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+            cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
             if cycle:
                 cycle["duration"] = corrected_duration
         # Profile stats will be recalculated when envelope is rebuilt

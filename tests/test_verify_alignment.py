@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import pytest
 import json
@@ -7,7 +23,7 @@ import glob
 from unittest.mock import MagicMock, AsyncMock, patch
 import sys
 import os
-sys.path.append(os.path.abspath("/root/ha_washdata/custom_components"))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "custom_components")))
 
 from ha_washdata.profile_store import ProfileStore
 
@@ -57,14 +73,19 @@ async def test_envelope_alignment_with_user_data(store, data_file):
     with open(data_file, 'r') as f:
         full_data = json.load(f)
     
-    wash_data = full_data.get("data", {}).get("store_data", {})
-    if not wash_data:
-        print(f"DEBUG: No store_data in {data_file}. Keys: {full_data.keys()}")
-        if "profiles" in full_data:
-            wash_data = full_data
-            print("DEBUG: Using full_data as wash_data")
-        else:
-            pytest.skip(f"No store_data found in {data_file}")
+    # Locate the store payload across the known export shapes:
+    #   - WashData config export:  data = {past_cycles, profiles, envelopes, ...}
+    #   - legacy diagnostics dump:  data.store_data = {...}
+    #   - raw store dump:           {past_cycles, profiles, ...} at the top level
+    data_section = full_data.get("data") if isinstance(full_data.get("data"), dict) else {}
+    if isinstance(data_section.get("store_data"), dict) and data_section["store_data"]:
+        wash_data = data_section["store_data"]
+    elif "past_cycles" in data_section or "profiles" in data_section:
+        wash_data = data_section
+    elif "past_cycles" in full_data or "profiles" in full_data:
+        wash_data = full_data
+    else:
+        pytest.skip(f"No store payload found in {data_file}")
 
     # Inject data into store
     store._data = wash_data

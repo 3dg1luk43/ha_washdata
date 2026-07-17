@@ -1,0 +1,96 @@
+{
+  "generated_at": "2026-07-01T06:27:13+00:00",
+  "models": [
+    {
+      "created_at": "2026-06-29T20:49:06+00:00",
+      "git_commit": "605a862",
+      "kind": "standardized_logistic",
+      "metrics": {
+        "owner_holdout": {
+          "accuracy": 0.865889,
+          "balanced_accuracy": 0.85704,
+          "f1": 0.760417,
+          "fn": 14,
+          "fp": 32,
+          "positive_rate": 0.306122,
+          "precision": 0.695238,
+          "problem_recall": 0.83908,
+          "rows": 343,
+          "specificity": 0.875,
+          "tn": 224,
+          "tp": 73
+        },
+        "premature_stop_rate": 0.125
+      },
+      "module": "cycle_end_detector_model.py",
+      "name": "cycle_end_detector",
+      "target": "cycle_truly_ended",
+      "target_units": ""
+    },
+    {
+      "created_at": "2026-06-29T20:48:41+00:00",
+      "git_commit": "605a862",
+      "kind": "standardized_logistic",
+      "metrics": {
+        "owner_holdout": {
+          "accuracy": 0.872,
+          "balanced_accuracy": 0.89997,
+          "f1": 0.898734,
+          "fn": 15,
+          "fp": 1,
+          "positive_rate": 0.576,
+          "precision": 0.986111,
+          "problem_recall": 0.825581,
+          "rows": 125,
+          "specificity": 0.974359,
+          "tn": 38,
+          "tp": 71
+        },
+        "synthetic_all": {
+          "accuracy": 1.0,
+          "balanced_accuracy": 0.5,
+          "f1": 1.0,
+          "fn": 0,
+          "fp": 0,
+          "positive_rate": 1.0,
+          "precision": 1.0,
+          "problem_recall": 1.0,
+          "rows": 1255,
+          "specificity": 0.0,
+          "tn": 0,
+          "tp": 1255
+        }
+      },
+      "module": "hybrid_curve_quality_model.py",
+      "name": "hybrid_curve_quality",
+      "target": "problem_cycle",
+      "target_units": ""
+    },
+    {
+      "created_at": "2026-06-29T20:49:05+00:00",
+      "git_commit": "605a862",
+      "kind": "standardized_logistic",
+      "metrics": {
+        "owner_holdout": {
+          "accuracy": 0.771789,
+          "balanced_accuracy": 0.741539,
+          "f1": 0.836751,
+          "fn": 120,
+          "fp": 79,
+          "positive_rate": 0.675459,
+          "precision": 0.865874,
+          "problem_recall": 0.809524,
+          "rows": 872,
+          "specificity": 0.673554,
+          "tn": 163,
+          "tp": 510
+        }
+      },
+      "module": "live_match_commit_model.py",
+      "name": "live_match_commit",
+      "target": "match_top1_correct",
+      "target_units": ""
+    }
+  ],
+  "source": "ml_washdata/output/promoted"
+}

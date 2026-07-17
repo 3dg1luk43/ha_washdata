@@ -1,17 +1,35 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Regression tests for issue #199.
 
 Two problems reported:
 1. Confidence stays at ~66% even after many user confirmations because
    matching always compared against the original sample cycle, ignoring
    the envelope (average of all confirmed cycles).
-2. No way to suppress persistent feedback notifications once cycles are
+2. Persistent feedback notifications were noisy once cycles are
    consistently detected correctly.
 
 Fixes:
 - async_match_profile now prefers the envelope avg curve when ≥2 labeled
   cycles have been confirmed, so confidence improves over time.
-- CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS suppresses the persistent HA
-  notification while still recording feedback internally.
+- The persistent feedback notification (and its suppress toggle) were
+  removed in 0.5.0; pending reviews are surfaced only in the panel's
+  Cycles review queue, so ``_maybe_request_feedback`` records the review
+  internally and never raises a notification.
 - CONF_AUTO_LABEL_CONFIDENCE and CONF_LEARNING_CONFIDENCE are now exposed
   in the Advanced Settings UI so users can tune the thresholds directly.
 """
@@ -26,10 +44,8 @@ from custom_components.ha_washdata.profile_store import ProfileStore
 from custom_components.ha_washdata.learning import LearningManager
 from custom_components.ha_washdata.const import (
     DOMAIN,
-    CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
-    DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     DEFAULT_LEARNING_CONFIDENCE,
 )
@@ -205,20 +221,21 @@ async def test_sample_cycle_used_when_envelope_has_only_one_cycle(store):
 
 
 # ---------------------------------------------------------------------------
-# Test 2: suppress_feedback_notifications suppresses notification only
+# Test 2: feedback requests never raise a persistent notification (0.5.0)
 # ---------------------------------------------------------------------------
 
-def test_suppress_notification_flag_default_is_false():
-    """The default for suppress_feedback_notifications is False (notifications on)."""
-    assert DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS is False
+def test_no_feedback_notification_method_exists():
+    """The persistent feedback notification was removed in 0.5.0; the sender
+    method must not exist on the LearningManager anymore."""
+    assert not hasattr(LearningManager, "_async_send_feedback_notification")
 
 
-def test_maybe_request_feedback_suppressed(learning_manager, mock_hass):
-    """When suppress_feedback_notifications=True, no HA notification is created."""
+def test_maybe_request_feedback_records_review_without_notification(learning_manager, mock_hass):
+    """A cycle in the feedback zone records the pending review (for the panel's
+    Cycles queue) but never spawns a persistent-notification task."""
     entry = _make_entry({
         CONF_AUTO_LABEL_CONFIDENCE: 0.9,
         CONF_LEARNING_CONFIDENCE: 0.6,
-        CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS: True,
     })
     mock_hass.config_entries.async_get_entry = MagicMock(return_value=entry)
 
@@ -240,52 +257,16 @@ def test_maybe_request_feedback_suppressed(learning_manager, mock_hass):
             predicted_duration=3600.0,
         )
 
-    # Internal feedback tracking still happens
+    # Internal feedback tracking still happens (surfaced in the panel review queue)
     mock_verify.assert_called_once()
 
-    # async_create_task should NOT have been called for the notification
-    # (it may be called for async_save but not for _async_send_feedback_notification)
+    # No task should ever be created for a feedback notification.
     notification_tasks = [
         str(call) for call in mock_hass.async_create_task.call_args_list
         if "_async_send_feedback_notification" in str(call)
     ]
     assert len(notification_tasks) == 0, (
-        "No notification task should be created when suppress_feedback_notifications=True"
-    )
-
-
-def test_maybe_request_feedback_not_suppressed(learning_manager, mock_hass):
-    """When suppress_feedback_notifications=False, the HA notification IS created."""
-    entry = _make_entry({
-        CONF_AUTO_LABEL_CONFIDENCE: 0.9,
-        CONF_LEARNING_CONFIDENCE: 0.6,
-        CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS: False,
-    })
-    mock_hass.config_entries.async_get_entry = MagicMock(return_value=entry)
-
-    cycle_data = {
-        "id": "cycle_002",
-        "duration": 3600,
-        "start_time": "2024-01-01T10:00:00+00:00",
-    }
-
-    with patch.object(
-        learning_manager, "request_cycle_verification"
-    ), patch.object(
-        learning_manager.profile_store, "async_save", new_callable=AsyncMock
-    ):
-        learning_manager._maybe_request_feedback(
-            cycle_data=cycle_data,
-            detected_profile="Normal 65°C",
-            confidence=0.66,
-            predicted_duration=3600.0,
-        )
-
-    # At least one task should be for the notification
-    all_tasks = [str(call) for call in mock_hass.async_create_task.call_args_list]
-    notification_tasks = [t for t in all_tasks if "_async_send_feedback_notification" in t]
-    assert len(notification_tasks) == 1, (
-        "A notification task should be created when suppress_feedback_notifications=False"
+        "Feedback notifications were removed; no notification task should be created"
     )
 
 
@@ -308,7 +289,6 @@ def test_maybe_request_feedback_skips_below_learning_threshold(learning_manager,
     entry = _make_entry({
         CONF_AUTO_LABEL_CONFIDENCE: 0.9,
         CONF_LEARNING_CONFIDENCE: 0.7,  # raised threshold
-        CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS: False,
     })
     mock_hass.config_entries.async_get_entry = MagicMock(return_value=entry)
 

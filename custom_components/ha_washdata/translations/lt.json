@@ -24,994 +24,64 @@
           "profile_name": "Profilio pavadinimas (neprivaloma)",
           "manual_duration": "Numatoma trukmė (min.)"
         }
+      },
+      "reconfigure": {
+        "title": "WashData rekonfigūracija",
+        "description": "Atnaujinkite įrenginio pavadinimą, prietaiso tipą arba galios jutiklį.",
+        "data": {
+          "name": "Įrenginio pavadinimas",
+          "device_type": "Įrenginio tipas",
+          "power_sensor": "Galios jutiklis",
+          "min_power": "Minimalios galios slenkstis (W)"
+        }
       }
     },
     "error": {
       "cannot_connect": "Nepavyko prisijungti",
       "invalid_auth": "Neteisingas autentifikavimas",
-      "unknown": "Netikėta klaida"
+      "unknown": "Netikėta klaida",
+      "invalid_power": "Galios slenkstis turi būti didesnis nei 0"
     },
     "abort": {
-      "already_configured": "Įrenginys jau sukonfigūruotas"
+      "already_configured": "Įrenginys jau sukonfigūruotas",
+      "reconfigure_successful": "Rekonfigūracija sėkminga"
     }
   },
   "options": {
     "step": {
       "init": {
-        "menu_options": {
-          "learning_feedbacks": "Peržiūrėti mokymosi atsiliepimus",
-          "settings": "Nustatymai",
-          "notifications": "Pranešimai",
-          "manage_cycles": "Tvarkyti ciklus",
-          "manage_profiles": "Tvarkyti profilius",
-          "manage_phase_catalog": "Tvarkyti fazių katalogą",
-          "record_cycle": "Ciklo įrašymas (rankinis)",
-          "diagnostics": "Diagnostika ir priežiūra"
-        }
-      },
-      "apply_suggestions": {
-        "title": "Nukopijuokite siūlomas reikšmes",
-        "description": "Dabartinės siūlomos reikšmės bus nukopijuotos į išsaugotus nustatymus. Tai yra vienkartinis veiksmas ir neįjungia automatinio perrašymo.\n\nSiūlomos kopijuoti vertės:\n{suggested}",
+        "title": "WashData nustatymai",
+        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
-          "confirm": "Patvirtinkite kopijavimo veiksmą"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Peržiūrėkite siūlomus pakeitimus",
-        "description": "Rasta „WashData“ **{pending_count}** siūloma (-ių) taikyti vertė (-ės).\n\nPakeitimai:\n{changes}\n\n✅ Pažymėkite toliau esantį laukelį ir spustelėkite **Pateikti**, kad pritaikytumėte ir išsaugotumėte šiuos pakeitimus nedelsiant.\n❌ Palikite jį nepažymėtą ir spustelėkite **Pateikti**, kad atšauktumėte ir grįžtumėte atgal.",
-        "data": {
-          "confirm_apply_suggestions": "Taikykite ir išsaugokite šiuos pakeitimus"
-        }
-      },
-      "settings": {
-        "title": "Nustatymai",
-        "description": "{deprecation_warning}Nustatykite aptikimo slenksčius, mokymąsi ir išplėstinį elgesį. Numatytieji nustatymai gerai veikia daugumoje sąrankų.\n\nŠiuo metu galimų siūlomų nustatymų: {suggestions_count}.\nJei šis skaičius viršija 0, atidarykite Išplėstinius nustatymus ir naudokite 'Taikyti siūlomas reikšmes' rekomendacijoms peržiūrėti.",
-        "data": {
-          "apply_suggestions": "Taikyti siūlomas reikšmes",
+          "name": "Įrenginio pavadinimas",
           "device_type": "Įrenginio tipas",
-          "power_sensor": "Galios jutiklio objektas",
-          "min_power": "Minimali galia (W)",
-          "off_delay": "Ciklo pabaigos delsa (s)",
-          "notify_actions": "Pranešimų veiksmai",
-          "notify_people": "Atidėti pristatymą, kol šie žmonės grįš namo",
-          "notify_only_when_home": "Atidėti pranešimus, kol pasirinktas asmuo bus namuose",
-          "notify_fire_events": "Paleisti automatizavimo įvykius",
-          "notify_start_services": "Ciklo pradžia – pranešimų tikslai",
-          "notify_finish_services": "Ciklo pabaiga – pranešimų tikslai",
-          "notify_live_services": "Tiesioginė eiga – pranešimų tikslai",
-          "notify_before_end_minutes": "Pranešimas prieš pabaigą (min. iki pabaigos)",
-          "notify_title": "Pranešimo pavadinimas",
-          "notify_icon": "Pranešimo piktograma",
-          "notify_start_message": "Pradžios pranešimo formatas",
-          "notify_finish_message": "Pabaigos pranešimo formatas",
-          "notify_pre_complete_message": "Išankstinio pabaigos pranešimo formatas",
-          "show_advanced": "Redaguoti išplėstinius nustatymus (kitas žingsnis)"
-        },
-        "data_description": {
-          "apply_suggestions": "Pažymėkite šį laukelį, jei norite kopijuoti mokymosi algoritmo siūlomas vertes į formą. Peržiūrėkite prieš išsaugodami.\n\nSiūloma (iš mokymosi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "Pasirinkite prietaiso tipą (skalbimo mašina, džiovintuvas, indaplovė, kavos aparatas, elektromobilis). Ši žyma saugoma su kiekvienu ciklu, kad būtų geriau organizuota.",
-          "power_sensor": "Jutiklio objektas, pranešantis apie galią realiuoju laiku (vatais). Tai galite bet kada pakeisti neprarasdami istorinių duomenų – tai naudinga, jei pakeisite išmanųjį kištuką.",
-          "min_power": "Galios rodmenys, viršijantys šią ribą (vatais), rodo, kad prietaisas veikia. Pradėkite nuo 2 W daugeliui įrenginių.",
-          "off_delay": "Sekundžių skaičius, kurį išlyginta galia turi išlikti žemiau stabdymo slenksčio, kad būtų pažymėta pabaiga. Numatytasis: 120 s.",
-          "notify_actions": "Pasirenkama Home Assistant veiksmų seka pranešimams (scenarijai, pranešimas, TTS ir kt.). Jei nustatyta, veiksmai atliekami prieš atsarginę pranešimų paslaugą.",
-          "notify_people": "Žmonių objektai, naudojami buvimo vietai patikrinti. Kai įjungta, pranešimų pristatymas atidedamas, kol bent vienas pasirinktas asmuo yra namuose.",
-          "notify_only_when_home": "Jei įjungta, atideda pranešimus, kol bent vienas pasirinktas asmuo yra namuose.",
-          "notify_fire_events": "Jei įjungta, paleidžia Home Assistant ciklo pradžios ir pabaigos įvykius (ha_washdata_cycle_started ir ha_washdata_cycle_ended) automatizavimams valdyti.",
-          "notify_start_services": "Viena ar kelios tarnybos praneša, kai prasideda ciklas. Palikite tuščią, kad praleistumėte pradžios pranešimus.",
-          "notify_finish_services": "Viena ar kelios tarnybos įspėja, kai ciklas baigiasi arba artėja prie pabaigos. Palikite tuščią, kad praleistumėte pabaigos pranešimus.",
-          "notify_live_services": "Viena ar daugiau pranešimų paslaugų, kad gautų tiesioginius eigos atnaujinimus, kai ciklas vyksta (tik mobiliajai programai). Palikite tuščią, kad praleistumėte tiesioginius atnaujinimus.",
-          "notify_before_end_minutes": "Minutės iki numatomos ciklo pabaigos, kad būtų suaktyvintas pranešimas. Norėdami išjungti, nustatykite 0. Numatytasis: 0.",
-          "notify_title": "Pasirinktinis pranešimų pavadinimas. Palaikomas {device} rezervuotos vietos žymeklis.",
-          "notify_icon": "Pranešimams naudojama piktograma (pvz., mdi:washing-machine). Palikite tuščią, kad siųstumėte be piktogramos.",
-          "notify_start_message": "Pranešimas siunčiamas, kai prasideda ciklas. Palaikomas {device} rezervuotos vietos žymeklis.",
-          "notify_finish_message": "Pranešimas siunčiamas, kai ciklas baigiasi. Palaikomi {device}, {duration}, {program}, {energy_kwh}, {cost} rezervuotų vietų žymekliai.",
-          "notify_pre_complete_message": "Pasikartojančios tiesioginės eigos tekstas atnaujinamas, kol vyksta ciklas. Palaikomos {device}, {minutes}, {program} rezervuotos vietos."
-        }
-      },
-      "notifications": {
-        "title": "Pranešimai",
-        "description": "Konfigūruokite pranešimų kanalus, šablonus ir pasirenkamus tiesioginius mobiliojo ryšio eigos naujinius.",
-        "data": {
-          "notify_actions": "Pranešimų veiksmai",
-          "notify_people": "Atidėti pristatymą, kol šie žmonės grįš namo",
-          "notify_only_when_home": "Atidėti pranešimus, kol pasirinktas asmuo bus namuose",
-          "notify_fire_events": "Paleisti automatizavimo įvykius",
-          "notify_start_services": "Ciklo pradžia – pranešimų tikslai",
-          "notify_finish_services": "Ciklo pabaiga – pranešimų tikslai",
-          "notify_live_services": "Tiesioginė eiga – pranešimų tikslai",
-          "notify_before_end_minutes": "Pranešimas prieš pabaigą (min. iki pabaigos)",
-          "notify_live_interval_seconds": "Tiesioginio atnaujinimo intervalas (sekundėmis)",
-          "notify_live_overrun_percent": "Tiesioginio atnaujinimo viršijimo leistina norma (%)",
-          "notify_live_chronometer": "Chronometro atgalinės atskaitos laikmatis",
-          "notify_title": "Pranešimo pavadinimas",
-          "notify_icon": "Pranešimo piktograma",
-          "notify_start_message": "Pradžios pranešimo formatas",
-          "notify_finish_message": "Pabaigos pranešimo formatas",
-          "notify_pre_complete_message": "Išankstinio pabaigos pranešimo formatas",
-          "energy_price_entity": "Energijos kaina – subjektas (neprivaloma)",
-          "energy_price_static": "Energijos kaina – statinė vertė (neprivaloma)",
-          "go_back": "Grįžti neišsaugant",
-          "notify_reminder_message": "Priminimo pranešimo formatas",
-          "notify_timeout_seconds": "Automatiškai atsisakyti po (sekundėmis)",
-          "notify_channel": "Pranešimų kanalas (būsena / tiesioginis / priminimas)",
-          "notify_finish_channel": "Pranešimų kanalas baigtas"
-        },
-        "data_description": {
-          "go_back": "Pažymėkite tai ir spustelėkite Pateikti, kad atmestumėte visus aukščiau pateiktus pakeitimus ir grįžtumėte į pagrindinį meniu.",
-          "notify_actions": "Pasirenkama „Home Assistant” veiksmų seka pranešimams (scenarijai, pranešimas, TTS ir kt.). Jei nustatyta, veiksmai atliekami prieš atsarginę pranešimų paslaugą.",
-          "notify_people": "Žmonių objektai, naudojami buvimo vietai patikrinti. Kai įjungta, pranešimų pristatymas atidedamas, kol bent vienas pasirinktas asmuo yra namuose.",
-          "notify_only_when_home": "Jei įjungta, atideda pranešimus, kol bent vienas pasirinktas asmuo yra namuose.",
-          "notify_fire_events": "Jei įjungta, paleidžia „Home Assistant” ciklo pradžios ir pabaigos įvykius (ha_washdata_cycle_started ir ha_washdata_cycle_ended) automatizavimams valdyti.",
-          "notify_start_services": "Viena ar daugiau pranešimų paslaugų, kurios įspėtų, kai ciklas prasideda (pvz., notify.mobile_app_my_phone). Palikite tuščią, kad praleistumėte pradžios pranešimus.",
-          "notify_finish_services": "Viena ar kelios tarnybos įspėja, kai ciklas baigiasi arba artėja prie pabaigos. Palikite tuščią, kad praleistumėte pabaigos pranešimus.",
-          "notify_live_services": "Viena ar daugiau pranešimų paslaugų gauti tiesioginius eigos naujinius, kai ciklas vyksta (tik mobilioji programa). Palikite tuščią, kad praleistumėte tiesioginius atnaujinimus.",
-          "notify_before_end_minutes": "Minutės iki numatomos ciklo pabaigos, kad būtų suaktyvintas pranešimas. Norėdami išjungti, nustatykite 0. Numatytasis: 0.",
-          "notify_live_interval_seconds": "Kaip dažnai veikiant siunčiami eigos naujiniai. Mažesnės reikšmės reaguoja greičiau, bet sunaudoja daugiau pranešimų. Taikoma ne mažiau kaip 30 sekundžių – mažesnės nei 30 s reikšmės automatiškai suapvalinamos iki 30 s.",
-          "notify_live_overrun_percent": "Saugos atsarga, viršijanti numatomą naujinimų skaičių ilgiems / per ilgiems ciklams (pvz., 20 % leidžia 1,2 karto apskaičiuotus naujinius).",
-          "notify_live_chronometer": "Kai įgalinta, į kiekvieną tiesioginį atnaujinimą įtraukiamas chronometro atgalinis skaičiavimas iki numatomo pabaigos laiko. Pranešimų laikmatis automatiškai įsijungia įrenginyje tarp atnaujinimų (tik „Android“ papildomai programai).",
-          "notify_title": "Pasirinktinis pranešimų pavadinimas. Palaikomas {device} rezervuotos vietos žymeklis.",
-          "notify_icon": "Pranešimams naudojama piktograma (pvz., mdi:washing-machine). Palikite tuščią, kad siųstumėte be piktogramos.",
-          "notify_start_message": "Pranešimas siunčiamas, kai prasideda ciklas. Palaikomas {device} rezervuotos vietos žymeklis.",
-          "notify_finish_message": "Pranešimas siunčiamas, kai ciklas baigiasi. Palaikomi {device}, {duration}, {program}, {energy_kwh}, {cost} rezervuotų vietų žymekliai.",
-          "energy_price_entity": "Pasirinkite skaitmeninį objektą, kuriame yra dabartinė elektros kaina (pvz., jutiklis.elektros_kaina, įvesties_numeris.energijos_norma). Kai nustatyta, įgalina rezervuotą vietą {cost}. Turi viršenybę prieš statinę vertę, jei sukonfigūruotos abi.",
-          "energy_price_static": "Fiksuota elektros kaina už kWh. Kai nustatyta, įgalina rezervuotą vietą {cost}. Nepaisoma, jei subjektas sukonfigūruotas aukščiau. Pranešimo šablone pridėkite savo valiutos simbolį, pvz. {cost} €.",
-          "notify_reminder_message": "Vienkartinio priminimo tekstas išsiuntė sukonfigūruotą minučių skaičių iki numatomos pabaigos. Skirtingai nuo pasikartojančių tiesioginių atnaujinimų aukščiau. Palaikomos {device}, {minutes}, {program} rezervuotos vietos.",
-          "notify_timeout_seconds": "Automatiškai atsisakykite pranešimų po tiek sekundžių (persiunčiami kaip papildomos programos laikas). Nustatykite 0, kad jie liktų, kol bus atmesti. Numatytasis: 0.",
-          "notify_channel": "Android papildomos programos pranešimų kanalas, skirtas būsenos, tiesioginės eigos ir priminimų pranešimams. Kanalo garsas ir svarba sukonfigūruojami papildomoje programoje pirmą kartą naudojant kanalo pavadinimą – WashData nustato tik kanalo pavadinimą. Palikite tuščią, kad nustatytumėte numatytąją programą.",
-          "notify_finish_channel": "Atskiras Android kanalas baigtam perspėjimui (taip pat naudojamas priminimui ir skalbinių laukimo ragavimui), kad jis galėtų turėti savo garsą. Palikite tuščią, jei norite pakartotinai naudoti aukščiau esantį kanalą.",
-          "notify_pre_complete_message": "Pasikartojančios tiesioginės eigos tekstas atnaujinamas, kol vyksta ciklas. Palaikomos {device}, {minutes}, {program} rezervuotos vietos."
-        }
-      },
-      "advanced_settings": {
-        "title": "Išplėstiniai nustatymai",
-        "description": "Nustatykite aptikimo slenksčius, mokymąsi ir išplėstinį elgesį. Numatytieji nustatymai gerai veikia daugumoje konfigūracijų.",
-        "sections": {
-          "suggestions_section": {
-            "name": "Siūlomi nustatymai",
-            "description": "Yra {suggestions_count} išmoktų pasiūlymų. Pažymėkite 'Taikyti siūlomas reikšmes', kad prieš išsaugodami peržiūrėtumėte siūlomus pakeitimus.",
-            "data": {
-              "apply_suggestions": "Taikyti siūlomas reikšmes"
-            },
-            "data_description": {
-              "apply_suggestions": "Pažymėkite šį laukelį, kad atidarytumėte siūlomų verčių iš mokymosi algoritmo peržiūros žingsnį. Niekas neišsaugoma automatiškai.\n\nSiūloma (iš mokymosi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
-            }
-          },
-          "detection_section": {
-            "name": "Aptikimas ir galios slenksčiai",
-            "description": "Nustato, kada prietaisas laikomas ĮJUNGTU arba IŠJUNGTU, energijos slenksčius ir būsenų perėjimų laiką.",
-            "data": {
-              "start_duration_threshold": "Pradžios atmetimo trukmė (s)",
-              "start_energy_threshold": "Pradžios energijos vartai (Wh)",
-              "completion_min_seconds": "Min. užbaigimo veikimo laikas (sekundėmis)",
-              "start_threshold_w": "Pradžios slenkstis (W)",
-              "stop_threshold_w": "Stabdymo slenkstis (W)",
-              "end_energy_threshold": "Pabaigos energijos vartai (Wh)",
-              "running_dead_zone": "Veikimo negyva zona (sekundėmis)",
-              "end_repeat_count": "Pabaigos pakartojimų skaičius",
-              "min_off_gap": "Minimalus tarpas tarp ciklų (s)",
-              "sampling_interval": "Mėginių ėmimo intervalas (s)"
-            },
-            "data_description": {
-              "start_duration_threshold": "Ignoruokite trumpus galios šuolius, trumpesnius nei ši trukmė (sekundėmis). Filtruoja įkrovos šuolius (pvz., 60 W 2 s) prieš prasidedant tikram ciklui. Numatytasis: 5 s.",
-              "start_energy_threshold": "Kad būtų patvirtinta, ciklas turi sukaupti bent tiek energijos (Wh) START fazės metu. Numatytasis: 0,005 Wh.",
-              "completion_min_seconds": "Ciklai, trumpesni nei šis, bus pažymėti kaip „nutrūkę”, net jei jie baigiasi natūraliai. Numatytasis: 600 s.",
-              "start_threshold_w": "Galia turi VIRŠYTI šį slenkstį, kad būtų PRADĖTAS ciklas. Nustatykite aukščiau nei budėjimo galia. Numatytasis: min_power + 1 W.",
-              "stop_threshold_w": "Galia turi NUKRISTI ŽEMIAU šio slenksčio, kad BAIGTŲ ciklą. Nustatykite šiek tiek virš nulio, kad išvengtumėte klaidingų pabaigų dėl triukšmo. Numatytasis: 0,6 * min_power.",
-              "end_energy_threshold": "Ciklas baigiasi tik tuo atveju, jei energija paskutiniame išjungimo delsos lange yra mažesnė nei ši vertė (Wh). Apsaugo nuo klaidingų pabaigų, jei galia svyruoja arti nulio. Numatytasis: 0,05 Wh.",
-              "running_dead_zone": "Prasidėjus ciklui, tiek sekundžių ignoruoti galios sumažėjimus, kad išvengtumėte klaidingo pabaigos aptikimo pradinėje sūkavimosi fazėje. Norėdami išjungti, nustatykite 0. Numatytasis: 0 s.",
-              "end_repeat_count": "Skaičius, kiek kartų iš eilės turi būti įvykdyta pabaigos sąlyga (galia mažesnė už slenkstį off_delay laiku) prieš baigiant ciklą. Didesnės vertės apsaugo nuo klaidingų galų pauzių metu. Numatytasis: 1.",
-              "min_off_gap": "Jei ciklas prasideda per tiek sekundžių nuo ankstesnio pabaigos, jie bus SUJUNGTI į vieną ciklą.",
-              "sampling_interval": "Minimalus mėginių ėmimo intervalas sekundėmis. Atnaujinimai, greitesni nei šis rodiklis, bus ignoruojami. Numatytasis: 30 s (2 s skalbimo mašinoms, skalbimo mašinoms-džiovykloms ir indaplovėms)."
-            }
-          },
-          "matching_section": {
-            "name": "Profilių atitikimas ir mokymasis",
-            "description": "Nustato, kaip agresyviai WashData lygina vykstančius ciklus su išmoktais profiliais ir kada prašyti atsiliepimo.",
-            "data": {
-              "profile_match_min_duration_ratio": "Profilio atitikties min. trukmės santykis (0,1–1,0)",
-              "profile_match_interval": "Profilio atitikties intervalas (sekundėmis)",
-              "profile_match_threshold": "Profilio atitikties slenkstis",
-              "profile_unmatch_threshold": "Profilio neatitikties slenkstis",
-              "auto_label_confidence": "Automatinio žymėjimo patikimumas (0–1)",
-              "learning_confidence": "Atsiliepimo užklausos patikimumas (0–1)",
-              "suppress_feedback_notifications": "Neleiskite atsiliepimų pranešimų",
-              "duration_tolerance": "Trukmės tolerancija (0–0,5)",
-              "smoothing_window": "Išlyginimo langas (mėginiai)",
-              "profile_duration_tolerance": "Profilio atitikties trukmės tolerancija (0–0,5)"
-            },
-            "data_description": {
-              "profile_match_min_duration_ratio": "Minimalus profilio derinimo trukmės santykis. Veikimo ciklas turi būti bent ši profilio trukmės dalis, kad atitiktų. Mažesnis = ankstesnis atitikimas. Numatytasis: 0,50 (50%).",
-              "profile_match_interval": "Kaip dažnai (sekundėmis) bandyti suderinti profilį ciklo metu. Mažesnės vertės užtikrina greitesnį aptikimą, bet naudoja daugiau procesoriaus. Numatytasis: 300 s (5 minutės).",
-              "profile_match_threshold": "Minimalus DTW panašumo balas (0,0–1,0), reikalingas norint profilį laikyti atitinkančiu. Didesnis = griežtesnis atitikimas, mažiau klaidingų teigiamų rezultatų. Numatytasis: 0,4.",
-              "profile_unmatch_threshold": "DTW panašumo balas (0,0–1,0), žemiau kurio anksčiau suderintas profilis atmetamas. Turi būti mažesnis už atitikties slenkstį, kad būtų išvengta mirgėjimo. Numatytasis: 0,35.",
-              "auto_label_confidence": "Automatiškai pažymėti ciklus, kurių patikimumas yra lygus arba didesnis baigiantis (0,0–1,0).",
-              "learning_confidence": "Minimalus patikimumas, norint paprašyti naudotojo patvirtinimo per įvykį (0,0–1,0).",
-              "suppress_feedback_notifications": "Kai įjungta, WashData vis tiek stebės ir prašys atsiliepimų viduje, bet nerodys nuolatinių pranešimų, kuriuose prašoma patvirtinti ciklus. Naudinga, kai ciklai visada aptinkami teisingai, o raginimai blaško dėmesį.",
-              "duration_tolerance": "Likusio laiko įverčių tolerancija veikimo metu (0,0–0,5 atitinka 0–50%).",
-              "smoothing_window": "Naujausių galios rodmenų, naudojamų slankiojo vidurkio išlyginimui, skaičius.",
-              "profile_duration_tolerance": "Tolerancija, naudojama profilių atitikimui bendrai trukmės dispersijai (0,0–0,5). Numatytasis elgesys: ±25%."
-            }
-          },
-          "timing_section": {
-            "name": "Laikas, priežiūra ir derinimas",
-            "description": "Watchdog, eigos nustatymas iš naujo, automatinė priežiūra ir derinimo objektų rodymas.",
-            "data": {
-              "watchdog_interval": "„Watchdog” intervalas (sekundėmis)",
-              "no_update_active_timeout": "Neatnaujinimo skirtasis laikas (s)",
-              "progress_reset_delay": "Eigos atstatymo delsa (sekundėmis)",
-              "auto_maintenance": "Įjungti automatinę priežiūrą",
-              "expose_debug_entities": "Rodyti derinimo objektus",
-              "save_debug_traces": "Išsaugoti derinimo pėdsakus"
-            },
-            "data_description": {
-              "watchdog_interval": "Sekundžių skaičius tarp „watchdog” patikrinimų veikimo metu. Numatytasis: 5 s. ĮSPĖJIMAS: Įsitikinkite, kad tai yra DAUGIAU nei jūsų jutiklio atnaujinimo intervalas, kad išvengtumėte klaidingų sustojimų (pvz., jei jutiklis atnaujinamas kas 60 s, naudokite 65 s+).",
-              "no_update_active_timeout": "Paskelbimo keičiant jutikliams: priverstinai baigti AKTYVŲ ciklą tik tuo atveju, jei tiek sekundžių negaunama jokių naujinių. Mažos galios pabaiga vis dar naudoja išjungimo delsą.",
-              "progress_reset_delay": "Pasibaigus ciklui (100%), palaukite tiek tuščiosios eigos sekundžių, kad iš naujo nustatytumėte eigą į 0%. Numatytasis: 300 s.",
-              "auto_maintenance": "Įjungti automatinę priežiūrą (remontuoti mėginius, sujungti fragmentus).",
-              "expose_debug_entities": "Rodyti išplėstinius jutiklius (patikimumas, fazė, dviprasmiškumas) derinimui.",
-              "save_debug_traces": "Išsaugoti išsamius reitingavimo ir galios sekimo duomenis istorijoje (padidina saugyklos naudojimą)."
-            }
-          },
-          "anti_wrinkle_section": {
-            "name": "Apsauga nuo raukšlių (džiovyklėms)",
-            "description": "Ignoruokite būgno pasukimus po ciklo pabaigos, kad išvengtumėte vaiduoklinių ciklų. Tik džiovintuvas / skalbyklė-džiovyklė.",
-            "data": {
-              "anti_wrinkle_enabled": "Apsauga nuo raukšlių (tik džiovintuvas / skalbimo mašina-džiovintuvas)",
-              "anti_wrinkle_max_power": "Maks. apsaugos nuo raukšlių galia (W) (tik džiovintuvas / skalbimo mašina-džiovintuvas)",
-              "anti_wrinkle_max_duration": "Maks. apsaugos nuo raukšlių trukmė (s) (tik džiovintuvas / skalbimo mašina-džiovintuvas)",
-              "anti_wrinkle_exit_power": "Apsaugos nuo raukšlių išėjimo galia (W) (tik džiovintuvas / skalbimo mašina-džiovintuvas)"
-            },
-            "data_description": {
-              "anti_wrinkle_enabled": "Ignoruoti trumpus mažos galios būgno sukimus pasibaigus ciklui, kad išvengtumėte šešėlinių ciklų (tik džiovintuvas / skalbimo mašina-džiovintuvas).",
-              "anti_wrinkle_max_power": "Sprogimai, kurių galia yra lygi arba mažesnė, traktuojami kaip sukimai nuo raukšlių, o ne nauji ciklai. Taikoma tik tada, kai įjungta apsauga nuo raukšlių.",
-              "anti_wrinkle_max_duration": "Maksimalus sprogimo ilgis, traktuojamas kaip sukimas nuo raukšlių. Taikoma tik tada, kai įjungta apsauga nuo raukšlių.",
-              "anti_wrinkle_exit_power": "Jei galia nukrenta žemiau šio lygio, iškart išjungiama apsauga nuo raukšlių (tikras išjungimas). Taikoma tik tada, kai įjungta apsauga nuo raukšlių."
-            }
-          },
-          "delay_start_section": {
-            "name": "Atidėto paleidimo aptikimas",
-            "description": "Nuolatinį budėjimo režimą su maža galia laikykite būsena 'Laukiama pradžios', kol ciklas iš tikrųjų prasidės.",
-            "data": {
-              "delay_start_detect_enabled": "Įgalinti atidėto paleidimo aptikimą",
-              "delay_confirm_seconds": "Atidėtas paleidimas: budėjimo patvirtinimo laikas (s)",
-              "delay_timeout_hours": "Atidėtas startas: maksimalus laukimo laikas (h)"
-            },
-            "data_description": {
-              "delay_start_detect_enabled": "Kai įjungta, trumpas mažos galios nutekėjimo šuolis, po kurio eina nuolatinis budėjimo režimas, aptinkamas kaip atidėtas paleidimas. Vėlavimo metu būsenos jutiklis rodo pranešimą „Laukiama pradžios“. Joks programos laikas ar eiga nesekami tol, kol ciklas iš tikrųjų neprasideda. Reikalinga, kad start_threshold_w būtų nustatytas virš nutekėjimo smaigalio galios.",
-              "delay_confirm_seconds": "Galia turi išlikti tarp sustabdymo slenksčio (W) ir paleidimo slenksčio (W) tiek sekundžių, kol WashData pereis į būseną 'Laukiama pradžios'. Taip atfiltruojami trumpi šuoliai naršant meniu. Numatytasis: 60 s.",
-              "delay_timeout_hours": "Saugos skirtasis laikas: jei aparatas po tiek valandų vis dar yra „Laukiama, kol bus paleista“, „WashData“ iš naujo nustatoma į „Išjungta“. Numatytasis: 8 val."
-            }
-          },
-          "external_triggers_section": {
-            "name": "Išoriniai aktyvikliai, durys ir pauzė",
-            "description": "Pasirenkamas išorinis ciklo pabaigos jutiklis, durų jutiklis pauzei / iškrovimui aptikti ir maitinimo išjungimo jungiklis pauzės metu.",
-            "data": {
-              "external_end_trigger_enabled": "Įjungti išorinį ciklo pabaigos aktyviklį",
-              "external_end_trigger": "Išorinis ciklo pabaigos jutiklis",
-              "external_end_trigger_inverted": "Apversti aktyviklio logiką (aktyvinti išjungus)",
-              "door_sensor_entity": "Durų jutiklis",
-              "pause_cuts_power": "Išjunkite maitinimą pristabdydami",
-              "switch_entity": "Jungiklio objektas (pristabdyti maitinimo nutraukimą)",
-              "notify_unload_delay_minutes": "Pranešimo apie skalbinių laukimą delsa (min.)"
-            },
-            "data_description": {
-              "external_end_trigger_enabled": "Įjungti išorinio dvejetainio jutiklio stebėjimą, kad suaktyvintumėte ciklo pabaigą.",
-              "external_end_trigger": "Pasirinkite dvejetainio jutiklio objektą. Kai šis jutiklis suveikia, dabartinis ciklas baigsis su būsena „baigta”.",
-              "external_end_trigger_inverted": "Pagal numatytuosius nustatymus aktyviklis suveikia, kai jutiklis įjungiamas. Pažymėkite šį laukelį, kad suveiktų, kai jutiklis išjungiamas.",
-              "door_sensor_entity": "Pasirenkamas dvejetainis mašinos durelių jutiklis (įjungta = atidaryta, išjungta = uždaryta). Kai durelės atsidaro aktyvaus ciklo metu, WashData patvirtins, kad ciklas buvo tyčia pristabdytas. Pasibaigus ciklui, jei durelės vis dar uždarytos, būsena pasikeičia į „Clean“, kol durys bus atidarytos. Pastaba: uždarius dureles automatiškai NEatnaujinamas pristabdytas ciklas – atnaujinimas turi būti suaktyvintas rankiniu būdu, naudojant mygtuką Tęsti ciklą arba paslauga.",
-              "pause_cuts_power": "Pristabdydami naudodami mygtuką Pause Cycle arba paslaugą, taip pat išjunkite sukonfigūruotą jungiklio objektą. Įsigalioja tik tada, jei šiam įrenginiui sukonfigūruotas jungiklio objektas.",
-              "switch_entity": "Perjungimo objektas, perjungiamas pristabdant arba tęsiant. Reikalingas, kai įjungta parinktis „Išjungti maitinimą pristabdant“.",
-              "notify_unload_delay_minutes": "Pasibaigus ciklui ir durims neatidarius tiek minučių, išsiųskite pranešimą per pranešimo apie pabaigą kanalą (reikalingas durų jutiklis). Norėdami išjungti, nustatykite 0. Numatytasis: 60 min."
-            }
-          },
-          "pump_section": {
-            "name": "Siurblio stebėjimas",
-            "description": "Tik siurblio tipo įrenginiams. Suaktyvina įvykį, jei siurblio ciklas trunka ilgiau nei šis laikas.",
-            "data": {
-              "pump_stuck_duration": "Siurblio užstrigimo įspėjimo slenkstis (-ai) (tik siurblys)"
-            },
-            "data_description": {
-              "pump_stuck_duration": "Jei po tiek sekundžių vis dar veikia siurblio ciklas, vieną kartą suaktyvinamas įvykis ha_washdata_pump_stuck. Naudokite tai norėdami aptikti užstrigusį variklį (įprastas karterio siurblio veikimas yra trumpesnis nei 60 s). Numatytasis: 1800 s (30 min.). Tik siurblio įrenginio tipas."
-            }
-          },
-          "device_link_section": {
-            "name": "Įrenginio nuoroda",
-            "description": "Pasirinktinai susiekite šį „WashData“ įrenginį su esamu Home Assistant įrenginiu (pvz., išmaniuoju kištuku arba pačiu prietaisu). Tada „WashData“ įrenginys rodomas kaip „Prisijungta per tą įrenginį“. Palikite tuščią, kad WashData liktų kaip atskiras įrenginys.",
-            "data": {
-              "linked_device": "Susietas įrenginys"
-            },
-            "data_description": {
-              "linked_device": "Pasirinkite įrenginį, prie kurio norite prijungti „WashData“. Tai prideda nuorodą „Prisijungta per“ įrenginių registre; „WashData“ saugo savo įrenginio kortelę ir objektus. Išvalykite pasirinkimą, kad pašalintumėte nuorodą."
-            }
-          }
-        }
-      },
-      "diagnostics": {
-        "title": "Diagnostika ir priežiūra",
-        "description": "Vykdykite priežiūros veiksmus, pvz., suskaidytų ciklų sujungimą arba saugomų duomenų perkėlimą.\n\n**Saugyklos naudojimas**\n\n– Failo dydis: {file_size_kb} KB\n– Ciklai: {cycle_count}\n– Profiliai: {profile_count}\n– Derinimo pėdsakai: {debug_count}",
-        "menu_options": {
-          "reprocess_history": "Priežiūra: iš naujo apdoroti ir optimizuoti duomenis",
-          "clear_debug_data": "Išvalyti derinimo duomenis (atlaisvinti vietos)",
-          "wipe_history": "Išvalyti VISUS šio įrenginio duomenis (negrįžtama)",
-          "export_import": "Eksportuoti / importuoti JSON su nustatymais (kopijuoti / įklijuoti)",
-          "menu_back": "← Atgal"
-        }
-      },
-      "clear_debug_data": {
-        "title": "Išvalyti derinimo duomenis",
-        "description": "Ar tikrai norite ištrinti visus saugomus derinimo pėdsakus? Tai atlaisvins vietos, bet pašalins išsamią reitingavimo informaciją iš ankstesnių ciklų."
-      },
-      "manage_cycles": {
-        "title": "Tvarkyti ciklus",
-        "description": "Naujausi ciklai:\n{recent_cycles}",
-        "menu_options": {
-          "auto_label_cycles": "Automatinis senų ciklų žymėjimas",
-          "select_cycle_to_label": "Pažymėti konkretų ciklą",
-          "select_cycle_to_delete": "Ištrinti ciklą",
-          "interactive_editor": "Sujungimo / padalijimo interaktyvus redaktorius",
-          "trim_cycle_select": "Apkarpyti ciklo duomenis",
-          "menu_back": "← Atgal"
-        }
-      },
-      "manage_cycles_empty": {
-        "title": "Tvarkyti ciklus",
-        "description": "Dar nėra užfiksuotų ciklų.",
-        "menu_options": {
-          "auto_label_cycles": "Automatinis senų ciklų žymėjimas",
-          "menu_back": "← Atgal"
-        }
-      },
-      "manage_profiles": {
-        "title": "Tvarkyti profilius",
-        "description": "Profilio santrauka:\n{profile_summary}",
-        "menu_options": {
-          "create_profile": "Sukurti naują profilį",
-          "edit_profile": "Redaguoti / pervardyti profilį",
-          "delete_profile_select": "Ištrinti profilį",
-          "profile_stats": "Profilio statistika",
-          "cleanup_profile": "Išvalyti istoriją – diagrama ir ištrynimas",
-          "assign_profile_phases_select": "Priskirti fazių diapazonus",
-          "menu_back": "← Atgal"
-        }
-      },
-      "manage_profiles_empty": {
-        "title": "Tvarkyti profilius",
-        "description": "Dar nesukurta jokių profilių.",
-        "menu_options": {
-          "create_profile": "Sukurti naują profilį",
-          "menu_back": "← Atgal"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Tvarkyti fazių katalogą",
-        "description": "Fazių katalogas (numatytieji šio įrenginio nustatymai + tinkintos fazės):\n{phase_summary}",
-        "menu_options": {
-          "phase_catalog_create": "Sukurti naują fazę",
-          "phase_catalog_edit_select": "Redaguoti fazę",
-          "phase_catalog_delete": "Ištrinti fazę",
-          "menu_back": "← Atgal"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Sukurti pasirinktinę fazę",
-        "description": "Sukurkite pasirinktinį fazės pavadinimą ir aprašą ir pasirinkite, kuriam įrenginio tipui jis taikomas.",
-        "data": {
-          "target_device_type": "Tikslinio įrenginio tipas",
-          "phase_name": "Fazės pavadinimas",
-          "phase_description": "Fazės aprašymas"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Redaguoti pasirinktinę fazę",
-        "description": "Pasirinkite tinkintą fazę, kurią norite redaguoti.",
-        "data": {
-          "phase_name": "Pasirinktinė fazė"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Redaguoti pasirinktinę fazę",
-        "description": "Redaguojama fazė: {phase_name}",
-        "data": {
-          "phase_name": "Fazės pavadinimas",
-          "phase_description": "Fazės aprašymas"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Ištrinti pasirinktinę fazę",
-        "description": "Pasirinkite tinkintą fazę, kurią norite ištrinti. Visi priskirti diapazonai naudojant šią fazę bus pašalinti.",
-        "data": {
-          "phase_name": "Pasirinktinė fazė"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Priskirti fazių diapazonus",
-        "description": "Profilio fazės peržiūra: **{profile_name}**\n\n{timeline_svg}\n\n**Dabartiniai diapazonai:**\n{current_ranges}\n\nNorėdami pridėti, redaguoti, ištrinti arba išsaugoti diapazonus, naudokite toliau nurodytus veiksmus.",
-        "menu_options": {
-          "assign_profile_phases_add": "Pridėti fazių diapazoną",
-          "assign_profile_phases_edit_select": "Redaguoti fazių diapazoną",
-          "assign_profile_phases_delete": "Ištrinti fazių diapazoną",
-          "phase_ranges_clear": "Išvalyti visus diapazonus",
-          "assign_profile_phases_auto_detect": "Automatiškai aptikti fazes",
-          "phase_ranges_save": "Išsaugoti ir grąžinti",
-          "menu_back": "← Atgal"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Pridėti fazių diapazoną",
-        "description": "Pridėkite vieną fazių diapazoną prie esamo juodraščio.",
-        "data": {
-          "phase_name": "Fazė",
-          "start_min": "Pradžios minutė",
-          "end_min": "Pabaigos minutė"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Redaguoti fazių diapazoną",
-        "description": "Pasirinkite norimą redaguoti diapazoną.",
-        "data": {
-          "range_index": "Fazių diapazonas"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Redaguoti fazių diapazoną",
-        "description": "Atnaujinkite pasirinktą fazių diapazoną.",
-        "data": {
-          "phase_name": "Fazė",
-          "start_min": "Pradžios minutė",
-          "end_min": "Pabaigos minutė"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Ištrinti fazių diapazoną",
-        "description": "Pasirinkite diapazoną, kurį norite pašalinti iš juodraščio.",
-        "data": {
-          "range_index": "Fazių diapazonas"
-        }
-      },
-      "assign_profile_phases_auto_detect": {
-        "title": "Automatiškai aptiktos fazės",
-        "description": "Profilis: **{profile_name}**\n\n{timeline_svg}\n\n**Automatiškai aptikta {detected_count} fazė (-ės).** Toliau pasirinkite veiksmą.",
-        "data": {
-          "action": "Veiksmas"
-        }
-      },
-      "assign_profile_phases_auto_detect_name": {
-        "title": "Pavadinkite aptiktas fazes",
-        "description": "Profilis: **{profile_name}**\n\n**Aptikta {detected_count} fazė (-ės):**\n{ranges_summary}\n\nKiekvienai fazei priskirkite pavadinimą."
-      },
-      "assign_profile_phases_select": {
-        "title": "Priskirti fazių diapazonus",
-        "description": "Pasirinkite profilį, kad sukonfigūruotumėte fazių diapazonus.",
-        "data": {
-          "profile": "Profilis"
-        }
-      },
-      "profile_stats": {
-        "title": "Profilio statistika",
-        "description": "{stats_table}"
-      },
-      "create_profile": {
-        "title": "Sukurti naują profilį",
-        "description": "Sukurkite naują profilį rankiniu būdu arba iš praėjusio ciklo.\n\nProfilio pavadinimo pavyzdžiai: „Smulkūs audiniai”, „Intensyvus skalbimas”, „Greitas skalbimas”",
-        "data": {
-          "profile_name": "Profilio pavadinimas",
-          "reference_cycle": "Etaloninis ciklas (neprivaloma)",
-          "manual_duration": "Rankinė trukmė (min.)"
-        }
-      },
-      "edit_profile": {
-        "title": "Redaguoti profilį",
-        "description": "Pasirinkite profilį, kurį norite pervardyti",
-        "data": {
-          "profile": "Profilis"
-        }
-      },
-      "rename_profile": {
-        "title": "Redaguoti profilio informaciją",
-        "description": "Dabartinis profilis: {current_name}",
-        "data": {
-          "new_name": "Profilio pavadinimas",
-          "manual_duration": "Rankinė trukmė (min.)"
-        }
-      },
-      "delete_profile_select": {
-        "title": "Ištrinti profilį",
-        "description": "Pasirinkite profilį, kurį norite ištrinti",
-        "data": {
-          "profile": "Profilis"
-        }
-      },
-      "delete_profile_confirm": {
-        "title": "Patvirtinkite profilio ištrynimą",
-        "description": "⚠️ Tai visam laikui ištrins profilį: {profile_name}",
-        "data": {
-          "unlabel_cycles": "Pašalinti etiketę nuo ciklų, naudojančių šį profilį"
-        }
-      },
-      "auto_label_cycles": {
-        "title": "Automatinis senų ciklų žymėjimas",
-        "description": "Iš viso rasta {total_count} ciklai. Profiliai: {profiles}",
-        "data": {
-          "confidence_threshold": "Minimalus patikimumas (0,50–0,95)"
-        }
-      },
-      "select_cycle_to_label": {
-        "title": "Pasirinkite ciklą žymėjimui",
-        "description": "✓ = baigta, ⚠ = atnaujinta, ✗ = nutraukta",
-        "data": {
-          "cycle_id": "Ciklas"
-        }
-      },
-      "select_cycle_to_delete": {
-        "title": "Ištrinti ciklą",
-        "description": "⚠️ Tai visam laikui ištrins pasirinktą ciklą",
-        "data": {
-          "cycle_id": "Ciklas ištrinimui"
-        }
-      },
-      "label_cycle": {
-        "title": "Pažymėti ciklą",
-        "description": "{cycle_info}",
-        "data": {
-          "profile_name": "Profilis",
-          "new_profile_name": "Naujas profilio pavadinimas (jei kuriamas)"
-        }
-      },
-      "post_process": {
-        "title": "Apdoroti istoriją (sujungti / išskaidyti)",
-        "description": "Išvalykite ciklo istoriją sujungdami suskaidytus paleidimus ir išskaidydami neteisingai sujungtus ciklus per laiko langą. Įveskite valandų skaičių, kiek norite peržiūrėti (visiems naudokite 999999).",
-        "data": {
-          "time_range": "Peržiūros langas (valandomis)",
-          "gap_seconds": "Sujungimo / padalijimo tarpas (sekundėmis)"
-        },
-        "data_description": {
-          "time_range": "Valandų skaičius, per kurį reikia nuskaityti suskaidytus ciklus, kad būtų sujungti. Norėdami apdoroti visus istorinius duomenis, naudokite 999999.",
-          "gap_seconds": "Slenkstis, kada sujungti, o kada skaidyti. Tarpai TRUMPESNI nei šis bus sujungti. Tarpai ILGESNI nei šis bus išskaidyti. Sumažinkite, kad priverstinai padalintumėte neteisingai sujungtą ciklą."
-        }
-      },
-      "cleanup_profile": {
-        "title": "Išvalyti istoriją – pasirinkite profilį",
-        "description": "Pasirinkite profilį, kurį norite vizualizuoti. Tai sugeneruos diagramą, rodančią visus praėjusius šio profilio ciklus, kad būtų lengviau nustatyti nuokrypius.",
-        "data": {
-          "profile": "Profilis"
-        }
-      },
-      "cleanup_select": {
-        "title": "Išvalyti istoriją – diagrama ir ištrynimas",
-        "description": "![Diagrama]({graph_url})\n\n**Vizualizuojamas {profile_name}**\n\nDiagramoje atskiri ciklai rodomi spalvotomis linijomis. Nustatykite nuokrypius (linijos, esančios toli nuo grupės) ir suderinkite jų spalvas toliau pateiktame sąraše, kad jas ištrintumėte.\n\n**Pasirinkite ciklus, kuriuos norite VISAM LAIKUI ištrinti:**",
-        "data": {
-          "cycles_to_delete": "Ciklai ištrinimui (patikrinkite atitinkančias spalvas)"
-        }
-      },
-      "interactive_editor": {
-        "title": "Sujungimo / padalijimo interaktyvus redaktorius",
-        "description": "Pasirinkite rankinį veiksmą, kurį norite atlikti ciklų istorijoje.",
-        "menu_options": {
-          "editor_split": "Padalinti ciklą (rasti tarpus)",
-          "editor_merge": "Sujungti ciklus (sujungti fragmentus)",
-          "editor_delete": "Ištrinti ciklą (-us)",
-          "menu_back": "← Atgal"
-        }
-      },
-      "editor_select": {
-        "title": "Pasirinkite ciklus",
-        "description": "Pasirinkite ciklą (-us), kurį (-iuos) norite apdoroti.\n\n{info_text}",
-        "data": {
-          "selected_cycles": "Ciklai"
-        }
-      },
-      "editor_configure": {
-        "title": "Konfigūruoti ir taikyti",
-        "description": "{preview_md}",
-        "data": {
-          "confirm_action": "Veiksmas",
-          "merged_profile": "Gautas profilis",
-          "new_profile_name": "Naujas profilio pavadinimas",
-          "confirm_commit": "Taip, patvirtinu šį veiksmą",
-          "segment_0_profile": "1 segmento profilis",
-          "segment_1_profile": "2 segmento profilis",
-          "segment_2_profile": "3 segmento profilis",
-          "segment_3_profile": "4 segmento profilis",
-          "segment_4_profile": "5 segmento profilis",
-          "segment_5_profile": "6 segmento profilis",
-          "segment_6_profile": "7 segmento profilis",
-          "segment_7_profile": "8 segmento profilis",
-          "segment_8_profile": "9 segmento profilis",
-          "segment_9_profile": "10 segmento profilis"
-        }
-      },
-      "editor_split_params": {
-        "title": "Padalijimo konfigūracija",
-        "description": "Sureguliuokite šio ciklo padalijimo jautrumą. Bet koks tuščiosios eigos tarpas, ilgesnis nei šis, sukels padalijimą.",
-        "data": {
-          "split_mode": "Padalijimo metodas"
-        }
-      },
-      "editor_split_auto_params": {
-        "title": "Automatinio padalijimo konfigūracija",
-        "description": "Sureguliuokite šio ciklo padalijimo jautrumą. Bet koks ilgesnis neveikos tarpas sukels padalijimą.",
-        "data": {
-          "min_gap_seconds": "Padalijimo tarpo slenkstis (sekundės)"
-        }
-      },
-      "editor_split_manual_params": {
-        "title": "Rankinės padalijimo laiko žymos",
-        "description": "{preview_md}Ciklo langas: **{cycle_start_wallclock} → {cycle_end_wallclock}** {cycle_date}.\n\nĮveskite vieną ar daugiau padalijimo laiko žymų (`HH:MM` arba `HH:MM:SS`), po vieną eilutėje. Ciklas bus perkirstas ties kiekviena laiko žyma — N laiko žymų sukuria N+1 segmentą.",
-        "data": {
-          "split_timestamps": "Padalijimo laiko žymos"
-        }
-      },
-      "reprocess_history": {
-        "title": "Priežiūra: iš naujo apdoroti ir optimizuoti duomenis",
-        "description": "Atlieka gilų istorinių duomenų valymą:\n1. Apkarpo nulinės galios rodmenis (tyla).\n2. Ištaiso ciklo laiką / trukmę.\n3. Perskaičiuoja visus statistinius modelius (vokus).\n\n**Paleiskite tai, kad ištaisytumėte duomenų problemas arba pritaikytumėte naujus algoritmus.**"
-      },
-      "wipe_history": {
-        "title": "Išvalyti istoriją (tik testavimui)",
-        "description": "⚠️ Tai visam laikui ištrins VISUS išsaugotus šio įrenginio ciklus ir profilius. To negalima anuliuoti!"
-      },
-      "export_import": {
-        "title": "Eksportuoti / importuoti JSON",
-        "description": "Kopijuoti / įklijuoti šio įrenginio ciklus, profilius IR nustatymus. Eksportuokite žemiau arba įklijuokite JSON importavimui.",
-        "data": {
-          "mode": "Veiksmas",
-          "json_payload": "Pilna konfigūracijos JSON"
-        },
-        "data_description": {
-          "mode": "Pasirinkite Eksportuoti, kad nukopijuotumėte esamus duomenis ir nustatymus, arba Importuoti, kad įklijuotumėte eksportuotus duomenis iš kito WashData įrenginio.",
-          "json_payload": "Eksportuojant: nukopijuokite šį JSON (apima ciklus, profilius ir visus patikslintus nustatymus). Importuojant: įklijuokite JSON, eksportuotą iš WashData."
-        }
-      },
-      "record_cycle": {
-        "title": "Įrašyti ciklą",
-        "description": "Rankiniu būdu įrašykite ciklą, kad sukurtumėte švarų profilį be trukdžių.\n\nBūsena: **{status}**\nTrukmė: {duration} sek\nMėginiai: {samples}",
-        "menu_options": {
-          "record_refresh": "Atnaujinti būseną",
-          "record_stop": "Sustabdyti įrašymą (išsaugoti ir apdoroti)",
-          "record_start": "Pradėti naują įrašymą",
-          "record_process": "Apdoroti paskutinį įrašą (apkarpyti ir išsaugoti)",
-          "record_discard": "Atmesti paskutinį įrašą",
-          "menu_back": "← Atgal"
-        }
-      },
-      "record_process": {
-        "title": "Apdoroti įrašymą",
-        "description": "![Diagrama]({graph_url})\n\n**Diagramoje rodomas neapdorotas įrašas.** Mėlyna = išlaikyti, raudona = siūlomas apkarpymas.\n*Diagrama yra statinė ir neatnaujinama keičiantis formai.*\n\nĮrašymas sustabdytas. Apkarpymai sulygiuojami pagal aptiktą mėginių ėmimo dažnį (~{sampling_rate} s).\n\nNeapdorota trukmė: {duration} sek\nMėginiai: {samples}",
-        "data": {
-          "head_trim": "Apkarpymo pradžia (sekundėmis)",
-          "tail_trim": "Apkarpymo pabaiga (sekundėmis)",
-          "save_mode": "Išsaugojimo vieta",
-          "profile_name": "Profilio pavadinimas"
-        }
-      },
-      "learning_feedbacks": {
-        "title": "Mokymosi atsiliepimai",
-        "description": "Laukiantys atsiliepimai: {count}\n\n{pending_table}\n\nPasirinkite ciklo peržiūros užklausą, kurią norite apdoroti.",
-        "menu_options": {
-          "learning_feedbacks_pick": "Peržiūrėti laukiantį atsiliepimą",
-          "learning_feedbacks_dismiss_all": "Atmesti visus laukiančius atsiliepimus",
-          "menu_back": "← Atgal"
-        }
-      },
-      "learning_feedbacks_pick": {
-        "title": "Pasirinkite atsiliepimą peržiūrai",
-        "description": "Pasirinkite ciklo peržiūros užklausą, kurią norite atidaryti.",
-        "data": {
-          "selected_feedback": "Pasirinkite ciklą peržiūrai"
-        }
-      },
-      "learning_feedbacks_empty": {
-        "title": "Mokymosi atsiliepimai",
-        "description": "Laukiančių atsiliepimų užklausų nerasta.",
-        "menu_options": {
-          "menu_back": "← Atgal"
-        }
-      },
-      "learning_feedbacks_dismiss_all": {
-        "title": "Atmesti visus laukiančius atsiliepimus",
-        "description": "Ketinate atmesti **{count}** laukiančias atsiliepimų užklausas. Atmesti ciklai liks jūsų istorijoje, tačiau neprisidės nauju mokymosi signalu. To negalima atšaukti.\n\n✅ Pažymėkite toliau esantį laukelį ir spustelėkite **Pateikti**, kad atmestumėte viską.\n❌ Palikite jį nepažymėtą ir spustelėkite **Pateikti**, kad atšauktumėte ir grįžtumėte atgal.",
-        "data": {
-          "confirm_dismiss_all": "Patvirtinti: atmesti visas laukiančias atsiliepimų užklausas"
-        }
-      },
-      "resolve_feedback": {
-        "title": "Išspręsti atsiliepimą",
-        "description": "{comparison_img}{candidates_table}\n**Aptiktas profilis**: {detected_profile} ({confidence_pct}%)\n**Numatoma trukmė**: {est_duration_min} min\n**Faktinė trukmė**: {act_duration_min} min\n\n__Pasirinkite veiksmą toliau:__",
-        "data": {
-          "action": "Ką norėtumėte daryti?",
-          "corrected_profile": "Teisinga programa (jei taisoma)",
-          "corrected_duration": "Teisinga trukmė sekundėmis (jei taisoma)"
-        }
-      },
-      "trim_cycle_select": {
-        "title": "Ciklo apkarpymas - pasirinkite ciklą",
-        "description": "Pasirinkite ciklą, kurį norite apkarpyti. ✓ = baigta, ⚠ = atnaujinta, ✗ = nutraukta",
-        "data": {
-          "cycle_id": "Ciklas"
-        }
-      },
-      "trim_cycle": {
-        "title": "Apkarpyti ciklą",
-        "description": "Dabartinis langas: {trim_summary}\n\n{trim_svg}",
-        "data": {
-          "action": "Veiksmas"
-        }
-      },
-      "trim_cycle_start": {
-        "title": "Nustatyti apkarpymo pradžią",
-        "description": "Ciklo langas: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nDabartinė pradžia: **{current_wallclock}** (+{current_offset_min} min. nuo ciklo pradžios)\n\nPasirinkite naują pradžios laiką naudodami toliau pateiktą laikrodžio parinkiklį.",
-        "data": {
-          "trim_start_time": "Naujas pradžios laikas",
-          "trim_start_min": "Nauja pradžia (minutės nuo ciklo pradžios)"
-        }
-      },
-      "trim_cycle_end": {
-        "title": "Nustatyti apkarpymo pabaigą",
-        "description": "Ciklo langas: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nDabartinė pabaiga: **{current_wallclock}** (+{current_offset_min} min. nuo ciklo pradžios)\n\nPasirinkite naują pabaigos laiką naudodami toliau pateiktą laikrodžio parinkiklį.",
-        "data": {
-          "trim_end_time": "Naujas pabaigos laikas",
-          "trim_end_min": "Nauja pabaiga (minutės nuo ciklo pradžios)"
+          "power_sensor": "Galios jutiklis",
+          "min_power": "Minimalios galios slenkstis (W)"
         }
       }
     },
     "error": {
-      "import_failed": "Importuoti nepavyko. Įklijuokite tinkamą „WashData” eksportavimo JSON.",
-      "select_exactly_one": "Pasirinkite tiksliai vieną ciklą šiam veiksmui.",
-      "select_at_least_one": "Pasirinkite bent vieną ciklą šiam veiksmui.",
-      "select_at_least_two": "Pasirinkite bent du ciklus šiam veiksmui.",
-      "profile_exists": "Profilis tokiu pavadinimu jau yra",
-      "rename_failed": "Nepavyko pervardyti profilio. Profilio gali nebūti arba naujas pavadinimas jau užimtas.",
-      "assignment_failed": "Nepavyko priskirti profilio ciklui",
-      "duplicate_phase": "Fazė tokiu pavadinimu jau yra.",
-      "phase_not_found": "Pasirinkta fazė nerasta.",
-      "invalid_phase_name": "Fazės pavadinimas negali būti tuščias.",
-      "phase_name_too_long": "Fazės pavadinimas per ilgas.",
-      "invalid_phase_range": "Fazių diapazonas netinkamas. Pabaiga turi būti didesnė už pradžią.",
-      "invalid_phase_timestamp": "Laiko žyma neteisinga. Naudokite MMMM-MM-DD VV:MM arba VV:MM formatą.",
-      "overlapping_phase_ranges": "Fazių diapazonai sutampa. Sureguliuokite diapazonus ir bandykite dar kartą.",
-      "incomplete_phase_row": "Kiekvienoje fazių eilutėje turi būti fazė ir visos pasirinkto režimo pradžios / pabaigos reikšmės.",
-      "timestamp_mode_cycle_required": "Naudodami laiko žymos režimą pasirinkite šaltinio ciklą.",
-      "no_phase_ranges": "Dar nėra šiam veiksmui skirtų fazių diapazonų.",
-      "feedback_notification_title": "„WashData”: patikrinti ciklą ({device})",
-      "feedback_notification_message": "**Įrenginys**: {device}\n**Programa**: {program} ({confidence}% patikimumas)\n**Laikas**: {time}\n\n„WashData” reikia jūsų pagalbos patikrinti šį aptiktą ciklą.\n\nEikite į **Nustatymai > Įrenginiai ir paslaugos > WashData > Konfigūruoti > Mokymosi atsiliepimai**, kad patvirtintumėte arba pataisytumėte šį rezultatą.",
-      "suggestions_ready_notification_title": "„WashData”: siūlomi nustatymai paruošti ({device})",
-      "suggestions_ready_notification_message": "**Siūlomų nustatymų** jutiklis dabar praneša apie **{count}** įgyvendinamas rekomendacijas.\n\nNorėdami juos peržiūrėti ir pritaikyti: **Nustatymai > Įrenginiai ir paslaugos > „WashData” > Konfigūruoti > Išplėstiniai nustatymai > Taikyti siūlomas reikšmes**.\n\nPasiūlymai yra neprivalomi ir rodomi peržiūrėti prieš išsaugant.",
-      "trim_range_invalid": "Pradžia turi būti prieš pabaigą. Sureguliuokite apkarpymo taškus.",
-      "trim_failed": "Apkarpyti nepavyko. Ciklo gali nebebūti arba langas tuščias.",
-      "invalid_split_timestamp": "Laiko žyma netinkama arba nepatenka į ciklo langą. Naudokite HH:MM arba HH:MM:SS ciklo lange.",
-      "no_split_segments_found": "Iš šių laiko žymų nepavyko sukurti tinkamų segmentų. Įsitikinkite, kad kiekviena laiko žyma yra ciklo lange ir segmentai trunka bent 1 minutę.",
-      "auto_tune_suggestion": "{device_type} {device_title} aptikta vaiduoklio ciklų. Siūlomas min_galios pokytis: {current_min}W -> {new_min}W (netaikomas automatiškai).",
-      "auto_tune_title": "„WashData“ automatinis derinimas",
-      "auto_tune_fallback": "{device_type} {device_title} aptikta vaiduoklio ciklų. Siūlomas min_galios pokytis: {current_min}W -> {new_min}W (netaikomas automatiškai)."
-    },
-    "abort": {
-      "no_cycles_found": "Ciklų nerasta",
-      "no_split_segments_found": "Pasirinktame cikle nerasta segmentų, kuriuos būtų galima padalyti.",
-      "cycle_not_found": "Nepavyko įkelti pasirinkto ciklo.",
-      "no_power_data": "Nėra pasirinkto ciklo galios sekimo duomenų.",
-      "no_profiles_found": "Nerasta jokių profilių. Pirmiausia sukurkite profilį.",
-      "no_profiles_for_matching": "Nėra profilių atitikimui. Pirmiausia sukurkite profilius.",
-      "no_unlabeled_cycles": "Visi ciklai jau pažymėti",
-      "no_suggestions": "Siūlomų verčių dar nėra. Paleiskite kelis ciklus ir bandykite dar kartą.",
-      "no_predictions": "Jokių prognozių",
-      "no_custom_phases": "Nerasta tinkintų fazių.",
-      "reprocess_success": "Sėkmingai iš naujo apdoroti {count} ciklai.",
-      "debug_data_cleared": "Derinimo duomenys sėkmingai išvalyti iš {count} ciklų."
+      "timer_default_message": "{device}: {minutes} min. laikmatis",
+      "timer_pause_action_title": "Tęsti ciklą",
+      "timer_pause_body_suffix": "Ciklas pristabdytas. Atidarykite WashData skydelį, kad tęstumėte.",
+      "notify_live_waiting_message": "{device}: Kol kas neatpažintas joks profilis.",
+      "vs_typical_longer": "{pct}% ilgiau nei įprastai",
+      "vs_typical_shorter": "{pct}% trumpiau nei įprastai",
+      "invalid_power": "Galios slenkstis turi būti didesnis nei 0"
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Ciklo pradžia",
-        "cycle_finish": "Ciklo pabaiga",
-        "cycle_live": "Tiesioginė eiga"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(be etiketės)",
-        "create_new_profile": "Sukurti naują profilį",
-        "remove_label": "Pašalinti etiketę",
-        "no_reference_cycle": "(Nėra etaloninio ciklo)",
-        "all_device_types": "Visi įrenginių tipai",
-        "current_suffix": "(dabartinis)",
-        "editor_select_info": "Pasirinkite 1 ciklą padalijimui arba 2+ ciklus sujungimui.",
-        "editor_select_info_split": "Pasirinkite 1 ciklą padalijimui.",
-        "editor_select_info_merge": "Pasirinkite 2+ ciklus sujungimui.",
-        "editor_select_info_delete": "Pasirinkite 1+ ciklus ištrynimui.",
-        "no_cycles_recorded": "Dar nėra užfiksuotų ciklų.",
-        "profile_summary_line": "– **{name}**: {count} ciklų, {avg} m vid.",
-        "no_profiles_created": "Dar nesukurta jokių profilių.",
-        "phase_preview": "Fazės peržiūra",
-        "phase_preview_no_curve": "Vidutinė profilio kreivė dar nepasiekiama. Vykdykite / žymėkite daugiau šio profilio ciklų.",
-        "average_power_curve": "Vidutinės galios kreivė",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} ciklų, ~{duration} m vid.)",
-        "profile_option_short_fmt": "{name} ({count} ciklų, ~{duration} m)",
-        "deleted_cycles_from_profile": "Ištrinta {count} ciklų iš {profile}.",
-        "not_enough_data_graph": "Nepakanka duomenų diagramai sukurti.",
-        "no_profiles_found": "Nerasta jokių profilių.",
-        "cycle_info_fmt": "Ciklas: {start}, {duration} m, dabartinė: {label}",
-        "top_candidates_header": "### Geriausi kandidatai",
-        "tbl_profile": "Profilis",
-        "tbl_confidence": "Patikimumas",
-        "tbl_correlation": "Koreliacija",
-        "tbl_duration_match": "Trukmės atitikimas",
-        "detected_profile": "Aptiktas profilis",
-        "estimated_duration": "Numatoma trukmė",
-        "actual_duration": "Faktinė trukmė",
-        "choose_action": "__Pasirinkite veiksmą toliau:__",
-        "tbl_count": "Skaičius",
-        "tbl_avg": "Vid.",
-        "tbl_min": "Min.",
-        "tbl_max": "Maks.",
-        "tbl_energy_avg": "Energija (vid.)",
-        "tbl_energy_total": "Energija (iš viso)",
-        "tbl_consistency": "Nuoseklumas",
-        "tbl_last_run": "Paskutinis paleidimas",
-        "graph_legend_title": "Diagramos legenda",
-        "graph_legend_body": "Mėlyna juosta rodo stebėtą minimalų ir maksimalų galios suvartojimo diapazoną. Linija rodo vidutinės galios kreivę.",
-        "recording_preview": "Įrašymo peržiūra",
-        "trim_start": "Apkarpymo pradžia",
-        "trim_end": "Apkarpymo pabaiga",
-        "split_preview_title": "Padalijimo peržiūra",
-        "split_preview_found_fmt": "Rasta {count} segmentų.",
-        "split_preview_confirm_fmt": "Spustelėkite Patvirtinti, kad padalintumėte šį ciklą į {count} atskirus ciklus.",
-        "merge_preview_title": "Sujungimo peržiūra",
-        "merge_preview_joining_fmt": "Sujungiama {count} ciklų. Tarpai bus užpildyti 0 W rodmenimis.",
-        "editor_delete_preview_title": "Trynimo peržiūra",
-        "editor_delete_preview_intro": "Pasirinkti ciklai bus ištrinti visam laikui:",
-        "editor_delete_preview_confirm": "Spustelėkite Patvirtinti, kad visam laikui ištrintumėte šiuos ciklų įrašus.",
-        "no_power_preview": "*Peržiūrai galios duomenų nėra.*",
-        "profile_comparison": "Profilių palyginimas",
-        "actual_cycle_label": "Šis ciklas (faktinis)",
-        "storage_usage_header": "Saugyklos naudojimas",
-        "storage_file_size": "Failo dydis",
-        "storage_cycles": "Ciklai",
-        "storage_profiles": "Profiliai",
-        "storage_debug_traces": "Derinimo pėdsakai",
-        "overview_suffix": "Apžvalga",
-        "phase_preview_for_profile": "Fazės peržiūra profiliui",
-        "current_ranges_header": "Dabartiniai diapazonai",
-        "assign_phases_help": "Norėdami pridėti, redaguoti, ištrinti arba išsaugoti diapazonus, naudokite toliau nurodytus veiksmus.",
-        "profile_summary_header": "Profilio santrauka",
-        "recent_cycles_header": "Naujausi ciklai",
-        "trim_cycle_preview_title": "Ciklo apkarpymo peržiūra",
-        "trim_cycle_preview_no_data": "Nėra šio ciklo galios duomenų.",
-        "trim_cycle_preview_kept_suffix": "išlaikyta",
-        "table_program": "Programa",
-        "table_when": "Kada",
-        "table_length": "Trukmė",
-        "table_match": "Atitikimas",
-        "table_profile": "Profilis",
-        "table_cycles": "Ciklai",
-        "table_avg_length": "Vid. trukmė",
-        "table_last_run": "Paskutinis paleidimas",
-        "table_avg_energy": "Vid. energija",
-        "table_detected_program": "Aptikta programa",
-        "table_confidence": "Patikimumas",
-        "table_reported": "Pranešta",
-        "phase_builtin_suffix": "(Įtaisytas)",
-        "phase_none_available": "Fazių nėra.",
-        "settings_deprecation_warning": "⚠️ **Nebenaudojamo įrenginio tipas:** {device_type} planuojama pašalinti būsimame leidime. „WashData“ atitikimo vamzdynas neduoda patikimų rezultatų šiai prietaisų klasei. Jūsų integracija veikia per nusidėvėjimo laikotarpį; Norėdami nutildyti šį įspėjimą, perjunkite toliau pateiktą **Įrenginio tipą** į vieną iš palaikomų tipų (skalbimo mašina, džiovyklė, skalbimo mašina-džiovyklė kombinuota, indaplovė, oro gruzdintuvė, duonos gaminimo mašina arba siurblys) arba į **Kita (išplėstinė)**, jei jūsų prietaisas neatitinka nė vieno iš palaikomų tipų. **Kita (išplėstinė)** tyčia pristato bendruosius numatytuosius nustatymus, kurie nėra pritaikyti jokiam konkrečiam įrenginiui, todėl turėsite patys sukonfigūruoti slenksčius, skirtąjį laiką ir atitinkamus parametrus; perjungus išsaugomi visi esami nustatymai.",
-        "phase_other_device_types": "Kiti įrenginių tipai:"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Padalinti ciklą (rasti tarpus)",
-        "merge": "Sujungti ciklus (sujungti fragmentus)",
-        "delete": "Ištrinti ciklą (-us)"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Automatiškai aptikti neveiklos tarpus",
-        "manual": "Rankinės laiko žymos"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Priežiūra: iš naujo apdoroti ir optimizuoti duomenis",
-        "clear_debug_data": "Išvalyti derinimo duomenis (atlaisvinti vietos)",
-        "wipe_history": "Išvalyti VISUS šio įrenginio duomenis (negrįžtama)",
-        "export_import": "Eksportuoti / importuoti JSON su nustatymais (kopijuoti / įklijuoti)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Eksportuoti visus duomenis",
-        "import": "Importuoti / sujungti duomenis"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Automatinis senų ciklų žymėjimas",
-        "select_cycle_to_label": "Pažymėti konkretų ciklą",
-        "select_cycle_to_delete": "Ištrinti ciklą",
-        "interactive_editor": "Sujungimo / padalijimo interaktyvus redaktorius",
-        "trim_cycle": "Apkarpyti ciklo duomenis"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Sukurti naują profilį",
-        "edit_profile": "Redaguoti / pervardyti profilį",
-        "delete_profile": "Ištrinti profilį",
-        "profile_stats": "Profilio statistika",
-        "cleanup_profile": "Išvalyti istoriją – diagrama ir ištrynimas",
-        "assign_phases": "Priskirti fazių diapazonus"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Sukurti naują fazę",
-        "edit_custom_phase": "Redaguoti fazę",
-        "delete_custom_phase": "Ištrinti fazę"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Pridėti fazių diapazoną",
-        "edit_range": "Redaguoti fazių diapazoną",
-        "delete_range": "Ištrinti fazių diapazoną",
-        "clear_ranges": "Išvalyti visus diapazonus",
-        "auto_detect_ranges": "Automatiškai aptikti fazes",
-        "save_ranges": "Išsaugoti ir grąžinti"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Atnaujinti būseną",
-        "stop_recording": "Sustabdyti įrašymą (išsaugoti ir apdoroti)",
-        "start_recording": "Pradėti naują įrašymą",
-        "process_recording": "Apdoroti paskutinį įrašą (apkarpyti ir išsaugoti)",
-        "discard_recording": "Atmesti paskutinį įrašą"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Sukurti naują profilį",
-        "existing_profile": "Pridėti prie esamo profilio",
-        "discard": "Atmesti įrašą"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Patvirtinti – teisingas aptikimas",
-        "correct": "Taisyti – pasirinkite programą / trukmę",
-        "ignore": "Ignoruoti – klaidingas teigiamas / triukšmingas ciklas",
-        "delete": "Ištrinti – pašalinti iš istorijos"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Pavadinti ir pritaikyti fazes",
-        "cancel": "Grįžti be pakeitimų"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Nustatyti pradžios tašką",
-        "set_end": "Nustatyti pabaigos tašką",
-        "reset": "Iš naujo nustatyti visą trukmę",
-        "apply": "Taikyti apkarpymą",
-        "cancel": "Atšaukti"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Skalbimo mašina",
         "dryer": "Džiovintuvas",
         "washer_dryer": "Skalbimo-džiovinimo kombinacija",
         "dishwasher": "Indaplovė",
-        "coffee_machine": "Kavos aparatas (nebenaudojamas)",
-        "ev": "Elektrinė transporto priemonė (nebenaudojama)",
         "air_fryer": "Oro gruzdintuvė",
-        "heat_pump": "Šilumos siurblys (nebenaudojamas)",
         "bread_maker": "Duonkepė",
         "pump": "Siurblys / Drenažinis siurblys",
-        "oven": "Orkaitė (nebenaudojama)",
-        "other": "Kita (išplėstinė)"
+        "generic": "Kita (išplėstinė)",
+        "other": "Slenksčio įtaisas"
       }
     }
   },
@@ -1207,6 +277,16 @@
           "description": "„WashData“ įrenginys, kad būtų atnaujintas."
         }
       }
+    },
+    "trigger_ml_training": {
+      "name": "Paleisti ML mokymą",
+      "description": "Rankiniu būdu iš naujo apmokyti įrenginyje esančius ML modelius naudojant šio įrenginio pažymėtus ciklus (eksperimentinis).",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "WashData įrenginys, kurio modelius reikia iš naujo apmokyti."
+        }
+      }
     }
   },
   "entity": {
@@ -1231,12 +311,12 @@
           "ending": "Baigiama",
           "finished": "Baigta",
           "anti_wrinkle": "Apsauga nuo raukšlių",
-          "delay_wait": "Laukiama pradžios",
           "interrupted": "Nutraukta",
           "force_stopped": "Priverstinai sustabdyta",
           "rinse": "Skalavimas",
           "unknown": "Nežinoma",
-          "clean": "Švarus"
+          "clean": "Švarus",
+          "delay_wait": "Laukiama pradžios"
         }
       },
       "washer_program": {
@@ -1269,11 +349,11 @@
           "none": "Nėra"
         }
       },
+      "ambiguity": {
+        "name": "Dviprasmiškumo balas"
+      },
       "current_phase": {
         "name": "Dabartinė fazė"
-      },
-      "wash_phase": {
-        "name": "Fazė"
       },
       "profile_cycle_count": {
         "name": "Profilio {profile_name} ciklų skaičius",
@@ -1287,6 +367,9 @@
       },
       "cycle_count": {
         "name": "Ciklų skaičius"
+      },
+      "energy_total": {
+        "name": "Bendra energija"
       }
     },
     "select": {
@@ -1306,6 +389,12 @@
       },
       "resume_cycle": {
         "name": "Tęsti ciklą"
+      },
+      "record_start": {
+        "name": "Pradėti ciklo įrašymą"
+      },
+      "record_stop": {
+        "name": "Sustabdyti ciklo įrašymą"
       }
     }
   },
@@ -1336,6 +425,24 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s turi būti didesnis nei trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Nėra aktyvaus ciklo pristabdyti ar tęsti."
+    },
+    "path_not_allowed": {
+      "message": "Kelias neleidžiamas: {path}. Pridėkite jo katalogą prie 'allowlist_external_dirs' faile configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Nepavyko sukurti profilio: {error}"
+    },
+    "export_path_exists": {
+      "message": "Eksporto paskirties vieta jau egzistuoja: {path}. Pasirinkite kitą kelią arba pirmiausia pašalinkite esamą failą."
+    },
+    "export_write_failed": {
+      "message": "Nepavyko įrašyti eksporto į {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Nepavyko priskirti profilio: {error}"
     }
   }
 }

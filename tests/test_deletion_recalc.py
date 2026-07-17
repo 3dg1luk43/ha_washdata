@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
 from datetime import datetime, timezone
@@ -29,12 +45,6 @@ async def test_deletion_recalculates_stats(mock_store_cls, mock_dt, mock_hass: H
     }
     
     store.async_save = AsyncMock()
-    def mock_decompress(cycle):
-        # Return list of (offset_seconds, power) floats - matches real _decompress_power_data format
-        data = cycle.get("power_data", [])
-        return [(float(item[0]), float(item[1])) for item in data]
-
-    store._decompress_power_data = mock_decompress
 
     # Helper to create a cycle
     def make_cycle(cid, duration, profile="Test Profile"):

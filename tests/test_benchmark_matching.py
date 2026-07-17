@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Benchmark for profile matching performance."""
 import time
 import json
@@ -9,8 +25,10 @@ from custom_components.ha_washdata.profile_store import ProfileStore, MatchResul
 
 pytestmark = pytest.mark.benchmark
 
-# Path to real data
-REAL_DATA_PATH = "/root/ha_washdata/cycle_data/me/washing_machine/real_export.json"
+# Path to real data (repo-relative; cycle_data/ is gitignored, so this skips in CI)
+REAL_DATA_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "cycle_data", "me", "washing_machine", "real_export.json"
+)
 
 def load_real_data():
     """Load real data from JSON export."""

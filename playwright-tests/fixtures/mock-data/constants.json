@@ -1,0 +1,34 @@
+{
+  "device_types": [
+    {"value": "washing_machine", "label": "Washing Machine"},
+    {"value": "dryer",           "label": "Dryer"},
+    {"value": "washer_dryer",    "label": "Washer-Dryer Combo"},
+    {"value": "dishwasher",      "label": "Dishwasher"},
+    {"value": "air_fryer",       "label": "Air Fryer"},
+    {"value": "bread_maker",     "label": "Bread Maker"},
+    {"value": "pump",            "label": "Pump / Sump Pump"},
+    {"value": "generic",         "label": "Other (Advanced)"},
+    {"value": "other",           "label": "Threshold Device"}
+  ],
+  "state_colors": {
+    "off":            "var(--state-inactive-color, #9e9e9e)",
+    "idle":           "var(--state-inactive-color, #9e9e9e)",
+    "delay_wait":     "var(--secondary-text-color, #757575)",
+    "starting":       "var(--warning-color, #ff9800)",
+    "running":        "var(--success-color, #4caf50)",
+    "paused":         "var(--warning-color, #ff9800)",
+    "user_paused":    "var(--warning-color, #ff9800)",
+    "ending":         "var(--info-color, #2196f3)",
+    "finished":       "var(--success-color, #4caf50)",
+    "anti_wrinkle":   "var(--info-color, #2196f3)",
+    "interrupted":    "var(--error-color, #f44336)",
+    "force_stopped":  "var(--error-color, #f44336)",
+    "rinse":          "var(--info-color, #2196f3)",
+    "clean":          "var(--teal-color, #009688)",
+    "unknown":        "var(--disabled-color, #bdbdbd)",
+    "recording":      "var(--error-color, #f44336)"
+  },
+  "ml_lab_enabled": true,
+  "ml_suggestions_enabled": true,
+  "ml_training_available": true
+}

@@ -3,18 +3,23 @@
   "name": "WashData",
   "after_dependencies": [
     "lovelace",
-    "http"
+    "http",
+    "frontend",
+    "websocket_api",
+    "recorder"
   ],
   "codeowners": [
     "@3dg1luk43"
   ],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": [
+    "conversation"
+  ],
   "documentation": "https://github.com/3dg1luk43/ha_washdata",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/3dg1luk43/ha_washdata/issues",
   "requirements": [
     "numpy"
   ],
-  "version": "0.4.5.1"
+  "version": "0.5.0"
 }

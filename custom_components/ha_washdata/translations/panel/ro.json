@@ -1,0 +1,1771 @@
+{
+  "badge": {
+    "artifact_tip": "{n} anomalii detectate (de exemplu, ușa deschisă la jumătatea ciclului) — deschideți pentru a le vedea pe grafic",
+    "auto": "(detectat automat)",
+    "built_in_tag": "integrat",
+    "declining": "↘ în scădere",
+    "energy_low": "Energie mai mică decât de obicei",
+    "energy_spike": "Energie mai mare decât de obicei",
+    "fair_fit": "calitate acceptabilă",
+    "fair_fit_tip": "Consistență moderată a potrivirii — unele cicluri atribuite acestui profil au scoruri de încredere mai mici. Etichetați mai multe cicluri sau reînregistrați profilul pentru a îmbunătăți acuratețea.",
+    "feedback_requested": "S-a solicitat feedback",
+    "golden_cycle": "Ciclu de referință înregistrat",
+    "improving": "↗ în îmbunătățire",
+    "manual": "(selectat manual)",
+    "needs_review": "Necesită revizuire",
+    "overrun": "A durat mai mult decât de obicei",
+    "poor_fit": "calitate slabă",
+    "poor_fit_tip": "Istoric de potrivire inconsecvent — luați în considerare reconstruirea acestui profil",
+    "restart_gap_tip": "{n} gol la repornirea HA: traseul de putere are o lipsă",
+    "reviewed": "Revizuit",
+    "steady": "→ stabil",
+    "underrun": "S-a terminat mai repede decât de obicei",
+    "using_defaults": "Folosind setările implicite",
+    "using_tuned": "Folosind ponderi ajustate",
+    "overrun_ratio": "({x}x față de estimat)",
+    "underrun_ratio": "({pct}% din estimat)",
+    "awaiting_tip": "În așteptarea aprobării comunității",
+    "awaiting_n": "În așteptarea aprobării · {n} confirmate",
+    "approved": "Aprobat",
+    "awaiting": "În așteptarea aprobării",
+    "imported_tip": "Importat din magazinul comunității. Folosit doar pentru potrivire, necontabilizat în statistici."
+  },
+  "btn": {
+    "add_device": "+ Adăugați dispozitiv",
+    "add_device_tip": "Adăugați un alt dispozitiv WashData",
+    "add_maintenance": "Adăugați eveniment de întreținere",
+    "add_phase": "+ Adăugați fază",
+    "add_timer": "+ Adăugați cronometru",
+    "apply_all": "Aplicați toate",
+    "apply_label": "Aplicați eticheta",
+    "apply_set_b": "Aplicați setul B",
+    "apply_split": "Aplicați divizarea",
+    "apply_trim": "Aplicați tăierea",
+    "auto_detect_split": "Detectare automată",
+    "auto_label_cycles": "Etichetați ciclurile automat",
+    "auto_label_cycles_tip": "Atribuiți automat nume de profil ciclurilor neetichetate a căror încredere de potrivire depășește pragul",
+    "cancel": "Anulați",
+    "clear_debug": "Curățați datele de depanare",
+    "clear_splits": "Curățați",
+    "close": "Închide",
+    "compare": "Comparați",
+    "confirm": "Confirmați",
+    "convert_to_automation": "Convertiți în automatizare",
+    "correct": "Corectați…",
+    "create": "Creați",
+    "create_from_cluster": "Creați profil din {count} cicluri",
+    "create_profile": "+ Creați profil",
+    "delete": "Ștergeți",
+    "delete_group": "Ștergeți grupul",
+    "delete_group_tip": "Ștergeți numai acest grup — profilurile membrilor sunt păstrate",
+    "delete_profile": "Ștergeți profilul",
+    "discard": "Renunțați",
+    "discard_tip": "Renunțați la urma înregistrată fără a salva",
+    "dismiss": "Ignorați",
+    "done": "Terminat",
+    "edit": "Editați",
+    "export": "Exportați",
+    "export_json": "Exportați în JSON",
+    "force_stop": "Oprire forțată",
+    "force_stop_tip": "Termina imediat ciclul curent și marchează-l ca oprit forțat",
+    "from_template": "Din șablon ▾",
+    "ignore": "Ignorați",
+    "import_json": "Importați din JSON",
+    "import_overwrite": "Importați (suprascrie datele)",
+    "inspect": "Inspectați",
+    "label": "Etichetează",
+    "load": "Încărcați",
+    "load_more": "Încărcați mai multe",
+    "manage": "Gestionați",
+    "merge": "Îmbinați",
+    "new_automation": "＋ Automatizare nouă",
+    "new_group": "+ Grup nou",
+    "new_group_tip": "Grupați profilurile aproape identice (aceeași formă/durată, temperatură sau turație diferite) pentru ca motorul de potrivire să le distingă fiabil",
+    "new_phase": "+ Fază nouă",
+    "new_profile": "+ Profil nou",
+    "new_profile_tip": "Creați un nou profil de program dintr-un ciclu etichetat existent sau o înregistrare",
+    "on_cycle_finished": "La terminarea ciclului",
+    "on_cycle_started": "La pornirea ciclului",
+    "pause_cycle": "Pauză",
+    "pause_cycle_tip": "Puneți în pauză ciclul în curs — aparatul va relua de unde a rămas",
+    "pg_apply_device": "Aplicați pe dispozitiv",
+    "pg_autofill": "Completare automată",
+    "play": "Redați",
+    "process": "Procesați",
+    "process_history": "Procesați acum",
+    "process_recording": "Salvați înregistrarea",
+    "process_tip": "Salvați urma înregistrată ca profil nou sau existent",
+    "rebuild": "Reconstruiți plicurile",
+    "rebuild_envelope": "Reconstruiți plicul",
+    "rebuild_tip": "Recalculați plicul de putere așteptat (banda min/max) pentru toate profilurile din ciclurile lor etichetate — rulați după etichetarea de noi cicluri sau corectarea celor vechi",
+    "rec_start_tip": "Porniți înregistrarea urmei de putere a aparatului — porniți imediat înainte de a rula un ciclu",
+    "rec_stop": "Opriți",
+    "rec_stop_tip": "Opriți înregistrarea și păstrați urma capturată pentru revizuire",
+    "record": "Porniți înregistrarea",
+    "refresh": "Actualizați",
+    "refresh_diag_tip": "Reîncărcați statisticile de stocare",
+    "refresh_logs_tip": "Reîncărcați cele mai recente înregistrări din jurnal",
+    "refresh_settings_tip": "Reîncărcați setările de pe server",
+    "relabel": "Reetichetați ({count})",
+    "remove": "Eliminați",
+    "remove_timer": "Eliminați cronometrul",
+    "reset": "Resetați",
+    "reset_ml_models_tip": "Renunțați la modelele ajustate și reveniți la cele integrate. WashData le poate reînvăța ulterior.",
+    "reset_to_builtin": "Resetați la modelele integrate",
+    "reset_to_defaults": "Resetați la valorile implicite",
+    "resume_cycle": "Reluare ciclu",
+    "resume_cycle_tip": "Reluați ciclul întrerupt",
+    "revert_settings": "Renunță la modificări",
+    "revert_settings_tip": "Restaurați setările de dinainte de ultima salvare",
+    "revert_settings_tip_none": "Salvați mai întâi pentru a activa anularea",
+    "revert": "Restaurează",
+    "revert_to_previous": "Restaurați această setare la valoarea anterioară",
+    "review": "Evaluează",
+    "run": "Rulați",
+    "run_analysis": "🔍 Rulați analiza sugestiilor",
+    "run_analysis_tip": "Analizați ciclurile înregistrate acum și actualizați sugestiile de ajustare",
+    "run_auto_label": "Rulați etichetarea automată",
+    "run_both": "Rulați A vs B",
+    "run_simulation": "Rulați simularea",
+    "save": "Salvați",
+    "save_access_control": "Salvați controlul accesului",
+    "save_group": "Salvați grupul",
+    "save_panel_settings": "Salvați setările panoului",
+    "save_phases": "Salvați fazele",
+    "save_preferences": "Salvați preferințele",
+    "save_reminders": "Salvați mementourile",
+    "save_review": "Salvați revizuirea",
+    "save_settings": "Salvați setările",
+    "select": "Selectați",
+    "select_all": "Selectați tot",
+    "select_last20": "Ultimele 20",
+    "select_none": "Deselectați",
+    "show_only": "Afișați doar",
+    "skip_setup": "Omiteți configurarea",
+    "split": "Divizați",
+    "stop": "Opriți",
+    "submit_correction": "Trimiteți corecția",
+    "train_now": "Antrenați acum",
+    "trim": "Tăiați",
+    "trim_split": "Tăiați / Divizați",
+    "undo": "Anulați",
+    "use": "Utilizați",
+    "wipe_all": "Ștergeți toate datele",
+    "delete_selected": "Ștergeți selecția ({n})",
+    "group_suggest": "Grup {n}: {members}",
+    "pg_apply_best": "Aplică cel mai bun",
+    "pg_apply_to_settings": "Salvează în setări",
+    "pg_apply_to_settings_tip": "Copiază valorile pe care le-ai modificat aici în setările active ale acestui dispozitiv",
+    "search": "Căutați",
+    "import": "Importați",
+    "disconnect": "Deconectați",
+    "connect_github": "Conectați GitHub",
+    "save_appliance": "Salvați aparatul",
+    "share_to_store": "Partajați în magazin",
+    "share": "Partajați",
+    "confirm_appliance": "Confirmați acest aparat",
+    "confirmed": "Confirmat",
+    "browse_community_setups": "Răsfoiți configurațiile comunității",
+    "download_device": "Descărcați această configurație",
+    "share_device": "⬆ Partajați acest dispozitiv",
+    "share_device_tip": "Partajați acest aparat și ciclurile sale de referință înregistrate în magazinul comunității, astfel încât alții cu același aparat să le poată adopta",
+    "share_n": "Partajați {n} ciclu(ri)"
+  },
+  "conflict": {
+    "anti_wrinkle_exit": {
+      "exit": "Trebuie să fie sub Pragul de oprire ({stop} W); altfel puterea de ieșire anti-șifonare este ignorată",
+      "stop": "Trebuie să fie peste Puterea de ieșire anti-șifonare ({exit} W)"
+    },
+    "anti_wrinkle_max": {
+      "max": "Trebuie să fie peste Pragul de pornire ({start} W); altfel limita de durată anti-șifonare este ignorată",
+      "start": "Trebuie să fie sub Puterea maximă anti-șifonare ({max} W)"
+    },
+    "attn_sub": "Rezolvați conflictele înainte de salvare",
+    "attn_title": "{n} conflict{s} de setări",
+    "settings_banner": "{n} conflict{s} de setări — verificați secțiunile evidențiate și remediați înainte de salvare.",
+    "settings_banner_btn": "Salt la primul",
+    "confidence": {
+      "auto": "Trebuie să fie cel puțin egal cu Pragul de potrivire ({match})",
+      "learning": "Trebuie să fie cel mult egal cu Pragul de potrivire ({match})",
+      "match_for_auto": "Trebuie să fie cel mult egal cu Încrederea de etichetare automată ({alc})",
+      "match_for_learning": "Trebuie să fie cel puțin egal cu Încrederea de învățare ({lc})"
+    },
+    "duration_ratio": {
+      "max": "Trebuie să fie mai mare decât Raportul de durată minim ({min})",
+      "min": "Trebuie să fie mai mic decât Raportul de durată maxim ({max})"
+    },
+    "hysteresis": {
+      "start": "Trebuie să fie peste Pragul de oprire ({stop} W)",
+      "stop": "Trebuie să fie sub Pragul de pornire ({start} W)"
+    },
+    "min_power": {
+      "min_power": "Trebuie să fie cel mult egal cu Pragul de oprire ({stop} W)",
+      "stop": "Trebuie să fie cel puțin egal cu Puterea minimă ({min} W)"
+    },
+    "no_update_timeout": {
+      "timeout": "Trebuie să fie mai mare decât Intervalul watchdog ({wi} s)",
+      "watchdog": "Trebuie să fie mai mic decât Limita de timp fără actualizări ({to} s)"
+    },
+    "off_delay": {
+      "gap": "Intervalul minim ar trebui să fie cel puțin egal cu Întârzierea de oprire ({delay} s)",
+      "off_delay": "Întârzierea de oprire ({off_delay} s) depășește Intervalul minim dintre cicluri ({gap} s); ciclurile consecutive se pot contopi"
+    },
+    "power_off": {
+      "stop": "Trebuie să fie peste Pragul de oprire fără alimentare ({pot} W)",
+      "threshold": "Trebuie să fie sub Pragul de oprire ({stop} W) pentru a avea efect"
+    },
+    "pump_stuck": {
+      "duration": "Trebuie să fie mai mic decât Limita de timp fără actualizări ({to} s) astfel încât alarma pompei blocate să se declanșeze înainte ca watchdog-ul să oprească ciclul",
+      "timeout": "Trebuie să depășească Durata pompei blocate ({ps} s) astfel încât alarma să se declanșeze înainte ca ciclul să fie oprit forțat"
+    },
+    "start_dur": {
+      "sampling": "Intervalul de eșantionare depășește Durata de pornire ({sdt} s); vârfurile pe un singur eșantion pot deschide un ciclu",
+      "threshold": "Ar trebui să fie de cel puțin un Interval de eșantionare ({si} s) pentru a preveni pornirile false pe un singur eșantion"
+    },
+    "unmatch": {
+      "match": "Trebuie să fie peste Pragul de non-potrivire ({un})",
+      "unmatch": "Trebuie să fie sub Pragul de potrivire ({match}); altfel o potrivire confirmată este anulată instantaneu"
+    },
+    "cascade_toast": "De asemenea, s-au ajustat {n} setare{s} pentru consecvență.",
+    "suggestion_resolves": "Aplicați sugestia în așteptare ({val}) de mai jos pentru a remedia aceasta",
+    "use_fix": "Folosiți {val}",
+    "watchdog": {
+      "interval": "Ar trebui să fie de cel puțin 2x Intervalul de eșantionare ({si} s)",
+      "sampling": "Intervalul de eșantionare ar trebui să fie cel mult jumătate din Intervalul watchdog ({wi} s)"
+    }
+  },
+  "hdr": {
+    "ab_comparison": "Comparație setări A/B",
+    "access_control": "Control acces",
+    "add_maintenance": "Adăugați eveniment de întreținere",
+    "automation_delete": "Ștergeți această automatizare",
+    "automation_needs_review": "Acest ciclu necesită revizuire",
+    "automation_open": "Deschideți în editorul de automatizări",
+    "automation_review_this_cycle": "Revizuiți acest ciclu",
+    "automations": "Automatizări",
+    "clear_debug": "Curățați urmele de depanare",
+    "cycle_simulator": "Simulator de cicluri",
+    "diagnostics_pref": "Diagnostice",
+    "display": "Afișaj",
+    "dtw_inspector": "Inspector DTW",
+    "export_import": "Export / Import",
+    "getting_started": "Primii pași",
+    "live_power": "Putere în timp real",
+    "logs": "Jurnale",
+    "logs_diagnostics": "Diagnostice",
+    "maintenance": "Acțiuni de întreținere",
+    "maintenance_log": "Jurnal de întreținere",
+    "maintenance_reminders": "Mementouri de service",
+    "manual_recording": "Înregistrare manuală",
+    "manual_recording_tip": "Rulați un ciclu intenționat în timp ce WashData înregistrează urma de putere. Porniți imediat înainte ca aparatul să pornească, Opriți când termină, apoi Procesați pentru a-l salva ca profil cu nume.",
+    "ml_learned": "Ce a învățat WashData",
+    "ml_matching_tuning": "Ajustare fină a potrivirii programelor",
+    "ml_settings_card": "Setări",
+    "ml_smart_learning": "Învățare inteligentă",
+    "my_preferences": "Preferințele mele",
+    "no_automations": "Nicio automatizare nu face referire încă la acest dispozitiv.",
+    "panel_settings": "Setări panou",
+    "param_sweep": "Scanare parametri",
+    "phase_catalog": "Catalog de faze",
+    "playground": "Zonă de test",
+    "process_history": "Istoricul procesării",
+    "settings_history": "Istoric setări",
+    "status": "Stare",
+    "status_graph": "Grafic de stare",
+    "storage_stats": "Statistici stocare",
+    "test_history": "Testare pe istoric",
+    "toggle_sidebar": "Comutați bara laterală Home Assistant",
+    "tools_and_data": "Instrumente și date",
+    "wipe_history": "Ștergeți istoricul",
+    "recommendations": "Recomandări ({n})",
+    "pg_detection_params": "Setări de detectare",
+    "pg_timeline": "Cronologia evenimentelor",
+    "pg_outcome": "Rezultatul simulării",
+    "pg_across_cycles": "În toate ciclurile tale",
+    "community_store": "Magazinul comunității",
+    "online_account": "Magazinul comunității și funcții online"
+  },
+  "health": {
+    "fair": "Calitate acceptabilă a profilului",
+    "good": "✓ Calitate bună a profilului",
+    "poor": "⚠ Calitate slabă a profilului"
+  },
+  "lbl": {
+    "actions": "Acțiuni",
+    "activity": "Activitate",
+    "administrators": "Administratori",
+    "aria_compare_chart": "Grafic de comparație a ciclurilor",
+    "aria_cycle_chart": "Curba de putere a ciclului",
+    "aria_envelope_chart": "Grafic al plicului de putere al profilului",
+    "aria_phase_chart": "Grafic al editorului de faze",
+    "aria_playground_chart": "Curba de putere a ciclului cu praguri de detectare glisabile",
+    "aria_power_chart": "Grafic al consumului de putere",
+    "aria_spaghetti_chart": "Curbe de putere ale ciclurilor suprapuse",
+    "aria_sweep_chart": "Grafic cu rezultatele scanării parametrilor",
+    "artifact_anomaly": "Anomalie",
+    "artifact_high_power": "Putere ridicată",
+    "artifact_interruption": "Întrerupere",
+    "artifact_low_power": "Putere scăzută",
+    "auto_detect": "Detectare automată",
+    "auto_fine_tune_off": "ajustare fină automată dezactivată",
+    "auto_fine_tune_on": "reglaj fin automat activat (în jurul orei {hour}:00)",
+    "avg_cost": "Cost mediu",
+    "change": "Modificare",
+    "clock_time": "Ora ceasului",
+    "cohesion_good": "coeziune {pct}%",
+    "cohesion_low": "⚠ coeziune scăzută {pct}%",
+    "compare_profiles": "Comparați cu profiluri",
+    "concurrency": "Concurență",
+    "confidence": "Încredere",
+    "confidence_threshold": "Pragul de încredere",
+    "correct_duration": "Durată corectată (min, opțional)",
+    "correct_profile": "Profil corectat",
+    "correlation": "Corelație",
+    "cost": "Cost",
+    "create_new_profile": "+ Creați un profil nou…",
+    "current_phase": "Faza curentă",
+    "curves": "Curbe",
+    "cycle": "Ciclu",
+    "cycle_date_display": "Afișarea datei ciclului",
+    "cycle_health": "Sănătatea ciclului",
+    "cycle_index": "index ciclu →",
+    "cycles": "Cicluri",
+    "cycles_count": "Cicluri",
+    "cycles_lc": "cicluri",
+    "dashed": "întrerupt",
+    "date": "Dată",
+    "debug_traces": "Urme de depanare",
+    "default": "Implicit",
+    "default_access_level": "Nivelul implicit pentru utilizatorii care nu sunt listați mai jos",
+    "default_other": "Implicit (alte dispozitive)",
+    "default_tab": "Fila implicită la deschiderea panoului",
+    "delta": "Δ",
+    "description": "Descriere",
+    "dtw_blend_w": "Pondere de amestecare",
+    "dtw_blended": "Scor amestecat",
+    "dtw_ddtw": "Scor DDTW",
+    "dtw_l1": "Scor L1",
+    "dtw_matched_profile": "(profilul potrivit al ciclului)",
+    "duration": "Durată",
+    "duration_agreement": "Concordanță durată",
+    "emphasis": "Accent",
+    "enable_access_control": "Activați controlul accesului per utilizator",
+    "energy": "Energie",
+    "energy_agreement": "Concordanță energie",
+    "event_timeline": "Cronologie evenimente",
+    "event_type": "Tip eveniment",
+    "expected": "Așteptat",
+    "expected_duration": "Durată așteptată (min)",
+    "file_kb": "Fișier (kB)",
+    "final_score": "Scor final",
+    "from": "De la",
+    "gap_s": "Pauză (s)",
+    "group_name": "Numele grupului",
+    "head_trim": "Tăiere inițială (s)",
+    "health": "Sănătate",
+    "hide_tabs": "Ascundeți filele pentru non-administratori",
+    "in_use": "În uz",
+    "json_data": "Date JSON",
+    "label": "Program potrivit",
+    "last": "Ultimele",
+    "last_checked": "Ultima verificare:",
+    "load_from_file": "Încărcați din fișier",
+    "mae_score": "Scor MAE",
+    "manual_duration": "Durată manuală (min, opțional)",
+    "match": "Potrivire",
+    "members": "Membri",
+    "metric": "Metrică",
+    "mode_existing_profile": "Adăugați la profilul existent",
+    "mode_new_profile": "Creați un profil nou",
+    "models_fine_tuned": "({count} model{plural} reglat fin)",
+    "n_classic_suggestions": "{n} clasice",
+    "n_ml_suggestions": "{n} ML",
+    "n_selected": "{n} selectate",
+    "n_tuning_suggestions": "{n} sugestie de reglaj",
+    "na": "n/a",
+    "new_profile_name": "Numele noului profil",
+    "notes": "Note",
+    "of": "din",
+    "outcome": "Rezultat",
+    "panel_default_tab": "Fila implicită",
+    "panel_language": "Limba panoului",
+    "per_cycle_short": "ciclu",
+    "pg_autofill_tip": "Completează automat intervalul din valoarea curentă ({lo}–{hi})",
+    "pg_best_value": "Cea mai bună valoare găsită",
+    "pg_current_value": "Valoarea curentă:",
+    "pg_drag_hint": "Trageți linia pe grafic",
+    "pg_dtw": "DTW",
+    "pg_ev_ending": "Se încheie",
+    "pg_ev_running": "În funcțiune",
+    "pg_group_advanced": "Cazuri limită",
+    "pg_group_detection": "Declanșatoare de detectare",
+    "pg_group_timing": "Reguli de temporizare",
+    "pg_idle": "Inactiv",
+    "pg_last_run": "Ultima rulare: {date}",
+    "pg_match_score": "Scor de potrivire",
+    "pg_pct_of": "{p}% din {total}",
+    "pg_poor_match": "Potrivire proastă",
+    "pg_strong_match": "Potrivire puternică",
+    "pg_tile_ambiguous": "Ambigue",
+    "pg_tile_ambiguous_tip": "Cicluri cu un rezultat aproape egal între două programe",
+    "pg_tile_detected": "Detectate",
+    "pg_tile_detected_tip": "Cicluri în care puterea a depășit pragul de pornire suficient de mult pentru a fi înregistrată ca în funcțiune",
+    "pg_tile_matched": "Potrivite",
+    "pg_tile_matched_tip": "Cicluri atribuite corect unui program cunoscut",
+    "pg_time_left": "Timp rămas",
+    "pg_weak_match": "Potrivire slabă",
+    "phase_name": "Nume",
+    "phase_timeline": "Cronologie faze",
+    "power": "Putere",
+    "profile": "Profil",
+    "profile_index": "index profil →",
+    "profile_name": "Numele profilului",
+    "program": "Program",
+    "program_tip": "Înlocuiți profilul potrivit ciclului curent. Detectarea automată permite integrării să aleagă automat cea mai bună potrivire. Fixați un program specific pentru a forța potrivirea când detectarea automată este incorectă sau știți ce rulează.",
+    "progress": "Progres",
+    "raw_socket": "Socket brut",
+    "read_only": "Doar citire",
+    "ref_cycle": "Ciclu de referință (opțional)",
+    "refresh_interval": "Interval de actualizare (s)",
+    "remaining": "Rămas",
+    "reminder_every": "Amintește la fiecare (cicluri)",
+    "remove_label": "- Eliminați eticheta -",
+    "rename_profile": "Redenumiți profilul",
+    "replay_duration": "Redare",
+    "resulting_profile": "Profilul rezultat",
+    "save_mode": "Mod de salvare",
+    "score": "Scor",
+    "score_breakdown": "Detalierea scorului",
+    "seconds_from_start": "Secunde de la start",
+    "select_profile": "Selectați profilul",
+    "setting": "Setare",
+    "settings_a": "Setări A (curente)",
+    "settings_a_short": "A",
+    "settings_advanced": "Avansat",
+    "settings_b": "Setări B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "De bază",
+    "settings_detail_level": "Nivel de detaliu al setărilor",
+    "settings_overrides": "Suprascrieri de setări",
+    "show_debug": "Afișați cardul de depanare a potrivirii live pe pagina de Stare (încredere, ambiguitate, principalii candidați)",
+    "show_expected": "Afișați suprapunerea curbei așteptate (profil potrivit, portocaliu)",
+    "show_raw": "Afișați comutatorul pentru semnalul brut al prizei în graficul de putere în timp real",
+    "sparkline": "Tendința recentă a duratei ciclurilor",
+    "stage2": "Etapa 2 — similaritate de bază",
+    "stage3": "Etapa 3 — DTW",
+    "stage4": "Etapa 4 — concordanță",
+    "status": "Stare",
+    "tail_trim": "Tăiere finală (s)",
+    "timer_auto_pause": "Pauză automată",
+    "timer_min": "min",
+    "timer_msg_placeholder": "Mesaj (opțional, {device}/{program}/{minutes})",
+    "to": "Până la",
+    "ungrouped": "Negrupat",
+    "unlabelled": "Neetichetat",
+    "unlabelled_paren": "(neetichetat)",
+    "warp_path": "Cale de deformare",
+    "input": "Intrare:",
+    "start": "Început",
+    "end": "Sfârșit",
+    "unit_s": "(s)",
+    "reviewed_on": "revizuit la {date}",
+    "unknown": "Necunoscut",
+    "quality": "Calitate",
+    "tags": "Etichete",
+    "at": "la",
+    "pct_match_confidence": "{pct}% încredere de potrivire",
+    "ha_restarted": "HA repornit",
+    "from_start": "De la început",
+    "to_end": "Până la sfârșit",
+    "click_to_select": "faceți clic pentru a selecta",
+    "envelope": "Plic",
+    "zoom_hint": "derulați pentru zoom · dublu clic pentru resetare",
+    "loading_paren": "(se încarcă…)",
+    "time_remaining": "~{v} rămas",
+    "no_duration": "fără durată",
+    "duration_avg": "~{v}m medie",
+    "name_placeholder": "(nume)",
+    "n_shown": ", {n} afișate",
+    "cycles_title": "Cicluri ({n})",
+    "pg_detecting": "Detectare",
+    "pg_best_marker": "Cel mai bun: {v}",
+    "pg_time_left_model": "Timp rămas (model)",
+    "pg_time_left_model_tip": "Timp rămas estimat de model (estimator de fază + combinație ML), nu o numărătoare inversă fixă",
+    "phase": "Fază",
+    "pg_mode_simulate": "Simulează",
+    "pg_mode_history": "Testează pe istoric",
+    "pg_mode_sweep": "Scanare",
+    "pg_ev_detected": "Detectat",
+    "pg_ev_match": "Potrivire confirmată",
+    "pg_ev_match_changed": "Potrivire schimbată",
+    "pg_ev_ambiguous": "Ambiguu",
+    "pg_ev_unmatched": "Fără potrivire",
+    "pg_ev_notify_start": "Notificare de pornire",
+    "pg_ev_notify_pre": "Notificare de pre-finalizare",
+    "pg_ev_notify_finish": "Notificare de finalizare",
+    "pg_ev_notify_milestone": "Notificare de etapă",
+    "pg_ev_notify_held": "Notificare reținută (ore de liniște)",
+    "pg_ev_finished": "Finalizat",
+    "pg_ended": "Încheiere",
+    "pg_proj_energy": "Energie est.",
+    "pg_alert_overrun": "Prea lung",
+    "pg_alert_underrun": "Prea scurt",
+    "pg_alert_did_not_finish": "Nu s-a terminat",
+    "pg_alert_false_end": "Împărțit în mai multe cicluri",
+    "pg_alert_unmatched": "Fără potrivire",
+    "pg_alert_ambiguous": "Potrivire ambiguă",
+    "pg_alert_energy": "Anomalie de energie",
+    "pg_newly_correct": "acum corect",
+    "pg_regressed": "regresat",
+    "pg_end_timing_changed": "moment de încheiere schimbat",
+    "pg_vs_current": "vs actual",
+    "pg_fixed": "rezolvat",
+    "pg_broke": "stricat",
+    "pg_sweep_param": "Parametru",
+    "pg_objective": "Obiectiv",
+    "pg_steps": "Pași",
+    "pg_sweep_2d": "Hartă termică 2D",
+    "pg_sweep_param_y": "Al 2-lea parametru",
+    "pg_obj_match": "Acuratețea potrivirii",
+    "pg_obj_endtiming": "Acuratețea momentului de încheiere",
+    "pg_obj_falseend": "Rata de sfârșituri false",
+    "pg_obj_overrun": "Abatere de durată",
+    "pg_obj_ambiguity": "Rata de ambiguitate",
+    "pg_best_combo": "cea mai bună combinație",
+    "pg_mode_optimize": "Optimizează",
+    "pg_group_matching": "Potrivirea programului",
+    "pg_zoom_hint": "dublu clic pentru a reseta zoomul",
+    "aria_playground_chart2": "Grafic interactiv al puterii ciclului: treci cu cursorul pentru a citi timpul/puterea, derulează pentru a mări, trage pentru a te deplasa",
+    "pg_alert_timeout_end": "Încheiat la expirarea timpului, nu prin predicție",
+    "pg_alert_indefinite": "Ar funcționa la nesfârșit",
+    "task_pg_history": "Testare pe istoric",
+    "task_pg_sweep": "Optimizare",
+    "task_reprocess": "Reprocesare",
+    "task_ml_training": "Învățare",
+    "eta_secs": "~{n} s rămase",
+    "eta_mins": "~{n} min rămase",
+    "pg_recent_runs": "Rulări recente",
+    "pg_load_run": "Reîncarcă această rulare",
+    "pg_match_confidence": "Încrederea în potrivire",
+    "pg_envelope_fit": "Încadrarea în anvelopă",
+    "pg_envelope_fit_tip": "Cât de bine se încadrează ciclul în anvelopa de putere salvată a acestui profil, o altă perspectivă decât încrederea în potrivire.",
+    "n_imported_note": ", {n} importate",
+    "enable_online": "Activați funcțiile online",
+    "store_brand": "Marca aparatului",
+    "store_model": "Modelul aparatului",
+    "anonymous": "Anonim",
+    "rate_quality": "Evaluați calitatea",
+    "rate_n": "{n} stele",
+    "approved_only": "Doar aprobate",
+    "adopt_settings": "Adoptați și setările",
+    "flags": "Semnale",
+    "include_phase_map": "Includeți harta fazelor",
+    "include_settings": "Includeți setările de detectare și potrivire",
+    "show_contributor": "Afișați numele contribuitorilor"
+  },
+  "log": {
+    "all_levels": "Toate nivelurile",
+    "all_devices": "Toate dispozitivele",
+    "all_components": "Toate componentele",
+    "search_ph": "Căutare în jurnale…"
+  },
+  "ml": {
+    "builtin_models": "● Folosind modele integrate",
+    "fit_fair": "Acceptabil",
+    "fit_good": "Bun",
+    "fit_slight": "Ușor",
+    "fit_strong": "Puternic",
+    "fit_weak": "Slab",
+    "fit_word": "potrivire",
+    "personalized": "● Personalizat pentru această mașină",
+    "better_than_baseline": "{pct}% mai bine decât estimarea de referință ({metric})",
+    "trend_improving_tip": "Potrivirea acestui model s-a îmbunătățit în ultimele reverificări.",
+    "trend_declining_tip": "Potrivirea acestui model s-a înrăutățit în ultimele reverificări: revizuirea mai multor cicluri îl poate ajuta să reînvețe.",
+    "trend_steady_tip": "Potrivirea acestui model a rămas aproximativ stabilă în ultimele reverificări.",
+    "cap_blurb": {
+      "end": "Să știe când un ciclu s-a încheiat cu adevărat",
+      "live_match": "Identificarea mai rapidă a programului în curs",
+      "quality": "Depistarea ciclurilor detectate greșit sau corupte",
+      "remaining_time": "Estimarea timpului rămas",
+      "total_energy": "Estimarea energiei totale și a costului"
+    },
+    "cap_label": {
+      "end": "Detectarea sfârșitului ciclului",
+      "live_match": "Recunoașterea programului",
+      "quality": "Verificarea calității ciclului",
+      "remaining_time": "Estimarea timpului rămas",
+      "total_energy": "Estimarea energiei"
+    },
+    "metric_auc": "AUC {auc} pe datele de validare",
+    "metric_mae": "eroare: {model} față de referința {baseline}"
+  },
+  "modal": {
+    "auto_label": "Etichetare automată a ciclurilor",
+    "correct_feedback": "Corectați feedback-ul",
+    "create_profile": "Creați profil",
+    "cycle": "Ciclu",
+    "edit_group": "Editează grupul de profiluri",
+    "edit_phase": "Editați faza",
+    "import_config": "Importați configurația",
+    "label_cycle": "Etichetați ciclul",
+    "merge_cycles": "Îmbinați {n} cicluri",
+    "new_group": "Grup de profiluri nou",
+    "new_phase": "Fază nouă",
+    "process_history_msg": "Reexecutați potrivirea, actualizați sugestiile, reantrenați ML (dacă este activat) și recalculați starea ciclurilor pentru toate ciclurile stocate. Acest lucru poate dura ceva timp.",
+    "process_history_ok": "Procesare",
+    "process_history_title": "Procesare Istoric",
+    "process_recording": "Procesați înregistrarea",
+    "delete_maintenance_msg": "Ștergeți acest istoric de întreținere? Această acțiune nu poate fi anulată.",
+    "delete_maintenance_title": "Ștergeți evenimentul de întreținere",
+    "relabel_cycles": "Reetichetați {count} cicluri",
+    "delete_automation_title": "Ștergeți automatizarea",
+    "delete_automation_msg": "Ștergeți automatizarea \"{name}\" din Home Assistant? Această acțiune nu poate fi anulată.",
+    "remove_legacy_title": "Eliminați acțiunile vechi",
+    "remove_legacy_msg": "Eliminați acțiunile personalizate vechi? Nu se vor mai declanșa la evenimentele de ciclu. Această acțiune nu poate fi anulată din panou.",
+    "discard_recording_title": "Renunțați la înregistrare",
+    "discard_recording_msg": "Renunțați la înregistrarea salvată? Această acțiune nu poate fi anulată.",
+    "dismiss_all_title": "Ignorați toate feedbackurile",
+    "dismiss_all_msg": "Ignorați toate cele {count} cereri de feedback în așteptare?",
+    "dismiss_all_ok": "Ignorați tot",
+    "delete_phase_title": "Ștergeți faza",
+    "delete_phase_msg": "Ștergeți faza \"{name}\"?",
+    "clear_debug_title": "Curățați datele de depanare",
+    "clear_debug_msg": "Ștergeți toate urmele de depanare stocate?",
+    "wipe_all_title": "Ștergeți toate datele",
+    "wipe_all_msg": "⚠️ Aceasta șterge definitiv TOATE ciclurile și profilurile. Această acțiune nu poate fi anulată.",
+    "wipe_all_ok": "Ștergeți tot",
+    "force_stop_title": "Opriți forțat ciclul",
+    "force_stop_msg": "Opriți forțat ciclul activ acum? Ciclul va fi salvat ca întrerupt.",
+    "store_import": "Importați ciclu de referință",
+    "store_share": "Partajați în magazinul comunității",
+    "store_share_device": "Partajați acest dispozitiv"
+  },
+  "msg": {
+    "appliance_monitor": "Monitor de aparate",
+    "artifact_dip_detail": "A scăzut sub banda de putere obișnuită timp de ~{n}s.",
+    "artifact_footer": "Evidențiate în graficul de mai sus. Acestea sunt artefacte tranzitorii (de exemplu, ușa deschisă la jumătatea ciclului), nu neapărat probleme.",
+    "artifact_header": "{n} anomalii detectate în timpul acestui ciclu",
+    "artifact_pause_detail": "Puterea a scăzut aproape la zero timp de ~{n}s, apoi a revenit — probabil ușa a fost deschisă în mijlocul ciclului sau ciclul a fost întrerupt.",
+    "artifact_spike_detail": "A depășit banda de putere obișnuită timp de ~{n}s.",
+    "auto_label_intro": "Atribuiți profiluri ciclurilor neetichetate a căror încredere de potrivire depășește pragul.",
+    "automations_intro": "WashData declanșează evenimente {start} / {end} și expune entități, astfel că notificările și acțiunile sunt cel mai bine construite ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
+    "cleanup_intro": "Toate ciclurile etichetate suprapuse. Bifați valorile aberante și ștergeți pentru a curăța profilul.",
+    "clear_debug_hint": "Eliminați datele de depanare stocate pentru a elibera spațiu.",
+    "collecting_data": "Se colectează date - mai sunt necesare {need} ciclu{plural} înainte ca reglajul fin să poată începe ({current}/{min}).",
+    "compare_overlay_profiles": "Suprapuneți profiluri (estompat)",
+    "compare_profiles_tip": "Suprapuneți alte plicuri de profil pe graficul de mai sus pentru a vedea care dintre ele se potrivește cel mai bine acestui ciclu.",
+    "compare_selected_cycles": "Cicluri selectate (solid) — afișați / ascundeți",
+    "consider_new_profile": "Luați în considerare crearea unui profil nou.",
+    "coverage_gap": "ciclurile recente nu au un profil corespunzător ({pct}% din ultimele 30).",
+    "coverage_gap_similar_cycles": "{count} cicluri similare neetichetate găsite — creați un profil pentru a începe potrivirea lor.",
+    "cycles_deleted": "{count} ciclu(ri) șterse",
+    "enough_data": "Date suficiente pentru a învăța ({current}/{min} cicluri).",
+    "export_description": "Exportați toate profilurile și ciclurile în JSON sau restaurați dintr-un export anterior.",
+    "feedback_cycles_pending": "{n} ciclu{s} de revizuit",
+    "feedback_prompt": "Confirmați că a fost corect, corectați programul sau ignorați.",
+    "filter_by_profile": "Filtrează după profil…",
+    "group_modal_help": "Grupați programe cu aceeași formă care diferă ca temperatură/centrifugare (duratele pot varia). Potrivirea evaluează grupul ca un singur candidat, apoi alege membrul cel mai potrivit. Alegeți cel puțin 2; suprapunerea arată cât de asemănătoare sunt.",
+    "group_not_cohesive": "Aceste profiluri nu sunt suficient de similare pentru a fi grupate în mod fiabil, deci potrivirea le tratează individual până când eliminați valoarea aberantă sau împărțiți grupul.",
+    "group_preview_hint": "Bifați 2 sau mai mulți membri pentru a previzualiza și compara curbele lor de putere.",
+    "import_intro": "Încărcați un fișier exportat sau lipiți un payload JSON mai jos.",
+    "legacy_actions_title": "{count} acțiune personalizată veche încă rulează",
+    "live_chart_loading": "Graficul de putere în timp real apare pe măsură ce sosesc citirile.",
+    "loading": "Se încarcă…",
+    "loading_curve": "Se încarcă curba…",
+    "loading_settings": "Se încarcă setările…",
+    "log_buffer_hint": "Cel mai nou mai întâi · memorează ultimele 500 de înregistrări ha_washdata de la repornire · trageți marginea de jos pentru a redimensiona.",
+    "maintenance_advisory": "Creșterea duratei/energiei poate indica necesitatea întreținerii aparatului (de exemplu, detartrare, curățarea filtrului).",
+    "maintenance_due": "Întreținere scadentă: {items}",
+    "maintenance_intro": "Înregistrați lucrările de service efectuate pe acest aparat și primiți un memento când fiecare sarcină devine din nou scadentă.",
+    "maintenance_load_error": "Nu s-au putut încărca datele de întreținere: {error}",
+    "maintenance_requires_access": "Întreținerea și exportul/importul necesită acces complet.",
+    "manual_duration_hint": "Durata medie/așteptată a ciclului profilului, utilizată pentru estimările timpului rămas. Editați pentru a o seta; lăsând-o neschimbată se păstrează valoarea curentă.",
+    "matching_tuning_intro": "În timpul învățării, WashData ajustează și ponderea acordată formei față de durată și energie în potrivirea programelor.",
+    "merge_intro": "Ciclurile selectate sunt combinate într-unul singur (în ordine cronologică; golurile sunt completate cu 0 W). Alegeți profilul rezultat.",
+    "ml_intro": "WashData vine cu modele inteligente care funcționează imediat.",
+    "ml_learned_intro": "Modele ajustate la această mașină.",
+    "ml_loading": "se încarcă ML…",
+    "ml_settings_intro": "Două comutatoare independente: unul aplică modelele în timpul unui ciclu, celălalt permite WashData să le ajusteze la mașina dvs. în timp.",
+    "name_first_program": "Aveți suficiente cicluri — denumiți primul program pentru a începe potrivirea.",
+    "near_duplicate_cluster": "cluster de profiluri aproape duplicate detectat. Gruparea permite potrivirii să aleagă în mod fiabil între profiluri similare (de exemplu, același program la temperaturi/viteze de centrifugare diferite).",
+    "no_cycles_match": "Niciun ciclu nu corespunde filtrului curent.",
+    "no_cycles_profile": "Niciun ciclu pentru acest profil.",
+    "no_cycles_selected": "Selectați mai întâi cel puțin un ciclu.",
+    "no_cycles_yet": "Niciun ciclu înregistrat încă.",
+    "no_device_selected": "Niciun dispozitiv selectat.",
+    "no_devices": "Niciun dispozitiv WashData configurat încă.",
+    "no_envelope": "Niciun plic încă — reconstruiți după etichetarea ciclurilor.",
+    "no_envelope_overlay": "Niciun plic disponibil pentru suprapunere.",
+    "no_fine_tuned": "Nimic ajustat încă — WashData folosește modelele sale integrate.",
+    "no_logs": "Nicio înregistrare în memorie încă.",
+    "no_maintenance": "Nicio întreținere înregistrată încă.",
+    "no_match_yet": "Nicio tentativă de potrivire încă — aceasta se completează în timpul unui ciclu activ.",
+    "no_other_users": "Niciun alt utilizator Home Assistant găsit.",
+    "no_phases": "Nicio fază definită.",
+    "no_phases_assigned": "Nicio fază atribuită.",
+    "no_profiles_compare": "Niciun profil de comparat.",
+    "no_profiles_overlay": "Niciun profil de suprapus.",
+    "no_profiles_yet": "Niciun profil încă. Creați unul dintr-un ciclu etichetat.",
+    "no_profiles_yet_short": "Niciun profil încă.",
+    "no_settings_match": "Nicio setare nu corespunde cu \"{q}\"",
+    "no_split_points": "Niciun punct de divizare încă.",
+    "no_suggestions": "Nicio sugestie activă.",
+    "notify_services_hint": "Utilizați ID-urile de serviciu {entity} (separate prin virgulă pentru mai multe). Variabile șablon: {vars}.",
+    "old_actions_warning": "Configurat cu vechiul editor de acțiuni (acum eliminat). Încă se declanșează la evenimentele de ciclu, dar nu mai pot fi editate aici. Convertiți-le într-o automatizare normală sau eliminați-le.",
+    "onboarding_progress": "{n} / 3 cicluri observate",
+    "onboarding_watching": "Utilizați aparatul în mod normal — WashData monitorizează. După 3 cicluri, va începe potrivirea programelor.",
+    "pending_feedback": "Feedback de detecție în așteptare",
+    "performance_trend": "Tendință de performanță ({n} cicluri)",
+    "pg_analysis_empty": "Încărcați un ciclu pentru a vedea analiza potrivirii.",
+    "pg_apply_confirm": "Aplicați cea mai bună valoare: {label} = {value}?",
+    "pg_canvas_empty": "Selectați un ciclu de mai sus, apoi apăsați Încărcați pentru a vedea curba sa de putere.",
+    "pg_chart_caption": "Rata de detectare/potrivire în funcție de valorile {param}",
+    "pg_match_rate": "{pct}% rată de potrivire pe {total} cicluri",
+    "pg_restart_note": "Reporniți Home Assistant pentru a activa instrumentele de simulare.",
+    "pg_sim_progress": "{done} / {total} cicluri",
+    "pg_starting": "Se pornește…",
+    "pg_sweep_intro": "Ce-ar fi dacă {param} ar fi diferit? Testați {steps} valori pe ultimele {cycles} cicluri pentru a găsi setarea la care se potrivesc corect cele mai multe cicluri.",
+    "pg_sweep_step": "Pasul {done} / {total}",
+    "pg_undetected": "{n} ciclu{s} nedetectat",
+    "pg_verdict_bad": "Necesită atenție: multe cicluri rămân nedetectate.",
+    "pg_verdict_good": "Bine reglat: majoritatea ciclurilor sunt identificate și potrivite corect.",
+    "pg_verdict_ok": "Acceptabil: unele cicluri au fost ratate. Încercați să reduceți pragul de pornire.",
+    "phase_catalog_intro": "Segmente denumite ale unui ciclu (Pre-spălare, Încălzire, Centrifugare…). Atribuiți-le unui profil din panoul de control al acestuia.",
+    "phase_ranges_intro": "Intervale de fază (minute de la pornirea ciclului) suprapuse pe curba medie. Editați valorile pentru a previzualiza în timp real.",
+    "playground_intro": "Un spațiu sigur de testare pentru a reda ciclurile anterioare cu setări diferite, a compara două configurații una lângă alta și a inspecta cum se aliniază un ciclu la un profil. Nimic de aici nu vă modifică datele active până când nu aplicați în mod explicit.",
+    "playground_needs_restart": "Reporniți Home Assistant pentru a activa instrumentele Zonei de test.",
+    "preferences_admin": "Preferințe, panou și control acces",
+    "preferences_adv": "Preferințe",
+    "prefs_personal": "Se aplică numai contului dvs. Home Assistant.",
+    "process_history_hint": "Reexecutați potrivirea pe toate ciclurile stocate, actualizați sugestiile de reglaj, reantrenați modelele ML (dacă sunt activate) și recalculați starea ciclurilor. Rulați după un lot de recenzii.",
+    "profile_deleted": "Profil șters",
+    "profile_poor_health_detail": "Ciclurile atribuite acestui profil au forme inconsistente sau încredere scăzută. Luați în considerare reconstruirea plicului sau revizuirea ciclurilor etichetate.",
+    "profiles_intro": "Faceți clic pe un profil pentru statistici, faze și curățare. Grupați programe aproape identice (aceeași formă/durată, temperatură sau centrifugare diferite) pentru ca potrivirea să aleagă în mod fiabil între ele.",
+    "rbac_hint": "Când este dezactivat, toți utilizatorii Home Assistant au acces complet (implicit). Administratorii au întotdeauna acces complet și pot gestiona toți utilizatorii.",
+    "recent_logs": "Înregistrări recente ha_washdata",
+    "recording_in_progress": "Înregistrare în curs",
+    "reminders_intro": "Afișați un memento în panou după acest număr de cicluri de la ultimul service. Lăsați necompletat sau 0 pentru a dezactiva un memento.",
+    "restart_gap_footer": "Evidențiat pe grafic. Datele de putere lipsesc pentru aceste intervale; potrivirea a folosit numai citiri reale.",
+    "restart_gap_header": "{n} gol la repornirea HA în timpul acestui ciclu",
+    "restart_gap_item": "{dur} gol",
+    "review_confirm_help": "Confirmați dacă acest ciclu a fost detectat corect. Recenziile dvs. antrenează modelul pe mașina dvs. — cu cât confirmați mai multe cicluri, cu atât obțineți o potrivire mai bună și un scor de sănătate mai bun. Un Bine/Rău rapid este suficient.",
+    "review_in_settings": "Revizuiți în Setări",
+    "review_notes_placeholder": "Note (opțional)",
+    "review_notes_tip": "Note cu text liber pentru referință proprie. Nu sunt folosite de potrivire sau antrenament.",
+    "review_profile_tip": "Programul cu care acest ciclu este etichetat. Dacă programul detectat automat a fost greșit, corectați-l aici — etichetarea învață potrivirea pentru ciclurile viitoare.",
+    "review_quality_tip": "Cât de curat este acest ciclu. Bine = un exemplu model al acestui program; Rău = detectat dar zgomotos sau atipic; Inutilizabil = detectat greșit (combinat, trunchiat sau fals). Determină scorul de sănătate și ce cicluri sunt permise pentru antrenarea modelului.",
+    "review_recorded_tip": "Marcați acest lucru ca un ciclu de referință ales manual pentru programul său — același rol ca un ciclu înregistrat manual. Ciclurile de referință sunt întotdeauna păstrate, generează șablonul de potrivire și nu sunt niciodată eliminate de curățare. (Acesta este steagul \"de aur\"/înregistrat; ambele sunt același lucru.)",
+    "review_tags_tip": "Semnale opționale care descriu ce a mers prost cu acest ciclu, astfel încât antrenamentul și curățarea pot ține cont de acest lucru.",
+    "review_to_cycles": "Deschideți coada de revizuire a Ciclurilor",
+    "saving_triggers_reload": "Salvarea declanșează o reîncărcare a integrării. Entitățile HA pot apărea pe scurt ca indisponibile.",
+    "search_placeholder": "Căutați setări…",
+    "see_recorder": "Consultați widgetul de înregistrare de mai jos",
+    "setting_changed": "Modificat de la {old} la {new} pe {date}",
+    "settings_basic_note": "Se afișează setările esențiale. Comutați la Avansat pentru lista completă.",
+    "shape_drift_advisory": "⚠ Deriva formei",
+    "shape_drift_detail": "Tiparul de putere al acestui profil s-a schimbat în timp — posibilă uzură a aparatului sau întreținere necesară (ex. detartrare, curățarea filtrului).",
+    "show_all_settings": "Afișați toate setările",
+    "showing_suggestions": "Se afișează setarea {count} cu sugestii.",
+    "split_intro": "Faceți clic pe grafic pentru a adăuga sau elimina un punct de divizare, sau detectați automat prin pauze de inactivitate. Fiecare segment rezultat poate primi propriul profil.",
+    "storage_diagnostics": "Statistici stocare, întreținere, export/import",
+    "sug_staged": "Setat {key} = {val}. Salvați pentru a aplica.",
+    "toast_auto_detect_enabled": "Detecție automată activată",
+    "toast_auto_label_complete": "Etichetare automată finalizată",
+    "toast_auto_label_failed": "Etichetare automată eșuată: {error}",
+    "toast_automation_failed": "Nu s-a putut crea automatizarea: {error}",
+    "toast_automation_migrated": "Acțiuni migrate la o automatizare; se deschide editorul",
+    "toast_convert_failed": "Conversie eșuată: {error}",
+    "toast_create_failed": "Creare eșuată: {error}",
+    "toast_delete_failed": "Ștergere eșuată: {error}",
+    "toast_error": "Eroare: {error}",
+    "toast_failed": "Eșuat: {error}",
+    "toast_force_stop_failed": "Oprire forțată eșuată: {error}",
+    "toast_name_required": "Nume obligatoriu",
+    "toast_no_automation": "Nu se poate crea automatizare aici",
+    "toast_profile_name_required": "Numele profilului este obligatoriu",
+    "toast_program_set": "Program setat: {program}",
+    "toast_rebuild_failed": "Reconstruire eșuată: {error}",
+    "toast_resume_failed": "Reluare eșuată: {error}",
+    "toast_revert_failed": "Revenire eșuată: {error}",
+    "toast_reverted": "{key} a revenit la valoarea anterioară",
+    "toast_save_failed": "Salvare eșuată: {error}",
+    "trend_duration_longer": "Durata este în creștere ({pct}%/ciclu) — medie recentă {avg}",
+    "trend_duration_shorter": "Durata este în scădere ({pct}%/ciclu) — medie recentă {avg}",
+    "trend_energy_down": "Energia este în scădere ({pct}%/ciclu)",
+    "trend_energy_up": "Energia este în creștere ({pct}%/ciclu) — medie recentă {avg}",
+    "trim_intro": "Trageți mânerele roșii sau introduceți valori. Tot ceea ce este în afara ferestrei este eliminat.",
+    "tuning_suggestions_available": "{count} sugestie de ajustare disponibilă din ciclurile observate. Acestea apar lângă câmpurile relevante.",
+    "unsure_detected_prefix": "WashData nu este sigur că a detectat",
+    "updated": "Actualizat",
+    "warmup_badge": "Încă învață ({done}/{needed} cicluri)",
+    "warmup_detail": "Acest profil are nevoie de {needed} cicluri etichetate înainte ca potrivirea automată să înceapă. Fiecare ciclu confirmat îl ajută să învețe.",
+    "wipe_history_warning": "Ștergeți definitiv toate ciclurile și profilurile. Nu poate fi anulat.",
+    "compare_overlay_tip": "Suprapuneți plicurile profilurilor învățate pentru a vedea cărui program seamănă fiecare ciclu.",
+    "duration_trend_up_tip": "Durată în creștere ({pct}%/ciclu)",
+    "duration_trend_down_tip": "Durată în scădere ({pct}%/ciclu)",
+    "energy_trend_up_tip": "Energie în creștere ({pct}%/ciclu)",
+    "energy_trend_down_tip": "Energie în scădere ({pct}%/ciclu)",
+    "performance_trending": "Tendință de performanță",
+    "pg_select_cycle_hint": "Selectați un ciclu și faceți clic pe ↺ pentru a încărca",
+    "pg_sweep_progress": "Pasul {done} / {total}",
+    "pg_analysis_hint": "Selectați un ciclu și faceți clic pe ↺ pentru a încărca analiza.",
+    "diagnostics_load_failed": "Nu s-au putut încărca diagnosticele: {error}",
+    "manual_duration_ref_hint": "Se folosește doar când nu este selectat niciun ciclu de referință. Un ciclu de referință stabilește durata în funcție de propria lungime.",
+    "toast_convert_rolled_back": "Conversia a eșuat și a fost anulată (nu a rămas nicio automatizare): {error}",
+    "toast_convert_orphan": "Automatizarea a fost creată, dar ștergerea acțiunilor vechi a eșuat. Nu încercați din nou: eliminați manual acțiunile vechi pentru a evita o automatizare duplicată.",
+    "advisory_duration_trend_up": "Ciclurile '{name}' durează tot mai mult (aproximativ +{pct}% pe ciclu). Dacă comportamentul aparatului s-a schimbat, reînregistrați sau reconstruiți acest profil.",
+    "advisory_energy_trend_up": "'{name}' consumă tot mai multă energie (aproximativ +{pct}% pe ciclu) - merită să verificați aparatul dacă acest lucru este neașteptat.",
+    "advisory_poor_health": "'{name}' are un scor de potrivire scăzut - ciclurile sale recente variază mult sau se potrivesc slab. Examinați ciclurile sau reînregistrați profilul pentru ca recunoașterea și estimările de timp să rămână exacte.",
+    "advisory_shape_drift": "'{name}' a deviat semnificativ față de forma inițială a puterii. Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente.",
+    "advisory_shape_drift_corr": "'{name}' a deviat semnificativ față de forma inițială a puterii (corelație {corr}). Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente.",
+    "pg_no_alerts": "Nicio problemă detectată în această rulare.",
+    "pg_override_active": "Se folosesc setările editate față de cele actuale",
+    "pg_history_intro": "Reluați ciclurile recente prin detectorul și sistemul de potrivire reale. Modificați mai întâi o setare de detectare în Simulează pentru a vedea aici o comparație înainte/după.",
+    "pg_history_empty": "Apăsați Rulați pentru a relua ciclurile.",
+    "pg_history_summary": "{detected}/{total} detectate · {correct} potrivite corect",
+    "pg_sweep_no_metric": "Date insuficiente pentru a evalua acest obiectiv.",
+    "pg_sweep_intro2": "Găsiți setarea care îndeplinește cel mai bine un obiectiv pe ciclurile recente. Nimic nu se schimbă până nu o aplicați.",
+    "pg_running_history": "Se reiau ciclurile tale…",
+    "pg_running_sweep": "Se testează valori pe toate ciclurile tale…",
+    "pg_row_load_hint": "Încarcă acest ciclu în graficul de mai sus",
+    "pg_history_intro2": "Reia ciclurile tale recente prin detectorul și sistemul de potrivire reale, cu setările de mai sus. Fă clic pe orice rând pentru a încărca acel ciclu în grafic; modifică o setare pentru a vedea o comparație înainte/după.",
+    "pg_simulating": "Se simulează ciclul…",
+    "pg_canvas_empty2": "Alege un ciclu de mai sus și apasă Rulează pentru a-l simula. Apoi treci cu cursorul pentru a citi valorile, derulează pentru a mări și trage pentru a te deplasa.",
+    "pg_apply_settings_confirm": "Salvezi aceste {n} setări pe acest dispozitiv? {list}",
+    "no_logs_match": "Nicio înregistrare din jurnal nu corespunde acestor filtre.",
+    "pg_analysis_hint2": "Selectați un ciclu și apăsați Rulați pentru a încărca analiza potrivirii.",
+    "pg_analysis_empty2": "Apăsați Rulați pentru a vedea analiza potrivirii.",
+    "imported_readonly": "Importat din magazinul comunității. Afișat pentru referință și potrivire. Nu este contabilizat în statisticile dvs. și nu poate fi editat.",
+    "merge_no_imports": "Înregistrările importate nu pot fi îmbinate într-un ciclu real. Deselectați-le pentru a le îmbina.",
+    "store_enable_hint": "Activați funcțiile online în Setări pentru a răsfoi și importa cicluri de referință ale comunității.",
+    "online_intro": "Partajați și descărcați cicluri de referință cu alți utilizatori WashData. Toate funcțiile online sunt opționale și dezactivate în mod implicit.",
+    "store_share_intro": "Încărcați acest ciclu de referință pentru ca alți utilizatori cu același aparat să îl poată folosi. Este examinat înainte de a apărea public.",
+    "online_intro_global": "Răsfoiți și partajați înregistrări de referință cu alți utilizatori WashData și confirmați intrările de aparate. O singură conexiune se aplică întregii dvs. integrări WashData; marca și modelul aparatului se stabilesc per dispozitiv în De bază. Toate funcțiile online sunt opționale și dezactivate în mod implicit.",
+    "online_unavailable": "Funcțiile online nu sunt disponibile pe acest server.",
+    "store_picker_offline": "Activați funcțiile online din pictograma de setări pentru a alege din catalogul comunității.",
+    "pick_brand_first": "Alegeți mai întâi o marcă de aparat.",
+    "model_not_found": "Încă nu este în catalog.",
+    "connect_to_confirm": "Conectați-vă din pictograma de setări pentru a confirma sau a evalua.",
+    "adopt_settings_hint": "Suprascrieți pragurile de detectare și potrivire ale acestui dispozitiv cu cele partajate. Notificările, entitățile și prețul energiei nu sunt niciodată modificate.",
+    "include_settings_hint": "Partajați pragurile de recunoaștere și potrivire ale acestui dispozitiv (nu notificările, entitățile sau prețul energiei). Cei care adoptă aleg dacă să le aplice.",
+    "onboard_download": "Dispozitiv nou? Adoptați o configurație gata pregătită (programe, cicluri de referință și faze) de la un alt utilizator WashData cu același aparat.",
+    "share_consent": "Confirm că aceste cicluri au rulat până la finalizare normală fără întreruperi",
+    "share_device_none": "Niciun ciclu de partajat încă. Marcați un ciclu înregistrat sau ales manual ca ciclu de referință (⭐) în fila Cicluri mai întâi.",
+    "share_guideline_naming": "Denumiți fiecare profil exact așa cum apare pe cadranul sau afișajul aparatului (de ex. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Partajați doar cicluri care s-au finalizat normal -- fără întreruperi la mijlocul ciclului, fără deschideri de ușă sau fluctuații de curent.",
+    "share_guideline_review": "Încărcarea dvs. începe ca în așteptare și apare public odată ce suficienți membri ai comunității o confirmă.",
+    "share_guidelines_title": "Înainte de a partaja",
+    "store_download_device_intro": "Adoptați fiecare program partajat și ciclurile sale de referință pe dispozitivul dvs. Propriile cicluri înregistrate și statisticile nu sunt afectate.",
+    "store_share_device_intro": "Încărcați {brand} {model} cu ciclurile de referință pe care le selectați. Alții cu același aparat vă pot adopta programele. Intrările sunt revizuite înainte de a apărea public.",
+    "share_profile_no_cycles": "Niciun ciclu de referință -- marcați un ciclu ca ⭐ în fila Cicluri pentru a include acest profil"
+  },
+  "phase_desc": {
+    "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
+    "anti_wrinkle": "Tumblare periodică post-ciclu pentru a reduce șifonarea.",
+    "cool_down": "Tumblare fără căldură aproape de sfârșitul ciclului.",
+    "drain_and_switch": "Perioada de tranziție de la modul de spălare la modul de uscare.",
+    "dry": "Etapă de uscare folosind rezistența și/sau căldura reziduală.",
+    "drying": "Perioada principală de tumblare cu căldură.",
+    "heat_up": "Încălzirea inițială a rezistentei înainte de a începe uscarea completă.",
+    "pre_rinse": "Pulverizare inițială înainte de spălarea cu detergent.",
+    "pre_wash": "Înmuiere inițială sau pre-tratament înainte de spălarea principală.",
+    "rinse": "Etapă de clătire cu apă curată. Această fază se poate repeta de mai multe ori.",
+    "sanitize": "Etapă de curățare la temperatură înaltă pentru programele de igienizare.",
+    "sensor_check": "Pauză scurtă de putere redusă în timp ce se măsoară gradul de uscare.",
+    "soak": "Perioadă de înmuiere cu activitate scăzută între etapele de spălare activă.",
+    "soak_dw": "Perioadă extinsă de înmuiere pentru vase foarte murdare.",
+    "spin": "Extracție de mare viteză pentru a elimina apa din încărcătură.",
+    "spin_wd": "Extracție de mare viteză înainte de tranziția la uscare.",
+    "wash": "Ciclu principal de spălare cu mișcare tambur și încălzire opțională.",
+    "wash_dw": "Spălare principală cu detergent și încălzire."
+  },
+  "placeholder": {
+    "add": "adaugă…",
+    "group_name": "ex. Bumbac 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+    "notify": "adaugă un serviciu de notificare…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "adaugă o persoană…",
+    "phase_name": "ex. Preclătire",
+    "profile_name": "ex. Bumbac 40°C",
+    "maintenance_notes": "de exemplu, filtru înlocuit, garnitura ușii curățată",
+    "store_brand": "de ex. Bosch",
+    "store_model": "de ex. WAT28401"
+  },
+  "pref": {
+    "date_absolute": "Absolut (ex.: 14:32 pe 2 iul.)",
+    "date_relative": "Relativ (ex.: acum 2 ore)",
+    "lang_auto": "Implicit sistem ({lang})",
+    "lang_en": "Engleză",
+    "use_panel_default": "(implicit panou)"
+  },
+  "quality": {
+    "bad": "Rău",
+    "good": "Bun",
+    "unusable": "Inutilizabil"
+  },
+  "section": {
+    "anti_wrinkle": {
+      "intro": "Modul anti-șifonare detectează pulsuri de tumblare la putere redusă după faza principală și le menține atașate ciclului terminat.",
+      "label": "Anti-Șifonare"
+    },
+    "basic": {
+      "intro": "Identitate centrală și elementele esențiale pentru majoritatea configurațiilor.",
+      "label": "De bază"
+    },
+    "delay": {
+      "intro": "Detectarea startului întârziat identifică momentul în care un aparat este pornit dar nu și-a început ciclul.",
+      "label": "Start Întârziat"
+    },
+    "detection": {
+      "intro": "Cum este detectat un ciclu ca pornind, rulând și terminând.",
+      "label": "Detectare"
+    },
+    "matching": {
+      "intro": "Cum ciclurile terminate sunt potrivite cu profiluri învățate și etichetate.",
+      "label": "Potrivire"
+    },
+    "ml_training": {
+      "intro": "Calendarul de reantrenare a învățării automate pe dispozitiv și setările de date.",
+      "label": "Antrenare ML"
+    },
+    "notifications": {
+      "intro": "Când și cum sunteți notificat despre evenimentele de ciclu.",
+      "label": "Notificări"
+    },
+    "timing": {
+      "intro": "Cadența de fundal, watchdog-ul offline și întreținerea.",
+      "label": "Temporizare și Watchdog"
+    },
+    "triggers": {
+      "intro": "Semnale externe opționale: un declanșator de sfârșit, un senzor de ușă, un comutator de pauză și reamintirea de descărcare.",
+      "label": "Declanșatoare și Uși"
+    }
+  },
+  "setting": {
+    "abrupt_drop_ratio": {
+      "doc": "O scădere mai mare decât această fracțiune a puterii curente este, de asemenea, tratată ca fiind bruscă (0,6 = o scădere de 60%). Completează pragul de wați în funcție de dimensiunile aparatului.",
+      "label": "Raport Scădere Bruscă"
+    },
+    "abrupt_drop_watts": {
+      "doc": "O scădere de putere mai mare decât aceasta indică ciclul ca întrerupt (anulare manuală), mai degrabă decât un finisaj natural.",
+      "label": "Scădere Bruscă"
+    },
+    "anti_wrinkle_enabled": {
+      "doc": "Recunoașteți impulsurile scurte de rufe de putere redusă pe care le emite un uscător după faza principală de căldură și mențineți-le atașate la ciclul terminat în loc să le citiți ca cicluri noi.",
+      "label": "Activați Detectarea Anti-Șifonare"
+    },
+    "anti_wrinkle_exit_power": {
+      "doc": "Puterea trebuie să scadă sub aceasta între impulsuri pentru ca modul antirid să rămână activ.",
+      "label": "Prag Putere de Ieșire"
+    },
+    "anti_wrinkle_max_duration": {
+      "doc": "Pulsurile mai lungi decât aceasta sunt tratate ca un ciclu real, mai degrabă decât o răsturnare antirid.",
+      "label": "Durată Maximă"
+    },
+    "anti_wrinkle_max_power": {
+      "doc": "Un puls peste această putere este tratat ca un ciclu cu adevărat nou, nu ca o răsturnare antirid. Setați chiar deasupra puterii pulsului.",
+      "label": "Putere Maximă Anti-Șifonare"
+    },
+    "auto_label_confidence": {
+      "doc": "Dacă scorul meciului la sfârșitul ciclului este egal sau peste acesta, programul este etichetat automat fără nicio solicitare de confirmare. Ridicați-l pentru a necesita o mai mare certitudine înainte de auto-etichetare; coborâți-l pentru a automatiza mai mult. Funcționează împreună cu Learning Confidence de mai jos.",
+      "label": "Încredere Etichetare Automată"
+    },
+    "auto_maintenance": {
+      "doc": "Efectuați întreținerea de noapte: reconstruiți plicurile de profil, recalculați starea ciclului, eliminați urmele de depanare și păstrați cele mai recente cicluri.",
+      "label": "Întreținere Automată (curățare nocturnă)"
+    },
+    "completion_min_seconds": {
+      "doc": "Ciclurile mai scurte decât aceasta sunt eliminate ca cicluri fantomă (testare, deschiderea ușii pentru a adăuga un șosetă).",
+      "label": "Durata Minimă a Ciclului"
+    },
+    "delay_confirm_seconds": {
+      "doc": "Puterea trebuie să rămână în banda de așteptare mult timp înainte ca aparatul să fie tratat ca așteptând să pornească și nu ca fiind în funcțiune.",
+      "label": "Secunde de Confirmare"
+    },
+    "delay_start_detect_enabled": {
+      "doc": "Detectați când aparatul este pornit și așteaptă (pornire întârziată / standby), dar nu și-a început ciclul, astfel încât retragerea în așteptare să nu fie confundată cu un ciclu de funcționare.",
+      "label": "Activați Detectarea Startului Întârziat"
+    },
+    "delay_timeout_hours": {
+      "doc": "Nu mai așteptați în modul de pornire întârziată după atâtea ore și reveniți la inactiv, astfel încât o mașină rămasă alimentată, dar care nu a pornit niciodată, nu așteaptă pentru totdeauna.",
+      "label": "Ore de Timeout"
+    },
+    "device_type": {
+      "doc": "Clasa de aparate. Setează valorile implicite sensibile de detecție (praguri, întârziere la oprire, manipulare finală) reglate pentru acel tip de aparat; schimbați-l numai dacă dispozitivul a fost configurat inițial ca tip greșit.",
+      "label": "Tipul Dispozitivului"
+    },
+    "door_sensor_entity": {
+      "doc": "Senzor binar de ușă opțional. Folosit pentru a detecta când aparatul a fost deschis/descărcat după un ciclu.",
+      "label": "Entitate Senzor Ușă"
+    },
+    "duration_tolerance": {
+      "doc": "Toleranță pentru estimările timpului rămas (feedback de învățare, nepotrivire). Dacă durata reală se încadrează în +/-X% din estimare, se consideră o potrivire bună.",
+      "label": "Toleranță Estimare"
+    },
+    "enable_ml_models": {
+      "doc": "În timp ce un ciclu rulează, lăsați modelele să rafineze rezultatele în direct: o estimare mai stabilă a timpului rămas și a energiei/costului și o protecție anti-oprire prematură la detectarea finalului (poate doar întârzia o finalizare, nu se oprește niciodată mai devreme și este limitată). Folosește modelele dvs. ajustate atunci când sunt disponibile, altfel cele încorporate. Off = doar logica clasică bazată pe putere (încă de încredere).",
+      "label": "Aplicați modele inteligente în timpul unui ciclu"
+    },
+    "end_energy_threshold": {
+      "doc": "În timpul numărătoarei inverse pentru oprire, energia acumulată (wați x timp) este comparată cu acest prag. Dacă este depășită, numărătoarea inversă se resetează - menținând robinetele anti-șifonare și cozile de uscare a mașinii de spălat vase atașate la ciclu în loc să le tăiați scurt. Ridicați-l dacă ciclurile se termină prea devreme în timpul răcirii; coborâți-l dacă detectarea este lentă.",
+      "label": "Energia de Sfârșit"
+    },
+    "end_repeat_count": {
+      "doc": "Numărul de citiri consecutive sub pragul de oprire necesare înainte de încheierea ciclului. 1 este în regulă pentru majoritatea prizei. Ridicați la 2-3 dacă mufa dvs. inteligentă raportează ocazional un eșantion fals zero la jumătatea ciclului și ciclurile dumneavoastră se termină prematur.",
+      "label": "Număr de Repetări la Sfârșit"
+    },
+    "energy_price_entity": {
+      "doc": "Senzor cu prețul curent al energiei electrice pe kWh (de exemplu, un tarif dinamic). Are prioritate față de prețul static de mai jos. Fiecare ciclu îngheață prețul în vigoare când s-a terminat.",
+      "label": "Entitate Preț Energie"
+    },
+    "energy_price_static": {
+      "doc": "Preț fix pe kWh utilizat pentru cifrele de cost atunci când nu este stabilită mai sus nicio entitate de preț activ.",
+      "label": "Preț Static Energie (pe kWh)"
+    },
+    "expose_debug_entities": {
+      "doc": "Publicați entități suplimentare de diagnosticare HA (încrederea potrivirii, ambiguitatea, elementele interne de stare). Off menține lista de entități curată pentru utilizare normală.",
+      "label": "Expuneți Entitățile de Depanare"
+    },
+    "external_end_trigger": {
+      "doc": "Senzor binar a cărui schimbare de stare marchează sfârșitul ciclului (de exemplu, un contact „terminat” al aparatului sau o integrare însoțitoare).",
+      "label": "Entitate Declanșator Extern"
+    },
+    "external_end_trigger_enabled": {
+      "doc": "Lăsați un senzor binar extern să semnaleze sfârșitul unui ciclu, pe lângă detectarea încorporată bazată pe putere.",
+      "label": "Activați Declanșatorul Extern de Sfârșit"
+    },
+    "external_end_trigger_inverted": {
+      "doc": "Tratați senzorul de declanșare oprit (mai degrabă decât pornit) ca semnal de sfârșit de ciclu.",
+      "label": "Inversați Declanșatorul Extern (declanșare la OPRIT)"
+    },
+    "learning_confidence": {
+      "doc": "Dacă scorul meciului se situează între acesta și Auto-Label Confidence, o notificare de feedback vă solicită să verificați programul identificat. Sub acest scor meciul este prea incert pentru a ieși la suprafață. Trebuie menținut sub nivelul de încredere pentru etichete automate.",
+      "label": "Încredere Învățare"
+    },
+    "linked_device": {
+      "doc": "Opțional, plasați acest dispozitiv WashData sub alt dispozitiv (de exemplu, mufa inteligentă) în registrul dispozitivului HA, afișat ca „Conectat prin...”.",
+      "label": "Grupați sub Dispozitiv"
+    },
+    "min_off_gap": {
+      "doc": "Dacă mașina se oprește mai puțin de acest timp, secvența de pornire/oprire/pornire este tratată ca un ciclu continuu. Împiedică programele de înmuiere (mașina se oprește timp de câteva minute la mijlocul spălării) să fie împărțite în două cicluri separate. Setați-l mai scurt decât distanța dintre sarcinile dvs. back-to-back dacă doriți ca acestea să fie socotite ca cicluri separate. Setările implicite ale tipului de dispozitiv protejează pauza tipică în cadrul ciclului pentru fiecare aparat.",
+      "label": "Pauză Minimă de Oprire"
+    },
+    "min_power": {
+      "doc": "Puterea minimă absolută considerată activă. Citirile de mai jos sunt tratate ca 0 W (standby), eliminând încărcătura fantomă a prizei inteligente și a LED-urilor de așteptare.",
+      "label": "Putere Minimă"
+    },
+    "ml_training_enabled": {
+      "doc": "Studiați periodic ciclurile examinate peste noapte și reglați fin modelele la această mașină specifică. O schimbare este păstrată doar atunci când obține cu adevărat un scor mai bun în ciclurile susținute, așa că aceasta poate doar să ajute sau să rămână la fel - nu regresează niciodată.",
+      "label": "Învățați de la această mașină"
+    },
+    "ml_training_hour": {
+      "doc": "Ora locală a zilei (0-23) pentru a face reglajul fin peste noapte. Alegeți o oră de liniște, cum ar fi 2 (02:00).",
+      "label": "Învățați la ora"
+    },
+    "ml_training_interval_days": {
+      "doc": "Verificați din nou pentru îmbunătățiri cel mult o dată la atâtea zile.",
+      "label": "Verificați cel mult la fiecare"
+    },
+    "ml_training_min_cycles": {
+      "doc": "Așteptați până când cel puțin atât de multe cicluri au fost înregistrate înainte de reglare fină, astfel încât să aveți suficiente din care să învățați.",
+      "label": "Cicluri necesare mai întâi"
+    },
+    "name": {
+      "doc": "Numele afișat este afișat în lista de integrări HA și în registrul dispozitivului.",
+      "label": "Numele Dispozitivului"
+    },
+    "no_update_active_timeout": {
+      "doc": "Dacă nu sosesc actualizări de alimentare pentru atâta timp în timp ce rulați, presupuneți că mufa a fost oprită offline și opriți forțat pentru a evita un ciclu zombi. Valoarea implicită de 600 s permite întârzierea norului sau a rețelei.",
+      "label": "Timeout Fără Actualizare"
+    },
+    "notify_before_end_minutes": {
+      "doc": "Trimiteți o alertă Aproape terminat atunci când timpul estimat rămas scade sub aceasta. 0 îl dezactivează.",
+      "label": "Alertă Înainte de Sfârșit"
+    },
+    "notify_channel": {
+      "doc": "Numele canalului de notificare Android pentru mesajele de pornire/live (controlează sunetul pe canal și prioritatea în aplicația mobilă). Blank utilizează aplicația însoțitoare implicită.",
+      "label": "Canal Android (pornire/timp real)"
+    },
+    "notify_cycle_timers": {
+      "doc": "Notificări la anumite minute dintr-un ciclu (de exemplu, pentru a adăuga balsam). Mesajul acceptă {device}, {program}, {minutes}. Activați Auto-pause pentru a întrerupe în acel moment și a primi o notificare interactivă cu un buton Reluare; reluați prin panou, serviciul de pauză/reluare sau acțiunea de notificare.",
+      "label": "Temporizatoare Ciclu"
+    },
+    "notify_finish_channel": {
+      "doc": "Numele canalului de notificare Android pentru mesajul final. Blank reutiliza canalul de pornire/live.",
+      "label": "Canal Android (finalizare)"
+    },
+    "notify_finish_message": {
+      "doc": "Corpul trimis când se termină un ciclu. Variabile de șablon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} și {vs_typical} sunt cele mai utile aici.",
+      "label": "Mesaj de Finalizare"
+    },
+    "notify_finish_services": {
+      "doc": "notifică.* servicii apelate când se termină un ciclu. Adăugați unul pe țintă; lăsați gol pentru nicio notificare de final.",
+      "label": "Servicii de Finalizare"
+    },
+    "notify_fire_events": {
+      "doc": "De asemenea, declanșați evenimente ha_washdata_* la începutul/terminarea ciclului, astfel încât să vă puteți construi propriile automatizări.",
+      "label": "Declanșați Evenimente HA pentru Notificări"
+    },
+    "notify_icon": {
+      "doc": "Pictogramă mdi opțională pentru notificare (de exemplu, mdi:washing-machine). Lăsați necompletat pentru valoarea prestabilită a platformei.",
+      "label": "Pictogramă Notificare"
+    },
+    "notify_live_chronometer": {
+      "doc": "Afișați un temporizator de numărătoare inversă de actualizare live în notificare (pe platformele care îl acceptă) în loc de o estimare statică.",
+      "label": "Utilizați Cronometru în Timp Real"
+    },
+    "notify_live_interval_seconds": {
+      "doc": "Cât de des sunt reîmprospătate notificările de progres în timp ce se execută un ciclu.",
+      "label": "Interval Actualizare în Timp Real"
+    },
+    "notify_live_overrun_percent": {
+      "doc": "Dacă un ciclu trece peste estimarea sa cu mai mult de acest procent, trimiteți o alertă de depășire.",
+      "label": "% Depășire Înainte de Alertă"
+    },
+    "notify_live_services": {
+      "doc": "notify.* serviciile solicitate pentru actualizări live de progres în timp ce rulează un ciclu. Lăsați gol pentru a dezactiva notificările de progres live.",
+      "label": "Servicii Progres în Timp Real"
+    },
+    "notify_only_when_home": {
+      "doc": "Trimiteți notificări numai atunci când cel puțin una dintre persoanele conectate (mai sus) este acasă.",
+      "label": "Notificați Doar Când Acasă"
+    },
+    "notify_people": {
+      "doc": "persoană.* entități utilizate de „Notifică numai când acasă” pentru a decide dacă cineva este acasă.",
+      "label": "Persoane (pentru Doar Când Acasă)"
+    },
+    "notify_pre_complete_message": {
+      "doc": "Corpul alertei de aproape gata / pre-finalizare. Variabile de șablon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "label": "Mesaj Pre-Finalizare"
+    },
+    "notify_reminder_message": {
+      "doc": "Corpul mementoului de descărcare care încă așteaptă. Necompletat folosește valoarea implicită. Variabile de șablon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "label": "Mesaj Reamintire"
+    },
+    "notify_start_message": {
+      "doc": "Corpul trimis când începe un ciclu. Variabile de șablon: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "label": "Mesaj de Pornire"
+    },
+    "notify_start_services": {
+      "doc": "notifică.* servicii apelate când începe un ciclu. Adăugați unul pentru fiecare țintă (telefon, tablou de bord etc.); lăsați gol pentru notificarea fără pornire.",
+      "label": "Servicii de Pornire"
+    },
+    "notify_timeout_seconds": {
+      "doc": "Închideți automat notificarea după atâtea secunde (pe platformele care o acceptă). 0 îl păstrează până când este anulat manual.",
+      "label": "Ignorare Automată După"
+    },
+    "notify_title": {
+      "doc": "Titlul notificarii. Variabile de șablon: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Titlu Notificare"
+    },
+    "notify_unload_delay_minutes": {
+      "doc": "La câteva minute după încheierea unui ciclu, înainte de a trimite mementoul încă în așteptare „descărcați mașina”. Setați 0 pentru a dezactiva mementoul.",
+      "label": "Întârziere Reamintire Descărcare"
+    },
+    "off_delay": {
+      "doc": "Timp de așteptat după căderea energiei înainte de a declara ciclul încheiat. Dacă alimentarea se reia în această fereastră, ciclul continuă fără întreruperi - acest lucru face legătura între etapele de spălare. Mașinile de spălat vase au faze lungi de uscare (oprire pentru 20-60 de minute), așa că întârzierea de oprire trebuie să depășească aceasta pentru a menține întreaga spălare+uscare ca un singur ciclu.",
+      "label": "Întârziere la Oprire"
+    },
+    "pause_cuts_power": {
+      "doc": "Când un ciclu este întrerupt, dezactivați, de asemenea, entitatea de comutare de mai jos. Doar pentru aparatele a căror priză poate fi tăiată în siguranță la jumătatea ciclului.",
+      "label": "Pauza Întrerupe Alimentarea (prin switch)"
+    },
+    "power_off_delay": {
+      "doc": "Cât timp trebuie să rămână puterea sub Prag Oprire Alimentare după terminarea unui ciclu înainte ca starea să revină la Oprit. Folosit doar când Prag Oprire Alimentare este peste 0. Este verificat conform cadenței din fundal, astfel încât întârzierea efectivă este rotunjită în sus până la următorul tick de expirare a stării.",
+      "label": "Întârziere Oprire Alimentare"
+    },
+    "power_off_threshold_w": {
+      "doc": "Detectare opțională a stării Oprit pe baza puterii. Când este peste 0, odată ce un ciclu s-a terminat și puterea rămâne sub acest nivel pe durata specificată de Întârziere Oprire Alimentare, mașina este considerată oprită, iar starea revine la Oprit. Lăsați la 0 pentru a dezactiva (valoarea implicită). Setați-l peste consumul real când mașina este oprită și sub Prag de Oprire, precum și sub consumul în standby al mașinii (terminată, dar încă pornită); dacă nu este sub Prag de Oprire, este ignorat. Când este activată, înlocuiește Întârziere Resetare Progres pentru revenirea la Oprit, astfel încât o mașină terminată rămâne în Terminat/Curat până când este oprită efectiv.",
+      "label": "Prag Oprire Alimentare"
+    },
+    "power_sensor": {
+      "doc": "Entitatea senzor care raportează puterea activă în wați pentru acest aparat (de exemplu, sensor.washer_power). Detectarea tuturor ciclurilor se bazează pe acest semnal.",
+      "label": "Senzor de Putere"
+    },
+    "profile_duration_tolerance": {
+      "doc": "Banda +/- din jurul unei durate medii de profil utilizată în timpul potrivirii. 0,25 înseamnă că un profil de 60 de minute se potrivește cu cicluri de 45-75 de minute.",
+      "label": "Toleranță Durată Profil"
+    },
+    "profile_match_interval": {
+      "doc": "Cât de des să încercați potrivirea profilului în timpul unui ciclu de rulare. Implicit 300 s (5 minute) echilibrează viteza de detectare și CPU.",
+      "label": "Interval de Potrivire"
+    },
+    "profile_match_max_duration_ratio": {
+      "doc": "Lungimea maximă a ciclului în raport cu profilul. 1.3 înseamnă că un ciclu trebuie să fie sub 130% din durata profilului pentru a se potrivi.",
+      "label": "Raport Durată Maximă"
+    },
+    "profile_match_min_duration_ratio": {
+      "doc": "Lungimea minimă a ciclului în raport cu profilul. 0,9 înseamnă că un ciclu trebuie să fie de cel puțin 90% din durata profilului pentru a se potrivi.",
+      "label": "Raport Durată Minimă"
+    },
+    "profile_match_threshold": {
+      "doc": "Scorul minim de similaritate (0-1) necesar la sfârșitul ciclului pentru a accepta identificarea unui program. Ridicați-l pentru a reduce identificările greșite; reduceți-l dacă programele aparatului dvs. nu sunt potrivite. Implicit 0,4 este un punct de plecare conservator.",
+      "label": "Prag de Potrivire"
+    },
+    "profile_unmatch_threshold": {
+      "doc": "Dacă un meci în direct la mijlocul ciclului scade sub acest scor, identificarea provizorie este șters. Păstrați-l puțin sub Pragul de potrivire, astfel încât o scurtă scădere în similitudine să nu întoarcă afișajul la neegalat.",
+      "label": "Prag de Nepotrivire"
+    },
+    "progress_reset_delay": {
+      "doc": "După terminare, mențineți progresul la 100% pentru acest timp, astfel încât Finalizat să fie vizibil pe tablourile de bord înainte de a reveni la Inactiv.",
+      "label": "Întârziere Resetare Progres"
+    },
+    "pump_stuck_duration": {
+      "doc": "În câteva secunde, o pompă poate funcționa continuu înainte de a fi semnalată ca posibil blocată (declanșează evenimentul de pompă blocată).",
+      "label": "Durata Pompei Blocate"
+    },
+    "running_dead_zone": {
+      "doc": "După începerea unui ciclu, scăderile de putere din această fereastră sunt ignorate. Mașinile de spălat se umplu cu apă rece (scăzând aproape de 0 W înainte de încălzire) - fără această protecție, faza de umplere arată ca un sfârșit de ciclu. Acest lucru NU omite datele: traseul complet de putere este înregistrat de la T=0. Motorul de sugestii măsoară modelul real de pornire al mașinii și îl dimensionează automat.",
+      "label": "Zonă Moartă în Funcționare"
+    },
+    "sampling_interval": {
+      "doc": "Timp așteptat între citirile senzorului - utilizat pentru a dimensiona fereastra de netezire și pentru a începe corect să renunțe. Fiecare actualizare a senzorului este capturată indiferent de această valoare; calibrează doar calculele din aval. Motorul de sugestii măsoară cadența reală a senzorului dvs. din ciclurile trecute și o setează automat.",
+      "label": "Interval de Eșantionare"
+    },
+    "save_debug_traces": {
+      "doc": "Stocați urmărirea completă a puterii și datele de depanare corespunzătoare pentru fiecare ciclu. Util pentru depanare, dar mărește dimensiunea de stocare.",
+      "label": "Salvați Urmele de Depanare"
+    },
+    "smoothing_window": {
+      "doc": "Cât de mult este netezit semnalul de putere brută. Scăzut (2) este receptiv, dar zgomotos; ridicat (5) netezește vârfurile, dar adaugă lag.",
+      "label": "Fereastră de Netezire"
+    },
+    "start_duration_threshold": {
+      "doc": "Puterea trebuie să rămână peste pragul de pornire atât de mult pentru a confirma o pornire reală, împiedicând comutatoarele de pornire/oprire în fracțiuni de secundă să înceapă un ciclu.",
+      "label": "Durata de Pornire"
+    },
+    "start_energy_threshold": {
+      "doc": "Energia (putere x timp) pe care trebuie să o consume aparatul înainte de FUNCȚIONARE. Un vârf scurt de mare putere are energie foarte scăzută și este ignorat, prevenind pornirile false.",
+      "label": "Energia de Pornire"
+    },
+    "start_threshold_w": {
+      "doc": "Puterea trebuie să crească peste acest nivel pentru a confirma că a început un ciclu. Setarea prea scăzută cauzează porniri false de la puterea de așteptare; Programele prea mari și cu pornire lentă (umplere la rece) sunt ratate. Motorul de sugestie setează acest lucru chiar peste cea mai mică putere activă observată a mașinii.",
+      "label": "Prag de Pornire"
+    },
+    "stop_threshold_w": {
+      "doc": "Puterea trebuie să scadă sub acest nivel înainte să înceapă numărătoarea inversă pentru întârzierea opririi. Setați-l sub pragul de pornire - decalajul dintre ele este banda de histerezis care previne pâlpâirea. Dacă se setează prea mult, fazele de putere scăzută (reținere de clătire, anti-încredere) declanșează în mod fals secvența de final.",
+      "label": "Prag de Oprire"
+    },
+    "switch_entity": {
+      "doc": "Comutator opțional dezactivat în pauză și reactivat la reluare, utilizat împreună cu „Pauză întrerupe și alimentarea”.",
+      "label": "Entitate Switch"
+    },
+    "watchdog_interval": {
+      "doc": "Cât de des verifică monitorul de fundal pentru senzori blocați și timeout-uri scurse. Implicit 30 s.",
+      "label": "Interval Watchdog"
+    },
+    "notify_milestone_message": {
+      "doc": "Mesajul pentru notificarea de etapă importantă. Variabile de șablon: {device}, {cycle_count}.",
+      "label": "Mesaj de etapă importantă"
+    },
+    "notify_milestones": {
+      "doc": "Numere de cicluri separate prin virgulă care declanșează o notificare unică de sărbătorire când sunt atinse (de exemplu, 50, 100, 500, 1000). Necompletat dezactivează notificările de etapă.",
+      "label": "Etape de cicluri"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Sfârșitul intervalului nu deranjați (0-23). Notificările reținute sunt livrate la această oră. Lăsați necompletat pentru a dezactiva.",
+      "label": "Sfârșitul orelor de liniște"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Începutul unui interval nu deranjați (0-23). Notificările de finalizare, memento și rufe curate care s-ar declanșa în timpul orelor de liniște sunt reținute și livrate când se încheie intervalul. Lăsați necompletat pentru a dezactiva. Acceptă intervale care trec de miezul nopții (de exemplu, început 22, sfârșit 7).",
+      "label": "Începutul orelor de liniște"
+    },
+    "peak_rate_message": {
+      "doc": "Text personalizat opțional pentru sfatul privind tariful de vârf, adăugat la notificarea de pornire. Variabile de șablon: {device}, {price}. Necompletat folosește valoarea implicită.",
+      "label": "Mesaj tarif de vârf"
+    },
+    "peak_rate_threshold": {
+      "doc": "Când începe un ciclu și prețul curent pe kWh este la această valoare sau peste, se adaugă un sfat privind tariful de vârf la notificarea de pornire. 0 sau necompletat dezactivează sfatul.",
+      "label": "Prag tarif de vârf (pe kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Toleranța potrivirii de formă",
+      "doc": "Cât de mult poate deforma în timp sistemul de potrivire un ciclu pentru a-l adapta la forma unui program salvat. O valoare mai mare tolerează variații de viteză mai mari; prea mare riscă să potrivească programul greșit."
+    },
+    "corr_weight": {
+      "label": "Ponderea formă / nivel",
+      "doc": "Echilibrul dintre forma curbei și nivelul absolut de putere la evaluarea unei potriviri. O valoare mai mare favorizează forma; una mai mică favorizează potrivirea nivelului de putere."
+    },
+    "duration_weight": {
+      "label": "Ponderea duratei",
+      "doc": "Cât de puternic este preferat un program a cărui durată obișnuită corespunde acestui ciclu."
+    },
+    "energy_weight": {
+      "label": "Ponderea energiei",
+      "doc": "Cât de puternic este preferat un program al cărui consum obișnuit de energie corespunde acestui ciclu."
+    },
+    "store_brand": {
+      "label": "Marca aparatului",
+      "doc": "Opțional. Marca aparatului, aleasă din catalogul comunității. Folosită pentru a găsi și partaja înregistrări de referință corespunzătoare. Lăsați necompletat dacă nu folosiți funcțiile online."
+    },
+    "store_model": {
+      "label": "Modelul aparatului",
+      "doc": "Opțional. Modelul aparatului, ales din catalogul comunității după ce este stabilită marca. Dacă modelul dvs. nu este listat, îl puteți adăuga în catalog."
+    },
+    "show_contributor": {
+      "doc": "Afișați atribuirea \"de <contributor>\" pe aparatele și ciclurile de referință ale comunității."
+    }
+  },
+  "setting_group": {
+    "auto_labeling": {
+      "label": "Etichetare Automată"
+    },
+    "cycle_end": {
+      "label": "Sfârșit Ciclu"
+    },
+    "cycle_start": {
+      "label": "Pornire Ciclu"
+    },
+    "cycle_timers": {
+      "label": "Temporizatoare Ciclu"
+    },
+    "data_management": {
+      "label": "Gestionare Date"
+    },
+    "debug": {
+      "label": "Depanare"
+    },
+    "dishwasher_end": {
+      "label": "Sfârșit Mașină de Spălat Vase"
+    },
+    "door_pause": {
+      "label": "Ușă și Pauză"
+    },
+    "dtw_refinement": {
+      "label": "Rafinare DTW"
+    },
+    "duration_gates": {
+      "label": "Porți Durată"
+    },
+    "energy": {
+      "label": "Energie"
+    },
+    "external_end_trigger": {
+      "label": "Declanșator Extern de Sfârșit"
+    },
+    "housekeeping": {
+      "label": "Întreținere"
+    },
+    "match_scoring": {
+      "label": "Scor Potrivire"
+    },
+    "messages": {
+      "label": "Mesaje"
+    },
+    "power_off": {
+      "label": "Oprire Alimentare"
+    },
+    "predictive_end": {
+      "label": "Sfârșit Predictiv"
+    },
+    "schedule": {
+      "label": "Program"
+    },
+    "services": {
+      "label": "Servicii"
+    },
+    "signal_processing": {
+      "label": "Procesare Semnal"
+    },
+    "thresholds_gap": {
+      "label": "Praguri și Pauză"
+    },
+    "timing": {
+      "label": "Temporizare"
+    },
+    "unload_reminder": {
+      "label": "Reamintire Descărcare"
+    },
+    "watchdog": {
+      "label": "Watchdog"
+    },
+    "quiet_hours_milestones": {
+      "label": "Ore de liniște și etape"
+    },
+    "device_info": {
+      "label": "Informații despre dispozitiv"
+    },
+    "basic_configuration": {
+      "label": "Configurație de bază"
+    }
+  },
+  "status": {
+    "active": "Activ",
+    "all_statuses": "Toate stările",
+    "ambiguous": "Ambiguu",
+    "auto_detect": "Detectare automată",
+    "clear": "Curățați",
+    "completed": "Finalizat",
+    "fine_tuning": "se ajustează…",
+    "force_stopped": "Oprit forțat",
+    "idle": "Inactiv",
+    "interrupted": "Întrerupt",
+    "ready": "Gata de procesare",
+    "recording": "Înregistrare",
+    "training": "Se antrenează…",
+    "saving": "Se salvează…",
+    "rebuilding": "Se reconstruiește…",
+    "analyzing": "Se analizează…",
+    "resetting": "Se resetează…",
+    "reverting": "Se revine…",
+    "trimming": "Se taie…",
+    "splitting": "Se divide…",
+    "deleting": "Se șterge…",
+    "imported": "Importat"
+  },
+  "tab": {
+    "advanced": "Avansat",
+    "diagnostics": "Diagnostice",
+    "history": "Cicluri",
+    "ml": "Antrenare ML",
+    "pp_cleanup": "Curățare",
+    "pp_manage": "Gestionare",
+    "pp_overview": "Prezentare generală",
+    "pp_phases": "Faze",
+    "profiles": "Profiluri",
+    "settings": "Setări",
+    "status": "Prezentare generală",
+    "subtab_phase_catalog": "Catalog de faze",
+    "subtab_profiles": "Profiluri",
+    "maintenance": "Întreținere",
+    "playground": "Zonă de test",
+    "store": "Magazin"
+  },
+  "tag": {
+    "early_end": "Sfârșit anticipat",
+    "late_start": "Start întârziat",
+    "merged": "Cicluri îmbinate",
+    "noise": "Zgomot",
+    "sensor_gap": "Pauză senzor",
+    "split": "Ciclu divizat",
+    "wrong_profile": "Profil greșit"
+  },
+  "toast": {
+    "access_saved": "Controlul accesului a fost salvat",
+    "all_wiped": "Toate datele au fost șterse",
+    "analysis_complete_none": "Analiză finalizată: nicio sugestie nouă",
+    "auto_label_complete": "Etichetare automată finalizată",
+    "automation_deleted": "Automatizare ștearsă",
+    "correction_submitted": "Corecție trimisă",
+    "cycle_deleted": "Ciclu șters",
+    "cycle_force_stopped": "Ciclu oprit forțat",
+    "cycle_labelled": "Ciclu etichetat",
+    "cycle_paused": "Ciclu în pauză",
+    "cycle_resumed": "Ciclu reluat",
+    "cycle_trimmed": "Ciclu tăiat",
+    "cycles_merged": "Cicluri îmbinate",
+    "envelope_rebuilt": "Plic reconstruit",
+    "envelopes_rebuilt": "Plicuri reconstruite",
+    "export_downloaded": "Export descărcat",
+    "feedback_all_dismissed": "Toate feedback-urile au fost ignorate",
+    "feedback_confirmed": "Feedback confirmat",
+    "feedback_dismissed": "Feedback ignorat",
+    "group_deleted": "Grup șters",
+    "group_name_required": "Numele grupului este obligatoriu",
+    "group_saved": "Grup salvat",
+    "import_successful": "Import reușit; integrarea se reîncarcă",
+    "json_required": "Datele JSON sunt obligatorii",
+    "legacy_removed": "Acțiuni vechi eliminate",
+    "logs_exported": "Jurnale exportate",
+    "matching_reverted": "Ponderile de potrivire revenite la valorile implicite",
+    "min_2_profiles": "Selectați cel puțin 2 profiluri pentru un grup",
+    "ml_training_no_improvement": "Antrenament finalizat: baza menținută (fără îmbunătățire)",
+    "models_reverted": "Modelele de pe dispozitiv au revenit la baza inițială",
+    "name_required": "Numele este obligatoriu",
+    "no_split_found": "Nu au fost găsite pauze de inactivitate pentru divizare",
+    "panel_settings_saved": "Setările panoului au fost salvate",
+    "phase_name_required": "Numele fazei este obligatoriu",
+    "phase_updated": "Fază actualizată",
+    "phases_saved": "Faze salvate",
+    "preferences_saved": "Preferințe salvate",
+    "processed": "Procesat {bits}",
+    "processed_cycles": "{n} cicluri",
+    "processed_models": "{n} modele promovate",
+    "processed_suggestions": "{n} sugestii",
+    "profile_name_required": "Numele profilului este obligatoriu",
+    "profile_renamed": "Profil redenumit",
+    "recording_discarded": "Înregistrare anulată",
+    "recording_saved": "Înregistrare salvată în profil",
+    "recording_started": "Înregistrare pornită",
+    "recording_stopped": "Înregistrare oprită",
+    "review_saved": "Revizuire salvată",
+    "settings_conflicts": "Corectați conflictele de setări evidențiate înainte de salvare.",
+    "settings_reverted": "Setări restaurate; integrarea se reîncarcă",
+    "settings_saved": "Setări salvate; integrarea se reîncarcă",
+    "suggestions_applied": "Sugestii aplicate; integrarea se reîncarcă",
+    "suggestions_dismissed": "Sugestii ignorate",
+    "apply_failed": "Aplicarea a eșuat: {error}",
+    "delete_failed": "Ștergerea a eșuat: {error}",
+    "load_more_failed": "Nu s-au putut încărca mai multe: {error}",
+    "maint_add_failed": "Nu s-a putut adăuga evenimentul: {error}",
+    "maint_added": "Eveniment de întreținere adăugat",
+    "maint_delete_failed": "Nu s-a putut șterge evenimentul: {error}",
+    "maint_deleted": "Eveniment de întreținere șters",
+    "relabel_done": "{count} ciclu(ri) reetichetate",
+    "relabel_failed": "Reetichetarea a eșuat: {error}",
+    "reminders_save_failed": "Nu s-au putut salva mementourile: {error}",
+    "reminders_saved": "Mementouri de service salvate",
+    "pause_no_cycle": "Niciun ciclu activ de pus în pauză",
+    "resume_no_cycle": "Niciun ciclu în pauză de reluat",
+    "delete_partial_failed": "Unele elemente nu au putut fi șterse și au fost restaurate",
+    "pg_run_gone": "Această rulare nu mai este disponibilă.",
+    "task_cancelled": "Anulat.",
+    "store_search_failed": "Căutarea a eșuat: {error}",
+    "store_connect_failed": "Conectarea a eșuat: {error}",
+    "store_connected": "Conectat la magazinul comunității",
+    "store_disconnected": "Deconectat de la magazinul comunității",
+    "store_error": "Eroare: {error}",
+    "store_unavailable": "Magazinul comunității nu este disponibil.",
+    "store_pick_profile": "Alegeți un profil în care să îmbinați",
+    "store_name_required": "Introduceți un nume de profil",
+    "store_import_failed": "Importul a eșuat: {error}",
+    "store_imported": "Importat în {profile}",
+    "store_program_required": "Introduceți un nume de program",
+    "store_no_appliance": "Stabiliți mai întâi marca și modelul aparatului dvs. în Setări.",
+    "store_share_failed": "Partajarea a eșuat: {error}",
+    "store_shared": "Partajat în magazinul comunității, în așteptarea examinării.",
+    "appliance_added": "Aparat adăugat, în așteptarea aprobării",
+    "thanks_confirming": "Vă mulțumim pentru confirmare",
+    "device_approved": "Aprobat de comunitate",
+    "rating_saved": "Evaluarea calității a fost salvată",
+    "brand_added": "Marcă adăugată, în așteptarea aprobării",
+    "profile_added": "Profil adăugat, în așteptarea aprobării",
+    "saved_except_conflicts": "Salvat. Remediați conflictele evidențiate pentru a salva restul.",
+    "share_device_none_sel": "Selectați cel puțin un ciclu de partajat",
+    "store_device_downloaded": "{p} program(e), {c} înregistrare(i) adăugate",
+    "store_device_downloaded_phases": "{p} program(e), {c} înregistrare(i), {ph} hartă(i) de faze adăugate",
+    "store_device_downloaded_settings": "{p} program(e), {c} înregistrare(i), {ph} hartă(i) de faze, {s} setare(i) adăugate",
+    "store_device_shared": "{n} ciclu(ri) partajate în magazinul comunității - în așteptarea revizuirii.",
+    "store_device_shared_all_dup": "Toate cele {n} ciclu(ri) erau deja în magazinul comunității.",
+    "store_device_shared_partial": "{n} ciclu(ri) partajate; {failed} nu au putut fi încărcate.",
+    "store_device_shared_some_dup": "{created} ciclu(ri) partajate; {dup} erau deja în magazin.",
+    "store_download_failed": "Descărcare eșuată: {error}",
+    "store_download_nothing": "Nimic nou de descărcat - această configurație este deja pe dispozitivul dvs."
+  },
+  "suggestion": {
+    "both_agree": "WashData recomandă",
+    "calibrated_label": "Calibrat",
+    "observed_label": "Observat",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Etichetează mai puține cicluri automat; mai multe merg la revizuire",
+        "lower": "Etichetează mai multe cicluri automat; unele pot fi identificate greșit"
+      },
+      "duration_tolerance": {
+        "higher": "Acceptă un interval de durată mai larg — potrivire mai flexibilă",
+        "lower": "Necesită durată mai apropiată — mai strict, poate respinge cicluri neobișnuite"
+      },
+      "end_energy_threshold": {
+        "higher": "Închide doar ciclurile care au consumat energie substanțială",
+        "lower": "Închide și cicluri scurte sau cu consum redus de energie"
+      },
+      "end_repeat_count": {
+        "higher": "Necesită repetarea semnalului de final de mai multe ori — mai robust, puțin mai lent",
+        "lower": "Se termină după mai puține repetări — detectare mai rapidă, risc mai mare de final fals"
+      },
+      "learning_confidence": {
+        "higher": "Învață doar din potriviri foarte sigure — mai lent dar mai fiabil",
+        "lower": "Învață din mai multe cicluri; modelul poate fi mai puțin precis"
+      },
+      "min_off_gap": {
+        "higher": "Este nevoie de mai mult timp de inactivitate înainte de a începe un nou ciclu",
+        "lower": "O pauză scurtă declanșează un nou ciclu — rulările consecutive pot fi împărțite"
+      },
+      "min_power": {
+        "higher": "Mai puțin sensibil la consumul de repaus; poate rata programe foarte silențioase",
+        "lower": "Mai sensibil; poate înregistra consumul în standby ca activitate"
+      },
+      "no_update_active_timeout": {
+        "higher": "Mai mult timp înainte de a declara un ciclu blocat",
+        "lower": "Oprește mai devreme un ciclu blocat"
+      },
+      "off_delay": {
+        "higher": "Mai mult timp pentru pauzele aparatului — gestionează faze lungi de înmuiere sau uscare",
+        "lower": "Detectare mai rapidă a finalului — funcționează bine pentru aparate cu pornire/oprire clară"
+      },
+      "profile_match_threshold": {
+        "higher": "Confirmă doar potriviri de înaltă încredere; mai multe cicluri rămân neetichetate",
+        "lower": "Potrivește mai multe cicluri; unele pot fi ușor greșite"
+      },
+      "running_dead_zone": {
+        "higher": "Ignoră scurte vârfuri de putere în repaus — mai puțin sensibil la zgomot",
+        "lower": "Răspunde la impulsuri mai scurte — detectează activitate tranzitorie rapidă"
+      },
+      "start_threshold_w": {
+        "higher": "Evită pornirile false cauzate de scurte vârfuri de putere",
+        "lower": "Detectează programe de putere redusă; poate fi declanșat de zgomot"
+      },
+      "stop_threshold_w": {
+        "higher": "Termină ciclul mai repede — se poate închide în timpul unei pauze",
+        "lower": "Așteaptă mai mult să termine — mai puține finalizări premature"
+      },
+      "watchdog_interval": {
+        "higher": "Faze silențioase mai lungi permise; mai puține opriri forțate false",
+        "lower": "Detectează ciclurile blocate mai agresiv"
+      }
+    },
+    "reason": {
+      "auto_label_confidence": "Încrederea la percentila 15 a {cycles} etichete automate pe care utilizatorul nu le-a corectat niciodată ({p15}).",
+      "completion_min_seconds": "Jumătate din durata p05 a ciclurilor curate ({minutes} min) pe {cycles} cicluri; filtrează ciclurile false.{excl}",
+      "dead_zone_batch": "Păstrat scurt (fereastra mediană de instabilitate la pornire pe {cycles} cicluri = {s}s), astfel încât un sfârșit real să fie detectat prompt.",
+      "dead_zone_from_dip": "Pe baza unei scăderi timpurii de putere detectate la {s}s.",
+      "end_energy_default": "Valoare de referință recomandată implicit pentru pragul de zgomot la sfârșitul ciclului.",
+      "end_energy_false": "Energia p95 de sfârșit fals ({p95}Wh) pe {cycles} cicluri, limitată inferior la 0.2% din energia mediană a ciclului ({floor}Wh).",
+      "end_energy_no_false": "Niciun sfârșit fals pe {cycles} cicluri; limitată inferior la 0.2% din energia mediană a ciclului ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} cicluri curate ({pct}%) au avut o pauză internă de >60s care a fost reluată; necesită {val} confirmare(i) de sfârșit.",
+      "learning_confidence": "Încrederea p05 a {cycles} cicluri etichetate de utilizator ({p05}); sub această valoare, se solicită verificare.",
+      "match_interval": "Pe baza cadenței de actualizare observate (mediană={median}s) * 10.",
+      "max_duration_ratio": "Pe baza duratelor ciclurilor etichetate (p95={p95}).",
+      "min_active": "Pe baza puterii active minime ({min}W) observate în ultimul ciclu.",
+      "min_duration_ratio": "Păstrat cât mai mic posibil, astfel încât un program să fie recunoscut devreme în ciclu; pragurile de încredere și de ambiguitate previn confirmările premature.",
+      "min_off_gap": "Pe baza a {gaps} intervale între cicluri observate (p05={p05}s). Limita inferioară a dispozitivului: {floor}s.",
+      "min_power": "40% din cea mai mică putere activă p05 ({p05}W) pe {cycles} cicluri curate, menținând pragul de oprire sub consumul real.{excl}",
+      "ml_auto_label": "Cea mai mică încredere pe care modelul de calitate a considerat-o încă drept curată (p10 din {cycles} cicluri curate = {p10}).",
+      "ml_end_repeat": "{false}/{total} cicluri ({pct}%) au avut o pauză pe care detectorul de sfârșit a evaluat-o la >50%; necesită {val} confirmare(i) de sfârșit.",
+      "ml_off_delay": "Pauze confirmate de detectorul de sfârșit: p95 {p95}s + 60s marjă, din {pauses} pauze verificate de model pe {cycles} cicluri (limită inferioară {floor}s).",
+      "no_update_timeout": "Pe baza cadenței de actualizare observate (p95={p95}s) * 20 (min. 60s).",
+      "off_delay_cadence": "Pe baza cadenței de actualizare observate (p95={p95}s) * 5",
+      "off_delay_device_floor": "S-a folosit minimul sigur specific dispozitivului pentru {device} ({floor}s).",
+      "off_delay_generic_floor": "S-a folosit minimul sigur generic ({floor}s).",
+      "off_delay_pauses": "Dimensionat pentru a depăși pauzele reale: pauza p95 din interiorul ciclului {p95}s + 60s marjă, din {pauses} pauze pe {cycles} cicluri curate (limită inferioară {floor}s).",
+      "profile_match_threshold": "Încrederea p10 a {cycles} etichete automate corecte ({p10}); prag inferior sigur de confirmare în timp real.",
+      "sampling_interval": "Intervalul median de actualizare observat pe {cycles} cicluri curate ({si}s).{excl}",
+      "smoothing_window": "Dimensionat pentru a netezi ~30s de citiri la eșantionare de {si}s ({samples} eșantioane).",
+      "start_duration": "Păstrat scurt (~un interval de eșantionare de {si}s), astfel încât detectarea să înceapă cât mai devreme posibil, ignorând totuși vârfurile de un singur eșantion.",
+      "thr_batch": "Păstrat chiar deasupra celei mai mici puteri active p05 pe {cycles} cicluri ({p05}W), astfel încât o pornire să fie surprinsă cât mai devreme posibil, iar pragul de oprire să rămână sub cea mai mică putere de funcționare a mașinii.",
+      "tol_per_profile": "p75 al varianței duratei per profil pe {profiles} profiluri ({cycles} cicluri); profilurile stabile nu sunt penalizate.",
+      "tol_pooled": "Pe baza varianței combinate a duratei a {cycles} cicluri recente etichetate (deviație p95={dev}).",
+      "watchdog": "Păstrat cât mai mic în siguranță (de 3x intervalul de actualizare p95 de {p95}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
+    },
+    "exclusions": {
+      "summary": "Excluse {total} cicluri detectate greșit: {parts}.",
+      "reason": {
+        "force_stopped": "oprite forțat",
+        "interrupted": "întrerupte",
+        "incomplete": "incomplete",
+        "noise": "zgomot",
+        "unlabeled": "neetichetate",
+        "no_trace_short": "prea scurte pentru inspectare",
+        "high_start": "pornite la putere mare",
+        "abrupt_end": "terminate brusc",
+        "mid_restart": "repornire la mijlocul ciclului",
+        "no_power": "fără putere",
+        "no_active_power": "fără putere activă"
+      }
+    }
+  },
+  "trend": {
+    "down": "Tendință descendentă",
+    "up": "Tendință ascendentă"
+  },
+  "maint": {
+    "bearing_service": "Service rulmenți",
+    "descale": "Detartrare",
+    "drum_clean": "Curățare tambur",
+    "filter_clean": "Curățare filtru",
+    "other": "Altele"
+  },
+  "pg_desc": {
+    "abrupt_drop_watts": "Scădere bruscă tratată ca sfârșit imediat",
+    "completion_min_seconds": "Cea mai scurtă rulare care contează ca ciclu real",
+    "end_repeat_count": "Citiri scăzute consecutive înainte de încheiere",
+    "interrupted_min_seconds": "Ciclurile scurte sunt marcate ca întrerupte",
+    "min_off_gap": "Pauza necesară pentru a separa două cicluri",
+    "off_delay": "Secunde de putere scăzută înainte de încheierea ciclului",
+    "start_duration_threshold": "Secunde peste prag pentru a confirma pornirea",
+    "start_threshold_w": "Wați minimi pentru a fi considerat pornit",
+    "stop_threshold_w": "Sub această valoare, mașina este considerată oprită",
+    "dtw_bandwidth": "Câtă deformare în timp permite potrivirea formei",
+    "corr_weight": "Ponderea formei curbei față de nivelul de putere în potrivire",
+    "duration_weight": "Cât de mult influențează concordanța duratei potrivirea",
+    "energy_weight": "Cât de mult influențează concordanța energiei potrivirea",
+    "profile_match_min_duration_ratio": "Cel mai scurt ciclu (față de profil) încă permis să corespundă",
+    "profile_match_max_duration_ratio": "Cel mai lung ciclu (față de profil) încă permis să corespundă"
+  },
+  "col": {
+    "profile_tip": "Numele programului corespunzător. Neetichetat înseamnă că niciun profil nu a corespuns la sfârșitul ciclului.",
+    "status_tip": "Rezultatul ciclului: Finalizat (sfârșit natural), Întrerupt (scădere bruscă de putere), Oprit forțat (manual) sau Necesită revizuire (feedback în așteptare).",
+    "date_tip": "Data și ora la care a început ciclul.",
+    "duration_tip": "Durata totală de rulare a ciclului, de la început până la sfârșit.",
+    "energy_tip": "Energia totală consumată (kWh). Calculată prin integrarea puterii în timp.",
+    "cost_tip": "Costul energetic al acestui ciclu, fixat la finalizare folosind prețul în vigoare atunci (energie x preț pe kWh). Setați un preț în Setări pentru a-l completa.",
+    "confidence_tip": "Încrederea de potrivire a profilului (0-100%). Cât de bine s-a potrivit curba de putere a ciclului cu programul identificat.",
+    "health_tip": "Starea ciclului prin ML (mai mare = mai bine). Faceți clic pe un ciclu pentru a-l inspecta și revizui.",
+    "flags_tip": "Semnale de revizuire, anomalie și sursă pentru ciclu. Treceți cu cursorul peste o pictogramă pentru detalii."
+  },
+  "stat": {
+    "avg": "medie",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "consistență ±{v}",
+    "total": "total {v}",
+    "last_run": "ultima rulare {v}",
+    "score": "scor {pct}%",
+    "duration_cv": "CV al duratei {pct}%",
+    "avg_confidence": "încredere medie {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Detectorul a recunoscut că un ciclu a început.",
+    "match_commit": "Modulul de potrivire a ales un program cu suficientă încredere.",
+    "match_changed": "Programul principal s-a schimbat pe măsură ce a fost observată o parte mai mare din ciclu.",
+    "match_ambiguous": "Două programe au obținut scoruri apropiate, așa că potrivirea a fost incertă.",
+    "unmatched": "Niciun program salvat nu s-a potrivit cu acest ciclu.",
+    "notify_start": "Ar fi trimisă o notificare de pornire.",
+    "notify_pre_complete": "Ar fi trimisă o notificare de aproape finalizat.",
+    "notify_finish": "Ar fi trimisă o notificare de finalizare.",
+    "notify_milestone": "Ar fi trimisă o notificare de etapă.",
+    "notify_held": "O notificare a fost reținută pentru orele de liniște.",
+    "finished": "Ciclul a ajuns într-o stare finală și s-a încheiat."
+  },
+  "store": {
+    "browse": "Răsfoiți",
+    "device": "Dispozitiv",
+    "favorites": "Favorite",
+    "search_ph": "Căutați după marcă sau model…",
+    "no_results": "Nu s-au găsit aparate corespunzătoare. Încercați o altă căutare.",
+    "n_programs": "{n} programe",
+    "n_cycles": "{n} cicluri",
+    "no_programs": "Încă nu există programe partajate pentru acest aparat.",
+    "no_cycles": "Încă nu au fost partajate cicluri de referință pentru acest program.",
+    "anon": "anonim",
+    "uploaded_by": "Partajat de {name}",
+    "connected_as": "Conectat ca {name}",
+    "not_connected": "Neconectat. Conectați un cont GitHub pentru a partaja propriile cicluri.",
+    "import_new": "Profil nou",
+    "import_merge": "Îmbinați într-unul existent",
+    "merge_target": "Îmbinați în profilul",
+    "description": "Descriere (opțional)",
+    "contributed_by": "de {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Încă nicio evaluare",
+    "website": "Site-ul magazinului ↗",
+    "website_tip": "Deschide site-ul magazinului comunității"
+  },
+  "settings": {
+    "gear": {
+      "title": "Setări"
+    }
+  },
+  "link": {
+    "manual": "Manual ↗",
+    "add_appliance": "Adăugați aparatul dvs."
+  },
+  "tip": {
+    "add_brand": "Marca nu este listată? Adăugați-o în catalogul comunității",
+    "add_appliance": "Modelul nu este listat? Adăugați aparatul dvs. în catalogul comunității",
+    "add_profile": "Adăugați un profil pentru acest aparat pe site-ul comunității"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Reprocesare: potrivirea ciclurilor",
+      "golden": "Reprocesare: marcarea ciclurilor de referință",
+      "suggestions": "Reprocesare: sugestii",
+      "ml_training": "Reprocesare: antrenare ML",
+      "health": "Reprocesare: sănătatea ciclurilor"
+    },
+    "pg_sweep": {
+      "optimize": "Optimizează: {param}"
+    }
+  }
+}

@@ -1,113 +1,22 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Integration tests for Recorder feature.
 
-"""Integration tests for Recorder feature."""
-import pytest
-from unittest.mock import AsyncMock, MagicMock
-from homeassistant.data_entry_flow import FlowResultType
-
-from custom_components.ha_washdata.const import DOMAIN
-
-@pytest.mark.asyncio
-async def test_record_flow_menu(mock_hass, mock_config_entry):
-    """Test Record Mode menu logic."""
-    # Setup manager mock
-    manager = MagicMock()
-    manager.recorder = MagicMock()
-    manager.recorder.is_recording = False
-    manager.recorder.last_run = None
-    manager.async_start_recording = AsyncMock()
-    
-    mock_hass.data[DOMAIN] = {mock_config_entry.entry_id: manager}
-    mock_hass.config_entries.async_get_known_entry.return_value = mock_config_entry
-    
-    # Init options flow
-    # We need to test OptionsFlowHandler directly or via hass.config_entries.options.async_init
-    # Testing handler directly is easier if we can instantiate it.
-    
-    from custom_components.ha_washdata.config_flow import OptionsFlowHandler
-    flow = OptionsFlowHandler(mock_config_entry)
-    flow.hass = mock_hass
-    flow.handler = mock_config_entry.entry_id
-    
-    # Step: record_cycle (Initial menu check)
-    result = await flow.async_step_record_cycle()
-    assert result["type"] == FlowResultType.MENU
-    assert result["step_id"] == "record_cycle"
-    assert "record_start" in result["menu_options"]
-
-    # Simulate user clicking "Start Recording" — menu dispatches directly to the step
-    result = await flow.async_step_record_start()
-
-    # Should call start_recording and loop back to menu
-    assert manager.async_start_recording.called
-    assert result["type"] == FlowResultType.MENU
-    assert result["step_id"] == "record_cycle"
-
-@pytest.mark.asyncio
-async def test_record_flow_stop_process(mock_hass, mock_config_entry):
-    """Test stopping and processing flow."""
-    manager = MagicMock()
-    manager.recorder = MagicMock()
-    # State: Recording Active
-    manager.recorder.is_recording = True
-    manager.recorder.last_run = {
-        "start_time": "2023-01-01T12:00:00+00:00",
-        "end_time": "2023-01-01T12:01:00+00:00",
-        "data": [("2023-01-01T12:00:00+00:00", 10.0)]
-    }
-    manager.async_stop_recording = AsyncMock()
-    
-    # Setup mock methods
-    manager.recorder.get_trim_suggestions.return_value = (5.0, 5.0, 1.0)
-    manager.recorder.clear_last_run = AsyncMock()
-    manager.profile_store.get_profiles.return_value = {"Existing": {}}
-    manager.profile_store.create_profile_standalone = AsyncMock()
-    manager.profile_store.async_add_cycle = AsyncMock()
-    manager.profile_store.async_rebuild_envelope = AsyncMock()
-    manager.profile_store.async_save = AsyncMock()
-    manager.profile_store.generate_preview_svg = MagicMock(return_value="<svg></svg>")
-    
-    mock_hass.data[DOMAIN] = {mock_config_entry.entry_id: manager}
-    mock_hass.config_entries.async_get_known_entry.return_value = mock_config_entry
-    
-    from custom_components.ha_washdata.config_flow import OptionsFlowHandler
-    flow = OptionsFlowHandler(mock_config_entry)
-    flow.hass = mock_hass
-    flow.handler = mock_config_entry.entry_id
-    flow._selector_translations = {}  # Skip translation fetch in tests
-    
-    # 1. Stop Recording — menu dispatches directly to the step
-    result = await flow.async_step_record_stop()
-    assert manager.async_stop_recording.called
-
-    # Should transition directly to process step
-    assert result["type"] == FlowResultType.FORM
-    assert result["step_id"] == "record_process"
-    
-    # Verify manager state simulation (stop should have produced last_run)
-    # Since we mocked async_stop_recording, it returns None.
-    # But current logic calls last_run.
-    # We need to ensure last_run is available.
-    manager.recorder.last_run = {
-        "start_time": "2023-01-01T12:00:00+00:00",
-        "end_time": "2023-01-01T12:01:00+00:00",
-        "data": [("2023-01-01T12:00:00+00:00", 10.0)]
-    }
-    
-    # 2. Submit Processing Form (Trim & Save)
-    user_input = {
-        "head_trim": 10.0,
-        "tail_trim": 5.0,
-        "save_mode": "new_profile",
-        "profile_name": "New Profile Name"
-    }
-    
-    result = await flow.async_step_record_process(user_input=user_input)
-    
-    assert result["type"] == FlowResultType.CREATE_ENTRY
-    
-    # Verify calls
-    manager.profile_store.create_profile_standalone.assert_called_with("New Profile Name")
-    assert manager.profile_store.async_add_cycle.called
-    manager.profile_store.async_rebuild_envelope.assert_called_with("New Profile Name")
-    assert manager.recorder.clear_last_run.called
-
+Recording is now managed entirely via the WashData panel (WebSocket commands:
+start_recording, stop_recording, get_recording_status). The old OptionsFlow
+record_cycle steps have been removed.
+"""

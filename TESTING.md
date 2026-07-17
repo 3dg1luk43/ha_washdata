@@ -1,6 +1,11 @@
 # WashData Testing Guide
 
-**Updated:** December 20, 2025
+**Updated:** July 2026
+
+> The primary automated suite is the pytest **fast / slow / benchmark** split below
+> (`./run_tests.sh`), which also runs a headless **panel render smoke test**
+> (`devtools/panel_smoke.js`) before pytest. The MQTT mock-socket walkthroughs further
+> down are for manual end-to-end verification against a running Home Assistant.
 
 Note: Despite the name, WashData also works well for other appliances (e.g., dryers and dishwashers) as long as the power-draw cycle is reasonably predictable.
 
@@ -119,7 +124,7 @@ def test_dtw_lite_performance():
 
 ---
 
-## Test 1: Cycle Duration Variance (±15%)
+## Test 1: Cycle Duration Variance
 
 ### Goal
 
@@ -204,8 +209,8 @@ grep -n "variance_factor" devtools/mqtt_mock_socket.py
 # 2. Profile matching: ±25% duration tolerance
 # 3. Shape Matching: NumPy correlation score (must be > learning_confidence)
 
-# Check profile matching tolerance (±25%):
-grep -n "0.75\|1.25" custom_components/ha_washdata/profile_store.py
+# Check the duration-ratio gate + tolerance (see const.py MATCH_* / profile_duration_tolerance):
+grep -n "MATCH_\|DURATION_RATIO" custom_components/ha_washdata/const.py
 ```
 
 ---
@@ -252,13 +257,13 @@ grep "Updated estimates: progress" home-assistant.log
 # Should see: progress increasing from 0-100%
 ```
 
-### Test 2B: Progress Reset After 5 Minutes
+### Test 2B: Progress Reset After the Reset Delay (default 30 min)
 
 1. **Let cycle complete (progress → 100%)**
 
 2. **Note the time when progress reaches 100%**
 
-3. **Wait 5 minutes with no new cycle**
+3. **Wait for the Progress Reset Delay (default 30 min) with no new cycle**
 
 4. **Check progress entity:**
 
@@ -266,7 +271,7 @@ grep "Updated estimates: progress" home-assistant.log
 # Immediately after cycle complete
 sensor.washer_progress: "100"
 
-# After 5 minutes idle
+# After the reset delay (default 30 min / 1800s) idle
 sensor.washer_progress: "0"
 ```
 
@@ -276,17 +281,17 @@ sensor.washer_progress: "0"
 grep "Progress reset\|Starting progress reset" home-assistant.log
 
 # Expected output:
-# [DEBUG] Starting progress reset timer (will reset after 300s)
-# [DEBUG] Progress reset: cycle idle for 300.0s (threshold: 300s)
+# [DEBUG] Starting progress reset timer (will reset after 1800s (the configurable Progress Reset Delay; default 30 min))
+# [DEBUG] Progress reset: cycle idle for 1800.0s (threshold: 1800s)
 ```
 
 ### Test 2C: Quick Restart Cancels Reset
 
 1. **Run cycle to completion (progress → 100%)**
 
-2. **Wait ~2 minutes (before 5-min reset)**
+2. **Wait a short time (before the reset delay elapses)**
 
-3. **Start new cycle within the 5-minute window**
+3. **Start a new cycle within the reset window**
 
 4. **Verify progress resets to 0% immediately:**
 
@@ -324,12 +329,12 @@ During Cycle:
   sensor.washer_progress: 0 → 100 (as cycle runs)
 
 Cycle Complete:
-  sensor.washer_progress: 100 (held for 5 minutes)
+  sensor.washer_progress: 100 (held for the reset delay, default 30 min)
 
 After Idle (no new cycle):
   sensor.washer_progress: 0 (auto-reset)
 
-Or: New Cycle (within 5 min):
+Or: New Cycle (within the reset window):
   sensor.washer_progress: 0 (immediate reset)
   → Cycle resumes from 0
 ```
@@ -461,14 +466,14 @@ grep "Applying correction learning\|avg_duration" home-assistant.log
 # Expected:
 # [INFO] Applying correction learning for profile '40°C Delicate'
 #        Old duration: 2700s, Correction: 3300s
-#        New avg: 2880s (80% old + 20% correction)
+#        Profile stats recomputed from labelled cycles (no EWMA): re-labels the cycle, then rebuilds the envelope and avg/min/max from the profile's cycles
 ```
 
 4. **Verify profile was updated:**
 
 ```yaml
-# Future cycles of "40°C Delicate" now use new avg_duration
-# Matching will use: 2880s ± 25% (2160-3600s acceptable)
+# Future cycles use the recomputed avg_duration (robust median over labelled cycles)
+# Matching then uses the recomputed avg ± tolerance (default ±25%)
 ```
 
 ### Test 3D: Verify Learning Stats
@@ -929,7 +934,7 @@ fast/slow/benchmark split.
 - [ ] Syntax: `python3 -m py_compile custom_components/ha_washdata/*.py`
 - [ ] Mock socket: `python3 devtools/mqtt_mock_socket.py --speedup 720`
 - [ ] Progress reaches 100% on cycle completion
-- [ ] Progress resets to 0% after 5 min idle
+- [ ] Progress resets to 0% after the reset delay (default 30 min) idle
 - [ ] Quick restart cancels reset timer
 - [ ] Feedback request event emitted
 - [ ] Submit feedback service works

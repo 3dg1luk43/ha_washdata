@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Regression tests for GitHub issue #197.
 
 A publish-on-change sensor (e.g. LightwaveRF) stops emitting updates once the
@@ -32,8 +48,6 @@ from custom_components.ha_washdata.cycle_detector import (
 )
 from custom_components.ha_washdata.const import (
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_NOTIFY_EVENTS,
-    NOTIFY_EVENT_FINISH,
 )
 from custom_components.ha_washdata.manager import WashDataManager
 
@@ -50,7 +64,6 @@ def mock_entry() -> Any:
     entry.title = "Test Washer 197"
     entry.options = {
         "power_sensor": "sensor.test_power",
-        CONF_NOTIFY_EVENTS: [NOTIFY_EVENT_FINISH],
         # User explicitly set a short no-update timeout (as reported in issue #197)
         CONF_NO_UPDATE_ACTIVE_TIMEOUT: 140,
     }

@@ -247,3 +247,39 @@ trim_cycle:
           max: 86400
           step: 1
           mode: box
+
+pause_cycle:
+  name: Pause Cycle
+  description: Pause the active cycle so a power drop won't finalize it (optionally cuts switch power).
+  fields:
+    device_id:
+      name: Device
+      description: The WashData device whose active cycle to pause.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+
+resume_cycle:
+  name: Resume Cycle
+  description: Resume a previously paused cycle.
+  fields:
+    device_id:
+      name: Device
+      description: The WashData device whose cycle to resume.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+
+trigger_ml_training:
+  name: Trigger ML Training
+  description: Manually retrain the on-device ML models from this device's own labelled cycles (experimental; requires ML training enabled).
+  fields:
+    device_id:
+      name: Device
+      description: The WashData device to retrain models for.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata

@@ -1,0 +1,1771 @@
+{
+  "badge": {
+    "artifact_tip": "{n} afwijkingen gedetecteerd (bijvoorbeeld de deur werd halverwege de cyclus geopend) — open om ze in de grafiek te zien",
+    "auto": "(automatisch gedetecteerd)",
+    "built_in_tag": "ingebouwd",
+    "declining": "↘ afnemend",
+    "energy_low": "Lager energieverbruik dan normaal",
+    "energy_spike": "Hoger energieverbruik dan normaal",
+    "fair_fit": "acceptabele kwaliteit",
+    "fair_fit_tip": "Matige matchconsistentie: sommige cycli die aan dit profiel zijn toegewezen, hebben lagere betrouwbaarheidsscores. Label meer cycli of neem het profiel opnieuw op om de nauwkeurigheid te verbeteren.",
+    "feedback_requested": "Feedback gevraagd",
+    "golden_cycle": "Geregistreerde referentiecyclus",
+    "improving": "↗ verbeteren",
+    "manual": "(handmatig geselecteerd)",
+    "needs_review": "Moet worden beoordeeld",
+    "overrun": "Langer gelopen dan normaal",
+    "poor_fit": "slechte kwaliteit",
+    "poor_fit_tip": "Inconsistente matchgeschiedenis: overweeg om dit profiel opnieuw op te bouwen",
+    "restart_gap_tip": "{n} HA-herstart-gat: het vermogensspoor heeft een gat",
+    "reviewed": "Beoordeeld",
+    "steady": "→ stabiel",
+    "underrun": "Sneller klaar dan normaal",
+    "using_defaults": "Standaardwaarden voor verzending gebruiken",
+    "using_tuned": "Gebruik van afgestemde gewichten",
+    "overrun_ratio": "({x}x verwacht)",
+    "underrun_ratio": "({pct}% van verwacht)",
+    "awaiting_tip": "Wacht op goedkeuring door de community",
+    "awaiting_n": "Wacht op goedkeuring · {n} bevestigd",
+    "approved": "Goedgekeurd",
+    "awaiting": "Wacht op goedkeuring",
+    "imported_tip": "Geïmporteerd uit de communitystore. Alleen gebruikt voor matchen, telt niet mee in statistieken."
+  },
+  "btn": {
+    "add_device": "+ Apparaat toevoegen",
+    "add_device_tip": "Voeg nog een WashData-apparaat toe",
+    "add_maintenance": "Onderhoudsgebeurtenis toevoegen",
+    "add_phase": "+ Fase toevoegen",
+    "add_timer": "+ Timer toevoegen",
+    "apply_all": "Alles toepassen",
+    "apply_label": "Etiket toepassen",
+    "apply_set_b": "Set B toepassen",
+    "apply_split": "Splitsing toepassen",
+    "apply_trim": "Pas trimmen toe",
+    "auto_detect_split": "Automatische detectie",
+    "auto_label_cycles": "Cycli automatisch labelen",
+    "auto_label_cycles_tip": "Wijs automatisch profielnamen toe aan ongelabelde cycli waarvan de matchbetrouwbaarheid de drempel haalt",
+    "cancel": "Annuleren",
+    "clear_debug": "Wis foutopsporingsgegevens",
+    "clear_splits": "Wissen",
+    "close": "Sluiten",
+    "compare": "Vergelijken",
+    "confirm": "Bevestigen",
+    "convert_to_automation": "Converteren naar automatisering",
+    "correct": "Corrigeren…",
+    "create": "Creëren",
+    "create_from_cluster": "Profiel aanmaken van {count} cycli",
+    "create_profile": "+ Profiel aanmaken",
+    "delete": "Verwijderen",
+    "delete_group": "Groep verwijderen",
+    "delete_group_tip": "Verwijder alleen deze groep - de ledenprofielen blijven behouden",
+    "delete_profile": "Profiel verwijderen",
+    "discard": "Weggooien",
+    "discard_tip": "Geregistreerde trace verwijderen zonder op te slaan",
+    "dismiss": "Afwijzen",
+    "done": "Klaar",
+    "edit": "Bewerken",
+    "export": "Exporteren",
+    "export_json": "Exporteren naar JSON",
+    "force_stop": "Forceer stop",
+    "force_stop_tip": "Huidige cyclus onmiddellijk beëindigen en markeren als geforceerd gestopt",
+    "from_template": "Van sjabloon ▾",
+    "ignore": "Negeren",
+    "import_json": "Importeren vanuit JSON",
+    "import_overwrite": "Importeren (overschrijft gegevens)",
+    "inspect": "Inspecteren",
+    "label": "Labelen",
+    "load": "Laden",
+    "load_more": "Meer laden",
+    "manage": "Beheren",
+    "merge": "Samenvoegen",
+    "new_automation": "＋ Nieuwe automatisering",
+    "new_group": "+ Nieuwe groep",
+    "new_group_tip": "Groepeer bijna identieke profielen (zelfde vorm/duur, verschillende temperatuur of centrifugeersnelheid) zodat de matcher betrouwbaar tussen hen kan kiezen",
+    "new_phase": "+ Nieuwe Fase",
+    "new_profile": "+ Nieuw profiel",
+    "new_profile_tip": "Maak een nieuw programma profiel van een bestaande gelabelde cyclus of opname",
+    "on_cycle_finished": "Op cyclus klaar",
+    "on_cycle_started": "Op cyclus gestart",
+    "pause_cycle": "Pauze",
+    "pause_cycle_tip": "De actieve cyclus pauzeren — het apparaat hervat waar het was gestopt",
+    "pg_apply_device": "Toepassen op apparaat",
+    "pg_autofill": "Automatisch invullen",
+    "play": "Afspelen",
+    "process": "Verwerken",
+    "process_history": "Verwerk nu",
+    "process_recording": "Opname opslaan",
+    "process_tip": "Sla de geregistreerde trace op als een nieuw of bestaand profiel",
+    "rebuild": "Enveloppen opnieuw opbouwen",
+    "rebuild_envelope": "Envelop opnieuw opbouwen",
+    "rebuild_tip": "Herbereken de verwachte vermogensenvelop (min/max-band) voor alle profielen op basis van hun gelabelde cycli — voer uit na het labelen van nieuwe cycli of het corrigeren van bestaande",
+    "rec_start_tip": "Begin met het opnemen van het vermogensspoor van het apparaat — start vlak voor het uitvoeren van een cyclus",
+    "rec_stop": "Stop",
+    "rec_stop_tip": "Stop de opname en bewaar de vastgelegde trace voor beoordeling",
+    "record": "Begin met opnemen",
+    "refresh": "Vernieuwen",
+    "refresh_diag_tip": "Opslagstatistieken opnieuw laden",
+    "refresh_logs_tip": "Meest recente logrecords opnieuw laden",
+    "refresh_settings_tip": "Instellingen opnieuw laden van de server",
+    "relabel": "Opnieuw labelen ({count})",
+    "remove": "Verwijderen",
+    "remove_timer": "Timer verwijderen",
+    "reset": "Opnieuw instellen",
+    "reset_ml_models_tip": "Gooi de verfijnde modellen weg en ga terug naar de ingebouwde modellen. WashData kan ze later opnieuw leren.",
+    "reset_to_builtin": "Reset naar ingebouwde modellen",
+    "reset_to_defaults": "Terugzetten naar standaardwaarden",
+    "resume_cycle": "Hervatten",
+    "resume_cycle_tip": "Hervat de gepauzeerde cyclus",
+    "revert_settings": "Wijzigingen ongedaan maken",
+    "revert_settings_tip": "Instellingen herstellen naar de staat van vóór de laatste opslag",
+    "revert_settings_tip_none": "Sla eerst op om ongedaan maken te activeren",
+    "revert": "Terugzetten",
+    "revert_to_previous": "Deze instelling terugzetten naar de vorige waarde",
+    "review": "Beoordelen",
+    "run": "Uitvoeren",
+    "run_analysis": "🔍 Voer suggestieanalyse uit",
+    "run_analysis_tip": "Analyseer nu uw geregistreerde cycli en vernieuw de afstemmingssuggesties",
+    "run_auto_label": "Voer Auto-Label uit",
+    "run_both": "A vs B uitvoeren",
+    "run_simulation": "Simulatie uitvoeren",
+    "save": "Opslaan",
+    "save_access_control": "Toegangscontrole opslaan",
+    "save_group": "Groep opslaan",
+    "save_panel_settings": "Paneelinstellingen opslaan",
+    "save_phases": "Fasen opslaan",
+    "save_preferences": "Bewaar voorkeuren",
+    "save_reminders": "Herinneringen opslaan",
+    "save_review": "Beoordeling opslaan",
+    "save_settings": "Instellingen opslaan",
+    "select": "Selecteer",
+    "select_all": "Alles selecteren",
+    "select_last20": "Laatste 20",
+    "select_none": "Wissen",
+    "show_only": "Alleen weergeven",
+    "skip_setup": "Installatie overslaan",
+    "split": "Splitsen",
+    "stop": "Stoppen",
+    "submit_correction": "Correctie indienen",
+    "train_now": "Train nu",
+    "trim": "Trimmen",
+    "trim_split": "Trimmen/splitsen",
+    "undo": "Ongedaan maken",
+    "use": "Gebruik",
+    "wipe_all": "Wis alle gegevens",
+    "delete_selected": "Selectie verwijderen ({n})",
+    "group_suggest": "Groep {n}: {members}",
+    "pg_apply_best": "Beste toepassen",
+    "pg_apply_to_settings": "Opslaan in instellingen",
+    "pg_apply_to_settings_tip": "De hier bewerkte waarden kopiëren naar de actieve instellingen van dit apparaat",
+    "search": "Zoeken",
+    "import": "Importeren",
+    "disconnect": "Verbinding verbreken",
+    "connect_github": "Verbinden met GitHub",
+    "save_appliance": "Apparaat opslaan",
+    "share_to_store": "Delen in store",
+    "share": "Delen",
+    "confirm_appliance": "Dit apparaat bevestigen",
+    "confirmed": "Bevestigd",
+    "browse_community_setups": "Community-setups doorzoeken",
+    "download_device": "Deze instelling downloaden",
+    "share_device": "⬆ Dit apparaat delen",
+    "share_device_tip": "Dit apparaat en zijn opgenomen referentiecycli delen in de communitystore, zodat andere gebruikers met hetzelfde apparaat ze kunnen overnemen",
+    "share_n": "{n} cyclus/cycli delen"
+  },
+  "conflict": {
+    "anti_wrinkle_exit": {
+      "exit": "Moet onder de stopdrempel ({stop} W) liggen; anders wordt het anti-kreuk-uitschakelverbruik genegeerd",
+      "stop": "Moet boven het anti-kreuk-uitschakelverbruik ({exit} W) liggen"
+    },
+    "anti_wrinkle_max": {
+      "max": "Moet boven de startdrempel ({start} W) liggen; anders wordt de anti-kreuk-maximale duur omzeild",
+      "start": "Moet onder het maximale anti-kreuk-vermogen ({max} W) liggen"
+    },
+    "attn_sub": "Los conflicten op voor het opslaan",
+    "attn_title": "{n} instellingsconflict{s}",
+    "confidence": {
+      "auto": "Moet op of boven de overeenkomstdrempel ({match}) liggen",
+      "learning": "Moet op of onder de overeenkomstdrempel ({match}) liggen",
+      "match_for_auto": "Moet op of onder het automatisch-label-betrouwbaarheidsniveau ({alc}) liggen",
+      "match_for_learning": "Moet op of boven het leerbetrouwbaarheidsniveau ({lc}) liggen"
+    },
+    "duration_ratio": {
+      "max": "Moet groter zijn dan de minimale duurverhouding ({min})",
+      "min": "Moet kleiner zijn dan de maximale duurverhouding ({max})"
+    },
+    "hysteresis": {
+      "start": "Moet boven de stopdrempel ({stop} W) liggen",
+      "stop": "Moet onder de startdrempel ({start} W) liggen"
+    },
+    "min_power": {
+      "min_power": "Moet op of onder de stopdrempel ({stop} W) liggen",
+      "stop": "Moet op of boven het minimumvermogen ({min} W) liggen"
+    },
+    "no_update_timeout": {
+      "timeout": "Moet groter zijn dan het watchdog-interval ({wi} s)",
+      "watchdog": "Moet kleiner zijn dan de geen-update-timeout ({to} s)"
+    },
+    "off_delay": {
+      "gap": "Minimale uitschakelonderbreking moet minimaal de uitschakelvertraging ({delay} s) zijn",
+      "off_delay": "Uitschakelvertraging ({off_delay} s) overschrijdt de minimale uitschakelonderbreking ({gap} s); opeenvolgende cycli kunnen samenvoegen"
+    },
+    "power_off": {
+      "stop": "Moet boven de uitschakeldrempel ({pot} W) liggen",
+      "threshold": "Moet onder de stopdrempel ({stop} W) liggen om van kracht te zijn"
+    },
+    "pump_stuck": {
+      "duration": "Moet kleiner zijn dan de geen-update-timeout ({to} s) zodat het vastgelopen-alarm afgaat vóór de watchdog de cyclus beëindigt",
+      "timeout": "Moet de vastgelopen-duur van de pomp ({ps} s) overschrijden zodat het alarm afgaat vóór de cyclus geforceerd wordt gestopt"
+    },
+    "start_dur": {
+      "sampling": "Bemonsteringsinterval overschrijdt de startduur ({sdt} s); pieken met één meting kunnen een cyclus openen",
+      "threshold": "Moet minimaal één bemonsteringsinterval ({si} s) zijn om valse starts met één meting te voorkomen"
+    },
+    "unmatch": {
+      "match": "Moet boven de niet-overeenkomstdrempel ({un}) liggen",
+      "unmatch": "Moet onder de overeenkomstdrempel ({match}) liggen; anders wordt een bevestigde overeenkomst direct ongedaan gemaakt"
+    },
+    "cascade_toast": "Ook {n} instelling{s} aangepast voor consistentie.",
+    "suggestion_resolves": "Pas hieronder de openstaande suggestie ({val}) toe om dit op te lossen",
+    "use_fix": "Gebruik {val}",
+    "watchdog": {
+      "interval": "Moet minimaal 2x het bemonsteringsinterval ({si} s) zijn",
+      "sampling": "Bemonsteringsinterval moet maximaal de helft van het watchdog-interval ({wi} s) zijn"
+    },
+    "settings_banner": "{n} instellingsconflict{s} — controleer de gemarkeerde secties en los ze op voor het opslaan.",
+    "settings_banner_btn": "Ga naar eerste"
+  },
+  "hdr": {
+    "ab_comparison": "Vergelijking van instellingen A/B",
+    "access_control": "Toegangscontrole",
+    "add_maintenance": "Onderhoudsgebeurtenis toevoegen",
+    "automation_delete": "Verwijder deze automatisering",
+    "automation_needs_review": "Deze cyclus moet worden herzien",
+    "automation_open": "Openen in de automatiseringseditor",
+    "automation_review_this_cycle": "Bekijk deze cyclus",
+    "automations": "Automatiseringen",
+    "clear_debug": "Wis foutopsporingssporen",
+    "cycle_simulator": "Cyclussimulator",
+    "diagnostics_pref": "Diagnostiek",
+    "display": "Weergave",
+    "dtw_inspector": "DTW-inspecteur",
+    "export_import": "Exporteren / importeren",
+    "getting_started": "Aan de slag",
+    "live_power": "Levende kracht",
+    "logs": "Logboeken",
+    "logs_diagnostics": "Diagnostiek",
+    "maintenance": "Onderhoudsacties",
+    "maintenance_log": "Onderhoudslogboek",
+    "maintenance_reminders": "Serviceherinneringen",
+    "manual_recording": "Handmatige opname",
+    "manual_recording_tip": "Voer bewust een cyclus uit terwijl WashData het vermogensspoor opneemt. Klik op Begin met opnemen net voor het apparaat start, op Stop wanneer het klaar is, en vervolgens op Proces om het op te slaan als een benoemd profiel.",
+    "ml_learned": "Wat WashData heeft geleerd",
+    "ml_matching_tuning": "Verfijning van programma-matching",
+    "ml_settings_card": "Instellingen",
+    "ml_smart_learning": "Slim leren",
+    "my_preferences": "Mijn voorkeuren",
+    "no_automations": "Er zijn nog geen automatiseringen die naar dit apparaat verwijzen.",
+    "panel_settings": "Paneelinstellingen",
+    "param_sweep": "Parameterscan",
+    "phase_catalog": "Fasecatalogus",
+    "playground": "Speeltuin",
+    "process_history": "Procesgeschiedenis",
+    "settings_history": "Instellingengeschiedenis",
+    "status": "Status",
+    "status_graph": "Statusgrafiek",
+    "storage_stats": "Opslagstatistieken",
+    "test_history": "Testen op geschiedenis",
+    "toggle_sidebar": "Schakel de Home Assistant-zijbalk in of uit",
+    "tools_and_data": "Hulpmiddelen en gegevens",
+    "wipe_history": "Geschiedenis wissen",
+    "recommendations": "Aanbevelingen ({n})",
+    "pg_detection_params": "Detectie-instellingen",
+    "pg_timeline": "Gebeurtenistijdlijn",
+    "pg_outcome": "Simulatieresultaat",
+    "pg_across_cycles": "Over al je cycli",
+    "community_store": "Communitystore",
+    "online_account": "Communitystore en onlinefuncties"
+  },
+  "health": {
+    "fair": "Acceptabele profielkwaliteit",
+    "good": "✓ Goede profielkwaliteit",
+    "poor": "⚠ Slechte profielkwaliteit"
+  },
+  "lbl": {
+    "actions": "Acties",
+    "activity": "Activiteit",
+    "administrators": "Beheerders",
+    "aria_compare_chart": "Cyclusvergelijkingsgrafiek",
+    "aria_cycle_chart": "Vermogenscurve van de cyclus",
+    "aria_envelope_chart": "Vermogensenvelop van het profiel",
+    "aria_phase_chart": "Grafiek van de fase-editor",
+    "aria_playground_chart": "Vermogenscurve van de cyclus met versleepbare detectiedrempels",
+    "aria_power_chart": "Vermogensgrafiek",
+    "aria_spaghetti_chart": "Over elkaar gelegde vermogenscurves van cycli",
+    "aria_sweep_chart": "Grafiek met resultaten van de parametersweep",
+    "artifact_anomaly": "Anomalie",
+    "artifact_high_power": "Hoog vermogen",
+    "artifact_interruption": "Onderbreking",
+    "artifact_low_power": "Laag vermogen",
+    "auto_detect": "Automatische detectie",
+    "auto_fine_tune_off": "automatische fijnafstemming uit",
+    "auto_fine_tune_on": "automatisch verfijnen actief (rond {hour}:00)",
+    "avg_cost": "Gem. kosten",
+    "change": "Wijziging",
+    "clock_time": "Kloktijd",
+    "cohesion_good": "cohesie {pct}%",
+    "cohesion_low": "⚠ lage cohesie {pct}%",
+    "compare_profiles": "Vergelijk met profielen",
+    "concurrency": "Gelijktijdigheid",
+    "confidence": "Vertrouwen",
+    "confidence_threshold": "Vertrouwensdrempel",
+    "correct_duration": "Correcte duur (min, optioneel)",
+    "correct_profile": "Correct profiel",
+    "correlation": "Correlatie",
+    "cost": "Kosten",
+    "create_new_profile": "+ Nieuw profiel aanmaken…",
+    "current_phase": "Huidige fase",
+    "curves": "Curven",
+    "cycle": "Cyclus",
+    "cycle_date_display": "Weergave cyclusdatum",
+    "cycle_health": "Gezondheid van de cyclus",
+    "cycle_index": "cyclusindex →",
+    "cycles": "Cycli",
+    "cycles_count": "Cycli",
+    "cycles_lc": "cycli",
+    "dashed": "gestreept",
+    "date": "Datum",
+    "debug_traces": "Sporen debuggen",
+    "default": "Standaard",
+    "default_access_level": "Standaardniveau voor gebruikers die hieronder niet worden vermeld",
+    "default_other": "Standaard (andere apparaten)",
+    "default_tab": "Standaardtabblad bij het openen van het paneel",
+    "delta": "Δ",
+    "description": "Beschrijving",
+    "dtw_blend_w": "Mengingsgewicht",
+    "dtw_blended": "Gemengde score",
+    "dtw_ddtw": "DDTW-score",
+    "dtw_l1": "L1-score",
+    "dtw_matched_profile": "(gematcht profiel van de cyclus)",
+    "duration": "Duur",
+    "duration_agreement": "Duurovereenkomst",
+    "emphasis": "Nadruk",
+    "enable_access_control": "Schakel toegangscontrole per gebruiker in",
+    "energy": "Energie",
+    "energy_agreement": "Energieovereenkomst",
+    "event_timeline": "Gebeurtenistijdlijn",
+    "event_type": "Gebeurtenistype",
+    "expected": "Verwacht",
+    "expected_duration": "Verwachte duur (min)",
+    "file_kb": "Bestand (kB)",
+    "final_score": "Eindscore",
+    "from": "Van",
+    "gap_s": "Tussenruimte (s)",
+    "group_name": "Groepsnaam",
+    "head_trim": "Begin bijsnijden (s)",
+    "health": "Gezondheid",
+    "hide_tabs": "Verberg tabbladen voor niet-beheerders",
+    "in_use": "In gebruik",
+    "json_data": "JSON-gegevens",
+    "label": "Overeenkomst",
+    "last": "Laatste",
+    "last_checked": "Laatst gecontroleerd:",
+    "load_from_file": "Laden uit bestand",
+    "mae_score": "MAE-score",
+    "manual_duration": "Handmatige duur (min, optioneel)",
+    "match": "Match",
+    "members": "Leden",
+    "metric": "Metriek",
+    "mode_existing_profile": "Toevoegen aan bestaand profiel",
+    "mode_new_profile": "Nieuw profiel maken",
+    "models_fine_tuned": "({count} model{plural} verfijnd)",
+    "n_classic_suggestions": "{n} klassiek",
+    "n_ml_suggestions": "{n} ML",
+    "n_selected": "{n} geselecteerd",
+    "n_tuning_suggestions": "{n} afstemmingssuggestie",
+    "na": "n.v.t.",
+    "new_profile_name": "Nieuwe profielnaam",
+    "notes": "Opmerkingen",
+    "of": "van",
+    "outcome": "Uitkomst",
+    "panel_default_tab": "Standaard tabblad",
+    "panel_language": "Paneeltaal",
+    "per_cycle_short": "cyclus",
+    "pg_autofill_tip": "Bereik automatisch invullen vanaf huidige waarde ({lo}–{hi})",
+    "pg_best_value": "Beste gevonden waarde",
+    "pg_current_value": "Huidige waarde:",
+    "pg_drag_hint": "Sleep de lijn op de grafiek",
+    "pg_dtw": "DTW",
+    "pg_ev_ending": "Afsluiten",
+    "pg_ev_running": "Actief",
+    "pg_group_advanced": "Randgevallen",
+    "pg_group_detection": "Detectietriggers",
+    "pg_group_timing": "Timingregels",
+    "pg_idle": "Inactief",
+    "pg_last_run": "Laatste run: {date}",
+    "pg_match_score": "Matchscore",
+    "pg_pct_of": "{p}% van {total}",
+    "pg_poor_match": "Slechte match",
+    "pg_strong_match": "Sterke match",
+    "pg_tile_ambiguous": "Dubbelzinnig",
+    "pg_tile_ambiguous_tip": "Cycli met een bijna gelijkspel tussen twee programma's",
+    "pg_tile_detected": "Gedetecteerd",
+    "pg_tile_detected_tip": "Cycli waarbij het vermogen lang genoeg boven de startdrempel kwam om als actief te worden geregistreerd",
+    "pg_tile_matched": "Herkend",
+    "pg_tile_matched_tip": "Cycli die correct aan een bekend programma zijn toegewezen",
+    "pg_time_left": "Resterende tijd",
+    "pg_weak_match": "Zwakke match",
+    "phase_name": "Naam",
+    "phase_timeline": "Fasetijdlijn",
+    "power": "Vermogen",
+    "profile": "Profiel",
+    "profile_index": "profielindex →",
+    "profile_name": "Profielnaam",
+    "program": "Programma",
+    "program_tip": "Overschrijft welk profiel wordt gekoppeld aan de huidige cyclus. Automatische detectie laat de integratie automatisch de beste overeenkomst kiezen. Zet een specifiek programma vast om het te forceren wanneer automatische detectie onjuist is of u weet wat er draait.",
+    "progress": "Voortgang",
+    "raw_socket": "Ruwe stroom",
+    "read_only": "Alleen-lezen",
+    "ref_cycle": "Referentiecyclus (optioneel)",
+    "refresh_interval": "Vernieuwingsinterval (s)",
+    "remaining": "Resterend",
+    "reminder_every": "Herinneren om de (cycli)",
+    "remove_label": "- Etiket verwijderen -",
+    "rename_profile": "Naam van profiel wijzigen",
+    "replay_duration": "Herhaling",
+    "resulting_profile": "Resulterend profiel",
+    "save_mode": "Bewaarmodus",
+    "score": "Score",
+    "score_breakdown": "Score-uitsplitsing",
+    "seconds_from_start": "Seconden vanaf het begin",
+    "select_profile": "Selecteer Profiel",
+    "setting": "Instelling",
+    "settings_a": "Instellingen A (huidig)",
+    "settings_a_short": "A",
+    "settings_advanced": "Geavanceerd",
+    "settings_b": "Instellingen B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Basis",
+    "settings_detail_level": "Detailniveau van instellingen",
+    "settings_overrides": "Overschreven instellingen",
+    "show_debug": "Toon live match-foutopsporingskaart op de statuspagina (vertrouwen, dubbelzinnigheid, topkandidaten)",
+    "show_expected": "Verwachte curve-overlay weergeven (overeenkomend profiel, oranje)",
+    "show_raw": "Toon schakelaar voor onbewerkte stopcontactwaarden in live vermogensgrafiek",
+    "sparkline": "Recente trend van cyclusduur",
+    "stage2": "Stap 2 — kerngelijkenis",
+    "stage3": "Stap 3 — DTW",
+    "stage4": "Stap 4 — overeenkomst",
+    "status": "Status",
+    "tail_trim": "Einde bijsnijden (s)",
+    "timer_auto_pause": "Automatische pauze",
+    "timer_min": "min",
+    "timer_msg_placeholder": "Bericht (optioneel, {device}/{program}/{minutes})",
+    "to": "Tot",
+    "ungrouped": "Niet-gegroepeerd",
+    "unlabelled": "Zonder etiket",
+    "unlabelled_paren": "(ongelabeld)",
+    "warp_path": "Uitlijningspad",
+    "input": "Invoer:",
+    "start": "Start",
+    "end": "Einde",
+    "unit_s": "(s)",
+    "reviewed_on": "beoordeeld op {date}",
+    "unknown": "Onbekend",
+    "quality": "Kwaliteit",
+    "tags": "Tags",
+    "at": "om",
+    "pct_match_confidence": "{pct}% matchbetrouwbaarheid",
+    "ha_restarted": "HA opnieuw opgestart",
+    "from_start": "Vanaf begin",
+    "to_end": "Tot einde",
+    "click_to_select": "klik om te selecteren",
+    "envelope": "Envelop",
+    "zoom_hint": "scroll om te zoomen · dubbelklik om te resetten",
+    "loading_paren": "(laden…)",
+    "time_remaining": "~{v} resterend",
+    "no_duration": "geen duur",
+    "duration_avg": "~{v}m gem.",
+    "name_placeholder": "(naam)",
+    "n_shown": ", {n} weergegeven",
+    "cycles_title": "Cycli ({n})",
+    "pg_detecting": "Detecteren",
+    "pg_best_marker": "Beste: {v}",
+    "pg_time_left_model": "Resterende tijd (model)",
+    "pg_time_left_model_tip": "Door het model geschatte resterende tijd (fase-schatter + ML-mix), geen statische aftelling",
+    "phase": "Fase",
+    "pg_mode_simulate": "Simuleren",
+    "pg_mode_history": "Op geschiedenis testen",
+    "pg_mode_sweep": "Scan",
+    "pg_ev_detected": "Gedetecteerd",
+    "pg_ev_match": "Match vastgelegd",
+    "pg_ev_match_changed": "Match gewijzigd",
+    "pg_ev_ambiguous": "Dubbelzinnig",
+    "pg_ev_unmatched": "Geen match",
+    "pg_ev_notify_start": "Startmelding",
+    "pg_ev_notify_pre": "Bijna-klaar-melding",
+    "pg_ev_notify_finish": "Eindmelding",
+    "pg_ev_notify_milestone": "Mijlpaalmelding",
+    "pg_ev_notify_held": "Melding vastgehouden (stille uren)",
+    "pg_ev_finished": "Voltooid",
+    "pg_ended": "Beëindigd",
+    "pg_proj_energy": "Verw. energie",
+    "pg_alert_overrun": "Te lang",
+    "pg_alert_underrun": "Te kort",
+    "pg_alert_did_not_finish": "Niet voltooid",
+    "pg_alert_false_end": "Opgesplitst in meerdere cycli",
+    "pg_alert_unmatched": "Geen match",
+    "pg_alert_ambiguous": "Dubbelzinnige match",
+    "pg_alert_energy": "Energieanomalie",
+    "pg_newly_correct": "nieuw correct",
+    "pg_regressed": "achteruitgegaan",
+    "pg_end_timing_changed": "eindtiming gewijzigd",
+    "pg_vs_current": "t.o.v. huidig",
+    "pg_fixed": "opgelost",
+    "pg_broke": "verslechterd",
+    "pg_sweep_param": "Parameter",
+    "pg_objective": "Doel",
+    "pg_steps": "Stappen",
+    "pg_sweep_2d": "2D-heatmap",
+    "pg_sweep_param_y": "2e parameter",
+    "pg_obj_match": "Matchnauwkeurigheid",
+    "pg_obj_endtiming": "Nauwkeurigheid eindtiming",
+    "pg_obj_falseend": "Vals-einde-percentage",
+    "pg_obj_overrun": "Duurafwijking",
+    "pg_obj_ambiguity": "Dubbelzinnigheidspercentage",
+    "pg_best_combo": "beste combinatie",
+    "pg_mode_optimize": "Optimaliseren",
+    "pg_group_matching": "Programmaherkenning",
+    "pg_zoom_hint": "dubbelklik om de zoom te resetten",
+    "aria_playground_chart2": "Interactieve vermogensgrafiek van de cyclus: beweeg de muis eroverheen om tijd/vermogen af te lezen, scroll om te zoomen, sleep om te verschuiven",
+    "pg_alert_timeout_end": "Beëindigd door time-out, niet door voorspelling",
+    "pg_alert_indefinite": "Zou eindeloos blijven draaien",
+    "task_pg_history": "Testen op geschiedenis",
+    "task_pg_sweep": "Optimaliseren",
+    "task_reprocess": "Opnieuw verwerken",
+    "task_ml_training": "Leren",
+    "eta_secs": "nog ~{n} s",
+    "eta_mins": "nog ~{n} min",
+    "pg_recent_runs": "Recente uitvoeringen",
+    "pg_load_run": "Deze uitvoering opnieuw laden",
+    "pg_match_confidence": "Matchbetrouwbaarheid",
+    "pg_envelope_fit": "Envelop-passing",
+    "pg_envelope_fit_tip": "Hoe strak de cyclus binnen de opgeslagen vermogensenvelop van dit profiel blijft, een andere invalshoek dan matchbetrouwbaarheid.",
+    "n_imported_note": ", {n} geïmporteerd",
+    "enable_online": "Onlinefuncties inschakelen",
+    "store_brand": "Merk van apparaat",
+    "store_model": "Model van apparaat",
+    "anonymous": "Anoniem",
+    "rate_quality": "Kwaliteit beoordelen",
+    "rate_n": "{n} sterren",
+    "approved_only": "Alleen goedgekeurd",
+    "adopt_settings": "Instellingen ook overnemen",
+    "flags": "Vlaggen",
+    "include_phase_map": "Fasekaart opnemen",
+    "include_settings": "Detectie- en matchinstellingen opnemen",
+    "show_contributor": "Bijdragersnamen weergeven"
+  },
+  "log": {
+    "all_levels": "Alle niveaus",
+    "all_devices": "Alle apparaten",
+    "all_components": "Alle componenten",
+    "search_ph": "Logboeken doorzoeken…"
+  },
+  "ml": {
+    "builtin_models": "● Ingebouwde modellen gebruiken",
+    "fit_fair": "Acceptabel",
+    "fit_good": "Goed",
+    "fit_slight": "Licht",
+    "fit_strong": "Sterk",
+    "fit_weak": "Zwak",
+    "fit_word": "fit",
+    "personalized": "● Gepersonaliseerd voor deze machine",
+    "better_than_baseline": "{pct}% beter dan de basisschatting ({metric})",
+    "trend_improving_tip": "De pasvorm van dit model is bij recente hercontroles verbeterd.",
+    "trend_declining_tip": "De pasvorm van dit model is bij recente hercontroles achteruitgegaan. Meer cycli beoordelen kan het helpen opnieuw te leren.",
+    "trend_steady_tip": "De pasvorm van dit model is bij recente hercontroles ongeveer stabiel gebleven.",
+    "cap_blurb": {
+      "end": "Weten wanneer een cyclus echt is afgelopen",
+      "live_match": "Het lopende programma sneller herkennen",
+      "quality": "Verkeerd gedetecteerde of beschadigde cycli opsporen",
+      "remaining_time": "Voorspellen hoe lang het nog duurt",
+      "total_energy": "Totaal energieverbruik en kosten voorspellen"
+    },
+    "cap_label": {
+      "end": "Detectie van cycluseinde",
+      "live_match": "Programmaherkenning",
+      "quality": "Kwaliteitscontrole van de cyclus",
+      "remaining_time": "Schatting van de resterende tijd",
+      "total_energy": "Schatting van het energieverbruik"
+    },
+    "metric_auc": "AUC {auc} op validatiegegevens",
+    "metric_mae": "fout {model} vs. referentie {baseline}"
+  },
+  "modal": {
+    "auto_label": "Automatische labelcycli",
+    "correct_feedback": "Correcte feedback",
+    "create_profile": "Profiel aanmaken",
+    "cycle": "Cyclus",
+    "edit_group": "Profielgroep bewerken",
+    "edit_phase": "Fase bewerken",
+    "import_config": "Configuratie importeren",
+    "label_cycle": "Labelcyclus",
+    "merge_cycles": "Voeg {n} cycli samen",
+    "new_group": "Nieuwe profielgroep",
+    "new_phase": "Nieuwe Fase",
+    "process_history_msg": "Voer opnieuw matching uit, vernieuw suggesties, train ML opnieuw (indien ingeschakeld) en herbereken de cyclusgezondheid over alle opgeslagen cycli. Dit kan even duren.",
+    "process_history_ok": "Verwerken",
+    "process_history_title": "Geschiedenis verwerken",
+    "process_recording": "Opname verwerken",
+    "delete_maintenance_msg": "Deze onderhoudsregistratie verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "delete_maintenance_title": "Onderhoudsgebeurtenis verwijderen",
+    "relabel_cycles": "{count} cycli opnieuw labelen",
+    "delete_automation_title": "Automatisering verwijderen",
+    "delete_automation_msg": "De automatisering \"{name}\" uit Home Assistant verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "remove_legacy_title": "Verouderde acties verwijderen",
+    "remove_legacy_msg": "De verouderde aangepaste acties verwijderen? Ze worden niet meer geactiveerd bij cyclusgebeurtenissen. Dit kan niet vanuit het paneel ongedaan worden gemaakt.",
+    "discard_recording_title": "Opname verwijderen",
+    "discard_recording_msg": "De opgeslagen opname verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "dismiss_all_title": "Alle feedback afwijzen",
+    "dismiss_all_msg": "Alle {count} openstaande feedbackverzoeken afwijzen?",
+    "dismiss_all_ok": "Alles afwijzen",
+    "delete_phase_title": "Fase verwijderen",
+    "delete_phase_msg": "Fase \"{name}\" verwijderen?",
+    "clear_debug_title": "Foutopsporingsgegevens wissen",
+    "clear_debug_msg": "Alle opgeslagen foutopsporingssporen verwijderen?",
+    "wipe_all_title": "Alle gegevens wissen",
+    "wipe_all_msg": "⚠️ Hiermee worden ALLE cycli en profielen permanent verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "wipe_all_ok": "Alles wissen",
+    "force_stop_title": "Cyclus geforceerd stoppen",
+    "force_stop_msg": "De actieve cyclus nu geforceerd stoppen? De cyclus wordt opgeslagen als onderbroken.",
+    "store_import": "Referentiecyclus importeren",
+    "store_share": "Delen in communitystore",
+    "store_share_device": "Dit apparaat delen"
+  },
+  "msg": {
+    "appliance_monitor": "Apparaatmonitor",
+    "artifact_dip_detail": "Daalde onder de gebruikelijke vermogensband voor ~{n}s.",
+    "artifact_footer": "Gemarkeerd in de bovenstaande grafiek. Dit zijn tijdelijke artefacten (bijvoorbeeld de deur die halverwege de cyclus wordt geopend), en niet noodzakelijkerwijs problemen.",
+    "artifact_header": "{n} afwijkingen gedetecteerd tijdens deze cyclus",
+    "artifact_pause_detail": "Vermogen daalde tot bijna nul voor ~{n}s en hervatte vervolgens — waarschijnlijk werd de deur halverwege de cyclus geopend of de cyclus gepauzeerd.",
+    "artifact_spike_detail": "Trad boven de gebruikelijke vermogensband voor ~{n}s.",
+    "auto_label_intro": "Wijs profielen toe aan niet-gelabelde cycli waarvan het matchvertrouwen de drempel overschrijdt.",
+    "automations_intro": "WashData activeert {start} / {end}-gebeurtenissen en stelt entiteiten beschikbaar, waardoor meldingen en acties het best als gewone Home Assistant-automatiseringen worden gebouwd. Automatiseringen die dit apparaat gebruiken, worden hieronder weergegeven.",
+    "cleanup_intro": "Elke gelabelde cyclus wordt overlay. Vink uitschieters aan en verwijder deze om het profiel op te schonen.",
+    "clear_debug_hint": "Verwijder opgeslagen foutopsporingsgegevens om ruimte vrij te maken.",
+    "collecting_data": "Gegevens worden verzameld: nog {need} cyclus{plural} voordat verfijning kan beginnen ({current}/{min}).",
+    "compare_overlay_profiles": "Overlay-profielen (vaag)",
+    "compare_profiles_tip": "Leg andere profielenveloppen op het schema hierboven om te zien welke het beste bij deze cyclus past.",
+    "compare_selected_cycles": "Geselecteerde cycli (vast) — tonen/verbergen",
+    "consider_new_profile": "Overweeg een nieuw profiel aan te maken.",
+    "coverage_gap": "recente cycli hebben geen overeenkomend profiel ({pct}% van de laatste 30).",
+    "coverage_gap_similar_cycles": "{count} vergelijkbare niet-gelabelde cycli gevonden — maak een profiel aan om ze te beginnen matchen.",
+    "cycles_deleted": "{count} cyclus(sen) verwijderd",
+    "enough_data": "Voldoende gegevens om van te leren ({current}/{min} cycli).",
+    "export_description": "Exporteer alle profielen en cycli naar JSON, of herstel vanuit een eerdere export.",
+    "feedback_cycles_pending": "{n} cyclus{s} te beoordelen",
+    "feedback_prompt": "Bevestig dat het goed was, corrigeer het programma of negeer het.",
+    "filter_by_profile": "Filteren op profiel…",
+    "group_modal_help": "Groepeer programma's met dezelfde vorm die verschillen in temperatuur/centrifugeren (duur kan variëren). Matching scoort de groep als één kandidaat en kiest vervolgens het best passende lid. Kies er minimaal 2; de overlay laat zien hoezeer ze op elkaar lijken.",
+    "group_not_cohesive": "Deze profielen lijken niet voldoende op elkaar om betrouwbaar te kunnen worden gegroepeerd, dus bij het matchen worden ze individueel behandeld totdat u de uitbijter verwijdert of de groep opsplitst.",
+    "group_preview_hint": "Selecteer 2 of meer leden om hun vermogenscurven te bekijken en te vergelijken.",
+    "import_intro": "Laad een geëxporteerd bestand of plak hieronder een JSON-payload.",
+    "legacy_actions_title": "{count} verouderde aangepaste actie wordt nog steeds uitgevoerd",
+    "live_chart_loading": "Een live vermogensgrafiek verschijnt zodra de metingen binnenkomen.",
+    "loading": "Laden…",
+    "loading_curve": "Curve laden…",
+    "loading_settings": "Instellingen laden…",
+    "log_buffer_hint": "Nieuwste eerst · buffert de laatste 500 ha_washdata-records sinds het opnieuw opstarten · sleep de onderrand om het formaat te wijzigen.",
+    "maintenance_advisory": "Het verhogen van de duur/energie kan erop wijzen dat er onderhoud aan het apparaat nodig is (bijvoorbeeld ontkalken, filterreiniging).",
+    "maintenance_due": "Onderhoud nodig: {items}",
+    "maintenance_intro": "Registreer het onderhoud dat je aan dit apparaat uitvoert en word herinnerd wanneer elke taak weer aan de beurt is.",
+    "maintenance_load_error": "Kan onderhoudsgegevens niet laden: {error}",
+    "maintenance_requires_access": "Onderhoud en export/import vereisen volledige toegang.",
+    "manual_duration_hint": "De gemiddelde/verwachte cycluslengte van het profiel, gebruikt voor schattingen van de resterende tijd. Bewerk om het in te stellen; Door het ongewijzigd te laten, blijft de huidige waarde behouden.",
+    "matching_tuning_intro": "Tijdens het leren past WashData ook aan hoeveel programmamatching de vorm versus duur en energie weegt.",
+    "merge_intro": "De geselecteerde cycli worden gecombineerd tot één (chronologische volgorde; gaten gevuld met 0 W). Kies het resulterende profiel.",
+    "ml_intro": "WashData wordt geleverd met slimme modellen die out-of-the-box werken.",
+    "ml_learned_intro": "Modellen die op deze machine zijn afgestemd.",
+    "ml_loading": "ML laden...",
+    "ml_settings_intro": "Twee onafhankelijke schakelaars: de ene past de modellen toe terwijl een cyclus loopt, de andere laat WashData ze in de loop van de tijd nauwkeurig afstemmen op uw machine.",
+    "name_first_program": "Je hebt genoeg cycli — geef je eerste programma een naam om te beginnen met matchen.",
+    "near_duplicate_cluster": "bijna dubbel profielcluster gedetecteerd. Door te groeperen kan er op betrouwbare wijze worden gekozen tussen look-alikes (bijvoorbeeld hetzelfde programma op verschillende temperatuur/centrifugeren).",
+    "no_cycles_match": "Er zijn geen cycli die overeenkomen met het huidige filter.",
+    "no_cycles_profile": "Geen cycli voor dit profiel.",
+    "no_cycles_selected": "Selecteer eerst minstens één cyclus.",
+    "no_cycles_yet": "Er zijn nog geen cycli geregistreerd.",
+    "no_device_selected": "Geen apparaat geselecteerd.",
+    "no_devices": "Er zijn nog geen WashData-apparaten geconfigureerd.",
+    "no_envelope": "Nog geen envelop - herbouw na etiketteringscycli.",
+    "no_envelope_overlay": "Er is geen envelop beschikbaar om te bedekken.",
+    "no_fine_tuned": "Er is nog niets verfijnd: WashData gebruikt de ingebouwde modellen.",
+    "no_logs": "Er zijn nog geen logrecords gebufferd.",
+    "no_maintenance": "Nog geen onderhoud geregistreerd.",
+    "no_match_yet": "Nog geen matchpoging: dit wordt ingevuld tijdens een actieve cyclus.",
+    "no_other_users": "Geen andere Home Assistant-gebruikers gevonden.",
+    "no_phases": "Geen fasen gedefinieerd.",
+    "no_phases_assigned": "Geen fasen toegewezen.",
+    "no_profiles_compare": "Geen profielen om te vergelijken.",
+    "no_profiles_overlay": "Geen profielen om over te leggen.",
+    "no_profiles_yet": "Nog geen profielen. Maak er een van een gelabelde cyclus.",
+    "no_profiles_yet_short": "Nog geen profielen.",
+    "no_settings_match": "Er zijn geen instellingen die overeenkomen met '{q}'",
+    "no_split_points": "Er zijn nog geen splitpunten.",
+    "no_suggestions": "Geen actieve suggesties.",
+    "notify_services_hint": "Gebruik {entity}-service-ID's (kommagescheiden voor meerdere). Sjabloonvariabelen: {vars}.",
+    "old_actions_warning": "Geconfigureerd met de oude actie-editor (nu verwijderd). Ze vuren nog steeds op cyclusevenementen, maar kunnen hier niet langer worden bewerkt. Converteer ze naar een normale automatisering of verwijder ze.",
+    "onboarding_progress": "{n} / 3 cycli waargenomen",
+    "onboarding_watching": "Gebruik je apparaat normaal — WashData kijkt mee. Na 3 cycli begint het matchen van programma's.",
+    "pending_feedback": "In afwachting van detectiefeedback",
+    "performance_trend": "Prestatietrend ({n} cycli)",
+    "pg_analysis_empty": "Laad een cyclus om de matchanalyse te bekijken.",
+    "pg_apply_confirm": "Beste waarde toepassen: {label} = {value}?",
+    "pg_canvas_empty": "Selecteer hierboven een cyclus en druk vervolgens op Laden om de vermogenscurve te bekijken.",
+    "pg_chart_caption": "Detectie-/matchpercentage over de waarden van {param}",
+    "pg_match_rate": "{pct}% matchpercentage op {total} cycli",
+    "pg_restart_note": "Start Home Assistant opnieuw op om de simulatiehulpmiddelen in te schakelen.",
+    "pg_sim_progress": "{done} / {total} cycli",
+    "pg_starting": "Bezig met starten…",
+    "pg_sweep_intro": "Wat als {param} anders was? Test {steps} waarden over je laatste {cycles} cycli om de instelling te vinden waarbij de meeste cycli correct worden herkend.",
+    "pg_sweep_step": "Stap {done} / {total}",
+    "pg_undetected": "{n} cyclus{s} niet gedetecteerd",
+    "pg_verdict_bad": "Vereist aandacht: veel cycli worden niet gedetecteerd.",
+    "pg_verdict_good": "Goed afgestemd: de meeste cycli worden correct herkend en gematcht.",
+    "pg_verdict_ok": "Acceptabel: sommige cycli gemist. Probeer de startdrempel te verlagen.",
+    "phase_catalog_intro": "Benoemde segmenten van een cyclus (Voorwas, Verwarming, Centrifugeren…). Wijs ze toe aan een profiel vanuit het configuratiescherm.",
+    "phase_ranges_intro": "Fasebereiken (minuten vanaf het begin van de cyclus) over de gemiddelde curve heen. Bewerk waarden om live een voorbeeld te bekijken.",
+    "playground_intro": "Een veilige speeltuin om eerdere cycli met andere instellingen opnieuw af te spelen, twee configuraties naast elkaar te vergelijken en te bekijken hoe een cyclus wordt uitgelijnd met een profiel. Niets hier verandert je actieve gegevens totdat je het expliciet toepast.",
+    "playground_needs_restart": "Start Home Assistant opnieuw op om de Speeltuin-tools in te schakelen.",
+    "preferences_admin": "Voorkeuren, paneel- en toegangscontrole",
+    "preferences_adv": "Voorkeuren",
+    "prefs_personal": "Deze zijn alleen van toepassing op uw Home Assistant-account.",
+    "process_history_hint": "Voer opnieuw matching uit op alle opgeslagen cycli, vernieuw afstemsugesties, train de ML-modellen opnieuw (indien ingeschakeld) en herbereken de cyclusgezondheid. Uitvoeren na een batch van beoordelingen.",
+    "profile_deleted": "Profiel verwijderd",
+    "profile_poor_health_detail": "Cycli die aan dit profiel zijn toegewezen, hebben inconsistente vormen of een lage betrouwbaarheid. Overweeg om de envelop opnieuw te maken of de gelabelde cycli te bekijken.",
+    "profiles_intro": "Klik op een profiel voor statistieken, fasen en opruimacties. Groepeer vrijwel identieke programma's (dezelfde vorm/duur, andere temperatuur of draairichting), zodat er betrouwbaar een keuze tussen de programma's kan worden gemaakt.",
+    "rbac_hint": "Indien uitgeschakeld heeft elke Home Assistant-gebruiker volledige toegang (standaard). Beheerders hebben altijd volledige toegang en kunnen iedereen beheren.",
+    "recent_logs": "Recente ha_washdata-records",
+    "recording_in_progress": "Opname bezig",
+    "reminders_intro": "Toon een herinnering in het paneel dit aantal cycli na de laatste servicebeurt. Laat leeg of 0 om een herinnering uit te schakelen.",
+    "restart_gap_footer": "Gemarkeerd op de grafiek. Vermogensgegevens ontbreken voor deze intervallen; matching gebruikte alleen echte metingen.",
+    "restart_gap_header": "{n} HA-herstart-gat tijdens deze cyclus",
+    "restart_gap_item": "{dur} gat",
+    "review_confirm_help": "Controleer of deze cyclus correct is gedetecteerd. Uw beoordelingen trainen het model op uw machine: hoe meer cycli u bevestigt, hoe beter de matching en de gezondheidsscore worden. Een snelle goed/slecht is genoeg.",
+    "review_in_settings": "Controleer in Instellingen",
+    "review_notes_placeholder": "Opmerkingen (optioneel)",
+    "review_notes_tip": "Vrije tekstnotities voor uw eigen referentie. Wordt niet gebruikt bij matching of training.",
+    "review_profile_tip": "Het programma waarmee deze cyclus wordt aangeduid als. Als het automatisch gedetecteerde programma fout was, corrigeer dit dan hier. Labeling leert matching voor toekomstige cycli.",
+    "review_quality_tip": "Hoe schoon is deze cyclus. Goed = een schoolvoorbeeld van dit programma; Slecht = gedetecteerd maar luidruchtig of atypisch; Onbruikbaar = verkeerd gedetecteerd (samengevoegd, afgekapt of onecht). Stuurt de gezondheidsscore aan en welke cycli het model mogen trainen.",
+    "review_recorded_tip": "Markeer dit als een zorgvuldig uitgekozen referentiecyclus voor het programma - dezelfde rol als een handmatig geregistreerde cyclus. Referentiecycli worden altijd bewaard, voorzien van de overeenkomende sjabloon en worden nooit verwijderd door opschoning. (Dit is de \"gouden\"/opgenomen vlag; beide zijn hetzelfde.)",
+    "review_tags_tip": "Optionele vlaggen die beschrijven wat er mis is gegaan in deze cyclus, zodat training en opruiming hiervan een verklaring kunnen zijn.",
+    "review_to_cycles": "Open de wachtrij voor het beoordelen van cycli",
+    "saving_triggers_reload": "Opslaan activeert een herladen van de integratie. HA-entiteiten kunnen kort worden weergegeven als niet beschikbaar.",
+    "search_placeholder": "Zoekinstellingen…",
+    "see_recorder": "Zie recorderwidget hieronder",
+    "setting_changed": "Gewijzigd van {old} naar {new} op {date}",
+    "settings_basic_note": "Essentiële instellingen worden getoond. Schakel over naar Geavanceerd voor de volledige lijst.",
+    "shape_drift_advisory": "⚠ Vormafwijking",
+    "shape_drift_detail": "Het vermogenspatroon voor dit profiel is in de loop van de tijd verschoven — mogelijk slijtage van het apparaat of onderhoud nodig (bijv. ontkalken, filterreiniging).",
+    "show_all_settings": "Toon alle instellingen",
+    "showing_suggestions": "Instelling {count} met suggesties weergegeven.",
+    "split_intro": "Klik op de grafiek om een ​​splitspunt toe te voegen of te verwijderen, of om automatisch gaten in de grafiek te detecteren. Elk resulterend segment kan zijn eigen profiel krijgen.",
+    "storage_diagnostics": "Opslagstatistieken, onderhoud, export/import",
+    "sug_staged": "{key} = {val} ingesteld. Sla op om toe te passen.",
+    "toast_auto_detect_enabled": "Automatische detectie ingeschakeld",
+    "toast_auto_label_complete": "Automatisch labelen voltooid",
+    "toast_auto_label_failed": "Automatisch labelen mislukt: {error}",
+    "toast_automation_failed": "Automatisering kon niet worden aangemaakt: {error}",
+    "toast_automation_migrated": "Acties gemigreerd naar een automatisering; editor wordt geopend",
+    "toast_convert_failed": "Conversie mislukt: {error}",
+    "toast_create_failed": "Aanmaken mislukt: {error}",
+    "toast_delete_failed": "Verwijderen mislukt: {error}",
+    "toast_error": "Fout: {error}",
+    "toast_failed": "Mislukt: {error}",
+    "toast_force_stop_failed": "Geforceerd stoppen mislukt: {error}",
+    "toast_name_required": "Naam vereist",
+    "toast_no_automation": "Hier kan geen automatisering worden aangemaakt",
+    "toast_profile_name_required": "Profielnaam is vereist",
+    "toast_program_set": "Programma ingesteld: {program}",
+    "toast_rebuild_failed": "Herbouwen mislukt: {error}",
+    "toast_resume_failed": "Hervatten mislukt: {error}",
+    "toast_revert_failed": "Terugzetten mislukt: {error}",
+    "toast_reverted": "{key} teruggezet",
+    "toast_save_failed": "Opslaan mislukt: {error}",
+    "trend_duration_longer": "Duur trending langer ({pct}%/cyclus) — recent gemiddelde {avg}",
+    "trend_duration_shorter": "Duur trending korter ({pct}%/cyclus) — recent gemiddelde {avg}",
+    "trend_energy_down": "Energietrend omlaag ({pct}%/cyclus)",
+    "trend_energy_up": "Energie stijgt ({pct}%/cyclus) — recent gemiddelde {avg}",
+    "trim_intro": "Versleep de rode grepen of voer waarden in. Alles buiten het raam wordt verwijderd.",
+    "tuning_suggestions_available": "{count} afstemmingssuggestie beschikbaar op basis van waargenomen cycli. Ze verschijnen naast de relevante velden.",
+    "unsure_detected_prefix": "WashData weet niet zeker of het is gedetecteerd",
+    "updated": "Bijgewerkt",
+    "warmup_badge": "Nog aan het leren ({done}/{needed} cycli)",
+    "warmup_detail": "Dit profiel heeft {needed} gelabelde cycli nodig voordat automatisch matchen begint. Elke bevestigde cyclus helpt het te leren.",
+    "wipe_history_warning": "Verwijder definitief alle cycli en profielen. Kan niet ongedaan worden gemaakt.",
+    "compare_overlay_tip": "Leg geleerde profielenvelopen over elkaar om te zien op welk programma elke cyclus lijkt.",
+    "duration_trend_up_tip": "Duur omhoog ({pct}%/cyclus)",
+    "duration_trend_down_tip": "Duur omlaag ({pct}%/cyclus)",
+    "energy_trend_up_tip": "Energie omhoog ({pct}%/cyclus)",
+    "energy_trend_down_tip": "Energie omlaag ({pct}%/cyclus)",
+    "performance_trending": "Prestatietrend",
+    "pg_select_cycle_hint": "Selecteer een cyclus en klik op ↺ om te laden",
+    "pg_sweep_progress": "Stap {done} / {total}",
+    "pg_analysis_hint": "Selecteer een cyclus en klik op ↺ om de analyse te laden.",
+    "diagnostics_load_failed": "Kon diagnostiek niet laden: {error}",
+    "manual_duration_ref_hint": "Wordt alleen gebruikt wanneer er geen referentiecyclus is geselecteerd. Een referentiecyclus stelt de duur in op basis van de eigen lengte.",
+    "toast_convert_rolled_back": "Conversie mislukt en teruggedraaid (geen automatisering achtergelaten): {error}",
+    "toast_convert_orphan": "De automatisering is aangemaakt, maar het wissen van de oude acties is mislukt. Probeer het niet opnieuw: verwijder de oude acties handmatig om een dubbele automatisering te voorkomen.",
+    "advisory_duration_trend_up": "De cycli van '{name}' worden steeds langer (ongeveer +{pct}% per cyclus). Als het gedrag van het apparaat is veranderd, neem dit profiel dan opnieuw op of bouw het opnieuw op.",
+    "advisory_energy_trend_up": "'{name}' verbruikt steeds meer energie (ongeveer +{pct}% per cyclus) - controleer het apparaat als dat onverwacht is.",
+    "advisory_poor_health": "'{name}' heeft een lage overeenkomstscore - de recente cycli variëren sterk of komen zwak overeen. Bekijk de cycli of neem het profiel opnieuw op zodat de herkenning en tijdschattingen nauwkeurig blijven.",
+    "advisory_shape_drift": "'{name}' is aanzienlijk afgeweken van de oorspronkelijke vermogenscurve. Het apparaat heeft zijn gedrag mogelijk in de loop van de tijd veranderd (bijv. kalkaanslag, slijtage). Overweeg dit profiel opnieuw op te nemen met recente cycli.",
+    "advisory_shape_drift_corr": "'{name}' is aanzienlijk afgeweken van de oorspronkelijke vermogenscurve (correlatie {corr}). Het apparaat heeft zijn gedrag mogelijk in de loop van de tijd veranderd (bijv. kalkaanslag, slijtage). Overweeg dit profiel opnieuw op te nemen met recente cycli.",
+    "pg_no_alerts": "Geen problemen gedetecteerd in deze run.",
+    "pg_override_active": "Gebruikt je bewerkte instellingen t.o.v. de huidige",
+    "pg_history_intro": "Speel je recente cycli opnieuw af via de echte detectie en matching. Bewerk eerst een detectie-instelling in Simuleren om hier een voor/na-vergelijking te zien.",
+    "pg_history_empty": "Druk op Uitvoeren om je cycli opnieuw af te spelen.",
+    "pg_history_summary": "{detected}/{total} gedetecteerd · {correct} correct gematcht",
+    "pg_sweep_no_metric": "Niet genoeg gegevens om dit doel te scoren.",
+    "pg_sweep_intro2": "Vind de instelling die een doel het best haalt over je recente cycli. Er verandert niets totdat je het toepast.",
+    "pg_running_history": "Je cycli worden opnieuw afgespeeld…",
+    "pg_running_sweep": "Waarden worden over je cycli getest…",
+    "pg_row_load_hint": "Deze cyclus in de grafiek hierboven laden",
+    "pg_history_intro2": "Laat je recente cycli opnieuw door de echte detector en herkenning lopen met de bovenstaande instellingen. Klik op een rij om die cyclus in de grafiek te laden; wijzig een instelling om een voor/na-vergelijking te zien.",
+    "pg_simulating": "Cyclus simuleren…",
+    "pg_canvas_empty2": "Kies hierboven een cyclus en druk op Uitvoeren om deze te simuleren. Beweeg vervolgens de muis erover om waarden af te lezen, scroll om te zoomen en sleep om te verschuiven.",
+    "pg_apply_settings_confirm": "Deze {n} instelling(en) opslaan voor dit apparaat? {list}",
+    "no_logs_match": "Geen logrecords komen overeen met deze filters.",
+    "pg_analysis_hint2": "Kies een cyclus en druk op Uitvoeren om de matchanalyse te laden.",
+    "pg_analysis_empty2": "Druk op Uitvoeren om de matchanalyse te zien.",
+    "imported_readonly": "Geïmporteerd uit de communitystore. Weergegeven ter referentie en voor matchen. Telt niet mee in je statistieken en kan niet worden bewerkt.",
+    "merge_no_imports": "Geïmporteerde opnamen kunnen niet worden samengevoegd met een echte cyclus. Deselecteer ze om samen te voegen.",
+    "store_enable_hint": "Schakel onlinefuncties in bij Instellingen om referentiecycli van de community te bekijken en te importeren.",
+    "online_intro": "Deel referentiecycli met andere WashData-gebruikers en download ze. Alle onlinefuncties zijn optioneel en standaard uitgeschakeld.",
+    "store_share_intro": "Upload deze referentiecyclus zodat anderen met hetzelfde apparaat hem kunnen gebruiken. Hij wordt beoordeeld voordat hij openbaar verschijnt.",
+    "online_intro_global": "Bekijk en deel referentieopnamen met andere WashData-gebruikers en bevestig apparaatvermeldingen. Eén verbinding geldt voor je hele WashData-integratie; merk en model van het apparaat worden per apparaat ingesteld onder Basis. Alle onlinefuncties zijn optioneel en standaard uitgeschakeld.",
+    "online_unavailable": "Onlinefuncties zijn niet beschikbaar op deze server.",
+    "store_picker_offline": "Schakel onlinefuncties in via het instellingentandwiel om te kiezen uit de communitycatalogus.",
+    "pick_brand_first": "Kies eerst een merk van het apparaat.",
+    "model_not_found": "Nog niet in de catalogus.",
+    "connect_to_confirm": "Verbind via het instellingentandwiel om te bevestigen of te beoordelen.",
+    "adopt_settings_hint": "Overschrijft de detectie- en matchdrempels van dit apparaat met de gedeelde. Uw meldingen, entiteiten en energieprijs worden nooit gewijzigd.",
+    "include_settings_hint": "Deelt de detectie- en matchdrempels van dit apparaat (niet uw meldingen, entiteiten of energieprijs). Overnemers kiezen zelf of ze ze toepassen.",
+    "onboard_download": "Nieuw apparaat? Neem een kant-en-klare instelling (programma's, referentiecycli en fasen) over van een andere WashData-gebruiker met hetzelfde apparaat.",
+    "share_consent": "Ik bevestig dat deze cycli normaal zijn voltooid zonder onderbreking",
+    "share_device_none": "Nog geen deelbare cycli. Markeer eerst een opgenomen of handmatig geselecteerde cyclus als referentiecyclus (⭐) op het tabblad Cycli.",
+    "share_guideline_naming": "Geef elk profiel precies de naam zoals weergegeven op de kiesschijf of het display van het apparaat (bijv. 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Deel alleen cycli die normaal zijn voltooid -- geen onderbrekingen halverwege, deur geopend of stroomuitval.",
+    "share_guideline_review": "Uw upload begint als in behandeling en verschijnt openbaar zodra genoeg communityleden het bevestigen.",
+    "share_guidelines_title": "Voordat u deelt",
+    "store_download_device_intro": "Neem elk gedeeld programma en zijn referentiecycli over op uw apparaat. Uw eigen opgenomen cycli en statistieken worden niet beïnvloed.",
+    "store_share_device_intro": "Upload {brand} {model} met de referentiecycli die u selecteert. Anderen met hetzelfde apparaat kunnen uw programma's overnemen. Vermeldingen worden beoordeeld voordat ze openbaar verschijnen.",
+    "share_profile_no_cycles": "Geen referentiecycli -- markeer een cyclus als ⭐ op het tabblad Cycli om dit profiel op te nemen"
+  },
+  "pg_desc": {
+    "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",
+    "completion_min_seconds": "Kortste run die als een echte cyclus telt",
+    "end_repeat_count": "Opeenvolgende lage metingen voor het einde",
+    "interrupted_min_seconds": "Korte cycli gemarkeerd als onderbroken",
+    "min_off_gap": "Vereist interval om twee cycli te scheiden",
+    "off_delay": "Seconden laag vermogen voordat de cyclus eindigt",
+    "start_duration_threshold": "Seconden boven de drempel om de start te bevestigen",
+    "start_threshold_w": "Minimaal aantal watt om als gestart te tellen",
+    "stop_threshold_w": "Hieronder telt de machine als uit",
+    "dtw_bandwidth": "Hoeveel tijdvervorming de vormherkenning toestaat",
+    "corr_weight": "Gewicht van curvevorm versus vermogensniveau in de herkenning",
+    "duration_weight": "Hoeveel overeenkomst in looptijd de herkenning beïnvloedt",
+    "energy_weight": "Hoeveel overeenkomst in energieverbruik de herkenning beïnvloedt",
+    "profile_match_min_duration_ratio": "Kortste cyclus (t.o.v. het profiel) die nog mag matchen",
+    "profile_match_max_duration_ratio": "Langste cyclus (t.o.v. het profiel) die nog mag matchen"
+  },
+  "phase_desc": {
+    "anti_crease": "Af en toe kort tuimelen na voltooiing om rimpels te verminderen.",
+    "anti_wrinkle": "Periodiek tuimelen na de cyclus om rimpels te verminderen.",
+    "cool_down": "Tuimelen zonder warmte tegen het einde van de cyclus.",
+    "drain_and_switch": "Overgangsperiode van wassen naar drogen.",
+    "dry": "Droogfase met behulp van verwarming en/of restwarmte.",
+    "drying": "Belangrijkste verwarmde tuimelen periode.",
+    "heat_up": "Eerste opwarming van de verwarming voordat het volledig drogen begint.",
+    "pre_rinse": "Eerste spray-down vóór het wassen met wasmiddel.",
+    "pre_wash": "Eerste inweken of voorbehandeling vóór de hoofdwas.",
+    "rinse": "Spoelfase met schoon water. Deze fase kan zich meerdere keren herhalen.",
+    "sanitize": "Reinigingsfase op hoge temperatuur voor ontsmettingsprogramma's.",
+    "sensor_check": "Korte pauze met laag vermogen terwijl de droogte wordt gemeten.",
+    "soak": "Inweekperiode met lage activiteit tussen actieve wasfasen.",
+    "soak_dw": "Verlengde weekperiode voor zware grond.",
+    "spin": "Snelle extractie om water uit de lading te verwijderen.",
+    "spin_wd": "Snelle extractie vóór de droogovergang.",
+    "wash": "Hoofdwasprogramma met trommelbeweging en optionele verwarming.",
+    "wash_dw": "Hoofdwasmiddel met verwarming."
+  },
+  "placeholder": {
+    "add": "toevoegen…",
+    "group_name": "bijv. Katoen 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+    "notify": "voeg een meldingsservice toe…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "voeg een persoon toe…",
+    "phase_name": "bijv. Voorwas",
+    "profile_name": "bijv. Katoen 40°C",
+    "maintenance_notes": "bijv. filter vervangen, deurrubber gereinigd",
+    "store_brand": "bijv. Bosch",
+    "store_model": "bijv. WAT28401"
+  },
+  "pref": {
+    "date_absolute": "Absoluut (bijv. 14:32 op 2 juli)",
+    "date_relative": "Relatief (bijvoorbeeld 2 uur geleden)",
+    "lang_auto": "Systeemstandaard ({lang})",
+    "lang_en": "Engels",
+    "use_panel_default": "(standaard paneel)"
+  },
+  "quality": {
+    "bad": "Slecht",
+    "good": "Goed",
+    "unusable": "Onbruikbaar"
+  },
+  "section": {
+    "anti_wrinkle": {
+      "intro": "De anti-kreuk-/anti-vouw-modus detecteert lage-vermogen trommelimpulsen na de hoofdfase en houdt ze bevestigd aan de voltooide cyclus.",
+      "label": "Anti-kreuk"
+    },
+    "basic": {
+      "intro": "Kernidentiteit en de essentie die de meeste setups nodig hebben.",
+      "label": "Basis"
+    },
+    "delay": {
+      "intro": "Detectie van vertraagde start identificeert wanneer een apparaat is ingeschakeld maar nog niet begonnen is met zijn cyclus.",
+      "label": "Vertraagde start"
+    },
+    "detection": {
+      "intro": "Hoe een cyclus wordt gedetecteerd als gestart, lopend en eindend.",
+      "label": "Detectie"
+    },
+    "matching": {
+      "intro": "Hoe voltooide cycli worden gekoppeld aan geleerde profielen en gelabeld.",
+      "label": "Afstemming"
+    },
+    "ml_training": {
+      "intro": "Planning en gegevensinstellingen voor ML-retraining op het apparaat.",
+      "label": "ML-training"
+    },
+    "notifications": {
+      "intro": "Wanneer en hoe u wordt geïnformeerd over cyclusgebeurtenissen.",
+      "label": "Meldingen"
+    },
+    "timing": {
+      "intro": "Achtergrondcadans, de offline waakhond en huishouding.",
+      "label": "Timing & Waakhond"
+    },
+    "triggers": {
+      "intro": "Optionele externe signalen: een eindtrigger, een deursensor, een pauzeknop en de uitlaadherinnering.",
+      "label": "Triggers & Deuren"
+    }
+  },
+  "setting": {
+    "abrupt_drop_ratio": {
+      "doc": "Een daling groter dan deze fractie van het huidige vermogen wordt ook als abrupt beschouwd (0,6 = een daling van 60%). Vult de wattdrempel aan voor alle apparaatformaten.",
+      "label": "Ratio plotse daling"
+    },
+    "abrupt_drop_watts": {
+      "doc": "Een stroomdaling groter dan dit markeert de cyclus als onderbroken (handmatige annulering) in plaats van als een natuurlijke afwerking.",
+      "label": "Plotse daling"
+    },
+    "anti_wrinkle_enabled": {
+      "doc": "Herken de korte tuimelpulsen met laag vermogen die een droger afgeeft na de hoofdverwarmingsfase en houd ze vast aan het voltooide programma in plaats van ze als nieuwe cycli te lezen.",
+      "label": "Anti-kreuk detectie inschakelen"
+    },
+    "anti_wrinkle_exit_power": {
+      "doc": "Het vermogen moet tussen de pulsen onder dit niveau liggen, anders blijft de antirimpelmodus actief.",
+      "label": "Drempel uitgangsverwarming"
+    },
+    "anti_wrinkle_max_duration": {
+      "doc": "Pulsaties langer dan dit worden behandeld als een echte cyclus in plaats van als een anti-rimpel-tuimelen.",
+      "label": "Max. duur"
+    },
+    "anti_wrinkle_max_power": {
+      "doc": "Een puls boven dit vermogen wordt beschouwd als een echte nieuwe cyclus, niet als een anti-rimpeltuimeling. Ingesteld net boven het vermogen van de tuimelpuls.",
+      "label": "Max. anti-kreuk vermogen"
+    },
+    "auto_label_confidence": {
+      "doc": "Als de wedstrijdscore aan het einde van de cyclus op of boven dit niveau ligt, wordt het programma automatisch gelabeld zonder enige bevestigingsvraag. Verhoog het niveau om meer zekerheid te vereisen vóór automatische etikettering; verlaag het om meer te automatiseren. Werkt samen met Learning Confidence eronder.",
+      "label": "Auto-label betrouwbaarheid"
+    },
+    "auto_maintenance": {
+      "doc": "Voer een nachtelijke huishouding uit: bouw profielenveloppen opnieuw op, bereken de cyclusstatus opnieuw, verwijder debug-sporen en bewaar de meest recente cycli.",
+      "label": "Automatisch onderhoud (nachtelijke opruiming)"
+    },
+    "completion_min_seconds": {
+      "doc": "Cycli korter dan dit worden weggegooid als spookcycli (testruns, de deur openen om een ​​sok toe te voegen).",
+      "label": "Min. cyclusduur"
+    },
+    "delay_confirm_seconds": {
+      "doc": "De stroom moet zo lang in de standby-band blijven voordat het apparaat wordt behandeld als wachtend om te starten in plaats van als actief.",
+      "label": "Bevestigingsseconden"
+    },
+    "delay_start_detect_enabled": {
+      "doc": "Detecteer wanneer het apparaat is ingeschakeld en wacht (uitgestelde start/stand-by) maar nog niet met zijn cyclus is begonnen. Stand-byverbruik wordt dus niet aangezien voor een lopende cyclus.",
+      "label": "Vertraagde start detectie inschakelen"
+    },
+    "delay_timeout_hours": {
+      "doc": "Stop na zoveel uren met wachten in de uitgestelde startmodus en keer terug naar stationair, zodat een machine die nog steeds is ingeschakeld maar nooit is gestart, niet eeuwig wacht.",
+      "label": "Time-out uren"
+    },
+    "device_type": {
+      "doc": "Apparaatklasse. Stelt verstandige detectiestandaarden in (drempels, uitschakelvertraging, eindafhandeling) afgestemd op dat apparaattype; wijzig dit alleen als het apparaat oorspronkelijk als het verkeerde type was ingesteld.",
+      "label": "Apparaattype"
+    },
+    "door_sensor_entity": {
+      "doc": "Optionele binaire deursensor. Wordt gebruikt om te detecteren wanneer het apparaat na een cyclus is geopend/uitgeladen.",
+      "label": "Deursensorentiteit"
+    },
+    "duration_tolerance": {
+      "doc": "Tolerantie voor resterende tijdschattingen (leerfeedback, niet matching). Als de werkelijke duur binnen +/-X% van de schatting ligt, telt dit als een goede match.",
+      "label": "Schattingstolerantie"
+    },
+    "enable_ml_models": {
+      "doc": "Terwijl een cyclus loopt, kunnen de modellen de live resultaten verfijnen: een stabielere schatting van de resterende tijd en energie/kosten, en een anti-voortijdige stop-bewaking bij einddetectie (deze kan een finish alleen maar uitstellen, nooit eerder eindigen, en is begrensd). Gebruikt uw verfijnde modellen indien beschikbaar, anders de ingebouwde modellen. Uit = alleen de klassieke, op energie gebaseerde logica (nog steeds betrouwbaar).",
+      "label": "Slimme modellen gebruiken tijdens een cyclus"
+    },
+    "end_energy_threshold": {
+      "doc": "Tijdens het aftellen van de uitschakelvertraging wordt de verzamelde energie (watt x tijd) vergeleken met deze drempel. Bij overschrijding wordt het aftellen gereset, waardoor anti-kreukdroogtrommels en vaatwasserdroogstukken aan het programma blijven gekoppeld in plaats van ze kort te knippen. Verhoog deze als de cycli tijdens het afkoelen te vroeg eindigen; verlaag deze als de detectie traag is.",
+      "label": "Eindenergie"
+    },
+    "end_repeat_count": {
+      "doc": "Aantal opeenvolgende metingen onder de stopdrempel vereist voordat de cyclus eindigt. 1 is prima voor de meeste stekkers. Verhoog naar 2-3 als uw slimme stekker halverwege de cyclus af en toe een vals-nulmonster rapporteert en uw cycli voortijdig eindigen.",
+      "label": "Eindherhalingsaantal"
+    },
+    "energy_price_entity": {
+      "doc": "Sensor met de actuele elektriciteitsprijs per kWh (bijvoorbeeld een dynamisch tarief). Heeft voorrang op de onderstaande statische prijs. Elke cyclus bevriest de geldende prijs wanneer deze is voltooid.",
+      "label": "Energieprijsentiteit"
+    },
+    "energy_price_static": {
+      "doc": "Vaste prijs per kWh gebruikt voor kostencijfers wanneer er hierboven geen live prijsentiteit is ingesteld.",
+      "label": "Vaste energieprijs (per kWh)"
+    },
+    "expose_debug_entities": {
+      "doc": "Publiceer extra diagnostische HA-entiteiten (matchvertrouwen, ambiguïteit, staatsinternals). Uit houdt de entiteitenlijst schoon voor normaal gebruik.",
+      "label": "Foutopsporingsentiteiten blootstellen"
+    },
+    "external_end_trigger": {
+      "doc": "Binaire sensor waarvan de statusverandering het einde van de cyclus markeert (bijvoorbeeld een apparaat \"klaar\" contact of een begeleidende integratie).",
+      "label": "Externe triggerentiteit"
+    },
+    "external_end_trigger_enabled": {
+      "doc": "Laat een externe binaire sensor het einde van een cyclus signaleren, naast de ingebouwde op stroom gebaseerde detectie.",
+      "label": "Externe eindtrigger inschakelen"
+    },
+    "external_end_trigger_inverted": {
+      "doc": "Beschouw het uitschakelen van de triggersensor (in plaats van AAN) als het signaal einde cyclus.",
+      "label": "Externe trigger omkeren (activeer bij UIT)"
+    },
+    "learning_confidence": {
+      "doc": "Als de matchscore tussen dit en Auto-Label Confidence ligt, wordt u in een feedbackmelding gevraagd het geïdentificeerde programma te verifiëren. Beneden deze score is de wedstrijd te onzeker om naar boven te komen. Moet onder Auto-Label Confidence blijven.",
+      "label": "Leerbetrouwbaarheid"
+    },
+    "linked_device": {
+      "doc": "Nest dit WashData-apparaat optioneel onder een ander apparaat (bijvoorbeeld de slimme plug) in het HA-apparaatregister, weergegeven als \"Verbonden via ...\".",
+      "label": "Groepeer onder apparaat"
+    },
+    "min_off_gap": {
+      "doc": "Als de machine korter dan deze tijd wordt uitgeschakeld, wordt de aan/uit/aan-reeks behandeld als één continue cyclus. Voorkomt dat weekprogramma's (de machine wordt tijdens het wassen enkele minuten uitgeschakeld) in twee afzonderlijke cycli worden opgesplitst. Stel deze korter in dan de afstand tussen uw rug-aan-rugladingen als u wilt dat deze als afzonderlijke cycli worden geteld. Standaardinstellingen voor het apparaattype beschermen de typische pauze binnen de cyclus voor elk apparaat.",
+      "label": "Min. uitschakelinterval"
+    },
+    "min_power": {
+      "doc": "Absoluut minimaal vermogen dat als actief wordt beschouwd. Aflezingen daaronder worden behandeld als 0 W (stand-by), waardoor de fantoombelasting van slimme stekkers en stand-by-LED's wordt weggefilterd.",
+      "label": "Minimaal vermogen"
+    },
+    "ml_training_enabled": {
+      "doc": "Bestudeer uw beoordeelde cycli regelmatig van de ene op de andere dag en stem de modellen af ​​op deze specifieke machine. Een verandering wordt alleen behouden als deze daadwerkelijk beter scoort op aanhoudende cycli, dus dit kan alleen maar helpen of hetzelfde blijven - nooit achteruitgaan.",
+      "label": "Leren van deze machine"
+    },
+    "ml_training_hour": {
+      "doc": "Lokaal uur van de dag (0-23) voor de nachtelijke fijnafstemming. Kies een rustig uur, bijvoorbeeld 2 (02:00 uur).",
+      "label": "Leren om uur"
+    },
+    "ml_training_interval_days": {
+      "doc": "Controleer maximaal één keer per zoveel dagen opnieuw of er verbeteringen zijn.",
+      "label": "Controleer maximaal elke"
+    },
+    "ml_training_min_cycles": {
+      "doc": "Wacht tot er minstens zoveel cycli zijn opgenomen voordat je gaat finetunen, zodat er genoeg is om van te leren.",
+      "label": "Eerst benodigde cycli"
+    },
+    "name": {
+      "doc": "Weergavenaam weergegeven in de HA-integratielijst en het apparaatregister.",
+      "label": "Apparaatnaam"
+    },
+    "no_update_active_timeout": {
+      "doc": "Als er gedurende deze tijd geen stroomupdates arriveren tijdens het gebruik, ga er dan van uit dat de stekker offline is gevallen en forceer een stop om een ​​zombiecyclus te voorkomen. Standaard 600 s maakt cloud- of mesh-vertraging mogelijk.",
+      "label": "Time-out zonder update"
+    },
+    "notify_before_end_minutes": {
+      "doc": "Stuur een melding Bijna klaar als de geschatte resterende tijd hieronder daalt. 0 schakelt het uit.",
+      "label": "Pre-eindalert"
+    },
+    "notify_channel": {
+      "doc": "Android-meldingskanaalnaam voor start-/liveberichten (controleert het geluid en de prioriteit per kanaal op de mobiele app). Blank gebruikt standaard de bijbehorende app.",
+      "label": "Android-kanaal (start/live)"
+    },
+    "notify_cycle_timers": {
+      "doc": "Meldingen op specifieke minuten in een cyclus (bijvoorbeeld om wasverzachter toe te voegen). Bericht ondersteunt {device}, {program}, {minutes}. Schakel Auto-pauze in om op dat punt te pauzeren en een interactieve melding te ontvangen met een knop Hervatten; hervatten via het paneel, de pauze-/hervattingsservice of de meldingsactie.",
+      "label": "Cyclustimers"
+    },
+    "notify_finish_channel": {
+      "doc": "Android-meldingskanaalnaam voor het eindbericht. Blank hergebruikt het start-/livekanaal.",
+      "label": "Android-kanaal (eind)"
+    },
+    "notify_finish_message": {
+      "doc": "Berichttekst die wordt verzonden wanneer een cyclus is voltooid. Sjabloonvariabelen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} en {vs_typical} zijn hier het nuttigst.",
+      "label": "Eindbericht"
+    },
+    "notify_finish_services": {
+      "doc": "notificeren.* services die worden aangeroepen wanneer een cyclus is voltooid. Voeg één per doel toe; laat leeg als er geen eindmelding is.",
+      "label": "Eindservices"
+    },
+    "notify_fire_events": {
+      "doc": "Activeer ook ha_washdata_*-gebeurtenissen bij het starten/beëindigen van de cyclus, zodat u uw eigen automatiseringen kunt bouwen.",
+      "label": "HA-gebeurtenissen afvuren voor meldingen"
+    },
+    "notify_icon": {
+      "doc": "Optioneel mdi-pictogram voor de melding (bijvoorbeeld mdi:wasmachine). Laat dit leeg voor de platformstandaard.",
+      "label": "Meldingspictogram"
+    },
+    "notify_live_chronometer": {
+      "doc": "Toon een live bijgewerkte afteltimer in de melding (op platforms die dit ondersteunen) in plaats van een statische schatting.",
+      "label": "Live chronometer gebruiken"
+    },
+    "notify_live_interval_seconds": {
+      "doc": "Hoe vaak live-voortgangsmeldingen worden vernieuwd terwijl een cyclus wordt uitgevoerd.",
+      "label": "Live update-interval"
+    },
+    "notify_live_overrun_percent": {
+      "doc": "Als een cyclus de schatting met meer dan dit percentage overschrijdt, verzendt u een overschrijdingswaarschuwing.",
+      "label": "Live overschrijding % voor alert"
+    },
+    "notify_live_services": {
+      "doc": "notificeren.* services vroegen om live voortgangsupdates terwijl een cyclus loopt. Laat dit leeg om live-voortgangsmeldingen uit te schakelen.",
+      "label": "Live voortgangsservices"
+    },
+    "notify_only_when_home": {
+      "doc": "Stuur alleen meldingen als minimaal één van de gekoppelde personen (hierboven) thuis is.",
+      "label": "Alleen melden als thuis"
+    },
+    "notify_people": {
+      "doc": "person.* entiteiten die worden gebruikt door \"Alleen melden wanneer thuis\" om te beslissen of er iemand thuis is.",
+      "label": "Personen (voor Alleen thuis)"
+    },
+    "notify_pre_complete_message": {
+      "doc": "Tekst van de melding vóór het einde / bijna klaar. Sjabloonvariabelen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "label": "Bijna klaar-bericht"
+    },
+    "notify_reminder_message": {
+      "doc": "Tekst van de herinnering dat er nog moet worden uitgeladen. Leeg gebruikt de ingebouwde standaard. Sjabloonvariabelen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "label": "Herinneringsbericht"
+    },
+    "notify_start_message": {
+      "doc": "Berichttekst die wordt verzonden wanneer een cyclus start. Sjabloonvariabelen: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "label": "Startbericht"
+    },
+    "notify_start_services": {
+      "doc": "notificeren.* services die worden aangeroepen wanneer een cyclus start. Voeg één toe per doel (telefoon, dashboard, etc.); laat leeg als er geen startmelding is.",
+      "label": "Startservices"
+    },
+    "notify_timeout_seconds": {
+      "doc": "Sluit de melding automatisch na dit aantal seconden (op platforms die dit ondersteunen). 0 behoudt het totdat het handmatig wordt verwijderd.",
+      "label": "Automatisch verwijderen na"
+    },
+    "notify_title": {
+      "doc": "Titel van melding. Sjabloonvariabelen: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Meldingstitel"
+    },
+    "notify_unload_delay_minutes": {
+      "doc": "Minuten nadat een cyclus is geëindigd voordat de nog wachtende herinnering voor het leegmaken van de machine wordt verzonden. Stel 0 in om de herinnering uit te schakelen.",
+      "label": "Vertraging uitlaadherinnering"
+    },
+    "off_delay": {
+      "doc": "Tijd om te wachten nadat de stroom is uitgevallen voordat de cyclus als voltooid wordt verklaard. Als de stroom binnen dit venster wordt hervat, gaat de cyclus naadloos verder - dit overbrugt pauzes tussen wasfasen. Vaatwassers hebben lange droogfasen (uitschakeling gedurende 20-60 minuten), dus de uitschakelvertraging moet groter zijn dan die om de hele was+droogcyclus als één cyclus te laten verlopen.",
+      "label": "Uitschakelvertraging"
+    },
+    "pause_cuts_power": {
+      "doc": "Wanneer een cyclus wordt gepauzeerd, schakel dan ook onderstaande Schakelentiteit uit. Alleen voor apparaten waarvan de stekker halverwege de cyclus veilig kan worden doorgesneden.",
+      "label": "Pauze schakelt ook vermogen uit (via schakelaar)"
+    },
+    "power_off_delay": {
+      "doc": "Hoe lang het vermogen na het voltooien van een cyclus onder de Uitschakeldrempel moet blijven voordat de status terugkeert naar Uit. Wordt alleen gebruikt wanneer de Uitschakeldrempel boven 0 is. Wordt gecontroleerd op de achtergrondcadans, dus de effectieve vertraging wordt naar boven afgerond tot de volgende tick waarop de status verloopt.",
+      "label": "Uitschakelvertraging"
+    },
+    "power_off_threshold_w": {
+      "doc": "Optionele, op vermogen gebaseerde Uit-detectie. Bij een waarde boven 0 wordt de machine als uitgeschakeld beschouwd en keert de status terug naar Uit zodra een cyclus is voltooid en het vermogen gedurende de Uitschakelvertraging onder dit niveau blijft. Laat op 0 staan om dit uit te schakelen (de standaard). Stel de waarde in boven het werkelijke uitgeschakelde nulniveau en onder de Stopdrempel en onder het standby-verbruik van uw machine in de toestand voltooid-maar-aan; als de waarde niet onder de Stopdrempel ligt, wordt deze genegeerd. Indien ingeschakeld vervangt deze waarde de Voortgangsreset vertraging voor het terugkeren naar Uit, zodat een voltooide machine in Voltooid/Schoon blijft totdat deze daadwerkelijk wordt uitgeschakeld.",
+      "label": "Uitschakeldrempel"
+    },
+    "power_sensor": {
+      "doc": "De sensorentiteit die het live vermogen in watt voor dit apparaat rapporteert (bijvoorbeeld sensor.washer_power). Alle cyclusdetectie is gebaseerd op dit signaal.",
+      "label": "Vermogenssensor"
+    },
+    "profile_duration_tolerance": {
+      "doc": "De +/- band rond een gemiddelde profielduur die wordt gebruikt tijdens het matchen. 0,25 betekent dat een profiel van 60 minuten overeenkomt met cycli van 45-75 minuten.",
+      "label": "Profiel duurtoleratie"
+    },
+    "profile_match_interval": {
+      "doc": "Hoe vaak profielmatching moet worden geprobeerd tijdens een hardloopcyclus. Standaard 300 s (5 minuten) balanceert detectiesnelheid en CPU.",
+      "label": "Afstemmingsinterval"
+    },
+    "profile_match_max_duration_ratio": {
+      "doc": "Maximale cycluslengte ten opzichte van het profiel. 1.3 betekent dat een cyclus minder dan 130% van de profielduur moet bedragen om te matchen.",
+      "label": "Max. duurverhouding"
+    },
+    "profile_match_min_duration_ratio": {
+      "doc": "Minimale cycluslengte ten opzichte van het profiel. 0,9 betekent dat een cyclus minimaal 90% van de profielduur moet bedragen om te matchen.",
+      "label": "Min. duurverhouding"
+    },
+    "profile_match_threshold": {
+      "doc": "Minimale gelijkheidsscore (0-1) vereist aan het einde van de cyclus om een ​​programma-identificatie te accepteren. Verhoog het om verkeerde identificaties te verminderen; verlaag het als de programma's van uw machine niet overeenkomen. Standaard 0,4 is een conservatief uitgangspunt.",
+      "label": "Afstemmingsdrempel"
+    },
+    "profile_unmatch_threshold": {
+      "doc": "Als een live mid-cycle-wedstrijd onder deze score daalt, wordt de voorlopige identificatie gewist. Houd het iets onder de Match Threshold, zodat een korte dip in gelijkenis het scherm niet terugzet naar ongeëvenaard.",
+      "label": "Niet-afstemmingsdrempel"
+    },
+    "progress_reset_delay": {
+      "doc": "Nadat u klaar bent, houdt u de voortgang zo lang op 100% vast, zodat Voltooid zichtbaar is op dashboards voordat u terugzet naar Inactief.",
+      "label": "Voortgangsreset vertraging"
+    },
+    "pump_stuck_duration": {
+      "doc": "Seconden dat een pomp continu kan draaien voordat deze wordt gemarkeerd als mogelijk vastgelopen (de gebeurtenis Vastgelopen pomp wordt geactiveerd).",
+      "label": "Duur pomp vastzitten"
+    },
+    "running_dead_zone": {
+      "doc": "Nadat een cyclus is gestart, worden stroomonderbrekingen binnen dit venster genegeerd. Wasmachines worden gevuld met koud water (zakt tot bijna 0 W voordat ze worden verwarmd) - zonder deze bescherming lijkt de vulfase op het einde van de cyclus. Hierbij worden GEEN gegevens overgeslagen: het volledige vermogensspoor wordt geregistreerd vanaf T=0. De suggestie-engine meet het daadwerkelijke opstartpatroon van uw machine en berekent dit automatisch.",
+      "label": "Loopzone"
+    },
+    "sampling_interval": {
+      "doc": "Verwachte tijd tussen sensormetingen - gebruikt om het afvlakkingsvenster te vergroten en de debounce correct te starten. Elke sensorupdate wordt ongeacht deze waarde vastgelegd; het kalibreert alleen de stroomafwaartse berekeningen. De suggestie-engine meet de werkelijke cadans van uw sensor uit eerdere cycli en stelt deze automatisch in.",
+      "label": "Samplinginterval"
+    },
+    "save_debug_traces": {
+      "doc": "Bewaar de volledige vermogenstrace en overeenkomende foutopsporingsgegevens voor elke cyclus. Handig voor het oplossen van problemen, maar vergroot de opslaggrootte.",
+      "label": "Foutopsporingssporen opslaan"
+    },
+    "smoothing_window": {
+      "doc": "Hoeveel het ruwe stroomsignaal wordt afgevlakt. Laag (2) is responsief maar luidruchtig; hoog (5) verzacht pieken maar voegt vertraging toe.",
+      "label": "Afvlakkingsvenster"
+    },
+    "start_duration_threshold": {
+      "doc": "Het vermogen moet zo lang boven de startdrempel blijven om een ​​echte start te bevestigen, waardoor wordt voorkomen dat aan/uit-schakelaars van een fractie van een seconde een cyclus starten.",
+      "label": "Startduur"
+    },
+    "start_energy_threshold": {
+      "doc": "Energie (vermogen x tijd) die het apparaat moet verbruiken voordat het WERKT. Een korte piek met hoog vermogen heeft een zeer lage energie en wordt genegeerd, waardoor valse starts worden voorkomen.",
+      "label": "Startenergie"
+    },
+    "start_threshold_w": {
+      "doc": "Het vermogen moet boven dit niveau stijgen om te bevestigen dat een cyclus is begonnen. Als u deze te laag instelt, worden valse starts veroorzaakt door de standby-stroom; te hoge en langzaam startende programma's (koud vullen) worden gemist. De suggestie-engine stelt dit net boven het waargenomen laagste actieve vermogen van de machine in.",
+      "label": "Startdrempel"
+    },
+    "stop_threshold_w": {
+      "doc": "Het vermogen moet onder dit niveau dalen voordat het aftellen van de uitschakelvertraging begint. Stel deze in onder de startdrempel. De ruimte daartussen is de hysteresisband die flikkering voorkomt. Als de fases met laag vermogen (spoelstops, anti-kreuk) te hoog zijn ingesteld, wordt ten onrechte de eindsequentie geactiveerd.",
+      "label": "Stopdrempel"
+    },
+    "switch_entity": {
+      "doc": "Optionele schakelaar die wordt uitgeschakeld bij pauze en weer ingeschakeld bij hervatten, gebruikt in combinatie met \"Pauze schakelt ook de stroom uit\".",
+      "label": "Schakelentiteit"
+    },
+    "watchdog_interval": {
+      "doc": "Hoe vaak de achtergrondwaakhond controleert op vastgelopen sensoren en verstreken time-outs. Standaard 30 sec.",
+      "label": "Waakhondinterval"
+    },
+    "notify_milestone_message": {
+      "doc": "Bericht voor de mijlpaalmelding. Sjabloonvariabelen: {device}, {cycle_count}.",
+      "label": "Mijlpaalbericht"
+    },
+    "notify_milestones": {
+      "doc": "Door komma's gescheiden aantallen cycli die een eenmalige felicitatiemelding activeren wanneer ze worden bereikt (bijv. 50, 100, 500, 1000). Leeg schakelt mijlpaalmeldingen uit.",
+      "label": "Cyclusmijlpalen"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Einde van het niet-storen-venster (0-23). Vastgehouden meldingen worden op dit uur bezorgd. Laat leeg om uit te schakelen.",
+      "label": "Einde stille uren"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Begin van een niet-storen-venster (0-23). Meldingen over voltooiing, herinneringen en schone-was-meldingen die tijdens de stille uren zouden afgaan, worden vastgehouden en bezorgd wanneer het venster eindigt. Laat leeg om uit te schakelen. Ondersteunt vensters die middernacht overschrijden (bijv. start 22, einde 7).",
+      "label": "Begin stille uren"
+    },
+    "peak_rate_message": {
+      "doc": "Optionele aangepaste tekst voor de piektarief-tip die aan de startmelding wordt toegevoegd. Sjabloonvariabelen: {device}, {price}. Leeg gebruikt de ingebouwde standaard.",
+      "label": "Bericht bij piektarief"
+    },
+    "peak_rate_threshold": {
+      "doc": "Wanneer een cyclus start en de huidige prijs per kWh op of boven deze waarde ligt, wordt een piektarief-tip aan de startmelding toegevoegd. 0 of leeg schakelt de tip uit.",
+      "label": "Drempel piektarief (per kWh)"
+    },
+    "dtw_bandwidth": {
+      "label": "Tolerantie voor vormherkenning",
+      "doc": "Hoeveel de herkenning een cyclus in de tijd mag vervormen om bij de vorm van een opgeslagen programma te passen. Hoger staat meer snelheidsvariatie toe; te hoog riskeert het verkeerde programma te herkennen."
+    },
+    "corr_weight": {
+      "label": "Gewicht vorm versus niveau",
+      "doc": "Balans tussen curvevorm en absoluut vermogensniveau bij het beoordelen van een herkenning. Hoger geeft voorkeur aan de vorm; lager geeft voorkeur aan het vermogensniveau."
+    },
+    "duration_weight": {
+      "label": "Gewicht van duur",
+      "doc": "Hoe sterk de voorkeur uitgaat naar een programma waarvan de typische looptijd bij deze cyclus past."
+    },
+    "energy_weight": {
+      "label": "Gewicht van energie",
+      "doc": "Hoe sterk de voorkeur uitgaat naar een programma waarvan het typische energieverbruik bij deze cyclus past."
+    },
+    "store_brand": {
+      "label": "Merk van apparaat",
+      "doc": "Optioneel. Het merk van het apparaat, gekozen uit de communitycatalogus. Wordt gebruikt om passende referentieopnamen te vinden en te delen. Laat leeg als je geen onlinefuncties gebruikt."
+    },
+    "store_model": {
+      "label": "Model van apparaat",
+      "doc": "Optioneel. Het model van het apparaat, gekozen uit de communitycatalogus zodra een merk is ingesteld. Als je model niet vermeld staat, kun je het toevoegen aan de catalogus."
+    },
+    "show_contributor": {
+      "doc": "Toont de vermelding 'door <contributor>' op community-apparaten en referentiecycli."
+    }
+  },
+  "setting_group": {
+    "auto_labeling": {
+      "label": "Automatisch labelen"
+    },
+    "cycle_end": {
+      "label": "Cyclus einde"
+    },
+    "cycle_start": {
+      "label": "Cyclusstart"
+    },
+    "cycle_timers": {
+      "label": "Cyclustimers"
+    },
+    "data_management": {
+      "label": "Gegevensbeheer"
+    },
+    "debug": {
+      "label": "Foutopsporing"
+    },
+    "dishwasher_end": {
+      "label": "Vaatwasser einde"
+    },
+    "door_pause": {
+      "label": "Deur & pauze"
+    },
+    "dtw_refinement": {
+      "label": "DTW verfijning"
+    },
+    "duration_gates": {
+      "label": "Duurpoorten"
+    },
+    "energy": {
+      "label": "Energie"
+    },
+    "external_end_trigger": {
+      "label": "Externe eindtrigger"
+    },
+    "housekeeping": {
+      "label": "Huishouding"
+    },
+    "match_scoring": {
+      "label": "Afstemmingsscoring"
+    },
+    "messages": {
+      "label": "Berichten"
+    },
+    "power_off": {
+      "label": "Uitschakelen"
+    },
+    "predictive_end": {
+      "label": "Predictief einde"
+    },
+    "schedule": {
+      "label": "Planning"
+    },
+    "services": {
+      "label": "Services"
+    },
+    "signal_processing": {
+      "label": "Signaalverwerking"
+    },
+    "thresholds_gap": {
+      "label": "Drempelwaarden & interval"
+    },
+    "timing": {
+      "label": "Timing"
+    },
+    "unload_reminder": {
+      "label": "Uitlaadherinnering"
+    },
+    "watchdog": {
+      "label": "Waakhond"
+    },
+    "quiet_hours_milestones": {
+      "label": "Stille uren en mijlpalen"
+    },
+    "device_info": {
+      "label": "Apparaatinfo"
+    },
+    "basic_configuration": {
+      "label": "Basisconfiguratie"
+    }
+  },
+  "status": {
+    "active": "Actief",
+    "all_statuses": "Alle statussen",
+    "ambiguous": "Ambigu",
+    "auto_detect": "Automatische detectie",
+    "clear": "Duidelijk",
+    "completed": "Voltooid",
+    "fine_tuning": "nu aan het finetunen...",
+    "force_stopped": "Geforceerd gestopt",
+    "idle": "Inactief",
+    "interrupted": "Onderbroken",
+    "ready": "Klaar om te verwerken",
+    "recording": "Opnemen",
+    "training": "Trainen…",
+    "saving": "Opslaan…",
+    "rebuilding": "Opnieuw opbouwen…",
+    "analyzing": "Analyseren…",
+    "resetting": "Resetten…",
+    "reverting": "Terugzetten…",
+    "trimming": "Bijsnijden…",
+    "splitting": "Splitsen…",
+    "deleting": "Verwijderen…",
+    "imported": "Geïmporteerd"
+  },
+  "suggestion": {
+    "both_agree": "WashData raadt aan",
+    "calibrated_label": "Gekalibreerd",
+    "observed_label": "Gemeten",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Minder automatische labels – meer cycli gaan naar beoordeling",
+        "lower": "Meer automatische labels – sommige kunnen onjuist zijn"
+      },
+      "duration_tolerance": {
+        "higher": "Accepteert een bredere duurtolerantie – flexibelere herkenning",
+        "lower": "Vereist nauwkeurigere duurovereenkomst – strenger, maar kan ongewone cycli weigeren"
+      },
+      "end_energy_threshold": {
+        "higher": "Sluit alleen cycli af met aanzienlijk energieverbruik",
+        "lower": "Sluit ook kortere of energiearme cycli af"
+      },
+      "end_repeat_count": {
+        "higher": "Eindsignaal moet vaker herhalen – robuuster, iets langzamer",
+        "lower": "Stopt na minder herhalingen – snellere detectie, meer kans op vals einde"
+      },
+      "learning_confidence": {
+        "higher": "Leert alleen van zeer zekere overeenkomsten – langzamer maar betrouwbaarder",
+        "lower": "Leert van meer cycli – model kan minder nauwkeurig worden"
+      },
+      "min_off_gap": {
+        "higher": "Langere pauze vereist voordat een nieuwe cyclus begint",
+        "lower": "Korte pauze volstaat – opeenvolgende runs kunnen worden gesplitst"
+      },
+      "min_power": {
+        "higher": "Minder gevoelig voor standby-verbruik – zeer stille programma's kunnen worden gemist",
+        "lower": "Gevoeliger – standby-verbruik kan als activiteit worden herkend"
+      },
+      "no_update_active_timeout": {
+        "higher": "Meer tijd voordat een vastgelopen cyclus wordt gedwongen gestopt",
+        "lower": "Stopt een vastgelopen cyclus eerder"
+      },
+      "off_delay": {
+        "higher": "Meer tijd voor apparaatpauzes – lange week- of droogfasen worden overbrugd",
+        "lower": "Snellere einddetectie – ideaal voor apparaten met duidelijk aan/uit-gedrag"
+      },
+      "profile_match_threshold": {
+        "higher": "Alleen zeer zekere overeenkomsten worden bevestigd – meer cycli blijven ongelabeld",
+        "lower": "Meer cycli worden gekoppeld – sommige kunnen licht onjuist zijn"
+      },
+      "running_dead_zone": {
+        "higher": "Korte vermogenspieken tijdens stilstand worden genegeerd – minder ruisgevoelig",
+        "lower": "Reageert op kortere vermogensimpulsen – detecteert snelle transiënten"
+      },
+      "start_threshold_w": {
+        "higher": "Voorkomt valse starts door korte vermogenspieken",
+        "lower": "Herkent programma's met laag vermogen – kan op ruis reageren"
+      },
+      "stop_threshold_w": {
+        "higher": "Beëindigt cycli sneller – kan tijdens een pauze activeren",
+        "lower": "Wacht langer met stoppen – minder voortijdige afsluitingen"
+      },
+      "watchdog_interval": {
+        "higher": "Langere stille fasen toegestaan – minder onbedoelde gedwongen stops",
+        "lower": "Detecteert vastgelopen cycli sneller"
+      }
+    },
+    "reason": {
+      "auto_label_confidence": "Betrouwbaarheid op het 15e percentiel van {cycles} automatische labels die de gebruiker nooit heeft gecorrigeerd ({p15}).",
+      "completion_min_seconds": "De helft van de p05-duur van schone cycli ({minutes} min) over {cycles} cycli; filtert spookcycli eruit.{excl}",
+      "dead_zone_batch": "Kort gehouden (mediane instabiliteitsvenster bij het opstarten over {cycles} cycli = {s}s) zodat een echt einde snel wordt gedetecteerd.",
+      "dead_zone_from_dip": "Op basis van een vroege vermogensdip die is gedetecteerd bij {s}s.",
+      "end_energy_default": "Aanbevolen standaardwaarde voor de ruisdrempel aan het einde van de cyclus.",
+      "end_energy_false": "p95 van de energie bij valse einden ({p95}Wh) over {cycles} cycli, met een ondergrens van 0.2% van de mediane cyclusenergie ({floor}Wh).",
+      "end_energy_no_false": "Geen valse einden over {cycles} cycli; met een ondergrens van 0.2% van de mediane cyclusenergie ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} schone cycli ({pct}%) hadden een interne pauze >60s die werd hervat; vereis {val} eindbevestiging(en).",
+      "learning_confidence": "p05-betrouwbaarheid van {cycles} door de gebruiker gelabelde cycli ({p05}); daaronder wordt om verificatie gevraagd.",
+      "match_interval": "Op basis van de waargenomen updatecadans (mediaan={median}s) * 10.",
+      "max_duration_ratio": "Op basis van de duur van gelabelde cycli (p95={p95}).",
+      "min_active": "Op basis van het minimale actieve vermogen ({min}W) dat in de laatste cyclus is waargenomen.",
+      "min_duration_ratio": "Zo laag mogelijk gehouden zodat een programma vroeg in de cyclus wordt herkend; de betrouwbaarheids- en ambiguïteitsdrempels voorkomen voortijdige beslissingen.",
+      "min_off_gap": "Op basis van {gaps} waargenomen tussenpozen tussen cycli (p05={p05}s). Ondergrens van het apparaat: {floor}s.",
+      "min_power": "40% van het laagste actieve vermogen op p05 ({p05}W) over {cycles} schone cycli, zodat de uitschakeldrempel onder het werkelijke verbruik blijft.{excl}",
+      "ml_auto_label": "Laagste betrouwbaarheid die het kwaliteitsmodel nog als schoon beoordeelde (p10 van {cycles} schone cycli = {p10}).",
+      "ml_end_repeat": "{false}/{total} cycli ({pct}%) hadden een pauze die de einddetector >50% scoorde; vereis {val} eindbevestiging(en).",
+      "ml_off_delay": "Door de einddetector bevestigde pauzes: p95 {p95}s + 60s buffer, uit {pauses} door het model geverifieerde pauzes over {cycles} cycli (ondergrens {floor}s).",
+      "no_update_timeout": "Op basis van de waargenomen updatecadans (p95={p95}s) * 20 (min. 60s).",
+      "off_delay_cadence": "Op basis van de waargenomen updatecadans (p95={p95}s) * 5",
+      "off_delay_device_floor": "Apparaatspecifiek veilig minimum gebruikt voor {device} ({floor}s).",
+      "off_delay_generic_floor": "Generiek veilig minimum gebruikt ({floor}s).",
+      "off_delay_pauses": "Zo gedimensioneerd dat echte pauzes worden overbrugd: p95 van de pauze binnen een cyclus {p95}s + 60s buffer, uit {pauses} pauzes over {cycles} schone cycli (ondergrens {floor}s).",
+      "profile_match_threshold": "p10-betrouwbaarheid van {cycles} correcte automatische labels ({p10}); veilige ondergrens voor live-bevestiging.",
+      "sampling_interval": "Mediaan-updateinterval waargenomen over {cycles} schone cycli ({si}s).{excl}",
+      "smoothing_window": "Zo gedimensioneerd dat ~30s aan metingen bij {si}s-bemonstering wordt afgevlakt ({samples} metingen).",
+      "start_duration": "Kort gehouden (~één bemonsteringsinterval van {si}s) zodat de detectie zo vroeg mogelijk begint, maar losse pieken van één meting toch worden genegeerd.",
+      "thr_batch": "Net boven het laagste actieve vermogen op p05 over {cycles} cycli ({p05}W) gehouden zodat een start zo vroeg mogelijk wordt opgemerkt en de stopdrempel onder het laagste draaivermogen van de machine blijft.",
+      "tol_per_profile": "p75 van de duurvariantie per profiel over {profiles} profielen ({cycles} cycli); strakke profielen worden niet benadeeld.",
+      "tol_pooled": "Op basis van de gebundelde duurvariantie van {cycles} recent gelabelde cycli (p95-afwijking={dev}).",
+      "watchdog": "Zo laag als veilig gehouden (3x de p95-updatekloof van {p95}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops."
+    },
+    "exclusions": {
+      "summary": "{total} verkeerd gedetecteerde cyclus(sen) uitgesloten: {parts}.",
+      "reason": {
+        "force_stopped": "geforceerd gestopt",
+        "interrupted": "onderbroken",
+        "incomplete": "onvolledig",
+        "noise": "ruis",
+        "unlabeled": "zonder label",
+        "no_trace_short": "te kort om te inspecteren",
+        "high_start": "gestart op hoog vermogen",
+        "abrupt_end": "abrupt beëindigd",
+        "mid_restart": "herstart midden in de cyclus",
+        "no_power": "geen vermogen",
+        "no_active_power": "geen actief vermogen"
+      }
+    }
+  },
+  "tab": {
+    "advanced": "Geavanceerd",
+    "diagnostics": "Diagnostiek",
+    "history": "Cycli",
+    "ml": "ML-training",
+    "pp_cleanup": "Opruimen",
+    "pp_manage": "Beheren",
+    "pp_overview": "Overzicht",
+    "pp_phases": "Fasen",
+    "profiles": "Profielen",
+    "settings": "Instellingen",
+    "status": "Overzicht",
+    "subtab_phase_catalog": "Fasecatalogus",
+    "subtab_profiles": "Profielen",
+    "maintenance": "Onderhoud",
+    "playground": "Speeltuin",
+    "store": "Store"
+  },
+  "tag": {
+    "early_end": "Vroeg einde",
+    "late_start": "Laat beginnen",
+    "merged": "Samengevoegde cycli",
+    "noise": "Lawaai",
+    "sensor_gap": "Sensorafstand",
+    "split": "Gesplitste cyclus",
+    "wrong_profile": "Verkeerd profiel"
+  },
+  "toast": {
+    "access_saved": "Toegangscontrole opgeslagen",
+    "all_wiped": "Alle gegevens gewist",
+    "analysis_complete_none": "Analyse voltooid: geen nieuwe suggesties",
+    "auto_label_complete": "Automatisch labelen voltooid",
+    "automation_deleted": "Automatisering verwijderd",
+    "correction_submitted": "Correctie ingediend",
+    "cycle_deleted": "Cyclus verwijderd",
+    "cycle_force_stopped": "Cyclus geforceerd gestopt",
+    "cycle_labelled": "Cyclus gelabeld",
+    "cycle_paused": "Cyclus onderbroken",
+    "cycle_resumed": "Cyclus hervat",
+    "cycle_trimmed": "Cyclus ingekort",
+    "cycles_merged": "Cycli samengevoegd",
+    "envelope_rebuilt": "Envelop opnieuw opgebouwd",
+    "envelopes_rebuilt": "Enveloppen opnieuw opgebouwd",
+    "export_downloaded": "Exporteren gedownload",
+    "feedback_all_dismissed": "Alle feedback is afgewezen",
+    "feedback_confirmed": "Feedback bevestigd",
+    "feedback_dismissed": "Feedback afgewezen",
+    "group_deleted": "Groep verwijderd",
+    "group_name_required": "Groepsnaam is vereist",
+    "group_saved": "Groep opgeslagen",
+    "import_successful": "Importeren succesvol; integratie herladen",
+    "json_required": "JSON-gegevens zijn vereist",
+    "legacy_removed": "Verouderde acties verwijderd",
+    "logs_exported": "Logboeken geëxporteerd",
+    "matching_reverted": "Overeenkomende gewichten zijn teruggezet naar de standaardwaarden",
+    "min_2_profiles": "Selecteer minimaal 2 profielen voor een groep",
+    "ml_training_no_improvement": "Training voltooid: basislijn behouden (geen verbetering)",
+    "models_reverted": "Modellen op het apparaat zijn teruggekeerd naar de basislijn",
+    "name_required": "Naam vereist",
+    "no_split_found": "Er zijn geen lege gaten gevonden om op te splitsen",
+    "panel_settings_saved": "Paneelinstellingen opgeslagen",
+    "phase_name_required": "Fasenaam is vereist",
+    "phase_updated": "Fase bijgewerkt",
+    "phases_saved": "Fasen opgeslagen",
+    "preferences_saved": "Voorkeuren opgeslagen",
+    "profile_name_required": "Profielnaam is vereist",
+    "profile_renamed": "Profiel hernoemd",
+    "recording_discarded": "Opname verwijderd",
+    "recording_saved": "Opname opgeslagen in profiel",
+    "recording_started": "De opname is gestart",
+    "recording_stopped": "De opname is gestopt",
+    "review_saved": "Beoordeling opgeslagen",
+    "settings_conflicts": "Los de gemarkeerde instellingsconflicten op voor het opslaan.",
+    "settings_reverted": "Instellingen hersteld; integratie herladen",
+    "settings_saved": "Instellingen opgeslagen; integratie herladen",
+    "suggestions_applied": "Suggesties toegepast; integratie herladen",
+    "suggestions_dismissed": "Suggesties afgewezen",
+    "apply_failed": "Toepassen mislukt: {error}",
+    "delete_failed": "Verwijderen mislukt: {error}",
+    "load_more_failed": "Kan niet meer laden: {error}",
+    "maint_add_failed": "Kan gebeurtenis niet toevoegen: {error}",
+    "maint_added": "Onderhoudsgebeurtenis toegevoegd",
+    "maint_delete_failed": "Kan gebeurtenis niet verwijderen: {error}",
+    "maint_deleted": "Onderhoudsgebeurtenis verwijderd",
+    "relabel_done": "{count} cyclus(sen) opnieuw gelabeld",
+    "relabel_failed": "Opnieuw labelen mislukt: {error}",
+    "reminders_save_failed": "Kan herinneringen niet opslaan: {error}",
+    "reminders_saved": "Serviceherinneringen opgeslagen",
+    "pause_no_cycle": "Geen actieve cyclus om te pauzeren",
+    "resume_no_cycle": "Geen gepauzeerde cyclus om te hervatten",
+    "delete_partial_failed": "Sommige items konden niet worden verwijderd en zijn hersteld",
+    "pg_run_gone": "Die uitvoering is niet meer beschikbaar.",
+    "task_cancelled": "Geannuleerd.",
+    "processed": "Verwerkt: {bits}",
+    "processed_cycles": "{n} cycli",
+    "processed_suggestions": "{n} suggesties",
+    "processed_models": "{n} modellen geactiveerd",
+    "store_search_failed": "Zoeken mislukt: {error}",
+    "store_connect_failed": "Verbinden mislukt: {error}",
+    "store_connected": "Verbonden met de communitystore",
+    "store_disconnected": "Verbinding met de communitystore verbroken",
+    "store_error": "Fout: {error}",
+    "store_unavailable": "De communitystore is niet beschikbaar.",
+    "store_pick_profile": "Kies een profiel om in samen te voegen",
+    "store_name_required": "Voer een profielnaam in",
+    "store_import_failed": "Importeren mislukt: {error}",
+    "store_imported": "Geïmporteerd in {profile}",
+    "store_program_required": "Voer een programmanaam in",
+    "store_no_appliance": "Stel eerst het merk en model van je apparaat in bij Instellingen.",
+    "store_share_failed": "Delen mislukt: {error}",
+    "store_shared": "Gedeeld in de communitystore, in afwachting van beoordeling.",
+    "appliance_added": "Apparaat toegevoegd, wacht op goedkeuring",
+    "thanks_confirming": "Bedankt voor het bevestigen",
+    "device_approved": "Goedgekeurd door de community",
+    "rating_saved": "Kwaliteitsbeoordeling opgeslagen",
+    "brand_added": "Merk toegevoegd, wacht op goedkeuring",
+    "profile_added": "Profiel toegevoegd, wacht op goedkeuring",
+    "saved_except_conflicts": "Opgeslagen. Los de gemarkeerde conflicten op om de rest op te slaan.",
+    "share_device_none_sel": "Selecteer ten minste één cyclus om te delen",
+    "store_device_downloaded": "{p} programma('s), {c} opname(s) toegevoegd",
+    "store_device_downloaded_phases": "{p} programma('s), {c} opname(s), {ph} fasekaart(en) toegevoegd",
+    "store_device_downloaded_settings": "{p} programma('s), {c} opname(s), {ph} fasekaart(en), {s} instelling(en) toegevoegd",
+    "store_device_shared": "{n} cyclus/cycli gedeeld in de communitystore -- wacht op beoordeling.",
+    "store_device_shared_all_dup": "Alle {n} cyclus/cycli stonden al in de communitystore.",
+    "store_device_shared_partial": "{n} cyclus/cycli gedeeld; {failed} konden niet worden geüpload.",
+    "store_device_shared_some_dup": "{created} cyclus/cycli gedeeld; {dup} stonden al in de store.",
+    "store_download_failed": "Downloaden mislukt: {error}",
+    "store_download_nothing": "Niets nieuws te downloaden -- deze instelling staat al op uw apparaat."
+  },
+  "trend": {
+    "down": "Trend naar beneden",
+    "up": "Trend omhoog"
+  },
+  "maint": {
+    "bearing_service": "Lageronderhoud",
+    "descale": "Ontkalken",
+    "drum_clean": "Trommel reinigen",
+    "filter_clean": "Filter reinigen",
+    "other": "Overig"
+  },
+  "col": {
+    "profile_tip": "Naam van het overeenkomende programma. Geen label betekent dat er aan het einde van de cyclus geen profiel overeenkwam.",
+    "status_tip": "Cyclusresultaat: Voltooid (natuurlijk einde), Onderbroken (abrupte vermogensdaling), Geforceerd gestopt (handmatig) of Beoordeling nodig (feedback in behandeling).",
+    "date_tip": "Datum en tijd waarop de cyclus is gestart.",
+    "duration_tip": "Totale looptijd van de cyclus van begin tot einde.",
+    "energy_tip": "Totaal verbruikte energie (kWh). Berekend door het vermogen over de tijd te integreren.",
+    "cost_tip": "Energiekosten voor deze cyclus, vastgezet bij voltooiing met de op dat moment geldende prijs (energie x prijs per kWh). Stel een prijs in onder Instellingen om deze te vullen.",
+    "confidence_tip": "Betrouwbaarheid van de profielovereenkomst (0-100%). Hoe nauwkeurig de vermogenscurve van de cyclus overeenkwam met het geïdentificeerde programma.",
+    "health_tip": "ML-cyclusgezondheid (hoger = beter). Klik op een cyclus om deze te inspecteren en te beoordelen.",
+    "flags_tip": "Beoordelings-, anomalie- en bronvlaggen voor de cyclus. Beweeg de muis over een pictogram voor details."
+  },
+  "stat": {
+    "avg": "gem.",
+    "min": "min. {v}",
+    "max": "max. {v}",
+    "consistency": "consistentie ±{v}",
+    "total": "totaal {v}",
+    "last_run": "laatste run {v}",
+    "score": "score {pct}%",
+    "duration_cv": "duur-CV {pct}%",
+    "avg_confidence": "gem. betrouwbaarheid {pct}%"
+  },
+  "pg_evd": {
+    "detected": "De detectie herkende dat een cyclus was gestart.",
+    "match_commit": "De toewijzing legde zich met voldoende zekerheid vast op een programma.",
+    "match_changed": "Het leidende programma veranderde naarmate meer van de cyclus zichtbaar werd.",
+    "match_ambiguous": "Twee programma's scoorden dicht bij elkaar, dus de toewijzing was onzeker.",
+    "unmatched": "Geen enkel opgeslagen programma paste bij deze cyclus.",
+    "notify_start": "Er zou een startmelding worden verzonden.",
+    "notify_pre_complete": "Er zou een bijna-klaar-melding worden verzonden.",
+    "notify_finish": "Er zou een voltooiingsmelding worden verzonden.",
+    "notify_milestone": "Er zou een mijlpaalmelding worden verzonden.",
+    "notify_held": "Een melding werd vastgehouden vanwege de stille uren.",
+    "finished": "De cyclus bereikte een eindtoestand en stopte."
+  },
+  "store": {
+    "browse": "Bladeren",
+    "device": "Apparaat",
+    "favorites": "Favorieten",
+    "search_ph": "Zoeken op merk of model…",
+    "no_results": "Geen passende apparaten gevonden. Probeer een andere zoekopdracht.",
+    "n_programs": "{n} programma's",
+    "n_cycles": "{n} cycli",
+    "no_programs": "Nog geen gedeelde programma's voor dit apparaat.",
+    "no_cycles": "Nog geen referentiecycli gedeeld voor dit programma.",
+    "anon": "anoniem",
+    "uploaded_by": "Gedeeld door {name}",
+    "connected_as": "Verbonden als {name}",
+    "not_connected": "Niet verbonden. Verbind een GitHub-account om je eigen cycli te delen.",
+    "import_new": "Nieuw profiel",
+    "import_merge": "Samenvoegen met bestaand",
+    "merge_target": "Samenvoegen in profiel",
+    "description": "Beschrijving (optioneel)",
+    "contributed_by": "door {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Nog geen beoordelingen",
+    "website": "Communitystore-website ↗",
+    "website_tip": "Open de communitystore-website"
+  },
+  "settings": {
+    "gear": {
+      "title": "Instellingen"
+    }
+  },
+  "link": {
+    "manual": "Handleiding ↗",
+    "add_appliance": "Je apparaat toevoegen"
+  },
+  "tip": {
+    "add_brand": "Merk niet vermeld? Voeg het toe aan de communitycatalogus",
+    "add_appliance": "Model niet vermeld? Voeg je apparaat toe aan de communitycatalogus",
+    "add_profile": "Voeg op de communitysite een profiel toe voor dit apparaat"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Opnieuw verwerken: cycli matchen",
+      "golden": "Opnieuw verwerken: referentiecycli aanvullen",
+      "suggestions": "Opnieuw verwerken: suggesties",
+      "ml_training": "Opnieuw verwerken: ML-training",
+      "health": "Opnieuw verwerken: cyclusgezondheid"
+    },
+    "pg_sweep": {
+      "optimize": "Optimaliseren: {param}"
+    }
+  }
+}

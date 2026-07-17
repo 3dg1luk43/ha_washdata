@@ -29,9 +29,9 @@ Please provide:
 ### Supported Versions
 
 Security fixes are provided for currently supported release lines, identified by
-semantic version tags (for example `v0.4.3`):
+semantic version tags (for example `v0.5.0`):
 
-- Supported: latest patch release on the current minor line (for example `0.4.x`)
+- Supported: latest patch release on the current minor line (for example `0.5.x`)
 - Best effort: previous minor line when impact is high and patching is low-risk
 - End-of-life (EOL): older minors and all unsupported majors
 
@@ -48,7 +48,7 @@ Backport policy:
 Include affected versions in reports using release tags or semver ranges.
 Example:
 
-`Affected versions: v0.4.0 - v0.4.3 (fixed in v0.4.4)`
+`Affected versions: v0.4.0 - v0.4.9 (fixed in v0.5.0)`
 
 ### Response Timeline
 
@@ -83,7 +83,10 @@ This integration monitors **high-power appliances** via smart plugs. **Electrica
 - **No tracking**: WashData does not collect or send usage analytics
 - **Configuration backups**: Exports are JSON files stored on your device/instance
 - **Power history**: Power readings are stored on your Home Assistant instance
-- **Notification routing is configurable**: If you configure `CONF_NOTIFY_SERVICE` or other notify-related options, payloads may be delivered by your selected notify integration (for example mobile app push, email, or other cloud-backed providers). Without notify integrations enabled, data remains local to Home Assistant.
+- **Notification routing is configurable**: If you configure per-event notify targets (`notify_start/finish/live_services`) or build your own automations on WashData's cycle events, payloads may be delivered by your selected notify integration (for example mobile-app push, email, or other cloud-backed providers). Without any notify target or automation, data remains local to Home Assistant.
+- **Community Store (opt-in, off by default)**: When you enable online features and connect an account, browsing fetches other users' shared program data from the store backend, and anything you explicitly choose to share (program profiles, reference power traces, and the appliance brand/model/type) is uploaded there. Nothing is transmitted unless you turn online features on and actively share; disabling online features clears the stored credential.
+- **Management panel & access control**: The full-screen panel is backed by a WebSocket API, and every command is authorised **server-side** against a per-user access level (none / read / edit / full, per device). Access control is off by default (single-user setups are unaffected); when enabled, read-only users cannot mutate data and destructive or export/import actions require full access. Authorisation is enforced on the server, not merely hidden in the UI.
+- **On-device ML**: The optional, experimental ML subsystem is **NumPy-only** and runs entirely on your instance - it downloads no models, calls no external services, and sends no data out. It is off by default.
 
 ### Home Assistant Security
 
@@ -114,14 +117,15 @@ To secure your Home Assistant installation:
 ❌ Download profiles or firmware updates  
 ❌ Run arbitrary user code  
 ℹ️ Store configuration and power history locally without encryption (relies on filesystem permissions)  
-ℹ️ Optional notify integrations configured via `CONF_NOTIFY_SERVICE`/notify options can forward notification payloads outside the instance; this depends on user configuration.  
+ℹ️ Optional per-event notify targets, or user-built automations on WashData's cycle events, can forward notification payloads outside the instance; this depends on user configuration.  
+ℹ️ From the management panel a user with sufficient access can create or delete Home Assistant automations and import a configuration (which overwrites data); these are explicit, permission-gated user actions (see access control below), not autonomous behaviour.  
 
 ### Dependencies
 
-WashData's dependencies are minimal:
+WashData's runtime dependencies are minimal:
 
-- **numpy**: Numerical computations (security-conscious library)
-- **Home Assistant**: Core framework (actively maintained)
+- **numpy**: Numerical computations (security-conscious library). This is the **only** third-party runtime dependency - including the ML subsystem, which is deliberately NumPy-only (no scikit-learn / PyTorch / SciPy ship at runtime).
+- **Home Assistant**: Core framework (actively maintained). WashData declares `frontend`, `websocket_api`, and (optional) `recorder` as `after_dependencies`.
 
 All dependencies are specified in `manifest.json`.
 
@@ -187,4 +191,4 @@ If you have security questions (not a vulnerability):
 
 **Thank you for helping keep WashData secure.** 🛡️
 
-*Last Updated: 2026-03-11*
+*Last Updated: 2026-07-02*

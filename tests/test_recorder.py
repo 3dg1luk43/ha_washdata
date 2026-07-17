@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """Tests for the CycleRecorder class."""
 import pytest
@@ -79,48 +95,3 @@ async def test_persistence_loading(mock_hass):
             # Note: is_recording flag is restored from storage
             assert recorder._is_recording == True
             assert recorder.last_run == {"some": "data"}
-
-@pytest.mark.asyncio
-async def test_trim_suggestions(mock_hass):
-    """Test trim suggestion logic."""
-    with patch("custom_components.ha_washdata.recorder.dt_util") as mock_dt:
-        dt_base = datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-        mock_dt.now.return_value = dt_base
-        mock_dt.parse_datetime.side_effect = datetime.fromisoformat
-        
-        recorder = CycleRecorder(mock_hass, "test_entry")
-        
-        # Create fake data
-        data = []
-        # Head noise (10s of 0W)
-        for i in range(10):
-            t = dt_base + timedelta(seconds=i)
-            data.append((t.isoformat(), 0.0))
-            
-        # Active (10s of 100W)
-        for i in range(10, 20):
-            t = dt_base + timedelta(seconds=i)
-            data.append((t.isoformat(), 100.0))
-            
-        # Tail noise (10s of 0W)
-        for i in range(20, 30):
-            t = dt_base + timedelta(seconds=i)
-            data.append((t.isoformat(), 0.0))
-            
-        head, tail, score = recorder.get_trim_suggestions(data)
-
-        assert 9.0 <= head <= 11.0
-        # New behavior: tail silence < 10 mins suggests 0.0 trim
-        assert tail == 0.0
-
-        # Case 2: Very long tail silence (> 10 mins)
-        long_data = list(data)
-        last_t = dt_base + timedelta(seconds=29)
-        for i in range(1, 900): # 15 mins more silence
-            t = last_t + timedelta(seconds=i)
-            long_data.append((t.isoformat(), 0.0))
-            
-        head2, tail2, score2 = recorder.get_trim_suggestions(long_data)
-        # 15 mins (900s) + original 10s = 910s. 
-        # Suggested trim should be 910s - 60s (buffer) = 850s
-        assert 840.0 <= tail2 <= 860.0

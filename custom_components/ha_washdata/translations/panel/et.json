@@ -1,0 +1,1771 @@
+{
+  "badge": {
+    "artifact_tip": "Tuvastati {n} anomaaliat (nt uks avati tsükli keskel) – avage, et näha neid graafikul",
+    "auto": "(tuvastatud automaatselt)",
+    "built_in_tag": "sisseehitatud",
+    "declining": "↘ väheneb",
+    "energy_low": "Tavalisest vähem energiat",
+    "energy_spike": "Tavalisest rohkem energiat",
+    "fair_fit": "rahuldav kvaliteet",
+    "fair_fit_tip": "Mõõdukas sobivuse järjepidevus – mõnel sellele profiilile määratud tsüklil on madalamad usaldusskoorid. Täpsuse parandamiseks märkige rohkem tsükleid või salvestage profiil uuesti.",
+    "feedback_requested": "Soovitakse tagasisidet",
+    "golden_cycle": "Salvestatud võrdlustsükkel",
+    "improving": "↗ paraneb",
+    "manual": "(käsitsi valitud)",
+    "needs_review": "Vajab ülevaatamist",
+    "overrun": "Jooks kauem kui tavaliselt",
+    "poor_fit": "kehv kvaliteet",
+    "poor_fit_tip": "Ebajärjekindel mänguajalugu – kaaluge selle profiili uuesti ülesehitamist",
+    "restart_gap_tip": "{n} HA taaskäivituslünk: võimsusjälg on katkenud",
+    "reviewed": "Üle vaadatud",
+    "steady": "→ stabiilne",
+    "underrun": "Lõppes tavalisest kiiremini",
+    "using_defaults": "Tarnitud vaikeseadete kasutamine",
+    "using_tuned": "Häälestatud raskuste kasutamine",
+    "overrun_ratio": "({x}x oodatust)",
+    "underrun_ratio": "({pct}% oodatust)",
+    "awaiting_tip": "Ootab kogukonna heakskiitu",
+    "awaiting_n": "Ootab heakskiitu · {n} kinnitust",
+    "approved": "Heaks kiidetud",
+    "awaiting": "Ootab heakskiitu",
+    "imported_tip": "Imporditud kogukonna poest. Kasutatakse ainult sobitamiseks, ei arvestata statistikas."
+  },
+  "btn": {
+    "add_device": "+ Lisa seade",
+    "add_device_tip": "Lisage veel üks WashData seade",
+    "add_maintenance": "Lisa hooldussündmus",
+    "add_phase": "+ Lisa faas",
+    "add_timer": "+ Lisa taimer",
+    "apply_all": "Rakenda kõik",
+    "apply_label": "Rakenda silt",
+    "apply_set_b": "Rakenda komplekt B",
+    "apply_split": "Rakenda poolitus",
+    "apply_trim": "Rakenda kärpimine",
+    "auto_detect_split": "Automaatne tuvastamine",
+    "auto_label_cycles": "Automaatsed märgistamise tsüklid",
+    "auto_label_cycles_tip": "Määra automaatselt profiilide nimed märgistamata tsüklitele, mille sobivuse usaldus ületab läve",
+    "cancel": "Tühista",
+    "clear_debug": "Silumisandmete kustutamine",
+    "clear_splits": "Tühjenda",
+    "close": "Sule",
+    "compare": "Võrdle",
+    "confirm": "Kinnita",
+    "convert_to_automation": "Teisendage automatiseerimiseks",
+    "correct": "Paranda…",
+    "create": "Loo",
+    "create_from_cluster": "Loo profiil {count} tsükli põhjal",
+    "create_profile": "+ Loo profiil",
+    "delete": "Kustuta",
+    "delete_group": "Kustuta grupp",
+    "delete_group_tip": "Kustuta ainult see grupp – liikmeprofiilid jäetakse alles",
+    "delete_profile": "Kustuta profiil",
+    "discard": "Visake ära",
+    "discard_tip": "Tühista salvestatud jälg ilma salvestamata",
+    "dismiss": "Loobu",
+    "done": "Valmis",
+    "edit": "Muuda",
+    "export": "Ekspordi",
+    "export_json": "Ekspordi JSON-i",
+    "force_stop": "Sundpeatus",
+    "force_stop_tip": "Lõpeta praegune tsükkel kohe ja märgi see sundpeatunuks",
+    "from_template": "Mallist ▾",
+    "ignore": "Ignoreeri",
+    "import_json": "Import JSON-ist",
+    "import_overwrite": "Import (kirjutab andmed üle)",
+    "inspect": "Kontrollige",
+    "label": "Sildista",
+    "load": "Laadi",
+    "load_more": "Laadi rohkem",
+    "manage": "Halda",
+    "merge": "Ühendage",
+    "new_automation": "＋ Uus automaatika",
+    "new_group": "+ Uus grupp",
+    "new_group_tip": "Rühmita peaaegu identsed profiilid (sama kuju/kestus, erinev temperatuur või tsentrifuugimine), et sobitamine valib nende vahel usaldusväärselt",
+    "new_phase": "+ Uus etapp",
+    "new_profile": "+ Uus profiil",
+    "new_profile_tip": "Loo uus programmide profiil olemasolevast märgistatud tsüklist või salvestusest",
+    "on_cycle_finished": "Tsükkel lõppenud",
+    "on_cycle_started": "Tsükkel algas",
+    "pause_cycle": "Paus",
+    "pause_cycle_tip": "Peata käimasolev tsükkel — seade jätkab sealt, kus pooleli jäi",
+    "pg_apply_device": "Rakenda seadmele",
+    "pg_autofill": "Täida automaatselt",
+    "play": "Esita",
+    "process": "Töötle",
+    "process_history": "Töötle kohe",
+    "process_recording": "Salvesta salvestus",
+    "process_tip": "Salvesta salvestatud jälg uue või olemasoleva profiilina",
+    "rebuild": "Ümbrikute ümberehitamine",
+    "rebuild_envelope": "Ümberehitage ümbrik",
+    "rebuild_tip": "Arvuta uuesti kõigi profiilide eeldatav võimsusümbrik (min/max riba) nende märgistatud tsüklite põhjal — käivitage pärast uute tsüklite märgistamist või vanade parandamist",
+    "rec_start_tip": "Alusta seadme võimsusjälje salvestamist — käivita vahetult enne tsükli käivitamist",
+    "rec_stop": "Peatus",
+    "rec_stop_tip": "Peata salvestamine ja hoia jäädvustatud jälg ülevaatamiseks",
+    "record": "Alustage salvestamist",
+    "refresh": "Värskenda",
+    "refresh_diag_tip": "Laadi salvestusstatistika uuesti",
+    "refresh_logs_tip": "Laadi uusimad logikirjed uuesti",
+    "refresh_settings_tip": "Laadi seaded serverist uuesti",
+    "relabel": "Märgista uuesti ({count})",
+    "remove": "Eemalda",
+    "remove_timer": "Eemalda taimer",
+    "reset": "Lähtesta",
+    "reset_ml_models_tip": "Loobuge peenhäälestatud mudelitest ja minge tagasi sisseehitatud mudelite juurde. WashData saab neid hiljem uuesti õppida.",
+    "reset_to_builtin": "Lähtestage sisseehitatud mudelitele",
+    "reset_to_defaults": "Lähtestage vaikeseadetele",
+    "resume_cycle": "Jätka tsüklit",
+    "resume_cycle_tip": "Jätka peatatud tsüklit",
+    "revert_settings": "Hülga muudatused",
+    "revert_settings_tip": "Taasta viimase salvestuse eelsed seaded",
+    "revert_settings_tip_none": "Salvestage esmalt tagasivõtmise lubamiseks",
+    "revert": "Taasta",
+    "revert_to_previous": "Taasta selle sätte eelmine väärtus",
+    "review": "Ülevaade",
+    "run": "Käivita",
+    "run_analysis": "🔍 Käivitage soovituste analüüs",
+    "run_analysis_tip": "Analüüsige oma salvestatud tsükleid kohe ja värskendage häälestussoovitusi",
+    "run_auto_label": "Käivitage automaatne silt",
+    "run_both": "Käivita A vs B",
+    "run_simulation": "Käivita simulatsioon",
+    "save": "Salvesta",
+    "save_access_control": "Salvesta juurdepääsukontroll",
+    "save_group": "Salvesta grupp",
+    "save_panel_settings": "Salvesta paneeli sätted",
+    "save_phases": "Salvestage faasid",
+    "save_preferences": "Salvestage eelistused",
+    "save_reminders": "Salvesta meeldetuletused",
+    "save_review": "Salvesta ülevaade",
+    "save_settings": "Salvesta sätted",
+    "select": "Valige",
+    "select_all": "Vali kõik",
+    "select_last20": "Viimased 20",
+    "select_none": "Tühista",
+    "show_only": "Näita ainult",
+    "skip_setup": "Jäta seadistus vahele",
+    "split": "Poolita",
+    "stop": "Peata",
+    "submit_correction": "Esitage parandus",
+    "train_now": "Treeni kohe",
+    "trim": "Kärbi",
+    "trim_split": "Kärbi / Poolita",
+    "undo": "Võta tagasi",
+    "use": "Kasutage",
+    "wipe_all": "Pühkige kõik andmed",
+    "delete_selected": "Kustuta valitud ({n})",
+    "group_suggest": "Rühm {n}: {members}",
+    "pg_apply_best": "Rakenda parim",
+    "pg_apply_to_settings": "Salvesta sätetesse",
+    "pg_apply_to_settings_tip": "Kopeeri siin muudetud väärtused selle seadme aktiivsetesse sätetesse",
+    "search": "Otsi",
+    "import": "Impordi",
+    "disconnect": "Katkesta ühendus",
+    "connect_github": "Ühenda GitHub",
+    "save_appliance": "Salvesta seade",
+    "share_to_store": "Jaga poodi",
+    "share": "Jaga",
+    "confirm_appliance": "Kinnita see seade",
+    "confirmed": "Kinnitatud",
+    "browse_community_setups": "Sirvi kogukonna seadistusi",
+    "download_device": "Laadi see seadistus alla",
+    "share_device": "⬆ Jaga seda seadet",
+    "share_device_tip": "Jaga seda kodumasinat ja selle salvestatud võrdlustsükleid kogukonna poodi, et teised sama masina omanikud saaksid neid kasutusele võtta",
+    "share_n": "Jaga {n} tsüklit"
+  },
+  "conflict": {
+    "anti_wrinkle_exit": {
+      "exit": "Peab olema alla peatumise läve ({stop} W); muidu kortsudevastane väljumise võimsus eiratakse",
+      "stop": "Peab olema üle kortsudevastase väljumise võimsuse ({exit} W)"
+    },
+    "anti_wrinkle_max": {
+      "max": "Peab olema üle käivitumise läve ({start} W); muidu kortsudevastane kestuse piirang minnakse mööda",
+      "start": "Peab olema alla kortsudevastase maksimaalse võimsuse ({max} W)"
+    },
+    "attn_sub": "Lahendage konfliktid enne salvestamist",
+    "attn_title": "{n} seadete konflikt{s}",
+    "settings_banner": "{n} seadete konflikt{s} — kontrollige esile tõstetud sektsioone ja parandage enne salvestamist.",
+    "settings_banner_btn": "Mine esimesele",
+    "confidence": {
+      "auto": "Peab olema vähemalt vaste läve tasemel ({match})",
+      "learning": "Peab olema kuni vaste läve ({match})",
+      "match_for_auto": "Peab olema kuni automaatse sildi usalduse ({alc})",
+      "match_for_learning": "Peab olema vähemalt õppimise usalduse tasemel ({lc})"
+    },
+    "duration_ratio": {
+      "max": "Peab olema suurem kui minimaalse kestuse suhe ({min})",
+      "min": "Peab olema väiksem kui maksimaalse kestuse suhe ({max})"
+    },
+    "hysteresis": {
+      "start": "Peab olema üle peatumise läve ({stop} W)",
+      "stop": "Peab olema alla käivitumise läve ({start} W)"
+    },
+    "min_power": {
+      "min_power": "Peab olema kuni peatumise läve ({stop} W)",
+      "stop": "Peab olema vähemalt minimaalse võimsuse tasemel ({min} W)"
+    },
+    "no_update_timeout": {
+      "timeout": "Peab olema suurem kui valvekoera intervall ({wi} s)",
+      "watchdog": "Peab olema väiksem kui ilma uuendusteta aegumine ({to} s)"
+    },
+    "off_delay": {
+      "gap": "Minimaalne väljalülitumise vahe peaks olema vähemalt väljalülitumise viivituse pikkune ({delay} s)",
+      "off_delay": "Väljalülitumise viivitus ({off_delay} s) ületab minimaalse väljalülitumise vahe ({gap} s); järjestikused tsüklid võivad ühineda"
+    },
+    "power_off": {
+      "stop": "Peab olema üle toite väljalülitamise läve ({pot} W)",
+      "threshold": "Peab olema alla peatumise läve ({stop} W), et jõustuda"
+    },
+    "pump_stuck": {
+      "duration": "Peab olema väiksem kui ilma uuendusteta aegumine ({to} s), et kinnijäämise alarm käivituks enne, kui valvekoer tsükli tühistab",
+      "timeout": "Peab ületama pumba kinnijäämise kestuse ({ps} s), et kinnijäämise alarm käivituks enne tsükli sundpeatust"
+    },
+    "start_dur": {
+      "sampling": "Proovivõtu intervall ületab käivitumise kestuse ({sdt} s); ühe proovi hüpped võivad avada tsükli",
+      "threshold": "Peaks olema vähemalt üks proovivõtu intervall ({si} s), et vältida ühe proovi valepäästikuid"
+    },
+    "unmatch": {
+      "match": "Peab olema üle mitte-vaste läve ({un})",
+      "unmatch": "Peab olema alla vaste läve ({match}); muidu tühistatakse kinnitatud vaste kohe"
+    },
+    "cascade_toast": "Järjepidevuse tagamiseks kohandati automaatselt ka {n} seadistust.",
+    "suggestion_resolves": "Rakendage allpool kuvatav ootel soovitus ({val}), et see parandada",
+    "use_fix": "Kasuta {val}",
+    "watchdog": {
+      "interval": "Peaks olema vähemalt 2x proovivõtu intervall ({si} s)",
+      "sampling": "Proovivõtu intervall peaks olema maksimaalselt pool valvekoera intervallist ({wi} s)"
+    }
+  },
+  "hdr": {
+    "ab_comparison": "A/B seadete võrdlus",
+    "access_control": "Juurdepääsu kontroll",
+    "add_maintenance": "Lisa hooldussündmus",
+    "automation_delete": "Kustutage see automatiseerimine",
+    "automation_needs_review": "See tsükkel vajab ülevaatamist",
+    "automation_open": "Avage automaatikaredaktoris",
+    "automation_review_this_cycle": "Vaadake see tsükkel üle",
+    "automations": "Automatiseerimised",
+    "clear_debug": "Tühjenda silumisjäljed",
+    "cycle_simulator": "Tsükli simulaator",
+    "diagnostics_pref": "Diagnostika",
+    "display": "Ekraan",
+    "dtw_inspector": "DTW inspektor",
+    "export_import": "Eksport / Import",
+    "getting_started": "Alustamine",
+    "live_power": "Elav jõud",
+    "logs": "Logid",
+    "logs_diagnostics": "Diagnostika",
+    "maintenance": "Hooldustoimingud",
+    "maintenance_log": "Hoolduslogi",
+    "maintenance_reminders": "Hoolduse meeldetuletused",
+    "manual_recording": "Käsitsi salvestamine",
+    "manual_recording_tip": "Käita tsükkel tahtlikult, samal ajal kui WashData salvestab võimsusjälje. Alusta vahetult enne seadme käivitamist, peata kui see lõpetab, seejärel töötle salvestamiseks nimega profiilina.",
+    "ml_learned": "Mida WashData on õppinud",
+    "ml_matching_tuning": "Programmi sobitamise peenhäälestus",
+    "ml_settings_card": "Seaded",
+    "ml_smart_learning": "Nutikas õppimine",
+    "my_preferences": "Minu eelistused",
+    "no_automations": "Sellele seadmele ei viita veel ükski automaatika.",
+    "panel_settings": "Paneeli sätted",
+    "param_sweep": "Parameetri pühkimine",
+    "phase_catalog": "Faaside kataloog",
+    "playground": "Mänguväljak",
+    "process_history": "Protsessi ajalugu",
+    "settings_history": "Seadete ajalugu",
+    "status": "Olek",
+    "status_graph": "Olekugraafik",
+    "storage_stats": "Salvestusstatistika",
+    "test_history": "Testi ajalool",
+    "toggle_sidebar": "Koduabilise külgriba sisse- ja väljalülitamine",
+    "tools_and_data": "Tööriistad ja andmed",
+    "wipe_history": "Pühkige ajalugu",
+    "recommendations": "Soovitused ({n})",
+    "pg_detection_params": "Tuvastuse seaded",
+    "pg_timeline": "Sündmuste ajajoon",
+    "pg_outcome": "Simulatsiooni tulemus",
+    "pg_across_cycles": "Sinu tsüklite lõikes",
+    "community_store": "Kogukonna pood",
+    "online_account": "Kogukonna pood ja veebifunktsioonid"
+  },
+  "health": {
+    "fair": "Rahuldav profiili kvaliteet",
+    "good": "✓ Hea profiili kvaliteet",
+    "poor": "⚠ Kehv profiili kvaliteet"
+  },
+  "lbl": {
+    "actions": "Tegevused",
+    "activity": "Tegevus",
+    "administrators": "Administraatorid",
+    "aria_compare_chart": "Tsüklite võrdluse graafik",
+    "aria_cycle_chart": "Tsükli võimsuskõver",
+    "aria_envelope_chart": "Profiili võimsusümbriku graafik",
+    "aria_phase_chart": "Faaside redaktori graafik",
+    "aria_playground_chart": "Tsükli võimsuskõver lohistatavate tuvastuslävedega",
+    "aria_power_chart": "Võimsustarbimise graafik",
+    "aria_spaghetti_chart": "Kattuvad tsükli võimsuskõverad",
+    "aria_sweep_chart": "Parameetri pühkimise tulemuste graafik",
+    "artifact_anomaly": "Anomaalia",
+    "artifact_high_power": "Kõrge võimsus",
+    "artifact_interruption": "Katkestus",
+    "artifact_low_power": "Madal võimsus",
+    "auto_detect": "Automaatne tuvastamine",
+    "auto_fine_tune_off": "automaatne peenhäälestus välja",
+    "auto_fine_tune_on": "automaatne peenhäälestus sees (umbes kell {hour}:00)",
+    "avg_cost": "Keskmine maksumus",
+    "change": "Muutus",
+    "clock_time": "Kellaaeg",
+    "cohesion_good": "ühtesus {pct}%",
+    "cohesion_low": "⚠ madal ühtesus {pct}%",
+    "compare_profiles": "Võrrelge profiilidega",
+    "concurrency": "Samaaegsus",
+    "confidence": "Usaldus",
+    "confidence_threshold": "Usalduse lävi",
+    "correct_duration": "Õige kestus (min, valikuline)",
+    "correct_profile": "Õige profiil",
+    "correlation": "Korrelatsioon",
+    "cost": "Maksumus",
+    "create_new_profile": "+ Loo uus profiil…",
+    "current_phase": "Praegune faas",
+    "curves": "Kõverad",
+    "cycle": "Tsükkel",
+    "cycle_date_display": "Tsükli kuupäeva kuva",
+    "cycle_health": "Tsükli tervis",
+    "cycle_index": "tsükli indeks →",
+    "cycles": "Tsüklid",
+    "cycles_count": "Tsüklid",
+    "cycles_lc": "tsüklit",
+    "dashed": "kriipsjoon",
+    "date": "Kuupäev",
+    "debug_traces": "Silumisjäljed",
+    "default": "Vaikimisi",
+    "default_access_level": "Vaiketase kasutajatele, keda pole allpool loetletud",
+    "default_other": "Vaikimisi (muud seadmed)",
+    "default_tab": "Vaikimisi vahekaart paneeli avamisel",
+    "delta": "Δ",
+    "description": "Kirjeldus",
+    "dtw_blend_w": "Segamise kaal",
+    "dtw_blended": "Segatud skoor",
+    "dtw_ddtw": "DDTW skoor",
+    "dtw_l1": "L1 skoor",
+    "dtw_matched_profile": "(tsükli sobitatud profiil)",
+    "duration": "Kestus",
+    "duration_agreement": "Kestuse kokkulangevus",
+    "emphasis": "Rõhuasetus",
+    "enable_access_control": "Luba kasutajapõhine juurdepääsu kontroll",
+    "energy": "Energia",
+    "energy_agreement": "Energia kokkulangevus",
+    "event_timeline": "Sündmuste ajajoon",
+    "event_type": "Sündmuse tüüp",
+    "expected": "Oodatav",
+    "expected_duration": "Eeldatav kestus (min)",
+    "file_kb": "Fail (kB)",
+    "final_score": "Lõppskoor",
+    "from": "Alates",
+    "gap_s": "Vahe(d)",
+    "group_name": "Rühma nimi",
+    "head_trim": "Pea trimm (id)",
+    "health": "Tervis",
+    "hide_tabs": "Peida vahekaardid mitteadministraatorite jaoks",
+    "in_use": "Kasutuses",
+    "json_data": "JSON-andmed",
+    "label": "Vastendatud programm",
+    "last": "Viimased",
+    "last_checked": "Viimati kontrollitud:",
+    "load_from_file": "Laadi failist",
+    "mae_score": "MAE skoor",
+    "manual_duration": "Käsitsi kestus (min, valikuline)",
+    "match": "Vaste",
+    "members": "Liikmed",
+    "metric": "Mõõdik",
+    "mode_existing_profile": "Lisa olemasolevale profiilile",
+    "mode_new_profile": "Loo uus profiil",
+    "models_fine_tuned": "({count} mudelit peenhäälestatud)",
+    "n_classic_suggestions": "{n} klassikaline",
+    "n_ml_suggestions": "{n} ML",
+    "n_selected": "{n} valitud",
+    "n_tuning_suggestions": "{n} häälestussoovitus",
+    "na": "pole",
+    "new_profile_name": "Uus profiilinimi",
+    "notes": "Märkmed",
+    "of": "/",
+    "outcome": "Tulemus",
+    "panel_default_tab": "Vaikevahekaart",
+    "panel_language": "Paneeli keel",
+    "per_cycle_short": "tsükkel",
+    "pg_autofill_tip": "Täida vahemik automaatselt praegusest väärtusest ({lo}–{hi})",
+    "pg_best_value": "Parim leitud väärtus",
+    "pg_current_value": "Praegune väärtus:",
+    "pg_drag_hint": "Lohista joont graafikul",
+    "pg_dtw": "DTW",
+    "pg_ev_ending": "Lõpetamine",
+    "pg_ev_running": "Töötab",
+    "pg_group_advanced": "Erijuhud",
+    "pg_group_detection": "Tuvastamise päästikud",
+    "pg_group_timing": "Ajastusreeglid",
+    "pg_idle": "Jõude",
+    "pg_last_run": "Viimane käivitus: {date}",
+    "pg_match_score": "Vaste skoor",
+    "pg_pct_of": "{p}% {total}-st",
+    "pg_poor_match": "Halb vaste",
+    "pg_strong_match": "Tugev vaste",
+    "pg_tile_ambiguous": "Ebaselge",
+    "pg_tile_ambiguous_tip": "Tsüklid, kus kaks programmi on peaaegu võrdsed",
+    "pg_tile_detected": "Tuvastatud",
+    "pg_tile_detected_tip": "Tsüklid, kus võimsus ületas käivitusläve piisavalt kaua, et registreeruda töötavana",
+    "pg_tile_matched": "Sobitatud",
+    "pg_tile_matched_tip": "Tsüklid, mis on õigesti seostatud tuntud programmiga",
+    "pg_time_left": "Aega jäänud",
+    "pg_weak_match": "Nõrk vaste",
+    "phase_name": "Nimi",
+    "phase_timeline": "Faaside ajajoon",
+    "power": "Võimsus",
+    "profile": "Profiil",
+    "profile_index": "profiili indeks →",
+    "profile_name": "Profiili nimi",
+    "program": "Programm",
+    "program_tip": "Asendage profiil, mis sobitatakse praeguse tsükliga. Automaatne tuvastamine laseb integratsioonil automaatselt valida parima vaste. Kinnitage konkreetne programm sundvastendamiseks, kui automaatne tuvastamine on vale või teate, mis töötab.",
+    "progress": "Edusammud",
+    "raw_socket": "Toores signaal",
+    "read_only": "Kirjutuskaitstud",
+    "ref_cycle": "Võrdlustsükkel (valikuline)",
+    "refresh_interval": "Värskendusintervall (id)",
+    "remaining": "Ülejäänud",
+    "reminder_every": "Tuleta meelde iga (tsüklit)",
+    "remove_label": "- Eemalda silt -",
+    "rename_profile": "Nimeta profiil ümber",
+    "replay_duration": "Taasesitus",
+    "resulting_profile": "Tulemuseks olev profiil",
+    "save_mode": "Salvestamisrežiim",
+    "score": "Skoor",
+    "score_breakdown": "Skoori jaotus",
+    "seconds_from_start": "Sekundid algusest",
+    "select_profile": "Valige Profiil",
+    "setting": "Säte",
+    "settings_a": "Seaded A (praegune)",
+    "settings_a_short": "A",
+    "settings_advanced": "Täpsemalt",
+    "settings_b": "Seaded B (test)",
+    "settings_b_short": "B",
+    "settings_basic": "Põhiline",
+    "settings_detail_level": "Seadete detailsuse tase",
+    "settings_overrides": "Seadete alistamised",
+    "show_debug": "Kuva reaalajas vaste silumiskaart lehel Olek (kindlus, ebaselgus, parimad kandidaadid)",
+    "show_expected": "Kuva eeldatav kõvera ülekate (sobiv profiil, oranž)",
+    "show_raw": "Kuva töötlemata pistikupesa lülitit reaalajas võimsusgraafikus",
+    "sparkline": "Hiljutine tsükli kestuse trend",
+    "stage2": "Etapp 2 — põhisarnasus",
+    "stage3": "Etapp 3 — DTW",
+    "stage4": "Etapp 4 — kokkulangevus",
+    "status": "Olek",
+    "tail_trim": "Saba trimm (id)",
+    "timer_auto_pause": "Automaatne paus",
+    "timer_min": "min",
+    "timer_msg_placeholder": "Sõnum (valikuline, {device}/{program}/{minutes})",
+    "to": "Kuni",
+    "ungrouped": "Grupeerimata",
+    "unlabelled": "Märgistamata",
+    "unlabelled_paren": "(sildistamata)",
+    "warp_path": "Moondamistee",
+    "input": "Sisend:",
+    "start": "Algus",
+    "end": "Lõpp",
+    "unit_s": "(s)",
+    "reviewed_on": "üle vaadatud {date}",
+    "unknown": "Teadmata",
+    "quality": "Kvaliteet",
+    "tags": "Sildid",
+    "at": "kell",
+    "pct_match_confidence": "{pct}% vaste usaldus",
+    "ha_restarted": "HA taaskäivitatud",
+    "from_start": "Algusest",
+    "to_end": "Lõpuni",
+    "click_to_select": "klõpsa valimiseks",
+    "envelope": "Võimsusvahemik",
+    "zoom_hint": "keri suumimiseks · topeltklõps lähtestamiseks",
+    "loading_paren": "(laadimine…)",
+    "time_remaining": "~{v} jäänud",
+    "no_duration": "kestus puudub",
+    "duration_avg": "~{v}m keskm.",
+    "name_placeholder": "(nimi)",
+    "n_shown": ", {n} kuvatud",
+    "cycles_title": "Tsüklid ({n})",
+    "pg_detecting": "Tuvastamine",
+    "pg_best_marker": "Parim: {v}",
+    "pg_time_left_model": "Aega jäänud (mudel)",
+    "pg_time_left_model_tip": "Mudeli hinnatud järelejäänud aeg (faasi hindaja + ML-segu), mitte staatiline loendur",
+    "phase": "Faas",
+    "pg_mode_simulate": "Simuleeri",
+    "pg_mode_history": "Testi ajalooga",
+    "pg_mode_sweep": "Pühkimine",
+    "pg_ev_detected": "Tuvastatud",
+    "pg_ev_match": "Vaste kinnitatud",
+    "pg_ev_match_changed": "Vaste muutus",
+    "pg_ev_ambiguous": "Ebaselge",
+    "pg_ev_unmatched": "Vasteta",
+    "pg_ev_notify_start": "Alguse teavitus",
+    "pg_ev_notify_pre": "Peaaegu valmis teavitus",
+    "pg_ev_notify_finish": "Lõpetamise teavitus",
+    "pg_ev_notify_milestone": "Vahe-eesmärgi teavitus",
+    "pg_ev_notify_held": "Teavitus kinni peetud (vaikuse tunnid)",
+    "pg_ev_finished": "Lõpetatud",
+    "pg_ended": "Lõppes",
+    "pg_proj_energy": "Prog. energia",
+    "pg_alert_overrun": "Kestis kauem",
+    "pg_alert_underrun": "Kestis lühemalt",
+    "pg_alert_did_not_finish": "Ei lõpetanud",
+    "pg_alert_false_end": "Jagunes mitmeks tsükliks",
+    "pg_alert_unmatched": "Vasteta",
+    "pg_alert_ambiguous": "Ebaselge vaste",
+    "pg_alert_energy": "Energia kõrvalekalle",
+    "pg_newly_correct": "nüüd õige",
+    "pg_regressed": "halvenes",
+    "pg_end_timing_changed": "lõpuaeg muutus",
+    "pg_vs_current": "vs praegune",
+    "pg_fixed": "parandatud",
+    "pg_broke": "läks katki",
+    "pg_sweep_param": "Parameeter",
+    "pg_objective": "Eesmärk",
+    "pg_steps": "Sammud",
+    "pg_sweep_2d": "2D soojuskaart",
+    "pg_sweep_param_y": "2. parameeter",
+    "pg_obj_match": "Vaste täpsus",
+    "pg_obj_endtiming": "Lõpuaja täpsus",
+    "pg_obj_falseend": "Valelõppude määr",
+    "pg_obj_overrun": "Kestuse kõrvalekalle",
+    "pg_obj_ambiguity": "Ebaselguse määr",
+    "pg_best_combo": "parim kombinatsioon",
+    "pg_mode_optimize": "Optimeeri",
+    "pg_group_matching": "Programmi sobitamine",
+    "pg_zoom_hint": "topeltklõps suumi lähtestamiseks",
+    "aria_playground_chart2": "Interaktiivne tsükli võimsusgraafik: hõljuta aja/võimsuse lugemiseks, keri suumimiseks, lohista liigutamiseks",
+    "pg_alert_timeout_end": "Lõpetati aegumisega, mitte ennustuse põhjal",
+    "pg_alert_indefinite": "Töötaks lõputult",
+    "task_pg_history": "Testi ajaloos",
+    "task_pg_sweep": "Optimeeri",
+    "task_reprocess": "Uuesti töötlemine",
+    "task_ml_training": "Õppimine",
+    "eta_secs": "~{n} s jäänud",
+    "eta_mins": "~{n} min jäänud",
+    "pg_recent_runs": "Hiljutised käitused",
+    "pg_load_run": "Laadi see käitus uuesti",
+    "pg_match_confidence": "Vaste kindlus",
+    "pg_envelope_fit": "Sobivus mähisjoonega",
+    "pg_envelope_fit_tip": "Kui täpselt tsükkel püsib selle profiili salvestatud võimsuse mähisjoone sees, teistsugune vaatenurk kui vaste kindlus.",
+    "n_imported_note": ", {n} imporditud",
+    "enable_online": "Luba veebifunktsioonid",
+    "store_brand": "Seadme bränd",
+    "store_model": "Seadme mudel",
+    "anonymous": "Anonüümne",
+    "rate_quality": "Hinda kvaliteeti",
+    "rate_n": "{n} tähte",
+    "approved_only": "Ainult heaks kiidetud",
+    "adopt_settings": "Võta ka seaded kasutusele",
+    "flags": "Embleemid",
+    "include_phase_map": "Kaasa faasikaart",
+    "include_settings": "Kaasa tuvastus- ja sobitamisseaded",
+    "show_contributor": "Näita kaastöötajate nimesid"
+  },
+  "log": {
+    "all_levels": "Kõik tasemed",
+    "all_devices": "Kõik seadmed",
+    "all_components": "Kõik komponendid",
+    "search_ph": "Otsi logidest…"
+  },
+  "ml": {
+    "builtin_models": "● Sisseehitatud mudelite kasutamine",
+    "fit_fair": "Rahuldav",
+    "fit_good": "Hea",
+    "fit_slight": "Kerge",
+    "fit_strong": "Tugev",
+    "fit_weak": "Nõrk",
+    "fit_word": "sobima",
+    "personalized": "● Selle masina jaoks kohandatud",
+    "better_than_baseline": "{pct}% parem kui lähtehinnang ({metric})",
+    "trend_improving_tip": "Selle mudeli sobivus on viimaste ülekontrollide jooksul paranenud.",
+    "trend_declining_tip": "Selle mudeli sobivus on viimaste ülekontrollide jooksul halvenenud, rohkemate tsüklite ülevaatamine võib aidata sel uuesti õppida.",
+    "trend_steady_tip": "Selle mudeli sobivus on viimaste ülekontrollide jooksul jäänud enam-vähem stabiilseks.",
+    "cap_blurb": {
+      "end": "Teadmine, millal tsükkel on tegelikult lõppenud",
+      "live_match": "Käimasoleva programmi kiirem tuvastamine",
+      "quality": "Valesti tuvastatud või rikutud tsüklite märkamine",
+      "remaining_time": "Järelejäänud aja ennustamine",
+      "total_energy": "Koguenergia ja kulu ennustamine"
+    },
+    "cap_label": {
+      "end": "Tsükli lõpu tuvastus",
+      "live_match": "Programmi tuvastus",
+      "quality": "Tsükli kvaliteedikontroll",
+      "remaining_time": "Järelejäänud aja hinnang",
+      "total_energy": "Energiahinnang"
+    },
+    "metric_auc": "AUC {auc} valideerimisandmetel",
+    "metric_mae": "viga {model} vs. baasjoon {baseline}"
+  },
+  "modal": {
+    "auto_label": "Automaatsed sildistamise tsüklid",
+    "correct_feedback": "Õige tagasiside",
+    "create_profile": "Loo profiil",
+    "cycle": "Tsükkel",
+    "edit_group": "Redigeeri profiilirühma",
+    "edit_phase": "Redigeeri faasi",
+    "import_config": "Impordi konfiguratsioon",
+    "label_cycle": "Sildi tsükkel",
+    "merge_cycles": "Ühendage {n} tsüklit",
+    "new_group": "Uus profiilirühm",
+    "new_phase": "Uus faas",
+    "process_history_msg": "Käivitage sobitamine uuesti, värskendage soovitusi, treenige ML uuesti (kui lubatud) ja arvutage tsükli tervis ümber kõigi salvestatud tsüklite jaoks. See võib võtta aega.",
+    "process_history_ok": "Töötle",
+    "process_history_title": "Töötle ajalugu",
+    "process_recording": "Protsessi salvestamine",
+    "delete_maintenance_msg": "Kustutada see hoolduskirje? Seda ei saa tagasi võtta.",
+    "delete_maintenance_title": "Kustuta hooldussündmus",
+    "relabel_cycles": "Märgista uuesti {count} tsüklit",
+    "delete_automation_title": "Kustuta automaatika",
+    "delete_automation_msg": "Kas kustutada automaatika \"{name}\" Home Assistantist? Seda ei saa tagasi võtta.",
+    "remove_legacy_title": "Eemalda vananenud toimingud",
+    "remove_legacy_msg": "Kas eemaldada vananenud kohandatud toimingud? Need lõpetavad tsükli sündmustele reageerimise. Seda ei saa paneelilt tagasi võtta.",
+    "discard_recording_title": "Visake salvestis ära",
+    "discard_recording_msg": "Kas visata salvestatud salvestis ära? Seda ei saa tagasi võtta.",
+    "dismiss_all_title": "Loobu kõigist tagasisidedest",
+    "dismiss_all_msg": "Kas loobuda kõigist {count} ootel olevast tagasiside päringust?",
+    "dismiss_all_ok": "Loobu kõigist",
+    "delete_phase_title": "Kustuta faas",
+    "delete_phase_msg": "Kas kustutada faas \"{name}\"?",
+    "clear_debug_title": "Tühjenda silumisandmed",
+    "clear_debug_msg": "Kas kustutada kõik salvestatud silumisjäljed?",
+    "wipe_all_title": "Pühi kõik andmed",
+    "wipe_all_msg": "⚠️ See kustutab jäädavalt KÕIK tsüklid ja profiilid. Seda ei saa tagasi võtta.",
+    "wipe_all_ok": "Pühi kõik",
+    "force_stop_title": "Peata tsükkel jõuga",
+    "force_stop_msg": "Kas peatada aktiivne tsükkel kohe jõuga? Tsükkel salvestatakse katkestatuna.",
+    "store_import": "Impordi võrdlustsükkel",
+    "store_share": "Jaga kogukonna poodi",
+    "store_share_device": "Jaga seda seadet"
+  },
+  "msg": {
+    "appliance_monitor": "Seadmete monitor",
+    "artifact_dip_detail": "Langes alla tavapärase võimsusriba umbes {n}s jooksul.",
+    "artifact_footer": "Ülaltoodud graafikul esile tõstetud. Need on mööduvad artefaktid (nt uks avati tsükli keskel), mitte tingimata probleemid.",
+    "artifact_header": "Selle tsükli jooksul tuvastati {n} anomaaliat",
+    "artifact_pause_detail": "Võimsus langes peaaegu nulli umbes {n}s jooksul ja taastus seejärel — tõenäoliselt avati uks tsükli keskel või tsükkel peatati.",
+    "artifact_spike_detail": "Ületas tavapärase võimsusriba umbes {n}s jooksul.",
+    "auto_label_intro": "Määrake profiilid märgistamata tsüklitele, mille sobivuse usaldus eemaldab läve.",
+    "automations_intro": "WashData käivitab {start} / {end} sündmusi ja avaldab olemeid, seega on teated ja toimingud kõige paremini ehitada tavaliste Home Assistanti automaatikana. Seda seadet kasutavad automaatikad kuvatakse allpool.",
+    "cleanup_intro": "Iga märgistatud tsükkel on kaetud. Profiili puhastamiseks märkige kõrvalekalded ja kustutage.",
+    "clear_debug_hint": "Ruumi vabastamiseks eemaldage salvestatud silumisandmed.",
+    "collecting_data": "Andmete kogumine - {need} tsüklit veel enne peenhäälestuse alustamist ({current}/{min}).",
+    "compare_overlay_profiles": "Ülekatteprofiilid (nõrkjad)",
+    "compare_profiles_tip": "Katke ülaltoodud diagrammil teised profiiliümbrikud, et näha, milline neist selle tsükliga kõige paremini sobib.",
+    "compare_selected_cycles": "Valitud tsüklid (tahked) — näita/peida",
+    "consider_new_profile": "Kaaluge uue profiili loomist.",
+    "coverage_gap": "viimastel tsüklitel pole sobivat profiili ({pct}% viimasest 30-st).",
+    "coverage_gap_similar_cycles": "{count} sarnast märgistamata tsüklit leitud — loo profiil, et neid sobitama hakata.",
+    "cycles_deleted": "{count} tsüklit kustutatud",
+    "enough_data": "Piisavalt andmeid õppimiseks ({current}/{min} tsüklit).",
+    "export_description": "Eksportige kõik profiilid ja tsüklid JSON-i või taastage eelmisest ekspordist.",
+    "feedback_cycles_pending": "{n} tsükkel{s} ülevaatamiseks",
+    "feedback_prompt": "Kinnitage, et see oli õige, parandage programmi või ignoreerige.",
+    "filter_by_profile": "Filtreeri profiili järgi…",
+    "group_modal_help": "Rühmitage sama kujuga programme, mis erinevad temperatuuri/tsentrifuugimise poolest (kestus võib erineda). Matching annab rühmale ühe kandidaadi ja valib seejärel kõige sobivama liikme. Valige vähemalt 2; ülekate näitab, kui sarnased need on.",
+    "group_not_cohesive": "Need profiilid ei ole piisavalt sarnased, et neid usaldusväärselt rühmitada, nii et sobitamine käsitleb neid üksikult, kuni eemaldate kõrvalekalde või jagate rühma.",
+    "group_preview_hint": "Märkige 2+ liiget nende võimenduskõverate eelvaatamiseks ja võrdlemiseks.",
+    "import_intro": "Laadige alla eksporditud fail või kleepige JSON-fail.",
+    "legacy_actions_title": "{count} pärand kohandatud toiming töötab endiselt",
+    "live_chart_loading": "Reaalajas võimsuse diagramm kuvatakse näitude saabumisel.",
+    "loading": "Laadimine…",
+    "loading_curve": "Kõvera laadimine…",
+    "loading_settings": "Seadete laadimine…",
+    "log_buffer_hint": "Uusimad enne · puhverdab viimased 500 ha_washdata kirjet pärast taaskäivitamist · lohistage alumist serva suuruse muutmiseks.",
+    "maintenance_advisory": "Kestuse/energia suurenemine võib viidata seadme hooldusvajadusele (nt katlakivi eemaldamine, filtri puhastamine).",
+    "maintenance_due": "Hooldus vajalik: {items}",
+    "maintenance_intro": "Registreeri selle seadme hooldustööd ja saa meeldetuletus, kui iga ülesanne on taas vajalik.",
+    "maintenance_load_error": "Hooldusandmete laadimine ebaõnnestus: {error}",
+    "maintenance_requires_access": "Hooldus ja eksport/import nõuavad täielikku juurdepääsu.",
+    "manual_duration_hint": "Profiili keskmine/eeldatav tsükli pikkus, mida kasutatakse järelejäänud aja hinnangute andmiseks. Muuda selle määramiseks; muutmata jättes säilib praegune väärtus.",
+    "matching_tuning_intro": "Õppides reguleerib WashData ka seda, kui palju programmide sobitamine kaalub kuju versus kestus ja energia.",
+    "merge_intro": "Valitud tsüklid ühendatakse üheks (kronoloogiline järjestus; lüngad täidetud 0 W-ga). Valige saadud profiil.",
+    "ml_intro": "WashData tarnitakse nutikate mudelitega, mis töötavad karbist välja.",
+    "ml_learned_intro": "Selle masina jaoks peenhäälestatud mudelid.",
+    "ml_loading": "ML laadimine…",
+    "ml_settings_intro": "Kaks sõltumatut lülitit: üks rakendab mudeleid tsükli töötamise ajal, teine ​​võimaldab WashDatal neid aja jooksul teie masinale täpselt häälestada.",
+    "name_first_program": "Sul on piisavalt tsükleid — pane oma esimesele programmile nimi, et alustada sobitamist.",
+    "near_duplicate_cluster": "Tuvastati peaaegu duplikaatprofiili klaster. Rühmitamine võimaldab sobitamisel usaldusväärselt valida sarnasuste vahel (nt sama programm erineval temperatuuril/tsentrifuugimisel).",
+    "no_cycles_match": "Ükski tsükkel ei vasta praegusele filtrile.",
+    "no_cycles_profile": "Sellel profiilil pole tsükleid.",
+    "no_cycles_selected": "Vali esmalt vähemalt üks tsükkel.",
+    "no_cycles_yet": "Tsükleid pole veel salvestatud.",
+    "no_device_selected": "Seadet pole valitud.",
+    "no_devices": "Ühtegi WashData seadet pole veel konfigureeritud.",
+    "no_envelope": "Ümbrikut veel pole – pärast märgistamistsükleid taastage.",
+    "no_envelope_overlay": "Ülekatmiseks pole ümbrikut saadaval.",
+    "no_fine_tuned": "Midagi pole veel peenhäälestatud – WashData kasutab oma sisseehitatud mudeleid.",
+    "no_logs": "Ühtegi logikirjet pole veel puhverdatud.",
+    "no_maintenance": "Hooldust pole veel registreeritud.",
+    "no_match_yet": "Ühtegi sobitamiskatset pole veel tehtud – see täitub jooksva tsükli ajal.",
+    "no_other_users": "Teisi koduabilise kasutajaid ei leitud.",
+    "no_phases": "Faase pole määratletud.",
+    "no_phases_assigned": "Faase pole määratud.",
+    "no_profiles_compare": "Pole profiile, mida võrrelda.",
+    "no_profiles_overlay": "Ülekatmiseks pole profiile.",
+    "no_profiles_yet": "Profiilid veel puuduvad. Looge see märgistatud tsüklist.",
+    "no_profiles_yet_short": "Profiilid veel puuduvad.",
+    "no_settings_match": "Ükski seade ei vasta \"{q}\"",
+    "no_split_points": "Jagatud punkte pole veel.",
+    "no_suggestions": "Aktiivseid soovitusi pole.",
+    "notify_services_hint": "Kasutage {entity} teenuse ID-sid (mitme korral komadega eraldatult). Malli muutujad: {vars}.",
+    "old_actions_warning": "Seadistatud vana toimingute redaktoriga (nüüd eemaldatud). Need käivituvad endiselt tsüklisündmustele, kuid neid ei saa siin enam redigeerida. Teisendage need tavaliseks automaatikaks või eemaldage need.",
+    "onboarding_progress": "{n} / 3 tsüklit jälgitud",
+    "onboarding_watching": "Kasuta oma seadet tavapäraselt — WashData jälgib. Pärast 3 tsüklit algab programmide sobitamine.",
+    "pending_feedback": "Ootab tuvastamise tagasisidet",
+    "performance_trend": "Toimivuse trend ({n} tsüklit)",
+    "pg_analysis_empty": "Vaste analüüsi nägemiseks laadi tsükkel.",
+    "pg_apply_confirm": "Kas rakendada parim väärtus: {label} = {value}?",
+    "pg_canvas_empty": "Vali ülalt tsükkel ja vajuta seejärel Laadi, et näha selle võimsuskõverat.",
+    "pg_chart_caption": "Tuvastus-/vastemäär {param} väärtuste lõikes",
+    "pg_match_rate": "{pct}% vastemäär {total} tsükli puhul",
+    "pg_restart_note": "Simulatsioonitööriistade lubamiseks taaskäivita Home Assistant.",
+    "pg_sim_progress": "{done} / {total} tsüklit",
+    "pg_starting": "Alustamine…",
+    "pg_sweep_intro": "Mis siis, kui {param} oleks teistsugune? Testi {steps} väärtust oma viimase {cycles} tsükli ulatuses, et leida seade, mille juures kõige rohkem tsükleid sobitatakse õigesti.",
+    "pg_sweep_step": "Samm {done} / {total}",
+    "pg_undetected": "{n} tsüklit tuvastamata",
+    "pg_verdict_bad": "Vajab tähelepanu: paljud tsüklid jäävad tuvastamata.",
+    "pg_verdict_good": "Hästi häälestatud: enamik tsükleid tuvastatakse ja sobitatakse õigesti.",
+    "pg_verdict_ok": "Vastuvõetav: mõned tsüklid jäid vahele. Proovi käivitusläve alandada.",
+    "phase_catalog_intro": "Nimetatud tsükli segmendid (eelpesu, kuumutamine, tsentrifuugimine…). Määrake need juhtpaneelilt profiilile.",
+    "phase_ranges_intro": "Faasivahemikud (minutid alates tsükli algusest) kattuvad keskmise kõveraga. Reaalajas eelvaate kuvamiseks muutke väärtusi.",
+    "playground_intro": "Turvaline katsekeskkond varasemate tsüklite uuesti esitamiseks erinevate seadetega, kahe seadistuse kõrvuti võrdlemiseks ja selle uurimiseks, kuidas tsükkel profiiliga joondub. Miski siin ei muuda su otseandmeid enne, kui sa selle sõnaselgelt rakendad.",
+    "playground_needs_restart": "Katseala tööriistade lubamiseks taaskäivita Home Assistant.",
+    "preferences_admin": "Eelistused, paneel ja juurdepääsu kontroll",
+    "preferences_adv": "Eelistused",
+    "prefs_personal": "Need kehtivad ainult teie koduabilise konto kohta.",
+    "process_history_hint": "Käivitage sobitamine uuesti kõigi salvestatud tsüklite jaoks, värskendage häälestamise soovitusi, treenige ML-mudeleid uuesti (kui lubatud) ja arvutage tsükli tervis ümber. Käivitage see pärast ülevaatuste partiid.",
+    "profile_deleted": "Profiil kustutatud",
+    "profile_poor_health_detail": "Sellele profiilile määratud tsüklitel on ebaühtlane kuju või madal usaldusväärsus. Kaaluge ümbriku ümberehitamist või märgistatud tsüklite ülevaatamist.",
+    "profiles_intro": "Statistika, faaside ja puhastamise vaatamiseks klõpsake profiilil. Grupeerige peaaegu identsed programmid (sama kuju/kestus, erinev temperatuur või tsentrifuugimine), nii et sobitamine valib nende vahel usaldusväärselt.",
+    "rbac_hint": "Kui see on välja lülitatud, on igal koduabilise kasutajal täielik juurdepääs (vaikeseade). Administraatoritel on alati täielik juurdepääs ja nad saavad kõiki hallata.",
+    "recent_logs": "Viimased ha_washdata kirjed",
+    "recording_in_progress": "Salvestamine on pooleli",
+    "reminders_intro": "Näita paneelil meeldetuletust nii mitu tsüklit pärast viimast hooldust. Meeldetuletuse väljalülitamiseks jäta tühjaks või pane 0.",
+    "restart_gap_footer": "Esile tõstetud graafikul. Võimsusandmed puuduvad nende intervalide jaoks; sobitamine kasutas ainult tegelikke näite.",
+    "restart_gap_header": "{n} HA taaskäivituslünk selle tsükli ajal",
+    "restart_gap_item": "{dur} lünk",
+    "review_confirm_help": "Kontrollige, kas see tsükkel tuvastati õigesti. Teie arvustused treenivad mudelit teie masinas – mida rohkem tsükleid kinnitate, seda parem on sobivus ja seisukord. Piisab kiirest Heast/Halbusest.",
+    "review_in_settings": "Vaadake üle seadetes",
+    "review_notes_placeholder": "Märkused (valikuline)",
+    "review_notes_tip": "Vabateksti märkmed teie enda jaoks. Ei kasutata sobitamisel ega treenimisel.",
+    "review_profile_tip": "Programm see tsükkel on märgistatud kui. Kui automaatselt tuvastatud programm oli vale, parandage see siin – sildistamine õpetab tulevaste tsüklite jaoks sobitamist.",
+    "review_quality_tip": "Kui puhas see tsükkel on. Hea = selle programmi õpikunäide; Halb = tuvastatud, kuid mürarikas või ebatüüpiline; Kasutamatu = valesti tuvastatud (liidetud, kärbitud või võlts). Juhib terviseskoori ja seda, millised tsüklid on mudeli treenimiseks lubatud.",
+    "review_recorded_tip": "Märkige see oma programmi jaoks käsitsi valitud võrdlustsükliks – sama roll kui käsitsi salvestatud tsüklil. Võrdlustsüklid jäetakse alati alles, külvatakse sobiv mall ja neid ei jäeta kunagi puhastamise käigus maha. (See on \"kuldne\" / salvestatud lipp; mõlemad on samad.)",
+    "review_tags_tip": "Valikulised lipud, mis kirjeldavad, mis selle tsükliga valesti läks, nii et koolitus ja puhastamine võivad seda arvesse võtta.",
+    "review_to_cycles": "Avage tsüklite ülevaatuse järjekord",
+    "saving_triggers_reload": "Salvestamine käivitab integratsiooni uuesti laadimise. HA olemid võivad hetkeks kuvada kui kättesaamatud.",
+    "search_placeholder": "Otsinguseaded…",
+    "see_recorder": "Vaadake salvesti vidinat allpool",
+    "setting_changed": "Muudetud {old} → {new} kuupäeval {date}",
+    "settings_basic_note": "Kuvatakse olulisi seadeid. Täieliku loendi nägemiseks vali Täpsemalt.",
+    "shape_drift_advisory": "⚠ Kuju triivib",
+    "shape_drift_detail": "Selle profiili võimsusstruktuur on aja jooksul muutunud — võimalik seadme kulumine või vajalik hooldus (nt katlakivi eemaldamine, filtri puhastamine).",
+    "show_all_settings": "Kuva kõik seaded",
+    "showing_suggestions": "Kuvatakse seade {count} koos soovitustega.",
+    "split_intro": "Jaotuspunkti lisamiseks või eemaldamiseks või tühikäigu automaatseks tuvastamiseks klõpsake graafikul. Iga saadud segment võib saada oma profiili.",
+    "storage_diagnostics": "Salvestusstatistika, hooldus, eksport/import",
+    "sug_staged": "Määratud {key} = {val}. Salvestage rakendamiseks.",
+    "toast_auto_detect_enabled": "Automaatne tuvastamine lubatud",
+    "toast_auto_label_complete": "Automaatne märgistamine lõpetatud",
+    "toast_auto_label_failed": "Automaatne märgistamine ebaõnnestus: {error}",
+    "toast_automation_failed": "Automatiseerimist ei saa luua: {error}",
+    "toast_automation_migrated": "Toimingud migreeritud automatiseerimiseks; avab redaktori",
+    "toast_convert_failed": "Teisendamine ebaõnnestus: {error}",
+    "toast_create_failed": "Loomine ebaõnnestus: {error}",
+    "toast_delete_failed": "Kustutamine ebaõnnestus: {error}",
+    "toast_error": "Viga: {error}",
+    "toast_failed": "Ebaõnnestus: {error}",
+    "toast_force_stop_failed": "Sunnitud peatamine ebaõnnestus: {error}",
+    "toast_name_required": "Nimi on nõutav",
+    "toast_no_automation": "Siia ei saa automatiseerimist luua",
+    "toast_profile_name_required": "Profiili nimi on nõutav",
+    "toast_program_set": "Programm seatud: {program}",
+    "toast_rebuild_failed": "Ülesehitamine ebaõnnestus: {error}",
+    "toast_resume_failed": "Jätkamine ebaõnnestus: {error}",
+    "toast_revert_failed": "Tagasipööramine ebaõnnestus: {error}",
+    "toast_reverted": "{key} taastatud",
+    "toast_save_failed": "Salvestamine ebaõnnestus: {error}",
+    "trend_duration_longer": "Kestus on pikem ({pct}%/tsükkel) – hiljutine keskmine {avg}",
+    "trend_duration_shorter": "Kestus on lühem ({pct}%/tsükkel) – hiljutine keskmine {avg}",
+    "trend_energy_down": "Energiatrend langeb ({pct}% tsükli kohta)",
+    "trend_energy_up": "Energiatrend tõuseb ({pct}%/tsükkel) – hiljutine keskmine {avg}",
+    "trim_intro": "Lohistage punaseid käepidemeid või sisestage väärtused. Kõik väljaspool akent eemaldatakse.",
+    "tuning_suggestions_available": "Vaadeldud tsüklitest on saadaval {count} häälestamise soovitus. Need kuvatakse asjakohaste väljade kõrval.",
+    "unsure_detected_prefix": "WashData pole kindel, et see tuvastas",
+    "updated": "Uuendatud",
+    "warmup_badge": "Õpib veel ({done}/{needed} tsüklit)",
+    "warmup_detail": "See profiil vajab {needed} märgistatud tsüklit enne automaatse sobitamise algust. Iga kinnitatud tsükkel aitab sellel õppida.",
+    "wipe_history_warning": "Kustutage jäädavalt kõik tsüklid ja profiilid. Seda ei saa tagasi võtta.",
+    "compare_overlay_tip": "Aseta õpitud profiilide võimsusvahemikud peale, et näha, millist programmi iga tsükkel meenutab.",
+    "duration_trend_up_tip": "Kestus tõuseb ({pct}%/tsükkel)",
+    "duration_trend_down_tip": "Kestus langeb ({pct}%/tsükkel)",
+    "energy_trend_up_tip": "Energia tõuseb ({pct}%/tsükkel)",
+    "energy_trend_down_tip": "Energia langeb ({pct}%/tsükkel)",
+    "performance_trending": "Jõudluse suundumus",
+    "pg_select_cycle_hint": "Vali tsükkel ja klõpsa ↺ laadimiseks",
+    "pg_sweep_progress": "Samm {done} / {total}",
+    "pg_analysis_hint": "Vali tsükkel ja klõpsa ↺ analüüsi laadimiseks.",
+    "diagnostics_load_failed": "Diagnostikat ei õnnestunud laadida: {error}",
+    "manual_duration_ref_hint": "Kasutatakse ainult siis, kui võrdlustsüklit pole valitud. Võrdlustsükkel määrab kestuse oma pikkuse järgi.",
+    "toast_convert_rolled_back": "Teisendamine ebaõnnestus ja võeti tagasi (ühtegi automatiseerimist ei jäänud): {error}",
+    "toast_convert_orphan": "Automatiseerimine loodi, kuid vanade toimingute kustutamine ebaõnnestus. Ärge proovige uuesti: eemaldage vanad toimingud käsitsi, et vältida dubleerivat automatiseerimist.",
+    "advisory_duration_trend_up": "'{name}' tsüklid muutuvad järk-järgult pikemaks (umbes +{pct}% tsükli kohta). Kui seadme käitumine on muutunud, salvesta või ehita see profiil uuesti.",
+    "advisory_energy_trend_up": "'{name}' tarbib järk-järgult rohkem energiat (umbes +{pct}% tsükli kohta) - kui see on ootamatu, tasub seade üle kontrollida.",
+    "advisory_poor_health": "'{name}' profiilil on madal sobivusskoor - selle hiljutised tsüklid varieeruvad palju või sobituvad nõrgalt. Vaata selle tsüklid üle või salvesta profiil uuesti, et tuvastus ja ajahinnangud püsiksid täpsed.",
+    "advisory_shape_drift": "'{name}' on oma algsest võimsuskõverast märgatavalt kõrvale kaldunud. Seadme käitumine võib olla aja jooksul muutunud (nt katlakivi, kulumine). Kaalu selle profiili uuesti salvestamist hiljutiste tsüklitega.",
+    "advisory_shape_drift_corr": "'{name}' on oma algsest võimsuskõverast märgatavalt kõrvale kaldunud (korrelatsioon {corr}). Seadme käitumine võib olla aja jooksul muutunud (nt katlakivi, kulumine). Kaalu selle profiili uuesti salvestamist hiljutiste tsüklitega.",
+    "pg_no_alerts": "Selles käivituses ei tuvastatud probleeme.",
+    "pg_override_active": "Kasutatakse su muudetud seadeid vs praegused",
+    "pg_history_intro": "Esita oma hiljutised tsüklid uuesti läbi päris tuvastaja ja sobitaja. Muuda esmalt tuvastuse seadet režiimis Simuleeri, et näha siin enne/pärast võrdlust.",
+    "pg_history_empty": "Vajuta Käivita, et oma tsüklid uuesti esitada.",
+    "pg_history_summary": "{detected}/{total} tuvastatud · {correct} õigesti sobitatud",
+    "pg_sweep_no_metric": "Selle eesmärgi hindamiseks pole piisavalt andmeid.",
+    "pg_sweep_intro2": "Leia seade, mis su hiljutistes tsüklites eesmärki kõige paremini täidab. Miski ei muutu enne, kui selle rakendad.",
+    "pg_running_history": "Tsüklite taasesitus…",
+    "pg_running_sweep": "Väärtuste testimine sinu tsüklites…",
+    "pg_row_load_hint": "Laadi see tsükkel ülalolevale graafikule",
+    "pg_history_intro2": "Taasesita oma hiljutised tsüklid läbi tegeliku tuvastaja ja sobitaja ülaltoodud sätetega. Klõpsa mis tahes real, et laadida see tsükkel graafikule; muuda sätet, et näha enne/pärast võrdlust.",
+    "pg_simulating": "Tsükli simuleerimine…",
+    "pg_canvas_empty2": "Vali ülalt tsükkel ja vajuta Käivita, et seda simuleerida. Seejärel hõljuta väärtuste lugemiseks, keri suumimiseks ja lohista liigutamiseks.",
+    "pg_apply_settings_confirm": "Kas salvestada need {n} sätet sellesse seadmesse? {list}",
+    "no_logs_match": "Ükski logikirje ei vasta nendele filtritele.",
+    "pg_analysis_hint2": "Vali tsükkel ja vajuta Käivita, et laadida vaste analüüs.",
+    "pg_analysis_empty2": "Vajuta Käivita, et näha vaste analüüsi.",
+    "imported_readonly": "Imporditud kogukonna poest. Kuvatakse viitena ja sobitamiseks. Seda ei arvestata sinu statistikas ega saa muuta.",
+    "merge_no_imports": "Imporditud salvestisi ei saa päris tsükliga liita. Tühista nende valik, et liitmine õnnestuks.",
+    "store_enable_hint": "Luba seadetes veebifunktsioonid, et sirvida ja importida kogukonna võrdlustsükleid.",
+    "online_intro": "Jaga ja laadi alla võrdlustsükleid teiste WashData kasutajatega. Kõik veebifunktsioonid on vabatahtlikud ja vaikimisi välja lülitatud.",
+    "store_share_intro": "Laadi see võrdlustsükkel üles, et teised sama seadmega kasutajad saaksid seda kasutada. See vaadatakse üle enne avalikuks muutumist.",
+    "online_intro_global": "Sirvi ja jaga võrdlussalvestisi teiste WashData kasutajatega ning kinnita seadmekirjeid. Üks ühendus kehtib kogu su WashData integratsioonile; seadme bränd ja mudel määratakse seadmepõhiselt jaotises Põhiseaded. Kõik veebifunktsioonid on vabatahtlikud ja vaikimisi välja lülitatud.",
+    "online_unavailable": "Veebifunktsioonid ei ole selles serveris saadaval.",
+    "store_picker_offline": "Luba veebifunktsioonid seadete hammasrattast, et valida kogukonna kataloogist.",
+    "pick_brand_first": "Vali kõigepealt seadme bränd.",
+    "model_not_found": "Pole veel kataloogis.",
+    "connect_to_confirm": "Ühenda seadete hammasrattast, et kinnitada või hinnata.",
+    "adopt_settings_hint": "Kirjuta üle selle seadme tuvastus- ja sobitamislävede ühiskasutuses olevad. Teie teatisi, olemeid ja energiahinda ei muudeta kunagi.",
+    "include_settings_hint": "Jaga selle seadme tuvastus- ja sobitamislävesid (mitte teie teatisi, olemeid ega energiahinda). Kasutusele võtjad otsustavad, kas neid rakendada.",
+    "onboard_download": "Uus seade? Võtke kasutusele valmis seadistus (programmid, võrdlustsüklid ja faasid) teiselt WashData kasutajalt, kellel on sama kodumasin.",
+    "share_consent": "Kinnitan, et need tsüklid lõpetati normaalselt ilma katkestusteta",
+    "share_device_none": "Jagatavaid tsükleid pole veel. Märkige salvestatud või käsitsi valitud tsükkel esmalt Tsüklid-vahekaardil võrdlustsükliks (⭐).",
+    "share_guideline_naming": "Nimetage iga profiil täpselt nii, nagu on näidatud kodumasina nupp- või ekraanivaatest (nt 'Cotton 40', 'Eco 60').",
+    "share_guideline_quality": "Jagage ainult tsükleid, mis lõpetati normaalselt -- ei mingeid katkestusi tsükli keskel, ukse avamise sündmusi ega võimsuslünki.",
+    "share_guideline_review": "Teie üleslaadimine algab ootelolekuna ja muutub avalikuks, kui piisavalt kogukonna liikmeid selle kinnitab.",
+    "share_guidelines_title": "Enne jagamist",
+    "store_download_device_intro": "Võtke kasutusele iga jagatud programm ja selle võrdlustsüklid oma seadmel. Teie enda salvestatud tsükleid ja statistikat ei mõjutata.",
+    "store_share_device_intro": "Laadige {brand} {model} üles valitud võrdlustsüklitega. Teised sama kodumasina kasutajad saavad teie programme kasutusele võtta. Kirjeid vaadatakse üle enne avalikustamist.",
+    "share_profile_no_cycles": "Võrdlustsükleid pole -- märkige tsükkel ⭐-ks Tsüklid-vahekaardil, et lisada see profiil"
+  },
+  "pg_desc": {
+    "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
+    "completion_min_seconds": "Lühim käivitus, mis loetakse päris tsükliks",
+    "end_repeat_count": "Madalate näitude arv järjest enne lõpetamist",
+    "interrupted_min_seconds": "Lühikesed tsüklid märgitakse katkestatuks",
+    "min_off_gap": "Kahe tsükli eraldamiseks vajalik vahe",
+    "off_delay": "Madala võimsuse sekundid enne tsükli lõppu",
+    "start_duration_threshold": "Sekundid üle läve käivituse kinnitamiseks",
+    "start_threshold_w": "Minimaalne vatt, et lugeda käivitunuks",
+    "stop_threshold_w": "Sellest allpool loetakse masin väljalülitatuks",
+    "dtw_bandwidth": "Kui palju ajalist venitamist kuju sobitamine lubab",
+    "corr_weight": "Kõvera kuju vs võimsustaseme kaal sobitamisel",
+    "duration_weight": "Kui palju kestuse kokkulangevus sobitamist mõjutab",
+    "energy_weight": "Kui palju energia kokkulangevus sobitamist mõjutab",
+    "profile_match_min_duration_ratio": "Lühim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada",
+    "profile_match_max_duration_ratio": "Pikim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada"
+  },
+  "phase_desc": {
+    "anti_crease": "Kortsude vähendamiseks tehke aeg-ajalt lühikesi tõmblusi pärast lõpetamist.",
+    "anti_wrinkle": "Perioodiline tsüklijärgne trummeldamine kortsude vähendamiseks.",
+    "cool_down": "Kuumutamine ilma kuumuseta tsükli lõpu lähedal.",
+    "drain_and_switch": "Üleminekuperiood pesemiselt kuivatusrežiimile.",
+    "dry": "Kuivatusaste küttekeha ja/või jääksoojuse abil.",
+    "drying": "Peamine kuumutatud trummeldamisperiood.",
+    "heat_up": "Küttekeha esialgne soojendamine enne täieliku kuivamise algust.",
+    "pre_rinse": "Esmane pihustamine enne pesuvahendiga pesemist.",
+    "pre_wash": "Esmane leotamine või eeltöötlus enne põhipesu.",
+    "rinse": "Puhta veega loputamise etapp. Seda faasi võib korrata mitu korda.",
+    "sanitize": "Kõrge temperatuuriga puhastamise etapp desinfitseerimisprogrammide jaoks.",
+    "sensor_check": "Lühike vähese võimsusega paus kuivuse mõõtmise ajal.",
+    "soak": "Madala aktiivsusega leotamisperiood aktiivsete pesufaaside vahel.",
+    "soak_dw": "Pikendatud leotamisperiood raske pinnase korral.",
+    "spin": "Kiire väljatõmme vee eemaldamiseks koormast.",
+    "spin_wd": "Kiire ekstraheerimine enne kuivatamise üleminekut.",
+    "wash": "Peamine pesutsükkel trumli liikumise ja valikulise kuumutamisega.",
+    "wash_dw": "Põhipesuvahendi pesu kuumutamisega."
+  },
+  "placeholder": {
+    "add": "lisa…",
+    "group_name": "nt. Puuvill 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+    "notify": "lisa teavitusteenust…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "lisa isik…",
+    "phase_name": "nt. Eelpesemine",
+    "profile_name": "nt. Puuvill 40°C",
+    "maintenance_notes": "nt filter vahetatud, ukse tihend puhastatud",
+    "store_brand": "nt Bosch",
+    "store_model": "nt WAT28401"
+  },
+  "pref": {
+    "date_absolute": "Absoluutne (nt 2. juulil 14:32)",
+    "date_relative": "Suhteline (nt 2 tundi tagasi)",
+    "lang_auto": "Süsteemi vaikimisi ({lang})",
+    "lang_en": "Inglise",
+    "use_panel_default": "(paneeli vaikimisi)"
+  },
+  "quality": {
+    "bad": "Halb",
+    "good": "Hea",
+    "unusable": "Kasutuskõlbmatu"
+  },
+  "section": {
+    "anti_wrinkle": {
+      "intro": "Kortsudevastane/kroomievastane režiim tuvastab madalvõimsusega trummelpulsid pärast põhifaasi ja hoiab need lõppenud tsükliga seotud.",
+      "label": "Kortsudevastane"
+    },
+    "basic": {
+      "intro": "Põhiidentiteet ja olulisemad asjad, mida enamik seadistusi vajab.",
+      "label": "Põhiline"
+    },
+    "delay": {
+      "intro": "Viivitatud käivituse tuvastamine tuvastab, millal seade on sisse lülitatud, kuid pole veel tsüklit alustanud.",
+      "label": "Viivitatud Käivitus"
+    },
+    "detection": {
+      "intro": "Kuidas tsüklit tuvastatakse käivitumisena, töötamisena ja lõppemisena.",
+      "label": "Tuvastamine"
+    },
+    "matching": {
+      "intro": "Kuidas lõppenud tsüklid sobitatakse õpitud profiilidega ja märgistatakse.",
+      "label": "Sobitamine"
+    },
+    "ml_training": {
+      "intro": "Seadmes toimuva masinõppe ümberõppe ajakava ja andmete seaded.",
+      "label": "ML Koolitus"
+    },
+    "notifications": {
+      "intro": "Millal ja kuidas teid tsüklisündmustest teavitatakse.",
+      "label": "Teavitused"
+    },
+    "timing": {
+      "intro": "Taustakadens, võrguühenduseta valvekoer ja hooldus.",
+      "label": "Ajastus ja Valvekoer"
+    },
+    "triggers": {
+      "intro": "Valikulised välised signaalid: lõpu päästik, ukse andur, pausi lüliti ja mahalaadimisel meeldetuletaja.",
+      "label": "Päästikud ja Uksed"
+    }
+  },
+  "setting": {
+    "abrupt_drop_ratio": {
+      "doc": "Sellest vooluvõimsuse osast suuremat langust käsitletakse samuti järsuna (0,6 = 60% langus). Täiendab vattide künnist seadme suuruste lõikes.",
+      "label": "Järsu Languse Suhe"
+    },
+    "abrupt_drop_watts": {
+      "doc": "Sellest suurem võimsuslangus märgib tsükli pigem Katkestatud (käsitsi tühistamine) kui loomuliku viimistlusena.",
+      "label": "Järsk Langus"
+    },
+    "anti_wrinkle_enabled": {
+      "doc": "Tuvastage lühikesed väikese võimsusega trummelimpulsid, mida kuivati ​​pärast peamist kuumutusfaasi kiirgab, ja hoidke need valmis tsükliga ühendatud, selle asemel, et lugeda neid uute tsüklitena.",
+      "label": "Luba Kortsudevastane Tuvastamine"
+    },
+    "anti_wrinkle_exit_power": {
+      "doc": "Kortsudevastase režiimi aktiivseks püsimiseks peab võimsus impulsside vahel langema sellest allapoole.",
+      "label": "Väljumise Võimsuse Lävi"
+    },
+    "anti_wrinkle_max_duration": {
+      "doc": "Sellest pikemaid kaunvilju käsitletakse pigem tõelise tsüklina kui kortsudevastasena.",
+      "label": "Maksimaalne Kestus"
+    },
+    "anti_wrinkle_max_power": {
+      "doc": "Sellest võimsusest kõrgemat pulssi käsitletakse kui tõelist uut tsüklit, mitte kui kortsudevastast tumblerit. Seadke trummelimpulsi võimsusest veidi kõrgemale.",
+      "label": "Maks Kortsudevastane Võimsus"
+    },
+    "auto_label_confidence": {
+      "doc": "Kui vaste skoor tsükli lõpus on sellel tasemel või sellest suurem, märgistatakse programm automaatselt ilma kinnitusviibata. Suurendage seda, et nõuda enne automaatset märgistamist suuremat kindlust; alandage seda, et rohkem automatiseerida. Töötab koos selle all oleva Learning Confidence'iga.",
+      "label": "Automaatse Sildi Usaldus"
+    },
+    "auto_maintenance": {
+      "doc": "Korraldage igaõhtust majapidamist: koostage profiiliümbrised, arvutage uuesti tsükli seisukord, pügake silumisjälgi ja säilitage uusimad tsüklid.",
+      "label": "Automaatne Hooldus (öine puhastus)"
+    },
+    "completion_min_seconds": {
+      "doc": "Sellest lühemad tsüklid jäetakse kummitustsüklitena kõrvale (testisõidud, soki lisamiseks ukse avamine).",
+      "label": "Min Tsükli Kestus"
+    },
+    "delay_confirm_seconds": {
+      "doc": "Toide peab jääma ooterežiimi sagedusalasse nii kauaks, enne kui seadet käsitletakse kui käivitust ootavat, mitte töötavat.",
+      "label": "Kinnitussekundid"
+    },
+    "delay_start_detect_enabled": {
+      "doc": "Tuvastab, millal seade on sisse lülitatud ja ootab (viivitusega käivitus / ooterežiim), kuid ei ole oma tsüklit alustanud, seega ei peeta ooterežiimi tõmbamist töötsükliks.",
+      "label": "Luba Viivitatud Käivituse Tuvastamine"
+    },
+    "delay_timeout_hours": {
+      "doc": "Lõpetage pärast seda mitu tundi viitkäivituse režiimis ootamist ja naaske tühikäigule, nii et masin, mis on jäetud toiteallikaks, kuid mitte käivitatud, ei oota igavesti.",
+      "label": "Aegumistunnid"
+    },
+    "device_type": {
+      "doc": "Seadmeklass. Määrab selle seadmetüübi jaoks häälestatud mõistlikud tuvastamise vaikesätted (läved, väljalülitusviivitus, lõppkäsitsus); muutke seda ainult siis, kui seade oli algselt seadistatud valet tüüpi.",
+      "label": "Seadme Tüüp"
+    },
+    "door_sensor_entity": {
+      "doc": "Valikuline ukse binaarandur. Kasutatakse selleks, et tuvastada, millal seade on pärast tsüklit avatud/laaditud.",
+      "label": "Ukse Anduri Olem"
+    },
+    "duration_tolerance": {
+      "doc": "Tolerants järelejäänud aja hinnangute suhtes (õppiv tagasiside, mitte sobitamine). Kui tegelik kestus jääb hinnangulisest +/-X% piiresse, loetakse see heaks vasteks.",
+      "label": "Hinnangu Tolerants"
+    },
+    "enable_ml_models": {
+      "doc": "Tsükli kulgemise ajal laske mudelitel reaalajas tulemusi täpsustada: ühtlasem järelejäänud aja- ja energia/kuluhinnang ning enneaegse peatumise vastane kaitse lõpu tuvastamisel (see võib ainult finišit edasi lükata, mitte kunagi varem lõpetada ja on piiratud). Kasutab võimalusel teie peenhäälestatud mudeleid, muul juhul sisseehitatud mudeleid. Väljas = ainult klassikaline toitepõhine loogika (ikka usaldusväärne).",
+      "label": "Rakenda nutikaid mudeleid tsükli ajal"
+    },
+    "end_energy_threshold": {
+      "doc": "Väljalülitusviivituse loenduse ajal võrreldakse kogunenud energiat (vatti x aeg) selle lävega. Ületamise korral pöördloendus lähtestub – kortsumisvastased trumlid ja nõudepesumasina kuivatussabad jäävad tsükli külge, selle asemel et neid lühikeseks lõigata. Tõstke seda, kui tsüklid lõpevad jahtumise ajal liiga vara; alandage seda, kui tuvastamine on aeglane.",
+      "label": "Lõpu Energia"
+    },
+    "end_repeat_count": {
+      "doc": "Enne tsükli lõppu on vajalik järjestikuste alla stopp-läve näitude arv. 1 sobib enamiku pistikute jaoks. Tõstke väärtuseni 2–3, kui teie nutipistik teatab aeg-ajalt valenull-näidist tsükli keskel ja teie tsüklid lõpevad enneaegselt.",
+      "label": "Lõpu Kordusloendur"
+    },
+    "energy_price_entity": {
+      "doc": "Andur praeguse elektrihinnaga kWh kohta (nt dünaamiline tariif). See on ülimuslik alloleva staatilise hinna suhtes. Iga tsükkel külmutab selle lõppedes kehtiva hinna.",
+      "label": "Energia Hinna Olem"
+    },
+    "energy_price_static": {
+      "doc": "Fikseeritud hind kWh kohta, mida kasutatakse kulunäitajate jaoks, kui ülal pole määratud reaalajas hinna olemit.",
+      "label": "Staatiline Energia Hind (kWh kohta)"
+    },
+    "expose_debug_entities": {
+      "doc": "Avaldage täiendavad diagnostilised HA-üksused (vaste usaldus, mitmetähenduslikkus, oleku sisemised andmed). Väljas hoiab olemiloendi tavakasutuseks puhtana.",
+      "label": "Näita Silumise Olemeid"
+    },
+    "external_end_trigger": {
+      "doc": "Binaarsensor, mille oleku muutus tähistab tsükli lõppu (nt seadme \"lõpetatud\" kontakt või kaasintegratsioon).",
+      "label": "Väline Päästiku Olem"
+    },
+    "external_end_trigger_enabled": {
+      "doc": "Lisaks sisseehitatud toitepõhisele tuvastamisele laske tsükli lõpust signaali anda välisel binaarsel anduril.",
+      "label": "Luba Väline Lõpu Päästik"
+    },
+    "external_end_trigger_inverted": {
+      "doc": "Käsitlege päästikuanduri VÄLJA lülitumist (mitte SISSE) tsükli lõpu signaalina.",
+      "label": "Pööra Väline Päästik (käivita VÄLJAS)"
+    },
+    "learning_confidence": {
+      "doc": "Kui vaste skoor jääb selle ja automaatse sildi usaldusväärsuse vahele, palutakse tagasiside teatises tuvastatud programmi kinnitada. Sellest punktist allpool on matš liiga ebakindel, et pinnale jõuda. Tuleb hoida allpool automaatse sildi usaldusväärsust.",
+      "label": "Õppimise Usaldus"
+    },
+    "linked_device": {
+      "doc": "Soovi korral pesake see WashData seade HA-seadmete registris mõne teise seadme (nt nutipistiku) alla, kuvatakse kui \"Ühendatud ... kaudu\".",
+      "label": "Grupeeri Seadme Alla"
+    },
+    "min_off_gap": {
+      "doc": "Kui masin lülitub välja vähem kui see aeg, käsitletakse sisse/välja/sisse jada ühe pideva tsüklina. Takistab leotusprogrammide (masin lülitub keset pesu mitmeks minutiks välja) jagamist kaheks eraldi tsükliks. Kui soovite, et neid loetaks eraldi tsüklitena, määrake see lühemaks kui vahe oma vahelt tagasi. Seadmetüübi vaikeseaded kaitsevad iga seadme tüüpilist tsüklisisest pausi.",
+      "label": "Min Väljalülitumise Vahe"
+    },
+    "min_power": {
+      "doc": "Aktiivseks loetav absoluutne minimaalne võimsus. Sellest allpool olevaid näitu käsitletakse kui 0 W (ooterežiim), filtreerides välja nutikate pistikute ja ooterežiimi LED-ide fantoomkoormuse.",
+      "label": "Minimaalne Võimsus"
+    },
+    "ml_training_enabled": {
+      "doc": "Uurige perioodiliselt üle öö oma ülevaadatud tsükleid ja viimistlege mudelid selle konkreetse masina jaoks. Muudatust hoitakse alles siis, kui see saavutab tõepoolest paremaid tulemusi pikendatud tsüklitel, nii et see võib ainult aidata või jääda samaks – mitte kunagi taanduda.",
+      "label": "Õpi sellest masinast"
+    },
+    "ml_training_hour": {
+      "doc": "Kohalik kellaaeg (0–23), et teha üleöö peenhäälestust. Valige vaikne tund, näiteks 2 (02:00).",
+      "label": "Õpi tunnil"
+    },
+    "ml_training_interval_days": {
+      "doc": "Kontrollige täiustusi uuesti kõige rohkem üks kord selle mitme päeva jooksul.",
+      "label": "Kontrolli maksimaalselt iga"
+    },
+    "ml_training_min_cycles": {
+      "doc": "Enne peenhäälestamist oodake, kuni vähemalt nii palju tsükleid on salvestatud, et oleks piisavalt õppida.",
+      "label": "Esmalt vajalikud tsüklid"
+    },
+    "name": {
+      "doc": "HA integratsioonide loendis ja seadmeregistris kuvatav nimi.",
+      "label": "Seadme Nimi"
+    },
+    "no_update_active_timeout": {
+      "doc": "Kui töötamise ajal nii kaua toitevärskendusi ei saabu, eeldage, et pistik katkeb võrguühenduseta ja sundpeata, et vältida zombitsüklit. Vaikimisi 600 s lubab pilve- või võrguviivitust.",
+      "label": "Ilma Uuenduseta Aegumine"
+    },
+    "notify_before_end_minutes": {
+      "doc": "Saatke peaaegu valmis hoiatus, kui hinnanguline järelejäänud aeg langeb sellest allapoole. 0 keelab selle.",
+      "label": "Eel-Lõpu Hoiatus"
+    },
+    "notify_channel": {
+      "doc": "Androidi teavituskanali nimi algus-/reaalajas sõnumite jaoks (juhib kanalipõhist heli ja prioriteeti mobiilirakenduses). Blank kasutab kaasrakenduse vaikeseadet.",
+      "label": "Android Kanal (käivitus/reaalajas)"
+    },
+    "notify_cycle_timers": {
+      "doc": "Teavitused tsükli teatud minutitel (nt pehmendaja lisamiseks). Sõnum toetab {device}, {program}, {minutes}. Lubage automaatne paus, et peatada sellel hetkel ja saada interaktiivne teatis nupuga Jätka; jätkake paneeli, peatamise/jätkamise teenuse või teavitustoimingu kaudu.",
+      "label": "Tsükli Taimerid"
+    },
+    "notify_finish_channel": {
+      "doc": "Androidi teavituskanali nimi lõpusõnumi jaoks. Tühi kasutab taaskäivitus-/reaalajas kanalit.",
+      "label": "Android Kanal (lõpetamine)"
+    },
+    "notify_finish_message": {
+      "doc": "Keha, mis saadetakse tsükli lõppedes. Malli muutujad: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} ja {vs_typical} on siin kõige kasulikumad.",
+      "label": "Lõpetamise Sõnum"
+    },
+    "notify_finish_services": {
+      "doc": "teata.* teenuseid kutsutakse tsükli lõppedes. Lisa üks sihtmärgi kohta; jätke tühjaks, et mitte lõpetada teatist.",
+      "label": "Lõpetamise Teenused"
+    },
+    "notify_fire_events": {
+      "doc": "Käivitage ka ha_washdata_* sündmused tsükli alguses/lõpetamisel, et saaksite luua oma automaatika.",
+      "label": "Käivita HA Sündmused Teavituste Jaoks"
+    },
+    "notify_icon": {
+      "doc": "Märguande valikuline mdi-ikoon (nt mdi:pesumasin). Platvormi vaikeseadeks jätke tühjaks.",
+      "label": "Teavituse Ikoon"
+    },
+    "notify_live_chronometer": {
+      "doc": "Staatilise hinnangu asemel kuvage teatises (seda toetavatel platvormidel) reaalajas taastuv taimer.",
+      "label": "Kasuta Elavat Kronomeetrit"
+    },
+    "notify_live_interval_seconds": {
+      "doc": "Reaalajas edenemise teatiste värskendamine tsükli ajal.",
+      "label": "Reaalajas Uuenduse Intervall"
+    },
+    "notify_live_overrun_percent": {
+      "doc": "Kui tsükkel möödub oma hinnangust rohkem kui see protsent, saatke ületamise hoiatus.",
+      "label": "Reaalajas Ülekulu % Enne Hoiatust"
+    },
+    "notify_live_services": {
+      "doc": "teata.* teenused nõudsid tsükli kulgemise ajal reaalajas edenemise värskendusi. Reaalajas edenemise märguannete keelamiseks jätke tühjaks.",
+      "label": "Reaalajas Edenemise Teenused"
+    },
+    "notify_only_when_home": {
+      "doc": "Saatke märguandeid ainult siis, kui vähemalt üks lingitud inimestest (ülal) on kodus.",
+      "label": "Teavita Ainult Kodus Olles"
+    },
+    "notify_people": {
+      "doc": "isik.* olemid, mida funktsioon „Teata ainult kodus” otsustamaks, kas keegi on kodus.",
+      "label": "Inimesed (Ainult Kodus Olles)"
+    },
+    "notify_pre_complete_message": {
+      "doc": "Eel-/peaaegu valmis hoiatuse sisu. Malli muutujad: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "label": "Eel-Lõpetamise Sõnum"
+    },
+    "notify_reminder_message": {
+      "doc": "Ikka ootava mahalaadimise meeldetuletuse sisu. Tühi kasutab sisseehitatud vaikeseadet. Malli muutujad: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "label": "Meeldetuletuse Sõnum"
+    },
+    "notify_start_message": {
+      "doc": "Keha, mis saadetakse tsükli alguses. Malli muutujad: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "label": "Käivitamise Sõnum"
+    },
+    "notify_start_services": {
+      "doc": "teata.* teenuseid kutsutakse tsükli alguses. Lisage üks iga sihtmärgi (telefon, armatuurlaud jne) kohta; jätke tühjaks, et mitte alustada märguannet.",
+      "label": "Käivitamise Teenused"
+    },
+    "notify_timeout_seconds": {
+      "doc": "Loobuge teatisest automaatselt pärast seda mitut sekundit (seda toetavatel platvormidel). 0 säilitab selle kuni käsitsi loobumiseni.",
+      "label": "Automaatne Sulgemine Pärast"
+    },
+    "notify_title": {
+      "doc": "Teatise pealkiri. Malli muutujad: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "label": "Teavituse Pealkiri"
+    },
+    "notify_unload_delay_minutes": {
+      "doc": "Minutid pärast tsükli lõppu enne veel ootava \"masina mahalaadimise\" meeldetuletuse saatmist. Meeldetuletuse keelamiseks määrake 0.",
+      "label": "Mahalaadimise Meeldetuletuse Viivitus"
+    },
+    "off_delay": {
+      "doc": "Aeg oodata pärast võimsuse langemist, enne kui tsükkel lõppenuks kuulutatakse. Kui toide taastub selles aknas, jätkub tsükkel sujuvalt – see sillutab pause pesuetappide vahel. Nõudepesumasinal on pikad kuivatusfaasid (väljalülitamine 20-60 min), seega peab väljalülitamise viivitus ületama seda, et hoida kogu pesu+kuiv ühe tsüklina.",
+      "label": "Väljalülitumise Viivitus"
+    },
+    "pause_cuts_power": {
+      "doc": "Kui tsükkel on peatatud, lülitage välja ka allolev olem Switch Entity. Ainult seadmetele, mille pistikut saab ohutult katkestada tsükli keskel.",
+      "label": "Paus Lõikab Ka Võimsuse (lüliti kaudu)"
+    },
+    "power_off_delay": {
+      "doc": "Kui kaua peab võimsus pärast tsükli lõppu püsima allpool Toite Väljalülitamise Läve, enne kui olek naaseb olekusse Väljas. Kasutatakse ainult siis, kui Toite Väljalülitamise Lävi on üle 0. Kontrollitakse taustatakti järgi, seega tegelik viivitus ümardatakse üles järgmise oleku aegumise sammuni.",
+      "label": "Toite Väljalülitamise Viivitus"
+    },
+    "power_off_threshold_w": {
+      "doc": "Valikuline võimsuspõhine Väljas-oleku tuvastamine. Kui väärtus on üle 0 ja tsükkel on lõppenud ning võimsus püsib sellest tasemest allpool Toite Väljalülitamise Viivituse jooksul, loetakse masin väljalülitatuks ja olek naaseb olekusse Väljas. Keelamiseks jätke väärtuseks 0 (vaikimisi). Määrake see tegelikust väljalülitatud tasemest kõrgemale, kuid Peatumise Läve ja oma masina lõpetatud-kuid-sees ooterežiimi tarbimisest allapoole; kui see ei ole Peatumise Lävest allpool, seda eiratakse. Sisselülitatuna asendab see olekusse Väljas naasmisel Edenemise Lähtestamise Viivituse, nii et lõpetatud masin jääb olekusse Valmis/Puhas, kuni see tegelikult välja lülitatakse.",
+      "label": "Toite Väljalülitamise Lävi"
+    },
+    "power_sensor": {
+      "doc": "Anduri olem, mis teatab selle seadme reaalajas võimsust vattides (nt sensor.washer_power). Kogu tsükli tuvastamine põhineb sellel signaalil.",
+      "label": "Võimsusandur"
+    },
+    "profile_duration_tolerance": {
+      "doc": "+/- riba profiili keskmise kestuse ümber, mida kasutatakse sobitamise ajal. 0,25 tähendab, et 60-minutiline profiil vastab 45-75-minutistele tsüklitele.",
+      "label": "Profiili Kestuse Tolerants"
+    },
+    "profile_match_interval": {
+      "doc": "Kui sageli proovite jooksutsükli jooksul profiili sobitada. Vaikimisi 300 s (5 minutit) tasakaalustab tuvastamise kiiruse ja protsessori.",
+      "label": "Vaste Intervall"
+    },
+    "profile_match_max_duration_ratio": {
+      "doc": "Tsükli maksimaalne pikkus profiili suhtes. 1.3 tähendab, et tsükkel peab vastamiseks olema alla 130% profiili kestusest.",
+      "label": "Max Kestuse Suhe"
+    },
+    "profile_match_min_duration_ratio": {
+      "doc": "Minimaalne tsükli pikkus profiili suhtes. 0,9 tähendab, et tsükkel peab vastamiseks moodustama vähemalt 90% profiili kestusest.",
+      "label": "Min Kestuse Suhe"
+    },
+    "profile_match_threshold": {
+      "doc": "Programmi tuvastamise aktsepteerimiseks on tsükli lõpus nõutav minimaalne sarnasusskoor (0-1). Tõstke see üles, et vähendada vale tuvastamist; alandage seda, kui teie masina programme ei sobitata. Vaikimisi 0,4 on konservatiivne lähtepunkt.",
+      "label": "Vaste Lävi"
+    },
+    "profile_unmatch_threshold": {
+      "doc": "Kui reaalajas tsükli keskel toimuv matš langeb sellest punktist allapoole, siis esialgne tuvastamine kustutatakse. Hoidke seda veidi allpool sobivusläve, nii et lühike sarnasuse langus ei muudaks ekraani uuesti võrreldamatuks.",
+      "label": "Mitte-Vaste Lävi"
+    },
+    "progress_reset_delay": {
+      "doc": "Pärast lõpetamist hoidke edenemist nii kaua 100% juures, et enne jõudeolekule lähtestamist oleks armatuurlaudadel näha tekst Lõpetatud.",
+      "label": "Edenemise Lähtestamise Viivitus"
+    },
+    "pump_stuck_duration": {
+      "doc": "Mõni sekund võib pump pidevalt töötada, enne kui see märgitakse võimalikuks ummikuks (käivitab pumba kinnijäämise sündmuse).",
+      "label": "Pumba Kinnijäämise Kestus"
+    },
+    "running_dead_zone": {
+      "doc": "Pärast tsükli algust eiratakse selle akna võimsuse langusi. Pesumasinad täituvad külma veega (enne kuumutamist langeb 0 W lähedale) – ilma selle kaitseta näeb täitmisfaas välja nagu tsükli lõpp. See EI jäta andmeid vahele: täisvõimsuse jälg salvestatakse alates T=0. Soovitusmootor mõõdab teie masina tegelikku käivitusmustrit ja määrab selle suuruse automaatselt.",
+      "label": "Töötava Surnud Tsoon"
+    },
+    "sampling_interval": {
+      "doc": "Eeldatav aeg andurite näitude vahel – kasutatakse silumisakna suuruse määramiseks ja tagasilöögi õigeks alustamiseks. Iga anduri värskendus salvestatakse olenemata sellest väärtusest; see kalibreerib ainult allavoolu arvutusi. Soovitusmootor mõõdab teie anduri tegelikku sagedust eelmiste tsüklite põhjal ja määrab selle automaatselt.",
+      "label": "Proovivõtu Intervall"
+    },
+    "save_debug_traces": {
+      "doc": "Salvestage iga tsükli täielik võimsusjälg ja vastavad silumisandmed. Kasulik tõrkeotsinguks, kuid suurendab salvestusruumi mahtu.",
+      "label": "Salvesta Silumise Jäljed"
+    },
+    "smoothing_window": {
+      "doc": "Kui palju toorvõimsussignaali tasandatakse. Madal (2) on tundlik, kuid lärmakas; kõrge (5) silub naelu, kuid lisab mahajäämust.",
+      "label": "Silumisaken"
+    },
+    "start_duration_threshold": {
+      "doc": "Tõelise käivituse kinnitamiseks peab võimsus püsima nii kaua üle käivitusläve, vältides sekundi murdosa sisse-/väljalülituslülititel tsükli käivitamist.",
+      "label": "Käivitumise Kestus"
+    },
+    "start_energy_threshold": {
+      "doc": "Energiat (võimsus x aeg), mida seade peab tarbima enne TÖÖTAMIST. Lühiajaline suure võimsusega piisk on väga madala energiaga ja seda ignoreeritakse, vältides valekäivitusi.",
+      "label": "Käivitumise Energia"
+    },
+    "start_threshold_w": {
+      "doc": "Tsükli käivitamise kinnitamiseks peab võimsus tõusma sellest tasemest kõrgemale. Selle liiga madalaks seadmine põhjustab valekäivitusi ooterežiimist; liiga kõrged ja aeglaselt käivituvad programmid (külmtäitmine) jäävad vahele. Soovitusmootor seab selle masina vaadeldud väikseima aktiivvõimsuse tasemest veidi kõrgemale.",
+      "label": "Käivitumise Lävi"
+    },
+    "stop_threshold_w": {
+      "doc": "Võimsus peab langema allapoole seda taset enne väljalülitusviivituse loenduse algust. Seadke see stardiläve alla – vahe nende vahel on hüstereesiriba, mis väldib virvendust. Kui see on liiga kõrgeks seatud, käivitavad väikese võimsusega faasid (loputusjäägid, kortsumisvastane) lõppjada ekslikult.",
+      "label": "Peatumise Lävi"
+    },
+    "switch_entity": {
+      "doc": "Valikuline lüliti lülitatakse pausi korral välja ja jätkamisel uuesti sisse, kasutatakse koos funktsiooniga \"Paus katkestab ka toite\".",
+      "label": "Lüliti Olem"
+    },
+    "watchdog_interval": {
+      "doc": "Kui sageli taustavalve kontrollib andureid seiskunud ja aegunud aegu. Vaikimisi 30 s.",
+      "label": "Valvekoera Intervall"
+    },
+    "notify_milestone_message": {
+      "doc": "Verstaposti teavituse sõnum. Malli muutujad: {device}, {cycle_count}.",
+      "label": "Verstaposti sõnum"
+    },
+    "notify_milestones": {
+      "doc": "Komadega eraldatud tsüklite arvud, mis saavutamisel käivitavad ühekordse tähistusteavituse (nt 50, 100, 500, 1000). Tühi keelab verstaposti teavitused.",
+      "label": "Tsükli verstapostid"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "Mittehäirimise akna lõpp (0-23). Kinnipeetud teavitused edastatakse sel tunnil. Keelamiseks jäta tühjaks.",
+      "label": "Vaikuse tundide lõpp"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "Mittehäirimise akna algus (0-23). Lõpetamise, meeldetuletuse ja puhta pesu teavitused, mis vaikuse tundidel käivituksid, peetakse kinni ja edastatakse akna lõppedes. Keelamiseks jäta tühjaks. Toetab keskööd ületavaid aknaid (nt algus 22, lõpp 7).",
+      "label": "Vaikuse tundide algus"
+    },
+    "peak_rate_message": {
+      "doc": "Valikuline kohandatud tekst tipptunni tariifi vihjele, mis lisatakse käivitamise teavitusele. Malli muutujad: {device}, {price}. Tühi kasutab sisseehitatud vaikeseadet.",
+      "label": "Tipptunni tariifi sõnum"
+    },
+    "peak_rate_threshold": {
+      "doc": "Kui tsükkel algab ja praegune hind kWh kohta on sellel väärtusel või kõrgem, lisatakse käivitamise teavitusele tipptunni tariifi vihje. 0 või tühi keelab vihje.",
+      "label": "Tipptunni tariifi lävi (kWh kohta)"
+    },
+    "dtw_bandwidth": {
+      "label": "Kuju sobitamise tolerants",
+      "doc": "Kui palju sobitaja võib tsüklit ajaliselt venitada, et see salvestatud programmi kujuga sobiks. Kõrgem lubab suuremat kiiruse varieerumist; liiga kõrge võib sobitada vale programmi."
+    },
+    "corr_weight": {
+      "label": "Kuju vs taseme kaal",
+      "doc": "Tasakaal kõvera kuju ja absoluutse võimsustaseme vahel sobivuse hindamisel. Kõrgem eelistab kuju; madalam eelistab võimsustaseme sobitamist."
+    },
+    "duration_weight": {
+      "label": "Kestuse kaal",
+      "doc": "Kui tugevalt eelistatakse programmi, mille tüüpiline kestus selle tsükliga sobib."
+    },
+    "energy_weight": {
+      "label": "Energia kaal",
+      "doc": "Kui tugevalt eelistatakse programmi, mille tüüpiline energiakulu selle tsükliga sobib."
+    },
+    "store_brand": {
+      "label": "Seadme bränd",
+      "doc": "Valikuline. Seadme bränd, mis valitakse kogukonna kataloogist. Kasutatakse sobivate võrdlussalvestiste leidmiseks ja jagamiseks. Jäta tühjaks, kui sa veebifunktsioone ei kasuta."
+    },
+    "store_model": {
+      "label": "Seadme mudel",
+      "doc": "Valikuline. Seadme mudel, mis valitakse kogukonna kataloogist, kui bränd on määratud. Kui sinu mudelit pole loendis, saad selle kataloogi lisada."
+    },
+    "show_contributor": {
+      "doc": "Kuva \"<kaastöötaja> poolt\" omistamine kogukonna kodumasinate ja võrdlustsüklite juures."
+    }
+  },
+  "setting_group": {
+    "auto_labeling": {
+      "label": "Automaatne Sildistamine"
+    },
+    "cycle_end": {
+      "label": "Tsükli Lõpp"
+    },
+    "cycle_start": {
+      "label": "Tsükli Algus"
+    },
+    "cycle_timers": {
+      "label": "Tsükli Taimerid"
+    },
+    "data_management": {
+      "label": "Andmehaldus"
+    },
+    "debug": {
+      "label": "Silumine"
+    },
+    "dishwasher_end": {
+      "label": "Nõudepesumasina Lõpp"
+    },
+    "door_pause": {
+      "label": "Uks ja Paus"
+    },
+    "dtw_refinement": {
+      "label": "DTW Täpsustamine"
+    },
+    "duration_gates": {
+      "label": "Kestuse Väravad"
+    },
+    "energy": {
+      "label": "Energia"
+    },
+    "external_end_trigger": {
+      "label": "Väline Lõpu Päästik"
+    },
+    "housekeeping": {
+      "label": "Hooldus"
+    },
+    "match_scoring": {
+      "label": "Vaste Skoor"
+    },
+    "messages": {
+      "label": "Sõnumid"
+    },
+    "power_off": {
+      "label": "Toite Väljalülitamine"
+    },
+    "predictive_end": {
+      "label": "Ennustav Lõpp"
+    },
+    "schedule": {
+      "label": "Ajakava"
+    },
+    "services": {
+      "label": "Teenused"
+    },
+    "signal_processing": {
+      "label": "Signaali Töötlus"
+    },
+    "thresholds_gap": {
+      "label": "Läviväärtused ja Vahe"
+    },
+    "timing": {
+      "label": "Ajastus"
+    },
+    "unload_reminder": {
+      "label": "Mahalaadimise Meeldetuletus"
+    },
+    "watchdog": {
+      "label": "Valvekoer"
+    },
+    "quiet_hours_milestones": {
+      "label": "Vaikuse tunnid ja verstapostid"
+    },
+    "device_info": {
+      "label": "Seadme teave"
+    },
+    "basic_configuration": {
+      "label": "Põhiseaded"
+    }
+  },
+  "status": {
+    "active": "Aktiivne",
+    "all_statuses": "Kõik olekud",
+    "ambiguous": "Mitmetähenduslik",
+    "auto_detect": "Automaatne tuvastamine",
+    "clear": "Selge",
+    "completed": "Lõpetatud",
+    "fine_tuning": "kohe peenhäälestus...",
+    "force_stopped": "Jõud peatus",
+    "idle": "Tühikäik",
+    "interrupted": "Katkestatud",
+    "ready": "Töötlemiseks valmis",
+    "recording": "Salvestamine",
+    "training": "Treenimine…",
+    "saving": "Salvestamine…",
+    "rebuilding": "Taasehitamine…",
+    "analyzing": "Analüüsimine…",
+    "resetting": "Lähtestamine…",
+    "reverting": "Taastamine…",
+    "trimming": "Kärpimine…",
+    "splitting": "Lõhestamine…",
+    "deleting": "Kustutamine…",
+    "imported": "Imporditud"
+  },
+  "tab": {
+    "advanced": "Täpsemalt",
+    "diagnostics": "Diagnostika",
+    "history": "Tsüklid",
+    "ml": "ML koolitus",
+    "pp_cleanup": "Puhastamine",
+    "pp_manage": "Halda",
+    "pp_overview": "Ülevaade",
+    "pp_phases": "Faasid",
+    "profiles": "Profiilid",
+    "settings": "Seaded",
+    "status": "Ülevaade",
+    "subtab_phase_catalog": "Faaside kataloog",
+    "subtab_profiles": "Profiilid",
+    "maintenance": "Hooldus",
+    "playground": "Katseala",
+    "store": "Pood"
+  },
+  "tag": {
+    "early_end": "Varajane lõpp",
+    "late_start": "Hiline algus",
+    "merged": "Ühendatud tsüklid",
+    "noise": "Müra",
+    "sensor_gap": "Anduri vahe",
+    "split": "Tükeldatud tsükkel",
+    "wrong_profile": "Vale profiil"
+  },
+  "toast": {
+    "access_saved": "Juurdepääsukontroll on salvestatud",
+    "all_wiped": "Kõik andmed on kustutatud",
+    "analysis_complete_none": "Analüüs on lõpetatud: uusi ettepanekuid pole",
+    "auto_label_complete": "Automaatne silt on lõpetatud",
+    "automation_deleted": "Automaatika kustutatud",
+    "correction_submitted": "Parandus esitatud",
+    "cycle_deleted": "Tsükkel kustutatud",
+    "cycle_force_stopped": "Tsükkel sundpeatatud",
+    "cycle_labelled": "Tsükkel märgistatud",
+    "cycle_paused": "Tsükkel peatatud",
+    "cycle_resumed": "Tsükkel jätkus",
+    "cycle_trimmed": "Tsükkel kärbitud",
+    "cycles_merged": "Tsüklid liidetud",
+    "envelope_rebuilt": "Ümbrik ümber ehitatud",
+    "envelopes_rebuilt": "Ümbrikud ümber ehitatud",
+    "export_downloaded": "Eksport on alla laaditud",
+    "feedback_all_dismissed": "Kõik tagasisided on tagasi lükatud",
+    "feedback_confirmed": "Tagasiside kinnitatud",
+    "feedback_dismissed": "Tagasiside tagasi lükatud",
+    "group_deleted": "Grupp kustutatud",
+    "group_name_required": "Grupi nimi on kohustuslik",
+    "group_saved": "Grupp salvestatud",
+    "import_successful": "Import õnnestus; integratsiooni uuesti laadimine",
+    "json_required": "Vaja on JSON-i andmeid",
+    "legacy_removed": "Pärandtoimingud eemaldati",
+    "logs_exported": "Palgid eksporditud",
+    "matching_reverted": "Sobivad kaalud taastati vaikeväärtustele",
+    "min_2_profiles": "Valige rühma jaoks vähemalt 2 profiili",
+    "ml_training_no_improvement": "Treening on lõpetatud: lähtetase säilinud (paranemist pole)",
+    "models_reverted": "Seadmes olevad mudelid taastati algtasemele",
+    "name_required": "Nimi nõutav",
+    "no_split_found": "Tühikäigulünki ei leitud, mille pealt poolitada",
+    "panel_settings_saved": "Paneeli sätted salvestatud",
+    "phase_name_required": "Etapi nimi on nõutav",
+    "phase_updated": "Faas värskendatud",
+    "phases_saved": "Faasid salvestatud",
+    "preferences_saved": "Eelistused salvestatud",
+    "profile_name_required": "Profiili nimi on nõutav",
+    "profile_renamed": "Profiil on ümber nimetatud",
+    "recording_discarded": "Salvestus tühistati",
+    "recording_saved": "Salvestis salvestati profiili",
+    "recording_started": "Salvestamine algas",
+    "recording_stopped": "Salvestamine peatus",
+    "review_saved": "Arvustus salvestatud",
+    "settings_conflicts": "Parandage esiletõstetud sätete konfliktid enne salvestamist.",
+    "settings_reverted": "Seaded taastatud; integratsiooni uuesti laadimine",
+    "settings_saved": "Seaded salvestatud; integratsiooni uuesti laadimine",
+    "suggestions_applied": "Soovitused rakendatud; integratsiooni uuesti laadimine",
+    "suggestions_dismissed": "Soovitused lükati tagasi",
+    "apply_failed": "Rakendamine ebaõnnestus: {error}",
+    "delete_failed": "Kustutamine ebaõnnestus: {error}",
+    "load_more_failed": "Rohkema laadimine ebaõnnestus: {error}",
+    "maint_add_failed": "Sündmuse lisamine ebaõnnestus: {error}",
+    "maint_added": "Hooldussündmus lisatud",
+    "maint_delete_failed": "Sündmuse kustutamine ebaõnnestus: {error}",
+    "maint_deleted": "Hooldussündmus kustutatud",
+    "relabel_done": "{count} tsüklit uuesti märgistatud",
+    "relabel_failed": "Uuesti märgistamine ebaõnnestus: {error}",
+    "reminders_save_failed": "Meeldetuletuste salvestamine ebaõnnestus: {error}",
+    "reminders_saved": "Hoolduse meeldetuletused salvestatud",
+    "pause_no_cycle": "Pole aktiivset tsüklit, mida peatada",
+    "resume_no_cycle": "Pole peatatud tsüklit, mida jätkata",
+    "delete_partial_failed": "Mõnda üksust ei õnnestunud kustutada ja need taastati",
+    "pg_run_gone": "See käitus pole enam saadaval.",
+    "task_cancelled": "Tühistatud.",
+    "processed": "Töödeldud {bits}",
+    "processed_cycles": "{n} tsüklit",
+    "processed_suggestions": "{n} soovitust",
+    "processed_models": "{n} mudelit edutatud",
+    "store_search_failed": "Otsing ebaõnnestus: {error}",
+    "store_connect_failed": "Ühendamine ebaõnnestus: {error}",
+    "store_connected": "Ühendatud kogukonna poega",
+    "store_disconnected": "Ühendus kogukonna poega katkestatud",
+    "store_error": "Viga: {error}",
+    "store_unavailable": "Kogukonna pood ei ole saadaval.",
+    "store_pick_profile": "Vali profiil, millega liita",
+    "store_name_required": "Sisesta profiili nimi",
+    "store_import_failed": "Import ebaõnnestus: {error}",
+    "store_imported": "Imporditud profiili {profile}",
+    "store_program_required": "Sisesta programmi nimi",
+    "store_no_appliance": "Määra kõigepealt seadetes seadme bränd ja mudel.",
+    "store_share_failed": "Jagamine ebaõnnestus: {error}",
+    "store_shared": "Jagatud kogukonna poodi - ootab ülevaatust.",
+    "appliance_added": "Seade lisatud - ootab heakskiitu",
+    "thanks_confirming": "Aitäh kinnitamast",
+    "device_approved": "Kogukond kiitis heaks",
+    "rating_saved": "Kvaliteedihinnang salvestatud",
+    "brand_added": "Bränd lisatud - ootab heakskiitu",
+    "profile_added": "Profiil lisatud - ootab heakskiitu",
+    "saved_except_conflicts": "Salvestatud. Parandage esiletõstetud konfliktid ülejäänud salvestamiseks.",
+    "share_device_none_sel": "Valige jagamiseks vähemalt üks tsükkel",
+    "store_device_downloaded": "{p} programmi, {c} salvestist lisatud",
+    "store_device_downloaded_phases": "{p} programmi, {c} salvestist, {ph} faasikaart(i) lisatud",
+    "store_device_downloaded_settings": "{p} programmi, {c} salvestist, {ph} faasikaart(i), {s} sätet lisatud",
+    "store_device_shared": "{n} tsüklit jagatud kogukonna poodi - ootab ülevaatamist.",
+    "store_device_shared_all_dup": "Kõik {n} tsüklit olid juba kogukonna poes.",
+    "store_device_shared_partial": "{n} tsüklit jagatud; {failed} ei saanud üles laadida.",
+    "store_device_shared_some_dup": "{created} tsüklit jagatud; {dup} olid juba poes.",
+    "store_download_failed": "Allalaadimine ebaõnnestus: {error}",
+    "store_download_nothing": "Midagi uut alla laadida pole - see seadistus on juba teie seadmel."
+  },
+  "suggestion": {
+    "both_agree": "WashData soovitab",
+    "calibrated_label": "Kalibreeritud",
+    "observed_label": "Mõõdetud",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "Märgistab automaatselt vähem tsükleid; rohkem suunatakse ülevaatusele",
+        "lower": "Märgistab automaatselt rohkem tsükleid; mõnda võidakse valesti tuvastada"
+      },
+      "duration_tolerance": {
+        "higher": "Aktsepteerib laiemat kestuse vahemikku — paindlikum sobitamine",
+        "lower": "Nõuab täpsemat kestuse vastavust — rangem, kuid võib lükata tagasi ebatavalisi tsükleid"
+      },
+      "end_energy_threshold": {
+        "higher": "Sulgeb ainult tsüklid, mis kasutasid olulisel määral energiat",
+        "lower": "Sulgeb ka lühemad või madalama energiatarbe tsüklid"
+      },
+      "end_repeat_count": {
+        "higher": "Nõuab lõpusignaali kordamist rohkem kordi — usaldusväärsem, pisut aeglasem",
+        "lower": "Lõpetab pärast vähemat kordust — kiirem tuvastamine, suurem vale lõpu oht"
+      },
+      "learning_confidence": {
+        "higher": "Õpib ainult väga kindlatest vastetest — aeglasem, kuid usaldusväärsem",
+        "lower": "Õpib rohkematest tsüklitest; mudel võib olla müraram"
+      },
+      "min_off_gap": {
+        "higher": "Enne uue tsükli algust on vajalik pikem tegevusetus",
+        "lower": "Lühike tegevusetus käivitab uue tsükli — järjestikused käivitused võivad jaguneda"
+      },
+      "min_power": {
+        "higher": "Vähem tundlik ooterežiimi tarbimise suhtes; võib vahele jätta vaikse töörežiimi",
+        "lower": "Tundlikum; võib logida ooterežiimi tarbimise tegevusena"
+      },
+      "no_update_active_timeout": {
+        "higher": "Rohkem aega enne tsükli kinni jäänuks kuulutamist",
+        "lower": "Jõudab kinni jäänud tsükli sundpeatamise kiiremini"
+      },
+      "off_delay": {
+        "higher": "Rohkem aega seadme paussideks — käsitleb pikka leotamist või kuivatamist",
+        "lower": "Kiirem lõpu tuvastamine — sobib hästi selge sisse/välja seadmetele"
+      },
+      "profile_match_threshold": {
+        "higher": "Kinnitab ainult suure kindlusega vasteid; rohkem tsükleid jääb märgistamata",
+        "lower": "Sobib rohkema tsükliga; mõnda võib olla veidi vale"
+      },
+      "running_dead_zone": {
+        "higher": "Ignoreerib lühikesi voolutõuse jõudeolekus — vähem müra suhtes tundlik",
+        "lower": "Reageerib lühematele energiapursetele — tabab kiiret mööduvat aktiivsust"
+      },
+      "start_threshold_w": {
+        "higher": "Väldib lühikestest energiatõusudest tulenevaid valesid käivitusi",
+        "lower": "Tabab madalvõimsusega programmid; võib käivituda müra peale"
+      },
+      "stop_threshold_w": {
+        "higher": "Lõpetab tsükli kiiremini — võib sulgeda pausi ajal",
+        "lower": "Ootab lõpetamisega kauem — vähem enneaegseid lõpetusi"
+      },
+      "watchdog_interval": {
+        "higher": "Lubatud pikemad vaiksed faasid; vähem valesid sundpeatusi",
+        "lower": "Tuvastab kinni jäänud tsükleid agressiivsemalt"
+      }
+    },
+    "reason": {
+      "auto_label_confidence": "15. protsentiili usaldusväärsus {cycles} automaatse sildi puhul, mida kasutaja kunagi ei parandanud ({p15}).",
+      "completion_min_seconds": "Pool puhaste tsüklite p05 kestusest ({minutes} min) {cycles} tsükli lõikes; filtreerib välja kummitustsüklid.{excl}",
+      "dead_zone_batch": "Hoitakse lühike (käivitusaegse ebastabiilsuse akna mediaan {cycles} tsükli lõikes = {s}s), et tegelik lõpp tuvastataks kiiresti.",
+      "dead_zone_from_dip": "Põhineb varasel võimsuse langusel, mis tuvastati hetkel {s}s.",
+      "end_energy_default": "Vaikimisi soovitatud baasjoon tsükli lõpu mürakünnisele.",
+      "end_energy_false": "p95 valelõppude energia ({p95}Wh) {cycles} tsükli lõikes, alampiiriga 0.2% tsükli mediaanenergiast ({floor}Wh).",
+      "end_energy_no_false": "Ei ühtki valelõppu {cycles} tsükli lõikes; alampiiriga 0.2% tsükli mediaanenergiast ({floor}Wh).",
+      "end_repeat_count": "{false}/{total} puhtast tsüklist ({pct}%) sisaldas üle 60s kestnud sisemist pausi, mis jätkus; nõuab {val} lõpukinnitust.",
+      "learning_confidence": "p05 usaldusväärsus {cycles} kasutaja märgistatud tsükli puhul ({p05}); sellest allpool küsitakse kinnitust.",
+      "match_interval": "Põhineb täheldatud uuendustempol (mediaan={median}s) * 10.",
+      "max_duration_ratio": "Põhineb märgistatud tsüklite kestustel (p95={p95}).",
+      "min_active": "Põhineb viimases tsüklis täheldatud madalaimal aktiivvõimsusel ({min}W).",
+      "min_duration_ratio": "Hoitakse võimalikult madal, et programm tuvastataks tsükli alguses varakult; usaldus- ja mitmetimõistetavuse lävid hoiavad ära enneaegsed otsused.",
+      "min_off_gap": "Põhineb {gaps} täheldatud tsüklitevahelisel pausil (p05={p05}s). Seadme alampiir: {floor}s.",
+      "min_power": "40% madalaimast aktiivvõimsusest p05 juures ({p05}W) {cycles} puhta tsükli lõikes, hoides väljalülituse läve alla tegeliku tarbimise.{excl}",
+      "ml_auto_label": "Madalaim usaldusväärsus, mida kvaliteedimudel hindas veel puhtaks (p10 {cycles} puhtast tsüklist = {p10}).",
+      "ml_end_repeat": "{false}/{total} tsüklist ({pct}%) sisaldas pausi, millele lõputuvastaja andis >50%; nõuab {val} lõpukinnitust.",
+      "ml_off_delay": "Lõputuvastaja kinnitatud pausid: p95 {p95}s + 60s puhver, {pauses} mudeli kontrollitud pausist {cycles} tsükli lõikes (alampiir {floor}s).",
+      "no_update_timeout": "Põhineb täheldatud uuendustempol (p95={p95}s) * 20 (min 60s).",
+      "off_delay_cadence": "Põhineb täheldatud uuendustempol (p95={p95}s) * 5",
+      "off_delay_device_floor": "Kasutati seadmepõhist ohutut miinimumi seadmele {device} ({floor}s).",
+      "off_delay_generic_floor": "Kasutati üldist ohutut miinimumi ({floor}s).",
+      "off_delay_pauses": "Mõõdetud kestma kauem kui tegelikud pausid: p95 tsüklisisene paus {p95}s + 60s puhver, {pauses} pausist {cycles} puhta tsükli lõikes (alampiir {floor}s).",
+      "profile_match_threshold": "p10 usaldusväärsus {cycles} õige automaatse sildi puhul ({p10}); ohutu alampiir reaalajas kinnitamiseks.",
+      "sampling_interval": "Uuendusintervalli mediaan, mis täheldati {cycles} puhta tsükli lõikes ({si}s).{excl}",
+      "smoothing_window": "Mõõdetud silumaks umbes 30s lugemeid {si}s diskreetimissammuga ({samples} näidet).",
+      "start_duration": "Hoitakse lühike (~üks {si}s diskreetimissamm), et tuvastus algaks võimalikult vara, kuid eiraks siiski üksiknäite piike.",
+      "thr_batch": "Hoitakse veidi üle madalaima aktiivvõimsuse p05 juures {cycles} tsükli lõikes ({p05}W), et käivitus tuvastataks võimalikult vara ja seiskamislävi jääks alla masina madalaima töövõimsuse.",
+      "tol_per_profile": "p75 profiilipõhisest kestuse dispersioonist {profiles} profiili lõikes ({cycles} tsüklit); kitsaid profiile ei karistata.",
+      "tol_pooled": "Põhineb {cycles} viimase märgistatud tsükli koondkestuse dispersioonil (p95 hälve={dev}).",
+      "watchdog": "Hoitakse nii madal kui ohutu (3x p95 uuendusintervall {p95}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta."
+    },
+    "exclusions": {
+      "summary": "Välja jäetud {total} valesti tuvastatud tsüklit: {parts}.",
+      "reason": {
+        "force_stopped": "jõuga peatatud",
+        "interrupted": "katkestatud",
+        "incomplete": "lõpetamata",
+        "noise": "müra",
+        "unlabeled": "sildistamata",
+        "no_trace_short": "kontrollimiseks liiga lühike",
+        "high_start": "algas suure võimsusega",
+        "abrupt_end": "lõppes järsult",
+        "mid_restart": "taaskäivitus keset tsüklit",
+        "no_power": "võimsus puudub",
+        "no_active_power": "aktiivne võimsus puudub"
+      }
+    }
+  },
+  "trend": {
+    "down": "Trend langeb",
+    "up": "Tõusev trend"
+  },
+  "maint": {
+    "bearing_service": "Laagrite hooldus",
+    "descale": "Katlakivi eemaldamine",
+    "drum_clean": "Puhasta trummel",
+    "filter_clean": "Puhasta filter",
+    "other": "Muu"
+  },
+  "col": {
+    "profile_tip": "Vastendatud programmi nimi. Sildistamata tähendab, et tsükli lõpus ei sobitunud ükski profiil.",
+    "status_tip": "Tsükli tulemus: Lõpetatud (loomulik lõpp), Katkestatud (järsk võimsuse langus), Jõuga peatatud (käsitsi) või Vajab ülevaatust (tagasiside ootel).",
+    "date_tip": "Kuupäev ja kellaaeg, mil tsükkel algas.",
+    "duration_tip": "Tsükli kogukestus algusest lõpuni.",
+    "energy_tip": "Kokku tarbitud energia (kWh). Arvutatud võimsuse integreerimisel aja jooksul.",
+    "cost_tip": "Selle tsükli energiakulu, fikseeritud lõpetamisel tollal kehtinud hinna järgi (energia x hind kWh kohta). Selle täitmiseks määra hind seadetes.",
+    "confidence_tip": "Profiili vaste usaldus (0-100%). Kui täpselt tsükli võimsuskõver vastas tuvastatud programmile.",
+    "health_tip": "ML tsükli tervis (kõrgem = parem). Klõpsa tsüklil, et seda uurida ja üle vaadata.",
+    "flags_tip": "Tsükli ülevaatus-, anomaalia- ja allika embleemid. Hõljutage ikooni kohal üksikasja nägemiseks."
+  },
+  "stat": {
+    "avg": "keskm.",
+    "min": "min {v}",
+    "max": "max {v}",
+    "consistency": "järjepidevus ±{v}",
+    "total": "kokku {v}",
+    "last_run": "viimane käivitus {v}",
+    "score": "skoor {pct}%",
+    "duration_cv": "kestuse CV {pct}%",
+    "avg_confidence": "keskm. usaldus {pct}%"
+  },
+  "pg_evd": {
+    "detected": "Tuvastaja tuvastas, et tsükkel oli alanud.",
+    "match_commit": "Sobitaja valis programmi piisava kindlusega.",
+    "match_changed": "Juhtiv programm muutus, kui tsüklit rohkem nähti.",
+    "match_ambiguous": "Kaks programmi said lähedased tulemused, seega oli vaste ebakindel.",
+    "unmatched": "Ükski salvestatud programm sellele tsüklile ei sobinud.",
+    "notify_start": "Saadetaks alustamise teavitus.",
+    "notify_pre_complete": "Saadetaks peaaegu valmis teavitus.",
+    "notify_finish": "Saadetaks lõpetamise teavitus.",
+    "notify_milestone": "Saadetaks verstaposti teavitus.",
+    "notify_held": "Teavitus peeti vaikse aja tõttu kinni.",
+    "finished": "Tsükkel jõudis lõppolekusse ja lõppes."
+  },
+  "store": {
+    "browse": "Sirvi",
+    "device": "Seade",
+    "favorites": "Lemmikud",
+    "search_ph": "Otsi brändi või mudeli järgi…",
+    "no_results": "Sobivaid seadmeid ei leitud. Proovi teistsugust otsingut.",
+    "n_programs": "{n} programmi",
+    "n_cycles": "{n} tsüklit",
+    "no_programs": "Sellele seadmele pole veel programme jagatud.",
+    "no_cycles": "Selle programmi jaoks pole veel võrdlustsükleid jagatud.",
+    "anon": "anonüümne",
+    "uploaded_by": "Jagas {name}",
+    "connected_as": "Ühendatud kasutajana {name}",
+    "not_connected": "Pole ühendatud. Ühenda GitHubi konto, et jagada oma tsükleid.",
+    "import_new": "Uus profiil",
+    "import_merge": "Liida olemasolevaga",
+    "merge_target": "Liida profiiliga",
+    "description": "Kirjeldus (valikuline)",
+    "contributed_by": "autor {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "Hinnanguid veel pole",
+    "website": "Poe veebisait ↗",
+    "website_tip": "Ava kogukonna poe veebisait"
+  },
+  "settings": {
+    "gear": {
+      "title": "Seaded"
+    }
+  },
+  "link": {
+    "manual": "Juhend ↗",
+    "add_appliance": "Lisa oma seade"
+  },
+  "tip": {
+    "add_brand": "Brändi pole loendis? Lisa see kogukonna kataloogi",
+    "add_appliance": "Mudelit pole loendis? Lisa oma seade kogukonna kataloogi",
+    "add_profile": "Lisa sellele seadmele profiil kogukonna saidil"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "Uuesti töötlemine: tsüklite sobitamine",
+      "golden": "Uuesti töötlemine: võrdlustsüklite märkimine",
+      "suggestions": "Uuesti töötlemine: soovitused",
+      "ml_training": "Uuesti töötlemine: ML-i treenimine",
+      "health": "Uuesti töötlemine: tsüklite tervis"
+    },
+    "pg_sweep": {
+      "optimize": "Optimeerimine: {param}"
+    }
+  }
+}

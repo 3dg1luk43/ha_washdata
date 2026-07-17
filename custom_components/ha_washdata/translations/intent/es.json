@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "Tu {device} todavía está en marcha. Quedan unos {minutes} minutos.",
+    "running_no_estimate": "Tu {device} todavía está en marcha.",
+    "finished_recently": "Tu {device} terminó hace {minutes} minutos.",
+    "just_finished": "Tu {device} acaba de terminar.",
+    "not_running": "Tu {device} no está en marcha.",
+    "no_devices": "No encontré ningún electrodoméstico de WashData.",
+    "unknown_device": "No encontré ningún electrodoméstico de WashData llamado {device}.",
+    "none_running": "Ninguno de tus electrodomésticos de WashData está en marcha.",
+    "error": "Lo siento, no pude comprobar tus electrodomésticos en este momento."
+  }
+}

@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Phase catalog defaults and helpers for WashData."""
 
 from __future__ import annotations
@@ -7,14 +23,8 @@ from copy import deepcopy
 from typing import Any
 
 from .const import (
-    DEVICE_TYPE_AIR_FRYER,
-    DEVICE_TYPE_BREAD_MAKER,
-    DEVICE_TYPE_COFFEE_MACHINE,
     DEVICE_TYPE_DISHWASHER,
     DEVICE_TYPE_DRYER,
-    DEVICE_TYPE_EV,
-    DEVICE_TYPE_HEAT_PUMP,
-    DEVICE_TYPE_OVEN,
     DEVICE_TYPE_WASHER_DRYER,
     DEVICE_TYPE_WASHING_MACHINE,
 )
@@ -32,31 +42,37 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
         {
             "name": "Pre-Wash",
             "description": "Initial soak or pre-treatment before the main wash.",
+            "translation_key": "phase_desc.pre_wash",
             "is_default": True,
         },
         {
             "name": "Wash",
             "description": "Main washing cycle with drum movement and optional heating.",
+            "translation_key": "phase_desc.wash",
             "is_default": True,
         },
         {
             "name": "Rinse",
             "description": "Clean-water rinse stage. This phase may repeat multiple times.",
+            "translation_key": "phase_desc.rinse",
             "is_default": True,
         },
         {
             "name": "Spin",
             "description": "High-speed extraction to remove water from the load.",
+            "translation_key": "phase_desc.spin",
             "is_default": True,
         },
         {
             "name": "Soak",
             "description": "Low-activity soaking period between active wash stages.",
+            "translation_key": "phase_desc.soak",
             "is_default": True,
         },
         {
             "name": "Anti-Crease",
             "description": "Occasional short tumbles after completion to reduce wrinkles.",
+            "translation_key": "phase_desc.anti_crease",
             "is_default": True,
         },
     ],
@@ -64,26 +80,31 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
         {
             "name": "Heat Up",
             "description": "Initial heater warm-up before full drying begins.",
+            "translation_key": "phase_desc.heat_up",
             "is_default": True,
         },
         {
             "name": "Drying",
             "description": "Main heated tumbling period.",
+            "translation_key": "phase_desc.drying",
             "is_default": True,
         },
         {
             "name": "Cool Down",
             "description": "Tumbling without heat near cycle end.",
+            "translation_key": "phase_desc.cool_down",
             "is_default": True,
         },
         {
             "name": "Anti-Wrinkle",
             "description": "Periodic post-cycle tumbling to reduce wrinkles.",
+            "translation_key": "phase_desc.anti_wrinkle",
             "is_default": True,
         },
         {
             "name": "Sensor Check",
             "description": "Short low-power pause while dryness is measured.",
+            "translation_key": "phase_desc.sensor_check",
             "is_default": True,
         },
     ],
@@ -91,46 +112,55 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
         {
             "name": "Pre-Wash",
             "description": "Initial soak or pre-treatment before the main wash.",
+            "translation_key": "phase_desc.pre_wash",
             "is_default": True,
         },
         {
             "name": "Wash",
             "description": "Main washing cycle with drum movement and optional heating.",
+            "translation_key": "phase_desc.wash",
             "is_default": True,
         },
         {
             "name": "Rinse",
             "description": "Clean-water rinse stage. This phase may repeat multiple times.",
+            "translation_key": "phase_desc.rinse",
             "is_default": True,
         },
         {
             "name": "Spin",
             "description": "High-speed extraction before drying transition.",
+            "translation_key": "phase_desc.spin_wd",
             "is_default": True,
         },
         {
             "name": "Drain & Switch",
             "description": "Transition period from washing to drying mode.",
+            "translation_key": "phase_desc.drain_and_switch",
             "is_default": True,
         },
         {
             "name": "Heat Up",
             "description": "Initial heater warm-up before full drying begins.",
+            "translation_key": "phase_desc.heat_up",
             "is_default": True,
         },
         {
             "name": "Drying",
             "description": "Main heated tumbling period.",
+            "translation_key": "phase_desc.drying",
             "is_default": True,
         },
         {
             "name": "Cool Down",
             "description": "Tumbling without heat near cycle end.",
+            "translation_key": "phase_desc.cool_down",
             "is_default": True,
         },
         {
             "name": "Anti-Wrinkle",
             "description": "Periodic post-cycle tumbling to reduce wrinkles.",
+            "translation_key": "phase_desc.anti_wrinkle",
             "is_default": True,
         },
     ],
@@ -138,213 +168,37 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
         {
             "name": "Pre-Rinse",
             "description": "Initial spray-down before detergent wash.",
+            "translation_key": "phase_desc.pre_rinse",
             "is_default": True,
         },
         {
             "name": "Wash",
             "description": "Main detergent wash with heating.",
+            "translation_key": "phase_desc.wash_dw",
             "is_default": True,
         },
         {
             "name": "Rinse",
             "description": "Clean-water rinse stage. This phase may repeat multiple times.",
+            "translation_key": "phase_desc.rinse",
             "is_default": True,
         },
         {
             "name": "Dry",
             "description": "Drying stage using heater and/or residual heat.",
+            "translation_key": "phase_desc.dry",
             "is_default": True,
         },
         {
             "name": "Sanitize",
             "description": "High-temperature cleaning stage for sanitization programs.",
+            "translation_key": "phase_desc.sanitize",
             "is_default": True,
         },
         {
             "name": "Soak",
             "description": "Extended soak period for heavy soil.",
-            "is_default": True,
-        },
-    ],
-    DEVICE_TYPE_COFFEE_MACHINE: [
-        {
-            "name": "Heat Up",
-            "description": "Boiler heating to reach operating temperature.",
-            "is_default": True,
-        },
-        {
-            "name": "Brewing",
-            "description": "Water pumping through coffee grounds.",
-            "is_default": True,
-        },
-        {
-            "name": "Keep Warm",
-            "description": "Maintaining temperature after brew completion.",
-            "is_default": True,
-        },
-        {
-            "name": "Grinding",
-            "description": "Bean grinding stage on machines with integrated grinder.",
-            "is_default": True,
-        },
-        {
-            "name": "Steaming",
-            "description": "Steam generation for milk frothing.",
-            "is_default": True,
-        },
-        {
-            "name": "Idle",
-            "description": "Ready/standby period with low power use.",
-            "is_default": True,
-        },
-    ],
-    DEVICE_TYPE_EV: [
-        {
-            "name": "Initialization",
-            "description": "Vehicle and charger handshake before power transfer.",
-            "is_default": True,
-        },
-        {
-            "name": "Charging",
-            "description": "Main charging period at available power.",
-            "is_default": True,
-        },
-        {
-            "name": "Taper",
-            "description": "Reduced charging rate near high state of charge.",
-            "is_default": True,
-        },
-        {
-            "name": "Maintenance",
-            "description": "Battery balancing or conditioning activity.",
-            "is_default": True,
-        },
-        {
-            "name": "Complete",
-            "description": "Charge complete with minimal top-up activity.",
-            "is_default": True,
-        },
-        {
-            "name": "Pre-Conditioning",
-            "description": "Battery temperature conditioning before or during charge.",
-            "is_default": True,
-        },
-    ],
-    DEVICE_TYPE_AIR_FRYER: [
-        {
-            "name": "Pre-Heat",
-            "description": "Initial chamber heating before full cooking.",
-            "is_default": True,
-        },
-        {
-            "name": "Cooking",
-            "description": "Main cooking phase with active heater and fan.",
-            "is_default": True,
-        },
-        {
-            "name": "Pause",
-            "description": "Short pause for shaking or inspection.",
-            "is_default": True,
-        },
-        {
-            "name": "Cool Down",
-            "description": "Fan-only cool-down stage after heating.",
-            "is_default": True,
-        },
-        {
-            "name": "Keep Warm",
-            "description": "Low-heat holding stage to keep food warm.",
-            "is_default": True,
-        },
-    ],
-    DEVICE_TYPE_HEAT_PUMP: [
-        {
-            "name": "Start-Up",
-            "description": "Compressor and system stabilization at cycle start.",
-            "is_default": True,
-        },
-        {
-            "name": "Heating",
-            "description": "Active heating operation.",
-            "is_default": True,
-        },
-        {
-            "name": "Cooling",
-            "description": "Active cooling operation.",
-            "is_default": True,
-        },
-        {
-            "name": "Defrost",
-            "description": "Defrost routine to clear outdoor coil ice.",
-            "is_default": True,
-        },
-        {
-            "name": "Standby",
-            "description": "Low-activity temperature holding period.",
-            "is_default": True,
-        },
-        {
-            "name": "Fan Only",
-            "description": "Air circulation without compressor heating/cooling.",
-            "is_default": True,
-        },
-        {
-            "name": "Boost",
-            "description": "High-output operation for rapid temperature change.",
-            "is_default": True,
-        },
-    ],
-    DEVICE_TYPE_BREAD_MAKER: [
-        {
-            "name": "Kneading",
-            "description": "Motor-driven dough mixing and development. High power draw.",
-            "is_default": True,
-        },
-        {
-            "name": "Resting",
-            "description": "Short low-power pause between kneading stages for gluten relaxation.",
-            "is_default": True,
-        },
-        {
-            "name": "Proving",
-            "description": "Low-heat rising period to allow yeast fermentation and dough expansion.",
-            "is_default": True,
-        },
-        {
-            "name": "Baking",
-            "description": "High-temperature heating element active for crust and crumb formation.",
-            "is_default": True,
-        },
-        {
-            "name": "Keep Warm",
-            "description": "Low-heat holding stage to keep the loaf warm after baking.",
-            "is_default": True,
-        },
-    ],
-    DEVICE_TYPE_OVEN: [
-        {
-            "name": "Pre-Heat",
-            "description": "Heating element runs continuously to bring the cavity up to the target temperature.",
-            "is_default": True,
-        },
-        {
-            "name": "Heating",
-            "description": "Active heater bursts during cooking when the thermostat calls for heat.",
-            "is_default": True,
-        },
-        {
-            "name": "Maintaining Temp",
-            "description": "Thermostat-regulated holding period: heater cycles on and off to keep the set temperature.",
-            "is_default": True,
-        },
-        {
-            "name": "Cool Down",
-            "description": "Heater off after the cycle ends; residual heat dissipates and the cooling fan may continue to run.",
-            "is_default": True,
-        },
-        {
-            "name": "Pyrolytic Clean",
-            "description": "High-temperature self-clean phase that burns off residue. Optional and only active during pyrolytic programs.",
+            "translation_key": "phase_desc.soak_dw",
             "is_default": True,
         },
     ],
@@ -371,28 +225,36 @@ def get_default_phase_catalog(device_type: str) -> list[PhaseItem]:
 
 
 def get_shared_default_phase_catalog() -> list[PhaseItem]:
-    """Return a shared default catalog deduplicated across all device types."""
-    merged: list[PhaseItem] = []
-    seen: set[str] = set()
+    """Return a shared default catalog deduplicated by name across all device types.
+
+    One entry per phase name (first occurrence wins), but a later same-named phase
+    can back-fill a ``translation_key`` the first occurrence lacked, so a localized
+    label from any device-specific definition is not silently discarded.
+    """
+    by_name: dict[str, PhaseItem] = {}
+    order: list[str] = []
     for device_type, device_phases in DEFAULT_PHASES_BY_DEVICE.items():
         for item in device_phases:
             name = str(item.get("name", "")).strip()
             if not name:
                 continue
             key = name.casefold()
-            if key in seen:
-                continue
-            seen.add(key)
-            merged.append(
-                {
+            existing = by_name.get(key)
+            if existing is None:
+                entry: PhaseItem = {
                     "id": _builtin_phase_id(device_type, name),
-                    "device_type": device_type,
+                    "device_type": "",
                     "name": name,
                     "description": str(item.get("description", "")).strip(),
                     "is_default": True,
                 }
-            )
-    return merged
+                if "translation_key" in item:
+                    entry["translation_key"] = item["translation_key"]
+                by_name[key] = entry
+                order.append(key)
+            elif "translation_key" not in existing and "translation_key" in item:
+                existing["translation_key"] = item["translation_key"]
+    return [by_name[k] for k in order]
 
 
 def get_builtin_phase_by_id(phase_id: str) -> PhaseItem | None:

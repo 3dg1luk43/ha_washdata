@@ -1,0 +1,1771 @@
+{
+  "badge": {
+    "artifact_tip": "检测到 {n} 个异常（例如，门在周期中打开）— 打开以在图表上查看",
+    "auto": "（自动检测）",
+    "built_in_tag": "内置",
+    "declining": "↘ 下降中",
+    "energy_low": "能耗低于正常水平",
+    "energy_spike": "能耗高于正常水平",
+    "fair_fit": "质量尚可",
+    "fair_fit_tip": "匹配一致性适中 — 分配给此配置文件的部分周期置信度较低。标记更多周期或重新录制配置文件以提高准确性。",
+    "feedback_requested": "已请求反馈",
+    "golden_cycle": "记录参考周期",
+    "improving": "↗ 提升中",
+    "manual": "（手动选择）",
+    "needs_review": "需要审查",
+    "overrun": "运行时间超出正常",
+    "poor_fit": "质量差",
+    "poor_fit_tip": "匹配历史不一致 — 考虑重建此配置文件",
+    "restart_gap_tip": "{n} HA 重启间隙 - 电源跟踪有漏洞",
+    "reviewed": "已审核",
+    "steady": "→ 稳定",
+    "underrun": "完成比通常更快",
+    "using_defaults": "使用出厂默认值",
+    "using_tuned": "使用已调整的权重",
+    "overrun_ratio": "（预期的 {x} 倍）",
+    "underrun_ratio": "（预期的 {pct}%）",
+    "awaiting_tip": "等待社区批准",
+    "awaiting_n": "等待批准 · 已确认 {n} 个",
+    "approved": "已批准",
+    "awaiting": "等待批准",
+    "imported_tip": "从社区商店导入。仅用于匹配，不计入统计。"
+  },
+  "btn": {
+    "add_device": "+ 添加设备",
+    "add_device_tip": "添加另一个 WashData 设备",
+    "add_maintenance": "添加维护事件",
+    "add_phase": "+ 添加阶段",
+    "add_timer": "+ 添加计时器",
+    "apply_all": "全部应用",
+    "apply_label": "应用标签",
+    "apply_set_b": "应用设置 B",
+    "apply_split": "应用拆分",
+    "apply_trim": "应用裁剪",
+    "auto_detect_split": "自动检测",
+    "auto_label_cycles": "自动标记周期",
+    "auto_label_cycles_tip": "自动为置信度达到阈值的未标记周期分配配置文件名称",
+    "cancel": "取消",
+    "clear_debug": "清除调试数据",
+    "clear_splits": "清除",
+    "close": "关闭",
+    "compare": "比较",
+    "confirm": "确认",
+    "convert_to_automation": "转换为自动化",
+    "correct": "修正…",
+    "create": "创建",
+    "create_from_cluster": "从 {count} 个周期创建配置文件",
+    "create_profile": "+ 创建配置文件",
+    "delete": "删除",
+    "delete_group": "删除组",
+    "delete_group_tip": "仅删除此组 — 保留成员配置文件",
+    "delete_profile": "删除配置文件",
+    "discard": "丢弃",
+    "discard_tip": "丢弃录制的电力记录，不保存",
+    "dismiss": "关闭",
+    "done": "完成",
+    "edit": "编辑",
+    "export": "导出",
+    "export_json": "导出为 JSON",
+    "force_stop": "强制停止",
+    "force_stop_tip": "立即结束当前周期并将其标记为强制停止",
+    "from_template": "从模板 ▾",
+    "ignore": "忽略",
+    "import_json": "从 JSON 导入",
+    "import_overwrite": "导入（覆盖数据）",
+    "inspect": "检查",
+    "label": "标记",
+    "load": "加载",
+    "load_more": "加载更多",
+    "manage": "管理",
+    "merge": "合并",
+    "new_automation": "＋ 新建自动化",
+    "new_group": "+ 新建组",
+    "new_group_tip": "将形状/时长相近（不同温度或转速）的配置文件分组，使匹配器能可靠地区分它们",
+    "new_phase": "+ 新建阶段",
+    "new_profile": "+ 新建配置文件",
+    "new_profile_tip": "从现有已标记的周期或录制中创建新程序配置文件",
+    "on_cycle_finished": "周期完成时",
+    "on_cycle_started": "周期开始时",
+    "pause_cycle": "暂停",
+    "pause_cycle_tip": "暂停正在运行的周期 — 设备将从中断处恢复",
+    "pg_apply_device": "应用到设备",
+    "pg_autofill": "自动填充",
+    "play": "播放",
+    "process": "处理",
+    "process_history": "立即处理",
+    "process_recording": "保存录制",
+    "process_tip": "将录制的电力记录保存为新的或现有的配置文件",
+    "rebuild": "重建包络",
+    "rebuild_envelope": "重建包络",
+    "rebuild_tip": "从已标记周期重新计算所有配置文件的预期功率包络（最小/最大范围）— 在标记新周期或修正旧周期后运行",
+    "rec_start_tip": "开始录制设备的电力轨迹 — 在运行周期之前立即开始",
+    "rec_stop": "停止",
+    "rec_stop_tip": "停止录制并保留已捕获的电力记录以供审核",
+    "record": "开始录制",
+    "refresh": "刷新",
+    "refresh_diag_tip": "重新加载存储统计信息",
+    "refresh_logs_tip": "重新加载最新日志记录",
+    "refresh_settings_tip": "从服务器重新加载设置",
+    "relabel": "重新标记（{count}）",
+    "remove": "移除",
+    "remove_timer": "删除计时器",
+    "reset": "重置",
+    "reset_ml_models_tip": "放弃微调模型并恢复内置模型。WashData 可以稍后重新学习。",
+    "reset_to_builtin": "重置为内置模型",
+    "reset_to_defaults": "重置为默认值",
+    "resume_cycle": "继续运行周期",
+    "resume_cycle_tip": "恢复已暂停的周期",
+    "revert_settings": "放弃更改",
+    "revert_settings_tip": "恢复上次保存前的设置",
+    "revert_settings_tip_none": "请先保存以启用撤销功能",
+    "revert": "还原",
+    "revert_to_previous": "将此设置还原为先前的值",
+    "review": "审查",
+    "run": "运行",
+    "run_analysis": "🔍 运行建议分析",
+    "run_analysis_tip": "立即分析已记录的周期并刷新调整建议",
+    "run_auto_label": "运行自动标记",
+    "run_both": "运行 A 对比 B",
+    "run_simulation": "运行模拟",
+    "save": "保存",
+    "save_access_control": "保存访问控制",
+    "save_group": "保存组",
+    "save_panel_settings": "保存面板设置",
+    "save_phases": "保存阶段",
+    "save_preferences": "保存偏好",
+    "save_reminders": "保存提醒",
+    "save_review": "保存审查",
+    "save_settings": "保存设置",
+    "select": "选择",
+    "select_all": "全选",
+    "select_last20": "最近 20",
+    "select_none": "清除",
+    "show_only": "只显示",
+    "skip_setup": "跳过设置",
+    "split": "拆分",
+    "stop": "停止",
+    "submit_correction": "提交修正",
+    "train_now": "立即训练",
+    "trim": "裁剪",
+    "trim_split": "裁剪 / 拆分",
+    "undo": "撤销",
+    "use": "使用",
+    "wipe_all": "清除所有数据",
+    "delete_selected": "删除所选（{n}）",
+    "group_suggest": "组 {n}：{members}",
+    "pg_apply_best": "应用最佳值",
+    "pg_apply_to_settings": "保存到设置",
+    "pg_apply_to_settings_tip": "将您在此处编辑的值复制到该设备当前生效的设置中",
+    "search": "搜索",
+    "import": "导入",
+    "disconnect": "断开连接",
+    "connect_github": "连接 GitHub",
+    "save_appliance": "保存家电",
+    "share_to_store": "分享到商店",
+    "share": "分享",
+    "confirm_appliance": "确认此家电",
+    "confirmed": "已确认",
+    "browse_community_setups": "浏览社区配置",
+    "download_device": "下载此配置",
+    "share_device": "⬆ 分享此设备",
+    "share_device_tip": "将此设备及其录制的参考周期分享到社区商店，让拥有相同机器的其他用户可以采用",
+    "share_n": "分享 {n} 个周期"
+  },
+  "conflict": {
+    "anti_wrinkle_exit": {
+      "exit": "必须低于停止阈值 ({stop} W)；否则防皱退出功率将被忽略",
+      "stop": "必须高于防皱退出功率 ({exit} W)"
+    },
+    "anti_wrinkle_max": {
+      "max": "必须高于启动阈值 ({start} W)；否则防皱时长限制将被绕过",
+      "start": "必须低于防皱最大功率 ({max} W)"
+    },
+    "attn_sub": "保存前请解决冲突",
+    "attn_title": "{n} 个设置冲突{s}",
+    "confidence": {
+      "auto": "必须不低于匹配阈值 ({match})",
+      "learning": "必须不超过匹配阈值 ({match})",
+      "match_for_auto": "必须不超过自动标记置信度 ({alc})",
+      "match_for_learning": "必须不低于学习置信度 ({lc})"
+    },
+    "duration_ratio": {
+      "max": "必须大于最小时长比例 ({min})",
+      "min": "必须小于最大时长比例 ({max})"
+    },
+    "hysteresis": {
+      "start": "必须高于停止阈值 ({stop} W)",
+      "stop": "必须低于启动阈值 ({start} W)"
+    },
+    "min_power": {
+      "min_power": "必须不超过停止阈值 ({stop} W)",
+      "stop": "必须不低于最小功率 ({min} W)"
+    },
+    "no_update_timeout": {
+      "timeout": "必须大于看门狗间隔 ({wi} 秒)",
+      "watchdog": "必须小于无更新超时 ({to} 秒)"
+    },
+    "off_delay": {
+      "gap": "最小关闭间隔应至少为关闭延迟 ({delay} 秒)",
+      "off_delay": "关闭延迟 ({off_delay} 秒) 超过最小关闭间隔 ({gap} 秒)；连续周期可能会合并"
+    },
+    "power_off": {
+      "stop": "必须高于电源关闭阈值 ({pot} W)",
+      "threshold": "必须低于停止阈值 ({stop} W) 才能生效"
+    },
+    "pump_stuck": {
+      "duration": "必须小于无更新超时 ({to} 秒)，以确保卡泵警报在看门狗终止周期前触发",
+      "timeout": "必须大于泵卡住时长 ({ps} 秒)，以确保卡泵警报在周期被强制停止前触发"
+    },
+    "start_dur": {
+      "sampling": "采样间隔超过启动时长 ({sdt} 秒)；单样本尖峰可能触发周期开始",
+      "threshold": "应至少为一个采样间隔 ({si} 秒) 以防止单样本误启动"
+    },
+    "unmatch": {
+      "match": "必须高于不匹配阈值 ({un})",
+      "unmatch": "必须低于匹配阈值 ({match})；否则已确认的匹配会立即取消"
+    },
+    "cascade_toast": "为保持一致性，还自动调整了 {n} 项设置{s}。",
+    "suggestion_resolves": "应用下方的待处理建议（{val}）以修复此问题",
+    "use_fix": "使用 {val}",
+    "watchdog": {
+      "interval": "应至少为采样间隔 ({si} 秒) 的 2 倍",
+      "sampling": "采样间隔应最多为看门狗间隔 ({wi} 秒) 的一半"
+    },
+    "settings_banner": "{n} 个设置冲突{s} — 请检查高亮显示的部分，并在保存前修复。",
+    "settings_banner_btn": "前往第一处"
+  },
+  "hdr": {
+    "ab_comparison": "A/B 设置对比",
+    "access_control": "访问控制",
+    "add_maintenance": "添加维护事件",
+    "automation_delete": "删除此自动化",
+    "automation_needs_review": "此周期需要审查",
+    "automation_open": "在自动化编辑器中打开",
+    "automation_review_this_cycle": "审查此周期",
+    "automations": "自动化",
+    "clear_debug": "清除调试追踪",
+    "cycle_simulator": "周期模拟器",
+    "diagnostics_pref": "诊断",
+    "display": "显示",
+    "dtw_inspector": "DTW 检查器",
+    "export_import": "导出 / 导入",
+    "getting_started": "快速上手",
+    "live_power": "实时功率",
+    "logs": "日志",
+    "logs_diagnostics": "诊断",
+    "maintenance": "维护操作",
+    "maintenance_log": "维护日志",
+    "maintenance_reminders": "保养提醒",
+    "manual_recording": "手动录制",
+    "manual_recording_tip": "在 WashData 记录电力轨迹时有意运行一个周期。在设备启动前立即按开始，完成后按停止，然后按处理将其保存为命名配置文件。",
+    "ml_learned": "WashData 已学到的内容",
+    "ml_matching_tuning": "程序匹配微调",
+    "ml_settings_card": "设置",
+    "ml_smart_learning": "智能学习",
+    "my_preferences": "我的偏好",
+    "no_automations": "尚未有自动化引用此设备。",
+    "panel_settings": "面板设置",
+    "param_sweep": "参数扫描",
+    "phase_catalog": "阶段目录",
+    "playground": "试验场",
+    "process_history": "处理历史",
+    "settings_history": "设置历史",
+    "status": "状态",
+    "status_graph": "状态图表",
+    "storage_stats": "存储统计",
+    "test_history": "在历史数据上测试",
+    "toggle_sidebar": "切换家庭助理侧边栏",
+    "tools_and_data": "工具与数据",
+    "wipe_history": "清除历史",
+    "recommendations": "建议（{n}）",
+    "pg_detection_params": "检测设置",
+    "pg_timeline": "事件时间线",
+    "pg_outcome": "模拟结果",
+    "pg_across_cycles": "所有周期综合",
+    "community_store": "社区商店",
+    "online_account": "社区商店与在线功能"
+  },
+  "health": {
+    "fair": "配置文件质量尚可",
+    "good": "✓ 配置文件质量良好",
+    "poor": "⚠ 配置文件质量差"
+  },
+  "lbl": {
+    "actions": "操作",
+    "activity": "活动",
+    "administrators": "管理员",
+    "aria_compare_chart": "周期对比图表",
+    "aria_cycle_chart": "周期功率曲线",
+    "aria_envelope_chart": "配置文件功率包络图表",
+    "aria_phase_chart": "阶段编辑器图表",
+    "aria_playground_chart": "带可拖动检测阈值的周期功率曲线",
+    "aria_power_chart": "功耗图表",
+    "aria_spaghetti_chart": "叠加的周期功率曲线",
+    "aria_sweep_chart": "参数扫描结果图表",
+    "artifact_anomaly": "异常",
+    "artifact_high_power": "高功率",
+    "artifact_interruption": "中断",
+    "artifact_low_power": "低功率",
+    "auto_detect": "自动检测",
+    "auto_fine_tune_off": "自动微调已关闭",
+    "auto_fine_tune_on": "自动微调已开启（大约 {hour}:00）",
+    "avg_cost": "平均成本",
+    "change": "变更",
+    "clock_time": "时钟时间",
+    "cohesion_good": "凝聚力 {pct}%",
+    "cohesion_low": "⚠ 低凝聚力 {pct}%",
+    "compare_profiles": "与配置文件比较",
+    "concurrency": "并发",
+    "confidence": "置信度",
+    "confidence_threshold": "置信度阈值",
+    "correct_duration": "修正时长（分钟，可选）",
+    "correct_profile": "修正配置文件",
+    "correlation": "相关性",
+    "cost": "费用",
+    "create_new_profile": "+ 创建新配置文件…",
+    "current_phase": "当前阶段",
+    "curves": "曲线",
+    "cycle": "周期",
+    "cycle_date_display": "周期日期显示",
+    "cycle_health": "周期健康",
+    "cycle_index": "周期序号 →",
+    "cycles": "周期",
+    "cycles_count": "周期数",
+    "cycles_lc": "个周期",
+    "dashed": "虚线",
+    "date": "日期",
+    "debug_traces": "调试追踪",
+    "default": "默认",
+    "default_access_level": "未列出用户的默认级别",
+    "default_other": "默认（其他设备）",
+    "default_tab": "打开面板时的默认标签",
+    "delta": "Δ",
+    "description": "描述",
+    "dtw_blend_w": "混合权重",
+    "dtw_blended": "混合得分",
+    "dtw_ddtw": "DDTW 得分",
+    "dtw_l1": "L1 得分",
+    "dtw_matched_profile": "（该周期匹配的配置文件）",
+    "duration": "时长",
+    "duration_agreement": "时长一致度",
+    "emphasis": "强调",
+    "enable_access_control": "启用每用户访问控制",
+    "energy": "能耗",
+    "energy_agreement": "能耗一致度",
+    "event_timeline": "事件时间线",
+    "event_type": "事件类型",
+    "expected": "预期",
+    "expected_duration": "预期时长（分钟）",
+    "file_kb": "文件（kB）",
+    "final_score": "最终得分",
+    "from": "起始",
+    "gap_s": "间隔（秒）",
+    "group_name": "组名称",
+    "head_trim": "头部裁剪（秒）",
+    "health": "健康",
+    "hide_tabs": "对非管理员隐藏标签",
+    "in_use": "使用中",
+    "json_data": "JSON 数据",
+    "label": "匹配的程序",
+    "last": "最近",
+    "last_checked": "上次检查：",
+    "load_from_file": "从文件加载",
+    "mae_score": "MAE 得分",
+    "manual_duration": "手动时长（分钟，可选）",
+    "match": "匹配",
+    "members": "成员",
+    "metric": "指标",
+    "mode_existing_profile": "添加到现有配置文件",
+    "mode_new_profile": "创建新配置文件",
+    "models_fine_tuned": "（{count}个模型{plural}已微调）",
+    "n_classic_suggestions": "{n} 经典",
+    "n_ml_suggestions": "{n} ML",
+    "n_selected": "已选 {n} 个",
+    "n_tuning_suggestions": "{n} 调整建议",
+    "na": "不适用",
+    "new_profile_name": "新配置文件名称",
+    "notes": "备注",
+    "of": "/",
+    "outcome": "结果",
+    "panel_default_tab": "默认标签",
+    "panel_language": "面板语言",
+    "per_cycle_short": "周期",
+    "pg_autofill_tip": "根据当前值自动填充范围（{lo}–{hi}）",
+    "pg_best_value": "找到的最佳值",
+    "pg_current_value": "当前值：",
+    "pg_drag_hint": "拖动图表上的线条",
+    "pg_dtw": "DTW",
+    "pg_ev_ending": "结束中",
+    "pg_ev_running": "运行中",
+    "pg_group_advanced": "边缘情况",
+    "pg_group_detection": "检测触发条件",
+    "pg_group_timing": "计时规则",
+    "pg_idle": "空闲",
+    "pg_last_run": "上次运行：{date}",
+    "pg_match_score": "匹配得分",
+    "pg_pct_of": "{total} 中的 {p}%",
+    "pg_poor_match": "匹配较差",
+    "pg_strong_match": "强匹配",
+    "pg_tile_ambiguous": "不明确",
+    "pg_tile_ambiguous_tip": "两个程序几乎打平的周期",
+    "pg_tile_detected": "已检测",
+    "pg_tile_detected_tip": "功率越过启动阈值足够久、被记录为运行中的周期",
+    "pg_tile_matched": "已匹配",
+    "pg_tile_matched_tip": "正确归属到已知程序的周期",
+    "pg_time_left": "剩余时间",
+    "pg_weak_match": "弱匹配",
+    "phase_name": "名称",
+    "phase_timeline": "阶段时间线",
+    "power": "功率",
+    "profile": "配置文件",
+    "profile_index": "配置文件序号 →",
+    "profile_name": "配置文件名称",
+    "program": "程序",
+    "program_tip": "覆盖与当前周期匹配的配置文件。自动检测让集成自动选择最佳匹配。当自动检测出错或您知道正在运行什么时，固定特定程序以强制匹配。",
+    "progress": "进度",
+    "raw_socket": "原始套接字",
+    "read_only": "只读",
+    "ref_cycle": "参考周期（可选）",
+    "refresh_interval": "刷新间隔（秒）",
+    "remaining": "剩余",
+    "reminder_every": "提醒间隔（周期）",
+    "remove_label": "- 删除标签 -",
+    "rename_profile": "重命名配置文件",
+    "replay_duration": "回放",
+    "resulting_profile": "结果配置文件",
+    "save_mode": "保存模式",
+    "score": "得分",
+    "score_breakdown": "得分明细",
+    "seconds_from_start": "从开始计的秒数",
+    "select_profile": "选择配置文件",
+    "setting": "设置",
+    "settings_a": "设置 A（当前）",
+    "settings_a_short": "A",
+    "settings_advanced": "高级",
+    "settings_b": "设置 B（测试）",
+    "settings_b_short": "B",
+    "settings_basic": "基础",
+    "settings_detail_level": "设置详细程度",
+    "settings_overrides": "设置覆盖项",
+    "show_debug": "在状态页面显示实时匹配调试卡（置信度、歧义、最佳候选）",
+    "show_expected": "显示预期曲线叠加（匹配配置文件，橙色）",
+    "show_raw": "在实时功率图中显示原始插座切换开关",
+    "sparkline": "近期周期时长趋势",
+    "stage2": "阶段 2 — 核心相似度",
+    "stage3": "阶段 3 — DTW",
+    "stage4": "阶段 4 — 一致度",
+    "status": "状态",
+    "tail_trim": "尾部裁剪（秒）",
+    "timer_auto_pause": "自动暂停",
+    "timer_min": "分钟",
+    "timer_msg_placeholder": "消息（可选，{device}/{program}/{minutes}）",
+    "to": "结束",
+    "ungrouped": "未分组",
+    "unlabelled": "未标记",
+    "unlabelled_paren": "（未标记）",
+    "warp_path": "规整路径",
+    "input": "输入：",
+    "start": "开始",
+    "end": "结束",
+    "unit_s": "（秒）",
+    "reviewed_on": "审核于 {date}",
+    "unknown": "未知",
+    "quality": "质量",
+    "tags": "标签",
+    "at": "于",
+    "pct_match_confidence": "{pct}% 匹配置信度",
+    "ha_restarted": "HA 已重启",
+    "from_start": "从开始",
+    "to_end": "到结束",
+    "click_to_select": "点击选择",
+    "envelope": "包络",
+    "zoom_hint": "滚动缩放 · 双击重置",
+    "loading_paren": "（加载中…）",
+    "time_remaining": "剩余 ~{v}",
+    "no_duration": "无时长",
+    "duration_avg": "平均 ~{v}分钟",
+    "name_placeholder": "（名称）",
+    "n_shown": "，显示 {n} 个",
+    "cycles_title": "周期（{n}）",
+    "pg_detecting": "检测中",
+    "pg_best_marker": "最佳：{v}",
+    "pg_time_left_model": "剩余时间（模型）",
+    "pg_time_left_model_tip": "由模型估算的剩余时间（阶段估算 + ML 混合），并非固定倒计时。",
+    "phase": "阶段",
+    "pg_mode_simulate": "模拟",
+    "pg_mode_history": "历史测试",
+    "pg_mode_sweep": "参数扫描",
+    "pg_ev_detected": "已检测",
+    "pg_ev_match": "匹配确定",
+    "pg_ev_match_changed": "匹配已更改",
+    "pg_ev_ambiguous": "不明确",
+    "pg_ev_unmatched": "未匹配",
+    "pg_ev_notify_start": "开始通知",
+    "pg_ev_notify_pre": "即将完成通知",
+    "pg_ev_notify_finish": "完成通知",
+    "pg_ev_notify_milestone": "里程碑通知",
+    "pg_ev_notify_held": "通知已暂存（免打扰时段）",
+    "pg_ev_finished": "已完成",
+    "pg_ended": "已结束",
+    "pg_proj_energy": "预计能耗",
+    "pg_alert_overrun": "运行过长",
+    "pg_alert_underrun": "运行过短",
+    "pg_alert_did_not_finish": "未完成",
+    "pg_alert_false_end": "拆分为多个周期",
+    "pg_alert_unmatched": "未匹配",
+    "pg_alert_ambiguous": "匹配不明确",
+    "pg_alert_energy": "能耗异常",
+    "pg_newly_correct": "新增正确",
+    "pg_regressed": "变差",
+    "pg_end_timing_changed": "结束时机改变",
+    "pg_vs_current": "对比当前",
+    "pg_fixed": "已修复",
+    "pg_broke": "出现问题",
+    "pg_sweep_param": "参数",
+    "pg_objective": "目标",
+    "pg_steps": "步数",
+    "pg_sweep_2d": "2D 热图",
+    "pg_sweep_param_y": "第二个参数",
+    "pg_obj_match": "匹配准确度",
+    "pg_obj_endtiming": "结束时机准确度",
+    "pg_obj_falseend": "误结束率",
+    "pg_obj_overrun": "时长偏离目标",
+    "pg_obj_ambiguity": "不明确率",
+    "pg_best_combo": "最佳组合",
+    "pg_mode_optimize": "优化",
+    "pg_group_matching": "程序匹配",
+    "pg_zoom_hint": "双击可重置缩放",
+    "aria_playground_chart2": "交互式周期功率图：悬停查看时间/功率，滚动缩放，拖动平移",
+    "pg_alert_timeout_end": "因超时而结束，并非预测结束",
+    "pg_alert_indefinite": "将一直运行下去",
+    "task_pg_history": "用历史测试",
+    "task_pg_sweep": "优化",
+    "task_reprocess": "重新处理",
+    "task_ml_training": "学习",
+    "eta_secs": "剩~{n}秒",
+    "eta_mins": "剩~{n}分",
+    "pg_recent_runs": "最近的运行",
+    "pg_load_run": "重新加载此运行",
+    "pg_match_confidence": "匹配置信度",
+    "pg_envelope_fit": "包络拟合度",
+    "pg_envelope_fit_tip": "周期与此配置文件已保存的功率包络的贴合程度，与匹配置信度不同的视角。",
+    "n_imported_note": "，已导入 {n} 个",
+    "enable_online": "启用在线功能",
+    "store_brand": "家电品牌",
+    "store_model": "家电型号",
+    "anonymous": "匿名",
+    "rate_quality": "评价质量",
+    "rate_n": "{n} 星",
+    "approved_only": "仅已批准",
+    "adopt_settings": "同时采用设置",
+    "flags": "标志",
+    "include_phase_map": "包含阶段图",
+    "include_settings": "包含检测与匹配设置",
+    "show_contributor": "显示贡献者名称"
+  },
+  "log": {
+    "all_levels": "所有级别",
+    "all_devices": "所有设备",
+    "all_components": "所有组件",
+    "search_ph": "搜索日志…"
+  },
+  "ml": {
+    "builtin_models": "● 使用内置模型",
+    "fit_fair": "尚可",
+    "fit_good": "良好",
+    "fit_slight": "轻微",
+    "fit_strong": "强",
+    "fit_weak": "弱",
+    "fit_word": "拟合",
+    "personalized": "● 已针对此机器个性化",
+    "better_than_baseline": "比基线估计好 {pct}%（{metric}）",
+    "trend_improving_tip": "该模型的拟合度在最近几次重新检查中有所提升。",
+    "trend_declining_tip": "该模型的拟合度在最近几次重新检查中有所下降，审查更多周期可能有助于它重新学习。",
+    "trend_steady_tip": "该模型的拟合度在最近几次重新检查中大致保持稳定。",
+    "cap_blurb": {
+      "end": "判断洗涤周期何时真正结束",
+      "live_match": "更早识别正在运行的程序",
+      "quality": "发现误检或损坏的周期",
+      "remaining_time": "预测剩余时间",
+      "total_energy": "预测总能耗和费用"
+    },
+    "cap_label": {
+      "end": "周期结束检测",
+      "live_match": "程序匹配",
+      "quality": "周期质量检查",
+      "remaining_time": "剩余时间估算",
+      "total_energy": "能耗估算"
+    },
+    "metric_auc": "留出验证数据上的 AUC {auc}",
+    "metric_mae": "误差 {model} vs 基线 {baseline}"
+  },
+  "modal": {
+    "auto_label": "自动标记周期",
+    "correct_feedback": "修正反馈",
+    "create_profile": "创建配置文件",
+    "cycle": "周期",
+    "edit_group": "编辑配置文件组",
+    "edit_phase": "编辑阶段",
+    "import_config": "导入配置",
+    "label_cycle": "标记周期",
+    "merge_cycles": "合并 {n} 个周期",
+    "new_group": "新建配置文件组",
+    "new_phase": "新建阶段",
+    "process_history_msg": "重新运行匹配、刷新建议、重新训练 ML（如果启用）并重新计算所有存储循环的循环健康状态。这可能需要一些时间。",
+    "process_history_ok": "处理",
+    "process_history_title": "处理历史记录",
+    "process_recording": "处理录制",
+    "delete_maintenance_msg": "删除此维护记录？此操作无法撤销。",
+    "delete_maintenance_title": "删除维护事件",
+    "relabel_cycles": "重新标记 {count} 个周期",
+    "delete_automation_title": "删除自动化",
+    "delete_automation_msg": "从 Home Assistant 中删除自动化“{name}”吗？此操作无法撤销。",
+    "remove_legacy_title": "移除旧版操作",
+    "remove_legacy_msg": "移除旧版自定义操作吗？它们将不再在周期事件上触发。此操作无法从面板撤销。",
+    "discard_recording_title": "丢弃录制",
+    "discard_recording_msg": "丢弃已保存的录制吗？此操作无法撤销。",
+    "dismiss_all_title": "关闭所有反馈",
+    "dismiss_all_msg": "关闭全部 {count} 个待处理的反馈请求吗？",
+    "dismiss_all_ok": "全部关闭",
+    "delete_phase_title": "删除阶段",
+    "delete_phase_msg": "删除阶段“{name}”吗？",
+    "clear_debug_title": "清除调试数据",
+    "clear_debug_msg": "删除所有已存储的调试追踪吗？",
+    "wipe_all_title": "清除所有数据",
+    "wipe_all_msg": "⚠️ 这将永久删除所有周期和配置文件。此操作无法撤销。",
+    "wipe_all_ok": "清除全部",
+    "force_stop_title": "强制停止周期",
+    "force_stop_msg": "立即强制停止当前周期吗？该周期将被保存为已中断。",
+    "store_import": "导入参考周期",
+    "store_share": "分享到社区商店",
+    "store_share_device": "分享此设备"
+  },
+  "msg": {
+    "appliance_monitor": "设备监控",
+    "artifact_dip_detail": "跌破通常功率范围约 {n} 秒。",
+    "artifact_footer": "在上图中高亮显示。这些是瞬态异常（例如门在周期中打开），不一定是问题。",
+    "artifact_header": "此周期中检测到 {n} 个异常",
+    "artifact_pause_detail": "功率降至接近零约 {n} 秒后恢复 — 可能是周期中途开门或周期被暂停。",
+    "artifact_spike_detail": "超出通常功率范围约 {n} 秒。",
+    "auto_label_intro": "为置信度达到阈值的未标记周期分配配置文件。",
+    "automations_intro": "WashData 触发 {start} / {end} 事件并公开实体，因此通知和操作最好构建为常规 Home Assistant 自动化。使用此设备的自动化显示在下方。",
+    "cleanup_intro": "显示所有已标记周期的叠加。勾选离群值并删除以清理配置文件。",
+    "clear_debug_hint": "删除存储的调试数据以释放空间。",
+    "collecting_data": "正在收集数据，还需要 {need} 个周期{plural}才能开始微调（{current}/{min}）。",
+    "compare_overlay_profiles": "叠加配置文件（浅色）",
+    "compare_profiles_tip": "将其他配置文件包络叠加在上方图表上，看哪个最适合此周期。",
+    "compare_selected_cycles": "选中的周期（实线）— 显示/隐藏",
+    "consider_new_profile": "考虑创建新配置文件。",
+    "coverage_gap": "近期周期没有匹配的配置文件（最近 30 次的 {pct}%）。",
+    "coverage_gap_similar_cycles": "发现 {count} 个相似未标记周期 — 创建配置文件以开始匹配它们。",
+    "cycles_deleted": "已删除 {count} 个周期",
+    "enough_data": "有足够数据可供学习（{current}/{min} 个循环）。",
+    "export_description": "将所有配置文件和周期导出为 JSON，或从之前的导出中恢复。",
+    "feedback_cycles_pending": "{n} 个周期{s}待审查",
+    "feedback_prompt": "确认正确、修正程序或忽略。",
+    "filter_by_profile": "按配置文件筛选…",
+    "group_modal_help": "将形状相同但温度/转速不同的程序分组（时长可能不同）。匹配将组作为一个候选项评分，然后选择最合适的成员。至少选 2 个；叠加显示相似程度。",
+    "group_not_cohesive": "这些配置文件不够相似，无法可靠分组，因此匹配会单独处理它们，直到您移除离群值或拆分组。",
+    "group_preview_hint": "勾选 2+ 个成员以预览并比较其功率曲线。",
+    "import_intro": "加载导出文件或在下方粘贴 JSON 内容。",
+    "legacy_actions_title": "{count} 个旧版自定义操作仍在运行",
+    "live_chart_loading": "实时功率图表将随读数到达而显示。",
+    "loading": "加载中…",
+    "loading_curve": "加载曲线…",
+    "loading_settings": "加载设置…",
+    "log_buffer_hint": "最新在前 · 缓冲自重启以来最后 500 条 ha_washdata 记录 · 拖动底边调整大小。",
+    "maintenance_advisory": "时长/能耗增加可能表明设备需要维护（例如除垢、清洗滤网）。",
+    "maintenance_due": "待办维护：{items}",
+    "maintenance_intro": "记录您对此设备执行的保养，并在每项任务再次到期时收到提醒。",
+    "maintenance_load_error": "无法加载维护数据：{error}",
+    "maintenance_requires_access": "维护和导出/导入需要完全访问权限。",
+    "manual_duration_hint": "配置文件的平均/预期周期时长，用于剩余时间估算。编辑以设置；保持不变则保留当前值。",
+    "matching_tuning_intro": "在学习时，WashData 还会调整程序匹配对形状与时长和能耗的权重比例。",
+    "merge_intro": "选中的周期将按时间顺序合并（间隙填充为 0 W）。选择结果配置文件。",
+    "ml_intro": "WashData 配备了开箱即用的智能模型。",
+    "ml_learned_intro": "针对此机器微调的模型。",
+    "ml_loading": "加载 ML 中…",
+    "ml_settings_intro": "两个独立开关：一个在周期运行时应用模型，另一个让 WashData 随时间针对您的机器进行微调。",
+    "name_first_program": "您已有足够的周期 — 为您的第一个程序命名即可开始匹配。",
+    "near_duplicate_cluster": "检测到近似重复的配置文件群。分组可让匹配在相似项目间可靠地选择（例如同一程序在不同温度/转速下）。",
+    "no_cycles_match": "没有与当前筛选条件匹配的周期。",
+    "no_cycles_profile": "此配置文件没有周期。",
+    "no_cycles_selected": "请先至少选择一个周期。",
+    "no_cycles_yet": "尚未记录任何周期。",
+    "no_device_selected": "未选择设备。",
+    "no_devices": "尚未配置 WashData 设备。",
+    "no_envelope": "还没有包络 — 标记周期后重建。",
+    "no_envelope_overlay": "没有可叠加的包络。",
+    "no_fine_tuned": "尚未微调 — WashData 正在使用内置模型。",
+    "no_logs": "尚未缓冲任何日志记录。",
+    "no_maintenance": "尚未记录任何维护。",
+    "no_match_yet": "尚未尝试匹配 — 此项在运行周期时填充。",
+    "no_other_users": "未找到其他 Home Assistant 用户。",
+    "no_phases": "未定义阶段。",
+    "no_phases_assigned": "未分配阶段。",
+    "no_profiles_compare": "没有可比较的配置文件。",
+    "no_profiles_overlay": "没有可叠加的配置文件。",
+    "no_profiles_yet": "还没有配置文件。从已标记的周期创建一个。",
+    "no_profiles_yet_short": "还没有配置文件。",
+    "no_settings_match": "没有与“{q}”匹配的设置",
+    "no_split_points": "还没有分割点。",
+    "no_suggestions": "没有活跃的建议。",
+    "notify_services_hint": "使用 {entity} 服务 ID（多个请用英文逗号分隔）。模板变量：{vars}。",
+    "old_actions_warning": "使用旧版操作编辑器配置（现已移除）。它们仍会在周期事件上触发，但无法在此处编辑。将它们转换为普通自动化，或移除它们。",
+    "onboarding_progress": "已观察 {n} / 3 个周期",
+    "onboarding_watching": "照常使用您的设备 — WashData 正在观察。3 个周期后将开始程序匹配。",
+    "pending_feedback": "待处理的检测反馈",
+    "performance_trend": "性能趋势（{n} 个周期）",
+    "pg_analysis_empty": "加载一个周期以查看匹配分析。",
+    "pg_apply_confirm": "应用最佳值：{label} = {value}？",
+    "pg_canvas_empty": "在上方选择一个周期，然后按加载查看其功率轨迹。",
+    "pg_chart_caption": "不同 {param} 取值下的检测/匹配率",
+    "pg_match_rate": "在 {total} 个周期上的匹配率为 {pct}%",
+    "pg_restart_note": "重启 Home Assistant 以启用模拟工具。",
+    "pg_sim_progress": "{done} / {total} 个周期",
+    "pg_starting": "正在启动…",
+    "pg_sweep_intro": "如果 {param} 不同会怎样？在最近 {cycles} 个周期上测试 {steps} 个值，找到能正确匹配最多周期的设置。",
+    "pg_sweep_step": "步骤 {done} / {total}",
+    "pg_undetected": "{n} 个周期{s}未检测到",
+    "pg_verdict_bad": "需要注意: 许多周期未被检测到。",
+    "pg_verdict_good": "调校良好: 大多数周期都被正确识别和匹配。",
+    "pg_verdict_ok": "尚可: 漏掉了一些周期。可尝试降低启动阈值。",
+    "phase_catalog_intro": "周期的命名片段（预洗、加热、甩干…）。从其控制面板将它们分配给配置文件。",
+    "phase_ranges_intro": "叠加在平均曲线上的阶段范围（从周期开始的分钟数）。编辑值以实时预览。",
+    "playground_intro": "一个安全的沙盒，可用不同设置回放过去的周期、并排比较两套配置，并查看周期如何与配置文件对齐。在您明确应用之前，此处的任何操作都不会更改您的实时数据。",
+    "playground_needs_restart": "重启 Home Assistant 以启用试验场工具。",
+    "preferences_admin": "偏好、面板和访问控制",
+    "preferences_adv": "偏好",
+    "prefs_personal": "这些仅适用于您的 Home Assistant 账户。",
+    "process_history_hint": "对所有存储的循环重新运行匹配、刷新调优建议、重新训练 ML 模型（如果启用）并重新计算循环健康状态。在批量审查后运行此项。",
+    "profile_deleted": "配置文件已删除",
+    "profile_poor_health_detail": "分配给此配置文件的周期形状不一致或置信度较低。考虑重建包络或审查已标记的周期。",
+    "profiles_intro": "点击配置文件查看统计、阶段和清理。将形状/时长相近（不同温度或转速）的程序分组，以便匹配可靠地区分它们。",
+    "rbac_hint": "关闭时，每个 Home Assistant 用户都有完全访问权限（默认）。管理员始终有完全访问权限并可管理所有人。",
+    "recent_logs": "最近的 ha_washdata 记录",
+    "recording_in_progress": "录制进行中",
+    "reminders_intro": "在上次保养后经过这么多个周期时在面板中显示提醒。留空或填 0 可关闭提醒。",
+    "restart_gap_footer": "在图表上突出显示。这些间隔的功率数据缺失——仅使用真实读数进行匹配。",
+    "restart_gap_header": "{n} 此周期内的 HA 重新启动间隔",
+    "restart_gap_item": "{dur}间隙",
+    "review_confirm_help": "确认此周期是否被正确检测。您的审查可在您的机器上训练模型 — 确认的周期越多，匹配和健康评分越好。快速的好/差就足够了。",
+    "review_in_settings": "在设置中审查",
+    "review_notes_placeholder": "注释（可选）",
+    "review_notes_tip": "供个人参考的自由文本注释。不用于匹配或训练。",
+    "review_profile_tip": "此周期标记的程序。如果自动检测的程序有误，请在此处修正 — 标记可帮助未来周期的匹配学习。",
+    "review_quality_tip": "此周期的质量。好 = 该程序的标准示例；差 = 已检测但有噪声或不典型；不可用 = 误检测（合并、截断或虚假）。影响健康评分及允许训练模型的周期。",
+    "review_recorded_tip": "将此标记为其程序的精选参考周期 — 与手动录制周期的作用相同。参考周期始终保留，为匹配模板提供种子，且不会被清理删除。（这是“黄金”/录制标志；两者是同一件事。）",
+    "review_tags_tip": "描述此周期出现问题的可选标志，以便训练和清理可以考虑这些问题。",
+    "review_to_cycles": "打开周期审查队列",
+    "saving_triggers_reload": "保存会触发集成重载。HA 实体可能短暂显示为不可用。",
+    "search_placeholder": "搜索设置…",
+    "see_recorder": "查看下方的录制小部件",
+    "setting_changed": "于 {date} 从 {old} 更改为 {new}",
+    "settings_basic_note": "正在显示基本设置。切换到高级可查看完整列表。",
+    "shape_drift_advisory": "⚠ 形状偏移",
+    "shape_drift_detail": "此配置文件的功率模式随时间发生了变化 — 可能是设备磨损或需要维护（例如除垢、清洁滤网）。",
+    "show_all_settings": "显示所有设置",
+    "showing_suggestions": "显示 {count} 个有建议的设置。",
+    "split_intro": "点击图表添加或删除分割点，或通过空闲间隔自动检测。每个结果片段可获得自己的配置文件。",
+    "storage_diagnostics": "存储统计、维护、导出/导入",
+    "sug_staged": "已设置 {key} = {val}。保存以应用。",
+    "toast_auto_detect_enabled": "自动检测已启用",
+    "toast_auto_label_complete": "自动标注完成",
+    "toast_auto_label_failed": "自动标注失败：{error}",
+    "toast_automation_failed": "无法创建自动化：{error}",
+    "toast_automation_migrated": "操作已迁移至自动化，正在打开编辑器",
+    "toast_convert_failed": "转换失败：{error}",
+    "toast_create_failed": "创建失败：{error}",
+    "toast_delete_failed": "删除失败：{error}",
+    "toast_error": "错误：{error}",
+    "toast_failed": "失败：{error}",
+    "toast_force_stop_failed": "强制停止失败：{error}",
+    "toast_name_required": "需要填写名称",
+    "toast_no_automation": "此处无法创建自动化",
+    "toast_profile_name_required": "配置文件名称为必填项",
+    "toast_program_set": "已设置程序：{program}",
+    "toast_rebuild_failed": "重建失败：{error}",
+    "toast_resume_failed": "恢复失败：{error}",
+    "toast_revert_failed": "还原失败：{error}",
+    "toast_reverted": "已还原 {key}",
+    "toast_save_failed": "保存失败：{error}",
+    "trend_duration_longer": "时长趋势增长（{pct}%/周期）— 近期平均 {avg}",
+    "trend_duration_shorter": "时长趋势缩短（{pct}%/周期）— 近期平均 {avg}",
+    "trend_energy_down": "能耗趋势下降（{pct}%/周期）",
+    "trend_energy_up": "能耗趋势上升（{pct}%/周期）— 近期平均 {avg}",
+    "trim_intro": "拖动红色控制柄，或输入值。窗口外的所有内容将被移除。",
+    "tuning_suggestions_available": "来自观察周期的 {count} 个调整建议可用。它们显示在相关字段旁边。",
+    "unsure_detected_prefix": "WashData 不确定是否检测到",
+    "updated": "已更新",
+    "warmup_badge": "仍在学习中（{done}/{needed} 个周期）",
+    "warmup_detail": "该配置文件需要 {needed} 个已标记的周期后才能开始自动匹配。每个已确认的周期都有助于学习。",
+    "wipe_history_warning": "永久删除所有周期和配置文件。无法撤销。",
+    "compare_overlay_tip": "叠加已学习的配置文件包络，查看每个周期与哪个程序相似。",
+    "duration_trend_up_tip": "时长上升（{pct}%/周期）",
+    "duration_trend_down_tip": "时长下降（{pct}%/周期）",
+    "energy_trend_up_tip": "能耗上升（{pct}%/周期）",
+    "energy_trend_down_tip": "能耗下降（{pct}%/周期）",
+    "performance_trending": "性能趋势变化",
+    "pg_select_cycle_hint": "选择一个周期并点击 ↺ 加载",
+    "pg_sweep_progress": "步骤 {done} / {total}",
+    "pg_analysis_hint": "选择一个周期并点击 ↺ 加载分析。",
+    "diagnostics_load_failed": "无法加载诊断：{error}",
+    "manual_duration_ref_hint": "仅在未选择参考周期时使用。参考周期会根据自身长度设置时长。",
+    "toast_convert_rolled_back": "转换失败并已回滚（未遗留任何自动化）：{error}",
+    "toast_convert_orphan": "自动化已创建，但清除旧操作失败。请勿重试：请手动移除旧操作，以避免自动化重复。",
+    "advisory_duration_trend_up": "'{name}' 的周期正逐渐变长（每个周期约 +{pct}%）。如果设备行为发生了变化，请重新录制或重建此配置文件。",
+    "advisory_energy_trend_up": "'{name}' 的能耗正逐渐增加（每个周期约 +{pct}%） - 如果这不符合预期，建议检查一下设备。",
+    "advisory_poor_health": "'{name}' 的拟合度评分较低 - 其近期周期波动较大或匹配较弱。请检查其周期或重新录制该配置文件，以保持匹配和时间估算的准确性。",
+    "advisory_shape_drift": "'{name}' 已明显偏离其原始功率曲线。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。",
+    "advisory_shape_drift_corr": "'{name}' 已明显偏离其原始功率曲线（相关系数 {corr}）。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。",
+    "pg_no_alerts": "本次运行未检测到问题。",
+    "pg_override_active": "正在使用您编辑的设置对比当前设置",
+    "pg_history_intro": "用真实的检测器和匹配器重放您最近的周期。若要在此查看前后对比，请先在模拟中编辑一项检测设置。",
+    "pg_history_empty": "按运行以重放您的周期。",
+    "pg_history_summary": "{detected}/{total} 已检测 · {correct} 正确匹配",
+    "pg_sweep_no_metric": "数据不足，无法为此目标评分。",
+    "pg_sweep_intro2": "在您最近的周期中找到最能满足某个目标的设置。在您应用之前不会有任何更改。",
+    "pg_running_history": "正在重放您的周期…",
+    "pg_running_sweep": "正在所有周期上测试各个值…",
+    "pg_row_load_hint": "在上方图表中加载此周期",
+    "pg_history_intro2": "使用上方设置，将您最近的周期通过真实的检测器和匹配器重新运行。点击任意行可在图表中加载该周期；修改设置可查看修改前后的对比。",
+    "pg_simulating": "正在模拟周期…",
+    "pg_canvas_empty2": "在上方选择一个周期并按“运行”进行模拟。然后悬停查看数值，滚动缩放，拖动平移。",
+    "pg_apply_settings_confirm": "将这 {n} 项设置保存到该设备吗？ {list}",
+    "no_logs_match": "没有日志记录符合这些筛选条件。",
+    "pg_analysis_hint2": "选择一个周期并点击运行以加载匹配分析。",
+    "pg_analysis_empty2": "点击运行以查看匹配分析。",
+    "imported_readonly": "从社区商店导入。用于参考和匹配。不计入您的统计，且无法编辑。",
+    "merge_no_imports": "导入的录制无法合并到真实周期中。取消选择它们以进行合并。",
+    "store_enable_hint": "在设置中启用在线功能，以浏览和导入社区参考周期。",
+    "online_intro": "与其他 WashData 用户分享和下载参考周期。所有在线功能均为自愿加入，默认关闭。",
+    "store_share_intro": "上传此参考周期，以便拥有相同家电的其他人使用。它会经过审核后才公开显示。",
+    "online_intro_global": "与其他 WashData 用户浏览和分享参考录制，并确认家电条目。一次连接适用于您的整个 WashData 集成；家电品牌和型号在“基本配置”下按设备设置。所有在线功能均为自愿加入，默认关闭。",
+    "online_unavailable": "此服务器不支持在线功能。",
+    "store_picker_offline": "在设置齿轮中启用在线功能，即可从社区目录中选择。",
+    "pick_brand_first": "请先选择家电品牌。",
+    "model_not_found": "尚未收录在目录中。",
+    "connect_to_confirm": "在设置齿轮中连接以确认或评分。",
+    "adopt_settings_hint": "用共享的设置覆盖此设备的检测和匹配阈值。您的通知、实体和电价永远不会更改。",
+    "include_settings_hint": "分享此设备的识别和匹配阈值（不含通知、实体或电价）。采用者自行选择是否应用。",
+    "onboard_download": "新设备？从拥有相同设备的其他 WashData 用户处采用现成配置（程序、参考周期和阶段）。",
+    "share_consent": "我确认这些周期均正常完成，无中断",
+    "share_device_none": "暂无可分享的周期。请先在\"周期\"选项卡中将录制或手动选择的周期标记为参考周期（⭐）。",
+    "share_guideline_naming": "请按设备表盘或显示屏上显示的名称命名每个配置文件（例如：'Cotton 40'、'Eco 60'）。",
+    "share_guideline_quality": "仅分享正常完成的周期 -- 无周期中断、开门事件或电源波动。",
+    "share_guideline_review": "您的上传从待审核状态开始，待足够多的社区成员确认后将公开显示。",
+    "share_guidelines_title": "分享前须知",
+    "store_download_device_intro": "将所有共享程序及其参考周期采用到您的设备。您自己录制的周期和统计数据不受影响。",
+    "store_share_device_intro": "上传 {brand} {model} 及您选择的参考周期。拥有相同设备的其他用户可以采用您的程序。条目在公开前经过审核。",
+    "share_profile_no_cycles": "无参考周期 -- 请在\"周期\"选项卡中将周期标记为 ⭐ 以包含此配置文件"
+  },
+  "pg_desc": {
+    "abrupt_drop_watts": "骤降视为立即结束",
+    "completion_min_seconds": "计为真实周期的最短运行时间",
+    "end_repeat_count": "结束前连续的低读数次数",
+    "interrupted_min_seconds": "短周期标记为中断",
+    "min_off_gap": "区分两个周期所需的间隔",
+    "off_delay": "周期结束前低功率持续的秒数",
+    "start_duration_threshold": "确认启动所需的超阈值秒数",
+    "start_threshold_w": "计为启动的最小瓦数",
+    "stop_threshold_w": "低于此值机器计为关闭",
+    "dtw_bandwidth": "形状匹配允许的时间扭曲程度",
+    "corr_weight": "匹配中曲线形状与功率水平的权重",
+    "duration_weight": "运行时长的吻合程度对匹配的影响大小",
+    "energy_weight": "能耗吻合程度对匹配的影响大小",
+    "profile_match_min_duration_ratio": "仍可用于匹配的最短运行时长（相对于程序档案）",
+    "profile_match_max_duration_ratio": "仍可用于匹配的最长运行时长（相对于程序档案）"
+  },
+  "phase_desc": {
+    "anti_crease": "完成后偶尔进行短暂的翻滚以减少皱纹。",
+    "anti_wrinkle": "周期后定期翻滚以减少皱纹。",
+    "cool_down": "接近循环结束时在没有热量的情况下翻滚。",
+    "drain_and_switch": "从洗涤模式到干燥模式的过渡期。",
+    "dry": "使用加热器和/或余热的干燥阶段。",
+    "drying": "主要加热翻滚期。",
+    "heat_up": "完全干燥开始之前加热器初始预热。",
+    "pre_rinse": "洗涤剂清洗前初步喷洒。",
+    "pre_wash": "主洗前的初步浸泡或预处理。",
+    "rinse": "清水冲洗阶段。该阶段可能会重复多次。",
+    "sanitize": "用于消毒程序的高温清洁阶段。",
+    "sensor_check": "测量干燥度时短暂的低功率暂停。",
+    "soak": "活性洗涤阶段之间的低活性浸泡期。",
+    "soak_dw": "对重度污垢进行延长浸泡。",
+    "spin": "高速提取以去除负载中的水。",
+    "spin_wd": "干燥过渡前高速萃取。",
+    "wash": "主洗涤周期带有滚筒运动和可选加热。",
+    "wash_dw": "主要洗涤剂加热洗涤。"
+  },
+  "placeholder": {
+    "add": "添加…",
+    "group_name": "例如 棉布 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+    "notify": "添加通知服务…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "添加人员…",
+    "phase_name": "例如 预洗",
+    "profile_name": "例如 棉布 40°C",
+    "maintenance_notes": "例如：更换了过滤器、清洁了门封",
+    "store_brand": "例如 Bosch",
+    "store_model": "例如 WAT28401"
+  },
+  "pref": {
+    "date_absolute": "绝对时间（例如：7月2日 14:32）",
+    "date_relative": "相对时间（例如：2小时前）",
+    "lang_auto": "系统默认（{lang}）",
+    "lang_en": "英语",
+    "use_panel_default": "（面板默认）"
+  },
+  "quality": {
+    "bad": "差",
+    "good": "好",
+    "unusable": "不可用"
+  },
+  "section": {
+    "anti_wrinkle": {
+      "intro": "防皱模式检测主阶段后的低功率翻滚脉冲，并将其附加到完成的周期。",
+      "label": "防皱"
+    },
+    "basic": {
+      "intro": "核心标识和大多数设置所需的基本要素。",
+      "label": "基本"
+    },
+    "delay": {
+      "intro": "延迟启动检测识别设备已通电但尚未开始运行的情况。",
+      "label": "延迟启动"
+    },
+    "detection": {
+      "intro": "周期的启动、运行和结束是如何被检测的。",
+      "label": "检测"
+    },
+    "matching": {
+      "intro": "已完成的周期如何与学习到的运行档案匹配并贴标签。",
+      "label": "匹配"
+    },
+    "ml_training": {
+      "intro": "设备端机器学习重训练计划和数据设置。",
+      "label": "ML 训练"
+    },
+    "notifications": {
+      "intro": "关于周期事件，您何时以及如何收到通知。",
+      "label": "通知"
+    },
+    "timing": {
+      "intro": "后台节奏、离线看门狗和日常维护。",
+      "label": "计时与看门狗"
+    },
+    "triggers": {
+      "intro": "可选的外部信号：结束触发器、门传感器、暂停开关和卸载提醒。",
+      "label": "触发器与门"
+    }
+  },
+  "setting": {
+    "abrupt_drop_ratio": {
+      "doc": "大于电流功率这一部分的下降也被视为突然下降（0.6 = 60% 下降）。补充不同设备尺寸的瓦特阈值。",
+      "label": "突降比例"
+    },
+    "abrupt_drop_watts": {
+      "doc": "功率下降大于此值会将循环标记为已中断（手动取消）而不是自然结束。",
+      "label": "突降功率"
+    },
+    "anti_wrinkle_enabled": {
+      "doc": "识别烘干机在主要加热阶段后发出的短的低功率翻滚脉冲，并将它们附加到完成的循环，而不是将它们视为新循环。",
+      "label": "启用防皱检测"
+    },
+    "anti_wrinkle_exit_power": {
+      "doc": "脉冲之间的功率必须低于此值，抗皱模式才能保持活动状态。",
+      "label": "退出功率阈值"
+    },
+    "anti_wrinkle_max_duration": {
+      "doc": "比这更长的脉冲被视为真正的周期，而不是抗皱滚动。",
+      "label": "最长时长"
+    },
+    "anti_wrinkle_max_power": {
+      "doc": "高于此功率的脉冲被视为真正的新周期，而不是抗皱翻滚。设置在翻滚脉冲功率的正上方。",
+      "label": "最大防皱功率"
+    },
+    "auto_label_confidence": {
+      "doc": "如果周期结束时的比赛分数等于或高于此分数，则节目将自动标记，无需任何确认提示。在自动标记之前将其提高到需要更高的确定性；降低它以实现更多自动化。与下面的学习信心结合使用。",
+      "label": "自动标记置信度"
+    },
+    "auto_maintenance": {
+      "doc": "每晚运行内务管理：重建配置文件包络、重新计算周期运行状况、修剪调试跟踪并保留最新的周期。",
+      "label": "自动维护（每夜清理）"
+    },
+    "completion_min_seconds": {
+      "doc": "比这个短的周期将被丢弃为幽灵周期（测试运行，打开门添加袜子）。",
+      "label": "最短周期时长"
+    },
+    "delay_confirm_seconds": {
+      "doc": "在设备被视为等待启动而不是运行之前，电源必须保持在待机状态这么长时间。",
+      "label": "确认秒数"
+    },
+    "delay_start_detect_enabled": {
+      "doc": "检测设备何时开机并等待（延迟启动/待机）但尚未开始其周期，因此待机绘制不会被误认为是运行周期。",
+      "label": "启用延迟启动检测"
+    },
+    "delay_timeout_hours": {
+      "doc": "经过这么多小时后，停止在延迟启动模式下等待并返回空闲状态，因此保持通电但从未启动的机器不会永远等待。",
+      "label": "超时小时数"
+    },
+    "device_type": {
+      "doc": "家电类。设置针对该设备类型调整的合理检测默认值（阈值、关闭延迟、结束处理）；仅当设备最初设置为错误类型时才更改它。",
+      "label": "设备类型"
+    },
+    "door_sensor_entity": {
+      "doc": "可选门二进制传感器。用于检测设备在一个周期后何时打开/卸载。",
+      "label": "门传感器实体"
+    },
+    "duration_tolerance": {
+      "doc": "对剩余时间估计的容忍度（学习反馈，而不是匹配）。如果实际持续时间在估计值的 +/-X% 范围内，则视为良好匹配。",
+      "label": "估算容差"
+    },
+    "enable_ml_models": {
+      "doc": "当一个循环运行时，让模型完善实时结果：更稳定的剩余时间和能量/成本估计，以及结束检测的防过早停止防护（它只能延迟完成，永远不会提前结束，并且是有限的）。如果可用，则使用您的微调模型，否则使用内置模型。关闭 = 仅经典的基于电源的逻辑（仍然可靠）。",
+      "label": "在周期中应用智能模型"
+    },
+    "end_energy_threshold": {
+      "doc": "在关闭延迟倒计时期间，累积能量（瓦特 x 时间）与该阈值进行比较。如果超过，倒计时会重置 - 将防皱翻滚和洗碗机干燥尾部连接到循环上，而不是缩短它们。如果冷却过程中循环结束得太早，则提高它；如果检测缓慢，则降低它。",
+      "label": "结束能耗"
+    },
+    "end_repeat_count": {
+      "doc": "周期结束前所需的连续低于停止阈值的读数数。 1 适用于大多数插头。如果您的智能插头偶尔在周期中报告假零样本并且您的周期提前结束，则提高到 2-3。",
+      "label": "结束重复次数"
+    },
+    "energy_price_entity": {
+      "doc": "具有当前每千瓦时电价的传感器（例如动态电价）。优先于下面的静态价格。每个周期结束后都会冻结实际价格。",
+      "label": "电价实体"
+    },
+    "energy_price_static": {
+      "doc": "当上面未设置实时价格实体时，每千瓦时的固定价格用于成本数据。",
+      "label": "固定电价（每 kWh）"
+    },
+    "expose_debug_entities": {
+      "doc": "发布额外的诊断 HA 实体（匹配置信度、模糊性、状态内部）。关闭可保持实体列表干净以供正常使用。",
+      "label": "暴露调试实体"
+    },
+    "external_end_trigger": {
+      "doc": "状态变化标志着周期结束的二进制传感器（例如，设备“完成”接触或配套集成）。",
+      "label": "外部触发器实体"
+    },
+    "external_end_trigger_enabled": {
+      "doc": "除了内置的基于电源的检测之外，还可以让外部二进制传感器发出周期结束信号。",
+      "label": "启用外部结束触发器"
+    },
+    "external_end_trigger_inverted": {
+      "doc": "将触发传感器关闭（而不是打开）视为周期结束信号。",
+      "label": "反转外部触发器（关闭时触发）"
+    },
+    "learning_confidence": {
+      "doc": "如果匹配分数介于此分数和自动标签置信度之间，则会出现反馈通知，要求您验证已识别的程序。低于这个分数，比赛就太不确定了，无法浮出水面。必须保持在自动标签置信度以下。",
+      "label": "学习置信度"
+    },
+    "linked_device": {
+      "doc": "可以选择将此 WashData 设备嵌套在 HA 设备注册表中的另一个设备（例如智能插头）下，显示为“通过...连接”。",
+      "label": "归入设备"
+    },
+    "min_off_gap": {
+      "doc": "如果机器关闭时间少于该时间，则开/关/开序列被视为一个连续周期。防止浸泡程序（机器在洗涤过程中关闭几分钟）被分成两个单独的周期。如果您希望将这些负载算作单独的循环，请将其设置为短于连续负载之间的间隙。设备类型默认值可保护每个设备的典型周期内暂停。",
+      "label": "最小关闭间隔"
+    },
+    "min_power": {
+      "doc": "视为活动的绝对最小功率。低于此值的读数被视为 0 W（待机），滤除智能插头和待机 LED 的幻象负载。",
+      "label": "最小功率"
+    },
+    "ml_training_enabled": {
+      "doc": "定期隔夜研究您审查的循环，并针对该特定机器微调模型。只有当改变在持续的周期中真正取得更好的成绩时，才会保留改变，因此这只能有所帮助或保持不变——永远不会倒退。",
+      "label": "从此机器学习"
+    },
+    "ml_training_hour": {
+      "doc": "一天中的当地时间 (0-23) 进行夜间微调。选择一个安静的时间，例如 2 (02:00)。",
+      "label": "学习时间（小时）"
+    },
+    "ml_training_interval_days": {
+      "doc": "每这么多天最多重新检查一次改进。",
+      "label": "最多每隔几天检查一次"
+    },
+    "ml_training_min_cycles": {
+      "doc": "等到至少记录了这么多周期后再进行微调，这样就有足够的东西可以学习了。",
+      "label": "需要的最少周期数"
+    },
+    "name": {
+      "doc": "HA 集成列表和设备注册表中显示的显示名称。",
+      "label": "设备名称"
+    },
+    "no_update_active_timeout": {
+      "doc": "如果运行时这么长时间没有电源更新到达，则假设插头脱机并强制停止以避免僵尸循环。默认 600 秒允许云或网格延迟。",
+      "label": "无更新超时"
+    },
+    "notify_before_end_minutes": {
+      "doc": "当预计剩余时间低于此值时，发送“即将完成”警报。 0 禁用它。",
+      "label": "结束前提醒"
+    },
+    "notify_channel": {
+      "doc": "开始/实时消息的 Android 通知通道名称（控制移动应用程序上的每个通道声音和优先级）。 Blank 使用配套应用程序默认值。",
+      "label": "Android 频道（启动/实时）"
+    },
+    "notify_cycle_timers": {
+      "doc": "在一个周期的特定分钟发出通知（例如添加柔软剂）。消息支持{device}、{program}、{minutes}。启用“自动暂停”以在该点暂停并通过“恢复”按钮接收交互式通知；通过面板、暂停/恢复服务或通知操作恢复。",
+      "label": "周期计时器"
+    },
+    "notify_finish_channel": {
+      "doc": "完成消息的 Android 通知通道名称。空白重用开始/直播频道。",
+      "label": "Android 频道（结束）"
+    },
+    "notify_finish_message": {
+      "doc": "循环结束时发送的正文。模板变量：{device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。此处 {time_finished} 和 {vs_typical} 最为有用。",
+      "label": "结束消息"
+    },
+    "notify_finish_services": {
+      "doc": "当一个周期结束时调用notify.*服务。每个目标添加一个；留空表示没有完成通知。",
+      "label": "结束服务"
+    },
+    "notify_fire_events": {
+      "doc": "还在循环开始/结束时触发 ha_​​washdata_* 事件，以便您可以构建自己的自动化。",
+      "label": "为通知触发 HA 事件"
+    },
+    "notify_icon": {
+      "doc": "通知的可选 mdi 图标（例如 mdi：洗衣机）。将平台默认值留空。",
+      "label": "通知图标"
+    },
+    "notify_live_chronometer": {
+      "doc": "在通知中显示实时更新的倒计时器（在支持它的平台上），而不是静态估计。",
+      "label": "使用实时计时器"
+    },
+    "notify_live_interval_seconds": {
+      "doc": "周期运行时刷新实时进度通知的频率。",
+      "label": "实时更新间隔"
+    },
+    "notify_live_overrun_percent": {
+      "doc": "如果周期超出其估计值超过此百分比，则发送超限警报。",
+      "label": "实时超时 % 提醒前"
+    },
+    "notify_live_services": {
+      "doc": "在循环运行时，notify.* 服务需要实时更新进度。留空以禁用实时进度通知。",
+      "label": "实时进度服务"
+    },
+    "notify_only_when_home": {
+      "doc": "仅当至少一名关联人员（上图）在家时才发送通知。",
+      "label": "仅在家时通知"
+    },
+    "notify_people": {
+      "doc": "person.* “Notify Only When Home”使用的实体来决定是否有人在家。",
+      "label": "人员（仅在家时通知用）"
+    },
+    "notify_pre_complete_message": {
+      "doc": "临近结束 / 即将完成提醒的正文。模板变量：{device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。",
+      "label": "完成前消息"
+    },
+    "notify_reminder_message": {
+      "doc": "仍在等待的取出衣物提醒的正文。留空则使用内置默认值。模板变量：{device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。",
+      "label": "提醒消息"
+    },
+    "notify_start_message": {
+      "doc": "循环开始时发送的正文。模板变量：{device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。",
+      "label": "启动消息"
+    },
+    "notify_start_services": {
+      "doc": "循环开始时调用的notify.*服务。每个目标（电话、仪表板等）添加一个；留空表示没有开始通知。",
+      "label": "启动服务"
+    },
+    "notify_timeout_seconds": {
+      "doc": "在这么多秒后自动关闭通知（在支持它的平台上）。 0 保留它直到手动关闭。",
+      "label": "自动关闭延迟"
+    },
+    "notify_title": {
+      "doc": "通知标题。模板变量：{device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。",
+      "label": "通知标题"
+    },
+    "notify_unload_delay_minutes": {
+      "doc": "一个周期结束后几分钟，发送仍在等待的“卸载机器”提醒。设置 0 禁用提醒。",
+      "label": "卸载提醒延迟"
+    },
+    "off_delay": {
+      "doc": "断电后宣告周期结束之前等待的时间。如果在此窗口内恢复供电，则循环将无缝继续 - 这会在清洗阶段之间建立暂停的桥梁。洗碗机具有较长的干燥阶段（关闭电源 20-60 分钟），因此关闭延迟必须超过该时间才能保持整个洗涤+干燥为一个循环。",
+      "label": "关闭延迟"
+    },
+    "pause_cuts_power": {
+      "doc": "当循环暂停时，还要关闭下面的开关实体。仅适用于插头可以在周期中安全切断的电器。",
+      "label": "暂停同时断电（通过开关）"
+    },
+    "power_off_delay": {
+      "doc": "周期完成后，在状态恢复为关闭之前，功率必须持续低于电源关闭阈值的时长。仅在电源关闭阈值大于 0 时使用。此项按后台周期检查，因此实际延迟会向上取整到下一个状态过期时刻。",
+      "label": "电源关闭延迟"
+    },
+    "power_off_threshold_w": {
+      "doc": "基于功率的关闭检测（可选）。当设置为大于 0 时，周期完成后，如果功率在电源关闭延迟期间持续低于此值，则机器被视为已关机，状态会恢复为关闭。保持为 0 可禁用此功能（默认值）。请将其设置为高于真正关机时的最低功率，且低于停止阈值以及机器完成后仍开机时的待机功耗；如果它不低于停止阈值，则会被忽略。启用后，它将取代进度重置延迟来恢复为关闭状态，因此已完成的机器会保持在已完成/干净的状态，直到实际断电为止。",
+      "label": "电源关闭阈值"
+    },
+    "power_sensor": {
+      "doc": "报告该设备的实时功率（以瓦为单位）的传感器实体（例如sensor.washer_power）。所有周期检测均基于该信号。",
+      "label": "功率传感器"
+    },
+    "profile_duration_tolerance": {
+      "doc": "匹配过程中使用的配置文件平均持续时间周围的 +/- 范围。 0.25 表示 60 分钟的配置文件与 45-75 分钟的循环匹配。",
+      "label": "运行档案时长容差"
+    },
+    "profile_match_interval": {
+      "doc": "在运行周期中尝试配置文件匹配的频率。默认 300 秒（5 分钟）平衡检测速度和 CPU。",
+      "label": "匹配间隔"
+    },
+    "profile_match_max_duration_ratio": {
+      "doc": "相对于轮廓的最大循环长度。 1.3 表示周期必须低于配置文件持续时间的 130% 才能匹配。",
+      "label": "最大时长比例"
+    },
+    "profile_match_min_duration_ratio": {
+      "doc": "相对于轮廓的最小周期长度。 0.9 表示一个周期必须至少为配置文件持续时间的 90% 才能匹配。",
+      "label": "最小时长比例"
+    },
+    "profile_match_threshold": {
+      "doc": "周期结束时接受程序识别所需的最低相似度分数 (0-1)。提高它可以减少错误识别；如果您的机器的程序不匹配，请降低它。默认值 0.4 是一个保守的起点。",
+      "label": "匹配阈值"
+    },
+    "profile_unmatch_threshold": {
+      "doc": "如果实时中期比赛的分数低于此分数，则临时标识将被清除。将其保持在匹配阈值以下一点，这样相似度的短暂下降不会将显示翻转回不匹配的状态。",
+      "label": "不匹配阈值"
+    },
+    "progress_reset_delay": {
+      "doc": "完成后，将进度保持在 100% 一段时间，以便在重置为“空闲”之前在仪表板上可以看到“已完成”。",
+      "label": "进度重置延迟"
+    },
+    "pump_stuck_duration": {
+      "doc": "泵在被标记为可能卡住之前可以连续运行的秒数（触发泵卡住事件）。",
+      "label": "泵卡住时长"
+    },
+    "running_dead_zone": {
+      "doc": "一个周期开始后，该窗口内的功率骤降将被忽略。洗衣机注满冷水（加热前下降到接近 0 W） - 如果没有这种保护，注水阶段看起来就像循环结束。这不会跳过数据：从 T=0 开始记录全功率轨迹。建议引擎会测量机器的实际启动模式并自动调整其大小。",
+      "label": "运行死区"
+    },
+    "sampling_interval": {
+      "doc": "传感器读数之间的预期时间 - 用于调整平滑窗口的大小并正确启动去抖。无论该值如何，都会捕获每个传感器更新；它仅校准下游计算。建议引擎会测量传感器过去周期的实际踏频并自动设置。",
+      "label": "采样间隔"
+    },
+    "save_debug_traces": {
+      "doc": "存储每个周期的完整功率跟踪和匹配调试数据。对于故障排除很有用，但会增加存储大小。",
+      "label": "保存调试追踪"
+    },
+    "smoothing_window": {
+      "doc": "原始功率信号被平滑了多少。低 (2) 响应灵敏，但噪音较大；高 (5) 可平滑尖峰，但会增加滞后。",
+      "label": "平滑窗口"
+    },
+    "start_duration_threshold": {
+      "doc": "电源必须保持在启动阈值以上这么长的时间才能确认真正的启动，从而防止瞬间开/关切换启动一个周期。",
+      "label": "启动时长"
+    },
+    "start_energy_threshold": {
+      "doc": "设备在运行前必须消耗的能量（功率 x 时间）。短暂的高功率尖峰能量非常低，会被忽略，从而防止误启动。",
+      "label": "启动能耗"
+    },
+    "start_threshold_w": {
+      "doc": "功率必须高于此水平才能确认周期已开始。设置太低会导致待机功率误启动；过高且启动缓慢的程序（冷填充）会被错过。建议引擎将其设置为略高于机器观察到的最低有功功率。",
+      "label": "启动阈值"
+    },
+    "stop_threshold_w": {
+      "doc": "在关闭延迟倒计时开始之前，功率必须降至此水平以下。将其设置为低于启动阈值 - 它们之间的间隙是防止闪烁的滞后带。如果设置得太高，低功率阶段（漂洗保持、防皱）会错误地触发结束序列。",
+      "label": "停止阈值"
+    },
+    "switch_entity": {
+      "doc": "可选开关在暂停时关闭，在恢复时重新打开，与“暂停也会切断电源”一起使用。",
+      "label": "开关实体"
+    },
+    "watchdog_interval": {
+      "doc": "后台看门狗检查停滞的传感器和超时的频率。默认 30 秒。",
+      "label": "看门狗间隔"
+    },
+    "notify_milestone_message": {
+      "doc": "里程碑通知的消息。模板变量：{device}、{cycle_count}。",
+      "label": "里程碑消息"
+    },
+    "notify_milestones": {
+      "doc": "以逗号分隔的周期计数，达到时触发一次性庆祝通知（例如 50、100、500、1000）。留空则禁用里程碑通知。",
+      "label": "周期里程碑"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "免打扰时段的结束时间（0-23）。暂存的通知将在此时段发送。留空则禁用。",
+      "label": "免打扰结束"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "免打扰时段的开始时间（0-23）。在免打扰时段内本应触发的完成、提醒和衣物已洗好通知将被暂存，并在时段结束时发送。留空则禁用。支持跨越午夜的时段（例如开始 22，结束 7）。",
+      "label": "免打扰开始"
+    },
+    "peak_rate_message": {
+      "doc": "附加到启动通知的高峰电价提示的可选自定义文本。模板变量：{device}、{price}。留空则使用内置默认值。",
+      "label": "高峰电价消息"
+    },
+    "peak_rate_threshold": {
+      "doc": "当周期开始且当前每千瓦时电价达到或超过此值时，在启动通知中附加高峰电价提示。0 或留空则禁用该提示。",
+      "label": "高峰电价阈值（每千瓦时）"
+    },
+    "dtw_bandwidth": {
+      "label": "形状匹配容差",
+      "doc": "匹配器为了贴合已保存程序的形状，可以对周期进行多大程度的时间扭曲。数值越高越能容忍速度变化；过高则可能匹配到错误的程序。"
+    },
+    "corr_weight": {
+      "label": "形状与水平权重",
+      "doc": "在为匹配评分时，曲线形状与绝对功率水平之间的平衡。数值越高越偏重形状；越低越偏重功率水平的吻合。"
+    },
+    "duration_weight": {
+      "label": "时长权重",
+      "doc": "典型运行时长与此周期吻合的程序会被优先选择的程度。"
+    },
+    "energy_weight": {
+      "label": "能耗权重",
+      "doc": "典型能耗与此周期吻合的程序会被优先选择的程度。"
+    },
+    "store_brand": {
+      "label": "家电品牌",
+      "doc": "可选。从社区目录中选择的家电品牌。用于查找和分享匹配的参考录制。如果您不使用在线功能，请留空。"
+    },
+    "store_model": {
+      "label": "家电型号",
+      "doc": "可选。设置品牌后，从社区目录中选择的家电型号。如果目录中没有您的型号，您可以将其添加到目录。"
+    },
+    "show_contributor": {
+      "doc": "在社区家电和参考周期上显示\"by <contributor>\"的贡献者署名。"
+    }
+  },
+  "setting_group": {
+    "auto_labeling": {
+      "label": "自动标记"
+    },
+    "cycle_end": {
+      "label": "周期结束"
+    },
+    "cycle_start": {
+      "label": "周期开始"
+    },
+    "cycle_timers": {
+      "label": "周期计时器"
+    },
+    "data_management": {
+      "label": "数据管理"
+    },
+    "debug": {
+      "label": "调试"
+    },
+    "dishwasher_end": {
+      "label": "洗碗机结束"
+    },
+    "door_pause": {
+      "label": "门与暂停"
+    },
+    "dtw_refinement": {
+      "label": "DTW 细化"
+    },
+    "duration_gates": {
+      "label": "时长门控"
+    },
+    "energy": {
+      "label": "能耗"
+    },
+    "external_end_trigger": {
+      "label": "外部结束触发器"
+    },
+    "housekeeping": {
+      "label": "日常维护"
+    },
+    "match_scoring": {
+      "label": "匹配评分"
+    },
+    "messages": {
+      "label": "消息"
+    },
+    "power_off": {
+      "label": "电源关闭"
+    },
+    "predictive_end": {
+      "label": "预测结束"
+    },
+    "schedule": {
+      "label": "计划"
+    },
+    "services": {
+      "label": "服务"
+    },
+    "signal_processing": {
+      "label": "信号处理"
+    },
+    "thresholds_gap": {
+      "label": "阈值与间隔"
+    },
+    "timing": {
+      "label": "计时"
+    },
+    "unload_reminder": {
+      "label": "卸载提醒"
+    },
+    "watchdog": {
+      "label": "看门狗"
+    },
+    "quiet_hours_milestones": {
+      "label": "免打扰时段与里程碑"
+    },
+    "device_info": {
+      "label": "设备信息"
+    },
+    "basic_configuration": {
+      "label": "基本配置"
+    }
+  },
+  "status": {
+    "active": "活跃",
+    "all_statuses": "所有状态",
+    "ambiguous": "不明确",
+    "auto_detect": "自动检测",
+    "clear": "正常",
+    "completed": "已完成",
+    "fine_tuning": "正在微调…",
+    "force_stopped": "强制停止",
+    "idle": "空闲",
+    "interrupted": "已中断",
+    "ready": "准备处理",
+    "recording": "录制中",
+    "training": "训练中…",
+    "saving": "保存中…",
+    "rebuilding": "重建中…",
+    "analyzing": "分析中…",
+    "resetting": "重置中…",
+    "reverting": "还原中…",
+    "trimming": "裁剪中…",
+    "splitting": "拆分中…",
+    "deleting": "删除中…",
+    "imported": "已导入"
+  },
+  "tab": {
+    "advanced": "高级",
+    "diagnostics": "诊断",
+    "history": "周期",
+    "ml": "ML 训练",
+    "pp_cleanup": "清理",
+    "pp_manage": "管理",
+    "pp_overview": "概览",
+    "pp_phases": "阶段",
+    "profiles": "配置文件",
+    "settings": "设置",
+    "status": "概览",
+    "subtab_phase_catalog": "阶段目录",
+    "subtab_profiles": "配置文件",
+    "maintenance": "维护",
+    "playground": "试验场",
+    "store": "商店"
+  },
+  "tag": {
+    "early_end": "提前结束",
+    "late_start": "延迟开始",
+    "merged": "合并周期",
+    "noise": "噪声",
+    "sensor_gap": "传感器间隔",
+    "split": "拆分周期",
+    "wrong_profile": "错误配置文件"
+  },
+  "toast": {
+    "access_saved": "已保存访问控制",
+    "all_wiped": "所有数据已清除",
+    "analysis_complete_none": "分析完成：没有新建议",
+    "auto_label_complete": "自动标记完成",
+    "automation_deleted": "自动化已删除",
+    "correction_submitted": "修正已提交",
+    "cycle_deleted": "周期已删除",
+    "cycle_force_stopped": "周期已强制停止",
+    "cycle_labelled": "周期已标记",
+    "cycle_paused": "周期已暂停",
+    "cycle_resumed": "周期已恢复",
+    "cycle_trimmed": "周期已裁剪",
+    "cycles_merged": "周期已合并",
+    "envelope_rebuilt": "包络已重建",
+    "envelopes_rebuilt": "所有包络已重建",
+    "export_downloaded": "导出已下载",
+    "feedback_all_dismissed": "所有反馈已关闭",
+    "feedback_confirmed": "反馈已确认",
+    "feedback_dismissed": "反馈已关闭",
+    "group_deleted": "组已删除",
+    "group_name_required": "需要组名",
+    "group_saved": "组已保存",
+    "import_successful": "导入成功；集成重载中",
+    "json_required": "需要 JSON 数据",
+    "legacy_removed": "旧版操作已移除",
+    "logs_exported": "日志已导出",
+    "matching_reverted": "匹配权重已恢复为默认值",
+    "min_2_profiles": "为组至少选择 2 个配置文件",
+    "ml_training_no_improvement": "训练完成：保留基准（无改进）",
+    "models_reverted": "设备上的模型已恢复为基准",
+    "name_required": "需要名称",
+    "no_split_found": "未找到可分割的空闲间隔",
+    "panel_settings_saved": "面板设置已保存",
+    "phase_name_required": "需要阶段名称",
+    "phase_updated": "阶段已更新",
+    "phases_saved": "阶段已保存",
+    "preferences_saved": "偏好已保存",
+    "profile_name_required": "需要配置文件名称",
+    "profile_renamed": "配置文件已重命名",
+    "recording_discarded": "录制已丢弃",
+    "recording_saved": "录制已保存到配置文件",
+    "recording_started": "录制已开始",
+    "recording_stopped": "录制已停止",
+    "review_saved": "审查已保存",
+    "settings_conflicts": "请先解决标红的设置冲突，再保存。",
+    "settings_reverted": "设置已恢复；集成正在重新加载",
+    "settings_saved": "设置已保存；集成重载中",
+    "suggestions_applied": "建议已应用；集成重载中",
+    "suggestions_dismissed": "建议已关闭",
+    "apply_failed": "应用失败：{error}",
+    "delete_failed": "删除失败：{error}",
+    "load_more_failed": "无法加载更多：{error}",
+    "maint_add_failed": "无法添加事件：{error}",
+    "maint_added": "已添加维护事件",
+    "maint_delete_failed": "无法删除事件：{error}",
+    "maint_deleted": "已删除维护事件",
+    "relabel_done": "已重新标记 {count} 个周期",
+    "relabel_failed": "重新标记失败：{error}",
+    "reminders_save_failed": "无法保存提醒：{error}",
+    "reminders_saved": "已保存保养提醒",
+    "pause_no_cycle": "没有可暂停的运行周期",
+    "resume_no_cycle": "没有可恢复的已暂停周期",
+    "delete_partial_failed": "部分项目无法删除，已恢复",
+    "pg_run_gone": "该运行已不可用。",
+    "task_cancelled": "已取消。",
+    "processed": "已处理 {bits}",
+    "processed_cycles": "{n} 个周期",
+    "processed_suggestions": "{n} 条建议",
+    "processed_models": "{n} 个模型升级",
+    "store_search_failed": "搜索失败：{error}",
+    "store_connect_failed": "连接失败：{error}",
+    "store_connected": "已连接到社区商店",
+    "store_disconnected": "已断开与社区商店的连接",
+    "store_error": "错误：{error}",
+    "store_unavailable": "社区商店不可用。",
+    "store_pick_profile": "请选择要合并到的配置文件",
+    "store_name_required": "请输入配置文件名称",
+    "store_import_failed": "导入失败：{error}",
+    "store_imported": "已导入到 {profile}",
+    "store_program_required": "请输入程序名称",
+    "store_no_appliance": "请先在设置中设置您的家电品牌和型号。",
+    "store_share_failed": "分享失败：{error}",
+    "store_shared": "已分享到社区商店（等待审核）",
+    "appliance_added": "已添加家电（等待批准）",
+    "thanks_confirming": "感谢您的确认",
+    "device_approved": "已获社区批准",
+    "rating_saved": "质量评分已保存",
+    "brand_added": "已添加品牌（等待批准）",
+    "profile_added": "已添加配置文件（等待批准）",
+    "saved_except_conflicts": "已保存。请修复突出显示的冲突以保存其余内容。",
+    "share_device_none_sel": "请至少选择一个周期进行分享",
+    "store_device_downloaded": "已添加 {p} 个程序、{c} 个录制",
+    "store_device_downloaded_phases": "已添加 {p} 个程序、{c} 个录制、{ph} 个阶段图",
+    "store_device_downloaded_settings": "已添加 {p} 个程序、{c} 个录制、{ph} 个阶段图、{s} 个设置",
+    "store_device_shared": "已将 {n} 个周期分享到社区商店 - 待审核。",
+    "store_device_shared_all_dup": "{n} 个周期均已在社区商店中。",
+    "store_device_shared_partial": "已分享 {n} 个周期；{failed} 个无法上传。",
+    "store_device_shared_some_dup": "已分享 {created} 个周期；{dup} 个已在商店中。",
+    "store_download_failed": "下载失败：{error}",
+    "store_download_nothing": "没有新内容可下载 - 此配置已在您的设备上。"
+  },
+  "suggestion": {
+    "both_agree": "WashData建议",
+    "calibrated_label": "已校准",
+    "observed_label": "观测值",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "自动标记的循环减少，更多循环进入审核",
+        "lower": "自动标记更多循环，部分可能被误识别"
+      },
+      "duration_tolerance": {
+        "higher": "接受更宽的时长范围——匹配更灵活",
+        "lower": "要求时长更接近——更严格，但可能拒绝非常规循环"
+      },
+      "end_energy_threshold": {
+        "higher": "仅关闭消耗大量能量的循环",
+        "lower": "也关闭较短或低能耗的循环"
+      },
+      "end_repeat_count": {
+        "higher": "结束信号需重复更多次——更稳健，但略慢",
+        "lower": "更少重复后结束——检测更快，但误结束风险更高"
+      },
+      "learning_confidence": {
+        "higher": "仅从高置信度匹配中学习——较慢但更可靠",
+        "lower": "从更多循环中学习，模型可能更嘈杂"
+      },
+      "min_off_gap": {
+        "higher": "新循环开始前需要更长的空闲时间",
+        "lower": "短暂空闲即触发新循环——连续运行可能被拆分"
+      },
+      "min_power": {
+        "higher": "对待机功耗不那么敏感，可能遗漏非常安静的程序",
+        "lower": "更灵敏，可能将待机功耗记录为活动"
+      },
+      "no_update_active_timeout": {
+        "higher": "在判定循环卡住前等待更长时间",
+        "lower": "更快地强制终止卡住的循环"
+      },
+      "off_delay": {
+        "higher": "为设备暂停留出更多时间——适合长时间浸泡或烘干阶段",
+        "lower": "更快检测结束——适合干净的开关设备"
+      },
+      "profile_match_threshold": {
+        "higher": "仅提交高置信度匹配，更多循环保持未标记",
+        "lower": "匹配更多循环，部分可能略有偏差"
+      },
+      "running_dead_zone": {
+        "higher": "忽略待机时的短暂功率尖峰——对噪声不那么敏感",
+        "lower": "响应更短的功率突发——捕捉快速瞬态活动"
+      },
+      "start_threshold_w": {
+        "higher": "避免因短暂功率尖峰引起的误启动",
+        "lower": "捕捉低功率程序，可能对噪声触发"
+      },
+      "stop_threshold_w": {
+        "higher": "更快结束循环——可能在暂停时关闭",
+        "lower": "等待更长时间结束——减少提前完成"
+      },
+      "watchdog_interval": {
+        "higher": "允许更长的静默阶段，减少误强制停止",
+        "lower": "更积极地捕捉卡住的循环"
+      }
+    },
+    "reason": {
+      "auto_label_confidence": "用户从未纠正的 {cycles} 个自动标注的第 15 百分位置信度（{p15}）。",
+      "completion_min_seconds": "{cycles} 个周期中 p05 正常周期时长的一半（{minutes} min）；用于过滤误检周期。{excl}",
+      "dead_zone_batch": "保持较短（{cycles} 个周期中启动不稳定窗口的中位数 = {s}s），以便及时检测到真正的结束。",
+      "dead_zone_from_dip": "基于在 {s}s 时检测到的早期功率下降。",
+      "end_energy_default": "周期结束噪声门限的推荐默认值。",
+      "end_energy_false": "{cycles} 个周期中 p95 的误结束能量（{p95}Wh），下限为周期能量中位数的 0.2%（{floor}Wh）。",
+      "end_energy_no_false": "{cycles} 个周期中无误结束；下限为周期能量中位数的 0.2%（{floor}Wh）。",
+      "end_repeat_count": "{false}/{total} 个正常周期（{pct}%）出现了超过 60s 且随后恢复的内部暂停；要求进行 {val} 次结束确认。",
+      "learning_confidence": "{cycles} 个用户标注周期的 p05 置信度（{p05}）；低于此值时请求验证。",
+      "match_interval": "基于观测到的更新频率（中位数={median}s） * 10。",
+      "max_duration_ratio": "基于已标注的周期时长（p95={p95}）。",
+      "min_active": "基于上一个周期中观测到的最小工作功率（{min}W）。",
+      "min_duration_ratio": "尽可能保持较低，以便在周期早期识别出程序；置信度和歧义门限可防止过早确定。",
+      "min_off_gap": "基于观测到的 {gaps} 个周期间间隔（p05={p05}s）。设备下限：{floor}s。",
+      "min_power": "{cycles} 个正常周期中 p05 最低工作功率（{p05}W）的 40%，使关闭门限保持在实际功耗之下。{excl}",
+      "ml_auto_label": "质量模型仍判定为正常的最低置信度（{cycles} 个正常周期的 p10 = {p10}）。",
+      "ml_end_repeat": "{false}/{total} 个周期（{pct}%）出现了结束检测器评分超过 50% 的暂停；要求进行 {val} 次结束确认。",
+      "ml_off_delay": "结束检测器已确认的暂停：p95 {p95}s + 60s 缓冲，来自 {cycles} 个周期中经模型验证的 {pauses} 次暂停（下限 {floor}s）。",
+      "no_update_timeout": "基于观测到的更新频率（p95={p95}s） * 20（最小 60s）。",
+      "off_delay_cadence": "基于观测到的更新频率（p95={p95}s） * 5",
+      "off_delay_device_floor": "对 {device} 使用了特定于设备的安全最小值（{floor}s）。",
+      "off_delay_generic_floor": "使用了通用安全最小值（{floor}s）。",
+      "off_delay_pauses": "设定为足以超过真实暂停：p95 周期内暂停 {p95}s + 60s 缓冲，来自 {cycles} 个正常周期中的 {pauses} 次暂停（下限 {floor}s）。",
+      "profile_match_threshold": "{cycles} 个正确自动标注的 p10 置信度（{p10}）；安全的实时确定下限。",
+      "sampling_interval": "{cycles} 个正常周期中观测到的更新间隔中位数（{si}s）。{excl}",
+      "smoothing_window": "设定为在 {si}s 采样下平滑约 30s 的读数（{samples} 个样本）。",
+      "start_duration": "保持较短（约一个 {si}s 采样间隔），以便尽早开始检测，同时忽略单个采样的尖峰。",
+      "thr_batch": "保持在 {cycles} 个周期中 p05 最低工作功率（{p05}W）略上方，以便尽早捕捉到启动，同时使停止阈值保持在设备最低运行功率之下。",
+      "tol_per_profile": "{profiles} 个配置文件（{cycles} 个周期）中每个配置文件时长方差的 p75；波动小的配置文件不受惩罚。",
+      "tol_pooled": "基于 {cycles} 个近期已标注周期的合并时长方差（p95 偏差={dev}）。",
+      "watchdog": "在安全范围内保持尽可能低（p95 更新间隔 {p95}s 的 3 倍，最小 30s），以便快速捕捉到停滞而不产生误停止。"
+    },
+    "exclusions": {
+      "summary": "已排除 {total} 个误检测周期：{parts}。",
+      "reason": {
+        "force_stopped": "强制停止",
+        "interrupted": "中断",
+        "incomplete": "未完成",
+        "noise": "噪声",
+        "unlabeled": "未标记",
+        "no_trace_short": "太短无法检查",
+        "high_start": "高功率启动",
+        "abrupt_end": "突然结束",
+        "mid_restart": "周期中途重启",
+        "no_power": "无功率",
+        "no_active_power": "无工作功率"
+      }
+    }
+  },
+  "trend": {
+    "down": "下降趋势",
+    "up": "上升趋势"
+  },
+  "maint": {
+    "bearing_service": "轴承保养",
+    "descale": "除垢",
+    "drum_clean": "清洁滚筒",
+    "filter_clean": "清洁过滤器",
+    "other": "其他"
+  },
+  "col": {
+    "profile_tip": "匹配的程序名称。未标记表示周期结束时没有配置文件匹配。",
+    "status_tip": "周期结果：已完成（自然结束）、已中断（功率骤降）、已强制停止（手动）或需要审查（反馈待处理）。",
+    "date_tip": "周期开始的日期和时间。",
+    "duration_tip": "从开始到结束的总周期运行时间。",
+    "energy_tip": "消耗的总能量（kWh）。通过对功率随时间积分计算得出。",
+    "cost_tip": "此周期的能耗成本，在完成时按当时生效的价格冻结（能量 x 每 kWh 价格）。在设置中设定价格以填充此项。",
+    "confidence_tip": "配置文件匹配置信度（0-100%）。周期功率曲线与识别出的程序的匹配程度。",
+    "health_tip": "ML 周期健康（越高越好）。点击周期以检查并审查。",
+    "flags_tip": "周期的审核、异常和来源标志。将鼠标悬停在图标上可查看详细信息。"
+  },
+  "stat": {
+    "avg": "平均",
+    "min": "最小 {v}",
+    "max": "最大 {v}",
+    "consistency": "一致性 ±{v}",
+    "total": "总计 {v}",
+    "last_run": "上次运行 {v}",
+    "score": "得分 {pct}%",
+    "duration_cv": "时长 CV {pct}%",
+    "avg_confidence": "平均置信度 {pct}%"
+  },
+  "pg_evd": {
+    "detected": "检测器识别到一个循环已经开始。",
+    "match_commit": "匹配器以足够的置信度确定了某个程序。",
+    "match_changed": "随着循环推进，领先的程序发生了变化。",
+    "match_ambiguous": "两个程序的得分很接近，因此匹配结果不确定。",
+    "unmatched": "没有已保存的程序与此循环匹配。",
+    "notify_start": "将发送开始通知。",
+    "notify_pre_complete": "将发送即将完成通知。",
+    "notify_finish": "将发送完成通知。",
+    "notify_milestone": "将发送里程碑通知。",
+    "notify_held": "由于处于免打扰时段，通知已被暂缓。",
+    "finished": "循环到达终止状态并已结束。"
+  },
+  "store": {
+    "browse": "浏览",
+    "device": "设备",
+    "favorites": "收藏",
+    "search_ph": "按品牌或型号搜索…",
+    "no_results": "未找到匹配的家电。请尝试其他搜索。",
+    "n_programs": "{n} 个程序",
+    "n_cycles": "{n} 个周期",
+    "no_programs": "此家电尚无共享的程序。",
+    "no_cycles": "此程序尚无共享的参考周期。",
+    "anon": "匿名",
+    "uploaded_by": "由 {name} 分享",
+    "connected_as": "已以 {name} 身份连接",
+    "not_connected": "未连接。连接 GitHub 账户以分享您自己的周期。",
+    "import_new": "新建配置文件",
+    "import_merge": "合并到现有",
+    "merge_target": "合并到配置文件",
+    "description": "描述（可选）",
+    "contributed_by": "由 {name} 提供",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "暂无评分",
+    "website": "商店网站 ↗",
+    "website_tip": "打开社区商店网站"
+  },
+  "settings": {
+    "gear": {
+      "title": "设置"
+    }
+  },
+  "link": {
+    "manual": "手册 ↗",
+    "add_appliance": "添加您的家电"
+  },
+  "tip": {
+    "add_brand": "品牌未收录？将其添加到社区目录",
+    "add_appliance": "型号未收录？将您的家电添加到社区目录",
+    "add_profile": "在社区网站上为此家电添加配置文件"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "重新处理：匹配周期",
+      "golden": "重新处理：补全参考周期",
+      "suggestions": "重新处理：建议",
+      "ml_training": "重新处理：ML 训练",
+      "health": "重新处理：周期健康"
+    },
+    "pg_sweep": {
+      "optimize": "优化：{param}"
+    }
+  }
+}

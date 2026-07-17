@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Signal processing primitives for WashData.
 
 Constraint: NumPy only.
@@ -28,12 +44,37 @@ class Segment:
     # Future extensibility: might add other channels here
 
 
-def integrate_wh(timestamps: np.ndarray, power: np.ndarray) -> float:
+def energy_gap_threshold_s(timestamps: np.ndarray) -> float:
+    """Data-driven gap threshold (seconds) for energy integration.
+
+    Ten times the median sample interval, clamped to ``[60, 3600]``. Segments
+    longer than this are treated as sensor outages and excluded from the energy
+    sum, without masking valid slow-sampling configurations. Single source for
+    both persistence paths (``manager._on_cycle_end`` / ``ProfileStore.add_cycle``).
+    """
+    ts = np.asarray(timestamps, dtype=float)
+    if ts.size < 2:
+        return 3600.0
+    intervals = np.diff(np.sort(ts))
+    positive = intervals[intervals > 0]
+    median_interval = float(np.median(positive)) if positive.size > 0 else 0.0
+    return float(np.clip(10.0 * median_interval, 60.0, 3600.0))
+
+
+def integrate_wh(
+    timestamps: np.ndarray,
+    power: np.ndarray,
+    *,
+    max_gap_s: float | None = None,
+) -> float:
     """Compute energy in Wh using trapezoidal integration.
 
     Args:
-        timestamps: Array of timestamps in seconds.
+        timestamps: Array of timestamps in seconds (must be ascending).
         power: Array of power values in Watts.
+        max_gap_s: When set, segments whose ``dt`` exceeds this (or is non-positive)
+            are excluded, so sensor-outage gaps don't inflate the total. When
+            ``None`` (default) every segment is integrated - the original behaviour.
 
     Returns:
         Energy in Watt-hours.
@@ -41,95 +82,19 @@ def integrate_wh(timestamps: np.ndarray, power: np.ndarray) -> float:
     if len(timestamps) < 2:
         return 0.0
 
-    # Calculate dt in hours
-    # np.diff(timestamps) is in seconds, divide by 3600 for hours
-    dt_hours = np.diff(timestamps) / 3600.0
+    # np.diff(timestamps) is in seconds; divide by 3600 for hours.
+    dt_hours = np.diff(np.asarray(timestamps, dtype=float)) / 3600.0
+    power = np.asarray(power, dtype=float)
 
     # Trapezoidal rule: (p[i] + p[i+1]) / 2 * dt
     avg_power = (power[:-1] + power[1:]) * 0.5
 
-    return float(np.sum(avg_power * dt_hours))
+    if max_gap_s is None:
+        return float(np.sum(avg_power * dt_hours))
 
+    mask = (dt_hours > 0) & (dt_hours <= float(max_gap_s) / 3600.0)
+    return float(np.sum(avg_power[mask] * dt_hours[mask]))
 
-def robust_smooth(
-    power: np.ndarray, timestamps: np.ndarray, time_constant_s: float = 30.0
-) -> np.ndarray:
-    """Apply robust smoothing to power data.
-
-    Combines a median filter (spike rejection) with an Exponential Moving Average (EMA).
-    EMA is calculated using time-weighted alpha to handle irregular jitter.
-
-    Args:
-        power: Array of power values.
-        timestamps: Array of timestamps in seconds.
-        time_constant_s: EMA time constant in seconds.
-                         alpha = 1 - exp(-dt / time_constant)
-
-    Returns:
-        Smoothed power array.
-    """
-    if len(power) == 0:
-        return np.array([])
-    if len(power) < 3:
-        return power.copy()
-
-    # 1. Median filter (3-point) using pure NumPy
-    p_med = power.copy()
-
-    # Vectorized 3-point median: y[i] = median(x[i-1], x[i], x[i+1])
-    # Edge handling: repeat values (first and last)
-    if len(power) >= 3:
-        # Pad with edge values
-        p_padded = np.empty(len(power) + 2)
-        p_padded[0] = power[0]
-        p_padded[-1] = power[-1]
-        p_padded[1:-1] = power
-
-        # Stack shifted views
-        # Left neighbor: p_padded[0:-2] -> indices 0..N
-        # Center:        p_padded[1:-1] -> indices 1..N+1 (original)
-        # Right neighbor: p_padded[2:]  -> indices 2..N+2
-        stack = np.vstack(
-            [p_padded[0 : len(power)], p_padded[1 : len(power) + 1], p_padded[2:]]
-        )
-
-        # Compute median down columns
-        p_med = np.median(stack, axis=0)
-
-    # 2. Time-aware EMA
-    # y[i] = alpha * x[i] + (1-alpha) * y[i-1]
-    # alpha = 1 - exp(-dt / tau)
-
-    smoothed = np.zeros_like(p_med, dtype=float)
-    smoothed[0] = p_med[0]
-
-    # We Iterate because alpha changes with dt.
-    # Vectorization is possible but complex for IIR filter with variable coefs.
-    # Python loop is fine for typical cycle lengths (points < 10k).
-
-    prev_y = p_med[0]
-    prev_t = timestamps[0]
-
-    for i in range(1, len(p_med)):
-        dt = timestamps[i] - prev_t
-        if dt <= 0:
-            # Duplicate or disorderly timestamp, just carry forward
-            smoothed[i] = prev_y
-            continue
-
-        current_val = p_med[i]
-
-        # Adaptive alpha based on dt
-        alpha = 1.0 - np.exp(-dt / time_constant_s)
-
-        # Apply EMA
-        y = alpha * current_val + (1.0 - alpha) * prev_y
-
-        smoothed[i] = y
-        prev_y = y
-        prev_t = timestamps[i]
-
-    return smoothed
 
 
 def resample_uniform(
@@ -197,6 +162,44 @@ def resample_uniform(
     return segments
 
 
+def resample_to_n(power: list[float], n: int) -> list[float]:
+    """Resample a power trace to exactly *n* evenly-spaced points via linear interpolation.
+
+    Works on raw power-value lists (no timestamp required — assumes uniform
+    original spacing).  Returns a plain Python list so callers can convert to
+    NumPy as needed.
+
+    Args:
+        power: Input power values. 2+ points are interpolated; fewer are handled
+            explicitly (see Returns).
+        n: Desired number of output points.
+
+    Returns:
+        List of *n* float values, except:
+        - returns the input unchanged when it already has exactly *n* points;
+        - returns ``[]`` for non-positive *n* or an empty input (no data to
+          resample — a "missing" marker, not fabricated zeros);
+        - returns *n* copies of the sole value for a single-sample input.
+    """
+    if len(power) == n:
+        return list(power)
+    if n < 1:
+        return []
+    src = np.asarray(power, dtype=float)
+    # An empty trace has no data to resample: return empty (a "missing" marker)
+    # rather than fabricating n zeros that read as real zero-power samples.
+    # Callers already guard empty/short input before calling.
+    if src.size == 0:
+        return []
+    # A single sample can only be replicated: return n copies of that value.
+    if src.size == 1:
+        return [float(src[0])] * n
+    src_x = np.linspace(0.0, 1.0, src.size)
+    dst_x = np.linspace(0.0, 1.0, n)
+    # Return native Python floats (not np.float64) so callers/JSON get plain floats.
+    return [float(v) for v in np.interp(dst_x, src_x, src)]
+
+
 def resample_adaptive(
     timestamps: np.ndarray,
     power: np.ndarray,
@@ -246,21 +249,3 @@ def resample_adaptive(
     return segments, target_dt
 
 
-def estimate_idle_baseline(power: np.ndarray) -> Tuple[float, float]:
-    """Estimate idle baseline level using robust statistics.
-
-    Args:
-        power: Power samples (ideally from a period known or suspected to be IDLE/lower).
-               If mixed data is passed, the median might be biased if active time > idle time.
-
-    Returns:
-        (baseline_median, baseline_mad)
-    """
-    if len(power) == 0:
-        return 0.0, 0.0
-
-    median = float(np.median(power))
-    # Median Absolute Deviation
-    mad = float(np.median(np.abs(power - median)))
-
-    return median, mad

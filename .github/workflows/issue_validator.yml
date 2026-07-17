@@ -140,15 +140,40 @@ jobs:
                 const latestStable = published.find(r => !r.prerelease);
                 const latestPre = published.find(r => r.prerelease);
 
-                const normalize = v => v.replace(/^v/i, '').trim().toLowerCase();
-                const reported = normalize(version);
-                const isOnStable = latestStable && reported === normalize(latestStable.tag_name);
-                const isOnPre    = latestPre    && reported === normalize(latestPre.tag_name);
+                // Parse "1.2.3" or "1.2.3-alpha" into { parts: [1,2,3], isPre: bool }
+                const parseVer = v => {
+                  const s = v.replace(/^v/i, '').trim().toLowerCase();
+                  const [base, ...rest] = s.split('-');
+                  return { parts: base.split('.').map(Number), isPre: rest.length > 0 };
+                };
+                // Returns true only when releaseTag is strictly newer than reportedStr
+                const isNewer = (releaseTag, reportedStr) => {
+                  const rel = parseVer(releaseTag);
+                  const rep = parseVer(reportedStr);
+                  const len = Math.max(rel.parts.length, rep.parts.length);
+                  for (let i = 0; i < len; i++) {
+                    const a = rel.parts[i] || 0, b = rep.parts[i] || 0;
+                    if (a > b) return true;
+                    if (a < b) return false;
+                  }
+                  // Same numeric base: stable is newer than a pre-release of the same version
+                  return !rel.isPre && rep.isPre;
+                };
 
-                if (!isOnStable && !isOnPre && (latestStable || latestPre)) {
+                // A pre-release is only a valid upgrade target when it is numerically
+                // newer than the latest stable. If stable is ahead (or equal), it is
+                // always the one true latest and the pre-release is never suggested.
+                const alphaIsLatest = latestPre
+                  ? (!latestStable || isNewer(latestPre.tag_name, latestStable.tag_name))
+                  : false;
+
+                const suggestStable = latestStable && isNewer(latestStable.tag_name, version);
+                const suggestPre    = alphaIsLatest && latestPre && isNewer(latestPre.tag_name, version);
+
+                if (suggestStable || suggestPre) {
                   const parts = [];
-                  if (latestStable) parts.push(`\`${latestStable.tag_name}\` (stable)`);
-                  if (latestPre)    parts.push(`\`${latestPre.tag_name}\` (pre-release)`);
+                  if (suggestStable) parts.push(`\`${latestStable.tag_name}\` (stable)`);
+                  if (suggestPre)    parts.push(`\`${latestPre.tag_name}\` (pre-release)`);
                   problems.push(
                     `**Outdated version** (\`${version}\`): the current release${parts.length > 1 ? 's are' : ' is'} ${parts.join(' and ')}. ` +
                     `Please upgrade and confirm the bug still exists on the latest version before we investigate — ` +
@@ -226,7 +251,7 @@ jobs:
                 });
 
                 const botComments = comments.data.filter(
-                  c => c.user.type === 'Bot' && c.body.includes('missing that we need before we can investigate')
+                  c => c.user.type === 'Bot' && (c.body || '').includes('missing that we need before we can investigate')
                 );
 
                 if (botComments.length === 0) {

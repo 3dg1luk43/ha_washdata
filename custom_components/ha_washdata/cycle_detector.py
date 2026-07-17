@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Cycle detection logic for WashData."""
 
 from __future__ import annotations
@@ -13,6 +29,8 @@ from homeassistant.util import dt as dt_util
 
 from .log_utils import DeviceLoggerAdapter
 from .const import (
+    ANTI_WRINKLE_ELIGIBLE_REASONS,
+    TerminationReason,
     STATE_OFF,
     STATE_DELAY_WAIT,
     STATE_STARTING,
@@ -30,21 +48,43 @@ from .const import (
     DEFAULT_MAX_DEFERRAL_SECONDS,
     DEFAULT_DEFER_FINISH_CONFIDENCE,
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
+    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
+    DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS,
+    DISHWASHER_MATCH_FREEZE_QUIET_SECONDS,
+    DISHWASHER_MIN_CYCLE_DURATION_S,
+    TERMINAL_DROP_OFF_DELAY_SECONDS,
 )
 
 # The dishwasher end-spike wait window is shared between two code paths
 # (Smart Termination's wait branch and _should_defer_finish's no-end-spike
-# branch).  They MUST release the cycle at the same instant — sanity-check
+# branch).  They MUST release the cycle at the same instant - sanity-check
 # that the constants module loaded a sensible value rather than allowing the
 # paths to silently drift if one was changed and the other forgotten.
-assert DISHWASHER_END_SPIKE_WAIT_SECONDS > 0, (
-    "DISHWASHER_END_SPIKE_WAIT_SECONDS must be positive"
-)
-assert 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1, (
-    "DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)"
-)
-from .signal_processing import integrate_wh
+if DISHWASHER_END_SPIKE_WAIT_SECONDS <= 0:
+    # Runtime check (not assert: asserts are stripped under python -O).
+    raise ValueError("DISHWASHER_END_SPIKE_WAIT_SECONDS must be positive")
+
+# Opt-in ML end-detection guard (Stage 6). When the manager injects an
+# end-confidence provider (only when the user enabled ML models for the device),
+# the cycle-end model can defer a *normal* completion if it judges the current
+# low-power event to be a pause rather than the true end. This is intentionally
+# asymmetric: it can only *delay* a completion, never end a cycle early, and it
+# is bounded, so a wrong model can slow a finish but can neither stop one early
+# nor hang the cycle. Force-stop / smart-termination / user paths never consult
+# it. Overridable emphasis lives here rather than const.py to keep the guard
+# self-contained (it is detector-internal policy, not user configuration).
+ML_END_GUARD_MIN_CONFIDENCE = 0.5        # P(true end) below this -> treat as a likely pause
+ML_END_GUARD_MAX_DEFER_SECONDS = 1800.0  # cap the extra wait the guard may add (30 min)
+# The opt-in ML end-guard / terminal-drop providers rebuild the trace and run
+# inference on every ENDING-phase evaluation. During a long quiet tail (e.g. a
+# dishwasher's up-to-1h soak) that is wasteful, so recompute at most this often
+# (data-clock seconds). Safe to cache: the guard only ever *defers* and terminal
+# drop only ever *shortens*, so both tolerate a value up to this window stale.
+ML_PROVIDER_THROTTLE_SECONDS = 30.0
+if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
+    raise ValueError("DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)")
+from .signal_processing import energy_gap_threshold_s, integrate_wh
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -80,6 +120,11 @@ class CycleDetectorConfig:
     start_threshold_w: float = 2.0
     stop_threshold_w: float = 2.0
     min_duration_ratio: float = 0.8  # Default deferred finish ratio
+    # Power-based Off detection (issue #284). Carried on the config so the manager
+    # (the single owner of the terminal -> Off transition) can read them live; the
+    # detector itself does not act on them. 0 = disabled.
+    power_off_threshold_w: float = 0.0
+    power_off_delay: float = 30.0
     match_interval: int = 300  # Default profile match interval
     profile_duration_tolerance: float = 0.25  # Default tolerance (±25%)
     anti_wrinkle_enabled: bool = False
@@ -95,13 +140,6 @@ class CycleDetectorConfig:
     delay_timeout_seconds: float = 28800.0
 
 
-@dataclass
-class CycleDetectorState:
-    """Internal state storage for save/restore."""
-
-    state: str = STATE_OFF
-    sub_state: str | None = None
-    accumulated_energy_wh: float = 0.0
     # Add other fields as needed
 
 
@@ -178,6 +216,12 @@ class CycleDetector:
             | None
         ) = None,
         device_name: str = "",
+        end_confidence_provider: (
+            Callable[[list[tuple[float, float]], float], float | None] | None
+        ) = None,
+        terminal_drop_provider: (
+            Callable[[list[tuple[float, float]], float], bool | None] | None
+        ) = None,
     ) -> None:
         """Initialize the cycle detector."""
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
@@ -185,6 +229,24 @@ class CycleDetector:
         self._on_state_change = on_state_change
         self._on_cycle_end = on_cycle_end
         self._profile_matcher = profile_matcher
+        # Opt-in ML end-guard: (points, expected_duration) -> P(true end) or None.
+        # Injected by the manager; None disables the guard (existing behavior).
+        self._end_confidence_provider = end_confidence_provider
+        # Opt-in terminal-drop detector: (points, expected_duration) -> bool.
+        # True means the current low-power event is an anomalously-early hard
+        # cliff-to-0 (never seen this early on this device), so the cycle may be
+        # finalized without waiting out the full soak-bridging min_off_gap.
+        # Injected by the manager; None disables it (existing behavior). Opposite
+        # asymmetry to the end-guard: it can only ever *shorten* the end wait.
+        self._terminal_drop_provider = terminal_drop_provider
+        # Throttle caches for the two providers, scoped to the cycle + expectation:
+        # (last_reading_ts, expected_duration, cycle_start, result). Reused only
+        # within the recompute window when expected_duration and cycle_start match.
+        self._ml_end_cache: tuple[datetime, float, datetime, float | None] | None = None
+        self._terminal_drop_cache: tuple[datetime, float, datetime, bool] | None = None
+        # Cycle duration (s) at which the ML guard first deferred the current
+        # ending episode; bounds how long the guard may keep deferring.
+        self._ml_defer_start_duration: float | None = None
 
         # State
         self._state = STATE_OFF
@@ -227,6 +289,9 @@ class CycleDetector:
         self._expected_duration: float = 0.0
         self._last_match_confidence: float = 0.0
         self._end_spike_seen: bool = False
+        self._end_spike_duration: float = 0.0  # cycle duration (s) when _end_spike_seen was last set
+        self._match_ambiguous: bool = False  # last live match was ambiguous (gates predictive end)
+        self._match_prefix_ambiguous: bool = False  # longer candidate with good shape exists (prefix guard)
 
         # Anti-wrinkle tracking (dryers only)
         self._anti_wrinkle_candidate_start: datetime | None = None
@@ -242,7 +307,7 @@ class CycleDetector:
         # diagnostics and tests.
         self._delay_band_start: datetime | None = None
         self._delay_band_seconds: float = 0.0
-        # _delay_band_peak is purely diagnostic — surfaced in the log line
+        # _delay_band_peak is purely diagnostic - surfaced in the log line
         # when the transition fires so users can see what their machine's
         # actual standby plateau looked like.
         self._delay_band_peak: float = 0.0
@@ -254,7 +319,7 @@ class CycleDetector:
         # _delay_wait_high_start anchors the first high-power reading
         # observed inside DELAY_WAIT.  We only transition to STARTING
         # when the high-power streak has lasted at least
-        # start_duration_threshold real seconds — measured between two
+        # start_duration_threshold real seconds - measured between two
         # consecutive high readings, not from the dt to the previous
         # (low) reading.  This prevents a single isolated spike from
         # tripping STARTING just because the sampling interval is long.
@@ -306,6 +371,22 @@ class CycleDetector:
         if not self._power_readings:
             return
 
+        # Terminal-tail match freeze (dishwashers): once we are in ENDING with a
+        # profile already matched and power has been sustained-quiet, the active
+        # cycle is over - only the passive drain/dry tail remains. Re-matching on
+        # the growing idle tail inflates the observed duration and drifts the
+        # Stage-4 duration-agreement toward a LONGER near-duplicate profile,
+        # flipping the label and stalling smart-termination on the ambiguity gate.
+        # Keep the active-phase match instead. Self-correcting: a real resume sends
+        # a high reading that leaves ENDING, so this guard stops applying.
+        if (
+            self._state == STATE_ENDING
+            and self._config.device_type == "dishwasher"
+            and self._matched_profile
+            and self._time_below_threshold >= DISHWASHER_MATCH_FREEZE_QUIET_SECONDS
+        ):
+            return
+
         # Rate limiting
         if not force and self._last_match_time:
             elapsed = (timestamp - self._last_match_time).total_seconds()
@@ -345,7 +426,7 @@ class CycleDetector:
         this helper so the gates in STATE_ENDING and ``_should_defer_finish``
         can trust the value without re-validating.
 
-        Emits a DEBUG log line distinguishing the rejection reason — the
+        Emits a DEBUG log line distinguishing the rejection reason - the
         ``<= 0`` and ``> 6h`` markers are part of issue #197's regression
         contract and tests assert on them.
         """
@@ -391,9 +472,15 @@ class CycleDetector:
         phase_name: str | None = None
         confidence: float = 0.0
         expected_duration: float = 0.0
+        ambiguous: bool = False
 
         if isinstance(result, (list, tuple)):  # type: ignore[misc]
             result_seq = cast(tuple[Any, ...] | list[Any], result)
+            # Optional 6th element: whether the live match is ambiguous
+            # (top-1 vs top-2 within MATCH_AMBIGUITY_MARGIN). Used to gate the
+            # predictive Smart Termination below.
+            if len(result_seq) >= 6:
+                ambiguous = bool(result_seq[5])
             if len(result_seq) >= 5:
                 (
                     raw_name,
@@ -442,8 +529,10 @@ class CycleDetector:
                     )
                     is_match_mismatch = False
 
-            # Store confidence for Smart Termination checks
+            # Store confidence + ambiguity for Smart Termination checks
             self._last_match_confidence = confidence or 0.0
+            self._match_ambiguous = ambiguous
+            self._match_prefix_ambiguous = bool(result_seq[6]) if len(result_seq) >= 7 else False
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -452,6 +541,8 @@ class CycleDetector:
         if is_match_mismatch and self._matched_profile:
             # Confident non-match - revert to detecting if previously matched
             self._matched_profile = None
+            self._match_ambiguous = False
+            self._match_prefix_ambiguous = False
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -461,7 +552,7 @@ class CycleDetector:
             # the cycle stays in detecting/unmatched mode.
             if expected_duration == self._SANITIZE_INVALID_SENTINEL:
                 self._logger.debug(
-                    "update_match: match %r ignored — expected_duration "
+                    "update_match: match %r ignored - expected_duration "
                     "sanitized to invalid sentinel; treating as unmatched",
                     match_name,
                 )
@@ -497,6 +588,10 @@ class CycleDetector:
         self._matched_profile = None
         self._ignore_power_until_idle = False  # Reset lockout
         self._lockout_high_seconds = 0.0
+        # Clear the verified-pause flag so it can't leak into the next cycle (B6):
+        # a stale True would make an early low-power dip look like a verified pause
+        # before the first live match of the new cycle runs.
+        self._verified_pause = False
         self._anti_wrinkle_candidate_start = None
         self._anti_wrinkle_candidate_peak = 0.0
         self._anti_wrinkle_candidate_start_power = 0.0
@@ -625,7 +720,11 @@ class CycleDetector:
 
         anti_wrinkle_active = (
             self._config.anti_wrinkle_enabled
-            and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
+            and self._config.device_type in (
+                DEVICE_TYPE_WASHING_MACHINE,
+                DEVICE_TYPE_DRYER,
+                DEVICE_TYPE_WASHER_DRYER,
+            )
         )
 
         # 3. State Machine
@@ -723,8 +822,8 @@ class CycleDetector:
             #
             # A machine in delayed-start mode sits in a power band between
             # the off-noise floor (stop_threshold_w) and the cycle-start
-            # threshold (start_threshold_w) — display, electronics, the
-            # occasional anti-damp tumble — for minutes to hours.  We
+            # threshold (start_threshold_w) - display, electronics, the
+            # occasional anti-damp tumble - for minutes to hours.  We
             # track anchored elapsed time while power is in that band; once
             # it crosses delay_confirm_seconds we transition to DELAY_WAIT.
             #
@@ -766,7 +865,7 @@ class CycleDetector:
                         )
                         self._transition_to(STATE_DELAY_WAIT, timestamp)
                         return
-                    # Stay in OFF while we accumulate evidence — do not
+                    # Stay in OFF while we accumulate evidence - do not
                     # fall through to the high-power start logic, the
                     # reading is below threshold by definition.
                     return
@@ -781,7 +880,7 @@ class CycleDetector:
                 # STATE_STARTING will abort it as a false start and we'll
                 # re-enter the band check on the next sample without
                 # losing accumulated time (we don't reset on a high
-                # excursion — most users' "menu navigation" peaks last
+                # excursion - most users' "menu navigation" peaks last
                 # less than a sample interval anyway).
 
             if is_high and not started_from_anti_wrinkle:
@@ -793,13 +892,14 @@ class CycleDetector:
                 self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
                 self._cycle_max_power = power
                 self._abrupt_drop = False
-            elif self._state != STATE_OFF:
-                # Auto-expire terminal states after 30 minutes
-                if (
-                    self._state_enter_time
-                    and (timestamp - self._state_enter_time).total_seconds() > 1800
-                ):
-                    self._transition_to(STATE_OFF, timestamp)
+            # NOTE: terminal-state expiry (Finished/Interrupted/Force-Stopped -> Off)
+            # is owned solely by the manager (WashDataManager._handle_state_expiry),
+            # which has a wall-clock timer that also fires when a change-only power
+            # sensor stops reporting, plus the opt-in power-based Off (issue #284).
+            # The detector used to auto-expire here after a hardcoded 30 min, but that
+            # duplicated the manager timer (a weaker, per-reading subset) and left the
+            # manager's bookkeeping (progress, clean overlay, notifications) dangling.
+            # ANTI_WRINKLE -> Off is handled by its own idle/timeout logic above.
 
         elif self._state == STATE_DELAY_WAIT:
             if power >= self._config.start_threshold_w:
@@ -843,7 +943,7 @@ class CycleDetector:
                         self._cycle_max_power = max(start_power, power)
                         self._abrupt_drop = False
             else:
-                # Power dropped back below start threshold — clear the
+                # Power dropped back below start threshold - clear the
                 # high-power streak anchor so the next high reading
                 # starts a fresh confirmation window.
                 self._delay_wait_high_start = None
@@ -883,18 +983,24 @@ class CycleDetector:
                 if self._energy_since_idle_wh >= self._config.start_energy_threshold:
                     self._transition_to(STATE_RUNNING, timestamp)
 
-            # Abort if power drops below threshold before confirmation
+            # Abort if power drops below threshold before confirmation.
+            # Skip the abort when the user has explicitly paused the cycle
+            # (issue #306): a user pause sets verified_pause=True, which signals
+            # that the low power is intentional, not a false start.
             if not is_high and self._time_below_threshold > 1.0:  # 1s grace period
-                # False start
-                self._logger.debug(
-                    "False start detected: power dropped after %.2fs",
-                    self._time_above_threshold,
-                )
-                self._delay_band_start = None
-                self._delay_band_seconds = 0.0
-                self._delay_band_peak = 0.0
-                self._preserve_delay_band_on_off = False
-                self._transition_to(STATE_OFF, timestamp)
+                if getattr(self, "_verified_pause", False):
+                    pass  # user pause holds; wait for Resume Cycle
+                else:
+                    # False start
+                    self._logger.debug(
+                        "False start detected: power dropped after %.2fs",
+                        self._time_above_threshold,
+                    )
+                    # Do NOT reset _delay_band_* here — _transition_to(STATE_OFF) will
+                    # preserve the band via _preserve_delay_band_on_off if it was set
+                    # at STARTING entry (line 838), so a brief high-power peak (menu
+                    # navigation) doesn't restart the delayed-start accumulation from zero.
+                    self._transition_to(STATE_OFF, timestamp)
 
         elif self._state == STATE_RUNNING:
             self._power_readings.append((timestamp, power))
@@ -955,6 +1061,7 @@ class CycleDetector:
                     >= self._expected_duration * DISHWASHER_END_SPIKE_MIN_PROGRESS
                 ):
                     self._end_spike_seen = True
+                    self._end_spike_duration = current_duration
                     self._logger.debug(
                         "End spike detected (power high in ENDING state, "
                         "%.0fs/%.0fs)",
@@ -1037,9 +1144,23 @@ class CycleDetector:
                     # 2. Require debounce to be measured FROM entry into ENDING state
 
                     if self._config.device_type == "dishwasher":
-                        smart_ratio = (
-                            0.99  # Very conservative for dishwashers to catch end spikes
-                        )
+                        # If the most-recent in-ENDING spike occurred at ≥90% of
+                        # expected, it is the terminal pump-out, not a mid-cycle
+                        # rinse drain.  Once that pump-out is confirmed, we don't
+                        # need to wait for 99% of the rolling avg — individual
+                        # cycles can be up to ~7% shorter than avg_duration and
+                        # still terminate cleanly.  Keeping the 0.99 gate for
+                        # spikes at <90% prevents premature closes during the
+                        # passive Dry phase that follows the pre-final-rinse drain.
+                        _esp_dur = getattr(self, "_end_spike_duration", 0.0)
+                        if (
+                            getattr(self, "_end_spike_seen", False)
+                            and self._expected_duration > 0
+                            and _esp_dur >= self._expected_duration * 0.90
+                        ):
+                            smart_ratio = 0.90  # pump-out confirmed near end
+                        else:
+                            smart_ratio = 0.99  # conservative: wait for expected duration
                     else:
                         smart_ratio = 0.98
 
@@ -1047,13 +1168,43 @@ class CycleDetector:
                         getattr(self, "_last_match_confidence", 0.0) >= 0.4
                     )
 
+                    # Gate the predictive end on match certainty.
+                    # _match_ambiguous: top-1 vs top-2 score gap is too small to
+                    # trust the matched profile's expected duration — fall through
+                    # to the power-based fallback timeout instead.
+                    # _match_prefix_ambiguous: a longer candidate with a similar
+                    # shape score exists in the pool. The current trace may be a
+                    # prefix of that longer program (e.g. Quick 46 min matched
+                    # while the machine is actually running Normal 88 min and
+                    # happens to be in a mid-cycle soak dip at the 46-min mark).
+                    # Blocking Smart Termination here means a true Quick cycle
+                    # waits for the fallback timeout instead of getting an early
+                    # close — an acceptable trade-off against the alternative of
+                    # splitting a Normal wash into two separate cycle records.
                     if (
                         current_duration >= (self._expected_duration * smart_ratio)
                         and is_confident_match
+                        and not self._match_ambiguous
+                        and not self._match_prefix_ambiguous
                     ):
                         # Dynamic confirmation window
                         if self._config.device_type == "dishwasher":
-                            smart_debounce = max(300.0, self._config.off_delay * 0.25)
+                            # Fixed - NOT off_delay-derived.  off_delay is sized to
+                            # bridge the long drying "pause", but must not delay the
+                            # end; see DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS.
+                            smart_debounce = DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS
+                        elif self._config.device_type in (
+                            DEVICE_TYPE_WASHING_MACHINE,
+                            DEVICE_TYPE_WASHER_DRYER,
+                        ):
+                            # Washing machines and washer-dryers have soak and
+                            # rinse gaps that can dip for several minutes between
+                            # programme phases.  Require quiet time equal to half
+                            # the soak-bridging min_off_gap before committing
+                            # Smart Termination, so a near-duplicate profile
+                            # doesn't cut a long cycle short during a mid-cycle
+                            # power trough.
+                            smart_debounce = max(180.0, self._config.min_off_gap * 0.5)
                         else:
                             smart_debounce = 120.0
 
@@ -1061,7 +1212,7 @@ class CycleDetector:
                             # --- END SPIKE WAIT PERIOD (Dishwashers) ---
                             # Dishwashers should see the real end-of-cycle
                             # pump-out (which arms _end_spike_seen via the 85%
-                            # progress gate) before Smart Termination fires —
+                            # progress gate) before Smart Termination fires -
                             # otherwise the pump-out arrives AFTER the cycle
                             # has already closed and registers as a brand-new
                             # "ghost" cycle.  User reports (issue #43) showed
@@ -1075,9 +1226,31 @@ class CycleDetector:
                             # guarantees the cycle terminates eventually for
                             # dishwashers that have no pump-out at all.
                             end_spike_seen = getattr(self, "_end_spike_seen", False)
+                            # Release the pump-out wait once EITHER the cycle has run
+                            # DISHWASHER_END_SPIKE_WAIT_SECONDS past its expected
+                            # duration OR it has already reached its expected duration
+                            # AND power has since stayed sustained-quiet for
+                            # DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS.  The second arm
+                            # closes cycles that finish shorter than the profile's
+                            # (drifted-up) average and whose terminal pump-out lands
+                            # *before* the drop into ENDING, so no in-ENDING end-spike
+                            # ever arms - without it they hang to the fallback timeout
+                            # (~30-44 min late) and their label can even drift to a longer
+                            # near-duplicate profile.  It is gated on
+                            # ``current_duration >= expected`` so it can NOT fire during a
+                            # long passive-drying phase that precedes a genuinely-late
+                            # pump-out (e.g. an ECO cycle quiet from 50%-99% of expected):
+                            # while still short of expected the cycle keeps waiting, and a
+                            # real pump-out at ~99% arms the end-spike first.  Takes the
+                            # SOONER of the two anchors, so it can only ever shorten the
+                            # wait, never extend it.
                             past_wait_period = current_duration >= (
                                 self._expected_duration
                                 + DISHWASHER_END_SPIKE_WAIT_SECONDS
+                            ) or (
+                                current_duration >= self._expected_duration
+                                and self._time_below_threshold
+                                >= DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
                             )
                             if (
                                 self._config.device_type == "dishwasher"
@@ -1105,7 +1278,7 @@ class CycleDetector:
                             self._finish_cycle(
                                 timestamp,
                                 status="completed",
-                                termination_reason="smart",
+                                termination_reason=TerminationReason.SMART,
                                 keep_tail=True,
                             )
                             return
@@ -1130,6 +1303,40 @@ class CycleDetector:
                 ):
                     effective_off_delay = min(effective_off_delay, 1800)
                     gate_window = effective_off_delay
+
+                # Opt-in terminal-drop fast finalize (asymmetric, shorten-only):
+                # a hard cliff-to-~0 sustained for TERMINAL_DROP_OFF_DELAY_SECONDS
+                # that began earlier than this device has ever legitimately gone
+                # quiet is almost certainly a real stop (plug pulled / cancelled),
+                # not a soak.  Finalize now instead of waiting out the full
+                # soak-bridging min_off_gap.  Only consulted when there is a longer
+                # wait to shorten and the provider is wired (ML/anomaly opt-in);
+                # the energy/defer gates are bypassed because the sustained sub-
+                # threshold span already proves the appliance is off, and the
+                # anomaly check has ruled out a legitimate early pause.
+                if (
+                    self._terminal_drop_provider is not None
+                    and not self._verified_pause
+                    and effective_off_delay > TERMINAL_DROP_OFF_DELAY_SECONDS
+                    and self._time_below_threshold >= TERMINAL_DROP_OFF_DELAY_SECONDS
+                    and self._is_terminal_drop()
+                ):
+                    start_time = self._current_cycle_start or timestamp
+                    current_duration = (timestamp - start_time).total_seconds()
+                    self._logger.info(
+                        "Terminal drop: anomalously-early power cliff after %.0fs "
+                        "(device never quiet this early) - finalizing without the "
+                        "full %.0fs soak wait.",
+                        current_duration,
+                        effective_off_delay,
+                    )
+                    self._finish_cycle(
+                        timestamp,
+                        status="interrupted",
+                        termination_reason=TerminationReason.TERMINAL_DROP,
+                        keep_tail=False,
+                    )
+                    return
 
                 if self._time_below_threshold >= effective_off_delay:
 
@@ -1159,7 +1366,8 @@ class CycleDetector:
                     # Compute energy in recent window
                     recent_ts = np.array([r[0].timestamp() for r in recent_window])
                     recent_p = np.array([r[1] for r in recent_window])
-                    recent_e = integrate_wh(recent_ts, recent_p)
+                    max_gap_s = energy_gap_threshold_s(recent_ts)
+                    recent_e = integrate_wh(recent_ts, recent_p, max_gap_s=max_gap_s)
 
                     if recent_e <= self.config.end_energy_threshold:
                         start_time = self._current_cycle_start or timestamp
@@ -1189,6 +1397,11 @@ class CycleDetector:
         self._time_in_state = 0.0
         self._sub_state = new_state.capitalize()  # Default substate
 
+        # Bound each ENDING episode's ML-guard deferral independently: clear the
+        # tracker whenever we are not in ENDING (e.g. on resume back to RUNNING).
+        if new_state != STATE_ENDING:
+            self._ml_defer_start_duration = None
+
         # Reset energy accumulator on transition to OFF
         if new_state == STATE_OFF:
             self._energy_since_idle_wh = 0.0
@@ -1206,6 +1419,7 @@ class CycleDetector:
         # Reset end spike tracker when entering ENDING state
         if new_state == STATE_ENDING:
             self._end_spike_seen = False
+            self._end_spike_duration = 0.0
         elif new_state == STATE_DELAY_WAIT:
             # Band-accumulation tracker already played its role getting us
             # here; reset it so a future OFF→band cycle starts fresh.
@@ -1235,20 +1449,98 @@ class CycleDetector:
         self._logger.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)
 
-    def should_defer_for_profile(self) -> bool:
-        """Check if we should defer termination for profile matching (public)."""
-        start_time = self._current_cycle_start
-        if not self._matched_profile or self._expected_duration <= 0 or not start_time:
-            return False
+    def _ml_end_confidence(self) -> float | None:
+        """P(the current low-power event is the true end) from the opt-in ML guard.
 
-        current_duration = (dt_util.now() - start_time).total_seconds()
-        return self._should_defer_finish(current_duration)
+        Builds the offset-second trace from the current cycle's readings and asks
+        the injected provider. Returns None when there is no provider, no cycle
+        start, or the provider declines (ML off / unmatched / model unavailable),
+        so the caller keeps the existing power/energy-based behavior.
+        """
+        provider = self._end_confidence_provider
+        start = self._current_cycle_start
+        if provider is None or start is None or not self._power_readings:
+            return None
+        # Throttle: reuse the last result within the recompute window, but only when
+        # it was computed for THIS cycle and the same expected_duration (which can
+        # change under overrun) — otherwise recompute.
+        now_ts = self._power_readings[-1][0]
+        exp = float(self._expected_duration)
+        cache = self._ml_end_cache
+        if (
+            cache is not None
+            and cache[1] == exp
+            and cache[2] == start
+            and (now_ts - cache[0]).total_seconds() < ML_PROVIDER_THROTTLE_SECONDS
+        ):
+            return cache[3]
+        points = [
+            ((ts - start).total_seconds(), float(power))
+            for ts, power in self._power_readings
+        ]
+        try:
+            result = provider(points, exp)
+        except Exception:  # noqa: BLE001 - ML must never break detection
+            result = None
+        self._ml_end_cache = (now_ts, exp, start, result)
+        return result
+
+    def _is_terminal_drop(self) -> bool:
+        """Whether the current low-power event is an anomalously-early hard drop.
+
+        Mirrors ``_ml_end_confidence``: builds the offset-second trace from the
+        current cycle's readings and asks the injected terminal-drop provider.
+        Returns ``False`` when there is no provider, no cycle start, or the
+        provider declines/raises (ML off / too little history / not anomalous),
+        so the caller keeps the proven soak-bridging end-detection.
+        """
+        provider = self._terminal_drop_provider
+        start = self._current_cycle_start
+        if provider is None or start is None or not self._power_readings:
+            return False
+        # Throttle: reuse within the window, scoped to this cycle + expected_duration.
+        now_ts = self._power_readings[-1][0]
+        exp = float(self._expected_duration)
+        cache = self._terminal_drop_cache
+        if (
+            cache is not None
+            and cache[1] == exp
+            and cache[2] == start
+            and (now_ts - cache[0]).total_seconds() < ML_PROVIDER_THROTTLE_SECONDS
+        ):
+            return cache[3]
+        points = [
+            ((ts - start).total_seconds(), float(power))
+            for ts, power in self._power_readings
+        ]
+        try:
+            result = bool(provider(points, exp))
+        except Exception:  # noqa: BLE001 - ML must never break detection
+            result = False
+        self._terminal_drop_cache = (now_ts, exp, start, result)
+        return result
 
     def _should_defer_finish(self, duration: float) -> bool:
         """Check if we should defer termination based on expected duration."""
         # Check explicit verified pause override from manager
         if getattr(self, "_verified_pause", False):
             self._logger.debug("Deferring cycle finish: Verified pause active")
+            return True
+
+        # Dishwasher minimum-duration floor: even without a matched profile (e.g.
+        # first cycle of a program, or the 5-min matcher hasn't fired yet) a
+        # dishwasher cycle should never end before it has crossed the minimum
+        # reasonable programme duration.  This prevents a dip during the fill or
+        # early wash phase from being read as the end of a complete cycle.
+        if (
+            self._config.device_type == "dishwasher"
+            and duration < DISHWASHER_MIN_CYCLE_DURATION_S
+        ):
+            self._logger.debug(
+                "Deferring dishwasher cycle end: elapsed %.0fs < minimum %.0fs",
+                duration,
+                DISHWASHER_MIN_CYCLE_DURATION_S,
+            )
             return True
 
         if not self._matched_profile or self._expected_duration <= 0:
@@ -1264,11 +1556,36 @@ class CycleDetector:
             )
             return False
 
+        # Opt-in ML end-guard (asymmetric anti-premature-stop, bounded). If the
+        # cycle-end model judges this low-power event to be more likely a pause
+        # than the true end, defer the normal completion - but only for a bounded
+        # extra window, so a wrong model can delay, never hang, the cycle. As the
+        # low-power run lengthens the model's confidence rises, so a genuine end
+        # is released once the model agrees or the cap is reached.
+        if (
+            self._end_confidence_provider is not None
+            and self._last_match_confidence >= DEFAULT_DEFER_FINISH_CONFIDENCE
+        ):
+            confidence = self._ml_end_confidence()
+            if confidence is not None and confidence < ML_END_GUARD_MIN_CONFIDENCE:
+                if self._ml_defer_start_duration is None:
+                    self._ml_defer_start_duration = duration
+                if (duration - self._ml_defer_start_duration) < ML_END_GUARD_MAX_DEFER_SECONDS:
+                    self._logger.debug(
+                        "Deferring cycle finish: ML end-guard (P(true end)=%.2f < %.2f)",
+                        confidence,
+                        ML_END_GUARD_MIN_CONFIDENCE,
+                    )
+                    return True
+            elif confidence is not None:
+                # Model is confident this is the true end -> stop ML-deferring.
+                self._ml_defer_start_duration = None
+
         # Dishwasher passive drying protection:
         # Dishwashers can have 2+ hour passive drying phases at near-0W.  A terminal
         # drain spike that fires early in the ENDING state (e.g. at 120 min of a
         # 233-min ECO cycle) resets _time_below_threshold, and the subsequent 60-min
-        # silence timeout would otherwise end the cycle at ~180 min — well before the
+        # silence timeout would otherwise end the cycle at ~180 min - well before the
         # real finish.  Defer until the cycle reaches the late-phase threshold (the
         # same one used by the end-spike arm gate, so both move together) so that
         # smart termination can catch the true end (~99% of expected) instead.
@@ -1296,13 +1613,26 @@ class CycleDetector:
         # passive-drying gate above, we still keep the cycle deferred until
         # the real end-of-cycle pump-out fires (sets _end_spike_seen=True via
         # the 85% progress gate in STATE_ENDING) or we cross the
-        # smart-termination wait window (expected + 30 min) — whichever comes
+        # smart-termination wait window (expected + 30 min) - whichever comes
         # first.  Shares DISHWASHER_END_SPIKE_WAIT_SECONDS with Smart
         # Termination's wait branch so the two paths release the cycle at the
         # same instant.  Beyond the wait window, Smart Termination's
         # past_wait_period kicks in and finalises; below it, the fallback
         # timeout's energy gate is the safety net for cycles whose pump-out
         # never arrives.
+        # Mirrors the STATE_ENDING pump-out wait so both paths release together.
+        # Keep deferring while we are still inside the wait window, UNLESS the cycle
+        # has already reached its expected duration and has since been sustained-quiet
+        # for DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS - in which case any terminal
+        # pump-out has already happened, so a cycle that finished slightly short of the
+        # profile's (drifted-up) average is released here instead of hanging to
+        # expected + 30 min.  The ``duration >= expected`` gate keeps a long
+        # passive-drying phase that still precedes a late pump-out deferred.
+        quiet_released = (
+            duration >= self._expected_duration
+            and self._time_below_threshold
+            >= DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+        )
         if (
             self._config.device_type == "dishwasher"
             and self._matched_profile
@@ -1310,13 +1640,15 @@ class CycleDetector:
             and not self._end_spike_seen
             and duration
             < (self._expected_duration + DISHWASHER_END_SPIKE_WAIT_SECONDS)
+            and not quiet_released
         ):
             self._logger.debug(
                 "Deferring cycle finish: dishwasher waiting for end-of-cycle "
-                "pump-out (%.0fs < expected %.0fs + %.0fs wait, profile: %s)",
+                "pump-out (%.0fs < expected %.0fs + %.0fs wait, quiet %.0fs, profile: %s)",
                 duration,
                 self._expected_duration,
                 DISHWASHER_END_SPIKE_WAIT_SECONDS,
+                self._time_below_threshold,
                 self._matched_profile,
             )
             return True
@@ -1365,7 +1697,7 @@ class CycleDetector:
         self,
         timestamp: datetime,
         status: str = "completed",
-        termination_reason: str = "timeout",
+        termination_reason: str = TerminationReason.TIMEOUT,
         keep_tail: bool = False,
     ) -> None:
         """Finalize cycle.
@@ -1439,9 +1771,13 @@ class CycleDetector:
             target = STATE_FORCE_STOPPED
         elif (
             status == "completed"
-            and termination_reason in {"timeout", "smart"}
+            and termination_reason in ANTI_WRINKLE_ELIGIBLE_REASONS
             and self._config.anti_wrinkle_enabled
-            and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
+            and self._config.device_type in (
+                DEVICE_TYPE_WASHING_MACHINE,
+                DEVICE_TYPE_DRYER,
+                DEVICE_TYPE_WASHER_DRYER,
+            )
         ):
             target = STATE_ANTI_WRINKLE
 
@@ -1454,7 +1790,7 @@ class CycleDetector:
             self._finish_cycle(
                 timestamp,
                 status="force_stopped",
-                termination_reason="force_stopped",
+                termination_reason=TerminationReason.FORCE_STOPPED,
                 keep_tail=False,  # Force stop usually implies snap back to reality
             )
             self._ignore_power_until_idle = False
@@ -1466,7 +1802,7 @@ class CycleDetector:
             self._finish_cycle(
                 now,
                 status="completed",
-                termination_reason="user",
+                termination_reason=TerminationReason.USER,
                 keep_tail=True,  # User implies "Done Now"
             )
             # Prevent immediate restart if power is still high
@@ -1507,6 +1843,10 @@ class CycleDetector:
                 self._state_enter_time.isoformat() if self._state_enter_time else None
             ),
             "end_spike_seen": self._end_spike_seen,
+            "end_spike_duration": self._end_spike_duration,
+            "match_ambiguous": self._match_ambiguous,
+            "match_prefix_ambiguous": self._match_prefix_ambiguous,
+            "ml_defer_start_duration": self._ml_defer_start_duration,
         }
 
     def get_elapsed_seconds(self) -> float:
@@ -1521,16 +1861,6 @@ class CycleDetector:
             self._state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
             and self._time_below_threshold > 0
         )
-
-    def low_power_elapsed(self, now: datetime) -> float:
-        """Return duration of current low power spell including time since last process."""
-        if self._time_below_threshold > 0 and self._last_process_time:
-            # Add time since last processing
-            return (
-                self._time_below_threshold
-                + (now - self._last_process_time).total_seconds()
-            )
-        return self._time_below_threshold
 
     def restore_state_snapshot(self, snapshot: dict[str, Any]) -> None:
         """Restore state from snapshot."""
@@ -1566,6 +1896,10 @@ class CycleDetector:
                 self._matched_profile = restored_match
             self._expected_duration = sanitized_expected
             self._end_spike_seen = snapshot.get("end_spike_seen", False)
+            self._end_spike_duration = float(snapshot.get("end_spike_duration", 0.0))
+            self._match_ambiguous = snapshot.get("match_ambiguous", False)
+            self._match_prefix_ambiguous = snapshot.get("match_prefix_ambiguous", False)
+            self._ml_defer_start_duration = snapshot.get("ml_defer_start_duration")
 
             # Restore state enter time and recompute time_in_state from it
             enter_time = snapshot.get("state_enter_time")

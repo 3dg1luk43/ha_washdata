@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "{device} još uvek radi. Ostalo je otprilike {minutes} minuta.",
+    "running_no_estimate": "{device} još uvek radi.",
+    "finished_recently": "{device} je završio pre {minutes} minuta.",
+    "just_finished": "{device} je upravo završio.",
+    "not_running": "{device} ne radi.",
+    "no_devices": "Nisam pronašao nijedan WashData uređaj.",
+    "unknown_device": "Nisam pronašao WashData uređaj pod nazivom {device}.",
+    "none_running": "Nijedan od vaših WashData uređaja ne radi.",
+    "error": "Izvinite, trenutno nisam mogao da proverim vaše uređaje."
+  }
+}

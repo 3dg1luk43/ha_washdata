@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "{device} încă funcționează. Au mai rămas aproximativ {minutes} minute.",
+    "running_no_estimate": "{device} încă funcționează.",
+    "finished_recently": "{device} s-a terminat acum {minutes} minute.",
+    "just_finished": "{device} tocmai s-a terminat.",
+    "not_running": "{device} nu funcționează.",
+    "no_devices": "Nu am găsit niciun aparat WashData.",
+    "unknown_device": "Nu am găsit niciun aparat WashData numit {device}.",
+    "none_running": "Niciunul dintre aparatele tale WashData nu funcționează.",
+    "error": "Îmi pare rău, nu am putut verifica aparatele tale acum."
+  }
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "feature": "elapsed_fraction",
+    "group": "cycle_end",
+    "runtime_source": "elapsed_seconds / matched profile expected duration"
+  },
+  {
+    "feature": "energy_fraction",
+    "group": "cycle_end",
+    "runtime_source": "energy delivered so far (Wh) / matched profile expected energy"
+  },
+  {
+    "feature": "energy_remaining_expected",
+    "group": "cycle_end",
+    "runtime_source": "max(0, 1 - energy_fraction)"
+  },
+  {
+    "feature": "power_before_ratio",
+    "group": "cycle_end",
+    "runtime_source": "mean power just before the drop / profile expected peak"
+  },
+  {
+    "feature": "drop_ratio",
+    "group": "cycle_end",
+    "runtime_source": "(power_before - current_power) / profile expected peak, clipped"
+  },
+  {
+    "feature": "peak_seen_ratio",
+    "group": "cycle_end",
+    "runtime_source": "max power seen so far / profile expected peak"
+  },
+  {
+    "feature": "low_run_s_log",
+    "group": "cycle_end",
+    "runtime_source": "log1p(seconds power has stayed below the low threshold)"
+  },
+  {
+    "feature": "elapsed_log",
+    "group": "cycle_end",
+    "runtime_source": "log1p(elapsed seconds since cycle start)"
+  }
+]

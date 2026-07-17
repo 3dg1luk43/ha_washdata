@@ -24,994 +24,64 @@
           "profile_name": "Profilnavn (valgfritt)",
           "manual_duration": "Estimert varighet (minutter)"
         }
+      },
+      "reconfigure": {
+        "title": "Rekonfigurer WashData",
+        "description": "Oppdater enhetsnavnet, apparattype eller strømsensor.",
+        "data": {
+          "name": "Enhetsnavn",
+          "device_type": "Enhetstype",
+          "power_sensor": "Strømsensor",
+          "min_power": "Minimum effektterskel (W)"
+        }
       }
     },
     "error": {
       "cannot_connect": "Kunne ikke koble til",
       "invalid_auth": "Ugyldig autentisering",
-      "unknown": "Uventet feil"
+      "unknown": "Uventet feil",
+      "invalid_power": "Effektterskelen må være større enn 0"
     },
     "abort": {
-      "already_configured": "Enheten er allerede konfigurert"
+      "already_configured": "Enheten er allerede konfigurert",
+      "reconfigure_successful": "Rekonfigurasjonen var vellykket"
     }
   },
   "options": {
     "step": {
       "init": {
-        "menu_options": {
-          "learning_feedbacks": "Gjennomgå lærings-tilbakemeldinger",
-          "settings": "Innstillinger",
-          "notifications": "Varsler",
-          "manage_cycles": "Administrer sykluser",
-          "manage_profiles": "Administrer profiler",
-          "manage_phase_catalog": "Administrer fasekatalog",
-          "record_cycle": "Opptakssyklus (manuell)",
-          "diagnostics": "Diagnostikk og vedlikehold"
-        }
-      },
-      "apply_suggestions": {
-        "title": "Kopier foreslåtte verdier",
-        "description": "Dette vil kopiere de gjeldende foreslåtte verdiene til dine lagrede innstillinger. Dette er en engangshandling og aktiverer ikke automatisk overskriving.\n\nForeslåtte verdier å kopiere:\n{suggested}",
+        "title": "WashData-innstillinger",
+        "description": "Alle innstillinger -- deteksjon, samsvar, timing, varsler, profiler og sykluser -- er tilgjengelige i WashData-panelet. Bruk dette skjemaet kun til å endre strømsensoren, enhetstype eller standbyterskelen.",
         "data": {
-          "confirm": "Bekreft kopihandling"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Gjennomgå foreslåtte endringer",
-        "description": "WashData funnet **{pending_count}** foreslåtte verdi(er) å bruke.\n\nEndringer:\n{changes}\n\n✅ Merk av i boksen nedenfor og klikk på **Send** for å bruke og lagre disse endringene umiddelbart.\n❌ La det være umerket og klikk på **Send** for å avbryte og gå tilbake.",
-        "data": {
-          "confirm_apply_suggestions": "Bruk og lagre disse endringene"
-        }
-      },
-      "settings": {
-        "title": "Innstillinger",
-        "description": "{deprecation_warning}Juster deteksjonsterskler, læring og avansert atferd. Standarder fungerer bra for de fleste oppsett.\n\nForeslåtte innstillinger tilgjengelig nå: {suggestions_count}.\nHvis dette er over 0, åpner du avanserte innstillinger og bruker 'Bruk foreslåtte verdier' for å gå gjennom anbefalingene.",
-        "data": {
-          "apply_suggestions": "Bruk foreslåtte verdier",
+          "name": "Enhetsnavn",
           "device_type": "Enhetstype",
-          "power_sensor": "Strømsensorenhet",
-          "min_power": "Minimum effekt (W)",
-          "off_delay": "Syklussluttforsinkelse (r)",
-          "notify_actions": "Varslingshandlinger",
-          "notify_people": "Utsett levering til disse menneskene er hjemme",
-          "notify_only_when_home": "Utsett varsler til valgt person er hjemme",
-          "notify_fire_events": "Brannautomatiseringshendelser",
-          "notify_start_services": "Syklusstart - varslingsmål",
-          "notify_finish_services": "Cycle Finish - Varslingsmål",
-          "notify_live_services": "Live Progress - Varslingsmål",
-          "notify_before_end_minutes": "Varsling før fullføring (minutter før slutt)",
-          "notify_title": "Meldingstittel",
-          "notify_icon": "Varslingsikon",
-          "notify_start_message": "Start meldingsformat",
-          "notify_finish_message": "Fullfør meldingsformat",
-          "notify_pre_complete_message": "Meldingsformat før fullføring",
-          "show_advanced": "Rediger avanserte innstillinger (neste trinn)"
-        },
-        "data_description": {
-          "apply_suggestions": "Kryss av i denne boksen for å kopiere verdier foreslått av læringsalgoritmen til skjemaet. Se gjennom før du lagrer.\n\nForeslått (fra læring):\n- min_effekt: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "Velg type apparat (vaskemaskin, tørketrommel, oppvaskmaskin, kaffemaskin, elbil). Denne taggen lagres med hver syklus for bedre organisering.",
-          "power_sensor": "Sensorenheten rapporterer sanntidseffekt (i watt). Du kan endre dette når som helst uten å miste historiske data – nyttig hvis du bytter ut en smartplugg.",
-          "min_power": "Effektavlesninger over denne terskelen (i watt) indikerer at apparatet er i gang. Start med 2W for de fleste enheter.",
-          "off_delay": "Sekunder må den utjevnede effekten holde seg under stoppterskelen for å markere fullføring. Standard: 120s.",
-          "notify_actions": "Valgfri Home Assistant-handlingssekvens for å kjøre for varsler (skript, varsling, TTS, etc.). Hvis angitt, kjøres handlinger før reservevarslingstjenesten.",
-          "notify_people": "Personenheter som brukes til tilstedeværelsesport. Når aktivert, forsinkes varslingsleveringen til minst én valgt person er hjemme.",
-          "notify_only_when_home": "Hvis aktivert, utsett varsler til minst én valgt person er hjemme.",
-          "notify_fire_events": "Hvis aktivert, utløs Home Assistant-hendelser for syklusstart og -slutt (ha_washdata_cycle_started og ha_washdata_cycle_ended) for å drive automatisering.",
-          "notify_start_services": "En eller flere varslingstjenester for å varsle når en syklus begynner. La stå tomt for å hoppe over startvarsler.",
-          "notify_finish_services": "En eller flere varslingstjenester for å varsle når en syklus avsluttes eller nærmer seg fullføring. La stå tomt for å hoppe over ferdigvarsler.",
-          "notify_live_services": "En eller flere varslingstjenester for å motta live fremdriftsoppdateringer mens syklusen kjører (kun mobilappen). La stå tomt for å hoppe over live-oppdateringer.",
-          "notify_before_end_minutes": "Minutter før beregnet slutt på syklusen for å utløse et varsel. Sett til 0 for å deaktivere. Standard: 0.",
-          "notify_title": "Egendefinert tittel for varsler. Støtter {device} plassholder.",
-          "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å sende uten ikon.",
-          "notify_start_message": "Melding sendt når en syklus starter. Støtter {device} plassholder.",
-          "notify_finish_message": "Melding sendt når en syklus er ferdig. Støtter {device}, {duration}, {program}, {energy_kwh}, {cost} plassholdere.",
-          "notify_pre_complete_message": "Tekst til gjentakende fremdriftsoppdateringer mens syklusen kjører. Støtter {device}, {minutes}, {program} plassholdere."
-        }
-      },
-      "notifications": {
-        "title": "Varsler",
-        "description": "Konfigurer varslingskanaler, maler og valgfrie live-fremdriftsoppdateringer for mobil.",
-        "data": {
-          "notify_actions": "Varslingshandlinger",
-          "notify_people": "Utsett levering til disse menneskene er hjemme",
-          "notify_only_when_home": "Utsett varsler til valgt person er hjemme",
-          "notify_fire_events": "Brannautomatiseringshendelser",
-          "notify_start_services": "Syklusstart - varslingsmål",
-          "notify_finish_services": "Cycle Finish - Varslingsmål",
-          "notify_live_services": "Live Progress - Varslingsmål",
-          "notify_before_end_minutes": "Varsling før fullføring (minutter før slutt)",
-          "notify_live_interval_seconds": "Live Update Interval (sekunder)",
-          "notify_live_overrun_percent": "Live Update Overrun Allowance (%)",
-          "notify_live_chronometer": "Kronometer nedtellingstimer",
-          "notify_title": "Meldingstittel",
-          "notify_icon": "Varslingsikon",
-          "notify_start_message": "Start meldingsformat",
-          "notify_finish_message": "Fullfør meldingsformat",
-          "notify_pre_complete_message": "Meldingsformat før fullføring",
-          "energy_price_entity": "Energipris – enhet (valgfritt)",
-          "energy_price_static": "Energipris – Statisk verdi (valgfritt)",
-          "go_back": "Gå tilbake uten å lagre",
-          "notify_reminder_message": "Format for påminnelsesmelding",
-          "notify_timeout_seconds": "Avvis automatisk etter (sekunder)",
-          "notify_channel": "Varslingskanal (status/live/påminnelse)",
-          "notify_finish_channel": "Fullført varslingskanal"
-        },
-        "data_description": {
-          "go_back": "Kryss av her og klikk på Send inn for å forkaste eventuelle endringer ovenfor og gå tilbake til hovedmenyen.",
-          "notify_actions": "Valgfri Home Assistant-handlingssekvens for å kjøre for varsler (skript, varsling, TTS, etc.). Hvis angitt, kjøres handlinger før reservevarslingstjenesten.",
-          "notify_people": "Personenheter som brukes til tilstedeværelsesport. Når aktivert, forsinkes varslingsleveringen til minst én valgt person er hjemme.",
-          "notify_only_when_home": "Hvis aktivert, utsett varsler til minst én valgt person er hjemme.",
-          "notify_fire_events": "Hvis aktivert, utløs Home Assistant-hendelser for syklusstart og -slutt (ha_washdata_cycle_started og ha_washdata_cycle_ended) for å drive automatisering.",
-          "notify_start_services": "En eller flere varslingstjenester for å varsle når en syklus begynner (f.eks. notify.mobile_app_my_phone). La stå tomt for å hoppe over startvarsler.",
-          "notify_finish_services": "En eller flere varslingstjenester for å varsle når en syklus avsluttes eller nærmer seg fullføring. La stå tomt for å hoppe over ferdigvarsler.",
-          "notify_live_services": "En eller flere varslingstjenester for å motta live fremdriftsoppdateringer mens syklusen kjører (kun mobilappen). La stå tomt for å hoppe over live-oppdateringer.",
-          "notify_before_end_minutes": "Minutter før beregnet slutt på syklusen for å utløse et varsel. Sett til 0 for å deaktivere. Standard: 0.",
-          "notify_live_interval_seconds": "Hvor ofte fremdriftsoppdateringer sendes mens du kjører. Lavere verdier er mer responsive, men bruker flere varsler. Minimum 30 sekunder håndheves – verdier under 30 s rundes automatisk av opp til 30 s.",
-          "notify_live_overrun_percent": "Sikkerhetsmargin over det estimerte oppdateringsantallet for lange/overløpende sykluser (for eksempel tillater 20 % 1,2x estimerte oppdateringer).",
-          "notify_live_chronometer": "Når den er aktivert, inkluderer hver liveoppdatering en kronometernedtelling til estimert sluttid. Varslingstidtakeren tikker automatisk ned på enheten mellom oppdateringer (kun Android-appen).",
-          "notify_title": "Egendefinert tittel for varsler. Støtter {device} plassholder.",
-          "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å sende uten ikon.",
-          "notify_start_message": "Melding sendt når en syklus starter. Støtter {device} plassholder.",
-          "notify_finish_message": "Melding sendt når en syklus er ferdig. Støtter {device}, {duration}, {program}, {energy_kwh}, {cost} plassholdere.",
-          "energy_price_entity": "Velg en numerisk enhet som har gjeldende strømpris (f.eks. sensor.elektrisitetspris, input_number.energy_rate). Aktiverer plassholderen {cost} når den er angitt. Har forrang over den statiske verdien hvis begge er konfigurert.",
-          "energy_price_static": "Fast strømpris per kWh. Aktiverer plassholderen {cost} når den er angitt. Ignorert hvis en enhet er konfigurert ovenfor. Legg til ditt valutasymbol i meldingsmalen, f.eks. {cost} €.",
-          "notify_reminder_message": "Teksten til engangspåminnelsen sendte det konfigurerte antallet minutter før beregnet slutt. Forskjellig fra de gjentatte liveoppdateringene ovenfor. Støtter {device}, {minutes}, {program} plassholdere.",
-          "notify_timeout_seconds": "Avvis automatisk varslinger etter så mange sekunder (videresendt som «timeout» for følgeappen). Sett til 0 for å beholde dem til de avvises. Standard: 0.",
-          "notify_channel": "Android varslingskanal for følgeapper for status, fremdrift og påminnelsesvarsler. Lyden og viktigheten til en kanal konfigureres i følgeappen første gang kanalnavnet brukes - WashData angir kun kanalnavnet. La stå tomt for appens standard.",
-          "notify_finish_channel": "Separat Android-kanal for det ferdige varselet (brukes også av påminnelsen og tøyet som venter), slik at det kan ha sin egen lyd. La stå tomt for å gjenbruke kanalen ovenfor.",
-          "notify_pre_complete_message": "Tekst til gjentakende fremdriftsoppdateringer mens syklusen kjører. Støtter {device}, {minutes}, {program} plassholdere."
-        }
-      },
-      "advanced_settings": {
-        "title": "Avanserte innstillinger",
-        "description": "Juster deteksjonsterskler, læring og avansert atferd. Standarder fungerer bra for de fleste oppsett.",
-        "sections": {
-          "suggestions_section": {
-            "name": "Foreslåtte innstillinger",
-            "description": "{suggestions_count} innlærte forslag tilgjengelig. Kryss av for Bruk foreslåtte verdier for å gjennomgå foreslåtte endringer før lagring.",
-            "data": {
-              "apply_suggestions": "Bruk foreslåtte verdier"
-            },
-            "data_description": {
-              "apply_suggestions": "Merk av i denne boksen for å åpne et gjennomgangstrinn for foreslåtte verdier fra læringsalgoritmen. Ingenting lagres automatisk.\n\nForeslått (fra læring):\n- min_effekt: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
-            }
-          },
-          "detection_section": {
-            "name": "Deteksjon og effektgrenser",
-            "description": "Når apparatet regnes som PÅ eller AV, energigrenser og tidsstyring for tilstandsoverganger.",
-            "data": {
-              "start_duration_threshold": "Start avvisningsvarighet (r)",
-              "start_energy_threshold": "Start Energy Gate (Wh)",
-              "completion_min_seconds": "Fullføring Minimum kjøretid (sekunder)",
-              "start_threshold_w": "Startterskel (W)",
-              "stop_threshold_w": "Stoppterskel (W)",
-              "end_energy_threshold": "End Energy Gate (Wh)",
-              "running_dead_zone": "Running Dead Zone (sekunder)",
-              "end_repeat_count": "Avslutt gjentakelse",
-              "min_off_gap": "Minste gap mellom sykluser (r)",
-              "sampling_interval": "Samplingsintervall (er)"
-            },
-            "data_description": {
-              "start_duration_threshold": "Ignorer korte krafttopper som er kortere enn denne varigheten (sekunder). Filtrerer ut støveltopper (f.eks. 60W i 2 sekunder) før den virkelige syklusen starter. Standard: 5s.",
-              "start_energy_threshold": "Syklusen må akkumulere minst så mye energi (Wh) under START-fasen for å bekreftes. Standard: 0,005 Wh.",
-              "completion_min_seconds": "Sykluser som er kortere enn dette vil bli merket som \"avbrutt\" selv om de avsluttes naturlig. Standard: 600s.",
-              "start_threshold_w": "Strømmen må stige OVER denne terskelen for å STARTE en syklus. Still inn høyere enn standby-styrken. Standard: min_power + 1 W.",
-              "stop_threshold_w": "Strømmen må falle UNDER denne terskelen for å AVSLUTE en syklus. Sett like over null for å unngå støy som utløser falske ender. Standard: 0,6 * min_power.",
-              "end_energy_threshold": "Syklusen avsluttes bare hvis energien i det siste Av-forsinkelse-vinduet er under denne verdien (Wh). Forhindrer falske slutter hvis effekten svinger nær null. Standard: 0,05 Wh.",
-              "running_dead_zone": "Etter at syklusen starter, ignorer strømfall i så mange sekunder for å forhindre falsk sluttdeteksjon under den første spin-up-fasen. Sett til 0 for å deaktivere. Standard: 0s.",
-              "end_repeat_count": "Antall ganger sluttbetingelsen (effekt under terskelen for off_delay) må oppfylles fortløpende før syklusen avsluttes. Høyere verdier forhindrer falske slutter under pauser. Standard: 1.",
-              "min_off_gap": "Hvis en syklus starter innen så mange sekunder etter at den forrige slutter, vil de bli slått sammen til en enkelt syklus.",
-              "sampling_interval": "Minimum prøvetakingsintervall i sekunder. Oppdateringer raskere enn denne hastigheten vil bli ignorert. Standard: 30s (2s for vaskemaskiner, kombimaskiner og oppvaskmaskiner)."
-            }
-          },
-          "matching_section": {
-            "name": "Profilmatching og læring",
-            "description": "Hvor aggressivt WashData matcher kjørende sykluser mot innlærte profiler, og når det skal bes om tilbakemelding.",
-            "data": {
-              "profile_match_min_duration_ratio": "Min varighetsforhold for profilmatch (0,1–1,0)",
-              "profile_match_interval": "Profilmatchintervall (sekunder)",
-              "profile_match_threshold": "Terskel for profilmatch",
-              "profile_unmatch_threshold": "Profil Unmatch Threshold",
-              "auto_label_confidence": "Auto-label Confidence (0-1)",
-              "learning_confidence": "Tilbakemeldingsforespørsel om tillit (0-1)",
-              "suppress_feedback_notifications": "Undertrykk tilbakemeldingsvarsler",
-              "duration_tolerance": "Varighetstoleranse (0-0,5)",
-              "smoothing_window": "Utjevningsvindu (prøver)",
-              "profile_duration_tolerance": "Toleranse for profilsamsvarsvarighet (0-0,5)"
-            },
-            "data_description": {
-              "profile_match_min_duration_ratio": "Minimum varighetsforhold for profiltilpasning. Løpsyklusen må være minst denne brøkdelen av profilvarigheten for å matche. Lavere = tidligere matching. Standard: 0,50 (50 %).",
-              "profile_match_interval": "Hvor ofte (i sekunder) du skal forsøke profiltilpasning i løpet av en syklus. Lavere verdier gir raskere deteksjon, men bruker mer CPU. Standard: 300s (5 minutter).",
-              "profile_match_threshold": "Minimum DTW likhetspoeng (0,0–1,0) kreves for å vurdere en profil som en match. Høyere = strengere matching, færre falske positive. Standard: 0,4.",
-              "profile_unmatch_threshold": "DTW likhetspoeng (0,0–1,0) under som en tidligere matchet profil avvises. Bør være lavere enn matchterskel for å forhindre flimring. Standard: 0,35.",
-              "auto_label_confidence": "Merk sykluser automatisk ved eller over denne konfidensen ved fullføring (0,0–1,0).",
-              "learning_confidence": "Minimum tillit for å be om brukerverifisering via en hendelse (0.0–1.0).",
-              "suppress_feedback_notifications": "Når aktivert, vil WashData fortsatt spore og be om tilbakemelding internt, men vil ikke vise vedvarende varsler som ber deg om å bekrefte sykluser. Nyttig når sykluser alltid oppdages på riktig måte og du synes meldingen er distraherende.",
-              "duration_tolerance": "Toleranse for gjenværende estimater under en kjøring (0,0–0,5 tilsvarer 0–50 %).",
-              "smoothing_window": "Antall nylige effektavlesninger brukt for glidende gjennomsnittlig utjevning.",
-              "profile_duration_tolerance": "Toleranse brukt av profiltilpasning for total varighetsvarians (0,0–0,5). Standard oppførsel: ±25 %."
-            }
-          },
-          "timing_section": {
-            "name": "Tidsstyring, vedlikehold og feilsøking",
-            "description": "Watchdog, tilbakestilling av fremdrift, automatisk vedlikehold og eksponering av feilsøkingsenheter.",
-            "data": {
-              "watchdog_interval": "Watchdog-intervall (sekunder)",
-              "no_update_active_timeout": "Tidsavbrudd uten oppdatering (er)",
-              "progress_reset_delay": "Forsinkelse for tilbakestilling av fremdrift (sekunder)",
-              "auto_maintenance": "Aktiver automatisk vedlikehold",
-              "expose_debug_entities": "Vis feilsøkingsenheter",
-              "save_debug_traces": "Lagre feilsøkingsspor"
-            },
-            "data_description": {
-              "watchdog_interval": "Sekunder mellom vakthundkontroller mens du løper. Standard: 5s. ADVARSEL: Sørg for at dette er HØYERE enn sensorens oppdateringsintervall for å unngå falske stopp (f.eks. hvis sensoren oppdateres hver 60. s, bruk 65s+).",
-              "no_update_active_timeout": "For publiser-ved-endringssensorer: tving kun til å avslutte en AKTIV syklus hvis ingen oppdateringer kommer i løpet av så mange sekunder. Lavstrømsfullføring bruker fortsatt Off Delay.",
-              "progress_reset_delay": "Etter at en syklus er fullført (100 %), vent så mange sekunder med tomgang før du tilbakestiller fremdriften til 0 %. Standard: 300s.",
-              "auto_maintenance": "Aktiver automatisk vedlikehold (reparere prøver, slå sammen fragmenter).",
-              "expose_debug_entities": "Vis avanserte sensorer (Confidence, Phase, Ambiguity) for feilsøking.",
-              "save_debug_traces": "Lagre detaljert rangering og kraftsporingsdata i historien (øker lagringsbruken)."
-            }
-          },
-          "anti_wrinkle_section": {
-            "name": "Antikrøll-beskyttelse (tørketromler)",
-            "description": "Ignorer trommelrotasjoner etter syklusen for å forhindre spøkelsessykluser. Kun tørketrommel / kombi vask/tørk.",
-            "data": {
-              "anti_wrinkle_enabled": "Anti-rynkeskjold (kun tørketrommel)",
-              "anti_wrinkle_max_power": "Anti-rynke maksimal effekt (W)",
-              "anti_wrinkle_max_duration": "Maksimal varighet mot rynker (r)",
-              "anti_wrinkle_exit_power": "Anti-rynke utgangseffekt (W)"
-            },
-            "data_description": {
-              "anti_wrinkle_enabled": "Ignorer korte trommelrotasjoner med lav effekt etter at en syklus er ferdig for å forhindre spøkelsessykluser (bare tørketrommel/vaskemaskin-tørketrommel).",
-              "anti_wrinkle_max_power": "Utbrudd ved eller under denne kraften behandles som anti-rynke rotasjoner i stedet for nye sykluser. Gjelder bare når Anti-Wrinkle Shield er aktivert.",
-              "anti_wrinkle_max_duration": "Maksimal sprengningslengde å behandle som anti-rynke rotasjon. Gjelder bare når Anti-Wrinkle Shield er aktivert.",
-              "anti_wrinkle_exit_power": "Hvis strømmen faller under dette nivået, gå ut av anti-rynke umiddelbart (true off). Gjelder bare når Anti-Wrinkle Shield er aktivert."
-            }
-          },
-          "delay_start_section": {
-            "name": "Deteksjon av forsinket start",
-            "description": "Behandle vedvarende lav-effekt standby som 'Venter på start' til syklusen faktisk begynner.",
-            "data": {
-              "delay_start_detect_enabled": "Aktiver forsinket startdeteksjon",
-              "delay_confirm_seconds": "Forsinket start: bekreftelsestid for standby (s)",
-              "delay_timeout_hours": "Forsinket start: Maks ventetid (t)"
-            },
-            "data_description": {
-              "delay_start_detect_enabled": "Når den er aktivert, oppdages en kort dreneringstopp med lav effekt etterfulgt av vedvarende standby-strøm som en forsinket start. Statussensoren viser 'Venter på å starte' under forsinkelsen. Ingen programtid eller fremgang spores før syklusen faktisk begynner. Krever at start_threshold_w settes over dreneringsspikekraften.",
-              "delay_confirm_seconds": "Effekten må holde seg mellom Stoppterskel (W) og Startterskel (W) i så mange sekunder før WashData går til 'Venter på start'. Filtrerer bort korte topper fra menynavigering. Standard: 60 s.",
-              "delay_timeout_hours": "Sikkerhetstidsavbrudd: Hvis maskinen fortsatt er i 'Venter på å starte' etter disse mange timene, tilbakestilles WashData til Av. Standard: 8 timer."
-            }
-          },
-          "external_triggers_section": {
-            "name": "Eksterne utløsere, dør og pause",
-            "description": "Valgfri ekstern sensor for syklusslutt, dørsensor for pause-/ren-deteksjon og bryter for å kutte strøm ved pause.",
-            "data": {
-              "external_end_trigger_enabled": "Aktiver ekstern syklussluttrigger",
-              "external_end_trigger": "Ekstern syklusavslutningssensor",
-              "external_end_trigger_inverted": "Inverter triggerlogikk (trigger på AV)",
-              "door_sensor_entity": "Dørsensor",
-              "pause_cuts_power": "Kutt strømmen under pause",
-              "switch_entity": "Bryterenhet (for Pause Power Cut)",
-              "notify_unload_delay_minutes": "Forsinkelse for varsel om klesvask (min)"
-            },
-            "data_description": {
-              "external_end_trigger_enabled": "Aktiver overvåking av en ekstern binær sensor for å utløse syklusfullføring.",
-              "external_end_trigger": "Velg en binær sensorenhet. Når denne sensoren utløses, vil gjeldende syklus avsluttes med status \"fullført\".",
-              "external_end_trigger_inverted": "Som standard utløses utløseren når sensoren slås PÅ. Merk av i denne boksen for å utløses når sensoren slås AV i stedet.",
-              "door_sensor_entity": "Valgfri binær sensor for maskindøren (på = åpen, av = lukket). Når døren åpnes under en aktiv syklus, vil WashData bekrefte at syklusen er satt på pause. Etter at syklusen er ferdig, hvis døren fortsatt er lukket, endres tilstanden til 'Rengjør' til døren åpnes. Merk: lukking av døren gjenopptar IKKE en midlertidig stoppet syklus – gjenoppta må utløses manuelt via Gjenoppta syklus-knappen eller tjenesten.",
-              "pause_cuts_power": "Når du setter på pause via pausesyklus-knappen eller tjenesten, må du også slå av den konfigurerte bryterenheten. Trer bare i kraft hvis en bryterenhet er konfigurert for denne enheten.",
-              "switch_entity": "Bytteenheten som skal veksles når du setter på pause eller gjenopptar. Nødvendig når 'Kutt strøm ved pause' er aktivert.",
-              "notify_unload_delay_minutes": "Send et varsel via sluttmeldingskanalen etter at syklusen er ferdig og døren ikke har vært åpnet på så mange minutter (krever dørsensor). Sett til 0 for å deaktivere. Standard: 60 min."
-            }
-          },
-          "pump_section": {
-            "name": "Pumpeovervåking",
-            "description": "Kun for enhetstypen pumpe. Utløser en hendelse hvis en pumpesyklus varer lenger enn denne varigheten.",
-            "data": {
-              "pump_stuck_duration": "Varselterskel (er) for pumpe fastlåst (kun pumpe)"
-            },
-            "data_description": {
-              "pump_stuck_duration": "Hvis en pumpesyklus fortsatt kjører etter så mange sekunder, utløses en ha_washdata_pump_stuck-hendelse én gang. Bruk denne til å oppdage en motor som har satt seg fast (typisk pumpekjøring er under 60 s). Standard: 1800 s (30 min). Kun type pumpeenhet."
-            }
-          },
-          "device_link_section": {
-            "name": "Enhetskobling",
-            "description": "Koble eventuelt denne WashData-enheten til en eksisterende Home Assistant-enhet (for eksempel smartpluggen eller selve apparatet). WashData-enheten vises da som \"Tilkoblet via\" den enheten. La det stå tomt for å beholde WashData som en frittstående enhet.",
-            "data": {
-              "linked_device": "Koblet enhet"
-            },
-            "data_description": {
-              "linked_device": "Velg enheten du vil koble WashData til. Dette legger til en 'Tilkoblet via'-referanse i enhetsregisteret; WashData beholder sitt eget enhetskort og enheter. Fjern valget for å fjerne koblingen."
-            }
-          }
-        }
-      },
-      "diagnostics": {
-        "title": "Diagnostikk og vedlikehold",
-        "description": "Kjør vedlikeholdshandlinger som å slå sammen fragmenterte sykluser eller migrere lagrede data.\n\n**Lagringsbruk**\n\n- Filstørrelse: {file_size_kb} KB\n- Sykluser: {cycle_count}\n- Profiler: {profile_count}\n- Feilsøkingsspor: {debug_count}",
-        "menu_options": {
-          "reprocess_history": "Vedlikehold: Bearbeid og optimaliser data",
-          "clear_debug_data": "Fjern feilsøkingsdata (frigjør plass)",
-          "wipe_history": "Tørk ALLE data for denne enheten (irreversibel)",
-          "export_import": "Eksporter/importer JSON med innstillinger (kopier/lim inn)",
-          "menu_back": "← Tilbake"
-        }
-      },
-      "clear_debug_data": {
-        "title": "Fjern feilsøkingsdata",
-        "description": "Er du sikker på at du vil slette alle lagrede feilsøkingsspor? Dette vil frigjøre plass, men fjerne detaljert rangeringsinformasjon fra tidligere sykluser."
-      },
-      "manage_cycles": {
-        "title": "Administrer sykluser",
-        "description": "Nylige sykluser:\n{recent_cycles}",
-        "menu_options": {
-          "auto_label_cycles": "Auto-merk gamle sykluser",
-          "select_cycle_to_label": "Etikettspesifikk syklus",
-          "select_cycle_to_delete": "Slett syklus",
-          "interactive_editor": "Slå sammen/splitt interaktiv editor",
-          "trim_cycle_select": "Trim syklusdata",
-          "menu_back": "← Tilbake"
-        }
-      },
-      "manage_cycles_empty": {
-        "title": "Administrer sykluser",
-        "description": "Ingen sykluser registrert ennå.",
-        "menu_options": {
-          "auto_label_cycles": "Auto-merk gamle sykluser",
-          "menu_back": "← Tilbake"
-        }
-      },
-      "manage_profiles": {
-        "title": "Administrer profiler",
-        "description": "Profilsammendrag:\n{profile_summary}",
-        "menu_options": {
-          "create_profile": "Opprett ny profil",
-          "edit_profile": "Rediger/gi nytt navn til profil",
-          "delete_profile_select": "Slett profil",
-          "profile_stats": "Profilstatistikk",
-          "cleanup_profile": "Rydd opp historikk - Graf og slett",
-          "assign_profile_phases_select": "Tilordne faseområder",
-          "menu_back": "← Tilbake"
-        }
-      },
-      "manage_profiles_empty": {
-        "title": "Administrer profiler",
-        "description": "Ingen profiler opprettet ennå.",
-        "menu_options": {
-          "create_profile": "Opprett ny profil",
-          "menu_back": "← Tilbake"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Administrer fasekatalog",
-        "description": "Fasekatalog (standard for denne enheten + tilpassede faser):\n{phase_summary}",
-        "menu_options": {
-          "phase_catalog_create": "Opprett ny fase",
-          "phase_catalog_edit_select": "Rediger fase",
-          "phase_catalog_delete": "Slett fase",
-          "menu_back": "← Tilbake"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Opprett egendefinert fase",
-        "description": "Lag et tilpasset fasenavn og beskrivelse, og velg hvilken enhetstype det gjelder.",
-        "data": {
-          "target_device_type": "Målenhetstype",
-          "phase_name": "Fasenavn",
-          "phase_description": "Fasebeskrivelse"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Rediger egendefinert fase",
-        "description": "Velg en egendefinert fase å redigere.",
-        "data": {
-          "phase_name": "Egendefinert fase"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Rediger egendefinert fase",
-        "description": "Redigeringsfase: {phase_name}",
-        "data": {
-          "phase_name": "Fasenavn",
-          "phase_description": "Fasebeskrivelse"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Slett egendefinert fase",
-        "description": "Velg en egendefinert fase for å slette. Eventuelle tildelte områder som bruker denne fasen vil bli fjernet.",
-        "data": {
-          "phase_name": "Egendefinert fase"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Tilordne faseområder",
-        "description": "Faseforhåndsvisning for profil: **{profile_name}**\n\n{timeline_svg}\n\n**Gjeldende områder:**\n{current_ranges}\n\nBruk handlingene nedenfor for å legge til, redigere, slette eller lagre områder.",
-        "menu_options": {
-          "assign_profile_phases_add": "Legg til faseområde",
-          "assign_profile_phases_edit_select": "Rediger faseområde",
-          "assign_profile_phases_delete": "Slett faseområde",
-          "phase_ranges_clear": "Fjern alle områder",
-          "assign_profile_phases_auto_detect": "Automatisk oppdage faser",
-          "phase_ranges_save": "Lagre og returner",
-          "menu_back": "← Tilbake"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Legg til faseområde",
-        "description": "Legg til ett faseområde til gjeldende utkast.",
-        "data": {
-          "phase_name": "Fase",
-          "start_min": "Startminutt",
-          "end_min": "Sluttminutt"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Rediger faseområde",
-        "description": "Velg et område du vil redigere.",
-        "data": {
-          "range_index": "Faseområde"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Rediger faseområde",
-        "description": "Oppdater det valgte faseområdet.",
-        "data": {
-          "phase_name": "Fase",
-          "start_min": "Startminutt",
-          "end_min": "Sluttminutt"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Slett faseområde",
-        "description": "Velg et område du vil fjerne fra utkastet.",
-        "data": {
-          "range_index": "Faseområde"
-        }
-      },
-      "assign_profile_phases_auto_detect": {
-        "title": "Automatisk oppdagede faser",
-        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fase(r) oppdaget automatisk.** Velg en handling nedenfor.",
-        "data": {
-          "action": "Handling"
-        }
-      },
-      "assign_profile_phases_auto_detect_name": {
-        "title": "Navn oppdaget faser",
-        "description": "Profil: **{profile_name}**\n\n**{detected_count} fase(r) oppdaget:**\n{ranges_summary}\n\nGi hver fase et navn."
-      },
-      "assign_profile_phases_select": {
-        "title": "Tilordne faseområder",
-        "description": "Velg en profil for å konfigurere faseområder.",
-        "data": {
-          "profile": "Profil"
-        }
-      },
-      "profile_stats": {
-        "title": "Profilstatistikk",
-        "description": "{stats_table}"
-      },
-      "create_profile": {
-        "title": "Opprett ny profil",
-        "description": "Opprett en ny profil manuelt eller fra en tidligere syklus.\n\nEksempler på profilnavn: «Delicates», «Heavy Duty», «Quick Wash»",
-        "data": {
-          "profile_name": "Profilnavn",
-          "reference_cycle": "Referansesyklus (valgfritt)",
-          "manual_duration": "Manuell varighet (minutter)"
-        }
-      },
-      "edit_profile": {
-        "title": "Rediger profil",
-        "description": "Velg en profil for å gi nytt navn",
-        "data": {
-          "profile": "Profil"
-        }
-      },
-      "rename_profile": {
-        "title": "Rediger profildetaljer",
-        "description": "Gjeldende profil: {current_name}",
-        "data": {
-          "new_name": "Profilnavn",
-          "manual_duration": "Manuell varighet (minutter)"
-        }
-      },
-      "delete_profile_select": {
-        "title": "Slett profil",
-        "description": "Velg en profil du vil slette",
-        "data": {
-          "profile": "Profil"
-        }
-      },
-      "delete_profile_confirm": {
-        "title": "Bekreft Slett profil",
-        "description": "⚠️ Dette sletter profilen permanent: {profile_name}",
-        "data": {
-          "unlabel_cycles": "Fjern etiketten fra sykluser med denne profilen"
-        }
-      },
-      "auto_label_cycles": {
-        "title": "Auto-merk gamle sykluser",
-        "description": "Fant {total_count} totale sykluser. Profiler: {profiles}",
-        "data": {
-          "confidence_threshold": "Minimum konfidens (0,50–0,95)"
-        }
-      },
-      "select_cycle_to_label": {
-        "title": "Velg Gå til etikett",
-        "description": "✓ = fullført, ⚠ = gjenopptatt, ✗ = avbrutt",
-        "data": {
-          "cycle_id": "Syklus"
-        }
-      },
-      "select_cycle_to_delete": {
-        "title": "Slett syklus",
-        "description": "⚠️ Dette vil slette den valgte syklusen permanent",
-        "data": {
-          "cycle_id": "Bla for å slette"
-        }
-      },
-      "label_cycle": {
-        "title": "Etikettsyklus",
-        "description": "{cycle_info}",
-        "data": {
-          "profile_name": "Profil",
-          "new_profile_name": "Nytt profilnavn (hvis opprettet)"
-        }
-      },
-      "post_process": {
-        "title": "Prosesshistorikk (slå sammen/delt)",
-        "description": "Rydd opp i syklushistorikk ved å slå sammen fragmenterte kjøringer og dele opp feil sammenslåtte sykluser innenfor et tidsvindu. Angi antall timer for å se tilbake (bruk 999999 for alle).",
-        "data": {
-          "time_range": "Tilbakeblikk-vindu (timer)",
-          "gap_seconds": "Slå sammen/delt gap (sekunder)"
-        },
-        "data_description": {
-          "time_range": "Antall timer å skanne etter fragmenterte sykluser for å slå sammen. Bruk 999999 til å behandle alle historiske data.",
-          "gap_seconds": "Terskel for å bestemme splitt vs sammenslåing. Mellomrom KORTERE enn dette slås sammen. Mellomrom LENGER enn dette deles. Senk denne for å tvinge frem en splittelse på en syklus som ble slått sammen feil."
-        }
-      },
-      "cleanup_profile": {
-        "title": "Rydd opp historikk - Velg profil",
-        "description": "Velg en profil du vil visualisere. Dette vil generere en graf som viser alle tidligere sykluser for denne profilen for å hjelpe med å identifisere uteliggere.",
-        "data": {
-          "profile": "Profil"
-        }
-      },
-      "cleanup_select": {
-        "title": "Rydd opp historikk - Graf og slett",
-        "description": "![Graph]({graph_url})\n\n**Visualiserer {profile_name}**\n\nGrafen viser individuelle sykluser som fargede linjer. Identifiser uteliggere (linjer langt fra gruppen) og match fargen deres i listen nedenfor for å slette dem.\n\n**Velg sykluser som skal slettes PERMANENT:**",
-        "data": {
-          "cycles_to_delete": "Sykluser for å slette (sjekk samsvarende farger)"
-        }
-      },
-      "interactive_editor": {
-        "title": "Slå sammen/splitt interaktiv editor",
-        "description": "Velg en manuell handling som skal utføres på syklushistorikken.",
-        "menu_options": {
-          "editor_split": "Del en syklus (finn hull)",
-          "editor_merge": "Slå sammen sykluser (Sett sammen fragmenter)",
-          "editor_delete": "Slett syklus(er)",
-          "menu_back": "← Tilbake"
-        }
-      },
-      "editor_select": {
-        "title": "Velg Sykluser",
-        "description": "Velg syklusen(e) som skal behandles.\n\n{info_text}",
-        "data": {
-          "selected_cycles": "Sykluser"
-        }
-      },
-      "editor_configure": {
-        "title": "Konfigurer og bruk",
-        "description": "{preview_md}",
-        "data": {
-          "confirm_action": "Handling",
-          "merged_profile": "Resulterende profil",
-          "new_profile_name": "Nytt profilnavn",
-          "confirm_commit": "Ja, jeg bekrefter denne handlingen",
-          "segment_0_profile": "Segment 1-profil",
-          "segment_1_profile": "Segment 2-profil",
-          "segment_2_profile": "Segment 3-profil",
-          "segment_3_profile": "Segment 4-profil",
-          "segment_4_profile": "Segment 5-profil",
-          "segment_5_profile": "Segment 6-profil",
-          "segment_6_profile": "Segment 7-profil",
-          "segment_7_profile": "Segment 8-profil",
-          "segment_8_profile": "Segment 9-profil",
-          "segment_9_profile": "Segment 10-profil"
-        }
-      },
-      "editor_split_params": {
-        "title": "Delt konfigurasjon",
-        "description": "Juster følsomheten for å dele denne syklusen. Ethvert tomgangsgap lenger enn dette vil føre til en splittelse.",
-        "data": {
-          "split_mode": "Delingsmetode"
-        }
-      },
-      "editor_split_auto_params": {
-        "title": "Konfigurasjon for automatisk oppdeling",
-        "description": "Juster følsomheten for å dele denne syklusen. Enhver inaktiv pause som er lengre enn dette vil føre til en oppdeling.",
-        "data": {
-          "min_gap_seconds": "Terskel for oppdelingsgap (sekunder)"
-        }
-      },
-      "editor_split_manual_params": {
-        "title": "Manuelle oppdelings-tidsstempler",
-        "description": "{preview_md}Syklusvindu: **{cycle_start_wallclock} → {cycle_end_wallclock}** den {cycle_date}.\n\nSkriv inn ett eller flere oppdelings-tidsstempler (`HH:MM` eller `HH:MM:SS`), ett per linje. Syklusen blir delt ved hvert tidsstempel — N tidsstempler gir N+1 segmenter.",
-        "data": {
-          "split_timestamps": "Delingstidsstempler"
-        }
-      },
-      "reprocess_history": {
-        "title": "Vedlikehold: Bearbeid og optimaliser data",
-        "description": "Utfører dyprensing av historiske data:\n1. Trimmer nulleffektavlesninger (stillhet).\n2. Retter syklustiming/-varighet.\n3. Beregner alle statistiske modeller (konvolutter).\n\n**Kjør dette for å fikse dataproblemer eller bruke nye algoritmer.**"
-      },
-      "wipe_history": {
-        "title": "Tørk historikk (kun testing)",
-        "description": "⚠️ Dette vil permanent slette ALLE lagrede sykluser og profiler for denne enheten. Dette kan ikke angres!"
-      },
-      "export_import": {
-        "title": "Eksporter/importer JSON",
-        "description": "Kopier/lim inn sykluser, profiler OG innstillinger for denne enheten. Eksporter nedenfor eller lim inn JSON for å importere.",
-        "data": {
-          "mode": "Handling",
-          "json_payload": "Fullfør konfigurasjon JSON"
-        },
-        "data_description": {
-          "mode": "Velg Eksporter for å kopiere gjeldende data og innstillinger, eller Importer for å lime inn eksporterte data fra en annen WashData-enhet.",
-          "json_payload": "For eksport: kopier denne JSON-en (inkluderer sykluser, profiler og alle finjusterte innstillinger). For import: lim inn JSON eksportert fra WashData."
-        }
-      },
-      "record_cycle": {
-        "title": "Opptakssyklus",
-        "description": "Ta opp en syklus manuelt for å lage en ren profil uten forstyrrelser.\n\nStatus: **{status}**\nVarighet: {duration}s\nEksempler: {samples}",
-        "menu_options": {
-          "record_refresh": "Oppdater status",
-          "record_stop": "Stopp opptak (lagre og behandle)",
-          "record_start": "Start nytt opptak",
-          "record_process": "Behandle siste opptak (trim og lagre)",
-          "record_discard": "Kast siste opptak",
-          "menu_back": "← Tilbake"
-        }
-      },
-      "record_process": {
-        "title": "Prosessopptak",
-        "description": "![Graph]({graph_url})\n\n**Graf viser råopptak.** Blå = Behold, Rød = Foreslått trim.\n*Graf er statisk og oppdateres ikke med skjemaendringer.*\n\nOpptaket stoppet. Trimmene er justert til den detekterte samplingsfrekvensen (~{sampling_rate}s).\n\nRå varighet: {duration}s\nEksempler: {samples}",
-        "data": {
-          "head_trim": "Trimstart (sekunder)",
-          "tail_trim": "Trim slutt (sekunder)",
-          "save_mode": "Lagre destinasjon",
-          "profile_name": "Profilnavn"
-        }
-      },
-      "learning_feedbacks": {
-        "title": "Lærings tilbakemeldinger",
-        "description": "Ventende tilbakemelding: {count}\n\n{pending_table}\n\nVelg en forespørsel om syklusgjennomgang som skal behandles.",
-        "menu_options": {
-          "learning_feedbacks_pick": "Gjennomgå ventende tilbakemelding",
-          "learning_feedbacks_dismiss_all": "Avvis all ventende tilbakemelding",
-          "menu_back": "← Tilbake"
-        }
-      },
-      "learning_feedbacks_pick": {
-        "title": "Velg tilbakemelding for gjennomgang",
-        "description": "Velg en syklusgjennomgangsforespørsel som skal åpnes.",
-        "data": {
-          "selected_feedback": "Velg syklus for gjennomgang"
-        }
-      },
-      "learning_feedbacks_empty": {
-        "title": "Lærings tilbakemeldinger",
-        "description": "Fant ingen ventende tilbakemeldingsforespørsler.",
-        "menu_options": {
-          "menu_back": "← Tilbake"
-        }
-      },
-      "learning_feedbacks_dismiss_all": {
-        "title": "Avvis alle ventende tilbakemeldinger",
-        "description": "Du er i ferd med å avvise **{count}** ventende tilbakemeldingsforespørsler. Avviste sykluser forblir i historikken din, men vil ikke bidra med nytt læringssignal. Dette kan ikke angres.\n\n✅ Merk av i boksen nedenfor og klikk på **Send** for å avvise alle.\n❌ La den være umerket og klikk på **Send** for å avbryte og gå tilbake.",
-        "data": {
-          "confirm_dismiss_all": "Bekreft: avvis alle ventende tilbakemeldingsforespørsler"
-        }
-      },
-      "resolve_feedback": {
-        "title": "Løs tilbakemelding",
-        "description": "{comparison_img}{candidates_table}\n**Oppdaget profil**: {detected_profile} ({confidence_pct}%)\n**Estimert varighet**: {est_duration_min} min\n**Faktisk varighet**: {act_duration_min} min\n\n__Velg en handling nedenfor:__",
-        "data": {
-          "action": "Hva vil du gjøre?",
-          "corrected_profile": "Riktig program (hvis korrigering)",
-          "corrected_duration": "Riktig varighet i sekunder (hvis korrigering)"
-        }
-      },
-      "trim_cycle_select": {
-        "title": "Trim Cycle - Velg Cycle",
-        "description": "Velg en syklus å trimme. ✓ = fullført, ⚠ = gjenopptatt, ✗ = avbrutt",
-        "data": {
-          "cycle_id": "Syklus"
-        }
-      },
-      "trim_cycle": {
-        "title": "Trim syklus",
-        "description": "Gjeldende vindu: {trim_summary}\n\n{trim_svg}",
-        "data": {
-          "action": "Handling"
-        }
-      },
-      "trim_cycle_start": {
-        "title": "Still inn trimstart",
-        "description": "Syklusvindu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNåværende start: **{current_wallclock}** (+{current_offset_min} min fra syklusstart)\n\nVelg et nytt starttidspunkt ved å bruke klokkevelgeren nedenfor.",
-        "data": {
-          "trim_start_time": "Ny starttid",
-          "trim_start_min": "Ny start (minutter fra syklusstart)"
-        }
-      },
-      "trim_cycle_end": {
-        "title": "Sett Trim End",
-        "description": "Syklusvindu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNåværende slutt: **{current_wallclock}** (+{current_offset_min} min fra syklusstart)\n\nVelg en ny sluttid ved å bruke klokkevelgeren nedenfor.",
-        "data": {
-          "trim_end_time": "Ny sluttid",
-          "trim_end_min": "Ny slutt (minutter fra syklusstart)"
+          "power_sensor": "Strømsensor",
+          "min_power": "Minimum effektterskel (W)"
         }
       }
     },
     "error": {
-      "import_failed": "Import mislyktes. Vennligst lim inn en gyldig WashData-eksport-JSON.",
-      "select_exactly_one": "Velg nøyaktig én syklus for denne handlingen.",
-      "select_at_least_one": "Velg minst én syklus for denne handlingen.",
-      "select_at_least_two": "Velg minst to sykluser for denne handlingen.",
-      "profile_exists": "En profil med dette navnet eksisterer allerede",
-      "rename_failed": "Kunne ikke endre navn på profilen. Det kan hende at profilen ikke eksisterer eller et nytt navn er allerede tatt.",
-      "assignment_failed": "Kunne ikke tilordne profilen til å sykle",
-      "duplicate_phase": "En fase med dette navnet eksisterer allerede.",
-      "phase_not_found": "Den valgte fasen ble ikke funnet.",
-      "invalid_phase_name": "Fasenavnet kan ikke være tomt.",
-      "phase_name_too_long": "Fasenavnet er for langt.",
-      "invalid_phase_range": "Faseområdet er ugyldig. Slutten må være større enn starten.",
-      "invalid_phase_timestamp": "Tidsstempelet er ugyldig. Bruk formatet ÅÅÅÅ-MM-DD TT:MM eller TT:MM.",
-      "overlapping_phase_ranges": "Faseområder overlapper hverandre. Juster områdene og prøv igjen.",
-      "incomplete_phase_row": "Hver faserad må inkludere en fase pluss komplette start-/sluttverdier for den valgte modusen.",
-      "timestamp_mode_cycle_required": "Velg en kildesyklus når du bruker tidsstempelmodus.",
-      "no_phase_ranges": "Ingen faseområder er tilgjengelige for den handlingen ennå.",
-      "feedback_notification_title": "WashData: Bekreft syklus ({device})",
-      "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence} % konfidens)\n**Tid**: {time}\n\nWashData trenger din hjelp for å bekrefte denne oppdagede syklusen.\n\nGå til **Innstillinger > Enheter og tjenester > WashData > Konfigurer > Læretilbakemeldinger** for å bekrefte eller korrigere dette resultatet.",
-      "suggestions_ready_notification_title": "WashData: Foreslåtte innstillinger klar ({device})",
-      "suggestions_ready_notification_message": "Sensoren **Foreslåtte innstillinger** rapporterer nå **{count}** nyttige anbefalinger.\n\nSlik ser du og bruker dem: **Innstillinger > Enheter og tjenester > WashData > Konfigurer > Avanserte innstillinger > Bruk foreslåtte verdier**.\n\nForslag er valgfrie og vises for vurdering før du lagrer.",
-      "trim_range_invalid": "Start må være før slutt. Juster trimpunktene dine.",
-      "trim_failed": "Trim mislyktes. Syklusen eksisterer kanskje ikke lenger eller vinduet er tomt.",
-      "invalid_split_timestamp": "Tidsstempelet er ugyldig eller utenfor syklusvinduet. Bruk HH:MM eller HH:MM:SS innenfor syklusvinduet.",
-      "no_split_segments_found": "Ingen gyldige segmenter kunne opprettes fra disse tidsstemplene. Sørg for at hvert tidsstempel er innenfor syklusvinduet og at segmentene er minst 1 minutt lange.",
-      "auto_tune_suggestion": "{device_type} {device_title} oppdaget spøkelsessykluser. Foreslått endring av min_effekt: {current_min}W -> {new_min}W (ikke brukt automatisk).",
-      "auto_tune_title": "WashData Auto-Tune",
-      "auto_tune_fallback": "{device_type} {device_title} oppdaget spøkelsessykluser. Foreslått endring av min_effekt: {current_min}W -> {new_min}W (ikke brukt automatisk)."
-    },
-    "abort": {
-      "no_cycles_found": "Ingen sykluser funnet",
-      "no_split_segments_found": "Ingen delbare segmenter ble funnet i den valgte syklusen.",
-      "cycle_not_found": "Den valgte syklusen kunne ikke lastes inn.",
-      "no_power_data": "Ingen kraftsporingsdata tilgjengelig for den valgte syklusen.",
-      "no_profiles_found": "Ingen profiler funnet. Opprett en profil først.",
-      "no_profiles_for_matching": "Ingen profiler tilgjengelig for matching. Opprett profiler først.",
-      "no_unlabeled_cycles": "Alle sykluser er allerede merket",
-      "no_suggestions": "Ingen foreslåtte verdier tilgjengelig ennå. Kjør noen sykluser og prøv igjen.",
-      "no_predictions": "Ingen spådommer",
-      "no_custom_phases": "Fant ingen egendefinerte faser.",
-      "reprocess_success": "{count} sykluser er behandlet på nytt.",
-      "debug_data_cleared": "Fjernet feilsøkingsdata fra {count} sykluser."
+      "timer_default_message": "{device}: {minutes} min. timer",
+      "timer_pause_action_title": "Fortsett syklus",
+      "timer_pause_body_suffix": "Syklusen er satt på pause. Åpne WashData-panelet for å fortsette.",
+      "notify_live_waiting_message": "{device}: Ingen profil gjenkjent ennå.",
+      "vs_typical_longer": "{pct}% lengre enn vanlig",
+      "vs_typical_shorter": "{pct}% kortere enn vanlig",
+      "invalid_power": "Effektterskelen må være større enn 0"
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Syklusstart",
-        "cycle_finish": "Syklus ferdig",
-        "cycle_live": "Live fremgang"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Umerket)",
-        "create_new_profile": "Opprett ny profil",
-        "remove_label": "Fjern etikett",
-        "no_reference_cycle": "(Ingen referansesyklus)",
-        "all_device_types": "Alle enhetstyper",
-        "current_suffix": "(nåværende)",
-        "editor_select_info": "Velg 1 syklus for å dele, eller 2+ sykluser for å slå sammen.",
-        "editor_select_info_split": "Velg 1 syklus som skal deles.",
-        "editor_select_info_merge": "Velg 2 eller flere sykluser som skal slås sammen.",
-        "editor_select_info_delete": "Velg 1 eller flere sykluser som skal slettes.",
-        "no_cycles_recorded": "Ingen sykluser registrert ennå.",
-        "profile_summary_line": "- **{name}**: {count} sykluser, {avg}m gj.sn",
-        "no_profiles_created": "Ingen profiler opprettet ennå.",
-        "phase_preview": "Forhåndsvisning av fase",
-        "phase_preview_no_curve": "Gjennomsnittlig profilkurve er ikke tilgjengelig ennå. Kjør/merk flere sykluser for denne profilen.",
-        "average_power_curve": "Gjennomsnittlig kraftkurve",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} sykluser, ~{duration}m snitt)",
-        "profile_option_short_fmt": "{name} ({count} sykluser, ~{duration}m)",
-        "deleted_cycles_from_profile": "Slettet {count} sykluser fra {profile}.",
-        "not_enough_data_graph": "Ikke nok data til å generere graf.",
-        "no_profiles_found": "Ingen profiler funnet.",
-        "cycle_info_fmt": "Syklus: {start}, {duration}m, strøm: {label}",
-        "top_candidates_header": "### Toppkandidater",
-        "tbl_profile": "Profil",
-        "tbl_confidence": "Selvtillit",
-        "tbl_correlation": "Korrelasjon",
-        "tbl_duration_match": "Varighet Match",
-        "detected_profile": "Oppdaget profil",
-        "estimated_duration": "Estimert varighet",
-        "actual_duration": "Faktisk varighet",
-        "choose_action": "__Velg en handling nedenfor:__",
-        "tbl_count": "Telle",
-        "tbl_avg": "Gj.sn",
-        "tbl_min": "Min",
-        "tbl_max": "Maks",
-        "tbl_energy_avg": "Energi (Gj.sn.)",
-        "tbl_energy_total": "Energi (totalt)",
-        "tbl_consistency": "Bestå.",
-        "tbl_last_run": "Siste løp",
-        "graph_legend_title": "Graflegende",
-        "graph_legend_body": "Det blå båndet representerer minimum og maksimum strømforbruk som er observert. Linjen viser gjennomsnittlig effektkurve.",
-        "recording_preview": "Forhåndsvisning av opptak",
-        "trim_start": "Trim Start",
-        "trim_end": "Trim ende",
-        "split_preview_title": "Delt forhåndsvisning",
-        "split_preview_found_fmt": "Fant {count} segmenter.",
-        "split_preview_confirm_fmt": "Klikk på Bekreft for å dele denne syklusen i {count} separate sykluser.",
-        "merge_preview_title": "Slå sammen forhåndsvisning",
-        "merge_preview_joining_fmt": "Blir med i {count} sykluser. Hullene vil bli fylt med 0W-avlesninger.",
-        "editor_delete_preview_title": "Forhåndsvisning av sletting",
-        "editor_delete_preview_intro": "De valgte syklusene blir slettet permanent:",
-        "editor_delete_preview_confirm": "Klikk på Bekreft for å slette disse sykluspostene permanent.",
-        "no_power_preview": "*Ingen strømdata tilgjengelig for forhåndsvisning.*",
-        "profile_comparison": "Profilsammenligning",
-        "actual_cycle_label": "Denne syklusen (faktisk)",
-        "storage_usage_header": "Lagringsbruk",
-        "storage_file_size": "Filstørrelse",
-        "storage_cycles": "Sykluser",
-        "storage_profiles": "Profiler",
-        "storage_debug_traces": "Feilsøk spor",
-        "overview_suffix": "Oversikt",
-        "phase_preview_for_profile": "Faseforhåndsvisning for profil",
-        "current_ranges_header": "Gjeldende områder",
-        "assign_phases_help": "Bruk handlingene nedenfor for å legge til, redigere, slette eller lagre områder.",
-        "profile_summary_header": "Profilsammendrag",
-        "recent_cycles_header": "Nylige sykluser",
-        "trim_cycle_preview_title": "Forhåndsvisning av syklustrim",
-        "trim_cycle_preview_no_data": "Ingen strømdata tilgjengelig for denne syklusen.",
-        "trim_cycle_preview_kept_suffix": "beholdt",
-        "table_program": "Program",
-        "table_when": "Når",
-        "table_length": "Lengde",
-        "table_match": "Treff",
-        "table_profile": "Profil",
-        "table_cycles": "Sykluser",
-        "table_avg_length": "Gj.sn. lengde",
-        "table_last_run": "Siste løp",
-        "table_avg_energy": "Gj.sn. energi",
-        "table_detected_program": "Oppdaget program",
-        "table_confidence": "Selvtillit",
-        "table_reported": "Rapportert",
-        "phase_builtin_suffix": "(innebygd)",
-        "phase_none_available": "Ingen faser tilgjengelig.",
-        "settings_deprecation_warning": "⚠️ **Utviklet enhetstype:** {device_type} er planlagt for fjerning i en fremtidig utgivelse. WashDatas matchende rørledning gir ikke pålitelige resultater for denne apparatklassen. Integrasjonen din fortsetter å fungere gjennom avskrivningsperioden; for å dempe denne advarselen, bytt **Enhetstype** nedenfor til en av de støttede typene (vaskemaskin, tørketrommel, vaskemaskin-tørketrommel, oppvaskmaskin, luftfrityrkoker, brødbakemaskin eller pumpe), eller til **Annet (avansert)** hvis apparatet ditt ikke samsvarer med noen av de støttede typene. **Annet (avansert)** sender med vilje generiske standardinnstillinger som ikke er innstilt for noen spesifikke enheter, så du må konfigurere terskler, tidsavbrudd og samsvarende parametere selv; alle eksisterende innstillinger bevares når du bytter.",
-        "phase_other_device_types": "Andre enhetstyper:"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Del en syklus (finn hull)",
-        "merge": "Slå sammen sykluser (Sett sammen fragmenter)",
-        "delete": "Slett syklus(er)"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Oppdag inaktive mellomrom automatisk",
-        "manual": "Manuelle tidsstempler"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Vedlikehold: Bearbeid og optimaliser data",
-        "clear_debug_data": "Fjern feilsøkingsdata (frigjør plass)",
-        "wipe_history": "Tørk ALLE data for denne enheten (irreversibel)",
-        "export_import": "Eksporter/importer JSON med innstillinger (kopier/lim inn)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Eksporter alle data",
-        "import": "Importer/slå sammen data"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Auto-merk gamle sykluser",
-        "select_cycle_to_label": "Etikettspesifikk syklus",
-        "select_cycle_to_delete": "Slett syklus",
-        "interactive_editor": "Slå sammen/splitt interaktiv editor",
-        "trim_cycle": "Trim syklusdata"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Opprett ny profil",
-        "edit_profile": "Rediger/gi nytt navn til profil",
-        "delete_profile": "Slett profil",
-        "profile_stats": "Profilstatistikk",
-        "cleanup_profile": "Rydd opp historikk - Graf og slett",
-        "assign_phases": "Tilordne faseområder"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Opprett ny fase",
-        "edit_custom_phase": "Rediger fase",
-        "delete_custom_phase": "Slett fase"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Legg til faseområde",
-        "edit_range": "Rediger faseområde",
-        "delete_range": "Slett faseområde",
-        "clear_ranges": "Fjern alle områder",
-        "auto_detect_ranges": "Automatisk oppdage faser",
-        "save_ranges": "Lagre og returner"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Oppdater status",
-        "stop_recording": "Stopp opptak (lagre og behandle)",
-        "start_recording": "Start nytt opptak",
-        "process_recording": "Behandle siste opptak (trim og lagre)",
-        "discard_recording": "Kast siste opptak"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Opprett ny profil",
-        "existing_profile": "Legg til i eksisterende profil",
-        "discard": "Forkast opptak"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Bekreft - Korrekt deteksjon",
-        "correct": "Riktig - Velg Program/Varighet",
-        "ignore": "Ignorer - falsk positiv/støyende syklus",
-        "delete": "Slett - Fjern fra loggen"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Navngi og bruk faser",
-        "cancel": "Gå tilbake uten endringer"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Sett startpunkt",
-        "set_end": "Angi sluttpunkt",
-        "reset": "Tilbakestill til full varighet",
-        "apply": "Påfør Trim",
-        "cancel": "Kansellere"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Vaskemaskin",
         "dryer": "Tørketrommel",
         "washer_dryer": "Vaske-tørketrommel kombi",
         "dishwasher": "Oppvaskmaskin",
-        "coffee_machine": "Kaffemaskin (avviklet)",
-        "ev": "Elektrisk kjøretøy (avviklet)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Varmepumpe (avviklet)",
         "bread_maker": "Brødbaker",
         "pump": "Pumpe / Sump Pump",
-        "oven": "Ovn (avviklet)",
-        "other": "Annet (avansert)"
+        "generic": "Annet (avansert)",
+        "other": "Terskelenhet"
       }
     }
   },
@@ -1079,7 +149,7 @@
           "description": "Vaskemaskinen."
         },
         "confidence_threshold": {
-          "name": "Confidence Threshold",
+          "name": "Konfidensgrense",
           "description": "Minste matchkonfidens (0,50–0,95) for å bruke etiketter."
         }
       }
@@ -1207,6 +277,16 @@
           "description": "WashData-enheten for å gjenoppta."
         }
       }
+    },
+    "trigger_ml_training": {
+      "name": "Utløs ML-trening",
+      "description": "Tren ML-modellene på enheten manuelt fra enhetens egne merkede sykluser (eksperimentelt).",
+      "fields": {
+        "device_id": {
+          "name": "Enhet",
+          "description": "WashData-enheten det skal trenes modeller for."
+        }
+      }
     }
   },
   "entity": {
@@ -1231,12 +311,12 @@
           "ending": "Slutt",
           "finished": "Ferdig",
           "anti_wrinkle": "Anti-rynke",
-          "delay_wait": "Venter på å starte",
           "interrupted": "Avbrutt",
           "force_stopped": "Tving stoppet",
           "rinse": "Skylle",
           "unknown": "Ukjent",
-          "clean": "Rengjøre"
+          "clean": "Rengjøre",
+          "delay_wait": "Venter på å starte"
         }
       },
       "washer_program": {
@@ -1261,7 +341,7 @@
         "name": "Feilsøkingsinformasjon"
       },
       "match_confidence": {
-        "name": "Match selvtillit"
+        "name": "Matchkonfidens"
       },
       "top_candidates": {
         "name": "Toppkandidater",
@@ -1269,11 +349,11 @@
           "none": "Ingen"
         }
       },
+      "ambiguity": {
+        "name": "Tvetydighetsscore"
+      },
       "current_phase": {
         "name": "Nåværende fase"
-      },
-      "wash_phase": {
-        "name": "Fase"
       },
       "profile_cycle_count": {
         "name": "Antall profil {profile_name}",
@@ -1287,6 +367,9 @@
       },
       "cycle_count": {
         "name": "Syklustelling"
+      },
+      "energy_total": {
+        "name": "Total energi"
       }
     },
     "select": {
@@ -1306,6 +389,12 @@
       },
       "resume_cycle": {
         "name": "Fortsett syklus"
+      },
+      "record_start": {
+        "name": "Start syklusopptak"
+      },
+      "record_stop": {
+        "name": "Stopp syklusopptak"
       }
     }
   },
@@ -1336,6 +425,24 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s må være større enn trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Ingen aktiv syklus å pause eller gjenoppta."
+    },
+    "path_not_allowed": {
+      "message": "Stien er ikke tillatt: {path}. Legg til katalogen dens i 'allowlist_external_dirs' i configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Kunne ikke opprette profil: {error}"
+    },
+    "export_path_exists": {
+      "message": "Eksportmålet finnes allerede: {path}. Velg en annen sti, eller fjern den eksisterende filen først."
+    },
+    "export_write_failed": {
+      "message": "Kunne ikke skrive eksporten til {path}: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Kunne ikke tildele profil: {error}"
     }
   }
 }

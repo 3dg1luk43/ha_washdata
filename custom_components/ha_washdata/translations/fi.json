@@ -24,994 +24,64 @@
           "profile_name": "Profiilin nimi (valinnainen)",
           "manual_duration": "Arvioitu kesto (minuutteja)"
         }
+      },
+      "reconfigure": {
+        "title": "Konfiguroi WashData uudelleen",
+        "description": "Päivitä laitteen nimi, laitteen tyyppi tai tehoanturi.",
+        "data": {
+          "name": "Laitteen nimi",
+          "device_type": "Laitteen tyyppi",
+          "power_sensor": "Tehon anturi",
+          "min_power": "Minimitehokynnys (W)"
+        }
       }
     },
     "error": {
       "cannot_connect": "Yhteyden muodostaminen epäonnistui",
       "invalid_auth": "Virheellinen todennus",
-      "unknown": "Odottamaton virhe"
+      "unknown": "Odottamaton virhe",
+      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0"
     },
     "abort": {
-      "already_configured": "Laite on jo määritetty"
+      "already_configured": "Laite on jo määritetty",
+      "reconfigure_successful": "Uudelleenmäärittely onnistui"
     }
   },
   "options": {
     "step": {
       "init": {
-        "menu_options": {
-          "learning_feedbacks": "Tutustu oppimispalautteisiin",
-          "settings": "Asetukset",
-          "notifications": "Ilmoitukset",
-          "manage_cycles": "Hallitse syklejä",
-          "manage_profiles": "Hallitse profiileja",
-          "manage_phase_catalog": "Hallitse vaiheluetteloa",
-          "record_cycle": "Tallennusjakso (manuaalinen)",
-          "diagnostics": "Diagnostiikka ja huolto"
-        }
-      },
-      "apply_suggestions": {
-        "title": "Kopioi ehdotetut arvot",
-        "description": "Tämä kopioi nykyiset ehdotetut arvot tallennettuihin asetuksiin. Tämä on kertaluonteinen toiminto, eikä automaattista päällekirjoitusta salli.\n\nEhdotetut arvot kopioitavaksi:\n{suggested}",
+        "title": "WashData-asetukset",
+        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
         "data": {
-          "confirm": "Vahvista kopiointitoiminto"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Tarkista ehdotetut muutokset",
-        "description": "WashData löytyi **{pending_count}** ehdotettua arvoa käytettäväksi.\n\nMuutokset:\n{changes}\n\n✅ Valitse alla oleva ruutu ja napsauta **Lähetä** ottaaksesi muutokset käyttöön ja tallentaaksesi nämä muutokset välittömästi.\n❌ Jätä se valitsematta ja napsauta **Lähetä** peruuttaaksesi ja palataksesi takaisin.",
-        "data": {
-          "confirm_apply_suggestions": "Ota nämä muutokset käyttöön ja tallenna ne"
-        }
-      },
-      "settings": {
-        "title": "Asetukset",
-        "description": "{deprecation_warning}Viritä tunnistuskynnykset, oppiminen ja edistynyt toiminta. Oletusasetukset toimivat hyvin useimmissa asetuksissa.\n\nNykyiset saatavilla olevat suositelut asetukset: {suggestions_count}.\nJos suurempi kuin 0, avaa Lisäasetukset ja käytä Käytä suositeltuja arvoja tarkastellaksesi suosituksia.",
-        "data": {
-          "apply_suggestions": "Käytä ehdotettuja arvoja",
+          "name": "Laitteen nimi",
           "device_type": "Laitteen tyyppi",
-          "power_sensor": "Tehoanturin kokonaisuus",
-          "min_power": "Vähimmäisteho (W)",
-          "off_delay": "Jakson päättymisviive (s)",
-          "notify_actions": "Ilmoitustoiminnot",
-          "notify_people": "Viivästyy toimitusta, kunnes nämä ihmiset ovat kotona",
-          "notify_only_when_home": "Viivästyttää ilmoituksia, kunnes valittu henkilö on kotona",
-          "notify_fire_events": "Automaatiotapahtumien käynnistäminen",
-          "notify_start_services": "Syklin aloitus - Ilmoituskohteet",
-          "notify_finish_services": "Syklin lopetus - Ilmoituskohteet",
-          "notify_live_services": "Reaaliaikainen edistyminen - Ilmoituskohteet",
-          "notify_before_end_minutes": "Ilmoitus ennen valmistumista (minuuttia ennen loppua)",
-          "notify_title": "Ilmoituksen otsikko",
-          "notify_icon": "Ilmoituskuvake",
-          "notify_start_message": "Aloitusviestin muoto",
-          "notify_finish_message": "Lopetusviesti muoto",
-          "notify_pre_complete_message": "Esivalmistumisviestin muoto",
-          "show_advanced": "Muokkaa lisäasetuksia (seuraava vaihe)"
-        },
-        "data_description": {
-          "apply_suggestions": "Valitse tämä valintaruutu kopioidaksesi oppimisalgoritmin ehdottamat arvot lomakkeeseen. Tarkista ennen tallentamista.\n\nSuositeltu (oppimisesta):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "Valitse laitetyyppi (pesukone, kuivausrumpu, astianpesukone, kahvinkeitin, sähköauto). Tämä tunniste tallennetaan jokaisen jakson yhteydessä paremman järjestelyn vuoksi.",
-          "power_sensor": "Anturientiteetti, joka raportoi reaaliaikaisen tehon (watteina). Voit muuttaa tätä milloin tahansa menettämättä historiallisia tietoja – hyödyllistä, jos vaihdat älypistokkeen.",
-          "min_power": "Tämän kynnyksen ylittävät teholukemat (watteina) osoittavat, että laite on käynnissä. Aloita 2 watilla useimmissa laitteissa.",
-          "off_delay": "Sekunneissa tasoitetun tehon on pysyttävä pysäytyskynnyksen alapuolella, jotta se merkitsee valmistumista. Oletus: 120s.",
-          "notify_actions": "Valinnainen Home Assistant -toimintosarja, joka suoritetaan ilmoituksia varten (skriptit, ilmoitus, TTS jne.). Jos asetettu, toiminnot suoritetaan ennen varailmoituspalvelua.",
-          "notify_people": "Henkilökokonaisuudet, joita käytetään läsnäolon portittamiseen. Kun tämä on käytössä, ilmoitusten toimitus viivästyy, kunnes vähintään yksi valittu henkilö on kotona.",
-          "notify_only_when_home": "Jos tämä on käytössä, viivytä ilmoituksia, kunnes vähintään yksi valittu henkilö on kotona.",
-          "notify_fire_events": "Jos käytössä, käynnistä Home Assistant -tapahtumat syklin alkaessa ja lopussa (ha_washdata_cycle_started ja ha_washdata_cycle_ended) automaation ohjaamiseksi.",
-          "notify_start_services": "Yksi tai useampi palvelu ilmoittaa syklin alkamisesta. Jätä tyhjäksi ohittaaksesi aloitusilmoitukset.",
-          "notify_finish_services": "Yksi tai useampi ilmoittaa palveluille, kun sykli päättyy tai lähestyy loppuaan. Jätä tyhjäksi ohittaaksesi lopetusilmoitukset.",
-          "notify_live_services": "Vähintään yksi ilmoitus palveluista saa reaaliaikaisia ​​edistymispäivityksiä syklin aikana (vain mobiilisovellus). Jätä tyhjäksi ohittaaksesi live-päivitykset.",
-          "notify_before_end_minutes": "Minuuttia ennen jakson arvioitua loppua ilmoituksen käynnistämiseksi. Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 0.",
-          "notify_title": "Mukautettu otsikko ilmoituksille. Tukee paikkamerkkiä {device}.",
-          "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi lähettääksesi ilman kuvaketta.",
-          "notify_start_message": "Viesti lähetetään, kun sykli alkaa. Tukee paikkamerkkiä {device}.",
-          "notify_finish_message": "Viesti lähetetään, kun jakso on päättynyt. Tukee paikkamerkkejä {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Toistuvan live-edistyksen teksti päivittyy syklin aikana. Tukee paikkamerkkejä {device}, {minutes}, {program}."
-        }
-      },
-      "notifications": {
-        "title": "Ilmoitukset",
-        "description": "Määritä ilmoituskanavia, malleja ja valinnaisia ​​reaaliaikaisia ​​mobiili edistymispäivityksiä.",
-        "data": {
-          "notify_actions": "Ilmoitustoiminnot",
-          "notify_people": "Viivästyy toimitusta, kunnes nämä ihmiset ovat kotona",
-          "notify_only_when_home": "Viivästyttää ilmoituksia, kunnes valittu henkilö on kotona",
-          "notify_fire_events": "Automaatiotapahtumien käynnistäminen",
-          "notify_start_services": "Syklin aloitus - Ilmoituskohteet",
-          "notify_finish_services": "Syklin lopetus - Ilmoituskohteet",
-          "notify_live_services": "Reaaliaikainen edistyminen - Ilmoituskohteet",
-          "notify_before_end_minutes": "Ilmoitus ennen valmistumista (minuuttia ennen loppua)",
-          "notify_live_interval_seconds": "Live-päivitysväli (sekuntia)",
-          "notify_live_overrun_percent": "Live-päivityksen ylityskorvaus (%)",
-          "notify_live_chronometer": "Kronometrin ajastin",
-          "notify_title": "Ilmoituksen otsikko",
-          "notify_icon": "Ilmoituskuvake",
-          "notify_start_message": "Käynnistä Viestimuoto",
-          "notify_finish_message": "Viimeistele viestin muoto",
-          "notify_pre_complete_message": "Esitäytetty viestin muoto",
-          "energy_price_entity": "Energian hinta – kokonaisuus (valinnainen)",
-          "energy_price_static": "Energian hinta – staattinen arvo (valinnainen)",
-          "go_back": "Palaa takaisin tallentamatta",
-          "notify_reminder_message": "Muistutusviestin muoto",
-          "notify_timeout_seconds": "Automaattinen poisto jälkeen (sekuntia)",
-          "notify_channel": "Ilmoituskanava (status/live/reminder)",
-          "notify_finish_channel": "Päätetty ilmoituskanava"
-        },
-        "data_description": {
-          "go_back": "Valitse tämä ja napsauta Lähetä hylätäksesi yllä olevat muutokset ja palataksesi päävalikkoon.",
-          "notify_actions": "Valinnainen Home Assistant -toimintosarja, joka suoritetaan ilmoituksia varten (skriptit, ilmoitus, TTS jne.). Jos asetettu, toiminnot suoritetaan ennen varailmoituspalvelua.",
-          "notify_people": "Henkilökokonaisuudet, joita käytetään läsnäolon portittamiseen. Kun tämä on käytössä, ilmoitusten toimitus viivästyy, kunnes vähintään yksi valittu henkilö on kotona.",
-          "notify_only_when_home": "Jos tämä on käytössä, viivytä ilmoituksia, kunnes vähintään yksi valittu henkilö on kotona.",
-          "notify_fire_events": "Jos käytössä, käynnistä Home Assistant -tapahtumat syklin alkaessa ja lopussa (ha_washdata_cycle_started ja ha_washdata_cycle_ended) automaation ohjaamiseksi.",
-          "notify_start_services": "Yksi tai useampi ilmoituspalvelu ilmoittaa syklin alkamisesta (esim. notify.mobile_app_my_phone). Jätä tyhjäksi ohittaaksesi aloitusilmoitukset.",
-          "notify_finish_services": "Yksi tai useampi ilmoittaa palveluille, kun sykli päättyy tai lähestyy loppuaan. Jätä tyhjäksi ohittaaksesi lopetusilmoitukset.",
-          "notify_live_services": "Vähintään yksi ilmoitus palveluista saa reaaliaikaisia ​​edistymispäivityksiä syklin aikana (vain mobiilisovellus). Jätä tyhjäksi ohittaaksesi live-päivitykset.",
-          "notify_before_end_minutes": "Minuuttia ennen jakson arvioitua loppua ilmoituksen käynnistämiseksi. Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 0.",
-          "notify_live_interval_seconds": "Kuinka usein edistymispäivityksiä lähetetään suorituksen aikana. Pienemmät arvot reagoivat paremmin, mutta kuluttavat enemmän ilmoituksia. Vähintään 30 sekuntia pakotetaan – alle 30 sekuntia olevat arvot pyöristetään automaattisesti 30 sekuntiin.",
-          "notify_live_overrun_percent": "Turvamarginaali yli arvioidut päivitysmäärät pitkille/ylitysjaksoille (esimerkiksi 20 % sallii 1,2-kertaiset arvioidut päivitykset).",
-          "notify_live_chronometer": "Kun tämä on käytössä, jokainen live-päivitys sisältää kronometrin lähtölaskennan arvioituun päättymisaikaan. Ilmoitusajastin tikittää automaattisesti laitteeseen päivitysten välillä (vain Android-kumppanisovellus).",
-          "notify_title": "Mukautettu otsikko ilmoituksille. Tukee paikkamerkkiä {device}.",
-          "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi lähettääksesi ilman kuvaketta.",
-          "notify_start_message": "Viesti lähetetään, kun sykli alkaa. Tukee paikkamerkkiä {device}.",
-          "notify_finish_message": "Viesti lähetetään, kun jakso on päättynyt. Tukee paikkamerkkejä {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "energy_price_entity": "Valitse numeerinen kokonaisuus, jolla on nykyinen sähkön hinta (esim. sensor.electricity_price, input_number.energy_rate). Kun asetettu, ottaa käyttöön paikkamerkin {cost}. Se on staattisen arvon edelle, jos molemmat on määritetty.",
-          "energy_price_static": "Kiinteä sähkön hinta per kWh. Kun asetettu, ottaa paikkamerkin {cost} käyttöön. Ohitetaan, jos entiteetti on määritetty yllä. Lisää viestipohjaan valuuttasymboli, esim. {cost} €.",
-          "notify_reminder_message": "Kertamuistimuistutuksen teksti lähetti vahvistetun minuuttimäärän ennen arvioitua loppua. Erona yllä olevista toistuvista päivityksistä. Tukee {device}, {minutes}, {program} paikkaa.",
-          "notify_timeout_seconds": "Hylätkää ilmoitukset automaattisesti näin monen sekunnin jälkeen (lähetetty kumppanisovelluksena \"timeout\"). Nolla pitää heidät poissa. Oletus: 0.",
-          "notify_channel": "Android kumppanisovelluksen ilmoituskanava tila, live etenemistä, ja muistutus ilmoitukset. Kanavan ääni ja merkitys määritetään kumppanisovelluksessa, kun ensimmäistä kertaa käytetään kanavan nimeä - WashData asettaa vain kanavan nimen. Jätä tyhjäksi sovelluksen oletusarvoon.",
-          "notify_finish_channel": "Erillinen Android-kanava valmiille hälytykselle (käytetään myös muistutuksessa ja pyykkiä odottavassa nalkussa), jotta sillä voi olla oma ääni. Jätä tyhjäksi käyttääksesi kanavaa yllä.",
-          "notify_pre_complete_message": "Toistuvan live-edistyksen teksti päivittyy syklin aikana. Tukee paikkamerkkejä {device}, {minutes}, {program}."
-        }
-      },
-      "advanced_settings": {
-        "title": "Lisäasetukset",
-        "description": "Viritä tunnistuskynnykset, oppiminen ja edistynyt toiminta. Oletusasetukset toimivat hyvin useimmissa asetuksissa.",
-        "sections": {
-          "suggestions_section": {
-            "name": "Suositellut asetukset",
-            "description": "{suggestions_count} opittua ehdotusta saatavilla. Valitse Käytä suositeltuja arvoja tarkistaaksesi ehdotetut muutokset ennen tallennusta.",
-            "data": {
-              "apply_suggestions": "Käytä ehdotettuja arvoja"
-            },
-            "data_description": {
-              "apply_suggestions": "Valitse tämä valintaruutu avataksesi tarkistusvaiheen oppimisalgoritmin ehdotettujen arvojen tarkastelulle. Mitään ei tallenneta automaattisesti.\n\nSuositeltu (oppimisesta):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
-            }
-          },
-          "detection_section": {
-            "name": "Tunnistus ja tehorajat",
-            "description": "Milloin laite katsotaan päällä- tai pois päältä -tilaan, energiarajat ja tilasiirtymien ajoitus.",
-            "data": {
-              "start_duration_threshold": "Aloita palautuksen kesto (s)",
-              "start_energy_threshold": "Start Energy Gate (Wh)",
-              "completion_min_seconds": "Valmistumisen vähimmäiskesto (sekuntia)",
-              "start_threshold_w": "Aloituskynnys (W)",
-              "stop_threshold_w": "Pysähdyskynnys (W)",
-              "end_energy_threshold": "End Energy Gate (Wh)",
-              "running_dead_zone": "Running Dead Zone (sekuntia)",
-              "end_repeat_count": "Lopeta toistojen laskenta",
-              "min_off_gap": "Minimiväli syklien välillä (s)",
-              "sampling_interval": "Näytteenottoväli (s)"
-            },
-            "data_description": {
-              "start_duration_threshold": "Ohita lyhyet tehopiikit, jotka ovat lyhyempiä tätä kestoa (sekunteina). Suodattaa pois käynnistyspiikit (esim. 60 W 2 sekuntia) ennen todellisen jakson alkamista. Oletus: 5s.",
-              "start_energy_threshold": "Jakson on kerättävä vähintään näin paljon energiaa (Wh) START-vaiheen aikana, jotta se vahvistetaan. Oletus: 0,005 Wh.",
-              "completion_min_seconds": "Tätä lyhyemmät syklit merkitään \"keskeytetyiksi\", vaikka ne päättyisivät luonnollisesti. Oletus: 600s.",
-              "start_threshold_w": "Tehon on noustava YLI tämän kynnyksen syklin ALOITTAMISEKSI. Aseta korkeampi kuin valmiustilan teho. Oletus: min_teho + 1 W.",
-              "stop_threshold_w": "Tehon on laskettava ALLE tämän kynnyksen, jotta jakso LOPETA. Aseta hieman nollan yläpuolelle, jotta kohina ei aiheuta vääriä loppuja. Oletus: 0,6 * min_teho.",
-              "end_energy_threshold": "Jakso päättyy vain, jos energia viimeisessä Off-Delay-ikkunassa on tämän arvon (Wh) alapuolella. Estää vääriä loppuja, jos teho vaihtelee lähellä nollaa. Oletus: 0,05 Wh.",
-              "running_dead_zone": "Kun sykli on alkanut, jätä tehohäviöt huomioimatta näin monen sekunnin ajan estääksesi väärän lopputunnistuksen alkupyöritysvaiheen aikana. Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 0s.",
-              "end_repeat_count": "Kuinka monta kertaa lopetusehto (teho alle off_delay-kynnyksen) on täytyttävä peräkkäin ennen jakson lopettamista. Suuremmat arvot estävät vääriä loppuja taukojen aikana. Oletus: 1.",
-              "min_off_gap": "Jos sykli alkaa näin monen sekunnin sisällä edellisen päättymisestä, ne YHDISTÄÄN yhdeksi sykliksi.",
-              "sampling_interval": "Vähimmäisnäytteenottoväli sekunneissa. Tätä nopeammat päivitykset ohitetaan. Oletus: 30 s (2 s pesukoneille, pesukone-kuivauskoneille ja astianpesukoneille)."
-            }
-          },
-          "matching_section": {
-            "name": "Profiilien täsmäytys ja oppiminen",
-            "description": "Kuinka aggressiivisesti WashData täsmäyttää käynnissä olevia syklejä opittuihin profiileihin ja milloin pyytää palautetta.",
-            "data": {
-              "profile_match_min_duration_ratio": "Profiilin osuman vähimmäiskeston suhde (0,1–1,0)",
-              "profile_match_interval": "Profiilin otteluväli (sekuntia)",
-              "profile_match_threshold": "Profiilin vastaavuuskynnys",
-              "profile_unmatch_threshold": "Profile Unmatch Threshold",
-              "auto_label_confidence": "Automaattisen etiketin luottamus (0-1)",
-              "learning_confidence": "Palautepyynnön luottamus (0-1)",
-              "suppress_feedback_notifications": "Estä palauteilmoitukset",
-              "duration_tolerance": "Keston toleranssi (0-0,5)",
-              "smoothing_window": "Tasoitusikkuna (esimerkkejä)",
-              "profile_duration_tolerance": "Profiiliottelun keston toleranssi (0-0,5)"
-            },
-            "data_description": {
-              "profile_match_min_duration_ratio": "Profiilin sovituksen vähimmäiskestosuhde. Ajojakson on oltava vähintään tämä osa profiilin kestosta, jotta se täsmää. Alempi = aikaisempi haku. Oletus: 0,50 (50 %).",
-              "profile_match_interval": "Kuinka usein (sekunneissa) profiilin täsmäämistä yritetään syklin aikana. Pienemmät arvot mahdollistavat nopeamman havaitsemisen, mutta käyttävät enemmän prosessoria. Oletus: 300 s (5 minuuttia).",
-              "profile_match_threshold": "Minimi DTW-samankaltaisuuspisteet (0,0–1,0), jotka vaaditaan profiilin katsomiseksi osumana. Korkeampi = tiukempi vastaavuus, vähemmän vääriä positiivisia. Oletus: 0.4.",
-              "profile_unmatch_threshold": "DTW-samankaltaisuuspisteet (0,0–1,0), jonka alapuolella aiemmin sovittu profiili hylätään. Pitäisi olla alle vastaavuuskynnyksen välkkymisen estämiseksi. Oletusarvo: 0,35.",
-              "auto_label_confidence": "Merkitse jaksot automaattisesti tällä luotettavuudella tai sen yläpuolella, kun se on valmis (0,0–1,0).",
-              "learning_confidence": "Vähimmäisluottamus pyytää käyttäjän vahvistusta tapahtuman kautta (0,0–1,0).",
-              "suppress_feedback_notifications": "Kun WashData on käytössä, se seuraa edelleen ja pyytää palautetta sisäisesti, mutta ei näytä jatkuvia ilmoituksia, joissa pyydetään vahvistamaan jaksot. Hyödyllinen, kun syklit tunnistetaan aina oikein ja kehotteet häiritsevät.",
-              "duration_tolerance": "Toleranssi ajon aikana jäljellä oleville arvioille (0,0–0,5 vastaa 0–50 %).",
-              "smoothing_window": "Liikkuvan keskiarvon tasoittamiseen käytettyjen viimeaikaisten teholukemien määrä.",
-              "profile_duration_tolerance": "Toleranssia käytetään profiilin sovituksessa kokonaiskestovarianssiin (0,0–0,5). Oletuskäyttäytyminen: ±25 %."
-            }
-          },
-          "timing_section": {
-            "name": "Ajoitus, ylläpito ja vianmääritys",
-            "description": "Watchdog, edistymisen nollaus, automaattinen ylläpito ja vianmääritysentiteettien näyttäminen.",
-            "data": {
-              "watchdog_interval": "Watchdog Interval (sekuntia)",
-              "no_update_active_timeout": "Ei päivityksen aikakatkaisu(t)",
-              "progress_reset_delay": "Edistymisen nollausviive (sekuntia)",
-              "auto_maintenance": "Ota automaattinen huolto käyttöön",
-              "expose_debug_entities": "Paljasta Debug Entities",
-              "save_debug_traces": "Tallenna virheenkorjausjäljet"
-            },
-            "data_description": {
-              "watchdog_interval": "Sekuntia vahtikoiran tarkastusten välillä juoksun aikana. Oletus: 5s. VAROITUS: Varmista, että tämä on KORKEAMPI kuin anturin päivitysväli, jotta vältytään vääriltä pysähdyksiltä (esim. jos anturi päivittyy 60 sekunnin välein, käytä yli 65 sekuntia).",
-              "no_update_active_timeout": "Julkaise muutoksen yhteydessä -anturit: pakota lopettamaan ACTIVE-jakso vain, jos päivityksiä ei tule näin moneen sekuntiin. Pienitehoinen viimeistely käyttää edelleen virrankatkaisuviivettä.",
-              "progress_reset_delay": "Kun sykli on päättynyt (100 %), odota näin monta sekuntia tyhjäkäyntiä ennen kuin nollaat edistymisen 0 prosenttiin. Oletus: 300 s.",
-              "auto_maintenance": "Ota automaattinen huolto käyttöön (korjaa näytteitä, yhdistä fragmentteja).",
-              "expose_debug_entities": "Näytä edistyneet anturit (luottamus, vaihe, epäselvyys) virheenkorjausta varten.",
-              "save_debug_traces": "Tallenna yksityiskohtaiset sijoitukset ja tehon seurantatiedot historiaan (lisää tallennustilan käyttöä)."
-            }
-          },
-          "anti_wrinkle_section": {
-            "name": "Rypynestosuoja (kuivausrummut)",
-            "description": "Ohita rummun pyörähdykset syklin jälkeen, jotta haamusyklit vältetään. Vain kuivausrummulle / pesukuivaajalle.",
-            "data": {
-              "anti_wrinkle_enabled": "Ryppyjä ehkäisevä suoja (vain kuivausrumpu)",
-              "anti_wrinkle_max_power": "Anti-Wrinkle Max Power (W)",
-              "anti_wrinkle_max_duration": "Anti-ryppyjen enimmäiskesto (s)",
-              "anti_wrinkle_exit_power": "Ryppyjä estävä poistumisteho (W)"
-            },
-            "data_description": {
-              "anti_wrinkle_enabled": "Jätä huomioimatta lyhyet pienitehoiset rummun kierrokset jakson päätyttyä estääksesi haamujaksot (vain kuivausrumpu/pesukone-kuivausrumpu).",
-              "anti_wrinkle_max_power": "Tällä teholla tai sen alapuolella olevia purskeita käsitellään ryppyjä ehkäisevinä kierroksina uusien jaksojen sijaan. Koskee vain, kun Anti-Wrinkle Shield on käytössä.",
-              "anti_wrinkle_max_duration": "Suurin purskeen pituus, jota voidaan pitää ryppyjä estävänä kiertona. Koskee vain, kun Anti-Wrinkle Shield on käytössä.",
-              "anti_wrinkle_exit_power": "Jos teho putoaa tämän tason alapuolelle, poistu välittömästi ryppyjä vastaan ​​(true off). Koskee vain, kun Anti-Wrinkle Shield on käytössä."
-            }
-          },
-          "delay_start_section": {
-            "name": "Viivästetyn käynnistyksen tunnistus",
-            "description": "Käsittele jatkuvaa matalatehoista valmiustilaa tilana 'Odottaa käynnistystä', kunnes sykli todella alkaa.",
-            "data": {
-              "delay_start_detect_enabled": "Ota viivästetun käynnistyksen tunnistus käyttöön",
-              "delay_confirm_seconds": "Viivästetty käynnistys: valmiustilan vahvistusaika (s)",
-              "delay_timeout_hours": "Viivästetty aloitus: maksimi odotusaika (h)"
-            },
-            "data_description": {
-              "delay_start_detect_enabled": "Kun tämä on käytössä, lyhyt virrankulutuspiikki, jota seuraa jatkuva valmiustila, havaitaan viivästettynä käynnistyksenä. Tila-anturi näyttää 'Odottaa käynnistystä' viiveen aikana. Ohjelman aikaa tai edistymistä ei seurata ennen kuin sykli todella alkaa. Edellyttää start_threshold_w-arvon asettamisen tyhjennyspiikin tehon yläpuolelle.",
-              "delay_confirm_seconds": "Tehon on pysyttävä Pysäytysrajan (W) ja Käynnistysrajan (W) välissä näin monta sekuntia ennen kuin WashData siirtyy tilaan 'Odottaa käynnistystä'. Suodattaa lyhyet valikkonavigoinnin piikit. Oletus: 60 s.",
-              "delay_timeout_hours": "Turvaaikakatkaisu: jos kone on edelleen \"Odottaa käynnistystä\" -tilassa tämän monen tunnin jälkeen, WashData palautuu pois päältä. Oletus: 8 h."
-            }
-          },
-          "external_triggers_section": {
-            "name": "Ulkoiset liipaisimet, ovi ja tauko",
-            "description": "Valinnainen ulkoinen syklin päättymisanturi, ovianturi tauko-/puhdas-tunnistukseen ja kytkin virran katkaisuun tauon ajaksi.",
-            "data": {
-              "external_end_trigger_enabled": "Ota käyttöön ulkoinen syklin lopetustriggeri",
-              "external_end_trigger": "Ulkoinen jakson päättymisanturi",
-              "external_end_trigger_inverted": "Käänteinen laukaisulogiikka (liipaisu päällä OFF)",
-              "door_sensor_entity": "Oven anturi",
-              "pause_cuts_power": "Katkaise virta tauon aikana",
-              "switch_entity": "Kytkinentiteetti (keskeytä virtakatkos)",
-              "notify_unload_delay_minutes": "Pyykin odotusilmoituksen viive (min)"
-            },
-            "data_description": {
-              "external_end_trigger_enabled": "Ota käyttöön ulkoisen binaarisensorin valvonta käynnistääksesi syklin valmistumisen.",
-              "external_end_trigger": "Valitse binäärinen anturikokonaisuus. Kun tämä anturi laukeaa, nykyinen jakso päättyy tilaan \"valmis\".",
-              "external_end_trigger_inverted": "Oletuksena laukaisu laukeaa, kun anturi kytkeytyy PÄÄLLE. Valitse tämä ruutu, jos haluat sen sijaan laukeaa, kun anturi sammuu.",
-              "door_sensor_entity": "Valinnainen binäärianturi koneen ovelle (päällä = auki, pois = kiinni). Kun luukku avautuu aktiivisen jakson aikana, WashData vahvistaa ohjelman tahallisesti keskeytetyksi. Jakson päätyttyä, jos ovi on edelleen kiinni, tila muuttuu 'Clean'-tilaan, kunnes ovi avataan. Huomautus: luukun sulkeminen EI jatka automaattisesti keskeytettyä jaksoa – jatkaminen on käynnistettävä manuaalisesti Resume Cycle -painikkeen tai palvelun kautta.",
-              "pause_cuts_power": "Kun keskeytät Pause Cycle -painikkeen tai palvelun kautta, sammuta myös määritetty kytkinkokonaisuus. Tulee voimaan vain, jos tälle laitteelle on määritetty kytkinyksikkö.",
-              "switch_entity": "Vaihtoyksikkö, joka vaihtaa, kun keskeytetään tai jatketaan. Vaaditaan, kun \"Katkaise virta tauon aikana\" on käytössä.",
-              "notify_unload_delay_minutes": "Lähetä ilmoitus lopetusilmoituskanavan kautta, kun jakso on päättynyt ja ovea ei ole avattu näin moneen minuuttiin (vaatii ovitunnistimen). Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 60 min."
-            }
-          },
-          "pump_section": {
-            "name": "Pumpun valvonta",
-            "description": "Vain pumpun laitetyypille. Laukaisee tapahtuman, jos pumpun sykli kestää tätä pidempään.",
-            "data": {
-              "pump_stuck_duration": "Pumpun jumiutuneen hälytyskynnys (vain pumppu)"
-            },
-            "data_description": {
-              "pump_stuck_duration": "Jos pumppujakso on edelleen käynnissä tämän monen sekunnin jälkeen, ha_washdata_pump_stuck -tapahtuma käynnistyy kerran. Käytä tätä havaitaksesi juuttunut moottori (tyypillinen öljypohjapumpun käynti on alle 60 s). Oletus: 1800 s (30 min). Vain pumppulaitetyyppi."
-            }
-          },
-          "device_link_section": {
-            "name": "Laitelinkki",
-            "description": "Valinnaisesti liitä tämä WashData-laite olemassa olevaan Home Assistant laitteeseen (esimerkiksi älytulppaan tai itse laitteeseen). Tämän jälkeen WashData-laite näytetään \"Connected via\" -laitteena. Jätä tyhjäksi, jotta WashData pysyy erillisenä laitteena.",
-            "data": {
-              "linked_device": "Yhdistetty laite"
-            },
-            "data_description": {
-              "linked_device": "Valitse laite, johon WashData liitetään. Tämä lisää \"Connected via\" -viittauksen laiterekisteriin; WashData säilyttää oman laitekorttinsa ja yksikkönsä. Tyhjennä valinta linkin poistamiseksi."
-            }
-          }
-        }
-      },
-      "diagnostics": {
-        "title": "Diagnostiikka ja huolto",
-        "description": "Suorita ylläpitotoimia, kuten pirstoutuneiden syklien yhdistäminen tai tallennettujen tietojen siirto.\n\n**Tallennustilan käyttö**\n\n- Tiedoston koko: {file_size_kb} kt\n- Pyörät: {cycle_count}\n- Profiilit: {profile_count}\n- Virheenkorjausjäljet: {debug_count}",
-        "menu_options": {
-          "reprocess_history": "Ylläpito: Käsittele ja optimoi tiedot uudelleen",
-          "clear_debug_data": "Tyhjennä virheenkorjaustiedot (vapauta tilaa)",
-          "wipe_history": "Tyhjennä KAIKKI tämän laitteen tiedot (peruuttamaton)",
-          "export_import": "Vie/tuo JSON asetuksilla (kopioi/liitä)",
-          "menu_back": "← Takaisin"
-        }
-      },
-      "clear_debug_data": {
-        "title": "Tyhjennä virheenkorjaustiedot",
-        "description": "Haluatko varmasti poistaa kaikki tallennetut virheenkorjausjäljet? Tämä vapauttaa tilaa, mutta poistaa yksityiskohtaiset sijoitustiedot aiemmista jaksoista."
-      },
-      "manage_cycles": {
-        "title": "Hallitse syklejä",
-        "description": "Viimeaikaiset syklit:\n{recent_cycles}",
-        "menu_options": {
-          "auto_label_cycles": "Merkitse vanhat syklit automaattisesti",
-          "select_cycle_to_label": "Merkitse tietty sykli",
-          "select_cycle_to_delete": "Poista sykli",
-          "interactive_editor": "Yhdistä/jakaa interaktiivinen editori",
-          "trim_cycle_select": "Trimmausjakson tiedot",
-          "menu_back": "← Takaisin"
-        }
-      },
-      "manage_cycles_empty": {
-        "title": "Hallitse syklejä",
-        "description": "Syklejä ei ole vielä tallennettu.",
-        "menu_options": {
-          "auto_label_cycles": "Merkitse vanhat syklit automaattisesti",
-          "menu_back": "← Takaisin"
-        }
-      },
-      "manage_profiles": {
-        "title": "Hallitse profiileja",
-        "description": "Profiilin yhteenveto:\n{profile_summary}",
-        "menu_options": {
-          "create_profile": "Luo uusi profiili",
-          "edit_profile": "Muokkaa/nimeä profiilia uudelleen",
-          "delete_profile_select": "Poista profiili",
-          "profile_stats": "Profiilitilastot",
-          "cleanup_profile": "Puhdista historia - piirrä ja poista",
-          "assign_profile_phases_select": "Määritä vaihealueet",
-          "menu_back": "← Takaisin"
-        }
-      },
-      "manage_profiles_empty": {
-        "title": "Hallitse profiileja",
-        "description": "Profiilia ei ole vielä luotu.",
-        "menu_options": {
-          "create_profile": "Luo uusi profiili",
-          "menu_back": "← Takaisin"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Hallitse vaiheluetteloa",
-        "description": "Vaiheluettelo (oletusasetukset tälle laitteelle + mukautetut vaiheet):\n{phase_summary}",
-        "menu_options": {
-          "phase_catalog_create": "Luo uusi vaihe",
-          "phase_catalog_edit_select": "Muokkaa vaihetta",
-          "phase_catalog_delete": "Poista vaihe",
-          "menu_back": "← Takaisin"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Luo mukautettu vaihe",
-        "description": "Luo mukautettu vaiheen nimi ja kuvaus ja valitse, mitä laitetyyppiä se koskee.",
-        "data": {
-          "target_device_type": "Kohdelaitetyyppi",
-          "phase_name": "Vaiheen nimi",
-          "phase_description": "Vaiheen kuvaus"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Muokkaa mukautettua vaihetta",
-        "description": "Valitse muokattava vaihe.",
-        "data": {
-          "phase_name": "Mukautettu vaihe"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Muokkaa mukautettua vaihetta",
-        "description": "Muokkausvaihe: {phase_name}",
-        "data": {
-          "phase_name": "Vaiheen nimi",
-          "phase_description": "Vaiheen kuvaus"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Poista mukautettu vaihe",
-        "description": "Valitse poistettava mukautettu vaihe. Kaikki tätä vaihetta käyttävät määritetyt alueet poistetaan.",
-        "data": {
-          "phase_name": "Mukautettu vaihe"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Määritä vaihealueet",
-        "description": "Profiilin vaiheen esikatselu: **{profile_name}**\n\n{timeline_svg}\n\n**Nykyiset vaihteluvälit:**\n{current_ranges}\n\nKäytä alla olevia toimintoja alueiden lisäämiseen, muokkaamiseen, poistamiseen tai tallentamiseen.",
-        "menu_options": {
-          "assign_profile_phases_add": "Lisää vaihealue",
-          "assign_profile_phases_edit_select": "Muokkaa vaihealuetta",
-          "assign_profile_phases_delete": "Poista vaihealue",
-          "phase_ranges_clear": "Tyhjennä kaikki alueet",
-          "assign_profile_phases_auto_detect": "Tunnista vaiheet automaattisesti",
-          "phase_ranges_save": "Tallenna ja palauta",
-          "menu_back": "← Takaisin"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Lisää vaihealue",
-        "description": "Lisää yksi vaihealue nykyiseen luonnokseen.",
-        "data": {
-          "phase_name": "Vaihe",
-          "start_min": "Aloitus minuutti",
-          "end_min": "Loppuminuutti"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Muokkaa vaihealuetta",
-        "description": "Valitse muokattava alue.",
-        "data": {
-          "range_index": "Vaihealue"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Muokkaa vaihealuetta",
-        "description": "Päivitä valittu vaihealue.",
-        "data": {
-          "phase_name": "Vaihe",
-          "start_min": "Aloitus minuutti",
-          "end_min": "Loppuminuutti"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Poista vaihealue",
-        "description": "Valitse luonnoksesta poistettava alue.",
-        "data": {
-          "range_index": "Vaihealue"
-        }
-      },
-      "assign_profile_phases_auto_detect": {
-        "title": "Automaattisesti tunnistetut vaiheet",
-        "description": "Profiili: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} vaihetta tunnistettu automaattisesti.** Valitse toiminto alta.",
-        "data": {
-          "action": "Toiminta"
-        }
-      },
-      "assign_profile_phases_auto_detect_name": {
-        "title": "Nimeä havaitut vaiheet",
-        "description": "Profiili: **{profile_name}**\n\n**{detected_count} vaihetta havaittu:**\n{ranges_summary}\n\nAnna jokaiselle vaiheelle nimi."
-      },
-      "assign_profile_phases_select": {
-        "title": "Määritä vaihealueet",
-        "description": "Valitse profiili määrittääksesi vaihealueet.",
-        "data": {
-          "profile": "Profiili"
-        }
-      },
-      "profile_stats": {
-        "title": "Profiilitilastot",
-        "description": "{stats_table}"
-      },
-      "create_profile": {
-        "title": "Luo uusi profiili",
-        "description": "Luo uusi profiili manuaalisesti tai aiemmasta jaksosta.\n\nEsimerkkejä profiilin nimistä: \"Delicates\", \"Heavy Duty\", \"Quick Wash\"",
-        "data": {
-          "profile_name": "Profiilin nimi",
-          "reference_cycle": "Viitesykli (valinnainen)",
-          "manual_duration": "Manuaalinen kesto (minuutteja)"
-        }
-      },
-      "edit_profile": {
-        "title": "Muokkaa profiilia",
-        "description": "Valitse uudelleennimettävä profiili",
-        "data": {
-          "profile": "Profiili"
-        }
-      },
-      "rename_profile": {
-        "title": "Muokkaa profiilin tietoja",
-        "description": "Nykyinen profiili: {current_name}",
-        "data": {
-          "new_name": "Profiilin nimi",
-          "manual_duration": "Manuaalinen kesto (minuutteja)"
-        }
-      },
-      "delete_profile_select": {
-        "title": "Poista profiili",
-        "description": "Valitse poistettava profiili",
-        "data": {
-          "profile": "Profiili"
-        }
-      },
-      "delete_profile_confirm": {
-        "title": "Vahvista profiilin poistaminen",
-        "description": "⚠️ Tämä poistaa pysyvästi profiilin: {profile_name}",
-        "data": {
-          "unlabel_cycles": "Poista etiketti syklistä käyttämällä tätä profiilia"
-        }
-      },
-      "auto_label_cycles": {
-        "title": "Merkitse vanhat syklit automaattisesti",
-        "description": "Löytyi yhteensä {total_count} sykliä. Profiilit: {profiles}",
-        "data": {
-          "confidence_threshold": "Vähimmäisluottamus (0,50-0,95)"
-        }
-      },
-      "select_cycle_to_label": {
-        "title": "Valitse Cycle to Label",
-        "description": "✓ = valmis, ⚠ = jatkunut, ✗ = keskeytetty",
-        "data": {
-          "cycle_id": "Kierrä"
-        }
-      },
-      "select_cycle_to_delete": {
-        "title": "Poista sykli",
-        "description": "⚠️ Tämä poistaa valitun syklin pysyvästi",
-        "data": {
-          "cycle_id": "Valitse Poista"
-        }
-      },
-      "label_cycle": {
-        "title": "Label Cycle",
-        "description": "{cycle_info}",
-        "data": {
-          "profile_name": "Profiili",
-          "new_profile_name": "Uusi profiilin nimi (jos luodaan)"
-        }
-      },
-      "post_process": {
-        "title": "Prosessihistoria (yhdistä/jakaa)",
-        "description": "Puhdista syklihistoria yhdistämällä hajanaiset ajot ja jakamalla väärin yhdistetyt jaksot aikaikkunassa. Anna, kuinka monta tuntia haluat katsoa taaksepäin (käytä 999999 kaikille).",
-        "data": {
-          "time_range": "Katsausikkuna (tuntia)",
-          "gap_seconds": "Yhdistä/jakaa väli (sekuntia)"
-        },
-        "data_description": {
-          "time_range": "Tuntimäärä, jonka aikana hajautettujen syklien etsiminen yhdistetään. Käytä numeroa 999999 kaikkien historiallisten tietojen käsittelemiseen.",
-          "gap_seconds": "Kynnys päättää jakamisesta vs yhdistämisestä. Tätä LYHEMMÄT aukot yhdistetään. Tätä PIDEMMÄT aukot jaetaan. Laske tätä pakottaaksesi jakamaan syklin, joka on yhdistetty väärin."
-        }
-      },
-      "cleanup_profile": {
-        "title": "Puhdista historia - Valitse profiili",
-        "description": "Valitse visualisoitava profiili. Tämä luo kaavion, joka näyttää kaikki tämän profiilin menneet jaksot, mikä auttaa tunnistamaan poikkeamat.",
-        "data": {
-          "profile": "Profiili"
-        }
-      },
-      "cleanup_select": {
-        "title": "Puhdista historia - piirrä ja poista",
-        "description": "![Kaavio]({graph_url})\n\n**Visualisointi {profile_name}**\n\nKaavio näyttää yksittäiset jaksot värillisinä viivoina. Tunnista poikkeamat (viivat kaukana ryhmästä) ja vastaa niiden väriä alla olevasta luettelosta poistaaksesi ne.\n\n**Valitse jaksot, jotka haluat poistaa PYSYVÄSTI:**",
-        "data": {
-          "cycles_to_delete": "Jaksoi poistaa (tarkista vastaavat värit)"
-        }
-      },
-      "interactive_editor": {
-        "title": "Yhdistä/jakaa interaktiivinen editori",
-        "description": "Valitse manuaalinen toimenpide, joka suoritetaan syklihistoriallesi.",
-        "menu_options": {
-          "editor_split": "Jaa sykli (etsi aukkoja)",
-          "editor_merge": "Yhdistä syklit (liitä fragmentit)",
-          "editor_delete": "Poista sykli(t)",
-          "menu_back": "← Takaisin"
-        }
-      },
-      "editor_select": {
-        "title": "Valitse Cycles",
-        "description": "Valitse käsiteltävä(t) sykli(t).\n\n{info_text}",
-        "data": {
-          "selected_cycles": "Pyörät"
-        }
-      },
-      "editor_configure": {
-        "title": "Määritä ja käytä",
-        "description": "{preview_md}",
-        "data": {
-          "confirm_action": "Toiminta",
-          "merged_profile": "Tuloksena oleva profiili",
-          "new_profile_name": "Uusi profiilinimi",
-          "confirm_commit": "Kyllä, vahvistan tämän toimenpiteen",
-          "segment_0_profile": "Segmentin 1 profiili",
-          "segment_1_profile": "Segmentin 2 profiili",
-          "segment_2_profile": "Segmentin 3 profiili",
-          "segment_3_profile": "Segmentin 4 profiili",
-          "segment_4_profile": "Segmentin 5 profiili",
-          "segment_5_profile": "Segmentin 6 profiili",
-          "segment_6_profile": "Segmentin 7 profiili",
-          "segment_7_profile": "Segmentin 8 profiili",
-          "segment_8_profile": "Segmentin 9 profiili",
-          "segment_9_profile": "Segmentin 10 profiili"
-        }
-      },
-      "editor_split_params": {
-        "title": "Jaettu kokoonpano",
-        "description": "Säädä tämän jakson herkkyys. Mikä tahansa tätä pidempi tyhjäkäyntiväli aiheuttaa halkeaman.",
-        "data": {
-          "split_mode": "Jakomenetelmä"
-        }
-      },
-      "editor_split_auto_params": {
-        "title": "Automaattisen jaon määritys",
-        "description": "Säädä tämän syklin jakamisen herkkyyttä. Tätä pidempi toimettomuusväli aiheuttaa jaon.",
-        "data": {
-          "min_gap_seconds": "Jaon välikynnys (sekuntia)"
-        }
-      },
-      "editor_split_manual_params": {
-        "title": "Manuaaliset jakamisen aikaleimat",
-        "description": "{preview_md}Syklin ikkuna: **{cycle_start_wallclock} → {cycle_end_wallclock}** päivänä {cycle_date}.\n\nAnna yksi tai useampi jakamisen aikaleima (`HH:MM` tai `HH:MM:SS`), yksi per rivi. Sykli katkaistaan jokaisen aikaleiman kohdalta — N aikaleimaa tuottaa N+1 segmenttiä.",
-        "data": {
-          "split_timestamps": "Jakoaikaleimat"
-        }
-      },
-      "reprocess_history": {
-        "title": "Ylläpito: Käsittele ja optimoi tiedot uudelleen",
-        "description": "Suorittaa historiallisten tietojen syväpuhdistuksen:\n1. Leikkaa nollateholukemat (hiljaisuus).\n2. Korjaa syklin ajoituksen/keston.\n3. Laskee uudelleen kaikki tilastolliset mallit (kirjekuoret).\n\n**Korjaa tietoongelmia tai käytä uusia algoritmeja suorittamalla tämä.**"
-      },
-      "wipe_history": {
-        "title": "Pyyhi historia (vain testaus)",
-        "description": "⚠️ Tämä poistaa pysyvästi KAIKKI tämän laitteen tallennetut jaksot ja profiilit. Tätä ei voi kumota!"
-      },
-      "export_import": {
-        "title": "Vie/tuo JSON",
-        "description": "Kopioi/liitä tämän laitteen jaksot, profiilit ja asetukset. Vie alla tai liitä JSON tuontia varten.",
-        "data": {
-          "mode": "Toiminta",
-          "json_payload": "Täydellinen määritys JSON"
-        },
-        "data_description": {
-          "mode": "Valitse Vie, jos haluat kopioida nykyiset tiedot ja asetukset, tai Tuo, jos haluat liittää viedyt tiedot toisesta WashData-laitteesta.",
-          "json_payload": "Vientiä varten: kopioi tämä JSON (sisältää syklit, profiilit ja kaikki hienosäädetyt asetukset). Tuontia varten: liitä WashDatasta viety JSON."
-        }
-      },
-      "record_cycle": {
-        "title": "Record Cycle",
-        "description": "Tallenna jakso manuaalisesti puhtaan profiilin luomiseksi ilman häiriöitä.\n\nTila: **{status}**\nKesto: {duration} s\nNäytteet: {samples}",
-        "menu_options": {
-          "record_refresh": "Päivitä tila",
-          "record_stop": "Lopeta tallennus (tallenna ja käsittele)",
-          "record_start": "Aloita uusi tallennus",
-          "record_process": "Käsittele viimeinen tallennus (leikkaa ja tallenna)",
-          "record_discard": "Hylkää viimeinen tallennus",
-          "menu_back": "← Takaisin"
-        }
-      },
-      "record_process": {
-        "title": "Prosessin tallennus",
-        "description": "![Kaavio]({graph_url})\n\n**Kaavio näyttää raakatallennuksen.** Sininen = Säilytä, Punainen = Ehdotettu leikkaus.\n*Kaavio on staattinen eikä päivity lomakemuutoksilla.*\n\nTallennus lopetettiin. Trimmit kohdistetaan havaittuun näytteenottotaajuuteen (~{sampling_rate} s).\n\nRaaka-aika: {duration} s\nNäytteet: {samples}",
-        "data": {
-          "head_trim": "Trimmauksen aloitus (sekuntia)",
-          "tail_trim": "Trimmaus loppu (sekuntia)",
-          "save_mode": "Tallenna kohde",
-          "profile_name": "Profiilin nimi"
-        }
-      },
-      "learning_feedbacks": {
-        "title": "Palautteiden oppiminen",
-        "description": "Odottava palaute: {count}\n\n{pending_table}\n\nValitse käsiteltävä syklin tarkistuspyyntö.",
-        "menu_options": {
-          "learning_feedbacks_pick": "Tarkista odottava palaute",
-          "learning_feedbacks_dismiss_all": "Hylkää kaikki odottavat palautteet",
-          "menu_back": "← Takaisin"
-        }
-      },
-      "learning_feedbacks_pick": {
-        "title": "Valitse tarkistettava palaute",
-        "description": "Valitse avattava syklin tarkistuspyyntö.",
-        "data": {
-          "selected_feedback": "Valitse tarkistettava sykli"
-        }
-      },
-      "learning_feedbacks_empty": {
-        "title": "Palautteiden oppiminen",
-        "description": "Odottavia palautepyyntöjä ei löytynyt.",
-        "menu_options": {
-          "menu_back": "← Takaisin"
-        }
-      },
-      "learning_feedbacks_dismiss_all": {
-        "title": "Hylkää kaikki odottavat palautteet",
-        "description": "Olet hylkäämässä **{count}** odottavaa palautepyyntöä. Hylätyt syklit jäävät historiaasi, mutta ne eivät tuota uutta oppimissignaalia. Tätä ei voi kumota.\n\n✅ Valitse alla oleva ruutu ja napsauta **Lähetä** hylätäksesi kaikki.\n❌ Jätä se valitsematta ja napsauta **Lähetä** peruuttaaksesi ja palataksesi takaisin.",
-        "data": {
-          "confirm_dismiss_all": "Vahvista: hylkää kaikki odottavat palautepyynnöt"
-        }
-      },
-      "resolve_feedback": {
-        "title": "Ratkaise palaute",
-        "description": "{comparison_img}{candidates_table}\n**Havaittu profiili**: {detected_profile} ({confidence_pct} %)\n**Arvioitu kesto**: {est_duration_min} min\n**Todellinen kesto**: {act_duration_min} min\n\n__Valitse toiminto alta:__",
-        "data": {
-          "action": "Mitä haluaisit tehdä?",
-          "corrected_profile": "Oikea ohjelma (jos korjataan)",
-          "corrected_duration": "Oikea kesto sekunteina (jos korjataan)"
-        }
-      },
-      "trim_cycle_select": {
-        "title": "Trimmausjakso - Valitse sykli",
-        "description": "Valitse trimmattava sykli. ✓ = valmis, ⚠ = jatkunut, ✗ = keskeytetty",
-        "data": {
-          "cycle_id": "Syklin tunnus"
-        }
-      },
-      "trim_cycle": {
-        "title": "Trimmaussykli",
-        "description": "Nykyinen ikkuna: {trim_summary}\n\n{trim_svg}",
-        "data": {
-          "action": "Toimenpide"
-        }
-      },
-      "trim_cycle_start": {
-        "title": "Aseta trimmauksen aloitus",
-        "description": "Kierrä ikkuna: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNykyinen aloitus: **{current_wallclock}** (+{current_offset_min} min syklin alusta)\n\nValitse uusi aloitusaika alla olevasta kellonvalitsimesta.",
-        "data": {
-          "trim_start_time": "Uusi aloitusaika",
-          "trim_start_min": "Uusi aloitus (minuutteja syklin alusta)"
-        }
-      },
-      "trim_cycle_end": {
-        "title": "Aseta trimmauksen loppu",
-        "description": "Kierrä ikkuna: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNykyinen loppu: **{current_wallclock}** (+{current_offset_min} min syklin alusta)\n\nValitse uusi lopetusaika alla olevalla kellonvalitsimella.",
-        "data": {
-          "trim_end_time": "Uusi lopetusaika",
-          "trim_end_min": "Uusi loppu (minuutteja syklin alusta)"
+          "power_sensor": "Tehon anturi",
+          "min_power": "Minimitehokynnys (W)"
         }
       }
     },
     "error": {
-      "import_failed": "Tuonti epäonnistui. Liitä kelvollinen WashData-vienti JSON.",
-      "select_exactly_one": "Valitse täsmälleen yksi sykli tätä toimintoa varten.",
-      "select_at_least_one": "Valitse vähintään yksi sykli tätä toimintoa varten.",
-      "select_at_least_two": "Valitse vähintään kaksi sykliä tätä toimintoa varten.",
-      "profile_exists": "Tämän niminen profiili on jo olemassa",
-      "rename_failed": "Profiilin uudelleennimeäminen epäonnistui. Profiilia ei ehkä ole olemassa tai uusi nimi on jo varattu.",
-      "assignment_failed": "Profiilin määrittäminen syklille epäonnistui",
-      "duplicate_phase": "Tämän niminen vaihe on jo olemassa.",
-      "phase_not_found": "Valittua vaihetta ei löytynyt.",
-      "invalid_phase_name": "Vaiheen nimi ei voi olla tyhjä.",
-      "phase_name_too_long": "Vaiheen nimi on liian pitkä.",
-      "invalid_phase_range": "Vaihealue on virheellinen. Lopun on oltava suurempi kuin alku.",
-      "invalid_phase_timestamp": "Aikaleima on virheellinen. Käytä VVVV-KK-PP HH:MM- tai HH:MM-muotoa.",
-      "overlapping_phase_ranges": "Vaihealueet menevät päällekkäin. Säädä alueita ja yritä uudelleen.",
-      "incomplete_phase_row": "Jokaisella vaiherivillä on oltava vaihe sekä valitun tilan täydelliset aloitus-/loppuarvot.",
-      "timestamp_mode_cycle_required": "Valitse lähdejakso, kun käytät aikaleimatilaa.",
-      "no_phase_ranges": "Vaihealueita ei ole vielä saatavilla tälle toiminnolle.",
-      "feedback_notification_title": "WashData: Tarkista sykli ({device})",
-      "feedback_notification_message": "**Laite**: {device}\n**Ohjelma**: {program} ({confidence} %:n luottamus)\n**Aika**: {time}\n\nWashData tarvitsee apuasi tämän havaitun jakson vahvistamiseksi.\n\nSiirry kohtaan **Asetukset > Laitteet ja palvelut > WashData > Configure > Learning Feedbacks** vahvistaaksesi tai korjataksesi tämän tuloksen.",
-      "suggestions_ready_notification_title": "WashData: Ehdotetut asetukset valmiina ({device})",
-      "suggestions_ready_notification_message": "**Ehdotetut asetukset** -anturi raportoi nyt **{count}** toimivia suosituksia.\n\nTarkista ja ota ne käyttöön seuraavasti: **Asetukset > Laitteet ja palvelut > WashData > Määritä > Lisäasetukset > Käytä ehdotettuja arvoja**.\n\nEhdotukset ovat valinnaisia, ja ne näytetään tarkistettavaksi ennen tallentamista.",
-      "trim_range_invalid": "Aloitus on oltava ennen loppua. Säädä leikkauspisteitäsi.",
-      "trim_failed": "Leikkaus epäonnistui. Jaksoa ei ehkä enää ole tai ikkuna on tyhjä.",
-      "invalid_split_timestamp": "Aikaleima on virheellinen tai syklin aikaikkunan ulkopuolella. Käytä muotoa HH:MM tai HH:MM:SS syklin aikaikkunan sisällä.",
-      "no_split_segments_found": "Näistä aikaleimoista ei voitu muodostaa kelvollisia segmenttejä. Varmista, että jokainen aikaleima on syklin aikaikkunan sisällä ja että segmentit ovat vähintään 1 minuutin pituisia.",
-      "auto_tune_suggestion": "{device_type} {device_title} havaitsi haamujaksoja. Ehdotettu minimitehon muutos: {current_min}W -> {new_min}W (ei käytössä automaattisesti).",
-      "auto_tune_title": "WashData automaattinen viritys",
-      "auto_tune_fallback": "{device_type} {device_title} havaitsi haamujaksoja. Ehdotettu minimitehon muutos: {current_min}W -> {new_min}W (ei käytössä automaattisesti)."
-    },
-    "abort": {
-      "no_cycles_found": "Syklejä ei löytynyt",
-      "no_split_segments_found": "Valitusta syklistä ei löytynyt jaettavia segmenttejä.",
-      "cycle_not_found": "Valittua sykliä ei voitu ladata.",
-      "no_power_data": "Valitulle jaksolle ei ole saatavilla tehojäljitystietoja.",
-      "no_profiles_found": "Profiilia ei löytynyt. Luo ensin profiili.",
-      "no_profiles_for_matching": "Vastaavia profiileja ei ole saatavilla. Luo ensin profiilit.",
-      "no_unlabeled_cycles": "Kaikki syklit on jo merkitty",
-      "no_suggestions": "Ehdotettuja arvoja ei ole vielä saatavilla. Suorita muutama sykli ja yritä uudelleen.",
-      "no_predictions": "Ei ennusteita",
-      "no_custom_phases": "Mukautettuja vaiheita ei löytynyt.",
-      "reprocess_success": "Uudelleenkäsitelty {count} jaksoa.",
-      "debug_data_cleared": "Virheenkorjaustiedot tyhjennettiin {count} jaksosta."
+      "timer_default_message": "{device}: {minutes} min ajastin",
+      "timer_pause_action_title": "Jatka sykliä",
+      "timer_pause_body_suffix": "Sykli on keskeytetty. Avaa WashData-paneeli jatkaaksesi.",
+      "notify_live_waiting_message": "{device}: Yhtään profiilia ei ole vielä tunnistettu.",
+      "vs_typical_longer": "{pct}% tavallista pidempi",
+      "vs_typical_shorter": "{pct}% tavallista lyhyempi",
+      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0"
     }
   },
   "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "Syklin alku",
-        "cycle_finish": "Syklin loppu",
-        "cycle_live": "Reaaliaikainen edistyminen"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(Merkitsemätön)",
-        "create_new_profile": "Luo uusi profiili",
-        "remove_label": "Poista etiketti",
-        "no_reference_cycle": "(Ei vertailujaksoa)",
-        "all_device_types": "Kaikki laitetyypit",
-        "current_suffix": "(nykyinen)",
-        "editor_select_info": "Valitse 1 jakso jakaaksesi tai 2+ jaksoa yhdistääksesi.",
-        "editor_select_info_split": "Valitse 1 jaettava sykli.",
-        "editor_select_info_merge": "Valitse yhdistettäväksi 2 tai useampi sykli.",
-        "editor_select_info_delete": "Valitse poistettavaksi 1 tai useampi sykli.",
-        "no_cycles_recorded": "Syklejä ei ole vielä tallennettu.",
-        "profile_summary_line": "- **{name}**: {count} sykliä, {avg} min keskim",
-        "no_profiles_created": "Profiilia ei ole vielä luotu.",
-        "phase_preview": "Vaiheen esikatselu",
-        "phase_preview_no_curve": "Keskimääräistä profiilikäyrää ei ole vielä saatavilla. Suorita/merkitä lisää syklejä tälle profiilille.",
-        "average_power_curve": "Keskimääräinen tehokäyrä",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} sykliä, ~{duration} min keskiarvo)",
-        "profile_option_short_fmt": "{name} ({count} sykliä, ~{duration} min)",
-        "deleted_cycles_from_profile": "Poistettu {count} jaksoa kohteesta {profile}.",
-        "not_enough_data_graph": "Ei tarpeeksi dataa kaavion luomiseen.",
-        "no_profiles_found": "Profiilia ei löytynyt.",
-        "cycle_info_fmt": "Sykli: {start}, {duration} min, nykyinen: {label}",
-        "top_candidates_header": "### Parhaat ehdokkaat",
-        "tbl_profile": "Profiili",
-        "tbl_confidence": "Luottamus",
-        "tbl_correlation": "Korrelaatio",
-        "tbl_duration_match": "Keston vastaavuus",
-        "detected_profile": "Havaittu profiili",
-        "estimated_duration": "Arvioitu kesto",
-        "actual_duration": "Todellinen kesto",
-        "choose_action": "__Valitse toiminto alta:__",
-        "tbl_count": "Lukumäärä",
-        "tbl_avg": "Keskim",
-        "tbl_min": "Min",
-        "tbl_max": "Max",
-        "tbl_energy_avg": "Energia (kesk.)",
-        "tbl_energy_total": "Energia (yhteensä)",
-        "tbl_consistency": "Johdonmukaisuus",
-        "tbl_last_run": "Viimeisin suoritus",
-        "graph_legend_title": "Kaavion selitys",
-        "graph_legend_body": "Sininen nauha edustaa havaittua pienintä ja suurinta tehonottoaluetta. Viiva näyttää keskimääräisen tehokäyrän.",
-        "recording_preview": "Tallennuksen esikatselu",
-        "trim_start": "Trimmauksen alku",
-        "trim_end": "Trimmauksen loppu",
-        "split_preview_title": "Jaettu esikatselu",
-        "split_preview_found_fmt": "Löytyi {count} segmenttiä.",
-        "split_preview_confirm_fmt": "Napsauta Vahvista jakaaksesi tämän syklin {count} erilliseen jaksoon.",
-        "merge_preview_title": "Yhdistä esikatselu",
-        "merge_preview_joining_fmt": "Liitytään {count} sykliin. Aukot täytetään 0 W lukemilla.",
-        "editor_delete_preview_title": "Poiston esikatselu",
-        "editor_delete_preview_intro": "Valitut syklit poistetaan pysyvästi:",
-        "editor_delete_preview_confirm": "Napsauta Vahvista poistaaksesi nämä syklitiedot pysyvästi.",
-        "no_power_preview": "*Tehotietoja ei ole saatavilla esikatseluun.*",
-        "profile_comparison": "Profiilien vertailu",
-        "actual_cycle_label": "Tämä sykli (todellinen)",
-        "storage_usage_header": "Varastoinnin käyttö",
-        "storage_file_size": "Tiedoston koko",
-        "storage_cycles": "Syklit",
-        "storage_profiles": "Profiilit",
-        "storage_debug_traces": "Virheenkorjauksen jäljet",
-        "overview_suffix": "Yleiskatsaus",
-        "phase_preview_for_profile": "Profiilin vaiheen esikatselu",
-        "current_ranges_header": "Nykyiset alueet",
-        "assign_phases_help": "Käytä alla olevia toimintoja alueiden lisäämiseen, muokkaamiseen, poistamiseen tai tallentamiseen.",
-        "profile_summary_header": "Profiilin yhteenveto",
-        "recent_cycles_header": "Viimeaikaiset syklit",
-        "trim_cycle_preview_title": "Sykli - trimmauksen esikatselu",
-        "trim_cycle_preview_no_data": "Tälle jaksolle ei ole saatavilla tehotietoja.",
-        "trim_cycle_preview_kept_suffix": "pidetty",
-        "table_program": "Ohjelma",
-        "table_when": "Milloin",
-        "table_length": "Pituus",
-        "table_match": "Vastaavuus",
-        "table_profile": "Profiili",
-        "table_cycles": "Syklit",
-        "table_avg_length": "Keskim. pituus",
-        "table_last_run": "Viimeisin suoritus",
-        "table_avg_energy": "Keskim. energia",
-        "table_detected_program": "Tunnistettu ohjelma",
-        "table_confidence": "Luottamus",
-        "table_reported": "Ilmoitettu",
-        "phase_builtin_suffix": "(Sisäänrakennettu)",
-        "phase_none_available": "Vaiheita ei ole saatavilla.",
-        "settings_deprecation_warning": "⚠️ **Käytöstä poistettu laitetyyppi:** {device_type} on ajoitettu poistettavaksi tulevassa julkaisussa. WashDatan täsmäysputki ei tuota luotettavia tuloksia tälle laiteluokalle. Integraatiosi toimii edelleen poistojakson ajan; vaimentaa tämä varoitus valitsemalla alla oleva **Laitetyyppi** jollekin tuetuista tyypeistä (pesukone, kuivausrumpu, pesukone-kuivausrumpu, astianpesukone, ilmakeitin, leipäkone tai pumppu) tai **Muu (Lisäasetukset)** -kohtaan, jos laitteesi ei vastaa mitään tuetuista tyypeistä. **Other (Advanced)** toimittaa tarkoituksella yleisiä oletusasetuksia, joita ei ole viritetty millekään tietylle laitteelle, joten sinun on määritettävä kynnykset, aikakatkaisut ja vastaavat parametrit itse. kaikki nykyiset asetuksesi säilyvät, kun vaihdat.",
-        "phase_other_device_types": "Muut laitetyypit:"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "Jaa sykli (etsi aukkoja)",
-        "merge": "Yhdistä syklit (liitä fragmentit)",
-        "delete": "Poista sykli(t)"
-      }
-    },
-    "split_mode": {
-      "options": {
-        "auto": "Tunnista joutokäyntivälit automaattisesti",
-        "manual": "Manuaaliset aikaleimat"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "Ylläpito: Käsittele ja optimoi tiedot uudelleen",
-        "clear_debug_data": "Tyhjennä virheenkorjaustiedot (vapauta tilaa)",
-        "wipe_history": "Tyhjennä KAIKKI tämän laitteen tiedot (peruuttamaton)",
-        "export_import": "Vie/tuo JSON asetuksilla (kopioi/liitä)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "Vie kaikki tiedot",
-        "import": "Tuo/Yhdistä tiedot"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "Merkitse vanhat syklit automaattisesti",
-        "select_cycle_to_label": "Merkitse tietty sykli",
-        "select_cycle_to_delete": "Poista sykli",
-        "interactive_editor": "Yhdistä/jakaa interaktiivinen editori",
-        "trim_cycle": "Trimmausjakson tiedot"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "Luo uusi profiili",
-        "edit_profile": "Muokkaa/nimeä profiilia uudelleen",
-        "delete_profile": "Poista profiili",
-        "profile_stats": "Profiilitilastot",
-        "cleanup_profile": "Puhdista historia - piirrä ja poista",
-        "assign_phases": "Määritä vaihealueet"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "Luo uusi vaihe",
-        "edit_custom_phase": "Muokkaa vaihetta",
-        "delete_custom_phase": "Poista vaihe"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "Lisää vaihealue",
-        "edit_range": "Muokkaa vaihealuetta",
-        "delete_range": "Poista vaihealue",
-        "clear_ranges": "Tyhjennä kaikki alueet",
-        "auto_detect_ranges": "Tunnista vaiheet automaattisesti",
-        "save_ranges": "Tallenna ja palauta"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "Päivitä tila",
-        "stop_recording": "Lopeta tallennus (tallenna ja käsittele)",
-        "start_recording": "Aloita uusi tallennus",
-        "process_recording": "Käsittele viimeinen tallennus (leikkaa ja tallenna)",
-        "discard_recording": "Hylkää viimeinen tallennus"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "Luo uusi profiili",
-        "existing_profile": "Lisää olemassa olevaan profiiliin",
-        "discard": "Hylkää tallennus"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "Vahvista - Oikea tunnistus",
-        "correct": "Oikein - Valitse Ohjelma/kesto",
-        "ignore": "Ohita - Väärä positiivinen/kohinainen sykli",
-        "delete": "Poista - Poista historiasta"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "Nimeä ja käytä vaiheita",
-        "cancel": "Palaa takaisin ilman muutoksia"
-      }
-    },
-    "trim_cycle_action": {
-      "options": {
-        "set_start": "Aseta aloituspiste",
-        "set_end": "Aseta päätepiste",
-        "reset": "Palauta täysi kesto",
-        "apply": "Käytä trimmaa",
-        "cancel": "Peruuttaa"
-      }
-    },
     "device_type": {
       "options": {
         "washing_machine": "Pesukone",
         "dryer": "Kuivausrumpu",
         "washer_dryer": "Pesukone-kuivausrumpu yhdistelmä",
         "dishwasher": "Astianpesukone",
-        "coffee_machine": "Kahvinkeitin (poistettu käytöstä)",
-        "ev": "Sähköajoneuvo (vanhentunut)",
         "air_fryer": "Air Fryer",
-        "heat_pump": "Lämpöpumppu (vanhentunut)",
         "bread_maker": "Leipäkone",
         "pump": "Pumppu / sumpupumppu",
-        "oven": "Uuni (poistettu käytöstä)",
-        "other": "Muu (edistynyt)"
+        "generic": "Muu (edistynyt)",
+        "other": "Kynnyslaite"
       }
     }
   },
@@ -1207,6 +277,16 @@
           "description": "WashData-laite jatkaa."
         }
       }
+    },
+    "trigger_ml_training": {
+      "name": "Käynnistä ML-koulutus",
+      "description": "Kouluta laitteen ML-mallit manuaalisesti uudelleen tämän laitteen omien merkittyjen syklien perusteella (kokeellinen).",
+      "fields": {
+        "device_id": {
+          "name": "Laite",
+          "description": "WashData-laite, jonka malleja koulutetaan uudelleen."
+        }
+      }
     }
   },
   "entity": {
@@ -1231,12 +311,12 @@
           "ending": "Loppuu",
           "finished": "Valmis",
           "anti_wrinkle": "Ryppyjenesto",
-          "delay_wait": "Odotetaan aloitusta",
           "interrupted": "Keskeytynyt",
           "force_stopped": "Pakotettu pysäytys",
           "rinse": "Huuhtelu",
           "unknown": "Tuntematon",
-          "clean": "Puhdas"
+          "clean": "Puhdas",
+          "delay_wait": "Odotetaan aloitusta"
         }
       },
       "washer_program": {
@@ -1269,11 +349,11 @@
           "none": "Ei mitään"
         }
       },
+      "ambiguity": {
+        "name": "Epäselvyyspisteet"
+      },
       "current_phase": {
         "name": "Nykyinen vaihe"
-      },
-      "wash_phase": {
-        "name": "Vaihe"
       },
       "profile_cycle_count": {
         "name": "Profiilin {profile_name} syklimäärä",
@@ -1287,6 +367,9 @@
       },
       "cycle_count": {
         "name": "Syklien määrä"
+      },
+      "energy_total": {
+        "name": "Energia yhteensä"
       }
     },
     "select": {
@@ -1306,6 +389,12 @@
       },
       "resume_cycle": {
         "name": "Jatka sykliä"
+      },
+      "record_start": {
+        "name": "Aloita syklin tallennus"
+      },
+      "record_stop": {
+        "name": "Lopeta syklin tallennus"
       }
     }
   },
@@ -1336,6 +425,24 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s on oltava suurempi kuin trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "Ei aktiivista jaksoa keskeyttää tai jatkaa."
+    },
+    "path_not_allowed": {
+      "message": "Polku ei ole sallittu: {path}. Lisää sen hakemisto asetukseen 'allowlist_external_dirs' tiedostossa configuration.yaml."
+    },
+    "create_profile_failed": {
+      "message": "Profiilin luominen epäonnistui: {error}"
+    },
+    "export_path_exists": {
+      "message": "Viennin kohde on jo olemassa: {path}. Valitse toinen polku tai poista ensin olemassa oleva tiedosto."
+    },
+    "export_write_failed": {
+      "message": "Viennin kirjoittaminen kohteeseen {path} epäonnistui: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "Profiilin määrittäminen epäonnistui: {error}"
     }
   }
 }

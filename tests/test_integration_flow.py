@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 import pytest
 import logging
 import asyncio
@@ -27,7 +43,9 @@ def mock_entry():
         "min_off_gap": 30, # Small value for fast test
         "end_energy_threshold": 0.05,
         "device_type": "washing_machine",
-        "notify_events": []
+        # The end-to-end test below asserts EVENT_CYCLE_STARTED/ENDED fire, so the
+        # bus events must be enabled (they are gated on this flag, default True).
+        "notify_fire_events": True
     }
     entry.data = {}
     return entry
@@ -52,6 +70,7 @@ async def test_end_to_end_integration(hass: HomeAssistant, mock_entry):
         store.get_profiles.return_value = {}
         store.get_active_cycle.return_value = None
         store.get_past_cycles.return_value = []
+        store.get_suggestion_apply_cycle_count.return_value = 0
         store.get_last_active_save.return_value = None
         store.async_load = AsyncMock()
         store.async_save = AsyncMock()
@@ -129,7 +148,6 @@ async def test_notify_fire_events_disabled_suppresses_both_events(hass: HomeAssi
         "min_off_gap": 30,
         "end_energy_threshold": 0.05,
         "device_type": "washing_machine",
-        "notify_events": [],
         CONF_NOTIFY_FIRE_EVENTS: False,  # Key option: disable events
     }
     entry.data = {}
@@ -148,6 +166,7 @@ async def test_notify_fire_events_disabled_suppresses_both_events(hass: HomeAssi
         store.get_profiles.return_value = {}
         store.get_active_cycle.return_value = None
         store.get_past_cycles.return_value = []
+        store.get_suggestion_apply_cycle_count.return_value = 0
         store.get_last_active_save.return_value = None
         store.async_load = AsyncMock()
         store.async_save = AsyncMock()
@@ -220,7 +239,6 @@ async def test_notify_fire_events_enabled_fires_both_events(hass: HomeAssistant)
         "min_off_gap": 30,
         "end_energy_threshold": 0.05,
         "device_type": "washing_machine",
-        "notify_events": [],
         CONF_NOTIFY_FIRE_EVENTS: True,  # Key option: enable events
     }
     entry.data = {}
@@ -239,6 +257,7 @@ async def test_notify_fire_events_enabled_fires_both_events(hass: HomeAssistant)
         store.get_profiles.return_value = {}
         store.get_active_cycle.return_value = None
         store.get_past_cycles.return_value = []
+        store.get_suggestion_apply_cycle_count.return_value = 0
         store.get_last_active_save.return_value = None
         store.async_load = AsyncMock()
         store.async_save = AsyncMock()

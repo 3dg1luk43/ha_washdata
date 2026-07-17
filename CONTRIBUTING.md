@@ -359,24 +359,16 @@ Fixes #123
 2. **Submit a Pull Request** with your corrections
    - Include a brief description of what was corrected
 
-3. **Use translation script** (for Home Assistant translations):
-   ```bash
-   source .venv_translation/bin/activate
-   python3 scripts/ha_integration_translator/translate.py custom_components/ha_washdata/translations --all
-   ```
-
-4. **Protect manually curated keys from auto-overwrite** (recommended):
-   - Add key paths to `custom_components/ha_washdata/translations/.translation-locks.json`
-   - Exact key lock example: `options.step.manage_profiles.title`
-   - Prefix lock example: `options.common_text.*`
-   - On next automated translation run, locked existing keys are preserved.
+> **Important:** Do **not** use `translate.py` or any automated machine-translation tool.
+> Machine translation produces domain-wrong output (e.g. "sports" for "match", "lumber" for "logs")
+> and has corrupted translation files in the past. All translation work must be done manually with
+> full context of what each term means in the WashData domain.
 
 ### Adding a New Language
 
 1. Copy `translations/en.json` to `translations/[new-language-code].json`
-2. Translate all values (keep keys unchanged)
-3. Include in strings.json if needed
-4. Submit PR with translations
+2. Translate all values manually, keeping keys unchanged and preserving `{placeholder}` tokens exactly
+3. Submit PR with translations
 
 **Note**: Translations are validated automatically. Ensure JSON is valid before submitting.
 
@@ -412,4 +404,14 @@ Thank you for making WashData better! 🌟
 
 ---
 
-**Last Updated**: 2026-06-02
+## License
+
+By contributing to WashData you agree that your contributions will be licensed under the
+**GNU Affero General Public License v3.0 or later** (AGPL-3.0-or-later), the same licence
+that covers the project. See [LICENSE](LICENSE) for the full terms.
+
+This software is provided free of charge. No contributor is required to assign copyright
+to the maintainer; you retain copyright in your own contributions while granting the project
+the right to distribute them under AGPL-3.0-or-later.
+
+**Last Updated**: 2026-07-16

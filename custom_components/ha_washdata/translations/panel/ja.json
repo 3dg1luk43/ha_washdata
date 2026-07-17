@@ -1,0 +1,1771 @@
+{
+  "badge": {
+    "artifact_tip": "{n} 個の異常が検出されました (例: サイクルの途中でドアが開いた) — 開いてグラフ上で確認します",
+    "auto": "(自動検出)",
+    "built_in_tag": "内蔵",
+    "declining": "↘ 減少",
+    "energy_low": "普段より消費エネルギーが少ない",
+    "energy_spike": "普段より消費エネルギーが多い",
+    "fair_fit": "普通",
+    "fair_fit_tip": "中程度の一致一貫性 - このプロファイルに割り当てられた一部のサイクルの信頼スコアが低くなります。精度を向上させるには、さらに多くのサイクルにラベルを付けるか、プロファイルを再記録します。",
+    "feedback_requested": "フィードバックが必要です",
+    "golden_cycle": "記録された基準サイクル",
+    "improving": "↗ 改善中",
+    "manual": "(手動で選択)",
+    "needs_review": "見直しが必要",
+    "overrun": "いつもより長く走った",
+    "poor_fit": "フィット感が悪い",
+    "poor_fit_tip": "一致しない試合履歴 - このプロファイルの再構築を検討してください",
+    "restart_gap_tip": "{n} HA 再起動ギャップ: 電力トレースに欠損区間があります",
+    "reviewed": "レビュー済み",
+    "steady": "→安定",
+    "underrun": "普段より早く終了した",
+    "using_defaults": "出荷時のデフォルトを使用する",
+    "using_tuned": "調整された重みの使用",
+    "overrun_ratio": "（予想の{x}倍）",
+    "underrun_ratio": "（予想の{pct}%）",
+    "awaiting_tip": "コミュニティの承認待ち",
+    "awaiting_n": "承認待ち · {n} 件確認済み",
+    "approved": "承認済み",
+    "awaiting": "承認待ち",
+    "imported_tip": "コミュニティストアからインポートしました。マッチングにのみ使用され、統計には含まれません。"
+  },
+  "btn": {
+    "add_device": "+ デバイスを追加",
+    "add_device_tip": "別の WashData デバイスを追加する",
+    "add_maintenance": "メンテナンスイベントを追加",
+    "add_phase": "+ フェーズを追加",
+    "add_timer": "+ タイマーを追加",
+    "apply_all": "全て適用",
+    "apply_label": "ラベルを適用する",
+    "apply_set_b": "セット B を適用",
+    "apply_split": "分割を適用する",
+    "apply_trim": "トリムを適用",
+    "auto_detect_split": "自動検出",
+    "auto_label_cycles": "自動ラベル付けサイクル",
+    "auto_label_cycles_tip": "一致信頼度がしきい値をクリアするラベルなしサイクルにプロファイル名を自動的に割り当てます",
+    "cancel": "キャンセル",
+    "clear_debug": "デバッグデータのクリア",
+    "clear_splits": "クリア",
+    "close": "閉じる",
+    "compare": "比較する",
+    "confirm": "確認する",
+    "convert_to_automation": "自動化への変換",
+    "correct": "正しい…",
+    "create": "作成する",
+    "create_from_cluster": "{count} サイクルからプロファイルを作成",
+    "create_profile": "+ プロフィールの作成",
+    "delete": "消去",
+    "delete_group": "グループの削除",
+    "delete_group_tip": "このグループのみを削除します - メンバーのプロフィールは保持されます",
+    "delete_profile": "プロフィールの削除",
+    "discard": "破棄",
+    "discard_tip": "録音されたトレースを保存せずに破棄します",
+    "dismiss": "却下する",
+    "done": "終わり",
+    "edit": "編集",
+    "export": "輸出",
+    "export_json": "JSON にエクスポート",
+    "force_stop": "強制停止",
+    "force_stop_tip": "現在のサイクルをすぐに終了し、強制停止としてマークします",
+    "from_template": "テンプレートから▾",
+    "ignore": "無視する",
+    "import_json": "JSONからインポート",
+    "import_overwrite": "インポート（データを上書き）",
+    "inspect": "検査する",
+    "label": "ラベル付け",
+    "load": "読み込み",
+    "load_more": "さらに読み込む",
+    "manage": "管理",
+    "merge": "マージ",
+    "new_automation": "＋ 新しい自動化",
+    "new_group": "+ 新しいグループ",
+    "new_group_tip": "ほぼ同一のプロファイルをグループ化（同じ形状/期間、異なる温度またはスピン）して、マッチングが確実にどれかを選択できるようにします",
+    "new_phase": "+ 新しいフェーズ",
+    "new_profile": "+ 新しいプロフィール",
+    "new_profile_tip": "既存のラベル付きサイクルまたは録音から新しいプログラムプロファイルを作成します",
+    "on_cycle_finished": "サイクルが終了しました",
+    "on_cycle_started": "サイクル開始時",
+    "pause_cycle": "一時停止",
+    "pause_cycle_tip": "実行中のサイクルを一時停止します — 家電は停止した場所から再開します",
+    "pg_apply_device": "デバイスに適用",
+    "pg_autofill": "自動入力",
+    "play": "再生",
+    "process": "プロセス",
+    "process_history": "今すぐ処理",
+    "process_recording": "録音の保存",
+    "process_tip": "録音されたトレースを新しいまたは既存のプロファイルとして保存します",
+    "rebuild": "エンベロープを再構築する",
+    "rebuild_envelope": "エンベロープの再構築",
+    "rebuild_tip": "ラベル付きサイクルからすべてのプロファイルの予想電力エンベロープ（最小/最大バンド）を再計算します — 新しいサイクルにラベルを付けた後や古いラベルを修正した後に実行します",
+    "rec_start_tip": "家電の電力トレースの録音を開始します — サイクルを実行する直前に開始します",
+    "rec_stop": "停止",
+    "rec_stop_tip": "録音を停止し、キャプチャされたトレースをレビューのために保持します",
+    "record": "録音を開始する",
+    "refresh": "リフレッシュ",
+    "refresh_diag_tip": "ストレージ統計を再読み込みします",
+    "refresh_logs_tip": "最新のログレコードを再読み込みします",
+    "refresh_settings_tip": "サーバーから設定を再読み込みします",
+    "relabel": "再ラベル付け ({count})",
+    "remove": "取り除く",
+    "remove_timer": "タイマーを削除する",
+    "reset": "リセット",
+    "reset_ml_models_tip": "微調整されたモデルを破棄し、組み込みモデルに戻ります。 WashData は後でそれらを再学習できます。",
+    "reset_to_builtin": "内蔵モデルにリセット",
+    "reset_to_defaults": "デフォルトにリセットする",
+    "resume_cycle": "再開する",
+    "resume_cycle_tip": "一時停止されたサイクルを再開します",
+    "revert_settings": "変更を破棄",
+    "revert_settings_tip": "前回の保存前の設定を復元します",
+    "revert_settings_tip_none": "元に戻す機能を有効にするには先に保存してください",
+    "revert": "元に戻す",
+    "revert_to_previous": "この設定を以前の値に戻す",
+    "review": "評価する",
+    "run": "実行",
+    "run_analysis": "🔍 提案分析を実行する",
+    "run_analysis_tip": "記録されたサイクルを今すぐ分析し、調整の提案を更新します",
+    "run_auto_label": "自動ラベルの実行",
+    "run_both": "A と B を実行",
+    "run_simulation": "シミュレーションを実行",
+    "save": "保存",
+    "save_access_control": "アクセス制御の保存",
+    "save_group": "グループの保存",
+    "save_panel_settings": "パネル設定の保存",
+    "save_phases": "フェーズの保存",
+    "save_preferences": "設定の保存",
+    "save_reminders": "リマインダーを保存",
+    "save_review": "レビューを保存",
+    "save_settings": "設定の保存",
+    "select": "選択",
+    "select_all": "すべて選択",
+    "select_last20": "直近 20 件",
+    "select_none": "クリア",
+    "show_only": "表示のみ",
+    "skip_setup": "セットアップをスキップ",
+    "split": "スプリット",
+    "stop": "停止",
+    "submit_correction": "修正の送信",
+    "train_now": "今すぐトレーニングする",
+    "trim": "トリム",
+    "trim_split": "トリム/スプリット",
+    "undo": "元に戻す",
+    "use": "使用",
+    "wipe_all": "すべてのデータを消去",
+    "delete_selected": "選択項目を削除（{n}）",
+    "group_suggest": "グループ {n}：{members}",
+    "pg_apply_best": "最適値を適用",
+    "pg_apply_to_settings": "設定に保存",
+    "pg_apply_to_settings_tip": "ここで編集した値をこのデバイスの現在有効な設定にコピーします",
+    "search": "検索",
+    "import": "インポート",
+    "disconnect": "切断",
+    "connect_github": "GitHub に接続",
+    "save_appliance": "家電を保存",
+    "share_to_store": "ストアに共有",
+    "share": "共有",
+    "confirm_appliance": "この家電を確認",
+    "confirmed": "確認済み",
+    "browse_community_setups": "コミュニティのセットアップを閲覧",
+    "download_device": "このセットアップをダウンロード",
+    "share_device": "⬆ このデバイスを共有",
+    "share_device_tip": "この機器と記録済みリファレンスサイクルをコミュニティストアに共有して、同じ機種を持つ他のユーザーが利用できるようにします",
+    "share_n": "{n}件のサイクルを共有"
+  },
+  "conflict": {
+    "anti_wrinkle_exit": {
+      "exit": "停止しきい値 ({stop} W) を下回る必要があります。そうでないとしわ防止終了電力は無視されます",
+      "stop": "しわ防止終了電力 ({exit} W) を上回る必要があります"
+    },
+    "anti_wrinkle_max": {
+      "max": "開始しきい値 ({start} W) を上回る必要があります。そうでないとしわ防止の時間制限がバイパスされます",
+      "start": "しわ防止最大電力 ({max} W) を下回る必要があります"
+    },
+    "attn_sub": "保存する前に競合を解消してください",
+    "attn_title": "{n}件の設定競合{s}",
+    "confidence": {
+      "auto": "マッチしきい値 ({match}) 以上である必要があります",
+      "learning": "マッチしきい値 ({match}) 以下である必要があります",
+      "match_for_auto": "自動ラベル信頼度 ({alc}) 以下である必要があります",
+      "match_for_learning": "学習信頼度 ({lc}) 以上である必要があります"
+    },
+    "duration_ratio": {
+      "max": "最小時間比率 ({min}) より大きい必要があります",
+      "min": "最大時間比率 ({max}) より小さい必要があります"
+    },
+    "hysteresis": {
+      "start": "停止しきい値 ({stop} W) を上回る必要があります",
+      "stop": "開始しきい値 ({start} W) を下回る必要があります"
+    },
+    "min_power": {
+      "min_power": "停止しきい値 ({stop} W) 以下である必要があります",
+      "stop": "最小電力 ({min} W) 以上である必要があります"
+    },
+    "no_update_timeout": {
+      "timeout": "ウォッチドッグ間隔 ({wi} 秒) より大きい必要があります",
+      "watchdog": "更新なしタイムアウト ({to} 秒) より小さい必要があります"
+    },
+    "off_delay": {
+      "gap": "最小オフギャップはオフ遅延 ({delay} 秒) 以上である必要があります",
+      "off_delay": "オフ遅延 ({off_delay} 秒) が最小オフギャップ ({gap} 秒) を超えています。連続サイクルが結合する可能性があります"
+    },
+    "power_off": {
+      "stop": "電源オフしきい値 ({pot} W) を上回る必要があります",
+      "threshold": "有効にするには停止しきい値 ({stop} W) を下回る必要があります"
+    },
+    "pump_stuck": {
+      "duration": "ウォッチドッグがサイクルを強制終了する前にスタックアラームが発動するよう、更新なしタイムアウト ({to} 秒) より小さい必要があります",
+      "timeout": "サイクルが強制停止される前にスタックアラームが発動するよう、ポンプ停止継続時間 ({ps} 秒) を超える必要があります"
+    },
+    "start_dur": {
+      "sampling": "サンプリング間隔が開始継続時間 ({sdt} 秒) を超えています。単一サンプルのスパイクがサイクルを開始する可能性があります",
+      "threshold": "単一サンプルの誤起動を防ぐために、少なくとも 1 サンプリング間隔 ({si} 秒) である必要があります"
+    },
+    "unmatch": {
+      "match": "アンマッチしきい値 ({un}) を上回る必要があります",
+      "unmatch": "マッチしきい値 ({match}) を下回る必要があります。そうでないと確定した一致が即座に解除されます"
+    },
+    "cascade_toast": "整合性のため、さらに{n}件の設定{s}も自動調整しました。",
+    "suggestion_resolves": "下の保留中の提案（{val}）を適用してこれを修正してください",
+    "use_fix": "{val} を使用",
+    "watchdog": {
+      "interval": "サンプリング間隔 ({si} 秒) の少なくとも 2 倍である必要があります",
+      "sampling": "サンプリング間隔はウォッチドッグ間隔 ({wi} 秒) の半分以下である必要があります"
+    },
+    "settings_banner": "{n} 件の設定競合{s} — 強調表示されたセクションを確認し、保存前に修正してください。",
+    "settings_banner_btn": "最初へ"
+  },
+  "hdr": {
+    "ab_comparison": "A/B 設定の比較",
+    "access_control": "アクセス制御",
+    "add_maintenance": "メンテナンスイベントの追加",
+    "automation_delete": "このオートメーションを削除します",
+    "automation_needs_review": "このサイクルは見直す必要がある",
+    "automation_open": "オートメーションエディターで開く",
+    "automation_review_this_cycle": "このサイクルを見直す",
+    "automations": "自動化",
+    "clear_debug": "デバッグトレースをクリアする",
+    "cycle_simulator": "サイクルシミュレーター",
+    "diagnostics_pref": "診断",
+    "display": "画面",
+    "dtw_inspector": "DTW インスペクター",
+    "export_import": "エクスポート/インポート",
+    "getting_started": "はじめに",
+    "live_power": "ライブパワー",
+    "logs": "ログ",
+    "logs_diagnostics": "診断",
+    "maintenance": "メンテナンスアクション",
+    "maintenance_log": "メンテナンス履歴",
+    "maintenance_reminders": "サービスリマインダー",
+    "manual_recording": "手動録音",
+    "manual_recording_tip": "WashData が電力トレースを記録する間、意図的にサイクルを実行します。家電が起動する直前に開始し、終了したら停止し、次に処理して名前付きプロファイルとして保存します。",
+    "ml_learned": "WashData が学んだこと",
+    "ml_matching_tuning": "プログラムマッチングの微調整",
+    "ml_settings_card": "設定",
+    "ml_smart_learning": "スマートラーニング",
+    "my_preferences": "私の好み",
+    "no_automations": "このデバイスを参照するオートメーションはまだありません。",
+    "panel_settings": "パネル設定",
+    "param_sweep": "パラメータースイープ",
+    "phase_catalog": "フェーズカタログ",
+    "playground": "プレイグラウンド",
+    "process_history": "プロセス履歴",
+    "settings_history": "設定履歴",
+    "status": "状態",
+    "status_graph": "ステータスグラフ",
+    "storage_stats": "ストレージ統計",
+    "test_history": "履歴でテスト",
+    "toggle_sidebar": "ホームアシスタントサイドバーの切り替え",
+    "tools_and_data": "ツールとデータ",
+    "wipe_history": "履歴を消去",
+    "recommendations": "推奨事項（{n}）",
+    "pg_detection_params": "検出設定",
+    "pg_timeline": "イベントタイムライン",
+    "pg_outcome": "シミュレーション結果",
+    "pg_across_cycles": "全サイクルにわたって",
+    "community_store": "コミュニティストア",
+    "online_account": "コミュニティストアとオンライン機能"
+  },
+  "health": {
+    "fair": "プロファイル品質: 普通",
+    "good": "✓ プロファイル品質: 良",
+    "poor": "⚠ プロファイル品質: 低"
+  },
+  "lbl": {
+    "actions": "アクション",
+    "activity": "活動",
+    "administrators": "管理者",
+    "aria_compare_chart": "サイクル比較グラフ",
+    "aria_cycle_chart": "サイクル電力推移",
+    "aria_envelope_chart": "プロファイルの電力エンベロープグラフ",
+    "aria_phase_chart": "フェーズエディターグラフ",
+    "aria_playground_chart": "ドラッグ可能な検出しきい値付きのサイクル電力推移",
+    "aria_power_chart": "消費電力グラフ",
+    "aria_spaghetti_chart": "重ね合わせたサイクル電力推移",
+    "aria_sweep_chart": "パラメータースイープ結果グラフ",
+    "artifact_anomaly": "異常",
+    "artifact_high_power": "高出力",
+    "artifact_interruption": "中断",
+    "artifact_low_power": "低出力",
+    "auto_detect": "自動検出",
+    "auto_fine_tune_off": "自動微調整オフ",
+    "auto_fine_tune_on": "自動微調整オン（{hour}:00 頃）",
+    "avg_cost": "平均料金",
+    "change": "変更",
+    "clock_time": "時計の時間",
+    "cohesion_good": "凝集度 {pct}%",
+    "cohesion_low": "⚠ 低凝集度 {pct}%",
+    "compare_profiles": "プロフィールと比較する",
+    "concurrency": "並列実行数",
+    "confidence": "自信",
+    "confidence_threshold": "信頼閾値",
+    "correct_duration": "正しい継続時間 (分、オプション)",
+    "correct_profile": "正しいプロフィール",
+    "correlation": "相関",
+    "cost": "料金",
+    "create_new_profile": "+ 新しいプロフィールを作成…",
+    "current_phase": "現在のフェーズ",
+    "curves": "曲線",
+    "cycle": "サイクル",
+    "cycle_date_display": "サイクル日付表示",
+    "cycle_health": "サイクルの健康",
+    "cycle_index": "サイクル番号 →",
+    "cycles": "サイクル",
+    "cycles_count": "サイクル",
+    "cycles_lc": "サイクル",
+    "dashed": "破線",
+    "date": "日付",
+    "debug_traces": "デバッグトレース",
+    "default": "デフォルト",
+    "default_access_level": "以下にリストされていないユーザーのデフォルト レベル",
+    "default_other": "デフォルト（他のデバイス）",
+    "default_tab": "パネルを開いたときのデフォルトのタブ",
+    "delta": "Δ",
+    "description": "説明",
+    "dtw_blend_w": "ブレンド重み",
+    "dtw_blended": "ブレンドスコア",
+    "dtw_ddtw": "DDTW スコア",
+    "dtw_l1": "L1 スコア",
+    "dtw_matched_profile": "(サイクルの一致プロフィール)",
+    "duration": "間隔",
+    "duration_agreement": "継続時間の一致度",
+    "emphasis": "強調",
+    "enable_access_control": "ユーザーごとのアクセス制御を有効にする",
+    "energy": "エネルギー",
+    "energy_agreement": "エネルギーの一致度",
+    "event_timeline": "イベントタイムライン",
+    "event_type": "イベントの種類",
+    "expected": "予想",
+    "expected_duration": "予想される所要時間 (分)",
+    "file_kb": "ファイル (kB)",
+    "final_score": "最終スコア",
+    "from": "開始",
+    "gap_s": "ギャップ",
+    "group_name": "グループ名",
+    "head_trim": "ヘッドトリム (複数可)",
+    "health": "健康",
+    "hide_tabs": "管理者以外のタブを非表示にする",
+    "in_use": "使用中",
+    "json_data": "JSONデータ",
+    "label": "一致したプログラム",
+    "last": "直近",
+    "last_checked": "最後にチェックした内容:",
+    "load_from_file": "ファイルからロード",
+    "mae_score": "MAE スコア",
+    "manual_duration": "手動持続時間 (分、オプション)",
+    "match": "マッチ",
+    "members": "メンバー",
+    "metric": "指標",
+    "mode_existing_profile": "既存のプロファイルに追加",
+    "mode_new_profile": "新しいプロファイルの作成",
+    "models_fine_tuned": "（{count}モデル{plural}微調整済み）",
+    "n_classic_suggestions": "{n} クラシック",
+    "n_ml_suggestions": "{n} ML",
+    "n_selected": "{n} 件選択中",
+    "n_tuning_suggestions": "{n} 件のチューニング提案",
+    "na": "該当なし",
+    "new_profile_name": "新しいプロファイル名",
+    "notes": "メモ",
+    "of": "/",
+    "outcome": "結果",
+    "panel_default_tab": "デフォルトのタブ",
+    "panel_language": "パネル言語",
+    "per_cycle_short": "サイクル",
+    "pg_autofill_tip": "現在の値から範囲を自動入力（{lo}–{hi}）",
+    "pg_best_value": "見つかった最適値",
+    "pg_current_value": "現在の値:",
+    "pg_drag_hint": "グラフ上の線をドラッグ",
+    "pg_dtw": "DTW",
+    "pg_ev_ending": "終了中",
+    "pg_ev_running": "実行中",
+    "pg_group_advanced": "エッジケース",
+    "pg_group_detection": "検出トリガー",
+    "pg_group_timing": "タイミングルール",
+    "pg_idle": "アイドル",
+    "pg_last_run": "前回の実行: {date}",
+    "pg_match_score": "マッチスコア",
+    "pg_pct_of": "{total} 中 {p}%",
+    "pg_poor_match": "不十分なマッチ",
+    "pg_strong_match": "強いマッチ",
+    "pg_tile_ambiguous": "あいまい",
+    "pg_tile_ambiguous_tip": "2つのプログラムがほぼ同点だったサイクル",
+    "pg_tile_detected": "検出",
+    "pg_tile_detected_tip": "電力が開始しきい値を十分な時間超えて、実行中として登録されたサイクル",
+    "pg_tile_matched": "マッチ",
+    "pg_tile_matched_tip": "既知のプログラムに正しく割り当てられたサイクル",
+    "pg_time_left": "残り時間",
+    "pg_weak_match": "弱いマッチ",
+    "phase_name": "名前",
+    "phase_timeline": "フェーズタイムライン",
+    "power": "電力",
+    "profile": "プロフィール",
+    "profile_index": "プロフィール番号 →",
+    "profile_name": "プロファイル名",
+    "program": "プログラム",
+    "program_tip": "現在のサイクルに一致するプロファイルを上書きします。自動検出では、統合が最適な一致を自動的に選択します。自動検出が誤っている場合や実行中のプログラムが分かっている場合は、特定のプログラムを固定して強制的に一致させます。",
+    "progress": "進捗",
+    "raw_socket": "生のソケット",
+    "read_only": "読み取り専用",
+    "ref_cycle": "基準サイクル (オプション)",
+    "refresh_interval": "リフレッシュ間隔 (秒)",
+    "remaining": "残り",
+    "reminder_every": "リマインド間隔 (サイクル)",
+    "remove_label": "- ラベルを剥がす -",
+    "rename_profile": "プロファイル名の変更",
+    "replay_duration": "再生",
+    "resulting_profile": "結果として得られるプロファイル",
+    "save_mode": "セーブモード",
+    "score": "スコア",
+    "score_breakdown": "スコアの内訳",
+    "seconds_from_start": "開始から数秒",
+    "select_profile": "プロファイルの選択",
+    "setting": "設定",
+    "settings_a": "設定 A (現在)",
+    "settings_a_short": "A",
+    "settings_advanced": "高度な",
+    "settings_b": "設定 B (テスト)",
+    "settings_b_short": "B",
+    "settings_basic": "基本",
+    "settings_detail_level": "設定の詳細レベル",
+    "settings_overrides": "設定の上書き",
+    "show_debug": "ステータス ページにライブ マッチ デバッグ カードを表示します (信頼性、曖昧さ、上位候補)",
+    "show_expected": "予想される曲線オーバーレイを表示 (一致したプロファイル、オレンジ色)",
+    "show_raw": "ライブ電力グラフに生ソケット切替を表示",
+    "sparkline": "最近のサイクル継続時間の傾向",
+    "stage2": "ステージ 2 — コア類似度",
+    "stage3": "ステージ 3 — DTW",
+    "stage4": "ステージ 4 — 一致度",
+    "status": "状態",
+    "tail_trim": "テールトリム (複数可)",
+    "timer_auto_pause": "自動一時停止",
+    "timer_min": "分",
+    "timer_msg_placeholder": "メッセージ (オプション、{device}/{program}/{minutes})",
+    "to": "終了",
+    "ungrouped": "グループ化されていない",
+    "unlabelled": "ラベルなし",
+    "unlabelled_paren": "(ラベルなし)",
+    "warp_path": "ワープパス",
+    "input": "入力：",
+    "start": "開始",
+    "end": "終了",
+    "unit_s": "（秒）",
+    "reviewed_on": "{date} にレビュー済み",
+    "unknown": "不明",
+    "quality": "品質",
+    "tags": "タグ",
+    "at": "＠",
+    "pct_match_confidence": "マッチ信頼度 {pct}%",
+    "ha_restarted": "HA が再起動しました",
+    "from_start": "開始から",
+    "to_end": "終了まで",
+    "click_to_select": "クリックして選択",
+    "envelope": "エンベロープ",
+    "zoom_hint": "スクロールでズーム · ダブルクリックでリセット",
+    "loading_paren": "（読み込み中…）",
+    "time_remaining": "残り約{v}",
+    "no_duration": "継続時間なし",
+    "duration_avg": "平均約{v}分",
+    "name_placeholder": "（名前）",
+    "n_shown": "、{n} 件表示",
+    "cycles_title": "サイクル（{n}）",
+    "pg_detecting": "検出中",
+    "pg_best_marker": "ベスト：{v}",
+    "pg_time_left_model": "残り時間（モデル）",
+    "pg_time_left_model_tip": "モデルが推定する残り時間（フェーズ推定＋MLブレンド）。固定のカウントダウンではありません。",
+    "phase": "フェーズ",
+    "pg_mode_simulate": "シミュレート",
+    "pg_mode_history": "履歴テスト",
+    "pg_mode_sweep": "スイープ",
+    "pg_ev_detected": "検出",
+    "pg_ev_match": "マッチ確定",
+    "pg_ev_match_changed": "マッチ変更",
+    "pg_ev_ambiguous": "あいまい",
+    "pg_ev_unmatched": "マッチなし",
+    "pg_ev_notify_start": "開始通知",
+    "pg_ev_notify_pre": "まもなく完了通知",
+    "pg_ev_notify_finish": "完了通知",
+    "pg_ev_notify_milestone": "マイルストーン通知",
+    "pg_ev_notify_held": "通知保留（サイレント時間）",
+    "pg_ev_finished": "完了",
+    "pg_ended": "終了",
+    "pg_proj_energy": "予測エネルギー",
+    "pg_alert_overrun": "長すぎ",
+    "pg_alert_underrun": "短すぎ",
+    "pg_alert_did_not_finish": "未完了",
+    "pg_alert_false_end": "複数サイクルに分割",
+    "pg_alert_unmatched": "マッチなし",
+    "pg_alert_ambiguous": "あいまいなマッチ",
+    "pg_alert_energy": "エネルギー異常",
+    "pg_newly_correct": "新たに正解",
+    "pg_regressed": "悪化",
+    "pg_end_timing_changed": "終了タイミング変更",
+    "pg_vs_current": "現在との比較",
+    "pg_fixed": "解消",
+    "pg_broke": "不具合発生",
+    "pg_sweep_param": "パラメーター",
+    "pg_objective": "目的",
+    "pg_steps": "ステップ数",
+    "pg_sweep_2d": "2Dヒートマップ",
+    "pg_sweep_param_y": "2番目のパラメーター",
+    "pg_obj_match": "マッチ精度",
+    "pg_obj_endtiming": "終了タイミング精度",
+    "pg_obj_falseend": "誤終了率",
+    "pg_obj_overrun": "所要時間のずれ",
+    "pg_obj_ambiguity": "あいまい率",
+    "pg_best_combo": "最適な組み合わせ",
+    "pg_mode_optimize": "最適化",
+    "pg_group_matching": "プログラムマッチング",
+    "pg_zoom_hint": "ダブルクリックでズームをリセット",
+    "aria_playground_chart2": "インタラクティブなサイクル電力グラフ: ホバーで時刻/電力を表示、スクロールでズーム、ドラッグで移動",
+    "pg_alert_timeout_end": "予測ではなくタイムアウトで終了しました",
+    "pg_alert_indefinite": "いつまでも終了しません",
+    "task_pg_history": "履歴でテスト",
+    "task_pg_sweep": "最適化",
+    "task_reprocess": "再処理",
+    "task_ml_training": "学習",
+    "eta_secs": "~{n}秒残り",
+    "eta_mins": "~{n}分残り",
+    "pg_recent_runs": "最近の実行",
+    "pg_load_run": "この実行を再読み込み",
+    "pg_match_confidence": "マッチ信頼度",
+    "pg_envelope_fit": "エンベロープ適合度",
+    "pg_envelope_fit_tip": "このプロフィールの保存された電力エンベロープ内にサイクルがどれだけ収まっているか。マッチ信頼度とは異なる視点です。",
+    "n_imported_note": "、{n} 件インポート済み",
+    "enable_online": "オンライン機能を有効化",
+    "store_brand": "家電ブランド",
+    "store_model": "家電モデル",
+    "anonymous": "匿名",
+    "rate_quality": "品質を評価",
+    "rate_n": "星{n}つ",
+    "approved_only": "承認済みのみ",
+    "adopt_settings": "設定も引き継ぐ",
+    "flags": "フラグ",
+    "include_phase_map": "フェーズマップを含める",
+    "include_settings": "検出・マッチング設定を含める",
+    "show_contributor": "投稿者名を表示"
+  },
+  "log": {
+    "all_levels": "すべてのレベル",
+    "all_devices": "すべてのデバイス",
+    "all_components": "すべてのコンポーネント",
+    "search_ph": "ログを検索…"
+  },
+  "ml": {
+    "builtin_models": "● 組み込みモデルの使用",
+    "fit_fair": "普通",
+    "fit_good": "良い",
+    "fit_slight": "わずかに",
+    "fit_strong": "強い",
+    "fit_weak": "弱い",
+    "fit_word": "フィット",
+    "personalized": "● このマシンに合わせてカスタマイズ可能",
+    "better_than_baseline": "ベースライン推定より {pct}% 良好（{metric}）",
+    "trend_improving_tip": "このモデルのフィットは最近の再チェックで改善しました。",
+    "trend_declining_tip": "このモデルのフィットは最近の再チェックで低下しました。さらにサイクルをレビューすると再学習に役立つ場合があります。",
+    "trend_steady_tip": "このモデルのフィットは最近の再チェックでおおむね安定しています。",
+    "cap_blurb": {
+      "end": "サイクルが本当に終了したタイミングを把握する",
+      "live_match": "実行中のプログラムをより早く識別する",
+      "quality": "誤検出や不完全なサイクルを見つける",
+      "remaining_time": "残り時間を予測する",
+      "total_energy": "総消費エネルギーとコストを予測する"
+    },
+    "cap_label": {
+      "end": "サイクル終了の検出",
+      "live_match": "プログラム照合",
+      "quality": "サイクル品質チェック",
+      "remaining_time": "残り時間の推定",
+      "total_energy": "エネルギー推定"
+    },
+    "metric_auc": "検証データでの AUC {auc}",
+    "metric_mae": "誤差 {model} vs ベースライン {baseline}"
+  },
+  "modal": {
+    "auto_label": "自動ラベル付けサイクル",
+    "correct_feedback": "正しいフィードバック",
+    "create_profile": "プロファイルの作成",
+    "cycle": "サイクル",
+    "edit_group": "プロファイルグループを編集",
+    "edit_phase": "編集フェーズ",
+    "import_config": "設定のインポート",
+    "label_cycle": "ラベルサイクル",
+    "merge_cycles": "{n} サイクルを結合",
+    "new_group": "新しいプロファイルグループ",
+    "new_phase": "新しいフェーズ",
+    "process_history_msg": "マッチングを再実行し、提案を更新し、ML を再訓練（有効な場合）し、保存されているすべてのサイクルのサイクル状態を再計算します。これには時間がかかる場合があります。",
+    "process_history_ok": "処理",
+    "process_history_title": "履歴の処理",
+    "process_recording": "プロセスの記録",
+    "delete_maintenance_msg": "このメンテナンス記録を削除しますか? この操作は元に戻せません。",
+    "delete_maintenance_title": "メンテナンスイベントを削除",
+    "relabel_cycles": "{count} 件のサイクルを再ラベル付け",
+    "delete_automation_title": "オートメーションを削除",
+    "delete_automation_msg": "オートメーション「{name}」を Home Assistant から削除しますか？この操作は元に戻せません。",
+    "remove_legacy_title": "従来のアクションを削除",
+    "remove_legacy_msg": "従来のカスタムアクションを削除しますか？サイクルイベントでの発火が停止します。この操作はパネルから元に戻せません。",
+    "discard_recording_title": "録音を破棄",
+    "discard_recording_msg": "保存された録音を破棄しますか？この操作は元に戻せません。",
+    "dismiss_all_title": "すべてのフィードバックを却下",
+    "dismiss_all_msg": "保留中の {count} 件のフィードバックリクエストをすべて却下しますか？",
+    "dismiss_all_ok": "すべて却下",
+    "delete_phase_title": "フェーズを削除",
+    "delete_phase_msg": "フェーズ「{name}」を削除しますか？",
+    "clear_debug_title": "デバッグデータをクリア",
+    "clear_debug_msg": "保存されているすべてのデバッグトレースを削除しますか？",
+    "wipe_all_title": "すべてのデータを消去",
+    "wipe_all_msg": "⚠️ すべてのサイクルとプロファイルを完全に削除します。この操作は元に戻せません。",
+    "wipe_all_ok": "すべて消去",
+    "force_stop_title": "サイクルを強制停止",
+    "force_stop_msg": "アクティブなサイクルを今すぐ強制停止しますか？サイクルは中断として保存されます。",
+    "store_import": "基準サイクルをインポート",
+    "store_share": "コミュニティストアに共有",
+    "store_share_device": "このデバイスを共有"
+  },
+  "msg": {
+    "appliance_monitor": "アプライアンスモニター",
+    "artifact_dip_detail": "通常の電力帯の下側に約{n}秒間落ちました。",
+    "artifact_footer": "上のグラフで強調表示されています。これらは一時的なアーチファクト (サイクルの途中でドアが開いたなど) であり、必ずしも問題があるわけではありません。",
+    "artifact_header": "このサイクル中に {n} 個の異常が検出されました",
+    "artifact_pause_detail": "電力が約{n}秒間ほぼゼロに落ちた後、再開されました。サイクルの途中でドアが開かれたか、一時停止された可能性があります。",
+    "artifact_spike_detail": "通常の電力帯の上側に約{n}秒間現れました。",
+    "auto_label_intro": "一致信頼度がしきい値をクリアするラベルのないサイクルにプロファイルを割り当てます。",
+    "automations_intro": "WashData は {start} / {end} イベントを発火しエンティティを公開するため、通知やアクションは通常の Home Assistant オートメーションとして構築するのが最適です。このデバイスを使用するオートメーションは以下に表示されます。",
+    "cleanup_intro": "すべてのラベル付きサイクルがオーバーレイされます。外れ値にチェックを入れて削除し、プロファイルをクリーンアップします。",
+    "clear_debug_hint": "保存されているデバッグ データを削除して領域を解放します。",
+    "collecting_data": "データを収集中です。微調整を開始するにはあと {need} サイクル{plural}必要です（{current}/{min}）。",
+    "compare_overlay_profiles": "オーバーレイプロファイル (淡い)",
+    "compare_profiles_tip": "他のプロファイル エンベロープを上のチャートに重ねて、どれがこのサイクルに最も適合するかを確認します。",
+    "compare_selected_cycles": "選択されたサイクル (実線) — 表示/非表示",
+    "consider_new_profile": "新しいプロファイルの作成を検討してください。",
+    "coverage_gap": "最近のサイクルには一致するプロファイルがありません (過去 30 回の {pct}%)。",
+    "coverage_gap_similar_cycles": "{count} 件の類似した未ラベルサイクルが見つかりました — プロファイルを作成してマッチングを開始してください。",
+    "cycles_deleted": "{count} 件のサイクルを削除しました",
+    "enough_data": "学習に十分なデータがあります（{current}/{min} サイクル）。",
+    "export_description": "すべてのプロファイルとサイクルを JSON にエクスポートするか、以前のエクスポートから復元します。",
+    "feedback_cycles_pending": "レビューが必要なサイクル: {n}件{s}",
+    "feedback_prompt": "それが正しかったことを確認し、プログラムを修正するか、無視してください。",
+    "filter_by_profile": "プロファイルでフィルター…",
+    "group_modal_help": "温度/スピンが異なる同じ形状のグループ プログラム (期間は異なる場合があります)。マッチングでは、グループを 1 つの候補としてスコア付けし、最も適合するメンバーを選択します。少なくとも 2 つ選択してください。オーバーレイは、それらがどれだけ似ているかを示します。",
+    "group_not_cohesive": "これらのプロファイルは、確実にグループ化できるほど類似していないため、外れ値を削除するかグループを分割するまで、マッチングでは個別に扱われます。",
+    "group_preview_hint": "2つ以上のメンバーを選択してパワーカーブをプレビュー・比較できます。",
+    "import_intro": "エクスポートされたファイルをロードするか、以下の JSON ペイロードを貼り付けます。",
+    "legacy_actions_title": "{count} 個の従来のカスタム アクションが引き続き実行中",
+    "live_chart_loading": "測定値が到着すると、ライブパワーチャートが表示されます。",
+    "loading": "読み込み中…",
+    "loading_curve": "荷重曲線…",
+    "loading_settings": "設定を読み込み中…",
+    "log_buffer_hint": "新しい順 · 再起動以降の最後の 500 ha_washdata レコードをバッファします · 下端をドラッグしてサイズ変更します。",
+    "maintenance_advisory": "持続時間/エネルギーの増加は、器具のメンテナンスが必要であることを示している可能性があります (スケール除去、フィルターの掃除など)。",
+    "maintenance_due": "メンテナンス時期: {items}",
+    "maintenance_intro": "この家電に対して行ったメンテナンスを記録すると、各作業の次回時期にリマインドされます。",
+    "maintenance_load_error": "メンテナンスデータを読み込めませんでした: {error}",
+    "maintenance_requires_access": "メンテナンスとエクスポート/インポートにはフルアクセスが必要です。",
+    "manual_duration_hint": "プロファイルの平均/予想サイクル長。残り時間の推定に使用されます。編集して設定します。変更しないままにすると、現在の値が維持されます。",
+    "matching_tuning_intro": "学習時に、WashData はプログラム マッチングによって形状と持続時間およびエネルギーをどの程度重みづけるかも調整します。",
+    "merge_intro": "選択したサイクルが 1 つに結合されます (時系列順、ギャップは 0 W で埋められます)。結果として得られるプロファイルを選択します。",
+    "ml_intro": "WashData には、すぐに使えるスマート モデルが同梱されています。",
+    "ml_learned_intro": "本機に合わせてチューニングされたモデル。",
+    "ml_loading": "ML を読み込み中…",
+    "ml_settings_intro": "2 つの独立したスイッチ: 1 つはサイクルの実行中にモデルを適用し、もう 1 つは WashData が時間の経過とともにモデルをマシンに合わせて微調整します。",
+    "name_first_program": "十分なサイクルがそろいました — 最初のプログラムに名前を付けて一致を開始しましょう。",
+    "near_duplicate_cluster": "ほぼ重複したプロファイル クラスターが検出されました。グループ化により、類似したもの (例: 異なる温度/スピンの同じプログラム) の間でマッチングを確実に選択できるようになります。",
+    "no_cycles_match": "現在のフィルターに一致するサイクルはありません。",
+    "no_cycles_profile": "このプロファイルにはサイクルがありません。",
+    "no_cycles_selected": "まずサイクルを 1 つ以上選択してください。",
+    "no_cycles_yet": "まだサイクルが記録されていません。",
+    "no_device_selected": "デバイスが選択されていません。",
+    "no_devices": "WashData デバイスはまだ構成されていません。",
+    "no_envelope": "エンベロープはまだありません - ラベル付けサイクル後に再構築します。",
+    "no_envelope_overlay": "オーバーレイできる封筒がありません。",
+    "no_fine_tuned": "まだ何も微調整されていません。WashData は組み込みモデルを使用しています。",
+    "no_logs": "ログレコードはまだバッファされていません。",
+    "no_maintenance": "メンテナンスの記録はまだありません。",
+    "no_match_yet": "まだ一致の試行がありません - これは実行サイクル中に設定されます。",
+    "no_other_users": "他のホーム アシスタント ユーザーは見つかりませんでした。",
+    "no_phases": "フェーズは定義されていません。",
+    "no_phases_assigned": "フェーズが割り当てられていません。",
+    "no_profiles_compare": "比較するプロファイルがありません。",
+    "no_profiles_overlay": "オーバーレイするプロファイルがありません。",
+    "no_profiles_yet": "まだプロフィールはありません。ラベル付きサイクルからサイクルを作成します。",
+    "no_profiles_yet_short": "まだプロフィールはありません。",
+    "no_settings_match": "「{q}」に一致する設定はありません",
+    "no_split_points": "まだ分​​割ポイントはありません。",
+    "no_suggestions": "積極的な提案はありません。",
+    "notify_services_hint": "{entity} サービス ID を使用してください（複数はカンマ区切り）。テンプレート変数：{vars}。",
+    "old_actions_warning": "古いアクション エディター (現在は削除されています) で構成されています。これらは引き続きサイクル イベントで起動されますが、ここでは編集できなくなりました。それらを通常のオートメーションに変換するか、削除します。",
+    "onboarding_progress": "{n} / 3 サイクルを観測",
+    "onboarding_watching": "家電をいつも通り使用してください — WashData が監視しています。3 サイクル後にプログラムの一致が始まります。",
+    "pending_feedback": "保留中の検出フィードバック",
+    "performance_trend": "パフォーマンスの傾向 ({n} サイクル)",
+    "pg_analysis_empty": "マッチ分析を見るにはサイクルを読み込んでください。",
+    "pg_apply_confirm": "最適値を適用: {label} = {value}?",
+    "pg_canvas_empty": "上でサイクルを選択し、「読み込み」を押すと電力トレースが表示されます。",
+    "pg_chart_caption": "{param} の値ごとの検出/マッチ率",
+    "pg_match_rate": "{total} サイクルで {pct}% のマッチ率",
+    "pg_restart_note": "シミュレーションツールを有効にするには Home Assistant を再起動してください。",
+    "pg_sim_progress": "{done} / {total} サイクル",
+    "pg_starting": "開始中…",
+    "pg_sweep_intro": "もし {param} が違っていたら? 最も多くのサイクルが正しくマッチする設定を見つけるため、直近 {cycles} サイクルにわたって {steps} 個の値をテストします。",
+    "pg_sweep_step": "ステップ {done} / {total}",
+    "pg_undetected": "{n} 件のサイクル{s}が未検出",
+    "pg_verdict_bad": "要注意: 多くのサイクルが検出されずに終わっています。",
+    "pg_verdict_good": "よく調整されています: ほとんどのサイクルが正しく識別・マッチされています。",
+    "pg_verdict_ok": "許容範囲: 一部のサイクルを見逃しています。開始しきい値を下げてみてください。",
+    "phase_catalog_intro": "サイクルの名前付きセグメント (前洗浄、加熱、脱水など)。コントロール パネルからプロファイルにそれらを割り当てます。",
+    "phase_ranges_intro": "位相範囲 (サイクル開始からの分) が平均曲線に重ねられます。値を編​​集してライブでプレビューします。",
+    "playground_intro": "過去のサイクルを異なる設定で再生し、2 つの構成を並べて比較し、サイクルがプロフィールにどう整合するかを確認できる安全なサンドボックスです。明示的に適用するまで、ここでの操作が実データを変更することはありません。",
+    "playground_needs_restart": "プレイグラウンドツールを有効にするには Home Assistant を再起動してください。",
+    "preferences_admin": "設定、パネル、アクセス制御",
+    "preferences_adv": "設定",
+    "prefs_personal": "これらはホーム アシスタント アカウントにのみ適用されます。",
+    "process_history_hint": "保存されているすべてのサイクルに対してマッチングを再実行し、チューニング提案を更新し、MLモデルを再訓練し（有効な場合）、サイクルの健全性を再計算します。一括レビュー後に実行してください。",
+    "profile_deleted": "プロフィールを削除しました",
+    "profile_poor_health_detail": "このプロファイルに割り当てられたサイクルには、形状が一貫していないか、信頼性が低いです。エンベロープを再構築するか、ラベル付きサイクルを確認することを検討してください。",
+    "profiles_intro": "プロファイルをクリックすると、統計、フェーズ、クリーンアップが表示されます。ほぼ同一のプログラム (同じ形状/持続時間、異なる温度またはスピン) をグループ化して、それらの間でマッチングを確実に選択します。",
+    "rbac_hint": "オフの場合、すべてのホーム アシスタント ユーザーはフル アクセス権を持ちます (デフォルト)。管理者は常に完全なアクセス権を持ち、全員を管理できます。",
+    "recent_logs": "最近の ha_washdata レコード",
+    "recording_in_progress": "録音中です",
+    "reminders_intro": "最後のサービスからこのサイクル数が経過した後にパネルにリマインダーを表示します。空欄または 0 でリマインダーをオフにします。",
+    "restart_gap_footer": "グラフ上でハイライト表示されます。これらの区間では電力データが欠損しています。マッチングには実際の計測値のみを使用しました。",
+    "restart_gap_header": "{n} HA 再起動ギャップ（このサイクル中）",
+    "restart_gap_item": "{dur} の欠損",
+    "review_confirm_help": "このサイクルが正しく検出されたかどうかを確認します。レビューによってマシン上でモデルがトレーニングされます。確認するサイクルが増えるほど、マッチングと健全性のスコアが向上します。簡単な「良い/悪い」で十分です。",
+    "review_in_settings": "設定で確認する",
+    "review_notes_placeholder": "注記 (オプション)",
+    "review_notes_tip": "自分の参照用の自由記述メモ。マッチングやトレーニングでは使用されません。",
+    "review_profile_tip": "このサイクルにラベルが付けられているプログラム。自動検出されたプログラムが間違っていた場合は、ここで修正します。ラベル付けにより、将来のサイクルのマッチングが教示されます。",
+    "review_quality_tip": "このサイクルはなんてクリーンなんだろう。良い = このプログラムの教科書的な例。 Bad = 検出されましたが、ノイズが多いか異常です。使用できない = 誤検出 (マージ、切り捨て、または偽)。ヘルススコアと、モデルのトレーニングに許可されるサイクルを決定します。",
+    "review_recorded_tip": "これをプログラム用に厳選された参照サイクルとしてマークします。これは、手動で記録されたサイクルと同じ役割です。参照サイクルは常に保持され、一致するテンプレートにシードされ、クリーンアップによって削除されることはありません。 (これは「ゴールデン」/記録済みフラグです。両方とも同じものです。)",
+    "review_tags_tip": "このサイクルで何が問題だったかを説明するオプションのフラグ。トレーニングとクリーンアップで問題を解決できます。",
+    "review_to_cycles": "Cycles レビューキューを開く",
+    "saving_triggers_reload": "保存すると統合のリロードがトリガーされます。 HA エンティティが一時的に利用不可として表示される場合があります。",
+    "search_placeholder": "検索設定…",
+    "see_recorder": "以下のレコーダー ウィジェットを参照してください",
+    "setting_changed": "{date} に {old} から {new} に変更",
+    "settings_basic_note": "必須の設定のみ表示しています。すべての一覧は「高度な」に切り替えてください。",
+    "shape_drift_advisory": "⚠ 形状がずれています",
+    "shape_drift_detail": "このプロファイルの電力パターンが時間とともに変化しました — 家電の劣化またはメンテナンスが必要な可能性があります（例：スケール除去、フィルター清掃）。",
+    "show_all_settings": "すべての設定を表示",
+    "showing_suggestions": "{count} 設定を候補とともに表示しています。",
+    "split_intro": "グラフをクリックして分割ポイントを追加または削除するか、アイドル ギャップを自動検出します。結果として得られる各セグメントは、独自のプロファイルを取得できます。",
+    "storage_diagnostics": "ストレージ統計、メンテナンス、エクスポート/インポート",
+    "sug_staged": "{key} = {val} を設定しました。保存して適用してください。",
+    "toast_auto_detect_enabled": "自動検出が有効になりました",
+    "toast_auto_label_complete": "自動ラベル付けが完了しました",
+    "toast_auto_label_failed": "自動ラベル付けに失敗しました: {error}",
+    "toast_automation_failed": "オートメーションを作成できませんでした: {error}",
+    "toast_automation_migrated": "アクションをオートメーションに移行しました。エディタを開いています",
+    "toast_convert_failed": "変換に失敗しました: {error}",
+    "toast_create_failed": "作成に失敗しました: {error}",
+    "toast_delete_failed": "削除に失敗しました: {error}",
+    "toast_error": "エラー: {error}",
+    "toast_failed": "失敗しました: {error}",
+    "toast_force_stop_failed": "強制停止に失敗しました: {error}",
+    "toast_name_required": "名前が必要です",
+    "toast_no_automation": "ここではオートメーションを作成できません",
+    "toast_profile_name_required": "プロファイル名が必要です",
+    "toast_program_set": "プログラムを設定しました: {program}",
+    "toast_rebuild_failed": "再構築に失敗しました: {error}",
+    "toast_resume_failed": "再開に失敗しました: {error}",
+    "toast_revert_failed": "元に戻すことに失敗しました: {error}",
+    "toast_reverted": "{key}を元に戻しました",
+    "toast_save_failed": "保存に失敗しました: {error}",
+    "trend_duration_longer": "期間は長くなる傾向にあります ({pct}%/サイクル) - 最近の平均 {avg}",
+    "trend_duration_shorter": "期間は短くなる傾向にあります ({pct}%/サイクル) - 最近の平均 {avg}",
+    "trend_energy_down": "エネルギーは減少傾向にあります ({pct}%/サイクル)",
+    "trend_energy_up": "エネルギーは増加傾向にあります ({pct}%/サイクル) - 最近の平均 {avg}",
+    "trim_intro": "赤いハンドルをドラッグするか、値を入力します。窓の外側のものはすべて削除されます。",
+    "tuning_suggestions_available": "{count} 観察されたサイクルから得られる調整提案。これらは関連するフィールドの横に表示されます。",
+    "unsure_detected_prefix": "WashData が検出したかどうかは不明",
+    "updated": "更新",
+    "warmup_badge": "学習中 ({done}/{needed} サイクル)",
+    "warmup_detail": "このプロファイルは自動マッチングが開始されるまで {needed} 個のラベル付きサイクルが必要です。確認されたサイクルごとに学習が進みます。",
+    "wipe_history_warning": "すべてのサイクルとプロファイルを完全に削除します。元に戻すことはできません。",
+    "compare_overlay_tip": "学習済みプロファイルのエンベロープを重ねて、各サイクルがどのプログラムに似ているかを確認します。",
+    "duration_trend_up_tip": "継続時間の増加（{pct}%/サイクル）",
+    "duration_trend_down_tip": "継続時間の減少（{pct}%/サイクル）",
+    "energy_trend_up_tip": "エネルギーの増加（{pct}%/サイクル）",
+    "energy_trend_down_tip": "エネルギーの減少（{pct}%/サイクル）",
+    "performance_trending": "パフォーマンスの傾向",
+    "pg_select_cycle_hint": "サイクルを選択し、↺ をクリックして読み込みます",
+    "pg_sweep_progress": "ステップ {done} / {total}",
+    "pg_analysis_hint": "サイクルを選択し、↺ をクリックして分析を読み込みます。",
+    "diagnostics_load_failed": "診断を読み込めませんでした: {error}",
+    "manual_duration_ref_hint": "基準サイクルが選択されていない場合にのみ使用されます。基準サイクルは、自身の長さから持続時間を設定します。",
+    "toast_convert_rolled_back": "変換に失敗し、ロールバックされました（オートメーションは残っていません）: {error}",
+    "toast_convert_orphan": "オートメーションは作成されましたが、古いアクションのクリアに失敗しました。再試行しないでください。オートメーションの重複を避けるため、古いアクションを手動で削除してください。",
+    "advisory_duration_trend_up": "'{name}' のサイクルが次第に長くなっています（1サイクルあたり約 +{pct}%）。機器の動作が変わった場合は、このプロファイルを再記録または再構築してください。",
+    "advisory_energy_trend_up": "'{name}' の消費エネルギーが次第に増えています（1サイクルあたり約 +{pct}%）。想定外であれば機器を確認することをおすすめします。",
+    "advisory_poor_health": "'{name}' の適合スコアが低くなっています。最近のサイクルはばらつきが大きい、または照合が弱いようです。照合と時間推定の精度を保つため、サイクルを確認するかプロファイルを再記録してください。",
+    "advisory_shape_drift": "'{name}' が元の電力波形から大きく変化しています。機器の動作が時間とともに変わった可能性があります（例: 石灰の付着、摩耗）。最近のサイクルでこのプロファイルを再記録することを検討してください。",
+    "advisory_shape_drift_corr": "'{name}' が元の電力波形から大きく変化しています（相関 {corr}）。機器の動作が時間とともに変わった可能性があります（例: 石灰の付着、摩耗）。最近のサイクルでこのプロファイルを再記録することを検討してください。",
+    "pg_no_alerts": "この実行で問題は検出されませんでした。",
+    "pg_override_active": "編集した設定を現在の設定と比較して使用中",
+    "pg_history_intro": "直近のサイクルを実際の検出器とマッチャーで再生します。ビフォー/アフターの比較を見るには、まず「シミュレート」で検出設定を編集してください。",
+    "pg_history_empty": "「実行」を押してサイクルを再生します。",
+    "pg_history_summary": "{detected}/{total} 検出 · {correct} 正しくマッチ",
+    "pg_sweep_no_metric": "この目的を評価するにはデータが不足しています。",
+    "pg_sweep_intro2": "直近のサイクル全体で目的を最もよく満たす設定を見つけます。適用するまで何も変更されません。",
+    "pg_running_history": "サイクルを再生しています…",
+    "pg_running_sweep": "全サイクルで値を検証しています…",
+    "pg_row_load_hint": "このサイクルを上のグラフに読み込む",
+    "pg_history_intro2": "上記の設定で、最近のサイクルを実際の検出器とマッチャーで再生します。行をクリックするとそのサイクルをグラフに読み込みます。設定を変更すると、変更前後の比較が表示されます。",
+    "pg_simulating": "サイクルをシミュレーションしています…",
+    "pg_canvas_empty2": "上でサイクルを選び、「実行」を押してシミュレーションします。その後、ホバーで値を表示、スクロールでズーム、ドラッグで移動できます。",
+    "pg_apply_settings_confirm": "これら {n} 件の設定をこのデバイスに保存しますか？ {list}",
+    "no_logs_match": "これらのフィルターに一致するログレコードはありません。",
+    "pg_analysis_hint2": "サイクルを選択して「実行」を押すと、マッチ分析が読み込まれます。",
+    "pg_analysis_empty2": "「実行」を押すとマッチ分析が表示されます。",
+    "imported_readonly": "コミュニティストアからインポートしました。参照とマッチングのために表示されます。統計には含まれず、編集できません。",
+    "merge_no_imports": "インポートした録音は実際のサイクルに統合できません。統合するには選択を解除してください。",
+    "store_enable_hint": "設定でオンライン機能を有効にすると、コミュニティの基準サイクルを閲覧・インポートできます。",
+    "online_intro": "他の WashData ユーザーと基準サイクルを共有・ダウンロードできます。すべてのオンライン機能はオプトインで、デフォルトではオフです。",
+    "store_share_intro": "この基準サイクルをアップロードすると、同じ家電を持つ他のユーザーが利用できます。公開前に審査されます。",
+    "online_intro_global": "他の WashData ユーザーと基準録音を閲覧・共有し、家電エントリを確認できます。1 つの接続が WashData 統合全体に適用されます。家電のブランドとモデルは「基本設定」でデバイスごとに設定します。すべてのオンライン機能はオプトインで、デフォルトではオフです。",
+    "online_unavailable": "このサーバーではオンライン機能を利用できません。",
+    "store_picker_offline": "設定（歯車アイコン）でオンライン機能を有効にすると、コミュニティカタログから選択できます。",
+    "pick_brand_first": "先に家電ブランドを選択してください。",
+    "model_not_found": "まだカタログにありません。",
+    "connect_to_confirm": "確認や評価を行うには、設定（歯車アイコン）で接続してください。",
+    "adopt_settings_hint": "このデバイスの検出・マッチングしきい値を共有されたものに上書きします。通知、エンティティ、電力料金は変更されません。",
+    "include_settings_hint": "このデバイスの認識・マッチングしきい値を共有します（通知、エンティティ、電力料金は除く）。引き継ぐかどうかは引継ぎ側が選択します。",
+    "onboard_download": "新しいデバイスですか？同じ機器を持つ他のWashDataユーザーの既成セットアップ（プログラム、リファレンスサイクル、フェーズ）を引き継ぎましょう。",
+    "share_consent": "これらのサイクルが中断なく正常に完了したことを確認します",
+    "share_device_none": "まだ共有できるサイクルがありません。サイクルタブで記録または手動選択したサイクルをリファレンスサイクル（⭐）として先にマークしてください。",
+    "share_guideline_naming": "各プロファイルは機器のダイヤルやディスプレイに表示されている通りに名前を付けてください（例：'Cotton 40'、'Eco 60'）。",
+    "share_guideline_quality": "正常に完了したサイクルのみ共有してください -- サイクル途中の中断、ドア開放、電力の乱れがないものに限ります。",
+    "share_guideline_review": "アップロードは審査中として開始され、十分なコミュニティメンバーが確認すると公開されます。",
+    "share_guidelines_title": "共有前に",
+    "store_download_device_intro": "共有されたすべてのプログラムとそのリファレンスサイクルをデバイスに引き継ぎます。ご自身の記録済みサイクルと統計には影響しません。",
+    "store_share_device_intro": "選択したリファレンスサイクルとともに{brand} {model}をアップロードします。同じ機器を持つ他のユーザーがあなたのプログラムを引き継ぐことができます。エントリは公開前に審査されます。",
+    "share_profile_no_cycles": "リファレンスサイクルなし -- サイクルタブでサイクルを⭐としてマークしてこのプロファイルを含めてください"
+  },
+  "pg_desc": {
+    "abrupt_drop_watts": "急激な低下は即時終了として扱う",
+    "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
+    "end_repeat_count": "終了前に連続する低い測定値の回数",
+    "interrupted_min_seconds": "短いサイクルは中断としてフラグ付け",
+    "min_off_gap": "2つのサイクルを分けるのに必要な間隔",
+    "off_delay": "サイクル終了までの低電力の秒数",
+    "start_duration_threshold": "開始を確定するしきい値超えの秒数",
+    "start_threshold_w": "開始とみなす最小ワット数",
+    "stop_threshold_w": "これを下回ると停止とみなす",
+    "dtw_bandwidth": "形状マッチングで許容する時間ワーピングの量",
+    "corr_weight": "マッチングにおける曲線形状と電力レベルの重み",
+    "duration_weight": "実行時間の一致がマッチングに与える影響の大きさ",
+    "energy_weight": "消費電力量の一致がマッチングに与える影響の大きさ",
+    "profile_match_min_duration_ratio": "一致対象として許可される最短の運転時間（プロファイル比）",
+    "profile_match_max_duration_ratio": "一致対象として許可される最長の運転時間（プロファイル比）"
+  },
+  "phase_desc": {
+    "anti_crease": "メインサイクル後にドラムが断続的に回転し、衣類のシワを防止します。",
+    "anti_wrinkle": "メインサイクル後にドラムが断続的に回転し、衣類のシワを防止します。",
+    "cool_down": "サイクル終了近くで熱を伴わないタンブリング。",
+    "drain_and_switch": "洗濯モードから乾燥モードへの移行期間。",
+    "dry": "ヒーターや余熱を使用した乾燥ステージ。",
+    "drying": "メインの加熱タンブリング期間。",
+    "heat_up": "完全な乾燥が始まる前に最初のヒーターのウォームアップを行います。",
+    "pre_rinse": "洗剤で洗う前の最初のスプレーダウン。",
+    "pre_wash": "本洗浄前の最初の浸漬または前処理。",
+    "rinse": "浄水すすぎ段階。このフェーズは複数回繰り返される場合があります。",
+    "sanitize": "消毒プログラム用の高温洗浄ステージ。",
+    "sensor_check": "乾燥度を測定する間、低電力で短い一時停止を行います。",
+    "soak": "アクティブな洗浄ステージ間の低アクティビティの浸漬期間。",
+    "soak_dw": "重い土壌の場合は浸漬期間を延長します。",
+    "spin": "負荷から水を除去する高速抽出。",
+    "spin_wd": "乾燥移行前の高速抽出。",
+    "wash": "ドラムの動きとオプションの加熱を伴うメインの洗濯サイクル。",
+    "wash_dw": "主な洗剤は加熱しながら洗浄します。"
+  },
+  "placeholder": {
+    "add": "追加…",
+    "group_name": "例：綿 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
+    "notify": "通知サービスを追加…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "人を追加…",
+    "phase_name": "例：予洗い",
+    "profile_name": "例：綿 40°C",
+    "maintenance_notes": "例: フィルター交換、ドアパッキンの清掃",
+    "store_brand": "例: Bosch",
+    "store_model": "例: WAT28401"
+  },
+  "pref": {
+    "date_absolute": "絶対 (例: 7 月 2 日 14:32)",
+    "date_relative": "相対的 (例: 2 時間前)",
+    "lang_auto": "システムデフォルト（{lang}）",
+    "lang_en": "英語",
+    "use_panel_default": "（パネルデフォルト）"
+  },
+  "quality": {
+    "bad": "悪い",
+    "good": "良い",
+    "unusable": "使用不可"
+  },
+  "section": {
+    "anti_wrinkle": {
+      "intro": "しわ防止モードは、メインフェーズ後の低電力タンブルパルスを検出し、終了したサイクルに付加します。",
+      "label": "しわ防止"
+    },
+    "basic": {
+      "intro": "コアとなる識別情報と、ほとんどの設定に必要な基本事項。",
+      "label": "基本"
+    },
+    "delay": {
+      "intro": "遅延スタート検出は、家電製品に電源が入っているがサイクルがまだ開始されていない状態を識別します。",
+      "label": "遅延スタート"
+    },
+    "detection": {
+      "intro": "サイクルの開始・実行・終了の検出方法。",
+      "label": "検出"
+    },
+    "matching": {
+      "intro": "終了したサイクルを学習済みプロファイルに照合してラベル付けする方法。",
+      "label": "マッチング"
+    },
+    "ml_training": {
+      "intro": "デバイス上の機械学習の再トレーニングスケジュールとデータ設定。",
+      "label": "MLトレーニング"
+    },
+    "notifications": {
+      "intro": "サイクルイベントの通知タイミングと方法。",
+      "label": "通知"
+    },
+    "timing": {
+      "intro": "バックグラウンドの実行間隔、オフライン監視、およびハウスキーピング。",
+      "label": "タイミングと監視"
+    },
+    "triggers": {
+      "intro": "オプションの外部信号：終了トリガー、ドアセンサー、一時停止スイッチ、取り出しリマインダー。",
+      "label": "トリガーとドア"
+    }
+  },
+  "setting": {
+    "abrupt_drop_ratio": {
+      "doc": "現在の電力のこの割合よりも大きな低下も突然として扱われます (0.6 = 60% の低下)。アプライアンスのサイズ全体でワットしきい値を補完します。",
+      "label": "急激な降下比率"
+    },
+    "abrupt_drop_watts": {
+      "doc": "これよりも大きな電力低下は、自然な終了ではなく、サイクルに中断 (手動キャンセル) としてフラグを立てます。",
+      "label": "急激な降下"
+    },
+    "anti_wrinkle_enabled": {
+      "doc": "乾燥機が主加熱フェーズの後に発する短い低電力タンブル パルスを認識し、新しいサイクルとして読み取るのではなく、終了したサイクルに接続したままにします。",
+      "label": "しわ防止検出を有効化"
+    },
+    "anti_wrinkle_exit_power": {
+      "doc": "しわ防止モードがアクティブな状態を維持するには、パルス間の電力がこれを下回る必要があります。",
+      "label": "終了電力しきい値"
+    },
+    "anti_wrinkle_max_duration": {
+      "doc": "これより長いパルスは、しわ防止タンブルではなく実際のサイクルとして扱われます。",
+      "label": "最大継続時間"
+    },
+    "anti_wrinkle_max_power": {
+      "doc": "このパワーを超えるパルスは、しわ防止タンブルではなく、実際の新しいサイクルとして扱われます。タンブルパルス出力のすぐ上に設定します。",
+      "label": "しわ防止最大電力"
+    },
+    "auto_label_confidence": {
+      "doc": "サイクル終了時の一致スコアがこれ以上の場合、プログラムには確認プロンプトなしで自動的にラベルが付けられます。自動ラベル付けの前に、より高い確実性を要求するには、この値を上げます。さらに自動化するには、値を下げます。その下の Learning Confidence と連動して機能します。",
+      "label": "自動ラベル信頼度"
+    },
+    "auto_maintenance": {
+      "doc": "夜間のハウスキーピングを実行します。プロファイル エンベロープを再構築し、サイクルの健全性を再計算し、デバッグ トレースを整理し、最新のサイクルを保持します。",
+      "label": "自動メンテナンス（夜間クリーンアップ）"
+    },
+    "completion_min_seconds": {
+      "doc": "これより短いサイクルはゴースト サイクル (テスト実行、靴下を追加するためにドアを開ける) として破棄されます。",
+      "label": "サイクル最小時間"
+    },
+    "delay_confirm_seconds": {
+      "doc": "アプライアンスが実行中ではなく起動待機中として扱われる前に、電力はこの時間スタンバイ帯域に留まる必要があります。",
+      "label": "確認秒数"
+    },
+    "delay_start_detect_enabled": {
+      "doc": "アプライアンスが電源オンで待機中 (遅延開始/スタンバイ) であるが、サイクルが開始されていないことを検出します。そのため、スタンバイ描画が実行サイクルと誤認されません。",
+      "label": "遅延スタート検出を有効化"
+    },
+    "delay_timeout_hours": {
+      "doc": "この時間が経過したら遅延開始モードでの待機を停止し、アイドル状態に戻ります。これにより、電源が入ったままのまま起動されなかったマシンが永遠に待機することがなくなります。",
+      "label": "タイムアウト時間"
+    },
+    "device_type": {
+      "doc": "アプライアンスクラス。 Sets sensible detection defaults (thresholds, off-delay, end handling) tuned for that appliance type; change it only if the device was originally set up as the wrong type.",
+      "label": "デバイスタイプ"
+    },
+    "door_sensor_entity": {
+      "doc": "オプションのドアバイナリセンサー。サイクル後にアプライアンスが開かれた/アンロードされたことを検出するために使用されます。",
+      "label": "ドアセンサーエンティティ"
+    },
+    "duration_tolerance": {
+      "doc": "残り時間の推定値の許容範囲 (学習フィードバック、一致ではない)。実際の継続時間が推定値の +/-X% 以内であれば、良好な一致としてカウントされます。",
+      "label": "推定許容誤差"
+    },
+    "enable_ml_models": {
+      "doc": "サイクルの実行中に、モデルにライブ結果を改良させます。つまり、より安定した残り時間とエネルギー/コストの推定、および終了検出時の早期停止防止ガード (終了を遅らせることしかできず、早期に終了することはなく、制限されています)。利用可能な場合は微調整されたモデルを使用し、それ以外の場合は組み込みモデルを使用します。オフ = 従来の電源ベースのロジックのみ (依然として信頼性があります)。",
+      "label": "サイクル中にスマートモデルを適用"
+    },
+    "end_energy_threshold": {
+      "doc": "オフディレーのカウントダウン中に、蓄積されたエネルギー (ワット x 時間) がこのしきい値と比較されます。それを超えると、カウントダウンがリセットされ、しわ防止タンブルと食器洗い機乾燥テールを短くするのではなく、サイクルに取り付けたままにします。クールダウン中にサイクルが早すぎる場合は値を上げます。検出が遅い場合は値を下げます。",
+      "label": "終了エネルギー"
+    },
+    "end_repeat_count": {
+      "doc": "サイクルが終了するまでに必要な連続停止しきい値未満の読み取り値の数。ほとんどのプラグでは 1 で問題ありません。スマート プラグがサイクル途中で偽ゼロ サンプルを報告することがあり、サイクルが途中で終了する場合は、2 ～ 3 に上げます。",
+      "label": "終了繰り返し回数"
+    },
+    "energy_price_entity": {
+      "doc": "現在の kWh あたりの電力料金 (動的料金など) を示すセンサー。以下の静的価格よりも優先されます。各サイクルは、終了時に有効な価格を凍結します。",
+      "label": "エネルギー価格エンティティ"
+    },
+    "energy_price_static": {
+      "doc": "上記のライブ価格エンティティが設定されていない場合、コスト数値に使用される kWh あたりの固定価格。",
+      "label": "静的エネルギー価格（kWhあたり）"
+    },
+    "expose_debug_entities": {
+      "doc": "追加の診断 HA エンティティ (一致信頼性、曖昧性、状態内部) を公開します。オフにすると、通常の使用のためにエンティティ リストがクリーンな状態に保たれます。",
+      "label": "デバッグエンティティを公開"
+    },
+    "external_end_trigger": {
+      "doc": "状態の変化がサイクルの終了を示すバイナリ センサー (例: アプライアンスの「完了」接触またはコンパニオン統合)​​。",
+      "label": "外部トリガーエンティティ"
+    },
+    "external_end_trigger_enabled": {
+      "doc": "内蔵の電力ベースの検出に加えて、外部バイナリ センサーでサイクルの終了を知らせます。",
+      "label": "外部終了トリガーを有効化"
+    },
+    "external_end_trigger_inverted": {
+      "doc": "トリガー センサーが (オンではなく) オフになることをサイクル終了信号として扱います。",
+      "label": "外部トリガーを反転（OFFでトリガー）"
+    },
+    "learning_confidence": {
+      "doc": "一致スコアがこの値と自動ラベルの信頼度の間にある場合、識別されたプログラムを確認するように求めるフィードバック通知が表示されます。このスコアを下回ると、試合は不確実すぎて表面化できません。自動ラベルの信頼度以下に保つ必要があります。",
+      "label": "学習信頼度"
+    },
+    "linked_device": {
+      "doc": "必要に応じて、この WashData デバイスを HA デバイス レジストリ内の別のデバイス (スマート プラグなど) の下にネストします (「接続経由 ...」と表示されます)。",
+      "label": "デバイス下にグループ化"
+    },
+    "min_off_gap": {
+      "doc": "マシンの電源がこの時間未満でオフになった場合、オン/オフ/オンのシーケンスは 1 つの連続したサイクルとして扱われます。浸しプログラム (洗濯中に数分間機械の電源がオフになる) が 2 つの別々のサイクルに分割されるのを防ぎます。連続した負荷を別々のサイクルとしてカウントしたい場合は、連続した負荷の間のギャップよりも短く設定します。デバイス タイプのデフォルトは、各アプライアンスの一般的なサイクル内の一時停止を保護します。",
+      "label": "最小オフギャップ"
+    },
+    "min_power": {
+      "doc": "アクティブとみなされる絶対最小電力。これを下回る測定値は 0 W (スタンバイ) として扱われ、スマート プラグとスタンバイ LED のファントム負荷が除外されます。",
+      "label": "最小電力"
+    },
+    "ml_training_enabled": {
+      "doc": "レビューしたサイクルを一晩かけて定期的に調査し、この特定のマシンに合わせてモデルを微調整します。変更は、保持されたサイクルで本当にスコアが向上した場合にのみ保持されるため、これは役立つか、同じままであり、後退することはありません。",
+      "label": "この機器から学習"
+    },
+    "ml_training_hour": {
+      "doc": "夜間の微調整を行うローカル時間 (0 ～ 23)。 2 (02:00) などの静かな時間を選択します。",
+      "label": "学習時刻"
+    },
+    "ml_training_interval_days": {
+      "doc": "改善点を再確認するのは、この日数に 1 回だけです。",
+      "label": "最大確認間隔"
+    },
+    "ml_training_min_cycles": {
+      "doc": "微調整する前に、少なくともこの数のサイクルが記録されるまで待ってください。これにより、そこから学ぶことが十分になります。",
+      "label": "必要なサイクル数"
+    },
+    "name": {
+      "doc": "HA 統合リストおよびデバイス レジストリに表示される表示名。",
+      "label": "デバイス名"
+    },
+    "no_update_active_timeout": {
+      "doc": "実行中にこれほど長い時間電源アップデートが届かない場合は、プラグがオフラインになったとみなして強制停止し、ゾンビ サイクルを回避します。デフォルトの 600 秒では、クラウドまたはメッシュのラグが考慮されます。",
+      "label": "更新なしタイムアウト"
+    },
+    "notify_before_end_minutes": {
+      "doc": "推定残り時間がこれを下回ると、ほぼ完了アラートを送信します。 0 は無効にします。",
+      "label": "終了前アラート"
+    },
+    "notify_channel": {
+      "doc": "開始/ライブ メッセージの Android 通知チャネル名 (チャネルごとのサウンドとモバイル アプリの優先度を制御します)。空白はコンパニオン アプリのデフォルトを使用します。",
+      "label": "Androidチャンネル（開始/ライブ）"
+    },
+    "notify_cycle_timers": {
+      "doc": "サイクルの特定の分での通知 (柔軟剤の追加など)。メッセージは {device}、{program}、{minutes} をサポートしています。 [自動一時停止] を有効にすると、その時点で一時停止し、[再開] ボタンでインタラクティブな通知を受け取ります。パネル、一時停止/再開サービス、または通知アクションを介して再開します。",
+      "label": "サイクルタイマー"
+    },
+    "notify_finish_channel": {
+      "doc": "終了メッセージの Android 通知チャネル名。空白の場合は、開始/ライブ チャネルを再利用します。",
+      "label": "Androidチャンネル（終了）"
+    },
+    "notify_finish_message": {
+      "doc": "サイクル終了時に送信される本文。テンプレート変数: {device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。ここでは {time_finished} と {vs_typical} が最も役立ちます。",
+      "label": "終了メッセージ"
+    },
+    "notify_finish_services": {
+      "doc": "Notice.* サイクルが終了すると呼び出されるサービス。ターゲットごとに 1 つ追加します。終了通知を行わない場合は空のままにします。",
+      "label": "終了サービス"
+    },
+    "notify_fire_events": {
+      "doc": "また、サイクルの開始時と終了時に ha_washdata_* イベントを発生させて、独自の自動化を構築できるようにします。",
+      "label": "通知用HAイベントを発火"
+    },
+    "notify_icon": {
+      "doc": "通知のオプションの mdi アイコン (例: mdi:washing-machine)。プラットフォームのデフォルトの場合は空白のままにします。",
+      "label": "通知アイコン"
+    },
+    "notify_live_chronometer": {
+      "doc": "静的な推定値の代わりに、ライブ更新カウントダウン タイマーを通知 (サポートするプラットフォーム上) に表示します。",
+      "label": "ライブクロノメーターを使用"
+    },
+    "notify_live_interval_seconds": {
+      "doc": "サイクルの実行中にライブ進行状況通知が更新される頻度。",
+      "label": "ライブ更新間隔"
+    },
+    "notify_live_overrun_percent": {
+      "doc": "サイクルがこのパーセンテージを超えて推定を超えて実行される場合、オーバーラン アラートが送信されます。",
+      "label": "ライブ超過%アラート"
+    },
+    "notify_live_services": {
+      "doc": "Notice.* サービスは、サイクルの実行中にライブ進行状況の更新を要求します。ライブ進行状況通知を無効にするには、空のままにします。",
+      "label": "ライブ進捗サービス"
+    },
+    "notify_only_when_home": {
+      "doc": "リンクされたユーザー (上記) の少なくとも 1 人が在宅している場合にのみ通知を送信します。",
+      "label": "在宅時のみ通知"
+    },
+    "notify_people": {
+      "doc": "person.* エンティティは、誰かが在宅しているかどうかを判断するために「在宅時のみ通知」によって使用されます。",
+      "label": "対象ユーザー（在宅時のみ）"
+    },
+    "notify_pre_complete_message": {
+      "doc": "終了前 / まもなく完了アラートの本文。テンプレート変数: {device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。",
+      "label": "完了前メッセージ"
+    },
+    "notify_reminder_message": {
+      "doc": "取り出し待ちリマインダーの本文。空欄で組み込みの既定値を使用します。テンプレート変数: {device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。",
+      "label": "リマインダーメッセージ"
+    },
+    "notify_start_message": {
+      "doc": "サイクル開始時に送信される本文。テンプレート変数: {device}、{duration}、{minutes}、{program}、{energy_kwh}、{cost}、{time_finished}、{vs_typical}、{cycle_count}。",
+      "label": "開始メッセージ"
+    },
+    "notify_start_services": {
+      "doc": "サイクルの開始時に呼び出される、notify.* サービス。ターゲット (電話、ダッシュボードなど) ごとに 1 つ追加します。開始通知を行わない場合は空のままにします。",
+      "label": "開始サービス"
+    },
+    "notify_timeout_seconds": {
+      "doc": "この秒数が経過すると、通知が自動的に閉じられます (通知をサポートしているプラ​​ットフォームの場合)。 0 は手動で終了するまで保持します。",
+      "label": "自動消去まで"
+    },
+    "notify_title": {
+      "doc": "通知のタイトル。テンプレート変数: {device}、{program}、{duration}、{energy}、{cost}、{date}、{time}、{minutes}。",
+      "label": "通知タイトル"
+    },
+    "notify_unload_delay_minutes": {
+      "doc": "サイクルが終了してから、まだ待機中の「マシンをアンロードする」リマインダーを送信するまでの数分。リマインダーを無効にするには、0 を設定します。",
+      "label": "取り出し通知遅延"
+    },
+    "off_delay": {
+      "doc": "電力が低下した後、サイクルの終了を宣言するまで待機する時間。このウィンドウ内で電力が再開されると、サイクルはシームレスに継続されます。これにより、洗浄段階の間で一時停止が生じます。食器洗い機には長い乾燥段階 (20 ～ 60 分間電源がオフになる) があるため、洗浄と乾燥全体を 1 サイクルとして維持するには、オフディレーをそれを超える必要があります。",
+      "label": "オフ遅延"
+    },
+    "pause_cuts_power": {
+      "doc": "サイクルが一時停止されている場合は、以下のスイッチ エンティティもオフにします。サイクルの途中でプラグを安全に切断できる器具に限ります。",
+      "label": "一時停止で電力もカット（スイッチ経由）"
+    },
+    "power_off_delay": {
+      "doc": "サイクル完了後、状態がオフに戻るまでに、電力が電源オフしきい値を下回ったまま維持しなければならない時間です。電源オフしきい値が 0 より大きい場合にのみ使用されます。バックグラウンドの周期でチェックされるため、実際の遅延は次の状態失効タイミングまで切り上げられます。",
+      "label": "電源オフ遅延"
+    },
+    "power_off_threshold_w": {
+      "doc": "消費電力に基づくオフ検出（任意）。0 より大きい値に設定すると、サイクルが完了した後、電源オフ遅延の間、電力がこのレベルを下回ったままになると、機器はスイッチが切られたとみなされ、状態がオフに戻ります。無効にするには 0 のままにします（既定値）。実際にスイッチを切ったときの下限より高く、停止しきい値と、機器が完了後もオンのままの待機時消費電力より低い値に設定してください。停止しきい値を下回っていない場合は無視されます。有効にすると、オフに戻す処理で進捗リセット遅延の代わりに使用されるため、完了した機器は実際に電源が切られるまで完了／クリーンのままになります。",
+      "label": "電源オフしきい値"
+    },
+    "power_sensor": {
+      "doc": "このアプライアンスのライブ電力をワット単位で報告するセンサー エンティティ (例: sensor.washer_power)。すべてのサイクル検出はこの信号に基づいています。",
+      "label": "電力センサー"
+    },
+    "profile_duration_tolerance": {
+      "doc": "マッチング中に使用されるプロファイル平均継続時間の周囲の +/- バンド。 0.25 は、60 分のプロファイルが 45 ～ 75 分のサイクルに一致することを意味します。",
+      "label": "プロファイル時間許容誤差"
+    },
+    "profile_match_interval": {
+      "doc": "実行サイクル中にプロファイルの一致を試行する頻度。デフォルトの 300 秒 (5 分) は、検出速度と CPU のバランスをとります。",
+      "label": "マッチ間隔"
+    },
+    "profile_match_max_duration_ratio": {
+      "doc": "プロファイルに対する最大サイクル長。 1.3 は、サイクルがプロファイル期間の 130% 未満でなければ一致しないことを意味します。",
+      "label": "最大時間比率"
+    },
+    "profile_match_min_duration_ratio": {
+      "doc": "プロファイルに対する最小サイクル長。 0.9 は、サイクルがプロファイル期間の少なくとも 90% でな​​ければ一致しないことを意味します。",
+      "label": "最小時間比率"
+    },
+    "profile_match_threshold": {
+      "doc": "プログラム識別を受け入れるためにサイクル終了時に必要な最小類似性スコア (0 ～ 1)。誤った識別を減らすには値を上げます。マシンのプログラムが一致しない場合は、値を下げてください。デフォルトの 0.4 は控えめな開始点です。",
+      "label": "マッチしきい値"
+    },
+    "profile_unmatch_threshold": {
+      "doc": "ライブのミッドサイクルマッチがこのスコアを下回った場合、暫定的な識別はクリアされます。類似性が一時的に下がっても表示が不一致に戻らないように、一致しきい値より少し下に保ちます。",
+      "label": "アンマッチしきい値"
+    },
+    "progress_reset_delay": {
+      "doc": "終了後、アイドル状態にリセットする前にダッシュボードに「完了」が表示されるように、進行状況を 100% のままにしておきます。",
+      "label": "進捗リセット遅延"
+    },
+    "pump_stuck_duration": {
+      "doc": "ポンプがスタックしている可能性があるとフラグが立てられる (スタックポンプ イベントが発生する) までに、ポンプが継続的に実行できる秒数。",
+      "label": "ポンプ停止継続時間"
+    },
+    "running_dead_zone": {
+      "doc": "サイクルの開始後、このウィンドウ内の電力低下は無視されます。洗濯機には冷水が充填されます (加熱前に 0 W 近くに低下します)。この保護がなければ、充填段階がサイクル終了のように見えます。これはデータをスキップしません。フルパワートレースは T=0 から記録されます。提案エンジンはマシンの実際の起動パターンを測定し、自動的にサイズを決定します。",
+      "label": "実行デッドゾーン"
+    },
+    "sampling_interval": {
+      "doc": "センサー読み取り間の予想時間 - スムージング ウィンドウのサイズを調整し、デバウンスを正しく開始するために使用されます。この値に関係なく、すべてのセンサーの更新がキャプチャされます。下流の計算のみを調整します。提案エンジンは、過去のサイクルからセンサーの実際のケイデンスを測定し、これを自動的に設定します。",
+      "label": "サンプリング間隔"
+    },
+    "save_debug_traces": {
+      "doc": "各サイクルの全電力トレースと一致するデバッグ データを保存します。トラブルシューティングには役立ちますが、ストレージ サイズが増加します。",
+      "label": "デバッグトレースを保存"
+    },
+    "smoothing_window": {
+      "doc": "生の電力信号がどの程度平滑化されるか。低 (2) は応答性は高くなりますが、ノイズが多くなります。高 (5) はスパイクを滑らかにしますが、ラグが追加されます。",
+      "label": "スムージングウィンドウ"
+    },
+    "start_duration_threshold": {
+      "doc": "実際の開始を確認するには、電力が開始しきい値をこの期間上に維持する必要があり、一瞬のオン/オフの切り替えによるサイクルの開始が防止されます。",
+      "label": "開始継続時間"
+    },
+    "start_energy_threshold": {
+      "doc": "アプライアンスが実行する前に消費しなければならないエネルギー (電力 x 時間)。短時間の高出力スパイクはエネルギーが非常に低いため無視され、誤った始動が防止されます。",
+      "label": "開始エネルギー"
+    },
+    "start_threshold_w": {
+      "doc": "サイクルが開始されたことを確認するには、電力がこのレベルを超える必要があります。設定が低すぎると、スタンバイ電源からの誤った起動が発生します。高すぎると、起動が遅いプログラム (コールドフィル) が失われます。提案エンジンは、これをマシンの観測された最低有効電力のすぐ上に設定します。",
+      "label": "開始しきい値"
+    },
+    "stop_threshold_w": {
+      "doc": "オフディレーのカウントダウンが開始される前に、電力はこのレベルを下回る必要があります。開始しきい値よりも低く設定します。それらの間のギャップは、ちらつきを防ぐヒステリシス帯域です。設定が高すぎると、低電力フェーズ (すすぎ保留、しわ防止) が誤って終了シーケンスをトリガーします。",
+      "label": "停止しきい値"
+    },
+    "switch_entity": {
+      "doc": "オプションのスイッチは、一時停止時にオフになり、再開時に再びオンに切り替わります。「一時停止すると電源も切断されます」と併用します。",
+      "label": "スイッチエンティティ"
+    },
+    "watchdog_interval": {
+      "doc": "バックグラウンド ウォッチドッグがセンサーの停止とタイムアウトの経過をチェックする頻度。デフォルトは 30 秒です。",
+      "label": "ウォッチドッグ間隔"
+    },
+    "notify_milestone_message": {
+      "doc": "マイルストーン通知のメッセージ。テンプレート変数: {device}、{cycle_count}。",
+      "label": "マイルストーンメッセージ"
+    },
+    "notify_milestones": {
+      "doc": "達成時に一度だけお祝い通知を送るサイクル数をカンマ区切りで指定します (例: 50, 100, 500, 1000)。空欄でマイルストーン通知を無効にします。",
+      "label": "サイクルマイルストーン"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "サイレント時間帯の終了 (0-23)。保留中の通知はこの時刻に配信されます。空欄で無効にします。",
+      "label": "サイレント時間の終了"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "サイレント時間帯の開始 (0-23)。サイレント時間中に発生する終了・リマインダー・洗濯完了の通知は保留され、時間帯の終了時に配信されます。空欄で無効にします。深夜をまたぐ時間帯にも対応 (例: 開始 22、終了 7)。",
+      "label": "サイレント時間の開始"
+    },
+    "peak_rate_message": {
+      "doc": "開始通知に追加するピーク料金のヒント用のカスタムテキスト (任意)。テンプレート変数: {device}、{price}。空欄で組み込みの既定値を使用します。",
+      "label": "ピーク料金メッセージ"
+    },
+    "peak_rate_threshold": {
+      "doc": "サイクル開始時に現在の kWh あたりの価格がこの値以上の場合、開始通知にピーク料金のヒントを追加します。0 または空欄でヒントを無効にします。",
+      "label": "ピーク料金のしきい値 (kWh あたり)"
+    },
+    "dtw_bandwidth": {
+      "label": "形状マッチングの許容度",
+      "doc": "保存済みプログラムの形状に合わせるために、マッチャーがサイクルをどれだけ時間ワーピングできるかを決めます。値を大きくすると速度の変動をより許容しますが、大きすぎると誤ったプログラムにマッチするおそれがあります。"
+    },
+    "corr_weight": {
+      "label": "形状とレベルの重み",
+      "doc": "マッチのスコアリング時に、曲線の形状と絶対的な電力レベルのどちらを重視するかのバランスです。値を大きくすると形状を、小さくすると電力レベルの一致を重視します。"
+    },
+    "duration_weight": {
+      "label": "実行時間の重み",
+      "doc": "一般的な実行時間がこのサイクルと一致するプログラムを、どれだけ優先するかを決めます。"
+    },
+    "energy_weight": {
+      "label": "エネルギーの重み",
+      "doc": "一般的な消費電力量がこのサイクルと一致するプログラムを、どれだけ優先するかを決めます。"
+    },
+    "store_brand": {
+      "label": "家電ブランド",
+      "doc": "任意。コミュニティカタログから選択した家電ブランドです。一致する基準録音の検索と共有に使用されます。オンライン機能を使用しない場合は空欄のままにしてください。"
+    },
+    "store_model": {
+      "label": "家電モデル",
+      "doc": "任意。ブランドを設定すると、コミュニティカタログから選択できる家電モデルです。お使いのモデルが一覧にない場合は、カタログに追加できます。"
+    },
+    "show_contributor": {
+      "doc": "コミュニティの家電および基準サイクルに「by <contributor>」のクレジット表示をします。"
+    }
+  },
+  "setting_group": {
+    "auto_labeling": {
+      "label": "自動ラベル付け"
+    },
+    "cycle_end": {
+      "label": "サイクル終了"
+    },
+    "cycle_start": {
+      "label": "サイクル開始"
+    },
+    "cycle_timers": {
+      "label": "サイクルタイマー"
+    },
+    "data_management": {
+      "label": "データ管理"
+    },
+    "debug": {
+      "label": "デバッグ"
+    },
+    "dishwasher_end": {
+      "label": "食器洗い機の終了"
+    },
+    "door_pause": {
+      "label": "ドアと一時停止"
+    },
+    "dtw_refinement": {
+      "label": "DTW精度向上"
+    },
+    "duration_gates": {
+      "label": "時間ゲート"
+    },
+    "energy": {
+      "label": "エネルギー"
+    },
+    "external_end_trigger": {
+      "label": "外部終了トリガー"
+    },
+    "housekeeping": {
+      "label": "ハウスキーピング"
+    },
+    "match_scoring": {
+      "label": "マッチングスコアリング"
+    },
+    "messages": {
+      "label": "メッセージ"
+    },
+    "power_off": {
+      "label": "電源オフ"
+    },
+    "predictive_end": {
+      "label": "予測終了"
+    },
+    "schedule": {
+      "label": "スケジュール"
+    },
+    "services": {
+      "label": "サービス"
+    },
+    "signal_processing": {
+      "label": "信号処理"
+    },
+    "thresholds_gap": {
+      "label": "しきい値とギャップ"
+    },
+    "timing": {
+      "label": "タイミング"
+    },
+    "unload_reminder": {
+      "label": "取り出しリマインダー"
+    },
+    "watchdog": {
+      "label": "ウォッチドッグ"
+    },
+    "quiet_hours_milestones": {
+      "label": "サイレント時間とマイルストーン"
+    },
+    "device_info": {
+      "label": "デバイス情報"
+    },
+    "basic_configuration": {
+      "label": "基本設定"
+    }
+  },
+  "status": {
+    "active": "アクティブ",
+    "all_statuses": "すべてのステータス",
+    "ambiguous": "あいまいな",
+    "auto_detect": "自動検出",
+    "clear": "クリア",
+    "completed": "完了",
+    "fine_tuning": "今微調整中…",
+    "force_stopped": "強制停止",
+    "idle": "アイドル状態",
+    "interrupted": "中断されました",
+    "ready": "処理の準備ができました",
+    "recording": "録音中",
+    "training": "トレーニング中…",
+    "saving": "保存中…",
+    "rebuilding": "再構築中…",
+    "analyzing": "分析中…",
+    "resetting": "リセット中…",
+    "reverting": "元に戻しています…",
+    "trimming": "トリム中…",
+    "splitting": "分割中…",
+    "deleting": "削除中…",
+    "imported": "インポート済み"
+  },
+  "tab": {
+    "advanced": "高度な",
+    "diagnostics": "診断",
+    "history": "サイクル",
+    "ml": "機械学習トレーニング",
+    "pp_cleanup": "掃除",
+    "pp_manage": "管理",
+    "pp_overview": "概要",
+    "pp_phases": "フェーズ",
+    "profiles": "プロフィール",
+    "settings": "設定",
+    "status": "概要",
+    "subtab_phase_catalog": "フェーズカタログ",
+    "subtab_profiles": "プロフィール",
+    "maintenance": "メンテナンス",
+    "playground": "プレイグラウンド",
+    "store": "ストア"
+  },
+  "tag": {
+    "early_end": "早期終了",
+    "late_start": "遅いスタート",
+    "merged": "マージされたサイクル",
+    "noise": "ノイズ",
+    "sensor_gap": "センサーギャップ",
+    "split": "スプリットサイクル",
+    "wrong_profile": "間違ったプロフィール"
+  },
+  "toast": {
+    "access_saved": "アクセス制御が保存されました",
+    "all_wiped": "すべてのデータが消去されました",
+    "analysis_complete_none": "分析が完了しました: 新しい提案はありません",
+    "auto_label_complete": "自動ラベル付け完了",
+    "automation_deleted": "オートメーションが削除されました",
+    "correction_submitted": "修正を提出しました",
+    "cycle_deleted": "サイクルが削除されました",
+    "cycle_force_stopped": "サイクル強制停止",
+    "cycle_labelled": "サイクルラベル付き",
+    "cycle_paused": "サイクルが一時停止されました",
+    "cycle_resumed": "サイクルが再開されました",
+    "cycle_trimmed": "サイクルトリム",
+    "cycles_merged": "統合されたサイクル",
+    "envelope_rebuilt": "再構築されたエンベロープ",
+    "envelopes_rebuilt": "再構築された封筒",
+    "export_downloaded": "ダウンロードしたエクスポート",
+    "feedback_all_dismissed": "すべてのフィードバックが却下されました",
+    "feedback_confirmed": "フィードバックが確認されました",
+    "feedback_dismissed": "フィードバックは却下されました",
+    "group_deleted": "グループが削除されました",
+    "group_name_required": "グループ名は必​​須です",
+    "group_saved": "グループが保存されました",
+    "import_successful": "インポートは成功しました。統合のリロード",
+    "json_required": "JSONデータは必須です",
+    "legacy_removed": "従来のアクションが削除されました",
+    "logs_exported": "エクスポートされたログ",
+    "matching_reverted": "マッチングウェイトがデフォルトに戻った",
+    "min_2_profiles": "グループに対して少なくとも 2 つのプロファイルを選択してください",
+    "ml_training_no_improvement": "トレーニング完了: ベースラインは維持 (改善なし)",
+    "models_reverted": "オンデバイスモデルがベースラインに戻った",
+    "name_required": "名前は必須です",
+    "no_split_found": "分割できるアイドル ギャップは見つかりませんでした",
+    "panel_settings_saved": "パネル設定が保存されました",
+    "phase_name_required": "フェーズ名は必須です",
+    "phase_updated": "フェーズが更新されました",
+    "phases_saved": "保存されたフェーズ",
+    "preferences_saved": "設定が保存されました",
+    "profile_name_required": "プロファイル名は必須です",
+    "profile_renamed": "プロファイルの名前が変更されました",
+    "recording_discarded": "録音は破棄されました",
+    "recording_saved": "録音はプロファイルに保存されました",
+    "recording_started": "録音開始",
+    "recording_stopped": "録音停止",
+    "review_saved": "レビューが保存されました",
+    "settings_conflicts": "保存する前に強調表示されている設定の競合を解消してください。",
+    "settings_reverted": "設定が復元されました。統合のリロード",
+    "settings_saved": "設定が保存されました。統合のリロード",
+    "suggestions_applied": "提案が適用されました。統合のリロード",
+    "suggestions_dismissed": "提案は却下されました",
+    "apply_failed": "適用に失敗しました: {error}",
+    "delete_failed": "削除に失敗しました: {error}",
+    "load_more_failed": "さらに読み込めませんでした: {error}",
+    "maint_add_failed": "イベントを追加できませんでした: {error}",
+    "maint_added": "メンテナンスイベントを追加しました",
+    "maint_delete_failed": "イベントを削除できませんでした: {error}",
+    "maint_deleted": "メンテナンスイベントを削除しました",
+    "relabel_done": "{count} 件のサイクルを再ラベル付けしました",
+    "relabel_failed": "再ラベル付けに失敗しました: {error}",
+    "reminders_save_failed": "リマインダーを保存できませんでした: {error}",
+    "reminders_saved": "サービスリマインダーを保存しました",
+    "pause_no_cycle": "一時停止できるアクティブなサイクルがありません",
+    "resume_no_cycle": "再開できる一時停止中のサイクルがありません",
+    "delete_partial_failed": "一部の項目を削除できなかったため、復元されました",
+    "pg_run_gone": "その実行は利用できなくなりました。",
+    "task_cancelled": "キャンセルしました。",
+    "processed": "{bits} を処理しました",
+    "processed_cycles": "{n} 件のサイクル",
+    "processed_suggestions": "{n} 件の提案",
+    "processed_models": "{n} 件のモデル昇格",
+    "store_search_failed": "検索に失敗しました: {error}",
+    "store_connect_failed": "接続に失敗しました: {error}",
+    "store_connected": "コミュニティストアに接続しました",
+    "store_disconnected": "コミュニティストアから切断しました",
+    "store_error": "エラー: {error}",
+    "store_unavailable": "コミュニティストアは利用できません。",
+    "store_pick_profile": "統合先のプロファイルを選択してください",
+    "store_name_required": "プロファイル名を入力してください",
+    "store_import_failed": "インポートに失敗しました: {error}",
+    "store_imported": "{profile} にインポートしました",
+    "store_program_required": "プログラム名を入力してください",
+    "store_no_appliance": "先に設定で家電のブランドとモデルを設定してください。",
+    "store_share_failed": "共有に失敗しました: {error}",
+    "store_shared": "コミュニティストアに共有しました（審査待ち）",
+    "appliance_added": "家電を追加しました（承認待ち）",
+    "thanks_confirming": "確認していただきありがとうございます",
+    "device_approved": "コミュニティによって承認されました",
+    "rating_saved": "品質評価を保存しました",
+    "brand_added": "ブランドを追加しました（承認待ち）",
+    "profile_added": "プロファイルを追加しました（承認待ち）",
+    "saved_except_conflicts": "保存しました。残りを保存するにはハイライトされた競合を修正してください。",
+    "share_device_none_sel": "共有するサイクルを少なくとも1つ選択してください",
+    "store_device_downloaded": "{p}件のプログラム、{c}件の記録を追加しました",
+    "store_device_downloaded_phases": "{p}件のプログラム、{c}件の記録、{ph}件のフェーズマップを追加しました",
+    "store_device_downloaded_settings": "{p}件のプログラム、{c}件の記録、{ph}件のフェーズマップ、{s}件の設定を追加しました",
+    "store_device_shared": "{n}件のサイクルをコミュニティストアに共有しました - 審査中。",
+    "store_device_shared_all_dup": "{n}件のサイクルはすべて既にコミュニティストアにありました。",
+    "store_device_shared_partial": "{n}件のサイクルを共有しました。{failed}件はアップロードできませんでした。",
+    "store_device_shared_some_dup": "{created}件のサイクルを共有しました。{dup}件は既にストアにありました。",
+    "store_download_failed": "ダウンロードに失敗しました: {error}",
+    "store_download_nothing": "ダウンロードする新しいものはありません - このセットアップは既にデバイスにあります。"
+  },
+  "suggestion": {
+    "both_agree": "WashDataの推奨",
+    "calibrated_label": "調整済み",
+    "observed_label": "観測値",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "自動ラベル付けされるサイクルが少なくなります。より多くがレビューに回されます",
+        "lower": "より多くのサイクルを自動ラベル付けします。一部は誤識別される可能性があります"
+      },
+      "duration_tolerance": {
+        "higher": "より広い時間範囲を受け入れます。柔軟なマッチング",
+        "lower": "より近い時間のマッチングが必要です。厳格ですが、異常なサイクルを拒否する場合があります"
+      },
+      "end_energy_threshold": {
+        "higher": "相当なエネルギーを使用したサイクルのみを終了します",
+        "lower": "短いまたは低エネルギーのサイクルも終了します"
+      },
+      "end_repeat_count": {
+        "higher": "終了信号をより多く繰り返す必要があります。より堅牢ですが、わずかに遅くなります",
+        "lower": "より少ない繰り返しで終了します。検出が速くなりますが、誤終了のリスクが高まります"
+      },
+      "learning_confidence": {
+        "higher": "非常に確信度の高いマッチングのみから学習します。遅くなりますが、より信頼性が高くなります",
+        "lower": "より多くのサイクルから学習します。モデルにノイズが増える可能性があります"
+      },
+      "min_off_gap": {
+        "higher": "新しいサイクルが始まる前により長いアイドル時間が必要です",
+        "lower": "短いアイドルで新しいサイクルが開始されます。連続運転が分割される場合があります"
+      },
+      "min_power": {
+        "higher": "アイドル消費電力への感度が低くなります。非常に静かなプログラムを見逃す場合があります",
+        "lower": "感度が高くなります。スタンバイ電力をアクティビティとして記録する場合があります"
+      },
+      "no_update_active_timeout": {
+        "higher": "サイクルが停止していると判断するまでの時間が長くなります",
+        "lower": "停止したサイクルをより早く強制停止します"
+      },
+      "off_delay": {
+        "higher": "家電の一時停止のための時間が長くなります。長い浸漬や乾燥フェーズに対応します",
+        "lower": "終了検出が速くなります。オン/オフが明確な家電に適しています"
+      },
+      "profile_match_threshold": {
+        "higher": "高い確信度のマッチングのみをコミットします。より多くのサイクルがラベルなしのままになります",
+        "lower": "より多くのサイクルをマッチングします。一部が若干間違っている場合があります"
+      },
+      "running_dead_zone": {
+        "higher": "アイドル中の短い電力スパイクを無視します。ノイズへの感度が低くなります",
+        "lower": "より短い電力バーストに反応します。短時間の一時的なアクティビティを検出します"
+      },
+      "start_threshold_w": {
+        "higher": "短い電力スパイクによる誤起動を防ぎます",
+        "lower": "低電力プログラムを検出します。ノイズでトリガーされる場合があります"
+      },
+      "stop_threshold_w": {
+        "higher": "サイクルをより速く終了します。一時停止中に閉じる場合があります",
+        "lower": "終了するまで長く待ちます。早期終了が少なくなります"
+      },
+      "watchdog_interval": {
+        "higher": "より長い静止フェーズが許可されます。誤った強制停止が少なくなります",
+        "lower": "停止したサイクルをより積極的に検出します"
+      }
+    },
+    "reason": {
+      "auto_label_confidence": "ユーザーが一度も修正しなかった {cycles} 件の自動ラベルの15パーセンタイル信頼度（{p15}）。",
+      "completion_min_seconds": "{cycles} サイクルにわたる p05 の正常サイクル時間の半分（{minutes} min）。誤検出サイクルを除外します。{excl}",
+      "dead_zone_batch": "短めに設定（{cycles} サイクルの起動時の不安定期間の中央値 = {s}s）。これにより本当の終了を速やかに検出します。",
+      "dead_zone_from_dip": "{s}s で検出された初期の電力低下に基づく。",
+      "end_energy_default": "サイクル終了時のノイズゲートに推奨される既定値。",
+      "end_energy_false": "{cycles} サイクルにわたる p95 の誤終了エネルギー（{p95}Wh）。サイクルエネルギー中央値の 0.2%（{floor}Wh）を下限とします。",
+      "end_energy_no_false": "{cycles} サイクルで誤終了なし。サイクルエネルギー中央値の 0.2%（{floor}Wh）を下限とします。",
+      "end_repeat_count": "{false}/{total} 件の正常サイクル（{pct}%）で、再開を伴う 60s を超える内部の一時停止がありました。{val} 回の終了確認を要求します。",
+      "learning_confidence": "{cycles} 件のユーザーラベル付きサイクルの p05 信頼度（{p05}）。これを下回る場合は確認を要求します。",
+      "match_interval": "観測された更新間隔に基づく（中央値={median}s）* 10。",
+      "max_duration_ratio": "ラベル付きサイクル時間に基づく（p95={p95}）。",
+      "min_active": "直近のサイクルで観測された最小の稼働電力（{min}W）に基づく。",
+      "min_duration_ratio": "プログラムをサイクルの早い段階で識別できるよう、できるだけ低く設定。信頼度と曖昧さのゲートが早すぎる確定を防ぎます。",
+      "min_off_gap": "観測された {gaps} 件のサイクル間の間隔に基づく（p05={p05}s）。機器の下限: {floor}s。",
+      "min_power": "{cycles} 件の正常サイクルにわたる p05 の最低稼働電力（{p05}W）の 40%。オフゲートを実際の消費電力より低く保ちます。{excl}",
+      "ml_auto_label": "品質モデルが正常と判定した最低の信頼度（{cycles} 件の正常サイクルの p10 = {p10}）。",
+      "ml_end_repeat": "{false}/{total} サイクル（{pct}%）で、終了検出器が 50% を超えるスコアを付けた一時停止がありました。{val} 回の終了確認を要求します。",
+      "ml_off_delay": "終了検出器が確認した一時停止: p95 {p95}s + 60s のバッファ。{cycles} サイクルにわたるモデル検証済みの一時停止 {pauses} 件から算出（下限 {floor}s）。",
+      "no_update_timeout": "観測された更新間隔に基づく（p95={p95}s）* 20（最小 60s）。",
+      "off_delay_cadence": "観測された更新間隔に基づく（p95={p95}s）* 5",
+      "off_delay_device_floor": "{device} 向けの機器固有の安全な最小値を使用（{floor}s）。",
+      "off_delay_generic_floor": "汎用の安全な最小値を使用（{floor}s）。",
+      "off_delay_pauses": "実際の一時停止を上回るよう設定: p95 のサイクル内一時停止 {p95}s + 60s のバッファ。{cycles} 件の正常サイクルにわたる {pauses} 件の一時停止から算出（下限 {floor}s）。",
+      "profile_match_threshold": "{cycles} 件の正しい自動ラベルの p10 信頼度（{p10}）。安全なライブ確定の下限。",
+      "sampling_interval": "{cycles} 件の正常サイクルにわたって観測された更新間隔の中央値（{si}s）。{excl}",
+      "smoothing_window": "{si}s のサンプリングで約 30s 分の測定値を平滑化するよう設定（{samples} サンプル）。",
+      "start_duration": "短めに設定（約 1 回の {si}s サンプル間隔）。単一サンプルのスパイクを無視しつつ、検出をできるだけ早く開始します。",
+      "thr_batch": "{cycles} サイクルにわたる p05 の最低稼働電力（{p05}W）のすぐ上に設定。これにより開始をできるだけ早く捉え、停止しきい値は機器の最低稼働電力を下回ったままになります。",
+      "tol_per_profile": "{profiles} 件のプロファイル（{cycles} サイクル）にわたるプロファイルごとの時間分散の p75。ばらつきの小さいプロファイルは不利になりません。",
+      "tol_pooled": "{cycles} 件の直近のラベル付きサイクルの統合時間分散に基づく（p95 偏差={dev}）。",
+      "watchdog": "安全な範囲でできるだけ低く設定（p95 の更新間隔 {p95}s の 3 倍、最小 30s）。誤った停止なしに停滞を素早く検出します。"
+    },
+    "exclusions": {
+      "summary": "{total} 件の誤検出サイクルを除外しました: {parts}。",
+      "reason": {
+        "force_stopped": "強制停止",
+        "interrupted": "中断",
+        "incomplete": "未完了",
+        "noise": "ノイズ",
+        "unlabeled": "ラベルなし",
+        "no_trace_short": "短すぎて検査不可",
+        "high_start": "高電力で開始",
+        "abrupt_end": "突然終了",
+        "mid_restart": "サイクル途中で再開",
+        "no_power": "電力なし",
+        "no_active_power": "稼働電力なし"
+      }
+    }
+  },
+  "trend": {
+    "down": "下降傾向",
+    "up": "上昇傾向"
+  },
+  "maint": {
+    "bearing_service": "ベアリングの整備",
+    "descale": "スケール除去",
+    "drum_clean": "ドラムの清掃",
+    "filter_clean": "フィルターの清掃",
+    "other": "その他"
+  },
+  "col": {
+    "profile_tip": "一致したプログラム名。ラベルなしは、サイクル終了時にプロファイルが一致しなかったことを意味します。",
+    "status_tip": "サイクルの結果: 完了（自然終了）、中断（急激な電力低下）、強制停止（手動）、または要レビュー（フィードバック保留中）。",
+    "date_tip": "サイクルが開始された日時。",
+    "duration_tip": "開始から終了までのサイクル全体の実行時間。",
+    "energy_tip": "消費された総エネルギー（kWh）。電力を時間で積分して計算されます。",
+    "cost_tip": "このサイクルのエネルギー料金。完了時にその時点で有効な価格（エネルギー x kWh あたりの価格）で確定されます。設定で価格を指定すると入力されます。",
+    "confidence_tip": "プロファイルのマッチ信頼度（0～100%）。サイクルの電力曲線が識別されたプログラムとどれだけ一致したか。",
+    "health_tip": "ML サイクルの健康度（高いほど良好）。サイクルをクリックして検査・レビューします。",
+    "flags_tip": "サイクルのレビュー、異常、ソースフラグ。アイコンにカーソルを合わせると詳細が表示されます。"
+  },
+  "stat": {
+    "avg": "平均",
+    "min": "最小 {v}",
+    "max": "最大 {v}",
+    "consistency": "一貫性 ±{v}",
+    "total": "合計 {v}",
+    "last_run": "前回の実行 {v}",
+    "score": "スコア {pct}%",
+    "duration_cv": "継続時間 CV {pct}%",
+    "avg_confidence": "平均信頼度 {pct}%"
+  },
+  "pg_evd": {
+    "detected": "検出機能がサイクルの開始を認識しました。",
+    "match_commit": "照合機能が十分な信頼度でプログラムを確定しました。",
+    "match_changed": "サイクルの経過が進むにつれて、最有力のプログラムが変わりました。",
+    "match_ambiguous": "2つのプログラムのスコアが接近していたため、照合結果が不確実でした。",
+    "unmatched": "このサイクルに合致する保存済みプログラムはありませんでした。",
+    "notify_start": "開始通知が送信されます。",
+    "notify_pre_complete": "まもなく完了の通知が送信されます。",
+    "notify_finish": "完了通知が送信されます。",
+    "notify_milestone": "マイルストーン通知が送信されます。",
+    "notify_held": "サイレント時間帯のため、通知が保留されました。",
+    "finished": "サイクルが終了状態に達して終了しました。"
+  },
+  "store": {
+    "browse": "閲覧",
+    "device": "デバイス",
+    "favorites": "お気に入り",
+    "search_ph": "ブランドまたはモデルで検索…",
+    "no_results": "一致する家電が見つかりません。別の検索をお試しください。",
+    "n_programs": "{n} 個のプログラム",
+    "n_cycles": "{n} 個のサイクル",
+    "no_programs": "この家電にはまだ共有されたプログラムがありません。",
+    "no_cycles": "このプログラムにはまだ共有された基準サイクルがありません。",
+    "anon": "匿名",
+    "uploaded_by": "{name} が共有",
+    "connected_as": "{name} として接続中",
+    "not_connected": "未接続です。自分のサイクルを共有するには GitHub アカウントを接続してください。",
+    "import_new": "新しいプロファイル",
+    "import_merge": "既存に統合",
+    "merge_target": "統合先プロファイル",
+    "description": "説明（任意）",
+    "contributed_by": "提供: {name}",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "まだ評価がありません",
+    "website": "ストアウェブサイト ↗",
+    "website_tip": "コミュニティストアのウェブサイトを開く"
+  },
+  "settings": {
+    "gear": {
+      "title": "設定"
+    }
+  },
+  "link": {
+    "manual": "マニュアル ↗",
+    "add_appliance": "家電を追加"
+  },
+  "tip": {
+    "add_brand": "ブランドが一覧にありませんか？コミュニティカタログに追加してください",
+    "add_appliance": "モデルが一覧にありませんか？お使いの家電をコミュニティカタログに追加してください",
+    "add_profile": "コミュニティサイトでこの家電のプロファイルを追加してください"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "再処理: サイクルのマッチング",
+      "golden": "再処理: 基準サイクルの補完",
+      "suggestions": "再処理: 提案",
+      "ml_training": "再処理: MLトレーニング",
+      "health": "再処理: サイクルの健康"
+    },
+    "pg_sweep": {
+      "optimize": "最適化: {param}"
+    }
+  }
+}

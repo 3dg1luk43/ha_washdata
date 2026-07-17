@@ -1,0 +1,110 @@
+{
+  "cases": [
+    {
+      "expected_score": 0.00031123,
+      "features": {
+        "drop_ratio": 0.01298192,
+        "elapsed_fraction": 0.02478321,
+        "elapsed_log": 5.83217569,
+        "energy_fraction": 0.00621172,
+        "energy_remaining_expected": 0.99378828,
+        "low_run_s_log": 5.70711026,
+        "peak_seen_ratio": 0.03683001,
+        "power_before_ratio": 0.03293804
+      }
+    },
+    {
+      "expected_score": 0.00046928,
+      "features": {
+        "drop_ratio": 0.0,
+        "elapsed_fraction": 0.00012455,
+        "elapsed_log": 0.69314718,
+        "energy_fraction": 0.0,
+        "energy_remaining_expected": 1.0,
+        "low_run_s_log": 5.49264984,
+        "peak_seen_ratio": 0.00356295,
+        "power_before_ratio": 0.00356295
+      }
+    },
+    {
+      "expected_score": 0.02292853,
+      "features": {
+        "drop_ratio": 0.03340821,
+        "elapsed_fraction": 0.43403046,
+        "elapsed_log": 8.69235585,
+        "energy_fraction": 0.53437329,
+        "energy_remaining_expected": 0.46562671,
+        "low_run_s_log": 5.69069724,
+        "peak_seen_ratio": 0.99399227,
+        "power_before_ratio": 0.03434855
+      }
+    },
+    {
+      "expected_score": 0.07338325,
+      "features": {
+        "drop_ratio": 0.01944167,
+        "elapsed_fraction": 0.60789299,
+        "elapsed_log": 8.57715877,
+        "energy_fraction": 0.59948446,
+        "energy_remaining_expected": 0.40051554,
+        "low_run_s_log": 4.79991426,
+        "peak_seen_ratio": 0.99750748,
+        "power_before_ratio": 0.03240279
+      }
+    },
+    {
+      "expected_score": 0.16173027,
+      "features": {
+        "drop_ratio": 0.03459041,
+        "elapsed_fraction": 0.73611397,
+        "elapsed_log": 8.76851206,
+        "energy_fraction": 0.63858395,
+        "energy_remaining_expected": 0.36141605,
+        "low_run_s_log": 4.11577984,
+        "peak_seen_ratio": 0.98851149,
+        "power_before_ratio": 0.03459041
+      }
+    },
+    {
+      "expected_score": 0.61603994,
+      "features": {
+        "drop_ratio": 0.00228805,
+        "elapsed_fraction": 0.8429428,
+        "elapsed_log": 8.89713534,
+        "energy_fraction": 0.98494733,
+        "energy_remaining_expected": 0.01505267,
+        "low_run_s_log": 5.15329159,
+        "peak_seen_ratio": 1.0,
+        "power_before_ratio": 0.0186657
+      }
+    },
+    {
+      "expected_score": 0.91631555,
+      "features": {
+        "drop_ratio": 0.19111446,
+        "elapsed_fraction": 1.05040586,
+        "elapsed_log": 9.13275714,
+        "energy_fraction": 0.97753783,
+        "energy_remaining_expected": 0.02246217,
+        "low_run_s_log": 3.7208625,
+        "peak_seen_ratio": 0.95060241,
+        "power_before_ratio": 0.20135542
+      }
+    },
+    {
+      "expected_score": 0.99973816,
+      "features": {
+        "drop_ratio": 0.18426352,
+        "elapsed_fraction": 1.83438035,
+        "elapsed_log": 8.41134367,
+        "energy_fraction": 1.54899093,
+        "energy_remaining_expected": 0.0,
+        "low_run_s_log": 3.71843826,
+        "peak_seen_ratio": 1.0,
+        "power_before_ratio": 0.19404488
+      }
+    }
+  ],
+  "kind": "standardized_logistic",
+  "model": "cycle_end_detector"
+}

@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Sensors for WashData."""
 
 from __future__ import annotations
@@ -7,11 +23,15 @@ import hashlib
 import logging
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorEntity,
+    SensorEntityDescription,
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import HomeAssistantError
-from homeassistant.const import EntityCategory
+from homeassistant.const import EntityCategory, UnitOfEnergy
 from homeassistant.helpers import entity_registry
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -161,6 +181,7 @@ async def async_setup_entry(
         WasherDebugSensor(manager, entry),
         WasherSuggestionsSensor(manager, entry),
         WasherCycleCountSensor(manager, entry),
+        WasherEnergyTotalSensor(manager, entry),
     ]
 
     # Add pump-specific sensors
@@ -173,6 +194,7 @@ async def async_setup_entry(
             [
                 WasherMatchConfidenceSensor(manager, entry),
                 WasherTopCandidatesSensor(manager, entry),
+                WasherAmbiguitySensor(manager, entry),
             ]
         )
 
@@ -256,18 +278,10 @@ class WasherStateSensor(WasherBaseSensor):
             return "mdi:tumble-dryer"
         if dtype == "dishwasher":
             return "mdi:dishwasher"
-        if dtype == "ev":
-            return "mdi:car-electric"
-        if dtype == "coffee_machine":
-            return "mdi:coffee-maker"
         if dtype == "air_fryer":
             return "mdi:pot-steam"
-        if dtype == "heat_pump":
-            return "mdi:heat-pump"
         if dtype == "pump":
             return "mdi:water-pump"
-        if dtype == "oven":
-            return "mdi:stove"
         return "mdi:washing-machine"
 
     @property
@@ -283,11 +297,44 @@ class WasherStateSensor(WasherBaseSensor):
         }
         if self._manager.device_type == DEVICE_TYPE_PUMP:
             attrs["pump_stuck"] = self._manager.pump_stuck
+        # Runtime anomaly signal (visible only; never a notification). Present the
+        # overrun ratio while a cycle is overrunning its usual duration so users /
+        # automations can react without a push.
+        anomaly = self._manager.cycle_anomaly
+        if anomaly and anomaly != "none":
+            attrs["cycle_anomaly"] = anomaly
+            attrs["overrun_ratio"] = round(self._manager.overrun_ratio, 2)
+        # Post-cycle anomaly data (underrun, energy spike/low) from last completed cycle.
+        last_post = self._manager.last_cycle_post_anomaly
+        if isinstance(last_post, dict):
+            if last_post.get("anomaly") == "underrun":
+                attrs["last_cycle_anomaly"] = "underrun"
+                if "underrun_ratio" in last_post:
+                    attrs["last_cycle_underrun_ratio"] = last_post["underrun_ratio"]
+            if "energy_anomaly" in last_post:
+                attrs["last_cycle_energy_anomaly"] = last_post["energy_anomaly"]
+            if "energy_z_score" in last_post:
+                attrs["last_cycle_energy_z_score"] = last_post["energy_z_score"]
+        # Surface HA restart gaps recorded during the current cycle so automations
+        # can see that the power trace has holes (pure metadata, never a notification).
+        gaps = self._manager.restart_gaps
+        if gaps:
+            attrs["ha_restart_gaps"] = len(gaps)
+        # Predictive-maintenance reminders (E2): event types whose cycle threshold
+        # has been reached. Automatable by users; never a notification.
+        maintenance_due = self._manager.maintenance_due
+        if maintenance_due:
+            attrs["maintenance_due"] = maintenance_due
         return attrs
 
 
 class WasherProgramSensor(WasherBaseSensor):
     """Sensor for the current program."""
+
+    # The reference-profile curve is a live forecast for energy managers; it is
+    # static per profile and has no historical value, so keep it out of the
+    # recorder database (still available live via state/templates/WebSocket).
+    _unrecorded_attributes = frozenset({"reference_profile"})
 
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the program sensor."""
@@ -348,6 +395,14 @@ class WasherProgramSensor(WasherBaseSensor):
             "phase_catalog": catalog_view,
             "phase_ranges": assigned,
         }
+        # Forward-looking reference power curve of the matched profile (issue
+        # #304): a compact `[[offset_s, watts], ...]` shape energy managers can
+        # slice by the live progress position to anticipate later load (e.g. a
+        # heating spike). Only present once a real profile is matched - the
+        # guard above already returns None while detecting/unmatched/off.
+        reference = self._manager.profile_store.reference_curve(profile_name)
+        if reference:
+            attrs["reference_profile"] = reference
         return attrs
 
 
@@ -427,6 +482,23 @@ class WasherProgressSensor(WasherBaseSensor):
     @property
     def native_value(self):  # type: ignore[override]
         return self._manager.cycle_progress
+
+    @property
+    def extra_state_attributes(self):  # type: ignore[override]
+        """Expose the live projected total energy/cost for the running cycle.
+
+        Derived from accumulated energy and the (ML-blended) progress estimate.
+        Keys are present only while a projection is available, so the attributes
+        stay clean when idle or early in a cycle.
+        """
+        attrs: dict[str, float] = {}
+        projected_wh = self._manager.projected_energy_wh
+        if projected_wh is not None:
+            attrs["projected_energy_kwh"] = round(float(projected_wh) / 1000.0, 3)
+        projected_cost = self._manager.projected_cost
+        if projected_cost is not None:
+            attrs["projected_cost"] = round(float(projected_cost), 2)
+        return attrs or None
 
 
 class WasherPowerSensor(WasherBaseSensor):
@@ -555,6 +627,37 @@ class WasherTopCandidatesSensor(WasherBaseSensor):
     @property
     def extra_state_attributes(self):  # type: ignore[override]
         return {"candidates": self._manager.top_candidates}
+
+
+class WasherAmbiguitySensor(WasherBaseSensor):
+    """Diagnostic sensor for how ambiguous the last profile match was.
+
+    Reports the score margin between the top-1 and top-2 candidates as a
+    percentage: a small margin means the matcher could not confidently
+    distinguish the best profile from the runner-up.
+    """
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="ambiguity",
+            translation_key="ambiguity",
+            icon="mdi:help-rhombus-outline",
+            state_class=SensorStateClass.MEASUREMENT,
+            native_unit_of_measurement="%",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self):  # type: ignore[override]
+        margin = self._manager.last_ambiguity_margin
+        if margin is None:
+            return None
+        return round(float(margin) * 100, 1)
+
+    @property
+    def extra_state_attributes(self):  # type: ignore[override]
+        return {"is_ambiguous": self._manager.match_ambiguity}
 
 
 class WasherCurrentPhaseSensor(WasherBaseSensor):
@@ -862,3 +965,23 @@ class WasherCycleCountSensor(WasherBaseSensor):
     @property
     def native_value(self) -> int:  # type: ignore[override]
         return self._manager.cycle_count
+
+
+class WasherEnergyTotalSensor(WasherBaseSensor):
+    """Lifetime-accumulating energy meter for the HA Energy dashboard."""
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="energy_total",
+            translation_key="energy_total",
+            device_class=SensorDeviceClass.ENERGY,
+            state_class=SensorStateClass.TOTAL_INCREASING,
+            native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+            suggested_display_precision=3,
+            icon="mdi:lightning-bolt",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self) -> float:  # type: ignore[override]
+        return self._manager.lifetime_energy_kwh

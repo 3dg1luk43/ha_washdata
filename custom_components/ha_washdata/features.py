@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Feature extraction logic for WashData.
 
 Constraint: NumPy only.
@@ -7,25 +23,9 @@ Constraint: All computations must be dt-aware.
 from dataclasses import dataclass
 import numpy as np
 
-
-@dataclass
-class PowerEvent:
-    """Represent a detected power change event."""
-
-    timestamp: float
-    magnitude: float  # Absolute change in Watts
-    rate: float  # Slope W/s
-    direction: str  # "rising" or "falling"
+from .signal_processing import energy_gap_threshold_s, integrate_wh
 
 
-@dataclass
-class CyclePhase:
-    """Represent a distinct phase within a cycle."""
-
-    start_ts: float
-    end_ts: float
-    label: str  # HEATER, MOTOR, IDLE, etc.
-    avg_power: float
 
 
 @dataclass
@@ -35,7 +35,7 @@ class CycleSignature:
     duration: float
     total_energy: float
     max_power: float
-    event_density: float  # Events per minute
+    event_density: float  # Deprecated/reserved: always 0.0 (event detector removed); kept for signature back-compat
     time_to_first_high: float  # Seconds to first HEATER/HIGH phase
     high_phase_ratio: float  # Duration of high phases / total duration
     # Distributions (quantiles of power)
@@ -46,144 +46,16 @@ class CycleSignature:
     p95: float
 
 
-def detect_events(
-    timestamps: np.ndarray,
-    power: np.ndarray,
-    idle_mad: float,
-    min_event_watts: float = 50.0,
-) -> list[PowerEvent]:
-    """Detect significant power events using dp/dt.
-
-    Args:
-        timestamps: Time array (seconds).
-        power: Power array (Watts).
-        idle_mad: Media Absolute Deviation of idle baseline (noise floor).
-        min_event_watts: Absolute floor for an event to be considered.
-    """
-    if len(power) < 2:
-        return []
-
-    dt = np.diff(timestamps)
-    dp = np.diff(power)
-
-    # Avoid div by zero
-    valid = dt > 0.1
-    rate = np.zeros_like(dp)
-    rate[valid] = dp[valid] / dt[valid]
-
-    # Adaptive threshold
-    # 3-sigma equivalent: 3 * 1.4826 * MAD ~= 4.5 * MAD
-    # But for dp/dt, noise scales differently.
-    # Let's use absolute threshold + noise factor.
-    noise_allowance = max(10.0, 5.0 * idle_mad)
-
-    events: list[PowerEvent] = []
-
-    for i, r in enumerate(rate):
-        if not valid[i]:
-            continue
-
-        mag = abs(dp[i])
-
-        # Criteria: Significant rate AND significant magnitude
-        # We want to ignore small jitter even if rate is high (dt small)
-        if mag > min_event_watts and abs(r) > noise_allowance:  # Rate threshold W/s
-            # Basic check: if dt is tiny (1s) and power jump is 50W, rate is 50 W/s.
-            # If dt is 10s and power jump is 50W, rate is 5 W/s.
-            # Real heater on: 2000W in ~2s => 1000 W/s.
-            # Motor tumble: 200W in 1s => 200 W/s.
-
-            direction = "rising" if r > 0 else "falling"
-            events.append(
-                PowerEvent(
-                    timestamp=timestamps[i], magnitude=mag, rate=r, direction=direction
-                )
-            )
-
-    return events
-
-
-def segment_phases(timestamps: np.ndarray, power: np.ndarray) -> list[CyclePhase]:
-    """Segment cycle into phases using quantile-based thresholds.
-
-    Labels:
-    - IDLE: < p10 (or min threshold)
-    - MOTOR: p25 - p75 approx
-    - HEATER/HIGH: > p90
-
-    Refined logic:
-    1. Calculate cycle quantiles.
-    2. Define levels: LOW, MED, HIGH.
-    3. Run-length encoding or simple state machine.
-    """
-    if len(power) < 10:
-        return []
-
-    # Quantiles
-    q_low = np.percentile(power, 25)
-    q_high = np.percentile(power, 90)
-
-    # Enforce device minimums to avoid "High" label on a 5W phone charger cycle
-    min_high = 500.0
-    min_motor = 50.0
-
-    # Adjust thresholds
-    thresh_high = max(q_high, min_high)
-    thresh_med = max(q_low, min_motor)
-
-    labels: list[str] = []
-    for p in power:
-        if p >= thresh_high:
-            labels.append("HEATER")
-        elif p >= thresh_med:
-            labels.append("MOTOR")
-        else:
-            labels.append("IDLE")
-
-    # Merge consecutive
-    phases: list[CyclePhase] = []
-    if not labels:
-        return []
-
-    current_label: str = labels[0]
-    start_idx = 0
-
-    for i in range(1, len(labels)):
-        if labels[i] != current_label:
-            # End current phase
-            phases.append(
-                CyclePhase(
-                    start_ts=timestamps[start_idx],
-                    end_ts=timestamps[i - 1],
-                    label=current_label,
-                    avg_power=float(np.mean(power[start_idx:i])),
-                )
-            )
-            current_label = labels[i]
-            start_idx = i
-
-    # Last one
-    phases.append(
-        CyclePhase(
-            start_ts=timestamps[start_idx],
-            end_ts=timestamps[-1],
-            label=current_label,
-            avg_power=float(np.mean(power[start_idx:])),
-        )
-    )
-
-    return phases
 
 
 def compute_signature(
-    timestamps: np.ndarray, power: np.ndarray, events: list[PowerEvent] | None = None
+    timestamps: np.ndarray, power: np.ndarray
 ) -> CycleSignature:
     """Compute compact signature for candidate rejection/matching.
 
     Args:
         timestamps: Timestamps (seconds)
         power: Power (Watts)
-        events: Pre-computed events (optional)
     """
     if len(power) == 0:
         # Return empty/zero signature
@@ -191,15 +63,10 @@ def compute_signature(
 
     duration = timestamps[-1] - timestamps[0]
 
-    # Energy approx
-    dt = np.diff(timestamps)
-    # Simple rectangular for speed here, or integrate_wh
-    if len(dt) > 0:
-        p_avg = (power[:-1] + power[1:]) / 2
-        total_energy = np.sum(p_avg * (dt / 3600.0))
-    else:
-        total_energy = 0.0
+    # Energy (trapezoidal Wh) via the shared integrator - single source of truth.
+    total_energy = integrate_wh(timestamps, power, max_gap_s=energy_gap_threshold_s(timestamps))
 
+    dt = np.diff(timestamps)  # sample intervals (s), reused by the high-phase ratio
     max_p = np.max(power)
 
     # Quantiles
@@ -219,20 +86,20 @@ def compute_signature(
     # Time in high / total time
     # Check dt where high_mask holds
     if len(dt) > 0:
-        # Align mask with intervals
-        # mask[i] corresponds to interval i? roughly
-        high_dur = np.sum(dt[high_mask[:-1]])
+        # Align mask with intervals; mask[i] corresponds to interval i.
+        # Exclude sensor-outage gaps: a long gap after a high-power sample is a data
+        # dropout, not high-phase time, so cap those intervals to 0 (mirrors the energy
+        # integrator's gap handling via energy_gap_threshold_s).
+        max_gap = energy_gap_threshold_s(timestamps)
+        capped_dt = np.where(dt > max_gap, 0.0, dt)
+        high_dur = np.sum(capped_dt[high_mask[:-1]])
         high_phase_ratio = high_dur / duration if duration > 0 else 0
     else:
         high_phase_ratio = 0.0
 
-    # Event density
-    if not events:
-        # Compute locally if needed, but ideally passed in
-        pass
-
-    event_count = len(events) if events else 0
-    event_density = (event_count / (duration / 60.0)) if duration > 60 else 0
+    # Event density: always 0 now that the event detector is gone; retained as a
+    # signature field for backward compatibility with stored signatures.
+    event_density = 0.0
 
     return CycleSignature(
         duration=float(duration),

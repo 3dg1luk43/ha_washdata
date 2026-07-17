@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "{device} kjører fortsatt. Omtrent {minutes} minutter igjen.",
+    "running_no_estimate": "{device} kjører fortsatt.",
+    "finished_recently": "{device} ble ferdig for {minutes} minutter siden.",
+    "just_finished": "{device} ble nettopp ferdig.",
+    "not_running": "{device} kjører ikke.",
+    "no_devices": "Jeg fant ingen WashData-apparater.",
+    "unknown_device": "Jeg fant ingen WashData-apparat som heter {device}.",
+    "none_running": "Ingen av WashData-apparatene dine kjører.",
+    "error": "Beklager, jeg kunne ikke sjekke apparatene dine akkurat nå."
+  }
+}

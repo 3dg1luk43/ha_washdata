@@ -1,3 +1,19 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import timedelta, datetime, timezone
@@ -5,13 +21,13 @@ import sys
 import os
 
 # Ensure the custom_components directory is in the path
-sys.path.append(os.path.abspath("/root/ha_washdata/custom_components"))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "custom_components")))
 
 from ha_washdata.manager import WashDataManager
 from ha_washdata.const import (
-    CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_POWER_SENSOR, 
+    CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_POWER_SENSOR,
     CONF_OFF_DELAY, STATE_RUNNING, STATE_OFF, CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_DEVICE_TYPE, CONF_NOTIFY_EVENTS
+    CONF_DEVICE_TYPE,
 )
 from homeassistant.util import dt as dt_util
 
@@ -41,7 +57,6 @@ def mock_entry():
         CONF_NO_UPDATE_ACTIVE_TIMEOUT: 1800, # 30 minutes
         CONF_DEVICE_TYPE: "dishwasher",
         "power_sensor": "sensor.test_power",
-        CONF_NOTIFY_EVENTS: [],
         "start_duration_threshold": 0,
         "start_energy_threshold": 0,
     }

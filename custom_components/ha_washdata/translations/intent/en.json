@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "Your {device} is still running. About {minutes} minutes left.",
+    "running_no_estimate": "Your {device} is still running.",
+    "finished_recently": "Your {device} finished {minutes} minutes ago.",
+    "just_finished": "Your {device} just finished.",
+    "not_running": "Your {device} is not running.",
+    "no_devices": "I couldn't find any WashData appliances.",
+    "unknown_device": "I couldn't find a WashData appliance called {device}.",
+    "none_running": "None of your WashData appliances are running.",
+    "error": "Sorry, I couldn't check your appliances right now."
+  }
+}
