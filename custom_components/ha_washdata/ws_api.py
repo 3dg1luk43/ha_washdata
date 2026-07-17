@@ -1456,8 +1456,9 @@ async def ws_get_setup_status(
             ref_names.add(rc["profile_name"])
 
     coverage_gap = await hass.async_add_executor_job(store.suggest_coverage_gaps)
-    # suggestions: use cached if available, else empty (avoid heavy computation here)
-    suggestions = manager._last_suggestions if hasattr(manager, "_last_suggestions") else []
+    # suggestions: read from the store (cheap dict lookup; heavy computation happens
+    # in the SuggestionEngine background task, not here).
+    suggestions = list((store.get_suggestions() or {}).values())
     pg_data = store._data.get("profile_groups", {})
     pending_groups = (pg_data.get("suggestions") or []) if isinstance(pg_data, dict) else []
 

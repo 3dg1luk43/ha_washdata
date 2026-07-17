@@ -119,12 +119,15 @@ def compute_setup_phase(
         return item
 
     # ── Phase 1a / 1b — early guidance (device has not yet seen coverage stats) ─
-    # Only shown when coverage_gap is None: once the device has accumulated enough
-    # cycles for the gap analyser to run (even if the nudge is suppressed), it has
-    # advanced past the "first profile" guidance stage.
+    # Only shown while the gap analyser has not yet flagged a coverage gap:
+    # suggest_coverage_gaps() returns {} (empty) when there are no cycles or not
+    # enough unmatched cycles, and a dict with suggest_create=True once the device
+    # has accumulated enough cycles for the gap to be actionable.  We treat any
+    # non-empty dict where suggest_create is True as "past the early stage".
+    # None is also accepted (function signature allows it) and treated as no gap.
     # Also skipped once the user has permanently dismissed ("never") or snoozed the
     # Phase 1 guidance via setup_skip_phase1.
-    if has_real and coverage_gap is None and not _is_step_suppressed("setup_skip_phase1", skipped_steps, now):
+    if has_real and not (coverage_gap and coverage_gap.get("suggest_create")) and not _is_step_suppressed("setup_skip_phase1", skipped_steps, now):
         if has_recorded:
             first_recorded_profile = _first_recorded_profile_name(past_cycles, real)
             return SetupPhaseResult(

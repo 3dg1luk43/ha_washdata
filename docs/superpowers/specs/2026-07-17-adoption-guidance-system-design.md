@@ -289,6 +289,12 @@ New key namespaces:
 
 1. **Coverage "complete" threshold for Phase 2 → Phase 3 transition:** currently defined as "no active coverage nudges for 14 days or user dismissed all nudges." Is 14 days the right snooze window, or should it be shorter (e.g. 7 days)?
 
+Answer: 14 days is fine but also option to not show again
+
 2. **Phase 1c store-download advancement:** the card advances once "the first successful match is confirmed." Should this require a match above the commit threshold (0.85 ML / ambiguity margin), or just any non-ambiguous match above `MATCH_KEEP_MIN_SCORE`?
 
+Answer: jsut non-ambiguous match
+
 3. **"Skip this step" lifetime for Phase 3 tuning items:** set to 7-day snooze above — is that right, or should some items (e.g. phase configuration) be indefinitely skippable (i.e. "never show again" rather than snooze)?
+
+Anser: snooze is fine, also option to never show again

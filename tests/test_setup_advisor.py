@@ -99,6 +99,65 @@ def test_phase1a_labelled_cycle():
     assert r.cta_action == "open_recorder"
 
 
+def test_phase1a_with_empty_coverage_gap():
+    """Empty dict (not None) from suggest_coverage_gaps() must still reach phase1a.
+
+    suggest_coverage_gaps() always returns a dict — it never returns None.
+    The old guard ``coverage_gap is None`` was always False, making Phase 1a/1b
+    unreachable in production.  The fixed guard uses
+    ``not (coverage_gap and coverage_gap.get("suggest_create"))`` which treats
+    both None and {} as "no active gap".
+    """
+    r = compute_setup_phase(
+        device_type="washing_machine",
+        profile_names=["Cotton 60°"],
+        past_cycles=[_cycle("Cotton 60°")],
+        ref_profile_names=set(),
+        coverage_gap={},  # real return value when not enough unmatched cycles
+        suggestions=[],
+        profile_groups=[],
+        skipped_steps={},
+        now=_NOW,
+    )
+    assert r.phase == "phase1a"
+
+
+def test_phase1b_with_empty_coverage_gap():
+    """Same fix — empty coverage_gap dict must not block phase1b either."""
+    r = compute_setup_phase(
+        device_type="washing_machine",
+        profile_names=["Cotton 60°"],
+        past_cycles=[_cycle("Cotton 60°", source="recorder")],
+        ref_profile_names=set(),
+        coverage_gap={},
+        suggestions=[],
+        profile_groups=[],
+        skipped_steps={},
+        now=_NOW,
+    )
+    assert r.phase == "phase1b"
+
+
+def test_phase1a_skipped_when_suggest_create_true():
+    """A live coverage gap (suggest_create=True) must NOT render phase1a, even if
+    phase2 is suppressed — the device has enough history to be past phase1."""
+    cg = {"suggest_create": True, "unmatched_count": 6, "unmatched_rate": 0.3,
+          "profile_suggestions": [], "duration_clusters": []}
+    r = compute_setup_phase(
+        device_type="washing_machine",
+        profile_names=["Cotton 60°"],
+        past_cycles=[_cycle("Cotton 60°")],
+        ref_profile_names=set(),
+        coverage_gap=cg,
+        suggestions=[],
+        profile_groups=[],
+        skipped_steps={"setup_skip_phase2": "never"},  # phase2 suppressed
+        now=_NOW,
+    )
+    # With phase2 suppressed and no suggestions/groups, must land on phase4, not phase1a.
+    assert r.phase == "phase4"
+
+
 def test_phase1b_recorded_cycle():
     r = compute_setup_phase(
         device_type="washing_machine",

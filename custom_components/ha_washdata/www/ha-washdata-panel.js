@@ -3477,10 +3477,10 @@ class HaWashdataPanel extends HTMLElement {
     const profileCount = (this._profiles || []).length;
     const setupDismissed = this._pref('setup_card_dismissed', false);
     const setupStatus = this._setupStatus;
-    const showSetupCard = setupStatus
-      && !(setupDismissed && setupStatus.phase === 'phase4')
-      && !hasCurve;
-    const setupCardHtml = showSetupCard ? this._htmlSetupCard(setupStatus) : '';
+    // Phase 3 and 4 collapse to a chip when dismissed; earlier phases always show
+    // the full guidance card regardless of the dismissed pref.
+    const showSetupCard = setupStatus && !hasCurve;
+    const setupCardHtml = showSetupCard ? this._htmlSetupCard(setupStatus, setupDismissed) : '';
     const curveHtml = hasCurve
       ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_power_chart', {}, 'Power consumption chart'))}" style="height:160px"></canvas></div>${legend}`
       : (showSetupCard
@@ -3559,19 +3559,30 @@ class HaWashdataPanel extends HTMLElement {
   // Phase 4 renders as a compact chip (device fully set up); phases 0–3 render
   // the full guidance card with a primary CTA, optional secondary action, skip
   // links, and a permanent-hide link when dismissible.
-  _htmlSetupCard(status) {
+  _htmlSetupCard(status, dismissed = false) {
     if (!status) return '';
     const { phase, message_key, message_params, cta_label_key, cta_action,
             secondary_label_key, secondary_action, skippable, dismissible,
             step_key } = status;
 
-    // Phase 4: collapsed chip (setup complete).
+    // Phase 4: always a collapsed chip (setup complete — no full card).
     if (phase === 'phase4') {
       return `
         <div class="wd-setup-chip wd-setup-chip--healthy" data-action="expand-setup" role="button" tabindex="0"
              title="${_esc(this._t('setup.cta.show_guidance', {}, 'Show guidance'))}">
           <span class="wd-setup-dot wd-setup-dot--green"></span>
           <span>${this._t('setup.hdr.healthy_chip', {}, 'Setup complete')}</span>
+        </div>`;
+    }
+
+    // Phase 3 dismissed: compact chip so the user can restore guidance without
+    // the full card. Click clears setup_card_dismissed and re-renders the full card.
+    if (phase === 'phase3' && dismissed) {
+      return `
+        <div class="wd-setup-chip" data-action="expand-setup" role="button" tabindex="0"
+             title="${_esc(this._t('setup.cta.show_guidance', {}, 'Show guidance'))}">
+          <span class="wd-setup-dot" style="background:var(--warning-color,#ff9800)"></span>
+          <span>${this._t('setup.hdr.card', {}, 'Device Setup')}</span>
         </div>`;
     }
 
@@ -9325,7 +9336,7 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
 
     } else if (a === 'expand-setup') {
-      // Phase-4 chip tapped — un-hide the card by clearing the dismissed pref.
+      // Phase 3/4 chip tapped — restore full guidance card by clearing the pref.
       this._setPref('setup_card_dismissed', false);
       this._render();
 

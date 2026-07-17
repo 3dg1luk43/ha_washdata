@@ -1735,10 +1735,10 @@
       "recorded": "Your recording was saved as {profile_name}. Now record or label your other common programs to build coverage."
     },
     "phase1c": {
-      "verify": "You have {count} {count, plural, one {program} other {programs}} from the community. Run a cycle to verify WashData recognises it correctly — matching will improve as your device builds its own history."
+      "verify": "You have {count} programs from the community. Run a cycle to verify WashData recognises it correctly — matching will improve as your device builds its own history."
     },
     "phase2": {
-      "cluster": "WashData has seen {count} {count, plural, one {cycle} other {cycles}} that don't match any saved program — they look similar to each other. Want to create a new profile for them?",
+      "cluster": "WashData has seen {count} cycles that don't match any saved program — they look similar to each other. Want to create a new profile for them?",
       "unmatched": "Your last cycle didn't match any saved program. Is it a new program?"
     },
     "phase3": {
@@ -1747,7 +1747,7 @@
       "phases": "Add program phases to {profile_name} for more accurate time-remaining estimates."
     },
     "phase4": {
-      "healthy": "This device is fully set up ({profile_count} {profile_count, plural, one {profile} other {profiles}})."
+      "healthy": "This device is fully set up ({profile_count} profiles)."
     },
     "cta": {
       "start_recording": "Start Recording",
