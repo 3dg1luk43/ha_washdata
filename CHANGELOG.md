@@ -208,6 +208,12 @@ The biggest release in WashData's history. It retires the 180-plus-tunable optio
 
 - **Event-loop responsiveness and store reliability**: The opt-in per-cycle ML quality score and the community-share trace downsampling now run in an executor thread instead of on the event loop, so neither can stall Home Assistant on a long trace; whole-device community downloads bound their per-profile fetch concurrency to avoid tripping the store's rate limiter on appliances with many profiles; and the profile-group cohesion cache is guarded against concurrent access from executor threads.
 
+- **Release validation (hassfest) fixed**: the voice-assistant intent responses were stored under a top-level `intent` key that Home Assistant's `hassfest` validator rejects (`extra keys not allowed`), which was failing release validation. They now live in a self-served `translations/intent/{lang}.json` directory (the same pattern the panel translations use) and are loaded directly, so all 35 languages stay localized and `hassfest` passes.
+
+- **Notification & upload hardening**: milestone lists now accept genuine positive integers only (a stray `50.5` or `true` can no longer fire an unconfigured milestone); the panel's HTML escaper also escapes single quotes, closing an attribute-injection edge for values containing an apostrophe; and community uploads validate their inputs instead of raising, honouring the "never raise" contract.
+
+- **Playground fidelity**: the what-if simulator now matches the live notification contract exactly (start notifications are never held by quiet hours; milestone notifications are), and the **Optimize → end-timing accuracy** objective now scores each cycle's detected end against that cycle's own recorded length rather than the program median, so a legitimately long or short cycle is judged fairly.
+
 ### 🛠️ Developer
 
 - **Type-safe WebSocket API contract + generated reference**: A new `ws_schema.py` is the single source of truth for the panel's WebSocket surface - a request registry (`WS_COMMANDS`) plus a typed response (`TypedDict`) for every one of the ~70 commands. A debug-only response validator runs when `HA_WASHDATA_WS_CONTRACT=1` (zero overhead otherwise), a sync test fails if a command is added or removed without updating the contract, and `devtools/generate_ws_types.py` regenerates both the TypeScript types (`www/ws-types.d.ts`) and an auto-generated command reference at [`docs/WS_API.md`](docs/WS_API.md).
