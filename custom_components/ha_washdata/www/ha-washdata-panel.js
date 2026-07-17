@@ -1959,7 +1959,9 @@ class HaWashdataPanel extends HTMLElement {
       tid = r && r.task_id;
       if (!tid) throw new Error('no task id');
       const kind = String(msg.type || '').endsWith('reprocess_history') ? 'reprocess'
-        : String(msg.type || '').endsWith('trigger_ml_training') ? 'ml_training' : 'task';
+        : String(msg.type || '').endsWith('trigger_ml_training') ? 'ml_training'
+        : String(msg.type || '').endsWith('apply_split') ? 'split'
+        : String(msg.type || '').endsWith('trim_cycle') ? 'trim' : 'task';
       this._addProvisionalTask(tid, kind, msg.entry_id, 0);
     } catch (e) {
       this._busy.delete(busyKey);
@@ -2047,6 +2049,8 @@ class HaWashdataPanel extends HTMLElement {
       pg_history: this._t('lbl.task_pg_history', {}, 'Test on history'),
       pg_sweep: this._t('lbl.task_pg_sweep', {}, 'Optimize'),
       pg_detail: this._t('lbl.task_pg_detail', {}, 'Simulate cycle'),
+      split: this._t('lbl.task_split', {}, 'Splitting cycle'),
+      trim: this._t('lbl.task_trim', {}, 'Trimming cycle'),
       reprocess: this._t('lbl.task_reprocess', {}, 'Reprocessing'),
       ml_training: this._t('lbl.task_ml_training', {}, 'Learning'),
     };
@@ -9948,19 +9952,34 @@ class HaWashdataPanel extends HTMLElement {
         return;
       }
       if (action === 'cyc-apply-trim') {
+        // Backgrounded task (issue #311): recompute + envelope rebuild can stall a
+        // low-power host, so run it via the registry with a header pill.
         const cid = m.cycleId, s = m.trim.start, e2 = m.trim.end;
-        await this._busyRun('cyc-trim-apply', async () => {
-          try { await this._ws({ type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 }); this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed')); await this._closeCycleDetail(eid); await this._fetchCycles(eid); }
-          catch (e) { this._showToast(this._t('toast.trim_failed', {error: e.message || e}, 'Trim failed: ' + (e.message || e)), 'error'); }
-        });
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
+          'cyc-trim-apply',
+          async () => {
+            this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed'));
+            await this._closeCycleDetail(eid);
+            await this._fetchCycles(eid);
+          },
+        );
         return;
       }
       if (action === 'cyc-apply-split') {
+        // Backgrounded task (issue #311): per-segment extraction + affected
+        // envelope rebuilds can stall a low-power host, so run it via the registry.
         const cid = m.cycleId, offs = m.split.offsets.slice(), profs = m.split.profiles.slice();
-        await this._busyRun('cyc-split-apply', async () => {
-          try { const r = await this._ws({ type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs }); this._showToast(this._t('toast.split_complete', {count: (r.new_ids || []).length}, `Split into ${(r.new_ids || []).length} cycles`)); await this._closeCycleDetail(eid); await this._fetchCycles(eid); await this._fetchProfiles(eid); }
-          catch (e) { this._showToast(this._t('toast.split_failed', {error: e.message || e}, 'Split failed: ' + (e.message || e)), 'error'); }
-        });
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs },
+          'cyc-split-apply',
+          async (result) => {
+            this._showToast(this._t('toast.split_complete', {count: (result.new_ids || []).length}, `Split into ${(result.new_ids || []).length} cycles`));
+            await this._closeCycleDetail(eid);
+            await this._fetchCycles(eid);
+            await this._fetchProfiles(eid);
+          },
+        );
         return;
       }
     }

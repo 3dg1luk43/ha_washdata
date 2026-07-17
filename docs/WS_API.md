@@ -55,9 +55,9 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `clear_suggestions` | entry_id | `SuccessResponse` |
 | `run_suggestion_analysis` | entry_id | `RunSuggestionAnalysisResponse` |
 | `get_cycle_power_data` | entry_id, cycle_id | `GetCyclePowerDataResponse` |
-| `trim_cycle` | entry_id, cycle_id, start_s, end_s | `SuccessResponse` |
+| `trim_cycle` | entry_id, cycle_id, start_s, end_s | `StartTaskResponse` |
 | `analyze_split` | entry_id, cycle_id, gap_seconds? | `AnalyzeSplitResponse` |
-| `apply_split` | entry_id, cycle_id, split_offsets, segment_profiles? | `ApplySplitResponse` |
+| `apply_split` | entry_id, cycle_id, split_offsets, segment_profiles? | `StartTaskResponse` |
 | `apply_merge` | entry_id, cycle_ids, target_profile?, new_profile_name? | `ApplyMergeResponse` |
 | `get_profile_envelope` | entry_id, profile_name | `GetProfileEnvelopeResponse` |
 | `get_profile_cycles` | entry_id, profile_name, limit? | `GetProfileCyclesResponse` |
@@ -873,11 +873,11 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `start_s` | yes | float |
 | `end_s` | yes | float |
 
-**Response** (`SuccessResponse`)
+**Response** (`StartTaskResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `success` | yes | bool |
+| `task_id` | yes | str |
 
 ## `ha_washdata/analyze_split`
 
@@ -909,12 +909,11 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `split_offsets` | yes | list[float] |
 | `segment_profiles` | no | list |
 
-**Response** (`ApplySplitResponse`)
+**Response** (`StartTaskResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `success` | yes | bool |
-| `new_ids` | yes | list[str] |
+| `task_id` | yes | str |
 
 ## `ha_washdata/apply_merge`
 

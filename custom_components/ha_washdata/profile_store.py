@@ -5780,8 +5780,21 @@ class ProfileStore:
             if p_data and p_data.get("sample_cycle_id") == original_sample_id:
                 p_data["sample_cycle_id"] = best_replacement_id
 
-            # Rebuild envelope because dataset changed
-            await self.async_rebuild_envelope(original_profile)
+        # Rebuild envelopes ONLY for the profiles whose dataset actually changed:
+        # the original profile (it lost the parent cycle) plus any profile a labeled
+        # segment was assigned to. This replaces a blanket rebuild-all-envelopes in
+        # the caller, which re-scanned every profile serially and stalled low-power
+        # hosts on a split (issue #311 follow-up).
+        touched: set[str] = set()
+        if original_profile:
+            touched.add(original_profile)
+        for seg in segments:
+            if isinstance(seg, dict):
+                seg_prof = seg.get("profile")
+                if seg_prof:
+                    touched.add(seg_prof)
+        for name in touched:
+            await self.async_rebuild_envelope(name)
 
         await self.async_save()
         self._logger.info("Interactive Split Applied to %s -> %s", cycle_id, new_ids)

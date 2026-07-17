@@ -24,11 +24,6 @@ export interface ApplyMergeResponse {
   new_id: string;
 }
 
-export interface ApplySplitResponse {
-  success: boolean;
-  new_ids: string[];
-}
-
 export interface ApplySuggestionsResponse {
   success: boolean;
   applied: string[];
@@ -1163,9 +1158,9 @@ export interface WashDataWsResponses {
   "ha_washdata/clear_suggestions": SuccessResponse;
   "ha_washdata/run_suggestion_analysis": RunSuggestionAnalysisResponse;
   "ha_washdata/get_cycle_power_data": GetCyclePowerDataResponse;
-  "ha_washdata/trim_cycle": SuccessResponse;
+  "ha_washdata/trim_cycle": StartTaskResponse;
   "ha_washdata/analyze_split": AnalyzeSplitResponse;
-  "ha_washdata/apply_split": ApplySplitResponse;
+  "ha_washdata/apply_split": StartTaskResponse;
   "ha_washdata/apply_merge": ApplyMergeResponse;
   "ha_washdata/get_profile_envelope": GetProfileEnvelopeResponse;
   "ha_washdata/get_profile_cycles": GetProfileCyclesResponse;

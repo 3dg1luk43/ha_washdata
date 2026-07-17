@@ -3159,32 +3159,61 @@ async def ws_get_cycle_power_data(
         vol.Required("end_s"): vol.Coerce(float),
     }
 )
-@websocket_api.async_response
-async def ws_trim_cycle(
+@callback
+def ws_trim_cycle(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Trim a cycle's power data to the [start_s, end_s] offset window."""
+    """Trim a cycle's power data to the [start_s, end_s] offset window.
+
+    Runs as a detached, registry-tracked task (returns a task_id immediately): the
+    trim recomputes the signature and rebuilds the profile envelope, which stalls
+    low-power hosts if held on the event loop for the whole WS request (issue #311).
+    Progress/result come via subscribe_tasks/get_task_result."""
     entry_id: str = msg["entry_id"]
-    manager = _get_manager(hass, entry_id)
-    if manager is None:
+    if _get_manager(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "trim", "Trimming cycle", label_key="task.trim.apply", label_params={},
+    )
+    hass.async_create_task(_trim_task(
+        hass, task, entry_id, msg["cycle_id"], float(msg["start_s"]), float(msg["end_s"]),
+    ))
+    _send_result(connection, msg["id"], "trim_cycle", {"task_id": task.id})
 
+
+async def _trim_task(
+    hass: HomeAssistant, task: Any, entry_id: str,
+    cycle_id: str, start_s: float, end_s: float,
+) -> None:
+    """Detached runner for a cycle trim (recompute + single-profile envelope
+    rebuild). Serialized under the per-entry write lock like reprocess."""
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    store = manager.profile_store
+    lock = _entry_write_lock(hass, entry_id)
+    await lock.acquire()
     try:
-        ok = await manager.profile_store.trim_cycle_power_data(
-            msg["cycle_id"], float(msg["start_s"]), float(msg["end_s"])
-        )
-        if ok:
+        reg.update(task, total=1, done=0)
+        ok = await store.trim_cycle_power_data(cycle_id, start_s, end_s)
+        reg.update(task, done=1)
+        if not ok:
+            reg.finish(task, state=task_registry.STATE_ERROR, error="trim_failed")
+            return
+        if _get_manager(hass, entry_id) is manager:
             manager.notify_update()
-            _send_result(connection, msg["id"], "trim_cycle", {"success": True})
-        else:
-            connection.send_error(
-                msg["id"], "trim_failed", "Trim produced no data or cycle not found"
-            )
+        reg.finish(task, state=task_registry.STATE_DONE, result={"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        _LOGGER.warning("Trim task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+    finally:
+        lock.release()
 
 
 @websocket_api.websocket_command(
@@ -3250,13 +3279,19 @@ async def ws_analyze_split(
         vol.Optional("segment_profiles"): list,
     }
 )
-@websocket_api.async_response
-async def ws_apply_split(
+@callback
+def ws_apply_split(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Split a cycle at the given offsets, optionally labeling each segment."""
+    """Split a cycle at the given offsets, optionally labeling each segment.
+
+    Cheap validation (cycle exists, at least two segments) runs synchronously so a
+    bad request fails fast; the heavy apply (per-segment extraction + affected
+    envelope rebuilds + save) then runs as a detached, registry-tracked task so it
+    never holds the event loop for the whole request on low-power hosts (issue
+    #311). Progress/result come via subscribe_tasks/get_task_result."""
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
     if manager is None:
@@ -3265,40 +3300,69 @@ async def ws_apply_split(
 
     store = manager.profile_store
     cycle_id: str = msg["cycle_id"]
-    try:
-        cycle = next(
-            (c for c in store.get_past_cycles() if c.get("id") == cycle_id), None
+    cycle = next(
+        (c for c in store.get_past_cycles() if c.get("id") == cycle_id), None
+    )
+    if not cycle:
+        connection.send_error(msg["id"], "not_found", f"Cycle {cycle_id!r} not found")
+        return
+
+    offsets = [float(o) for o in msg["split_offsets"]]
+    seg_bounds = store.build_split_segments_from_offsets(cycle, offsets)
+    if len(seg_bounds) < 2:
+        connection.send_error(
+            msg["id"],
+            "split_failed",
+            "Split points did not produce at least two segments",
         )
-        if not cycle:
-            connection.send_error(msg["id"], "not_found", f"Cycle {cycle_id!r} not found")
-            return
+        return
 
-        offsets = [float(o) for o in msg["split_offsets"]]
-        seg_bounds = store.build_split_segments_from_offsets(cycle, offsets)
-        if len(seg_bounds) < 2:
-            connection.send_error(
-                msg["id"],
-                "split_failed",
-                "Split points did not produce at least two segments",
-            )
-            return
+    profiles = msg.get("segment_profiles") or []
+    segments: list[dict[str, Any]] = []
+    for i, (seg_start, seg_end) in enumerate(seg_bounds):
+        prof = profiles[i] if i < len(profiles) else None
+        if prof in ("", "none", "__none__"):
+            prof = None
+        segments.append(
+            {"start": float(seg_start), "end": float(seg_end), "profile": prof}
+        )
 
-        profiles = msg.get("segment_profiles") or []
-        segments: list[dict[str, Any]] = []
-        for i, (seg_start, seg_end) in enumerate(seg_bounds):
-            prof = profiles[i] if i < len(profiles) else None
-            if prof in ("", "none", "__none__"):
-                prof = None
-            segments.append(
-                {"start": float(seg_start), "end": float(seg_end), "profile": prof}
-            )
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "split", "Splitting cycle", label_key="task.split.apply", label_params={},
+    )
+    hass.async_create_task(_apply_split_task(hass, task, entry_id, cycle_id, segments))
+    _send_result(connection, msg["id"], "apply_split", {"task_id": task.id})
 
+
+async def _apply_split_task(
+    hass: HomeAssistant, task: Any, entry_id: str,
+    cycle_id: str, segments: list[dict[str, Any]],
+) -> None:
+    """Detached runner for a cycle split. Rebuilds only the affected profiles'
+    envelopes (done inside apply_split_interactive). Serialized under the per-entry
+    write lock like reprocess."""
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    store = manager.profile_store
+    lock = _entry_write_lock(hass, entry_id)
+    await lock.acquire()
+    try:
+        reg.update(task, total=1, done=0)
         new_ids = await store.apply_split_interactive(cycle_id, segments)
-        await store.async_rebuild_all_envelopes()
-        manager.notify_update()
-        _send_result(connection, msg["id"], "apply_split", {"success": True, "new_ids": new_ids})
+        reg.update(task, done=1)
+        if _get_manager(hass, entry_id) is manager:
+            manager.notify_update()
+        reg.finish(
+            task, state=task_registry.STATE_DONE,
+            result={"success": True, "new_ids": new_ids},
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        _LOGGER.warning("Apply-split task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
 
 
 @websocket_api.websocket_command(
