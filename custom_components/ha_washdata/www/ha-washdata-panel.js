@@ -5081,8 +5081,19 @@ class HaWashdataPanel extends HTMLElement {
       ['end_repeat_count',        'End Repeat Count',      '',  'Low readings in a row before ending',          'advanced'],
       ['abrupt_drop_watts',       'Abrupt Drop Threshold', 'W', 'Sudden drop treated as immediate end',         'advanced'],
       ['interrupted_min_seconds', 'Interrupted Min',       's', 'Short cycles flagged as interrupted',          'advanced'],
-      ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Shortest run (vs the profile) still allowed to match', 'matching'],
-      ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Longest run (vs the profile) still allowed to match', 'matching'],
+      ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
+      ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
+      ['corr_weight',      'Correlation Weight', '', 'Stage 2: shape-correlation vs MAE weight (0-1; higher = trust shape more)', 'matching'],
+      ['keep_min_score',   'Keep Min Score',     '', 'Stage 2: lowest similarity score kept as a candidate', 'matching'],
+      ['dtw_bandwidth',    'DTW Bandwidth',      '', 'Stage 3: Sakoe-Chiba warping band (0 disables DTW; ~0.15-0.20 typical)', 'matching'],
+      ['dtw_blend',        'DTW Blend',          '', 'Stage 3: how much the DTW score replaces the core score (0-1)', 'matching'],
+      ['dtw_ensemble_w',   'DTW Ensemble Weight','', 'Stage 3: scaled-vs-derivative mix in ensemble mode (0-1)', 'matching'],
+      ['dtw_ddtw_scale',   'DDTW Scale',         '', 'Stage 3: derivative-DTW distance scale', 'matching'],
+      ['dtw_refine_top_n', 'DTW Refine Top-N',   '', 'Stage 3: how many top candidates DTW re-scores', 'matching'],
+      ['duration_weight',  'Duration Weight',    '', 'Stage 4: weight of duration agreement (0-1)', 'matching'],
+      ['energy_weight',    'Energy Weight',      '', 'Stage 4: weight of energy (mean-power) agreement (0-1)', 'matching'],
+      ['duration_scale',   'Duration Scale',     '', 'Stage 4: sharpness of duration agreement (smaller = sharper)', 'matching'],
+      ['energy_scale',     'Energy Scale',       '', 'Stage 4: sharpness of energy agreement (smaller = sharper)', 'matching'],
     ];
   }
 

@@ -48,8 +48,8 @@ def test_build_sim_config_honours_previously_dropped_keys():
 
 
 def test_apply_match_overrides_maps_user_options_to_matcher_keys():
-    # Only the user-settable duration-ratio options are honoured, and they map to
-    # the matcher-config keys (min/max_duration_ratio) the matcher actually reads.
+    # The user-settable duration-ratio options map to the matcher-config keys
+    # (min/max_duration_ratio) the matcher actually reads; detection keys ignored.
     mc = {"min_duration_ratio": 0.07, "max_duration_ratio": 1.5, "dtw_bandwidth": 0.2}
     out = playground.apply_match_overrides(
         mc,
@@ -57,15 +57,59 @@ def test_apply_match_overrides_maps_user_options_to_matcher_keys():
             "profile_match_min_duration_ratio": "0.2",  # coerced to float
             "profile_match_max_duration_ratio": 1.1,
             "off_delay": 300,        # detection key: ignored here
-            "corr_weight": 0.9,      # not user-settable: ignored (pointless in sim)
         },
     )
     assert out["min_duration_ratio"] == 0.2
     assert out["max_duration_ratio"] == 1.1
-    assert "corr_weight" not in out           # weights are not exposed
     assert out["dtw_bandwidth"] == 0.2        # untouched
     # Original dict untouched (copy semantics).
     assert mc == {"min_duration_ratio": 0.07, "max_duration_ratio": 1.5, "dtw_bandwidth": 0.2}
+
+
+def test_apply_match_overrides_exposes_stage_2_3_4_params_for_experiment():
+    # Stage 2-4 scoring / DTW knobs are exposed as SANDBOX-ONLY overrides so power
+    # users can experiment with the matcher in the Playground; they map straight to
+    # the config keys compute_matches_worker reads, and coerce (str->num, int).
+    mc = {"corr_weight": 0.45, "duration_weight": 0.22}
+    out = playground.apply_match_overrides(
+        mc,
+        {
+            "corr_weight": "0.7",       # Stage 2
+            "keep_min_score": 0.05,
+            "dtw_bandwidth": 0.0,       # Stage 3 (0 disables DTW)
+            "dtw_blend": 0.4,
+            "dtw_ensemble_w": 0.6,
+            "dtw_ddtw_scale": 25,
+            "dtw_refine_top_n": "3",    # int-coerced
+            "duration_weight": 0.3,     # Stage 4
+            "energy_weight": 0.3,
+            "duration_scale": 0.2,
+            "energy_scale": 0.25,
+            "totally_unknown_key": 9,   # ignored
+        },
+    )
+    assert out["corr_weight"] == 0.7
+    assert out["keep_min_score"] == 0.05
+    assert out["dtw_bandwidth"] == 0.0
+    assert out["dtw_blend"] == 0.4
+    assert out["dtw_ensemble_w"] == 0.6
+    assert out["dtw_ddtw_scale"] == 25.0
+    assert out["dtw_refine_top_n"] == 3 and isinstance(out["dtw_refine_top_n"], int)
+    assert out["duration_weight"] == 0.3
+    assert out["energy_weight"] == 0.3
+    assert out["duration_scale"] == 0.2
+    assert out["energy_scale"] == 0.25
+    assert "totally_unknown_key" not in out
+    # base dict untouched
+    assert mc == {"corr_weight": 0.45, "duration_weight": 0.22}
+
+
+def test_apply_match_overrides_every_stage_key_maps_to_a_config_key():
+    # Guard: every exposed override key coerces cleanly and lands in the config.
+    ov = {k: 1 for k in playground._MATCH_OVERRIDE_KEYS}
+    out = playground.apply_match_overrides({}, ov)
+    for _opt, (cfg_key, _c) in playground._MATCH_OVERRIDE_KEYS.items():
+        assert cfg_key in out
 
 
 def test_apply_match_overrides_noop_without_matching_keys():

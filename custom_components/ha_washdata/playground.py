@@ -132,14 +132,31 @@ _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
 }
 
 # Matching options the Playground honours, mapped to the ``match_config`` key
-# (Stage-1 duration gate) they drive. Only options the user can ACTUALLY set in
-# Settings are here, so a value found in the Playground can be applied for real -
-# the scoring weights (corr/duration/energy) and dtw_bandwidth are ML-tuned, not
-# user-settable, so exposing them would be pointless. Anything else in
-# ``settings_override`` is ignored.
+# they drive. The two duration ratios are real user settings (a good value found
+# here can be applied for real). The remaining keys are the Stage 2-4 scoring
+# weights / DTW knobs: they are NOT persistent settings (they are ML-tuned
+# defaults), but they ARE exposed here as SANDBOX-ONLY overrides so power users
+# can experiment with how each stage of the matcher scores their own cycles in
+# the Playground. They never persist - a match config built from them lives only
+# for the simulation. Anything else in ``settings_override`` is ignored.
 _MATCH_OVERRIDE_KEYS: dict[str, tuple[str, Callable[[Any], Any]]] = {
+    # Stage 1 - duration gate (real settings)
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO: ("min_duration_ratio", float),
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO: ("max_duration_ratio", float),
+    # Stage 2 - core similarity (sandbox-only)
+    "corr_weight": ("corr_weight", float),
+    "keep_min_score": ("keep_min_score", float),
+    # Stage 3 - DTW refinement (sandbox-only)
+    "dtw_bandwidth": ("dtw_bandwidth", float),
+    "dtw_blend": ("dtw_blend", float),
+    "dtw_ensemble_w": ("dtw_ensemble_w", float),
+    "dtw_ddtw_scale": ("dtw_ddtw_scale", float),
+    "dtw_refine_top_n": ("dtw_refine_top_n", int),
+    # Stage 4 - duration/energy agreement (sandbox-only)
+    "duration_weight": ("duration_weight", float),
+    "energy_weight": ("energy_weight", float),
+    "duration_scale": ("duration_scale", float),
+    "energy_scale": ("energy_scale", float),
 }
 
 
