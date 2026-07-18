@@ -1119,7 +1119,7 @@ function _fmtEnergy(kwh) {
 }
 // Current cycle-date display mode ('relative' | 'absolute'), synced from the
 // user's persisted "Cycle date display" preference by _render() on each paint.
-let _datePref = 'relative';
+let _datePref = 'absolute';
 
 // Locale-aware "3 hours ago" / "in 2 days" formatting. Intl handles localization,
 // so this needs no translation strings; falls back to absolute if unsupported.
@@ -3182,7 +3182,7 @@ class HaWashdataPanel extends HTMLElement {
     // Sync the module-level date-display mode from the user's saved preference so
     // _fmtDate (a module helper) honors relative/absolute without threading it
     // through every call site.
-    _datePref = this._pref('date_format', 'relative');
+    _datePref = this._pref('date_format', 'absolute');
     // Capture the element that had focus BEFORE we replace the DOM: innerHTML wipes
     // it, so this is the only chance to remember the trigger to return focus to when
     // a modal closes (a11y). Passed into _syncModalFocus below.
