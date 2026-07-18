@@ -90,6 +90,12 @@ class FakeClient:
         return {"ok": True, "cycle_ids": [f"c{i}" for i in range(len(items))], "errors": []}
     async def get_device_bundle(self, device_id, include_pending=True):
         return getattr(self, "bundle", {"device_id": device_id, "profiles": []})
+    async def bump_downloads(self, store_ids):
+        self.bumped_downloads = list(store_ids or [])
+        return None
+    async def bump_analytics(self, metric, count=1):
+        self.bumped_analytics = (metric, count)
+        return None
 
 
 @pytest.fixture
