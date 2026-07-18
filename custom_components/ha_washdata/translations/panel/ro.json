@@ -1320,6 +1320,27 @@
     "enable_phase_matching": {
       "label": "Timp rămas în funcție de faze",
       "doc": "Împarte fiecare ciclu în curs în faze (încălzire, spălare, centrifugare) și repartizează timpul rămas pe fiecare fază, combinat cu estimarea clasică - bazându-se pe repartiția pe faze la începutul ciclului și pe estimarea clasică spre final. Acest lucru personalizează numărătoarea inversă în funcție de cât de mult încălzește și funcționează efectiv mașina, ceea ce se observă cel mai mult în prima jumătate a unui ciclu. Dezactivat = doar estimarea clasică. Este afectată doar afișarea timpului rămas; potrivirea programelor și detectarea ciclurilor rămân neschimbate."
+    },
+    "keep_min_score": {
+      "label": "Scor Min. de Potrivire"
+    },
+    "dtw_blend": {
+      "label": "Amestec Deformare"
+    },
+    "dtw_ensemble_w": {
+      "label": "Mix Ansamblu Deformare"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Scară Deformare Derivativă"
+    },
+    "dtw_refine_top_n": {
+      "label": "Contor Rafinare DTW"
+    },
+    "duration_scale": {
+      "label": "Precizie Durată"
+    },
+    "energy_scale": {
+      "label": "Precizie Energie"
     }
   },
   "setting_group": {
@@ -1696,7 +1717,14 @@
     "duration_weight": "Cât de mult influențează concordanța duratei potrivirea",
     "energy_weight": "Cât de mult influențează concordanța energiei potrivirea",
     "profile_match_min_duration_ratio": "Cel mai scurt ciclu (față de profil) încă permis să corespundă",
-    "profile_match_max_duration_ratio": "Cel mai lung ciclu (față de profil) încă permis să corespundă"
+    "profile_match_max_duration_ratio": "Cel mai lung ciclu (față de profil) încă permis să corespundă",
+    "keep_min_score": "Etapa 2: cel mai mic scor de similaritate păstrat ca și candidat",
+    "dtw_blend": "Etapa 3: cât din scorul de deformare înlocuiește scorul de bază (0-1)",
+    "dtw_ensemble_w": "Etapa 3: mixul deformării scalate față de cea derivativă în modul ansamblu (0-1)",
+    "dtw_ddtw_scale": "Etapa 3: scara distanței de deformare derivativă",
+    "dtw_refine_top_n": "Etapa 3: câți candidați de top sunt rescorați prin deformare",
+    "duration_scale": "Etapa 4: precizia acordului de durată (mai mic = mai strict)",
+    "energy_scale": "Etapa 4: precizia acordului de energie (mai mic = mai strict)"
   },
   "col": {
     "profile_tip": "Numele programului corespunzător. Neetichetat înseamnă că niciun profil nu a corespuns la sfârșitul ciclului.",

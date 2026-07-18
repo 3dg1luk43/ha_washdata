@@ -881,7 +881,14 @@
     "duration_weight": "Kui palju kestuse kokkulangevus sobitamist mõjutab",
     "energy_weight": "Kui palju energia kokkulangevus sobitamist mõjutab",
     "profile_match_min_duration_ratio": "Lühim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada",
-    "profile_match_max_duration_ratio": "Pikim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada"
+    "profile_match_max_duration_ratio": "Pikim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada",
+    "keep_min_score": "Etapp 2: madalaim sarnasuse skoor, mis säilib kandidaadina",
+    "dtw_blend": "Etapp 3: kui palju DTW-skoor asendab põhiskoori (0-1)",
+    "dtw_ensemble_w": "Etapp 3: skaleeritud ja tuletise DTW segu ensemble-režiimis (0-1)",
+    "dtw_ddtw_scale": "Etapp 3: tuletise DTW kauguse skaala",
+    "dtw_refine_top_n": "Etapp 3: mitu parimat kandidaati DTW ümber hindab",
+    "duration_scale": "Etapp 4: kestuse kokkulangevuse teravus (väiksem = rangem)",
+    "energy_scale": "Etapp 4: energia kokkulangevuse teravus (väiksem = rangem)"
   },
   "phase_desc": {
     "anti_crease": "Kortsude vähendamiseks tehke aeg-ajalt lühikesi tõmblusi pärast lõpetamist.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "Faasiteadlik järelejäänud aeg",
       "doc": "Jaga iga käimasolev tsükkel faasideks (kuumutamine, pesu, tsentrifuugimine) ja eelarvesta järelejäänud aeg faaside kaupa, segatuna klassikalise hinnanguga - toetudes tsükli alguses faasi eelarvele ja lõpu lähedal klassikalisele hinnangule. See kohandab loenduri sellele, kui kaua su masin tegelikult kuumutab ja töötab, mis on kõige märgatavam tsükli esimeses pooles. Väljas = ainult klassikaline hinnang. Mõjutab ainult järelejäänud aja kuva; programmi sobitamine ja tsükli tuvastamine jäävad muutmata."
+    },
+    "keep_min_score": {
+      "label": "Min vastenduse skoor"
+    },
+    "dtw_blend": {
+      "label": "DTW-segu"
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW ensemble-miks"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Tuletise DTW skaala"
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW täpsustusarv"
+    },
+    "duration_scale": {
+      "label": "Kestuse teravus"
+    },
+    "energy_scale": {
+      "label": "Energia teravus"
     }
   },
   "setting_group": {

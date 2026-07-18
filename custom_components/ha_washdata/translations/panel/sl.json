@@ -1320,6 +1320,27 @@
     "enable_phase_matching": {
       "label": "Preostali čas z upoštevanjem faz",
       "doc": "Vsak tekoči cikel razdeli na faze (ogrevanje, pranje, ožemanje) in razporedi preostali čas po fazah, združen s klasično oceno - na začetku cikla se opira na proračun faz, proti koncu pa na klasično oceno. To prilagodi odštevanje temu, kako dolgo se vaša naprava dejansko segreva in deluje, kar je najbolj opazno v prvi polovici cikla. Izklopljeno = samo klasična ocena. Vpliva le na prikaz preostalega časa; ujemanje programov in zaznavanje cikla ostaneta nespremenjena."
+    },
+    "keep_min_score": {
+      "label": "Min. ocena ujemanja"
+    },
+    "dtw_blend": {
+      "label": "Mešanje deformacije"
+    },
+    "dtw_ensemble_w": {
+      "label": "Mešanica kombinacije DTW"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Merilo izvedene deformacije"
+    },
+    "dtw_refine_top_n": {
+      "label": "Stevilo natancnejših kandidatov"
+    },
+    "duration_scale": {
+      "label": "Ostrina trajanja"
+    },
+    "energy_scale": {
+      "label": "Ostrina energije"
     }
   },
   "setting_group": {
@@ -1696,7 +1717,14 @@
     "duration_weight": "Koliko skladnost trajanja vpliva na ujemanje",
     "energy_weight": "Koliko skladnost porabe energije vpliva na ujemanje",
     "profile_match_min_duration_ratio": "Najkrajše izvajanje (glede na profil), ki se še lahko ujema",
-    "profile_match_max_duration_ratio": "Najdaljše izvajanje (glede na profil), ki se še lahko ujema"
+    "profile_match_max_duration_ratio": "Najdaljše izvajanje (glede na profil), ki se še lahko ujema",
+    "keep_min_score": "Stopnja 2: najnižja ocena podobnosti obdržana kot kandidat",
+    "dtw_blend": "Stopnja 3: koliko ocena DTW nadomesti osnovno oceno (0-1)",
+    "dtw_ensemble_w": "Stopnja 3: razmerje skalirane in izvedene deformacije v nacinu kombinacije (0-1)",
+    "dtw_ddtw_scale": "Stopnja 3: merilo razdalje izvedene deformacije",
+    "dtw_refine_top_n": "Stopnja 3: koliko najboljših kandidatov DTW znova vrednoti",
+    "duration_scale": "Stopnja 4: ostrina ujemanja trajanja (manjše = strožje)",
+    "energy_scale": "Stopnja 4: ostrina ujemanja energije (manjše = strožje)"
   },
   "col": {
     "profile_tip": "Ime ujemajočega programa. Brez oznake pomeni, da se ob koncu cikla ni ujemal noben profil.",

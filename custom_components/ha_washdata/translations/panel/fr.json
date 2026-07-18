@@ -881,7 +881,14 @@
     "duration_weight": "Influence de la concordance de durée sur la correspondance",
     "energy_weight": "Influence de la concordance d'énergie sur la correspondance",
     "profile_match_min_duration_ratio": "Cycle le plus court (par rapport au profil) encore autorisé à correspondre",
-    "profile_match_max_duration_ratio": "Cycle le plus long (par rapport au profil) encore autorisé à correspondre"
+    "profile_match_max_duration_ratio": "Cycle le plus long (par rapport au profil) encore autorisé à correspondre",
+    "keep_min_score": "Étape 2 : score de similarité minimal conservé comme candidat",
+    "dtw_blend": "Étape 3 : part du score Warp dans le score central (0-1)",
+    "dtw_ensemble_w": "Étape 3 : mélange Warp normalisé vs dérivé en mode ensemble (0-1)",
+    "dtw_ddtw_scale": "Étape 3 : échelle de distance du Warp dérivé",
+    "dtw_refine_top_n": "Étape 3 : nombre de candidats réévalués par le Warp",
+    "duration_scale": "Étape 4 : précision de la concordance de durée (plus petit = plus strict)",
+    "energy_scale": "Étape 4 : précision de la concordance d'énergie (plus petit = plus strict)"
   },
   "phase_desc": {
     "anti_crease": "Courts culbutages occasionnels après completion pour réduire le froissement du linge.",
@@ -1338,6 +1345,27 @@
     "enable_phase_matching": {
       "label": "Temps restant tenant compte des phases",
       "doc": "Découpe chaque cycle en cours en phases (chauffage, lavage, essorage) et répartit le temps restant par phase, mélangé à l'estimation classique - en s'appuyant sur la répartition par phases en début de cycle et sur l'estimation classique vers la fin. Cela personnalise le compte à rebours en fonction de la durée réelle de chauffage et de fonctionnement de votre machine, ce qui est le plus perceptible dans la première moitié du cycle. Désactivé = uniquement l'estimation classique. Seul l'affichage du temps restant est concerné ; la reconnaissance des programmes et la détection des cycles restent inchangées."
+    },
+    "keep_min_score": {
+      "label": "Score min de correspondance"
+    },
+    "dtw_blend": {
+      "label": "Fusion Warp"
+    },
+    "dtw_ensemble_w": {
+      "label": "Mix Warp ensemble"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Échelle Warp dérivé"
+    },
+    "dtw_refine_top_n": {
+      "label": "Nb candidats affinés Warp"
+    },
+    "duration_scale": {
+      "label": "Précision durée"
+    },
+    "energy_scale": {
+      "label": "Précision énergie"
     }
   },
   "setting_group": {

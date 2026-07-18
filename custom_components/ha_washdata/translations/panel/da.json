@@ -881,7 +881,14 @@
     "duration_weight": "Hvor meget overensstemmelse i køretid påvirker genkendelsen",
     "energy_weight": "Hvor meget overensstemmelse i energiforbrug påvirker genkendelsen",
     "profile_match_min_duration_ratio": "Korteste kørsel (i forhold til profilen), der stadig må matche",
-    "profile_match_max_duration_ratio": "Længste kørsel (i forhold til profilen), der stadig må matche"
+    "profile_match_max_duration_ratio": "Længste kørsel (i forhold til profilen), der stadig må matche",
+    "keep_min_score": "Trin 2: laveste lighedsscore beholdt som kandidat",
+    "dtw_blend": "Trin 3: hvor meget DTW-scoren erstatter kerneresultatet (0-1)",
+    "dtw_ensemble_w": "Trin 3: miks af skaleret og derivativ DTW i ensemble-tilstand (0-1)",
+    "dtw_ddtw_scale": "Trin 3: afstandsskala for derivativ DTW",
+    "dtw_refine_top_n": "Trin 3: hvor mange topkandidater DTW gen-scorer",
+    "duration_scale": "Trin 4: skarphed for varighedsoverensstemmelse (lavere = strengere)",
+    "energy_scale": "Trin 4: skarphed for energioverensstemmelse (lavere = strengere)"
   },
   "phase_desc": {
     "anti_crease": "Lejlighedsvis korte tumblinger efter færdiggørelse for at reducere rynker.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "Fasebevidst resterende tid",
       "doc": "Opdel hver kørende cyklus i faser (opvarmning, vask, centrifugering) og budgettér den resterende tid pr. fase, blandet med det klassiske estimat - tidligt i cyklussen læner den sig op ad fasebudgettet og mod slutningen op ad det klassiske estimat. Dette tilpasser nedtællingen til, hvor længe din maskine faktisk varmer op og kører, hvilket er mest mærkbart i den første halvdel af en cyklus. Fra = kun det klassiske estimat. Kun visningen af resterende tid påvirkes; programmatchning og cyklusregistrering er uændrede."
+    },
+    "keep_min_score": {
+      "label": "Min. matchingsscore"
+    },
+    "dtw_blend": {
+      "label": "DTW-blanding"
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW-ensemblemiks"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Derivativ DTW-skala"
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW-forfiningsnummer"
+    },
+    "duration_scale": {
+      "label": "Varighedsskarphed"
+    },
+    "energy_scale": {
+      "label": "Energiskarphed"
     }
   },
   "setting_group": {

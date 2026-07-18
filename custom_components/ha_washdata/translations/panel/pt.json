@@ -881,7 +881,14 @@
     "duration_weight": "Quanto a concordância de duração afeta a correspondência",
     "energy_weight": "Quanto a concordância de energia afeta a correspondência",
     "profile_match_min_duration_ratio": "Ciclo mais curto (face ao perfil) ainda autorizado a corresponder",
-    "profile_match_max_duration_ratio": "Ciclo mais longo (face ao perfil) ainda autorizado a corresponder"
+    "profile_match_max_duration_ratio": "Ciclo mais longo (face ao perfil) ainda autorizado a corresponder",
+    "keep_min_score": "Fase 2: menor pontuação de similaridade mantida como candidata",
+    "dtw_blend": "Fase 3: quanto o score Warp substitui o score central (0-1)",
+    "dtw_ensemble_w": "Fase 3: mistura de Warp escalado vs derivativo no modo ensemble (0-1)",
+    "dtw_ddtw_scale": "Fase 3: escala de distância do Warp derivativo",
+    "dtw_refine_top_n": "Fase 3: quantos candidatos principais o Warp reavalia",
+    "duration_scale": "Fase 4: nitidez da concordância de duração (menor = mais rigoroso)",
+    "energy_scale": "Fase 4: nitidez da concordância de energia (menor = mais rigoroso)"
   },
   "phase_desc": {
     "anti_crease": "Rotações curtas ocasionais após a conclusão para reduzir vincos.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "Tempo restante com base nas fases",
       "doc": "Divide cada ciclo em curso em fases (aquecimento, lavagem, centrifugação) e distribui o tempo restante por fase, combinado com a estimativa clássica - apoiando-se na repartição por fases no início do ciclo e na estimativa clássica perto do fim. Isto personaliza a contagem decrescente de acordo com o tempo que a sua máquina realmente aquece e funciona, o que é mais percetível na primeira metade de um ciclo. Desativado = apenas a estimativa clássica. Apenas a apresentação do tempo restante é afetada; a correspondência de programas e a deteção de ciclos permanecem inalteradas."
+    },
+    "keep_min_score": {
+      "label": "Score mín de correspondência"
+    },
+    "dtw_blend": {
+      "label": "Fusão Warp"
+    },
+    "dtw_ensemble_w": {
+      "label": "Mix ensemble Warp"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Escala Warp derivativa"
+    },
+    "dtw_refine_top_n": {
+      "label": "Contagem de refinamento Warp"
+    },
+    "duration_scale": {
+      "label": "Nitidez de duração"
+    },
+    "energy_scale": {
+      "label": "Nitidez de energia"
     }
   },
   "setting_group": {

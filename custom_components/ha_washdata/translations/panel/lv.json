@@ -1320,6 +1320,27 @@
     "enable_phase_matching": {
       "label": "Uz fāzēm balstīts atlikušais laiks",
       "doc": "Sadaliet katru notiekošo ciklu fāzēs (sildīšana, mazgāšana, izgriešana) un plānojiet atlikušo laiku katrai fāzei, sajaucot ar klasisko aprēķinu - cikla sākumā paļaujoties uz fāžu plānojumu, bet beigās uz klasisko aprēķinu. Tas pielāgo atpakaļskaitīšanu tam, cik ilgi jūsu mašīna patiešām sildās un darbojas, kas visvairāk pamanāms cikla pirmajā pusē. Izslēgts = tikai klasiskais aprēķins. Tiek ietekmēts tikai atlikušā laika attēlojums; programmu saskaņošana un ciklu noteikšana paliek nemainīga."
+    },
+    "keep_min_score": {
+      "label": "Min. atbilstības rezultāts"
+    },
+    "dtw_blend": {
+      "label": "DTW sajaukums"
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW ensemble miks"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Atv. DTW skāle"
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW precizēšanas skaits"
+    },
+    "duration_scale": {
+      "label": "Ilguma asums"
+    },
+    "energy_scale": {
+      "label": "Enerģijas asums"
     }
   },
   "setting_group": {
@@ -1696,7 +1717,14 @@
     "duration_weight": "Cik lielā mērā ilguma atbilstība ietekmē saskaņošanu",
     "energy_weight": "Cik lielā mērā enerģijas atbilstība ietekmē saskaņošanu",
     "profile_match_min_duration_ratio": "Īsākais cikls (salīdzinot ar profilu), kuram vēl atļauts atbilst",
-    "profile_match_max_duration_ratio": "Garākais cikls (salīdzinot ar profilu), kuram vēl atļauts atbilst"
+    "profile_match_max_duration_ratio": "Garākais cikls (salīdzinot ar profilu), kuram vēl atļauts atbilst",
+    "keep_min_score": "2. posms: zemākais līdzības rezultāts, kas saglabāts kā kandidāts",
+    "dtw_blend": "3. posms: cik daudz DTW rezultāts aizstāj pamatresultātu (0-1)",
+    "dtw_ensemble_w": "3. posms: skalētās un atvasinātās DTW sajaukums ensemble režīmā (0-1)",
+    "dtw_ddtw_scale": "3. posms: atvasinātās DTW attāluma skāle",
+    "dtw_refine_top_n": "3. posms: cik daudz labāko kandidātu DTW pārvērtē",
+    "duration_scale": "4. posms: ilguma atbilstības asums (mazāks = stingrāks)",
+    "energy_scale": "4. posms: enerģijas atbilstības asums (mazāks = stingrāks)"
   },
   "col": {
     "profile_tip": "Atbilstošās programmas nosaukums. Bez birkas nozīmē, ka cikla beigās neatbilda neviens profils.",

@@ -881,7 +881,14 @@
     "duration_weight": "Quanto la concordanza della durata influisce sulla corrispondenza",
     "energy_weight": "Quanto la concordanza dell'energia influisce sulla corrispondenza",
     "profile_match_min_duration_ratio": "Ciclo più breve (rispetto al profilo) che può ancora corrispondere",
-    "profile_match_max_duration_ratio": "Ciclo più lungo (rispetto al profilo) che può ancora corrispondere"
+    "profile_match_max_duration_ratio": "Ciclo più lungo (rispetto al profilo) che può ancora corrispondere",
+    "keep_min_score": "Fase 2: punteggio di similarità minimo mantenuto come candidato",
+    "dtw_blend": "Fase 3: quanto il punteggio Warp sostituisce il punteggio centrale (0-1)",
+    "dtw_ensemble_w": "Fase 3: mix Warp scalato vs derivato in modalità ensemble (0-1)",
+    "dtw_ddtw_scale": "Fase 3: scala della distanza Warp derivata",
+    "dtw_refine_top_n": "Fase 3: quanti candidati principali vengono rivalutati dal Warp",
+    "duration_scale": "Fase 4: nitidezza della concordanza di durata (minore = più rigoroso)",
+    "energy_scale": "Fase 4: nitidezza della concordanza energetica (minore = più rigoroso)"
   },
   "phase_desc": {
     "anti_crease": "Brevi tumble occasionali dopo il completamento per ridurre le grinze del bucato.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "Tempo rimanente in base alle fasi",
       "doc": "Suddivide ogni ciclo in corso in fasi (riscaldamento, lavaggio, centrifuga) e distribuisce il tempo rimanente per fase, combinato con la stima classica - basandosi sulla ripartizione per fasi all'inizio del ciclo e sulla stima classica verso la fine. Questo personalizza il conto alla rovescia in base a quanto la tua macchina riscalda e funziona realmente, cosa più evidente nella prima metà di un ciclo. Disattivato = solo la stima classica. È interessata solo la visualizzazione del tempo rimanente; la corrispondenza dei programmi e il rilevamento dei cicli restano invariati."
+    },
+    "keep_min_score": {
+      "label": "Score min corrispondenza"
+    },
+    "dtw_blend": {
+      "label": "Fusione Warp"
+    },
+    "dtw_ensemble_w": {
+      "label": "Mix Warp ensemble"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Scala Warp derivata"
+    },
+    "dtw_refine_top_n": {
+      "label": "Conteggio affinamento Warp"
+    },
+    "duration_scale": {
+      "label": "Nitidezza durata"
+    },
+    "energy_scale": {
+      "label": "Nitidezza energia"
     }
   },
   "setting_group": {

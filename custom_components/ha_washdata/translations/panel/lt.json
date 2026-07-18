@@ -1320,6 +1320,27 @@
     "enable_phase_matching": {
       "label": "Į fazes atsižvelgiantis likęs laikas",
       "doc": "Padalykite kiekvieną vykstantį ciklą į fazes (šildymas, plovimas, gręžimas) ir paskirstykite likusį laiką kiekvienai fazei, sumaišydami su klasikiniu įverčiu - ciklo pradžioje remdamiesi fazių paskirstymu, o pabaigoje - klasikiniu įverčiu. Tai pritaiko laikmatį prie to, kiek laiko jūsų mašina iš tikrųjų kaista ir veikia, o tai labiausiai pastebima pirmoje ciklo pusėje. Išjungta = tik klasikinis įvertis. Paveikiamas tik likusio laiko rodinys; programų atitikimas ir ciklų aptikimas nekeičiami."
+    },
+    "keep_min_score": {
+      "label": "Min. atitikties balas"
+    },
+    "dtw_blend": {
+      "label": "DTW mišinys"
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW ansamblio mišinys"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Išvest. DTW skalė"
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW tikslinimo skaičius"
+    },
+    "duration_scale": {
+      "label": "Trukmės ryškumas"
+    },
+    "energy_scale": {
+      "label": "Energijos ryškumas"
     }
   },
   "setting_group": {
@@ -1696,7 +1717,14 @@
     "duration_weight": "Kiek trukmės sutapimas veikia atitiktį",
     "energy_weight": "Kiek energijos sutapimas veikia atitiktį",
     "profile_match_min_duration_ratio": "Trumpiausias ciklas (palyginti su profiliu), kuriam dar leidžiama atitikti",
-    "profile_match_max_duration_ratio": "Ilgiausias ciklas (palyginti su profiliu), kuriam dar leidžiama atitikti"
+    "profile_match_max_duration_ratio": "Ilgiausias ciklas (palyginti su profiliu), kuriam dar leidžiama atitikti",
+    "keep_min_score": "2 etapas: žemiausias panašumo balas, išlaikomas kaip kandidatas",
+    "dtw_blend": "3 etapas: kiek DTW balas pakeičia pagrindinį balą (0-1)",
+    "dtw_ensemble_w": "3 etapas: mastelio ir išvestinės DTW mišinys ansamblio režimu (0-1)",
+    "dtw_ddtw_scale": "3 etapas: išvestinės DTW atstumo skalė",
+    "dtw_refine_top_n": "3 etapas: kiek geriausių kandidatų DTW iš naujo vertina",
+    "duration_scale": "4 etapas: trukmės atitikimo ryškumas (mažesnis = griežtesnis)",
+    "energy_scale": "4 etapas: energijos atitikimo ryškumas (mažesnis = griežtesnis)"
   },
   "col": {
     "profile_tip": "Atitikusios programos pavadinimas. Nepažymėta reiškia, kad ciklo pabaigoje neatitiko joks profilis.",

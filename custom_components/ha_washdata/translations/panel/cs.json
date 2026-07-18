@@ -1320,6 +1320,27 @@
     "enable_phase_matching": {
       "label": "Zbývající čas zohledňující fáze",
       "doc": "Rozdělí každý běžící cyklus do fází (ohřev, praní, odstřeďování) a rozpočítá zbývající čas na jednotlivé fáze, smíchaný s klasickým odhadem - na začátku cyklu se opírá o rozpočet fází a ke konci o klasický odhad. Přizpůsobí odpočet tomu, jak dlouho se váš spotřebič skutečně ohřívá a běží, což je nejvíce patrné v první polovině cyklu. Vypnuto = pouze klasický odhad. Ovlivněno je jen zobrazení zbývajícího času; shoda programů a detekce cyklu se nemění."
+    },
+    "keep_min_score": {
+      "label": "Min. skore shody"
+    },
+    "dtw_blend": {
+      "label": "Mísení deformace"
+    },
+    "dtw_ensemble_w": {
+      "label": "Mix kombinace DTW"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Škála derivátní deformace"
+    },
+    "dtw_refine_top_n": {
+      "label": "Pocet zpresnenych kandidatu"
+    },
+    "duration_scale": {
+      "label": "Ostrost délky trvání"
+    },
+    "energy_scale": {
+      "label": "Ostrost energie"
     }
   },
   "setting_group": {
@@ -1696,7 +1717,14 @@
     "duration_weight": "Jak moc shoda délky trvání ovlivňuje přiřazení",
     "energy_weight": "Jak moc shoda spotřeby energie ovlivňuje přiřazení",
     "profile_match_min_duration_ratio": "Nejkratší běh (oproti profilu), který ještě může odpovídat",
-    "profile_match_max_duration_ratio": "Nejdelší běh (oproti profilu), který ještě může odpovídat"
+    "profile_match_max_duration_ratio": "Nejdelší běh (oproti profilu), který ještě může odpovídat",
+    "keep_min_score": "Fáze 2: nejnižší skóre podobnosti ponechané jako kandidát",
+    "dtw_blend": "Fáze 3: jak moc skóre DTW nahrazuje základní skóre (0-1)",
+    "dtw_ensemble_w": "Fáze 3: podíl škálovaného vs. derivátního DTW v režimu kombinace (0-1)",
+    "dtw_ddtw_scale": "Fáze 3: škála vzdálenosti derivátní deformace",
+    "dtw_refine_top_n": "Fáze 3: kolik nejlepších kandidátu DTW znovu hodnotí",
+    "duration_scale": "Fáze 4: ostrost shody délky trvání (menší = přísnější)",
+    "energy_scale": "Fáze 4: ostrost shody energie (menší = přísnější)"
   },
   "col": {
     "profile_tip": "Název odpovídajícího programu. Bez štítku znamená, že na konci cyklu nebyl nalezen žádný profil.",

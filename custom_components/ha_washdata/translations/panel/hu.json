@@ -1320,6 +1320,27 @@
     "enable_phase_matching": {
       "label": "Fázistudatos hátralévő idő",
       "doc": "Bontsa minden futó ciklust fázisokra (fűtés, mosás, centrifugálás), és a hátralévő időt fázisonként ossza be, a klasszikus becsléssel keverve - a ciklus elején a fázisbeosztásra, a vége felé pedig a klasszikus becslésre támaszkodva. Ez a visszaszámlálót ahhoz igazítja, hogy a gépe ténylegesen mennyi ideig fűt és működik, ami leginkább a ciklus első felében figyelhető meg. Ki = csak a klasszikus becslés. Csak a hátralévő idő kijelzését érinti; a program párosítása és a ciklusérzékelés változatlan marad."
+    },
+    "keep_min_score": {
+      "label": "Min. Egyezési Pontszám"
+    },
+    "dtw_blend": {
+      "label": "Torzítás Keverék"
+    },
+    "dtw_ensemble_w": {
+      "label": "Torzítás Együttes Mix"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Derivált Torzítás Skála"
+    },
+    "dtw_refine_top_n": {
+      "label": "Torzítás Finomítás Szám"
+    },
+    "duration_scale": {
+      "label": "Időtartam Élesség"
+    },
+    "energy_scale": {
+      "label": "Energia Élesség"
     }
   },
   "setting_group": {
@@ -1696,7 +1717,14 @@
     "duration_weight": "Mennyire befolyásolja az időtartam egyezése az illesztést",
     "energy_weight": "Mennyire befolyásolja az energia egyezése az illesztést",
     "profile_match_min_duration_ratio": "A legrövidebb ciklus (a profilhoz képest), amely még egyezhet",
-    "profile_match_max_duration_ratio": "A leghosszabb ciklus (a profilhoz képest), amely még egyezhet"
+    "profile_match_max_duration_ratio": "A leghosszabb ciklus (a profilhoz képest), amely még egyezhet",
+    "keep_min_score": "2. szakasz: jelöltként megtartott legalacsonyabb hasonlósági pontszám",
+    "dtw_blend": "3. szakasz: mennyire helyettesíti a torzítási pontszám az alap pontszámot (0-1)",
+    "dtw_ensemble_w": "3. szakasz: skálázott és derivált torzítás keveréke együttes módban (0-1)",
+    "dtw_ddtw_scale": "3. szakasz: derivált torzítás távolságskálája",
+    "dtw_refine_top_n": "3. szakasz: hány legjobb jelöltet értékel újra a torzítás",
+    "duration_scale": "4. szakasz: az időtartam-egyezés élessége (kisebb = szigorúbb)",
+    "energy_scale": "4. szakasz: az energia-egyezés élessége (kisebb = szigorúbb)"
   },
   "col": {
     "profile_tip": "Az egyezést mutató program neve. A címkézetlen azt jelenti, hogy a ciklus végén egyetlen profil sem egyezett.",

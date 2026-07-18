@@ -881,7 +881,14 @@
     "duration_weight": "실행 시간 일치가 매칭에 미치는 영향의 정도",
     "energy_weight": "에너지 일치가 매칭에 미치는 영향의 정도",
     "profile_match_min_duration_ratio": "일치 대상으로 허용되는 최단 실행 시간(프로파일 대비)",
-    "profile_match_max_duration_ratio": "일치 대상으로 허용되는 최장 실행 시간(프로파일 대비)"
+    "profile_match_max_duration_ratio": "일치 대상으로 허용되는 최장 실행 시간(프로파일 대비)",
+    "keep_min_score": "Stage 2: 후보로 유지되는 최소 유사도 점수",
+    "dtw_blend": "Stage 3: 워프 점수가 핵심 점수를 대체하는 정도 (0-1)",
+    "dtw_ensemble_w": "Stage 3: 앙상블 모드에서 스케일 대 미분 워프의 혼합 비율 (0-1)",
+    "dtw_ddtw_scale": "Stage 3: 미분 워프 거리 스케일",
+    "dtw_refine_top_n": "Stage 3: 워프가 재점수화하는 상위 후보 수",
+    "duration_scale": "Stage 4: 지속 시간 일치의 선명도 (작을수록 엄격)",
+    "energy_scale": "Stage 4: 에너지 일치의 선명도 (작을수록 엄격)"
   },
   "phase_desc": {
     "anti_crease": "메인 사이클 후 드럼이 간헐적으로 회전하여 의류 구김을 방지합니다.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "단계 기반 남은 시간",
       "doc": "실행 중인 각 사이클을 단계(가열, 세탁, 탈수)로 나누고 단계별로 남은 시간을 배분하여 기존 추정값과 혼합합니다. 사이클 초반에는 단계별 배분을, 종료에 가까워질수록 기존 추정값을 더 중시합니다. 이렇게 하면 기기가 실제로 가열하고 작동하는 시간에 맞춰 카운트다운이 개인화되며, 사이클 전반부에서 가장 뚜렷하게 나타납니다. 꺼짐 = 기존 추정값만 사용. 남은 시간 표시에만 영향을 미치며, 프로그램 매칭과 사이클 감지는 변경되지 않습니다."
+    },
+    "keep_min_score": {
+      "label": "최소 매칭 점수"
+    },
+    "dtw_blend": {
+      "label": "워프 블렌드"
+    },
+    "dtw_ensemble_w": {
+      "label": "워프 앙상블 혼합"
+    },
+    "dtw_ddtw_scale": {
+      "label": "미분 워프 스케일"
+    },
+    "dtw_refine_top_n": {
+      "label": "워프 정제 개수"
+    },
+    "duration_scale": {
+      "label": "지속 시간 선명도"
+    },
+    "energy_scale": {
+      "label": "에너지 선명도"
     }
   },
   "setting_group": {

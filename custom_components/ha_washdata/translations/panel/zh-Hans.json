@@ -881,7 +881,14 @@
     "duration_weight": "运行时长的吻合程度对匹配的影响大小",
     "energy_weight": "能耗吻合程度对匹配的影响大小",
     "profile_match_min_duration_ratio": "仍可用于匹配的最短运行时长（相对于程序档案）",
-    "profile_match_max_duration_ratio": "仍可用于匹配的最长运行时长（相对于程序档案）"
+    "profile_match_max_duration_ratio": "仍可用于匹配的最长运行时长（相对于程序档案）",
+    "keep_min_score": "Stage 2: 保留为候选的最低相似度得分",
+    "dtw_blend": "Stage 3: 规整得分替换核心得分的程度 (0-1)",
+    "dtw_ensemble_w": "Stage 3: 集成模式下缩放与导数规整的混合比 (0-1)",
+    "dtw_ddtw_scale": "Stage 3: 导数规整距离尺度",
+    "dtw_refine_top_n": "Stage 3: 规整重新评分的顶部候选数量",
+    "duration_scale": "Stage 4: 时长一致性的锐度（越小越严格）",
+    "energy_scale": "Stage 4: 能耗一致性的锐度（越小越严格）"
   },
   "phase_desc": {
     "anti_crease": "完成后偶尔进行短暂的翻滚以减少皱纹。",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "阶段感知的剩余时间",
       "doc": "将每个运行中的周期分解为多个阶段（加热、洗涤、脱水），按阶段分配剩余时间，并与经典估算相融合：周期早期更依赖阶段分配，接近结束时更依赖经典估算。这会根据您的机器实际加热和运行的时长来个性化倒计时，在周期的前半段效果最明显。关闭 = 仅使用经典估算。仅影响剩余时间显示；程序匹配和周期检测保持不变。"
+    },
+    "keep_min_score": {
+      "label": "最低匹配得分"
+    },
+    "dtw_blend": {
+      "label": "规整混合"
+    },
+    "dtw_ensemble_w": {
+      "label": "规整集成混合"
+    },
+    "dtw_ddtw_scale": {
+      "label": "导数规整尺度"
+    },
+    "dtw_refine_top_n": {
+      "label": "规整精化数量"
+    },
+    "duration_scale": {
+      "label": "时长锐度"
+    },
+    "energy_scale": {
+      "label": "能耗锐度"
     }
   },
   "setting_group": {

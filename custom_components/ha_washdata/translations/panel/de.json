@@ -881,7 +881,14 @@
     "duration_weight": "Wie stark die Übereinstimmung der Laufzeit die Zuordnung beeinflusst",
     "energy_weight": "Wie stark die Übereinstimmung des Energieverbrauchs die Zuordnung beeinflusst",
     "profile_match_min_duration_ratio": "Kürzester Durchlauf (im Vergleich zum Profil), der noch zugeordnet werden darf",
-    "profile_match_max_duration_ratio": "Längster Durchlauf (im Vergleich zum Profil), der noch zugeordnet werden darf"
+    "profile_match_max_duration_ratio": "Längster Durchlauf (im Vergleich zum Profil), der noch zugeordnet werden darf",
+    "keep_min_score": "Stufe 2: niedrigster Ähnlichkeitswert, der als Kandidat erhalten bleibt",
+    "dtw_blend": "Stufe 3: Anteil des Warp-Scores am Kern-Score (0-1)",
+    "dtw_ensemble_w": "Stufe 3: Mischverhältnis skalierter vs. abgeleiteter Warp im Ensemble-Modus (0-1)",
+    "dtw_ddtw_scale": "Stufe 3: Skalierung der Ableitungs-Warp-Distanz",
+    "dtw_refine_top_n": "Stufe 3: Anzahl der Top-Kandidaten, die per Warp neu bewertet werden",
+    "duration_scale": "Stufe 4: Trennschärfe der Laufzeitübereinstimmung (kleiner = strenger)",
+    "energy_scale": "Stufe 4: Trennschärfe der Energieübereinstimmung (kleiner = strenger)"
   },
   "phase_desc": {
     "anti_crease": "Gelegentliche kurze Trommelumwälzungen nach Abschluss, um Knitterung zu vermeiden.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "Phasenbewusste Restzeit",
       "doc": "Teilt jeden laufenden Zyklus in Phasen auf (Heizen, Waschen, Schleudern) und veranschlagt die verbleibende Zeit pro Phase, gemischt mit der klassischen Schätzung - zu Beginn des Zyklus stützt sie sich auf das Phasenbudget, gegen Ende auf die klassische Schätzung. Dadurch wird der Countdown darauf abgestimmt, wie lange Ihre Maschine tatsächlich heizt und läuft, was in der ersten Hälfte eines Zyklus am deutlichsten spürbar ist. Aus = nur die klassische Schätzung. Betroffen ist ausschließlich die Anzeige der verbleibenden Zeit; Programmabgleich und Zykluserkennung bleiben unverändert."
+    },
+    "keep_min_score": {
+      "label": "Min. Match-Score"
+    },
+    "dtw_blend": {
+      "label": "Warp-Mischgewicht"
+    },
+    "dtw_ensemble_w": {
+      "label": "Warp-Ensemble-Anteil"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Ableitungs-Warp-Skalierung"
+    },
+    "dtw_refine_top_n": {
+      "label": "Warp-Verfeinerungsanzahl"
+    },
+    "duration_scale": {
+      "label": "Laufzeit-Trennschärfe"
+    },
+    "energy_scale": {
+      "label": "Energie-Trennschärfe"
     }
   },
   "setting_group": {

@@ -881,7 +881,14 @@
     "duration_weight": "Hvor mye samsvar i kjøretid påvirker gjenkjenningen",
     "energy_weight": "Hvor mye samsvar i energiforbruk påvirker gjenkjenningen",
     "profile_match_min_duration_ratio": "Korteste kjøring (i forhold til profilen) som fortsatt kan matche",
-    "profile_match_max_duration_ratio": "Lengste kjøring (i forhold til profilen) som fortsatt kan matche"
+    "profile_match_max_duration_ratio": "Lengste kjøring (i forhold til profilen) som fortsatt kan matche",
+    "keep_min_score": "Trinn 2: laveste likhetspoeng beholdt som kandidat",
+    "dtw_blend": "Trinn 3: hvor mye DTW-poengsummen erstatter kjerneresultatet (0-1)",
+    "dtw_ensemble_w": "Trinn 3: miks av skalert og derivativ DTW i ensemble-modus (0-1)",
+    "dtw_ddtw_scale": "Trinn 3: avstandsskala for derivativ DTW",
+    "dtw_refine_top_n": "Trinn 3: hvor mange toppkandidater DTW omvurderer",
+    "duration_scale": "Trinn 4: skarphet for varighetsoverensstemmelse (lavere = strengere)",
+    "energy_scale": "Trinn 4: skarphet for energioverensstemmelse (lavere = strengere)"
   },
   "phase_desc": {
     "anti_crease": "Enkelte korte fall etter ferdigstillelse for å redusere rynker.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "Fasebevisst tid som gjenstår",
       "doc": "Del hver pågående syklus inn i faser (oppvarming, vask, sentrifugering) og budsjetter tiden som gjenstår per fase, blandet med det klassiske estimatet - tidlig i syklusen støtter den seg på fasebudsjettet og mot slutten på det klassiske estimatet. Dette tilpasser nedtellingen til hvor lenge maskinen din faktisk varmer opp og kjører, noe som er mest merkbart i første halvdel av en syklus. Av = bare det klassiske estimatet. Bare visningen av tid som gjenstår påvirkes; programsamsvar og syklusdeteksjon er uendret."
+    },
+    "keep_min_score": {
+      "label": "Min. matchingspoeng"
+    },
+    "dtw_blend": {
+      "label": "DTW-blanding"
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW-ensemblemiks"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Derivativ DTW-skala"
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW-forfiningsantall"
+    },
+    "duration_scale": {
+      "label": "Varighetsskarphet"
+    },
+    "energy_scale": {
+      "label": "Energiskarphet"
     }
   },
   "setting_group": {

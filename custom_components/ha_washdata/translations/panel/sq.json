@@ -1320,6 +1320,27 @@
     "enable_phase_matching": {
       "label": "Kohë e mbetur e ndërgjegjshme për fazat",
       "doc": "Ndan çdo cikël që po funksionon në faza (ngrohje, larje, centrifugim) dhe shpërndan kohën e mbetur për çdo fazë, e përzier me vlerësimin klasik - duke u mbështetur te shpërndarja sipas fazave në fillim të ciklit dhe te vlerësimi klasik afër fundit. Kjo e personalizon numërimin mbrapsht sipas kohës që makina juaj në të vërtetë ngroh dhe punon, gjë që vihet re më së shumti në gjysmën e parë të një cikli. Off = vetëm vlerësimi klasik. Preket vetëm shfaqja e kohës së mbetur; përputhja e programeve dhe zbulimi i ciklit mbeten të pandryshuara."
+    },
+    "keep_min_score": {
+      "label": "Rezultat Min. Përputhjeje"
+    },
+    "dtw_blend": {
+      "label": "Përzierje Deformimi"
+    },
+    "dtw_ensemble_w": {
+      "label": "Mix Ansambël DTW"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Shkalla e Deformimit Derivativ"
+    },
+    "dtw_refine_top_n": {
+      "label": "Numri i Rafinimit DTW"
+    },
+    "duration_scale": {
+      "label": "Saktësia e Kohëzgjatjes"
+    },
+    "energy_scale": {
+      "label": "Saktësia e Energjisë"
     }
   },
   "setting_group": {
@@ -1696,7 +1717,14 @@
     "duration_weight": "Sa ndikon përkimi i kohëzgjatjes te përputhja",
     "energy_weight": "Sa ndikon përkimi i energjisë te përputhja",
     "profile_match_min_duration_ratio": "Cikli më i shkurtër (krahasuar me profilin) që lejohet ende të përputhet",
-    "profile_match_max_duration_ratio": "Cikli më i gjatë (krahasuar me profilin) që lejohet ende të përputhet"
+    "profile_match_max_duration_ratio": "Cikli më i gjatë (krahasuar me profilin) që lejohet ende të përputhet",
+    "keep_min_score": "Etapa 2: rezultati më i ulët i ngjashmërisë i mbajtur si kandidat",
+    "dtw_blend": "Etapa 3: sa e zëvendëson rezultati i deformimit rezultatin bazë (0-1)",
+    "dtw_ensemble_w": "Etapa 3: miksimi i deformimit të shkallëzuar kundrejt derivativit në modalitetin ansambël (0-1)",
+    "dtw_ddtw_scale": "Etapa 3: shkalla e distancës së deformimit derivativ",
+    "dtw_refine_top_n": "Etapa 3: sa kandidatë të parë rishënon deformimi",
+    "duration_scale": "Etapa 4: saktësia e marrëveshjes së kohëzgjatjes (më i vogël = më i rreptë)",
+    "energy_scale": "Etapa 4: saktësia e marrëveshjes së energjisë (më i vogël = më i rreptë)"
   },
   "col": {
     "profile_tip": "Emri i programit të përputhur. I paetiketuar do të thotë se asnjë profil nuk u përputh në fund të ciklit.",

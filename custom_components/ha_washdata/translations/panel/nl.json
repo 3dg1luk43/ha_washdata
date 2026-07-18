@@ -881,7 +881,14 @@
     "duration_weight": "Hoeveel overeenkomst in looptijd de herkenning beïnvloedt",
     "energy_weight": "Hoeveel overeenkomst in energieverbruik de herkenning beïnvloedt",
     "profile_match_min_duration_ratio": "Kortste cyclus (t.o.v. het profiel) die nog mag matchen",
-    "profile_match_max_duration_ratio": "Langste cyclus (t.o.v. het profiel) die nog mag matchen"
+    "profile_match_max_duration_ratio": "Langste cyclus (t.o.v. het profiel) die nog mag matchen",
+    "keep_min_score": "Stap 2: laagste gelijkenisscore bewaard als kandidaat",
+    "dtw_blend": "Stap 3: mate waarin de warp-score de kernscore vervangt (0-1)",
+    "dtw_ensemble_w": "Stap 3: mix van geschaalde vs. afgeleide warp in ensemble-modus (0-1)",
+    "dtw_ddtw_scale": "Stap 3: schaal van de afgeleide warp-afstand",
+    "dtw_refine_top_n": "Stap 3: aantal topcandidaten dat door warp opnieuw beoordeeld wordt",
+    "duration_scale": "Stap 4: scherpte van de duurovereenkomst (kleiner = strenger)",
+    "energy_scale": "Stap 4: scherpte van de energie-overeenkomst (kleiner = strenger)"
   },
   "phase_desc": {
     "anti_crease": "Af en toe kort tuimelen na voltooiing om rimpels te verminderen.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "Fasebewuste resterende tijd",
       "doc": "Verdeel elke lopende cyclus in fasen (verwarmen, wassen, centrifugeren) en begroot de resterende tijd per fase, gemengd met de klassieke schatting - vroeg in de cyclus leunend op het fasebudget en tegen het einde op de klassieke schatting. Dit stemt het aftellen af op hoe lang uw machine daadwerkelijk verwarmt en draait, wat het meest merkbaar is in de eerste helft van een cyclus. Uit = alleen de klassieke schatting. Alleen de weergave van de resterende tijd wordt beïnvloed; programma-matching en cyclusdetectie blijven ongewijzigd."
+    },
+    "keep_min_score": {
+      "label": "Min. matchscore"
+    },
+    "dtw_blend": {
+      "label": "Warp-mengfactor"
+    },
+    "dtw_ensemble_w": {
+      "label": "Warp-ensemblemix"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Afgeleide warp-schaal"
+    },
+    "dtw_refine_top_n": {
+      "label": "Warp-verfijningsaantal"
+    },
+    "duration_scale": {
+      "label": "Duur-scherpte"
+    },
+    "energy_scale": {
+      "label": "Energie-scherpte"
     }
   },
   "setting_group": {

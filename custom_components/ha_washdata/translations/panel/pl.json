@@ -1320,6 +1320,27 @@
     "enable_phase_matching": {
       "label": "Pozostały czas uwzględniający fazy",
       "doc": "Dzieli każdy trwający cykl na fazy (podgrzewanie, pranie, wirowanie) i planuje pozostały czas dla każdej fazy, łącząc go z klasycznym szacowaniem - opierając się na budżecie faz na początku cyklu, a na klasycznym szacowaniu pod koniec. Personalizuje to odliczanie do tego, jak długo urządzenie faktycznie się nagrzewa i pracuje, co jest najbardziej zauważalne w pierwszej połowie cyklu. Wyłączone = tylko klasyczne szacowanie. Wpływa to wyłącznie na wyświetlanie pozostałego czasu; dopasowanie programów i wykrywanie cykli pozostają bez zmian."
+    },
+    "keep_min_score": {
+      "label": "Min. wynik dopasowania"
+    },
+    "dtw_blend": {
+      "label": "Mieszanie znieksztalcenia"
+    },
+    "dtw_ensemble_w": {
+      "label": "Mix kombinacji DTW"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Skala pochodnej DTW"
+    },
+    "dtw_refine_top_n": {
+      "label": "Liczba doprecyzowanych kandydatow"
+    },
+    "duration_scale": {
+      "label": "Ostrość czasu trwania"
+    },
+    "energy_scale": {
+      "label": "Ostrość energii"
     }
   },
   "setting_group": {
@@ -1696,7 +1717,14 @@
     "duration_weight": "Jak bardzo zgodność czasu trwania wpływa na dopasowanie",
     "energy_weight": "Jak bardzo zgodność zużycia energii wpływa na dopasowanie",
     "profile_match_min_duration_ratio": "Najkrótszy przebieg (względem profilu), który nadal może zostać dopasowany",
-    "profile_match_max_duration_ratio": "Najdłuższy przebieg (względem profilu), który nadal może zostać dopasowany"
+    "profile_match_max_duration_ratio": "Najdłuższy przebieg (względem profilu), który nadal może zostać dopasowany",
+    "keep_min_score": "Etap 2: najniższy wynik podobienstwa zachowany jako kandydat",
+    "dtw_blend": "Etap 3: jak bardzo wynik DTW zastepuje wynik główny (0-1)",
+    "dtw_ensemble_w": "Etap 3: proporcja skalowanego do pochodnego DTW w trybie kombinacji (0-1)",
+    "dtw_ddtw_scale": "Etap 3: skala odleglosci pochodnej DTW",
+    "dtw_refine_top_n": "Etap 3: ile najlepszych kandydatow jest ponownie ocenianych przez DTW",
+    "duration_scale": "Etap 4: ostrość zgodnosci czasu trwania (mniejsza = surowsza)",
+    "energy_scale": "Etap 4: ostrość zgodnosci energii (mniejsza = surowsza)"
   },
   "col": {
     "profile_tip": "Nazwa dopasowanego programu. Brak etykiety oznacza, że na końcu cyklu nie dopasowano żadnego profilu.",

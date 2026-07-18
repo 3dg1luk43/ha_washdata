@@ -881,7 +881,14 @@
     "duration_weight": "Hur mycket överensstämmelse i körtid påverkar matchningen",
     "energy_weight": "Hur mycket överensstämmelse i energiförbrukning påverkar matchningen",
     "profile_match_min_duration_ratio": "Kortaste körning (jämfört med profilen) som fortfarande får matcha",
-    "profile_match_max_duration_ratio": "Längsta körning (jämfört med profilen) som fortfarande får matcha"
+    "profile_match_max_duration_ratio": "Längsta körning (jämfört med profilen) som fortfarande får matcha",
+    "keep_min_score": "Steg 2: lägsta likhetspoäng som behålls som kandidat",
+    "dtw_blend": "Steg 3: hur mycket DTW-poängen ersätter kärnpoängen (0-1)",
+    "dtw_ensemble_w": "Steg 3: mix av skalad och derivativ DTW i ensemble-läge (0-1)",
+    "dtw_ddtw_scale": "Steg 3: avståndsskala för derivativ DTW",
+    "dtw_refine_top_n": "Steg 3: hur många toppkandidater DTW omvärderar",
+    "duration_scale": "Steg 4: skärpa för varaktighetsöverensstämmelse (lägre = striktare)",
+    "energy_scale": "Steg 4: skärpa för energiöverensstämmelse (lägre = striktare)"
   },
   "phase_desc": {
     "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "Fasmedveten återstående tid",
       "doc": "Dela upp varje pågående cykel i faser (uppvärmning, tvätt, centrifugering) och budgetera den återstående tiden per fas, blandat med den klassiska uppskattningen - tidigt i cykeln lutar den sig mot fasbudgeten och mot slutet mot den klassiska uppskattningen. Detta anpassar nedräkningen efter hur länge din maskin faktiskt värms upp och körs, vilket märks tydligast under den första halvan av en cykel. Av = endast den klassiska uppskattningen. Endast visningen av återstående tid påverkas; programmatchning och cykeldetektering är oförändrade."
+    },
+    "keep_min_score": {
+      "label": "Min matchningspoäng"
+    },
+    "dtw_blend": {
+      "label": "DTW-blandning"
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW-ensemblemix"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Derivativ DTW-skala"
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW-förfinandetal"
+    },
+    "duration_scale": {
+      "label": "Varaktighetsskärpa"
+    },
+    "energy_scale": {
+      "label": "Energiskärpa"
     }
   },
   "setting_group": {

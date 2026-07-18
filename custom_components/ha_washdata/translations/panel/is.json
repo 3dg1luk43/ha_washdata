@@ -881,7 +881,14 @@
     "duration_weight": "Hversu mikið samræmi í keyrslutíma hefur áhrif á samsvörunina",
     "energy_weight": "Hversu mikið samræmi í orkunotkun hefur áhrif á samsvörunina",
     "profile_match_min_duration_ratio": "Stysta keyrsla (miðað við sniðið) sem enn má samsvara",
-    "profile_match_max_duration_ratio": "Lengsta keyrsla (miðað við sniðið) sem enn má samsvara"
+    "profile_match_max_duration_ratio": "Lengsta keyrsla (miðað við sniðið) sem enn má samsvara",
+    "keep_min_score": "Þrep 2: lægsta líkindaeinkunn sem heldist sem frambjóðandi",
+    "dtw_blend": "Þrep 3: hversu mikið DTW-einkunnin kemur í stað kjarnaeinkunnin (0-1)",
+    "dtw_ensemble_w": "Þrep 3: blanda af skaluðum og afleiðu-DTW í ensemble-ham (0-1)",
+    "dtw_ddtw_scale": "Þrep 3: fjarlægðarkvarði afleiðu-DTW",
+    "dtw_refine_top_n": "Þrep 3: hversu margir toppframbjóðendur DTW endurmetur",
+    "duration_scale": "Þrep 4: skerpa fyrir samræmi í keyrslulengd (minna = strangara)",
+    "energy_scale": "Þrep 4: skerpa fyrir samræmi í orkunotkun (minna = strangara)"
   },
   "phase_desc": {
     "anti_crease": "Stundum hrynur stutt eftir að því er lokið til að draga úr hrukkum.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "Fasaskiptur tími sem eftir er",
       "doc": "Skiptu hverri lotu í gangi upp í fasa (upphitun, þvottur, vinda) og áætlaðu tímann sem eftir er fyrir hvern fasa, blandað saman við klassíska matið - snemma í lotunni styðst það við fasaáætlunina og undir lokin við klassíska matið. Þetta sérsníður niðurtalninguna að því hversu lengi vélin þín hitar og gengur í raun, sem er mest áberandi í fyrri helmingi lotu. Slökkt = aðeins klassíska matið. Aðeins birting á tíma sem eftir er verður fyrir áhrifum; forritasamsvörun og lotugreining haldast óbreytt."
+    },
+    "keep_min_score": {
+      "label": "Lágm. samsvörunareinkunn"
+    },
+    "dtw_blend": {
+      "label": "DTW-blandning"
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW-ensemble-blanda"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Afleiðu-DTW-kvarði"
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW-fínstillingarfjöldi"
+    },
+    "duration_scale": {
+      "label": "Lengdarskerpa"
+    },
+    "energy_scale": {
+      "label": "Orkuskerpa"
     }
   },
   "setting_group": {

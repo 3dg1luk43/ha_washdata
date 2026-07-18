@@ -834,7 +834,14 @@
     "duration_weight": "How much run-length agreement affects the match",
     "energy_weight": "How much energy agreement affects the match",
     "profile_match_min_duration_ratio": "Shortest run (vs the profile) still allowed to match",
-    "profile_match_max_duration_ratio": "Longest run (vs the profile) still allowed to match"
+    "profile_match_max_duration_ratio": "Longest run (vs the profile) still allowed to match",
+    "keep_min_score": "Stage 2: lowest similarity score kept as a candidate",
+    "dtw_blend": "Stage 3: how much the warp score replaces the core score (0-1)",
+    "dtw_ensemble_w": "Stage 3: scaled vs derivative warp mix in ensemble mode (0-1)",
+    "dtw_ddtw_scale": "Stage 3: derivative warp distance scale",
+    "dtw_refine_top_n": "Stage 3: how many top candidates warp re-scores",
+    "duration_scale": "Stage 4: sharpness of duration agreement (smaller = stricter)",
+    "energy_scale": "Stage 4: sharpness of energy agreement (smaller = stricter)"
   },
   "phase_desc": {
     "anti_crease": "Occasional short tumbles after completion to reduce wrinkles.",
@@ -1290,6 +1297,27 @@
     "enable_phase_matching": {
       "doc": "Break each running cycle into phases (heating, wash, spin) and budget the time remaining per phase, blended with the classic estimate - leaning on the phase budget early in the cycle and the classic estimate near the end. This personalises the countdown to how long your machine actually heats and runs, which is most noticeable in the first half of a cycle. Off = the classic estimate only. Only the time-remaining display is affected; program matching and cycle detection are unchanged.",
       "label": "Phase-aware time remaining"
+    },
+    "keep_min_score": {
+      "label": "Min Match Score"
+    },
+    "dtw_blend": {
+      "label": "Warp Blend"
+    },
+    "dtw_ensemble_w": {
+      "label": "Warp Ensemble Mix"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Derivative Warp Scale"
+    },
+    "dtw_refine_top_n": {
+      "label": "Warp Refine Count"
+    },
+    "duration_scale": {
+      "label": "Duration Sharpness"
+    },
+    "energy_scale": {
+      "label": "Energy Sharpness"
     }
   },
   "setting_group": {

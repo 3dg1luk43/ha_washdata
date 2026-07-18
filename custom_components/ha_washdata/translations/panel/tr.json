@@ -881,7 +881,14 @@
     "duration_weight": "Süre uyumunun eşleştirmeyi ne kadar etkilediği",
     "energy_weight": "Enerji uyumunun eşleştirmeyi ne kadar etkilediği",
     "profile_match_min_duration_ratio": "Eşleşmeye hâlâ izin verilen en kısa çevrim (profile göre)",
-    "profile_match_max_duration_ratio": "Eşleşmeye hâlâ izin verilen en uzun çevrim (profile göre)"
+    "profile_match_max_duration_ratio": "Eşleşmeye hâlâ izin verilen en uzun çevrim (profile göre)",
+    "keep_min_score": "Aşama 2: aday olarak tutulan en düşük benzerlik puanı",
+    "dtw_blend": "Aşama 3: büküm puanının çekirdek puanın ne kadarını değiştirdiği (0-1)",
+    "dtw_ensemble_w": "Aşama 3: topluluk modunda ölçeklendirilmiş ile türev büküm karışımı (0-1)",
+    "dtw_ddtw_scale": "Aşama 3: türev büküm mesafe ölçeği",
+    "dtw_refine_top_n": "Aşama 3: büküm ile yeniden puanlanan en iyi aday sayısı",
+    "duration_scale": "Aşama 4: süre uyumunun keskinliği (daha küçük = daha katı)",
+    "energy_scale": "Aşama 4: enerji uyumunun keskinliği (daha küçük = daha katı)"
   },
   "phase_desc": {
     "anti_crease": "Kırışıklıkları azaltmak için tamamlandıktan sonra ara sıra kısa yuvarlanmalar.",
@@ -1337,6 +1344,27 @@
     "enable_phase_matching": {
       "label": "Aşama farkındalıklı kalan süre",
       "doc": "Çalışan her çevrimi aşamalara (ısıtma, yıkama, sıkma) böler ve kalan süreyi aşama başına ayırarak klasik tahminle harmanlar - çevrimin başında aşama bütçesine, sona yaklaşırken klasik tahmine ağırlık verir. Bu, geri sayımı makinenizin gerçekte ne kadar ısıttığına ve çalıştığına göre kişiselleştirir; en çok çevrimin ilk yarısında fark edilir. Kapalı = yalnızca klasik tahmin. Yalnızca kalan süre göstergesi etkilenir; program eşleştirme ve çevrim algılama değişmez."
+    },
+    "keep_min_score": {
+      "label": "Min. Eşleşme Puanı"
+    },
+    "dtw_blend": {
+      "label": "Büküm Karışımı"
+    },
+    "dtw_ensemble_w": {
+      "label": "Büküm Topluluk Karışımı"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Türev Büküm Ölçeği"
+    },
+    "dtw_refine_top_n": {
+      "label": "Büküm Yeniden Skor Sayısı"
+    },
+    "duration_scale": {
+      "label": "Süre Keskinliği"
+    },
+    "energy_scale": {
+      "label": "Enerji Keskinliği"
     }
   },
   "setting_group": {

@@ -1320,6 +1320,27 @@
     "enable_phase_matching": {
       "label": "Preostalo vrijeme prema fazama",
       "doc": "Svaki aktivni ciklus dijeli na faze (grijanje, pranje, centrifuga) i raspoređuje preostalo vrijeme po fazama, spojeno s klasičnom procjenom - na početku ciklusa oslanja se na proračun faza, a pri kraju na klasičnu procjenu. To prilagođava odbrojavanje tome koliko se vaš uređaj stvarno grije i radi, što je najuočljivije u prvoj polovici ciklusa. Isključeno = samo klasična procjena. Utječe samo na prikaz preostalog vremena; podudaranje programa i otkrivanje ciklusa ostaju nepromijenjeni."
+    },
+    "keep_min_score": {
+      "label": "Min. ocjena podudaranja"
+    },
+    "dtw_blend": {
+      "label": "Miješanje deformacije"
+    },
+    "dtw_ensemble_w": {
+      "label": "Miks kombinacije DTW"
+    },
+    "dtw_ddtw_scale": {
+      "label": "Skala derivatne deformacije"
+    },
+    "dtw_refine_top_n": {
+      "label": "Broj preciziranih kandidata"
+    },
+    "duration_scale": {
+      "label": "Oštrість trajanja"
+    },
+    "energy_scale": {
+      "label": "Oštrina energije"
     }
   },
   "setting_group": {
@@ -1696,7 +1717,14 @@
     "duration_weight": "Koliko slaganje trajanja utječe na podudaranje",
     "energy_weight": "Koliko slaganje potrošnje energije utječe na podudaranje",
     "profile_match_min_duration_ratio": "Najkraće izvođenje (u odnosu na profil) koje se još može podudarati",
-    "profile_match_max_duration_ratio": "Najdulje izvođenje (u odnosu na profil) koje se još može podudarati"
+    "profile_match_max_duration_ratio": "Najdulje izvođenje (u odnosu na profil) koje se još može podudarati",
+    "keep_min_score": "Faza 2: najniža ocjena slicnosti zadržana kao kandidat",
+    "dtw_blend": "Faza 3: koliko DTW ocjena zamjenjuje osnovnu ocjenu (0-1)",
+    "dtw_ensemble_w": "Faza 3: omjer skalirane i derivatne deformacije u nacinu kombinacije (0-1)",
+    "dtw_ddtw_scale": "Faza 3: skala udaljenosti derivatne deformacije",
+    "dtw_refine_top_n": "Faza 3: koliko najviše rangiranih kandidata DTW ponovo vrednuje",
+    "duration_scale": "Faza 4: oštrina suglasnosti trajanja (manje = strože)",
+    "energy_scale": "Faza 4: oštrina suglasnosti energije (manje = strože)"
   },
   "col": {
     "profile_tip": "Naziv podudarnog programa. Bez oznake znači da se na kraju ciklusa nijedan profil nije podudarao.",
