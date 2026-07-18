@@ -210,7 +210,7 @@ Consecutive low-power readings required before ending a cycle.
 ## 10. Profile Matching Thresholds
 
 ### `profile_match_threshold`
-The minimum DTW (Dynamic Time Warping) similarity score (0.0–1.0) for a profile to be considered a match.
+The minimum **composite similarity score** (0.0–1.0) for a profile to be considered a match. This is *not* a raw DTW score - it is the final blended score from the whole matching pipeline: shape correlation + peak-relative MAE (Stage 2), DTW refinement (Stage 3), and duration/energy agreement (Stage 4). DTW is only one component.
 - **Higher Value (e.g., 0.6)**: Stricter matching, fewer false positives, but may miss valid runs if noisy.
 - **Lower Value (e.g., 0.3)**: More lenient, catches more matches but may have false positives.
 - **Default: 0.4**
@@ -250,4 +250,20 @@ Relative power drop detection (0.0–1.0).
 - Complements `abrupt_drop_watts` for different appliance sizes.
 - A drop is "abrupt" if it's *either* > `abrupt_drop_watts` *or* > `abrupt_drop_ratio` of the current power.
 - **Example**: 0.6 means a 60% drop (e.g., 500W → 200W) is considered abrupt.
+
+---
+
+## 13. Time-Remaining Estimation
+
+### `enable_phase_matching` (Phase-aware time remaining)
+Opt-in (0.5.1). When on, WashData budgets each cycle *stage* (heating, wash, spin) separately
+instead of scaling one whole-cycle duration model, which makes the **time-remaining estimate**
+more accurate for temperature/spin variants of the same program (a 60 °C wash spends far longer
+heating than a 30 °C wash, even though the overall shape looks similar).
+- It refines **time remaining only** - it never changes which program is matched.
+- Early in a cycle the per-phase budget dominates the estimate; later, the proven whole-cycle
+  estimator takes over. With the toggle off, the estimate is identical to previous versions.
+- Currently available for **washing machines** and **washer-dryers**. Requires a few clean,
+  labelled cycles per profile so the per-phase budgets can be learned.
+- **Default: off**
 - **Default: 0.6**

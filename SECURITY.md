@@ -120,6 +120,24 @@ To secure your Home Assistant installation:
 ℹ️ Optional per-event notify targets, or user-built automations on WashData's cycle events, can forward notification payloads outside the instance; this depends on user configuration.  
 ℹ️ From the management panel a user with sufficient access can create or delete Home Assistant automations and import a configuration (which overwrites data); these are explicit, permission-gated user actions (see access control below), not autonomous behaviour.  
 
+### Access control & privileged actions
+
+Every WebSocket command the panel uses is access-guarded. WashData supports optional
+per-user role-based access control (View / Edit / None, per device), configurable from the
+panel's **Advanced → Access Control** sub-tab. Administrators always have full access.
+
+The following are enforced as **administrator-only**, even when per-user RBAC is left disabled:
+
+- Destructive data actions: wiping history, importing/exporting configuration, reprocessing
+  history, clearing debug data.
+- Integration-wide settings: panel configuration, and all Community Store account /
+  online-feature / preference commands (enabling online features, connecting an account,
+  changing sharing preferences).
+
+Background-task commands resolve each task's owning device and check the caller's access to
+that device before returning progress or results, and export/import file paths are validated
+to stay within the Home Assistant config directory. These hardening changes landed in 0.5.1.
+
 ### Dependencies
 
 WashData's runtime dependencies are minimal:
@@ -191,4 +209,4 @@ If you have security questions (not a vulnerability):
 
 **Thank you for helping keep WashData secure.** 🛡️
 
-*Last Updated: 2026-07-02*
+*Last Updated: 2026-07-18*

@@ -39,36 +39,50 @@ pip install paho-mqtt
 ### Running Tests
 
 ```bash
-# Fast suite (default) — ~30s, skips real-data replays and benchmarks
+# Fast suite (default) – ~30s, skips real-data replays and benchmarks
 ./run_tests.sh
+
+# Playwright E2E browser tests (panel UI; ~30s, 210 tests across chromium + mobile-chrome)
+./run_tests.sh --e2e
+
+# Everything (fast + slow + benchmark + E2E, ~12 min)
+./run_tests.sh --all
 
 # Run a single test file
 ./.venv/bin/pytest tests/test_cycle_detector.py -v
 
 # Syntax check
-python3 -m py_compile custom_components/ha_washdata/*.py
+python3 -m compileall custom_components/ha_washdata tests/ --quiet
 
 # Start mock socket simulator (manual end-to-end)
 python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 ```
 
 See [Test Categories](#test-categories-fast--slow--benchmark) for the full
-suite and how to opt in to slow/benchmark runs.
+suite and how to opt in to slow / benchmark / E2E runs.
 
 ---
 
 ## Test Categories (fast / slow / benchmark)
 
-Tests are split into three categories via pytest markers so the dev loop stays
-fast. The default `./run_tests.sh` (and raw `pytest tests/`) runs only the
-**fast** subset — about 30 seconds for UI / config / unit changes. The full
-suite is opt-in for releases and CI.
+Tests are split into four categories so the dev loop stays fast. The Python
+tests use pytest markers; the browser tests are a separate Playwright suite. The
+default `./run_tests.sh` (and raw `pytest tests/`) runs only the **fast** subset
+– about 30 seconds for UI / config / unit changes. The other categories are
+opt-in for releases and CI (`--slow`, `--bench`, `--e2e`, or `--all`).
 
-| Category    | Marker                 | What it covers                                                              | Default? |
+| Category    | Marker / runner        | What it covers                                                              | Default? |
 |-------------|------------------------|------------------------------------------------------------------------------|----------|
 | **fast**    | (none)                 | Unit & integration tests with mocked dependencies, issue reproducers         | ✅ runs  |
-| **slow**    | `@pytest.mark.slow`    | Real-data replays from `cycle_data/`, stress simulations, full HA flow       | ❌ opt-in |
-| **benchmark** | `@pytest.mark.benchmark` | Performance characterization (timing prints, no functional assertions)    | ❌ opt-in |
+| **slow**    | `@pytest.mark.slow`    | Real-data replays from `cycle_data/`, stress simulations, full HA flow       | ❌ `--slow` |
+| **benchmark** | `@pytest.mark.benchmark` | Performance characterization (timing prints, no functional assertions)    | ❌ `--bench` |
+| **e2e**     | Playwright (`playwright-tests/`) | Full panel UI across chromium + mobile-chrome (210 tests). Required for any panel change. | ❌ `--e2e` |
+
+Run the browser suite with `./run_tests.sh --e2e`, or directly:
+`cd playwright-tests && npx playwright test` (single spec:
+`npx playwright test tests/settings.spec.ts`; interactive: `npx playwright test --ui`).
+The test server (`serve.mjs`) and the WS mock start automatically. When you add
+or change a panel feature, add or update the matching spec in `playwright-tests/tests/`.
 
 ### Running each category
 

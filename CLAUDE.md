@@ -54,14 +54,14 @@ python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 
 ### Core Components
 
-**`manager.py`** (~5200 lines) - Central orchestrator. Listens to power sensor state changes from Home Assistant, feeds readings to `CycleDetector`, triggers async profile matching every 5 minutes, and updates all entities. This is the "brain" of the integration.
+**`manager.py`** (~6360 lines) - Central orchestrator. Listens to power sensor state changes from Home Assistant, feeds readings to `CycleDetector`, triggers async profile matching every 5 minutes, and updates all entities. This is the "brain" of the integration. (Note: the `task_registry` wiring for long background operations lives in `ws_api.py`, not here; `manager.py` runs its own long jobs, e.g. scheduled ML training / health recompute, as plain executor/`async_create_task` jobs.)
 
-**`cycle_detector.py`** (~1200 lines) - State machine with states: `OFF → STARTING → RUNNING ↔ PAUSED → ENDING → OFF`. Uses configurable power thresholds and energy gates to detect cycle start/stop. Handles edge cases like dryer anti-wrinkle mode and external triggers.
+**`cycle_detector.py`** (~1970 lines) - State machine with states: `OFF → STARTING → RUNNING ↔ PAUSED → ENDING → OFF`. Uses configurable power thresholds and energy gates to detect cycle start/stop. Handles edge cases like dryer anti-wrinkle mode and external triggers.
 
-**`profile_store.py`** (~4500 lines) - Stores learned profiles (power-consumption signatures for programs like "Cotton 40°C", "Eco", etc.) and implements a 3-stage matching pipeline. (The panel renders all charts client-side in JS; the old server-side `generate_*_svg` helpers were config-flow-era and have been removed.)
+**`profile_store.py`** (~6180 lines) - Stores learned profiles (power-consumption signatures for programs like "Cotton 40°C", "Eco", etc.) and orchestrates the matching pipeline (the numeric Stages 1-4 run in `analysis.py::compute_matches_worker`; profile_store adds the Stage-5 grouping and reconstructs the `MatchResult`). (The panel renders all charts client-side in JS; the old server-side `generate_*_svg` helpers were config-flow-era and have been removed.)
 1. Fast Reject (simple statistics)
 2. Core Similarity (NumPy correlation)
-3. DTW Refinement (Dynamic Time Warping via `signal_processing.py`)
+3. DTW Refinement (Dynamic Time Warping; `compute_dtw_lite` in `analysis.py`, using resampling helpers from `signal_processing.py`)
 
 Also exposes several **pure-statistics (no ML)** per-profile heuristics that never raise (return empty/`None` on error) and are surfaced via `ws_get_profiles` in `ws_api.py`:
 - `compute_profile_health()` — combines duration CV and mean match confidence into a `health_score` (0–1) + `health_status` (healthy/fair/poor/unknown). Shown as health badges in the panel's Profiles tab.
@@ -80,11 +80,13 @@ Also manages **match ranking history** (`record_match_ranking_snapshot` / `confi
 ### Supporting Modules
 
 - **`analysis.py`** - NumPy coarse-to-fine alignment and correlation scoring
-- **`signal_processing.py`** - Resampling, filtering, DTW implementation
+- **`signal_processing.py`** - Resampling + the shared energy-integration primitives (`integrate_wh`, `energy_gap_threshold_s`). No filtering, and **no DTW** (the DTW-lite implementation lives in `analysis.py`).
 - **`progress.py`** - **Single source of truth** for cycle progress / remaining-time / phase / projected-energy math (`estimate_phase_progress`, `ml_progress_percent`, `ml_energy_total`, `compute_progress` — the blend+EMA+back-calc, `current_phase`, `projected_energy`, `cycle_anomaly`). Pure (no HA); `manager.py`'s `_estimate_phase_progress`/`_update_remaining_only`/`_update_projected_energy`/`_current_phase_from_progress`/`_update_cycle_anomaly` are thin wrappers, and the Playground `SimRunner` calls the same functions — so the panel's what-if replay is byte-identical to the live estimator. Behavior is locked by a golden before/after snapshot + the progress/phase/ML/energy test suite; never fork this math.
 - **`notification_rules.py`** - Pure notification **decision** predicates (`quiet_hours_bounds`, `in_quiet_hours(bounds, when)`, `seconds_until_quiet_end`, `milestone_crossed`, `should_notify_pre_completion`) shared by `manager.py` (which keeps all delivery: hass services, quiet-hours queueing, presence) and the Playground sim. Delivery stays in the manager; only the thresholds/gating live here.
 - **`learning.py`** - Self-learning feedback system with confidence tracking
-- **`phase_catalog.py`** - Phase labels (pre-wash, heating, spin, etc.) mapped to time ranges within cycles. Users draw per-profile phase ranges in the panel (visual configurator → `ws_set_profile_phases` → `profile["phases"]`); the live current phase is derived by `manager._current_phase_from_progress`, which indexes those ranges by the **ML-blended progress fraction** (not raw elapsed) via `profile_store.check_phase_match`, so the readout stays correct under overrun/underrun. One phase definition, driven by the progress estimator.
+- **`phase_catalog.py`** - Phase labels (pre-wash, heating, spin, etc.) mapped to time ranges within cycles. Users draw per-profile phase ranges in the panel (visual configurator → `ws_set_profile_phases` → `profile["phases"]`); the live current phase is derived by `manager._current_phase_from_progress`, which indexes those ranges by the **ML-blended progress fraction** (not raw elapsed) via `profile_store.check_phase_match`, so the readout stays correct under overrun/underrun. One phase definition, driven by the progress estimator. This is separate from the phase-*segmented matching* system below.
+- **`phase_segmenter.py`** - (0.5.1) Unsupervised regime segmenter: a hysteresis classifier splits a cycle trace into idle/active/high runs (+ terminal spin) and derives per-role priors (heating/wash/spin/idle) held in a `PhaseModel`. Models are built for `washing_machine`, `washer_dryer`, `dishwasher`. Feeds the phase-profile cache (`envelope["phase_profile"]`, a derived cache built during envelope rebuild; storage v11 is a marker-only bump).
+- **`phase_match.py`** - (0.5.1) Per-role duration/energy log-ratio agreement + `phase_eta` (Σ max(0, expected − consumed) per role, heating weighted 0.50; the in-progress role is scored one-sided). Consumed **only** by the opt-in phase-resolved ETA blend in `progress.py`; it does NOT change program (Stage 1-5) matching. Gated by the per-device `enable_phase_matching` flag AND `LIVE_PHASE_DEVICE_TYPES = (washing_machine, washer_dryer)`. See IMPLEMENTATION.md "Phase-segmented matching & ETA (0.5.1)".
 - **`suggestion_engine.py`** - Recommends tuning parameters from history. `select_clean_cycles()` filters out mis-detected cycles first; `SuggestionEngine` (classic statistics) and `MLSuggestionEngine` (ML-calibrated, gated) produce suggestions; `reconcile_suggestions()` enforces cross-parameter invariants so coupled settings stay consistent.
 - **`recorder.py`** - Manual recording mode for training new profiles
 - **`features.py`** - Computes profile feature vectors/signatures
@@ -206,14 +208,14 @@ Panel `{lang}.json` files are served as-is (no rebuild). Step 1 is fast and netw
 
 **Two separate migration layers — test them separately:**
 
-1. **Config entry migration** (`async_migrate_entry` in `__init__.py`, config schema v1→3.6): tested in `tests/test_migration_harness.py`. Covers key moves (data→options), notify_service→per-event lists, device type remapping, drain-spike key removal, idempotency.
+1. **Config entry migration** (`async_migrate_entry` in `__init__.py`, config schema v1→3.7): tested in `tests/test_migration_harness.py`. Covers key moves (data→options), notify_service→per-event lists, device type remapping (incl. coffee/EV/heat-pump/oven → Threshold Device), drain-spike key removal, the v3.6→v3.7 `initial_profile` stub removal, idempotency.
 
-2. **Storage migration** (`WashDataStore._async_migrate_func` in `profile_store.py`, storage v1→8): tested in `tests/test_migration_v032.py`. Call `_async_migrate_func(old_version, 1, data)` **directly** — do not go through `ProfileStore.async_load()` (which requires file I/O). Pattern for adding a new storage version (e.g. v9):
+2. **Storage migration** (`WashDataStore._async_migrate_func` in `profile_store.py`, storage v1→11, `STORAGE_VERSION = 11` in `const.py`): tested in `tests/test_migration_v032.py`. Call `_async_migrate_func(old_version, 1, data)` **directly** — do not go through `ProfileStore.async_load()` (which requires file I/O). Pattern for adding a new storage version (e.g. v12):
    ```python
-   async def test_v8_my_new_step():
+   async def test_v11_my_new_step():
        store = WashDataStore(_make_hass(), STORAGE_VERSION, f"{STORAGE_KEY}.test")
        data = {"past_cycles": [...], "profiles": {...}}
-       result = await store._async_migrate_func(8, 1, data)
+       result = await store._async_migrate_func(11, 1, data)
        assert result[...]  # verify the new invariant
    ```
    Storage versions and what each step does:
@@ -224,6 +226,9 @@ Panel `{lang}.json` files are served as-is (no rebuild). Step 1 is fast and netw
    - v5→v6: flag recorded cycles (`meta.source="recorder"`) as `ml_review.golden=True`
    - v6→v7: re-run golden backfill (broader check, idempotent)
    - v7→v8: re-run golden backfill for old recordings without meta marker (structural: completed + no `max_power` + no `termination_reason`)
+   - v8→v9: pre-initialize additive top-level keys (`lifetime_energy_wh`, `lifetime_cycle_count` seeded from history, `settings_changelog`, `maintenance_log`); idempotent `setdefault`
+   - v9→v10: add `reference_cycles: []` (imported/community cycles live here, never in `past_cycles`, so they feed envelopes/matcher but never usage/energy stats)
+   - v10→v11: **marker-only** bump for the per-phase profile cache (`envelope["phase_profile"]`); nothing is migrated — the derived cache self-populates on the next envelope rebuild
 
 ## Matching Pipeline Details
 
@@ -238,7 +243,7 @@ constants" block (`MATCH_*`); the values below reference them.
 
 **Stage 4 - duration/energy agreement:** final score = `(1 - dur_w - en_w)·shape + dur_w·dur_agreement + en_w·energy_agreement`, where `agreement = 1/(1 + |ln(observed/expected)|/scale)`. Tuned via a weight×scale grid on the net (recall−FP) metric: `MATCH_DURATION_WEIGHT`/`MATCH_ENERGY_WEIGHT` 0.15→**0.22** with the agreement scales **halved** (`MATCH_DURATION_SCALE` 0.35→0.175, `MATCH_ENERGY_SCALE` 0.5→0.25). A *sharper* scale + higher weight separates near-duplicate same-device profiles (net 13.7%→17.4% with FP *dropping* 62.7%→59.9%); raising weight alone at the old loose scale inflated both recall and FP (net-negative), so both knobs move together. Overridable via `duration_weight`/`energy_weight`/`duration_scale`/`energy_scale`.
 
-**Match confidence:** `MatchResult.confidence` is the raw Stage-2/3 similarity score of the top candidate (0–1); it is a similarity score, not a calibrated probability.
+**Match confidence:** `MatchResult.confidence` is the top candidate's **final blended pipeline score** `best["score"]` (Stage-2 similarity as refined by Stage-3 DTW and Stage-4 duration/energy agreement), 0–1; it is a similarity score, not a calibrated probability. (`shape_score`/`original_score` on each candidate hold the pre-Stage-4 / pre-DTW values.)
 
 **Ambiguity:** `is_ambiguous = (top1_score - top2_score) < MATCH_AMBIGUITY_MARGIN` (single source in `const.py`, used by both match paths and surfaced by the Match Ambiguity diagnostic sensor).
 
