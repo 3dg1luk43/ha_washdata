@@ -1322,25 +1322,32 @@
       "doc": "Împarte fiecare ciclu în curs în faze (încălzire, spălare, centrifugare) și repartizează timpul rămas pe fiecare fază, combinat cu estimarea clasică - bazându-se pe repartiția pe faze la începutul ciclului și pe estimarea clasică spre final. Acest lucru personalizează numărătoarea inversă în funcție de cât de mult încălzește și funcționează efectiv mașina, ceea ce se observă cel mai mult în prima jumătate a unui ciclu. Dezactivat = doar estimarea clasică. Este afectată doar afișarea timpului rămas; potrivirea programelor și detectarea ciclurilor rămân neschimbate."
     },
     "keep_min_score": {
-      "label": "Scor Min. de Potrivire"
+      "label": "Scor Min. de Potrivire",
+      "doc": "Scorul minim de similaritate de care are nevoie un candidat pentru a rămâne în cursa de potrivire. Implicit 0.1 este deliberat permisiv - admite chiar și candidați slabi, lăsând etapele ulterioare să găsească cea mai bună potrivire. Măriți pentru a elimina mai devreme profilurile improbabile; micșorați pentru a lărgi grupul inițial de candidați."
     },
     "dtw_blend": {
-      "label": "Amestec Deformare"
+      "label": "Amestec Deformare",
+      "doc": "Cât din scorul de aliniere prin deformare temporală (DTW) înlocuiește scorul de bază al Etapei 2. 0 = utilizați doar scorul Etapei 2, 1 = utilizați doar scorul DTW, 0.5 (implicit) = amestec egal. Măriți pentru a vă baza mai mult pe alinierea prin deformare când programele au niveluri de putere similare dar tipare de sincronizare diferite."
     },
     "dtw_ensemble_w": {
-      "label": "Mix Ansamblu Deformare"
+      "label": "Mix Ansamblu Deformare",
+      "doc": "În modul ansamblu DTW (implicit), ponderea pe L1 scalat față de DTW derivativ (DDTW). 1.0 = tot scalat-L1, 0 = tot DDTW, 0.7 = implicit. Varianta scalat-L1 compară nivelurile de putere; varianta derivativă reacționează la modul în care puterea se schimbă în timp. Ansamblul combină ambele."
     },
     "dtw_ddtw_scale": {
-      "label": "Scară Deformare Derivativă"
+      "label": "Scară Deformare Derivativă",
+      "doc": "Distanța de semi-saturație pentru scorul DTW derivativ. Scorul se înjumătățește când distanța DDTW egalează această valoare. Mai mic = mai sensibil la diferențele de formă. Implicit 30 este calibrat pentru urme tipice de putere ale aparatelor. Afectează doar modurile DTW ansamblu și ddtw."
     },
     "dtw_refine_top_n": {
-      "label": "Contor Rafinare DTW"
+      "label": "Contor Rafinare DTW",
+      "doc": "Câți candidați de top ai Etapei 2 sunt rescorați de DTW. DTW este mai costisitor computațional, deci este aplicat doar la primii N candidați. Implicit 5. Măriți (la 7-9) dacă profilul corect ajunge uneori doar pe locul 4 sau 5 după Etapa 2 - DTW îl poate recupera. Micșorarea accelerează ușor potrivirea."
     },
     "duration_scale": {
-      "label": "Precizie Durată"
+      "label": "Precizie Durată",
+      "doc": "Rigoarea penalizării acordului de durată a Etapei 4. Acesta este raportul logaritmic la care scorul de acord se înjumătățește. Mai mic = mai strict: o nepotrivire de durată afectează mai mult. Implicit 0.175 corespunde unei toleranțe de durată de aproximativ 18% la jumătate de pondere. Utilizați împreună cu Ponderea Duratei."
     },
     "energy_scale": {
-      "label": "Precizie Energie"
+      "label": "Precizie Energie",
+      "doc": "Rigoarea penalizării acordului de energie a Etapei 4. Mai mic = mai strict: o nepotrivire de energie afectează mai mult. Implicit 0.25 este intenționat mai permisiv decât Rigoarea Duratei deoarece energia variază în funcție de sarcină. Utilizați împreună cu Ponderea Energiei."
     }
   },
   "setting_group": {
@@ -1712,19 +1719,19 @@
     "start_duration_threshold": "Secunde peste prag pentru a confirma pornirea",
     "start_threshold_w": "Wați minimi pentru a fi considerat pornit",
     "stop_threshold_w": "Sub această valoare, mașina este considerată oprită",
-    "dtw_bandwidth": "Câtă deformare în timp permite potrivirea formei",
-    "corr_weight": "Ponderea formei curbei față de nivelul de putere în potrivire",
-    "duration_weight": "Cât de mult influențează concordanța duratei potrivirea",
-    "energy_weight": "Cât de mult influențează concordanța energiei potrivirea",
-    "profile_match_min_duration_ratio": "Cel mai scurt ciclu (față de profil) încă permis să corespundă",
-    "profile_match_max_duration_ratio": "Cel mai lung ciclu (față de profil) încă permis să corespundă",
-    "keep_min_score": "Etapa 2: cel mai mic scor de similaritate păstrat ca și candidat",
-    "dtw_blend": "Etapa 3: cât din scorul de deformare înlocuiește scorul de bază (0-1)",
-    "dtw_ensemble_w": "Etapa 3: mixul deformării scalate față de cea derivativă în modul ansamblu (0-1)",
-    "dtw_ddtw_scale": "Etapa 3: scara distanței de deformare derivativă",
-    "dtw_refine_top_n": "Etapa 3: câți candidați de top sunt rescorați prin deformare",
-    "duration_scale": "Etapa 4: precizia acordului de durată (mai mic = mai strict)",
-    "energy_scale": "Etapa 4: precizia acordului de energie (mai mic = mai strict)"
+    "dtw_bandwidth": "Etapa 3: banda de deformare Sakoe-Chiba (0 = DTW dezactivat; implicit 0.2 = 20% din lungimea ciclului)",
+    "corr_weight": "Etapa 2: echilibru între forma curbei (corelație) și nivelul de putere (MAE); implicit 0.45",
+    "duration_weight": "Etapa 4: cât de puternic influențează acordul de durată scorul final (implicit 0.22)",
+    "energy_weight": "Etapa 4: cât de puternic influențează acordul de energie scorul final (implicit 0.22)",
+    "profile_match_min_duration_ratio": "Etapa 1: lungimea minimă a ciclului ca fracție din durata profilului; implicit 0.1 (10%)",
+    "profile_match_max_duration_ratio": "Etapa 1: lungimea maximă a ciclului ca fracție din durata profilului; implicit 1.5 (150%)",
+    "keep_min_score": "Etapa 2: prag minim de scor pentru a rămâne în cursă; implicit 0.1 admite potriviri slabe, etapele ulterioare aleg cel mai bun",
+    "dtw_blend": "Etapa 3: 0 = doar scor de bază, 1 = doar scor DTW, 0.5 = amestec egal (implicit)",
+    "dtw_ensemble_w": "Etapa 3 (modul ansamblu): ponderea pe L1 scalat față de DTW derivativ; implicit 0.7 favorizează nivelul de putere",
+    "dtw_ddtw_scale": "Etapa 3: distanța de semi-saturație DDTW; mai mic = mai sensibil la formă (implicit 30)",
+    "dtw_refine_top_n": "Etapa 3: candidați rescorați de DTW; măriți la 7-9 dacă profilul corect se clasează pe locul 4-5 (implicit 5)",
+    "duration_scale": "Etapa 4: raportul logaritmic la care acordul de durată se înjumătățește; mai mic = penalizare mai strictă (implicit 0.175)",
+    "energy_scale": "Etapa 4: raportul logaritmic la care acordul de energie se înjumătățește; mai mic = penalizare mai strictă (implicit 0.25)"
   },
   "col": {
     "profile_tip": "Numele programului corespunzător. Neetichetat înseamnă că niciun profil nu a corespuns la sfârșitul ciclului.",

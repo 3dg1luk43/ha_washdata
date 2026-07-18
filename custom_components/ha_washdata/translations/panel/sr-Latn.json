@@ -1322,25 +1322,32 @@
       "doc": "Deli svaki aktivni ciklus na faze (zagrevanje, pranje, centrifuga) i raspoređuje preostalo vreme po fazama, u kombinaciji sa klasičnom procenom - oslanjajući se na raspored po fazama na početku ciklusa, a na klasičnu procenu pri kraju. Ovo prilagođava odbrojavanje tome koliko se vaša mašina zaista greje i radi, što je najuočljivije u prvoj polovini ciklusa. Isključeno = samo klasična procena. Utiče samo na prikaz preostalog vremena; podudaranje programa i detekcija ciklusa ostaju nepromenjeni."
     },
     "keep_min_score": {
-      "label": "Min. rezultat podudaranja"
+      "label": "Min. rezultat podudaranja",
+      "doc": "Minimalni rezultat sličnosti koji kandidat mora imati da bi ostao u utrci podudaranja. Podrazumevana vrednost 0,1 je namerno benigna - prihvata čak i slabe kandidate i oslanja se na kasnijе faze za pronalazak najboljeg podudaranja. Povećajte za ranije odbacivanje neprobabilnih profila; smanjite za proširenje početnog skupa kandidata."
     },
     "dtw_blend": {
-      "label": "Mešanje deformacije"
+      "label": "Mešanje deformacije",
+      "doc": "Koliko DTW rezultat poravnanja zamenjuje osnovni rezultat Faze 2. 0 = koristi samo rezultat Faze 2, 1 = koristi samo DTW rezultat, 0,5 (podrazumevano) = jednako mešanje. Povećajte za veće oslanjanje na warp poravnanje kada programi imaju slične nivoe snage ali različite obrasce tajminga."
     },
     "dtw_ensemble_w": {
-      "label": "Miks kombinacije DTW"
+      "label": "Miks kombinacije DTW",
+      "doc": "U kombinovanom DTW režimu (podrazumevanom), težina skaliranog L1 naspram derivatnog DTW (DDTW). 1,0 = sve skalirano L1, 0 = sve DDTW, 0,7 = podrazumevano. Skalirana L1 varijanta upoređuje nivoe snage; derivatna varijanta reaguje na promene snage tokom vremena. Kombinovani režim spaja oba."
     },
     "dtw_ddtw_scale": {
-      "label": "Razmera derivatne deformacije"
+      "label": "Razmera derivatne deformacije",
+      "doc": "Rastojanje polu-zasićenja za ocenjivanje derivatnim DTW. Rezultat se prepolovi kada rastojanje DDTW bude jednako ovoj vrednosti. Manje = osetljivije na razlike u obliku. Podrazumevana vrednost 30 je kalibrisana za tipične tragove snage kućanskih uređaja. Utiče samo na kombinovani i ddtw DTW režim."
     },
     "dtw_refine_top_n": {
-      "label": "Broj preciziranih kandidata"
+      "label": "Broj preciziranih kandidata",
+      "doc": "Koliko prvih kandidata Faze 2 DTW ponovo ocenjuje. DTW je skuplji pa se primenjuje samo na N najboljih kandidata. Podrazumevano 5. Povećajte (na 7-9) ako ispravni profil ponekad dostigne samo 4. ili 5. mesto nakon Faze 2 - DTW ga može spasiti. Smanjenje malo ubrzava podudaranje."
     },
     "duration_scale": {
-      "label": "Ostrina trajanja"
+      "label": "Ostrina trajanja",
+      "doc": "Oštrina kazne za nepodudaranje trajanja u Fazi 4. Ovo je odnos logaritma pri kome se rezultat slaganja prepolovi. Manje = strože: nepodudaranje trajanja više snižava rezultat. Podrazumevana vrednost 0,175 odgovara toleranciji trajanja od oko 18% pri polu-težini. Koristite zajedno s Težinom trajanja."
     },
     "energy_scale": {
-      "label": "Ostrina energije"
+      "label": "Ostrina energije",
+      "doc": "Oštrina kazne za nepodudaranje energije u Fazi 4. Manje = strože: nepodudaranje energije više snižava rezultat. Podrazumevana vrednost 0,25 je namerno blaža od Oštrine trajanja jer energija varira s opterećenjem. Koristite zajedno s Težinom energije."
     }
   },
   "setting_group": {
@@ -1712,19 +1719,19 @@
     "start_duration_threshold": "Sekundi iznad praga za potvrdu pokretanja",
     "start_threshold_w": "Minimum vati da bi se računalo kao pokrenuto",
     "stop_threshold_w": "Ispod ovoga mašina se računa kao isključena",
-    "dtw_bandwidth": "Koliko vremenskog izobličenja dozvoljava podudaranje oblika",
-    "corr_weight": "Težina oblika krive u odnosu na nivo snage pri podudaranju",
-    "duration_weight": "Koliko slaganje trajanja utiče na podudaranje",
-    "energy_weight": "Koliko slaganje potrošnje energije utiče na podudaranje",
-    "profile_match_min_duration_ratio": "Najkraće izvođenje (u odnosu na profil) koje još može da se podudari",
-    "profile_match_max_duration_ratio": "Najduže izvođenje (u odnosu na profil) koje još može da se podudari",
-    "keep_min_score": "Faza 2: najniži rezultat slicnosti zadržan kao kandidat",
-    "dtw_blend": "Faza 3: koliko DTW rezultat zamenjuje osnovni rezultat (0-1)",
-    "dtw_ensemble_w": "Faza 3: omjer skaliranog i derivatnog DTW u nacinu kombinacije (0-1)",
-    "dtw_ddtw_scale": "Faza 3: razmera udaljenosti derivatne deformacije",
-    "dtw_refine_top_n": "Faza 3: koliko najviše rangiranih kandidata DTW ponovo ocenjuje",
-    "duration_scale": "Faza 4: ostrina saglasnosti trajanja (manje = strože)",
-    "energy_scale": "Faza 4: ostrina saglasnosti energije (manje = strože)"
+    "dtw_bandwidth": "Faza 3: warp opseg Sakoe-Chiba (0 = DTW isključen; podrazumevano 0,2 = 20% dužine ciklusa)",
+    "corr_weight": "Faza 2: ravnoteža između oblika krive (korelacija) i nivoa snage (MAE); podrazumevano 0,45",
+    "duration_weight": "Faza 4: koliko jako slaganje trajanja utiče na konačni rezultat (podrazumevano 0,22)",
+    "energy_weight": "Faza 4: koliko jako slaganje energije utiče na konačni rezultat (podrazumevano 0,22)",
+    "profile_match_min_duration_ratio": "Faza 1: minimalna dužina ciklusa kao udeo trajanja profila; podrazumevano 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Faza 1: maksimalna dužina ciklusa kao udeo trajanja profila; podrazumevano 1,5 (150%)",
+    "keep_min_score": "Faza 2: minimalni rezultat za ostanak u utrci; podrazumevano 0,1 prihvata slaba podudaranja, kasniji koraci biraju najbolje",
+    "dtw_blend": "Faza 3: 0 = samo osnovni rezultat, 1 = samo DTW rezultat, 0,5 = jednako mešanje (podrazumevano)",
+    "dtw_ensemble_w": "Faza 3 (kombinovani režim): težina skaliranog L1 naspram derivatnog DTW; podrazumevano 0,7 favorizuje nivo",
+    "dtw_ddtw_scale": "Faza 3: rastojanje polu-zasićenja DDTW; manje = osetljivije na oblik (podrazumevano 30)",
+    "dtw_refine_top_n": "Faza 3: kandidati koje DTW ponovo ocenjuje; povećajte na 7-9 ako ispravni profil zauzme 4.-5. mesto (podrazumevano 5)",
+    "duration_scale": "Faza 4: odnos logaritma gde se slaganje trajanja prepolovi; manje = stroža kazna (podrazumevano 0,175)",
+    "energy_scale": "Faza 4: odnos logaritma gde se slaganje energije prepolovi; manje = stroža kazna (podrazumevano 0,25)"
   },
   "col": {
     "profile_tip": "Naziv podudarnog programa. Bez oznake znači da se na kraju ciklusa nijedan profil nije podudarao.",

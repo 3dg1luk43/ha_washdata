@@ -876,19 +876,19 @@
     "start_duration_threshold": "Başlangıcı onaylamak için eşik üstünde saniye",
     "start_threshold_w": "Başladı sayılması için minimum watt",
     "stop_threshold_w": "Bunun altında makine kapalı sayılır",
-    "dtw_bandwidth": "Şekil eşleştirmesinin ne kadar zaman bükmeye izin verdiği",
-    "corr_weight": "Eşleştirmede eğri şekline karşı güç düzeyinin ağırlığı",
-    "duration_weight": "Süre uyumunun eşleştirmeyi ne kadar etkilediği",
-    "energy_weight": "Enerji uyumunun eşleştirmeyi ne kadar etkilediği",
-    "profile_match_min_duration_ratio": "Eşleşmeye hâlâ izin verilen en kısa çevrim (profile göre)",
-    "profile_match_max_duration_ratio": "Eşleşmeye hâlâ izin verilen en uzun çevrim (profile göre)",
-    "keep_min_score": "Aşama 2: aday olarak tutulan en düşük benzerlik puanı",
-    "dtw_blend": "Aşama 3: büküm puanının çekirdek puanın ne kadarını değiştirdiği (0-1)",
-    "dtw_ensemble_w": "Aşama 3: topluluk modunda ölçeklendirilmiş ile türev büküm karışımı (0-1)",
-    "dtw_ddtw_scale": "Aşama 3: türev büküm mesafe ölçeği",
-    "dtw_refine_top_n": "Aşama 3: büküm ile yeniden puanlanan en iyi aday sayısı",
-    "duration_scale": "Aşama 4: süre uyumunun keskinliği (daha küçük = daha katı)",
-    "energy_scale": "Aşama 4: enerji uyumunun keskinliği (daha küçük = daha katı)"
+    "dtw_bandwidth": "Aşama 3: Sakoe-Chiba büküm bandı (0 = DTW kapalı; varsayılan 0.2 = döngü uzunluğunun %20'si)",
+    "corr_weight": "Aşama 2: eğri şekli (korelasyon) ile güç düzeyi (MAE) arasındaki denge; varsayılan 0.45",
+    "duration_weight": "Aşama 4: çalışma süresi uyumunun nihai puanı ne kadar etkilediği (varsayılan 0.22)",
+    "energy_weight": "Aşama 4: enerji uyumunun nihai puanı ne kadar etkilediği (varsayılan 0.22)",
+    "profile_match_min_duration_ratio": "Aşama 1: profil süresinin bir kesri olarak minimum döngü uzunluğu; varsayılan 0.1 (%10)",
+    "profile_match_max_duration_ratio": "Aşama 1: profil süresinin bir kesri olarak maksimum döngü uzunluğu; varsayılan 1.5 (%150)",
+    "keep_min_score": "Aşama 2: yarışta kalmak için taban puan; varsayılan 0.1 zayıf eşleşmelere izin verir, sonraki aşamalar en iyisini seçer",
+    "dtw_blend": "Aşama 3: 0 = yalnızca çekirdek puan, 1 = yalnızca DTW puanı, 0.5 = eşit karışım (varsayılan)",
+    "dtw_ensemble_w": "Aşama 3 (topluluk modu): ölçeklendirilmiş-L1 ile türev DTW arasındaki ağırlık; varsayılan 0.7 düzey farkındalığını tercih eder",
+    "dtw_ddtw_scale": "Aşama 3: DDTW yarı doygunluk mesafesi; küçük = şekle daha duyarlı (varsayılan 30)",
+    "dtw_refine_top_n": "Aşama 3: DTW'nin yeniden puanladığı aday sayısı; doğru profil 4-5. sıraya düşüyorsa 7-9'a yükseltin (varsayılan 5)",
+    "duration_scale": "Aşama 4: süre uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.175)",
+    "energy_scale": "Aşama 4: enerji uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.25)"
   },
   "phase_desc": {
     "anti_crease": "Kırışıklıkları azaltmak için tamamlandıktan sonra ara sıra kısa yuvarlanmalar.",
@@ -1346,25 +1346,32 @@
       "doc": "Çalışan her çevrimi aşamalara (ısıtma, yıkama, sıkma) böler ve kalan süreyi aşama başına ayırarak klasik tahminle harmanlar - çevrimin başında aşama bütçesine, sona yaklaşırken klasik tahmine ağırlık verir. Bu, geri sayımı makinenizin gerçekte ne kadar ısıttığına ve çalıştığına göre kişiselleştirir; en çok çevrimin ilk yarısında fark edilir. Kapalı = yalnızca klasik tahmin. Yalnızca kalan süre göstergesi etkilenir; program eşleştirme ve çevrim algılama değişmez."
     },
     "keep_min_score": {
-      "label": "Min. Eşleşme Puanı"
+      "label": "Min. Eşleşme Puanı",
+      "doc": "Bir adayın eşleşme yarışında kalabilmesi için gereken minimum benzerlik puanı. Varsayılan 0.1 kasıtlı olarak gevşektir - zayıf adayları bile kabul eder ve en iyi eşleşmeyi sonraki aşamalara bırakır. Olası olmayan profilleri daha erken elemek için artırın; başlangıç aday havuzunu genişletmek için azaltın."
     },
     "dtw_blend": {
-      "label": "Büküm Karışımı"
+      "label": "Büküm Karışımı",
+      "doc": "Zaman bükme (DTW) hizalama puanının Aşama 2 çekirdek puanını ne ölçüde değiştirdiği. 0 = yalnızca Aşama 2 puanı, 1 = yalnızca DTW puanı, 0.5 (varsayılan) = eşit karışım. Programların güç düzeyleri benzer ancak zamanlama kalıpları farklıysa büküm hizalamasına daha fazla güvenmek için artırın."
     },
     "dtw_ensemble_w": {
-      "label": "Büküm Topluluk Karışımı"
+      "label": "Büküm Topluluk Karışımı",
+      "doc": "Topluluk DTW modunda (varsayılan), ölçeklendirilmiş L1 ile türev DTW (DDTW) arasındaki ağırlık. 1.0 = tamamen ölçeklendirilmiş-L1, 0 = tamamen DDTW, 0.7 = varsayılan. Ölçeklendirilmiş-L1 değişkeni güç düzeylerini karşılaştırır; türev değişkeni gücün zaman içinde nasıl değiştiğine tepki verir. Topluluk her ikisini de birleştirir."
     },
     "dtw_ddtw_scale": {
-      "label": "Türev Büküm Ölçeği"
+      "label": "Türev Büküm Ölçeği",
+      "doc": "Türev DTW puanlaması için yarı doygunluk mesafesi. DDTW mesafesi bu değere eşit olduğunda puan yarıya düşer. Küçük = şekil farklılıklarına daha duyarlı. Varsayılan 30, tipik ev aletleri güç izleri için kalibre edilmiştir. Yalnızca topluluk ve ddtw DTW modlarını etkiler."
     },
     "dtw_refine_top_n": {
-      "label": "Büküm Yeniden Skor Sayısı"
+      "label": "Büküm Yeniden Skor Sayısı",
+      "doc": "Kaç üst Aşama 2 adayı DTW tarafından yeniden puanlandırılır. DTW daha pahalıdır, bu nedenle yalnızca en iyi N adaya uygulanır. Varsayılan 5. Doğru profil bazen Aşama 2'den sonra yalnızca 4. veya 5. sıraya geliyorsa artırın (7-9'a) - DTW onu kurtarabilir. Azaltmak eşleşmeyi biraz hızlandırır."
     },
     "duration_scale": {
-      "label": "Süre Keskinliği"
+      "label": "Süre Keskinliği",
+      "doc": "Aşama 4 süre uyumu cezasının keskinliği. Bu, uyum puanının yarıya düştüğü logaritmik orandır. Küçük = daha sert: bir süre uyumsuzluğu daha fazla zarara yol açar. Varsayılan 0.175, yarı ağırlıkta yaklaşık %18 süre toleransına karşılık gelir. Süre Ağırlığı ile birlikte kullanın."
     },
     "energy_scale": {
-      "label": "Enerji Keskinliği"
+      "label": "Enerji Keskinliği",
+      "doc": "Aşama 4 enerji uyumu cezasının keskinliği. Küçük = daha sert: bir enerji uyumsuzluğu daha fazla zarara yol açar. Varsayılan 0.25, enerji yükle değiştiğinden Süre Keskinliğinden kasıtlı olarak daha gevşektir. Enerji Ağırlığı ile birlikte kullanın."
     }
   },
   "setting_group": {

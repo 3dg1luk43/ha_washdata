@@ -1322,25 +1322,32 @@
       "doc": "Sadaliet katru notiekošo ciklu fāzēs (sildīšana, mazgāšana, izgriešana) un plānojiet atlikušo laiku katrai fāzei, sajaucot ar klasisko aprēķinu - cikla sākumā paļaujoties uz fāžu plānojumu, bet beigās uz klasisko aprēķinu. Tas pielāgo atpakaļskaitīšanu tam, cik ilgi jūsu mašīna patiešām sildās un darbojas, kas visvairāk pamanāms cikla pirmajā pusē. Izslēgts = tikai klasiskais aprēķins. Tiek ietekmēts tikai atlikušā laika attēlojums; programmu saskaņošana un ciklu noteikšana paliek nemainīga."
     },
     "keep_min_score": {
-      "label": "Min. atbilstības rezultāts"
+      "label": "Min. atbilstības rezultāts",
+      "doc": "Zemākais līdzības rezultāts, kas kandidātam vajadzīgs, lai paliktu saskaņošanas procesā. Noklusējums 0,1 ir apzināti ļaujošs – tas pieļauj pat vājus kandidātus un paļaujas uz vēlākajiem posmiem labākā atbilstības atrašanai. Palieliniet, lai agrāk filtrētu maz ticamos profilus; samaziniet, lai paplašinātu sākotnējo kandidātu kopumu."
     },
     "dtw_blend": {
-      "label": "DTW sajaukums"
+      "label": "DTW sajaukums",
+      "doc": "Cik daudz DTW izlīdzināšanas rezultāts aizstāj 2. posma pamatrezultātu. 0 = izmantojiet tikai 2. posma rezultātu, 1 = izmantojiet tikai DTW rezultātu, 0,5 (noklusējums) = vienāds sajaukums. Palieliniet, lai vairāk paļautos uz laika izlīdzināšanu, ja programmām ir līdzīgi jaudas līmeņi, bet atšķirīgas laika shēmas."
     },
     "dtw_ensemble_w": {
-      "label": "DTW ensemble miks"
+      "label": "DTW ensemble miks",
+      "doc": "Ensemble-DTW režīmā (noklusējums) tas ir svars skalētajam L1 salīdzinājumā ar atvasināto DTW (DDTW). 1,0 = tikai skalētais L1, 0 = tikai DDTW, 0,7 = noklusējums. Skalētā varianta salīdzina jaudas līmeņus; atvasinātā varianta reaģē uz to, kā jauda mainās laika gaitā. Ensemble apvieno abus."
     },
     "dtw_ddtw_scale": {
-      "label": "Atv. DTW skāle"
+      "label": "Atv. DTW skāle",
+      "doc": "Atvasinātās DTW vērtēšanas pusiesātinājuma attālums. Rezultāts uz pusēm samazinās, kad DDTW attālums ir vienāds ar šo vērtību. Mazāks = jutīgāks pret formas atšķirībām. Noklusējums 30 ir kalibrēts tipiskajiem sadzīves tehnikas jaudas profiliem. Ietekmē tikai ensemble un ddtw DTW režīmus."
     },
     "dtw_refine_top_n": {
-      "label": "DTW precizēšanas skaits"
+      "label": "DTW precizēšanas skaits",
+      "doc": "Cik daudz 2. posma labāko kandidātu DTW pārvērtē. DTW ir dārgāks, tāpēc tas tiek piemērots tikai N labākajiem. Noklusējums 5. Palieliniet (līdz 7-9), ja pareizais profils dažreiz pēc 2. posma sasniedz tikai 4. vai 5. vietu – DTW var to glābt. Zemāka vērtība nedaudz paātrina saskaņošanu."
     },
     "duration_scale": {
-      "label": "Ilguma asums"
+      "label": "Ilguma asums",
+      "doc": "4. posma ilguma atbilstības soda asums. Tas ir logaritmiskais koeficients, pie kura atbilstības rezultāts uz pusēm samazinās. Mazāks = bargāks: ilguma neatbilstība kaitē vairāk. Noklusējums 0,175 atbilst aptuveni 18% ilguma tolerancei pie pus-svara. Izmantojiet kopā ar Ilguma svaru."
     },
     "energy_scale": {
-      "label": "Enerģijas asums"
+      "label": "Enerģijas asums",
+      "doc": "4. posma enerģijas atbilstības soda asums. Mazāks = bargāks: enerģijas neatbilstība kaitē vairāk. Noklusējums 0,25 ir apzināti piedodošāks nekā ilguma asums, jo enerģija mainās atkarībā no slodzes. Izmantojiet kopā ar Enerģijas svaru."
     }
   },
   "setting_group": {
@@ -1712,19 +1719,19 @@
     "start_duration_threshold": "Sekundes virs sliekšņa, lai apstiprinātu sākumu",
     "start_threshold_w": "Minimālais vatu skaits, lai skaitītos kā sācies",
     "stop_threshold_w": "Zem šīs vērtības iekārta skaitās izslēgta",
-    "dtw_bandwidth": "Cik lielu laika deformāciju pieļauj formas saskaņošana",
-    "corr_weight": "Līknes formas un jaudas līmeņa svars saskaņošanā",
-    "duration_weight": "Cik lielā mērā ilguma atbilstība ietekmē saskaņošanu",
-    "energy_weight": "Cik lielā mērā enerģijas atbilstība ietekmē saskaņošanu",
-    "profile_match_min_duration_ratio": "Īsākais cikls (salīdzinot ar profilu), kuram vēl atļauts atbilst",
-    "profile_match_max_duration_ratio": "Garākais cikls (salīdzinot ar profilu), kuram vēl atļauts atbilst",
-    "keep_min_score": "2. posms: zemākais līdzības rezultāts, kas saglabāts kā kandidāts",
-    "dtw_blend": "3. posms: cik daudz DTW rezultāts aizstāj pamatresultātu (0-1)",
-    "dtw_ensemble_w": "3. posms: skalētās un atvasinātās DTW sajaukums ensemble režīmā (0-1)",
-    "dtw_ddtw_scale": "3. posms: atvasinātās DTW attāluma skāle",
-    "dtw_refine_top_n": "3. posms: cik daudz labāko kandidātu DTW pārvērtē",
-    "duration_scale": "4. posms: ilguma atbilstības asums (mazāks = stingrāks)",
-    "energy_scale": "4. posms: enerģijas atbilstības asums (mazāks = stingrāks)"
+    "dtw_bandwidth": "3. posms: Sakoe-Chiba laika locīšanas josla (0 = DTW izslēgts; noklusējums 0,2 = 20% no cikla garuma)",
+    "corr_weight": "2. posms: līdzsvars starp līknes formu (korelācija) un jaudas līmeni (MAE); noklusējums 0,45",
+    "duration_weight": "4. posms: cik stipri ilguma atbilstība ietekmē galīgo rezultātu (noklusējums 0,22)",
+    "energy_weight": "4. posms: cik stipri enerģijas atbilstība ietekmē galīgo rezultātu (noklusējums 0,22)",
+    "profile_match_min_duration_ratio": "1. posms: īsākais cikls kā profila ilguma daļa; noklusējums 0,1 (10%)",
+    "profile_match_max_duration_ratio": "1. posms: garākais cikls kā profila ilguma daļa; noklusējums 1,5 (150%)",
+    "keep_min_score": "2. posms: zemākais rezultāts, lai paliktu sacensībā; noklusējums 0,1 pieļauj vājus kandidātus, vēlākie posmi izvēlas labāko",
+    "dtw_blend": "3. posms: 0 = tikai pamatrezultāts, 1 = tikai DTW rezultāts, 0,5 = vienāds sajaukums (noklusējums)",
+    "dtw_ensemble_w": "3. posms (ensemble režīms): skalētā L1 svars pret atvasinātās DTW; noklusējums 0,7 dod priekšroku līmeņapziņai",
+    "dtw_ddtw_scale": "3. posms: DDTW pusiesātinājuma attālums; mazāks = jutīgāks pret formas atšķirībām (noklusējums 30)",
+    "dtw_refine_top_n": "3. posms: kandidāti, kurus DTW pārvērtē; palieliniet līdz 7-9, ja pareizais profils ierindojas 4.-5. vietā (noklusējums 5)",
+    "duration_scale": "4. posms: logaritmiskais koeficients, kur ilguma atbilstība uz pusēm; mazāks = bargāks sods (noklusējums 0,175)",
+    "energy_scale": "4. posms: logaritmiskais koeficients, kur enerģijas atbilstība uz pusēm; mazāks = bargāks sods (noklusējums 0,25)"
   },
   "col": {
     "profile_tip": "Atbilstošās programmas nosaukums. Bez birkas nozīmē, ka cikla beigās neatbilda neviens profils.",

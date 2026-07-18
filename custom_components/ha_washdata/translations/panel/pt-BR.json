@@ -1322,25 +1322,32 @@
       "doc": "Divide cada ciclo em andamento em fases (aquecimento, lavagem, centrifugação) e distribui o tempo restante por fase, combinado com a estimativa clássica - apoiando-se na repartição por fases no início do ciclo e na estimativa clássica perto do fim. Isso personaliza a contagem regressiva de acordo com o tempo que sua máquina realmente aquece e funciona, o que é mais perceptível na primeira metade de um ciclo. Desativado = apenas a estimativa clássica. Apenas a exibição do tempo restante é afetada; a correspondência de programas e a detecção de ciclos permanecem inalteradas."
     },
     "keep_min_score": {
-      "label": "Score mín de correspondência"
+      "label": "Score mín de correspondência",
+      "doc": "Pontuação de similaridade mínima que um candidato precisa para permanecer na disputa. O padrão 0,1 é deliberadamente permissivo - admite até candidatos fracos e depende de etapas posteriores para encontrar a melhor correspondência. Aumente para eliminar perfis improváveis mais cedo; reduza para ampliar o pool inicial de candidatos."
     },
     "dtw_blend": {
-      "label": "Fusão Warp"
+      "label": "Fusão Warp",
+      "doc": "O quanto o score de alinhamento por deformação temporal (DTW) substitui o score central da etapa 2. 0 = usar apenas o score da etapa 2, 1 = usar apenas o score DTW, 0,5 (padrão) = mistura equilibrada. Aumente para confiar mais no alinhamento Warp quando os programas têm níveis de potência semelhantes mas padrões temporais diferentes."
     },
     "dtw_ensemble_w": {
-      "label": "Mix ensemble Warp"
+      "label": "Mix ensemble Warp",
+      "doc": "No modo DTW ensemble (o padrão), o peso em L1 escalado versus DTW derivativo (DDTW). 1,0 = apenas L1 escalado, 0 = apenas DDTW, 0,7 = padrão. A variante L1 escalada compara os níveis de potência; a variante derivativa reage a como a potência muda ao longo do tempo. Ensemble combina ambos."
     },
     "dtw_ddtw_scale": {
-      "label": "Escala Warp derivada"
+      "label": "Escala Warp derivada",
+      "doc": "Distância de meia saturação para a pontuação DTW derivativa. A pontuação é reduzida à metade quando a distância DDTW é igual a este valor. Menor = mais sensível às diferenças de forma. O padrão 30 está calibrado para rastros de potência típicos de eletrodomésticos. Afeta apenas os modos DTW ensemble e ddtw."
     },
     "dtw_refine_top_n": {
-      "label": "Contagem de refinamento Warp"
+      "label": "Contagem de refinamento Warp",
+      "doc": "Quantos candidatos principais da etapa 2 são reavaliados pelo DTW. O DTW é mais caro, por isso é aplicado apenas aos N melhores candidatos. Padrão 5. Aumente (para 7-9) se o perfil correto às vezes só chega ao 4.º ou 5.º lugar após a etapa 2 - o DTW pode recuperá-lo. Reduzir acelera ligeiramente a correspondência."
     },
     "duration_scale": {
-      "label": "Nitidez de duração"
+      "label": "Nitidez de duração",
+      "doc": "Precisão da penalidade de concordância de duração na etapa 4. Este é o log-razão em que o score de concordância é reduzido à metade. Menor = mais rigoroso: uma discordância de duração penaliza mais. O padrão 0,175 corresponde a cerca de 18% de tolerância de duração a meio peso. Use em conjunto com o Peso de duração."
     },
     "energy_scale": {
-      "label": "Nitidez de energia"
+      "label": "Nitidez de energia",
+      "doc": "Precisão da penalidade de concordância de energia. Menor = mais rigoroso: uma discordância de energia penaliza mais. O padrão 0,25 é intencionalmente mais permissivo do que a Precisão de duração, porque a energia varia com a carga. Use em conjunto com o Peso de energia."
     }
   },
   "setting_group": {
@@ -1712,19 +1719,19 @@
     "start_duration_threshold": "Segundos acima do limite para confirmar o início",
     "start_threshold_w": "Watts mínimos para contar como iniciado",
     "stop_threshold_w": "Abaixo disso, a máquina conta como desligada",
-    "dtw_bandwidth": "Quanta deformação temporal a correspondência de forma permite",
-    "corr_weight": "Peso da forma da curva em relação ao nível de potência na correspondência",
-    "duration_weight": "Quanto a concordância de duração afeta a correspondência",
-    "energy_weight": "Quanto a concordância de energia afeta a correspondência",
-    "profile_match_min_duration_ratio": "Ciclo mais curto (em relação ao perfil) ainda permitido para corresponder",
-    "profile_match_max_duration_ratio": "Ciclo mais longo (em relação ao perfil) ainda permitido para corresponder",
-    "keep_min_score": "Fase 2: menor pontuação de similaridade mantida como candidata",
-    "dtw_blend": "Fase 3: quanto o score Warp substitui o score principal (0-1)",
-    "dtw_ensemble_w": "Fase 3: mistura de Warp escalado vs derivado no modo ensemble (0-1)",
-    "dtw_ddtw_scale": "Fase 3: escala de distância do Warp derivado",
-    "dtw_refine_top_n": "Fase 3: quantos candidatos principais o Warp reavalia",
-    "duration_scale": "Fase 4: nitidez da concordância de duração (menor = mais rigoroso)",
-    "energy_scale": "Fase 4: nitidez da concordância de energia (menor = mais rigoroso)"
+    "dtw_bandwidth": "Etapa 3: banda de deformação Sakoe-Chiba (0 = DTW desativado; padrão 0,2 = 20% do comprimento do ciclo)",
+    "corr_weight": "Etapa 2: equilíbrio entre a forma da curva (correlação) e o nível de potência (MAE); padrão 0,45",
+    "duration_weight": "Etapa 4: o quanto a concordância de duração afeta a pontuação final (padrão 0,22)",
+    "energy_weight": "Etapa 4: o quanto a concordância de energia afeta a pontuação final (padrão 0,22)",
+    "profile_match_min_duration_ratio": "Etapa 1: duração mínima do ciclo como fração da duração do perfil; padrão 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Etapa 1: duração máxima do ciclo como fração da duração do perfil; padrão 1,5 (150%)",
+    "keep_min_score": "Etapa 2: pontuação mínima para permanecer na disputa; o padrão 0,1 admite candidatos fracos, etapas posteriores escolhem o melhor",
+    "dtw_blend": "Etapa 3: 0 = apenas pontuação central, 1 = apenas pontuação DTW, 0,5 = mistura equilibrada (padrão)",
+    "dtw_ensemble_w": "Etapa 3 (modo ensemble): peso em L1 escalado vs DTW derivativo; o padrão 0,7 favorece a sensibilidade ao nível",
+    "dtw_ddtw_scale": "Etapa 3: distância de meia saturação DDTW; menor = mais sensível à forma (padrão 30)",
+    "dtw_refine_top_n": "Etapa 3: candidatos reavaliados pelo DTW; aumente para 7-9 se o perfil correto se classificar em 4.º-5.º (padrão 5)",
+    "duration_scale": "Etapa 4: log-razão em que a concordância de duração é reduzida à metade; menor = penalidade mais severa (padrão 0,175)",
+    "energy_scale": "Etapa 4: log-razão em que a concordância de energia é reduzida à metade; menor = penalidade mais severa (padrão 0,25)"
   },
   "col": {
     "profile_tip": "Nome do programa correspondente. Sem rótulo significa que nenhum perfil correspondeu no fim do ciclo.",

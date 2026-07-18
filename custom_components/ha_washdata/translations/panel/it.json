@@ -876,19 +876,19 @@
     "start_duration_threshold": "Secondi sopra la soglia per confermare l'avvio",
     "start_threshold_w": "Watt minimi per contare come avviato",
     "stop_threshold_w": "Al di sotto, la macchina è considerata spenta",
-    "dtw_bandwidth": "Quanta deformazione temporale consente la corrispondenza della forma",
-    "corr_weight": "Peso della forma della curva rispetto al livello di potenza nella corrispondenza",
-    "duration_weight": "Quanto la concordanza della durata influisce sulla corrispondenza",
-    "energy_weight": "Quanto la concordanza dell'energia influisce sulla corrispondenza",
-    "profile_match_min_duration_ratio": "Ciclo più breve (rispetto al profilo) che può ancora corrispondere",
-    "profile_match_max_duration_ratio": "Ciclo più lungo (rispetto al profilo) che può ancora corrispondere",
-    "keep_min_score": "Fase 2: punteggio di similarità minimo mantenuto come candidato",
-    "dtw_blend": "Fase 3: quanto il punteggio Warp sostituisce il punteggio centrale (0-1)",
-    "dtw_ensemble_w": "Fase 3: mix Warp scalato vs derivato in modalità ensemble (0-1)",
-    "dtw_ddtw_scale": "Fase 3: scala della distanza Warp derivata",
-    "dtw_refine_top_n": "Fase 3: quanti candidati principali vengono rivalutati dal Warp",
-    "duration_scale": "Fase 4: nitidezza della concordanza di durata (minore = più rigoroso)",
-    "energy_scale": "Fase 4: nitidezza della concordanza energetica (minore = più rigoroso)"
+    "dtw_bandwidth": "Fase 3: banda di deformazione Sakoe-Chiba (0 = DTW disattivato; predefinito 0,2 = 20% della lunghezza del ciclo)",
+    "corr_weight": "Fase 2: equilibrio tra forma della curva (correlazione) e livello di potenza (MAE); predefinito 0,45",
+    "duration_weight": "Fase 4: quanto la concordanza di durata influisce sul punteggio finale (predefinito 0,22)",
+    "energy_weight": "Fase 4: quanto la concordanza di energia influisce sul punteggio finale (predefinito 0,22)",
+    "profile_match_min_duration_ratio": "Fase 1: durata minima del ciclo come frazione della durata del profilo; predefinito 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Fase 1: durata massima del ciclo come frazione della durata del profilo; predefinito 1,5 (150%)",
+    "keep_min_score": "Fase 2: punteggio minimo per restare in gara; il predefinito 0,1 ammette candidati deboli, le fasi successive scelgono il migliore",
+    "dtw_blend": "Fase 3: 0 = solo punteggio centrale, 1 = solo punteggio DTW, 0,5 = mix equilibrato (predefinito)",
+    "dtw_ensemble_w": "Fase 3 (modalità ensemble): peso su L1 scalato rispetto a DTW derivato; il predefinito 0,7 favorisce la sensibilità al livello",
+    "dtw_ddtw_scale": "Fase 3: distanza di semi-saturazione DDTW; minore = maggiore sensibilità alla forma (predefinito 30)",
+    "dtw_refine_top_n": "Fase 3: candidati rivalutati da DTW; aumentare a 7-9 se il profilo corretto si classifica 4°-5° (predefinito 5)",
+    "duration_scale": "Fase 4: log-rapporto in cui la concordanza di durata si dimezza; minore = penalità più severa (predefinito 0,175)",
+    "energy_scale": "Fase 4: log-rapporto in cui la concordanza di energia si dimezza; minore = penalità più severa (predefinito 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Brevi tumble occasionali dopo il completamento per ridurre le grinze del bucato.",
@@ -1346,25 +1346,32 @@
       "doc": "Suddivide ogni ciclo in corso in fasi (riscaldamento, lavaggio, centrifuga) e distribuisce il tempo rimanente per fase, combinato con la stima classica - basandosi sulla ripartizione per fasi all'inizio del ciclo e sulla stima classica verso la fine. Questo personalizza il conto alla rovescia in base a quanto la tua macchina riscalda e funziona realmente, cosa più evidente nella prima metà di un ciclo. Disattivato = solo la stima classica. È interessata solo la visualizzazione del tempo rimanente; la corrispondenza dei programmi e il rilevamento dei cicli restano invariati."
     },
     "keep_min_score": {
-      "label": "Score min corrispondenza"
+      "label": "Score min corrispondenza",
+      "doc": "Punteggio di similarità minimo che un candidato deve avere per restare in gara. Il predefinito 0,1 è volutamente permissivo - ammette anche candidati deboli e si affida alle fasi successive per trovare la migliore corrispondenza. Aumentarlo per eliminare prima i profili improbabili; ridurlo per ampliare il pool iniziale di candidati."
     },
     "dtw_blend": {
-      "label": "Fusione Warp"
+      "label": "Fusione Warp",
+      "doc": "Quanto il punteggio di allineamento per deformazione temporale (DTW) sostituisce il punteggio centrale della fase 2. 0 = usa solo il punteggio della fase 2, 1 = usa solo il punteggio DTW, 0,5 (predefinito) = mix equilibrato. Aumentarlo per affidarsi maggiormente all'allineamento Warp quando i programmi hanno livelli di potenza simili ma schemi temporali diversi."
     },
     "dtw_ensemble_w": {
-      "label": "Mix Warp ensemble"
+      "label": "Mix Warp ensemble",
+      "doc": "In modalità DTW ensemble (la predefinita), il peso su L1 scalato rispetto a DTW derivato (DDTW). 1,0 = solo L1 scalato, 0 = solo DDTW, 0,7 = predefinito. La variante L1 scalata confronta i livelli di potenza; la variante derivata reagisce a come la potenza cambia nel tempo. Ensemble li combina entrambi."
     },
     "dtw_ddtw_scale": {
-      "label": "Scala Warp derivata"
+      "label": "Scala Warp derivata",
+      "doc": "Distanza di semi-saturazione per la valutazione DTW derivata. Il punteggio si dimezza quando la distanza DDTW è uguale a questo valore. Minore = maggiore sensibilità alle differenze di forma. Il predefinito 30 è calibrato su tracce di potenza tipiche degli elettrodomestici. Influisce solo sulle modalità DTW ensemble e ddtw."
     },
     "dtw_refine_top_n": {
-      "label": "Conteggio affinamento Warp"
+      "label": "Conteggio affinamento Warp",
+      "doc": "Quanti candidati principali della fase 2 vengono rivalutati da DTW. DTW è più costoso, quindi viene applicato solo agli N migliori candidati. Predefinito 5. Aumentarlo (a 7-9) se il profilo corretto a volte raggiunge solo il 4° o 5° posto dopo la fase 2 - DTW può recuperarlo. Ridurlo velocizza leggermente il matching."
     },
     "duration_scale": {
-      "label": "Nitidezza durata"
+      "label": "Nitidezza durata",
+      "doc": "Precisione della penalità di concordanza di durata nella fase 4. È il log-rapporto in cui il punteggio di concordanza si dimezza. Minore = più severo: una discordanza di durata penalizza di più. Il predefinito 0,175 corrisponde a circa il 18% di tolleranza di durata a metà peso. Combinare con Peso durata."
     },
     "energy_scale": {
-      "label": "Nitidezza energia"
+      "label": "Nitidezza energia",
+      "doc": "Precisione della penalità di concordanza di energia. Minore = più severo: una discordanza di energia penalizza di più. Il predefinito 0,25 è intenzionalmente più indulgente della Precisione di durata, perché l'energia varia con il carico. Combinare con Peso energia."
     }
   },
   "setting_group": {

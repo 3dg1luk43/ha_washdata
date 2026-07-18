@@ -876,19 +876,19 @@
     "start_duration_threshold": "Segundos acima do limiar para confirmar o início",
     "start_threshold_w": "Watts mínimos para contar como iniciado",
     "stop_threshold_w": "Abaixo disto, a máquina conta como desligada",
-    "dtw_bandwidth": "Quanta deformação temporal a correspondência de forma permite",
-    "corr_weight": "Peso da forma da curva face ao nível de potência na correspondência",
-    "duration_weight": "Quanto a concordância de duração afeta a correspondência",
-    "energy_weight": "Quanto a concordância de energia afeta a correspondência",
-    "profile_match_min_duration_ratio": "Ciclo mais curto (face ao perfil) ainda autorizado a corresponder",
-    "profile_match_max_duration_ratio": "Ciclo mais longo (face ao perfil) ainda autorizado a corresponder",
-    "keep_min_score": "Fase 2: menor pontuação de similaridade mantida como candidata",
-    "dtw_blend": "Fase 3: quanto o score Warp substitui o score central (0-1)",
-    "dtw_ensemble_w": "Fase 3: mistura de Warp escalado vs derivativo no modo ensemble (0-1)",
-    "dtw_ddtw_scale": "Fase 3: escala de distância do Warp derivativo",
-    "dtw_refine_top_n": "Fase 3: quantos candidatos principais o Warp reavalia",
-    "duration_scale": "Fase 4: nitidez da concordância de duração (menor = mais rigoroso)",
-    "energy_scale": "Fase 4: nitidez da concordância de energia (menor = mais rigoroso)"
+    "dtw_bandwidth": "Fase 3: banda de deformação Sakoe-Chiba (0 = DTW desativado; predefinição 0,2 = 20% do comprimento do ciclo)",
+    "corr_weight": "Fase 2: equilíbrio entre a forma da curva (correlação) e o nível de potência (MAE); predefinição 0,45",
+    "duration_weight": "Fase 4: o quanto a concordância de duração afeta a pontuação final (predefinição 0,22)",
+    "energy_weight": "Fase 4: o quanto a concordância de energia afeta a pontuação final (predefinição 0,22)",
+    "profile_match_min_duration_ratio": "Fase 1: duração mínima do ciclo como fração da duração do perfil; predefinição 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Fase 1: duração máxima do ciclo como fração da duração do perfil; predefinição 1,5 (150%)",
+    "keep_min_score": "Fase 2: pontuação mínima para permanecer em jogo; a predefinição 0,1 admite candidatos fracos, as fases seguintes escolhem o melhor",
+    "dtw_blend": "Fase 3: 0 = apenas pontuação central, 1 = apenas pontuação DTW, 0,5 = mistura equilibrada (predefinição)",
+    "dtw_ensemble_w": "Fase 3 (modo ensemble): peso em L1 escalado vs DTW derivativo; a predefinição 0,7 favorece a sensibilidade ao nível",
+    "dtw_ddtw_scale": "Fase 3: distância de semissaturação DDTW; menor = maior sensibilidade à forma (predefinição 30)",
+    "dtw_refine_top_n": "Fase 3: candidatos reavaliados pelo DTW; aumente para 7-9 se o perfil correto se classificar em 4.º-5.º (predefinição 5)",
+    "duration_scale": "Fase 4: log-razão em que a concordância de duração é reduzida a metade; menor = penalidade mais severa (predefinição 0,175)",
+    "energy_scale": "Fase 4: log-razão em que a concordância de energia é reduzida a metade; menor = penalidade mais severa (predefinição 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Rotações curtas ocasionais após a conclusão para reduzir vincos.",
@@ -1346,25 +1346,32 @@
       "doc": "Divide cada ciclo em curso em fases (aquecimento, lavagem, centrifugação) e distribui o tempo restante por fase, combinado com a estimativa clássica - apoiando-se na repartição por fases no início do ciclo e na estimativa clássica perto do fim. Isto personaliza a contagem decrescente de acordo com o tempo que a sua máquina realmente aquece e funciona, o que é mais percetível na primeira metade de um ciclo. Desativado = apenas a estimativa clássica. Apenas a apresentação do tempo restante é afetada; a correspondência de programas e a deteção de ciclos permanecem inalteradas."
     },
     "keep_min_score": {
-      "label": "Score mín de correspondência"
+      "label": "Score mín de correspondência",
+      "doc": "Pontuação de similaridade mínima que um candidato precisa para permanecer em jogo. A predefinição 0,1 é deliberadamente permissiva - admite mesmo candidatos fracos e depende das fases seguintes para encontrar a melhor correspondência. Aumente para eliminar perfis improváveis mais cedo; reduza para ampliar o pool inicial de candidatos."
     },
     "dtw_blend": {
-      "label": "Fusão Warp"
+      "label": "Fusão Warp",
+      "doc": "O quanto o score de alinhamento por deformação temporal (DTW) substitui o score central da fase 2. 0 = usar apenas o score da fase 2, 1 = usar apenas o score DTW, 0,5 (predefinição) = mistura equilibrada. Aumente para confiar mais no alinhamento Warp quando os programas têm níveis de potência semelhantes mas padrões temporais diferentes."
     },
     "dtw_ensemble_w": {
-      "label": "Mix ensemble Warp"
+      "label": "Mix ensemble Warp",
+      "doc": "No modo DTW ensemble (a predefinição), o peso em L1 escalado versus DTW derivativo (DDTW). 1,0 = apenas L1 escalado, 0 = apenas DDTW, 0,7 = predefinição. A variante L1 escalada compara os níveis de potência; a variante derivativa reage a como a potência muda ao longo do tempo. Ensemble combina ambos."
     },
     "dtw_ddtw_scale": {
-      "label": "Escala Warp derivativa"
+      "label": "Escala Warp derivativa",
+      "doc": "Distância de semissaturação para a pontuação DTW derivativa. A pontuação é reduzida a metade quando a distância DDTW é igual a este valor. Menor = mais sensível às diferenças de forma. A predefinição 30 está calibrada para traços de potência típicos de eletrodomésticos. Afeta apenas os modos DTW ensemble e ddtw."
     },
     "dtw_refine_top_n": {
-      "label": "Contagem de refinamento Warp"
+      "label": "Contagem de refinamento Warp",
+      "doc": "Quantos candidatos principais da fase 2 são reavaliados pelo DTW. O DTW é mais dispendioso, por isso é aplicado apenas aos N melhores candidatos. Predefinição 5. Aumente (para 7-9) se o perfil correto às vezes só chega ao 4.º ou 5.º lugar após a fase 2 - o DTW pode recuperá-lo. Reduzir acelera ligeiramente a correspondência."
     },
     "duration_scale": {
-      "label": "Nitidez de duração"
+      "label": "Nitidez de duração",
+      "doc": "Precisão da penalidade de concordância de duração na fase 4. Este é o log-razão em que o score de concordância é reduzido a metade. Menor = mais rigoroso: uma discordância de duração penaliza mais. A predefinição 0,175 corresponde a cerca de 18% de tolerância de duração a meio peso. Use em conjunto com o Peso de duração."
     },
     "energy_scale": {
-      "label": "Nitidez de energia"
+      "label": "Nitidez de energia",
+      "doc": "Precisão da penalidade de concordância de energia. Menor = mais rigoroso: uma discordância de energia penaliza mais. A predefinição 0,25 é intencionalmente mais permissiva do que a Precisão de duração, porque a energia varia com a carga. Use em conjunto com o Peso de energia."
     }
   },
   "setting_group": {

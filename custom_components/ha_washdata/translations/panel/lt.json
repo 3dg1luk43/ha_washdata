@@ -1322,25 +1322,32 @@
       "doc": "Padalykite kiekvieną vykstantį ciklą į fazes (šildymas, plovimas, gręžimas) ir paskirstykite likusį laiką kiekvienai fazei, sumaišydami su klasikiniu įverčiu - ciklo pradžioje remdamiesi fazių paskirstymu, o pabaigoje - klasikiniu įverčiu. Tai pritaiko laikmatį prie to, kiek laiko jūsų mašina iš tikrųjų kaista ir veikia, o tai labiausiai pastebima pirmoje ciklo pusėje. Išjungta = tik klasikinis įvertis. Paveikiamas tik likusio laiko rodinys; programų atitikimas ir ciklų aptikimas nekeičiami."
     },
     "keep_min_score": {
-      "label": "Min. atitikties balas"
+      "label": "Min. atitikties balas",
+      "doc": "Žemiausias panašumo balas, kurio kandidatui reikia likti derinimo procese. Numatytoji 0,1 yra sąmoningai leistina – ji leidžia net silpnus kandidatus ir pasitiki vėlesniais etapais rasti geriausią atitiktį. Padidinkite, kad anksčiau filtruotumėte mažai tikėtinus profilius; sumažinkite pradiniam kandidatų telkiniui išplėsti."
     },
     "dtw_blend": {
-      "label": "DTW mišinys"
+      "label": "DTW mišinys",
+      "doc": "Kiek DTW lygiavimo balas pakeičia 2 etapo pagrindinį balą. 0 = naudokite tik 2 etapo balą, 1 = naudokite tik DTW balą, 0,5 (numatytoji) = lygus mišinys. Padidinkite, kad labiau pasikliauti laiko lygiavimo, kai programos turi panašius galios lygius, bet skirtingus laiko modelius."
     },
     "dtw_ensemble_w": {
-      "label": "DTW ansamblio mišinys"
+      "label": "DTW ansamblio mišinys",
+      "doc": "Ansamblio DTW režime (numatytoji) tai yra skalieroto L1 svoris lyginant su išvestiniu DTW (DDTW). 1,0 = tik skalierota L1, 0 = tik DDTW, 0,7 = numatytoji. Skalierota variacija lygina galios lygius; išvestinė variacija reaguoja į tai, kaip galia keičiasi bėgant laikui. Ansamblis derina abi."
     },
     "dtw_ddtw_scale": {
-      "label": "Išvest. DTW skalė"
+      "label": "Išvest. DTW skalė",
+      "doc": "Pusiau prisotinimo atstumas išvestiniam DTW vertinimui. Balas perpus sumažėja, kai DDTW atstumas lygus šiai reikšmei. Mažesnis = jautresnis formos skirtumams. Numatytoji 30 sukalibruota tipiškai buitinių prietaisų galios kreivėms. Veikia tik ansamblio ir ddtw DTW režimus."
     },
     "dtw_refine_top_n": {
-      "label": "DTW tikslinimo skaičius"
+      "label": "DTW tikslinimo skaičius",
+      "doc": "Kiek geriausių 2 etapo kandidatų DTW perskaičiuoja balus. DTW yra brangesnė operacija, todėl taikoma tik N geriausiems. Numatytoji 5. Padidinkite (iki 7-9), jei teisingas profilis kartais po 2 etapo patenka tik į 4 arba 5 vietą – DTW gali jį išgelbėti. Mažesnė reikšmė šiek tiek pagreitina derinimą."
     },
     "duration_scale": {
-      "label": "Trukmės ryškumas"
+      "label": "Trukmės ryškumas",
+      "doc": "4 etapo trukmės atitikimo bausmės ryškumas. Tai yra logaritmas, ties kuriuo atitikimo balas perpus sumažėja. Mažesnis = griežtesnis: trukmės neatitikimas kenkia labiau. Numatytoji 0,175 atitinka maždaug 18% trukmės toleranciją ties pusiau svoriu. Naudokite su Trukmės svoriu."
     },
     "energy_scale": {
-      "label": "Energijos ryškumas"
+      "label": "Energijos ryškumas",
+      "doc": "4 etapo energijos atitikimo bausmės ryškumas. Mažesnis = griežtesnis: energijos neatitikimas kenkia labiau. Numatytoji 0,25 sąmoningai atlaidesnė nei trukmės ryškumas, nes energija kinta priklausomai nuo apkrovos. Naudokite su Energijos svoriu."
     }
   },
   "setting_group": {
@@ -1712,19 +1719,19 @@
     "start_duration_threshold": "Sekundės virš slenksčio startui patvirtinti",
     "start_threshold_w": "Mažiausia galia (W), kad būtų skaičiuojama kaip prasidėjęs",
     "stop_threshold_w": "Žemiau šios ribos aparatas laikomas išjungtu",
-    "dtw_bandwidth": "Kiek laiko iškraipymo leidžia formos atitiktis",
-    "corr_weight": "Kreivės formos ir galios lygio svoris atitikime",
-    "duration_weight": "Kiek trukmės sutapimas veikia atitiktį",
-    "energy_weight": "Kiek energijos sutapimas veikia atitiktį",
-    "profile_match_min_duration_ratio": "Trumpiausias ciklas (palyginti su profiliu), kuriam dar leidžiama atitikti",
-    "profile_match_max_duration_ratio": "Ilgiausias ciklas (palyginti su profiliu), kuriam dar leidžiama atitikti",
-    "keep_min_score": "2 etapas: žemiausias panašumo balas, išlaikomas kaip kandidatas",
-    "dtw_blend": "3 etapas: kiek DTW balas pakeičia pagrindinį balą (0-1)",
-    "dtw_ensemble_w": "3 etapas: mastelio ir išvestinės DTW mišinys ansamblio režimu (0-1)",
-    "dtw_ddtw_scale": "3 etapas: išvestinės DTW atstumo skalė",
-    "dtw_refine_top_n": "3 etapas: kiek geriausių kandidatų DTW iš naujo vertina",
-    "duration_scale": "4 etapas: trukmės atitikimo ryškumas (mažesnis = griežtesnis)",
-    "energy_scale": "4 etapas: energijos atitikimo ryškumas (mažesnis = griežtesnis)"
+    "dtw_bandwidth": "3 etapas: Sakoe-Chiba laiko lankstymo juosta (0 = DTW išjungtas; numatytoji 0,2 = 20% ciklo ilgio)",
+    "corr_weight": "2 etapas: balansas tarp kreivės formos (koreliacija) ir galios lygio (MAE); numatytoji 0,45",
+    "duration_weight": "4 etapas: kaip stipriai trukmės atitikimas veikia galutinį balą (numatytoji 0,22)",
+    "energy_weight": "4 etapas: kaip stipriai energijos atitikimas veikia galutinį balą (numatytoji 0,22)",
+    "profile_match_min_duration_ratio": "1 etapas: trumpiausias ciklas kaip profilio trukmės dalis; numatytoji 0,1 (10%)",
+    "profile_match_max_duration_ratio": "1 etapas: ilgiausias ciklas kaip profilio trukmės dalis; numatytoji 1,5 (150%)",
+    "keep_min_score": "2 etapas: žemiausias balas likti lenktynėse; numatytoji 0,1 leidžia silpnus kandidatus, vėlesni etapai parenka geriausią",
+    "dtw_blend": "3 etapas: 0 = tik pagrindinis balas, 1 = tik DTW balas, 0,5 = lygus mišinys (numatytoji)",
+    "dtw_ensemble_w": "3 etapas (ansamblio režimas): skalieroto L1 svoris prieš išvestinės DTW; numatytoji 0,7 teikia pirmenybę lygio sąmoningumui",
+    "dtw_ddtw_scale": "3 etapas: DDTW pusiau prisotinimo atstumas; mažesnis = jautresnis formos skirtumams (numatytoji 30)",
+    "dtw_refine_top_n": "3 etapas: kandidatai, kuriems DTW perskaičiuoja balus; padidinkite iki 7-9 jei teisingas profilis patenka į 4-5 vietą (numatytoji 5)",
+    "duration_scale": "4 etapas: logaritmas, ties kuriuo trukmės atitikimas perpus sumažėja; mažesnis = griežtesnė bausmė (numatytoji 0,175)",
+    "energy_scale": "4 etapas: logaritmas, ties kuriuo energijos atitikimas perpus sumažėja; mažesnis = griežtesnė bausmė (numatytoji 0,25)"
   },
   "col": {
     "profile_tip": "Atitikusios programos pavadinimas. Nepažymėta reiškia, kad ciklo pabaigoje neatitiko joks profilis.",

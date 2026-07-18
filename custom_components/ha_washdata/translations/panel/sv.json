@@ -876,19 +876,19 @@
     "start_duration_threshold": "Sekunder över tröskeln för att bekräfta start",
     "start_threshold_w": "Minsta antal watt för att räknas som startad",
     "stop_threshold_w": "Under detta räknas maskinen som avstängd",
-    "dtw_bandwidth": "Hur mycket tidsförvrängning formmatchningen tillåter",
-    "corr_weight": "Vikt på kurvform kontra effektnivå i matchningen",
-    "duration_weight": "Hur mycket överensstämmelse i körtid påverkar matchningen",
-    "energy_weight": "Hur mycket överensstämmelse i energiförbrukning påverkar matchningen",
-    "profile_match_min_duration_ratio": "Kortaste körning (jämfört med profilen) som fortfarande får matcha",
-    "profile_match_max_duration_ratio": "Längsta körning (jämfört med profilen) som fortfarande får matcha",
-    "keep_min_score": "Steg 2: lägsta likhetspoäng som behålls som kandidat",
-    "dtw_blend": "Steg 3: hur mycket DTW-poängen ersätter kärnpoängen (0-1)",
-    "dtw_ensemble_w": "Steg 3: mix av skalad och derivativ DTW i ensemble-läge (0-1)",
-    "dtw_ddtw_scale": "Steg 3: avståndsskala för derivativ DTW",
-    "dtw_refine_top_n": "Steg 3: hur många toppkandidater DTW omvärderar",
-    "duration_scale": "Steg 4: skärpa för varaktighetsöverensstämmelse (lägre = striktare)",
-    "energy_scale": "Steg 4: skärpa för energiöverensstämmelse (lägre = striktare)"
+    "dtw_bandwidth": "Steg 3: Sakoe-Chiba-förvrängningsband (0 = DTW av; standard 0,2 = 20% av cykellängd)",
+    "corr_weight": "Steg 2: balans mellan kurvform (korrelation) och effektnivå (MAE); standard 0,45",
+    "duration_weight": "Steg 4: hur starkt körtidsöverensstämmelse påverkar slutpoängen (standard 0,22)",
+    "energy_weight": "Steg 4: hur starkt energiöverensstämmelse påverkar slutpoängen (standard 0,22)",
+    "profile_match_min_duration_ratio": "Steg 1: lägsta cykellängd som andel av profilduration; standard 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Steg 1: högsta cykellängd som andel av profilduration; standard 1,5 (150%)",
+    "keep_min_score": "Steg 2: lägsta poäng för att vara kvar i matchen; standard 0,1 tillåter svaga kandidater, senare steg väljer bäst",
+    "dtw_blend": "Steg 3: 0 = bara kärnpoäng, 1 = bara DTW-poäng, 0,5 = lika blandning (standard)",
+    "dtw_ensemble_w": "Steg 3 (ensemble-läge): vikt på skalad L1 kontra derivativ DTW; standard 0,7 gynnar nivåmedvetenhet",
+    "dtw_ddtw_scale": "Steg 3: DDTW-halvmättnadsavstånd; lägre = mer formkänslig (standard 30)",
+    "dtw_refine_top_n": "Steg 3: kandidater som DTW ompoängsätter; öka till 7-9 om rätt profil placerar sig 4-5:a (standard 5)",
+    "duration_scale": "Steg 4: log-kvot där varaktighetsöverensstämmelse halveras; lägre = striktare straff (standard 0,175)",
+    "energy_scale": "Steg 4: log-kvot där energiöverensstämmelse halveras; lägre = striktare straff (standard 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
@@ -1346,25 +1346,32 @@
       "doc": "Dela upp varje pågående cykel i faser (uppvärmning, tvätt, centrifugering) och budgetera den återstående tiden per fas, blandat med den klassiska uppskattningen - tidigt i cykeln lutar den sig mot fasbudgeten och mot slutet mot den klassiska uppskattningen. Detta anpassar nedräkningen efter hur länge din maskin faktiskt värms upp och körs, vilket märks tydligast under den första halvan av en cykel. Av = endast den klassiska uppskattningen. Endast visningen av återstående tid påverkas; programmatchning och cykeldetektering är oförändrade."
     },
     "keep_min_score": {
-      "label": "Min matchningspoäng"
+      "label": "Min matchningspoäng",
+      "doc": "Lägsta likhetspoäng som en kandidat behöver för att vara kvar i matchningen. Standard 0,1 är avsiktligt tillåtande – det tillåter även svaga kandidater och förlitar sig på senare steg för att hitta bästa match. Höj för att gallra bort osannolika profiler tidigare; sänk för att utöka den initiala kandidatpoolen."
     },
     "dtw_blend": {
-      "label": "DTW-blandning"
+      "label": "DTW-blandning",
+      "doc": "Hur mycket DTW-justeringspoängen ersätter kärnpoängen från Steg 2. 0 = använd bara Steg 2-poängen, 1 = använd bara DTW-poängen, 0,5 (standard) = lika blandning. Höj om program har liknande effektnivåer men olika timingmönster."
     },
     "dtw_ensemble_w": {
-      "label": "DTW-ensemblemix"
+      "label": "DTW-ensemblemix",
+      "doc": "I ensemble-DTW-läge (standard) anger detta vikten på skalad L1 kontra derivativ DTW (DDTW). 1,0 = enbart skalad L1, 0 = enbart DDTW, 0,7 = standard. Den skalade varianten jämför effektnivåer; den derivativa reagerar på hur effekten förändras över tid. Ensemble blandar båda."
     },
     "dtw_ddtw_scale": {
-      "label": "Derivativ DTW-skala"
+      "label": "Derivativ DTW-skala",
+      "doc": "Halvmättnadsavstånd för derivativ DTW-poängsättning. Poängen halveras när DDTW-avståndet är lika med detta värde. Lägre = mer känslig för formskillnader. Standard 30 är kalibrerad för typiska apparaters effektprofiler. Påverkar bara ensemble- och ddtw-DTW-lägen."
     },
     "dtw_refine_top_n": {
-      "label": "DTW-förfinandetal"
+      "label": "DTW-förfinandetal",
+      "doc": "Hur många toppkandidater från Steg 2 som ompoängsätts av DTW. DTW är mer beräkningskrävande så det tillämpas bara på de N bästa. Standard 5. Höj (till 7-9) om rätt profil ibland bara når 4:e eller 5:e plats efter Steg 2 – DTW kan rädda den. Lägre värde snabbar upp matchningen något."
     },
     "duration_scale": {
-      "label": "Varaktighetsskärpa"
+      "label": "Varaktighetsskärpa",
+      "doc": "Skärpan i Steg 4:s straff för varaktighetsöverensstämmelse. Det är log-kvoten vid vilken överensstämmelsepoängen halveras. Lägre = striktare: en varaktighetsavvikelse straffas mer. Standard 0,175 motsvarar ungefär 18% varaktighetstolerans vid halvvikt. Para ihop med Varaktighetssvikt."
     },
     "energy_scale": {
-      "label": "Energiskärpa"
+      "label": "Energiskärpa",
+      "doc": "Skärpan i Steg 4:s straff för energiöverensstämmelse. Lägre = striktare: en energiavvikelse straffas mer. Standard 0,25 är avsiktligt mer tillåtande än varaktighetsskärpan eftersom energiförbrukning varierar med last. Para ihop med Energivikt."
     }
   },
   "setting_group": {

@@ -876,19 +876,19 @@
     "start_duration_threshold": "Seconden boven de drempel om de start te bevestigen",
     "start_threshold_w": "Minimaal aantal watt om als gestart te tellen",
     "stop_threshold_w": "Hieronder telt de machine als uit",
-    "dtw_bandwidth": "Hoeveel tijdvervorming de vormherkenning toestaat",
-    "corr_weight": "Gewicht van curvevorm versus vermogensniveau in de herkenning",
-    "duration_weight": "Hoeveel overeenkomst in looptijd de herkenning beïnvloedt",
-    "energy_weight": "Hoeveel overeenkomst in energieverbruik de herkenning beïnvloedt",
-    "profile_match_min_duration_ratio": "Kortste cyclus (t.o.v. het profiel) die nog mag matchen",
-    "profile_match_max_duration_ratio": "Langste cyclus (t.o.v. het profiel) die nog mag matchen",
-    "keep_min_score": "Stap 2: laagste gelijkenisscore bewaard als kandidaat",
-    "dtw_blend": "Stap 3: mate waarin de warp-score de kernscore vervangt (0-1)",
-    "dtw_ensemble_w": "Stap 3: mix van geschaalde vs. afgeleide warp in ensemble-modus (0-1)",
-    "dtw_ddtw_scale": "Stap 3: schaal van de afgeleide warp-afstand",
-    "dtw_refine_top_n": "Stap 3: aantal topcandidaten dat door warp opnieuw beoordeeld wordt",
-    "duration_scale": "Stap 4: scherpte van de duurovereenkomst (kleiner = strenger)",
-    "energy_scale": "Stap 4: scherpte van de energie-overeenkomst (kleiner = strenger)"
+    "dtw_bandwidth": "Stap 3: Sakoe-Chiba-vervormingsband (0 = DTW uit; standaard 0,2 = 20% van de cycluslengte)",
+    "corr_weight": "Stap 2: balans tussen curvevorm (correlatie) en vermogensniveau (MAE); standaard 0,45",
+    "duration_weight": "Stap 4: hoe sterk de duurovereenkomst de eindscore beïnvloedt (standaard 0,22)",
+    "energy_weight": "Stap 4: hoe sterk de energieovereenkomst de eindscore beïnvloedt (standaard 0,22)",
+    "profile_match_min_duration_ratio": "Stap 1: minimale cycluslengte als fractie van de profielduur; standaard 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Stap 1: maximale cycluslengte als fractie van de profielduur; standaard 1,5 (150%)",
+    "keep_min_score": "Stap 2: minimale score om in de race te blijven; standaard 0,1 laat zwakke kandidaten toe, latere stappen kiezen de beste",
+    "dtw_blend": "Stap 3: 0 = alleen kernscore, 1 = alleen DTW-score, 0,5 = gelijke mix (standaard)",
+    "dtw_ensemble_w": "Stap 3 (ensemble-modus): gewicht op geschaalde L1 vs afgeleid DTW; standaard 0,7 geeft voorkeur aan niveauafhankelijke herkenning",
+    "dtw_ddtw_scale": "Stap 3: DDTW-halfsaturatieafstand; kleiner = gevoeliger voor vorm (standaard 30)",
+    "dtw_refine_top_n": "Stap 3: kandidaten die door DTW opnieuw beoordeeld worden; verhoog naar 7-9 als het juiste profiel op de 4e-5e plaats staat (standaard 5)",
+    "duration_scale": "Stap 4: log-verhouding waarbij de duurovereenkomst halveert; kleiner = strengere straf (standaard 0,175)",
+    "energy_scale": "Stap 4: log-verhouding waarbij de energieovereenkomst halveert; kleiner = strengere straf (standaard 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Af en toe kort tuimelen na voltooiing om rimpels te verminderen.",
@@ -1346,25 +1346,32 @@
       "doc": "Verdeel elke lopende cyclus in fasen (verwarmen, wassen, centrifugeren) en begroot de resterende tijd per fase, gemengd met de klassieke schatting - vroeg in de cyclus leunend op het fasebudget en tegen het einde op de klassieke schatting. Dit stemt het aftellen af op hoe lang uw machine daadwerkelijk verwarmt en draait, wat het meest merkbaar is in de eerste helft van een cyclus. Uit = alleen de klassieke schatting. Alleen de weergave van de resterende tijd wordt beïnvloed; programma-matching en cyclusdetectie blijven ongewijzigd."
     },
     "keep_min_score": {
-      "label": "Min. matchscore"
+      "label": "Min. matchscore",
+      "doc": "Minimale gelijkenisscore die een kandidaat nodig heeft om in de race te blijven. De standaard 0,1 is bewust permissief - het laat zelfs zwakke kandidaten toe en vertrouwt op latere stappen om de beste overeenkomst te vinden. Verhoog het om onwaarschijnlijke profielen eerder te verwijderen; verlaag het om de initiële kandidatenpool te verbreden."
     },
     "dtw_blend": {
-      "label": "Warp-mengfactor"
+      "label": "Warp-mengfactor",
+      "doc": "Hoeveel de tijdvervormingsscore (DTW) de kernscore van stap 2 vervangt. 0 = gebruik alleen de stap 2-score, 1 = gebruik alleen de DTW-score, 0,5 (standaard) = gelijke mix. Verhoog het om meer te vertrouwen op warp-uitlijning wanneer programma's vergelijkbare vermogensniveaus maar verschillende tijdpatronen hebben."
     },
     "dtw_ensemble_w": {
-      "label": "Warp-ensemblemix"
+      "label": "Warp-ensemblemix",
+      "doc": "In ensemble DTW-modus (de standaard), het gewicht op geschaalde L1 versus afgeleid DTW (DDTW). 1,0 = alleen geschaalde L1, 0 = alleen DDTW, 0,7 = standaard. De geschaalde L1-variant vergelijkt vermogensniveaus; de afgeleide variant reageert op hoe vermogen verandert over de tijd. Ensemble mengt beide."
     },
     "dtw_ddtw_scale": {
-      "label": "Afgeleide warp-schaal"
+      "label": "Afgeleide warp-schaal",
+      "doc": "Halfsaturatieafstand voor de afgeleide DTW-beoordeling. De score halveert wanneer de DDTW-afstand gelijk is aan deze waarde. Kleiner = gevoeliger voor vormverschillen. Standaard 30 is gekalibreerd op typische vermogenssporen van apparaten. Beïnvloedt alleen ensemble- en ddtw DTW-modi."
     },
     "dtw_refine_top_n": {
-      "label": "Warp-verfijningsaantal"
+      "label": "Warp-verfijningsaantal",
+      "doc": "Hoeveel top stap 2-kandidaten opnieuw worden beoordeeld door DTW. DTW is duurder en wordt daarom alleen toegepast op de beste N kandidaten. Standaard 5. Verhoog het (naar 7-9) als het juiste profiel na stap 2 soms alleen de 4e of 5e plaats bereikt - DTW kan het redden. Verlagen versnelt het matchen iets."
     },
     "duration_scale": {
-      "label": "Duur-scherpte"
+      "label": "Duur-scherpte",
+      "doc": "Scherpte van de duurovereenkomststraf in stap 4. Dit is de log-verhouding waarbij de overeenkomstscore halveert. Kleiner = strenger: een duurafwijking kost meer punten. Standaard 0,175 komt overeen met ongeveer 18% duurtolerантie op half gewicht. Combineer met Duurgewicht."
     },
     "energy_scale": {
-      "label": "Energie-scherpte"
+      "label": "Energie-scherpte",
+      "doc": "Scherpte van de energieovereenkomststraf. Kleiner = strenger: een energiemismatch kost meer punten. Standaard 0,25 is bewust meer vergevingsgezind dan Duurscherpte, omdat energie varieert met de belasting. Combineer met Energiegewicht."
     }
   },
   "setting_group": {

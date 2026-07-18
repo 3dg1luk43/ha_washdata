@@ -876,19 +876,19 @@
     "start_duration_threshold": "Segundos por encima del umbral para confirmar el inicio",
     "start_threshold_w": "Vatios mínimos para contar como iniciado",
     "stop_threshold_w": "Por debajo de esto, la máquina cuenta como apagada",
-    "dtw_bandwidth": "Cuánta deformación temporal permite la coincidencia de forma",
-    "corr_weight": "Peso de la forma de la curva frente al nivel de potencia en la coincidencia",
-    "duration_weight": "Cuánto influye la concordancia de duración en la coincidencia",
-    "energy_weight": "Cuánto influye la concordancia de energía en la coincidencia",
-    "profile_match_min_duration_ratio": "Ciclo más corto (frente al perfil) que aún puede coincidir",
-    "profile_match_max_duration_ratio": "Ciclo más largo (frente al perfil) que aún puede coincidir",
-    "keep_min_score": "Etapa 2: puntuación de similitud mínima conservada como candidata",
-    "dtw_blend": "Etapa 3: cuánto el score Warp reemplaza al score central (0-1)",
-    "dtw_ensemble_w": "Etapa 3: mezcla de Warp escalado vs derivado en modo ensemble (0-1)",
-    "dtw_ddtw_scale": "Etapa 3: escala de distancia del Warp derivado",
-    "dtw_refine_top_n": "Etapa 3: cuántos candidatos principales el Warp reevalúa",
-    "duration_scale": "Etapa 4: nitidez de la concordancia de duración (menor = más estricto)",
-    "energy_scale": "Etapa 4: nitidez de la concordancia de energía (menor = más estricto)"
+    "dtw_bandwidth": "Etapa 3: banda de deformación Sakoe-Chiba (0 = DTW desactivado; predeterminado 0,2 = 20% de la longitud del ciclo)",
+    "corr_weight": "Etapa 2: equilibrio entre la forma de la curva (correlación) y el nivel de potencia (MAE); predeterminado 0,45",
+    "duration_weight": "Etapa 4: cuánto influye la concordancia de duración en la puntuación final (predeterminado 0,22)",
+    "energy_weight": "Etapa 4: cuánto influye la concordancia de energía en la puntuación final (predeterminado 0,22)",
+    "profile_match_min_duration_ratio": "Etapa 1: duración mínima del ciclo como fracción de la duración del perfil; predeterminado 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Etapa 1: duración máxima del ciclo como fracción de la duración del perfil; predeterminado 1,5 (150%)",
+    "keep_min_score": "Etapa 2: puntuación mínima para seguir en la carrera; el valor predeterminado 0,1 admite coincidencias débiles, las etapas posteriores seleccionan la mejor",
+    "dtw_blend": "Etapa 3: 0 = solo puntuación central, 1 = solo puntuación DTW, 0,5 = mezcla igual (predeterminado)",
+    "dtw_ensemble_w": "Etapa 3 (modo ensemble): peso en L1 escalado frente a DTW derivado; el predeterminado 0,7 favorece la sensibilidad al nivel",
+    "dtw_ddtw_scale": "Etapa 3: distancia de semisaturación DDTW; menor = mayor sensibilidad a la forma (predeterminado 30)",
+    "dtw_refine_top_n": "Etapa 3: candidatos que DTW vuelve a puntuar; aumente a 7-9 si el perfil correcto se sitúa en 4.º-5.º lugar (predeterminado 5)",
+    "duration_scale": "Etapa 4: log-razón donde la concordancia de duración se reduce a la mitad; menor = penalización más estricta (predeterminado 0,175)",
+    "energy_scale": "Etapa 4: log-razón donde la concordancia de energía se reduce a la mitad; menor = penalización más estricta (predeterminado 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Volteos breves ocasionales tras finalizar para evitar que la ropa se arrugue.",
@@ -1346,25 +1346,32 @@
       "doc": "Divide cada ciclo en curso en fases (calentamiento, lavado, centrifugado) y reparte el tiempo restante por fase, combinado con la estimación clásica - apoyándose en el reparto por fases al principio del ciclo y en la estimación clásica cerca del final. Esto personaliza la cuenta atrás según cuánto calienta y funciona realmente tu máquina, lo que se nota más en la primera mitad del ciclo. Desactivado = solo la estimación clásica. Solo se ve afectada la visualización del tiempo restante; la coincidencia de programas y la detección de ciclos no cambian."
     },
     "keep_min_score": {
-      "label": "Score mín de coincidencia"
+      "label": "Score mín de coincidencia",
+      "doc": "Puntuación de similitud mínima que necesita un candidato para seguir en la carrera de coincidencia. El valor predeterminado 0,1 es deliberadamente permisivo - admite incluso candidatos débiles y se basa en etapas posteriores para encontrar la mejor coincidencia. Auméntelo para eliminar perfiles improbables antes; redúzcalo para ampliar el pool de candidatos inicial."
     },
     "dtw_blend": {
-      "label": "Fusión Warp"
+      "label": "Fusión Warp",
+      "doc": "Cuánto reemplaza la puntuación de alineación por deformación temporal (DTW) a la puntuación central de la Etapa 2. 0 = usar solo la puntuación de la Etapa 2, 1 = usar solo la puntuación DTW, 0,5 (predeterminado) = mezcla igual. Auméntelo para confiar más en el alineamiento Warp cuando los programas tienen niveles de potencia similares pero diferentes patrones de temporización."
     },
     "dtw_ensemble_w": {
-      "label": "Mix ensemble Warp"
+      "label": "Mix ensemble Warp",
+      "doc": "En el modo DTW ensemble (el predeterminado), el peso en L1 escalado frente a DTW derivado (DDTW). 1,0 = todo L1 escalado, 0 = todo DDTW, 0,7 = predeterminado. La variante L1 escalado compara niveles de potencia; la variante derivada reacciona a cómo cambia la potencia con el tiempo. Ensemble combina ambas."
     },
     "dtw_ddtw_scale": {
-      "label": "Escala Warp derivada"
+      "label": "Escala Warp derivada",
+      "doc": "Distancia de semisaturación para la puntuación DTW derivada. La puntuación se reduce a la mitad cuando la distancia DDTW es igual a este valor. Menor = más sensible a las diferencias de forma. El predeterminado 30 está calibrado para trazas de potencia típicas de electrodomésticos. Solo afecta a los modos DTW ensemble y ddtw."
     },
     "dtw_refine_top_n": {
-      "label": "Contador de refinamiento Warp"
+      "label": "Contador de refinamiento Warp",
+      "doc": "Cuántos candidatos principales de la Etapa 2 son repuntuados por DTW. DTW es más costoso, por lo que solo se aplica a los mejores N candidatos. Predeterminado 5. Auméntelo (a 7-9) si el perfil correcto a veces solo alcanza el 4.º o 5.º lugar tras la Etapa 2 - DTW puede rescatarlo. Reducirlo acelera ligeramente la coincidencia."
     },
     "duration_scale": {
-      "label": "Nitidez de duración"
+      "label": "Nitidez de duración",
+      "doc": "Precisión de la penalización por concordancia de duración en la Etapa 4. Este es el log-ratio en el que el score de concordancia se reduce a la mitad. Menor = más estricto: una discordancia de duración penaliza más. El predeterminado 0,175 corresponde a aproximadamente el 18% de tolerancia de duración a medio peso. Combinar con Peso de duración."
     },
     "energy_scale": {
-      "label": "Nitidez de energía"
+      "label": "Nitidez de energía",
+      "doc": "Precisión de la penalización por concordancia de energía. Menor = más estricto: una discordancia de energía penaliza más. El predeterminado 0,25 es intencionalmente más indulgente que la Precisión de duración, porque la energía varía con la carga. Combinar con Peso de energía."
     }
   },
   "setting_group": {

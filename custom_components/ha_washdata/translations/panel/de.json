@@ -876,19 +876,19 @@
     "start_duration_threshold": "Sekunden über dem Schwellenwert, um den Start zu bestätigen",
     "start_threshold_w": "Mindestwattzahl, um als gestartet zu gelten",
     "stop_threshold_w": "Darunter gilt die Maschine als aus",
-    "dtw_bandwidth": "Wie viel Zeitverzerrung der Formabgleich zulässt",
-    "corr_weight": "Gewichtung von Kurvenform gegenüber Leistungspegel bei der Zuordnung",
-    "duration_weight": "Wie stark die Übereinstimmung der Laufzeit die Zuordnung beeinflusst",
-    "energy_weight": "Wie stark die Übereinstimmung des Energieverbrauchs die Zuordnung beeinflusst",
-    "profile_match_min_duration_ratio": "Kürzester Durchlauf (im Vergleich zum Profil), der noch zugeordnet werden darf",
-    "profile_match_max_duration_ratio": "Längster Durchlauf (im Vergleich zum Profil), der noch zugeordnet werden darf",
-    "keep_min_score": "Stufe 2: niedrigster Ähnlichkeitswert, der als Kandidat erhalten bleibt",
-    "dtw_blend": "Stufe 3: Anteil des Warp-Scores am Kern-Score (0-1)",
-    "dtw_ensemble_w": "Stufe 3: Mischverhältnis skalierter vs. abgeleiteter Warp im Ensemble-Modus (0-1)",
-    "dtw_ddtw_scale": "Stufe 3: Skalierung der Ableitungs-Warp-Distanz",
-    "dtw_refine_top_n": "Stufe 3: Anzahl der Top-Kandidaten, die per Warp neu bewertet werden",
-    "duration_scale": "Stufe 4: Trennschärfe der Laufzeitübereinstimmung (kleiner = strenger)",
-    "energy_scale": "Stufe 4: Trennschärfe der Energieübereinstimmung (kleiner = strenger)"
+    "dtw_bandwidth": "Stufe 3: Sakoe-Chiba-Verzerrungsband (0 = DTW aus; Standard 0,2 = 20% der Zykluslänge)",
+    "corr_weight": "Stufe 2: Balance zwischen Kurvenform (Korrelation) und Leistungspegel (MAE); Standard 0,45",
+    "duration_weight": "Stufe 4: wie stark die Dauerübereinstimmung den Endscore beeinflusst (Standard 0,22)",
+    "energy_weight": "Stufe 4: wie stark die Energieübereinstimmung den Endscore beeinflusst (Standard 0,22)",
+    "profile_match_min_duration_ratio": "Stufe 1: minimale Zyklusdauer als Bruchteil der Profildauer; Standard 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Stufe 1: maximale Zyklusdauer als Bruchteil der Profildauer; Standard 1,5 (150%)",
+    "keep_min_score": "Stufe 2: Mindest-Score, um im Auswahlverfahren zu bleiben; Standard 0,1 lässt schwache Kandidaten zu, spätere Stufen wählen den besten",
+    "dtw_blend": "Stufe 3: 0 = nur Kernscore, 1 = nur DTW-Score, 0,5 = gleiche Mischung (Standard)",
+    "dtw_ensemble_w": "Stufe 3 (Ensemble-Modus): Gewicht auf skaliertem L1 gegenüber Ableitungs-DTW; Standard 0,7 bevorzugt pegelabhängige Erkennung",
+    "dtw_ddtw_scale": "Stufe 3: DDTW-Halbsättigungsabstand; kleiner = formempfindlicher (Standard 30)",
+    "dtw_refine_top_n": "Stufe 3: per DTW neu bewertete Kandidaten; auf 7-9 erhöhen, wenn das richtige Profil auf Platz 4-5 liegt (Standard 5)",
+    "duration_scale": "Stufe 4: Log-Verhältnis, bei dem die Dauerübereinstimmung halbiert wird; kleiner = strengere Strafe (Standard 0,175)",
+    "energy_scale": "Stufe 4: Log-Verhältnis, bei dem die Energieübereinstimmung halbiert wird; kleiner = strengere Strafe (Standard 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Gelegentliche kurze Trommelumwälzungen nach Abschluss, um Knitterung zu vermeiden.",
@@ -1346,25 +1346,32 @@
       "doc": "Teilt jeden laufenden Zyklus in Phasen auf (Heizen, Waschen, Schleudern) und veranschlagt die verbleibende Zeit pro Phase, gemischt mit der klassischen Schätzung - zu Beginn des Zyklus stützt sie sich auf das Phasenbudget, gegen Ende auf die klassische Schätzung. Dadurch wird der Countdown darauf abgestimmt, wie lange Ihre Maschine tatsächlich heizt und läuft, was in der ersten Hälfte eines Zyklus am deutlichsten spürbar ist. Aus = nur die klassische Schätzung. Betroffen ist ausschließlich die Anzeige der verbleibenden Zeit; Programmabgleich und Zykluserkennung bleiben unverändert."
     },
     "keep_min_score": {
-      "label": "Min. Match-Score"
+      "label": "Min. Match-Score",
+      "doc": "Mindest-Ähnlichkeitsscore, den ein Kandidat benötigt, um im Auswahlverfahren zu bleiben. Der Standard 0,1 ist absichtlich permissiv - er lässt auch schwache Kandidaten zu und verlässt sich auf spätere Stufen, um die beste Übereinstimmung zu finden. Erhöhen, um unwahrscheinliche Profile früher auszuschließen; verringern, um den anfänglichen Kandidatenpool zu erweitern."
     },
     "dtw_blend": {
-      "label": "Warp-Mischgewicht"
+      "label": "Warp-Mischgewicht",
+      "doc": "Wie stark der Zeitverzerrungsscore (DTW) den Kernscore der Stufe 2 ersetzt. 0 = nur Stufe-2-Score, 1 = nur DTW-Score, 0,5 (Standard) = gleiche Mischung. Erhöhen, um sich mehr auf die Warp-Ausrichtung zu verlassen, wenn Programme ähnliche Leistungspegel, aber unterschiedliche Zeitmuster aufweisen."
     },
     "dtw_ensemble_w": {
-      "label": "Warp-Ensemble-Anteil"
+      "label": "Warp-Ensemble-Anteil",
+      "doc": "Im Ensemble-DTW-Modus (Standard) das Gewicht auf skaliertem L1 gegenüber Ableitungs-DTW (DDTW). 1,0 = nur skaliertes L1, 0 = nur DDTW, 0,7 = Standard. Die skalierte L1-Variante vergleicht Leistungspegel; die Ableitungsvariante reagiert auf Leistungsänderungen im Zeitverlauf. Ensemble kombiniert beide."
     },
     "dtw_ddtw_scale": {
-      "label": "Ableitungs-Warp-Skalierung"
+      "label": "Ableitungs-Warp-Skalierung",
+      "doc": "Halbsättigungsabstand für die Ableitungs-DTW-Bewertung. Der Score halbiert sich, wenn die DDTW-Distanz diesen Wert erreicht. Kleiner = empfindlicher gegenüber Formunterschieden. Standard 30 ist auf typische Geräteleistungsverläufe kalibriert. Betrifft nur Ensemble- und DDTW-DTW-Modi."
     },
     "dtw_refine_top_n": {
-      "label": "Warp-Verfeinerungsanzahl"
+      "label": "Warp-Verfeinerungsanzahl",
+      "doc": "Anzahl der besten Stufe-2-Kandidaten, die per DTW neu bewertet werden. DTW ist aufwendiger, daher wird es nur auf die besten N Kandidaten angewendet. Standard 5. Erhöhen (auf 7-9), wenn das richtige Profil nach Stufe 2 manchmal nur auf Platz 4 oder 5 landet - DTW kann es noch retten. Verringern beschleunigt das Matching leicht."
     },
     "duration_scale": {
-      "label": "Laufzeit-Trennschärfe"
+      "label": "Laufzeit-Trennschärfe",
+      "doc": "Schärfe der Dauerübereinstimmungsstrafe in Stufe 4. Dies ist das Log-Verhältnis, bei dem der Übereinstimmungsscore halbiert wird. Kleiner = strenger: eine Dauerabweichung schadet mehr. Standard 0,175 entspricht etwa 18% Dauertoleranz beim halben Gewicht. Gemeinsam mit der Dauergewichtung anpassen."
     },
     "energy_scale": {
-      "label": "Energie-Trennschärfe"
+      "label": "Energie-Trennschärfe",
+      "doc": "Schärfe der Energieübereinstimmungsstrafe. Kleiner = strenger: eine Energieabweichung schadet mehr. Standard 0,25 ist absichtlich nachsichtiger als die Dauerschärfe, da Energie lastabhängig schwankt. Gemeinsam mit der Energiegewichtung anpassen."
     }
   },
   "setting_group": {

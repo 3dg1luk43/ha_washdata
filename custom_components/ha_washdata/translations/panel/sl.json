@@ -1322,25 +1322,32 @@
       "doc": "Vsak tekoči cikel razdeli na faze (ogrevanje, pranje, ožemanje) in razporedi preostali čas po fazah, združen s klasično oceno - na začetku cikla se opira na proračun faz, proti koncu pa na klasično oceno. To prilagodi odštevanje temu, kako dolgo se vaša naprava dejansko segreva in deluje, kar je najbolj opazno v prvi polovici cikla. Izklopljeno = samo klasična ocena. Vpliva le na prikaz preostalega časa; ujemanje programov in zaznavanje cikla ostaneta nespremenjena."
     },
     "keep_min_score": {
-      "label": "Min. ocena ujemanja"
+      "label": "Min. ocena ujemanja",
+      "doc": "Minimalna ocena podobnosti, ki jo mora imeti kandidat, da ostane v tekmi za ujemanje. Privzeta vrednost 0,1 je namerno dovoljna - sprejme celo šibke kandidate in se zanaša na kasnejše stopnje za iskanje najboljšega ujemanja. Zvišajte za zgodnejše izločanje malo verjetnih profilov; znižajte za razširitev začetnega nabora kandidatov."
     },
     "dtw_blend": {
-      "label": "Mešanje deformacije"
+      "label": "Mešanje deformacije",
+      "doc": "Koliko DTW ocena poravnave nadomešča osnovno oceno Stopnje 2. 0 = uporabi samo oceno Stopnje 2, 1 = uporabi samo DTW oceno, 0,5 (privzeto) = enakomerno mešanje. Zvišajte za večje zanašanje na poravnavo, ko imajo programi podobne ravni moči, a različne časovne vzorce."
     },
     "dtw_ensemble_w": {
-      "label": "Mešanica kombinacije DTW"
+      "label": "Mešanica kombinacije DTW",
+      "doc": "V kombiniranem načinu DTW (privzetem) je to utež skaliranega L1 v primerjavi z izvedenim DTW (DDTW). 1,0 = vse skalirano L1, 0 = vse DDTW, 0,7 = privzeto. Skalirana varianta L1 primerja ravni moči; izvedena varianta se odziva na spremembe moči skozi čas. Kombinirani način združuje oba."
     },
     "dtw_ddtw_scale": {
-      "label": "Merilo izvedene deformacije"
+      "label": "Merilo izvedene deformacije",
+      "doc": "Razdalja pol-nasičenja za ocenjevanje z izvedenim DTW. Ocena se prepolovi, ko je razdalja DDTW enaka tej vrednosti. Manjša = bolj občutljiva na razlike v obliki. Privzeta vrednost 30 je umerjena za tipične sledilce moči gospodinjskih aparatov. Vpliva samo na kombinirani in ddtw način DTW."
     },
     "dtw_refine_top_n": {
-      "label": "Stevilo natancnejših kandidatov"
+      "label": "Stevilo natancnejših kandidatov",
+      "doc": "Koliko najboljših kandidatov Stopnje 2 DTW znova oceni. DTW je dražji, zato se uporablja samo za N najboljših kandidatov. Privzeto 5. Zvišajte (na 7-9), če pravi profil po Stopnji 2 včasih doseže samo 4. ali 5. mesto - DTW ga lahko reši. Znižanje rahlo pospeši ujemanje."
     },
     "duration_scale": {
-      "label": "Ostrina trajanja"
+      "label": "Ostrina trajanja",
+      "doc": "Ostrina kazni za neujemanje trajanja na Stopnji 4. To je logaritmično razmerje, pri katerem se ocena ujemanja prepolovi. Manjše = strožje: neujemanje trajanja bolj znižuje oceno. Privzeta vrednost 0,175 ustreza toleranci trajanja približno 18% pri pol-uteži. Kombinirajte z Utežjo trajanja."
     },
     "energy_scale": {
-      "label": "Ostrina energije"
+      "label": "Ostrina energije",
+      "doc": "Ostrina kazni za neujemanje energije na Stopnji 4. Manjše = strožje: neujemanje energije bolj znižuje oceno. Privzeta vrednost 0,25 je namerno bolj dovoljna od Ostrine trajanja, ker energija niha z obremenitvijo. Kombinirajte z Utežjo energije."
     }
   },
   "setting_group": {
@@ -1712,19 +1719,19 @@
     "start_duration_threshold": "Sekunde nad pragom za potrditev zagona",
     "start_threshold_w": "Najmanjša moč v vatih, da šteje kot zagnano",
     "stop_threshold_w": "Pod to vrednostjo naprava šteje kot izklopljena",
-    "dtw_bandwidth": "Koliko časovnega raztegovanja dovoljuje ujemanje oblike",
-    "corr_weight": "Utež oblike krivulje glede na raven moči pri ujemanju",
-    "duration_weight": "Koliko skladnost trajanja vpliva na ujemanje",
-    "energy_weight": "Koliko skladnost porabe energije vpliva na ujemanje",
-    "profile_match_min_duration_ratio": "Najkrajše izvajanje (glede na profil), ki se še lahko ujema",
-    "profile_match_max_duration_ratio": "Najdaljše izvajanje (glede na profil), ki se še lahko ujema",
-    "keep_min_score": "Stopnja 2: najnižja ocena podobnosti obdržana kot kandidat",
-    "dtw_blend": "Stopnja 3: koliko ocena DTW nadomesti osnovno oceno (0-1)",
-    "dtw_ensemble_w": "Stopnja 3: razmerje skalirane in izvedene deformacije v nacinu kombinacije (0-1)",
-    "dtw_ddtw_scale": "Stopnja 3: merilo razdalje izvedene deformacije",
-    "dtw_refine_top_n": "Stopnja 3: koliko najboljših kandidatov DTW znova vrednoti",
-    "duration_scale": "Stopnja 4: ostrina ujemanja trajanja (manjše = strožje)",
-    "energy_scale": "Stopnja 4: ostrina ujemanja energije (manjše = strožje)"
+    "dtw_bandwidth": "Stopnja 3: deformacijski pas Sakoe-Chiba (0 = DTW izklopljen; privzeto 0,2 = 20% dolžine cikla)",
+    "corr_weight": "Stopnja 2: ravnovesje med obliko krivulje (korelacija) in ravnijo moči (MAE); privzeto 0,45",
+    "duration_weight": "Stopnja 4: kako močno ujemanje trajanja vpliva na končno oceno (privzeto 0,22)",
+    "energy_weight": "Stopnja 4: kako močno ujemanje energije vpliva na končno oceno (privzeto 0,22)",
+    "profile_match_min_duration_ratio": "Stopnja 1: minimalna dolžina cikla kot del trajanja profila; privzeto 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Stopnja 1: maksimalna dolžina cikla kot del trajanja profila; privzeto 1,5 (150%)",
+    "keep_min_score": "Stopnja 2: minimalna ocena za ostanok v tekmi; privzeto 0,1 sprejme šibka ujemanja, kasnejše stopnje izberejo najboljše",
+    "dtw_blend": "Stopnja 3: 0 = samo osnovna ocena, 1 = samo DTW ocena, 0,5 = enakomerno mešanje (privzeto)",
+    "dtw_ensemble_w": "Stopnja 3 (kombinirani način): utež skaliranega L1 v primerjavi z izvedenim DTW; privzeto 0,7 daje prednost ravni",
+    "dtw_ddtw_scale": "Stopnja 3: razdalja pol-nasičenja DDTW; manjša = bolj občutljiva na obliko (privzeto 30)",
+    "dtw_refine_top_n": "Stopnja 3: kandidati, ki jih DTW znova oceni; zvišajte na 7-9, če pravi profil zasede 4.-5. mesto (privzeto 5)",
+    "duration_scale": "Stopnja 4: logaritmično razmerje, pri katerem se ujemanje trajanja prepolovi; manjše = strožja kazen (privzeto 0,175)",
+    "energy_scale": "Stopnja 4: logaritmično razmerje, pri katerem se ujemanje energije prepolovi; manjše = strožja kazen (privzeto 0,25)"
   },
   "col": {
     "profile_tip": "Ime ujemajočega programa. Brez oznake pomeni, da se ob koncu cikla ni ujemal noben profil.",

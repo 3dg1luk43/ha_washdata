@@ -876,19 +876,19 @@
     "start_duration_threshold": "Sekunteja kynnyksen yläpuolella käynnistyksen vahvistamiseksi",
     "start_threshold_w": "Vähimmäiswatit, jotta lasketaan käynnistyneeksi",
     "stop_threshold_w": "Tämän alapuolella laite lasketaan pois päältä olevaksi",
-    "dtw_bandwidth": "Kuinka paljon ajan venytystä muodon täsmäytys sallii",
-    "corr_weight": "Käyrän muodon ja tehotason painotus täsmäytyksessä",
-    "duration_weight": "Kuinka paljon keston yhteensopivuus vaikuttaa täsmäytykseen",
-    "energy_weight": "Kuinka paljon energian yhteensopivuus vaikuttaa täsmäytykseen",
-    "profile_match_min_duration_ratio": "Lyhin sykli (profiiliin verrattuna), joka voi vielä täsmätä",
-    "profile_match_max_duration_ratio": "Pisin sykli (profiiliin verrattuna), joka voi vielä täsmätä",
-    "keep_min_score": "Vaihe 2: alin samankaltaisuuspisteet, jotka säilytetään ehdokkaana",
-    "dtw_blend": "Vaihe 3: kuinka paljon DTW-pisteet korvaavat ydinpisteet (0-1)",
-    "dtw_ensemble_w": "Vaihe 3: skaalatun ja derivatiivisen DTW:n sekoitus ensemble-tilassa (0-1)",
-    "dtw_ddtw_scale": "Vaihe 3: derivatiivisen DTW:n etäisyysskala",
-    "dtw_refine_top_n": "Vaihe 3: kuinka monta parasta ehdokasta DTW pisteyttää uudelleen",
-    "duration_scale": "Vaihe 4: keston vastaavuuden tarkkuus (pienempi = tiukempi)",
-    "energy_scale": "Vaihe 4: energian vastaavuuden tarkkuus (pienempi = tiukempi)"
+    "dtw_bandwidth": "Vaihe 3: Sakoe-Chiba-ajankäyristyskaista (0 = DTW pois; oletus 0,2 = 20% syklinpituudesta)",
+    "corr_weight": "Vaihe 2: tasapaino käyrän muodon (korrelaatio) ja tehotason (MAE) välillä; oletus 0,45",
+    "duration_weight": "Vaihe 4: kuinka vahvasti keston yhdenmukaisuus vaikuttaa lopullisiin pisteisiin (oletus 0,22)",
+    "energy_weight": "Vaihe 4: kuinka vahvasti energian yhdenmukaisuus vaikuttaa lopullisiin pisteisiin (oletus 0,22)",
+    "profile_match_min_duration_ratio": "Vaihe 1: lyhin sykli profiilinkeston murto-osana; oletus 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Vaihe 1: pisin sykli profiilinkeston murto-osana; oletus 1,5 (150%)",
+    "keep_min_score": "Vaihe 2: alin pisteet pysyäkseen mukana; oletus 0,1 sallii heikot ehdokkaat, myöhemmät vaiheet valitsevat parhaan",
+    "dtw_blend": "Vaihe 3: 0 = vain ydinpisteet, 1 = vain DTW-pisteet, 0,5 = tasainen sekoitus (oletus)",
+    "dtw_ensemble_w": "Vaihe 3 (ensemble-tila): skaloidun L1 paino vs. derivatiivinen DTW; oletus 0,7 suosii tasonhavainnoivaa",
+    "dtw_ddtw_scale": "Vaihe 3: DDTW:n puolikyllästymisetäisyys; pienempi = herkempi muodon eroille (oletus 30)",
+    "dtw_refine_top_n": "Vaihe 3: ehdokkaat joille DTW laskee pisteet uudelleen; nosta 7-9:ään jos oikea profiili sijoittuu 4.-5. (oletus 5)",
+    "duration_scale": "Vaihe 4: log-suhde jossa keston yhdenmukaisuus puolittuu; pienempi = tiukempi rangaistus (oletus 0,175)",
+    "energy_scale": "Vaihe 4: log-suhde jossa energian yhdenmukaisuus puolittuu; pienempi = tiukempi rangaistus (oletus 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Satunnaisia lyhyitä rumpujaksia valmistumisen jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
@@ -1346,25 +1346,32 @@
       "doc": "Jaa jokainen käynnissä oleva sykli vaiheisiin (lämmitys, pesu, linkous) ja budjetoi jäljellä oleva aika vaihekohtaisesti, yhdistettynä klassiseen arvioon - nojaten syklin alkuvaiheessa vaihebudjettiin ja lopussa klassiseen arvioon. Tämä mukauttaa laskurin siihen, kuinka kauan koneesi todella lämmittää ja käy, mikä näkyy selvimmin syklin alkupuoliskolla. Pois = vain klassinen arvio. Vaikuttaa vain jäljellä olevan ajan näyttöön; ohjelman täsmäytys ja syklin tunnistus pysyvät ennallaan."
     },
     "keep_min_score": {
-      "label": "Vähim. vastaavuuspisteet"
+      "label": "Vähim. vastaavuuspisteet",
+      "doc": "Alin samankaltaisuuspisteet, jotka ehdokas tarvitsee pysyäkseen täsmäytyksessä mukana. Oletus 0,1 on tarkoituksellisesti salliva – se sallii jopa heikot ehdokkaat ja luottaa myöhempiin vaiheisiin parhaan löytämiseksi. Nosta leikkaamaan epätodennäköiset profiilit aikaisemmin; laske laajentamaan alkuperäistä ehdokaspoolia."
     },
     "dtw_blend": {
-      "label": "DTW-sekoitus"
+      "label": "DTW-sekoitus",
+      "doc": "Kuinka paljon DTW-kohdistuspisteet korvaavat Vaiheen 2 ydinpisteet. 0 = käytä vain Vaiheen 2 pisteitä, 1 = käytä vain DTW-pisteitä, 0,5 (oletus) = tasainen sekoitus. Nosta luottamaan enemmän aikakohdistukseen kun ohjelmilla on samanlaiset tehotasot mutta erilaiset ajoitusmustrit."
     },
     "dtw_ensemble_w": {
-      "label": "DTW-ensemble-miksaus"
+      "label": "DTW-ensemble-miksaus",
+      "doc": "Ensemble-DTW-tilassa (oletus) tämä on skaloidun L1:n paino verrattuna derivatiiviseen DTW:hen (DDTW). 1,0 = vain skaloitu L1, 0 = vain DDTW, 0,7 = oletus. Skaloitu muunnelma vertaa tehotasoja; derivatiivinen reagoi siihen miten teho muuttuu ajan kuluessa. Ensemble yhdistää molemmat."
     },
     "dtw_ddtw_scale": {
-      "label": "Deriv. DTW-skala"
+      "label": "Deriv. DTW-skala",
+      "doc": "Derivatiivisen DTW-pisteytyksen puolikyllästymisetäisyys. Pisteet puolittuvat kun DDTW-etäisyys on yhtä suuri kuin tämä arvo. Pienempi = herkempi muodon eroille. Oletus 30 on kalibroitu tyypillisten laitteiden tehokäyrille. Vaikuttaa vain ensemble- ja ddtw-DTW-tiloihin."
     },
     "dtw_refine_top_n": {
-      "label": "DTW-tarkistusmäärä"
+      "label": "DTW-tarkistusmäärä",
+      "doc": "Kuinka monelle Vaiheen 2 parhaalle ehdokkaalle DTW laskee pisteet uudelleen. DTW on kalliimpaa joten se sovelletaan vain N parhaaseen. Oletus 5. Nosta (7-9:ään) jos oikea profiili pääsee joskus vain 4. tai 5. sijalle Vaiheen 2 jälkeen – DTW voi pelastaa sen. Pienempi arvo nopeuttaa täsmäytystä hieman."
     },
     "duration_scale": {
-      "label": "Keston tarkkuus"
+      "label": "Keston tarkkuus",
+      "doc": "Vaiheen 4 keston yhdenmukaisuusrangaistuksen tarkkuus. Tämä on log-suhde jossa yhdenmukaisuuspisteet puolittuvat. Pienempi = tiukempi: keston poikkeama haittaa enemmän. Oletus 0,175 vastaa noin 18% kestontoleranssia puolipainolla. Yhdistä Kestopaino-asetukseen."
     },
     "energy_scale": {
-      "label": "Energian tarkkuus"
+      "label": "Energian tarkkuus",
+      "doc": "Vaiheen 4 energian yhdenmukaisuusrangaistuksen tarkkuus. Pienempi = tiukempi: energian poikkeama haittaa enemmän. Oletus 0,25 on tarkoituksellisesti sallivampi kuin kestotarkkuus koska energia vaihtelee kuorman mukaan. Yhdistä Energiapaino-asetukseen."
     }
   },
   "setting_group": {

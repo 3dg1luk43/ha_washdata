@@ -876,19 +876,19 @@
     "start_duration_threshold": "Sekundid üle läve käivituse kinnitamiseks",
     "start_threshold_w": "Minimaalne vatt, et lugeda käivitunuks",
     "stop_threshold_w": "Sellest allpool loetakse masin väljalülitatuks",
-    "dtw_bandwidth": "Kui palju ajalist venitamist kuju sobitamine lubab",
-    "corr_weight": "Kõvera kuju vs võimsustaseme kaal sobitamisel",
-    "duration_weight": "Kui palju kestuse kokkulangevus sobitamist mõjutab",
-    "energy_weight": "Kui palju energia kokkulangevus sobitamist mõjutab",
-    "profile_match_min_duration_ratio": "Lühim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada",
-    "profile_match_max_duration_ratio": "Pikim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada",
-    "keep_min_score": "Etapp 2: madalaim sarnasuse skoor, mis säilib kandidaadina",
-    "dtw_blend": "Etapp 3: kui palju DTW-skoor asendab põhiskoori (0-1)",
-    "dtw_ensemble_w": "Etapp 3: skaleeritud ja tuletise DTW segu ensemble-režiimis (0-1)",
-    "dtw_ddtw_scale": "Etapp 3: tuletise DTW kauguse skaala",
-    "dtw_refine_top_n": "Etapp 3: mitu parimat kandidaati DTW ümber hindab",
-    "duration_scale": "Etapp 4: kestuse kokkulangevuse teravus (väiksem = rangem)",
-    "energy_scale": "Etapp 4: energia kokkulangevuse teravus (väiksem = rangem)"
+    "dtw_bandwidth": "Etapp 3: Sakoe-Chiba aja-nihkeriba (0 = DTW väljas; vaikimisi 0,2 = 20% tsükli pikkusest)",
+    "corr_weight": "Etapp 2: tasakaal kõvera kuju (korrelatsioon) ja võimsustaseme (MAE) vahel; vaikimisi 0,45",
+    "duration_weight": "Etapp 4: kui tugevalt kestuse vastavus mõjutab lõppskooris (vaikimisi 0,22)",
+    "energy_weight": "Etapp 4: kui tugevalt energia vastavus mõjutab lõppskooris (vaikimisi 0,22)",
+    "profile_match_min_duration_ratio": "Etapp 1: lühim tsükkel profiili kestuse murdosana; vaikimisi 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Etapp 1: pikim tsükkel profiili kestuse murdosana; vaikimisi 1,5 (150%)",
+    "keep_min_score": "Etapp 2: madalaim skoor võistluses püsimiseks; vaikimisi 0,1 lubab nõrku kandidaate, hilisemad etapid valivad parima",
+    "dtw_blend": "Etapp 3: 0 = ainult põhiskoor, 1 = ainult DTW-skoor, 0,5 = võrdne segu (vaikimisi)",
+    "dtw_ensemble_w": "Etapp 3 (ensemble-režiim): skaleeritud L1 kaal vs tuletise DTW; vaikimisi 0,7 eelistab tasemeteadlikkust",
+    "dtw_ddtw_scale": "Etapp 3: DDTW pool-küllastumiskaugus; väiksem = tundlikum kuju erinevuste suhtes (vaikimisi 30)",
+    "dtw_refine_top_n": "Etapp 3: kandidaadid keda DTW hindab ümber; tõstke 7-9-ni kui õige profiil jõuab 4.-5. kohale (vaikimisi 5)",
+    "duration_scale": "Etapp 4: log-suhe kus kestuse vastavus poolitub; väiksem = rangem karistus (vaikimisi 0,175)",
+    "energy_scale": "Etapp 4: log-suhe kus energia vastavus poolitub; väiksem = rangem karistus (vaikimisi 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Kortsude vähendamiseks tehke aeg-ajalt lühikesi tõmblusi pärast lõpetamist.",
@@ -1346,25 +1346,32 @@
       "doc": "Jaga iga käimasolev tsükkel faasideks (kuumutamine, pesu, tsentrifuugimine) ja eelarvesta järelejäänud aeg faaside kaupa, segatuna klassikalise hinnanguga - toetudes tsükli alguses faasi eelarvele ja lõpu lähedal klassikalisele hinnangule. See kohandab loenduri sellele, kui kaua su masin tegelikult kuumutab ja töötab, mis on kõige märgatavam tsükli esimeses pooles. Väljas = ainult klassikaline hinnang. Mõjutab ainult järelejäänud aja kuva; programmi sobitamine ja tsükli tuvastamine jäävad muutmata."
     },
     "keep_min_score": {
-      "label": "Min vastenduse skoor"
+      "label": "Min vastenduse skoor",
+      "doc": "Madalaim sarnasuskoor, mida kandidaat vajab sobitamisel püsimiseks. Vaikimisi 0,1 on tahtlikult lubav – see lubab isegi nõrku kandidaate ja toetub hilisematele etappidele parima vaste leidmiseks. Tõstke, et kärpida ebatõenäolisi profiile varem; langetage algse kandidaatide hulga laiendamiseks."
     },
     "dtw_blend": {
-      "label": "DTW-segu"
+      "label": "DTW-segu",
+      "doc": "Kui palju DTW-joondamise skoor asendab 2. etapi põhiskoorit. 0 = kasuta ainult 2. etapi skoorit, 1 = kasuta ainult DTW-skoorit, 0,5 (vaikimisi) = võrdne segu. Tõstke, et rohkem toetuda aja-joondamisele, kui programmidel on sarnased võimsustasemed kuid erinevad ajastamismustrid."
     },
     "dtw_ensemble_w": {
-      "label": "DTW ensemble-miks"
+      "label": "DTW ensemble-miks",
+      "doc": "Ensemble-DTW-režiimis (vaikimisi) on see kaal skaleeritud L1 versus tuletise DTW (DDTW). 1,0 = ainult skaleeritud L1, 0 = ainult DDTW, 0,7 = vaikimisi. Skaleeritud variant võrdleb võimsustasemeid; tuletise variant reageerib sellele, kuidas võimsus aja jooksul muutub. Ensemble ühendab mõlemad."
     },
     "dtw_ddtw_scale": {
-      "label": "Tuletise DTW skaala"
+      "label": "Tuletise DTW skaala",
+      "doc": "Pool-küllastumiskaugus tuletise DTW hindamisel. Skoor poolitub, kui DDTW-kaugus võrdub selle väärtusega. Väiksem = tundlikum kuju erinevuste suhtes. Vaikimisi 30 on kalibreeritud tüüpiliste seadmete võimsusjälgedele. Mõjutab ainult ensemble- ja ddtw-DTW-režiime."
     },
     "dtw_refine_top_n": {
-      "label": "DTW täpsustusarv"
+      "label": "DTW täpsustusarv",
+      "doc": "Mitu parimat 2. etapi kandidaati DTW ümber hindab. DTW on kallim, seega rakendatakse seda ainult N parimale. Vaikimisi 5. Tõstke (7-9-ni), kui õige profiil jõuab mõnikord ainult 4. või 5. kohale pärast 2. etappi – DTW saab selle päästa. Madalama väärtusega sobitumine kiireneb veidi."
     },
     "duration_scale": {
-      "label": "Kestuse teravus"
+      "label": "Kestuse teravus",
+      "doc": "4. etapi kestuse vastavuse karistuse teravus. See on log-suhe, mille juures vastavuse skoor poolitub. Väiksem = rangem: kestuse mittevastavus teeb rohkem kahju. Vaikimisi 0,175 vastab ligikaudu 18% kestuse tolerantsile poolkaalu juures. Kasutage koos Kestuse kaaluga."
     },
     "energy_scale": {
-      "label": "Energia teravus"
+      "label": "Energia teravus",
+      "doc": "4. etapi energia vastavuse karistuse teravus. Väiksem = rangem: energia mittevastavus teeb rohkem kahju. Vaikimisi 0,25 on tahtlikult andelikum kui kestuse teravus, kuna energia varieerub koormuse järgi. Kasutage koos Energia kaaluga."
     }
   },
   "setting_group": {

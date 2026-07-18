@@ -829,19 +829,19 @@
     "start_duration_threshold": "Seconds above threshold to confirm start",
     "start_threshold_w": "Minimum watts to count as started",
     "stop_threshold_w": "Below this, machine counts as off",
-    "dtw_bandwidth": "How much time-warping the shape match allows",
-    "corr_weight": "Weight on curve-shape vs power level in the match",
-    "duration_weight": "How much run-length agreement affects the match",
-    "energy_weight": "How much energy agreement affects the match",
-    "profile_match_min_duration_ratio": "Shortest run (vs the profile) still allowed to match",
-    "profile_match_max_duration_ratio": "Longest run (vs the profile) still allowed to match",
-    "keep_min_score": "Stage 2: lowest similarity score kept as a candidate",
-    "dtw_blend": "Stage 3: how much the warp score replaces the core score (0-1)",
-    "dtw_ensemble_w": "Stage 3: scaled vs derivative warp mix in ensemble mode (0-1)",
-    "dtw_ddtw_scale": "Stage 3: derivative warp distance scale",
-    "dtw_refine_top_n": "Stage 3: how many top candidates warp re-scores",
-    "duration_scale": "Stage 4: sharpness of duration agreement (smaller = stricter)",
-    "energy_scale": "Stage 4: sharpness of energy agreement (smaller = stricter)"
+    "dtw_bandwidth": "Stage 3: Sakoe-Chiba warp band (0 = DTW off; default 0.2 = 20% of cycle length)",
+    "corr_weight": "Stage 2: balance between curve shape (correlation) and power level (MAE); default 0.45",
+    "duration_weight": "Stage 4: how strongly run-length agreement affects the final score (default 0.22)",
+    "energy_weight": "Stage 4: how strongly energy agreement affects the final score (default 0.22)",
+    "profile_match_min_duration_ratio": "Stage 1: minimum cycle length as a fraction of profile duration; default 0.1 (10%)",
+    "profile_match_max_duration_ratio": "Stage 1: maximum cycle length as a fraction of profile duration; default 1.5 (150%)",
+    "keep_min_score": "Stage 2: floor score to stay in the race; default 0.1 admits weak matches, later stages pick the best",
+    "dtw_blend": "Stage 3: 0 = core score only, 1 = DTW score only, 0.5 = equal blend (default)",
+    "dtw_ensemble_w": "Stage 3 (ensemble mode): weight on scaled-L1 vs derivative DTW; default 0.7 favours level-aware",
+    "dtw_ddtw_scale": "Stage 3: DDTW half-saturation distance; smaller = more shape-sensitive (default 30)",
+    "dtw_refine_top_n": "Stage 3: candidates DTW re-scores; raise to 7-9 if correct profile ranks 4th-5th (default 5)",
+    "duration_scale": "Stage 4: log-ratio where duration agreement halves; smaller = stricter penalty (default 0.175)",
+    "energy_scale": "Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)"
   },
   "phase_desc": {
     "anti_crease": "Occasional short tumbles after completion to reduce wrinkles.",
@@ -1299,25 +1299,32 @@
       "label": "Phase-aware time remaining"
     },
     "keep_min_score": {
-      "label": "Min Match Score"
+      "label": "Min Match Score",
+      "doc": "Minimum similarity score a candidate needs to stay in the match race. The default 0.1 is deliberately permissive - it admits even weak candidates and relies on later stages to find the best match. Raise it to prune unlikely profiles earlier; lower it to widen the initial candidate pool."
     },
     "dtw_blend": {
-      "label": "Warp Blend"
+      "label": "Warp Blend",
+      "doc": "How much the time-warp (DTW) alignment score replaces the Stage 2 core score. 0 = use only the Stage 2 score, 1 = use only the DTW score, 0.5 (default) = equal blend. Raise it to rely more on warp alignment when programs have similar power levels but different timing patterns."
     },
     "dtw_ensemble_w": {
-      "label": "Warp Ensemble Mix"
+      "label": "Warp Ensemble Mix",
+      "doc": "In ensemble DTW mode (the default), the weight on scaled L1 versus derivative DTW (DDTW). 1.0 = all scaled-L1, 0 = all DDTW, 0.7 = default. The scaled-L1 variant compares power levels; the derivative variant reacts to how power changes over time. Ensemble blends both."
     },
     "dtw_ddtw_scale": {
-      "label": "Derivative Warp Scale"
+      "label": "Derivative Warp Scale",
+      "doc": "Half-saturation distance for derivative DTW scoring. The score halves when the DDTW distance equals this value. Smaller = more sensitive to shape differences. Default 30 is calibrated to typical appliance power traces. Only affects ensemble and ddtw DTW modes."
     },
     "dtw_refine_top_n": {
-      "label": "Warp Refine Count"
+      "label": "Warp Refine Count",
+      "doc": "How many top Stage 2 candidates are re-scored by DTW. DTW is more expensive so it is only applied to the best N candidates. Default 5. Raise it (to 7-9) if the correct profile sometimes only reaches 4th or 5th place after Stage 2 - DTW can rescue it. Lowering speeds up matching slightly."
     },
     "duration_scale": {
-      "label": "Duration Sharpness"
+      "label": "Duration Sharpness",
+      "doc": "Sharpness of the Stage 4 duration agreement penalty. This is the log-ratio at which the agreement score halves. Smaller = stricter: a duration mismatch hurts more. Default 0.175 corresponds to roughly 18% duration tolerance at half-weight. Pair with Duration Weight."
     },
     "energy_scale": {
-      "label": "Energy Sharpness"
+      "label": "Energy Sharpness",
+      "doc": "Sharpness of the Stage 4 energy agreement penalty. Smaller = stricter: an energy mismatch hurts more. Default 0.25 is intentionally more forgiving than Duration Sharpness because energy varies with load. Pair with Energy Weight."
     }
   },
   "setting_group": {

@@ -1322,25 +1322,32 @@
       "doc": "Rozdelí každý bežiaci cyklus do fáz (ohrev, pranie, odstreďovanie) a rozpočíta zostávajúci čas na jednotlivé fázy, zmiešaný s klasickým odhadom - na začiatku cyklu sa opiera o rozpočet fáz a ku koncu o klasický odhad. Prispôsobí odpočet tomu, ako dlho sa váš spotrebič skutočne ohrieva a beží, čo je najviac badateľné v prvej polovici cyklu. Vypnuté = iba klasický odhad. Ovplyvnené je len zobrazenie zostávajúceho času; zhoda programov a detekcia cyklu sa nemenia."
     },
     "keep_min_score": {
-      "label": "Min. skóre zhody"
+      "label": "Min. skóre zhody",
+      "doc": "Minimálne skóre podobnosti, ktoré musí mať kandidát, aby zostal v závode o zhodu. Predvolená hodnota 0,1 je zámerne benevolentná - pripúšťa aj slabých kandidátov a spolieha sa na neskoršie fázy pri výbere najlepšej zhody. Zvýšte ju pre skoršie vyradenie nepravdepodobných profilov; znížte ju pre rozšírenie počiatočnej skupiny kandidátov."
     },
     "dtw_blend": {
-      "label": "Miešanie deformácie"
+      "label": "Miešanie deformácie",
+      "doc": "Ako veľmi skóre zarovnania DTW nahrádza základné skóre Fázy 2. 0 = použite iba skóre Fázy 2, 1 = použite iba skóre DTW, 0,5 (predvolené) = rovnaké miešanie. Zvýšte, ak chcete viac spoliehať na zarovnanie, keď majú programy podobné úrovne výkonu, ale rôzne časové vzory."
     },
     "dtw_ensemble_w": {
-      "label": "Mix kombinácie DTW"
+      "label": "Mix kombinácie DTW",
+      "doc": "V kombinačnom režime DTW (predvolenom) je to váha škálovaného L1 oproti derivátneho DTW (DDTW). 1,0 = iba škálované L1, 0 = iba DDTW, 0,7 = predvolené. Škálovaná varianta L1 porovnáva úrovne výkonu; derivátna varianta reaguje na zmeny výkonu v čase. Kombinácia spája obe."
     },
     "dtw_ddtw_scale": {
-      "label": "Škála derivátnej deformácie"
+      "label": "Škála derivátnej deformácie",
+      "doc": "Vzdialenosť polosaturácie pre hodnotenie derivátnym DTW. Skóre sa zníži na polovicu, keď sa vzdialenosť DDTW rovná tejto hodnote. Menšia = citlivejšia na rozdiely v tvare. Predvolená hodnota 30 je kalibrovaná pre typické priebehy výkonu spotrebičov. Ovplyvňuje iba kombinačný a ddtw režim DTW."
     },
     "dtw_refine_top_n": {
-      "label": "Pocet spresnenych kandidátov"
+      "label": "Pocet spresnenych kandidátov",
+      "doc": "Koľko najlepších kandidátov z Fázy 2 je prehodnotených DTW. DTW je nákladnejší, takže sa používa iba pre N najlepších kandidátov. Predvolených 5. Zvýšte (na 7-9), ak správny profil po Fáze 2 niekedy dosiahne iba 4. alebo 5. miesto - DTW ho môže zachrániť. Zníženie mierne urýchli porovnávanie."
     },
     "duration_scale": {
-      "label": "Ostrost doby trvania"
+      "label": "Ostrost doby trvania",
+      "doc": "Ostrosť penalizácie za nezhodu dĺžky trvania vo Fáze 4. Je to logaritmický pomer, pri ktorom sa skóre zhody zníži na polovicu. Menší = prísnejší: nezhoda dĺžky trvania viac znižuje skóre. Predvolená hodnota 0,175 zodpovedá približne 18% tolerancii dĺžky trvania pri polovičnej váhe. Kombinujte s Váhou dĺžky trvania."
     },
     "energy_scale": {
-      "label": "Ostrost energie"
+      "label": "Ostrost energie",
+      "doc": "Ostrosť penalizácie za nezhodu energie vo Fáze 4. Menší = prísnejší: nezhoda energie viac znižuje skóre. Predvolená hodnota 0,25 je zámerne benevolentnejšia ako Ostrosť dĺžky trvania, pretože energia sa líši podľa záťaže. Kombinujte s Váhou energie."
     }
   },
   "setting_group": {
@@ -1712,19 +1719,19 @@
     "start_duration_threshold": "Sekundy nad prahom na potvrdenie spustenia",
     "start_threshold_w": "Minimálny výkon vo wattoch na započítanie spustenia",
     "stop_threshold_w": "Pod touto hodnotou sa stroj počíta ako vypnutý",
-    "dtw_bandwidth": "Aké veľké časové deformácie zhoda tvaru umožňuje",
-    "corr_weight": "Váha tvaru krivky verzus úrovne výkonu pri priraďovaní",
-    "duration_weight": "Ako veľmi zhoda dĺžky trvania ovplyvňuje priradenie",
-    "energy_weight": "Ako veľmi zhoda spotreby energie ovplyvňuje priradenie",
-    "profile_match_min_duration_ratio": "Najkratší beh (oproti profilu), ktorý ešte môže zodpovedať",
-    "profile_match_max_duration_ratio": "Najdlhší beh (oproti profilu), ktorý ešte môže zodpovedať",
-    "keep_min_score": "Fáza 2: najnižšie skóre podobnosti ponechané ako kandidát",
-    "dtw_blend": "Fáza 3: ako veľmi skóre DTW nahrádza základné skóre (0-1)",
-    "dtw_ensemble_w": "Fáza 3: podiel škálovaného vs. derivátneho DTW v režime kombinácie (0-1)",
-    "dtw_ddtw_scale": "Fáza 3: škála vzdialenosti derivátnej deformácie",
-    "dtw_refine_top_n": "Fáza 3: kolko najlepších kandidátov DTW znovu hodnotí",
-    "duration_scale": "Fáza 4: ostrost zhody doby trvania (menšia = prísnejšia)",
-    "energy_scale": "Fáza 4: ostrost zhody energie (menšia = prísnejšia)"
+    "dtw_bandwidth": "Fáza 3: deformačné pásmo Sakoe-Chiba (0 = DTW vypnuté; predvolené 0,2 = 20 % dĺžky cyklu)",
+    "corr_weight": "Fáza 2: rovnováha medzi tvarom krivky (korelácia) a úrovňou výkonu (MAE); predvolené 0,45",
+    "duration_weight": "Fáza 4: ako silno zhoda dĺžky trvania ovplyvňuje výsledné skóre (predvolené 0,22)",
+    "energy_weight": "Fáza 4: ako silno zhoda energie ovplyvňuje výsledné skóre (predvolené 0,22)",
+    "profile_match_min_duration_ratio": "Fáza 1: minimálna dĺžka cyklu ako zlomok dĺžky trvania profilu; predvolené 0,1 (10 %)",
+    "profile_match_max_duration_ratio": "Fáza 1: maximálna dĺžka cyklu ako zlomok dĺžky trvania profilu; predvolené 1,5 (150 %)",
+    "keep_min_score": "Fáza 2: minimálne skóre na zostanie v závode; predvolené 0,1 pripúšťa slabé zhody, neskoršie fázy vyberú najlepšie",
+    "dtw_blend": "Fáza 3: 0 = iba základné skóre, 1 = iba skóre DTW, 0,5 = rovnaké miešanie (predvolené)",
+    "dtw_ensemble_w": "Fáza 3 (režim kombinácie): váha škálovaného L1 oproti derivátneho DTW; predvolené 0,7 uprednostňuje úroveň",
+    "dtw_ddtw_scale": "Fáza 3: vzdialenosť polosaturácie DDTW; menšia = citlivejšia na tvar (predvolené 30)",
+    "dtw_refine_top_n": "Fáza 3: kandidáti, ktorých DTW prehodnotí; zvýšte na 7-9, ak správny profil skončí na 4.-5. mieste (predvolené 5)",
+    "duration_scale": "Fáza 4: logaritmický pomer, pri ktorom sa zhoda dĺžky trvania zníži na polovicu; menší = prísnejšia penalizácia (predvolené 0,175)",
+    "energy_scale": "Fáza 4: logaritmický pomer, pri ktorom sa zhoda energie zníži na polovicu; menší = prísnejšia penalizácia (predvolené 0,25)"
   },
   "col": {
     "profile_tip": "Názov zhodného programu. Bez štítku znamená, že na konci cyklu sa nezhodoval žiadny profil.",

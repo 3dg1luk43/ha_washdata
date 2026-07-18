@@ -1322,25 +1322,32 @@
       "doc": "Bontsa minden futó ciklust fázisokra (fűtés, mosás, centrifugálás), és a hátralévő időt fázisonként ossza be, a klasszikus becsléssel keverve - a ciklus elején a fázisbeosztásra, a vége felé pedig a klasszikus becslésre támaszkodva. Ez a visszaszámlálót ahhoz igazítja, hogy a gépe ténylegesen mennyi ideig fűt és működik, ami leginkább a ciklus első felében figyelhető meg. Ki = csak a klasszikus becslés. Csak a hátralévő idő kijelzését érinti; a program párosítása és a ciklusérzékelés változatlan marad."
     },
     "keep_min_score": {
-      "label": "Min. Egyezési Pontszám"
+      "label": "Min. Egyezési Pontszám",
+      "doc": "A minimális hasonlósági pontszám, amelyre egy jelöltnek szüksége van az egyezési versenyben való maradáshoz. Az alapértelmezett 0.1 szándékosan megengedő - még a gyenge jelölteket is beengedi, és a következő szakaszokra bízza a legjobb egyezés megtalálását. Növelje a valószínűtlen profilok korábbi kizárásához; csökkentse a kezdeti jelöltállomány bővítéséhez."
     },
     "dtw_blend": {
-      "label": "Torzítás Keverék"
+      "label": "Torzítás Keverék",
+      "doc": "Mennyire helyettesíti az időtorzítás (DTW) igazítási pontszám a 2. szakasz alappontszámát. 0 = csak a 2. szakasz pontszáma, 1 = csak a DTW-pontszám, 0.5 (alapértelmezett) = egyenlő keverék. Növelje, hogy jobban támaszkodjon a torzítási igazításra, ha a programoknak hasonló a teljesítményszintjük, de eltérő az időbeli mintájuk."
     },
     "dtw_ensemble_w": {
-      "label": "Torzítás Együttes Mix"
+      "label": "Torzítás Együttes Mix",
+      "doc": "Együttes DTW módban (az alapértelmezett), a súly a skálázott L1 és a derivált DTW (DDTW) között. 1.0 = kizárólag skálázott-L1, 0 = kizárólag DDTW, 0.7 = alapértelmezett. A skálázott-L1 változat a teljesítményszinteket hasonlítja össze; a derivált változat arra reagál, ahogyan a teljesítmény változik az idő során. Az együttes mindkettőt kombinálja."
     },
     "dtw_ddtw_scale": {
-      "label": "Derivált Torzítás Skála"
+      "label": "Derivált Torzítás Skála",
+      "doc": "Féltelítési távolság a derivált DTW pontozáshoz. A pontszám megfeleződik, ha a DDTW-távolság eléri ezt az értéket. Kisebb = érzékenyebb az alakkülönbségekre. Az alapértelmezett 30 a tipikus háztartási gépek teljesítménynyomaihoz van kalibrálva. Csak az együttes és ddtw DTW-módokat érinti."
     },
     "dtw_refine_top_n": {
-      "label": "Torzítás Finomítás Szám"
+      "label": "Torzítás Finomítás Szám",
+      "doc": "Hány legjobb 2. szakasz jelöltet pontozza újra a DTW. A DTW számításigényesebb, ezért csak a legjobb N jelöltre alkalmazzák. Alapértelmezett 5. Növelje (7-9-re), ha a helyes profil néha csak a 4. vagy 5. helyen végez a 2. szakasz után - a DTW meg tudja menteni. A csökkentés enyhén felgyorsítja az egyeztetést."
     },
     "duration_scale": {
-      "label": "Időtartam Élesség"
+      "label": "Időtartam Élesség",
+      "doc": "A 4. szakasz időtartam-egyezési büntetésének élessége. Ez az a logaritmikus arány, amelynél az egyezési pontszám megfeleződik. Kisebb = szigorúbb: egy időtartam-eltérés jobban büntet. Az alapértelmezett 0.175 nagyjából 18%-os időtartam-toleranciának felel meg a félsúlynál. Párosítsa az Időtartam Súlyával."
     },
     "energy_scale": {
-      "label": "Energia Élesség"
+      "label": "Energia Élesség",
+      "doc": "A 4. szakasz energia-egyezési büntetésének élessége. Kisebb = szigorúbb: egy energia-eltérés jobban büntet. Az alapértelmezett 0.25 szándékosan megengedőbb az Időtartam Élességénél, mivel az energia változik a terheléssel. Párosítsa az Energia Súlyával."
     }
   },
   "setting_group": {
@@ -1712,19 +1719,19 @@
     "start_duration_threshold": "A küszöb feletti másodpercek az indulás megerősítéséhez",
     "start_threshold_w": "Minimális wattérték az indulás elismeréséhez",
     "stop_threshold_w": "Ez alatt a gép kikapcsoltnak számít",
-    "dtw_bandwidth": "Mennyi időbeli torzítást engedélyez az alakillesztés",
-    "corr_weight": "A görbe alakjának és a teljesítményszintnek a súlya az illesztésben",
-    "duration_weight": "Mennyire befolyásolja az időtartam egyezése az illesztést",
-    "energy_weight": "Mennyire befolyásolja az energia egyezése az illesztést",
-    "profile_match_min_duration_ratio": "A legrövidebb ciklus (a profilhoz képest), amely még egyezhet",
-    "profile_match_max_duration_ratio": "A leghosszabb ciklus (a profilhoz képest), amely még egyezhet",
-    "keep_min_score": "2. szakasz: jelöltként megtartott legalacsonyabb hasonlósági pontszám",
-    "dtw_blend": "3. szakasz: mennyire helyettesíti a torzítási pontszám az alap pontszámot (0-1)",
-    "dtw_ensemble_w": "3. szakasz: skálázott és derivált torzítás keveréke együttes módban (0-1)",
-    "dtw_ddtw_scale": "3. szakasz: derivált torzítás távolságskálája",
-    "dtw_refine_top_n": "3. szakasz: hány legjobb jelöltet értékel újra a torzítás",
-    "duration_scale": "4. szakasz: az időtartam-egyezés élessége (kisebb = szigorúbb)",
-    "energy_scale": "4. szakasz: az energia-egyezés élessége (kisebb = szigorúbb)"
+    "dtw_bandwidth": "3. szakasz: Sakoe-Chiba torzítási sáv (0 = DTW kikapcsolva; alapértelmezett 0.2 = a ciklushossz 20%-a)",
+    "corr_weight": "2. szakasz: egyensúly a görbe alakja (korreláció) és a teljesítményszint (MAE) között; alapértelmezett 0.45",
+    "duration_weight": "4. szakasz: mennyire befolyásolja a futási idő egyezése a végső pontszámot (alapértelmezett 0.22)",
+    "energy_weight": "4. szakasz: mennyire befolyásolja az energia-egyezés a végső pontszámot (alapértelmezett 0.22)",
+    "profile_match_min_duration_ratio": "1. szakasz: minimális ciklushossz a profil időtartamának törtjeként; alapértelmezett 0.1 (10%)",
+    "profile_match_max_duration_ratio": "1. szakasz: maximális ciklushossz a profil időtartamának törtjeként; alapértelmezett 1.5 (150%)",
+    "keep_min_score": "2. szakasz: minimális pontszám a versenyben maradáshoz; az alapértelmezett 0.1 gyenge egyezéseket is beenged, a következő szakaszok választják ki a legjobbat",
+    "dtw_blend": "3. szakasz: 0 = csak alappontszám, 1 = csak DTW-pontszám, 0.5 = egyenlő keverék (alapértelmezett)",
+    "dtw_ensemble_w": "3. szakasz (együttes mód): súly a skálázott-L1 és derivált DTW között; alapértelmezett 0.7 a szintfüggőt részesíti előnyben",
+    "dtw_ddtw_scale": "3. szakasz: DDTW féltelítési távolság; kisebb = érzékenyebb az alakra (alapértelmezett 30)",
+    "dtw_refine_top_n": "3. szakasz: DTW által újrapontozandó jelöltek; növelje 7-9-re, ha a helyes profil a 4-5. helyen végez (alapértelmezett 5)",
+    "duration_scale": "4. szakasz: logaritmikus arány, ahol az időtartam-egyezés megfeleződik; kisebb = szigorúbb büntetés (alapértelmezett 0.175)",
+    "energy_scale": "4. szakasz: logaritmikus arány, ahol az energia-egyezés megfeleződik; kisebb = szigorúbb büntetés (alapértelmezett 0.25)"
   },
   "col": {
     "profile_tip": "Az egyezést mutató program neve. A címkézetlen azt jelenti, hogy a ciklus végén egyetlen profil sem egyezett.",

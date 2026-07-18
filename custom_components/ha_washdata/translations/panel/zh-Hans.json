@@ -876,19 +876,19 @@
     "start_duration_threshold": "确认启动所需的超阈值秒数",
     "start_threshold_w": "计为启动的最小瓦数",
     "stop_threshold_w": "低于此值机器计为关闭",
-    "dtw_bandwidth": "形状匹配允许的时间扭曲程度",
-    "corr_weight": "匹配中曲线形状与功率水平的权重",
-    "duration_weight": "运行时长的吻合程度对匹配的影响大小",
-    "energy_weight": "能耗吻合程度对匹配的影响大小",
-    "profile_match_min_duration_ratio": "仍可用于匹配的最短运行时长（相对于程序档案）",
-    "profile_match_max_duration_ratio": "仍可用于匹配的最长运行时长（相对于程序档案）",
-    "keep_min_score": "Stage 2: 保留为候选的最低相似度得分",
-    "dtw_blend": "Stage 3: 规整得分替换核心得分的程度 (0-1)",
-    "dtw_ensemble_w": "Stage 3: 集成模式下缩放与导数规整的混合比 (0-1)",
-    "dtw_ddtw_scale": "Stage 3: 导数规整距离尺度",
-    "dtw_refine_top_n": "Stage 3: 规整重新评分的顶部候选数量",
-    "duration_scale": "Stage 4: 时长一致性的锐度（越小越严格）",
-    "energy_scale": "Stage 4: 能耗一致性的锐度（越小越严格）"
+    "dtw_bandwidth": "Stage 3: Sakoe-Chiba 规整带宽 (0 = DTW 关闭; 默认 0.2 = 周期长度的 20%)",
+    "corr_weight": "Stage 2: 曲线形状（相关性）与功率水平（MAE）之间的平衡; 默认 0.45",
+    "duration_weight": "Stage 4: 运行时长一致性对最终得分的影响程度（默认 0.22）",
+    "energy_weight": "Stage 4: 能耗一致性对最终得分的影响程度（默认 0.22）",
+    "profile_match_min_duration_ratio": "Stage 1: 最短允许运行时长占档案时长的比例; 默认 0.1 (10%)",
+    "profile_match_max_duration_ratio": "Stage 1: 最长允许运行时长占档案时长的比例; 默认 1.5 (150%)",
+    "keep_min_score": "Stage 2: 保留在竞争中的最低得分; 默认 0.1 接受弱候选，后续阶段选出最佳",
+    "dtw_blend": "Stage 3: 0 = 仅核心得分，1 = 仅 DTW 得分，0.5 = 等权混合（默认）",
+    "dtw_ensemble_w": "Stage 3 (集成模式): 缩放 L1 对导数 DTW 的权重; 默认 0.7 偏重水平感知",
+    "dtw_ddtw_scale": "Stage 3: DDTW 半饱和距离; 越小对形状越敏感（默认 30）",
+    "dtw_refine_top_n": "Stage 3: DTW 重新评分的候选数量; 若正确档案排在第 4-5 位则调高至 7-9（默认 5）",
+    "duration_scale": "Stage 4: 时长一致性得分减半时的对数比率; 越小惩罚越严格（默认 0.175）",
+    "energy_scale": "Stage 4: 能耗一致性得分减半时的对数比率; 越小惩罚越严格（默认 0.25）"
   },
   "phase_desc": {
     "anti_crease": "完成后偶尔进行短暂的翻滚以减少皱纹。",
@@ -1346,25 +1346,32 @@
       "doc": "将每个运行中的周期分解为多个阶段（加热、洗涤、脱水），按阶段分配剩余时间，并与经典估算相融合：周期早期更依赖阶段分配，接近结束时更依赖经典估算。这会根据您的机器实际加热和运行的时长来个性化倒计时，在周期的前半段效果最明显。关闭 = 仅使用经典估算。仅影响剩余时间显示；程序匹配和周期检测保持不变。"
     },
     "keep_min_score": {
-      "label": "最低匹配得分"
+      "label": "最低匹配得分",
+      "doc": "候选档案留在匹配竞争中所需的最低相似度得分。默认 0.1 有意设置得较宽松，允许弱候选也进入，由后续阶段找出最佳匹配。提高此值可更早淘汰不合适的档案；降低此值可扩大初始候选池。"
     },
     "dtw_blend": {
-      "label": "规整混合"
+      "label": "规整混合",
+      "doc": "时间规整（DTW）对齐得分替换 Stage 2 核心得分的程度。0 = 仅使用 Stage 2 得分，1 = 仅使用 DTW 得分，0.5（默认）= 等权混合。当程序功率水平相近但时序模式不同时，可提高此值以更多依赖规整对齐。"
     },
     "dtw_ensemble_w": {
-      "label": "规整集成混合"
+      "label": "规整集成混合",
+      "doc": "在集成 DTW 模式（默认）下，缩放 L1 与导数 DTW（DDTW）的权重分配。1.0 = 全部缩放-L1，0 = 全部 DDTW，0.7 = 默认。缩放-L1 变体比较功率水平；导数变体对功率如何随时间变化做出响应。集成模式将二者结合。"
     },
     "dtw_ddtw_scale": {
-      "label": "导数规整尺度"
+      "label": "导数规整尺度",
+      "doc": "导数 DTW 评分的半饱和距离。当 DDTW 距离等于此值时，得分减半。越小对形状差异越敏感。默认 30 针对典型家电功率曲线进行了校准。仅影响集成和 ddtw DTW 模式。"
     },
     "dtw_refine_top_n": {
-      "label": "规整精化数量"
+      "label": "规整精化数量",
+      "doc": "DTW 重新评分的 Stage 2 顶部候选数量。由于 DTW 计算代价较高，仅对前 N 个候选应用。默认 5。若正确档案有时在 Stage 2 后只排到第 4 或第 5 位，可调高此值（至 7-9），DTW 能将其拉回。降低此值可略微加速匹配。"
     },
     "duration_scale": {
-      "label": "时长锐度"
+      "label": "时长锐度",
+      "doc": "Stage 4 时长一致性惩罚的锐度。这是一致性得分减半时的对数比率。越小越严格：时长不匹配的惩罚越大。默认 0.175 对应半权重下约 18% 的时长容差。请与时长权重配合使用。"
     },
     "energy_scale": {
-      "label": "能耗锐度"
+      "label": "能耗锐度",
+      "doc": "Stage 4 能耗一致性惩罚的锐度。越小越严格：能耗不匹配的惩罚越大。默认 0.25 有意比时长锐度更宽松，因为能耗会随负荷变化。请与能耗权重配合使用。"
     }
   },
   "setting_group": {

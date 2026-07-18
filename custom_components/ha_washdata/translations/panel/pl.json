@@ -1322,25 +1322,32 @@
       "doc": "Dzieli każdy trwający cykl na fazy (podgrzewanie, pranie, wirowanie) i planuje pozostały czas dla każdej fazy, łącząc go z klasycznym szacowaniem - opierając się na budżecie faz na początku cyklu, a na klasycznym szacowaniu pod koniec. Personalizuje to odliczanie do tego, jak długo urządzenie faktycznie się nagrzewa i pracuje, co jest najbardziej zauważalne w pierwszej połowie cyklu. Wyłączone = tylko klasyczne szacowanie. Wpływa to wyłącznie na wyświetlanie pozostałego czasu; dopasowanie programów i wykrywanie cykli pozostają bez zmian."
     },
     "keep_min_score": {
-      "label": "Min. wynik dopasowania"
+      "label": "Min. wynik dopasowania",
+      "doc": "Minimalny wynik podobieństwa potrzebny kandydatowi, by pozostać w wyścigu dopasowań. Domyślna wartość 0,1 jest celowo łagodna - dopuszcza nawet słabych kandydatów i polega na późniejszych etapach w wyborze najlepszego dopasowania. Zwiększ, by wcześniej odrzucać mało prawdopodobne profile; zmniejsz, by poszerzyć początkową pulę kandydatów."
     },
     "dtw_blend": {
-      "label": "Mieszanie znieksztalcenia"
+      "label": "Mieszanie znieksztalcenia",
+      "doc": "Jak bardzo wynik wyrównania DTW zastępuje wynik główny Etapu 2. 0 = używaj tylko wyniku Etapu 2, 1 = używaj tylko wyniku DTW, 0,5 (domyślnie) = równe mieszanie. Zwiększ, by bardziej polegać na wyrównaniu, gdy programy mają podobne poziomy mocy, ale różne wzorce czasowe."
     },
     "dtw_ensemble_w": {
-      "label": "Mix kombinacji DTW"
+      "label": "Mix kombinacji DTW",
+      "doc": "W trybie kombinacji DTW (domyślnym), waga skalowanego L1 względem pochodnego DTW (DDTW). 1,0 = tylko skalowane L1, 0 = tylko DDTW, 0,7 = domyślnie. Wariant skalowany L1 porównuje poziomy mocy; wariant pochodny reaguje na zmiany mocy w czasie. Kombinacja łączy oba."
     },
     "dtw_ddtw_scale": {
-      "label": "Skala pochodnej DTW"
+      "label": "Skala pochodnej DTW",
+      "doc": "Odległość półnasycenia dla oceniania pochodnym DTW. Wynik spada do połowy, gdy odległość DDTW równa się tej wartości. Mniejsza = większa wrażliwość na różnice kształtu. Domyślna wartość 30 jest skalibrowana do typowych przebiegów mocy urządzeń. Dotyczy tylko trybów DTW kombinacji i ddtw."
     },
     "dtw_refine_top_n": {
-      "label": "Liczba doprecyzowanych kandydatow"
+      "label": "Liczba doprecyzowanych kandydatow",
+      "doc": "Ile najlepszych kandydatów Etapu 2 jest ponownie ocenianych przez DTW. DTW jest kosztowniejszy, więc stosowany jest tylko do N najlepszych kandydatów. Domyślnie 5. Zwiększ (do 7-9), jeśli właściwy profil czasem zajmuje tylko 4. lub 5. miejsce po Etapie 2 - DTW może go uratować. Zmniejszenie nieznacznie przyspiesza dopasowanie."
     },
     "duration_scale": {
-      "label": "Ostrość czasu trwania"
+      "label": "Ostrość czasu trwania",
+      "doc": "Ostrość kary za niezgodność czasu trwania w Etapie 4. To logarytm stosunku, przy którym wynik zgodności spada do połowy. Mniejszy = surowszy: niezgodność czasu trwania bardziej obniża wynik. Domyślna wartość 0,175 odpowiada tolerancji ok. 18% przy połowie wagi. Używaj razem z Wagą Czasu Trwania."
     },
     "energy_scale": {
-      "label": "Ostrość energii"
+      "label": "Ostrość energii",
+      "doc": "Ostrość kary za niezgodność energii w Etapie 4. Mniejszy = surowszy: niezgodność energii bardziej obniża wynik. Domyślna wartość 0,25 jest celowo bardziej łagodna niż Ostrość Czasu Trwania, ponieważ energia zmienia się z obciążeniem. Używaj razem z Wagą Energii."
     }
   },
   "setting_group": {
@@ -1712,19 +1719,19 @@
     "start_duration_threshold": "Sekundy powyżej progu, by potwierdzić start",
     "start_threshold_w": "Minimalna moc w watach, by uznać za rozpoczęty",
     "stop_threshold_w": "Poniżej tej wartości urządzenie liczone jest jako wyłączone",
-    "dtw_bandwidth": "Jak duże zniekształcenie czasowe dopuszcza dopasowanie kształtu",
-    "corr_weight": "Waga kształtu krzywej względem poziomu mocy w dopasowaniu",
-    "duration_weight": "Jak bardzo zgodność czasu trwania wpływa na dopasowanie",
-    "energy_weight": "Jak bardzo zgodność zużycia energii wpływa na dopasowanie",
-    "profile_match_min_duration_ratio": "Najkrótszy przebieg (względem profilu), który nadal może zostać dopasowany",
-    "profile_match_max_duration_ratio": "Najdłuższy przebieg (względem profilu), który nadal może zostać dopasowany",
-    "keep_min_score": "Etap 2: najniższy wynik podobienstwa zachowany jako kandydat",
-    "dtw_blend": "Etap 3: jak bardzo wynik DTW zastepuje wynik główny (0-1)",
-    "dtw_ensemble_w": "Etap 3: proporcja skalowanego do pochodnego DTW w trybie kombinacji (0-1)",
-    "dtw_ddtw_scale": "Etap 3: skala odleglosci pochodnej DTW",
-    "dtw_refine_top_n": "Etap 3: ile najlepszych kandydatow jest ponownie ocenianych przez DTW",
-    "duration_scale": "Etap 4: ostrość zgodnosci czasu trwania (mniejsza = surowsza)",
-    "energy_scale": "Etap 4: ostrość zgodnosci energii (mniejsza = surowsza)"
+    "dtw_bandwidth": "Etap 3: pasmo zniekształcenia Sakoe-Chiba (0 = DTW wyłączony; domyślnie 0,2 = 20% długości cyklu)",
+    "corr_weight": "Etap 2: balans między kształtem krzywej (korelacja) a poziomem mocy (MAE); domyślnie 0,45",
+    "duration_weight": "Etap 4: jak mocno zgodność czasu trwania wpływa na wynik końcowy (domyślnie 0,22)",
+    "energy_weight": "Etap 4: jak mocno zgodność energii wpływa na wynik końcowy (domyślnie 0,22)",
+    "profile_match_min_duration_ratio": "Etap 1: minimalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Etap 1: maksymalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 1,5 (150%)",
+    "keep_min_score": "Etap 2: minimalny wynik, by pozostać w wyścigu; domyślnie 0,1 dopuszcza słabe dopasowania, późniejsze etapy wybierają najlepsze",
+    "dtw_blend": "Etap 3: 0 = tylko wynik główny, 1 = tylko wynik DTW, 0,5 = równe mieszanie (domyślnie)",
+    "dtw_ensemble_w": "Etap 3 (tryb kombinacji): waga skalowanego L1 względem pochodnego DTW; domyślnie 0,7 faworyzuje poziom",
+    "dtw_ddtw_scale": "Etap 3: odległość półnasycenia DDTW; mniejsza = bardziej wrażliwa na kształt (domyślnie 30)",
+    "dtw_refine_top_n": "Etap 3: kandydaci ponownie oceniani przez DTW; zwiększ do 7-9, jeśli właściwy profil zajmuje 4-5 miejsce (domyślnie 5)",
+    "duration_scale": "Etap 4: logarytm stosunku, przy którym zgodność czasu trwania spada do połowy; mniejszy = surowsza kara (domyślnie 0,175)",
+    "energy_scale": "Etap 4: logarytm stosunku, przy którym zgodność energii spada do połowy; mniejszy = surowsza kara (domyślnie 0,25)"
   },
   "col": {
     "profile_tip": "Nazwa dopasowanego programu. Brak etykiety oznacza, że na końcu cyklu nie dopasowano żadnego profilu.",

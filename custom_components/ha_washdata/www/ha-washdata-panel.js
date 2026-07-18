@@ -147,8 +147,8 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Duration Gates', fields: [
       { key: 'profile_match_min_duration_ratio', label: 'Min Duration Ratio', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
         doc: 'Minimum cycle length relative to the profile. 0.9 means a cycle must be at least 90% of the profile duration to match.' },
-      { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.3,
-        doc: 'Maximum cycle length relative to the profile. 1.3 means a cycle must be under 130% of the profile duration to match.' },
+      { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.5,
+        doc: 'Maximum cycle length relative to the profile. 1.5 means a cycle must be under 150% of the profile duration to match.' },
       { key: 'profile_duration_tolerance', label: 'Profile Duration Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.25,
         doc: 'The +/- band around a profile average duration used during matching. 0.25 means a 60 min profile matches 45-75 min cycles.' },
       { key: 'duration_tolerance', label: 'Estimate Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
@@ -319,6 +319,24 @@ for (const sec of _SETTINGS_SECTIONS) {
   const groups = sec.groups || [{ fields: sec.fields }];
   for (const grp of groups) for (const f of (grp.fields || [])) _FIELD_BY_KEY[f.key] = f;
 }
+
+// Default values for playground-only matcher params (code constants, not stored
+// options, so _FIELD_BY_KEY has no entry for them).
+const _PG_MATCH_DEFAULTS = {
+  profile_match_min_duration_ratio: 0.1,
+  profile_match_max_duration_ratio: 1.5,
+  corr_weight: 0.45,
+  keep_min_score: 0.1,
+  dtw_bandwidth: 0.2,
+  dtw_blend: 0.5,
+  dtw_ensemble_w: 0.7,
+  dtw_ddtw_scale: 30,
+  dtw_refine_top_n: 5,
+  duration_weight: 0.22,
+  energy_weight: 0.22,
+  duration_scale: 0.175,
+  energy_scale: 0.25,
+};
 
 // ─── Setting conflict rules ───────────────────────────────────────────────────
 // Each rule describes a cross-parameter invariant. `check(vals)` returns true
@@ -5083,29 +5101,31 @@ class HaWashdataPanel extends HTMLElement {
       ['interrupted_min_seconds', 'Interrupted Min',       's', 'Short cycles flagged as interrupted',          'advanced'],
       ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
       ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
-      ['corr_weight',      'Correlation Weight', '', 'Stage 2: shape-correlation vs MAE weight (0-1; higher = trust shape more)', 'matching'],
-      ['keep_min_score',   'Keep Min Score',     '', 'Stage 2: lowest similarity score kept as a candidate', 'matching'],
-      ['dtw_bandwidth',    'DTW Bandwidth',      '', 'Stage 3: Sakoe-Chiba warping band (0 disables DTW; ~0.15-0.20 typical)', 'matching'],
-      ['dtw_blend',        'DTW Blend',          '', 'Stage 3: how much the DTW score replaces the core score (0-1)', 'matching'],
-      ['dtw_ensemble_w',   'DTW Ensemble Weight','', 'Stage 3: scaled-vs-derivative mix in ensemble mode (0-1)', 'matching'],
-      ['dtw_ddtw_scale',   'DDTW Scale',         '', 'Stage 3: derivative-DTW distance scale', 'matching'],
-      ['dtw_refine_top_n', 'DTW Refine Top-N',   '', 'Stage 3: how many top candidates DTW re-scores', 'matching'],
-      ['duration_weight',  'Duration Weight',    '', 'Stage 4: weight of duration agreement (0-1)', 'matching'],
-      ['energy_weight',    'Energy Weight',      '', 'Stage 4: weight of energy (mean-power) agreement (0-1)', 'matching'],
-      ['duration_scale',   'Duration Scale',     '', 'Stage 4: sharpness of duration agreement (smaller = sharper)', 'matching'],
-      ['energy_scale',     'Energy Scale',       '', 'Stage 4: sharpness of energy agreement (smaller = sharper)', 'matching'],
+      ['corr_weight',      'Correlation Weight', '', 'Stage 2: balance between curve shape (correlation) and power level (MAE); default 0.45', 'matching'],
+      ['keep_min_score',   'Keep Min Score',     '', 'Stage 2: floor score to stay in the race; default 0.1 admits weak matches, later stages pick the best', 'matching'],
+      ['dtw_bandwidth',    'DTW Bandwidth',      '', 'Stage 3: Sakoe-Chiba warp band (0 = DTW off; default 0.2 = 20% of cycle length)', 'matching'],
+      ['dtw_blend',        'DTW Blend',          '', 'Stage 3: 0 = core score only, 1 = DTW score only, 0.5 = equal blend (default)', 'matching'],
+      ['dtw_ensemble_w',   'DTW Ensemble Weight','', 'Stage 3 (ensemble mode): weight on scaled-L1 vs derivative DTW; default 0.7 favours level-aware', 'matching'],
+      ['dtw_ddtw_scale',   'DDTW Scale',         '', 'Stage 3: DDTW half-saturation distance; smaller = more shape-sensitive (default 30)', 'matching'],
+      ['dtw_refine_top_n', 'DTW Refine Top-N',   '', 'Stage 3: candidates DTW re-scores; raise to 7-9 if correct profile ranks 4th-5th (default 5)', 'matching'],
+      ['duration_weight',  'Duration Weight',    '', 'Stage 4: how strongly run-length agreement affects the final score (default 0.22)', 'matching'],
+      ['energy_weight',    'Energy Weight',      '', 'Stage 4: how strongly energy agreement affects the final score (default 0.22)', 'matching'],
+      ['duration_scale',   'Duration Scale',     '', 'Stage 4: log-ratio where duration agreement halves; smaller = stricter penalty (default 0.175)', 'matching'],
+      ['energy_scale',     'Energy Scale',       '', 'Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)', 'matching'],
     ];
   }
 
   // Resolve a pre-fill value for an override field: staged override → live option
-  // → field default → ''.
+  // → field default (settings schema) → matcher constant default → ''.
   _pgFieldVal(key, store) {
     const s = store || {};
     if (s[key] !== undefined) return s[key];
     const o = this._opts || {};
     if (o[key] !== undefined && o[key] !== null) return o[key];
     const f = _FIELD_BY_KEY[key] || {};
-    return f.def !== undefined ? f.def : '';
+    if (f.def !== undefined) return f.def;
+    if (_PG_MATCH_DEFAULTS[key] !== undefined) return _PG_MATCH_DEFAULTS[key];
+    return '';
   }
 
   _htmlPlayground() {

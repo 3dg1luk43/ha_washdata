@@ -876,19 +876,19 @@
     "start_duration_threshold": "Sekúndur yfir þröskuldi til að staðfesta ræsingu",
     "start_threshold_w": "Lágmarksvött til að teljast ræst",
     "stop_threshold_w": "Undir þessu telst vélin af",
-    "dtw_bandwidth": "Hversu mikla tímabjögun formsamsvörunin leyfir",
-    "corr_weight": "Vægi á ferilform á móti aflstigi í samsvöruninni",
-    "duration_weight": "Hversu mikið samræmi í keyrslutíma hefur áhrif á samsvörunina",
-    "energy_weight": "Hversu mikið samræmi í orkunotkun hefur áhrif á samsvörunina",
-    "profile_match_min_duration_ratio": "Stysta keyrsla (miðað við sniðið) sem enn má samsvara",
-    "profile_match_max_duration_ratio": "Lengsta keyrsla (miðað við sniðið) sem enn má samsvara",
-    "keep_min_score": "Þrep 2: lægsta líkindaeinkunn sem heldist sem frambjóðandi",
-    "dtw_blend": "Þrep 3: hversu mikið DTW-einkunnin kemur í stað kjarnaeinkunnin (0-1)",
-    "dtw_ensemble_w": "Þrep 3: blanda af skaluðum og afleiðu-DTW í ensemble-ham (0-1)",
-    "dtw_ddtw_scale": "Þrep 3: fjarlægðarkvarði afleiðu-DTW",
-    "dtw_refine_top_n": "Þrep 3: hversu margir toppframbjóðendur DTW endurmetur",
-    "duration_scale": "Þrep 4: skerpa fyrir samræmi í keyrslulengd (minna = strangara)",
-    "energy_scale": "Þrep 4: skerpa fyrir samræmi í orkunotkun (minna = strangara)"
+    "dtw_bandwidth": "Þrep 3: Sakoe-Chiba-tímabjögunarband (0 = DTW af; sjálfgefið 0,2 = 20% af lotulegð)",
+    "corr_weight": "Þrep 2: jafnvægi milli ferilforms (fylgni) og aflstigs (MAE); sjálfgefið 0,45",
+    "duration_weight": "Þrep 4: hversu sterklega samræmi í keyrslulengd hefur áhrif á lokaskorið (sjálfgefið 0,22)",
+    "energy_weight": "Þrep 4: hversu sterklega samræmi í orkunotkun hefur áhrif á lokaskorið (sjálfgefið 0,22)",
+    "profile_match_min_duration_ratio": "Þrep 1: stysta lota sem hlutfall af lotulegð sniðs; sjálfgefið 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Þrep 1: lengsta lota sem hlutfall af lotulegð sniðs; sjálfgefið 1,5 (150%)",
+    "keep_min_score": "Þrep 2: lægsta einkunn til að vera eftir í samsvöruninni; sjálfgefið 0,1 leyfir veika frambjóðendur, síðari þrep velja best",
+    "dtw_blend": "Þrep 3: 0 = aðeins kjarnaskor, 1 = aðeins DTW-skor, 0,5 = jöfn blanda (sjálfgefið)",
+    "dtw_ensemble_w": "Þrep 3 (ensemble-hamur): þunginn á skaluðum L1 gagnvart afleiðu-DTW; sjálfgefið 0,7 hlynnar að stiga-meðvitund",
+    "dtw_ddtw_scale": "Þrep 3: DDTW hálf-mettunarfjarlægð; minna = meira formnæmt (sjálfgefið 30)",
+    "dtw_refine_top_n": "Þrep 3: frambjóðendur sem DTW endurgerir skor fyrir; hækkið í 7-9 ef rétt snið lendir á 4.-5. sæti (sjálfgefið 5)",
+    "duration_scale": "Þrep 4: log-hlutfall þar sem samræmi í keyrslulengd helmingast; minna = strangara viðurlög (sjálfgefið 0,175)",
+    "energy_scale": "Þrep 4: log-hlutfall þar sem samræmi í orkunotkun helmingast; minna = strangara viðurlög (sjálfgefið 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Stundum hrynur stutt eftir að því er lokið til að draga úr hrukkum.",
@@ -1346,25 +1346,32 @@
       "doc": "Skiptu hverri lotu í gangi upp í fasa (upphitun, þvottur, vinda) og áætlaðu tímann sem eftir er fyrir hvern fasa, blandað saman við klassíska matið - snemma í lotunni styðst það við fasaáætlunina og undir lokin við klassíska matið. Þetta sérsníður niðurtalninguna að því hversu lengi vélin þín hitar og gengur í raun, sem er mest áberandi í fyrri helmingi lotu. Slökkt = aðeins klassíska matið. Aðeins birting á tíma sem eftir er verður fyrir áhrifum; forritasamsvörun og lotugreining haldast óbreytt."
     },
     "keep_min_score": {
-      "label": "Lágm. samsvörunareinkunn"
+      "label": "Lágm. samsvörunareinkunn",
+      "doc": "Lægsta likhetseinkunn sem frambjóðandi þarf til að vera eftir í samsvöruninni. Sjálfgefið 0,1 er vísvitandi rýmt – það leyfir jafnvel veika frambjóðendur og treystir á síðari þrep til að finna besta samsvörun. Hækkið til að sía út ósennilegar sniðmát fyrr; lækkkið til að víkka upphaflega frambjóðendasafnið."
     },
     "dtw_blend": {
-      "label": "DTW-blandning"
+      "label": "DTW-blandning",
+      "doc": "Hversu mikið DTW-jöfnunarskorið kemur í stað kjarnaskorinnar frá Þrepi 2. 0 = notaðu aðeins Þreps 2 skor, 1 = notaðu aðeins DTW-skor, 0,5 (sjálfgefið) = jöfn blanda. Hækkið til að treystir meira á tímaröðun þegar forrit hafa svipaðar aflstigseiningar en ólík tímasetningarmynstur."
     },
     "dtw_ensemble_w": {
-      "label": "DTW-ensemble-blanda"
+      "label": "DTW-ensemble-blanda",
+      "doc": "Í ensemble-DTW-ham (sjálfgefinn) er þetta þunginn á skaluðum L1 gagnvart afleiðu-DTW (DDTW). 1,0 = aðeins skalað L1, 0 = aðeins DDTW, 0,7 = sjálfgefið. Skalade útgáfan ber saman aflstig; afleiðuútgáfan bregst við því hvernig afl breytist með tíma. Ensemble blandar bæði."
     },
     "dtw_ddtw_scale": {
-      "label": "Afleiðu-DTW-kvarði"
+      "label": "Afleiðu-DTW-kvarði",
+      "doc": "Hálf-mettunarfjarlægð fyrir afleiðu-DTW-stigagjöf. Einkunnin helmingast þegar DDTW-fjarlægðin er jöfn þessu gildi. Minna = næmara fyrir formmunur. Sjálfgefið 30 er kvarðað fyrir dæmigerðar aflferil tækja. Hefur aðeins áhrif á ensemble- og ddtw-DTW-hama."
     },
     "dtw_refine_top_n": {
-      "label": "DTW-fínstillingarfjöldi"
+      "label": "DTW-fínstillingarfjöldi",
+      "doc": "Hversu marga toppframbjóðendur frá Þrepi 2 DTW endurgerir skor fyrir. DTW er dýrara svo það er aðeins beitt á bestu N frambjóðendurna. Sjálfgefið 5. Hækkið (í 7-9) ef rétt snið lendir stundum aðeins á 4. eða 5. sæti eftir Þrep 2 – DTW getur bjargað því. Lægra gildi hraðar samsvörun lítið."
     },
     "duration_scale": {
-      "label": "Lengdarskerpa"
+      "label": "Lengdarskerpa",
+      "doc": "Skerpa í viðurlögum Þreps 4 vegna samræmis í keyrslulengd. Þetta er log-hlutfallið þar sem samræmisskorið helmingast. Minna = strangara: frávik í keyrslulengd skemmir meira. Sjálfgefið 0,175 samsvarar um 18% þolmörkum í keyrslulengd við hálft þyngd. Notaðu með Keyrslulengdarþyngd."
     },
     "energy_scale": {
-      "label": "Orkuskerpa"
+      "label": "Orkuskerpa",
+      "doc": "Skerpa í viðurlögum Þreps 4 vegna samræmis í orkunotkun. Minna = strangara: frávik í orkunotkun skemmir meira. Sjálfgefið 0,25 er vísvitandi rýmra en keyrslulengdarskerpan vegna þess að orka breytist með álagi. Notaðu með Orkuþyngd."
     }
   },
   "setting_group": {

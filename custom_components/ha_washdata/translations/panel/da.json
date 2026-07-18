@@ -876,19 +876,19 @@
     "start_duration_threshold": "Sekunder over tærsklen for at bekræfte start",
     "start_threshold_w": "Minimum watt for at tælle som startet",
     "stop_threshold_w": "Under dette tælles maskinen som slukket",
-    "dtw_bandwidth": "Hvor meget tidsforvrængning formgenkendelsen tillader",
-    "corr_weight": "Vægt på kurveform kontra effektniveau i genkendelsen",
-    "duration_weight": "Hvor meget overensstemmelse i køretid påvirker genkendelsen",
-    "energy_weight": "Hvor meget overensstemmelse i energiforbrug påvirker genkendelsen",
-    "profile_match_min_duration_ratio": "Korteste kørsel (i forhold til profilen), der stadig må matche",
-    "profile_match_max_duration_ratio": "Længste kørsel (i forhold til profilen), der stadig må matche",
-    "keep_min_score": "Trin 2: laveste lighedsscore beholdt som kandidat",
-    "dtw_blend": "Trin 3: hvor meget DTW-scoren erstatter kerneresultatet (0-1)",
-    "dtw_ensemble_w": "Trin 3: miks af skaleret og derivativ DTW i ensemble-tilstand (0-1)",
-    "dtw_ddtw_scale": "Trin 3: afstandsskala for derivativ DTW",
-    "dtw_refine_top_n": "Trin 3: hvor mange topkandidater DTW gen-scorer",
-    "duration_scale": "Trin 4: skarphed for varighedsoverensstemmelse (lavere = strengere)",
-    "energy_scale": "Trin 4: skarphed for energioverensstemmelse (lavere = strengere)"
+    "dtw_bandwidth": "Trin 3: Sakoe-Chiba-tidsforvrængningsband (0 = DTW slukket; standard 0,2 = 20% af cykellængde)",
+    "corr_weight": "Trin 2: balance mellem kurveform (korrelation) og effektniveau (MAE); standard 0,45",
+    "duration_weight": "Trin 4: hvor stærkt varighedsoverensstemmelse påvirker slutscoren (standard 0,22)",
+    "energy_weight": "Trin 4: hvor stærkt energioverensstemmelse påvirker slutscoren (standard 0,22)",
+    "profile_match_min_duration_ratio": "Trin 1: korteste cykellængde som brøkdel af profilvarighed; standard 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Trin 1: længste cykellængde som brøkdel af profilvarighed; standard 1,5 (150%)",
+    "keep_min_score": "Trin 2: laveste score for at forblive i kampen; standard 0,1 tillader svage kandidater, senere trin vælger bedst",
+    "dtw_blend": "Trin 3: 0 = kun kernescore, 1 = kun DTW-score, 0,5 = ligelig blanding (standard)",
+    "dtw_ensemble_w": "Trin 3 (ensemble-tilstand): vægt på skaleret L1 kontra derivativ DTW; standard 0,7 foretrækker niveaubevidst",
+    "dtw_ddtw_scale": "Trin 3: DDTW-halvmætningsafstand; mindre = mere formfølsom (standard 30)",
+    "dtw_refine_top_n": "Trin 3: kandidater DTW gen-scorer; hæv til 7-9 hvis korrekt profil placerer sig 4.-5. (standard 5)",
+    "duration_scale": "Trin 4: log-forhold der varighedsoverensstemmelse halveres; lavere = strengere straf (standard 0,175)",
+    "energy_scale": "Trin 4: log-forhold der energioverensstemmelse halveres; lavere = strengere straf (standard 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Lejlighedsvis korte tumblinger efter færdiggørelse for at reducere rynker.",
@@ -1346,25 +1346,32 @@
       "doc": "Opdel hver kørende cyklus i faser (opvarmning, vask, centrifugering) og budgettér den resterende tid pr. fase, blandet med det klassiske estimat - tidligt i cyklussen læner den sig op ad fasebudgettet og mod slutningen op ad det klassiske estimat. Dette tilpasser nedtællingen til, hvor længe din maskine faktisk varmer op og kører, hvilket er mest mærkbart i den første halvdel af en cyklus. Fra = kun det klassiske estimat. Kun visningen af resterende tid påvirkes; programmatchning og cyklusregistrering er uændrede."
     },
     "keep_min_score": {
-      "label": "Min. matchingsscore"
+      "label": "Min. matchingsscore",
+      "doc": "Laveste lighedsscore en kandidat behøver for at forblive i matcheprocessen. Standard 0,1 er bevidst tillåtende – det tillader selv svage kandidater og stoler på at senere trin finder den bedste match. Hæv for at skære usandsynlige profiler fra tidligere; sænk for at udvide den indledende kandidatpulje."
     },
     "dtw_blend": {
-      "label": "DTW-blanding"
+      "label": "DTW-blanding",
+      "doc": "Hvor meget DTW-justeringsscoren erstatter kerneresultatet fra Trin 2. 0 = brug kun Trin 2-scoren, 1 = brug kun DTW-scoren, 0,5 (standard) = ligelig blanding. Hæv for at stole mere på tidsjustering når programmer har ensartede effektniveauer men forskellige timingmønstre."
     },
     "dtw_ensemble_w": {
-      "label": "DTW-ensemblemiks"
+      "label": "DTW-ensemblemiks",
+      "doc": "I ensemble-DTW-tilstand (standard) er dette vægten på skaleret L1 kontra derivativ DTW (DDTW). 1,0 = kun skaleret L1, 0 = kun DDTW, 0,7 = standard. Den skalerede variant sammenligner effektniveauer; den derivative reagerer på hvordan effekten ændres over tid. Ensemble blander begge."
     },
     "dtw_ddtw_scale": {
-      "label": "Derivativ DTW-skala"
+      "label": "Derivativ DTW-skala",
+      "doc": "Halvmætningsafstand for derivativ DTW-scoring. Scoren halveres når DDTW-afstanden er lig denne værdi. Lavere = mere følsom for formforskelle. Standard 30 er kalibreret til typiske husholdningsapparaters effektprofiler. Påvirker kun ensemble- og ddtw-DTW-tilstande."
     },
     "dtw_refine_top_n": {
-      "label": "DTW-forfiningsnummer"
+      "label": "DTW-forfiningsnummer",
+      "doc": "Hvor mange topkandidater fra Trin 2 der gen-scores af DTW. DTW er mere kostbar så det anvendes kun på de N bedste. Standard 5. Hæv (til 7-9) hvis den korrekte profil sommetider kun når 4. eller 5. plads efter Trin 2 – DTW kan redde den. Lavere giver lidt hurtigere matching."
     },
     "duration_scale": {
-      "label": "Varighedsskarphed"
+      "label": "Varighedsskarphed",
+      "doc": "Skarphed i Trin 4's straf for varighedsoverensstemmelse. Det er log-forholdet ved hvilket overensstemmelses-scoren halveres. Lavere = strengere: et varighedsafvigelse skader mere. Standard 0,175 svarer til omtrent 18% varighedstolerens ved halvvægt. Par med Varighedsvægt."
     },
     "energy_scale": {
-      "label": "Energiskarphed"
+      "label": "Energiskarphed",
+      "doc": "Skarphed i Trin 4's straf for energioverensstemmelse. Lavere = strengere: et energiafvigelse skader mere. Standard 0,25 er bevidst mere tillåtende end varighedsskarphed fordi energi varierer med belastning. Par med Energivægt."
     }
   },
   "setting_group": {

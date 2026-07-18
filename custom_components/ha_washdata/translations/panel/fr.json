@@ -876,19 +876,19 @@
     "start_duration_threshold": "Secondes au-dessus du seuil pour confirmer le démarrage",
     "start_threshold_w": "Watts minimum pour être compté comme démarré",
     "stop_threshold_w": "En dessous, la machine est comptée comme éteinte",
-    "dtw_bandwidth": "Quantité de déformation temporelle autorisée par la correspondance de forme",
-    "corr_weight": "Poids de la forme de la courbe par rapport au niveau de puissance dans la correspondance",
-    "duration_weight": "Influence de la concordance de durée sur la correspondance",
-    "energy_weight": "Influence de la concordance d'énergie sur la correspondance",
-    "profile_match_min_duration_ratio": "Cycle le plus court (par rapport au profil) encore autorisé à correspondre",
-    "profile_match_max_duration_ratio": "Cycle le plus long (par rapport au profil) encore autorisé à correspondre",
-    "keep_min_score": "Étape 2 : score de similarité minimal conservé comme candidat",
-    "dtw_blend": "Étape 3 : part du score Warp dans le score central (0-1)",
-    "dtw_ensemble_w": "Étape 3 : mélange Warp normalisé vs dérivé en mode ensemble (0-1)",
-    "dtw_ddtw_scale": "Étape 3 : échelle de distance du Warp dérivé",
-    "dtw_refine_top_n": "Étape 3 : nombre de candidats réévalués par le Warp",
-    "duration_scale": "Étape 4 : précision de la concordance de durée (plus petit = plus strict)",
-    "energy_scale": "Étape 4 : précision de la concordance d'énergie (plus petit = plus strict)"
+    "dtw_bandwidth": "Étape 3 : bande de déformation Sakoe-Chiba (0 = DTW désactivé ; défaut 0,2 = 20 % de la longueur du cycle)",
+    "corr_weight": "Étape 2 : équilibre entre la forme de la courbe (corrélation) et le niveau de puissance (MAE) ; défaut 0,45",
+    "duration_weight": "Étape 4 : force avec laquelle la concordance de durée affecte le score final (défaut 0,22)",
+    "energy_weight": "Étape 4 : force avec laquelle la concordance d'énergie affecte le score final (défaut 0,22)",
+    "profile_match_min_duration_ratio": "Étape 1 : durée de cycle minimale en fraction de la durée du profil ; défaut 0,1 (10 %)",
+    "profile_match_max_duration_ratio": "Étape 1 : durée de cycle maximale en fraction de la durée du profil ; défaut 1,5 (150 %)",
+    "keep_min_score": "Étape 2 : score plancher pour rester en lice ; le défaut 0,1 admet les candidats faibles, les étapes suivantes sélectionnent le meilleur",
+    "dtw_blend": "Étape 3 : 0 = score central uniquement, 1 = score DTW uniquement, 0,5 = mélange égal (défaut)",
+    "dtw_ensemble_w": "Étape 3 (mode ensemble) : poids sur L1 normalisé vs DTW dérivé ; le défaut 0,7 favorise la sensibilité au niveau",
+    "dtw_ddtw_scale": "Étape 3 : distance de demi-saturation DDTW ; plus petit = plus sensible à la forme (défaut 30)",
+    "dtw_refine_top_n": "Étape 3 : candidats réévalués par DTW ; augmentez à 7-9 si le profil correct se classe 4e ou 5e (défaut 5)",
+    "duration_scale": "Étape 4 : log-ratio où la concordance de durée est divisée par deux ; plus petit = pénalité plus stricte (défaut 0,175)",
+    "energy_scale": "Étape 4 : log-ratio où la concordance d'énergie est divisée par deux ; plus petit = pénalité plus stricte (défaut 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Courts culbutages occasionnels après completion pour réduire le froissement du linge.",
@@ -1347,25 +1347,32 @@
       "doc": "Découpe chaque cycle en cours en phases (chauffage, lavage, essorage) et répartit le temps restant par phase, mélangé à l'estimation classique - en s'appuyant sur la répartition par phases en début de cycle et sur l'estimation classique vers la fin. Cela personnalise le compte à rebours en fonction de la durée réelle de chauffage et de fonctionnement de votre machine, ce qui est le plus perceptible dans la première moitié du cycle. Désactivé = uniquement l'estimation classique. Seul l'affichage du temps restant est concerné ; la reconnaissance des programmes et la détection des cycles restent inchangées."
     },
     "keep_min_score": {
-      "label": "Score min de correspondance"
+      "label": "Score min de correspondance",
+      "doc": "Score de similarité minimum qu'un candidat doit atteindre pour rester dans la course. Le défaut 0,1 est délibérément permissif - il admet même les candidats faibles et s'appuie sur les étapes suivantes pour trouver la meilleure correspondance. Augmentez-le pour éliminer les profils improbables plus tôt ; réduisez-le pour élargir le pool de candidats initial."
     },
     "dtw_blend": {
-      "label": "Fusion Warp"
+      "label": "Fusion Warp",
+      "doc": "Dans quelle mesure le score d'alignement par déformation temporelle (DTW) remplace le score central de l'étape 2. 0 = utiliser uniquement le score de l'étape 2, 1 = utiliser uniquement le score DTW, 0,5 (défaut) = mélange égal. Augmentez-le pour vous fier davantage à l'alignement Warp lorsque les programmes ont des niveaux de puissance similaires mais des schémas temporels différents."
     },
     "dtw_ensemble_w": {
-      "label": "Mix Warp ensemble"
+      "label": "Mix Warp ensemble",
+      "doc": "En mode DTW ensemble (le défaut), le poids sur L1 normalisé par rapport au DTW dérivé (DDTW). 1,0 = tout L1 normalisé, 0 = tout DDTW, 0,7 = défaut. La variante L1 normalisée compare les niveaux de puissance ; la variante dérivée réagit à la façon dont la puissance évolue dans le temps. Ensemble mélange les deux."
     },
     "dtw_ddtw_scale": {
-      "label": "Échelle Warp dérivé"
+      "label": "Échelle Warp dérivé",
+      "doc": "Distance de demi-saturation pour la notation DTW dérivé. Le score est divisé par deux quand la distance DDTW atteint cette valeur. Plus petit = plus sensible aux différences de forme. Le défaut 30 est calibré sur les traces de puissance typiques des appareils. N'affecte que les modes DTW ensemble et ddtw."
     },
     "dtw_refine_top_n": {
-      "label": "Nb candidats affinés Warp"
+      "label": "Nb candidats affinés Warp",
+      "doc": "Nombre de candidats de l'étape 2 réévalués par DTW. DTW est plus coûteux, il n'est donc appliqué qu'aux N meilleurs candidats. Défaut 5. Augmentez-le (à 7-9) si le profil correct n'atteint parfois que la 4e ou 5e place après l'étape 2 - DTW peut le sauver. Baisser accélère légèrement la mise en correspondance."
     },
     "duration_scale": {
-      "label": "Précision durée"
+      "label": "Précision durée",
+      "doc": "Précision de la pénalité de concordance de durée à l'étape 4. C'est le log-ratio auquel le score de concordance est divisé par deux. Plus petit = plus strict : un écart de durée pénalise davantage. Le défaut 0,175 correspond à environ 18 % de tolérance de durée à mi-poids. À combiner avec la Pondération de durée."
     },
     "energy_scale": {
-      "label": "Précision énergie"
+      "label": "Précision énergie",
+      "doc": "Précision de la pénalité de concordance d'énergie. Plus petit = plus strict : un écart d'énergie pénalise davantage. Le défaut 0,25 est intentionnellement plus indulgent que la Précision de durée, car l'énergie varie avec la charge. À combiner avec la Pondération d'énergie."
     }
   },
   "setting_group": {

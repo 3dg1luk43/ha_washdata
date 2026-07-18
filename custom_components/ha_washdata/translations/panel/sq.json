@@ -1322,25 +1322,32 @@
       "doc": "Ndan çdo cikël që po funksionon në faza (ngrohje, larje, centrifugim) dhe shpërndan kohën e mbetur për çdo fazë, e përzier me vlerësimin klasik - duke u mbështetur te shpërndarja sipas fazave në fillim të ciklit dhe te vlerësimi klasik afër fundit. Kjo e personalizon numërimin mbrapsht sipas kohës që makina juaj në të vërtetë ngroh dhe punon, gjë që vihet re më së shumti në gjysmën e parë të një cikli. Off = vetëm vlerësimi klasik. Preket vetëm shfaqja e kohës së mbetur; përputhja e programeve dhe zbulimi i ciklit mbeten të pandryshuara."
     },
     "keep_min_score": {
-      "label": "Rezultat Min. Përputhjeje"
+      "label": "Rezultat Min. Përputhjeje",
+      "doc": "Rezultati minimal i ngjashmërisë që i nevojitet një kandidati për të qëndruar në garën e përputhjes. Parazgjedhja 0.1 është me qëllim lejuese - pranon edhe kandidatë të dobët dhe u lë etapave të mëvonshme të gjejnë përputhjen më të mirë. Rriteni për të eliminuar profilet e pamundshme herët; uleni për të zgjeruar grupin fillestar të kandidatëve."
     },
     "dtw_blend": {
-      "label": "Përzierje Deformimi"
+      "label": "Përzierje Deformimi",
+      "doc": "Sa e zëvendëson rezultati i bashkimit DTW rezultatin bazë të Etapës 2. 0 = përdor vetëm rezultatin e Etapës 2, 1 = përdor vetëm rezultatin DTW, 0.5 (parazgjedhja) = përzierje e barabartë. Rriteni për t'u mbështetur më shumë në bashkimin e deformimit kur programet kanë nivele të ngjashme fuqie por modele të ndryshme kohore."
     },
     "dtw_ensemble_w": {
-      "label": "Mix Ansambël DTW"
+      "label": "Mix Ansambël DTW",
+      "doc": "Në modalitetin ansambël DTW (parazgjedhja), pesë për L1-e shkallëzuar kundrejt DTW derivativ (DDTW). 1.0 = gjithë shkallëzuar-L1, 0 = gjithë DDTW, 0.7 = parazgjedhja. Varianti shkallëzuar-L1 krahason nivelet e fuqisë; varianti derivativ reagon ndaj mënyrës sesi ndryshon fuqia me kalimin e kohës. Ansambëli kombinon të dyja."
     },
     "dtw_ddtw_scale": {
-      "label": "Shkalla e Deformimit Derivativ"
+      "label": "Shkalla e Deformimit Derivativ",
+      "doc": "Distanca e gjysmë-ngopjes për vlerësimin e DTW derivativ. Rezultati gjysmohet kur distanca DDTW është e barabartë me këtë vlerë. Më i vogël = më i ndjeshëm ndaj ndryshimeve të formës. Parazgjedhja 30 është kalibruar për gjurmët tipike të fuqisë së pajisjeve. Ndikon vetëm mënyrat DTW ansambël dhe ddtw."
     },
     "dtw_refine_top_n": {
-      "label": "Numri i Rafinimit DTW"
+      "label": "Numri i Rafinimit DTW",
+      "doc": "Sa kandidatë të parë të Etapës 2 ri-vlerësohen nga DTW. DTW është më e shtrenjtë llogaritëse, kështu që aplikohet vetëm tek kandidatët N më të mirë. Parazgjedhja 5. Rriteni (në 7-9) nëse profili i saktë ndonjëherë arrin vetëm në vendin e 4-të ose 5-të pas Etapës 2 - DTW mund ta shpëtojë. Ulja e saj shpejton pak përputhjen."
     },
     "duration_scale": {
-      "label": "Saktësia e Kohëzgjatjes"
+      "label": "Saktësia e Kohëzgjatjes",
+      "doc": "Ashpërsia e ndëshkimit të marrëveshjes së kohëzgjatjes së Etapës 4. Ky është raporti logaritmik në të cilin rezultati i marrëveshjes gjysmohet. Më i vogël = më i rreptë: një mospërputhje kohëzgjatjeje ndëshkon më shumë. Parazgjedhja 0.175 korrespondon me tolerancën e kohëzgjatjes rreth 18% në gjysmë-peshë. Çiftojeni me Peshën e Kohëzgjatjes."
     },
     "energy_scale": {
-      "label": "Saktësia e Energjisë"
+      "label": "Saktësia e Energjisë",
+      "doc": "Ashpërsia e ndëshkimit të marrëveshjes së energjisë së Etapës 4. Më i vogël = më i rreptë: një mospërputhje energjie ndëshkon më shumë. Parazgjedhja 0.25 është me qëllim më lejuese se Ashpërsia e Kohëzgjatjes sepse energjia ndryshon me ngarkesën. Çiftojeni me Peshën e Energjisë."
     }
   },
   "setting_group": {
@@ -1712,19 +1719,19 @@
     "start_duration_threshold": "Sekonda mbi prag për të konfirmuar nisjen",
     "start_threshold_w": "Watt minimalë për t'u llogaritur si nisur",
     "stop_threshold_w": "Nën këtë, makina llogaritet e fikur",
-    "dtw_bandwidth": "Sa shtrembërim kohor lejon përputhja e formës",
-    "corr_weight": "Pesha e formës së kurbës kundrejt nivelit të fuqisë në përputhje",
-    "duration_weight": "Sa ndikon përkimi i kohëzgjatjes te përputhja",
-    "energy_weight": "Sa ndikon përkimi i energjisë te përputhja",
-    "profile_match_min_duration_ratio": "Cikli më i shkurtër (krahasuar me profilin) që lejohet ende të përputhet",
-    "profile_match_max_duration_ratio": "Cikli më i gjatë (krahasuar me profilin) që lejohet ende të përputhet",
-    "keep_min_score": "Etapa 2: rezultati më i ulët i ngjashmërisë i mbajtur si kandidat",
-    "dtw_blend": "Etapa 3: sa e zëvendëson rezultati i deformimit rezultatin bazë (0-1)",
-    "dtw_ensemble_w": "Etapa 3: miksimi i deformimit të shkallëzuar kundrejt derivativit në modalitetin ansambël (0-1)",
-    "dtw_ddtw_scale": "Etapa 3: shkalla e distancës së deformimit derivativ",
-    "dtw_refine_top_n": "Etapa 3: sa kandidatë të parë rishënon deformimi",
-    "duration_scale": "Etapa 4: saktësia e marrëveshjes së kohëzgjatjes (më i vogël = më i rreptë)",
-    "energy_scale": "Etapa 4: saktësia e marrëveshjes së energjisë (më i vogël = më i rreptë)"
+    "dtw_bandwidth": "Etapa 3: brez deformimi Sakoe-Chiba (0 = DTW joaktiv; parazgjedhja 0.2 = 20% e gjatësisë së ciklit)",
+    "corr_weight": "Etapa 2: balancë mes formës së kurbës (korrelacion) dhe nivelit të fuqisë (MAE); parazgjedhja 0.45",
+    "duration_weight": "Etapa 4: sa fortë ndikon marrëveshja e kohëzgjatjes në rezultatin final (parazgjedhja 0.22)",
+    "energy_weight": "Etapa 4: sa fortë ndikon marrëveshja e energjisë në rezultatin final (parazgjedhja 0.22)",
+    "profile_match_min_duration_ratio": "Etapa 1: gjatësia minimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 0.1 (10%)",
+    "profile_match_max_duration_ratio": "Etapa 1: gjatësia maksimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 1.5 (150%)",
+    "keep_min_score": "Etapa 2: rezultati minimal për të qëndruar në garë; parazgjedhja 0.1 pranon përputhje të dobëta, etapat e mëvonshme zgjedhin më të mirën",
+    "dtw_blend": "Etapa 3: 0 = vetëm rezultati bazë, 1 = vetëm rezultati DTW, 0.5 = përzierje e barabartë (parazgjedhja)",
+    "dtw_ensemble_w": "Etapa 3 (modaliteti ansambël): pesë për L1-e shkallëzuar kundrejt DTW derivativ; parazgjedhja 0.7 favorizon nivelin e fuqisë",
+    "dtw_ddtw_scale": "Etapa 3: distanca e gjysmë-ngopjes DDTW; më e vogël = më e ndjeshme ndaj formës (parazgjedhja 30)",
+    "dtw_refine_top_n": "Etapa 3: kandidatë të rishënuara nga DTW; rriteni në 7-9 nëse profili i saktë renditet i 4-5 (parazgjedhja 5)",
+    "duration_scale": "Etapa 4: raporti logaritmik ku marrëveshja e kohëzgjatjes gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.175)",
+    "energy_scale": "Etapa 4: raporti logaritmik ku marrëveshja e energjisë gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.25)"
   },
   "col": {
     "profile_tip": "Emri i programit të përputhur. I paetiketuar do të thotë se asnjë profil nuk u përputh në fund të ciklit.",
