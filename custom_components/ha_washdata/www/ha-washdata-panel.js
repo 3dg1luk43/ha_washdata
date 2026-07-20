@@ -645,13 +645,16 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 #wd-settings-form .wd-switch-text, #wd-ml-form .wd-switch-text { color: var(--primary-text-color); }
 /* Normal-case, readable label for switches outside the Settings form (store /
    panel prefs / access control), whose labels are descriptive sentences. */
-.wd-switch-text--plain { font-size: .95em; font-weight: 500; letter-spacing: normal; text-transform: none; color: var(--primary-text-color); }
+.wd-switch-text--plain { font-size: 1em; font-weight: 600; line-height: 1.3; letter-spacing: normal; text-transform: none; color: var(--primary-text-color); }
 .wd-switch { position: relative; display: inline-flex; flex: 0 0 auto; width: 40px; height: 22px; }
 .wd-switch input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
 .wd-switch-slider { position: absolute; inset: 0; border-radius: 22px; background: var(--switch-unchecked-track-color, rgba(120,120,120,.5)); transition: background .2s; }
 .wd-switch-slider::before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; border-radius: 50%; background: var(--switch-unchecked-button-color, #fafafa); box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .2s; }
 .wd-switch input:checked + .wd-switch-slider { background: var(--switch-checked-track-color, var(--primary-color, #03a9f4)); }
-.wd-switch input:checked + .wd-switch-slider::before { transform: translateX(18px); background: var(--switch-checked-button-color, #fff); }
+/* Force a light thumb: some themes set --switch-checked-button-color to the accent,
+   which made the knob vanish into the (also-accent) track. A white thumb reads on
+   any track colour. */
+.wd-switch input:checked + .wd-switch-slider::before { transform: translateX(18px); background: #fff; }
 .wd-switch input:focus-visible + .wd-switch-slider { outline: 2px solid var(--primary-color, #03a9f4); outline-offset: 2px; }
 /* A11y: a shared keyboard focus ring for all interactive controls (many HA themes
    suppress the UA default outline). */
