@@ -632,16 +632,20 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 }
 .wd-field textarea { min-height: 64px; resize: vertical; }
 .wd-field input[type=checkbox] { width: auto; margin-right: 8px; }
-.wd-field .wd-check-row { display: flex; align-items: center; cursor: pointer; text-transform: none; letter-spacing: normal; font-weight: 500; color: var(--primary-text-color); }
 /* Switch-style boolean settings (replaces the old plain checkbox). Scoped under
    .wd-field-switch so the switch label wins over the generic ".wd-field label"
    (display:block, higher specificity) rule and stays a centered flex row. */
 .wd-field-switch label { margin: 0; }
 .wd-field-switch .wd-switch-row { display: flex; align-items: center; gap: 10px; min-height: 22px; }
-.wd-field-switch .wd-switch-lbl { display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; margin: 0; }
+/* Base switch label: toggle + text on one baseline, aligned. Used inline (outside
+   .wd-field-switch) by _switchInline for prefs/store toggles too. */
+.wd-switch-lbl { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; margin: 0; }
 /* Match the switch label to every other setting name (see .wd-field label). */
 .wd-switch-text { font-size: .82em; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--secondary-text-color); }
 #wd-settings-form .wd-switch-text, #wd-ml-form .wd-switch-text { color: var(--primary-text-color); }
+/* Normal-case, readable label for switches outside the Settings form (store /
+   panel prefs / access control), whose labels are descriptive sentences. */
+.wd-switch-text--plain { font-size: .95em; font-weight: 500; letter-spacing: normal; text-transform: none; color: var(--primary-text-color); }
 .wd-switch { position: relative; display: inline-flex; flex: 0 0 auto; width: 40px; height: 22px; }
 .wd-switch input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
 .wd-switch-slider { position: absolute; inset: 0; border-radius: 22px; background: var(--switch-unchecked-track-color, rgba(120,120,120,.5)); transition: background .2s; }
@@ -1506,6 +1510,20 @@ const _DIAGRAM_BY_KEY = {
 function _tip(text, diagram) {
   const dg = diagram ? _diagram(diagram) : '';
   return `<span class="wd-tip">i<span class="wd-tip-pop">${dg}<span class="wd-tip-txt">${_esc(text)}</span></span></span>`;
+}
+
+// Settings-style toggle switch, reused everywhere instead of raw checkboxes.
+// `inner` is the <input> attributes (id / data-* / checked / disabled), `label`
+// is plain-case text, `tip` is an optional _tip(...) string placed inline at the
+// end of the row. Inline variant (no .wd-field wrapper) fits inside flex rows.
+function _switchInline(inner, label, tip = '') {
+  return `<label class="wd-switch-lbl"><span class="wd-switch"><input type="checkbox" ${inner}>`
+    + `<span class="wd-switch-slider"></span></span>`
+    + `<span class="wd-switch-text wd-switch-text--plain">${_esc(label)}</span></label>${tip || ''}`;
+}
+function _switchRow(inner, label, tip = '', hint = '') {
+  return `<div class="wd-field wd-field-switch"><div class="wd-switch-row">${_switchInline(inner, label, tip)}</div>`
+    + `${hint ? `<div class="wd-field-hint">${_esc(hint)}</div>` : ''}</div>`;
 }
 
 // Small conceptual diagrams illustrating each parameter (from SETTINGS_VISUALIZED).
@@ -6625,10 +6643,10 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-field"><label>${this._t('lbl.panel_language', {}, 'Panel language')}</label><select id="wd-pref-lang">${langOpts}</select></div>
       </div>
       <div class="wd-subhead">${this._t('hdr.status_graph', {}, 'Status Graph')}</div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}> ${this._t('lbl.show_expected', {}, 'Show expected curve overlay (matched profile, orange)')}</label></div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-raw" ${cur.show_raw ? 'checked' : ''}> ${this._t('lbl.show_raw', {}, 'Show raw socket toggle in live power graph')}</label></div>
+      ${_switchRow(`id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}`, this._t('lbl.show_expected', {}, 'Show expected curve overlay (matched profile, orange)'))}
+      ${_switchRow(`id="wd-pref-raw" ${cur.show_raw ? 'checked' : ''}`, this._t('lbl.show_raw', {}, 'Show raw socket toggle in live power graph'))}
       <div class="wd-subhead">${this._t('hdr.diagnostics_pref', {}, 'Diagnostics')}</div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-debug" ${cur.show_debug ? 'checked' : ''}> ${this._t('lbl.show_debug', {}, 'Show live match debug card on the Status page (confidence, ambiguity, top candidates)')}</label></div>
+      ${_switchRow(`id="wd-pref-debug" ${cur.show_debug ? 'checked' : ''}`, this._t('lbl.show_debug', {}, 'Show live match debug card on the Status page (confidence, ambiguity, top candidates)'))}
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-prefs">${this._t('btn.save_preferences', {}, 'Save Preferences')}</button></div>
     </div>`;
   }
@@ -6645,13 +6663,13 @@ class HaWashdataPanel extends HTMLElement {
     const dtOpts = tabOpts.map(([v, l]) => `<option value="${v}" ${(p.default_tab || 'status') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
     const hidden = p.hidden_tabs || [];
     const hideChecks = tabOpts.filter(([v]) => v !== 'status')
-      .map(([v, l]) => `<label class="wd-check-row" style="margin-right:14px;display:inline-flex"><input type="checkbox" data-hidetab="${v}" ${hidden.includes(v) ? 'checked' : ''}> ${_esc(l)}</label>`).join('');
+      .map(([v, l]) => _switchInline(`data-hidetab="${v}" ${hidden.includes(v) ? 'checked' : ''}`, l)).join('');
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.panel_settings', {}, 'Panel Settings (all users)')}</div>
       <div class="wd-form-grid">
         <div class="wd-field"><label>${this._t('lbl.panel_default_tab', {}, 'Default tab')}</label><select id="wd-ps-deftab">${dtOpts}</select></div>
       </div>
-      <div class="wd-field"><label>${this._t('lbl.hide_tabs', {}, 'Hide tabs for non-admins')}</label><div style="display:flex;flex-wrap:wrap;gap:4px">${hideChecks}</div></div>
+      <div class="wd-field"><label>${this._t('lbl.hide_tabs', {}, 'Hide tabs for non-admins')}</label><div style="display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:6px">${hideChecks}</div></div>
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-panel">${this._t('btn.save_panel_settings', {}, 'Save Panel Settings')}</button></div>
     </div>`;
   }
@@ -6674,8 +6692,7 @@ class HaWashdataPanel extends HTMLElement {
     const adminNote = users.filter(u => u.is_admin).map(u => `<span class="wd-pill">${_esc(u.name)} - full (admin)</span>`).join(' ');
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.access_control', {}, 'Access Control')}</div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-rbac-enabled" ${rbac.enabled ? 'checked' : ''}> ${this._t('lbl.enable_access_control', {}, 'Enable per-user access control')}</label>
-        <div class="wd-field-hint">${this._t('msg.rbac_hint', {}, 'When off, every Home Assistant user has full access (the default). Administrators always have full access and can manage everyone.')}</div></div>
+      ${_switchRow(`id="wd-rbac-enabled" ${rbac.enabled ? 'checked' : ''}`, this._t('lbl.enable_access_control', {}, 'Enable per-user access control'), '', this._t('msg.rbac_hint', {}, 'When off, every Home Assistant user has full access (the default). Administrators always have full access and can manage everyone.'))}
       <div class="wd-field"><label>${this._t('lbl.default_access_level', {}, 'Default level for users not listed below')}</label>${this._levelSelect('id="wd-rbac-default"', rbac.default_level || 'none', false)}</div>
       ${adminNote ? `<div class="wd-field"><label>${this._t('lbl.administrators', {}, 'Administrators')}</label><div>${adminNote}</div></div>` : ''}
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-rbac">${this._t('btn.save_access_control', {}, 'Save Access Control')}</button></div>
@@ -6769,7 +6786,7 @@ class HaWashdataPanel extends HTMLElement {
     const dlBusy = this._busy.has('store-download-device');
     const dlHeader = (this._canEdit() && dev && items.length) ? `<div class="wd-card" style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <span class="wd-info" style="flex:1;min-width:180px">${this._t('msg.store_download_device_intro', {}, 'Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.')}</span>
-      <label class="wd-check-row" style="font-size:.85em">${this._t('lbl.adopt_settings', {}, 'Also adopt settings')} ${_tip(this._t('msg.adopt_settings_hint', {}, 'Overwrite this device\'s detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.'))}<input type="checkbox" data-action="store-toggle-dl-settings" ${this._dlSettings ? 'checked' : ''} ${dlBusy ? 'disabled' : ''}></label>
+      ${_switchInline(`data-action="store-toggle-dl-settings" ${this._dlSettings ? 'checked' : ''} ${dlBusy ? 'disabled' : ''}`, this._t('lbl.adopt_settings', {}, 'Also adopt settings'), _tip(this._t('msg.adopt_settings_hint', {}, 'Overwrite this device\'s detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.')))}
       <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-download-device" data-device-id="${_esc(dev.id)}" ${dlBusy ? 'disabled' : ''}>${dlBusy ? '<span class="wd-spin"></span> ' : '⬇ '}${this._t('btn.download_device', {}, 'Download this setup')}</button>
     </div>` : '';
     return dlHeader + list;
@@ -6865,7 +6882,7 @@ class HaWashdataPanel extends HTMLElement {
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.online_account', {}, 'Community Store & online features')}</div>
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.online_intro_global', {}, 'Browse and share reference recordings with other WashData users, and confirm appliance entries. One connection applies to your whole WashData integration; appliance brand and model are set per device under Basic. All online features are opt-in and off by default.')}</p>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" data-action="store-toggle-online" ${on ? 'checked' : ''} ${busy ? 'disabled' : ''}> ${this._t('lbl.enable_online', {}, 'Enable online features')}</label></div>
+      ${_switchRow(`data-action="store-toggle-online" ${on ? 'checked' : ''} ${busy ? 'disabled' : ''}`, this._t('lbl.enable_online', {}, 'Enable online features'))}
       ${on ? this._htmlStorePrefs(busy) : ''}
       ${on ? connBlock : ''}
     </div>`;
@@ -6877,7 +6894,7 @@ class HaWashdataPanel extends HTMLElement {
     const prefs = (this._constants && this._constants.storePrefs) || {};
     return _STORE_PREFS.map(p => {
       const checked = prefs[p.key] !== false;  // defaults on; get_constants sends the full set
-      return `<div class="wd-field"><label class="wd-check-row"><input type="checkbox" data-action="store-toggle-pref" data-pref="${_esc(p.key)}" ${checked ? 'checked' : ''} ${busy ? 'disabled' : ''}> ${this._t(p.labelKey, {}, p.labelFb)}</label> ${_tip(this._t(p.docKey, {}, p.docFb))}</div>`;
+      return _switchRow(`data-action="store-toggle-pref" data-pref="${_esc(p.key)}" ${checked ? 'checked' : ''} ${busy ? 'disabled' : ''}`, this._t(p.labelKey, {}, p.labelFb), _tip(this._t(p.docKey, {}, p.docFb)));
     }).join('');
   }
 
