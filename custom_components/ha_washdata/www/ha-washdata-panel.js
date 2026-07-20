@@ -2394,6 +2394,13 @@ class HaWashdataPanel extends HTMLElement {
         await this._fetchCycles(dev.entry_id);
         await this._fetchSuggestions(dev.entry_id);
         await this._fetchProfiles(dev.entry_id);
+        // Prime the Setup Card on the very first paint so it appears immediately
+        // without requiring a tab click or device switch.
+        if (this._tab === 'status') {
+          try {
+            this._setupStatus = await this._ws({ type: `${_DOMAIN}/get_setup_status`, entry_id: dev.entry_id });
+          } catch (_) { this._setupStatus = null; }
+        }
         // The Store tab's visibility depends on this._onlineEnabled(),
         // which is normally loaded per-tab. Prime it at boot ONLY when the backend
         // exposes online features, so the tab can appear without visiting Settings.
@@ -2813,6 +2820,7 @@ class HaWashdataPanel extends HTMLElement {
     this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = [];
     this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
+    this._setupStatus = null;       // per-device; re-fetched by _fetchTabData
     this._deviceAutomations = [];   // per-device; re-fetched on the settings tab
     this._selectMode = false; this._cycleSel = new Set();
     this._cycleFilter = { text: '', status: '' };

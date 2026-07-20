@@ -127,7 +127,12 @@ def compute_setup_phase(
     # None is also accepted (function signature allows it) and treated as no gap.
     # Also skipped once the user has permanently dismissed ("never") or snoozed the
     # Phase 1 guidance via setup_skip_phase1.
-    if has_real and not (coverage_gap and coverage_gap.get("suggest_create")) and not _is_step_suppressed("setup_skip_phase1", skipped_steps, now):
+    # Auto-graduated when the device is clearly established: ≥2 real profiles, or
+    # ≥5 cycles assigned to real profiles.  At that point the "record your first
+    # cycle" nudge is stale and misleading regardless of whether the user ever
+    # clicked Skip.
+    _established = len(real) >= 2 or _real_cycle_count(past_cycles, real) >= 5
+    if has_real and not _established and not (coverage_gap and coverage_gap.get("suggest_create")) and not _is_step_suppressed("setup_skip_phase1", skipped_steps, now):
         if has_recorded:
             first_recorded_profile = _first_recorded_profile_name(past_cycles, real)
             return SetupPhaseResult(
@@ -169,6 +174,10 @@ def compute_setup_phase(
 def _real_profile_names(profile_names: list[str], past_cycles: list[dict]) -> set[str]:
     named = {c.get("profile_name") for c in past_cycles if c.get("profile_name")}
     return {n for n in profile_names if n in named}
+
+
+def _real_cycle_count(past_cycles: list[dict], real: set[str]) -> int:
+    return sum(1 for c in past_cycles if c.get("profile_name") in real)
 
 
 def _has_recorded_cycles(past_cycles: list[dict], real: set[str]) -> bool:
