@@ -809,7 +809,10 @@ class StoreClient:
         allows an anonymous ``downloads++`` (unauthenticated), so this needs no token --
         it mirrors the website's per-download bump. Chunked to stay under Firestore's
         500-writes-per-commit limit. Never raises."""
-        ids = [c for c in (cycle_ids or []) if c]
+        # Deduplicate (order-preserving): Firestore :commit rejects a batch (HTTP 400)
+        # if it contains two writes to the same document, which a bundle referencing
+        # the same shared cycle across profiles can produce.
+        ids = list(dict.fromkeys(c for c in (cycle_ids or []) if c))
         for start in range(0, len(ids), 400):
             writes = [
                 {"transform": {

@@ -160,6 +160,21 @@ class StoreBridge:
         self._ps = profile_store
         self._client = StoreClient(hass)
 
+    def _fire_download_telemetry(self, cycle_ids: list[str]) -> None:
+        """Fire best-effort download/adoption telemetry as a detached background task.
+
+        Awaiting these store round-trips inline would add their HTTP latency (up to the
+        15s per-request timeout when the store is slow/unreachable) to the user-facing
+        adopt response. Their outcome does not affect the result, and both bump_* calls
+        swallow their own errors, so a detached task can never surface an exception.
+        """
+        async def _bump() -> None:
+            if cycle_ids:
+                await self._client.bump_downloads(cycle_ids)
+            await self._client.bump_analytics("downloads", 1)
+
+        self._hass.async_create_background_task(_bump(), "washdata_store_telemetry")
+
     # ── account / status (global) ───────────────────────────────────────────────
 
     def status(self) -> dict[str, Any]:
@@ -245,9 +260,8 @@ class StoreBridge:
             return {"error": "invalid_trace"}
         # Credit the download on the source store cycle + record one community-wide
         # adoption for the store's usage dashboard (the real "someone used it" metric).
-        if cyc.get("id"):
-            await self._client.bump_downloads([cyc.get("id")])
-        await self._client.bump_analytics("downloads", 1)
+        # Fired in the background so store latency never delays the adopt response.
+        self._fire_download_telemetry([cyc["id"]] if cyc.get("id") else [])
         return {"profile": profile, "cycle_id": local_id}
 
     async def share_cycle(
@@ -418,10 +432,10 @@ class StoreBridge:
         # underlying object, not just one). Skipped/duplicate cycles aren't re-counted,
         # so re-downloading the same device doesn't inflate the counters. Also record one
         # community-wide "download" (adoption) for the store's usage dashboard -- the real
-        # metric of how many people actually pulled this into their integration.
+        # metric of how many people actually pulled this into their integration. Fired in
+        # the background so store latency never delays the adopt-bundle response.
         if imported_store_ids:
-            await self._client.bump_downloads(imported_store_ids)
-            await self._client.bump_analytics("downloads", 1)
+            self._fire_download_telemetry(imported_store_ids)
         settings = bundle.get("settings") if isinstance(bundle.get("settings"), dict) else {}
         return {
             "profiles_adopted": profiles_adopted,

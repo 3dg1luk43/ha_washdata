@@ -2238,6 +2238,16 @@ class ProfileStore:
                 except Exception:  # noqa: BLE001
                     continue
 
+            # Most-recent unmatched cycle id, so the setup advisor's phase-2
+            # "unmatched" nudge can deep-link straight to it (open_cycle:<id>)
+            # instead of always falling back to the whole unlabelled list.
+            last_unmatched_cycle_id = None
+            for c in reversed(unmatched):
+                cid = c.get("id")
+                if cid:
+                    last_unmatched_cycle_id = cid
+                    break
+
             return {
                 "unmatched_count": n_unmatched,
                 "low_confidence_count": len(low_conf),
@@ -2245,6 +2255,7 @@ class ProfileStore:
                 "suggest_create": bool(n_unmatched >= min_unmatched and rate >= min_unmatched_rate),
                 "duration_clusters": clusters,
                 "profile_suggestions": profile_suggestions,   # NEW (A3)
+                "last_unmatched_cycle_id": last_unmatched_cycle_id,
             }
         except Exception:  # noqa: BLE001
             return {}
@@ -3304,6 +3315,16 @@ class ProfileStore:
                     if c.get("id") in pending_feedback_ids:
                         continue
 
+                    # EXEMPTION: Never strip power data from user-pinned "golden" cycles.
+                    # The matcher uses a golden trace as the sharp single-cycle template
+                    # (has_golden in the snapshot builder), and golden_profiles membership
+                    # is gated on the trace still being present — trimming it would flip
+                    # has_golden false and silently drop the profile back to the smeared
+                    # envelope average.
+                    rev = c.get("ml_review")
+                    if isinstance(rev, dict) and rev.get("golden"):
+                        continue
+
                     if c.get("power_data"):
                         c.pop("power_data", None)
                         c.pop("sampling_interval", None)
@@ -4006,7 +4027,7 @@ class ProfileStore:
                     if len(sib) >= 2:
                         return sib
         except Exception:  # noqa: BLE001
-            pass
+            self._logger.debug("_group_scope failed for %r", program, exc_info=True)
         return None
 
     def _candidate_phase_profiles(self, scope: set[str] | None = None) -> list:
@@ -4973,15 +4994,31 @@ class ProfileStore:
 
     @property
     def has_real_profiles(self) -> bool:
-        """True if at least one stored profile has a cycle in past_cycles."""
+        """True if at least one stored profile is backed by a real cycle.
+
+        A profile counts as "real" when it has a labelled cycle in ``past_cycles``
+        OR an imported ``reference_cycle`` (store-adopted templates that the matcher
+        treats as eligible snapshots — see the snapshot builder in async_match). An
+        import-only install has zero past_cycles but is fully matchable, so it must
+        pass this gate too, otherwise matching and the setup notifications are
+        skipped for it entirely.
+        """
+        profile_names = self._data.get("profiles", {}).keys()
+        if not profile_names:
+            return False
         assigned = {
             c.get("profile_name")
             for c in self._data.get("past_cycles", [])
             if c.get("profile_name")
         }
-        return bool(
-            assigned.intersection(self._data.get("profiles", {}).keys())
-        )
+        if assigned.intersection(profile_names):
+            return True
+        ref_assigned = {
+            c.get("profile_name")
+            for c in self._data.get("reference_cycles", [])
+            if c.get("profile_name")
+        }
+        return bool(ref_assigned.intersection(profile_names))
 
     def list_profiles(self) -> list[dict[str, Any]]:
         """List all profiles with metadata."""

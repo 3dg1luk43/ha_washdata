@@ -146,7 +146,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry, data=new_data, minor_version=7
         )
         minor_version = 7
-        _LOGGER.debug("Migrated WashData entry from 3.6 to 3.7")
+        _log.debug("Migrated WashData entry from 3.6 to 3.7")
 
     if version == 3 and minor_version >= 7:
         return True

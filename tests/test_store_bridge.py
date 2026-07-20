@@ -111,6 +111,9 @@ def bridge():
 
     hass.async_add_executor_job = AsyncMock(side_effect=_exec)
     hass.async_create_task = lambda coro, *a: asyncio.create_task(coro)
+    # Mirror real hass: schedule the coroutine so fire-and-forget telemetry runs
+    # (and doesn't leak a "coroutine was never awaited" warning).
+    hass.async_create_background_task = lambda coro, *a, **k: asyncio.create_task(coro)
     with patch("custom_components.ha_washdata.profile_store.WashDataStore"):
         ps = ProfileStore(hass, "e", min_duration_ratio=0.0, max_duration_ratio=3.0)
         ps._store.async_load = AsyncMock(return_value=None)

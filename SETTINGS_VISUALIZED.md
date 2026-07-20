@@ -19,6 +19,7 @@ Suggestions are optional and are never applied automatically — you choose whic
 ## 1. Signal Conditioning
 
 ### `smoothing_window`
+
 Controls how much the raw power signal is smoothed before processing.
 - **Low Value (e.g., 2)**: Responsive but susceptible to noise.
 - **High Value (e.g., 5)**: Smooths out spikes but introduces lag.
@@ -26,6 +27,7 @@ Controls how much the raw power signal is smoothed before processing.
 ![Smoothing Window](docs/images/suggest/param_smoothing_window.png)
 
 ### `min_power`
+
 The absolute minimum power (Watts) considered "active".
 - Readings below this line are treated as **0 W** (Standby/Off).
 - It filters out the "phantom load" of smart plugs or standby LEDs.
@@ -37,6 +39,7 @@ The absolute minimum power (Watts) considered "active".
 ## 2. Cycle Detection Logic
 
 ### `min_power` vs `start_threshold_w` / `stop_threshold_w` (Hysteresis)
+
 By default, the system uses `min_power` for both starting and stopping.
 - However, you can configure split thresholds to prevent rapid toggling.
 - **Start Threshold (Green)**: Power must rise above this to become ACTIVE.
@@ -46,6 +49,7 @@ By default, the system uses `min_power` for both starting and stopping.
 ![Hysteresis](docs/images/suggest/param_hysteresis.png)
 
 ### `start_energy_threshold`
+
 Prevents false starts from brief power spikes (e.g., a pump check or accidental button press).
 - The appliance must consume a certain amount of **Energy (Wh)** (Power x Time) before the state changes to `RUNNING`.
 - A high-power spike that lasts a fraction of a second has very low energy and is ignored.
@@ -53,6 +57,7 @@ Prevents false starts from brief power spikes (e.g., a pump check or accidental 
 ![Start Energy Threshold](docs/images/suggest/param_start_energy.png)
 
 ### `off_delay`
+
 The most critical parameter for **Dishwashers** and machines with pauses.
 - It is the time the system waits *after* power drops to 0 before declaring the cycle **Finished**.
 - If power resumes within this window, the cycle continues (bridges the gap).
@@ -65,6 +70,7 @@ The most critical parameter for **Dishwashers** and machines with pauses.
 ## 3. Profile Matching
 
 ### `profile_duration_tolerance` (Matching Bandwidth)
+
 Controls how "strict" the matching algorithm is regarding total duration.
 - It defines a +/- percentage band around the stored profile's average duration.
 - **Example**: If profile is 60 mins and tolerance is 0.25 (25%):
@@ -78,6 +84,7 @@ Controls how "strict" the matching algorithm is regarding total duration.
 ## 4. Cycle Integrity & Maintenance
 
 ### `completion_min_seconds`
+
 Filters out short, invalid cycles that might be caused by test runs or accidents.
 - If a cycle finishes (power drops to 0) but the total duration is less than this value, it is discarded as a "Ghost" cycle.
 - **Example**: Opening the door to add a sock might start a 1-minute "cycle", which we want to ignore.
@@ -85,6 +92,7 @@ Filters out short, invalid cycles that might be caused by test runs or accidents
 ![Completion Min Seconds](docs/images/suggest/param_completion_min_seconds.png)
 
 ### `min_off_gap`
+
 Prevents a single cycle from being split into two if there is a short pause.
 - If two detection events happen close together (gap < `min_off_gap`), the system treats them as one continuous session.
 - Useful for machines with very long soak times or drying pauses.
@@ -98,6 +106,7 @@ Prevents a single cycle from being split into two if there is a short pause.
 ## 5. Abrupt Interruption Logic
 
 ### `abrupt_drop_watts`
+
 Detects if a cycle was manually cancelled or failed, rather than finishing naturally.
 - A "Natural" finish usually involves power tapering off or dropping from a low state.
 - An "Interruption" happens when high power (e.g. 2000W heater) suddenly cuts to zero.
@@ -108,6 +117,7 @@ Detects if a cycle was manually cancelled or failed, rather than finishing natur
 ## 6. Sensor Protection & Logic
 
 ### `running_dead_zone`
+
 Ignores sensor noise immediately after the cycle starts.
 - For the first few seconds (default 3s) after detection, any power dip to 0W is ignored.
 - Prevents immediate self-termination if the appliance cycles relays during boot.
@@ -115,6 +125,7 @@ Ignores sensor noise immediately after the cycle starts.
 ![Dead Zone](docs/images/suggest/param_dead_zone.png)
 
 ### `no_update_active_timeout` (Watchdog)
+
 Failsafe for when your smart plug drops off the network.
 - If the integration stops receiving updates for this long *while the cycle is running*, it assumes something is wrong.
 - Default: **600s (10 minutes)** to allow for cloud/mesh network lag.
@@ -127,6 +138,7 @@ Failsafe for when your smart plug drops off the network.
 ## 7. Advanced Profile Logic
 
 ### `end_energy_threshold` (The Tail Check)
+
 Ensures a cycle doesn't end prematurely on a low-power "trickle".
 - Some machines spin down slowly or have an anti-crease mode that consumes small power (< min_power).
 - If the accumulated energy during the `off_delay` period exceeds this threshold, the system resets the timer, keeping the cycle alive.
@@ -134,6 +146,7 @@ Ensures a cycle doesn't end prematurely on a low-power "trickle".
 ![End Energy](docs/images/suggest/param_end_energy.png)
 
 ### `profile_match_min_duration_ratio` / `max`
+
 Defines the acceptable "Length" of a cycle relative to the profile.
 - Even if the *shape* matches perfectly, the *duration* must be plausible.
 - **Example**: If profile is 60 mins:
@@ -143,6 +156,7 @@ Defines the acceptable "Length" of a cycle relative to the profile.
 ![Match Ratios](docs/images/suggest/param_match_ratios.png)
 
 ### `start_duration_threshold` (Debounce)
+
 A time-based filter complementing `start_energy_threshold`.
 - Even if power is high, it must stay high for this many seconds to be valid.
 - Prevents split-second "On/Off" toggles from starting a cycle.
@@ -154,6 +168,7 @@ A time-based filter complementing `start_energy_threshold`.
 ## 8. User Experience & Notifications
 
 ### `notify_before_end_minutes`
+
 The "Almost Done" Alert.
 - Proactively notifies you when the estimated time remaining drops below this value.
 - Useful for getting ready to unload.
@@ -161,6 +176,7 @@ The "Almost Done" Alert.
 ![Pre-Complete Notify](docs/images/suggest/param_notify_pre.png)
 
 ### `progress_reset_delay`
+
 The "Unloading Phase".
 - After a cycle finishes (Status: Completed), the progress stays at **100%**.
 - This timer holds that state (default **30 min / 1800 s**) to let you see "Completed" on dashboards before resetting to "Idle" (0%).
@@ -168,12 +184,14 @@ The "Unloading Phase".
 ![Progress Reset](docs/images/suggest/param_progress_reset.png)
 
 ### `anti_wrinkle_exit_power`
+
 Exit power for anti-wrinkle / anti-crease mode.
 - Power must fall **below** this threshold between tumble pulses for anti-wrinkle mode to stay active.
 - **Default: 0.8 W** — slightly above zero, so a momentary standby glitch does not break the anti-wrinkle sequence.
 - Raise it if your appliance has a slightly elevated standby draw during anti-crease cycles.
 
 ### `auto_tune_noise_events_threshold`
+
 Self-Learning Trigger.
 - The system counts how many "Ghost Cycles" (too short to be real) happen in 24 hours.
 - If this count exceeds the threshold (e.g. 3), it assumes your `min_power` is too low (picking up noise) and suggests a new, higher threshold. The suggestion appears in the panel's Settings suggestions banner / per-field pill; it is not applied automatically and does not raise a persistent notification.
@@ -185,22 +203,26 @@ Self-Learning Trigger.
 ## 9. Timing & Performance
 
 ### `sampling_interval`
+
 Rate-limiting for sensor updates.
 - If your power sensor fires very frequently (e.g. every 100ms), this setting throttles processing.
 - **Low Value (e.g., 2s)**: More responsive detection but higher CPU usage.
 - **High Value (e.g., 30s)**: Lower CPU, acceptable for most smart plugs that poll every 30-60s.
 
 ### `watchdog_interval`
+
 How often the background watchdog task runs its checks.
 - Default: **30s** - every 30 seconds, it checks if sensors are still updating and if timeouts have elapsed.
 - A smaller value catches issues faster but uses more resources.
 
 ### `profile_match_interval`
+
 How often (in seconds) to attempt profile matching during a running cycle.
 - **Low Value (e.g., 60s)**: Faster program detection but more CPU overhead.
 - **Default (300s = 5 minutes)**: A good balance for most scenarios.
 
 ### `end_repeat_count`
+
 Consecutive low-power readings required before ending a cycle.
 - Prevents a single noisy reading from prematurely stopping detection.
 - **Example**: If `end_repeat_count = 3`, the power must be below the stop threshold for 3 consecutive samples.
@@ -210,12 +232,14 @@ Consecutive low-power readings required before ending a cycle.
 ## 10. Profile Matching Thresholds
 
 ### `profile_match_threshold`
+
 The minimum **composite similarity score** (0.0–1.0) for a profile to be considered a match. This is *not* a raw DTW score - it is the final blended score from the whole matching pipeline: shape correlation + peak-relative MAE (Stage 2), DTW refinement (Stage 3), and duration/energy agreement (Stage 4). DTW is only one component.
 - **Higher Value (e.g., 0.6)**: Stricter matching, fewer false positives, but may miss valid runs if noisy.
 - **Lower Value (e.g., 0.3)**: More lenient, catches more matches but may have false positives.
 - **Default: 0.4**
 
 ### `profile_unmatch_threshold`
+
 The score below which a *previously matched* profile is rejected mid-cycle.
 - This should be **lower** than `profile_match_threshold` to prevent "flickering" (rapid match/unmatch toggling).
 - **Example**: Match at 0.4, unmatch at 0.35 creates a small hysteresis band.
@@ -226,17 +250,20 @@ The score below which a *previously matched* profile is rejected mid-cycle.
 ## 11. Learning & Feedback
 
 ### `duration_tolerance`
+
 Tolerance for time-remaining estimates during a running cycle.
 - This is **NOT** for profile matching (that's `profile_duration_tolerance`), but for learning feedback.
 - When the cycle ends, if the actual duration is within ±X% of the estimate, it's flagged as a "good match".
 - **Default: 0.10 (±10%)**
 
 ### `learning_confidence`
+
 Minimum confidence to trigger a user verification request.
 - When a cycle ends, if the match confidence is **above** this threshold (but below `auto_label_confidence`), the finished cycle is flagged for review in the panel's Cycles queue so you can verify or correct the identified program. WashData does not raise a persistent notification for this.
 - **Default: 0.6 (60%)**
 
 ### `auto_label_confidence`
+
 Confidence threshold for automatic labeling.
 - If a cycle completes with confidence **above** this value, the integration automatically assigns the matched profile name without asking.
 - **Default: 0.9 (90%)** - only highly confident matches are auto-labeled.
@@ -246,16 +273,19 @@ Confidence threshold for automatic labeling.
 ## 12. Interruption Detection (Advanced)
 
 ### `abrupt_drop_ratio`
+
 Relative power drop detection (0.0–1.0).
 - Complements `abrupt_drop_watts` for different appliance sizes.
 - A drop is "abrupt" if it's *either* > `abrupt_drop_watts` *or* > `abrupt_drop_ratio` of the current power.
 - **Example**: 0.6 means a 60% drop (e.g., 500W → 200W) is considered abrupt.
+- **Default: 0.6**
 
 ---
 
 ## 13. Time-Remaining Estimation
 
 ### `enable_phase_matching` (Phase-aware time remaining)
+
 Opt-in (0.5.1). When on, WashData budgets each cycle *stage* (heating, wash, spin) separately
 instead of scaling one whole-cycle duration model, which makes the **time-remaining estimate**
 more accurate for temperature/spin variants of the same program (a 60 °C wash spends far longer
@@ -266,4 +296,3 @@ heating than a 30 °C wash, even though the overall shape looks similar).
 - Currently available for **washing machines** and **washer-dryers**. Requires a few clean,
   labelled cycles per profile so the per-phase budgets can be learned.
 - **Default: off**
-- **Default: 0.6**

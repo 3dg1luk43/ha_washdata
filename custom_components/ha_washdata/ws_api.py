@@ -2953,6 +2953,21 @@ def ws_get_constants(
     ]
     from .const import STORE_WEB_ORIGIN
     from . import store_account
+    from .const import (  # pylint: disable=import-outside-toplevel
+        DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+        DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+        DEFAULT_DTW_BANDWIDTH,
+        MATCH_CORR_WEIGHT,
+        MATCH_KEEP_MIN_SCORE,
+        MATCH_DTW_BLEND,
+        MATCH_DTW_ENSEMBLE_W,
+        MATCH_DDTW_DIST_SCALE,
+        MATCH_DTW_REFINE_TOP_N,
+        MATCH_DURATION_WEIGHT,
+        MATCH_ENERGY_WEIGHT,
+        MATCH_DURATION_SCALE,
+        MATCH_ENERGY_SCALE,
+    )
     _send_result(connection, msg["id"], "get_constants", {
             "device_types": device_types,
             "state_colors": dict(STATE_COLORS),
@@ -2960,6 +2975,24 @@ def ws_get_constants(
             "ml_suggestions_enabled": ENABLE_ML_SUGGESTIONS,
             "ml_training_available": ENABLE_ML_TRAINING,
             "PROFILE_MIN_WARMUP_CYCLES": CONF_PROFILE_MIN_WARMUP_CYCLES,
+            # Canonical matcher defaults for the Playground's matcher-param fields, so
+            # the panel's _PG_MATCH_DEFAULTS table cannot silently drift from const.py.
+            # The panel keeps that table only as an offline fallback.
+            "pg_match_defaults": {
+                "profile_match_min_duration_ratio": DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+                "profile_match_max_duration_ratio": DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+                "corr_weight": MATCH_CORR_WEIGHT,
+                "keep_min_score": MATCH_KEEP_MIN_SCORE,
+                "dtw_bandwidth": DEFAULT_DTW_BANDWIDTH,
+                "dtw_blend": MATCH_DTW_BLEND,
+                "dtw_ensemble_w": MATCH_DTW_ENSEMBLE_W,
+                "dtw_ddtw_scale": MATCH_DDTW_DIST_SCALE,
+                "dtw_refine_top_n": MATCH_DTW_REFINE_TOP_N,
+                "duration_weight": MATCH_DURATION_WEIGHT,
+                "energy_weight": MATCH_ENERGY_WEIGHT,
+                "duration_scale": MATCH_DURATION_SCALE,
+                "energy_scale": MATCH_ENERGY_SCALE,
+            },
             # Community store: the panel opens <origin>/connect.html for the GitHub
             # handoff and validates postMessage against new URL(origin).origin.
             "store_online_available": True,
@@ -3496,12 +3529,22 @@ async def _apply_merge_task(
     await lock.acquire()
     try:
         reg.update(task, total=1, done=0)
+        created_new = False
         if new_name:
+            # Raises ValueError if the name already exists, so reaching the next
+            # line guarantees we created a brand-new (empty) profile that must be
+            # rolled back if the merge below fails.
             await store.create_profile_standalone(new_name)
+            created_new = True
             target = new_name
         new_id = await store.apply_merge_interactive(ids, target)
         reg.update(task, done=1)
         if not new_id:
+            if created_new and new_name:
+                # Merge rejected the cycle set (stale/invalid id, unparseable start
+                # time, ...). Delete the empty profile we just created so a failed
+                # merge doesn't orphan a cycle-less profile in the store.
+                await store.delete_profile(new_name, unlabel_cycles=False)
             reg.finish(task, state=task_registry.STATE_ERROR, error="merge_failed")
             return
         if _get_manager(hass, entry_id) is manager:

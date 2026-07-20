@@ -1666,7 +1666,7 @@ class HaWashdataPanel extends HTMLElement {
     this._hassUpdateThrottle = null;
     this._evtUnsubs = [];
     // Data
-    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '', storePrefs: {} };
+    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '', storePrefs: {}, pgMatchDefaults: {} };
     this._constantsLoaded = false;
     this._devices = [];
     this._cycles = [];
@@ -2298,7 +2298,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._constantsLoaded) {
         try {
           const c = await this._ws({ type: `${_DOMAIN}/get_constants` });
-          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeOnlineEnabled: !!(c.store_online_enabled), storeWebOrigin: c.store_web_origin || '', storePrefs: c.store_prefs || {} };
+          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeOnlineEnabled: !!(c.store_online_enabled), storeWebOrigin: c.store_web_origin || '', storePrefs: c.store_prefs || {}, pgMatchDefaults: c.pg_match_defaults || {}, PROFILE_MIN_WARMUP_CYCLES: c.PROFILE_MIN_WARMUP_CYCLES };
         } catch (_) { /* fall back to humanized labels */ }
         try {
           this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
@@ -5177,6 +5177,11 @@ class HaWashdataPanel extends HTMLElement {
     if (o[key] !== undefined && o[key] !== null) return o[key];
     const f = _FIELD_BY_KEY[key] || {};
     if (f.def !== undefined) return f.def;
+    // Prefer backend-provided matcher defaults (const.py, via get_constants) so the
+    // Playground can't drift from the real defaults; the hardcoded _PG_MATCH_DEFAULTS
+    // table below is only an offline fallback for when the payload hasn't loaded.
+    const be = (this._constants && this._constants.pgMatchDefaults) || {};
+    if (be[key] !== undefined) return be[key];
     if (_PG_MATCH_DEFAULTS[key] !== undefined) return _PG_MATCH_DEFAULTS[key];
     return '';
   }
@@ -7824,7 +7829,7 @@ class HaWashdataPanel extends HTMLElement {
           if (!adv) return '';
           return `<div style="margin-top:8px;padding:8px 10px;background:color-mix(in srgb, var(--warning-color,#ff9800) 9%, transparent);border-radius:6px;border-left:3px solid var(--warning-color,#ff9800)">
             <span style="font-weight:600;color:var(--warning-color,#ff9800)">${this._t('msg.advisory_phase_inconsistent_title', {}, '⚠ Possibly mixed programs')}</span>
-            <span style="font-size:.82em;opacity:.85;display:block;margin-top:4px">${this._t(adv.message_key, adv.message_params, adv.message)}</span>
+            <span style="font-size:.82em;opacity:.85;display:block;margin-top:4px">${_esc(this._t(adv.message_key, adv.message_params, adv.message))}</span>
           </div>`;
         })()}
         ${env.avg && env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-env-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_envelope_chart', {}, 'Profile power envelope chart'))}"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope', {}, 'No envelope yet - rebuild after labelling cycles.')}</p>`}`;
@@ -9435,8 +9440,10 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'hide-setup-card') {
       // Setup card permanent hide (only offered when dismissible, i.e. phase 3/4).
+      // Keep _setupStatus so _htmlSetupCard can collapse to the phase-3 chip
+      // immediately (nulling it here would hide the card entirely instead — the
+      // sibling setup-skip / expand-setup handlers also leave the status intact).
       this._setPref('setup_card_dismissed', true);
-      this._setupStatus = null;
       this._render();
 
     } else if (a === 'expand-setup') {
@@ -9623,7 +9630,12 @@ class HaWashdataPanel extends HTMLElement {
       if (tid) {
         this._cancellingTasks.add(tid);
         this._updateTaskPills();
-        this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
+        this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {
+          // Cancel request itself failed (dropped socket, etc.) — re-enable the
+          // ✕ so the user can retry instead of leaving the pill stuck "Cancelling…".
+          this._cancellingTasks.delete(tid);
+          this._updateTaskPills();
+        });
       }
     } else if (a === 'pg-load-run') {
       const tid = btn.dataset.taskId;
