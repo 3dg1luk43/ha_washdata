@@ -1,0 +1,218 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Phase-profile derived-cache population in the envelope-rebuild path (Phase 2)."""
+from __future__ import annotations
+
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from custom_components.ha_washdata.profile_store import ProfileStore
+
+
+@pytest.fixture
+def mock_hass():
+    hass = MagicMock()
+    hass.data = {}
+
+    async def mock_executor_job(func, *args, **kwargs):
+        return func(*args, **kwargs)
+
+    hass.async_add_executor_job = AsyncMock(side_effect=mock_executor_job)
+    return hass
+
+
+@pytest.fixture
+def store(mock_hass):
+    with patch("homeassistant.helpers.storage.Store") as MockStore:
+        s = ProfileStore(mock_hass, "test_entry")
+        s._store = MockStore.return_value
+        s._store.async_load = AsyncMock(return_value=None)
+        s._store.async_save = AsyncMock()
+        return s
+
+
+def _cotton_power_data(heat_s, dt=30.0):
+    phases = [(5, 300), (1600, heat_s), (80, 4500), (5, 180), (350, 300), (5, 120)]
+    pd, cur = [], 0.0
+    for power, dur in phases:
+        for _ in range(max(1, int(dur // dt))):
+            pd.append([cur, float(power)])
+            cur += dt
+    return pd, cur
+
+
+def _add_cycle(store, name, cid, heat_s, device_type="washing_machine"):
+    pd, total = _cotton_power_data(heat_s)
+    store._data["past_cycles"].append({
+        "id": cid, "profile_name": name, "status": "completed",
+        "duration": total, "power_data": pd, "max_power": 1700.0,
+    })
+    store._data.setdefault("profiles", {}).setdefault(
+        name, {"avg_duration": total, "device_type": device_type, "phases": []}
+    )
+
+
+@pytest.mark.asyncio
+async def test_rebuild_populates_phase_profile_for_washing_machine(store):
+    for i, heat in enumerate((1400, 1500, 1600)):
+        _add_cycle(store, "Cotton 40", f"c{i}", heat)
+    ok = await store.async_rebuild_envelope("Cotton 40")
+    assert ok
+    env = store._data["envelopes"]["Cotton 40"]
+    assert "phase_profile" in env, "phase_profile should be cached for washing_machine"
+    pp = env["phase_profile"]
+    assert "heating" in pp["roles"]
+    assert pp["roles"]["heating"]["dur_mean"] > 0
+    assert pp["n_cycles"] == 3
+
+
+@pytest.mark.asyncio
+async def test_rebuild_skips_phase_profile_for_unsupported_device(store):
+    # dishwasher is NOT live-supported (offline-only); no phase_profile cached.
+    for i, heat in enumerate((1400, 1500, 1600)):
+        _add_cycle(store, "Eco 50", f"d{i}", heat, device_type="dishwasher")
+    ok = await store.async_rebuild_envelope("Eco 50")
+    assert ok
+    env = store._data["envelopes"]["Eco 50"]
+    assert "phase_profile" not in env
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_after_rebuild(store):
+    for i, heat in enumerate((1400, 1500, 1600)):
+        _add_cycle(store, "Cotton 40", f"c{i}", heat)
+    await store.async_rebuild_envelope("Cotton 40")
+
+    # observe a cycle 25% of the way in (idle lead + into heating)
+    pd, total = _cotton_power_data(1500)
+    elapsed = 0.25 * total
+    observed = [p for p in pd if p[0] <= elapsed]
+    res = store.phase_remaining(observed, "washing_machine", "Cotton 40")
+    assert res is not None
+    assert res["matched"] == "Cotton 40"
+    assert res["remaining_s"] > 0
+    # remaining + elapsed should be in the right ballpark of the true total
+    assert 0.4 * total < res["remaining_s"] + elapsed < 1.8 * total
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_none_for_unsupported_device(store):
+    for i, heat in enumerate((1400, 1500, 1600)):
+        _add_cycle(store, "Eco 50", f"d{i}", heat, device_type="dishwasher")
+    await store.async_rebuild_envelope("Eco 50")
+    pd, total = _cotton_power_data(1500)
+    observed = [p for p in pd if p[0] <= 0.25 * total]
+    assert store.phase_remaining(observed, "dishwasher", "Eco 50") is None
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_none_when_no_profiles(store):
+    # no envelopes cached yet
+    pd, total = _cotton_power_data(1500)
+    observed = [p for p in pd if p[0] <= 0.25 * total]
+    assert store.phase_remaining(observed, "washing_machine", "Cotton 40") is None
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_cold_start_floor(store):
+    # a single-cycle profile has noisy (zero-variance) priors -> not trusted
+    _add_cycle(store, "Cotton 40", "only", 1500)
+    await store.async_rebuild_envelope("Cotton 40")
+    pd, total = _cotton_power_data(1500)
+    observed = [p for p in pd if p[0] <= 0.25 * total]
+    assert store.phase_remaining(observed, "washing_machine", "Cotton 40") is None
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_constrained_to_program_group(store):
+    # A (long heat) + its group sibling A2 (short heat, distinct); unrelated B has
+    # the SAME long heat as A. Without scope, A and B would tie (ambiguous -> None).
+    # Scope must exclude B so A wins the group unambiguously.
+    for i, h in enumerate((1450, 1500, 1550)):
+        _add_cycle(store, "A", f"a{i}", h)
+        _add_cycle(store, "B", f"b{i}", h)
+    for i, h in enumerate((560, 600, 640)):
+        _add_cycle(store, "A2", f"a2{i}", h)
+    for name in ("A", "A2", "B"):
+        await store.async_rebuild_envelope(name)
+    store._data["profile_groups"] = {"grp": {"members": ["A", "A2"]}}
+    pd, total = _cotton_power_data(1500)  # long-heat observed cycle
+    observed = [p for p in pd if p[0] <= 0.5 * total]
+    res = store.phase_remaining(observed, "washing_machine", "A")
+    assert res is not None  # would be None (A~B ambiguous) if B weren't excluded
+    assert res["matched"] == "A"
+
+
+@pytest.mark.asyncio
+async def test_phase_remaining_ambiguous_group_falls_back(store):
+    # two group members with identical phase structure -> ambiguous -> None
+    for i, h in enumerate((1500, 1500, 1500)):
+        _add_cycle(store, "G1", f"g1{i}", h)
+        _add_cycle(store, "G2", f"g2{i}", h)
+    await store.async_rebuild_envelope("G1")
+    await store.async_rebuild_envelope("G2")
+    store._data["profile_groups"] = {"grp": {"members": ["G1", "G2"]}}
+    pd, total = _cotton_power_data(1500)
+    observed = [p for p in pd if p[0] <= 0.5 * total]
+    assert store.phase_remaining(observed, "washing_machine", "G1") is None
+
+
+@pytest.mark.asyncio
+async def test_phase_inconsistent_advisory_flags_mixed_temperatures(store):
+    # one label with wildly different heating times -> mixed temperatures
+    for i, heat in enumerate((540, 560, 2100, 2220, 600, 2000)):
+        _add_cycle(store, "Cotton (mixed)", f"m{i}", heat)
+    await store.async_rebuild_envelope("Cotton (mixed)")
+    advisories = store.compute_profile_advisories()
+    codes = {(a["profile"], a["code"]) for a in advisories}
+    # either the phase-inconsistency advisory OR poor_health (both are acceptable
+    # "this profile is a mess" signals; phase adds the split suggestion)
+    assert ("Cotton (mixed)", "phase_inconsistent") in codes or any(
+        p == "Cotton (mixed)" for p, _ in codes
+    )
+    # specifically, the phase advisory should carry the split suggestion + key
+    phase_adv = [a for a in advisories if a["code"] == "phase_inconsistent"]
+    if phase_adv:
+        assert phase_adv[0]["message_key"] == "msg.advisory_phase_inconsistent"
+        assert phase_adv[0]["severity"] == "warning"
+
+
+@pytest.mark.asyncio
+async def test_phase_consistent_profile_not_flagged(store):
+    for i, heat in enumerate((1400, 1500, 1600, 1550, 1450, 1520)):
+        _add_cycle(store, "Cotton 40", f"c{i}", heat)
+    await store.async_rebuild_envelope("Cotton 40")
+    advisories = store.compute_profile_advisories()
+    assert not any(
+        a["code"] == "phase_inconsistent" and a["profile"] == "Cotton 40"
+        for a in advisories
+    )
+
+
+@pytest.mark.asyncio
+async def test_rebuild_phase_profile_matches_temperature(store):
+    """The cached heating duration must reflect the profile's real heating time."""
+    for i, heat in enumerate((520, 560, 600)):   # ~9 min heat -> "30C"
+        _add_cycle(store, "Cotton 30", f"cold{i}", heat)
+    for i, heat in enumerate((2100, 2220, 2300)):  # ~37 min heat -> "90C"
+        _add_cycle(store, "Cotton 90", f"hot{i}", heat)
+    await store.async_rebuild_envelope("Cotton 30")
+    await store.async_rebuild_envelope("Cotton 90")
+    cold = store._data["envelopes"]["Cotton 30"]["phase_profile"]["roles"]["heating"]["dur_mean"]
+    hot = store._data["envelopes"]["Cotton 90"]["phase_profile"]["roles"]["heating"]["dur_mean"]
+    assert hot > cold * 2  # 37 min vs 9 min

@@ -107,9 +107,6 @@ class CycleDetectorConfig:
     device_type: str = DEVICE_TYPE_WASHING_MACHINE
     smoothing_window: int = 5
     interrupted_min_seconds: int = 150
-    abrupt_drop_watts: float = 500.0
-    abrupt_drop_ratio: float = 0.6
-    abrupt_high_load_factor: float = 5.0
     completion_min_seconds: int = 600
     start_duration_threshold: float = 5.0
     start_energy_threshold: float = 0.005
@@ -273,7 +270,6 @@ class CycleDetector:
         self._matched_profile: str | None = None
         self._verified_pause: bool = False
 
-        self._abrupt_drop: bool = False
         self._last_power: float | None = None
         self._time_in_state: float = 0.0
 
@@ -780,7 +776,6 @@ class CycleDetector:
                         self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
 
                     self._cycle_max_power = max(candidate_peak, power)
-                    self._abrupt_drop = False
             elif self._state != STATE_ANTI_WRINKLE:
                 self._anti_wrinkle_candidate_start = None
                 self._anti_wrinkle_candidate_peak = 0.0
@@ -891,7 +886,6 @@ class CycleDetector:
                 self._power_readings = [(timestamp, power)]
                 self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
                 self._cycle_max_power = power
-                self._abrupt_drop = False
             # NOTE: terminal-state expiry (Finished/Interrupted/Force-Stopped -> Off)
             # is owned solely by the manager (WashDataManager._handle_state_expiry),
             # which has a wall-clock timer that also fires when a change-only power
@@ -941,7 +935,6 @@ class CycleDetector:
                         if timestamp != start_timestamp:
                             self._power_readings.append((timestamp, power))
                         self._cycle_max_power = max(start_power, power)
-                        self._abrupt_drop = False
             else:
                 # Power dropped back below start threshold - clear the
                 # high-power streak anchor so the next high reading
@@ -1728,10 +1721,6 @@ class CycleDetector:
         if duration < self._config.interrupted_min_seconds:
             status = "interrupted"
         elif duration < self._config.completion_min_seconds:
-            status = "interrupted"
-        elif self._abrupt_drop and duration < (
-            self._config.interrupted_min_seconds + 90
-        ):
             status = "interrupted"
 
         # Trim leading/trailing zero readings for cleaner data

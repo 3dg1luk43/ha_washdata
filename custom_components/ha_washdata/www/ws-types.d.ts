@@ -19,16 +19,6 @@ export interface AnalyzeSplitResponse {
   full_duration_s: number;
 }
 
-export interface ApplyMergeResponse {
-  success: boolean;
-  new_id: string;
-}
-
-export interface ApplySplitResponse {
-  success: boolean;
-  new_ids: string[];
-}
-
 export interface ApplySuggestionsResponse {
   success: boolean;
   applied: string[];
@@ -263,6 +253,19 @@ export interface GetSettingsChangelogResponse {
   changelog: Record<string, unknown>[];
 }
 
+export interface GetSetupStatusResponse {
+  phase?: string;
+  message_key?: string;
+  message_params?: Record<string, unknown>;
+  cta_label_key?: string;
+  cta_action?: string;
+  secondary_label_key?: string | null;
+  secondary_action?: string | null;
+  skippable?: boolean;
+  dismissible?: boolean;
+  step_key?: string | null;
+}
+
 export interface GetShareableCyclesResponse {
   items?: unknown[];
   phase_programs?: unknown[];
@@ -278,19 +281,6 @@ export interface ListTasksResponse {
 
 export interface OkResponse {
   ok: boolean;
-}
-
-export interface PlaygroundSummary {
-  cycles: number;
-  requested: number;
-  concurrency: number;
-  detected: number;
-  missed: number;
-  false_end: number;
-  match_correct: number;
-  match_wrong: number;
-  unmatched: number;
-  skipped_ids: string[];
 }
 
 export interface ProfileEnvelope {
@@ -328,11 +318,6 @@ export interface RunPlaygroundHistoryResponse {
   baseline_rows?: Record<string, unknown>[];
   baseline_summary?: Record<string, unknown>;
   diff?: Record<string, string[]>;
-}
-
-export interface RunPlaygroundSimulationResponse {
-  results: Record<string, unknown>[];
-  summary: PlaygroundSummary;
 }
 
 export interface RunPlaygroundSweepResponse {
@@ -497,6 +482,10 @@ export interface SetOptionsRequest {
 }
 
 export interface GetSettingsChangelogRequest {
+  entry_id: string;
+}
+
+export interface GetSetupStatusRequest {
   entry_id: string;
 }
 
@@ -817,13 +806,6 @@ export interface TerminateCycleRequest {
   entry_id: string;
 }
 
-export interface RunPlaygroundSimulationRequest {
-  entry_id: string;
-  cycle_ids?: string[];
-  settings_override?: Record<string, unknown>;
-  concurrency?: number;
-}
-
 export interface RunPlaygroundCycleDetailRequest {
   entry_id: string;
   cycle_id: string;
@@ -883,6 +865,12 @@ export interface StartPlaygroundSweepRequest {
   objective: string;
   param_y?: string | null;
   values_y?: number[];
+}
+
+export interface StartPlaygroundCycleDetailRequest {
+  entry_id: string;
+  cycle_id: string;
+  settings_override?: Record<string, unknown>;
 }
 
 export interface StoreStatusRequest {
@@ -996,6 +984,7 @@ export interface WashDataWsRequests {
   "ha_washdata/get_options": GetOptionsRequest;
   "ha_washdata/set_options": SetOptionsRequest;
   "ha_washdata/get_settings_changelog": GetSettingsChangelogRequest;
+  "ha_washdata/get_setup_status": GetSetupStatusRequest;
   "ha_washdata/get_profiles": GetProfilesRequest;
   "ha_washdata/create_profile": CreateProfileRequest;
   "ha_washdata/rename_profile": RenameProfileRequest;
@@ -1059,7 +1048,6 @@ export interface WashDataWsRequests {
   "ha_washdata/pause_cycle": PauseCycleRequest;
   "ha_washdata/resume_cycle": ResumeCycleRequest;
   "ha_washdata/terminate_cycle": TerminateCycleRequest;
-  "ha_washdata/run_playground_simulation": RunPlaygroundSimulationRequest;
   "ha_washdata/run_playground_cycle_detail": RunPlaygroundCycleDetailRequest;
   "ha_washdata/run_playground_history": RunPlaygroundHistoryRequest;
   "ha_washdata/run_playground_sweep": RunPlaygroundSweepRequest;
@@ -1070,6 +1058,7 @@ export interface WashDataWsRequests {
   "ha_washdata/get_task_result": GetTaskResultRequest;
   "ha_washdata/start_playground_history": StartPlaygroundHistoryRequest;
   "ha_washdata/start_playground_sweep": StartPlaygroundSweepRequest;
+  "ha_washdata/start_playground_cycle_detail": StartPlaygroundCycleDetailRequest;
   "ha_washdata/store_status": StoreStatusRequest;
   "ha_washdata/store_connect": StoreConnectRequest;
   "ha_washdata/store_disconnect": StoreDisconnectRequest;
@@ -1096,6 +1085,7 @@ export interface WashDataWsResponses {
   "ha_washdata/get_options": GetOptionsResponse;
   "ha_washdata/set_options": SuccessResponse;
   "ha_washdata/get_settings_changelog": GetSettingsChangelogResponse;
+  "ha_washdata/get_setup_status": GetSetupStatusResponse;
   "ha_washdata/get_profiles": GetProfilesResponse;
   "ha_washdata/create_profile": CreateProfileResponse;
   "ha_washdata/rename_profile": SuccessResponse;
@@ -1104,7 +1094,7 @@ export interface WashDataWsResponses {
   "ha_washdata/save_profile_group": SuccessResponse;
   "ha_washdata/rename_profile_group": SuccessResponse;
   "ha_washdata/delete_profile_group": SuccessResponse;
-  "ha_washdata/rebuild_envelopes": SuccessResponse;
+  "ha_washdata/rebuild_envelopes": StartTaskResponse;
   "ha_washdata/get_profile_phases": GetProfilePhasesResponse;
   "ha_washdata/set_profile_phases": SuccessResponse;
   "ha_washdata/get_maintenance_log": GetMaintenanceLogResponse;
@@ -1137,10 +1127,10 @@ export interface WashDataWsResponses {
   "ha_washdata/clear_suggestions": SuccessResponse;
   "ha_washdata/run_suggestion_analysis": RunSuggestionAnalysisResponse;
   "ha_washdata/get_cycle_power_data": GetCyclePowerDataResponse;
-  "ha_washdata/trim_cycle": SuccessResponse;
+  "ha_washdata/trim_cycle": StartTaskResponse;
   "ha_washdata/analyze_split": AnalyzeSplitResponse;
-  "ha_washdata/apply_split": ApplySplitResponse;
-  "ha_washdata/apply_merge": ApplyMergeResponse;
+  "ha_washdata/apply_split": StartTaskResponse;
+  "ha_washdata/apply_merge": StartTaskResponse;
   "ha_washdata/get_profile_envelope": GetProfileEnvelopeResponse;
   "ha_washdata/get_profile_cycles": GetProfileCyclesResponse;
   "ha_washdata/get_panel_config": GetPanelConfigResponse;
@@ -1159,7 +1149,6 @@ export interface WashDataWsResponses {
   "ha_washdata/pause_cycle": OkResponse;
   "ha_washdata/resume_cycle": OkResponse;
   "ha_washdata/terminate_cycle": OkResponse;
-  "ha_washdata/run_playground_simulation": RunPlaygroundSimulationResponse;
   "ha_washdata/run_playground_cycle_detail": RunPlaygroundCycleDetailResponse;
   "ha_washdata/run_playground_history": RunPlaygroundHistoryResponse;
   "ha_washdata/run_playground_sweep": RunPlaygroundSweepResponse;
@@ -1170,6 +1159,7 @@ export interface WashDataWsResponses {
   "ha_washdata/get_task_result": TaskSnapshot;
   "ha_washdata/start_playground_history": StartTaskResponse;
   "ha_washdata/start_playground_sweep": StartTaskResponse;
+  "ha_washdata/start_playground_cycle_detail": StartTaskResponse;
   "ha_washdata/store_status": StoreStatusResponse;
   "ha_washdata/store_connect": StoreSimpleResponse;
   "ha_washdata/store_disconnect": StoreSimpleResponse;

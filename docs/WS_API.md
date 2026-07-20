@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**97 commands.**
+**98 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -13,6 +13,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_options` | entry_id | `GetOptionsResponse` |
 | `set_options` | entry_id, options | `SuccessResponse` |
 | `get_settings_changelog` | entry_id | `GetSettingsChangelogResponse` |
+| `get_setup_status` | entry_id | `GetSetupStatusResponse` |
 | `get_profiles` | entry_id | `GetProfilesResponse` |
 | `create_profile` | entry_id, name, reference_cycle?, manual_duration_min? | `CreateProfileResponse` |
 | `rename_profile` | entry_id, profile_name, new_name, manual_duration_min? | `SuccessResponse` |
@@ -21,7 +22,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `save_profile_group` | entry_id, name, members | `SuccessResponse` |
 | `rename_profile_group` | entry_id, name, new_name | `SuccessResponse` |
 | `delete_profile_group` | entry_id, name | `SuccessResponse` |
-| `rebuild_envelopes` | entry_id | `SuccessResponse` |
+| `rebuild_envelopes` | entry_id | `StartTaskResponse` |
 | `get_profile_phases` | entry_id, profile_name | `GetProfilePhasesResponse` |
 | `set_profile_phases` | entry_id, profile_name, phases | `SuccessResponse` |
 | `get_maintenance_log` | entry_id | `GetMaintenanceLogResponse` |
@@ -54,10 +55,10 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `clear_suggestions` | entry_id | `SuccessResponse` |
 | `run_suggestion_analysis` | entry_id | `RunSuggestionAnalysisResponse` |
 | `get_cycle_power_data` | entry_id, cycle_id | `GetCyclePowerDataResponse` |
-| `trim_cycle` | entry_id, cycle_id, start_s, end_s | `SuccessResponse` |
+| `trim_cycle` | entry_id, cycle_id, start_s, end_s | `StartTaskResponse` |
 | `analyze_split` | entry_id, cycle_id, gap_seconds? | `AnalyzeSplitResponse` |
-| `apply_split` | entry_id, cycle_id, split_offsets, segment_profiles? | `ApplySplitResponse` |
-| `apply_merge` | entry_id, cycle_ids, target_profile?, new_profile_name? | `ApplyMergeResponse` |
+| `apply_split` | entry_id, cycle_id, split_offsets, segment_profiles? | `StartTaskResponse` |
+| `apply_merge` | entry_id, cycle_ids, target_profile?, new_profile_name? | `StartTaskResponse` |
 | `get_profile_envelope` | entry_id, profile_name | `GetProfileEnvelopeResponse` |
 | `get_profile_cycles` | entry_id, profile_name, limit? | `GetProfileCyclesResponse` |
 | `get_panel_config` | — | `GetPanelConfigResponse` |
@@ -76,7 +77,6 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `pause_cycle` | entry_id | `OkResponse` |
 | `resume_cycle` | entry_id | `OkResponse` |
 | `terminate_cycle` | entry_id | `OkResponse` |
-| `run_playground_simulation` | entry_id, cycle_ids?, settings_override?, concurrency? | `RunPlaygroundSimulationResponse` |
 | `run_playground_cycle_detail` | entry_id, cycle_id, settings_override? | `RunPlaygroundCycleDetailResponse` |
 | `run_playground_history` | entry_id, cycle_ids?, settings_override?, concurrency? | `RunPlaygroundHistoryResponse` |
 | `run_playground_sweep` | entry_id, param, values, objective, cycle_ids?, concurrency?, param_y?, values_y? | `RunPlaygroundSweepResponse` |
@@ -87,6 +87,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_task_result` | task_id | `TaskSnapshot` |
 | `start_playground_history` | entry_id, cycle_ids?, settings_override? | `StartTaskResponse` |
 | `start_playground_sweep` | entry_id, param, values, objective, param_y?, values_y? | `StartTaskResponse` |
+| `start_playground_cycle_detail` | entry_id, cycle_id, settings_override? | `StartTaskResponse` |
 | `store_status` | entry_id | `StoreStatusResponse` |
 | `store_connect` | entry_id, refresh_token, uid, name? | `StoreSimpleResponse` |
 | `store_disconnect` | entry_id | `StoreSimpleResponse` |
@@ -180,6 +181,29 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `changelog` | yes | list[dict[str, any]] |
+
+## `ha_washdata/get_setup_status`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`GetSetupStatusResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `phase` | no | str |
+| `message_key` | no | str |
+| `message_params` | no | dict |
+| `cta_label_key` | no | str |
+| `cta_action` | no | str |
+| `secondary_label_key` | no | str \| null |
+| `secondary_action` | no | str \| null |
+| `skippable` | no | bool |
+| `dismissible` | no | bool |
+| `step_key` | no | str \| null |
 
 ## `ha_washdata/get_profiles`
 
@@ -321,11 +345,11 @@ _None._
 | --- | --- | --- |
 | `entry_id` | yes | str |
 
-**Response** (`SuccessResponse`)
+**Response** (`StartTaskResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `success` | yes | bool |
+| `task_id` | yes | str |
 
 ## `ha_washdata/get_profile_phases`
 
@@ -848,11 +872,11 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `start_s` | yes | float |
 | `end_s` | yes | float |
 
-**Response** (`SuccessResponse`)
+**Response** (`StartTaskResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `success` | yes | bool |
+| `task_id` | yes | str |
 
 ## `ha_washdata/analyze_split`
 
@@ -884,12 +908,11 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `split_offsets` | yes | list[float] |
 | `segment_profiles` | no | list |
 
-**Response** (`ApplySplitResponse`)
+**Response** (`StartTaskResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `success` | yes | bool |
-| `new_ids` | yes | list[str] |
+| `task_id` | yes | str |
 
 ## `ha_washdata/apply_merge`
 
@@ -902,12 +925,11 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `target_profile` | no | str\|null |
 | `new_profile_name` | no | str\|null |
 
-**Response** (`ApplyMergeResponse`)
+**Response** (`StartTaskResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `success` | yes | bool |
-| `new_id` | yes | str |
+| `task_id` | yes | str |
 
 ## `ha_washdata/get_profile_envelope`
 
@@ -1200,24 +1222,6 @@ _None._
 | --- | --- | --- |
 | `ok` | yes | bool |
 
-## `ha_washdata/run_playground_simulation`
-
-**Request parameters**
-
-| Param | Required | Type |
-| --- | --- | --- |
-| `entry_id` | yes | str |
-| `cycle_ids` | no | list[str] |
-| `settings_override` | no | dict |
-| `concurrency` | no | int |
-
-**Response** (`RunPlaygroundSimulationResponse`)
-
-| Field | Always present | Type |
-| --- | --- | --- |
-| `results` | yes | list[dict[str, any]] |
-| `summary` | yes | PlaygroundSummary |
-
 ## `ha_washdata/run_playground_cycle_detail`
 
 **Request parameters**
@@ -1427,6 +1431,22 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `objective` | yes | str |
 | `param_y` | no | str\|null |
 | `values_y` | no | list[float] |
+
+**Response** (`StartTaskResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `task_id` | yes | str |
+
+## `ha_washdata/start_playground_cycle_detail`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `cycle_id` | yes | str |
+| `settings_override` | no | dict |
 
 **Response** (`StartTaskResponse`)
 

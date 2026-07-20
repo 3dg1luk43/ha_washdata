@@ -44,9 +44,6 @@ def detector_config():
         off_delay=60,
         interrupted_min_seconds=150,
         completion_min_seconds=600,
-        abrupt_drop_watts=500.0,
-        abrupt_drop_ratio=0.5,
-        abrupt_high_load_factor=1.2,
         start_duration_threshold=0.0,
     )
 

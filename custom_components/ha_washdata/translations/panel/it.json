@@ -87,7 +87,7 @@
     "on_cycle_finished": "Il ciclo è terminato",
     "on_cycle_started": "Il ciclo è iniziato",
     "pause_cycle": "Pausa",
-    "pause_cycle_tip": "Metti in pausa il ciclo in corso — l'elettrodomestico riprenderà da dove si era fermato",
+    "pause_cycle_tip": "Metti in pausa il ciclo in corso – l'elettrodomestico riprenderà da dove si era fermato",
     "pg_apply_device": "Applica al dispositivo",
     "pg_autofill": "Compilazione automatica",
     "play": "Riproduci",
@@ -97,8 +97,8 @@
     "process_tip": "Salva la traccia registrata come profilo nuovo o esistente",
     "rebuild": "Ricostruisci le buste",
     "rebuild_envelope": "Ricostruisci la busta",
-    "rebuild_tip": "Ricalcola la busta di potenza attesa (banda min/max) per tutti i profili dai loro cicli etichettati — eseguire dopo aver etichettato nuovi cicli o corretto quelli esistenti",
-    "rec_start_tip": "Avvia la registrazione della traccia di potenza dell'elettrodomestico — avvia appena prima di eseguire un ciclo",
+    "rebuild_tip": "Ricalcola la busta di potenza attesa (banda min/max) per tutti i profili dai loro cicli etichettati – eseguire dopo aver etichettato nuovi cicli o corretto quelli esistenti",
+    "rec_start_tip": "Avvia la registrazione della traccia di potenza dell'elettrodomestico – avvia appena prima di eseguire un ciclo",
     "rec_stop": "Fermare",
     "rec_stop_tip": "Ferma la registrazione e mantieni la traccia acquisita per la revisione",
     "record": "Inizia a registrare",
@@ -182,7 +182,7 @@
     },
     "attn_sub": "Correggi i conflitti prima di salvare",
     "attn_title": "{n} conflitto{s} nelle impostazioni",
-    "settings_banner": "{n} conflitto{s} nelle impostazioni — controlla le sezioni evidenziate e correggile prima di salvare.",
+    "settings_banner": "{n} conflitto{s} nelle impostazioni – controlla le sezioni evidenziate e correggile prima di salvare.",
     "settings_banner_btn": "Vai al primo",
     "confidence": {
       "auto": "Deve essere maggiore o uguale alla Soglia di corrispondenza ({match})",
@@ -451,9 +451,9 @@
     "show_expected": "Mostra sovrapposizione curva prevista (profilo corrispondente, arancione)",
     "show_raw": "Mostra l'interruttore del segnale grezzo della presa nel grafico di potenza in tempo reale",
     "sparkline": "Andamento recente durata cicli",
-    "stage2": "Fase 2 — somiglianza di base",
-    "stage3": "Fase 3 — DTW",
-    "stage4": "Fase 4 — concordanza",
+    "stage2": "Fase 2 – somiglianza di base",
+    "stage3": "Fase 3 – DTW",
+    "stage4": "Fase 4 – concordanza",
     "status": "Stato",
     "tail_trim": "Taglio(i) di coda",
     "timer_auto_pause": "Pausa automatica",
@@ -561,7 +561,12 @@
     "flags": "Indicatori",
     "include_phase_map": "Includi mappa delle fasi",
     "include_settings": "Includi impostazioni di rilevamento e riconoscimento",
-    "show_contributor": "Mostra i nomi dei collaboratori"
+    "show_contributor": "Mostra i nomi dei collaboratori",
+    "task_pg_detail": "Simula ciclo",
+    "task_split": "Divisione del ciclo",
+    "task_trim": "Ritaglio del ciclo",
+    "task_merge": "Unione dei cicli",
+    "task_rebuild": "Ricostruzione degli inviluppi"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -645,7 +650,7 @@
     "artifact_dip_detail": "È sceso sotto la banda di potenza normale per ~{n}s.",
     "artifact_footer": "Evidenziato nel grafico sopra. Si tratta di artefatti temporanei (ad esempio la porta aperta a metà ciclo), non necessariamente problemi.",
     "artifact_header": "{n} anomalie rilevate durante questo ciclo",
-    "artifact_pause_detail": "La potenza è scesa quasi a zero per ~{n}s poi è ripresa — probabilmente la porta è stata aperta a metà ciclo o il ciclo è stato messo in pausa.",
+    "artifact_pause_detail": "La potenza è scesa quasi a zero per ~{n}s poi è ripresa – probabilmente la porta è stata aperta a metà ciclo o il ciclo è stato messo in pausa.",
     "artifact_spike_detail": "Ha superato la banda di potenza normale per ~{n}s.",
     "auto_label_intro": "Assegnare profili a cicli senza etichetta la cui confidenza di corrispondenza supera la soglia.",
     "automations_intro": "WashData genera gli eventi {start} / {end} ed espone entità, quindi le notifiche e le azioni si costruiscono al meglio come normali automatizzazioni di Home Assistant. Le automatizzazioni che utilizzano questo dispositivo appaiono di seguito.",
@@ -654,10 +659,10 @@
     "collecting_data": "Raccolta dati - ancora {need} ciclo{plural} prima che l'ottimizzazione possa iniziare ({current}/{min}).",
     "compare_overlay_profiles": "Profili sovrapposti (debole)",
     "compare_profiles_tip": "Sovrapponi altri involucri del profilo sulla tabella sopra per vedere quale si adatta meglio a questo ciclo.",
-    "compare_selected_cycles": "Cicli selezionati (fissi) — mostra/nascondi",
+    "compare_selected_cycles": "Cicli selezionati (fissi) – mostra/nascondi",
     "consider_new_profile": "Valuta la possibilità di creare un nuovo profilo.",
     "coverage_gap": "i cicli recenti non hanno un profilo corrispondente ({pct}% degli ultimi 30).",
-    "coverage_gap_similar_cycles": "{count} cicli simili senza etichetta trovati — crea un profilo per iniziare a trovare corrispondenze.",
+    "coverage_gap_similar_cycles": "{count} cicli simili senza etichetta trovati – crea un profilo per iniziare a trovare corrispondenze.",
     "cycles_deleted": "{count} ciclo/i eliminato/i",
     "enough_data": "Dati sufficienti per apprendere ({current}/{min} cicli).",
     "export_description": "Esporta tutti i profili e i cicli in JSON o ripristina da un'esportazione precedente.",
@@ -686,7 +691,7 @@
     "ml_learned_intro": "Modelli ottimizzati per questa macchina.",
     "ml_loading": "caricamento ML...",
     "ml_settings_intro": "Due interruttori indipendenti: uno applica i modelli durante l'esecuzione di un ciclo, l'altro consente a WashData di adattarli alla tua macchina nel tempo.",
-    "name_first_program": "Hai cicli sufficienti — assegna un nome al tuo primo programma per iniziare l'abbinamento.",
+    "name_first_program": "Hai cicli sufficienti – assegna un nome al tuo primo programma per iniziare l'abbinamento.",
     "near_duplicate_cluster": "rilevato cluster di profili quasi duplicati. Il raggruppamento consente all'abbinamento di scegliere in modo affidabile tra sosia (ad esempio lo stesso programma a temperatura/centrifuga diversa).",
     "no_cycles_match": "Nessun ciclo corrisponde al filtro corrente.",
     "no_cycles_profile": "Nessun ciclo per questo profilo.",
@@ -713,7 +718,7 @@
     "notify_services_hint": "Usa gli ID servizio {entity} (separati da virgole per più servizi). Variabili del modello: {vars}.",
     "old_actions_warning": "Configurato con il vecchio editor delle azioni (ora rimosso). Si attivano ancora durante gli eventi del ciclo ma non possono più essere modificati qui. Convertili in una normale automazione o rimuovili.",
     "onboarding_progress": "{n} / 3 cicli osservati",
-    "onboarding_watching": "Usa l'elettrodomestico normalmente — WashData sta osservando. Dopo 3 cicli inizierà l'abbinamento dei programmi.",
+    "onboarding_watching": "Usa l'elettrodomestico normalmente – WashData sta osservando. Dopo 3 cicli inizierà l'abbinamento dei programmi.",
     "pending_feedback": "In attesa di feedback sul rilevamento",
     "performance_trend": "Andamento delle prestazioni ({n} cicli)",
     "pg_analysis_empty": "Carica un ciclo per vedere l'analisi di abbinamento.",
@@ -763,7 +768,7 @@
     "setting_changed": "Modificato da {old} a {new} il {date}",
     "settings_basic_note": "Vengono mostrate le impostazioni essenziali. Passa ad Avanzato per l'elenco completo.",
     "shape_drift_advisory": "⚠ Forma in deriva",
-    "shape_drift_detail": "Il profilo di potenza per questo profilo è cambiato nel tempo — possibile usura dell'apparecchio o manutenzione necessaria (es. decalcificazione, pulizia del filtro).",
+    "shape_drift_detail": "Il profilo di potenza per questo profilo è cambiato nel tempo – possibile usura dell'apparecchio o manutenzione necessaria (es. decalcificazione, pulizia del filtro).",
     "show_all_settings": "Mostra tutte le impostazioni",
     "showing_suggestions": "Visualizzazione dell'impostazione {count} con suggerimenti.",
     "split_intro": "Fare clic sul grafico per aggiungere o rimuovere un punto di divisione o per rilevare automaticamente gli spazi inattivi. Ogni segmento risultante può ottenere il proprio profilo.",
@@ -789,10 +794,10 @@
     "toast_revert_failed": "Ripristino fallito: {error}",
     "toast_reverted": "{key} ripristinato",
     "toast_save_failed": "Salvataggio fallito: {error}",
-    "trend_duration_longer": "Durata tendenzialmente più lunga ({pct}%/ciclo) — media recente {avg}",
-    "trend_duration_shorter": "La durata tendenzialmente è più breve ({pct}%/ciclo) — media recente {avg}",
+    "trend_duration_longer": "Durata tendenzialmente più lunga ({pct}%/ciclo) – media recente {avg}",
+    "trend_duration_shorter": "La durata tendenzialmente è più breve ({pct}%/ciclo) – media recente {avg}",
     "trend_energy_down": "Energia in diminuzione ({pct}%/ciclo)",
-    "trend_energy_up": "Energia in aumento ({pct}%/ciclo) — media recente {avg}",
+    "trend_energy_up": "Energia in aumento ({pct}%/ciclo) – media recente {avg}",
     "trim_intro": "Trascina le maniglie rosse o inserisci i valori. Tutto fuori dalla finestra viene rimosso.",
     "tuning_suggestions_available": "{count} suggerimento di ottimizzazione disponibile dai cicli osservati. Appaiono accanto ai campi pertinenti.",
     "unsure_detected_prefix": "WashData non è sicuro di averlo rilevato",
@@ -857,7 +862,9 @@
     "share_guidelines_title": "Prima di condividere",
     "store_download_device_intro": "Adotta ogni programma condiviso e i suoi cicli di riferimento sul tuo dispositivo. I tuoi cicli registrati e le tue statistiche non vengono modificati.",
     "store_share_device_intro": "Carica {brand} {model} con i cicli di riferimento che selezioni. Altri con lo stesso elettrodomestico possono adottare i tuoi programmi. Le voci vengono revisionate prima di apparire pubblicamente.",
-    "share_profile_no_cycles": "Nessun ciclo di riferimento -- contrassegna un ciclo come ⭐ nella scheda Cicli per includere questo profilo"
+    "share_profile_no_cycles": "Nessun ciclo di riferimento -- contrassegna un ciclo come ⭐ nella scheda Cicli per includere questo profilo",
+    "advisory_phase_inconsistent": "'{name}' sembra mescolare programmi o temperature diversi - i suoi cicli riscaldano per intervalli di tempo molto diversi. Dividerlo in profili separati (ad es. per temperatura) migliorerà la corrispondenza e le stime dei tempi.",
+    "advisory_phase_inconsistent_title": "⚠ Possibili programmi misti"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Calo improvviso trattato come fine immediata",
@@ -869,12 +876,19 @@
     "start_duration_threshold": "Secondi sopra la soglia per confermare l'avvio",
     "start_threshold_w": "Watt minimi per contare come avviato",
     "stop_threshold_w": "Al di sotto, la macchina è considerata spenta",
-    "dtw_bandwidth": "Quanta deformazione temporale consente la corrispondenza della forma",
-    "corr_weight": "Peso della forma della curva rispetto al livello di potenza nella corrispondenza",
-    "duration_weight": "Quanto la concordanza della durata influisce sulla corrispondenza",
-    "energy_weight": "Quanto la concordanza dell'energia influisce sulla corrispondenza",
-    "profile_match_min_duration_ratio": "Ciclo più breve (rispetto al profilo) che può ancora corrispondere",
-    "profile_match_max_duration_ratio": "Ciclo più lungo (rispetto al profilo) che può ancora corrispondere"
+    "dtw_bandwidth": "Fase 3: banda di deformazione Sakoe-Chiba (0 = DTW disattivato; predefinito 0,2 = 20% della lunghezza del ciclo)",
+    "corr_weight": "Fase 2: equilibrio tra forma della curva (correlazione) e livello di potenza (MAE); predefinito 0,45",
+    "duration_weight": "Fase 4: quanto la concordanza di durata influisce sul punteggio finale (predefinito 0,22)",
+    "energy_weight": "Fase 4: quanto la concordanza di energia influisce sul punteggio finale (predefinito 0,22)",
+    "profile_match_min_duration_ratio": "Fase 1: durata minima del ciclo come frazione della durata del profilo; predefinito 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Fase 1: durata massima del ciclo come frazione della durata del profilo; predefinito 1,5 (150%)",
+    "keep_min_score": "Fase 2: punteggio minimo per restare in gara; il predefinito 0,1 ammette candidati deboli, le fasi successive scelgono il migliore",
+    "dtw_blend": "Fase 3: 0 = solo punteggio centrale, 1 = solo punteggio DTW, 0,5 = mix equilibrato (predefinito)",
+    "dtw_ensemble_w": "Fase 3 (modalità ensemble): peso su L1 scalato rispetto a DTW derivato; il predefinito 0,7 favorisce la sensibilità al livello",
+    "dtw_ddtw_scale": "Fase 3: distanza di semi-saturazione DDTW; minore = maggiore sensibilità alla forma (predefinito 30)",
+    "dtw_refine_top_n": "Fase 3: candidati rivalutati da DTW; aumentare a 7-9 se il profilo corretto si classifica 4°-5° (predefinito 5)",
+    "duration_scale": "Fase 4: log-rapporto in cui la concordanza di durata si dimezza; minore = penalità più severa (predefinito 0,175)",
+    "energy_scale": "Fase 4: log-rapporto in cui la concordanza di energia si dimezza; minore = penalità più severa (predefinito 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Brevi tumble occasionali dopo il completamento per ridurre le grinze del bucato.",
@@ -957,6 +971,10 @@
     "triggers": {
       "intro": "Segnali esterni opzionali: un trigger di fine, un sensore di porta, un interruttore di pausa e il promemoria di scarico.",
       "label": "Trigger e porte"
+    },
+    "phase_eta": {
+      "label": "Tempo rimanente",
+      "intro": "Tempo rimanente in base alle fasi, per le macchine la cui durata del ciclo dipende dalla temperatura o dalla centrifuga."
     }
   },
   "setting": {
@@ -1039,6 +1057,10 @@
     "energy_price_static": {
       "doc": "Prezzo fisso per kWh utilizzato per i dati sui costi quando non è impostata alcuna entità di prezzo in tempo reale sopra.",
       "label": "Prezzo energia statico (per kWh)"
+    },
+    "energy_sensor": {
+      "doc": "Contatore di energia cumulativa opzionale (total_increasing in kWh/Wh, ad es. il contatore di consumo totale della presa stessa). Quando è impostato, l'energia riportata di ogni ciclo viene ricavata dalla differenza di questo contatore tra inizio e fine, il che evita la sottostima che si ottiene integrando un sensore di potenza che aggiorna lentamente. Ripiega sul valore integrato se la lettura manca, se la sua unità è sconosciuta o se il delta non è positivo. Lascia vuoto per continuare a integrare il sensore di potenza.",
+      "label": "Entità del contatore di energia"
     },
     "expose_debug_entities": {
       "doc": "Pubblica entità HA diagnostiche aggiuntive (confidenza della corrispondenza, ambiguità, stati interni). Disattivato mantiene l'elenco delle entità pulito per l'uso normale.",
@@ -1322,6 +1344,38 @@
     },
     "show_contributor": {
       "doc": "Mostra l'attribuzione \"di <collaboratore>\" sugli elettrodomestici della community e sui cicli di riferimento."
+    },
+    "enable_phase_matching": {
+      "label": "Tempo rimanente in base alle fasi",
+      "doc": "Suddivide ogni ciclo in corso in fasi (riscaldamento, lavaggio, centrifuga) e distribuisce il tempo rimanente per fase, combinato con la stima classica - basandosi sulla ripartizione per fasi all'inizio del ciclo e sulla stima classica verso la fine. Questo personalizza il conto alla rovescia in base a quanto la tua macchina riscalda e funziona realmente, cosa più evidente nella prima metà di un ciclo. Disattivato = solo la stima classica. È interessata solo la visualizzazione del tempo rimanente; la corrispondenza dei programmi e il rilevamento dei cicli restano invariati."
+    },
+    "keep_min_score": {
+      "label": "Score min corrispondenza",
+      "doc": "Punteggio di similarità minimo che un candidato deve avere per restare in gara. Il predefinito 0,1 è volutamente permissivo - ammette anche candidati deboli e si affida alle fasi successive per trovare la migliore corrispondenza. Aumentarlo per eliminare prima i profili improbabili; ridurlo per ampliare il pool iniziale di candidati."
+    },
+    "dtw_blend": {
+      "label": "Fusione Warp",
+      "doc": "Quanto il punteggio di allineamento per deformazione temporale (DTW) sostituisce il punteggio centrale della fase 2. 0 = usa solo il punteggio della fase 2, 1 = usa solo il punteggio DTW, 0,5 (predefinito) = mix equilibrato. Aumentarlo per affidarsi maggiormente all'allineamento Warp quando i programmi hanno livelli di potenza simili ma schemi temporali diversi."
+    },
+    "dtw_ensemble_w": {
+      "label": "Mix Warp ensemble",
+      "doc": "In modalità DTW ensemble (la predefinita), il peso su L1 scalato rispetto a DTW derivato (DDTW). 1,0 = solo L1 scalato, 0 = solo DDTW, 0,7 = predefinito. La variante L1 scalata confronta i livelli di potenza; la variante derivata reagisce a come la potenza cambia nel tempo. Ensemble li combina entrambi."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Scala Warp derivata",
+      "doc": "Distanza di semi-saturazione per la valutazione DTW derivata. Il punteggio si dimezza quando la distanza DDTW è uguale a questo valore. Minore = maggiore sensibilità alle differenze di forma. Il predefinito 30 è calibrato su tracce di potenza tipiche degli elettrodomestici. Influisce solo sulle modalità DTW ensemble e ddtw."
+    },
+    "dtw_refine_top_n": {
+      "label": "Conteggio affinamento Warp",
+      "doc": "Quanti candidati principali della fase 2 vengono rivalutati da DTW. DTW è più costoso, quindi viene applicato solo agli N migliori candidati. Predefinito 5. Aumentarlo (a 7-9) se il profilo corretto a volte raggiunge solo il 4° o 5° posto dopo la fase 2 - DTW può recuperarlo. Ridurlo velocizza leggermente il matching."
+    },
+    "duration_scale": {
+      "label": "Nitidezza durata",
+      "doc": "Precisione della penalità di concordanza di durata nella fase 4. È il log-rapporto in cui il punteggio di concordanza si dimezza. Minore = più severo: una discordanza di durata penalizza di più. Il predefinito 0,175 corrisponde a circa il 18% di tolleranza di durata a metà peso. Combinare con Peso durata."
+    },
+    "energy_scale": {
+      "label": "Nitidezza energia",
+      "doc": "Precisione della penalità di concordanza di energia. Minore = più severo: una discordanza di energia penalizza di più. Il predefinito 0,25 è intenzionalmente più indulgente della Precisione di durata, perché l'energia varia con il carico. Combinare con Peso energia."
     }
   },
   "setting_group": {
@@ -1570,24 +1624,24 @@
         "lower": "Etichetta più cicli automaticamente; alcuni possono essere mal identificati"
       },
       "duration_tolerance": {
-        "higher": "Accetta un intervallo di durata più ampio — corrispondenza più flessibile",
-        "lower": "Richiede una durata più vicina — più rigoroso, può rifiutare cicli insoliti"
+        "higher": "Accetta un intervallo di durata più ampio – corrispondenza più flessibile",
+        "lower": "Richiede una durata più vicina – più rigoroso, può rifiutare cicli insoliti"
       },
       "end_energy_threshold": {
         "higher": "Chiude solo i cicli che hanno consumato energia sostanziale",
         "lower": "Chiude anche cicli brevi o a basso consumo energetico"
       },
       "end_repeat_count": {
-        "higher": "Richiede che il segnale di fine si ripeta più volte — più robusto, leggermente più lento",
-        "lower": "Termina dopo meno ripetizioni — rilevamento più rapido, maggior rischio di fine falsa"
+        "higher": "Richiede che il segnale di fine si ripeta più volte – più robusto, leggermente più lento",
+        "lower": "Termina dopo meno ripetizioni – rilevamento più rapido, maggior rischio di fine falsa"
       },
       "learning_confidence": {
-        "higher": "Impara solo da corrispondenze molto affidabili — più lento ma più preciso",
+        "higher": "Impara solo da corrispondenze molto affidabili – più lento ma più preciso",
         "lower": "Impara da più cicli; il modello potrebbe essere meno preciso"
       },
       "min_off_gap": {
         "higher": "Richiede più tempo di inattività prima di avviare un nuovo ciclo",
-        "lower": "Una breve inattività avvia un nuovo ciclo — esecuzioni consecutive possono dividersi"
+        "lower": "Una breve inattività avvia un nuovo ciclo – esecuzioni consecutive possono dividersi"
       },
       "min_power": {
         "higher": "Meno sensibile al consumo in standby; potrebbe non rilevare programmi a bassa potenza",
@@ -1598,24 +1652,24 @@
         "lower": "Interrompe prima un ciclo bloccato"
       },
       "off_delay": {
-        "higher": "Più tempo per le pause dell'elettrodomestico — gestisce lunghe fasi di ammollo o asciugatura",
-        "lower": "Rilevamento della fine più rapido — ideale per elettrodomestici con on/off netto"
+        "higher": "Più tempo per le pause dell'elettrodomestico – gestisce lunghe fasi di ammollo o asciugatura",
+        "lower": "Rilevamento della fine più rapido – ideale per elettrodomestici con on/off netto"
       },
       "profile_match_threshold": {
         "higher": "Conferma solo le corrispondenze ad alta affidabilità; più cicli rimangono senza etichetta",
         "lower": "Corrisponde a più cicli; alcuni potrebbero essere leggermente errati"
       },
       "running_dead_zone": {
-        "higher": "Ignora brevi picchi di potenza durante il riposo — meno sensibile al rumore",
-        "lower": "Risponde a impulsi più brevi — rileva attività transitorie rapide"
+        "higher": "Ignora brevi picchi di potenza durante il riposo – meno sensibile al rumore",
+        "lower": "Risponde a impulsi più brevi – rileva attività transitorie rapide"
       },
       "start_threshold_w": {
         "higher": "Evita avvii falsi causati da brevi picchi di potenza",
         "lower": "Rileva programmi a bassa potenza; può attivarsi con il rumore"
       },
       "stop_threshold_w": {
-        "higher": "Termina il ciclo prima — potrebbe chiudersi durante una pausa",
-        "lower": "Attende più a lungo per terminare — meno completamenti prematuri"
+        "higher": "Termina il ciclo prima – potrebbe chiudersi durante una pausa",
+        "lower": "Attende più a lungo per terminare – meno completamenti prematuri"
       },
       "watchdog_interval": {
         "higher": "Fasi silenziose più lunghe consentite; meno false fermate forzate",
@@ -1766,6 +1820,69 @@
     },
     "pg_sweep": {
       "optimize": "Ottimizza: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simula ciclo"
+    },
+    "split": {
+      "apply": "Divisione del ciclo"
+    },
+    "trim": {
+      "apply": "Ritaglio del ciclo"
+    },
+    "merge": {
+      "apply": "Unione dei cicli"
+    },
+    "rebuild": {
+      "envelopes": "Ricostruzione degli inviluppi"
+    },
+    "cancelling": "Annullamento..."
+  },
+  "setup": {
+    "hdr": {
+      "card": "Configurazione dispositivo",
+      "healthy_chip": "Configurazione completata"
+    },
+    "phase0": {
+      "washer": "WashData sta già rilevando i tuoi cicli. Registra il tuo primo ciclo per abilitare i nomi dei programmi e le stime dei tempi.",
+      "dishwasher": "WashData sta monitorando. Le lavastoviglie hanno cicli complessi – è vivamente consigliato registrare il primo ciclo. Se un ciclo rilevato dura troppo a lungo, usa l'editor dei cicli per ritagliarlo prima di salvarlo come profilo.",
+      "generic": "WashData sta monitorando. Registra o etichetta un ciclo rilevato per iniziare a creare profili."
+    },
+    "phase1a": {
+      "labelled": "Buon inizio – il tuo primo programma è salvato. Per dati più precisi, considera di registrare il prossimo ciclo con il widget di registrazione."
+    },
+    "phase1b": {
+      "recorded": "La tua registrazione è stata salvata come {profile_name}. Ora registra o etichetta gli altri programmi che usi di solito per ampliare la copertura."
+    },
+    "phase1c": {
+      "verify": "Hai {count} programmi dalla community. Esegui un ciclo per verificare che WashData li riconosca correttamente – l'abbinamento migliorerà man mano che il dispositivo accumula il proprio storico."
+    },
+    "phase2": {
+      "cluster": "WashData ha rilevato {count} cicli che non corrispondono a nessun programma salvato – si assomigliano tra loro. Vuoi creare un nuovo profilo per essi?",
+      "unmatched": "L'ultimo ciclo non ha corrisposto a nessun programma salvato. È un nuovo programma?"
+    },
+    "phase3": {
+      "suggestions": "WashData ha raccomandazioni sulle impostazioni basate sulla cronologia dei cicli – revisionale per migliorare la precisione di rilevamento.",
+      "groups": "Alcuni dei tuoi profili sembrano lo stesso programma a temperature diverse. Organizzali in un gruppo per un abbinamento più affidabile.",
+      "phases": "Aggiungi le fasi del programma a {profile_name} per stime più accurate del tempo rimanente."
+    },
+    "phase4": {
+      "healthy": "Questo dispositivo è completamente configurato ({profile_count} profili)."
+    },
+    "cta": {
+      "start_recording": "Avvia registrazione",
+      "label_detected_cycle": "Ho già un ciclo rilevato – etichettalo invece",
+      "browse_cycles": "Sfoglia i cicli per etichettarne un altro",
+      "view_profiles": "Visualizza i tuoi profili",
+      "create_from_cluster": "Crea profilo da questi cicli",
+      "create_profile": "Crea un profilo per questo programma",
+      "review_suggestions": "Rivedi i suggerimenti",
+      "organise_profiles": "Organizza i profili",
+      "configure_phases": "Configura le fasi",
+      "skip_step": "Salta questo passaggio",
+      "skip_forever": "Non mostrare più",
+      "hide_guidance": "Nascondi guida",
+      "show_guidance": "Mostra guida"
     }
   }
 }

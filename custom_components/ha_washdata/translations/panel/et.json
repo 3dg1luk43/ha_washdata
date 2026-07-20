@@ -87,7 +87,7 @@
     "on_cycle_finished": "Tsükkel lõppenud",
     "on_cycle_started": "Tsükkel algas",
     "pause_cycle": "Paus",
-    "pause_cycle_tip": "Peata käimasolev tsükkel — seade jätkab sealt, kus pooleli jäi",
+    "pause_cycle_tip": "Peata käimasolev tsükkel – seade jätkab sealt, kus pooleli jäi",
     "pg_apply_device": "Rakenda seadmele",
     "pg_autofill": "Täida automaatselt",
     "play": "Esita",
@@ -97,8 +97,8 @@
     "process_tip": "Salvesta salvestatud jälg uue või olemasoleva profiilina",
     "rebuild": "Ümbrikute ümberehitamine",
     "rebuild_envelope": "Ümberehitage ümbrik",
-    "rebuild_tip": "Arvuta uuesti kõigi profiilide eeldatav võimsusümbrik (min/max riba) nende märgistatud tsüklite põhjal — käivitage pärast uute tsüklite märgistamist või vanade parandamist",
-    "rec_start_tip": "Alusta seadme võimsusjälje salvestamist — käivita vahetult enne tsükli käivitamist",
+    "rebuild_tip": "Arvuta uuesti kõigi profiilide eeldatav võimsusümbrik (min/max riba) nende märgistatud tsüklite põhjal – käivitage pärast uute tsüklite märgistamist või vanade parandamist",
+    "rec_start_tip": "Alusta seadme võimsusjälje salvestamist – käivita vahetult enne tsükli käivitamist",
     "rec_stop": "Peatus",
     "rec_stop_tip": "Peata salvestamine ja hoia jäädvustatud jälg ülevaatamiseks",
     "record": "Alustage salvestamist",
@@ -182,7 +182,7 @@
     },
     "attn_sub": "Lahendage konfliktid enne salvestamist",
     "attn_title": "{n} seadete konflikt{s}",
-    "settings_banner": "{n} seadete konflikt{s} — kontrollige esile tõstetud sektsioone ja parandage enne salvestamist.",
+    "settings_banner": "{n} seadete konflikt{s} – kontrollige esile tõstetud sektsioone ja parandage enne salvestamist.",
     "settings_banner_btn": "Mine esimesele",
     "confidence": {
       "auto": "Peab olema vähemalt vaste läve tasemel ({match})",
@@ -451,9 +451,9 @@
     "show_expected": "Kuva eeldatav kõvera ülekate (sobiv profiil, oranž)",
     "show_raw": "Kuva töötlemata pistikupesa lülitit reaalajas võimsusgraafikus",
     "sparkline": "Hiljutine tsükli kestuse trend",
-    "stage2": "Etapp 2 — põhisarnasus",
-    "stage3": "Etapp 3 — DTW",
-    "stage4": "Etapp 4 — kokkulangevus",
+    "stage2": "Etapp 2 – põhisarnasus",
+    "stage3": "Etapp 3 – DTW",
+    "stage4": "Etapp 4 – kokkulangevus",
     "status": "Olek",
     "tail_trim": "Saba trimm (id)",
     "timer_auto_pause": "Automaatne paus",
@@ -561,7 +561,12 @@
     "flags": "Embleemid",
     "include_phase_map": "Kaasa faasikaart",
     "include_settings": "Kaasa tuvastus- ja sobitamisseaded",
-    "show_contributor": "Näita kaastöötajate nimesid"
+    "show_contributor": "Näita kaastöötajate nimesid",
+    "task_pg_detail": "Tsükli simuleerimine",
+    "task_split": "Tsükli poolitamine",
+    "task_trim": "Tsükli kärpimine",
+    "task_merge": "Tsüklite ühendamine",
+    "task_rebuild": "Võimsusvahemike taasloomine"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -645,7 +650,7 @@
     "artifact_dip_detail": "Langes alla tavapärase võimsusriba umbes {n}s jooksul.",
     "artifact_footer": "Ülaltoodud graafikul esile tõstetud. Need on mööduvad artefaktid (nt uks avati tsükli keskel), mitte tingimata probleemid.",
     "artifact_header": "Selle tsükli jooksul tuvastati {n} anomaaliat",
-    "artifact_pause_detail": "Võimsus langes peaaegu nulli umbes {n}s jooksul ja taastus seejärel — tõenäoliselt avati uks tsükli keskel või tsükkel peatati.",
+    "artifact_pause_detail": "Võimsus langes peaaegu nulli umbes {n}s jooksul ja taastus seejärel – tõenäoliselt avati uks tsükli keskel või tsükkel peatati.",
     "artifact_spike_detail": "Ületas tavapärase võimsusriba umbes {n}s jooksul.",
     "auto_label_intro": "Määrake profiilid märgistamata tsüklitele, mille sobivuse usaldus eemaldab läve.",
     "automations_intro": "WashData käivitab {start} / {end} sündmusi ja avaldab olemeid, seega on teated ja toimingud kõige paremini ehitada tavaliste Home Assistanti automaatikana. Seda seadet kasutavad automaatikad kuvatakse allpool.",
@@ -654,10 +659,10 @@
     "collecting_data": "Andmete kogumine - {need} tsüklit veel enne peenhäälestuse alustamist ({current}/{min}).",
     "compare_overlay_profiles": "Ülekatteprofiilid (nõrkjad)",
     "compare_profiles_tip": "Katke ülaltoodud diagrammil teised profiiliümbrikud, et näha, milline neist selle tsükliga kõige paremini sobib.",
-    "compare_selected_cycles": "Valitud tsüklid (tahked) — näita/peida",
+    "compare_selected_cycles": "Valitud tsüklid (tahked) – näita/peida",
     "consider_new_profile": "Kaaluge uue profiili loomist.",
     "coverage_gap": "viimastel tsüklitel pole sobivat profiili ({pct}% viimasest 30-st).",
-    "coverage_gap_similar_cycles": "{count} sarnast märgistamata tsüklit leitud — loo profiil, et neid sobitama hakata.",
+    "coverage_gap_similar_cycles": "{count} sarnast märgistamata tsüklit leitud – loo profiil, et neid sobitama hakata.",
     "cycles_deleted": "{count} tsüklit kustutatud",
     "enough_data": "Piisavalt andmeid õppimiseks ({current}/{min} tsüklit).",
     "export_description": "Eksportige kõik profiilid ja tsüklid JSON-i või taastage eelmisest ekspordist.",
@@ -686,7 +691,7 @@
     "ml_learned_intro": "Selle masina jaoks peenhäälestatud mudelid.",
     "ml_loading": "ML laadimine…",
     "ml_settings_intro": "Kaks sõltumatut lülitit: üks rakendab mudeleid tsükli töötamise ajal, teine ​​võimaldab WashDatal neid aja jooksul teie masinale täpselt häälestada.",
-    "name_first_program": "Sul on piisavalt tsükleid — pane oma esimesele programmile nimi, et alustada sobitamist.",
+    "name_first_program": "Sul on piisavalt tsükleid – pane oma esimesele programmile nimi, et alustada sobitamist.",
     "near_duplicate_cluster": "Tuvastati peaaegu duplikaatprofiili klaster. Rühmitamine võimaldab sobitamisel usaldusväärselt valida sarnasuste vahel (nt sama programm erineval temperatuuril/tsentrifuugimisel).",
     "no_cycles_match": "Ükski tsükkel ei vasta praegusele filtrile.",
     "no_cycles_profile": "Sellel profiilil pole tsükleid.",
@@ -713,7 +718,7 @@
     "notify_services_hint": "Kasutage {entity} teenuse ID-sid (mitme korral komadega eraldatult). Malli muutujad: {vars}.",
     "old_actions_warning": "Seadistatud vana toimingute redaktoriga (nüüd eemaldatud). Need käivituvad endiselt tsüklisündmustele, kuid neid ei saa siin enam redigeerida. Teisendage need tavaliseks automaatikaks või eemaldage need.",
     "onboarding_progress": "{n} / 3 tsüklit jälgitud",
-    "onboarding_watching": "Kasuta oma seadet tavapäraselt — WashData jälgib. Pärast 3 tsüklit algab programmide sobitamine.",
+    "onboarding_watching": "Kasuta oma seadet tavapäraselt – WashData jälgib. Pärast 3 tsüklit algab programmide sobitamine.",
     "pending_feedback": "Ootab tuvastamise tagasisidet",
     "performance_trend": "Toimivuse trend ({n} tsüklit)",
     "pg_analysis_empty": "Vaste analüüsi nägemiseks laadi tsükkel.",
@@ -763,7 +768,7 @@
     "setting_changed": "Muudetud {old} → {new} kuupäeval {date}",
     "settings_basic_note": "Kuvatakse olulisi seadeid. Täieliku loendi nägemiseks vali Täpsemalt.",
     "shape_drift_advisory": "⚠ Kuju triivib",
-    "shape_drift_detail": "Selle profiili võimsusstruktuur on aja jooksul muutunud — võimalik seadme kulumine või vajalik hooldus (nt katlakivi eemaldamine, filtri puhastamine).",
+    "shape_drift_detail": "Selle profiili võimsusstruktuur on aja jooksul muutunud – võimalik seadme kulumine või vajalik hooldus (nt katlakivi eemaldamine, filtri puhastamine).",
     "show_all_settings": "Kuva kõik seaded",
     "showing_suggestions": "Kuvatakse seade {count} koos soovitustega.",
     "split_intro": "Jaotuspunkti lisamiseks või eemaldamiseks või tühikäigu automaatseks tuvastamiseks klõpsake graafikul. Iga saadud segment võib saada oma profiili.",
@@ -857,7 +862,9 @@
     "share_guidelines_title": "Enne jagamist",
     "store_download_device_intro": "Võtke kasutusele iga jagatud programm ja selle võrdlustsüklid oma seadmel. Teie enda salvestatud tsükleid ja statistikat ei mõjutata.",
     "store_share_device_intro": "Laadige {brand} {model} üles valitud võrdlustsüklitega. Teised sama kodumasina kasutajad saavad teie programme kasutusele võtta. Kirjeid vaadatakse üle enne avalikustamist.",
-    "share_profile_no_cycles": "Võrdlustsükleid pole -- märkige tsükkel ⭐-ks Tsüklid-vahekaardil, et lisada see profiil"
+    "share_profile_no_cycles": "Võrdlustsükleid pole -- märkige tsükkel ⭐-ks Tsüklid-vahekaardil, et lisada see profiil",
+    "advisory_phase_inconsistent": "'{name}' näib segavat erinevaid programme või temperatuure - selle tsüklid kuumutavad väga erineva aja jooksul. Selle jagamine eraldi profiilideks (nt temperatuuri järgi) parandab sobitamist ja ajahinnanguid.",
+    "advisory_phase_inconsistent_title": "⚠ Võimalik programmide segu"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
@@ -869,12 +876,19 @@
     "start_duration_threshold": "Sekundid üle läve käivituse kinnitamiseks",
     "start_threshold_w": "Minimaalne vatt, et lugeda käivitunuks",
     "stop_threshold_w": "Sellest allpool loetakse masin väljalülitatuks",
-    "dtw_bandwidth": "Kui palju ajalist venitamist kuju sobitamine lubab",
-    "corr_weight": "Kõvera kuju vs võimsustaseme kaal sobitamisel",
-    "duration_weight": "Kui palju kestuse kokkulangevus sobitamist mõjutab",
-    "energy_weight": "Kui palju energia kokkulangevus sobitamist mõjutab",
-    "profile_match_min_duration_ratio": "Lühim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada",
-    "profile_match_max_duration_ratio": "Pikim tsükkel (profiiliga võrreldes), mida veel lubatakse sobitada"
+    "dtw_bandwidth": "Etapp 3: Sakoe-Chiba aja-nihkeriba (0 = DTW väljas; vaikimisi 0,2 = 20% tsükli pikkusest)",
+    "corr_weight": "Etapp 2: tasakaal kõvera kuju (korrelatsioon) ja võimsustaseme (MAE) vahel; vaikimisi 0,45",
+    "duration_weight": "Etapp 4: kui tugevalt kestuse vastavus mõjutab lõppskooris (vaikimisi 0,22)",
+    "energy_weight": "Etapp 4: kui tugevalt energia vastavus mõjutab lõppskooris (vaikimisi 0,22)",
+    "profile_match_min_duration_ratio": "Etapp 1: lühim tsükkel profiili kestuse murdosana; vaikimisi 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Etapp 1: pikim tsükkel profiili kestuse murdosana; vaikimisi 1,5 (150%)",
+    "keep_min_score": "Etapp 2: madalaim skoor võistluses püsimiseks; vaikimisi 0,1 lubab nõrku kandidaate, hilisemad etapid valivad parima",
+    "dtw_blend": "Etapp 3: 0 = ainult põhiskoor, 1 = ainult DTW-skoor, 0,5 = võrdne segu (vaikimisi)",
+    "dtw_ensemble_w": "Etapp 3 (ensemble-režiim): skaleeritud L1 kaal vs tuletise DTW; vaikimisi 0,7 eelistab tasemeteadlikkust",
+    "dtw_ddtw_scale": "Etapp 3: DDTW pool-küllastumiskaugus; väiksem = tundlikum kuju erinevuste suhtes (vaikimisi 30)",
+    "dtw_refine_top_n": "Etapp 3: kandidaadid keda DTW hindab ümber; tõstke 7-9-ni kui õige profiil jõuab 4.-5. kohale (vaikimisi 5)",
+    "duration_scale": "Etapp 4: log-suhe kus kestuse vastavus poolitub; väiksem = rangem karistus (vaikimisi 0,175)",
+    "energy_scale": "Etapp 4: log-suhe kus energia vastavus poolitub; väiksem = rangem karistus (vaikimisi 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Kortsude vähendamiseks tehke aeg-ajalt lühikesi tõmblusi pärast lõpetamist.",
@@ -957,6 +971,10 @@
     "triggers": {
       "intro": "Valikulised välised signaalid: lõpu päästik, ukse andur, pausi lüliti ja mahalaadimisel meeldetuletaja.",
       "label": "Päästikud ja Uksed"
+    },
+    "phase_eta": {
+      "label": "Järelejäänud aeg",
+      "intro": "Faasiteadlik järelejäänud aeg masinatele, mille tsükli pikkus sõltub temperatuurist või tsentrifuugimisest."
     }
   },
   "setting": {
@@ -1039,6 +1057,10 @@
     "energy_price_static": {
       "doc": "Fikseeritud hind kWh kohta, mida kasutatakse kulunäitajate jaoks, kui ülal pole määratud reaalajas hinna olemit.",
       "label": "Staatiline Energia Hind (kWh kohta)"
+    },
+    "energy_sensor": {
+      "doc": "Valikuline kumulatiivne energialoendur (total_increasing kWh/Wh, nt pistiku enda kogutarbimise arvesti). Kui see on määratud, võetakse iga tsükli energianäit selle loenduri algus- ja lõppnäidu vahest, mis väldib alamõõtmist, mida tekitab aeglaselt uueneva võimsusanduri integreerimine. Kui näit puudub, selle ühik on teadmata või vahe pole positiivne, kasutatakse tagavaraks integreeritud väärtust. Jätke tühjaks, et jätkata võimsusanduri integreerimist.",
+      "label": "Energiaarvesti Olem"
     },
     "expose_debug_entities": {
       "doc": "Avaldage täiendavad diagnostilised HA-üksused (vaste usaldus, mitmetähenduslikkus, oleku sisemised andmed). Väljas hoiab olemiloendi tavakasutuseks puhtana.",
@@ -1322,6 +1344,38 @@
     },
     "show_contributor": {
       "doc": "Kuva \"<kaastöötaja> poolt\" omistamine kogukonna kodumasinate ja võrdlustsüklite juures."
+    },
+    "enable_phase_matching": {
+      "label": "Faasiteadlik järelejäänud aeg",
+      "doc": "Jaga iga käimasolev tsükkel faasideks (kuumutamine, pesu, tsentrifuugimine) ja eelarvesta järelejäänud aeg faaside kaupa, segatuna klassikalise hinnanguga - toetudes tsükli alguses faasi eelarvele ja lõpu lähedal klassikalisele hinnangule. See kohandab loenduri sellele, kui kaua su masin tegelikult kuumutab ja töötab, mis on kõige märgatavam tsükli esimeses pooles. Väljas = ainult klassikaline hinnang. Mõjutab ainult järelejäänud aja kuva; programmi sobitamine ja tsükli tuvastamine jäävad muutmata."
+    },
+    "keep_min_score": {
+      "label": "Min vastenduse skoor",
+      "doc": "Madalaim sarnasuskoor, mida kandidaat vajab sobitamisel püsimiseks. Vaikimisi 0,1 on tahtlikult lubav – see lubab isegi nõrku kandidaate ja toetub hilisematele etappidele parima vaste leidmiseks. Tõstke, et kärpida ebatõenäolisi profiile varem; langetage algse kandidaatide hulga laiendamiseks."
+    },
+    "dtw_blend": {
+      "label": "DTW-segu",
+      "doc": "Kui palju DTW-joondamise skoor asendab 2. etapi põhiskoorit. 0 = kasuta ainult 2. etapi skoorit, 1 = kasuta ainult DTW-skoorit, 0,5 (vaikimisi) = võrdne segu. Tõstke, et rohkem toetuda aja-joondamisele, kui programmidel on sarnased võimsustasemed kuid erinevad ajastamismustrid."
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW ensemble-miks",
+      "doc": "Ensemble-DTW-režiimis (vaikimisi) on see kaal skaleeritud L1 versus tuletise DTW (DDTW). 1,0 = ainult skaleeritud L1, 0 = ainult DDTW, 0,7 = vaikimisi. Skaleeritud variant võrdleb võimsustasemeid; tuletise variant reageerib sellele, kuidas võimsus aja jooksul muutub. Ensemble ühendab mõlemad."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Tuletise DTW skaala",
+      "doc": "Pool-küllastumiskaugus tuletise DTW hindamisel. Skoor poolitub, kui DDTW-kaugus võrdub selle väärtusega. Väiksem = tundlikum kuju erinevuste suhtes. Vaikimisi 30 on kalibreeritud tüüpiliste seadmete võimsusjälgedele. Mõjutab ainult ensemble- ja ddtw-DTW-režiime."
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW täpsustusarv",
+      "doc": "Mitu parimat 2. etapi kandidaati DTW ümber hindab. DTW on kallim, seega rakendatakse seda ainult N parimale. Vaikimisi 5. Tõstke (7-9-ni), kui õige profiil jõuab mõnikord ainult 4. või 5. kohale pärast 2. etappi – DTW saab selle päästa. Madalama väärtusega sobitumine kiireneb veidi."
+    },
+    "duration_scale": {
+      "label": "Kestuse teravus",
+      "doc": "4. etapi kestuse vastavuse karistuse teravus. See on log-suhe, mille juures vastavuse skoor poolitub. Väiksem = rangem: kestuse mittevastavus teeb rohkem kahju. Vaikimisi 0,175 vastab ligikaudu 18% kestuse tolerantsile poolkaalu juures. Kasutage koos Kestuse kaaluga."
+    },
+    "energy_scale": {
+      "label": "Energia teravus",
+      "doc": "4. etapi energia vastavuse karistuse teravus. Väiksem = rangem: energia mittevastavus teeb rohkem kahju. Vaikimisi 0,25 on tahtlikult andelikum kui kestuse teravus, kuna energia varieerub koormuse järgi. Kasutage koos Energia kaaluga."
     }
   },
   "setting_group": {
@@ -1570,24 +1624,24 @@
         "lower": "Märgistab automaatselt rohkem tsükleid; mõnda võidakse valesti tuvastada"
       },
       "duration_tolerance": {
-        "higher": "Aktsepteerib laiemat kestuse vahemikku — paindlikum sobitamine",
-        "lower": "Nõuab täpsemat kestuse vastavust — rangem, kuid võib lükata tagasi ebatavalisi tsükleid"
+        "higher": "Aktsepteerib laiemat kestuse vahemikku – paindlikum sobitamine",
+        "lower": "Nõuab täpsemat kestuse vastavust – rangem, kuid võib lükata tagasi ebatavalisi tsükleid"
       },
       "end_energy_threshold": {
         "higher": "Sulgeb ainult tsüklid, mis kasutasid olulisel määral energiat",
         "lower": "Sulgeb ka lühemad või madalama energiatarbe tsüklid"
       },
       "end_repeat_count": {
-        "higher": "Nõuab lõpusignaali kordamist rohkem kordi — usaldusväärsem, pisut aeglasem",
-        "lower": "Lõpetab pärast vähemat kordust — kiirem tuvastamine, suurem vale lõpu oht"
+        "higher": "Nõuab lõpusignaali kordamist rohkem kordi – usaldusväärsem, pisut aeglasem",
+        "lower": "Lõpetab pärast vähemat kordust – kiirem tuvastamine, suurem vale lõpu oht"
       },
       "learning_confidence": {
-        "higher": "Õpib ainult väga kindlatest vastetest — aeglasem, kuid usaldusväärsem",
+        "higher": "Õpib ainult väga kindlatest vastetest – aeglasem, kuid usaldusväärsem",
         "lower": "Õpib rohkematest tsüklitest; mudel võib olla müraram"
       },
       "min_off_gap": {
         "higher": "Enne uue tsükli algust on vajalik pikem tegevusetus",
-        "lower": "Lühike tegevusetus käivitab uue tsükli — järjestikused käivitused võivad jaguneda"
+        "lower": "Lühike tegevusetus käivitab uue tsükli – järjestikused käivitused võivad jaguneda"
       },
       "min_power": {
         "higher": "Vähem tundlik ooterežiimi tarbimise suhtes; võib vahele jätta vaikse töörežiimi",
@@ -1598,24 +1652,24 @@
         "lower": "Jõudab kinni jäänud tsükli sundpeatamise kiiremini"
       },
       "off_delay": {
-        "higher": "Rohkem aega seadme paussideks — käsitleb pikka leotamist või kuivatamist",
-        "lower": "Kiirem lõpu tuvastamine — sobib hästi selge sisse/välja seadmetele"
+        "higher": "Rohkem aega seadme paussideks – käsitleb pikka leotamist või kuivatamist",
+        "lower": "Kiirem lõpu tuvastamine – sobib hästi selge sisse/välja seadmetele"
       },
       "profile_match_threshold": {
         "higher": "Kinnitab ainult suure kindlusega vasteid; rohkem tsükleid jääb märgistamata",
         "lower": "Sobib rohkema tsükliga; mõnda võib olla veidi vale"
       },
       "running_dead_zone": {
-        "higher": "Ignoreerib lühikesi voolutõuse jõudeolekus — vähem müra suhtes tundlik",
-        "lower": "Reageerib lühematele energiapursetele — tabab kiiret mööduvat aktiivsust"
+        "higher": "Ignoreerib lühikesi voolutõuse jõudeolekus – vähem müra suhtes tundlik",
+        "lower": "Reageerib lühematele energiapursetele – tabab kiiret mööduvat aktiivsust"
       },
       "start_threshold_w": {
         "higher": "Väldib lühikestest energiatõusudest tulenevaid valesid käivitusi",
         "lower": "Tabab madalvõimsusega programmid; võib käivituda müra peale"
       },
       "stop_threshold_w": {
-        "higher": "Lõpetab tsükli kiiremini — võib sulgeda pausi ajal",
-        "lower": "Ootab lõpetamisega kauem — vähem enneaegseid lõpetusi"
+        "higher": "Lõpetab tsükli kiiremini – võib sulgeda pausi ajal",
+        "lower": "Ootab lõpetamisega kauem – vähem enneaegseid lõpetusi"
       },
       "watchdog_interval": {
         "higher": "Lubatud pikemad vaiksed faasid; vähem valesid sundpeatusi",
@@ -1766,6 +1820,69 @@
     },
     "pg_sweep": {
       "optimize": "Optimeerimine: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Tsükli simuleerimine"
+    },
+    "split": {
+      "apply": "Tsükli poolitamine"
+    },
+    "trim": {
+      "apply": "Tsükli kärpimine"
+    },
+    "merge": {
+      "apply": "Tsüklite ühendamine"
+    },
+    "rebuild": {
+      "envelopes": "Võimsusvahemike taasloomine"
+    },
+    "cancelling": "Katkestan..."
+  },
+  "setup": {
+    "hdr": {
+      "card": "Seadme seadistus",
+      "healthy_chip": "Seadistus lõpetatud"
+    },
+    "phase0": {
+      "washer": "WashData tuvastab juba teie tsükleid. Salvestage esimene tsükkel, et lubada programmide nimed ja ajahinnangud.",
+      "dishwasher": "WashData jälgib. Nõudepesumasinatel on keerukad tsüklid – esimese tsükli salvestamine on tungivalt soovitatav. Kui tuvastatud tsükkel töötab liiga kaua, kasutage tsükli redaktorit selle kärpimiseks enne profiilina salvestamist.",
+      "generic": "WashData jälgib. Salvestage või märgistage tuvastatud tsükkel profiilide loomise alustamiseks."
+    },
+    "phase1a": {
+      "labelled": "Hea algus – teie esimene programm on salvestatud. Puhtaimate andmete saamiseks kaaluge järgmise tsükli salvestamist salvestusvidinaga."
+    },
+    "phase1b": {
+      "recorded": "Teie salvestus on salvestatud kui {profile_name}. Nüüd salvestage või märgistage oma teised sagedased programmid katvuse suurendamiseks."
+    },
+    "phase1c": {
+      "verify": "Teil on {count} programmi kogukonnast. Käivitage tsükkel, et kontrollida, kas WashData tunneb selle õigesti ära – sobitamine paraneb, kui teie seade koostab oma ajaloo."
+    },
+    "phase2": {
+      "cluster": "WashData on näinud {count} tsüklit, mis ei vasta ühelegi salvestatud programmile – need näevad sarnased välja. Kas soovite neile luua uue profiili?",
+      "unmatched": "Viimane tsükkel ei vastanud ühelegi salvestatud programmile. Kas see on uus programm?"
+    },
+    "phase3": {
+      "suggestions": "WashDatal on teie tsüklite ajaloo põhjal seadete soovitusi – vaadake need läbi tuvastustäpsuse parandamiseks.",
+      "groups": "Mõned teie profiilid näevad välja nagu sama programm erinevatel temperatuuridel. Korraldage need rühma parema sobitamise jaoks.",
+      "phases": "Lisage programmifaasid profiilile {profile_name} täpsemate järelejäänud aja hinnangute saamiseks."
+    },
+    "phase4": {
+      "healthy": "See seade on täielikult seadistatud ({profile_count} profiili)."
+    },
+    "cta": {
+      "start_recording": "Alusta salvestamist",
+      "label_detected_cycle": "Mul on juba tuvastatud tsükkel – märgista see",
+      "browse_cycles": "Sirvi tsükleid, et märgistada teine",
+      "view_profiles": "Vaata oma profiile",
+      "create_from_cluster": "Loo profiil nendest tsüklitest",
+      "create_profile": "Loo sellele profiil",
+      "review_suggestions": "Vaata soovitusi läbi",
+      "organise_profiles": "Korralda profiile",
+      "configure_phases": "Seadista faasid",
+      "skip_step": "Jäta see samm vahele",
+      "skip_forever": "Ära näita enam",
+      "hide_guidance": "Peida juhised",
+      "show_guidance": "Näita juhiseid"
     }
   }
 }

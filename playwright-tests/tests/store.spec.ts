@@ -186,7 +186,7 @@ test('gear online toggle persists via the global store_set_online command', asyn
   });
   await page.locator('#wd-settings-btn').click();
   await page.locator('[data-gtab="online"]').click();
-  await page.locator('input[data-action="store-toggle-online"]').click();
+  await page.locator('.wd-switch-lbl:has(input[data-action="store-toggle-online"])').click();
   const calls = await assertWsCalled(page, 'ha_washdata/store_set_online');
   expect(calls[0]).toHaveProperty('enabled', true);
 });
@@ -200,7 +200,7 @@ test('gear "Show contributor names" toggle persists via store_set_prefs', async 
   });
   await page.locator('#wd-settings-btn').click();
   await page.locator('[data-gtab="online"]').click();
-  const pref = page.locator('input[data-action="store-toggle-pref"][data-pref="show_contributor"]');
+  const pref = page.locator('.wd-switch-lbl:has(input[data-action="store-toggle-pref"][data-pref="show_contributor"])');
   await expect(pref).toBeVisible({ timeout: 8_000 });
   await pref.click();
   const calls = await assertWsCalled(page, 'ha_washdata/store_set_prefs');
@@ -284,7 +284,7 @@ test('device download can adopt settings via the opt-in checkbox', async ({ page
   });
   await clickTab(page, 'store');
   await page.locator('[data-action="store-open-device"]').first().click();
-  const adopt = page.locator('[data-action="store-toggle-dl-settings"]');
+  const adopt = page.locator('.wd-switch-lbl:has(input[data-action="store-toggle-dl-settings"])');
   await expect(adopt).toBeVisible({ timeout: 8_000 });
   await adopt.click();
   // The store device-detail header hosts the primary "Download this setup"

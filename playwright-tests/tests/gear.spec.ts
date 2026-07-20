@@ -64,5 +64,5 @@ test('Online & Community tab shows when the backend advertises it', async ({ pag
   });
   await openGear(page);
   await page.locator('.wd-modal [data-gtab="online"]').click();
-  await expect(page.locator('.wd-modal input[data-action="store-toggle-online"]')).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('.wd-modal .wd-switch-lbl:has(input[data-action="store-toggle-online"])')).toBeVisible({ timeout: 8_000 });
 });

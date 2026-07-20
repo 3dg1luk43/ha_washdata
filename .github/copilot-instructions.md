@@ -26,6 +26,8 @@
 - **NO inline strings in Python code** for UI text
 - All labels/descriptions in `strings.json` and `translations/en.json`
 - Translation keys format: `step_name.data.field_name` or `step_name.description`
+- Community translations are submitted via [GitLocalize](https://gitlocalize.com/repo/10819) — it opens PRs automatically
+- New keys added by the maintainer are translated via Claude subagents with domain context; machine translation is banned
 
 ### 4. Home Assistant Patterns
 - Use `async_update_entry` for config entry modifications

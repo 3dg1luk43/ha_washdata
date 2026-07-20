@@ -1,13 +1,13 @@
 {
   "badge": {
-    "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) — hapeni për t'i parë ato në grafik",
+    "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) – hapeni për t'i parë ato në grafik",
     "auto": "(zbuluar automatikisht)",
     "built_in_tag": "i integruar",
     "declining": "↘ në rënie",
     "energy_low": "Energji më e ulët se zakonisht",
     "energy_spike": "Energji më e lartë se zakonisht",
     "fair_fit": "cilësi e pranueshme",
-    "fair_fit_tip": "Konsistencë e moderuar e ndeshjes — disa cikle të caktuara për këtë profil kanë rezultate më të ulëta besimi. Etiketoni më shumë cikle ose riregjistroni profilin për të përmirësuar saktësinë.",
+    "fair_fit_tip": "Konsistencë e moderuar e ndeshjes – disa cikle të caktuara për këtë profil kanë rezultate më të ulëta besimi. Etiketoni më shumë cikle ose riregjistroni profilin për të përmirësuar saktësinë.",
     "feedback_requested": "Kërkohet koment",
     "golden_cycle": "Cikli referues i regjistruar",
     "improving": "↗ në rritje",
@@ -15,7 +15,7 @@
     "needs_review": "Ka nevojë për rishikim",
     "overrun": "Zgjati më shumë se zakonisht",
     "poor_fit": "cilësi e keqe",
-    "poor_fit_tip": "Histori jokonsistente e ndeshjeve — merrni parasysh rindërtimin e këtij profili",
+    "poor_fit_tip": "Histori jokonsistente e ndeshjeve – merrni parasysh rindërtimin e këtij profili",
     "restart_gap_tip": "{n} boshllëk rinisje të HA: gjurma e energjisë ka një vrimë",
     "reviewed": "Shqyrtuar",
     "steady": "→ i qëndrueshëm",
@@ -87,7 +87,7 @@
     "on_cycle_finished": "Kur cikli përfundon",
     "on_cycle_started": "Kur cikli fillon",
     "pause_cycle": "Ndalo",
-    "pause_cycle_tip": "Ndalo ciklin aktiv — pajisja do të vazhdojë nga aty ku kishte mbetur",
+    "pause_cycle_tip": "Ndalo ciklin aktiv – pajisja do të vazhdojë nga aty ku kishte mbetur",
     "pg_apply_device": "Apliko te pajisja",
     "pg_autofill": "Mbushje automatike",
     "play": "Luaj",
@@ -97,8 +97,8 @@
     "process_tip": "Ruaj gjurmën e regjistruar si profil të ri ose ekzistues",
     "rebuild": "Rindërto zarfet",
     "rebuild_envelope": "Rindërto zarfin",
-    "rebuild_tip": "Rillogaris zarfin e pritshmë të energjisë (brezin min/maks) për të gjitha profilet nga ciklet e tyre të etiketuara — ekzekuto pas etiketimit të cikleve të reja ose korrigjimit të tjerave",
-    "rec_start_tip": "Fillo regjistrimin e gjurmës së energjisë të pajisjes — fillo pak para ekzekutimit të një cikli",
+    "rebuild_tip": "Rillogaris zarfin e pritshmë të energjisë (brezin min/maks) për të gjitha profilet nga ciklet e tyre të etiketuara – ekzekuto pas etiketimit të cikleve të reja ose korrigjimit të tjerave",
+    "rec_start_tip": "Fillo regjistrimin e gjurmës së energjisë të pajisjes – fillo pak para ekzekutimit të një cikli",
     "rec_stop": "Ndalo",
     "rec_stop_tip": "Ndalo regjistrimin dhe mbaj gjurmën e kapur për shqyrtim",
     "record": "Fillo regjistrimin",
@@ -231,7 +231,7 @@
       "interval": "Duhet të jetë të paktën 2× Intervali i Kampionimit ({si} s)",
       "sampling": "Intervali i Kampionimit duhet të jetë të paktën gjysma e Intervalit të Rojtarit ({wi} s)"
     },
-    "settings_banner": "{n} konflikt{s} cilësimi — kontrolloni seksionet e theksuara dhe korrigjojini para ruajtjes.",
+    "settings_banner": "{n} konflikt{s} cilësimi – kontrolloni seksionet e theksuara dhe korrigjojini para ruajtjes.",
     "settings_banner_btn": "Shko te i pari"
   },
   "hdr": {
@@ -451,9 +451,9 @@
     "show_expected": "Shfaq mbivendosjen e kurbës së pritshme (profili i përputhshëm, portokalli)",
     "show_raw": "Shfaq çelësin e të dhënave bruto të prizës në grafikun e fuqisë në kohë reale",
     "sparkline": "Prirja e fundit e kohëzgjatjes së cikleve",
-    "stage2": "Etapa 2 — ngjashmëria bazë",
-    "stage3": "Etapa 3 — DTW",
-    "stage4": "Etapa 4 — përputhja",
+    "stage2": "Etapa 2 – ngjashmëria bazë",
+    "stage3": "Etapa 3 – DTW",
+    "stage4": "Etapa 4 – përputhja",
     "status": "Statusi",
     "tail_trim": "Prerja e fundit (s)",
     "timer_auto_pause": "Auto-pauzë",
@@ -561,7 +561,12 @@
     "flags": "Flamuj",
     "include_phase_map": "Përfshi hartën e fazave",
     "include_settings": "Përfshi cilësimet e zbulimit dhe përputhjes",
-    "show_contributor": "Trego emrat e kontribuesve"
+    "show_contributor": "Trego emrat e kontribuesve",
+    "task_pg_detail": "Simulimi i ciklit",
+    "task_split": "Ndarja e ciklit",
+    "task_trim": "Prerja e ciklit",
+    "task_merge": "Bashkimi i cikleve",
+    "task_rebuild": "Rindërtimi i zarfave"
   },
   "log": {
     "all_levels": "Të gjitha nivelet",
@@ -645,7 +650,7 @@
     "artifact_dip_detail": "Ra nën brezin e zakonshëm të fuqisë për ~{n} s.",
     "artifact_footer": "E theksuar në grafikun e mësipërm. Këto janë objekte kalimtare (p.sh. dera e hapur në mes të ciklit), jo domosdoshmërisht probleme.",
     "artifact_header": "{n} anomali të zbuluara gjatë këtij cikli",
-    "artifact_pause_detail": "Fuqia ra pothuajse në zero për ~{n} s dhe u rikuperua — ndoshta dera u hap në mes të ciklit ose cikli u ndërpre.",
+    "artifact_pause_detail": "Fuqia ra pothuajse në zero për ~{n} s dhe u rikuperua – ndoshta dera u hap në mes të ciklit ose cikli u ndërpre.",
     "artifact_spike_detail": "Shkoi mbi brezin e zakonshëm të fuqisë për ~{n} s.",
     "auto_label_intro": "Cakto profile te ciklet e paetiketuara që besueshmëria e tyre e përputhjes tejkalon pragun.",
     "automations_intro": "WashData ndez ngjarje {start} / {end} dhe ekspozon entitete, kështu njoftimet dhe veprimet ndërtohen më mirë si automatizime normale të Home Assistant. Automatizimi që përdorin këtë pajisje shfaqen më poshtë.",
@@ -654,10 +659,10 @@
     "collecting_data": "Duke mbledhur të dhëna: nevojiten edhe {need} cikël{plural} para se të fillojë sintonizimi i imët ({current}/{min}).",
     "compare_overlay_profiles": "Mbivendos profilet (të zbetura)",
     "compare_profiles_tip": "Mbivendosni zarfat e tjerë të profileve në grafikun e mësipërm për të parë se cili i përshtatet më mirë këtij cikli.",
-    "compare_selected_cycles": "Ciklet e zgjedhura (solide) — shfaq / fshih",
+    "compare_selected_cycles": "Ciklet e zgjedhura (solide) – shfaq / fshih",
     "consider_new_profile": "Konsideroni krijimin e një profili të ri.",
     "coverage_gap": "ciklet e fundit nuk kanë asnjë profil që përputhet ({pct}% e 30 të fundit).",
-    "coverage_gap_similar_cycles": "U gjetën {count} cikle të ngjashme të paetiketuara — krijo një profil për të filluar përputhjen.",
+    "coverage_gap_similar_cycles": "U gjetën {count} cikle të ngjashme të paetiketuara – krijo një profil për të filluar përputhjen.",
     "cycles_deleted": "{count} cikël(e) u fshinë",
     "enough_data": "Të dhëna të mjaftueshme për të mësuar ({current}/{min} cikle).",
     "export_description": "Eksporto të gjitha profilet dhe ciklet në JSON ose rivendos nga një eksportim i mëparshëm.",
@@ -686,7 +691,7 @@
     "ml_learned_intro": "Modele të rregulluara mirë për këtë makinë.",
     "ml_loading": "duke ngarkuar ML…",
     "ml_settings_intro": "Dy çelësa të pavarur: njëri aplikon modelet ndërsa një cikël ekzekutohet, tjetri lejon WashData t'i rregullojë ato me kalimin e kohës.",
-    "name_first_program": "Keni cikle të mjaftueshme — emërtoni programin tuaj të parë për të nisur përputhjen.",
+    "name_first_program": "Keni cikle të mjaftueshme – emërtoni programin tuaj të parë për të nisur përputhjen.",
     "near_duplicate_cluster": "u zbulua grupi i profilit pothuajse dublikatë. Grupimi lejon që përputhja të zgjedhë në mënyrë të besueshme midis pamjeve të ngjashme (p.sh. i njëjti program në temperaturë/centrifugim të ndryshëm).",
     "no_cycles_match": "Asnjë cikël nuk përputhet me filtrin aktual.",
     "no_cycles_profile": "Asnjë cikël për këtë profil.",
@@ -696,7 +701,7 @@
     "no_devices": "Asnjë pajisje WashData e konfiguruar ende.",
     "no_envelope": "Asnjë zarf ende - rindërtoni pas etiketimit të cikleve.",
     "no_envelope_overlay": "Asnjë zarf i disponueshëm për mbivendosje.",
-    "no_fine_tuned": "Asgjë e rregulluar mirë ende — WashData po përdor modelet e integruara.",
+    "no_fine_tuned": "Asgjë e rregulluar mirë ende – WashData po përdor modelet e integruara.",
     "no_logs": "Asnjë regjistrim i mbajtur në bufer ende.",
     "no_maintenance": "Ende nuk është regjistruar asnjë mirëmbajtje.",
     "no_match_yet": "Asnjë tentativë përputhje ende - kjo plotësohet gjatë një cikli aktiv.",
@@ -713,7 +718,7 @@
     "notify_services_hint": "Përdorni ID-të e shërbimit {entity} (të ndara me presje për shumë). Variablat e shabllonit: {vars}.",
     "old_actions_warning": "Konfiguruar me redaktuesin e vjetër të veprimeve (tani i hequr). Ato ende ndezin në ngjarjet e ciklit, por nuk mund të modifikohen më këtu. Shndërrojini ato në një automatizim normal ose hiqni ato.",
     "onboarding_progress": "{n} / 3 cikle të vëzhguara",
-    "onboarding_watching": "Përdorni pajisjen normalisht — WashData po vëzhgon. Pas 3 cikleve, do të nisë përputhja e programeve.",
+    "onboarding_watching": "Përdorni pajisjen normalisht – WashData po vëzhgon. Pas 3 cikleve, do të nisë përputhja e programeve.",
     "pending_feedback": "Koment në pritje të zbulimit",
     "performance_trend": "Tendenca e performancës ({n} cikle)",
     "pg_analysis_empty": "Ngarkoni një cikël për të parë analizën e përputhjes.",
@@ -763,7 +768,7 @@
     "setting_changed": "Ndryshuar nga {old} në {new} më {date}",
     "settings_basic_note": "Po shfaqen cilësimet thelbësore. Kaloni te Të avancuara për listën e plotë.",
     "shape_drift_advisory": "⚠ Zhvendosje forme",
-    "shape_drift_detail": "Modeli i energjisë i këtij profili ka ndryshuar me kalimin e kohës — mundësi të konsumit të pajisjes ose nevojë mirëmbajtjeje (p.sh. heqja e gurëve, pastrimi i filtrit).",
+    "shape_drift_detail": "Modeli i energjisë i këtij profili ka ndryshuar me kalimin e kohës – mundësi të konsumit të pajisjes ose nevojë mirëmbajtjeje (p.sh. heqja e gurëve, pastrimi i filtrit).",
     "show_all_settings": "Shfaq të gjitha cilësimet",
     "showing_suggestions": "Po shfaq cilësimin e {count} me sugjerime.",
     "split_intro": "Kliko grafikun për të shtuar ose hequr një pikë ndarjeje, ose zbulo automatikisht sipas ndërprerjeve. Çdo segment që rezulton mund të ketë profilin e tij.",
@@ -789,7 +794,7 @@
     "toast_revert_failed": "Kthimi prapa dështoi: {error}",
     "toast_reverted": "{key} u rikthye",
     "toast_save_failed": "Ruajtja dështoi: {error}",
-    "trend_duration_longer": "Kohëzgjatja në tendencë më e gjatë ({pct}%/cikël) — mesatare e fundit {avg}",
+    "trend_duration_longer": "Kohëzgjatja në tendencë më e gjatë ({pct}%/cikël) – mesatare e fundit {avg}",
     "trend_duration_shorter": "Kohëzgjatja në tendencë më e shkurtër ({pct}%/cikël) - mesatare e fundit {avg}",
     "trend_energy_down": "Tendenca e energjisë në rënie ({pct}%/cikël)",
     "trend_energy_up": "Tendenca e energjisë në rritje ({pct}%/cikël) - mesatarisht kohët e fundit {avg}",
@@ -857,7 +862,9 @@
     "share_guidelines_title": "Para se të ndani",
     "store_download_device_intro": "Adoptoni çdo program të ndarë dhe ciklet e tij të referencës në pajisjen tuaj. Ciklet dhe statistikat tuaja të regjistruara nuk preken.",
     "store_share_device_intro": "Ngarko {brand} {model} me ciklet e referencës që zgjidhni. Të tjerët me të njëjtën pajisje mund të adoptojnë programet tuaja. Hyrjet shqyrtohen para publikimit.",
-    "share_profile_no_cycles": "Nuk ka cikle referimi -- shënojeni një cikël si ⭐ tek skeda Ciklet për të përfshirë këtë profil"
+    "share_profile_no_cycles": "Nuk ka cikle referimi -- shënojeni një cikël si ⭐ tek skeda Ciklet për të përfshirë këtë profil",
+    "advisory_phase_inconsistent": "'{name}' duket se përzien programe ose temperatura të ndryshme - ciklet e tij ngrohin për periudha shumë të ndryshme kohore. Ndarja e tij në profile të veçanta (p.sh. sipas temperaturës) do të përmirësojë përputhjen dhe vlerësimet e kohës.",
+    "advisory_phase_inconsistent_title": "⚠ Ndoshta programe të përziera"
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -940,6 +947,10 @@
     "triggers": {
       "intro": "Sinjalet e jashtme opsionale: aktivizues përfundimi, senzori i derës, çelësi i pauzës dhe kujtues për shkarkim.",
       "label": "Aktivizues dhe dera"
+    },
+    "phase_eta": {
+      "label": "Koha e Mbetur",
+      "intro": "Kohë e mbetur e ndërgjegjshme për fazat, për makinat gjatësia e ciklit të të cilave varet nga temperatura ose centrifugimi."
     }
   },
   "setting": {
@@ -1022,6 +1033,10 @@
     "energy_price_static": {
       "doc": "Çmimi fiks për kWh i përdorur për shifrat e kostos kur nuk është vendosur më sipër asnjë subjekt i çmimit të drejtpërdrejtë.",
       "label": "Çmimi statik i energjisë (për kWh)"
+    },
+    "energy_sensor": {
+      "doc": "Numërues kumulativ opsional i energjisë (total_increasing kWh/Wh, p.sh. matësi i vetë prizës për konsumin total). Kur vendoset, energjia e raportuar e çdo cikli merret nga diferenca e këtij numëruesi nga fillimi deri në fund, gjë që shmang nënllogaritjen që merrni nga integrimi i një sensori fuqie që raporton ngadalë. Kthehet te vlera e integruar nëse leximi mungon, njësia e tij është e panjohur, ose diferenca nuk është pozitive. Lëreni bosh për të vazhduar integrimin e sensorit të fuqisë.",
+      "label": "Entiteti i matësit të energjisë"
     },
     "expose_debug_entities": {
       "doc": "Publikoni entitete shtesë diagnostikuese HA (besimi i ndeshjes, paqartësia, të brendshmet e gjendjes). Off e mban listën e entiteteve të pastër për përdorim normal.",
@@ -1305,6 +1320,38 @@
     },
     "show_contributor": {
       "doc": "Shfaq atribuimin \"nga <kontribuesi>\" në pajisjet dhe ciklet referuese të komunitetit."
+    },
+    "enable_phase_matching": {
+      "label": "Kohë e mbetur e ndërgjegjshme për fazat",
+      "doc": "Ndan çdo cikël që po funksionon në faza (ngrohje, larje, centrifugim) dhe shpërndan kohën e mbetur për çdo fazë, e përzier me vlerësimin klasik - duke u mbështetur te shpërndarja sipas fazave në fillim të ciklit dhe te vlerësimi klasik afër fundit. Kjo e personalizon numërimin mbrapsht sipas kohës që makina juaj në të vërtetë ngroh dhe punon, gjë që vihet re më së shumti në gjysmën e parë të një cikli. Off = vetëm vlerësimi klasik. Preket vetëm shfaqja e kohës së mbetur; përputhja e programeve dhe zbulimi i ciklit mbeten të pandryshuara."
+    },
+    "keep_min_score": {
+      "label": "Rezultat Min. Përputhjeje",
+      "doc": "Rezultati minimal i ngjashmërisë që i nevojitet një kandidati për të qëndruar në garën e përputhjes. Parazgjedhja 0.1 është me qëllim lejuese - pranon edhe kandidatë të dobët dhe u lë etapave të mëvonshme të gjejnë përputhjen më të mirë. Rriteni për të eliminuar profilet e pamundshme herët; uleni për të zgjeruar grupin fillestar të kandidatëve."
+    },
+    "dtw_blend": {
+      "label": "Përzierje Deformimi",
+      "doc": "Sa e zëvendëson rezultati i bashkimit DTW rezultatin bazë të Etapës 2. 0 = përdor vetëm rezultatin e Etapës 2, 1 = përdor vetëm rezultatin DTW, 0.5 (parazgjedhja) = përzierje e barabartë. Rriteni për t'u mbështetur më shumë në bashkimin e deformimit kur programet kanë nivele të ngjashme fuqie por modele të ndryshme kohore."
+    },
+    "dtw_ensemble_w": {
+      "label": "Mix Ansambël DTW",
+      "doc": "Në modalitetin ansambël DTW (parazgjedhja), pesë për L1-e shkallëzuar kundrejt DTW derivativ (DDTW). 1.0 = gjithë shkallëzuar-L1, 0 = gjithë DDTW, 0.7 = parazgjedhja. Varianti shkallëzuar-L1 krahason nivelet e fuqisë; varianti derivativ reagon ndaj mënyrës sesi ndryshon fuqia me kalimin e kohës. Ansambëli kombinon të dyja."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Shkalla e Deformimit Derivativ",
+      "doc": "Distanca e gjysmë-ngopjes për vlerësimin e DTW derivativ. Rezultati gjysmohet kur distanca DDTW është e barabartë me këtë vlerë. Më i vogël = më i ndjeshëm ndaj ndryshimeve të formës. Parazgjedhja 30 është kalibruar për gjurmët tipike të fuqisë së pajisjeve. Ndikon vetëm mënyrat DTW ansambël dhe ddtw."
+    },
+    "dtw_refine_top_n": {
+      "label": "Numri i Rafinimit DTW",
+      "doc": "Sa kandidatë të parë të Etapës 2 ri-vlerësohen nga DTW. DTW është më e shtrenjtë llogaritëse, kështu që aplikohet vetëm tek kandidatët N më të mirë. Parazgjedhja 5. Rriteni (në 7-9) nëse profili i saktë ndonjëherë arrin vetëm në vendin e 4-të ose 5-të pas Etapës 2 - DTW mund ta shpëtojë. Ulja e saj shpejton pak përputhjen."
+    },
+    "duration_scale": {
+      "label": "Saktësia e Kohëzgjatjes",
+      "doc": "Ashpërsia e ndëshkimit të marrëveshjes së kohëzgjatjes së Etapës 4. Ky është raporti logaritmik në të cilin rezultati i marrëveshjes gjysmohet. Më i vogël = më i rreptë: një mospërputhje kohëzgjatjeje ndëshkon më shumë. Parazgjedhja 0.175 korrespondon me tolerancën e kohëzgjatjes rreth 18% në gjysmë-peshë. Çiftojeni me Peshën e Kohëzgjatjes."
+    },
+    "energy_scale": {
+      "label": "Saktësia e Energjisë",
+      "doc": "Ashpërsia e ndëshkimit të marrëveshjes së energjisë së Etapës 4. Më i vogël = më i rreptë: një mospërputhje energjie ndëshkon më shumë. Parazgjedhja 0.25 është me qëllim më lejuese se Ashpërsia e Kohëzgjatjes sepse energjia ndryshon me ngarkesën. Çiftojeni me Peshën e Energjisë."
     }
   },
   "setting_group": {
@@ -1553,24 +1600,24 @@
         "lower": "Etiketimet automatike rriten; disa mund të identifikohen gabim"
       },
       "duration_tolerance": {
-        "higher": "Pranon gamë më të gjerë kohëzgjatjeje — përputhje më fleksibël",
-        "lower": "Kërkon përputhje më të ngushtë kohëzgjatjeje — më rigoroze por mund të refuzojë cikle të pazakonshme"
+        "higher": "Pranon gamë më të gjerë kohëzgjatjeje – përputhje më fleksibël",
+        "lower": "Kërkon përputhje më të ngushtë kohëzgjatjeje – më rigoroze por mund të refuzojë cikle të pazakonshme"
       },
       "end_energy_threshold": {
         "higher": "Mbyll vetëm ciklet që kanë konsumuar energji të konsiderueshme",
         "lower": "Mbyll edhe ciklet e shkurtra ose me konsum të ulët energjie"
       },
       "end_repeat_count": {
-        "higher": "Kërkon që sinjali i fundit të përsëritet më shumë herë — më i qëndrueshëm, pak më i ngadaltë",
-        "lower": "Mbyllet pas përsëritjeve më të pakta — detektim më i shpejtë, rrezik më i lartë mbylljeje false"
+        "higher": "Kërkon që sinjali i fundit të përsëritet më shumë herë – më i qëndrueshëm, pak më i ngadaltë",
+        "lower": "Mbyllet pas përsëritjeve më të pakta – detektim më i shpejtë, rrezik më i lartë mbylljeje false"
       },
       "learning_confidence": {
-        "higher": "Mëson vetëm nga përputhjet me besueshmëri shumë të lartë — më e ngadaltë por më e besueshme",
+        "higher": "Mëson vetëm nga përputhjet me besueshmëri shumë të lartë – më e ngadaltë por më e besueshme",
         "lower": "Mëson nga më shumë cikle; modeli mund të jetë më i zhurmshëm"
       },
       "min_off_gap": {
         "higher": "Nevojitet pushim më i gjatë para se të fillojë një cikël i ri",
-        "lower": "Pushimi i shkurtër nis ciklin e ri — rrotullimet e njëpasnjëshme mund të ndahen"
+        "lower": "Pushimi i shkurtër nis ciklin e ri – rrotullimet e njëpasnjëshme mund të ndahen"
       },
       "min_power": {
         "higher": "Më pak e ndjeshme ndaj konsumit në gjendje pritjeje; mund të humbasë programe shumë të heshtura",
@@ -1581,24 +1628,24 @@
         "lower": "Ndërpret ciklin e bllokuar më shpejt"
       },
       "off_delay": {
-        "higher": "Më shumë kohë për pauza të pajisjes — trajton faza të gjata njomjeje ose tharjeje",
-        "lower": "Detektim më i shpejtë i fundit — i përshtatshëm për pajisje me ndezje/shuarje të qarta"
+        "higher": "Më shumë kohë për pauza të pajisjes – trajton faza të gjata njomjeje ose tharjeje",
+        "lower": "Detektim më i shpejtë i fundit – i përshtatshëm për pajisje me ndezje/shuarje të qarta"
       },
       "profile_match_threshold": {
         "higher": "Konfirmon vetëm përputhjet me besueshmëri të lartë; më shumë cikle mbeten pa etiketë",
         "lower": "Përputhet me më shumë cikle; disa mund të jenë paksa të gabuara"
       },
       "running_dead_zone": {
-        "higher": "Injoron kumbëzat e shkurtra të fuqisë gjatë pushimit — më pak e ndjeshme ndaj zhurmës",
-        "lower": "Reagron ndaj shpërthimeve më të shkurtra të fuqisë — kap aktivitetin kalimtar të shpejtë"
+        "higher": "Injoron kumbëzat e shkurtra të fuqisë gjatë pushimit – më pak e ndjeshme ndaj zhurmës",
+        "lower": "Reagron ndaj shpërthimeve më të shkurtra të fuqisë – kap aktivitetin kalimtar të shpejtë"
       },
       "start_threshold_w": {
         "higher": "Shmang startet false nga kumbëzat e shkurtra të fuqisë",
         "lower": "Kap programet me fuqi të ulët; mund të aktivizohet nga zhurma"
       },
       "stop_threshold_w": {
-        "higher": "Mbyll ciklin më shpejt — mund të mbyllet gjatë një pauze",
-        "lower": "Pret më gjatë para mbylljes — redukton përfundimet e parakohshme"
+        "higher": "Mbyll ciklin më shpejt – mund të mbyllet gjatë një pauze",
+        "lower": "Pret më gjatë para mbylljes – redukton përfundimet e parakohshme"
       },
       "watchdog_interval": {
         "higher": "Lejon faza më të gjata të heshtura; më pak ndërprerje false",
@@ -1676,12 +1723,19 @@
     "start_duration_threshold": "Sekonda mbi prag për të konfirmuar nisjen",
     "start_threshold_w": "Watt minimalë për t'u llogaritur si nisur",
     "stop_threshold_w": "Nën këtë, makina llogaritet e fikur",
-    "dtw_bandwidth": "Sa shtrembërim kohor lejon përputhja e formës",
-    "corr_weight": "Pesha e formës së kurbës kundrejt nivelit të fuqisë në përputhje",
-    "duration_weight": "Sa ndikon përkimi i kohëzgjatjes te përputhja",
-    "energy_weight": "Sa ndikon përkimi i energjisë te përputhja",
-    "profile_match_min_duration_ratio": "Cikli më i shkurtër (krahasuar me profilin) që lejohet ende të përputhet",
-    "profile_match_max_duration_ratio": "Cikli më i gjatë (krahasuar me profilin) që lejohet ende të përputhet"
+    "dtw_bandwidth": "Etapa 3: brez deformimi Sakoe-Chiba (0 = DTW joaktiv; parazgjedhja 0.2 = 20% e gjatësisë së ciklit)",
+    "corr_weight": "Etapa 2: balancë mes formës së kurbës (korrelacion) dhe nivelit të fuqisë (MAE); parazgjedhja 0.45",
+    "duration_weight": "Etapa 4: sa fortë ndikon marrëveshja e kohëzgjatjes në rezultatin final (parazgjedhja 0.22)",
+    "energy_weight": "Etapa 4: sa fortë ndikon marrëveshja e energjisë në rezultatin final (parazgjedhja 0.22)",
+    "profile_match_min_duration_ratio": "Etapa 1: gjatësia minimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 0.1 (10%)",
+    "profile_match_max_duration_ratio": "Etapa 1: gjatësia maksimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 1.5 (150%)",
+    "keep_min_score": "Etapa 2: rezultati minimal për të qëndruar në garë; parazgjedhja 0.1 pranon përputhje të dobëta, etapat e mëvonshme zgjedhin më të mirën",
+    "dtw_blend": "Etapa 3: 0 = vetëm rezultati bazë, 1 = vetëm rezultati DTW, 0.5 = përzierje e barabartë (parazgjedhja)",
+    "dtw_ensemble_w": "Etapa 3 (modaliteti ansambël): pesë për L1-e shkallëzuar kundrejt DTW derivativ; parazgjedhja 0.7 favorizon nivelin e fuqisë",
+    "dtw_ddtw_scale": "Etapa 3: distanca e gjysmë-ngopjes DDTW; më e vogël = më e ndjeshme ndaj formës (parazgjedhja 30)",
+    "dtw_refine_top_n": "Etapa 3: kandidatë të rishënuara nga DTW; rriteni në 7-9 nëse profili i saktë renditet i 4-5 (parazgjedhja 5)",
+    "duration_scale": "Etapa 4: raporti logaritmik ku marrëveshja e kohëzgjatjes gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.175)",
+    "energy_scale": "Etapa 4: raporti logaritmik ku marrëveshja e energjisë gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.25)"
   },
   "col": {
     "profile_tip": "Emri i programit të përputhur. I paetiketuar do të thotë se asnjë profil nuk u përputh në fund të ciklit.",
@@ -1766,6 +1820,68 @@
     },
     "pg_sweep": {
       "optimize": "Optimizim: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulimi i ciklit"
+    },
+    "split": {
+      "apply": "Ndarja e ciklit"
+    },
+    "trim": {
+      "apply": "Prerja e ciklit"
+    },
+    "merge": {
+      "apply": "Bashkimi i cikleve"
+    },
+    "rebuild": {
+      "envelopes": "Rindërtimi i zarfave"
+    }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Konfigurimi i pajisjes",
+      "healthy_chip": "Konfigurimi u kompletua"
+    },
+    "phase0": {
+      "washer": "WashData tashmë po zbulon ciklet tuaja. Regjistroni ciklin tuaj të parë për të aktivizuar emrat e programeve dhe vlerësimet e kohës.",
+      "dishwasher": "WashData po vëzhgon. Lavatriçet e enëve kanë cikle komplekse – regjistrimi i ciklit tuaj të parë rekomandohet fuqimisht. Nëse një cikël i zbuluar zgjat shumë, përdorni redaktuesin e ciklit për ta prerë para se ta ruani si profil.",
+      "generic": "WashData po vëzhgon. Regjistroni ose etiketoni një cikël të zbuluar për të filluar ndërtimin e profileve."
+    },
+    "phase1a": {
+      "labelled": "Fillim i mirë – programi juaj i parë është ruajtur. Për të dhëna sa më të pastra, merrni parasysh regjistrimin e ciklit tuaj të ardhshëm me veglën e regjistruesit."
+    },
+    "phase1b": {
+      "recorded": "Regjistrimi juaj u ruajt si {profile_name}. Tani regjistroni ose etiketoni programet tuaja të tjera të zakonshme për të ndërtuar mbulimin."
+    },
+    "phase1c": {
+      "verify": "Keni {count} programe nga komuniteti. Ekzekutoni një cikël për të verifikuar nëse WashData e njeh saktë – përputhja do të përmirësohet ndërsa pajisja juaj ndërton historinë e vet."
+    },
+    "phase2": {
+      "cluster": "WashData ka parë {count} cikle që nuk përputhen me asnjë program të ruajtur – ato duken të ngjashme me njëra-tjetrën. Dëshironi të krijoni një profil të ri për to?",
+      "unmatched": "Cikli juaj i fundit nuk u përputh me asnjë program të ruajtur. A është një program i ri?"
+    },
+    "phase3": {
+      "suggestions": "WashData ka rekomandime për cilësimet bazuar në historikun tuaj të cikleve – shqyrtojini ato për të përmirësuar saktësinë e zbulimit.",
+      "groups": "Disa nga profilet tuaja duken si i njëjti program në temperatura të ndryshme. Organizojini ato në një grup për përputhje më të mirë.",
+      "phases": "Shtoni faza programi te {profile_name} për vlerësime më të sakta të kohës së mbetur."
+    },
+    "phase4": {
+      "healthy": "Kjo pajisje është konfiguruar plotësisht ({profile_count} profile)."
+    },
+    "cta": {
+      "start_recording": "Fillo regjistrimin",
+      "label_detected_cycle": "Kam tashmë një cikël të zbuluar – etiketoje atë",
+      "browse_cycles": "Shfleto ciklet për të etiketuar një tjetër",
+      "view_profiles": "Shiko profilet tuaja",
+      "create_from_cluster": "Krijo profil nga këto cikle",
+      "create_profile": "Krijo një profil për të",
+      "review_suggestions": "Shqyrto sugjerimet",
+      "organise_profiles": "Organizo profilet",
+      "configure_phases": "Konfiguro fazat",
+      "skip_step": "Anashkalo këtë hap",
+      "skip_forever": "Mos shfaq më",
+      "hide_guidance": "Fshih udhëzuesin",
+      "show_guidance": "Shfaq udhëzuesin"
     }
   }
 }

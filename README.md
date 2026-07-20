@@ -69,9 +69,10 @@ Follow these steps to get accurate results quickly.
 3. **Device Type**: Select the type (Washer, Dryer, etc.) - this sets smart defaults for the internal logic.
 4. **Power Sensor**: Select your smart plug's power entity (Watts). *Note: The system is now optimized for polling intervals of 30-60 seconds (defaults adjusted automatically).*
 5. **Minimum Power (Optional)**: The standby threshold in Watts below which the appliance counts as off (default 2 W). Leave it unless your plug reports a high phantom load.
-6. **Initial Profile (Optional)**: A second step lets you pre-create one profile - give it a name (e.g. "Cotton") and an approximate duration in minutes. Skip it and add profiles later from the panel.
 
-> **Then open the WashData panel.** After setup, a **WashData** entry appears in the Home Assistant **sidebar** - that panel is where you do everything: **Overview** (live status + manual recording), **Cycles**, **Profiles**, **Settings**, **ML Training**, and **Advanced**. The integration's **Configure** dialog now keeps only three essentials (device type, power sensor, minimum power); every other setting and action moved into the panel.
+That is the whole wizard - setup is just device type, power sensor, and minimum power. (Earlier versions had an optional "Create First Profile" step; it was removed in 0.5.1. The panel's **Setup Card** now guides you through creating your first profile.)
+
+> **Then open the WashData panel.** After setup, a **WashData** entry appears in the Home Assistant **sidebar** - that panel is where you do everything: **Overview** (live status + manual recording + a **Setup Card** that guides your next step), **Cycles**, **Profiles**, **Settings**, **Playground**, **Store** (when online features are enabled), and **Advanced** (which contains **Maintenance**, **Diagnostics**, and **ML Training** sub-tabs). The integration's **Configure** dialog keeps only three essentials (device type, power sensor, minimum power); every other setting and action lives in the panel.
 
 #### 💡 Tips for Zigbee2MQTT (Z2M) users
 If you are using Zigbee2MQTT with smart plugs, ensure your device reporting is responsive enough for accurate matching:
@@ -115,6 +116,13 @@ Programs that differ **only** in temperature or spin speed (e.g. Cotton 40°C vs
 - On first run the system may assign the wrong variant - **correct it from the feedback attention card** on the panel's Overview.
 - With a few confirmed corrections the system learns; 3–5 corrections per variant pair is usually enough.
 - If your machine's power draw barely changes between temperatures, the variants may remain hard to distinguish automatically. In that case, selecting the program manually via the Program Selector dropdown remains reliable.
+
+> **Phase-aware time remaining (0.5.1, opt-in).** Temperature variants differ mostly in how
+> long they spend *heating*. WashData can budget each cycle stage (heating / wash / spin)
+> separately so the **time-remaining estimate** stays accurate across variants, even when the
+> overall shape looks the same. Enable it per device with **"Use phase-aware time remaining"**
+> in Settings (currently available for washing machines and washer-dryers). It only refines
+> the ETA - it never changes which program is matched.
 
 #### Practical advice for washer-dryer combos
 
@@ -181,13 +189,13 @@ Everything is managed from the **WashData** panel in the Home Assistant sidebar.
 
 | Tab | What you do there |
 | --- | --- |
-| **Overview** | Live state, power chart, progress with a color-coded **phase timeline**, and time remaining, a program selector, attention cards for pending suggestions and feedback, a first-run onboarding card on new devices, and **Manual Recording** (start/stop) right here on the home screen. |
-| **Cycles** | Cycle history (with per-cycle energy **cost**), paginated with **Load more**; open a cycle to label, trim, split, merge, or delete it; multi-select for **compare / merge / bulk relabel / delete**, a 10s **undo** on deletes, and a "needs review" filter. |
+| **Overview** | Live state, power chart, progress with a color-coded **phase timeline**, and time remaining, a program selector, feedback attention cards, a **Setup Card** that guides your next step on new devices (record a profile, browse the community store, resolve suggestions), and **Manual Recording** (start/stop) right here on the home screen. |
+| **Cycles** | Cycle history (with per-cycle energy **cost**), paginated with **Load more**; open a cycle to label, trim, split, merge, or delete it; multi-select for **compare / merge / bulk relabel / delete**, a 10s **undo** on deletes, and a "needs review" filter. Heavy edits (trim / split / merge / rebuild envelopes) run as **background tasks** with a header progress pill, so the panel never freezes. |
 | **Profiles** | Create (**+ New Profile**), rename, rebuild, group, and clean up profiles; per-profile **average cost** and a duration sparkline; a **Phase Catalog** sub-tab and a phase-range editor. |
-| **Settings** | All tunables (detection, matching, timing, notifications, energy price, ...), each with a tooltip and inline suggestions, behind a **Basic / Advanced** toggle. **Notifications** includes an **Automations** section (see below). |
-| **ML Training** | The opt-in, experimental ML subsystem: on-device training, matcher tuning, and the runtime-models toggle. (Shown only when ML training is available.) |
-| **Playground** | Power-user what-if tools, in three modes, all driven by the **real detection/matching/estimation engine** (not an approximation). **Simulate**: load a stored cycle and replay it exactly as the integration would run it - real detector state band, **model-estimated time-left** / progress / live match confidence / current phase updating as you scrub or play, a synchronized event timeline (detected → match committed → notification points → finished) and a side rail of alerts (overrun, did-not-finish, unmatched, …); drag the detection thresholds to re-run instantly. **Test on history**: replay your recent cycles into a per-cycle results table with drill-down and a before/after diff when you edit a setting. **Sweep**: find the setting value that best meets an objective (match accuracy, end-timing, false-end rate, duration off-target, ambiguity) as a 1D curve or a 2D heatmap, then apply the best. |
-| **Advanced** | Sub-tabs for **My Preferences**, **Diagnostics** (storage stats, maintenance, and config **export / import**), a **Maintenance** log with service reminders, **Logs**, **Panel Settings**, and **Access Control** (per-user RBAC). The gear icon in this tab controls **online features** (opt-in): enable to unlock the Community Store brand/model pickers, browse shared setups, and share your own programs. |
+| **Settings** | All tunables (detection, matching, timing, notifications, energy price, ...), each with a tooltip and inline suggestions, behind a **Basic / Advanced** toggle. Includes the opt-in **phase-aware time-remaining** toggle. **Notifications** includes an **Automations** section (see below). |
+| **Playground** | Power-user what-if tools, all driven by the **real detection/matching/estimation engine** (not an approximation), presented as one workbench. **Simulate**: load a stored cycle and replay it exactly as the integration would run it - real detector state band, **model-estimated time-left** / progress / live match confidence / current phase updating as you scrub or play, a synchronized event timeline (detected → match committed → notification points → finished) and a side rail of alerts (overrun, did-not-finish, unmatched, …); drag the detection thresholds to re-run instantly. **Test on history**: replay your recent cycles into a per-cycle results table with drill-down and a before/after diff when you edit a setting. **Optimize**: find the setting value that best meets an objective (match accuracy, end-timing, false-end rate, duration off-target, ambiguity) as a 1D curve or a 2D heatmap, then apply the best. |
+| **Store** | The **Community Store** (shown when online features are enabled): browse shared appliance setups by brand/model, adopt a matching device to skip recording from scratch, and share your own programs. |
+| **Advanced** | Sub-tabs for **My Preferences**, **Diagnostics** (storage stats, maintenance actions, and config **export / import**), a **Maintenance** log with service reminders, **Logs**, **Panel Settings**, **Access Control** (per-user RBAC), and **ML Training** (the opt-in on-device training, matcher tuning, and runtime-models toggle; shown only when ML training is available). The gear icon controls **online features** (opt-in) that unlock the Store tab and the brand/model pickers. |
 
 The integration's **Configure** dialog ([Settings → Devices & Services → WashData](https://my.home-assistant.io/redirect/integration/?domain=ha_washdata)) is now a small stub with just device type, power sensor, and minimum power - everything else lives in the panel. (The panel itself is a custom sidebar entry at `/ha-washdata`; open it from the Home Assistant sidebar.)
 
@@ -204,9 +212,9 @@ Click a section to expand screenshots and descriptions.
 
 The device bar at the top shows all configured appliances at a glance - state badge, pending suggestions count, and review queue. Clicking any card switches the active device without leaving the panel.
 
-![Overview tab - dishwasher idle](doc/images/panel/overview_idle.png)
+![Overview tab - dishwasher idle](docs/images/panel/overview_idle.png)
 
-The Overview tab shows the current state (Off / Running / Detecting), a live power reading, and the progress and time-remaining estimates once a cycle is matched. Attention cards surface pending review items and tuning suggestions inline so you act without hunting through menus. **Manual Recording** lives here too - hit Start Recording before you run a new program to get a clean reference cycle.
+The Overview tab shows the current state (Off / Running / Detecting), a live power reading, and the progress and time-remaining estimates once a cycle is matched. A single **Setup Card** guides your next step depending on how far along the device is (record your first program, browse the community store, widen coverage, or resolve tuning suggestions), and feedback attention cards surface finished cycles that need review - so you act without hunting through menus. **Manual Recording** lives here too - hit Start Recording before you run a new program to get a clean reference cycle.
 
 </details>
 
@@ -217,37 +225,37 @@ The Overview tab shows the current state (Off / Running / Detecting), a live pow
 
 Every completed cycle is listed with profile, status, date, duration, energy, cost, match confidence, and cycle-health score. Sortable columns; filter by profile name or status (completed / interrupted / unknown / needs review).
 
-![Cycles tab - history list](doc/images/panel/cycles_list.png)
+![Cycles tab - history list](docs/images/panel/cycles_list.png)
 
 **Multi-select actions**
 
 Tick two or more cycles to reveal the bulk action bar: **Compare** overlays their power curves side by side, **Merge** fuses two mis-split runs into one, and **Delete** removes them permanently.
 
-![Cycles list - multi-select with Compare / Merge / Delete](doc/images/panel/cycles_multiselect.png)
+![Cycles list - multi-select with Compare / Merge / Delete](docs/images/panel/cycles_multiselect.png)
 
 **Inspect - power graph and anomaly report**
 
 Opening a cycle shows its power trace overlaid on the matched profile's envelope. Shaded regions highlight detected artifacts (door-open pauses, out-of-band spikes/dips). The anomaly list below the graph describes each event with its timestamp and duration so you can judge whether it was intentional (e.g. adding clothes mid-cycle) or a detection problem.
 
-![Cycle modal - Inspect tab with artifact shading and anomaly list](doc/images/panel/cycle_inspect.png)
+![Cycle modal - Inspect tab with artifact shading and anomaly list](docs/images/panel/cycle_inspect.png)
 
 **Trim - remove noise from cycle boundaries**
 
 Drag the red handles on the graph, or type exact offsets, to crop a late-detected start or an overrun tail. Everything outside the window is discarded when you hit **Apply Trim**.
 
-![Cycle modal - Trim tab](doc/images/panel/cycle_trim.png)
+![Cycle modal - Trim tab](docs/images/panel/cycle_trim.png)
 
 **Split - divide one run into separate cycles**
 
 Click on the graph to place split points, or use **Auto-detect** to find idle gaps automatically. Each resulting segment gets its own profile dropdown so you can label wash and dry phases of a combo cycle separately.
 
-![Cycle modal - Split tab](doc/images/panel/cycle_split.png)
+![Cycle modal - Split tab](docs/images/panel/cycle_split.png)
 
 **Review - confirm, tag, and teach the model**
 
 Set the correct profile and a quality rating (Good / Bad), tick issue tags (Late start, Noise, Wrong profile, …), compare against alternative profiles side by side, and add free-text notes. Saved reviews feed the on-device ML model and refine future matching.
 
-![Cycle modal - Review tab](doc/images/panel/cycle_review.png)
+![Cycle modal - Review tab](docs/images/panel/cycle_review.png)
 
 </details>
 
@@ -258,25 +266,25 @@ Set the correct profile and a quality rating (Good / Bad), tick issue tags (Late
 
 All learned programs are shown as cards with cycle count, average duration, per-cycle energy, and accumulated total. A quality badge ("acceptable quality") appears once enough cycles have been labelled. A yellow banner calls out near-duplicate clusters and invites you to group them so the matcher can reliably pick between look-alike programs (same shape, different temperature or spin speed).
 
-![Profiles tab - grouped and ungrouped profile cards](doc/images/panel/profiles_list.png)
+![Profiles tab - grouped and ungrouped profile cards](docs/images/panel/profiles_list.png)
 
 **Phases - visual phase-range editor**
 
 Open any profile and switch to the Phases tab to see every labelled cycle's average curve with coloured phase bands overlaid. Drag boundary values or type minute offsets to map Pre-Rinse, Wash, Rinse, Soak, Spin, Dry and other phases to time ranges. The live progress readout on the Overview tab uses these ranges to display the current phase name.
 
-![Profile modal - Phases tab with colour-coded phase bands](doc/images/panel/profile_phases.png)
+![Profile modal - Phases tab with colour-coded phase bands](docs/images/panel/profile_phases.png)
 
 **Cleanup - spot and remove outlier cycles**
 
 The Cleanup tab overlays every labelled cycle as a spaghetti graph. Hover a row in the table to highlight that cycle's curve; tick the checkbox to select it; hit **Delete selected** to remove outliers that are pulling the profile envelope out of shape. Scroll position is preserved while you tick boxes.
 
-![Profile modal - Cleanup tab with spaghetti graph and cycle checklist](doc/images/panel/profile_cleanup.png)
+![Profile modal - Cleanup tab with spaghetti graph and cycle checklist](docs/images/panel/profile_cleanup.png)
 
 **Manage - rename, retune, delete**
 
 Set the expected duration (used for time-remaining estimates before the cycle completes its first 50%), rebuild the envelope after cleanup, or delete the profile entirely.
 
-![Profile modal - Manage tab](doc/images/panel/profile_manage.png)
+![Profile modal - Manage tab](docs/images/panel/profile_manage.png)
 
 </details>
 
@@ -287,19 +295,19 @@ Set the expected duration (used for time-remaining estimates before the cycle co
 
 Device name, device type (sets detection defaults), power sensor entity, minimum power threshold, off delay, and HA device grouping. Inline suggestion chips appear when WashData's analysis finds a better value from your cycle history - click **Use** to accept or ignore them individually, or **Apply all** in the banner.
 
-![Settings - Basic section with inline ML and classic suggestions](doc/images/panel/settings_basic.png)
+![Settings - Basic section with inline ML and classic suggestions](docs/images/panel/settings_basic.png)
 
 **Notifications section - push alerts and automations**
 
 Configure push targets for cycle-start, finish, and live-progress events using a filterable entity picker (type to narrow the list). The **Automations** section links to the HA automations that already reference this device and lets you create new ones from a blank or prefilled template. Pre-end alert timing, live-update interval, and overrun threshold live here too.
 
-![Settings - Notifications section with pill pickers and automation links](doc/images/panel/settings_notifications.png)
+![Settings - Notifications section with pill pickers and automation links](docs/images/panel/settings_notifications.png)
 
 **Log drawer**
 
 The log panel slides in from the right edge of any Settings view. It streams the last 500 WashData log lines, filterable by level (Info / Warning / Error). Drag the left edge of the drawer to resize it; the width and open/closed state persist across page refreshes.
 
-![Settings with the Logs side drawer open and resizable](doc/images/panel/settings_logs.png)
+![Settings with the Logs side drawer open and resizable](docs/images/panel/settings_logs.png)
 
 </details>
 
@@ -312,7 +320,7 @@ The ML Training tab is the single home for all on-device learning. The **Status*
 
 The **Program-matching fine-tuning** table shows whether per-device matching weights (shape vs duration vs energy) have diverged from the shipped defaults after tuning against your labelled history.
 
-![ML Training tab - personalized status, model quality bars, matching tuning table](doc/images/panel/ml_training.png)
+![ML Training tab - personalized status, model quality bars, matching tuning table](docs/images/panel/ml_training.png)
 
 </details>
 
@@ -323,25 +331,25 @@ The **Program-matching fine-tuning** table shows whether per-device matching wei
 
 Per-HA-account display options: default landing tab, cycle date format (relative or absolute), whether to show the expected-curve overlay on the power graph, and the live match debug card visibility.
 
-![Advanced - My Preferences subtab](doc/images/panel/advanced_preferences.png)
+![Advanced - My Preferences subtab](docs/images/panel/advanced_preferences.png)
 
 **Diagnostics**
 
 Storage stats (cycle count, profile count, file size), and three maintenance actions: **Process History** re-runs matching and ML retraining on all stored cycles after a batch of reviews; **Clear Debug Traces** frees space; **Wipe All Data** is the nuclear option. **Export / Import** lets you back up the full profile and cycle database to JSON or restore from a previous export (also accepts HA diagnostics downloads).
 
-![Advanced - Diagnostics subtab with storage stats, maintenance actions, and export/import](doc/images/panel/advanced_diagnostics.png)
+![Advanced - Diagnostics subtab with storage stats, maintenance actions, and export/import](docs/images/panel/advanced_diagnostics.png)
 
 **Panel Settings**
 
 Admin-level defaults: which tab opens by default for all users, and which tabs (Cycles, Profiles, Settings) are hidden from non-admin users.
 
-![Advanced - Panel Settings subtab](doc/images/panel/advanced_panel_settings.png)
+![Advanced - Panel Settings subtab](docs/images/panel/advanced_panel_settings.png)
 
 **Access Control**
 
 Per-user RBAC. Enable per-user control, set the fallback level for unlisted users (View / Edit / None), and override per device for each HA account. Administrators always have full access and can manage everyone's permissions from this screen.
 
-![Advanced - Access Control subtab with per-user, per-device permission dropdowns](doc/images/panel/advanced_access_control.png)
+![Advanced - Access Control subtab with per-user, per-device permission dropdowns](docs/images/panel/advanced_access_control.png)
 
 </details>
 
@@ -442,7 +450,7 @@ The [WashData Community Store](https://3dg1luk43.github.io/washdata-store) is a 
 
 **Enabling it:** Open the WashData panel, go to the **Advanced** tab, click the **gear icon**, and toggle **Enable online features** on. Then use the Brand and Model pickers to declare which appliance you own. Online features are disabled by default and no data is sent or fetched until you opt in.
 
-**Adopting a setup:** Once your model is declared, a **Browse community setups** button appears on the onboarding card for new devices. Click it to see contributed programs for your model, preview their power-cycle waveforms, and import them with a single click. An optional checkbox lets you also adopt the contributor's detection and matching settings -- useful if your machine is the same model and the contributor has already tuned the thresholds.
+**Adopting a setup:** Once your model is declared, a **Browse community setups** button appears on the Overview tab's **Setup Card** for new devices. Click it to see contributed programs for your model, preview their power-cycle waveforms, and import them with a single click. An optional checkbox lets you also adopt the contributor's detection and matching settings -- useful if your machine is the same model and the contributor has already tuned the thresholds.
 
 **Sharing your programs:** When you have programs with golden reference cycles (cycles marked ⭐ in the Cycles tab, or captured via Record Mode), the **Share this device** button uploads them to the store. Contributions are reviewed; once five distinct users confirm a setup works for their machine, it is auto-approved. Phase maps and detection settings can optionally be bundled with the share.
 

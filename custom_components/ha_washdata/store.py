@@ -160,6 +160,21 @@ class StoreBridge:
         self._ps = profile_store
         self._client = StoreClient(hass)
 
+    def _fire_download_telemetry(self, cycle_ids: list[str]) -> None:
+        """Fire best-effort download/adoption telemetry as a detached background task.
+
+        Awaiting these store round-trips inline would add their HTTP latency (up to the
+        15s per-request timeout when the store is slow/unreachable) to the user-facing
+        adopt response. Their outcome does not affect the result, and both bump_* calls
+        swallow their own errors, so a detached task can never surface an exception.
+        """
+        async def _bump() -> None:
+            if cycle_ids:
+                await self._client.bump_downloads(cycle_ids)
+            await self._client.bump_analytics("downloads", 1)
+
+        self._hass.async_create_background_task(_bump(), "washdata_store_telemetry")
+
     # ── account / status (global) ───────────────────────────────────────────────
 
     def status(self) -> dict[str, Any]:
@@ -243,6 +258,10 @@ class StoreBridge:
         })
         if not local_id:  # trace failed validation in add_reference_cycle
             return {"error": "invalid_trace"}
+        # Credit the download on the source store cycle + record one community-wide
+        # adoption for the store's usage dashboard (the real "someone used it" metric).
+        # Fired in the background so store latency never delays the adopt response.
+        self._fire_download_telemetry([cyc["id"]] if cyc.get("id") else [])
         return {"profile": profile, "cycle_id": local_id}
 
     async def share_cycle(
@@ -378,6 +397,7 @@ class StoreBridge:
         profiles_adopted = 0
         cycles_imported = 0
         phases_applied = 0
+        imported_store_ids: list[str] = []
         for prof in bundle.get("profiles", []) or []:
             program = str(prof.get("program") or prof.get("program_lc") or "").strip()
             if not program:
@@ -398,6 +418,8 @@ class StoreBridge:
                 if local_id:
                     cycles_imported += 1
                     adopted_any = True
+                    if store_cid:
+                        imported_store_ids.append(store_cid)
             if adopted_any:
                 profiles_adopted += 1
             # Stage 2: apply the bundled phase map (replace) + reconcile labels. Never
@@ -406,6 +428,14 @@ class StoreBridge:
             # re-download with no new cycles still reconciles updated phase ranges.
             if prof.get("phases") and await self._apply_phases(program, prof.get("phases"), device_type):
                 phases_applied += 1
+        # Credit a download on every reference cycle actually adopted this run (each
+        # underlying object, not just one). Skipped/duplicate cycles aren't re-counted,
+        # so re-downloading the same device doesn't inflate the counters. Also record one
+        # community-wide "download" (adoption) for the store's usage dashboard -- the real
+        # metric of how many people actually pulled this into their integration. Fired in
+        # the background so store latency never delays the adopt-bundle response.
+        if imported_store_ids:
+            self._fire_download_telemetry(imported_store_ids)
         settings = bundle.get("settings") if isinstance(bundle.get("settings"), dict) else {}
         return {
             "profiles_adopted": profiles_adopted,

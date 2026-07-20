@@ -448,6 +448,27 @@ async def test_v9_to_v10_idempotent():
     assert result["reference_cycles"] == [{"id": "r"}]
 
 
+@pytest.mark.asyncio
+async def test_v10_to_v11_marker_no_data_loss():
+    """v10 → v11: marker-only bump (phase_profile is derived cache). No data is
+    added, removed, or altered - cycles/profiles/envelopes pass through untouched."""
+    store = _make_store()
+    env = {"time_grid": [0.0, 1.0], "avg": [[0.0, 5.0], [1.0, 6.0]], "cycle_count": 3}
+    data: dict[str, Any] = {
+        "past_cycles": [{"id": "a"}, {"id": "b"}],
+        "profiles": {"Cotton 40": {"avg_duration": 8000.0, "device_type": "washing_machine"}},
+        "envelopes": {"Cotton 40": dict(env)},
+        "reference_cycles": [{"id": "r"}],
+    }
+    result = await store._async_migrate_func(10, 1, data)
+    assert [c["id"] for c in result["past_cycles"]] == ["a", "b"]
+    assert result["profiles"]["Cotton 40"]["avg_duration"] == 8000.0
+    assert result["reference_cycles"] == [{"id": "r"}]
+    # envelope untouched; no phase_profile injected by the migration itself
+    assert result["envelopes"]["Cotton 40"] == env
+    assert "phase_profile" not in result["envelopes"]["Cotton 40"]
+
+
 # ---------------------------------------------------------------------------
 # Full chain v1 → current: end-to-end through all migration steps
 # ---------------------------------------------------------------------------

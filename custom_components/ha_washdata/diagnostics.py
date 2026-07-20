@@ -54,6 +54,7 @@ _SENSITIVE_KEYS = {
     "door_sensor_entity",
     "switch_entity",
     "energy_price_entity",
+    "energy_sensor",
 }
 
 

@@ -258,16 +258,6 @@ class AnalyzeSplitResponse(TypedDict):
     full_duration_s: float
 
 
-class ApplySplitResponse(TypedDict):
-    success: bool
-    new_ids: list[str]
-
-
-class ApplyMergeResponse(TypedDict):
-    success: bool
-    new_id: str
-
-
 # ─── Profile envelope / member cycles ──────────────────────────────────────────
 
 class ProfileEnvelope(TypedDict):
@@ -362,24 +352,6 @@ class GetMlTrainingStatusResponse(TypedDict):
 
 
 # ─── Playground (F3) ───────────────────────────────────────────────────────────
-
-class PlaygroundSummary(TypedDict):
-    cycles: int
-    requested: int
-    concurrency: int
-    detected: int
-    missed: int
-    false_end: int
-    match_correct: int
-    match_wrong: int
-    unmatched: int
-    skipped_ids: list[str]
-
-
-class RunPlaygroundSimulationResponse(TypedDict):
-    results: list[dict[str, Any]]
-    summary: PlaygroundSummary
-
 
 class RunPlaygroundCycleDetailResponse(TypedDict, total=False):
     cycle_id: Any
@@ -602,12 +574,27 @@ class GetShareableCyclesResponse(TypedDict, total=False):
     phase_programs: list
 
 
+class GetSetupStatusResponse(TypedDict, total=False):
+    """Current adoption phase for the setup guidance card."""
+    phase: str
+    message_key: str
+    message_params: dict
+    cta_label_key: str
+    cta_action: str
+    secondary_label_key: str | None
+    secondary_action: str | None
+    skippable: bool
+    dismissible: bool
+    step_key: str | None
+
+
 WS_RESPONSE_TYPES: dict[str, type] = {
     "get_devices": GetDevicesResponse,
     "get_device_cycles": GetDeviceCyclesResponse,
     "get_options": GetOptionsResponse,
     "set_options": SuccessResponse,
     "get_settings_changelog": GetSettingsChangelogResponse,
+    "get_setup_status": GetSetupStatusResponse,
     "get_profiles": GetProfilesResponse,
     "create_profile": CreateProfileResponse,
     "rename_profile": SuccessResponse,
@@ -616,7 +603,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "save_profile_group": SuccessResponse,
     "rename_profile_group": SuccessResponse,
     "delete_profile_group": SuccessResponse,
-    "rebuild_envelopes": SuccessResponse,
+    "rebuild_envelopes": StartTaskResponse,
     "get_profile_phases": GetProfilePhasesResponse,
     "set_profile_phases": SuccessResponse,
     "get_maintenance_log": GetMaintenanceLogResponse,
@@ -649,10 +636,10 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "clear_suggestions": SuccessResponse,
     "run_suggestion_analysis": RunSuggestionAnalysisResponse,
     "get_cycle_power_data": GetCyclePowerDataResponse,
-    "trim_cycle": SuccessResponse,
+    "trim_cycle": StartTaskResponse,
     "analyze_split": AnalyzeSplitResponse,
-    "apply_split": ApplySplitResponse,
-    "apply_merge": ApplyMergeResponse,
+    "apply_split": StartTaskResponse,
+    "apply_merge": StartTaskResponse,
     "get_profile_envelope": GetProfileEnvelopeResponse,
     "get_profile_cycles": GetProfileCyclesResponse,
     "get_panel_config": GetPanelConfigResponse,
@@ -671,7 +658,6 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "pause_cycle": OkResponse,
     "resume_cycle": OkResponse,
     "terminate_cycle": OkResponse,
-    "run_playground_simulation": RunPlaygroundSimulationResponse,
     "run_playground_cycle_detail": RunPlaygroundCycleDetailResponse,
     "run_playground_history": RunPlaygroundHistoryResponse,
     "run_playground_sweep": RunPlaygroundSweepResponse,
@@ -682,6 +668,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_task_result": TaskSnapshot,
     "start_playground_history": StartTaskResponse,
     "start_playground_sweep": StartTaskResponse,
+    "start_playground_cycle_detail": StartTaskResponse,
     "store_status": StoreStatusResponse,
     "store_connect": StoreSimpleResponse,
     "store_disconnect": StoreSimpleResponse,
@@ -751,6 +738,7 @@ WS_COMMANDS: dict[str, dict] = {
     "get_options": {"params": [_entry()]},
     "set_options": {"params": [_entry(), _p("options", "dict")]},
     "get_settings_changelog": {"params": [_entry()]},
+    "get_setup_status": {"params": [_entry()]},
     "get_profiles": {"params": [_entry()]},
     "create_profile": {"params": [
         _entry(),
@@ -911,12 +899,6 @@ WS_COMMANDS: dict[str, dict] = {
     "pause_cycle": {"params": [_entry()]},
     "resume_cycle": {"params": [_entry()]},
     "terminate_cycle": {"params": [_entry()]},
-    "run_playground_simulation": {"params": [
-        _entry(),
-        _p("cycle_ids", "list[str]", False),
-        _p("settings_override", "dict", False),
-        _p("concurrency", "int", False),
-    ]},
     "run_playground_cycle_detail": {"params": [
         _entry(),
         _p("cycle_id", "str"),
@@ -959,6 +941,11 @@ WS_COMMANDS: dict[str, dict] = {
         _p("objective", "str"),
         _p("param_y", "str|null", False),
         _p("values_y", "list[float]", False),
+    ]},
+    "start_playground_cycle_detail": {"params": [
+        _entry(),
+        _p("cycle_id", "str"),
+        _p("settings_override", "dict", False),
     ]},
     # Community store (online features)
     "store_status": {"params": [_entry()]},

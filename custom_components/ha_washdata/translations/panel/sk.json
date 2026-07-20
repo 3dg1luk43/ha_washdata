@@ -1,13 +1,13 @@
 {
   "badge": {
-    "artifact_tip": "Zistilo sa {n} anomálií (napr. dvere otvorené uprostred cyklu) — otvorte ich, aby ste ich videli na grafe",
+    "artifact_tip": "Zistilo sa {n} anomálií (napr. dvere otvorené uprostred cyklu) – otvorte ich, aby ste ich videli na grafe",
     "auto": "(automaticky zistené)",
     "built_in_tag": "vstavaný",
     "declining": "↘ klesajúci",
     "energy_low": "Nižšia spotreba energie ako zvyčajne",
     "energy_spike": "Vyššia spotreba energie ako zvyčajne",
     "fair_fit": "prijateľná kvalita",
-    "fair_fit_tip": "Stredná konzistencia zhody — niektoré cykly priradené k tomuto profilu majú nižšie skóre spoľahlivosti. Označte viac cyklov alebo znova nahrajte profil, aby ste zlepšili presnosť.",
+    "fair_fit_tip": "Stredná konzistencia zhody – niektoré cykly priradené k tomuto profilu majú nižšie skóre spoľahlivosti. Označte viac cyklov alebo znova nahrajte profil, aby ste zlepšili presnosť.",
     "feedback_requested": "Vyžiadaná spätná väzba",
     "golden_cycle": "Zaznamenaný referenčný cyklus",
     "improving": "↗ zlepšujúci sa",
@@ -15,7 +15,7 @@
     "needs_review": "Vyžaduje preskúmanie",
     "overrun": "Trvalo dlhšie ako zvyčajne",
     "poor_fit": "zlá kvalita",
-    "poor_fit_tip": "Nekonzistentná história zhôd — zvážte prestavbu tohto profilu",
+    "poor_fit_tip": "Nekonzistentná história zhôd – zvážte prestavbu tohto profilu",
     "restart_gap_tip": "{n} medzera reštartu HA: priebeh výkonu má dieru",
     "reviewed": "Skontrolované",
     "steady": "→ stabilný",
@@ -57,7 +57,7 @@
     "create_profile": "+ Vytvoriť profil",
     "delete": "Odstrániť",
     "delete_group": "Odstrániť skupinu",
-    "delete_group_tip": "Odstrániť iba túto skupinu — profily členov sa zachovajú",
+    "delete_group_tip": "Odstrániť iba túto skupinu – profily členov sa zachovajú",
     "delete_profile": "Odstrániť profil",
     "discard": "Zahodiť",
     "discard_tip": "Zahodiť zaznamenaný priebeh bez uloženia",
@@ -87,7 +87,7 @@
     "on_cycle_finished": "Po dokončení cyklu",
     "on_cycle_started": "Pri spustení cyklu",
     "pause_cycle": "Pozastaviť",
-    "pause_cycle_tip": "Pozastaviť bežiaci cyklus — spotrebič pokračuje tam, kde prestal",
+    "pause_cycle_tip": "Pozastaviť bežiaci cyklus – spotrebič pokračuje tam, kde prestal",
     "pg_apply_device": "Použiť na zariadenie",
     "pg_autofill": "Automaticky vyplniť",
     "play": "Prehrať",
@@ -97,8 +97,8 @@
     "process_tip": "Uložiť zaznamenaný priebeh ako nový alebo existujúci profil",
     "rebuild": "Prebudovať obálky",
     "rebuild_envelope": "Prebudovať obálku",
-    "rebuild_tip": "Prepočítať očakávanú výkonovú obálku (pásmo min/max) pre všetky profily z ich označených cyklov — spustiť po označení nových cyklov alebo oprave starých",
-    "rec_start_tip": "Začať nahrávanie priebehu výkonu spotrebiča — spustiť tesne pred začatím cyklu",
+    "rebuild_tip": "Prepočítať očakávanú výkonovú obálku (pásmo min/max) pre všetky profily z ich označených cyklov – spustiť po označení nových cyklov alebo oprave starých",
+    "rec_start_tip": "Začať nahrávanie priebehu výkonu spotrebiča – spustiť tesne pred začatím cyklu",
     "rec_stop": "Zastaviť",
     "rec_stop_tip": "Zastaviť nahrávanie a podržať zachytený priebeh na kontrolu",
     "record": "Začať nahrávanie",
@@ -231,7 +231,7 @@
       "interval": "Mal by byť aspoň 2× Interval vzorkovania ({si} s)",
       "sampling": "Interval vzorkovania by mal byť najviac polovica Intervalu watchdog ({wi} s)"
     },
-    "settings_banner": "{n} konflikt{s} nastavení — skontrolujte zvýraznené sekcie a opravte pred uložením.",
+    "settings_banner": "{n} konflikt{s} nastavení – skontrolujte zvýraznené sekcie a opravte pred uložením.",
     "settings_banner_btn": "Prejsť na prvý"
   },
   "hdr": {
@@ -451,9 +451,9 @@
     "show_expected": "Zobraziť očakávanú krivku (zhodný profil, oranžový)",
     "show_raw": "Zobraziť prepínač surových dát zásuvky v živom grafe výkonu",
     "sparkline": "Nedávny trend trvania cyklov",
-    "stage2": "Etapa 2 — základná podobnosť",
-    "stage3": "Etapa 3 — DTW",
-    "stage4": "Etapa 4 — zhoda",
+    "stage2": "Etapa 2 – základná podobnosť",
+    "stage3": "Etapa 3 – DTW",
+    "stage4": "Etapa 4 – zhoda",
     "status": "Stav",
     "tail_trim": "Orezanie konca (s)",
     "timer_auto_pause": "Automatické pozastavenie",
@@ -561,7 +561,12 @@
     "flags": "Príznaky",
     "include_phase_map": "Zahrnúť mapu fáz",
     "include_settings": "Zahrnúť nastavenia",
-    "show_contributor": "Zobraziť prispievateľa"
+    "show_contributor": "Zobraziť prispievateľa",
+    "task_pg_detail": "Simulovať cyklus",
+    "task_split": "Rozdeľovanie cyklu",
+    "task_trim": "Orezávanie cyklu",
+    "task_merge": "Zlučovanie cyklov",
+    "task_rebuild": "Prepočítavanie obálok"
   },
   "log": {
     "all_levels": "Všetky úrovne",
@@ -645,7 +650,7 @@
     "artifact_dip_detail": "Poklesol pod bežné pásmo výkonu počas ~{n} s.",
     "artifact_footer": "Zvýraznené na grafe vyššie. Sú to prechodné artefakty (napr. dvere otvorené uprostred cyklu), nie nevyhnutne problémy.",
     "artifact_header": "Počet anomálií zistených počas tohto cyklu: {n}",
-    "artifact_pause_detail": "Výkon poklesol takmer na nulu počas ~{n} s a potom sa obnovil — pravdepodobne boli otvorené dvere uprostred cyklu alebo bol cyklus pozastavený.",
+    "artifact_pause_detail": "Výkon poklesol takmer na nulu počas ~{n} s a potom sa obnovil – pravdepodobne boli otvorené dvere uprostred cyklu alebo bol cyklus pozastavený.",
     "artifact_spike_detail": "Bol nad bežným pásmom výkonu počas ~{n} s.",
     "auto_label_intro": "Priradiť profily neoznačeným cyklom, ktorých zhoda prekračuje prah.",
     "automations_intro": "WashData spúšťa udalosti {start} / {end} a sprístupňuje entity, takže notifikácie a akcie sa najlepšie vytvárajú ako bežné automatizácie Home Assistant. Automatizácie používajúce toto zariadenie sú zobrazené nižšie.",
@@ -654,10 +659,10 @@
     "collecting_data": "Zbieranie dát: ešte {need} cyklov do spustenia doladenia ({current}/{min}).",
     "compare_overlay_profiles": "Prekryté profily (bledé)",
     "compare_profiles_tip": "Prekryte ostatné profilové obálky v tabuľke vyššie, aby ste videli, ktorá z nich najlepšie vyhovuje tomuto cyklu.",
-    "compare_selected_cycles": "Vybraté cykly (tučné) — zobraziť / skryť",
+    "compare_selected_cycles": "Vybraté cykly (tučné) – zobraziť / skryť",
     "consider_new_profile": "Zvážte vytvorenie nového profilu.",
     "coverage_gap": "nedávne cykly nemajú žiadny zodpovedajúci profil ({pct} % z posledných 30).",
-    "coverage_gap_similar_cycles": "Nájdených {count} podobných neoznačených cyklov — vytvorte profil, aby sa začali párovať.",
+    "coverage_gap_similar_cycles": "Nájdených {count} podobných neoznačených cyklov – vytvorte profil, aby sa začali párovať.",
     "cycles_deleted": "Odstránených cyklov: {count}",
     "enough_data": "Dostatok dát na učenie ({current}/{min} cyklov).",
     "export_description": "Exportujte všetky profily a cykly do JSON alebo obnovte z predchádzajúceho exportu.",
@@ -686,7 +691,7 @@
     "ml_learned_intro": "Modely doladené pre tento stroj.",
     "ml_loading": "načítava sa ML…",
     "ml_settings_intro": "Dva nezávislé prepínače: jeden používa modely počas behu cyklu, druhý umožňuje WashData časom ich doladiť na váš stroj.",
-    "name_first_program": "Máte dostatok cyklov — pomenujte svoj prvý program a spustite priraďovanie.",
+    "name_first_program": "Máte dostatok cyklov – pomenujte svoj prvý program a spustite priraďovanie.",
     "near_duplicate_cluster": "zistený takmer duplicitný klaster profilov. Zoskupenie umožňuje zhodu spoľahlivo vybrať medzi podobnými (napr. rovnaký program pri inej teplote/odstreďovaní).",
     "no_cycles_match": "Žiadne cykly nezodpovedajú aktuálnemu filtru.",
     "no_cycles_profile": "Pre tento profil nie sú žiadne cykly.",
@@ -694,12 +699,12 @@
     "no_cycles_yet": "Zatiaľ neboli zaznamenané žiadne cykly.",
     "no_device_selected": "Nebolo vybrané žiadne zariadenie.",
     "no_devices": "Zatiaľ nie sú nakonfigurované žiadne zariadenia WashData.",
-    "no_envelope": "Zatiaľ žiadna obálka — prebudujte po označení cyklov.",
+    "no_envelope": "Zatiaľ žiadna obálka – prebudujte po označení cyklov.",
     "no_envelope_overlay": "Žiadna obálka dostupná na prekrytie.",
-    "no_fine_tuned": "Zatiaľ nič nedoladené — WashData používa vstavané modely.",
+    "no_fine_tuned": "Zatiaľ nič nedoladené – WashData používa vstavané modely.",
     "no_logs": "Zatiaľ nie sú uložené žiadne záznamy.",
     "no_maintenance": "Zatiaľ nebola zaznamenaná žiadna údržba.",
-    "no_match_yet": "Zatiaľ žiadny pokus o zhodu — zobrazí sa počas bežiaceho cyklu.",
+    "no_match_yet": "Zatiaľ žiadny pokus o zhodu – zobrazí sa počas bežiaceho cyklu.",
     "no_other_users": "Neboli nájdení žiadni iní používatelia Home Assistant.",
     "no_phases": "Nie sú definované žiadne fázy.",
     "no_phases_assigned": "Nie sú priradené žiadne fázy.",
@@ -713,7 +718,7 @@
     "notify_services_hint": "Použite ID služieb {entity} (oddelené čiarkami pre viacero). Premenné šablóny: {vars}.",
     "old_actions_warning": "Nakonfigurované pomocou starého editora akcií (teraz odstránený). Stále sa spúšťajú pri udalostiach cyklu, ale už ich tu nemožno upravovať. Premeňte ich na normálnu automatizáciu alebo ich odstráňte.",
     "onboarding_progress": "Pozorovaných cyklov: {n} / 3",
-    "onboarding_watching": "Používajte spotrebič bežne — WashData sleduje. Po 3 cykloch sa spustí priraďovanie programov.",
+    "onboarding_watching": "Používajte spotrebič bežne – WashData sleduje. Po 3 cykloch sa spustí priraďovanie programov.",
     "pending_feedback": "Čaká sa na spätnú väzbu k detekcii",
     "performance_trend": "Trend výkonnosti ({n} cyklov)",
     "pg_analysis_empty": "Načítajte cyklus na zobrazenie analýzy zhody.",
@@ -748,13 +753,13 @@
     "restart_gap_footer": "Zvýraznené v grafe. Údaje o výkone chýbajú pre tieto intervaly; párovanie použilo iba skutočné merania.",
     "restart_gap_header": "{n} medzera reštartu HA počas tohto cyklu",
     "restart_gap_item": "{dur} medzera",
-    "review_confirm_help": "Potvrďte, či bol tento cyklus rozpoznaný správne. Vaše recenzie trénujú model na vašom stroji — čím viac cyklov potvrdíte, tým lepšie bude porovnávanie a hodnotenie zdravia. Stačí rýchle dobré/zlé.",
+    "review_confirm_help": "Potvrďte, či bol tento cyklus rozpoznaný správne. Vaše recenzie trénujú model na vašom stroji – čím viac cyklov potvrdíte, tým lepšie bude porovnávanie a hodnotenie zdravia. Stačí rýchle dobré/zlé.",
     "review_in_settings": "Skontrolovať v nastaveniach",
     "review_notes_placeholder": "Poznámky (voliteľné)",
     "review_notes_tip": "Poznámky s voľným textom pre vašu vlastnú potrebu. Nepoužíva sa priraďovaním alebo tréningom.",
-    "review_profile_tip": "Program, pod ktorým je tento cyklus označený. Ak bol automaticky zistený program nesprávny, opravte ho tu — označovanie učí párovanie pre budúce cykly.",
+    "review_profile_tip": "Program, pod ktorým je tento cyklus označený. Ak bol automaticky zistený program nesprávny, opravte ho tu – označovanie učí párovanie pre budúce cykly.",
     "review_quality_tip": "Aký čistý je tento cyklus. Dobrý = učebnicový príklad tohto programu; Zlý = detekovaný, ale hlučný alebo atypický; Nepoužiteľný = nesprávne zistený (zlúčený, skrátený alebo falošný). Riadi skóre zdravia a ktoré cykly sú povolené na trénovanie modelu.",
-    "review_recorded_tip": "Označte to ako ručne vybraný referenčný cyklus pre svoj program — rovnakú úlohu ako manuálne zaznamenaný cyklus. Referenčné cykly sa vždy uchovávajú, nasadzujú zodpovedajúcu šablónu a pri čistení sa nikdy nezrušia. (Toto je zlatá/zaznamenaná vlajka; obe sú to isté.)",
+    "review_recorded_tip": "Označte to ako ručne vybraný referenčný cyklus pre svoj program – rovnakú úlohu ako manuálne zaznamenaný cyklus. Referenčné cykly sa vždy uchovávajú, nasadzujú zodpovedajúcu šablónu a pri čistení sa nikdy nezrušia. (Toto je zlatá/zaznamenaná vlajka; obe sú to isté.)",
     "review_tags_tip": "Voliteľné príznaky popisujúce, čo sa v tomto cykle pokazilo, aby to tréning a čistenie mohli zohľadniť.",
     "review_to_cycles": "Otvoriť front kontroly cyklov",
     "saving_triggers_reload": "Uloženie spustí opätovné načítanie integrácie. Entity HA sa môžu nakrátko zobraziť ako nedostupné.",
@@ -763,7 +768,7 @@
     "setting_changed": "Zmenené z {old} na {new} dňa {date}",
     "settings_basic_note": "Zobrazujú sa základné nastavenia. Prepnite na Rozšírené pre úplný zoznam.",
     "shape_drift_advisory": "⚠ Posun tvaru",
-    "shape_drift_detail": "Vzor výkonu tohto profilu sa časom zmenil — možné opotrebenie spotrebiča alebo potreba údržby (napr. odstraňovanie vodného kameňa, čistenie filtra).",
+    "shape_drift_detail": "Vzor výkonu tohto profilu sa časom zmenil – možné opotrebenie spotrebiča alebo potreba údržby (napr. odstraňovanie vodného kameňa, čistenie filtra).",
     "show_all_settings": "Zobraziť všetky nastavenia",
     "showing_suggestions": "Zobrazuje sa nastavenie {count} s návrhmi.",
     "split_intro": "Kliknite na graf a pridajte alebo odstráňte bod rozdelenia, alebo automaticky zistite nečinné medzery. Každý výsledný segment môže mať vlastný profil.",
@@ -789,10 +794,10 @@
     "toast_revert_failed": "Vrátenie zmien zlyhalo: {error}",
     "toast_reverted": "{key} vrátené späť",
     "toast_save_failed": "Uloženie zlyhalo: {error}",
-    "trend_duration_longer": "Trvanie je dlhšie trendy ({pct} %/cyklus) — posledný priemer {avg}",
-    "trend_duration_shorter": "Trvanie je kratšie ({pct} %/cyklus) — posledný priemer {avg}",
+    "trend_duration_longer": "Trvanie je dlhšie trendy ({pct} %/cyklus) – posledný priemer {avg}",
+    "trend_duration_shorter": "Trvanie je kratšie ({pct} %/cyklus) – posledný priemer {avg}",
     "trend_energy_down": "Energetický trend klesá ({pct} %/cyklus)",
-    "trend_energy_up": "Energetický trend stúpa ({pct} %/cyklus) — posledný priemer {avg}",
+    "trend_energy_up": "Energetický trend stúpa ({pct} %/cyklus) – posledný priemer {avg}",
     "trim_intro": "Potiahnite červené rukoväti alebo zadajte hodnoty. Všetko mimo okna sa odstráni.",
     "tuning_suggestions_available": "{count} návrh ladenia dostupný z pozorovaných cyklov. Zobrazujú sa vedľa príslušných polí.",
     "unsure_detected_prefix": "WashData si nie je istý, či zistil",
@@ -857,7 +862,9 @@
     "share_guidelines_title": "Pred zdieľaním",
     "store_download_device_intro": "Stiahnuť nastavenie zariadenia komunity a použiť ho na nové alebo existujúce zariadenie",
     "store_share_device_intro": "Zdieľať programy vášho zariadenia (profily + referenčné cykly) s komunitou. Nastavenia sú voliteľné.",
-    "share_profile_no_cycles": "Profil '{p}' nemá žiadne ⭐ referenčné cykly -- bude preskočený, ak nemáte {n}+ potvrdených spustení"
+    "share_profile_no_cycles": "Profil '{p}' nemá žiadne ⭐ referenčné cykly -- bude preskočený, ak nemáte {n}+ potvrdených spustení",
+    "advisory_phase_inconsistent": "Zdá sa, že '{name}' mieša rôzne programy alebo teploty - jeho cykly sa ohrievajú veľmi rôzne dlho. Rozdelenie na samostatné profily (napr. podľa teploty) zlepší zhodu aj odhady času.",
+    "advisory_phase_inconsistent_title": "⚠ Možno zmiešané programy"
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -940,6 +947,10 @@
     "triggers": {
       "intro": "Voliteľné externé signály: spúšť ukončenia, senzor dverí, prepínač pauzy a pripomienka vyloženia.",
       "label": "Spúšte a dvere"
+    },
+    "phase_eta": {
+      "label": "Zostávajúci čas",
+      "intro": "Zostávajúci čas zohľadňujúci fázy, pre spotrebiče, ktorých dĺžka cyklu závisí od teploty alebo odstreďovania."
     }
   },
   "setting": {
@@ -1022,6 +1033,10 @@
     "energy_price_static": {
       "doc": "Pevná cena za kWh použitá pre číselné údaje o nákladoch, keď vyššie nie je nastavená žiadna aktuálna cena.",
       "label": "Statická cena energie (za kWh)"
+    },
+    "energy_sensor": {
+      "doc": "Voliteľné kumulatívne počítadlo energie (total_increasing kWh/Wh, napr. vlastný celoživotný merač zásuvky). Keď je nastavené, energia hlásená za každý cyklus sa odvodzuje z rozdielu tohto počítadla medzi začiatkom a koncom, čo zabraňuje podhodnoteniu, ktoré vzniká integráciou pomaly hlásiaceho senzora výkonu. Vráti sa k integrovanej hodnote, ak údaj chýba, jeho jednotka je neznáma alebo rozdiel nie je kladný. Nechajte prázdne, ak chcete naďalej integrovať senzor výkonu.",
+      "label": "Entita merača energie"
     },
     "expose_debug_entities": {
       "doc": "Zverejniť ďalšie diagnostické entity HA (dôvera v zhodu, nejednoznačnosť, vnútorné údaje). Vypnuté udržiava zoznam entít čistý na bežné použitie.",
@@ -1305,6 +1320,38 @@
     },
     "show_contributor": {
       "doc": "Zobraziť meno prispievateľa pri profiloch stiahnutých z obchodu komunity"
+    },
+    "enable_phase_matching": {
+      "label": "Zostávajúci čas zohľadňujúci fázy",
+      "doc": "Rozdelí každý bežiaci cyklus do fáz (ohrev, pranie, odstreďovanie) a rozpočíta zostávajúci čas na jednotlivé fázy, zmiešaný s klasickým odhadom - na začiatku cyklu sa opiera o rozpočet fáz a ku koncu o klasický odhad. Prispôsobí odpočet tomu, ako dlho sa váš spotrebič skutočne ohrieva a beží, čo je najviac badateľné v prvej polovici cyklu. Vypnuté = iba klasický odhad. Ovplyvnené je len zobrazenie zostávajúceho času; zhoda programov a detekcia cyklu sa nemenia."
+    },
+    "keep_min_score": {
+      "label": "Min. skóre zhody",
+      "doc": "Minimálne skóre podobnosti, ktoré musí mať kandidát, aby zostal v závode o zhodu. Predvolená hodnota 0,1 je zámerne benevolentná - pripúšťa aj slabých kandidátov a spolieha sa na neskoršie fázy pri výbere najlepšej zhody. Zvýšte ju pre skoršie vyradenie nepravdepodobných profilov; znížte ju pre rozšírenie počiatočnej skupiny kandidátov."
+    },
+    "dtw_blend": {
+      "label": "Miešanie deformácie",
+      "doc": "Ako veľmi skóre zarovnania DTW nahrádza základné skóre Fázy 2. 0 = použite iba skóre Fázy 2, 1 = použite iba skóre DTW, 0,5 (predvolené) = rovnaké miešanie. Zvýšte, ak chcete viac spoliehať na zarovnanie, keď majú programy podobné úrovne výkonu, ale rôzne časové vzory."
+    },
+    "dtw_ensemble_w": {
+      "label": "Mix kombinácie DTW",
+      "doc": "V kombinačnom režime DTW (predvolenom) je to váha škálovaného L1 oproti derivátneho DTW (DDTW). 1,0 = iba škálované L1, 0 = iba DDTW, 0,7 = predvolené. Škálovaná varianta L1 porovnáva úrovne výkonu; derivátna varianta reaguje na zmeny výkonu v čase. Kombinácia spája obe."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Škála derivátnej deformácie",
+      "doc": "Vzdialenosť polosaturácie pre hodnotenie derivátnym DTW. Skóre sa zníži na polovicu, keď sa vzdialenosť DDTW rovná tejto hodnote. Menšia = citlivejšia na rozdiely v tvare. Predvolená hodnota 30 je kalibrovaná pre typické priebehy výkonu spotrebičov. Ovplyvňuje iba kombinačný a ddtw režim DTW."
+    },
+    "dtw_refine_top_n": {
+      "label": "Pocet spresnenych kandidátov",
+      "doc": "Koľko najlepších kandidátov z Fázy 2 je prehodnotených DTW. DTW je nákladnejší, takže sa používa iba pre N najlepších kandidátov. Predvolených 5. Zvýšte (na 7-9), ak správny profil po Fáze 2 niekedy dosiahne iba 4. alebo 5. miesto - DTW ho môže zachrániť. Zníženie mierne urýchli porovnávanie."
+    },
+    "duration_scale": {
+      "label": "Ostrost doby trvania",
+      "doc": "Ostrosť penalizácie za nezhodu dĺžky trvania vo Fáze 4. Je to logaritmický pomer, pri ktorom sa skóre zhody zníži na polovicu. Menší = prísnejší: nezhoda dĺžky trvania viac znižuje skóre. Predvolená hodnota 0,175 zodpovedá približne 18% tolerancii dĺžky trvania pri polovičnej váhe. Kombinujte s Váhou dĺžky trvania."
+    },
+    "energy_scale": {
+      "label": "Ostrost energie",
+      "doc": "Ostrosť penalizácie za nezhodu energie vo Fáze 4. Menší = prísnejší: nezhoda energie viac znižuje skóre. Predvolená hodnota 0,25 je zámerne benevolentnejšia ako Ostrosť dĺžky trvania, pretože energia sa líši podľa záťaže. Kombinujte s Váhou energie."
     }
   },
   "setting_group": {
@@ -1424,24 +1471,24 @@
         "lower": "Viac cyklov je označených automaticky; niektoré môžu byť nesprávne určené"
       },
       "duration_tolerance": {
-        "higher": "Akceptuje širší rozsah trvania — flexibilnejšie porovnávanie",
-        "lower": "Vyžaduje bližšiu zhodu trvania — prísnejšie, ale môže odmietnuť nezvyčajné cykly"
+        "higher": "Akceptuje širší rozsah trvania – flexibilnejšie porovnávanie",
+        "lower": "Vyžaduje bližšiu zhodu trvania – prísnejšie, ale môže odmietnuť nezvyčajné cykly"
       },
       "end_energy_threshold": {
         "higher": "Uzatvára iba cykly so značnou spotrebou energie",
         "lower": "Uzatvára aj kratšie alebo menej energetické cykly"
       },
       "end_repeat_count": {
-        "higher": "Vyžaduje viac opakovaní signálu konca — spoľahlivejšie, mierne pomalšie",
-        "lower": "Ukončí po menej opakovaniach — rýchlejšia detekcia, väčšie riziko predčasného ukončenia"
+        "higher": "Vyžaduje viac opakovaní signálu konca – spoľahlivejšie, mierne pomalšie",
+        "lower": "Ukončí po menej opakovaniach – rýchlejšia detekcia, väčšie riziko predčasného ukončenia"
       },
       "learning_confidence": {
-        "higher": "Učí sa iba z veľmi istých zhôd — pomalšie, ale spoľahlivejšie",
+        "higher": "Učí sa iba z veľmi istých zhôd – pomalšie, ale spoľahlivejšie",
         "lower": "Učí sa z viacerých cyklov; model môže byť menej presný"
       },
       "min_off_gap": {
         "higher": "Pred začiatkom nového cyklu je potrebný dlhší pokoj",
-        "lower": "Krátky pokoj spustí nový cyklus — po sebe idúce cykly sa môžu rozdeliť"
+        "lower": "Krátky pokoj spustí nový cyklus – po sebe idúce cykly sa môžu rozdeliť"
       },
       "min_power": {
         "higher": "Menej citlivý na kľudový príkon; môže prehliadnuť veľmi tichý program",
@@ -1452,24 +1499,24 @@
         "lower": "Zaseknutý cyklus je ukončený skôr"
       },
       "off_delay": {
-        "higher": "Viac času na prestávky spotrebiča — vhodné pre dlhé fázy namáčania alebo sušenia",
-        "lower": "Rýchlejšia detekcia konca — vhodné pre spotrebiče s čistým zapínaním/vypínaním"
+        "higher": "Viac času na prestávky spotrebiča – vhodné pre dlhé fázy namáčania alebo sušenia",
+        "lower": "Rýchlejšia detekcia konca – vhodné pre spotrebiče s čistým zapínaním/vypínaním"
       },
       "profile_match_threshold": {
         "higher": "Potvrdzuje iba vysoko isté zhody; viac cyklov zostane neoznačených",
         "lower": "Páruje viac cyklov; niektoré môžu byť mierne nesprávne"
       },
       "running_dead_zone": {
-        "higher": "Ignoruje krátke výkonové špičky počas nečinnosti — menej citlivý na rušenie",
-        "lower": "Reaguje na kratšie výkonové impulzy — zachytí rýchlu prechodnú aktivitu"
+        "higher": "Ignoruje krátke výkonové špičky počas nečinnosti – menej citlivý na rušenie",
+        "lower": "Reaguje na kratšie výkonové impulzy – zachytí rýchlu prechodnú aktivitu"
       },
       "start_threshold_w": {
         "higher": "Zabraňuje falošným štartom z krátkych výkonových špiček",
         "lower": "Zachytí programy s nízkym príkonom; môže reagovať na šum"
       },
       "stop_threshold_w": {
-        "higher": "Ukončí cyklus rýchlejšie — môže uzatvoriť počas pauzy",
-        "lower": "Čaká dlhšie na ukončenie — menej predčasných dokončení"
+        "higher": "Ukončí cyklus rýchlejšie – môže uzatvoriť počas pauzy",
+        "lower": "Čaká dlhšie na ukončenie – menej predčasných dokončení"
       },
       "watchdog_interval": {
         "higher": "Umožňuje dlhšie tiché fázy; menej falošných vynútených zastavení",
@@ -1676,12 +1723,19 @@
     "start_duration_threshold": "Sekundy nad prahom na potvrdenie spustenia",
     "start_threshold_w": "Minimálny výkon vo wattoch na započítanie spustenia",
     "stop_threshold_w": "Pod touto hodnotou sa stroj počíta ako vypnutý",
-    "dtw_bandwidth": "Aké veľké časové deformácie zhoda tvaru umožňuje",
-    "corr_weight": "Váha tvaru krivky verzus úrovne výkonu pri priraďovaní",
-    "duration_weight": "Ako veľmi zhoda dĺžky trvania ovplyvňuje priradenie",
-    "energy_weight": "Ako veľmi zhoda spotreby energie ovplyvňuje priradenie",
-    "profile_match_min_duration_ratio": "Najkratší beh (oproti profilu), ktorý ešte môže zodpovedať",
-    "profile_match_max_duration_ratio": "Najdlhší beh (oproti profilu), ktorý ešte môže zodpovedať"
+    "dtw_bandwidth": "Fáza 3: deformačné pásmo Sakoe-Chiba (0 = DTW vypnuté; predvolené 0,2 = 20 % dĺžky cyklu)",
+    "corr_weight": "Fáza 2: rovnováha medzi tvarom krivky (korelácia) a úrovňou výkonu (MAE); predvolené 0,45",
+    "duration_weight": "Fáza 4: ako silno zhoda dĺžky trvania ovplyvňuje výsledné skóre (predvolené 0,22)",
+    "energy_weight": "Fáza 4: ako silno zhoda energie ovplyvňuje výsledné skóre (predvolené 0,22)",
+    "profile_match_min_duration_ratio": "Fáza 1: minimálna dĺžka cyklu ako zlomok dĺžky trvania profilu; predvolené 0,1 (10 %)",
+    "profile_match_max_duration_ratio": "Fáza 1: maximálna dĺžka cyklu ako zlomok dĺžky trvania profilu; predvolené 1,5 (150 %)",
+    "keep_min_score": "Fáza 2: minimálne skóre na zostanie v závode; predvolené 0,1 pripúšťa slabé zhody, neskoršie fázy vyberú najlepšie",
+    "dtw_blend": "Fáza 3: 0 = iba základné skóre, 1 = iba skóre DTW, 0,5 = rovnaké miešanie (predvolené)",
+    "dtw_ensemble_w": "Fáza 3 (režim kombinácie): váha škálovaného L1 oproti derivátneho DTW; predvolené 0,7 uprednostňuje úroveň",
+    "dtw_ddtw_scale": "Fáza 3: vzdialenosť polosaturácie DDTW; menšia = citlivejšia na tvar (predvolené 30)",
+    "dtw_refine_top_n": "Fáza 3: kandidáti, ktorých DTW prehodnotí; zvýšte na 7-9, ak správny profil skončí na 4.-5. mieste (predvolené 5)",
+    "duration_scale": "Fáza 4: logaritmický pomer, pri ktorom sa zhoda dĺžky trvania zníži na polovicu; menší = prísnejšia penalizácia (predvolené 0,175)",
+    "energy_scale": "Fáza 4: logaritmický pomer, pri ktorom sa zhoda energie zníži na polovicu; menší = prísnejšia penalizácia (predvolené 0,25)"
   },
   "col": {
     "profile_tip": "Názov zhodného programu. Bez štítku znamená, že na konci cyklu sa nezhodoval žiadny profil.",
@@ -1766,6 +1820,69 @@
     },
     "pg_sweep": {
       "optimize": "Optimalizácia: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulovať cyklus"
+    },
+    "split": {
+      "apply": "Rozdeľovanie cyklu"
+    },
+    "trim": {
+      "apply": "Orezávanie cyklu"
+    },
+    "merge": {
+      "apply": "Zlučovanie cyklov"
+    },
+    "rebuild": {
+      "envelopes": "Prepočítavanie obálok"
+    },
+    "cancelling": "Ruším..."
+  },
+  "setup": {
+    "hdr": {
+      "card": "Nastavenie zariadenia",
+      "healthy_chip": "Nastavenie dokončené"
+    },
+    "phase0": {
+      "washer": "WashData už deteguje vaše cykly. Nahrajte prvý cyklus, aby ste povolili názvy programov a odhady doby trvania.",
+      "dishwasher": "WashData sleduje. Umývačky riadu majú zložité cykly – nahranie prvého cyklu je dôrazne odporúčané. Ak detegovaný cyklus trvá príliš dlho, orežte ho v editore cyklov pred uložením ako profil.",
+      "generic": "WashData sleduje. Nahrajte alebo označte detegovaný cyklus a začnite vytvárať profily."
+    },
+    "phase1a": {
+      "labelled": "Dobrý začiatok – váš prvý program je uložený. Pre najčistejšie dáta zvážte nahranie ďalšieho cyklu pomocou widgetu nahrávania."
+    },
+    "phase1b": {
+      "recorded": "Vaša nahrávka bola uložená ako {profile_name}. Teraz nahrajte alebo označte ďalšie bežné programy, aby ste rozšírili pokrytie."
+    },
+    "phase1c": {
+      "verify": "Máte {count} programov od komunity. Spustite cyklus, aby ste overili, že ich WashData správne rozoznáva – porovnávanie sa bude zlepšovať, ako zariadenie buduje vlastnú históriu."
+    },
+    "phase2": {
+      "cluster": "WashData zaznamenal {count} cyklov, ktoré nezodpovedajú žiadnemu uloženému programu – navzájom si podobajú. Chcete pre ne vytvoriť nový profil?",
+      "unmatched": "Váš posledný cyklus nezodpovedal žiadnemu uloženému programu. Je to nový program?"
+    },
+    "phase3": {
+      "suggestions": "WashData má odporúčania nastavení na základe vašej histórie cyklov – skontrolujte ich pre zlepšenie presnosti detekcie.",
+      "groups": "Niektoré vaše profily vyzerajú ako rovnaký program pri rôznych teplotách. Usporiadajte ich do skupiny pre lepšie porovnávanie.",
+      "phases": "Pridajte fázy programu k {profile_name} pre presnejšie odhady zostávajúceho času."
+    },
+    "phase4": {
+      "healthy": "Toto zariadenie je plne nastavené ({profile_count} profilov)."
+    },
+    "cta": {
+      "start_recording": "Spustiť nahrávanie",
+      "label_detected_cycle": "Už mám detegovaný cyklus – namiesto toho ho označte",
+      "browse_cycles": "Prechádzať cykly a označiť ďalší",
+      "view_profiles": "Zobraziť vaše profily",
+      "create_from_cluster": "Vytvoriť profil z týchto cyklov",
+      "create_profile": "Vytvoriť preňho profil",
+      "review_suggestions": "Skontrolovať návrhy",
+      "organise_profiles": "Usporiadať profily",
+      "configure_phases": "Nakonfigurovať fázy",
+      "skip_step": "Preskočiť tento krok",
+      "skip_forever": "Nezobrazovať znova",
+      "hide_guidance": "Skryť pokyny",
+      "show_guidance": "Zobraziť pokyny"
     }
   }
 }

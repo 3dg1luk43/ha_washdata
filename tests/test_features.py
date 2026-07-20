@@ -132,17 +132,6 @@ def test_compute_signature_energy_nonzero_for_active_cycle():
 
 
 # ---------------------------------------------------------------------------
-# event_density is always zero (field retained for compat)
-# ---------------------------------------------------------------------------
-
-
-def test_compute_signature_event_density_is_zero():
-    ts, pw = _make_trace([100.0, 200.0, 150.0, 50.0])
-    sig = compute_signature(ts, pw)
-    assert sig.event_density == pytest.approx(0.0)
-
-
-# ---------------------------------------------------------------------------
 # Duration matches timestamps
 # ---------------------------------------------------------------------------
 

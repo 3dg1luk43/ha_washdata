@@ -87,7 +87,7 @@
     "on_cycle_finished": "A ciklus végén",
     "on_cycle_started": "Beindult a ciklus",
     "pause_cycle": "Szünet",
-    "pause_cycle_tip": "Szüneteltesse a futó ciklust — a készülék onnan folytatja, ahol abbahagyta",
+    "pause_cycle_tip": "Szüneteltesse a futó ciklust – a készülék onnan folytatja, ahol abbahagyta",
     "pg_apply_device": "Alkalmazás az eszközre",
     "pg_autofill": "Automatikus kitöltés",
     "play": "Lejátszás",
@@ -97,8 +97,8 @@
     "process_tip": "Mentse el a rögzített nyomot új vagy meglévő profilként",
     "rebuild": "Borítékok újjáépítése",
     "rebuild_envelope": "Boríték újraépítése",
-    "rebuild_tip": "Számítsa újra az elvárt energiaburkolót (min/max sáv) az összes profilhoz a felcímkézett ciklusaik alapján — futtassa új ciklusok felcímkézése vagy régiek javítása után",
-    "rec_start_tip": "Kezdje el rögzíteni a készülék teljesítménynyomát — indítsa közvetlenül a ciklus futtatása előtt",
+    "rebuild_tip": "Számítsa újra az elvárt energiaburkolót (min/max sáv) az összes profilhoz a felcímkézett ciklusaik alapján – futtassa új ciklusok felcímkézése vagy régiek javítása után",
+    "rec_start_tip": "Kezdje el rögzíteni a készülék teljesítménynyomát – indítsa közvetlenül a ciklus futtatása előtt",
     "rec_stop": "Leállítás",
     "rec_stop_tip": "Állítsa le a rögzítést, és tartsa fenn a rögzített nyomot áttekintésre",
     "record": "Indítsa el a Felvételt",
@@ -182,7 +182,7 @@
     },
     "attn_sub": "Mentés előtt javítsa az ütközéseket",
     "attn_title": "{n} beállítási ütközés{s}",
-    "settings_banner": "{n} beállítási ütközés{s} — ellenőrizze a kijelölt szakaszokat és javítsa ki mentés előtt.",
+    "settings_banner": "{n} beállítási ütközés{s} – ellenőrizze a kijelölt szakaszokat és javítsa ki mentés előtt.",
     "settings_banner_btn": "Ugrás az elsőhöz",
     "confidence": {
       "auto": "Legalább az Egyezési küszöb értékén kell lennie ({match})",
@@ -451,9 +451,9 @@
     "show_expected": "Várható görbefedvény megjelenítése (egyező profil, narancssárga)",
     "show_raw": "Nyers csatlakozó kapcsoló megjelenítése az élő teljesítménygrafikonon",
     "sparkline": "Legutóbbi ciklusidőtartam-trend",
-    "stage2": "2. szakasz — alapvető hasonlóság",
-    "stage3": "3. szakasz — DTW",
-    "stage4": "4. szakasz — egyezés",
+    "stage2": "2. szakasz – alapvető hasonlóság",
+    "stage3": "3. szakasz – DTW",
+    "stage4": "4. szakasz – egyezés",
     "status": "Állapot",
     "tail_trim": "Farokszegély(ek)",
     "timer_auto_pause": "Automatikus szünet",
@@ -561,7 +561,12 @@
     "flags": "Jelzők",
     "include_phase_map": "Fázistérkép belefoglalása",
     "include_settings": "Érzékelési és párosítási beállítások belefoglalása",
-    "show_contributor": "Közreműködők nevének megjelenítése"
+    "show_contributor": "Közreműködők nevének megjelenítése",
+    "task_pg_detail": "Ciklus szimulálása",
+    "task_split": "Ciklus felosztása",
+    "task_trim": "Ciklus levágása",
+    "task_merge": "Ciklusok egyesítése",
+    "task_rebuild": "Burkológörbék újraépítése"
   },
   "log": {
     "all_levels": "Minden szinten",
@@ -645,7 +650,7 @@
     "artifact_dip_detail": "~{n}s-re a szokásos energiasáv alá esett.",
     "artifact_footer": "A fenti grafikonon kiemelve. Ezek átmeneti műtermékek (pl. a ciklus közepén kinyílt ajtó), nem feltétlenül problémák.",
     "artifact_header": "{n} rendellenesség észlelve ebben a ciklusban",
-    "artifact_pause_detail": "A teljesítmény ~{n}s-re közel nullára esett, majd visszatért — valószínűleg kinyílt az ajtó a ciklus közben, vagy a ciklus szünetelt.",
+    "artifact_pause_detail": "A teljesítmény ~{n}s-re közel nullára esett, majd visszatért – valószínűleg kinyílt az ajtó a ciklus közben, vagy a ciklus szünetelt.",
     "artifact_spike_detail": "~{n}s-re a szokásos energiasáv felett volt.",
     "auto_label_intro": "Rendeljen hozzá profilokat címkézetlen ciklusokhoz, amelyek egyezési megbízhatósága törli a küszöböt.",
     "automations_intro": "A WashData {start} / {end} eseményeket küld és entitásokat tesz elérhetővé, ezért az értesítések és műveletek legjobban normál Home Assistant automatizálásként építhetők fel. Az ezt az eszközt használó automatizálások alább jelennek meg.",
@@ -654,10 +659,10 @@
     "collecting_data": "Adatgyűjtés folyamatban - még {need} ciklus szükséges a finomhangolás megkezdéséhez ({current}/{min}).",
     "compare_overlay_profiles": "Fedőprofilok (halvány)",
     "compare_profiles_tip": "Fedjen rá más profilborítékokat a fenti diagramra, hogy megtudja, melyik illik legjobban ehhez a ciklushoz.",
-    "compare_selected_cycles": "Kiválasztott ciklusok (folytonos) — megjelenítés/elrejtés",
+    "compare_selected_cycles": "Kiválasztott ciklusok (folytonos) – megjelenítés/elrejtés",
     "consider_new_profile": "Fontolja meg egy új profil létrehozását.",
     "coverage_gap": "a legutóbbi ciklusoknak nincs megfelelő profilja (az utolsó 30 {pct}%-a).",
-    "coverage_gap_similar_cycles": "{count} hasonló felcímkézetlen ciklus található — hozzon létre egy profilt az egyeztetés megkezdéséhez.",
+    "coverage_gap_similar_cycles": "{count} hasonló felcímkézetlen ciklus található – hozzon létre egy profilt az egyeztetés megkezdéséhez.",
     "cycles_deleted": "{count} ciklus törölve",
     "enough_data": "Elegendő adat a tanuláshoz ({current}/{min} ciklus).",
     "export_description": "Exportálja az összes profilt és ciklust JSON-ba, vagy állítsa vissza az előző exportálásból.",
@@ -686,7 +691,7 @@
     "ml_learned_intro": "Ehhez a géphez finomhangolt modellek.",
     "ml_loading": "ML betöltése…",
     "ml_settings_intro": "Két független kapcsoló: az egyik a ciklus futása közben alkalmazza a modelleket, a másik lehetővé teszi, hogy a WashData idővel finomhangolja őket a gépére.",
-    "name_first_program": "Elég ciklusa van — nevezze el az első programját az egyeztetés elindításához.",
+    "name_first_program": "Elég ciklusa van – nevezze el az első programját az egyeztetés elindításához.",
     "near_duplicate_cluster": "majdnem ismétlődő profilfürt észlelve. A csoportosítás lehetővé teszi, hogy a párosítás megbízhatóan válasszon a hasonlók között (pl. ugyanaz a program különböző hőmérsékleten/centrifugáláson).",
     "no_cycles_match": "Egyetlen ciklus sem felel meg az aktuális szűrőnek.",
     "no_cycles_profile": "Nincs ciklus ehhez a profilhoz.",
@@ -713,7 +718,7 @@
     "notify_services_hint": "Használja a(z) {entity} szolgáltatásazonosítókat (több esetén vesszővel elválasztva). Sablonváltozók: {vars}.",
     "old_actions_warning": "A régi műveletszerkesztővel konfigurálva (most eltávolítva). Továbbra is aktiválják a cikluseseményeket, de már nem szerkeszthetők itt. Alakítsa át őket normál automatizálássá, vagy távolítsa el őket.",
     "onboarding_progress": "{n} / 3 ciklus megfigyelve",
-    "onboarding_watching": "Használja a készülékét a szokásos módon — a WashData figyel. 3 ciklus után elindul a programegyeztetés.",
+    "onboarding_watching": "Használja a készülékét a szokásos módon – a WashData figyel. 3 ciklus után elindul a programegyeztetés.",
     "pending_feedback": "Függőben lévő észlelési visszajelzés",
     "performance_trend": "Teljesítménytrend ({n} ciklus)",
     "pg_analysis_empty": "Töltsön be egy ciklust az egyezéselemzés megtekintéséhez.",
@@ -763,7 +768,7 @@
     "setting_changed": "Módosítva: {old} → {new} ekkor: {date}",
     "settings_basic_note": "Az alapvető beállítások láthatók. Váltson Fejlett nézetre a teljes listához.",
     "shape_drift_advisory": "⚠ Alakváltás",
-    "shape_drift_detail": "Ennek a profilnak a teljesítménymintázata idővel megváltozott — lehetséges készülékhasználat okozta kopás vagy szükséges karbantartás (pl. vízkőmentesítés, szűrőtisztítás).",
+    "shape_drift_detail": "Ennek a profilnak a teljesítménymintázata idővel megváltozott – lehetséges készülékhasználat okozta kopás vagy szükséges karbantartás (pl. vízkőmentesítés, szűrőtisztítás).",
     "show_all_settings": "Minden beállítás megjelenítése",
     "showing_suggestions": "{count} beállítás megjelenítése javaslatokkal.",
     "split_intro": "Kattintson a diagramra egy osztási pont hozzáadásához vagy eltávolításához, vagy az üresjárati hézagok automatikus észleléséhez. Minden eredményül kapott szegmens saját profilt kaphat.",
@@ -857,7 +862,9 @@
     "share_guidelines_title": "Megosztás előtt",
     "store_download_device_intro": "Vegyen át minden megosztott programot és annak referenciaciklusait az eszközére. A saját rögzített ciklusait és statisztikáit nem érinti.",
     "store_share_device_intro": "Töltse fel a(z) {brand} {model} eszközt a kiválasztott referenciaciklusokkal. Más, ugyanolyan készülékkel rendelkezők átvehetik programjait. A bejegyzések felülvizsgálatra kerülnek nyilvánossá válás előtt.",
-    "share_profile_no_cycles": "Nincsenek referenciaciklusok -- jelöljön meg egy ciklust ⭐-gal a Ciklusok lapon, hogy belefoglalhassa ezt a profilt"
+    "share_profile_no_cycles": "Nincsenek referenciaciklusok -- jelöljön meg egy ciklust ⭐-gal a Ciklusok lapon, hogy belefoglalhassa ezt a profilt",
+    "advisory_phase_inconsistent": "Úgy tűnik, hogy a(z) '{name}' különböző programokat vagy hőmérsékleteket kever - ciklusai nagyon eltérő ideig fűtenek. Ha külön profilokra bontja (pl. hőmérsékletenként), az javítja a párosítást és az időbecsléseket.",
+    "advisory_phase_inconsistent_title": "⚠ Esetleg kevert programok"
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -940,6 +947,10 @@
     "triggers": {
       "intro": "Opcionális külső jelek: záró trigger, ajtóérzékelő, szünetkapcsoló és a kirakodási emlékeztető.",
       "label": "Triggerek és ajtók"
+    },
+    "phase_eta": {
+      "label": "Hátralévő idő",
+      "intro": "Fázistudatos hátralévő idő olyan gépekhez, amelyek ciklushossza a hőmérséklettől vagy a centrifugálástól függ."
     }
   },
   "setting": {
@@ -1022,6 +1033,10 @@
     "energy_price_static": {
       "doc": "Rögzített kWh-nkénti ár a költségadatokhoz használatos, ha nincs fent beállítva élő ár entitás.",
       "label": "Statikus energiaár (kWh-nként)"
+    },
+    "energy_sensor": {
+      "doc": "Opcionális kumulatív energiaszámláló (total_increasing kWh/Wh, pl. a konnektor saját élettartam-mérője). Ha be van állítva, minden ciklus jelentett energiája ennek a számlálónak a kezdő- és záróértéke közötti különbségéből származik, ami elkerüli azt az alulmérést, amit egy lassan jelentő teljesítményérzékelő integrálásából kapna. Visszavált az integrált értékre, ha a leolvasás hiányzik, mértékegysége ismeretlen, vagy a különbség nem pozitív. Hagyja üresen, hogy továbbra is a teljesítményérzékelőt integrálja.",
+      "label": "Energiamérő entitás"
     },
     "expose_debug_entities": {
       "doc": "Extra diagnosztikai HA entitások közzététele (egyezési megbízhatóság, kétértelműség, belső állapot). Az Off (Kikapcsolva) funkció tisztán tartja az entitáslistát normál használathoz.",
@@ -1305,6 +1320,38 @@
     },
     "show_contributor": {
       "doc": "Jelenítse meg a \"<közreműködő> által\" jelölést a közösségi készülékeken és referenciaciklusokon."
+    },
+    "enable_phase_matching": {
+      "label": "Fázistudatos hátralévő idő",
+      "doc": "Bontsa minden futó ciklust fázisokra (fűtés, mosás, centrifugálás), és a hátralévő időt fázisonként ossza be, a klasszikus becsléssel keverve - a ciklus elején a fázisbeosztásra, a vége felé pedig a klasszikus becslésre támaszkodva. Ez a visszaszámlálót ahhoz igazítja, hogy a gépe ténylegesen mennyi ideig fűt és működik, ami leginkább a ciklus első felében figyelhető meg. Ki = csak a klasszikus becslés. Csak a hátralévő idő kijelzését érinti; a program párosítása és a ciklusérzékelés változatlan marad."
+    },
+    "keep_min_score": {
+      "label": "Min. Egyezési Pontszám",
+      "doc": "A minimális hasonlósági pontszám, amelyre egy jelöltnek szüksége van az egyezési versenyben való maradáshoz. Az alapértelmezett 0.1 szándékosan megengedő - még a gyenge jelölteket is beengedi, és a következő szakaszokra bízza a legjobb egyezés megtalálását. Növelje a valószínűtlen profilok korábbi kizárásához; csökkentse a kezdeti jelöltállomány bővítéséhez."
+    },
+    "dtw_blend": {
+      "label": "Torzítás Keverék",
+      "doc": "Mennyire helyettesíti az időtorzítás (DTW) igazítási pontszám a 2. szakasz alappontszámát. 0 = csak a 2. szakasz pontszáma, 1 = csak a DTW-pontszám, 0.5 (alapértelmezett) = egyenlő keverék. Növelje, hogy jobban támaszkodjon a torzítási igazításra, ha a programoknak hasonló a teljesítményszintjük, de eltérő az időbeli mintájuk."
+    },
+    "dtw_ensemble_w": {
+      "label": "Torzítás Együttes Mix",
+      "doc": "Együttes DTW módban (az alapértelmezett), a súly a skálázott L1 és a derivált DTW (DDTW) között. 1.0 = kizárólag skálázott-L1, 0 = kizárólag DDTW, 0.7 = alapértelmezett. A skálázott-L1 változat a teljesítményszinteket hasonlítja össze; a derivált változat arra reagál, ahogyan a teljesítmény változik az idő során. Az együttes mindkettőt kombinálja."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Derivált Torzítás Skála",
+      "doc": "Féltelítési távolság a derivált DTW pontozáshoz. A pontszám megfeleződik, ha a DDTW-távolság eléri ezt az értéket. Kisebb = érzékenyebb az alakkülönbségekre. Az alapértelmezett 30 a tipikus háztartási gépek teljesítménynyomaihoz van kalibrálva. Csak az együttes és ddtw DTW-módokat érinti."
+    },
+    "dtw_refine_top_n": {
+      "label": "Torzítás Finomítás Szám",
+      "doc": "Hány legjobb 2. szakasz jelöltet pontozza újra a DTW. A DTW számításigényesebb, ezért csak a legjobb N jelöltre alkalmazzák. Alapértelmezett 5. Növelje (7-9-re), ha a helyes profil néha csak a 4. vagy 5. helyen végez a 2. szakasz után - a DTW meg tudja menteni. A csökkentés enyhén felgyorsítja az egyeztetést."
+    },
+    "duration_scale": {
+      "label": "Időtartam Élesség",
+      "doc": "A 4. szakasz időtartam-egyezési büntetésének élessége. Ez az a logaritmikus arány, amelynél az egyezési pontszám megfeleződik. Kisebb = szigorúbb: egy időtartam-eltérés jobban büntet. Az alapértelmezett 0.175 nagyjából 18%-os időtartam-toleranciának felel meg a félsúlynál. Párosítsa az Időtartam Súlyával."
+    },
+    "energy_scale": {
+      "label": "Energia Élesség",
+      "doc": "A 4. szakasz energia-egyezési büntetésének élessége. Kisebb = szigorúbb: egy energia-eltérés jobban büntet. Az alapértelmezett 0.25 szándékosan megengedőbb az Időtartam Élességénél, mivel az energia változik a terheléssel. Párosítsa az Energia Súlyával."
     }
   },
   "setting_group": {
@@ -1553,24 +1600,24 @@
         "lower": "Automatikusan több ciklust jelöl; néhány félre lehet azonosítva"
       },
       "duration_tolerance": {
-        "higher": "Szélesebb időtartomány elfogadása — rugalmasabb egyeztetés",
-        "lower": "Pontosabb időtartam-egyezést igényel — szigorúbb, de szokatlan ciklusokat elutasíthat"
+        "higher": "Szélesebb időtartomány elfogadása – rugalmasabb egyeztetés",
+        "lower": "Pontosabb időtartam-egyezést igényel – szigorúbb, de szokatlan ciklusokat elutasíthat"
       },
       "end_energy_threshold": {
         "higher": "Csak jelentős energiát felhasználó ciklusokat zár be",
         "lower": "Rövidebb vagy alacsony energiájú ciklusokat is bezár"
       },
       "end_repeat_count": {
-        "higher": "A befejezési jelet több ismétlés után fogadja el — megbízhatóbb, kissé lassabb",
-        "lower": "Kevesebb ismétlés után ér véget — gyorsabb érzékelés, több hamis befejezési kockázat"
+        "higher": "A befejezési jelet több ismétlés után fogadja el – megbízhatóbb, kissé lassabb",
+        "lower": "Kevesebb ismétlés után ér véget – gyorsabb érzékelés, több hamis befejezési kockázat"
       },
       "learning_confidence": {
-        "higher": "Csak nagyon magabiztos egyezésekből tanul — lassabb, de megbízhatóbb",
+        "higher": "Csak nagyon magabiztos egyezésekből tanul – lassabb, de megbízhatóbb",
         "lower": "Több ciklusból tanul; a modell zajosabb lehet"
       },
       "min_off_gap": {
         "higher": "Hosszabb tétlenség szükséges az új ciklus indulása előtt",
-        "lower": "Rövid tétlenség új ciklust indít — egymást követő futások szétválhatnak"
+        "lower": "Rövid tétlenség új ciklust indít – egymást követő futások szétválhatnak"
       },
       "min_power": {
         "higher": "Kevésbé érzékeny a tétlenségi fogyasztásra; nagyon csendes programokat elszalaszthat",
@@ -1581,24 +1628,24 @@
         "lower": "Elakadt ciklust gyorsabban kényszerít leállítani"
       },
       "off_delay": {
-        "higher": "Több idő a készülék szüneteire — hosszú áztatás vagy szárítás kezelése",
-        "lower": "Gyorsabb vége érzékelés — egyértelmű be/ki készülékekhez jól működik"
+        "higher": "Több idő a készülék szüneteire – hosszú áztatás vagy szárítás kezelése",
+        "lower": "Gyorsabb vége érzékelés – egyértelmű be/ki készülékekhez jól működik"
       },
       "profile_match_threshold": {
         "higher": "Csak nagy magabiztosságú egyezéseket erősít meg; több ciklus marad jelöletlen",
         "lower": "Több ciklust egyeztet; néhány kissé helytelen lehet"
       },
       "running_dead_zone": {
-        "higher": "Figyelmen kívül hagyja a rövid teljesítménycsúcsokat tétlenség közben — zajra kevésbé érzékeny",
-        "lower": "Rövidebb teljesítménylökésekre reagál — gyors átmeneti aktivitást észlel"
+        "higher": "Figyelmen kívül hagyja a rövid teljesítménycsúcsokat tétlenség közben – zajra kevésbé érzékeny",
+        "lower": "Rövidebb teljesítménylökésekre reagál – gyors átmeneti aktivitást észlel"
       },
       "start_threshold_w": {
         "higher": "Elkerüli a rövid teljesítménycsúcsokból eredő hamis indításokat",
         "lower": "Kis teljesítményű programokat is érzékel; zajra is aktiválódhat"
       },
       "stop_threshold_w": {
-        "higher": "Gyorsabban fejezi be a ciklust — szünet közben is zárhat",
-        "lower": "Hosszabb ideig vár a befejezésre — kevesebb idő előtti befejezés"
+        "higher": "Gyorsabban fejezi be a ciklust – szünet közben is zárhat",
+        "lower": "Hosszabb ideig vár a befejezésre – kevesebb idő előtti befejezés"
       },
       "watchdog_interval": {
         "higher": "Hosszabb csendes fázisok megengedett; kevesebb hamis kényszeres leállítás",
@@ -1676,12 +1723,19 @@
     "start_duration_threshold": "A küszöb feletti másodpercek az indulás megerősítéséhez",
     "start_threshold_w": "Minimális wattérték az indulás elismeréséhez",
     "stop_threshold_w": "Ez alatt a gép kikapcsoltnak számít",
-    "dtw_bandwidth": "Mennyi időbeli torzítást engedélyez az alakillesztés",
-    "corr_weight": "A görbe alakjának és a teljesítményszintnek a súlya az illesztésben",
-    "duration_weight": "Mennyire befolyásolja az időtartam egyezése az illesztést",
-    "energy_weight": "Mennyire befolyásolja az energia egyezése az illesztést",
-    "profile_match_min_duration_ratio": "A legrövidebb ciklus (a profilhoz képest), amely még egyezhet",
-    "profile_match_max_duration_ratio": "A leghosszabb ciklus (a profilhoz képest), amely még egyezhet"
+    "dtw_bandwidth": "3. szakasz: Sakoe-Chiba torzítási sáv (0 = DTW kikapcsolva; alapértelmezett 0.2 = a ciklushossz 20%-a)",
+    "corr_weight": "2. szakasz: egyensúly a görbe alakja (korreláció) és a teljesítményszint (MAE) között; alapértelmezett 0.45",
+    "duration_weight": "4. szakasz: mennyire befolyásolja a futási idő egyezése a végső pontszámot (alapértelmezett 0.22)",
+    "energy_weight": "4. szakasz: mennyire befolyásolja az energia-egyezés a végső pontszámot (alapértelmezett 0.22)",
+    "profile_match_min_duration_ratio": "1. szakasz: minimális ciklushossz a profil időtartamának törtjeként; alapértelmezett 0.1 (10%)",
+    "profile_match_max_duration_ratio": "1. szakasz: maximális ciklushossz a profil időtartamának törtjeként; alapértelmezett 1.5 (150%)",
+    "keep_min_score": "2. szakasz: minimális pontszám a versenyben maradáshoz; az alapértelmezett 0.1 gyenge egyezéseket is beenged, a következő szakaszok választják ki a legjobbat",
+    "dtw_blend": "3. szakasz: 0 = csak alappontszám, 1 = csak DTW-pontszám, 0.5 = egyenlő keverék (alapértelmezett)",
+    "dtw_ensemble_w": "3. szakasz (együttes mód): súly a skálázott-L1 és derivált DTW között; alapértelmezett 0.7 a szintfüggőt részesíti előnyben",
+    "dtw_ddtw_scale": "3. szakasz: DDTW féltelítési távolság; kisebb = érzékenyebb az alakra (alapértelmezett 30)",
+    "dtw_refine_top_n": "3. szakasz: DTW által újrapontozandó jelöltek; növelje 7-9-re, ha a helyes profil a 4-5. helyen végez (alapértelmezett 5)",
+    "duration_scale": "4. szakasz: logaritmikus arány, ahol az időtartam-egyezés megfeleződik; kisebb = szigorúbb büntetés (alapértelmezett 0.175)",
+    "energy_scale": "4. szakasz: logaritmikus arány, ahol az energia-egyezés megfeleződik; kisebb = szigorúbb büntetés (alapértelmezett 0.25)"
   },
   "col": {
     "profile_tip": "Az egyezést mutató program neve. A címkézetlen azt jelenti, hogy a ciklus végén egyetlen profil sem egyezett.",
@@ -1766,6 +1820,69 @@
     },
     "pg_sweep": {
       "optimize": "Optimalizálás: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Ciklus szimulálása"
+    },
+    "split": {
+      "apply": "Ciklus felosztása"
+    },
+    "trim": {
+      "apply": "Ciklus levágása"
+    },
+    "merge": {
+      "apply": "Ciklusok egyesítése"
+    },
+    "rebuild": {
+      "envelopes": "Burkológörbék újraépítése"
+    },
+    "cancelling": "Megszakítás..."
+  },
+  "setup": {
+    "hdr": {
+      "card": "Eszköz beállítása",
+      "healthy_chip": "Beállítás kész"
+    },
+    "phase0": {
+      "washer": "A WashData már észleli a ciklusait. Rögzítse az első ciklust a programnevek és az időbecslések engedélyezéséhez.",
+      "dishwasher": "A WashData figyel. A mosogatógépek összetett ciklusokkal rendelkeznek – az első ciklus rögzítése erősen ajánlott. Ha egy észlelt ciklus túl hosszú ideig tart, a profilként való mentés előtt a ciklusszerkesztővel kurtítsa le.",
+      "generic": "A WashData figyel. Rögzítsen vagy jelöljön meg egy észlelt ciklust a profilok létrehozásának megkezdéséhez."
+    },
+    "phase1a": {
+      "labelled": "Jó kezdés – az első programja el van mentve. A legtisztább adatokhoz érdemes a következő ciklust a rögzítő widgettel felvenni."
+    },
+    "phase1b": {
+      "recorded": "A felvétele {profile_name} névvel lett elmentve. Most rögzítse vagy jelölje meg a többi gyakran használt programját a lefedettség növeléséhez."
+    },
+    "phase1c": {
+      "verify": "Önnek {count} program van a közösségtől. Futtasson egy ciklust, hogy ellenőrizze, a WashData helyesen ismeri-e fel – az egyeztetés javul, ahogy az eszköz saját előzményeket gyűjt."
+    },
+    "phase2": {
+      "cluster": "A WashData {count} ciklust látott, amelyek nem felelnek meg egyetlen mentett programnak sem – hasonlítanak egymásra. Szeretne létrehozni nekik egy új profilt?",
+      "unmatched": "Az utolsó ciklus nem felelt meg egyetlen mentett programnak sem. Ez egy új program?"
+    },
+    "phase3": {
+      "suggestions": "A WashData a ciklustörténete alapján beállítási javaslatokkal rendelkezik – tekintse át ezeket az észlelési pontosság javítása érdekében.",
+      "groups": "Néhány profilja ugyanolyannak tűnik, mint ugyanaz a program különböző hőmérsékleteken. Rendezze csoportba a jobb egyeztetés érdekében.",
+      "phases": "Adjon programfázisokat a(z) {profile_name} profilhoz a pontosabb hátralévő idő becslések érdekében."
+    },
+    "phase4": {
+      "healthy": "Ez az eszköz teljesen be van állítva ({profile_count} profil)."
+    },
+    "cta": {
+      "start_recording": "Felvétel indítása",
+      "label_detected_cycle": "Már van egy észlelt ciklusom – inkább jelöljük meg",
+      "browse_cycles": "Ciklusok böngészése egy másik megjelöléséhez",
+      "view_profiles": "Profilok megtekintése",
+      "create_from_cluster": "Profil létrehozása ezekből a ciklusokból",
+      "create_profile": "Profil létrehozása hozzá",
+      "review_suggestions": "Javaslatok áttekintése",
+      "organise_profiles": "Profilok rendezése",
+      "configure_phases": "Fázisok konfigurálása",
+      "skip_step": "Lépés kihagyása",
+      "skip_forever": "Ne mutasd újra",
+      "hide_guidance": "Útmutatás elrejtése",
+      "show_guidance": "Útmutatás megjelenítése"
     }
   }
 }

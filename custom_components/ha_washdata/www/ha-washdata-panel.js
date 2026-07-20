@@ -147,8 +147,8 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Duration Gates', fields: [
       { key: 'profile_match_min_duration_ratio', label: 'Min Duration Ratio', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
         doc: 'Minimum cycle length relative to the profile. 0.9 means a cycle must be at least 90% of the profile duration to match.' },
-      { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.3,
-        doc: 'Maximum cycle length relative to the profile. 1.3 means a cycle must be under 130% of the profile duration to match.' },
+      { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.5,
+        doc: 'Maximum cycle length relative to the profile. 1.5 means a cycle must be under 150% of the profile duration to match.' },
       { key: 'profile_duration_tolerance', label: 'Profile Duration Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.25,
         doc: 'The +/- band around a profile average duration used during matching. 0.25 means a 60 min profile matches 45-75 min cycles.' },
       { key: 'duration_tolerance', label: 'Estimate Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
@@ -160,6 +160,10 @@ const _SETTINGS_SECTIONS = [
       { key: 'learning_confidence', label: 'Learning Confidence', type: 'number', step: 0.01, min: 0, max: 1, def: 0.6,
         doc: 'If the match score falls between this and Auto-Label Confidence, WashData flags the finished cycle for review in the Cycles queue so you can verify the identified program. Below this score the match is too uncertain to surface. Must be kept below Auto-Label Confidence.' },
     ] },
+  ] },
+  { id: 'phase_eta', label: 'Time Remaining', intro: 'Phase-aware time-remaining, for machines whose cycle length depends on temperature or spin.', onlyDeviceTypes: ['washing_machine', 'washer_dryer'], fields: [
+    { key: 'enable_phase_matching', label: 'Phase-aware time remaining', type: 'checkbox', def: false,
+      doc: 'Break each running cycle into phases (heating, wash, spin) and budget the time remaining per phase, blended with the classic estimate - leaning on the phase budget early in the cycle and the classic estimate near the end. This personalises the countdown to how long your machine actually heats and runs, which is most noticeable in the first half of a cycle. Off = the classic estimate only. Only the time-remaining display is affected; program matching and cycle detection are unchanged.' },
   ] },
   { id: 'timing', label: 'Timing & Watchdog', intro: 'Background cadence, the offline watchdog and housekeeping.', groups: [
     { sub: 'Watchdog', fields: [
@@ -271,6 +275,8 @@ const _SETTINGS_SECTIONS = [
         doc: 'Android notification channel name for the finish message. Blank reuses the start/live channel.' },
     ] },
     { sub: 'Energy', fields: [
+      { key: 'energy_sensor', label: 'Energy Meter Entity', type: 'entity', domain: 'sensor', optional: true,
+        doc: 'Optional cumulative energy counter (total_increasing kWh/Wh, e.g. the plug\'s own lifetime meter). When set, each cycle\'s reported energy is taken from this counter\'s start-to-end delta, which avoids the under-counting you get from integrating a slow-reporting power sensor. Falls back to the integrated value if the reading is missing, its unit is unknown, or the delta is not positive. Leave blank to keep integrating the power sensor.' },
       { key: 'energy_price_entity', label: 'Energy Price Entity', type: 'entity', domain: 'sensor', basic: true,
         doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. Each cycle freezes the price in effect when it finished.' },
       { key: 'energy_price_static', label: 'Static Energy Price (per kWh)', type: 'number', step: 0.001, min: 0, basic: true,
@@ -315,6 +321,24 @@ for (const sec of _SETTINGS_SECTIONS) {
   const groups = sec.groups || [{ fields: sec.fields }];
   for (const grp of groups) for (const f of (grp.fields || [])) _FIELD_BY_KEY[f.key] = f;
 }
+
+// Default values for playground-only matcher params (code constants, not stored
+// options, so _FIELD_BY_KEY has no entry for them).
+const _PG_MATCH_DEFAULTS = {
+  profile_match_min_duration_ratio: 0.1,
+  profile_match_max_duration_ratio: 1.5,
+  corr_weight: 0.45,
+  keep_min_score: 0.1,
+  dtw_bandwidth: 0.2,
+  dtw_blend: 0.5,
+  dtw_ensemble_w: 0.7,
+  dtw_ddtw_scale: 30,
+  dtw_refine_top_n: 5,
+  duration_weight: 0.22,
+  energy_weight: 0.22,
+  duration_scale: 0.175,
+  energy_scale: 0.25,
+};
 
 // ─── Setting conflict rules ───────────────────────────────────────────────────
 // Each rule describes a cross-parameter invariant. `check(vals)` returns true
@@ -608,22 +632,37 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 }
 .wd-field textarea { min-height: 64px; resize: vertical; }
 .wd-field input[type=checkbox] { width: auto; margin-right: 8px; }
-.wd-field .wd-check-row { display: flex; align-items: center; cursor: pointer; text-transform: none; letter-spacing: normal; font-weight: 500; color: var(--primary-text-color); }
 /* Switch-style boolean settings (replaces the old plain checkbox). Scoped under
    .wd-field-switch so the switch label wins over the generic ".wd-field label"
    (display:block, higher specificity) rule and stays a centered flex row. */
 .wd-field-switch label { margin: 0; }
 .wd-field-switch .wd-switch-row { display: flex; align-items: center; gap: 10px; min-height: 22px; }
-.wd-field-switch .wd-switch-lbl { display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; margin: 0; }
+/* Switch label: a flex row [toggle][text], vertically centred. The .wd-field
+   .wd-switch-lbl selector is needed to beat .wd-field label (display:block +
+   .82em + uppercase, specificity 0,1,1) which otherwise leaks in and both breaks
+   the vertical centring (align-items is a no-op on a block) and shrinks the label.
+   The bare .wd-switch-lbl covers inline use outside a .wd-field (e.g. adopt). */
+.wd-switch-lbl,
+.wd-field .wd-switch-lbl {
+  display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+  min-width: 0; margin: 0; font-size: 1rem; font-weight: 400;
+  letter-spacing: normal; text-transform: none;
+}
 /* Match the switch label to every other setting name (see .wd-field label). */
 .wd-switch-text { font-size: .82em; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--secondary-text-color); }
 #wd-settings-form .wd-switch-text, #wd-ml-form .wd-switch-text { color: var(--primary-text-color); }
+/* Normal-case, readable label for switches outside the Settings form (store /
+   panel prefs / access control), whose labels are descriptive sentences. */
+.wd-switch-text--plain { font-size: .9em; font-weight: 600; line-height: 1.3; letter-spacing: normal; text-transform: none; color: var(--primary-text-color); }
 .wd-switch { position: relative; display: inline-flex; flex: 0 0 auto; width: 40px; height: 22px; }
 .wd-switch input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
 .wd-switch-slider { position: absolute; inset: 0; border-radius: 22px; background: var(--switch-unchecked-track-color, rgba(120,120,120,.5)); transition: background .2s; }
 .wd-switch-slider::before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; border-radius: 50%; background: var(--switch-unchecked-button-color, #fafafa); box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .2s; }
 .wd-switch input:checked + .wd-switch-slider { background: var(--switch-checked-track-color, var(--primary-color, #03a9f4)); }
-.wd-switch input:checked + .wd-switch-slider::before { transform: translateX(18px); background: var(--switch-checked-button-color, #fff); }
+/* Force a light thumb: some themes set --switch-checked-button-color to the accent,
+   which made the knob vanish into the (also-accent) track. A white thumb reads on
+   any track colour. */
+.wd-switch input:checked + .wd-switch-slider::before { transform: translateX(18px); background: #fff; }
 .wd-switch input:focus-visible + .wd-switch-slider { outline: 2px solid var(--primary-color, #03a9f4); outline-offset: 2px; }
 /* A11y: a shared keyboard focus ring for all interactive controls (many HA themes
    suppress the UA default outline). */
@@ -779,9 +818,16 @@ button.wd-profile-card { display: block; }
 .wd-prof-wrap { position: relative; }
 .wd-profile-name { font-weight: 600; font-size: 1em; margin-bottom: 6px; }
 .wd-profile-meta { font-size: .8em; color: var(--secondary-text-color); }
+/* Profile-card header: name on the left, mini power-signature sparkline on the
+   right, both on one line and vertically aligned regardless of badge count. */
+.wd-profile-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.wd-profile-head .wd-profile-name { margin: 0; flex: 1 1 auto; min-width: 0; }
+/* Status-pill row: wraps cleanly on its own line below the name, and every pill
+   (health / trend / warm-up / imported) shares one uniform compact pill shape. */
+.wd-profile-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+.wd-profile-badges .wd-badge { margin: 0; padding: 2px 9px; border-radius: 999px; font-size: .72em; font-weight: 600; gap: 4px; }
 /* D2: mini duration sparkline on profile cards */
-.wd-profile-name { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.wd-prof-spark { margin-left: auto; width: 64px; height: 20px; display: block; flex-shrink: 0; }
+.wd-prof-spark { width: 64px; height: 20px; display: block; flex-shrink: 0; }
 /* Community Store */
 .wd-store-crumbs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; font-size: .85em; }
 .wd-crumb { background: none; border: none; color: var(--primary-color); cursor: pointer; padding: 2px 4px; font: inherit; }
@@ -929,6 +975,15 @@ button.wd-profile-card { display: block; }
 .wd-onboard .wd-card-title { margin-top: 0; }
 .wd-onboard-skip { font-size: .8em; color: var(--secondary-text-color); text-decoration: underline; cursor: pointer; }
 .wd-onboard-skip:hover { color: var(--primary-color); }
+/* Setup card (replaces getting-started card, phases 0-3) and phase-4 chip */
+.wd-setup-card { margin-top: 12px; padding: 16px; border-radius: 10px; border: 1px solid var(--primary-color, #03a9f4); background: color-mix(in srgb, var(--primary-color, #03a9f4) 8%, var(--card-background-color, var(--ha-card-background))); }
+.wd-setup-card .wd-card-title { margin-top: 0; }
+.wd-setup-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: .82em; font-weight: 600; cursor: pointer; border: 1px solid var(--divider-color); background: var(--secondary-background-color); margin-top: 12px; }
+.wd-setup-chip--healthy { border-color: var(--success-color, #4caf50); background: color-mix(in srgb, var(--success-color, #4caf50) 10%, var(--card-background-color, transparent)); }
+.wd-setup-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.wd-setup-dot--green { background: var(--success-color, #4caf50); }
+.wd-link { background: none; border: none; padding: 0; color: var(--primary-color); cursor: pointer; font: inherit; text-decoration: underline; display: inline; }
+.wd-link:hover { opacity: .8; }
 /* Logs page */
 .wd-logbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
 .wd-logs { font-family: monospace; font-size: .76em; background: var(--secondary-background-color); border-radius: var(--wd-radius-md); padding: 10px; height: 56vh; min-height: 140px; overflow: auto; resize: vertical; }
@@ -1073,6 +1128,9 @@ button.wd-profile-card { display: block; }
 .wd-task-pill-eta { opacity: .75; }
 .wd-task-pill-x { border: none; background: rgba(0,0,0,.18); color: inherit; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; font-size: .9em; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 .wd-task-pill-x:hover { background: rgba(0,0,0,.32); }
+.wd-task-pill--cancelling { background: rgba(255,160,0,.28); }
+.wd-task-pill-cancelling { opacity: .9; font-style: italic; }
+.wd-task-pill-x--cancelling { opacity: .4; cursor: default; pointer-events: none; }
 .wd-task-spin { width: 10px; height: 10px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: wd-spin-kf .8s linear infinite; opacity: .9; }
 @keyframes wd-spin-kf { to { transform: rotate(360deg); } }
 .wd-pg-batchrow { display: flex; align-items: center; gap: 10px; margin: 6px 0 8px; }
@@ -1167,6 +1225,35 @@ function _esc(s) {
 function _safeHttpUrl(u) {
   const s = String(u == null ? '' : u).trim();
   return /^https?:\/\//i.test(s) ? s : '';
+}
+// Apply an alpha channel to any CSS color and return a valid rgba() string.
+// The base color may come from a theme's `--primary-color` (issues #314/#315),
+// which `getPropertyValue` returns as the raw declared token: `#03a9f4` for hex
+// themes but `rgb(238, 147, 0)` for many custom themes / HA's accent picker.
+// The old `col + '55'` alpha-suffix concatenation produced `rgb(238, 147, 0)55`,
+// an invalid color that made canvas `addColorStop`/`fillStyle` throw and froze
+// the panel. This parses hex (#rgb/#rgba/#rrggbb/#rrggbbaa) and rgb()/rgba(),
+// and never throws -- an unrecognised color falls back to itself so the draw
+// still succeeds (worst case: no transparency) rather than aborting the render.
+function _withAlpha(col, alpha) {
+  const s = String(col == null ? '' : col).trim();
+  let m = s.match(/^#([0-9a-fA-F]{3,8})$/);
+  if (m) {
+    let h = m[1];
+    if (h.length === 3 || h.length === 4) h = h.split('').map(c => c + c).join('');
+    if (h.length === 6 || h.length === 8) {
+      const r = parseInt(h.slice(0, 2), 16);
+      const g = parseInt(h.slice(2, 4), 16);
+      const b = parseInt(h.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+  }
+  m = s.match(/^rgba?\(([^)]+)\)$/i);
+  if (m) {
+    const parts = m[1].split(',').map(p => p.trim());
+    if (parts.length >= 3) return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+  }
+  return s;
 }
 function _num(v, def) { const n = parseFloat(v); return isNaN(n) ? def : n; }
 // Visible, keyboard-focusable descendants of `root` (for modal focus trapping).
@@ -1436,6 +1523,20 @@ function _tip(text, diagram) {
   return `<span class="wd-tip">i<span class="wd-tip-pop">${dg}<span class="wd-tip-txt">${_esc(text)}</span></span></span>`;
 }
 
+// Settings-style toggle switch, reused everywhere instead of raw checkboxes.
+// `inner` is the <input> attributes (id / data-* / checked / disabled), `label`
+// is plain-case text, `tip` is an optional _tip(...) string placed inline at the
+// end of the row. Inline variant (no .wd-field wrapper) fits inside flex rows.
+function _switchInline(inner, label, tip = '') {
+  return `<label class="wd-switch-lbl"><span class="wd-switch"><input type="checkbox" ${inner}>`
+    + `<span class="wd-switch-slider"></span></span>`
+    + `<span class="wd-switch-text wd-switch-text--plain">${_esc(label)}</span></label>${tip || ''}`;
+}
+function _switchRow(inner, label, tip = '', hint = '') {
+  return `<div class="wd-field wd-field-switch"><div class="wd-switch-row">${_switchInline(inner, label, tip)}</div>`
+    + `${hint ? `<div class="wd-field-hint">${_esc(hint)}</div>` : ''}</div>`;
+}
+
 // Small conceptual diagrams illustrating each parameter (from SETTINGS_VISUALIZED).
 function _diagram(id) {
   const wrap = inner => `<svg class="wd-dg" viewBox="0 0 200 90" preserveAspectRatio="xMidYMid meet">${inner}</svg>`;
@@ -1601,7 +1702,7 @@ class HaWashdataPanel extends HTMLElement {
     this._hassUpdateThrottle = null;
     this._evtUnsubs = [];
     // Data
-    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '', storePrefs: {} };
+    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '', storePrefs: {}, pgMatchDefaults: {} };
     this._constantsLoaded = false;
     this._devices = [];
     this._cycles = [];
@@ -1627,6 +1728,7 @@ class HaWashdataPanel extends HTMLElement {
     this._mlSettings = {};        // conf key -> {classic_value, ml_value, ml_reason, ...}
     this._mlSettingsLoading = false;
     this._mlTrainingStatus = null; // {enabled, running, last_trained, cycle_count, min_cycles, ...}
+    this._setupStatus = null;      // result of ws_get_setup_status
     // UI state
     this._selIdx = 0;
     this._tab = 'status';
@@ -1648,6 +1750,7 @@ class HaWashdataPanel extends HTMLElement {
     this._pendingSettings = {};        // unsaved edits accumulated across section switches
     this._busy = new Set();            // in-flight long operations (drives spinners)
     this._tasks = {};                  // id -> background-task snapshot (registry, reconnect-safe)
+    this._cancellingTasks = new Set(); // task ids for which cancel was requested but not yet confirmed
     this._taskCallbacks = {};          // id -> fn(taskSnapshot) run once when a tracked task settles
     this._tasksSubscribed = false;     // subscribe_tasks succeeded (else poll fallback)
     this._pgHistoryTaskId = null;      // active Test-on-history task id
@@ -1846,6 +1949,7 @@ class HaWashdataPanel extends HTMLElement {
     const prev = this._tasks[t.id];
     if (prev && (prev.updated_at || 0) > (t.updated_at || 0)) return;
     this._tasks[t.id] = t;
+    if (t.state !== 'running') this._cancellingTasks.delete(t.id);
     this._updateTaskPills();
     this._pgAdoptTask(t);
     this._onTrackedTaskProgress(t);
@@ -1949,7 +2053,11 @@ class HaWashdataPanel extends HTMLElement {
       tid = r && r.task_id;
       if (!tid) throw new Error('no task id');
       const kind = String(msg.type || '').endsWith('reprocess_history') ? 'reprocess'
-        : String(msg.type || '').endsWith('trigger_ml_training') ? 'ml_training' : 'task';
+        : String(msg.type || '').endsWith('trigger_ml_training') ? 'ml_training'
+        : String(msg.type || '').endsWith('apply_split') ? 'split'
+        : String(msg.type || '').endsWith('trim_cycle') ? 'trim'
+        : String(msg.type || '').endsWith('apply_merge') ? 'merge'
+        : String(msg.type || '').endsWith('rebuild_envelopes') ? 'rebuild' : 'task';
       this._addProvisionalTask(tid, kind, msg.entry_id, 0);
     } catch (e) {
       this._busy.delete(busyKey);
@@ -2036,6 +2144,11 @@ class HaWashdataPanel extends HTMLElement {
     const m = {
       pg_history: this._t('lbl.task_pg_history', {}, 'Test on history'),
       pg_sweep: this._t('lbl.task_pg_sweep', {}, 'Optimize'),
+      pg_detail: this._t('lbl.task_pg_detail', {}, 'Simulate cycle'),
+      split: this._t('lbl.task_split', {}, 'Splitting cycle'),
+      trim: this._t('lbl.task_trim', {}, 'Trimming cycle'),
+      merge: this._t('lbl.task_merge', {}, 'Merging cycles'),
+      rebuild: this._t('lbl.task_rebuild', {}, 'Rebuilding envelopes'),
       reprocess: this._t('lbl.task_reprocess', {}, 'Reprocessing'),
       ml_training: this._t('lbl.task_ml_training', {}, 'Learning'),
     };
@@ -2065,17 +2178,23 @@ class HaWashdataPanel extends HTMLElement {
     const running = Object.values(this._tasks || {}).filter(t => t.state === 'running');
     if (!running.length) return '';
     return running.map(t => {
+      const cancelling = this._cancellingTasks.has(t.id);
       const dev = this._deviceName(t.entry_id);
       const action = t.label_key ? this._t(t.label_key, t.label_params || {}, t.label || this._taskActionLabel(t.kind)) : this._taskActionLabel(t.kind);
       const label = (dev ? dev + ' · ' : '') + action;
       const pct = t.progress != null ? Math.round(t.progress * 100) + '%' : '';
       const eta = (t.eta_s != null && t.eta_s > 0) ? this._fmtEta(t.eta_s) : '';
-      return `<span class="wd-task-pill" title="${_esc(label + (pct ? ' ' + pct : ''))}">`
+      const cancellingLabel = this._t('task.cancelling', {}, 'Cancelling…');
+      const pillClass = 'wd-task-pill' + (cancelling ? ' wd-task-pill--cancelling' : '');
+      const titleSuffix = cancelling ? (' · ' + cancellingLabel) : (pct ? ' ' + pct : '');
+      return `<span class="${pillClass}" title="${_esc(label + titleSuffix)}">`
         + `<span class="wd-task-spin"></span>`
         + `<span class="wd-task-pill-lbl">${_esc(label)}</span>`
-        + (pct ? `<span class="wd-task-pill-pct">${pct}</span>` : '')
-        + (eta ? `<span class="wd-task-pill-eta">${_esc(eta)}</span>` : '')
-        + `<button class="wd-task-pill-x" data-action="task-cancel" data-task-id="${_esc(t.id)}" title="${_esc(this._t('btn.cancel', {}, 'Cancel'))}">✕</button>`
+        + (cancelling
+            ? `<span class="wd-task-pill-cancelling">${_esc(cancellingLabel)}</span>`
+            : (pct ? `<span class="wd-task-pill-pct">${pct}</span>` : '')
+              + (eta ? `<span class="wd-task-pill-eta">${_esc(eta)}</span>` : ''))
+        + `<button class="wd-task-pill-x${cancelling ? ' wd-task-pill-x--cancelling' : ''}" data-action="task-cancel" data-task-id="${_esc(t.id)}" ${cancelling ? 'disabled ' : ''}title="${_esc(this._t('btn.cancel', {}, 'Cancel'))}">✕</button>`
         + `</span>`;
     }).join('');
   }
@@ -2215,7 +2334,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._constantsLoaded) {
         try {
           const c = await this._ws({ type: `${_DOMAIN}/get_constants` });
-          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeOnlineEnabled: !!(c.store_online_enabled), storeWebOrigin: c.store_web_origin || '', storePrefs: c.store_prefs || {} };
+          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeOnlineEnabled: !!(c.store_online_enabled), storeWebOrigin: c.store_web_origin || '', storePrefs: c.store_prefs || {}, pgMatchDefaults: c.pg_match_defaults || {}, PROFILE_MIN_WARMUP_CYCLES: c.PROFILE_MIN_WARMUP_CYCLES };
         } catch (_) { /* fall back to humanized labels */ }
         try {
           this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
@@ -2247,7 +2366,11 @@ class HaWashdataPanel extends HTMLElement {
         // Keep the Manual Recording widget's live duration / sample count fresh
         // while a recording is running (the backend reports them live; without
         // this poll the widget stays frozen at its start-of-recording snapshot).
-        if (this._canEdit() && this._recState && this._recState.state === 'recording') {
+        // Gate on the authoritative dev.recording flag rather than the polled
+        // _recState, which is null on first load and would otherwise never be
+        // populated -- leaving the widget showing "Start Recording" during an
+        // active recording (#313).
+        if (this._canEdit() && dev.recording) {
           try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
         }
       }
@@ -2791,6 +2914,13 @@ class HaWashdataPanel extends HTMLElement {
           try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: eid }); } catch (_) { /* keep */ }
         }
         if (this._canEdit()) { try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: eid }); } catch (_) {} }
+        // Fetch setup guidance phase (always, not just when profileCount === 0)
+        try {
+          this._setupStatus = await this._ws({
+            type: `${_DOMAIN}/get_setup_status`,
+            entry_id: eid,
+          });
+        } catch (_) { this._setupStatus = null; }
       } else if (this._tab === 'history') {
         await this._fetchCycles(eid);
         if (!this._profiles.length) await this._fetchProfiles(eid);
@@ -3453,17 +3583,20 @@ class HaWashdataPanel extends HTMLElement {
       ${this._statusEnv ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_expected" ${showExpected ? 'checked' : ''}><span class="wd-leg-sw" style="background:#ff9800"></span> ${this._t('lbl.expected', {}, 'Expected')}</label>` : ''}
       ${this._pref('show_raw', false) ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_raw_active" ${showRawLeg ? 'checked' : ''}><span class="wd-leg-sw" style="background:#9e9e9e"></span> ${this._t('lbl.raw_socket', {}, 'Raw socket')}</label>` : ''}
     </div>`;
-    // F1 first-run wizard: on a fresh device (no profiles yet, onboarding not
-    // skipped) replace the empty chart placeholder with a getting-started card
-    // until enough cycles are observed. A live cycle (hasCurve) always wins so
-    // the user sees their appliance being watched in real time.
+    // Setup card: phase-aware guidance replacing the old getting-started card.
+    // A live cycle (hasCurve) always wins so the user sees their appliance.
     const cycleCount = this._cyclesTotal || 0;
     const profileCount = (this._profiles || []).length;
-    const showGettingStarted = !this._pref('onboarding_dismissed', false) && profileCount === 0 && !hasCurve;
+    const setupDismissed = this._pref('setup_card_dismissed', false);
+    const setupStatus = this._setupStatus;
+    // Phase 3 and 4 collapse to a chip when dismissed; earlier phases always show
+    // the full guidance card regardless of the dismissed pref.
+    const showSetupCard = setupStatus && !hasCurve;
+    const setupCardHtml = showSetupCard ? this._htmlSetupCard(setupStatus, setupDismissed) : '';
     const curveHtml = hasCurve
       ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_power_chart', {}, 'Power consumption chart'))}" style="height:160px"></canvas></div>${legend}`
-      : (showGettingStarted
-          ? this._htmlGettingStarted(cycleCount)
+      : (showSetupCard
+          ? setupCardHtml
           : `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`);
 
     const showDebug = this._pref('show_debug', false);
@@ -3514,7 +3647,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         <div class="wd-badge ${isRunning ? 'wd-running' : ''}" style="color:${color};background:color-mix(in srgb, ${color} 13%, transparent);">
           <span class="wd-dot"></span>${_esc(label)}
-          ${dev.sub_state ? `<span style="opacity:.7;font-size:.85em">(${_esc(dev.sub_state)})</span>` : ''}
+          ${!rec && dev.sub_state && dev.sub_state.toLowerCase() !== state ? `<span style="opacity:.7;font-size:.85em">(${_esc(dev.sub_state)})</span>` : ''}
         </div>
         ${programCtl}
         <div class="wd-stats">
@@ -3524,7 +3657,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         ${progressHtml}
         ${this._htmlPhaseTimeline(dev, prog, isRunning)}
-        ${showGettingStarted ? '' : `<div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>`}
+        ${showSetupCard ? '' : `<div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>`}
         ${curveHtml}
       </div>
       ${this._canEdit() ? this._htmlRecordingWidget() : ''}
@@ -3533,35 +3666,131 @@ class HaWashdataPanel extends HTMLElement {
     `;
   }
 
-  // F1: first-run guided card shown in the Status power-chart area of a fresh
-  // device. Below 3 observed cycles it explains the "just run it" learning phase
-  // with a 0..3 progress meter; at 3+ it nudges toward creating the first
-  // profile (reusing the existing create-profile entry point). A "Skip setup"
-  // link dismisses it permanently via the onboarding_dismissed user pref.
-  _htmlGettingStarted(cycleCount) {
-    const n = Math.max(0, Math.min(3, cycleCount || 0));
-    const heading = `<div class="wd-card-title" style="margin:12px 0 4px">${this._t('hdr.getting_started', {}, 'Getting started')}</div>`;
-    const skip = `<div style="margin-top:14px"><span role="button" tabindex="0" data-action="skip-onboarding" class="wd-onboard-skip">${this._t('btn.skip_setup', {}, 'Skip setup')}</span></div>`;
-    if (cycleCount >= 3) {
-      // Enough cycles observed — point the user at naming their first program.
-      const createBtn = this._canEdit()
-        ? `<div style="margin-top:12px"><button class="wd-btn wd-btn-primary" data-action="create-profile">${this._t('btn.new_profile', {}, '+ New Profile')}</button></div>`
-        : '';
-      return `<div class="wd-onboard">
-        ${heading}
-        <p class="wd-info" style="margin:0">${this._t('msg.name_first_program', {}, 'You have enough cycles — name your first program to start matching.')}</p>
-        ${createBtn}
-        ${skip}
-      </div>`;
+  // Setup Card — phase-aware guidance for device onboarding. Replaces the old
+  // getting-started card for backends that support get_setup_status (Task 4).
+  // Phase 4 renders as a compact chip (device fully set up); phases 0–3 render
+  // the full guidance card with a primary CTA, optional secondary action, skip
+  // links, and a permanent-hide link when dismissible.
+  _htmlSetupCard(status, dismissed = false) {
+    if (!status) return '';
+    const { phase, message_key, message_params, cta_label_key, cta_action,
+            secondary_label_key, secondary_action, skippable, dismissible,
+            step_key } = status;
+
+    // Phase 4: always a collapsed chip (setup complete — no full card).
+    if (phase === 'phase4') {
+      return `
+        <div class="wd-setup-chip wd-setup-chip--healthy" data-action="expand-setup" role="button" tabindex="0"
+             title="${_esc(this._t('setup.cta.show_guidance', {}, 'Show guidance'))}">
+          <span class="wd-setup-dot wd-setup-dot--green"></span>
+          <span>${this._t('setup.hdr.healthy_chip', {}, 'Setup complete')}</span>
+        </div>`;
     }
-    const pct = (n / 3) * 100;
-    return `<div class="wd-onboard">
-      ${heading}
-      <p class="wd-info" style="margin:0 0 12px">${this._t('msg.onboarding_watching', {}, 'Run your appliance normally — WashData is watching. After 3 cycles, program matching will begin.')}</p>
-      <div class="wd-prog-bg"><div class="wd-prog-fill" style="width:${pct.toFixed(0)}%"></div></div>
-      <div class="wd-prog-row"><span>${this._t('msg.onboarding_progress', {n}, `${n} / 3 cycles observed`)}</span></div>
-      ${skip}
-    </div>`;
+
+    // Phase 3 dismissed: compact chip so the user can restore guidance without
+    // the full card. Click clears setup_card_dismissed and re-renders the full card.
+    if (phase === 'phase3' && dismissed) {
+      return `
+        <div class="wd-setup-chip" data-action="expand-setup" role="button" tabindex="0"
+             title="${_esc(this._t('setup.cta.show_guidance', {}, 'Show guidance'))}">
+          <span class="wd-setup-dot" style="background:var(--warning-color,#ff9800)"></span>
+          <span>${this._t('setup.hdr.card', {}, 'Device Setup')}</span>
+        </div>`;
+    }
+
+    const msg = this._t(message_key, message_params || {}, '');
+    const ctaLabel = this._t(cta_label_key, {}, 'Continue');
+    const secLabel = secondary_label_key
+      ? this._t(secondary_label_key, {}, '')
+      : null;
+
+    const skipHtml = skippable ? `
+      <span style="display:flex;gap:12px;margin-top:6px">
+        <a class="wd-link" data-action="setup-skip" data-step="${_esc(step_key || '')}" data-snooze="14d"
+           style="font-size:.85em">${this._t('setup.cta.skip_step', {}, 'Skip this step')}</a>
+        <a class="wd-link" data-action="setup-skip" data-step="${_esc(step_key || '')}" data-snooze="never"
+           style="font-size:.85em;opacity:.7">${this._t('setup.cta.skip_forever', {}, "Don't show again")}</a>
+      </span>` : '';
+
+    const hideHtml = dismissible ? `
+      <a class="wd-link" data-action="hide-setup-card" style="font-size:.8em;opacity:.6;margin-top:4px">
+        ${this._t('setup.cta.hide_guidance', {}, 'Hide guidance')}
+      </a>` : '';
+
+    return `
+      <div class="wd-setup-card" data-phase="${_esc(phase)}">
+        <div class="wd-card-title">${this._t('setup.hdr.card', {}, 'Device Setup')}</div>
+        <p style="margin:6px 0 12px">${_esc(msg)}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <button class="wd-btn wd-btn-primary" data-action="setup-cta"
+                  data-cta-action="${_esc(cta_action || '')}"
+                  data-cta-params="${_esc(JSON.stringify(message_params || {}))}">
+            ${_esc(ctaLabel)}
+          </button>
+          ${secLabel ? `<a class="wd-link" data-action="setup-cta"
+                           data-cta-action="${_esc(secondary_action || '')}"
+                           data-cta-params="${_esc(JSON.stringify(message_params || {}))}">
+            ${_esc(secLabel)}
+          </a>` : ''}
+        </div>
+        ${skipHtml}
+        ${hideHtml}
+      </div>`;
+  }
+
+  // Dispatch a setup card CTA action to the appropriate panel destination.
+  _dispatchSetupCta(ctaAction, params) {
+    if (!ctaAction) return;
+    if (ctaAction === 'open_recorder') {
+      // Scroll to recorder widget on the Status tab
+      this.shadowRoot.querySelector('.wd-rec-dot')?.closest('.wd-card')?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    if (ctaAction === 'open_cycles' || ctaAction === 'open_cycles_unlabeled') {
+      this._tab = 'history';
+      if (ctaAction === 'open_cycles_unlabeled') {
+        this._cycleFilter = { ...(this._cycleFilter || {}), status: 'unlabeled' };
+      }
+      this._fetchTabData();
+      return;
+    }
+    if (ctaAction === 'open_profiles' || ctaAction === 'open_profiles_groups') {
+      this._tab = 'profiles';
+      this._fetchTabData();
+      return;
+    }
+    if (ctaAction === 'open_suggestions') {
+      this._tab = 'settings';
+      this._settingsSugOnly = true;
+      this._fetchTabData();
+      return;
+    }
+    if (ctaAction === 'create_profile_from_cluster') {
+      // No modal shortcut yet — open the profiles tab where the user can create
+      // a profile; a future task may pre-populate from cluster cycle IDs.
+      this._tab = 'profiles';
+      this._fetchTabData();
+      return;
+    }
+    if (ctaAction && ctaAction.startsWith('open_cycle:')) {
+      // No direct cycle modal shortcut yet — open the history tab.
+      this._tab = 'history';
+      this._fetchTabData();
+      return;
+    }
+  }
+
+  // Reload the setup guidance phase from the backend and re-render.
+  async _reloadSetupStatus() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    try {
+      this._setupStatus = await this._ws({
+        type: `${_DOMAIN}/get_setup_status`,
+        entry_id: dev.entry_id,
+      });
+    } catch (_) { this._setupStatus = null; }
+    this._render();
   }
 
   // D1: compact horizontal phase timeline for the matched profile, drawn below
@@ -3597,11 +3826,18 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlRecordingWidget() {
     const rs = this._recState;
-    const state = rs ? rs.state : 'idle';
+    // dev.recording (from get_devices) is the authoritative recording flag.
+    // _recState is a separately-polled detail source that is null on first load
+    // and only refreshed while already recording, so trusting it alone showed
+    // "Start Recording" during an active recording (#313). Derive the state from
+    // the authoritative flag and use _recState only for the live duration/samples.
+    const dev = this._devices[this._selIdx];
+    const recording = !!(dev && dev.recording);
+    const state = recording ? 'recording' : (rs ? rs.state : 'idle');
     const dotCls = state === 'recording' ? 'wd-rec-active' : state === 'stopped' ? 'wd-rec-ready' : 'wd-rec-idle';
     const stateLabel = state === 'recording' ? this._t('status.recording', {}, 'Recording…') : state === 'stopped' ? this._t('status.ready', {}, 'Ready to process') : this._t('status.idle', {}, 'Idle');
     let detail = '';
-    if (state === 'recording') detail = `${_fmtDuration(rs.duration_s)} · ${rs.sample_count || 0} samples`;
+    if (state === 'recording') detail = rs ? `${_fmtDuration(rs.duration_s)} · ${rs.sample_count || 0} samples` : '';
     else if (state === 'stopped') detail = `${rs.sample_count || 0} samples · ${_fmtDuration(rs.duration_s)}`;
     const buttons = state === 'recording'
       ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="rec-stop" title="${_esc(this._t('btn.rec_stop_tip', {}, 'Stop recording and hold the captured trace for review'))}">${this._t('btn.rec_stop', {}, 'Stop')}</button>`
@@ -3872,10 +4108,10 @@ class HaWashdataPanel extends HTMLElement {
     // match immediately), shown with an "Imported" badge instead of "Still learning".
     const isWarmup = cycleCount < warmupThreshold && !p.is_imported;
     const warmupBadge = isWarmup
-      ? `<span class="wd-badge" title="${_esc(this._t('msg.warmup_detail', {needed: warmupThreshold}, `This profile needs ${warmupThreshold} labelled cycles before auto-matching begins. Every confirmed cycle helps it learn.`))}" style="background:var(--info-color,#2196f3);color:#fff;padding:2px 6px;border-radius:4px;font-size:.75em">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
+      ? `<span class="wd-badge" title="${_esc(this._t('msg.warmup_detail', {needed: warmupThreshold}, `This profile needs ${warmupThreshold} labelled cycles before auto-matching begins. Every confirmed cycle helps it learn.`))}" style="background:var(--info-color,#2196f3);color:#fff">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
       : '';
     const importedBadge = p.is_imported
-      ? `<span class="wd-badge" title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="background:var(--info-color,#2196f3);color:#fff;padding:2px 6px;border-radius:4px;font-size:.75em">📥 ${this._t('status.imported', {}, 'Imported')}</span>`
+      ? `<span class="wd-badge" title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="background:var(--info-color,#2196f3);color:#fff">📥 ${this._t('status.imported', {}, 'Imported')}</span>`
       : '';
     const badges = [healthBadge, trendBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
     // Mini power-signature curve: the profile's real average power shape (from its
@@ -3887,7 +4123,11 @@ class HaWashdataPanel extends HTMLElement {
     return `
       <div class="wd-prof-wrap">
         <button class="wd-profile-card" type="button" data-action="open-profile" data-pname="${_esc(p.name)}">
-          <div class="wd-profile-name">${_esc(p.name)}${badges ? ' ' + badges : ''}${spark}</div>
+          <div class="wd-profile-head">
+            <span class="wd-profile-name">${_esc(p.name)}</span>
+            ${spark}
+          </div>
+          ${badges ? `<div class="wd-profile-badges">${badges}</div>` : ''}
           <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}${cost}</div>
         </button>
       </div>`;
@@ -3931,42 +4171,6 @@ class HaWashdataPanel extends HTMLElement {
     const pg = this._profileGroups || { groups: [], suggestions: [] };
     const groupedNames = new Set();
     pg.groups.forEach(g => (g.members || []).forEach(m => groupedNames.add(m)));
-
-    // Suggestion banner: near-duplicate clusters the user can confirm as groups.
-    const sugBanner = (canEdit && (pg.suggestions || []).length) ? `
-      <div class="wd-sug-banner">
-        <span>🔗 <b>${pg.suggestions.length}</b> ${this._t('msg.near_duplicate_cluster', {}, 'near-duplicate profile cluster' + (pg.suggestions.length > 1 ? 's' : '') + ' detected. Grouping lets matching reliably pick between look-alikes (e.g. same program at different temperature/spin).')}</span>
-        ${pg.suggestions.map((s, i) => `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-suggest" data-idx="${i}">${this._t('btn.group_suggest', {n: s.members.length, members: _esc(s.members.join(', ').slice(0, 48))}, `Group ${s.members.length}: ${_esc(s.members.join(', ').slice(0, 48))}`)}</button>`).join('')}
-      </div>` : '';
-
-    // Coverage gap banner: unmatched cycles that might represent unknown programs.
-    const cg = this._coverageGaps || {};
-    const cgBanner = (canEdit && cg.suggest_create) ? (() => {
-      const clusters = (cg.duration_clusters || []).slice(0, 3);
-      const clusterHints = clusters.map(cl => `~${cl.duration_bucket_min}–${cl.duration_bucket_min + 15} min (${cl.count}×)`).join(', ');
-      const profileSuggestions = (cg.profile_suggestions || []).slice(0, 2);
-      const suggestionHtml = profileSuggestions.length > 0
-        ? profileSuggestions.map(ps => `
-            <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
-              <span style="font-size:.9em">${this._t('msg.coverage_gap_similar_cycles', {count: ps.count}, `${ps.count} similar unlabelled cycles found — create a profile to start matching them.`)}</span>
-              <button class="wd-btn wd-btn-sm wd-btn-primary wd-create-cluster" data-cycle-ids="${_esc(JSON.stringify(ps.cycle_ids))}" data-name="${_esc(ps.suggested_name)}">${this._t('btn.create_from_cluster', {count: ps.count}, `Create profile from ${ps.count} cycles`)}</button>
-            </div>`).join('')
-        : '';
-      return `<div class="wd-sug-banner" style="border-color:var(--info-color,#2196f3);background:rgba(33,150,243,.07)">
-        <span>📂 <b>${cg.unmatched_count}</b> ${this._t('msg.coverage_gap', {pct: Math.round(cg.unmatched_rate * 100)}, `recent cycles have no matching profile (${Math.round(cg.unmatched_rate * 100)}% of last 30).`)}${clusterHints ? ` ${this._t('lbl.duration', {}, 'Duration')}: ${clusterHints}.` : ''} ${this._t('msg.consider_new_profile', {}, 'Consider creating a new profile.')}</span>
-        ${canEdit ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="create-profile">${this._t('btn.create_profile', {}, '+ Create profile')}</button>` : ''}
-        ${suggestionHtml}
-      </div>`;
-    })() : '';
-
-    // Recommendations: actionable maintenance advisories derived from the
-    // per-profile health/trend signals (drift, poor fit). Informational only.
-    const advisories = this._profileAdvisories || [];
-    const advBanner = advisories.length ? `
-      <div class="wd-sug-banner" style="border-color:var(--warning-color,#ff9800);background:rgba(255,152,0,.06);flex-direction:column;align-items:stretch;gap:6px">
-        <span style="font-weight:600">💡 ${this._t('hdr.recommendations', {n: advisories.length}, `Recommendations (${advisories.length})`)}</span>
-        ${advisories.slice(0, 5).map(a => `<div style="font-size:.9em">${a.severity === 'warning' ? '⚠' : 'ℹ️'} ${_esc(a.message_key ? this._t(a.message_key, a.message_params || {}, a.message || '') : (a.message || ''))}</div>`).join('')}
-      </div>` : '';
 
     // Group sections (with cohesion badge + low-cohesion warning).
     const groupSections = pg.groups.map(g => {
@@ -4014,9 +4218,6 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''} title="${_esc(this._t('btn.rebuild_tip', {}, 'Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles — run after labelling new cycles or correcting old ones'))}">${rebuildBusy ? ('<span class="wd-spin"></span> ' + this._t('status.rebuilding', {}, 'Rebuilding…')) : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
         </div>` : ''}
       </div>
-      ${sugBanner}
-      ${cgBanner}
-      ${advBanner}
       ${groupSections}
       ${this._profiles.length === 0
         ? `<div class="wd-empty"><div class="wd-icon">📊</div>${this._t('msg.no_profiles_yet', {}, 'No profiles yet. Create one from a labelled cycle.')}</div>`
@@ -4991,20 +5192,38 @@ class HaWashdataPanel extends HTMLElement {
       ['end_repeat_count',        'End Repeat Count',      '',  'Low readings in a row before ending',          'advanced'],
       ['abrupt_drop_watts',       'Abrupt Drop Threshold', 'W', 'Sudden drop treated as immediate end',         'advanced'],
       ['interrupted_min_seconds', 'Interrupted Min',       's', 'Short cycles flagged as interrupted',          'advanced'],
-      ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Shortest run (vs the profile) still allowed to match', 'matching'],
-      ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Longest run (vs the profile) still allowed to match', 'matching'],
+      ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
+      ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
+      ['corr_weight',      'Correlation Weight', '', 'Stage 2: balance between curve shape (correlation) and power level (MAE); default 0.45', 'matching'],
+      ['keep_min_score',   'Keep Min Score',     '', 'Stage 2: floor score to stay in the race; default 0.1 admits weak matches, later stages pick the best', 'matching'],
+      ['dtw_bandwidth',    'DTW Bandwidth',      '', 'Stage 3: Sakoe-Chiba warp band (0 = DTW off; default 0.2 = 20% of cycle length)', 'matching'],
+      ['dtw_blend',        'DTW Blend',          '', 'Stage 3: 0 = core score only, 1 = DTW score only, 0.5 = equal blend (default)', 'matching'],
+      ['dtw_ensemble_w',   'DTW Ensemble Weight','', 'Stage 3 (ensemble mode): weight on scaled-L1 vs derivative DTW; default 0.7 favours level-aware', 'matching'],
+      ['dtw_ddtw_scale',   'DDTW Scale',         '', 'Stage 3: DDTW half-saturation distance; smaller = more shape-sensitive (default 30)', 'matching'],
+      ['dtw_refine_top_n', 'DTW Refine Top-N',   '', 'Stage 3: candidates DTW re-scores; raise to 7-9 if correct profile ranks 4th-5th (default 5)', 'matching'],
+      ['duration_weight',  'Duration Weight',    '', 'Stage 4: how strongly run-length agreement affects the final score (default 0.22)', 'matching'],
+      ['energy_weight',    'Energy Weight',      '', 'Stage 4: how strongly energy agreement affects the final score (default 0.22)', 'matching'],
+      ['duration_scale',   'Duration Scale',     '', 'Stage 4: log-ratio where duration agreement halves; smaller = stricter penalty (default 0.175)', 'matching'],
+      ['energy_scale',     'Energy Scale',       '', 'Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)', 'matching'],
     ];
   }
 
   // Resolve a pre-fill value for an override field: staged override → live option
-  // → field default → ''.
+  // → field default (settings schema) → matcher constant default → ''.
   _pgFieldVal(key, store) {
     const s = store || {};
     if (s[key] !== undefined) return s[key];
     const o = this._opts || {};
     if (o[key] !== undefined && o[key] !== null) return o[key];
     const f = _FIELD_BY_KEY[key] || {};
-    return f.def !== undefined ? f.def : '';
+    if (f.def !== undefined) return f.def;
+    // Prefer backend-provided matcher defaults (const.py, via get_constants) so the
+    // Playground can't drift from the real defaults; the hardcoded _PG_MATCH_DEFAULTS
+    // table below is only an offline fallback for when the payload hasn't loaded.
+    const be = (this._constants && this._constants.pgMatchDefaults) || {};
+    if (be[key] !== undefined) return be[key];
+    if (_PG_MATCH_DEFAULTS[key] !== undefined) return _PG_MATCH_DEFAULTS[key];
+    return '';
   }
 
   _htmlPlayground() {
@@ -5668,10 +5887,33 @@ class HaWashdataPanel extends HTMLElement {
     const override = { ...this._pgParamOverrides };
     if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
     if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
+    // Run the heavy per-5s replay as a detached, chunked background task so a long
+    // cycle no longer stalls Home Assistant (issue #311). We still await its
+    // completion here (the caller drives the busy spinner + redraw), but the
+    // backend yields the event loop between chunks. A header pill shows progress.
     try {
-      const d = await this._ws({ type: `${_DOMAIN}/run_playground_cycle_detail`, entry_id: entryId, cycle_id: cid, settings_override: override });
+      const r = await this._ws({ type: `${_DOMAIN}/start_playground_cycle_detail`, entry_id: entryId, cycle_id: cid, settings_override: override });
+      const tid = r && r.task_id;
+      if (!tid) throw new Error('no task id');
+      this._addProvisionalTask(tid, 'pg_detail', entryId, 0);
+      const result = await new Promise((resolve) => {
+        this._taskCallbacks[tid] = async (t) => {
+          if (t.state === 'done' || t.state === 'cancelled') {
+            try {
+              const rr = await this._ws({ type: `${_DOMAIN}/get_task_result`, task_id: t.id });
+              resolve(rr && rr.result);
+            } catch (_) { resolve(null); }
+          } else {
+            resolve(null);  // error / lost
+          }
+        };
+        // Race guard: task may have finished before the callback was registered.
+        const known = this._tasks[tid];
+        if (known && known.state !== 'running') this._settleTaskCallback(known);
+        else if (!this._tasksSubscribed) this._pollTaskGeneric(tid);
+      });
       if (!this._isActiveEntry(entryId)) return;  // device switched mid-flight - drop stale result
-      this._pgDetail = (d && !d.error) ? d : null;
+      this._pgDetail = (result && !result.error) ? result : null;
       this._pgNeedsRestart = false;
     } catch (e) {
       if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
@@ -5863,7 +6105,7 @@ class HaWashdataPanel extends HTMLElement {
     pts.forEach(p => ctx.lineTo(toX(p.t), toY(p.w)));
     ctx.lineTo(toX(pts[pts.length-1].t), toY(0));
     ctx.closePath();
-    ctx.fillStyle = primary + '1a'; ctx.fill();
+    ctx.fillStyle = _withAlpha(primary, 0.10); ctx.fill();
 
     // Cycle power trace line
     ctx.beginPath(); ctx.strokeStyle = primary; ctx.lineWidth = 2*dpr;
@@ -6412,10 +6654,10 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-field"><label>${this._t('lbl.panel_language', {}, 'Panel language')}</label><select id="wd-pref-lang">${langOpts}</select></div>
       </div>
       <div class="wd-subhead">${this._t('hdr.status_graph', {}, 'Status Graph')}</div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}> ${this._t('lbl.show_expected', {}, 'Show expected curve overlay (matched profile, orange)')}</label></div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-raw" ${cur.show_raw ? 'checked' : ''}> ${this._t('lbl.show_raw', {}, 'Show raw socket toggle in live power graph')}</label></div>
+      ${_switchRow(`id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}`, this._t('lbl.show_expected', {}, 'Show expected curve overlay (matched profile, orange)'))}
+      ${_switchRow(`id="wd-pref-raw" ${cur.show_raw ? 'checked' : ''}`, this._t('lbl.show_raw', {}, 'Show raw socket toggle in live power graph'))}
       <div class="wd-subhead">${this._t('hdr.diagnostics_pref', {}, 'Diagnostics')}</div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-pref-debug" ${cur.show_debug ? 'checked' : ''}> ${this._t('lbl.show_debug', {}, 'Show live match debug card on the Status page (confidence, ambiguity, top candidates)')}</label></div>
+      ${_switchRow(`id="wd-pref-debug" ${cur.show_debug ? 'checked' : ''}`, this._t('lbl.show_debug', {}, 'Show live match debug card on the Status page (confidence, ambiguity, top candidates)'))}
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-prefs">${this._t('btn.save_preferences', {}, 'Save Preferences')}</button></div>
     </div>`;
   }
@@ -6432,13 +6674,13 @@ class HaWashdataPanel extends HTMLElement {
     const dtOpts = tabOpts.map(([v, l]) => `<option value="${v}" ${(p.default_tab || 'status') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
     const hidden = p.hidden_tabs || [];
     const hideChecks = tabOpts.filter(([v]) => v !== 'status')
-      .map(([v, l]) => `<label class="wd-check-row" style="margin-right:14px;display:inline-flex"><input type="checkbox" data-hidetab="${v}" ${hidden.includes(v) ? 'checked' : ''}> ${_esc(l)}</label>`).join('');
+      .map(([v, l]) => _switchInline(`data-hidetab="${v}" ${hidden.includes(v) ? 'checked' : ''}`, l)).join('');
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.panel_settings', {}, 'Panel Settings (all users)')}</div>
       <div class="wd-form-grid">
         <div class="wd-field"><label>${this._t('lbl.panel_default_tab', {}, 'Default tab')}</label><select id="wd-ps-deftab">${dtOpts}</select></div>
       </div>
-      <div class="wd-field"><label>${this._t('lbl.hide_tabs', {}, 'Hide tabs for non-admins')}</label><div style="display:flex;flex-wrap:wrap;gap:4px">${hideChecks}</div></div>
+      <div class="wd-field"><label>${this._t('lbl.hide_tabs', {}, 'Hide tabs for non-admins')}</label><div style="display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:6px">${hideChecks}</div></div>
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-panel">${this._t('btn.save_panel_settings', {}, 'Save Panel Settings')}</button></div>
     </div>`;
   }
@@ -6461,8 +6703,7 @@ class HaWashdataPanel extends HTMLElement {
     const adminNote = users.filter(u => u.is_admin).map(u => `<span class="wd-pill">${_esc(u.name)} - full (admin)</span>`).join(' ');
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.access_control', {}, 'Access Control')}</div>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" id="wd-rbac-enabled" ${rbac.enabled ? 'checked' : ''}> ${this._t('lbl.enable_access_control', {}, 'Enable per-user access control')}</label>
-        <div class="wd-field-hint">${this._t('msg.rbac_hint', {}, 'When off, every Home Assistant user has full access (the default). Administrators always have full access and can manage everyone.')}</div></div>
+      ${_switchRow(`id="wd-rbac-enabled" ${rbac.enabled ? 'checked' : ''}`, this._t('lbl.enable_access_control', {}, 'Enable per-user access control'), '', this._t('msg.rbac_hint', {}, 'When off, every Home Assistant user has full access (the default). Administrators always have full access and can manage everyone.'))}
       <div class="wd-field"><label>${this._t('lbl.default_access_level', {}, 'Default level for users not listed below')}</label>${this._levelSelect('id="wd-rbac-default"', rbac.default_level || 'none', false)}</div>
       ${adminNote ? `<div class="wd-field"><label>${this._t('lbl.administrators', {}, 'Administrators')}</label><div>${adminNote}</div></div>` : ''}
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-rbac">${this._t('btn.save_access_control', {}, 'Save Access Control')}</button></div>
@@ -6556,7 +6797,7 @@ class HaWashdataPanel extends HTMLElement {
     const dlBusy = this._busy.has('store-download-device');
     const dlHeader = (this._canEdit() && dev && items.length) ? `<div class="wd-card" style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <span class="wd-info" style="flex:1;min-width:180px">${this._t('msg.store_download_device_intro', {}, 'Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.')}</span>
-      <label class="wd-check-row" style="font-size:.85em">${this._t('lbl.adopt_settings', {}, 'Also adopt settings')} ${_tip(this._t('msg.adopt_settings_hint', {}, 'Overwrite this device\'s detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.'))}<input type="checkbox" data-action="store-toggle-dl-settings" ${this._dlSettings ? 'checked' : ''} ${dlBusy ? 'disabled' : ''}></label>
+      ${_switchInline(`data-action="store-toggle-dl-settings" ${this._dlSettings ? 'checked' : ''} ${dlBusy ? 'disabled' : ''}`, this._t('lbl.adopt_settings', {}, 'Also adopt settings'), _tip(this._t('msg.adopt_settings_hint', {}, 'Overwrite this device\'s detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.')))}
       <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-download-device" data-device-id="${_esc(dev.id)}" ${dlBusy ? 'disabled' : ''}>${dlBusy ? '<span class="wd-spin"></span> ' : '⬇ '}${this._t('btn.download_device', {}, 'Download this setup')}</button>
     </div>` : '';
     return dlHeader + list;
@@ -6652,7 +6893,7 @@ class HaWashdataPanel extends HTMLElement {
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.online_account', {}, 'Community Store & online features')}</div>
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.online_intro_global', {}, 'Browse and share reference recordings with other WashData users, and confirm appliance entries. One connection applies to your whole WashData integration; appliance brand and model are set per device under Basic. All online features are opt-in and off by default.')}</p>
-      <div class="wd-field"><label class="wd-check-row"><input type="checkbox" data-action="store-toggle-online" ${on ? 'checked' : ''} ${busy ? 'disabled' : ''}> ${this._t('lbl.enable_online', {}, 'Enable online features')}</label></div>
+      ${_switchRow(`data-action="store-toggle-online" ${on ? 'checked' : ''} ${busy ? 'disabled' : ''}`, this._t('lbl.enable_online', {}, 'Enable online features'))}
       ${on ? this._htmlStorePrefs(busy) : ''}
       ${on ? connBlock : ''}
     </div>`;
@@ -6664,7 +6905,7 @@ class HaWashdataPanel extends HTMLElement {
     const prefs = (this._constants && this._constants.storePrefs) || {};
     return _STORE_PREFS.map(p => {
       const checked = prefs[p.key] !== false;  // defaults on; get_constants sends the full set
-      return `<div class="wd-field"><label class="wd-check-row"><input type="checkbox" data-action="store-toggle-pref" data-pref="${_esc(p.key)}" ${checked ? 'checked' : ''} ${busy ? 'disabled' : ''}> ${this._t(p.labelKey, {}, p.labelFb)}</label> ${_tip(this._t(p.docKey, {}, p.docFb))}</div>`;
+      return _switchRow(`data-action="store-toggle-pref" data-pref="${_esc(p.key)}" ${checked ? 'checked' : ''} ${busy ? 'disabled' : ''}`, this._t(p.labelKey, {}, p.labelFb), _tip(this._t(p.docKey, {}, p.docFb)));
     }).join('');
   }
 
@@ -6848,7 +7089,7 @@ class HaWashdataPanel extends HTMLElement {
       ctx.beginPath();
       opts.band.max.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])));
       for (let i = opts.band.min.length - 1; i >= 0; i--) ctx.lineTo(X(opts.band.min[i][0]), Y(opts.band.min[i][1]));
-      ctx.closePath(); ctx.fillStyle = opts.band.fill || (primary + '22'); ctx.fill();
+      ctx.closePath(); ctx.fillStyle = opts.band.fill || _withAlpha(primary, 0.13); ctx.fill();
     }
     series.forEach(s => {
       const pts = s.points || []; if (!pts.length) return;
@@ -6856,7 +7097,7 @@ class HaWashdataPanel extends HTMLElement {
       if (s.fill) {
         ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])));
         ctx.lineTo(X(pts[pts.length - 1][0]), Y(0)); ctx.lineTo(X(pts[0][0]), Y(0)); ctx.closePath();
-        const g = ctx.createLinearGradient(0, padT, 0, ch - padB); g.addColorStop(0, col + '55'); g.addColorStop(1, col + '08'); ctx.fillStyle = g; ctx.fill();
+        const g = ctx.createLinearGradient(0, padT, 0, ch - padB); g.addColorStop(0, _withAlpha(col, 0.33)); g.addColorStop(1, _withAlpha(col, 0.03)); ctx.fillStyle = g; ctx.fill();
       }
       ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])));
       ctx.strokeStyle = col; ctx.lineWidth = (s.width || 1.5) * dpr; ctx.lineJoin = 'round';
@@ -7622,6 +7863,14 @@ class HaWashdataPanel extends HTMLElement {
             <span style="font-size:.82em;opacity:.75;display:block;margin-top:4px">${this._t('msg.shape_drift_detail', {}, 'The power pattern for this profile has shifted over time — possible appliance wear or maintenance needed (e.g. descaling, filter cleaning).')}</span>
           </div>`;
         })() : ''}
+        ${(() => {
+          const adv = (this._profileAdvisories || []).find(a => a && a.profile === m.name && a.code === 'phase_inconsistent');
+          if (!adv) return '';
+          return `<div style="margin-top:8px;padding:8px 10px;background:color-mix(in srgb, var(--warning-color,#ff9800) 9%, transparent);border-radius:6px;border-left:3px solid var(--warning-color,#ff9800)">
+            <span style="font-weight:600;color:var(--warning-color,#ff9800)">${this._t('msg.advisory_phase_inconsistent_title', {}, '⚠ Possibly mixed programs')}</span>
+            <span style="font-size:.82em;opacity:.85;display:block;margin-top:4px">${_esc(this._t(adv.message_key, adv.message_params, adv.message))}</span>
+          </div>`;
+        })()}
         ${env.avg && env.avg.length ? `<div class="wd-canvas-wrap"><canvas id="wd-env-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_envelope_chart', {}, 'Profile power envelope chart'))}"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_envelope', {}, 'No envelope yet - rebuild after labelling cycles.')}</p>`}`;
     } else if (m.tab === 'phases') {
       const cat = m.catalog || [];
@@ -7852,7 +8101,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!m || !m.env || !(m.env.avg || []).length) return;
     const env = m.env;
     const full = env.target_duration || env.avg[env.avg.length - 1][0];
-    const bands = (m.phases || []).map((ph, i) => ({ x0: ph.start, x1: ph.end, fill: _PALETTE[i % _PALETTE.length] + '33' }));
+    const bands = (m.phases || []).map((ph, i) => ({ x0: ph.start, x1: ph.end, fill: _withAlpha(_PALETTE[i % _PALETTE.length], 0.20) }));
     const vlines = [];
     (m.phases || []).forEach((ph, i) => {
       const col = _PALETTE[i % _PALETTE.length];
@@ -9204,9 +9453,41 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'create-profile') {
       this._modal = { type: 'create-profile' }; this._render();
 
-    } else if (a === 'skip-onboarding') {
-      // F1: dismiss the first-run wizard permanently for this user.
-      this._setPref('onboarding_dismissed', true);
+    } else if (a === 'setup-cta') {
+      // Setup card primary / secondary CTA — navigate to the relevant panel section.
+      const ctaAction = btn.dataset.ctaAction || '';
+      let params = {};
+      try { params = JSON.parse(btn.dataset.ctaParams || '{}'); } catch (_) {}
+      this._dispatchSetupCta(ctaAction, params);
+
+    } else if (a === 'setup-skip') {
+      // Setup card step skip (snooze 14 days or never).
+      const stepKey = btn.dataset.step;
+      const snooze = btn.dataset.snooze; // "never" or "14d"
+      if (stepKey) {
+        let val;
+        if (snooze === 'never') {
+          val = 'never';
+        } else {
+          const until = new Date();
+          until.setDate(until.getDate() + 14);
+          val = until.toISOString();
+        }
+        this._setPref(stepKey, val);
+        this._reloadSetupStatus(); // async fire-and-forget; calls _render() when done
+      }
+
+    } else if (a === 'hide-setup-card') {
+      // Setup card permanent hide (only offered when dismissible, i.e. phase 3/4).
+      // Keep _setupStatus so _htmlSetupCard can collapse to the phase-3 chip
+      // immediately (nulling it here would hide the card entirely instead — the
+      // sibling setup-skip / expand-setup handlers also leave the status intact).
+      this._setPref('setup_card_dismissed', true);
+      this._render();
+
+    } else if (a === 'expand-setup') {
+      // Phase 3/4 chip tapped — restore full guidance card by clearing the pref.
+      this._setPref('setup_card_dismissed', false);
       this._render();
 
     } else if (a === 'set-settings-level') {
@@ -9237,10 +9518,13 @@ class HaWashdataPanel extends HTMLElement {
       });
 
     } else if (a === 'rebuild-envelopes') {
-      this._busyRun('rebuild-envelopes', async () => {
-        try { await this._ws({ type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid }); this._showToast(this._t('toast.envelopes_rebuilt', {}, 'Envelopes rebuilt')); await this._fetchProfiles(eid); }
-        catch (e) { this._showToast(this._t('toast.rebuild_failed', {error: e.message || e}, 'Rebuild failed: ' + (e.message || e)), 'error'); }
-      });
+      // Backgrounded task (issue #311): rebuilding every profile serially can
+      // stall a low-power host, so run it via the registry with a header pill.
+      this._kickAndTrack(
+        { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
+        'rebuild-envelopes',
+        async () => { this._showToast(this._t('toast.envelopes_rebuilt', {}, 'Envelopes rebuilt')); await this._fetchProfiles(eid); },
+      );
 
     } else if (a === 'rec-start') {
       this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
@@ -9382,7 +9666,16 @@ class HaWashdataPanel extends HTMLElement {
       if (tid) this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
     } else if (a === 'task-cancel') {
       const tid = btn.dataset.taskId;
-      if (tid) this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
+      if (tid) {
+        this._cancellingTasks.add(tid);
+        this._updateTaskPills();
+        this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {
+          // Cancel request itself failed (dropped socket, etc.) — re-enable the
+          // ✕ so the user can retry instead of leaving the pill stuck "Cancelling…".
+          this._cancellingTasks.delete(tid);
+          this._updateTaskPills();
+        });
+      }
     } else if (a === 'pg-load-run') {
       const tid = btn.dataset.taskId;
       if (!tid) return;
@@ -9817,19 +10110,34 @@ class HaWashdataPanel extends HTMLElement {
         return;
       }
       if (action === 'cyc-apply-trim') {
+        // Backgrounded task (issue #311): recompute + envelope rebuild can stall a
+        // low-power host, so run it via the registry with a header pill.
         const cid = m.cycleId, s = m.trim.start, e2 = m.trim.end;
-        await this._busyRun('cyc-trim-apply', async () => {
-          try { await this._ws({ type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 }); this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed')); await this._closeCycleDetail(eid); await this._fetchCycles(eid); }
-          catch (e) { this._showToast(this._t('toast.trim_failed', {error: e.message || e}, 'Trim failed: ' + (e.message || e)), 'error'); }
-        });
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
+          'cyc-trim-apply',
+          async () => {
+            this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed'));
+            await this._closeCycleDetail(eid);
+            await this._fetchCycles(eid);
+          },
+        );
         return;
       }
       if (action === 'cyc-apply-split') {
+        // Backgrounded task (issue #311): per-segment extraction + affected
+        // envelope rebuilds can stall a low-power host, so run it via the registry.
         const cid = m.cycleId, offs = m.split.offsets.slice(), profs = m.split.profiles.slice();
-        await this._busyRun('cyc-split-apply', async () => {
-          try { const r = await this._ws({ type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs }); this._showToast(this._t('toast.split_complete', {count: (r.new_ids || []).length}, `Split into ${(r.new_ids || []).length} cycles`)); await this._closeCycleDetail(eid); await this._fetchCycles(eid); await this._fetchProfiles(eid); }
-          catch (e) { this._showToast(this._t('toast.split_failed', {error: e.message || e}, 'Split failed: ' + (e.message || e)), 'error'); }
-        });
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs },
+          'cyc-split-apply',
+          async (result) => {
+            this._showToast(this._t('toast.split_complete', {count: (result.new_ids || []).length}, `Split into ${(result.new_ids || []).length} cycles`));
+            await this._closeCycleDetail(eid);
+            await this._fetchCycles(eid);
+            await this._fetchProfiles(eid);
+          },
+        );
         return;
       }
     }
@@ -9887,10 +10195,19 @@ class HaWashdataPanel extends HTMLElement {
         return;
       }
       if (action === 'pp-rebuild') {
-        await this._busyRun('pp-rebuild', async () => {
-          try { await this._ws({ type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid }); const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name }); if (this._modal) this._modal.env = r.envelope; this._showToast(this._t('toast.envelope_rebuilt', {}, 'Envelope rebuilt')); }
-          catch (e) { this._showToast(this._t('msg.toast_rebuild_failed', {error: e.message || e}, 'Rebuild failed: ' + (e.message || e)), 'error'); }
-        });
+        // Backgrounded task (issue #311): rebuild runs via the registry; the
+        // profile's fresh envelope is fetched only once the task has settled.
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
+          'pp-rebuild',
+          async () => {
+            try {
+              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name });
+              if (this._modal) this._modal.env = r.envelope;
+            } catch (_) { /* modal may have closed */ }
+            this._showToast(this._t('toast.envelope_rebuilt', {}, 'Envelope rebuilt'));
+          },
+        );
         return;
       }
       if (action === 'pp-delete') {
@@ -9980,14 +10297,17 @@ class HaWashdataPanel extends HTMLElement {
       const newName = sr.getElementById('wd-merge-newname')?.value?.trim() || null;
       const ids = m.ids || [];
       this._modal = null; this._render();
-      await this._busyRun('cyc-merge', async () => {
-        try {
-          await this._ws({ type: `${_DOMAIN}/apply_merge`, entry_id: eid, cycle_ids: ids, target_profile: target || null, new_profile_name: newName });
+      // Backgrounded task (issue #311): gap-fill + affected envelope rebuilds can
+      // stall a low-power host, so run it via the registry with a header pill.
+      this._kickAndTrack(
+        { type: `${_DOMAIN}/apply_merge`, entry_id: eid, cycle_ids: ids, target_profile: target || null, new_profile_name: newName },
+        'cyc-merge',
+        async () => {
           this._showToast(this._t('toast.cycles_merged', {}, 'Cycles merged'));
           this._cycleSel.clear(); this._selectMode = false;
           await this._fetchCycles(eid); await this._fetchProfiles(eid);
-        } catch (e) { this._showToast(this._t('toast.merge_failed', {error: e.message || e}, 'Merge failed: ' + (e.message || e)), 'error'); }
-      });
+        },
+      );
     } else if (action === 'bulk-relabel-ok' && eid) {
       // D6: apply the chosen label to every selected cycle via label_cycle.
       const profileName = sr.getElementById('wd-relabel-profile')?.value || '';

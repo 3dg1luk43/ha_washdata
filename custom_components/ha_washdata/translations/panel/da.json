@@ -87,7 +87,7 @@
     "on_cycle_finished": "På cyklus færdig",
     "on_cycle_started": "På cyklus startet",
     "pause_cycle": "Pause",
-    "pause_cycle_tip": "Sæt den kørende cyklus på pause — apparatet genoptager, hvor det slap",
+    "pause_cycle_tip": "Sæt den kørende cyklus på pause – apparatet genoptager, hvor det slap",
     "pg_apply_device": "Anvend på enhed",
     "pg_autofill": "Autoudfyld",
     "play": "Afspil",
@@ -97,8 +97,8 @@
     "process_tip": "Gem det optagede spor som en ny eller eksisterende profil",
     "rebuild": "Genopbyg konvolutter",
     "rebuild_envelope": "Genopbyg konvolut",
-    "rebuild_tip": "Genberegn den forventede effektkonvolut (min/max-bånd) for alle profiler fra deres mærkede cyklusser — kør efter mærkning af nye cyklusser eller korrigering af gamle",
-    "rec_start_tip": "Begynd at optage apparatets effektspor — start umiddelbart inden du kører en cyklus",
+    "rebuild_tip": "Genberegn den forventede effektkonvolut (min/max-bånd) for alle profiler fra deres mærkede cyklusser – kør efter mærkning af nye cyklusser eller korrigering af gamle",
+    "rec_start_tip": "Begynd at optage apparatets effektspor – start umiddelbart inden du kører en cyklus",
     "rec_stop": "Stop",
     "rec_stop_tip": "Stop optagelsen og behold det indfangede spor til gennemgang",
     "record": "Start optagelse",
@@ -231,7 +231,7 @@
       "interval": "Bør være mindst 2x samplingsintervallet ({si} s)",
       "sampling": "Samplingsinterval bør højst være halvdelen af watchdog-intervallet ({wi} s)"
     },
-    "settings_banner": "{n} indstillingskonflikt{s} — tjek de fremhævede sektioner og ret dem inden du gemmer.",
+    "settings_banner": "{n} indstillingskonflikt{s} – tjek de fremhævede sektioner og ret dem inden du gemmer.",
     "settings_banner_btn": "Gå til første"
   },
   "hdr": {
@@ -451,9 +451,9 @@
     "show_expected": "Vis forventet kurveoverlejring (matchet profil, orange)",
     "show_raw": "Vis kontakt for råe stikkontaktværdier i live strømgraf",
     "sparkline": "Tendens for seneste cyklusvarigheder",
-    "stage2": "Trin 2 — kerneligning",
-    "stage3": "Trin 3 — DTW",
-    "stage4": "Trin 4 — overensstemmelse",
+    "stage2": "Trin 2 – kerneligning",
+    "stage3": "Trin 3 – DTW",
+    "stage4": "Trin 4 – overensstemmelse",
     "status": "Status",
     "tail_trim": "Beskær slut (s)",
     "timer_auto_pause": "Auto-pause",
@@ -561,7 +561,12 @@
     "flags": "Flags",
     "include_phase_map": "Inkludér fasekort",
     "include_settings": "Inkludér detektions- og matchindstillinger",
-    "show_contributor": "Vis bidragydernes navne"
+    "show_contributor": "Vis bidragydernes navne",
+    "task_pg_detail": "Simulér cyklus",
+    "task_split": "Opdeler cyklus",
+    "task_trim": "Beskærer cyklus",
+    "task_merge": "Sammenfletter cyklusser",
+    "task_rebuild": "Genopbygger envelopes"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -645,7 +650,7 @@
     "artifact_dip_detail": "Faldt under det normale effektbånd i ~{n}s.",
     "artifact_footer": "Fremhævet på grafen ovenfor. Disse er forbigående artefakter (f.eks. døren åbnet midt i cyklussen), ikke nødvendigvis problemer.",
     "artifact_header": "{n} uregelmæssigheder opdaget i denne cyklus",
-    "artifact_pause_detail": "Effekten faldt til næsten nul i ~{n}s og genoptog derefter — sandsynligvis blev døren åbnet midt i cyklussen, eller cyklussen blev sat på pause.",
+    "artifact_pause_detail": "Effekten faldt til næsten nul i ~{n}s og genoptog derefter – sandsynligvis blev døren åbnet midt i cyklussen, eller cyklussen blev sat på pause.",
     "artifact_spike_detail": "Steg over det normale effektbånd i ~{n}s.",
     "auto_label_intro": "Tildel profiler til umærkede cyklusser, hvis matchkonfidens rydder tærsklen.",
     "automations_intro": "WashData udløser {start} / {end}-hændelser og stiller entiteter til rådighed, så notifikationer og handlinger bedst bygges som normale Home Assistant-automatiseringer. Automatiseringer, der bruger denne enhed, vises nedenfor.",
@@ -654,10 +659,10 @@
     "collecting_data": "Indsamler data: {need} cyklus{plural} mere, før finjustering kan starte ({current}/{min}).",
     "compare_overlay_profiles": "Overlejringsprofiler (svage)",
     "compare_profiles_tip": "Overlæg andre profilkonvolutter på skemaet ovenfor for at se, hvilken der passer bedst til denne cyklus.",
-    "compare_selected_cycles": "Valgte cyklusser (fast) — vis/skjul",
+    "compare_selected_cycles": "Valgte cyklusser (fast) – vis/skjul",
     "consider_new_profile": "Overvej at oprette en ny profil.",
     "coverage_gap": "seneste cyklusser har ingen matchende profil ({pct}% af sidste 30).",
-    "coverage_gap_similar_cycles": "{count} lignende umærkede cyklusser fundet — opret en profil for at begynde at matche dem.",
+    "coverage_gap_similar_cycles": "{count} lignende umærkede cyklusser fundet – opret en profil for at begynde at matche dem.",
     "cycles_deleted": "{count} cyklus(ser) slettet",
     "enough_data": "Nok data til at lære af ({current}/{min} cyklusser).",
     "export_description": "Eksporter alle profiler og cyklusser til JSON, eller gendan fra en tidligere eksport.",
@@ -686,7 +691,7 @@
     "ml_learned_intro": "Modeller finjusteret til denne maskine.",
     "ml_loading": "indlæser ML...",
     "ml_settings_intro": "To uafhængige kontakter: Den ene anvender modellerne, mens en cyklus kører, den anden lader WashData finjustere dem til din maskine over tid.",
-    "name_first_program": "Du har nok cyklusser — navngiv dit første program for at begynde matchning.",
+    "name_first_program": "Du har nok cyklusser – navngiv dit første program for at begynde matchning.",
     "near_duplicate_cluster": "næsten dublet profilklynge fundet. Gruppering gør det muligt for matchning pålideligt at vælge mellem look-alikes (f.eks. samme program ved forskellig temperatur/spin).",
     "no_cycles_match": "Ingen cyklusser matcher det aktuelle filter.",
     "no_cycles_profile": "Ingen cyklusser for denne profil.",
@@ -713,7 +718,7 @@
     "notify_services_hint": "Brug {entity}-service-ID'er (kommaseparerede for flere). Skabelonvariabler: {vars}.",
     "old_actions_warning": "Konfigureret med den gamle handlingseditor (nu fjernet). De skyder stadig på cyklusbegivenheder, men kan ikke længere redigeres her. Konverter dem til en normal automatisering, eller fjern dem.",
     "onboarding_progress": "{n} / 3 cyklusser observeret",
-    "onboarding_watching": "Lad dit apparat køre normalt — WashData holder øje. Efter 3 cyklusser begynder programmatchning.",
+    "onboarding_watching": "Lad dit apparat køre normalt – WashData holder øje. Efter 3 cyklusser begynder programmatchning.",
     "pending_feedback": "Afventer detektionsfeedback",
     "performance_trend": "Præstationstendens ({n} cyklusser)",
     "pg_analysis_empty": "Indlæs en cyklus for at se matchanalyse.",
@@ -763,7 +768,7 @@
     "setting_changed": "Ændret fra {old} til {new} den {date}",
     "settings_basic_note": "Viser væsentlige indstillinger. Skift til Avanceret for hele listen.",
     "shape_drift_advisory": "⚠ Formdrift",
-    "shape_drift_detail": "Effektmønsteret for denne profil har ændret sig over tid — mulig slid på apparatet eller vedligeholdelse nødvendig (f.eks. afkalkning, filterrensning).",
+    "shape_drift_detail": "Effektmønsteret for denne profil har ændret sig over tid – mulig slid på apparatet eller vedligeholdelse nødvendig (f.eks. afkalkning, filterrensning).",
     "show_all_settings": "Vis alle indstillinger",
     "showing_suggestions": "Viser indstillingen {count} med forslag.",
     "split_intro": "Klik på grafen for at tilføje eller fjerne et opdelingspunkt, eller automatisk detektere ved inaktive huller. Hvert resulterende segment kan få sin egen profil.",
@@ -789,10 +794,10 @@
     "toast_revert_failed": "Tilbagerulning mislykkedes: {error}",
     "toast_reverted": "{key} tilbageført",
     "toast_save_failed": "Lagring mislykkedes: {error}",
-    "trend_duration_longer": "Varighed, der trender længere ({pct}%/cyklus) — seneste gennemsnit {avg}",
-    "trend_duration_shorter": "Varighed, der trender kortere ({pct}%/cyklus) — seneste gennemsnit {avg}",
+    "trend_duration_longer": "Varighed, der trender længere ({pct}%/cyklus) – seneste gennemsnit {avg}",
+    "trend_duration_shorter": "Varighed, der trender kortere ({pct}%/cyklus) – seneste gennemsnit {avg}",
     "trend_energy_down": "Energi på vej ned ({pct} %/cyklus)",
-    "trend_energy_up": "Energitrends op ({pct} %/cyklus) — seneste gennemsnit {avg}",
+    "trend_energy_up": "Energitrends op ({pct} %/cyklus) – seneste gennemsnit {avg}",
     "trim_intro": "Træk i de røde håndtag, eller indtast værdier. Alt uden for vinduet fjernes.",
     "tuning_suggestions_available": "{count} indstillingsforslag tilgængeligt fra observerede cyklusser. De vises ved siden af ​​de relevante felter.",
     "unsure_detected_prefix": "WashData er usikker på, om det er registreret",
@@ -857,7 +862,9 @@
     "share_guidelines_title": "Inden du deler",
     "store_download_device_intro": "Overtag alle delte programmer og deres referencecyklusser til dit apparat. Dine egne optagede cyklusser og statistik påvirkes ikke.",
     "store_share_device_intro": "Upload {brand} {model} med de referencecyklusser, du vælger. Andre med samme apparat kan overtage dine programmer. Bidrag gennemgås inden offentliggørelse.",
-    "share_profile_no_cycles": "Ingen referencecyklusser -- markér en cyklus som ⭐ under fanen Cyklusser for at inkludere denne profil"
+    "share_profile_no_cycles": "Ingen referencecyklusser -- markér en cyklus som ⭐ under fanen Cyklusser for at inkludere denne profil",
+    "advisory_phase_inconsistent": "'{name}' ser ud til at blande forskellige programmer eller temperaturer - dens cyklusser varmer op i meget forskellige tidsrum. Hvis du deler den op i separate profiler (f.eks. pr. temperatur), forbedres matchningen og tidsestimaterne.",
+    "advisory_phase_inconsistent_title": "⚠ Muligvis blandede programmer"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Pludseligt fald behandlet som øjeblikkelig afslutning",
@@ -869,12 +876,19 @@
     "start_duration_threshold": "Sekunder over tærsklen for at bekræfte start",
     "start_threshold_w": "Minimum watt for at tælle som startet",
     "stop_threshold_w": "Under dette tælles maskinen som slukket",
-    "dtw_bandwidth": "Hvor meget tidsforvrængning formgenkendelsen tillader",
-    "corr_weight": "Vægt på kurveform kontra effektniveau i genkendelsen",
-    "duration_weight": "Hvor meget overensstemmelse i køretid påvirker genkendelsen",
-    "energy_weight": "Hvor meget overensstemmelse i energiforbrug påvirker genkendelsen",
-    "profile_match_min_duration_ratio": "Korteste kørsel (i forhold til profilen), der stadig må matche",
-    "profile_match_max_duration_ratio": "Længste kørsel (i forhold til profilen), der stadig må matche"
+    "dtw_bandwidth": "Trin 3: Sakoe-Chiba-tidsforvrængningsband (0 = DTW slukket; standard 0,2 = 20% af cykellængde)",
+    "corr_weight": "Trin 2: balance mellem kurveform (korrelation) og effektniveau (MAE); standard 0,45",
+    "duration_weight": "Trin 4: hvor stærkt varighedsoverensstemmelse påvirker slutscoren (standard 0,22)",
+    "energy_weight": "Trin 4: hvor stærkt energioverensstemmelse påvirker slutscoren (standard 0,22)",
+    "profile_match_min_duration_ratio": "Trin 1: korteste cykellængde som brøkdel af profilvarighed; standard 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Trin 1: længste cykellængde som brøkdel af profilvarighed; standard 1,5 (150%)",
+    "keep_min_score": "Trin 2: laveste score for at forblive i kampen; standard 0,1 tillader svage kandidater, senere trin vælger bedst",
+    "dtw_blend": "Trin 3: 0 = kun kernescore, 1 = kun DTW-score, 0,5 = ligelig blanding (standard)",
+    "dtw_ensemble_w": "Trin 3 (ensemble-tilstand): vægt på skaleret L1 kontra derivativ DTW; standard 0,7 foretrækker niveaubevidst",
+    "dtw_ddtw_scale": "Trin 3: DDTW-halvmætningsafstand; mindre = mere formfølsom (standard 30)",
+    "dtw_refine_top_n": "Trin 3: kandidater DTW gen-scorer; hæv til 7-9 hvis korrekt profil placerer sig 4.-5. (standard 5)",
+    "duration_scale": "Trin 4: log-forhold der varighedsoverensstemmelse halveres; lavere = strengere straf (standard 0,175)",
+    "energy_scale": "Trin 4: log-forhold der energioverensstemmelse halveres; lavere = strengere straf (standard 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Lejlighedsvis korte tumblinger efter færdiggørelse for at reducere rynker.",
@@ -957,6 +971,10 @@
     "triggers": {
       "intro": "Valgfrie eksterne signaler: en slutudløser, en dørsensor, en pausekontakt og aflæsningspåmindelsen.",
       "label": "Udløsere og døre"
+    },
+    "phase_eta": {
+      "label": "Resterende tid",
+      "intro": "Fasebevidst resterende tid, til maskiner hvis cykluslængde afhænger af temperatur eller centrifugering."
     }
   },
   "setting": {
@@ -1039,6 +1057,10 @@
     "energy_price_static": {
       "doc": "Fast pris pr. kWh brugt til omkostningstal, når der ikke er angivet en levende prisenhed ovenfor.",
       "label": "Statisk energipris (per kWh)"
+    },
+    "energy_sensor": {
+      "doc": "Valgfri kumulativ energitæller (total_increasing i kWh/Wh, f.eks. stikkets egen levetidsmåler). Når den er angivet, tages hver cyklus' rapporterede energi fra denne tællers forskel mellem start og slut, hvilket undgår den undertælling, du får ved at integrere en langsomt rapporterende effektsensor. Falder tilbage til den integrerede værdi, hvis aflæsningen mangler, dens enhed er ukendt, eller forskellen ikke er positiv. Lad feltet stå tomt for at fortsætte med at integrere effektsensoren.",
+      "label": "Energimålerenhed"
     },
     "expose_debug_entities": {
       "doc": "Udgiv ekstra diagnostiske HA-enheder (match konfidens, tvetydighed, interne tilstande). Fra holder enhedslisten ren til normal brug.",
@@ -1322,6 +1344,38 @@
     },
     "show_contributor": {
       "doc": "Viser tilskrivningen 'af <contributor>' på fællesskabsapparater og referencecyklusser."
+    },
+    "enable_phase_matching": {
+      "label": "Fasebevidst resterende tid",
+      "doc": "Opdel hver kørende cyklus i faser (opvarmning, vask, centrifugering) og budgettér den resterende tid pr. fase, blandet med det klassiske estimat - tidligt i cyklussen læner den sig op ad fasebudgettet og mod slutningen op ad det klassiske estimat. Dette tilpasser nedtællingen til, hvor længe din maskine faktisk varmer op og kører, hvilket er mest mærkbart i den første halvdel af en cyklus. Fra = kun det klassiske estimat. Kun visningen af resterende tid påvirkes; programmatchning og cyklusregistrering er uændrede."
+    },
+    "keep_min_score": {
+      "label": "Min. matchingsscore",
+      "doc": "Laveste lighedsscore en kandidat behøver for at forblive i matcheprocessen. Standard 0,1 er bevidst tillåtende – det tillader selv svage kandidater og stoler på at senere trin finder den bedste match. Hæv for at skære usandsynlige profiler fra tidligere; sænk for at udvide den indledende kandidatpulje."
+    },
+    "dtw_blend": {
+      "label": "DTW-blanding",
+      "doc": "Hvor meget DTW-justeringsscoren erstatter kerneresultatet fra Trin 2. 0 = brug kun Trin 2-scoren, 1 = brug kun DTW-scoren, 0,5 (standard) = ligelig blanding. Hæv for at stole mere på tidsjustering når programmer har ensartede effektniveauer men forskellige timingmønstre."
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW-ensemblemiks",
+      "doc": "I ensemble-DTW-tilstand (standard) er dette vægten på skaleret L1 kontra derivativ DTW (DDTW). 1,0 = kun skaleret L1, 0 = kun DDTW, 0,7 = standard. Den skalerede variant sammenligner effektniveauer; den derivative reagerer på hvordan effekten ændres over tid. Ensemble blander begge."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Derivativ DTW-skala",
+      "doc": "Halvmætningsafstand for derivativ DTW-scoring. Scoren halveres når DDTW-afstanden er lig denne værdi. Lavere = mere følsom for formforskelle. Standard 30 er kalibreret til typiske husholdningsapparaters effektprofiler. Påvirker kun ensemble- og ddtw-DTW-tilstande."
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW-forfiningsnummer",
+      "doc": "Hvor mange topkandidater fra Trin 2 der gen-scores af DTW. DTW er mere kostbar så det anvendes kun på de N bedste. Standard 5. Hæv (til 7-9) hvis den korrekte profil sommetider kun når 4. eller 5. plads efter Trin 2 – DTW kan redde den. Lavere giver lidt hurtigere matching."
+    },
+    "duration_scale": {
+      "label": "Varighedsskarphed",
+      "doc": "Skarphed i Trin 4's straf for varighedsoverensstemmelse. Det er log-forholdet ved hvilket overensstemmelses-scoren halveres. Lavere = strengere: et varighedsafvigelse skader mere. Standard 0,175 svarer til omtrent 18% varighedstolerens ved halvvægt. Par med Varighedsvægt."
+    },
+    "energy_scale": {
+      "label": "Energiskarphed",
+      "doc": "Skarphed i Trin 4's straf for energioverensstemmelse. Lavere = strengere: et energiafvigelse skader mere. Standard 0,25 er bevidst mere tillåtende end varighedsskarphed fordi energi varierer med belastning. Par med Energivægt."
     }
   },
   "setting_group": {
@@ -1766,6 +1820,69 @@
     },
     "pg_sweep": {
       "optimize": "Optimér: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulér cyklus"
+    },
+    "split": {
+      "apply": "Opdeler cyklus"
+    },
+    "trim": {
+      "apply": "Beskærer cyklus"
+    },
+    "merge": {
+      "apply": "Sammenfletter cyklusser"
+    },
+    "rebuild": {
+      "envelopes": "Genopbygger envelopes"
+    },
+    "cancelling": "Annullerer..."
+  },
+  "setup": {
+    "hdr": {
+      "card": "Apparatopsætning",
+      "healthy_chip": "Opsætning fuldført"
+    },
+    "phase0": {
+      "washer": "WashData registrerer allerede dine cyklusser. Optag din første cyklus for at aktivere programnavne og tidsestimater.",
+      "dishwasher": "WashData holder øje. Opvaskemaskiner har komplekse cyklusser – det anbefales stærkt at optage din første cyklus. Hvis en registreret cyklus kører for længe, brug cyklus-editoren til at beskære den, inden du gemmer den som en profil.",
+      "generic": "WashData holder øje. Optag eller mærk en registreret cyklus for at begynde at opbygge profiler."
+    },
+    "phase1a": {
+      "labelled": "Godt gået – dit første program er gemt. For de reneste data kan du overveje at optage din næste cyklus med optagelses-widgetten."
+    },
+    "phase1b": {
+      "recorded": "Din optagelse blev gemt som {profile_name}. Optag nu eller mærk dine andre hyppigt brugte programmer for at opbygge dækning."
+    },
+    "phase1c": {
+      "verify": "Du har {count} programmer fra fællesskabet. Kør en cyklus for at bekræfte, at WashData genkender den korrekt – matchningen forbedres, efterhånden som din enhed opbygger sin egen historik."
+    },
+    "phase2": {
+      "cluster": "WashData har set {count} cyklusser, der ikke matcher noget gemt program – de ligner hinanden. Vil du oprette en ny profil til dem?",
+      "unmatched": "Din seneste cyklus matchede ikke noget gemt program. Er det et nyt program?"
+    },
+    "phase3": {
+      "suggestions": "WashData har indstillingsanbefalinger baseret på din cyklushistorik – gennemgå dem for at forbedre registreringens nøjagtighed.",
+      "groups": "Nogle af dine profiler ligner det samme program ved forskellige temperaturer. Organiser dem i en gruppe for bedre matchning.",
+      "phases": "Tilføj programfaser til {profile_name} for mere præcise estimater af den resterende tid."
+    },
+    "phase4": {
+      "healthy": "Dette apparat er fuldt opsat ({profile_count} profiler)."
+    },
+    "cta": {
+      "start_recording": "Start optagelse",
+      "label_detected_cycle": "Jeg har allerede en registreret cyklus – mærk den i stedet",
+      "browse_cycles": "Gennemse cyklusser for at mærke en anden",
+      "view_profiles": "Se dine profiler",
+      "create_from_cluster": "Opret profil fra disse cyklusser",
+      "create_profile": "Opret en profil til den",
+      "review_suggestions": "Gennemgå anbefalinger",
+      "organise_profiles": "Organiser profiler",
+      "configure_phases": "Konfigurer faser",
+      "skip_step": "Spring dette trin over",
+      "skip_forever": "Vis ikke igen",
+      "hide_guidance": "Skjul vejledning",
+      "show_guidance": "Vis vejledning"
     }
   }
 }

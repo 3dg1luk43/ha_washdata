@@ -1,13 +1,13 @@
 {
   "badge": {
-    "artifact_tip": "{n} anomalier upptäckta (t.ex. dörren öppnades mitt i cykeln) — öppna för att se dem i diagrammet",
+    "artifact_tip": "{n} anomalier upptäckta (t.ex. dörren öppnades mitt i cykeln) – öppna för att se dem i diagrammet",
     "auto": "(automatiskt identifierat)",
     "built_in_tag": "inbyggd",
     "declining": "↘ sjunkande",
     "energy_low": "Lägre energi än vanligt",
     "energy_spike": "Högre energi än vanligt",
     "fair_fit": "acceptabel kvalitet",
-    "fair_fit_tip": "Måttlig matchkonsistens — vissa cykler tilldelade den här profilen har lägre konfidenspoäng. Märk fler cykler eller spela in profilen igen för att förbättra noggrannheten.",
+    "fair_fit_tip": "Måttlig matchkonsistens – vissa cykler tilldelade den här profilen har lägre konfidenspoäng. Märk fler cykler eller spela in profilen igen för att förbättra noggrannheten.",
     "feedback_requested": "Feedback begärd",
     "golden_cycle": "Inspelad referenscykel",
     "improving": "↗ förbättras",
@@ -15,7 +15,7 @@
     "needs_review": "Behöver granskning",
     "overrun": "Pågick längre än vanligt",
     "poor_fit": "dålig kvalitet",
-    "poor_fit_tip": "Inkonsekvent matchhistorik — överväg att bygga om den här profilen",
+    "poor_fit_tip": "Inkonsekvent matchhistorik – överväg att bygga om den här profilen",
     "restart_gap_tip": "{n} HA-omstartslucka: effektspåret har ett hål",
     "reviewed": "Granskad",
     "steady": "→ stabil",
@@ -87,7 +87,7 @@
     "on_cycle_finished": "När cykeln är klar",
     "on_cycle_started": "När cykeln startar",
     "pause_cycle": "Pausa",
-    "pause_cycle_tip": "Pausa den pågående cykeln — apparaten återupptar där den slutade",
+    "pause_cycle_tip": "Pausa den pågående cykeln – apparaten återupptar där den slutade",
     "pg_apply_device": "Tillämpa på enhet",
     "pg_autofill": "Autofyll",
     "play": "Spela",
@@ -97,8 +97,8 @@
     "process_tip": "Spara det inspelade spåret som en ny eller befintlig profil",
     "rebuild": "Bygg om kuvert",
     "rebuild_envelope": "Bygg om kuvert",
-    "rebuild_tip": "Beräkna om det förväntade effektkuvertet (min/max-band) för alla profiler från deras märkta cykler — kör efter märkning av nya cykler eller korrigering av gamla",
-    "rec_start_tip": "Börja spela in apparatens effektspår — starta strax innan du kör en cykel",
+    "rebuild_tip": "Beräkna om det förväntade effektkuvertet (min/max-band) för alla profiler från deras märkta cykler – kör efter märkning av nya cykler eller korrigering av gamla",
+    "rec_start_tip": "Börja spela in apparatens effektspår – starta strax innan du kör en cykel",
     "rec_stop": "Stoppa",
     "rec_stop_tip": "Stoppa inspelningen och behåll det registrerade spåret för granskning",
     "record": "Starta inspelning",
@@ -231,7 +231,7 @@
       "interval": "Bör vara minst 2x samplingsintervallet ({si} s)",
       "sampling": "Samplingsintervall bör vara högst hälften av vakthundsintervallet ({wi} s)"
     },
-    "settings_banner": "{n} inställningskonflikt{s} — kontrollera de markerade avsnitten och åtgärda dem innan du sparar.",
+    "settings_banner": "{n} inställningskonflikt{s} – kontrollera de markerade avsnitten och åtgärda dem innan du sparar.",
     "settings_banner_btn": "Gå till första"
   },
   "hdr": {
@@ -451,9 +451,9 @@
     "show_expected": "Visa förväntat kurvöverlägg (matchad profil, orange)",
     "show_raw": "Visa växlare för råa uttag-värden i live-effektdiagram",
     "sparkline": "Trend för senaste cykellängder",
-    "stage2": "Steg 2 — kärnlikhet",
-    "stage3": "Steg 3 — DTW",
-    "stage4": "Steg 4 — överensstämmelse",
+    "stage2": "Steg 2 – kärnlikhet",
+    "stage3": "Steg 3 – DTW",
+    "stage4": "Steg 4 – överensstämmelse",
     "status": "Status",
     "tail_trim": "Sluttrimning (s)",
     "timer_auto_pause": "Automatisk paus",
@@ -561,7 +561,12 @@
     "flags": "Flaggor",
     "include_phase_map": "Inkludera fasekarta",
     "include_settings": "Inkludera identifierings- och matchningsinställningar",
-    "show_contributor": "Visa bidragsgivarnamn"
+    "show_contributor": "Visa bidragsgivarnamn",
+    "task_pg_detail": "Simulera cykel",
+    "task_split": "Delar upp cykel",
+    "task_trim": "Beskär cykel",
+    "task_merge": "Slår ihop cykler",
+    "task_rebuild": "Bygger om enveloppar"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -645,19 +650,19 @@
     "artifact_dip_detail": "Föll under det normala effektbandet i ~{n} s.",
     "artifact_footer": "Markerad i grafen ovan. Dessa är övergående artefakter (t.ex. dörren öppnas mitt i cykeln), inte nödvändigtvis problem.",
     "artifact_header": "{n} anomalier upptäcktes under denna cykel",
-    "artifact_pause_detail": "Effekten föll till nära noll i ~{n} s och återupptogs sedan — troligtvis öppnades dörren mitt i cykeln eller cykeln pausades.",
+    "artifact_pause_detail": "Effekten föll till nära noll i ~{n} s och återupptogs sedan – troligtvis öppnades dörren mitt i cykeln eller cykeln pausades.",
     "artifact_spike_detail": "Drog över det normala effektbandet i ~{n} s.",
     "auto_label_intro": "Tilldela profiler till omärkta cykler vars matchningskonfidens överstiger tröskeln.",
-    "automations_intro": "WashData utlöser {start} / {end}-händelser och tillhandahåller entiteter — aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
+    "automations_intro": "WashData utlöser {start} / {end}-händelser och tillhandahåller entiteter – aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
     "cleanup_intro": "Alla märkta cykler är överlagda. Kryssa i avvikare och ta bort dem för att rensa profilen.",
     "clear_debug_hint": "Ta bort lagrad felsökningsdata för att frigöra utrymme.",
     "collecting_data": "Samlar in data: {need} cykel{plural} kvar innan finjustering kan starta ({current}/{min}).",
     "compare_overlay_profiles": "Lägg över profiler (svag)",
     "compare_profiles_tip": "Lägg över andra profilkuvert på diagrammet ovan för att se vilket som passar bäst för denna cykel.",
-    "compare_selected_cycles": "Valda cykler (solid) — visa / dölj",
+    "compare_selected_cycles": "Valda cykler (solid) – visa / dölj",
     "consider_new_profile": "Överväg att skapa en ny profil.",
     "coverage_gap": "de senaste cyklerna har ingen matchande profil ({pct}% av de senaste 30).",
-    "coverage_gap_similar_cycles": "{count} liknande omärkta cykler hittades — skapa en profil för att börja matcha dem.",
+    "coverage_gap_similar_cycles": "{count} liknande omärkta cykler hittades – skapa en profil för att börja matcha dem.",
     "cycles_deleted": "{count} cykler borttagna",
     "enough_data": "Tillräckligt med data för att lära sig av ({current}/{min} cykler).",
     "export_description": "Exportera alla profiler och cykler till JSON, eller återställ från en tidigare export.",
@@ -686,7 +691,7 @@
     "ml_learned_intro": "Modeller finjusterade till denna maskin.",
     "ml_loading": "laddar ML…",
     "ml_settings_intro": "Två oberoende switchar: en tillämpar modellerna medan en cykel körs, den andra låter WashData finjustera dem till din maskin över tid.",
-    "name_first_program": "Du har tillräckligt med cykler — namnge ditt första program för att börja matcha.",
+    "name_first_program": "Du har tillräckligt med cykler – namnge ditt första program för att börja matcha.",
     "near_duplicate_cluster": "nästan duplicerat profilkluster upptäcktes. Gruppering gör att matchning på ett tillförlitligt sätt kan välja mellan look-alikes (t.ex. samma program vid olika temperaturer/centrifugering).",
     "no_cycles_match": "Inga cykler matchar det aktuella filtret.",
     "no_cycles_profile": "Inga cykler för denna profil.",
@@ -696,7 +701,7 @@
     "no_devices": "Inga WashData-enheter konfigurerade än.",
     "no_envelope": "Inget kuvert ännu - bygg om efter märkning av cykler.",
     "no_envelope_overlay": "Inget kuvert tillgängligt att lägga över.",
-    "no_fine_tuned": "Inget finjusterat ännu — WashData använder sina inbyggda modeller.",
+    "no_fine_tuned": "Inget finjusterat ännu – WashData använder sina inbyggda modeller.",
     "no_logs": "Inga loggposter buffrade än.",
     "no_maintenance": "Inget underhåll registrerat ännu.",
     "no_match_yet": "Inget matchningsförsök ännu - detta fylls i under en aktiv cykel.",
@@ -713,7 +718,7 @@
     "notify_services_hint": "Använd {entity}-tjänst-ID:n (kommaavgränsade för flera). Mallvariabler: {vars}.",
     "old_actions_warning": "Konfigurerad med den gamla åtgärdsredigeraren (nu borttagen). De utlöses fortfarande vid cykelhändelser men kan inte längre redigeras här. Konvertera dem till en normal automatisering, eller ta bort dem.",
     "onboarding_progress": "{n} / 3 cykler observerade",
-    "onboarding_watching": "Använd apparaten som vanligt — WashData observerar. Efter 3 cykler börjar programmatchningen.",
+    "onboarding_watching": "Använd apparaten som vanligt – WashData observerar. Efter 3 cykler börjar programmatchningen.",
     "pending_feedback": "Väntande detektionsfeedback",
     "performance_trend": "Prestandatrend ({n} cykler)",
     "pg_analysis_empty": "Ladda en cykel för att se matchningsanalys.",
@@ -763,7 +768,7 @@
     "setting_changed": "Ändrad från {old} till {new} den {date}",
     "settings_basic_note": "Visar väsentliga inställningar. Byt till Avancerat för hela listan.",
     "shape_drift_advisory": "⚠ Form avviker",
-    "shape_drift_detail": "Effektmönstret för den här profilen har förändrats över tid — möjligt apparatslitage eller underhåll behövs (t.ex. avkalkning, filterrengöring).",
+    "shape_drift_detail": "Effektmönstret för den här profilen har förändrats över tid – möjligt apparatslitage eller underhåll behövs (t.ex. avkalkning, filterrengöring).",
     "show_all_settings": "Visa alla inställningar",
     "showing_suggestions": "Visar {count} inställning med förslag.",
     "split_intro": "Klicka på diagrammet för att lägga till eller ta bort en delningspunkt, eller autoidentifiera via tomma luckor. Varje resulterande segment kan få sin egen profil.",
@@ -789,10 +794,10 @@
     "toast_revert_failed": "Återställning misslyckades: {error}",
     "toast_reverted": "{key} återställd",
     "toast_save_failed": "Sparning misslyckades: {error}",
-    "trend_duration_longer": "Varaktighet trendar längre ({pct}%/cykel) — senaste medelvärde {avg}",
-    "trend_duration_shorter": "Varaktighet trendar kortare ({pct}%/cykel) — senaste medelvärde {avg}",
+    "trend_duration_longer": "Varaktighet trendar längre ({pct}%/cykel) – senaste medelvärde {avg}",
+    "trend_duration_shorter": "Varaktighet trendar kortare ({pct}%/cykel) – senaste medelvärde {avg}",
     "trend_energy_down": "Energin går ned ({pct}%/cykel)",
-    "trend_energy_up": "Energitrend uppåt ({pct}%/cykel) — senaste snitt {avg}",
+    "trend_energy_up": "Energitrend uppåt ({pct}%/cykel) – senaste snitt {avg}",
     "trim_intro": "Dra de röda handtagen eller ange värden. Allt utanför fönstret tas bort.",
     "tuning_suggestions_available": "{count} inställningsförslag tillgängligt från observerade cykler. De visas bredvid de relevanta fälten.",
     "unsure_detected_prefix": "WashData är osäker på att den identifierade",
@@ -857,7 +862,9 @@
     "share_guidelines_title": "Innan du delar",
     "store_download_device_intro": "Ta över alla delade program och deras referenscykler till din apparat. Dina egna inspelade cykler och statistik påverkas inte.",
     "store_share_device_intro": "Ladda upp {brand} {model} med de referenscykler du väljer. Andra med samma apparat kan ta över dina program. Poster granskas innan de visas offentligt.",
-    "share_profile_no_cycles": "Inga referenscykler -- markera en cykel som ⭐ på fliken Cykler för att inkludera den här profilen"
+    "share_profile_no_cycles": "Inga referenscykler -- markera en cykel som ⭐ på fliken Cykler för att inkludera den här profilen",
+    "advisory_phase_inconsistent": "'{name}' verkar blanda olika program eller temperaturer - dess cykler värms upp under mycket olika lång tid. Om du delar upp den i separata profiler (t.ex. per temperatur) förbättras matchningen och tidsuppskattningarna.",
+    "advisory_phase_inconsistent_title": "⚠ Möjligen blandade program"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",
@@ -869,12 +876,19 @@
     "start_duration_threshold": "Sekunder över tröskeln för att bekräfta start",
     "start_threshold_w": "Minsta antal watt för att räknas som startad",
     "stop_threshold_w": "Under detta räknas maskinen som avstängd",
-    "dtw_bandwidth": "Hur mycket tidsförvrängning formmatchningen tillåter",
-    "corr_weight": "Vikt på kurvform kontra effektnivå i matchningen",
-    "duration_weight": "Hur mycket överensstämmelse i körtid påverkar matchningen",
-    "energy_weight": "Hur mycket överensstämmelse i energiförbrukning påverkar matchningen",
-    "profile_match_min_duration_ratio": "Kortaste körning (jämfört med profilen) som fortfarande får matcha",
-    "profile_match_max_duration_ratio": "Längsta körning (jämfört med profilen) som fortfarande får matcha"
+    "dtw_bandwidth": "Steg 3: Sakoe-Chiba-förvrängningsband (0 = DTW av; standard 0,2 = 20% av cykellängd)",
+    "corr_weight": "Steg 2: balans mellan kurvform (korrelation) och effektnivå (MAE); standard 0,45",
+    "duration_weight": "Steg 4: hur starkt körtidsöverensstämmelse påverkar slutpoängen (standard 0,22)",
+    "energy_weight": "Steg 4: hur starkt energiöverensstämmelse påverkar slutpoängen (standard 0,22)",
+    "profile_match_min_duration_ratio": "Steg 1: lägsta cykellängd som andel av profilduration; standard 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Steg 1: högsta cykellängd som andel av profilduration; standard 1,5 (150%)",
+    "keep_min_score": "Steg 2: lägsta poäng för att vara kvar i matchen; standard 0,1 tillåter svaga kandidater, senare steg väljer bäst",
+    "dtw_blend": "Steg 3: 0 = bara kärnpoäng, 1 = bara DTW-poäng, 0,5 = lika blandning (standard)",
+    "dtw_ensemble_w": "Steg 3 (ensemble-läge): vikt på skalad L1 kontra derivativ DTW; standard 0,7 gynnar nivåmedvetenhet",
+    "dtw_ddtw_scale": "Steg 3: DDTW-halvmättnadsavstånd; lägre = mer formkänslig (standard 30)",
+    "dtw_refine_top_n": "Steg 3: kandidater som DTW ompoängsätter; öka till 7-9 om rätt profil placerar sig 4-5:a (standard 5)",
+    "duration_scale": "Steg 4: log-kvot där varaktighetsöverensstämmelse halveras; lägre = striktare straff (standard 0,175)",
+    "energy_scale": "Steg 4: log-kvot där energiöverensstämmelse halveras; lägre = striktare straff (standard 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
@@ -957,6 +971,10 @@
     "triggers": {
       "intro": "Valfria externa signaler: en slututlösare, en dörrsensor, en pausknapp och en lossningspåminnelse.",
       "label": "Utlösare och dörrar"
+    },
+    "phase_eta": {
+      "label": "Återstående tid",
+      "intro": "Fasmedveten återstående tid, för maskiner vars cykellängd beror på temperatur eller centrifugering."
     }
   },
   "setting": {
@@ -1039,6 +1057,10 @@
     "energy_price_static": {
       "doc": "Fast pris per kWh som används för kostnadssiffror när ingen levande prisenhet anges ovan.",
       "label": "Statiskt energipris (per kWh)"
+    },
+    "energy_sensor": {
+      "doc": "Valfri kumulativ energiräknare (total_increasing i kWh/Wh, t.ex. uttagets egen livstidsmätare). När den anges hämtas varje cykels rapporterade energi från skillnaden på denna räknare mellan start och slut, vilket undviker den underräkning du får när en långsamt rapporterande effektsensor integreras. Faller tillbaka på det integrerade värdet om avläsningen saknas, dess enhet är okänd eller skillnaden inte är positiv. Lämna tomt för att fortsätta integrera effektsensorn.",
+      "label": "Energimätarentitet"
     },
     "expose_debug_entities": {
       "doc": "Publicera extra diagnostiska HA-enheter (matchningsförtroende, tvetydighet, tillståndsinterna). Av håller enhetslistan ren för normal användning.",
@@ -1322,6 +1344,38 @@
     },
     "show_contributor": {
       "doc": "Visar tillskrivningen 'av <contributor>' på gemenskapsapparater och referenscykler."
+    },
+    "enable_phase_matching": {
+      "label": "Fasmedveten återstående tid",
+      "doc": "Dela upp varje pågående cykel i faser (uppvärmning, tvätt, centrifugering) och budgetera den återstående tiden per fas, blandat med den klassiska uppskattningen - tidigt i cykeln lutar den sig mot fasbudgeten och mot slutet mot den klassiska uppskattningen. Detta anpassar nedräkningen efter hur länge din maskin faktiskt värms upp och körs, vilket märks tydligast under den första halvan av en cykel. Av = endast den klassiska uppskattningen. Endast visningen av återstående tid påverkas; programmatchning och cykeldetektering är oförändrade."
+    },
+    "keep_min_score": {
+      "label": "Min matchningspoäng",
+      "doc": "Lägsta likhetspoäng som en kandidat behöver för att vara kvar i matchningen. Standard 0,1 är avsiktligt tillåtande – det tillåter även svaga kandidater och förlitar sig på senare steg för att hitta bästa match. Höj för att gallra bort osannolika profiler tidigare; sänk för att utöka den initiala kandidatpoolen."
+    },
+    "dtw_blend": {
+      "label": "DTW-blandning",
+      "doc": "Hur mycket DTW-justeringspoängen ersätter kärnpoängen från Steg 2. 0 = använd bara Steg 2-poängen, 1 = använd bara DTW-poängen, 0,5 (standard) = lika blandning. Höj om program har liknande effektnivåer men olika timingmönster."
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW-ensemblemix",
+      "doc": "I ensemble-DTW-läge (standard) anger detta vikten på skalad L1 kontra derivativ DTW (DDTW). 1,0 = enbart skalad L1, 0 = enbart DDTW, 0,7 = standard. Den skalade varianten jämför effektnivåer; den derivativa reagerar på hur effekten förändras över tid. Ensemble blandar båda."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Derivativ DTW-skala",
+      "doc": "Halvmättnadsavstånd för derivativ DTW-poängsättning. Poängen halveras när DDTW-avståndet är lika med detta värde. Lägre = mer känslig för formskillnader. Standard 30 är kalibrerad för typiska apparaters effektprofiler. Påverkar bara ensemble- och ddtw-DTW-lägen."
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW-förfinandetal",
+      "doc": "Hur många toppkandidater från Steg 2 som ompoängsätts av DTW. DTW är mer beräkningskrävande så det tillämpas bara på de N bästa. Standard 5. Höj (till 7-9) om rätt profil ibland bara når 4:e eller 5:e plats efter Steg 2 – DTW kan rädda den. Lägre värde snabbar upp matchningen något."
+    },
+    "duration_scale": {
+      "label": "Varaktighetsskärpa",
+      "doc": "Skärpan i Steg 4:s straff för varaktighetsöverensstämmelse. Det är log-kvoten vid vilken överensstämmelsepoängen halveras. Lägre = striktare: en varaktighetsavvikelse straffas mer. Standard 0,175 motsvarar ungefär 18% varaktighetstolerans vid halvvikt. Para ihop med Varaktighetssvikt."
+    },
+    "energy_scale": {
+      "label": "Energiskärpa",
+      "doc": "Skärpan i Steg 4:s straff för energiöverensstämmelse. Lägre = striktare: en energiavvikelse straffas mer. Standard 0,25 är avsiktligt mer tillåtande än varaktighetsskärpan eftersom energiförbrukning varierar med last. Para ihop med Energivikt."
     }
   },
   "setting_group": {
@@ -1766,6 +1820,69 @@
     },
     "pg_sweep": {
       "optimize": "Optimera: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulera cykel"
+    },
+    "split": {
+      "apply": "Delar upp cykel"
+    },
+    "trim": {
+      "apply": "Beskär cykel"
+    },
+    "merge": {
+      "apply": "Slår ihop cykler"
+    },
+    "rebuild": {
+      "envelopes": "Bygger om enveloppar"
+    },
+    "cancelling": "Avbryter..."
+  },
+  "setup": {
+    "hdr": {
+      "card": "Enhetsinställning",
+      "healthy_chip": "Konfiguration klar"
+    },
+    "phase0": {
+      "washer": "WashData identifierar redan dina cykler. Spela in din första cykel för att aktivera programnamn och tidsuppskattningar.",
+      "dishwasher": "WashData observerar. Diskmaskiner har komplexa cykler – att spela in din första cykel rekommenderas starkt. Om en identifierad cykel körs för länge, använd cykeleditorn för att trimma den innan du sparar den som en profil.",
+      "generic": "WashData observerar. Spela in eller märk en identifierad cykel för att börja bygga profiler."
+    },
+    "phase1a": {
+      "labelled": "Bra start – ditt första program är sparat. För renast möjliga data kan du spela in din nästa cykel med inspelningswidgeten."
+    },
+    "phase1b": {
+      "recorded": "Din inspelning sparades som {profile_name}. Spela nu in eller märk dina andra vanliga program för att bygga upp täckning."
+    },
+    "phase1c": {
+      "verify": "Du har {count} program från gemenskapen. Kör en cykel för att verifiera att WashData identifierar den rätt – matchningen förbättras ju mer historik din enhet bygger upp."
+    },
+    "phase2": {
+      "cluster": "WashData har sett {count} cykler som inte matchar något sparat program – de liknar varandra. Vill du skapa en ny profil för dem?",
+      "unmatched": "Din senaste cykel matchade inget sparat program. Är det ett nytt program?"
+    },
+    "phase3": {
+      "suggestions": "WashData har inställningsrekommendationer baserade på din cykelhistorik – granska dem för att förbättra detekteringens noggrannhet.",
+      "groups": "Några av dina profiler ser ut som samma program vid olika temperaturer. Organisera dem i en grupp för bättre matchning.",
+      "phases": "Lägg till programfaser i {profile_name} för mer exakta uppskattningar av återstående tid."
+    },
+    "phase4": {
+      "healthy": "Den här enheten är helt konfigurerad ({profile_count} profiler)."
+    },
+    "cta": {
+      "start_recording": "Starta inspelning",
+      "label_detected_cycle": "Jag har redan en identifierad cykel – märk den istället",
+      "browse_cycles": "Bläddra bland cykler för att märka en till",
+      "view_profiles": "Visa dina profiler",
+      "create_from_cluster": "Skapa profil från dessa cykler",
+      "create_profile": "Skapa en profil för det",
+      "review_suggestions": "Granska förslag",
+      "organise_profiles": "Organisera profiler",
+      "configure_phases": "Konfigurera faser",
+      "skip_step": "Hoppa över det här steget",
+      "skip_forever": "Visa inte igen",
+      "hide_guidance": "Dölj vägledning",
+      "show_guidance": "Visa vägledning"
     }
   }
 }

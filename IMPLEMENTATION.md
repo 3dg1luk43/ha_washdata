@@ -28,16 +28,602 @@ This document covers the complete implementation of all major features:
 
 ## Flows & Processes
 
+### 0. End-to-End System Map (complete)
+
+The single big picture. Every subsequent diagram in this section zooms into one region of
+this map. Solid arrows are the primary data/control path; dotted arrows are opt-in or
+feedback paths. Boxes are grouped by subsystem (module ownership in parentheses).
+
+```mermaid
+flowchart TB
+    %% ---------------- INPUTS ----------------
+    subgraph IN["Inputs"]
+        PWR["Power sensor<br/>state_changed (W)"]
+        DOOR["Door sensor (optional)"]
+        USER["User actions<br/>panel / services / Assist"]
+        BOOT["HA start / reload<br/>state restore"]
+    end
+
+    %% ---------------- MANAGER INTAKE ----------------
+    subgraph MGR["Manager intake (manager.py)"]
+        PC["async_handle_power_change"]
+        DB["DiagBuffer<br/>24h rolling trace/state/log"]
+        THR["sampling throttle<br/>(low power always passes)"]
+        REC["record-mode intercept"]
+        WD["Watchdog<br/>0W keepalive · zombie/ghost force-end · timeouts"]
+    end
+
+    %% ---------------- DETECTOR ----------------
+    subgraph DET["CycleDetector state machine (cycle_detector.py)"]
+        SM["OFF -> STARTING -> RUNNING &lt;-&gt; PAUSED -> ENDING -> OFF<br/>(+ DELAY_WAIT, ANTI_WRINKLE, INTERRUPTED, FINISHED/CLEAN/FORCE_STOPPED)"]
+        GATE["dual start gate<br/>time_above &amp; energy_since_idle"]
+        DYN["dynamic pause/end thresholds<br/>from p95 sample gap"]
+        DISH["dishwasher end-spike<br/>+ pump-out wait"]
+        EG["ML end-guard<br/>(defer only, opt-in)"]
+        TD["terminal-drop<br/>(shorten only, pure stats)"]
+    end
+
+    %% ---------------- MATCHING ----------------
+    subgraph MATCH["Matching, 5-min loop, executor (analysis.py + profile_store.py)"]
+        TRIG["match trigger (fire-and-forget)"]
+        WORK["compute_matches_worker<br/>S1 duration gate · S2 corr+MAE · S3 DTW · S4 dur/energy"]
+        G5["Stage 5 group collapse + member pick"]
+        PERS["persistence gate<br/>+ ML early-commit &gt;= 0.85"]
+        AMB["ambiguity gate<br/>top1-top2 &lt; 0.05"]
+        MR["MatchResult<br/>name · confidence · is_ambiguous · ranking"]
+    end
+
+    %% ---------------- PROGRESS / ETA ----------------
+    subgraph PROG["progress.py (single source of truth)"]
+        PH["estimate_phase_progress"]
+        MLP["ml_progress_percent<br/>(regressor blend)"]
+        PRM["phase_remaining<br/>phase_match.phase_eta (opt-in)"]
+        CP["compute_progress<br/>blend + EMA + monotonic + phase-ETA blend"]
+        OUT["remaining · progress% · phase · projected energy/cost"]
+    end
+
+    %% ---------------- CYCLE END ----------------
+    subgraph CEND["Cycle-end pipeline (manager.py + learning.py)"]
+        OCE["_on_cycle_end<br/>integrate_wh · ghost/pump-out suppression"]
+        APCE["_async_process_cycle_end<br/>persist · artifacts · conformance · anomalies · cost freeze"]
+        LEARN["learning._maybe_request_feedback<br/>auto-label vs feedback (quality+conformance+warmup)"]
+        REB["envelope rebuild + phase_profile cache"]
+        SNAP["confirm match-ranking snapshot"]
+    end
+
+    %% ---------------- NOTIFICATIONS ----------------
+    subgraph NOTIF["Notifications (notification_rules.py decides, manager delivers)"]
+        NR["decisions<br/>quiet hours · milestones · pre-completion"]
+        DEL["delivery<br/>per-event targets · presence · quiet queue · lifecycle tag"]
+        EVT["HA events<br/>cycle_started/ended · pump_stuck · ml_training_complete"]
+    end
+
+    %% ---------------- ENTITIES ----------------
+    subgraph ENTG["Entities (sensor/binary_sensor/select/button)"]
+        SIG["dispatcher signal<br/>ha_washdata_update_{entry}"]
+        ENTS["25 entities (state, program, remaining, progress, energy, ...)"]
+    end
+
+    %% ---------------- ML ----------------
+    subgraph MLS["ML subsystem (ml/, opt-in, NumPy-only)"]
+        RANK["ranking history + derived labels"]
+        TT["training_task (scheduled)<br/>promote by AUC / MAE margin"]
+        RS["resolve_scorer / resolve_regressor"]
+        MT["matching_tuner -> matching_config override"]
+    end
+
+    %% ---------------- PERSISTENCE ----------------
+    subgraph PST["ProfileStore, Store v11 (profile_store.py)"]
+        PS["profiles · past_cycles · reference_cycles<br/>groups · phases · ml_model_versions · matching_config"]
+    end
+
+    %% ---------------- GUIDANCE ----------------
+    subgraph GDE["Guidance"]
+        SUG["suggestion_engine<br/>clean cycles -> suggestions -> reconcile"]
+        SA["setup_advisor.compute_setup_phase -> Setup Card"]
+    end
+
+    %% ---------------- WS / PANEL ----------------
+    subgraph WSP["ws_api (99 cmds, RBAC) + panel (frontend.py)"]
+        WSC["WebSocket handlers"]
+        PANEL["Panel (7 tabs)"]
+        TR["task_registry<br/>playground · reprocess · ML · trim/split/merge/rebuild"]
+        PILL["header activity pills"]
+    end
+
+    %% ---------------- PLAYGROUND ----------------
+    subgraph PGB["Playground (playground.py, byte-identical replay)"]
+        SIM["simulate / history / sweep<br/>reuses real detector + matcher + progress"]
+    end
+
+    %% ---------------- COMMUNITY STORE ----------------
+    subgraph CST["Community Store (store*.py, opt-in)"]
+        SB["StoreBridge &lt;-&gt; Firestore"]
+        ADOPT["adopt -> reference_cycles"]
+        SHARE["share bundle"]
+    end
+
+    %% ---------------- EDGES ----------------
+    PWR --> PC
+    DOOR --> PC
+    BOOT --> PC
+    PC --> DB
+    PC --> THR --> REC --> SM
+    PC --> WD --> SM
+
+    SM --- GATE
+    SM --- DYN
+    SM --- DISH
+    EG -.->|defer| SM
+    TD -.->|shorten| SM
+    SM -->|running / interval| TRIG
+
+    TRIG --> WORK --> G5 --> PERS --> AMB --> MR
+    PS --> WORK
+    MR --> PROG
+    MR -.->|committed name| SM
+
+    PH --> CP
+    MLP --> CP
+    PRM --> CP
+    PS --> PRM
+    CP --> OUT --> SIG --> ENTS
+
+    SM -->|cycle end| OCE --> APCE
+    APCE --> PS
+    APCE --> LEARN --> REB --> PS
+    APCE --> SNAP --> RANK
+    APCE --> NR
+    OUT --> NR
+    NR --> DEL --> EVT
+    DEL --> ENTS
+
+    RANK --> TT --> PS
+    PS --> TT
+    PS --> RS
+    RS -.->|gated| EG
+    RS -.->|gated| PERS
+    RS -.->|gated| LEARN
+    RS -.->|gated| MLP
+    PS --> MT --> PS
+
+    PS --> SUG --> PANEL
+    PS --> SA --> PANEL
+
+    USER --> PANEL --> WSC --> PS
+    WSC --> TR --> PILL --> PANEL
+    TR --> SIM
+    SIM --> WORK
+    SIM --> CP
+
+    PANEL --> SB
+    SB --> ADOPT --> PS
+    PS --> SHARE --> SB
+```
+
+**Reading the map, briefly:** power readings flow left-to-right through the manager into the
+detector; a 5-minute executor loop matches the running cycle against stored profiles;
+`progress.py` turns the match into remaining/phase/energy which drive the entities and gate
+notifications; cycle end persists the cycle, runs the learning router, and (opt-in) feeds the
+ML training data. Everything the panel does goes through the WebSocket layer and, for long
+jobs, the task registry. The Playground replays stored cycles through the *same* detector +
+matcher + `progress.py` so its output matches live behaviour byte-for-byte. The opt-in ML
+scorers/regressors and the Community Store are the only dotted (conditional) paths into the
+core.
+
+### 0a. Exhaustive decision & loop map (every branch)
+
+The whole runtime as one graph: every decision diamond and every loop-back. Diamonds are
+decisions; `-->|yes|`/`-->|no|` (or labelled) edges are the branch taken; dotted edges are
+opt-in/feedback paths, state transitions ("next reading"), and the recurring loops
+(per-reading, 5-min match, watchdog poll, 60s state-expiry poll, PAUSED/ENDING resume).
+
+```mermaid
+flowchart TD
+    %% ================= POWER INGESTION =================
+    RDG(["Power sensor reading (t, W)"]) --> ING1{"unavailable / unknown / non-numeric?"}
+    ING1 -->|yes| DROP1["drop"]
+    ING1 -->|no| ING2["diag_buffer.record_power (raw, pre-throttle)"]
+    ING2 --> ING3{"recorder.is_recording?"}
+    ING3 -->|yes| REC["feed recorder - update power - notify"] --> DROP1
+    ING3 -->|no| ING4{"power &gt;= min_power AND<br/>&lt; sampling_interval since last?"}
+    ING4 -->|"yes (throttle)"| DROP1
+    ING4 -->|"no (low power bypasses)"| ING5["learning.process_power_reading"]
+    ING5 --> PR0["detector.process_reading(power, t)"]
+
+    %% ================= DETECTOR HOT PATH =================
+    PR0 --> D1{"dt = t - last &lt; 0?"}
+    D1 -->|yes| DDROP["update last_t - return"]
+    D1 -->|no| D2{"manual-stop lockout active?"}
+    D2 -->|no| D4["update cadence (p95 dt) - MA buffer"]
+    D2 -->|yes| D3{"power &lt; start_threshold_w?"}
+    D3 -->|yes| D3a["clear lockout"] --> D4
+    D3 -->|no| D3b{"lockout_high &lt; 180s?"}
+    D3b -->|yes| DDROP2["swallow - return"]
+    D3b -->|no| D3c["release lockout (back-to-back load)"] --> D4
+    D4 --> D5{"state in OFF/DELAY_WAIT/STARTING/UNKNOWN?"}
+    D5 -->|yes| D6["threshold = start_threshold_w"]
+    D5 -->|no| D7["threshold = stop_threshold_w"]
+    D6 --> D8{"power &gt;= threshold (is_high)?"}
+    D7 --> D8
+    D8 -->|yes| D9["time_above += dt - energy_since_idle += P*dt/3600"]
+    D8 -->|no| D10["time_below += dt"]
+    D9 --> DISP{"current state"}
+    D10 --> DISP
+    DISP -->|OFF| OFF1
+    DISP -->|ANTI_WRINKLE| AW1
+    DISP -->|DELAY_WAIT| DW1
+    DISP -->|STARTING| ST1
+    DISP -->|RUNNING| RUN1
+    DISP -->|PAUSED| PAU1
+    DISP -->|ENDING| END1
+    DISP -->|"FINISHED / INTERRUPTED / FORCE_STOPPED"| TERMx["terminal: manager owns -&gt; OFF (see expiry)"]
+
+    %% ================= OFF =================
+    OFF1{"is_high?"}
+    OFF1 -->|yes| OFFstart["seed cycle -&gt; STARTING"]
+    OFF1 -->|no| OFFdelay{"delay-start enabled AND<br/>stop_w &lt; start_w AND power in band?"}
+    OFFdelay -->|yes| OFFband{"band_seconds &gt;= delay_confirm?"}
+    OFFband -->|yes| OFFtoDW["-&gt; DELAY_WAIT"]
+    OFFband -->|no| OFFwait["accumulate band - stay OFF"]
+    OFFdelay -->|no| OFFstay["stay OFF"]
+    OFFstart -.->|next reading| ST1
+    OFFtoDW -.->|next reading| DW1
+
+    %% ================= ANTI_WRINKLE =================
+    AW1{"burst peak &gt; aw_max_power OR<br/>burst dur &gt; aw_max_duration?"}
+    AW1 -->|yes| AWre["seed from burst -&gt; STARTING"]
+    AW1 -->|no| AWidle{"idle &gt;= max(end_thr,120s)<br/>OR in-state &gt; 7200s?"}
+    AWidle -->|yes| AWoff["-&gt; OFF"]
+    AWidle -->|no| AWstay["stay ANTI_WRINKLE"]
+    AWre -.->|next reading| ST1
+
+    %% ================= DELAY_WAIT =================
+    DW1{"power &gt;= start_w?"}
+    DW1 -->|yes| DWstreak{"high streak &gt;= start_duration?"}
+    DWstreak -->|yes| DWstart["seed cycle -&gt; STARTING"]
+    DWstreak -->|no| DWanchor["anchor high - stay"]
+    DW1 -->|no| DWlow{"power &lt; stop_w AND true_off &gt;= 30s?"}
+    DWlow -->|yes| DWoff["-&gt; OFF (cancelled)"]
+    DWlow -->|no| DWto{"in-state &gt;= 8h?"}
+    DWto -->|yes| DWoff
+    DWto -->|no| DWstay["stay DELAY_WAIT"]
+    DWstart -.->|next reading| ST1
+
+    %% ================= STARTING =================
+    ST1{"time_above &gt;= start_duration AND<br/>energy_since_idle &gt;= start_energy?"}
+    ST1 -->|yes| STrun["-&gt; RUNNING"]
+    ST1 -->|no| STabort{"not is_high AND time_below &gt; 1s<br/>AND NOT verified_pause?"}
+    STabort -->|yes| SToff["-&gt; OFF (false start)"]
+    STabort -->|no| STstay["stay STARTING"]
+    STrun -.->|next reading| RUN1
+
+    %% ================= RUNNING =================
+    RUN1{"time_below &gt;= dynamic_pause_threshold<br/>(max 15s, 3x p95 dt)?"}
+    RUN1 -->|yes| RUNpause["force match -&gt; PAUSED"]
+    RUN1 -->|no| RUNsafe{"in-state &gt; 8h?"}
+    RUNsafe -->|yes| RUNfs["finish force_stopped"]
+    RUNsafe -->|no| RUNmatch["periodic match (match_interval)"]
+    RUNpause -.->|next reading| PAU1
+    RUNmatch -.->|5-min loop| MO1
+
+    %% ================= PAUSED =================
+    PAU1{"is_high?"}
+    PAU1 -->|yes| PAUresume["-&gt; RUNNING (resume)"]
+    PAU1 -->|no| PAUend{"time_below &gt;= dynamic_end_threshold?"}
+    PAUend -->|yes| PAUto["-&gt; ENDING"]
+    PAUend -->|no| PAUmatch["periodic match - stay PAUSED"]
+    PAUresume -.->|resume loop| RUN1
+    PAUto -.->|next reading| END1
+    PAUmatch -.->|5-min loop| MO1
+
+    %% ================= ENDING =================
+    END1{"is_high reading?"}
+    END1 -->|yes| ENhi{"arm gate: expected&lt;=0 OR<br/>duration &gt;= expected x 0.85?"}
+    ENhi -->|yes| ENspike["record end-spike"]
+    ENhi -->|no| ENnoarm["mid-cycle: do not arm"]
+    ENspike --> ENterm{"terminal_spike?<br/>in-state&gt;=120s; dishwasher near_expected 0.90"}
+    ENnoarm --> ENterm
+    ENterm -->|yes| ENstay["stay ENDING"]
+    ENterm -->|no| ENpast{"past_expected (&gt;= 0.98)?"}
+    ENpast -->|yes| ENstay
+    ENpast -->|no| ENresume["-&gt; RUNNING (genuine activity)"]
+    END1 -->|no| ENlow["periodic match"]
+    ENlow --> ENsmart{"Smart Termination: matched AND<br/>dur &gt;= expected x smart_ratio AND conf &gt;= 0.4<br/>AND !ambiguous AND !prefix_ambiguous<br/>AND in-state &gt;= smart_debounce<br/>AND dishwasher pump-out wait done?"}
+    ENsmart -->|yes| ENfin1["finish completed (SMART, keep_tail)"]
+    ENsmart -->|no| ENtd{"Terminal-drop (opt-in): provider AND<br/>!verified_pause AND off_delay &gt; 90 AND<br/>time_below &gt;= 90 AND is_terminal_drop?"}
+    ENtd -->|yes| ENfin2["finish interrupted (TERMINAL_DROP)"]
+    ENtd -->|no| ENto{"time_below &gt;= max(off_delay, min_off_gap)?"}
+    ENto -->|no| ENwait["stay ENDING"]
+    ENto -->|yes| ENwin{"recent_window energy &lt;= end_energy_threshold?"}
+    ENwin -->|no| ENblock["blocked by energy gate - stay"]
+    ENwin -->|yes| ENdef["evaluate _should_defer_finish"]
+    ENresume -.->|resume loop| RUN1
+    ENstay -.->|resume possible| END1
+    ENlow -.->|5-min loop| MO1
+
+    %% ================= DEFER LADDER =================
+    ENdef --> DF1{"verified_pause?"}
+    DF1 -->|yes| DFdefer["DEFER (stay ENDING)"]
+    DF1 -->|no| DF2{"dishwasher AND dur &lt; 1800s?"}
+    DF2 -->|yes| DFdefer
+    DF2 -->|no| DF3{"no profile OR expected &lt;= 0?"}
+    DF3 -->|yes| DFfin["FINISH"]
+    DF3 -->|no| DF4{"dur &gt; expected + 14400s (4h)?"}
+    DF4 -->|yes| DFfin
+    DF4 -->|no| DF5{"ML end-guard: conf &gt;= 0.55 AND<br/>P(end) &lt; 0.5 AND defer &lt; 1800s?"}
+    DF5 -->|yes| DFdefer
+    DF5 -->|no| DF6{"dishwasher dur &lt; expected x 0.85?"}
+    DF6 -->|yes| DFdefer
+    DF6 -->|no| DF7{"dishwasher pump-out wait?"}
+    DF7 -->|yes| DFdefer
+    DF7 -->|no| DF8{"conf &lt; 0.55?"}
+    DF8 -->|yes| DFfin
+    DF8 -->|no| DF9{"dur &lt; expected x min_duration_ratio?"}
+    DF9 -->|yes| DFdefer
+    DF9 -->|no| DFfin
+    DFdefer -.->|re-eval next reading| END1
+    DFfin --> FIN
+    ENfin1 --> FIN
+    ENfin2 --> FIN
+    RUNfs --> FIN
+
+    %% ================= FINISH =================
+    FIN["_finish_cycle"] --> FINstat{"duration &lt; interrupted_min (150s)<br/>OR &lt; completion_min (600s)?"}
+    FINstat -->|yes| FINint["status = interrupted"]
+    FINstat -->|no| FINcomp["status = completed"]
+    FINint --> FINcb["build offset power_data -&gt; _on_cycle_end"]
+    FINcomp --> FINcb
+    FINcb --> CE1
+
+    %% ================= MATCH ORCHESTRATION (5-min loop) =================
+    MO1{"manual program active?"}
+    MO1 -->|yes| MOman["return (program, 1.0, dur, phase)"]
+    MO1 -->|no| MO2{"already matching OR no readings<br/>OR has_real_profiles == false?"}
+    MO2 -->|yes| MOskip["skip"]
+    MO2 -->|no| S1
+
+    %% ================= MATCH PIPELINE (Stages 1-5) =================
+    S1{"Stage 1: duration ratio in [min,max]?"}
+    S1 -->|no| S1rej["reject candidate"]
+    S1 -->|yes| S2["Stage 2: score = 0.45 corr + 0.55 peak-rel MAE"]
+    S2 --> S2k{"score &gt;= keep_min (0.1)?"}
+    S2k -->|no| S1rej
+    S2k -->|yes| S3{"dtw_bandwidth &gt; 0?"}
+    S3 -->|yes| S3d["Stage 3: DTW-lite top5 - blend 0.5/0.5 - re-sort"]
+    S3 -->|no| S4
+    S3d --> S4["Stage 4: + duration/energy agreement (0.22/0.22)"]
+    S4 --> S5{"cohesive group? (cohesion &gt;= 0.80)"}
+    S5 -->|yes| S5g["collapse to aggregate - pick member"]
+    S5 -->|no| S5i["keep individual"]
+    S5g --> S5m{"member fit &lt; 0.55 x group<br/>OR overrun &gt; 1.05?"}
+    S5m -->|yes| S5dg["downgrade to uncertain"]
+    S5m -->|no| CMT
+    S5i --> CMT{"top1 score &gt;= 0.4 commit?"}
+    S5dg --> CMT
+    CMT -->|no| MRunk["MatchResult: unknown / detecting"]
+    CMT -->|yes| AMBq{"ambiguous? top1 - top2 &lt; 0.05"}
+    AMBq -->|yes| MRamb["uncertain -&gt; feedback"]
+    AMBq -->|no| MRok["MatchResult: confident"]
+    MRok --> MO3
+    MRamb --> MO3
+    MRunk --> MO3
+
+    %% ================= PROGRAM SWITCHING =================
+    MO3{"current program?"}
+    MO3 -->|"detecting..."| SW1{"conf &gt;= 0.15 AND !ambiguous?"}
+    SW1 -->|no| SWstay["stay detecting"]
+    SW1 -->|yes| SW2{"persistent (counter &gt;= match_persistence)<br/>OR ML early-commit (score &gt;= 0.85, conf &gt;= 0.30)?"}
+    SW2 -->|yes| SWset["commit program"]
+    SW2 -->|no| SWinc["bump candidate counter - stay"]
+    MO3 -->|matched| SW3{"divergence: conf &lt; peak x 0.6?"}
+    SW3 -->|yes| SW3p{"unmatch counter &gt;= persistence?"}
+    SW3p -->|yes| SWrevert["revert to detecting"]
+    SW3p -->|no| SWincd["bump unmatch counter"]
+    SW3 -->|no| SW4{"override: conf &gt; 0.8 AND gap &gt; 0.15,<br/>or persistent + trend + gap &gt; 0.05?"}
+    SW4 -->|yes| SWset
+    SW4 -->|no| SWkeep["keep current"]
+    SWset --> DUPD
+    SWrevert --> DUPD
+    SWkeep --> DUPD
+    MOman --> DUPD
+
+    %% ================= DETECTOR UPDATE + LIVE =================
+    DUPD["detector.update_match(name, conf, dur, phase,<br/>is_mismatch, is_ambiguous, is_prefix_ambiguous)"]
+    DUPD --> DUP2{"user paused?"}
+    DUP2 -->|yes| DUPvp["verified_pause = True (authoritative)"]
+    DUP2 -->|no| DUPenv{"envelope verify low-power phase?"}
+    DUPenv -->|yes| DUPvp
+    DUPenv -->|no| DUPclear["clear verified_pause"]
+    DUPvp --> UPR["_update_remaining_only"]
+    DUPclear --> UPR
+    DUPD -.->|expected_duration + conf feed| END1
+
+    %% ================= PROGRESS / ETA =================
+    UPR --> P1{"matched profile AND &gt;= 10 pts?"}
+    P1 -->|no| Plin["linear fallback (alpha 0.10)"]
+    P1 -->|yes| Pph["phase-aware base"]
+    Pph --> P2{"ml_pct? (remaining_time regressor, opt-in)"}
+    Plin --> P2
+    P2 -->|yes| Pblend["blended = 0.5 base + 0.5 ml_pct"]
+    P2 -->|no| Pbase["base only"]
+    Pblend --> P3{"power variance tier?"}
+    Pbase --> P3
+    P3 -->|"&lt; 50W"| Pa1["EMA alpha 0.20"]
+    P3 -->|"50-100W"| Pa2["EMA alpha 0.10"]
+    P3 -->|"&gt; 100W"| Pa3["EMA alpha 0.05"]
+    Pa1 --> Pbd{"backward drop &gt; device threshold?"}
+    Pa2 --> Pbd
+    Pa3 --> Pbd
+    Pbd -->|yes| Pdamp["heavy damp 95/5"]
+    Pbd -->|no| Pema["apply EMA"]
+    Pdamp --> Pph2{"phase_remaining_s set? (opt-in)"}
+    Pema --> Pph2
+    Pph2 -->|yes| Pblend2["phase_pct = elapsed/(elapsed+phase_s); blend into<br/>phase-progress before EMA/monotonic (f = base_progress/100)"]
+    Pph2 -->|no| Pbc["remaining = matched_dur x (1 - smoothed/100)"]
+    Pblend2 --> Pcap["cap progress 99 live"]
+    Pbc --> Pcap
+    Pcap --> PE{"progress &gt;= 3% AND energy_so_far &gt; 0?"}
+    PE -->|yes| PEml{"total_energy regressor? (opt-in)"}
+    PEml -->|yes| PEr["projected = regressor - max(., so_far)"]
+    PEml -->|no| PEl["projected = so_far / (progress/100)"]
+    PE -->|no| PEskip["no projection yet"]
+    Pcap --> ANm{"elapsed &gt; expected x 1.5?"}
+    ANm -->|yes| ANov["cycle_anomaly = overrun (visible only)"]
+    ANm -->|no| ANok["no live anomaly"]
+    Pcap --> ENTS2["update entities via dispatcher signal"]
+    UPR --> PCq{"pre-complete: lead set AND not fired AND<br/>remaining &lt;= lead AND progress &lt; 100 AND !ambiguous?"}
+    PCq -->|yes| PCfire["fire pre-completion notification"]
+    PCq -->|no| PCno["skip"]
+    UPR --> LVq{"live progress: RUNNING/PAUSED/ENDING<br/>AND live services AND throttle ok?"}
+    LVq -->|yes| LVfire["update live card (bar + countdown)"]
+    LVq -->|no| LVno["skip"]
+
+    %% ================= CYCLE END =================
+    CE1["_on_cycle_end: stop timers - integrate_wh"] --> CEg{"ghost? dur &lt; 60s AND energy &lt; 0.05Wh<br/>OR dishwasher pump-out ghost?"}
+    CEg -->|yes| CEdisc["discard (no persist/notify/learn) - arm expiry"]
+    CEg -->|no| CE2["capture race token - schedule async tail"]
+    CE2 --> CE3{"still detecting?"}
+    CE3 -->|yes| CE3m["final match on full data (thr 0.15, ignore ambiguity)"]
+    CE3 -->|no| CE4
+    CE3m --> CE4["freeze locals (B1) - conformance - artifacts"]
+    CE4 --> CEan1{"duration &lt; median x 0.55?"}
+    CEan1 -->|yes| CEun["anomaly = underrun"]
+    CEan1 -->|no| CEov{"elapsed &gt; expected x 1.5?"}
+    CEov -->|yes| CEovr["anomaly = overrun"]
+    CEov -->|no| CEnoan["no duration anomaly"]
+    CE4 --> CEz{"|energy z-score| &gt; 2.5?"}
+    CEz -->|yes| CEes["energy_anomaly (high/low)"]
+    CEz -->|no| CEze["energy normal"]
+    CE4 --> CEml{"ml_models_enabled?"}
+    CEml -->|yes| CEq["ML quality score (pre-persist)"]
+    CEml -->|no| CEnoq["skip quality"]
+    CEq --> CEadd
+    CEnoq --> CEadd["add_cycle - rebuild envelope - lifetime counters"]
+    CEadd --> LR1
+    CEadd --> EVend["fire EVENT_CYCLE_ENDED (exclude heavy)<br/>- finish notification - milestone"]
+    CEadd -.->|ranking + labels| MLtrain
+
+    %% ================= LEARNING ROUTING =================
+    LR1{"non-imported profile AND &lt; 5 labeled cycles (warmup)?"}
+    LR1 -->|yes| LRreq["request verification (Cycles queue, no notification)"]
+    LR1 -->|no| LR2{"ML quality P(problem) &gt;= 0.65?"}
+    LR2 -->|yes| LRreq
+    LR2 -->|no| LR3{"envelope conformance &lt; 0.40?"}
+    LR3 -->|yes| LRreq
+    LR3 -->|no| LR4{"route conf &gt;= auto_label (0.9)?"}
+    LR4 -->|yes| LRauto["auto-label - rebuild envelope"]
+    LR4 -->|no| LR5{"route conf &gt;= learning (0.6)?"}
+    LR5 -->|yes| LRpend["pending feedback record"]
+    LR5 -->|no| LRskip["skip (log only)"]
+    LRauto --> CEreset
+    LRpend --> CEreset
+    LRreq --> CEreset
+    LRskip --> CEreset
+    CEreset{"back-to-back: race token changed?"}
+    CEreset -->|yes| CEkeep["keep new cycle's live fields (skip reset)"]
+    CEreset -->|no| CEoff["reset terminal - progress 100 - arm expiry timer"]
+
+    %% ================= NOTIFICATION DISPATCH =================
+    EVend --> NO1{"quiet hours? finish-type event AND<br/>in window AND allow_deferral?"}
+    NO1 -->|yes| NOq["queue -&gt; flush at window end"]
+    NO1 -->|no| NO2{"presence: notify_only_when_home AND nobody home?"}
+    NO2 -->|yes| NOp["pending -&gt; release on home"]
+    NO2 -->|no| NO3["run actions (script) + per-event services"]
+    NO3 --> NO4{"LIVE event?"}
+    NO4 -->|yes| NO4m{"target is mobile_app_*?"}
+    NO4m -->|no| NOskip["skip target"]
+    NO4m -->|yes| NOsend["send (progress / countdown / LiveActivity)"]
+    NO4 -->|no| NO5{"any service sent?"}
+    NO5 -->|no| NOpn["persistent-notification fallback"]
+    NO5 -->|yes| NOsend
+    NOq -.->|window end| NO2
+    NOp -.->|person home| NO3
+
+    %% ================= WATCHDOG (poll loop) =================
+    WD0(["watchdog tick (watchdog_interval)"]) --> WDp{"pump AND elapsed &gt;= stuck_duration?"}
+    WDp -->|yes| WDpe["fire EVENT_PUMP_STUCK"]
+    WDp -->|no| WDz{"matched AND elapsed &gt; expected x3 AND &gt; 14400s?"}
+    WDz -->|yes| WDfe["force_end"]
+    WDz -->|no| WDg{"detecting AND within suspicious window?"}
+    WDg -->|yes| WDfe
+    WDg -->|no| WDl{"low power?"}
+    WDl -->|yes| WDlt{"stale &gt; effective_timeout?"}
+    WDlt -->|yes| WDfe
+    WDlt -->|no| WDka["inject 0W keepalive"]
+    WDl -->|no| WDh{"silence &gt; no_update_timeout?"}
+    WDh -->|yes| WDhw{"within expected + 14400s?"}
+    WDhw -->|yes| WDref["inject refresh reading"]
+    WDhw -->|no| WDfe
+    WDh -->|no| WDok["ok"]
+    WD0 -.->|loop| WD0
+    WDka -.->|advances detector| PR0
+    WDref -.-> PR0
+    WDfe --> FIN
+
+    %% ================= STATE EXPIRY (poll loop) =================
+    EX0(["expiry tick (60s, after cycle end)"]) --> EXn{"clean nag pending?"}
+    EXn -->|yes| EXhold["send nag once - hold terminal"]
+    EXn -->|no| EXpo{"power-off enabled? 0 &lt; power_off_w &lt; stop_w"}
+    EXpo -->|yes| EXpw{"power &lt; threshold for power_off_delay?"}
+    EXpw -->|yes| EXoff["_reset_terminal_to_off"]
+    EXpw -->|no| EXwait["progress bar zeroes - terminal persists"]
+    EXpo -->|no| EXt{"progress_reset_delay elapsed?"}
+    EXt -->|yes| EXoff
+    EXt -->|no| EXwait
+    EX0 -.->|loop| EX0
+    CEoff -.->|arms| EX0
+    CEdisc -.->|arms| EX0
+    EXoff -.->|state = OFF| OFF1
+
+    %% ================= ML CONSUMERS (opt-in, gated) =================
+    MLtrain["training_task (scheduled)<br/>promote by AUC / MAE margin"]
+    MLtrain -.-> MLend["end scorer -&gt; defer only"]
+    MLtrain -.-> MLcommit["live_match scorer -&gt; early commit"]
+    MLtrain -.-> MLqual["quality scorer -&gt; downgrade"]
+    MLtrain -.-> MLreg["remaining_time / total_energy regressors"]
+    MLtd["terminal-drop (pure stats, no model)"]
+    MLend -.->|"P(end) &lt; 0.5"| DF5
+    MLcommit -.->|"&gt;= 0.85"| SW2
+    MLqual -.->|"&gt;= 0.65"| LR2
+    MLreg -.-> P2
+    MLtd -.-> ENtd
+
+    %% ================= PANEL / WS / TASKS / PLAYGROUND =================
+    USR(["user action (panel / service / Assist)"]) --> WS1{"RBAC allows?"}
+    WS1 -->|no| WSden["deny"]
+    WS1 -->|yes| WS2{"long op?"}
+    WS2 -->|yes| WS3["task_registry (progress / cancel / header pill)"]
+    WS2 -->|no| WS4["direct handler -&gt; profile_store / manager"]
+    WS3 --> PGsim["Playground replay:<br/>same detector + matcher + progress"]
+    PGsim -.->|byte-identical| PR0
+    WS4 -.-> ENTS2
+
+    %% ================= COMMUNITY STORE (opt-in) =================
+    CS0{"online features enabled?"}
+    CS0 -->|yes| CSadopt["adopt -&gt; reference_cycles"]
+    CS0 -->|yes| CSshare["share bundle -&gt; Firestore"]
+    CSadopt -.->|feeds envelope + matcher| S1
+
+    %% ================= SETUP ADVISOR =================
+    SU0{"setup phase (setup_advisor)"}
+    SU0 -->|"none + reference-only"| SU1c["Phase 1c: run once to confirm download"]
+    SU0 -->|none| SU0p["Phase 0: record/label or browse store"]
+    SU0 -->|few labeled| SU2["Phase 2: build coverage"]
+    SU0 -->|good| SU3["Phase 3: tuning / groups / phases"]
+    SU0 -->|healthy| SU4["Phase 4: complete (quiet chip)"]
+    CEadd -.->|recompute| SU0
+```
+
 ### 1. User Journey Flow
 This high-level flow describes how a user interacts with the integration, from initial setup to daily use and feedback.
 
 ```mermaid
 graph TD
     A[Install Integration] --> B["Add Integration wizard<br/>(name · device type · power sensor · min power)"]
-    B --> B2{"Create first profile now?"}
-    B2 -- "Yes (name + approx. duration)" --> W[Open WashData panel]
-    B2 -- "Skip" --> W
-    W --> C{Action?}
+    B --> W[Open WashData panel]
+    W --> SC["Setup Card guides the next step<br/>(setup_advisor phase 0-4)"]
+    SC --> C{Action?}
     
     C -- "Create Profile" --> D["Create Profile (Profiles tab)"]
     C -- "Record Cycle" --> E["Start Recording (Overview)"]
@@ -62,7 +648,7 @@ graph TD
     L --> N[Cycle Complete]
     M --> N
     
-    N --> O[Update Stats & Envelopes]
+    N --> O["Update Stats &amp; Envelopes"]
     O --> P{Check Confidence}
     
     P -- "High (>=0.9)" --> Q[Auto-Label Cycle]
@@ -81,9 +667,10 @@ How raw power sensor data is processed into cycle states.
      participant Sensor as Power Sensor
      participant Manager as WashDataManager
      participant Detector as CycleDetector
-     participant Matcher as ProfileStore (Async)
+     participant Matcher as ProfileStore (executor)
      
      Sensor->>Manager: State Change (Power W)
+     Manager->>Manager: diag_buffer.record + throttle (low power bypasses)
      Manager->>Detector: process_reading(time, watts)
      
      rect rgb(20, 20, 20)
@@ -94,12 +681,14 @@ How raw power sensor data is processed into cycle states.
      
      Detector-->>Manager: State Changed (e.g. STARTING -> RUNNING)
      
-     loop Every 5 Minutes
-         Manager->>Matcher: async_match_profile(current_data)
-         Matcher->>Matcher: 5-Stage Pipeline (NumPy/DTW)
-         Matcher-->>Manager: MatchResult (Best Profile, Confidence)
-         Manager->>Manager: Update Estimations
+     loop Every match_interval (~5 min) while RUNNING
+         Detector->>Manager: profile_matcher (fire-and-forget trigger)
+         Manager->>Matcher: async_match_profile (executor, NumPy)
+         Matcher->>Matcher: Stage 1-5 pipeline
+         Matcher-->>Manager: MatchResult (name, confidence, ambiguity)
+         Manager->>Manager: switching (persistence / ML commit) + progress.py
      end
+     Manager->>Manager: dispatcher signal -> entities (publish-on-change)
  ```
  
  ### 3. Cycle Detection State Machine
@@ -116,11 +705,11 @@ How raw power sensor data is processed into cycle states.
      STARTING --> OFF: Gates not met (spike)
      RUNNING --> PAUSED: Power below pause threshold
      PAUSED --> RUNNING: Power back above threshold
-     RUNNING --> INTERRUPTED: Abrupt drop early (< interrupted_min_seconds)
      RUNNING --> ENDING: Low-power run begins
      PAUSED --> ENDING: Low-power run sustained
      ENDING --> RUNNING: Power/energy resumes (false end; ML end-guard may defer)
      ENDING --> FINISHED: off_delay + energy gate, or Smart Termination near expected
+     ENDING --> INTERRUPTED: Short run (< completion_min), or terminal-drop fast finalize (opt-in)
      ENDING --> FORCE_STOPPED: Watchdog / no-update timeout
      FINISHED --> ANTI_WRINKLE: Dryer tumble pulses (opt-in)
      ANTI_WRINKLE --> OFF: True-off after idle
@@ -149,7 +738,7 @@ How raw power sensor data is processed into cycle states.
      H --> I{"Top-1 score >= 0.4 commit threshold?"}
      I -- No --> M["Unknown / Detecting..."]
      I -- Yes --> J{"Ambiguous? top1 - top2 < 0.05"}
-     J -- Yes --> R[Uncertain -> request feedback]
+     J -- Yes --> R["Uncertain -&gt; request feedback"]
      J -- No --> L[Match Confirmed]
  ```
 
@@ -157,21 +746,30 @@ How raw power sensor data is processed into cycle states.
 How the system adapts to user corrections.
 
 ```mermaid
-graph LR
-    A[Cycle Complete] --> B{Confidence Level}
-    
-    B -- "High (>= 0.9)" --> C[Auto-Label Cycle]
-    C --> D[Rebuild Envelope]
-    
-    B -- "Moderate (0.6 - 0.9)" --> E[Emit Feedback Request]
-    E --> F[User Notification]
-    F --> G{User Action?}
-    
-    G -- Confirm --> H[Boost Confidence]
-    G -- Correct --> I[Update Profile Stats]
-    
-    B -- "Low (< 0.6)" --> J["Log to History (No Action)"]
+graph TD
+    A["Cycle complete + matched"] --> W{"Warm-up? profile has &lt; 5 labelled cycles"}
+    W -- yes --> RQ["Route to Cycles review queue<br/>(no notification)"]
+    W -- no --> QG{"ML quality P(problem) &gt;= 0.65?<br/>(opt-in)"}
+    QG -- yes --> RQ
+    QG -- no --> CF{"envelope conformance &lt; 0.40?"}
+    CF -- yes --> RQ
+    CF -- no --> B{"route confidence?"}
+    B -- "&gt;= 0.9 (auto_label)" --> C["Auto-label cycle"]
+    C --> D["Rebuild envelope + recompute stats"]
+    B -- "0.6 - 0.9 (learning)" --> RQ
+    B -- "&lt; 0.6" --> J["Log to history (no action)"]
+    RQ --> G{"User acts in panel"}
+    G -- Confirm --> H["Confirm label + feedback record"]
+    G -- Correct --> I["Re-label cycle -&gt; recompute duration stats<br/>from all labelled cycles (outlier-filtered)"]
+    H --> D
+    I --> D
 ```
+
+The confidence ladder is the *routing* confidence: a warm-up profile, a suspicious ML quality
+score (opt-in), or low envelope conformance each downgrade an otherwise-high-confidence match
+to the review queue. Feedback is surfaced in the panel's **Cycles** tab, never as a
+notification. A correction **re-labels** the cycle and **recomputes** the profile's duration
+statistics from all its labelled cycles (outlier-filtered) - the old EWMA nudge was removed.
 
 
 ---
@@ -622,10 +1220,10 @@ ProfileStore.async_run_maintenance()
 **Solution:**
 - Implemented a formal State Machine: `OFF` -> `STARTING` -> `RUNNING` <-> `PAUSED` -> `ENDING` -> `OFF`.
 - **OFF**: Monitoring for `min_power`.
-- **STARTING**: Debounce phase. Requires `start_duration_threshold` AND `start_energy_threshold` (e.g. 5Wh) to confirm.
+- **STARTING**: Debounce phase. Requires `start_duration_threshold` AND `start_energy_threshold` (default 0.005 Wh) to confirm.
 - **RUNNING**: Main active state.
 - **PAUSED**: Entered if power drops low but not long enough to end. Allows for soaking or door opening.
-- **ENDING**: Candidates for completion. Must satisfy `off_delay` AND `end_energy_threshold` (e.g. < 50Wh in last window) to finish.
+- **ENDING**: Candidates for completion. Must satisfy `off_delay` AND `end_energy_threshold` (default 0.05 Wh in the last window) to finish.
 
 **Benefits:**
 - Eliminates false starts from brief spikes.
@@ -658,7 +1256,7 @@ ProfileStore.async_run_maintenance()
 **Solution:**
 - **Conservative Ratio**: Dishwashers require **99%** of expected duration before Smart Termination is even considered (vs 98% for others).
 - **End Spike Wait Period**: Even if the duration is met, the system scans the "Ending" state for a high-power spike.
-- If no spike is found, it **waits up to 5 extra minutes** past the expected duration to catch it.
+- If no spike is found, it **waits up to 30 extra minutes** (`DISHWASHER_END_SPIKE_WAIT_SECONDS` = 1800 s) past the expected duration to catch it.
 - **Quiet-tail release (short cycles)**: The pump-out wait is anchored on the profile's *expected* duration, which drifts upward as longer cycles are learned. A cycle that runs a few minutes *shorter* than that average, and whose terminal pump-out lands **before** the drop into `ENDING` (so no in-`ENDING` end-spike ever arms), would otherwise hang the full `DISHWASHER_END_SPIKE_WAIT_SECONDS` (30 min) past expected and even have its label drift to a longer near-duplicate profile. The wait now **also** releases once the cycle has reached its expected duration **and** power has since been sustained-quiet for `DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS` (10 min). Gated on `duration >= expected`, so a long passive-drying phase that precedes a genuinely-late pump-out (quiet from ~50%-99% of expected) keeps waiting and its real pump-out is still caught by the end-spike arm. Takes the sooner of the two anchors, so it only ever shortens the wait.
 - **Terminal-tail match freeze**: once a dishwasher is in `ENDING` with a profile already matched and power sustained-quiet for `DISHWASHER_MATCH_FREEZE_QUIET_SECONDS` (5 min), live re-matching is frozen. Re-matching on the ever-growing idle tail inflates the observed duration and drifts the Stage-4 duration-agreement toward the *longer* of two near-duplicate profiles (e.g. a true "65°" cycle being overtaken by "50°" as the 0 W tail lengthens), which flips the stored label and stalls Smart Termination on the ambiguity gate. The active-phase match is complete by then; a real resume sends a high reading that leaves `ENDING` and re-arms matching, so the freeze is self-correcting.
 - **Ghost Cycle Suppression**: A "Suspicious Window" (20 mins) protects legitimate short cycles. Aggressive ghost cycle termination (10 min timeout) only applies if a cycle starts within 20 mins of the previous one ending.
@@ -671,28 +1269,31 @@ ProfileStore.async_run_maintenance()
 
 **Solution:**
 - **Profile-Aware Watchdog**: The watchdog now checks the `expected_duration` from the matched profile. If the cycle is currently within its expected runtime (even if silent for > 60 mins), the watchdog automatically extends the timeout.
-- **Verified Pause Support**: For devices like dishwashers with multi-hour silent drying phases, the watchdog detects a `verified_pause` (via profile alignment). When active, the timeout is extended to **DEFAULT_MAX_DEFERRAL_SECONDS** (2 hours) plus a 30-minute buffer, ensuring the cycle is not killed even if it exceeds its original expected duration during the pause.
-- **Zombie Killer (Hard Limit)**: To prevent runaway "ghost" cycles, a hard termination limit is enforced at **200%** of the expected profile duration (minimum 2 hours).
+- **Verified Pause Support**: For devices like dishwashers with multi-hour silent drying phases, the watchdog detects a `verified_pause` (via profile alignment). When active, the timeout is extended to **DEFAULT_MAX_DEFERRAL_SECONDS** (4 hours) plus a 30-minute buffer, ensuring the cycle is not killed even if it exceeds its original expected duration during the pause.
+- **Zombie Killer (Hard Limit)**: To prevent runaway "ghost" cycles, a hard termination limit fires when a matched cycle exceeds **300%** of its expected profile duration **and** has run more than **4 hours** (`net elapsed > expected x 3` AND `> 14400 s`).
 - **Stuck Power Reset**: When the watchdog or detector forces a cycle to end (due to timeout or manual stop), the `current_power` state is explicitly reset to **0.0W**, ensuring Home Assistant entities reflect reality even if the hardware sensor fails to report the final drop.
 - **Low-Power Bypass**: Power readings below `min_power` now bypass all debouncing, smoothing, and throttling filters in `manager.py`, ensuring the "cycle end" signal is processed with zero latency.
 
 **Watchdog Logic Flow:**
 ```mermaid
 graph TD
-    A[Watchdog Check] --> B{Cycle Active?}
+    A["Watchdog tick (watchdog_interval)"] --> B{"Cycle active?"}
     B -- No --> C[Exit]
-    B -- Yes --> D{Silence Duration?}
-    D -- > Timeout --> E{Verified Pause?}
-    E -- Yes --> G[Extend to Deferral Limit + 30m]
-    E -- No --> F{Profile Matched?}
-    F -- Yes --> H{Elapsed < Expected?}
-    H -- Yes --> I[Extend to Expected + 30m]
-    H -- No --> J{Elapsed > 200%?}
-    J -- Yes --> K[Force End + Reset Power to 0W]
-    J -- No --> L[Inject Refresh]
-    F -- No --> M{Silence > 10m?}
-    M -- Yes --> K
-    M -- No --> L
+    B -- Yes --> P{"pump AND elapsed &gt;= stuck_duration?"}
+    P -- Yes --> PE["fire EVENT_PUMP_STUCK<br/>(visible, no force-end)"]
+    P -- No --> Z{"matched AND elapsed &gt; expected x3 AND &gt; 4h?"}
+    Z -- Yes --> K["Force end + reset power to 0W"]
+    Z -- No --> GH{"detecting AND within suspicious window?"}
+    GH -- Yes --> K
+    GH -- No --> LP{"low power?"}
+    LP -- Yes --> LPT{"stale &gt; effective_timeout?<br/>(device floor, + expected, + deferral if verified pause)"}
+    LPT -- Yes --> K
+    LPT -- No --> KA["Inject 0W keepalive (advance detector)"]
+    LP -- No --> HS{"real-update silence &gt; no_update_timeout?"}
+    HS -- Yes --> HW{"still high AND within expected + 4h?"}
+    HW -- Yes --> R["Inject refresh reading"]
+    HW -- No --> K
+    HS -- No --> OK[OK]
 ```
 
 
@@ -731,7 +1332,7 @@ manager._cycle_completed_time  # When cycle finished (ISO)
 |--------|---------|
 | `request_cycle_verification(cycle_data, confidence)` | Flag cycle for user verification |
 | `submit_cycle_feedback(cycle_id, user_confirmed, corrected_profile, corrected_duration, notes)` | Accept user input |
-| `_apply_correction_learning(profile_name, corrected_duration)` | Update profile (80%/20% weighting) |
+| `_apply_correction_learning(profile_name, corrected_duration)` | Re-label the cycle, then recompute the profile's duration stats from all its labelled cycles (outlier-filtered). The old 80%/20% EWMA nudge was removed. |
 | `get_pending_feedback()` | Return cycles awaiting input |
 | `get_feedback_history(limit=10)` | Return recent feedback |
 | `get_learning_stats()` | Return learning metrics |
@@ -774,26 +1375,34 @@ The integration includes specialized handling for different appliance types to a
 - **Air Fryer**: High constant load with thermostat-driven dropouts; explicit user-set timer per cycle.
 - **Bread Maker**: Long programs with low-power proving/rising phases; 2-hour active-timeout to bridge those silences.
 - **Pump / Sump Pump**: Sharp on/off with no warm-down; stuck-alarm watchdog rather than profile matching is the primary feature.
-- **Other (Advanced)**: Generic bucket for appliances that do not fit one of the supported classes. Ships intentionally generic defaults that are not tuned for any specific appliance; no curated phase catalog; no device-type-specific runtime branching. The user is expected to configure thresholds, timeouts, and matching parameters themselves. Also the runtime fallback for entries whose device type is hard-removed after deprecation.
+- **Other (Advanced)** (`generic`): Bucket for predictable appliances that do not fit one of the named classes but still benefit from full profile matching/learning. Ships neutral defaults with no device-type-specific runtime branching; the user tunes thresholds, timeouts, and matching parameters themselves.
+- **Threshold Device** (`other`): Truly uncategorised appliances where only threshold-based detection is wanted (no profile matching). Ships intentionally generic defaults the user must tune. This is also the runtime fallback for entries whose device type was hard-removed after deprecation.
 
-**Deprecated (0.4.4.3, scheduled removal 0.6.0)**: Electric Vehicle, Coffee Machine, Heat Pump, and Oven. Existing setups continue to work; these types fail at least one of WashData's three appliance fit tests (user-selected discrete program, reproducible power signature, clean return to OFF) so matching produces noise rather than signal. The new-entry dropdown filters them out, and existing entries on a deprecated type are recommended to migrate to a supported type or to **Other (Advanced)**.
+**Removed in 0.5.0**: Electric Vehicle, Coffee Machine, Heat Pump, and Oven. These types fail at least one of WashData's three appliance fit tests (user-selected discrete program, reproducible power signature, clean return to OFF), so matching produced noise rather than signal. They were removed from the new-entry dropdown, and existing entries on those types are **automatically migrated to Threshold Device** on config-entry upgrade, preserving all tuned options. (Earlier releases had marked them deprecated with a scheduled 0.6.0 removal; the removal was brought forward to 0.5.0.)
 
 ---
 
 ## 9. Phase Management System
 
 ### Overview
-Phases are **purely informational labels** that segment a cycle into meaningful time-based regions (Wash, Rinse, Spin, etc.). They do **NOT** affect cycle detection, profile matching, or time estimation - these all use power-curve analysis independently.
 
-### Architecture
+There are **two distinct systems that share the word "phase"** in WashData, and they are not wired to each other:
+
+1. **Phase labels (this section)** - per-profile, offset-based time ranges (Wash, Rinse, Spin, etc.) that the user draws over a profile's average power curve. These drive the **current-phase readout** and appear in event data. The live phase is indexed by the **ML-blended progress fraction**, not raw elapsed time (see [Phase-segmented matching & ETA](#phase-segmented-matching--eta-051)), so overrunning/underrunning cycles still name the phase correctly.
+
+2. **Phase-segmented matching & ETA (0.5.1, opt-in)** - an unsupervised segmenter (`phase_segmenter.py`) that derives per-role priors (heating / wash / spin / idle) from a profile's cycles and, when `enable_phase_matching` is on, feeds a **phase-resolved time-remaining estimate** into `progress.py`. Documented in its own subsection below.
+
+The user-drawn phase labels do **not** by themselves affect cycle detection, profile (program) matching, or duration estimation. The opt-in phase-segmented ETA *does* refine time-remaining, but only for time-remaining - it never changes which program is matched.
+
+### Architecture (phase labels)
 ```text
 Phase Catalog (Default + Custom)
-    ↓
+    v
 Device-Type Filtering
-    ↓
+    v
 Phase Assignment (Offset-Based Ranges)
-    ↓
-SVG Visualization (Power Curve + Phase Spans)
+    v
+Client-side JS canvas (average power curve + phase spans, rendered in the panel)
 ```
 
 ### Key Concepts
@@ -809,13 +1418,13 @@ SVG Visualization (Power Curve + Phase Spans)
 - **Validation**: Overlapping ranges are rejected; ranges must be contiguous with cycle duration
 
 **3. Phase Visualization**
-- **SVG Power Curve Chart**: Interactive chart showing:
-  - Average power curve (blue line) from all cycles in the profile
-  - Colored phase spans (semi-transparent rectangles) 
-  - Dashed gating lines at phase boundaries
+- **Client-side JS canvas** (the panel renders all charts in JavaScript; the old server-side `generate_*_svg` helpers were config-flow-era and have been removed). The phase configurator, inside the Profile panel modal, shows:
+  - Average power curve from all cycles in the profile
+  - Colored phase spans (semi-transparent rectangles)
+  - Draggable boundaries at phase edges
   - Time axis (0/mid/total minutes)
   - Legend with phase names and ranges
-- **Real-Time Updates**: Chart refresh as user edits phase ranges in the assignment dialog
+- **Real-Time Updates**: the canvas redraws as the user drags phase ranges in the configurator
 
 ### Workflow: Creating & Assigning Phases
 
@@ -896,13 +1505,13 @@ async_set_profile_phase_ranges(profile_name: str, ranges: list[dict])
 
 ### Important Notes
 
-1. **Detection Independence**: Phases are NOT used in:
+1. **Scope of the phase *labels***: the user-drawn phase ranges are NOT used in:
    - Cycle start/end detection (uses power thresholds)
-   - Profile matching (uses power curve similarity)
-   - Duration estimation (uses avg_duration from profile)
-   - Any matching or analysis logic
+   - Profile (program) matching (uses power-curve similarity - Stages 1-5)
+   - Which program is selected
+   They ARE used to name the current phase (indexed by ML-blended progress fraction). Separately, the opt-in **phase-segmented ETA** (0.5.1) refines *time-remaining* only. See the [Phase-segmented matching & ETA](#phase-segmented-matching--eta-051) subsection - the older "phases are never used in any analysis logic" claim is no longer accurate.
 
-2. **Metadata Only**: Phases are display labels that:
+2. **Metadata Only**: Phase labels are display labels that:
    - Appear in event data when a cycle is running
    - Show on the dashboard card (if enabled)
    - Help users understand cycle progression
@@ -925,6 +1534,94 @@ async_set_profile_phase_ranges(profile_name: str, ranges: list[dict])
    - Modify the name and/or description
    - An override entry is automatically created for default phases
    - This allows device-specific customization without affecting the built-in defaults
+
+---
+
+### Phase-segmented matching & ETA (0.5.1)
+
+This is a separate system from the user-drawn phase labels above. It exists to solve a
+specific accuracy problem: **temperature/spin variants of the same program have nearly
+identical overall shape but very different phase budgets** (a 60C wash spends far longer in
+heating than a 30C wash). A single whole-cycle duration model therefore mis-estimates
+time-remaining for the variant that was not the median. Phase-segmented ETA gives each cycle
+role its own time budget.
+
+It is **opt-in and time-remaining-only**. It never changes which program is matched; the
+Stage 1-5 program matcher is untouched.
+
+```mermaid
+flowchart TD
+    subgraph Build["Build (envelope rebuild path, cached)"]
+        CY["Profile's clean cycles"] --> SEG["phase_segmenter.segment_cycle<br/>regimes: idle / active / high (+ spin)"]
+        SEG --> ROLE["Roles: heating / wash / spin / idle"]
+        ROLE --> PM["PhaseModel per role<br/>(expected duration + energy priors)"]
+        PM --> CACHE["envelope['phase_profile']<br/>(derived cache; storage v11 marker only)"]
+    end
+    subgraph Live["Live (opt-in, gated)"]
+        RUN["Running cycle so far"] --> GATE{"enable_phase_matching<br/>AND device in<br/>LIVE_PHASE_DEVICE_TYPES?"}
+        GATE -- No --> BASE["progress.compute_progress<br/>(phase_remaining_s = None)<br/>= legacy estimator, byte-identical"]
+        GATE -- Yes --> MATCH["phase_match.phase_eta<br/>completed=0 / current=mean-consumed / future=occ*mean"]
+        CACHE --> MATCH
+        MATCH --> BLEND["compute_progress(phase_remaining_s=...)<br/>phase% blended into progress BEFORE EMA/monotonic (byte-identical off)"]
+    end
+```
+
+**Segmenter (`phase_segmenter.py`).** A hysteresis regime classifier splits a trace into
+idle / active / high runs (the high threshold is `max(floor, frac * P95)` of the trace),
+merges sub-minimum runs, and detects the terminal spin as the last non-idle run in the
+end zone. Roles produced: `heating`, `wash`, `spin`, `idle`. Per-role priors are held in a
+`PhaseModel`. Models are only built for `washing_machine`, `washer_dryer`, and `dishwasher`.
+
+**Phase-profile cache.** `_compute_phase_profile` populates `envelope["phase_profile"]` during
+the normal envelope-rebuild path. It is a derived cache, not migrated data - `STORAGE_VERSION`
+was bumped to **11** with a marker-only migration; the cache self-populates on the next rebuild.
+
+**Matcher (`phase_match.py`).** Per-role duration and energy agreement uses a log-ratio score
+`1/(1 + |ln(observed/expected)|/scale)`; heating is weighted most heavily (0.50) because it is
+the temperature discriminator. The currently in-progress role is scored one-sided (on both
+duration and energy) so a larger heating budget cannot rule out a hotter variant mid-cycle.
+`phase_eta` classifies each profile role against the observed-so-far segments and sums the
+remaining budget accordingly: a **completed** role (already observed, not the open one)
+contributes **0** even if it ran shorter than its mean; the **current** open role contributes
+`max(0, dur_mean − consumed)` using the conditional mean (no occurrence discount, since the
+role is known present); a **future** role (not yet seen) contributes the occurrence-weighted
+prior. (This role-aware split fixed a completed-role over-count found in review.)
+
+**ETA blend (`progress.compute_progress`, the single source of truth).** When a
+`phase_remaining_s` is supplied, it is converted to a completion **percent**
+(`phase_pct = elapsed / (elapsed + phase_remaining_s)`) and blended into the phase-progress
+signal **before** delegating to `_compute_progress_base` - so the blend rides the proven,
+golden-locked EMA + monotonicity + back-calculation guards (design §8, "one smoothing
+implementation") rather than re-deriving a raw, unsmoothed progress that could jitter or
+collapse. The crossover leans on the phase budget early (low base progress) and the proven
+phase estimate late (`f = base_phase_progress/100`; `blended = (1-f)·phase_pct + f·base`).
+When `phase_remaining_s is None` the result is **byte-identical** to the legacy estimator, so
+the feature is inert until enabled. The manager (live) and the Playground `SimRunner` call
+`compute_progress` identically, so the what-if replay stays faithful.
+
+**Candidate scope + safety gates (`ProfileStore.phase_remaining`).** The phase matcher considers
+the matched program's **group siblings** when it is grouped (narrow within the family -
+coherent and accurate), otherwise **all** of the device's cached phase profiles (best-fit;
+the Phase-0 gate showed constraining an ungrouped cycle to the sometimes-wrong whole-cycle
+match regresses the ETA). Two safety gates bound it: a **cold-start floor**
+(`PHASE_PROFILE_MIN_CYCLES = 2`, so a single-cycle zero-variance prior can't drive the ETA)
+and an **ambiguity gate** (top-2 phase scores within `MATCH_AMBIGUITY_MARGIN` fall back to the
+classic estimate rather than committing a coin-flip variant).
+
+**Gating.** Live phase-ETA requires both the per-device `enable_phase_matching` option flag
+AND the device type being in `LIVE_PHASE_DEVICE_TYPES = (washing_machine, washer_dryer)`.
+Dishwashers have a segmenter model but are deliberately excluded from *live* ETA for now.
+
+**Panel.** A single checkbox, `enable_phase_matching`, lives in a device-gated "Time Remaining"
+settings section, saved through `ws_set_options` (there is no config-flow entry for it).
+
+**Mixed-profile / data-hygiene advisory (Phase 5).** `compute_profile_advisories` inspects the
+cached phase profile and flags a profile whose cycles are internally inconsistent (heating
+coefficient of variation > 0.45, or heating present in only 25-75% of cycles - a sign two
+different programs were labelled as one). It emits `{code: "phase_inconsistent", ...}` in the
+`profile_advisories` returned by `ws_get_profiles`. (Maintainer note: as of this branch the
+advisory renders inline on the affected profile card in the Profiles tab, using the
+`msg.advisory_phase_inconsistent_title` string.)
 
 ---
 
@@ -1130,14 +1827,34 @@ A batch of feature groups (roadmap A-H) layered on top of the 0.5.0 architecture
 
 ### F. Onboarding, Settings Disclosure & Playground
 
-**F1 - First-run wizard.** With zero cycles and zero profiles, the Status tab renders an onboarding card ("run your appliance normally... after 3 cycles matching begins") with an N/3 progress meter and a Skip link that stores an `onboarding_dismissed` per-user preference (via `ws_set_panel_prefs`). Once `>= 3` cycles exist, it prompts the user to name their first program.
+**F1 - Setup Card / adoption guidance (0.5.1).** The old first-run onboarding card, the
+coverage-gap banner, and the Profiles-tab "Recommendations" banner were **consolidated into a
+single Setup Card** on the Overview tab. Its content is driven by `setup_advisor.py`
+(`compute_setup_phase` -> the `get_setup_status` WS command) as a six-phase state machine:
+
+| Phase | Situation | Card guidance |
+|-------|-----------|---------------|
+| **0** | No profiles at all | Record/label a first program, or "Browse community setups" (Store CTA) |
+| **1c** | `reference_cycles` exist but no self-recorded cycles (store-download-only) | Run the appliance once so the downloaded template can be confirmed against your machine; advances on the first non-ambiguous match |
+| **2** | Building coverage (few labelled cycles) | Keep running/labelling programs to widen coverage |
+| **3** | Coverage good, tuning opportunities | Review suggested settings / resolve pending feedback |
+| **4** | Healthy | Card goes quiet (can resurface amber on drift) |
+
+The card supports snooze / dismiss / hide-guidance (persisted per user via panel prefs) and
+resurfaces (amber) when a new actionable condition appears. The **config flow was simplified**
+in 0.5.1: the old "Create First Profile" step was removed, so setup is now purely device
+type + power sensor + min power, with the Setup Card taking over from there.
+
+**Threshold mode (no profiles).** When a device has **no real profiles**, WashData skips the
+periodic match poll entirely and suppresses the "No profile matched yet" notification - a fresh
+Threshold Device (or a not-yet-trained appliance) no longer nags about the absence of a match.
 
 **F2 - Basic / Advanced settings.** A per-user `settings_level` preference (`basic` | `advanced`) drives a Basic|Advanced toggle atop the Settings tab. Basic renders ~12 highest-impact fields; Advanced renders everything. It is purely a visibility filter - hidden fields keep their stored values.
 
 **F3 - Playground tab (unified workbench).** A top-level Playground tab backed by `playground.py`, built as **one workbench** rather than mutually-exclusive modes: a single interactive power graph is always the centrepiece; a shared detection/matching settings panel and a bottom "Across your cycles" drawer both feed it. **Single source of truth:** the whole tab reuses the *exact* production code - the real `CycleDetector`, the real Stage 1-4 matcher, `progress.py` (progress/remaining/phase/energy) and `notification_rules.py` (notification decisions). There is no client-side detection copy (the former `_pgComputeDetection` JS state machine and the static `remaining = totalDur - elapsed` countdown were deleted).
 
 - **The graph (always present).** Pick a cycle (profile defaults to **auto-detect** so the sim shows what the matcher picks), press **Run** (or **Cancel**); one WS call (`run_playground_cycle_detail` → `playground.simulate_cycle_detail`) returns a full timeline: a per-5s `series` (state, model progress/remaining, live confidence, phase, energy, projected energy/cost), a typed `events` log (`detected`, `match_commit`/`match_changed`/`match_ambiguous`, `notify_start`/`notify_pre_complete`/`notify_finish`/`notify_milestone`/`notify_held`, `finished`), `alerts`, and an `outcome`. Alerts now include **end-detection flags**: `timeout_end` (ended only by the low-power off-delay, not smart prediction - warn when also unmatched) and `would_run_indefinitely` (`TerminationReason.FORCE_STOPPED` - never ended on its own), so an auto-detected cycle's end behaviour is visible. `_pgDrawCanvas` renders the detector state band + phase bands + draggable thresholds and **event pins**: heads sit in a band ABOVE the plot (`_PG_PIN_BAND_H`) on stems down to the real event time, nudged apart on collision; hovering a head (hit-tested via `_pgEventHits`) shows a tooltip with `_pgEventDescription(type)`. The graph is interactive (hover readout of from-start / to-end / power, scroll to zoom, drag to pan, double-click to reset via `_pgView`/`_pgHoverT`/`_pgMap`); no JS replay. Dragging a threshold or editing a param debounces a re-run (`_pgRerunDetail`). **Match faithfulness:** the detail `_matcher` reports a **persistence-gated committed** match (mirrors the manager: a candidate must be non-ambiguous top-1 for `match_persistence` consecutive matches before it commits, and the committed match is held) rather than the raw per-interval top-1 — so the series/events show no phantom mid-cycle profile flips. The detector still receives the raw top-1 (detection unchanged). The analysis panel shows **Match confidence** (the committed matcher score, same as the strip) separately from **Envelope fit** (the `get_dtw_debug` envelope score) so the two aren't confused.
-- **Settings panel (shared).** `_pgOverrideFields()` groups detection triggers / timing / edge-cases / **program matching**. Every field is a real, user-settable option (so a value found here can be applied for real): `build_sim_config` applies the detection keys (including `start_duration_threshold` / `abrupt_drop_watts` / `interrupted_min_seconds`, which used to be shown but silently dropped), and `apply_match_overrides` maps the two user-configurable matching options (`profile_match_min/max_duration_ratio`) onto the matcher's `min/max_duration_ratio` so the sim can A/B the Stage-1 duration gate. The ML-tuned scoring weights are deliberately NOT exposed (users can't set them anywhere). **Save to settings** (`_pgApplyToSettings`) copies every staged override into the device's live options via `set_options` in one click.
+- **Settings panel (shared).** `_pgOverrideFields()` groups detection triggers / timing / edge-cases / **program matching**. `build_sim_config` applies the detection keys (including `start_duration_threshold` / `abrupt_drop_watts` / `interrupted_min_seconds`, which used to be shown but silently dropped), and `apply_match_overrides` maps the matching options onto the matcher config. The **program-matching** group exposes the whole pipeline for experimentation: the two real, user-settable duration-gate options (`profile_match_min/max_duration_ratio`, Stage 1 - a value found here can be applied for real) **plus** the Stage 2-4 scoring / DTW knobs (`corr_weight`, `keep_min_score`, `dtw_bandwidth`, `dtw_blend`, `dtw_ensemble_w`, `dtw_ddtw_scale`, `dtw_refine_top_n`, `duration_weight`, `energy_weight`, `duration_scale`, `energy_scale`). The scoring knobs are **sandbox-only** - they are not persistent settings, so they only shape the simulation's match config (built fresh and never saved); they let a power user A/B how each stage scores their own cycles. **Save to settings** (`_pgApplyToSettings`) copies staged *real* overrides into the device's live options via `set_options`. (Stage-5 group-cohesion and Stage-6 phase parameters are not yet exposed - they are not config-driven in the sim path.)
 - **Drawer: Test on history** - `_pgRunHistory` replays the last N cycles in small chunks (`run_playground_history` per 2-cycle slice) so each executor job is short and the event loop breathes between them (responsive UI, other data keeps loading), driving a determinate progress bar (`_htmlPgBatchBar`/`_pgUpdateBatchBar`, advanced by direct DOM writes so it is never lost) with a working **Cancel** (`_pgBatchCancel`). Rows accumulate client-side; the summary + before/after `diff` are aggregated in JS (`_pgHistorySummary`/`_pgHistoryDiff`, mirroring the backend counters - trivial counting of server-computed per-cycle results). Clicking a row calls `_pgSelectCycle(cid)`, loading that cycle **into the graph above in place** (auto-detect profile, `_pgLoadSeq` supersede, row highlight, scroll into view) - no page switch.
 - **Drawer: Optimize** - `_pgRunSweep2` chunks the sweep too: one value per WS call (1D) or one grid cell per call (2D), same progress bar + Cancel; `objective_metric` (`match_accuracy`, `end_timing_accuracy`, `false_end_rate`, `median_overrun` = |median ratio − 1|, `ambiguity_rate`) is still computed server-side per call, and the best value/cell is selected client-side (`_pgSweepBest1D`/`_pgSweepBest2D`, mirroring `_sweep_is_better`). "Apply best" persists the value and stages it into the graph.
 
@@ -1174,10 +1891,23 @@ regression test enforces this), serialized per entry under `_entry_write_lock`.
 After a panel reload their completion re-refreshes the ML/diagnostics views via
 `_settleTaskCallback` -> `_autoSettleAdopted`, and the pills render any kind.
 
+**Cycle-management background tasks (0.5.1).** The panel's destructive/heavy cycle-editing
+operations - **trim** (`trim_cycle`), **split** (`apply_split`), **merge** (`apply_merge`),
+and **rebuild envelopes** (`rebuild_envelopes`) - were moved onto the same registry. They now
+return a `StartTaskResponse` (a `task_id`) immediately and run as chunked background tasks with
+a header progress pill and Cancel, instead of blocking the WS request while re-integrating
+energy and rebuilding envelopes. This fixes the frozen-panel behaviour (issue #311): a backgrounded
+tab or a dropped socket no longer orphans or loses the operation, and the result is read back
+reconnect-safe via `get_task_result`. There are **nine task kinds** in total: playground
+history / sweep / cycle-detail, reprocess, ML training, rebuild-envelopes, trim, split, merge.
+(Note: the `task_registry` wiring lives entirely in `ws_api.py`; `manager.py` runs its own
+long jobs, e.g. scheduled ML training and health recompute, as plain executor/`async_create_task`
+jobs outside the registry.)
+
 ### G. Conversation intents (Assist)
 
 `intents.py` defines a single `HaWashdataStatus` intent (`INTENT_STATUS`), registered once per HA instance from `async_setup_entry` via `async_setup_intents` (no import-time side effects). The handler answers "is my washer done / how long left" from live manager/sensor state ("still running, about N minutes left" / "finished N minutes ago" / "not running"), resolving the device by an optional `{name}` slot. `conversation` is added to `manifest.json` dependencies. Because HA has no runtime API for a custom integration to inject sentences into the built-in conversation agent, trigger sentences are wired by the user via a `<config>/custom_sentences/en/ha_washdata.yaml` pack (one file per language); the intent is fireable immediately from automations / `intent_script` / the Assist pipeline. (Roadmap G2, a community profile library, is deferred / not shipped.)
 
 ### H. Type-safe WS API contract (developer)
 
-`ws_schema.py` is the single source of truth for the panel's WebSocket surface: a `TypedDict` response per command plus a `WS_COMMANDS` request registry covering all ~70 commands. A debug-only `_send_result` wrapper validates outgoing responses against the declared shape when `HA_WASHDATA_WS_CONTRACT=1` (zero overhead otherwise). `devtools/generate_ws_types.py` regenerates `www/ws-types.d.ts` (TypeScript types) and `docs/WS_API.md` (auto-generated command reference). `tests/test_ws_contract.py` fails if a command is added or removed without updating the contract, keeping `ws_api.py`, `ws_schema.py`, and the generated docs in sync.
+`ws_schema.py` is the single source of truth for the panel's WebSocket surface: a `TypedDict` response per command plus a `WS_COMMANDS` request registry covering all **99 commands**. A debug-only `_send_result` wrapper validates outgoing responses against the declared shape when `HA_WASHDATA_WS_CONTRACT=1` (zero overhead otherwise). `devtools/generate_ws_types.py` regenerates `www/ws-types.d.ts` (TypeScript types) and `docs/WS_API.md` (auto-generated command reference). `tests/test_ws_contract.py` fails if a command is added or removed without updating the contract, keeping `ws_api.py`, `ws_schema.py`, and the generated docs in sync.

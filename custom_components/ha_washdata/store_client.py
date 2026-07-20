@@ -36,6 +36,7 @@ from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.util import dt as dt_util
 
 from .const import (
     SHAREABLE_SETTING_KEYS,
@@ -334,7 +335,9 @@ class StoreClient:
             "structuredQuery": {"from": [{"collectionId": "ratings"}]},
             "aggregations": [
                 {"alias": "cnt", "count": {}},
-                {"alias": "avg", "average": {"field": {"fieldPath": "rating"}}},
+                # NB: the Firestore aggregation operator is `avg`, NOT `average` --
+                # the wrong name 400s the whole query and silently zeroes ratings.
+                {"alias": "avg", "avg": {"field": {"fieldPath": "rating"}}},
             ],
         }}
         try:
@@ -800,3 +803,59 @@ class StoreClient:
         if not ok:
             _LOGGER.warning("Store rate_device failed: %s", body[:200])
         return ok
+
+    async def bump_downloads(self, cycle_ids: list[str]) -> None:
+        """Best-effort +1 to each cycle's public ``downloads`` counter. The store rule
+        allows an anonymous ``downloads++`` (unauthenticated), so this needs no token --
+        it mirrors the website's per-download bump. Chunked to stay under Firestore's
+        500-writes-per-commit limit. Never raises."""
+        # Deduplicate (order-preserving): Firestore :commit rejects a batch (HTTP 400)
+        # if it contains two writes to the same document, which a bundle referencing
+        # the same shared cycle across profiles can produce.
+        ids = list(dict.fromkeys(c for c in (cycle_ids or []) if c))
+        for start in range(0, len(ids), 400):
+            writes = [
+                {"transform": {
+                    "document": self._doc_path(f"cycles/{cid}"),
+                    "fieldTransforms": [{"fieldPath": "downloads", "increment": _encode(1)}],
+                }}
+                for cid in ids[start:start + 400]
+            ]
+            try:
+                async with self._sess().post(
+                    f"{self._base}:commit", json={"writes": writes}, timeout=15,
+                ) as resp:
+                    if resp.status != 200:
+                        _LOGGER.debug("Store bump_downloads HTTP %s: %s", resp.status, (await resp.text())[:200])
+            except Exception as exc:  # noqa: BLE001
+                _LOGGER.debug("Store bump_downloads error: %s", exc)
+
+    async def bump_analytics(self, field: str, n: int = 1) -> None:
+        """Best-effort +n to an aggregate usage counter the store's admin dashboard reads
+        (``analytics/totals`` + ``analytics/daily_YYYYMMDD``). This is how integration
+        downloads become a real, community-wide usage metric -- the website has no
+        download action, so the integration is the source of truth for "someone adopted
+        this". Unauthenticated (the analytics rule allows anonymous counter writes) and
+        never raises. The daily doc id is UTC to line up with the website's own writes.
+        """
+        if not field or n <= 0:
+            return
+        day = dt_util.utcnow().strftime("%Y%m%d")  # UTC to match the website's daily docs
+        writes = [
+            {"transform": {
+                "document": self._doc_path(f"analytics/daily_{day}"),
+                "fieldTransforms": [{"fieldPath": field, "increment": _encode(n)}],
+            }},
+            {"transform": {
+                "document": self._doc_path("analytics/totals"),
+                "fieldTransforms": [{"fieldPath": field, "increment": _encode(n)}],
+            }},
+        ]
+        try:
+            async with self._sess().post(
+                f"{self._base}:commit", json={"writes": writes}, timeout=15,
+            ) as resp:
+                if resp.status != 200:
+                    _LOGGER.debug("Store bump_analytics HTTP %s: %s", resp.status, (await resp.text())[:200])
+        except Exception as exc:  # noqa: BLE001
+            _LOGGER.debug("Store bump_analytics error: %s", exc)

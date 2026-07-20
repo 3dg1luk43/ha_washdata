@@ -1,13 +1,13 @@
 {
   "badge": {
-    "artifact_tip": "Otkriveno je {n} anomalija (npr. vrata otvorena usred ciklusa) — otvorite da ih vidite na grafikonu",
+    "artifact_tip": "Otkriveno je {n} anomalija (npr. vrata otvorena usred ciklusa) – otvorite da ih vidite na grafikonu",
     "auto": "(automatski otkriveno)",
     "built_in_tag": "ugrađen",
     "declining": "↘ opadajući",
     "energy_low": "Manja potrošnja energije nego obično",
     "energy_spike": "Veća potrošnja energije nego obično",
     "fair_fit": "prihvatljiva kvaliteta",
-    "fair_fit_tip": "Umerena doslednost podudaranja — neki ciklusi dodeljeni ovom profilu imaju niže ocene pouzdanosti. Označite više ciklusa ili ponovo snimite profil da biste poboljšali tačnost.",
+    "fair_fit_tip": "Umerena doslednost podudaranja – neki ciklusi dodeljeni ovom profilu imaju niže ocene pouzdanosti. Označite više ciklusa ili ponovo snimite profil da biste poboljšali tačnost.",
     "feedback_requested": "Zatražena povratna informacija",
     "golden_cycle": "Snimljeni referentni ciklus",
     "improving": "↗ poboljšava se",
@@ -15,7 +15,7 @@
     "needs_review": "Potreban pregled",
     "overrun": "Trajao duže nego obično",
     "poor_fit": "loša kvaliteta",
-    "poor_fit_tip": "Nedosledna istorija podudaranja — razmislite o ponovnoj izgradnji ovog profila",
+    "poor_fit_tip": "Nedosledna istorija podudaranja – razmislite o ponovnoj izgradnji ovog profila",
     "restart_gap_tip": "{n} HA praznina ponovnog pokretanja: trag snage ima rupu",
     "reviewed": "Pregledano",
     "steady": "→ stabilan",
@@ -87,7 +87,7 @@
     "on_cycle_finished": "Po završetku ciklusa",
     "on_cycle_started": "Po pokretanju ciklusa",
     "pause_cycle": "Pauziraj",
-    "pause_cycle_tip": "Pauziraj aktivni ciklus — uređaj će se nastaviti od mesta gde je stao",
+    "pause_cycle_tip": "Pauziraj aktivni ciklus – uređaj će se nastaviti od mesta gde je stao",
     "pg_apply_device": "Primeni na uređaj",
     "pg_autofill": "Automatsko popunjavanje",
     "play": "Reprodukuj",
@@ -97,8 +97,8 @@
     "process_tip": "Sačuvaj snimljeni trag kao novi ili postojeći profil",
     "rebuild": "Obnovi omotače",
     "rebuild_envelope": "Obnovi omotač",
-    "rebuild_tip": "Ponovo izračunaj očekivani omotač snage (min/maks opseg) za sve profile iz njihovih označenih ciklusa — pokreni nakon označavanja novih ciklusa ili ispravljanja starih",
-    "rec_start_tip": "Počni snimanje traga snage uređaja — pokreni neposredno pre pokretanja ciklusa",
+    "rebuild_tip": "Ponovo izračunaj očekivani omotač snage (min/maks opseg) za sve profile iz njihovih označenih ciklusa – pokreni nakon označavanja novih ciklusa ili ispravljanja starih",
+    "rec_start_tip": "Počni snimanje traga snage uređaja – pokreni neposredno pre pokretanja ciklusa",
     "rec_stop": "Zaustavi",
     "rec_stop_tip": "Zaustavi snimanje i zadrži snimljeni trag radi pregleda",
     "record": "Počni snimanje",
@@ -231,7 +231,7 @@
       "interval": "Treba biti najmanje 2× Interval uzorkovanja ({si} s)",
       "sampling": "Interval uzorkovanja treba biti najviše pola Intervala nadzornika ({wi} s)"
     },
-    "settings_banner": "{n} konflikt{s} podešavanja — proverite istaknute odeljke i ispravite pre čuvanja.",
+    "settings_banner": "{n} konflikt{s} podešavanja – proverite istaknute odeljke i ispravite pre čuvanja.",
     "settings_banner_btn": "Idi na prvi"
   },
   "hdr": {
@@ -451,9 +451,9 @@
     "show_expected": "Prikaži preklop očekivane krive (usklađeni profil, narandžasta)",
     "show_raw": "Prikaži prekidač sirovih očitavanja utičnice u živom grafu snage",
     "sparkline": "Nedavni trend trajanja ciklusa",
-    "stage2": "Etapa 2 — osnovna sličnost",
-    "stage3": "Etapa 3 — DTW",
-    "stage4": "Etapa 4 — slaganje",
+    "stage2": "Etapa 2 – osnovna sličnost",
+    "stage3": "Etapa 3 – DTW",
+    "stage4": "Etapa 4 – slaganje",
     "status": "Status",
     "tail_trim": "Isecanje kraja (s)",
     "timer_auto_pause": "Automatska pauza",
@@ -561,7 +561,12 @@
     "flags": "Oznake",
     "include_phase_map": "Uključi mapu faza",
     "include_settings": "Uključi podešavanja",
-    "show_contributor": "Prikaži saradnika"
+    "show_contributor": "Prikaži saradnika",
+    "task_pg_detail": "Simuliraj ciklus",
+    "task_split": "Deljenje ciklusa",
+    "task_trim": "Obrezivanje ciklusa",
+    "task_merge": "Spajanje ciklusa",
+    "task_rebuild": "Ponovna izgradnja omotača"
   },
   "log": {
     "all_levels": "Svi nivoi",
@@ -645,7 +650,7 @@
     "artifact_dip_detail": "Pao ispod uobičajenog opsega snage za ~{n} s.",
     "artifact_footer": "Istaknuto na grafikonu iznad. Ovo su prolazni artefakti (npr. vrata se otvaraju usred ciklusa), ne nužno problemi.",
     "artifact_header": "{n} anomalija otkrivenih tokom ovog ciklusa",
-    "artifact_pause_detail": "Snaga je pala gotovo na nulu za ~{n} s i zatim se obnovila — verovatno su se otvorila vrata usred ciklusa ili je ciklus bio pauziran.",
+    "artifact_pause_detail": "Snaga je pala gotovo na nulu za ~{n} s i zatim se obnovila – verovatno su se otvorila vrata usred ciklusa ili je ciklus bio pauziran.",
     "artifact_spike_detail": "Prešao uobičajeni opseg snage za ~{n} s.",
     "auto_label_intro": "Dodeli profile neoznačenim ciklusima čija pouzdanost podudaranja prelazi prag.",
     "automations_intro": "WashData okida događaje {start} / {end} i izlaže entitete, pa je obaveštenja i akcije najbolje graditi kao normalne automatizacije Home Assistanta. Automatizacije koje koriste ovaj uređaj prikazane su ispod.",
@@ -654,10 +659,10 @@
     "collecting_data": "Prikupljanje podataka: još {need} ciklusa do početka finog podešavanja ({current}/{min}).",
     "compare_overlay_profiles": "Preklapanje profila (bledi)",
     "compare_profiles_tip": "Prekrijte druge omotače profila na gornjem grafikonu da vidite koji najbolje odgovara ovom ciklusu.",
-    "compare_selected_cycles": "Izabrani ciklusi (neprozirni) — prikaži / sakrij",
+    "compare_selected_cycles": "Izabrani ciklusi (neprozirni) – prikaži / sakrij",
     "consider_new_profile": "Razmislite o kreiranju novog profila.",
     "coverage_gap": "nedavni ciklusi nemaju odgovarajući profil ({pct}% od poslednjih 30).",
-    "coverage_gap_similar_cycles": "{count} sličnih neoznačenih ciklusa pronađeno — napravite profil da biste počeli njihovo podudaranje.",
+    "coverage_gap_similar_cycles": "{count} sličnih neoznačenih ciklusa pronađeno – napravite profil da biste počeli njihovo podudaranje.",
     "cycles_deleted": "Obrisano ciklusa: {count}",
     "enough_data": "Dovoljno podataka za učenje ({current}/{min} ciklusa).",
     "export_description": "Izvezite sve profile i cikluse u JSON ili vratite iz prethodnog izvoza.",
@@ -686,7 +691,7 @@
     "ml_learned_intro": "Modeli fino podešeni za ovu mašinu.",
     "ml_loading": "učitavanje ML…",
     "ml_settings_intro": "Dve nezavisne sklopke: jedna primenjuje modele dok se ciklus izvodi, druga omogućava WashData da ih fino podesi za vašu mašinu tokom vremena.",
-    "name_first_program": "Imate dovoljno ciklusa — imenujte svoj prvi program da biste započeli uparivanje.",
+    "name_first_program": "Imate dovoljno ciklusa – imenujte svoj prvi program da biste započeli uparivanje.",
     "near_duplicate_cluster": "otkrivena je skoro duplirana grupa profila. Grupisanje omogućava pouzdano podudaranje da bira između sličnih (npr. isti program na različitoj temperaturi/centrifugiranju).",
     "no_cycles_match": "Nema ciklusa koji odgovaraju trenutnom filteru.",
     "no_cycles_profile": "Nema ciklusa za ovaj profil.",
@@ -696,7 +701,7 @@
     "no_devices": "Nema WashData uređaja konfigurisanih još.",
     "no_envelope": "Nema omotača još - obnovi nakon označavanja ciklusa.",
     "no_envelope_overlay": "Nema dostupnog omotača za preklapanje.",
-    "no_fine_tuned": "Ništa fino podešeno još — WashData koristi ugrađene modele.",
+    "no_fine_tuned": "Ništa fino podešeno još – WashData koristi ugrađene modele.",
     "no_logs": "Nema dnevničkih zapisa baferovanih još.",
     "no_maintenance": "Održavanje još nije zabeleženo.",
     "no_match_yet": "Nema pokušaja podudaranja još - ovo se popunjava tokom aktivnog ciklusa.",
@@ -713,7 +718,7 @@
     "notify_services_hint": "Koristite ID-ove servisa {entity} (odvojene zarezima za više). Promenljive šablona: {vars}.",
     "old_actions_warning": "Konfigurisano sa starim uređivačem radnji (sada uklonjeno). I dalje se aktiviraju na događaje ciklusa, ali više ne mogu da se uređuju ovde. Pretvorite ih u normalnu automatizaciju ili ih uklonite.",
     "onboarding_progress": "Posmatrano ciklusa: {n} / 3",
-    "onboarding_watching": "Koristite uređaj normalno — WashData posmatra. Nakon 3 ciklusa počeće uparivanje programa.",
+    "onboarding_watching": "Koristite uređaj normalno – WashData posmatra. Nakon 3 ciklusa počeće uparivanje programa.",
     "pending_feedback": "Povratna informacija detekcije na čekanju",
     "performance_trend": "Trend učinka ({n} ciklusa)",
     "pg_analysis_empty": "Učitajte ciklus da vidite analizu poklapanja.",
@@ -763,7 +768,7 @@
     "setting_changed": "Promenjeno sa {old} na {new} dana {date}",
     "settings_basic_note": "Prikazuju se osnovna podešavanja. Prebacite na Napredno za potpunu listu.",
     "shape_drift_advisory": "⚠ Pomeraj oblika",
-    "shape_drift_detail": "Obrazac snage ovog profila se promenio s vremenom — moguće habanje uređaja ili potrebno održavanje (npr. uklanjanje kamenca, čišćenje filtera).",
+    "shape_drift_detail": "Obrazac snage ovog profila se promenio s vremenom – moguće habanje uređaja ili potrebno održavanje (npr. uklanjanje kamenca, čišćenje filtera).",
     "show_all_settings": "Prikaži sva podešavanja",
     "showing_suggestions": "Prikazuje se podešavanje {count} sa prijedlozima.",
     "split_intro": "Klikni na grafikon za dodavanje ili uklanjanje tačke deljenja, ili automatski otkrij po prazninama. Svaki rezultujući segment može dobiti sopstveni profil.",
@@ -789,10 +794,10 @@
     "toast_revert_failed": "Povrat nije uspeo: {error}",
     "toast_reverted": "{key} vraćeno",
     "toast_save_failed": "Čuvanje nije uspelo: {error}",
-    "trend_duration_longer": "Trajanje je u trendu duže ({pct}%/ciklus) — nedavno u proseku {avg}",
-    "trend_duration_shorter": "Trajanje u trendu kraće ({pct}%/ciklus) — nedavno u proseku {avg}",
+    "trend_duration_longer": "Trajanje je u trendu duže ({pct}%/ciklus) – nedavno u proseku {avg}",
+    "trend_duration_shorter": "Trajanje u trendu kraće ({pct}%/ciklus) – nedavno u proseku {avg}",
     "trend_energy_down": "Energija opada ({pct}%/ciklus)",
-    "trend_energy_up": "Energetski trend raste ({pct}%/ciklus) — nedavni prosek {avg}",
+    "trend_energy_up": "Energetski trend raste ({pct}%/ciklus) – nedavni prosek {avg}",
     "trim_intro": "Prevuci crvene ručice ili unesi vrednosti. Sve izvan prozora se uklanja.",
     "tuning_suggestions_available": "{count} prijedlog podešavanja dostupan je iz posmatranih ciklusa. Pojavljuju se pored relevantnih polja.",
     "unsure_detected_prefix": "WashData nije siguran da je otkrio",
@@ -857,7 +862,9 @@
     "share_guidelines_title": "Pre deljenja",
     "store_download_device_intro": "Preuzmite podešavanja uređaja iz zajednice i primenite ih na novi ili postojeći uređaj",
     "store_share_device_intro": "Podelite programe svog uređaja (profile + referentne cikluse) sa zajednicom. Podešavanja su opcionalna.",
-    "share_profile_no_cycles": "Profil '{p}' nema ⭐ referentnih ciklusa -- biće preskočen osim ako nemate {n}+ potvrđenih pokretanja"
+    "share_profile_no_cycles": "Profil '{p}' nema ⭐ referentnih ciklusa -- biće preskočen osim ako nemate {n}+ potvrđenih pokretanja",
+    "advisory_phase_inconsistent": "Izgleda da '{name}' meša različite programe ili temperature - njegovi ciklusi se greju veoma različito dugo. Podela na zasebne profile (npr. po temperaturi) poboljšaće podudaranje i procene vremena.",
+    "advisory_phase_inconsistent_title": "⚠ Možda pomešani programi"
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka okretanja nakon završetka radi smanjenja gužvanja.",
@@ -940,6 +947,10 @@
     "triggers": {
       "intro": "Opcionalni spoljni signali: okidač kraja, senzor vrata, prekidač pauze i podsetnik za istovar.",
       "label": "Okidači i vrata"
+    },
+    "phase_eta": {
+      "label": "Preostalo vreme",
+      "intro": "Procena preostalog vremena zasnovana na fazama, za mašine čija dužina ciklusa zavisi od temperature ili centrifuge."
     }
   },
   "setting": {
@@ -1022,6 +1033,10 @@
     "energy_price_static": {
       "doc": "Fiksna cena po kVh koja se koristi za brojke troškova kada nije postavljen nijedan entitet cene uživo iznad.",
       "label": "Statična cena energije (po kWh)"
+    },
+    "energy_sensor": {
+      "doc": "Opciono kumulativno brojilo energije (total_increasing kWh/Wh, npr. sopstveno brojilo ukupne potrošnje utičnice). Kada je postavljeno, energija prijavljena za svaki ciklus uzima se iz razlike očitavanja ovog brojila između početka i kraja, čime se izbegava potcenjivanje koje nastaje integracijom sporo izveštavajućeg senzora snage. Vraća se na integrisanu vrednost ako očitavanje nedostaje, njegova jedinica je nepoznata ili razlika nije pozitivna. Ostavite prazno da biste nastavili da integrišete senzor snage.",
+      "label": "Entitet brojila energije"
     },
     "expose_debug_entities": {
       "doc": "Objavite dodatne dijagnostičke HA entitete (pouzdanost podudaranja, dvosmislenost, unutrašnje karakteristike stanja). Isključeno održava listu entiteta čistom za normalnu upotrebu.",
@@ -1305,6 +1320,38 @@
     },
     "show_contributor": {
       "doc": "Prikaži ime saradnika na profilima preuzetim iz prodavnice zajednice"
+    },
+    "enable_phase_matching": {
+      "label": "Preostalo vreme prilagođeno fazama",
+      "doc": "Deli svaki aktivni ciklus na faze (zagrevanje, pranje, centrifuga) i raspoređuje preostalo vreme po fazama, u kombinaciji sa klasičnom procenom - oslanjajući se na raspored po fazama na početku ciklusa, a na klasičnu procenu pri kraju. Ovo prilagođava odbrojavanje tome koliko se vaša mašina zaista greje i radi, što je najuočljivije u prvoj polovini ciklusa. Isključeno = samo klasična procena. Utiče samo na prikaz preostalog vremena; podudaranje programa i detekcija ciklusa ostaju nepromenjeni."
+    },
+    "keep_min_score": {
+      "label": "Min. rezultat podudaranja",
+      "doc": "Minimalni rezultat sličnosti koji kandidat mora imati da bi ostao u utrci podudaranja. Podrazumevana vrednost 0,1 je namerno benigna - prihvata čak i slabe kandidate i oslanja se na kasnijе faze za pronalazak najboljeg podudaranja. Povećajte za ranije odbacivanje neprobabilnih profila; smanjite za proširenje početnog skupa kandidata."
+    },
+    "dtw_blend": {
+      "label": "Mešanje deformacije",
+      "doc": "Koliko DTW rezultat poravnanja zamenjuje osnovni rezultat Faze 2. 0 = koristi samo rezultat Faze 2, 1 = koristi samo DTW rezultat, 0,5 (podrazumevano) = jednako mešanje. Povećajte za veće oslanjanje na warp poravnanje kada programi imaju slične nivoe snage ali različite obrasce tajminga."
+    },
+    "dtw_ensemble_w": {
+      "label": "Miks kombinacije DTW",
+      "doc": "U kombinovanom DTW režimu (podrazumevanom), težina skaliranog L1 naspram derivatnog DTW (DDTW). 1,0 = sve skalirano L1, 0 = sve DDTW, 0,7 = podrazumevano. Skalirana L1 varijanta upoređuje nivoe snage; derivatna varijanta reaguje na promene snage tokom vremena. Kombinovani režim spaja oba."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Razmera derivatne deformacije",
+      "doc": "Rastojanje polu-zasićenja za ocenjivanje derivatnim DTW. Rezultat se prepolovi kada rastojanje DDTW bude jednako ovoj vrednosti. Manje = osetljivije na razlike u obliku. Podrazumevana vrednost 30 je kalibrisana za tipične tragove snage kućanskih uređaja. Utiče samo na kombinovani i ddtw DTW režim."
+    },
+    "dtw_refine_top_n": {
+      "label": "Broj preciziranih kandidata",
+      "doc": "Koliko prvih kandidata Faze 2 DTW ponovo ocenjuje. DTW je skuplji pa se primenjuje samo na N najboljih kandidata. Podrazumevano 5. Povećajte (na 7-9) ako ispravni profil ponekad dostigne samo 4. ili 5. mesto nakon Faze 2 - DTW ga može spasiti. Smanjenje malo ubrzava podudaranje."
+    },
+    "duration_scale": {
+      "label": "Ostrina trajanja",
+      "doc": "Oštrina kazne za nepodudaranje trajanja u Fazi 4. Ovo je odnos logaritma pri kome se rezultat slaganja prepolovi. Manje = strože: nepodudaranje trajanja više snižava rezultat. Podrazumevana vrednost 0,175 odgovara toleranciji trajanja od oko 18% pri polu-težini. Koristite zajedno s Težinom trajanja."
+    },
+    "energy_scale": {
+      "label": "Ostrina energije",
+      "doc": "Oštrina kazne za nepodudaranje energije u Fazi 4. Manje = strože: nepodudaranje energije više snižava rezultat. Podrazumevana vrednost 0,25 je namerno blaža od Oštrine trajanja jer energija varira s opterećenjem. Koristite zajedno s Težinom energije."
     }
   },
   "setting_group": {
@@ -1424,24 +1471,24 @@
         "lower": "Više ciklusa se automatski označava; neki mogu biti pogrešno identifikovani"
       },
       "duration_tolerance": {
-        "higher": "Prihvata širi opseg trajanja — fleksibilnije podudaranje",
-        "lower": "Zahteva bliže podudaranje trajanja — strože, ali može odbiti neobične cikluse"
+        "higher": "Prihvata širi opseg trajanja – fleksibilnije podudaranje",
+        "lower": "Zahteva bliže podudaranje trajanja – strože, ali može odbiti neobične cikluse"
       },
       "end_energy_threshold": {
         "higher": "Zatvara samo cikluse sa značajnom potrošnjom energije",
         "lower": "Zatvara i kraće ili manje energetske cikluse"
       },
       "end_repeat_count": {
-        "higher": "Zahteva više ponavljanja signala kraja — pouzdanije, malo sporije",
-        "lower": "Završava nakon manje ponavljanja — brže otkrivanje, veći rizik lažnog završetka"
+        "higher": "Zahteva više ponavljanja signala kraja – pouzdanije, malo sporije",
+        "lower": "Završava nakon manje ponavljanja – brže otkrivanje, veći rizik lažnog završetka"
       },
       "learning_confidence": {
-        "higher": "Uči se samo iz visoko pouzdanih podudaranja — sporije, ali pouzdanije",
+        "higher": "Uči se samo iz visoko pouzdanih podudaranja – sporije, ali pouzdanije",
         "lower": "Uči se iz više ciklusa; model može biti manje precizan"
       },
       "min_off_gap": {
         "higher": "Potreban je duži odmor pre početka novog ciklusa",
-        "lower": "Kratak odmor pokreće novi ciklus — uzastopni ciklusi se mogu razdeliti"
+        "lower": "Kratak odmor pokreće novi ciklus – uzastopni ciklusi se mogu razdeliti"
       },
       "min_power": {
         "higher": "Manje osetljiv na potrošnju u mirovanju; može propustiti tihe programe",
@@ -1452,24 +1499,24 @@
         "lower": "Zaglavljen ciklus se prisilno zaustavlja ranije"
       },
       "off_delay": {
-        "higher": "Više vremena za pauze uređaja — prikladno za duge faze namakanja ili sušenja",
-        "lower": "Brže otkrivanje kraja — dobro za uređaje s čistim uključivanjem/isključivanjem"
+        "higher": "Više vremena za pauze uređaja – prikladno za duge faze namakanja ili sušenja",
+        "lower": "Brže otkrivanje kraja – dobro za uređaje s čistim uključivanjem/isključivanjem"
       },
       "profile_match_threshold": {
         "higher": "Potvrđuje samo visoko pouzdana podudaranja; više ciklusa ostaje neoznačeno",
         "lower": "Podudara više ciklusa; neki mogu biti blago pogrešni"
       },
       "running_dead_zone": {
-        "higher": "Zanemaruje kratke skokove snage tokom mirovanja — manje osetljiv na šum",
-        "lower": "Reaguje na kraće impulse snage — otkriva brzu prolaznu aktivnost"
+        "higher": "Zanemaruje kratke skokove snage tokom mirovanja – manje osetljiv na šum",
+        "lower": "Reaguje na kraće impulse snage – otkriva brzu prolaznu aktivnost"
       },
       "start_threshold_w": {
         "higher": "Sprečava lažne startove od kratkih skokova snage",
         "lower": "Otkriva programe s niskom snagom; može reagovati na šum"
       },
       "stop_threshold_w": {
-        "higher": "Završava ciklus brže — može zatvoriti tokom pauze",
-        "lower": "Duže čeka na završetak — manje prevremenih završetaka"
+        "higher": "Završava ciklus brže – može zatvoriti tokom pauze",
+        "lower": "Duže čeka na završetak – manje prevremenih završetaka"
       },
       "watchdog_interval": {
         "higher": "Dozvoljava duže tihe faze; manje lažnih prisilnih zaustavljanja",
@@ -1676,12 +1723,19 @@
     "start_duration_threshold": "Sekundi iznad praga za potvrdu pokretanja",
     "start_threshold_w": "Minimum vati da bi se računalo kao pokrenuto",
     "stop_threshold_w": "Ispod ovoga mašina se računa kao isključena",
-    "dtw_bandwidth": "Koliko vremenskog izobličenja dozvoljava podudaranje oblika",
-    "corr_weight": "Težina oblika krive u odnosu na nivo snage pri podudaranju",
-    "duration_weight": "Koliko slaganje trajanja utiče na podudaranje",
-    "energy_weight": "Koliko slaganje potrošnje energije utiče na podudaranje",
-    "profile_match_min_duration_ratio": "Najkraće izvođenje (u odnosu na profil) koje još može da se podudari",
-    "profile_match_max_duration_ratio": "Najduže izvođenje (u odnosu na profil) koje još može da se podudari"
+    "dtw_bandwidth": "Faza 3: warp opseg Sakoe-Chiba (0 = DTW isključen; podrazumevano 0,2 = 20% dužine ciklusa)",
+    "corr_weight": "Faza 2: ravnoteža između oblika krive (korelacija) i nivoa snage (MAE); podrazumevano 0,45",
+    "duration_weight": "Faza 4: koliko jako slaganje trajanja utiče na konačni rezultat (podrazumevano 0,22)",
+    "energy_weight": "Faza 4: koliko jako slaganje energije utiče na konačni rezultat (podrazumevano 0,22)",
+    "profile_match_min_duration_ratio": "Faza 1: minimalna dužina ciklusa kao udeo trajanja profila; podrazumevano 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Faza 1: maksimalna dužina ciklusa kao udeo trajanja profila; podrazumevano 1,5 (150%)",
+    "keep_min_score": "Faza 2: minimalni rezultat za ostanak u utrci; podrazumevano 0,1 prihvata slaba podudaranja, kasniji koraci biraju najbolje",
+    "dtw_blend": "Faza 3: 0 = samo osnovni rezultat, 1 = samo DTW rezultat, 0,5 = jednako mešanje (podrazumevano)",
+    "dtw_ensemble_w": "Faza 3 (kombinovani režim): težina skaliranog L1 naspram derivatnog DTW; podrazumevano 0,7 favorizuje nivo",
+    "dtw_ddtw_scale": "Faza 3: rastojanje polu-zasićenja DDTW; manje = osetljivije na oblik (podrazumevano 30)",
+    "dtw_refine_top_n": "Faza 3: kandidati koje DTW ponovo ocenjuje; povećajte na 7-9 ako ispravni profil zauzme 4.-5. mesto (podrazumevano 5)",
+    "duration_scale": "Faza 4: odnos logaritma gde se slaganje trajanja prepolovi; manje = stroža kazna (podrazumevano 0,175)",
+    "energy_scale": "Faza 4: odnos logaritma gde se slaganje energije prepolovi; manje = stroža kazna (podrazumevano 0,25)"
   },
   "col": {
     "profile_tip": "Naziv podudarnog programa. Bez oznake znači da se na kraju ciklusa nijedan profil nije podudarao.",
@@ -1766,6 +1820,68 @@
     },
     "pg_sweep": {
       "optimize": "Optimizacija: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simuliraj ciklus"
+    },
+    "split": {
+      "apply": "Deljenje ciklusa"
+    },
+    "trim": {
+      "apply": "Obrezivanje ciklusa"
+    },
+    "merge": {
+      "apply": "Spajanje ciklusa"
+    },
+    "rebuild": {
+      "envelopes": "Ponovna izgradnja omotača"
+    }
+  },
+  "setup": {
+    "hdr": {
+      "card": "Podešavanje uređaja",
+      "healthy_chip": "Podešavanje dovršeno"
+    },
+    "phase0": {
+      "washer": "WashData već otkriva vaše cikluse. Snimite prvi ciklus kako biste omogućili nazive programa i procene vremena.",
+      "dishwasher": "WashData posmatra. Mašine za pranje sudova imaju složene cikluse – snimanje prvog ciklusa je izrazito preporučeno. Ako otkriveni ciklus traje predugo, koristite uređivač ciklusa za isecanje pre čuvanja kao profila.",
+      "generic": "WashData posmatra. Snimite ili označite otkriveni ciklus kako biste počeli da gradite profile."
+    },
+    "phase1a": {
+      "labelled": "Dobar početak – vaš prvi program je sačuvan. Za najčistije podatke razmislite o snimanju sledećeg ciklusa pomoću vidžeta za snimanje."
+    },
+    "phase1b": {
+      "recorded": "Vaša snimka sačuvana je kao {profile_name}. Sada snimite ili označite ostale uobičajene programe za izgradnju pokrivenosti."
+    },
+    "phase1c": {
+      "verify": "Imate {count} programa od zajednice. Pokrenite ciklus kako biste proverili da li ih WashData ispravno prepoznaje – poklapanje će se poboljšavati kako vaš uređaj gradi sopstvenu istoriju."
+    },
+    "phase2": {
+      "cluster": "WashData je video {count} ciklusa koji se ne poklapaju ni sa jednim sačuvanim programom – međusobno su slični. Da li želite da napravite novi profil za njih?",
+      "unmatched": "Vaš poslednji ciklus se nije poklopio ni sa jednim sačuvanim programom. Da li je to novi program?"
+    },
+    "phase3": {
+      "suggestions": "WashData ima preporuke podešavanja zasnovane na istoriji vaših ciklusa – pregledajte ih da biste poboljšali tačnost otkrivanja.",
+      "groups": "Neki vaši profili izgledaju kao isti program na različitim temperaturama. Organizujte ih u grupu za bolje poklapanje.",
+      "phases": "Dodajte faze programa u {profile_name} za tačnije procene preostalog vremena."
+    },
+    "phase4": {
+      "healthy": "Ovaj uređaj je u potpunosti podešen ({profile_count} profila)."
+    },
+    "cta": {
+      "start_recording": "Pokreni snimanje",
+      "label_detected_cycle": "Već imam otkriven ciklus – umesto toga ga označi",
+      "browse_cycles": "Pregledaj cikluse za označavanje sledećeg",
+      "view_profiles": "Pogledaj svoje profile",
+      "create_from_cluster": "Napravi profil od ovih ciklusa",
+      "create_profile": "Napravi za njega profil",
+      "review_suggestions": "Preglej predloge",
+      "organise_profiles": "Organizuj profile",
+      "configure_phases": "Konfiguriši faze",
+      "skip_step": "Preskoči ovaj korak",
+      "skip_forever": "Ne prikazuj ponovo",
+      "hide_guidance": "Sakrij uputstvo",
+      "show_guidance": "Prikaži uputstvo"
     }
   }
 }

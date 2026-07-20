@@ -42,6 +42,11 @@ from .const import (
     MAINTENANCE_EVENT_TYPES,
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
+    PHASE_CONSISTENCY_MIN_CYCLES,
+    PHASE_PROFILE_MIN_CYCLES,
+    PHASE_HEAT_CV_WARN,
+    PHASE_HEAT_OCC_MIXED_LO,
+    PHASE_HEAT_OCC_MIXED_HI,
     REFERENCE_PROFILE_CURVE_POINTS,
     SHAPE_DRIFT_MIN_CYCLES,
     SHAPE_DRIFT_RESAMPLE_N,
@@ -68,6 +73,14 @@ from .phase_catalog import (
     get_builtin_phase_by_id,
     merge_phase_catalog,
     normalize_phase_name,
+)
+from .phase_segmenter import phase_matching_live_supported, phase_model_for, segment_cycle
+from .phase_match import (
+    build_phase_profile,
+    match_phase_profiles,
+    phase_eta,
+    phase_profile_from_dict,
+    phase_profile_to_dict,
 )
 from .log_utils import DeviceLoggerAdapter
 
@@ -461,6 +474,24 @@ def device_active_peak_range(
     return (min(peaks), max(peaks))
 
 
+def terminal_drop_baseline(
+    cycles: list[CycleDict],
+    stop_threshold_w: float,
+    min_quiet_span_s: float,
+    min_clean_cycles: int,
+) -> tuple[float | None, tuple[float, float] | None]:
+    """Combined ``(earliest_quiet_offset, peak_range)`` baseline.
+
+    Pure (no store / no I/O beyond decompressing the passed-in cycle traces), so
+    the manager can offload the whole per-cycle scan to an executor thread in one
+    hop instead of decompressing every trace on the event loop (issue #311)."""
+    earliest = earliest_sustained_quiet_offset(
+        cycles, stop_threshold_w, min_quiet_span_s, min_clean_cycles
+    )
+    peak_range = device_active_peak_range(cycles, min_clean_cycles)
+    return earliest, peak_range
+
+
 def is_terminal_drop(
     points: list[tuple[float, float]],
     earliest_quiet: float | None,
@@ -783,56 +814,18 @@ class WashDataStore(Store[JSONDict]):
             _LOGGER.info("Migrating storage from v%s to v10", old_major_version)
             old_data.setdefault("reference_cycles", [])
 
+        if old_major_version < 11:
+            # Marker-only bump. Per-phase profiles (envelope["phase_profile"], used
+            # by phase-segmented matching / phase-resolved ETA) are DERIVED CACHE
+            # built by async_rebuild_envelope, not stored data - so there is nothing
+            # to migrate. They self-populate on the next envelope rebuild (which
+            # runs on every cycle end / label change); until then consumers fall
+            # back to the existing estimator via lazy absent-key handling. No data
+            # is added, removed, or altered here.
+            _LOGGER.info("Migrating storage from v%s to v11 (phase-profile cache marker)",
+                         old_major_version)
+
         return old_data
-
-    async def get_storage_stats(self) -> dict[str, Any]:
-        """Get storage usage statistics."""
-        data = self._data  # pylint: disable=protected-access
-        if not data:
-            data = await self.async_load() or {}
-
-        # Rough file size estimation if possible, else 0
-        file_size_kb = 0
-        try:
-            path = self.path  # pylint: disable=no-member
-            if os.path.exists(path):
-                file_size_kb = os.path.getsize(path) / 1024
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
-
-        cycles = data.get("past_cycles", [])
-        profiles = data.get("profiles", {})
-
-        debug_traces_count = sum(1 for c in cycles if c.get("debug_data"))
-
-        return {
-            "file_size_kb": round(file_size_kb, 1),
-            "total_cycles": len(cycles),
-            "total_profiles": len(profiles),
-            "debug_traces_count": debug_traces_count,
-        }
-
-    async def async_clear_debug_data(self) -> int:
-        """Clear granular debug data from all cycles to free space."""
-        if not self._data:
-            await self.async_load()
-
-        if self._data is None:
-            return 0
-
-        cycles = self._data.get("past_cycles", [])
-        count = 0
-        for cycle in cycles:
-            if "debug_data" in cycle:
-                del cycle["debug_data"]
-                count += 1
-
-        if count > 0:
-            await self.async_save(self._data)
-            _LOGGER.info("Cleared debug data from %s cycles", count)
-
-        return count
-
 
 def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     """Top1-vs-top2 score margin and whether the match is ambiguous.
@@ -2245,6 +2238,16 @@ class ProfileStore:
                 except Exception:  # noqa: BLE001
                     continue
 
+            # Most-recent unmatched cycle id, so the setup advisor's phase-2
+            # "unmatched" nudge can deep-link straight to it (open_cycle:<id>)
+            # instead of always falling back to the whole unlabelled list.
+            last_unmatched_cycle_id = None
+            for c in reversed(unmatched):
+                cid = c.get("id")
+                if cid:
+                    last_unmatched_cycle_id = cid
+                    break
+
             return {
                 "unmatched_count": n_unmatched,
                 "low_confidence_count": len(low_conf),
@@ -2252,6 +2255,7 @@ class ProfileStore:
                 "suggest_create": bool(n_unmatched >= min_unmatched and rate >= min_unmatched_rate),
                 "duration_clusters": clusters,
                 "profile_suggestions": profile_suggestions,   # NEW (A3)
+                "last_unmatched_cycle_id": last_unmatched_cycle_id,
             }
         except Exception:  # noqa: BLE001
             return {}
@@ -2437,6 +2441,47 @@ class ProfileStore:
                         "message_key": "msg.advisory_energy_trend_up",
                         "message_params": {"name": name, "pct": f"{pct:.0f}"},
                     })
+
+            # Phase-structure consistency (phase-matching device types only). Uses
+            # the cached per-role phase profile: a profile whose member cycles heat
+            # for wildly different times, or where only some cycles heat at all,
+            # most likely mixes different programs/temperatures under one label -
+            # which hurts both matching and the phase-resolved ETA. Advisory only
+            # (Profiles tab); no relabeling (phase matching does not label better).
+            _sd = getattr(self, "_data", None)
+            _envs = _sd.get("envelopes") if isinstance(_sd, dict) else None
+            for pname, penv in (_envs if isinstance(_envs, dict) else {}).items():
+                if health.get(pname, {}).get("health_status") == "poor":
+                    continue  # avoid double advice
+                pp = penv.get("phase_profile") if isinstance(penv, dict) else None
+                if not isinstance(pp, dict):
+                    continue
+                try:
+                    if int(pp.get("n_cycles") or 0) < PHASE_CONSISTENCY_MIN_CYCLES:
+                        continue
+                    heat = (pp.get("roles") or {}).get("heating") or {}
+                    heat_mean = float(heat.get("dur_mean") or 0.0)
+                    heat_std = float(heat.get("dur_std") or 0.0)
+                    heat_occ = float(heat.get("occurrence") or 0.0)
+                    heat_cv = (heat_std / heat_mean) if heat_mean > 60.0 else 0.0
+                    mixed_temp = heat_cv > PHASE_HEAT_CV_WARN
+                    mixed_prog = PHASE_HEAT_OCC_MIXED_LO <= heat_occ <= PHASE_HEAT_OCC_MIXED_HI
+                    if not (mixed_temp or mixed_prog):
+                        continue
+                    advisories.append({
+                        "profile": pname, "severity": "warning",
+                        "code": "phase_inconsistent",
+                        "message": (
+                            f"'{pname}' looks like it mixes different programs or "
+                            "temperatures - its cycles heat for very different lengths "
+                            "of time. Splitting it into separate profiles (e.g. per "
+                            "temperature) will improve matching and time estimates."
+                        ),
+                        "message_key": "msg.advisory_phase_inconsistent",
+                        "message_params": {"name": pname},
+                    })
+                except (TypeError, ValueError):
+                    continue
 
             # E1: suppress the "needs maintenance" nag (duration-trending-longer /
             # shape-drift/poor-fit) when the user recently logged a descale, filter
@@ -3270,6 +3315,16 @@ class ProfileStore:
                     if c.get("id") in pending_feedback_ids:
                         continue
 
+                    # EXEMPTION: Never strip power data from user-pinned "golden" cycles.
+                    # The matcher uses a golden trace as the sharp single-cycle template
+                    # (has_golden in the snapshot builder), and golden_profiles membership
+                    # is gated on the trace still being present — trimming it would flip
+                    # has_golden false and silently drop the profile back to the smeared
+                    # envelope average.
+                    rev = c.get("ml_review")
+                    if isinstance(rev, dict) and rev.get("golden"):
+                        continue
+
                     if c.get("power_data"):
                         c.pop("power_data", None)
                         c.pop("sampling_interval", None)
@@ -3895,11 +3950,162 @@ class ProfileStore:
             "updated": dt_util.now().isoformat(),
         }
 
+        # Derived cache: per-phase profile (per-role duration/energy priors) used by
+        # phase-segmented matching / phase-resolved ETA. Built only for device types
+        # phase matching is live-supported for; absent otherwise (consumers fall back
+        # to the whole-cycle pipeline). Pure/cheap - segmentation is O(samples).
+        device_type = str(
+            self._data.get("profiles", {}).get(profile_name, {}).get("device_type") or ""
+        )
+        # Offload the per-cycle segmentation to the executor (it can be tens of ms
+        # for very long traces; keep it off the event loop, like the envelope DTW).
+        phase_profile = await self.hass.async_add_executor_job(
+            self._compute_phase_profile, profile_name, shape_cycles, device_type
+        )
+        if phase_profile is not None:
+            envelope_data["phase_profile"] = phase_profile
+
         if "envelopes" not in self._data:
             self._data["envelopes"] = {}
         self._data["envelopes"][profile_name] = envelope_data
 
         return True
+
+    def _compute_phase_profile(
+        self, profile_name: str, cycles: list[CycleDict], device_type: str
+    ) -> dict[str, Any] | None:
+        """Segment each member cycle and aggregate a per-role phase profile.
+
+        Returns a JSON-safe dict for ``envelope["phase_profile"]`` or ``None`` when
+        phase matching is not live-supported for this device type or no cycle could
+        be segmented. Never raises (phase support must never break envelope rebuild).
+        """
+        try:
+            if not phase_matching_live_supported(device_type):
+                return None
+            model = phase_model_for(device_type)
+            if model is None:
+                return None
+            segmented: list = []
+            for cycle in cycles:
+                offsets = power_data_to_offsets(cycle.get("power_data") or [])
+                if len(offsets) < 4:
+                    continue
+                t = [float(o) for o, _ in offsets]
+                w = [float(p) for _, p in offsets]
+                segs = segment_cycle(t, w, model)
+                if segs:
+                    segmented.append(segs)
+            if not segmented:
+                return None
+            profile = build_phase_profile(profile_name, segmented)
+            return phase_profile_to_dict(profile) if profile is not None else None
+        except Exception:  # noqa: BLE001 - phase caching must never break rebuild
+            self._logger.debug("phase-profile build failed for %s", profile_name, exc_info=True)
+            return None
+
+    def _group_scope(self, program: str) -> set[str] | None:
+        """Phase-narrowing scope for the matched ``program``:
+
+        * If ``program`` is in a group with >= 2 members, return that group's
+          members - narrow WITHIN the family (design §9). This is both coherent
+          (same program family as the displayed program) and accurate (picks the
+          right temperature/spin variant among siblings).
+        * Otherwise return ``None`` = no scope filter (consider ALL of the
+          device's phase profiles). The Phase-0 gate showed that constraining an
+          UNGROUPED cycle to only the whole-cycle-matched program regresses the
+          ETA whenever that match is wrong (common on mislabeled data): the best
+          ETA comes from letting the phase matcher pick the best-fitting profile,
+          bounded by the ambiguity gate + cold-start floor. Grouping variants is
+          the recommended workflow and restores full coherence.
+        """
+        try:
+            for grp in self.get_profile_groups().values():
+                members = grp.get("members") if isinstance(grp, dict) else None
+                if isinstance(members, list) and program in members:
+                    sib = {m for m in members if isinstance(m, str)}
+                    if len(sib) >= 2:
+                        return sib
+        except Exception:  # noqa: BLE001
+            self._logger.debug("_group_scope failed for %r", program, exc_info=True)
+        return None
+
+    def _candidate_phase_profiles(self, scope: set[str] | None = None) -> list:
+        """Cached per-profile PhaseProfiles (from envelope['phase_profile']).
+
+        Restricted to ``scope`` (profile names) when given, and always filtered to
+        profiles with >= ``PHASE_PROFILE_MIN_CYCLES`` member cycles so a noisy
+        single-cycle prior can't drive the ETA (cold-start floor).
+        """
+        out = []
+        for name, env in (self._data.get("envelopes") or {}).items():
+            if scope is not None and name not in scope:
+                continue
+            if isinstance(env, dict):
+                pp = phase_profile_from_dict(env.get("phase_profile"))
+                if pp is not None and pp.n_cycles >= PHASE_PROFILE_MIN_CYCLES:
+                    out.append(pp)
+        return out
+
+    def phase_remaining(
+        self,
+        power_data: list,
+        device_type: str,
+        program: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Phase-resolved remaining-time for a running cycle. Never raises.
+
+        Segments the observed-so-far trace and matches it against the matched
+        ``program``'s phase profile (and its group siblings, design §9), returning
+        the winning member's per-role budget remaining. Returns ``None`` (caller
+        keeps the current estimate) when: phase matching is not live-supported for
+        the device type; ``program`` is unknown / has no cached phase profile
+        (or too few cycles - cold-start floor); segmentation is degenerate; or the
+        top two candidates are within ``MATCH_AMBIGUITY_MARGIN`` (ambiguous - do
+        not commit a variant, design §7).
+
+        This is the *phase* half of the blended ETA; the blend with the current
+        estimator lives in ``progress.compute_progress`` (single source of truth).
+        Pure and cheap (segmentation + per-role agreement, no DTW) - safe to call
+        inline from the async matching path.
+        """
+        try:
+            if not phase_matching_live_supported(device_type):
+                return None
+            model = phase_model_for(device_type)
+            if model is None or not program:
+                return None
+            candidates = self._candidate_phase_profiles(self._group_scope(program))
+            if not candidates:
+                return None
+            offsets = power_data_to_offsets(power_data or [])
+            if len(offsets) < 4:
+                return None
+            t = [float(o) for o, _ in offsets]
+            w = [float(p) for _, p in offsets]
+            segs = segment_cycle(t, w, model, partial=True)
+            if not segs:
+                return None
+            ranked = match_phase_profiles(segs, candidates, {})
+            if not ranked:
+                return None
+            # Ambiguity gate: a near-tie among group members is not a confident
+            # variant call - fall back rather than swing the ETA between budgets.
+            if (len(ranked) >= 2
+                    and (ranked[0].score - ranked[1].score) < MATCH_AMBIGUITY_MARGIN):
+                return None
+            best = next((c for c in candidates if c.name == ranked[0].name), None)
+            remaining = phase_eta(segs, best) if best is not None else None
+            if remaining is None:
+                return None
+            return {
+                "remaining_s": float(remaining),
+                "matched": ranked[0].name,
+                "score": float(ranked[0].score),
+            }
+        except Exception:  # noqa: BLE001 - phase ETA must never break the estimate
+            self._logger.debug("phase_remaining failed", exc_info=True)
+            return None
 
 
 
@@ -3976,6 +4182,66 @@ class ProfileStore:
             }
         except Exception:  # pragma: no cover - defensive; never break the sensor
             return None
+
+    def get_profile_power_profile(
+        self, profile_name: str, interval_s: float = 900.0
+    ) -> list[float]:
+        """Average power (W) per fixed interval across a profile's learned shape.
+
+        Resamples the profile envelope's average power-over-time curve into
+        consecutive ``interval_s`` buckets (default 15 min) and returns the mean
+        watts in each, e.g. ``[2200, 2200, 800, 800, 1500, 500, 400, 200]`` - the
+        flat per-slot array external planners such as tibber_prices'
+        ``power_profile`` consume to pick the cheapest window to run the appliance
+        (issue #272). Unlike :meth:`reference_curve` (a downsampled time/watt shape
+        surfaced on the running-program sensor), this is a fixed-interval average
+        exposed per profile so it can be read for planning before a cycle starts.
+
+        The final bucket is averaged only over the part of the cycle that actually
+        falls inside it. Pure statistics; never raises. Returns an empty list when
+        the profile has no learned envelope yet.
+        """
+        try:
+            if interval_s <= 0:
+                return []
+            env = self.get_envelope(profile_name)
+            if not isinstance(env, dict):
+                return []
+            avg = env.get("avg")
+            if (
+                not isinstance(avg, list)
+                or len(avg) < 2
+                or not isinstance(avg[0], (list, tuple))
+                or len(avg[0]) < 2
+            ):
+                return []
+            ts = np.asarray([float(p[0]) for p in avg], dtype=float)
+            ws = np.asarray([float(p[1]) for p in avg], dtype=float)
+            if ts.size < 2 or not (np.all(np.isfinite(ts)) and np.all(np.isfinite(ws))):
+                return []
+            if ts[-1] <= ts[0]:
+                return []
+            total = float(env.get("target_duration") or 0.0)
+            if total <= 0:
+                total = float(ts[-1])
+            if total <= 0:
+                return []
+            n_buckets = int(math.ceil(total / interval_s))
+            out: list[float] = []
+            for k in range(n_buckets):
+                lo = k * interval_s
+                hi = min(lo + interval_s, total)
+                if hi <= lo:
+                    break
+                # Time-average the curve over the half-open slot [lo, hi) on a fine
+                # interpolated grid, so the result is independent of the envelope's
+                # grid spacing. endpoint=False keeps a slot boundary from being
+                # double-counted into the adjacent slot.
+                fine = np.linspace(lo, hi, 16, endpoint=False)
+                out.append(round(float(np.mean(np.interp(fine, ts, ws))), 1))
+            return out
+        except Exception:  # pragma: no cover - defensive; never break the sensor
+            return []
 
     def compute_envelope_conformance(
         self,
@@ -4315,39 +4581,48 @@ class ProfileStore:
             # Prepare Snapshots. Imported reference cycles are eligible as matching
             # templates alongside real cycles (so an import-only profile can match).
             all_cycles = list(self._data["past_cycles"]) + list(self._data.get("reference_cycles", []))
+            # Precompute per-profile lookups ONCE so the loop below is O(profiles),
+            # not O(profiles x cycles). Rescanning all_cycles with next()/any() for
+            # every profile made matching quadratic and stalled low-power hosts on
+            # auto-label (many matches x many cycles) - issue #311. Selections are
+            # byte-identical: cycles_by_id keeps the FIRST occurrence (== next()),
+            # labeled_by_profile keeps the first eligible cycle in all_cycles order,
+            # and golden_profiles mirrors the any(...) golden test.
+            cycles_by_id: dict[str, CycleDict] = {}
+            labeled_by_profile: dict[str, CycleDict] = {}
+            golden_profiles: set[str] = set()
+            for c in all_cycles:
+                cid = c.get("id")
+                if cid is not None and cid not in cycles_by_id:
+                    cycles_by_id[cid] = c
+                pname = c.get("profile_name")
+                if not pname or not c.get("power_data"):
+                    continue
+                if (
+                    pname not in labeled_by_profile
+                    and c.get("status") in ("completed", "force_stopped")
+                ):
+                    labeled_by_profile[pname] = c
+                rev = c.get("ml_review")
+                if isinstance(rev, dict) and rev.get("golden"):
+                    golden_profiles.add(pname)
+
             snapshots: list[dict[str, Any]] = []
             skipped_profiles: list[str] = []
             for name, profile in self._data["profiles"].items():
                 # Try sample_cycle_id first, fall back to any labeled cycle
                 sample_id = profile.get("sample_cycle_id")
-                sample_cycle = None
-                if sample_id:
-                    sample_cycle = next(
-                        (c for c in all_cycles if c["id"] == sample_id),
-                        None
-                    )
+                sample_cycle = cycles_by_id.get(sample_id) if sample_id else None
                 # Fallback: find ANY completed cycle labeled with this profile
                 if not sample_cycle:
-                    sample_cycle = next(
-                        (c for c in all_cycles
-                          if c.get("profile_name") == name
-                          and c.get("status") in ("completed", "force_stopped")
-                          and c.get("power_data")),
-                        None
-                    )
+                    sample_cycle = labeled_by_profile.get(name)
                 # Boost user-pinned "golden" cycles: when a profile has one, use
                 # its sharp single-cycle trace as the matching template instead
                 # of the envelope average. The envelope average smears the
                 # wash-phase peaks (each cycle's spikes land at slightly
                 # different times), which hurts correlation for sharply-shaped
                 # programs; a trusted golden cycle preserves that shape.
-                has_golden = any(
-                    c.get("profile_name") == name
-                    and isinstance(c.get("ml_review"), dict)
-                    and c["ml_review"].get("golden")
-                    and c.get("power_data")
-                    for c in all_cycles
-                )
+                has_golden = name in golden_profiles
 
                 # Prefer envelope avg curve when ≥2 labeled cycles have been
                 # confirmed - it gives a more representative reference signal
@@ -4716,6 +4991,34 @@ class ProfileStore:
 
         # Save to persist the label
         await self.async_save()
+
+    @property
+    def has_real_profiles(self) -> bool:
+        """True if at least one stored profile is backed by a real cycle.
+
+        A profile counts as "real" when it has a labelled cycle in ``past_cycles``
+        OR an imported ``reference_cycle`` (store-adopted templates that the matcher
+        treats as eligible snapshots — see the snapshot builder in async_match). An
+        import-only install has zero past_cycles but is fully matchable, so it must
+        pass this gate too, otherwise matching and the setup notifications are
+        skipped for it entirely.
+        """
+        profile_names = self._data.get("profiles", {}).keys()
+        if not profile_names:
+            return False
+        assigned = {
+            c.get("profile_name")
+            for c in self._data.get("past_cycles", [])
+            if c.get("profile_name")
+        }
+        if assigned.intersection(profile_names):
+            return True
+        ref_assigned = {
+            c.get("profile_name")
+            for c in self._data.get("reference_cycles", [])
+            if c.get("profile_name")
+        }
+        return bool(ref_assigned.intersection(profile_names))
 
     def list_profiles(self) -> list[dict[str, Any]]:
         """List all profiles with metadata."""
@@ -5768,8 +6071,21 @@ class ProfileStore:
             if p_data and p_data.get("sample_cycle_id") == original_sample_id:
                 p_data["sample_cycle_id"] = best_replacement_id
 
-            # Rebuild envelope because dataset changed
-            await self.async_rebuild_envelope(original_profile)
+        # Rebuild envelopes ONLY for the profiles whose dataset actually changed:
+        # the original profile (it lost the parent cycle) plus any profile a labeled
+        # segment was assigned to. This replaces a blanket rebuild-all-envelopes in
+        # the caller, which re-scanned every profile serially and stalled low-power
+        # hosts on a split (issue #311 follow-up).
+        touched: set[str] = set()
+        if original_profile:
+            touched.add(original_profile)
+        for seg in segments:
+            if isinstance(seg, dict):
+                seg_prof = seg.get("profile")
+                if seg_prof:
+                    touched.add(seg_prof)
+        for name in touched:
+            await self.async_rebuild_envelope(name)
 
         await self.async_save()
         self._logger.info("Interactive Split Applied to %s -> %s", cycle_id, new_ids)

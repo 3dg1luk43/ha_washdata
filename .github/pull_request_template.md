@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> **Translation PRs are exempt from the requirement below.**
+> **Translation PRs are exempt from the requirement below** (including those opened automatically by [GitLocalize](https://gitlocalize.com/repo/10819)).
 > For all other PRs: you must reference an issue that carries the `accepted` label.
 > If no accepted issue is linked, this PR will be closed automatically.
 > To get your work accepted: open a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml) first, indicate you plan to submit a PR, and wait for the maintainer to add the `accepted` label before opening this PR.
@@ -72,7 +72,8 @@ Describe the breaking change and how to migrate...
 
 ## For Translations
 
-<!-- If this is a translation PR, include: -->
+<!-- Translation contributions are preferred via GitLocalize: https://gitlocalize.com/repo/10819
+     GitLocalize opens PRs automatically. If this is a manual translation PR, fill in below. -->
 
 - [ ] Language: [e.g., Russian, Spanish, French]
 - [ ] I've verified JSON syntax: `python3 -m json.tool custom_components/ha_washdata/translations/[lang].json`

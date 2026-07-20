@@ -163,8 +163,11 @@ test('personalized model row shows a quality chip', async ({ page }) => {
     'ha_washdata/get_ml_training_status': ML_STATUS_PERSONALIZED,
   });
   await openMlTab(page);
-  // AUC 0.94 → "Strong" quality chip
-  const chip = page.locator('text=Strong').first();
+  // AUC 0.94 → "Strong fit" quality chip. Scope to the "What WashData has learned"
+  // card and match the full chip text so it can't collide with substrings like the
+  // Playground's "how strongly run-length agreement..." matcher-param label.
+  const learnedCard = page.locator('.wd-card', { hasText: 'What WashData has learned' });
+  const chip = learnedCard.getByText('Strong fit').first();
   await expect(chip).toBeVisible({ timeout: 8_000 });
 });
 

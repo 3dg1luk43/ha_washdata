@@ -16,16 +16,14 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Tests for Group F3 backend — the Playground tab.
 
-Covers the two new WebSocket commands and their pure helper logic in
+Covers Playground WebSocket commands and their pure helper logic in
 ``playground.py``:
 
-- ``run_playground_simulation`` (via :func:`playground.run_playground_batch`)
-  replays stored cycles through a fresh headless :class:`CycleDetector` with the
-  device's settings (optionally overridden) and returns a per-cycle event log +
-  outcome plus an aggregate summary.
 - ``get_dtw_debug`` (via :func:`playground.dtw_debug_payload`) returns the
   Stage 2 / DTW / Stage 4 score breakdown, the two resampled traces on a shared
   grid, and the DTW warping path for one cycle vs one profile.
+- override plumbing (``build_sim_config``, ``apply_match_overrides``,
+  ``finalize_sweep_1d``, ``finalize_sweep_2d``).
 
 Fast, pure-unit tests (no HA boot, no file I/O).
 """
@@ -156,104 +154,6 @@ def test_build_sim_config_empty_override_returns_base():
 
 
 # ---------------------------------------------------------------------------
-# run_playground_batch
-# ---------------------------------------------------------------------------
-
-def test_batch_detects_and_matches_labeled_cycles():
-    store = _default_store()
-    res = playground.run_playground_batch(
-        store, ["c1", "c2"], _base_config(), {}, concurrency=5
-    )
-    summary = res["summary"]
-    assert summary["cycles"] == 2
-    assert summary["detected"] == 2
-    assert summary["missed"] == 0
-    assert summary["match_correct"] == 2
-    assert summary["match_wrong"] == 0
-    assert summary["unmatched"] == 0
-
-    for r in res["results"]:
-        oc = r["outcome"]
-        assert oc["detected"] is True
-        assert oc["match_profile"] == "Cotton 40"
-        assert oc["match_correct"] is True
-        assert oc["termination_reason"] == "timeout"
-        assert oc["stored_duration_s"] == 3600.0
-        # event log has state transitions + a match event + an end event
-        types = {e["type"] for e in r["events"]}
-        assert "state" in types
-        assert "matched" in types
-        assert "end" in types
-        # each event carries the {t, type, detail} shape
-        for e in r["events"]:
-            assert set(e) == {"t", "type", "detail"}
-
-
-def test_batch_settings_override_changes_outcome():
-    """A start threshold above the trace's peak means the cycle never starts."""
-    store = _default_store()
-    baseline = playground.run_playground_batch(store, ["c1"], _base_config(), {}, 1)
-    assert baseline["results"][0]["outcome"]["detected"] is True
-
-    overridden = playground.run_playground_batch(
-        store,
-        ["c1"],
-        _base_config(),
-        {CONF_START_THRESHOLD_W: 5000.0, CONF_STOP_THRESHOLD_W: 4000.0},
-        1,
-    )
-    oc = overridden["results"][0]["outcome"]
-    assert oc["detected"] is False
-    assert oc["match_correct"] is None
-    assert overridden["summary"]["detected"] == 0
-    assert overridden["summary"]["missed"] == 1
-
-
-def test_batch_empty_cycle_ids_defaults_to_recent():
-    # Build 25 cycles; recent-20 default should be applied.
-    cycles = [_make_cycle(f"c{i}", (i % 27) + 1) for i in range(25)]
-    store = _make_store(cycles, {"Cotton 40": {"sample_cycle_id": "c0", "avg_duration": 3600.0}})
-    res = playground.run_playground_batch(store, [], _base_config(), {}, concurrency=50)
-    # capped at the most recent DEFAULT_RECENT_CYCLES
-    assert res["summary"]["requested"] == playground.DEFAULT_RECENT_CYCLES
-    assert res["summary"]["cycles"] == playground.DEFAULT_RECENT_CYCLES
-    run_ids = {r["cycle_id"] for r in res["results"]}
-    # the newest cycles are the tail of the list
-    assert run_ids == {c["id"] for c in cycles[-playground.DEFAULT_RECENT_CYCLES:]}
-
-
-def test_batch_concurrency_clamped_and_caps_batch_size():
-    store = _default_store()
-    # concurrency below range -> clamped to 1, and only 1 of 2 selected cycles run
-    low = playground.run_playground_batch(store, ["c1", "c2"], _base_config(), {}, 0)
-    assert low["summary"]["concurrency"] == 1
-    assert low["summary"]["cycles"] == 1
-    assert low["summary"]["requested"] == 2
-
-    # concurrency above range -> clamped to MAX_BATCH_CYCLES
-    high = playground.run_playground_batch(store, [], _base_config(), {}, 999)
-    assert high["summary"]["concurrency"] == playground.MAX_BATCH_CYCLES
-
-
-def test_batch_unknown_cycle_ids_skipped():
-    store = _default_store()
-    res = playground.run_playground_batch(
-        store, ["c1", "ghost", "c2"], _base_config(), {}, concurrency=5
-    )
-    assert res["summary"]["skipped_ids"] == ["ghost"]
-    assert res["summary"]["cycles"] == 2
-    assert {r["cycle_id"] for r in res["results"]} == {"c1", "c2"}
-
-
-def test_batch_empty_store_is_graceful():
-    store = _make_store([], {})
-    res = playground.run_playground_batch(store, ["nope"], _base_config(), {}, 1)
-    assert res["results"] == []
-    assert res["summary"]["cycles"] == 0
-    assert res["summary"]["skipped_ids"] == ["nope"]
-
-
-# ---------------------------------------------------------------------------
 # dtw_debug_payload
 # ---------------------------------------------------------------------------
 
@@ -333,37 +233,6 @@ def _make_hass_with_manager(store: ProfileStore, base_config: CycleDetectorConfi
     return hass
 
 
-async def test_ws_run_playground_simulation_sends_result():
-    store = _default_store()
-    hass = _make_hass_with_manager(store, _base_config())
-    connection = MagicMock()
-    msg = {
-        "id": 7,
-        "entry_id": "e1",
-        "cycle_ids": ["c1"],
-        "settings_override": {},
-        "concurrency": 1,
-    }
-    await ws_api.ws_run_playground_simulation.__wrapped__(hass, connection, msg)
-
-    connection.send_result.assert_called_once()
-    payload = connection.send_result.call_args[0][1]
-    assert "results" in payload and "summary" in payload
-    assert payload["summary"]["cycles"] == 1
-    connection.send_error.assert_not_called()
-
-
-async def test_ws_run_playground_simulation_no_manager():
-    hass = MagicMock()
-    hass.data = {DOMAIN: {}}
-    connection = MagicMock()
-    msg = {"id": 1, "entry_id": "missing", "cycle_ids": [], "settings_override": {}, "concurrency": 1}
-    await ws_api.ws_run_playground_simulation.__wrapped__(hass, connection, msg)
-
-    connection.send_error.assert_called_once()
-    assert connection.send_error.call_args[0][1] == "not_found"
-
-
 async def test_ws_get_dtw_debug_sends_result():
     store = _default_store()
     hass = _make_hass_with_manager(store, _base_config())
@@ -408,7 +277,7 @@ def test_playground_tab_whitelisted():
     assert "playground" in ws_api._PANEL_TABS
 
 
-def test_playground_simulation_is_read_level():
-    # run_playground_simulation does not start with get_, so it must be
+def test_playground_history_is_read_level():
+    # run_playground_history does not start with get_, so it must be
     # explicitly whitelisted to gate at the 'read' level.
-    assert "run_playground_simulation" in ws_api._READ_WRITE_COMMANDS
+    assert "run_playground_history" in ws_api._READ_WRITE_COMMANDS

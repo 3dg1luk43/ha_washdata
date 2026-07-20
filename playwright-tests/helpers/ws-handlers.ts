@@ -99,7 +99,12 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   'ha_washdata/add_maintenance_event': { success: true, id: 'maint-001' },
   'ha_washdata/delete_maintenance_event': { success: true },
   'ha_washdata/save_maintenance_reminders': { success: true },
-  'ha_washdata/run_playground_simulation': { results: {}, summary: {} },
+  // Split/trim run as background tasks; these are the payloads get_task_result returns.
+  'ha_washdata/apply_split': { success: true, new_ids: ['cyc-split-a', 'cyc-split-b'] },
+  'ha_washdata/trim_cycle': { success: true },
+  'ha_washdata/apply_merge': { success: true, new_id: 'cyc-merged' },
+  'ha_washdata/rebuild_envelopes': { success: true, rebuilt: 3 },
+  'ha_washdata/analyze_split': { segments: [[0, 600], [900, 1740]], split_offsets: [600], samples: [], full_duration_s: 1740 },
   'ha_washdata/get_cycle_power_data': {
     samples: Array.from({ length: 30 }, (_, i) => [i * 60, i < 2 || i > 27 ? 3 : 900]),
     full_duration_s: 1740,

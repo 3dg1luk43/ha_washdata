@@ -75,15 +75,9 @@ from .const import (
     CONF_SMOOTHING_WINDOW,
     CONF_PROFILE_DURATION_TOLERANCE,
     CONF_INTERRUPTED_MIN_SECONDS,
-    CONF_ABRUPT_DROP_WATTS,
-    CONF_ABRUPT_DROP_RATIO,
-    CONF_ABRUPT_HIGH_LOAD_FACTOR,
     DEFAULT_SMOOTHING_WINDOW,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEFAULT_INTERRUPTED_MIN_SECONDS,
-    DEFAULT_ABRUPT_DROP_WATTS,
-    DEFAULT_ABRUPT_DROP_RATIO,
-    DEFAULT_ABRUPT_HIGH_LOAD_FACTOR,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
@@ -142,7 +136,19 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         return False
 
-    if version == 3 and minor_version >= 6:
+    if version == 3 and minor_version >= 7:
+        return True
+
+    # 3.6 → 3.7: remove initial_profile stub key from entry.data.
+    if version == 3 and minor_version == 6:
+        new_data = {k: v for k, v in entry.data.items() if k != "initial_profile"}
+        hass.config_entries.async_update_entry(
+            entry, data=new_data, minor_version=7
+        )
+        minor_version = 7
+        _log.debug("Migrated WashData entry from 3.6 to 3.7")
+
+    if version == 3 and minor_version >= 7:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -185,9 +191,6 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE
     )
     options.setdefault(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS)
-    options.setdefault(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS)
-    options.setdefault(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO)
-    options.setdefault(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR)
 
     options.setdefault(
         CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
@@ -280,10 +283,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data=data,
         options=options,
         version=3,
-        minor_version=6,
+        minor_version=7,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.6", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.7", version, minor_version
     )
     return True
 
@@ -369,28 +372,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await manager.async_setup()
     await _migrate_online_to_global(hass, entry, manager)
-
-    # Check for initial profile from onboarding
-    if "initial_profile" in entry.data:
-        init_prof = entry.data["initial_profile"]
-        name = init_prof.get("name")
-        duration = init_prof.get("avg_duration")
-        if name:
-            try:
-                # Create the profile immediately
-                await manager.profile_store.create_profile_standalone(
-                    name, avg_duration=duration
-                )
-                manager._logger.info("Created initial profile '%s' from onboarding", name)
-
-                # Clean up config entry (remove initial_profile to avoid re-creation or cruft)
-                new_data = {
-                    k: v for k, v in entry.data.items() if k != "initial_profile"
-                }
-                hass.config_entries.async_update_entry(entry, data=new_data)
-
-            except Exception as e:  # pylint: disable=broad-exception-caught
-                manager._logger.error("Failed to create initial profile: %s", e)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 

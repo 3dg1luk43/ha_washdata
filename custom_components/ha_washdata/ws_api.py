@@ -40,9 +40,12 @@ from .const import (
     CONF_COMPLETION_MIN_SECONDS,
     CONF_DEVICE_TYPE,
     CONF_DOOR_SENSOR_ENTITY,
+    CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_DURATION_TOLERANCE,
     CONF_END_ENERGY_THRESHOLD,
     CONF_END_REPEAT_COUNT,
+    CONF_ENERGY_SENSOR,
     CONF_EXTERNAL_END_TRIGGER,
     CONF_LEARNING_CONFIDENCE,
     CONF_LINKED_DEVICE,
@@ -57,7 +60,9 @@ from .const import (
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PROFILE_MIN_WARMUP_CYCLES,
+    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PUMP_STUCK_DURATION,
+    CONF_POWER_OFF_THRESHOLD_W,
     CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
     CONF_SMOOTHING_WINDOW,
@@ -82,6 +87,7 @@ from .const import (
 from . import playground
 from . import task_registry
 from .cycle_detector import CycleDetectorConfig
+from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
 _LOGGER = logging.getLogger(__name__)
@@ -175,6 +181,12 @@ _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_LEARNING_CONFIDENCE,
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_END_REPEAT_COUNT,
+    # Device-class-specific suggestions from reconcile_suggestions
+    CONF_PROFILE_UNMATCH_THRESHOLD,
+    CONF_POWER_OFF_THRESHOLD_W,
+    CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_MAX_POWER,
+    CONF_PUMP_STUCK_DURATION,
 )
 
 # Suggestion keys coerced to int when applied (mirrors the OptionsFlow).
@@ -188,6 +200,7 @@ _SUGGESTION_INT_KEYS: frozenset[str] = frozenset({
     CONF_SMOOTHING_WINDOW,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_END_REPEAT_COUNT,
+    CONF_PUMP_STUCK_DURATION,
 })
 
 
@@ -288,8 +301,15 @@ async def _recorder_power(hass: HomeAssistant, entity_id: str, start_dt: Any) ->
 
 
 def _cycle_kwh(c: dict[str, Any]) -> float | None:
-    """Cycle energy in kWh. Cycles store energy as ``energy_wh``; convert."""
-    wh = c.get("energy_wh")
+    """Cycle energy in kWh for display.
+
+    Prefers the external meter's reading (``energy_meter_wh``, issue #316) when a
+    cycle recorded one, otherwise the integrated ``energy_wh``. Cycles store energy
+    in Wh; convert to kWh.
+    """
+    wh = c.get("energy_meter_wh")
+    if wh is None:
+        wh = c.get("energy_wh")
     if wh is not None:
         try:
             return round(float(wh) / 1000.0, 4)
@@ -449,7 +469,6 @@ _ADMIN_COMMANDS = frozenset({
 # with get_, so it is whitelisted here to gate at the 'read' level.
 _READ_WRITE_COMMANDS = frozenset({
     "set_program",
-    "run_playground_simulation",
     "run_playground_cycle_detail",
     "run_playground_history",
     "run_playground_sweep",
@@ -461,6 +480,7 @@ _READ_WRITE_COMMANDS = frozenset({
     "get_task_result",
     "start_playground_history",
     "start_playground_sweep",
+    "start_playground_cycle_detail",
     # Community store: read-only browse is read-level (writes below default to 'edit').
     "store_status",
     "store_search_devices",
@@ -1030,6 +1050,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_devices, ws_get_device_cycles,
         # Settings
         ws_get_options, ws_set_options, ws_get_settings_changelog,
+        ws_get_setup_status,
         # Profiles
         ws_get_profiles, ws_create_profile, ws_rename_profile, ws_delete_profile,
         ws_rebuild_envelopes, ws_get_profile_phases, ws_set_profile_phases,
@@ -1076,8 +1097,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_revert_ml_models,
         # Cycle controls (pause / resume / force-stop)
         ws_pause_cycle, ws_resume_cycle, ws_terminate_cycle,
-        # Playground (F3): headless what-if replay + DTW visualizer
-        ws_run_playground_simulation, ws_get_dtw_debug,
+        # Playground (F3): DTW visualizer
+        ws_get_dtw_debug,
         # Playground redesign: faithful single-cycle sim + history table + sweep
         ws_run_playground_cycle_detail, ws_run_playground_history,
         ws_run_playground_sweep,
@@ -1085,6 +1106,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_list_tasks, ws_subscribe_tasks, ws_cancel_task, ws_get_task_result,
         # Playground batch/sweep as detached registry-tracked tasks
         ws_start_playground_history, ws_start_playground_sweep,
+        ws_start_playground_cycle_detail,
         # Community store (online features): status/connect/disconnect/browse/import/upload
         ws_store_status, ws_store_connect, ws_store_disconnect,
         ws_store_search_devices, ws_store_get_profiles, ws_store_get_cycles,
@@ -1319,6 +1341,7 @@ async def ws_set_options(
         CONF_DOOR_SENSOR_ENTITY,
         CONF_LINKED_DEVICE,
         CONF_SWITCH_ENTITY,
+        CONF_ENERGY_SENSOR,
     ):
         if key in new_options and not new_options[key]:
             new_options[key] = None
@@ -1411,6 +1434,79 @@ async def ws_get_settings_changelog(
         )
 
     _send_result(connection, msg["id"], "get_settings_changelog", {"changelog": changelog})
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_setup_status",
+        vol.Required("entry_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_get_setup_status(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the current setup phase for the adoption guidance card."""
+    manager = _get_manager(hass, msg["entry_id"])
+    if not manager:
+        connection.send_error(msg["id"], "not_found", "Device not found")
+        return
+
+    # Gather user's skipped steps from user prefs
+    skipped_steps: dict[str, str | None] = {}
+    user = getattr(connection, "user", None)
+    if user:
+        holder = hass.data.get(_PANEL_DATA_KEY)
+        if holder:
+            prefs = holder["data"].get("prefs", {}).get(user.id, {})
+            for k, v in prefs.items():
+                if k.startswith("setup_skip_"):
+                    skipped_steps[k] = v
+
+    # Gather store data (executor-safe reads)
+    store = manager.profile_store
+    profile_names = list(store._data.get("profiles", {}).keys())
+    past_cycles = store._data.get("past_cycles", [])
+    ref_names: set[str] = set()
+    for rc in store._data.get("reference_cycles", []):
+        if rc.get("profile_name"):
+            ref_names.add(rc["profile_name"])
+
+    coverage_gap = await hass.async_add_executor_job(store.suggest_coverage_gaps)
+    # suggestions: read from the store (cheap dict lookup; heavy computation happens
+    # in the SuggestionEngine background task, not here).
+    suggestions = list((store.get_suggestions() or {}).values())
+    pg_data = store._data.get("profile_groups", {})
+    pending_groups = (pg_data.get("suggestions") or []) if isinstance(pg_data, dict) else []
+
+    device_type = manager.device_type
+
+    result = compute_setup_phase(
+        device_type=device_type,
+        profile_names=profile_names,
+        past_cycles=past_cycles,
+        ref_profile_names=ref_names,
+        coverage_gap=coverage_gap,
+        suggestions=suggestions,
+        profile_groups=pending_groups,
+        skipped_steps=skipped_steps,
+        now=dt_util.now(),
+    )
+
+    _send_result(connection, msg["id"], "get_setup_status", {
+        "phase": result.phase,
+        "message_key": result.message_key,
+        "message_params": result.message_params,
+        "cta_label_key": result.cta_label_key,
+        "cta_action": result.cta_action,
+        "secondary_label_key": result.secondary_label_key,
+        "secondary_action": result.secondary_action,
+        "skippable": result.skippable,
+        "dismissible": result.dismissible,
+        "step_key": result.step_key,
+    })
 
 
 # ─── Profiles ─────────────────────────────────────────────────────────────────
@@ -1721,24 +1817,67 @@ async def ws_delete_profile_group(
 @websocket_api.websocket_command(
     {vol.Required("type"): "ha_washdata/rebuild_envelopes", vol.Required("entry_id"): str}
 )
-@websocket_api.async_response
-async def ws_rebuild_envelopes(
+@callback
+def ws_rebuild_envelopes(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Rebuild power-profile envelopes for all profiles."""
+    """Rebuild power-profile envelopes for all profiles.
+
+    Runs as a detached, registry-tracked task that rebuilds one profile per step
+    (each DTW pass already offloads to the executor): rebuilding every profile
+    serially inside the WS request stalled low-power hosts for the whole run
+    (issue #311). Progress/result come via the task registry."""
     entry_id: str = msg["entry_id"]
-    manager = _get_manager(hass, entry_id)
-    if manager is None:
+    if _get_manager(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "rebuild", "Rebuilding envelopes",
+        label_key="task.rebuild.envelopes", label_params={},
+    )
+    hass.async_create_task(_rebuild_envelopes_task(hass, task, entry_id))
+    _send_result(connection, msg["id"], "rebuild_envelopes", {"task_id": task.id})
 
+
+async def _rebuild_envelopes_task(hass: HomeAssistant, task: Any, entry_id: str) -> None:
+    """Detached runner: rebuild every profile's envelope one at a time, reporting
+    progress and honouring cancel, so the loop breathes between profiles."""
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    store = manager.profile_store
+    lock = _entry_write_lock(hass, entry_id)
+    await lock.acquire()
     try:
-        await manager.profile_store.async_rebuild_all_envelopes()
-        _send_result(connection, msg["id"], "rebuild_envelopes", {"success": True})
+        names = list(store.get_profiles().keys())
+        reg.update(task, total=len(names), done=0)
+        rebuilt = 0
+        for i, name in enumerate(names):
+            if task.cancel_requested:
+                break
+            try:
+                if await store.async_rebuild_envelope(name):
+                    rebuilt += 1
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                _LOGGER.debug("Envelope rebuild failed for %s/%s: %s", entry_id, name, exc)
+            reg.update(task, done=i + 1)
+        if _get_manager(hass, entry_id) is manager:
+            manager.notify_update()
+        reg.finish(
+            task,
+            state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
+            result={"success": True, "rebuilt": rebuilt},
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        _LOGGER.warning("Rebuild-envelopes task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+    finally:
+        lock.release()
 
 
 @websocket_api.websocket_command(
@@ -2814,6 +2953,21 @@ def ws_get_constants(
     ]
     from .const import STORE_WEB_ORIGIN
     from . import store_account
+    from .const import (  # pylint: disable=import-outside-toplevel
+        DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+        DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+        DEFAULT_DTW_BANDWIDTH,
+        MATCH_CORR_WEIGHT,
+        MATCH_KEEP_MIN_SCORE,
+        MATCH_DTW_BLEND,
+        MATCH_DTW_ENSEMBLE_W,
+        MATCH_DDTW_DIST_SCALE,
+        MATCH_DTW_REFINE_TOP_N,
+        MATCH_DURATION_WEIGHT,
+        MATCH_ENERGY_WEIGHT,
+        MATCH_DURATION_SCALE,
+        MATCH_ENERGY_SCALE,
+    )
     _send_result(connection, msg["id"], "get_constants", {
             "device_types": device_types,
             "state_colors": dict(STATE_COLORS),
@@ -2821,6 +2975,24 @@ def ws_get_constants(
             "ml_suggestions_enabled": ENABLE_ML_SUGGESTIONS,
             "ml_training_available": ENABLE_ML_TRAINING,
             "PROFILE_MIN_WARMUP_CYCLES": CONF_PROFILE_MIN_WARMUP_CYCLES,
+            # Canonical matcher defaults for the Playground's matcher-param fields, so
+            # the panel's _PG_MATCH_DEFAULTS table cannot silently drift from const.py.
+            # The panel keeps that table only as an offline fallback.
+            "pg_match_defaults": {
+                "profile_match_min_duration_ratio": DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+                "profile_match_max_duration_ratio": DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+                "corr_weight": MATCH_CORR_WEIGHT,
+                "keep_min_score": MATCH_KEEP_MIN_SCORE,
+                "dtw_bandwidth": DEFAULT_DTW_BANDWIDTH,
+                "dtw_blend": MATCH_DTW_BLEND,
+                "dtw_ensemble_w": MATCH_DTW_ENSEMBLE_W,
+                "dtw_ddtw_scale": MATCH_DDTW_DIST_SCALE,
+                "dtw_refine_top_n": MATCH_DTW_REFINE_TOP_N,
+                "duration_weight": MATCH_DURATION_WEIGHT,
+                "energy_weight": MATCH_ENERGY_WEIGHT,
+                "duration_scale": MATCH_DURATION_SCALE,
+                "energy_scale": MATCH_ENERGY_SCALE,
+            },
             # Community store: the panel opens <origin>/connect.html for the GitHub
             # handoff and validates postMessage against new URL(origin).origin.
             "store_online_available": True,
@@ -3082,32 +3254,61 @@ async def ws_get_cycle_power_data(
         vol.Required("end_s"): vol.Coerce(float),
     }
 )
-@websocket_api.async_response
-async def ws_trim_cycle(
+@callback
+def ws_trim_cycle(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Trim a cycle's power data to the [start_s, end_s] offset window."""
+    """Trim a cycle's power data to the [start_s, end_s] offset window.
+
+    Runs as a detached, registry-tracked task (returns a task_id immediately): the
+    trim recomputes the signature and rebuilds the profile envelope, which stalls
+    low-power hosts if held on the event loop for the whole WS request (issue #311).
+    Progress/result come via subscribe_tasks/get_task_result."""
     entry_id: str = msg["entry_id"]
-    manager = _get_manager(hass, entry_id)
-    if manager is None:
+    if _get_manager(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "trim", "Trimming cycle", label_key="task.trim.apply", label_params={},
+    )
+    hass.async_create_task(_trim_task(
+        hass, task, entry_id, msg["cycle_id"], float(msg["start_s"]), float(msg["end_s"]),
+    ))
+    _send_result(connection, msg["id"], "trim_cycle", {"task_id": task.id})
 
+
+async def _trim_task(
+    hass: HomeAssistant, task: Any, entry_id: str,
+    cycle_id: str, start_s: float, end_s: float,
+) -> None:
+    """Detached runner for a cycle trim (recompute + single-profile envelope
+    rebuild). Serialized under the per-entry write lock like reprocess."""
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    store = manager.profile_store
+    lock = _entry_write_lock(hass, entry_id)
+    await lock.acquire()
     try:
-        ok = await manager.profile_store.trim_cycle_power_data(
-            msg["cycle_id"], float(msg["start_s"]), float(msg["end_s"])
-        )
-        if ok:
+        reg.update(task, total=1, done=0)
+        ok = await store.trim_cycle_power_data(cycle_id, start_s, end_s)
+        reg.update(task, done=1)
+        if not ok:
+            reg.finish(task, state=task_registry.STATE_ERROR, error="trim_failed")
+            return
+        if _get_manager(hass, entry_id) is manager:
             manager.notify_update()
-            _send_result(connection, msg["id"], "trim_cycle", {"success": True})
-        else:
-            connection.send_error(
-                msg["id"], "trim_failed", "Trim produced no data or cycle not found"
-            )
+        reg.finish(task, state=task_registry.STATE_DONE, result={"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        _LOGGER.warning("Trim task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+    finally:
+        lock.release()
 
 
 @websocket_api.websocket_command(
@@ -3173,13 +3374,19 @@ async def ws_analyze_split(
         vol.Optional("segment_profiles"): list,
     }
 )
-@websocket_api.async_response
-async def ws_apply_split(
+@callback
+def ws_apply_split(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Split a cycle at the given offsets, optionally labeling each segment."""
+    """Split a cycle at the given offsets, optionally labeling each segment.
+
+    Cheap validation (cycle exists, at least two segments) runs synchronously so a
+    bad request fails fast; the heavy apply (per-segment extraction + affected
+    envelope rebuilds + save) then runs as a detached, registry-tracked task so it
+    never holds the event loop for the whole request on low-power hosts (issue
+    #311). Progress/result come via subscribe_tasks/get_task_result."""
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
     if manager is None:
@@ -3188,40 +3395,69 @@ async def ws_apply_split(
 
     store = manager.profile_store
     cycle_id: str = msg["cycle_id"]
-    try:
-        cycle = next(
-            (c for c in store.get_past_cycles() if c.get("id") == cycle_id), None
+    cycle = next(
+        (c for c in store.get_past_cycles() if c.get("id") == cycle_id), None
+    )
+    if not cycle:
+        connection.send_error(msg["id"], "not_found", f"Cycle {cycle_id!r} not found")
+        return
+
+    offsets = [float(o) for o in msg["split_offsets"]]
+    seg_bounds = store.build_split_segments_from_offsets(cycle, offsets)
+    if len(seg_bounds) < 2:
+        connection.send_error(
+            msg["id"],
+            "split_failed",
+            "Split points did not produce at least two segments",
         )
-        if not cycle:
-            connection.send_error(msg["id"], "not_found", f"Cycle {cycle_id!r} not found")
-            return
+        return
 
-        offsets = [float(o) for o in msg["split_offsets"]]
-        seg_bounds = store.build_split_segments_from_offsets(cycle, offsets)
-        if len(seg_bounds) < 2:
-            connection.send_error(
-                msg["id"],
-                "split_failed",
-                "Split points did not produce at least two segments",
-            )
-            return
+    profiles = msg.get("segment_profiles") or []
+    segments: list[dict[str, Any]] = []
+    for i, (seg_start, seg_end) in enumerate(seg_bounds):
+        prof = profiles[i] if i < len(profiles) else None
+        if prof in ("", "none", "__none__"):
+            prof = None
+        segments.append(
+            {"start": float(seg_start), "end": float(seg_end), "profile": prof}
+        )
 
-        profiles = msg.get("segment_profiles") or []
-        segments: list[dict[str, Any]] = []
-        for i, (seg_start, seg_end) in enumerate(seg_bounds):
-            prof = profiles[i] if i < len(profiles) else None
-            if prof in ("", "none", "__none__"):
-                prof = None
-            segments.append(
-                {"start": float(seg_start), "end": float(seg_end), "profile": prof}
-            )
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "split", "Splitting cycle", label_key="task.split.apply", label_params={},
+    )
+    hass.async_create_task(_apply_split_task(hass, task, entry_id, cycle_id, segments))
+    _send_result(connection, msg["id"], "apply_split", {"task_id": task.id})
 
+
+async def _apply_split_task(
+    hass: HomeAssistant, task: Any, entry_id: str,
+    cycle_id: str, segments: list[dict[str, Any]],
+) -> None:
+    """Detached runner for a cycle split. Rebuilds only the affected profiles'
+    envelopes (done inside apply_split_interactive). Serialized under the per-entry
+    write lock like reprocess."""
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    store = manager.profile_store
+    lock = _entry_write_lock(hass, entry_id)
+    await lock.acquire()
+    try:
+        reg.update(task, total=1, done=0)
         new_ids = await store.apply_split_interactive(cycle_id, segments)
-        await store.async_rebuild_all_envelopes()
-        manager.notify_update()
-        _send_result(connection, msg["id"], "apply_split", {"success": True, "new_ids": new_ids})
+        reg.update(task, done=1)
+        if _get_manager(hass, entry_id) is manager:
+            manager.notify_update()
+        reg.finish(
+            task, state=task_registry.STATE_DONE,
+            result={"success": True, "new_ids": new_ids},
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        _LOGGER.warning("Apply-split task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
 
 
 @websocket_api.websocket_command(
@@ -3233,20 +3469,24 @@ async def ws_apply_split(
         vol.Optional("new_profile_name"): vol.Any(str, None),
     }
 )
-@websocket_api.async_response
-async def ws_apply_merge(
+@callback
+def ws_apply_merge(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Merge two or more cycles into one, optionally labeling the result."""
+    """Merge two or more cycles into one, optionally labeling the result.
+
+    Cheap validation runs synchronously; the merge (gap-fill + signature recompute
+    + affected-profile envelope rebuilds + save) then runs as a detached,
+    registry-tracked task so it never holds the event loop for the whole request
+    on low-power hosts (issue #311). Progress/result via the task registry."""
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
     if manager is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
 
-    store = manager.profile_store
     ids: list[str] = msg["cycle_ids"]
     if len(ids) < 2:
         connection.send_error(
@@ -3255,29 +3495,69 @@ async def ws_apply_merge(
         return
 
     target = msg.get("target_profile")
-    try:
-        if target == "__create_new__":
-            name = (msg.get("new_profile_name") or "").strip()
-            if not name:
-                connection.send_error(
-                    msg["id"], "invalid_format", "New profile name required"
-                )
-                return
-            await store.create_profile_standalone(name)
-            target = name
-        elif target in ("", "none", "__none__"):
-            target = None
-
-        new_id = await store.apply_merge_interactive(ids, target)
-        if not new_id:
-            connection.send_error(msg["id"], "merge_failed", "Cycles could not be merged")
+    new_name: str | None = None
+    if target == "__create_new__":
+        new_name = (msg.get("new_profile_name") or "").strip()
+        if not new_name:
+            connection.send_error(msg["id"], "invalid_format", "New profile name required")
             return
+    elif target in ("", "none", "__none__"):
+        target = None
 
-        await store.async_rebuild_all_envelopes()
-        manager.notify_update()
-        _send_result(connection, msg["id"], "apply_merge", {"success": True, "new_id": new_id})
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "merge", "Merging cycles", label_key="task.merge.apply", label_params={},
+    )
+    hass.async_create_task(_apply_merge_task(hass, task, entry_id, ids, target, new_name))
+    _send_result(connection, msg["id"], "apply_merge", {"task_id": task.id})
+
+
+async def _apply_merge_task(
+    hass: HomeAssistant, task: Any, entry_id: str,
+    ids: list[str], target: str | None, new_name: str | None,
+) -> None:
+    """Detached runner for a cycle merge. Rebuilds only the affected profiles'
+    envelopes (done inside apply_merge_interactive). Serialized under the per-entry
+    write lock like reprocess."""
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    store = manager.profile_store
+    lock = _entry_write_lock(hass, entry_id)
+    await lock.acquire()
+    try:
+        reg.update(task, total=1, done=0)
+        created_new = False
+        if new_name:
+            # Raises ValueError if the name already exists, so reaching the next
+            # line guarantees we created a brand-new (empty) profile that must be
+            # rolled back if the merge below fails.
+            await store.create_profile_standalone(new_name)
+            created_new = True
+            target = new_name
+        new_id = await store.apply_merge_interactive(ids, target)
+        reg.update(task, done=1)
+        if not new_id:
+            if created_new and new_name:
+                # Merge rejected the cycle set (stale/invalid id, unparseable start
+                # time, ...). Delete the empty profile we just created so a failed
+                # merge doesn't orphan a cycle-less profile in the store.
+                await store.delete_profile(new_name, unlabel_cycles=False)
+            reg.finish(task, state=task_registry.STATE_ERROR, error="merge_failed")
+            return
+        if _get_manager(hass, entry_id) is manager:
+            manager.notify_update()
+        reg.finish(
+            task, state=task_registry.STATE_DONE,
+            result={"success": True, "new_id": new_id},
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        _LOGGER.warning("Apply-merge task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+    finally:
+        lock.release()
 
 
 # ─── Profile envelope / member cycles ──────────────────────────────────────────
@@ -3492,6 +3772,13 @@ async def ws_set_user_prefs(
             cur.pop("lang_override", None)  # empty clears -> system default
         elif isinstance(lang, str) and _PREF_LANG_TAG_RE.match(lang):
             cur["lang_override"] = lang
+    # Allow setup guidance skip keys: setup_skip_<step_key> -> "never" | ISO timestamp
+    for k, v in p.items():
+        if isinstance(k, str) and k.startswith("setup_skip_"):
+            if v is None:
+                cur.pop(k, None)
+            elif v == "never" or (isinstance(v, str) and len(v) <= 40):
+                cur[k] = v
     prefs[user.id] = cur
     await _save_panel_data(hass)
     _send_result(connection, msg["id"], "set_user_prefs", {"success": True})
@@ -4567,56 +4854,6 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
     )
 
 
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): "ha_washdata/run_playground_simulation",
-        vol.Required("entry_id"): str,
-        vol.Optional("cycle_ids", default=list): [str],
-        vol.Optional("settings_override", default=dict): dict,
-        vol.Optional("concurrency", default=1): vol.Coerce(int),
-    }
-)
-@websocket_api.async_response
-async def ws_run_playground_simulation(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Replay stored cycles through a headless detector with overridden settings.
-
-    Returns ``{results: [...], summary: {...}}`` - a per-cycle event log +
-    outcome plus aggregate counts. Nothing is persisted; this is a pure what-if.
-    """
-    entry_id: str = msg["entry_id"]
-    manager = _get_manager(hass, entry_id)
-    if manager is None:
-        _err_not_found(connection, msg["id"], entry_id)
-        return
-
-    store = getattr(manager, "profile_store", None)
-    if store is None:
-        connection.send_error(msg["id"], "unavailable", "Profile store unavailable")
-        return
-
-    try:
-        base_config = _playground_base_config(manager, _get_entry(hass, entry_id))
-        cycle_ids = list(msg.get("cycle_ids") or [])
-        settings_override = dict(msg.get("settings_override") or {})
-        concurrency = int(msg.get("concurrency", 1))
-        payload = await hass.async_add_executor_job(
-            playground.run_playground_batch,
-            store,
-            cycle_ids,
-            base_config,
-            settings_override,
-            concurrency,
-        )
-        _send_result(connection, msg["id"], "run_playground_simulation", payload)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground simulation failed for %s: %s", entry_id, exc)
-        connection.send_error(msg["id"], "unknown_error", str(exc))
-
-
 def _playground_context(hass: HomeAssistant, entry_id: str):
     """Return (manager, store, base_config, options, price) for a Playground call,
     or None (after sending the appropriate error) when unavailable."""
@@ -5108,3 +5345,88 @@ def ws_start_playground_sweep(
         msg["objective"], param_y, list(values_y) if values_y else None,
     ))
     _send_result(connection, msg["id"], "start_playground_sweep", {"task_id": task.id})
+
+
+# Readings replayed per executor job for the single-cycle detail sim. The event
+# loop breathes between chunks; a ~233min/5s dishwasher cycle (~2800 readings)
+# becomes ~11 short jobs instead of one multi-minute GIL-holding call (issue #311).
+_PG_DETAIL_CHUNK = 250
+
+
+async def _pg_detail_task(
+    hass: HomeAssistant, task: Any, entry_id: str,
+    cycle_id: str, override: dict[str, Any] | None,
+) -> None:
+    reg = task_registry.get_registry(hass)
+    ctx = _playground_context(hass, entry_id)
+    if ctx is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    _manager, store, base_config, options, price = ctx
+    try:
+        sim = await hass.async_add_executor_job(
+            playground.build_cycle_detail_sim_by_id,
+            store, cycle_id, base_config, override, options, price,
+        )
+        if isinstance(sim, dict):  # {"error": ...} marker (not_found / build failure)
+            if sim.get("error") == "not_found":
+                reg.finish(task, state=task_registry.STATE_ERROR, error="not_found")
+            else:
+                reg.finish(task, state=task_registry.STATE_ERROR, error=str(sim.get("error")))
+            return
+        if not sim.ready:
+            reg.finish(task, state=task_registry.STATE_DONE, result=sim.empty_payload())
+            return
+        total = sim.n_readings
+        reg.update(task, total=total)
+        for i in range(0, total, _PG_DETAIL_CHUNK):
+            if task.cancel_requested:
+                break
+            await hass.async_add_executor_job(sim.step, i, i + _PG_DETAIL_CHUNK)
+            reg.update(task, done=min(total, i + _PG_DETAIL_CHUNK))
+        if not task.cancel_requested:
+            await hass.async_add_executor_job(sim.run_tail)
+        payload = await hass.async_add_executor_job(sim.finalize)
+        payload["partial"] = task.cancel_requested
+        reg.finish(
+            task,
+            state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
+            result=payload,
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Playground detail task failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/start_playground_cycle_detail",
+        vol.Required("entry_id"): str,
+        vol.Required("cycle_id"): str,
+        vol.Optional("settings_override", default=dict): dict,
+    }
+)
+@callback
+def ws_start_playground_cycle_detail(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Kick off a detached, registry-tracked single-cycle "Simulate" replay;
+    returns the task id immediately. The heavy per-5s replay runs chunk-by-chunk
+    in the executor so a long cycle no longer stalls Home Assistant (issue #311).
+    Progress/result come via subscribe_tasks/get_task_result."""
+    entry_id = msg["entry_id"]
+    if _playground_context(hass, entry_id) is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "pg_detail", "Simulate cycle",
+        label_key="task.pg_detail.simulate", label_params={},
+    )
+    override = dict(msg.get("settings_override") or {})
+    hass.async_create_task(
+        _pg_detail_task(hass, task, entry_id, msg["cycle_id"], override)
+    )
+    _send_result(connection, msg["id"], "start_playground_cycle_detail", {"task_id": task.id})

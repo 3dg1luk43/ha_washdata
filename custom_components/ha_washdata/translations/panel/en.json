@@ -1,11 +1,11 @@
 {
   "badge": {
-    "artifact_tip": "{n} anomalies detected (e.g. door opened mid-cycle) — open to see them on the graph",
+    "artifact_tip": "{n} anomalies detected (e.g. door opened mid-cycle) – open to see them on the graph",
     "auto": "(auto-detected)",
     "built_in_tag": "built-in",
     "declining": "↘ declining",
     "fair_fit": "acceptable quality",
-    "fair_fit_tip": "Moderate match consistency — some cycles assigned to this profile have lower confidence scores. Label more cycles or re-record the profile to improve accuracy.",
+    "fair_fit_tip": "Moderate match consistency – some cycles assigned to this profile have lower confidence scores. Label more cycles or re-record the profile to improve accuracy.",
     "feedback_requested": "Feedback requested",
     "golden_cycle": "Recorded reference cycle",
     "improving": "↗ improving",
@@ -16,7 +16,7 @@
     "energy_spike": "Higher energy than usual",
     "energy_low": "Lower energy than usual",
     "poor_fit": "poor quality",
-    "poor_fit_tip": "Inconsistent match history — consider rebuilding this profile",
+    "poor_fit_tip": "Inconsistent match history – consider rebuilding this profile",
     "restart_gap_tip": "{n} HA restart gap: power trace has a hole",
     "reviewed": "Reviewed",
     "steady": "→ steady",
@@ -87,7 +87,7 @@
     "on_cycle_finished": "On cycle finished",
     "on_cycle_started": "On cycle started",
     "pause_cycle": "Pause",
-    "pause_cycle_tip": "Pause the running cycle — the appliance will resume where it left off",
+    "pause_cycle_tip": "Pause the running cycle – the appliance will resume where it left off",
     "pg_apply_device": "Apply to device",
     "pg_autofill": "Auto-fill",
     "play": "Play",
@@ -97,8 +97,8 @@
     "process_tip": "Save the recorded trace as a new or existing profile",
     "rebuild": "Rebuild Envelopes",
     "rebuild_envelope": "Rebuild Envelope",
-    "rebuild_tip": "Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles — run after labelling new cycles or correcting old ones",
-    "rec_start_tip": "Begin recording the appliance's power trace — start just before running a cycle",
+    "rebuild_tip": "Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles – run after labelling new cycles or correcting old ones",
+    "rec_start_tip": "Begin recording the appliance's power trace – start just before running a cycle",
     "rec_stop": "Stop",
     "rec_stop_tip": "Stop recording and hold the captured trace for review",
     "record": "Start Recording",
@@ -181,7 +181,7 @@
     },
     "attn_sub": "Fix conflicts before saving",
     "attn_title": "{n} setting conflict{s}",
-    "settings_banner": "{n} setting conflict{s} — check the highlighted sections and fix before saving.",
+    "settings_banner": "{n} setting conflict{s} – check the highlighted sections and fix before saving.",
     "settings_banner_btn": "Go to first",
     "confidence": {
       "auto": "Must be at or above Match Threshold ({match})",
@@ -448,9 +448,9 @@
     "show_expected": "Show expected curve overlay (matched profile, orange)",
     "show_raw": "Show raw socket toggle in live power graph",
     "sparkline": "Recent cycle-duration trend",
-    "stage2": "Stage 2 — core similarity",
-    "stage3": "Stage 3 — DTW",
-    "stage4": "Stage 4 — agreement",
+    "stage2": "Stage 2 – core similarity",
+    "stage3": "Stage 3 – DTW",
+    "stage4": "Stage 4 – agreement",
     "status": "Status",
     "tail_trim": "Tail Trim (s)",
     "timer_auto_pause": "Auto-pause",
@@ -495,6 +495,11 @@
     "pg_alert_indefinite": "Would run indefinitely",
     "task_pg_history": "Test on history",
     "task_pg_sweep": "Optimize",
+    "task_pg_detail": "Simulate cycle",
+    "task_split": "Splitting cycle",
+    "task_trim": "Trimming cycle",
+    "task_merge": "Merging cycles",
+    "task_rebuild": "Rebuilding envelopes",
     "task_reprocess": "Reprocessing",
     "task_ml_training": "Learning",
     "eta_secs": "~{n}s left",
@@ -540,7 +545,7 @@
     "personalized": "● Personalized to this machine",
     "better_than_baseline": "{pct}% better than the baseline estimate ({metric})",
     "trend_improving_tip": "This model's fit has improved across recent re-checks.",
-    "trend_declining_tip": "This model's fit has slipped across recent re-checks — reviewing more cycles may help it re-learn.",
+    "trend_declining_tip": "This model's fit has slipped across recent re-checks – reviewing more cycles may help it re-learn.",
     "trend_steady_tip": "This model's fit has held roughly steady across recent re-checks.",
     "cap_label": {
       "end": "Cycle-end detection",
@@ -605,19 +610,19 @@
     "artifact_dip_detail": "Dropped below the usual power band for ~{n}s.",
     "artifact_footer": "Highlighted on the graph above. These are transient artifacts (e.g. the door opened mid-cycle), not necessarily problems.",
     "artifact_header": "{n} anomalies detected during this cycle",
-    "artifact_pause_detail": "Power dropped to near zero for ~{n}s then resumed — likely the door was opened mid-cycle or the cycle was paused.",
+    "artifact_pause_detail": "Power dropped to near zero for ~{n}s then resumed – likely the door was opened mid-cycle or the cycle was paused.",
     "artifact_spike_detail": "Drew above the usual power band for ~{n}s.",
     "auto_label_intro": "Assign profiles to unlabelled cycles whose match confidence clears the threshold.",
     "automations_intro": "WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.",
     "cleanup_intro": "Every labelled cycle overlaid. Tick outliers and delete to clean up the profile.",
     "clear_debug_hint": "Remove stored debug data to free space.",
-    "collecting_data": "Collecting data — {need} more cycle{plural} before fine-tuning can start ({current}/{min}).",
+    "collecting_data": "Collecting data – {need} more cycle{plural} before fine-tuning can start ({current}/{min}).",
     "compare_overlay_profiles": "Overlay profiles (faint)",
     "compare_profiles_tip": "Overlay other profile envelopes on the chart above to see which one best fits this cycle.",
-    "compare_selected_cycles": "Selected cycles (solid) — show / hide",
+    "compare_selected_cycles": "Selected cycles (solid) – show / hide",
     "consider_new_profile": "Consider creating a new profile.",
     "coverage_gap": "recent cycles have no matching profile ({pct}% of last 30).",
-    "coverage_gap_similar_cycles": "{count} similar unlabelled cycles found — create a profile to start matching them.",
+    "coverage_gap_similar_cycles": "{count} similar unlabelled cycles found – create a profile to start matching them.",
     "cycles_deleted": "{count} cycle(s) deleted",
     "enough_data": "Enough data to learn from ({current}/{min} cycles).",
     "export_description": "Export all profiles and cycles to JSON, or restore from a previous export.",
@@ -646,7 +651,7 @@
     "ml_learned_intro": "Models fine-tuned to this machine.",
     "ml_loading": "loading ML…",
     "ml_settings_intro": "Two independent switches: one applies the models while a cycle runs, the other lets WashData fine-tune them to your machine over time.",
-    "name_first_program": "You have enough cycles — name your first program to start matching.",
+    "name_first_program": "You have enough cycles – name your first program to start matching.",
     "near_duplicate_cluster": "near-duplicate profile cluster detected. Grouping lets matching reliably pick between look-alikes (e.g. same program at different temperature/spin).",
     "no_cycles_match": "No cycles match the current filter.",
     "no_cycles_profile": "No cycles for this profile.",
@@ -658,7 +663,7 @@
     "no_devices": "No WashData devices configured yet.",
     "no_envelope": "No envelope yet - rebuild after labelling cycles.",
     "no_envelope_overlay": "No envelope available to overlay.",
-    "no_fine_tuned": "Nothing fine-tuned yet — WashData is using its built-in models.",
+    "no_fine_tuned": "Nothing fine-tuned yet – WashData is using its built-in models.",
     "no_logs": "No log records buffered yet.",
     "no_maintenance": "No maintenance recorded yet.",
     "no_match_yet": "No match attempt yet - this populates during a running cycle.",
@@ -675,7 +680,7 @@
     "notify_services_hint": "Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.",
     "old_actions_warning": "Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.",
     "onboarding_progress": "{n} / 3 cycles observed",
-    "onboarding_watching": "Run your appliance normally — WashData is watching. After 3 cycles, program matching will begin.",
+    "onboarding_watching": "Run your appliance normally – WashData is watching. After 3 cycles, program matching will begin.",
     "pending_feedback": "Pending detection feedback",
     "performance_trend": "Performance trend ({n} cycles)",
     "pg_analysis_empty": "Load a cycle to see match analysis.",
@@ -725,7 +730,7 @@
     "setting_changed": "Changed from {old} to {new} on {date}",
     "settings_basic_note": "Showing essential settings. Switch to Advanced for the full list.",
     "shape_drift_advisory": "⚠ Shape drifting",
-    "shape_drift_detail": "The power pattern for this profile has shifted over time — possible appliance wear or maintenance needed (e.g. descaling, filter cleaning).",
+    "shape_drift_detail": "The power pattern for this profile has shifted over time – possible appliance wear or maintenance needed (e.g. descaling, filter cleaning).",
     "show_all_settings": "Show all settings",
     "showing_suggestions": "Showing {count} setting with suggestions.",
     "split_intro": "Click the graph to add or remove a split point, or auto-detect by idle gaps. Each resulting segment can get its own profile.",
@@ -753,10 +758,10 @@
     "toast_revert_failed": "Revert failed: {error}",
     "toast_reverted": "{key} reverted",
     "toast_save_failed": "Save failed: {error}",
-    "trend_duration_longer": "Duration trending longer ({pct}%/cycle) — recent avg {avg}",
-    "trend_duration_shorter": "Duration trending shorter ({pct}%/cycle) — recent avg {avg}",
+    "trend_duration_longer": "Duration trending longer ({pct}%/cycle) – recent avg {avg}",
+    "trend_duration_shorter": "Duration trending shorter ({pct}%/cycle) – recent avg {avg}",
     "trend_energy_down": "Energy trending down ({pct}%/cycle)",
-    "trend_energy_up": "Energy trending up ({pct}%/cycle) — recent avg {avg}",
+    "trend_energy_up": "Energy trending up ({pct}%/cycle) – recent avg {avg}",
     "trim_intro": "Drag the red handles, or enter values. Everything outside the window is removed.",
     "tuning_suggestions_available": "{count} tuning suggestion available from observed cycles. They appear beside the relevant fields.",
     "unsure_detected_prefix": "WashData is unsure it detected",
@@ -774,12 +779,14 @@
     "pg_sweep_progress": "Step {done} / {total}",
     "pg_analysis_hint": "Select a cycle and click ↺ to load analysis.",
     "diagnostics_load_failed": "Could not load diagnostics: {error}",
-    "manual_duration_ref_hint": "Only used when no reference cycle is selected — a reference cycle sets the duration from its own length.",
+    "manual_duration_ref_hint": "Only used when no reference cycle is selected – a reference cycle sets the duration from its own length.",
     "advisory_poor_health": "'{name}' has a low fit score - its recent cycles vary a lot or match weakly. Review its cycles or re-record the profile so matching and time estimates stay accurate.",
     "advisory_shape_drift": "'{name}' has drifted significantly from its original power shape. The appliance may have changed behaviour over time (e.g. limescale, wear). Consider re-recording this profile with recent cycles.",
     "advisory_shape_drift_corr": "'{name}' has drifted significantly from its original power shape (correlation {corr}). The appliance may have changed behaviour over time (e.g. limescale, wear). Consider re-recording this profile with recent cycles.",
     "advisory_duration_trend_up": "'{name}' cycles are running progressively longer (about +{pct}% per cycle). If the appliance's behaviour changed, re-record or rebuild this profile.",
     "advisory_energy_trend_up": "'{name}' is drawing progressively more energy (about +{pct}% per cycle) - worth checking the appliance if that is unexpected.",
+    "advisory_phase_inconsistent": "'{name}' looks like it mixes different programs or temperatures - its cycles heat for very different lengths of time. Splitting it into separate profiles (e.g. per temperature) will improve matching and time estimates.",
+    "advisory_phase_inconsistent_title": "⚠ Possibly mixed programs",
     "pg_running_history": "Replaying your cycles…",
     "pg_running_sweep": "Testing values across your cycles…",
     "pg_row_load_hint": "Load this cycle in the graph above",
@@ -810,7 +817,7 @@
     "share_guideline_quality": "Only share cycles that completed normally -- no mid-cycle interruptions, door-open events, or power blips.",
     "share_guideline_review": "Your upload starts as pending and appears publicly once enough community members confirm it.",
     "share_consent": "I confirm these cycles ran to normal completion without interruption",
-    "share_profile_no_cycles": "No reference cycles — mark a cycle as ⭐ in the Cycles tab to include this profile"
+    "share_profile_no_cycles": "No reference cycles – mark a cycle as ⭐ in the Cycles tab to include this profile"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Sudden drop treated as immediate end",
@@ -822,12 +829,19 @@
     "start_duration_threshold": "Seconds above threshold to confirm start",
     "start_threshold_w": "Minimum watts to count as started",
     "stop_threshold_w": "Below this, machine counts as off",
-    "dtw_bandwidth": "How much time-warping the shape match allows",
-    "corr_weight": "Weight on curve-shape vs power level in the match",
-    "duration_weight": "How much run-length agreement affects the match",
-    "energy_weight": "How much energy agreement affects the match",
-    "profile_match_min_duration_ratio": "Shortest run (vs the profile) still allowed to match",
-    "profile_match_max_duration_ratio": "Longest run (vs the profile) still allowed to match"
+    "dtw_bandwidth": "Stage 3: Sakoe-Chiba warp band (0 = DTW off; default 0.2 = 20% of cycle length)",
+    "corr_weight": "Stage 2: balance between curve shape (correlation) and power level (MAE); default 0.45",
+    "duration_weight": "Stage 4: how strongly run-length agreement affects the final score (default 0.22)",
+    "energy_weight": "Stage 4: how strongly energy agreement affects the final score (default 0.22)",
+    "profile_match_min_duration_ratio": "Stage 1: minimum cycle length as a fraction of profile duration; default 0.1 (10%)",
+    "profile_match_max_duration_ratio": "Stage 1: maximum cycle length as a fraction of profile duration; default 1.5 (150%)",
+    "keep_min_score": "Stage 2: floor score to stay in the race; default 0.1 admits weak matches, later stages pick the best",
+    "dtw_blend": "Stage 3: 0 = core score only, 1 = DTW score only, 0.5 = equal blend (default)",
+    "dtw_ensemble_w": "Stage 3 (ensemble mode): weight on scaled-L1 vs derivative DTW; default 0.7 favours level-aware",
+    "dtw_ddtw_scale": "Stage 3: DDTW half-saturation distance; smaller = more shape-sensitive (default 30)",
+    "dtw_refine_top_n": "Stage 3: candidates DTW re-scores; raise to 7-9 if correct profile ranks 4th-5th (default 5)",
+    "duration_scale": "Stage 4: log-ratio where duration agreement halves; smaller = stricter penalty (default 0.175)",
+    "energy_scale": "Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)"
   },
   "phase_desc": {
     "anti_crease": "Occasional short tumbles after completion to reduce wrinkles.",
@@ -910,6 +924,10 @@
     "triggers": {
       "intro": "Optional external signals: an end trigger, a door sensor, a pause switch, and the unload reminder.",
       "label": "Triggers & Doors"
+    },
+    "phase_eta": {
+      "intro": "Phase-aware time-remaining, for machines whose cycle length depends on temperature or spin.",
+      "label": "Time Remaining"
     }
   },
   "setting": {
@@ -992,6 +1010,10 @@
     "energy_price_static": {
       "doc": "Fixed price per kWh used for cost figures when no live price entity is set above.",
       "label": "Static Energy Price (per kWh)"
+    },
+    "energy_sensor": {
+      "doc": "Optional cumulative energy counter (total_increasing kWh/Wh, e.g. the plug's own lifetime meter). When set, each cycle's reported energy is taken from this counter's start-to-end delta, which avoids the under-counting you get from integrating a slow-reporting power sensor. Falls back to the integrated value if the reading is missing, its unit is unknown, or the delta is not positive. Leave blank to keep integrating the power sensor.",
+      "label": "Energy Meter Entity"
     },
     "expose_debug_entities": {
       "doc": "Publish extra diagnostic HA entities (match confidence, ambiguity, state internals). Off keeps the entity list clean for normal use.",
@@ -1275,6 +1297,38 @@
     },
     "show_contributor": {
       "doc": "Show the \"by <contributor>\" attribution on community appliances and reference cycles."
+    },
+    "enable_phase_matching": {
+      "doc": "Break each running cycle into phases (heating, wash, spin) and budget the time remaining per phase, blended with the classic estimate - leaning on the phase budget early in the cycle and the classic estimate near the end. This personalises the countdown to how long your machine actually heats and runs, which is most noticeable in the first half of a cycle. Off = the classic estimate only. Only the time-remaining display is affected; program matching and cycle detection are unchanged.",
+      "label": "Phase-aware time remaining"
+    },
+    "keep_min_score": {
+      "label": "Min Match Score",
+      "doc": "Minimum similarity score a candidate needs to stay in the match race. The default 0.1 is deliberately permissive - it admits even weak candidates and relies on later stages to find the best match. Raise it to prune unlikely profiles earlier; lower it to widen the initial candidate pool."
+    },
+    "dtw_blend": {
+      "label": "Warp Blend",
+      "doc": "How much the time-warp (DTW) alignment score replaces the Stage 2 core score. 0 = use only the Stage 2 score, 1 = use only the DTW score, 0.5 (default) = equal blend. Raise it to rely more on warp alignment when programs have similar power levels but different timing patterns."
+    },
+    "dtw_ensemble_w": {
+      "label": "Warp Ensemble Mix",
+      "doc": "In ensemble DTW mode (the default), the weight on scaled L1 versus derivative DTW (DDTW). 1.0 = all scaled-L1, 0 = all DDTW, 0.7 = default. The scaled-L1 variant compares power levels; the derivative variant reacts to how power changes over time. Ensemble blends both."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Derivative Warp Scale",
+      "doc": "Half-saturation distance for derivative DTW scoring. The score halves when the DDTW distance equals this value. Smaller = more sensitive to shape differences. Default 30 is calibrated to typical appliance power traces. Only affects ensemble and ddtw DTW modes."
+    },
+    "dtw_refine_top_n": {
+      "label": "Warp Refine Count",
+      "doc": "How many top Stage 2 candidates are re-scored by DTW. DTW is more expensive so it is only applied to the best N candidates. Default 5. Raise it (to 7-9) if the correct profile sometimes only reaches 4th or 5th place after Stage 2 - DTW can rescue it. Lowering speeds up matching slightly."
+    },
+    "duration_scale": {
+      "label": "Duration Sharpness",
+      "doc": "Sharpness of the Stage 4 duration agreement penalty. This is the log-ratio at which the agreement score halves. Smaller = stricter: a duration mismatch hurts more. Default 0.175 corresponds to roughly 18% duration tolerance at half-weight. Pair with Duration Weight."
+    },
+    "energy_scale": {
+      "label": "Energy Sharpness",
+      "doc": "Sharpness of the Stage 4 energy agreement penalty. Smaller = stricter: an energy mismatch hurts more. Default 0.25 is intentionally more forgiving than Duration Sharpness because energy varies with load. Pair with Energy Weight."
     }
   },
   "setting_group": {
@@ -1394,24 +1448,24 @@
         "lower": "Labels more cycles automatically; some may be misidentified"
       },
       "duration_tolerance": {
-        "higher": "Accepts a wider duration range — more flexible matching",
-        "lower": "Requires closer duration match — stricter but may reject unusual cycles"
+        "higher": "Accepts a wider duration range – more flexible matching",
+        "lower": "Requires closer duration match – stricter but may reject unusual cycles"
       },
       "end_energy_threshold": {
         "higher": "Closes only cycles that used substantial energy",
         "lower": "Closes shorter or lower-energy cycles too"
       },
       "end_repeat_count": {
-        "higher": "Requires the end signal to repeat more times — more robust, slightly slower",
-        "lower": "Ends after fewer repetitions — faster detection, more false-end risk"
+        "higher": "Requires the end signal to repeat more times – more robust, slightly slower",
+        "lower": "Ends after fewer repetitions – faster detection, more false-end risk"
       },
       "learning_confidence": {
-        "higher": "Learns only from very confident matches — slower but more reliable",
+        "higher": "Learns only from very confident matches – slower but more reliable",
         "lower": "Learns from more cycles; model may be noisier"
       },
       "min_off_gap": {
         "higher": "Longer idle needed before a new cycle starts",
-        "lower": "Brief idle triggers a new cycle — back-to-back runs may split"
+        "lower": "Brief idle triggers a new cycle – back-to-back runs may split"
       },
       "min_power": {
         "higher": "Less sensitive to idle power draw; may miss very quiet programs",
@@ -1422,24 +1476,24 @@
         "lower": "Force-stops a stuck cycle sooner"
       },
       "off_delay": {
-        "higher": "More time for appliance pauses — handles long soak or drying phases",
-        "lower": "Faster end detection — works well for clean on/off appliances"
+        "higher": "More time for appliance pauses – handles long soak or drying phases",
+        "lower": "Faster end detection – works well for clean on/off appliances"
       },
       "profile_match_threshold": {
         "higher": "Commits only high-confidence matches; more cycles stay unlabelled",
         "lower": "Matches more cycles; some may be slightly wrong"
       },
       "running_dead_zone": {
-        "higher": "Ignores brief power spikes during idle — less noise-sensitive",
-        "lower": "Responds to shorter power bursts — catches fast transient activity"
+        "higher": "Ignores brief power spikes during idle – less noise-sensitive",
+        "lower": "Responds to shorter power bursts – catches fast transient activity"
       },
       "start_threshold_w": {
         "higher": "Avoids false starts from brief power spikes",
         "lower": "Catches low-power programs; may trigger on noise"
       },
       "stop_threshold_w": {
-        "higher": "Ends cycle faster — may close during a pause",
-        "lower": "Waits longer to end — fewer premature completions"
+        "higher": "Ends cycle faster – may close during a pause",
+        "lower": "Waits longer to end – fewer premature completions"
       },
       "watchdog_interval": {
         "higher": "Longer quiet phases allowed; fewer false force-stops",
@@ -1712,6 +1766,69 @@
     },
     "pg_sweep": {
       "optimize": "Optimize: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simulate cycle"
+    },
+    "split": {
+      "apply": "Splitting cycle"
+    },
+    "trim": {
+      "apply": "Trimming cycle"
+    },
+    "merge": {
+      "apply": "Merging cycles"
+    },
+    "rebuild": {
+      "envelopes": "Rebuilding envelopes"
+    },
+    "cancelling": "Cancelling..."
+  },
+  "setup": {
+    "hdr": {
+      "card": "Device Setup",
+      "healthy_chip": "Setup complete"
+    },
+    "phase0": {
+      "washer": "WashData is already detecting your cycles. Record your first cycle to enable program names and time estimates.",
+      "dishwasher": "WashData is watching. Dishwashers have complex cycles – recording your first cycle is strongly recommended. If a detected cycle runs too long, use the cycle editor to trim it before saving as a profile.",
+      "generic": "WashData is watching. Record or label a detected cycle to start building profiles."
+    },
+    "phase1a": {
+      "labelled": "Good start – your first program is saved. For the cleanest data, consider recording your next cycle with the recorder widget."
+    },
+    "phase1b": {
+      "recorded": "Your recording was saved as {profile_name}. Now record or label your other common programs to build coverage."
+    },
+    "phase1c": {
+      "verify": "You have {count} programs from the community. Run a cycle to verify WashData recognises it correctly – matching will improve as your device builds its own history."
+    },
+    "phase2": {
+      "cluster": "WashData has seen {count} cycles that don't match any saved program – they look similar to each other. Want to create a new profile for them?",
+      "unmatched": "Your last cycle didn't match any saved program. Is it a new program?"
+    },
+    "phase3": {
+      "suggestions": "WashData has settings recommendations based on your cycle history – review them to improve detection accuracy.",
+      "groups": "Some of your profiles look like the same program at different temperatures. Organise them into a group for better matching.",
+      "phases": "Add program phases to {profile_name} for more accurate time-remaining estimates."
+    },
+    "phase4": {
+      "healthy": "This device is fully set up ({profile_count} profiles)."
+    },
+    "cta": {
+      "start_recording": "Start Recording",
+      "label_detected_cycle": "I already have a detected cycle – label it instead",
+      "browse_cycles": "Browse cycles to label another",
+      "view_profiles": "View your profiles",
+      "create_from_cluster": "Create profile from these cycles",
+      "create_profile": "Create a profile for it",
+      "review_suggestions": "Review suggestions",
+      "organise_profiles": "Organise profiles",
+      "configure_phases": "Configure phases",
+      "skip_step": "Skip this step",
+      "skip_forever": "Don't show again",
+      "hide_guidance": "Hide guidance",
+      "show_guidance": "Show guidance"
     }
   }
 }

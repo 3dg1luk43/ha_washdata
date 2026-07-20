@@ -43,6 +43,8 @@ MODEL_NAME = 'live_match_commit'
 MODEL_TARGET = 'match_top1_correct'
 MODEL_KIND = 'standardized_logistic'
 TARGET_UNITS = ''
+# Training artifact for select_threshold only — NOT used at live inference.
+# The live early-commit gate reads ML_MATCH_COMMIT_THRESHOLD from const.py.
 THRESHOLD = 0.371786
 
 FEATURE_COLUMNS = [

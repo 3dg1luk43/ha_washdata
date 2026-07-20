@@ -147,7 +147,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
     """Handle a config flow for WashData."""
 
     VERSION = 3
-    MINOR_VERSION = 6
+    MINOR_VERSION = 7
 
     def __init__(self) -> None:
         """Initialize the config flow."""
@@ -182,42 +182,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
             )
 
         self._user_input = user_input
-        return await self.async_step_first_profile()
-
-    async def async_step_first_profile(
-        self, user_input: dict[str, Any] | None = None  # pylint: disable=unused-argument
-    ) -> FlowResult:
-        """Step to optionally create the first profile."""
-
-        if user_input is not None:
-            profile_name = user_input.get("profile_name", "").strip()
-            data = dict(self._user_input)
-
-            if profile_name:
-                duration_mins = user_input.get("manual_duration")
-                duration_sec = (duration_mins * 60.0) if duration_mins else None
-                data["initial_profile"] = {
-                    "name": profile_name,
-                    "avg_duration": duration_sec,
-                }
-
-            return self.async_create_entry(title=data[CONF_NAME], data=data)
-
-        schema = vol.Schema(
-            {
-                vol.Optional("profile_name"): str,
-                vol.Optional("manual_duration", default=120): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0,
-                        max=480,
-                        unit_of_measurement="min",
-                        mode=selector.NumberSelectorMode.BOX,
-                    )
-                ),
-            }
-        )
-
-        return self.async_show_form(step_id="first_profile", data_schema=schema)
+        return self.async_create_entry(title=self._user_input[CONF_NAME], data=self._user_input)
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None

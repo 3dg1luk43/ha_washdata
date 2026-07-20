@@ -1,13 +1,15 @@
-name: '🌐 Auto Translate'
+# This workflow previously auto-translated new English keys via GoogleTranslator (deep-translator).
+# It is DISABLED as of 0.5.1: community translations are now submitted through GitLocalize
+# (https://gitlocalize.com/repo/10819), which syncs new keys to translators automatically.
+# New keys added by the maintainer are translated via Claude subagents with domain context
+# (see CLAUDE.md "Translation maintenance"). Machine translation via this pipeline is banned.
+#
+# The workflow_dispatch trigger is retained as an emergency escape hatch only.
+# Do NOT re-enable the push trigger without discussing the translation workflow change first.
+
+name: '🌐 Auto Translate (disabled)'
 
 on:
-  push:
-    branches:
-      - main
-      - master
-    paths:
-      - 'custom_components/ha_washdata/translations/en.json'
-      - 'custom_components/ha_washdata/www/ha-washdata-card.js'
   workflow_dispatch:
 
 permissions:

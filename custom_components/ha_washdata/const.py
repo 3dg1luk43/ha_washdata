@@ -96,13 +96,33 @@ CONF_POWER_OFF_DELAY = (
     "power_off_delay"  # Seconds below the power-off threshold before Finished/Clean -> Off
 )
 CONF_EXPOSE_DEBUG_ENTITIES = "expose_debug_entities"  # Expose detailed debug sensors
+# Per-device opt-in: blend the phase-resolved (per-role budget) ETA into the
+# time-remaining estimate for phase-matching-supported device types (washing
+# machine, washer-dryer). Default off. Validated by the Phase-0 ETA gate; see
+# docs/superpowers/specs/2026-07-17-phase-segmented-matching-design.md.
+CONF_ENABLE_PHASE_MATCHING = "enable_phase_matching"
+# Phase-structure consistency advisory (Profiles tab, never a notification).
+# A single-program/temperature profile should have a fairly consistent heating
+# block; wildly varying heating time or heating present in only some cycles
+# usually means different programs/temperatures were labelled under one profile
+# (the "mixed labels" data-hygiene problem). Pure statistics from the cached
+# phase profile - no relabeling (phase matching does not label better than the
+# whole-cycle matcher; see the Phase-0 gate).
+# Minimum member cycles before a profile's cached phase profile is trusted to
+# drive the live phase-resolved ETA (mirrors the envelope's cycle_count>=2 gate);
+# below this the priors are too noisy (single-cycle -> zero variance) and the
+# estimate falls back to the classic one. Design §6 cold-start floor.
+PHASE_PROFILE_MIN_CYCLES = 2
+PHASE_CONSISTENCY_MIN_CYCLES = 4
+# Heating-time std/mean above this -> likely mixed temperatures under one label.
+# A clean single-temperature profile sits ~0.2 (load variation only); a profile
+# mixing 30/40/90C sits ~0.45-0.6, so 0.45 catches genuine mixing with margin.
+PHASE_HEAT_CV_WARN = 0.45
+PHASE_HEAT_OCC_MIXED_LO = 0.25    # heating present in only 25%-75% of cycles ->
+PHASE_HEAT_OCC_MIXED_HI = 0.75    #   mixed with a non-heating program
 CONF_SAVE_DEBUG_TRACES = (
     "save_debug_traces"  # Improve historical cycle data with rich debug info
 )
-# Cycle interruption detection settings (not exposed in UI, but used internally)
-CONF_ABRUPT_DROP_WATTS = "abrupt_drop_watts"  # Power cliff threshold for interrupted status
-CONF_ABRUPT_DROP_RATIO = "abrupt_drop_ratio"  # Relative drop ratio for interrupted status
-CONF_ABRUPT_HIGH_LOAD_FACTOR = "abrupt_high_load_factor"  # High load factor threshold
 CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"  # Noise events before auto-tune
 CONF_EXTERNAL_END_TRIGGER_ENABLED = "external_end_trigger_enabled"  # Enable external cycle end trigger
 CONF_EXTERNAL_END_TRIGGER = "external_end_trigger"  # Binary sensor entity for external cycle end
@@ -138,6 +158,14 @@ CONF_NOTIFY_CHANNEL = "notify_channel"  # Android channel for status/live/remind
 CONF_NOTIFY_FINISH_CHANNEL = "notify_finish_channel"  # Distinct Android channel for finished/clean
 CONF_ENERGY_PRICE_STATIC = "energy_price_static"
 CONF_ENERGY_PRICE_ENTITY = "energy_price_entity"
+# Optional external cumulative energy meter (issue #316). When set, each cycle's
+# reported energy is taken from this counter's start->end delta instead of the
+# integrated power trace, which systematically under-counts on report-on-change
+# plugs. Strictly opt-in: with no entity configured, behaviour is unchanged. The
+# integrated value is always still computed and stored (energy_wh) so matching,
+# ML and anomaly stats stay internally consistent; the meter only supplies the
+# user-facing reported figure (cost, lifetime total, notifications, panel).
+CONF_ENERGY_SENSOR = "energy_sensor"
 # Peak-rate awareness: when the current price meets/exceeds this threshold, the
 # start notification gets an informational tip appended (purely advisory).
 CONF_PEAK_RATE_THRESHOLD = "peak_rate_threshold"
@@ -323,10 +351,6 @@ TERMINAL_DROP_MIN_PEAK_RATIO = 5.0      # cycle must have been clearly ON (peak 
 # rather than assumed to be a stop.
 TERMINAL_DROP_PEAK_FAMILIAR_TOL = 0.4
 
-# Cycle interruption detection defaults (internal)
-DEFAULT_ABRUPT_DROP_WATTS = 500.0  # Power cliff detection threshold (W)
-DEFAULT_ABRUPT_DROP_RATIO = 0.6  # 60% drop considered abrupt
-DEFAULT_ABRUPT_HIGH_LOAD_FACTOR = 5.0  # High load factor threshold
 DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Ghost cycles before threshold adjustment
 
 # Anti-wrinkle defaults (advanced; disabled by default)
@@ -435,6 +459,8 @@ REFERENCE_PROFILE_CURVE_POINTS = 50
 # actually DROPPING (62.7%->59.9%). Raising weight alone at the old loose scale
 # inflated both recall and FP (net-negative), so both knobs move together.
 MATCH_DURATION_WEIGHT = 0.22
+# Despite the name, "energy" here means mean power (W), not Wh — the Stage-4
+# agreement term compares cur_energy=mean(curr_arr) vs profile_mean_power.
 MATCH_ENERGY_WEIGHT = 0.22
 MATCH_DURATION_SCALE = 0.175       # ~ln ratio at which duration agreement halves
 MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
@@ -688,7 +714,10 @@ GROUP_MIN_COHESION = 0.80
 # v9: pre-initialize additive top-level keys (lifetime_energy_wh,
 # settings_changelog, maintenance_log) so they are present from first load
 # rather than only appearing lazily on first use.
-STORAGE_VERSION = 10
+# v11 is a marker-only bump: per-phase profiles (envelope["phase_profile"]) are
+# derived cache populated by async_rebuild_envelope, so no data migration is
+# needed - they self-populate on the next envelope rebuild.
+STORAGE_VERSION = 11
 STORAGE_KEY = "ha_washdata"
 
 # Notification events

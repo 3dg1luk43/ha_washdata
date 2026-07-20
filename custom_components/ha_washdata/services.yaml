@@ -86,7 +86,7 @@ auto_label_cycles:
       name: Confidence Threshold
       description: Minimum match confidence (0.50-0.95) to apply labels.
       required: false
-      default: 0.70
+      default: 0.75
       selector:
         number:
           min: 0.50

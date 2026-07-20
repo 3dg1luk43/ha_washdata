@@ -68,9 +68,6 @@ from .const import (
     CONF_SMOOTHING_WINDOW,
     CONF_PROFILE_DURATION_TOLERANCE,
     CONF_INTERRUPTED_MIN_SECONDS,
-    CONF_ABRUPT_DROP_WATTS,
-    CONF_ABRUPT_DROP_RATIO,
-    CONF_ABRUPT_HIGH_LOAD_FACTOR,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -133,9 +130,6 @@ from .const import (
     DEFAULT_SMOOTHING_WINDOW,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEFAULT_INTERRUPTED_MIN_SECONDS,
-    DEFAULT_ABRUPT_DROP_WATTS,
-    DEFAULT_ABRUPT_DROP_RATIO,
-    DEFAULT_ABRUPT_HIGH_LOAD_FACTOR,
     DEFAULT_COMPLETION_MIN_SECONDS,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_PROFILE_MATCH_THRESHOLD,
@@ -175,6 +169,7 @@ from .const import (
     CONF_NOTIFY_FINISH_CHANNEL,
     CONF_ENERGY_PRICE_STATIC,
     CONF_ENERGY_PRICE_ENTITY,
+    CONF_ENERGY_SENSOR,
     CONF_PEAK_RATE_THRESHOLD,
     CONF_PEAK_RATE_MESSAGE,
     DEFAULT_PEAK_RATE_MESSAGE,
@@ -249,9 +244,8 @@ from .learning import LearningManager
 from .profile_store import (
     ProfileStore,
     decompress_power_data,
-    device_active_peak_range,
-    earliest_sustained_quiet_offset,
     is_terminal_drop,
+    terminal_drop_baseline,
 )
 from .signal_processing import integrate_wh, energy_gap_threshold_s
 from .recorder import CycleRecorder
@@ -260,6 +254,7 @@ from .log_utils import DeviceLoggerAdapter
 from .time_utils import power_data_to_offsets
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
+from .phase_segmenter import phase_matching_enabled
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -417,6 +412,12 @@ class WashDataManager:
         # Cleared and stored into cycle_data["restart_gaps"] at cycle end.
         # Matching always uses real readings only; this list is for display/anomaly.
         self._restart_gaps: list[dict[str, Any]] = []
+
+        # External energy-meter snapshot for the current cycle (issue #316).
+        # Captured at cycle start, read back at cycle end for the start->end delta.
+        # Both survive a restart via the active-cycle snapshot.
+        self._energy_meter_start: float | None = None
+        self._energy_meter_source: str | None = None
 
         # Pause tracking (user-triggered)
         self._user_pause_start: datetime | None = None
@@ -607,12 +608,6 @@ class WashDataManager:
         interrupted_min_seconds = int(
             config_entry.options.get("interrupted_min_seconds", 150)
         )
-        abrupt_drop_watts = float(config_entry.options.get("abrupt_drop_watts", 500.0))
-        abrupt_drop_ratio = float(config_entry.options.get("abrupt_drop_ratio", 0.6))
-        abrupt_high_load_factor = float(
-            config_entry.options.get("abrupt_high_load_factor", 5.0)
-        )
-
         # Get device specific default for completion threshold
         device_default_completion = DEVICE_COMPLETION_THRESHOLDS.get(
             self.device_type, DEFAULT_COMPLETION_MIN_SECONDS
@@ -647,9 +642,6 @@ class WashDataManager:
             off_delay=int(off_delay),
             smoothing_window=smoothing_window,
             interrupted_min_seconds=interrupted_min_seconds,
-            abrupt_drop_watts=abrupt_drop_watts,
-            abrupt_drop_ratio=abrupt_drop_ratio,
-            abrupt_high_load_factor=abrupt_high_load_factor,
             completion_min_seconds=completion_min_seconds,
             start_duration_threshold=start_duration_threshold,
             running_dead_zone=running_dead_zone,
@@ -796,6 +788,9 @@ class WashDataManager:
         self._terminal_drop_cache: (
             tuple[int, float | None, tuple[float, float] | None] | None
         ) = None
+        # Cycle count an executor refresh of the baseline is in-flight/done for, so
+        # the loop never recomputes it (issue #311) and never double-schedules.
+        self._terminal_drop_refresh_n: int | None = None
 
         self._remove_listener = None
         self._remove_external_trigger_listener = None  # External cycle end trigger
@@ -893,6 +888,11 @@ class WashDataManager:
         try:
             if not readings:
                 self._logger.debug("Matching skipped: no readings")
+                return
+
+            # Skip match entirely when no real profiles exist — nothing to match against.
+            if not self.profile_store.has_real_profiles:
+                self._logger.debug("Matching skipped: no real profiles configured yet")
                 return
 
             self._matching_task = self.hass.async_create_task(self._async_do_perform_matching(readings))
@@ -1577,6 +1577,15 @@ class WashDataManager:
                         "manual_program", False
                     )
 
+                    # Restore the external energy-meter snapshot (issue #316) so a
+                    # restart mid-cycle keeps an accurate start->end delta.
+                    self._energy_meter_start = active_snapshot_to_restore.get(
+                        "energy_meter_start"
+                    )
+                    self._energy_meter_source = active_snapshot_to_restore.get(
+                        "energy_meter_source"
+                    )
+
                     # If we restored into a low-power state, ensure we don't
                     # immediately quit. For now we just log this; the cycle
                     # detector's off_delay will handle actual shutdown.
@@ -1887,9 +1896,6 @@ class WashDataManager:
         old_off_delay = self.detector.config.off_delay
         old_smoothing = self.detector.config.smoothing_window
         old_interrupted_min = self.detector.config.interrupted_min_seconds
-        old_abrupt_drop_watts = self.detector.config.abrupt_drop_watts
-        old_abrupt_drop_ratio = self.detector.config.abrupt_drop_ratio
-        old_abrupt_high_load = self.detector.config.abrupt_high_load_factor
 
         # Get new values from config
         new_min_power = float(
@@ -1904,12 +1910,6 @@ class WashDataManager:
                 CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS
             )
         )
-        new_abrupt_drop_watts = float(
-            config_entry.options.get(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS)
-        )
-        new_abrupt_drop_ratio = float(
-            config_entry.options.get(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO)
-        )
         self.detector.config.match_interval = int(
             config_entry.options.get(
                 CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
@@ -1917,11 +1917,6 @@ class WashDataManager:
         )
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
-        )
-        new_abrupt_high_load = float(
-            config_entry.options.get(
-                CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR
-            )
         )
 
         # Device default
@@ -2017,9 +2012,6 @@ class WashDataManager:
         self.detector.config.off_delay = new_off_delay
         self.detector.config.smoothing_window = new_smoothing
         self.detector.config.interrupted_min_seconds = new_interrupted_min
-        self.detector.config.abrupt_drop_watts = new_abrupt_drop_watts
-        self.detector.config.abrupt_drop_ratio = new_abrupt_drop_ratio
-        self.detector.config.abrupt_high_load_factor = new_abrupt_high_load
         self.detector.config.completion_min_seconds = new_completion_min
         self.detector.config.start_duration_threshold = new_start_threshold
         self.detector.config.running_dead_zone = new_running_dead_zone
@@ -2048,14 +2040,10 @@ class WashDataManager:
             or old_off_delay != new_off_delay
             or old_smoothing != new_smoothing
             or old_interrupted_min != new_interrupted_min
-            or old_abrupt_drop_watts != new_abrupt_drop_watts
-            or old_abrupt_drop_ratio != new_abrupt_drop_ratio
-            or old_abrupt_high_load != new_abrupt_high_load
         ):
             self._logger.info(
-                "Updated detector config: min_power %.1fW→%.1fW, off_delay %ds→%ds, "
-                "smoothing %d→%d, interrupted_min %ds→%ds, abrupt_drop %.0fW→%.0fW, "
-                "abrupt_ratio %.2f→%.2f, high_load %.1f→%.1f",
+                "Updated detector config: min_power %.1fW->%.1fW, off_delay %ds->%ds, "
+                "smoothing %d->%d, interrupted_min %ds->%ds",
                 old_min_power,
                 new_min_power,
                 old_off_delay,
@@ -2064,12 +2052,6 @@ class WashDataManager:
                 new_smoothing,
                 old_interrupted_min,
                 new_interrupted_min,
-                old_abrupt_drop_watts,
-                new_abrupt_drop_watts,
-                old_abrupt_drop_ratio,
-                new_abrupt_drop_ratio,
-                old_abrupt_high_load,
-                new_abrupt_high_load,
             )
 
         # Update profile matching parameters
@@ -2190,8 +2172,6 @@ class WashDataManager:
                 self._reset_live_notification_state()
                 self._check_live_progress_notification()
 
-        self._logger.info("Configuration reloaded successfully")
-
         # Trigger entity updates to reflect any changes
         async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
 
@@ -2270,15 +2250,7 @@ class WashDataManager:
 
         # Save active state before shutdown
         if self.detector.state in {STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING}:
-            snapshot = self.detector.get_state_snapshot()
-            snapshot["manual_program"] = self._manual_program_active
-            snapshot["notified_start"] = self._notified_start
-            snapshot["start_event_fired"] = self._start_event_fired
-            snapshot["is_user_paused"] = self._is_user_paused
-            snapshot["user_pause_start"] = (
-                self._user_pause_start.isoformat() if self._user_pause_start else None
-            )
-            snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
+            snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
             await self.profile_store.async_save_active_cycle(snapshot)
 
         self._last_reading_time = None
@@ -2829,15 +2801,7 @@ class WashDataManager:
         if not last_save or (now - last_save).total_seconds() > 60:
             # Fire and forget save task
             # Inject manual program flag into snapshot before saving
-            snapshot = self.detector.get_state_snapshot()
-            snapshot["manual_program"] = self._manual_program_active
-            snapshot["notified_start"] = self._notified_start
-            snapshot["start_event_fired"] = self._start_event_fired
-            snapshot["is_user_paused"] = self._is_user_paused
-            snapshot["user_pause_start"] = (
-                self._user_pause_start.isoformat() if self._user_pause_start else None
-            )
-            snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
+            snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
 
             self.hass.async_create_task(
                 self.profile_store.async_save_active_cycle(snapshot)
@@ -3463,6 +3427,9 @@ class WashDataManager:
                 self._cycle_start_time = self.detector.current_cycle_start or dt_util.now()
                 self._ranking_snapshot_cycle_id = str(uuid.uuid4())
                 self._reset_live_notification_state()
+                # Snapshot the external energy meter (issue #316) so cycle end can
+                # take an accurate start->end delta. No-op when none is configured.
+                self._snapshot_energy_meter_start()
 
                 # Reset pause tracking and clean state for new cycle
                 self._is_user_paused = False
@@ -3623,6 +3590,16 @@ class WashDataManager:
         # Store energy for notification and persistence (calculated above for ghost detection)
         cycle_data["energy_wh"] = round(cycle_energy_wh, 3)
 
+        # External energy meter (issue #316): when an accurate start->end delta is
+        # available, record it alongside the integrated value and mark the source.
+        # The integrated energy_wh above is left untouched so matching / ML / anomaly
+        # stats stay internally consistent; only user-facing figures prefer the meter.
+        cycle_data["energy_source"] = "integration"
+        meter_wh = self._compute_meter_energy_wh()
+        if meter_wh is not None:
+            cycle_data["energy_meter_wh"] = round(meter_wh, 3)
+            cycle_data["energy_source"] = "meter"
+
         # Schedule heavy post-processing asynchronously. Capture this cycle's identity
         # token so the async tail can tell if a NEW cycle started while it was awaiting
         # (power changes are handled synchronously, so a back-to-back load can drive the
@@ -3736,23 +3713,53 @@ class WashDataManager:
 
         Both are learned from the device's completed cycles and used by the
         terminal-drop detector (anomaly + familiarity gates).  Keyed by cycle
-        count so it refreshes as history grows without re-decompressing every
-        trace on each low-power reading."""
+        count so it refreshes as history grows.
+
+        The recompute decompresses every completed trace, which is too heavy to run
+        on the event loop inside the detector's reading path (issue #311). So this
+        NEVER recomputes synchronously: on a miss/stale cache it schedules an
+        executor refresh and serves the last known baseline in the meantime (one
+        cycle stale is harmless for an anomaly heuristic). Until the first refresh
+        lands there is no baseline, so it returns ``(None, None)`` and
+        ``is_terminal_drop`` defers to the proven slow end-detection."""
         cycles = self.profile_store.get_past_cycles()
         n = len(cycles)
         cache = self._terminal_drop_cache
         if cache is not None and cache[0] == n:
             return cache[1], cache[2]
-        stop_threshold = float(self.detector.config.stop_threshold_w)
-        earliest = earliest_sustained_quiet_offset(
-            cycles,
-            stop_threshold,
-            TERMINAL_DROP_MIN_QUIET_SPAN_S,
-            TERMINAL_DROP_MIN_CLEAN_CYCLES,
-        )
-        peak_range = device_active_peak_range(cycles, TERMINAL_DROP_MIN_CLEAN_CYCLES)
-        self._terminal_drop_cache = (n, earliest, peak_range)
-        return earliest, peak_range
+        self._schedule_terminal_drop_refresh(n)
+        if cache is not None:
+            return cache[1], cache[2]
+        return None, None
+
+    def _schedule_terminal_drop_refresh(self, n: int) -> None:
+        """Kick a one-shot executor refresh of the terminal-drop baseline for the
+        current cycle count, unless one is already in-flight/done for it."""
+        if self._terminal_drop_refresh_n == n:
+            return
+        self._terminal_drop_refresh_n = n
+        self.hass.async_create_task(self._async_refresh_terminal_drop_baseline(n))
+
+    async def _async_refresh_terminal_drop_baseline(self, n: int) -> None:
+        """Recompute the baseline off the event loop and cache it. Never raises -
+        the anomaly signal must never break detection."""
+        try:
+            # Snapshot the list on the loop before handing it to the executor.
+            cycles = list(self.profile_store.get_past_cycles())
+            stop_threshold = float(self.detector.config.stop_threshold_w)
+            earliest, peak_range = await self.hass.async_add_executor_job(
+                terminal_drop_baseline,
+                cycles,
+                stop_threshold,
+                TERMINAL_DROP_MIN_QUIET_SPAN_S,
+                TERMINAL_DROP_MIN_CLEAN_CYCLES,
+            )
+            self._terminal_drop_cache = (len(cycles), earliest, peak_range)
+        except Exception as err:  # noqa: BLE001 - anomaly signal must never break detection
+            self._logger.debug("Terminal-drop baseline refresh failed: %s", err)
+            # Allow a later reading to retry the refresh for this count.
+            if self._terminal_drop_refresh_n == n:
+                self._terminal_drop_refresh_n = None
 
     def _ml_progress_percent(
         self,
@@ -3898,6 +3905,102 @@ class WashDataManager:
             except (ValueError, TypeError):
                 pass
         return None
+
+    def _read_energy_meter(self) -> tuple[float, str] | None:
+        """Read the configured external energy meter, normalized to Wh.
+
+        Returns ``(value_wh, entity_id)`` or ``None`` when no meter is configured
+        or its reading is not usable (unknown/unavailable/non-numeric state, or an
+        unrecognised unit). Never raises -- every failure path returns ``None`` so
+        the caller falls back to the integrated energy (issue #316).
+        """
+        entity_id = self.config_entry.options.get(CONF_ENERGY_SENSOR)
+        if not entity_id:
+            return None
+        state = self.hass.states.get(entity_id)
+        if state is None or state.state in (None, "unknown", "unavailable", ""):
+            return None
+        try:
+            value = float(state.state)
+        except (ValueError, TypeError):
+            return None
+        unit = str(state.attributes.get("unit_of_measurement") or "").strip().lower()
+        # Normalize to Wh. An unrecognised unit is treated as unusable so a
+        # mis-configured entity falls back rather than reporting a wrong figure.
+        scale = {"wh": 1.0, "kwh": 1000.0, "mwh": 1_000_000.0}.get(unit)
+        if scale is None:
+            return None
+        return value * scale, entity_id
+
+    def _snapshot_energy_meter_start(self) -> None:
+        """Capture the meter reading at cycle start (issue #316)."""
+        snap = self._read_energy_meter()
+        if snap is None:
+            self._energy_meter_start = None
+            self._energy_meter_source = None
+        else:
+            self._energy_meter_start, self._energy_meter_source = snap
+
+    def _compute_meter_energy_wh(self) -> float | None:
+        """Cycle energy from the external meter's start->end delta, or None.
+
+        Falls back (returns ``None``) when: no start was captured; no meter is
+        configured now; the configured entity differs from the one snapshotted at
+        start (source changed mid-cycle -- no cross-meter delta); the current
+        reading is unusable; or the delta is <= 0 (counter reset or stuck plug).
+        """
+        start = self._energy_meter_start
+        source = self._energy_meter_source
+        if start is None or source is None:
+            return None
+        cur = self._read_energy_meter()
+        if cur is None:
+            return None
+        cur_wh, cur_source = cur
+        if cur_source != source:
+            return None
+        delta = cur_wh - start
+        if delta <= 0:
+            return None
+        return delta
+
+    @staticmethod
+    def _cycle_report_energy_wh(cycle_data: dict[str, Any]) -> float:
+        """User-facing reported energy (Wh): meter value if present, else integrated.
+
+        The integrated ``energy_wh`` is always stored and used internally (matching,
+        ML, anomaly, envelopes); only cost/lifetime/notifications/panel display
+        prefer the more accurate meter figure when one was captured (issue #316).
+        """
+        meter = cycle_data.get("energy_meter_wh")
+        if meter is not None:
+            try:
+                return float(meter)
+            except (ValueError, TypeError):
+                pass
+        try:
+            return float(cycle_data.get("energy_wh", 0.0))
+        except (ValueError, TypeError):
+            return 0.0
+
+    def _augment_active_snapshot(self, snapshot: dict[str, Any]) -> dict[str, Any]:
+        """Add manager-owned fields to a detector snapshot before persisting.
+
+        The detector snapshot only carries detector state; these fields are owned
+        by the manager and must survive a restart alongside it. Kept in one place
+        so every save site (shutdown, periodic, pause, resume) stays consistent.
+        """
+        snapshot["manual_program"] = self._manual_program_active
+        snapshot["notified_start"] = self._notified_start
+        snapshot["start_event_fired"] = self._start_event_fired
+        snapshot["is_user_paused"] = self._is_user_paused
+        snapshot["user_pause_start"] = (
+            self._user_pause_start.isoformat() if self._user_pause_start else None
+        )
+        snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
+        snapshot["energy_meter_start"] = self._energy_meter_start
+        snapshot["energy_meter_source"] = self._energy_meter_source
+        return snapshot
 
     @staticmethod
     def _format_vs_typical(
@@ -4145,7 +4248,9 @@ class WashDataManager:
         price = self._resolve_energy_price()
         if price is not None:
             cycle_data["energy_price"] = price
-            cycle_data["cost"] = round(cycle_data.get("energy_wh", 0.0) / 1000.0 * price, 4)
+            cycle_data["cost"] = round(
+                self._cycle_report_energy_wh(cycle_data) / 1000.0 * price, 4
+            )
 
         # Score cycle quality with the ML model before persisting so the score is
         # stored on the cycle record and available to the learning manager immediately.
@@ -4209,7 +4314,7 @@ class WashDataManager:
         if cycle_persisted:
             try:
                 await self.profile_store.async_add_lifetime_energy_wh(
-                    cycle_data.get("energy_wh", 0.0)
+                    self._cycle_report_energy_wh(cycle_data)
                 )
             except Exception as e:  # pylint: disable=broad-exception-caught
                 self._logger.debug("Failed to accumulate lifetime energy: %s", e)
@@ -4269,7 +4374,7 @@ class WashDataManager:
             duration_min = int(cycle_data['duration'] / 60)
             program_name = event_cycle_data.get("profile_name", "unknown")
 
-            energy_kwh = round(cycle_data.get("energy_wh", 0.0) / 1000, 3)
+            energy_kwh = round(self._cycle_report_energy_wh(cycle_data) / 1000, 3)
 
             # Reuse the cost frozen onto the cycle above (same price resolution).
             cost_val = cycle_data.get("cost")
@@ -5252,6 +5357,10 @@ class WashDataManager:
             # the waiting message again.
             self._live_waiting_notification_sent = False
         if not has_profile_match:
+            # Suppress the waiting notification when no profiles exist at all —
+            # the setup card explains the state instead.
+            if not self.profile_store.has_real_profiles:
+                return
             if self._live_waiting_notification_sent:
                 return
 
@@ -5650,6 +5759,24 @@ class WashDataManager:
                 trace, duration_so_far, self._current_program
             )
         ml_pct = self._ml_progress_percent(trace, self._current_program)
+
+        # Opt-in phase-resolved ETA (washing machine / washer-dryer only). Segment
+        # the observed-so-far trace, match against cached per-profile phase profiles,
+        # and blend the per-role budget remaining into the estimate (progress.py
+        # owns the blend). Gated + guarded: any failure leaves the proven estimate
+        # untouched (phase_remaining_s stays None -> byte-identical behaviour).
+        phase_remaining_s: float | None = None
+        if (
+            len(trace) >= 10
+            and self._current_program not in ("detecting...", "off", None)
+            and phase_matching_enabled(self.config_entry.options, self.device_type)
+        ):
+            pr = self.profile_store.phase_remaining(
+                trace, self.device_type, self._current_program
+            )
+            if pr is not None:
+                phase_remaining_s = pr.get("remaining_s")
+
         result = progress_mod.compute_progress(
             self.device_type,
             float(self._matched_profile_duration),
@@ -5658,6 +5785,7 @@ class WashDataManager:
             phase_result,
             ml_pct,
             self._logger,
+            phase_remaining_s=phase_remaining_s,
         )
 
         self._cycle_progress = result.progress
@@ -6135,15 +6263,7 @@ class WashDataManager:
                     self.detector.set_verified_pause(prev_verified)
                     return False
 
-        snapshot = self.detector.get_state_snapshot()
-        snapshot["manual_program"] = self._manual_program_active
-        snapshot["notified_start"] = self._notified_start
-        snapshot["start_event_fired"] = self._start_event_fired
-        snapshot["is_user_paused"] = self._is_user_paused
-        snapshot["user_pause_start"] = (
-            self._user_pause_start.isoformat() if self._user_pause_start else None
-        )
-        snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
+        snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
         self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
         self._notify_update()
         return True
@@ -6203,15 +6323,7 @@ class WashDataManager:
         # early with the card still up, matching the real (still-paused) state.
         self._clear_timer_pause_notification()
 
-        snapshot = self.detector.get_state_snapshot()
-        snapshot["manual_program"] = self._manual_program_active
-        snapshot["notified_start"] = self._notified_start
-        snapshot["start_event_fired"] = self._start_event_fired
-        snapshot["is_user_paused"] = self._is_user_paused
-        snapshot["user_pause_start"] = (
-            self._user_pause_start.isoformat() if self._user_pause_start else None
-        )
-        snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
+        snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
         self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
         self._notify_update()
         return True

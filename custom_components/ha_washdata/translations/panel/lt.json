@@ -87,7 +87,7 @@
     "on_cycle_finished": "Ciklas baigtas",
     "on_cycle_started": "Prasidėjus ciklui",
     "pause_cycle": "Pauzė",
-    "pause_cycle_tip": "Pristabdyti veikiantį ciklą — prietaisas tęsis nuo tos vietos, kur sustojo",
+    "pause_cycle_tip": "Pristabdyti veikiantį ciklą – prietaisas tęsis nuo tos vietos, kur sustojo",
     "pg_apply_device": "Taikyti įrenginiui",
     "pg_autofill": "Automatinis užpildymas",
     "play": "Leisti",
@@ -97,8 +97,8 @@
     "process_tip": "Išsaugoti įrašytą seką kaip naują arba esamą profilį",
     "rebuild": "Atstatyti vokus",
     "rebuild_envelope": "Atstatyti voką",
-    "rebuild_tip": "Perskaičiuoti laukiamą galios voką (min/maks juosta) visiems profiliams iš jų pažymėtų ciklų — paleiskite pažymėję naujus ciklus arba pataisę senus",
-    "rec_start_tip": "Pradėti įrašyti prietaiso galios seką — pradėkite prieš pat paleidžiant ciklą",
+    "rebuild_tip": "Perskaičiuoti laukiamą galios voką (min/maks juosta) visiems profiliams iš jų pažymėtų ciklų – paleiskite pažymėję naujus ciklus arba pataisę senus",
+    "rec_start_tip": "Pradėti įrašyti prietaiso galios seką – pradėkite prieš pat paleidžiant ciklą",
     "rec_stop": "Stabdyti",
     "rec_stop_tip": "Sustabdyti įrašymą ir laikyti užfiksuotą seką peržiūrai",
     "record": "Pradėti įrašymą",
@@ -182,7 +182,7 @@
     },
     "attn_sub": "Prieš išsaugant ištaisykite konfliktus",
     "attn_title": "{n} nustatymų konfliktas{s}",
-    "settings_banner": "{n} nustatymų konfliktas{s} — patikrinkite pažymėtas sekcijas ir ištaisykite prieš išsaugant.",
+    "settings_banner": "{n} nustatymų konfliktas{s} – patikrinkite pažymėtas sekcijas ir ištaisykite prieš išsaugant.",
     "settings_banner_btn": "Eiti į pirmą",
     "confidence": {
       "auto": "Turi būti lygus arba aukščiau atitikimo slenksčio ({match})",
@@ -451,9 +451,9 @@
     "show_expected": "Rodyti numatomą kreivės perdangą (atitinkantį profilį, oranžinė)",
     "show_raw": "Rodyti neapdoroto lizdo perjungiklį tiesioginiame galios grafike",
     "sparkline": "Naujausia ciklų trukmės tendencija",
-    "stage2": "2 etapas — pagrindinis panašumas",
-    "stage3": "3 etapas — DTW",
-    "stage4": "4 etapas — atitikimas",
+    "stage2": "2 etapas – pagrindinis panašumas",
+    "stage3": "3 etapas – DTW",
+    "stage4": "4 etapas – atitikimas",
     "status": "Būsena",
     "tail_trim": "Uodegos apdaila (-ai)",
     "timer_auto_pause": "Automatinis pristabdymas",
@@ -561,7 +561,12 @@
     "flags": "Žymės",
     "include_phase_map": "Įtraukti fazių žemėlapį",
     "include_settings": "Įtraukti aptikimo ir atitikties nustatymus",
-    "show_contributor": "Rodyti dalyvių vardus"
+    "show_contributor": "Rodyti dalyvių vardus",
+    "task_pg_detail": "Simuliuojamas ciklas",
+    "task_split": "Padalijamas ciklas",
+    "task_trim": "Apkarpomas ciklas",
+    "task_merge": "Sujungiami ciklai",
+    "task_rebuild": "Perkuriamos gaubtinės"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -657,7 +662,7 @@
     "compare_selected_cycles": "Pasirinkti ciklai (vientisas) – rodyti / slėpti",
     "consider_new_profile": "Apsvarstykite galimybę sukurti naują profilį.",
     "coverage_gap": "paskutiniai ciklai neturi atitinkančio profilio ({pct} % iš paskutinių 30).",
-    "coverage_gap_similar_cycles": "Rasti {count} panašūs nepažymėti ciklai — sukurkite profilį, kad pradėtumėte juos atpažinti.",
+    "coverage_gap_similar_cycles": "Rasti {count} panašūs nepažymėti ciklai – sukurkite profilį, kad pradėtumėte juos atpažinti.",
     "cycles_deleted": "Ištrinta ciklų: {count}",
     "enough_data": "Pakankamai duomenų mokymui ({current}/{min} ciklų).",
     "export_description": "Eksportuokite visus profilius ir ciklus į JSON arba atkurkite iš ankstesnio eksportavimo.",
@@ -686,7 +691,7 @@
     "ml_learned_intro": "Modeliai, pritaikyti šiai mašinai.",
     "ml_loading": "įkeliamas ML…",
     "ml_settings_intro": "Du nepriklausomi jungikliai: vienas pritaiko modelius, kol veikia ciklas, kitas leidžia WashData laikui bėgant tiksliai suderinti juos su jūsų aparatu.",
-    "name_first_program": "Turite pakankamai ciklų — pavadinkite pirmąją programą, kad prasidėtų suderinimas.",
+    "name_first_program": "Turite pakankamai ciklų – pavadinkite pirmąją programą, kad prasidėtų suderinimas.",
     "near_duplicate_cluster": "Aptikta beveik pasikartojanti profilių grupė. Grupavimas leidžia suderinti patikimai pasirinkti panašius dalykus (pvz., ta pati programa esant skirtingai temperatūrai / sukimuisi).",
     "no_cycles_match": "Nė vienas ciklas neatitinka esamo filtro.",
     "no_cycles_profile": "Šiam profiliui nėra ciklų.",
@@ -710,10 +715,10 @@
     "no_settings_match": "Jokie nustatymai neatitinka „{q}“",
     "no_split_points": "Dar nėra padalintų taškų.",
     "no_suggestions": "Nėra aktyvių pasiūlymų.",
-    "notify_services_hint": "Naudokite {entity} paslaugų ID (keliems — atskirkite kableliais). Šablono kintamieji: {vars}.",
+    "notify_services_hint": "Naudokite {entity} paslaugų ID (keliems – atskirkite kableliais). Šablono kintamieji: {vars}.",
     "old_actions_warning": "Sukonfigūruota naudojant seną veiksmų rengyklę (dabar pašalinta). Jie vis dar suaktyvinami ciklo įvykiuose, bet čia jų redaguoti nebegalima. Konvertuokite juos į įprastą automatiką arba pašalinkite.",
     "onboarding_progress": "Stebėta ciklų: {n} / 3",
-    "onboarding_watching": "Naudokite prietaisą įprastai — „WashData“ stebi. Po 3 ciklų prasidės programų suderinimas.",
+    "onboarding_watching": "Naudokite prietaisą įprastai – „WashData“ stebi. Po 3 ciklų prasidės programų suderinimas.",
     "pending_feedback": "Laukiama aptikimo atsiliepimo",
     "performance_trend": "Našumo tendencija ({n} ciklai)",
     "pg_analysis_empty": "Įkelkite ciklą, kad pamatytumėte atitikties analizę.",
@@ -763,7 +768,7 @@
     "setting_changed": "Pakeista iš {old} į {new} {date}",
     "settings_basic_note": "Rodomi esminiai nustatymai. Norėdami pamatyti visą sąrašą, perjunkite į „Išplėstinė“.",
     "shape_drift_advisory": "⚠ Formos dreifas",
-    "shape_drift_detail": "Šio profilio galios šablonas laikui bėgant pasikeitė — galimas prietaiso susidėvėjimas arba reikalinga priežiūra (pvz., nukalkinimas, filtro valymas).",
+    "shape_drift_detail": "Šio profilio galios šablonas laikui bėgant pasikeitė – galimas prietaiso susidėvėjimas arba reikalinga priežiūra (pvz., nukalkinimas, filtro valymas).",
     "show_all_settings": "Rodyti visus nustatymus",
     "showing_suggestions": "Rodomas {count} nustatymas su pasiūlymais.",
     "split_intro": "Spustelėkite diagramą, kad pridėtumėte arba pašalintumėte padalijimo tašką, arba automatiškai aptiktumėte pagal tuščiosios eigos tarpus. Kiekvienas gautas segmentas gali gauti savo profilį.",
@@ -857,7 +862,9 @@
     "share_guidelines_title": "Prieš dalijantis",
     "store_download_device_intro": "Perimkite kiekvieną bendrą programą ir jos etalonius ciklus į savo įrenginį. Jūsų pačių įrašyti ciklai ir statistika neįtakojami.",
     "store_share_device_intro": "Įkelkite {brand} {model} su pasirinktais etaloniniais ciklais. Kiti, turintys tą patį prietaisą, gali perimti jūsų programas. Įrašai peržiūrimi prieš viešinant.",
-    "share_profile_no_cycles": "Nėra etaloninių ciklų -- pažymėkite ciklą kaip ⭐ Ciklų skirtuke, kad įtrauktumėte šį profilį"
+    "share_profile_no_cycles": "Nėra etaloninių ciklų -- pažymėkite ciklą kaip ⭐ Ciklų skirtuke, kad įtrauktumėte šį profilį",
+    "advisory_phase_inconsistent": "Atrodo, kad '{name}' maišo skirtingas programas ar temperatūras - jo ciklai kaista labai skirtingą laiką. Padalijus jį į atskirus profilius (pvz., pagal temperatūrą), pagerės atitikimas ir laiko įverčiai.",
+    "advisory_phase_inconsistent_title": "⚠ Galimai sumaišytos programos"
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -940,6 +947,10 @@
     "triggers": {
       "intro": "Pasirenkami išoriniai signalai: pabaigos trigeris, durų jutiklis, pauzės jungiklis ir iškrovimo priminimas.",
       "label": "Trigeriai ir durys"
+    },
+    "phase_eta": {
+      "label": "Likęs laikas",
+      "intro": "Į fazes atsižvelgiantis likęs laikas mašinoms, kurių ciklo trukmė priklauso nuo temperatūros ar gręžimo."
     }
   },
   "setting": {
@@ -1022,6 +1033,10 @@
     "energy_price_static": {
       "doc": "Fiksuota kaina už kWh, naudojama sąnaudų skaičiams, kai aukščiau nenustatytas joks tiesioginės kainos subjektas.",
       "label": "Statinė energijos kaina (už kWh)"
+    },
+    "energy_sensor": {
+      "doc": "Neprivalomas kaupiamasis energijos skaitiklis (total_increasing kWh/Wh, pvz., paties kištuko viso laikotarpio skaitiklis). Kai nustatytas, kiekvieno ciklo pateikiama energija imama iš šio skaitiklio rodmens pokyčio nuo pradžios iki pabaigos, taip išvengiama per mažo skaičiavimo, kurį gaunate integruodami lėtai duomenis pateikiantį galios jutiklį. Grįžta prie integruotos reikšmės, jei rodmens nėra, jo vienetas nežinomas arba skirtumas nėra teigiamas. Palikite tuščią, kad būtų ir toliau integruojamas galios jutiklis.",
+      "label": "Energijos skaitiklio objektas"
     },
     "expose_debug_entities": {
       "doc": "Paskelbkite papildomus diagnostinius HA objektus (atitikties patikimumą, dviprasmiškumą, būsenos vidines savybes). Išjungta objektų sąrašas išlieka švarus normaliam naudojimui.",
@@ -1305,6 +1320,38 @@
     },
     "show_contributor": {
       "doc": "Rodyti \"autorius: <dalyvis>\" priskyrimą bendruomenės prietaisuose ir etaloniniuose cikluose."
+    },
+    "enable_phase_matching": {
+      "label": "Į fazes atsižvelgiantis likęs laikas",
+      "doc": "Padalykite kiekvieną vykstantį ciklą į fazes (šildymas, plovimas, gręžimas) ir paskirstykite likusį laiką kiekvienai fazei, sumaišydami su klasikiniu įverčiu - ciklo pradžioje remdamiesi fazių paskirstymu, o pabaigoje - klasikiniu įverčiu. Tai pritaiko laikmatį prie to, kiek laiko jūsų mašina iš tikrųjų kaista ir veikia, o tai labiausiai pastebima pirmoje ciklo pusėje. Išjungta = tik klasikinis įvertis. Paveikiamas tik likusio laiko rodinys; programų atitikimas ir ciklų aptikimas nekeičiami."
+    },
+    "keep_min_score": {
+      "label": "Min. atitikties balas",
+      "doc": "Žemiausias panašumo balas, kurio kandidatui reikia likti derinimo procese. Numatytoji 0,1 yra sąmoningai leistina – ji leidžia net silpnus kandidatus ir pasitiki vėlesniais etapais rasti geriausią atitiktį. Padidinkite, kad anksčiau filtruotumėte mažai tikėtinus profilius; sumažinkite pradiniam kandidatų telkiniui išplėsti."
+    },
+    "dtw_blend": {
+      "label": "DTW mišinys",
+      "doc": "Kiek DTW lygiavimo balas pakeičia 2 etapo pagrindinį balą. 0 = naudokite tik 2 etapo balą, 1 = naudokite tik DTW balą, 0,5 (numatytoji) = lygus mišinys. Padidinkite, kad labiau pasikliauti laiko lygiavimo, kai programos turi panašius galios lygius, bet skirtingus laiko modelius."
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW ansamblio mišinys",
+      "doc": "Ansamblio DTW režime (numatytoji) tai yra skalieroto L1 svoris lyginant su išvestiniu DTW (DDTW). 1,0 = tik skalierota L1, 0 = tik DDTW, 0,7 = numatytoji. Skalierota variacija lygina galios lygius; išvestinė variacija reaguoja į tai, kaip galia keičiasi bėgant laikui. Ansamblis derina abi."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Išvest. DTW skalė",
+      "doc": "Pusiau prisotinimo atstumas išvestiniam DTW vertinimui. Balas perpus sumažėja, kai DDTW atstumas lygus šiai reikšmei. Mažesnis = jautresnis formos skirtumams. Numatytoji 30 sukalibruota tipiškai buitinių prietaisų galios kreivėms. Veikia tik ansamblio ir ddtw DTW režimus."
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW tikslinimo skaičius",
+      "doc": "Kiek geriausių 2 etapo kandidatų DTW perskaičiuoja balus. DTW yra brangesnė operacija, todėl taikoma tik N geriausiems. Numatytoji 5. Padidinkite (iki 7-9), jei teisingas profilis kartais po 2 etapo patenka tik į 4 arba 5 vietą – DTW gali jį išgelbėti. Mažesnė reikšmė šiek tiek pagreitina derinimą."
+    },
+    "duration_scale": {
+      "label": "Trukmės ryškumas",
+      "doc": "4 etapo trukmės atitikimo bausmės ryškumas. Tai yra logaritmas, ties kuriuo atitikimo balas perpus sumažėja. Mažesnis = griežtesnis: trukmės neatitikimas kenkia labiau. Numatytoji 0,175 atitinka maždaug 18% trukmės toleranciją ties pusiau svoriu. Naudokite su Trukmės svoriu."
+    },
+    "energy_scale": {
+      "label": "Energijos ryškumas",
+      "doc": "4 etapo energijos atitikimo bausmės ryškumas. Mažesnis = griežtesnis: energijos neatitikimas kenkia labiau. Numatytoji 0,25 sąmoningai atlaidesnė nei trukmės ryškumas, nes energija kinta priklausomai nuo apkrovos. Naudokite su Energijos svoriu."
     }
   },
   "setting_group": {
@@ -1553,24 +1600,24 @@
         "lower": "Automatiškai pažymi daugiau ciklų; kai kurie gali būti neteisingai identifikuoti"
       },
       "duration_tolerance": {
-        "higher": "Priima platesnį trukmės diapazoną — lankstesnis atitikimas",
-        "lower": "Reikalauja tikslesnio trukmės atitikimo — griežtesnė, bet gali atmesti neįprastus ciklus"
+        "higher": "Priima platesnį trukmės diapazoną – lankstesnis atitikimas",
+        "lower": "Reikalauja tikslesnio trukmės atitikimo – griežtesnė, bet gali atmesti neįprastus ciklus"
       },
       "end_energy_threshold": {
         "higher": "Uždaro tik ciklus, kurie sunaudojo daug energijos",
         "lower": "Uždaro ir trumpesnius arba mažiau energijos naudojančius ciklus"
       },
       "end_repeat_count": {
-        "higher": "Reikalauja, kad pabaigos signalas kartotųsi daugiau kartų — patikimesnis, šiek tiek lėtesnis",
-        "lower": "Baigia po mažiau pasikartojimų — greitesnis aptikimas, didesnis klaidingo pabaigos pavojus"
+        "higher": "Reikalauja, kad pabaigos signalas kartotųsi daugiau kartų – patikimesnis, šiek tiek lėtesnis",
+        "lower": "Baigia po mažiau pasikartojimų – greitesnis aptikimas, didesnis klaidingo pabaigos pavojus"
       },
       "learning_confidence": {
-        "higher": "Mokosi tik iš labai tikrų atitikimų — lėčiau, bet patikimiau",
+        "higher": "Mokosi tik iš labai tikrų atitikimų – lėčiau, bet patikimiau",
         "lower": "Mokosi iš daugiau ciklų; modelis gali būti triukšmingesnis"
       },
       "min_off_gap": {
         "higher": "Prieš naują ciklą reikia ilgesnio neveiklumo laikotarpio",
-        "lower": "Trumpas neveiklumas paleidžia naują ciklą — vienas po kito einantys paleidimai gali išsiskirti"
+        "lower": "Trumpas neveiklumas paleidžia naują ciklą – vienas po kito einantys paleidimai gali išsiskirti"
       },
       "min_power": {
         "higher": "Mažiau jautrus budėjimo galiai; gali praleisti labai tylias programas",
@@ -1581,24 +1628,24 @@
         "lower": "Greičiau priverstinai sustabdo įstrigusį ciklą"
       },
       "off_delay": {
-        "higher": "Daugiau laiko prietaiso pauzėms — valdo ilgas mirkymo arba džiovinimo fazes",
-        "lower": "Greitesnis pabaigos aptikimas — tinka aiškiems įjungimo/išjungimo prietaisams"
+        "higher": "Daugiau laiko prietaiso pauzėms – valdo ilgas mirkymo arba džiovinimo fazes",
+        "lower": "Greitesnis pabaigos aptikimas – tinka aiškiems įjungimo/išjungimo prietaisams"
       },
       "profile_match_threshold": {
         "higher": "Patvirtina tik aukšto pasitikėjimo atitikimus; daugiau ciklų lieka nepažymėtų",
         "lower": "Atitinka daugiau ciklų; kai kurie gali būti šiek tiek neteisingi"
       },
       "running_dead_zone": {
-        "higher": "Ignoruoja trumpus galios šuolius neveiklumo metu — mažiau jautrus triukšmui",
-        "lower": "Reaguoja į trumpesnius galios pliūpsnius — aptinka greitą trumpalaikę veiklą"
+        "higher": "Ignoruoja trumpus galios šuolius neveiklumo metu – mažiau jautrus triukšmui",
+        "lower": "Reaguoja į trumpesnius galios pliūpsnius – aptinka greitą trumpalaikę veiklą"
       },
       "start_threshold_w": {
         "higher": "Išvengia netikrų paleidimų dėl trumpų galios šuolių",
         "lower": "Aptinka mažos galios programas; gali suaktyvėti nuo triukšmo"
       },
       "stop_threshold_w": {
-        "higher": "Greičiau baigia ciklą — gali uždaryti pauzės metu",
-        "lower": "Laukia ilgiau prieš baigiant — mažiau ankstyvų pabaigimų"
+        "higher": "Greičiau baigia ciklą – gali uždaryti pauzės metu",
+        "lower": "Laukia ilgiau prieš baigiant – mažiau ankstyvų pabaigimų"
       },
       "watchdog_interval": {
         "higher": "Leidžiamos ilgesnės tylios fazės; mažiau klaidingų priverstinių sustabdymų",
@@ -1676,12 +1723,19 @@
     "start_duration_threshold": "Sekundės virš slenksčio startui patvirtinti",
     "start_threshold_w": "Mažiausia galia (W), kad būtų skaičiuojama kaip prasidėjęs",
     "stop_threshold_w": "Žemiau šios ribos aparatas laikomas išjungtu",
-    "dtw_bandwidth": "Kiek laiko iškraipymo leidžia formos atitiktis",
-    "corr_weight": "Kreivės formos ir galios lygio svoris atitikime",
-    "duration_weight": "Kiek trukmės sutapimas veikia atitiktį",
-    "energy_weight": "Kiek energijos sutapimas veikia atitiktį",
-    "profile_match_min_duration_ratio": "Trumpiausias ciklas (palyginti su profiliu), kuriam dar leidžiama atitikti",
-    "profile_match_max_duration_ratio": "Ilgiausias ciklas (palyginti su profiliu), kuriam dar leidžiama atitikti"
+    "dtw_bandwidth": "3 etapas: Sakoe-Chiba laiko lankstymo juosta (0 = DTW išjungtas; numatytoji 0,2 = 20% ciklo ilgio)",
+    "corr_weight": "2 etapas: balansas tarp kreivės formos (koreliacija) ir galios lygio (MAE); numatytoji 0,45",
+    "duration_weight": "4 etapas: kaip stipriai trukmės atitikimas veikia galutinį balą (numatytoji 0,22)",
+    "energy_weight": "4 etapas: kaip stipriai energijos atitikimas veikia galutinį balą (numatytoji 0,22)",
+    "profile_match_min_duration_ratio": "1 etapas: trumpiausias ciklas kaip profilio trukmės dalis; numatytoji 0,1 (10%)",
+    "profile_match_max_duration_ratio": "1 etapas: ilgiausias ciklas kaip profilio trukmės dalis; numatytoji 1,5 (150%)",
+    "keep_min_score": "2 etapas: žemiausias balas likti lenktynėse; numatytoji 0,1 leidžia silpnus kandidatus, vėlesni etapai parenka geriausią",
+    "dtw_blend": "3 etapas: 0 = tik pagrindinis balas, 1 = tik DTW balas, 0,5 = lygus mišinys (numatytoji)",
+    "dtw_ensemble_w": "3 etapas (ansamblio režimas): skalieroto L1 svoris prieš išvestinės DTW; numatytoji 0,7 teikia pirmenybę lygio sąmoningumui",
+    "dtw_ddtw_scale": "3 etapas: DDTW pusiau prisotinimo atstumas; mažesnis = jautresnis formos skirtumams (numatytoji 30)",
+    "dtw_refine_top_n": "3 etapas: kandidatai, kuriems DTW perskaičiuoja balus; padidinkite iki 7-9 jei teisingas profilis patenka į 4-5 vietą (numatytoji 5)",
+    "duration_scale": "4 etapas: logaritmas, ties kuriuo trukmės atitikimas perpus sumažėja; mažesnis = griežtesnė bausmė (numatytoji 0,175)",
+    "energy_scale": "4 etapas: logaritmas, ties kuriuo energijos atitikimas perpus sumažėja; mažesnis = griežtesnė bausmė (numatytoji 0,25)"
   },
   "col": {
     "profile_tip": "Atitikusios programos pavadinimas. Nepažymėta reiškia, kad ciklo pabaigoje neatitiko joks profilis.",
@@ -1766,6 +1820,69 @@
     },
     "pg_sweep": {
       "optimize": "Optimizavimas: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simuliuojamas ciklas"
+    },
+    "split": {
+      "apply": "Padalijamas ciklas"
+    },
+    "trim": {
+      "apply": "Apkarpomas ciklas"
+    },
+    "merge": {
+      "apply": "Sujungiami ciklai"
+    },
+    "rebuild": {
+      "envelopes": "Perkuriamos gaubtinės"
+    },
+    "cancelling": "Atšaukiama..."
+  },
+  "setup": {
+    "hdr": {
+      "card": "Įrenginio sąranka",
+      "healthy_chip": "Sąranka baigta"
+    },
+    "phase0": {
+      "washer": "WashData jau aptinka jūsų ciklus. Įrašykite pirmąjį ciklą, kad galėtumėte naudoti programų pavadinimus ir laiko įverčius.",
+      "dishwasher": "WashData stebi. Indaplovių ciklai yra sudėtingi – labai rekomenduojame įrašyti pirmąjį ciklą. Jei aptiktas ciklas trunka per ilgai, prieš išsaugant kaip profilį, apkarpykite jį ciklo redaktoriuje.",
+      "generic": "WashData stebi. Įrašykite arba pažymėkite aptiktą ciklą, kad pradėtumėte kurti profilius."
+    },
+    "phase1a": {
+      "labelled": "Gera pradžia – jūsų pirmoji programa išsaugota. Kad duomenys būtų kuo švaresni, apsvarstykite galimybę įrašyti kitą ciklą naudodami įrašymo valdiklį."
+    },
+    "phase1b": {
+      "recorded": "Jūsų įrašas išsaugotas kaip {profile_name}. Dabar įrašykite arba pažymėkite kitas dažniausiai naudojamas programas, kad padidintumėte aprėptį."
+    },
+    "phase1c": {
+      "verify": "Turite {count} bendruomenės programas. Paleiskite ciklą, kad patikrintumėte, ar WashData jas teisingai atpažįsta – atitikimas gerės, kai jūsų įrenginys sukaupia savo istoriją."
+    },
+    "phase2": {
+      "cluster": "WashData aptiko {count} ciklus, kurie neatitinka jokios išsaugotos programos – jie yra panašūs vienas į kitą. Ar norite sukurti jiems naują profilį?",
+      "unmatched": "Paskutinis ciklas neatitiko jokios išsaugotos programos. Ar tai nauja programa?"
+    },
+    "phase3": {
+      "suggestions": "WashData pateikia nustatymų rekomendacijas pagal jūsų ciklų istoriją – peržiūrėkite jas, kad pagerintumėte aptikimo tikslumą.",
+      "groups": "Kai kurie jūsų profiliai atrodo kaip ta pati programa skirtingose temperatūrose. Sugrupuokite juos, kad atitikimas būtų tikslesnis.",
+      "phases": "Pridėkite programų fazes prie {profile_name}, kad likusio laiko įverčiai būtų tikslesni."
+    },
+    "phase4": {
+      "healthy": "Šis įrenginys yra visiškai sukonfigūruotas ({profile_count} profiliai)."
+    },
+    "cta": {
+      "start_recording": "Pradėti įrašymą",
+      "label_detected_cycle": "Jau turiu aptiktą ciklą – vietoj to pažymėti jį",
+      "browse_cycles": "Naršyti ciklus, kad pažymėtumėte kitą",
+      "view_profiles": "Peržiūrėti profilius",
+      "create_from_cluster": "Sukurti profilį iš šių ciklų",
+      "create_profile": "Sukurti jam profilį",
+      "review_suggestions": "Peržiūrėti pasiūlymus",
+      "organise_profiles": "Tvarkyti profilius",
+      "configure_phases": "Konfigūruoti fazes",
+      "skip_step": "Praleisti šį žingsnį",
+      "skip_forever": "Daugiau nerodyti",
+      "hide_guidance": "Slėpti nurodymus",
+      "show_guidance": "Rodyti nurodymus"
     }
   }
 }

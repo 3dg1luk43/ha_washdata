@@ -40,15 +40,15 @@ Online features in WashData are **disabled by default**. Nothing is sent to or f
 
 1. Open the **WashData** panel from the Home Assistant sidebar.
 2. Go to the **Advanced** tab.
-3. Click the **gear icon** in the top area of the Advanced tab.
-4. Toggle **Enable online features** on.
-5. Use the **Brand** and **Model** pickers to declare which appliance you own.
+3. Click the **gear icon** in the top area of the Advanced tab, then open **Online & Community**.
+4. Toggle **Enable online features** on. Online features are integration-wide - one switch covers all of your WashData devices - and enabling them requires a Home Assistant administrator.
+5. Declare which appliance you own with the **Brand** and **Model** fields in each device's **Settings** tab (Basic section). This is per-device, so a household with several different machines links each one to the right store entry.
 
 The brand and model declaration is what links your WashData device to the correct store entry. Without it, the integration does not know which shared programs are relevant to you.
 
 Once online features are enabled and your appliance model is declared, two new actions become available in the panel:
 
-- **Browse community setups** -- shown on the onboarding card for a new device (no profiles yet) and accessible from the store section in the Advanced tab. Opens the store filtered to your declared model.
+- **Browse community setups** -- shown on the **Setup Card** for a new device (no profiles yet) and accessible from the Store tab. Opens the store filtered to your declared model.
 - **Share this device** -- available once you have programs with reference cycles to contribute.
 
 You can disable online features at any time from the same gear menu. Disabling removes the store UI but does not delete any locally adopted cycles -- those remain part of your profile library.
@@ -61,7 +61,7 @@ If another user has shared a setup for your appliance model, adopting it takes l
 
 **Steps to adopt:**
 
-1. Click **Browse community setups** (shown on the onboarding card on a new device, or from the Advanced tab).
+1. Click **Browse community setups** (shown on the **Setup Card** on a new device, or from the Store tab).
 2. The store panel opens, already filtered to programs contributed for your declared model.
 3. Browse the available programs. Each shows program name, contributor, how many reference cycles are included, and a waveform preview.
 4. Click **Download this setup** on a program or the full device setup you want.

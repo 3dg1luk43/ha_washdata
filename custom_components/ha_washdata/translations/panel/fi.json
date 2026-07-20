@@ -87,7 +87,7 @@
     "on_cycle_finished": "Kierros päättyi",
     "on_cycle_started": "Kierros alkoi",
     "pause_cycle": "Tauko",
-    "pause_cycle_tip": "Keskeytä käynnissä oleva sykli — laite jatkaa siitä, mihin se jäi",
+    "pause_cycle_tip": "Keskeytä käynnissä oleva sykli – laite jatkaa siitä, mihin se jäi",
     "pg_apply_device": "Käytä laitteeseen",
     "pg_autofill": "Autotäyttö",
     "play": "Toista",
@@ -97,8 +97,8 @@
     "process_tip": "Tallenna tallennettu jälki uutena tai olemassa olevana profiilina",
     "rebuild": "Rakenna kirjekuoret uudelleen",
     "rebuild_envelope": "Rakenna kirjekuori uudelleen",
-    "rebuild_tip": "Laske uudelleen kaikkien profiilien odotettu tehokuori (min/maks-alue) merkityistä sykleistä — suorita uusien syklien merkitsemisen tai vanhojen korjaamisen jälkeen",
-    "rec_start_tip": "Aloita laitteen tehojäljen tallentaminen — käynnistä juuri ennen syklin suorittamista",
+    "rebuild_tip": "Laske uudelleen kaikkien profiilien odotettu tehokuori (min/maks-alue) merkityistä sykleistä – suorita uusien syklien merkitsemisen tai vanhojen korjaamisen jälkeen",
+    "rec_start_tip": "Aloita laitteen tehojäljen tallentaminen – käynnistä juuri ennen syklin suorittamista",
     "rec_stop": "Pysäytä",
     "rec_stop_tip": "Lopeta tallennus ja pidä tallennettu jälki tarkistettavana",
     "record": "Aloita tallennus",
@@ -231,7 +231,7 @@
       "interval": "Tulisi olla vähintään 2x näytteenottoväli ({si} s)",
       "sampling": "Näytteenottovälin tulee olla enintään puolet tarkkailijavälistä ({wi} s)"
     },
-    "settings_banner": "{n} asetusten ristiriita{s} — tarkista korostetut osiot ja korjaa ne ennen tallentamista.",
+    "settings_banner": "{n} asetusten ristiriita{s} – tarkista korostetut osiot ja korjaa ne ennen tallentamista.",
     "settings_banner_btn": "Siirry ensimmäiseen"
   },
   "hdr": {
@@ -451,9 +451,9 @@
     "show_expected": "Näytä odotettu käyrän peittokuva (vastaava profiili, oranssi)",
     "show_raw": "Näytä raakadatan pistorasiakytkin reaaliaikaisessa tehograafissa",
     "sparkline": "Viimeaikainen syklin keston suuntaus",
-    "stage2": "Vaihe 2 — ydinsamankaltaisuus",
-    "stage3": "Vaihe 3 — DTW",
-    "stage4": "Vaihe 4 — vastaavuus",
+    "stage2": "Vaihe 2 – ydinsamankaltaisuus",
+    "stage3": "Vaihe 3 – DTW",
+    "stage4": "Vaihe 4 – vastaavuus",
     "status": "Tila",
     "tail_trim": "Hännän leikkaus (s)",
     "timer_auto_pause": "Automaattinen tauko",
@@ -561,7 +561,12 @@
     "flags": "Liput",
     "include_phase_map": "Sisällytä vaihdekartta",
     "include_settings": "Sisällytä tunnistus- ja täsmäytysasetukset",
-    "show_contributor": "Näytä osallistujien nimet"
+    "show_contributor": "Näytä osallistujien nimet",
+    "task_pg_detail": "Simuloidaan sykliä",
+    "task_split": "Jaetaan sykliä",
+    "task_trim": "Rajataan sykliä",
+    "task_merge": "Yhdistetään syklejä",
+    "task_rebuild": "Rakennetaan tehoalueita uudelleen"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -645,7 +650,7 @@
     "artifact_dip_detail": "Alitti tavallisen tehon alarajan noin {n} sekunnin ajan.",
     "artifact_footer": "Korostettu yllä olevassa kaaviossa. Nämä ovat ohimeneviä esineitä (esim. ovi avautui kesken syklin), eivät välttämättä ongelmia.",
     "artifact_header": "{n} poikkeavaa havaittu tämän jakson aikana",
-    "artifact_pause_detail": "Teho laski lähes nollaan noin {n} sekunniksi ja jatkui sitten — todennäköisesti ovi avattiin syklin aikana tai sykli pysäytettiin.",
+    "artifact_pause_detail": "Teho laski lähes nollaan noin {n} sekunniksi ja jatkui sitten – todennäköisesti ovi avattiin syklin aikana tai sykli pysäytettiin.",
     "artifact_spike_detail": "Ylitti tavallisen tehon ylärajan noin {n} sekunnin ajan.",
     "auto_label_intro": "Määritä profiilit nimeämättömille sykleille, joiden osuvuusvarmuus tyhjentää kynnyksen.",
     "automations_intro": "WashData laukaisee {start} / {end}-tapahtumat ja tarjoaa entiteetit, joten ilmoitukset ja toiminnot kannattaa rakentaa tavallisina Home Assistant -automaatioina. Tätä laitetta käyttävät automaatiot näkyvät alla.",
@@ -654,10 +659,10 @@
     "collecting_data": "Kerätään tietoja - vielä {need} sykliä tarvitaan ennen hienosäädön käynnistymistä ({current}/{min}).",
     "compare_overlay_profiles": "Päällekkäiset profiilit (himmeä)",
     "compare_profiles_tip": "Aseta muut profiilikuoret yllä olevaan kaavioon nähdäksesi, mikä sopii parhaiten tähän jaksoon.",
-    "compare_selected_cycles": "Valitut jaksot (kiinteä) — näytä/piilota",
+    "compare_selected_cycles": "Valitut jaksot (kiinteä) – näytä/piilota",
     "consider_new_profile": "Harkitse uuden profiilin luomista.",
     "coverage_gap": "viimeaikaisilla jaksoilla ei ole vastaavaa profiilia ({pct} % viimeisestä 30:stä).",
-    "coverage_gap_similar_cycles": "{count} samanlaista merkitsemätöntä sykliä löydetty — luo profiili, jotta voit aloittaa niiden täsmäämisen.",
+    "coverage_gap_similar_cycles": "{count} samanlaista merkitsemätöntä sykliä löydetty – luo profiili, jotta voit aloittaa niiden täsmäämisen.",
     "cycles_deleted": "{count} sykli(ä) poistettu",
     "enough_data": "Tarpeeksi tietoja oppimiseen ({current}/{min} sykliä).",
     "export_description": "Vie kaikki profiilit ja syklit JSONiin tai palauta edellisestä viennistä.",
@@ -686,7 +691,7 @@
     "ml_learned_intro": "Mallit hienosäädetty tälle koneelle.",
     "ml_loading": "ladataan ML…",
     "ml_settings_intro": "Kaksi erillistä kytkintä: toinen käyttää malleja syklin aikana, toinen antaa WashDatan hienosäätää ne koneellesi ajan myötä.",
-    "name_first_program": "Sinulla on tarpeeksi syklejä — nimeä ensimmäinen ohjelma aloittaaksesi täsmäyksen.",
+    "name_first_program": "Sinulla on tarpeeksi syklejä – nimeä ensimmäinen ohjelma aloittaaksesi täsmäyksen.",
     "near_duplicate_cluster": "lähes kaksoiskappale profiiliklusteri havaittu. Ryhmittely mahdollistaa täsmäämisen luotettavasti valitsemaan samankaltaisten ohjelmien välillä (esim. sama ohjelma eri lämpötilassa/linkouksessa).",
     "no_cycles_match": "Yksikään jakso ei vastaa nykyistä suodatinta.",
     "no_cycles_profile": "Ei jaksoja tälle profiilille.",
@@ -713,7 +718,7 @@
     "notify_services_hint": "Käytä {entity}-palvelun tunnuksia (pilkulla eroteltuna usealle). Mallimuuttujat: {vars}.",
     "old_actions_warning": "Määritetty vanhalla toimintoeditorilla (nyt poistettu). Ne käynnistyvät edelleen syklitapahtumissa, mutta niitä ei voi enää muokata täällä. Muunna ne normaaliksi automaatioksi tai poista ne.",
     "onboarding_progress": "{n} / 3 sykliä havaittu",
-    "onboarding_watching": "Käytä laitettasi normaalisti — WashData tarkkailee. Kolmen syklin jälkeen ohjelmien täsmäys alkaa.",
+    "onboarding_watching": "Käytä laitettasi normaalisti – WashData tarkkailee. Kolmen syklin jälkeen ohjelmien täsmäys alkaa.",
     "pending_feedback": "Odottaa tunnistuspalautetta",
     "performance_trend": "Tehotrendi ({n} jaksoa)",
     "pg_analysis_empty": "Lataa sykli nähdäksesi osuma-analyysin.",
@@ -763,7 +768,7 @@
     "setting_changed": "Muutettu {old} → {new} {date}",
     "settings_basic_note": "Näytetään olennaiset asetukset. Vaihda Edistynyt-tilaan nähdäksesi koko luettelon.",
     "shape_drift_advisory": "⚠ Muoto ajautuu",
-    "shape_drift_detail": "Tämän profiilin tehomuoto on muuttunut ajan myötä — mahdollinen laitteen kuluminen tai huolto tarvitaan (esim. kalkinpoisto, suodattimen puhdistus).",
+    "shape_drift_detail": "Tämän profiilin tehomuoto on muuttunut ajan myötä – mahdollinen laitteen kuluminen tai huolto tarvitaan (esim. kalkinpoisto, suodattimen puhdistus).",
     "show_all_settings": "Näytä kaikki asetukset",
     "showing_suggestions": "Näytetään asetus {count} ja ehdotuksia.",
     "split_intro": "Napsauta kaaviota lisätäksesi tai poistaaksesi jakopisteen tai tunnistaa automaattisesti tyhjäkäynnin väliltä. Jokainen tuloksena oleva segmentti voi saada oman profiilinsa.",
@@ -857,7 +862,9 @@
     "share_guidelines_title": "Ennen jakamista",
     "store_download_device_intro": "Ota käyttöön jokainen jaettu ohjelma ja sen viitesyklit laitteellesi. Omat tallennetut syklisi ja tilastosi eivät vaikutu.",
     "store_share_device_intro": "Lataa {brand} {model} valitsemiesi viitesyklien kanssa. Muut saman laitteen omistajat voivat ottaa ohjelmiasi käyttöön. Merkinnät tarkistetaan ennen julkaisua.",
-    "share_profile_no_cycles": "Ei viitesyklejä -- merkitse sykli ⭐:ksi Syklit-välilehdessä sisällyttääksesi tämän profiilin"
+    "share_profile_no_cycles": "Ei viitesyklejä -- merkitse sykli ⭐:ksi Syklit-välilehdessä sisällyttääksesi tämän profiilin",
+    "advisory_phase_inconsistent": "'{name}' vaikuttaa sekoittavan eri ohjelmia tai lämpötiloja - sen syklit lämmittävät hyvin eripituisia aikoja. Sen jakaminen erillisiin profiileihin (esim. lämpötilan mukaan) parantaa täsmäytystä ja aika-arvioita.",
+    "advisory_phase_inconsistent_title": "⚠ Mahdollisesti sekoittuneet ohjelmat"
   },
   "pg_desc": {
     "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",
@@ -869,12 +876,19 @@
     "start_duration_threshold": "Sekunteja kynnyksen yläpuolella käynnistyksen vahvistamiseksi",
     "start_threshold_w": "Vähimmäiswatit, jotta lasketaan käynnistyneeksi",
     "stop_threshold_w": "Tämän alapuolella laite lasketaan pois päältä olevaksi",
-    "dtw_bandwidth": "Kuinka paljon ajan venytystä muodon täsmäytys sallii",
-    "corr_weight": "Käyrän muodon ja tehotason painotus täsmäytyksessä",
-    "duration_weight": "Kuinka paljon keston yhteensopivuus vaikuttaa täsmäytykseen",
-    "energy_weight": "Kuinka paljon energian yhteensopivuus vaikuttaa täsmäytykseen",
-    "profile_match_min_duration_ratio": "Lyhin sykli (profiiliin verrattuna), joka voi vielä täsmätä",
-    "profile_match_max_duration_ratio": "Pisin sykli (profiiliin verrattuna), joka voi vielä täsmätä"
+    "dtw_bandwidth": "Vaihe 3: Sakoe-Chiba-ajankäyristyskaista (0 = DTW pois; oletus 0,2 = 20% syklinpituudesta)",
+    "corr_weight": "Vaihe 2: tasapaino käyrän muodon (korrelaatio) ja tehotason (MAE) välillä; oletus 0,45",
+    "duration_weight": "Vaihe 4: kuinka vahvasti keston yhdenmukaisuus vaikuttaa lopullisiin pisteisiin (oletus 0,22)",
+    "energy_weight": "Vaihe 4: kuinka vahvasti energian yhdenmukaisuus vaikuttaa lopullisiin pisteisiin (oletus 0,22)",
+    "profile_match_min_duration_ratio": "Vaihe 1: lyhin sykli profiilinkeston murto-osana; oletus 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Vaihe 1: pisin sykli profiilinkeston murto-osana; oletus 1,5 (150%)",
+    "keep_min_score": "Vaihe 2: alin pisteet pysyäkseen mukana; oletus 0,1 sallii heikot ehdokkaat, myöhemmät vaiheet valitsevat parhaan",
+    "dtw_blend": "Vaihe 3: 0 = vain ydinpisteet, 1 = vain DTW-pisteet, 0,5 = tasainen sekoitus (oletus)",
+    "dtw_ensemble_w": "Vaihe 3 (ensemble-tila): skaloidun L1 paino vs. derivatiivinen DTW; oletus 0,7 suosii tasonhavainnoivaa",
+    "dtw_ddtw_scale": "Vaihe 3: DDTW:n puolikyllästymisetäisyys; pienempi = herkempi muodon eroille (oletus 30)",
+    "dtw_refine_top_n": "Vaihe 3: ehdokkaat joille DTW laskee pisteet uudelleen; nosta 7-9:ään jos oikea profiili sijoittuu 4.-5. (oletus 5)",
+    "duration_scale": "Vaihe 4: log-suhde jossa keston yhdenmukaisuus puolittuu; pienempi = tiukempi rangaistus (oletus 0,175)",
+    "energy_scale": "Vaihe 4: log-suhde jossa energian yhdenmukaisuus puolittuu; pienempi = tiukempi rangaistus (oletus 0,25)"
   },
   "phase_desc": {
     "anti_crease": "Satunnaisia lyhyitä rumpujaksia valmistumisen jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
@@ -957,6 +971,10 @@
     "triggers": {
       "intro": "Valinnaiset ulkoiset signaalit: päätyssignaali, ovianturi, taukokytkin ja purkamismuistutus.",
       "label": "Käynnistysimpulssit ja ovet"
+    },
+    "phase_eta": {
+      "label": "Jäljellä oleva aika",
+      "intro": "Vaihetietoinen jäljellä oleva aika koneille, joiden syklin pituus riippuu lämpötilasta tai linkouksesta."
     }
   },
   "setting": {
@@ -1039,6 +1057,10 @@
     "energy_price_static": {
       "doc": "Kiinteää kWh-hintaa käytetään kustannusluvuissa, kun yllä ei ole asetettu reaaliaikaista hintakokonaisuutta.",
       "label": "Kiinteä energiahinta (per kWh)"
+    },
+    "energy_sensor": {
+      "doc": "Valinnainen kumulatiivinen energialaskuri (total_increasing kWh/Wh, esim. pistokkeen oma kokonaismittari). Kun tämä on asetettu, kunkin syklin raportoitu energia otetaan tämän laskurin alku- ja loppuarvon erotuksesta, mikä välttää alilaskennan, jonka saat integroimalla hitaasti raportoivaa tehoanturia. Palaa integroituun arvoon, jos lukema puuttuu, sen yksikkö on tuntematon tai erotus ei ole positiivinen. Jätä tyhjäksi jatkaaksesi tehoanturin integrointia.",
+      "label": "Energiamittarin entiteetti"
     },
     "expose_debug_entities": {
       "doc": "Julkaise ylimääräisiä diagnostisia HA-kokonaisuuksia (osumavarmuus, moniselitteisyys, tilan sisäiset tiedot). Pois päältä pitää entiteettiluettelon puhtaana normaalia käyttöä varten.",
@@ -1322,6 +1344,38 @@
     },
     "show_contributor": {
       "doc": "Näytä \"tekijä <osallistuja>\" -merkintä yhteisön laitteissa ja viitesykleissä."
+    },
+    "enable_phase_matching": {
+      "label": "Vaihetietoinen jäljellä oleva aika",
+      "doc": "Jaa jokainen käynnissä oleva sykli vaiheisiin (lämmitys, pesu, linkous) ja budjetoi jäljellä oleva aika vaihekohtaisesti, yhdistettynä klassiseen arvioon - nojaten syklin alkuvaiheessa vaihebudjettiin ja lopussa klassiseen arvioon. Tämä mukauttaa laskurin siihen, kuinka kauan koneesi todella lämmittää ja käy, mikä näkyy selvimmin syklin alkupuoliskolla. Pois = vain klassinen arvio. Vaikuttaa vain jäljellä olevan ajan näyttöön; ohjelman täsmäytys ja syklin tunnistus pysyvät ennallaan."
+    },
+    "keep_min_score": {
+      "label": "Vähim. vastaavuuspisteet",
+      "doc": "Alin samankaltaisuuspisteet, jotka ehdokas tarvitsee pysyäkseen täsmäytyksessä mukana. Oletus 0,1 on tarkoituksellisesti salliva – se sallii jopa heikot ehdokkaat ja luottaa myöhempiin vaiheisiin parhaan löytämiseksi. Nosta leikkaamaan epätodennäköiset profiilit aikaisemmin; laske laajentamaan alkuperäistä ehdokaspoolia."
+    },
+    "dtw_blend": {
+      "label": "DTW-sekoitus",
+      "doc": "Kuinka paljon DTW-kohdistuspisteet korvaavat Vaiheen 2 ydinpisteet. 0 = käytä vain Vaiheen 2 pisteitä, 1 = käytä vain DTW-pisteitä, 0,5 (oletus) = tasainen sekoitus. Nosta luottamaan enemmän aikakohdistukseen kun ohjelmilla on samanlaiset tehotasot mutta erilaiset ajoitusmustrit."
+    },
+    "dtw_ensemble_w": {
+      "label": "DTW-ensemble-miksaus",
+      "doc": "Ensemble-DTW-tilassa (oletus) tämä on skaloidun L1:n paino verrattuna derivatiiviseen DTW:hen (DDTW). 1,0 = vain skaloitu L1, 0 = vain DDTW, 0,7 = oletus. Skaloitu muunnelma vertaa tehotasoja; derivatiivinen reagoi siihen miten teho muuttuu ajan kuluessa. Ensemble yhdistää molemmat."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Deriv. DTW-skala",
+      "doc": "Derivatiivisen DTW-pisteytyksen puolikyllästymisetäisyys. Pisteet puolittuvat kun DDTW-etäisyys on yhtä suuri kuin tämä arvo. Pienempi = herkempi muodon eroille. Oletus 30 on kalibroitu tyypillisten laitteiden tehokäyrille. Vaikuttaa vain ensemble- ja ddtw-DTW-tiloihin."
+    },
+    "dtw_refine_top_n": {
+      "label": "DTW-tarkistusmäärä",
+      "doc": "Kuinka monelle Vaiheen 2 parhaalle ehdokkaalle DTW laskee pisteet uudelleen. DTW on kalliimpaa joten se sovelletaan vain N parhaaseen. Oletus 5. Nosta (7-9:ään) jos oikea profiili pääsee joskus vain 4. tai 5. sijalle Vaiheen 2 jälkeen – DTW voi pelastaa sen. Pienempi arvo nopeuttaa täsmäytystä hieman."
+    },
+    "duration_scale": {
+      "label": "Keston tarkkuus",
+      "doc": "Vaiheen 4 keston yhdenmukaisuusrangaistuksen tarkkuus. Tämä on log-suhde jossa yhdenmukaisuuspisteet puolittuvat. Pienempi = tiukempi: keston poikkeama haittaa enemmän. Oletus 0,175 vastaa noin 18% kestontoleranssia puolipainolla. Yhdistä Kestopaino-asetukseen."
+    },
+    "energy_scale": {
+      "label": "Energian tarkkuus",
+      "doc": "Vaiheen 4 energian yhdenmukaisuusrangaistuksen tarkkuus. Pienempi = tiukempi: energian poikkeama haittaa enemmän. Oletus 0,25 on tarkoituksellisesti sallivampi kuin kestotarkkuus koska energia vaihtelee kuorman mukaan. Yhdistä Energiapaino-asetukseen."
     }
   },
   "setting_group": {
@@ -1766,6 +1820,69 @@
     },
     "pg_sweep": {
       "optimize": "Optimointi: {param}"
+    },
+    "pg_detail": {
+      "simulate": "Simuloidaan sykliä"
+    },
+    "split": {
+      "apply": "Jaetaan sykliä"
+    },
+    "trim": {
+      "apply": "Rajataan sykliä"
+    },
+    "merge": {
+      "apply": "Yhdistetään syklejä"
+    },
+    "rebuild": {
+      "envelopes": "Rakennetaan tehoalueita uudelleen"
+    },
+    "cancelling": "Perutaan..."
+  },
+  "setup": {
+    "hdr": {
+      "card": "Laitteen asetukset",
+      "healthy_chip": "Asetukset valmiit"
+    },
+    "phase0": {
+      "washer": "WashData tunnistaa jo syklisi. Tallenna ensimmäinen sykli ottaaksesi käyttöön ohjelmanimet ja aikaarviot.",
+      "dishwasher": "WashData tarkkailee. Astianpesukoneilla on monimutkaisia syklejä – ensimmäisen syklin tallentaminen on erittäin suositeltavaa. Jos tunnistettu sykli kestää liian kauan, käytä syklin editoria sen leikkaamiseen ennen profiilina tallentamista.",
+      "generic": "WashData tarkkailee. Tallenna tai merkitse tunnistettu sykli aloittaaksesi profiilien luomisen."
+    },
+    "phase1a": {
+      "labelled": "Hyvä alku – ensimmäinen ohjelmasi on tallennettu. Puhtaimman datan saamiseksi harkitse seuraavan syklin tallentamista tallennuswidgetillä."
+    },
+    "phase1b": {
+      "recorded": "Tallennuksesi on tallennettu nimellä {profile_name}. Tallenna tai merkitse nyt muut yleisimmät ohjelmasi kattavuuden rakentamiseksi."
+    },
+    "phase1c": {
+      "verify": "Sinulla on {count} ohjelmaa yhteisöltä. Suorita sykli tarkistaaksesi, tunnistaako WashData sen oikein – täsmäytys paranee laitteen kerätessä omaa historiaansa."
+    },
+    "phase2": {
+      "cluster": "WashData on havainnut {count} sykliä, jotka eivät täsmää mihinkään tallennettuun ohjelmaan – ne näyttävät samanlaisilta keskenään. Haluatko luoda niille uuden profiilin?",
+      "unmatched": "Viimeisin sykli ei täsmännyt mihinkään tallennettuun ohjelmaan. Onko se uusi ohjelma?"
+    },
+    "phase3": {
+      "suggestions": "WashDatalla on asetussuosituksia syklihistoriasi perusteella – tarkista ne tunnistustarkkuuden parantamiseksi.",
+      "groups": "Jotkut profiileistasi näyttävät samalta ohjelmalta eri lämpötiloissa. Järjestä ne ryhmään parempaa täsmäytystä varten.",
+      "phases": "Lisää ohjelman vaiheet profiiliin {profile_name} tarkempien jäljellä olevan ajan arvioiden saamiseksi."
+    },
+    "phase4": {
+      "healthy": "Tämä laite on täysin asennettu ({profile_count} profiilia)."
+    },
+    "cta": {
+      "start_recording": "Aloita tallennus",
+      "label_detected_cycle": "Minulla on jo tunnistettu sykli – merkitse se sen sijaan",
+      "browse_cycles": "Selaa syklejä merkitäksesi toisen",
+      "view_profiles": "Näytä profiilit",
+      "create_from_cluster": "Luo profiili näistä sykleistä",
+      "create_profile": "Luo sille profiili",
+      "review_suggestions": "Tarkista ehdotukset",
+      "organise_profiles": "Järjestä profiilit",
+      "configure_phases": "Määritä vaiheet",
+      "skip_step": "Ohita tämä vaihe",
+      "skip_forever": "Älä näytä enää",
+      "hide_guidance": "Piilota opastus",
+      "show_guidance": "Näytä opastus"
     }
   }
 }

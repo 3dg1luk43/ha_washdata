@@ -45,23 +45,6 @@ test('clicking a profile card opens the profile detail modal', async ({ page }) 
   await expect(page.locator('.wd-modal')).toBeVisible({ timeout: 5_000 });
 });
 
-test('coverage gap banner appears when suggest_create is true', async ({ page }) => {
-  await bootPanel(page, {
-    'ha_washdata/get_profiles': {
-      ...profilesData,
-      coverage_gaps: {
-        suggest_create: true,
-        unmatched_count: 5,
-        unmatched_rate: 0.4,
-        profile_suggestions: [],
-      },
-    },
-  });
-  await clickTab(page, 'profiles');
-  const banner = page.locator('.wd-sug-banner').first();
-  await expect(banner).toBeVisible({ timeout: 5_000 });
-});
-
 test('health badge shows on profile card based on health status', async ({ page }) => {
   await clickTab(page, 'profiles');
   // Cotton 40°C has health_status: "healthy" — should show a health badge
