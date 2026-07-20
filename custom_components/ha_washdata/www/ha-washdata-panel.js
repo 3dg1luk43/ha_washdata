@@ -637,15 +637,23 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
    (display:block, higher specificity) rule and stays a centered flex row. */
 .wd-field-switch label { margin: 0; }
 .wd-field-switch .wd-switch-row { display: flex; align-items: center; gap: 10px; min-height: 22px; }
-/* Base switch label: toggle + text on one baseline, aligned. Used inline (outside
-   .wd-field-switch) by _switchInline for prefs/store toggles too. */
-.wd-switch-lbl { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; margin: 0; }
+/* Switch label: a flex row [toggle][text], vertically centred. The .wd-field
+   .wd-switch-lbl selector is needed to beat .wd-field label (display:block +
+   .82em + uppercase, specificity 0,1,1) which otherwise leaks in and both breaks
+   the vertical centring (align-items is a no-op on a block) and shrinks the label.
+   The bare .wd-switch-lbl covers inline use outside a .wd-field (e.g. adopt). */
+.wd-switch-lbl,
+.wd-field .wd-switch-lbl {
+  display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+  min-width: 0; margin: 0; font-size: 1rem; font-weight: 400;
+  letter-spacing: normal; text-transform: none;
+}
 /* Match the switch label to every other setting name (see .wd-field label). */
 .wd-switch-text { font-size: .82em; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--secondary-text-color); }
 #wd-settings-form .wd-switch-text, #wd-ml-form .wd-switch-text { color: var(--primary-text-color); }
 /* Normal-case, readable label for switches outside the Settings form (store /
    panel prefs / access control), whose labels are descriptive sentences. */
-.wd-switch-text--plain { font-size: 1em; font-weight: 600; line-height: 1.3; letter-spacing: normal; text-transform: none; color: var(--primary-text-color); }
+.wd-switch-text--plain { font-size: .9em; font-weight: 600; line-height: 1.3; letter-spacing: normal; text-transform: none; color: var(--primary-text-color); }
 .wd-switch { position: relative; display: inline-flex; flex: 0 0 auto; width: 40px; height: 22px; }
 .wd-switch input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
 .wd-switch-slider { position: absolute; inset: 0; border-radius: 22px; background: var(--switch-unchecked-track-color, rgba(120,120,120,.5)); transition: background .2s; }
