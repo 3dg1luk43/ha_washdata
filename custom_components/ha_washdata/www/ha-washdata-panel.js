@@ -803,9 +803,16 @@ button.wd-profile-card { display: block; }
 .wd-prof-wrap { position: relative; }
 .wd-profile-name { font-weight: 600; font-size: 1em; margin-bottom: 6px; }
 .wd-profile-meta { font-size: .8em; color: var(--secondary-text-color); }
+/* Profile-card header: name on the left, mini power-signature sparkline on the
+   right, both on one line and vertically aligned regardless of badge count. */
+.wd-profile-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.wd-profile-head .wd-profile-name { margin: 0; flex: 1 1 auto; min-width: 0; }
+/* Status-pill row: wraps cleanly on its own line below the name, and every pill
+   (health / trend / warm-up / imported) shares one uniform compact pill shape. */
+.wd-profile-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+.wd-profile-badges .wd-badge { margin: 0; padding: 2px 9px; border-radius: 999px; font-size: .72em; font-weight: 600; gap: 4px; }
 /* D2: mini duration sparkline on profile cards */
-.wd-profile-name { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.wd-prof-spark { margin-left: auto; width: 64px; height: 20px; display: block; flex-shrink: 0; }
+.wd-prof-spark { width: 64px; height: 20px; display: block; flex-shrink: 0; }
 /* Community Store */
 .wd-store-crumbs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; font-size: .85em; }
 .wd-crumb { background: none; border: none; color: var(--primary-color); cursor: pointer; padding: 2px 4px; font: inherit; }
@@ -4072,10 +4079,10 @@ class HaWashdataPanel extends HTMLElement {
     // match immediately), shown with an "Imported" badge instead of "Still learning".
     const isWarmup = cycleCount < warmupThreshold && !p.is_imported;
     const warmupBadge = isWarmup
-      ? `<span class="wd-badge" title="${_esc(this._t('msg.warmup_detail', {needed: warmupThreshold}, `This profile needs ${warmupThreshold} labelled cycles before auto-matching begins. Every confirmed cycle helps it learn.`))}" style="background:var(--info-color,#2196f3);color:#fff;padding:2px 6px;border-radius:4px;font-size:.75em">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
+      ? `<span class="wd-badge" title="${_esc(this._t('msg.warmup_detail', {needed: warmupThreshold}, `This profile needs ${warmupThreshold} labelled cycles before auto-matching begins. Every confirmed cycle helps it learn.`))}" style="background:var(--info-color,#2196f3);color:#fff">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
       : '';
     const importedBadge = p.is_imported
-      ? `<span class="wd-badge" title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="background:var(--info-color,#2196f3);color:#fff;padding:2px 6px;border-radius:4px;font-size:.75em">📥 ${this._t('status.imported', {}, 'Imported')}</span>`
+      ? `<span class="wd-badge" title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="background:var(--info-color,#2196f3);color:#fff">📥 ${this._t('status.imported', {}, 'Imported')}</span>`
       : '';
     const badges = [healthBadge, trendBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
     // Mini power-signature curve: the profile's real average power shape (from its
@@ -4087,7 +4094,11 @@ class HaWashdataPanel extends HTMLElement {
     return `
       <div class="wd-prof-wrap">
         <button class="wd-profile-card" type="button" data-action="open-profile" data-pname="${_esc(p.name)}">
-          <div class="wd-profile-name">${_esc(p.name)}${badges ? ' ' + badges : ''}${spark}</div>
+          <div class="wd-profile-head">
+            <span class="wd-profile-name">${_esc(p.name)}</span>
+            ${spark}
+          </div>
+          ${badges ? `<div class="wd-profile-badges">${badges}</div>` : ''}
           <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}${cost}</div>
         </button>
       </div>`;
