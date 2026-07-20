@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "正在重建包络"
-    }
+    },
+    "cancelling": "正在取消..."
   },
   "setup": {
     "hdr": {

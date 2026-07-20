@@ -1781,7 +1781,8 @@
     },
     "rebuild": {
       "envelopes": "Rebuilding envelopes"
-    }
+    },
+    "cancelling": "Cancelling..."
   },
   "setup": {
     "hdr": {

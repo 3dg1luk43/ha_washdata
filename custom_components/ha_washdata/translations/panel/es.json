@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Reconstruyendo envolventes"
-    }
+    },
+    "cancelling": "Cancelando..."
   },
   "setup": {
     "hdr": {

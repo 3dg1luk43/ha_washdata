@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Burkológörbék újraépítése"
-    }
+    },
+    "cancelling": "Megszakítás..."
   },
   "setup": {
     "hdr": {

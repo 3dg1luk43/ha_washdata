@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Hüllkurven werden neu aufgebaut"
-    }
+    },
+    "cancelling": "Wird abgebrochen..."
   },
   "setup": {
     "hdr": {

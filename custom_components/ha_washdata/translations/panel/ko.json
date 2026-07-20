@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "엔벨로프 재구성 중"
-    }
+    },
+    "cancelling": "취소 중..."
   },
   "setup": {
     "hdr": {

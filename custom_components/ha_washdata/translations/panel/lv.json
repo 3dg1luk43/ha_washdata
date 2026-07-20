@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Apvalklīkņu pārbūve"
-    }
+    },
+    "cancelling": "Atceļ..."
   },
   "setup": {
     "hdr": {

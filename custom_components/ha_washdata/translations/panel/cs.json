@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Přepočítávání obálek"
-    }
+    },
+    "cancelling": "Ruším..."
   },
   "setup": {
     "hdr": {

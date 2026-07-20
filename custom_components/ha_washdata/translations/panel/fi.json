@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Rakennetaan tehoalueita uudelleen"
-    }
+    },
+    "cancelling": "Perutaan..."
   },
   "setup": {
     "hdr": {

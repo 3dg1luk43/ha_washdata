@@ -1106,6 +1106,9 @@ button.wd-profile-card { display: block; }
 .wd-task-pill-eta { opacity: .75; }
 .wd-task-pill-x { border: none; background: rgba(0,0,0,.18); color: inherit; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; font-size: .9em; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 .wd-task-pill-x:hover { background: rgba(0,0,0,.32); }
+.wd-task-pill--cancelling { background: rgba(255,160,0,.28); }
+.wd-task-pill-cancelling { opacity: .9; font-style: italic; }
+.wd-task-pill-x--cancelling { opacity: .4; cursor: default; pointer-events: none; }
 .wd-task-spin { width: 10px; height: 10px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: wd-spin-kf .8s linear infinite; opacity: .9; }
 @keyframes wd-spin-kf { to { transform: rotate(360deg); } }
 .wd-pg-batchrow { display: flex; align-items: center; gap: 10px; margin: 6px 0 8px; }
@@ -1711,6 +1714,7 @@ class HaWashdataPanel extends HTMLElement {
     this._pendingSettings = {};        // unsaved edits accumulated across section switches
     this._busy = new Set();            // in-flight long operations (drives spinners)
     this._tasks = {};                  // id -> background-task snapshot (registry, reconnect-safe)
+    this._cancellingTasks = new Set(); // task ids for which cancel was requested but not yet confirmed
     this._taskCallbacks = {};          // id -> fn(taskSnapshot) run once when a tracked task settles
     this._tasksSubscribed = false;     // subscribe_tasks succeeded (else poll fallback)
     this._pgHistoryTaskId = null;      // active Test-on-history task id
@@ -1909,6 +1913,7 @@ class HaWashdataPanel extends HTMLElement {
     const prev = this._tasks[t.id];
     if (prev && (prev.updated_at || 0) > (t.updated_at || 0)) return;
     this._tasks[t.id] = t;
+    if (t.state !== 'running') this._cancellingTasks.delete(t.id);
     this._updateTaskPills();
     this._pgAdoptTask(t);
     this._onTrackedTaskProgress(t);
@@ -2137,17 +2142,23 @@ class HaWashdataPanel extends HTMLElement {
     const running = Object.values(this._tasks || {}).filter(t => t.state === 'running');
     if (!running.length) return '';
     return running.map(t => {
+      const cancelling = this._cancellingTasks.has(t.id);
       const dev = this._deviceName(t.entry_id);
       const action = t.label_key ? this._t(t.label_key, t.label_params || {}, t.label || this._taskActionLabel(t.kind)) : this._taskActionLabel(t.kind);
       const label = (dev ? dev + ' · ' : '') + action;
       const pct = t.progress != null ? Math.round(t.progress * 100) + '%' : '';
       const eta = (t.eta_s != null && t.eta_s > 0) ? this._fmtEta(t.eta_s) : '';
-      return `<span class="wd-task-pill" title="${_esc(label + (pct ? ' ' + pct : ''))}">`
+      const cancellingLabel = this._t('task.cancelling', {}, 'Cancelling…');
+      const pillClass = 'wd-task-pill' + (cancelling ? ' wd-task-pill--cancelling' : '');
+      const titleSuffix = cancelling ? (' · ' + cancellingLabel) : (pct ? ' ' + pct : '');
+      return `<span class="${pillClass}" title="${_esc(label + titleSuffix)}">`
         + `<span class="wd-task-spin"></span>`
         + `<span class="wd-task-pill-lbl">${_esc(label)}</span>`
-        + (pct ? `<span class="wd-task-pill-pct">${pct}</span>` : '')
-        + (eta ? `<span class="wd-task-pill-eta">${_esc(eta)}</span>` : '')
-        + `<button class="wd-task-pill-x" data-action="task-cancel" data-task-id="${_esc(t.id)}" title="${_esc(this._t('btn.cancel', {}, 'Cancel'))}">✕</button>`
+        + (cancelling
+            ? `<span class="wd-task-pill-cancelling">${_esc(cancellingLabel)}</span>`
+            : (pct ? `<span class="wd-task-pill-pct">${pct}</span>` : '')
+              + (eta ? `<span class="wd-task-pill-eta">${_esc(eta)}</span>` : ''))
+        + `<button class="wd-task-pill-x${cancelling ? ' wd-task-pill-x--cancelling' : ''}" data-action="task-cancel" data-task-id="${_esc(t.id)}" ${cancelling ? 'disabled ' : ''}title="${_esc(this._t('btn.cancel', {}, 'Cancel'))}">✕</button>`
         + `</span>`;
     }).join('');
   }
@@ -9609,7 +9620,11 @@ class HaWashdataPanel extends HTMLElement {
       if (tid) this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
     } else if (a === 'task-cancel') {
       const tid = btn.dataset.taskId;
-      if (tid) this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
+      if (tid) {
+        this._cancellingTasks.add(tid);
+        this._updateTaskPills();
+        this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
+      }
     } else if (a === 'pg-load-run') {
       const tid = btn.dataset.taskId;
       if (!tid) return;

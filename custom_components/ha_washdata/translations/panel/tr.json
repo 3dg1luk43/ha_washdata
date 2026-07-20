@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Zarflar yeniden oluşturuluyor"
-    }
+    },
+    "cancelling": "İptal ediliyor..."
   },
   "setup": {
     "hdr": {

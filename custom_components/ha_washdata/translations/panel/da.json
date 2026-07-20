@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Genopbygger envelopes"
-    }
+    },
+    "cancelling": "Annullerer..."
   },
   "setup": {
     "hdr": {

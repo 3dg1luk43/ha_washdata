@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Bygger opp envelopes på nytt"
-    }
+    },
+    "cancelling": "Avbryter..."
   },
   "setup": {
     "hdr": {

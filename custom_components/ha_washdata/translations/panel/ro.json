@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Se reconstruiesc anvelopele"
-    }
+    },
+    "cancelling": "Se anulează..."
   },
   "setup": {
     "hdr": {

@@ -1835,7 +1835,8 @@
     },
     "rebuild": {
       "envelopes": "Ponovni izračun ovojnic"
-    }
+    },
+    "cancelling": "Prekinjam..."
   },
   "setup": {
     "hdr": {
