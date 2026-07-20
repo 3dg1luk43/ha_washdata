@@ -17,7 +17,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Config flow simplified**: The "Create First Profile" step has been removed from the setup wizard. It created a name-only stub with no cycle data that made users think they had a working profile when they did not. The Setup Card's Phase 0 replaces it with clear guidance and direct actions. Existing installs that already have an `initial_profile` key from this step are silently cleaned up on the next HA restart (config migration 3.6 to 3.7).
 
+- **Per-profile power profile for price-based scheduling** ([#272](https://github.com/3dg1luk43/ha_washdata/issues/272)): Each learned profile's count sensor (`sensor.<name>_<profile>`) now carries a **`power_profile`** attribute: the profile's average power in watts per 15-minute slot, as a flat array like `[2200, 2200, 800, 800, 1500, 500, 400, 200]` (with a companion `power_profile_interval_min: 15`). This is exactly the shape external planners consume, so you can feed it straight into, for example, `tibber_prices.find_cheapest_block` to run the appliance in the cheapest window:
+
+  ```yaml
+  action: tibber_prices.find_cheapest_block
+  data:
+    duration: "02:00:00"
+    search_scope: next_24h
+    power_profile: "{{ state_attr('sensor.washer_cotton_40_c', 'power_profile') }}"
+  response_variable: result
+  ```
+
+  It is derived from the profile's learned envelope and refreshes as the profile does (the envelope is rebuilt on each new labelled cycle), and it stays empty until the profile has enough data to have an envelope. Unlike the running-cycle `reference_profile` attribute (a time/watt shape on the program sensor, only present mid-cycle), this is a fixed 15-minute average exposed per profile so it can be read for planning **before** a cycle starts.
+
+- **Optional external energy meter as the cycle energy source** ([#316](https://github.com/3dg1luk43/ha_washdata/issues/316)): Integrating a slow-reporting power sensor systematically under-counts each cycle's energy (the area between reported samples is lost), often by 20 % or more. Many smart plugs also expose a *cumulative* energy counter that does not suffer this loss. You can now point WashData at one via the new optional **Energy Meter Entity** setting (Settings → Energy). When set, each cycle's reported energy is taken from that counter's start-to-end delta, and the cycle records where its energy came from (`energy_source: "meter"` vs `"integration"`). It is **strictly opt-in**: with no meter configured, behaviour is byte-for-byte unchanged. The integrated value is still always computed and stored, so profile matching, ML and the anomaly/drift statistics keep using one consistent internal figure - only the user-facing numbers (per-cycle cost, the Energy-dashboard lifetime total, the finish notification, and the panel) prefer the more accurate meter reading. Every guard falls back to the integrated value and never breaks cycle end: unknown/unavailable/non-numeric readings, an unrecognised unit, a non-positive delta (counter reset or a stuck plug), or the meter entity being changed mid-cycle. The meter snapshot survives a Home Assistant restart mid-cycle. Thanks to @kdjkdjkdj for the proposal and a reference implementation.
+
 ### 🐛 Bug Fixes
+
+- **Panel no longer freezes on custom themes / Safari** ([#314](https://github.com/3dg1luk43/ha_washdata/issues/314), [#315](https://github.com/3dg1luk43/ha_washdata/issues/315)): With a theme (e.g. graphite) or Home Assistant accent colour that defines the primary colour in `rgb(...)` form rather than hex, every chart that drew a shaded area fill crashed - the code built the translucent fill by appending a hex-alpha suffix to the colour (`rgb(238, 147, 0)` became the invalid `rgb(238, 147, 0)55`), which made the canvas throw and left the panel stuck on a loading spinner on every tab except the Overview, and made opening a cycle for review fail with "The string did not match the expected pattern." Fills now apply transparency in a colour-format-agnostic way, so hex, `rgb()`, and `rgba()` theme colours all render correctly.
+
+- **Manual recording no longer shows a confusing mixed state** ([#313](https://github.com/3dg1luk43/ha_washdata/issues/313)): While a manual recording was running the panel could show "Recording", "Recording (Off)", and a "Start Recording" button all at once. Recording was actually working the whole time; the display was reading the recording state from the wrong places. During a recording the underlying detector is intentionally idle, and that raw "Off" state was leaking into the status badge, while the Manual Recording widget trusted a separate value that was never populated on first load. Both now follow the single authoritative recording flag, so the badge reads "Recording" and the widget shows a **Stop** button as soon as the panel opens. As a bonus, an idle device no longer shows a redundant "(Off)" next to its status.
 
 - **Playground no longer stalls Home Assistant on long cycles** ([#311](https://github.com/3dg1luk43/ha_washdata/issues/311)): Simulating a single long cycle (for example a ~4-hour dishwasher eco program) previously ran the entire faithful replay - thousands of iterations of the real detector, matcher and progress estimator - in one uninterrupted worker call, which held Python's global lock long enough to slow the whole Home Assistant instance to a crawl until it finished. The single-cycle "Simulate" replay now runs as a detached, cancellable background task that is processed in small chunks, yielding the event loop between each so Home Assistant stays responsive. It shows a progress pill in the panel header just like Test-on-history and Optimize already did, and the simulated timeline is byte-for-byte identical to before.
 
@@ -26,6 +45,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Lighter matching and end-detection on low-power hosts** ([#311](https://github.com/3dg1luk43/ha_washdata/issues/311)): Two further responsiveness fixes for slower hardware. Profile matching no longer rescans your entire cycle history once per profile on every match (it now builds the lookups a single time), which noticeably speeds up the "auto-label cycles" action on devices with a large history. And the opt-in terminal-drop end-detection baseline, which reads back every completed cycle's power trace, is now computed off the main thread instead of during a live power reading. Both changes are behaviour-preserving - matching results are identical.
 
 - **Merging cycles and rebuilding envelopes no longer freeze the instance** ([#311](https://github.com/3dg1luk43/ha_washdata/issues/311)): Like split and trim, merging cycles rebuilt *every* profile's envelope on the event loop even though only the affected profiles changed; the redundant rebuild is removed and the merge now runs as a background task. The **Rebuild Envelopes** button also runs as a background task now, rebuilding one profile at a time with a header progress pill (and it can be cancelled) instead of holding the whole instance while it works through every profile.
+
+- **Apply suggestions actually applies all suggested settings**: Five settings that `reconcile_suggestions` could recommend (profile unmatch threshold, power-off threshold, anti-wrinkle exit and max power, pump stuck duration) were silently dropped by the "Apply Suggestions" action because they were missing from the internal allow-list (`_SUGGESTION_KEYS`). They are now applied correctly.
+
+- **Stale `auto_label_cycles` confidence threshold default corrected**: The service description listed a default confidence threshold of `0.70`, while the Python handler actually used `0.75`. Both now agree on `0.75`.
+
+- **Duplicate "Configuration reloaded" log entry removed**: Reloading a device's settings logged the confirmation message twice. The earlier, premature log line (before state restoration completed) has been removed.
+
+- **Dead detection code removed - `_abrupt_drop` flag and its config fields**: Three config fields (`abrupt_drop_watts`, `abrupt_drop_ratio`, `abrupt_high_load_factor`) that once drove an abrupt-drop detection branch were wired through options, manager, detector config, and the Playground override map, but the branch they guarded had been replaced long ago and was never reached. All six constants and every reference across five files have been removed.
+
+- **Duration-ratio Stage-1 fallback now uses canonical defaults**: The fallback values in `analysis.py` for the Stage-1 duration-ratio gate were `0.07`/`1.30`, diverging from the authoritative `const.py` defaults of `0.10`/`1.50`. The fallback now reads `DEFAULT_PROFILE_MATCH_MIN/MAX_DURATION_RATIO` directly.
+
+- **Dead `WashDataStore` methods with blocking I/O removed**: Two duplicate methods (`get_storage_stats`, `async_clear_debug_data`) on the internal `WashDataStore` subclass used `os.path.getsize()` (blocking disk I/O on the event loop) and were never reachable by any caller - the callers use `ProfileStore` versions of these methods, not the `WashDataStore` ones.
+
+- **Legacy Playground batch path removed**: The old `run_playground_batch` / `_simulate_one` code path (~215 lines) and its `run_playground_simulation` WebSocket command were superseded by the faithful history/sweep runner in 0.5.0 but never removed. The dead code and all associated WS schema entries, type definitions, and tests have been cleaned up.
+
+- **Sweep result now includes direction for heatmap colouring**: `finalize_sweep_1d` and `finalize_sweep_2d` now include a `lower_is_better` boolean in their return payload, letting the panel colour the heatmap consistently without re-deriving the direction from the objective name.
+
+- **`event_density` zero-variance ML column removed from `CycleSignature`**: The `event_density` field on `CycleSignature` was permanently `0.0` since the event detector was removed. It wasted a column in every ML feature vector and was a zero-variance input that provided no discriminative value.
+
+### New Contributors
+
+* @kdjkdjkdj made their first contribution in https://github.com/3dg1luk43/ha_washdata/issues/316
 
 ## 0.5.0 - "Goodbye OptionsFlow, Hello Panel (Oh, and hi WashData Community Store)" - 2026-07-16
 

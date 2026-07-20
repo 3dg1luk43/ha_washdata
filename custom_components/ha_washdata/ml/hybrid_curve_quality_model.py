@@ -43,6 +43,8 @@ MODEL_NAME = 'hybrid_curve_quality'
 MODEL_TARGET = 'problem_cycle'
 MODEL_KIND = 'standardized_logistic'
 TARGET_UNITS = ''
+# Training artifact for select_threshold only — NOT used at live inference.
+# The live quality-suspicious gate reads ML_QUALITY_SUSPICIOUS_THRESHOLD from const.py.
 THRESHOLD = 0.19
 
 FEATURE_COLUMNS = [

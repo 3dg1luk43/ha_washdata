@@ -1034,6 +1034,10 @@
       "doc": "Rögzített kWh-nkénti ár a költségadatokhoz használatos, ha nincs fent beállítva élő ár entitás.",
       "label": "Statikus energiaár (kWh-nként)"
     },
+    "energy_sensor": {
+      "doc": "Opcionális kumulatív energiaszámláló (total_increasing kWh/Wh, pl. a konnektor saját élettartam-mérője). Ha be van állítva, minden ciklus jelentett energiája ennek a számlálónak a kezdő- és záróértéke közötti különbségéből származik, ami elkerüli azt az alulmérést, amit egy lassan jelentő teljesítményérzékelő integrálásából kapna. Visszavált az integrált értékre, ha a leolvasás hiányzik, mértékegysége ismeretlen, vagy a különbség nem pozitív. Hagyja üresen, hogy továbbra is a teljesítményérzékelőt integrálja.",
+      "label": "Energiamérő entitás"
+    },
     "expose_debug_entities": {
       "doc": "Extra diagnosztikai HA entitások közzététele (egyezési megbízhatóság, kétértelműség, belső állapot). Az Off (Kikapcsolva) funkció tisztán tartja az entitáslistát normál használathoz.",
       "label": "Hibakeresési entitások közzététele"

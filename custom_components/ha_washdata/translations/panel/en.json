@@ -1011,6 +1011,10 @@
       "doc": "Fixed price per kWh used for cost figures when no live price entity is set above.",
       "label": "Static Energy Price (per kWh)"
     },
+    "energy_sensor": {
+      "doc": "Optional cumulative energy counter (total_increasing kWh/Wh, e.g. the plug's own lifetime meter). When set, each cycle's reported energy is taken from this counter's start-to-end delta, which avoids the under-counting you get from integrating a slow-reporting power sensor. Falls back to the integrated value if the reading is missing, its unit is unknown, or the delta is not positive. Leave blank to keep integrating the power sensor.",
+      "label": "Energy Meter Entity"
+    },
     "expose_debug_entities": {
       "doc": "Publish extra diagnostic HA entities (match confidence, ambiguity, state internals). Off keeps the entity list clean for normal use.",
       "label": "Expose Debug Entities"

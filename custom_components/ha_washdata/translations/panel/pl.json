@@ -1034,6 +1034,10 @@
       "doc": "Stała cena za kWh używana do danych o kosztach, gdy powyżej nie określono żadnej jednostki ceny rzeczywistej.",
       "label": "Statyczna Cena Energii (za kWh)"
     },
+    "energy_sensor": {
+      "doc": "Opcjonalny skumulowany licznik energii (total_increasing kWh/Wh, np. własny licznik całkowitego zużycia wtyczki). Po ustawieniu energia raportowana dla każdego cyklu jest pobierana z różnicy wskazań tego licznika między początkiem a końcem, co pozwala uniknąć zaniżania wynikającego z całkowania wolno raportującego czujnika mocy. W razie braku odczytu, nieznanej jednostki lub niedodatniej różnicy następuje powrót do wartości całkowanej. Pozostaw puste, aby nadal całkować czujnik mocy.",
+      "label": "Encja Licznika Energii"
+    },
     "expose_debug_entities": {
       "doc": "Publikuj dodatkowe jednostki diagnostyczne HA (pewność dopasowania, niejednoznaczność, elementy wewnętrzne stanu). Opcja Off utrzymuje listę encji w czystości podczas normalnego użytkowania.",
       "label": "Ujawnij Encje Debugowania"

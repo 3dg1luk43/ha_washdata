@@ -1058,6 +1058,10 @@
       "doc": "Yukarıda hiçbir canlı fiyat varlığı belirlenmediğinde maliyet rakamları için kullanılan kWh başına sabit fiyat.",
       "label": "Sabit Enerji Fiyatı (kWh başına)"
     },
+    "energy_sensor": {
+      "doc": "İsteğe bağlı kümülatif enerji sayacı (total_increasing kWh/Wh, örn. prizin kendi ömür boyu sayacı). Ayarlandığında, her döngünün raporlanan enerjisi bu sayacın baştan sona olan farkından alınır; bu da yavaş raporlayan bir güç sensörünün integralini almaktan kaynaklanan eksik sayımı önler. Okuma eksikse, birimi bilinmiyorsa veya fark pozitif değilse integral alınmış değere geri döner. Güç sensörünün integralini almaya devam etmek için boş bırakın.",
+      "label": "Enerji Sayacı Varlığı"
+    },
     "expose_debug_entities": {
       "doc": "Ekstra teşhis HA varlıkları yayınlayın (eşleşme güveni, belirsizlik, dahili durum bilgileri). Kapalı, varlık listesini normal kullanım için temiz tutar.",
       "label": "Hata Ayıklama Varlıklarını Göster"

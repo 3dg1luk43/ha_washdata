@@ -20,22 +20,17 @@ Pure, executor-safe logic behind the panel's Playground tab. Nothing here
 touches Home Assistant, fires events, or does I/O; the WebSocket handlers in
 ``ws_api.py`` call these helpers inside ``hass.async_add_executor_job``.
 
-Two entry points:
+Main entry points:
 
-- :func:`run_playground_batch` - replays stored cycles through a *fresh*
-  headless :class:`CycleDetector` (with the device's live settings, optionally
-  overridden) and returns a structured per-cycle event log + outcome plus an
-  aggregate summary. The detector is driven exactly as in production
-  (``process_reading`` fed the cycle's own trace), and a synchronous profile
-  matcher (the real Stage 1-4 pipeline via ``analysis.compute_matches_worker``)
-  is wired in so match/ambiguous/unmatched events are captured. No live HA
-  events are fired - transitions are collected into an in-memory buffer.
-
+- :func:`simulate_cycle_detail` - faithful single-cycle replay with per-step
+  progress/remaining-time/phase/energy series and typed event log.
+- :func:`run_playground_history` - per-cycle rows + optional before/after diff.
+- :func:`run_playground_sweep` - objective 1D/2D grid sweep.
 - :func:`dtw_debug_payload` - the score breakdown (Stage 2 / DTW / Stage 4),
   the two resampled traces on a shared grid, and the DTW warping path for one
   cycle vs one profile (the DTW visualizer).
 
-Both top-level entry points are defensive: they never raise, returning an
+All top-level entry points are defensive: they never raise, returning an
 ``{"error": ...}`` marker instead so the WS handlers can relay it.
 """
 from __future__ import annotations
@@ -54,7 +49,6 @@ from . import notification_rules as notif_rules
 from . import progress as progress_mod
 from .phase_segmenter import phase_matching_enabled
 from .const import (
-    CONF_ABRUPT_DROP_WATTS,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_END_REPEAT_COUNT,
     CONF_INTERRUPTED_MIN_SECONDS,
@@ -127,7 +121,6 @@ _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
     CONF_STOP_THRESHOLD_W: ("stop_threshold_w", float),
     CONF_RUNNING_DEAD_ZONE: ("running_dead_zone", int),
     CONF_START_DURATION_THRESHOLD: ("start_duration_threshold", float),
-    CONF_ABRUPT_DROP_WATTS: ("abrupt_drop_watts", float),
     CONF_INTERRUPTED_MIN_SECONDS: ("interrupted_min_seconds", int),
 }
 
@@ -247,7 +240,7 @@ def _build_match_snapshots(
     :meth:`ProfileStore._grouped_snapshots`: returns the collapsed snapshot list
     (where each cohesive group is represented by a single ``__group__*``
     aggregate candidate), plus ``group_members`` and ``member_snaps`` for the
-    Stage-5 member-resolution step in :func:`_simulate_one`.
+    Stage-5 member-resolution step in the faithful history runner.
 
     Returns ``(grouped_snapshots, match_config, group_members, member_snaps)``.
     When no cohesive groups exist ``group_members`` and ``member_snaps`` are both
@@ -356,314 +349,6 @@ def _readings_from_cycle(
     base = _cycle_base_time(cycle)
     readings = [(base + timedelta(seconds=float(o)), float(p)) for o, p in points]
     return readings, points, base
-
-
-def _simulate_one(
-    cycle: dict[str, Any],
-    sim_config: CycleDetectorConfig,
-    snapshots: list[dict[str, Any]],
-    match_config: dict[str, Any],
-    store: Any = None,
-    group_members: dict[str, list[str]] | None = None,
-    member_snaps: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Replay one stored cycle through a fresh headless detector.
-
-    Returns ``{cycle_id, profile_name, events, outcome}``. Never raises.
-
-    When ``group_members`` is non-empty the matcher applies Stage-5 group
-    resolution: a winning ``__group__*`` aggregate candidate is resolved to its
-    best-fitting member profile so ``outcome["match_profile"]`` always contains
-    a real profile name, never a group key.
-    """
-    cycle_id = cycle.get("id")
-    label = _cycle_label(cycle)
-    events: list[dict[str, Any]] = []
-    outcome: dict[str, Any] = {
-        "detected": False,
-        "detected_duration_s": None,
-        "stored_duration_s": _safe_float(cycle.get("duration")),
-        "match_profile": None,
-        "match_correct": None,
-        "ambiguous": False,
-        "termination_reason": None,
-        "status": None,
-        "detected_count": 0,
-    }
-
-    try:
-        readings, _points, base = _readings_from_cycle(cycle)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground: bad cycle %s: %s", cycle_id, exc)
-        return {
-            "cycle_id": cycle_id,
-            "profile_name": label,
-            "events": events,
-            "outcome": outcome,
-        }
-
-    if len(readings) < 5:
-        return {
-            "cycle_id": cycle_id,
-            "profile_name": label,
-            "events": events,
-            "outcome": outcome,
-        }
-
-    # Shared mutable state for the callbacks (offset seconds from cycle start).
-    cursor = {"t": 0.0}
-    captured: list[dict[str, Any]] = []
-    last_match: dict[str, Any] = {"name": None, "conf": 0.0, "ambiguous": False}
-    # Dedupe consecutive identical match outcomes so the log stays readable.
-    last_logged_match: dict[str, Any] = {"kind": None, "name": None}
-
-    def _emit(etype: str, detail: str) -> None:
-        if len(events) < MAX_EVENTS_PER_CYCLE:
-            events.append({"t": round(cursor["t"], 1), "type": etype, "detail": detail})
-
-    def _on_state_change(old_state: str, new_state: str) -> None:
-        _emit("state", f"{old_state}->{new_state}")
-
-    def _on_cycle_end(cycle_data: dict[str, Any]) -> None:
-        captured.append(cycle_data)
-        _emit(
-            "end",
-            "reason={reason} status={status} dur={dur:.0f}s".format(
-                reason=cycle_data.get("termination_reason"),
-                status=cycle_data.get("status"),
-                dur=float(cycle_data.get("duration") or 0.0),
-            ),
-        )
-
-    def _matcher(
-        det_readings: list[tuple[datetime, float]],
-    ) -> tuple[str | None, float, float, str | None, bool, bool]:
-        if len(det_readings) < 5 or not snapshots:
-            return (None, 0.0, 0.0, None, False, False)
-        powers = [p for _, p in det_readings]
-        duration = (det_readings[-1][0] - det_readings[0][0]).total_seconds()
-        try:
-            candidates = analysis.compute_matches_worker(
-                powers, duration, snapshots, match_config
-            )
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Playground match failed: %s", exc)
-            candidates = []
-
-        if not candidates:
-            if last_logged_match["kind"] != "unmatched":
-                _emit("unmatched", "no candidate")
-                last_logged_match["kind"] = "unmatched"
-                last_logged_match["name"] = None
-            last_match["name"] = None
-            last_match["conf"] = 0.0
-            last_match["ambiguous"] = False
-            return (None, 0.0, 0.0, None, False, False)
-
-        # Stage-5: resolve a winning group aggregate to its best-fitting member.
-        # This mirrors profile_store._stage5_pick_member used in production.
-        # Note: dtw_debug_payload always works on an individual profile, so
-        # Stage-5 resolution is only needed here in the batch matcher.
-        if group_members and candidates:
-            top = candidates[0]
-            gkey = top.get("name", "")
-            if gkey.startswith("__group__") and store is not None:
-                members = group_members.get(gkey, [])
-                if members:
-                    try:
-                        powers_list = list(powers)
-                        member_name, _, _ = store._stage5_pick_member(  # pylint: disable=protected-access
-                            powers_list, duration, members, member_snaps or {}
-                        )
-                        candidates[0] = dict(top, name=member_name)
-                        _emit("group_resolved", f"{gkey} -> {member_name}")
-                    except Exception as exc:  # pylint: disable=broad-exception-caught
-                        _LOGGER.debug(
-                            "Playground stage5 pick_member failed: %s", exc
-                        )
-
-        best = candidates[0]
-        margin, is_ambiguous = _ambiguity_from_candidates(candidates)
-        name = best.get("name")
-        conf = float(best.get("score") or 0.0)
-        expected = float(best.get("profile_duration") or 0.0)
-        last_match["name"] = name
-        last_match["conf"] = conf
-        last_match["ambiguous"] = bool(is_ambiguous)
-
-        if is_ambiguous:
-            runner = candidates[1].get("name") if len(candidates) > 1 else None
-            if (
-                last_logged_match["kind"] != "ambiguous"
-                or last_logged_match["name"] != name
-            ):
-                _emit("ambiguous", f"{name} vs {runner} (margin={margin:.3f})")
-                last_logged_match["kind"] = "ambiguous"
-                last_logged_match["name"] = name
-        elif (
-            last_logged_match["kind"] != "matched"
-            or last_logged_match["name"] != name
-        ):
-            _emit("matched", f"{name} (conf={conf:.2f})")
-            last_logged_match["kind"] = "matched"
-            last_logged_match["name"] = name
-
-        return (name, conf, expected, None, False, bool(is_ambiguous))
-
-    detector = CycleDetector(
-        sim_config,
-        _on_state_change,
-        _on_cycle_end,
-        profile_matcher=_matcher,
-        device_name="playground",
-    )
-
-    try:
-        for ts, power in readings:
-            cursor["t"] = (ts - base).total_seconds()
-            detector.process_reading(power, ts)
-
-        # Feed a synthetic quiet tail so a natural end (timeout / min-off-gap)
-        # can fire, exactly as it would in production once the appliance goes
-        # idle. Sized to comfortably exceed both the off-delay and the
-        # soak-bridging min_off_gap.
-        last_ts = readings[-1][0]
-        tail_span = max(
-            float(sim_config.off_delay or 0.0),
-            float(sim_config.min_off_gap or 0.0),
-        ) * 1.5 + 300.0
-        step = 30.0
-        n_steps = min(int(tail_span / step) + 1, 400)
-        for i in range(1, n_steps + 1):
-            ts = last_ts + timedelta(seconds=step * i)
-            cursor["t"] = (ts - base).total_seconds()
-            detector.process_reading(0.0, ts)
-            if detector.state in (STATE_OFF, STATE_FINISHED) and captured:
-                break
-
-        # If a cycle started but never finalized (unusual), flush it so the
-        # outcome is well-defined; it lands in the log as force-stopped.
-        if not captured and detector.state != STATE_OFF:
-            flush_ts = last_ts + timedelta(seconds=step * (n_steps + 2))
-            cursor["t"] = (flush_ts - base).total_seconds()
-            detector.force_end(flush_ts)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground simulate failed for %s: %s", cycle_id, exc)
-
-    outcome["detected_count"] = len(captured)
-    if captured:
-        primary = max(captured, key=lambda c: float(c.get("duration") or 0.0))
-        outcome["detected"] = True
-        outcome["detected_duration_s"] = _safe_float(primary.get("duration"))
-        outcome["termination_reason"] = primary.get("termination_reason")
-        outcome["status"] = primary.get("status")
-
-    outcome["match_profile"] = last_match["name"]
-    outcome["ambiguous"] = bool(last_match["ambiguous"])
-    if outcome["detected"] and last_match["name"] and label:
-        outcome["match_correct"] = last_match["name"].strip() == label.strip()
-    else:
-        outcome["match_correct"] = None
-
-    return {
-        "cycle_id": cycle_id,
-        "profile_name": label,
-        "events": events,
-        "outcome": outcome,
-    }
-
-
-def run_playground_batch(
-    store: Any,
-    cycle_ids: list[str] | None,
-    base_config: CycleDetectorConfig,
-    settings_override: dict[str, Any] | None,
-    concurrency: int,
-) -> dict[str, Any]:
-    """Replay a set of cycles headlessly; return {results, summary}.
-
-    ``concurrency`` caps how many of the selected cycles are simulated in this
-    batch (batch size), clamped 1..MAX_BATCH_CYCLES. Executor-safe; never raises.
-    """
-    try:
-        concurrency = max(1, min(MAX_BATCH_CYCLES, int(concurrency)))
-    except (TypeError, ValueError):
-        concurrency = 1
-
-    summary: dict[str, Any] = {
-        "cycles": 0,
-        "requested": 0,
-        "concurrency": concurrency,
-        "detected": 0,
-        "missed": 0,
-        "false_end": 0,
-        "match_correct": 0,
-        "match_wrong": 0,
-        "unmatched": 0,
-        "skipped_ids": [],
-    }
-
-    try:
-        past = list(store.get_past_cycles() or [])
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground: get_past_cycles failed: %s", exc)
-        return {"results": [], "summary": summary}
-
-    by_id = {c.get("id"): c for c in past if isinstance(c, dict)}
-
-    selected: list[dict[str, Any]] = []
-    skipped: list[str] = []
-    if cycle_ids:
-        for cid in cycle_ids:
-            cycle = by_id.get(cid)
-            if cycle is None:
-                skipped.append(cid)
-            else:
-                selected.append(cycle)
-    else:
-        selected = past[-DEFAULT_RECENT_CYCLES:]
-
-    summary["requested"] = len(cycle_ids) if cycle_ids else len(selected)
-
-    # Batch-size cap: simulate up to ``concurrency`` of the selected cycles
-    # (the runner is sequential). Any selected cycles beyond the cap are reported
-    # as skipped rather than silently dropped, so ``requested`` always reconciles
-    # with ``len(results) + len(skipped_ids)``.
-    to_run = selected[:concurrency]
-    if len(selected) > concurrency:
-        # Account for every capped cycle (even one lacking an id) so that
-        # requested == len(results) + len(skipped_ids) always reconciles.
-        skipped.extend(str(c.get("id") or "") for c in selected[concurrency:])
-    summary["skipped_ids"] = skipped
-
-    config = build_sim_config(base_config, settings_override)
-    snapshots, match_config, group_members, member_snaps = _build_match_snapshots(store)
-    match_config = apply_match_overrides(match_config, settings_override)
-
-    results: list[dict[str, Any]] = []
-    for cycle in to_run:
-        res = _simulate_one(
-            cycle, config, snapshots, match_config,
-            store=store, group_members=group_members, member_snaps=member_snaps,
-        )
-        results.append(res)
-        oc = res["outcome"]
-        summary["cycles"] += 1
-        if oc.get("detected"):
-            summary["detected"] += 1
-            if int(oc.get("detected_count") or 0) > 1:
-                summary["false_end"] += 1
-            correct = oc.get("match_correct")
-            if oc.get("match_profile") is None:
-                summary["unmatched"] += 1
-            elif correct is True:
-                summary["match_correct"] += 1
-            elif correct is False:
-                summary["match_wrong"] += 1
-        else:
-            summary["missed"] += 1
-
-    return {"results": results, "summary": summary}
 
 
 # ─── Single-cycle faithful simulation (Simulate mode) ───────────────────────────
@@ -1145,7 +830,7 @@ class _DetailSim:
             )
 
     def run_tail(self) -> None:
-        """Synthetic quiet tail so a natural end can fire, as in _simulate_one."""
+        """Synthetic quiet tail so a natural end can fire."""
         if self._aborted or not self.ready:
             return
         try:
@@ -1486,6 +1171,7 @@ def finalize_sweep_1d(
         "current_value": current_value,
         "best_value": best["value"] if best else None,
         "best_metric": best["metric"] if best else None,
+        "lower_is_better": objective in _SWEEP_LOWER_IS_BETTER,
     }
 
 
@@ -1506,6 +1192,7 @@ def finalize_sweep_2d(
         "param_x": param_x, "param_y": param_y, "objective": objective,
         "x_values": x_values, "y_values": y_values, "grid": grid,
         "best": best, "current": current,
+        "lower_is_better": objective in _SWEEP_LOWER_IS_BETTER,
     }
 
 

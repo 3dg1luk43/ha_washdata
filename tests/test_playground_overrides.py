@@ -30,21 +30,20 @@ from custom_components.ha_washdata import playground
 from custom_components.ha_washdata.cycle_detector import CycleDetectorConfig
 
 
-def test_build_sim_config_honours_previously_dropped_keys():
+def test_build_sim_config_honours_override_keys_and_ignores_unknown():
     base = CycleDetectorConfig(min_power=10.0, off_delay=180)
     cfg = playground.build_sim_config(
         base,
         {
             "start_duration_threshold": 12,
-            "abrupt_drop_watts": 999,
             "interrupted_min_seconds": 77,
+            "completely_unknown_key": 999,
         },
     )
     assert cfg.start_duration_threshold == 12.0
-    assert cfg.abrupt_drop_watts == 999.0
     assert cfg.interrupted_min_seconds == 77
     # Base is not mutated.
-    assert base.abrupt_drop_watts != 999.0
+    assert base.interrupted_min_seconds != 77
 
 
 def test_apply_match_overrides_maps_user_options_to_matcher_keys():
@@ -191,9 +190,12 @@ def test_finalize_sweep_picks_best_by_direction():
     pts = [{"value": 60, "metric": 0.7}, {"value": 120, "metric": 0.9}, {"value": 180, "metric": None}]
     hi = playground.finalize_sweep_1d("off_delay", "match_accuracy", pts, current_value=120)
     assert hi["best_value"] == 120 and hi["best_metric"] == 0.9   # higher is better
+    assert hi["lower_is_better"] is False
     lo = playground.finalize_sweep_1d("off_delay", "false_end_rate", pts, current_value=None)
     assert lo["best_value"] == 60 and lo["best_metric"] == 0.7    # lower is better
+    assert lo["lower_is_better"] is True
 
     grid = [[0.5, 0.8], [None, 0.6]]
     g = playground.finalize_sweep_2d("p", "q", "match_accuracy", [10, 20], [1, 2], grid, {"x": 10, "y": 1})
     assert g["best"] == {"x": 20, "y": 1, "metric": 0.8}
+    assert g["lower_is_better"] is False

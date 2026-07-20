@@ -1034,6 +1034,10 @@
       "doc": "Fiksna cijena po kWh koja se koristi za podatke o troškovima kada iznad nije postavljen entitet stvarne cijene.",
       "label": "Statička cijena energije (po kWh)"
     },
+    "energy_sensor": {
+      "doc": "Neobavezno kumulativno brojilo energije (total_increasing kWh/Wh, npr. vlastito brojilo ukupne potrošnje utičnice). Kada je postavljeno, energija prijavljena za svaki ciklus uzima se iz razlike očitanja ovog brojila između početka i kraja, čime se izbjegava podbrojavanje koje nastaje integriranjem sporo izvještavajućeg senzora snage. Vraća se na integriranu vrijednost ako očitanje nedostaje, njegova je jedinica nepoznata ili razlika nije pozitivna. Ostavite prazno da nastavite integrirati senzor snage.",
+      "label": "Entitet brojila energije"
+    },
     "expose_debug_entities": {
       "doc": "Objavite dodatne dijagnostičke HA entitete (povjerenje podudaranja, dvosmislenost, interno stanje). Isključeno održava popis entiteta čistim za normalnu upotrebu.",
       "label": "Izloži entitete za otklanjanje pogrešaka"

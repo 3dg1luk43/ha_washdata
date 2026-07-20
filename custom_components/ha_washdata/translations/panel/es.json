@@ -1058,6 +1058,10 @@
       "doc": "Precio fijo por kWh utilizado para cifras de costos cuando no se establece ninguna entidad de precio en vivo arriba.",
       "label": "Precio de energía estático (por kWh)"
     },
+    "energy_sensor": {
+      "doc": "Contador de energía acumulada opcional (total_increasing en kWh/Wh, p. ej. el propio medidor de consumo total del enchufe). Cuando se establece, la energía indicada de cada ciclo se toma de la diferencia de este contador entre el inicio y el final, lo que evita la subestimación que se produce al integrar un sensor de potencia que informa lentamente. Recurre al valor integrado si falta la lectura, si su unidad es desconocida o si el delta no es positivo. Deje en blanco para seguir integrando el sensor de potencia.",
+      "label": "Entidad del medidor de energía"
+    },
     "expose_debug_entities": {
       "doc": "Publicar entidades HA de diagnóstico adicionales (confianza de coincidencia, ambigüedad, estados internos). Desactivado mantiene la lista de entidades limpia para un uso normal.",
       "label": "Exponer entidades de depuración"

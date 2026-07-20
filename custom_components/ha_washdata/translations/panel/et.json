@@ -1058,6 +1058,10 @@
       "doc": "Fikseeritud hind kWh kohta, mida kasutatakse kulunäitajate jaoks, kui ülal pole määratud reaalajas hinna olemit.",
       "label": "Staatiline Energia Hind (kWh kohta)"
     },
+    "energy_sensor": {
+      "doc": "Valikuline kumulatiivne energialoendur (total_increasing kWh/Wh, nt pistiku enda kogutarbimise arvesti). Kui see on määratud, võetakse iga tsükli energianäit selle loenduri algus- ja lõppnäidu vahest, mis väldib alamõõtmist, mida tekitab aeglaselt uueneva võimsusanduri integreerimine. Kui näit puudub, selle ühik on teadmata või vahe pole positiivne, kasutatakse tagavaraks integreeritud väärtust. Jätke tühjaks, et jätkata võimsusanduri integreerimist.",
+      "label": "Energiaarvesti Olem"
+    },
     "expose_debug_entities": {
       "doc": "Avaldage täiendavad diagnostilised HA-üksused (vaste usaldus, mitmetähenduslikkus, oleku sisemised andmed). Väljas hoiab olemiloendi tavakasutuseks puhtana.",
       "label": "Näita Silumise Olemeid"

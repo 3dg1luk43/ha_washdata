@@ -283,19 +283,6 @@ export interface OkResponse {
   ok: boolean;
 }
 
-export interface PlaygroundSummary {
-  cycles: number;
-  requested: number;
-  concurrency: number;
-  detected: number;
-  missed: number;
-  false_end: number;
-  match_correct: number;
-  match_wrong: number;
-  unmatched: number;
-  skipped_ids: string[];
-}
-
 export interface ProfileEnvelope {
   avg: number[][];
   min: number[][];
@@ -331,11 +318,6 @@ export interface RunPlaygroundHistoryResponse {
   baseline_rows?: Record<string, unknown>[];
   baseline_summary?: Record<string, unknown>;
   diff?: Record<string, string[]>;
-}
-
-export interface RunPlaygroundSimulationResponse {
-  results: Record<string, unknown>[];
-  summary: PlaygroundSummary;
 }
 
 export interface RunPlaygroundSweepResponse {
@@ -824,13 +806,6 @@ export interface TerminateCycleRequest {
   entry_id: string;
 }
 
-export interface RunPlaygroundSimulationRequest {
-  entry_id: string;
-  cycle_ids?: string[];
-  settings_override?: Record<string, unknown>;
-  concurrency?: number;
-}
-
 export interface RunPlaygroundCycleDetailRequest {
   entry_id: string;
   cycle_id: string;
@@ -1073,7 +1048,6 @@ export interface WashDataWsRequests {
   "ha_washdata/pause_cycle": PauseCycleRequest;
   "ha_washdata/resume_cycle": ResumeCycleRequest;
   "ha_washdata/terminate_cycle": TerminateCycleRequest;
-  "ha_washdata/run_playground_simulation": RunPlaygroundSimulationRequest;
   "ha_washdata/run_playground_cycle_detail": RunPlaygroundCycleDetailRequest;
   "ha_washdata/run_playground_history": RunPlaygroundHistoryRequest;
   "ha_washdata/run_playground_sweep": RunPlaygroundSweepRequest;
@@ -1175,7 +1149,6 @@ export interface WashDataWsResponses {
   "ha_washdata/pause_cycle": OkResponse;
   "ha_washdata/resume_cycle": OkResponse;
   "ha_washdata/terminate_cycle": OkResponse;
-  "ha_washdata/run_playground_simulation": RunPlaygroundSimulationResponse;
   "ha_washdata/run_playground_cycle_detail": RunPlaygroundCycleDetailResponse;
   "ha_washdata/run_playground_history": RunPlaygroundHistoryResponse;
   "ha_washdata/run_playground_sweep": RunPlaygroundSweepResponse;

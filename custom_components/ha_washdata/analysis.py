@@ -24,6 +24,8 @@ import numpy as np
 
 from .const import (
     DEFAULT_DTW_MODE,
+    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     MATCH_CORR_WEIGHT,
     MATCH_DDTW_DIST_SCALE,
     MATCH_DTW_BLEND,
@@ -270,8 +272,8 @@ def compute_matches_worker(
     """Worker function to compute matches against snapshots."""
     candidates: list[dict[str, Any]] = []
 
-    min_duration_ratio = config.get("min_duration_ratio", 0.07)
-    max_duration_ratio = config.get("max_duration_ratio", 1.3)
+    min_duration_ratio = config.get("min_duration_ratio", DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
+    max_duration_ratio = config.get("max_duration_ratio", DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)
     dtw_bandwidth = config.get("dtw_bandwidth", 0.1)
     dtw_mode = config.get("dtw_mode", DEFAULT_DTW_MODE)
     keep_min = float(config.get("keep_min_score", MATCH_KEEP_MIN_SCORE))

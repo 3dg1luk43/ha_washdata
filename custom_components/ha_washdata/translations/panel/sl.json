@@ -1034,6 +1034,10 @@
       "doc": "Fiksna cena na kWh, ki se uporablja za podatke o stroških, kadar zgoraj ni nastavljen noben subjekt v živo.",
       "label": "Statična cena energije (za kWh)"
     },
+    "energy_sensor": {
+      "doc": "Neobvezni kumulativni števec energije (total_increasing kWh/Wh, npr. lasten števec skupne porabe vtičnice). Ko je nastavljen, se energija, prikazana za vsak cikel, vzame iz razlike odčitkov tega števca med začetkom in koncem, kar prepreči podštevanje, do katerega pride pri integriranju počasi poročajočega senzorja moči. Vrne se na integrirano vrednost, če odčitek manjka, je njegova enota neznana ali razlika ni pozitivna. Pustite prazno, da še naprej integrirate senzor moči.",
+      "label": "Entiteta merilnika energije"
+    },
     "expose_debug_entities": {
       "doc": "Objavite dodatne diagnostične entitete HA (zaupanje ujemanja, dvoumnost, notranje stanje). Izključeno ohranja seznam entitet čist za običajno uporabo.",
       "label": "Izpostavi entitete za odpravljanje napak"

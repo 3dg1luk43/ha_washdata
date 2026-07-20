@@ -1058,6 +1058,10 @@
       "doc": "Vaste prijs per kWh gebruikt voor kostencijfers wanneer er hierboven geen live prijsentiteit is ingesteld.",
       "label": "Vaste energieprijs (per kWh)"
     },
+    "energy_sensor": {
+      "doc": "Optionele cumulatieve energieteller (total_increasing in kWh/Wh, bijvoorbeeld de eigen levensduurteller van de stekker). Indien ingesteld wordt de gerapporteerde energie van elke cyclus genomen uit het verschil van deze teller tussen begin en einde, wat de onderregistratie voorkomt die je krijgt bij het integreren van een traag rapporterende vermogenssensor. Valt terug op de geïntegreerde waarde als de meting ontbreekt, de eenheid onbekend is of het verschil niet positief is. Laat leeg om de vermogenssensor te blijven integreren.",
+      "label": "Energiemeterentiteit"
+    },
     "expose_debug_entities": {
       "doc": "Publiceer extra diagnostische HA-entiteiten (matchvertrouwen, ambiguïteit, staatsinternals). Uit houdt de entiteitenlijst schoon voor normaal gebruik.",
       "label": "Foutopsporingsentiteiten blootstellen"

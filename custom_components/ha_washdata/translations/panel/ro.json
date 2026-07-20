@@ -1034,6 +1034,10 @@
       "doc": "Preț fix pe kWh utilizat pentru cifrele de cost atunci când nu este stabilită mai sus nicio entitate de preț activ.",
       "label": "Preț Static Energie (pe kWh)"
     },
+    "energy_sensor": {
+      "doc": "Contor de energie cumulativ opțional (total_increasing în kWh/Wh, de ex. propriul contor de consum total al prizei). Când este setat, energia raportată a fiecărui ciclu este preluată din diferența acestui contor între început și sfârșit, ceea ce evită subevaluarea care apare la integrarea unui senzor de putere care raportează lent. Revine la valoarea integrată dacă citirea lipsește, dacă unitatea sa este necunoscută sau dacă delta nu este pozitiv. Lăsați necompletat pentru a continua să integrați senzorul de putere.",
+      "label": "Entitate contor de energie"
+    },
     "expose_debug_entities": {
       "doc": "Publicați entități suplimentare de diagnosticare HA (încrederea potrivirii, ambiguitatea, elementele interne de stare). Off menține lista de entități curată pentru utilizare normală.",
       "label": "Expuneți Entitățile de Depanare"

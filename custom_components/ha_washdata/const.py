@@ -123,10 +123,6 @@ PHASE_HEAT_OCC_MIXED_HI = 0.75    #   mixed with a non-heating program
 CONF_SAVE_DEBUG_TRACES = (
     "save_debug_traces"  # Improve historical cycle data with rich debug info
 )
-# Cycle interruption detection settings (not exposed in UI, but used internally)
-CONF_ABRUPT_DROP_WATTS = "abrupt_drop_watts"  # Power cliff threshold for interrupted status
-CONF_ABRUPT_DROP_RATIO = "abrupt_drop_ratio"  # Relative drop ratio for interrupted status
-CONF_ABRUPT_HIGH_LOAD_FACTOR = "abrupt_high_load_factor"  # High load factor threshold
 CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"  # Noise events before auto-tune
 CONF_EXTERNAL_END_TRIGGER_ENABLED = "external_end_trigger_enabled"  # Enable external cycle end trigger
 CONF_EXTERNAL_END_TRIGGER = "external_end_trigger"  # Binary sensor entity for external cycle end
@@ -162,6 +158,14 @@ CONF_NOTIFY_CHANNEL = "notify_channel"  # Android channel for status/live/remind
 CONF_NOTIFY_FINISH_CHANNEL = "notify_finish_channel"  # Distinct Android channel for finished/clean
 CONF_ENERGY_PRICE_STATIC = "energy_price_static"
 CONF_ENERGY_PRICE_ENTITY = "energy_price_entity"
+# Optional external cumulative energy meter (issue #316). When set, each cycle's
+# reported energy is taken from this counter's start->end delta instead of the
+# integrated power trace, which systematically under-counts on report-on-change
+# plugs. Strictly opt-in: with no entity configured, behaviour is unchanged. The
+# integrated value is always still computed and stored (energy_wh) so matching,
+# ML and anomaly stats stay internally consistent; the meter only supplies the
+# user-facing reported figure (cost, lifetime total, notifications, panel).
+CONF_ENERGY_SENSOR = "energy_sensor"
 # Peak-rate awareness: when the current price meets/exceeds this threshold, the
 # start notification gets an informational tip appended (purely advisory).
 CONF_PEAK_RATE_THRESHOLD = "peak_rate_threshold"
@@ -347,10 +351,6 @@ TERMINAL_DROP_MIN_PEAK_RATIO = 5.0      # cycle must have been clearly ON (peak 
 # rather than assumed to be a stop.
 TERMINAL_DROP_PEAK_FAMILIAR_TOL = 0.4
 
-# Cycle interruption detection defaults (internal)
-DEFAULT_ABRUPT_DROP_WATTS = 500.0  # Power cliff detection threshold (W)
-DEFAULT_ABRUPT_DROP_RATIO = 0.6  # 60% drop considered abrupt
-DEFAULT_ABRUPT_HIGH_LOAD_FACTOR = 5.0  # High load factor threshold
 DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Ghost cycles before threshold adjustment
 
 # Anti-wrinkle defaults (advanced; disabled by default)
@@ -459,6 +459,8 @@ REFERENCE_PROFILE_CURVE_POINTS = 50
 # actually DROPPING (62.7%->59.9%). Raising weight alone at the old loose scale
 # inflated both recall and FP (net-negative), so both knobs move together.
 MATCH_DURATION_WEIGHT = 0.22
+# Despite the name, "energy" here means mean power (W), not Wh — the Stage-4
+# agreement term compares cur_energy=mean(curr_arr) vs profile_mean_power.
 MATCH_ENERGY_WEIGHT = 0.22
 MATCH_DURATION_SCALE = 0.175       # ~ln ratio at which duration agreement halves
 MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves

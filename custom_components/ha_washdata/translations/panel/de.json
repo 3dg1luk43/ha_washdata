@@ -1058,6 +1058,10 @@
       "doc": "Fester Preis pro kWh, der für Kostenzahlen verwendet wird, wenn oben keine Live-Preiseinheit festgelegt ist.",
       "label": "Statischer Energiepreis (pro kWh)"
     },
+    "energy_sensor": {
+      "doc": "Optionaler kumulativer Energiezähler (total_increasing in kWh/Wh, z. B. der eigene Lebensdauerzähler der Steckdose). Wenn gesetzt, wird die gemeldete Energie jedes Zyklus aus der Differenz dieses Zählers zwischen Anfang und Ende ermittelt, was die Untererfassung vermeidet, die beim Integrieren eines langsam meldenden Leistungssensors entsteht. Greift auf den integrierten Wert zurück, wenn der Messwert fehlt, seine Einheit unbekannt ist oder die Differenz nicht positiv ausfällt. Leer lassen, um weiterhin den Leistungssensor zu integrieren.",
+      "label": "Energiezähler-Entität"
+    },
     "expose_debug_entities": {
       "doc": "Veröffentlichen Sie zusätzliche diagnostische HA-Entitäten (Übereinstimmungskonfidenz, Mehrdeutigkeit, Zustandsinterna). Aus sorgt dafür, dass die Entitätsliste für den normalen Gebrauch sauber bleibt.",
       "label": "Debug-Entitäten anzeigen"

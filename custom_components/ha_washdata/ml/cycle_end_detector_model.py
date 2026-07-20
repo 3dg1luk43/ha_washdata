@@ -43,6 +43,8 @@ MODEL_NAME = 'cycle_end_detector'
 MODEL_TARGET = 'cycle_truly_ended'
 MODEL_KIND = 'standardized_logistic'
 TARGET_UNITS = ''
+# Training artifact for select_threshold only — NOT used at live inference.
+# The live defer-finish gate reads DEFAULT_DEFER_FINISH_CONFIDENCE from const.py.
 THRESHOLD = 0.6
 
 FEATURE_COLUMNS = [

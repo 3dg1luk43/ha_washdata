@@ -1034,6 +1034,10 @@
       "doc": "Fiksuota kaina už kWh, naudojama sąnaudų skaičiams, kai aukščiau nenustatytas joks tiesioginės kainos subjektas.",
       "label": "Statinė energijos kaina (už kWh)"
     },
+    "energy_sensor": {
+      "doc": "Neprivalomas kaupiamasis energijos skaitiklis (total_increasing kWh/Wh, pvz., paties kištuko viso laikotarpio skaitiklis). Kai nustatytas, kiekvieno ciklo pateikiama energija imama iš šio skaitiklio rodmens pokyčio nuo pradžios iki pabaigos, taip išvengiama per mažo skaičiavimo, kurį gaunate integruodami lėtai duomenis pateikiantį galios jutiklį. Grįžta prie integruotos reikšmės, jei rodmens nėra, jo vienetas nežinomas arba skirtumas nėra teigiamas. Palikite tuščią, kad būtų ir toliau integruojamas galios jutiklis.",
+      "label": "Energijos skaitiklio objektas"
+    },
     "expose_debug_entities": {
       "doc": "Paskelbkite papildomus diagnostinius HA objektus (atitikties patikimumą, dviprasmiškumą, būsenos vidines savybes). Išjungta objektų sąrašas išlieka švarus normaliam naudojimui.",
       "label": "Rodyti derinimo objektus"

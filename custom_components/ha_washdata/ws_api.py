@@ -40,9 +40,12 @@ from .const import (
     CONF_COMPLETION_MIN_SECONDS,
     CONF_DEVICE_TYPE,
     CONF_DOOR_SENSOR_ENTITY,
+    CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_DURATION_TOLERANCE,
     CONF_END_ENERGY_THRESHOLD,
     CONF_END_REPEAT_COUNT,
+    CONF_ENERGY_SENSOR,
     CONF_EXTERNAL_END_TRIGGER,
     CONF_LEARNING_CONFIDENCE,
     CONF_LINKED_DEVICE,
@@ -57,7 +60,9 @@ from .const import (
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PROFILE_MIN_WARMUP_CYCLES,
+    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PUMP_STUCK_DURATION,
+    CONF_POWER_OFF_THRESHOLD_W,
     CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
     CONF_SMOOTHING_WINDOW,
@@ -176,6 +181,12 @@ _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_LEARNING_CONFIDENCE,
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_END_REPEAT_COUNT,
+    # Device-class-specific suggestions from reconcile_suggestions
+    CONF_PROFILE_UNMATCH_THRESHOLD,
+    CONF_POWER_OFF_THRESHOLD_W,
+    CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_MAX_POWER,
+    CONF_PUMP_STUCK_DURATION,
 )
 
 # Suggestion keys coerced to int when applied (mirrors the OptionsFlow).
@@ -189,6 +200,7 @@ _SUGGESTION_INT_KEYS: frozenset[str] = frozenset({
     CONF_SMOOTHING_WINDOW,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_END_REPEAT_COUNT,
+    CONF_PUMP_STUCK_DURATION,
 })
 
 
@@ -289,8 +301,15 @@ async def _recorder_power(hass: HomeAssistant, entity_id: str, start_dt: Any) ->
 
 
 def _cycle_kwh(c: dict[str, Any]) -> float | None:
-    """Cycle energy in kWh. Cycles store energy as ``energy_wh``; convert."""
-    wh = c.get("energy_wh")
+    """Cycle energy in kWh for display.
+
+    Prefers the external meter's reading (``energy_meter_wh``, issue #316) when a
+    cycle recorded one, otherwise the integrated ``energy_wh``. Cycles store energy
+    in Wh; convert to kWh.
+    """
+    wh = c.get("energy_meter_wh")
+    if wh is None:
+        wh = c.get("energy_wh")
     if wh is not None:
         try:
             return round(float(wh) / 1000.0, 4)
@@ -450,7 +469,6 @@ _ADMIN_COMMANDS = frozenset({
 # with get_, so it is whitelisted here to gate at the 'read' level.
 _READ_WRITE_COMMANDS = frozenset({
     "set_program",
-    "run_playground_simulation",
     "run_playground_cycle_detail",
     "run_playground_history",
     "run_playground_sweep",
@@ -1079,8 +1097,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_revert_ml_models,
         # Cycle controls (pause / resume / force-stop)
         ws_pause_cycle, ws_resume_cycle, ws_terminate_cycle,
-        # Playground (F3): headless what-if replay + DTW visualizer
-        ws_run_playground_simulation, ws_get_dtw_debug,
+        # Playground (F3): DTW visualizer
+        ws_get_dtw_debug,
         # Playground redesign: faithful single-cycle sim + history table + sweep
         ws_run_playground_cycle_detail, ws_run_playground_history,
         ws_run_playground_sweep,
@@ -1323,6 +1341,7 @@ async def ws_set_options(
         CONF_DOOR_SENSOR_ENTITY,
         CONF_LINKED_DEVICE,
         CONF_SWITCH_ENTITY,
+        CONF_ENERGY_SENSOR,
     ):
         if key in new_options and not new_options[key]:
             new_options[key] = None
@@ -4790,56 +4809,6 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
             opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)
         ),
     )
-
-
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): "ha_washdata/run_playground_simulation",
-        vol.Required("entry_id"): str,
-        vol.Optional("cycle_ids", default=list): [str],
-        vol.Optional("settings_override", default=dict): dict,
-        vol.Optional("concurrency", default=1): vol.Coerce(int),
-    }
-)
-@websocket_api.async_response
-async def ws_run_playground_simulation(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Replay stored cycles through a headless detector with overridden settings.
-
-    Returns ``{results: [...], summary: {...}}`` - a per-cycle event log +
-    outcome plus aggregate counts. Nothing is persisted; this is a pure what-if.
-    """
-    entry_id: str = msg["entry_id"]
-    manager = _get_manager(hass, entry_id)
-    if manager is None:
-        _err_not_found(connection, msg["id"], entry_id)
-        return
-
-    store = getattr(manager, "profile_store", None)
-    if store is None:
-        connection.send_error(msg["id"], "unavailable", "Profile store unavailable")
-        return
-
-    try:
-        base_config = _playground_base_config(manager, _get_entry(hass, entry_id))
-        cycle_ids = list(msg.get("cycle_ids") or [])
-        settings_override = dict(msg.get("settings_override") or {})
-        concurrency = int(msg.get("concurrency", 1))
-        payload = await hass.async_add_executor_job(
-            playground.run_playground_batch,
-            store,
-            cycle_ids,
-            base_config,
-            settings_override,
-            concurrency,
-        )
-        _send_result(connection, msg["id"], "run_playground_simulation", payload)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground simulation failed for %s: %s", entry_id, exc)
-        connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
 def _playground_context(hass: HomeAssistant, entry_id: str):

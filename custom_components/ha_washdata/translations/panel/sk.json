@@ -1034,6 +1034,10 @@
       "doc": "Pevná cena za kWh použitá pre číselné údaje o nákladoch, keď vyššie nie je nastavená žiadna aktuálna cena.",
       "label": "Statická cena energie (za kWh)"
     },
+    "energy_sensor": {
+      "doc": "Voliteľné kumulatívne počítadlo energie (total_increasing kWh/Wh, napr. vlastný celoživotný merač zásuvky). Keď je nastavené, energia hlásená za každý cyklus sa odvodzuje z rozdielu tohto počítadla medzi začiatkom a koncom, čo zabraňuje podhodnoteniu, ktoré vzniká integráciou pomaly hlásiaceho senzora výkonu. Vráti sa k integrovanej hodnote, ak údaj chýba, jeho jednotka je neznáma alebo rozdiel nie je kladný. Nechajte prázdne, ak chcete naďalej integrovať senzor výkonu.",
+      "label": "Entita merača energie"
+    },
     "expose_debug_entities": {
       "doc": "Zverejniť ďalšie diagnostické entity HA (dôvera v zhodu, nejednoznačnosť, vnútorné údaje). Vypnuté udržiava zoznam entít čistý na bežné použitie.",
       "label": "Zobraziť ladiace entity"

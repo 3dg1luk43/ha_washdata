@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**99 commands.**
+**98 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -77,7 +77,6 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `pause_cycle` | entry_id | `OkResponse` |
 | `resume_cycle` | entry_id | `OkResponse` |
 | `terminate_cycle` | entry_id | `OkResponse` |
-| `run_playground_simulation` | entry_id, cycle_ids?, settings_override?, concurrency? | `RunPlaygroundSimulationResponse` |
 | `run_playground_cycle_detail` | entry_id, cycle_id, settings_override? | `RunPlaygroundCycleDetailResponse` |
 | `run_playground_history` | entry_id, cycle_ids?, settings_override?, concurrency? | `RunPlaygroundHistoryResponse` |
 | `run_playground_sweep` | entry_id, param, values, objective, cycle_ids?, concurrency?, param_y?, values_y? | `RunPlaygroundSweepResponse` |
@@ -1222,24 +1221,6 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `ok` | yes | bool |
-
-## `ha_washdata/run_playground_simulation`
-
-**Request parameters**
-
-| Param | Required | Type |
-| --- | --- | --- |
-| `entry_id` | yes | str |
-| `cycle_ids` | no | list[str] |
-| `settings_override` | no | dict |
-| `concurrency` | no | int |
-
-**Response** (`RunPlaygroundSimulationResponse`)
-
-| Field | Always present | Type |
-| --- | --- | --- |
-| `results` | yes | list[dict[str, any]] |
-| `summary` | yes | PlaygroundSummary |
 
 ## `ha_washdata/run_playground_cycle_detail`
 

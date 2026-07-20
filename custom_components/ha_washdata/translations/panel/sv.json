@@ -1058,6 +1058,10 @@
       "doc": "Fast pris per kWh som används för kostnadssiffror när ingen levande prisenhet anges ovan.",
       "label": "Statiskt energipris (per kWh)"
     },
+    "energy_sensor": {
+      "doc": "Valfri kumulativ energiräknare (total_increasing i kWh/Wh, t.ex. uttagets egen livstidsmätare). När den anges hämtas varje cykels rapporterade energi från skillnaden på denna räknare mellan start och slut, vilket undviker den underräkning du får när en långsamt rapporterande effektsensor integreras. Faller tillbaka på det integrerade värdet om avläsningen saknas, dess enhet är okänd eller skillnaden inte är positiv. Lämna tomt för att fortsätta integrera effektsensorn.",
+      "label": "Energimätarentitet"
+    },
     "expose_debug_entities": {
       "doc": "Publicera extra diagnostiska HA-enheter (matchningsförtroende, tvetydighet, tillståndsinterna). Av håller enhetslistan ren för normal användning.",
       "label": "Exponera felsökningsentiteter"

@@ -353,24 +353,6 @@ class GetMlTrainingStatusResponse(TypedDict):
 
 # ─── Playground (F3) ───────────────────────────────────────────────────────────
 
-class PlaygroundSummary(TypedDict):
-    cycles: int
-    requested: int
-    concurrency: int
-    detected: int
-    missed: int
-    false_end: int
-    match_correct: int
-    match_wrong: int
-    unmatched: int
-    skipped_ids: list[str]
-
-
-class RunPlaygroundSimulationResponse(TypedDict):
-    results: list[dict[str, Any]]
-    summary: PlaygroundSummary
-
-
 class RunPlaygroundCycleDetailResponse(TypedDict, total=False):
     cycle_id: Any
     label: str | None
@@ -676,7 +658,6 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "pause_cycle": OkResponse,
     "resume_cycle": OkResponse,
     "terminate_cycle": OkResponse,
-    "run_playground_simulation": RunPlaygroundSimulationResponse,
     "run_playground_cycle_detail": RunPlaygroundCycleDetailResponse,
     "run_playground_history": RunPlaygroundHistoryResponse,
     "run_playground_sweep": RunPlaygroundSweepResponse,
@@ -918,12 +899,6 @@ WS_COMMANDS: dict[str, dict] = {
     "pause_cycle": {"params": [_entry()]},
     "resume_cycle": {"params": [_entry()]},
     "terminate_cycle": {"params": [_entry()]},
-    "run_playground_simulation": {"params": [
-        _entry(),
-        _p("cycle_ids", "list[str]", False),
-        _p("settings_override", "dict", False),
-        _p("concurrency", "int", False),
-    ]},
     "run_playground_cycle_detail": {"params": [
         _entry(),
         _p("cycle_id", "str"),

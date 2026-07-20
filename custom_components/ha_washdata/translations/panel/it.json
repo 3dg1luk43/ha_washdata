@@ -1058,6 +1058,10 @@
       "doc": "Prezzo fisso per kWh utilizzato per i dati sui costi quando non è impostata alcuna entità di prezzo in tempo reale sopra.",
       "label": "Prezzo energia statico (per kWh)"
     },
+    "energy_sensor": {
+      "doc": "Contatore di energia cumulativa opzionale (total_increasing in kWh/Wh, ad es. il contatore di consumo totale della presa stessa). Quando è impostato, l'energia riportata di ogni ciclo viene ricavata dalla differenza di questo contatore tra inizio e fine, il che evita la sottostima che si ottiene integrando un sensore di potenza che aggiorna lentamente. Ripiega sul valore integrato se la lettura manca, se la sua unità è sconosciuta o se il delta non è positivo. Lascia vuoto per continuare a integrare il sensore di potenza.",
+      "label": "Entità del contatore di energia"
+    },
     "expose_debug_entities": {
       "doc": "Pubblica entità HA diagnostiche aggiuntive (confidenza della corrispondenza, ambiguità, stati interni). Disattivato mantiene l'elenco delle entità pulito per l'uso normale.",
       "label": "Esponi entità di debug"

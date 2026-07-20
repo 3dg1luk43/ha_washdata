@@ -1058,6 +1058,10 @@
       "doc": "Fast verð á kWst notað fyrir kostnaðartölur þegar engin lifandi verðeining er stillt hér að ofan.",
       "label": "Fast orkuverð (á kWh)"
     },
+    "energy_sensor": {
+      "doc": "Valfrjáls uppsafnaður orkuteljari (total_increasing í kWh/Wh, t.d. eigin líftímamælir innstungunnar). Þegar hann er stilltur er uppgefin orka hverrar lotu tekin úr mismun þessa teljara milli upphafs og enda, sem kemur í veg fyrir vantalninguna sem hlýst af því að heilda hægvirkan aflskynjara. Fer aftur í heildaða gildið ef mælingin vantar, eining hennar er óþekkt eða mismunurinn er ekki jákvæður. Skildu eftir autt til að halda áfram að heilda aflskynjarann.",
+      "label": "Orkumælieining"
+    },
     "expose_debug_entities": {
       "doc": "Birtu auka greiningar HA einingar (samsvörun, tvíræðni, innri hluti ríkisins). Slökkt heldur einingarlistanum hreinum fyrir venjulega notkun.",
       "label": "Birta villuleitareiningar"

@@ -1034,6 +1034,10 @@
       "doc": "Fiksētā cena par kWh, ko izmanto izmaksu skaitļiem, ja iepriekš nav iestatīta reāllaika cenas vienība.",
       "label": "Fiksētā enerģijas cena (par kWh)"
     },
+    "energy_sensor": {
+      "doc": "Neobligāts kumulatīvs enerģijas skaitītājs (total_increasing kWh/Wh, piemēram, paša kontaktdakšas kopējais skaitītājs). Ja iestatīts, katra cikla uzrādītā enerģija tiek ņemta no šī skaitītāja rādījuma starpības no sākuma līdz beigām, kas novērš nepietiekamu uzskaiti, ko rada lēni ziņojoša jaudas sensora integrēšana. Atgriežas pie integrētās vērtības, ja rādījuma nav, tā mērvienība nav zināma vai starpība nav pozitīva. Atstājiet tukšu, lai turpinātu integrēt jaudas sensoru.",
+      "label": "Enerģijas skaitītāja entītija"
+    },
     "expose_debug_entities": {
       "doc": "Publicējiet papildu diagnostikas HA entītijas (atbilstības ticamība, neskaidrība, stāvokļa iekšējās vērtības). Izslēgts saglabā entītiju sarakstu tīru normālai lietošanai.",
       "label": "Atklāt atkļūdošanas entītijas"

@@ -275,6 +275,8 @@ const _SETTINGS_SECTIONS = [
         doc: 'Android notification channel name for the finish message. Blank reuses the start/live channel.' },
     ] },
     { sub: 'Energy', fields: [
+      { key: 'energy_sensor', label: 'Energy Meter Entity', type: 'entity', domain: 'sensor', optional: true,
+        doc: 'Optional cumulative energy counter (total_increasing kWh/Wh, e.g. the plug\'s own lifetime meter). When set, each cycle\'s reported energy is taken from this counter\'s start-to-end delta, which avoids the under-counting you get from integrating a slow-reporting power sensor. Falls back to the integrated value if the reading is missing, its unit is unknown, or the delta is not positive. Leave blank to keep integrating the power sensor.' },
       { key: 'energy_price_entity', label: 'Energy Price Entity', type: 'entity', domain: 'sensor', basic: true,
         doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. Each cycle freezes the price in effect when it finished.' },
       { key: 'energy_price_static', label: 'Static Energy Price (per kWh)', type: 'number', step: 0.001, min: 0, basic: true,
@@ -1198,6 +1200,35 @@ function _esc(s) {
 function _safeHttpUrl(u) {
   const s = String(u == null ? '' : u).trim();
   return /^https?:\/\//i.test(s) ? s : '';
+}
+// Apply an alpha channel to any CSS color and return a valid rgba() string.
+// The base color may come from a theme's `--primary-color` (issues #314/#315),
+// which `getPropertyValue` returns as the raw declared token: `#03a9f4` for hex
+// themes but `rgb(238, 147, 0)` for many custom themes / HA's accent picker.
+// The old `col + '55'` alpha-suffix concatenation produced `rgb(238, 147, 0)55`,
+// an invalid color that made canvas `addColorStop`/`fillStyle` throw and froze
+// the panel. This parses hex (#rgb/#rgba/#rrggbb/#rrggbbaa) and rgb()/rgba(),
+// and never throws -- an unrecognised color falls back to itself so the draw
+// still succeeds (worst case: no transparency) rather than aborting the render.
+function _withAlpha(col, alpha) {
+  const s = String(col == null ? '' : col).trim();
+  let m = s.match(/^#([0-9a-fA-F]{3,8})$/);
+  if (m) {
+    let h = m[1];
+    if (h.length === 3 || h.length === 4) h = h.split('').map(c => c + c).join('');
+    if (h.length === 6 || h.length === 8) {
+      const r = parseInt(h.slice(0, 2), 16);
+      const g = parseInt(h.slice(2, 4), 16);
+      const b = parseInt(h.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+  }
+  m = s.match(/^rgba?\(([^)]+)\)$/i);
+  if (m) {
+    const parts = m[1].split(',').map(p => p.trim());
+    if (parts.length >= 3) return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+  }
+  return s;
 }
 function _num(v, def) { const n = parseFloat(v); return isNaN(n) ? def : n; }
 // Visible, keyboard-focusable descendants of `root` (for modal focus trapping).
@@ -2288,7 +2319,11 @@ class HaWashdataPanel extends HTMLElement {
         // Keep the Manual Recording widget's live duration / sample count fresh
         // while a recording is running (the backend reports them live; without
         // this poll the widget stays frozen at its start-of-recording snapshot).
-        if (this._canEdit() && this._recState && this._recState.state === 'recording') {
+        // Gate on the authoritative dev.recording flag rather than the polled
+        // _recState, which is null on first load and would otherwise never be
+        // populated -- leaving the widget showing "Start Recording" during an
+        // active recording (#313).
+        if (this._canEdit() && dev.recording) {
           try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
         }
       }
@@ -3565,7 +3600,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         <div class="wd-badge ${isRunning ? 'wd-running' : ''}" style="color:${color};background:color-mix(in srgb, ${color} 13%, transparent);">
           <span class="wd-dot"></span>${_esc(label)}
-          ${dev.sub_state ? `<span style="opacity:.7;font-size:.85em">(${_esc(dev.sub_state)})</span>` : ''}
+          ${!rec && dev.sub_state && dev.sub_state.toLowerCase() !== state ? `<span style="opacity:.7;font-size:.85em">(${_esc(dev.sub_state)})</span>` : ''}
         </div>
         ${programCtl}
         <div class="wd-stats">
@@ -3744,11 +3779,18 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlRecordingWidget() {
     const rs = this._recState;
-    const state = rs ? rs.state : 'idle';
+    // dev.recording (from get_devices) is the authoritative recording flag.
+    // _recState is a separately-polled detail source that is null on first load
+    // and only refreshed while already recording, so trusting it alone showed
+    // "Start Recording" during an active recording (#313). Derive the state from
+    // the authoritative flag and use _recState only for the live duration/samples.
+    const dev = this._devices[this._selIdx];
+    const recording = !!(dev && dev.recording);
+    const state = recording ? 'recording' : (rs ? rs.state : 'idle');
     const dotCls = state === 'recording' ? 'wd-rec-active' : state === 'stopped' ? 'wd-rec-ready' : 'wd-rec-idle';
     const stateLabel = state === 'recording' ? this._t('status.recording', {}, 'Recording…') : state === 'stopped' ? this._t('status.ready', {}, 'Ready to process') : this._t('status.idle', {}, 'Idle');
     let detail = '';
-    if (state === 'recording') detail = `${_fmtDuration(rs.duration_s)} · ${rs.sample_count || 0} samples`;
+    if (state === 'recording') detail = rs ? `${_fmtDuration(rs.duration_s)} · ${rs.sample_count || 0} samples` : '';
     else if (state === 'stopped') detail = `${rs.sample_count || 0} samples · ${_fmtDuration(rs.duration_s)}`;
     const buttons = state === 'recording'
       ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="rec-stop" title="${_esc(this._t('btn.rec_stop_tip', {}, 'Stop recording and hold the captured trace for review'))}">${this._t('btn.rec_stop', {}, 'Stop')}</button>`
@@ -6007,7 +6049,7 @@ class HaWashdataPanel extends HTMLElement {
     pts.forEach(p => ctx.lineTo(toX(p.t), toY(p.w)));
     ctx.lineTo(toX(pts[pts.length-1].t), toY(0));
     ctx.closePath();
-    ctx.fillStyle = primary + '1a'; ctx.fill();
+    ctx.fillStyle = _withAlpha(primary, 0.10); ctx.fill();
 
     // Cycle power trace line
     ctx.beginPath(); ctx.strokeStyle = primary; ctx.lineWidth = 2*dpr;
@@ -6992,7 +7034,7 @@ class HaWashdataPanel extends HTMLElement {
       ctx.beginPath();
       opts.band.max.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])));
       for (let i = opts.band.min.length - 1; i >= 0; i--) ctx.lineTo(X(opts.band.min[i][0]), Y(opts.band.min[i][1]));
-      ctx.closePath(); ctx.fillStyle = opts.band.fill || (primary + '22'); ctx.fill();
+      ctx.closePath(); ctx.fillStyle = opts.band.fill || _withAlpha(primary, 0.13); ctx.fill();
     }
     series.forEach(s => {
       const pts = s.points || []; if (!pts.length) return;
@@ -7000,7 +7042,7 @@ class HaWashdataPanel extends HTMLElement {
       if (s.fill) {
         ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])));
         ctx.lineTo(X(pts[pts.length - 1][0]), Y(0)); ctx.lineTo(X(pts[0][0]), Y(0)); ctx.closePath();
-        const g = ctx.createLinearGradient(0, padT, 0, ch - padB); g.addColorStop(0, col + '55'); g.addColorStop(1, col + '08'); ctx.fillStyle = g; ctx.fill();
+        const g = ctx.createLinearGradient(0, padT, 0, ch - padB); g.addColorStop(0, _withAlpha(col, 0.33)); g.addColorStop(1, _withAlpha(col, 0.03)); ctx.fillStyle = g; ctx.fill();
       }
       ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])));
       ctx.strokeStyle = col; ctx.lineWidth = (s.width || 1.5) * dpr; ctx.lineJoin = 'round';
@@ -8004,7 +8046,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!m || !m.env || !(m.env.avg || []).length) return;
     const env = m.env;
     const full = env.target_duration || env.avg[env.avg.length - 1][0];
-    const bands = (m.phases || []).map((ph, i) => ({ x0: ph.start, x1: ph.end, fill: _PALETTE[i % _PALETTE.length] + '33' }));
+    const bands = (m.phases || []).map((ph, i) => ({ x0: ph.start, x1: ph.end, fill: _withAlpha(_PALETTE[i % _PALETTE.length], 0.20) }));
     const vlines = [];
     (m.phases || []).forEach((ph, i) => {
       const col = _PALETTE[i % _PALETTE.length];

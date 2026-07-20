@@ -258,6 +258,27 @@ Resolved:
 
 Open:
 1. Per-device defaults: don't leak dicts into the Options schema.
+2. `cycle_detector._abrupt_drop` is never set `True` — the INTERRUPTED classification branch at L1732 is dead code; `abrupt_drop_watts`/`abrupt_drop_ratio` config fields are vestigial. See register item 27.
+3. `features.CycleSignature.event_density` is always 0.0 (event detector removed); kept for signature back-compat but is a zero-variance ML column. See register item 28.
+4. `auto_label_cycles` service schema default (0.70) does not match Python handler default (0.75). See register item 30.
+5. `WashDataStore.get_storage_stats()` and `WashDataStore.async_clear_debug_data()` are dead code — callers always reach the `ProfileStore` versions. The `WashDataStore` version also has blocking I/O on the event loop. See register item 39.
+6. `reconcile_suggestions` produces 5 keys (`profile_unmatch_threshold`, `power_off_threshold_w`, `anti_wrinkle_exit_power`, `anti_wrinkle_max_power`, `pump_stuck_duration`) that `ws_apply_suggestions` silently drops (missing from `_SUGGESTION_KEYS`). See register item 40.
+
+## Internal Reference Documentation
+
+`docs/internal/INTEGRATION_REFERENCE.md` is the canonical, ever-current engineering reference for this codebase. It contains:
+- Module map with line counts and deep-dive links
+- Subsystem summaries (detection, matching, phases, progress, ML, WS API, panel, store)
+- **Discrepancy & tech-debt register** (items 1-41) — the single source of truth for known bugs, dead code, naming traps, and doc inaccuracies
+
+**Maintenance rule (critical):** Every time a bug is fixed, a feature is added, a constant changes value, a module grows significantly, or a naming trap is resolved, **update the register**:
+- Mark fixed items `[FIXED]` with the commit hash and what changed
+- Add new `[CODE]` items when new bugs or dead code are found
+- Update `[NOTE]` items when intentional divergences are resolved or change
+- Update the module map line counts if a file grows by >100 lines
+- Update the quick-reference table at the top of §7
+
+Deep-dive files under `docs/internal/reference/` are supplementary detail — they are accurate as of 2026-07-18 but may lag; the register is what matters most to keep current.
 
 ## Key Design Conventions
 

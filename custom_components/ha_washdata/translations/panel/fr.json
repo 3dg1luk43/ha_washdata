@@ -1058,6 +1058,10 @@
       "doc": "Prix ​​fixe par kWh utilisé pour les chiffres de coût lorsqu'aucune entité de prix en direct n'est définie ci-dessus.",
       "label": "Prix de l'énergie statique (par kWh)"
     },
+    "energy_sensor": {
+      "doc": "Compteur d'énergie cumulé facultatif (total_increasing en kWh/Wh, par ex. le compteur de consommation totale de la prise elle-même). Lorsqu'il est défini, l'énergie indiquée pour chaque cycle provient de la différence de ce compteur entre le début et la fin, ce qui évite le sous-comptage provoqué par l'intégration d'un capteur de puissance qui se met à jour lentement. Revient à la valeur intégrée si la lecture est absente, si son unité est inconnue ou si le delta n'est pas positif. Laissez vide pour continuer à intégrer le capteur de puissance.",
+      "label": "Entité du compteur d'énergie"
+    },
     "expose_debug_entities": {
       "doc": "Publiez des entités HA de diagnostic supplémentaires (correspondance à la confiance, à l'ambiguïté, aux éléments internes de l'état). Désactivé maintient la liste des entités propre pour une utilisation normale.",
       "label": "Exposer les entités de débogage"

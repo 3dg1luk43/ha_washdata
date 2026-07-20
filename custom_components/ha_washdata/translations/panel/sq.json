@@ -1034,6 +1034,10 @@
       "doc": "Çmimi fiks për kWh i përdorur për shifrat e kostos kur nuk është vendosur më sipër asnjë subjekt i çmimit të drejtpërdrejtë.",
       "label": "Çmimi statik i energjisë (për kWh)"
     },
+    "energy_sensor": {
+      "doc": "Numërues kumulativ opsional i energjisë (total_increasing kWh/Wh, p.sh. matësi i vetë prizës për konsumin total). Kur vendoset, energjia e raportuar e çdo cikli merret nga diferenca e këtij numëruesi nga fillimi deri në fund, gjë që shmang nënllogaritjen që merrni nga integrimi i një sensori fuqie që raporton ngadalë. Kthehet te vlera e integruar nëse leximi mungon, njësia e tij është e panjohur, ose diferenca nuk është pozitive. Lëreni bosh për të vazhduar integrimin e sensorit të fuqisë.",
+      "label": "Entiteti i matësit të energjisë"
+    },
     "expose_debug_entities": {
       "doc": "Publikoni entitete shtesë diagnostikuese HA (besimi i ndeshjes, paqartësia, të brendshmet e gjendjes). Off e mban listën e entiteteve të pastër për përdorim normal.",
       "label": "Ekspono entitetet e korrigjimit"

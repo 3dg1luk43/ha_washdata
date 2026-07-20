@@ -35,7 +35,6 @@ class CycleSignature:
     duration: float
     total_energy: float
     max_power: float
-    event_density: float  # Deprecated/reserved: always 0.0 (event detector removed); kept for signature back-compat
     time_to_first_high: float  # Seconds to first HEATER/HIGH phase
     high_phase_ratio: float  # Duration of high phases / total duration
     # Distributions (quantiles of power)
@@ -59,7 +58,7 @@ def compute_signature(
     """
     if len(power) == 0:
         # Return empty/zero signature
-        return CycleSignature(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        return CycleSignature(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
     duration = timestamps[-1] - timestamps[0]
 
@@ -97,15 +96,10 @@ def compute_signature(
     else:
         high_phase_ratio = 0.0
 
-    # Event density: always 0 now that the event detector is gone; retained as a
-    # signature field for backward compatibility with stored signatures.
-    event_density = 0.0
-
     return CycleSignature(
         duration=float(duration),
         total_energy=float(total_energy),
         max_power=float(max_p),
-        event_density=float(event_density),
         time_to_first_high=float(time_to_first_high),
         high_phase_ratio=float(high_phase_ratio),
         p05=float(qs[0]),

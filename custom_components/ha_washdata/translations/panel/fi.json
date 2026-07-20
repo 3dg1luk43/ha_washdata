@@ -1058,6 +1058,10 @@
       "doc": "Kiinteää kWh-hintaa käytetään kustannusluvuissa, kun yllä ei ole asetettu reaaliaikaista hintakokonaisuutta.",
       "label": "Kiinteä energiahinta (per kWh)"
     },
+    "energy_sensor": {
+      "doc": "Valinnainen kumulatiivinen energialaskuri (total_increasing kWh/Wh, esim. pistokkeen oma kokonaismittari). Kun tämä on asetettu, kunkin syklin raportoitu energia otetaan tämän laskurin alku- ja loppuarvon erotuksesta, mikä välttää alilaskennan, jonka saat integroimalla hitaasti raportoivaa tehoanturia. Palaa integroituun arvoon, jos lukema puuttuu, sen yksikkö on tuntematon tai erotus ei ole positiivinen. Jätä tyhjäksi jatkaaksesi tehoanturin integrointia.",
+      "label": "Energiamittarin entiteetti"
+    },
     "expose_debug_entities": {
       "doc": "Julkaise ylimääräisiä diagnostisia HA-kokonaisuuksia (osumavarmuus, moniselitteisyys, tilan sisäiset tiedot). Pois päältä pitää entiteettiluettelon puhtaana normaalia käyttöä varten.",
       "label": "Näytä virheenkorjausentiteetit"

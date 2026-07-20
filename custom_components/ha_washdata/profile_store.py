@@ -827,55 +827,6 @@ class WashDataStore(Store[JSONDict]):
 
         return old_data
 
-    async def get_storage_stats(self) -> dict[str, Any]:
-        """Get storage usage statistics."""
-        data = self._data  # pylint: disable=protected-access
-        if not data:
-            data = await self.async_load() or {}
-
-        # Rough file size estimation if possible, else 0
-        file_size_kb = 0
-        try:
-            path = self.path  # pylint: disable=no-member
-            if os.path.exists(path):
-                file_size_kb = os.path.getsize(path) / 1024
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
-
-        cycles = data.get("past_cycles", [])
-        profiles = data.get("profiles", {})
-
-        debug_traces_count = sum(1 for c in cycles if c.get("debug_data"))
-
-        return {
-            "file_size_kb": round(file_size_kb, 1),
-            "total_cycles": len(cycles),
-            "total_profiles": len(profiles),
-            "debug_traces_count": debug_traces_count,
-        }
-
-    async def async_clear_debug_data(self) -> int:
-        """Clear granular debug data from all cycles to free space."""
-        if not self._data:
-            await self.async_load()
-
-        if self._data is None:
-            return 0
-
-        cycles = self._data.get("past_cycles", [])
-        count = 0
-        for cycle in cycles:
-            if "debug_data" in cycle:
-                del cycle["debug_data"]
-                count += 1
-
-        if count > 0:
-            await self.async_save(self._data)
-            _LOGGER.info("Cleared debug data from %s cycles", count)
-
-        return count
-
-
 def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     """Top1-vs-top2 score margin and whether the match is ambiguous.
 
@@ -4210,6 +4161,66 @@ class ProfileStore:
             }
         except Exception:  # pragma: no cover - defensive; never break the sensor
             return None
+
+    def get_profile_power_profile(
+        self, profile_name: str, interval_s: float = 900.0
+    ) -> list[float]:
+        """Average power (W) per fixed interval across a profile's learned shape.
+
+        Resamples the profile envelope's average power-over-time curve into
+        consecutive ``interval_s`` buckets (default 15 min) and returns the mean
+        watts in each, e.g. ``[2200, 2200, 800, 800, 1500, 500, 400, 200]`` - the
+        flat per-slot array external planners such as tibber_prices'
+        ``power_profile`` consume to pick the cheapest window to run the appliance
+        (issue #272). Unlike :meth:`reference_curve` (a downsampled time/watt shape
+        surfaced on the running-program sensor), this is a fixed-interval average
+        exposed per profile so it can be read for planning before a cycle starts.
+
+        The final bucket is averaged only over the part of the cycle that actually
+        falls inside it. Pure statistics; never raises. Returns an empty list when
+        the profile has no learned envelope yet.
+        """
+        try:
+            if interval_s <= 0:
+                return []
+            env = self.get_envelope(profile_name)
+            if not isinstance(env, dict):
+                return []
+            avg = env.get("avg")
+            if (
+                not isinstance(avg, list)
+                or len(avg) < 2
+                or not isinstance(avg[0], (list, tuple))
+                or len(avg[0]) < 2
+            ):
+                return []
+            ts = np.asarray([float(p[0]) for p in avg], dtype=float)
+            ws = np.asarray([float(p[1]) for p in avg], dtype=float)
+            if ts.size < 2 or not (np.all(np.isfinite(ts)) and np.all(np.isfinite(ws))):
+                return []
+            if ts[-1] <= ts[0]:
+                return []
+            total = float(env.get("target_duration") or 0.0)
+            if total <= 0:
+                total = float(ts[-1])
+            if total <= 0:
+                return []
+            n_buckets = int(math.ceil(total / interval_s))
+            out: list[float] = []
+            for k in range(n_buckets):
+                lo = k * interval_s
+                hi = min(lo + interval_s, total)
+                if hi <= lo:
+                    break
+                # Time-average the curve over the half-open slot [lo, hi) on a fine
+                # interpolated grid, so the result is independent of the envelope's
+                # grid spacing. endpoint=False keeps a slot boundary from being
+                # double-counted into the adjacent slot.
+                fine = np.linspace(lo, hi, 16, endpoint=False)
+                out.append(round(float(np.mean(np.interp(fine, ts, ws))), 1))
+            return out
+        except Exception:  # pragma: no cover - defensive; never break the sensor
+            return []
 
     def compute_envelope_conformance(
         self,

@@ -1058,6 +1058,10 @@
       "doc": "Fast pris per kWh brukt for kostnadstall når ingen levende prisenhet er satt ovenfor.",
       "label": "Statisk energipris (per kWh)"
     },
+    "energy_sensor": {
+      "doc": "Valgfri kumulativ energiteller (total_increasing i kWh/Wh, f.eks. støpselets egen levetidsmåler). Når den er angitt, hentes hver syklus' rapporterte energi fra forskjellen på denne telleren mellom start og slutt, noe som unngår undertellingen du får ved å integrere en tregt rapporterende strømsensor. Faller tilbake til den integrerte verdien hvis avlesningen mangler, enheten er ukjent, eller forskjellen ikke er positiv. La feltet stå tomt for å fortsette å integrere strømsensoren.",
+      "label": "Energimålerenhet"
+    },
     "expose_debug_entities": {
       "doc": "Publiser ekstra diagnostiske HA-enheter (match konfidens, tvetydighet, tilstandsinternal). Av holder enhetslisten ren for normal bruk.",
       "label": "Vis feilsøkingsenheter"

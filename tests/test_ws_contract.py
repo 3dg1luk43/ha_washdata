@@ -278,10 +278,10 @@ def test_generated_files_exist_and_are_current():
     assert ts.strip() and md.strip()
 
     # Spot-check that known commands / types made it into both artifacts.
-    for token in ("GetProfilesResponse", "RunPlaygroundSimulationResponse",
+    for token in ("GetProfilesResponse", "RunPlaygroundCycleDetailResponse",
                   "WashDataWsResponses"):
         assert token in ts, token
-    for command in ("run_playground_simulation", "get_dtw_debug", "get_devices"):
+    for command in ("run_playground_cycle_detail", "get_dtw_debug", "get_devices"):
         assert command in md, command
 
     # The committed files must be up to date with the schema (idempotent gen).

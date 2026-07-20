@@ -1058,6 +1058,10 @@
       "doc": "Fast pris pr. kWh brugt til omkostningstal, når der ikke er angivet en levende prisenhed ovenfor.",
       "label": "Statisk energipris (per kWh)"
     },
+    "energy_sensor": {
+      "doc": "Valgfri kumulativ energitæller (total_increasing i kWh/Wh, f.eks. stikkets egen levetidsmåler). Når den er angivet, tages hver cyklus' rapporterede energi fra denne tællers forskel mellem start og slut, hvilket undgår den undertælling, du får ved at integrere en langsomt rapporterende effektsensor. Falder tilbage til den integrerede værdi, hvis aflæsningen mangler, dens enhed er ukendt, eller forskellen ikke er positiv. Lad feltet stå tomt for at fortsætte med at integrere effektsensoren.",
+      "label": "Energimålerenhed"
+    },
     "expose_debug_entities": {
       "doc": "Udgiv ekstra diagnostiske HA-enheder (match konfidens, tvetydighed, interne tilstande). Fra holder enhedslisten ren til normal brug.",
       "label": "Vis fejlretningsenheder"
