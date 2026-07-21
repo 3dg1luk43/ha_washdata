@@ -583,6 +583,42 @@ STANDBY_BAND_MAX_FRACTION = 0.10      # plateau level <= 10% of the cycle's peak
 STANDBY_BAND_FLATNESS_FRACTION = 0.03  # window (max-min) <= 3% of the cycle's peak
 STANDBY_BAND_FLATNESS_FLOOR_W = 2.0   # absolute flatness floor for low-peak devices
 
+# Issue #296 follow-up: anti-crease ("Knitterschutz") back-to-back handling.
+#
+# After a wash finishes, some machines (e.g. Miele) hold a low-power tumble tail -
+# a constant baseline plus periodic sub-``anti_wrinkle_max_power`` bursts, NO
+# heating - until the door is opened.  To the power-off detector this looks like
+# continued RUNNING (the bursts recur faster than off_delay and keep reviving the
+# cycle out of ENDING), so the cycle never finalises into STATE_ANTI_WRINKLE - the
+# state that is designed to absorb the tail and split off the next wash.  If a
+# second load is started before the door is opened, the whole sequence
+# (wash -> tail -> wash -> tail) merges into one multi-hour "cycle".
+#
+# Two coordinated mechanisms fix it, BOTH opt-in via ``anti_wrinkle_enabled`` and
+# gated to the anti-wrinkle device types (see ``anti_wrinkle_active`` in
+# cycle_detector):
+#
+#  * a proactive finalise (``_is_anticrease_tail`` -> Smart Termination into
+#    ANTI_WRINKLE): once a *matched* cycle is past its expected duration AND the
+#    recent window shows only the low-power tail, finalise without waiting to reach
+#    ENDING through the burst-defeated off_delay path;
+#  * a match freeze (``_try_profile_match`` guard) under the SAME condition, so
+#    re-matching on the growing flat tail cannot drift the label to a longer
+#    near-duplicate profile (which would push expected_duration out and break the
+#    finalise gate) - the field failure that breaks Smart Termination.
+#
+# Gated on ``elapsed >= expected * ratio`` so a legitimate mid-wash low-power phase
+# can NEVER trigger it: a washer spends most of its cycle below
+# ``anti_wrinkle_max_power`` (only brief heating spikes exceed it), but every
+# observed clean cycle's mid-cycle sub-max_power gap ENDS well before its expected
+# duration, while the anti-crease tail BEGINS after it.  Also requires a genuinely
+# energetic cycle (peak above ``anti_wrinkle_max_power``) so a low-power program
+# that never heats is left alone.  Asymmetric (finalise-only, can only shorten the
+# wait) and self-correcting (a new wash's heating burst leaves the regime and
+# re-arms matching).
+ANTI_CREASE_FINALIZE_RATIO = 0.98      # elapsed must reach 98% of expected duration
+ANTI_CREASE_CONFIRM_WINDOW_S = 180.0   # recent window that must hold no reading > max_power
+
 # Device Type Defaults
 # Device Type Defaults (Maps)
 

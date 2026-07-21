@@ -64,6 +64,8 @@ from .const import (
     STANDBY_BAND_MAX_FRACTION,
     STANDBY_BAND_FLATNESS_FRACTION,
     STANDBY_BAND_FLATNESS_FLOOR_W,
+    ANTI_CREASE_FINALIZE_RATIO,
+    ANTI_CREASE_CONFIRM_WINDOW_S,
 )
 
 # The dishwasher end-spike wait window is shared between two code paths
@@ -397,6 +399,18 @@ class CycleDetector:
         ):
             return
 
+        # Terminal-tail match freeze (anti-crease, #296): once a washer/dryer with
+        # anti-wrinkle enabled is past its expected duration and has settled into
+        # the low-power tumble tail, re-matching on the growing flat tail drifts the
+        # label toward a LONGER near-duplicate (its expected duration grows), which
+        # pushes the anti-crease finalize gate out and breaks Smart Termination -
+        # the field failure that merges back-to-back washes.  Keep the good
+        # pre-tail match instead.  Self-correcting: a new wash's heating burst above
+        # anti_wrinkle_max_power leaves the tail regime, so this stops applying and
+        # matching re-arms for the next cycle.
+        if self._matched_profile and self._in_anticrease_freeze(timestamp):
+            return
+
         # Rate limiting
         if not force and self._last_match_time:
             elapsed = (timestamp - self._last_match_time).total_seconds()
@@ -473,6 +487,20 @@ class CycleDetector:
 
         Can be called by the matcher callback directly or asynchronously.
         """
+        # Terminal-tail match freeze (anti-crease, #296).  This is the single sink
+        # for ALL match updates - the detector's own _try_profile_match AND the
+        # manager's async 5-min matcher (manager.py calls update_match directly).
+        # Once a washer/dryer with anti-wrinkle enabled is past its expected
+        # duration and has settled into the low-power tumble tail, re-matching on
+        # the growing flat tail drifts the label toward a LONGER near-duplicate (or
+        # flips it ambiguous), which pushes out expected_duration and would block
+        # the anti-crease finalize - the field failure that merges back-to-back
+        # washes.  Keep the good pre-tail match instead.  Self-correcting: a new
+        # wash's heating burst above anti_wrinkle_max_power leaves the tail regime,
+        # so this stops applying and matching re-arms for the next cycle.
+        if self._matched_profile and self._power_readings:
+            if self._in_anticrease_freeze(self._power_readings[-1][0]):
+                return
         # Unpack 5 elements (or 4 for backward compatibility if needed, but wrapper is updated)
         # wrapper returns (name, confidence, duration, phase, is_mismatch)
         # Or MatchResult object if refactored, but currently wrapper returns tuple.
@@ -1045,6 +1073,13 @@ class CycleDetector:
             self._power_readings.append((timestamp, power))
             self._cycle_max_power = max(self._cycle_max_power, power)
 
+            # Anti-crease finalize (#296): a matched cycle past its expected
+            # duration that has settled into the low-power tumble tail is done -
+            # finalize into anti-wrinkle now instead of letting the periodic
+            # bursts keep reviving RUNNING until a second wash merges in.
+            if self._maybe_finalize_anticrease_tail(timestamp):
+                return
+
             # Use dynamic threshold
             thresh = self._dynamic_pause_threshold
             if self._time_below_threshold >= thresh:
@@ -1090,6 +1125,10 @@ class CycleDetector:
         elif self._state == STATE_PAUSED:
             self._power_readings.append((timestamp, power))
 
+            # Anti-crease finalize (#296) - see the RUNNING branch.
+            if self._maybe_finalize_anticrease_tail(timestamp):
+                return
+
             if is_high:
                 # Resume to RUNNING
                 self._transition_to(STATE_RUNNING, timestamp)
@@ -1111,6 +1150,12 @@ class CycleDetector:
                 and (timestamp - self._current_cycle_start).total_seconds() > 28800
             ):
                 self._finish_cycle(timestamp, status="force_stopped")
+                return
+
+            # Anti-crease finalize (#296) - see the RUNNING branch.  Fires ahead of
+            # the is_high end-spike handling so a sub-max_power tail burst finalizes
+            # into anti-wrinkle instead of reviving RUNNING.
+            if self._maybe_finalize_anticrease_tail(timestamp):
                 return
 
             if is_high:
@@ -1682,6 +1727,143 @@ class CycleDetector:
         )
         if (hi - lo) > flatness_limit:
             return False  # fluctuating - still doing work
+        return True
+
+    def _anticrease_gate_open(self, timestamp: datetime) -> bool:
+        """Core anti-crease gate (#296): everything except the current power level
+        and the low-power-window check.  Shared by the match freeze
+        (``_in_anticrease_freeze``) and the finalise (``_is_anticrease_tail``).
+
+        True only when a genuinely energetic, confidently-matched cycle for an
+        anti-wrinkle device is PAST its expected duration - the discriminator that
+        separates the post-wash anti-crease tail from a mid-wash low-power trough
+        (a washer spends most of its cycle below ``anti_wrinkle_max_power``, but a
+        mid-wash trough is always BEFORE the expected duration, the tail after it).
+        """
+        if not self._config.anti_wrinkle_enabled:
+            return False
+        if self._config.device_type not in (
+            DEVICE_TYPE_WASHING_MACHINE,
+            DEVICE_TYPE_DRYER,
+            DEVICE_TYPE_WASHER_DRYER,
+        ):
+            return False
+        if getattr(self, "_verified_pause", False):
+            return False
+        if not (self._matched_profile and self._expected_duration > 0):
+            return False
+        if self._last_match_confidence < 0.4:
+            return False
+        if self._match_ambiguous or self._match_prefix_ambiguous:
+            return False
+        if self._cycle_max_power <= float(self._config.anti_wrinkle_max_power):
+            return False  # never a hot/energetic cycle - leave low-power programs alone
+        start = self._current_cycle_start
+        if start is None:
+            return False
+        current_duration = (timestamp - start).total_seconds()
+        if current_duration < self._expected_duration * ANTI_CREASE_FINALIZE_RATIO:
+            return False
+        return True
+
+    def _in_anticrease_freeze(self, timestamp: datetime) -> bool:
+        """Whether match updates should be frozen (#296): the anti-crease gate is
+        open AND the most recent reading is in the low-power regime (at or below
+        ``anti_wrinkle_max_power``).
+
+        Deliberately lighter than ``_is_anticrease_tail`` - it does NOT wait for the
+        full ``ANTI_CREASE_CONFIRM_WINDOW_S``, so the confident pre-tail match is
+        preserved from the instant the cycle crosses its expected duration in a
+        low-power state, before the window accrues.  Without this a match that
+        degrades to ambiguous within the first window's worth of tail would
+        deadlock both the freeze and the finalise (both require an unambiguous
+        match).  Self-correcting: a heating burst above ``anti_wrinkle_max_power``
+        leaves the regime and re-arms matching.
+        """
+        if not self._power_readings:
+            return False
+        if float(self._power_readings[-1][1]) > float(
+            self._config.anti_wrinkle_max_power
+        ):
+            return False
+        return self._anticrease_gate_open(timestamp)
+
+    def _is_anticrease_tail(self, timestamp: datetime) -> bool:
+        """Whether a matched, past-expected cycle has settled into the anti-crease
+        tumble tail (#296) - the trigger for the finalise into STATE_ANTI_WRINKLE.
+
+        Miele-style "Knitterschutz": after the wash proper ends, the machine holds
+        a constant baseline plus periodic sub-``anti_wrinkle_max_power`` tumble
+        bursts (no heating) until the door is opened.  Because those bursts recur
+        faster than off_delay they keep reviving the cycle out of ENDING, so the
+        normal power-off path never finalises it and STATE_ANTI_WRINKLE - which is
+        built to absorb the tail and split off the next wash - never engages.
+        Recognising the tail lets us finalise into anti-wrinkle directly.
+
+        Requires the core gate (``_anticrease_gate_open``) AND that the most recent
+        >= ``ANTI_CREASE_CONFIRM_WINDOW_S`` of readings are ALL at or below
+        ``anti_wrinkle_max_power`` (we are in the low-power tail, clear of the final
+        spin and not mid-heating).  The expensive window scan runs only after the
+        cheap gate passes, so normal cycles never pay for it.
+        """
+        if not self._anticrease_gate_open(timestamp):
+            return False
+        max_power = float(self._config.anti_wrinkle_max_power)
+        # Walk the tail; readings are chronological so we can break once outside the
+        # window (O(window), not O(n)).
+        window: list[float] = []
+        oldest_in_window: datetime | None = None
+        saw_older = False
+        for ts, p in reversed(self._power_readings):
+            if (timestamp - ts).total_seconds() <= ANTI_CREASE_CONFIRM_WINDOW_S:
+                window.append(float(p))
+                oldest_in_window = ts
+            else:
+                saw_older = True
+                break
+        # The low-power tail must actually SPAN the window (data exists from before
+        # it) and have enough points to judge - not just a couple of recent samples.
+        # ``saw_older`` plus a coverage sanity is robust to sample phase/granularity
+        # (mirrors _is_standby_band_stuck).
+        if (
+            oldest_in_window is None
+            or not saw_older
+            or len(window) < 3
+            or (timestamp - oldest_in_window).total_seconds()
+            < ANTI_CREASE_CONFIRM_WINDOW_S * 0.9
+        ):
+            return False
+        if max(window) > max_power:
+            return False  # a heating / high-spin reading in the window - still washing
+        return True
+
+    def _maybe_finalize_anticrease_tail(self, timestamp: datetime) -> bool:
+        """Finalise a cycle that has entered the anti-crease tail into
+        STATE_ANTI_WRINKLE (#296).  Returns True if the cycle was finalised.
+
+        Shared by the RUNNING / PAUSED / ENDING branches so the finalise fires no
+        matter which state a burst left the detector in.  Uses Smart Termination
+        (in ``ANTI_WRINKLE_ELIGIBLE_REASONS``) so ``_finish_cycle`` routes into
+        STATE_ANTI_WRINKLE, which then absorbs the tail and splits off any next
+        wash on its first heating burst above ``anti_wrinkle_max_power``.
+        """
+        if not self._is_anticrease_tail(timestamp):
+            return False
+        start_time = self._current_cycle_start or timestamp
+        current_duration = (timestamp - start_time).total_seconds()
+        self._logger.info(
+            "Anti-crease finalize: matched '%s' past expected %.0fs (elapsed %.0fs), "
+            "settled into the low-power tumble tail — finalizing into anti-wrinkle.",
+            self._matched_profile,
+            self._expected_duration,
+            current_duration,
+        )
+        self._finish_cycle(
+            timestamp,
+            status="completed",
+            termination_reason=TerminationReason.SMART,
+            keep_tail=True,
+        )
         return True
 
     def _is_terminal_drop(self) -> bool:
