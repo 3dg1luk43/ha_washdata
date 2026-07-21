@@ -961,7 +961,9 @@ class _DetailSim:
         series = self.series
         if len(series) > MAX_SERIES_PER_CYCLE:
             # Thin evenly so the shape is preserved (first + last always kept).
-            step = len(series) / MAX_SERIES_PER_CYCLE
+            # Span (len-1)/(N-1) so the final index lands on the true last point
+            # (a plain len/N tops out below it and drops the terminal sample).
+            step = (len(series) - 1) / (MAX_SERIES_PER_CYCLE - 1)
             series = [series[round(i * step)] for i in range(MAX_SERIES_PER_CYCLE)]
 
         return {

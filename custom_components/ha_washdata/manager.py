@@ -2065,7 +2065,9 @@ class WashDataManager:
         new_min_ratio = float(
             config_entry.options.get(
                 CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+                DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
+                    self.device_type, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
+                ),
             )
         )
         new_max_ratio = float(
@@ -3498,9 +3500,14 @@ class WashDataManager:
                         },
                     )
                     self._start_event_fired = True
-                    # Event delivery counts as the start signal — prevent the matching
-                    # fallback from re-entering this block on every 5-min match tick.
-                    self._notified_start = True
+                    # Mark the start fully handled ONLY when there is no push to send, so
+                    # the restart-recovery fallback does not re-enter for event-only
+                    # configs. When a push service/action IS configured, leave
+                    # _notified_start False so the push block below still fires: a config
+                    # with both events and push must get both (event delivery is tracked
+                    # separately by _start_event_fired).
+                    if not (self._notify_start_services or self._notify_actions):
+                        self._notified_start = True
 
                 # Fire push notification immediately - do not wait for profile matching.
                 if not self._notified_start and (self._notify_start_services or self._notify_actions):

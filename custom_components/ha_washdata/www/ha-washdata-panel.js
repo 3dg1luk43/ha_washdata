@@ -7362,7 +7362,7 @@ class HaWashdataPanel extends HTMLElement {
     tip.style.top = Math.max(6, top) + 'px';
   }
 
-  _hideGraphTip() { if (this._gtip) this._gtip.style.display = 'none'; this._syncSpagRowHighlight(null); }
+  _hideGraphTip() { if (this._hoverRafId) { cancelAnimationFrame(this._hoverRafId); this._hoverRafId = null; this._hoverPending = null; } if (this._gtip) this._gtip.style.display = 'none'; this._syncSpagRowHighlight(null); }
 
   _syncSpagRowHighlight(cid) {
     if (cid === this._spagHoverCid) return;
@@ -9089,7 +9089,9 @@ class HaWashdataPanel extends HTMLElement {
     // Click the highlighted curve on the graph to toggle that cycle's selection.
     const spag = sr.getElementById('wd-spag-canvas');
     if (spag) spag.addEventListener('pointerdown', e => {
-      this._onGraphHover(e, 'wd-spag-canvas');
+      // Hit-test synchronously: _onGraphHover defers via rAF, so _hoverNearest
+      // would still be stale/null on this same tick and the click would no-op.
+      this._onGraphHoverInner(e.clientX, e.clientY, 'wd-spag-canvas');
       const hn = this._hoverNearest;
       if (hn && hn.cid) {
         const sel = m.cleanup.selected;

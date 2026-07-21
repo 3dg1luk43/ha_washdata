@@ -22,9 +22,9 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.const import (
-    DOMAIN, STATE_RUNNING, STATE_OFF, 
+    DOMAIN, STATE_RUNNING, STATE_OFF,
     EVENT_CYCLE_STARTED, EVENT_CYCLE_ENDED,
-    CONF_NOTIFY_FIRE_EVENTS
+    CONF_NOTIFY_FIRE_EVENTS, CONF_NOTIFY_START_SERVICES, NOTIFY_EVENT_START,
 )
 from custom_components.ha_washdata.manager import WashDataManager
 from tests.utils.synthesizer import CycleSynthesizer
@@ -314,4 +314,88 @@ async def test_notify_fire_events_enabled_fires_both_events(hass: HomeAssistant)
         # Verify cycle completed and was recorded
         assert store.async_add_cycle.called
         assert store.async_clear_active_cycle.called
+
+
+@pytest.mark.asyncio
+async def test_start_push_fires_when_events_also_enabled(hass: HomeAssistant):
+    """Regression (PR #324): with BOTH notify_fire_events=True (default) and a
+    start push service configured, the start push must still dispatch.
+
+    A prior change set _notified_start=True immediately on firing EVENT_CYCLE_STARTED,
+    which then short-circuited the push block gated on `not _notified_start` -
+    silently dropping the start push for anyone using events + push together.
+    """
+    entry = MagicMock()
+    entry.entry_id = "test_events_plus_push"
+    entry.title = "Events+Push Washer"
+    entry.options = {
+        "power_sensor": "sensor.test_power",
+        "min_power": 5.0,
+        "off_delay": 30,
+        "min_off_gap": 30,
+        "end_energy_threshold": 0.05,
+        "device_type": "washing_machine",
+        CONF_NOTIFY_FIRE_EVENTS: True,          # events on (default)
+        CONF_NOTIFY_START_SERVICES: ["notify.test"],  # AND a push service
+    }
+    entry.data = {}
+
+    synth = CycleSynthesizer()
+    synth.add_phase(100.0, 30.0)   # Starting
+    synth.add_phase(500.0, 60.0)   # Running
+    synth.add_gap(300.0)           # End
+    readings = synth.generate(sample_interval=10.0)
+
+    with patch("custom_components.ha_washdata.manager.ProfileStore") as MockStore:
+        manager = WashDataManager(hass, entry)
+        store = MockStore.return_value
+        store.get_profiles.return_value = {}
+        store.get_active_cycle.return_value = None
+        store.get_past_cycles.return_value = []
+        store.get_suggestion_apply_cycle_count.return_value = 0
+        store.get_last_active_save.return_value = None
+        store.async_load = AsyncMock()
+        store.async_save = AsyncMock()
+        store.async_add_cycle = AsyncMock()
+        store.async_clear_active_cycle = AsyncMock()
+        store.async_repair_profile_samples = AsyncMock(return_value={})
+        store.async_migrate_cycles_to_compressed = AsyncMock()
+        store.async_run_maintenance = AsyncMock(return_value={})
+        store.get_suggestions.return_value = {}
+        mock_result = MagicMock()
+        mock_result.confidence = 0.0
+        mock_result.best_profile = None
+        mock_result.is_ambiguous = False
+        mock_result.expected_duration = 0.0
+        mock_result.matched_phase = None
+        mock_result.candidates = []
+        mock_result.is_confident_mismatch = False
+        store.async_match_profile = AsyncMock(return_value=mock_result)
+
+        await manager.async_setup()
+
+        events_started = []
+        hass.bus.async_listen(EVENT_CYCLE_STARTED, lambda e: events_started.append(e))
+
+        # Observe start-push dispatch without touching real HA notify services.
+        manager._dispatch_notification = MagicMock()
+
+        for ts, power in readings:
+            with patch("homeassistant.util.dt.now", return_value=ts):
+                event = MagicMock()
+                event.data = {"new_state": MagicMock(state=str(power))}
+                manager._async_power_changed(event)
+        await hass.async_block_till_done()
+        await asyncio.sleep(0.1)
+        await hass.async_block_till_done()
+
+        assert len(events_started) >= 1, "start event should fire"
+        start_pushes = [
+            c for c in manager._dispatch_notification.call_args_list
+            if c.kwargs.get("event_type") == NOTIFY_EVENT_START
+        ]
+        assert start_pushes, (
+            "start push must dispatch even when notify_fire_events is enabled "
+            "(events + push configured together)"
+        )
 

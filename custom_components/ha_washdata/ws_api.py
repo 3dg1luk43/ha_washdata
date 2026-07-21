@@ -1854,8 +1854,10 @@ async def _rebuild_envelopes_task(hass: HomeAssistant, task: Any, entry_id: str)
         return
     store = manager.profile_store
     lock = _entry_write_lock(hass, entry_id)
-    await lock.acquire()
+    acquired = False
     try:
+        await lock.acquire()
+        acquired = True
         names = list(store.get_profiles().keys())
         reg.update(task, total=len(names), done=0)
         rebuilt = 0
@@ -1882,7 +1884,8 @@ async def _rebuild_envelopes_task(hass: HomeAssistant, task: Any, entry_id: str)
         _LOGGER.warning("Rebuild-envelopes task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
     finally:
-        lock.release()
+        if acquired:
+            lock.release()
 
 
 @websocket_api.websocket_command(
@@ -2708,8 +2711,10 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
     # retrains and rewrites the store, and must not interleave with a concurrent
     # import / recording persist for the same entry.
     lock = _entry_write_lock(hass, entry_id)
-    await lock.acquire()
+    acquired = False
     try:
+        await lock.acquire()
+        acquired = True
         if task.cancel_requested:
             reg.finish(task, state=task_registry.STATE_CANCELLED)
             return
@@ -2785,7 +2790,8 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
         _LOGGER.warning("Reprocess task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
     finally:
-        lock.release()
+        if acquired:
+            lock.release()
 
 
 @websocket_api.websocket_command(
@@ -3317,8 +3323,10 @@ async def _trim_task(
         return
     store = manager.profile_store
     lock = _entry_write_lock(hass, entry_id)
-    await lock.acquire()
+    acquired = False
     try:
+        await lock.acquire()
+        acquired = True
         if task.cancel_requested:
             reg.finish(task, state=task_registry.STATE_CANCELLED)
             return
@@ -3338,7 +3346,8 @@ async def _trim_task(
         _LOGGER.warning("Trim task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
     finally:
-        lock.release()
+        if acquired:
+            lock.release()
 
 
 @websocket_api.websocket_command(
@@ -3474,8 +3483,10 @@ async def _apply_split_task(
         return
     store = manager.profile_store
     lock = _entry_write_lock(hass, entry_id)
-    await lock.acquire()
+    acquired = False
     try:
+        await lock.acquire()
+        acquired = True
         if task.cancel_requested:
             reg.finish(task, state=task_registry.STATE_CANCELLED)
             return
@@ -3495,7 +3506,8 @@ async def _apply_split_task(
         _LOGGER.warning("Apply-split task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
     finally:
-        lock.release()
+        if acquired:
+            lock.release()
 
 
 @websocket_api.websocket_command(
@@ -3564,8 +3576,10 @@ async def _apply_merge_task(
         return
     store = manager.profile_store
     lock = _entry_write_lock(hass, entry_id)
-    await lock.acquire()
+    acquired = False
     try:
+        await lock.acquire()
+        acquired = True
         if task.cancel_requested:
             reg.finish(task, state=task_registry.STATE_CANCELLED)
             return
@@ -3601,7 +3615,8 @@ async def _apply_merge_task(
         _LOGGER.warning("Apply-merge task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
     finally:
-        lock.release()
+        if acquired:
+            lock.release()
 
 
 # ─── Profile envelope / member cycles ──────────────────────────────────────────
@@ -4664,8 +4679,10 @@ async def _ml_training_task(hass: HomeAssistant, task: Any, entry_id: str) -> No
     # reprocess itself runs ML training): training rewrites the store, so two runs
     # for the same entry must not interleave.
     lock = _entry_write_lock(hass, entry_id)
-    await lock.acquire()
+    acquired = False
     try:
+        await lock.acquire()
+        acquired = True
         summary = await manager.async_run_ml_training(force=True)
         reg.finish(task, state=task_registry.STATE_DONE, result=summary)
     except asyncio.CancelledError:
@@ -4677,7 +4694,8 @@ async def _ml_training_task(hass: HomeAssistant, task: Any, entry_id: str) -> No
         _LOGGER.warning("ML training task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
     finally:
-        lock.release()
+        if acquired:
+            lock.release()
 
 
 @websocket_api.websocket_command(

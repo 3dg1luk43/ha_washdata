@@ -498,9 +498,12 @@ class CycleDetector:
         # washes.  Keep the good pre-tail match instead.  Self-correcting: a new
         # wash's heating burst above anti_wrinkle_max_power leaves the tail regime,
         # so this stops applying and matching re-arms for the next cycle.
-        if self._matched_profile and self._power_readings:
-            if self._in_anticrease_freeze(self._power_readings[-1][0]):
-                return
+        if (
+            self._matched_profile
+            and self._power_readings
+            and self._in_anticrease_freeze(self._power_readings[-1][0])
+        ):
+            return
         # Unpack 5 elements (or 4 for backward compatibility if needed, but wrapper is updated)
         # wrapper returns (name, confidence, duration, phase, is_mismatch)
         # Or MatchResult object if refactored, but currently wrapper returns tuple.
