@@ -239,6 +239,68 @@ def test_false_start_still_fires_without_verified_pause() -> None:
     )
 
 
+def test_paused_starting_falls_to_off_on_sustained_true_off() -> None:
+    """A user-paused STARTING must not stay pinned forever if the machine is
+    actually switched off (audit item: STARTING has no timeout).
+
+    verified_pause holds STARTING through a normal pause, but sustained power
+    below the stop threshold means the appliance was switched off rather than
+    resumed, so after STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS the detector must
+    fall back to OFF.
+    """
+    from custom_components.ha_washdata.const import (
+        STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS,
+    )
+
+    detector = _starting_detector()
+    now = dt_util.now()
+
+    detector.process_reading(200.0, now)
+    assert detector.state == STATE_STARTING
+    detector.set_verified_pause(True)
+
+    # Short pause with power off - still held (below the timeout).
+    detector.process_reading(0.0, now + timedelta(seconds=10))
+    assert detector.state == STATE_STARTING
+
+    # Sustained true-off beyond the timeout: the machine was switched off.
+    detector.process_reading(
+        0.0, now + timedelta(seconds=STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS + 30)
+    )
+    assert detector.state == STATE_OFF, (
+        "Paused STARTING should fall to OFF after sustained true-off; "
+        f"got state={detector.state!r}"
+    )
+
+
+def test_paused_starting_standby_power_holds() -> None:
+    """Control: a paused STARTING with standby power in the band *above* the stop
+    threshold but *below* the start threshold keeps holding (a genuine pause),
+    never falling to OFF on the true-off path."""
+    config = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=60,
+        start_duration_threshold=2.0,
+        start_energy_threshold=0.001,
+        start_threshold_w=10.0,
+        stop_threshold_w=2.0,
+    )
+    detector = CycleDetector(config, MagicMock(), MagicMock())
+    now = dt_util.now()
+
+    detector.process_reading(200.0, now)
+    assert detector.state == STATE_STARTING
+    detector.set_verified_pause(True)
+
+    # Standby power (5 W) sits above stop_threshold_w (2) but below start_threshold_w
+    # (10) for a long time - a genuine pause, not true-off. Must hold STARTING.
+    for minutes in range(1, 12):
+        detector.process_reading(5.0, now + timedelta(minutes=minutes))
+    assert detector.state == STATE_STARTING, (
+        f"Genuine standby pause must hold STARTING; got state={detector.state!r}"
+    )
+
+
 # ---------------------------------------------------------------------------
 # Fix D: manager restore promotes STARTING+user_paused snapshot to PAUSED
 # ---------------------------------------------------------------------------

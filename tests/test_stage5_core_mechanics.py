@@ -148,11 +148,16 @@ def test_reconcile_gap_raised_to_off_delay() -> None:
     assert out[CONF_MIN_OFF_GAP]["value"] == 180.0
 
 
-def test_reconcile_off_delay_lowered_when_gap_fixed() -> None:
-    # min_off_gap is a fixed current value (not suggested) -> lower off_delay.
+def test_reconcile_gap_raised_when_off_delay_suggested() -> None:
+    # off_delay is suggested (300) and min_off_gap is a fixed current value (120).
+    # Rule 2 must NEVER lower off_delay (that makes end/pause detection more
+    # aggressive and can split a genuine soak pause); it cascade-raises the gap
+    # to the off delay instead. off_delay stays 300.
     s = {CONF_OFF_DELAY: _sug(300.0)}
     out, changed = reconcile_suggestions(s, {CONF_MIN_OFF_GAP: 120})
-    assert out[CONF_OFF_DELAY]["value"] == 120.0
+    assert out[CONF_OFF_DELAY]["value"] == 300.0
+    assert out[CONF_MIN_OFF_GAP]["value"] == 300.0
+    assert CONF_MIN_OFF_GAP in changed
 
 
 def test_reconcile_watchdog_and_timeout() -> None:

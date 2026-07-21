@@ -51,9 +51,19 @@ from .const import (
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
     DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS,
+    WASHER_SMART_TERMINATION_DEBOUNCE_MAX_SECONDS,
+    STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS,
     DISHWASHER_MATCH_FREEZE_QUIET_SECONDS,
     DISHWASHER_MIN_CYCLE_DURATION_S,
     TERMINAL_DROP_OFF_DELAY_SECONDS,
+    ENDING_HARD_FINALIZE_RATIO,
+    ENDING_HARD_FINALIZE_MIN_QUIET_S,
+    STANDBY_BAND_FINALIZE_DEVICE_TYPES,
+    STANDBY_BAND_MIN_RATIO,
+    STANDBY_BAND_WINDOW_S,
+    STANDBY_BAND_MAX_FRACTION,
+    STANDBY_BAND_FLATNESS_FRACTION,
+    STANDBY_BAND_FLATNESS_FLOOR_W,
 )
 
 # The dishwasher end-spike wait window is shared between two code paths
@@ -312,6 +322,10 @@ class CycleDetector:
         # OFF only when the machine has clearly been switched off rather
         # than briefly dipped.
         self._delay_wait_true_off_seconds: float = 0.0
+        # _starting_true_off_seconds tracks sustained "true off" while a
+        # user-paused STARTING state is being held (issue #306), so the detector
+        # can fall back to OFF if the machine is switched off rather than resumed.
+        self._starting_true_off_seconds: float = 0.0
         # _delay_wait_high_start anchors the first high-power reading
         # observed inside DELAY_WAIT.  We only transition to STARTING
         # when the high-power streak has lasted at least
@@ -604,6 +618,7 @@ class CycleDetector:
         self._delay_band_seconds = 0.0
         self._delay_band_peak = 0.0
         self._delay_wait_true_off_seconds = 0.0
+        self._starting_true_off_seconds = 0.0
         self._delay_wait_high_start = None
 
     @property
@@ -979,6 +994,10 @@ class CycleDetector:
             self._power_readings.append((timestamp, power))
             self._cycle_max_power = max(self._cycle_max_power, power)
 
+            if is_high:
+                # Power back up - clear any accumulated "true off" hold time.
+                self._starting_true_off_seconds = 0.0
+
             if self._time_above_threshold >= self._config.start_duration_threshold:
                 if self._energy_since_idle_wh >= self._config.start_energy_threshold:
                     self._transition_to(STATE_RUNNING, timestamp)
@@ -989,7 +1008,27 @@ class CycleDetector:
             # that the low power is intentional, not a false start.
             if not is_high and self._time_below_threshold > 1.0:  # 1s grace period
                 if getattr(self, "_verified_pause", False):
-                    pass  # user pause holds; wait for Resume Cycle
+                    # User pause holds; wait for Resume Cycle (issue #306).  But a
+                    # genuinely paused appliance keeps standby power above the stop
+                    # threshold - sustained power *below* it means the machine was
+                    # switched off, so fall back to OFF rather than pinning STARTING
+                    # forever.
+                    if power < self._config.stop_threshold_w:
+                        self._starting_true_off_seconds += dt
+                        if (
+                            self._starting_true_off_seconds
+                            >= STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS
+                        ):
+                            self._logger.info(
+                                "Paused STARTING cancelled: power off (%.1fW) for "
+                                "%.0fs → OFF",
+                                power,
+                                self._starting_true_off_seconds,
+                            )
+                            self._transition_to(STATE_OFF, timestamp)
+                            return
+                    else:
+                        self._starting_true_off_seconds = 0.0
                 else:
                     # False start
                     self._logger.debug(
@@ -1014,6 +1053,32 @@ class CycleDetector:
 
             # Periodic profile matching
             self._try_profile_match(timestamp)
+
+            # Standby-band stuck finalize (#296): an appliance holding a flat
+            # low standby draw ABOVE stop_threshold never accumulates
+            # _time_below_threshold, so it never reaches PAUSED/ENDING.  Detect
+            # the plateau and finalize as a normal completion (so anti-wrinkle
+            # still engages).  Cheaply gated on being well past expected before
+            # the window scan runs.
+            if self._is_standby_band_stuck(timestamp):
+                start_time = self._current_cycle_start or timestamp
+                current_duration = (timestamp - start_time).total_seconds()
+                self._logger.info(
+                    "Standby-band finalize: flat plateau ~%.1fW (peak %.0fW) held "
+                    "past %.1fx expected %.0fs — appliance finished but holds a "
+                    "standby draw above stop_threshold; finalizing.",
+                    power,
+                    self._cycle_max_power,
+                    current_duration / max(self._expected_duration, 1.0),
+                    self._expected_duration,
+                )
+                self._finish_cycle(
+                    timestamp,
+                    status="completed",
+                    termination_reason=TerminationReason.TIMEOUT,
+                    keep_tail=False,
+                )
+                return
 
             # Max duration safety
             if (
@@ -1212,8 +1277,14 @@ class CycleDetector:
                             # the soak-bridging min_off_gap before committing
                             # Smart Termination, so a near-duplicate profile
                             # doesn't cut a long cycle short during a mid-cycle
-                            # power trough.
-                            smart_debounce = max(180.0, self._config.min_off_gap * 0.5)
+                            # power trough.  Bounded above so a large suggested /
+                            # hand-set min_off_gap can't inflate the quiet-time
+                            # requirement and starve end-detection (see
+                            # WASHER_SMART_TERMINATION_DEBOUNCE_MAX_SECONDS).
+                            smart_debounce = min(
+                                WASHER_SMART_TERMINATION_DEBOUNCE_MAX_SECONDS,
+                                max(180.0, self._config.min_off_gap * 0.5),
+                            )
                         else:
                             smart_debounce = 120.0
 
@@ -1291,6 +1362,47 @@ class CycleDetector:
                                 keep_tail=True,
                             )
                             return
+
+                    # --- DURATION-ANCHORED HARD FINALIZE (backstop) ---
+                    # Separate safety net for a matched cycle whose Smart
+                    # Termination is blocked (ambiguous / prefix-ambiguous match)
+                    # and whose fallback energy gate is held open by a low standby
+                    # baseline: without this it sits in ENDING until the 8 h cap /
+                    # zombie-kill (#296/#311).  Fires only well past the expected
+                    # duration AND after a long *continuous* sub-threshold span, so
+                    # it can never truncate a longer program mismatched to a shorter
+                    # profile (a real longer program has high-power phases that keep
+                    # resetting the quiet timer) — asymmetric, shorten-only.  Not
+                    # for user-paused cycles.
+                    required_quiet = max(
+                        ENDING_HARD_FINALIZE_MIN_QUIET_S,
+                        float(max(self._config.off_delay, self._config.min_off_gap)),
+                    )
+                    if (
+                        self._expected_duration > 0
+                        and current_duration
+                        >= self._expected_duration * ENDING_HARD_FINALIZE_RATIO
+                        and self._time_below_threshold >= required_quiet
+                        and not self._verified_pause
+                    ):
+                        self._logger.info(
+                            "Duration-anchored finalize: cycle in ENDING at %.0fs "
+                            "(%.1fx expected %.0fs), quiet %.0fs — Smart Termination "
+                            "was blocked (ambiguous=%s prefix=%s); finalizing.",
+                            current_duration,
+                            current_duration / self._expected_duration,
+                            self._expected_duration,
+                            self._time_below_threshold,
+                            self._match_ambiguous,
+                            self._match_prefix_ambiguous,
+                        )
+                        self._finish_cycle(
+                            timestamp,
+                            status="completed",
+                            termination_reason=TerminationReason.TIMEOUT,
+                            keep_tail=False,
+                        )
+                        return
 
                 # --- FALLBACK TIMEOUT CHECK ---
                 # Rule: To separate cycles, we must wait at least min_off_gap.
@@ -1497,6 +1609,80 @@ class CycleDetector:
             result = None
         self._ml_end_cache = (now_ts, exp, start, result)
         return result
+
+    def _is_standby_band_stuck(self, timestamp: datetime) -> bool:
+        """Whether a RUNNING cycle is stuck on a flat standby plateau (#296).
+
+        Returns True only when ALL of the following hold, so this can never end
+        an active low-power phase:
+
+        * the device is a wet appliance where a stuck baseline is unambiguously
+          anomalous (``STANDBY_BAND_FINALIZE_DEVICE_TYPES``);
+        * a profile is matched and elapsed >= ``STANDBY_BAND_MIN_RATIO`` x the
+          expected duration (well past when it should have ended);
+        * not user-paused;
+        * the most recent >= ``STANDBY_BAND_WINDOW_S`` of readings are ALL at or
+          below ``STANDBY_BAND_MAX_FRACTION`` of the cycle's own peak power AND
+          span no more than ``STANDBY_BAND_FLATNESS_FRACTION`` of the peak (a flat
+          plateau, not fluctuating activity).
+
+        The expensive window scan runs only after the cheap duration gate passes,
+        so normal cycles never pay for it.
+        """
+        if self._config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES:
+            return False
+        if getattr(self, "_verified_pause", False):
+            return False
+        if not (self._matched_profile and self._expected_duration > 0):
+            return False
+        start = self._current_cycle_start
+        if start is None:
+            return False
+        current_duration = (timestamp - start).total_seconds()
+        if current_duration < self._expected_duration * STANDBY_BAND_MIN_RATIO:
+            return False
+        peak = float(self._cycle_max_power)
+        if peak <= 0:
+            return False
+
+        level_ceiling = peak * STANDBY_BAND_MAX_FRACTION
+        # Walk the tail; readings are chronological so we can break once outside
+        # the window (O(window), not O(n)).
+        window: list[float] = []
+        oldest_in_window: datetime | None = None
+        saw_older = False  # a reading older than the window exists -> full coverage
+        for ts, p in reversed(self._power_readings):
+            if (timestamp - ts).total_seconds() <= STANDBY_BAND_WINDOW_S:
+                window.append(float(p))
+                oldest_in_window = ts
+            else:
+                saw_older = True
+                break
+        # The plateau must actually SPAN the required window (data exists from
+        # before it), not just a couple of recent samples, and have enough points
+        # to judge.  `saw_older` (rather than an exact span >= WINDOW check) is
+        # robust to sample phase/granularity: with e.g. 30 s sampling the oldest
+        # in-window reading is typically only ~570-599 s old, which an exact check
+        # would wrongly reject.  A coverage sanity (oldest >= 90% of the window)
+        # guards against a sparse burst of samples sitting next to one old reading.
+        if (
+            oldest_in_window is None
+            or not saw_older
+            or len(window) < 3
+            or (timestamp - oldest_in_window).total_seconds()
+            < STANDBY_BAND_WINDOW_S * 0.9
+        ):
+            return False
+        hi = max(window)
+        lo = min(window)
+        if hi > level_ceiling:
+            return False  # a real active reading in the window - not standby
+        flatness_limit = max(
+            STANDBY_BAND_FLATNESS_FLOOR_W, peak * STANDBY_BAND_FLATNESS_FRACTION
+        )
+        if (hi - lo) > flatness_limit:
+            return False  # fluctuating - still doing work
+        return True
 
     def _is_terminal_drop(self) -> bool:
         """Whether the current low-power event is an anomalously-early hard drop.

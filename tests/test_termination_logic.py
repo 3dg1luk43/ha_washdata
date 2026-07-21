@@ -157,6 +157,217 @@ def test_manual_program_override_termination(base_config, mock_callbacks):
     # Should be OFF
     assert detector.state == STATE_FINISHED
 
+def test_ambiguous_match_stuck_in_ending_is_hard_finalized(base_config, mock_callbacks):
+    """Duration-anchored backstop: an ambiguous match whose fallback energy gate is
+    held open by a low standby baseline is finalized at ~2x expected instead of
+    sitting in ENDING until the 8h cap (#296/#311).
+
+    A 6-tuple match with ambiguous=True blocks Smart Termination; a 3.5 W standby
+    (below stop_threshold=4.0 so ENDING is reached, but energetic enough to trip
+    the 0.05 Wh energy gate over the 60 s off_delay window) blocks the normal
+    fallback timeout. Only the backstop can end the cycle.
+    """
+    from custom_components.ha_washdata.const import ENDING_HARD_FINALIZE_RATIO
+
+    mock_matcher = Mock()
+    # 6-tuple: (name, conf, expected_dur, phase, is_mismatch, ambiguous)
+    mock_matcher.side_effect = lambda readings: ("Heavy", 0.9, 3600.0, "Washing", False, True)
+
+    detector = CycleDetector(
+        config=base_config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+        profile_matcher=mock_matcher,
+    )
+
+    # Start + confirm RUNNING + establish the ambiguous match.
+    detector.process_reading(100.0, dt(0))
+    detector.process_reading(100.0, dt(30))
+    detector.process_reading(100.0, dt(60))
+    assert detector.matched_profile == "Heavy"
+    assert detector._match_ambiguous is True
+
+    # Run high for a while, then drop to a 3.5 W standby baseline.
+    for t in range(90, 1800, 30):
+        detector.process_reading(100.0, dt(t))
+    for t in range(1800, 5000, 30):
+        detector.process_reading(3.5, dt(t))
+
+    # Well past off_delay but below 2x expected (7200s): the energy gate must have
+    # blocked the normal fallback, so the cycle is still open (in ENDING).
+    assert detector.state != STATE_OFF, (
+        "Normal fallback fired despite the standby energy gate; "
+        f"state={detector.state!r}"
+    )
+    assert not mock_callbacks["on_cycle_end"].called
+
+    # Cross 2x expected (7200s) with the baseline still held: the backstop fires.
+    for t in range(5000, 7400, 30):
+        detector.process_reading(3.5, dt(t))
+
+    assert mock_callbacks["on_cycle_end"].called, (
+        "Duration-anchored backstop did not finalize the stuck cycle"
+    )
+    cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
+    # Finalized around 2x expected, well before the 8h (28800s) hard cap.
+    assert cycle_data["duration"] < 28800
+    assert cycle_data.get("termination_reason") == "timeout"
+
+
+def test_backstop_does_not_truncate_longer_program(base_config, mock_callbacks):
+    """Control: the backstop must NOT truncate a longer program mismatched to a
+    shorter profile. A real longer program keeps producing high-power phases, which
+    reset the continuous-quiet timer, so the sustained-quiet guard is never met.
+
+    Dips use a 3.9 W standby (below stop_threshold=4.0, but energetic enough to trip
+    the energy gate) so the *normal* fallback also can't fire during a dip — this
+    isolates the backstop: the only thing that could end the cycle here is the
+    duration-anchored finalize, and it must not.
+    """
+    mock_matcher = Mock()
+    # Mismatched to a short 1200s profile, ambiguous (so Smart Termination is off).
+    mock_matcher.side_effect = lambda readings: ("Quick", 0.9, 1200.0, "Washing", False, True)
+
+    detector = CycleDetector(
+        config=base_config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+        profile_matcher=mock_matcher,
+    )
+
+    detector.process_reading(100.0, dt(0))
+    detector.process_reading(100.0, dt(30))
+    detector.process_reading(100.0, dt(60))
+    assert detector.matched_profile == "Quick"
+
+    # A genuinely longer program: alternating high-power work and standby dips, run
+    # well past 2x the (wrong) 1200s expected. Each dip (~450s) is shorter than the
+    # 600s continuous-quiet floor and every high burst resets the quiet timer, so
+    # the sustained-quiet guard is never satisfied.
+    t = 90
+    while t < 6000:  # 5x the mismatched expected
+        for _ in range(4):    # ~120s of high-power work (resets the quiet timer)
+            detector.process_reading(120.0, dt(t)); t += 30
+        for _ in range(15):   # ~450s standby dip (< 600s quiet floor)
+            detector.process_reading(3.9, dt(t)); t += 30
+
+    # Despite being far past 2x the wrong expected duration, the cycle must NOT have
+    # been hard-finalized — high-power phases keep resetting the continuous-quiet timer.
+    assert not mock_callbacks["on_cycle_end"].called, (
+        "Backstop truncated a longer program mismatched to a shorter profile"
+    )
+
+
+def test_standby_band_stuck_running_is_finalized(base_config, mock_callbacks):
+    """#296: a washer that finishes but holds a flat standby draw ABOVE
+    stop_threshold never accumulates below-threshold time, so it never reaches
+    ENDING. The standby-band detector finalizes it (as a normal completion) once
+    the flat plateau has held past 2x the expected duration."""
+    mock_matcher = Mock()
+    mock_matcher.side_effect = lambda readings: ("Cotton", 0.9, 1200.0, "Washing", False, False)
+
+    detector = CycleDetector(
+        config=base_config,  # washing_machine, stop=4.0, start=6.0
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+        profile_matcher=mock_matcher,
+    )
+
+    # Establish RUNNING + match with real activity (peak 100 W).
+    for t in range(0, 300, 30):
+        detector.process_reading(100.0, dt(t))
+    assert detector.matched_profile == "Cotton"
+    assert detector.state == STATE_RUNNING
+
+    # Drop to a flat 5 W anti-crease baseline: above stop_threshold (4.0), so
+    # _time_below_threshold never accumulates and the cycle stays RUNNING.
+    for t in range(300, 2000, 30):
+        detector.process_reading(5.0, dt(t))
+    # Still short of 2x expected (2400s): must still be RUNNING (the #296 bug).
+    assert detector.state == STATE_RUNNING
+    assert not mock_callbacks["on_cycle_end"].called
+
+    # Cross 2x expected with the flat plateau still held → standby-band finalize.
+    for t in range(2000, 2600, 30):
+        detector.process_reading(5.0, dt(t))
+    assert mock_callbacks["on_cycle_end"].called, (
+        "Standby-band detector did not finalize the stuck cycle"
+    )
+    cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
+    assert cycle_data.get("termination_reason") == "timeout"
+    assert cycle_data["duration"] < 28800  # well before the 8h hard cap
+
+
+def test_standby_band_ignores_fluctuating_activity(base_config, mock_callbacks):
+    """Control: periodic high-power bursts (real activity) past 2x expected must
+    NOT be seen as a standby plateau — the level gate rejects any window with a
+    reading above a small fraction of the cycle peak."""
+    mock_matcher = Mock()
+    mock_matcher.side_effect = lambda readings: ("Cotton", 0.9, 1200.0, "Washing", False, False)
+
+    detector = CycleDetector(
+        config=base_config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+        profile_matcher=mock_matcher,
+    )
+
+    for t in range(0, 300, 30):
+        detector.process_reading(100.0, dt(t))
+    assert detector.matched_profile == "Cotton"
+
+    # Genuine ongoing activity well past 2x expected: 5 W plateaus broken by
+    # 100 W bursts. Any window containing a burst is not a standby plateau.
+    t = 300
+    while t < 4000:
+        for _ in range(15):  # ~450s at 5 W
+            detector.process_reading(5.0, dt(t)); t += 30
+        for _ in range(3):   # ~90s at 100 W (real activity)
+            detector.process_reading(100.0, dt(t)); t += 30
+
+    assert not mock_callbacks["on_cycle_end"].called, (
+        "Standby-band detector truncated a cycle that still had real activity"
+    )
+
+
+def test_standby_band_excludes_non_wet_device(mock_callbacks):
+    """Control: bread makers (keep-warm hold is legitimate) are excluded from the
+    standby-band finalize."""
+    from custom_components.ha_washdata.const import DEVICE_TYPE_BREAD_MAKER
+
+    config = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=60,
+        device_type=DEVICE_TYPE_BREAD_MAKER,
+        interrupted_min_seconds=150,
+        completion_min_seconds=600,
+        start_duration_threshold=0.0,
+        start_energy_threshold=0.0,
+        start_threshold_w=6.0,
+        stop_threshold_w=4.0,
+    )
+    mock_matcher = Mock()
+    mock_matcher.side_effect = lambda readings: ("Basic", 0.9, 1200.0, "Baking", False, False)
+    detector = CycleDetector(
+        config=config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+        profile_matcher=mock_matcher,
+    )
+
+    for t in range(0, 300, 30):
+        detector.process_reading(100.0, dt(t))
+    assert detector.matched_profile == "Basic"
+
+    # Flat 5 W keep-warm past 2x expected: excluded device type, so the
+    # standby-band finalize must not fire.
+    for t in range(300, 2800, 30):
+        detector.process_reading(5.0, dt(t))
+    assert not mock_callbacks["on_cycle_end"].called, (
+        "Standby-band finalize fired for an excluded device type"
+    )
+
+
 def test_fix_duration_keeps_alive(base_config, mock_callbacks):
     """
     Test that will PASS only after the fix.

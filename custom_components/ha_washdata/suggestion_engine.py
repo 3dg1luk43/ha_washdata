@@ -481,15 +481,17 @@ def reconcile_suggestions(
             adjust(CONF_MIN_POWER, round(stop * 0.8, 1), "the stop threshold")
 
         # ── Rule 2: min_off_gap >= off_delay ──────────────────────────────────
-        # Prefer raising the gap (derived); lower off_delay only when the gap is
-        # a fixed current value.
+        # Always cascade-RAISE the gap to the off delay; never lower off_delay.
+        # Lowering off_delay makes end/pause detection more aggressive and can
+        # split a genuine multi-minute soak pause into two separate cycles. The
+        # detector already takes max(off_delay, min_off_gap) at runtime, so
+        # raising the gap is the safe (and no-op-at-runtime) direction; the
+        # smart_debounce coupling that a larger gap would otherwise inflate is
+        # bounded in cycle_detector.py.
         min_gap = eff(CONF_MIN_OFF_GAP)
         off_delay = eff(CONF_OFF_DELAY)
         if off_delay is not None and min_gap is not None and min_gap < off_delay and in_out(CONF_MIN_OFF_GAP, CONF_OFF_DELAY):
-            if is_original(CONF_MIN_OFF_GAP):
-                adjust(CONF_MIN_OFF_GAP, off_delay, "the off delay")
-            else:
-                adjust(CONF_OFF_DELAY, min_gap, "the minimum off gap")
+            adjust(CONF_MIN_OFF_GAP, off_delay, "the off delay")
 
         # ── Rule 3a: watchdog_interval >= 2 × sampling_interval ───────────────
         sampling = eff(CONF_SAMPLING_INTERVAL)
