@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Võimalik programmide segu"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Järsk langus käsitletakse kohese lõpuna",
     "completion_min_seconds": "Lühim käivitus, mis loetakse päris tsükliks",
     "end_repeat_count": "Madalate näitude arv järjest enne lõpetamist",
     "interrupted_min_seconds": "Lühikesed tsüklid märgitakse katkestatuks",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Sellest vooluvõimsuse osast suuremat langust käsitletakse samuti järsuna (0,6 = 60% langus). Täiendab vattide künnist seadme suuruste lõikes.",
-      "label": "Järsu Languse Suhe"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Sellest suurem võimsuslangus märgib tsükli pigem Katkestatud (käsitsi tühistamine) kui loomuliku viimistlusena.",
-      "label": "Järsk Langus"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Tuvastage lühikesed väikese võimsusega trummelimpulsid, mida kuivati ​​pärast peamist kuumutusfaasi kiirgab, ja hoidke need valmis tsükliga ühendatud, selle asemel, et lugeda neid uute tsüklitena.",
       "label": "Luba Kortsudevastane Tuvastamine"

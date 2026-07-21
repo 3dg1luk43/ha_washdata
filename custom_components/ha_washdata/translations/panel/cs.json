@@ -954,14 +954,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Pokles větší než tento zlomek aktuálního příkonu je také považován za náhlý (0,6 = pokles o 60 %). Doplňuje prahovou hodnotu ve wattech pro spotřebiče různých velikostí.",
-      "label": "Poměr náhlého poklesu"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Pokles příkonu větší než tato hodnota označuje cyklus jako Přerušený (ručně zrušeno) spíše než přirozené ukončení.",
-      "label": "Náhlý pokles"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Rozpoznejte krátké impulzy s nízkým příkonem, které sušič emituje po hlavní tepelné fázi, a udržte je připojené k dokončenému cyklu místo čtení jako nové cykly.",
       "label": "Povolit detekci ochrany před zmačkáním"
@@ -1714,7 +1706,6 @@
     "other": "Jiné"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Náhlý pokles považovaný za okamžitý konec",
     "completion_min_seconds": "Nejkratší běh, který se počítá jako skutečný cyklus",
     "end_repeat_count": "Nízká čtení za sebou před ukončením",
     "interrupted_min_seconds": "Krátké cykly označené jako přerušené",

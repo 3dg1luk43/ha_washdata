@@ -954,14 +954,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Didesnis nei ši srovės galios sumažėjimas taip pat laikomas staigiu (0,6 = 60 % kritimas). Papildo vatų slenkstį įvairiems prietaisų dydžiams.",
-      "label": "Staigaus kritimo santykis"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Jei galios sumažėjimas didesnis nei šis, ciklas pažymimas kaip Pertrauktas (rankinis atšaukimas), o ne kaip natūrali apdaila.",
-      "label": "Staigus kritimas"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Atpažinkite trumpus mažos galios būgninius impulsus, kuriuos džiovyklė skleidžia po pagrindinės šildymo fazės, ir laikykite juos prijungtus prie baigto ciklo, o ne skaitykite juos kaip naujus ciklus.",
       "label": "Įjungti apsaugą nuo raukšlių"
@@ -1714,7 +1706,6 @@
     "other": "Kita"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Staigus kritimas laikomas nedelsiama pabaiga",
     "completion_min_seconds": "Trumpiausias veikimas, laikomas tikru ciklu",
     "end_repeat_count": "Kiek žemų rodmenų iš eilės prieš pabaigą",
     "interrupted_min_seconds": "Trumpi ciklai pažymimi kaip pertraukti",

@@ -337,6 +337,7 @@
     "default_tab": "Default tab when opening the panel",
     "delta": "Δ",
     "description": "Description",
+    "drag_to_resize": "Drag to resize",
     "dtw_blend_w": "Blend weight",
     "dtw_blended": "Blended score",
     "dtw_ddtw": "DDTW score",
@@ -780,6 +781,8 @@
     "pg_analysis_hint": "Select a cycle and click ↺ to load analysis.",
     "diagnostics_load_failed": "Could not load diagnostics: {error}",
     "manual_duration_ref_hint": "Only used when no reference cycle is selected – a reference cycle sets the duration from its own length.",
+    "head_trim_hint": "Remove this many seconds from the start",
+    "tail_trim_hint": "Remove this many seconds from the end",
     "advisory_poor_health": "'{name}' has a low fit score - its recent cycles vary a lot or match weakly. Review its cycles or re-record the profile so matching and time estimates stay accurate.",
     "advisory_shape_drift": "'{name}' has drifted significantly from its original power shape. The appliance may have changed behaviour over time (e.g. limescale, wear). Consider re-recording this profile with recent cycles.",
     "advisory_shape_drift_corr": "'{name}' has drifted significantly from its original power shape (correlation {corr}). The appliance may have changed behaviour over time (e.g. limescale, wear). Consider re-recording this profile with recent cycles.",
@@ -820,7 +823,6 @@
     "share_profile_no_cycles": "No reference cycles – mark a cycle as ⭐ in the Cycles tab to include this profile"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Sudden drop treated as immediate end",
     "completion_min_seconds": "Shortest run that counts as a real cycle",
     "end_repeat_count": "Low readings in a row before ending",
     "interrupted_min_seconds": "Short cycles flagged as interrupted",
@@ -931,14 +933,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "A drop larger than this fraction of current power is also treated as abrupt (0.6 = a 60% drop). Complements the watts threshold across appliance sizes.",
-      "label": "Abrupt Drop Ratio"
-    },
-    "abrupt_drop_watts": {
-      "doc": "A power drop larger than this flags the cycle as Interrupted (manual cancel) rather than a natural finish.",
-      "label": "Abrupt Drop"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Recognise the short low-power tumble pulses a dryer emits after the main heat phase and keep them attached to the finished cycle instead of reading them as new cycles.",
       "label": "Enable Anti-Wrinkle Detection"

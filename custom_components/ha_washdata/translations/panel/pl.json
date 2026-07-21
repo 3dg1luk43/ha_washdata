@@ -954,14 +954,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Spadek większy niż ten ułamek mocy prądu jest również traktowany jako gwałtowny (0,6 = spadek o 60%). Uzupełnia próg watów dla różnych rozmiarów urządzeń.",
-      "label": "Współczynnik Nagłego Spadku"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Większy spadek mocy oznacza cykl jako przerwany (ręczne anulowanie), a nie jako naturalne zakończenie.",
-      "label": "Nagły Spadek"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Rozpoznawaj krótkie impulsy suszenia o małej mocy, które suszarka emituje po głównej fazie nagrzewania, i pamiętaj o ich dołączeniu do zakończonego cyklu, zamiast odczytywać je jako nowe cykle.",
       "label": "Włącz Wykrywanie Antygniotowe"
@@ -1714,7 +1706,6 @@
     "other": "Inne"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Nagły spadek traktowany jako natychmiastowy koniec",
     "completion_min_seconds": "Najkrótszy przebieg liczony jako prawdziwy cykl",
     "end_repeat_count": "Kolejne niskie odczyty przed zakończeniem",
     "interrupted_min_seconds": "Krótkie cykle oznaczane jako przerwane",

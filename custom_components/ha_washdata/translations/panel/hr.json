@@ -954,14 +954,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Pad veći od ovog udjela trenutne snage također se tretira kao nagli (0,6 = pad od 60%). Nadopunjuje prag u vatima za sve veličine uređaja.",
-      "label": "Omjer naglog pada"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Pad snage veći od ovoga označava ciklus kao prekinut (ručno otkazivanje), a ne prirodni završetak.",
-      "label": "Nagli pad (W)"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Prepoznajte kratke impulse male snage koje sušilica emitira nakon glavne faze zagrijavanja i držite ih vezanima uz završeni ciklus umjesto da ih čitate kao nove cikluse.",
       "label": "Omogući otkrivanje anti-bora"
@@ -1714,7 +1706,6 @@
     "other": "Ostalo"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Nagli pad tretiran kao trenutni završetak",
     "completion_min_seconds": "Najkraći rad koji se broji kao pravi ciklus",
     "end_repeat_count": "Uzastopna niska očitanja prije završetka",
     "interrupted_min_seconds": "Kratki ciklusi označeni kao prekinuti",

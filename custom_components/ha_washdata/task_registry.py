@@ -215,6 +215,18 @@ class TaskRegistry:
             return True
         return False
 
+    def cancel_entry_tasks(self, entry_id: str) -> None:
+        """Mark all running tasks for an entry as cancelled and finish them.
+
+        Called during async_unload_entry so that tasks whose asyncio coroutine
+        was already cancelled (CancelledError) get a clean final state instead
+        of staying stuck in STATE_RUNNING across a reload.
+        """
+        for task in list(self._tasks.values()):
+            if task.entry_id == entry_id and task.state == STATE_RUNNING:
+                task._cancelled = True  # noqa: SLF001
+                self.finish(task, state=STATE_CANCELLED)
+
     # -- reads ---------------------------------------------------------------
     def get(self, task_id: str) -> Task | None:
         return self._tasks.get(task_id)
@@ -227,12 +239,16 @@ class TaskRegistry:
         ]
 
     def _evict(self) -> None:
-        finished = sorted(
-            [t for t in self._tasks.values() if t.state != STATE_RUNNING],
-            key=lambda t: t.finished_at or 0.0,
-        )
-        while len(finished) > _MAX_FINISHED:
-            self._tasks.pop(finished.pop(0).id, None)
+        # Evict per entry_id so that a busy entry cannot displace another entry's
+        # finished results before the panel reads them via get_task_result.
+        by_entry: dict[str, list[Task]] = {}
+        for t in self._tasks.values():
+            if t.state != STATE_RUNNING:
+                by_entry.setdefault(t.entry_id, []).append(t)
+        for tasks in by_entry.values():
+            tasks.sort(key=lambda t: t.finished_at or 0.0)
+            while len(tasks) > _MAX_FINISHED:
+                self._tasks.pop(tasks.pop(0).id, None)
 
 
 def get_registry(hass: HomeAssistant) -> TaskRegistry:

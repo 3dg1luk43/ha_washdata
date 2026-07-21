@@ -954,14 +954,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Padec, večji od tega deleža trenutne moči, se prav tako obravnava kot nenaden (0,6 = 60-odstotni padec). Dopolnjuje mejno vrednost v vatih za vse velikosti aparatov.",
-      "label": "Razmerje nenadnega padca"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Večji padec moči od tega označi cikel kot prekinjen (ročni preklic) in ne kot naravni zaključek.",
-      "label": "Nenaden padec"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Prepoznajte kratke vrtilne impulze nizke moči, ki jih oddaja sušilni stroj po glavni fazi segrevanja, in jih ohranite povezane s končanim ciklom, namesto da jih berete kot nove cikle.",
       "label": "Omogoči zaznavanje zaščite pred gubami"
@@ -1714,7 +1706,6 @@
     "other": "Drugo"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Nenaden padec, obravnavan kot takojšen konec",
     "completion_min_seconds": "Najkrajši zagon, ki šteje kot pravi cikel",
     "end_repeat_count": "Zaporedni nizki odčitki pred koncem",
     "interrupted_min_seconds": "Kratki cikli, označeni kot prekinjeni",

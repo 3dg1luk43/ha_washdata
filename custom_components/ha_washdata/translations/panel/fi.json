@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Mahdollisesti sekoittuneet ohjelmat"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Äkillinen pudotus tulkitaan välittömäksi lopuksi",
     "completion_min_seconds": "Lyhin ajo, joka lasketaan oikeaksi sykliksi",
     "end_repeat_count": "Peräkkäisten matalien lukemien määrä ennen päättymistä",
     "interrupted_min_seconds": "Lyhyet syklit merkitään keskeytyneiksi",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Tätä suurempaa pudotusta virran tehosta käsitellään myös äkillisenä (0,6 = 60 % pudotus). Täydentää wattirajaa eri laitekokojen välillä.",
-      "label": "Äkillisen pudotuksen suhde"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Tätä suurempi tehohäviö merkitsee syklin keskeytetyksi (manuaalinen peruutus) luonnollisen viimeistelyn sijaan.",
-      "label": "Äkillinen pudotus"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Tunnista lyhyet vähätehoiset rumpupulssit, joita kuivausrumpu lähettää päälämpövaiheen jälkeen, ja pidä ne kiinni valmiissa jaksossa sen sijaan, että luet ne uusina jaksoina.",
       "label": "Ota ryppyjenesto käyttöön"

@@ -333,23 +333,26 @@ def test_train_from_cycles_includes_remaining_time_record() -> None:
 
 
 def _spec() -> dict:
+    from custom_components.ha_washdata.ml.feature_extraction import PROGRESS_FEATURE_COLUMNS as _PROG_COLS
+    n = len(_PROG_COLS)
     fit = T.fit_ridge(
-        np.random.default_rng(8).normal(0.0, 1.0, (40, 2)),
+        np.random.default_rng(8).normal(0.0, 1.0, (40, n)),
         np.random.default_rng(9).uniform(0.1, 0.9, 40),
     )
     return T.build_regression_spec(
         name="remaining_time", target="progress_fraction",
-        feature_columns=["a", "b"], fit=fit,
+        feature_columns=list(_PROG_COLS), fit=fit,
     )
 
 
 def test_resolve_regressor_prefers_on_device_spec() -> None:
+    from custom_components.ha_washdata.ml.feature_extraction import PROGRESS_FEATURE_COLUMNS as _PROG_COLS
     store = MagicMock()
     store.get_ml_model_versions.return_value = {"remaining_time": {"spec": _spec()}}
     predict_fn, source = E.resolve_regressor("remaining_time", store)
     assert predict_fn is not None
     assert source == "on_device"
-    assert isinstance(predict_fn({"a": 0.5, "b": 0.5}), float)
+    assert isinstance(predict_fn({k: 0.5 for k in _PROG_COLS}), float)
 
 
 def test_resolve_regressor_none_without_store() -> None:

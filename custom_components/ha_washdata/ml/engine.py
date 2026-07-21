@@ -116,6 +116,28 @@ def resolve_scorer(capability: str, store: object | None):
             # classifier and regression capability keys are disjoint today, but this
             # guard keeps it safe if a key were ever reused.
             if isinstance(spec, dict) and spec.get("kind") != "standardized_linear":
+                # Feature-column schema guard: a spec promoted under an older
+                # FEATURE_COLUMNS must be dropped rather than silently scoring on a
+                # stale/neutral-filled schema. The call-time guard already catches
+                # shape mismatches, but this catches them at load time and logs
+                # clearly, so users see a single warm-up warning instead of a
+                # per-inference warning storm.
+                module_name = _MODEL_MODULES.get(capability)
+                if module_name is not None:
+                    try:
+                        _bm = importlib.import_module(f"{__package__}.{module_name}")
+                        _expected = list(getattr(_bm, "FEATURE_COLUMNS", []))
+                        _stored = list(spec.get("feature_columns") or [])
+                        if _expected and _stored and _stored != _expected:
+                            _LOGGER.warning(
+                                "Promoted spec for %r has stale feature schema "
+                                "(%d cols vs current %d); reverting to baseline.",
+                                capability, len(_stored), len(_expected),
+                            )
+                            return _baseline()
+                    except Exception:  # noqa: BLE001 - schema check must not break inference
+                        pass
+
                 from .trainer import score_spec
 
                 def _on_device_score(feats, _s=spec):
@@ -165,6 +187,21 @@ def resolve_regressor(capability: str, store: object | None):
         record = versions.get(capability)
         spec = record.get("spec") if isinstance(record, dict) else None
         if isinstance(spec, dict) and spec.get("kind") == "standardized_linear":
+            # Feature-column schema guard for regression specs.
+            try:
+                from .feature_extraction import PROGRESS_FEATURE_COLUMNS
+                _expected_r = list(PROGRESS_FEATURE_COLUMNS)
+                _stored_r = list(spec.get("feature_columns") or [])
+                if _expected_r and _stored_r and _stored_r != _expected_r:
+                    _LOGGER.warning(
+                        "Promoted regression spec for %r has stale feature schema "
+                        "(%d cols vs current %d); reverting to inert.",
+                        capability, len(_stored_r), len(_expected_r),
+                    )
+                    return (None, None)
+            except Exception:  # noqa: BLE001 - schema check must not break inference
+                pass
+
             from .trainer import predict_value_spec
 
             def _on_device_predict(feats, _s=spec):

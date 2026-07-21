@@ -107,6 +107,10 @@ DEFAULT_RECENT_CYCLES = 20
 MAX_BATCH_CYCLES = 50
 # Cap the per-cycle event log so a pathological trace cannot bloat the payload.
 MAX_EVENTS_PER_CYCLE = 300
+# Cap the per-cycle timeline series so a very long cycle (4h dishwasher = ~2800 pts)
+# does not bloat the task result. Points are thinned at finalize time — evenly-spaced,
+# so the shape is preserved rather than truncated.
+MAX_SERIES_PER_CYCLE = 600
 
 # Override keys the Playground honours, mapped to CycleDetectorConfig fields.
 # Only detection-relevant knobs matter; everything else in settings_override is
@@ -232,7 +236,7 @@ def _build_match_snapshots(
 ) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, list[str]], dict[str, Any]]:
     """Prepare the matcher snapshots + config once from the store.
 
-    Mirrors :meth:`ProfileStore.match_profile`: one snapshot per profile using
+    Mirrors the store's async matching path: one snapshot per profile using
     its sample cycle's decompressed trace, plus the store's live matching config
     (with any on-device tuned weight overrides merged in).
 
@@ -357,7 +361,7 @@ def _readings_from_cycle(
 _PROGRESS_STATES = (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
 # States in which no progress estimate is shown (mirrors _update_remaining_only).
 _DEAD_STATES = (STATE_OFF, STATE_UNKNOWN, STATE_IDLE)
-_SIM_SERIES_THROTTLE_S = 5.0  # production recomputes progress every 5s
+_SIM_SERIES_THROTTLE_S = 30.0  # cap estimator calls; 5s matched cadence made this a no-op
 
 
 def simulate_cycle_detail(
@@ -954,12 +958,18 @@ class _DetailSim:
                 alerts.append({"code": "underrun", "severity": "warn",
                                "detail": f"Finished at {ratio:.0%} of typical duration."})
 
+        series = self.series
+        if len(series) > MAX_SERIES_PER_CYCLE:
+            # Thin evenly so the shape is preserved (first + last always kept).
+            step = len(series) / MAX_SERIES_PER_CYCLE
+            series = [series[round(i * step)] for i in range(MAX_SERIES_PER_CYCLE)]
+
         return {
             "cycle_id": self.cycle.get("id"),
             "label": self.label,
             "duration_s": self.stored_duration,
             "config_summary": _sim_config_summary(self.config),
-            "series": self.series,
+            "series": series,
             "events": self.events,
             "alerts": alerts,
             "outcome": outcome,
@@ -1030,10 +1040,13 @@ def _run_rows(
     settings_override: dict[str, Any] | None,
     options: dict[str, Any],
     price: float | None,
+    prebuilt: tuple[Any, Any, Any, Any] | None = None,
 ) -> list[dict[str, Any]]:
     # Snapshots are store-derived (independent of the cycle and the detector-level
     # settings_override), so build them ONCE and reuse across all cycles/values.
-    prebuilt = _build_match_snapshots(store)
+    # Callers that drive many chunks should pass prebuilt= to avoid rebuilding per chunk.
+    if prebuilt is None:
+        prebuilt = _build_match_snapshots(store)
     rows: list[dict[str, Any]] = []
     for cycle in cycles:
         detail = simulate_cycle_detail(
@@ -1054,6 +1067,7 @@ def run_playground_history(
     options: dict[str, Any] | None,
     price: float | None,
     concurrency: int,
+    prebuilt: tuple[Any, Any, Any, Any] | None = None,
 ) -> dict[str, Any]:
     """Per-cycle rows for the Test-on-history table, plus a before/after diff when
     ``settings_override`` is set. Executor-safe; never raises."""
@@ -1076,11 +1090,11 @@ def run_playground_history(
     selected = selected[:concurrency]
 
     override = settings_override or None
-    rows = _run_rows(store, selected, base_config, override, options, price)
+    rows = _run_rows(store, selected, base_config, override, options, price, prebuilt)
     payload: dict[str, Any] = {"rows": rows, "summary": _rows_summary(rows)}
 
     if override:
-        base_rows = _run_rows(store, selected, base_config, None, options, price)
+        base_rows = _run_rows(store, selected, base_config, None, options, price, prebuilt)
         payload["baseline_rows"] = base_rows
         payload["baseline_summary"] = _rows_summary(base_rows)
         payload["diff"] = _diff_rows(base_rows, rows)
@@ -1272,6 +1286,7 @@ def run_playground_sweep(
     concurrency: int,
     param_y: str | None = None,
     values_y: list[float] | None = None,
+    prebuilt: tuple[Any, Any, Any, Any] | None = None,
 ) -> dict[str, Any]:
     """Sweep one param (1D curve) or two params (2D heatmap) and score each point
     by ``objective`` computed from the per-cycle rows. Executor-safe; never raises.
@@ -1296,7 +1311,7 @@ def run_playground_sweep(
     selected = selected[:concurrency]
 
     def _metric_for(override: dict[str, Any]) -> tuple[float | None, dict[str, Any]]:
-        rows = _run_rows(store, selected, base_config, override, options, price)
+        rows = _run_rows(store, selected, base_config, override, options, price, prebuilt)
         return objective_metric(rows, objective), _rows_summary(rows)
 
     current_x = _sim_config_summary(base_config).get(

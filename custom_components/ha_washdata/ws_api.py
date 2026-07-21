@@ -73,8 +73,10 @@ from .const import (
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_MAINTENANCE_REMINDER_CYCLES,
+    DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_OFF_DELAY_BY_DEVICE,
+    DEFAULT_RUNNING_DEAD_ZONE,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
     DEVICE_TYPES,
@@ -1873,6 +1875,9 @@ async def _rebuild_envelopes_task(hass: HomeAssistant, task: Any, entry_id: str)
             state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
             result={"success": True, "rebuilt": rebuilt},
         )
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.warning("Rebuild-envelopes task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
@@ -2705,9 +2710,17 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
     lock = _entry_write_lock(hass, entry_id)
     await lock.acquire()
     try:
+        if task.cancel_requested:
+            reg.finish(task, state=task_registry.STATE_CANCELLED)
+            return
+
         reg.update(task, total=5, done=0, label="Reprocessing: matching cycles",
                    label_key="task.reprocess.matching")
         summary["count"] = await store.async_reprocess_all_data()
+
+        if task.cancel_requested:
+            reg.finish(task, state=task_registry.STATE_CANCELLED, result=summary)
+            return
 
         reg.update(task, done=1, label="Reprocessing: backfilling golden",
                    label_key="task.reprocess.golden")
@@ -2715,6 +2728,10 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
             summary["golden_backfilled"] = await store.async_backfill_recorded_golden()
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _LOGGER.debug("golden backfill failed for %s: %s", entry_id, exc)
+
+        if task.cancel_requested:
+            reg.finish(task, state=task_registry.STATE_CANCELLED, result=summary)
+            return
 
         reg.update(task, done=2, label="Reprocessing: suggestions",
                    label_key="task.reprocess.suggestions")
@@ -2739,6 +2756,10 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 _LOGGER.debug("ML training failed for %s: %s", entry_id, exc)
 
+        if task.cancel_requested:
+            reg.finish(task, state=task_registry.STATE_CANCELLED, result=summary)
+            return
+
         reg.update(task, done=4, label="Reprocessing: cycle health",
                    label_key="task.reprocess.health")
         # Recompute per-cycle health against the (possibly retrained) model.
@@ -2755,6 +2776,9 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
         if _get_manager(hass, entry_id) is manager:
             manager.notify_update()
         reg.finish(task, state=task_registry.STATE_DONE, result=summary)
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
         # Task-level failure: log at WARNING so it is visible in the default HA log
         # and the panel Logs view (sub-step failures above stay at debug on purpose).
@@ -3295,6 +3319,9 @@ async def _trim_task(
     lock = _entry_write_lock(hass, entry_id)
     await lock.acquire()
     try:
+        if task.cancel_requested:
+            reg.finish(task, state=task_registry.STATE_CANCELLED)
+            return
         reg.update(task, total=1, done=0)
         ok = await store.trim_cycle_power_data(cycle_id, start_s, end_s)
         reg.update(task, done=1)
@@ -3304,6 +3331,9 @@ async def _trim_task(
         if _get_manager(hass, entry_id) is manager:
             manager.notify_update()
         reg.finish(task, state=task_registry.STATE_DONE, result={"success": True})
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.warning("Trim task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
@@ -3446,6 +3476,9 @@ async def _apply_split_task(
     lock = _entry_write_lock(hass, entry_id)
     await lock.acquire()
     try:
+        if task.cancel_requested:
+            reg.finish(task, state=task_registry.STATE_CANCELLED)
+            return
         reg.update(task, total=1, done=0)
         new_ids = await store.apply_split_interactive(cycle_id, segments)
         reg.update(task, done=1)
@@ -3455,9 +3488,14 @@ async def _apply_split_task(
             task, state=task_registry.STATE_DONE,
             result={"success": True, "new_ids": new_ids},
         )
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.warning("Apply-split task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+    finally:
+        lock.release()
 
 
 @websocket_api.websocket_command(
@@ -3528,6 +3566,9 @@ async def _apply_merge_task(
     lock = _entry_write_lock(hass, entry_id)
     await lock.acquire()
     try:
+        if task.cancel_requested:
+            reg.finish(task, state=task_registry.STATE_CANCELLED)
+            return
         reg.update(task, total=1, done=0)
         created_new = False
         if new_name:
@@ -3553,6 +3594,9 @@ async def _apply_merge_task(
             task, state=task_registry.STATE_DONE,
             result={"success": True, "new_id": new_id},
         )
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.warning("Apply-merge task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
@@ -4624,6 +4668,9 @@ async def _ml_training_task(hass: HomeAssistant, task: Any, entry_id: str) -> No
     try:
         summary = await manager.async_run_ml_training(force=True)
         reg.finish(task, state=task_registry.STATE_DONE, result=summary)
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
         # Task-level failure: log at WARNING so it surfaces in the default HA log and
         # the panel Logs view (not swallowed at debug like a routine sub-step miss).
@@ -4838,7 +4885,7 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
     opts: dict[str, Any] = {}
     if entry is not None:
         opts = {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
-    min_power = float(opts.get(CONF_MIN_POWER, 5.0) or 5.0)
+    min_power = float(opts.get(CONF_MIN_POWER, DEFAULT_MIN_POWER) or DEFAULT_MIN_POWER)
     return CycleDetectorConfig(
         min_power=min_power,
         off_delay=int(opts.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY)),
@@ -4846,7 +4893,7 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
         completion_min_seconds=int(opts.get(CONF_COMPLETION_MIN_SECONDS, 600)),
         end_repeat_count=int(opts.get(CONF_END_REPEAT_COUNT, 1)),
         min_off_gap=int(opts.get(CONF_MIN_OFF_GAP, 60)),
-        running_dead_zone=int(opts.get(CONF_RUNNING_DEAD_ZONE, 0)),
+        running_dead_zone=int(opts.get(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE)),
         start_threshold_w=float(opts.get(CONF_START_THRESHOLD_W, min_power)),
         stop_threshold_w=float(
             opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)
@@ -5186,6 +5233,9 @@ async def _pg_history_task(
         else:
             ids = [c.get("id") for c in past[-playground.DEFAULT_RECENT_CYCLES:]]
         ids = [i for i in ids[:playground.MAX_BATCH_CYCLES] if i]
+        # Build match snapshots once — they are store-derived and identical for
+        # every chunk; rebuilding per chunk is O(n_profiles) wasted work.
+        prebuilt = await hass.async_add_executor_job(playground._build_match_snapshots, store)
         reg.update(task, total=len(ids))
         rows: list[dict[str, Any]] = []
         base_rows: list[dict[str, Any]] = []
@@ -5195,7 +5245,7 @@ async def _pg_history_task(
             chunk = ids[i:i + _PG_HISTORY_CHUNK]
             r = await hass.async_add_executor_job(
                 playground.run_playground_history,
-                store, chunk, base_config, override, options, price, len(chunk),
+                store, chunk, base_config, override, options, price, len(chunk), prebuilt,
             )
             rows.extend(r.get("rows") or [])
             base_rows.extend(r.get("baseline_rows") or [])
@@ -5207,6 +5257,9 @@ async def _pg_history_task(
             state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
             result=payload,
         )
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground history task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
@@ -5228,6 +5281,8 @@ async def _pg_sweep_task(
         ids = [c.get("id") for c in past[-playground.DEFAULT_RECENT_CYCLES:] if isinstance(c, dict)]
         ids = [i for i in ids[:playground.MAX_BATCH_CYCLES] if i]
         n = max(1, len(ids))
+        # Build match snapshots once — identical for every sweep value/cell.
+        prebuilt = await hass.async_add_executor_job(playground._build_match_snapshots, store)
         if param_y and values_y:
             reg.update(task, total=len(values) * len(values_y))
             grid: list[list[float | None]] = [[None] * len(values) for _ in values_y]
@@ -5242,7 +5297,7 @@ async def _pg_sweep_task(
                     r = await hass.async_add_executor_job(
                         playground.run_playground_sweep,
                         store, ids, base_config, param, [vx], objective,
-                        options, price, n, param_y, [vy],
+                        options, price, n, param_y, [vy], prebuilt,
                     )
                     cell = (r.get("grid") or [[None]])[0]
                     grid[j][i] = cell[0] if cell else None
@@ -5263,6 +5318,7 @@ async def _pg_sweep_task(
                 r = await hass.async_add_executor_job(
                     playground.run_playground_sweep,
                     store, ids, base_config, param, [vx], objective, options, price, n,
+                    None, None, prebuilt,
                 )
                 points.extend(r.get("points") or [])
                 if r.get("current_value") is not None:
@@ -5275,6 +5331,9 @@ async def _pg_sweep_task(
             state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
             result=payload,
         )
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground sweep task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
@@ -5393,6 +5452,9 @@ async def _pg_detail_task(
             state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
             result=payload,
         )
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground detail task failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))

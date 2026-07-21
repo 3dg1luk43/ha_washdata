@@ -582,6 +582,13 @@ class CycleDetector:
             self._time_below_threshold = 0.0
         self._last_match_time = None
         self._matched_profile = None
+        # Clear stale match state so the next cycle starts with clean defaults.
+        # _expected_duration left at 0 tells the dishwasher end-spike gate that
+        # no profile is matched yet; stale non-zero would mis-gate the spike check.
+        self._expected_duration = 0.0
+        self._last_match_confidence = 0.0
+        self._match_ambiguous = False
+        self._match_prefix_ambiguous = False
         self._ignore_power_until_idle = False  # Reset lockout
         self._lockout_high_seconds = 0.0
         # Clear the verified-pause flag so it can't leak into the next cycle (B6):
@@ -1032,6 +1039,15 @@ class CycleDetector:
         elif self._state == STATE_ENDING:
             self._power_readings.append((timestamp, power))
 
+            # Hard cap: ENDING must not run longer than RUNNING's 8 h safety limit.
+            # Without this a standby baseline can hold the state open indefinitely.
+            if (
+                self._current_cycle_start
+                and (timestamp - self._current_cycle_start).total_seconds() > 28800
+            ):
+                self._finish_cycle(timestamp, status="force_stopped")
+                return
+
             if is_high:
                 start_time = self._current_cycle_start or timestamp
                 current_duration = (timestamp - start_time).total_seconds()
@@ -1333,11 +1349,15 @@ class CycleDetector:
 
                 if self._time_below_threshold >= effective_off_delay:
 
-                    recent_window = [
-                        r
-                        for r in self._power_readings
-                        if (timestamp - r[0]).total_seconds() <= gate_window
-                    ]
+                    # Walk from the tail — readings are chronological so we can
+                    # break as soon as we exceed the gate window (O(window) not O(n)).
+                    recent_window = []
+                    for r in reversed(self._power_readings):
+                        if (timestamp - r[0]).total_seconds() <= gate_window:
+                            recent_window.append(r)
+                        else:
+                            break
+                    recent_window.reverse()
 
                     if not recent_window:
                         # Check deferred finish for matched profiles

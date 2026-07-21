@@ -954,14 +954,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Një rënie më e madhe se kjo pjesë e fuqisë aktuale trajtohet gjithashtu si e papritur (0.6 = një rënie prej 60%). Plotëson pragun e vateve në përmasat e pajisjes.",
-      "label": "Raporti i rënies së papritur"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Një rënie energjie më e madhe se kjo e shënon ciklin si të ndërprerë (anulim manual) dhe jo si përfundim natyral.",
-      "label": "Rënie e papritur"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Njihni pulset e shkurtra me fuqi të ulët që lëshon një tharëse pas fazës kryesore të nxehtësisë dhe mbajini të lidhura me ciklin e përfunduar në vend që t'i lexoni si cikle të reja.",
       "label": "Aktivizo zbulimin kundër rrudhave"
@@ -1714,7 +1706,6 @@
     "other": "Tjetër"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Rënia e papritur trajtohet si përfundim i menjëhershëm",
     "completion_min_seconds": "Ekzekutimi më i shkurtër që llogaritet si cikël i vërtetë",
     "end_repeat_count": "Lexime të ulëta radhazi para përfundimit",
     "interrupted_min_seconds": "Ciklet e shkurtra shënohen si të ndërprera",

@@ -954,14 +954,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Az áramerősség ezen hányadánál nagyobb esést is hirtelennek kell tekinteni (0,6 = 60%-os csökkenés). Kiegészíti a watt-küszöböt a készülékek méretében.",
-      "label": "Hirtelen esés aránya"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Az ennél nagyobb teljesítménycsökkenés a ciklust Megszakítottként (kézi törlés) jelzi, nem pedig természetes befejezésként.",
-      "label": "Hirtelen esés"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Ismerje fel a szárítógép által a fő fűtési fázis után kibocsátott rövid, kis teljesítményű szárítópulzusokat, és tartsa őket a kész ciklushoz kapcsolva, ahelyett, hogy új ciklusként olvasná őket.",
       "label": "Ránctalanítás érzékelés engedélyezése"
@@ -1714,7 +1706,6 @@
     "other": "Egyéb"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "A hirtelen esést azonnali befejezésként kezeli",
     "completion_min_seconds": "A legrövidebb futás, ami valódi ciklusnak számít",
     "end_repeat_count": "Egymást követő alacsony leolvasások a befejezés előtt",
     "interrupted_min_seconds": "A rövid ciklusokat megszakítottként jelöli",

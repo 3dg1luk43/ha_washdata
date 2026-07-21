@@ -67,6 +67,10 @@ def find_best_alignment(
     n_curr = len(curr)
     n_ref = len(ref)
 
+    # Guard: cross-correlation crashes on empty or single-element arrays.
+    if n_curr < 2 or n_ref < 2:
+        return 0.0, {"corr": 0.0, "mae_score": 0.0}, 0
+
     # 1. Coarse Alignment (Cross-Correlation)
     # Downsample for speed if arrays are large
     ds_factor = 1
@@ -251,11 +255,12 @@ def _dtw_component_score(
     band: float,
     derivative: bool,
     scale: float,
+    curr_resampled: np.ndarray | None = None,
 ) -> float:
     """DTW similarity in [0,1] for one candidate: resample both series to a
     common grid, warp (level or derivative), and express the distance relative
     to the current peak (behaviour-neutral at MATCH_MAE_REF_PEAK)."""
-    a = _resample_to(curr_arr, MATCH_DTW_RESAMPLE_N)
+    a = curr_resampled if curr_resampled is not None else _resample_to(curr_arr, MATCH_DTW_RESAMPLE_N)
     b = _resample_to(sample_arr, MATCH_DTW_RESAMPLE_N)
     dtw_dist = compute_dtw_lite(a, b, band_width_ratio=band, derivative=derivative)
     norm_dist = dtw_dist / MATCH_DTW_RESAMPLE_N
@@ -326,6 +331,8 @@ def compute_matches_worker(
         l1_scale = float(config.get("dtw_l1_scale", MATCH_DTW_DIST_SCALE))
         ddtw_scale = float(config.get("dtw_ddtw_scale", MATCH_DDTW_DIST_SCALE))
         ensemble_w = float(config.get("dtw_ensemble_w", MATCH_DTW_ENSEMBLE_W))
+        # Resample the current trace once — it's the same for every candidate.
+        curr_resampled = _resample_to(curr_arr, MATCH_DTW_RESAMPLE_N)
 
         for cand in to_refine:
             sample_arr = np.array(cand["sample"])
@@ -340,8 +347,8 @@ def compute_matches_worker(
             elif dtw_mode == "ensemble":
                 # Blend the level-based (L1) and shape-based (derivative) DTW
                 # scores; they are complementary signals.
-                s_l1 = _dtw_component_score(curr_arr, sample_arr, current_peak, dtw_bandwidth, False, l1_scale)
-                s_dd = _dtw_component_score(curr_arr, sample_arr, current_peak, dtw_bandwidth, True, ddtw_scale)
+                s_l1 = _dtw_component_score(curr_arr, sample_arr, current_peak, dtw_bandwidth, False, l1_scale, curr_resampled=curr_resampled)
+                s_dd = _dtw_component_score(curr_arr, sample_arr, current_peak, dtw_bandwidth, True, ddtw_scale, curr_resampled=curr_resampled)
                 dtw_score = ensemble_w * s_l1 + (1.0 - ensemble_w) * s_dd
                 norm_dist = 0.0  # composite; per-component distance not meaningful
             else:
@@ -352,7 +359,7 @@ def compute_matches_worker(
                 use_deriv = dtw_mode == "ddtw"
                 scale = ddtw_scale if use_deriv else l1_scale
                 dtw_score = _dtw_component_score(
-                    curr_arr, sample_arr, current_peak, dtw_bandwidth, use_deriv, scale
+                    curr_arr, sample_arr, current_peak, dtw_bandwidth, use_deriv, scale, curr_resampled=curr_resampled
                 )
                 norm_dist = 0.0
 

@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Möglicherweise gemischte Programme"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Plötzlicher Abfall gilt als sofortiges Ende",
     "completion_min_seconds": "Kürzester Lauf, der als echter Zyklus zählt",
     "end_repeat_count": "Aufeinanderfolgende niedrige Messwerte vor dem Ende",
     "interrupted_min_seconds": "Kurze Zyklen werden als unterbrochen markiert",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Ein Abfall, der größer als dieser Bruchteil der aktuellen Leistung ist, wird ebenfalls als abrupt behandelt (0,6 = ein Abfall von 60 %). Ergänzt den Watt-Grenzwert für alle Gerätegrößen.",
-      "label": "Abruptes Abfallverhältnis"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Bei einem größeren Leistungsabfall wird der Zyklus als unterbrochen (manueller Abbruch) und nicht als natürliches Ende gekennzeichnet.",
-      "label": "Abrupter Abfall"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Erkennen Sie die kurzen, stromsparenden Wäscheimpulse, die ein Trockner nach der Hauptheizphase abgibt, und behalten Sie im Zusammenhang mit dem abgeschlossenen Zyklus bei, anstatt sie als neue Zyklen zu lesen.",
       "label": "Knitterschutzerkennung aktivieren"

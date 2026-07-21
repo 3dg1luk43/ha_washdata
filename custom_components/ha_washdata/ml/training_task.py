@@ -469,7 +469,9 @@ def _train_regression_capability(
     }
     preds = np.clip(T.predict_matrix_spec(spec_probe, X_te), 0.0, 1.0)
     metrics = T.regression_metrics(y_te, preds)
-    model_mae = float(metrics.get("mae") or 1.0)
+    # Explicit None check — `or 1.0` would coerce MAE=0.0 to 1.0, rejecting a
+    # perfect regressor and blocking promotion.
+    model_mae = float(metrics.get("mae") if metrics.get("mae") is not None else 1.0)
 
     naive_col = columns.index("elapsed_over_expected") if "elapsed_over_expected" in columns else 0
     naive = np.clip(X_te[:, naive_col], 0.0, 1.0)

@@ -380,6 +380,7 @@ class WashDataManager:
         self._notify_finish_services: list[str] = []
         self._notify_live_services: list[str] = []
         self._notify_actions: list[dict[str, Any]] = []
+        self._notify_script: Any = None  # cached Script; invalidated on options reload
         self._notify_people: list[str] = []
         self._notify_cycle_timers: list[dict[str, Any]] = []
         self._fired_cycle_timers: set[int] = set()
@@ -485,6 +486,8 @@ class WashDataManager:
         self._sample_intervals: list[float] = []
         self._sample_interval_stats: dict[str, Any] = {}
         self._matching_task: Task[Any] | None = None
+        self._cycle_end_task: Task[Any] | None = None
+        self._is_shutdown: bool = False
         self._last_state_save = 0.0
         self._last_cycle_end_time: datetime | None = None
         self._remove_state_expiry_timer = None
@@ -503,7 +506,9 @@ class WashDataManager:
             self.entry_id,
             min_duration_ratio=config_entry.options.get(
                 CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+                DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
+                    self.device_type, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
+                ),
             ),
             max_duration_ratio=config_entry.options.get(
                 CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
@@ -2106,6 +2111,7 @@ class WashDataManager:
         self._notify_actions = list(
             cast(list[dict[str, Any]], config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or [])
         )
+        self._notify_script = None
         self._notify_people = list(
             config_entry.options.get(CONF_NOTIFY_PEOPLE, []) or []
         )
@@ -2202,6 +2208,13 @@ class WashDataManager:
 
     async def async_shutdown(self) -> None:
         """Shutdown."""
+        self._is_shutdown = True
+        # Cancel in-flight matching and cycle-end tasks so they don't race a
+        # freshly-loaded ProfileStore on reload_config_entry.
+        if self._matching_task and not self._matching_task.done():
+            self._matching_task.cancel()
+        if self._cycle_end_task and not self._cycle_end_task.done():
+            self._cycle_end_task.cancel()
         if self._remove_listener:
             self._remove_listener()
         if self._remove_external_trigger_listener:
@@ -2759,10 +2772,18 @@ class WashDataManager:
 
         now = dt_util.now()
 
-        # Throttle updates to avoid CPU overload on noisy sensors
-        # BUT always allow updates if power is below min_power (critical end-of-cycle signal).
+        # Throttle updates to avoid CPU overload on noisy sensors.
+        # Low-power readings bypass throttling when:
+        #   (a) a cycle is active (RUNNING/ENDING/PAUSED) — critical end-of-cycle signal, or
+        #   (b) this is a genuine power DROP from above min_power — captures power-off events
+        #       that occur before the detector has processed the previous above-threshold reading.
+        # Without the guard, an idle device at 0W fires an update on every sensor poll (typically
+        # every 1–5 s), flooding the detector with zero-value no-ops.
         min_p = float(self.detector.config.min_power)
-        is_low_power = power < min_p
+        is_low_power = power < min_p and (
+            self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+            or self._current_power >= min_p  # genuine drop from active power
+        )
 
         if (
             not is_low_power
@@ -3191,6 +3212,26 @@ class WashDataManager:
                 self._notify_update()
                 return
 
+        # Secondary zombie guard for unmatched cycles (expected == 0 when no profile
+        # has been matched). The detector hard-caps RUNNING at 8h but a chatty sensor
+        # that never goes silent can keep the watchdog from reaching the end state.
+        # Kill here after 4h so a stuck false-start doesn't run indefinitely.
+        elif (
+            expected == 0
+            and not self._is_user_paused
+            and not _verified_pause_zombie
+            and elapsed > 14400
+            and self._current_program in ("detecting...",)
+        ):
+            self._logger.warning(
+                "Watchdog: Unmatched cycle exceeded 4h (%.0fs). Force-ending.",
+                elapsed,
+            )
+            self.detector.force_end(now)
+            self._current_power = 0.0
+            self._notify_update()
+            return
+
         # 1. GHOST CYCLE SUPPRESSOR
         # If we are "detecting" for more than 10 minutes and haven't seen an update for 5 minutes,
         # it's likely a pump-out spike or an accidental start (ghost cycle).
@@ -3457,6 +3498,9 @@ class WashDataManager:
                         },
                     )
                     self._start_event_fired = True
+                    # Event delivery counts as the start signal — prevent the matching
+                    # fallback from re-entering this block on every 5-min match tick.
+                    self._notified_start = True
 
                 # Fire push notification immediately - do not wait for profile matching.
                 if not self._notified_start and (self._notify_start_services or self._notify_actions):
@@ -3606,9 +3650,10 @@ class WashDataManager:
         # detector into a fresh RUNNING before post-processing completes). See B1 in
         # _async_process_cycle_end.
         end_token = self._ranking_snapshot_cycle_id
-        self.hass.async_create_task(
-            self._async_process_cycle_end(cycle_data, cycle_token=end_token)
-        )
+        if not self._is_shutdown:
+            self._cycle_end_task = self.hass.async_create_task(
+                self._async_process_cycle_end(cycle_data, cycle_token=end_token)
+            )
 
     def _ml_end_confidence(
         self, points: list[tuple[float, float]], expected_duration: float
@@ -3842,7 +3887,10 @@ class WashDataManager:
             durations: list[float] = []
             energies: list[float] = []
             peaks: list[float] = []
-            for c in self.profile_store.get_past_cycles():
+            # Snapshot the list: this function runs in an executor thread and the
+            # event loop may append cycles concurrently; iterating a live list is
+            # a data race.
+            for c in list(self.profile_store.get_past_cycles()):
                 if c.get("profile_name") != profile_name:
                     continue
                 if c.get("duration") is not None:
@@ -5079,28 +5127,30 @@ class WashDataManager:
         if not actions:
             return False
 
-        try:
-            script = script_helper.Script(
-                self.hass,
-                actions,
-                name=f"{self.config_entry.title} notification",
-                domain=DOMAIN,
-                logger=_LOGGER,
-            )
-        except (ValueError, TypeError, HomeAssistantError) as err:
-            self._logger.error(
-                "Invalid notification action configuration for %s: %s",
-                self.config_entry.title,
-                err,
-            )
-            return False
-        except Exception as err:
-            self._logger.exception(
-                "Unexpected error while building notification actions for %s: %s",
-                self.config_entry.title,
-                err,
-            )
-            return False
+        if self._notify_script is None:
+            try:
+                self._notify_script = script_helper.Script(
+                    self.hass,
+                    actions,
+                    name=f"{self.config_entry.title} notification",
+                    domain=DOMAIN,
+                    logger=_LOGGER,
+                )
+            except (ValueError, TypeError, HomeAssistantError) as err:
+                self._logger.error(
+                    "Invalid notification action configuration for %s: %s",
+                    self.config_entry.title,
+                    err,
+                )
+                return False
+            except Exception as err:
+                self._logger.exception(
+                    "Unexpected error while building notification actions for %s: %s",
+                    self.config_entry.title,
+                    err,
+                )
+                return False
+        script = self._notify_script
 
         try:
             self.hass.async_create_task(
@@ -6118,7 +6168,7 @@ class WashDataManager:
     @property
     def samples_recorded(self):
         """Return the number of power samples recorded in current cycle."""
-        return len(self.detector.get_power_trace())
+        return self.detector.samples_recorded
 
     @property
     def sample_interval_stats(self):
