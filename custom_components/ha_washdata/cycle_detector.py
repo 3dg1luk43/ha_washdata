@@ -1101,14 +1101,35 @@ class CycleDetector:
             if self._is_standby_band_stuck(timestamp):
                 start_time = self._current_cycle_start or timestamp
                 current_duration = (timestamp - start_time).total_seconds()
+                # The plateau sits ABOVE stop_threshold, so it keeps advancing
+                # _last_active_time and the default keep_tail=False trim would NOT
+                # remove it - inflating the stored duration/energy with minutes of
+                # standby. Snap the end back to the last real activity (the last
+                # reading above the plateau ceiling) and drop the trailing plateau.
+                level_ceiling = float(self._cycle_max_power) * STANDBY_BAND_MAX_FRACTION
+                plateau_start_idx = None
+                for i in range(len(self._power_readings) - 1, -1, -1):
+                    if float(self._power_readings[i][1]) > level_ceiling:
+                        plateau_start_idx = i
+                        break
+                if (
+                    plateau_start_idx is not None
+                    and plateau_start_idx < len(self._power_readings) - 1
+                ):
+                    self._power_readings = self._power_readings[: plateau_start_idx + 1]
+                    self._last_active_time = self._power_readings[-1][0]
+                    current_duration = (
+                        self._last_active_time - start_time
+                    ).total_seconds()
                 self._logger.info(
                     "Standby-band finalize: flat plateau ~%.1fW (peak %.0fW) held "
-                    "past %.1fx expected %.0fs — appliance finished but holds a "
-                    "standby draw above stop_threshold; finalizing.",
+                    "past expected %.0fs — appliance finished but holds a standby "
+                    "draw above stop_threshold; finalizing (plateau trimmed, "
+                    "duration %.0fs).",
                     power,
                     self._cycle_max_power,
-                    current_duration / max(self._expected_duration, 1.0),
                     self._expected_duration,
+                    current_duration,
                 )
                 self._finish_cycle(
                     timestamp,
@@ -1588,6 +1609,10 @@ class CycleDetector:
             self._delay_wait_high_start = None
             self._delay_wait_high_power = None
             self._preserve_delay_band_on_off = False
+            # Clear the paused-STARTING true-off accumulator so a later STARTING
+            # cycle cannot inherit stale hold time and finalize to OFF prematurely
+            # (this path is also reached via the paused-STARTING cancellation).
+            self._starting_true_off_seconds = 0.0
 
         # Reset end spike tracker when entering ENDING state
         if new_state == STATE_ENDING:
@@ -1613,6 +1638,8 @@ class CycleDetector:
         elif new_state == STATE_STARTING:
             # Reset idle time if exiting ANTI_WRINKLE to STARTING (high-power burst resumed)
             self._anti_wrinkle_idle_time = 0.0
+            # Fresh STARTING cycle: never inherit a prior cycle's true-off hold.
+            self._starting_true_off_seconds = 0.0
         elif new_state == STATE_RUNNING:
             self._delay_band_start = None
             self._delay_band_seconds = 0.0

@@ -487,6 +487,10 @@ class WashDataManager:
         self._sample_interval_stats: dict[str, Any] = {}
         self._matching_task: Task[Any] | None = None
         self._cycle_end_task: Task[Any] | None = None
+        # Detached store-touching tasks (matching trigger, active-cycle clear,
+        # post-cycle processing) tracked so async_shutdown can cancel them before a
+        # reload/unload swaps the ProfileStore out from under them.
+        self._background_tasks: set[Task[Any]] = set()
         self._is_shutdown: bool = False
         self._last_state_save = 0.0
         self._last_cycle_end_time: datetime | None = None
@@ -774,7 +778,7 @@ class WashDataManager:
             # Snapshotted for thread safety indirectly by task logic
             # We don't need a wrapper task if we unify with _update_estimates matching
             # but for now let's keep the detector callback as a trigger
-            self.hass.async_create_task(self._async_perform_combined_matching(readings))
+            self._spawn_tracked(self._async_perform_combined_matching(readings))
             return (None, 0.0, 0.0, None)
 
         self.detector = CycleDetector(
@@ -2081,6 +2085,10 @@ class WashDataManager:
             self.profile_store.set_duration_ratio_limits(
                 min_ratio=new_min_ratio, max_ratio=new_max_ratio
             )
+            # Keep the detector's copy in sync: _should_defer_finish() reads
+            # detector.config.min_duration_ratio, which otherwise keeps the
+            # construction-time value until a restart (diverging from the matcher).
+            self.detector.config.min_duration_ratio = new_min_ratio
             self._logger.info(
                 "Updated duration ratios: min %.2f→%.2f, max %.2f→%.2f",
                 old_min_ratio,
@@ -2208,6 +2216,22 @@ class WashDataManager:
 
         self._logger.info("Configuration reloaded successfully")
 
+    def _spawn_tracked(self, coro: Any) -> "Task[Any]":
+        """Create a detached task and track it so shutdown can cancel it.
+
+        Use for fire-and-forget tasks that touch the ProfileStore (matching
+        trigger, active-cycle clear, post-cycle processing): if a reload/unload
+        swaps the store out mid-flight, an untracked task would keep writing to the
+        stale store. The task auto-removes itself from the set when it finishes.
+        """
+        task = self.hass.async_create_task(coro)
+        # Real HA always returns a Task; guard for degenerate returns (e.g. a
+        # mocked hass in tests) so tracking never breaks the caller.
+        if task is not None and hasattr(task, "add_done_callback"):
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
+        return task
+
     async def async_shutdown(self) -> None:
         """Shutdown."""
         self._is_shutdown = True
@@ -2217,6 +2241,11 @@ class WashDataManager:
             self._matching_task.cancel()
         if self._cycle_end_task and not self._cycle_end_task.done():
             self._cycle_end_task.cancel()
+        # Cancel every other tracked detached task (matching trigger, active-cycle
+        # clear, post-cycle processing) for the same reason.
+        for task in list(self._background_tasks):
+            if not task.done():
+                task.cancel()
         if self._remove_listener:
             self._remove_listener()
         if self._remove_external_trigger_listener:
@@ -2782,9 +2811,23 @@ class WashDataManager:
         # Without the guard, an idle device at 0W fires an update on every sensor poll (typically
         # every 1–5 s), flooding the detector with zero-value no-ops.
         min_p = float(self.detector.config.min_power)
+        # For the "genuine drop" bypass, compare against the previous RAW sensor
+        # value (old_state), not _current_power: the latter is only updated after a
+        # reading passes the throttle, so a suppressed high reading would leave it
+        # low and the following low reading would be throttled too, missing a short
+        # high->low transition. old_state reflects the plug's actual prior value.
+        prev_raw_power = self._current_power
+        old_state = cast(State | None, event_data.get("old_state"))
+        if old_state is not None and old_state.state not in (
+            STATE_UNKNOWN, STATE_UNAVAILABLE
+        ):
+            try:
+                prev_raw_power = float(old_state.state)
+            except ValueError:
+                pass
         is_low_power = power < min_p and (
             self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
-            or self._current_power >= min_p  # genuine drop from active power
+            or prev_raw_power >= min_p  # genuine drop from active power
         )
 
         if (
@@ -3223,7 +3266,12 @@ class WashDataManager:
             and not self._is_user_paused
             and not _verified_pause_zombie
             and elapsed > 14400
-            and self._current_program in ("detecting...",)
+            # Gate on the active detector state, not _current_program: the latter is
+            # only set to "detecting..." on the RUNNING transition, so a cycle stuck
+            # in STARTING keeps a stale program and would never hit this 4h guard.
+            and self.detector.state in (
+                STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING
+            )
         ):
             self._logger.warning(
                 "Watchdog: Unmatched cycle exceeded 4h (%.0fs). Force-ending.",
@@ -3563,7 +3611,7 @@ class WashDataManager:
         stranded in a terminal state with a stale active snapshot until the next
         cycle. Deliberately does NOT persist, notify, or run the learning pipeline.
         """
-        self.hass.async_create_task(self.profile_store.async_clear_active_cycle())
+        self._spawn_tracked(self.profile_store.async_clear_active_cycle())
         # Anchor the terminal state so _handle_state_expiry (and power-off) can act,
         # then arm the expiry timer that resets terminal -> Off after the reset delay.
         self._cycle_completed_time = dt_util.now()
@@ -3863,7 +3911,11 @@ class WashDataManager:
             self._logger,
         )
 
-    def _compute_cycle_quality_score(self, cycle_data: dict[str, Any]) -> None:
+    def _compute_cycle_quality_score(
+        self,
+        cycle_data: dict[str, Any],
+        past_cycles_snapshot: list[dict[str, Any]] | None = None,
+    ) -> None:
         """Score a just-finished cycle with the hybrid_curve_quality model (opt-in).
 
         When ML models are enabled for this device, computes P(cycle is a problem)
@@ -3894,10 +3946,16 @@ class WashDataManager:
             durations: list[float] = []
             energies: list[float] = []
             peaks: list[float] = []
-            # Snapshot the list: this function runs in an executor thread and the
-            # event loop may append cycles concurrently; iterating a live list is
-            # a data race.
-            for c in list(self.profile_store.get_past_cycles()):
+            # This function runs in an executor thread and the event loop may
+            # append cycles concurrently; iterating (or even copying) the live list
+            # here is a data race. Prefer the snapshot taken on the event loop at
+            # the call site; only fall back to a local copy for direct callers.
+            cycles = (
+                past_cycles_snapshot
+                if past_cycles_snapshot is not None
+                else list(self.profile_store.get_past_cycles())
+            )
+            for c in cycles:
                 if c.get("profile_name") != profile_name:
                     continue
                 if c.get("duration") is not None:
@@ -4320,8 +4378,12 @@ class WashDataManager:
         from .ml.engine import ml_models_enabled  # noqa: PLC0415
 
         if ml_models_enabled(self.config_entry.options):
+            # Snapshot past_cycles on the event loop before offloading: iterating
+            # (or copying) the live list inside the executor races the loop
+            # appending this just-finished cycle.
+            past_cycles_snapshot = list(self.profile_store.get_past_cycles())
             await self.hass.async_add_executor_job(
-                self._compute_cycle_quality_score, cycle_data
+                self._compute_cycle_quality_score, cycle_data, past_cycles_snapshot
             )
 
         # Add cycle to store immediately (still sync but offloadable parts optimized
@@ -4386,10 +4448,10 @@ class WashDataManager:
         # If a new cycle started during the awaits above, it now owns the active
         # snapshot; clearing it here would strip the new cycle's restart-resilience.
         if cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
-            self.hass.async_create_task(self.profile_store.async_clear_active_cycle())
+            self._spawn_tracked(self.profile_store.async_clear_active_cycle())
 
         # Auto post-process: merge fragmented cycles from last 3 hours
-        self.hass.async_create_task(self._run_post_cycle_processing())
+        self._spawn_tracked(self._run_post_cycle_processing())
 
         # Prepare cycle data for event (enrich if needed)
         # IMPORTANT: Exclude large fields to prevent exceeding HA's 32KB event data limit
@@ -5160,9 +5222,26 @@ class WashDataManager:
         script = self._notify_script
 
         try:
-            self.hass.async_create_task(
+            action_task = self.hass.async_create_task(
                 script.async_run(variables, context=Context())
             )
+            # This method is synchronous, so the script runs fire-and-forget: a
+            # failure inside async_run() would otherwise land after we return True
+            # and be swallowed. Surface it via a done-callback so an action-only
+            # setup at least logs the drop. (A user-visible fallback would require
+            # awaiting, i.e. making the whole notification-dispatch chain async.)
+            def _log_action_failure(task: "Task[Any]") -> None:
+                if task.cancelled():
+                    return
+                exc = task.exception()
+                if exc is not None:
+                    self._logger.warning(
+                        "Notification action execution failed for %s: %s",
+                        self.config_entry.title,
+                        exc,
+                    )
+
+            action_task.add_done_callback(_log_action_failure)
             return True
         except HomeAssistantError as err:
             self._logger.warning(
