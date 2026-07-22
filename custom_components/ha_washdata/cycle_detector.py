@@ -1045,7 +1045,14 @@ class CycleDetector:
                     # switched off, so fall back to OFF rather than pinning STARTING
                     # forever.
                     if power < self._config.stop_threshold_w:
-                        self._starting_true_off_seconds += dt
+                        # An outage-sized gap since the last reading is NOT observed
+                        # quiet (the machine may still be paused, we just lost
+                        # telemetry): reset so only genuinely-sampled sustained-off
+                        # time can cancel a paused STARTING.
+                        if dt > self._outage_threshold_s():
+                            self._starting_true_off_seconds = 0.0
+                        else:
+                            self._starting_true_off_seconds += dt
                         if (
                             self._starting_true_off_seconds
                             >= STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS
@@ -1144,7 +1151,11 @@ class CycleDetector:
                 self._current_cycle_start
                 and (timestamp - self._current_cycle_start).total_seconds() > 28800
             ):  # 8h safety
-                self._finish_cycle(timestamp, status="force_stopped")
+                self._finish_cycle(
+                    timestamp,
+                    status="force_stopped",
+                    termination_reason=TerminationReason.FORCE_STOPPED,
+                )
 
         elif self._state == STATE_PAUSED:
             self._power_readings.append((timestamp, power))
@@ -1173,7 +1184,11 @@ class CycleDetector:
                 self._current_cycle_start
                 and (timestamp - self._current_cycle_start).total_seconds() > 28800
             ):
-                self._finish_cycle(timestamp, status="force_stopped")
+                self._finish_cycle(
+                    timestamp,
+                    status="force_stopped",
+                    termination_reason=TerminationReason.FORCE_STOPPED,
+                )
                 return
 
             # Anti-crease finalize (#296) - see the RUNNING branch.  Fires ahead of
@@ -1447,12 +1462,21 @@ class CycleDetector:
                         ENDING_HARD_FINALIZE_MIN_QUIET_S,
                         float(max(self._config.off_delay, self._config.min_off_gap)),
                     )
+                    # Require the required_quiet tail to be actually SAMPLED (no
+                    # outage-sized gap): otherwise a telemetry outage that inflated
+                    # _time_below_threshold could finalize an active cycle early.
+                    quiet_ts = [
+                        ts
+                        for ts, _ in self._power_readings
+                        if (timestamp - ts).total_seconds() <= required_quiet
+                    ]
                     if (
                         self._expected_duration > 0
                         and current_duration
                         >= self._expected_duration * ENDING_HARD_FINALIZE_RATIO
                         and self._time_below_threshold >= required_quiet
                         and not self._verified_pause
+                        and not self._window_has_outage_gap(quiet_ts)
                     ):
                         self._logger.info(
                             "Duration-anchored finalize: cycle in ENDING at %.0fs "
@@ -1699,12 +1723,20 @@ class CycleDetector:
         """
         if len(window_ts) < 2:
             return True  # too few points to trust as a sustained window
+        max_gap = self._outage_threshold_s()
+        ordered = sorted(t.timestamp() for t in window_ts)
+        return any((b - a) > max_gap for a, b in zip(ordered, ordered[1:]))
+
+    def _outage_threshold_s(self) -> float:
+        """Sensor-adaptive gap ceiling (seconds): intervals longer than this are
+        treated as telemetry outages, not observed quiet. Data-driven from the
+        trace's own cadence (`energy_gap_threshold_s`), so a change-only sensor's
+        sparse-but-real stable stretches are not mistaken for a dropout.
+        """
         all_ts = np.array(
             [r[0].timestamp() for r in self._power_readings], dtype=float
         )
-        max_gap = energy_gap_threshold_s(all_ts)
-        ordered = sorted(t.timestamp() for t in window_ts)
-        return any((b - a) > max_gap for a, b in zip(ordered, ordered[1:]))
+        return energy_gap_threshold_s(all_ts)
 
     def _is_standby_band_stuck(self, timestamp: datetime) -> bool:
         """Whether a RUNNING cycle is stuck on a flat standby plateau (#296).
