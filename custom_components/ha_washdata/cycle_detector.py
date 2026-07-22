@@ -1685,6 +1685,27 @@ class CycleDetector:
         self._ml_end_cache = (now_ts, exp, start, result)
         return result
 
+    def _window_has_outage_gap(self, window_ts: list[datetime]) -> bool:
+        """Whether a 'sustained window' contains a data-outage-sized hole.
+
+        The span + coverage checks in the standby / anti-crease window scans accept
+        e.g. three readings spanning the window even if a long unobserved gap sits
+        between them (a sensor dropout, or a sparse burst next to one old reading).
+        Finalizing on such a window could wrongly cut an active cycle, so reject it.
+        The gap ceiling is the sensor's own data-driven outage threshold
+        (``energy_gap_threshold_s`` over the full trace), so a change-only sensor's
+        legitimately-sparse stable stretches (tens of seconds between reports) are
+        NOT rejected while a genuine dropout is.
+        """
+        if len(window_ts) < 2:
+            return True  # too few points to trust as a sustained window
+        all_ts = np.array(
+            [r[0].timestamp() for r in self._power_readings], dtype=float
+        )
+        max_gap = energy_gap_threshold_s(all_ts)
+        ordered = sorted(t.timestamp() for t in window_ts)
+        return any((b - a) > max_gap for a, b in zip(ordered, ordered[1:]))
+
     def _is_standby_band_stuck(self, timestamp: datetime) -> bool:
         """Whether a RUNNING cycle is stuck on a flat standby plateau (#296).
 
@@ -1724,11 +1745,13 @@ class CycleDetector:
         # Walk the tail; readings are chronological so we can break once outside
         # the window (O(window), not O(n)).
         window: list[float] = []
+        window_ts: list[datetime] = []
         oldest_in_window: datetime | None = None
         saw_older = False  # a reading older than the window exists -> full coverage
         for ts, p in reversed(self._power_readings):
             if (timestamp - ts).total_seconds() <= STANDBY_BAND_WINDOW_S:
                 window.append(float(p))
+                window_ts.append(ts)
                 oldest_in_window = ts
             else:
                 saw_older = True
@@ -1739,13 +1762,15 @@ class CycleDetector:
         # robust to sample phase/granularity: with e.g. 30 s sampling the oldest
         # in-window reading is typically only ~570-599 s old, which an exact check
         # would wrongly reject.  A coverage sanity (oldest >= 90% of the window)
-        # guards against a sparse burst of samples sitting next to one old reading.
+        # plus an adjacent-gap check (``_window_has_outage_gap``) guard against a
+        # sparse burst of samples sitting next to one old reading across a dropout.
         if (
             oldest_in_window is None
             or not saw_older
             or len(window) < 3
             or (timestamp - oldest_in_window).total_seconds()
             < STANDBY_BAND_WINDOW_S * 0.9
+            or self._window_has_outage_gap(window_ts)
         ):
             return False
         hi = max(window)
@@ -1842,25 +1867,29 @@ class CycleDetector:
         # Walk the tail; readings are chronological so we can break once outside the
         # window (O(window), not O(n)).
         window: list[float] = []
+        window_ts: list[datetime] = []
         oldest_in_window: datetime | None = None
         saw_older = False
         for ts, p in reversed(self._power_readings):
             if (timestamp - ts).total_seconds() <= ANTI_CREASE_CONFIRM_WINDOW_S:
                 window.append(float(p))
+                window_ts.append(ts)
                 oldest_in_window = ts
             else:
                 saw_older = True
                 break
         # The low-power tail must actually SPAN the window (data exists from before
         # it) and have enough points to judge - not just a couple of recent samples.
-        # ``saw_older`` plus a coverage sanity is robust to sample phase/granularity
-        # (mirrors _is_standby_band_stuck).
+        # ``saw_older`` plus a coverage sanity and an adjacent-gap check
+        # (``_window_has_outage_gap``) is robust to sample phase/granularity while
+        # rejecting a dropout-sized hole (mirrors _is_standby_band_stuck).
         if (
             oldest_in_window is None
             or not saw_older
             or len(window) < 3
             or (timestamp - oldest_in_window).total_seconds()
             < ANTI_CREASE_CONFIRM_WINDOW_S * 0.9
+            or self._window_has_outage_gap(window_ts)
         ):
             return False
         if max(window) > max_power:
