@@ -7845,8 +7845,13 @@ class HaWashdataPanel extends HTMLElement {
     // step === 'select'
     const man = m.manifest || {};
     const mismatch = man.device_type_match === false;
+    // Escape: source_device_type comes verbatim from the imported/shared file's
+    // device_fingerprint and is unvalidated; _t() does raw {var} substitution, so an
+    // un-escaped value would inject markup into innerHTML (XSS via a crafted import).
+    const srcDt = _esc(man.source_device_type || '?');
+    const localDt = _esc(man.local_device_type || '?');
     const warnBanner = mismatch ? `<div class="wd-banner wd-banner-warn" style="margin-bottom:12px;padding:8px 12px;border-radius:8px;background:var(--warning-color,#e6a700);color:#111">
-      ${this._t('msg.device_type_mismatch_warn', { src: man.source_device_type || '?', local: man.local_device_type || '?' }, 'This export is from a different appliance type (' + (man.source_device_type || '?') + ' vs ' + (man.local_device_type || '?') + '). Programs and cycles can still be imported as reference data, but device-specific settings and real-history import are disabled.')}
+      ${this._t('msg.device_type_mismatch_warn', { src: srcDt, local: localDt }, 'This export is from a different appliance type (' + srcDt + ' vs ' + localDt + '). Programs and cycles can still be imported as reference data, but device-specific settings and real-history import are disabled.')}
     </div>` : '';
     const tree = this._htmlSelectionTree(m, man, { importableOnly: true, conflicts: true });
     // Merge / replace mode toggle.
@@ -8654,7 +8659,18 @@ class HaWashdataPanel extends HTMLElement {
       if (key === 'start_threshold_w') this._pgThreshStart = val;
       else if (key === 'stop_threshold_w') this._pgThreshStop = val;
       else this._pgParamOverrides[key] = val;
+      // _render() rebuilds the shadow DOM (so the "Save to settings" button appears once
+      // an override exists), which destroys this <input> and drops focus mid-typing.
+      // Re-render, then restore focus + caret to the same field so multi-digit keyboard
+      // entry isn't interrupted after the first character.
+      let caret = null;
+      try { caret = inp.selectionStart; } catch (_) {}
       this._render();
+      const again = sr.querySelector(`[data-pgkey="${key}"]`);
+      if (again) {
+        again.focus();
+        if (caret != null) { try { again.setSelectionRange(caret, caret); } catch (_) {} }
+      }
       requestAnimationFrame(() => this._pgDrawCanvas());
     }));
 
@@ -9137,6 +9153,10 @@ class HaWashdataPanel extends HTMLElement {
 
     sr.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', e => this._onAction(e.currentTarget)));
     sr.querySelectorAll('[data-maction]').forEach(btn => btn.addEventListener('click', e => this._onModalAction(e.currentTarget.dataset.maction, e.currentTarget)));
+    // A <select data-maction> commits via `change` (not `click`, esp. on keyboard
+    // selection), so bind change too — otherwise e.g. the import conflict-resolution
+    // dropdown never records the user's pick and silently falls back to the default.
+    sr.querySelectorAll('select[data-maction]').forEach(sel => sel.addEventListener('change', e => this._onModalAction(e.currentTarget.dataset.maction, e.currentTarget)));
     // indeterminate is a JS property (no HTML attribute); apply it after render for
     // the share-device tree's partially-selected profile checkboxes.
     sr.querySelectorAll('input[data-indeterminate]').forEach(cb => { cb.indeterminate = true; });

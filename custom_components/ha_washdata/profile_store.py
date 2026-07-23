@@ -1698,7 +1698,8 @@ class ProfileStore:
         return out
 
     def _add_reference_cycle_nosave(
-        self, profile_name: str, points: list[list[float]], meta: dict[str, Any]
+        self, profile_name: str, points: list[list[float]], meta: dict[str, Any],
+        *, id_pool: set[Any] | None = None,
     ) -> str:
         """Validate + append one reference cycle. NO envelope rebuild, NO save.
 
@@ -1754,7 +1755,7 @@ class ProfileStore:
         profiles = self._data.setdefault("profiles", {})
         if profile_name not in profiles:
             profiles[profile_name] = {"avg_duration": duration}
-        self._add_cycle_data(cycle, target=self._data.setdefault("reference_cycles", []))
+        self._add_cycle_data(cycle, target=self._data.setdefault("reference_cycles", []), id_pool=id_pool)
         return str(cycle.get("id", ""))
 
     async def add_reference_cycle(
@@ -3415,16 +3416,28 @@ class ProfileStore:
         self._add_cycle_data(cycle_data)
         await self.async_enforce_retention()
 
-    def _add_cycle_data(self, cycle_data: CycleDict, target: list[CycleDict] | None = None) -> None:
+    def _add_cycle_data(
+        self,
+        cycle_data: CycleDict,
+        target: list[CycleDict] | None = None,
+        *,
+        id_pool: set[Any] | None = None,
+    ) -> None:
         """Internal logic to add cycle data to storage.
 
         ``target`` defaults to ``past_cycles``; ``add_reference_cycle`` passes the
         separate ``reference_cycles`` list so imported cycles never enter usage stats.
+
+        ``id_pool`` lets a bulk caller (e.g. selective import) hand in a reusable set of
+        already-assigned ids so the SHA-id uniqueness check stays O(1) amortized instead
+        of rebuilding the id set from the growing destination list on every call (which is
+        O(N^2) over a large import and would block the event loop). When supplied it is
+        mutated in place with the newly-minted id.
         """
         dest = self._data["past_cycles"] if target is None else target
         # Generate SHA256 ID — dedup suffix avoids collisions when two cycles share
         # an identical raw start_time + duration (e.g. bulk reference-cycle imports).
-        existing_ids = {c.get("id") for c in dest if isinstance(c, dict)}
+        existing_ids = id_pool if id_pool is not None else {c.get("id") for c in dest if isinstance(c, dict)}
         unique_str = f"{cycle_data['start_time']}_{cycle_data['duration']}"
         candidate = hashlib.sha256(unique_str.encode()).hexdigest()[:12]
         suffix = 0
@@ -3432,6 +3445,8 @@ class ProfileStore:
             suffix += 1
             candidate = hashlib.sha256(f"{unique_str}_{suffix}".encode()).hexdigest()[:12]
         cycle_data["id"] = candidate
+        if id_pool is not None:
+            id_pool.add(candidate)
 
         # Preserve profile_name if already set by manager; default to None otherwise
         if "profile_name" not in cycle_data:
@@ -6067,11 +6082,18 @@ class ProfileStore:
         src_past = [c for c in (data_dict.get("past_cycles") or []) if isinstance(c, dict)]
         src_refs = [c for c in (data_dict.get("reference_cycles") or []) if isinstance(c, dict)]
 
-        # Replace-mode anti-data-loss guard: don't let an empty file wipe live data.
-        if mode == "replace" and ("profiles" in cats or "real_cycles" in cats):
-            if not src_profiles and not src_past:
+        # Replace-mode anti-data-loss guard: don't let an empty file wipe live data. Each
+        # ticked category is guarded against its own kind of empty payload (the reference
+        # arm was previously unguarded, so a stale client could wipe curated reference
+        # cycles with a file that carried none).
+        if mode == "replace":
+            if ("profiles" in cats or "real_cycles" in cats) and not src_profiles and not src_past:
                 raise ValueError(
                     "Import payload contains no profiles or cycles — aborting to prevent data loss"
+                )
+            if "reference_cycles" in cats and not src_refs:
+                raise ValueError(
+                    "Import payload contains no reference cycles — aborting to prevent data loss"
                 )
 
         prof_filter = selection.get("profiles") if isinstance(selection.get("profiles"), list) else None
@@ -6099,6 +6121,7 @@ class ProfileStore:
         local_profiles = self._data.setdefault("profiles", {})
         name_remap: dict[str, str] = {}
         touched: set[str] = set()
+        overwritten: set[str] = set()  # profiles whose definition the file replaced in place
         created_profiles = 0
         conflicts_resolved = 0
         real_imported = 0
@@ -6111,13 +6134,24 @@ class ProfileStore:
                 if not isinstance(src_def, dict):
                     continue
                 if name in local_profiles:
-                    res = str(conflict_resolutions.get(name, "import_as_copy"))
+                    # In replace mode the file wins for every ticked category, so a name
+                    # clash always overwrites the local profile in place. This is enforced
+                    # here (not just as a default) because the panel still transmits its
+                    # analyze-time per-conflict resolutions even though it hides the resolver
+                    # in replace mode — honouring an "import_as_copy" there would leave a
+                    # stale original with an un-rebuilt envelope and, when reference_cycles
+                    # is also replaced, a dangling sample_cycle_id. Merge mode keeps the safe
+                    # copy default and shows the resolver.
+                    res = "overwrite" if mode == "replace" else str(
+                        conflict_resolutions.get(name, "import_as_copy")
+                    )
                     conflicts_resolved += 1
                     if res == "keep_mine":
                         name_remap[name] = name  # cycles route to the existing local profile
                     elif res == "overwrite":
                         local_profiles[name] = dict(src_def)
                         name_remap[name] = name
+                        overwritten.add(name)  # let Step 5 replace any stale local envelope
                     else:  # import_as_copy
                         new_name = _unique_profile_name(local_profiles, f"{name} (imported)")
                         local_profiles[new_name] = dict(src_def)
@@ -6134,34 +6168,64 @@ class ProfileStore:
                 local_profiles[name] = {"avg_duration": float(duration or 0)}
                 created_profiles += 1
 
+        # Replace-mode wipes (hoisted so the id pools + dedup set below reflect the
+        # post-wipe lists). Only the ticked category's list is cleared; the empty-payload
+        # guard above already refused to run if the file had nothing to replace it with.
+        if mode == "replace":
+            if "reference_cycles" in cats:
+                self._data["reference_cycles"] = []
+            if "real_cycles" in cats and cycle_destination == "real_history":
+                self._data["past_cycles"] = []
+
+        # O(N) id pools threaded through the bulk cycle adds so SHA-id uniqueness stays
+        # O(1) amortized instead of rebuilding the id set from the growing destination on
+        # every insert (previously O(N^2) for a large import, all on the event loop).
+        ref_id_pool: set[Any] = {c.get("id") for c in self._data.get("reference_cycles", []) if isinstance(c, dict)}
+        past_id_pool: set[Any] = {c.get("id") for c in self._data.get("past_cycles", []) if isinstance(c, dict)}
+        # Reference-cycle dedup: skip re-importing a reference cycle already held so a
+        # repeated import stays idempotent (otherwise envelopes get double-weighted and
+        # cycle_count inflates). Keyed on the stable source id stamped into meta.source.
+        existing_ref_sources: set[str] = {
+            str((c.get("meta") or {}).get("source"))
+            for c in self._data.get("reference_cycles", [])
+            if isinstance(c, dict) and (c.get("meta") or {}).get("source")
+        }
+
+        def _ref_dedup_key(raw_id: Any) -> str:
+            sid = str(raw_id or "")
+            return f"store:{sid}" if sid else ""
+
         # ── Step 2: reference cycles (shape-only) ───────────────────────────────
         if "reference_cycles" in cats:
-            if mode == "replace":
-                self._data["reference_cycles"] = []
             for c in _apply_id_filter(src_refs, ref_id_filter):
                 orig = str(c.get("profile_name") or "")
                 target = name_remap.get(orig, orig)
                 if not target:
                     continue
-                _ensure_profile(target, c.get("duration") or 0)
                 src_meta = c.get("meta") if isinstance(c.get("meta"), dict) else {}
+                raw_sid = src_meta.get("source") or c.get("id")
+                dkey = _ref_dedup_key(raw_sid)
+                if dkey and dkey in existing_ref_sources:
+                    continue  # already imported -> keep re-import idempotent
+                _ensure_profile(target, c.get("duration") or 0)
                 cid = self._add_reference_cycle_nosave(
                     target,
                     c.get("power_data") or [],
                     {
-                        "store_cycle_id": src_meta.get("source") or c.get("id"),
+                        "store_cycle_id": raw_sid,
                         "store_uploaded_at": src_meta.get("store_uploaded_at"),
                         "sampling_interval": c.get("sampling_interval"),
                     },
+                    id_pool=ref_id_pool,
                 )
                 if cid:
+                    if dkey:
+                        existing_ref_sources.add(dkey)
                     touched.add(target)
                     ref_imported += 1
 
         # ── Step 3: real cycles (reference-shape or real-history) ───────────────
         if "real_cycles" in cats:
-            if cycle_destination == "real_history" and mode == "replace":
-                self._data["past_cycles"] = []
             # Identity set (native ids + prior import provenance) for real-history dedup.
             known_ids: set[str] = set()
             for c in self._data.get("past_cycles", []):
@@ -6175,11 +6239,18 @@ class ProfileStore:
                 orig = str(c.get("profile_name") or "")
                 target = name_remap.get(orig, orig)
                 if cycle_destination == "reference":
+                    raw_sid = c.get("id")
+                    dkey = _ref_dedup_key(raw_sid)
+                    if dkey and dkey in existing_ref_sources:
+                        continue  # already imported as a reference cycle
                     _ensure_profile(target or "(imported)", c.get("duration") or 0)
                     cid = self._add_reference_cycle_nosave(
-                        target or "(imported)", c.get("power_data") or [], {"store_cycle_id": c.get("id")}
+                        target or "(imported)", c.get("power_data") or [],
+                        {"store_cycle_id": raw_sid}, id_pool=ref_id_pool,
                     )
                     if cid:
+                        if dkey:
+                            existing_ref_sources.add(dkey)
                         touched.add(target or "(imported)")
                         ref_imported += 1
                 else:  # real_history
@@ -6194,7 +6265,9 @@ class ProfileStore:
                         meta_c["imported_from"] = orig_id
                     cyc["meta"] = meta_c
                     cyc.pop("id", None)  # let _add_cycle_data assign a fresh, collision-safe id
-                    self._add_cycle_data(cyc, target=self._data.setdefault("past_cycles", []))
+                    self._add_cycle_data(
+                        cyc, target=self._data.setdefault("past_cycles", []), id_pool=past_id_pool
+                    )
                     if orig_id:
                         known_ids.add(orig_id)
                     if target:
@@ -6233,7 +6306,11 @@ class ProfileStore:
         for orig, new_name in name_remap.items():
             if new_name in touched:
                 continue  # will be rebuilt from imported cycles
-            if orig in src_envs and new_name not in local_envs:
+            # Carry the file's envelope when the target has none, OR when the file
+            # overwrote the definition in place (replace/overwrite: the file wins, so its
+            # envelope must supersede the now-mismatched stale local one instead of being
+            # discarded — otherwise matching keeps using the old shape).
+            if orig in src_envs and (new_name not in local_envs or new_name in overwritten):
                 local_envs[new_name] = src_envs[orig]  # keep it matchable without raw traces
         for p in sorted(touched):
             await self.async_rebuild_envelope(p)

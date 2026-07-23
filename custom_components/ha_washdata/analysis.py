@@ -222,48 +222,55 @@ def compute_dtw_lite(
 
     w = max(1, int(min(n, m) * band_width_ratio))
 
-    # Precompute band bounds for all rows (eliminates per-row int/max/min calls).
-    i_idx = np.arange(1, n + 1, dtype=float)
-    centers = (i_idx * (m / n)).astype(np.intp)
-    start_js = np.maximum(1, centers - w)
-    end_js = np.minimum(m, centers + w + 1)
+    try:
+        # Precompute band bounds for all rows (eliminates per-row int/max/min calls).
+        i_idx = np.arange(1, n + 1, dtype=float)
+        centers = (i_idx * (m / n)).astype(np.intp)
+        start_js = np.maximum(1, centers - w)
+        end_js = np.minimum(m, centers + w + 1)
 
-    # Convert y to a plain Python list once so that inner-loop element access
-    # is native float retrieval rather than NumPy scalar unboxing.
-    ylist = yf.tolist()
+        # Convert y to a plain Python list once so that inner-loop element access
+        # is native float retrieval rather than NumPy scalar unboxing.
+        ylist = yf.tolist()
 
-    prev_row = np.full(m + 1, np.inf)
-    curr_row = np.full(m + 1, np.inf)
-    prev_row[0] = 0.0
+        prev_row = np.full(m + 1, np.inf)
+        curr_row = np.full(m + 1, np.inf)
+        prev_row[0] = 0.0
 
-    for i in range(n):
-        sj = int(start_js[i])
-        ej = int(end_js[i])
-        curr_row[:] = np.inf
-        val_x = float(xf[i])
+        for i in range(n):
+            sj = int(start_js[i])
+            ej = int(end_js[i])
+            curr_row[:] = np.inf
+            val_x = float(xf[i])
 
-        # Convert the relevant prev_row slice to Python lists once per row.
-        # prev_prev[k]  == prev_row[sj - 1 + k]   (diagonal predecessor of cell j=sj+k)
-        # prev_curr[k]  == prev_row[sj + k]         (up-predecessor of cell j=sj+k)
-        prev_prev = prev_row[sj - 1 : ej].tolist()   # length = ej - sj + 1
-        prev_curr = prev_row[sj     : ej + 1].tolist() # length = ej - sj + 1
+            # Convert the relevant prev_row slice to Python lists once per row.
+            # prev_prev[k]  == prev_row[sj - 1 + k]   (diagonal predecessor of cell j=sj+k)
+            # prev_curr[k]  == prev_row[sj + k]         (up-predecessor of cell j=sj+k)
+            prev_prev = prev_row[sj - 1 : ej].tolist()   # length = ej - sj + 1
+            prev_curr = prev_row[sj     : ej + 1].tolist() # length = ej - sj + 1
 
-        row_vals: list[float] = []
-        prev_j_val = np.inf  # curr_row[sj - 1] — left predecessor, maintained locally
-        for y_val, pr_j1, pr_j in zip(ylist[sj - 1 : ej], prev_prev, prev_curr):
-            cost = abs(val_x - y_val)
-            # min(up=pr_j, left=prev_j_val, diag=pr_j1)
-            best = pr_j if pr_j < prev_j_val else prev_j_val
-            if pr_j1 < best:
-                best = pr_j1
-            prev_j_val = cost + best
-            row_vals.append(prev_j_val)
+            row_vals: list[float] = []
+            prev_j_val = np.inf  # curr_row[sj - 1] — left predecessor, maintained locally
+            for y_val, pr_j1, pr_j in zip(ylist[sj - 1 : ej], prev_prev, prev_curr):
+                cost = abs(val_x - y_val)
+                # min(up=pr_j, left=prev_j_val, diag=pr_j1)
+                best = pr_j if pr_j < prev_j_val else prev_j_val
+                if pr_j1 < best:
+                    best = pr_j1
+                prev_j_val = cost + best
+                row_vals.append(prev_j_val)
 
-        curr_row[sj : ej + 1] = row_vals   # single slice write
+            curr_row[sj : ej + 1] = row_vals   # single slice write
 
-        prev_row, curr_row = curr_row, prev_row  # swap without copy
+            prev_row, curr_row = curr_row, prev_row  # swap without copy
 
-    return float(prev_row[m])
+        return float(prev_row[m])
+    except Exception:  # pylint: disable=broad-exception-caught
+        # The scalar reference is byte-identical (proven by tests), so degrade to it on
+        # any unexpected error rather than propagating out of the unguarded Stage-3
+        # refinement loop in compute_matches_worker. Mirrors compute_dtw_path.
+        _LOGGER.debug("compute_dtw_lite vectorized path failed; using scalar fallback", exc_info=True)
+        return _dtw_lite_scalar(xf, yf, n, m, w)
 
 def _resample_to(arr: np.ndarray, n: int) -> np.ndarray:
     """Linearly resample a 1-D array to exactly ``n`` points over its index span.

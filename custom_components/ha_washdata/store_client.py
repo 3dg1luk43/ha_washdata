@@ -177,6 +177,11 @@ class StoreClient:
     # freshly-contributed entry still appears immediately for the user who added it.
     _CATALOG_CACHE_TTL_S = 900.0   # brands + device searches (15 min)
     _CONFIG_CACHE_TTL_S = 3600.0   # config/site (maintenance flag + confirm threshold)
+    # Hard cap on distinct cached read keys. Device searches key on the brand term, so a
+    # long-lived session that issues many distinct searches would otherwise accumulate an
+    # unbounded number of (mostly expired) entries. When the cap is exceeded we evict the
+    # soonest-to-expire entries, keeping the live TTL guarantee while bounding memory.
+    _MAX_READ_CACHE_ENTRIES = 256
 
     def __init__(
         self,
@@ -212,13 +217,20 @@ class StoreClient:
         if ent is None:
             return None
         expiry, value = ent
-        if time.time() >= expiry:
+        # Monotonic clock: immune to NTP/wall-clock steps that could otherwise extend or
+        # truncate the TTL (put + get must use the same clock).
+        if time.monotonic() >= expiry:
             self._read_cache.pop(key, None)
             return None
         return value
 
     def _cache_put(self, key: str, value: Any, ttl: float) -> None:
-        self._read_cache[key] = (time.time() + ttl, value)
+        self._read_cache[key] = (time.monotonic() + ttl, value)
+        if len(self._read_cache) > self._MAX_READ_CACHE_ENTRIES:
+            # Drop the soonest-to-expire entries (expired ones first) to stay bounded.
+            overflow = len(self._read_cache) - self._MAX_READ_CACHE_ENTRIES
+            for k, _ in sorted(self._read_cache.items(), key=lambda kv: kv[1][0])[:overflow]:
+                self._read_cache.pop(k, None)
 
     def _invalidate_catalog_cache(self) -> None:
         """Drop cached brand/device catalog reads (call after a create/upload write so a
@@ -265,7 +277,10 @@ class StoreClient:
 
     # ── reads (public, no token) ────────────────────────────────────────────────
 
-    async def _run_query(self, sq: dict[str, Any], parent: str = "") -> list[dict[str, Any]]:
+    async def _run_query(self, sq: dict[str, Any], parent: str = "") -> list[dict[str, Any]] | None:
+        """Run a structured query. Returns the decoded rows on success (possibly an empty
+        list), or ``None`` on any HTTP error / network failure so callers can distinguish a
+        genuinely-empty result from a transient failure and avoid caching the latter."""
         url = f"{self._base}/{parent}:runQuery" if parent else f"{self._base}:runQuery"
         try:
             async with self._sess().post(url, json={"structuredQuery": sq}, timeout=15) as resp:
@@ -275,11 +290,11 @@ class StoreClient:
                         _LOGGER.warning("Store query HTTP %s: %s", resp.status, body)
                     except Exception:
                         _LOGGER.warning("Store query HTTP %s (no body)", resp.status)
-                    return []
+                    return None
                 rows = await resp.json()
         except Exception as exc:  # noqa: BLE001
             _LOGGER.warning("Store query error: %s", exc)
-            return []
+            return None
         return [_decode_doc(r["document"]) for r in rows if isinstance(r, dict) and "document" in r]
 
     @staticmethod
@@ -321,8 +336,12 @@ class StoreClient:
                 "orderBy": [{"field": {"fieldPath": "favoriteCount"}, "direction": "DESCENDING"}],
                 "limit": page_size,
             }
-            rows = await self._run_query(sq)
-            self._cache_put(key, rows, self._CATALOG_CACHE_TTL_S)
+            fetched = await self._run_query(sq)
+            # Only cache a successful query; a transient failure (None) must not pin an
+            # empty catalog for the full TTL (mirrors get_config's discipline).
+            rows = fetched if fetched is not None else []
+            if fetched is not None:
+                self._cache_put(key, rows, self._CATALOG_CACHE_TTL_S)
         if model_query:
             p = model_query.lower()
             rows = [r for r in rows if str(r.get("model_lc", "")).startswith(p)]
@@ -340,8 +359,10 @@ class StoreClient:
                 "orderBy": [{"field": {"fieldPath": "brand_lc"}, "direction": "ASCENDING"}],
                 "limit": page_size,
             }
-            rows = await self._run_query(sq)
-            self._cache_put(key, rows, self._CATALOG_CACHE_TTL_S)
+            fetched = await self._run_query(sq)
+            rows = fetched if fetched is not None else []
+            if fetched is not None:
+                self._cache_put(key, rows, self._CATALOG_CACHE_TTL_S)
         if q:
             p = q.lower()
             rows = [r for r in rows if str(r.get("brand_lc", "")).startswith(p)]
@@ -431,7 +452,7 @@ class StoreClient:
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
-        return await self._run_query(sq)
+        return await self._run_query(sq) or []
 
     async def device_profiles(self, brand: str, model: str, appliance_type: str) -> dict[str, Any]:
         """Resolve the store deviceId from brand/model/type and return its profiles
@@ -488,7 +509,7 @@ class StoreClient:
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
-        cycles = [self._with_decoded_trace(c) for c in await self._run_query(sq)]
+        cycles = [self._with_decoded_trace(c) for c in (await self._run_query(sq) or [])]
         # Attach each cycle's 5-star rating summary (info-only; the aggregation lives
         # in a subcollection so it can't ride the list query). Bound concurrency with
         # a semaphore so a large page can't fan out into dozens of simultaneous

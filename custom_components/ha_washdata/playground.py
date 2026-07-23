@@ -1129,7 +1129,7 @@ class _DetailSim:
                         f"{h}h {m}m later via {reason}."
                     ),
                 })
-            else:
+            elif st.get("hit_cap"):
                 if st.get("idle_above_threshold"):
                     alerts.append({
                         "code": "stress_above_threshold", "severity": "warn",
