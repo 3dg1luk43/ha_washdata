@@ -110,6 +110,7 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
     CONF_DELAY_START_DETECT_ENABLED,
     CONF_DELAY_CONFIRM_SECONDS,
     CONF_DELAY_TIMEOUT_HOURS,
@@ -151,6 +152,7 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
+    DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT,
     DEFAULT_DELAY_START_DETECT_ENABLED,
     DEFAULT_DELAY_CONFIRM_SECONDS,
     DEFAULT_DELAY_TIMEOUT_HOURS,
@@ -725,6 +727,11 @@ class WashDataManager:
             anti_wrinkle_exit_power=float(
                 config_entry.options.get(
                     CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
+                )
+            ),
+            anti_wrinkle_idle_timeout=float(
+                config_entry.options.get(
+                    CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT
                 )
             ),
             delay_detect_enabled=bool(
@@ -2002,6 +2009,11 @@ class WashDataManager:
                 CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
             )
         )
+        new_anti_wrinkle_idle_timeout = float(
+            config_entry.options.get(
+                CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT
+            )
+        )
         new_delay_detect_enabled = bool(
             config_entry.options.get(
                 CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
@@ -2037,6 +2049,7 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_max_power = new_anti_wrinkle_max_power
         self.detector.config.anti_wrinkle_max_duration = new_anti_wrinkle_max_duration
         self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
+        self.detector.config.anti_wrinkle_idle_timeout = new_anti_wrinkle_idle_timeout
         self.detector.config.delay_detect_enabled = new_delay_detect_enabled
         self.detector.config.delay_confirm_seconds = new_delay_confirm_seconds
         self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds

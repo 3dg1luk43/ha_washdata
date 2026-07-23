@@ -190,6 +190,8 @@ const _SETTINGS_SECTIONS = [
       doc: 'Pulses longer than this are treated as a real cycle rather than an anti-wrinkle tumble.' },
     { key: 'anti_wrinkle_exit_power', label: 'Exit Power Threshold', unit: 'W', type: 'number', step: 0.1, min: 0, def: 0.8,
       doc: 'Power must fall below this between pulses for anti-wrinkle mode to stay active.' },
+    { key: 'anti_wrinkle_idle_timeout', label: 'Max Pulse Gap', unit: 's', type: 'number', step: 30, min: 0, def: 120,
+      doc: 'How long the machine may stay quiet between two tumble pulses before anti-wrinkle mode ends. Set it above the longest gap your dryer leaves between pulses, otherwise every later pulse is read as a false start.' },
   ] },
   { id: 'delay', label: 'Delay Start', intro: 'Delayed-start detection identifies when an appliance is powered but has not yet begun its cycle.', fields: [
     { key: 'delay_start_detect_enabled', label: 'Enable Delay-Start Detection', type: 'checkbox',
@@ -1509,6 +1511,7 @@ const _DIAGRAM_BY_KEY = {
   no_update_active_timeout: 'watchdog_timeout',
   anti_wrinkle_enabled: 'anti_wrinkle', anti_wrinkle_max_power: 'anti_wrinkle',
   anti_wrinkle_max_duration: 'anti_wrinkle', anti_wrinkle_exit_power: 'anti_wrinkle',
+  anti_wrinkle_idle_timeout: 'anti_wrinkle',
   sampling_interval: 'sampling',
 };
 
@@ -5222,6 +5225,8 @@ class HaWashdataPanel extends HTMLElement {
       ['start_duration_threshold','Start Duration',        's', 'Seconds above threshold to confirm start',     'timing'],
       ['end_repeat_count',        'End Repeat Count',      '',  'Low readings in a row before ending',          'advanced'],
       ['interrupted_min_seconds', 'Interrupted Min',       's', 'Short cycles flagged as interrupted',          'advanced'],
+      ['anti_wrinkle_max_power',  'Max Anti-Wrinkle Power','W', 'A pulse above this ends anti-wrinkle and opens a new cycle', 'advanced'],
+      ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
       ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
       ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
       ['corr_weight',      'Correlation Weight', '', 'Stage 2: balance between curve shape (correlation) and power level (MAE); default 0.45', 'matching'],
@@ -5996,6 +6001,7 @@ class HaWashdataPanel extends HTMLElement {
     if (st === 'running' || st === 'paused') return 'running';
     if (st === 'ending') return 'ending';
     if (st === 'starting') return 'detecting';
+    if (st === 'anti_wrinkle') return 'anti_wrinkle';
     return 'idle';
   }
 
@@ -6201,8 +6207,8 @@ class HaWashdataPanel extends HTMLElement {
     drawThrLine(+threshStop, '#e34948', this._t('btn.stop', {}, 'Stop'));
 
     // State band
-    const stateColors = { idle: bgCol, detecting: '#42a5f566', running: '#66bb6a66', ending: '#ef535066' };
-    const stateLabels = { idle: this._t('lbl.pg_idle', {}, 'Idle'), detecting: this._t('lbl.pg_detecting', {}, 'Detecting'), running: this._t('lbl.pg_ev_running', {}, 'Running'), ending: this._t('lbl.pg_ev_ending', {}, 'Ending') };
+    const stateColors = { idle: bgCol, detecting: '#42a5f566', running: '#66bb6a66', ending: '#ef535066', anti_wrinkle: '#ab47bc66' };
+    const stateLabels = { idle: this._t('lbl.pg_idle', {}, 'Idle'), detecting: this._t('lbl.pg_detecting', {}, 'Detecting'), running: this._t('lbl.pg_ev_running', {}, 'Running'), ending: this._t('lbl.pg_ev_ending', {}, 'Ending'), anti_wrinkle: this._t('lbl.pg_anti_wrinkle', {}, 'Anti-wrinkle') };
     const stateY = ch - stateBandH - phaseBandH;
     ctx.fillStyle = bgCol; ctx.fillRect(padL, stateY, cw - padL - padR, stateBandH);
     // Real detector state band from the backend simulation (no client-side copy).
@@ -6442,6 +6448,7 @@ class HaWashdataPanel extends HTMLElement {
       detecting: [this._t('lbl.pg_detecting', {}, 'Detecting'), '#42a5f5'],
       running: [this._t('lbl.pg_ev_running', {}, 'Running'), '#66bb6a'],
       ending: [this._t('lbl.pg_ev_ending', {}, 'Ending'), '#ef5350'],
+      anti_wrinkle: [this._t('lbl.pg_anti_wrinkle', {}, 'Anti-wrinkle'), '#ab47bc'],
     };
     const [stateText, stateColor] = stripStateMap[stateKey] || stripStateMap.idle;
     const pct = sp && sp.progress != null ? Math.round(sp.progress) : null;

@@ -50,6 +50,11 @@ from . import notification_rules as notif_rules
 from . import progress as progress_mod
 from .phase_segmenter import phase_matching_enabled
 from .const import (
+    CONF_ANTI_WRINKLE_ENABLED,
+    CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
+    CONF_ANTI_WRINKLE_MAX_DURATION,
+    CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_END_REPEAT_COUNT,
     CONF_INTERRUPTED_MIN_SECONDS,
@@ -125,6 +130,11 @@ MAX_SERIES_PER_CYCLE = 600
 # ignored safely.
 _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
     CONF_MIN_POWER: ("min_power", float),
+    CONF_ANTI_WRINKLE_ENABLED: ("anti_wrinkle_enabled", bool),
+    CONF_ANTI_WRINKLE_MAX_POWER: ("anti_wrinkle_max_power", float),
+    CONF_ANTI_WRINKLE_MAX_DURATION: ("anti_wrinkle_max_duration", float),
+    CONF_ANTI_WRINKLE_EXIT_POWER: ("anti_wrinkle_exit_power", float),
+    CONF_ANTI_WRINKLE_IDLE_TIMEOUT: ("anti_wrinkle_idle_timeout", float),
     CONF_OFF_DELAY: ("off_delay", int),
     CONF_MIN_OFF_GAP: ("min_off_gap", int),
     CONF_COMPLETION_MIN_SECONDS: ("completion_min_seconds", int),
@@ -1176,6 +1186,8 @@ def _sim_config_summary(config: CycleDetectorConfig) -> dict[str, Any]:
         "min_off_gap": getattr(config, "min_off_gap", None),
         "start_threshold_w": getattr(config, "start_threshold_w", None),
         "stop_threshold_w": getattr(config, "stop_threshold_w", None),
+        "anti_wrinkle_enabled": getattr(config, "anti_wrinkle_enabled", None),
+        "anti_wrinkle_idle_timeout": getattr(config, "anti_wrinkle_idle_timeout", None),
     }
 
 
