@@ -28,7 +28,9 @@
     "awaiting_n": "Čeka odobrenje · potvrđeno {n}",
     "approved": "Odobreno",
     "awaiting": "Čeka odobrenje",
-    "imported_tip": "Uvezeno iz prodavnice zajednice. Koristi se samo za podudaranje, ne računa se u statistiku."
+    "imported_tip": "Uvezeno iz prodavnice zajednice. Koristi se samo za podudaranje, ne računa se u statistiku.",
+    "not_importable": "nije primenljivo",
+    "exists": "postoji"
   },
   "btn": {
     "add_device": "+ Dodaj uređaj",
@@ -169,7 +171,14 @@
     "download_device": "Preuzmi podešavanja uređaja",
     "share_device": "Podeli podešavanja uređaja",
     "share_device_tip": "Podelite programe i podešavanja ovog uređaja sa zajednicom",
-    "share_n": "Podeli {n} program{s}"
+    "share_n": "Podeli {n} program{s}",
+    "export_selected": "Izvoz (izbor podataka)",
+    "export_all": "Brzi izvoz svega",
+    "import_raw": "Napredno: zameni sve iz JSON-a",
+    "download_export": "Preuzmi izvoz",
+    "analyze_import": "Analiziraj datoteku",
+    "import_selected": "Uvezi izabrano",
+    "back": "Nazad"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Deljenje ciklusa",
     "task_trim": "Obrezivanje ciklusa",
     "task_merge": "Spajanje ciklusa",
-    "task_rebuild": "Ponovna izgradnja omotača"
+    "task_rebuild": "Ponovna izgradnja omotača",
+    "cat_profiles": "Profili (programi)",
+    "cat_real_cycles": "Ciklusi (istorija izvršavanja)",
+    "cat_reference_cycles": "Referentni ciklusi (uvezeni)",
+    "cat_custom_phases": "Prilagođene faze",
+    "cat_profile_groups": "Grupe profila",
+    "cat_settings": "Podešavanja detekcije i prepoznavanja",
+    "cat_matching_config": "Fino podešavanje prepoznavanja",
+    "cat_ml_models": "ML modeli",
+    "cat_feedback": "Povratne informacije i oznake pregleda",
+    "cat_suggestions": "Predlozi",
+    "cat_maintenance_log": "Dnevnik održavanja",
+    "cat_history_logs": "Dnevnici istorije i izmena",
+    "cat_lifetime_stats": "Ukupni zbirovi za sve vreme",
+    "cycles_short": "ciklusa",
+    "import_mode": "Kako kombinovati",
+    "mode_merge": "Spoji (zadrži moje)",
+    "mode_replace": "Zameni izabrano",
+    "cycle_destination": "Gde treba da idu uvezeni ciklusi?",
+    "dest_reference": "Referentni (samo oblik)",
+    "dest_real_history": "Stvarna istorija (računa se u statistici)",
+    "conflict_resolution": "Sukobi imena",
+    "conflict_import_copy": "Uvezi kao kopiju",
+    "conflict_keep_mine": "Zadrži moje",
+    "conflict_overwrite": "Prepiši"
   },
   "log": {
     "all_levels": "Svi nivoi",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Prisilno zaustaviti aktivni ciklus sada? Ciklus će biti sačuvan kao prekinut.",
     "store_import": "Uvezi referentni ciklus",
     "store_share": "Podeli u prodavnicu zajednice",
-    "store_share_device": "Podeli podešavanja uređaja"
+    "store_share_device": "Podeli podešavanja uređaja",
+    "export_select": "Izvoz - izbor podataka",
+    "import_wizard": "Uvoz - izbor podataka"
   },
   "msg": {
     "appliance_monitor": "Monitor uređaja",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} sličnih neoznačenih ciklusa pronađeno – napravite profil da biste počeli njihovo podudaranje.",
     "cycles_deleted": "Obrisano ciklusa: {count}",
     "enough_data": "Dovoljno podataka za učenje ({current}/{min} ciklusa).",
-    "export_description": "Izvezite sve profile i cikluse u JSON ili vratite iz prethodnog izvoza.",
+    "export_description": "Izaberite tačno koje profile, cikluse, podešavanja i drugo želite da izvezete u JSON, ili analizirajte datoteku i uvezite samo delove koje želite.",
     "feedback_cycles_pending": "{n} ciklusa za pregled",
     "feedback_prompt": "Potvrdi da je bio tačan, ispravi program ili ignoriši.",
     "filter_by_profile": "Filtriraj po profilu…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Podelite programe svog uređaja (profile + referentne cikluse) sa zajednicom. Podešavanja su opcionalna.",
     "share_profile_no_cycles": "Profil '{p}' nema ⭐ referentnih ciklusa -- biće preskočen osim ako nemate {n}+ potvrđenih pokretanja",
     "advisory_phase_inconsistent": "Izgleda da '{name}' meša različite programe ili temperature - njegovi ciklusi se greju veoma različito dugo. Podela na zasebne profile (npr. po temperaturi) poboljšaće podudaranje i procene vremena.",
-    "advisory_phase_inconsistent_title": "⚠ Možda pomešani programi"
+    "advisory_phase_inconsistent_title": "⚠ Možda pomešani programi",
+    "export_select_intro": "Označite tačno šta želite da uključite. Izbor profila bez njihovih ciklusa i dalje izvozi prepoznatljiv program (njegov naučeni oblik ide zajedno sa njim).",
+    "import_analyze_hint": "Učitajte izvezenu datoteku (ili nalepite njen JSON). WashData je analizira i prikazuje tačno šta može da se uveze pre bilo kakve promene.",
+    "analyzing": "Analiziranje…",
+    "device_type_mismatch_warn": "Ovaj izvoz je sa uređaja drugog tipa ({src} umesto {local}). Programi i ciklusi i dalje mogu da se uvezu kao referentni podaci, ali podešavanja specifična za uređaj i uvoz stvarne istorije su onemogućeni.",
+    "merge_hint": "Uvezene stavke se dodaju; ništa lokalno se ne gubi. Sukobi imena rešavaju se ispod.",
+    "replace_warn": "Svaka označena kategorija se briše i zamenjuje podacima iz datoteke. Neoznačene kategorije ostaju netaknute.",
+    "dest_reference_hint": "Uvezeni ciklusi samo poboljšavaju prepoznavanje programa i nikada ne utiču na statistiku potrošnje/energije.",
+    "dest_real_history_hint": "Uvezeni ciklusi se računaju kao sopstvena istorija ovog uređaja i pune statistiku energije/potrošnje. Koristite za premeštanje jednog uređaja na novu instalaciju."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka okretanja nakon završetka radi smanjenja gužvanja.",
@@ -1692,7 +1735,9 @@
     "store_device_shared_partial": "Delimično deljenje: {n} program{s} učitan, {failed} preskočeno",
     "store_device_shared_some_dup": "Podešavanja uređaja podeljena: {n} program{s} učitan ({dup} već postoji)",
     "store_download_failed": "Preuzimanje nije uspelo: {error}",
-    "store_download_nothing": "Nema ničeg za preuzimanje -- svi profili već postoje na ovom uređaju"
+    "store_download_nothing": "Nema ničeg za preuzimanje -- svi profili već postoje na ovom uređaju",
+    "export_selective_done": "Izvoz preuzet",
+    "import_selective_done": "Uvezeno {profiles} profil(a) i {cycles} ciklus(a)"
   },
   "trend": {
     "down": "Opadajući trend",

@@ -28,7 +28,9 @@
     "awaiting_n": "A aguardar aprovação · {n} confirmados",
     "approved": "Aprovado",
     "awaiting": "A aguardar aprovação",
-    "imported_tip": "Importado da loja da comunidade. Usado apenas para correspondência, não contabilizado nas estatísticas."
+    "imported_tip": "Importado da loja da comunidade. Usado apenas para correspondência, não contabilizado nas estatísticas.",
+    "not_importable": "n/d aqui",
+    "exists": "já existe"
   },
   "btn": {
     "add_device": "+ Adicionar dispositivo",
@@ -169,7 +171,14 @@
     "download_device": "Transferir esta configuração",
     "share_device": "⬆ Partilhar este dispositivo",
     "share_device_tip": "Partilhar este electrodoméstico e os seus ciclos de referência gravados na loja da comunidade para que outros utilizadores com o mesmo aparelho os possam adotar",
-    "share_n": "Partilhar {n} ciclo(s)"
+    "share_n": "Partilhar {n} ciclo(s)",
+    "export_selected": "Exportar (escolher dados)",
+    "export_all": "Exportar tudo rapidamente",
+    "import_raw": "Avançado: substituir tudo a partir de JSON",
+    "download_export": "Transferir exportação",
+    "analyze_import": "Analisar ficheiro",
+    "import_selected": "Importar seleção",
+    "back": "Voltar"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "A dividir o ciclo",
     "task_trim": "A recortar o ciclo",
     "task_merge": "A combinar ciclos",
-    "task_rebuild": "A reconstruir envelopes"
+    "task_rebuild": "A reconstruir envelopes",
+    "cat_profiles": "Perfis (programas)",
+    "cat_real_cycles": "Ciclos (histórico de utilização)",
+    "cat_reference_cycles": "Ciclos de referência (importados)",
+    "cat_custom_phases": "Fases personalizadas",
+    "cat_profile_groups": "Grupos de perfis",
+    "cat_settings": "Definições de deteção e reconhecimento",
+    "cat_matching_config": "Ajuste do reconhecimento",
+    "cat_ml_models": "Modelos de ML",
+    "cat_feedback": "Comentários e etiquetas de revisão",
+    "cat_suggestions": "Sugestões",
+    "cat_maintenance_log": "Registo de manutenção",
+    "cat_history_logs": "Histórico e registos de alterações",
+    "cat_lifetime_stats": "Totais acumulados",
+    "cycles_short": "ciclos",
+    "import_mode": "Como combinar",
+    "mode_merge": "Combinar (manter os meus)",
+    "mode_replace": "Substituir seleção",
+    "cycle_destination": "Para onde devem ir os ciclos importados?",
+    "dest_reference": "Referência (apenas forma)",
+    "dest_real_history": "Histórico real (conta nas estatísticas)",
+    "conflict_resolution": "Conflitos de nomes",
+    "conflict_import_copy": "Importar como cópia",
+    "conflict_keep_mine": "Manter o meu",
+    "conflict_overwrite": "Substituir"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Forçar a paragem do ciclo ativo agora? O ciclo será guardado como interrompido.",
     "store_import": "Importar ciclo de referência",
     "store_share": "Partilhar na loja da comunidade",
-    "store_share_device": "Partilhar este dispositivo"
+    "store_share_device": "Partilhar este dispositivo",
+    "export_select": "Exportar - escolher dados",
+    "import_wizard": "Importar - escolher dados"
   },
   "msg": {
     "appliance_monitor": "Monitor de electrodoméstico",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} ciclos semelhantes sem rótulo encontrados – crie um perfil para começar a correspondê-los.",
     "cycles_deleted": "{count} ciclo(s) eliminado(s)",
     "enough_data": "Dados suficientes para aprender ({current}/{min} ciclos).",
-    "export_description": "Exporte todos os perfis e ciclos para JSON ou restaure a partir de uma exportação anterior.",
+    "export_description": "Escolha exatamente que perfis, ciclos, definições e mais exportar para JSON, ou analise um ficheiro e importe apenas as partes que quiser.",
     "feedback_cycles_pending": "{n} ciclo{s} para rever",
     "feedback_prompt": "Confirme que estava correcto, corrija o programa ou ignore.",
     "filter_by_profile": "Filtrar por perfil…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Carregar {brand} {model} com os ciclos de referência que selecionar. Outros utilizadores com o mesmo electrodoméstico podem adotar os seus programas. As entradas são revistas antes de aparecerem publicamente.",
     "share_profile_no_cycles": "Sem ciclos de referência -- marque um ciclo como ⭐ no separador Ciclos para incluir este perfil",
     "advisory_phase_inconsistent": "'{name}' parece misturar diferentes programas ou temperaturas - os seus ciclos aquecem durante períodos de tempo muito diferentes. Dividi-lo em perfis separados (p. ex. por temperatura) melhorará a correspondência e as estimativas de tempo.",
-    "advisory_phase_inconsistent_title": "⚠ Possíveis programas misturados"
+    "advisory_phase_inconsistent_title": "⚠ Possíveis programas misturados",
+    "export_select_intro": "Marque exatamente o que incluir. Selecionar perfis sem os seus ciclos exporta na mesma um programa reconhecível (a forma aprendida vai junto).",
+    "import_analyze_hint": "Carregue um ficheiro exportado (ou cole o seu JSON). O WashData analisa-o e mostra exatamente o que pode ser importado antes de qualquer alteração.",
+    "analyzing": "A analisar…",
+    "device_type_mismatch_warn": "Esta exportação é de um tipo de eletrodoméstico diferente ({src} em vez de {local}). Os programas e ciclos ainda podem ser importados como dados de referência, mas as definições específicas do dispositivo e a importação para o histórico real estão desativadas.",
+    "merge_hint": "Os itens importados são adicionados; nada local é perdido. Os conflitos de nomes são resolvidos abaixo.",
+    "replace_warn": "Cada categoria marcada é apagada e substituída pelo conteúdo do ficheiro. As categorias não marcadas ficam intactas.",
+    "dest_reference_hint": "Os ciclos importados só melhoram o reconhecimento de programas e nunca afetam as estatísticas de utilização/energia.",
+    "dest_real_history_hint": "Os ciclos importados contam como histórico próprio deste dispositivo e alimentam as estatísticas de energia/utilização. Use para mover um eletrodoméstico para uma nova instalação."
   },
   "pg_desc": {
     "completion_min_seconds": "Execução mais curta que conta como um ciclo real",
@@ -1603,7 +1646,9 @@
     "store_device_shared_partial": "{n} ciclo(s) partilhado(s); {failed} não puderam ser carregados.",
     "store_device_shared_some_dup": "{created} ciclo(s) partilhado(s); {dup} já estavam na loja.",
     "store_download_failed": "Falha na transferência: {error}",
-    "store_download_nothing": "Nada de novo para transferir -- esta configuração já está no seu dispositivo."
+    "store_download_nothing": "Nada de novo para transferir -- esta configuração já está no seu dispositivo.",
+    "export_selective_done": "Exportação transferida",
+    "import_selective_done": "Importados {profiles} perfil(is) e {cycles} ciclo(s)"
   },
   "suggestion": {
     "both_agree": "WashData recomenda",

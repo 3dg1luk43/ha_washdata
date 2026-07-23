@@ -28,7 +28,9 @@
     "awaiting_n": "Bíður samþykkis · {n} staðfestingar",
     "approved": "Samþykkt",
     "awaiting": "Bíður samþykkis",
-    "imported_tip": "Flutt inn úr samfélagsversluninni. Aðeins notað til samsvörunar, ekki talið með í tölfræði."
+    "imported_tip": "Flutt inn úr samfélagsversluninni. Aðeins notað til samsvörunar, ekki talið með í tölfræði.",
+    "not_importable": "ekki hér",
+    "exists": "til staðar"
   },
   "btn": {
     "add_device": "+ Bæta við tæki",
@@ -169,7 +171,14 @@
     "download_device": "Hlaða niður þessari uppsetningu",
     "share_device": "⬆ Deila þessu tæki",
     "share_device_tip": "Deila þessu tæki og uptökum viðmiðunarlota þess í samfélagsverslunina svo aðrir með sömu vél geti tekið þær yfir",
-    "share_n": "Deila {n} lotu/lotum"
+    "share_n": "Deila {n} lotu/lotum",
+    "export_selected": "Flytja út (velja gögn)",
+    "export_all": "Flytja allt út hratt",
+    "import_raw": "Ítarlegt: skipta öllu út úr JSON",
+    "download_export": "Sækja útflutning",
+    "analyze_import": "Greina skrá",
+    "import_selected": "Flytja inn valið",
+    "back": "Til baka"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Skipti lotu upp",
     "task_trim": "Klippi lotu til",
     "task_merge": "Sameina lotur",
-    "task_rebuild": "Endurreikna aflhjúpa"
+    "task_rebuild": "Endurreikna aflhjúpa",
+    "cat_profiles": "Prófílar (forrit)",
+    "cat_real_cycles": "Lotur (keyrslusaga)",
+    "cat_reference_cycles": "Viðmiðunarlotur (innfluttar)",
+    "cat_custom_phases": "Sérsniðnir fasar",
+    "cat_profile_groups": "Prófílhópar",
+    "cat_settings": "Greiningar- & samsvörunarstillingar",
+    "cat_matching_config": "Fínstilling samsvörunar",
+    "cat_ml_models": "ML-líkön",
+    "cat_feedback": "Umsögn & yfirferðarmerki",
+    "cat_suggestions": "Tillögur",
+    "cat_maintenance_log": "Viðhaldsskrá",
+    "cat_history_logs": "Sögu- & breytingaskrár",
+    "cat_lifetime_stats": "Heildartölur (líftími)",
+    "cycles_short": "lotur",
+    "import_mode": "Hvernig á að sameina",
+    "mode_merge": "Sameina (halda mínum)",
+    "mode_replace": "Skipta út völdum",
+    "cycle_destination": "Hvert eiga innfluttar lotur að fara?",
+    "dest_reference": "Viðmiðun (aðeins ferill)",
+    "dest_real_history": "Raunveruleg saga (telur í tölfræði)",
+    "conflict_resolution": "Nafnaárekstrar",
+    "conflict_import_copy": "Flytja inn sem afrit",
+    "conflict_keep_mine": "Halda mínum",
+    "conflict_overwrite": "Skrifa yfir"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Þvinga virku lotuna til að stöðvast núna? Lotan verður vistuð sem trufluð.",
     "store_import": "Flytja inn viðmiðunarlotu",
     "store_share": "Deila í samfélagsverslun",
-    "store_share_device": "Deila þessu tæki"
+    "store_share_device": "Deila þessu tæki",
+    "export_select": "Útflutningur - velja gögn",
+    "import_wizard": "Innflutningur - velja gögn"
   },
   "msg": {
     "appliance_monitor": "Vöktunartæki",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} svipaðar ómerktar lotur fundust – búðu til prófíl til að byrja að samstemma þær.",
     "cycles_deleted": "{count} lotu(m) eytt",
     "enough_data": "Nóg gögn til að læra af ({current}/{min} lotur).",
-    "export_description": "Flyttu út öll snið og lotur í JSON, eða endurheimtu frá fyrri útflutningi.",
+    "export_description": "Veldu nákvæmlega hvaða prófíla, lotur, stillingar og fleira á að flytja út í JSON, eða greindu skrá og fluttu aðeins inn þá hluta sem þú vilt.",
     "feedback_cycles_pending": "{n} lota{s} til yfirferðar",
     "feedback_prompt": "Staðfestu að það væri rétt, leiðréttu forritið eða hunsa.",
     "filter_by_profile": "Sía eftir prófíl…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Hlaðaðu upp {brand} {model} með viðmiðunarlotum sem þú velur. Aðrir með sama tæki geta tekið yfir forritin þín. Færslur eru yfirfarnar áður en þær birtast opinberlega.",
     "share_profile_no_cycles": "Engar viðmiðunarlotir -- merktu lotu sem ⭐ í flipanum Lotir til að hafa þennan prófíl með",
     "advisory_phase_inconsistent": "'{name}' virðist blanda saman ólíkum forritum eða hitastigum - lotur þess hita mislengi. Ef þú skiptir því upp í aðskilin snið (t.d. eftir hitastigi) batnar samsvörun og tímamat.",
-    "advisory_phase_inconsistent_title": "⚠ Hugsanlega blönduð forrit"
+    "advisory_phase_inconsistent_title": "⚠ Hugsanlega blönduð forrit",
+    "export_select_intro": "Merktu nákvæmlega við hvað á að hafa með. Að velja prófíla án lotanna þeirra flytur samt út greinanlegt forrit (lærði ferillinn fylgir með).",
+    "import_analyze_hint": "Hladdu inn útfluttri skrá (eða límdu inn JSON-ið hennar). WashData greinir hana og sýnir nákvæmlega hvað er hægt að flytja inn áður en nokkuð breytist.",
+    "analyzing": "Greini…",
+    "device_type_mismatch_warn": "Þessi útflutningur er frá annarri tegund tækis ({src} á móti {local}). Enn er hægt að flytja inn forrit og lotur sem viðmiðunargögn, en tækjabundnar stillingar og innflutningur á raunverulegri sögu eru óvirk.",
+    "merge_hint": "Innfluttum atriðum er bætt við; ekkert staðbundið tapast. Nafnaárekstrar eru leystir hér að neðan.",
+    "replace_warn": "Hver valinn flokkur er hreinsaður og settur í staðinn úr skránni. Óvaldir flokkar haldast óbreyttir.",
+    "dest_reference_hint": "Innfluttar lotur bæta aðeins forritasamsvörun og hafa aldrei áhrif á notkunar-/orkutölfræði.",
+    "dest_real_history_hint": "Innfluttar lotur teljast sem eigin saga þessa tækis og fæða orku-/notkunartölfræði. Notaðu þetta til að flytja eitt tæki yfir í nýja uppsetningu."
   },
   "pg_desc": {
     "completion_min_seconds": "Stysta keyrsla sem telst raunveruleg lota",
@@ -1715,7 +1758,9 @@
     "store_device_shared_partial": "{n} lota/lotir deilt; {failed} tókst ekki að hlaða upp.",
     "store_device_shared_some_dup": "{created} lota/lotir deilt; {dup} voru þegar í verslun.",
     "store_download_failed": "Niðurhal mistókst: {error}",
-    "store_download_nothing": "Ekkert nýtt til að hlaða niður -- þessi uppsetning er þegar á tækinu þínu."
+    "store_download_nothing": "Ekkert nýtt til að hlaða niður -- þessi uppsetning er þegar á tækinu þínu.",
+    "export_selective_done": "Útflutningur sóttur",
+    "import_selective_done": "Flutti inn {profiles} prófíl(a) og {cycles} lotu(r)"
   },
   "trend": {
     "down": "Stefnir niður",

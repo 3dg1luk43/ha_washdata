@@ -28,7 +28,9 @@
     "awaiting_n": "Wacht op goedkeuring · {n} bevestigd",
     "approved": "Goedgekeurd",
     "awaiting": "Wacht op goedkeuring",
-    "imported_tip": "Geïmporteerd uit de communitystore. Alleen gebruikt voor matchen, telt niet mee in statistieken."
+    "imported_tip": "Geïmporteerd uit de communitystore. Alleen gebruikt voor matchen, telt niet mee in statistieken.",
+    "not_importable": "hier n.v.t.",
+    "exists": "bestaat"
   },
   "btn": {
     "add_device": "+ Apparaat toevoegen",
@@ -169,7 +171,14 @@
     "download_device": "Deze instelling downloaden",
     "share_device": "⬆ Dit apparaat delen",
     "share_device_tip": "Dit apparaat en zijn opgenomen referentiecycli delen in de communitystore, zodat andere gebruikers met hetzelfde apparaat ze kunnen overnemen",
-    "share_n": "{n} cyclus/cycli delen"
+    "share_n": "{n} cyclus/cycli delen",
+    "export_selected": "Exporteren (gegevens kiezen)",
+    "export_all": "Alles snel exporteren",
+    "import_raw": "Geavanceerd: alles vervangen vanuit JSON",
+    "download_export": "Export downloaden",
+    "analyze_import": "Bestand analyseren",
+    "import_selected": "Selectie importeren",
+    "back": "Terug"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Cyclus splitsen",
     "task_trim": "Cyclus bijsnijden",
     "task_merge": "Cycli samenvoegen",
-    "task_rebuild": "Enveloppen opnieuw opbouwen"
+    "task_rebuild": "Enveloppen opnieuw opbouwen",
+    "cat_profiles": "Profielen (programma's)",
+    "cat_real_cycles": "Cycli (gebruiksgeschiedenis)",
+    "cat_reference_cycles": "Referentiecycli (geïmporteerd)",
+    "cat_custom_phases": "Aangepaste fasen",
+    "cat_profile_groups": "Profielgroepen",
+    "cat_settings": "Detectie- & herkenningsinstellingen",
+    "cat_matching_config": "Herkenningsafstemming",
+    "cat_ml_models": "ML-modellen",
+    "cat_feedback": "Feedback & beoordelingslabels",
+    "cat_suggestions": "Suggesties",
+    "cat_maintenance_log": "Onderhoudslogboek",
+    "cat_history_logs": "Geschiedenis- & wijzigingslogboeken",
+    "cat_lifetime_stats": "Totalen (levensduur)",
+    "cycles_short": "cycli",
+    "import_mode": "Hoe combineren",
+    "mode_merge": "Samenvoegen (die van mij behouden)",
+    "mode_replace": "Selectie vervangen",
+    "cycle_destination": "Waar moeten geïmporteerde cycli heen?",
+    "dest_reference": "Referentie (alleen vorm)",
+    "dest_real_history": "Echte geschiedenis (telt mee in statistieken)",
+    "conflict_resolution": "Naamconflicten",
+    "conflict_import_copy": "Importeren als kopie",
+    "conflict_keep_mine": "Die van mij behouden",
+    "conflict_overwrite": "Overschrijven"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -643,7 +676,9 @@
     "force_stop_msg": "De actieve cyclus nu geforceerd stoppen? De cyclus wordt opgeslagen als onderbroken.",
     "store_import": "Referentiecyclus importeren",
     "store_share": "Delen in communitystore",
-    "store_share_device": "Dit apparaat delen"
+    "store_share_device": "Dit apparaat delen",
+    "export_select": "Export - gegevens kiezen",
+    "import_wizard": "Import - gegevens kiezen"
   },
   "msg": {
     "appliance_monitor": "Apparaatmonitor",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} vergelijkbare niet-gelabelde cycli gevonden – maak een profiel aan om ze te beginnen matchen.",
     "cycles_deleted": "{count} cyclus(sen) verwijderd",
     "enough_data": "Voldoende gegevens om van te leren ({current}/{min} cycli).",
-    "export_description": "Exporteer alle profielen en cycli naar JSON, of herstel vanuit een eerdere export.",
+    "export_description": "Kies precies welke profielen, cycli, instellingen en meer u naar JSON wilt exporteren, of analyseer een bestand en importeer alleen de onderdelen die u wilt.",
     "feedback_cycles_pending": "{n} cyclus{s} te beoordelen",
     "feedback_prompt": "Bevestig dat het goed was, corrigeer het programma of negeer het.",
     "filter_by_profile": "Filteren op profiel…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Upload {brand} {model} met de referentiecycli die u selecteert. Anderen met hetzelfde apparaat kunnen uw programma's overnemen. Vermeldingen worden beoordeeld voordat ze openbaar verschijnen.",
     "share_profile_no_cycles": "Geen referentiecycli -- markeer een cyclus als ⭐ op het tabblad Cycli om dit profiel op te nemen",
     "advisory_phase_inconsistent": "'{name}' lijkt verschillende programma's of temperaturen te combineren - de cycli verwarmen gedurende sterk uiteenlopende tijden. Door het op te splitsen in aparte profielen (bijv. per temperatuur) verbeteren de matching en tijdschattingen.",
-    "advisory_phase_inconsistent_title": "⚠ Mogelijk gemengde programma's"
+    "advisory_phase_inconsistent_title": "⚠ Mogelijk gemengde programma's",
+    "export_select_intro": "Vink precies aan wat u wilt opnemen. Als u profielen zonder hun cycli selecteert, wordt toch een herkenbaar programma geëxporteerd (de geleerde vorm gaat mee).",
+    "import_analyze_hint": "Laad een geëxporteerd bestand (of plak de JSON ervan). WashData analyseert het en toont precies wat kan worden geïmporteerd voordat er iets verandert.",
+    "analyzing": "Analyseren…",
+    "device_type_mismatch_warn": "Deze export komt van een ander apparaattype ({src} vs {local}). Programma's en cycli kunnen nog steeds als referentiegegevens worden geïmporteerd, maar apparaatspecifieke instellingen en het importeren van echte geschiedenis zijn uitgeschakeld.",
+    "merge_hint": "Geïmporteerde items worden toegevoegd; er gaat lokaal niets verloren. Naamconflicten worden hieronder opgelost.",
+    "replace_warn": "Elke aangevinkte categorie wordt gewist en vervangen vanuit het bestand. Niet-aangevinkte categorieën blijven ongewijzigd.",
+    "dest_reference_hint": "Geïmporteerde cycli verbeteren alleen de programmaherkenning en hebben nooit invloed op de gebruiks-/energiestatistieken.",
+    "dest_real_history_hint": "Geïmporteerde cycli tellen als de eigen geschiedenis van dit apparaat en voeden de energie-/gebruiksstatistieken. Gebruik dit om één apparaat naar een nieuwe installatie te verplaatsen."
   },
   "pg_desc": {
     "completion_min_seconds": "Kortste run die als een echte cyclus telt",
@@ -1715,7 +1758,9 @@
     "store_device_shared_partial": "{n} cyclus/cycli gedeeld; {failed} konden niet worden geüpload.",
     "store_device_shared_some_dup": "{created} cyclus/cycli gedeeld; {dup} stonden al in de store.",
     "store_download_failed": "Downloaden mislukt: {error}",
-    "store_download_nothing": "Niets nieuws te downloaden -- deze instelling staat al op uw apparaat."
+    "store_download_nothing": "Niets nieuws te downloaden -- deze instelling staat al op uw apparaat.",
+    "export_selective_done": "Export gedownload",
+    "import_selective_done": "{profiles} profiel(en) en {cycles} cyclus(sen) geïmporteerd"
   },
   "trend": {
     "down": "Trend naar beneden",

@@ -28,7 +28,9 @@
     "awaiting_n": "等待批准 · 已确认 {n} 个",
     "approved": "已批准",
     "awaiting": "等待批准",
-    "imported_tip": "从社区商店导入。仅用于匹配，不计入统计。"
+    "imported_tip": "从社区商店导入。仅用于匹配，不计入统计。",
+    "not_importable": "此处不适用",
+    "exists": "已存在"
   },
   "btn": {
     "add_device": "+ 添加设备",
@@ -169,7 +171,14 @@
     "download_device": "下载此配置",
     "share_device": "⬆ 分享此设备",
     "share_device_tip": "将此设备及其录制的参考周期分享到社区商店，让拥有相同机器的其他用户可以采用",
-    "share_n": "分享 {n} 个周期"
+    "share_n": "分享 {n} 个周期",
+    "export_selected": "导出（选择数据）",
+    "export_all": "快速导出全部",
+    "import_raw": "高级：用 JSON 替换全部",
+    "download_export": "下载导出文件",
+    "analyze_import": "分析文件",
+    "import_selected": "导入所选",
+    "back": "返回"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "正在拆分周期",
     "task_trim": "正在裁剪周期",
     "task_merge": "正在合并周期",
-    "task_rebuild": "正在重建包络"
+    "task_rebuild": "正在重建包络",
+    "cat_profiles": "配置文件（程序）",
+    "cat_real_cycles": "周期（运行历史）",
+    "cat_reference_cycles": "参考周期（已导入）",
+    "cat_custom_phases": "自定义阶段",
+    "cat_profile_groups": "配置文件组",
+    "cat_settings": "检测与识别设置",
+    "cat_matching_config": "识别器调优",
+    "cat_ml_models": "ML 模型",
+    "cat_feedback": "反馈与审阅标签",
+    "cat_suggestions": "建议",
+    "cat_maintenance_log": "维护日志",
+    "cat_history_logs": "历史与更改日志",
+    "cat_lifetime_stats": "累计总量",
+    "cycles_short": "周期",
+    "import_mode": "合并方式",
+    "mode_merge": "合并（保留我的）",
+    "mode_replace": "替换所选",
+    "cycle_destination": "导入的周期应存放到哪里？",
+    "dest_reference": "参考（仅形状）",
+    "dest_real_history": "真实历史（计入统计）",
+    "conflict_resolution": "名称冲突",
+    "conflict_import_copy": "作为副本导入",
+    "conflict_keep_mine": "保留我的",
+    "conflict_overwrite": "覆盖"
   },
   "log": {
     "all_levels": "所有级别",
@@ -643,7 +676,9 @@
     "force_stop_msg": "立即强制停止当前周期吗？该周期将被保存为已中断。",
     "store_import": "导入参考周期",
     "store_share": "分享到社区商店",
-    "store_share_device": "分享此设备"
+    "store_share_device": "分享此设备",
+    "export_select": "导出 - 选择数据",
+    "import_wizard": "导入 - 选择数据"
   },
   "msg": {
     "appliance_monitor": "设备监控",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "发现 {count} 个相似未标记周期 – 创建配置文件以开始匹配它们。",
     "cycles_deleted": "已删除 {count} 个周期",
     "enough_data": "有足够数据可供学习（{current}/{min} 个循环）。",
-    "export_description": "将所有配置文件和周期导出为 JSON，或从之前的导出中恢复。",
+    "export_description": "精确选择要导出到 JSON 的配置文件、周期、设置等，或分析文件并仅导入所需的部分。",
     "feedback_cycles_pending": "{n} 个周期{s}待审查",
     "feedback_prompt": "确认正确、修正程序或忽略。",
     "filter_by_profile": "按配置文件筛选…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "上传 {brand} {model} 及您选择的参考周期。拥有相同设备的其他用户可以采用您的程序。条目在公开前经过审核。",
     "share_profile_no_cycles": "无参考周期 -- 请在\"周期\"选项卡中将周期标记为 ⭐ 以包含此配置文件",
     "advisory_phase_inconsistent": "'{name}' 似乎混合了不同的程序或温度，各周期的加热时长差异很大。将其拆分为独立的配置文件（例如按温度区分）可以改善匹配和时间估算。",
-    "advisory_phase_inconsistent_title": "⚠ 可能混合了不同程序"
+    "advisory_phase_inconsistent_title": "⚠ 可能混合了不同程序",
+    "export_select_intro": "精确勾选要包含的内容。即使选择配置文件而不包含其周期，仍会导出可识别的程序（其学习到的形状会一同迁移）。",
+    "import_analyze_hint": "加载导出的文件（或粘贴其 JSON）。WashData 会对其进行分析，并在任何更改之前准确显示可导入的内容。",
+    "analyzing": "正在分析…",
+    "device_type_mismatch_warn": "此导出文件来自不同的设备类型（{src} 对 {local}）。程序和周期仍可作为参考数据导入，但设备专属设置和真实历史导入将被禁用。",
+    "merge_hint": "导入的项目会被添加，本地数据不会丢失。名称冲突将在下方解决。",
+    "replace_warn": "每个勾选的类别都会被清除并用文件中的内容替换。未勾选的类别保持不变。",
+    "dest_reference_hint": "导入的周期仅用于改进程序识别，绝不影响用量/能耗统计。",
+    "dest_real_history_hint": "导入的周期计为本设备自身的历史记录，并纳入能耗/用量统计。适用于将一台设备迁移到新的安装环境。"
   },
   "pg_desc": {
     "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1603,7 +1646,9 @@
     "store_device_shared_partial": "已分享 {n} 个周期；{failed} 个无法上传。",
     "store_device_shared_some_dup": "已分享 {created} 个周期；{dup} 个已在商店中。",
     "store_download_failed": "下载失败：{error}",
-    "store_download_nothing": "没有新内容可下载 - 此配置已在您的设备上。"
+    "store_download_nothing": "没有新内容可下载 - 此配置已在您的设备上。",
+    "export_selective_done": "导出已下载",
+    "import_selective_done": "已导入 {profiles} 个配置文件和 {cycles} 个周期"
   },
   "suggestion": {
     "both_agree": "WashData建议",

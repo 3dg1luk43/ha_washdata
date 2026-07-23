@@ -28,7 +28,9 @@
     "awaiting_n": "Onay bekleniyor · {n} onaylandı",
     "approved": "Onaylandı",
     "awaiting": "Onay bekleniyor",
-    "imported_tip": "Topluluk mağazasından içe aktarıldı. Yalnızca eşleştirme için kullanılır, istatistiklere sayılmaz."
+    "imported_tip": "Topluluk mağazasından içe aktarıldı. Yalnızca eşleştirme için kullanılır, istatistiklere sayılmaz.",
+    "not_importable": "burada geçersiz",
+    "exists": "mevcut"
   },
   "btn": {
     "add_device": "+ Cihaz ekle",
@@ -169,7 +171,14 @@
     "download_device": "Bu kurulumu indir",
     "share_device": "⬆ Bu cihazı paylaş",
     "share_device_tip": "Bu cihazı ve kayıtlı referans döngülerini topluluk mağazasına paylaşın; aynı makineye sahip diğer kullanıcılar bunları benimseyebilsin",
-    "share_n": "{n} döngü paylaş"
+    "share_n": "{n} döngü paylaş",
+    "export_selected": "Dışa aktar (veri seç)",
+    "export_all": "Her şeyi hızlı dışa aktar",
+    "import_raw": "Gelişmiş: JSON'dan tümünü değiştir",
+    "download_export": "Dışa aktarmayı indir",
+    "analyze_import": "Dosyayı analiz et",
+    "import_selected": "Seçileni içe aktar",
+    "back": "Geri"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Döngü bölünüyor",
     "task_trim": "Döngü kırpılıyor",
     "task_merge": "Döngüler birleştiriliyor",
-    "task_rebuild": "Zarflar yeniden oluşturuluyor"
+    "task_rebuild": "Zarflar yeniden oluşturuluyor",
+    "cat_profiles": "Profiller (programlar)",
+    "cat_real_cycles": "Döngüler (çalışma geçmişi)",
+    "cat_reference_cycles": "Referans döngüler (içe aktarılan)",
+    "cat_custom_phases": "Özel aşamalar",
+    "cat_profile_groups": "Profil grupları",
+    "cat_settings": "Algılama ve tanıma ayarları",
+    "cat_matching_config": "Tanıyıcı ayarı",
+    "cat_ml_models": "ML modelleri",
+    "cat_feedback": "Geri bildirim ve inceleme etiketleri",
+    "cat_suggestions": "Öneriler",
+    "cat_maintenance_log": "Bakım günlüğü",
+    "cat_history_logs": "Geçmiş ve değişiklik günlükleri",
+    "cat_lifetime_stats": "Ömür boyu toplamlar",
+    "cycles_short": "döngü",
+    "import_mode": "Nasıl birleştirilsin",
+    "mode_merge": "Birleştir (benimkini koru)",
+    "mode_replace": "Seçileni değiştir",
+    "cycle_destination": "İçe aktarılan döngüler nereye gitsin?",
+    "dest_reference": "Referans (yalnızca şekil)",
+    "dest_real_history": "Gerçek geçmiş (istatistiklere sayılır)",
+    "conflict_resolution": "Ad çakışmaları",
+    "conflict_import_copy": "Kopya olarak içe aktar",
+    "conflict_keep_mine": "Benimkini koru",
+    "conflict_overwrite": "Üzerine yaz"
   },
   "log": {
     "all_levels": "Tüm seviyeler",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Etkin döngü şimdi zorla durdurulsun mu? Döngü, kesintiye uğramış olarak kaydedilecek.",
     "store_import": "Referans döngüyü içe aktar",
     "store_share": "Topluluk mağazasında paylaş",
-    "store_share_device": "Bu cihazı paylaş"
+    "store_share_device": "Bu cihazı paylaş",
+    "export_select": "Dışa aktarma - veri seçin",
+    "import_wizard": "İçe aktarma - veri seçin"
   },
   "msg": {
     "appliance_monitor": "Cihaz monitörü",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} benzer etiketsiz döngü bulundu – bunları eşleştirmeye başlamak için bir profil oluşturun.",
     "cycles_deleted": "{count} döngü silindi",
     "enough_data": "Öğrenmek için yeterli veri ({current}/{min} döngü).",
-    "export_description": "Tüm profilleri ve döngüleri JSON'a aktarın veya önceki bir dışa aktarma işleminden geri yükleyin.",
+    "export_description": "JSON'a dışa aktarılacak profilleri, döngüleri, ayarları ve daha fazlasını tam olarak seçin ya da bir dosyayı analiz edip yalnızca istediğiniz kısımları içe aktarın.",
     "feedback_cycles_pending": "İncelenecek {n} döngü{s}",
     "feedback_prompt": "Doğru olduğunu onaylayın, programı düzeltin veya yoksayın.",
     "filter_by_profile": "Profile göre filtrele…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Seçtiğiniz referans döngüleriyle {brand} {model} cihazını yükleyin. Aynı cihaza sahip diğer kullanıcılar programlarınızı benimseyebilir. Girişler kamuya açılmadan önce incelenir.",
     "share_profile_no_cycles": "Referans döngüsü yok -- bu profili dahil etmek için Döngüler sekmesinde bir döngüyü ⭐ olarak işaretleyin",
     "advisory_phase_inconsistent": "'{name}' farklı programları veya sıcaklıkları karıştırıyor gibi görünüyor - çevrimleri çok farklı sürelerde ısıtma yapıyor. Bunu ayrı profillere bölmek (örneğin her sıcaklık için) eşleştirmeyi ve süre tahminlerini iyileştirir.",
-    "advisory_phase_inconsistent_title": "⚠ Karışık olabilecek programlar"
+    "advisory_phase_inconsistent_title": "⚠ Karışık olabilecek programlar",
+    "export_select_intro": "Nelerin dahil edileceğini tam olarak işaretleyin. Profilleri döngüleri olmadan seçmek yine de tanınabilir bir program dışa aktarır (öğrenilen şekli de birlikte taşınır).",
+    "import_analyze_hint": "Dışa aktarılmış bir dosya yükleyin (veya JSON'unu yapıştırın). WashData bunu analiz eder ve herhangi bir değişiklik olmadan önce tam olarak neyin içe aktarılabileceğini gösterir.",
+    "analyzing": "Analiz ediliyor…",
+    "device_type_mismatch_warn": "Bu dışa aktarma farklı bir cihaz türünden ({src} ile {local}). Programlar ve döngüler yine de referans verisi olarak içe aktarılabilir, ancak cihaza özgü ayarlar ve gerçek geçmiş içe aktarımı devre dışıdır.",
+    "merge_hint": "İçe aktarılan öğeler eklenir; yerel hiçbir şey kaybolmaz. Ad çakışmaları aşağıda çözülür.",
+    "replace_warn": "İşaretlenen her kategori silinir ve dosyadan gelenle değiştirilir. İşaretlenmeyen kategorilere dokunulmaz.",
+    "dest_reference_hint": "İçe aktarılan döngüler yalnızca program tanımayı iyileştirir ve kullanım/enerji istatistiklerini asla etkilemez.",
+    "dest_real_history_hint": "İçe aktarılan döngüler bu cihazın kendi geçmişi olarak sayılır ve enerji/kullanım istatistiklerini besler. Bir cihazı yeni bir kuruluma taşırken kullanın."
   },
   "pg_desc": {
     "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1603,7 +1646,9 @@
     "store_device_shared_partial": "{n} döngü paylaşıldı; {failed} yüklenemedi.",
     "store_device_shared_some_dup": "{created} döngü paylaşıldı; {dup} zaten mağazadaydı.",
     "store_download_failed": "İndirme başarısız: {error}",
-    "store_download_nothing": "İndirilecek yeni bir şey yok - bu kurulum zaten cihazınızda."
+    "store_download_nothing": "İndirilecek yeni bir şey yok - bu kurulum zaten cihazınızda.",
+    "export_selective_done": "Dışa aktarma indirildi",
+    "import_selective_done": "{profiles} profil ve {cycles} döngü içe aktarıldı"
   },
   "suggestion": {
     "both_agree": "WashData öneriyor",

@@ -28,7 +28,9 @@
     "awaiting_n": "Odottaa hyväksyntää · {n} vahvistusta",
     "approved": "Hyväksytty",
     "awaiting": "Odottaa hyväksyntää",
-    "imported_tip": "Tuotu yhteisökaupasta. Käytetään vain täsmäytykseen, ei lasketa tilastoihin."
+    "imported_tip": "Tuotu yhteisökaupasta. Käytetään vain täsmäytykseen, ei lasketa tilastoihin.",
+    "not_importable": "ei käytettävissä",
+    "exists": "on jo"
   },
   "btn": {
     "add_device": "+ Lisää laite",
@@ -169,7 +171,14 @@
     "download_device": "Lataa tämä asetus",
     "share_device": "⬆ Jaa tämä laite",
     "share_device_tip": "Jaa tämä laite ja sen tallennetut viitesyklit yhteisökauppaan, jotta muut saman koneen omistajat voivat ottaa ne käyttöön",
-    "share_n": "Jaa {n} sykli(ä)"
+    "share_n": "Jaa {n} sykli(ä)",
+    "export_selected": "Vie (valitse tiedot)",
+    "export_all": "Pikavienti: vie kaikki",
+    "import_raw": "Lisäasetukset: korvaa kaikki JSONista",
+    "download_export": "Lataa vienti",
+    "analyze_import": "Analysoi tiedosto",
+    "import_selected": "Tuo valitut",
+    "back": "Takaisin"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Jaetaan sykliä",
     "task_trim": "Rajataan sykliä",
     "task_merge": "Yhdistetään syklejä",
-    "task_rebuild": "Rakennetaan tehoalueita uudelleen"
+    "task_rebuild": "Rakennetaan tehoalueita uudelleen",
+    "cat_profiles": "Profiilit (ohjelmat)",
+    "cat_real_cycles": "Jaksot (käyttöhistoria)",
+    "cat_reference_cycles": "Viitejaksot (tuodut)",
+    "cat_custom_phases": "Mukautetut vaiheet",
+    "cat_profile_groups": "Profiiliryhmät",
+    "cat_settings": "Havaitsemis- ja tunnistusasetukset",
+    "cat_matching_config": "Tunnistuksen hienosäätö",
+    "cat_ml_models": "ML-mallit",
+    "cat_feedback": "Palaute- ja tarkistusmerkinnät",
+    "cat_suggestions": "Ehdotukset",
+    "cat_maintenance_log": "Huoltoloki",
+    "cat_history_logs": "Historia- ja muutoslokit",
+    "cat_lifetime_stats": "Elinkaaren kokonaissummat",
+    "cycles_short": "jaksoa",
+    "import_mode": "Yhdistämistapa",
+    "mode_merge": "Yhdistä (säilytä omat)",
+    "mode_replace": "Korvaa valitut",
+    "cycle_destination": "Minne tuodut jaksot sijoitetaan?",
+    "dest_reference": "Viite (vain muoto)",
+    "dest_real_history": "Todellinen historia (lasketaan tilastoihin)",
+    "conflict_resolution": "Nimien törmäykset",
+    "conflict_import_copy": "Tuo kopiona",
+    "conflict_keep_mine": "Säilytä omat",
+    "conflict_overwrite": "Korvaa"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Pakotetaanko aktiivinen sykli pysähtymään nyt? Sykli tallennetaan keskeytyneenä.",
     "store_import": "Tuo viitesykli",
     "store_share": "Jaa yhteisökauppaan",
-    "store_share_device": "Jaa tämä laite"
+    "store_share_device": "Jaa tämä laite",
+    "export_select": "Vienti - valitse tiedot",
+    "import_wizard": "Tuonti - valitse tiedot"
   },
   "msg": {
     "appliance_monitor": "Laitteen näyttö",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} samanlaista merkitsemätöntä sykliä löydetty – luo profiili, jotta voit aloittaa niiden täsmäämisen.",
     "cycles_deleted": "{count} sykli(ä) poistettu",
     "enough_data": "Tarpeeksi tietoja oppimiseen ({current}/{min} sykliä).",
-    "export_description": "Vie kaikki profiilit ja syklit JSONiin tai palauta edellisestä viennistä.",
+    "export_description": "Valitse tarkalleen, mitkä profiilit, jaksot, asetukset ja muut viedään JSON-tiedostoon, tai analysoi tiedosto ja tuo vain haluamasi osat.",
     "feedback_cycles_pending": "{n} sykliä tarkistettavana",
     "feedback_prompt": "Vahvista, että se oli oikein, korjaa ohjelma tai jätä huomiotta.",
     "filter_by_profile": "Suodata profiilin mukaan…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Lataa {brand} {model} valitsemiesi viitesyklien kanssa. Muut saman laitteen omistajat voivat ottaa ohjelmiasi käyttöön. Merkinnät tarkistetaan ennen julkaisua.",
     "share_profile_no_cycles": "Ei viitesyklejä -- merkitse sykli ⭐:ksi Syklit-välilehdessä sisällyttääksesi tämän profiilin",
     "advisory_phase_inconsistent": "'{name}' vaikuttaa sekoittavan eri ohjelmia tai lämpötiloja - sen syklit lämmittävät hyvin eripituisia aikoja. Sen jakaminen erillisiin profiileihin (esim. lämpötilan mukaan) parantaa täsmäytystä ja aika-arvioita.",
-    "advisory_phase_inconsistent_title": "⚠ Mahdollisesti sekoittuneet ohjelmat"
+    "advisory_phase_inconsistent_title": "⚠ Mahdollisesti sekoittuneet ohjelmat",
+    "export_select_intro": "Rastita tarkalleen, mitä sisällytetään. Kun valitset profiilit ilman niiden jaksoja, viedään silti tunnistettava ohjelma (sen opittu muoto kulkee mukana).",
+    "import_analyze_hint": "Lataa viety tiedosto (tai liitä sen JSON). WashData analysoi sen ja näyttää tarkalleen, mitä voidaan tuoda, ennen kuin mitään muuttuu.",
+    "analyzing": "Analysoidaan…",
+    "device_type_mismatch_warn": "Tämä vienti on eri laitetyypistä ({src} vs {local}). Ohjelmat ja jaksot voidaan silti tuoda viitedataksi, mutta laitekohtaiset asetukset ja todellisen historian tuonti on poistettu käytöstä.",
+    "merge_hint": "Tuodut kohteet lisätään; mitään paikallista ei menetetä. Nimien törmäykset ratkaistaan alla.",
+    "replace_warn": "Jokainen rastitettu luokka tyhjennetään ja korvataan tiedostosta. Rastittamattomia luokkia ei kosketa.",
+    "dest_reference_hint": "Tuodut jaksot vain parantavat ohjelmien tunnistusta eivätkä koskaan vaikuta käyttö- tai energiatilastoihin.",
+    "dest_real_history_hint": "Tuodut jaksot lasketaan tämän laitteen omaksi historiaksi ja syöttävät energia- ja käyttötilastoja. Käytä tätä, kun siirrät yhden laitteen uuteen asennukseen."
   },
   "pg_desc": {
     "completion_min_seconds": "Lyhin ajo, joka lasketaan oikeaksi sykliksi",
@@ -1715,7 +1758,9 @@
     "store_device_shared_partial": "{n} sykliä jaettu; {failed} ei voitu ladata.",
     "store_device_shared_some_dup": "{created} sykliä jaettu; {dup} olivat jo kaupassa.",
     "store_download_failed": "Lataus epäonnistui: {error}",
-    "store_download_nothing": "Ei uutta ladattavaa - tämä asetus on jo laitteellasi."
+    "store_download_nothing": "Ei uutta ladattavaa - tämä asetus on jo laitteellasi.",
+    "export_selective_done": "Vienti ladattu",
+    "import_selective_done": "Tuotu {profiles} profiilia ja {cycles} jaksoa"
   },
   "trend": {
     "down": "Trendikäs alaspäin",

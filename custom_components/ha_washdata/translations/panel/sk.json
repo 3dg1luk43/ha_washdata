@@ -28,7 +28,9 @@
     "awaiting_n": "Čaká na schválenie · potvrdené {n}",
     "approved": "Schválené",
     "awaiting": "Čaká na schválenie",
-    "imported_tip": "Importované z komunitného obchodu. Používa sa iba na porovnávanie, nezapočítava sa do štatistík."
+    "imported_tip": "Importované z komunitného obchodu. Používa sa iba na porovnávanie, nezapočítava sa do štatistík.",
+    "not_importable": "nedostupné",
+    "exists": "existuje"
   },
   "btn": {
     "add_device": "+ Pridať zariadenie",
@@ -169,7 +171,14 @@
     "download_device": "Stiahnuť nastavenie zariadenia",
     "share_device": "Zdieľať nastavenie zariadenia",
     "share_device_tip": "Zdieľať programy a nastavenia tohto zariadenia s komunitou",
-    "share_n": "Zdieľať {n} program{s}"
+    "share_n": "Zdieľať {n} program{s}",
+    "export_selected": "Export (vybrať údaje)",
+    "export_all": "Rýchly export všetkého",
+    "import_raw": "Pokročilé: nahradiť všetko zo súboru JSON",
+    "download_export": "Stiahnuť export",
+    "analyze_import": "Analyzovať súbor",
+    "import_selected": "Importovať vybrané",
+    "back": "Späť"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Rozdeľovanie cyklu",
     "task_trim": "Orezávanie cyklu",
     "task_merge": "Zlučovanie cyklov",
-    "task_rebuild": "Prepočítavanie obálok"
+    "task_rebuild": "Prepočítavanie obálok",
+    "cat_profiles": "Profily (programy)",
+    "cat_real_cycles": "Cykly (história prevádzky)",
+    "cat_reference_cycles": "Referenčné cykly (importované)",
+    "cat_custom_phases": "Vlastné fázy",
+    "cat_profile_groups": "Skupiny profilov",
+    "cat_settings": "Nastavenia detekcie a rozpoznávania",
+    "cat_matching_config": "Ladenie rozpoznávania",
+    "cat_ml_models": "Modely ML",
+    "cat_feedback": "Spätná väzba a hodnotiace štítky",
+    "cat_suggestions": "Návrhy",
+    "cat_maintenance_log": "Protokol údržby",
+    "cat_history_logs": "Protokoly histórie a zmien",
+    "cat_lifetime_stats": "Celkové súčty",
+    "cycles_short": "cyklov",
+    "import_mode": "Ako skombinovať",
+    "mode_merge": "Zlúčiť (ponechať moje)",
+    "mode_replace": "Nahradiť vybrané",
+    "cycle_destination": "Kam majú importované cykly patriť?",
+    "dest_reference": "Referenčné (iba krivka)",
+    "dest_real_history": "Skutočná história (počíta sa do štatistík)",
+    "conflict_resolution": "Konflikty názvov",
+    "conflict_import_copy": "Importovať ako kópiu",
+    "conflict_keep_mine": "Ponechať moje",
+    "conflict_overwrite": "Prepísať"
   },
   "log": {
     "all_levels": "Všetky úrovne",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Vynútiť teraz zastavenie aktívneho cyklu? Cyklus sa uloží ako prerušený.",
     "store_import": "Importovať referenčný cyklus",
     "store_share": "Zdieľať do komunitného obchodu",
-    "store_share_device": "Zdieľať nastavenie zariadenia"
+    "store_share_device": "Zdieľať nastavenie zariadenia",
+    "export_select": "Export - vybrať údaje",
+    "import_wizard": "Import - vybrať údaje"
   },
   "msg": {
     "appliance_monitor": "Monitor spotrebiča",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "Nájdených {count} podobných neoznačených cyklov – vytvorte profil, aby sa začali párovať.",
     "cycles_deleted": "Odstránených cyklov: {count}",
     "enough_data": "Dostatok dát na učenie ({current}/{min} cyklov).",
-    "export_description": "Exportujte všetky profily a cykly do JSON alebo obnovte z predchádzajúceho exportu.",
+    "export_description": "Vyberte presne, ktoré profily, cykly, nastavenia a ďalšie údaje exportovať do súboru JSON, alebo analyzujte súbor a importujte len tie časti, ktoré chcete.",
     "feedback_cycles_pending": "{n} cyklov na kontrolu",
     "feedback_prompt": "Potvrďte správnosť, opravte program alebo ignorujte.",
     "filter_by_profile": "Filtrovať podľa profilu…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Zdieľať programy vášho zariadenia (profily + referenčné cykly) s komunitou. Nastavenia sú voliteľné.",
     "share_profile_no_cycles": "Profil '{p}' nemá žiadne ⭐ referenčné cykly -- bude preskočený, ak nemáte {n}+ potvrdených spustení",
     "advisory_phase_inconsistent": "Zdá sa, že '{name}' mieša rôzne programy alebo teploty - jeho cykly sa ohrievajú veľmi rôzne dlho. Rozdelenie na samostatné profily (napr. podľa teploty) zlepší zhodu aj odhady času.",
-    "advisory_phase_inconsistent_title": "⚠ Možno zmiešané programy"
+    "advisory_phase_inconsistent_title": "⚠ Možno zmiešané programy",
+    "export_select_intro": "Zaškrtnite presne to, čo sa má zahrnúť. Výber profilov bez ich cyklov aj tak exportuje rozpoznateľný program (jeho naučená krivka sa prenesie spolu s ním).",
+    "import_analyze_hint": "Načítajte exportovaný súbor (alebo vložte jeho JSON). WashData ho analyzuje a presne ukáže, čo možno importovať, skôr než dôjde k akejkoľvek zmene.",
+    "analyzing": "Analyzujem…",
+    "device_type_mismatch_warn": "Tento export pochádza z iného typu spotrebiča ({src} vs {local}). Programy a cykly možno stále importovať ako referenčné údaje, ale nastavenia špecifické pre zariadenie a import skutočnej histórie sú zakázané.",
+    "merge_hint": "Importované položky sa pridajú; nič miestne sa nestratí. Konflikty názvov sa riešia nižšie.",
+    "replace_warn": "Každá zaškrtnutá kategória sa vymaže a nahradí údajmi zo súboru. Nezaškrtnuté kategórie zostanú bez zmeny.",
+    "dest_reference_hint": "Importované cykly len zlepšujú rozpoznávanie programov a nikdy neovplyvňujú štatistiky spotreby/energie.",
+    "dest_real_history_hint": "Importované cykly sa počítajú ako vlastná história tohto zariadenia a prispievajú do štatistík energie/spotreby. Použite pri presune jedného spotrebiča do novej inštalácie."
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1692,7 +1735,9 @@
     "store_device_shared_partial": "Čiastočné zdieľanie: {n} program{s} nahraný, {failed} preskočené",
     "store_device_shared_some_dup": "Nastavenie zariadenia zdieľané: {n} program{s} nahraný ({dup} už existovalo)",
     "store_download_failed": "Sťahovanie zlyhalo: {error}",
-    "store_download_nothing": "Nič na stiahnutie -- všetky profily na tomto zariadení už existujú"
+    "store_download_nothing": "Nič na stiahnutie -- všetky profily na tomto zariadení už existujú",
+    "export_selective_done": "Export stiahnutý",
+    "import_selective_done": "Importovaných {profiles} profilov a {cycles} cyklov"
   },
   "trend": {
     "down": "Klesajúci trend",

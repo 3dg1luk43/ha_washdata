@@ -28,7 +28,9 @@
     "awaiting_n": "En attente d'approbation · {n} confirmés",
     "approved": "Approuvé",
     "awaiting": "En attente d'approbation",
-    "imported_tip": "Importé depuis la boutique communautaire. Utilisé uniquement pour la correspondance, non compté dans les statistiques."
+    "imported_tip": "Importé depuis la boutique communautaire. Utilisé uniquement pour la correspondance, non compté dans les statistiques.",
+    "not_importable": "n/a ici",
+    "exists": "existe déjà"
   },
   "btn": {
     "add_device": "+ Ajouter un appareil",
@@ -169,7 +171,14 @@
     "download_device": "Télécharger cette configuration",
     "share_device": "⬆ Partager cet appareil",
     "share_device_tip": "Partager cet appareil et ses cycles de référence enregistrés sur la boutique communautaire pour que d'autres utilisateurs du même modèle puissent les adopter",
-    "share_n": "Partager {n} cycle(s)"
+    "share_n": "Partager {n} cycle(s)",
+    "export_selected": "Exporter (choisir les données)",
+    "export_all": "Exporter tout rapidement",
+    "import_raw": "Avancé : tout remplacer depuis un JSON",
+    "download_export": "Télécharger l'export",
+    "analyze_import": "Analyser le fichier",
+    "import_selected": "Importer la sélection",
+    "back": "Retour"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Division du cycle",
     "task_trim": "Rognage du cycle",
     "task_merge": "Fusion des cycles",
-    "task_rebuild": "Reconstruction des enveloppes"
+    "task_rebuild": "Reconstruction des enveloppes",
+    "cat_profiles": "Profils (programmes)",
+    "cat_real_cycles": "Cycles (historique d'utilisation)",
+    "cat_reference_cycles": "Cycles de référence (importés)",
+    "cat_custom_phases": "Phases personnalisées",
+    "cat_profile_groups": "Groupes de profils",
+    "cat_settings": "Réglages de détection & de reconnaissance",
+    "cat_matching_config": "Réglage de la reconnaissance",
+    "cat_ml_models": "Modèles ML",
+    "cat_feedback": "Retours & étiquettes de révision",
+    "cat_suggestions": "Suggestions",
+    "cat_maintenance_log": "Journal de maintenance",
+    "cat_history_logs": "Historique & journaux de modifications",
+    "cat_lifetime_stats": "Totaux cumulés",
+    "cycles_short": "cycles",
+    "import_mode": "Comment combiner",
+    "mode_merge": "Fusionner (garder les miens)",
+    "mode_replace": "Remplacer la sélection",
+    "cycle_destination": "Où placer les cycles importés ?",
+    "dest_reference": "Référence (forme uniquement)",
+    "dest_real_history": "Historique réel (compte dans les stats)",
+    "conflict_resolution": "Conflits de noms",
+    "conflict_import_copy": "Importer comme copie",
+    "conflict_keep_mine": "Garder le mien",
+    "conflict_overwrite": "Écraser"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Forcer l'arrêt du cycle actif maintenant ? Le cycle sera enregistré comme interrompu.",
     "store_import": "Importer un cycle de référence",
     "store_share": "Partager sur la boutique communautaire",
-    "store_share_device": "Partager cet appareil"
+    "store_share_device": "Partager cet appareil",
+    "export_select": "Exporter - choisir les données",
+    "import_wizard": "Importer - choisir les données"
   },
   "msg": {
     "appliance_monitor": "Moniteur d'appareils",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} cycles similaires non étiquetés trouvés – créez un profil pour commencer à les identifier.",
     "cycles_deleted": "{count} cycle(s) supprimé(s)",
     "enough_data": "Suffisamment de données pour apprendre ({current}/{min} cycles).",
-    "export_description": "Exportez tous les profils et cycles vers JSON, ou restaurez à partir d'une exportation précédente.",
+    "export_description": "Choisissez précisément quels profils, cycles, réglages et autres exporter vers un JSON, ou analysez un fichier pour n'importer que les éléments souhaités.",
     "feedback_cycles_pending": "{n} cycle{s} à examiner",
     "feedback_prompt": "Confirmez que c'était correct, corrigez le programme ou ignorez-le.",
     "filter_by_profile": "Filtrer par profil…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Envoyez {brand} {model} avec les cycles de référence que vous sélectionnez. D'autres utilisateurs du même appareil peuvent adopter vos programmes. Les entrées sont examinées avant d'apparaître publiquement.",
     "share_profile_no_cycles": "Aucun cycle de référence -- marquez un cycle comme ⭐ dans l'onglet Cycles pour inclure ce profil",
     "advisory_phase_inconsistent": "'{name}' semble mélanger différents programmes ou températures - ses cycles chauffent pendant des durées très variables. Le diviser en profils distincts (p. ex. par température) améliorera la reconnaissance et les estimations de temps.",
-    "advisory_phase_inconsistent_title": "⚠ Programmes peut-être mélangés"
+    "advisory_phase_inconsistent_title": "⚠ Programmes peut-être mélangés",
+    "export_select_intro": "Cochez exactement ce qu'il faut inclure. Sélectionner des profils sans leurs cycles exporte tout de même un programme reconnaissable (sa forme apprise l'accompagne).",
+    "import_analyze_hint": "Chargez un fichier exporté (ou collez son JSON). WashData l'analyse et montre exactement ce qui peut être importé avant tout changement.",
+    "analyzing": "Analyse en cours…",
+    "device_type_mismatch_warn": "Cet export provient d'un autre type d'appareil ({src} au lieu de {local}). Les programmes et cycles peuvent tout de même être importés comme données de référence, mais les réglages spécifiques à l'appareil et l'import dans l'historique réel sont désactivés.",
+    "merge_hint": "Les éléments importés sont ajoutés ; rien de local n'est perdu. Les conflits de noms sont résolus ci-dessous.",
+    "replace_warn": "Chaque catégorie cochée est effacée et remplacée par le contenu du fichier. Les catégories non cochées restent intactes.",
+    "dest_reference_hint": "Les cycles importés améliorent uniquement la reconnaissance des programmes et n'affectent jamais les statistiques d'utilisation/d'énergie.",
+    "dest_real_history_hint": "Les cycles importés comptent comme l'historique propre de cet appareil et alimentent les statistiques d'énergie/d'utilisation. À utiliser pour déplacer un appareil vers une nouvelle installation."
   },
   "pg_desc": {
     "completion_min_seconds": "Plus courte exécution comptant comme un vrai cycle",
@@ -1604,7 +1647,9 @@
     "store_device_shared_partial": "{n} cycle(s) partagé(s) ; {failed} n'ont pas pu être envoyés.",
     "store_device_shared_some_dup": "{created} cycle(s) partagé(s) ; {dup} étaient déjà dans la boutique.",
     "store_download_failed": "Échec du téléchargement : {error}",
-    "store_download_nothing": "Rien de nouveau à télécharger -- cette configuration est déjà sur votre appareil."
+    "store_download_nothing": "Rien de nouveau à télécharger -- cette configuration est déjà sur votre appareil.",
+    "export_selective_done": "Export téléchargé",
+    "import_selective_done": "{profiles} profil(s) et {cycles} cycle(s) importés"
   },
   "suggestion": {
     "both_agree": "WashData recommande",

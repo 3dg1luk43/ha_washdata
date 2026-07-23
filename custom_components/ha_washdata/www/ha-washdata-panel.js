@@ -1810,6 +1810,8 @@ class HaWashdataPanel extends HTMLElement {
     this._pgView = null;            // {min,max} time-axis zoom window (seconds); null = full
     this._pgHoverT = null;          // hovered time (seconds) for cursor readout; null = none
     this._pgMap = null;             // current time<->x mapping, set by _pgDrawCanvas
+    this._pgStressTail = false;     // idle termination test toggle
+    this._pgStressIdleW = null;     // null = auto-derive; number = manual override (W)
     this._pgPanStart = null;        // pan drag anchor {clientX, vMin, vMax, totalDur}
     this._pgHoverEvent = null;      // {t,type} of the event pin under the cursor (tooltip)
     this._pgBatchProgress = null;   // {done,total} for history/sweep chunked runs (determinate bar)
@@ -2858,6 +2860,7 @@ class HaWashdataPanel extends HTMLElement {
     this._busy.delete('pg-history'); this._busy.delete('pg-sweep'); this._pgBatchProgress = null;
     // Cancel any pending detail re-run so it can't repopulate the outgoing device.
     if (this._pgDetailDebounceTimer) { clearTimeout(this._pgDetailDebounceTimer); this._pgDetailDebounceTimer = null; }
+    this._pgStressTail = false; this._pgStressIdleW = null;
     // Reset the Community Store browse on device change (status re-fetched per-tab).
     this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null; this._storeQuery = '';
     this._storeDevices = []; this._storeProfiles = []; this._storeCycles = [];
@@ -5393,9 +5396,34 @@ class HaWashdataPanel extends HTMLElement {
     const applyBtn = (this._canEdit() && hasOverrides)
       ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-apply-settings" title="${_esc(this._t('btn.pg_apply_to_settings_tip', {}, 'Copy the values you edited here into this device\'s live settings'))}">${this._t('btn.pg_apply_to_settings', {}, 'Save to settings')}</button>`
       : '';
+    const stressGc = '#c0392b';
+    const stressHeader = `<div style="display:flex;align-items:center;gap:8px;margin:12px 0 5px">
+      <div style="width:3px;height:14px;border-radius:2px;background:${stressGc};flex-shrink:0"></div>
+      <span style="font-size:.7em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--secondary-text-color)">${_esc(this._t('lbl.pg_stress_group', {}, 'Idle termination test'))}</span>
+    </div>`;
+    const stressToggle = `<div style="display:flex;align-items:flex-start;gap:6px;margin:0 0 6px 11px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.82em;font-weight:600;margin-bottom:1px">${_esc(this._t('lbl.pg_stress_toggle', {}, 'Test idle termination'))}</div>
+        <div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('lbl.pg_stress_toggle_desc', {}, 'Simulates the appliance staying at its standby draw after recording ends — shows if and when WashData stops the cycle.'))}</div>
+      </div>
+      <label style="display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer">
+        <input type="checkbox" id="wd-pg-stress-toggle" ${this._pgStressTail ? 'checked' : ''}>
+      </label>
+    </div>`;
+    const stressIdleField = this._pgStressTail ? `<div style="display:flex;align-items:flex-start;gap:6px;margin:0 0 6px 11px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.82em;font-weight:600;margin-bottom:1px">${_esc(this._t('lbl.pg_stress_idle_w', {}, 'Idle level (W)'))}</div>
+        <div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('lbl.pg_stress_idle_w_desc', {}, 'Override the auto-detected standby floor (leave blank for auto).'))}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <input class="wd-pg-param-inp" type="number" id="wd-pg-stress-idle-w" value="${this._pgStressIdleW != null ? _esc(String(this._pgStressIdleW)) : ''}" placeholder="${_esc(this._t('lbl.pg_stress_idle_auto', {}, 'Auto'))}" style="width:72px" min="0" step="0.1">
+        <span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">W</span>
+      </div>
+    </div>` : '';
+    const stressGroup = `${stressHeader}${stressToggle}${stressIdleField}`;
     return `<div class="wd-pg-params">
       <div class="wd-subhead" style="margin:0 0 6px">${this._t('hdr.pg_detection_params', {}, 'Detection settings')}</div>
-      ${paramRows}
+      ${paramRows}${stressGroup}
       <div style="display:flex;gap:6px;margin:8px 0 4px;align-items:center;flex-wrap:wrap">
         ${applyBtn}
         <button class="wd-btn wd-btn-sm" data-action="pg-reset-params">${this._t('btn.reset', {}, 'Reset')}</button>
@@ -5448,6 +5476,9 @@ class HaWashdataPanel extends HTMLElement {
       energy_anomaly: this._t('lbl.pg_alert_energy', {}, 'Energy anomaly'),
       timeout_end: this._t('lbl.pg_alert_timeout_end', {}, 'Ended by timeout, not prediction'),
       would_run_indefinitely: this._t('lbl.pg_alert_indefinite', {}, 'Would run indefinitely'),
+      stress_terminated: this._t('lbl.pg_alert_stress_ok', {}, 'Idle termination: cycle stopped'),
+      stress_above_threshold: this._t('lbl.pg_alert_stress_warn', {}, 'Idle draw above stop threshold'),
+      stress_hit_cap: this._t('lbl.pg_alert_stress_cap', {}, 'Hit 8 h safety cap'),
     };
     return map[code] || code;
   }
@@ -5919,7 +5950,7 @@ class HaWashdataPanel extends HTMLElement {
     // completion here (the caller drives the busy spinner + redraw), but the
     // backend yields the event loop between chunks. A header pill shows progress.
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/start_playground_cycle_detail`, entry_id: entryId, cycle_id: cid, settings_override: override });
+      const r = await this._ws({ type: `${_DOMAIN}/start_playground_cycle_detail`, entry_id: entryId, cycle_id: cid, settings_override: override, stress_tail: this._pgStressTail, stress_idle_w: this._pgStressIdleW != null ? parseFloat(this._pgStressIdleW) : null });
       const tid = r && r.task_id;
       if (!tid) throw new Error('no task id');
       this._addProvisionalTask(tid, 'pg_detail', entryId, 0);
@@ -6138,6 +6169,20 @@ class HaWashdataPanel extends HTMLElement {
     ctx.beginPath(); ctx.strokeStyle = primary; ctx.lineWidth = 2*dpr;
     pts.forEach((p, i) => i ? ctx.lineTo(toX(p.t), toY(p.w)) : ctx.moveTo(toX(p.t), toY(p.w)));
     ctx.stroke();
+
+    // Stress-tail synthetic region: tinted overlay from synthetic_from_s onward
+    const stressFrom = this._pgDetail && this._pgDetail.outcome && this._pgDetail.outcome.stress && this._pgDetail.outcome.stress.synthetic_from_s;
+    if (stressFrom != null && stressFrom < vMax) {
+      const xFrom = toX(stressFrom);
+      ctx.fillStyle = 'rgba(192,57,43,0.07)';
+      ctx.fillRect(xFrom, padT, Math.max(0, padL + plotW - xFrom), powerH);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(192,57,43,0.5)';
+      ctx.lineWidth = dpr;
+      ctx.setLineDash([4*dpr, 4*dpr]);
+      ctx.beginPath(); ctx.moveTo(xFrom, padT); ctx.lineTo(xFrom, padT + powerH); ctx.stroke();
+      ctx.restore();
+    }
 
     ctx.restore();  // end plot clip
 
@@ -6530,10 +6575,12 @@ class HaWashdataPanel extends HTMLElement {
       </div>
       <div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.export_import', {}, 'Export / Import')}</div>
-        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.export_description', {}, 'Export all profiles and cycles to JSON, or restore from a previous export.')}</p>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.export_description', {}, 'Choose exactly which profiles, cycles, settings and more to export to JSON, or analyze a file and import only the parts you want.')}</p>
         <div class="wd-card-actions">
-          <button class="wd-btn wd-btn-secondary" data-action="export-config">${this._t('btn.export_json', {}, 'Export to JSON')}</button>
-          <button class="wd-btn wd-btn-secondary" data-action="import-config-open">${this._t('btn.import_json', {}, 'Import from JSON')}</button>
+          <button class="wd-btn wd-btn-primary" data-action="export-select-open">${this._t('btn.export_selected', {}, 'Export (choose data)')}</button>
+          <button class="wd-btn wd-btn-primary" data-action="import-config-open">${this._t('btn.import_json', {}, 'Import from JSON')}</button>
+          <button class="wd-btn wd-btn-secondary" data-action="export-config">${this._t('btn.export_all', {}, 'Quick export everything')}</button>
+          <button class="wd-btn wd-btn-secondary" data-action="import-config-raw">${this._t('btn.import_raw', {}, 'Advanced: replace all from JSON')}</button>
         </div>
       </div>` : `<div class="wd-card"><p class="wd-info">${this._t('msg.maintenance_requires_access', {}, 'Maintenance and export/import require full access.')}</p></div>`}`;
   }
@@ -7401,6 +7448,8 @@ class HaWashdataPanel extends HTMLElement {
     if (m.type === 'profile-group') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlProfileGroupModal(m)}</div></div>`;
     if (m.type === 'compare-cycles') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlCompareModal(m)}</div></div>`;
     if (m.type === 'gear-settings') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlGearModal(m)}</div></div>`;
+    if (m.type === 'export-select') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlExportSelectModal(m)}</div></div>`;
+    if (m.type === 'import-wizard') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlImportWizardModal(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
@@ -7608,6 +7657,243 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel" ${busy ? 'disabled' : ''}>${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="store-share-device-ok" ${busy || !selCount || !consented ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.share_n', {n: selCount}, `Share ${selCount} cycle(s)`)}</button>
+      </div>`;
+  }
+
+  // ── Selective export/import wizard ──────────────────────────────────────────
+  // Fixed display order for the category tree (mirrors _EXPORT_CATEGORIES on the
+  // backend). Enumerable categories (profiles / cycles) come first.
+  _wizCatOrder() {
+    return ['profiles', 'real_cycles', 'reference_cycles', 'custom_phases',
+      'profile_groups', 'settings', 'matching_config', 'ml_models', 'feedback',
+      'suggestions', 'maintenance_log', 'history_logs', 'lifetime_stats'];
+  }
+
+  _wizCatLabel(catId) {
+    const map = {
+      profiles: this._t('lbl.cat_profiles', {}, 'Profiles (programs)'),
+      real_cycles: this._t('lbl.cat_real_cycles', {}, 'Cycles (run history)'),
+      reference_cycles: this._t('lbl.cat_reference_cycles', {}, 'Reference cycles (imported)'),
+      custom_phases: this._t('lbl.cat_custom_phases', {}, 'Custom phases'),
+      profile_groups: this._t('lbl.cat_profile_groups', {}, 'Profile groups'),
+      settings: this._t('lbl.cat_settings', {}, 'Detection & matching settings'),
+      matching_config: this._t('lbl.cat_matching_config', {}, 'Matcher tuning'),
+      ml_models: this._t('lbl.cat_ml_models', {}, 'ML models'),
+      feedback: this._t('lbl.cat_feedback', {}, 'Feedback & review labels'),
+      suggestions: this._t('lbl.cat_suggestions', {}, 'Suggestions'),
+      maintenance_log: this._t('lbl.cat_maintenance_log', {}, 'Maintenance log'),
+      history_logs: this._t('lbl.cat_history_logs', {}, 'History & change logs'),
+      lifetime_stats: this._t('lbl.cat_lifetime_stats', {}, 'Lifetime totals'),
+    };
+    return map[catId] || catId;
+  }
+
+  // Build a fresh selection model from a manifest. When importableOnly is set,
+  // categories/items the backend marked not-importable are left unselected.
+  _wizInitSel(manifest, importableOnly) {
+    const cats = new Set(), profiles = new Set(), realIds = new Set(), refIds = new Set();
+    const c = (manifest && manifest.categories) || {};
+    const ok = (info) => !!(info && info.present && (!importableOnly || info.importable !== false));
+    if (ok(c.profiles)) (c.profiles.items || []).forEach(i => profiles.add(i.name));
+    if (ok(c.real_cycles)) (c.real_cycles.groups || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) realIds.add(String(cy.id)); }));
+    if (ok(c.reference_cycles)) (c.reference_cycles.groups || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) refIds.add(String(cy.id)); }));
+    Object.keys(c).forEach(cid => {
+      if (['profiles', 'real_cycles', 'reference_cycles'].includes(cid)) return;
+      if (ok(c[cid])) cats.add(cid);
+    });
+    return { cats, profiles, realIds, refIds };
+  }
+
+  // The selection payload sent to the backend (categories + item subsets).
+  _wizSelectionPayload(m) {
+    const s = m.sel;
+    const categories = [];
+    if (s.profiles.size) categories.push('profiles');
+    if (s.realIds.size) categories.push('real_cycles');
+    if (s.refIds.size) categories.push('reference_cycles');
+    s.cats.forEach(cid => categories.push(cid));
+    const out = { categories };
+    if (s.profiles.size) out.profiles = Array.from(s.profiles);
+    if (s.realIds.size) out.real_cycle_ids = Array.from(s.realIds);
+    if (s.refIds.size) out.reference_cycle_ids = Array.from(s.refIds);
+    return out;
+  }
+
+  // Ids of the cycles in one manifest group (real_cycles / reference_cycles).
+  _wizGroupIds(manifest, catId, prof) {
+    const cat = (manifest.categories || {})[catId] || {};
+    const g = (cat.groups || []).find(gr => gr.profile === prof);
+    return g ? g.cycles.map(cy => String(cy.id)).filter(id => id !== 'null') : [];
+  }
+
+  // tri-state {sel, total, state} for a category, for the checkbox rendering.
+  _wizCatState(m, catId, manifest) {
+    const s = m.sel;
+    const cat = (manifest.categories || {})[catId] || {};
+    if (catId === 'profiles') {
+      const items = cat.items || [];
+      const total = items.length;
+      const sel = items.filter(i => s.profiles.has(i.name)).length;
+      return { sel, total, state: sel === 0 ? 'none' : (sel === total ? 'all' : 'some') };
+    }
+    if (catId === 'real_cycles' || catId === 'reference_cycles') {
+      const set = catId === 'real_cycles' ? s.realIds : s.refIds;
+      const total = cat.count || 0;
+      let sel = 0;
+      (cat.groups || []).forEach(g => g.cycles.forEach(cy => { if (set.has(String(cy.id))) sel++; }));
+      return { sel, total, state: sel === 0 ? 'none' : (sel === total ? 'all' : 'some') };
+    }
+    const on = s.cats.has(catId);
+    return { sel: on ? 1 : 0, total: 1, state: on ? 'all' : 'none' };
+  }
+
+  // Render the shared tri-state category tree from a manifest/inventory.
+  // opts = { importableOnly, conflicts } — conflicts marks profiles that clash.
+  _htmlSelectionTree(m, manifest, opts = {}) {
+    const cats = (manifest && manifest.categories) || {};
+    const conflictNames = new Set();
+    if (opts.conflicts) (cats.profiles && cats.profiles.items || []).forEach(i => { if (i.conflict) conflictNames.add(i.name); });
+    const order = this._wizCatOrder().filter(cid => cats[cid] && cats[cid].present);
+    // Master select-all state across every currently-selectable category.
+    let anySel = false, allSel = true;
+    order.forEach(cid => {
+      if (opts.importableOnly && cats[cid].importable === false) return;
+      const st = this._wizCatState(m, cid, manifest);
+      if (st.state !== 'none') anySel = true;
+      if (st.state !== 'all') allSel = false;
+    });
+    const master = `<label class="wd-sd-prof" style="border-bottom:1px solid var(--divider-color, #444)">
+      <input type="checkbox" data-maction="wiz-toggle-all" ${allSel ? 'checked' : ''} ${!allSel && anySel ? 'data-indeterminate="1"' : ''}>
+      <span class="wd-sd-prof-name"><strong>${this._t('btn.select_all', {}, 'Select all')}</strong></span>
+    </label>`;
+    const rows = order.map(cid => {
+      const info = cats[cid];
+      const blocked = opts.importableOnly && info.importable === false;
+      const st = this._wizCatState(m, cid, manifest);
+      const enumerable = ['profiles', 'real_cycles', 'reference_cycles'].includes(cid);
+      const countLbl = enumerable ? `${st.sel}/${info.count}` : '';
+      const header = `<label class="wd-sd-prof">
+        <input type="checkbox" data-maction="wiz-toggle-cat" data-cat="${cid}" ${st.state === 'all' ? 'checked' : ''} ${st.state === 'some' ? 'data-indeterminate="1"' : ''} ${blocked ? 'disabled' : ''}>
+        <span class="wd-sd-prof-name">${_esc(this._wizCatLabel(cid))}${blocked ? ` <span class="wd-tag">${this._t('badge.not_importable', {}, 'n/a here')}</span>` : ''}</span>
+        <span class="wd-sd-count">${countLbl}</span>
+      </label>`;
+      let items = '';
+      if (!blocked && cid === 'profiles') {
+        items = `<div class="wd-sd-cycles">${(info.items || []).map(i => `<label class="wd-sd-cyc">
+          <input type="checkbox" data-maction="wiz-toggle-profile" data-name="${_esc(i.name)}" ${m.sel.profiles.has(i.name) ? 'checked' : ''}>
+          <span class="wd-sd-cyc-meta">${_esc(i.name)} · ${(i.real_cycles || 0) + (i.reference_cycles || 0)} ${this._t('lbl.cycles_short', {}, 'cycles')}${conflictNames.has(i.name) ? ` <span class="wd-tag" style="color:var(--warning-color,#e6a700)">${this._t('badge.exists', {}, 'exists')}</span>` : ''}</span>
+        </label>`).join('')}</div>`;
+      } else if (!blocked && (cid === 'real_cycles' || cid === 'reference_cycles')) {
+        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
+        items = `<div class="wd-sd-cycles">${(info.groups || []).map(g => {
+          const ids = g.cycles.map(cy => String(cy.id));
+          const gsel = ids.filter(id => set.has(id)).length;
+          const gall = gsel === ids.length && ids.length > 0;
+          const gsome = gsel > 0 && !gall;
+          const key = `${cid}:${g.profile}`;
+          const expanded = m.expanded && m.expanded.has(key);
+          const rows2 = expanded ? g.cycles.map(cy => `<label class="wd-sd-cyc" style="margin-left:18px">
+            <input type="checkbox" data-maction="wiz-toggle-cyc" data-cat="${cid}" data-cid="${_esc(String(cy.id))}" ${set.has(String(cy.id)) ? 'checked' : ''}>
+            <span class="wd-sd-cyc-meta">${_esc(cy.date ? _fmtDate(cy.date) : String(cy.id))}${cy.duration != null ? ' · ' + _fmtDuration(cy.duration) : ''}</span>
+          </label>`).join('') : '';
+          return `<div>
+            <label class="wd-sd-cyc">
+              <input type="checkbox" data-maction="wiz-toggle-cycgroup" data-cat="${cid}" data-prof="${_esc(g.profile)}" ${gall ? 'checked' : ''} ${gsome ? 'data-indeterminate="1"' : ''}>
+              <span class="wd-sd-cyc-meta"><strong>${_esc(g.profile || this._t('lbl.unlabelled', {}, 'Unlabelled'))}</strong> (${gsel}/${g.count})</span>
+              <button type="button" class="wd-linkbtn" data-maction="wiz-expand" data-key="${_esc(key)}" style="margin-left:auto;background:none;border:none;color:var(--primary-color);cursor:pointer">${expanded ? '▾' : '▸'}</button>
+            </label>
+            ${rows2}
+          </div>`;
+        }).join('')}</div>`;
+      }
+      return `<div class="wd-sd-group">${header}${items}</div>`;
+    }).join('');
+    return `<div class="wd-sd-tree">${master}${rows}</div>`;
+  }
+
+  _htmlExportSelectModal(m) {
+    const busy = this._busy.has('export-select');
+    let body;
+    if (m.loading || !m.inventory) {
+      body = `<div class="wd-empty" style="padding:24px"><div class="wd-icon">⏳</div>${this._t('msg.loading', {}, 'Loading…')}</div>`;
+    } else {
+      body = this._htmlSelectionTree(m, { categories: m.inventory }, { importableOnly: false });
+    }
+    const anything = m.sel && (m.sel.profiles.size || m.sel.realIds.size || m.sel.refIds.size || m.sel.cats.size);
+    return `<h2 id="wd-modal-title">${this._t('modal.export_select', {}, 'Export - choose data')}</h2>
+      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.export_select_intro', {}, 'Tick exactly what to include. Selecting profiles without their cycles still exports a matchable program (its learned shape travels along).')}</p>
+      ${body}
+      <div class="wd-modal-actions">
+        <button class="wd-btn wd-btn-secondary" data-maction="cancel" ${busy ? 'disabled' : ''}>${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="export-generate" ${busy || !anything ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.download_export', {}, 'Download export')}</button>
+      </div>`;
+  }
+
+  _htmlImportWizardModal(m) {
+    const busy = this._busy.has('import-wizard');
+    const title = `<h2 id="wd-modal-title">${this._t('modal.import_wizard', {}, 'Import - choose data')}</h2>`;
+    if (m.step === 'input' || m.step === 'analyze') {
+      const analyzing = m.step === 'analyze';
+      return `${title}
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.import_analyze_hint', {}, 'Load an exported file (or paste its JSON). WashData analyzes it and shows exactly what can be imported before anything changes.')}</p>
+        <div class="wd-field"><label>${this._t('lbl.load_from_file', {}, 'Load from file')}</label><input type="file" id="wd-import-file" accept=".json,application/json" ${analyzing ? 'disabled' : ''}></div>
+        <div class="wd-field"><label>${this._t('lbl.json_data', {}, 'JSON Data')}</label><textarea id="wd-import-json" style="min-height:120px;font-family:monospace;font-size:.78em" ${analyzing ? 'disabled' : ''}>${_esc(m.jsonText || '')}</textarea></div>
+        ${m.error ? `<p class="wd-info" style="color:var(--error-color)">${_esc(m.error)}</p>` : ''}
+        <div class="wd-modal-actions">
+          <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="import-analyze" ${analyzing ? 'disabled' : ''}>${analyzing ? '<span class="wd-spin"></span> ' + this._t('msg.analyzing', {}, 'Analyzing…') : this._t('btn.analyze_import', {}, 'Analyze file')}</button>
+        </div>`;
+    }
+    // step === 'select'
+    const man = m.manifest || {};
+    const mismatch = man.device_type_match === false;
+    const warnBanner = mismatch ? `<div class="wd-banner wd-banner-warn" style="margin-bottom:12px;padding:8px 12px;border-radius:8px;background:var(--warning-color,#e6a700);color:#111">
+      ${this._t('msg.device_type_mismatch_warn', { src: man.source_device_type || '?', local: man.local_device_type || '?' }, 'This export is from a different appliance type (' + (man.source_device_type || '?') + ' vs ' + (man.local_device_type || '?') + '). Programs and cycles can still be imported as reference data, but device-specific settings and real-history import are disabled.')}
+    </div>` : '';
+    const tree = this._htmlSelectionTree(m, man, { importableOnly: true, conflicts: true });
+    // Merge / replace mode toggle.
+    const modeBar = `<div class="wd-field"><label>${this._t('lbl.import_mode', {}, 'How to combine')}</label>
+      <div class="wd-mode-bar" style="display:flex;gap:8px">
+        <button type="button" class="wd-btn ${m.mode === 'merge' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="imp-mode-merge">${this._t('lbl.mode_merge', {}, 'Merge (keep mine)')}</button>
+        <button type="button" class="wd-btn ${m.mode === 'replace' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="imp-mode-replace">${this._t('lbl.mode_replace', {}, 'Replace selected')}</button>
+      </div>
+      <div class="wd-field-hint">${m.mode === 'replace' ? this._t('msg.replace_warn', {}, 'Each ticked category is wiped and replaced from the file. Unticked categories are left untouched.') : this._t('msg.merge_hint', {}, 'Imported items are added; nothing local is lost. Name clashes are resolved below.')}</div>
+    </div>`;
+    // Cycle destination toggle (only relevant when cycles are being imported).
+    const realAllowed = man.real_history_allowed !== false;
+    const destBar = `<div class="wd-field"><label>${this._t('lbl.cycle_destination', {}, 'Where should imported cycles go?')}</label>
+      <div class="wd-mode-bar" style="display:flex;gap:8px">
+        <button type="button" class="wd-btn ${m.cycleDest === 'reference' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="imp-dest-reference">${this._t('lbl.dest_reference', {}, 'Reference (shape only)')}</button>
+        <button type="button" class="wd-btn ${m.cycleDest === 'real_history' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="imp-dest-real" ${realAllowed ? '' : 'disabled'}>${this._t('lbl.dest_real_history', {}, 'Real history (counts in stats)')}</button>
+      </div>
+      <div class="wd-field-hint">${m.cycleDest === 'real_history' ? this._t('msg.dest_real_history_hint', {}, 'Imported cycles count as this device\'s own history and feed energy/usage stats. Use for moving one appliance to a new install.') : this._t('msg.dest_reference_hint', {}, 'Imported cycles only improve program matching and never affect usage/energy statistics.')}</div>
+    </div>`;
+    // Per-conflict resolution (merge mode, selected conflicting profiles).
+    let conflictBar = '';
+    const profItems = (man.categories && man.categories.profiles && man.categories.profiles.items) || [];
+    const selConflicts = profItems.filter(i => i.conflict && m.sel.profiles.has(i.name));
+    if (m.mode === 'merge' && selConflicts.length) {
+      conflictBar = `<div class="wd-field"><label>${this._t('lbl.conflict_resolution', {}, 'Name clashes')}</label>
+        ${selConflicts.map(i => `<div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+          <span style="flex:1">${_esc(i.name)}</span>
+          <select data-maction="imp-conflict" data-prof="${_esc(i.name)}">
+            <option value="import_as_copy" ${(m.conflicts[i.name] || 'import_as_copy') === 'import_as_copy' ? 'selected' : ''}>${this._t('lbl.conflict_import_copy', {}, 'Import as copy')}</option>
+            <option value="keep_mine" ${m.conflicts[i.name] === 'keep_mine' ? 'selected' : ''}>${this._t('lbl.conflict_keep_mine', {}, 'Keep mine')}</option>
+            <option value="overwrite" ${m.conflicts[i.name] === 'overwrite' ? 'selected' : ''}>${this._t('lbl.conflict_overwrite', {}, 'Overwrite')}</option>
+          </select>
+        </div>`).join('')}
+      </div>`;
+    }
+    const anything = m.sel && (m.sel.profiles.size || m.sel.realIds.size || m.sel.refIds.size || m.sel.cats.size);
+    return `${title}
+      ${warnBanner}
+      ${tree}
+      ${modeBar}
+      ${destBar}
+      ${conflictBar}
+      <div class="wd-modal-actions">
+        <button class="wd-btn wd-btn-secondary" data-maction="import-back" ${busy ? 'disabled' : ''}>${this._t('btn.back', {}, 'Back')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="import-apply-ok" ${busy || !anything ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.import_selected', {}, 'Import selected')}</button>
       </div>`;
   }
 
@@ -8375,6 +8661,23 @@ class HaWashdataPanel extends HTMLElement {
       // estimates, events and alerts reflect it (debounced).
       this._pgRerunDetail();
     }));
+
+    // F3: Idle termination test toggle
+    const pgStressToggle = sr.getElementById('wd-pg-stress-toggle');
+    if (pgStressToggle) pgStressToggle.addEventListener('change', () => {
+      this._pgStressTail = pgStressToggle.checked;
+      this._pgStressIdleW = null;
+      this._render();
+      this._pgRerunDetail();
+    });
+
+    // F3: Idle level override field (only present when toggle is on)
+    const pgStressIdleW = sr.getElementById('wd-pg-stress-idle-w');
+    if (pgStressIdleW) pgStressIdleW.addEventListener('input', () => {
+      const v = parseFloat(pgStressIdleW.value);
+      this._pgStressIdleW = isNaN(v) ? null : v;
+      this._pgRerunDetail();
+    });
 
     // F3: Cycle selector
     const pgCycSel = sr.getElementById('wd-pg-cyc-sel');
@@ -9679,6 +9982,21 @@ class HaWashdataPanel extends HTMLElement {
         document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
         this._showToast(this._t('toast.export_downloaded', {}, 'Export downloaded'));
       }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
+    } else if (a === 'export-select-open') {
+      // Open the export wizard: fetch this device's inventory, default everything on.
+      this._modal = { type: 'export-select', inventory: null, loading: true, sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }, expanded: new Set() };
+      this._render();
+      (async () => {
+        let inv = null;
+        try { const r = await this._ws({ type: `${_DOMAIN}/get_export_inventory`, entry_id: eid }); inv = (r && r.manifest) || null; }
+        catch (e) { this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'); }
+        if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'export-select') return;
+        if (!inv) { this._modal = null; this._render(); return; }
+        this._modal.inventory = inv;
+        this._modal.sel = this._wizInitSel({ categories: inv }, false);
+        this._modal.loading = false;
+        this._render();
+      })();
     } else if (a === 'cyc-select-toggle') {
       this._selectMode = !this._selectMode;
       if (!this._selectMode) this._cycleSel.clear();
@@ -9752,6 +10070,7 @@ class HaWashdataPanel extends HTMLElement {
       this._pgCancelRun();
     } else if (a === 'pg-reset-params') {
       this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
+      this._pgStressTail = false; this._pgStressIdleW = null;
       this._render(); requestAnimationFrame(() => this._pgDrawCanvas());
     } else if (a === 'pg-apply-settings') {
       this._pgApplyToSettings();
@@ -9845,6 +10164,13 @@ class HaWashdataPanel extends HTMLElement {
         this._showToast(this._t('toast.logs_exported', {}, 'Logs exported'));
       }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
     } else if (a === 'import-config-open') {
+      // Open the import wizard at the paste/upload step.
+      this._modal = { type: 'import-wizard', step: 'input', jsonText: '', manifest: null, error: null,
+        sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() },
+        expanded: new Set(), mode: 'merge', cycleDest: 'reference', conflicts: {} };
+      this._render();
+    } else if (a === 'import-config-raw') {
+      // Advanced fallback: the legacy raw-JSON whole-store replace.
       this._modal = { type: 'import-config' }; this._render();
 
     } else if (a === 'save-prefs') {
@@ -10100,6 +10426,146 @@ class HaWashdataPanel extends HTMLElement {
             else if (dup) this._showToast(this._t('toast.store_device_shared_some_dup', {created, dup}, `Shared ${created} cycle(s); ${dup} were already in the store.`));
             else this._showToast(this._t('toast.store_device_shared', {n: created}, `Shared ${created} cycle(s) to the community store - pending review.`));
           } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+
+    // ---- Selective export / import wizard ----
+    if (m && (m.type === 'export-select' || m.type === 'import-wizard')) {
+      // The manifest that backs the tree: inventory for export, analyze result for import.
+      const man = m.type === 'export-select' ? { categories: m.inventory || {} } : (m.manifest || { categories: {} });
+      if (action === 'wiz-toggle-all') {
+        const cats = man.categories || {};
+        const importableOnly = m.type === 'import-wizard';
+        // If everything is already selected, clear; otherwise select all selectable.
+        let allSel = true;
+        this._wizCatOrder().filter(cid => cats[cid] && cats[cid].present).forEach(cid => {
+          if (importableOnly && cats[cid].importable === false) return;
+          if (this._wizCatState(m, cid, man).state !== 'all') allSel = false;
+        });
+        m.sel = allSel
+          ? { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }
+          : this._wizInitSel(man, importableOnly);
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-cat') {
+        const cid = btn.dataset.cat;
+        const st = this._wizCatState(m, cid, man);
+        const turnOn = st.state !== 'all';
+        if (cid === 'profiles') {
+          const items = (man.categories.profiles && man.categories.profiles.items) || [];
+          m.sel.profiles = new Set(turnOn ? items.map(i => i.name) : []);
+        } else if (cid === 'real_cycles' || cid === 'reference_cycles') {
+          const set = new Set();
+          if (turnOn) ((man.categories[cid] && man.categories[cid].groups) || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) set.add(String(cy.id)); }));
+          if (cid === 'real_cycles') m.sel.realIds = set; else m.sel.refIds = set;
+        } else if (turnOn) { m.sel.cats.add(cid); } else { m.sel.cats.delete(cid); }
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-profile') {
+        const name = btn.dataset.name;
+        if (m.sel.profiles.has(name)) m.sel.profiles.delete(name); else m.sel.profiles.add(name);
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-cycgroup') {
+        const cid = btn.dataset.cat; const prof = btn.dataset.prof;
+        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
+        const ids = this._wizGroupIds(man, cid, prof);
+        const all = ids.length > 0 && ids.every(id => set.has(id));
+        ids.forEach(id => { if (all) set.delete(id); else set.add(id); });
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-cyc') {
+        const cid = btn.dataset.cat; const id = btn.dataset.cid;
+        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
+        if (set.has(id)) set.delete(id); else set.add(id);
+        this._render();
+        return;
+      }
+      if (action === 'wiz-expand') {
+        const key = btn.dataset.key;
+        if (!m.expanded) m.expanded = new Set();
+        if (m.expanded.has(key)) m.expanded.delete(key); else m.expanded.add(key);
+        this._render();
+        return;
+      }
+    }
+
+    // Export wizard: generate + download the filtered JSON.
+    if (m && m.type === 'export-select' && action === 'export-generate' && eid) {
+      const selection = this._wizSelectionPayload(m);
+      await this._busyRun('export-select', async () => {
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/export_config_selective`, entry_id: eid, selection });
+          const blob = new Blob([r.json_data], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a2 = document.createElement('a');
+          a2.href = url; a2.download = `washdata_export_${eid.slice(0, 8)}.json`;
+          document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
+          this._modal = null;
+          this._showToast(this._t('toast.export_selective_done', {}, 'Export downloaded'));
+        } catch (e) { this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'); }
+      });
+      return;
+    }
+
+    // Import wizard: step machine + toggles + apply.
+    if (m && m.type === 'import-wizard') {
+      if (action === 'import-back') {
+        m.step = 'input'; m.error = null; this._render();
+        return;
+      }
+      if (action === 'imp-mode-merge') { m.mode = 'merge'; this._render(); return; }
+      if (action === 'imp-mode-replace') { m.mode = 'replace'; this._render(); return; }
+      if (action === 'imp-dest-reference') { m.cycleDest = 'reference'; this._render(); return; }
+      if (action === 'imp-dest-real') { if ((m.manifest || {}).real_history_allowed !== false) { m.cycleDest = 'real_history'; this._render(); } return; }
+      if (action === 'imp-conflict') { m.conflicts[btn.dataset.prof] = btn.value; return; }
+      if (action === 'import-analyze' && eid) {
+        const ta = sr.getElementById('wd-import-json');
+        const jsonText = ta ? ta.value : (m.jsonText || '');
+        m.jsonText = jsonText;
+        if (!jsonText.trim()) { this._showToast(this._t('toast.json_required', {}, 'JSON data is required'), 'error'); return; }
+        m.step = 'analyze'; m.error = null; this._render();
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/analyze_import`, entry_id: eid, json_data: jsonText });
+          if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'import-wizard') return;
+          const manifest = (r && r.manifest) || {};
+          if (manifest.error) { m.step = 'input'; m.error = manifest.error; this._render(); return; }
+          m.manifest = manifest;
+          m.sel = this._wizInitSel(manifest, true);
+          // Default every conflicting profile to the safest resolution.
+          m.conflicts = {};
+          ((manifest.categories && manifest.categories.profiles && manifest.categories.profiles.items) || [])
+            .forEach(i => { if (i.conflict) m.conflicts[i.name] = 'import_as_copy'; });
+          m.step = 'select';
+          this._render();
+        } catch (e) {
+          if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'import-wizard') return;
+          m.step = 'input'; m.error = (e && e.message) || String(e); this._render();
+        }
+        return;
+      }
+      if (action === 'import-apply-ok' && eid) {
+        const selection = this._wizSelectionPayload(m);
+        await this._busyRun('import-wizard', async () => {
+          try {
+            const r = await this._ws({ type: `${_DOMAIN}/import_config_selective`, entry_id: eid,
+              json_data: m.jsonText, selection, mode: m.mode,
+              conflict_resolutions: m.conflicts, cycle_destination: m.cycleDest, apply_settings: true });
+            const s = (r && r.summary) || {};
+            this._modal = null;
+            this._showToast(this._t('toast.import_selective_done', {
+              profiles: s.profiles_imported || 0,
+              cycles: (s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0),
+            }, `Imported ${s.profiles_imported || 0} profile(s) and ${(s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0)} cycle(s)`));
+            await this._fetchCycles(eid);
+            await this._fetchProfiles(eid);
+          } catch (e) { this._showToast(this._t('toast.import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
