@@ -5720,7 +5720,6 @@ class HaWashdataPanel extends HTMLElement {
       }
     });
     this._render();
-    this._pgRerunDetail();
   }
 
   async _pgApplySweepValue(val) {
@@ -5740,7 +5739,6 @@ class HaWashdataPanel extends HTMLElement {
         else this._pgParamOverrides[paramKey] = +val;
         this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
         this._render();
-        this._pgRerunDetail();
       } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
     });
   }
@@ -8624,7 +8622,7 @@ class HaWashdataPanel extends HTMLElement {
         const wasThr = this._pgDragging === 'start_thr' || this._pgDragging === 'stop_thr';
         this._pgDragging = null; this._pgPanStart = null;
         pgCanvas.classList.remove('wd-pg-panning');
-        if (wasThr) this._pgRerunDetail();  // re-run the sim under the new threshold
+        if (wasThr) this._pgDrawCanvas();
       });
       pgCanvas.addEventListener('pointerleave', () => {
         if (this._pgDragging) return;
@@ -8656,10 +8654,8 @@ class HaWashdataPanel extends HTMLElement {
       if (key === 'start_threshold_w') this._pgThreshStart = val;
       else if (key === 'stop_threshold_w') this._pgThreshStop = val;
       else this._pgParamOverrides[key] = val;
-      this._pgDrawCanvas();
-      // Re-run the faithful sim under the new setting so the state band, model
-      // estimates, events and alerts reflect it (debounced).
-      this._pgRerunDetail();
+      this._render();
+      requestAnimationFrame(() => this._pgDrawCanvas());
     }));
 
     // F3: Idle termination test toggle
@@ -8668,7 +8664,6 @@ class HaWashdataPanel extends HTMLElement {
       this._pgStressTail = pgStressToggle.checked;
       this._pgStressIdleW = null;
       this._render();
-      this._pgRerunDetail();
     });
 
     // F3: Idle level override field (only present when toggle is on)
@@ -8676,7 +8671,6 @@ class HaWashdataPanel extends HTMLElement {
     if (pgStressIdleW) pgStressIdleW.addEventListener('input', () => {
       const v = parseFloat(pgStressIdleW.value);
       this._pgStressIdleW = isNaN(v) ? null : v;
-      this._pgRerunDetail();
     });
 
     // F3: Cycle selector
