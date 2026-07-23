@@ -28,7 +28,9 @@
     "awaiting_n": "Laukiama patvirtinimo · {n} patvirtinimai",
     "approved": "Patvirtinta",
     "awaiting": "Laukiama patvirtinimo",
-    "imported_tip": "Importuota iš bendruomenės parduotuvės. Naudojama tik atitikčiai, neįskaičiuojama į statistiką."
+    "imported_tip": "Importuota iš bendruomenės parduotuvės. Naudojama tik atitikčiai, neįskaičiuojama į statistiką.",
+    "not_importable": "čia nepasiekiama",
+    "exists": "jau yra"
   },
   "btn": {
     "add_device": "+ Pridėti įrenginį",
@@ -169,7 +171,14 @@
     "download_device": "Atsisiųsti šią konfigūraciją",
     "share_device": "⬆ Dalintis šiuo įrenginiu",
     "share_device_tip": "Bendrinkite šį prietaisą ir jo įrašytus etaloniniais ciklus bendruomenės parduotuvėje, kad kiti, turintys tą patį aparatą, galėtų juos perimti",
-    "share_n": "Bendrinti {n} ciklą(-us)"
+    "share_n": "Bendrinti {n} ciklą(-us)",
+    "export_selected": "Eksportuoti (pasirinkti duomenis)",
+    "export_all": "Greitasis eksportas: viskas",
+    "import_raw": "Išplėstinis: pakeisti viską iš JSON",
+    "download_export": "Atsisiųsti eksportą",
+    "analyze_import": "Analizuoti failą",
+    "import_selected": "Importuoti pasirinktus",
+    "back": "Atgal"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Padalijamas ciklas",
     "task_trim": "Apkarpomas ciklas",
     "task_merge": "Sujungiami ciklai",
-    "task_rebuild": "Perkuriamos gaubtinės"
+    "task_rebuild": "Perkuriamos gaubtinės",
+    "cat_profiles": "Profiliai (programos)",
+    "cat_real_cycles": "Ciklai (naudojimo istorija)",
+    "cat_reference_cycles": "Atskaitos ciklai (importuoti)",
+    "cat_custom_phases": "Pasirinktinės fazės",
+    "cat_profile_groups": "Profilių grupės",
+    "cat_settings": "Aptikimo ir atpažinimo nustatymai",
+    "cat_matching_config": "Atpažinimo derinimas",
+    "cat_ml_models": "ML modeliai",
+    "cat_feedback": "Atsiliepimų ir peržiūros žymos",
+    "cat_suggestions": "Pasiūlymai",
+    "cat_maintenance_log": "Priežiūros žurnalas",
+    "cat_history_logs": "Istorijos ir pakeitimų žurnalai",
+    "cat_lifetime_stats": "Viso laiko sumos",
+    "cycles_short": "ciklų",
+    "import_mode": "Kaip sujungti",
+    "mode_merge": "Sujungti (išlaikyti manuosius)",
+    "mode_replace": "Pakeisti pasirinktus",
+    "cycle_destination": "Kur turėtų patekti importuoti ciklai?",
+    "dest_reference": "Atskaita (tik forma)",
+    "dest_real_history": "Tikra istorija (įskaičiuojama į statistiką)",
+    "conflict_resolution": "Pavadinimų konfliktai",
+    "conflict_import_copy": "Importuoti kaip kopiją",
+    "conflict_keep_mine": "Išlaikyti manuosius",
+    "conflict_overwrite": "Perrašyti"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Priverstinai sustabdyti aktyvų ciklą dabar? Ciklas bus išsaugotas kaip nutrauktas.",
     "store_import": "Importuoti etaloninį ciklą",
     "store_share": "Bendrinti bendruomenės parduotuvėje",
-    "store_share_device": "Bendrinti šį įrenginį"
+    "store_share_device": "Bendrinti šį įrenginį",
+    "export_select": "Eksportas - pasirinkti duomenis",
+    "import_wizard": "Importas - pasirinkti duomenis"
   },
   "msg": {
     "appliance_monitor": "Prietaisų monitorius",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "Rasti {count} panašūs nepažymėti ciklai – sukurkite profilį, kad pradėtumėte juos atpažinti.",
     "cycles_deleted": "Ištrinta ciklų: {count}",
     "enough_data": "Pakankamai duomenų mokymui ({current}/{min} ciklų).",
-    "export_description": "Eksportuokite visus profilius ir ciklus į JSON arba atkurkite iš ankstesnio eksportavimo.",
+    "export_description": "Pasirinkite tiksliai, kuriuos profilius, ciklus, nustatymus ir kita eksportuoti į JSON, arba išanalizuokite failą ir importuokite tik norimas dalis.",
     "feedback_cycles_pending": "{n} cikl{s} peržiūrai",
     "feedback_prompt": "Patvirtinkite, kad tai buvo teisinga, pataisykite programą arba ignoruokite.",
     "filter_by_profile": "Filtruoti pagal profilį…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Įkelkite {brand} {model} su pasirinktais etaloniniais ciklais. Kiti, turintys tą patį prietaisą, gali perimti jūsų programas. Įrašai peržiūrimi prieš viešinant.",
     "share_profile_no_cycles": "Nėra etaloninių ciklų -- pažymėkite ciklą kaip ⭐ Ciklų skirtuke, kad įtrauktumėte šį profilį",
     "advisory_phase_inconsistent": "Atrodo, kad '{name}' maišo skirtingas programas ar temperatūras - jo ciklai kaista labai skirtingą laiką. Padalijus jį į atskirus profilius (pvz., pagal temperatūrą), pagerės atitikimas ir laiko įverčiai.",
-    "advisory_phase_inconsistent_title": "⚠ Galimai sumaišytos programos"
+    "advisory_phase_inconsistent_title": "⚠ Galimai sumaišytos programos",
+    "export_select_intro": "Pažymėkite tiksliai, ką įtraukti. Pasirinkus profilius be jų ciklų, vis tiek eksportuojama atpažįstama programa (jos išmokta forma keliauja kartu).",
+    "import_analyze_hint": "Įkelkite eksportuotą failą (arba įklijuokite jo JSON). WashData jį išanalizuoja ir tiksliai parodo, ką galima importuoti, prieš ką nors keičiant.",
+    "analyzing": "Analizuojama…",
+    "device_type_mismatch_warn": "Šis eksportas yra iš kito prietaiso tipo ({src} vs {local}). Programas ir ciklus vis tiek galima importuoti kaip atskaitos duomenis, tačiau konkrečiam prietaisui skirti nustatymai ir tikros istorijos importas yra išjungti.",
+    "merge_hint": "Importuoti elementai pridedami; jokie vietiniai duomenys neprarandami. Pavadinimų konfliktai sprendžiami toliau.",
+    "replace_warn": "Kiekviena pažymėta kategorija ištrinama ir pakeičiama iš failo. Nepažymėtos kategorijos lieka nepaliestos.",
+    "dest_reference_hint": "Importuoti ciklai tik pagerina programų atpažinimą ir niekada neveikia naudojimo/energijos statistikos.",
+    "dest_real_history_hint": "Importuoti ciklai laikomi šio prietaiso paties istorija ir papildo energijos/naudojimo statistiką. Naudokite perkeliant vieną prietaisą į naują įdiegimą."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1580,7 +1623,9 @@
     "store_device_shared_partial": "{n} ciklai bendrinti; {failed} nepavyko įkelti.",
     "store_device_shared_some_dup": "{created} ciklai bendrinti; {dup} jau buvo parduotuvėje.",
     "store_download_failed": "Atsisiuntimas nepavyko: {error}",
-    "store_download_nothing": "Nieko naujo atsisiųsti -- ši konfigūracija jau yra jūsų įrenginyje."
+    "store_download_nothing": "Nieko naujo atsisiųsti -- ši konfigūracija jau yra jūsų įrenginyje.",
+    "export_selective_done": "Eksportas atsisiųstas",
+    "import_selective_done": "Importuota {profiles} profilių ir {cycles} ciklų"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",

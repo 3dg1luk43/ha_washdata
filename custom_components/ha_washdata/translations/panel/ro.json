@@ -28,7 +28,9 @@
     "awaiting_n": "În așteptarea aprobării · {n} confirmate",
     "approved": "Aprobat",
     "awaiting": "În așteptarea aprobării",
-    "imported_tip": "Importat din magazinul comunității. Folosit doar pentru potrivire, necontabilizat în statistici."
+    "imported_tip": "Importat din magazinul comunității. Folosit doar pentru potrivire, necontabilizat în statistici.",
+    "not_importable": "n/a aici",
+    "exists": "există deja"
   },
   "btn": {
     "add_device": "+ Adăugați dispozitiv",
@@ -169,7 +171,14 @@
     "download_device": "Descărcați această configurație",
     "share_device": "⬆ Partajați acest dispozitiv",
     "share_device_tip": "Partajați acest aparat și ciclurile sale de referință înregistrate în magazinul comunității, astfel încât alții cu același aparat să le poată adopta",
-    "share_n": "Partajați {n} ciclu(ri)"
+    "share_n": "Partajați {n} ciclu(ri)",
+    "export_selected": "Exportă (alege datele)",
+    "export_all": "Exportă rapid tot",
+    "import_raw": "Avansat: înlocuiește tot din JSON",
+    "download_export": "Descarcă exportul",
+    "analyze_import": "Analizează fișierul",
+    "import_selected": "Importă selecția",
+    "back": "Înapoi"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Se divide ciclul",
     "task_trim": "Se decupează ciclul",
     "task_merge": "Se îmbină ciclurile",
-    "task_rebuild": "Se reconstruiesc anvelopele"
+    "task_rebuild": "Se reconstruiesc anvelopele",
+    "cat_profiles": "Profiluri (programe)",
+    "cat_real_cycles": "Cicluri (istoric de utilizare)",
+    "cat_reference_cycles": "Cicluri de referință (importate)",
+    "cat_custom_phases": "Faze personalizate",
+    "cat_profile_groups": "Grupuri de profiluri",
+    "cat_settings": "Setări de detectare și recunoaștere",
+    "cat_matching_config": "Reglarea recunoașterii",
+    "cat_ml_models": "Modele ML",
+    "cat_feedback": "Feedback și etichete de revizuire",
+    "cat_suggestions": "Sugestii",
+    "cat_maintenance_log": "Jurnal de mentenanță",
+    "cat_history_logs": "Istoric și jurnale de modificări",
+    "cat_lifetime_stats": "Totaluri cumulate",
+    "cycles_short": "cicluri",
+    "import_mode": "Cum se combină",
+    "mode_merge": "Îmbină (păstrează-le pe ale mele)",
+    "mode_replace": "Înlocuiește selecția",
+    "cycle_destination": "Unde ar trebui să meargă ciclurile importate?",
+    "dest_reference": "Referință (doar forma)",
+    "dest_real_history": "Istoric real (contează în statistici)",
+    "conflict_resolution": "Conflicte de nume",
+    "conflict_import_copy": "Importă drept copie",
+    "conflict_keep_mine": "Păstrează-l pe al meu",
+    "conflict_overwrite": "Suprascrie"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Opriți forțat ciclul activ acum? Ciclul va fi salvat ca întrerupt.",
     "store_import": "Importați ciclu de referință",
     "store_share": "Partajați în magazinul comunității",
-    "store_share_device": "Partajați acest dispozitiv"
+    "store_share_device": "Partajați acest dispozitiv",
+    "export_select": "Exportă - alege datele",
+    "import_wizard": "Importă - alege datele"
   },
   "msg": {
     "appliance_monitor": "Monitor de aparate",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} cicluri similare neetichetate găsite – creați un profil pentru a începe potrivirea lor.",
     "cycles_deleted": "{count} ciclu(ri) șterse",
     "enough_data": "Date suficiente pentru a învăța ({current}/{min} cicluri).",
-    "export_description": "Exportați toate profilurile și ciclurile în JSON sau restaurați dintr-un export anterior.",
+    "export_description": "Alege exact ce profiluri, cicluri, setări și altele să exporți în JSON, sau analizează un fișier și importă doar părțile dorite.",
     "feedback_cycles_pending": "{n} ciclu{s} de revizuit",
     "feedback_prompt": "Confirmați că a fost corect, corectați programul sau ignorați.",
     "filter_by_profile": "Filtrează după profil…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Încărcați {brand} {model} cu ciclurile de referință pe care le selectați. Alții cu același aparat vă pot adopta programele. Intrările sunt revizuite înainte de a apărea public.",
     "share_profile_no_cycles": "Niciun ciclu de referință -- marcați un ciclu ca ⭐ în fila Cicluri pentru a include acest profil",
     "advisory_phase_inconsistent": "'{name}' pare să amestece programe sau temperaturi diferite - ciclurile sale se încălzesc pe durate foarte diferite. Împărțirea sa în profiluri separate (de ex. pe temperatură) va îmbunătăți potrivirea și estimările de timp.",
-    "advisory_phase_inconsistent_title": "⚠ Posibil programe amestecate"
+    "advisory_phase_inconsistent_title": "⚠ Posibil programe amestecate",
+    "export_select_intro": "Bifează exact ce să incluzi. Selectarea profilurilor fără ciclurile lor exportă totuși un program recunoscibil (forma învățată îl însoțește).",
+    "import_analyze_hint": "Încarcă un fișier exportat (sau lipește JSON-ul acestuia). WashData îl analizează și arată exact ce poate fi importat înainte de orice modificare.",
+    "analyzing": "Se analizează…",
+    "device_type_mismatch_warn": "Acest export provine de la un alt tip de electrocasnic ({src} în loc de {local}). Programele și ciclurile pot fi totuși importate ca date de referință, dar setările specifice dispozitivului și importul în istoricul real sunt dezactivate.",
+    "merge_hint": "Elementele importate sunt adăugate; nimic local nu se pierde. Conflictele de nume se rezolvă mai jos.",
+    "replace_warn": "Fiecare categorie bifată este ștearsă și înlocuită cu conținutul fișierului. Categoriile nebifate rămân neatinse.",
+    "dest_reference_hint": "Ciclurile importate îmbunătățesc doar recunoașterea programelor și nu afectează niciodată statisticile de utilizare/energie.",
+    "dest_real_history_hint": "Ciclurile importate contează ca istoric propriu al acestui dispozitiv și alimentează statisticile de energie/utilizare. Folosește pentru a muta un electrocasnic pe o instalare nouă."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1580,7 +1623,9 @@
     "store_device_shared_partial": "{n} ciclu(ri) partajate; {failed} nu au putut fi încărcate.",
     "store_device_shared_some_dup": "{created} ciclu(ri) partajate; {dup} erau deja în magazin.",
     "store_download_failed": "Descărcare eșuată: {error}",
-    "store_download_nothing": "Nimic nou de descărcat - această configurație este deja pe dispozitivul dvs."
+    "store_download_nothing": "Nimic nou de descărcat - această configurație este deja pe dispozitivul dvs.",
+    "export_selective_done": "Export descărcat",
+    "import_selective_done": "Importate {profiles} profil(uri) și {cycles} ciclu(ri)"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",

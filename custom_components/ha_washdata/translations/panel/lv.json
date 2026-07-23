@@ -28,7 +28,9 @@
     "awaiting_n": "Gaida apstiprinājumu · {n} apstiprinājumi",
     "approved": "Apstiprināts",
     "awaiting": "Gaida apstiprinājumu",
-    "imported_tip": "Importēts no kopienas veikala. Izmanto tikai saskaņošanai, netiek ieskaitīts statistikā."
+    "imported_tip": "Importēts no kopienas veikala. Izmanto tikai saskaņošanai, netiek ieskaitīts statistikā.",
+    "not_importable": "šeit nav pieejams",
+    "exists": "jau eksistē"
   },
   "btn": {
     "add_device": "+ Pievienot ierīci",
@@ -169,7 +171,14 @@
     "download_device": "Lejupielādēt šo iestatījumu",
     "share_device": "⬆ Kopīgot šo ierīci",
     "share_device_tip": "Kopīgojiet šo ierīci un tās reģistrētos atskaites ciklus kopienas veikalā, lai citi ar to pašu mašīnu varētu tos pieņemt",
-    "share_n": "Kopīgot {n} ciklu(-s)"
+    "share_n": "Kopīgot {n} ciklu(-s)",
+    "export_selected": "Eksportēt (izvēlēties datus)",
+    "export_all": "Ātrā eksportēšana: viss",
+    "import_raw": "Papildu: aizstāt visu no JSON",
+    "download_export": "Lejupielādēt eksportu",
+    "analyze_import": "Analizēt failu",
+    "import_selected": "Importēt atlasītos",
+    "back": "Atpakaļ"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Cikla sadalīšana",
     "task_trim": "Cikla apgriešana",
     "task_merge": "Ciklu apvienošana",
-    "task_rebuild": "Apvalklīkņu pārbūve"
+    "task_rebuild": "Apvalklīkņu pārbūve",
+    "cat_profiles": "Profili (programmas)",
+    "cat_real_cycles": "Cikli (lietojuma vēsture)",
+    "cat_reference_cycles": "Atsauces cikli (importēti)",
+    "cat_custom_phases": "Pielāgotās fāzes",
+    "cat_profile_groups": "Profilu grupas",
+    "cat_settings": "Noteikšanas un atpazīšanas iestatījumi",
+    "cat_matching_config": "Atpazīšanas pielāgošana",
+    "cat_ml_models": "ML modeļi",
+    "cat_feedback": "Atsauksmju un pārskatīšanas atzīmes",
+    "cat_suggestions": "Ieteikumi",
+    "cat_maintenance_log": "Apkopes žurnāls",
+    "cat_history_logs": "Vēstures un izmaiņu žurnāli",
+    "cat_lifetime_stats": "Visa laika kopsummas",
+    "cycles_short": "cikli",
+    "import_mode": "Kā apvienot",
+    "mode_merge": "Apvienot (paturēt manējos)",
+    "mode_replace": "Aizstāt atlasītos",
+    "cycle_destination": "Kur jānonāk importētajiem cikliem?",
+    "dest_reference": "Atsauce (tikai forma)",
+    "dest_real_history": "Reālā vēsture (ieskaita statistikā)",
+    "conflict_resolution": "Nosaukumu konflikti",
+    "conflict_import_copy": "Importēt kā kopiju",
+    "conflict_keep_mine": "Paturēt manējos",
+    "conflict_overwrite": "Pārrakstīt"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Piespiedu kārtā apturēt aktīvo ciklu tagad? Cikls tiks saglabāts kā pārtraukts.",
     "store_import": "Importēt atsauces ciklu",
     "store_share": "Kopīgot kopienas veikalā",
-    "store_share_device": "Kopīgot šo ierīci"
+    "store_share_device": "Kopīgot šo ierīci",
+    "export_select": "Eksports - izvēlēties datus",
+    "import_wizard": "Imports - izvēlēties datus"
   },
   "msg": {
     "appliance_monitor": "Ierīces monitors",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "Atrasti {count} līdzīgi nemarķēti cikli – izveidojiet profilu, lai sāktu tos saskaņot.",
     "cycles_deleted": "Dzēsti cikli: {count}",
     "enough_data": "Pietiek datu mācīšanai ({current}/{min} cikli).",
-    "export_description": "Eksportējiet visus profilus un ciklus uz JSON vai atjaunojiet no iepriekšējās eksportēšanas.",
+    "export_description": "Izvēlieties precīzi, kurus profilus, ciklus, iestatījumus un citus datus eksportēt uz JSON, vai analizējiet failu un importējiet tikai vēlamās daļas.",
     "feedback_cycles_pending": "{n} cikl{s} pārskatīšanai",
     "feedback_prompt": "Apstipriniet, ka tas bija pareizi, labojiet programmu vai ignorējiet.",
     "filter_by_profile": "Filtrēt pēc profila…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Augšupielādējiet {brand} {model} ar atlasītajiem atskaites cikliem. Citi ar to pašu ierīci var pieņemt jūsu programmas. Ieraksti tiek pārskatīti pirms publiskošanas.",
     "share_profile_no_cycles": "Nav atskaites ciklu -- atzīmējiet ciklu kā ⭐ cilnē Cikli, lai iekļautu šo profilu",
     "advisory_phase_inconsistent": "Šķiet, ka '{name}' sajauc dažādas programmas vai temperatūras - tā cikli sildās ļoti atšķirīgu laiku. Sadalot to atsevišķos profilos (piemēram, pēc temperatūras), tiks uzlabota saskaņošana un laika aprēķini.",
-    "advisory_phase_inconsistent_title": "⚠ Iespējams, jauktas programmas"
+    "advisory_phase_inconsistent_title": "⚠ Iespējams, jauktas programmas",
+    "export_select_intro": "Atzīmējiet precīzi, ko iekļaut. Izvēloties profilus bez to cikliem, joprojām tiek eksportēta atpazīstama programma (tās apgūtā forma ceļo līdzi).",
+    "import_analyze_hint": "Ielādējiet eksportēto failu (vai ielīmējiet tā JSON). WashData to analizē un precīzi parāda, ko var importēt, pirms kaut kas mainās.",
+    "analyzing": "Notiek analīze…",
+    "device_type_mismatch_warn": "Šis eksports ir no cita ierīces tipa ({src} vs {local}). Programmas un ciklus joprojām var importēt kā atsauces datus, taču ierīcei specifiskie iestatījumi un reālās vēstures imports ir atspējoti.",
+    "merge_hint": "Importētie vienumi tiek pievienoti; nekas no vietējiem datiem netiek zaudēts. Nosaukumu konflikti tiek risināti tālāk.",
+    "replace_warn": "Katra atzīmētā kategorija tiek dzēsta un aizstāta no faila. Neatzīmētās kategorijas paliek neskartas.",
+    "dest_reference_hint": "Importētie cikli tikai uzlabo programmu atpazīšanu un nekad neietekmē lietojuma/enerģijas statistiku.",
+    "dest_real_history_hint": "Importētie cikli tiek uzskaitīti kā šīs ierīces pašas vēsture un papildina enerģijas/lietojuma statistiku. Izmantojiet, pārvietojot vienu ierīci uz jaunu instalāciju."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1580,7 +1623,9 @@
     "store_device_shared_partial": "{n} cikli kopīgoti; {failed} neizdevās augšupielādēt.",
     "store_device_shared_some_dup": "{created} cikli kopīgoti; {dup} jau bija veikalā.",
     "store_download_failed": "Lejupielāde neizdevās: {error}",
-    "store_download_nothing": "Nav nekā jauna lejupielādei - šis iestatījums jau ir jūsų ierīcē."
+    "store_download_nothing": "Nav nekā jauna lejupielādei - šis iestatījums jau ir jūsų ierīcē.",
+    "export_selective_done": "Eksports lejupielādēts",
+    "import_selective_done": "Importēti {profiles} profili un {cycles} cikli"
   },
   "suggestion": {
     "both_agree": "WashData iesaka",

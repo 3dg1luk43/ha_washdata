@@ -28,7 +28,9 @@
     "awaiting_n": "승인 대기 중 · {n}개 확인됨",
     "approved": "승인됨",
     "awaiting": "승인 대기 중",
-    "imported_tip": "커뮤니티 스토어에서 가져왔습니다. 매칭에만 사용되며 통계에는 포함되지 않습니다."
+    "imported_tip": "커뮤니티 스토어에서 가져왔습니다. 매칭에만 사용되며 통계에는 포함되지 않습니다.",
+    "not_importable": "해당 없음",
+    "exists": "존재함"
   },
   "btn": {
     "add_device": "+ 장치 추가",
@@ -169,7 +171,14 @@
     "download_device": "이 설정 다운로드",
     "share_device": "⬆ 이 기기 공유",
     "share_device_tip": "이 가전제품과 기록된 참조 사이클을 커뮤니티 스토어에 공유하여 같은 기기를 가진 다른 사용자가 채택할 수 있도록 합니다",
-    "share_n": "{n}개 사이클 공유"
+    "share_n": "{n}개 사이클 공유",
+    "export_selected": "내보내기 (데이터 선택)",
+    "export_all": "모두 빠르게 내보내기",
+    "import_raw": "고급: JSON에서 전체 교체",
+    "download_export": "내보내기 다운로드",
+    "analyze_import": "파일 분석",
+    "import_selected": "선택 항목 가져오기",
+    "back": "뒤로"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "사이클 분할 중",
     "task_trim": "사이클 트리밍 중",
     "task_merge": "사이클 병합 중",
-    "task_rebuild": "엔벨로프 재구성 중"
+    "task_rebuild": "엔벨로프 재구성 중",
+    "cat_profiles": "프로필(프로그램)",
+    "cat_real_cycles": "사이클(실행 기록)",
+    "cat_reference_cycles": "참조 사이클(가져옴)",
+    "cat_custom_phases": "사용자 지정 단계",
+    "cat_profile_groups": "프로필 그룹",
+    "cat_settings": "감지 및 인식 설정",
+    "cat_matching_config": "인식기 조정",
+    "cat_ml_models": "ML 모델",
+    "cat_feedback": "피드백 및 검토 라벨",
+    "cat_suggestions": "제안",
+    "cat_maintenance_log": "유지관리 로그",
+    "cat_history_logs": "기록 및 변경 로그",
+    "cat_lifetime_stats": "누적 합계",
+    "cycles_short": "사이클",
+    "import_mode": "결합 방법",
+    "mode_merge": "병합(내 것 유지)",
+    "mode_replace": "선택 항목 교체",
+    "cycle_destination": "가져온 사이클을 어디에 저장할까요?",
+    "dest_reference": "참조(형태만)",
+    "dest_real_history": "실제 기록(통계에 집계)",
+    "conflict_resolution": "이름 충돌",
+    "conflict_import_copy": "사본으로 가져오기",
+    "conflict_keep_mine": "내 것 유지",
+    "conflict_overwrite": "덮어쓰기"
   },
   "log": {
     "all_levels": "모든 레벨",
@@ -643,7 +676,9 @@
     "force_stop_msg": "지금 실행 중인 사이클을 강제 정지하시겠습니까? 사이클은 중단됨으로 저장됩니다.",
     "store_import": "참조 주기 가져오기",
     "store_share": "커뮤니티 스토어에 공유",
-    "store_share_device": "이 기기 공유"
+    "store_share_device": "이 기기 공유",
+    "export_select": "내보내기 - 데이터 선택",
+    "import_wizard": "가져오기 - 데이터 선택"
   },
   "msg": {
     "appliance_monitor": "가전제품 모니터",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "유사한 미라벨 사이클 {count}개를 발견했습니다 – 프로필을 만들어 매칭을 시작하세요.",
     "cycles_deleted": "{count}개 사이클이 삭제되었습니다",
     "enough_data": "학습할 충분한 데이터가 있습니다（{current}/{min}사이클）。",
-    "export_description": "모든 프로필과 사이클을 JSON으로 내보내거나 이전 내보내기에서 복원합니다.",
+    "export_description": "JSON으로 내보낼 프로필, 사이클, 설정 등을 정확히 선택하거나, 파일을 분석하여 원하는 부분만 가져올 수 있습니다.",
     "feedback_cycles_pending": "검토가 필요한 사이클 {n}개{s}",
     "feedback_prompt": "그것이 옳았는지 확인하고, 프로그램을 수정하거나, 무시하십시오.",
     "filter_by_profile": "프로필로 필터링…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "선택한 참조 사이클과 함께 {brand} {model}을 업로드합니다. 같은 가전제품을 가진 다른 사용자가 프로그램을 채택할 수 있습니다. 항목은 공개 전에 검토됩니다.",
     "share_profile_no_cycles": "참조 사이클 없음 -- 이 프로파일을 포함하려면 사이클 탭에서 사이클을 ⭐로 표시하세요",
     "advisory_phase_inconsistent": "'{name}'은(는) 서로 다른 프로그램이나 온도가 섞여 있는 것 같습니다. 사이클마다 가열 시간이 크게 다릅니다. 온도별 등으로 별도의 프로필로 나누면 매칭과 시간 추정이 개선됩니다.",
-    "advisory_phase_inconsistent_title": "⚠ 프로그램이 섞였을 수 있음"
+    "advisory_phase_inconsistent_title": "⚠ 프로그램이 섞였을 수 있음",
+    "export_select_intro": "포함할 항목을 정확히 선택하세요. 사이클 없이 프로필만 선택해도 인식 가능한 프로그램은 내보내집니다(학습된 형태도 함께 이동합니다).",
+    "import_analyze_hint": "내보낸 파일을 불러오거나 해당 JSON을 붙여넣으세요. WashData가 이를 분석하여 변경 전에 가져올 수 있는 항목을 정확히 보여줍니다.",
+    "analyzing": "분석 중…",
+    "device_type_mismatch_warn": "이 내보내기는 다른 기기 유형에서 생성되었습니다({src} 대 {local}). 프로그램과 사이클은 참조 데이터로 가져올 수 있지만, 기기별 설정과 실제 기록 가져오기는 비활성화됩니다.",
+    "merge_hint": "가져온 항목이 추가되며 로컬 데이터는 손실되지 않습니다. 이름 충돌은 아래에서 해결합니다.",
+    "replace_warn": "선택한 각 범주는 삭제되고 파일 내용으로 교체됩니다. 선택하지 않은 범주는 그대로 유지됩니다.",
+    "dest_reference_hint": "가져온 사이클은 프로그램 인식만 개선하며 사용량/에너지 통계에는 영향을 주지 않습니다.",
+    "dest_real_history_hint": "가져온 사이클은 이 기기 자체의 기록으로 집계되어 에너지/사용량 통계에 반영됩니다. 기기 하나를 새 설치 환경으로 옮길 때 사용하세요."
   },
   "pg_desc": {
     "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -1603,7 +1646,9 @@
     "store_device_shared_partial": "{n}개 사이클 공유됨; {failed}개는 업로드할 수 없었습니다.",
     "store_device_shared_some_dup": "{created}개 사이클 공유됨; {dup}개는 이미 스토어에 있었습니다.",
     "store_download_failed": "다운로드 실패: {error}",
-    "store_download_nothing": "다운로드할 새 항목 없음 - 이 설정은 이미 기기에 있습니다."
+    "store_download_nothing": "다운로드할 새 항목 없음 - 이 설정은 이미 기기에 있습니다.",
+    "export_selective_done": "내보내기 다운로드 완료",
+    "import_selective_done": "{profiles}개 프로필과 {cycles}개 사이클을 가져왔습니다"
   },
   "suggestion": {
     "both_agree": "WashData 권장",

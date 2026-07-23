@@ -28,7 +28,9 @@
     "awaiting_n": "Oczekuje na zatwierdzenie · potwierdzono {n}",
     "approved": "Zatwierdzone",
     "awaiting": "Oczekuje na zatwierdzenie",
-    "imported_tip": "Zaimportowano ze sklepu społecznościowego. Używane tylko do dopasowywania, nie liczy się do statystyk."
+    "imported_tip": "Zaimportowano ze sklepu społecznościowego. Używane tylko do dopasowywania, nie liczy się do statystyk.",
+    "not_importable": "niedostępne",
+    "exists": "istnieje"
   },
   "btn": {
     "add_device": "+ Dodaj urządzenie",
@@ -169,7 +171,14 @@
     "download_device": "Pobierz konfigurację urządzenia",
     "share_device": "Udostępnij konfigurację urządzenia",
     "share_device_tip": "Udostępnij programy i ustawienia tego urządzenia społeczności",
-    "share_n": "Udostępnij {n} program{s}"
+    "share_n": "Udostępnij {n} program{s}",
+    "export_selected": "Eksport (wybierz dane)",
+    "export_all": "Szybki eksport wszystkiego",
+    "import_raw": "Zaawansowane: zastąp wszystko z pliku JSON",
+    "download_export": "Pobierz eksport",
+    "analyze_import": "Analizuj plik",
+    "import_selected": "Importuj wybrane",
+    "back": "Wstecz"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Dzielenie cyklu",
     "task_trim": "Przycinanie cyklu",
     "task_merge": "Scalanie cykli",
-    "task_rebuild": "Przeliczanie obwiedni"
+    "task_rebuild": "Przeliczanie obwiedni",
+    "cat_profiles": "Profile (programy)",
+    "cat_real_cycles": "Cykle (historia pracy)",
+    "cat_reference_cycles": "Cykle referencyjne (zaimportowane)",
+    "cat_custom_phases": "Fazy niestandardowe",
+    "cat_profile_groups": "Grupy profili",
+    "cat_settings": "Ustawienia wykrywania i rozpoznawania",
+    "cat_matching_config": "Strojenie rozpoznawania",
+    "cat_ml_models": "Modele ML",
+    "cat_feedback": "Etykiety opinii i weryfikacji",
+    "cat_suggestions": "Sugestie",
+    "cat_maintenance_log": "Dziennik konserwacji",
+    "cat_history_logs": "Dzienniki historii i zmian",
+    "cat_lifetime_stats": "Sumy całkowite",
+    "cycles_short": "cykle",
+    "import_mode": "Jak połączyć",
+    "mode_merge": "Scal (zachowaj moje)",
+    "mode_replace": "Zastąp wybrane",
+    "cycle_destination": "Gdzie mają trafić zaimportowane cykle?",
+    "dest_reference": "Referencyjne (tylko kształt)",
+    "dest_real_history": "Rzeczywista historia (liczy się w statystykach)",
+    "conflict_resolution": "Konflikty nazw",
+    "conflict_import_copy": "Importuj jako kopię",
+    "conflict_keep_mine": "Zachowaj moje",
+    "conflict_overwrite": "Nadpisz"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Wymusić teraz zatrzymanie aktywnego cyklu? Cykl zostanie zapisany jako przerwany.",
     "store_import": "Importuj cykl referencyjny",
     "store_share": "Udostępnij w sklepie społecznościowym",
-    "store_share_device": "Udostępnij konfigurację urządzenia"
+    "store_share_device": "Udostępnij konfigurację urządzenia",
+    "export_select": "Eksport - wybierz dane",
+    "import_wizard": "Import - wybierz dane"
   },
   "msg": {
     "appliance_monitor": "Monitor urządzenia",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "Znaleziono {count} podobnych nieoznaczonych cykli – utwórz profil, aby zacząć je dopasowywać.",
     "cycles_deleted": "Usunięto cykle: {count}",
     "enough_data": "Wystarczająco danych do nauki ({current}/{min} cykli).",
-    "export_description": "Eksportuj wszystkie profile i cykle do formatu JSON lub przywróć dane z poprzedniego eksportu.",
+    "export_description": "Wybierz dokładnie, które profile, cykle, ustawienia i inne dane wyeksportować do pliku JSON, albo przeanalizuj plik i zaimportuj tylko wybrane części.",
     "feedback_cycles_pending": "{n} cykl{s} do sprawdzenia",
     "feedback_prompt": "Potwierdź, że wszystko było w porządku, popraw program lub zignoruj.",
     "filter_by_profile": "Filtruj według profilu…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Udostępnij programy swojego urządzenia (profile + cykle referencyjne) społeczności. Ustawienia są opcjonalne.",
     "share_profile_no_cycles": "Profil '{p}' nie ma ⭐ cykli referencyjnych -- zostanie pominięty, chyba że masz {n}+ potwierdzonych uruchomień",
     "advisory_phase_inconsistent": "Wygląda na to, że '{name}' miesza różne programy lub temperatury - jego cykle nagrzewają się przez bardzo różne czasy. Podzielenie go na osobne profile (np. dla każdej temperatury) poprawi dopasowanie i szacowanie czasu.",
-    "advisory_phase_inconsistent_title": "⚠ Prawdopodobnie pomieszane programy"
+    "advisory_phase_inconsistent_title": "⚠ Prawdopodobnie pomieszane programy",
+    "export_select_intro": "Zaznacz dokładnie to, co ma zostać uwzględnione. Wybranie profili bez ich cykli i tak eksportuje rozpoznawalny program (jego wyuczony kształt jest przenoszony razem z nim).",
+    "import_analyze_hint": "Wczytaj wyeksportowany plik (lub wklej jego JSON). WashData go przeanalizuje i pokaże dokładnie, co można zaimportować, zanim cokolwiek się zmieni.",
+    "analyzing": "Analizowanie…",
+    "device_type_mismatch_warn": "Ten eksport pochodzi z innego typu urządzenia ({src} vs {local}). Programy i cykle można nadal zaimportować jako dane referencyjne, ale ustawienia specyficzne dla urządzenia oraz import rzeczywistej historii są wyłączone.",
+    "merge_hint": "Zaimportowane elementy są dodawane; nic lokalnego nie zostaje utracone. Konflikty nazw rozwiązuje się poniżej.",
+    "replace_warn": "Każda zaznaczona kategoria zostaje wyczyszczona i zastąpiona danymi z pliku. Niezaznaczone kategorie pozostają nietknięte.",
+    "dest_reference_hint": "Zaimportowane cykle jedynie poprawiają rozpoznawanie programów i nigdy nie wpływają na statystyki zużycia/energii.",
+    "dest_real_history_hint": "Zaimportowane cykle liczą się jako własna historia tego urządzenia i zasilają statystyki energii/zużycia. Użyj przy przenoszeniu jednego urządzenia do nowej instalacji."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1692,7 +1735,9 @@
     "store_device_shared_partial": "Częściowe udostępnienie: {n} program{s} przesłany, {failed} pominięte",
     "store_device_shared_some_dup": "Konfiguracja urządzenia udostępniona: {n} program{s} przesłany ({dup} już istniało)",
     "store_download_failed": "Pobieranie nie powiodło się: {error}",
-    "store_download_nothing": "Nic do pobrania -- wszystkie profile już istnieją na tym urządzeniu"
+    "store_download_nothing": "Nic do pobrania -- wszystkie profile już istnieją na tym urządzeniu",
+    "export_selective_done": "Eksport pobrany",
+    "import_selective_done": "Zaimportowano {profiles} profil(e) i {cycles} cykl(e)"
   },
   "trend": {
     "down": "Trend w dół",

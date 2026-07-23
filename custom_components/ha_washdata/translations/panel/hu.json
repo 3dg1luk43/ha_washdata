@@ -28,7 +28,9 @@
     "awaiting_n": "Jóváhagyásra vár · {n} megerősítés",
     "approved": "Jóváhagyva",
     "awaiting": "Jóváhagyásra vár",
-    "imported_tip": "A közösségi boltból importálva. Csak egyeztetéshez használatos, a statisztikába nem számít bele."
+    "imported_tip": "A közösségi boltból importálva. Csak egyeztetéshez használatos, a statisztikába nem számít bele.",
+    "not_importable": "itt nem elérhető",
+    "exists": "létezik"
   },
   "btn": {
     "add_device": "+ Eszköz hozzáadása",
@@ -169,7 +171,14 @@
     "download_device": "Beállítás letöltése",
     "share_device": "⬆ Eszköz megosztása",
     "share_device_tip": "Ossza meg ezt a készüléket és a rögzített referenciaciklusait a közösségi boltban, hogy mások ugyanazzal a géppel magukévá tehessék",
-    "share_n": "{n} ciklus megosztása"
+    "share_n": "{n} ciklus megosztása",
+    "export_selected": "Exportálás (adatok kiválasztása)",
+    "export_all": "Gyorsexport: minden",
+    "import_raw": "Speciális: mindent lecserél a JSON-ból",
+    "download_export": "Export letöltése",
+    "analyze_import": "Fájl elemzése",
+    "import_selected": "Kiválasztottak importálása",
+    "back": "Vissza"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Ciklus felosztása",
     "task_trim": "Ciklus levágása",
     "task_merge": "Ciklusok egyesítése",
-    "task_rebuild": "Burkológörbék újraépítése"
+    "task_rebuild": "Burkológörbék újraépítése",
+    "cat_profiles": "Profilok (programok)",
+    "cat_real_cycles": "Ciklusok (használati előzmények)",
+    "cat_reference_cycles": "Referenciaciklusok (importált)",
+    "cat_custom_phases": "Egyéni fázisok",
+    "cat_profile_groups": "Profilcsoportok",
+    "cat_settings": "Észlelési és illesztési beállítások",
+    "cat_matching_config": "Illesztés finomhangolása",
+    "cat_ml_models": "ML-modellek",
+    "cat_feedback": "Visszajelzési és ellenőrzési címkék",
+    "cat_suggestions": "Javaslatok",
+    "cat_maintenance_log": "Karbantartási napló",
+    "cat_history_logs": "Előzmény- és változásnaplók",
+    "cat_lifetime_stats": "Élettartam-összesítések",
+    "cycles_short": "ciklus",
+    "import_mode": "Hogyan egyesítse",
+    "mode_merge": "Egyesítés (a sajátom megtartása)",
+    "mode_replace": "Kiválasztottak cseréje",
+    "cycle_destination": "Hová kerüljenek az importált ciklusok?",
+    "dest_reference": "Referencia (csak görbe)",
+    "dest_real_history": "Valós előzmények (statisztikába számít)",
+    "conflict_resolution": "Névütközések",
+    "conflict_import_copy": "Importálás másolatként",
+    "conflict_keep_mine": "A sajátom megtartása",
+    "conflict_overwrite": "Felülírás"
   },
   "log": {
     "all_levels": "Minden szinten",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Kényszerítve leállítod most az aktív ciklust? A ciklus megszakítottként lesz elmentve.",
     "store_import": "Referenciaciklus importálása",
     "store_share": "Megosztás a közösségi boltban",
-    "store_share_device": "Eszköz megosztása"
+    "store_share_device": "Eszköz megosztása",
+    "export_select": "Exportálás - adatok kiválasztása",
+    "import_wizard": "Importálás - adatok kiválasztása"
   },
   "msg": {
     "appliance_monitor": "Készülék monitor",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} hasonló felcímkézetlen ciklus található – hozzon létre egy profilt az egyeztetés megkezdéséhez.",
     "cycles_deleted": "{count} ciklus törölve",
     "enough_data": "Elegendő adat a tanuláshoz ({current}/{min} ciklus).",
-    "export_description": "Exportálja az összes profilt és ciklust JSON-ba, vagy állítsa vissza az előző exportálásból.",
+    "export_description": "Válaszd ki pontosan, mely profilokat, ciklusokat, beállításokat és egyebeket exportálsz JSON-ba, vagy elemezz egy fájlt, és csak a kívánt részeket importáld.",
     "feedback_cycles_pending": "{n} ciklus{s} áttekintésre vár",
     "feedback_prompt": "Erősítse meg, hogy helyes volt, javítsa ki a programot, vagy hagyja figyelmen kívül.",
     "filter_by_profile": "Szűrés profil szerint…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Töltse fel a(z) {brand} {model} eszközt a kiválasztott referenciaciklusokkal. Más, ugyanolyan készülékkel rendelkezők átvehetik programjait. A bejegyzések felülvizsgálatra kerülnek nyilvánossá válás előtt.",
     "share_profile_no_cycles": "Nincsenek referenciaciklusok -- jelöljön meg egy ciklust ⭐-gal a Ciklusok lapon, hogy belefoglalhassa ezt a profilt",
     "advisory_phase_inconsistent": "Úgy tűnik, hogy a(z) '{name}' különböző programokat vagy hőmérsékleteket kever - ciklusai nagyon eltérő ideig fűtenek. Ha külön profilokra bontja (pl. hőmérsékletenként), az javítja a párosítást és az időbecsléseket.",
-    "advisory_phase_inconsistent_title": "⚠ Esetleg kevert programok"
+    "advisory_phase_inconsistent_title": "⚠ Esetleg kevert programok",
+    "export_select_intro": "Jelöld be pontosan, mit szeretnél belefoglalni. Ha a profilokat a ciklusaik nélkül választod ki, akkor is felismerhető program exportálódik (a megtanult görbéje vele utazik).",
+    "import_analyze_hint": "Tölts be egy exportált fájlt (vagy illeszd be a JSON-ját). A WashData elemzi, és pontosan megmutatja, mi importálható, mielőtt bármi megváltozna.",
+    "analyzing": "Elemzés…",
+    "device_type_mismatch_warn": "Ez az export egy másik készüléktípusból származik ({src} vs {local}). A programok és ciklusok továbbra is importálhatók referenciaadatként, de a készülékspecifikus beállítások és a valós előzmények importálása le van tiltva.",
+    "merge_hint": "Az importált elemek hozzáadódnak; semmi helyi adat nem vész el. A névütközéseket alább oldhatod fel.",
+    "replace_warn": "Minden bejelölt kategória törlődik, és a fájlból cserélődik le. A be nem jelölt kategóriák érintetlenül maradnak.",
+    "dest_reference_hint": "Az importált ciklusok csak a programfelismerést javítják, és soha nem befolyásolják a használati/energia-statisztikákat.",
+    "dest_real_history_hint": "Az importált ciklusok ennek a készüléknek a saját előzményeiként számítanak, és az energia-/használati statisztikákat táplálják. Egy készülék új telepítésre költöztetéséhez használd."
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1580,7 +1623,9 @@
     "store_device_shared_partial": "{n} ciklus megosztva; {failed} nem sikerült feltölteni.",
     "store_device_shared_some_dup": "{created} ciklus megosztva; {dup} már a boltban volt.",
     "store_download_failed": "Letöltés sikertelen: {error}",
-    "store_download_nothing": "Nincs új letöltendő - ez a beállítás már megvan az eszközön."
+    "store_download_nothing": "Nincs új letöltendő - ez a beállítás már megvan az eszközön.",
+    "export_selective_done": "Export letöltve",
+    "import_selective_done": "{profiles} profil és {cycles} ciklus importálva"
   },
   "suggestion": {
     "both_agree": "A WashData javasolja",

@@ -28,7 +28,9 @@
     "awaiting_n": "Në pritje të miratimit · {n} të konfirmuara",
     "approved": "Miratuar",
     "awaiting": "Në pritje të miratimit",
-    "imported_tip": "Importuar nga dyqani i komunitetit. Përdoret vetëm për përputhje, nuk llogaritet në statistika."
+    "imported_tip": "Importuar nga dyqani i komunitetit. Përdoret vetëm për përputhje, nuk llogaritet në statistika.",
+    "not_importable": "s'aplikohet këtu",
+    "exists": "ekziston"
   },
   "btn": {
     "add_device": "+ Shto pajisje",
@@ -169,7 +171,14 @@
     "download_device": "Shkarko këtë konfigurim",
     "share_device": "⬆ Ndaj këtë pajisje",
     "share_device_tip": "Ndani këtë pajisje dhe ciklet e saj të referencës të regjistruara në dyqanin e komunitetit, që të tjerët me të njëjtën makinë t'i adoptojnë",
-    "share_n": "Ndaj {n} cikël(-ë)"
+    "share_n": "Ndaj {n} cikël(-ë)",
+    "export_selected": "Eksporto (zgjidh të dhënat)",
+    "export_all": "Eksportim i shpejtë i gjithçkaje",
+    "import_raw": "I avancuar: zëvendëso gjithçka nga JSON",
+    "download_export": "Shkarko eksportin",
+    "analyze_import": "Analizo skedarin",
+    "import_selected": "Importo të zgjedhurat",
+    "back": "Prapa"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Ndarja e ciklit",
     "task_trim": "Prerja e ciklit",
     "task_merge": "Bashkimi i cikleve",
-    "task_rebuild": "Rindërtimi i zarfave"
+    "task_rebuild": "Rindërtimi i zarfave",
+    "cat_profiles": "Profilet (programet)",
+    "cat_real_cycles": "Ciklet (historiku i punës)",
+    "cat_reference_cycles": "Ciklet e referencës (të importuara)",
+    "cat_custom_phases": "Faza të personalizuara",
+    "cat_profile_groups": "Grupet e profileve",
+    "cat_settings": "Cilësimet e zbulimit & njohjes",
+    "cat_matching_config": "Rregullimi i njohësit",
+    "cat_ml_models": "Modelet ML",
+    "cat_feedback": "Etiketat e reagimit & rishikimit",
+    "cat_suggestions": "Sugjerime",
+    "cat_maintenance_log": "Regjistri i mirëmbajtjes",
+    "cat_history_logs": "Historiku & regjistrat e ndryshimeve",
+    "cat_lifetime_stats": "Totalet e përgjithshme",
+    "cycles_short": "cikle",
+    "import_mode": "Si të kombinohen",
+    "mode_merge": "Bashko (mba të miat)",
+    "mode_replace": "Zëvendëso të zgjedhurat",
+    "cycle_destination": "Ku duhet të shkojnë ciklet e importuara?",
+    "dest_reference": "Referencë (vetëm forma)",
+    "dest_real_history": "Historik real (numërohet në statistika)",
+    "conflict_resolution": "Përplasjet e emrave",
+    "conflict_import_copy": "Importo si kopje",
+    "conflict_keep_mine": "Mba të miat",
+    "conflict_overwrite": "Mbishkruaj"
   },
   "log": {
     "all_levels": "Të gjitha nivelet",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Të ndalohet me forcë cikli aktiv tani? Cikli do të ruhet si i ndërprerë.",
     "store_import": "Importo ciklin referues",
     "store_share": "Ndaj në dyqanin e komunitetit",
-    "store_share_device": "Ndaj këtë pajisje"
+    "store_share_device": "Ndaj këtë pajisje",
+    "export_select": "Eksporto - zgjidh të dhënat",
+    "import_wizard": "Importo - zgjidh të dhënat"
   },
   "msg": {
     "appliance_monitor": "Monitor i pajisjes",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "U gjetën {count} cikle të ngjashme të paetiketuara – krijo një profil për të filluar përputhjen.",
     "cycles_deleted": "{count} cikël(e) u fshinë",
     "enough_data": "Të dhëna të mjaftueshme për të mësuar ({current}/{min} cikle).",
-    "export_description": "Eksporto të gjitha profilet dhe ciklet në JSON ose rivendos nga një eksportim i mëparshëm.",
+    "export_description": "Zgjidhni saktësisht cilat profile, cikle, cilësime dhe të tjera do të eksportohen në JSON, ose analizoni një skedar dhe importoni vetëm pjesët që dëshironi.",
     "feedback_cycles_pending": "{n} cikël{s} për rishikim",
     "feedback_prompt": "Konfirmo nëse ishte i saktë, korrigjo programin ose injorojë.",
     "filter_by_profile": "Filtro sipas profilit…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Ngarko {brand} {model} me ciklet e referencës që zgjidhni. Të tjerët me të njëjtën pajisje mund të adoptojnë programet tuaja. Hyrjet shqyrtohen para publikimit.",
     "share_profile_no_cycles": "Nuk ka cikle referimi -- shënojeni një cikël si ⭐ tek skeda Ciklet për të përfshirë këtë profil",
     "advisory_phase_inconsistent": "'{name}' duket se përzien programe ose temperatura të ndryshme - ciklet e tij ngrohin për periudha shumë të ndryshme kohore. Ndarja e tij në profile të veçanta (p.sh. sipas temperaturës) do të përmirësojë përputhjen dhe vlerësimet e kohës.",
-    "advisory_phase_inconsistent_title": "⚠ Ndoshta programe të përziera"
+    "advisory_phase_inconsistent_title": "⚠ Ndoshta programe të përziera",
+    "export_select_intro": "Shënoni saktësisht çfarë të përfshihet. Zgjedhja e profileve pa ciklet e tyre gjithsesi eksporton një program të njohshëm (forma e mësuar e tij udhëton bashkë me të).",
+    "import_analyze_hint": "Ngarkoni një skedar të eksportuar (ose ngjisni JSON-in e tij). WashData e analizon dhe tregon saktësisht çfarë mund të importohet përpara se të ndryshojë çdo gjë.",
+    "analyzing": "Duke analizuar…",
+    "device_type_mismatch_warn": "Ky eksport është nga një tip tjetër pajisjeje ({src} ndaj {local}). Programet dhe ciklet mund të importohen gjithsesi si të dhëna reference, por cilësimet specifike të pajisjes dhe importimi i historikut real janë çaktivizuar.",
+    "merge_hint": "Artikujt e importuar shtohen; asgjë lokale nuk humbet. Përplasjet e emrave zgjidhen më poshtë.",
+    "replace_warn": "Çdo kategori e shënuar fshihet dhe zëvendësohet nga skedari. Kategoritë e pashënuara mbeten të paprekura.",
+    "dest_reference_hint": "Ciklet e importuara vetëm përmirësojnë njohjen e programit dhe nuk ndikojnë kurrë në statistikat e përdorimit/energjisë.",
+    "dest_real_history_hint": "Ciklet e importuara llogariten si historik i vetë kësaj pajisjeje dhe ushqejnë statistikat e energjisë/përdorimit. Përdoreni për të zhvendosur një pajisje në një instalim të ri."
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1580,7 +1623,9 @@
     "store_device_shared_partial": "{n} cikle ndajur; {failed} nuk u ngarkuan.",
     "store_device_shared_some_dup": "{created} cikle ndajur; {dup} ishin tashmë në dyqan.",
     "store_download_failed": "Shkarkimi dështoi: {error}",
-    "store_download_nothing": "Asgjë e re për të shkarkuar - ky konfigurim është tashmë në pajisjen tuaj."
+    "store_download_nothing": "Asgjë e re për të shkarkuar - ky konfigurim është tashmë në pajisjen tuaj.",
+    "export_selective_done": "Eksporti u shkarkua",
+    "import_selective_done": "U importuan {profiles} profil(e) dhe {cycles} cikël(cikle)"
   },
   "suggestion": {
     "both_agree": "WashData rekomandon",

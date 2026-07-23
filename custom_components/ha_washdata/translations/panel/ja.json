@@ -28,7 +28,9 @@
     "awaiting_n": "承認待ち · {n} 件確認済み",
     "approved": "承認済み",
     "awaiting": "承認待ち",
-    "imported_tip": "コミュニティストアからインポートしました。マッチングにのみ使用され、統計には含まれません。"
+    "imported_tip": "コミュニティストアからインポートしました。マッチングにのみ使用され、統計には含まれません。",
+    "not_importable": "対象外",
+    "exists": "既存"
   },
   "btn": {
     "add_device": "+ デバイスを追加",
@@ -169,7 +171,14 @@
     "download_device": "このセットアップをダウンロード",
     "share_device": "⬆ このデバイスを共有",
     "share_device_tip": "この機器と記録済みリファレンスサイクルをコミュニティストアに共有して、同じ機種を持つ他のユーザーが利用できるようにします",
-    "share_n": "{n}件のサイクルを共有"
+    "share_n": "{n}件のサイクルを共有",
+    "export_selected": "エクスポート（データを選択）",
+    "export_all": "すべてをクイックエクスポート",
+    "import_raw": "詳細設定：JSONからすべて置き換え",
+    "download_export": "エクスポートをダウンロード",
+    "analyze_import": "ファイルを解析",
+    "import_selected": "選択項目をインポート",
+    "back": "戻る"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "サイクルを分割中",
     "task_trim": "サイクルをトリミング中",
     "task_merge": "サイクルを結合中",
-    "task_rebuild": "エンベロープを再構築中"
+    "task_rebuild": "エンベロープを再構築中",
+    "cat_profiles": "プロファイル（プログラム）",
+    "cat_real_cycles": "サイクル（実行履歴）",
+    "cat_reference_cycles": "参照サイクル（インポート済み）",
+    "cat_custom_phases": "カスタムフェーズ",
+    "cat_profile_groups": "プロファイルグループ",
+    "cat_settings": "検出と認識の設定",
+    "cat_matching_config": "認識の調整",
+    "cat_ml_models": "MLモデル",
+    "cat_feedback": "フィードバックとレビューラベル",
+    "cat_suggestions": "提案",
+    "cat_maintenance_log": "メンテナンスログ",
+    "cat_history_logs": "履歴と変更ログ",
+    "cat_lifetime_stats": "累計値",
+    "cycles_short": "サイクル",
+    "import_mode": "結合方法",
+    "mode_merge": "マージ（自分のを保持）",
+    "mode_replace": "選択項目を置き換え",
+    "cycle_destination": "インポートしたサイクルの保存先は？",
+    "dest_reference": "参照（形状のみ）",
+    "dest_real_history": "実履歴（統計に計上）",
+    "conflict_resolution": "名前の衝突",
+    "conflict_import_copy": "コピーとしてインポート",
+    "conflict_keep_mine": "自分のを保持",
+    "conflict_overwrite": "上書き"
   },
   "log": {
     "all_levels": "すべてのレベル",
@@ -643,7 +676,9 @@
     "force_stop_msg": "アクティブなサイクルを今すぐ強制停止しますか？サイクルは中断として保存されます。",
     "store_import": "基準サイクルをインポート",
     "store_share": "コミュニティストアに共有",
-    "store_share_device": "このデバイスを共有"
+    "store_share_device": "このデバイスを共有",
+    "export_select": "エクスポート - データを選択",
+    "import_wizard": "インポート - データを選択"
   },
   "msg": {
     "appliance_monitor": "アプライアンスモニター",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} 件の類似した未ラベルサイクルが見つかりました – プロファイルを作成してマッチングを開始してください。",
     "cycles_deleted": "{count} 件のサイクルを削除しました",
     "enough_data": "学習に十分なデータがあります（{current}/{min} サイクル）。",
-    "export_description": "すべてのプロファイルとサイクルを JSON にエクスポートするか、以前のエクスポートから復元します。",
+    "export_description": "JSONにエクスポートするプロファイル、サイクル、設定などを正確に選択するか、ファイルを解析して必要な部分だけをインポートできます。",
     "feedback_cycles_pending": "レビューが必要なサイクル: {n}件{s}",
     "feedback_prompt": "それが正しかったことを確認し、プログラムを修正するか、無視してください。",
     "filter_by_profile": "プロファイルでフィルター…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "選択したリファレンスサイクルとともに{brand} {model}をアップロードします。同じ機器を持つ他のユーザーがあなたのプログラムを引き継ぐことができます。エントリは公開前に審査されます。",
     "share_profile_no_cycles": "リファレンスサイクルなし -- サイクルタブでサイクルを⭐としてマークしてこのプロファイルを含めてください",
     "advisory_phase_inconsistent": "'{name}' は異なるプログラムや温度が混在しているようです。加熱時間がサイクルごとに大きく異なります。温度ごとなど別々のプロファイルに分割すると、マッチングと時間推定が改善されます。",
-    "advisory_phase_inconsistent_title": "⚠ プログラム混在の可能性"
+    "advisory_phase_inconsistent_title": "⚠ プログラム混在の可能性",
+    "export_select_intro": "含める項目を正確にチェックしてください。サイクルなしでプロファイルを選択しても、認識可能なプログラムはエクスポートされます（学習した形状も一緒に移行します）。",
+    "import_analyze_hint": "エクスポートしたファイルを読み込む（またはそのJSONを貼り付ける）と、WashDataが解析し、変更前にインポート可能な内容を正確に表示します。",
+    "analyzing": "解析中…",
+    "device_type_mismatch_warn": "このエクスポートは異なる機器タイプのものです（{src} と {local}）。プログラムとサイクルは参照データとしてインポートできますが、機器固有の設定と実履歴のインポートは無効になります。",
+    "merge_hint": "インポートした項目は追加され、ローカルのデータは失われません。名前の衝突は以下で解決します。",
+    "replace_warn": "チェックした各カテゴリは消去され、ファイルの内容で置き換えられます。チェックしていないカテゴリはそのまま残ります。",
+    "dest_reference_hint": "インポートしたサイクルはプログラムの認識精度を向上させるだけで、使用量やエネルギーの統計には影響しません。",
+    "dest_real_history_hint": "インポートしたサイクルはこの機器自身の履歴として扱われ、エネルギーや使用量の統計に反映されます。1台の機器を新しい環境に移行する際に使用します。"
   },
   "pg_desc": {
     "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
@@ -1603,7 +1646,9 @@
     "store_device_shared_partial": "{n}件のサイクルを共有しました。{failed}件はアップロードできませんでした。",
     "store_device_shared_some_dup": "{created}件のサイクルを共有しました。{dup}件は既にストアにありました。",
     "store_download_failed": "ダウンロードに失敗しました: {error}",
-    "store_download_nothing": "ダウンロードする新しいものはありません - このセットアップは既にデバイスにあります。"
+    "store_download_nothing": "ダウンロードする新しいものはありません - このセットアップは既にデバイスにあります。",
+    "export_selective_done": "エクスポートをダウンロードしました",
+    "import_selective_done": "{profiles} 件のプロファイルと {cycles} 件のサイクルをインポートしました"
   },
   "suggestion": {
     "both_agree": "WashDataの推奨",

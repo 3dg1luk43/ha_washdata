@@ -28,7 +28,9 @@
     "awaiting_n": "Väntar på godkännande · {n} bekräftade",
     "approved": "Godkänd",
     "awaiting": "Väntar på godkännande",
-    "imported_tip": "Importerad från gemenskapsbutiken. Används endast för matchning, räknas inte in i statistiken."
+    "imported_tip": "Importerad från gemenskapsbutiken. Används endast för matchning, räknas inte in i statistiken.",
+    "not_importable": "ej här",
+    "exists": "finns"
   },
   "btn": {
     "add_device": "+ Lägg till enhet",
@@ -169,7 +171,14 @@
     "download_device": "Ladda ner denna inställning",
     "share_device": "⬆ Dela den här apparaten",
     "share_device_tip": "Dela denna apparat och dess inspelade referenscykler till gemenskapsbutiken så att andra med samma maskin kan ta över dem",
-    "share_n": "Dela {n} cykel/cyklar"
+    "share_n": "Dela {n} cykel/cyklar",
+    "export_selected": "Exportera (välj data)",
+    "export_all": "Snabbexportera allt",
+    "import_raw": "Avancerat: ersätt allt från JSON",
+    "download_export": "Ladda ner export",
+    "analyze_import": "Analysera fil",
+    "import_selected": "Importera valda",
+    "back": "Tillbaka"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -566,7 +575,31 @@
     "task_split": "Delar upp cykel",
     "task_trim": "Beskär cykel",
     "task_merge": "Slår ihop cykler",
-    "task_rebuild": "Bygger om enveloppar"
+    "task_rebuild": "Bygger om enveloppar",
+    "cat_profiles": "Profiler (program)",
+    "cat_real_cycles": "Cykler (körhistorik)",
+    "cat_reference_cycles": "Referenscykler (importerade)",
+    "cat_custom_phases": "Anpassade faser",
+    "cat_profile_groups": "Profilgrupper",
+    "cat_settings": "Detekterings- & matchningsinställningar",
+    "cat_matching_config": "Finjustering av matchning",
+    "cat_ml_models": "ML-modeller",
+    "cat_feedback": "Feedback & granskningsetiketter",
+    "cat_suggestions": "Förslag",
+    "cat_maintenance_log": "Underhållslogg",
+    "cat_history_logs": "Historik- & ändringsloggar",
+    "cat_lifetime_stats": "Totaler (livstid)",
+    "cycles_short": "cykler",
+    "import_mode": "Så kombineras",
+    "mode_merge": "Slå samman (behåll mina)",
+    "mode_replace": "Ersätt valda",
+    "cycle_destination": "Vart ska importerade cykler placeras?",
+    "dest_reference": "Referens (endast form)",
+    "dest_real_history": "Verklig historik (räknas i statistik)",
+    "conflict_resolution": "Namnkonflikter",
+    "conflict_import_copy": "Importera som kopia",
+    "conflict_keep_mine": "Behåll mina",
+    "conflict_overwrite": "Skriv över"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -643,7 +676,9 @@
     "force_stop_msg": "Tvångsstoppa den aktiva cykeln nu? Cykeln sparas som avbruten.",
     "store_import": "Importera referenscykel",
     "store_share": "Dela till gemenskapsbutiken",
-    "store_share_device": "Dela den här apparaten"
+    "store_share_device": "Dela den här apparaten",
+    "export_select": "Export - välj data",
+    "import_wizard": "Import - välj data"
   },
   "msg": {
     "appliance_monitor": "Apparatövervakning",
@@ -665,7 +700,7 @@
     "coverage_gap_similar_cycles": "{count} liknande omärkta cykler hittades – skapa en profil för att börja matcha dem.",
     "cycles_deleted": "{count} cykler borttagna",
     "enough_data": "Tillräckligt med data för att lära sig av ({current}/{min} cykler).",
-    "export_description": "Exportera alla profiler och cykler till JSON, eller återställ från en tidigare export.",
+    "export_description": "Välj exakt vilka profiler, cykler, inställningar och mer som ska exporteras till JSON, eller analysera en fil och importera bara de delar du vill ha.",
     "feedback_cycles_pending": "{n} cykel{s} att granska",
     "feedback_prompt": "Bekräfta att det var rätt, korrigera programmet eller ignorera.",
     "filter_by_profile": "Filtrera efter profil…",
@@ -864,7 +899,15 @@
     "store_share_device_intro": "Ladda upp {brand} {model} med de referenscykler du väljer. Andra med samma apparat kan ta över dina program. Poster granskas innan de visas offentligt.",
     "share_profile_no_cycles": "Inga referenscykler -- markera en cykel som ⭐ på fliken Cykler för att inkludera den här profilen",
     "advisory_phase_inconsistent": "'{name}' verkar blanda olika program eller temperaturer - dess cykler värms upp under mycket olika lång tid. Om du delar upp den i separata profiler (t.ex. per temperatur) förbättras matchningen och tidsuppskattningarna.",
-    "advisory_phase_inconsistent_title": "⚠ Möjligen blandade program"
+    "advisory_phase_inconsistent_title": "⚠ Möjligen blandade program",
+    "export_select_intro": "Kryssa i exakt vad som ska inkluderas. Att välja profiler utan deras cykler exporterar ändå ett matchningsbart program (den inlärda formen följer med).",
+    "import_analyze_hint": "Läs in en exporterad fil (eller klistra in dess JSON). WashData analyserar den och visar exakt vad som kan importeras innan något ändras.",
+    "analyzing": "Analyserar…",
+    "device_type_mismatch_warn": "Den här exporten kommer från en annan apparattyp ({src} vs {local}). Program och cykler kan fortfarande importeras som referensdata, men apparatspecifika inställningar och import av verklig historik är inaktiverade.",
+    "merge_hint": "Importerade objekt läggs till; inget lokalt går förlorat. Namnkonflikter löses nedan.",
+    "replace_warn": "Varje ikryssad kategori raderas och ersätts från filen. Icke ikryssade kategorier lämnas orörda.",
+    "dest_reference_hint": "Importerade cykler förbättrar bara programmatchning och påverkar aldrig användnings-/energistatistik.",
+    "dest_real_history_hint": "Importerade cykler räknas som den här apparatens egen historik och matar energi-/användningsstatistik. Använd detta för att flytta en apparat till en ny installation."
   },
   "pg_desc": {
     "completion_min_seconds": "Kortaste körning som räknas som en riktig cykel",
@@ -1715,7 +1758,9 @@
     "store_device_shared_partial": "{n} cykel/cyklar delade; {failed} kunde inte laddas upp.",
     "store_device_shared_some_dup": "{created} cykel/cyklar delade; {dup} fanns redan i butiken.",
     "store_download_failed": "Nedladdning misslyckades: {error}",
-    "store_download_nothing": "Inget nytt att ladda ner -- den här inställningen finns redan på din apparat."
+    "store_download_nothing": "Inget nytt att ladda ner -- den här inställningen finns redan på din apparat.",
+    "export_selective_done": "Export nedladdad",
+    "import_selective_done": "Importerade {profiles} profil(er) och {cycles} cykel/cykler"
   },
   "trend": {
     "down": "Nedåtgående trend",
