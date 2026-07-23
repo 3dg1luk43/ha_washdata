@@ -295,6 +295,103 @@ async def test_get_config_decodes():
     assert cfg["confirmThreshold"] == 7 and cfg["maintenance"] is False
 
 
+# ── read cache (catalog + config) ───────────────────────────────────────────────
+# The community catalog is public and slow-changing; caching brand/device/config reads
+# in memory keeps the panel re-opening a tab from re-querying Firestore (the store's #1
+# free-tier read source). See StoreClient class docstring.
+
+@pytest.mark.asyncio
+async def test_list_brands_caches_across_calls():
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../brands/bosch", "fields": {"brand_lc": {"stringValue": "bosch"}}}},
+        {"document": {"name": ".../brands/miele", "fields": {"brand_lc": {"stringValue": "miele"}}}},
+    ]))
+    c = _client(s)
+    first = await c.list_brands()
+    assert [b["id"] for b in first] == ["bosch", "miele"]
+    assert len(s.posts) == 1
+    # Second call is served from cache -- no new Firestore query.
+    second = await c.list_brands()
+    assert [b["id"] for b in second] == ["bosch", "miele"]
+    assert len(s.posts) == 1
+    # A prefix search reuses the same cached rows (filtered in memory), still no query.
+    filtered = await c.list_brands(q="mi")
+    assert [b["id"] for b in filtered] == ["miele"]
+    assert len(s.posts) == 1
+
+
+@pytest.mark.asyncio
+async def test_search_devices_caches_per_key():
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../devices/d1", "fields": {"model_lc": {"stringValue": "wat28"}}}},
+    ]))
+    c = _client(s)
+    await c.search_devices(brand="Bosch", appliance_type="washer")
+    assert len(s.posts) == 1
+    # Same brand/type/include_pending/page_size -> cached, and a model prefix filters in memory.
+    hit = await c.search_devices(brand="Bosch", appliance_type="washer", model_query="wat")
+    assert [d["id"] for d in hit] == ["d1"]
+    assert len(s.posts) == 1
+    # A different brand is a different cache key -> a new query.
+    s.queue_post(_Resp(200, []))
+    await c.search_devices(brand="Miele", appliance_type="washer")
+    assert len(s.posts) == 2
+
+
+@pytest.mark.asyncio
+async def test_get_config_caches_and_never_caches_failure():
+    s = _Session()
+    # First read fails (non-200) -> {} and NOT cached.
+    s.queue_get(_Resp(500, {}))
+    c = _client(s)
+    assert await c.get_config() == {}
+    assert len(s.gets) == 1
+    # A later successful read is fetched (failure was not cached) and then cached.
+    s.queue_get(_Resp(200, {"name": ".../config/site", "fields": {"confirmThreshold": {"integerValue": "5"}}}))
+    assert (await c.get_config())["confirmThreshold"] == 5
+    assert len(s.gets) == 2
+    assert (await c.get_config())["confirmThreshold"] == 5
+    assert len(s.gets) == 2  # served from cache
+
+
+@pytest.mark.asyncio
+async def test_catalog_cache_invalidated_on_create():
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../brands/bosch", "fields": {"brand_lc": {"stringValue": "bosch"}}}},
+    ]))
+    c = _client(s)
+    await c.list_brands()
+    await c.list_brands()
+    assert len(s.posts) == 1  # cached
+    # An upload creates the brand/device docs -> catalog cache must be dropped so the
+    # newly-contributed entry appears immediately for this user.
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))  # token
+    for _ in range(4):  # brand/device/profile/cycle creates (200 => created)
+        s.queue_post(_Resp(200, {}))
+    meta = {"applianceType": "washer", "brand": "Miele", "model": "WWV", "program": "Cotton", "sampleIntervalSec": 60}
+    await c.upload_reference_cycle("refresh", "u1", "Alice", meta, [[0, 2000], [60, 100]], {}, 2)
+    posts_after_upload = len(s.posts)
+    # The next brand list re-queries (the cache was invalidated on create).
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../brands/bosch", "fields": {"brand_lc": {"stringValue": "bosch"}}}},
+    ]))
+    await c.list_brands()
+    assert len(s.posts) == posts_after_upload + 1
+
+
+def test_read_cache_get_put_and_expiry():
+    c = _client(_Session())
+    c._cache_put("k", [1, 2], ttl=100.0)
+    assert c._cache_get("k") == [1, 2]
+    # An already-expired entry reads as a miss and is evicted.
+    c._cache_put("k2", [3], ttl=-1.0)
+    assert c._cache_get("k2") is None
+    assert "k2" not in c._read_cache
+
+
 @pytest.mark.asyncio
 async def test_upload_encodes_points_as_maps_not_nested_arrays():
     # Firestore forbids directly-nested arrays; trace.points must be an array of maps.
