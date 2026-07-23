@@ -5,6 +5,12 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.3 - 2026-07-23
+
+### Performance
+
+- **The community store no longer re-queries the brand and device catalog on every panel open** (`store_client.py`): The online-features panel fetches the store's brand list and device search results whenever the Settings or Store tab is (re-)opened, and those reads were sent to the store's Firebase backend every single time with no caching. On the store's free tier (a fixed daily document-read budget shared by every install) that brand-list query alone was by far the largest read source, and repeated panel opens could exhaust the daily budget. The integration now caches these public, slow-changing catalog reads (`list_brands`, `search_devices`) in memory for 15 minutes, and the `config/site` read (used to resolve the community confirm-threshold on every device confirmation) for one hour. Because the store client is a single long-lived instance per device, the cache survives panel reloads, so a burst of panel opens now costs at most one Firestore query per catalog key per window instead of one per open. Contributing a brand or device immediately clears the affected cache entries, so a freshly-added entry still appears right away for the user who added it. Only successful reads are cached, so a transient network failure never pins a stale or empty result.
+
 ## 0.5.2 - 2026-07-23
 
 ### Bug Fixes
