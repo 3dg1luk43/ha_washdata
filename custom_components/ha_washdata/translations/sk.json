@@ -17,14 +17,6 @@
           "min_power": "Údaje o príkone nad touto hranicou (vo wattoch) indikujú, že spotrebič beží. Začnite s 2 W pre väčšinu zariadení."
         }
       },
-      "first_profile": {
-        "title": "Vytvorte prvý profil",
-        "description": "**Cyklus** je úplný chod vášho spotrebiča (napr. náplň bielizne). **Profil** zoskupuje tieto cykly podľa typu (napr. „Bavlna”, „Rýchle pranie”). Vytvorenie profilu teraz pomôže integrácii okamžite odhadnúť trvanie.\n\nAk sa tento profil nezistí automaticky, môžete ho manuálne vybrať v ovládacích prvkoch zariadenia.\n\n**Ak chcete tento krok preskočiť, ponechajte pole Názov profilu prázdne.**",
-        "data": {
-          "profile_name": "Názov profilu (voliteľné)",
-          "manual_duration": "Odhadované trvanie (minúty)"
-        }
-      },
       "reconfigure": {
         "title": "Reconfigure WashData",
         "description": "Update the device name, appliance type, or power sensor.",

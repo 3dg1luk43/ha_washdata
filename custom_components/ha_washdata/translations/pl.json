@@ -17,14 +17,6 @@
           "min_power": "Odczyty mocy powyżej tego progu (w watach) wskazują, że urządzenie pracuje. Zacznij od 2 W dla większości urządzeń."
         }
       },
-      "first_profile": {
-        "title": "Utwórz pierwszy profil",
-        "description": "**Cykl** to pełny przebieg urządzenia (np. załadowanie prania). **Profil** grupuje te cykle według rodzaju (np. „Bawełna”, „Pranie szybkie”). Utworzenie profilu teraz umożliwia natychmiastowe szacowanie czasu trwania.\n\nMożesz ręcznie wybrać ten profil w elementach sterujących urządzenia, jeśli nie zostanie wykryty automatycznie.\n\n**Pozostaw pole „Nazwa profilu” puste, aby pominąć ten krok.**",
-        "data": {
-          "profile_name": "Nazwa profilu (opcjonalnie)",
-          "manual_duration": "Szacowany czas trwania (minuty)"
-        }
-      },
       "reconfigure": {
         "title": "Rekonfiguracja WashData",
         "description": "Zaktualizuj nazwę urządzenia, typ urządzenia lub czujnik mocy.",

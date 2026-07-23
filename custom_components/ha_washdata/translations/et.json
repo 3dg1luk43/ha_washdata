@@ -17,14 +17,6 @@
           "min_power": "Sellest läviväärtusest kõrgemad võimsusnäidud (vattides) näitavad, et seade töötab. Enamiku seadmete puhul alustage 2W-st."
         }
       },
-      "first_profile": {
-        "title": "Loo esimene profiil",
-        "description": "**Tsükkel** on teie seadme täielik töökord (nt täis pesu). **Profiil** rühmitab need tsüklid tüübi järgi (nt 'puuvill', 'kiirpesu'). Profiili loomine aitab koheselt hinnata integratsiooni kestust.\n\nSaate selle profiili seadme juhtelementidest käsitsi valida, kui seda automaatselt ei tuvastata.\n\n**Selle sammu vahelejätmiseks jätke „Profiili nimi” tühjaks.**",
-        "data": {
-          "profile_name": "Profiili nimi (valikuline)",
-          "manual_duration": "Hinnanguline kestus (minutites)"
-        }
-      },
       "reconfigure": {
         "title": "WashData uuesti seadistamine",
         "description": "Uuendage seadme nime, seadmetüüpi või võimsusandurit.",
