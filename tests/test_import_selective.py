@@ -301,6 +301,71 @@ async def test_replace_empty_payload_guarded(store):
             mode="replace", local_device_type="washing_machine")
 
 
+@pytest.mark.asyncio
+async def test_replace_empty_reference_payload_guarded(store):
+    # A reference-only replace with no reference cycles in the file must NOT wipe the
+    # locally-curated reference cycles (the guard previously only covered profiles/real).
+    await store.add_reference_cycle("KeepMe", _trace(1000), {"store_cycle_id": "keep"})
+    payload = _payload(refs=[])
+    with pytest.raises(ValueError):
+        await store.async_import_data_selective(
+            payload, selection={"categories": ["reference_cycles"]},
+            mode="replace", local_device_type="washing_machine")
+    assert len(store.get_reference_cycles()) == 1  # preserved
+
+
+@pytest.mark.asyncio
+async def test_replace_conflict_overwrites_not_copies(store):
+    # In replace mode a name clash must overwrite the local profile in place, not create a
+    # copy. Crucially this must hold even though the panel transmits its analyze-time
+    # conflict_resolutions (import_as_copy) while hiding the resolver in replace mode — the
+    # backend enforces overwrite regardless of what the client sent (real UI path).
+    store._data["profiles"]["Cotton 40"] = {"avg_duration": 1000, "marker": "local"}
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 9999, "marker": "from_file"}},
+                       refs=[_cyc("r1", "Cotton 40", 2000)])
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["profiles", "reference_cycles"]},
+        conflict_resolutions={"Cotton 40": "import_as_copy"},   # what the panel actually sends
+        mode="replace", local_device_type="washing_machine")
+    profs = store.get_profiles()
+    # Definition overwritten in place (marker survives the envelope rebuild that recomputes
+    # avg_duration), and no dangling "(imported)" copy left behind.
+    assert profs["Cotton 40"].get("marker") == "from_file"
+    assert "Cotton 40 (imported)" not in profs
+    ref = store.get_reference_cycles()
+    assert [c["profile_name"] for c in ref] == ["Cotton 40"]   # cycle routes to the real profile
+
+
+@pytest.mark.asyncio
+async def test_replace_overwrite_carries_file_envelope(store):
+    # Definition-only replace of a clashing profile (no cycles routed to it) must adopt the
+    # file's envelope, not keep the stale local one that no longer matches the new definition.
+    store._data["profiles"]["Eco"] = {"avg_duration": 1000}
+    store._data.setdefault("envelopes", {})["Eco"] = {"marker": "LOCAL_ENV"}
+    payload = _payload(profiles={"Eco": {"avg_duration": 5000}},
+                       extra={"envelopes": {"Eco": {"marker": "FILE_ENV"}}})
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["profiles"]},
+        mode="replace", local_device_type="washing_machine")
+    assert store._data["envelopes"]["Eco"] == {"marker": "FILE_ENV"}  # file wins
+
+
+@pytest.mark.asyncio
+async def test_reference_reimport_is_idempotent(store):
+    # Importing the same reference bundle twice must not duplicate cycles (which would
+    # double-weight the envelope and inflate cycle_count).
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}},
+                       refs=[_cyc("r1", "Cotton 40", 2000)])
+    sel = {"categories": ["profiles", "reference_cycles"]}
+    s1 = await store.async_import_data_selective(payload, selection=sel,
+                                                 local_device_type="washing_machine")
+    s2 = await store.async_import_data_selective(payload, selection=sel,
+                                                 local_device_type="washing_machine")
+    assert s1["reference_cycles_imported"] == 1
+    assert s2["reference_cycles_imported"] == 0        # deduped on re-import
+    assert len(store.get_reference_cycles()) == 1
+
+
 # ── guards + envelopes ───────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
