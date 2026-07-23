@@ -25,7 +25,9 @@ import hashlib
 import inspect
 import math
 import uuid
+import asyncio
 from asyncio import Task
+from collections.abc import Coroutine
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, cast
 import numpy as np
@@ -2216,7 +2218,7 @@ class WashDataManager:
 
         self._logger.info("Configuration reloaded successfully")
 
-    def _spawn_tracked(self, coro: Any) -> Task[Any]:
+    def _spawn_tracked(self, coro: Coroutine[Any, Any, Any]) -> Task[Any]:
         """Create a detached task and track it so shutdown can cancel it.
 
         Use for fire-and-forget tasks that touch the ProfileStore (matching
@@ -2237,15 +2239,22 @@ class WashDataManager:
         self._is_shutdown = True
         # Cancel in-flight matching and cycle-end tasks so they don't race a
         # freshly-loaded ProfileStore on reload_config_entry.
+        _to_await: list[Task[Any]] = []
         if self._matching_task and not self._matching_task.done():
             self._matching_task.cancel()
+            _to_await.append(self._matching_task)
         if self._cycle_end_task and not self._cycle_end_task.done():
             self._cycle_end_task.cancel()
+            _to_await.append(self._cycle_end_task)
         # Cancel every other tracked detached task (matching trigger, active-cycle
         # clear, post-cycle processing) for the same reason.
         for task in list(self._background_tasks):
             if not task.done():
                 task.cancel()
+                _to_await.append(task)
+        # Drain cancelled tasks so they don't race the freshly-reloaded ProfileStore.
+        if _to_await:
+            await asyncio.gather(*_to_await, return_exceptions=True)
         if self._remove_listener:
             self._remove_listener()
         if self._remove_external_trigger_listener:
@@ -3706,7 +3715,7 @@ class WashDataManager:
         # _async_process_cycle_end.
         end_token = self._ranking_snapshot_cycle_id
         if not self._is_shutdown:
-            self._cycle_end_task = self.hass.async_create_task(
+            self._cycle_end_task = self._spawn_tracked(
                 self._async_process_cycle_end(cycle_data, cycle_token=end_token)
             )
 

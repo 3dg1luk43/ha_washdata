@@ -1466,11 +1466,19 @@ class CycleDetector:
                     # Require the required_quiet tail to be actually SAMPLED (no
                     # outage-sized gap): otherwise a telemetry outage that inflated
                     # _time_below_threshold could finalize an active cycle early.
-                    quiet_ts = [
-                        ts
-                        for ts, _ in self._power_readings
-                        if (timestamp - ts).total_seconds() <= required_quiet
-                    ]
+                    # Walk in reverse so we can capture the boundary reading (the
+                    # first reading outside the window) — an outage right before the
+                    # window would be invisible if we only passed in-window timestamps.
+                    quiet_ts: list[datetime] = []
+                    _boundary_q: datetime | None = None
+                    for _ts, _ in reversed(self._power_readings):
+                        if (timestamp - _ts).total_seconds() <= required_quiet:
+                            quiet_ts.append(_ts)
+                        elif quiet_ts:
+                            _boundary_q = _ts
+                            break
+                    if _boundary_q is not None:
+                        quiet_ts.append(_boundary_q)
                     if (
                         self._expected_duration > 0
                         and current_duration
@@ -1781,6 +1789,7 @@ class CycleDetector:
         window_ts: list[datetime] = []
         oldest_in_window: datetime | None = None
         saw_older = False  # a reading older than the window exists -> full coverage
+        _standby_boundary_ts: datetime | None = None
         for ts, p in reversed(self._power_readings):
             if (timestamp - ts).total_seconds() <= STANDBY_BAND_WINDOW_S:
                 window.append(float(p))
@@ -1788,6 +1797,7 @@ class CycleDetector:
                 oldest_in_window = ts
             else:
                 saw_older = True
+                _standby_boundary_ts = ts  # boundary: last reading before the window
                 break
         # The plateau must actually SPAN the required window (data exists from
         # before it), not just a couple of recent samples, and have enough points
@@ -1803,7 +1813,11 @@ class CycleDetector:
             or len(window) < 3
             or (timestamp - oldest_in_window).total_seconds()
             < STANDBY_BAND_WINDOW_S * 0.9
-            or self._window_has_outage_gap(window_ts)
+            or self._window_has_outage_gap(
+                ([_standby_boundary_ts] + window_ts)
+                if _standby_boundary_ts is not None
+                else window_ts
+            )
         ):
             return False
         hi = max(window)
@@ -1903,6 +1917,7 @@ class CycleDetector:
         window_ts: list[datetime] = []
         oldest_in_window: datetime | None = None
         saw_older = False
+        _ac_boundary_ts: datetime | None = None
         for ts, p in reversed(self._power_readings):
             if (timestamp - ts).total_seconds() <= ANTI_CREASE_CONFIRM_WINDOW_S:
                 window.append(float(p))
@@ -1910,6 +1925,7 @@ class CycleDetector:
                 oldest_in_window = ts
             else:
                 saw_older = True
+                _ac_boundary_ts = ts  # boundary: last reading before the window
                 break
         # The low-power tail must actually SPAN the window (data exists from before
         # it) and have enough points to judge - not just a couple of recent samples.
@@ -1922,7 +1938,11 @@ class CycleDetector:
             or len(window) < 3
             or (timestamp - oldest_in_window).total_seconds()
             < ANTI_CREASE_CONFIRM_WINDOW_S * 0.9
-            or self._window_has_outage_gap(window_ts)
+            or self._window_has_outage_gap(
+                ([_ac_boundary_ts] + window_ts)
+                if _ac_boundary_ts is not None
+                else window_ts
+            )
         ):
             return False
         if max(window) > max_power:
