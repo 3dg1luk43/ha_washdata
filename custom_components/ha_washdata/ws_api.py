@@ -1840,7 +1840,9 @@ def ws_rebuild_envelopes(
         entry_id, "rebuild", "Rebuilding envelopes",
         label_key="task.rebuild.envelopes", label_params={},
     )
-    hass.async_create_task(_rebuild_envelopes_task(hass, task, entry_id))
+    _raw = hass.async_create_task(_rebuild_envelopes_task(hass, task, entry_id))
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "rebuild_envelopes", {"task_id": task.id})
 
 
@@ -2813,7 +2815,9 @@ def ws_reprocess_history(
         return
     reg = task_registry.get_registry(hass)
     task = reg.create(entry_id, "reprocess", "Reprocessing")
-    hass.async_create_task(_reprocess_task(hass, task, entry_id))
+    _raw = hass.async_create_task(_reprocess_task(hass, task, entry_id))
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "reprocess_history", {"task_id": task.id})
 
 
@@ -3304,9 +3308,11 @@ def ws_trim_cycle(
     task = reg.create(
         entry_id, "trim", "Trimming cycle", label_key="task.trim.apply", label_params={},
     )
-    hass.async_create_task(_trim_task(
+    _raw = hass.async_create_task(_trim_task(
         hass, task, entry_id, msg["cycle_id"], float(msg["start_s"]), float(msg["end_s"]),
     ))
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "trim_cycle", {"task_id": task.id})
 
 
@@ -3465,7 +3471,9 @@ def ws_apply_split(
     task = reg.create(
         entry_id, "split", "Splitting cycle", label_key="task.split.apply", label_params={},
     )
-    hass.async_create_task(_apply_split_task(hass, task, entry_id, cycle_id, segments))
+    _raw = hass.async_create_task(_apply_split_task(hass, task, entry_id, cycle_id, segments))
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "apply_split", {"task_id": task.id})
 
 
@@ -3558,7 +3566,9 @@ def ws_apply_merge(
     task = reg.create(
         entry_id, "merge", "Merging cycles", label_key="task.merge.apply", label_params={},
     )
-    hass.async_create_task(_apply_merge_task(hass, task, entry_id, ids, target, new_name))
+    _raw = hass.async_create_task(_apply_merge_task(hass, task, entry_id, ids, target, new_name))
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "apply_merge", {"task_id": task.id})
 
 
@@ -4721,7 +4731,9 @@ def ws_trigger_ml_training(
         return
     reg = task_registry.get_registry(hass)
     task = reg.create(entry_id, "ml_training", "Learning")
-    hass.async_create_task(_ml_training_task(hass, task, entry_id))
+    _raw = hass.async_create_task(_ml_training_task(hass, task, entry_id))
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "trigger_ml_training", {"task_id": task.id})
 
 
@@ -5381,7 +5393,9 @@ def ws_start_playground_history(
     task = reg.create(entry_id, "pg_history", "Test on history")
     override = dict(msg.get("settings_override") or {}) or None
     cycle_ids = list(msg.get("cycle_ids") or [])
-    hass.async_create_task(_pg_history_task(hass, task, entry_id, cycle_ids, override))
+    _raw = hass.async_create_task(_pg_history_task(hass, task, entry_id, cycle_ids, override))
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "start_playground_history", {"task_id": task.id})
 
 
@@ -5417,10 +5431,12 @@ def ws_start_playground_sweep(
         entry_id, "pg_sweep", f"Optimize: {msg['param']}",
         label_key="task.pg_sweep.optimize", label_params={"param": msg["param"]},
     )
-    hass.async_create_task(_pg_sweep_task(
+    _raw = hass.async_create_task(_pg_sweep_task(
         hass, task, entry_id, msg["param"], list(msg.get("values") or []),
         msg["objective"], param_y, list(values_y) if values_y else None,
     ))
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "start_playground_sweep", {"task_id": task.id})
 
 
@@ -5506,7 +5522,9 @@ def ws_start_playground_cycle_detail(
         label_key="task.pg_detail.simulate", label_params={},
     )
     override = dict(msg.get("settings_override") or {})
-    hass.async_create_task(
+    _raw = hass.async_create_task(
         _pg_detail_task(hass, task, entry_id, msg["cycle_id"], override)
     )
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "start_playground_cycle_detail", {"task_id": task.id})

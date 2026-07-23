@@ -28,6 +28,7 @@ listener to push updates and calls :func:`get_registry` to read/kick/cancel.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from collections import OrderedDict
@@ -125,6 +126,9 @@ class TaskRegistry:
     def __init__(self) -> None:
         self._tasks: OrderedDict[str, Task] = OrderedDict()
         self._listeners: set[Callable[[dict[str, Any]], None]] = set()
+        # Raw asyncio Task handles linked by ws_api so cancel_entry_tasks can
+        # actually inject CancelledError, not just set the polling flag.
+        self._asyncio_tasks: dict[str, asyncio.Task[Any]] = {}
 
     # -- listeners -----------------------------------------------------------
     def add_listener(self, cb: Callable[[dict[str, Any]], None]) -> Callable[[], None]:
@@ -165,6 +169,15 @@ class TaskRegistry:
         self._evict()
         return task
 
+    def link_asyncio_task(self, task_id: str, asyncio_task: asyncio.Task[Any]) -> None:
+        """Associate the raw asyncio Task with a registry entry.
+
+        Call this immediately after hass.async_create_task() so that
+        cancel_entry_tasks() can inject CancelledError rather than only
+        setting the polling flag.
+        """
+        self._asyncio_tasks[task_id] = asyncio_task
+
     def update(
         self,
         task: Task,
@@ -201,6 +214,7 @@ class TaskRegistry:
         # once STATE_CANCELLED is set, no subsequent finish() call can downgrade it.
         if task.state == STATE_CANCELLED and state != STATE_CANCELLED:
             return
+        self._asyncio_tasks.pop(task.id, None)
         task.state = state
         task.error = error
         if result is not None:
@@ -220,15 +234,19 @@ class TaskRegistry:
         return False
 
     def cancel_entry_tasks(self, entry_id: str) -> None:
-        """Mark all running tasks for an entry as cancelled and finish them.
+        """Cancel all running tasks for an entry and mark them finished.
 
-        Called during async_unload_entry so that tasks whose asyncio coroutine
-        was already cancelled (CancelledError) get a clean final state instead
-        of staying stuck in STATE_RUNNING across a reload.
+        Sets the polling flag and — when a raw asyncio Task was linked via
+        link_asyncio_task — injects CancelledError so the coroutine stops
+        promptly rather than waiting for the next cancel_requested poll.
+        Called during async_unload_entry.
         """
         for task in list(self._tasks.values()):
             if task.entry_id == entry_id and task.state == STATE_RUNNING:
                 task._cancelled = True  # noqa: SLF001
+                raw = self._asyncio_tasks.pop(task.id, None)
+                if raw is not None and not raw.done():
+                    raw.cancel()
                 self.finish(task, state=STATE_CANCELLED)
 
     # -- reads ---------------------------------------------------------------
