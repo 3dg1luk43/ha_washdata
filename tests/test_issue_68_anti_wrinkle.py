@@ -312,3 +312,90 @@ def test_anti_wrinkle_interrupted_cycle_no_transition(
 
     # Should end in FINISHED (not ANTI_WRINKLE) when user-stopped
     assert detector.state == STATE_FINISHED
+
+@pytest.fixture
+def dryer_config_long_pulse_gap() -> CycleDetectorConfig:
+    """Anti-wrinkle dryer config that tolerates minutes between tumble pulses."""
+    return CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=60,
+        device_type=DEVICE_TYPE_DRYER,
+        anti_wrinkle_enabled=True,
+        anti_wrinkle_max_power=400.0,
+        anti_wrinkle_max_duration=60.0,
+        anti_wrinkle_exit_power=0.8,
+        anti_wrinkle_idle_timeout=900.0,
+    )
+
+
+def _run_to_anti_wrinkle(detector: CycleDetector) -> float:
+    """Drive a full cycle so the detector settles in ANTI_WRINKLE, return the offset."""
+    detector.process_reading(500.0, dt(0))
+    detector.process_reading(500.0, dt(10))
+    for t in range(10, 1500, 10):
+        detector.process_reading(500.0, dt(t))
+    detector.process_reading(1.0, dt(1501))
+    detector.process_reading(1.0, dt(1540))
+    flush_buffer(detector, 1540, num_readings=35)
+    assert detector.state == STATE_ANTI_WRINKLE
+    return 1575.0
+
+
+def test_anti_wrinkle_survives_gap_between_tumble_pulses(
+    dryer_config_long_pulse_gap: CycleDetectorConfig,
+    mock_callbacks: dict[str, Mock],
+) -> None:
+    """A gap shorter than the configured tolerance keeps anti-wrinkle alive.
+
+    A heat-pump dryer leaves minutes between two tumble pulses. With a matching
+    tolerance those gaps must not end the mode, otherwise every later pulse is
+    read as a new (false) cycle start.
+    """
+    detector = CycleDetector(
+        config=dryer_config_long_pulse_gap,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+    t = _run_to_anti_wrinkle(detector)
+
+    # 600 s quiet - far beyond the default tolerance, well inside the configured one.
+    for i in range(1, 61):
+        detector.process_reading(1.0, dt(t + 10 * i))
+    assert detector.state == STATE_ANTI_WRINKLE
+
+    # A tumble pulse arrives, is absorbed (no new cycle) and resets the gap.
+    detector.process_reading(90.0, dt(t + 610))
+    assert detector.state == STATE_ANTI_WRINKLE
+
+    for i in range(1, 61):
+        detector.process_reading(1.0, dt(t + 610 + 10 * i))
+    assert detector.state == STATE_ANTI_WRINKLE
+    mock_callbacks["on_cycle_end"].assert_called_once()
+
+
+def test_anti_wrinkle_ends_after_configured_gap(
+    dryer_config_with_anti_wrinkle: CycleDetectorConfig,
+    mock_callbacks: dict[str, Mock],
+) -> None:
+    """A quiet gap beyond the tolerance ends anti-wrinkle (default behaviour)."""
+    detector = CycleDetector(
+        config=dryer_config_with_anti_wrinkle,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+    t = _run_to_anti_wrinkle(detector)
+
+    for i in range(1, 31):
+        detector.process_reading(1.0, dt(t + 10 * i))
+    assert detector.state == STATE_OFF
+
+
+def test_anti_wrinkle_idle_timeout_is_configurable() -> None:
+    """The tolerance is a config field defaulting to the previous hardcoded value."""
+    default = CycleDetectorConfig(min_power=5.0, off_delay=60)
+    assert default.anti_wrinkle_idle_timeout == 120.0
+
+    tuned = CycleDetectorConfig(
+        min_power=5.0, off_delay=60, anti_wrinkle_idle_timeout=900.0
+    )
+    assert tuned.anti_wrinkle_idle_timeout == 900.0
