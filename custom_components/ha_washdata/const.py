@@ -994,3 +994,14 @@ MAINTENANCE_EVENT_TYPES = (
 # A logged maintenance event of a matching type within this many days suppresses
 # the "needs maintenance" nag advisory (duration-trend / shape-drift).
 MAINTENANCE_RECENT_SUPPRESS_DAYS = 30
+
+# ─── Playground stress-tail constants (never used by the live integration) ─────
+# These govern the synthetic idle continuation in the "Test idle termination"
+# Playground toggle. All times are in seconds.
+PLAYGROUND_STRESS_TRAILING_WINDOW_S: float = 60.0    # window for idle-floor derivation
+PLAYGROUND_STRESS_FLOOR_PERCENTILE: float = 0.07     # p7 of window readings = standby floor
+PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC: float = 0.12  # ±12% fallback when window is flat
+PLAYGROUND_STRESS_DENSE_STEP_S: float = 30.0         # dense pre-fill cadence
+PLAYGROUND_STRESS_DENSE_DURATION_S: float = 1200.0   # dense pre-fill length (20 min)
+PLAYGROUND_STRESS_SPARSE_STEP_S: float = 1800.0      # sparse main step (30 min)
+PLAYGROUND_STRESS_MAX_SPARSE_STEPS: int = 15         # max sparse steps → max 7.5 h extra
