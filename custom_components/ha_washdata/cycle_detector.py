@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import itertools
 import logging
 import math
 from dataclasses import dataclass
@@ -51,9 +52,21 @@ from .const import (
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
     DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS,
+    WASHER_SMART_TERMINATION_DEBOUNCE_MAX_SECONDS,
+    STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS,
     DISHWASHER_MATCH_FREEZE_QUIET_SECONDS,
     DISHWASHER_MIN_CYCLE_DURATION_S,
     TERMINAL_DROP_OFF_DELAY_SECONDS,
+    ENDING_HARD_FINALIZE_RATIO,
+    ENDING_HARD_FINALIZE_MIN_QUIET_S,
+    STANDBY_BAND_FINALIZE_DEVICE_TYPES,
+    STANDBY_BAND_MIN_RATIO,
+    STANDBY_BAND_WINDOW_S,
+    STANDBY_BAND_MAX_FRACTION,
+    STANDBY_BAND_FLATNESS_FRACTION,
+    STANDBY_BAND_FLATNESS_FLOOR_W,
+    ANTI_CREASE_FINALIZE_RATIO,
+    ANTI_CREASE_CONFIRM_WINDOW_S,
 )
 
 # The dishwasher end-spike wait window is shared between two code paths
@@ -312,6 +325,11 @@ class CycleDetector:
         # OFF only when the machine has clearly been switched off rather
         # than briefly dipped.
         self._delay_wait_true_off_seconds: float = 0.0
+        # _starting_paused_off_since anchors the first below-stop reading while
+        # a user-paused STARTING state is held (issue #306). Elapsed time is
+        # measured from this anchor, not accumulated per-dt, so a single large
+        # (but sub-outage) interval cannot prematurely credit minutes of quiet time.
+        self._starting_paused_off_since: datetime | None = None
         # _delay_wait_high_start anchors the first high-power reading
         # observed inside DELAY_WAIT.  We only transition to STARTING
         # when the high-power streak has lasted at least
@@ -381,6 +399,18 @@ class CycleDetector:
             and self._matched_profile
             and self._time_below_threshold >= DISHWASHER_MATCH_FREEZE_QUIET_SECONDS
         ):
+            return
+
+        # Terminal-tail match freeze (anti-crease, #296): once a washer/dryer with
+        # anti-wrinkle enabled is past its expected duration and has settled into
+        # the low-power tumble tail, re-matching on the growing flat tail drifts the
+        # label toward a LONGER near-duplicate (its expected duration grows), which
+        # pushes the anti-crease finalize gate out and breaks Smart Termination -
+        # the field failure that merges back-to-back washes.  Keep the good
+        # pre-tail match instead.  Self-correcting: a new wash's heating burst above
+        # anti_wrinkle_max_power leaves the tail regime, so this stops applying and
+        # matching re-arms for the next cycle.
+        if self._matched_profile and self._in_anticrease_freeze(timestamp):
             return
 
         # Rate limiting
@@ -459,6 +489,23 @@ class CycleDetector:
 
         Can be called by the matcher callback directly or asynchronously.
         """
+        # Terminal-tail match freeze (anti-crease, #296).  This is the single sink
+        # for ALL match updates - the detector's own _try_profile_match AND the
+        # manager's async 5-min matcher (manager.py calls update_match directly).
+        # Once a washer/dryer with anti-wrinkle enabled is past its expected
+        # duration and has settled into the low-power tumble tail, re-matching on
+        # the growing flat tail drifts the label toward a LONGER near-duplicate (or
+        # flips it ambiguous), which pushes out expected_duration and would block
+        # the anti-crease finalize - the field failure that merges back-to-back
+        # washes.  Keep the good pre-tail match instead.  Self-correcting: a new
+        # wash's heating burst above anti_wrinkle_max_power leaves the tail regime,
+        # so this stops applying and matching re-arms for the next cycle.
+        if (
+            self._matched_profile
+            and self._power_readings
+            and self._in_anticrease_freeze(self._power_readings[-1][0])
+        ):
+            return
         # Unpack 5 elements (or 4 for backward compatibility if needed, but wrapper is updated)
         # wrapper returns (name, confidence, duration, phase, is_mismatch)
         # Or MatchResult object if refactored, but currently wrapper returns tuple.
@@ -582,6 +629,13 @@ class CycleDetector:
             self._time_below_threshold = 0.0
         self._last_match_time = None
         self._matched_profile = None
+        # Clear stale match state so the next cycle starts with clean defaults.
+        # _expected_duration left at 0 tells the dishwasher end-spike gate that
+        # no profile is matched yet; stale non-zero would mis-gate the spike check.
+        self._expected_duration = 0.0
+        self._last_match_confidence = 0.0
+        self._match_ambiguous = False
+        self._match_prefix_ambiguous = False
         self._ignore_power_until_idle = False  # Reset lockout
         self._lockout_high_seconds = 0.0
         # Clear the verified-pause flag so it can't leak into the next cycle (B6):
@@ -597,6 +651,7 @@ class CycleDetector:
         self._delay_band_seconds = 0.0
         self._delay_band_peak = 0.0
         self._delay_wait_true_off_seconds = 0.0
+        self._starting_paused_off_since = None
         self._delay_wait_high_start = None
 
     @property
@@ -972,6 +1027,10 @@ class CycleDetector:
             self._power_readings.append((timestamp, power))
             self._cycle_max_power = max(self._cycle_max_power, power)
 
+            if is_high:
+                # Power back up - clear any accumulated "true off" hold time.
+                self._starting_paused_off_since = None
+
             if self._time_above_threshold >= self._config.start_duration_threshold:
                 if self._energy_since_idle_wh >= self._config.start_energy_threshold:
                     self._transition_to(STATE_RUNNING, timestamp)
@@ -982,7 +1041,41 @@ class CycleDetector:
             # that the low power is intentional, not a false start.
             if not is_high and self._time_below_threshold > 1.0:  # 1s grace period
                 if getattr(self, "_verified_pause", False):
-                    pass  # user pause holds; wait for Resume Cycle
+                    # User pause holds; wait for Resume Cycle (issue #306).  But a
+                    # genuinely paused appliance keeps standby power above the stop
+                    # threshold - sustained power *below* it means the machine was
+                    # switched off, so fall back to OFF rather than pinning STARTING
+                    # forever.
+                    if power < self._config.stop_threshold_w:
+                        # An outage-sized gap since the last reading is NOT observed
+                        # quiet (the machine may still be paused, we just lost
+                        # telemetry): reset anchor so only genuinely-sampled
+                        # sustained-off time can cancel a paused STARTING.
+                        if dt > self._outage_threshold_s():
+                            self._starting_paused_off_since = None
+                        elif self._starting_paused_off_since is None:
+                            # First below-stop reading: anchor the timestamp.
+                            # Don't credit the preceding dt interval — we only
+                            # know the device is off *now*, not how long before
+                            # this sample it went quiet.
+                            self._starting_paused_off_since = timestamp
+                        observed_off_s = (
+                            (timestamp - self._starting_paused_off_since).total_seconds()
+                            if self._starting_paused_off_since is not None
+                            else 0.0
+                        )
+                        if observed_off_s >= STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS:
+                            self._logger.info(
+                                "Paused STARTING cancelled: power off (%.1fW) for "
+                                "%.0fs → OFF",
+                                power,
+                                observed_off_s,
+                            )
+                            self._transition_to(STATE_OFF, timestamp)
+                            return
+                    else:
+                        # Power recovered — clear the off anchor.
+                        self._starting_paused_off_since = None
                 else:
                     # False start
                     self._logger.debug(
@@ -999,6 +1092,13 @@ class CycleDetector:
             self._power_readings.append((timestamp, power))
             self._cycle_max_power = max(self._cycle_max_power, power)
 
+            # Anti-crease finalize (#296): a matched cycle past its expected
+            # duration that has settled into the low-power tumble tail is done -
+            # finalize into anti-wrinkle now instead of letting the periodic
+            # bursts keep reviving RUNNING until a second wash merges in.
+            if self._maybe_finalize_anticrease_tail(timestamp):
+                return
+
             # Use dynamic threshold
             thresh = self._dynamic_pause_threshold
             if self._time_below_threshold >= thresh:
@@ -1008,15 +1108,70 @@ class CycleDetector:
             # Periodic profile matching
             self._try_profile_match(timestamp)
 
+            # Standby-band stuck finalize (#296): an appliance holding a flat
+            # low standby draw ABOVE stop_threshold never accumulates
+            # _time_below_threshold, so it never reaches PAUSED/ENDING.  Detect
+            # the plateau and finalize as a normal completion (so anti-wrinkle
+            # still engages).  Cheaply gated on being well past expected before
+            # the window scan runs.
+            if self._is_standby_band_stuck(timestamp):
+                start_time = self._current_cycle_start or timestamp
+                current_duration = (timestamp - start_time).total_seconds()
+                # The plateau sits ABOVE stop_threshold, so it keeps advancing
+                # _last_active_time and the default keep_tail=False trim would NOT
+                # remove it - inflating the stored duration/energy with minutes of
+                # standby. Snap the end back to the last real activity (the last
+                # reading above the plateau ceiling) and drop the trailing plateau.
+                level_ceiling = float(self._cycle_max_power) * STANDBY_BAND_MAX_FRACTION
+                plateau_start_idx = None
+                for i in range(len(self._power_readings) - 1, -1, -1):
+                    if float(self._power_readings[i][1]) > level_ceiling:
+                        plateau_start_idx = i
+                        break
+                if (
+                    plateau_start_idx is not None
+                    and plateau_start_idx < len(self._power_readings) - 1
+                ):
+                    self._power_readings = self._power_readings[: plateau_start_idx + 1]
+                    self._last_active_time = self._power_readings[-1][0]
+                    current_duration = (
+                        self._last_active_time - start_time
+                    ).total_seconds()
+                self._logger.info(
+                    "Standby-band finalize: flat plateau ~%.1fW (peak %.0fW) held "
+                    "past expected %.0fs — appliance finished but holds a standby "
+                    "draw above stop_threshold; finalizing (plateau trimmed, "
+                    "duration %.0fs).",
+                    power,
+                    self._cycle_max_power,
+                    self._expected_duration,
+                    current_duration,
+                )
+                self._finish_cycle(
+                    timestamp,
+                    status="completed",
+                    termination_reason=TerminationReason.TIMEOUT,
+                    keep_tail=False,
+                )
+                return
+
             # Max duration safety
             if (
                 self._current_cycle_start
                 and (timestamp - self._current_cycle_start).total_seconds() > 28800
             ):  # 8h safety
-                self._finish_cycle(timestamp, status="force_stopped")
+                self._finish_cycle(
+                    timestamp,
+                    status="force_stopped",
+                    termination_reason=TerminationReason.FORCE_STOPPED,
+                )
 
         elif self._state == STATE_PAUSED:
             self._power_readings.append((timestamp, power))
+
+            # Anti-crease finalize (#296) - see the RUNNING branch.
+            if self._maybe_finalize_anticrease_tail(timestamp):
+                return
 
             if is_high:
                 # Resume to RUNNING
@@ -1031,6 +1186,25 @@ class CycleDetector:
 
         elif self._state == STATE_ENDING:
             self._power_readings.append((timestamp, power))
+
+            # Hard cap: ENDING must not run longer than RUNNING's 8 h safety limit.
+            # Without this a standby baseline can hold the state open indefinitely.
+            if (
+                self._current_cycle_start
+                and (timestamp - self._current_cycle_start).total_seconds() > 28800
+            ):
+                self._finish_cycle(
+                    timestamp,
+                    status="force_stopped",
+                    termination_reason=TerminationReason.FORCE_STOPPED,
+                )
+                return
+
+            # Anti-crease finalize (#296) - see the RUNNING branch.  Fires ahead of
+            # the is_high end-spike handling so a sub-max_power tail burst finalizes
+            # into anti-wrinkle instead of reviving RUNNING.
+            if self._maybe_finalize_anticrease_tail(timestamp):
+                return
 
             if is_high:
                 start_time = self._current_cycle_start or timestamp
@@ -1196,8 +1370,14 @@ class CycleDetector:
                             # the soak-bridging min_off_gap before committing
                             # Smart Termination, so a near-duplicate profile
                             # doesn't cut a long cycle short during a mid-cycle
-                            # power trough.
-                            smart_debounce = max(180.0, self._config.min_off_gap * 0.5)
+                            # power trough.  Bounded above so a large suggested /
+                            # hand-set min_off_gap can't inflate the quiet-time
+                            # requirement and starve end-detection (see
+                            # WASHER_SMART_TERMINATION_DEBOUNCE_MAX_SECONDS).
+                            smart_debounce = min(
+                                WASHER_SMART_TERMINATION_DEBOUNCE_MAX_SECONDS,
+                                max(180.0, self._config.min_off_gap * 0.5),
+                            )
                         else:
                             smart_debounce = 120.0
 
@@ -1276,6 +1456,64 @@ class CycleDetector:
                             )
                             return
 
+                    # --- DURATION-ANCHORED HARD FINALIZE (backstop) ---
+                    # Separate safety net for a matched cycle whose Smart
+                    # Termination is blocked (ambiguous / prefix-ambiguous match)
+                    # and whose fallback energy gate is held open by a low standby
+                    # baseline: without this it sits in ENDING until the 8 h cap /
+                    # zombie-kill (#296/#311).  Fires only well past the expected
+                    # duration AND after a long *continuous* sub-threshold span, so
+                    # it can never truncate a longer program mismatched to a shorter
+                    # profile (a real longer program has high-power phases that keep
+                    # resetting the quiet timer) — asymmetric, shorten-only.  Not
+                    # for user-paused cycles.
+                    required_quiet = max(
+                        ENDING_HARD_FINALIZE_MIN_QUIET_S,
+                        float(max(self._config.off_delay, self._config.min_off_gap)),
+                    )
+                    # Require the required_quiet tail to be actually SAMPLED (no
+                    # outage-sized gap): otherwise a telemetry outage that inflated
+                    # _time_below_threshold could finalize an active cycle early.
+                    # Walk in reverse so we can capture the boundary reading (the
+                    # first reading outside the window) — an outage right before the
+                    # window would be invisible if we only passed in-window timestamps.
+                    quiet_ts: list[datetime] = []
+                    _boundary_q: datetime | None = None
+                    for _ts, _ in reversed(self._power_readings):
+                        if (timestamp - _ts).total_seconds() <= required_quiet:
+                            quiet_ts.append(_ts)
+                        elif quiet_ts:
+                            _boundary_q = _ts
+                            break
+                    if _boundary_q is not None:
+                        quiet_ts.append(_boundary_q)
+                    if (
+                        self._expected_duration > 0
+                        and current_duration
+                        >= self._expected_duration * ENDING_HARD_FINALIZE_RATIO
+                        and self._time_below_threshold >= required_quiet
+                        and not self._verified_pause
+                        and not self._window_has_outage_gap(quiet_ts)
+                    ):
+                        self._logger.info(
+                            "Duration-anchored finalize: cycle in ENDING at %.0fs "
+                            "(%.1fx expected %.0fs), quiet %.0fs — Smart Termination "
+                            "was blocked (ambiguous=%s prefix=%s); finalizing.",
+                            current_duration,
+                            current_duration / self._expected_duration,
+                            self._expected_duration,
+                            self._time_below_threshold,
+                            self._match_ambiguous,
+                            self._match_prefix_ambiguous,
+                        )
+                        self._finish_cycle(
+                            timestamp,
+                            status="completed",
+                            termination_reason=TerminationReason.TIMEOUT,
+                            keep_tail=False,
+                        )
+                        return
+
                 # --- FALLBACK TIMEOUT CHECK ---
                 # Rule: To separate cycles, we must wait at least min_off_gap.
                 effective_off_delay = max(self._config.off_delay, self._config.min_off_gap)
@@ -1333,11 +1571,15 @@ class CycleDetector:
 
                 if self._time_below_threshold >= effective_off_delay:
 
-                    recent_window = [
-                        r
-                        for r in self._power_readings
-                        if (timestamp - r[0]).total_seconds() <= gate_window
-                    ]
+                    # Walk from the tail — readings are chronological so we can
+                    # break as soon as we exceed the gate window (O(window) not O(n)).
+                    recent_window = []
+                    for r in reversed(self._power_readings):
+                        if (timestamp - r[0]).total_seconds() <= gate_window:
+                            recent_window.append(r)
+                        else:
+                            break
+                    recent_window.reverse()
 
                     if not recent_window:
                         # Check deferred finish for matched profiles
@@ -1408,6 +1650,10 @@ class CycleDetector:
             self._delay_wait_high_start = None
             self._delay_wait_high_power = None
             self._preserve_delay_band_on_off = False
+            # Clear the paused-STARTING true-off accumulator so a later STARTING
+            # cycle cannot inherit stale hold time and finalize to OFF prematurely
+            # (this path is also reached via the paused-STARTING cancellation).
+            self._starting_paused_off_since = None
 
         # Reset end spike tracker when entering ENDING state
         if new_state == STATE_ENDING:
@@ -1433,6 +1679,8 @@ class CycleDetector:
         elif new_state == STATE_STARTING:
             # Reset idle time if exiting ANTI_WRINKLE to STARTING (high-power burst resumed)
             self._anti_wrinkle_idle_time = 0.0
+            # Fresh STARTING cycle: never inherit a prior cycle's true-off hold.
+            self._starting_paused_off_since = None
         elif new_state == STATE_RUNNING:
             self._delay_band_start = None
             self._delay_band_seconds = 0.0
@@ -1477,6 +1725,266 @@ class CycleDetector:
             result = None
         self._ml_end_cache = (now_ts, exp, start, result)
         return result
+
+    def _window_has_outage_gap(self, window_ts: list[datetime]) -> bool:
+        """Whether a 'sustained window' contains a data-outage-sized hole.
+
+        The span + coverage checks in the standby / anti-crease window scans accept
+        e.g. three readings spanning the window even if a long unobserved gap sits
+        between them (a sensor dropout, or a sparse burst next to one old reading).
+        Finalizing on such a window could wrongly cut an active cycle, so reject it.
+        The gap ceiling is the sensor's own data-driven outage threshold
+        (``energy_gap_threshold_s`` over the full trace), so a change-only sensor's
+        legitimately-sparse stable stretches (tens of seconds between reports) are
+        NOT rejected while a genuine dropout is.
+        """
+        if len(window_ts) < 2:
+            return True  # too few points to trust as a sustained window
+        max_gap = self._outage_threshold_s()
+        ordered = sorted(t.timestamp() for t in window_ts)
+        return any((b - a) > max_gap for a, b in itertools.pairwise(ordered))
+
+    def _outage_threshold_s(self) -> float:
+        """Sensor-adaptive gap ceiling (seconds): intervals longer than this are
+        treated as telemetry outages, not observed quiet. Data-driven from the
+        trace's own cadence (`energy_gap_threshold_s`), so a change-only sensor's
+        sparse-but-real stable stretches are not mistaken for a dropout.
+        """
+        all_ts = np.array(
+            [r[0].timestamp() for r in self._power_readings], dtype=float
+        )
+        return energy_gap_threshold_s(all_ts)
+
+    def _is_standby_band_stuck(self, timestamp: datetime) -> bool:
+        """Whether a RUNNING cycle is stuck on a flat standby plateau (#296).
+
+        Returns True only when ALL of the following hold, so this can never end
+        an active low-power phase:
+
+        * the device is a wet appliance where a stuck baseline is unambiguously
+          anomalous (``STANDBY_BAND_FINALIZE_DEVICE_TYPES``);
+        * a profile is matched and elapsed >= ``STANDBY_BAND_MIN_RATIO`` x the
+          expected duration (well past when it should have ended);
+        * not user-paused;
+        * the most recent >= ``STANDBY_BAND_WINDOW_S`` of readings are ALL at or
+          below ``STANDBY_BAND_MAX_FRACTION`` of the cycle's own peak power AND
+          span no more than ``STANDBY_BAND_FLATNESS_FRACTION`` of the peak (a flat
+          plateau, not fluctuating activity).
+
+        The expensive window scan runs only after the cheap duration gate passes,
+        so normal cycles never pay for it.
+        """
+        if self._config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES:
+            return False
+        if getattr(self, "_verified_pause", False):
+            return False
+        if not (self._matched_profile and self._expected_duration > 0):
+            return False
+        start = self._current_cycle_start
+        if start is None:
+            return False
+        current_duration = (timestamp - start).total_seconds()
+        if current_duration < self._expected_duration * STANDBY_BAND_MIN_RATIO:
+            return False
+        peak = float(self._cycle_max_power)
+        if peak <= 0:
+            return False
+
+        level_ceiling = peak * STANDBY_BAND_MAX_FRACTION
+        # Walk the tail; readings are chronological so we can break once outside
+        # the window (O(window), not O(n)).
+        window: list[float] = []
+        window_ts: list[datetime] = []
+        oldest_in_window: datetime | None = None
+        saw_older = False  # a reading older than the window exists -> full coverage
+        _standby_boundary_ts: datetime | None = None
+        for ts, p in reversed(self._power_readings):
+            if (timestamp - ts).total_seconds() <= STANDBY_BAND_WINDOW_S:
+                window.append(float(p))
+                window_ts.append(ts)
+                oldest_in_window = ts
+            else:
+                saw_older = True
+                _standby_boundary_ts = ts  # boundary: last reading before the window
+                break
+        # The plateau must actually SPAN the required window (data exists from
+        # before it), not just a couple of recent samples, and have enough points
+        # to judge.  `saw_older` (rather than an exact span >= WINDOW check) is
+        # robust to sample phase/granularity: with e.g. 30 s sampling the oldest
+        # in-window reading is typically only ~570-599 s old, which an exact check
+        # would wrongly reject.  A coverage sanity (oldest >= 90% of the window)
+        # plus an adjacent-gap check (``_window_has_outage_gap``) guard against a
+        # sparse burst of samples sitting next to one old reading across a dropout.
+        if (
+            oldest_in_window is None
+            or not saw_older
+            or len(window) < 3
+            or (timestamp - oldest_in_window).total_seconds()
+            < STANDBY_BAND_WINDOW_S * 0.9
+            or self._window_has_outage_gap(
+                [_standby_boundary_ts, *window_ts]
+                if _standby_boundary_ts is not None
+                else window_ts
+            )
+        ):
+            return False
+        hi = max(window)
+        lo = min(window)
+        if hi > level_ceiling:
+            return False  # a real active reading in the window - not standby
+        flatness_limit = max(
+            STANDBY_BAND_FLATNESS_FLOOR_W, peak * STANDBY_BAND_FLATNESS_FRACTION
+        )
+        if (hi - lo) > flatness_limit:
+            return False  # fluctuating - still doing work
+        return True
+
+    def _anticrease_gate_open(self, timestamp: datetime) -> bool:
+        """Core anti-crease gate (#296): everything except the current power level
+        and the low-power-window check.  Shared by the match freeze
+        (``_in_anticrease_freeze``) and the finalise (``_is_anticrease_tail``).
+
+        True only when a genuinely energetic, confidently-matched cycle for an
+        anti-wrinkle device is PAST its expected duration - the discriminator that
+        separates the post-wash anti-crease tail from a mid-wash low-power trough
+        (a washer spends most of its cycle below ``anti_wrinkle_max_power``, but a
+        mid-wash trough is always BEFORE the expected duration, the tail after it).
+        """
+        if not self._config.anti_wrinkle_enabled:
+            return False
+        if self._config.device_type not in (
+            DEVICE_TYPE_WASHING_MACHINE,
+            DEVICE_TYPE_DRYER,
+            DEVICE_TYPE_WASHER_DRYER,
+        ):
+            return False
+        if getattr(self, "_verified_pause", False):
+            return False
+        if not (self._matched_profile and self._expected_duration > 0):
+            return False
+        if self._last_match_confidence < 0.4:
+            return False
+        if self._match_ambiguous or self._match_prefix_ambiguous:
+            return False
+        if self._cycle_max_power <= float(self._config.anti_wrinkle_max_power):
+            return False  # never a hot/energetic cycle - leave low-power programs alone
+        start = self._current_cycle_start
+        if start is None:
+            return False
+        current_duration = (timestamp - start).total_seconds()
+        if current_duration < self._expected_duration * ANTI_CREASE_FINALIZE_RATIO:
+            return False
+        return True
+
+    def _in_anticrease_freeze(self, timestamp: datetime) -> bool:
+        """Whether match updates should be frozen (#296): the anti-crease gate is
+        open AND the most recent reading is in the low-power regime (at or below
+        ``anti_wrinkle_max_power``).
+
+        Deliberately lighter than ``_is_anticrease_tail`` - it does NOT wait for the
+        full ``ANTI_CREASE_CONFIRM_WINDOW_S``, so the confident pre-tail match is
+        preserved from the instant the cycle crosses its expected duration in a
+        low-power state, before the window accrues.  Without this a match that
+        degrades to ambiguous within the first window's worth of tail would
+        deadlock both the freeze and the finalise (both require an unambiguous
+        match).  Self-correcting: a heating burst above ``anti_wrinkle_max_power``
+        leaves the regime and re-arms matching.
+        """
+        if not self._power_readings:
+            return False
+        if float(self._power_readings[-1][1]) > float(
+            self._config.anti_wrinkle_max_power
+        ):
+            return False
+        return self._anticrease_gate_open(timestamp)
+
+    def _is_anticrease_tail(self, timestamp: datetime) -> bool:
+        """Whether a matched, past-expected cycle has settled into the anti-crease
+        tumble tail (#296) - the trigger for the finalise into STATE_ANTI_WRINKLE.
+
+        Miele-style "Knitterschutz": after the wash proper ends, the machine holds
+        a constant baseline plus periodic sub-``anti_wrinkle_max_power`` tumble
+        bursts (no heating) until the door is opened.  Because those bursts recur
+        faster than off_delay they keep reviving the cycle out of ENDING, so the
+        normal power-off path never finalises it and STATE_ANTI_WRINKLE - which is
+        built to absorb the tail and split off the next wash - never engages.
+        Recognising the tail lets us finalise into anti-wrinkle directly.
+
+        Requires the core gate (``_anticrease_gate_open``) AND that the most recent
+        >= ``ANTI_CREASE_CONFIRM_WINDOW_S`` of readings are ALL at or below
+        ``anti_wrinkle_max_power`` (we are in the low-power tail, clear of the final
+        spin and not mid-heating).  The expensive window scan runs only after the
+        cheap gate passes, so normal cycles never pay for it.
+        """
+        if not self._anticrease_gate_open(timestamp):
+            return False
+        max_power = float(self._config.anti_wrinkle_max_power)
+        # Walk the tail; readings are chronological so we can break once outside the
+        # window (O(window), not O(n)).
+        window: list[float] = []
+        window_ts: list[datetime] = []
+        oldest_in_window: datetime | None = None
+        saw_older = False
+        _ac_boundary_ts: datetime | None = None
+        for ts, p in reversed(self._power_readings):
+            if (timestamp - ts).total_seconds() <= ANTI_CREASE_CONFIRM_WINDOW_S:
+                window.append(float(p))
+                window_ts.append(ts)
+                oldest_in_window = ts
+            else:
+                saw_older = True
+                _ac_boundary_ts = ts  # boundary: last reading before the window
+                break
+        # The low-power tail must actually SPAN the window (data exists from before
+        # it) and have enough points to judge - not just a couple of recent samples.
+        # ``saw_older`` plus a coverage sanity and an adjacent-gap check
+        # (``_window_has_outage_gap``) is robust to sample phase/granularity while
+        # rejecting a dropout-sized hole (mirrors _is_standby_band_stuck).
+        if (
+            oldest_in_window is None
+            or not saw_older
+            or len(window) < 3
+            or (timestamp - oldest_in_window).total_seconds()
+            < ANTI_CREASE_CONFIRM_WINDOW_S * 0.9
+            or self._window_has_outage_gap(
+                [_ac_boundary_ts, *window_ts]
+                if _ac_boundary_ts is not None
+                else window_ts
+            )
+        ):
+            return False
+        if max(window) > max_power:
+            return False  # a heating / high-spin reading in the window - still washing
+        return True
+
+    def _maybe_finalize_anticrease_tail(self, timestamp: datetime) -> bool:
+        """Finalise a cycle that has entered the anti-crease tail into
+        STATE_ANTI_WRINKLE (#296).  Returns True if the cycle was finalised.
+
+        Shared by the RUNNING / PAUSED / ENDING branches so the finalise fires no
+        matter which state a burst left the detector in.  Uses Smart Termination
+        (in ``ANTI_WRINKLE_ELIGIBLE_REASONS``) so ``_finish_cycle`` routes into
+        STATE_ANTI_WRINKLE, which then absorbs the tail and splits off any next
+        wash on its first heating burst above ``anti_wrinkle_max_power``.
+        """
+        if not self._is_anticrease_tail(timestamp):
+            return False
+        start_time = self._current_cycle_start or timestamp
+        current_duration = (timestamp - start_time).total_seconds()
+        self._logger.info(
+            "Anti-crease finalize: matched '%s' past expected %.0fs (elapsed %.0fs), "
+            "settled into the low-power tumble tail — finalizing into anti-wrinkle.",
+            self._matched_profile,
+            self._expected_duration,
+            current_duration,
+        )
+        self._finish_cycle(
+            timestamp,
+            status="completed",
+            termination_reason=TerminationReason.SMART,
+            keep_tail=True,
+        )
+        return True
 
     def _is_terminal_drop(self) -> bool:
         """Whether the current low-power event is an anomalously-early hard drop.

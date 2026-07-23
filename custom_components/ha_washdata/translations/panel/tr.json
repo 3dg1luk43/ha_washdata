@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Karışık olabilecek programlar"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Ani düşüş anında bitiş sayılır",
     "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
     "end_repeat_count": "Bitmeden önce arka arkaya düşük okuma",
     "interrupted_min_seconds": "Kısa döngüler kesintiye uğramış olarak işaretlenir",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Akım gücünün bu kısmından daha büyük bir düşüş de ani olarak değerlendirilir (0,6 = %60'lık bir düşüş). Cihaz boyutlarındaki watt eşiğini tamamlar.",
-      "label": "Ani Düşüş Oranı"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Bundan daha büyük bir güç düşüşü, döngüyü doğal bir son yerine Kesintili (manuel iptal) olarak işaretler.",
-      "label": "Ani Düşüş"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Kurutucunun ana ısıtma aşamasından sonra yaydığı kısa, düşük güçlü tambur darbelerini tanıyın ve bunları yeni döngüler olarak okumak yerine bitmiş döngüye bağlı tutun.",
       "label": "Kırışıklık Önleme Algılamayı Etkinleştir"

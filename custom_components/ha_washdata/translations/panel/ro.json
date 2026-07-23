@@ -954,14 +954,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "O scădere mai mare decât această fracțiune a puterii curente este, de asemenea, tratată ca fiind bruscă (0,6 = o scădere de 60%). Completează pragul de wați în funcție de dimensiunile aparatului.",
-      "label": "Raport Scădere Bruscă"
-    },
-    "abrupt_drop_watts": {
-      "doc": "O scădere de putere mai mare decât aceasta indică ciclul ca întrerupt (anulare manuală), mai degrabă decât un finisaj natural.",
-      "label": "Scădere Bruscă"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Recunoașteți impulsurile scurte de rufe de putere redusă pe care le emite un uscător după faza principală de căldură și mențineți-le atașate la ciclul terminat în loc să le citiți ca cicluri noi.",
       "label": "Activați Detectarea Anti-Șifonare"
@@ -1714,7 +1706,6 @@
     "other": "Altele"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Scădere bruscă tratată ca sfârșit imediat",
     "completion_min_seconds": "Cea mai scurtă rulare care contează ca ciclu real",
     "end_repeat_count": "Citiri scăzute consecutive înainte de încheiere",
     "interrupted_min_seconds": "Ciclurile scurte sunt marcate ca întrerupte",

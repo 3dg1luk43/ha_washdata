@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Programmes peut-être mélangés"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Chute soudaine traitée comme une fin immédiate",
     "completion_min_seconds": "Plus courte exécution comptant comme un vrai cycle",
     "end_repeat_count": "Lectures basses consécutives avant la fin",
     "interrupted_min_seconds": "Cycles courts signalés comme interrompus",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Une chute supérieure à cette fraction de puissance actuelle est également traitée comme brusque (0,6 = une chute de 60 %). Complète le seuil de watts pour toutes les tailles d’appareils.",
-      "label": "Ratio de chute brusque"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Une chute de puissance plus importante signale le cycle comme étant interrompu (annulation manuelle) plutôt que comme une finition naturelle.",
-      "label": "Chute brusque"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Reconnaissez les courtes impulsions de culbutage de faible puissance qu'un sèche-linge émet après la phase de chauffage principale et conservez-les attachées au cycle terminé au lieu de les lire comme de nouveaux cycles.",
       "label": "Activer la détection anti-froissement"

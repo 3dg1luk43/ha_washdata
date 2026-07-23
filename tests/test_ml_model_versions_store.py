@@ -53,9 +53,11 @@ async def test_ml_model_versions_crud(store):
 async def test_clear_reverts_scorer_to_baseline(store):
     # A promoted spec is preferred; after clear, resolve_scorer falls back to the
     # shipped embedded baseline (source == "baseline").
+    from custom_components.ha_washdata.ml.cycle_end_detector_model import FEATURE_COLUMNS as _END_COLS
+    n = len(_END_COLS)
     spec = {
-        "kind": "standardized_logistic", "feature_columns": ["a"],
-        "center": [0.0], "scale": [1.0], "coef": [1.0], "bias": 0.0, "threshold": 0.5,
+        "kind": "standardized_logistic", "feature_columns": list(_END_COLS),
+        "center": [0.0] * n, "scale": [1.0] * n, "coef": [1.0] * n, "bias": 0.0, "threshold": 0.5,
     }
     await store.set_ml_model_version("end", {"spec": spec})
     _fn, source = E.resolve_scorer("end", store)
@@ -68,9 +70,11 @@ async def test_clear_reverts_scorer_to_baseline(store):
 
 async def test_clear_makes_baseless_regressor_inert(store):
     # remaining_time has no shipped baseline: after clear, resolve_regressor is None.
+    from custom_components.ha_washdata.ml.feature_extraction import PROGRESS_FEATURE_COLUMNS as _PROG_COLS
+    n = len(_PROG_COLS)
     spec = {
-        "kind": "standardized_linear", "feature_columns": ["a"],
-        "center": [0.0], "scale": [1.0], "coef": [1.0], "bias": 0.0,
+        "kind": "standardized_linear", "feature_columns": list(_PROG_COLS),
+        "center": [0.0] * n, "scale": [1.0] * n, "coef": [1.0] * n, "bias": 0.0,
         "output_center": 0.5, "output_scale": 0.2,
     }
     await store.set_ml_model_version("remaining_time", {"spec": spec})

@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Mogelijk gemengde programma's"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Plotselinge daling behandeld als onmiddellijk einde",
     "completion_min_seconds": "Kortste run die als een echte cyclus telt",
     "end_repeat_count": "Opeenvolgende lage metingen voor het einde",
     "interrupted_min_seconds": "Korte cycli gemarkeerd als onderbroken",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Een daling groter dan deze fractie van het huidige vermogen wordt ook als abrupt beschouwd (0,6 = een daling van 60%). Vult de wattdrempel aan voor alle apparaatformaten.",
-      "label": "Ratio plotse daling"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Een stroomdaling groter dan dit markeert de cyclus als onderbroken (handmatige annulering) in plaats van als een natuurlijke afwerking.",
-      "label": "Plotse daling"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Herken de korte tuimelpulsen met laag vermogen die een droger afgeeft na de hoofdverwarmingsfase en houd ze vast aan het voltooide programma in plaats van ze als nieuwe cycli te lezen.",
       "label": "Anti-kreuk detectie inschakelen"

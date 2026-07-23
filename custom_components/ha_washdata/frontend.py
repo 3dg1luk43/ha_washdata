@@ -56,10 +56,24 @@ class LovelaceResourceItem(TypedDict, total=False):
 
 
 def get_cache_buster(filename: str = CARD_NAME) -> str:
-    """Generate a stable cache buster based on a www asset's mtime."""
+    """Generate a stable cache buster based on a www asset's mtime.
+
+    Also considers the translations/panel/ directory mtime so that
+    translation-only releases (e.g. GitLocalize merges) still bust the
+    browser cache for both the panel JS and the per-language JSON files.
+    """
     try:
-        src = Path(__file__).parent / "www" / filename
-        return str(int(os.path.getmtime(src)))
+        base = Path(__file__).parent
+        src_mtime = os.path.getmtime(base / "www" / filename)
+        try:
+            panel_dir = base / "translations" / "panel"
+            trans_mtime = max(
+                (os.path.getmtime(f) for f in panel_dir.iterdir() if f.is_file()),
+                default=0.0,
+            )
+        except OSError:
+            trans_mtime = 0.0
+        return str(int(max(src_mtime, trans_mtime)))
     except OSError:
         # Deterministic fallback when file is unavailable.
         return "1"

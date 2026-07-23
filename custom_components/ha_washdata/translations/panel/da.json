@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Muligvis blandede programmer"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Pludseligt fald behandlet som øjeblikkelig afslutning",
     "completion_min_seconds": "Korteste kørsel, der tæller som en rigtig cyklus",
     "end_repeat_count": "Lave målinger i træk før afslutning",
     "interrupted_min_seconds": "Korte cyklusser markeres som afbrudt",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Et fald, der er større end denne del af den nuværende effekt, behandles også som brat (0,6 = et fald på 60%). Komplementerer watt-tærsklen på tværs af apparatstørrelser.",
-      "label": "Ratio for pludseligt fald"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Et krafttab større end dette markerer cyklussen som afbrudt (manuel annullering) snarere end en naturlig finish.",
-      "label": "Pludseligt fald"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Genkend de korte tørretumblerimpulser med lav effekt, som en tørretumbler udsender efter hovedvarmefasen, og hold dem fastgjort til den færdige cyklus i stedet for at læse dem som nye cyklusser.",
       "label": "Aktivér anti-rynke registrering"

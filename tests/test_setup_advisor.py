@@ -352,6 +352,54 @@ def test_phase4_all_clear():
     assert r.dismissible is True
 
 
+def test_phase1_auto_graduated_two_profiles():
+    """Device with 2+ real profiles should skip Phase 1 and go to Phase 4."""
+    r = compute_setup_phase(
+        device_type="washing_machine",
+        profile_names=["Cotton 60°", "Eco 40°"],
+        past_cycles=[_cycle("Cotton 60°"), _cycle("Eco 40°")],
+        ref_profile_names=set(),
+        coverage_gap=None,
+        suggestions=[],
+        profile_groups=[],
+        skipped_steps={},  # Phase 1 never explicitly dismissed
+        now=_NOW,
+    )
+    assert r.phase == "phase4"
+
+
+def test_phase1_auto_graduated_five_cycles():
+    """Single profile with 5+ cycles should skip Phase 1 and go to Phase 4."""
+    r = compute_setup_phase(
+        device_type="washing_machine",
+        profile_names=["Cotton 60°"],
+        past_cycles=[_cycle("Cotton 60°")] * 5,
+        ref_profile_names=set(),
+        coverage_gap=None,
+        suggestions=[],
+        profile_groups=[],
+        skipped_steps={},  # Phase 1 never explicitly dismissed
+        now=_NOW,
+    )
+    assert r.phase == "phase4"
+
+
+def test_phase1a_still_shows_for_fresh_device():
+    """Single profile with 1 cycle (not established) still shows Phase 1a."""
+    r = compute_setup_phase(
+        device_type="washing_machine",
+        profile_names=["Cotton 60°"],
+        past_cycles=[_cycle("Cotton 60°")],
+        ref_profile_names=set(),
+        coverage_gap=None,
+        suggestions=[],
+        profile_groups=[],
+        skipped_steps={},
+        now=_NOW,
+    )
+    assert r.phase == "phase1a"
+
+
 # ── _real_profile_names ───────────────────────────────────────────────────────
 
 def test_has_real_profiles_false_for_stub():

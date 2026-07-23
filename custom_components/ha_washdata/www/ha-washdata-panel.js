@@ -129,10 +129,6 @@ const _SETTINGS_SECTIONS = [
         doc: 'Expected time between sensor readings - used to size the smoothing window and start debounce correctly. Every sensor update is captured regardless of this value; it only calibrates the downstream calculations. The suggestion engine measures your sensor\'s actual cadence from past cycles and sets this automatically.' },
       { key: 'smoothing_window', label: 'Smoothing Window', type: 'number', min: 1, def: 2,
         doc: 'How much the raw power signal is smoothed. Low (2) is responsive but noisy; high (5) smooths spikes but adds lag.' },
-      { key: 'abrupt_drop_watts', label: 'Abrupt Drop', unit: 'W', type: 'number', min: 0, def: 500,
-        doc: 'A power drop larger than this flags the cycle as Interrupted (manual cancel) rather than a natural finish.' },
-      { key: 'abrupt_drop_ratio', label: 'Abrupt Drop Ratio', type: 'number', step: 0.05, min: 0, max: 1, def: 0.6,
-        doc: 'A drop larger than this fraction of current power is also treated as abrupt (0.6 = a 60% drop). Complements the watts threshold across appliance sizes.' },
     ] },
   ] },
   { id: 'matching', label: 'Matching', intro: 'How finished cycles are matched to learned profiles and labelled.', notDeviceTypes: ['other'], groups: [
@@ -1375,7 +1371,7 @@ function _field(f, value, extra) {
     // Chip/pill multi-picker: existing values as removable pills + a combobox
     // add-input. Managed by DOM (no re-render) and collected on save.
     const vals = Array.isArray(value) ? value : (value ? [value] : []);
-    const pills = vals.map(x => `<span class="wd-pill" data-val="${_esc(x)}">${_esc(x)}<button type="button" class="wd-pill-x" aria-label="Remove">×</button></span>`).join('');
+    const pills = vals.map(x => `<span class="wd-pill" data-val="${_esc(x)}">${_esc(x)}<button type="button" class="wd-pill-x" aria-label="${_esc(extra.t ? extra.t('btn.remove', {}, 'Remove') : 'Remove')}">×</button></span>`).join('');
     input = `<div class="wd-pillbox" data-opt="${key}" data-ftype="entitylist">${pills}` +
       `<div class="wd-combo wd-combo-pill">` +
       `<input type="text" class="wd-pill-add" autocomplete="off" spellcheck="false" placeholder="${_esc(extra.t('placeholder.' + (f.domain || 'add'), {}, f.placeholder || 'add…'))}">` +
@@ -1500,7 +1496,6 @@ const _DIAGRAM_BY_KEY = {
   min_power: 'min_power', off_delay: 'off_delay', smoothing_window: 'smoothing',
   start_threshold_w: 'hysteresis', stop_threshold_w: 'hysteresis',
   start_energy_threshold: 'start_energy', running_dead_zone: 'dead_zone',
-  abrupt_drop_watts: 'abrupt_drop', abrupt_drop_ratio: 'abrupt_drop',
   profile_duration_tolerance: 'duration_tolerance',
   profile_match_min_duration_ratio: 'match_ratios', profile_match_max_duration_ratio: 'match_ratios',
   progress_reset_delay: 'progress_reset', completion_min_seconds: 'min_duration',
@@ -1578,11 +1573,6 @@ function _diagram(id) {
         <line class="ax" x1="60" y1="47" x2="140" y2="47"/>
         <line class="ln" x1="100" y1="30" x2="100" y2="64"/>
         <text x="62" y="30">-tol</text><text x="120" y="30">+tol</text><text x="84" y="74">profile</text>`);
-    case 'abrupt_drop':
-      return wrap(`${base}
-        <polyline class="ln" points="8,72 30,34 110,34 111,74 190,74"/>
-        <line class="bad dash" x1="111" y1="34" x2="111" y2="74"/>
-        <text x="116" y="56">abrupt</text>`);
     case 'match_ratios':
       return wrap(`${base}
         <line class="ax" x1="20" y1="47" x2="180" y2="47"/>
@@ -1701,6 +1691,8 @@ class HaWashdataPanel extends HTMLElement {
     this._toastTimer = null;
     this._hassUpdateThrottle = null;
     this._evtUnsubs = [];
+    this._hoverRafId = null;   // rAF handle for chart-hover coalescing
+    this._hoverPending = null; // last pending hover coords {px, py, id}
     // Data
     this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '', storePrefs: {}, pgMatchDefaults: {} };
     this._constantsLoaded = false;
@@ -1866,7 +1858,22 @@ class HaWashdataPanel extends HTMLElement {
   set narrow(n) { this._narrow = n; }
 
   connectedCallback() {
-    if (this._initialized) this._startPoll();
+    if (this._initialized) {
+      this._startPoll();
+      // Restore WS push subscriptions (cycle events + task registry) that
+      // disconnectedCallback tore down. Without this, navigate-away/back leaves
+      // the panel relying only on the 30s fallback poll — live cycle transitions
+      // and task progress no longer update, and modal Escape/Tab are dead.
+      this._setupSubscriptions();
+      // Immediately refresh state so a navigate-away/back shows current data
+      // instead of waiting up to 30s for the next poll tick.
+      this._fetchAll();
+      // Re-attach the modal keyboard handler (removed on disconnect).
+      if (this.shadowRoot && !this._kbdHandler) {
+        this._kbdHandler = (e) => this._onKeydown(e);
+        this.shadowRoot.addEventListener('keydown', this._kbdHandler);
+      }
+    }
     this._onResize = () => this._resizeLogsPage();
     window.addEventListener('resize', this._onResize);
   }
@@ -1907,6 +1914,14 @@ class HaWashdataPanel extends HTMLElement {
       this._fetchAll();
       this._startPoll();
     });
+    this._setupSubscriptions();
+  }
+
+  _setupSubscriptions() {
+    // Tear down any existing subscriptions first so reconnect is idempotent.
+    this._evtUnsubs.forEach(u => { try { u(); } catch (_) {} });
+    this._evtUnsubs = [];
+    this._tasksSubscribed = false;
     // Subscribe to WashData cycle events for immediate push-refresh.
     // These fire when a cycle starts/ends so the UI updates instantly
     // instead of waiting for the 30s fallback poll.
@@ -2176,6 +2191,11 @@ class HaWashdataPanel extends HTMLElement {
   // Header activity cluster: one pill per running task (device · action · % · ✕).
   _htmlTaskPills() {
     const running = Object.values(this._tasks || {}).filter(t => t.state === 'running');
+    // Prune stale cancelling-task IDs: if a task is no longer running (evicted from
+    // the registry, finished while our WS subscription was down, etc.), its
+    // "Cancelling…" pill would never clear on its own — clean it up here.
+    const runningIds = new Set(running.map(t => t.id));
+    this._cancellingTasks.forEach(id => { if (!runningIds.has(id)) this._cancellingTasks.delete(id); });
     if (!running.length) return '';
     return running.map(t => {
       const cancelling = this._cancellingTasks.has(t.id);
@@ -2394,6 +2414,13 @@ class HaWashdataPanel extends HTMLElement {
         await this._fetchCycles(dev.entry_id);
         await this._fetchSuggestions(dev.entry_id);
         await this._fetchProfiles(dev.entry_id);
+        // Prime the Setup Card on the very first paint so it appears immediately
+        // without requiring a tab click or device switch.
+        if (this._tab === 'status') {
+          try {
+            this._setupStatus = await this._ws({ type: `${_DOMAIN}/get_setup_status`, entry_id: dev.entry_id });
+          } catch (_) { this._setupStatus = null; }
+        }
         // The Store tab's visibility depends on this._onlineEnabled(),
         // which is normally loaded per-tab. Prime it at boot ONLY when the backend
         // exposes online features, so the tab can appear without visiting Settings.
@@ -2813,6 +2840,7 @@ class HaWashdataPanel extends HTMLElement {
     this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = [];
     this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
+    this._setupStatus = null;       // per-device; re-fetched by _fetchTabData
     this._deviceAutomations = [];   // per-device; re-fetched on the settings tab
     this._selectMode = false; this._cycleSel = new Set();
     this._cycleFilter = { text: '', status: '' };
@@ -3445,7 +3473,7 @@ class HaWashdataPanel extends HTMLElement {
       <circle cx="12" cy="14" r="5"/>
       <circle cx="12" cy="14" r="2"/>
     </svg>`;
-    const burger = `<button class="wd-burger" id="wd-burger" aria-label="Toggle sidebar" title="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}">
+    const burger = `<button class="wd-burger" id="wd-burger" aria-label="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}" title="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
     </button>`;
     return `
@@ -5190,7 +5218,6 @@ class HaWashdataPanel extends HTMLElement {
       ['completion_min_seconds',  'Min Cycle Duration',    's', 'Shortest run that counts as a real cycle',     'timing'],
       ['start_duration_threshold','Start Duration',        's', 'Seconds above threshold to confirm start',     'timing'],
       ['end_repeat_count',        'End Repeat Count',      '',  'Low readings in a row before ending',          'advanced'],
-      ['abrupt_drop_watts',       'Abrupt Drop Threshold', 'W', 'Sudden drop treated as immediate end',         'advanced'],
       ['interrupted_min_seconds', 'Interrupted Min',       's', 'Short cycles flagged as interrupted',          'advanced'],
       ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
       ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
@@ -7021,7 +7048,7 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlLogDrawer() {
     return `<div class="wd-log-drawer open" style="width:${this._logDrawerWidth}px">
-      <div class="wd-log-resize" title="Drag to resize"></div>
+      <div class="wd-log-resize" title="${_esc(this._t('lbl.drag_to_resize', {}, 'Drag to resize'))}"></div>
       <div class="wd-log-drawer-head">
         <span>${this._t('hdr.logs', {}, 'Logs')}</span>
         <div style="display:flex;align-items:center;gap:6px">
@@ -7048,7 +7075,10 @@ class HaWashdataPanel extends HTMLElement {
     const dpr = window.devicePixelRatio || 1;
     const cw = Math.max(1, Math.round(rect.width * dpr));
     const ch = Math.max(1, Math.round((rect.height || 240) * dpr));
-    canvas.width = cw; canvas.height = ch;
+    // Only reallocate the canvas backing store when dimensions actually changed;
+    // reassigning canvas.width/height unconditionally clears the canvas AND triggers
+    // a GPU-side realloc on every hover redraw.
+    if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
     const ctx = canvas.getContext('2d');
     const cs = getComputedStyle(this);
     const primary = (cs.getPropertyValue('--primary-color') || '#03a9f4').trim() || '#03a9f4';
@@ -7255,12 +7285,25 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _onGraphHover(e, id) {
-    const canvas = this.shadowRoot.getElementById(id);
+    // rAF-coalesce: many pointermove events fire per frame; only do one redraw+overlay
+    // per animation frame. Capture coordinates immediately (they may be stale by rAF).
+    const px = e.clientX, py = e.clientY;
+    if (this._hoverRafId) { this._hoverPending = { px, py, id }; return; }
+    this._hoverPending = { px, py, id };
+    this._hoverRafId = requestAnimationFrame(() => {
+      this._hoverRafId = null;
+      const { px: cx, py: cy, id: cid } = this._hoverPending || {};
+      if (!cid) return;
+      this._onGraphHoverInner(cx, cy, cid);
+    });
+  }
+  _onGraphHoverInner(px, py, id) {
+    const canvas = this.shadowRoot && this.shadowRoot.getElementById(id);
     const wd = canvas && canvas._wd;
     if (!wd) return;
     const rect = canvas.getBoundingClientRect();
-    const x = wd.cssToX(e.clientX - rect.left);
-    const cursorYdev = (e.clientY - rect.top) * wd.dpr;
+    const x = wd.cssToX(px - rect.left);
+    const cursorYdev = (py - rect.top) * wd.dpr;
     this._redrawCanvas(id);
     const ctx = canvas.getContext('2d');
     const xp = wd.Xpx(x);
@@ -7304,7 +7347,7 @@ class HaWashdataPanel extends HTMLElement {
     });
     if (this._canvasZoom[id]) lines.push(`<span style="opacity:.45">${this._t('lbl.zoom_hint', {}, 'scroll to zoom · dblclick to reset')}</span>`);
     ctx.restore();
-    this._showGraphTip(e.clientX, e.clientY, lines);
+    this._showGraphTip(px, py, lines);
     this._syncSpagRowHighlight(this._hoverNearest ? this._hoverNearest.cid : null);
   }
 
@@ -7321,7 +7364,7 @@ class HaWashdataPanel extends HTMLElement {
     tip.style.top = Math.max(6, top) + 'px';
   }
 
-  _hideGraphTip() { if (this._gtip) this._gtip.style.display = 'none'; this._syncSpagRowHighlight(null); }
+  _hideGraphTip() { if (this._hoverRafId) { cancelAnimationFrame(this._hoverRafId); this._hoverRafId = null; this._hoverPending = null; } if (this._gtip) this._gtip.style.display = 'none'; this._syncSpagRowHighlight(null); }
 
   _syncSpagRowHighlight(cid) {
     if (cid === this._spagHoverCid) return;
@@ -7399,8 +7442,8 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-field"><label>${this._t('lbl.save_mode', {}, 'Save Mode')}</label><select id="wd-pr-mode"><option value="new_profile">${this._t('lbl.mode_new_profile', {}, 'Create New Profile')}</option><option value="existing_profile">${this._t('lbl.mode_existing_profile', {}, 'Add to Existing Profile')}</option></select></div>
         <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-pr-profile" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}">
           <div id="wd-pr-existing" style="display:none;margin-top:4px"><select id="wd-pr-profile-sel">${this._profileOptions()}</select></div></div>
-        <div class="wd-field"><label>${this._t('lbl.head_trim', {}, 'Head Trim (s)')}</label><input type="number" id="wd-pr-head" min="0" value="0" step="1"><div class="wd-field-hint">Remove this many seconds from the start</div></div>
-        <div class="wd-field"><label>${this._t('lbl.tail_trim', {}, 'Tail Trim (s)')}</label><input type="number" id="wd-pr-tail" min="0" value="0" step="1"><div class="wd-field-hint">Remove this many seconds from the end</div></div>
+        <div class="wd-field"><label>${this._t('lbl.head_trim', {}, 'Head Trim (s)')}</label><input type="number" id="wd-pr-head" min="0" value="0" step="1"><div class="wd-field-hint">${_esc(this._t('msg.head_trim_hint', {}, 'Remove this many seconds from the start'))}</div></div>
+        <div class="wd-field"><label>${this._t('lbl.tail_trim', {}, 'Tail Trim (s)')}</label><input type="number" id="wd-pr-tail" min="0" value="0" step="1"><div class="wd-field-hint">${_esc(this._t('msg.tail_trim_hint', {}, 'Remove this many seconds from the end'))}</div></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="process-rec-ok">${this._t('btn.process_recording', {}, 'Save Recording')}</button></div>`;
     } else if (m.type === 'correct-feedback') {
@@ -7427,7 +7470,7 @@ class HaWashdataPanel extends HTMLElement {
       body = `<h2>${this._t('modal.merge_cycles', {n: m.ids.length}, `Merge ${m.ids.length} Cycles`)}</h2>
         <p class="wd-info" style="margin-bottom:12px">${this._t('msg.merge_intro', {}, 'The selected cycles are combined into one (chronological order; gaps filled with 0 W). Pick the resulting profile.')}</p>
         <div class="wd-field"><label>${this._t('lbl.resulting_profile', {}, 'Resulting profile')}</label>
-          <select id="wd-merge-prof"><option value="">${this._t('lbl.unlabelled_paren', {}, '(unlabelled)')}</option><option value="__create_new__">+ Create new profile…</option>${this._profileOptions()}</select></div>
+          <select id="wd-merge-prof"><option value="">${this._t('lbl.unlabelled_paren', {}, '(unlabelled)')}</option><option value="__create_new__">${this._t('lbl.create_new_profile', {}, '+ Create new profile…')}</option>${this._profileOptions()}</select></div>
         <div id="wd-merge-new" class="wd-field" style="display:none"><label>${this._t('lbl.new_profile_name', {}, 'New profile name')}</label><input type="text" id="wd-merge-newname" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}"></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="merge-ok">${this._t('btn.merge', {}, 'Merge')}</button></div>`;
@@ -9048,7 +9091,9 @@ class HaWashdataPanel extends HTMLElement {
     // Click the highlighted curve on the graph to toggle that cycle's selection.
     const spag = sr.getElementById('wd-spag-canvas');
     if (spag) spag.addEventListener('pointerdown', e => {
-      this._onGraphHover(e, 'wd-spag-canvas');
+      // Hit-test synchronously: _onGraphHover defers via rAF, so _hoverNearest
+      // would still be stale/null on this same tick and the click would no-op.
+      this._onGraphHoverInner(e.clientX, e.clientY, 'wd-spag-canvas');
       const hn = this._hoverNearest;
       if (hn && hn.cid) {
         const sel = m.cleanup.selected;

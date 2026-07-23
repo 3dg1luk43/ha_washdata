@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Possíveis programas misturados"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Queda repentina tratada como fim imediato",
     "completion_min_seconds": "Execução mais curta que conta como um ciclo real",
     "end_repeat_count": "Leituras baixas consecutivas antes de terminar",
     "interrupted_min_seconds": "Ciclos curtos marcados como interrompidos",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Uma queda maior que esta fração da potência atual também é tratada como abrupta (0,6 = queda de 60%). Complementa o limite de watts em todos os tamanhos de aparelhos.",
-      "label": "Rácio de Queda Abrupta"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Uma queda de energia maior que isso sinaliza o ciclo como Interrompido (cancelamento manual) em vez de um término natural.",
-      "label": "Queda Abrupta"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Reconheça os pulsos curtos de baixa potência que uma secadora emite após a fase de aquecimento principal e mantenha-os anexados ao ciclo finalizado, em vez de lê-los como novos ciclos.",
       "label": "Activar Detecção Anti-Vincos"

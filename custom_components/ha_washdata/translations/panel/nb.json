@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Muligens blandede programmer"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Plutselig fall behandlet som umiddelbar slutt",
     "completion_min_seconds": "Korteste kjøring som teller som en ekte syklus",
     "end_repeat_count": "Lave avlesninger på rad før avslutning",
     "interrupted_min_seconds": "Korte sykluser merkes som avbrutt",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Et fall som er større enn denne brøkdelen av gjeldende effekt, blir også behandlet som brå (0,6 = et fall på 60 %). Utfyller watt-terskelen på tvers av apparatstørrelser.",
-      "label": "Bratt fall-forhold"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Et kraftfall større enn dette flagger syklusen som avbrutt (manuell kansellering) i stedet for en naturlig finish.",
-      "label": "Bratt fall"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Gjenkjenn de korte laveffekttrommelpulsene en tørketrommel sender ut etter hovedvarmefasen, og hold dem festet til den ferdige syklusen i stedet for å lese dem som nye sykluser.",
       "label": "Aktiver anti-rynke-deteksjon"

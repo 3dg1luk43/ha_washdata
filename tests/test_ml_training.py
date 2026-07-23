@@ -175,21 +175,24 @@ def test_training_result_shape() -> None:
 
 
 def _user_spec(coef, bias=0.0):
-    fit = {"center": np.array([0.0]), "scale": np.array([1.0]),
-           "coef": np.array([coef]), "bias": bias}
-    return T.build_spec(name="end", target="cycle_end", feature_columns=["x"], fit=fit, threshold=0.5)
+    from custom_components.ha_washdata.ml.cycle_end_detector_model import FEATURE_COLUMNS as _END_COLS
+    n = len(_END_COLS)
+    fit = {"center": np.zeros(n), "scale": np.ones(n),
+           "coef": np.full(n, coef), "bias": bias}
+    return T.build_spec(name="end", target="cycle_end", feature_columns=list(_END_COLS), fit=fit, threshold=0.5)
 
 
 def test_resolve_scorer_prefers_on_device_spec() -> None:
     """The inference bridge: a stored spec wins over the embedded baseline."""
     from unittest.mock import MagicMock
     from custom_components.ha_washdata.ml.engine import resolve_scorer
+    from custom_components.ha_washdata.ml.cycle_end_detector_model import FEATURE_COLUMNS as _END_COLS
 
     store = MagicMock()
     store.get_ml_model_versions.return_value = {"end": {"spec": _user_spec(10.0)}}
     fn, source = resolve_scorer("end", store)
     assert source == "on_device"
-    assert fn({"x": 1.0}) > 0.9
+    assert fn({k: 1.0 for k in _END_COLS}) > 0.9
 
     # No stored spec -> embedded baseline is used.
     store.get_ml_model_versions.return_value = {}

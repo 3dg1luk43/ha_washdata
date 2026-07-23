@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ 可能混合了不同程序"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "骤降视为立即结束",
     "completion_min_seconds": "计为真实周期的最短运行时间",
     "end_repeat_count": "结束前连续的低读数次数",
     "interrupted_min_seconds": "短周期标记为中断",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "大于电流功率这一部分的下降也被视为突然下降（0.6 = 60% 下降）。补充不同设备尺寸的瓦特阈值。",
-      "label": "突降比例"
-    },
-    "abrupt_drop_watts": {
-      "doc": "功率下降大于此值会将循环标记为已中断（手动取消）而不是自然结束。",
-      "label": "突降功率"
-    },
     "anti_wrinkle_enabled": {
       "doc": "识别烘干机在主要加热阶段后发出的短的低功率翻滚脉冲，并将它们附加到完成的循环，而不是将它们视为新循环。",
       "label": "启用防皱检测"

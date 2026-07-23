@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Hugsanlega blönduð forrit"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Skyndilegt fall meðhöndlað sem tafarlaus endir",
     "completion_min_seconds": "Stysta keyrsla sem telst raunveruleg lota",
     "end_repeat_count": "Lágir álestrar í röð áður en lýkur",
     "interrupted_min_seconds": "Stuttar lotur merktar sem truflaðar",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Fall sem er stærra en þetta brot af núverandi afli er einnig meðhöndlað sem snöggt (0,6 = 60% lækkun). Bætir wöttaþröskuldinum yfir stærðum tækja.",
-      "label": "Hlutfall snöggrar niðurfellingar"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Aflfall sem er stærra en þetta merkir lotuna sem truflað (handvirkt hætta við) frekar en náttúrulega frágang.",
-      "label": "Snögg niðurfelling"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Viðurkenndu stuttu lág-afls þurrkarapúlsana sem þurrkari gefur frá sér eftir aðalhitafasann og haltu þeim tengdum við lokið lotu í stað þess að lesa þá sem nýjar lotur.",
       "label": "Virkja hrukkuleysi-greiningu"

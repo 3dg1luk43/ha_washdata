@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Möjligen blandade program"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Plötsligt fall som tolkas som omedelbart slut",
     "completion_min_seconds": "Kortaste körning som räknas som en riktig cykel",
     "end_repeat_count": "Antal låga avläsningar i rad innan avslut",
     "interrupted_min_seconds": "Korta cykler markeras som avbrutna",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Ett fall som är större än denna andel av strömeffekten behandlas också som abrupt (0,6 = 60 % minskning). Kompletterar watt-tröskeln över apparatstorlekar.",
-      "label": "Abrupt fallförhållande"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Ett effektfall större än detta flaggar cykeln som avbruten (manuell avbrytning) snarare än en naturlig finish.",
-      "label": "Abrupt fall"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Känn igen de korta torktumlarpulser med låg effekt en torktumlare avger efter huvuduppvärmningsfasen och håll dem kopplade till den färdiga cykeln istället för att läsa dem som nya cykler.",
       "label": "Aktivera skrynkelskyddsdetektering"

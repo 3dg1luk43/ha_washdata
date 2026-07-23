@@ -3081,9 +3081,16 @@ class ProfileStore:
         separate ``reference_cycles`` list so imported cycles never enter usage stats.
         """
         dest = self._data["past_cycles"] if target is None else target
-        # Generate SHA256 ID
+        # Generate SHA256 ID — dedup suffix avoids collisions when two cycles share
+        # an identical raw start_time + duration (e.g. bulk reference-cycle imports).
+        existing_ids = {c.get("id") for c in dest if isinstance(c, dict)}
         unique_str = f"{cycle_data['start_time']}_{cycle_data['duration']}"
-        cycle_data["id"] = hashlib.sha256(unique_str.encode()).hexdigest()[:12]
+        candidate = hashlib.sha256(unique_str.encode()).hexdigest()[:12]
+        suffix = 0
+        while candidate in existing_ids:
+            suffix += 1
+            candidate = hashlib.sha256(f"{unique_str}_{suffix}".encode()).hexdigest()[:12]
+        cycle_data["id"] = candidate
 
         # Preserve profile_name if already set by manager; default to None otherwise
         if "profile_name" not in cycle_data:
@@ -4814,63 +4821,6 @@ class ProfileStore:
             is_prefix_ambiguous=is_prefix_ambiguous,
         )
 
-    def match_profile(
-        self, power_data: list[tuple[str, float]], duration: float
-    ) -> MatchResult:
-        """Synchronous wrapper for matching (for use in executor tasks)."""
-        # Convert to list for worker
-        p_list = [p[1] for p in power_data]
-
-        # Prepare snapshots safely
-        snapshots: list[dict[str, Any]] = []
-        # Accessing self._data in thread is generally safe for reads if not modifying
-        for name, profile in self._data["profiles"].items():
-            sample_id = profile.get("sample_cycle_id")
-            sample_cycle = next((c for c in self._data["past_cycles"] if c["id"] == sample_id), None)
-            if not sample_cycle:
-                continue
-
-            # Decompress sample data
-            sample_p_data = decompress_power_data(sample_cycle)
-            if not sample_p_data:
-                continue
-
-            snapshots.append({
-                "name": name,
-                "avg_duration": profile.get("avg_duration", sample_cycle.get("duration", 0)),
-                "sample_power": [x[1] for x in sample_p_data],
-            })
-
-        config = {
-            "min_duration_ratio": self._min_duration_ratio,
-            "max_duration_ratio": self._max_duration_ratio,
-            "dtw_bandwidth": self.dtw_bandwidth,
-            # On-device tuned scoring weights (opt-in); empty = shipped defaults.
-            **self._matching_overrides(),
-        }
-
-        candidates = analysis.compute_matches_worker(
-            p_list, duration, cast(Any, snapshots), config
-        )
-
-        if not candidates:
-            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
-
-        best = candidates[0]
-
-        margin, is_ambiguous = _ambiguity_from_candidates(candidates)
-
-        return MatchResult(
-            best["name"],
-            best["score"],
-            best["profile_duration"],
-            None,
-            candidates,
-            is_ambiguous,
-            margin,
-            ranking=candidates,
-        )
-
     async def async_verify_alignment(
         self,
         profile_name: str,
@@ -4952,23 +4902,34 @@ class ProfileStore:
         if not phases:
             return None
 
+        # Guard against non-dict entries (legacy/malformed storage) and
+        # None/non-numeric start values before sorting.
         phases_sorted = sorted(
-            phases,
-            key=lambda p: float(p.get("start", 0)),
+            [p for p in phases if isinstance(p, dict)],
+            key=lambda p: float(p.get("start") or 0),
         )
 
+        last_matched: str | None = None
         for phase in phases_sorted:
-            p_start = phase.get("start", 0)
-            p_end = phase.get("end", 0)
+            p_start = float(phase.get("start") or 0)
+            p_end = float(phase.get("end") or 0)
+            if p_end <= p_start:
+                # Missing or zero end — phase range is invalid; skip silently.
+                continue
             if p_start <= duration <= p_end:
                 return str(phase.get("name", "Unknown"))
+            if p_start <= duration:
+                # Track the last phase whose start we have passed; used for gap fallback.
+                last_matched = str(phase.get("name", "Unknown"))
 
-        # If duration is outside explicit bounds, keep a phase label anyway so
-        # entities avoid falling back to generic running/starting states.
+        # Duration is outside explicit bounds — keep a label so entities avoid
+        # falling back to generic running/starting states.
         if phases_sorted:
-            if duration < float(phases_sorted[0].get("start", 0)):
+            if duration < float(phases_sorted[0].get("start") or 0):
                 return str(phases_sorted[0].get("name", "Unknown"))
-            return str(phases_sorted[-1].get("name", "Unknown"))
+            # Return the phase that just ended (last_matched) when in a gap, or the
+            # final phase when past all ranges, rather than always the absolute last.
+            return last_matched or str(phases_sorted[-1].get("name", "Unknown"))
 
         return None
 
@@ -5835,6 +5796,19 @@ class ProfileStore:
         cycle["sampling_interval"] = round(sampling_interval, 1)
         cycle["duration"] = new_duration
 
+        # Recompute energy and max_power from the trimmed trace so stored stats
+        # reflect the kept window (not the pre-trim full cycle).
+        ts_s = np.array([r[0] for r in renorm], dtype=float)
+        p_s = np.array([r[1] for r in renorm], dtype=float)
+        if len(ts_s) > 1:
+            cycle["energy_wh"] = round(
+                integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
+            )
+            cycle["max_power"] = round(float(np.max(p_s)), 1)
+        elif len(ts_s) == 1:
+            cycle["energy_wh"] = 0.0
+            cycle["max_power"] = round(float(p_s[0]), 1)
+
         # Keep end_time consistent with the updated start_time and duration
         new_start_ts = _value_to_timestamp(cycle.get("start_time"))
         if new_start_ts is not None:
@@ -5986,20 +5960,47 @@ class ProfileStore:
             return []
 
         cycle = cycles[idx]
-        cycles.pop(idx) # Remove original
 
-        new_ids: list[str] = []
-        original_profile = cycle.get("profile_name")
+        # Validate before mutating — early returns below this point would otherwise
+        # permanently delete the source cycle from the live list.
         start_dt_base_parsed = _parse_start_dt(cycle["start_time"])
         if not start_dt_base_parsed:
             return []
 
-        start_ts = start_dt_base_parsed.timestamp()
-
-        # Decompress original data
         p_data_tuples = decompress_power_data(cycle)
         if not p_data_tuples:
             return []
+
+        # Pre-materialise all segment bounds before touching history; a malformed
+        # segment that raises after the pop would leave the source cycle permanently
+        # deleted with only partial children created.
+        try:
+            materialized_segs: list[tuple[float, float, str | None]] = []
+            for seg in segments:
+                if isinstance(seg, (list, tuple)):
+                    seg_s = float(seg[0])
+                    seg_e = float(seg[1])
+                    seg_p: str | None = None
+                else:
+                    seg_s = float(seg["start"])
+                    seg_e = float(seg["end"])
+                    seg_p = seg.get("profile")
+                if seg_e <= seg_s:
+                    return []
+                materialized_segs.append((seg_s, seg_e, seg_p))
+        except (TypeError, ValueError, KeyError, IndexError):
+            return []
+        # A split into fewer than two pieces is not a real split; guard here so
+        # an empty or single-element segments list can't pop the source cycle and
+        # leave zero or one orphaned children.
+        if len(materialized_segs) < 2:
+            return []
+
+        cycles.pop(idx)  # Remove original — all segments validated, safe to mutate
+
+        new_ids: list[str] = []
+        original_profile = cycle.get("profile_name")
+        start_ts = start_dt_base_parsed.timestamp()
 
         # Prepare points (relative seconds)
         points: list[tuple[float, float]] = []
@@ -6007,17 +6008,7 @@ class ProfileStore:
             points.append((float(offset_seconds), float(val)))
 
         # Create new cycles
-        for seg in segments:
-            if isinstance(seg, (list, tuple)):
-                seg_tuple = cast(tuple[Any, ...] | list[Any], seg)
-                seg_start = float(seg_tuple[0])
-                seg_end = float(seg_tuple[1])
-                seg_profile = None
-            else:
-                seg_start = float(seg["start"])
-                seg_end = float(seg["end"])
-                seg_profile = seg.get("profile")
-
+        for seg_start, seg_end, seg_profile in materialized_segs:
             seg_dur = seg_end - seg_start
             new_cycle_start = start_dt_base_parsed + timedelta(seconds=seg_start)
             new_cycle_start_ts = new_cycle_start.timestamp()
@@ -6051,14 +6042,14 @@ class ProfileStore:
                 "power_data": p_data_abs,
                 "profile_name": seg_profile
             }
-            self.add_cycle(new_cycle)
+            await self.async_add_cycle(new_cycle)
             new_ids.append(new_cycle["id"])
 
         # Fix profile refs (handle original sample cycle logic)
         original_sample_id = cycle.get("id")
         best_replacement_id = None
         longest_dur = 0
-        new_cycles_objs = [c for c in cycles if c["id"] in new_ids] # 'cycles' is mutated by add_cycle
+        new_cycles_objs = [c for c in cycles if c["id"] in new_ids]
 
         for c in new_cycles_objs:
             d = c.get("duration", 0)
@@ -6238,6 +6229,18 @@ class ProfileStore:
             new_power_data.append([offset, float(p)])
 
         c1["power_data"] = new_power_data
+
+        # Recompute energy from the merged trace (merge keeps only c1's original
+        # energy_wh which under-represents the combined cycle).
+        try:
+            ts_s = np.array([pt[0] for pt in new_power_data], dtype=float)
+            p_s = np.array([pt[1] for pt in new_power_data], dtype=float)
+            if len(ts_s) > 1:
+                c1["energy_wh"] = round(
+                    integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
+                )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.warning("Energy recompute failed after cycle merge", exc_info=True)
 
         # New Hash ID
         new_id = hashlib.sha256(f"{c1['start_time']}_{c1['duration']}".encode()).hexdigest()[:12]

@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ 프로그램이 섞였을 수 있음"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "급격한 강하는 즉시 종료로 처리",
     "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
     "end_repeat_count": "종료 전 연속되는 낮은 측정값 횟수",
     "interrupted_min_seconds": "짧은 사이클은 중단으로 표시",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "현재 전력의 이 부분보다 큰 하락도 갑작스러운 것으로 간주됩니다(0.6 = 60% 하락). 어플라이언스 크기 전반에 걸쳐 와트 임계값을 보완합니다.",
-      "label": "급격한 강하 비율"
-    },
-    "abrupt_drop_watts": {
-      "doc": "이보다 큰 전력 감소는 주기를 자연스러운 종료가 아닌 중단됨(수동 취소)으로 표시합니다.",
-      "label": "급격한 강하"
-    },
     "anti_wrinkle_enabled": {
       "doc": "건조기가 주요 가열 단계 후에 방출하는 짧은 저전력 텀블 펄스를 인식하고 이를 새 주기로 읽는 대신 완료된 주기에 연결해 두십시오.",
       "label": "구김 방지 감지 활성화"

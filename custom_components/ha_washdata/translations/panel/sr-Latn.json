@@ -954,14 +954,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Pad veći od ovog dela struje takođe se tretira kao nagli (0,6 = pad od 60%). Dopunjuje prag u vatima za različite veličine uređaja.",
-      "label": "Odnos naglog pada"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Pad snage veći od ovog označava ciklus kao Prekinut (ručno otkazivanje), a ne kao prirodni završetak.",
-      "label": "Nagli pad"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Prepoznajte kratke impulse male snage koje mašina za sušenje emituje nakon glavne faze grejanja i držite ih povezanim sa završenim ciklusom umesto da ih čitate kao nove cikluse.",
       "label": "Omogući detekciju zaštite od gužvanja"
@@ -1714,7 +1706,6 @@
     "other": "Ostalo"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Nagli pad se tretira kao trenutni završetak",
     "completion_min_seconds": "Najkraće pokretanje koje se računa kao pravi ciklus",
     "end_repeat_count": "Niska očitavanja zaredom pre završetka",
     "interrupted_min_seconds": "Kratki ciklusi označeni kao prekinuti",

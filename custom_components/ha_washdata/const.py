@@ -297,6 +297,27 @@ MATCH_RANKING_HISTORY_MAX = 500
 # hard limit: this only surfaces "running longer than usual" for the UI. Kept
 # below the zombie threshold so it lights up well before any termination.
 CYCLE_OVERRUN_ANOMALY_RATIO = 1.5
+
+# Duration-anchored hard-finalize backstop in the ENDING state.  Smart Termination
+# is (deliberately) gated on a confident, non-ambiguous match; an ambiguous /
+# prefix-ambiguous match therefore skips it and relies on the power+energy fallback
+# timeout, which a low standby baseline (below stop_threshold but energetic enough
+# to trip the energy gate) can hold open until the 8 h cap / zombie-kill — the
+# #296/#311 "finishes hours/1000+ min late" reports.  This SEPARATE backstop
+# finalizes a matched cycle that has sat in ENDING well past its expected duration
+# AND been genuinely quiet (below stop_threshold) for a sustained span.  It is
+# asymmetric (can only ever SHORTEN a stuck wait, never end a cycle early) and the
+# sustained-quiet guard is what keeps it from truncating a longer program that was
+# mismatched to a shorter profile — a real longer program has high-power phases
+# that keep resetting the below-threshold timer, so it never accumulates the
+# required continuous quiet.  Sits between CYCLE_OVERRUN_ANOMALY_RATIO (1.5, soft
+# visible signal) and the manager's 3x zombie-kill, so it fires well after any
+# legitimate overrun but well before the hard kill.
+ENDING_HARD_FINALIZE_RATIO = 2.0
+ENDING_HARD_FINALIZE_MIN_QUIET_S = 600.0  # continuous sub-threshold span floor
+
+# NOTE: STANDBY_BAND_* constants live further down, after the DEVICE_TYPE_*
+# definitions they reference (search "Standby-band stuck-in-RUNNING finalize").
 # Underrun anomaly: a cycle that finishes in less than this fraction of its
 # matched profile's median duration is flagged "underrun" (post-cycle only,
 # never a live signal — computed in _async_process_cycle_end after the cycle
@@ -536,6 +557,68 @@ DEVICE_TYPES = {
     DEVICE_TYPE_OTHER: "Threshold Device",
 }
 
+# Standby-band stuck-in-RUNNING finalize (#296).  Some appliances finish but hold
+# a small, flat "anti-crease" / display standby draw that sits ABOVE stop_threshold_w
+# (e.g. a ~2.5-3.2 W baseline while stop_threshold is ~1.2 W).  Because power never
+# drops below the stop threshold, _time_below_threshold never accumulates, so the
+# cycle never reaches PAUSED/ENDING and runs until the 8 h RUNNING cap — and the
+# anti-wrinkle handler can't help because entering it requires a completed
+# TIMEOUT/SMART finish that never happens (chicken-and-egg).  This detector spots a
+# sustained, FLAT, tiny-fraction-of-peak plateau *past* the expected duration and
+# finalizes the cycle (as a normal TIMEOUT completion, so an anti-wrinkle-enabled
+# washer/dryer still routes into ANTI_WRINKLE afterwards).  Heavily gated so it can
+# never end an active low-power phase: it needs a matched profile, elapsed >= 2x
+# expected, and the whole recent window flat + below a small fraction of the cycle's
+# own peak.  Restricted to wet appliances where a stuck baseline is unambiguously
+# anomalous (bread-maker keep-warm, pump, air-fryer etc. have legitimate holds and
+# are excluded).
+STANDBY_BAND_FINALIZE_DEVICE_TYPES = (
+    DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_WASHER_DRYER,
+    DEVICE_TYPE_DRYER,
+)
+STANDBY_BAND_MIN_RATIO = 2.0          # only past 2x the expected duration
+STANDBY_BAND_WINDOW_S = 600.0         # require a >=10 min flat plateau
+STANDBY_BAND_MAX_FRACTION = 0.10      # plateau level <= 10% of the cycle's peak
+STANDBY_BAND_FLATNESS_FRACTION = 0.03  # window (max-min) <= 3% of the cycle's peak
+STANDBY_BAND_FLATNESS_FLOOR_W = 2.0   # absolute flatness floor for low-peak devices
+
+# Issue #296 follow-up: anti-crease ("Knitterschutz") back-to-back handling.
+#
+# After a wash finishes, some machines (e.g. Miele) hold a low-power tumble tail -
+# a constant baseline plus periodic sub-``anti_wrinkle_max_power`` bursts, NO
+# heating - until the door is opened.  To the power-off detector this looks like
+# continued RUNNING (the bursts recur faster than off_delay and keep reviving the
+# cycle out of ENDING), so the cycle never finalises into STATE_ANTI_WRINKLE - the
+# state that is designed to absorb the tail and split off the next wash.  If a
+# second load is started before the door is opened, the whole sequence
+# (wash -> tail -> wash -> tail) merges into one multi-hour "cycle".
+#
+# Two coordinated mechanisms fix it, BOTH opt-in via ``anti_wrinkle_enabled`` and
+# gated to the anti-wrinkle device types (see ``anti_wrinkle_active`` in
+# cycle_detector):
+#
+#  * a proactive finalise (``_is_anticrease_tail`` -> Smart Termination into
+#    ANTI_WRINKLE): once a *matched* cycle is past its expected duration AND the
+#    recent window shows only the low-power tail, finalise without waiting to reach
+#    ENDING through the burst-defeated off_delay path;
+#  * a match freeze (``_try_profile_match`` guard) under the SAME condition, so
+#    re-matching on the growing flat tail cannot drift the label to a longer
+#    near-duplicate profile (which would push expected_duration out and break the
+#    finalise gate) - the field failure that breaks Smart Termination.
+#
+# Gated on ``elapsed >= expected * ratio`` so a legitimate mid-wash low-power phase
+# can NEVER trigger it: a washer spends most of its cycle below
+# ``anti_wrinkle_max_power`` (only brief heating spikes exceed it), but every
+# observed clean cycle's mid-cycle sub-max_power gap ENDS well before its expected
+# duration, while the anti-crease tail BEGINS after it.  Also requires a genuinely
+# energetic cycle (peak above ``anti_wrinkle_max_power``) so a low-power program
+# that never heats is left alone.  Asymmetric (finalise-only, can only shorten the
+# wait) and self-correcting (a new wash's heating burst leaves the regime and
+# re-arms matching).
+ANTI_CREASE_FINALIZE_RATIO = 0.98      # elapsed must reach 98% of expected duration
+ANTI_CREASE_CONFIRM_WINDOW_S = 180.0   # recent window that must hold no reading > max_power
+
 # Device Type Defaults
 # Device Type Defaults (Maps)
 
@@ -617,6 +700,26 @@ DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS = 600.0
 # end.  Smart Termination is independently gated on duration >= expected*ratio, so
 # a shorter window can never fire it mid-cycle.
 DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS = 300.0
+
+# Sustained "true off" (power below stop_threshold_w) window that cancels a
+# user-paused STARTING state back to OFF.  A user pause during STARTING is held
+# indefinitely (issue #306) waiting for Resume Cycle, but a genuinely paused
+# appliance keeps standby power above the stop threshold; sustained power below it
+# means the machine was switched off, so without this the detector could stay
+# pinned in STARTING forever.  Generous enough not to abort a real pause whose
+# standby briefly dips (and well above the issue-#306 test's 10 s hold), while
+# bounding the pinned-forever case.
+STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS = 300.0
+
+# Upper bound on the washer / washer-dryer Smart-Termination debounce, which is
+# otherwise derived as max(180, min_off_gap * 0.5).  At the shipped defaults this
+# is 240 s (washing machine, min_off_gap 480) / 300 s (washer-dryer, min_off_gap
+# 600) and the cap never bites.  It only bounds the case where a suggested or
+# hand-set min_off_gap (e.g. 1800 s) would inflate the quiet-time requirement to
+# 15 min, starving end-detection for confident non-ambiguous matches the same way
+# the old dishwasher off_delay*0.25 coupling did.  600 s leaves ample headroom for
+# a washer's longest legitimate mid-cycle soak trough while capping the pathology.
+WASHER_SMART_TERMINATION_DEBOUNCE_MAX_SECONDS = 600.0
 
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)

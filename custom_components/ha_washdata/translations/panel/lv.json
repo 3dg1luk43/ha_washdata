@@ -954,14 +954,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Kritums, kas ir lielāks par šo strāvas jaudas daļu, arī tiek uzskatīts par pēkšņu (0,6 = 60% kritums). Papildina vatu slieksni dažādiem ierīču izmēriem.",
-      "label": "Pēkšņa krituma attiecība"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Jaudas kritums, kas ir lielāks par šo, norāda ciklu kā Pārtraukts (manuāla atcelšana), nevis dabisku apdari.",
-      "label": "Pēkšņs kritums"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Atpazīstiet īsos mazjaudas veļas impulsus, ko žāvētājs izstaro pēc galvenās karsēšanas fāzes, un turiet tos pievienotus gatavajam ciklam, nevis nolasiet tos kā jaunus ciklus.",
       "label": "Iespējot pretgrumbu noteikšanu"
@@ -1714,7 +1706,6 @@
     "other": "Cits"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Pēkšņs kritums tiek uzskatīts par tūlītējām beigām",
     "completion_min_seconds": "Īsākais darbības laiks, kas skaitās par īstu ciklu",
     "end_repeat_count": "Zemi rādījumi pēc kārtas pirms beigām",
     "interrupted_min_seconds": "Īsi cikli tiek atzīmēti kā pārtraukti",

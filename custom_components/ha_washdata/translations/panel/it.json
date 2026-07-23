@@ -867,7 +867,6 @@
     "advisory_phase_inconsistent_title": "⚠ Possibili programmi misti"
   },
   "pg_desc": {
-    "abrupt_drop_watts": "Calo improvviso trattato come fine immediata",
     "completion_min_seconds": "Esecuzione più breve che conta come ciclo reale",
     "end_repeat_count": "Letture basse consecutive prima della fine",
     "interrupted_min_seconds": "Cicli brevi contrassegnati come interrotti",
@@ -978,14 +977,6 @@
     }
   },
   "setting": {
-    "abrupt_drop_ratio": {
-      "doc": "Anche un calo maggiore di questa frazione della potenza attuale viene considerato brusco (0,6 = calo del 60%). Completa la soglia dei watt per tutte le dimensioni degli elettrodomestici.",
-      "label": "Rapporto calo brusco"
-    },
-    "abrupt_drop_watts": {
-      "doc": "Un calo di potenza maggiore segnala il ciclo come Interrotto (annullamento manuale) piuttosto che come completamento naturale.",
-      "label": "Calo brusco"
-    },
     "anti_wrinkle_enabled": {
       "doc": "Riconosci i brevi impulsi di asciugatrice a bassa potenza emessi da un'asciugatrice dopo la fase di riscaldamento principale e mantienili collegati al ciclo finito invece di leggerli come nuovi cicli.",
       "label": "Abilita rilevamento antirughe"

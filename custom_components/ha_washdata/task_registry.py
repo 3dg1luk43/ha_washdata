@@ -28,6 +28,7 @@ listener to push updates and calls :func:`get_registry` to read/kick/cancel.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from collections import OrderedDict
@@ -125,6 +126,9 @@ class TaskRegistry:
     def __init__(self) -> None:
         self._tasks: OrderedDict[str, Task] = OrderedDict()
         self._listeners: set[Callable[[dict[str, Any]], None]] = set()
+        # Raw asyncio Task handles linked by ws_api so cancel_entry_tasks can
+        # actually inject CancelledError, not just set the polling flag.
+        self._asyncio_tasks: dict[str, asyncio.Task[Any]] = {}
 
     # -- listeners -----------------------------------------------------------
     def add_listener(self, cb: Callable[[dict[str, Any]], None]) -> Callable[[], None]:
@@ -165,6 +169,15 @@ class TaskRegistry:
         self._evict()
         return task
 
+    def link_asyncio_task(self, task_id: str, asyncio_task: asyncio.Task[Any]) -> None:
+        """Associate the raw asyncio Task with a registry entry.
+
+        Call this immediately after hass.async_create_task() so that
+        cancel_entry_tasks() can inject CancelledError rather than only
+        setting the polling flag.
+        """
+        self._asyncio_tasks[task_id] = asyncio_task
+
     def update(
         self,
         task: Task,
@@ -197,6 +210,11 @@ class TaskRegistry:
         result: Any = None,
         error: str | None = None,
     ) -> None:
+        # A cancellation that races a late-arriving normal completion must win:
+        # once STATE_CANCELLED is set, no subsequent finish() call can downgrade it.
+        if task.state == STATE_CANCELLED and state != STATE_CANCELLED:
+            return
+        self._asyncio_tasks.pop(task.id, None)
         task.state = state
         task.error = error
         if result is not None:
@@ -215,6 +233,28 @@ class TaskRegistry:
             return True
         return False
 
+    def cancel_entry_tasks(self, entry_id: str) -> list[asyncio.Task[Any]]:
+        """Cancel all running tasks for an entry and mark them finished.
+
+        Sets the polling flag and — when a raw asyncio Task was linked via
+        link_asyncio_task — injects CancelledError so the coroutine stops
+        promptly rather than waiting for the next cancel_requested poll.
+        Returns the list of raw asyncio Tasks that were cancelled so the caller
+        can await their completion (ensuring finally blocks run and locks are
+        released) before tearing down shared state.
+        Called during async_unload_entry.
+        """
+        cancelled: list[asyncio.Task[Any]] = []
+        for task in list(self._tasks.values()):
+            if task.entry_id == entry_id and task.state == STATE_RUNNING:
+                task._cancelled = True  # noqa: SLF001
+                raw = self._asyncio_tasks.pop(task.id, None)
+                if raw is not None and not raw.done():
+                    raw.cancel()
+                    cancelled.append(raw)
+                self.finish(task, state=STATE_CANCELLED)
+        return cancelled
+
     # -- reads ---------------------------------------------------------------
     def get(self, task_id: str) -> Task | None:
         return self._tasks.get(task_id)
@@ -227,12 +267,16 @@ class TaskRegistry:
         ]
 
     def _evict(self) -> None:
-        finished = sorted(
-            [t for t in self._tasks.values() if t.state != STATE_RUNNING],
-            key=lambda t: t.finished_at or 0.0,
-        )
-        while len(finished) > _MAX_FINISHED:
-            self._tasks.pop(finished.pop(0).id, None)
+        # Evict per entry_id so that a busy entry cannot displace another entry's
+        # finished results before the panel reads them via get_task_result.
+        by_entry: dict[str, list[Task]] = {}
+        for t in self._tasks.values():
+            if t.state != STATE_RUNNING:
+                by_entry.setdefault(t.entry_id, []).append(t)
+        for tasks in by_entry.values():
+            tasks.sort(key=lambda t: t.finished_at or 0.0)
+            while len(tasks) > _MAX_FINISHED:
+                self._tasks.pop(tasks.pop(0).id, None)
 
 
 def get_registry(hass: HomeAssistant) -> TaskRegistry:
