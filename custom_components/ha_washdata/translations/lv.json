@@ -17,14 +17,6 @@
           "min_power": "Jaudas rādījumi, kas pārsniedz šo slieksni (vatos), norāda, ka ierīce darbojas. Lielākajai daļai ierīču sāciet ar 2 W."
         }
       },
-      "first_profile": {
-        "title": "Izveidojiet pirmo profilu",
-        "description": "**Cikls** ir jūsu ierīces pilnīga darbība (piemēram, veļas slodze). **Profils** grupē šos ciklus pēc veida (piemēram, “Kokvilna”, “Ātrā mazgāšana”). Profila izveide tagad palīdz nekavējoties aprēķināt integrācijas ilgumu.\n\nVarat manuāli atlasīt šo profilu ierīces vadīklās, ja tas netiek atklāts automātiski.\n\n**Atstājiet “Profila nosaukums” tukšu, lai izlaistu šo darbību.**",
-        "data": {
-          "profile_name": "Profila nosaukums (neobligāti)",
-          "manual_duration": "Paredzamais ilgums (minūtes)"
-        }
-      },
       "reconfigure": {
         "title": "WashData pārkonfigurēšana",
         "description": "Atjauniniet ierīces nosaukumu, ierīces veidu vai jaudas sensoru.",

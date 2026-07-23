@@ -17,14 +17,6 @@
           "min_power": "Leximet e fuqisë mbi këtë prag (në vat) tregojnë se pajisja është në punë. Filloni me 2 W për shumicën e pajisjeve."
         }
       },
-      "first_profile": {
-        "title": "Krijo profilin e parë",
-        "description": "Një **Cikl** është një funksion i plotë i pajisjes suaj (p.sh., një ngarkesë rrobash). Një **Profil** i grupon këto cikle sipas llojit (p.sh. \"Pambuk\", \"Larje e shpejtë\"). Krijimi i një profili tani ndihmon në vlerësimin e kohëzgjatjes menjëherë.\n\nMund ta zgjidhni manualisht këtë profil në kontrollet e pajisjes nëse nuk zbulohet automatikisht.\n\n**Lëreni 'Emri i profilit' bosh për të kapërcyer këtë hap.**",
-        "data": {
-          "profile_name": "Emri i profilit (opsionale)",
-          "manual_duration": "Kohëzgjatja e parashikuar (minuta)"
-        }
-      },
       "reconfigure": {
         "title": "Rikonfiguro WashData",
         "description": "Përditëso emrin e pajisjes, llojin e pajisjes ose sensorin e fuqisë.",

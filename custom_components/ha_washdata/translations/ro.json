@@ -17,14 +17,6 @@
           "min_power": "Citirile de putere peste acest prag (în wați) indică faptul că aparatul funcționează. Începeți cu 2W pentru majoritatea dispozitivelor."
         }
       },
-      "first_profile": {
-        "title": "Creați primul profil",
-        "description": "Un **ciclu** este o funcționare completă a aparatului dvs. (de exemplu, o încărcătură de rufe). Un **Profil** grupează aceste cicluri după tip (de exemplu, „Bumbac”, „Spălare rapidă”). Crearea unui profil acum ajută integrarea să estimeze durata imediat.\n\nPuteți selecta manual acest profil în comenzile dispozitivului dacă nu este detectat automat.\n\n**Lăsați „Numele profilului” necompletat pentru a sări peste acest pas.**",
-        "data": {
-          "profile_name": "Nume profil (opțional)",
-          "manual_duration": "Durata estimată (minute)"
-        }
-      },
       "reconfigure": {
         "title": "Reconfigure WashData",
         "description": "Update the device name, appliance type, or power sensor.",

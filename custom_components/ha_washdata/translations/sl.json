@@ -17,14 +17,6 @@
           "min_power": "Odčitki moči nad tem pragom (v vatih) pomenijo, da naprava deluje. Začnite z 2 W za večino naprav."
         }
       },
-      "first_profile": {
-        "title": "Ustvari prvi profil",
-        "description": "**Cikel** je celoten zagon vaše naprave (npr. količina perila). **Profil** združuje te cikle glede na vrsto (npr. 'Bombaž', 'Hitro pranje'). Ustvarjanje profila zdaj pomaga integraciji takoj oceniti trajanje.\n\nTa profil lahko ročno izberete v kontrolnikih naprave, če ni samodejno zaznan.\n\n**Pustite »Ime profila« prazno, če želite preskočiti ta korak.**",
-        "data": {
-          "profile_name": "Ime profila (neobvezno)",
-          "manual_duration": "Predvideno trajanje (minute)"
-        }
-      },
       "reconfigure": {
         "title": "Ponovno konfigurirajte WashData",
         "description": "Posodobite ime naprave, vrsto naprave ali senzor moči.",

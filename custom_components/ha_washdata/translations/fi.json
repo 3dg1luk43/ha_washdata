@@ -17,14 +17,6 @@
           "min_power": "Tämän kynnyksen ylittävät teholukemat (watteina) osoittavat, että laite on käynnissä. Aloita 2 watilla useimmissa laitteissa."
         }
       },
-      "first_profile": {
-        "title": "Luo ensimmäinen profiili",
-        "description": "**Sykli** on laitteesi täydellinen suoritus (esim. yksi pyykkikerta). **Profiili** ryhmittelee nämä syklit tyypin mukaan (esim. \"Puuvilla\", \"Pikapesu\"). Profiilin luominen auttaa integraatiota arvioimaan keston välittömästi.\n\nVoit valita tämän profiilin manuaalisesti laitteen ohjaimista, jos sitä ei tunnisteta automaattisesti.\n\n**Jätä \"Profiilin nimi\" tyhjäksi ohittaaksesi tämän vaiheen.**",
-        "data": {
-          "profile_name": "Profiilin nimi (valinnainen)",
-          "manual_duration": "Arvioitu kesto (minuutteja)"
-        }
-      },
       "reconfigure": {
         "title": "Konfiguroi WashData uudelleen",
         "description": "Päivitä laitteen nimi, laitteen tyyppi tai tehoanturi.",

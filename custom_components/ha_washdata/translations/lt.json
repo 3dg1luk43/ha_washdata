@@ -17,14 +17,6 @@
           "min_power": "Galios rodmenys, viršijantys šią ribą (vatais), rodo, kad prietaisas veikia. Pradėkite nuo 2 W daugeliui įrenginių."
         }
       },
-      "first_profile": {
-        "title": "Sukurkite pirmąjį profilį",
-        "description": "**Ciklas** yra visas jūsų prietaiso veikimas (pvz., skalbinių įkrovimas). **Profilis** sugrupuoja šiuos ciklus pagal tipą (pvz., 'Medvilnė', 'Greitas skalbimas'). Sukūrus profilį dabar galima nedelsiant apskaičiuoti integracijos trukmę.\n\nGalite rankiniu būdu pasirinkti šį profilį įrenginio valdikliuose, jei jis neaptinkamas automatiškai.\n\n**Jei norite praleisti šį veiksmą, palikite 'Profilio pavadinimas' tuščią.**",
-        "data": {
-          "profile_name": "Profilio pavadinimas (neprivaloma)",
-          "manual_duration": "Numatoma trukmė (min.)"
-        }
-      },
       "reconfigure": {
         "title": "WashData rekonfigūracija",
         "description": "Atnaujinkite įrenginio pavadinimą, prietaiso tipą arba galios jutiklį.",

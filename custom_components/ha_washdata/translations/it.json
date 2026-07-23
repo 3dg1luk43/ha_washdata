@@ -17,14 +17,6 @@
           "min_power": "Le letture di potenza superiori a questa soglia (in watt) indicano che l'elettrodomestico è in funzione. Inizia con 2 W per la maggior parte dei dispositivi."
         }
       },
-      "first_profile": {
-        "title": "Crea il primo profilo",
-        "description": "Un **Ciclo** è un'esecuzione completa dell'elettrodomestico (ad esempio, un carico di bucato). Un **Profilo** raggruppa questi cicli per tipo (ad esempio, \"Cotone\", \"Lavaggio rapido\"). La creazione di un profilo ora consente all'integrazione di stimare subito la durata.\n\nPuoi selezionare manualmente questo profilo nei controlli del dispositivo se non viene rilevato automaticamente.\n\n**Lascia vuoto il campo \"Nome profilo\" per saltare questo passaggio.**",
-        "data": {
-          "profile_name": "Nome profilo (facoltativo)",
-          "manual_duration": "Durata stimata (minuti)"
-        }
-      },
       "reconfigure": {
         "title": "Reconfigure WashData",
         "description": "Update the device name, appliance type, or power sensor.",
