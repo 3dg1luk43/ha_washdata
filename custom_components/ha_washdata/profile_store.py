@@ -5990,6 +5990,11 @@ class ProfileStore:
                 materialized_segs.append((seg_s, seg_e, seg_p))
         except (TypeError, ValueError, KeyError, IndexError):
             return []
+        # A split into fewer than two pieces is not a real split; guard here so
+        # an empty or single-element segments list can't pop the source cycle and
+        # leave zero or one orphaned children.
+        if len(materialized_segs) < 2:
+            return []
 
         cycles.pop(idx)  # Remove original — all segments validated, safe to mutate
 
