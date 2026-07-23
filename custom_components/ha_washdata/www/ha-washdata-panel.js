@@ -7080,7 +7080,6 @@ class HaWashdataPanel extends HTMLElement {
     // a GPU-side realloc on every hover redraw.
     if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, cw, ch);
     const cs = getComputedStyle(this);
     const primary = (cs.getPropertyValue('--primary-color') || '#03a9f4').trim() || '#03a9f4';
     const grid = (cs.getPropertyValue('--divider-color') || 'rgba(127,127,127,.3)').trim() || 'rgba(127,127,127,.3)';

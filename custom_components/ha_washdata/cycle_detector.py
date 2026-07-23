@@ -1814,7 +1814,7 @@ class CycleDetector:
             or (timestamp - oldest_in_window).total_seconds()
             < STANDBY_BAND_WINDOW_S * 0.9
             or self._window_has_outage_gap(
-                ([_standby_boundary_ts] + window_ts)
+                [_standby_boundary_ts, *window_ts]
                 if _standby_boundary_ts is not None
                 else window_ts
             )
@@ -1939,7 +1939,7 @@ class CycleDetector:
             or (timestamp - oldest_in_window).total_seconds()
             < ANTI_CREASE_CONFIRM_WINDOW_S * 0.9
             or self._window_has_outage_gap(
-                ([_ac_boundary_ts] + window_ts)
+                [_ac_boundary_ts, *window_ts]
                 if _ac_boundary_ts is not None
                 else window_ts
             )

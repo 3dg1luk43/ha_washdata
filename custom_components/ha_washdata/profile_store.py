@@ -5804,6 +5804,9 @@ class ProfileStore:
                 integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
             )
             cycle["max_power"] = round(float(np.max(p_s)), 1)
+        elif len(ts_s) == 1:
+            cycle["energy_wh"] = 0.0
+            cycle["max_power"] = round(float(p_s[0]), 1)
 
         # Keep end_time consistent with the updated start_time and duration
         new_start_ts = _value_to_timestamp(cycle.get("start_time"))
@@ -6221,7 +6224,7 @@ class ProfileStore:
                     integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
                 )
         except Exception:  # pylint: disable=broad-exception-caught
-            pass  # stale energy_wh is better than a broken merge
+            self._logger.warning("Energy recompute failed after cycle merge", exc_info=True)
 
         # New Hash ID
         new_id = hashlib.sha256(f"{c1['start_time']}_{c1['duration']}".encode()).hexdigest()[:12]

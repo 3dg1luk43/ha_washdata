@@ -233,21 +233,27 @@ class TaskRegistry:
             return True
         return False
 
-    def cancel_entry_tasks(self, entry_id: str) -> None:
+    def cancel_entry_tasks(self, entry_id: str) -> list[asyncio.Task[Any]]:
         """Cancel all running tasks for an entry and mark them finished.
 
         Sets the polling flag and — when a raw asyncio Task was linked via
         link_asyncio_task — injects CancelledError so the coroutine stops
         promptly rather than waiting for the next cancel_requested poll.
+        Returns the list of raw asyncio Tasks that were cancelled so the caller
+        can await their completion (ensuring finally blocks run and locks are
+        released) before tearing down shared state.
         Called during async_unload_entry.
         """
+        cancelled: list[asyncio.Task[Any]] = []
         for task in list(self._tasks.values()):
             if task.entry_id == entry_id and task.state == STATE_RUNNING:
                 task._cancelled = True  # noqa: SLF001
                 raw = self._asyncio_tasks.pop(task.id, None)
                 if raw is not None and not raw.done():
                     raw.cancel()
+                    cancelled.append(raw)
                 self.finish(task, state=STATE_CANCELLED)
+        return cancelled
 
     # -- reads ---------------------------------------------------------------
     def get(self, task_id: str) -> Task | None:

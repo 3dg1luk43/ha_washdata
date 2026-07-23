@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from pathlib import Path
@@ -1039,7 +1040,11 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # Settle registry: mark any still-RUNNING tasks for this entry as
         # cancelled so they don't appear as zombies after reload.
         from . import task_registry as _task_registry
-        _task_registry.get_registry(hass).cancel_entry_tasks(entry.entry_id)
+        _cancelled_tasks = _task_registry.get_registry(hass).cancel_entry_tasks(entry.entry_id)
+        # Drain cancelled WS-spawned tasks so their finally blocks (lock releases)
+        # complete before we remove the write lock below.
+        if _cancelled_tasks:
+            await asyncio.gather(*_cancelled_tasks, return_exceptions=True)
 
         # Release the per-entry write lock so it doesn't block the next setup.
         from .ws_api import _WS_WRITE_LOCKS_KEY
