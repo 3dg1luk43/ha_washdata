@@ -36,6 +36,7 @@ All top-level entry points are defensive: they never raise, returning an
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
@@ -85,6 +86,13 @@ from .const import (
     MATCH_MAE_PEAK_FLOOR,
     MATCH_MAE_REF_PEAK,
     MATCH_MAE_SCALE,
+    PLAYGROUND_STRESS_DENSE_DURATION_S,
+    PLAYGROUND_STRESS_DENSE_STEP_S,
+    PLAYGROUND_STRESS_FLOOR_PERCENTILE,
+    PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC,
+    PLAYGROUND_STRESS_MAX_SPARSE_STEPS,
+    PLAYGROUND_STRESS_SPARSE_STEP_S,
+    PLAYGROUND_STRESS_TRAILING_WINDOW_S,
     STATE_ENDING,
     STATE_FINISHED,
     STATE_IDLE,
@@ -373,6 +381,8 @@ def simulate_cycle_detail(
     price: float | None = None,
     compute_series: bool = True,
     prebuilt: tuple[Any, Any, Any, Any] | None = None,
+    stress_tail: bool = False,
+    stress_idle_w: float | None = None,
 ) -> dict[str, Any]:
     """Faithful single-cycle replay for the Playground "Simulate" view.
 
@@ -391,7 +401,7 @@ def simulate_cycle_detail(
     try:
         return _simulate_cycle_detail_inner(
             cycle, base_config, settings_override, store, options, price,
-            compute_series, prebuilt,
+            compute_series, prebuilt, stress_tail, stress_idle_w,
         )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground detail sim failed for %s: %s", cycle.get("id"), exc)
@@ -435,6 +445,8 @@ def build_cycle_detail_sim_by_id(
     settings_override: dict[str, Any] | None,
     options: dict[str, Any] | None,
     price: float | None = None,
+    stress_tail: bool = False,
+    stress_idle_w: float | None = None,
 ) -> "_DetailSim | dict[str, Any]":
     """Look up a stored cycle by id and build a resumable :class:`_DetailSim`.
 
@@ -456,6 +468,7 @@ def build_cycle_detail_sim_by_id(
     try:
         return _DetailSim(
             cycle, base_config, settings_override, store, options, price,
+            stress_tail=stress_tail, stress_idle_w=stress_idle_w,
         )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground detail sim build failed for %s: %s", cycle_id, exc)
@@ -471,6 +484,8 @@ def _simulate_cycle_detail_inner(
     price: float | None,
     compute_series: bool = True,
     prebuilt: tuple[Any, Any, Any, Any] | None = None,
+    stress_tail: bool = False,
+    stress_idle_w: float | None = None,
 ) -> dict[str, Any]:
     """One-shot faithful replay: build the resumable sim and run it to completion.
 
@@ -483,11 +498,15 @@ def _simulate_cycle_detail_inner(
     sim = _DetailSim(
         cycle, base_config, settings_override, store, options, price,
         compute_series, prebuilt,
+        stress_tail=stress_tail, stress_idle_w=stress_idle_w,
     )
     if not sim.ready:
         return sim.empty_payload()
     sim.step(0, sim.n_readings)
-    sim.run_tail()
+    if sim.stress_tail:
+        sim.run_stress_tail()
+    else:
+        sim.run_tail()
     return sim.finalize()
 
 
@@ -518,6 +537,8 @@ class _DetailSim:
         price: float | None,
         compute_series: bool = True,
         prebuilt: tuple[Any, Any, Any, Any] | None = None,
+        stress_tail: bool = False,
+        stress_idle_w: float | None = None,
     ) -> None:
         self.cycle = cycle
         self.store = store
@@ -543,7 +564,11 @@ class _DetailSim:
             "overrun_ratio": None,
             "projected_energy_wh": None,
             "projected_cost": None,
+            "stress": None,
         }
+        self.stress_tail = stress_tail
+        self.stress_idle_override = stress_idle_w
+        self._stress_outcome: dict[str, Any] | None = None
         if prebuilt is not None:
             snapshots, match_config, group_members, member_snaps = prebuilt
         else:
@@ -833,6 +858,34 @@ class _DetailSim:
                 "Playground detail replay failed for %s: %s", self.cycle.get("id"), exc
             )
 
+    def _derive_idle_level(self) -> tuple[float, float]:
+        """Derive (idle_w, fluct_w) from the standby floor of the real cycle tail.
+
+        idle_w  = p7 of readings in the last PLAYGROUND_STRESS_TRAILING_WINDOW_S;
+                  this is the between-burst standby floor, not a contaminated mean.
+        fluct_w = std-dev of the low band (readings ≤ idle_w × 1.5); falls back
+                  to ±PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC when the tail is flat.
+        """
+        if not self.readings:
+            return 3.0, 0.36
+        cutoff = self.readings[-1][0] - timedelta(seconds=PLAYGROUND_STRESS_TRAILING_WINDOW_S)
+        window = [p for ts, p in self.readings if ts >= cutoff]
+        if not window:
+            window = [self.readings[-1][1]]
+        sorted_w = sorted(window)
+        p7_idx = max(0, int(len(sorted_w) * PLAYGROUND_STRESS_FLOOR_PERCENTILE))
+        idle_w = float(sorted_w[p7_idx])
+        low_band = [p for p in window if p <= idle_w * 1.5]
+        if len(low_band) >= 2:
+            mean_lb = sum(low_band) / len(low_band)
+            variance = sum((p - mean_lb) ** 2 for p in low_band) / len(low_band)
+            fluct_w = variance ** 0.5
+            if fluct_w < 0.01:
+                fluct_w = idle_w * PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC
+        else:
+            fluct_w = idle_w * PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC
+        return max(0.0, idle_w), max(0.01, fluct_w)
+
     def run_tail(self) -> None:
         """Synthetic quiet tail so a natural end can fire."""
         if self._aborted or not self.ready:
@@ -858,6 +911,106 @@ class _DetailSim:
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _LOGGER.debug(
                 "Playground detail replay failed for %s: %s", self.cycle.get("id"), exc
+            )
+
+    def run_stress_tail(self) -> None:
+        """Synthetic idle continuation for the idle termination test.
+
+        Replaces the quiet tail when ``stress_tail=True``.  Never raises.
+
+        Two phases keep CPU near zero while preserving detector fidelity:
+
+        * **Dense pre-fill** (DENSE_DURATION_S at DENSE_STEP_S): populates
+          ``_power_readings`` so ``_is_standby_band_stuck`` (10-min plateau check)
+          and ``_window_has_outage_gap`` can fire correctly.
+        * **Sparse main** (SPARSE_STEP_S steps): ``_time_below_threshold += dt``
+          accumulates correctly for large dt; the 8h hard cap fires normally.
+
+        ``_sample()`` is called on every step so the series carries progress /
+        remaining_s / phase through the overrun, identical to the live estimator.
+        """
+        if self._aborted or not self.ready:
+            return
+        try:
+            idle_w, fluct_w = self._derive_idle_level()
+            if self.stress_idle_override is not None:
+                idle_w = float(self.stress_idle_override)
+                _, fluct_w = self._derive_idle_level()
+
+            synthetic_from_s = self.cursor["t"]
+            stop_thresh = float(getattr(self.config, "stop_threshold_w", 2.0))
+            idle_above = idle_w >= stop_thresh
+
+            seed = sum(ord(c) for c in (self.cycle.get("id") or "pg")) & 0xFFFF
+
+            self._emit(
+                "stress_tail_start",
+                f"idle ~{idle_w:.1f}W fluct={fluct_w:.2f}W above_stop_thresh={idle_above}",
+            )
+
+            last_ts = self.readings[-1][0]
+            captured_before = len(self.captured)
+
+            n_dense = int(PLAYGROUND_STRESS_DENSE_DURATION_S / PLAYGROUND_STRESS_DENSE_STEP_S)
+            dense_end_ts = last_ts
+            for i in range(1, n_dense + 1):
+                ts = last_ts + timedelta(seconds=PLAYGROUND_STRESS_DENSE_STEP_S * i)
+                power = max(0.0, idle_w + fluct_w * math.sin(seed + i * 1.1))
+                self.cursor["t"] = (ts - self.base).total_seconds()
+                self.detector.process_reading(power, ts)
+                self._sample(ts)
+                dense_end_ts = ts
+                if len(self.captured) > captured_before:
+                    break
+
+            if len(self.captured) == captured_before:
+                for i in range(1, PLAYGROUND_STRESS_MAX_SPARSE_STEPS + 1):
+                    ts = dense_end_ts + timedelta(seconds=PLAYGROUND_STRESS_SPARSE_STEP_S * i)
+                    power = max(0.0, idle_w + fluct_w * math.sin(seed + n_dense + i * 1.1))
+                    self.cursor["t"] = (ts - self.base).total_seconds()
+                    self.detector.process_reading(power, ts)
+                    self._sample(ts)
+                    if len(self.captured) > captured_before:
+                        break
+
+            if len(self.captured) == captured_before:
+                flush_ts = dense_end_ts + timedelta(
+                    seconds=PLAYGROUND_STRESS_SPARSE_STEP_S * (PLAYGROUND_STRESS_MAX_SPARSE_STEPS + 2)
+                )
+                self.cursor["t"] = (flush_ts - self.base).total_seconds()
+                self.detector.force_end(flush_ts)
+
+            terminated = len(self.captured) > captured_before
+            terminated_after_s: float | None = None
+            term_reason: Any = None
+            hit_cap = False
+            if terminated:
+                primary = max(
+                    self.captured[captured_before:],
+                    key=lambda c: float(c.get("duration") or 0.0),
+                )
+                term_reason = primary.get("termination_reason")
+                hit_cap = str(term_reason) == str(TerminationReason.FORCE_STOPPED)
+                terminated_after_s = self.cursor["t"] - synthetic_from_s
+
+            self._stress_outcome = {
+                "enabled": True,
+                "idle_w": round(idle_w, 2),
+                "fluct_w": round(fluct_w, 3),
+                "manual_override": self.stress_idle_override is not None,
+                "synthetic_from_s": round(synthetic_from_s, 1),
+                "stop_threshold_w": round(stop_thresh, 2),
+                "idle_above_threshold": idle_above,
+                "terminated": terminated,
+                "terminated_after_s": (
+                    round(terminated_after_s, 1) if terminated_after_s is not None else None
+                ),
+                "termination_reason": str(term_reason) if term_reason is not None else None,
+                "hit_cap": hit_cap,
+            }
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug(
+                "Playground stress tail failed for %s: %s", self.cycle.get("id"), exc
             )
 
     def finalize(self) -> dict[str, Any]:
@@ -957,6 +1110,42 @@ class _DetailSim:
             elif ratio <= CYCLE_UNDERRUN_ANOMALY_RATIO:
                 alerts.append({"code": "underrun", "severity": "warn",
                                "detail": f"Finished at {ratio:.0%} of typical duration."})
+
+        # --- stress-tail verdict ---
+        st = self._stress_outcome
+        if st and st.get("enabled"):
+            outcome["stress"] = st
+            idle_w = st["idle_w"]
+            stop_thresh = st["stop_threshold_w"]
+            if st.get("terminated") and not st.get("hit_cap"):
+                after_s = float(st.get("terminated_after_s") or 0.0)
+                h, rem = divmod(int(after_s), 3600)
+                m = rem // 60
+                reason = st.get("termination_reason") or "?"
+                alerts.append({
+                    "code": "stress_terminated", "severity": "info",
+                    "detail": (
+                        f"Settled to ~{idle_w:.1f}W idle — cycle ended "
+                        f"{h}h {m}m later via {reason}."
+                    ),
+                })
+            else:
+                if st.get("idle_above_threshold"):
+                    alerts.append({
+                        "code": "stress_above_threshold", "severity": "warn",
+                        "detail": (
+                            f"Idle draw ~{idle_w:.1f}W is at or above the effective stop "
+                            f"threshold ({stop_thresh:.1f}W) — the cycle never registered "
+                            f"as quiet. Raise stop_threshold_w to fix."
+                        ),
+                    })
+                alerts.append({
+                    "code": "stress_hit_cap", "severity": "error",
+                    "detail": (
+                        f"Cycle ran 8 h without stopping — force-stopped by the safety cap. "
+                        f"Idle draw {idle_w:.1f}W vs stop threshold {stop_thresh:.1f}W."
+                    ),
+                })
 
         series = self.series
         if len(series) > MAX_SERIES_PER_CYCLE:
