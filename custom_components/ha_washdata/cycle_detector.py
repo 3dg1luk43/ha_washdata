@@ -325,10 +325,11 @@ class CycleDetector:
         # OFF only when the machine has clearly been switched off rather
         # than briefly dipped.
         self._delay_wait_true_off_seconds: float = 0.0
-        # _starting_true_off_seconds tracks sustained "true off" while a
-        # user-paused STARTING state is being held (issue #306), so the detector
-        # can fall back to OFF if the machine is switched off rather than resumed.
-        self._starting_true_off_seconds: float = 0.0
+        # _starting_paused_off_since anchors the first below-stop reading while
+        # a user-paused STARTING state is held (issue #306). Elapsed time is
+        # measured from this anchor, not accumulated per-dt, so a single large
+        # (but sub-outage) interval cannot prematurely credit minutes of quiet time.
+        self._starting_paused_off_since: datetime | None = None
         # _delay_wait_high_start anchors the first high-power reading
         # observed inside DELAY_WAIT.  We only transition to STARTING
         # when the high-power streak has lasted at least
@@ -650,7 +651,7 @@ class CycleDetector:
         self._delay_band_seconds = 0.0
         self._delay_band_peak = 0.0
         self._delay_wait_true_off_seconds = 0.0
-        self._starting_true_off_seconds = 0.0
+        self._starting_paused_off_since = None
         self._delay_wait_high_start = None
 
     @property
@@ -1028,7 +1029,7 @@ class CycleDetector:
 
             if is_high:
                 # Power back up - clear any accumulated "true off" hold time.
-                self._starting_true_off_seconds = 0.0
+                self._starting_paused_off_since = None
 
             if self._time_above_threshold >= self._config.start_duration_threshold:
                 if self._energy_since_idle_wh >= self._config.start_energy_threshold:
@@ -1048,26 +1049,33 @@ class CycleDetector:
                     if power < self._config.stop_threshold_w:
                         # An outage-sized gap since the last reading is NOT observed
                         # quiet (the machine may still be paused, we just lost
-                        # telemetry): reset so only genuinely-sampled sustained-off
-                        # time can cancel a paused STARTING.
+                        # telemetry): reset anchor so only genuinely-sampled
+                        # sustained-off time can cancel a paused STARTING.
                         if dt > self._outage_threshold_s():
-                            self._starting_true_off_seconds = 0.0
-                        else:
-                            self._starting_true_off_seconds += dt
-                        if (
-                            self._starting_true_off_seconds
-                            >= STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS
-                        ):
+                            self._starting_paused_off_since = None
+                        elif self._starting_paused_off_since is None:
+                            # First below-stop reading: anchor the timestamp.
+                            # Don't credit the preceding dt interval — we only
+                            # know the device is off *now*, not how long before
+                            # this sample it went quiet.
+                            self._starting_paused_off_since = timestamp
+                        observed_off_s = (
+                            (timestamp - self._starting_paused_off_since).total_seconds()
+                            if self._starting_paused_off_since is not None
+                            else 0.0
+                        )
+                        if observed_off_s >= STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS:
                             self._logger.info(
                                 "Paused STARTING cancelled: power off (%.1fW) for "
                                 "%.0fs → OFF",
                                 power,
-                                self._starting_true_off_seconds,
+                                observed_off_s,
                             )
                             self._transition_to(STATE_OFF, timestamp)
                             return
                     else:
-                        self._starting_true_off_seconds = 0.0
+                        # Power recovered — clear the off anchor.
+                        self._starting_paused_off_since = None
                 else:
                     # False start
                     self._logger.debug(
@@ -1645,7 +1653,7 @@ class CycleDetector:
             # Clear the paused-STARTING true-off accumulator so a later STARTING
             # cycle cannot inherit stale hold time and finalize to OFF prematurely
             # (this path is also reached via the paused-STARTING cancellation).
-            self._starting_true_off_seconds = 0.0
+            self._starting_paused_off_since = None
 
         # Reset end spike tracker when entering ENDING state
         if new_state == STATE_ENDING:
@@ -1672,7 +1680,7 @@ class CycleDetector:
             # Reset idle time if exiting ANTI_WRINKLE to STARTING (high-power burst resumed)
             self._anti_wrinkle_idle_time = 0.0
             # Fresh STARTING cycle: never inherit a prior cycle's true-off hold.
-            self._starting_true_off_seconds = 0.0
+            self._starting_paused_off_since = None
         elif new_state == STATE_RUNNING:
             self._delay_band_start = None
             self._delay_band_seconds = 0.0

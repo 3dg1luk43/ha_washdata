@@ -4902,9 +4902,10 @@ class ProfileStore:
         if not phases:
             return None
 
-        # Guard against None/non-numeric start values before sorting.
+        # Guard against non-dict entries (legacy/malformed storage) and
+        # None/non-numeric start values before sorting.
         phases_sorted = sorted(
-            phases,
+            [p for p in phases if isinstance(p, dict)],
             key=lambda p: float(p.get("start") or 0),
         )
 
@@ -5970,7 +5971,27 @@ class ProfileStore:
         if not p_data_tuples:
             return []
 
-        cycles.pop(idx)  # Remove original — validation passed, safe to mutate
+        # Pre-materialise all segment bounds before touching history; a malformed
+        # segment that raises after the pop would leave the source cycle permanently
+        # deleted with only partial children created.
+        try:
+            materialized_segs: list[tuple[float, float, str | None]] = []
+            for seg in segments:
+                if isinstance(seg, (list, tuple)):
+                    seg_s = float(seg[0])
+                    seg_e = float(seg[1])
+                    seg_p: str | None = None
+                else:
+                    seg_s = float(seg["start"])
+                    seg_e = float(seg["end"])
+                    seg_p = seg.get("profile")
+                if seg_e <= seg_s:
+                    return []
+                materialized_segs.append((seg_s, seg_e, seg_p))
+        except (TypeError, ValueError, KeyError, IndexError):
+            return []
+
+        cycles.pop(idx)  # Remove original — all segments validated, safe to mutate
 
         new_ids: list[str] = []
         original_profile = cycle.get("profile_name")
@@ -5982,17 +6003,7 @@ class ProfileStore:
             points.append((float(offset_seconds), float(val)))
 
         # Create new cycles
-        for seg in segments:
-            if isinstance(seg, (list, tuple)):
-                seg_tuple = cast(tuple[Any, ...] | list[Any], seg)
-                seg_start = float(seg_tuple[0])
-                seg_end = float(seg_tuple[1])
-                seg_profile = None
-            else:
-                seg_start = float(seg["start"])
-                seg_end = float(seg["end"])
-                seg_profile = seg.get("profile")
-
+        for seg_start, seg_end, seg_profile in materialized_segs:
             seg_dur = seg_end - seg_start
             new_cycle_start = start_dt_base_parsed + timedelta(seconds=seg_start)
             new_cycle_start_ts = new_cycle_start.timestamp()
