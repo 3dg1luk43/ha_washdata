@@ -66,7 +66,11 @@ def get_cache_buster(filename: str = CARD_NAME) -> str:
         base = Path(__file__).parent
         src_mtime = os.path.getmtime(base / "www" / filename)
         try:
-            trans_mtime = os.path.getmtime(base / "translations" / "panel")
+            panel_dir = base / "translations" / "panel"
+            trans_mtime = max(
+                (os.path.getmtime(f) for f in panel_dir.iterdir() if f.is_file()),
+                default=0.0,
+            )
         except OSError:
             trans_mtime = 0.0
         return str(int(max(src_mtime, trans_mtime)))

@@ -2216,7 +2216,7 @@ class WashDataManager:
 
         self._logger.info("Configuration reloaded successfully")
 
-    def _spawn_tracked(self, coro: Any) -> "Task[Any]":
+    def _spawn_tracked(self, coro: Any) -> Task[Any]:
         """Create a detached task and track it so shutdown can cancel it.
 
         Use for fire-and-forget tasks that touch the ProfileStore (matching
@@ -5230,7 +5230,7 @@ class WashDataManager:
             # and be swallowed. Surface it via a done-callback so an action-only
             # setup at least logs the drop. (A user-visible fallback would require
             # awaiting, i.e. making the whole notification-dispatch chain async.)
-            def _log_action_failure(task: "Task[Any]") -> None:
+            def _log_action_failure(task: Task[Any]) -> None:
                 if task.cancelled():
                     return
                 exc = task.exception()

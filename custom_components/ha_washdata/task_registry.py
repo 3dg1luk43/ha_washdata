@@ -197,6 +197,10 @@ class TaskRegistry:
         result: Any = None,
         error: str | None = None,
     ) -> None:
+        # A cancellation that races a late-arriving normal completion must win:
+        # once STATE_CANCELLED is set, no subsequent finish() call can downgrade it.
+        if task.state == STATE_CANCELLED and state != STATE_CANCELLED:
+            return
         task.state = state
         task.error = error
         if result is not None:

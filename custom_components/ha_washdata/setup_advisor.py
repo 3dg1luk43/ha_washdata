@@ -132,7 +132,9 @@ def compute_setup_phase(
     # cycle" nudge is stale and misleading regardless of whether the user ever
     # clicked Skip.
     _established = len(real) >= 2 or _real_cycle_count(past_cycles, real) >= 5
-    if has_real and not _established and not (coverage_gap and coverage_gap.get("suggest_create")) and not _is_step_suppressed("setup_skip_phase1", skipped_steps, now):
+    _coverage_gap_actionable = bool(coverage_gap and coverage_gap.get("suggest_create"))
+    _phase1_suppressed = _is_step_suppressed("setup_skip_phase1", skipped_steps, now)
+    if has_real and not _established and not _coverage_gap_actionable and not _phase1_suppressed:
         if has_recorded:
             first_recorded_profile = _first_recorded_profile_name(past_cycles, real)
             return SetupPhaseResult(

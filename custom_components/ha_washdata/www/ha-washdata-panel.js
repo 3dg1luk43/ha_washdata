@@ -1865,6 +1865,9 @@ class HaWashdataPanel extends HTMLElement {
       // the panel relying only on the 30s fallback poll — live cycle transitions
       // and task progress no longer update, and modal Escape/Tab are dead.
       this._setupSubscriptions();
+      // Immediately refresh state so a navigate-away/back shows current data
+      // instead of waiting up to 30s for the next poll tick.
+      this._fetchAll();
       // Re-attach the modal keyboard handler (removed on disconnect).
       if (this.shadowRoot && !this._kbdHandler) {
         this._kbdHandler = (e) => this._onKeydown(e);

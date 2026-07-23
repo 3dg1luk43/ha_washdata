@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import itertools
 import logging
 import math
 from dataclasses import dataclass
@@ -1725,7 +1726,7 @@ class CycleDetector:
             return True  # too few points to trust as a sustained window
         max_gap = self._outage_threshold_s()
         ordered = sorted(t.timestamp() for t in window_ts)
-        return any((b - a) > max_gap for a, b in zip(ordered, ordered[1:]))
+        return any((b - a) > max_gap for a, b in itertools.pairwise(ordered))
 
     def _outage_threshold_s(self) -> float:
         """Sensor-adaptive gap ceiling (seconds): intervals longer than this are
