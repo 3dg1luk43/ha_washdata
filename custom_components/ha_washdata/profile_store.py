@@ -6257,11 +6257,14 @@ class ProfileStore:
         # repeated import stays idempotent (otherwise envelopes get double-weighted and
         # cycle_count inflates). Keyed on the CANONICAL source id, so a legacy double-prefixed
         # persisted value and a fresh single-prefixed import map to the same key.
-        existing_ref_sources: set[str] = {
-            _ref_dedup_key((c.get("meta") or {}).get("source"))
-            for c in self._data.get("reference_cycles", [])
-            if isinstance(c, dict) and (c.get("meta") or {}).get("source")
-        }
+        existing_ref_sources: set[str] = set()
+        for c in self._data.get("reference_cycles", []):
+            if not isinstance(c, dict):
+                continue
+            meta = c.get("meta")
+            src = meta.get("source") if isinstance(meta, dict) else None
+            if src:
+                existing_ref_sources.add(_ref_dedup_key(src))
 
         # ── Step 2: reference cycles (shape-only) ───────────────────────────────
         # Each record is processed defensively: a single malformed record is skipped (not
