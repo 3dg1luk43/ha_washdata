@@ -270,25 +270,33 @@ class WashDataCardRegistration:
 
 
 async def _async_register_path(hass: HomeAssistant, url_path: str, path: str) -> None:
-    """Register one static path, falling back to the sync helper on any API failure.
+    """Register one static path.
 
-    Attempts the modern ``async_register_static_paths`` API first; on any
-    exception (ImportError when the new API isn't available, AttributeError, or
-    a ValueError/'already registered' from HA itself) falls back silently to
-    ``_register_static_path``.
+    Uses the modern ``async_register_static_paths`` API when available.  Falls
+    back to the legacy sync helper only when that API is absent — not on a
+    genuine registration failure.  An already-registered path is treated as
+    success (benign on integration reload); any other exception propagates so
+    the caller can decide whether to report failure.
     """
     try:
         from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
-
-        if hasattr(hass.http, "async_register_static_paths"):
-            await hass.http.async_register_static_paths(
-                [StaticPathConfig(url_path, path, cache_headers=True)]
-            )
-        else:
-            _register_static_path(hass, url_path, path)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Static path registration failed, falling back %s: %s", url_path, exc)
+    except ImportError:
         _register_static_path(hass, url_path, path)
+        return
+
+    if not hasattr(hass.http, "async_register_static_paths"):
+        _register_static_path(hass, url_path, path)
+        return
+
+    try:
+        await hass.http.async_register_static_paths(
+            [StaticPathConfig(url_path, path, cache_headers=True)]
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        if "already" in str(exc).lower():
+            _LOGGER.debug("Static path already registered (ok): %s", url_path)
+            return
+        raise
 
 
 async def _do_register_static_paths(hass: HomeAssistant, src: Path) -> bool:
