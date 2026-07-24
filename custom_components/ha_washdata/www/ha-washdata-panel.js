@@ -5226,6 +5226,8 @@ class HaWashdataPanel extends HTMLElement {
       ['end_repeat_count',        'End Repeat Count',      '',  'Low readings in a row before ending',          'advanced'],
       ['interrupted_min_seconds', 'Interrupted Min',       's', 'Short cycles flagged as interrupted',          'advanced'],
       ['anti_wrinkle_max_power',  'Max Anti-Wrinkle Power','W', 'A pulse above this ends anti-wrinkle and opens a new cycle', 'advanced'],
+      ['anti_wrinkle_max_duration','Max Anti-Wrinkle Duration','s', 'A pulse longer than this ends anti-wrinkle and opens a new cycle', 'advanced'],
+      ['anti_wrinkle_exit_power', 'Anti-Wrinkle Exit Power','W', 'Power must fall below this between pulses for anti-wrinkle to stay active', 'advanced'],
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
       ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
       ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
