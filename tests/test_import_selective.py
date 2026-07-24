@@ -351,6 +351,20 @@ async def test_replace_overwrite_carries_file_envelope(store):
 
 
 @pytest.mark.asyncio
+async def test_replace_empty_after_id_filter_guarded(store):
+    # A stale/malformed id selection that filters every source cycle out must abort the
+    # replace (guarding on the post-filter set) rather than wipe the destination empty.
+    await store.add_reference_cycle("Keep", _trace(1000), {"store_cycle_id": "keep"})
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}},
+                       past=[_cyc("p1", "Cotton 40", 2000)])
+    with pytest.raises(ValueError):
+        await store.async_import_data_selective(
+            payload, selection={"categories": ["real_cycles"], "real_cycle_ids": ["does-not-exist"]},
+            mode="replace", cycle_destination="reference", local_device_type="washing_machine")
+    assert len(store.get_reference_cycles()) == 1  # untouched -- not wiped
+
+
+@pytest.mark.asyncio
 async def test_replace_real_cycles_to_reference_wipes_reference_list(store):
     # Replace mode + only "real_cycles" ticked + default reference destination routes the
     # imported real cycles into reference_cycles, so that list (the actual destination) must
