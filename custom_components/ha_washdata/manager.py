@@ -1866,6 +1866,9 @@ class WashDataManager:
                 STATE_RUNNING,
             )
             if d_state == STATE_RUNNING:
+                # Skip the sensor change but continue with the other config
+                # updates: returning here would silently drop every setting
+                # saved alongside the sensor in the same submission.
                 self._logger.warning(
                     "Cannot change power sensor from %s to %s while a cycle "
                     "is active. Please wait for the current cycle to complete "
@@ -1873,32 +1876,30 @@ class WashDataManager:
                     self.power_sensor_entity_id,
                     new_sensor,
                 )
-                # Skip sensor change but continue with other config updates
-                return
-
-            self._logger.info(
-                "Power sensor changed: %s -> %s", self.power_sensor_entity_id, new_sensor
-            )
-            self.power_sensor_entity_id = new_sensor
-            # Remove old listener
-            if self._remove_listener:
-                self._remove_listener()
-            # Attach new listener
-            self._remove_listener = async_track_state_change_event(
-                self.hass, [self.power_sensor_entity_id], self._async_power_changed
-            )
-            # Force update from new sensor
-            state = self.hass.states.get(self.power_sensor_entity_id)
-            if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
-                try:
-                    power = float(state.state)
-                    self.detector.process_reading(power, dt_util.now())
-                except ValueError:
-                    self._logger.debug(
-                        "Initial power value for %s after config reload is not numeric: %r",
-                        self.power_sensor_entity_id,
-                        state.state,
-                    )
+            else:
+                self._logger.info(
+                    "Power sensor changed: %s -> %s", self.power_sensor_entity_id, new_sensor
+                )
+                self.power_sensor_entity_id = new_sensor
+                # Remove old listener
+                if self._remove_listener:
+                    self._remove_listener()
+                # Attach new listener
+                self._remove_listener = async_track_state_change_event(
+                    self.hass, [self.power_sensor_entity_id], self._async_power_changed
+                )
+                # Force update from new sensor
+                state = self.hass.states.get(self.power_sensor_entity_id)
+                if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
+                    try:
+                        power = float(state.state)
+                        self.detector.process_reading(power, dt_util.now())
+                    except ValueError:
+                        self._logger.debug(
+                            "Initial power value for %s after config reload is not numeric: %r",
+                            self.power_sensor_entity_id,
+                            state.state,
+                        )
 
         # Update device type
         self.device_type = config_entry.options.get(

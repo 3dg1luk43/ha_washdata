@@ -399,3 +399,49 @@ def test_anti_wrinkle_idle_timeout_is_configurable() -> None:
         min_power=5.0, off_delay=60, anti_wrinkle_idle_timeout=900.0
     )
     assert tuned.anti_wrinkle_idle_timeout == 900.0
+
+
+def test_anti_wrinkle_idle_timeout_never_below_dynamic_floor(
+    mock_callbacks: dict[str, Mock],
+) -> None:
+    """A configured tolerance below the dynamic end threshold does not shorten it.
+
+    The exit takes ``max(dynamic_end_threshold, anti_wrinkle_idle_timeout)``, so
+    even a 0 s setting cannot end the mode on the first quiet reading.
+    """
+    config = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=60,
+        device_type=DEVICE_TYPE_DRYER,
+        anti_wrinkle_enabled=True,
+        anti_wrinkle_max_power=400.0,
+        anti_wrinkle_max_duration=60.0,
+        anti_wrinkle_exit_power=0.8,
+        anti_wrinkle_idle_timeout=0.0,
+    )
+    detector = CycleDetector(
+        config=config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+
+    detector.process_reading(500.0, dt(0))
+    detector.process_reading(500.0, dt(10))
+    for t in range(10, 1500, 10):
+        detector.process_reading(500.0, dt(t))
+
+    # Readings every 10 s put the dynamic end threshold well above zero.
+    t = 1500
+    while detector.state != STATE_ANTI_WRINKLE and t < 1900:
+        t += 10
+        detector.process_reading(1.0, dt(t))
+    assert detector.state == STATE_ANTI_WRINKLE
+
+    # One more quiet reading must not be enough despite the 0 s setting.
+    detector.process_reading(1.0, dt(t + 10))
+    assert detector.state == STATE_ANTI_WRINKLE
+
+    # Past the dynamic floor it ends normally.
+    for i in range(2, 12):
+        detector.process_reading(1.0, dt(t + 10 * i))
+    assert detector.state == STATE_OFF
