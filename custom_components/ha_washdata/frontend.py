@@ -42,6 +42,7 @@ PANEL_STATIC_REGISTERED = "ha_washdata_panel_static_registered"
 # only the user's language + en fallback, instead of one monolithic bundle.
 PANEL_TRANSLATIONS_DIRNAME = "panel"
 PANEL_TRANSLATIONS_URL = f"/{LOCAL_SUBDIR}/panel-translations"
+BRAND_ICON_URL = f"/{LOCAL_SUBDIR}/icon.png"
 CARD_DEFERRED = "deferred"
 CARD_FAILED = "failed"
 CardRegisterResult = Literal["registered", "deferred", "failed"]
@@ -326,6 +327,22 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
                 except Exception as exc:  # pylint: disable=broad-exception-caught
                     _LOGGER.debug("Panel translations path registration failed: %s", exc)
                     _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
+
+            # Serve brand/icon.png so the panel header can display the real icon.
+            icon_src = Path(__file__).parent / "brand" / "icon.png"
+            if await hass.async_add_executor_job(icon_src.exists):
+                try:
+                    from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
+
+                    if hasattr(hass.http, "async_register_static_paths"):
+                        await hass.http.async_register_static_paths(
+                            [StaticPathConfig(BRAND_ICON_URL, str(icon_src), True)]
+                        )
+                    else:
+                        _register_static_path(hass, BRAND_ICON_URL, str(icon_src))
+                except Exception as exc:  # pylint: disable=broad-exception-caught
+                    _LOGGER.debug("Brand icon path registration failed: %s", exc)
+                    _register_static_path(hass, BRAND_ICON_URL, str(icon_src))
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _LOGGER.warning("WashData panel static path registration failed: %s", exc)
             hass.data.pop(PANEL_STATIC_REGISTERED, None)

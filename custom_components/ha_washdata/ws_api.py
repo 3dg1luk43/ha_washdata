@@ -3222,6 +3222,14 @@ def ws_get_constants(
         {"id": key, "label": label}
         for key, label in DEVICE_TYPES.items()
     ]
+    import json as _json  # pylint: disable=import-outside-toplevel
+    from pathlib import Path as _Path  # pylint: disable=import-outside-toplevel
+    from .frontend import BRAND_ICON_URL as _BRAND_ICON_URL  # pylint: disable=import-outside-toplevel
+    try:
+        _manifest = _json.loads((_Path(__file__).parent / "manifest.json").read_text(encoding="utf-8"))
+        _version = _manifest.get("version", "")
+    except Exception:  # pylint: disable=broad-exception-caught
+        _version = ""
     from .const import STORE_WEB_ORIGIN
     from . import store_account
     from .const import (  # pylint: disable=import-outside-toplevel
@@ -3240,6 +3248,8 @@ def ws_get_constants(
         MATCH_ENERGY_SCALE,
     )
     _send_result(connection, msg["id"], "get_constants", {
+            "version": _version,
+            "icon_url": _BRAND_ICON_URL,
             "device_types": device_types,
             "state_colors": dict(STATE_COLORS),
             "ml_lab_enabled": SHOW_ML_LAB,
