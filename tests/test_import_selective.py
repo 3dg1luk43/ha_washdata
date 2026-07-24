@@ -381,6 +381,20 @@ async def test_replace_all_degenerate_reference_traces_guarded(store):
 
 
 @pytest.mark.asyncio
+async def test_replace_real_history_all_malformed_guarded(store):
+    # Replace into real_history where every selected record lacks start_time/duration (so
+    # Step 3 would skip them all) must abort, not wipe past_cycles and refill nothing.
+    store._data["past_cycles"] = [_cyc("keep", "Wool 20", 900)]
+    bad = {"id": "b1", "profile_name": "Cotton 40", "power_data": _trace(2000)}  # no start_time/duration
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}}, past=[bad])
+    with pytest.raises(ValueError):
+        await store.async_import_data_selective(
+            payload, selection={"categories": ["real_cycles"]},
+            mode="replace", cycle_destination="real_history", local_device_type="washing_machine")
+    assert len(store.get_past_cycles()) == 1  # not wiped
+
+
+@pytest.mark.asyncio
 async def test_replace_real_cycles_to_reference_wipes_reference_list(store):
     # Replace mode + only "real_cycles" ticked + default reference destination routes the
     # imported real cycles into reference_cycles, so that list (the actual destination) must

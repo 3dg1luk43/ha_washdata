@@ -6135,6 +6135,15 @@ class ProfileStore:
             # the wipe guard checks usability, not mere presence, for reference-bound cycles.
             return any(_usable_reference_pairs(c.get("power_data")) is not None for c in cs)
 
+        def _any_real_importable(cs: list[dict[str, Any]]) -> bool:
+            # A real-history record is skipped in Step 3 if it lacks start_time/duration (the
+            # fields _add_cycle_data requires), so the wipe guard requires at least one record
+            # that carries both -- otherwise an all-malformed selection wipes past_cycles and
+            # refills nothing.
+            return any(
+                c.get("start_time") is not None and c.get("duration") is not None for c in cs
+            )
+
         # Replace-mode anti-data-loss guard: never wipe a destination unless the file has a
         # SELECTED set that will actually refill it. Guarding on the post-filter sets (not raw
         # src_*) means a stale/malformed id selection that matches nothing aborts here instead
@@ -6151,7 +6160,7 @@ class ProfileStore:
                     raise ValueError(
                         "Import payload has no usable cycles — aborting to prevent data loss"
                     )
-                if cycle_destination == "real_history" and not selected_past:
+                if cycle_destination == "real_history" and not _any_real_importable(selected_past):
                     raise ValueError(
                         "Import payload contains no real cycles — aborting to prevent data loss"
                     )
