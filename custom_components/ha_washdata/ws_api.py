@@ -3233,7 +3233,7 @@ def ws_get_constants(
         {"id": key, "label": label}
         for key, label in DEVICE_TYPES.items()
     ]
-    from .frontend import BRAND_ICON_URL as _BRAND_ICON_URL  # pylint: disable=import-outside-toplevel
+    from .frontend import BRAND_ICON_URL as _BRAND_ICON_URL, BRAND_ICON_REGISTERED_KEY as _BRAND_ICON_KEY  # pylint: disable=import-outside-toplevel
     from .const import STORE_WEB_ORIGIN
     from . import store_account
     from .const import (  # pylint: disable=import-outside-toplevel
@@ -3253,7 +3253,7 @@ def ws_get_constants(
     )
     _send_result(connection, msg["id"], "get_constants", {
             "version": _INTEGRATION_VERSION,
-            "icon_url": _BRAND_ICON_URL,
+            "icon_url": _BRAND_ICON_URL if hass.data.get(_BRAND_ICON_KEY) else None,
             "device_types": device_types,
             "state_colors": dict(STATE_COLORS),
             "ml_lab_enabled": SHOW_ML_LAB,
