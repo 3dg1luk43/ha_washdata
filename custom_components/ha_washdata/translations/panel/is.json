@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Gagnvirkt aflrit fyrir lotuna: haltu bendlinum yfir til að lesa tíma/afl, skrunaðu til að þysja, dragðu til að hliðra",
     "pg_alert_timeout_end": "Endaði vegna tímamarka, ekki vegna spár",
     "pg_alert_indefinite": "Myndi ganga endalaust",
-    "pg_alert_stress_cap": "8 klst. öryggismörk náð",
+    "pg_alert_stress_cap": "Öryggismörk náð",
     "pg_alert_stress_ok": "Aðgerðalaus lok: lota stöðvuð",
     "pg_alert_stress_warn": "Biðstraumur yfir stöðvunarþröskuldi",
     "task_pg_history": "Prófa á sögu",

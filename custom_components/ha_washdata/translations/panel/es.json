@@ -524,7 +524,7 @@
     "pg_alert_unmatched": "Sin coincidencia",
     "pg_alert_ambiguous": "Coincidencia ambigua",
     "pg_alert_energy": "Anomalía de energía",
-    "pg_alert_stress_cap": "Límite de seguridad de 8 h alcanzado",
+    "pg_alert_stress_cap": "Límite de seguridad alcanzado",
     "pg_alert_stress_ok": "Terminación en reposo: ciclo detenido",
     "pg_alert_stress_warn": "Consumo en reposo por encima del umbral de parada",
     "pg_newly_correct": "ahora correcto",

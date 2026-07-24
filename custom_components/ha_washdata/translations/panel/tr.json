@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Etkileşimli döngü güç grafiği: zamanı/gücü okumak için üzerine gelin, yakınlaştırmak için kaydırın, kaydırmak için sürükleyin",
     "pg_alert_timeout_end": "Tahminle değil, zaman aşımıyla sona erdi",
     "pg_alert_indefinite": "Süresiz olarak çalışırdı",
-    "pg_alert_stress_cap": "8 saatlik güvenlik sınırına ulaşıldı",
+    "pg_alert_stress_cap": "Güvenlik sınırına ulaşıldı",
     "pg_alert_stress_ok": "Bekleme sonlandırması: döngü durduruldu",
     "pg_alert_stress_warn": "Bekleme tüketimi durdurma eşiğinin üzerinde",
     "task_pg_history": "Geçmişte test et",

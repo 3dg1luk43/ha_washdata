@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Interaktiv effektgraf för cykeln: hovra för att avläsa tid/effekt, skrolla för att zooma, dra för att panorera",
     "pg_alert_timeout_end": "Avslutad genom timeout, inte genom förutsägelse",
     "pg_alert_indefinite": "Skulle köra i all oändlighet",
-    "pg_alert_stress_cap": "8 h säkerhetsgräns nådd",
+    "pg_alert_stress_cap": "Säkerhetsgräns nådd",
     "pg_alert_stress_ok": "Inaktiv avslutning: cykel stoppad",
     "pg_alert_stress_warn": "Standby-förbrukning över stopptröskel",
     "task_pg_history": "Testa på historik",

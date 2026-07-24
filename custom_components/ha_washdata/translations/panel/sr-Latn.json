@@ -547,7 +547,7 @@
     "aria_playground_chart2": "Interaktivni grafikon snage ciklusa: pređite mišem za prikaz vremena/snage, pomerajte točkić za zumiranje, prevucite za pomeranje",
     "pg_alert_timeout_end": "Završeno zbog isteka vremena, a ne na osnovu predviđanja",
     "pg_alert_indefinite": "Radio bi beskonačno",
-    "pg_alert_stress_cap": "Dostignut 8-satni sigurnosni limit",
+    "pg_alert_stress_cap": "Dostignut sigurnosni limit",
     "pg_alert_stress_ok": "Detekcija mirovanja: ciklus zaustavljen",
     "pg_alert_stress_warn": "Potrošnja u mirovanju iznad praga zaustavljanja",
     "pg_stress_group": "Test detekcije mirovanja",

@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Interaktīva cikla jaudas diagramma: turiet kursoru virs, lai nolasītu laiku/jaudu, ritiniet, lai tuvinātu, velciet, lai pārvietotu",
     "pg_alert_timeout_end": "Beidzās pēc noildzes, nevis prognozes",
     "pg_alert_indefinite": "Darbotos bezgalīgi",
-    "pg_alert_stress_cap": "Sasniegts 8 h drošības ierobežojums",
+    "pg_alert_stress_cap": "Sasniegts drošības ierobežojums",
     "pg_alert_stress_ok": "Dīkstāves apturēšana: cikls apturēts",
     "pg_alert_stress_warn": "Dīkstāves patēriņš pārsniedz apstāšanās slieksni",
     "task_pg_history": "Pārbaudīt vēsturē",

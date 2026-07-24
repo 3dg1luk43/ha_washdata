@@ -547,7 +547,7 @@
     "aria_playground_chart2": "Interaktywny wykres mocy cyklu: najedź, aby odczytać czas/moc, przewiń, aby powiększyć, przeciągnij, aby przesunąć",
     "pg_alert_timeout_end": "Zakończono z powodu limitu czasu, nie na podstawie prognozy",
     "pg_alert_indefinite": "Działałby w nieskończoność",
-    "pg_alert_stress_cap": "Osiągnięto 8-godzinny limit bezpieczeństwa",
+    "pg_alert_stress_cap": "Osiągnięto limit bezpieczeństwa",
     "pg_alert_stress_ok": "Wykrycie stanu bezczynności: cykl zatrzymany",
     "pg_alert_stress_warn": "Pobór mocy w trybie bezczynności powyżej progu zatrzymania",
     "pg_stress_group": "Test zatrzymania w stanie bezczynności",

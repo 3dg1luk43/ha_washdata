@@ -6173,12 +6173,19 @@ class ProfileStore:
                 created_profiles += 1
 
         # Replace-mode wipes (hoisted so the id pools + dedup set below reflect the
-        # post-wipe lists). Only the ticked category's list is cleared; the empty-payload
-        # guard above already refused to run if the file had nothing to replace it with.
+        # post-wipe lists). Each ticked cycle category clears the list it actually writes to
+        # (per the docstring's "each ticked category is wiped and replaced"), so real_cycles
+        # routed to the default reference destination wipes reference_cycles too -- not just
+        # when the reference_cycles category itself is ticked. The empty-payload guard above
+        # already refused to run if the file had nothing to replace it with.
         if mode == "replace":
-            if "reference_cycles" in cats:
+            wipe_reference = "reference_cycles" in cats or (
+                "real_cycles" in cats and cycle_destination == "reference"
+            )
+            wipe_past = "real_cycles" in cats and cycle_destination == "real_history"
+            if wipe_reference:
                 self._data["reference_cycles"] = []
-            if "real_cycles" in cats and cycle_destination == "real_history":
+            if wipe_past:
                 self._data["past_cycles"] = []
 
         # O(N) id pools threaded through the bulk cycle adds so SHA-id uniqueness stays

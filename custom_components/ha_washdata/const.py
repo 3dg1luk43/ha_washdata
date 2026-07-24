@@ -1005,3 +1005,6 @@ PLAYGROUND_STRESS_DENSE_STEP_S: float = 30.0         # dense pre-fill cadence
 PLAYGROUND_STRESS_DENSE_DURATION_S: float = 1200.0   # dense pre-fill length (20 min)
 PLAYGROUND_STRESS_SPARSE_STEP_S: float = 1800.0      # sparse main step (30 min)
 PLAYGROUND_STRESS_MAX_SPARSE_STEPS: int = 15         # max sparse steps → max 7.5 h extra
+PLAYGROUND_STRESS_MAX_IDLE_W: float = 100000.0       # upper bound for a manual idle override
+                                                     # (far beyond any appliance; guards against
+                                                     # inf/absurd values corrupting synthesis)

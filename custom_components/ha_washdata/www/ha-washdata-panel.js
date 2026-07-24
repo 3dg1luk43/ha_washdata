@@ -5478,7 +5478,7 @@ class HaWashdataPanel extends HTMLElement {
       would_run_indefinitely: this._t('lbl.pg_alert_indefinite', {}, 'Would run indefinitely'),
       stress_terminated: this._t('lbl.pg_alert_stress_ok', {}, 'Idle termination: cycle stopped'),
       stress_above_threshold: this._t('lbl.pg_alert_stress_warn', {}, 'Idle draw above stop threshold'),
-      stress_hit_cap: this._t('lbl.pg_alert_stress_cap', {}, 'Hit 8 h safety cap'),
+      stress_hit_cap: this._t('lbl.pg_alert_stress_cap', {}, 'Hit safety cap'),
     };
     return map[code] || code;
   }

@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Interactieve vermogensgrafiek van de cyclus: beweeg de muis eroverheen om tijd/vermogen af te lezen, scroll om te zoomen, sleep om te verschuiven",
     "pg_alert_timeout_end": "Beëindigd door time-out, niet door voorspelling",
     "pg_alert_indefinite": "Zou eindeloos blijven draaien",
-    "pg_alert_stress_cap": "8 uur veiligheidslimiet bereikt",
+    "pg_alert_stress_cap": "Veiligheidslimiet bereikt",
     "pg_alert_stress_ok": "Inactieve beëindiging: cyclus gestopt",
     "pg_alert_stress_warn": "Standby-verbruik boven stoptempel",
     "task_pg_history": "Testen op geschiedenis",

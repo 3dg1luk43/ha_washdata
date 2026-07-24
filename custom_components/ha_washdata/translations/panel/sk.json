@@ -547,7 +547,7 @@
     "aria_playground_chart2": "Interaktívny graf výkonu cyklu: prejdením myšou zobrazíte čas/výkon, kolieskom priblížite, ťahaním posuniete",
     "pg_alert_timeout_end": "Ukončené časovým limitom, nie predikciou",
     "pg_alert_indefinite": "Bežalo by donekonečna",
-    "pg_alert_stress_cap": "Dosiahnutý 8-hodinový bezpečnostný limit",
+    "pg_alert_stress_cap": "Dosiahnutý bezpečnostný limit",
     "pg_alert_stress_ok": "Detekcia nečinnosti: cyklus zastavený",
     "pg_alert_stress_warn": "Príkon v nečinnosti nad prahom zastavenia",
     "pg_stress_group": "Test detekcie nečinnosti",

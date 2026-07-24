@@ -214,6 +214,30 @@ def test_stress_negative_override_clamped_to_zero():
     assert st["idle_above_threshold"] is False
 
 
+def test_stress_override_non_finite_falls_back(monkeypatch):
+    """A non-finite override (inf/nan) is ignored (auto-derived floor used) rather than
+    corrupting the synthetic samples; the run still completes with a valid outcome."""
+    import math as _math
+    cycle = _make_cycle(duration_s=3600.0, tail_idle_w=1.0)
+    cfg = _cfg(stop_threshold_w=2.0, off_delay=180, min_off_gap=60)
+    for bad in (float("inf"), float("nan"), -float("inf")):
+        d = _run_stress(cycle, cfg, stress_idle_w=bad)
+        st = d["outcome"]["stress"]
+        assert st is not None and st.get("enabled") is True
+        assert _math.isfinite(st["idle_w"]) and st["idle_w"] >= 0.0
+
+
+def test_stress_override_huge_clamped():
+    """An absurdly large override is clamped to the documented ceiling, never inf."""
+    from custom_components.ha_washdata.const import PLAYGROUND_STRESS_MAX_IDLE_W
+    cycle = _make_cycle(duration_s=3600.0, tail_idle_w=1.0)
+    cfg = _cfg(stop_threshold_w=2.0, off_delay=180, min_off_gap=60)
+    d = _run_stress(cycle, cfg, stress_idle_w=1e12)
+    st = d["outcome"]["stress"]
+    assert st["idle_w"] == pytest.approx(PLAYGROUND_STRESS_MAX_IDLE_W, rel=1e-6)
+    assert st["idle_above_threshold"] is True
+
+
 def test_derive_idle_level_returns_floor_not_mean():
     """_derive_idle_level returns the p7 standby floor, not the contaminated mean."""
     base = datetime(2024, 1, 1, tzinfo=timezone.utc)

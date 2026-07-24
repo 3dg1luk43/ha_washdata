@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Interaktiv effektgraf for syklusen: hold pekeren over for å lese av tid/effekt, rull for å zoome, dra for å panorere",
     "pg_alert_timeout_end": "Avsluttet ved tidsavbrudd, ikke ved forutsigelse",
     "pg_alert_indefinite": "Ville kjøre i det uendelige",
-    "pg_alert_stress_cap": "8 t. sikkerhetsgrense nådd",
+    "pg_alert_stress_cap": "Sikkerhetsgrense nådd",
     "pg_alert_stress_ok": "Inaktiv avslutning: syklus stoppet",
     "pg_alert_stress_warn": "Standby-forbruk over stoppterskel",
     "task_pg_history": "Test på historikk",

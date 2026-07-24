@@ -446,7 +446,7 @@
     "pct_match_confidence": "{pct}% match confidence",
     "per_cycle_short": "cycle",
     "pg_alert_indefinite": "Would run indefinitely",
-    "pg_alert_stress_cap": "Hit 8 h safety cap",
+    "pg_alert_stress_cap": "Hit safety cap",
     "pg_alert_stress_ok": "Idle termination: cycle stopped",
     "pg_alert_stress_warn": "Idle draw above stop threshold",
     "pg_alert_timeout_end": "Ended by timeout, not prediction",

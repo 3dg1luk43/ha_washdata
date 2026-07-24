@@ -524,7 +524,7 @@
     "pg_alert_unmatched": "Senza abbinamento",
     "pg_alert_ambiguous": "Abbinamento ambiguo",
     "pg_alert_energy": "Anomalia di energia",
-    "pg_alert_stress_cap": "Limite di sicurezza di 8 h raggiunto",
+    "pg_alert_stress_cap": "Limite di sicurezza raggiunto",
     "pg_alert_stress_ok": "Terminazione a riposo: ciclo interrotto",
     "pg_alert_stress_warn": "Consumo in standby superiore alla soglia di arresto",
     "pg_newly_correct": "ora corretto",

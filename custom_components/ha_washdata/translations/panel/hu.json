@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Interaktív ciklusteljesítmény-grafikon: vigye rá a mutatót az idő/teljesítmény leolvasásához, görgessen a nagyításhoz, húzza az eltoláshoz",
     "pg_alert_timeout_end": "Időtúllépés miatt ért véget, nem előrejelzés alapján",
     "pg_alert_indefinite": "Végtelen ideig futna",
-    "pg_alert_stress_cap": "Elérte a 8 órás biztonsági korlátot",
+    "pg_alert_stress_cap": "Elérte a biztonsági korlátot",
     "pg_alert_stress_ok": "Üresjárati leállás: a ciklus megállt",
     "pg_alert_stress_warn": "Üresjárati fogyasztás meghaladja a leállási küszöböt",
     "task_pg_history": "Tesztelés előzményeken",
