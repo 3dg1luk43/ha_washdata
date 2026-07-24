@@ -36,13 +36,15 @@ PANEL_JS_URL = f"/{LOCAL_SUBDIR}/{PANEL_JS_NAME}"
 PANEL_ELEMENT = "ha-washdata-panel"
 PANEL_URL_PATH = "ha-washdata"
 PANEL_REGISTERED_KEY = "ha_washdata_panel_registered"
-PANEL_STATIC_REGISTERED = "ha_washdata_panel_static_registered"
 # Per-language panel translations are served straight from the integration's
 # translations/panel/ directory (one {lang}.json per language). The panel fetches
 # only the user's language + en fallback, instead of one monolithic bundle.
 PANEL_TRANSLATIONS_DIRNAME = "panel"
 PANEL_TRANSLATIONS_URL = f"/{LOCAL_SUBDIR}/panel-translations"
 BRAND_ICON_URL = f"/{LOCAL_SUBDIR}/icon.png"
+# Task stored in hass.data so concurrent setup_entry calls share it rather than
+# each doing an independent registration that races ahead to sidebar registration.
+PANEL_STATIC_TASK_KEY = "ha_washdata_panel_static_task"
 CARD_DEFERRED = "deferred"
 CARD_FAILED = "failed"
 CardRegisterResult = Literal["registered", "deferred", "failed"]
@@ -267,6 +269,61 @@ class WashDataCardRegistration:
         return CARD_FAILED
 
 
+async def _do_register_static_paths(hass: HomeAssistant, src: Path) -> bool:
+    """Register all WashData panel static HTTP paths.  Returns True on success."""
+    try:
+        # Panel JS (primary asset — must be available before the sidebar fires).
+        try:
+            from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
+
+            if hasattr(hass.http, "async_register_static_paths"):
+                await hass.http.async_register_static_paths(
+                    [StaticPathConfig(PANEL_JS_URL, str(src), True)]
+                )
+            else:
+                _register_static_path(hass, PANEL_JS_URL, str(src))
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Panel static path registration failed, falling back: %s", exc)
+            _register_static_path(hass, PANEL_JS_URL, str(src))
+
+        # Per-language translation files.
+        trans_src = Path(__file__).parent / "translations" / PANEL_TRANSLATIONS_DIRNAME
+        if await hass.async_add_executor_job(trans_src.is_dir):
+            try:
+                from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
+
+                if hasattr(hass.http, "async_register_static_paths"):
+                    await hass.http.async_register_static_paths(
+                        [StaticPathConfig(PANEL_TRANSLATIONS_URL, str(trans_src), True)]
+                    )
+                else:
+                    _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                _LOGGER.debug("Panel translations path registration failed: %s", exc)
+                _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
+
+        # Brand icon (panel header).
+        icon_src = Path(__file__).parent / "brand" / "icon.png"
+        if await hass.async_add_executor_job(icon_src.is_file):
+            try:
+                from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
+
+                if hasattr(hass.http, "async_register_static_paths"):
+                    await hass.http.async_register_static_paths(
+                        [StaticPathConfig(BRAND_ICON_URL, str(icon_src), cache_headers=True)]
+                    )
+                else:
+                    _register_static_path(hass, BRAND_ICON_URL, str(icon_src))
+            except (ImportError, AttributeError) as exc:
+                _LOGGER.debug("Brand icon path registration failed: %s", exc)
+                _register_static_path(hass, BRAND_ICON_URL, str(icon_src))
+
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.warning("WashData panel static path registration failed: %s", exc)
+        return False
+
+
 async def async_register_panel(hass: HomeAssistant) -> bool:
     """Serve ha-washdata-panel.js and register a sidebar panel with Home Assistant.
 
@@ -283,74 +340,32 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
         _LOGGER.warning("Panel JS not found at %s — sidebar panel not registered", src)
         return False
 
-    # Serve the JS module under /ha_washdata/ha-washdata-panel.js.
-    # Await the static path registration directly so the file is available
-    # before HA fires EVENT_PANELS_UPDATED and the frontend tries to import it.
-    # Guard with a flag set *before* the await so two concurrent setup_entry
-    # calls (multiple devices) don't both try to register the same route and
-    # log a benign "method GET is already registered" debug line.
-    if not hass.data.get(PANEL_STATIC_REGISTERED):
-        hass.data[PANEL_STATIC_REGISTERED] = True
-        # Outer guard: a static-path registration failure (including a raising
-        # fallback) must not escape and abort setup -- degrade gracefully like the
-        # sidebar-registration section below.
-        try:
-            try:
-                from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
+    # Coalesce concurrent setup_entry calls (multiple WashData devices) onto a
+    # single shared asyncio Task.  The first caller creates and stores the task;
+    # all callers — including the first — await it.  This guarantees every caller
+    # waits until the static paths are fully registered before proceeding to
+    # sidebar registration, eliminating the race where a concurrent caller skips
+    # the static-path block and races ahead to panel registration.
+    # A completed task that is re-awaited returns its result immediately, so
+    # later callers (e.g. a second device added after boot) are also fine.
+    if PANEL_STATIC_TASK_KEY not in hass.data:
+        hass.data[PANEL_STATIC_TASK_KEY] = hass.async_create_task(
+            _do_register_static_paths(hass, src)
+        )
 
-                if hasattr(hass.http, "async_register_static_paths"):
-                    await hass.http.async_register_static_paths(
-                        [StaticPathConfig(PANEL_JS_URL, str(src), True)]
-                    )
-                else:
-                    _register_static_path(hass, PANEL_JS_URL, str(src))
-            except Exception as exc:  # pylint: disable=broad-exception-caught
-                _LOGGER.debug("Panel static path registration failed, falling back: %s", exc)
-                _register_static_path(hass, PANEL_JS_URL, str(src))
+    try:
+        ok: bool = await hass.data[PANEL_STATIC_TASK_KEY]
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.warning("WashData panel static path registration failed: %s", exc)
+        hass.data.pop(PANEL_STATIC_TASK_KEY, None)
+        return False
 
-            # Serve the translations/panel/ directory for per-user-language loading.
-            # The panel fetches /ha_washdata/panel-translations/{lang}.json (+ en.json
-            # fallback) on demand, so browsers only download the language(s) in use
-            # rather than a monolithic all-languages bundle.
-            trans_src = Path(__file__).parent / "translations" / PANEL_TRANSLATIONS_DIRNAME
-            # Filesystem check offloaded to the executor (see note above).
-            if await hass.async_add_executor_job(trans_src.is_dir):
-                try:
-                    from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
+    if not ok:
+        hass.data.pop(PANEL_STATIC_TASK_KEY, None)
+        return False
 
-                    if hasattr(hass.http, "async_register_static_paths"):
-                        await hass.http.async_register_static_paths(
-                            [StaticPathConfig(PANEL_TRANSLATIONS_URL, str(trans_src), True)]
-                        )
-                    else:
-                        _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
-                except Exception as exc:  # pylint: disable=broad-exception-caught
-                    _LOGGER.debug("Panel translations path registration failed: %s", exc)
-                    _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
-
-            # Serve brand/icon.png so the panel header can display the real icon.
-            icon_src = Path(__file__).parent / "brand" / "icon.png"
-            if await hass.async_add_executor_job(icon_src.is_file):
-                try:
-                    from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
-
-                    if hasattr(hass.http, "async_register_static_paths"):
-                        await hass.http.async_register_static_paths(
-                            [StaticPathConfig(BRAND_ICON_URL, str(icon_src), cache_headers=True)]
-                        )
-                    else:
-                        _register_static_path(hass, BRAND_ICON_URL, str(icon_src))
-                except (ImportError, AttributeError) as exc:
-                    _LOGGER.debug("Brand icon path registration failed: %s", exc)
-                    _register_static_path(hass, BRAND_ICON_URL, str(icon_src))
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.warning("WashData panel static path registration failed: %s", exc)
-            hass.data.pop(PANEL_STATIC_REGISTERED, None)
-            return False
-
-    # Re-check after the await: with multiple WashData devices, all concurrent
-    # setup_entry calls pass the initial guard before any one of them sets the
-    # key. The first to resume after the await wins; the rest bail out here.
+    # Re-check after the await: another concurrent caller may have already
+    # registered the sidebar panel while we were waiting for the shared task.
     if hass.data.get(PANEL_REGISTERED_KEY):
         return True
 
@@ -403,14 +418,12 @@ async def async_unregister_panel(hass: HomeAssistant) -> None:
     be called from ``async_unload_entry`` when the *final* WashData config entry
     is removed, so no stale panel registration, sidebar entry, or static route is
     left behind.  Mirrors the register flow and is guarded by the same
-    once-per-boot keys (``PANEL_REGISTERED_KEY`` / ``PANEL_STATIC_REGISTERED``),
+    once-per-boot keys (``PANEL_REGISTERED_KEY`` / ``PANEL_STATIC_TASK_KEY``),
     so it is a no-op when the panel was never registered and is safe to call
     repeatedly.  After clearing the guards a later setup revalidates the assets
     and registers the panel + routes again.
     """
-    if not hass.data.get(PANEL_REGISTERED_KEY) and not hass.data.get(
-        PANEL_STATIC_REGISTERED
-    ):
+    if not hass.data.get(PANEL_REGISTERED_KEY) and PANEL_STATIC_TASK_KEY not in hass.data:
         return
 
     # Remove the sidebar panel using Home Assistant's supported API.
@@ -428,4 +441,4 @@ async def async_unregister_panel(hass: HomeAssistant) -> None:
     # and re-register the routes (a benign "already registered" debug line at
     # worst) rather than leaving a stale registration flag behind.
     hass.data.pop(PANEL_REGISTERED_KEY, None)
-    hass.data.pop(PANEL_STATIC_REGISTERED, None)
+    hass.data.pop(PANEL_STATIC_TASK_KEY, None)
