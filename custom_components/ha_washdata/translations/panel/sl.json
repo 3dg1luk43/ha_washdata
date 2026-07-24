@@ -547,7 +547,7 @@
     "aria_playground_chart2": "Interaktivni graf moči cikla: pomaknite kazalec za prikaz časa/moči, drsajte za povečavo, povlecite za premikanje",
     "pg_alert_timeout_end": "Končano zaradi časovne omejitve, ne na podlagi napovedi",
     "pg_alert_indefinite": "Deloval bi v nedogled",
-    "pg_alert_stress_cap": "Dosežena 8-urna varnostna meja",
+    "pg_alert_stress_cap": "Dosežena varnostna meja",
     "pg_alert_stress_ok": "Zaznavanje mirovanja: cikel ustavljen",
     "pg_alert_stress_warn": "Poraba v mirovanju nad pragom ustavitve",
     "pg_stress_group": "Preizkus zaznave mirovanja",

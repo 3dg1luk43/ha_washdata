@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Interaktiivinen jakson tehokaavio: vie osoitin päälle lukeaksesi ajan/tehon, vieritä zoomataksesi, vedä panoroidaksesi",
     "pg_alert_timeout_end": "Päättyi aikakatkaisuun, ei ennusteeseen",
     "pg_alert_indefinite": "Kävisi loputtomiin",
-    "pg_alert_stress_cap": "8 tunnin turvaraja saavutettu",
+    "pg_alert_stress_cap": "Turvaraja saavutettu",
     "pg_alert_stress_ok": "Valmiustilan päätös: sykli pysäytetty",
     "pg_alert_stress_warn": "Valmiustilan kulutus ylittää pysäytyskynnyksen",
     "task_pg_history": "Testaa historialla",

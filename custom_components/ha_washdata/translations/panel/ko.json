@@ -553,7 +553,7 @@
     "aria_playground_chart2": "대화형 사이클 전력 그래프: 마우스를 올리면 시간/전력 표시, 스크롤하여 확대/축소, 드래그하여 이동",
     "pg_alert_timeout_end": "예측이 아닌 타임아웃으로 종료됨",
     "pg_alert_indefinite": "무한정 계속 실행됨",
-    "pg_alert_stress_cap": "8시간 안전 한도에 도달했습니다",
+    "pg_alert_stress_cap": "안전 한도에 도달했습니다",
     "pg_alert_stress_ok": "대기 상태 종료: 사이클이 중지되었습니다",
     "pg_alert_stress_warn": "대기 전력이 정지 임계값을 초과합니다",
     "task_pg_history": "기록으로 테스트",

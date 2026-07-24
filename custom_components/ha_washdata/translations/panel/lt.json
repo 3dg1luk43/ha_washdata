@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Interaktyvus ciklo galios grafikas: užveskite žymeklį, kad nuskaitytumėte laiką/galią, slinkite, kad priartintumėte, vilkite, kad pastumtumėte",
     "pg_alert_timeout_end": "Baigta pasibaigus skirtajam laikui, o ne pagal prognozę",
     "pg_alert_indefinite": "Veiktų neribotą laiką",
-    "pg_alert_stress_cap": "Pasiektas 8 val. apsauginis limitas",
+    "pg_alert_stress_cap": "Pasiektas apsauginis limitas",
     "pg_alert_stress_ok": "Budėjimo nutraukimas: ciklas sustabdytas",
     "pg_alert_stress_warn": "Budėjimo suvartojimas viršija sustabdymo slenkstį",
     "task_pg_history": "Testuoti su istorija",

@@ -524,7 +524,7 @@
     "pg_alert_unmatched": "Fără potrivire",
     "pg_alert_ambiguous": "Potrivire ambiguă",
     "pg_alert_energy": "Anomalie de energie",
-    "pg_alert_stress_cap": "Limita de siguranță de 8 h atinsă",
+    "pg_alert_stress_cap": "Limita de siguranță atinsă",
     "pg_alert_stress_ok": "Terminare în repaus: ciclu oprit",
     "pg_alert_stress_warn": "Consum în standby peste pragul de oprire",
     "pg_newly_correct": "acum corect",

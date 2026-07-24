@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Interaktives Leistungsdiagramm des Zyklus: zum Ablesen von Zeit/Leistung mit dem Zeiger darüberfahren, zum Zoomen scrollen, zum Verschieben ziehen",
     "pg_alert_timeout_end": "Durch Zeitüberschreitung beendet, nicht durch Vorhersage",
     "pg_alert_indefinite": "Würde unbegrenzt weiterlaufen",
-    "pg_alert_stress_cap": "8-Stunden-Sicherheitsstopp erreicht",
+    "pg_alert_stress_cap": "Sicherheitsstopp erreicht",
     "pg_alert_stress_ok": "Ruhezustandserkennung: Zyklus gestoppt",
     "pg_alert_stress_warn": "Ruhestromverbrauch über Stoppgrenze",
     "task_pg_history": "Mit Verlauf testen",

@@ -553,7 +553,7 @@
     "aria_playground_chart2": "交互式周期功率图：悬停查看时间/功率，滚动缩放，拖动平移",
     "pg_alert_timeout_end": "因超时而结束，并非预测结束",
     "pg_alert_indefinite": "将一直运行下去",
-    "pg_alert_stress_cap": "已达到 8 小时安全上限",
+    "pg_alert_stress_cap": "已达到安全上限",
     "pg_alert_stress_ok": "闲置终止: 运行周期已停止",
     "pg_alert_stress_warn": "待机功耗超过停止阈值",
     "task_pg_history": "用历史测试",

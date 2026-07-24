@@ -553,7 +553,7 @@
     "aria_playground_chart2": "Grafik interaktiv i fuqisë së ciklit: kaloni kursorin për të lexuar kohën/fuqinë, rrëshqitni për të zmadhuar, tërhiqni për të lëvizur",
     "pg_alert_timeout_end": "Përfundoi nga skadimi i kohës, jo nga parashikimi",
     "pg_alert_indefinite": "Do të vazhdonte pafundësisht",
-    "pg_alert_stress_cap": "U arrit kufiri i sigurisë 8 orë",
+    "pg_alert_stress_cap": "U arrit kufiri i sigurisë",
     "pg_alert_stress_ok": "Ndërprerja e gjendjes statike: cikli u ndal",
     "pg_alert_stress_warn": "Konsumi i gjendjes statike mbi pragun e ndalimit",
     "task_pg_history": "Testo në histori",

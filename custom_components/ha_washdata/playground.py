@@ -90,6 +90,7 @@ from .const import (
     PLAYGROUND_STRESS_DENSE_STEP_S,
     PLAYGROUND_STRESS_FLOOR_PERCENTILE,
     PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC,
+    PLAYGROUND_STRESS_MAX_IDLE_W,
     PLAYGROUND_STRESS_MAX_SPARSE_STEPS,
     PLAYGROUND_STRESS_SPARSE_STEP_S,
     PLAYGROUND_STRESS_TRAILING_WINDOW_S,
@@ -934,10 +935,13 @@ class _DetailSim:
         try:
             idle_w, fluct_w = self._derive_idle_level()
             if self.stress_idle_override is not None:
-                # Clamp to non-negative (the schema allows any float) so a negative
-                # override can't surface as a nonsensical "-Xw" idle draw; keep fluct_w
-                # from the single call above.
-                idle_w = max(0.0, float(self.stress_idle_override))
+                # The schema accepts any float. Reject non-finite (nan/inf) by keeping the
+                # auto-derived floor, and clamp to [0, MAX] so a negative can't surface as a
+                # nonsensical "-Xw" draw and a huge/inf value can't corrupt the synthetic
+                # power samples (NaN/inf detector math). fluct_w stays from the call above.
+                ov = float(self.stress_idle_override)
+                if math.isfinite(ov):
+                    idle_w = max(0.0, min(ov, PLAYGROUND_STRESS_MAX_IDLE_W))
 
             synthetic_from_s = self.cursor["t"]
             stop_thresh = float(getattr(self.config, "stop_threshold_w", 2.0))
@@ -981,6 +985,10 @@ class _DetailSim:
                 )
                 self.cursor["t"] = (flush_ts - self.base).total_seconds()
                 self.detector.force_end(flush_ts)
+                # Record a series sample at the forced-stop timestamp so the plotted tail
+                # reaches the reported elapsed time (otherwise the last point sits up to two
+                # sparse steps short of terminated_after_s).
+                self._sample(flush_ts)
 
             terminated = len(self.captured) > captured_before
             terminated_after_s: float | None = None

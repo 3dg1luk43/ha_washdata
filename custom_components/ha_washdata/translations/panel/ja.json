@@ -553,7 +553,7 @@
     "aria_playground_chart2": "インタラクティブなサイクル電力グラフ: ホバーで時刻/電力を表示、スクロールでズーム、ドラッグで移動",
     "pg_alert_timeout_end": "予測ではなくタイムアウトで終了しました",
     "pg_alert_indefinite": "いつまでも終了しません",
-    "pg_alert_stress_cap": "8時間の安全制限に達しました",
+    "pg_alert_stress_cap": "安全制限に達しました",
     "pg_alert_stress_ok": "待機終了: サイクルが停止しました",
     "pg_alert_stress_warn": "待機電力が停止しきい値を超えています",
     "task_pg_history": "履歴でテスト",

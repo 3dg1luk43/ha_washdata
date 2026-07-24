@@ -351,6 +351,24 @@ async def test_replace_overwrite_carries_file_envelope(store):
 
 
 @pytest.mark.asyncio
+async def test_replace_real_cycles_to_reference_wipes_reference_list(store):
+    # Replace mode + only "real_cycles" ticked + default reference destination routes the
+    # imported real cycles into reference_cycles, so that list (the actual destination) must
+    # be wiped first -- otherwise replace silently behaves like merge for reference_cycles.
+    await store.add_reference_cycle("Old", _trace(1000), {"store_cycle_id": "old"})
+    assert len(store.get_reference_cycles()) == 1
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}},
+                       past=[_cyc("p1", "Cotton 40", 2000)])
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["real_cycles"]},
+        mode="replace", cycle_destination="reference", local_device_type="washing_machine")
+    refs = store.get_reference_cycles()
+    assert len(refs) == 1                       # old wiped, one new added (not 2)
+    assert refs[0]["profile_name"] == "Cotton 40"
+    assert store.get_past_cycles() == []        # real_history untouched
+
+
+@pytest.mark.asyncio
 async def test_reference_reimport_is_idempotent(store):
     # Importing the same reference bundle twice must not duplicate cycles (which would
     # double-weight the envelope and inflate cycle_count).
