@@ -6236,9 +6236,17 @@ class ProfileStore:
             if isinstance(c, dict) and (c.get("meta") or {}).get("source")
         }
 
-        def _ref_dedup_key(raw_id: Any) -> str:
+        def _bare_store_id(raw_id: Any) -> str:
+            # A reference cycle exported after a prior import already carries
+            # meta.source="store:<id>". Strip that prefix so re-prefixing does not accumulate
+            # "store:store:..." across round-trips (which would make the dedup key and the
+            # stamped source drift apart and defeat re-import dedup).
             sid = str(raw_id or "")
-            return f"store:{sid}" if sid else ""
+            return sid[len("store:"):] if sid.startswith("store:") else sid
+
+        def _ref_dedup_key(raw_id: Any) -> str:
+            bare = _bare_store_id(raw_id)
+            return f"store:{bare}" if bare else ""
 
         # ── Step 2: reference cycles (shape-only) ───────────────────────────────
         # Each record is processed defensively: a single malformed record is skipped (not
@@ -6261,7 +6269,7 @@ class ProfileStore:
                         target,
                         c.get("power_data") or [],
                         {
-                            "store_cycle_id": raw_sid,
+                            "store_cycle_id": _bare_store_id(raw_sid),
                             "store_uploaded_at": src_meta.get("store_uploaded_at"),
                             "sampling_interval": c.get("sampling_interval"),
                         },
@@ -6298,7 +6306,7 @@ class ProfileStore:
                     _ensure_profile(target or "(imported)", c.get("duration") or 0)
                     cid = self._add_reference_cycle_nosave(
                         target or "(imported)", c.get("power_data") or [],
-                        {"store_cycle_id": raw_sid}, id_pool=ref_id_pool,
+                        {"store_cycle_id": _bare_store_id(raw_sid)}, id_pool=ref_id_pool,
                     )
                     if cid:
                         if dkey:
