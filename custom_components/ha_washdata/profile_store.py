@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import hashlib
 import json
@@ -1763,10 +1764,9 @@ class ProfileStore:
             },
         }
         if meta.get("sampling_interval"):
-            try:
+            # ignore a malformed sampling_interval rather than raise mid-import
+            with contextlib.suppress(TypeError, ValueError):
                 cycle["sampling_interval"] = float(meta["sampling_interval"])
-            except (TypeError, ValueError):
-                pass  # ignore a malformed sampling_interval rather than raise mid-import
         # A reference cycle implies its program exists locally; create a minimal profile
         # entry if absent so the matcher iterates it and the rebuild can set its template.
         profiles = self._data.setdefault("profiles", {})
@@ -6164,6 +6164,7 @@ class ProfileStore:
         conflicts_resolved = 0
         real_imported = 0
         ref_imported = 0
+        malformed_skipped = 0  # records dropped mid-import (surfaced in the summary)
 
         # ── Step 1: profiles + conflict resolution ──────────────────────────────
         if "profiles" in cats:
@@ -6281,6 +6282,7 @@ class ProfileStore:
                         touched.add(target)
                         ref_imported += 1
                 except Exception:  # noqa: BLE001 - skip a malformed record, never abort the import
+                    malformed_skipped += 1
                     self._logger.debug("selective import: skipped a malformed reference cycle", exc_info=True)
 
         # ── Step 3: real cycles (reference-shape or real-history) ───────────────
@@ -6336,6 +6338,7 @@ class ProfileStore:
                         touched.add(target)
                     real_imported += 1
               except Exception:  # noqa: BLE001 - skip a malformed record, never abort the import
+                  malformed_skipped += 1
                   self._logger.debug("selective import: skipped a malformed cycle", exc_info=True)
 
         # ── Step 4: leaf categories (additive merge / replace) ──────────────────
@@ -6391,6 +6394,7 @@ class ProfileStore:
             "real_cycles_imported": real_imported,
             "reference_cycles_imported": ref_imported,
             "conflicts_resolved": conflicts_resolved,
+            "skipped_cycles": malformed_skipped,
             "categories_applied": sorted(cats),
             "device_type_match": device_type_match,
             "settings": settings_out,

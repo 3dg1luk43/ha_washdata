@@ -399,6 +399,22 @@ async def test_replace_real_cycles_to_reference_wipes_reference_list(store):
 
 
 @pytest.mark.asyncio
+async def test_import_reports_skipped_malformed(store, monkeypatch):
+    # A per-record add that raises unexpectedly is skipped (not fatal) and counted in the
+    # summary's skipped_cycles, rather than silently vanishing.
+    def _boom(*a, **k):
+        raise RuntimeError("boom")
+    monkeypatch.setattr(store, "_add_reference_cycle_nosave", _boom)
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}},
+                       refs=[_cyc("r1", "Cotton 40", 2000)])
+    res = await store.async_import_data_selective(
+        payload, selection={"categories": ["reference_cycles"]},
+        mode="merge", local_device_type="washing_machine")
+    assert res["skipped_cycles"] == 1
+    assert res["reference_cycles_imported"] == 0
+
+
+@pytest.mark.asyncio
 async def test_reference_reimport_canonical_source_idempotent(store):
     # A reference cycle exported after a prior import carries meta.source="store:<id>".
     # Re-importing it must dedup (canonical provenance, no "store:store:" drift), not
