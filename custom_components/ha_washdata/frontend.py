@@ -330,17 +330,17 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
 
             # Serve brand/icon.png so the panel header can display the real icon.
             icon_src = Path(__file__).parent / "brand" / "icon.png"
-            if await hass.async_add_executor_job(icon_src.exists):
+            if await hass.async_add_executor_job(icon_src.is_file):
                 try:
                     from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
 
                     if hasattr(hass.http, "async_register_static_paths"):
                         await hass.http.async_register_static_paths(
-                            [StaticPathConfig(BRAND_ICON_URL, str(icon_src), True)]
+                            [StaticPathConfig(BRAND_ICON_URL, str(icon_src), cache_headers=True)]
                         )
                     else:
                         _register_static_path(hass, BRAND_ICON_URL, str(icon_src))
-                except Exception as exc:  # pylint: disable=broad-exception-caught
+                except (ImportError, AttributeError) as exc:
                     _LOGGER.debug("Brand icon path registration failed: %s", exc)
                     _register_static_path(hass, BRAND_ICON_URL, str(icon_src))
         except Exception as exc:  # pylint: disable=broad-exception-caught
