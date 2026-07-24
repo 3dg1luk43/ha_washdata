@@ -8686,7 +8686,9 @@ class HaWashdataPanel extends HTMLElement {
     const pgStressIdleW = sr.getElementById('wd-pg-stress-idle-w');
     if (pgStressIdleW) pgStressIdleW.addEventListener('input', () => {
       const v = parseFloat(pgStressIdleW.value);
-      this._pgStressIdleW = isNaN(v) ? null : v;
+      // Number.isFinite rejects Infinity (parseFloat("1e999")) which isNaN misses; clamp
+      // negatives out too (a type=number field still accepts them despite min="0").
+      this._pgStressIdleW = (Number.isFinite(v) && v >= 0) ? v : null;
     });
 
     // F3: Cycle selector
@@ -10135,7 +10137,7 @@ class HaWashdataPanel extends HTMLElement {
       const val = JSON.parse(btn.dataset.val);
       if (!key) return;
       const eid = dev.entry_id;
-      this._ws({ type: `${_DOMAIN}/ws_set_options`, entry_id: eid, options: { [key]: val } })
+      this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { [key]: val } })
         .then(() => this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }))
         .then(r => { this._opts = r.options || {}; return this._fetchSettingsChangelog(eid); })
         .then(() => {

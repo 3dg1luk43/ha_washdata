@@ -225,6 +225,8 @@ def test_stress_override_non_finite_falls_back(monkeypatch):
         st = d["outcome"]["stress"]
         assert st is not None and st.get("enabled") is True
         assert _math.isfinite(st["idle_w"]) and st["idle_w"] >= 0.0
+        # provenance: a non-finite override was NOT applied, so it must not claim one was
+        assert st["manual_override"] is False
 
 
 def test_stress_override_huge_clamped():

@@ -32,6 +32,7 @@ import logging
 import re
 import time
 import unicodedata
+from collections.abc import Callable
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -302,6 +303,26 @@ class StoreClient:
             return None
         return [_decode_doc(r["document"]) for r in rows if isinstance(r, dict) and "document" in r]
 
+    async def _cached_catalog_query(
+        self, key: str, build_sq: "Callable[[], dict[str, Any]]"
+    ) -> list[dict[str, Any]]:
+        """Shared cache-get -> (on miss) run query -> conditionally-cache flow for the public
+        catalog reads. ``build_sq`` is called only on a cache miss (kept lazy). A successful
+        result is cached only if no invalidation happened while the query was in flight (the
+        generation guard), so an in-flight read cannot re-cache a pre-write snapshot; a
+        transient failure (None) is never cached. Callers apply their own in-memory prefix
+        filter to the returned full list."""
+        cached = self._cache_get(key)
+        if cached is not None:
+            return cached
+        gen = self._cache_gen
+        fetched = await self._run_query(build_sq())
+        if fetched is None:
+            return []
+        if gen == self._cache_gen:
+            self._cache_put(key, fetched, self._CATALOG_CACHE_TTL_S)
+        return fetched
+
     @staticmethod
     def _field_filter(field: str, op: str, value: Any) -> dict[str, Any]:
         return {"fieldFilter": {"field": {"fieldPath": field}, "op": op, "value": _encode(value)}}
@@ -332,27 +353,21 @@ class StoreClient:
         # whole TTL. A query reads only the docs that exist, so the high ceiling adds no reads
         # for today's catalog while staying complete as it grows.
         key = f"devices:{(brand or '').lower()}:{appliance_type or ''}:{int(include_pending)}:{page_size}"
-        rows = self._cache_get(key)
-        if rows is None:
-            gen = self._cache_gen
+
+        def _build() -> dict[str, Any]:
             filters = [self._status_filter(include_pending)]
             if appliance_type:
                 filters.append(self._field_filter("applianceType", "EQUAL", appliance_type))
             if brand:
                 filters.append(self._field_filter("brand_lc", "EQUAL", brand.lower()))
-            sq = {
+            return {
                 "from": [{"collectionId": "devices"}],
                 "where": self._where(filters),
                 "orderBy": [{"field": {"fieldPath": "favoriteCount"}, "direction": "DESCENDING"}],
                 "limit": page_size,
             }
-            fetched = await self._run_query(sq)
-            # Only cache a successful query (a transient failure -> None must not pin an empty
-            # catalog for the TTL, mirroring get_config), and only if no invalidation happened
-            # while the query was in flight (else we would re-cache a pre-write snapshot).
-            rows = fetched if fetched is not None else []
-            if fetched is not None and gen == self._cache_gen:
-                self._cache_put(key, rows, self._CATALOG_CACHE_TTL_S)
+
+        rows = await self._cached_catalog_query(key, _build)
         if model_query:
             p = model_query.lower()
             rows = [r for r in rows if str(r.get("model_lc", "")).startswith(p)]
@@ -367,20 +382,12 @@ class StoreClient:
         # only reads the docs that exist, so this ceiling does not add reads for today's
         # catalog while staying correct as it grows.
         key = f"brands:{int(include_pending)}:{page_size}"
-        rows = self._cache_get(key)
-        if rows is None:
-            gen = self._cache_gen
-            sq = {
-                "from": [{"collectionId": "brands"}],
-                "where": self._where([self._status_filter(include_pending)]),
-                "orderBy": [{"field": {"fieldPath": "brand_lc"}, "direction": "ASCENDING"}],
-                "limit": page_size,
-            }
-            fetched = await self._run_query(sq)
-            rows = fetched if fetched is not None else []
-            # Cache only a successful, non-superseded read (see search_devices).
-            if fetched is not None and gen == self._cache_gen:
-                self._cache_put(key, rows, self._CATALOG_CACHE_TTL_S)
+        rows = await self._cached_catalog_query(key, lambda: {
+            "from": [{"collectionId": "brands"}],
+            "where": self._where([self._status_filter(include_pending)]),
+            "orderBy": [{"field": {"fieldPath": "brand_lc"}, "direction": "ASCENDING"}],
+            "limit": page_size,
+        })
         if q:
             p = q.lower()
             rows = [r for r in rows if str(r.get("brand_lc", "")).startswith(p)]

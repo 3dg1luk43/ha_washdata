@@ -6086,20 +6086,6 @@ class ProfileStore:
         src_past = [c for c in (data_dict.get("past_cycles") or []) if isinstance(c, dict)]
         src_refs = [c for c in (data_dict.get("reference_cycles") or []) if isinstance(c, dict)]
 
-        # Replace-mode anti-data-loss guard: don't let an empty file wipe live data. Each
-        # ticked category is guarded against its own kind of empty payload (the reference
-        # arm was previously unguarded, so a stale client could wipe curated reference
-        # cycles with a file that carried none).
-        if mode == "replace":
-            if ("profiles" in cats or "real_cycles" in cats) and not src_profiles and not src_past:
-                raise ValueError(
-                    "Import payload contains no profiles or cycles — aborting to prevent data loss"
-                )
-            if "reference_cycles" in cats and not src_refs:
-                raise ValueError(
-                    "Import payload contains no reference cycles — aborting to prevent data loss"
-                )
-
         prof_filter = selection.get("profiles") if isinstance(selection.get("profiles"), list) else None
         real_id_filter = (
             selection.get("real_cycle_ids") if isinstance(selection.get("real_cycle_ids"), list) else None
@@ -6121,6 +6107,25 @@ class ProfileStore:
                 return cycles
             keep = {str(i) for i in idf}
             return [c for c in cycles if str(c.get("id")) in keep]
+
+        # The cycles that will actually be imported once the per-item id selection is applied.
+        selected_refs = _apply_id_filter(src_refs, ref_id_filter)
+        selected_past = _apply_id_filter(src_past, real_id_filter)
+
+        # Replace-mode anti-data-loss guard: never wipe a destination unless the file has a
+        # non-empty SELECTED set to refill it. Guarding on the post-filter sets (not raw
+        # src_*) means a stale/malformed id selection that matches nothing aborts here instead
+        # of emptying the local list. Profiles are never wiped (per-name overwrite/copy), so
+        # a profiles-only replace needs no guard.
+        if mode == "replace":
+            if "reference_cycles" in cats and not selected_refs:
+                raise ValueError(
+                    "Import payload contains no reference cycles — aborting to prevent data loss"
+                )
+            if "real_cycles" in cats and not selected_past:
+                raise ValueError(
+                    "Import payload contains no real cycles — aborting to prevent data loss"
+                )
 
         local_profiles = self._data.setdefault("profiles", {})
         name_remap: dict[str, str] = {}
@@ -6208,7 +6213,7 @@ class ProfileStore:
 
         # ── Step 2: reference cycles (shape-only) ───────────────────────────────
         if "reference_cycles" in cats:
-            for c in _apply_id_filter(src_refs, ref_id_filter):
+            for c in selected_refs:
                 orig = str(c.get("profile_name") or "")
                 target = name_remap.get(orig, orig)
                 if not target:
@@ -6246,7 +6251,7 @@ class ProfileStore:
                     imp = (c.get("meta") or {}).get("imported_from")
                     if imp:
                         known_ids.add(str(imp))
-            for c in _apply_id_filter(src_past, real_id_filter):
+            for c in selected_past:
                 orig = str(c.get("profile_name") or "")
                 target = name_remap.get(orig, orig)
                 if cycle_destination == "reference":

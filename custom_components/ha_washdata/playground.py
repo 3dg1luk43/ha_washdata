@@ -934,6 +934,7 @@ class _DetailSim:
             return
         try:
             idle_w, fluct_w = self._derive_idle_level()
+            override_applied = False
             if self.stress_idle_override is not None:
                 # The schema accepts any float. Reject non-finite (nan/inf) by keeping the
                 # auto-derived floor, and clamp to [0, MAX] so a negative can't surface as a
@@ -942,6 +943,7 @@ class _DetailSim:
                 ov = float(self.stress_idle_override)
                 if math.isfinite(ov):
                     idle_w = max(0.0, min(ov, PLAYGROUND_STRESS_MAX_IDLE_W))
+                    override_applied = True
 
             synthetic_from_s = self.cursor["t"]
             stop_thresh = float(getattr(self.config, "stop_threshold_w", 2.0))
@@ -1007,7 +1009,7 @@ class _DetailSim:
                 "enabled": True,
                 "idle_w": round(idle_w, 2),
                 "fluct_w": round(fluct_w, 3),
-                "manual_override": self.stress_idle_override is not None,
+                "manual_override": override_applied,
                 "synthetic_from_s": round(synthetic_from_s, 1),
                 "stop_threshold_w": round(stop_thresh, 2),
                 "idle_above_threshold": idle_above,
