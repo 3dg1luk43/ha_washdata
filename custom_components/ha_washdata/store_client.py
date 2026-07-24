@@ -206,9 +206,12 @@ class StoreClient:
         # caches the result if it is unchanged afterwards, so an in-flight read that spans an
         # invalidation cannot re-cache a pre-write snapshot.
         self._cache_gen: int = 0
-        # Single-flight: one in-flight query per cache key so concurrent panel misses share a
-        # single Firestore read instead of each issuing one (matters on the free-tier budget).
-        self._inflight: dict[str, "asyncio.Future[list[dict[str, Any]]]"] = {}
+        # Single-flight: one in-flight (generation, task) per cache key so concurrent panel
+        # misses share a single Firestore read instead of each issuing one (matters on the
+        # free-tier budget). The generation is stored so a query started before an
+        # invalidation is not joined by a post-invalidation caller (which would receive a
+        # pre-write snapshot); such a caller starts a fresh query instead.
+        self._inflight: dict[str, "tuple[int, asyncio.Future[list[dict[str, Any]]]]"] = {}
 
     def last_error(self) -> str | None:
         return self._last_error
@@ -318,28 +321,33 @@ class StoreClient:
         cached = self._cache_get(key)
         if cached is not None:
             return cached
-        # Single-flight: if an identical query is already in flight, await its result instead
-        # of issuing a second Firestore read.
-        existing = self._inflight.get(key)
-        if existing is not None:
-            return await existing
-        fut: asyncio.Future[list[dict[str, Any]]] = asyncio.get_event_loop().create_future()
-        self._inflight[key] = fut
-        try:
+        # Single-flight: join an in-flight query for the CURRENT generation; otherwise start
+        # a fresh one. An entry from an older generation (started before an invalidation) is
+        # deliberately not joined -- it may carry a pre-write snapshot.
+        entry = self._inflight.get(key)
+        if entry is None or entry[0] != self._cache_gen:
             gen = self._cache_gen
+            entry = (gen, asyncio.ensure_future(self._fetch_and_cache(key, gen, build_sq)))
+            self._inflight[key] = entry
+        # Shield so one waiter's cancellation neither cancels the shared query nor the other
+        # waiters coalesced onto it.
+        return await asyncio.shield(entry[1])
+
+    async def _fetch_and_cache(
+        self, key: str, gen: int, build_sq: "Callable[[], dict[str, Any]]"
+    ) -> list[dict[str, Any]]:
+        """The shared single-flight body: run the query, cache only a successful, non-
+        superseded result, and clear the in-flight slot when done (if it is still ours)."""
+        try:
             fetched = await self._run_query(build_sq())
             result = fetched if fetched is not None else []
-            # Cache only a successful (non-None) and non-superseded read (the generation guard
-            # rejects a snapshot fetched across an invalidation).
             if fetched is not None and gen == self._cache_gen:
                 self._cache_put(key, result, self._CATALOG_CACHE_TTL_S)
-            fut.set_result(result)
             return result
-        except BaseException as exc:  # noqa: BLE001 - propagate to coalesced awaiters too
-            fut.set_exception(exc)
-            raise
         finally:
-            self._inflight.pop(key, None)
+            cur = self._inflight.get(key)
+            if cur is not None and cur[1] is asyncio.current_task():
+                self._inflight.pop(key, None)
 
     @staticmethod
     def _field_filter(field: str, op: str, value: Any) -> dict[str, Any]:
