@@ -390,6 +390,37 @@ def test_anti_wrinkle_ends_after_configured_gap(
     assert detector.state == STATE_OFF
 
 
+def test_anti_wrinkle_default_tolerance_is_120_seconds(
+    dryer_config_with_anti_wrinkle: CycleDetectorConfig,
+    mock_callbacks: dict[str, Mock],
+) -> None:
+    """Without the new setting the mode still ends after the historic 120 s gap.
+
+    The exit takes ``max(dynamic_end_threshold, anti_wrinkle_idle_timeout)``. At
+    this 10 s cadence the dynamic floor is 45 s, so the 120 s default is what
+    decides - the behaviour every existing installation had before the setting.
+    """
+    detector = CycleDetector(
+        config=dryer_config_with_anti_wrinkle,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+    t = _run_to_anti_wrinkle(detector)
+
+    # A tumble pulse is absorbed and restarts the quiet-gap clock.
+    detector.process_reading(90.0, dt(t))
+    assert detector.state == STATE_ANTI_WRINKLE
+
+    # 110 s of quiet is still inside the default tolerance.
+    for i in range(1, 12):
+        detector.process_reading(1.0, dt(t + 10 * i))
+    assert detector.state == STATE_ANTI_WRINKLE
+
+    # Crossing 120 s ends it.
+    detector.process_reading(1.0, dt(t + 120))
+    assert detector.state == STATE_OFF
+
+
 def test_anti_wrinkle_idle_timeout_is_configurable() -> None:
     """The tolerance is a config field defaulting to the previous hardcoded value."""
     default = CycleDetectorConfig(min_power=5.0, off_delay=60)

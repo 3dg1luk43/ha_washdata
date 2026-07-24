@@ -943,7 +943,10 @@
     "duration_scale": "Stufe 4: Log-Verhältnis, bei dem die Dauerübereinstimmung halbiert wird; kleiner = strengere Strafe (Standard 0,175)",
     "energy_scale": "Stufe 4: Log-Verhältnis, bei dem die Energieübereinstimmung halbiert wird; kleiner = strengere Strafe (Standard 0,25)",
     "anti_wrinkle_idle_timeout": "Erlaubte Stille zwischen zwei Trommelimpulsen, bevor der Knitterschutz endet",
-    "anti_wrinkle_max_power": "Ein Impuls darüber beendet den Knitterschutz und öffnet einen neuen Zyklus"
+    "anti_wrinkle_max_power": "Ein Impuls darüber beendet den Knitterschutz und öffnet einen neuen Zyklus",
+    "anti_wrinkle_enabled": "Die Trommelimpulse nach der Hauptphase schlucken, statt sie als neue Zyklen zu lesen",
+    "anti_wrinkle_max_duration": "Ein längerer Impuls beendet den Knitterschutz und öffnet einen neuen Zyklus",
+    "anti_wrinkle_exit_power": "Die Leistung muss zwischen den Impulsen darunter fallen, damit der Knitterschutz aktiv bleibt"
   },
   "phase_desc": {
     "anti_crease": "Gelegentliche kurze Trommelumwälzungen nach Abschluss, um Knitterung zu vermeiden.",

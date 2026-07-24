@@ -5225,6 +5225,7 @@ class HaWashdataPanel extends HTMLElement {
       ['start_duration_threshold','Start Duration',        's', 'Seconds above threshold to confirm start',     'timing'],
       ['end_repeat_count',        'End Repeat Count',      '',  'Low readings in a row before ending',          'advanced'],
       ['interrupted_min_seconds', 'Interrupted Min',       's', 'Short cycles flagged as interrupted',          'advanced'],
+      ['anti_wrinkle_enabled',    'Enable Anti-Wrinkle Detection', '', 'Absorb the tumble pulses after the main phase instead of reading them as new cycles', 'advanced', 'bool'],
       ['anti_wrinkle_max_power',  'Max Anti-Wrinkle Power','W', 'A pulse above this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_max_duration','Max Anti-Wrinkle Duration','s', 'A pulse longer than this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_exit_power', 'Anti-Wrinkle Exit Power','W', 'Power must fall below this between pulses for anti-wrinkle to stay active', 'advanced'],
@@ -5368,13 +5369,14 @@ class HaWashdataPanel extends HTMLElement {
       matching: this._t('lbl.pg_group_matching', {}, 'Program matching'),
     };
     let lastGroup = '';
-    const paramRows = fields.map(([key, fb, unit, desc, group]) => {
+    const paramRows = fields.map(([key, fb, unit, desc, group, type]) => {
       const lbl = this._t('setting.' + key + '.label', {}, fb);
       const liveVal = this._pgFieldVal(key, {});
       let curVal;
       if (key === 'start_threshold_w') curVal = this._pgThreshStart ?? liveVal;
       else if (key === 'stop_threshold_w') curVal = this._pgThreshStop ?? liveVal;
       else curVal = this._pgParamOverrides[key] ?? liveVal;
+      const isBool = type === 'bool';
       const isDrag = threshFields.has(key);
       const unitTxt = unit ? unit : '';
       const gc = groupColors[group] || '#2a78d6';
@@ -5393,7 +5395,9 @@ class HaWashdataPanel extends HTMLElement {
           ${desc ? `<div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('pg_desc.' + key, {}, desc))}</div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-          <input class="wd-pg-param-inp" type="number" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" style="width:72px">
+          ${isBool
+            ? `<input class="wd-pg-param-chk" type="checkbox" data-pgkey="${_esc(key)}" data-pgtype="bool" ${curVal ? 'checked' : ''} style="width:18px;height:18px;margin:1px 27px 0 27px">`
+            : `<input class="wd-pg-param-inp" type="number" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" style="width:72px">`}
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
         </div>
       </div>`;
@@ -5625,7 +5629,8 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlPgSweepMode() {
     const busy = this._busy.has('pg-sweep');
-    const fields = this._pgOverrideFields();
+    // Sweeping walks a numeric range, so on/off fields are not offered here.
+    const fields = this._pgOverrideFields().filter(([, , , , , type]) => type !== 'bool');
     const paramOpts = fields.map(([k, fb]) => `<option value="${k}" ${this._pgSweepParam === k ? 'selected' : ''}>${_esc(this._t('setting.' + k + '.label', {}, fb))}</option>`).join('');
     const objOpts = this._pgSweepObjectives().map(([k, lbl]) => `<option value="${k}" ${this._pgSweepObjective === k ? 'selected' : ''}>${_esc(lbl)}</option>`).join('');
     const intro = `<p class="wd-sec-intro" style="margin:0 0 8px">${this._t('msg.pg_sweep_intro2', {}, 'Find the setting that best meets an objective across your recent cycles. Nothing changes until you apply it.')}</p>`;
@@ -6428,7 +6433,9 @@ class HaWashdataPanel extends HTMLElement {
   _pgUpdateParamInput(key, val) {
     const sr = this.shadowRoot;
     const inp = sr && sr.querySelector(`[data-pgkey="${key}"]`);
-    if (inp) inp.value = typeof val === 'number' ? Math.round(val) : val;
+    if (!inp) return;
+    if (inp.dataset.pgtype === 'bool') inp.checked = !!val;
+    else inp.value = typeof val === 'number' ? Math.round(val) : val;
   }
 
   // Update the readout strip for a hovered time (seconds), or the final state
@@ -8663,8 +8670,13 @@ class HaWashdataPanel extends HTMLElement {
     // F3: Param input fields → sync to threshold state + redraw
     sr.querySelectorAll('[data-pgkey]').forEach(inp => inp.addEventListener('input', () => {
       const key = inp.dataset.pgkey;
-      const val = parseFloat(inp.value);
-      if (isNaN(val)) return;
+      let val;
+      if (inp.dataset.pgtype === 'bool') {
+        val = inp.checked;
+      } else {
+        val = parseFloat(inp.value);
+        if (isNaN(val)) return;
+      }
       if (key === 'start_threshold_w') this._pgThreshStart = val;
       else if (key === 'stop_threshold_w') this._pgThreshStop = val;
       else this._pgParamOverrides[key] = val;
