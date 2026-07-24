@@ -934,8 +934,10 @@ class _DetailSim:
         try:
             idle_w, fluct_w = self._derive_idle_level()
             if self.stress_idle_override is not None:
-                idle_w = float(self.stress_idle_override)
-                _, fluct_w = self._derive_idle_level()
+                # Clamp to non-negative (the schema allows any float) so a negative
+                # override can't surface as a nonsensical "-Xw" idle draw; keep fluct_w
+                # from the single call above.
+                idle_w = max(0.0, float(self.stress_idle_override))
 
             synthetic_from_s = self.cursor["t"]
             stop_thresh = float(getattr(self.config, "stop_threshold_w", 2.0))
@@ -1124,8 +1126,10 @@ class _DetailSim:
                 reason = st.get("termination_reason") or "?"
                 alerts.append({
                     "code": "stress_terminated", "severity": "info",
+                    "detail_key": "msg.pg_stress_terminated_detail",
+                    "detail_params": {"idle": f"{idle_w:.1f}", "h": h, "m": m, "reason": reason},
                     "detail": (
-                        f"Settled to ~{idle_w:.1f}W idle — cycle ended "
+                        f"Settled to ~{idle_w:.1f}W idle -- cycle ended "
                         f"{h}h {m}m later via {reason}."
                     ),
                 })
@@ -1133,16 +1137,25 @@ class _DetailSim:
                 if st.get("idle_above_threshold"):
                     alerts.append({
                         "code": "stress_above_threshold", "severity": "warn",
+                        "detail_key": "msg.pg_stress_above_threshold_detail",
+                        "detail_params": {"idle": f"{idle_w:.1f}", "stop": f"{stop_thresh:.1f}"},
                         "detail": (
                             f"Idle draw ~{idle_w:.1f}W is at or above the effective stop "
-                            f"threshold ({stop_thresh:.1f}W) — the cycle never registered "
+                            f"threshold ({stop_thresh:.1f}W) -- the cycle never registered "
                             f"as quiet. Raise stop_threshold_w to fix."
                         ),
                     })
+                # Report the actual elapsed synthetic time (the cap is ~7h50m of synthetic
+                # tail plus the pre-tail cycle length, not a flat 8 h).
+                after_s = float(st.get("terminated_after_s") or 0.0)
+                h, rem = divmod(int(after_s), 3600)
+                m = rem // 60
                 alerts.append({
                     "code": "stress_hit_cap", "severity": "error",
+                    "detail_key": "msg.pg_stress_hit_cap_detail",
+                    "detail_params": {"h": h, "m": m, "idle": f"{idle_w:.1f}", "stop": f"{stop_thresh:.1f}"},
                     "detail": (
-                        f"Cycle ran 8 h without stopping — force-stopped by the safety cap. "
+                        f"Cycle ran {h}h {m}m without stopping -- force-stopped by the safety cap. "
                         f"Idle draw {idle_w:.1f}W vs stop threshold {stop_thresh:.1f}W."
                     ),
                 })

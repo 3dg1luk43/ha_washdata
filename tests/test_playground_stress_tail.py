@@ -202,6 +202,18 @@ def test_stress_manual_override():
     assert st["idle_above_threshold"] is True
 
 
+def test_stress_negative_override_clamped_to_zero():
+    """A negative stress_idle_w override is clamped to 0 (the schema allows any float),
+    so the outcome never reports a nonsensical negative idle draw."""
+    cycle = _make_cycle(duration_s=3600.0, tail_idle_w=3.2)
+    cfg = _cfg(stop_threshold_w=2.0, off_delay=180, min_off_gap=60)
+    d = _run_stress(cycle, cfg, stress_idle_w=-5.0)
+
+    st = d["outcome"]["stress"]
+    assert st["idle_w"] == pytest.approx(0.0, abs=0.01)
+    assert st["idle_above_threshold"] is False
+
+
 def test_derive_idle_level_returns_floor_not_mean():
     """_derive_idle_level returns the p7 standby floor, not the contaminated mean."""
     base = datetime(2024, 1, 1, tzinfo=timezone.utc)

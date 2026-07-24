@@ -5407,7 +5407,7 @@ class HaWashdataPanel extends HTMLElement {
         <div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('lbl.pg_stress_toggle_desc', {}, 'Simulates the appliance staying at its standby draw after recording ends — shows if and when WashData stops the cycle.'))}</div>
       </div>
       <label style="display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer">
-        <input type="checkbox" id="wd-pg-stress-toggle" ${this._pgStressTail ? 'checked' : ''}>
+        <input type="checkbox" id="wd-pg-stress-toggle" ${this._pgStressTail ? 'checked' : ''} aria-label="${_esc(this._t('lbl.pg_stress_toggle', {}, 'Test idle termination'))}">
       </label>
     </div>`;
     const stressIdleField = this._pgStressTail ? `<div style="display:flex;align-items:flex-start;gap:6px;margin:0 0 6px 11px">
@@ -5445,7 +5445,7 @@ class HaWashdataPanel extends HTMLElement {
     const alertRows = alerts.length
       ? alerts.map(a => `<div class="wd-pg-alert" style="border-left-color:${sevColor[a.severity] || sevColor.info}">
           <span style="font-weight:600">${_esc(this._pgAlertLabel(a.code))}</span>
-          <div style="font-size:.78em;color:var(--secondary-text-color)">${_esc(a.detail || '')}</div>
+          <div style="font-size:.78em;color:var(--secondary-text-color)">${_esc(a.detail_key ? this._t(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || ''))}</div>
         </div>`).join('')
       : `<div style="font-size:.82em;color:var(--success-color,#4caf50)">✓ ${this._t('msg.pg_no_alerts', {}, 'No issues detected in this run.')}</div>`;
     const term = o.termination_reason ? String(o.termination_reason) : '—';
