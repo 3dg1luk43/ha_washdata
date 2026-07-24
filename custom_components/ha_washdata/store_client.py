@@ -206,6 +206,9 @@ class StoreClient:
         # caches the result if it is unchanged afterwards, so an in-flight read that spans an
         # invalidation cannot re-cache a pre-write snapshot.
         self._cache_gen: int = 0
+        # Single-flight: one in-flight query per cache key so concurrent panel misses share a
+        # single Firestore read instead of each issuing one (matters on the free-tier budget).
+        self._inflight: dict[str, "asyncio.Future[list[dict[str, Any]]]"] = {}
 
     def last_error(self) -> str | None:
         return self._last_error
@@ -315,13 +318,28 @@ class StoreClient:
         cached = self._cache_get(key)
         if cached is not None:
             return cached
-        gen = self._cache_gen
-        fetched = await self._run_query(build_sq())
-        if fetched is None:
-            return []
-        if gen == self._cache_gen:
-            self._cache_put(key, fetched, self._CATALOG_CACHE_TTL_S)
-        return fetched
+        # Single-flight: if an identical query is already in flight, await its result instead
+        # of issuing a second Firestore read.
+        existing = self._inflight.get(key)
+        if existing is not None:
+            return await existing
+        fut: asyncio.Future[list[dict[str, Any]]] = asyncio.get_event_loop().create_future()
+        self._inflight[key] = fut
+        try:
+            gen = self._cache_gen
+            fetched = await self._run_query(build_sq())
+            result = fetched if fetched is not None else []
+            # Cache only a successful (non-None) and non-superseded read (the generation guard
+            # rejects a snapshot fetched across an invalidation).
+            if fetched is not None and gen == self._cache_gen:
+                self._cache_put(key, result, self._CATALOG_CACHE_TTL_S)
+            fut.set_result(result)
+            return result
+        except BaseException as exc:  # noqa: BLE001 - propagate to coalesced awaiters too
+            fut.set_exception(exc)
+            raise
+        finally:
+            self._inflight.pop(key, None)
 
     @staticmethod
     def _field_filter(field: str, op: str, value: Any) -> dict[str, Any]:
