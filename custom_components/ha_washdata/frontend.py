@@ -269,54 +269,43 @@ class WashDataCardRegistration:
         return CARD_FAILED
 
 
+async def _async_register_path(hass: HomeAssistant, url_path: str, path: str) -> None:
+    """Register one static path, falling back to the sync helper on any API failure.
+
+    Attempts the modern ``async_register_static_paths`` API first; on any
+    exception (ImportError when the new API isn't available, AttributeError, or
+    a ValueError/'already registered' from HA itself) falls back silently to
+    ``_register_static_path``.
+    """
+    try:
+        from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
+
+        if hasattr(hass.http, "async_register_static_paths"):
+            await hass.http.async_register_static_paths(
+                [StaticPathConfig(url_path, path, cache_headers=True)]
+            )
+        else:
+            _register_static_path(hass, url_path, path)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Static path registration failed, falling back %s: %s", url_path, exc)
+        _register_static_path(hass, url_path, path)
+
+
 async def _do_register_static_paths(hass: HomeAssistant, src: Path) -> bool:
     """Register all WashData panel static HTTP paths.  Returns True on success."""
     try:
         # Panel JS (primary asset — must be available before the sidebar fires).
-        try:
-            from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
-
-            if hasattr(hass.http, "async_register_static_paths"):
-                await hass.http.async_register_static_paths(
-                    [StaticPathConfig(PANEL_JS_URL, str(src), True)]
-                )
-            else:
-                _register_static_path(hass, PANEL_JS_URL, str(src))
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Panel static path registration failed, falling back: %s", exc)
-            _register_static_path(hass, PANEL_JS_URL, str(src))
+        await _async_register_path(hass, PANEL_JS_URL, str(src))
 
         # Per-language translation files.
         trans_src = Path(__file__).parent / "translations" / PANEL_TRANSLATIONS_DIRNAME
         if await hass.async_add_executor_job(trans_src.is_dir):
-            try:
-                from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
-
-                if hasattr(hass.http, "async_register_static_paths"):
-                    await hass.http.async_register_static_paths(
-                        [StaticPathConfig(PANEL_TRANSLATIONS_URL, str(trans_src), True)]
-                    )
-                else:
-                    _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
-            except Exception as exc:  # pylint: disable=broad-exception-caught
-                _LOGGER.debug("Panel translations path registration failed: %s", exc)
-                _register_static_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
+            await _async_register_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
 
         # Brand icon (panel header).
         icon_src = Path(__file__).parent / "brand" / "icon.png"
         if await hass.async_add_executor_job(icon_src.is_file):
-            try:
-                from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
-
-                if hasattr(hass.http, "async_register_static_paths"):
-                    await hass.http.async_register_static_paths(
-                        [StaticPathConfig(BRAND_ICON_URL, str(icon_src), cache_headers=True)]
-                    )
-                else:
-                    _register_static_path(hass, BRAND_ICON_URL, str(icon_src))
-            except (ImportError, AttributeError) as exc:
-                _LOGGER.debug("Brand icon path registration failed: %s", exc)
-                _register_static_path(hass, BRAND_ICON_URL, str(icon_src))
+            await _async_register_path(hass, BRAND_ICON_URL, str(icon_src))
 
         return True
     except Exception as exc:  # pylint: disable=broad-exception-caught
