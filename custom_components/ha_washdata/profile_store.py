@@ -1151,7 +1151,7 @@ def _usable_reference_pairs(points: Any) -> list[list[float]] | None:
             x, y = float(p[0]), float(p[1])
         except (TypeError, ValueError):
             continue
-        if math.isfinite(x) and math.isfinite(y):
+        if np.isfinite(x) and np.isfinite(y):
             pairs.append([x, y])
     if len(pairs) < 2:
         return None

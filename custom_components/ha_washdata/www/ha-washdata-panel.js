@@ -5390,7 +5390,7 @@ class HaWashdataPanel extends HTMLElement {
           ${desc ? `<div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('pg_desc.' + key, {}, desc))}</div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-          <input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" style="width:72px">
+          <input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" aria-label="${_esc(lbl)}" style="width:72px">
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
         </div>
       </div>`;
@@ -5420,7 +5420,7 @@ class HaWashdataPanel extends HTMLElement {
         <div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('lbl.pg_stress_idle_w_desc', {}, 'Override the auto-detected standby floor (leave blank for auto).'))}</div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-        <input class="wd-pg-param-inp" type="text" inputmode="decimal" id="wd-pg-stress-idle-w" value="${this._pgStressIdleW != null ? _esc(String(this._pgStressIdleW)) : ''}" placeholder="${_esc(this._t('lbl.pg_stress_idle_auto', {}, 'Auto'))}" style="width:72px">
+        <input class="wd-pg-param-inp" type="text" inputmode="decimal" id="wd-pg-stress-idle-w" value="${this._pgStressIdleW != null ? _esc(String(this._pgStressIdleW)) : ''}" placeholder="${_esc(this._t('lbl.pg_stress_idle_auto', {}, 'Auto'))}" aria-label="${_esc(this._t('lbl.pg_stress_idle_w', {}, 'Idle level (W)'))}" style="width:72px">
         <span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">W</span>
       </div>
     </div>` : '';
