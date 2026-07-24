@@ -270,6 +270,22 @@ _QUIET_HOURS_EVENT_TYPES = frozenset(
 )
 
 
+# Detector states in which the power sensor must not be swapped out. Every state
+# with an in-flight cycle, plus ANTI_WRINKLE: its tumble pulses are still being
+# attributed to the cycle that just finished, so re-pointing the listener there
+# would splice a different appliance into that tail.
+_SENSOR_SWAP_BLOCKED_STATES = frozenset(
+    {
+        STATE_STARTING,
+        STATE_RUNNING,
+        STATE_PAUSED,
+        STATE_USER_PAUSED,
+        STATE_ENDING,
+        STATE_ANTI_WRINKLE,
+    }
+)
+
+
 def _sanitize_ranking(raw_list: list[dict[str, Any]], limit: int = 5) -> list[dict[str, Any]]:
     """Top-N ranking candidates stripped of the heavy `current`/`sample` power
     arrays, safe to persist on cycle_data and to include in the 32KB-limited
@@ -1865,16 +1881,17 @@ class WashDataManager:
                 type(d_state),
                 STATE_RUNNING,
             )
-            if d_state == STATE_RUNNING:
+            if d_state in _SENSOR_SWAP_BLOCKED_STATES:
                 # Skip the sensor change but continue with the other config
                 # updates: returning here would silently drop every setting
                 # saved alongside the sensor in the same submission.
                 self._logger.warning(
-                    "Cannot change power sensor from %s to %s while a cycle "
-                    "is active. Please wait for the current cycle to complete "
-                    "before changing the power sensor.",
+                    "Cannot change power sensor from %s to %s while the "
+                    "detector is in state %s. Please wait for the current "
+                    "cycle to complete before changing the power sensor.",
                     self.power_sensor_entity_id,
                     new_sensor,
+                    d_state,
                 )
             else:
                 self._logger.info(

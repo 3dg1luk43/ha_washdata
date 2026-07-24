@@ -135,7 +135,13 @@ def _coerce_bool(value: Any) -> bool:
     if isinstance(value, bool):
         return value
     if isinstance(value, (int, float)):
-        return bool(value)
+        # Only the two values that actually mean a toggle. Anything else (2, -1,
+        # NaN, inf) is a malformed override, not an intent to switch a mode on.
+        if value == 0:
+            return False
+        if value == 1:
+            return True
+        raise ValueError(f"not a boolean: {value!r}")
     if isinstance(value, str):
         low = value.strip().lower()
         if low in ("true", "1", "yes", "on"):
@@ -1207,6 +1213,9 @@ def _sim_config_summary(config: CycleDetectorConfig) -> dict[str, Any]:
         "start_threshold_w": getattr(config, "start_threshold_w", None),
         "stop_threshold_w": getattr(config, "stop_threshold_w", None),
         "anti_wrinkle_enabled": getattr(config, "anti_wrinkle_enabled", None),
+        "anti_wrinkle_max_power": getattr(config, "anti_wrinkle_max_power", None),
+        "anti_wrinkle_max_duration": getattr(config, "anti_wrinkle_max_duration", None),
+        "anti_wrinkle_exit_power": getattr(config, "anti_wrinkle_exit_power", None),
         "anti_wrinkle_idle_timeout": getattr(config, "anti_wrinkle_idle_timeout", None),
     }
 
