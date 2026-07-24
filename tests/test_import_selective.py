@@ -399,6 +399,24 @@ async def test_replace_real_cycles_to_reference_wipes_reference_list(store):
 
 
 @pytest.mark.asyncio
+async def test_reference_reimport_canonical_source_idempotent(store):
+    # A reference cycle exported after a prior import carries meta.source="store:<id>".
+    # Re-importing it must dedup (canonical provenance, no "store:store:" drift), not
+    # duplicate and double-weight the envelope.
+    cyc = _cyc("c1", "Cotton 40", 2000)
+    cyc["meta"] = {"source": "store:abc123"}
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}}, refs=[cyc])
+    sel = {"categories": ["profiles", "reference_cycles"]}
+    s1 = await store.async_import_data_selective(payload, selection=sel, local_device_type="washing_machine")
+    assert s1["reference_cycles_imported"] == 1
+    stored = store.get_reference_cycles()
+    assert stored[0]["meta"]["source"] == "store:abc123"  # canonical single prefix, no drift
+    s2 = await store.async_import_data_selective(payload, selection=sel, local_device_type="washing_machine")
+    assert s2["reference_cycles_imported"] == 0            # deduped on re-import
+    assert len(store.get_reference_cycles()) == 1
+
+
+@pytest.mark.asyncio
 async def test_reference_reimport_is_idempotent(store):
     # Importing the same reference bundle twice must not duplicate cycles (which would
     # double-weight the envelope and inflate cycle_count).
