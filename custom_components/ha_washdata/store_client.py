@@ -347,9 +347,14 @@ class StoreClient:
             rows = [r for r in rows if str(r.get("model_lc", "")).startswith(p)]
         return rows
 
-    async def list_brands(self, q: str | None = None, include_pending: bool = True, page_size: int = 60) -> list[dict[str, Any]]:
+    async def list_brands(self, q: str | None = None, include_pending: bool = True, page_size: int = 500) -> list[dict[str, Any]]:
         # Cache the unfiltered brand list (the q prefix filter is applied in memory below),
-        # so one Firestore query serves every search prefix for this key.
+        # so one Firestore query serves every search prefix for this key. The limit is a
+        # full-catalog ceiling (not a UI page size): the in-memory prefix filter can only
+        # match what was fetched, so a low cap would make brands past it unsearchable for
+        # the whole cache TTL. The brand collection is small with tiny docs, and a query
+        # only reads the docs that exist, so this ceiling does not add reads for today's
+        # catalog while staying correct as it grows.
         key = f"brands:{int(include_pending)}:{page_size}"
         rows = self._cache_get(key)
         if rows is None:

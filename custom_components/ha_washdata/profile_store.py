@@ -6073,7 +6073,11 @@ class ProfileStore:
         # Device-type gating: block device-specific categories and force reference-only
         # cycle destination when the source device type does not match this device.
         source_dt = str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
-        device_type_match = (not source_dt) or (not local_device_type) or (source_dt == local_device_type)
+        # Keep this identical to build_import_manifest so the analysis shown to the user
+        # (which disables device-specific categories / real-history on a mismatch) cannot
+        # diverge from what the apply actually does. An unknown local device type is treated
+        # as a mismatch (conservative), matching the manifest.
+        device_type_match = (not source_dt) or (source_dt == local_device_type)
         if not device_type_match:
             cats = {c for c in cats if not _EXPORT_CATEGORIES.get(c, {}).get("device_specific")}
             cycle_destination = "reference"
