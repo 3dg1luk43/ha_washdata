@@ -5386,7 +5386,7 @@ class HaWashdataPanel extends HTMLElement {
           ${desc ? `<div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('pg_desc.' + key, {}, desc))}</div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-          <input class="wd-pg-param-inp" type="number" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" style="width:72px">
+          <input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" style="width:72px">
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
         </div>
       </div>`;
@@ -5416,7 +5416,7 @@ class HaWashdataPanel extends HTMLElement {
         <div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('lbl.pg_stress_idle_w_desc', {}, 'Override the auto-detected standby floor (leave blank for auto).'))}</div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-        <input class="wd-pg-param-inp" type="number" id="wd-pg-stress-idle-w" value="${this._pgStressIdleW != null ? _esc(String(this._pgStressIdleW)) : ''}" placeholder="${_esc(this._t('lbl.pg_stress_idle_auto', {}, 'Auto'))}" style="width:72px" min="0" step="0.1">
+        <input class="wd-pg-param-inp" type="text" inputmode="decimal" id="wd-pg-stress-idle-w" value="${this._pgStressIdleW != null ? _esc(String(this._pgStressIdleW)) : ''}" placeholder="${_esc(this._t('lbl.pg_stress_idle_auto', {}, 'Auto'))}" style="width:72px">
         <span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">W</span>
       </div>
     </div>` : '';
@@ -6061,8 +6061,19 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
 
-    const totalDur = (this._cycles || []).find(c => c.id === this._pgCycleId)?._pg_duration || pts[pts.length-1].t || 1;
-    const maxW = Math.max(...pts.map(p => p.w), 1);
+    // Stress tail — extract outcome early so totalDur and maxW can include it.
+    const stressOut = this._pgDetail && this._pgDetail.outcome && this._pgDetail.outcome.stress;
+    const stressFrom = stressOut && stressOut.enabled ? stressOut.synthetic_from_s : null;
+    const stressSeries = (stressFrom != null && this._pgDetail && this._pgDetail.series)
+      ? this._pgDetail.series.filter(pt => pt.t >= stressFrom)
+      : [];
+    let totalDur = (this._cycles || []).find(c => c.id === this._pgCycleId)?._pg_duration || pts[pts.length-1].t || 1;
+    if (stressOut && stressOut.terminated && stressOut.terminated_after_s != null && stressFrom != null) {
+      totalDur = Math.max(totalDur, stressFrom + stressOut.terminated_after_s);
+    } else if (stressSeries.length) {
+      totalDur = Math.max(totalDur, stressSeries[stressSeries.length - 1].t);
+    }
+    const maxW = Math.max(...pts.map(p => p.w), ...stressSeries.map(p => p.power || 0), 1);
     const threshStart = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
     const threshStop = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
 
@@ -6168,8 +6179,25 @@ class HaWashdataPanel extends HTMLElement {
     pts.forEach((p, i) => i ? ctx.lineTo(toX(p.t), toY(p.w)) : ctx.moveTo(toX(p.t), toY(p.w)));
     ctx.stroke();
 
+    // Stress-tail synthetic power trace — dashed continuation of the real curve.
+    if (stressSeries.length) {
+      const lastReal = pts[pts.length - 1];
+      ctx.beginPath();
+      ctx.moveTo(toX(lastReal.t), toY(lastReal.w));
+      stressSeries.forEach(p => ctx.lineTo(toX(p.t), toY(p.power)));
+      ctx.lineTo(toX(stressSeries[stressSeries.length - 1].t), toY(0));
+      ctx.lineTo(toX(lastReal.t), toY(0));
+      ctx.closePath();
+      ctx.fillStyle = _withAlpha(primary, 0.06); ctx.fill();
+      ctx.beginPath();
+      ctx.strokeStyle = primary; ctx.lineWidth = 1.5 * dpr;
+      ctx.setLineDash([4 * dpr, 4 * dpr]);
+      ctx.moveTo(toX(lastReal.t), toY(lastReal.w));
+      stressSeries.forEach(p => ctx.lineTo(toX(p.t), toY(p.power)));
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+
     // Stress-tail synthetic region: tinted overlay from synthetic_from_s onward
-    const stressFrom = this._pgDetail && this._pgDetail.outcome && this._pgDetail.outcome.stress && this._pgDetail.outcome.stress.synthetic_from_s;
     if (stressFrom != null && stressFrom < vMax) {
       const xFrom = toX(stressFrom);
       ctx.fillStyle = 'rgba(192,57,43,0.07)';
@@ -8652,27 +8680,38 @@ class HaWashdataPanel extends HTMLElement {
     }
 
     // F3: Param input fields → sync to threshold state + redraw
-    sr.querySelectorAll('[data-pgkey]').forEach(inp => inp.addEventListener('input', () => {
-      const key = inp.dataset.pgkey;
-      const val = parseFloat(inp.value);
-      if (isNaN(val)) return;
-      if (key === 'start_threshold_w') this._pgThreshStart = val;
-      else if (key === 'stop_threshold_w') this._pgThreshStop = val;
-      else this._pgParamOverrides[key] = val;
-      // _render() rebuilds the shadow DOM (so the "Save to settings" button appears once
-      // an override exists), which destroys this <input> and drops focus mid-typing.
-      // Re-render, then restore focus + caret to the same field so multi-digit keyboard
-      // entry isn't interrupted after the first character.
-      let caret = null;
-      try { caret = inp.selectionStart; } catch (_) {}
-      this._render();
-      const again = sr.querySelector(`[data-pgkey="${key}"]`);
-      if (again) {
-        again.focus();
-        if (caret != null) { try { again.setSelectionRange(caret, caret); } catch (_) {} }
-      }
-      requestAnimationFrame(() => this._pgDrawCanvas());
-    }));
+    sr.querySelectorAll('[data-pgkey]').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const key = inp.dataset.pgkey;
+        const raw = inp.value.trim();
+        if (!raw) {
+          if (key === 'start_threshold_w') this._pgThreshStart = null;
+          else if (key === 'stop_threshold_w') this._pgThreshStop = null;
+          else delete this._pgParamOverrides[key];
+        } else {
+          const val = parseFloat(raw);
+          if (!isNaN(val)) {
+            if (key === 'start_threshold_w') this._pgThreshStart = val;
+            else if (key === 'stop_threshold_w') this._pgThreshStop = val;
+            else this._pgParamOverrides[key] = val;
+          }
+          // Partial value ("1.", ".", "-") — leave state unchanged until next keystroke.
+        }
+        // Save the raw text and caret before _render() destroys this input. With
+        // type="text" (not number), selectionStart is a real index and setSelectionRange
+        // works, so cursor restoration is reliable unlike the old type=number approach.
+        const caret = inp.selectionStart;
+        const rawVal = inp.value;
+        this._render();
+        const again = sr.querySelector(`[data-pgkey="${key}"]`);
+        if (again) {
+          again.value = rawVal;   // restore raw text incl. trailing "." the browser strips
+          again.focus();
+          try { again.setSelectionRange(caret, caret); } catch (_) {}
+        }
+        requestAnimationFrame(() => this._pgDrawCanvas());
+      });
+    });
 
     // F3: Idle termination test toggle
     const pgStressToggle = sr.getElementById('wd-pg-stress-toggle');
@@ -8686,8 +8725,7 @@ class HaWashdataPanel extends HTMLElement {
     const pgStressIdleW = sr.getElementById('wd-pg-stress-idle-w');
     if (pgStressIdleW) pgStressIdleW.addEventListener('input', () => {
       const v = parseFloat(pgStressIdleW.value);
-      // Number.isFinite rejects Infinity (parseFloat("1e999")) which isNaN misses; clamp
-      // negatives out too (a type=number field still accepts them despite min="0").
+      // Number.isFinite rejects Infinity (parseFloat("1e999")) which isNaN misses.
       this._pgStressIdleW = (Number.isFinite(v) && v >= 0) ? v : null;
     });
 
