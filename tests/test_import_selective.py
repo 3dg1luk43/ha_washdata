@@ -447,6 +447,21 @@ async def test_reference_reimport_canonical_source_idempotent(store):
 
 
 @pytest.mark.asyncio
+async def test_import_tolerates_malformed_persisted_meta(store):
+    # A persisted reference cycle with a non-dict meta (legacy/raw import) must not raise
+    # AttributeError and block the whole import when building the dedup set.
+    store._data["reference_cycles"] = [
+        {"id": "x1", "profile_name": "Old", "meta": ["not", "a", "dict"], "power_data": _trace(1000)},
+    ]
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}},
+                       refs=[_cyc("r1", "Cotton 40", 2000)])
+    res = await store.async_import_data_selective(
+        payload, selection={"categories": ["profiles", "reference_cycles"]},
+        local_device_type="washing_machine")
+    assert res["reference_cycles_imported"] == 1  # import proceeded despite the malformed meta
+
+
+@pytest.mark.asyncio
 async def test_reference_dedup_matches_legacy_double_prefixed_source(store):
     # A reference cycle persisted by the old buggy path has meta.source="store:store:abc".
     # Importing the canonical "store:abc" must dedup against it (both canonicalize to the
