@@ -899,7 +899,10 @@
     "duration_scale": "Stage 4: log-ratio where duration agreement halves; smaller = stricter penalty (default 0.175)",
     "energy_scale": "Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)",
     "anti_wrinkle_idle_timeout": "Quiet time allowed between two tumble pulses before anti-wrinkle ends",
-    "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle"
+    "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
+    "anti_wrinkle_enabled": "Absorb the tumble pulses after the main phase instead of reading them as new cycles",
+    "anti_wrinkle_max_duration": "A pulse longer than this ends anti-wrinkle and opens a new cycle",
+    "anti_wrinkle_exit_power": "Power must fall below this between pulses for anti-wrinkle to stay active"
   },
   "phase_desc": {
     "anti_crease": "Occasional short tumbles after completion to reduce wrinkles.",
