@@ -433,6 +433,24 @@ async def test_reference_reimport_canonical_source_idempotent(store):
 
 
 @pytest.mark.asyncio
+async def test_reference_dedup_matches_legacy_double_prefixed_source(store):
+    # A reference cycle persisted by the old buggy path has meta.source="store:store:abc".
+    # Importing the canonical "store:abc" must dedup against it (both canonicalize to the
+    # same key), not add a duplicate.
+    await store.add_reference_cycle("Cotton 40", _trace(2000), {"store_cycle_id": "store:abc"})
+    ref = store.get_reference_cycles()
+    assert ref[0]["meta"]["source"] == "store:store:abc"  # legacy double-prefixed persisted value
+    cyc = _cyc("c1", "Cotton 40", 2000)
+    cyc["meta"] = {"source": "store:abc"}  # canonical incoming
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}}, refs=[cyc])
+    res = await store.async_import_data_selective(
+        payload, selection={"categories": ["profiles", "reference_cycles"]},
+        local_device_type="washing_machine")
+    assert res["reference_cycles_imported"] == 0        # deduped against the legacy value
+    assert len(store.get_reference_cycles()) == 1
+
+
+@pytest.mark.asyncio
 async def test_reference_reimport_is_idempotent(store):
     # Importing the same reference bundle twice must not duplicate cycles (which would
     # double-weight the envelope and inflate cycle_count).

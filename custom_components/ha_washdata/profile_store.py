@@ -6228,26 +6228,31 @@ class ProfileStore:
         # every insert (previously O(N^2) for a large import, all on the event loop).
         ref_id_pool: set[Any] = {c.get("id") for c in self._data.get("reference_cycles", []) if isinstance(c, dict)}
         past_id_pool: set[Any] = {c.get("id") for c in self._data.get("past_cycles", []) if isinstance(c, dict)}
-        # Reference-cycle dedup: skip re-importing a reference cycle already held so a
-        # repeated import stays idempotent (otherwise envelopes get double-weighted and
-        # cycle_count inflates). Keyed on the stable source id stamped into meta.source.
-        existing_ref_sources: set[str] = {
-            str((c.get("meta") or {}).get("source"))
-            for c in self._data.get("reference_cycles", [])
-            if isinstance(c, dict) and (c.get("meta") or {}).get("source")
-        }
-
         def _bare_store_id(raw_id: Any) -> str:
             # A reference cycle exported after a prior import already carries
-            # meta.source="store:<id>". Strip that prefix so re-prefixing does not accumulate
-            # "store:store:..." across round-trips (which would make the dedup key and the
-            # stamped source drift apart and defeat re-import dedup).
+            # meta.source="store:<id>". Strip EVERY leading "store:" so re-prefixing does not
+            # accumulate "store:store:..." across round-trips and, crucially, so historical
+            # double-prefixed values already persisted collapse to the same canonical id --
+            # otherwise a later import of "store:<id>" would miss a stored "store:store:<id>"
+            # and add a duplicate.
             sid = str(raw_id or "")
-            return sid[len("store:"):] if sid.startswith("store:") else sid
+            while sid.startswith("store:"):
+                sid = sid[len("store:"):]
+            return sid
 
         def _ref_dedup_key(raw_id: Any) -> str:
             bare = _bare_store_id(raw_id)
             return f"store:{bare}" if bare else ""
+
+        # Reference-cycle dedup: skip re-importing a reference cycle already held so a
+        # repeated import stays idempotent (otherwise envelopes get double-weighted and
+        # cycle_count inflates). Keyed on the CANONICAL source id, so a legacy double-prefixed
+        # persisted value and a fresh single-prefixed import map to the same key.
+        existing_ref_sources: set[str] = {
+            _ref_dedup_key((c.get("meta") or {}).get("source"))
+            for c in self._data.get("reference_cycles", [])
+            if isinstance(c, dict) and (c.get("meta") or {}).get("source")
+        }
 
         # ── Step 2: reference cycles (shape-only) ───────────────────────────────
         # Each record is processed defensively: a single malformed record is skipped (not
