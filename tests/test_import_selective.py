@@ -365,6 +365,22 @@ async def test_replace_empty_after_id_filter_guarded(store):
 
 
 @pytest.mark.asyncio
+async def test_replace_all_degenerate_reference_traces_guarded(store):
+    # Replace with reference cycles that are all geometrically unusable (single point / zero
+    # span) must abort rather than wipe the destination and then silently add nothing.
+    await store.add_reference_cycle("Keep", _trace(1000), {"store_cycle_id": "keep"})
+    bad = {"id": "b1", "profile_name": "Cotton 40", "duration": 0,
+           "status": "completed", "start_time": "2023-01-01T10:00:00+00:00",
+           "power_data": [[0.0, 5.0]]}  # only one point -> unusable
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}}, refs=[bad])
+    with pytest.raises(ValueError):
+        await store.async_import_data_selective(
+            payload, selection={"categories": ["reference_cycles"]},
+            mode="replace", local_device_type="washing_machine")
+    assert len(store.get_reference_cycles()) == 1  # not wiped
+
+
+@pytest.mark.asyncio
 async def test_replace_real_cycles_to_reference_wipes_reference_list(store):
     # Replace mode + only "real_cycles" ticked + default reference destination routes the
     # imported real cycles into reference_cycles, so that list (the actual destination) must

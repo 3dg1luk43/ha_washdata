@@ -1134,6 +1134,32 @@ def _unique_profile_name(existing: dict[str, Any], base: str) -> str:
     return f"{base} {i}"
 
 
+def _usable_reference_pairs(points: Any) -> list[list[float]] | None:
+    """Validate a raw ``[[offset, watts], ...]`` trace for reference-cycle import: drop
+    non-finite/non-numeric samples, require >= 2 points and a positive time span. Returns the
+    sorted ``[offset, watts]`` pairs, or ``None`` if the trace is unusable (would no-op).
+
+    Single source of the "is this trace importable" rule, shared by ``_add_reference_cycle_nosave``
+    (which mutates) and the selective-import replace guard (which must not wipe a destination
+    when every selected cycle would silently no-op)."""
+    pairs: list[list[float]] = []
+    for p in (points or []):
+        if len(p) < 2:
+            continue
+        try:
+            x, y = float(p[0]), float(p[1])
+        except (TypeError, ValueError):
+            continue
+        if math.isfinite(x) and math.isfinite(y):
+            pairs.append([x, y])
+    if len(pairs) < 2:
+        return None
+    pairs.sort(key=lambda q: q[0])  # defensive: normalize any out-of-order offsets
+    if float(pairs[-1][0] - pairs[0][0]) <= 0:
+        return None
+    return pairs
+
+
 def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
     """Append items from ``incoming`` to ``base`` in place, skipping duplicates.
 
@@ -1708,25 +1734,13 @@ class ProfileStore:
         profile once + a single save at the end). Returns the new cycle id, or ``""``
         when the trace is unusable (mutating nothing).
         """
-        # Validate the trace BEFORE creating any persistent state (profile entry /
-        # reference cycle): drop non-finite/non-numeric samples, require >= 2 points
-        # and a positive time span. A garbage trace returns "" and mutates nothing.
-        pairs: list[list[float]] = []
-        for p in (points or []):
-            if len(p) < 2:
-                continue
-            try:
-                x, y = float(p[0]), float(p[1])
-            except (TypeError, ValueError):
-                continue
-            if math.isfinite(x) and math.isfinite(y):
-                pairs.append([x, y])
-        if len(pairs) < 2:
+        # Validate the trace BEFORE creating any persistent state (profile entry / reference
+        # cycle): a garbage trace returns "" and mutates nothing. Same rule the import guard
+        # uses to decide whether a replace has anything usable to refill a destination with.
+        pairs = _usable_reference_pairs(points)
+        if pairs is None:
             return ""
-        pairs.sort(key=lambda q: q[0])  # defensive: normalize any out-of-order offsets
         duration = float(pairs[-1][0] - pairs[0][0])
-        if duration <= 0:
-            return ""
         # Re-base to offset 0 so envelope reconstruction and DTW work correctly.
         if pairs[0][0] != 0.0:
             origin = pairs[0][0]
@@ -6112,20 +6126,32 @@ class ProfileStore:
         selected_refs = _apply_id_filter(src_refs, ref_id_filter)
         selected_past = _apply_id_filter(src_past, real_id_filter)
 
+        def _any_usable(cs: list[dict[str, Any]]) -> bool:
+            # A cycle bound for reference storage only refills the destination if its trace is
+            # usable (_add_reference_cycle_nosave silently no-ops on a degenerate trace), so
+            # the wipe guard checks usability, not mere presence, for reference-bound cycles.
+            return any(_usable_reference_pairs(c.get("power_data")) is not None for c in cs)
+
         # Replace-mode anti-data-loss guard: never wipe a destination unless the file has a
-        # non-empty SELECTED set to refill it. Guarding on the post-filter sets (not raw
+        # SELECTED set that will actually refill it. Guarding on the post-filter sets (not raw
         # src_*) means a stale/malformed id selection that matches nothing aborts here instead
-        # of emptying the local list. Profiles are never wiped (per-name overwrite/copy), so
-        # a profiles-only replace needs no guard.
+        # of emptying the local list; for reference-bound cycles we further require at least
+        # one usable trace so an all-degenerate selection can't wipe-then-add-nothing. Profiles
+        # are never wiped (per-name overwrite/copy), so a profiles-only replace needs no guard.
         if mode == "replace":
-            if "reference_cycles" in cats and not selected_refs:
+            if "reference_cycles" in cats and not _any_usable(selected_refs):
                 raise ValueError(
-                    "Import payload contains no reference cycles — aborting to prevent data loss"
+                    "Import payload has no usable reference cycles — aborting to prevent data loss"
                 )
-            if "real_cycles" in cats and not selected_past:
-                raise ValueError(
-                    "Import payload contains no real cycles — aborting to prevent data loss"
-                )
+            if "real_cycles" in cats:
+                if cycle_destination == "reference" and not _any_usable(selected_past):
+                    raise ValueError(
+                        "Import payload has no usable cycles — aborting to prevent data loss"
+                    )
+                if cycle_destination == "real_history" and not selected_past:
+                    raise ValueError(
+                        "Import payload contains no real cycles — aborting to prevent data loss"
+                    )
 
         local_profiles = self._data.setdefault("profiles", {})
         name_remap: dict[str, str] = {}
