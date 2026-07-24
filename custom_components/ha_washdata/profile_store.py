@@ -1143,8 +1143,8 @@ def _usable_reference_pairs(points: Any) -> list[list[float]] | None:
     (which mutates) and the selective-import replace guard (which must not wipe a destination
     when every selected cycle would silently no-op)."""
     pairs: list[list[float]] = []
-    for p in (points or []):
-        if len(p) < 2:
+    for p in (points if isinstance(points, (list, tuple)) else []):
+        if not isinstance(p, (list, tuple)) or len(p) < 2:
             continue
         try:
             x, y = float(p[0]), float(p[1])
@@ -1763,7 +1763,10 @@ class ProfileStore:
             },
         }
         if meta.get("sampling_interval"):
-            cycle["sampling_interval"] = float(meta["sampling_interval"])
+            try:
+                cycle["sampling_interval"] = float(meta["sampling_interval"])
+            except (TypeError, ValueError):
+                pass  # ignore a malformed sampling_interval rather than raise mid-import
         # A reference cycle implies its program exists locally; create a minimal profile
         # entry if absent so the matcher iterates it and the rebuild can set its template.
         profiles = self._data.setdefault("profiles", {})
@@ -6238,33 +6241,39 @@ class ProfileStore:
             return f"store:{sid}" if sid else ""
 
         # ── Step 2: reference cycles (shape-only) ───────────────────────────────
+        # Each record is processed defensively: a single malformed record is skipped (not
+        # fatal) so a replace-mode import can never abort part-way and leave a wiped
+        # destination in an inconsistent state (the wipe above already happened).
         if "reference_cycles" in cats:
             for c in selected_refs:
-                orig = str(c.get("profile_name") or "")
-                target = name_remap.get(orig, orig)
-                if not target:
-                    continue
-                src_meta = c.get("meta") if isinstance(c.get("meta"), dict) else {}
-                raw_sid = src_meta.get("source") or c.get("id")
-                dkey = _ref_dedup_key(raw_sid)
-                if dkey and dkey in existing_ref_sources:
-                    continue  # already imported -> keep re-import idempotent
-                _ensure_profile(target, c.get("duration") or 0)
-                cid = self._add_reference_cycle_nosave(
-                    target,
-                    c.get("power_data") or [],
-                    {
-                        "store_cycle_id": raw_sid,
-                        "store_uploaded_at": src_meta.get("store_uploaded_at"),
-                        "sampling_interval": c.get("sampling_interval"),
-                    },
-                    id_pool=ref_id_pool,
-                )
-                if cid:
-                    if dkey:
-                        existing_ref_sources.add(dkey)
-                    touched.add(target)
-                    ref_imported += 1
+                try:
+                    orig = str(c.get("profile_name") or "")
+                    target = name_remap.get(orig, orig)
+                    if not target:
+                        continue
+                    src_meta = c.get("meta") if isinstance(c.get("meta"), dict) else {}
+                    raw_sid = src_meta.get("source") or c.get("id")
+                    dkey = _ref_dedup_key(raw_sid)
+                    if dkey and dkey in existing_ref_sources:
+                        continue  # already imported -> keep re-import idempotent
+                    _ensure_profile(target, c.get("duration") or 0)
+                    cid = self._add_reference_cycle_nosave(
+                        target,
+                        c.get("power_data") or [],
+                        {
+                            "store_cycle_id": raw_sid,
+                            "store_uploaded_at": src_meta.get("store_uploaded_at"),
+                            "sampling_interval": c.get("sampling_interval"),
+                        },
+                        id_pool=ref_id_pool,
+                    )
+                    if cid:
+                        if dkey:
+                            existing_ref_sources.add(dkey)
+                        touched.add(target)
+                        ref_imported += 1
+                except Exception:  # noqa: BLE001 - skip a malformed record, never abort the import
+                    self._logger.debug("selective import: skipped a malformed reference cycle", exc_info=True)
 
         # ── Step 3: real cycles (reference-shape or real-history) ───────────────
         if "real_cycles" in cats:
@@ -6278,6 +6287,7 @@ class ProfileStore:
                     if imp:
                         known_ids.add(str(imp))
             for c in selected_past:
+              try:
                 orig = str(c.get("profile_name") or "")
                 target = name_remap.get(orig, orig)
                 if cycle_destination == "reference":
@@ -6299,6 +6309,8 @@ class ProfileStore:
                     orig_id = str(c.get("id") or "")
                     if orig_id and orig_id in known_ids:
                         continue  # already imported / round-trip -> skip duplicate
+                    if c.get("start_time") is None or c.get("duration") is None:
+                        continue  # malformed real record (add_cycle needs both) -> skip, don't raise
                     _ensure_profile(target, c.get("duration") or 0)
                     cyc = dict(c)
                     cyc["profile_name"] = target or None
@@ -6315,6 +6327,8 @@ class ProfileStore:
                     if target:
                         touched.add(target)
                     real_imported += 1
+              except Exception:  # noqa: BLE001 - skip a malformed record, never abort the import
+                  self._logger.debug("selective import: skipped a malformed cycle", exc_info=True)
 
         # ── Step 4: leaf categories (additive merge / replace) ──────────────────
         for cat_id in cats:
