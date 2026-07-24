@@ -5396,7 +5396,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
           ${isBool
-            ? `<input class="wd-pg-param-chk" type="checkbox" data-pgkey="${_esc(key)}" data-pgtype="bool" ${curVal ? 'checked' : ''} style="width:18px;height:18px;margin:1px 27px 0 27px">`
+            ? `<input class="wd-pg-param-chk" type="checkbox" data-pgkey="${_esc(key)}" data-pgtype="bool" aria-label="${_esc(lbl)}" ${curVal ? 'checked' : ''} style="width:18px;height:18px;margin:1px 27px 0 27px">`
             : `<input class="wd-pg-param-inp" type="number" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" style="width:72px">`}
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
         </div>
