@@ -35,6 +35,7 @@ from custom_components.ha_washdata.const import (
     CONF_NOTIFY_TIMEOUT_SECONDS,
     CONF_OFF_DELAY,
     CONF_POWER_SENSOR,
+    CONF_RUNNING_DEAD_ZONE,
     DEFAULT_NOTIFY_REMINDER_MESSAGE,
     DEFAULT_NOTIFY_TIMEOUT_SECONDS,
     DOMAIN,
@@ -91,7 +92,7 @@ async def test_migration_with_harness_moves_and_preserves_fields(
     hass.config_entries.async_update_entry.assert_called_once()
 
     assert legacy_entry.version == 3
-    assert legacy_entry.minor_version == 7
+    assert legacy_entry.minor_version == 8
 
     assert legacy_entry.options[CONF_MIN_POWER] == 5.0
     assert legacy_entry.options[CONF_OFF_DELAY] == 120
@@ -147,7 +148,7 @@ async def test_migration_is_idempotent_after_first_run(
 @pytest.mark.asyncio
 async def test_migration_latest_version_is_noop(hass: HomeAssistant) -> None:
     """Entries already at 3.7 should not trigger updates."""
-    entry = DummyEntry(version=3, minor_version=7, data={}, options={})
+    entry = DummyEntry(version=3, minor_version=8, data={}, options={})
     hass.config_entries.async_update_entry = MagicMock()
 
     migrated = await async_migrate_entry(hass, entry)
@@ -181,7 +182,7 @@ async def test_migration_remaps_removed_device_types_to_other(
     assert entry.options[CONF_DEVICE_TYPE] == "other"
     # Tuned options are preserved through the remap.
     assert entry.options[CONF_MIN_POWER] == 7.0
-    assert entry.minor_version == 7
+    assert entry.minor_version == 8
 
 
 @pytest.mark.asyncio
@@ -235,7 +236,7 @@ async def test_migration_strips_suppress_feedback_notifications(
     # Unrelated tuned options survive the strip.
     assert entry.options[CONF_DEVICE_TYPE] == "dishwasher"
     assert entry.options[CONF_MIN_POWER] == 9.0
-    assert entry.minor_version == 7
+    assert entry.minor_version == 8
 
 
 @pytest.mark.asyncio
@@ -268,7 +269,7 @@ async def test_migrate_3_6_to_3_7_removes_initial_profile(hass: HomeAssistant) -
     assert entry.data["name"] == "Washer"
     assert entry.data["power_sensor"] == "sensor.power"
     assert entry.version == 3
-    assert entry.minor_version == 7
+    assert entry.minor_version == 8
 
 
 @pytest.mark.asyncio
@@ -293,6 +294,64 @@ async def test_migrate_3_6_to_3_7_no_initial_profile_is_noop(hass: HomeAssistant
 
     result = await async_migrate_entry(hass, entry)
     assert result is True
-    assert entry.minor_version == 7
+    assert entry.minor_version == 8
     assert entry.data["name"] == "Washer"
     assert entry.data["power_sensor"] == "sensor.power"
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_7_to_3_8_removes_running_dead_zone(hass: HomeAssistant) -> None:
+    """3.7 → 3.8: running_dead_zone is stripped from options (was never wired)."""
+    entry = DummyEntry(
+        version=3,
+        minor_version=7,
+        data={},
+        options={
+            "running_dead_zone": 300,
+            "off_delay": 120,
+            "min_power": 2.0,
+        },
+    )
+
+    def _apply_update(e: DummyEntry, **kwargs: Any) -> None:
+        if "options" in kwargs:
+            e.options = kwargs["options"]
+        if "minor_version" in kwargs:
+            e.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(
+        side_effect=lambda *a, **kw: _apply_update(*a, **kw)
+    )
+
+    result = await async_migrate_entry(hass, entry)
+    assert result is True
+    assert entry.minor_version == 8
+    assert CONF_RUNNING_DEAD_ZONE not in entry.options
+    assert entry.options["off_delay"] == 120
+    assert entry.options["min_power"] == 2.0
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_7_to_3_8_idempotent_no_dead_zone(hass: HomeAssistant) -> None:
+    """3.7 → 3.8 is a no-op when running_dead_zone was never set."""
+    entry = DummyEntry(
+        version=3,
+        minor_version=7,
+        data={},
+        options={"off_delay": 120},
+    )
+
+    def _apply_update(e: DummyEntry, **kwargs: Any) -> None:
+        if "options" in kwargs:
+            e.options = kwargs["options"]
+        if "minor_version" in kwargs:
+            e.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(
+        side_effect=lambda *a, **kw: _apply_update(*a, **kw)
+    )
+
+    result = await async_migrate_entry(hass, entry)
+    assert result is True
+    assert entry.minor_version == 8
+    assert entry.options["off_delay"] == 120

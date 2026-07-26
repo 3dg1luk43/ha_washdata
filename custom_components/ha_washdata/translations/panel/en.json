@@ -446,7 +446,7 @@
     "pct_match_confidence": "{pct}% match confidence",
     "per_cycle_short": "cycle",
     "pg_alert_indefinite": "Would run indefinitely",
-    "pg_alert_stress_cap": "Hit 8 h safety cap",
+    "pg_alert_stress_cap": "Hit safety cap",
     "pg_alert_stress_ok": "Idle termination: cycle stopped",
     "pg_alert_stress_warn": "Idle draw above stop threshold",
     "pg_alert_timeout_end": "Ended by timeout, not prediction",
@@ -694,6 +694,7 @@
     "export_select_intro": "Tick exactly what to include. Selecting profiles without their cycles still exports a matchable program (its learned shape travels along).",
     "feedback_cycles_pending": "{n} cycle{s} to review",
     "feedback_prompt": "Confirm it was right, correct the program, or ignore.",
+    "feedback_relabel_hint": "Re-labelling this cycle resolves it too.",
     "filter_by_profile": "Filter by profile…",
     "group_modal_help": "Group programs with the same shape that differ in temperature/spin (durations may vary). Matching scores the group as one candidate, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.",
     "group_not_cohesive": "These profiles aren't similar enough to group reliably, so matching treats them individually until you remove the outlier or split the group.",
@@ -767,6 +768,9 @@
     "pg_analysis_hint2": "Pick a cycle and press Run to load match analysis.",
     "pg_apply_confirm": "Apply best value: {label} = {value}?",
     "pg_apply_settings_confirm": "Save these {n} setting(s) to this device? {list}",
+    "pg_stress_terminated_detail": "Settled to ~{idle}W idle -- cycle ended {h}h {m}m later via {reason}.",
+    "pg_stress_above_threshold_detail": "Idle draw ~{idle}W is at or above the effective stop threshold ({stop}W) -- the cycle never registered as quiet. Raise stop_threshold_w to fix.",
+    "pg_stress_hit_cap_detail": "Cycle ran {h}h {m}m without stopping -- force-stopped by the safety cap. Idle draw {idle}W vs stop threshold {stop}W.",
     "pg_canvas_empty": "Select a cycle above, then press Load to see its power trace.",
     "pg_canvas_empty2": "Pick a cycle above and press Run to simulate it. Then hover to read values, scroll to zoom, and drag to pan.",
     "pg_chart_caption": "Detection/match rate across values of {param}",
@@ -1284,10 +1288,6 @@
       "doc": "Seconds a pump may run continuously before it is flagged as possibly stuck (fires the stuck-pump event).",
       "label": "Pump Stuck Duration"
     },
-    "running_dead_zone": {
-      "doc": "After a cycle starts, power dips within this window are ignored. Washing machines fill with cold water (dropping near 0 W before heating) - without this protection that fill phase looks like a cycle end. This does NOT skip data: the full power trace is recorded from T=0. The suggestion engine measures your machine's actual startup pattern and sizes this automatically.",
-      "label": "Running Dead Zone"
-    },
     "sampling_interval": {
       "doc": "Expected time between sensor readings - used to size the smoothing window and start debounce correctly. Every sensor update is captured regardless of this value; it only calibrates the downstream calculations. The suggestion engine measures your sensor's actual cadence from past cycles and sets this automatically.",
       "label": "Sampling Interval"
@@ -1539,10 +1539,6 @@
       "profile_match_threshold": {
         "higher": "Commits only high-confidence matches; more cycles stay unlabelled",
         "lower": "Matches more cycles; some may be slightly wrong"
-      },
-      "running_dead_zone": {
-        "higher": "Ignores brief power spikes during idle – less noise-sensitive",
-        "lower": "Responds to shorter power bursts – catches fast transient activity"
       },
       "start_threshold_w": {
         "higher": "Avoids false starts from brief power spikes",

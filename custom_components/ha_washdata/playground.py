@@ -69,7 +69,6 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
@@ -95,6 +94,7 @@ from .const import (
     PLAYGROUND_STRESS_DENSE_STEP_S,
     PLAYGROUND_STRESS_FLOOR_PERCENTILE,
     PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC,
+    PLAYGROUND_STRESS_MAX_IDLE_W,
     PLAYGROUND_STRESS_MAX_SPARSE_STEPS,
     PLAYGROUND_STRESS_SPARSE_STEP_S,
     PLAYGROUND_STRESS_TRAILING_WINDOW_S,
@@ -167,7 +167,6 @@ _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
     CONF_END_REPEAT_COUNT: ("end_repeat_count", int),
     CONF_START_THRESHOLD_W: ("start_threshold_w", float),
     CONF_STOP_THRESHOLD_W: ("stop_threshold_w", float),
-    CONF_RUNNING_DEAD_ZONE: ("running_dead_zone", int),
     CONF_START_DURATION_THRESHOLD: ("start_duration_threshold", float),
     CONF_INTERRUPTED_MIN_SECONDS: ("interrupted_min_seconds", int),
 }
@@ -969,9 +968,16 @@ class _DetailSim:
             return
         try:
             idle_w, fluct_w = self._derive_idle_level()
+            override_applied = False
             if self.stress_idle_override is not None:
-                idle_w = float(self.stress_idle_override)
-                _, fluct_w = self._derive_idle_level()
+                # The schema accepts any float. Reject non-finite (nan/inf) by keeping the
+                # auto-derived floor, and clamp to [0, MAX] so a negative can't surface as a
+                # nonsensical "-Xw" draw and a huge/inf value can't corrupt the synthetic
+                # power samples (NaN/inf detector math). fluct_w stays from the call above.
+                ov = float(self.stress_idle_override)
+                if math.isfinite(ov):
+                    idle_w = max(0.0, min(ov, PLAYGROUND_STRESS_MAX_IDLE_W))
+                    override_applied = True
 
             synthetic_from_s = self.cursor["t"]
             stop_thresh = float(getattr(self.config, "stop_threshold_w", 2.0))
@@ -1015,6 +1021,10 @@ class _DetailSim:
                 )
                 self.cursor["t"] = (flush_ts - self.base).total_seconds()
                 self.detector.force_end(flush_ts)
+                # Record a series sample at the forced-stop timestamp so the plotted tail
+                # reaches the reported elapsed time (otherwise the last point sits up to two
+                # sparse steps short of terminated_after_s).
+                self._sample(flush_ts)
 
             terminated = len(self.captured) > captured_before
             terminated_after_s: float | None = None
@@ -1033,7 +1043,7 @@ class _DetailSim:
                 "enabled": True,
                 "idle_w": round(idle_w, 2),
                 "fluct_w": round(fluct_w, 3),
-                "manual_override": self.stress_idle_override is not None,
+                "manual_override": override_applied,
                 "synthetic_from_s": round(synthetic_from_s, 1),
                 "stop_threshold_w": round(stop_thresh, 2),
                 "idle_above_threshold": idle_above,
@@ -1160,8 +1170,10 @@ class _DetailSim:
                 reason = st.get("termination_reason") or "?"
                 alerts.append({
                     "code": "stress_terminated", "severity": "info",
+                    "detail_key": "msg.pg_stress_terminated_detail",
+                    "detail_params": {"idle": f"{idle_w:.1f}", "h": h, "m": m, "reason": reason},
                     "detail": (
-                        f"Settled to ~{idle_w:.1f}W idle — cycle ended "
+                        f"Settled to ~{idle_w:.1f}W idle -- cycle ended "
                         f"{h}h {m}m later via {reason}."
                     ),
                 })
@@ -1169,16 +1181,25 @@ class _DetailSim:
                 if st.get("idle_above_threshold"):
                     alerts.append({
                         "code": "stress_above_threshold", "severity": "warn",
+                        "detail_key": "msg.pg_stress_above_threshold_detail",
+                        "detail_params": {"idle": f"{idle_w:.1f}", "stop": f"{stop_thresh:.1f}"},
                         "detail": (
                             f"Idle draw ~{idle_w:.1f}W is at or above the effective stop "
-                            f"threshold ({stop_thresh:.1f}W) — the cycle never registered "
+                            f"threshold ({stop_thresh:.1f}W) -- the cycle never registered "
                             f"as quiet. Raise stop_threshold_w to fix."
                         ),
                     })
+                # Report the actual elapsed synthetic time (the cap is ~7h50m of synthetic
+                # tail plus the pre-tail cycle length, not a flat 8 h).
+                after_s = float(st.get("terminated_after_s") or 0.0)
+                h, rem = divmod(int(after_s), 3600)
+                m = rem // 60
                 alerts.append({
                     "code": "stress_hit_cap", "severity": "error",
+                    "detail_key": "msg.pg_stress_hit_cap_detail",
+                    "detail_params": {"h": h, "m": m, "idle": f"{idle_w:.1f}", "stop": f"{stop_thresh:.1f}"},
                     "detail": (
-                        f"Cycle ran 8 h without stopping — force-stopped by the safety cap. "
+                        f"Cycle ran {h}h {m}m without stopping -- force-stopped by the safety cap. "
                         f"Idle draw {idle_w:.1f}W vs stop threshold {stop_thresh:.1f}W."
                     ),
                 })

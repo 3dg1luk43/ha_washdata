@@ -50,7 +50,6 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
@@ -903,7 +902,6 @@ class WasherSuggestionsSensor(WasherBaseSensor):
             CONF_STOP_THRESHOLD_W,
             CONF_START_THRESHOLD_W,
             CONF_END_ENERGY_THRESHOLD,
-            CONF_RUNNING_DEAD_ZONE,
         )
 
     def _count_applicable_suggestions(self, suggestions: dict[str, Any]) -> int:

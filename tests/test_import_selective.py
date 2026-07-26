@@ -351,6 +351,135 @@ async def test_replace_overwrite_carries_file_envelope(store):
 
 
 @pytest.mark.asyncio
+async def test_replace_empty_after_id_filter_guarded(store):
+    # A stale/malformed id selection that filters every source cycle out must abort the
+    # replace (guarding on the post-filter set) rather than wipe the destination empty.
+    await store.add_reference_cycle("Keep", _trace(1000), {"store_cycle_id": "keep"})
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}},
+                       past=[_cyc("p1", "Cotton 40", 2000)])
+    with pytest.raises(ValueError):
+        await store.async_import_data_selective(
+            payload, selection={"categories": ["real_cycles"], "real_cycle_ids": ["does-not-exist"]},
+            mode="replace", cycle_destination="reference", local_device_type="washing_machine")
+    assert len(store.get_reference_cycles()) == 1  # untouched -- not wiped
+
+
+@pytest.mark.asyncio
+async def test_replace_all_degenerate_reference_traces_guarded(store):
+    # Replace with reference cycles that are all geometrically unusable (single point / zero
+    # span) must abort rather than wipe the destination and then silently add nothing.
+    await store.add_reference_cycle("Keep", _trace(1000), {"store_cycle_id": "keep"})
+    bad = {"id": "b1", "profile_name": "Cotton 40", "duration": 0,
+           "status": "completed", "start_time": "2023-01-01T10:00:00+00:00",
+           "power_data": [[0.0, 5.0]]}  # only one point -> unusable
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}}, refs=[bad])
+    with pytest.raises(ValueError):
+        await store.async_import_data_selective(
+            payload, selection={"categories": ["reference_cycles"]},
+            mode="replace", local_device_type="washing_machine")
+    assert len(store.get_reference_cycles()) == 1  # not wiped
+
+
+@pytest.mark.asyncio
+async def test_replace_real_history_all_malformed_guarded(store):
+    # Replace into real_history where every selected record lacks start_time/duration (so
+    # Step 3 would skip them all) must abort, not wipe past_cycles and refill nothing.
+    store._data["past_cycles"] = [_cyc("keep", "Wool 20", 900)]
+    bad = {"id": "b1", "profile_name": "Cotton 40", "power_data": _trace(2000)}  # no start_time/duration
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}}, past=[bad])
+    with pytest.raises(ValueError):
+        await store.async_import_data_selective(
+            payload, selection={"categories": ["real_cycles"]},
+            mode="replace", cycle_destination="real_history", local_device_type="washing_machine")
+    assert len(store.get_past_cycles()) == 1  # not wiped
+
+
+@pytest.mark.asyncio
+async def test_replace_real_cycles_to_reference_wipes_reference_list(store):
+    # Replace mode + only "real_cycles" ticked + default reference destination routes the
+    # imported real cycles into reference_cycles, so that list (the actual destination) must
+    # be wiped first -- otherwise replace silently behaves like merge for reference_cycles.
+    await store.add_reference_cycle("Old", _trace(1000), {"store_cycle_id": "old"})
+    assert len(store.get_reference_cycles()) == 1
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}},
+                       past=[_cyc("p1", "Cotton 40", 2000)])
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["real_cycles"]},
+        mode="replace", cycle_destination="reference", local_device_type="washing_machine")
+    refs = store.get_reference_cycles()
+    assert len(refs) == 1                       # old wiped, one new added (not 2)
+    assert refs[0]["profile_name"] == "Cotton 40"
+    assert store.get_past_cycles() == []        # real_history untouched
+
+
+@pytest.mark.asyncio
+async def test_import_reports_skipped_malformed(store, monkeypatch):
+    # A per-record add that raises unexpectedly is skipped (not fatal) and counted in the
+    # summary's skipped_cycles, rather than silently vanishing.
+    def _boom(*a, **k):
+        raise RuntimeError("boom")
+    monkeypatch.setattr(store, "_add_reference_cycle_nosave", _boom)
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}},
+                       refs=[_cyc("r1", "Cotton 40", 2000)])
+    res = await store.async_import_data_selective(
+        payload, selection={"categories": ["reference_cycles"]},
+        mode="merge", local_device_type="washing_machine")
+    assert res["skipped_cycles"] == 1
+    assert res["reference_cycles_imported"] == 0
+
+
+@pytest.mark.asyncio
+async def test_reference_reimport_canonical_source_idempotent(store):
+    # A reference cycle exported after a prior import carries meta.source="store:<id>".
+    # Re-importing it must dedup (canonical provenance, no "store:store:" drift), not
+    # duplicate and double-weight the envelope.
+    cyc = _cyc("c1", "Cotton 40", 2000)
+    cyc["meta"] = {"source": "store:abc123"}
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}}, refs=[cyc])
+    sel = {"categories": ["profiles", "reference_cycles"]}
+    s1 = await store.async_import_data_selective(payload, selection=sel, local_device_type="washing_machine")
+    assert s1["reference_cycles_imported"] == 1
+    stored = store.get_reference_cycles()
+    assert stored[0]["meta"]["source"] == "store:abc123"  # canonical single prefix, no drift
+    s2 = await store.async_import_data_selective(payload, selection=sel, local_device_type="washing_machine")
+    assert s2["reference_cycles_imported"] == 0            # deduped on re-import
+    assert len(store.get_reference_cycles()) == 1
+
+
+@pytest.mark.asyncio
+async def test_import_tolerates_malformed_persisted_meta(store):
+    # A persisted reference cycle with a non-dict meta (legacy/raw import) must not raise
+    # AttributeError and block the whole import when building the dedup set.
+    store._data["reference_cycles"] = [
+        {"id": "x1", "profile_name": "Old", "meta": ["not", "a", "dict"], "power_data": _trace(1000)},
+    ]
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}},
+                       refs=[_cyc("r1", "Cotton 40", 2000)])
+    res = await store.async_import_data_selective(
+        payload, selection={"categories": ["profiles", "reference_cycles"]},
+        local_device_type="washing_machine")
+    assert res["reference_cycles_imported"] == 1  # import proceeded despite the malformed meta
+
+
+@pytest.mark.asyncio
+async def test_reference_dedup_matches_legacy_double_prefixed_source(store):
+    # A reference cycle persisted by the old buggy path has meta.source="store:store:abc".
+    # Importing the canonical "store:abc" must dedup against it (both canonicalize to the
+    # same key), not add a duplicate.
+    await store.add_reference_cycle("Cotton 40", _trace(2000), {"store_cycle_id": "store:abc"})
+    ref = store.get_reference_cycles()
+    assert ref[0]["meta"]["source"] == "store:store:abc"  # legacy double-prefixed persisted value
+    cyc = _cyc("c1", "Cotton 40", 2000)
+    cyc["meta"] = {"source": "store:abc"}  # canonical incoming
+    payload = _payload(profiles={"Cotton 40": {"avg_duration": 3600}}, refs=[cyc])
+    res = await store.async_import_data_selective(
+        payload, selection={"categories": ["profiles", "reference_cycles"]},
+        local_device_type="washing_machine")
+    assert res["reference_cycles_imported"] == 0        # deduped against the legacy value
+    assert len(store.get_reference_cycles()) == 1
+
+
+@pytest.mark.asyncio
 async def test_reference_reimport_is_idempotent(store):
     # Importing the same reference bundle twice must not duplicate cycles (which would
     # double-weight the envelope and inflate cycle_count).

@@ -91,7 +91,6 @@ from .const import (
     CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_DEVICE_TYPE,
     CONF_START_DURATION_THRESHOLD,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_END_REPEAT_COUNT,
     CONF_MIN_OFF_GAP,
     CONF_START_ENERGY_THRESHOLD,
@@ -216,7 +215,6 @@ from .const import (
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_START_DURATION_THRESHOLD,
-    DEFAULT_RUNNING_DEAD_ZONE,
     DEFAULT_END_REPEAT_COUNT,
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
@@ -652,9 +650,6 @@ class WashDataManager:
                 CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD
             )
         )
-        running_dead_zone = int(
-            config_entry.options.get(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE)
-        )
         end_repeat_count = int(
             config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
         )
@@ -673,7 +668,6 @@ class WashDataManager:
             interrupted_min_seconds=interrupted_min_seconds,
             completion_min_seconds=completion_min_seconds,
             start_duration_threshold=start_duration_threshold,
-            running_dead_zone=running_dead_zone,
             end_repeat_count=end_repeat_count,
             min_off_gap=int(
                 config_entry.options.get(
@@ -1968,9 +1962,6 @@ class WashDataManager:
                 CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD
             )
         )
-        new_running_dead_zone = int(
-            config_entry.options.get(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE)
-        )
         new_end_repeat_count = int(
             config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
         )
@@ -2055,7 +2046,6 @@ class WashDataManager:
         self.detector.config.interrupted_min_seconds = new_interrupted_min
         self.detector.config.completion_min_seconds = new_completion_min
         self.detector.config.start_duration_threshold = new_start_threshold
-        self.detector.config.running_dead_zone = new_running_dead_zone
         self.detector.config.end_repeat_count = new_end_repeat_count
         self.detector.config.start_threshold_w = new_start_threshold_w
         self.detector.config.stop_threshold_w = new_stop_threshold_w

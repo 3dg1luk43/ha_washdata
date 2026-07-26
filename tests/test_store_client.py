@@ -341,6 +341,21 @@ async def test_search_devices_caches_per_key():
 
 
 @pytest.mark.asyncio
+async def test_concurrent_misses_coalesce_into_one_query():
+    # Single-flight: two concurrent cache-misses for the same key share one Firestore read.
+    import asyncio
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../brands/bosch", "fields": {"brand_lc": {"stringValue": "bosch"}}}},
+    ]))
+    c = _client(s)
+    r1, r2 = await asyncio.gather(c.list_brands(), c.list_brands())
+    assert [b["id"] for b in r1] == ["bosch"]
+    assert [b["id"] for b in r2] == ["bosch"]
+    assert len(s.posts) == 1  # coalesced: a second query would have hit the empty default resp
+
+
+@pytest.mark.asyncio
 async def test_get_config_caches_and_never_caches_failure():
     s = _Session()
     # First read fails (non-200) -> {} and NOT cached.

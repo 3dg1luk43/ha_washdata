@@ -109,8 +109,6 @@ const _SETTINGS_SECTIONS = [
         doc: 'Energy (power x time) the appliance must consume before RUNNING. A brief high-power spike has very low energy and is ignored, preventing false starts.' },
       { key: 'completion_min_seconds', label: 'Min Cycle Duration', unit: 's', type: 'number', min: 0, def: 600, basic: true,
         doc: 'Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).' },
-      { key: 'running_dead_zone', label: 'Running Dead Zone', unit: 's', type: 'number', min: 0, def: 3,
-        doc: 'After a cycle starts, power dips within this window are ignored. Washing machines fill with cold water (dropping near 0 W before heating) - without this protection that fill phase looks like a cycle end. This does NOT skip data: the full power trace is recorded from T=0. The suggestion engine measures your machine\'s actual startup pattern and sizes this automatically.' },
     ] },
     { sub: 'Cycle End', fields: [
       { key: 'end_energy_threshold', label: 'End Energy', unit: 'Wh', type: 'number', step: 0.001, min: 0, def: 0.05,
@@ -1697,7 +1695,7 @@ class HaWashdataPanel extends HTMLElement {
     this._hoverRafId = null;   // rAF handle for chart-hover coalescing
     this._hoverPending = null; // last pending hover coords {px, py, id}
     // Data
-    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '', storePrefs: {}, pgMatchDefaults: {} };
+    this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlSuggestionsEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '', storePrefs: {}, pgMatchDefaults: {}, version: '', iconUrl: '' };
     this._constantsLoaded = false;
     this._devices = [];
     this._cycles = [];
@@ -2359,7 +2357,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._constantsLoaded) {
         try {
           const c = await this._ws({ type: `${_DOMAIN}/get_constants` });
-          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeOnlineEnabled: !!(c.store_online_enabled), storeWebOrigin: c.store_web_origin || '', storePrefs: c.store_prefs || {}, pgMatchDefaults: c.pg_match_defaults || {}, PROFILE_MIN_WARMUP_CYCLES: c.PROFILE_MIN_WARMUP_CYCLES };
+          this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlSuggestionsEnabled: !!(c.ml_suggestions_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeOnlineEnabled: !!(c.store_online_enabled), storeWebOrigin: c.store_web_origin || '', storePrefs: c.store_prefs || {}, pgMatchDefaults: c.pg_match_defaults || {}, PROFILE_MIN_WARMUP_CYCLES: c.PROFILE_MIN_WARMUP_CYCLES, version: c.version || '', iconUrl: c.icon_url || '' };
         } catch (_) { /* fall back to humanized labels */ }
         try {
           this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
@@ -3473,12 +3471,16 @@ class HaWashdataPanel extends HTMLElement {
     const working = nonTaskBusy
       ? `<span class="wd-badge" style="margin:0 0 0 12px;color:var(--app-header-text-color,#fff);background:rgba(255,255,255,.15)">${this._t('status.working', {}, 'Working…')}</span>`
       : '';
-    const logo = `<svg class="wd-logo" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+    const iconUrl = this._constants.iconUrl;
+    const logo = iconUrl
+      ? `<img class="wd-logo" src="${_esc(iconUrl)}" width="30" height="30" alt="WashData" aria-hidden="true" style="border-radius:6px;object-fit:contain">`
+      : `<svg class="wd-logo" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
       <rect x="4" y="2.5" width="16" height="19" rx="2.5"/>
       <line x1="7" y1="6" x2="9.5" y2="6"/>
       <circle cx="12" cy="14" r="5"/>
       <circle cx="12" cy="14" r="2"/>
     </svg>`;
+    const ver = this._constants.version;
     const burger = `<button class="wd-burger" id="wd-burger" aria-label="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}" title="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
     </button>`;
@@ -3486,7 +3488,7 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-header">
         ${burger}
         ${logo}
-        <div><h1>WashData</h1><div class="wd-sub">${this._t('msg.appliance_monitor', {}, 'Appliance monitor')}</div></div>
+        <div><h1>WashData</h1><div class="wd-sub">${ver ? `v${_esc(ver)} &middot; ` : ''}${this._t('msg.appliance_monitor', {}, 'Appliance monitor')}</div></div>
         ${working}
         <span class="wd-task-pills" id="wd-task-pills">${this._htmlTaskPills()}</span>
         <span style="flex:1"></span>
@@ -5397,7 +5399,7 @@ class HaWashdataPanel extends HTMLElement {
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
           ${isBool
             ? `<input class="wd-pg-param-chk" type="checkbox" data-pgkey="${_esc(key)}" data-pgtype="bool" aria-label="${_esc(lbl)}" ${curVal ? 'checked' : ''} style="width:18px;height:18px;margin:1px 27px 0 27px">`
-            : `<input class="wd-pg-param-inp" type="number" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" style="width:72px">`}
+            : `<input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" aria-label="${_esc(lbl)}" style="width:72px">`}
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
         </div>
       </div>`;
@@ -5418,7 +5420,7 @@ class HaWashdataPanel extends HTMLElement {
         <div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('lbl.pg_stress_toggle_desc', {}, 'Simulates the appliance staying at its standby draw after recording ends — shows if and when WashData stops the cycle.'))}</div>
       </div>
       <label style="display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer">
-        <input type="checkbox" id="wd-pg-stress-toggle" ${this._pgStressTail ? 'checked' : ''}>
+        <input type="checkbox" id="wd-pg-stress-toggle" ${this._pgStressTail ? 'checked' : ''} aria-label="${_esc(this._t('lbl.pg_stress_toggle', {}, 'Test idle termination'))}">
       </label>
     </div>`;
     const stressIdleField = this._pgStressTail ? `<div style="display:flex;align-items:flex-start;gap:6px;margin:0 0 6px 11px">
@@ -5427,7 +5429,7 @@ class HaWashdataPanel extends HTMLElement {
         <div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('lbl.pg_stress_idle_w_desc', {}, 'Override the auto-detected standby floor (leave blank for auto).'))}</div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-        <input class="wd-pg-param-inp" type="number" id="wd-pg-stress-idle-w" value="${this._pgStressIdleW != null ? _esc(String(this._pgStressIdleW)) : ''}" placeholder="${_esc(this._t('lbl.pg_stress_idle_auto', {}, 'Auto'))}" style="width:72px" min="0" step="0.1">
+        <input class="wd-pg-param-inp" type="text" inputmode="decimal" id="wd-pg-stress-idle-w" value="${this._pgStressIdleW != null ? _esc(String(this._pgStressIdleW)) : ''}" placeholder="${_esc(this._t('lbl.pg_stress_idle_auto', {}, 'Auto'))}" aria-label="${_esc(this._t('lbl.pg_stress_idle_w', {}, 'Idle level (W)'))}" style="width:72px">
         <span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">W</span>
       </div>
     </div>` : '';
@@ -5456,7 +5458,7 @@ class HaWashdataPanel extends HTMLElement {
     const alertRows = alerts.length
       ? alerts.map(a => `<div class="wd-pg-alert" style="border-left-color:${sevColor[a.severity] || sevColor.info}">
           <span style="font-weight:600">${_esc(this._pgAlertLabel(a.code))}</span>
-          <div style="font-size:.78em;color:var(--secondary-text-color)">${_esc(a.detail || '')}</div>
+          <div style="font-size:.78em;color:var(--secondary-text-color)">${_esc(a.detail_key ? this._t(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || ''))}</div>
         </div>`).join('')
       : `<div style="font-size:.82em;color:var(--success-color,#4caf50)">✓ ${this._t('msg.pg_no_alerts', {}, 'No issues detected in this run.')}</div>`;
     const term = o.termination_reason ? String(o.termination_reason) : '—';
@@ -5489,7 +5491,7 @@ class HaWashdataPanel extends HTMLElement {
       would_run_indefinitely: this._t('lbl.pg_alert_indefinite', {}, 'Would run indefinitely'),
       stress_terminated: this._t('lbl.pg_alert_stress_ok', {}, 'Idle termination: cycle stopped'),
       stress_above_threshold: this._t('lbl.pg_alert_stress_warn', {}, 'Idle draw above stop threshold'),
-      stress_hit_cap: this._t('lbl.pg_alert_stress_cap', {}, 'Hit 8 h safety cap'),
+      stress_hit_cap: this._t('lbl.pg_alert_stress_cap', {}, 'Hit safety cap'),
     };
     return map[code] || code;
   }
@@ -6074,8 +6076,19 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
 
-    const totalDur = (this._cycles || []).find(c => c.id === this._pgCycleId)?._pg_duration || pts[pts.length-1].t || 1;
-    const maxW = Math.max(...pts.map(p => p.w), 1);
+    // Stress tail — extract outcome early so totalDur and maxW can include it.
+    const stressOut = this._pgDetail && this._pgDetail.outcome && this._pgDetail.outcome.stress;
+    const stressFrom = stressOut && stressOut.enabled ? stressOut.synthetic_from_s : null;
+    const stressSeries = (stressFrom != null && this._pgDetail && this._pgDetail.series)
+      ? this._pgDetail.series.filter(pt => pt.t >= stressFrom)
+      : [];
+    let totalDur = (this._cycles || []).find(c => c.id === this._pgCycleId)?._pg_duration || pts[pts.length-1].t || 1;
+    if (stressOut && stressOut.terminated && stressOut.terminated_after_s != null && stressFrom != null) {
+      totalDur = Math.max(totalDur, stressFrom + stressOut.terminated_after_s);
+    } else if (stressSeries.length) {
+      totalDur = Math.max(totalDur, stressSeries[stressSeries.length - 1].t);
+    }
+    const maxW = Math.max(...pts.map(p => p.w), ...stressSeries.map(p => p.power || 0), 1);
     const threshStart = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
     const threshStop = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
 
@@ -6181,8 +6194,25 @@ class HaWashdataPanel extends HTMLElement {
     pts.forEach((p, i) => i ? ctx.lineTo(toX(p.t), toY(p.w)) : ctx.moveTo(toX(p.t), toY(p.w)));
     ctx.stroke();
 
+    // Stress-tail synthetic power trace — dashed continuation of the real curve.
+    if (stressSeries.length) {
+      const lastReal = pts[pts.length - 1];
+      ctx.beginPath();
+      ctx.moveTo(toX(lastReal.t), toY(lastReal.w));
+      stressSeries.forEach(p => ctx.lineTo(toX(p.t), toY(p.power)));
+      ctx.lineTo(toX(stressSeries[stressSeries.length - 1].t), toY(0));
+      ctx.lineTo(toX(lastReal.t), toY(0));
+      ctx.closePath();
+      ctx.fillStyle = _withAlpha(primary, 0.06); ctx.fill();
+      ctx.beginPath();
+      ctx.strokeStyle = primary; ctx.lineWidth = 1.5 * dpr;
+      ctx.setLineDash([4 * dpr, 4 * dpr]);
+      ctx.moveTo(toX(lastReal.t), toY(lastReal.w));
+      stressSeries.forEach(p => ctx.lineTo(toX(p.t), toY(p.power)));
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+
     // Stress-tail synthetic region: tinted overlay from synthetic_from_s onward
-    const stressFrom = this._pgDetail && this._pgDetail.outcome && this._pgDetail.outcome.stress && this._pgDetail.outcome.stress.synthetic_from_s;
     if (stressFrom != null && stressFrom < vMax) {
       const xFrom = toX(stressFrom);
       ctx.fillStyle = 'rgba(192,57,43,0.07)';
@@ -7964,6 +7994,23 @@ class HaWashdataPanel extends HTMLElement {
       <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>
     </div>` : (isRef ? `<div class="wd-info" style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${this._t('msg.imported_readonly', {}, 'Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.')}</div>` : '');
 
+    // Pending-detection-feedback banner (Confirm / Correct… / Ignore). Built once
+    // and shown in BOTH Inspect and Review modes, so a cycle in the "needs review"
+    // queue exposes the resolve controls without the user having to discover Review
+    // mode (#331). Editors only; imported reference cycles never carry feedback.
+    const pendingFb = this._canEdit() ? (this._feedbacks || []).find(f => f.cycle_id === m.cycleId) : null;
+    const fbProf = pendingFb ? (pendingFb.detected_profile || pendingFb.profile_name || this._t('lbl.unknown', {}, 'Unknown')) : '';
+    const fbBanner = pendingFb ? `
+        <div class="wd-card" style="background:var(--secondary-background-color);border-left:3px solid var(--warning-color,#ff9800);margin:0 0 12px;padding:12px">
+          <div style="font-weight:600;margin-bottom:4px">⚠ ${this._t('msg.pending_feedback', {}, 'Pending detection feedback')}</div>
+          <p class="wd-info" style="margin:0 0 8px">${this._t('msg.unsure_detected_prefix', {}, 'WashData is unsure it detected')} <strong>${_esc(fbProf)}</strong>${pendingFb.confidence != null ? ` (${this._t('lbl.confidence', {}, 'confidence').toLowerCase()} ${(pendingFb.confidence * 100).toFixed(0)}%)` : ''}. ${this._t('msg.feedback_prompt', {}, 'Confirm it was right, correct the program, or ignore.')} ${this._t('msg.feedback_relabel_hint', {}, 'Re-labelling this cycle resolves it too.')}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="fb-confirm" data-cid="${_esc(m.cycleId)}">${this._t('btn.confirm', {}, 'Confirm')}</button>
+            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-correct" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(fbProf)}">${this._t('btn.correct', {}, 'Correct…')}</button>
+            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-ignore" data-cid="${_esc(m.cycleId)}">${this._t('btn.ignore', {}, 'Ignore')}</button>
+          </div>
+        </div>` : '';
+
     let controls = '';
     if (m.mode === 'view') {
       // Share to community store: only for recorded/golden reference cycles, and
@@ -7979,7 +8026,7 @@ class HaWashdataPanel extends HTMLElement {
         : isRef ? `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>`
         : `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="cyc-label">${this._t('btn.label', {}, 'Label')}</button>`;
-      controls = `<div class="wd-modal-actions">
+      controls = `${fbBanner}<div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
         ${shareBtn}
         ${editBtns}</div>`;
@@ -8042,21 +8089,8 @@ class HaWashdataPanel extends HTMLElement {
       ];
       const tagChecks = TAGS.map(([v, l]) => `<label class="wd-rev-tag"><input type="checkbox" class="wd-cyc-rev-tag" value="${v}" ${(rv.tags || []).includes(v) ? 'checked' : ''}> ${l}</label>`).join('');
       const reviewedBadge = rv.reviewed_at ? `<span style="font-size:.75em;color:var(--secondary-text-color)">${this._t('lbl.reviewed_on', {date: new Date(rv.reviewed_at).toLocaleDateString()}, `reviewed ${new Date(rv.reviewed_at).toLocaleDateString()}`)}</span>` : '';
-      // If this cycle has a pending detection feedback (the learning loop is
-      // unsure of the program it matched), surface Confirm/Correct/Ignore right
-      // here. This folds the old Feedbacks subtab into the unified review flow.
-      const pendingFb = (this._feedbacks || []).find(f => f.cycle_id === m.cycleId);
-      const fbProf = pendingFb ? (pendingFb.detected_profile || pendingFb.profile_name || this._t('lbl.unknown', {}, 'Unknown')) : '';
-      const fbBanner = pendingFb ? `
-        <div class="wd-card" style="background:var(--secondary-background-color);border-left:3px solid var(--warning-color,#ff9800);margin:0 0 12px;padding:12px">
-          <div style="font-weight:600;margin-bottom:4px">⚠ ${this._t('msg.pending_feedback', {}, 'Pending detection feedback')}</div>
-          <p class="wd-info" style="margin:0 0 8px">${this._t('msg.unsure_detected_prefix', {}, 'WashData is unsure it detected')} <strong>${_esc(fbProf)}</strong>${pendingFb.confidence != null ? ` (${this._t('lbl.confidence', {}, 'confidence').toLowerCase()} ${(pendingFb.confidence * 100).toFixed(0)}%)` : ''}. ${this._t('msg.feedback_prompt', {}, 'Confirm it was right, correct the program, or ignore.')}</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="fb-confirm" data-cid="${_esc(m.cycleId)}">${this._t('btn.confirm', {}, 'Confirm')}</button>
-            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-correct" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(fbProf)}">${this._t('btn.correct', {}, 'Correct…')}</button>
-            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-ignore" data-cid="${_esc(m.cycleId)}">${this._t('btn.ignore', {}, 'Ignore')}</button>
-          </div>
-        </div>` : '';
+      // Pending-feedback banner (Confirm/Correct/Ignore) is built in the shared
+      // scope above and rendered here as well as in Inspect mode (#331).
       const tProfile = _tip(this._t('msg.review_profile_tip', {}, 'The program this cycle is labelled as. If the auto-detected program was wrong, correct it here - labelling teaches matching for future cycles.'));
       const tQuality = _tip(this._t('msg.review_quality_tip', {}, 'How clean this cycle is. Good = a textbook example of this program; Bad = detected but noisy or atypical; Unusable = mis-detected (merged, truncated or spurious). Drives the health score and which cycles are allowed to train the model.'));
       const tRecorded = _tip(this._t('msg.review_recorded_tip', {}, 'Mark this as a hand-picked reference cycle for its program - the same role as a manually recorded cycle. Reference cycles are always kept, seed the matching template, and are never dropped by cleanup. (This is the "golden"/recorded flag; both are the same thing.)'));
@@ -8668,32 +8702,49 @@ class HaWashdataPanel extends HTMLElement {
     }
 
     // F3: Param input fields → sync to threshold state + redraw
-    sr.querySelectorAll('[data-pgkey]').forEach(inp => inp.addEventListener('input', () => {
-      const key = inp.dataset.pgkey;
-      let val;
-      if (inp.dataset.pgtype === 'bool') {
-        val = inp.checked;
-      } else {
-        val = parseFloat(inp.value);
-        if (isNaN(val)) return;
-      }
-      if (key === 'start_threshold_w') this._pgThreshStart = val;
-      else if (key === 'stop_threshold_w') this._pgThreshStop = val;
-      else this._pgParamOverrides[key] = val;
-      // _render() rebuilds the shadow DOM (so the "Save to settings" button appears once
-      // an override exists), which destroys this <input> and drops focus mid-typing.
-      // Re-render, then restore focus + caret to the same field so multi-digit keyboard
-      // entry isn't interrupted after the first character.
-      let caret = null;
-      try { caret = inp.selectionStart; } catch (_) {}
-      this._render();
-      const again = sr.querySelector(`[data-pgkey="${key}"]`);
-      if (again) {
-        again.focus();
-        if (caret != null) { try { again.setSelectionRange(caret, caret); } catch (_) {} }
-      }
-      requestAnimationFrame(() => this._pgDrawCanvas());
-    }));
+    sr.querySelectorAll('[data-pgkey]').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const key = inp.dataset.pgkey;
+        if (inp.dataset.pgtype === 'bool') {
+          const val = inp.checked;
+          if (key === 'start_threshold_w') this._pgThreshStart = val;
+          else if (key === 'stop_threshold_w') this._pgThreshStop = val;
+          else this._pgParamOverrides[key] = val;
+          this._render();
+          const again = sr.querySelector(`[data-pgkey="${key}"]`);
+          if (again) again.focus();
+          requestAnimationFrame(() => this._pgDrawCanvas());
+          return;
+        }
+        const raw = inp.value.trim();
+        if (!raw) {
+          if (key === 'start_threshold_w') this._pgThreshStart = null;
+          else if (key === 'stop_threshold_w') this._pgThreshStop = null;
+          else delete this._pgParamOverrides[key];
+        } else {
+          const val = parseFloat(raw);
+          if (!isNaN(val)) {
+            if (key === 'start_threshold_w') this._pgThreshStart = val;
+            else if (key === 'stop_threshold_w') this._pgThreshStop = val;
+            else this._pgParamOverrides[key] = val;
+          }
+          // Partial value ("1.", ".", "-") — leave state unchanged until next keystroke.
+        }
+        // Save the raw text and caret before _render() destroys this input. With
+        // type="text" (not number), selectionStart is a real index and setSelectionRange
+        // works, so cursor restoration is reliable unlike the old type=number approach.
+        const caret = inp.selectionStart;
+        const rawVal = inp.value;
+        this._render();
+        const again = sr.querySelector(`[data-pgkey="${key}"]`);
+        if (again) {
+          again.value = rawVal;   // restore raw text incl. trailing "." the browser strips
+          again.focus();
+          try { again.setSelectionRange(caret, caret); } catch (_) {}
+        }
+        requestAnimationFrame(() => this._pgDrawCanvas());
+      });
+    });
 
     // F3: Idle termination test toggle
     const pgStressToggle = sr.getElementById('wd-pg-stress-toggle');
@@ -8707,7 +8758,8 @@ class HaWashdataPanel extends HTMLElement {
     const pgStressIdleW = sr.getElementById('wd-pg-stress-idle-w');
     if (pgStressIdleW) pgStressIdleW.addEventListener('input', () => {
       const v = parseFloat(pgStressIdleW.value);
-      this._pgStressIdleW = isNaN(v) ? null : v;
+      // Number.isFinite rejects Infinity (parseFloat("1e999")) which isNaN misses.
+      this._pgStressIdleW = (Number.isFinite(v) && v >= 0) ? v : null;
     });
 
     // F3: Cycle selector
@@ -10156,7 +10208,7 @@ class HaWashdataPanel extends HTMLElement {
       const val = JSON.parse(btn.dataset.val);
       if (!key) return;
       const eid = dev.entry_id;
-      this._ws({ type: `${_DOMAIN}/ws_set_options`, entry_id: eid, options: { [key]: val } })
+      this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { [key]: val } })
         .then(() => this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }))
         .then(r => { this._opts = r.options || {}; return this._fetchSettingsChangelog(eid); })
         .then(() => {
@@ -10629,6 +10681,9 @@ class HaWashdataPanel extends HTMLElement {
             }
             this._showToast(this._t('toast.review_saved', {}, 'Review saved'));
             await this._fetchCycles(eid);
+            // A label change in review now resolves the pending feedback backend-side
+            // (#331), so refresh the queue rather than leaving a stale entry.
+            if (newLabel !== curLabel) await this._fetchFeedbacks(eid);
             await this._loadMlIndex(eid);
             if (this._modal && this._modal.cycleId === cid) this._modal.ml = (this._mlById || {})[cid] || this._modal.ml;
           } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
@@ -10775,7 +10830,9 @@ class HaWashdataPanel extends HTMLElement {
         ? (sr.getElementById('wd-new-profile-name')?.value?.trim() || null)
         : null;
       this._modal = null;
-      try { await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: m.cycleId, profile_name: profileName || null, new_profile_name: newName }); this._showToast(this._t('toast.cycle_labelled', {}, 'Cycle labelled')); await this._fetchCycles(eid); await this._fetchProfiles(eid); }
+      // Re-fetch feedbacks too: labelling a review cycle now resolves its pending
+      // feedback backend-side (#331), so the "needs review" queue must refresh.
+      try { await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: m.cycleId, profile_name: profileName || null, new_profile_name: newName }); this._showToast(this._t('toast.cycle_labelled', {}, 'Cycle labelled')); await this._fetchCycles(eid); await this._fetchProfiles(eid); await this._fetchFeedbacks(eid); }
       catch (e) { this._showToast(this._t('toast.label_failed', {error: e.message || e}, 'Label failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'create-profile-ok' && eid) {
@@ -10865,7 +10922,8 @@ class HaWashdataPanel extends HTMLElement {
           for (const cid of ids) await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: profileName || null });
           this._showToast(this._t('toast.relabel_done', { count: ids.length }, `Relabelled ${ids.length} cycle(s)`));
           this._cycleSel.clear(); this._selectMode = false;
-          await this._fetchCycles(eid); await this._fetchProfiles(eid);
+          // Bulk relabel resolves any pending feedback on those cycles (#331).
+          await this._fetchCycles(eid); await this._fetchProfiles(eid); await this._fetchFeedbacks(eid);
         } catch (e) { this._showToast(this._t('toast.relabel_failed', { error: e.message || e }, 'Relabel failed: ' + (e.message || e)), 'error'); }
       });
     }
