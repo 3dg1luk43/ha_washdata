@@ -712,6 +712,7 @@
     "export_description": "Odaberite točno koje profile, cikluse, postavke i ostalo želite izvesti u JSON datoteku ili analizirajte datoteku i uvezite samo željene dijelove.",
     "feedback_cycles_pending": "{n} ciklus{s} za pregled",
     "feedback_prompt": "Potvrdite da je ispravno, ispravite program ili zanemarite.",
+    "feedback_relabel_hint": "Ponovno označavanje ovog ciklusa također ga rješava.",
     "filter_by_profile": "Filtriraj po profilu…",
     "group_modal_help": "Grupirajte programe istog oblika koji se razlikuju po temperaturi/centrifugi (trajanje može varirati). Spajanje ocjenjuje grupu kao jednog kandidata, a zatim odabire člana koji najbolje odgovara. Odaberite barem 2; sloj pokazuje koliko su slični.",
     "group_not_cohesive": "Ovi profili nisu dovoljno slični da bi se pouzdano grupirali, pa ih uparivanje tretira pojedinačno dok ne uklonite izuzetak ili ne podijelite grupu.",

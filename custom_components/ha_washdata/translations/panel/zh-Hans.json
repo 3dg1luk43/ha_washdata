@@ -712,6 +712,7 @@
     "export_description": "精确选择要导出到 JSON 的配置文件、周期、设置等，或分析文件并仅导入所需的部分。",
     "feedback_cycles_pending": "{n} 个周期{s}待审查",
     "feedback_prompt": "确认正确、修正程序或忽略。",
+    "feedback_relabel_hint": "重新标记此周期也会解决它。",
     "filter_by_profile": "按配置文件筛选…",
     "group_modal_help": "将形状相同但温度/转速不同的程序分组（时长可能不同）。匹配将组作为一个候选项评分，然后选择最合适的成员。至少选 2 个；叠加显示相似程度。",
     "group_not_cohesive": "这些配置文件不够相似，无法可靠分组，因此匹配会单独处理它们，直到您移除离群值或拆分组。",

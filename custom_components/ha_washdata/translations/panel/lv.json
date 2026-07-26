@@ -712,6 +712,7 @@
     "export_description": "Izvēlieties precīzi, kurus profilus, ciklus, iestatījumus un citus datus eksportēt uz JSON, vai analizējiet failu un importējiet tikai vēlamās daļas.",
     "feedback_cycles_pending": "{n} cikl{s} pārskatīšanai",
     "feedback_prompt": "Apstipriniet, ka tas bija pareizi, labojiet programmu vai ignorējiet.",
+    "feedback_relabel_hint": "Šī cikla atkārtota marķēšana arī to atrisina.",
     "filter_by_profile": "Filtrēt pēc profila…",
     "group_modal_help": "Grupējiet programmas ar vienādu formu, kas atšķiras pēc temperatūras/griešanās (ilgums var atšķirties). Atbilstības gadījumā grupa tiek vērtēta kā viens kandidāts, pēc tam tiek izvēlēts atbilstošākais dalībnieks. Izvēlieties vismaz 2; pārklājums parāda, cik tie ir līdzīgi.",
     "group_not_cohesive": "Šie profili nav pietiekami līdzīgi, lai tos varētu droši grupēt, tāpēc saskaņošanas funkcija tos apstrādā atsevišķi, līdz noņemat novirzi vai sadalāt grupu.",

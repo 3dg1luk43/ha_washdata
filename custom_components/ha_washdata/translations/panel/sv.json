@@ -712,6 +712,7 @@
     "export_description": "Välj exakt vilka profiler, cykler, inställningar och mer som ska exporteras till JSON, eller analysera en fil och importera bara de delar du vill ha.",
     "feedback_cycles_pending": "{n} cykel{s} att granska",
     "feedback_prompt": "Bekräfta att det var rätt, korrigera programmet eller ignorera.",
+    "feedback_relabel_hint": "Att märka om den här cykeln löser också granskningen.",
     "filter_by_profile": "Filtrera efter profil…",
     "group_modal_help": "Gruppera program med samma form som skiljer sig i temperatur/centrifugering (längderna kan variera). Matchning ger gruppen poäng som en kandidat och väljer sedan den medlem som passar bäst. Välj minst 2; överlägget visar hur lika de är.",
     "group_not_cohesive": "Dessa profiler är inte tillräckligt lika för att gruppera på ett tillförlitligt sätt, så matchning behandlar dem individuellt tills du tar bort avvikelsen eller delar upp gruppen.",

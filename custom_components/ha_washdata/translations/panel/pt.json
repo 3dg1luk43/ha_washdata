@@ -712,6 +712,7 @@
     "export_description": "Escolha exatamente que perfis, ciclos, definições e mais exportar para JSON, ou analise um ficheiro e importe apenas as partes que quiser.",
     "feedback_cycles_pending": "{n} ciclo{s} para rever",
     "feedback_prompt": "Confirme que estava correcto, corrija o programa ou ignore.",
+    "feedback_relabel_hint": "Voltar a rotular este ciclo também o resolve.",
     "filter_by_profile": "Filtrar por perfil…",
     "group_modal_help": "Agrupe programas com a mesma forma que diferem em temperatura/centrifugação (as durações podem variar). A correspondência pontua o grupo como um candidato e, em seguida, escolhe o membro mais adequado. Escolha pelo menos 2; a sobreposição mostra o grau de semelhança.",
     "group_not_cohesive": "Estes perfis não são suficientemente semelhantes para serem agrupados de forma fiável, pelo que a correspondência os trata individualmente até remover o valor aberrante ou dividir o grupo.",

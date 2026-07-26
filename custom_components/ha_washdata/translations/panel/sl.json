@@ -712,6 +712,7 @@
     "export_description": "Izberite natančno, katere profile, cikle, nastavitve in drugo želite izvoziti v datoteko JSON, ali analizirajte datoteko in uvozite samo želene dele.",
     "feedback_cycles_pending": "{n} ciklov za pregled",
     "feedback_prompt": "Potrdite pravilnost, popravite program ali prezrite.",
+    "feedback_relabel_hint": "Ponovno označevanje tega cikla ga prav tako razreši.",
     "filter_by_profile": "Filtriraj po profilu…",
     "group_modal_help": "Skupinske programe enake oblike, ki se razlikujejo po temperaturi/ožemanju (trajanje se lahko razlikuje). Ujemanje oceni skupino kot enega kandidata, nato pa izbere najbolj primernega člana. Izberite vsaj 2; prekrivanje kaže, kako si sta podobna.",
     "group_not_cohesive": "Ti profili si niso dovolj podobni, da bi jih lahko zanesljivo združevali, zato jih ujemanje obravnava posamično, dokler ne odstranite odstopanja ali razdelite skupine.",

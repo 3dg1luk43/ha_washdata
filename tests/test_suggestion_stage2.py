@@ -16,12 +16,14 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Stage 2 tests: fixes to the classic suggestion algorithms.
 
-Covers the five reworked heuristics:
+Covers the four reworked heuristics:
   1. off_delay derived from real intra-cycle pauses (fallback to cadence)
   2. end_energy_threshold from p95 false-end + proportional floor
-  3. running_dead_zone from the last early-instability dip
-  4. stop/start thresholds via the bimodal standby/active valley
-  5. duration_tolerance computed per-profile
+  3. stop/start thresholds via the bimodal standby/active valley
+  4. duration_tolerance computed per-profile
+
+Note: running_dead_zone was removed in 0.5.3 (it was never wired to
+detection logic — the config field existed but had no effect).
 """
 from __future__ import annotations
 
@@ -36,7 +38,6 @@ from custom_components.ha_washdata.const import (
     CONF_END_ENERGY_THRESHOLD,
     CONF_OFF_DELAY,
     CONF_PROFILE_DURATION_TOLERANCE,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     DEFAULT_OFF_DELAY,
@@ -153,36 +154,7 @@ def test_end_energy_ignores_single_outlier() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 3. running_dead_zone: last early dip within the startup window
-# ---------------------------------------------------------------------------
-
-
-def test_running_dead_zone_uses_last_early_dip() -> None:
-    # A dip at ~200s (after power became active) should set the dead zone near
-    # 200s, not near the first sample. A start ramp avoids the high-start rule
-    # and a wind-down avoids the abrupt-end rule.
-    def trace_with_early_dip():
-        pts = []
-        for t in range(0, 3600, 30):
-            if t <= 90:
-                p = 1000.0 * (t / 90.0)   # ramp up over ~90s (not a high start)
-            elif 180 <= t <= 210:
-                p = 0.0                    # early instability dip ~200s
-            elif t >= 3400:
-                p = 0.0                    # clean off tail (not an abrupt end)
-            else:
-                p = 1000.0
-            pts.append([float(t), round(p, 1)])
-        return pts
-
-    cycles = [_cycle(trace_with_early_dip(), cid=f"d{i}") for i in range(6)]
-    out = _engine(cycles).run_batch_simulation(cycles)
-    dz = out[CONF_RUNNING_DEAD_ZONE]["value"]
-    assert 150 <= dz <= 300
-
-
-# ---------------------------------------------------------------------------
-# 4. stop/start thresholds: bimodal valley
+# 3. stop/start thresholds: bimodal valley
 # ---------------------------------------------------------------------------
 
 
