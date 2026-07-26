@@ -401,8 +401,13 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
         )
 
     try:
-        return bool(await hass.data[PANEL_TASK_KEY])
+        return bool(await asyncio.shield(hass.data[PANEL_TASK_KEY]))
     except asyncio.CancelledError:
+        # Re-raise when this caller was cancelled so HA setup propagates correctly;
+        # otherwise a CancelledError came from the shielded inner task (not us),
+        # and we return False so other callers remain unaffected.
+        if asyncio.current_task().cancelling():
+            raise
         return False
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.warning("WashData panel registration failed: %s", exc)
@@ -430,8 +435,10 @@ async def async_unregister_panel(hass: HomeAssistant) -> None:
         task.cancel()
         try:
             await task
-        except (asyncio.CancelledError, Exception):  # pylint: disable=broad-exception-caught
+        except asyncio.CancelledError:
             pass
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("WashData panel task ended with error during teardown: %s", exc)
 
     # Remove the sidebar panel using Home Assistant's supported API.
     if hass.data.get(PANEL_REGISTERED_KEY):

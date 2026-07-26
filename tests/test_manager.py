@@ -333,7 +333,9 @@ async def test_async_reload_config_blocks_sensor_change_during_active_cycle(
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "state",
-    [STATE_STARTING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING, STATE_ANTI_WRINKLE],
+    # STATE_USER_PAUSED is not a CycleDetector state; a user-paused appliance
+    # keeps detector.state == STATE_PAUSED, which is already in the blocked set.
+    [STATE_STARTING, STATE_PAUSED, STATE_ENDING, STATE_ANTI_WRINKLE],
 )
 async def test_async_reload_config_blocks_sensor_change_in_every_active_state(
     manager: WashDataManager, mock_entry: Any, mock_hass: Any, state: str
