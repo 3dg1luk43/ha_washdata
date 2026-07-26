@@ -80,7 +80,7 @@ CONF_WATCHDOG_INTERVAL = "watchdog_interval"  # Derived from sampling_interval
 CONF_MATCH_PERSISTENCE = "match_persistence"
 CONF_COMPLETION_MIN_SECONDS = "completion_min_seconds"
 CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
-CONF_RUNNING_DEAD_ZONE = "running_dead_zone"  # Seconds after start to ignore power dips
+CONF_RUNNING_DEAD_ZONE = "running_dead_zone"  # REMOVED in 0.5.3 — was never wired to detection
 CONF_END_REPEAT_COUNT = "end_repeat_count"  # Number of times end condition must be met
 CONF_MIN_OFF_GAP = "min_off_gap"  # Minimum gap to separate cycles (seconds)
 CONF_START_ENERGY_THRESHOLD = "start_energy_threshold"  # Wh required to confirm start
@@ -268,7 +268,6 @@ DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
 DEFAULT_WATCHDOG_INTERVAL = 30  # Derived: 2 * sampling_interval + 1
 DEFAULT_MATCH_PERSISTENCE = 3
-DEFAULT_RUNNING_DEAD_ZONE = 3  # Seconds after start to ignore power dips
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 
 # Matching & Termination Stability
@@ -879,7 +878,6 @@ SHAREABLE_SETTING_KEYS: tuple[str, ...] = (
     CONF_START_DURATION_THRESHOLD,
     CONF_START_ENERGY_THRESHOLD,
     CONF_COMPLETION_MIN_SECONDS,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_MIN_OFF_GAP,
     CONF_END_ENERGY_THRESHOLD,
     CONF_POWER_OFF_THRESHOLD_W,
