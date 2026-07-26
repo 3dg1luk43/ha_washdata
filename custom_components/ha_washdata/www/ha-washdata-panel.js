@@ -5390,7 +5390,9 @@ class HaWashdataPanel extends HTMLElement {
           ${desc ? `<div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('pg_desc.' + key, {}, desc))}</div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-          <input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" aria-label="${_esc(lbl)}" style="width:72px">
+          ${isBool
+            ? `<input class="wd-pg-param-chk" type="checkbox" data-pgkey="${_esc(key)}" data-pgtype="bool" aria-label="${_esc(lbl)}" ${curVal ? 'checked' : ''} style="width:18px;height:18px;margin:1px 27px 0 27px">`
+            : `<input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" aria-label="${_esc(lbl)}" style="width:72px">`}
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
         </div>
       </div>`;
@@ -8687,6 +8689,17 @@ class HaWashdataPanel extends HTMLElement {
     sr.querySelectorAll('[data-pgkey]').forEach(inp => {
       inp.addEventListener('input', () => {
         const key = inp.dataset.pgkey;
+        if (inp.dataset.pgtype === 'bool') {
+          const val = inp.checked;
+          if (key === 'start_threshold_w') this._pgThreshStart = val;
+          else if (key === 'stop_threshold_w') this._pgThreshStop = val;
+          else this._pgParamOverrides[key] = val;
+          this._render();
+          const again = sr.querySelector(`[data-pgkey="${key}"]`);
+          if (again) again.focus();
+          requestAnimationFrame(() => this._pgDrawCanvas());
+          return;
+        }
         const raw = inp.value.trim();
         if (!raw) {
           if (key === 'start_threshold_w') this._pgThreshStart = null;
