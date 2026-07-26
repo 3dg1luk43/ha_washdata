@@ -38,7 +38,6 @@ from .const import (
     CONF_STOP_THRESHOLD_W,
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_END_ENERGY_THRESHOLD,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
     CONF_SAMPLING_INTERVAL,
@@ -1249,17 +1248,6 @@ class SuggestionEngine:
         # Energy suggestions
         suggested_end_energy = 0.05
 
-        # Dead zone: look for early dips in the first 5 minutes
-        dead_zone = 0
-        for ts_offset, p in readings:
-            elapsed = ts_offset
-            if elapsed > 300:
-                break
-            if p < 5.0 and elapsed > 5.0:
-                dead_zone = int(elapsed)
-
-        suggested_dead_zone = min(300, dead_zone) if dead_zone > 0 else 60
-
         return {
             CONF_STOP_THRESHOLD_W: {
                 "value": suggested_stop,
@@ -1278,12 +1266,6 @@ class SuggestionEngine:
                 "reason": "Default recommended baseline for end-of-cycle noise gate.",
                 "reason_key": "suggestion.reason.end_energy_default",
                 "reason_params": {},
-            },
-            CONF_RUNNING_DEAD_ZONE: {
-                "value": suggested_dead_zone,
-                "reason": f"Based on early power dip detected at {suggested_dead_zone}s.",
-                "reason_key": "suggestion.reason.dead_zone_from_dip",
-                "reason_params": {"s": suggested_dead_zone},
             },
         }
 
@@ -1342,8 +1324,6 @@ class SuggestionEngine:
         lowest_active: list[float] = []
         cycle_energies: list[float] = []      # per-cycle total energy (Wh) for proportional floor
         false_end_energies: list[float] = []
-        dead_zone_candidates: list[int] = []
-
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
         for readings in valid_cycles:
             powers = np.array([p for _, p in readings])
@@ -1352,22 +1332,6 @@ class SuggestionEngine:
             active_thr = max(stop_thr, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
             if active.size > 0:
                 lowest_active.append(float(np.min(active)))
-
-            # Running dead zone: length of the early-instability window - the
-            # LAST time power dipped below the active threshold within the first
-            # 10 minutes after it had already become active. This covers fill /
-            # initial-pause transients so they do not trigger a premature end.
-            active_seen = False
-            last_early_dip = 0
-            for ts_offset, p in readings:
-                if ts_offset > 600:
-                    break
-                if p >= active_thr:
-                    active_seen = True
-                elif active_seen and ts_offset > 5.0:
-                    last_early_dip = int(ts_offset)
-            if last_early_dip > 0:
-                dead_zone_candidates.append(last_early_dip)
 
             # Per-cycle total energy (trapezoidal, gap-guarded) for the
             # proportional end-energy floor.
@@ -1471,22 +1435,6 @@ class SuggestionEngine:
             "reason_key": reason_end_key,
             "reason_params": reason_end_params,
         }
-
-        if dead_zone_candidates:
-            # Goal: as SHORT as safely possible so a real end is detected
-            # promptly. Use the median early-instability window (covers the
-            # typical startup dip) rather than a conservative p75.
-            p50_dz = int(np.percentile(dead_zone_candidates, 50))
-            suggested_dz = min(300, p50_dz)
-            suggestions[CONF_RUNNING_DEAD_ZONE] = {
-                "value": suggested_dz,
-                "reason": (
-                    f"Kept short (median startup-instability window across "
-                    f"{len(dead_zone_candidates)} cycles = {suggested_dz}s) so a real end is detected promptly."
-                ),
-                "reason_key": "suggestion.reason.dead_zone_batch",
-                "reason_params": {"cycles": len(dead_zone_candidates), "s": suggested_dz},
-            }
 
         min_off_gap = self._suggest_min_off_gap(cycles)
         if min_off_gap is not None:

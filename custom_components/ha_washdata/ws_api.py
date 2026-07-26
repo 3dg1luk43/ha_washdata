@@ -63,7 +63,6 @@ from .const import (
     CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PUMP_STUCK_DURATION,
     CONF_POWER_OFF_THRESHOLD_W,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
     CONF_SMOOTHING_WINDOW,
     CONF_START_DURATION_THRESHOLD,
@@ -76,7 +75,6 @@ from .const import (
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_OFF_DELAY_BY_DEVICE,
-    DEFAULT_RUNNING_DEAD_ZONE,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
     DEVICE_TYPES,
@@ -93,6 +91,17 @@ from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
 _LOGGER = logging.getLogger(__name__)
+
+# Read once at import time (manifest.json is static) so ws_get_constants never does
+# blocking I/O on the event loop. Falls back to "" if the file is absent.
+try:
+    from pathlib import Path as _Path
+    _INTEGRATION_VERSION: str = json.loads(
+        (_Path(__file__).parent / "manifest.json").read_text(encoding="utf-8")
+    ).get("version", "")
+    del _Path
+except Exception:  # pragma: no cover  # pylint: disable=broad-exception-caught
+    _INTEGRATION_VERSION = ""
 
 # ─── WS response contract (Group H1) ────────────────────────────────────────────
 # Debug-only validation of every send_result payload against the TypedDict
@@ -175,7 +184,6 @@ _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_END_ENERGY_THRESHOLD,
-    CONF_RUNNING_DEAD_ZONE,
     # Stage 1 detection suggestions
     CONF_SMOOTHING_WINDOW,
     CONF_START_DURATION_THRESHOLD,
@@ -198,7 +206,6 @@ _SUGGESTION_INT_KEYS: frozenset[str] = frozenset({
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_MIN_OFF_GAP,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_SMOOTHING_WINDOW,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_END_REPEAT_COUNT,
@@ -229,7 +236,6 @@ _ML_COMPARE_SETTINGS: tuple[tuple[str, str, str], ...] = (
     (CONF_STOP_THRESHOLD_W, "Stop Threshold", "W"),
     (CONF_START_THRESHOLD_W, "Start Threshold", "W"),
     (CONF_END_ENERGY_THRESHOLD, "End Energy Threshold", "Wh"),
-    (CONF_RUNNING_DEAD_ZONE, "Running Dead Zone", "s"),
     (CONF_MIN_POWER, "Min Power", "W"),
     (CONF_MIN_OFF_GAP, "Min Off Gap", "s"),
     (CONF_DURATION_TOLERANCE, "Duration Tolerance", ""),
@@ -2085,9 +2091,17 @@ async def ws_label_cycle(
             if not new_profile_name or not new_profile_name.strip():
                 connection.send_error(msg["id"], "invalid_format", "New profile name required")
                 return
-            await manager.profile_store.create_profile(new_profile_name.strip(), cycle_id)
+            applied_profile: str | None = new_profile_name.strip()
+            await manager.profile_store.create_profile(applied_profile, cycle_id)
         else:
+            applied_profile = profile_name
             await manager.profile_store.assign_profile_to_cycle(cycle_id, profile_name)
+        # Manually (re)labelling a cycle awaiting verification IS the user's answer,
+        # so resolve any pending feedback and drop it from the review queue (#331).
+        if hasattr(manager, "learning_manager"):
+            await manager.learning_manager.async_resolve_pending_from_label(
+                cycle_id, applied_profile
+            )
         manager.notify_update()
         _send_result(connection, msg["id"], "label_cycle", {"success": True})
     except ValueError as exc:
@@ -3222,6 +3236,7 @@ def ws_get_constants(
         {"id": key, "label": label}
         for key, label in DEVICE_TYPES.items()
     ]
+    from .frontend import BRAND_ICON_URL as _BRAND_ICON_URL, BRAND_ICON_REGISTERED_KEY as _BRAND_ICON_KEY  # pylint: disable=import-outside-toplevel
     from .const import STORE_WEB_ORIGIN
     from . import store_account
     from .const import (  # pylint: disable=import-outside-toplevel
@@ -3240,6 +3255,8 @@ def ws_get_constants(
         MATCH_ENERGY_SCALE,
     )
     _send_result(connection, msg["id"], "get_constants", {
+            "version": _INTEGRATION_VERSION,
+            "icon_url": _BRAND_ICON_URL if hass.data.get(_BRAND_ICON_KEY) else None,
             "device_types": device_types,
             "state_colors": dict(STATE_COLORS),
             "ml_lab_enabled": SHOW_ML_LAB,
@@ -4199,7 +4216,19 @@ async def ws_get_power_history(
         cycle_start = getattr(detector, "current_cycle_start", None) if detector else None
         if cycle_start and trace:
             start_dt = trace[0][0]
+            start_ts = start_dt.timestamp()
             live = [[round((t - start_dt).total_seconds(), 1), round(float(p), 1)] for t, p in trace]
+            # Overlay any diag_buffer readings strictly newer than the last trace
+            # point. During STATE_ENDING the detector trace can lag the raw sensor
+            # by up to one sampling interval (readings are throttled; the diag_buffer
+            # records every reading before the throttle), so the chart would appear
+            # frozen at the last active reading until the next throttle-pass.
+            if diag is not None and live:
+                last_trace_ts = trace[-1][0].timestamp()
+                for raw_ts, raw_w in diag.power_samples(last_trace_ts + 0.1):
+                    offset_s = round(raw_ts - start_ts, 1)
+                    if offset_s > live[-1][0]:
+                        live.append([offset_s, round(float(raw_w), 1)])
             out["cycle_active"] = True
             out["live"] = _downsample(live)
             out["cycle_elapsed_s"] = live[-1][0] if live else 0.0
@@ -5160,7 +5189,6 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
         completion_min_seconds=int(opts.get(CONF_COMPLETION_MIN_SECONDS, 600)),
         end_repeat_count=int(opts.get(CONF_END_REPEAT_COUNT, 1)),
         min_off_gap=int(opts.get(CONF_MIN_OFF_GAP, 60)),
-        running_dead_zone=int(opts.get(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE)),
         start_threshold_w=float(opts.get(CONF_START_THRESHOLD_W, min_power)),
         stop_threshold_w=float(
             opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)

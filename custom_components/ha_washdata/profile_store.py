@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import hashlib
 import json
@@ -1134,6 +1135,32 @@ def _unique_profile_name(existing: dict[str, Any], base: str) -> str:
     return f"{base} {i}"
 
 
+def _usable_reference_pairs(points: Any) -> list[list[float]] | None:
+    """Validate a raw ``[[offset, watts], ...]`` trace for reference-cycle import: drop
+    non-finite/non-numeric samples, require >= 2 points and a positive time span. Returns the
+    sorted ``[offset, watts]`` pairs, or ``None`` if the trace is unusable (would no-op).
+
+    Single source of the "is this trace importable" rule, shared by ``_add_reference_cycle_nosave``
+    (which mutates) and the selective-import replace guard (which must not wipe a destination
+    when every selected cycle would silently no-op)."""
+    pairs: list[list[float]] = []
+    for p in (points if isinstance(points, (list, tuple)) else []):
+        if not isinstance(p, (list, tuple)) or len(p) < 2:
+            continue
+        try:
+            x, y = float(p[0]), float(p[1])
+        except (TypeError, ValueError):
+            continue
+        if np.isfinite(x) and np.isfinite(y):
+            pairs.append([x, y])
+    if len(pairs) < 2:
+        return None
+    pairs.sort(key=lambda q: q[0])  # defensive: normalize any out-of-order offsets
+    if float(pairs[-1][0] - pairs[0][0]) <= 0:
+        return None
+    return pairs
+
+
 def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
     """Append items from ``incoming`` to ``base`` in place, skipping duplicates.
 
@@ -1708,25 +1735,13 @@ class ProfileStore:
         profile once + a single save at the end). Returns the new cycle id, or ``""``
         when the trace is unusable (mutating nothing).
         """
-        # Validate the trace BEFORE creating any persistent state (profile entry /
-        # reference cycle): drop non-finite/non-numeric samples, require >= 2 points
-        # and a positive time span. A garbage trace returns "" and mutates nothing.
-        pairs: list[list[float]] = []
-        for p in (points or []):
-            if len(p) < 2:
-                continue
-            try:
-                x, y = float(p[0]), float(p[1])
-            except (TypeError, ValueError):
-                continue
-            if math.isfinite(x) and math.isfinite(y):
-                pairs.append([x, y])
-        if len(pairs) < 2:
+        # Validate the trace BEFORE creating any persistent state (profile entry / reference
+        # cycle): a garbage trace returns "" and mutates nothing. Same rule the import guard
+        # uses to decide whether a replace has anything usable to refill a destination with.
+        pairs = _usable_reference_pairs(points)
+        if pairs is None:
             return ""
-        pairs.sort(key=lambda q: q[0])  # defensive: normalize any out-of-order offsets
         duration = float(pairs[-1][0] - pairs[0][0])
-        if duration <= 0:
-            return ""
         # Re-base to offset 0 so envelope reconstruction and DTW work correctly.
         if pairs[0][0] != 0.0:
             origin = pairs[0][0]
@@ -1749,7 +1764,9 @@ class ProfileStore:
             },
         }
         if meta.get("sampling_interval"):
-            cycle["sampling_interval"] = float(meta["sampling_interval"])
+            # ignore a malformed sampling_interval rather than raise mid-import
+            with contextlib.suppress(TypeError, ValueError):
+                cycle["sampling_interval"] = float(meta["sampling_interval"])
         # A reference cycle implies its program exists locally; create a minimal profile
         # entry if absent so the matcher iterates it and the rebuild can set its template.
         profiles = self._data.setdefault("profiles", {})
@@ -6073,7 +6090,11 @@ class ProfileStore:
         # Device-type gating: block device-specific categories and force reference-only
         # cycle destination when the source device type does not match this device.
         source_dt = str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
-        device_type_match = (not source_dt) or (not local_device_type) or (source_dt == local_device_type)
+        # Keep this identical to build_import_manifest so the analysis shown to the user
+        # (which disables device-specific categories / real-history on a mismatch) cannot
+        # diverge from what the apply actually does. An unknown local device type is treated
+        # as a mismatch (conservative), matching the manifest.
+        device_type_match = (not source_dt) or (source_dt == local_device_type)
         if not device_type_match:
             cats = {c for c in cats if not _EXPORT_CATEGORIES.get(c, {}).get("device_specific")}
             cycle_destination = "reference"
@@ -6081,20 +6102,6 @@ class ProfileStore:
         src_profiles = data_dict.get("profiles") if isinstance(data_dict.get("profiles"), dict) else {}
         src_past = [c for c in (data_dict.get("past_cycles") or []) if isinstance(c, dict)]
         src_refs = [c for c in (data_dict.get("reference_cycles") or []) if isinstance(c, dict)]
-
-        # Replace-mode anti-data-loss guard: don't let an empty file wipe live data. Each
-        # ticked category is guarded against its own kind of empty payload (the reference
-        # arm was previously unguarded, so a stale client could wipe curated reference
-        # cycles with a file that carried none).
-        if mode == "replace":
-            if ("profiles" in cats or "real_cycles" in cats) and not src_profiles and not src_past:
-                raise ValueError(
-                    "Import payload contains no profiles or cycles — aborting to prevent data loss"
-                )
-            if "reference_cycles" in cats and not src_refs:
-                raise ValueError(
-                    "Import payload contains no reference cycles — aborting to prevent data loss"
-                )
 
         prof_filter = selection.get("profiles") if isinstance(selection.get("profiles"), list) else None
         real_id_filter = (
@@ -6118,6 +6125,46 @@ class ProfileStore:
             keep = {str(i) for i in idf}
             return [c for c in cycles if str(c.get("id")) in keep]
 
+        # The cycles that will actually be imported once the per-item id selection is applied.
+        selected_refs = _apply_id_filter(src_refs, ref_id_filter)
+        selected_past = _apply_id_filter(src_past, real_id_filter)
+
+        def _any_usable(cs: list[dict[str, Any]]) -> bool:
+            # A cycle bound for reference storage only refills the destination if its trace is
+            # usable (_add_reference_cycle_nosave silently no-ops on a degenerate trace), so
+            # the wipe guard checks usability, not mere presence, for reference-bound cycles.
+            return any(_usable_reference_pairs(c.get("power_data")) is not None for c in cs)
+
+        def _any_real_importable(cs: list[dict[str, Any]]) -> bool:
+            # A real-history record is skipped in Step 3 if it lacks start_time/duration (the
+            # fields _add_cycle_data requires), so the wipe guard requires at least one record
+            # that carries both -- otherwise an all-malformed selection wipes past_cycles and
+            # refills nothing.
+            return any(
+                c.get("start_time") is not None and c.get("duration") is not None for c in cs
+            )
+
+        # Replace-mode anti-data-loss guard: never wipe a destination unless the file has a
+        # SELECTED set that will actually refill it. Guarding on the post-filter sets (not raw
+        # src_*) means a stale/malformed id selection that matches nothing aborts here instead
+        # of emptying the local list; for reference-bound cycles we further require at least
+        # one usable trace so an all-degenerate selection can't wipe-then-add-nothing. Profiles
+        # are never wiped (per-name overwrite/copy), so a profiles-only replace needs no guard.
+        if mode == "replace":
+            if "reference_cycles" in cats and not _any_usable(selected_refs):
+                raise ValueError(
+                    "Import payload has no usable reference cycles — aborting to prevent data loss"
+                )
+            if "real_cycles" in cats:
+                if cycle_destination == "reference" and not _any_usable(selected_past):
+                    raise ValueError(
+                        "Import payload has no usable cycles — aborting to prevent data loss"
+                    )
+                if cycle_destination == "real_history" and not _any_real_importable(selected_past):
+                    raise ValueError(
+                        "Import payload contains no real cycles — aborting to prevent data loss"
+                    )
+
         local_profiles = self._data.setdefault("profiles", {})
         name_remap: dict[str, str] = {}
         touched: set[str] = set()
@@ -6126,6 +6173,7 @@ class ProfileStore:
         conflicts_resolved = 0
         real_imported = 0
         ref_imported = 0
+        malformed_skipped = 0  # records dropped mid-import (surfaced in the summary)
 
         # ── Step 1: profiles + conflict resolution ──────────────────────────────
         if "profiles" in cats:
@@ -6169,12 +6217,19 @@ class ProfileStore:
                 created_profiles += 1
 
         # Replace-mode wipes (hoisted so the id pools + dedup set below reflect the
-        # post-wipe lists). Only the ticked category's list is cleared; the empty-payload
-        # guard above already refused to run if the file had nothing to replace it with.
+        # post-wipe lists). Each ticked cycle category clears the list it actually writes to
+        # (per the docstring's "each ticked category is wiped and replaced"), so real_cycles
+        # routed to the default reference destination wipes reference_cycles too -- not just
+        # when the reference_cycles category itself is ticked. The empty-payload guard above
+        # already refused to run if the file had nothing to replace it with.
         if mode == "replace":
-            if "reference_cycles" in cats:
+            wipe_reference = "reference_cycles" in cats or (
+                "real_cycles" in cats and cycle_destination == "reference"
+            )
+            wipe_past = "real_cycles" in cats and cycle_destination == "real_history"
+            if wipe_reference:
                 self._data["reference_cycles"] = []
-            if "real_cycles" in cats and cycle_destination == "real_history":
+            if wipe_past:
                 self._data["past_cycles"] = []
 
         # O(N) id pools threaded through the bulk cycle adds so SHA-id uniqueness stays
@@ -6182,47 +6237,70 @@ class ProfileStore:
         # every insert (previously O(N^2) for a large import, all on the event loop).
         ref_id_pool: set[Any] = {c.get("id") for c in self._data.get("reference_cycles", []) if isinstance(c, dict)}
         past_id_pool: set[Any] = {c.get("id") for c in self._data.get("past_cycles", []) if isinstance(c, dict)}
-        # Reference-cycle dedup: skip re-importing a reference cycle already held so a
-        # repeated import stays idempotent (otherwise envelopes get double-weighted and
-        # cycle_count inflates). Keyed on the stable source id stamped into meta.source.
-        existing_ref_sources: set[str] = {
-            str((c.get("meta") or {}).get("source"))
-            for c in self._data.get("reference_cycles", [])
-            if isinstance(c, dict) and (c.get("meta") or {}).get("source")
-        }
+        def _bare_store_id(raw_id: Any) -> str:
+            # A reference cycle exported after a prior import already carries
+            # meta.source="store:<id>". Strip EVERY leading "store:" so re-prefixing does not
+            # accumulate "store:store:..." across round-trips and, crucially, so historical
+            # double-prefixed values already persisted collapse to the same canonical id --
+            # otherwise a later import of "store:<id>" would miss a stored "store:store:<id>"
+            # and add a duplicate.
+            sid = str(raw_id or "")
+            while sid.startswith("store:"):
+                sid = sid[len("store:"):]
+            return sid
 
         def _ref_dedup_key(raw_id: Any) -> str:
-            sid = str(raw_id or "")
-            return f"store:{sid}" if sid else ""
+            bare = _bare_store_id(raw_id)
+            return f"store:{bare}" if bare else ""
+
+        # Reference-cycle dedup: skip re-importing a reference cycle already held so a
+        # repeated import stays idempotent (otherwise envelopes get double-weighted and
+        # cycle_count inflates). Keyed on the CANONICAL source id, so a legacy double-prefixed
+        # persisted value and a fresh single-prefixed import map to the same key.
+        existing_ref_sources: set[str] = set()
+        for c in self._data.get("reference_cycles", []):
+            if not isinstance(c, dict):
+                continue
+            meta = c.get("meta")
+            src = meta.get("source") if isinstance(meta, dict) else None
+            if src:
+                existing_ref_sources.add(_ref_dedup_key(src))
 
         # ── Step 2: reference cycles (shape-only) ───────────────────────────────
+        # Each record is processed defensively: a single malformed record is skipped (not
+        # fatal) so a replace-mode import can never abort part-way and leave a wiped
+        # destination in an inconsistent state (the wipe above already happened).
         if "reference_cycles" in cats:
-            for c in _apply_id_filter(src_refs, ref_id_filter):
-                orig = str(c.get("profile_name") or "")
-                target = name_remap.get(orig, orig)
-                if not target:
-                    continue
-                src_meta = c.get("meta") if isinstance(c.get("meta"), dict) else {}
-                raw_sid = src_meta.get("source") or c.get("id")
-                dkey = _ref_dedup_key(raw_sid)
-                if dkey and dkey in existing_ref_sources:
-                    continue  # already imported -> keep re-import idempotent
-                _ensure_profile(target, c.get("duration") or 0)
-                cid = self._add_reference_cycle_nosave(
-                    target,
-                    c.get("power_data") or [],
-                    {
-                        "store_cycle_id": raw_sid,
-                        "store_uploaded_at": src_meta.get("store_uploaded_at"),
-                        "sampling_interval": c.get("sampling_interval"),
-                    },
-                    id_pool=ref_id_pool,
-                )
-                if cid:
-                    if dkey:
-                        existing_ref_sources.add(dkey)
-                    touched.add(target)
-                    ref_imported += 1
+            for c in selected_refs:
+                try:
+                    orig = str(c.get("profile_name") or "")
+                    target = name_remap.get(orig, orig)
+                    if not target:
+                        continue
+                    src_meta = c.get("meta") if isinstance(c.get("meta"), dict) else {}
+                    raw_sid = src_meta.get("source") or c.get("id")
+                    dkey = _ref_dedup_key(raw_sid)
+                    if dkey and dkey in existing_ref_sources:
+                        continue  # already imported -> keep re-import idempotent
+                    _ensure_profile(target, c.get("duration") or 0)
+                    cid = self._add_reference_cycle_nosave(
+                        target,
+                        c.get("power_data") or [],
+                        {
+                            "store_cycle_id": _bare_store_id(raw_sid),
+                            "store_uploaded_at": src_meta.get("store_uploaded_at"),
+                            "sampling_interval": c.get("sampling_interval"),
+                        },
+                        id_pool=ref_id_pool,
+                    )
+                    if cid:
+                        if dkey:
+                            existing_ref_sources.add(dkey)
+                        touched.add(target)
+                        ref_imported += 1
+                except Exception:  # noqa: BLE001 - skip a malformed record, never abort the import
+                    malformed_skipped += 1
+                    self._logger.debug("selective import: skipped a malformed reference cycle", exc_info=True)
 
         # ── Step 3: real cycles (reference-shape or real-history) ───────────────
         if "real_cycles" in cats:
@@ -6235,7 +6313,8 @@ class ProfileStore:
                     imp = (c.get("meta") or {}).get("imported_from")
                     if imp:
                         known_ids.add(str(imp))
-            for c in _apply_id_filter(src_past, real_id_filter):
+            for c in selected_past:
+              try:
                 orig = str(c.get("profile_name") or "")
                 target = name_remap.get(orig, orig)
                 if cycle_destination == "reference":
@@ -6246,7 +6325,7 @@ class ProfileStore:
                     _ensure_profile(target or "(imported)", c.get("duration") or 0)
                     cid = self._add_reference_cycle_nosave(
                         target or "(imported)", c.get("power_data") or [],
-                        {"store_cycle_id": raw_sid}, id_pool=ref_id_pool,
+                        {"store_cycle_id": _bare_store_id(raw_sid)}, id_pool=ref_id_pool,
                     )
                     if cid:
                         if dkey:
@@ -6257,6 +6336,8 @@ class ProfileStore:
                     orig_id = str(c.get("id") or "")
                     if orig_id and orig_id in known_ids:
                         continue  # already imported / round-trip -> skip duplicate
+                    if c.get("start_time") is None or c.get("duration") is None:
+                        continue  # malformed real record (add_cycle needs both) -> skip, don't raise
                     _ensure_profile(target, c.get("duration") or 0)
                     cyc = dict(c)
                     cyc["profile_name"] = target or None
@@ -6273,6 +6354,9 @@ class ProfileStore:
                     if target:
                         touched.add(target)
                     real_imported += 1
+              except Exception:  # noqa: BLE001 - skip a malformed record, never abort the import
+                  malformed_skipped += 1
+                  self._logger.debug("selective import: skipped a malformed cycle", exc_info=True)
 
         # ── Step 4: leaf categories (additive merge / replace) ──────────────────
         for cat_id in cats:
@@ -6327,6 +6411,7 @@ class ProfileStore:
             "real_cycles_imported": real_imported,
             "reference_cycles_imported": ref_imported,
             "conflicts_resolved": conflicts_resolved,
+            "skipped_cycles": malformed_skipped,
             "categories_applied": sorted(cats),
             "device_type_match": device_type_match,
             "settings": settings_out,
