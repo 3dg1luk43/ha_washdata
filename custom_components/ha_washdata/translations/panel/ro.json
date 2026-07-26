@@ -399,6 +399,7 @@
     "panel_default_tab": "Fila implicită",
     "panel_language": "Limba panoului",
     "per_cycle_short": "ciclu",
+    "pg_anti_wrinkle": "Anti-șifonare",
     "pg_autofill_tip": "Completează automat intervalul din valoarea curentă ({lo}–{hi})",
     "pg_best_value": "Cea mai bună valoare găsită",
     "pg_current_value": "Valoarea curentă:",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Puterea trebuie să scadă sub aceasta între impulsuri pentru ca modul antirid să rămână activ.",
       "label": "Prag Putere de Ieșire"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Cât timp poate rămâne aparatul în liniște între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie. Setați-l peste cel mai lung interval pe care uscătorul îl lasă între impulsuri, altfel fiecare impuls ulterior este citit ca o pornire falsă.",
+      "label": "Interval Maxim Între Impulsuri"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulsurile mai lungi decât aceasta sunt tratate ca un ciclu real, mai degrabă decât o răsturnare antirid.",
@@ -1765,6 +1770,11 @@
     "other": "Altele"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",
+    "anti_wrinkle_exit_power": "Puterea trebuie să scadă sub această valoare între impulsuri pentru ca modul anti-șifonare să rămână activ",
+    "anti_wrinkle_idle_timeout": "Timp de liniște permis între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie",
+    "anti_wrinkle_max_duration": "Un impuls mai lung decât acesta încheie modul anti-șifonare și deschide un ciclu nou",
+    "anti_wrinkle_max_power": "Un impuls peste această valoare încheie modul anti-șifonare și deschide un ciclu nou",
     "completion_min_seconds": "Cea mai scurtă rulare care contează ca ciclu real",
     "end_repeat_count": "Citiri scăzute consecutive înainte de încheiere",
     "interrupted_min_seconds": "Ciclurile scurte sunt marcate ca întrerupte",

@@ -300,6 +300,7 @@
     "poor": "⚠ Gyenge profilminőség"
   },
   "lbl": {
+    "pg_anti_wrinkle": "Ránctalanítás",
     "actions": "Akciók",
     "activity": "Tevékenység",
     "administrators": "Rendszergazdák",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "A teljesítménynek ez alá kell csökkennie az impulzusok között, hogy a ránctalanító üzemmód aktív maradjon.",
       "label": "Kilépési teljesítmény küszöb"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Meddig maradhat a gép csendben két szárítópulzus között, mielőtt a ránctalanító üzemmód véget ér. Állítsa hosszabbra, mint a leghosszabb szünet, amit a szárítógép a pulzusok között hagy, különben minden későbbi pulzus téves indításként lesz értelmezve.",
+      "label": "Max. impulzusszünet"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Az ennél hosszabb impulzusokat valódi ciklusnak tekintik, nem pedig ránctalanítónak.",
@@ -1765,6 +1770,11 @@
     "other": "Egyéb"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Nyelje el a fő fázis utáni szárítópulzusokat, ahelyett hogy új ciklusként olvasná őket",
+    "anti_wrinkle_exit_power": "A ránctalanítás aktívan tartásához a teljesítménynek az impulzusok között ez alá kell csökkennie",
+    "anti_wrinkle_idle_timeout": "Két szárítópulzus között engedélyezett csendes idő, mielőtt a ránctalanítás véget ér",
+    "anti_wrinkle_max_duration": "Az ennél hosszabb impulzus befejezi a ránctalanítást és új ciklust nyit",
+    "anti_wrinkle_max_power": "Az ennél magasabb impulzus befejezi a ránctalanítást és új ciklust nyit",
     "completion_min_seconds": "A legrövidebb futás, ami valódi ciklusnak számít",
     "end_repeat_count": "Egymást követő alacsony leolvasások a befejezés előtt",
     "interrupted_min_seconds": "A rövid ciklusokat megszakítottként jelöli",

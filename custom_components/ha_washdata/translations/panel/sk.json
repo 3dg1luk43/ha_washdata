@@ -403,6 +403,7 @@
     "pg_best_value": "Nájdená najlepšia hodnota",
     "pg_current_value": "Aktuálna hodnota:",
     "pg_drag_hint": "Potiahnite čiaru v grafe",
+    "pg_anti_wrinkle": "Ochrana pred krčením",
     "pg_dtw": "DTW",
     "pg_ev_ending": "Ukončovanie",
     "pg_ev_running": "Beží",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Aby režim proti vráskam zostal aktívny, musí výkon medzi impulzmi klesnúť pod túto hodnotu.",
       "label": "Prah výkonu ukončenia"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Ako dlho môže stroj medzi dvoma impulzmi bubna zostať v pokoji, než sa režim ochrany pred krčením skončí. Nastavte ju nad najdlhšiu medzeru, ktorú vaša sušička medzi impulzmi ponecháva, inak sa každý ďalší impulz vyhodnotí ako falošné spustenie.",
+      "label": "Max. medzera medzi impulzmi"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Dlhšie pulzy sa považujú za skutočný cyklus a nie za protivráskové.",
@@ -1765,6 +1770,11 @@
     "other": "Iné"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Pohltiť impulzy bubna po hlavnej fáze namiesto ich čítania ako nové cykly",
+    "anti_wrinkle_exit_power": "Výkon musí medzi impulzmi klesnúť pod túto hodnotu, aby ochrana pred krčením zostala aktívna",
+    "anti_wrinkle_idle_timeout": "Povolený pokoj medzi dvoma impulzmi bubna, než sa ochrana pred krčením skončí",
+    "anti_wrinkle_max_duration": "Dlhší impulz ukončí ochranu pred krčením a otvorí nový cyklus",
+    "anti_wrinkle_max_power": "Impulz nad touto hodnotou ukončí ochranu pred krčením a otvorí nový cyklus",
     "completion_min_seconds": "Najkratší beh, ktorý sa počíta ako skutočný cyklus",
     "end_repeat_count": "Nízke čítania za sebou pred ukončením",
     "interrupted_min_seconds": "Krátke cykly označené ako prerušené",

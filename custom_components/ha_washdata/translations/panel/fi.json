@@ -300,6 +300,7 @@
     "poor": "⚠ Heikko profiililaatu"
   },
   "lbl": {
+    "pg_anti_wrinkle": "Ryppyjenesto",
     "actions": "Toiminnot",
     "activity": "Toiminta",
     "administrators": "Järjestelmänvalvojat",
@@ -924,6 +925,11 @@
     "dest_real_history_hint": "Tuodut jaksot lasketaan tämän laitteen omaksi historiaksi ja syöttävät energia- ja käyttötilastoja. Käytä tätä, kun siirrät yhden laitteen uuteen asennukseen."
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Sulauta päävaiheen jälkeiset rumpupulssit sen sijaan, että lukisit ne uusina sykleinä",
+    "anti_wrinkle_exit_power": "Tehon on laskettava tämän alle pulssien välillä, jotta ryppyjenesto pysyy aktiivisena",
+    "anti_wrinkle_idle_timeout": "Kahden rumpupulssin välillä sallittu hiljainen aika ennen kuin ryppyjenesto päättyy",
+    "anti_wrinkle_max_duration": "Tätä pidempi pulssi päättää ryppyjeneston ja aloittaa uuden syklin",
+    "anti_wrinkle_max_power": "Tätä suurempi pulssi päättää ryppyjeneston ja aloittaa uuden syklin",
     "completion_min_seconds": "Lyhin ajo, joka lasketaan oikeaksi sykliksi",
     "end_repeat_count": "Peräkkäisten matalien lukemien määrä ennen päättymistä",
     "interrupted_min_seconds": "Lyhyet syklit merkitään keskeytyneiksi",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Tehon on oltava tämän alapuolella pulssien välillä, jotta ryppyjä estävä tila pysyy aktiivisena.",
       "label": "Poistumistehokynnys"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Kuinka kauan kone saa pysyä hiljaa kahden rumpupulssin välillä ennen kuin ryppyjenesto-tila päättyy. Aseta se pidemmäksi kuin pisin väli, jonka kuivausrumpu jättää pulssien välille, muuten jokainen myöhempi pulssi luetaan vääräksi käynnistykseksi.",
+      "label": "Pulssien enimmäisväli"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Tätä pidempiä pulsseja käsitellään pikemminkin todellisena syklinä kuin ryppyjä ehkäisevänä ryppynä.",

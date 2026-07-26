@@ -399,6 +399,7 @@
     "panel_default_tab": "Aba padrão",
     "panel_language": "Idioma do painel",
     "per_cycle_short": "ciclo",
+    "pg_anti_wrinkle": "Antiamasso",
     "pg_autofill_tip": "Preencher automaticamente a faixa a partir do valor atual ({lo}–{hi})",
     "pg_best_value": "Melhor valor encontrado",
     "pg_current_value": "Valor atual:",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "A potência deve cair abaixo disso entre os pulsos para que o modo antirrugas permaneça ativo.",
       "label": "Limite de Saída de Potência"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Por quanto tempo a máquina pode permanecer em silêncio entre dois pulsos de giro antes de o modo antiamasso terminar. Defina-o acima do maior intervalo que sua secadora deixa entre pulsos; caso contrário, cada pulso posterior é lido como um início falso.",
+      "label": "Intervalo Máximo Entre Pulsos"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulsos mais longos do que isso são tratados como um ciclo real, e não como uma queda anti-rugas.",
@@ -1765,6 +1770,11 @@
     "other": "Outro"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Absorver os pulsos de giro após a fase principal em vez de lê-los como novos ciclos",
+    "anti_wrinkle_exit_power": "A potência deve cair abaixo deste valor entre os pulsos para que o modo antiamasso permaneça ativo",
+    "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de giro antes de o modo antiamasso terminar",
+    "anti_wrinkle_max_duration": "Um pulso mais longo do que isso encerra o modo antiamasso e abre um novo ciclo",
+    "anti_wrinkle_max_power": "Um pulso acima disso encerra o modo antiamasso e abre um novo ciclo",
     "completion_min_seconds": "Menor duração que conta como ciclo real",
     "end_repeat_count": "Leituras baixas seguidas antes de terminar",
     "interrupted_min_seconds": "Ciclos curtos marcados como interrompidos",

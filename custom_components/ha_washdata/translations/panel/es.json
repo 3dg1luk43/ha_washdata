@@ -399,6 +399,7 @@
     "panel_default_tab": "Pestaña predeterminada",
     "panel_language": "Idioma del panel",
     "per_cycle_short": "ciclo",
+    "pg_anti_wrinkle": "Antiarrugas",
     "pg_autofill_tip": "Autocompletar el rango a partir del valor actual ({lo}–{hi})",
     "pg_best_value": "Mejor valor encontrado",
     "pg_current_value": "Valor actual:",
@@ -924,6 +925,11 @@
     "dest_real_history_hint": "Los ciclos importados cuentan como el historial propio de este dispositivo y alimentan las estadísticas de energía/uso. Úsalo para mover un electrodoméstico a una instalación nueva."
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Absorber los pulsos de volteo tras la fase principal en lugar de leerlos como nuevos ciclos",
+    "anti_wrinkle_exit_power": "La potencia debe caer por debajo de este valor entre pulsos para que el modo antiarrugas siga activo",
+    "anti_wrinkle_idle_timeout": "Tiempo de silencio permitido entre dos pulsos de volteo antes de que finalice el modo antiarrugas",
+    "anti_wrinkle_max_duration": "Un pulso más largo que esto finaliza el modo antiarrugas y abre un nuevo ciclo",
+    "anti_wrinkle_max_power": "Un pulso por encima de esto finaliza el modo antiarrugas y abre un nuevo ciclo",
     "completion_min_seconds": "Ejecución más corta que cuenta como ciclo real",
     "end_repeat_count": "Lecturas bajas consecutivas antes de terminar",
     "interrupted_min_seconds": "Ciclos cortos marcados como interrumpidos",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "La energía debe caer por debajo de esto entre pulsos para que el modo antiarrugas permanezca activo.",
       "label": "Umbral de potencia de salida"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Cuánto tiempo puede permanecer en silencio la máquina entre dos pulsos de volteo antes de que finalice el modo antiarrugas. Ajústelo por encima del intervalo más largo que su secadora deja entre pulsos; de lo contrario, cada pulso posterior se lee como un falso inicio.",
+      "label": "Intervalo máximo entre pulsos"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Los pulsos más largos se tratan como un ciclo real en lugar de una caída antiarrugas.",

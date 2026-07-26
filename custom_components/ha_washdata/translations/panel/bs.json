@@ -403,6 +403,7 @@
     "pg_best_value": "Pronađena najbolja vrijednost",
     "pg_current_value": "Trenutna vrijednost:",
     "pg_drag_hint": "Povucite liniju na grafikonu",
+    "pg_anti_wrinkle": "Anti-gužvanje",
     "pg_dtw": "DTW",
     "pg_ev_ending": "Završava",
     "pg_ev_running": "U toku",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Snaga mora pasti ispod ove između impulsa da bi režim protiv bora ostao aktivan.",
       "label": "Prag izlazne snage"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Koliko dugo mašina smije ostati mirna između dva impulsa bubnja prije nego što se režim anti-gužvanja završi. Postavite ga iznad najdužeg razmaka koji vaša sušilica ostavlja između impulsa, inače se svaki naredni impuls čita kao lažni početak.",
+      "label": "Maksimalni razmak između impulsa"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulsevi duži od ovog tretiraju se kao pravi ciklus, a ne kao nalet protiv bora.",
@@ -1765,6 +1770,11 @@
     "other": "Ostalo"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Upij impulse bubnja nakon glavne faze, a ne čitaj ih kao nove cikluse",
+    "anti_wrinkle_exit_power": "Snaga mora pasti ispod ove vrijednosti između impulsa da bi anti-gužvanje ostalo aktivno",
+    "anti_wrinkle_idle_timeout": "Dozvoljeno vrijeme mirovanja između dva impulsa bubnja prije nego što se anti-gužvanje završi",
+    "anti_wrinkle_max_duration": "Duži impuls završava anti-gužvanje i otvara novi ciklus",
+    "anti_wrinkle_max_power": "Impuls iznad ove vrijednosti završava anti-gužvanje i otvara novi ciklus",
     "completion_min_seconds": "Najkraće pokretanje koje se računa kao pravi ciklus",
     "end_repeat_count": "Niska očitanja zaredom prije završetka",
     "interrupted_min_seconds": "Kratki ciklusi označeni kao prekinuti",

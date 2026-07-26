@@ -410,6 +410,7 @@
     "pg_group_detection": "Okidači otkrivanja",
     "pg_group_timing": "Pravila vremena",
     "pg_idle": "U mirovanju",
+    "pg_anti_wrinkle": "Zaštita od gužvanja",
     "pg_last_run": "Poslednje pokretanje: {date}",
     "pg_match_score": "Ocena poklapanja",
     "pg_pct_of": "{p}% od {total}",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Snaga mora pasti ispod ove između impulsa da bi režim protiv bora ostao aktivan.",
       "label": "Prag izlazne snage"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "Maks. razmak između impulsa",
+      "doc": "Koliko dugo mašina sme da ostane tiha između dva impulsa prevrtanja bubnja pre nego što se režim zaštite od gužvanja završi. Postavite je iznad najdužeg razmaka koji vaša mašina za sušenje ostavlja između impulsa, inače se svaki naredni impuls čita kao lažni start."
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulsevi duži od ovoga se tretiraju kao pravi ciklus, a ne kao protiv bora.",
@@ -1773,6 +1778,11 @@
     "start_duration_threshold": "Sekundi iznad praga za potvrdu pokretanja",
     "start_threshold_w": "Minimum vati da bi se računalo kao pokrenuto",
     "stop_threshold_w": "Ispod ovoga mašina se računa kao isključena",
+    "anti_wrinkle_enabled": "Upijte impulse prevrtanja bubnja nakon glavne faze umesto da ih čitate kao nove cikluse",
+    "anti_wrinkle_exit_power": "Snaga između impulsa mora pasti ispod ove da bi zaštita od gužvanja ostala aktivna",
+    "anti_wrinkle_idle_timeout": "Dozvoljena tišina između dva impulsa prevrtanja bubnja pre nego što se zaštita od gužvanja završi",
+    "anti_wrinkle_max_duration": "Impuls duži od ovoga završava zaštitu od gužvanja i otvara novi ciklus",
+    "anti_wrinkle_max_power": "Impuls iznad ovoga završava zaštitu od gužvanja i otvara novi ciklus",
     "dtw_bandwidth": "Faza 3: warp opseg Sakoe-Chiba (0 = DTW isključen; podrazumevano 0,2 = 20% dužine ciklusa)",
     "corr_weight": "Faza 2: ravnoteža između oblika krive (korelacija) i nivoa snage (MAE); podrazumevano 0,45",
     "duration_weight": "Faza 4: koliko jako slaganje trajanja utiče na konačni rezultat (podrazumevano 0,22)",

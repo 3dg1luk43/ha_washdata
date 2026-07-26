@@ -403,6 +403,7 @@
     "pg_best_value": "Znaleziona najlepsza wartość",
     "pg_current_value": "Bieżąca wartość:",
     "pg_drag_hint": "Przeciągnij linię na wykresie",
+    "pg_anti_wrinkle": "Antygniotowy",
     "pg_dtw": "DTW",
     "pg_ev_ending": "Kończenie",
     "pg_ev_running": "Działa",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Moc musi spaść poniżej tej wartości pomiędzy impulsami, aby tryb przeciwzmarszczkowy pozostał aktywny.",
       "label": "Próg Wyjścia Mocy"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Jak długo maszyna może pozostać cicha między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy. Ustaw powyżej najdłuższej przerwy, jaką suszarka zostawia między impulsami, w przeciwnym razie każdy kolejny impuls zostanie odczytany jako fałszywy start.",
+      "label": "Maks. Odstęp Impulsów"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Impulsy dłuższe niż ten traktowane są jako prawdziwy cykl, a nie przeciwzmarszczkowy upadek.",
@@ -1765,6 +1770,11 @@
     "other": "Inne"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",
+    "anti_wrinkle_exit_power": "Moc musi spaść poniżej tej wartości pomiędzy impulsami, aby tryb antygniotowy pozostał aktywny",
+    "anti_wrinkle_idle_timeout": "Dozwolony czas ciszy między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy",
+    "anti_wrinkle_max_duration": "Dłuższy impuls kończy tryb antygniotowy i otwiera nowy cykl",
+    "anti_wrinkle_max_power": "Impuls powyżej tej wartości kończy tryb antygniotowy i otwiera nowy cykl",
     "completion_min_seconds": "Najkrótszy przebieg liczony jako prawdziwy cykl",
     "end_repeat_count": "Kolejne niskie odczyty przed zakończeniem",
     "interrupted_min_seconds": "Krótkie cykle oznaczane jako przerwane",
