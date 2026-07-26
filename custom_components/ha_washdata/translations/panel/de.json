@@ -28,7 +28,9 @@
     "awaiting_n": "Warten auf Freigabe · {n} bestätigt",
     "approved": "Freigegeben",
     "awaiting": "Warten auf Freigabe",
-    "imported_tip": "Aus dem Community-Store importiert. Wird nur für den Abgleich verwendet, zählt nicht in die Statistik."
+    "imported_tip": "Aus dem Community-Store importiert. Wird nur für den Abgleich verwendet, zählt nicht in die Statistik.",
+    "not_importable": "hier n. v.",
+    "exists": "vorhanden"
   },
   "btn": {
     "add_device": "+ Gerät hinzufügen",
@@ -169,7 +171,14 @@
     "download_device": "Dieses Setup herunterladen",
     "share_device": "⬆ Dieses Gerät teilen",
     "share_device_tip": "Dieses Gerät und seine aufgezeichneten Referenzzyklen im Community-Store teilen, damit andere Nutzer mit demselben Gerät sie übernehmen können",
-    "share_n": "{n} Zyklen teilen"
+    "share_n": "{n} Zyklen teilen",
+    "export_selected": "Exportieren (Daten wählen)",
+    "export_all": "Alles schnell exportieren",
+    "import_raw": "Erweitert: alles aus JSON ersetzen",
+    "download_export": "Export herunterladen",
+    "analyze_import": "Datei analysieren",
+    "import_selected": "Auswahl importieren",
+    "back": "Zurück"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -401,6 +410,12 @@
     "pg_group_detection": "Erkennungsauslöser",
     "pg_group_timing": "Zeitregeln",
     "pg_idle": "Leerlauf",
+    "pg_stress_group": "Leerlauferkennungstest",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Leerlaufpegel (W)",
+    "pg_stress_idle_w_desc": "Automatisch erkannten Bereitschafts-Basiswert überschreiben (leer lassen für automatisch).",
+    "pg_stress_toggle": "Leerlauferkennung testen",
+    "pg_stress_toggle_desc": "Simuliert, dass das Gerät nach dem Ende der Aufnahme weiterhin Bereitschaftsstrom verbraucht - zeigt, ob und wann WashData den Zyklus beendet.",
     "pg_last_run": "Letzter Lauf: {date}",
     "pg_match_score": "Übereinstimmungswert",
     "pg_pct_of": "{p}% von {total}",
@@ -538,6 +553,9 @@
     "aria_playground_chart2": "Interaktives Leistungsdiagramm des Zyklus: zum Ablesen von Zeit/Leistung mit dem Zeiger darüberfahren, zum Zoomen scrollen, zum Verschieben ziehen",
     "pg_alert_timeout_end": "Durch Zeitüberschreitung beendet, nicht durch Vorhersage",
     "pg_alert_indefinite": "Würde unbegrenzt weiterlaufen",
+    "pg_alert_stress_cap": "Sicherheitsstopp erreicht",
+    "pg_alert_stress_ok": "Ruhezustandserkennung: Zyklus gestoppt",
+    "pg_alert_stress_warn": "Ruhestromverbrauch über Stoppgrenze",
     "task_pg_history": "Mit Verlauf testen",
     "task_pg_sweep": "Optimieren",
     "task_reprocess": "Neuverarbeitung",
@@ -566,7 +584,32 @@
     "task_split": "Zyklus wird geteilt",
     "task_trim": "Zyklus wird zugeschnitten",
     "task_merge": "Zyklen werden zusammengeführt",
-    "task_rebuild": "Hüllkurven werden neu aufgebaut"
+    "task_rebuild": "Hüllkurven werden neu aufgebaut",
+    "cat_profiles": "Profile (Programme)",
+    "cat_real_cycles": "Zyklen (Nutzungsverlauf)",
+    "cat_reference_cycles": "Referenzzyklen (importiert)",
+    "cat_custom_phases": "Benutzerdefinierte Phasen",
+    "cat_profile_groups": "Profilgruppen",
+    "cat_settings": "Erkennungs- & Zuordnungseinstellungen",
+    "cat_matching_config": "Feinabstimmung der Zuordnung",
+    "cat_ml_models": "ML-Modelle",
+    "cat_feedback": "Feedback & Prüf-Labels",
+    "cat_suggestions": "Vorschläge",
+    "cat_maintenance_log": "Wartungsprotokoll",
+    "cat_history_logs": "Verlaufs- & Änderungsprotokolle",
+    "cat_lifetime_stats": "Gesamtsummen (Lebensdauer)",
+    "cycles_short": "Zyklen",
+    "import_mode": "Wie kombinieren",
+    "mode_merge": "Zusammenführen (meine behalten)",
+    "mode_replace": "Auswahl ersetzen",
+    "cycle_destination": "Wohin sollen importierte Zyklen?",
+    "dest_reference": "Referenz (nur Kurve)",
+    "dest_real_history": "Echter Verlauf (zählt in Statistik)",
+    "conflict_resolution": "Namenskonflikte",
+    "conflict_import_copy": "Als Kopie importieren",
+    "conflict_keep_mine": "Meine behalten",
+    "conflict_overwrite": "Überschreiben",
+    "pg_anti_wrinkle": "Knitterschutz"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Den aktiven Zyklus jetzt zwangsweise stoppen? Der Zyklus wird als unterbrochen gespeichert.",
     "store_import": "Referenzzyklus importieren",
     "store_share": "Im Community-Store teilen",
-    "store_share_device": "Dieses Gerät teilen"
+    "store_share_device": "Dieses Gerät teilen",
+    "export_select": "Export - Daten wählen",
+    "import_wizard": "Import - Daten wählen"
   },
   "msg": {
     "appliance_monitor": "Gerätemonitor",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "{count} ähnliche unbeschriftete Zyklen gefunden – erstellen Sie ein Profil, um diese zu erkennen.",
     "cycles_deleted": "{count} Zyklen gelöscht",
     "enough_data": "Genügend Daten zum Lernen ({current}/{min} Zyklen).",
-    "export_description": "Exportieren Sie alle Profile und Zyklen nach JSON oder stellen Sie einen vorherigen Export wieder her.",
+    "export_description": "Wählen Sie genau aus, welche Profile, Zyklen, Einstellungen und mehr nach JSON exportiert werden sollen, oder analysieren Sie eine Datei und importieren Sie nur die gewünschten Teile.",
     "feedback_cycles_pending": "{n} Zyklus{s} zur Überprüfung",
     "feedback_prompt": "Bestätigen Sie, dass es richtig war, korrigieren Sie das Programm oder ignorieren Sie es.",
+    "feedback_relabel_hint": "Das erneute Beschriften dieses Zyklus erledigt die Überprüfung ebenfalls.",
     "filter_by_profile": "Nach Profil filtern…",
     "group_modal_help": "Gruppieren Sie Programme mit derselben Form, die sich in Temperatur/Schleudergang unterscheiden (Dauer kann variieren). Matching bewertet die Gruppe als einen Kandidaten und wählt dann das am besten passende Mitglied aus. Wählen Sie mindestens 2; Die Überlagerung zeigt, wie ähnlich sie sind.",
     "group_not_cohesive": "Diese Profile sind nicht ähnlich genug, um zuverlässig gruppiert zu werden. Beim Matching werden sie daher einzeln behandelt, bis Sie den Ausreißer entfernen oder die Gruppe aufteilen.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Starten Sie Home Assistant neu, um die Simulationstools zu aktivieren.",
     "pg_sim_progress": "{done} / {total} Zyklen",
     "pg_starting": "Wird gestartet…",
+    "pg_stress_synthetic": "Leerlaufsimulation beginnt hier",
     "pg_sweep_intro": "Was wäre, wenn {param} anders wäre? Testen Sie {steps} Werte über Ihre letzten {cycles} Zyklen, um die Einstellung zu finden, bei der die meisten Zyklen korrekt zugeordnet werden.",
     "pg_sweep_step": "Schritt {done} / {total}",
     "pg_undetected": "{n} Zyklus{s} nicht erkannt",
@@ -837,6 +884,9 @@
     "pg_simulating": "Zyklus wird simuliert…",
     "pg_canvas_empty2": "Wähle oben einen Zyklus und drücke auf Ausführen, um ihn zu simulieren. Fahre dann mit dem Zeiger darüber, um Werte abzulesen, scrolle zum Zoomen und ziehe zum Verschieben.",
     "pg_apply_settings_confirm": "Diese {n} Einstellung(en) für dieses Gerät speichern? {list}",
+    "pg_stress_terminated_detail": "Auf ~{idle}W Leerlauf eingependelt -- Zyklus endete {h} Std. {m} Min. später über {reason}.",
+    "pg_stress_above_threshold_detail": "Der Ruhestromverbrauch von ~{idle}W liegt auf oder über der effektiven Stoppgrenze ({stop}W) -- der Zyklus wurde nie als ruhig erkannt. Erhöhe stop_threshold_w zur Behebung.",
+    "pg_stress_hit_cap_detail": "Der Zyklus lief {h} Std. {m} Min. ohne anzuhalten -- durch den Sicherheitsstopp zwangsweise beendet. Ruhestromverbrauch {idle}W gegenüber Stoppgrenze {stop}W.",
     "no_logs_match": "Keine Protokolleinträge entsprechen diesen Filtern.",
     "pg_analysis_hint2": "Wählen Sie einen Zyklus und klicken Sie auf Ausführen, um die Zuordnungsanalyse zu laden.",
     "pg_analysis_empty2": "Klicken Sie auf Ausführen, um die Zuordnungsanalyse anzuzeigen.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Laden Sie {brand} {model} mit den von Ihnen ausgewählten Referenzzyklen hoch. Andere mit demselben Gerät können Ihre Programme übernehmen. Einträge werden vor der öffentlichen Erscheinung geprüft.",
     "share_profile_no_cycles": "Keine Referenzzyklen -- markieren Sie einen Zyklus als ⭐ im Tab Zyklen, um dieses Profil einzubeziehen",
     "advisory_phase_inconsistent": "'{name}' scheint verschiedene Programme oder Temperaturen zu vermischen - seine Zyklen heizen unterschiedlich lange. Wenn Sie es in separate Profile aufteilen (z. B. pro Temperatur), verbessern sich Abgleich und Zeitschätzungen.",
-    "advisory_phase_inconsistent_title": "⚠ Möglicherweise gemischte Programme"
+    "advisory_phase_inconsistent_title": "⚠ Möglicherweise gemischte Programme",
+    "export_select_intro": "Kreuzen Sie genau an, was enthalten sein soll. Wenn Sie Profile ohne ihre Zyklen auswählen, wird trotzdem ein erkennbares Programm exportiert (seine gelernte Kurve wird mit übertragen).",
+    "import_analyze_hint": "Laden Sie eine exportierte Datei (oder fügen Sie ihr JSON ein). WashData analysiert sie und zeigt genau, was importiert werden kann, bevor sich etwas ändert.",
+    "analyzing": "Analysiere…",
+    "device_type_mismatch_warn": "Dieser Export stammt von einem anderen Gerätetyp ({src} vs. {local}). Programme und Zyklen können weiterhin als Referenzdaten importiert werden, aber gerätespezifische Einstellungen und der Import echter Verläufe sind deaktiviert.",
+    "merge_hint": "Importierte Elemente werden hinzugefügt; nichts Lokales geht verloren. Namenskonflikte werden unten aufgelöst.",
+    "replace_warn": "Jede angekreuzte Kategorie wird gelöscht und aus der Datei ersetzt. Nicht angekreuzte Kategorien bleiben unverändert.",
+    "dest_reference_hint": "Importierte Zyklen verbessern nur die Programmerkennung und beeinflussen niemals die Nutzungs-/Energiestatistik.",
+    "dest_real_history_hint": "Importierte Zyklen zählen als eigener Verlauf dieses Geräts und fließen in die Energie-/Nutzungsstatistik ein. Verwenden Sie dies, um ein Gerät in eine neue Installation zu übertragen."
   },
   "pg_desc": {
     "completion_min_seconds": "Kürzester Lauf, der als echter Zyklus zählt",
@@ -887,7 +945,12 @@
     "dtw_ddtw_scale": "Stufe 3: DDTW-Halbsättigungsabstand; kleiner = formempfindlicher (Standard 30)",
     "dtw_refine_top_n": "Stufe 3: per DTW neu bewertete Kandidaten; auf 7-9 erhöhen, wenn das richtige Profil auf Platz 4-5 liegt (Standard 5)",
     "duration_scale": "Stufe 4: Log-Verhältnis, bei dem die Dauerübereinstimmung halbiert wird; kleiner = strengere Strafe (Standard 0,175)",
-    "energy_scale": "Stufe 4: Log-Verhältnis, bei dem die Energieübereinstimmung halbiert wird; kleiner = strengere Strafe (Standard 0,25)"
+    "energy_scale": "Stufe 4: Log-Verhältnis, bei dem die Energieübereinstimmung halbiert wird; kleiner = strengere Strafe (Standard 0,25)",
+    "anti_wrinkle_idle_timeout": "Erlaubte Stille zwischen zwei Trommelimpulsen, bevor der Knitterschutz endet",
+    "anti_wrinkle_max_power": "Ein Impuls darüber beendet den Knitterschutz und öffnet einen neuen Zyklus",
+    "anti_wrinkle_enabled": "Die Trommelimpulse nach der Hauptphase schlucken, statt sie als neue Zyklen zu lesen",
+    "anti_wrinkle_max_duration": "Ein längerer Impuls beendet den Knitterschutz und öffnet einen neuen Zyklus",
+    "anti_wrinkle_exit_power": "Die Leistung muss zwischen den Impulsen darunter fallen, damit der Knitterschutz aktiv bleibt"
   },
   "phase_desc": {
     "anti_crease": "Gelegentliche kurze Trommelumwälzungen nach Abschluss, um Knitterung zu vermeiden.",
@@ -1367,6 +1430,10 @@
     "energy_scale": {
       "label": "Energie-Trennschärfe",
       "doc": "Schärfe der Energieübereinstimmungsstrafe. Kleiner = strenger: eine Energieabweichung schadet mehr. Standard 0,25 ist absichtlich nachsichtiger als die Dauerschärfe, da Energie lastabhängig schwankt. Gemeinsam mit der Energiegewichtung anpassen."
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "Maximale Impulspause",
+      "doc": "Wie lange das Gerät zwischen zwei Trommelimpulsen still bleiben darf, bevor der Knitterschutz-Modus endet. Höher setzen als die längste Pause, die Ihr Trockner zwischen zwei Impulsen lässt – sonst wird jeder weitere Impuls als Fehlstart gewertet."
     }
   },
   "setting_group": {
@@ -1715,7 +1782,9 @@
     "store_device_shared_partial": "{n} Zyklus/Zyklen geteilt; {failed} konnten nicht hochgeladen werden.",
     "store_device_shared_some_dup": "{created} Zyklus/Zyklen geteilt; {dup} waren bereits im Store.",
     "store_download_failed": "Download fehlgeschlagen: {error}",
-    "store_download_nothing": "Nichts Neues zum Herunterladen -- dieses Setup ist bereits auf Ihrem Gerät."
+    "store_download_nothing": "Nichts Neues zum Herunterladen -- dieses Setup ist bereits auf Ihrem Gerät.",
+    "export_selective_done": "Export heruntergeladen",
+    "import_selective_done": "{profiles} Profil(e) und {cycles} Zyklus/Zyklen importiert"
   },
   "trend": {
     "down": "Abwärtstrend",

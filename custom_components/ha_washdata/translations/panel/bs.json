@@ -28,7 +28,9 @@
     "awaiting_n": "Čeka odobrenje · potvrđeno {n}",
     "approved": "Odobreno",
     "awaiting": "Čeka odobrenje",
-    "imported_tip": "Uvezeno iz zajedničke trgovine. Koristi se samo za podudaranje, ne broji se u statistiku."
+    "imported_tip": "Uvezeno iz zajedničke trgovine. Koristi se samo za podudaranje, ne broji se u statistiku.",
+    "not_importable": "nije dostupno",
+    "exists": "postoji"
   },
   "btn": {
     "add_device": "+ Dodaj uređaj",
@@ -169,7 +171,14 @@
     "download_device": "Preuzmi postavke uređaja",
     "share_device": "Podijeli postavke uređaja",
     "share_device_tip": "Podijelite programe i postavke ovog uređaja sa zajednicom",
-    "share_n": "Podijeli {n} program{s}"
+    "share_n": "Podijeli {n} program{s}",
+    "export_selected": "Izvoz (odaberi podatke)",
+    "export_all": "Brzi izvoz svega",
+    "import_raw": "Napredno: zamijeni sve iz JSON datoteke",
+    "download_export": "Preuzmi izvoz",
+    "analyze_import": "Analiziraj datoteku",
+    "import_selected": "Uvezi odabrano",
+    "back": "Nazad"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -394,6 +403,7 @@
     "pg_best_value": "Pronađena najbolja vrijednost",
     "pg_current_value": "Trenutna vrijednost:",
     "pg_drag_hint": "Povucite liniju na grafikonu",
+    "pg_anti_wrinkle": "Anti-gužvanje",
     "pg_dtw": "DTW",
     "pg_ev_ending": "Završava",
     "pg_ev_running": "U toku",
@@ -538,6 +548,15 @@
     "aria_playground_chart2": "Interaktivni grafikon snage ciklusa: pređite mišem za prikaz vremena/snage, pomjerajte točkić za zumiranje, povucite za pomjeranje",
     "pg_alert_timeout_end": "Završeno zbog isteka vremena, a ne na osnovu predviđanja",
     "pg_alert_indefinite": "Radio bi beskonačno",
+    "pg_alert_stress_cap": "Dostignut sigurnosni limit",
+    "pg_alert_stress_ok": "Otkrivanje mirovanja: ciklus zaustavljen",
+    "pg_alert_stress_warn": "Potrošnja u mirovanju iznad praga zaustavljanja",
+    "pg_stress_group": "Test otkrivanja mirovanja",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Razina mirovanja (W)",
+    "pg_stress_idle_w_desc": "Zamijeni automatski otkrivenu donju granicu u stanju pripravnosti (ostavi prazno za automatsko otkrivanje).",
+    "pg_stress_toggle": "Testiraj otkrivanje mirovanja",
+    "pg_stress_toggle_desc": "Simulira da uređaj ostaje na potrošnji u stanju pripravnosti nakon završetka snimanja -- prikazuje ako i kada WashData zaustavi ciklus.",
     "task_pg_history": "Test na historiji",
     "task_pg_sweep": "Optimiziraj",
     "task_reprocess": "Ponovna obrada",
@@ -566,7 +585,31 @@
     "task_split": "Dijeljenje ciklusa",
     "task_trim": "Obrezivanje ciklusa",
     "task_merge": "Spajanje ciklusa",
-    "task_rebuild": "Ponovna izgradnja omotača"
+    "task_rebuild": "Ponovna izgradnja omotača",
+    "cat_profiles": "Profili (programi)",
+    "cat_real_cycles": "Ciklusi (historija rada)",
+    "cat_reference_cycles": "Referentni ciklusi (uvezeni)",
+    "cat_custom_phases": "Prilagođene faze",
+    "cat_profile_groups": "Grupe profila",
+    "cat_settings": "Postavke otkrivanja i prepoznavanja",
+    "cat_matching_config": "Podešavanje prepoznavanja",
+    "cat_ml_models": "ML modeli",
+    "cat_feedback": "Oznake povratnih informacija i pregleda",
+    "cat_suggestions": "Prijedlozi",
+    "cat_maintenance_log": "Dnevnik održavanja",
+    "cat_history_logs": "Dnevnici historije i promjena",
+    "cat_lifetime_stats": "Ukupni zbirovi",
+    "cycles_short": "ciklusa",
+    "import_mode": "Kako kombinovati",
+    "mode_merge": "Spoji (zadrži moje)",
+    "mode_replace": "Zamijeni odabrano",
+    "cycle_destination": "Gdje trebaju ići uvezeni ciklusi?",
+    "dest_reference": "Referenca (samo oblik)",
+    "dest_real_history": "Stvarna historija (računa se u statistici)",
+    "conflict_resolution": "Sukobi naziva",
+    "conflict_import_copy": "Uvezi kao kopiju",
+    "conflict_keep_mine": "Zadrži moje",
+    "conflict_overwrite": "Prepiši"
   },
   "log": {
     "all_levels": "Svi nivoi",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Prisilno zaustaviti aktivni ciklus sada? Ciklus će biti sačuvan kao prekinut.",
     "store_import": "Uvezi referentni ciklus",
     "store_share": "Podijeli u zajedničku trgovinu",
-    "store_share_device": "Podijeli postavke uređaja"
+    "store_share_device": "Podijeli postavke uređaja",
+    "export_select": "Izvoz - odaberi podatke",
+    "import_wizard": "Uvoz - odaberi podatke"
   },
   "msg": {
     "appliance_monitor": "Monitor uređaja",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "Pronađeno {count} sličnih neoznačenih ciklusa – kreirajte profil da počnete s njihovim uparivanjem.",
     "cycles_deleted": "Izbrisano ciklusa: {count}",
     "enough_data": "Dovoljno podataka za učenje ({current}/{min} ciklusa).",
-    "export_description": "Izvezite sve profile i cikluse u JSON ili vratite iz prethodnog izvoza.",
+    "export_description": "Odaberite tačno koje profile, cikluse, postavke i ostalo želite izvesti u JSON datoteku ili analizirajte datoteku i uvezite samo željene dijelove.",
     "feedback_cycles_pending": "{n} ciklus{s} za pregled",
     "feedback_prompt": "Potvrdite da je ispravno, ispravite program ili zanemarite.",
+    "feedback_relabel_hint": "Ponovno označavanje ovog ciklusa takođe ga rješava.",
     "filter_by_profile": "Filtriraj po profilu…",
     "group_modal_help": "Grupni programi istog oblika koji se razlikuju po temperaturi/centru (trajanja mogu varirati). Uparivanje boduje grupu kao jednog kandidata, a zatim bira najprikladnijeg člana. Odaberite najmanje 2; prekrivanje pokazuje koliko su slični.",
     "group_not_cohesive": "Ovi profili nisu dovoljno slični da bi se pouzdano grupirali, tako da ih uparivanje tretira pojedinačno sve dok ne uklonite izuzetak ili podijelite grupu.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Ponovo pokrenite Home Assistant da omogućite alate za simulaciju.",
     "pg_sim_progress": "{done} / {total} ciklusa",
     "pg_starting": "Pokretanje…",
+    "pg_stress_synthetic": "simulacija mirovanja počinje ovdje",
     "pg_sweep_intro": "Šta ako bi {param} bio drugačiji? Testirajte {steps} vrijednosti na vaših posljednjih {cycles} ciklusa da pronađete postavku pri kojoj se najviše ciklusa ispravno podudara.",
     "pg_sweep_step": "Korak {done} / {total}",
     "pg_undetected": "{n} neotkrivenih ciklusa",
@@ -837,6 +884,9 @@
     "pg_simulating": "Simuliranje ciklusa…",
     "pg_canvas_empty2": "Odaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim pređite mišem za prikaz vrijednosti, pomjerajte točkić za zumiranje i povucite za pomjeranje.",
     "pg_apply_settings_confirm": "Sačuvati ovih {n} postavki na ovaj uređaj? {list}",
+    "pg_stress_terminated_detail": "Ustalilo se na ~{idle}W mirovanja -- ciklus je završio {h} h {m} min kasnije putem {reason}.",
+    "pg_stress_above_threshold_detail": "Potrošnja u mirovanju ~{idle}W jednaka je ili viša od stvarnog praga zaustavljanja ({stop}W) -- ciklus nikad nije zabilježen kao miran. Za ispravku povećajte stop_threshold_w.",
+    "pg_stress_hit_cap_detail": "Ciklus je radio {h} h {m} min bez zaustavljanja -- prisilno zaustavljen sigurnosnim limitom. Potrošnja u mirovanju {idle}W u odnosu na prag zaustavljanja {stop}W.",
     "no_logs_match": "Nijedan zapis dnevnika ne odgovara ovim filterima.",
     "pg_analysis_hint2": "Odaberite ciklus i pritisnite Pokreni za učitavanje analize podudaranja.",
     "pg_analysis_empty2": "Pritisnite Pokreni za prikaz analize podudaranja.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Podijelite programe svog uređaja (profile + referentne cikluse) sa zajednicom. Postavke su opcione.",
     "share_profile_no_cycles": "Profil '{p}' nema ⭐ referentnih ciklusa -- bit će preskočen osim ako nemate {n}+ potvrđenih pokretanja",
     "advisory_phase_inconsistent": "Čini se da '{name}' miješa različite programe ili temperature - njegovi ciklusi se griju vrlo različito dugo. Podjela na zasebne profile (npr. po temperaturi) poboljšat će podudaranje i procjene vremena.",
-    "advisory_phase_inconsistent_title": "⚠ Možda pomiješani programi"
+    "advisory_phase_inconsistent_title": "⚠ Možda pomiješani programi",
+    "export_select_intro": "Označite tačno šta treba uključiti. Odabir profila bez njihovih ciklusa i dalje izvozi prepoznatljiv program (njegov naučeni oblik prenosi se s njim).",
+    "import_analyze_hint": "Učitajte izvezenu datoteku (ili zalijepite njen JSON). WashData je analizira i tačno prikazuje šta se može uvesti prije nego što se išta promijeni.",
+    "analyzing": "Analiziranje…",
+    "device_type_mismatch_warn": "Ovaj izvoz je s druge vrste uređaja ({src} vs {local}). Programe i cikluse i dalje je moguće uvesti kao referentne podatke, ali postavke specifične za uređaj i uvoz stvarne historije su onemogućeni.",
+    "merge_hint": "Uvezene stavke se dodaju; ništa lokalno se ne gubi. Sukobi naziva rješavaju se u nastavku.",
+    "replace_warn": "Svaka označena kategorija briše se i zamjenjuje podacima iz datoteke. Neoznačene kategorije ostaju nepromijenjene.",
+    "dest_reference_hint": "Uvezeni ciklusi samo poboljšavaju prepoznavanje programa i nikada ne utiču na statistiku potrošnje/energije.",
+    "dest_real_history_hint": "Uvezeni ciklusi računaju se kao vlastita historija ovog uređaja i doprinose statistici energije/potrošnje. Koristite pri premještanju jednog uređaja na novu instalaciju."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka spuštanja nakon završetka za smanjenje bora.",
@@ -961,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Snaga mora pasti ispod ove između impulsa da bi režim protiv bora ostao aktivan.",
       "label": "Prag izlazne snage"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Koliko dugo mašina smije ostati mirna između dva impulsa bubnja prije nego što se režim anti-gužvanja završi. Postavite ga iznad najdužeg razmaka koji vaša sušilica ostavlja između impulsa, inače se svaki naredni impuls čita kao lažni početak.",
+      "label": "Maksimalni razmak između impulsa"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulsevi duži od ovog tretiraju se kao pravi ciklus, a ne kao nalet protiv bora.",
@@ -1692,7 +1754,9 @@
     "store_device_shared_partial": "Djelimično dijeljenje: {n} program{s} učitan, {failed} preskočeno",
     "store_device_shared_some_dup": "Postavke uređaja podijeljene: {n} program{s} učitan ({dup} već postoji)",
     "store_download_failed": "Preuzimanje nije uspjelo: {error}",
-    "store_download_nothing": "Nema ništa za preuzimanje -- svi profili već postoje na ovom uređaju"
+    "store_download_nothing": "Nema ništa za preuzimanje -- svi profili već postoje na ovom uređaju",
+    "export_selective_done": "Izvoz preuzet",
+    "import_selective_done": "Uvezeno {profiles} profila i {cycles} ciklusa"
   },
   "trend": {
     "down": "Opadajući trend",
@@ -1706,6 +1770,11 @@
     "other": "Ostalo"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Upij impulse bubnja nakon glavne faze, a ne čitaj ih kao nove cikluse",
+    "anti_wrinkle_exit_power": "Snaga mora pasti ispod ove vrijednosti između impulsa da bi anti-gužvanje ostalo aktivno",
+    "anti_wrinkle_idle_timeout": "Dozvoljeno vrijeme mirovanja između dva impulsa bubnja prije nego što se anti-gužvanje završi",
+    "anti_wrinkle_max_duration": "Duži impuls završava anti-gužvanje i otvara novi ciklus",
+    "anti_wrinkle_max_power": "Impuls iznad ove vrijednosti završava anti-gužvanje i otvara novi ciklus",
     "completion_min_seconds": "Najkraće pokretanje koje se računa kao pravi ciklus",
     "end_repeat_count": "Niska očitanja zaredom prije završetka",
     "interrupted_min_seconds": "Kratki ciklusi označeni kao prekinuti",

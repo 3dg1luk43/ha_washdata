@@ -17,14 +17,6 @@
           "min_power": "Effektaflæsninger over denne tærskel (i watt) indikerer, at apparatet kører. Start med 2W for de fleste enheder."
         }
       },
-      "first_profile": {
-        "title": "Opret første profil",
-        "description": "En **cyklus** er en komplet kørsel af dit apparat (f.eks. et læs vasketøj). En **Profil** grupperer disse cyklusser efter type (f.eks. \"Bomuld\", \"Hurtig vask\"). Oprettelse af en profil hjælper nu integrationen med at estimere varigheden med det samme.\n\nDu kan manuelt vælge denne profil i enhedskontrollerne, hvis den ikke registreres automatisk.\n\n**Lad \"Profilnavn\" stå tomt for at springe dette trin over.**",
-        "data": {
-          "profile_name": "Profilnavn (valgfrit)",
-          "manual_duration": "Estimeret varighed (minutter)"
-        }
-      },
       "reconfigure": {
         "title": "Reconfigure WashData",
         "description": "Update the device name, appliance type, or power sensor.",

@@ -28,7 +28,9 @@
     "awaiting_n": "Onay bekleniyor · {n} onaylandı",
     "approved": "Onaylandı",
     "awaiting": "Onay bekleniyor",
-    "imported_tip": "Topluluk mağazasından içe aktarıldı. Yalnızca eşleştirme için kullanılır, istatistiklere sayılmaz."
+    "imported_tip": "Topluluk mağazasından içe aktarıldı. Yalnızca eşleştirme için kullanılır, istatistiklere sayılmaz.",
+    "not_importable": "burada geçersiz",
+    "exists": "mevcut"
   },
   "btn": {
     "add_device": "+ Cihaz ekle",
@@ -169,7 +171,14 @@
     "download_device": "Bu kurulumu indir",
     "share_device": "⬆ Bu cihazı paylaş",
     "share_device_tip": "Bu cihazı ve kayıtlı referans döngülerini topluluk mağazasına paylaşın; aynı makineye sahip diğer kullanıcılar bunları benimseyebilsin",
-    "share_n": "{n} döngü paylaş"
+    "share_n": "{n} döngü paylaş",
+    "export_selected": "Dışa aktar (veri seç)",
+    "export_all": "Her şeyi hızlı dışa aktar",
+    "import_raw": "Gelişmiş: JSON'dan tümünü değiştir",
+    "download_export": "Dışa aktarmayı indir",
+    "analyze_import": "Dosyayı analiz et",
+    "import_selected": "Seçileni içe aktar",
+    "back": "Geri"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -390,6 +399,7 @@
     "panel_default_tab": "Varsayılan sekme",
     "panel_language": "Panel dili",
     "per_cycle_short": "döngü",
+    "pg_anti_wrinkle": "Kırışıklık önleme",
     "pg_autofill_tip": "Geçerli değerden aralığı otomatik doldur ({lo}–{hi})",
     "pg_best_value": "Bulunan en iyi değer",
     "pg_current_value": "Geçerli değer:",
@@ -524,6 +534,12 @@
     "pg_sweep_param": "Parametre",
     "pg_objective": "Hedef",
     "pg_steps": "Adımlar",
+    "pg_stress_group": "Bekleme sonlandırma testi",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Bekleme seviyesi (W)",
+    "pg_stress_idle_w_desc": "Otomatik algılanan bekleme tabanını geçersiz kıl (otomatik için boş bırakın).",
+    "pg_stress_toggle": "Bekleme sonlandırmasını test et",
+    "pg_stress_toggle_desc": "Kaydın bitmesinin ardından cihazın bekleme modundaki güç tüketimine devam ettiğini simüle eder - WashData'nın döngüyü durdurup durdurmayacağını ve ne zaman durduracağını gösterir.",
     "pg_sweep_2d": "2D ısı haritası",
     "pg_sweep_param_y": "2. parametre",
     "pg_obj_match": "Eşleşme doğruluğu",
@@ -538,6 +554,9 @@
     "aria_playground_chart2": "Etkileşimli döngü güç grafiği: zamanı/gücü okumak için üzerine gelin, yakınlaştırmak için kaydırın, kaydırmak için sürükleyin",
     "pg_alert_timeout_end": "Tahminle değil, zaman aşımıyla sona erdi",
     "pg_alert_indefinite": "Süresiz olarak çalışırdı",
+    "pg_alert_stress_cap": "Güvenlik sınırına ulaşıldı",
+    "pg_alert_stress_ok": "Bekleme sonlandırması: döngü durduruldu",
+    "pg_alert_stress_warn": "Bekleme tüketimi durdurma eşiğinin üzerinde",
     "task_pg_history": "Geçmişte test et",
     "task_pg_sweep": "Optimize et",
     "task_reprocess": "Yeniden işleme",
@@ -566,7 +585,31 @@
     "task_split": "Döngü bölünüyor",
     "task_trim": "Döngü kırpılıyor",
     "task_merge": "Döngüler birleştiriliyor",
-    "task_rebuild": "Zarflar yeniden oluşturuluyor"
+    "task_rebuild": "Zarflar yeniden oluşturuluyor",
+    "cat_profiles": "Profiller (programlar)",
+    "cat_real_cycles": "Döngüler (çalışma geçmişi)",
+    "cat_reference_cycles": "Referans döngüler (içe aktarılan)",
+    "cat_custom_phases": "Özel aşamalar",
+    "cat_profile_groups": "Profil grupları",
+    "cat_settings": "Algılama ve tanıma ayarları",
+    "cat_matching_config": "Tanıyıcı ayarı",
+    "cat_ml_models": "ML modelleri",
+    "cat_feedback": "Geri bildirim ve inceleme etiketleri",
+    "cat_suggestions": "Öneriler",
+    "cat_maintenance_log": "Bakım günlüğü",
+    "cat_history_logs": "Geçmiş ve değişiklik günlükleri",
+    "cat_lifetime_stats": "Ömür boyu toplamlar",
+    "cycles_short": "döngü",
+    "import_mode": "Nasıl birleştirilsin",
+    "mode_merge": "Birleştir (benimkini koru)",
+    "mode_replace": "Seçileni değiştir",
+    "cycle_destination": "İçe aktarılan döngüler nereye gitsin?",
+    "dest_reference": "Referans (yalnızca şekil)",
+    "dest_real_history": "Gerçek geçmiş (istatistiklere sayılır)",
+    "conflict_resolution": "Ad çakışmaları",
+    "conflict_import_copy": "Kopya olarak içe aktar",
+    "conflict_keep_mine": "Benimkini koru",
+    "conflict_overwrite": "Üzerine yaz"
   },
   "log": {
     "all_levels": "Tüm seviyeler",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Etkin döngü şimdi zorla durdurulsun mu? Döngü, kesintiye uğramış olarak kaydedilecek.",
     "store_import": "Referans döngüyü içe aktar",
     "store_share": "Topluluk mağazasında paylaş",
-    "store_share_device": "Bu cihazı paylaş"
+    "store_share_device": "Bu cihazı paylaş",
+    "export_select": "Dışa aktarma - veri seçin",
+    "import_wizard": "İçe aktarma - veri seçin"
   },
   "msg": {
     "appliance_monitor": "Cihaz monitörü",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "{count} benzer etiketsiz döngü bulundu – bunları eşleştirmeye başlamak için bir profil oluşturun.",
     "cycles_deleted": "{count} döngü silindi",
     "enough_data": "Öğrenmek için yeterli veri ({current}/{min} döngü).",
-    "export_description": "Tüm profilleri ve döngüleri JSON'a aktarın veya önceki bir dışa aktarma işleminden geri yükleyin.",
+    "export_description": "JSON'a dışa aktarılacak profilleri, döngüleri, ayarları ve daha fazlasını tam olarak seçin ya da bir dosyayı analiz edip yalnızca istediğiniz kısımları içe aktarın.",
     "feedback_cycles_pending": "İncelenecek {n} döngü{s}",
     "feedback_prompt": "Doğru olduğunu onaylayın, programı düzeltin veya yoksayın.",
+    "feedback_relabel_hint": "Bu döngüyü yeniden etiketlemek de bunu çözer.",
     "filter_by_profile": "Profile göre filtrele…",
     "group_modal_help": "Sıcaklık/dönme açısından farklı olan aynı şekle sahip programları gruplandırın (süreler değişebilir). Eşleştirme, grubu bir aday olarak puanlar ve ardından en uygun üyeyi seçer. En az 2 tanesini seçin; kaplama ne kadar benzer olduklarını gösteriyor.",
     "group_not_cohesive": "Bu profiller güvenilir bir şekilde gruplandırılacak kadar benzer değildir; bu nedenle eşleştirme, siz aykırı değeri kaldırana veya grubu bölene kadar bunları ayrı ele alır.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Simülasyon araçlarını etkinleştirmek için Home Assistant'ı yeniden başlatın.",
     "pg_sim_progress": "{done} / {total} döngü",
     "pg_starting": "Başlatılıyor…",
+    "pg_stress_synthetic": "bekleme simülasyonu burada başlar",
     "pg_sweep_intro": "{param} farklı olsaydı ne olurdu? En çok döngünün doğru şekilde eşleştirildiği ayarı bulmak için son {cycles} döngünüzde {steps} değeri test edin.",
     "pg_sweep_step": "Adım {done} / {total}",
     "pg_undetected": "{n} döngü{s} algılanmadı",
@@ -837,6 +884,9 @@
     "pg_simulating": "Döngü simüle ediliyor…",
     "pg_canvas_empty2": "Yukarıdan bir döngü seçin ve simüle etmek için Çalıştır'a basın. Ardından değerleri okumak için üzerine gelin, yakınlaştırmak için kaydırın ve kaydırmak için sürükleyin.",
     "pg_apply_settings_confirm": "Bu {n} ayar bu cihaza kaydedilsin mi? {list}",
+    "pg_stress_terminated_detail": "Yaklaşık {idle} W bekleme seviyesine oturdu -- döngü {h} sa {m} dk sonra {reason} ile sona erdi.",
+    "pg_stress_above_threshold_detail": "Bekleme tüketimi (~{idle} W) etkin durdurma eşiğine ({stop} W) eşit veya bu eşiğin üzerinde -- döngü hiçbir zaman sessiz olarak kaydedilmedi. Düzeltmek için stop_threshold_w değerini artırın.",
+    "pg_stress_hit_cap_detail": "Döngü {h} sa {m} dk boyunca durmadan çalıştı -- güvenlik sınırı tarafından zorla durduruldu. Bekleme tüketimi {idle} W, durdurma eşiği {stop} W.",
     "no_logs_match": "Bu filtrelerle eşleşen günlük kaydı yok.",
     "pg_analysis_hint2": "Bir döngü seçin ve eşleşme analizini yüklemek için Çalıştır'a basın.",
     "pg_analysis_empty2": "Eşleşme analizini görmek için Çalıştır'a basın.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Seçtiğiniz referans döngüleriyle {brand} {model} cihazını yükleyin. Aynı cihaza sahip diğer kullanıcılar programlarınızı benimseyebilir. Girişler kamuya açılmadan önce incelenir.",
     "share_profile_no_cycles": "Referans döngüsü yok -- bu profili dahil etmek için Döngüler sekmesinde bir döngüyü ⭐ olarak işaretleyin",
     "advisory_phase_inconsistent": "'{name}' farklı programları veya sıcaklıkları karıştırıyor gibi görünüyor - çevrimleri çok farklı sürelerde ısıtma yapıyor. Bunu ayrı profillere bölmek (örneğin her sıcaklık için) eşleştirmeyi ve süre tahminlerini iyileştirir.",
-    "advisory_phase_inconsistent_title": "⚠ Karışık olabilecek programlar"
+    "advisory_phase_inconsistent_title": "⚠ Karışık olabilecek programlar",
+    "export_select_intro": "Nelerin dahil edileceğini tam olarak işaretleyin. Profilleri döngüleri olmadan seçmek yine de tanınabilir bir program dışa aktarır (öğrenilen şekli de birlikte taşınır).",
+    "import_analyze_hint": "Dışa aktarılmış bir dosya yükleyin (veya JSON'unu yapıştırın). WashData bunu analiz eder ve herhangi bir değişiklik olmadan önce tam olarak neyin içe aktarılabileceğini gösterir.",
+    "analyzing": "Analiz ediliyor…",
+    "device_type_mismatch_warn": "Bu dışa aktarma farklı bir cihaz türünden ({src} ile {local}). Programlar ve döngüler yine de referans verisi olarak içe aktarılabilir, ancak cihaza özgü ayarlar ve gerçek geçmiş içe aktarımı devre dışıdır.",
+    "merge_hint": "İçe aktarılan öğeler eklenir; yerel hiçbir şey kaybolmaz. Ad çakışmaları aşağıda çözülür.",
+    "replace_warn": "İşaretlenen her kategori silinir ve dosyadan gelenle değiştirilir. İşaretlenmeyen kategorilere dokunulmaz.",
+    "dest_reference_hint": "İçe aktarılan döngüler yalnızca program tanımayı iyileştirir ve kullanım/enerji istatistiklerini asla etkilemez.",
+    "dest_real_history_hint": "İçe aktarılan döngüler bu cihazın kendi geçmişi olarak sayılır ve enerji/kullanım istatistiklerini besler. Bir cihazı yeni bir kuruluma taşırken kullanın."
   },
   "pg_desc": {
     "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -875,6 +933,11 @@
     "start_duration_threshold": "Başlangıcı onaylamak için eşik üstünde saniye",
     "start_threshold_w": "Başladı sayılması için minimum watt",
     "stop_threshold_w": "Bunun altında makine kapalı sayılır",
+    "anti_wrinkle_enabled": "Ana aşamadan sonraki takla darbelerini yeni döngü olarak okumak yerine emer",
+    "anti_wrinkle_exit_power": "Kırışıklık önlemenin etkin kalması için gücün darbeler arasında bunun altına düşmesi gerekir",
+    "anti_wrinkle_idle_timeout": "Kırışıklık önleme sona ermeden önce iki takla darbesi arasında izin verilen sessiz süre",
+    "anti_wrinkle_max_duration": "Bundan uzun bir darbe kırışıklık önlemeyi bitirir ve yeni bir döngü açar",
+    "anti_wrinkle_max_power": "Bunun üzerindeki bir darbe kırışıklık önlemeyi bitirir ve yeni bir döngü açar",
     "dtw_bandwidth": "Aşama 3: Sakoe-Chiba büküm bandı (0 = DTW kapalı; varsayılan 0.2 = döngü uzunluğunun %20'si)",
     "corr_weight": "Aşama 2: eğri şekli (korelasyon) ile güç düzeyi (MAE) arasındaki denge; varsayılan 0.45",
     "duration_weight": "Aşama 4: çalışma süresi uyumunun nihai puanı ne kadar etkilediği (varsayılan 0.22)",
@@ -984,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Kırışıklık önleme modunun aktif kalması için darbeler arasında gücün bu değerin altına düşmesi gerekir.",
       "label": "Çıkış Gücü Eşiği"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "Maks. Darbe Aralığı",
+      "doc": "Kırışıklık önleme modu sona ermeden önce makinenin iki takla darbesi arasında ne kadar süre sessiz kalabileceği. Bunu kurutucunuzun darbeler arasında bıraktığı en uzun boşluğun üzerine ayarlayın, aksi halde sonraki her darbe hatalı başlangıç olarak okunur."
     },
     "anti_wrinkle_max_duration": {
       "doc": "Bundan daha uzun darbeler, kırışıklık önleyici bir takla yerine gerçek bir döngü olarak değerlendirilir.",
@@ -1603,7 +1670,9 @@
     "store_device_shared_partial": "{n} döngü paylaşıldı; {failed} yüklenemedi.",
     "store_device_shared_some_dup": "{created} döngü paylaşıldı; {dup} zaten mağazadaydı.",
     "store_download_failed": "İndirme başarısız: {error}",
-    "store_download_nothing": "İndirilecek yeni bir şey yok - bu kurulum zaten cihazınızda."
+    "store_download_nothing": "İndirilecek yeni bir şey yok - bu kurulum zaten cihazınızda.",
+    "export_selective_done": "Dışa aktarma indirildi",
+    "import_selective_done": "{profiles} profil ve {cycles} döngü içe aktarıldı"
   },
   "suggestion": {
     "both_agree": "WashData öneriyor",

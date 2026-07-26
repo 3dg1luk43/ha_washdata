@@ -17,14 +17,6 @@
           "min_power": "Vermogensmetingen boven deze drempel (in watt) geven aan dat het apparaat werkt. Begin met 2W voor de meeste apparaten."
         }
       },
-      "first_profile": {
-        "title": "Maak het eerste profiel aan",
-        "description": "Een **Cyclus** is een volledige cyclus van uw apparaat (bijvoorbeeld een lading wasgoed). Een **Profiel** groepeert deze cycli op type (bijvoorbeeld 'Katoen', 'Snelwas'). Door nu een profiel aan te maken, kan de integratieduur direct worden ingeschat.\n\nU kunt dit profiel handmatig selecteren in de apparaatbediening als het niet automatisch wordt gedetecteerd.\n\n**Laat 'Profielnaam' leeg om deze stap over te slaan.**",
-        "data": {
-          "profile_name": "Profielnaam (optioneel)",
-          "manual_duration": "Geschatte duur (minuten)"
-        }
-      },
       "reconfigure": {
         "title": "WashData opnieuw configureren",
         "description": "Werk de apparaatnaam, het type apparaat of de vermogenssensor bij.",

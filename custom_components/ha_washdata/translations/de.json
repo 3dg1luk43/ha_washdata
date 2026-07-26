@@ -17,14 +17,6 @@
           "min_power": "Leistungswerte über diesem Schwellwert (in Watt) zeigen an, dass das Gerät läuft. Für die meisten Geräte ist 2W ein guter Anfang."
         }
       },
-      "first_profile": {
-        "title": "Erstes Profil erstellen",
-        "description": "Ein **Zyklus** ist ein vollständiger Durchlauf Ihres Geräts (z. B. eine Ladung Wäsche). Ein **Profil** gruppiert diese Programme nach Typ (z. B. „Baumwolle“, „Schnellwäsche“). Wenn Sie jetzt ein Profil erstellen, kann die Integrationsdauer sofort geschätzt werden.\n\nSie können dieses Profil in der Gerätesteuerung manuell auswählen, wenn es nicht automatisch erkannt wird.\n\n**Lassen Sie „Profilname“ leer, um diesen Schritt zu überspringen.**",
-        "data": {
-          "profile_name": "Profilname (optional)",
-          "manual_duration": "Geschätzte Dauer (Minuten)"
-        }
-      },
       "reconfigure": {
         "title": "Reconfigure WashData",
         "description": "Update the device name, appliance type, or power sensor.",

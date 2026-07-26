@@ -172,17 +172,22 @@ def _classify(power: np.ndarray, model: PhaseModel) -> tuple[np.ndarray, float]:
 
 
 def _runs(reg: np.ndarray) -> list[list[int]]:
-    """Contiguous same-regime runs as ``[regime, start_idx, end_idx]`` (inclusive)."""
-    runs: list[list[int]] = []
-    n = len(reg)
-    i = 0
-    while i < n:
-        j = i
-        while j + 1 < n and reg[j + 1] == reg[i]:
-            j += 1
-        runs.append([int(reg[i]), i, j])
-        i = j + 1
-    return runs
+    """Contiguous same-regime runs as ``[regime, start_idx, end_idx]`` (inclusive).
+
+    Replaces the nested while-loop (O(n) Python iterations) with np.diff +
+    np.flatnonzero (C-level), then a short list comprehension over only the
+    run-boundary indices (~10-30 for a real cycle vs 1 400+ element visits).
+    """
+    if len(reg) == 0:
+        return []
+    changes = np.flatnonzero(np.diff(reg))          # indices where value changes
+    starts = np.empty(len(changes) + 1, dtype=np.intp)
+    ends   = np.empty(len(changes) + 1, dtype=np.intp)
+    starts[0]  = 0
+    starts[1:] = changes + 1
+    ends[:-1]  = changes
+    ends[-1]   = len(reg) - 1
+    return [[int(reg[s]), int(s), int(e)] for s, e in zip(starts, ends)]
 
 
 def _merge_short(runs: list[list[int]], t: np.ndarray, min_run_s: float) -> list[list[int]]:

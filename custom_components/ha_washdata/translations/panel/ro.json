@@ -28,7 +28,9 @@
     "awaiting_n": "În așteptarea aprobării · {n} confirmate",
     "approved": "Aprobat",
     "awaiting": "În așteptarea aprobării",
-    "imported_tip": "Importat din magazinul comunității. Folosit doar pentru potrivire, necontabilizat în statistici."
+    "imported_tip": "Importat din magazinul comunității. Folosit doar pentru potrivire, necontabilizat în statistici.",
+    "not_importable": "n/a aici",
+    "exists": "există deja"
   },
   "btn": {
     "add_device": "+ Adăugați dispozitiv",
@@ -169,7 +171,14 @@
     "download_device": "Descărcați această configurație",
     "share_device": "⬆ Partajați acest dispozitiv",
     "share_device_tip": "Partajați acest aparat și ciclurile sale de referință înregistrate în magazinul comunității, astfel încât alții cu același aparat să le poată adopta",
-    "share_n": "Partajați {n} ciclu(ri)"
+    "share_n": "Partajați {n} ciclu(ri)",
+    "export_selected": "Exportă (alege datele)",
+    "export_all": "Exportă rapid tot",
+    "import_raw": "Avansat: înlocuiește tot din JSON",
+    "download_export": "Descarcă exportul",
+    "analyze_import": "Analizează fișierul",
+    "import_selected": "Importă selecția",
+    "back": "Înapoi"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -390,6 +399,7 @@
     "panel_default_tab": "Fila implicită",
     "panel_language": "Limba panoului",
     "per_cycle_short": "ciclu",
+    "pg_anti_wrinkle": "Anti-șifonare",
     "pg_autofill_tip": "Completează automat intervalul din valoarea curentă ({lo}–{hi})",
     "pg_best_value": "Cea mai bună valoare găsită",
     "pg_current_value": "Valoarea curentă:",
@@ -515,6 +525,9 @@
     "pg_alert_unmatched": "Fără potrivire",
     "pg_alert_ambiguous": "Potrivire ambiguă",
     "pg_alert_energy": "Anomalie de energie",
+    "pg_alert_stress_cap": "Limita de siguranță atinsă",
+    "pg_alert_stress_ok": "Terminare în repaus: ciclu oprit",
+    "pg_alert_stress_warn": "Consum în standby peste pragul de oprire",
     "pg_newly_correct": "acum corect",
     "pg_regressed": "regresat",
     "pg_end_timing_changed": "moment de încheiere schimbat",
@@ -524,6 +537,12 @@
     "pg_sweep_param": "Parametru",
     "pg_objective": "Obiectiv",
     "pg_steps": "Pași",
+    "pg_stress_group": "Test de terminare în repaus",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Nivel în repaus (W)",
+    "pg_stress_idle_w_desc": "Înlocuiește nivelul de repaus detectat automat (lăsați gol pentru automat).",
+    "pg_stress_toggle": "Testați terminarea în repaus",
+    "pg_stress_toggle_desc": "Simulează aparatul menținut la consumul său în standby după terminarea înregistrării – arată dacă și când WashData oprește ciclul.",
     "pg_sweep_2d": "Hartă termică 2D",
     "pg_sweep_param_y": "Al 2-lea parametru",
     "pg_obj_match": "Acuratețea potrivirii",
@@ -566,7 +585,31 @@
     "task_split": "Se divide ciclul",
     "task_trim": "Se decupează ciclul",
     "task_merge": "Se îmbină ciclurile",
-    "task_rebuild": "Se reconstruiesc anvelopele"
+    "task_rebuild": "Se reconstruiesc anvelopele",
+    "cat_profiles": "Profiluri (programe)",
+    "cat_real_cycles": "Cicluri (istoric de utilizare)",
+    "cat_reference_cycles": "Cicluri de referință (importate)",
+    "cat_custom_phases": "Faze personalizate",
+    "cat_profile_groups": "Grupuri de profiluri",
+    "cat_settings": "Setări de detectare și recunoaștere",
+    "cat_matching_config": "Reglarea recunoașterii",
+    "cat_ml_models": "Modele ML",
+    "cat_feedback": "Feedback și etichete de revizuire",
+    "cat_suggestions": "Sugestii",
+    "cat_maintenance_log": "Jurnal de mentenanță",
+    "cat_history_logs": "Istoric și jurnale de modificări",
+    "cat_lifetime_stats": "Totaluri cumulate",
+    "cycles_short": "cicluri",
+    "import_mode": "Cum se combină",
+    "mode_merge": "Îmbină (păstrează-le pe ale mele)",
+    "mode_replace": "Înlocuiește selecția",
+    "cycle_destination": "Unde ar trebui să meargă ciclurile importate?",
+    "dest_reference": "Referință (doar forma)",
+    "dest_real_history": "Istoric real (contează în statistici)",
+    "conflict_resolution": "Conflicte de nume",
+    "conflict_import_copy": "Importă drept copie",
+    "conflict_keep_mine": "Păstrează-l pe al meu",
+    "conflict_overwrite": "Suprascrie"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Opriți forțat ciclul activ acum? Ciclul va fi salvat ca întrerupt.",
     "store_import": "Importați ciclu de referință",
     "store_share": "Partajați în magazinul comunității",
-    "store_share_device": "Partajați acest dispozitiv"
+    "store_share_device": "Partajați acest dispozitiv",
+    "export_select": "Exportă - alege datele",
+    "import_wizard": "Importă - alege datele"
   },
   "msg": {
     "appliance_monitor": "Monitor de aparate",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "{count} cicluri similare neetichetate găsite – creați un profil pentru a începe potrivirea lor.",
     "cycles_deleted": "{count} ciclu(ri) șterse",
     "enough_data": "Date suficiente pentru a învăța ({current}/{min} cicluri).",
-    "export_description": "Exportați toate profilurile și ciclurile în JSON sau restaurați dintr-un export anterior.",
+    "export_description": "Alege exact ce profiluri, cicluri, setări și altele să exporți în JSON, sau analizează un fișier și importă doar părțile dorite.",
     "feedback_cycles_pending": "{n} ciclu{s} de revizuit",
     "feedback_prompt": "Confirmați că a fost corect, corectați programul sau ignorați.",
+    "feedback_relabel_hint": "Și reetichetarea acestui ciclu îl rezolvă.",
     "filter_by_profile": "Filtrează după profil…",
     "group_modal_help": "Grupați programe cu aceeași formă care diferă ca temperatură/centrifugare (duratele pot varia). Potrivirea evaluează grupul ca un singur candidat, apoi alege membrul cel mai potrivit. Alegeți cel puțin 2; suprapunerea arată cât de asemănătoare sunt.",
     "group_not_cohesive": "Aceste profiluri nu sunt suficient de similare pentru a fi grupate în mod fiabil, deci potrivirea le tratează individual până când eliminați valoarea aberantă sau împărțiți grupul.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Reporniți Home Assistant pentru a activa instrumentele de simulare.",
     "pg_sim_progress": "{done} / {total} cicluri",
     "pg_starting": "Se pornește…",
+    "pg_stress_synthetic": "simularea în repaus începe aici",
     "pg_sweep_intro": "Ce-ar fi dacă {param} ar fi diferit? Testați {steps} valori pe ultimele {cycles} cicluri pentru a găsi setarea la care se potrivesc corect cele mai multe cicluri.",
     "pg_sweep_step": "Pasul {done} / {total}",
     "pg_undetected": "{n} ciclu{s} nedetectat",
@@ -837,6 +884,9 @@
     "pg_simulating": "Se simulează ciclul…",
     "pg_canvas_empty2": "Alege un ciclu de mai sus și apasă Rulează pentru a-l simula. Apoi treci cu cursorul pentru a citi valorile, derulează pentru a mări și trage pentru a te deplasa.",
     "pg_apply_settings_confirm": "Salvezi aceste {n} setări pe acest dispozitiv? {list}",
+    "pg_stress_terminated_detail": "S-a stabilizat la ~{idle}W în standby -- ciclul s-a încheiat {h}h {m}m mai târziu prin {reason}.",
+    "pg_stress_above_threshold_detail": "Consumul în standby ~{idle}W este egal sau mai mare decât pragul de oprire efectiv ({stop}W) -- ciclul nu a fost niciodată considerat inactiv. Măriți stop_threshold_w pentru a corecta.",
+    "pg_stress_hit_cap_detail": "Ciclul a rulat {h}h {m}m fără să se oprească -- oprit forțat de limita de siguranță. Consum în standby {idle}W față de pragul de oprire {stop}W.",
     "no_logs_match": "Nicio înregistrare din jurnal nu corespunde acestor filtre.",
     "pg_analysis_hint2": "Selectați un ciclu și apăsați Rulați pentru a încărca analiza potrivirii.",
     "pg_analysis_empty2": "Apăsați Rulați pentru a vedea analiza potrivirii.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Încărcați {brand} {model} cu ciclurile de referință pe care le selectați. Alții cu același aparat vă pot adopta programele. Intrările sunt revizuite înainte de a apărea public.",
     "share_profile_no_cycles": "Niciun ciclu de referință -- marcați un ciclu ca ⭐ în fila Cicluri pentru a include acest profil",
     "advisory_phase_inconsistent": "'{name}' pare să amestece programe sau temperaturi diferite - ciclurile sale se încălzesc pe durate foarte diferite. Împărțirea sa în profiluri separate (de ex. pe temperatură) va îmbunătăți potrivirea și estimările de timp.",
-    "advisory_phase_inconsistent_title": "⚠ Posibil programe amestecate"
+    "advisory_phase_inconsistent_title": "⚠ Posibil programe amestecate",
+    "export_select_intro": "Bifează exact ce să incluzi. Selectarea profilurilor fără ciclurile lor exportă totuși un program recunoscibil (forma învățată îl însoțește).",
+    "import_analyze_hint": "Încarcă un fișier exportat (sau lipește JSON-ul acestuia). WashData îl analizează și arată exact ce poate fi importat înainte de orice modificare.",
+    "analyzing": "Se analizează…",
+    "device_type_mismatch_warn": "Acest export provine de la un alt tip de electrocasnic ({src} în loc de {local}). Programele și ciclurile pot fi totuși importate ca date de referință, dar setările specifice dispozitivului și importul în istoricul real sunt dezactivate.",
+    "merge_hint": "Elementele importate sunt adăugate; nimic local nu se pierde. Conflictele de nume se rezolvă mai jos.",
+    "replace_warn": "Fiecare categorie bifată este ștearsă și înlocuită cu conținutul fișierului. Categoriile nebifate rămân neatinse.",
+    "dest_reference_hint": "Ciclurile importate îmbunătățesc doar recunoașterea programelor și nu afectează niciodată statisticile de utilizare/energie.",
+    "dest_real_history_hint": "Ciclurile importate contează ca istoric propriu al acestui dispozitiv și alimentează statisticile de energie/utilizare. Folosește pentru a muta un electrocasnic pe o instalare nouă."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -961,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Puterea trebuie să scadă sub aceasta între impulsuri pentru ca modul antirid să rămână activ.",
       "label": "Prag Putere de Ieșire"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Cât timp poate rămâne aparatul în liniște între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie. Setați-l peste cel mai lung interval pe care uscătorul îl lasă între impulsuri, altfel fiecare impuls ulterior este citit ca o pornire falsă.",
+      "label": "Interval Maxim Între Impulsuri"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulsurile mai lungi decât aceasta sunt tratate ca un ciclu real, mai degrabă decât o răsturnare antirid.",
@@ -1580,7 +1642,9 @@
     "store_device_shared_partial": "{n} ciclu(ri) partajate; {failed} nu au putut fi încărcate.",
     "store_device_shared_some_dup": "{created} ciclu(ri) partajate; {dup} erau deja în magazin.",
     "store_download_failed": "Descărcare eșuată: {error}",
-    "store_download_nothing": "Nimic nou de descărcat - această configurație este deja pe dispozitivul dvs."
+    "store_download_nothing": "Nimic nou de descărcat - această configurație este deja pe dispozitivul dvs.",
+    "export_selective_done": "Export descărcat",
+    "import_selective_done": "Importate {profiles} profil(uri) și {cycles} ciclu(ri)"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",
@@ -1706,6 +1770,11 @@
     "other": "Altele"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",
+    "anti_wrinkle_exit_power": "Puterea trebuie să scadă sub această valoare între impulsuri pentru ca modul anti-șifonare să rămână activ",
+    "anti_wrinkle_idle_timeout": "Timp de liniște permis între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie",
+    "anti_wrinkle_max_duration": "Un impuls mai lung decât acesta încheie modul anti-șifonare și deschide un ciclu nou",
+    "anti_wrinkle_max_power": "Un impuls peste această valoare încheie modul anti-șifonare și deschide un ciclu nou",
     "completion_min_seconds": "Cea mai scurtă rulare care contează ca ciclu real",
     "end_repeat_count": "Citiri scăzute consecutive înainte de încheiere",
     "interrupted_min_seconds": "Ciclurile scurte sunt marcate ca întrerupte",

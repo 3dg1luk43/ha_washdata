@@ -17,14 +17,6 @@
           "min_power": "Bu eşiğin üzerindeki güç değerleri (watt cinsinden) cihazın çalıştığını gösterir. Çoğu cihaz için 2W ile başlayın."
         }
       },
-      "first_profile": {
-        "title": "İlk Profili Oluştur",
-        "description": "**Döngü**, cihazınızın tamamen çalıştırılmasıdır (ör. bir miktar çamaşır). **Profil** bu programları türe göre gruplandırır (ör. 'Pamuklu', 'Hızlı Yıkama'). Artık bir profil oluşturmak entegrasyonun süreyi hemen tahmin etmesine yardımcı oluyor.\n\nOtomatik olarak algılanmazsa bu profili cihaz kontrollerinden manuel olarak seçebilirsiniz.\n\n**Bu adımı atlamak için 'Profil Adı'nı boş bırakın.**",
-        "data": {
-          "profile_name": "Profil Adı (İsteğe bağlı)",
-          "manual_duration": "Tahmini Süre (dakika)"
-        }
-      },
       "reconfigure": {
         "title": "Reconfigure WashData",
         "description": "Update the device name, appliance type, or power sensor.",

@@ -28,7 +28,9 @@
     "awaiting_n": "Në pritje të miratimit · {n} të konfirmuara",
     "approved": "Miratuar",
     "awaiting": "Në pritje të miratimit",
-    "imported_tip": "Importuar nga dyqani i komunitetit. Përdoret vetëm për përputhje, nuk llogaritet në statistika."
+    "imported_tip": "Importuar nga dyqani i komunitetit. Përdoret vetëm për përputhje, nuk llogaritet në statistika.",
+    "not_importable": "s'aplikohet këtu",
+    "exists": "ekziston"
   },
   "btn": {
     "add_device": "+ Shto pajisje",
@@ -169,7 +171,14 @@
     "download_device": "Shkarko këtë konfigurim",
     "share_device": "⬆ Ndaj këtë pajisje",
     "share_device_tip": "Ndani këtë pajisje dhe ciklet e saj të referencës të regjistruara në dyqanin e komunitetit, që të tjerët me të njëjtën makinë t'i adoptojnë",
-    "share_n": "Ndaj {n} cikël(-ë)"
+    "share_n": "Ndaj {n} cikël(-ë)",
+    "export_selected": "Eksporto (zgjidh të dhënat)",
+    "export_all": "Eksportim i shpejtë i gjithçkaje",
+    "import_raw": "I avancuar: zëvendëso gjithçka nga JSON",
+    "download_export": "Shkarko eksportin",
+    "analyze_import": "Analizo skedarin",
+    "import_selected": "Importo të zgjedhurat",
+    "back": "Prapa"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -390,6 +399,7 @@
     "panel_default_tab": "Skeda e parazgjedhur",
     "panel_language": "Gjuha e panelit",
     "per_cycle_short": "cikël",
+    "pg_anti_wrinkle": "Kundër rrudhave",
     "pg_autofill_tip": "Mbush automatikisht intervalin nga vlera aktuale ({lo}–{hi})",
     "pg_best_value": "Vlera më e mirë e gjetur",
     "pg_current_value": "Vlera aktuale:",
@@ -524,6 +534,12 @@
     "pg_sweep_param": "Parametër",
     "pg_objective": "Objektivi",
     "pg_steps": "Hapat",
+    "pg_stress_group": "Testi i ndërprerjes me gjendje statike",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Niveli i gjendjes statike (W)",
+    "pg_stress_idle_w_desc": "Anuloni vlerën minimale të gjendjes statike të zbuluar automatikisht (lini bosh për automatik).",
+    "pg_stress_toggle": "Testo ndërprerjen me gjendje statike",
+    "pg_stress_toggle_desc": "Simulon pajisjen që qëndron në nivelin e konsumit të gjendjes statike pas përfundimit të regjistrimit - tregon nëse dhe kur WashData ndalon ciklin.",
     "pg_sweep_2d": "Hartë nxehtësie 2D",
     "pg_sweep_param_y": "Parametri 2",
     "pg_obj_match": "Saktësia e përputhjes",
@@ -538,6 +554,9 @@
     "aria_playground_chart2": "Grafik interaktiv i fuqisë së ciklit: kaloni kursorin për të lexuar kohën/fuqinë, rrëshqitni për të zmadhuar, tërhiqni për të lëvizur",
     "pg_alert_timeout_end": "Përfundoi nga skadimi i kohës, jo nga parashikimi",
     "pg_alert_indefinite": "Do të vazhdonte pafundësisht",
+    "pg_alert_stress_cap": "U arrit kufiri i sigurisë",
+    "pg_alert_stress_ok": "Ndërprerja e gjendjes statike: cikli u ndal",
+    "pg_alert_stress_warn": "Konsumi i gjendjes statike mbi pragun e ndalimit",
     "task_pg_history": "Testo në histori",
     "task_pg_sweep": "Optimizo",
     "task_reprocess": "Ripërpunim",
@@ -566,7 +585,31 @@
     "task_split": "Ndarja e ciklit",
     "task_trim": "Prerja e ciklit",
     "task_merge": "Bashkimi i cikleve",
-    "task_rebuild": "Rindërtimi i zarfave"
+    "task_rebuild": "Rindërtimi i zarfave",
+    "cat_profiles": "Profilet (programet)",
+    "cat_real_cycles": "Ciklet (historiku i punës)",
+    "cat_reference_cycles": "Ciklet e referencës (të importuara)",
+    "cat_custom_phases": "Faza të personalizuara",
+    "cat_profile_groups": "Grupet e profileve",
+    "cat_settings": "Cilësimet e zbulimit & njohjes",
+    "cat_matching_config": "Rregullimi i njohësit",
+    "cat_ml_models": "Modelet ML",
+    "cat_feedback": "Etiketat e reagimit & rishikimit",
+    "cat_suggestions": "Sugjerime",
+    "cat_maintenance_log": "Regjistri i mirëmbajtjes",
+    "cat_history_logs": "Historiku & regjistrat e ndryshimeve",
+    "cat_lifetime_stats": "Totalet e përgjithshme",
+    "cycles_short": "cikle",
+    "import_mode": "Si të kombinohen",
+    "mode_merge": "Bashko (mba të miat)",
+    "mode_replace": "Zëvendëso të zgjedhurat",
+    "cycle_destination": "Ku duhet të shkojnë ciklet e importuara?",
+    "dest_reference": "Referencë (vetëm forma)",
+    "dest_real_history": "Historik real (numërohet në statistika)",
+    "conflict_resolution": "Përplasjet e emrave",
+    "conflict_import_copy": "Importo si kopje",
+    "conflict_keep_mine": "Mba të miat",
+    "conflict_overwrite": "Mbishkruaj"
   },
   "log": {
     "all_levels": "Të gjitha nivelet",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Të ndalohet me forcë cikli aktiv tani? Cikli do të ruhet si i ndërprerë.",
     "store_import": "Importo ciklin referues",
     "store_share": "Ndaj në dyqanin e komunitetit",
-    "store_share_device": "Ndaj këtë pajisje"
+    "store_share_device": "Ndaj këtë pajisje",
+    "export_select": "Eksporto - zgjidh të dhënat",
+    "import_wizard": "Importo - zgjidh të dhënat"
   },
   "msg": {
     "appliance_monitor": "Monitor i pajisjes",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "U gjetën {count} cikle të ngjashme të paetiketuara – krijo një profil për të filluar përputhjen.",
     "cycles_deleted": "{count} cikël(e) u fshinë",
     "enough_data": "Të dhëna të mjaftueshme për të mësuar ({current}/{min} cikle).",
-    "export_description": "Eksporto të gjitha profilet dhe ciklet në JSON ose rivendos nga një eksportim i mëparshëm.",
+    "export_description": "Zgjidhni saktësisht cilat profile, cikle, cilësime dhe të tjera do të eksportohen në JSON, ose analizoni një skedar dhe importoni vetëm pjesët që dëshironi.",
     "feedback_cycles_pending": "{n} cikël{s} për rishikim",
     "feedback_prompt": "Konfirmo nëse ishte i saktë, korrigjo programin ose injorojë.",
+    "feedback_relabel_hint": "Rietiketimi i këtij cikli e zgjidh atë gjithashtu.",
     "filter_by_profile": "Filtro sipas profilit…",
     "group_modal_help": "Gruponi programe me të njëjtën formë që ndryshojnë në temperaturë/centrifugim (kohëzgjatja mund të ndryshojë). Përputhja shënon grupin si një kandidat dhe më pas zgjedh anëtarin më të përshtatshëm. Zgjidhni të paktën 2; mbivendosja tregon se sa të ngjashëm janë.",
     "group_not_cohesive": "Këto profile nuk janë mjaft të ngjashme për t'u grupuar në mënyrë të besueshme, kështu që përputhja i trajton ato individualisht derisa të hiqni pjesën e jashtme ose të ndani grupin.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Rinisni Home Assistant për të aktivizuar mjetet e simulimit.",
     "pg_sim_progress": "{done} / {total} cikle",
     "pg_starting": "Duke filluar…",
+    "pg_stress_synthetic": "simulimi i gjendjes statike fillon këtu",
     "pg_sweep_intro": "Po sikur {param} të ishte ndryshe? Testoni {steps} vlera në {cycles} ciklet tuaja të fundit për të gjetur cilësimin ku përputhen saktë sa më shumë cikle.",
     "pg_sweep_step": "Hapi {done} / {total}",
     "pg_undetected": "{n} cikël{s} të pazbuluar",
@@ -837,6 +884,9 @@
     "pg_simulating": "Po simulohet cikli…",
     "pg_canvas_empty2": "Zgjidhni një cikël më sipër dhe shtypni Ekzekuto për ta simuluar. Pastaj kaloni kursorin për të lexuar vlerat, rrëshqitni për të zmadhuar dhe tërhiqni për të lëvizur.",
     "pg_apply_settings_confirm": "Të ruhen këto {n} cilësime në këtë pajisje? {list}",
+    "pg_stress_terminated_detail": "U stabilizua në rreth {idle} W gjendje statike -- cikli përfundoi {h} orë {m} min më vonë përmes {reason}.",
+    "pg_stress_above_threshold_detail": "Konsumi i gjendjes statike (~{idle} W) është në ose mbi pragun efektiv të ndalimit ({stop} W) -- cikli nuk u regjistrua kurrë si i qetë. Për ta rregulluar, rrisni stop_threshold_w.",
+    "pg_stress_hit_cap_detail": "Cikli funksionoi {h} orë {m} min pa u ndalur -- u ndal me forcë nga kufiri i sigurisë. Konsumi i gjendjes statike {idle} W kundrejt pragut të ndalimit {stop} W.",
     "no_logs_match": "Asnjë regjistrim nuk përputhet me këta filtra.",
     "pg_analysis_hint2": "Zgjidhni një cikël dhe shtypni Ekzekuto për të ngarkuar analizën e përputhjes.",
     "pg_analysis_empty2": "Shtypni Ekzekuto për të parë analizën e përputhjes.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Ngarko {brand} {model} me ciklet e referencës që zgjidhni. Të tjerët me të njëjtën pajisje mund të adoptojnë programet tuaja. Hyrjet shqyrtohen para publikimit.",
     "share_profile_no_cycles": "Nuk ka cikle referimi -- shënojeni një cikël si ⭐ tek skeda Ciklet për të përfshirë këtë profil",
     "advisory_phase_inconsistent": "'{name}' duket se përzien programe ose temperatura të ndryshme - ciklet e tij ngrohin për periudha shumë të ndryshme kohore. Ndarja e tij në profile të veçanta (p.sh. sipas temperaturës) do të përmirësojë përputhjen dhe vlerësimet e kohës.",
-    "advisory_phase_inconsistent_title": "⚠ Ndoshta programe të përziera"
+    "advisory_phase_inconsistent_title": "⚠ Ndoshta programe të përziera",
+    "export_select_intro": "Shënoni saktësisht çfarë të përfshihet. Zgjedhja e profileve pa ciklet e tyre gjithsesi eksporton një program të njohshëm (forma e mësuar e tij udhëton bashkë me të).",
+    "import_analyze_hint": "Ngarkoni një skedar të eksportuar (ose ngjisni JSON-in e tij). WashData e analizon dhe tregon saktësisht çfarë mund të importohet përpara se të ndryshojë çdo gjë.",
+    "analyzing": "Duke analizuar…",
+    "device_type_mismatch_warn": "Ky eksport është nga një tip tjetër pajisjeje ({src} ndaj {local}). Programet dhe ciklet mund të importohen gjithsesi si të dhëna reference, por cilësimet specifike të pajisjes dhe importimi i historikut real janë çaktivizuar.",
+    "merge_hint": "Artikujt e importuar shtohen; asgjë lokale nuk humbet. Përplasjet e emrave zgjidhen më poshtë.",
+    "replace_warn": "Çdo kategori e shënuar fshihet dhe zëvendësohet nga skedari. Kategoritë e pashënuara mbeten të paprekura.",
+    "dest_reference_hint": "Ciklet e importuara vetëm përmirësojnë njohjen e programit dhe nuk ndikojnë kurrë në statistikat e përdorimit/energjisë.",
+    "dest_real_history_hint": "Ciklet e importuara llogariten si historik i vetë kësaj pajisjeje dhe ushqejnë statistikat e energjisë/përdorimit. Përdoreni për të zhvendosur një pajisje në një instalim të ri."
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -961,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Fuqia duhet të bjerë nën këtë mes pulseve që modaliteti kundër rrudhave të qëndrojë aktiv.",
       "label": "Pragu i fuqisë së daljes"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "Hendeku maks. i pulseve",
+      "doc": "Sa gjatë mund të qëndrojë e qetë makina mes dy pulseve të rrotullimit para se të mbarojë modaliteti kundër rrudhave. Vendoseni mbi hendekun më të gjatë që lë tharësja juaj mes pulseve, përndryshe çdo puls i mëvonshëm lexohet si nisje e gabuar."
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulset më të gjata se kjo trajtohen si një cikël i vërtetë dhe jo si një rrëshqitje kundër rrudhave.",
@@ -1580,7 +1642,9 @@
     "store_device_shared_partial": "{n} cikle ndajur; {failed} nuk u ngarkuan.",
     "store_device_shared_some_dup": "{created} cikle ndajur; {dup} ishin tashmë në dyqan.",
     "store_download_failed": "Shkarkimi dështoi: {error}",
-    "store_download_nothing": "Asgjë e re për të shkarkuar - ky konfigurim është tashmë në pajisjen tuaj."
+    "store_download_nothing": "Asgjë e re për të shkarkuar - ky konfigurim është tashmë në pajisjen tuaj.",
+    "export_selective_done": "Eksporti u shkarkua",
+    "import_selective_done": "U importuan {profiles} profil(e) dhe {cycles} cikël(cikle)"
   },
   "suggestion": {
     "both_agree": "WashData rekomandon",
@@ -1714,6 +1778,11 @@
     "start_duration_threshold": "Sekonda mbi prag për të konfirmuar nisjen",
     "start_threshold_w": "Watt minimalë për t'u llogaritur si nisur",
     "stop_threshold_w": "Nën këtë, makina llogaritet e fikur",
+    "anti_wrinkle_enabled": "Thith pulset e rrotullimit pas fazës kryesore në vend që t'i lexojë si cikle të reja",
+    "anti_wrinkle_exit_power": "Fuqia duhet të bjerë nën këtë mes pulseve që modaliteti kundër rrudhave të qëndrojë aktiv",
+    "anti_wrinkle_idle_timeout": "Koha e qetësisë e lejuar mes dy pulseve të rrotullimit para se të mbarojë modaliteti kundër rrudhave",
+    "anti_wrinkle_max_duration": "Një puls më i gjatë se ky e mbaron modalitetin kundër rrudhave dhe hap një cikël të ri",
+    "anti_wrinkle_max_power": "Një puls mbi këtë e mbaron modalitetin kundër rrudhave dhe hap një cikël të ri",
     "dtw_bandwidth": "Etapa 3: brez deformimi Sakoe-Chiba (0 = DTW joaktiv; parazgjedhja 0.2 = 20% e gjatësisë së ciklit)",
     "corr_weight": "Etapa 2: balancë mes formës së kurbës (korrelacion) dhe nivelit të fuqisë (MAE); parazgjedhja 0.45",
     "duration_weight": "Etapa 4: sa fortë ndikon marrëveshja e kohëzgjatjes në rezultatin final (parazgjedhja 0.22)",

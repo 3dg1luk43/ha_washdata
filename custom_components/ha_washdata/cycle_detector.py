@@ -124,7 +124,6 @@ class CycleDetectorConfig:
     start_duration_threshold: float = 5.0
     start_energy_threshold: float = 0.005
     end_energy_threshold: float = 0.05  # 50 Wh threshold for "still active"
-    running_dead_zone: int = 0
     end_repeat_count: int = 1
     min_off_gap: int = 60
     start_threshold_w: float = 2.0
@@ -141,6 +140,7 @@ class CycleDetectorConfig:
     anti_wrinkle_max_power: float = 400.0
     anti_wrinkle_max_duration: float = 60.0
     anti_wrinkle_exit_power: float = 0.8
+    anti_wrinkle_idle_timeout: float = 120.0
     delay_detect_enabled: bool = False
     # Sustained seconds power must stay in the standby band (between
     # stop_threshold_w and start_threshold_w) before DELAY_WAIT engages.
@@ -307,7 +307,6 @@ class CycleDetector:
         self._anti_wrinkle_candidate_peak: float = 0.0
         self._anti_wrinkle_candidate_start_power: float = 0.0
         self._anti_wrinkle_idle_time: float = 0.0  # Track time spent below exit_power while in ANTI_WRINKLE
-        self._anti_wrinkle_idle_timeout: float = 120.0
 
         # Delayed-start band tracking.
         # _delay_band_start anchors the first reading in the standby band
@@ -847,7 +846,7 @@ class CycleDetector:
                     self._anti_wrinkle_idle_time += dt
                     anti_wrinkle_end_threshold = max(
                         self._dynamic_end_threshold,
-                        self._anti_wrinkle_idle_timeout,
+                        float(self._config.anti_wrinkle_idle_timeout),
                     )
                     if self._anti_wrinkle_idle_time >= anti_wrinkle_end_threshold:
                         self._transition_to(STATE_OFF, timestamp)

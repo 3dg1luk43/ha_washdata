@@ -28,7 +28,9 @@
     "awaiting_n": "Jóváhagyásra vár · {n} megerősítés",
     "approved": "Jóváhagyva",
     "awaiting": "Jóváhagyásra vár",
-    "imported_tip": "A közösségi boltból importálva. Csak egyeztetéshez használatos, a statisztikába nem számít bele."
+    "imported_tip": "A közösségi boltból importálva. Csak egyeztetéshez használatos, a statisztikába nem számít bele.",
+    "not_importable": "itt nem elérhető",
+    "exists": "létezik"
   },
   "btn": {
     "add_device": "+ Eszköz hozzáadása",
@@ -169,7 +171,14 @@
     "download_device": "Beállítás letöltése",
     "share_device": "⬆ Eszköz megosztása",
     "share_device_tip": "Ossza meg ezt a készüléket és a rögzített referenciaciklusait a közösségi boltban, hogy mások ugyanazzal a géppel magukévá tehessék",
-    "share_n": "{n} ciklus megosztása"
+    "share_n": "{n} ciklus megosztása",
+    "export_selected": "Exportálás (adatok kiválasztása)",
+    "export_all": "Gyorsexport: minden",
+    "import_raw": "Speciális: mindent lecserél a JSON-ból",
+    "download_export": "Export letöltése",
+    "analyze_import": "Fájl elemzése",
+    "import_selected": "Kiválasztottak importálása",
+    "back": "Vissza"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -291,6 +300,7 @@
     "poor": "⚠ Gyenge profilminőség"
   },
   "lbl": {
+    "pg_anti_wrinkle": "Ránctalanítás",
     "actions": "Akciók",
     "activity": "Tevékenység",
     "administrators": "Rendszergazdák",
@@ -524,6 +534,12 @@
     "pg_sweep_param": "Paraméter",
     "pg_objective": "Cél",
     "pg_steps": "Lépések",
+    "pg_stress_group": "Üresjárati leállás tesztje",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Üresjárati szint (W)",
+    "pg_stress_idle_w_desc": "Felülbírálja az automatikusan észlelt készenléti teljesítmény alsó értékét (hagyja üresen az automatikus beállításhoz).",
+    "pg_stress_toggle": "Üresjárati leállás tesztelése",
+    "pg_stress_toggle_desc": "Szimulálja, hogy a készülék a felvétel befejezése után a készenléti fogyasztási szintjén marad - megmutatja, hogy és mikor állítja le a WashData a ciklust.",
     "pg_sweep_2d": "2D hőtérkép",
     "pg_sweep_param_y": "2. paraméter",
     "pg_obj_match": "Egyezés pontossága",
@@ -538,6 +554,9 @@
     "aria_playground_chart2": "Interaktív ciklusteljesítmény-grafikon: vigye rá a mutatót az idő/teljesítmény leolvasásához, görgessen a nagyításhoz, húzza az eltoláshoz",
     "pg_alert_timeout_end": "Időtúllépés miatt ért véget, nem előrejelzés alapján",
     "pg_alert_indefinite": "Végtelen ideig futna",
+    "pg_alert_stress_cap": "Elérte a biztonsági korlátot",
+    "pg_alert_stress_ok": "Üresjárati leállás: a ciklus megállt",
+    "pg_alert_stress_warn": "Üresjárati fogyasztás meghaladja a leállási küszöböt",
     "task_pg_history": "Tesztelés előzményeken",
     "task_pg_sweep": "Optimalizálás",
     "task_reprocess": "Újrafeldolgozás",
@@ -566,7 +585,31 @@
     "task_split": "Ciklus felosztása",
     "task_trim": "Ciklus levágása",
     "task_merge": "Ciklusok egyesítése",
-    "task_rebuild": "Burkológörbék újraépítése"
+    "task_rebuild": "Burkológörbék újraépítése",
+    "cat_profiles": "Profilok (programok)",
+    "cat_real_cycles": "Ciklusok (használati előzmények)",
+    "cat_reference_cycles": "Referenciaciklusok (importált)",
+    "cat_custom_phases": "Egyéni fázisok",
+    "cat_profile_groups": "Profilcsoportok",
+    "cat_settings": "Észlelési és illesztési beállítások",
+    "cat_matching_config": "Illesztés finomhangolása",
+    "cat_ml_models": "ML-modellek",
+    "cat_feedback": "Visszajelzési és ellenőrzési címkék",
+    "cat_suggestions": "Javaslatok",
+    "cat_maintenance_log": "Karbantartási napló",
+    "cat_history_logs": "Előzmény- és változásnaplók",
+    "cat_lifetime_stats": "Élettartam-összesítések",
+    "cycles_short": "ciklus",
+    "import_mode": "Hogyan egyesítse",
+    "mode_merge": "Egyesítés (a sajátom megtartása)",
+    "mode_replace": "Kiválasztottak cseréje",
+    "cycle_destination": "Hová kerüljenek az importált ciklusok?",
+    "dest_reference": "Referencia (csak görbe)",
+    "dest_real_history": "Valós előzmények (statisztikába számít)",
+    "conflict_resolution": "Névütközések",
+    "conflict_import_copy": "Importálás másolatként",
+    "conflict_keep_mine": "A sajátom megtartása",
+    "conflict_overwrite": "Felülírás"
   },
   "log": {
     "all_levels": "Minden szinten",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Kényszerítve leállítod most az aktív ciklust? A ciklus megszakítottként lesz elmentve.",
     "store_import": "Referenciaciklus importálása",
     "store_share": "Megosztás a közösségi boltban",
-    "store_share_device": "Eszköz megosztása"
+    "store_share_device": "Eszköz megosztása",
+    "export_select": "Exportálás - adatok kiválasztása",
+    "import_wizard": "Importálás - adatok kiválasztása"
   },
   "msg": {
     "appliance_monitor": "Készülék monitor",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "{count} hasonló felcímkézetlen ciklus található – hozzon létre egy profilt az egyeztetés megkezdéséhez.",
     "cycles_deleted": "{count} ciklus törölve",
     "enough_data": "Elegendő adat a tanuláshoz ({current}/{min} ciklus).",
-    "export_description": "Exportálja az összes profilt és ciklust JSON-ba, vagy állítsa vissza az előző exportálásból.",
+    "export_description": "Válaszd ki pontosan, mely profilokat, ciklusokat, beállításokat és egyebeket exportálsz JSON-ba, vagy elemezz egy fájlt, és csak a kívánt részeket importáld.",
     "feedback_cycles_pending": "{n} ciklus{s} áttekintésre vár",
     "feedback_prompt": "Erősítse meg, hogy helyes volt, javítsa ki a programot, vagy hagyja figyelmen kívül.",
+    "feedback_relabel_hint": "Ennek a ciklusnak az újracímkézése ezt is megoldja.",
     "filter_by_profile": "Szűrés profil szerint…",
     "group_modal_help": "Azonos alakú programok, amelyek hőmérséklete/centrifugálása különbözik (az időtartam változhat). Az egyezés pontozza a csoportot, mint egy jelöltet, majd kiválasztja a legmegfelelőbb tagot. Válasszon legalább 2-t; az átfedés megmutatja, mennyire hasonlítanak egymásra.",
     "group_not_cohesive": "Ezek a profilok nem eléggé hasonlóak ahhoz, hogy megbízhatóan csoportosítsák, ezért az egyeztetés egyenként kezeli őket, amíg el nem távolítja a kiugró értéket, vagy fel nem osztja a csoportot.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Indítsa újra a Home Assistantot a szimulációs eszközök engedélyezéséhez.",
     "pg_sim_progress": "{done} / {total} ciklus",
     "pg_starting": "Indítás…",
+    "pg_stress_synthetic": "az üresjárati szimuláció itt kezdődik",
     "pg_sweep_intro": "Mi lenne, ha a {param} más lenne? Teszteljen {steps} értéket az utolsó {cycles} cikluson, hogy megtalálja azt a beállítást, ahol a legtöbb ciklus helyesen egyezik.",
     "pg_sweep_step": "{done} / {total}. lépés",
     "pg_undetected": "{n} nem észlelt ciklus",
@@ -837,6 +884,9 @@
     "pg_simulating": "Ciklus szimulálása…",
     "pg_canvas_empty2": "Válassz ki egy ciklust fent, és nyomd meg a Futtatás gombot a szimulációhoz. Ezután vidd rá a mutatót az értékek leolvasásához, görgess a nagyításhoz, és húzd az eltoláshoz.",
     "pg_apply_settings_confirm": "Elmenti ezt a(z) {n} beállítást erre az eszközre? {list}",
+    "pg_stress_terminated_detail": "Körülbelül {idle} W üresjárati szinten állandósult -- a ciklus {h} ó {m} p múlva {reason} révén ért véget.",
+    "pg_stress_above_threshold_detail": "Az üresjárati fogyasztás (kb. {idle} W) eléri vagy meghaladja a tényleges leállási küszöböt ({stop} W) -- a ciklust soha nem érzékelte csendesnek. A javításhoz növelje a stop_threshold_w értékét.",
+    "pg_stress_hit_cap_detail": "A ciklus {h} ó {m} p futott leállás nélkül -- a biztonsági korlát kényszerítette leállásra. Üresjárati fogyasztás {idle} W a(z) {stop} W leállási küszöbhöz képest.",
     "no_logs_match": "Egyetlen naplóbejegyzés sem felel meg ezeknek a szűrőknek.",
     "pg_analysis_hint2": "Válasszon egy ciklust, és nyomja meg a Futtatás gombot az egyezéselemzés betöltéséhez.",
     "pg_analysis_empty2": "Nyomja meg a Futtatás gombot az egyezéselemzés megtekintéséhez.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Töltse fel a(z) {brand} {model} eszközt a kiválasztott referenciaciklusokkal. Más, ugyanolyan készülékkel rendelkezők átvehetik programjait. A bejegyzések felülvizsgálatra kerülnek nyilvánossá válás előtt.",
     "share_profile_no_cycles": "Nincsenek referenciaciklusok -- jelöljön meg egy ciklust ⭐-gal a Ciklusok lapon, hogy belefoglalhassa ezt a profilt",
     "advisory_phase_inconsistent": "Úgy tűnik, hogy a(z) '{name}' különböző programokat vagy hőmérsékleteket kever - ciklusai nagyon eltérő ideig fűtenek. Ha külön profilokra bontja (pl. hőmérsékletenként), az javítja a párosítást és az időbecsléseket.",
-    "advisory_phase_inconsistent_title": "⚠ Esetleg kevert programok"
+    "advisory_phase_inconsistent_title": "⚠ Esetleg kevert programok",
+    "export_select_intro": "Jelöld be pontosan, mit szeretnél belefoglalni. Ha a profilokat a ciklusaik nélkül választod ki, akkor is felismerhető program exportálódik (a megtanult görbéje vele utazik).",
+    "import_analyze_hint": "Tölts be egy exportált fájlt (vagy illeszd be a JSON-ját). A WashData elemzi, és pontosan megmutatja, mi importálható, mielőtt bármi megváltozna.",
+    "analyzing": "Elemzés…",
+    "device_type_mismatch_warn": "Ez az export egy másik készüléktípusból származik ({src} vs {local}). A programok és ciklusok továbbra is importálhatók referenciaadatként, de a készülékspecifikus beállítások és a valós előzmények importálása le van tiltva.",
+    "merge_hint": "Az importált elemek hozzáadódnak; semmi helyi adat nem vész el. A névütközéseket alább oldhatod fel.",
+    "replace_warn": "Minden bejelölt kategória törlődik, és a fájlból cserélődik le. A be nem jelölt kategóriák érintetlenül maradnak.",
+    "dest_reference_hint": "Az importált ciklusok csak a programfelismerést javítják, és soha nem befolyásolják a használati/energia-statisztikákat.",
+    "dest_real_history_hint": "Az importált ciklusok ennek a készüléknek a saját előzményeiként számítanak, és az energia-/használati statisztikákat táplálják. Egy készülék új telepítésre költöztetéséhez használd."
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -961,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "A teljesítménynek ez alá kell csökkennie az impulzusok között, hogy a ránctalanító üzemmód aktív maradjon.",
       "label": "Kilépési teljesítmény küszöb"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Meddig maradhat a gép csendben két szárítópulzus között, mielőtt a ránctalanító üzemmód véget ér. Állítsa hosszabbra, mint a leghosszabb szünet, amit a szárítógép a pulzusok között hagy, különben minden későbbi pulzus téves indításként lesz értelmezve.",
+      "label": "Max. impulzusszünet"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Az ennél hosszabb impulzusokat valódi ciklusnak tekintik, nem pedig ránctalanítónak.",
@@ -1580,7 +1642,9 @@
     "store_device_shared_partial": "{n} ciklus megosztva; {failed} nem sikerült feltölteni.",
     "store_device_shared_some_dup": "{created} ciklus megosztva; {dup} már a boltban volt.",
     "store_download_failed": "Letöltés sikertelen: {error}",
-    "store_download_nothing": "Nincs új letöltendő - ez a beállítás már megvan az eszközön."
+    "store_download_nothing": "Nincs új letöltendő - ez a beállítás már megvan az eszközön.",
+    "export_selective_done": "Export letöltve",
+    "import_selective_done": "{profiles} profil és {cycles} ciklus importálva"
   },
   "suggestion": {
     "both_agree": "A WashData javasolja",
@@ -1706,6 +1770,11 @@
     "other": "Egyéb"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Nyelje el a fő fázis utáni szárítópulzusokat, ahelyett hogy új ciklusként olvasná őket",
+    "anti_wrinkle_exit_power": "A ránctalanítás aktívan tartásához a teljesítménynek az impulzusok között ez alá kell csökkennie",
+    "anti_wrinkle_idle_timeout": "Két szárítópulzus között engedélyezett csendes idő, mielőtt a ránctalanítás véget ér",
+    "anti_wrinkle_max_duration": "Az ennél hosszabb impulzus befejezi a ránctalanítást és új ciklust nyit",
+    "anti_wrinkle_max_power": "Az ennél magasabb impulzus befejezi a ránctalanítást és új ciklust nyit",
     "completion_min_seconds": "A legrövidebb futás, ami valódi ciklusnak számít",
     "end_repeat_count": "Egymást követő alacsony leolvasások a befejezés előtt",
     "interrupted_min_seconds": "A rövid ciklusokat megszakítottként jelöli",

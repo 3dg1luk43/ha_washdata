@@ -28,7 +28,9 @@
     "awaiting_n": "Afventer godkendelse · {n} bekræftet",
     "approved": "Godkendt",
     "awaiting": "Afventer godkendelse",
-    "imported_tip": "Importeret fra fællesskabsbutikken. Bruges kun til matchning, tælles ikke med i statistikken."
+    "imported_tip": "Importeret fra fællesskabsbutikken. Bruges kun til matchning, tælles ikke med i statistikken.",
+    "not_importable": "ikke her",
+    "exists": "findes"
   },
   "btn": {
     "add_device": "+ Tilføj enhed",
@@ -169,7 +171,14 @@
     "download_device": "Download denne opsætning",
     "share_device": "⬆ Del dette apparat",
     "share_device_tip": "Del dette apparat og dets optagede referencecyklusser til fællesskabsbutikken, så andre med samme maskine kan overtage dem",
-    "share_n": "Del {n} cyklus/cyklusser"
+    "share_n": "Del {n} cyklus/cyklusser",
+    "export_selected": "Eksportér (vælg data)",
+    "export_all": "Hurtig eksport af alt",
+    "import_raw": "Avanceret: erstat alt fra JSON",
+    "download_export": "Download eksport",
+    "analyze_import": "Analysér fil",
+    "import_selected": "Importér valgte",
+    "back": "Tilbage"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -401,6 +410,12 @@
     "pg_group_detection": "Registreringsudløsere",
     "pg_group_timing": "Tidsregler",
     "pg_idle": "Inaktiv",
+    "pg_stress_group": "Test af inaktiv afslutning",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Inaktivt niveau (W)",
+    "pg_stress_idle_w_desc": "Tilsidesæt den automatisk registrerede standby-minimumsgrænse (lad feltet være tomt for automatisk).",
+    "pg_stress_toggle": "Test inaktiv afslutning",
+    "pg_stress_toggle_desc": "Simulerer at apparatet forbliver ved sit standbyforbrug efter optagelsens afslutning - viser om og hvornår WashData stopper cyklussen.",
     "pg_last_run": "Seneste kørsel: {date}",
     "pg_match_score": "Matchscore",
     "pg_pct_of": "{p}% af {total}",
@@ -538,6 +553,9 @@
     "aria_playground_chart2": "Interaktiv effektgraf for cyklussen: hold markøren over for at aflæse tid/effekt, rul for at zoome, træk for at panorere",
     "pg_alert_timeout_end": "Afsluttet ved timeout, ikke ved forudsigelse",
     "pg_alert_indefinite": "Ville køre i det uendelige",
+    "pg_alert_stress_cap": "Sikkerhedsgrænse nået",
+    "pg_alert_stress_ok": "Inaktiv afslutning: cyklus stoppet",
+    "pg_alert_stress_warn": "Standbyforbrug over stoptærskel",
     "task_pg_history": "Test på historik",
     "task_pg_sweep": "Optimér",
     "task_reprocess": "Genbehandling",
@@ -566,7 +584,32 @@
     "task_split": "Opdeler cyklus",
     "task_trim": "Beskærer cyklus",
     "task_merge": "Sammenfletter cyklusser",
-    "task_rebuild": "Genopbygger envelopes"
+    "task_rebuild": "Genopbygger envelopes",
+    "cat_profiles": "Profiler (programmer)",
+    "cat_real_cycles": "Cyklusser (kørselshistorik)",
+    "cat_reference_cycles": "Referencecyklusser (importeret)",
+    "cat_custom_phases": "Brugerdefinerede faser",
+    "cat_profile_groups": "Profilgrupper",
+    "cat_settings": "Registrerings- & genkendelsesindstillinger",
+    "cat_matching_config": "Finjustering af genkendelse",
+    "cat_ml_models": "ML-modeller",
+    "cat_feedback": "Feedback & gennemgangsetiketter",
+    "cat_suggestions": "Forslag",
+    "cat_maintenance_log": "Vedligeholdelseslog",
+    "cat_history_logs": "Historik- & ændringslogger",
+    "cat_lifetime_stats": "Totaler (levetid)",
+    "cycles_short": "cyklusser",
+    "import_mode": "Sådan kombineres",
+    "mode_merge": "Flet (behold mine)",
+    "mode_replace": "Erstat valgte",
+    "cycle_destination": "Hvor skal importerede cyklusser placeres?",
+    "dest_reference": "Reference (kun form)",
+    "dest_real_history": "Rigtig historik (tæller i statistik)",
+    "conflict_resolution": "Navnekonflikter",
+    "conflict_import_copy": "Importér som kopi",
+    "conflict_keep_mine": "Behold mine",
+    "conflict_overwrite": "Overskriv",
+    "pg_anti_wrinkle": "Anti-rynke"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Tving den aktive cyklus til at stoppe nu? Cyklussen gemmes som afbrudt.",
     "store_import": "Importér referencecyklus",
     "store_share": "Del i fællesskabsbutikken",
-    "store_share_device": "Del dette apparat"
+    "store_share_device": "Del dette apparat",
+    "export_select": "Eksport - vælg data",
+    "import_wizard": "Import - vælg data"
   },
   "msg": {
     "appliance_monitor": "Apparat monitor",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "{count} lignende umærkede cyklusser fundet – opret en profil for at begynde at matche dem.",
     "cycles_deleted": "{count} cyklus(ser) slettet",
     "enough_data": "Nok data til at lære af ({current}/{min} cyklusser).",
-    "export_description": "Eksporter alle profiler og cyklusser til JSON, eller gendan fra en tidligere eksport.",
+    "export_description": "Vælg præcis hvilke profiler, cyklusser, indstillinger og mere der skal eksporteres til JSON, eller analysér en fil og importér kun de dele, du vil have.",
     "feedback_cycles_pending": "{n} cyklus{s} til gennemgang",
     "feedback_prompt": "Bekræft, at det var rigtigt, ret programmet, eller ignorer.",
+    "feedback_relabel_hint": "At mærke denne cyklus om løser også gennemgangen.",
     "filter_by_profile": "Filtrer efter profil…",
     "group_modal_help": "Gruppér programmer med samme form, der adskiller sig i temperatur/centrifugering (varigheden kan variere). Matching scorer gruppen som én kandidat, og vælger derefter det bedst passende medlem. Vælg mindst 2; overlejringen viser, hvor ens de er.",
     "group_not_cohesive": "Disse profiler er ikke ens nok til at gruppere pålideligt, så matching behandler dem individuelt, indtil du fjerner afvigelsen eller opdeler gruppen.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Genstart Home Assistant for at aktivere simuleringsværktøjerne.",
     "pg_sim_progress": "{done} / {total} cyklusser",
     "pg_starting": "Starter…",
+    "pg_stress_synthetic": "inaktiv simulering begynder her",
     "pg_sweep_intro": "Hvad hvis {param} var anderledes? Test {steps} værdier på tværs af dine seneste {cycles} cyklusser for at finde indstillingen, hvor flest cyklusser matches korrekt.",
     "pg_sweep_step": "Trin {done} / {total}",
     "pg_undetected": "{n} cyklus{s} ikke registreret",
@@ -837,6 +884,9 @@
     "pg_simulating": "Simulerer cyklus…",
     "pg_canvas_empty2": "Vælg en cyklus ovenfor, og tryk på Kør for at simulere den. Hold derefter markøren over for at aflæse værdier, rul for at zoome, og træk for at panorere.",
     "pg_apply_settings_confirm": "Gem disse {n} indstilling(er) på denne enhed? {list}",
+    "pg_stress_terminated_detail": "Stabiliserede sig på ~{idle}W inaktiv -- cyklussen sluttede {h} t {m} min senere via {reason}.",
+    "pg_stress_above_threshold_detail": "Standbyforbruget på ~{idle}W er på eller over den effektive stoptærskel ({stop}W) -- cyklussen blev aldrig registreret som inaktiv. Hæv stop_threshold_w for at rette dette.",
+    "pg_stress_hit_cap_detail": "Cyklussen kørte {h} t {m} min uden at stoppe -- tvangsstoppet af sikkerhedsgrænsen. Standbyforbrug {idle}W mod stoptærskel {stop}W.",
     "no_logs_match": "Ingen logposter matcher disse filtre.",
     "pg_analysis_hint2": "Vælg en cyklus, og tryk på Kør for at indlæse matchanalysen.",
     "pg_analysis_empty2": "Tryk på Kør for at se matchanalysen.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Upload {brand} {model} med de referencecyklusser, du vælger. Andre med samme apparat kan overtage dine programmer. Bidrag gennemgås inden offentliggørelse.",
     "share_profile_no_cycles": "Ingen referencecyklusser -- markér en cyklus som ⭐ under fanen Cyklusser for at inkludere denne profil",
     "advisory_phase_inconsistent": "'{name}' ser ud til at blande forskellige programmer eller temperaturer - dens cyklusser varmer op i meget forskellige tidsrum. Hvis du deler den op i separate profiler (f.eks. pr. temperatur), forbedres matchningen og tidsestimaterne.",
-    "advisory_phase_inconsistent_title": "⚠ Muligvis blandede programmer"
+    "advisory_phase_inconsistent_title": "⚠ Muligvis blandede programmer",
+    "export_select_intro": "Markér præcis hvad der skal inkluderes. At vælge profiler uden deres cyklusser eksporterer stadig et genkendeligt program (den lærte form følger med).",
+    "import_analyze_hint": "Indlæs en eksporteret fil (eller indsæt dens JSON). WashData analyserer den og viser præcis hvad der kan importeres, før noget ændres.",
+    "analyzing": "Analyserer…",
+    "device_type_mismatch_warn": "Denne eksport er fra en anden apparattype ({src} vs {local}). Programmer og cyklusser kan stadig importeres som referencedata, men apparatspecifikke indstillinger og import af rigtig historik er deaktiveret.",
+    "merge_hint": "Importerede elementer tilføjes; intet lokalt går tabt. Navnekonflikter løses nedenfor.",
+    "replace_warn": "Hver markeret kategori slettes og erstattes fra filen. Ikke-markerede kategorier forbliver uændrede.",
+    "dest_reference_hint": "Importerede cyklusser forbedrer kun programgenkendelse og påvirker aldrig forbrugs-/energistatistik.",
+    "dest_real_history_hint": "Importerede cyklusser tæller som dette apparats egen historik og indgår i energi-/forbrugsstatistik. Brug dette til at flytte ét apparat til en ny installation."
   },
   "pg_desc": {
     "completion_min_seconds": "Korteste kørsel, der tæller som en rigtig cyklus",
@@ -887,7 +945,12 @@
     "dtw_ddtw_scale": "Trin 3: DDTW-halvmætningsafstand; mindre = mere formfølsom (standard 30)",
     "dtw_refine_top_n": "Trin 3: kandidater DTW gen-scorer; hæv til 7-9 hvis korrekt profil placerer sig 4.-5. (standard 5)",
     "duration_scale": "Trin 4: log-forhold der varighedsoverensstemmelse halveres; lavere = strengere straf (standard 0,175)",
-    "energy_scale": "Trin 4: log-forhold der energioverensstemmelse halveres; lavere = strengere straf (standard 0,25)"
+    "energy_scale": "Trin 4: log-forhold der energioverensstemmelse halveres; lavere = strengere straf (standard 0,25)",
+    "anti_wrinkle_idle_timeout": "Tilladt stilletid mellem to tumle-pulser, før anti-rynke slutter",
+    "anti_wrinkle_max_power": "En puls over dette afslutter anti-rynke og åbner en ny cyklus",
+    "anti_wrinkle_enabled": "Opfange tumle-pulserne efter hovedfasen i stedet for at læse dem som nye cyklusser",
+    "anti_wrinkle_max_duration": "En puls længere end dette afslutter anti-rynke og åbner en ny cyklus",
+    "anti_wrinkle_exit_power": "Effekten skal falde under dette mellem pulserne, for at anti-rynke forbliver aktiv"
   },
   "phase_desc": {
     "anti_crease": "Lejlighedsvis korte tumblinger efter færdiggørelse for at reducere rynker.",
@@ -984,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Strømmen skal falde under dette mellem pulserne for at anti-rynketilstand forbliver aktiv.",
       "label": "Udgangstærskel for effekt"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Hvor længe maskinen må forblive stille mellem to tumle-pulser, før anti-rynketilstand slutter. Sæt den højere end den længste pause, din tørretumbler efterlader mellem to pulser, ellers læses hver efterfølgende puls som en falsk start.",
+      "label": "Maks. pulspause"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulser længere end dette behandles som en ægte cyklus snarere end en anti-rynke tumbling.",
@@ -1715,7 +1782,9 @@
     "store_device_shared_partial": "{n} cyklus/cyklusser delt; {failed} kunne ikke uploades.",
     "store_device_shared_some_dup": "{created} cyklus/cyklusser delt; {dup} var allerede i butikken.",
     "store_download_failed": "Download mislykkedes: {error}",
-    "store_download_nothing": "Intet nyt at downloade -- denne opsætning er allerede på dit apparat."
+    "store_download_nothing": "Intet nyt at downloade -- denne opsætning er allerede på dit apparat.",
+    "export_selective_done": "Eksport downloadet",
+    "import_selective_done": "Importerede {profiles} profil(er) og {cycles} cyklus(ser)"
   },
   "trend": {
     "down": "Trend nedad",

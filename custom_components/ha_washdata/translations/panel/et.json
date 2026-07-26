@@ -28,7 +28,9 @@
     "awaiting_n": "Ootab heakskiitu · {n} kinnitust",
     "approved": "Heaks kiidetud",
     "awaiting": "Ootab heakskiitu",
-    "imported_tip": "Imporditud kogukonna poest. Kasutatakse ainult sobitamiseks, ei arvestata statistikas."
+    "imported_tip": "Imporditud kogukonna poest. Kasutatakse ainult sobitamiseks, ei arvestata statistikas.",
+    "not_importable": "pole saadaval",
+    "exists": "on olemas"
   },
   "btn": {
     "add_device": "+ Lisa seade",
@@ -169,7 +171,14 @@
     "download_device": "Laadi see seadistus alla",
     "share_device": "⬆ Jaga seda seadet",
     "share_device_tip": "Jaga seda kodumasinat ja selle salvestatud võrdlustsükleid kogukonna poodi, et teised sama masina omanikud saaksid neid kasutusele võtta",
-    "share_n": "Jaga {n} tsüklit"
+    "share_n": "Jaga {n} tsüklit",
+    "export_selected": "Ekspordi (vali andmed)",
+    "export_all": "Kiirekspordi kõik",
+    "import_raw": "Täpsem: asenda kõik JSON-ist",
+    "download_export": "Laadi eksport alla",
+    "analyze_import": "Analüüsi faili",
+    "import_selected": "Impordi valitud",
+    "back": "Tagasi"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -291,6 +300,7 @@
     "poor": "⚠ Kehv profiili kvaliteet"
   },
   "lbl": {
+    "pg_anti_wrinkle": "Kortsudevastane",
     "actions": "Tegevused",
     "activity": "Tegevus",
     "administrators": "Administraatorid",
@@ -524,6 +534,12 @@
     "pg_sweep_param": "Parameeter",
     "pg_objective": "Eesmärk",
     "pg_steps": "Sammud",
+    "pg_stress_group": "Tühikäigu lõpetamise test",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Tühikäigu tase (W)",
+    "pg_stress_idle_w_desc": "Defineeri automaatselt tuvastatud ooterežiimi põhi käsitsi (jäta tühjaks automaatse jaoks).",
+    "pg_stress_toggle": "Testi tühikäigu lõpetamist",
+    "pg_stress_toggle_desc": "Simuleerib seadet, mis jääb salvestuse lõpus ooterežiimi tarbimise tasemele - näitab, kas ja millal WashData tsükli peatab.",
     "pg_sweep_2d": "2D soojuskaart",
     "pg_sweep_param_y": "2. parameeter",
     "pg_obj_match": "Vaste täpsus",
@@ -538,6 +554,9 @@
     "aria_playground_chart2": "Interaktiivne tsükli võimsusgraafik: hõljuta aja/võimsuse lugemiseks, keri suumimiseks, lohista liigutamiseks",
     "pg_alert_timeout_end": "Lõpetati aegumisega, mitte ennustuse põhjal",
     "pg_alert_indefinite": "Töötaks lõputult",
+    "pg_alert_stress_cap": "Ohutuspiir saavutatud",
+    "pg_alert_stress_ok": "Tühikäigu lõpetamine: tsükkel peatatud",
+    "pg_alert_stress_warn": "Tühikäigu tarbimine ületab peatumisläve",
     "task_pg_history": "Testi ajaloos",
     "task_pg_sweep": "Optimeeri",
     "task_reprocess": "Uuesti töötlemine",
@@ -566,7 +585,31 @@
     "task_split": "Tsükli poolitamine",
     "task_trim": "Tsükli kärpimine",
     "task_merge": "Tsüklite ühendamine",
-    "task_rebuild": "Võimsusvahemike taasloomine"
+    "task_rebuild": "Võimsusvahemike taasloomine",
+    "cat_profiles": "Profiilid (programmid)",
+    "cat_real_cycles": "Tsüklid (kasutusajalugu)",
+    "cat_reference_cycles": "Viitetsüklid (imporditud)",
+    "cat_custom_phases": "Kohandatud faasid",
+    "cat_profile_groups": "Profiilirühmad",
+    "cat_settings": "Tuvastus- ja sobitamisseaded",
+    "cat_matching_config": "Sobitamise häälestus",
+    "cat_ml_models": "ML-mudelid",
+    "cat_feedback": "Tagasiside- ja ülevaatussildid",
+    "cat_suggestions": "Soovitused",
+    "cat_maintenance_log": "Hoolduslogi",
+    "cat_history_logs": "Ajaloo- ja muudatuselogid",
+    "cat_lifetime_stats": "Eluaegsed kogusummad",
+    "cycles_short": "tsüklit",
+    "import_mode": "Kuidas ühendada",
+    "mode_merge": "Ühenda (säilita minu omad)",
+    "mode_replace": "Asenda valitud",
+    "cycle_destination": "Kuhu peaksid imporditud tsüklid minema?",
+    "dest_reference": "Viide (ainult kuju)",
+    "dest_real_history": "Tegelik ajalugu (arvestatakse statistikasse)",
+    "conflict_resolution": "Nimekonfliktid",
+    "conflict_import_copy": "Impordi koopiana",
+    "conflict_keep_mine": "Säilita minu omad",
+    "conflict_overwrite": "Kirjuta üle"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Kas peatada aktiivne tsükkel kohe jõuga? Tsükkel salvestatakse katkestatuna.",
     "store_import": "Impordi võrdlustsükkel",
     "store_share": "Jaga kogukonna poodi",
-    "store_share_device": "Jaga seda seadet"
+    "store_share_device": "Jaga seda seadet",
+    "export_select": "Eksport - vali andmed",
+    "import_wizard": "Import - vali andmed"
   },
   "msg": {
     "appliance_monitor": "Seadmete monitor",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "{count} sarnast märgistamata tsüklit leitud – loo profiil, et neid sobitama hakata.",
     "cycles_deleted": "{count} tsüklit kustutatud",
     "enough_data": "Piisavalt andmeid õppimiseks ({current}/{min} tsüklit).",
-    "export_description": "Eksportige kõik profiilid ja tsüklid JSON-i või taastage eelmisest ekspordist.",
+    "export_description": "Vali täpselt, millised profiilid, tsüklid, seaded ja muu JSON-i eksportida, või analüüsi fail ja impordi ainult soovitud osad.",
     "feedback_cycles_pending": "{n} tsükkel{s} ülevaatamiseks",
     "feedback_prompt": "Kinnitage, et see oli õige, parandage programmi või ignoreerige.",
+    "feedback_relabel_hint": "Selle tsükli uuesti sildistamine lahendab ka selle.",
     "filter_by_profile": "Filtreeri profiili järgi…",
     "group_modal_help": "Rühmitage sama kujuga programme, mis erinevad temperatuuri/tsentrifuugimise poolest (kestus võib erineda). Matching annab rühmale ühe kandidaadi ja valib seejärel kõige sobivama liikme. Valige vähemalt 2; ülekate näitab, kui sarnased need on.",
     "group_not_cohesive": "Need profiilid ei ole piisavalt sarnased, et neid usaldusväärselt rühmitada, nii et sobitamine käsitleb neid üksikult, kuni eemaldate kõrvalekalde või jagate rühma.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Simulatsioonitööriistade lubamiseks taaskäivita Home Assistant.",
     "pg_sim_progress": "{done} / {total} tsüklit",
     "pg_starting": "Alustamine…",
+    "pg_stress_synthetic": "tühikäigu simulatsioon algab siit",
     "pg_sweep_intro": "Mis siis, kui {param} oleks teistsugune? Testi {steps} väärtust oma viimase {cycles} tsükli ulatuses, et leida seade, mille juures kõige rohkem tsükleid sobitatakse õigesti.",
     "pg_sweep_step": "Samm {done} / {total}",
     "pg_undetected": "{n} tsüklit tuvastamata",
@@ -837,6 +884,9 @@
     "pg_simulating": "Tsükli simuleerimine…",
     "pg_canvas_empty2": "Vali ülalt tsükkel ja vajuta Käivita, et seda simuleerida. Seejärel hõljuta väärtuste lugemiseks, keri suumimiseks ja lohista liigutamiseks.",
     "pg_apply_settings_confirm": "Kas salvestada need {n} sätet sellesse seadmesse? {list}",
+    "pg_stress_terminated_detail": "Stabiliseerus umbes {idle} W tühikäigule -- tsükkel lõppes {h} h {m} min hiljem põhjusel {reason}.",
+    "pg_stress_above_threshold_detail": "Tühikäigu tarbimine umbes {idle} W on peatumislävel ({stop} W) või sellest kõrgemal -- tsüklit ei registreeritud kunagi vaikseks. Paranda, tõstes väärtust stop_threshold_w.",
+    "pg_stress_hit_cap_detail": "Tsükkel töötas {h} h {m} min peatumata -- ohutuspiir peatas selle sunniviisiliselt. Tühikäigu tarbimine {idle} W vs peatumislävi {stop} W.",
     "no_logs_match": "Ükski logikirje ei vasta nendele filtritele.",
     "pg_analysis_hint2": "Vali tsükkel ja vajuta Käivita, et laadida vaste analüüs.",
     "pg_analysis_empty2": "Vajuta Käivita, et näha vaste analüüsi.",
@@ -864,9 +914,22 @@
     "store_share_device_intro": "Laadige {brand} {model} üles valitud võrdlustsüklitega. Teised sama kodumasina kasutajad saavad teie programme kasutusele võtta. Kirjeid vaadatakse üle enne avalikustamist.",
     "share_profile_no_cycles": "Võrdlustsükleid pole -- märkige tsükkel ⭐-ks Tsüklid-vahekaardil, et lisada see profiil",
     "advisory_phase_inconsistent": "'{name}' näib segavat erinevaid programme või temperatuure - selle tsüklid kuumutavad väga erineva aja jooksul. Selle jagamine eraldi profiilideks (nt temperatuuri järgi) parandab sobitamist ja ajahinnanguid.",
-    "advisory_phase_inconsistent_title": "⚠ Võimalik programmide segu"
+    "advisory_phase_inconsistent_title": "⚠ Võimalik programmide segu",
+    "export_select_intro": "Märgi täpselt, mida kaasata. Profiilide valimine ilma nende tsükliteta ekspordib siiski tuvastatava programmi (selle õpitud kuju liigub kaasa).",
+    "import_analyze_hint": "Laadi eksporditud fail (või kleebi selle JSON). WashData analüüsib seda ja näitab täpselt, mida saab importida, enne kui midagi muutub.",
+    "analyzing": "Analüüsimine…",
+    "device_type_mismatch_warn": "See eksport on erinevast seadmetüübist ({src} vs {local}). Programme ja tsükleid saab siiski importida viiteandmetena, kuid seadmepõhised seaded ja tegeliku ajaloo import on keelatud.",
+    "merge_hint": "Imporditud üksused lisatakse; kohalikest andmetest ei lähe midagi kaotsi. Nimekonfliktid lahendatakse allpool.",
+    "replace_warn": "Iga märgitud kategooria kustutatakse ja asendatakse failist. Märkimata kategooriaid ei puudutata.",
+    "dest_reference_hint": "Imporditud tsüklid ainult parandavad programmide tuvastamist ega mõjuta kunagi kasutus- ega energiastatistikat.",
+    "dest_real_history_hint": "Imporditud tsüklid arvestatakse selle seadme enda ajalooks ja need toidavad energia- ja kasutusstatistikat. Kasuta ühe seadme uude paigaldusse teisaldamiseks."
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Neelab pärast põhifaasi trummelimpulsid, selle asemel et lugeda neid uute tsüklitena",
+    "anti_wrinkle_exit_power": "Kortsudevastase režiimi aktiivsena püsimiseks peab võimsus impulsside vahel sellest allapoole langema",
+    "anti_wrinkle_idle_timeout": "Kahe trummelimpulsi vahel lubatud vaikuseaeg enne kortsudevastase režiimi lõppu",
+    "anti_wrinkle_max_duration": "Sellest pikem impulss lõpetab kortsudevastase režiimi ja avab uue tsükli",
+    "anti_wrinkle_max_power": "Sellest kõrgem impulss lõpetab kortsudevastase režiimi ja avab uue tsükli",
     "completion_min_seconds": "Lühim käivitus, mis loetakse päris tsükliks",
     "end_repeat_count": "Madalate näitude arv järjest enne lõpetamist",
     "interrupted_min_seconds": "Lühikesed tsüklid märgitakse katkestatuks",
@@ -984,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Kortsudevastase režiimi aktiivseks püsimiseks peab võimsus impulsside vahel langema sellest allapoole.",
       "label": "Väljumise Võimsuse Lävi"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Kui kaua tohib masin kahe trummelimpulsi vahel vaikida, enne kui kortsudevastane režiim lõpeb. Seadke see kõrgemaks kui pikim paus, mille teie kuivati impulsside vahele jätab, muidu loetakse iga hilisem impulss valestardiks.",
+      "label": "Maksimaalne Impulsivahe"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Sellest pikemaid kaunvilju käsitletakse pigem tõelise tsüklina kui kortsudevastasena.",
@@ -1603,7 +1670,9 @@
     "store_device_shared_partial": "{n} tsüklit jagatud; {failed} ei saanud üles laadida.",
     "store_device_shared_some_dup": "{created} tsüklit jagatud; {dup} olid juba poes.",
     "store_download_failed": "Allalaadimine ebaõnnestus: {error}",
-    "store_download_nothing": "Midagi uut alla laadida pole - see seadistus on juba teie seadmel."
+    "store_download_nothing": "Midagi uut alla laadida pole - see seadistus on juba teie seadmel.",
+    "export_selective_done": "Eksport alla laaditud",
+    "import_selective_done": "Imporditud {profiles} profiili ja {cycles} tsüklit"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",

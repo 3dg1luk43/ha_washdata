@@ -722,16 +722,14 @@ class LearningManager:
                     cycle_id,
                 )
 
-        feedback_record: dict[str, Any] = {
-            "cycle_id": cycle_id,
-            "original_detected_profile": pending["detected_profile"],
-            "original_confidence": pending["confidence"],
-            "user_confirmed": user_confirmed,
-            "corrected_profile": corrected_profile,
-            "corrected_duration": duration_sec,
-            "notes": notes,
-            "submitted_at": dt_util.now().isoformat(),
-        }
+        feedback_record = self._build_feedback_record(
+            cycle_id,
+            pending,
+            user_confirmed=user_confirmed,
+            corrected_profile=corrected_profile,
+            corrected_duration=duration_sec,
+            notes=notes,
+        )
 
         self.profile_store.get_feedback_history()[cycle_id] = feedback_record
 
@@ -803,6 +801,85 @@ class LearningManager:
         # Trigger UI and sensor refresh (Issue #155)
         async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
 
+        return True
+
+    def _build_feedback_record(
+        self,
+        cycle_id: str,
+        pending: dict[str, Any],
+        *,
+        user_confirmed: bool,
+        corrected_profile: Optional[str] = None,
+        corrected_duration: Optional[float] = None,
+        notes: str = "",
+    ) -> dict[str, Any]:
+        """Build a feedback_history record from a pending request + the response.
+
+        Shared by ``async_submit_cycle_feedback`` (explicit confirm/correct/ignore)
+        and ``async_resolve_pending_from_label`` (manual relabel), so both write
+        an identically-shaped record.
+        """
+        return {
+            "cycle_id": cycle_id,
+            "original_detected_profile": pending.get("detected_profile"),
+            "original_confidence": pending.get("confidence"),
+            "user_confirmed": user_confirmed,
+            "corrected_profile": corrected_profile,
+            "corrected_duration": corrected_duration,
+            "notes": notes,
+            "submitted_at": dt_util.now().isoformat(),
+        }
+
+    async def async_resolve_pending_from_label(
+        self, cycle_id: str, applied_profile: Optional[str]
+    ) -> bool:
+        """Resolve a pending feedback when the user manually (re)labels a cycle.
+
+        Manually labelling a cycle that is awaiting verification IS the user's
+        answer to "did WashData detect the right program?", so it must clear the
+        pending feedback and drop the cycle from the review queue (issue #331).
+
+        The label itself has already been applied by ``assign_profile_to_cycle`` /
+        ``create_profile`` (which preserve ``label_source="manual"`` and rebuild the
+        affected envelopes), so this only records the feedback response and removes
+        the pending entry - it deliberately does NOT re-label or rebuild again.
+
+        Returns True when a pending entry existed and was resolved.
+        """
+        pending = self.profile_store.get_pending_feedback().get(cycle_id)
+        if not pending:
+            return False
+
+        detected = pending.get("detected_profile")
+        if applied_profile and applied_profile == detected:
+            # User picked the same program WashData detected -> confirmation.
+            user_confirmed, corrected_profile = True, None
+        elif applied_profile:
+            # User picked a different program -> correction.
+            user_confirmed, corrected_profile = False, applied_profile
+        else:
+            # Label removed: the detection was rejected without naming a program.
+            user_confirmed, corrected_profile = False, None
+
+        self.profile_store.get_feedback_history()[cycle_id] = self._build_feedback_record(
+            cycle_id,
+            pending,
+            user_confirmed=user_confirmed,
+            corrected_profile=corrected_profile,
+        )
+
+        del self.profile_store.get_pending_feedback()[cycle_id]
+
+        await self.profile_store.async_save()
+        async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
+        self._logger.info(
+            "Resolved pending feedback for cycle %s from manual label "
+            "(detected='%s', applied='%s', confirmed=%s)",
+            cycle_id,
+            detected,
+            applied_profile,
+            user_confirmed,
+        )
         return True
 
     def _auto_label_cycle(self, cycle_id: str, profile_name: str, manual_duration: float | None = None) -> None:

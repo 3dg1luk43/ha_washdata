@@ -28,7 +28,9 @@
     "awaiting_n": "A aguardar aprovação · {n} confirmados",
     "approved": "Aprovado",
     "awaiting": "A aguardar aprovação",
-    "imported_tip": "Importado da loja da comunidade. Usado apenas para correspondência, não contabilizado nas estatísticas."
+    "imported_tip": "Importado da loja da comunidade. Usado apenas para correspondência, não contabilizado nas estatísticas.",
+    "not_importable": "n/d aqui",
+    "exists": "já existe"
   },
   "btn": {
     "add_device": "+ Adicionar dispositivo",
@@ -169,7 +171,14 @@
     "download_device": "Transferir esta configuração",
     "share_device": "⬆ Partilhar este dispositivo",
     "share_device_tip": "Partilhar este electrodoméstico e os seus ciclos de referência gravados na loja da comunidade para que outros utilizadores com o mesmo aparelho os possam adotar",
-    "share_n": "Partilhar {n} ciclo(s)"
+    "share_n": "Partilhar {n} ciclo(s)",
+    "export_selected": "Exportar (escolher dados)",
+    "export_all": "Exportar tudo rapidamente",
+    "import_raw": "Avançado: substituir tudo a partir de JSON",
+    "download_export": "Transferir exportação",
+    "analyze_import": "Analisar ficheiro",
+    "import_selected": "Importar seleção",
+    "back": "Voltar"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -390,6 +399,7 @@
     "panel_default_tab": "Separador predefinido",
     "panel_language": "Idioma do painel",
     "per_cycle_short": "ciclo",
+    "pg_anti_wrinkle": "Anti-vincos",
     "pg_autofill_tip": "Preencher automaticamente o intervalo a partir do valor atual ({lo}–{hi})",
     "pg_best_value": "Melhor valor encontrado",
     "pg_current_value": "Valor atual:",
@@ -515,6 +525,9 @@
     "pg_alert_unmatched": "Sem correspondência",
     "pg_alert_ambiguous": "Correspondência ambígua",
     "pg_alert_energy": "Anomalia de energia",
+    "pg_alert_stress_cap": "Limite de segurança atingido",
+    "pg_alert_stress_ok": "Terminação em repouso: ciclo parado",
+    "pg_alert_stress_warn": "Consumo em repouso acima do limiar de paragem",
     "pg_newly_correct": "agora correto",
     "pg_regressed": "regrediu",
     "pg_end_timing_changed": "momento do fim alterado",
@@ -524,6 +537,12 @@
     "pg_sweep_param": "Parâmetro",
     "pg_objective": "Objetivo",
     "pg_steps": "Passos",
+    "pg_stress_group": "Teste de terminação em repouso",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Nível em repouso (W)",
+    "pg_stress_idle_w_desc": "Substitui o piso de repouso detectado automaticamente (deixe em branco para automático).",
+    "pg_stress_toggle": "Testar terminação em repouso",
+    "pg_stress_toggle_desc": "Simula o electrodoméstico mantido no seu consumo em repouso após o fim da gravação – mostra se e quando o WashData para o ciclo.",
     "pg_sweep_2d": "Mapa de calor 2D",
     "pg_sweep_param_y": "2.º parâmetro",
     "pg_obj_match": "Precisão de correspondência",
@@ -566,7 +585,31 @@
     "task_split": "A dividir o ciclo",
     "task_trim": "A recortar o ciclo",
     "task_merge": "A combinar ciclos",
-    "task_rebuild": "A reconstruir envelopes"
+    "task_rebuild": "A reconstruir envelopes",
+    "cat_profiles": "Perfis (programas)",
+    "cat_real_cycles": "Ciclos (histórico de utilização)",
+    "cat_reference_cycles": "Ciclos de referência (importados)",
+    "cat_custom_phases": "Fases personalizadas",
+    "cat_profile_groups": "Grupos de perfis",
+    "cat_settings": "Definições de deteção e reconhecimento",
+    "cat_matching_config": "Ajuste do reconhecimento",
+    "cat_ml_models": "Modelos de ML",
+    "cat_feedback": "Comentários e etiquetas de revisão",
+    "cat_suggestions": "Sugestões",
+    "cat_maintenance_log": "Registo de manutenção",
+    "cat_history_logs": "Histórico e registos de alterações",
+    "cat_lifetime_stats": "Totais acumulados",
+    "cycles_short": "ciclos",
+    "import_mode": "Como combinar",
+    "mode_merge": "Combinar (manter os meus)",
+    "mode_replace": "Substituir seleção",
+    "cycle_destination": "Para onde devem ir os ciclos importados?",
+    "dest_reference": "Referência (apenas forma)",
+    "dest_real_history": "Histórico real (conta nas estatísticas)",
+    "conflict_resolution": "Conflitos de nomes",
+    "conflict_import_copy": "Importar como cópia",
+    "conflict_keep_mine": "Manter o meu",
+    "conflict_overwrite": "Substituir"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Forçar a paragem do ciclo ativo agora? O ciclo será guardado como interrompido.",
     "store_import": "Importar ciclo de referência",
     "store_share": "Partilhar na loja da comunidade",
-    "store_share_device": "Partilhar este dispositivo"
+    "store_share_device": "Partilhar este dispositivo",
+    "export_select": "Exportar - escolher dados",
+    "import_wizard": "Importar - escolher dados"
   },
   "msg": {
     "appliance_monitor": "Monitor de electrodoméstico",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "{count} ciclos semelhantes sem rótulo encontrados – crie um perfil para começar a correspondê-los.",
     "cycles_deleted": "{count} ciclo(s) eliminado(s)",
     "enough_data": "Dados suficientes para aprender ({current}/{min} ciclos).",
-    "export_description": "Exporte todos os perfis e ciclos para JSON ou restaure a partir de uma exportação anterior.",
+    "export_description": "Escolha exatamente que perfis, ciclos, definições e mais exportar para JSON, ou analise um ficheiro e importe apenas as partes que quiser.",
     "feedback_cycles_pending": "{n} ciclo{s} para rever",
     "feedback_prompt": "Confirme que estava correcto, corrija o programa ou ignore.",
+    "feedback_relabel_hint": "Voltar a rotular este ciclo também o resolve.",
     "filter_by_profile": "Filtrar por perfil…",
     "group_modal_help": "Agrupe programas com a mesma forma que diferem em temperatura/centrifugação (as durações podem variar). A correspondência pontua o grupo como um candidato e, em seguida, escolhe o membro mais adequado. Escolha pelo menos 2; a sobreposição mostra o grau de semelhança.",
     "group_not_cohesive": "Estes perfis não são suficientemente semelhantes para serem agrupados de forma fiável, pelo que a correspondência os trata individualmente até remover o valor aberrante ou dividir o grupo.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Reinicie o Home Assistant para ativar as ferramentas de simulação.",
     "pg_sim_progress": "{done} / {total} ciclos",
     "pg_starting": "A iniciar…",
+    "pg_stress_synthetic": "a simulação de repouso começa aqui",
     "pg_sweep_intro": "E se {param} fosse diferente? Teste {steps} valores nos seus últimos {cycles} ciclos para encontrar a definição em que mais ciclos são reconhecidos corretamente.",
     "pg_sweep_step": "Passo {done} / {total}",
     "pg_undetected": "{n} ciclo{s} não detetado{s}",
@@ -837,6 +884,9 @@
     "pg_simulating": "A simular o ciclo…",
     "pg_canvas_empty2": "Escolha um ciclo acima e prima Executar para o simular. Depois passe o cursor para ler os valores, percorra para ampliar e arraste para deslocar.",
     "pg_apply_settings_confirm": "Guardar estas {n} definição(ões) neste dispositivo? {list}",
+    "pg_stress_terminated_detail": "Estabilizou em ~{idle}W em repouso -- o ciclo terminou {h}h {m}m depois através de {reason}.",
+    "pg_stress_above_threshold_detail": "O consumo em repouso ~{idle}W é igual ou superior ao limiar de paragem efetivo ({stop}W) -- o ciclo nunca foi considerado inativo. Aumente stop_threshold_w para corrigir.",
+    "pg_stress_hit_cap_detail": "O ciclo durou {h}h {m}m sem parar -- parado à força pelo limite de segurança. Consumo em repouso {idle}W face ao limiar de paragem {stop}W.",
     "no_logs_match": "Nenhum registo corresponde a estes filtros.",
     "pg_analysis_hint2": "Selecione um ciclo e prima Executar para carregar a análise de correspondência.",
     "pg_analysis_empty2": "Prima Executar para ver a análise de correspondência.",
@@ -864,9 +914,22 @@
     "store_share_device_intro": "Carregar {brand} {model} com os ciclos de referência que selecionar. Outros utilizadores com o mesmo electrodoméstico podem adotar os seus programas. As entradas são revistas antes de aparecerem publicamente.",
     "share_profile_no_cycles": "Sem ciclos de referência -- marque um ciclo como ⭐ no separador Ciclos para incluir este perfil",
     "advisory_phase_inconsistent": "'{name}' parece misturar diferentes programas ou temperaturas - os seus ciclos aquecem durante períodos de tempo muito diferentes. Dividi-lo em perfis separados (p. ex. por temperatura) melhorará a correspondência e as estimativas de tempo.",
-    "advisory_phase_inconsistent_title": "⚠ Possíveis programas misturados"
+    "advisory_phase_inconsistent_title": "⚠ Possíveis programas misturados",
+    "export_select_intro": "Marque exatamente o que incluir. Selecionar perfis sem os seus ciclos exporta na mesma um programa reconhecível (a forma aprendida vai junto).",
+    "import_analyze_hint": "Carregue um ficheiro exportado (ou cole o seu JSON). O WashData analisa-o e mostra exatamente o que pode ser importado antes de qualquer alteração.",
+    "analyzing": "A analisar…",
+    "device_type_mismatch_warn": "Esta exportação é de um tipo de eletrodoméstico diferente ({src} em vez de {local}). Os programas e ciclos ainda podem ser importados como dados de referência, mas as definições específicas do dispositivo e a importação para o histórico real estão desativadas.",
+    "merge_hint": "Os itens importados são adicionados; nada local é perdido. Os conflitos de nomes são resolvidos abaixo.",
+    "replace_warn": "Cada categoria marcada é apagada e substituída pelo conteúdo do ficheiro. As categorias não marcadas ficam intactas.",
+    "dest_reference_hint": "Os ciclos importados só melhoram o reconhecimento de programas e nunca afetam as estatísticas de utilização/energia.",
+    "dest_real_history_hint": "Os ciclos importados contam como histórico próprio deste dispositivo e alimentam as estatísticas de energia/utilização. Use para mover um eletrodoméstico para uma nova instalação."
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Absorver os pulsos de rotação após a fase principal em vez de os ler como novos ciclos",
+    "anti_wrinkle_exit_power": "A potência deve descer abaixo deste valor entre pulsos para que o modo anti-vincos permaneça ativo",
+    "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de rotação antes de o modo anti-vincos terminar",
+    "anti_wrinkle_max_duration": "Um pulso mais longo do que isto termina o modo anti-vincos e abre um novo ciclo",
+    "anti_wrinkle_max_power": "Um pulso acima disto termina o modo anti-vincos e abre um novo ciclo",
     "completion_min_seconds": "Execução mais curta que conta como um ciclo real",
     "end_repeat_count": "Leituras baixas consecutivas antes de terminar",
     "interrupted_min_seconds": "Ciclos curtos marcados como interrompidos",
@@ -984,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "A potência deve cair abaixo disso entre os pulsos para que o modo antirrugas permaneça ativo.",
       "label": "Limiar de Saída de Potência"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Durante quanto tempo a máquina pode permanecer em silêncio entre dois pulsos de rotação antes de o modo anti-vincos terminar. Defina-o acima do intervalo mais longo que a sua secadora deixa entre pulsos, caso contrário cada pulso posterior é lido como um falso arranque.",
+      "label": "Intervalo Máximo Entre Pulsos"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulsos mais longos do que isso são tratados como um ciclo real, e não como uma queda anti-rugas.",
@@ -1603,7 +1670,9 @@
     "store_device_shared_partial": "{n} ciclo(s) partilhado(s); {failed} não puderam ser carregados.",
     "store_device_shared_some_dup": "{created} ciclo(s) partilhado(s); {dup} já estavam na loja.",
     "store_download_failed": "Falha na transferência: {error}",
-    "store_download_nothing": "Nada de novo para transferir -- esta configuração já está no seu dispositivo."
+    "store_download_nothing": "Nada de novo para transferir -- esta configuração já está no seu dispositivo.",
+    "export_selective_done": "Exportação transferida",
+    "import_selective_done": "Importados {profiles} perfil(is) e {cycles} ciclo(s)"
   },
   "suggestion": {
     "both_agree": "WashData recomenda",

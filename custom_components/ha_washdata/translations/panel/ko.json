@@ -28,7 +28,9 @@
     "awaiting_n": "승인 대기 중 · {n}개 확인됨",
     "approved": "승인됨",
     "awaiting": "승인 대기 중",
-    "imported_tip": "커뮤니티 스토어에서 가져왔습니다. 매칭에만 사용되며 통계에는 포함되지 않습니다."
+    "imported_tip": "커뮤니티 스토어에서 가져왔습니다. 매칭에만 사용되며 통계에는 포함되지 않습니다.",
+    "not_importable": "해당 없음",
+    "exists": "존재함"
   },
   "btn": {
     "add_device": "+ 장치 추가",
@@ -169,7 +171,14 @@
     "download_device": "이 설정 다운로드",
     "share_device": "⬆ 이 기기 공유",
     "share_device_tip": "이 가전제품과 기록된 참조 사이클을 커뮤니티 스토어에 공유하여 같은 기기를 가진 다른 사용자가 채택할 수 있도록 합니다",
-    "share_n": "{n}개 사이클 공유"
+    "share_n": "{n}개 사이클 공유",
+    "export_selected": "내보내기 (데이터 선택)",
+    "export_all": "모두 빠르게 내보내기",
+    "import_raw": "고급: JSON에서 전체 교체",
+    "download_export": "내보내기 다운로드",
+    "analyze_import": "파일 분석",
+    "import_selected": "선택 항목 가져오기",
+    "back": "뒤로"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -390,6 +399,7 @@
     "panel_default_tab": "기본 탭",
     "panel_language": "패널 언어",
     "per_cycle_short": "사이클",
+    "pg_anti_wrinkle": "구김 방지",
     "pg_autofill_tip": "현재 값에서 범위 자동 채우기 ({lo}–{hi})",
     "pg_best_value": "찾은 최적 값",
     "pg_current_value": "현재 값:",
@@ -524,6 +534,12 @@
     "pg_sweep_param": "매개변수",
     "pg_objective": "목표",
     "pg_steps": "단계 수",
+    "pg_stress_group": "대기 상태 종료 테스트",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "대기 레벨 (W)",
+    "pg_stress_idle_w_desc": "자동 감지된 대기 전력 하한값을 재정의합니다(자동의 경우 빈칸으로 두세요).",
+    "pg_stress_toggle": "대기 상태 종료 테스트",
+    "pg_stress_toggle_desc": "녹화 종료 후 기기가 대기 전력 수준에서 계속 작동하는 상황을 시뮬레이션합니다 - WashData가 사이클을 중지하는지, 언제 중지하는지 확인합니다.",
     "pg_sweep_2d": "2D 히트맵",
     "pg_sweep_param_y": "두 번째 매개변수",
     "pg_obj_match": "매칭 정확도",
@@ -538,6 +554,9 @@
     "aria_playground_chart2": "대화형 사이클 전력 그래프: 마우스를 올리면 시간/전력 표시, 스크롤하여 확대/축소, 드래그하여 이동",
     "pg_alert_timeout_end": "예측이 아닌 타임아웃으로 종료됨",
     "pg_alert_indefinite": "무한정 계속 실행됨",
+    "pg_alert_stress_cap": "안전 한도에 도달했습니다",
+    "pg_alert_stress_ok": "대기 상태 종료: 사이클이 중지되었습니다",
+    "pg_alert_stress_warn": "대기 전력이 정지 임계값을 초과합니다",
     "task_pg_history": "기록으로 테스트",
     "task_pg_sweep": "최적화",
     "task_reprocess": "재처리",
@@ -566,7 +585,31 @@
     "task_split": "사이클 분할 중",
     "task_trim": "사이클 트리밍 중",
     "task_merge": "사이클 병합 중",
-    "task_rebuild": "엔벨로프 재구성 중"
+    "task_rebuild": "엔벨로프 재구성 중",
+    "cat_profiles": "프로필(프로그램)",
+    "cat_real_cycles": "사이클(실행 기록)",
+    "cat_reference_cycles": "참조 사이클(가져옴)",
+    "cat_custom_phases": "사용자 지정 단계",
+    "cat_profile_groups": "프로필 그룹",
+    "cat_settings": "감지 및 인식 설정",
+    "cat_matching_config": "인식기 조정",
+    "cat_ml_models": "ML 모델",
+    "cat_feedback": "피드백 및 검토 라벨",
+    "cat_suggestions": "제안",
+    "cat_maintenance_log": "유지관리 로그",
+    "cat_history_logs": "기록 및 변경 로그",
+    "cat_lifetime_stats": "누적 합계",
+    "cycles_short": "사이클",
+    "import_mode": "결합 방법",
+    "mode_merge": "병합(내 것 유지)",
+    "mode_replace": "선택 항목 교체",
+    "cycle_destination": "가져온 사이클을 어디에 저장할까요?",
+    "dest_reference": "참조(형태만)",
+    "dest_real_history": "실제 기록(통계에 집계)",
+    "conflict_resolution": "이름 충돌",
+    "conflict_import_copy": "사본으로 가져오기",
+    "conflict_keep_mine": "내 것 유지",
+    "conflict_overwrite": "덮어쓰기"
   },
   "log": {
     "all_levels": "모든 레벨",
@@ -643,7 +686,9 @@
     "force_stop_msg": "지금 실행 중인 사이클을 강제 정지하시겠습니까? 사이클은 중단됨으로 저장됩니다.",
     "store_import": "참조 주기 가져오기",
     "store_share": "커뮤니티 스토어에 공유",
-    "store_share_device": "이 기기 공유"
+    "store_share_device": "이 기기 공유",
+    "export_select": "내보내기 - 데이터 선택",
+    "import_wizard": "가져오기 - 데이터 선택"
   },
   "msg": {
     "appliance_monitor": "가전제품 모니터",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "유사한 미라벨 사이클 {count}개를 발견했습니다 – 프로필을 만들어 매칭을 시작하세요.",
     "cycles_deleted": "{count}개 사이클이 삭제되었습니다",
     "enough_data": "학습할 충분한 데이터가 있습니다（{current}/{min}사이클）。",
-    "export_description": "모든 프로필과 사이클을 JSON으로 내보내거나 이전 내보내기에서 복원합니다.",
+    "export_description": "JSON으로 내보낼 프로필, 사이클, 설정 등을 정확히 선택하거나, 파일을 분석하여 원하는 부분만 가져올 수 있습니다.",
     "feedback_cycles_pending": "검토가 필요한 사이클 {n}개{s}",
     "feedback_prompt": "그것이 옳았는지 확인하고, 프로그램을 수정하거나, 무시하십시오.",
+    "feedback_relabel_hint": "이 사이클을 다시 라벨 지정하면 이것도 해결됩니다.",
     "filter_by_profile": "프로필로 필터링…",
     "group_modal_help": "온도/회전이 다른 동일한 모양의 프로그램을 그룹화합니다(기간은 다를 수 있음). 매칭은 그룹을 하나의 후보로 평가한 다음 가장 적합한 멤버를 선택합니다. 최소 2개를 선택하세요. 오버레이는 얼마나 유사한지 보여줍니다.",
     "group_not_cohesive": "이러한 프로필은 안정적으로 그룹화할 만큼 유사하지 않으므로 일치는 이상값을 제거하거나 그룹을 분할할 때까지 프로필을 개별적으로 처리합니다.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "시뮬레이션 도구를 활성화하려면 Home Assistant를 다시 시작하세요.",
     "pg_sim_progress": "{done} / {total} 사이클",
     "pg_starting": "시작 중…",
+    "pg_stress_synthetic": "대기 시뮬레이션이 여기서 시작됩니다",
     "pg_sweep_intro": "{param}이(가) 달랐다면 어땠을까요? 가장 많은 사이클이 올바르게 매칭되는 설정을 찾기 위해 최근 {cycles}개 사이클에서 {steps}개 값을 테스트합니다.",
     "pg_sweep_step": "단계 {done} / {total}",
     "pg_undetected": "{n}개 사이클{s} 미감지",
@@ -837,6 +884,9 @@
     "pg_simulating": "사이클을 시뮬레이션하는 중…",
     "pg_canvas_empty2": "위에서 사이클을 선택하고 실행을 눌러 시뮬레이션하세요. 그런 다음 마우스를 올려 값을 확인하고, 스크롤하여 확대/축소하고, 드래그하여 이동할 수 있습니다.",
     "pg_apply_settings_confirm": "이 {n}개 설정을 이 기기에 저장하시겠습니까? {list}",
+    "pg_stress_terminated_detail": "약 {idle}W 대기 상태로 안정되었습니다 -- {h}시간 {m}분 후 {reason}(으)로 인해 사이클이 종료되었습니다.",
+    "pg_stress_above_threshold_detail": "대기 전력 약 {idle}W가 유효 정지 임계값 ({stop}W) 이상입니다 -- 사이클이 한 번도 조용한 상태로 인식되지 않았습니다. 해결하려면 stop_threshold_w 값을 높이세요.",
+    "pg_stress_hit_cap_detail": "사이클이 멈추지 않고 {h}시간 {m}분 동안 실행되었습니다 -- 안전 한도에 의해 강제 중지되었습니다. 대기 전력 {idle}W 대 정지 임계값 {stop}W.",
     "no_logs_match": "이 필터와 일치하는 로그 기록이 없습니다.",
     "pg_analysis_hint2": "사이클을 선택하고 실행을 누르면 매칭 분석이 로드됩니다.",
     "pg_analysis_empty2": "실행을 누르면 매칭 분석이 표시됩니다.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "선택한 참조 사이클과 함께 {brand} {model}을 업로드합니다. 같은 가전제품을 가진 다른 사용자가 프로그램을 채택할 수 있습니다. 항목은 공개 전에 검토됩니다.",
     "share_profile_no_cycles": "참조 사이클 없음 -- 이 프로파일을 포함하려면 사이클 탭에서 사이클을 ⭐로 표시하세요",
     "advisory_phase_inconsistent": "'{name}'은(는) 서로 다른 프로그램이나 온도가 섞여 있는 것 같습니다. 사이클마다 가열 시간이 크게 다릅니다. 온도별 등으로 별도의 프로필로 나누면 매칭과 시간 추정이 개선됩니다.",
-    "advisory_phase_inconsistent_title": "⚠ 프로그램이 섞였을 수 있음"
+    "advisory_phase_inconsistent_title": "⚠ 프로그램이 섞였을 수 있음",
+    "export_select_intro": "포함할 항목을 정확히 선택하세요. 사이클 없이 프로필만 선택해도 인식 가능한 프로그램은 내보내집니다(학습된 형태도 함께 이동합니다).",
+    "import_analyze_hint": "내보낸 파일을 불러오거나 해당 JSON을 붙여넣으세요. WashData가 이를 분석하여 변경 전에 가져올 수 있는 항목을 정확히 보여줍니다.",
+    "analyzing": "분석 중…",
+    "device_type_mismatch_warn": "이 내보내기는 다른 기기 유형에서 생성되었습니다({src} 대 {local}). 프로그램과 사이클은 참조 데이터로 가져올 수 있지만, 기기별 설정과 실제 기록 가져오기는 비활성화됩니다.",
+    "merge_hint": "가져온 항목이 추가되며 로컬 데이터는 손실되지 않습니다. 이름 충돌은 아래에서 해결합니다.",
+    "replace_warn": "선택한 각 범주는 삭제되고 파일 내용으로 교체됩니다. 선택하지 않은 범주는 그대로 유지됩니다.",
+    "dest_reference_hint": "가져온 사이클은 프로그램 인식만 개선하며 사용량/에너지 통계에는 영향을 주지 않습니다.",
+    "dest_real_history_hint": "가져온 사이클은 이 기기 자체의 기록으로 집계되어 에너지/사용량 통계에 반영됩니다. 기기 하나를 새 설치 환경으로 옮길 때 사용하세요."
   },
   "pg_desc": {
     "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -875,6 +933,11 @@
     "start_duration_threshold": "시작 확정을 위한 임계값 초과 초",
     "start_threshold_w": "시작으로 간주할 최소 와트",
     "stop_threshold_w": "이 값 미만이면 기기가 꺼진 것으로 간주",
+    "anti_wrinkle_enabled": "메인 단계 이후의 회전 펄스를 새 사이클로 인식하지 않고 흡수",
+    "anti_wrinkle_exit_power": "구김 방지가 활성 상태를 유지하려면 펄스 사이 전력이 이 값 아래로 떨어져야 함",
+    "anti_wrinkle_idle_timeout": "구김 방지가 끝나기 전 두 회전 펄스 사이에 허용되는 정지 시간",
+    "anti_wrinkle_max_duration": "이보다 긴 펄스는 구김 방지를 끝내고 새 사이클을 시작",
+    "anti_wrinkle_max_power": "이보다 높은 펄스는 구김 방지를 끝내고 새 사이클을 시작",
     "dtw_bandwidth": "Stage 3: Sakoe-Chiba 워프 대역폭 (0 = DTW 비활성; 기본값 0.2 = 사이클 길이의 20%)",
     "corr_weight": "Stage 2: 곡선 형태(상관관계)와 전력 수준(MAE) 사이의 균형; 기본값 0.45",
     "duration_weight": "Stage 4: 실행 시간 일치가 최종 점수에 미치는 영향(기본값 0.22)",
@@ -984,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "주름 방지 모드가 활성 상태를 유지하려면 펄스 사이에 전력이 이 값 아래로 낮아져야 합니다.",
       "label": "종료 전력 임계값"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "최대 펄스 간격",
+      "doc": "구김 방지 모드가 종료되기 전에 기기가 두 회전 펄스 사이에서 정지 상태로 있을 수 있는 시간입니다. 건조기가 펄스 사이에 남기는 가장 긴 간격보다 높게 설정하십시오. 그렇지 않으면 이후의 모든 펄스가 잘못된 시작으로 인식됩니다."
     },
     "anti_wrinkle_max_duration": {
       "doc": "이보다 긴 펄스는 주름 방지 텀블이 아닌 실제 주기로 간주됩니다.",
@@ -1603,7 +1670,9 @@
     "store_device_shared_partial": "{n}개 사이클 공유됨; {failed}개는 업로드할 수 없었습니다.",
     "store_device_shared_some_dup": "{created}개 사이클 공유됨; {dup}개는 이미 스토어에 있었습니다.",
     "store_download_failed": "다운로드 실패: {error}",
-    "store_download_nothing": "다운로드할 새 항목 없음 - 이 설정은 이미 기기에 있습니다."
+    "store_download_nothing": "다운로드할 새 항목 없음 - 이 설정은 이미 기기에 있습니다.",
+    "export_selective_done": "내보내기 다운로드 완료",
+    "import_selective_done": "{profiles}개 프로필과 {cycles}개 사이클을 가져왔습니다"
   },
   "suggestion": {
     "both_agree": "WashData 권장",

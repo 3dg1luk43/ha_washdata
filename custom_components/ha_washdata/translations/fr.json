@@ -17,14 +17,6 @@
           "min_power": "Les lectures de puissance supérieures à ce seuil (en watts) indiquent que l'appareil est en marche. Commencez avec 2 W pour la plupart des appareils."
         }
       },
-      "first_profile": {
-        "title": "Créer un premier profil",
-        "description": "Un **Cycle** est un fonctionnement complet de votre appareil (par exemple, une charge de linge). Un **Profil** regroupe ces cycles par type (par exemple, « Coton », « Lavage rapide »). La création d'un profil permet désormais d'estimer immédiatement la durée de l'intégration.\n\nVous pouvez sélectionner manuellement ce profil dans les contrôles de l'appareil s'il n'est pas détecté automatiquement.\n\n**Laissez « Nom du profil » vide pour ignorer cette étape.**",
-        "data": {
-          "profile_name": "Nom du profil (facultatif)",
-          "manual_duration": "Durée estimée (minutes)"
-        }
-      },
       "reconfigure": {
         "title": "Reconfigurer WashData",
         "description": "Mettez à jour le nom de l'appareil, le type d'appareil ou le capteur de puissance.",

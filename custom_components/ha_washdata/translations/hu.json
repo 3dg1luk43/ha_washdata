@@ -17,14 +17,6 @@
           "min_power": "Az e küszöbérték feletti teljesítményértékek (wattban) azt jelzik, hogy a készülék működik. Kezdje 2 W-tal a legtöbb eszköz esetében."
         }
       },
-      "first_profile": {
-        "title": "Első profil létrehozása",
-        "description": "A **Ciklus** a készülék teljes működése (pl. egy adag szennyes). A **Profil** ezeket a ciklusokat típus szerint csoportosítja (pl. „Pamut”, „Gyorsmosás”). A profil létrehozása azonnal segíti az integráció becsült időtartamát.\n\nEzt a profilt manuálisan is kiválaszthatja az eszközvezérlők között, ha a rendszer nem észleli automatikusan.\n\n**A lépés kihagyásához hagyja üresen a „Profilnév” mezőt.**",
-        "data": {
-          "profile_name": "Profilnév (nem kötelező)",
-          "manual_duration": "Becsült időtartam (perc)"
-        }
-      },
       "reconfigure": {
         "title": "Reconfigure WashData",
         "description": "Update the device name, appliance type, or power sensor.",

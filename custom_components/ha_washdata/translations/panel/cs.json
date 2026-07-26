@@ -28,7 +28,9 @@
     "awaiting_n": "Čeká na schválení · potvrzeno {n}",
     "approved": "Schváleno",
     "awaiting": "Čeká na schválení",
-    "imported_tip": "Importováno z komunitního obchodu. Používá se pouze pro porovnávání, nezapočítává se do statistik."
+    "imported_tip": "Importováno z komunitního obchodu. Používá se pouze pro porovnávání, nezapočítává se do statistik.",
+    "not_importable": "nedostupné",
+    "exists": "existuje"
   },
   "btn": {
     "add_device": "+ Přidat zařízení",
@@ -169,7 +171,14 @@
     "download_device": "Stáhnout nastavení zařízení",
     "share_device": "Sdílet nastavení zařízení",
     "share_device_tip": "Sdílet programy a nastavení tohoto zařízení s komunitou",
-    "share_n": "Sdílet {n} program{s}"
+    "share_n": "Sdílet {n} program{s}",
+    "export_selected": "Export (vybrat data)",
+    "export_all": "Rychlý export všeho",
+    "import_raw": "Pokročilé: nahradit vše ze souboru JSON",
+    "download_export": "Stáhnout export",
+    "analyze_import": "Analyzovat soubor",
+    "import_selected": "Importovat vybrané",
+    "back": "Zpět"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -394,6 +403,7 @@
     "pg_best_value": "Nalezena nejlepší hodnota",
     "pg_current_value": "Aktuální hodnota:",
     "pg_drag_hint": "Táhněte čáru v grafu",
+    "pg_anti_wrinkle": "Ochrana před zmačkáním",
     "pg_dtw": "DTW",
     "pg_ev_ending": "Končí",
     "pg_ev_running": "Běží",
@@ -538,6 +548,15 @@
     "aria_playground_chart2": "Interaktivní graf výkonu cyklu: najetím zobrazíte čas/výkon, kolečkem přiblížíte, tažením posunete",
     "pg_alert_timeout_end": "Ukončeno časovým limitem, ne predikcí",
     "pg_alert_indefinite": "Běželo by donekonečna",
+    "pg_alert_stress_cap": "Dosažen bezpečnostní limit",
+    "pg_alert_stress_ok": "Detekce nečinnosti: cyklus zastaven",
+    "pg_alert_stress_warn": "Příkon v nečinnosti nad prahem zastavení",
+    "pg_stress_group": "Test detekce nečinnosti",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Úroveň nečinnosti (W)",
+    "pg_stress_idle_w_desc": "Přepsat automaticky zjištěnou spodní hranici pohotovostního příkonu (ponechte prázdné pro automatické zjištění).",
+    "pg_stress_toggle": "Testovat detekci nečinnosti",
+    "pg_stress_toggle_desc": "Simuluje, že spotřebič zůstane při svém pohotovostním příkonu po skončení záznamu -- zobrazí, zda a kdy WashData cyklus zastaví.",
     "task_pg_history": "Test na historii",
     "task_pg_sweep": "Optimalizovat",
     "task_reprocess": "Opětovné zpracování",
@@ -566,7 +585,31 @@
     "task_split": "Rozdělování cyklu",
     "task_trim": "Ořezávání cyklu",
     "task_merge": "Slučování cyklů",
-    "task_rebuild": "Přepočítávání obálek"
+    "task_rebuild": "Přepočítávání obálek",
+    "cat_profiles": "Profily (programy)",
+    "cat_real_cycles": "Cykly (historie provozu)",
+    "cat_reference_cycles": "Referenční cykly (importované)",
+    "cat_custom_phases": "Vlastní fáze",
+    "cat_profile_groups": "Skupiny profilů",
+    "cat_settings": "Nastavení detekce a rozpoznávání",
+    "cat_matching_config": "Ladění rozpoznávání",
+    "cat_ml_models": "Modely ML",
+    "cat_feedback": "Zpětná vazba a hodnoticí štítky",
+    "cat_suggestions": "Návrhy",
+    "cat_maintenance_log": "Protokol údržby",
+    "cat_history_logs": "Protokoly historie a změn",
+    "cat_lifetime_stats": "Celkové součty",
+    "cycles_short": "cyklů",
+    "import_mode": "Jak zkombinovat",
+    "mode_merge": "Sloučit (ponechat moje)",
+    "mode_replace": "Nahradit vybrané",
+    "cycle_destination": "Kam mají importované cykly patřit?",
+    "dest_reference": "Referenční (pouze křivka)",
+    "dest_real_history": "Skutečná historie (počítá se do statistik)",
+    "conflict_resolution": "Konflikty názvů",
+    "conflict_import_copy": "Importovat jako kopii",
+    "conflict_keep_mine": "Ponechat moje",
+    "conflict_overwrite": "Přepsat"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Vynutit nyní zastavení aktivního cyklu? Cyklus bude uložen jako přerušený.",
     "store_import": "Importovat referenční cyklus",
     "store_share": "Sdílet do komunitního obchodu",
-    "store_share_device": "Sdílet nastavení zařízení"
+    "store_share_device": "Sdílet nastavení zařízení",
+    "export_select": "Export - vybrat data",
+    "import_wizard": "Import - vybrat data"
   },
   "msg": {
     "appliance_monitor": "Monitor spotřebiče",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "Nalezeno {count} podobných neoznačených cyklů – vytvořte profil, abyste je začali párovat.",
     "cycles_deleted": "Smazáno cyklů: {count}",
     "enough_data": "Dostatek dat k učení ({current}/{min} cyklů).",
-    "export_description": "Exportujte všechny profily a cykly do JSON nebo obnovte z předchozího exportu.",
+    "export_description": "Vyberte přesně, které profily, cykly, nastavení a další data exportovat do souboru JSON, nebo analyzujte soubor a importujte jen ty části, které chcete.",
     "feedback_cycles_pending": "{n} cyklus{s} ke kontrole",
     "feedback_prompt": "Potvrďte, že to bylo správné, opravte program nebo jej ignorujte.",
+    "feedback_relabel_hint": "Přeznačení tohoto cyklu jej také vyřeší.",
     "filter_by_profile": "Filtrovat podle profilu…",
     "group_modal_help": "Skupinové programy se stejným tvarem, které se liší teplotou/odstřeďováním (doba trvání se může lišit). Shoda hodnotí skupinu jako jednoho kandidáta a poté vybere nejlépe padnoucího člena. Vyberte alespoň 2; překrytí ukazuje, jak jsou si podobné.",
     "group_not_cohesive": "Tyto profily nejsou dostatečně podobné, aby se daly spolehlivě seskupit, takže shoda s nimi zachází individuálně, dokud neodstraníte odlehlou hodnotu nebo nerozdělíte skupinu.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Restartujte Home Assistant, abyste povolili nástroje simulace.",
     "pg_sim_progress": "{done} / {total} cyklů",
     "pg_starting": "Spouštění…",
+    "pg_stress_synthetic": "simulace nečinnosti začíná zde",
     "pg_sweep_intro": "Co kdyby {param} byl jiný? Otestujte {steps} hodnot na vašich posledních {cycles} cyklech a najděte nastavení, při kterém je správně spárováno nejvíce cyklů.",
     "pg_sweep_step": "Krok {done} / {total}",
     "pg_undetected": "{n} nedetekovaných cyklů",
@@ -837,6 +884,9 @@
     "pg_simulating": "Simulace cyklu…",
     "pg_canvas_empty2": "Vyberte cyklus výše a stisknutím Spustit jej nasimulujte. Poté najetím zobrazíte hodnoty, kolečkem přiblížíte a tažením posunete.",
     "pg_apply_settings_confirm": "Uložit těchto {n} nastavení do tohoto zařízení? {list}",
+    "pg_stress_terminated_detail": "Ustálil se na ~{idle}W v nečinnosti -- cyklus skončil o {h} h {m} min později přes {reason}.",
+    "pg_stress_above_threshold_detail": "Příkon v nečinnosti ~{idle}W je roven nebo vyšší než efektivní práh zastavení ({stop}W) -- cyklus se nikdy nezaregistroval jako klidový. Opravte to zvýšením stop_threshold_w.",
+    "pg_stress_hit_cap_detail": "Cyklus běžel {h} h {m} min bez zastavení -- vynuceně zastaven bezpečnostním limitem. Příkon v nečinnosti {idle}W oproti prahu zastavení {stop}W.",
     "no_logs_match": "Těmto filtrům neodpovídají žádné záznamy protokolu.",
     "pg_analysis_hint2": "Vyberte cyklus a stiskněte Spustit pro načtení analýzy shody.",
     "pg_analysis_empty2": "Stiskněte Spustit pro zobrazení analýzy shody.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Sdílet programy vašeho zařízení (profily + referenční cykly) s komunitou. Nastavení jsou volitelná.",
     "share_profile_no_cycles": "Profil '{p}' nemá žádné ⭐ referenční cykly -- bude přeskočen, pokud nemáte {n}+ potvrzených spuštění",
     "advisory_phase_inconsistent": "Zdá se, že '{name}' míchá různé programy nebo teploty - jeho cykly se ohřívají po velmi různě dlouhou dobu. Rozdělení na samostatné profily (např. podle teploty) zlepší shodu i odhady času.",
-    "advisory_phase_inconsistent_title": "⚠ Možná smíšené programy"
+    "advisory_phase_inconsistent_title": "⚠ Možná smíšené programy",
+    "export_select_intro": "Zaškrtněte přesně to, co má být zahrnuto. Výběr profilů bez jejich cyklů stále exportuje rozpoznatelný program (jeho naučená křivka se přenese s ním).",
+    "import_analyze_hint": "Načtěte exportovaný soubor (nebo vložte jeho JSON). WashData jej analyzuje a přesně ukáže, co lze importovat, dříve než dojde k jakékoli změně.",
+    "analyzing": "Analyzuji…",
+    "device_type_mismatch_warn": "Tento export pochází z jiného typu spotřebiče ({src} vs {local}). Programy a cykly lze stále importovat jako referenční data, ale nastavení specifická pro zařízení a import skutečné historie jsou zakázány.",
+    "merge_hint": "Importované položky se přidají; nic místního se neztratí. Konflikty názvů se řeší níže.",
+    "replace_warn": "Každá zaškrtnutá kategorie se vymaže a nahradí daty ze souboru. Nezaškrtnuté kategorie zůstanou beze změny.",
+    "dest_reference_hint": "Importované cykly pouze zlepšují rozpoznávání programů a nikdy neovlivňují statistiky spotřeby/energie.",
+    "dest_real_history_hint": "Importované cykly se počítají jako vlastní historie tohoto zařízení a přispívají do statistik energie/spotřeby. Použijte při přesunu jednoho spotřebiče do nové instalace."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -961,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Příkon musí klesnout pod tuto hodnotu mezi impulzy, aby režim ochrany před mačkáním zůstal aktivní.",
       "label": "Práh výkonu pro ukončení"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Jak dlouho může stroj mezi dvěma impulzy bubnu zůstat v klidu, než skončí režim ochrany před zmačkáním. Nastavte ji nad nejdelší mezeru, kterou vaše sušička mezi impulzy nechává, jinak se každý další impulz vyhodnotí jako falešné spuštění.",
+      "label": "Max. mezera mezi impulzy"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Impulzy delší než toto jsou považovány za skutečný cyklus spíše než za otočení ochrany před mačkáním.",
@@ -1692,7 +1754,9 @@
     "store_device_shared_partial": "Částečné sdílení: {n} program{s} nahrán, {failed} přeskočeno",
     "store_device_shared_some_dup": "Nastavení zařízení sdíleno: {n} program{s} nahrán ({dup} již existovalo)",
     "store_download_failed": "Stahování selhalo: {error}",
-    "store_download_nothing": "Nic ke stažení -- všechny profily na tomto zařízení již existují"
+    "store_download_nothing": "Nic ke stažení -- všechny profily na tomto zařízení již existují",
+    "export_selective_done": "Export stažen",
+    "import_selective_done": "Importováno {profiles} profilů a {cycles} cyklů"
   },
   "trend": {
     "down": "Klesající trend",
@@ -1706,6 +1770,11 @@
     "other": "Jiné"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Pohltit impulzy bubnu po hlavní fázi místo čtení jako nové cykly",
+    "anti_wrinkle_exit_power": "Výkon musí mezi impulzy klesnout pod tuto hodnotu, aby ochrana před zmačkáním zůstala aktivní",
+    "anti_wrinkle_idle_timeout": "Povolený klid mezi dvěma impulzy bubnu, než ochrana před zmačkáním skončí",
+    "anti_wrinkle_max_duration": "Delší impulz ukončí ochranu před zmačkáním a otevře nový cyklus",
+    "anti_wrinkle_max_power": "Impulz nad touto hodnotou ukončí ochranu před zmačkáním a otevře nový cyklus",
     "completion_min_seconds": "Nejkratší běh, který se počítá jako skutečný cyklus",
     "end_repeat_count": "Nízká čtení za sebou před ukončením",
     "interrupted_min_seconds": "Krátké cykly označené jako přerušené",

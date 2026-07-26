@@ -28,7 +28,9 @@
     "awaiting_n": "Wacht op goedkeuring · {n} bevestigd",
     "approved": "Goedgekeurd",
     "awaiting": "Wacht op goedkeuring",
-    "imported_tip": "Geïmporteerd uit de communitystore. Alleen gebruikt voor matchen, telt niet mee in statistieken."
+    "imported_tip": "Geïmporteerd uit de communitystore. Alleen gebruikt voor matchen, telt niet mee in statistieken.",
+    "not_importable": "hier n.v.t.",
+    "exists": "bestaat"
   },
   "btn": {
     "add_device": "+ Apparaat toevoegen",
@@ -169,7 +171,14 @@
     "download_device": "Deze instelling downloaden",
     "share_device": "⬆ Dit apparaat delen",
     "share_device_tip": "Dit apparaat en zijn opgenomen referentiecycli delen in de communitystore, zodat andere gebruikers met hetzelfde apparaat ze kunnen overnemen",
-    "share_n": "{n} cyclus/cycli delen"
+    "share_n": "{n} cyclus/cycli delen",
+    "export_selected": "Exporteren (gegevens kiezen)",
+    "export_all": "Alles snel exporteren",
+    "import_raw": "Geavanceerd: alles vervangen vanuit JSON",
+    "download_export": "Export downloaden",
+    "analyze_import": "Bestand analyseren",
+    "import_selected": "Selectie importeren",
+    "back": "Terug"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -401,6 +410,12 @@
     "pg_group_detection": "Detectietriggers",
     "pg_group_timing": "Timingregels",
     "pg_idle": "Inactief",
+    "pg_stress_group": "Test voor inactieve beëindiging",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Inactief vermogen (W)",
+    "pg_stress_idle_w_desc": "Overschrijf de automatisch gedetecteerde standby-drempelwaarde (laat leeg voor automatisch).",
+    "pg_stress_toggle": "Inactieve beëindiging testen",
+    "pg_stress_toggle_desc": "Simuleert dat het apparaat na het einde van de opname op zijn standby-verbruik blijft - toont of en wanneer WashData de cyclus stopt.",
     "pg_last_run": "Laatste run: {date}",
     "pg_match_score": "Matchscore",
     "pg_pct_of": "{p}% van {total}",
@@ -538,6 +553,9 @@
     "aria_playground_chart2": "Interactieve vermogensgrafiek van de cyclus: beweeg de muis eroverheen om tijd/vermogen af te lezen, scroll om te zoomen, sleep om te verschuiven",
     "pg_alert_timeout_end": "Beëindigd door time-out, niet door voorspelling",
     "pg_alert_indefinite": "Zou eindeloos blijven draaien",
+    "pg_alert_stress_cap": "Veiligheidslimiet bereikt",
+    "pg_alert_stress_ok": "Inactieve beëindiging: cyclus gestopt",
+    "pg_alert_stress_warn": "Standby-verbruik boven stoptempel",
     "task_pg_history": "Testen op geschiedenis",
     "task_pg_sweep": "Optimaliseren",
     "task_reprocess": "Opnieuw verwerken",
@@ -566,7 +584,32 @@
     "task_split": "Cyclus splitsen",
     "task_trim": "Cyclus bijsnijden",
     "task_merge": "Cycli samenvoegen",
-    "task_rebuild": "Enveloppen opnieuw opbouwen"
+    "task_rebuild": "Enveloppen opnieuw opbouwen",
+    "cat_profiles": "Profielen (programma's)",
+    "cat_real_cycles": "Cycli (gebruiksgeschiedenis)",
+    "cat_reference_cycles": "Referentiecycli (geïmporteerd)",
+    "cat_custom_phases": "Aangepaste fasen",
+    "cat_profile_groups": "Profielgroepen",
+    "cat_settings": "Detectie- & herkenningsinstellingen",
+    "cat_matching_config": "Herkenningsafstemming",
+    "cat_ml_models": "ML-modellen",
+    "cat_feedback": "Feedback & beoordelingslabels",
+    "cat_suggestions": "Suggesties",
+    "cat_maintenance_log": "Onderhoudslogboek",
+    "cat_history_logs": "Geschiedenis- & wijzigingslogboeken",
+    "cat_lifetime_stats": "Totalen (levensduur)",
+    "cycles_short": "cycli",
+    "import_mode": "Hoe combineren",
+    "mode_merge": "Samenvoegen (die van mij behouden)",
+    "mode_replace": "Selectie vervangen",
+    "cycle_destination": "Waar moeten geïmporteerde cycli heen?",
+    "dest_reference": "Referentie (alleen vorm)",
+    "dest_real_history": "Echte geschiedenis (telt mee in statistieken)",
+    "conflict_resolution": "Naamconflicten",
+    "conflict_import_copy": "Importeren als kopie",
+    "conflict_keep_mine": "Die van mij behouden",
+    "conflict_overwrite": "Overschrijven",
+    "pg_anti_wrinkle": "Anti-kreuk"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -643,7 +686,9 @@
     "force_stop_msg": "De actieve cyclus nu geforceerd stoppen? De cyclus wordt opgeslagen als onderbroken.",
     "store_import": "Referentiecyclus importeren",
     "store_share": "Delen in communitystore",
-    "store_share_device": "Dit apparaat delen"
+    "store_share_device": "Dit apparaat delen",
+    "export_select": "Export - gegevens kiezen",
+    "import_wizard": "Import - gegevens kiezen"
   },
   "msg": {
     "appliance_monitor": "Apparaatmonitor",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "{count} vergelijkbare niet-gelabelde cycli gevonden – maak een profiel aan om ze te beginnen matchen.",
     "cycles_deleted": "{count} cyclus(sen) verwijderd",
     "enough_data": "Voldoende gegevens om van te leren ({current}/{min} cycli).",
-    "export_description": "Exporteer alle profielen en cycli naar JSON, of herstel vanuit een eerdere export.",
+    "export_description": "Kies precies welke profielen, cycli, instellingen en meer u naar JSON wilt exporteren, of analyseer een bestand en importeer alleen de onderdelen die u wilt.",
     "feedback_cycles_pending": "{n} cyclus{s} te beoordelen",
     "feedback_prompt": "Bevestig dat het goed was, corrigeer het programma of negeer het.",
+    "feedback_relabel_hint": "Deze cyclus opnieuw labelen lost de beoordeling ook op.",
     "filter_by_profile": "Filteren op profiel…",
     "group_modal_help": "Groepeer programma's met dezelfde vorm die verschillen in temperatuur/centrifugeren (duur kan variëren). Matching scoort de groep als één kandidaat en kiest vervolgens het best passende lid. Kies er minimaal 2; de overlay laat zien hoezeer ze op elkaar lijken.",
     "group_not_cohesive": "Deze profielen lijken niet voldoende op elkaar om betrouwbaar te kunnen worden gegroepeerd, dus bij het matchen worden ze individueel behandeld totdat u de uitbijter verwijdert of de groep opsplitst.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Start Home Assistant opnieuw op om de simulatiehulpmiddelen in te schakelen.",
     "pg_sim_progress": "{done} / {total} cycli",
     "pg_starting": "Bezig met starten…",
+    "pg_stress_synthetic": "inactieve simulatie begint hier",
     "pg_sweep_intro": "Wat als {param} anders was? Test {steps} waarden over je laatste {cycles} cycli om de instelling te vinden waarbij de meeste cycli correct worden herkend.",
     "pg_sweep_step": "Stap {done} / {total}",
     "pg_undetected": "{n} cyclus{s} niet gedetecteerd",
@@ -837,6 +884,9 @@
     "pg_simulating": "Cyclus simuleren…",
     "pg_canvas_empty2": "Kies hierboven een cyclus en druk op Uitvoeren om deze te simuleren. Beweeg vervolgens de muis erover om waarden af te lezen, scroll om te zoomen en sleep om te verschuiven.",
     "pg_apply_settings_confirm": "Deze {n} instelling(en) opslaan voor dit apparaat? {list}",
+    "pg_stress_terminated_detail": "Gestabiliseerd op ~{idle}W standby -- cyclus eindigde {h} u {m} min later via {reason}.",
+    "pg_stress_above_threshold_detail": "Standby-verbruik ~{idle}W ligt op of boven de effectieve stopdrempel ({stop}W) -- de cyclus is nooit als inactief geregistreerd. Verhoog stop_threshold_w om dit op te lossen.",
+    "pg_stress_hit_cap_detail": "Cyclus liep {h} u {m} min zonder te stoppen -- geforceerd gestopt door de veiligheidslimiet. Standby-verbruik {idle}W versus stopdrempel {stop}W.",
     "no_logs_match": "Geen logrecords komen overeen met deze filters.",
     "pg_analysis_hint2": "Kies een cyclus en druk op Uitvoeren om de matchanalyse te laden.",
     "pg_analysis_empty2": "Druk op Uitvoeren om de matchanalyse te zien.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Upload {brand} {model} met de referentiecycli die u selecteert. Anderen met hetzelfde apparaat kunnen uw programma's overnemen. Vermeldingen worden beoordeeld voordat ze openbaar verschijnen.",
     "share_profile_no_cycles": "Geen referentiecycli -- markeer een cyclus als ⭐ op het tabblad Cycli om dit profiel op te nemen",
     "advisory_phase_inconsistent": "'{name}' lijkt verschillende programma's of temperaturen te combineren - de cycli verwarmen gedurende sterk uiteenlopende tijden. Door het op te splitsen in aparte profielen (bijv. per temperatuur) verbeteren de matching en tijdschattingen.",
-    "advisory_phase_inconsistent_title": "⚠ Mogelijk gemengde programma's"
+    "advisory_phase_inconsistent_title": "⚠ Mogelijk gemengde programma's",
+    "export_select_intro": "Vink precies aan wat u wilt opnemen. Als u profielen zonder hun cycli selecteert, wordt toch een herkenbaar programma geëxporteerd (de geleerde vorm gaat mee).",
+    "import_analyze_hint": "Laad een geëxporteerd bestand (of plak de JSON ervan). WashData analyseert het en toont precies wat kan worden geïmporteerd voordat er iets verandert.",
+    "analyzing": "Analyseren…",
+    "device_type_mismatch_warn": "Deze export komt van een ander apparaattype ({src} vs {local}). Programma's en cycli kunnen nog steeds als referentiegegevens worden geïmporteerd, maar apparaatspecifieke instellingen en het importeren van echte geschiedenis zijn uitgeschakeld.",
+    "merge_hint": "Geïmporteerde items worden toegevoegd; er gaat lokaal niets verloren. Naamconflicten worden hieronder opgelost.",
+    "replace_warn": "Elke aangevinkte categorie wordt gewist en vervangen vanuit het bestand. Niet-aangevinkte categorieën blijven ongewijzigd.",
+    "dest_reference_hint": "Geïmporteerde cycli verbeteren alleen de programmaherkenning en hebben nooit invloed op de gebruiks-/energiestatistieken.",
+    "dest_real_history_hint": "Geïmporteerde cycli tellen als de eigen geschiedenis van dit apparaat en voeden de energie-/gebruiksstatistieken. Gebruik dit om één apparaat naar een nieuwe installatie te verplaatsen."
   },
   "pg_desc": {
     "completion_min_seconds": "Kortste run die als een echte cyclus telt",
@@ -887,7 +945,12 @@
     "dtw_ddtw_scale": "Stap 3: DDTW-halfsaturatieafstand; kleiner = gevoeliger voor vorm (standaard 30)",
     "dtw_refine_top_n": "Stap 3: kandidaten die door DTW opnieuw beoordeeld worden; verhoog naar 7-9 als het juiste profiel op de 4e-5e plaats staat (standaard 5)",
     "duration_scale": "Stap 4: log-verhouding waarbij de duurovereenkomst halveert; kleiner = strengere straf (standaard 0,175)",
-    "energy_scale": "Stap 4: log-verhouding waarbij de energieovereenkomst halveert; kleiner = strengere straf (standaard 0,25)"
+    "energy_scale": "Stap 4: log-verhouding waarbij de energieovereenkomst halveert; kleiner = strengere straf (standaard 0,25)",
+    "anti_wrinkle_idle_timeout": "Toegestane stille tijd tussen twee tuimelpulsen voordat anti-kreuk eindigt",
+    "anti_wrinkle_max_power": "Een puls boven dit niveau beëindigt anti-kreuk en opent een nieuwe cyclus",
+    "anti_wrinkle_enabled": "De tuimelpulsen na de hoofdfase opvangen in plaats van ze als nieuwe cycli te lezen",
+    "anti_wrinkle_max_duration": "Een puls die langer is dan dit beëindigt anti-kreuk en opent een nieuwe cyclus",
+    "anti_wrinkle_exit_power": "Het vermogen moet tussen de pulsen onder dit niveau vallen om anti-kreuk actief te houden"
   },
   "phase_desc": {
     "anti_crease": "Af en toe kort tuimelen na voltooiing om rimpels te verminderen.",
@@ -984,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Het vermogen moet tussen de pulsen onder dit niveau liggen, anders blijft de antirimpelmodus actief.",
       "label": "Drempel uitgangsverwarming"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Hoe lang het apparaat tussen twee tuimelpulsen stil mag blijven voordat de anti-kreukmodus eindigt. Stel dit hoger in dan de langste pauze die uw droger tussen twee pulsen laat, anders wordt elke latere puls als valse start gelezen.",
+      "label": "Max. pulspauze"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulsaties langer dan dit worden behandeld als een echte cyclus in plaats van als een anti-rimpel-tuimelen.",
@@ -1715,7 +1782,9 @@
     "store_device_shared_partial": "{n} cyclus/cycli gedeeld; {failed} konden niet worden geüpload.",
     "store_device_shared_some_dup": "{created} cyclus/cycli gedeeld; {dup} stonden al in de store.",
     "store_download_failed": "Downloaden mislukt: {error}",
-    "store_download_nothing": "Niets nieuws te downloaden -- deze instelling staat al op uw apparaat."
+    "store_download_nothing": "Niets nieuws te downloaden -- deze instelling staat al op uw apparaat.",
+    "export_selective_done": "Export gedownload",
+    "import_selective_done": "{profiles} profiel(en) en {cycles} cyclus(sen) geïmporteerd"
   },
   "trend": {
     "down": "Trend naar beneden",
