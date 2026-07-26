@@ -277,7 +277,6 @@ _SENSOR_SWAP_BLOCKED_STATES = frozenset(
         STATE_STARTING,
         STATE_RUNNING,
         STATE_PAUSED,
-        STATE_USER_PAUSED,
         STATE_ENDING,
         STATE_ANTI_WRINKLE,
     }
