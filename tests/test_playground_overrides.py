@@ -26,6 +26,8 @@ Pure/fast: no real cycle data, no detector replay.
 """
 from __future__ import annotations
 
+import pytest
+
 from custom_components.ha_washdata import playground
 from custom_components.ha_washdata.cycle_detector import CycleDetectorConfig
 
@@ -199,3 +201,25 @@ def test_finalize_sweep_picks_best_by_direction():
     g = playground.finalize_sweep_2d("p", "q", "match_accuracy", [10, 20], [1, 2], grid, {"x": 10, "y": 1})
     assert g["best"] == {"x": 20, "y": 1, "metric": 0.8}
     assert g["lower_is_better"] is False
+
+
+def test_coerce_bool_accepts_only_unambiguous_boolean_values():
+    # Real booleans, the two numeric spellings of a toggle, and the usual strings.
+    for truthy in (True, 1, 1.0, "1", "true", "TRUE", "yes", "on"):
+        assert playground._coerce_bool(truthy) is True
+    for falsy in (False, 0, 0.0, "0", "false", "no", "off"):
+        assert playground._coerce_bool(falsy) is False
+
+    # Anything else is a malformed override, not an intent to switch a mode on.
+    for bad in (2, -1, 0.5, float("nan"), float("inf"), "maybe", "", None, [1]):
+        with pytest.raises((ValueError, TypeError)):
+            playground._coerce_bool(bad)
+
+
+def test_build_sim_config_ignores_a_malformed_boolean_override():
+    base = CycleDetectorConfig(min_power=10.0, off_delay=180, anti_wrinkle_enabled=False)
+    # A nonzero number is not a toggle: the mode must stay off, not be enabled.
+    cfg = playground.build_sim_config(base, {"anti_wrinkle_enabled": 2})
+    assert cfg.anti_wrinkle_enabled is False
+    # A well-formed one still applies.
+    assert playground.build_sim_config(base, {"anti_wrinkle_enabled": 1}).anti_wrinkle_enabled is True

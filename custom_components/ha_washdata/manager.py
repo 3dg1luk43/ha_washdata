@@ -109,6 +109,7 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
     CONF_DELAY_START_DETECT_ENABLED,
     CONF_DELAY_CONFIRM_SECONDS,
     CONF_DELAY_TIMEOUT_HOURS,
@@ -150,6 +151,7 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
+    DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT,
     DEFAULT_DELAY_START_DETECT_ENABLED,
     DEFAULT_DELAY_CONFIRM_SECONDS,
     DEFAULT_DELAY_TIMEOUT_HOURS,
@@ -263,6 +265,22 @@ _LOGGER = logging.getLogger(__name__)
 # and the start notification (NOTIFY_EVENT_START) are intentionally excluded.
 _QUIET_HOURS_EVENT_TYPES = frozenset(
     {NOTIFY_EVENT_FINISH, NOTIFY_EVENT_CLEAN, "pre_complete"}
+)
+
+
+# Detector states in which the power sensor must not be swapped out. Every state
+# with an in-flight cycle, plus ANTI_WRINKLE: its tumble pulses are still being
+# attributed to the cycle that just finished, so re-pointing the listener there
+# would splice a different appliance into that tail.
+_SENSOR_SWAP_BLOCKED_STATES = frozenset(
+    {
+        STATE_STARTING,
+        STATE_RUNNING,
+        STATE_PAUSED,
+        STATE_USER_PAUSED,
+        STATE_ENDING,
+        STATE_ANTI_WRINKLE,
+    }
 )
 
 
@@ -719,6 +737,11 @@ class WashDataManager:
             anti_wrinkle_exit_power=float(
                 config_entry.options.get(
                     CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
+                )
+            ),
+            anti_wrinkle_idle_timeout=float(
+                config_entry.options.get(
+                    CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT
                 )
             ),
             delay_detect_enabled=bool(
@@ -1852,40 +1875,42 @@ class WashDataManager:
                 type(d_state),
                 STATE_RUNNING,
             )
-            if d_state == STATE_RUNNING:
+            if d_state in _SENSOR_SWAP_BLOCKED_STATES:
+                # Skip the sensor change but continue with the other config
+                # updates: returning here would silently drop every setting
+                # saved alongside the sensor in the same submission.
                 self._logger.warning(
-                    "Cannot change power sensor from %s to %s while a cycle "
-                    "is active. Please wait for the current cycle to complete "
-                    "before changing the power sensor.",
+                    "Cannot change power sensor from %s to %s while the "
+                    "detector is in state %s. Please wait for the current "
+                    "cycle to complete before changing the power sensor.",
                     self.power_sensor_entity_id,
                     new_sensor,
+                    d_state,
                 )
-                # Skip sensor change but continue with other config updates
-                return
-
-            self._logger.info(
-                "Power sensor changed: %s -> %s", self.power_sensor_entity_id, new_sensor
-            )
-            self.power_sensor_entity_id = new_sensor
-            # Remove old listener
-            if self._remove_listener:
-                self._remove_listener()
-            # Attach new listener
-            self._remove_listener = async_track_state_change_event(
-                self.hass, [self.power_sensor_entity_id], self._async_power_changed
-            )
-            # Force update from new sensor
-            state = self.hass.states.get(self.power_sensor_entity_id)
-            if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
-                try:
-                    power = float(state.state)
-                    self.detector.process_reading(power, dt_util.now())
-                except ValueError:
-                    self._logger.debug(
-                        "Initial power value for %s after config reload is not numeric: %r",
-                        self.power_sensor_entity_id,
-                        state.state,
-                    )
+            else:
+                self._logger.info(
+                    "Power sensor changed: %s -> %s", self.power_sensor_entity_id, new_sensor
+                )
+                self.power_sensor_entity_id = new_sensor
+                # Remove old listener
+                if self._remove_listener:
+                    self._remove_listener()
+                # Attach new listener
+                self._remove_listener = async_track_state_change_event(
+                    self.hass, [self.power_sensor_entity_id], self._async_power_changed
+                )
+                # Force update from new sensor
+                state = self.hass.states.get(self.power_sensor_entity_id)
+                if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
+                    try:
+                        power = float(state.state)
+                        self.detector.process_reading(power, dt_util.now())
+                    except ValueError:
+                        self._logger.debug(
+                            "Initial power value for %s after config reload is not numeric: %r",
+                            self.power_sensor_entity_id,
+                            state.state,
+                        )
 
         # Update device type
         self.device_type = config_entry.options.get(
@@ -1993,6 +2018,11 @@ class WashDataManager:
                 CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
             )
         )
+        new_anti_wrinkle_idle_timeout = float(
+            config_entry.options.get(
+                CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT
+            )
+        )
         new_delay_detect_enabled = bool(
             config_entry.options.get(
                 CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
@@ -2027,6 +2057,7 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_max_power = new_anti_wrinkle_max_power
         self.detector.config.anti_wrinkle_max_duration = new_anti_wrinkle_max_duration
         self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
+        self.detector.config.anti_wrinkle_idle_timeout = new_anti_wrinkle_idle_timeout
         self.detector.config.delay_detect_enabled = new_delay_detect_enabled
         self.detector.config.delay_confirm_seconds = new_delay_confirm_seconds
         self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds
