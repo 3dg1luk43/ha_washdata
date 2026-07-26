@@ -562,7 +562,8 @@
     "unlabelled": "Unlabelled",
     "unlabelled_paren": "(unlabelled)",
     "warp_path": "Warp path",
-    "zoom_hint": "scroll to zoom · dblclick to reset"
+    "zoom_hint": "scroll to zoom · dblclick to reset",
+    "pg_anti_wrinkle": "Anti-wrinkle"
   },
   "log": {
     "all_levels": "All levels",
@@ -900,7 +901,12 @@
     "dtw_ddtw_scale": "Stage 3: DDTW half-saturation distance; smaller = more shape-sensitive (default 30)",
     "dtw_refine_top_n": "Stage 3: candidates DTW re-scores; raise to 7-9 if correct profile ranks 4th-5th (default 5)",
     "duration_scale": "Stage 4: log-ratio where duration agreement halves; smaller = stricter penalty (default 0.175)",
-    "energy_scale": "Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)"
+    "energy_scale": "Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)",
+    "anti_wrinkle_idle_timeout": "Quiet time allowed between two tumble pulses before anti-wrinkle ends",
+    "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
+    "anti_wrinkle_enabled": "Absorb the tumble pulses after the main phase instead of reading them as new cycles",
+    "anti_wrinkle_max_duration": "A pulse longer than this ends anti-wrinkle and opens a new cycle",
+    "anti_wrinkle_exit_power": "Power must fall below this between pulses for anti-wrinkle to stay active"
   },
   "phase_desc": {
     "anti_crease": "Occasional short tumbles after completion to reduce wrinkles.",
@@ -1376,6 +1382,10 @@
     "energy_scale": {
       "label": "Energy Sharpness",
       "doc": "Sharpness of the Stage 4 energy agreement penalty. Smaller = stricter: an energy mismatch hurts more. Default 0.25 is intentionally more forgiving than Duration Sharpness because energy varies with load. Pair with Energy Weight."
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "Max Pulse Gap",
+      "doc": "How long the machine may stay quiet between two tumble pulses before anti-wrinkle mode ends. Set it above the longest gap your dryer leaves between pulses, otherwise every later pulse is read as a false start."
     }
   },
   "setting_group": {

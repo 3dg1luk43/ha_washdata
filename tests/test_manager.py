@@ -27,6 +27,7 @@ from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_NOTIFY_BEFORE_END_MINUTES,
     CONF_POWER_SENSOR, STATE_RUNNING, STATE_OFF, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_START,
+    STATE_STARTING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING, STATE_ANTI_WRINKLE,
     CONF_NOTIFY_ACTIONS, CONF_NOTIFY_PEOPLE, CONF_NOTIFY_ONLY_WHEN_HOME, CONF_NOTIFY_FIRE_EVENTS
 )
 
@@ -282,6 +283,24 @@ def test_cycle_end_skips_feedback_low_confidence(manager: WashDataManager, mock_
     assert mock_hass.components.persistent_notification.async_create.call_count == 0
 
 
+def _stub_reload_ready(manager: WashDataManager) -> None:
+    """Stub the store/manager calls the config-reload tail makes past the sensor guard.
+
+    A refused sensor swap mid-cycle no longer returns early — it skips only the swap
+    and applies the rest — so the full reload tail (duration-ratio limits, state
+    restoration, maintenance scheduler) now runs in these blocked-state tests too.
+    The shared ``manager`` fixture only mocks ``get_suggestions``; give it the same
+    complete stub set the idle-reload test uses so that tail can complete.
+    """
+    manager.profile_store.get_duration_ratio_limits = MagicMock(return_value=(0.1, 1.5))
+    manager.profile_store.set_duration_ratio_limits = MagicMock()
+    manager.profile_store.get_active_cycle = MagicMock(return_value={"manual_program": False})
+    manager.profile_store.get_past_cycles = MagicMock(return_value=[])
+    manager.profile_store.get_last_active_save = MagicMock(return_value=None)
+    manager.profile_store.async_clear_active_cycle = AsyncMock()
+    manager._setup_maintenance_scheduler = AsyncMock()
+
+
 @pytest.mark.asyncio
 async def test_async_reload_config_blocks_sensor_change_during_active_cycle(
     manager: WashDataManager, mock_entry: Any, mock_hass: Any
@@ -290,6 +309,7 @@ async def test_async_reload_config_blocks_sensor_change_during_active_cycle(
     # Setup: simulate an active cycle
     manager.detector.state = STATE_RUNNING
     original_sensor = manager.power_sensor_entity_id
+    _stub_reload_ready(manager)
 
     # Create a new config entry with a different power sensor
     new_entry = MagicMock()
@@ -308,6 +328,39 @@ async def test_async_reload_config_blocks_sensor_change_during_active_cycle(
     # Assert: power sensor should NOT have changed
     assert manager.power_sensor_entity_id == original_sensor
     assert manager.power_sensor_entity_id != "sensor.new_power"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "state",
+    [STATE_STARTING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING, STATE_ANTI_WRINKLE],
+)
+async def test_async_reload_config_blocks_sensor_change_in_every_active_state(
+    manager: WashDataManager, mock_entry: Any, mock_hass: Any, state: str
+) -> None:
+    """The guard covers every state with a cycle attached, not just RUNNING.
+
+    Swapping the listener mid-cycle would splice a second appliance into the
+    same trace; ANTI_WRINKLE counts too, because its tumble pulses are still
+    being attributed to the cycle that just finished.
+    """
+    manager.detector.state = state
+    original_sensor = manager.power_sensor_entity_id
+    _stub_reload_ready(manager)
+
+    new_entry = MagicMock()
+    new_entry.entry_id = "test_entry"
+    new_entry.options = {
+        CONF_POWER_SENSOR: "sensor.new_power",
+        CONF_MIN_POWER: 2.0,
+        CONF_COMPLETION_MIN_SECONDS: 600,
+        CONF_NOTIFY_BEFORE_END_MINUTES: 5,
+    }
+    new_entry.data = {}
+
+    await manager.async_reload_config(new_entry)
+
+    assert manager.power_sensor_entity_id == original_sensor
 
 
 @pytest.mark.asyncio

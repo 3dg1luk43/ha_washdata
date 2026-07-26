@@ -50,6 +50,11 @@ from . import notification_rules as notif_rules
 from . import progress as progress_mod
 from .phase_segmenter import phase_matching_enabled
 from .const import (
+    CONF_ANTI_WRINKLE_ENABLED,
+    CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
+    CONF_ANTI_WRINKLE_MAX_DURATION,
+    CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_END_REPEAT_COUNT,
     CONF_INTERRUPTED_MIN_SECONDS,
@@ -120,11 +125,42 @@ MAX_EVENTS_PER_CYCLE = 300
 # so the shape is preserved rather than truncated.
 MAX_SERIES_PER_CYCLE = 600
 
+def _coerce_bool(value: Any) -> bool:
+    """Strict bool coercion for override values.
+
+    Plain ``bool()`` would read the string ``"false"`` as True, so a toggle sent
+    as a string could switch a mode *on* when the user asked for it off. Unknown
+    values raise, which ``build_sim_config`` turns into "ignore this override".
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        # Only the two values that actually mean a toggle. Anything else (2, -1,
+        # NaN, inf) is a malformed override, not an intent to switch a mode on.
+        if value == 0:
+            return False
+        if value == 1:
+            return True
+        raise ValueError(f"not a boolean: {value!r}")
+    if isinstance(value, str):
+        low = value.strip().lower()
+        if low in ("true", "1", "yes", "on"):
+            return True
+        if low in ("false", "0", "no", "off"):
+            return False
+    raise ValueError(f"not a boolean: {value!r}")
+
+
 # Override keys the Playground honours, mapped to CycleDetectorConfig fields.
 # Only detection-relevant knobs matter; everything else in settings_override is
 # ignored safely.
 _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
     CONF_MIN_POWER: ("min_power", float),
+    CONF_ANTI_WRINKLE_ENABLED: ("anti_wrinkle_enabled", _coerce_bool),
+    CONF_ANTI_WRINKLE_MAX_POWER: ("anti_wrinkle_max_power", float),
+    CONF_ANTI_WRINKLE_MAX_DURATION: ("anti_wrinkle_max_duration", float),
+    CONF_ANTI_WRINKLE_EXIT_POWER: ("anti_wrinkle_exit_power", float),
+    CONF_ANTI_WRINKLE_IDLE_TIMEOUT: ("anti_wrinkle_idle_timeout", float),
     CONF_OFF_DELAY: ("off_delay", int),
     CONF_MIN_OFF_GAP: ("min_off_gap", int),
     CONF_COMPLETION_MIN_SECONDS: ("completion_min_seconds", int),
@@ -1197,6 +1233,11 @@ def _sim_config_summary(config: CycleDetectorConfig) -> dict[str, Any]:
         "min_off_gap": getattr(config, "min_off_gap", None),
         "start_threshold_w": getattr(config, "start_threshold_w", None),
         "stop_threshold_w": getattr(config, "stop_threshold_w", None),
+        "anti_wrinkle_enabled": getattr(config, "anti_wrinkle_enabled", None),
+        "anti_wrinkle_max_power": getattr(config, "anti_wrinkle_max_power", None),
+        "anti_wrinkle_max_duration": getattr(config, "anti_wrinkle_max_duration", None),
+        "anti_wrinkle_exit_power": getattr(config, "anti_wrinkle_exit_power", None),
+        "anti_wrinkle_idle_timeout": getattr(config, "anti_wrinkle_idle_timeout", None),
     }
 
 
