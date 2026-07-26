@@ -5363,13 +5363,14 @@ class HaWashdataPanel extends HTMLElement {
       matching: this._t('lbl.pg_group_matching', {}, 'Program matching'),
     };
     let lastGroup = '';
-    const paramRows = fields.map(([key, fb, unit, desc, group]) => {
+    const paramRows = fields.map(([key, fb, unit, desc, group, type]) => {
       const lbl = this._t('setting.' + key + '.label', {}, fb);
       const liveVal = this._pgFieldVal(key, {});
       let curVal;
       if (key === 'start_threshold_w') curVal = this._pgThreshStart ?? liveVal;
       else if (key === 'stop_threshold_w') curVal = this._pgThreshStop ?? liveVal;
       else curVal = this._pgParamOverrides[key] ?? liveVal;
+      const isBool = type === 'bool';
       const isDrag = threshFields.has(key);
       const unitTxt = unit ? unit : '';
       const gc = groupColors[group] || '#2a78d6';
