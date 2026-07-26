@@ -28,7 +28,9 @@
     "awaiting_n": "Laukiama patvirtinimo · {n} patvirtinimai",
     "approved": "Patvirtinta",
     "awaiting": "Laukiama patvirtinimo",
-    "imported_tip": "Importuota iš bendruomenės parduotuvės. Naudojama tik atitikčiai, neįskaičiuojama į statistiką."
+    "imported_tip": "Importuota iš bendruomenės parduotuvės. Naudojama tik atitikčiai, neįskaičiuojama į statistiką.",
+    "not_importable": "čia nepasiekiama",
+    "exists": "jau yra"
   },
   "btn": {
     "add_device": "+ Pridėti įrenginį",
@@ -169,7 +171,14 @@
     "download_device": "Atsisiųsti šią konfigūraciją",
     "share_device": "⬆ Dalintis šiuo įrenginiu",
     "share_device_tip": "Bendrinkite šį prietaisą ir jo įrašytus etaloniniais ciklus bendruomenės parduotuvėje, kad kiti, turintys tą patį aparatą, galėtų juos perimti",
-    "share_n": "Bendrinti {n} ciklą(-us)"
+    "share_n": "Bendrinti {n} ciklą(-us)",
+    "export_selected": "Eksportuoti (pasirinkti duomenis)",
+    "export_all": "Greitasis eksportas: viskas",
+    "import_raw": "Išplėstinis: pakeisti viską iš JSON",
+    "download_export": "Atsisiųsti eksportą",
+    "analyze_import": "Analizuoti failą",
+    "import_selected": "Importuoti pasirinktus",
+    "back": "Atgal"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -291,6 +300,7 @@
     "poor": "⚠ Prasta profilio kokybė"
   },
   "lbl": {
+    "pg_anti_wrinkle": "Apsauga nuo raukšlių",
     "actions": "Veiksmai",
     "activity": "Veikla",
     "administrators": "Administratoriai",
@@ -524,6 +534,12 @@
     "pg_sweep_param": "Parametras",
     "pg_objective": "Tikslas",
     "pg_steps": "Žingsniai",
+    "pg_stress_group": "Budėjimo nutraukimo testas",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Budėjimo lygis (W)",
+    "pg_stress_idle_w_desc": "Perrašyti automatiškai aptiktą budėjimo lygio apatinę ribą (palikite tuščią automatiniam).",
+    "pg_stress_toggle": "Testuoti budėjimo nutraukimą",
+    "pg_stress_toggle_desc": "Imituoja prietaisą, kuris po įrašymo pasibaigimo lieka budėjimo suvartojimo lygyje - parodo, ar ir kada WashData sustabdys ciklą.",
     "pg_sweep_2d": "2D šilumos žemėlapis",
     "pg_sweep_param_y": "Antras parametras",
     "pg_obj_match": "Atitikties tikslumas",
@@ -538,6 +554,9 @@
     "aria_playground_chart2": "Interaktyvus ciklo galios grafikas: užveskite žymeklį, kad nuskaitytumėte laiką/galią, slinkite, kad priartintumėte, vilkite, kad pastumtumėte",
     "pg_alert_timeout_end": "Baigta pasibaigus skirtajam laikui, o ne pagal prognozę",
     "pg_alert_indefinite": "Veiktų neribotą laiką",
+    "pg_alert_stress_cap": "Pasiektas apsauginis limitas",
+    "pg_alert_stress_ok": "Budėjimo nutraukimas: ciklas sustabdytas",
+    "pg_alert_stress_warn": "Budėjimo suvartojimas viršija sustabdymo slenkstį",
     "task_pg_history": "Testuoti su istorija",
     "task_pg_sweep": "Optimizuoti",
     "task_reprocess": "Pakartotinis apdorojimas",
@@ -566,7 +585,31 @@
     "task_split": "Padalijamas ciklas",
     "task_trim": "Apkarpomas ciklas",
     "task_merge": "Sujungiami ciklai",
-    "task_rebuild": "Perkuriamos gaubtinės"
+    "task_rebuild": "Perkuriamos gaubtinės",
+    "cat_profiles": "Profiliai (programos)",
+    "cat_real_cycles": "Ciklai (naudojimo istorija)",
+    "cat_reference_cycles": "Atskaitos ciklai (importuoti)",
+    "cat_custom_phases": "Pasirinktinės fazės",
+    "cat_profile_groups": "Profilių grupės",
+    "cat_settings": "Aptikimo ir atpažinimo nustatymai",
+    "cat_matching_config": "Atpažinimo derinimas",
+    "cat_ml_models": "ML modeliai",
+    "cat_feedback": "Atsiliepimų ir peržiūros žymos",
+    "cat_suggestions": "Pasiūlymai",
+    "cat_maintenance_log": "Priežiūros žurnalas",
+    "cat_history_logs": "Istorijos ir pakeitimų žurnalai",
+    "cat_lifetime_stats": "Viso laiko sumos",
+    "cycles_short": "ciklų",
+    "import_mode": "Kaip sujungti",
+    "mode_merge": "Sujungti (išlaikyti manuosius)",
+    "mode_replace": "Pakeisti pasirinktus",
+    "cycle_destination": "Kur turėtų patekti importuoti ciklai?",
+    "dest_reference": "Atskaita (tik forma)",
+    "dest_real_history": "Tikra istorija (įskaičiuojama į statistiką)",
+    "conflict_resolution": "Pavadinimų konfliktai",
+    "conflict_import_copy": "Importuoti kaip kopiją",
+    "conflict_keep_mine": "Išlaikyti manuosius",
+    "conflict_overwrite": "Perrašyti"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Priverstinai sustabdyti aktyvų ciklą dabar? Ciklas bus išsaugotas kaip nutrauktas.",
     "store_import": "Importuoti etaloninį ciklą",
     "store_share": "Bendrinti bendruomenės parduotuvėje",
-    "store_share_device": "Bendrinti šį įrenginį"
+    "store_share_device": "Bendrinti šį įrenginį",
+    "export_select": "Eksportas - pasirinkti duomenis",
+    "import_wizard": "Importas - pasirinkti duomenis"
   },
   "msg": {
     "appliance_monitor": "Prietaisų monitorius",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "Rasti {count} panašūs nepažymėti ciklai – sukurkite profilį, kad pradėtumėte juos atpažinti.",
     "cycles_deleted": "Ištrinta ciklų: {count}",
     "enough_data": "Pakankamai duomenų mokymui ({current}/{min} ciklų).",
-    "export_description": "Eksportuokite visus profilius ir ciklus į JSON arba atkurkite iš ankstesnio eksportavimo.",
+    "export_description": "Pasirinkite tiksliai, kuriuos profilius, ciklus, nustatymus ir kita eksportuoti į JSON, arba išanalizuokite failą ir importuokite tik norimas dalis.",
     "feedback_cycles_pending": "{n} cikl{s} peržiūrai",
     "feedback_prompt": "Patvirtinkite, kad tai buvo teisinga, pataisykite programą arba ignoruokite.",
+    "feedback_relabel_hint": "Šio ciklo pažymėjimas iš naujo taip pat išsprendžia peržiūrą.",
     "filter_by_profile": "Filtruoti pagal profilį…",
     "group_modal_help": "Grupuoti tos pačios formos programas, kurios skiriasi temperatūra / sukimu (trukmė gali skirtis). Atitikimas įvertina grupę kaip vieną kandidatą, tada parenka geriausiai tinkantį narį. Pasirinkite bent 2; perdanga parodo, kokie jie panašūs.",
     "group_not_cohesive": "Šie profiliai nėra pakankamai panašūs, kad būtų galima patikimai sugrupuoti, todėl derinant jie traktuojami atskirai, kol pašalinsite nuokrypį arba padalinsite grupę.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Iš naujo paleiskite „Home Assistant“, kad įjungtumėte simuliavimo įrankius.",
     "pg_sim_progress": "{done} / {total} ciklai",
     "pg_starting": "Pradedama…",
+    "pg_stress_synthetic": "budėjimo imitacija prasideda čia",
     "pg_sweep_intro": "O kas, jei {param} būtų kitokia? Išbandykite {steps} reikšmes paskutiniuose {cycles} cikluose ir raskite nustatymą, su kuriuo teisingai atitinka daugiausiai ciklų.",
     "pg_sweep_step": "Žingsnis {done} / {total}",
     "pg_undetected": "Neaptikta ciklų: {n}",
@@ -837,6 +884,9 @@
     "pg_simulating": "Simuliuojamas ciklas…",
     "pg_canvas_empty2": "Pasirinkite ciklą aukščiau ir paspauskite Vykdyti, kad jį simuliuotumėte. Tada užveskite žymeklį, kad nuskaitytumėte reikšmes, slinkite, kad priartintumėte, ir vilkite, kad pastumtumėte.",
     "pg_apply_settings_confirm": "Ar išsaugoti šiuos {n} nustatymus šiame įrenginyje? {list}",
+    "pg_stress_terminated_detail": "Nusistovėjo ties maždaug {idle} W budėjimo lygiu -- ciklas baigėsi po {h} val. {m} min. dėl {reason}.",
+    "pg_stress_above_threshold_detail": "Budėjimo suvartojimas (~{idle} W) yra ties sustabdymo slenksčiu ({stop} W) arba jį viršija -- ciklas niekada nebuvo užregistruotas kaip tylus. Norėdami pataisyti, padidinkite stop_threshold_w.",
+    "pg_stress_hit_cap_detail": "Ciklas veikė {h} val. {m} min. nesustodamas -- priverstinai sustabdytas apsauginio limito. Budėjimo suvartojimas {idle} W, palyginti su sustabdymo slenksčiu {stop} W.",
     "no_logs_match": "Nė vienas žurnalo įrašas neatitinka šių filtrų.",
     "pg_analysis_hint2": "Pasirinkite ciklą ir paspauskite Vykdyti, kad įkeltumėte atitikties analizę.",
     "pg_analysis_empty2": "Paspauskite Vykdyti, kad pamatytumėte atitikties analizę.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Įkelkite {brand} {model} su pasirinktais etaloniniais ciklais. Kiti, turintys tą patį prietaisą, gali perimti jūsų programas. Įrašai peržiūrimi prieš viešinant.",
     "share_profile_no_cycles": "Nėra etaloninių ciklų -- pažymėkite ciklą kaip ⭐ Ciklų skirtuke, kad įtrauktumėte šį profilį",
     "advisory_phase_inconsistent": "Atrodo, kad '{name}' maišo skirtingas programas ar temperatūras - jo ciklai kaista labai skirtingą laiką. Padalijus jį į atskirus profilius (pvz., pagal temperatūrą), pagerės atitikimas ir laiko įverčiai.",
-    "advisory_phase_inconsistent_title": "⚠ Galimai sumaišytos programos"
+    "advisory_phase_inconsistent_title": "⚠ Galimai sumaišytos programos",
+    "export_select_intro": "Pažymėkite tiksliai, ką įtraukti. Pasirinkus profilius be jų ciklų, vis tiek eksportuojama atpažįstama programa (jos išmokta forma keliauja kartu).",
+    "import_analyze_hint": "Įkelkite eksportuotą failą (arba įklijuokite jo JSON). WashData jį išanalizuoja ir tiksliai parodo, ką galima importuoti, prieš ką nors keičiant.",
+    "analyzing": "Analizuojama…",
+    "device_type_mismatch_warn": "Šis eksportas yra iš kito prietaiso tipo ({src} vs {local}). Programas ir ciklus vis tiek galima importuoti kaip atskaitos duomenis, tačiau konkrečiam prietaisui skirti nustatymai ir tikros istorijos importas yra išjungti.",
+    "merge_hint": "Importuoti elementai pridedami; jokie vietiniai duomenys neprarandami. Pavadinimų konfliktai sprendžiami toliau.",
+    "replace_warn": "Kiekviena pažymėta kategorija ištrinama ir pakeičiama iš failo. Nepažymėtos kategorijos lieka nepaliestos.",
+    "dest_reference_hint": "Importuoti ciklai tik pagerina programų atpažinimą ir niekada neveikia naudojimo/energijos statistikos.",
+    "dest_real_history_hint": "Importuoti ciklai laikomi šio prietaiso paties istorija ir papildo energijos/naudojimo statistiką. Naudokite perkeliant vieną prietaisą į naują įdiegimą."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -961,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Kad raukšlių mažinimo režimas išliktų aktyvus, tarp impulsų galia turi būti mažesnė.",
       "label": "Išėjimo galios slenkstis"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Kiek ilgai mašina gali tylėti tarp dviejų būgninių impulsų, kol baigiasi apsaugos nuo raukšlių režimas. Nustatykite ilgesnį nei ilgiausias tarpas, kurį jūsų džiovyklė palieka tarp impulsų, antraip kiekvienas vėlesnis impulsas bus laikomas klaidingu paleidimu.",
+      "label": "Maks. tarpas tarp impulsų"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Ilgesni impulsai laikomi tikru ciklu, o ne raukšlių mažinimu.",
@@ -1580,7 +1642,9 @@
     "store_device_shared_partial": "{n} ciklai bendrinti; {failed} nepavyko įkelti.",
     "store_device_shared_some_dup": "{created} ciklai bendrinti; {dup} jau buvo parduotuvėje.",
     "store_download_failed": "Atsisiuntimas nepavyko: {error}",
-    "store_download_nothing": "Nieko naujo atsisiųsti -- ši konfigūracija jau yra jūsų įrenginyje."
+    "store_download_nothing": "Nieko naujo atsisiųsti -- ši konfigūracija jau yra jūsų įrenginyje.",
+    "export_selective_done": "Eksportas atsisiųstas",
+    "import_selective_done": "Importuota {profiles} profilių ir {cycles} ciklų"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",
@@ -1706,6 +1770,11 @@
     "other": "Kita"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Sugerkite būgninius impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
+    "anti_wrinkle_exit_power": "Kad apsauga nuo raukšlių išliktų aktyvi, galia tarp impulsų turi nukristi žemiau šios ribos",
+    "anti_wrinkle_idle_timeout": "Tylos laikas, leidžiamas tarp dviejų būgninių impulsų prieš pasibaigiant apsaugai nuo raukšlių",
+    "anti_wrinkle_max_duration": "Ilgesnis nei šis impulsas užbaigia apsaugą nuo raukšlių ir pradeda naują ciklą",
+    "anti_wrinkle_max_power": "Už šią didesnis impulsas užbaigia apsaugą nuo raukšlių ir pradeda naują ciklą",
     "completion_min_seconds": "Trumpiausias veikimas, laikomas tikru ciklu",
     "end_repeat_count": "Kiek žemų rodmenų iš eilės prieš pabaigą",
     "interrupted_min_seconds": "Trumpi ciklai pažymimi kaip pertraukti",

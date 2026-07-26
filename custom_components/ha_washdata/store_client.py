@@ -32,6 +32,7 @@ import logging
 import re
 import time
 import unicodedata
+from collections.abc import Callable
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -167,6 +168,22 @@ class StoreClient:
     _FS = "https://firestore.googleapis.com/v1"
     _TOKEN = "https://securetoken.googleapis.com/v1/token"
 
+    # The community catalog (brands + device searches) is public and changes rarely, but
+    # the panel re-queries it every time the Settings/Store tab is (re-)opened. On the
+    # store's Firebase free tier (50k document reads/day) that brand-list query alone was
+    # the single largest read source. Cache these reads in memory for a short TTL so a
+    # burst of panel opens collapses to at most one Firestore query per key per window.
+    # The client is a long-lived singleton (one per manager) so the cache survives panel
+    # reloads. Writes that add brands/devices invalidate it (see _commit_create) so a
+    # freshly-contributed entry still appears immediately for the user who added it.
+    _CATALOG_CACHE_TTL_S = 900.0   # brands + device searches (15 min)
+    _CONFIG_CACHE_TTL_S = 3600.0   # config/site (maintenance flag + confirm threshold)
+    # Hard cap on distinct cached read keys. Device searches key on the brand term, so a
+    # long-lived session that issues many distinct searches would otherwise accumulate an
+    # unbounded number of (mostly expired) entries. When the cap is exceeded we evict the
+    # soonest-to-expire entries, keeping the live TTL guarantee while bounding memory.
+    _MAX_READ_CACHE_ENTRIES = 256
+
     def __init__(
         self,
         hass: HomeAssistant,
@@ -183,6 +200,18 @@ class StoreClient:
         self._id_token_rt: str | None = None  # refresh token that produced the cached id_token
         self._last_error: str | None = None  # short reason for the last failed write, for the UI
         self._base = f"{self._FS}/projects/{project_id}/databases/(default)/documents"
+        # key -> (expiry_epoch, value). Read-only catalog/config responses; see class docstring.
+        self._read_cache: dict[str, tuple[float, Any]] = {}
+        # Bumped on every catalog invalidation; a read captures it before its query and only
+        # caches the result if it is unchanged afterwards, so an in-flight read that spans an
+        # invalidation cannot re-cache a pre-write snapshot.
+        self._cache_gen: int = 0
+        # Single-flight: one in-flight (generation, task) per cache key so concurrent panel
+        # misses share a single Firestore read instead of each issuing one (matters on the
+        # free-tier budget). The generation is stored so a query started before an
+        # invalidation is not joined by a post-invalidation caller (which would receive a
+        # pre-write snapshot); such a caller starts a fresh query instead.
+        self._inflight: dict[str, "tuple[int, asyncio.Future[list[dict[str, Any]]]]"] = {}
 
     def last_error(self) -> str | None:
         return self._last_error
@@ -191,6 +220,35 @@ class StoreClient:
         if self._session is None:
             self._session = async_get_clientsession(self._hass)
         return self._session
+
+    # ── read cache (public catalog/config; see class docstring) ─────────────────
+
+    def _cache_get(self, key: str) -> Any | None:
+        ent = self._read_cache.get(key)
+        if ent is None:
+            return None
+        expiry, value = ent
+        # Monotonic clock: immune to NTP/wall-clock steps that could otherwise extend or
+        # truncate the TTL (put + get must use the same clock).
+        if time.monotonic() >= expiry:
+            self._read_cache.pop(key, None)
+            return None
+        return value
+
+    def _cache_put(self, key: str, value: Any, ttl: float) -> None:
+        self._read_cache[key] = (time.monotonic() + ttl, value)
+        if len(self._read_cache) > self._MAX_READ_CACHE_ENTRIES:
+            # Drop the soonest-to-expire entries (expired ones first) to stay bounded.
+            overflow = len(self._read_cache) - self._MAX_READ_CACHE_ENTRIES
+            for k, _ in sorted(self._read_cache.items(), key=lambda kv: kv[1][0])[:overflow]:
+                self._read_cache.pop(k, None)
+
+    def _invalidate_catalog_cache(self) -> None:
+        """Drop cached brand/device catalog reads (call after a create/upload/promote write so
+        a just-contributed or newly-approved entry appears immediately, not after the TTL)."""
+        self._cache_gen += 1
+        for key in [k for k in self._read_cache if k.startswith(("brands:", "devices:"))]:
+            self._read_cache.pop(key, None)
 
     # ── auth ──────────────────────────────────────────────────────────────────
 
@@ -231,7 +289,10 @@ class StoreClient:
 
     # ── reads (public, no token) ────────────────────────────────────────────────
 
-    async def _run_query(self, sq: dict[str, Any], parent: str = "") -> list[dict[str, Any]]:
+    async def _run_query(self, sq: dict[str, Any], parent: str = "") -> list[dict[str, Any]] | None:
+        """Run a structured query. Returns the decoded rows on success (possibly an empty
+        list), or ``None`` on any HTTP error / network failure so callers can distinguish a
+        genuinely-empty result from a transient failure and avoid caching the latter."""
         url = f"{self._base}/{parent}:runQuery" if parent else f"{self._base}:runQuery"
         try:
             async with self._sess().post(url, json={"structuredQuery": sq}, timeout=15) as resp:
@@ -241,12 +302,52 @@ class StoreClient:
                         _LOGGER.warning("Store query HTTP %s: %s", resp.status, body)
                     except Exception:
                         _LOGGER.warning("Store query HTTP %s (no body)", resp.status)
-                    return []
+                    return None
                 rows = await resp.json()
         except Exception as exc:  # noqa: BLE001
             _LOGGER.warning("Store query error: %s", exc)
-            return []
+            return None
         return [_decode_doc(r["document"]) for r in rows if isinstance(r, dict) and "document" in r]
+
+    async def _cached_catalog_query(
+        self, key: str, build_sq: "Callable[[], dict[str, Any]]"
+    ) -> list[dict[str, Any]]:
+        """Shared cache-get -> (on miss) run query -> conditionally-cache flow for the public
+        catalog reads. ``build_sq`` is called only on a cache miss (kept lazy). A successful
+        result is cached only if no invalidation happened while the query was in flight (the
+        generation guard), so an in-flight read cannot re-cache a pre-write snapshot; a
+        transient failure (None) is never cached. Callers apply their own in-memory prefix
+        filter to the returned full list."""
+        cached = self._cache_get(key)
+        if cached is not None:
+            return cached
+        # Single-flight: join an in-flight query for the CURRENT generation; otherwise start
+        # a fresh one. An entry from an older generation (started before an invalidation) is
+        # deliberately not joined -- it may carry a pre-write snapshot.
+        entry = self._inflight.get(key)
+        if entry is None or entry[0] != self._cache_gen:
+            gen = self._cache_gen
+            entry = (gen, asyncio.ensure_future(self._fetch_and_cache(key, gen, build_sq)))
+            self._inflight[key] = entry
+        # Shield so one waiter's cancellation neither cancels the shared query nor the other
+        # waiters coalesced onto it.
+        return await asyncio.shield(entry[1])
+
+    async def _fetch_and_cache(
+        self, key: str, gen: int, build_sq: "Callable[[], dict[str, Any]]"
+    ) -> list[dict[str, Any]]:
+        """The shared single-flight body: run the query, cache only a successful, non-
+        superseded result, and clear the in-flight slot when done (if it is still ours)."""
+        try:
+            fetched = await self._run_query(build_sq())
+            result = fetched if fetched is not None else []
+            if fetched is not None and gen == self._cache_gen:
+                self._cache_put(key, result, self._CATALOG_CACHE_TTL_S)
+            return result
+        finally:
+            cur = self._inflight.get(key)
+            if cur is not None and cur[1] is asyncio.current_task():
+                self._inflight.pop(key, None)
 
     @staticmethod
     def _field_filter(field: str, op: str, value: Any) -> dict[str, Any]:
@@ -269,33 +370,50 @@ class StoreClient:
 
     async def search_devices(
         self, brand: str | None = None, appliance_type: str | None = None,
-        model_query: str | None = None, include_pending: bool = False, page_size: int = 60,
+        model_query: str | None = None, *, include_pending: bool = False, page_size: int = 500,
     ) -> list[dict[str, Any]]:
-        filters = [self._status_filter(include_pending)]
-        if appliance_type:
-            filters.append(self._field_filter("applianceType", "EQUAL", appliance_type))
-        if brand:
-            filters.append(self._field_filter("brand_lc", "EQUAL", brand.lower()))
-        sq = {
-            "from": [{"collectionId": "devices"}],
-            "where": self._where(filters),
-            "orderBy": [{"field": {"fieldPath": "favoriteCount"}, "direction": "DESCENDING"}],
-            "limit": page_size,
-        }
-        rows = await self._run_query(sq)
+        # Cache the full per-brand/type device list (the model_query prefix filter is applied
+        # in memory below), so one Firestore query serves every model prefix. page_size is a
+        # full-catalog ceiling, not a UI page size: the in-memory filter can only match what
+        # was fetched, so caching a truncated list would hide models past the limit for the
+        # whole TTL. A query reads only the docs that exist, so the high ceiling adds no reads
+        # for today's catalog while staying complete as it grows.
+        key = f"devices:{(brand or '').lower()}:{appliance_type or ''}:{int(include_pending)}:{page_size}"
+
+        def _build() -> dict[str, Any]:
+            filters = [self._status_filter(include_pending)]
+            if appliance_type:
+                filters.append(self._field_filter("applianceType", "EQUAL", appliance_type))
+            if brand:
+                filters.append(self._field_filter("brand_lc", "EQUAL", brand.lower()))
+            return {
+                "from": [{"collectionId": "devices"}],
+                "where": self._where(filters),
+                "orderBy": [{"field": {"fieldPath": "favoriteCount"}, "direction": "DESCENDING"}],
+                "limit": page_size,
+            }
+
+        rows = await self._cached_catalog_query(key, _build)
         if model_query:
             p = model_query.lower()
             rows = [r for r in rows if str(r.get("model_lc", "")).startswith(p)]
         return rows
 
-    async def list_brands(self, q: str | None = None, include_pending: bool = True, page_size: int = 60) -> list[dict[str, Any]]:
-        sq = {
+    async def list_brands(self, q: str | None = None, *, include_pending: bool = True, page_size: int = 500) -> list[dict[str, Any]]:
+        # Cache the unfiltered brand list (the q prefix filter is applied in memory below),
+        # so one Firestore query serves every search prefix for this key. The limit is a
+        # full-catalog ceiling (not a UI page size): the in-memory prefix filter can only
+        # match what was fetched, so a low cap would make brands past it unsearchable for
+        # the whole cache TTL. The brand collection is small with tiny docs, and a query
+        # only reads the docs that exist, so this ceiling does not add reads for today's
+        # catalog while staying correct as it grows.
+        key = f"brands:{int(include_pending)}:{page_size}"
+        rows = await self._cached_catalog_query(key, lambda: {
             "from": [{"collectionId": "brands"}],
             "where": self._where([self._status_filter(include_pending)]),
             "orderBy": [{"field": {"fieldPath": "brand_lc"}, "direction": "ASCENDING"}],
             "limit": page_size,
-        }
-        rows = await self._run_query(sq)
+        })
         if q:
             p = q.lower()
             rows = [r for r in rows if str(r.get("brand_lc", "")).startswith(p)]
@@ -315,15 +433,24 @@ class StoreClient:
         return _decode_doc(doc)
 
     async def get_config(self) -> dict[str, Any]:
-        """Public config/site (maintenance flag + confirmThreshold). {} on failure."""
+        """Public config/site (maintenance flag + confirmThreshold). {} on failure.
+
+        Cached for a long TTL: this is read on every confirm_device to resolve the
+        confirmThreshold, which changes almost never. Only successful reads are cached,
+        so a transient failure never pins an empty config."""
+        cached = self._cache_get("config:site")
+        if cached is not None:
+            return cached
         try:
             async with self._sess().get(f"{self._base}/config/site", timeout=15) as resp:
                 if resp.status != 200:
                     return {}
-                return _decode_doc(await resp.json())
+                cfg = _decode_doc(await resp.json())
         except Exception as exc:  # noqa: BLE001
             _LOGGER.debug("Store get_config error: %s", exc)
             return {}
+        self._cache_put("config:site", cfg, self._CONFIG_CACHE_TTL_S)
+        return cfg
 
     async def _rating_agg(self, parent_path: str) -> dict[str, Any]:
         """count + average over the `ratings` subcollection under ``parent_path``.
@@ -376,7 +503,7 @@ class StoreClient:
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
-        return await self._run_query(sq)
+        return await self._run_query(sq) or []
 
     async def device_profiles(self, brand: str, model: str, appliance_type: str) -> dict[str, Any]:
         """Resolve the store deviceId from brand/model/type and return its profiles
@@ -433,7 +560,7 @@ class StoreClient:
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
-        cycles = [self._with_decoded_trace(c) for c in await self._run_query(sq)]
+        cycles = [self._with_decoded_trace(c) for c in (await self._run_query(sq) or [])]
         # Attach each cycle's 5-star rating summary (info-only; the aggregation lives
         # in a subcollection so it can't ride the list query). Bound concurrency with
         # a semaphore so a large page can't fan out into dozens of simultaneous
@@ -513,6 +640,10 @@ class StoreClient:
                 timeout=15,
             ) as resp:
                 if resp.status == 200:
+                    # A newly-created brand/device changes the catalog listing; drop the
+                    # cached brand/device reads so it appears immediately for this user.
+                    if path.split("/", 1)[0] in ("brands", "devices"):
+                        self._invalidate_catalog_cache()
                     return (True, True)
                 body = await resp.text()
                 # Precondition failure => the doc already exists; that is fine (no-op).
@@ -785,6 +916,9 @@ class StoreClient:
             }]
             if (await self._commit(token, promote))[0]:
                 status = "approved"
+                # Promotion changes catalog visibility (pending -> approved); drop cached
+                # listings so the newly-approved device shows in approved-only searches now.
+                self._invalidate_catalog_cache()
         return {"confirmed": True, "confirmCount": count, "status": status}
 
     async def rate_device(self, refresh_token: str, uid: str, device_id: str, rating: int) -> bool:

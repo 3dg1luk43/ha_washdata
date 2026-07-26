@@ -28,7 +28,9 @@
     "awaiting_n": "承認待ち · {n} 件確認済み",
     "approved": "承認済み",
     "awaiting": "承認待ち",
-    "imported_tip": "コミュニティストアからインポートしました。マッチングにのみ使用され、統計には含まれません。"
+    "imported_tip": "コミュニティストアからインポートしました。マッチングにのみ使用され、統計には含まれません。",
+    "not_importable": "対象外",
+    "exists": "既存"
   },
   "btn": {
     "add_device": "+ デバイスを追加",
@@ -169,7 +171,14 @@
     "download_device": "このセットアップをダウンロード",
     "share_device": "⬆ このデバイスを共有",
     "share_device_tip": "この機器と記録済みリファレンスサイクルをコミュニティストアに共有して、同じ機種を持つ他のユーザーが利用できるようにします",
-    "share_n": "{n}件のサイクルを共有"
+    "share_n": "{n}件のサイクルを共有",
+    "export_selected": "エクスポート（データを選択）",
+    "export_all": "すべてをクイックエクスポート",
+    "import_raw": "詳細設定：JSONからすべて置き換え",
+    "download_export": "エクスポートをダウンロード",
+    "analyze_import": "ファイルを解析",
+    "import_selected": "選択項目をインポート",
+    "back": "戻る"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -390,6 +399,7 @@
     "panel_default_tab": "デフォルトのタブ",
     "panel_language": "パネル言語",
     "per_cycle_short": "サイクル",
+    "pg_anti_wrinkle": "しわ防止",
     "pg_autofill_tip": "現在の値から範囲を自動入力（{lo}–{hi}）",
     "pg_best_value": "見つかった最適値",
     "pg_current_value": "現在の値:",
@@ -524,6 +534,12 @@
     "pg_sweep_param": "パラメーター",
     "pg_objective": "目的",
     "pg_steps": "ステップ数",
+    "pg_stress_group": "待機終了テスト",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "待機レベル (W)",
+    "pg_stress_idle_w_desc": "自動検出された待機電力下限を上書きします（自動の場合は空欄）。",
+    "pg_stress_toggle": "待機終了をテスト",
+    "pg_stress_toggle_desc": "記録終了後に待機電力レベルで稼働し続ける機器をシミュレートします - WashData がサイクルを停止するかどうか、およびいつ停止するかを確認します。",
     "pg_sweep_2d": "2Dヒートマップ",
     "pg_sweep_param_y": "2番目のパラメーター",
     "pg_obj_match": "マッチ精度",
@@ -538,6 +554,9 @@
     "aria_playground_chart2": "インタラクティブなサイクル電力グラフ: ホバーで時刻/電力を表示、スクロールでズーム、ドラッグで移動",
     "pg_alert_timeout_end": "予測ではなくタイムアウトで終了しました",
     "pg_alert_indefinite": "いつまでも終了しません",
+    "pg_alert_stress_cap": "安全制限に達しました",
+    "pg_alert_stress_ok": "待機終了: サイクルが停止しました",
+    "pg_alert_stress_warn": "待機電力が停止しきい値を超えています",
     "task_pg_history": "履歴でテスト",
     "task_pg_sweep": "最適化",
     "task_reprocess": "再処理",
@@ -566,7 +585,31 @@
     "task_split": "サイクルを分割中",
     "task_trim": "サイクルをトリミング中",
     "task_merge": "サイクルを結合中",
-    "task_rebuild": "エンベロープを再構築中"
+    "task_rebuild": "エンベロープを再構築中",
+    "cat_profiles": "プロファイル（プログラム）",
+    "cat_real_cycles": "サイクル（実行履歴）",
+    "cat_reference_cycles": "参照サイクル（インポート済み）",
+    "cat_custom_phases": "カスタムフェーズ",
+    "cat_profile_groups": "プロファイルグループ",
+    "cat_settings": "検出と認識の設定",
+    "cat_matching_config": "認識の調整",
+    "cat_ml_models": "MLモデル",
+    "cat_feedback": "フィードバックとレビューラベル",
+    "cat_suggestions": "提案",
+    "cat_maintenance_log": "メンテナンスログ",
+    "cat_history_logs": "履歴と変更ログ",
+    "cat_lifetime_stats": "累計値",
+    "cycles_short": "サイクル",
+    "import_mode": "結合方法",
+    "mode_merge": "マージ（自分のを保持）",
+    "mode_replace": "選択項目を置き換え",
+    "cycle_destination": "インポートしたサイクルの保存先は？",
+    "dest_reference": "参照（形状のみ）",
+    "dest_real_history": "実履歴（統計に計上）",
+    "conflict_resolution": "名前の衝突",
+    "conflict_import_copy": "コピーとしてインポート",
+    "conflict_keep_mine": "自分のを保持",
+    "conflict_overwrite": "上書き"
   },
   "log": {
     "all_levels": "すべてのレベル",
@@ -643,7 +686,9 @@
     "force_stop_msg": "アクティブなサイクルを今すぐ強制停止しますか？サイクルは中断として保存されます。",
     "store_import": "基準サイクルをインポート",
     "store_share": "コミュニティストアに共有",
-    "store_share_device": "このデバイスを共有"
+    "store_share_device": "このデバイスを共有",
+    "export_select": "エクスポート - データを選択",
+    "import_wizard": "インポート - データを選択"
   },
   "msg": {
     "appliance_monitor": "アプライアンスモニター",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "{count} 件の類似した未ラベルサイクルが見つかりました – プロファイルを作成してマッチングを開始してください。",
     "cycles_deleted": "{count} 件のサイクルを削除しました",
     "enough_data": "学習に十分なデータがあります（{current}/{min} サイクル）。",
-    "export_description": "すべてのプロファイルとサイクルを JSON にエクスポートするか、以前のエクスポートから復元します。",
+    "export_description": "JSONにエクスポートするプロファイル、サイクル、設定などを正確に選択するか、ファイルを解析して必要な部分だけをインポートできます。",
     "feedback_cycles_pending": "レビューが必要なサイクル: {n}件{s}",
     "feedback_prompt": "それが正しかったことを確認し、プログラムを修正するか、無視してください。",
+    "feedback_relabel_hint": "このサイクルを再ラベル付けすると、これも解決します。",
     "filter_by_profile": "プロファイルでフィルター…",
     "group_modal_help": "温度/スピンが異なる同じ形状のグループ プログラム (期間は異なる場合があります)。マッチングでは、グループを 1 つの候補としてスコア付けし、最も適合するメンバーを選択します。少なくとも 2 つ選択してください。オーバーレイは、それらがどれだけ似ているかを示します。",
     "group_not_cohesive": "これらのプロファイルは、確実にグループ化できるほど類似していないため、外れ値を削除するかグループを分割するまで、マッチングでは個別に扱われます。",
@@ -729,6 +775,7 @@
     "pg_restart_note": "シミュレーションツールを有効にするには Home Assistant を再起動してください。",
     "pg_sim_progress": "{done} / {total} サイクル",
     "pg_starting": "開始中…",
+    "pg_stress_synthetic": "待機シミュレーションはここから開始",
     "pg_sweep_intro": "もし {param} が違っていたら? 最も多くのサイクルが正しくマッチする設定を見つけるため、直近 {cycles} サイクルにわたって {steps} 個の値をテストします。",
     "pg_sweep_step": "ステップ {done} / {total}",
     "pg_undetected": "{n} 件のサイクル{s}が未検出",
@@ -837,6 +884,9 @@
     "pg_simulating": "サイクルをシミュレーションしています…",
     "pg_canvas_empty2": "上でサイクルを選び、「実行」を押してシミュレーションします。その後、ホバーで値を表示、スクロールでズーム、ドラッグで移動できます。",
     "pg_apply_settings_confirm": "これら {n} 件の設定をこのデバイスに保存しますか？ {list}",
+    "pg_stress_terminated_detail": "約 {idle}W の待機状態に落ち着きました -- {h}時間{m}分後に {reason} によってサイクルが終了しました。",
+    "pg_stress_above_threshold_detail": "待機電力 約 {idle}W が実効停止しきい値 ({stop}W) 以上です -- サイクルが一度も静音状態として認識されませんでした。修正するには stop_threshold_w を上げてください。",
+    "pg_stress_hit_cap_detail": "サイクルが停止せずに {h}時間{m}分 稼働しました -- 安全制限により強制停止されました。待機電力 {idle}W に対して停止しきい値 {stop}W です。",
     "no_logs_match": "これらのフィルターに一致するログレコードはありません。",
     "pg_analysis_hint2": "サイクルを選択して「実行」を押すと、マッチ分析が読み込まれます。",
     "pg_analysis_empty2": "「実行」を押すとマッチ分析が表示されます。",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "選択したリファレンスサイクルとともに{brand} {model}をアップロードします。同じ機器を持つ他のユーザーがあなたのプログラムを引き継ぐことができます。エントリは公開前に審査されます。",
     "share_profile_no_cycles": "リファレンスサイクルなし -- サイクルタブでサイクルを⭐としてマークしてこのプロファイルを含めてください",
     "advisory_phase_inconsistent": "'{name}' は異なるプログラムや温度が混在しているようです。加熱時間がサイクルごとに大きく異なります。温度ごとなど別々のプロファイルに分割すると、マッチングと時間推定が改善されます。",
-    "advisory_phase_inconsistent_title": "⚠ プログラム混在の可能性"
+    "advisory_phase_inconsistent_title": "⚠ プログラム混在の可能性",
+    "export_select_intro": "含める項目を正確にチェックしてください。サイクルなしでプロファイルを選択しても、認識可能なプログラムはエクスポートされます（学習した形状も一緒に移行します）。",
+    "import_analyze_hint": "エクスポートしたファイルを読み込む（またはそのJSONを貼り付ける）と、WashDataが解析し、変更前にインポート可能な内容を正確に表示します。",
+    "analyzing": "解析中…",
+    "device_type_mismatch_warn": "このエクスポートは異なる機器タイプのものです（{src} と {local}）。プログラムとサイクルは参照データとしてインポートできますが、機器固有の設定と実履歴のインポートは無効になります。",
+    "merge_hint": "インポートした項目は追加され、ローカルのデータは失われません。名前の衝突は以下で解決します。",
+    "replace_warn": "チェックした各カテゴリは消去され、ファイルの内容で置き換えられます。チェックしていないカテゴリはそのまま残ります。",
+    "dest_reference_hint": "インポートしたサイクルはプログラムの認識精度を向上させるだけで、使用量やエネルギーの統計には影響しません。",
+    "dest_real_history_hint": "インポートしたサイクルはこの機器自身の履歴として扱われ、エネルギーや使用量の統計に反映されます。1台の機器を新しい環境に移行する際に使用します。"
   },
   "pg_desc": {
     "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
@@ -875,6 +933,11 @@
     "start_duration_threshold": "開始を確定するしきい値超えの秒数",
     "start_threshold_w": "開始とみなす最小ワット数",
     "stop_threshold_w": "これを下回ると停止とみなす",
+    "anti_wrinkle_enabled": "メインフェーズ後のタンブルパルスを新しいサイクルと解釈せず吸収する",
+    "anti_wrinkle_exit_power": "しわ防止を有効に保つには、パルス間の電力がこの値を下回る必要がある",
+    "anti_wrinkle_idle_timeout": "しわ防止が終了するまでに2つのタンブルパルスの間に許容される静止時間",
+    "anti_wrinkle_max_duration": "これより長いパルスはしわ防止を終了し、新しいサイクルを開始する",
+    "anti_wrinkle_max_power": "これを超えるパルスはしわ防止を終了し、新しいサイクルを開始する",
     "dtw_bandwidth": "ステージ 3: Sakoe-Chiba ワープバンド (0 = DTW 無効; デフォルト 0.2 = サイクル長の 20%)",
     "corr_weight": "ステージ 2: 曲線形状（相関）と電力レベル（MAE）のバランス; デフォルト 0.45",
     "duration_weight": "ステージ 4: 運転時間の一致が最終スコアにどれだけ影響するか（デフォルト 0.22）",
@@ -984,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "しわ防止モードがアクティブな状態を維持するには、パルス間の電力がこれを下回る必要があります。",
       "label": "終了電力しきい値"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "最大パルス間隔",
+      "doc": "しわ防止モードが終了するまでに、機器が2つのタンブルパルスの間に静止していられる時間。乾燥機がパルス間に残す最長の間隔より長く設定してください。そうしないと、以降のパルスがすべて誤った開始として読み取られます。"
     },
     "anti_wrinkle_max_duration": {
       "doc": "これより長いパルスは、しわ防止タンブルではなく実際のサイクルとして扱われます。",
@@ -1603,7 +1670,9 @@
     "store_device_shared_partial": "{n}件のサイクルを共有しました。{failed}件はアップロードできませんでした。",
     "store_device_shared_some_dup": "{created}件のサイクルを共有しました。{dup}件は既にストアにありました。",
     "store_download_failed": "ダウンロードに失敗しました: {error}",
-    "store_download_nothing": "ダウンロードする新しいものはありません - このセットアップは既にデバイスにあります。"
+    "store_download_nothing": "ダウンロードする新しいものはありません - このセットアップは既にデバイスにあります。",
+    "export_selective_done": "エクスポートをダウンロードしました",
+    "import_selective_done": "{profiles} 件のプロファイルと {cycles} 件のサイクルをインポートしました"
   },
   "suggestion": {
     "both_agree": "WashDataの推奨",

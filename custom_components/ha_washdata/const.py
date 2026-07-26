@@ -80,7 +80,7 @@ CONF_WATCHDOG_INTERVAL = "watchdog_interval"  # Derived from sampling_interval
 CONF_MATCH_PERSISTENCE = "match_persistence"
 CONF_COMPLETION_MIN_SECONDS = "completion_min_seconds"
 CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
-CONF_RUNNING_DEAD_ZONE = "running_dead_zone"  # Seconds after start to ignore power dips
+CONF_RUNNING_DEAD_ZONE = "running_dead_zone"  # REMOVED in 0.5.3 — was never wired to detection
 CONF_END_REPEAT_COUNT = "end_repeat_count"  # Number of times end condition must be met
 CONF_MIN_OFF_GAP = "min_off_gap"  # Minimum gap to separate cycles (seconds)
 CONF_START_ENERGY_THRESHOLD = "start_energy_threshold"  # Wh required to confirm start
@@ -131,6 +131,7 @@ CONF_ANTI_WRINKLE_ENABLED = "anti_wrinkle_enabled"  # Dryer anti-wrinkle shieldi
 CONF_ANTI_WRINKLE_MAX_POWER = "anti_wrinkle_max_power"  # W threshold for anti-wrinkle spikes
 CONF_ANTI_WRINKLE_MAX_DURATION = "anti_wrinkle_max_duration"  # Seconds to treat as anti-wrinkle
 CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true-off exit
+CONF_ANTI_WRINKLE_IDLE_TIMEOUT = "anti_wrinkle_idle_timeout"  # Seconds below exit power before anti-wrinkle ends
 CONF_DELAY_START_DETECT_ENABLED = "delay_start_detect_enabled"  # Enable delayed-start detection
 CONF_DELAY_CONFIRM_SECONDS = "delay_confirm_seconds"  # Seconds power must stay in standby band before DELAY_WAIT engages
 CONF_DELAY_TIMEOUT_HOURS = "delay_timeout_hours"  # Safety timeout (hours) while waiting to start
@@ -268,7 +269,6 @@ DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
 DEFAULT_WATCHDOG_INTERVAL = 30  # Derived: 2 * sampling_interval + 1
 DEFAULT_MATCH_PERSISTENCE = 3
-DEFAULT_RUNNING_DEAD_ZONE = 3  # Seconds after start to ignore power dips
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 
 # Matching & Termination Stability
@@ -379,6 +379,12 @@ DEFAULT_ANTI_WRINKLE_ENABLED = False
 DEFAULT_ANTI_WRINKLE_MAX_POWER = 400.0  # W
 DEFAULT_ANTI_WRINKLE_MAX_DURATION = 60.0  # s
 DEFAULT_ANTI_WRINKLE_EXIT_POWER = 0.8  # W
+# Quiet gap a machine may leave between two anti-wrinkle pulses before the mode
+# ends. Keeps the previous hardcoded behaviour as the default; dryers whose
+# pulses sit further apart (a heat-pump dryer measured 130-660 s) need a higher
+# value, otherwise the mode drops out after the first pulse and every later one
+# surfaces as an aborted false start.
+DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT = 120.0  # s
 
 # Delayed-start detection defaults (disabled by default).
 #
@@ -879,7 +885,6 @@ SHAREABLE_SETTING_KEYS: tuple[str, ...] = (
     CONF_START_DURATION_THRESHOLD,
     CONF_START_ENERGY_THRESHOLD,
     CONF_COMPLETION_MIN_SECONDS,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_MIN_OFF_GAP,
     CONF_END_ENERGY_THRESHOLD,
     CONF_POWER_OFF_THRESHOLD_W,
@@ -994,3 +999,17 @@ MAINTENANCE_EVENT_TYPES = (
 # A logged maintenance event of a matching type within this many days suppresses
 # the "needs maintenance" nag advisory (duration-trend / shape-drift).
 MAINTENANCE_RECENT_SUPPRESS_DAYS = 30
+
+# ─── Playground stress-tail constants (never used by the live integration) ─────
+# These govern the synthetic idle continuation in the "Test idle termination"
+# Playground toggle. All times are in seconds.
+PLAYGROUND_STRESS_TRAILING_WINDOW_S: float = 60.0    # window for idle-floor derivation
+PLAYGROUND_STRESS_FLOOR_PERCENTILE: float = 0.07     # p7 of window readings = standby floor
+PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC: float = 0.12  # ±12% fallback when window is flat
+PLAYGROUND_STRESS_DENSE_STEP_S: float = 30.0         # dense pre-fill cadence
+PLAYGROUND_STRESS_DENSE_DURATION_S: float = 1200.0   # dense pre-fill length (20 min)
+PLAYGROUND_STRESS_SPARSE_STEP_S: float = 1800.0      # sparse main step (30 min)
+PLAYGROUND_STRESS_MAX_SPARSE_STEPS: int = 15         # max sparse steps → max 7.5 h extra
+PLAYGROUND_STRESS_MAX_IDLE_W: float = 100000.0       # upper bound for a manual idle override
+                                                     # (far beyond any appliance; guards against
+                                                     # inf/absurd values corrupting synthesis)

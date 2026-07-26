@@ -17,14 +17,6 @@
           "min_power": "Effektavläsningar över detta tröskelvärde (i watt) indikerar att apparaten är igång. Börja med 2W för de flesta enheter."
         }
       },
-      "first_profile": {
-        "title": "Skapa första profil",
-        "description": "En **Cykel** är en komplett körning av din apparat (t.ex. en massa tvätt). En **Profil** grupperar dessa cykler efter typ (t.ex. \"Bomull\", \"Snabbtvätt\"). Att skapa en profil hjälper nu integrationen att uppskatta varaktigheten omedelbart.\n\nDu kan välja den här profilen manuellt i enhetens kontroller om den inte upptäcks automatiskt.\n\n**Lämna \"Profilnamn\" tomt för att hoppa över det här steget.**",
-        "data": {
-          "profile_name": "Profilnamn (valfritt)",
-          "manual_duration": "Beräknad varaktighet (minuter)"
-        }
-      },
       "reconfigure": {
         "title": "Konfigurera om WashData",
         "description": "Uppdatera enhetens namn, apparattyp eller effektsensor.",

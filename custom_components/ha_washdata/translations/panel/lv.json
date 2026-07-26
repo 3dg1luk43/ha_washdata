@@ -28,7 +28,9 @@
     "awaiting_n": "Gaida apstiprinājumu · {n} apstiprinājumi",
     "approved": "Apstiprināts",
     "awaiting": "Gaida apstiprinājumu",
-    "imported_tip": "Importēts no kopienas veikala. Izmanto tikai saskaņošanai, netiek ieskaitīts statistikā."
+    "imported_tip": "Importēts no kopienas veikala. Izmanto tikai saskaņošanai, netiek ieskaitīts statistikā.",
+    "not_importable": "šeit nav pieejams",
+    "exists": "jau eksistē"
   },
   "btn": {
     "add_device": "+ Pievienot ierīci",
@@ -169,7 +171,14 @@
     "download_device": "Lejupielādēt šo iestatījumu",
     "share_device": "⬆ Kopīgot šo ierīci",
     "share_device_tip": "Kopīgojiet šo ierīci un tās reģistrētos atskaites ciklus kopienas veikalā, lai citi ar to pašu mašīnu varētu tos pieņemt",
-    "share_n": "Kopīgot {n} ciklu(-s)"
+    "share_n": "Kopīgot {n} ciklu(-s)",
+    "export_selected": "Eksportēt (izvēlēties datus)",
+    "export_all": "Ātrā eksportēšana: viss",
+    "import_raw": "Papildu: aizstāt visu no JSON",
+    "download_export": "Lejupielādēt eksportu",
+    "analyze_import": "Analizēt failu",
+    "import_selected": "Importēt atlasītos",
+    "back": "Atpakaļ"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -291,6 +300,7 @@
     "poor": "⚠ Slikta profila kvalitāte"
   },
   "lbl": {
+    "pg_anti_wrinkle": "Pretgrumbu režīms",
     "actions": "Darbības",
     "activity": "Aktivitāte",
     "administrators": "Administratori",
@@ -524,6 +534,12 @@
     "pg_sweep_param": "Parametrs",
     "pg_objective": "Mērķis",
     "pg_steps": "Soļi",
+    "pg_stress_group": "Dīkstāves apturēšanas tests",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Dīkstāves līmenis (W)",
+    "pg_stress_idle_w_desc": "Pārrakstīt automātiski noteikto gaidstāves jaudas apakšrobežu (atstājiet tukšu automātiskai).",
+    "pg_stress_toggle": "Pārbaudīt dīkstāves apturēšanu",
+    "pg_stress_toggle_desc": "Simulē ierīci, kas paliek gaidstāves patēriņa līmenī pēc ierakstīšanas beigām - rāda, vai un kad WashData aptur ciklu.",
     "pg_sweep_2d": "2D siltuma karte",
     "pg_sweep_param_y": "2. parametrs",
     "pg_obj_match": "Atbilstības precizitāte",
@@ -538,6 +554,9 @@
     "aria_playground_chart2": "Interaktīva cikla jaudas diagramma: turiet kursoru virs, lai nolasītu laiku/jaudu, ritiniet, lai tuvinātu, velciet, lai pārvietotu",
     "pg_alert_timeout_end": "Beidzās pēc noildzes, nevis prognozes",
     "pg_alert_indefinite": "Darbotos bezgalīgi",
+    "pg_alert_stress_cap": "Sasniegts drošības ierobežojums",
+    "pg_alert_stress_ok": "Dīkstāves apturēšana: cikls apturēts",
+    "pg_alert_stress_warn": "Dīkstāves patēriņš pārsniedz apstāšanās slieksni",
     "task_pg_history": "Pārbaudīt vēsturē",
     "task_pg_sweep": "Optimizēt",
     "task_reprocess": "Atkārtota apstrāde",
@@ -566,7 +585,31 @@
     "task_split": "Cikla sadalīšana",
     "task_trim": "Cikla apgriešana",
     "task_merge": "Ciklu apvienošana",
-    "task_rebuild": "Apvalklīkņu pārbūve"
+    "task_rebuild": "Apvalklīkņu pārbūve",
+    "cat_profiles": "Profili (programmas)",
+    "cat_real_cycles": "Cikli (lietojuma vēsture)",
+    "cat_reference_cycles": "Atsauces cikli (importēti)",
+    "cat_custom_phases": "Pielāgotās fāzes",
+    "cat_profile_groups": "Profilu grupas",
+    "cat_settings": "Noteikšanas un atpazīšanas iestatījumi",
+    "cat_matching_config": "Atpazīšanas pielāgošana",
+    "cat_ml_models": "ML modeļi",
+    "cat_feedback": "Atsauksmju un pārskatīšanas atzīmes",
+    "cat_suggestions": "Ieteikumi",
+    "cat_maintenance_log": "Apkopes žurnāls",
+    "cat_history_logs": "Vēstures un izmaiņu žurnāli",
+    "cat_lifetime_stats": "Visa laika kopsummas",
+    "cycles_short": "cikli",
+    "import_mode": "Kā apvienot",
+    "mode_merge": "Apvienot (paturēt manējos)",
+    "mode_replace": "Aizstāt atlasītos",
+    "cycle_destination": "Kur jānonāk importētajiem cikliem?",
+    "dest_reference": "Atsauce (tikai forma)",
+    "dest_real_history": "Reālā vēsture (ieskaita statistikā)",
+    "conflict_resolution": "Nosaukumu konflikti",
+    "conflict_import_copy": "Importēt kā kopiju",
+    "conflict_keep_mine": "Paturēt manējos",
+    "conflict_overwrite": "Pārrakstīt"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Piespiedu kārtā apturēt aktīvo ciklu tagad? Cikls tiks saglabāts kā pārtraukts.",
     "store_import": "Importēt atsauces ciklu",
     "store_share": "Kopīgot kopienas veikalā",
-    "store_share_device": "Kopīgot šo ierīci"
+    "store_share_device": "Kopīgot šo ierīci",
+    "export_select": "Eksports - izvēlēties datus",
+    "import_wizard": "Imports - izvēlēties datus"
   },
   "msg": {
     "appliance_monitor": "Ierīces monitors",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "Atrasti {count} līdzīgi nemarķēti cikli – izveidojiet profilu, lai sāktu tos saskaņot.",
     "cycles_deleted": "Dzēsti cikli: {count}",
     "enough_data": "Pietiek datu mācīšanai ({current}/{min} cikli).",
-    "export_description": "Eksportējiet visus profilus un ciklus uz JSON vai atjaunojiet no iepriekšējās eksportēšanas.",
+    "export_description": "Izvēlieties precīzi, kurus profilus, ciklus, iestatījumus un citus datus eksportēt uz JSON, vai analizējiet failu un importējiet tikai vēlamās daļas.",
     "feedback_cycles_pending": "{n} cikl{s} pārskatīšanai",
     "feedback_prompt": "Apstipriniet, ka tas bija pareizi, labojiet programmu vai ignorējiet.",
+    "feedback_relabel_hint": "Šī cikla atkārtota marķēšana arī to atrisina.",
     "filter_by_profile": "Filtrēt pēc profila…",
     "group_modal_help": "Grupējiet programmas ar vienādu formu, kas atšķiras pēc temperatūras/griešanās (ilgums var atšķirties). Atbilstības gadījumā grupa tiek vērtēta kā viens kandidāts, pēc tam tiek izvēlēts atbilstošākais dalībnieks. Izvēlieties vismaz 2; pārklājums parāda, cik tie ir līdzīgi.",
     "group_not_cohesive": "Šie profili nav pietiekami līdzīgi, lai tos varētu droši grupēt, tāpēc saskaņošanas funkcija tos apstrādā atsevišķi, līdz noņemat novirzi vai sadalāt grupu.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Restartējiet Home Assistant, lai iespējotu simulācijas rīkus.",
     "pg_sim_progress": "{done} / {total} cikli",
     "pg_starting": "Sākas…",
+    "pg_stress_synthetic": "dīkstāves simulācija sākas šeit",
     "pg_sweep_intro": "Kā būtu, ja {param} atšķirtos? Pārbaudiet {steps} vērtības pēdējos {cycles} ciklos, lai atrastu iestatījumu, kurā pareizi tiek saskaņoti visvairāk ciklu.",
     "pg_sweep_step": "Solis {done} / {total}",
     "pg_undetected": "Neatklāti cikli: {n}",
@@ -837,6 +884,9 @@
     "pg_simulating": "Notiek cikla simulācija…",
     "pg_canvas_empty2": "Izvēlieties ciklu augšā un nospiediet Palaist, lai to simulētu. Pēc tam turiet kursoru virs, lai nolasītu vērtības, ritiniet, lai tuvinātu, un velciet, lai pārvietotu.",
     "pg_apply_settings_confirm": "Vai saglabāt šos {n} iestatījumus šajā ierīcē? {list}",
+    "pg_stress_terminated_detail": "Nostabilizējās aptuveni {idle} W dīkstāves līmenī -- cikls beidzās {h} h {m} min vēlāk {reason} dēļ.",
+    "pg_stress_above_threshold_detail": "Dīkstāves patēriņš (~{idle} W) ir vienāds ar faktisko apstāšanās slieksni ({stop} W) vai to pārsniedz -- cikls nekad netika reģistrēts kā kluss. Lai to labotu, palieliniet stop_threshold_w.",
+    "pg_stress_hit_cap_detail": "Cikls darbojās {h} h {m} min bez apstāšanās -- to piespiedu kārtā apturēja drošības ierobežojums. Dīkstāves patēriņš {idle} W pret apstāšanās slieksni {stop} W.",
     "no_logs_match": "Neviens žurnāla ieraksts neatbilst šiem filtriem.",
     "pg_analysis_hint2": "Atlasiet ciklu un nospiediet Palaist, lai ielādētu atbilstības analīzi.",
     "pg_analysis_empty2": "Nospiediet Palaist, lai skatītu atbilstības analīzi.",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "Augšupielādējiet {brand} {model} ar atlasītajiem atskaites cikliem. Citi ar to pašu ierīci var pieņemt jūsu programmas. Ieraksti tiek pārskatīti pirms publiskošanas.",
     "share_profile_no_cycles": "Nav atskaites ciklu -- atzīmējiet ciklu kā ⭐ cilnē Cikli, lai iekļautu šo profilu",
     "advisory_phase_inconsistent": "Šķiet, ka '{name}' sajauc dažādas programmas vai temperatūras - tā cikli sildās ļoti atšķirīgu laiku. Sadalot to atsevišķos profilos (piemēram, pēc temperatūras), tiks uzlabota saskaņošana un laika aprēķini.",
-    "advisory_phase_inconsistent_title": "⚠ Iespējams, jauktas programmas"
+    "advisory_phase_inconsistent_title": "⚠ Iespējams, jauktas programmas",
+    "export_select_intro": "Atzīmējiet precīzi, ko iekļaut. Izvēloties profilus bez to cikliem, joprojām tiek eksportēta atpazīstama programma (tās apgūtā forma ceļo līdzi).",
+    "import_analyze_hint": "Ielādējiet eksportēto failu (vai ielīmējiet tā JSON). WashData to analizē un precīzi parāda, ko var importēt, pirms kaut kas mainās.",
+    "analyzing": "Notiek analīze…",
+    "device_type_mismatch_warn": "Šis eksports ir no cita ierīces tipa ({src} vs {local}). Programmas un ciklus joprojām var importēt kā atsauces datus, taču ierīcei specifiskie iestatījumi un reālās vēstures imports ir atspējoti.",
+    "merge_hint": "Importētie vienumi tiek pievienoti; nekas no vietējiem datiem netiek zaudēts. Nosaukumu konflikti tiek risināti tālāk.",
+    "replace_warn": "Katra atzīmētā kategorija tiek dzēsta un aizstāta no faila. Neatzīmētās kategorijas paliek neskartas.",
+    "dest_reference_hint": "Importētie cikli tikai uzlabo programmu atpazīšanu un nekad neietekmē lietojuma/enerģijas statistiku.",
+    "dest_real_history_hint": "Importētie cikli tiek uzskaitīti kā šīs ierīces pašas vēsture un papildina enerģijas/lietojuma statistiku. Izmantojiet, pārvietojot vienu ierīci uz jaunu instalāciju."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -961,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Lai pretgrumbu režīms paliktu aktīvs, starp impulsiem jaudai ir jāsamazinās zem šī.",
       "label": "Izejas jaudas slieksnis"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Cik ilgi mašīna drīkst palikt klusa starp diviem griešanās impulsiem, pirms pretgrumbu režīms beidzas. Iestatiet to garāku par garāko atstarpi, ko jūsu žāvētājs atstāj starp impulsiem, citādi katrs nākamais impulss tiek uztverts kā kļūdains starts.",
+      "label": "Maks. atstarpe starp impulsiem"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pākšaugi, kas ir garāki par šo, tiek uzskatīti par īstu ciklu, nevis kā pretgrumbu izkrišanu.",
@@ -1580,7 +1642,9 @@
     "store_device_shared_partial": "{n} cikli kopīgoti; {failed} neizdevās augšupielādēt.",
     "store_device_shared_some_dup": "{created} cikli kopīgoti; {dup} jau bija veikalā.",
     "store_download_failed": "Lejupielāde neizdevās: {error}",
-    "store_download_nothing": "Nav nekā jauna lejupielādei - šis iestatījums jau ir jūsų ierīcē."
+    "store_download_nothing": "Nav nekā jauna lejupielādei - šis iestatījums jau ir jūsų ierīcē.",
+    "export_selective_done": "Eksports lejupielādēts",
+    "import_selective_done": "Importēti {profiles} profili un {cycles} cikli"
   },
   "suggestion": {
     "both_agree": "WashData iesaka",
@@ -1706,6 +1770,11 @@
     "other": "Cits"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Absorbējiet griešanās impulsus pēc galvenās fāzes, nevis nolasiet tos kā jaunus ciklus",
+    "anti_wrinkle_exit_power": "Lai pretgrumbu režīms paliktu aktīvs, jaudai starp impulsiem jānokrītas zem šīs vērtības",
+    "anti_wrinkle_idle_timeout": "Atļautais klusuma laiks starp diviem griešanās impulsiem, pirms pretgrumbu režīms beidzas",
+    "anti_wrinkle_max_duration": "Impulss, kas garāks par šo, beidz pretgrumbu režīmu un sāk jaunu ciklu",
+    "anti_wrinkle_max_power": "Impulss, kas pārsniedz šo, beidz pretgrumbu režīmu un sāk jaunu ciklu",
     "completion_min_seconds": "Īsākais darbības laiks, kas skaitās par īstu ciklu",
     "end_repeat_count": "Zemi rādījumi pēc kārtas pirms beigām",
     "interrupted_min_seconds": "Īsi cikli tiek atzīmēti kā pārtraukti",

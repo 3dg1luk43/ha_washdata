@@ -28,7 +28,9 @@
     "awaiting_n": "等待批准 · 已确认 {n} 个",
     "approved": "已批准",
     "awaiting": "等待批准",
-    "imported_tip": "从社区商店导入。仅用于匹配，不计入统计。"
+    "imported_tip": "从社区商店导入。仅用于匹配，不计入统计。",
+    "not_importable": "此处不适用",
+    "exists": "已存在"
   },
   "btn": {
     "add_device": "+ 添加设备",
@@ -169,7 +171,14 @@
     "download_device": "下载此配置",
     "share_device": "⬆ 分享此设备",
     "share_device_tip": "将此设备及其录制的参考周期分享到社区商店，让拥有相同机器的其他用户可以采用",
-    "share_n": "分享 {n} 个周期"
+    "share_n": "分享 {n} 个周期",
+    "export_selected": "导出（选择数据）",
+    "export_all": "快速导出全部",
+    "import_raw": "高级：用 JSON 替换全部",
+    "download_export": "下载导出文件",
+    "analyze_import": "分析文件",
+    "import_selected": "导入所选",
+    "back": "返回"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -390,6 +399,7 @@
     "panel_default_tab": "默认标签",
     "panel_language": "面板语言",
     "per_cycle_short": "周期",
+    "pg_anti_wrinkle": "防皱",
     "pg_autofill_tip": "根据当前值自动填充范围（{lo}–{hi}）",
     "pg_best_value": "找到的最佳值",
     "pg_current_value": "当前值：",
@@ -524,6 +534,12 @@
     "pg_sweep_param": "参数",
     "pg_objective": "目标",
     "pg_steps": "步数",
+    "pg_stress_group": "闲置终止测试",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "待机功率 (W)",
+    "pg_stress_idle_w_desc": "覆盖自动检测的待机功率下限（留空则使用自动值）。",
+    "pg_stress_toggle": "测试闲置终止",
+    "pg_stress_toggle_desc": "模拟设备在录制结束后维持待机功耗水平，查看 WashData 是否以及何时停止运行周期。",
     "pg_sweep_2d": "2D 热图",
     "pg_sweep_param_y": "第二个参数",
     "pg_obj_match": "匹配准确度",
@@ -538,6 +554,9 @@
     "aria_playground_chart2": "交互式周期功率图：悬停查看时间/功率，滚动缩放，拖动平移",
     "pg_alert_timeout_end": "因超时而结束，并非预测结束",
     "pg_alert_indefinite": "将一直运行下去",
+    "pg_alert_stress_cap": "已达到安全上限",
+    "pg_alert_stress_ok": "闲置终止: 运行周期已停止",
+    "pg_alert_stress_warn": "待机功耗超过停止阈值",
     "task_pg_history": "用历史测试",
     "task_pg_sweep": "优化",
     "task_reprocess": "重新处理",
@@ -566,7 +585,31 @@
     "task_split": "正在拆分周期",
     "task_trim": "正在裁剪周期",
     "task_merge": "正在合并周期",
-    "task_rebuild": "正在重建包络"
+    "task_rebuild": "正在重建包络",
+    "cat_profiles": "配置文件（程序）",
+    "cat_real_cycles": "周期（运行历史）",
+    "cat_reference_cycles": "参考周期（已导入）",
+    "cat_custom_phases": "自定义阶段",
+    "cat_profile_groups": "配置文件组",
+    "cat_settings": "检测与识别设置",
+    "cat_matching_config": "识别器调优",
+    "cat_ml_models": "ML 模型",
+    "cat_feedback": "反馈与审阅标签",
+    "cat_suggestions": "建议",
+    "cat_maintenance_log": "维护日志",
+    "cat_history_logs": "历史与更改日志",
+    "cat_lifetime_stats": "累计总量",
+    "cycles_short": "周期",
+    "import_mode": "合并方式",
+    "mode_merge": "合并（保留我的）",
+    "mode_replace": "替换所选",
+    "cycle_destination": "导入的周期应存放到哪里？",
+    "dest_reference": "参考（仅形状）",
+    "dest_real_history": "真实历史（计入统计）",
+    "conflict_resolution": "名称冲突",
+    "conflict_import_copy": "作为副本导入",
+    "conflict_keep_mine": "保留我的",
+    "conflict_overwrite": "覆盖"
   },
   "log": {
     "all_levels": "所有级别",
@@ -643,7 +686,9 @@
     "force_stop_msg": "立即强制停止当前周期吗？该周期将被保存为已中断。",
     "store_import": "导入参考周期",
     "store_share": "分享到社区商店",
-    "store_share_device": "分享此设备"
+    "store_share_device": "分享此设备",
+    "export_select": "导出 - 选择数据",
+    "import_wizard": "导入 - 选择数据"
   },
   "msg": {
     "appliance_monitor": "设备监控",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "发现 {count} 个相似未标记周期 – 创建配置文件以开始匹配它们。",
     "cycles_deleted": "已删除 {count} 个周期",
     "enough_data": "有足够数据可供学习（{current}/{min} 个循环）。",
-    "export_description": "将所有配置文件和周期导出为 JSON，或从之前的导出中恢复。",
+    "export_description": "精确选择要导出到 JSON 的配置文件、周期、设置等，或分析文件并仅导入所需的部分。",
     "feedback_cycles_pending": "{n} 个周期{s}待审查",
     "feedback_prompt": "确认正确、修正程序或忽略。",
+    "feedback_relabel_hint": "重新标记此周期也会解决它。",
     "filter_by_profile": "按配置文件筛选…",
     "group_modal_help": "将形状相同但温度/转速不同的程序分组（时长可能不同）。匹配将组作为一个候选项评分，然后选择最合适的成员。至少选 2 个；叠加显示相似程度。",
     "group_not_cohesive": "这些配置文件不够相似，无法可靠分组，因此匹配会单独处理它们，直到您移除离群值或拆分组。",
@@ -729,6 +775,7 @@
     "pg_restart_note": "重启 Home Assistant 以启用模拟工具。",
     "pg_sim_progress": "{done} / {total} 个周期",
     "pg_starting": "正在启动…",
+    "pg_stress_synthetic": "待机模拟从此处开始",
     "pg_sweep_intro": "如果 {param} 不同会怎样？在最近 {cycles} 个周期上测试 {steps} 个值，找到能正确匹配最多周期的设置。",
     "pg_sweep_step": "步骤 {done} / {total}",
     "pg_undetected": "{n} 个周期{s}未检测到",
@@ -837,6 +884,9 @@
     "pg_simulating": "正在模拟周期…",
     "pg_canvas_empty2": "在上方选择一个周期并按“运行”进行模拟。然后悬停查看数值，滚动缩放，拖动平移。",
     "pg_apply_settings_confirm": "将这 {n} 项设置保存到该设备吗？ {list}",
+    "pg_stress_terminated_detail": "稳定在约 {idle}W 的待机功率 -- {h} 小时 {m} 分钟后通过 {reason} 结束了周期。",
+    "pg_stress_above_threshold_detail": "待机功耗约 {idle}W 达到或超过有效停止阈值 ({stop}W) -- 周期从未被判定为静止状态。请提高 stop_threshold_w 以修复。",
+    "pg_stress_hit_cap_detail": "周期运行了 {h} 小时 {m} 分钟仍未停止 -- 被安全上限强制停止。待机功耗 {idle}W 对比停止阈值 {stop}W。",
     "no_logs_match": "没有日志记录符合这些筛选条件。",
     "pg_analysis_hint2": "选择一个周期并点击运行以加载匹配分析。",
     "pg_analysis_empty2": "点击运行以查看匹配分析。",
@@ -864,7 +914,15 @@
     "store_share_device_intro": "上传 {brand} {model} 及您选择的参考周期。拥有相同设备的其他用户可以采用您的程序。条目在公开前经过审核。",
     "share_profile_no_cycles": "无参考周期 -- 请在\"周期\"选项卡中将周期标记为 ⭐ 以包含此配置文件",
     "advisory_phase_inconsistent": "'{name}' 似乎混合了不同的程序或温度，各周期的加热时长差异很大。将其拆分为独立的配置文件（例如按温度区分）可以改善匹配和时间估算。",
-    "advisory_phase_inconsistent_title": "⚠ 可能混合了不同程序"
+    "advisory_phase_inconsistent_title": "⚠ 可能混合了不同程序",
+    "export_select_intro": "精确勾选要包含的内容。即使选择配置文件而不包含其周期，仍会导出可识别的程序（其学习到的形状会一同迁移）。",
+    "import_analyze_hint": "加载导出的文件（或粘贴其 JSON）。WashData 会对其进行分析，并在任何更改之前准确显示可导入的内容。",
+    "analyzing": "正在分析…",
+    "device_type_mismatch_warn": "此导出文件来自不同的设备类型（{src} 对 {local}）。程序和周期仍可作为参考数据导入，但设备专属设置和真实历史导入将被禁用。",
+    "merge_hint": "导入的项目会被添加，本地数据不会丢失。名称冲突将在下方解决。",
+    "replace_warn": "每个勾选的类别都会被清除并用文件中的内容替换。未勾选的类别保持不变。",
+    "dest_reference_hint": "导入的周期仅用于改进程序识别，绝不影响用量/能耗统计。",
+    "dest_real_history_hint": "导入的周期计为本设备自身的历史记录，并纳入能耗/用量统计。适用于将一台设备迁移到新的安装环境。"
   },
   "pg_desc": {
     "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -875,6 +933,11 @@
     "start_duration_threshold": "确认启动所需的超阈值秒数",
     "start_threshold_w": "计为启动的最小瓦数",
     "stop_threshold_w": "低于此值机器计为关闭",
+    "anti_wrinkle_enabled": "吸收主阶段之后的翻滚脉冲，而不是将其识别为新周期",
+    "anti_wrinkle_exit_power": "脉冲之间的功率必须低于此值，防皱才能保持活动",
+    "anti_wrinkle_idle_timeout": "防皱结束前两次翻滚脉冲之间允许的静止时间",
+    "anti_wrinkle_max_duration": "长于此值的脉冲将结束防皱并开启新周期",
+    "anti_wrinkle_max_power": "高于此值的脉冲将结束防皱并开启新周期",
     "dtw_bandwidth": "Stage 3: Sakoe-Chiba 规整带宽 (0 = DTW 关闭; 默认 0.2 = 周期长度的 20%)",
     "corr_weight": "Stage 2: 曲线形状（相关性）与功率水平（MAE）之间的平衡; 默认 0.45",
     "duration_weight": "Stage 4: 运行时长一致性对最终得分的影响程度（默认 0.22）",
@@ -984,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "脉冲之间的功率必须低于此值，抗皱模式才能保持活动状态。",
       "label": "退出功率阈值"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "最大脉冲间隔",
+      "doc": "防皱模式结束前，机器在两次翻滚脉冲之间可以保持静止的时长。请将其设置为高于烘干机在脉冲之间留出的最长间隔，否则之后的每个脉冲都会被识别为误启动。"
     },
     "anti_wrinkle_max_duration": {
       "doc": "比这更长的脉冲被视为真正的周期，而不是抗皱滚动。",
@@ -1603,7 +1670,9 @@
     "store_device_shared_partial": "已分享 {n} 个周期；{failed} 个无法上传。",
     "store_device_shared_some_dup": "已分享 {created} 个周期；{dup} 个已在商店中。",
     "store_download_failed": "下载失败：{error}",
-    "store_download_nothing": "没有新内容可下载 - 此配置已在您的设备上。"
+    "store_download_nothing": "没有新内容可下载 - 此配置已在您的设备上。",
+    "export_selective_done": "导出已下载",
+    "import_selective_done": "已导入 {profiles} 个配置文件和 {cycles} 个周期"
   },
   "suggestion": {
     "both_agree": "WashData建议",

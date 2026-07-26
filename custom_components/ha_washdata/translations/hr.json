@@ -17,14 +17,6 @@
           "min_power": "Očitavanje snage iznad ovog praga (u vatima) znači da uređaj radi. Počnite s 2 W za većinu uređaja."
         }
       },
-      "first_profile": {
-        "title": "Napravi prvi profil",
-        "description": "**Ciklus** je cijeli rad vašeg uređaja (npr. puno rublja). **Profil** grupira ove cikluse prema vrsti (npr. 'Pamuk', 'Brzo pranje'). Stvaranje profila sada pomaže u trenutnoj procjeni trajanja integracije.\n\nOvaj profil možete ručno odabrati u kontrolama uređaja ako se ne otkrije automatski.\n\n**Ostavite 'Naziv profila' prazno da biste preskočili ovaj korak.**",
-        "data": {
-          "profile_name": "Ime profila (neobavezno)",
-          "manual_duration": "Procijenjeno trajanje (minute)"
-        }
-      },
       "reconfigure": {
         "title": "Reconfigure WashData",
         "description": "Update the device name, appliance type, or power sensor.",

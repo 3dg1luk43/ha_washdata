@@ -18,8 +18,10 @@
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import hashlib
+import json
 import logging
 import math
 import os
@@ -51,6 +53,7 @@ from .const import (
     SHAPE_DRIFT_MIN_CYCLES,
     SHAPE_DRIFT_RESAMPLE_N,
     SHAPE_DRIFT_THRESHOLD,
+    SHAREABLE_SETTING_KEYS,
     SMART_TERM_LANDSCAPE_RATIO,
     SMART_TERM_LANDSCAPE_MIN_SHAPE,
     STORAGE_KEY,
@@ -840,6 +843,356 @@ def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     return margin, margin < MATCH_AMBIGUITY_MARGIN
 
 
+# ── Selective export/import taxonomy ────────────────────────────────────────────
+# One canonical description of the store's top-level data kinds, grouped into the
+# user-facing categories offered by the export/import wizard. A single walker
+# (``_scan_data``) drives BOTH the export inventory and the import manifest so the
+# tree UI is identical on both sides, and the export filter + selective-import
+# apply agree on what each category contains.
+#
+# Keys NOT listed here are handled specially and are never a selectable category:
+#   - "envelopes": derived cache -- rebuilt on import for cycle-receiving profiles,
+#     or carried verbatim for a profiles-only export so definition-only profiles
+#     stay matchable without their raw traces.
+#   - "active_cycle" / "last_active_save": transient in-flight state -- never exported.
+#   - "store_account": credential (GitHub refresh token) -- never exported.
+_EXPORT_CATEGORIES: dict[str, dict[str, Any]] = {
+    "profiles":         {"keys": ["profiles"], "kind": "dict", "enumerable": True},
+    "real_cycles":      {"keys": ["past_cycles"], "kind": "list", "enumerable": True,
+                         "group_by": "profile_name"},
+    "reference_cycles": {"keys": ["reference_cycles"], "kind": "list", "enumerable": True,
+                         "group_by": "profile_name"},
+    "custom_phases":    {"keys": ["custom_phases"], "kind": "list"},
+    "profile_groups":   {"keys": ["profile_groups"], "kind": "dict"},
+    "matching_config":  {"keys": ["matching_config"], "kind": "dict", "device_specific": True},
+    "suggestions":      {"keys": ["suggestions", "suggestion_apply_cycle_count"], "kind": "mixed"},
+    "feedback":         {"keys": ["feedback_history", "pending_feedback"], "kind": "dict"},
+    "maintenance_log":  {"keys": ["maintenance_log"], "kind": "list"},
+    "ml_models":        {"keys": ["ml_model_versions", "ml_training_history", "ml_last_training_run"],
+                         "kind": "mixed", "device_specific": True},
+    "history_logs":     {"keys": ["auto_adjustments", "match_ranking_history", "settings_changelog"],
+                         "kind": "list"},
+    "lifetime_stats":   {"keys": ["lifetime_energy_wh", "lifetime_cycle_count"], "kind": "scalar"},
+    "settings":         {"keys": [], "kind": "options", "device_specific": True},
+}
+
+# Categories whose payload rides at the envelope level (entry_options), not inside "data".
+_ENVELOPE_LEVEL_CATEGORIES = frozenset({"settings"})
+# Enumerable/structural categories handled explicitly (not as plain leaf keys).
+_STRUCTURAL_CATEGORIES = frozenset({"profiles", "real_cycles", "reference_cycles", "settings"})
+
+
+def _strip_redacted_dict(d: Any) -> dict[str, Any]:
+    """Drop diagnostic ``**REDACTED**`` sentinels so they never overwrite real settings."""
+    if not isinstance(d, dict):
+        return {}
+    return {k: v for k, v in d.items() if v != "**REDACTED**"}
+
+
+def _shareable_settings(opts: Any) -> dict[str, Any]:
+    """Filter options to the SHAREABLE allow-list, numeric non-bool only.
+
+    Mirrors the community-bundle settings filter (``store.py`` / ``ws_api.py``): the
+    only options that may travel with an export are recognition/matching thresholds,
+    never identity keys or the power-sensor binding.
+    """
+    if not isinstance(opts, dict):
+        return {}
+    return {
+        k: opts[k]
+        for k in SHAREABLE_SETTING_KEYS
+        if k in opts and isinstance(opts[k], (int, float)) and not isinstance(opts[k], bool)
+    }
+
+
+def _selected_categories(selection: Any) -> set[str]:
+    """Normalize a wizard ``selection`` into the set of enabled category ids.
+
+    Accepts either ``{"categories": [ids...]}`` or ``{"categories": {id: bool}}``.
+    Unknown category ids are ignored so a stale client can't inject junk keys.
+    """
+    if not isinstance(selection, dict):
+        return set()
+    cats = selection.get("categories")
+    out: set[str] = set()
+    if isinstance(cats, dict):
+        for cid, on in cats.items():
+            if on and cid in _EXPORT_CATEGORIES:
+                out.add(str(cid))
+    elif isinstance(cats, list):
+        for cid in cats:
+            if cid in _EXPORT_CATEGORIES:
+                out.add(str(cid))
+    return out
+
+
+def _cycles_by_profile(seq: Any) -> dict[str, list[dict[str, Any]]]:
+    """Group a cycle list by ``profile_name`` (unlabeled cycles under ``""``)."""
+    groups: dict[str, list[dict[str, Any]]] = {}
+    if not isinstance(seq, list):
+        return groups
+    for c in seq:
+        if not isinstance(c, dict):
+            continue
+        name = str(c.get("profile_name") or "")
+        groups.setdefault(name, []).append(c)
+    return groups
+
+
+def _scan_data(data_dict: Any, entry_options: Any = None) -> dict[str, dict[str, Any]]:
+    """Walk a store ``data`` blob and return a per-category inventory.
+
+    Pure and never raises. Drives both the export inventory (over ``self._data``)
+    and the import manifest (over an unwrapped payload). Enumerable categories
+    carry item/group detail so the panel can render a hierarchical tri-state tree.
+    """
+    out: dict[str, dict[str, Any]] = {}
+    dd = data_dict if isinstance(data_dict, dict) else {}
+    profiles = dd.get("profiles") if isinstance(dd.get("profiles"), dict) else {}
+    past = dd.get("past_cycles") if isinstance(dd.get("past_cycles"), list) else []
+    refs = dd.get("reference_cycles") if isinstance(dd.get("reference_cycles"), list) else []
+
+    past_by = _cycles_by_profile(past)
+    ref_by = _cycles_by_profile(refs)
+
+    # profiles: each profile with its local real/reference cycle counts
+    prof_items = [
+        {
+            "name": name,
+            "real_cycles": len(past_by.get(name, [])),
+            "reference_cycles": len(ref_by.get(name, [])),
+        }
+        for name in profiles
+    ]
+    out["profiles"] = {"present": bool(profiles), "count": len(profiles), "items": prof_items}
+
+    def _groups(groups: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = []
+        for name in sorted(groups):
+            cs = groups[name]
+            result.append(
+                {
+                    "profile": name,
+                    "count": len(cs),
+                    "cycles": [
+                        {
+                            "id": c.get("id"),
+                            "date": c.get("start_time"),
+                            "duration": c.get("duration"),
+                        }
+                        for c in cs
+                        if isinstance(c, dict)
+                    ],
+                }
+            )
+        return result
+
+    out["real_cycles"] = {"present": bool(past), "count": len(past), "groups": _groups(past_by)}
+    out["reference_cycles"] = {"present": bool(refs), "count": len(refs), "groups": _groups(ref_by)}
+
+    # leaf categories (everything except the structural ones above + settings)
+    for cat_id, spec in _EXPORT_CATEGORIES.items():
+        if cat_id in _STRUCTURAL_CATEGORIES:
+            continue
+        present = False
+        count = 0
+        for key in spec.get("keys", []):
+            if key not in dd:
+                continue
+            val = dd.get(key)
+            if isinstance(val, (dict, list)):
+                if val:
+                    present = True
+                    count += len(val)
+            elif val not in (None, 0, 0.0, ""):
+                present = True
+                count += 1
+        out[cat_id] = {"present": present, "count": count}
+
+    # settings: the shareable numeric subset of entry_options
+    shareable = _shareable_settings(entry_options)
+    out["settings"] = {
+        "present": bool(shareable),
+        "count": len(shareable),
+        "keys": sorted(shareable.keys()),
+    }
+    return out
+
+
+def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Normalize any supported export/import wrapper into ``(data_dict, meta)``.
+
+    Handles the four shapes the integration can be handed:
+      * HA diagnostics download   -> ``{"home_assistant": ..., "data": {...}}``
+      * integration diagnostics   -> ``{..., "store_export": {...}}``
+      * v1 flat export            -> ``{"profiles": ..., "past_cycles": ...}``
+      * v2+ nested export         -> ``{"version": N, "data": {...}, ...}``
+
+    Returns a shallow-copied, shape-repaired ``data_dict`` (so the caller can mutate
+    or assign it without aliasing the input) plus a ``meta`` dict carrying format,
+    version, redaction-stripped ``entry_data``/``entry_options``, the device
+    fingerprint and the export timestamp. Raises ``ValueError`` on a payload that
+    is not a usable object.
+    """
+    if isinstance(payload, dict) and "home_assistant" in payload and "data" in payload:
+        payload = payload["data"]
+    if isinstance(payload, dict) and "store_export" in payload:
+        payload = payload["store_export"]
+    if not isinstance(payload, dict):
+        raise ValueError("Invalid export payload (not a JSON object)")
+
+    version = payload.get("version", 1)
+    if version == 1 or "data" not in payload:
+        data_dict: dict[str, Any] = {
+            "profiles": payload.get("profiles", {}),
+            "past_cycles": payload.get("past_cycles", []),
+            "envelopes": payload.get("envelopes", {}),
+        }
+        fmt = "v1"
+    else:
+        data = payload.get("data")
+        if not isinstance(data, dict):
+            raise ValueError("Invalid export payload (missing or invalid 'data' key)")
+        data_dict = dict(data)  # shallow copy: caller may assign/mutate freely
+        fmt = "v2"
+
+    # Repair top-level shape so downstream code can assume the core keys.
+    if not isinstance(data_dict.get("profiles"), dict):
+        data_dict["profiles"] = {}
+    if not isinstance(data_dict.get("past_cycles"), list):
+        data_dict["past_cycles"] = []
+    if not isinstance(data_dict.get("reference_cycles"), list):
+        data_dict["reference_cycles"] = []
+    data_dict.setdefault("envelopes", {})
+
+    fingerprint = payload.get("device_fingerprint")
+    meta: dict[str, Any] = {
+        "format": fmt,
+        "version": version,
+        "entry_data": _strip_redacted_dict(payload.get("entry_data", {})),
+        "entry_options": _strip_redacted_dict(payload.get("entry_options", {})),
+        "device_fingerprint": fingerprint if isinstance(fingerprint, dict) else {},
+        "exported_at": payload.get("exported_at"),
+    }
+    return data_dict, meta
+
+
+def build_import_manifest(
+    payload: Any, *, local_device_type: str, local_profile_names: Any
+) -> dict[str, Any]:
+    """Analyze an import payload and describe what it contains + what can be imported.
+
+    Pure (no store mutation). Returns ``{"error": msg}`` on an unparseable payload so
+    the WS layer / panel can render a friendly message instead of failing. Otherwise
+    returns the format/version, source-vs-local device type compatibility, per-category
+    inventory (with per-profile ``conflict`` flags and ``importable`` gating), and any
+    warnings the panel should surface.
+    """
+    try:
+        data_dict, meta = unwrap_import_payload(payload)
+    except ValueError as exc:
+        return {"error": str(exc)}
+
+    scan = _scan_data(data_dict, entry_options=meta.get("entry_options"))
+    source_dt = str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
+    device_type_match = (not source_dt) or (source_dt == local_device_type)
+
+    local_names = {str(n).casefold() for n in (local_profile_names or [])}
+    for item in scan.get("profiles", {}).get("items", []):
+        item["conflict"] = str(item.get("name", "")).casefold() in local_names
+
+    for cat_id, info in scan.items():
+        spec = _EXPORT_CATEGORIES.get(cat_id, {})
+        importable = bool(info.get("present"))
+        if spec.get("device_specific") and not device_type_match:
+            importable = False
+        info["importable"] = importable
+
+    warnings: list[str] = []
+    if not device_type_match:
+        warnings.append("device_type_mismatch")
+
+    return {
+        "format": meta.get("format"),
+        "version": meta.get("version"),
+        "exported_at": meta.get("exported_at"),
+        "source_device_type": source_dt,
+        "local_device_type": local_device_type,
+        "device_type_match": device_type_match,
+        "real_history_allowed": device_type_match,
+        "categories": scan,
+        "warnings": warnings,
+    }
+
+
+def _unique_profile_name(existing: dict[str, Any], base: str) -> str:
+    """Return ``base`` or ``"base 2"``/``"base 3"``… so it doesn't collide in ``existing``."""
+    if base not in existing:
+        return base
+    i = 2
+    while f"{base} {i}" in existing:
+        i += 1
+    return f"{base} {i}"
+
+
+def _usable_reference_pairs(points: Any) -> list[list[float]] | None:
+    """Validate a raw ``[[offset, watts], ...]`` trace for reference-cycle import: drop
+    non-finite/non-numeric samples, require >= 2 points and a positive time span. Returns the
+    sorted ``[offset, watts]`` pairs, or ``None`` if the trace is unusable (would no-op).
+
+    Single source of the "is this trace importable" rule, shared by ``_add_reference_cycle_nosave``
+    (which mutates) and the selective-import replace guard (which must not wipe a destination
+    when every selected cycle would silently no-op)."""
+    pairs: list[list[float]] = []
+    for p in (points if isinstance(points, (list, tuple)) else []):
+        if not isinstance(p, (list, tuple)) or len(p) < 2:
+            continue
+        try:
+            x, y = float(p[0]), float(p[1])
+        except (TypeError, ValueError):
+            continue
+        if np.isfinite(x) and np.isfinite(y):
+            pairs.append([x, y])
+    if len(pairs) < 2:
+        return None
+    pairs.sort(key=lambda q: q[0])  # defensive: normalize any out-of-order offsets
+    if float(pairs[-1][0] - pairs[0][0]) <= 0:
+        return None
+    return pairs
+
+
+def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
+    """Append items from ``incoming`` to ``base`` in place, skipping duplicates.
+
+    Dedupes by ``id`` when items carry one, else by a stable JSON signature so
+    re-importing the same log file is idempotent for id-less list entries.
+    """
+    seen_ids = {str(x.get("id")) for x in base if isinstance(x, dict) and x.get("id") is not None}
+    seen_sigs: set[str] = set()
+    for x in base:
+        try:
+            seen_sigs.add(json.dumps(x, sort_keys=True, default=str))
+        except (TypeError, ValueError):
+            pass
+    for item in incoming:
+        if isinstance(item, dict) and item.get("id") is not None:
+            key = str(item.get("id"))
+            if key in seen_ids:
+                continue
+            seen_ids.add(key)
+            base.append(item)
+            continue
+        try:
+            sig = json.dumps(item, sort_keys=True, default=str)
+        except (TypeError, ValueError):
+            sig = None
+        if sig is not None:
+            if sig in seen_sigs:
+                continue
+            seen_sigs.add(sig)
+        base.append(item)
+
+
 class ProfileStore:
     """Manages storage of washer profiles and past cycles."""
 
@@ -1371,37 +1724,24 @@ class ProfileStore:
         out.sort(key=lambda r: r.get("start_time") or "", reverse=True)
         return out
 
-    async def add_reference_cycle(
-        self, profile_name: str, points: list[list[float]], meta: dict[str, Any]
+    def _add_reference_cycle_nosave(
+        self, profile_name: str, points: list[list[float]], meta: dict[str, Any],
+        *, id_pool: set[Any] | None = None,
     ) -> str:
-        """Import a reference cycle downloaded from the store into ``reference_cycles``.
+        """Validate + append one reference cycle. NO envelope rebuild, NO save.
 
-        ``points`` is a raw trace of ``[offset_seconds, watts]`` pairs. ``meta`` may carry
-        ``store_cycle_id`` (-> ``meta.source = "store:<id>"``), ``store_uploaded_at`` and
-        ``sampling_interval``. The cycle is stamped with import-time timestamps (its real
-        run time is meaningless locally), forced ``status="completed"`` and
-        ``ml_review.golden=True`` so it seeds the envelope shape, then the envelope is
-        rebuilt. Never accumulates lifetime energy or touches ``past_cycles``.
+        The mutation core shared by ``add_reference_cycle`` (single-cycle: rebuild +
+        save after) and ``async_import_data_selective`` (bulk: rebuild each touched
+        profile once + a single save at the end). Returns the new cycle id, or ``""``
+        when the trace is unusable (mutating nothing).
         """
-        # Validate the trace BEFORE creating any persistent state (profile entry /
-        # reference cycle): drop non-finite/non-numeric samples, require >= 2 points
-        # and a positive time span. A garbage trace returns "" and mutates nothing.
-        pairs: list[list[float]] = []
-        for p in (points or []):
-            if len(p) < 2:
-                continue
-            try:
-                x, y = float(p[0]), float(p[1])
-            except (TypeError, ValueError):
-                continue
-            if math.isfinite(x) and math.isfinite(y):
-                pairs.append([x, y])
-        if len(pairs) < 2:
+        # Validate the trace BEFORE creating any persistent state (profile entry / reference
+        # cycle): a garbage trace returns "" and mutates nothing. Same rule the import guard
+        # uses to decide whether a replace has anything usable to refill a destination with.
+        pairs = _usable_reference_pairs(points)
+        if pairs is None:
             return ""
-        pairs.sort(key=lambda q: q[0])  # defensive: normalize any out-of-order offsets
         duration = float(pairs[-1][0] - pairs[0][0])
-        if duration <= 0:
-            return ""
         # Re-base to offset 0 so envelope reconstruction and DTW work correctly.
         if pairs[0][0] != 0.0:
             origin = pairs[0][0]
@@ -1424,16 +1764,35 @@ class ProfileStore:
             },
         }
         if meta.get("sampling_interval"):
-            cycle["sampling_interval"] = float(meta["sampling_interval"])
+            # ignore a malformed sampling_interval rather than raise mid-import
+            with contextlib.suppress(TypeError, ValueError):
+                cycle["sampling_interval"] = float(meta["sampling_interval"])
         # A reference cycle implies its program exists locally; create a minimal profile
         # entry if absent so the matcher iterates it and the rebuild can set its template.
         profiles = self._data.setdefault("profiles", {})
         if profile_name not in profiles:
             profiles[profile_name] = {"avg_duration": duration}
-        self._add_cycle_data(cycle, target=self._data.setdefault("reference_cycles", []))
+        self._add_cycle_data(cycle, target=self._data.setdefault("reference_cycles", []), id_pool=id_pool)
+        return str(cycle.get("id", ""))
+
+    async def add_reference_cycle(
+        self, profile_name: str, points: list[list[float]], meta: dict[str, Any]
+    ) -> str:
+        """Import a reference cycle downloaded from the store into ``reference_cycles``.
+
+        ``points`` is a raw trace of ``[offset_seconds, watts]`` pairs. ``meta`` may carry
+        ``store_cycle_id`` (-> ``meta.source = "store:<id>"``), ``store_uploaded_at`` and
+        ``sampling_interval``. The cycle is stamped with import-time timestamps (its real
+        run time is meaningless locally), forced ``status="completed"`` and
+        ``ml_review.golden=True`` so it seeds the envelope shape, then the envelope is
+        rebuilt. Never accumulates lifetime energy or touches ``past_cycles``.
+        """
+        cid = self._add_reference_cycle_nosave(profile_name, points, meta)
+        if not cid:
+            return ""
         await self.async_rebuild_envelope(profile_name)
         await self.async_save()
-        return str(cycle.get("id", ""))
+        return cid
 
     # ── Profile groups (Stage 5: near-duplicate variants) ──────────────────────
 
@@ -3074,16 +3433,28 @@ class ProfileStore:
         self._add_cycle_data(cycle_data)
         await self.async_enforce_retention()
 
-    def _add_cycle_data(self, cycle_data: CycleDict, target: list[CycleDict] | None = None) -> None:
+    def _add_cycle_data(
+        self,
+        cycle_data: CycleDict,
+        target: list[CycleDict] | None = None,
+        *,
+        id_pool: set[Any] | None = None,
+    ) -> None:
         """Internal logic to add cycle data to storage.
 
         ``target`` defaults to ``past_cycles``; ``add_reference_cycle`` passes the
         separate ``reference_cycles`` list so imported cycles never enter usage stats.
+
+        ``id_pool`` lets a bulk caller (e.g. selective import) hand in a reusable set of
+        already-assigned ids so the SHA-id uniqueness check stays O(1) amortized instead
+        of rebuilding the id set from the growing destination list on every call (which is
+        O(N^2) over a large import and would block the event loop). When supplied it is
+        mutated in place with the newly-minted id.
         """
         dest = self._data["past_cycles"] if target is None else target
         # Generate SHA256 ID — dedup suffix avoids collisions when two cycles share
         # an identical raw start_time + duration (e.g. bulk reference-cycle imports).
-        existing_ids = {c.get("id") for c in dest if isinstance(c, dict)}
+        existing_ids = id_pool if id_pool is not None else {c.get("id") for c in dest if isinstance(c, dict)}
         unique_str = f"{cycle_data['start_time']}_{cycle_data['duration']}"
         candidate = hashlib.sha256(unique_str.encode()).hexdigest()[:12]
         suffix = 0
@@ -3091,6 +3462,8 @@ class ProfileStore:
             suffix += 1
             candidate = hashlib.sha256(f"{unique_str}_{suffix}".encode()).hexdigest()[:12]
         cycle_data["id"] = candidate
+        if id_pool is not None:
+            id_pool.add(candidate)
 
         # Preserve profile_name if already set by manager; default to None otherwise
         if "profile_name" not in cycle_data:
@@ -5535,10 +5908,18 @@ class ProfileStore:
 
 
     def export_data(
-        self, entry_data: JSONDict | None = None, entry_options: JSONDict | None = None
+        self,
+        entry_data: JSONDict | None = None,
+        entry_options: JSONDict | None = None,
+        selection: dict[str, Any] | None = None,
     ) -> JSONDict:
         # Return a serializable snapshot of the store for backup/export.
         # Includes config entry data/options so users can transfer fine-tuned settings.
+        #
+        # ``selection`` (wizard) narrows the payload to chosen categories/items; when
+        # ``None`` this is the whole-store dump the diagnostics + quick-export callers
+        # rely on. The envelope shape ({version, data, entry_data, entry_options, ...})
+        # is identical either way so old importers accept a selective export too.
         opts = entry_options or {}
         data = entry_data or {}
         _FINGERPRINT_KEYS = (
@@ -5553,67 +5934,110 @@ class ProfileStore:
         for key in _FINGERPRINT_KEYS:
             if key in opts:
                 device_fingerprint[key] = opts[key]
-        # Never let a backup/diagnostics export carry the GitHub refresh token: the
-        # (legacy, now-global) per-device store account may still hold it. Shallow-copy
-        # so we can drop the credential without mutating live state, and so a caller
-        # can't alias-mutate self._data through the returned snapshot.
-        export_store = dict(self._data)
-        export_store.pop("store_account", None)
+        if selection is None:
+            # Never let a backup/diagnostics export carry the GitHub refresh token: the
+            # (legacy, now-global) per-device store account may still hold it. Shallow-copy
+            # so we can drop the credential without mutating live state, and so a caller
+            # can't alias-mutate self._data through the returned snapshot.
+            export_store = dict(self._data)
+            export_store.pop("store_account", None)
+            out_entry_data = data
+            out_entry_options = opts
+        else:
+            # Selective export: start from an empty blob and copy only chosen categories
+            # (store_account can never leak because it is not a category). Raw entry_data
+            # is never shipped (it carries the source power_sensor binding); settings
+            # travel only as the shareable numeric subset, and only when selected.
+            export_store = self._filter_export_data(dict(self._data), selection, opts)
+            cats = _selected_categories(selection)
+            out_entry_data = {}
+            out_entry_options = _shareable_settings(opts) if "settings" in cats else {}
         return {
             "version": STORAGE_VERSION,
             "entry_id": self.entry_id,
             "exported_at": dt_util.now().isoformat(),
             "device_fingerprint": device_fingerprint,
             "data": export_store,
-            "entry_data": data,
-            "entry_options": opts,
+            "entry_data": out_entry_data,
+            "entry_options": out_entry_options,
         }
 
+    def get_export_inventory(self, entry_options: JSONDict | None = None) -> dict[str, Any]:
+        """Per-category inventory of this device's store, for the export wizard tree."""
+        return _scan_data(self._data, entry_options=entry_options or {})
+
+    def _filter_export_data(
+        self, data: dict[str, Any], selection: dict[str, Any], entry_options: JSONDict
+    ) -> dict[str, Any]:
+        """Build a filtered ``data`` blob containing only the selected categories/items.
+
+        Enumerable categories (profiles, real/reference cycles) honour an optional
+        per-category id/name subset from ``selection``; when the subset is absent the
+        whole category is included. The "profiles empty" rule: when profiles are
+        selected but neither cycle category is, the profiles' cached envelopes are
+        carried so the target can still match without the raw traces.
+        """
+        cats = _selected_categories(selection)
+        out: dict[str, Any] = {}
+        profiles_src = data.get("profiles") if isinstance(data.get("profiles"), dict) else {}
+
+        selected_profiles: set[str] | None = None
+        if "profiles" in cats:
+            names = selection.get("profiles")
+            if isinstance(names, list):
+                selected_profiles = {str(n) for n in names}
+                out["profiles"] = {
+                    n: profiles_src[n] for n in profiles_src if n in selected_profiles
+                }
+            else:
+                selected_profiles = set(profiles_src.keys())
+                out["profiles"] = dict(profiles_src)
+
+        def _filter_cycles(key: str, id_sel_key: str) -> list[Any]:
+            src = data.get(key) if isinstance(data.get(key), list) else []
+            ids = selection.get(id_sel_key)
+            if isinstance(ids, list):
+                idset = {str(i) for i in ids}
+                return [c for c in src if isinstance(c, dict) and str(c.get("id")) in idset]
+            return [c for c in src if isinstance(c, dict)]
+
+        include_real = "real_cycles" in cats
+        include_ref = "reference_cycles" in cats
+        if include_real:
+            out["past_cycles"] = _filter_cycles("past_cycles", "real_cycle_ids")
+        if include_ref:
+            out["reference_cycles"] = _filter_cycles("reference_cycles", "reference_cycle_ids")
+
+        # "profiles empty" rule: carry cached envelopes when profiles ship without cycles.
+        if "profiles" in cats and not include_real and not include_ref:
+            envs = data.get("envelopes") if isinstance(data.get("envelopes"), dict) else {}
+            carried = {n: envs[n] for n in (selected_profiles or set()) if n in envs}
+            if carried:
+                out["envelopes"] = carried
+
+        # Leaf categories: copy their raw store keys verbatim.
+        for cat_id in cats:
+            if cat_id in _STRUCTURAL_CATEGORIES:
+                continue
+            for key in _EXPORT_CATEGORIES.get(cat_id, {}).get("keys", []):
+                if key in data:
+                    out[key] = data[key]
+        return out
+
     async def async_import_data(self, payload: dict[str, Any]) -> dict[str, Any]:
-        # Import data from JSON payload (migration aware).
-        # Unwrap HA diagnostics download file (outer HA wrapper: {home_assistant, data, ...})
-        if "home_assistant" in payload and "data" in payload:
-            payload = payload["data"]
-            self._logger.info("Detected HA diagnostics file wrapper, unwrapping 'data'")
+        """Wholesale import: replace the entire store from a JSON payload.
 
-        # Unwrap our integration's diagnostics format ({entry, manager_state, store_export, ...})
-        if "store_export" in payload:
-            payload = payload["store_export"]
-            self._logger.info("Detected diagnostics store_export format, unwrapping")
-
-        version = payload.get("version", 1)
-
-        # Handle v1 format (flat structure) - convert to v2
-        if version == 1 or "data" not in payload:
-            # V1 format had profiles/past_cycles at top level
-            data_dict = {
-                "profiles": payload.get("profiles", {}),
-                "past_cycles": payload.get("past_cycles", []),
-                "envelopes": payload.get("envelopes", {}),
-            }
-            self._logger.info(
-                "Importing v1 format: %s cycles", len(data_dict.get("past_cycles", []))
-            )
-        else:
-            # V2 format with nested "data" key
-            data = payload.get("data")
-            if not isinstance(data, dict):
-                raise ValueError(
-                    "Invalid export payload (missing or invalid 'data' key)"
-                )
-            data_dict = cast(JSONDict, data)
-            self._logger.info(
-                "Importing v2 format: %s cycles", len(data_dict.get("past_cycles", []))
-            )
-
-        # Validate and repair structure
-        if not isinstance(data_dict.get("profiles"), dict):
-            data_dict["profiles"] = {}
-        if not isinstance(data_dict.get("past_cycles"), list):
-            data_dict["past_cycles"] = []
-        if not isinstance(data_dict.get("reference_cycles"), list):
-            data_dict["reference_cycles"] = []
-        data_dict.setdefault("envelopes", {})
+        Migration/wrapper aware via ``unwrap_import_payload`` (HA diagnostics,
+        integration ``store_export``, v1 flat, v2 nested). This is the destructive
+        "replace everything" path used by the legacy service / raw-JSON fallback;
+        selective merge lives in ``async_import_data_selective``.
+        """
+        data_dict, meta = unwrap_import_payload(payload)
+        self._logger.info(
+            "Importing %s format: %s cycles",
+            meta.get("format"),
+            len(data_dict.get("past_cycles", [])),
+        )
 
         if not data_dict.get("profiles") and not data_dict.get("past_cycles"):
             raise ValueError(
@@ -5623,17 +6047,375 @@ class ProfileStore:
         self._cached_sample_segments = {}
         await self.async_save()
 
-        # Strip diagnostic redaction sentinels so they don't overwrite real settings
-        def _strip_redacted(d: dict) -> dict:
-            if not isinstance(d, dict):
-                return {}
-            return {k: v for k, v in d.items() if v != "**REDACTED**"}
-
         return {
-            "entry_data": _strip_redacted(payload.get("entry_data", {})),
-            "entry_options": _strip_redacted(payload.get("entry_options", {})),
+            "entry_data": meta.get("entry_data", {}),
+            "entry_options": meta.get("entry_options", {}),
         }
 
+    async def async_import_data_selective(
+        self,
+        payload: dict[str, Any],
+        *,
+        selection: dict[str, Any],
+        mode: str = "merge",
+        conflict_resolutions: dict[str, str] | None = None,
+        cycle_destination: str = "reference",
+        apply_settings: bool = True,
+        local_device_type: str = "",
+    ) -> dict[str, Any]:
+        """Selectively import chosen categories/items, merging into existing data.
+
+        ``mode`` = ``"merge"`` (additive, nothing local is lost) or ``"replace"``
+        (each ticked category is wiped and replaced from the file). ``cycle_destination``
+        routes imported real cycles to ``"reference"`` (shape-only, never touches usage/
+        energy/count/lifetime stats — the hard isolation invariant) or ``"real_history"``
+        (``past_cycles``, feeds stats; only when the source device type matches).
+        ``conflict_resolutions`` maps a source profile name to
+        ``keep_mine`` / ``overwrite`` / ``import_as_copy``.
+
+        Reuses the community-adopt primitives (``_add_reference_cycle_nosave``,
+        ``_add_cycle_data``) and rebuilds each cycle-receiving profile's envelope
+        exactly once. Never routes through the wholesale replace path.
+        """
+        data_dict, meta = unwrap_import_payload(payload)
+        conflict_resolutions = conflict_resolutions or {}
+        mode = "replace" if str(mode) == "replace" else "merge"
+        cycle_destination = (
+            "real_history" if str(cycle_destination) == "real_history" else "reference"
+        )
+        cats = _selected_categories(selection)
+        if not cats:
+            raise ValueError("Import selection is empty — nothing to import")
+
+        # Device-type gating: block device-specific categories and force reference-only
+        # cycle destination when the source device type does not match this device.
+        source_dt = str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
+        # Keep this identical to build_import_manifest so the analysis shown to the user
+        # (which disables device-specific categories / real-history on a mismatch) cannot
+        # diverge from what the apply actually does. An unknown local device type is treated
+        # as a mismatch (conservative), matching the manifest.
+        device_type_match = (not source_dt) or (source_dt == local_device_type)
+        if not device_type_match:
+            cats = {c for c in cats if not _EXPORT_CATEGORIES.get(c, {}).get("device_specific")}
+            cycle_destination = "reference"
+
+        src_profiles = data_dict.get("profiles") if isinstance(data_dict.get("profiles"), dict) else {}
+        src_past = [c for c in (data_dict.get("past_cycles") or []) if isinstance(c, dict)]
+        src_refs = [c for c in (data_dict.get("reference_cycles") or []) if isinstance(c, dict)]
+
+        prof_filter = selection.get("profiles") if isinstance(selection.get("profiles"), list) else None
+        real_id_filter = (
+            selection.get("real_cycle_ids") if isinstance(selection.get("real_cycle_ids"), list) else None
+        )
+        ref_id_filter = (
+            selection.get("reference_cycle_ids")
+            if isinstance(selection.get("reference_cycle_ids"), list)
+            else None
+        )
+
+        def _apply_prof_filter(names: list[str]) -> list[str]:
+            if prof_filter is None:
+                return names
+            keep = {str(n) for n in prof_filter}
+            return [n for n in names if n in keep]
+
+        def _apply_id_filter(cycles: list[dict[str, Any]], idf: list[Any] | None) -> list[dict[str, Any]]:
+            if idf is None:
+                return cycles
+            keep = {str(i) for i in idf}
+            return [c for c in cycles if str(c.get("id")) in keep]
+
+        # The cycles that will actually be imported once the per-item id selection is applied.
+        selected_refs = _apply_id_filter(src_refs, ref_id_filter)
+        selected_past = _apply_id_filter(src_past, real_id_filter)
+
+        def _any_usable(cs: list[dict[str, Any]]) -> bool:
+            # A cycle bound for reference storage only refills the destination if its trace is
+            # usable (_add_reference_cycle_nosave silently no-ops on a degenerate trace), so
+            # the wipe guard checks usability, not mere presence, for reference-bound cycles.
+            return any(_usable_reference_pairs(c.get("power_data")) is not None for c in cs)
+
+        def _any_real_importable(cs: list[dict[str, Any]]) -> bool:
+            # A real-history record is skipped in Step 3 if it lacks start_time/duration (the
+            # fields _add_cycle_data requires), so the wipe guard requires at least one record
+            # that carries both -- otherwise an all-malformed selection wipes past_cycles and
+            # refills nothing.
+            return any(
+                c.get("start_time") is not None and c.get("duration") is not None for c in cs
+            )
+
+        # Replace-mode anti-data-loss guard: never wipe a destination unless the file has a
+        # SELECTED set that will actually refill it. Guarding on the post-filter sets (not raw
+        # src_*) means a stale/malformed id selection that matches nothing aborts here instead
+        # of emptying the local list; for reference-bound cycles we further require at least
+        # one usable trace so an all-degenerate selection can't wipe-then-add-nothing. Profiles
+        # are never wiped (per-name overwrite/copy), so a profiles-only replace needs no guard.
+        if mode == "replace":
+            if "reference_cycles" in cats and not _any_usable(selected_refs):
+                raise ValueError(
+                    "Import payload has no usable reference cycles — aborting to prevent data loss"
+                )
+            if "real_cycles" in cats:
+                if cycle_destination == "reference" and not _any_usable(selected_past):
+                    raise ValueError(
+                        "Import payload has no usable cycles — aborting to prevent data loss"
+                    )
+                if cycle_destination == "real_history" and not _any_real_importable(selected_past):
+                    raise ValueError(
+                        "Import payload contains no real cycles — aborting to prevent data loss"
+                    )
+
+        local_profiles = self._data.setdefault("profiles", {})
+        name_remap: dict[str, str] = {}
+        touched: set[str] = set()
+        overwritten: set[str] = set()  # profiles whose definition the file replaced in place
+        created_profiles = 0
+        conflicts_resolved = 0
+        real_imported = 0
+        ref_imported = 0
+        malformed_skipped = 0  # records dropped mid-import (surfaced in the summary)
+
+        # ── Step 1: profiles + conflict resolution ──────────────────────────────
+        if "profiles" in cats:
+            for name in _apply_prof_filter(list(src_profiles.keys())):
+                src_def = src_profiles.get(name)
+                if not isinstance(src_def, dict):
+                    continue
+                if name in local_profiles:
+                    # In replace mode the file wins for every ticked category, so a name
+                    # clash always overwrites the local profile in place. This is enforced
+                    # here (not just as a default) because the panel still transmits its
+                    # analyze-time per-conflict resolutions even though it hides the resolver
+                    # in replace mode — honouring an "import_as_copy" there would leave a
+                    # stale original with an un-rebuilt envelope and, when reference_cycles
+                    # is also replaced, a dangling sample_cycle_id. Merge mode keeps the safe
+                    # copy default and shows the resolver.
+                    res = "overwrite" if mode == "replace" else str(
+                        conflict_resolutions.get(name, "import_as_copy")
+                    )
+                    conflicts_resolved += 1
+                    if res == "keep_mine":
+                        name_remap[name] = name  # cycles route to the existing local profile
+                    elif res == "overwrite":
+                        local_profiles[name] = dict(src_def)
+                        name_remap[name] = name
+                        overwritten.add(name)  # let Step 5 replace any stale local envelope
+                    else:  # import_as_copy
+                        new_name = _unique_profile_name(local_profiles, f"{name} (imported)")
+                        local_profiles[new_name] = dict(src_def)
+                        name_remap[name] = new_name
+                        created_profiles += 1
+                else:
+                    local_profiles[name] = dict(src_def)
+                    name_remap[name] = name
+                    created_profiles += 1
+
+        def _ensure_profile(name: str, duration: float) -> None:
+            nonlocal created_profiles
+            if name and name not in local_profiles:
+                local_profiles[name] = {"avg_duration": float(duration or 0)}
+                created_profiles += 1
+
+        # Replace-mode wipes (hoisted so the id pools + dedup set below reflect the
+        # post-wipe lists). Each ticked cycle category clears the list it actually writes to
+        # (per the docstring's "each ticked category is wiped and replaced"), so real_cycles
+        # routed to the default reference destination wipes reference_cycles too -- not just
+        # when the reference_cycles category itself is ticked. The empty-payload guard above
+        # already refused to run if the file had nothing to replace it with.
+        if mode == "replace":
+            wipe_reference = "reference_cycles" in cats or (
+                "real_cycles" in cats and cycle_destination == "reference"
+            )
+            wipe_past = "real_cycles" in cats and cycle_destination == "real_history"
+            if wipe_reference:
+                self._data["reference_cycles"] = []
+            if wipe_past:
+                self._data["past_cycles"] = []
+
+        # O(N) id pools threaded through the bulk cycle adds so SHA-id uniqueness stays
+        # O(1) amortized instead of rebuilding the id set from the growing destination on
+        # every insert (previously O(N^2) for a large import, all on the event loop).
+        ref_id_pool: set[Any] = {c.get("id") for c in self._data.get("reference_cycles", []) if isinstance(c, dict)}
+        past_id_pool: set[Any] = {c.get("id") for c in self._data.get("past_cycles", []) if isinstance(c, dict)}
+        def _bare_store_id(raw_id: Any) -> str:
+            # A reference cycle exported after a prior import already carries
+            # meta.source="store:<id>". Strip EVERY leading "store:" so re-prefixing does not
+            # accumulate "store:store:..." across round-trips and, crucially, so historical
+            # double-prefixed values already persisted collapse to the same canonical id --
+            # otherwise a later import of "store:<id>" would miss a stored "store:store:<id>"
+            # and add a duplicate.
+            sid = str(raw_id or "")
+            while sid.startswith("store:"):
+                sid = sid[len("store:"):]
+            return sid
+
+        def _ref_dedup_key(raw_id: Any) -> str:
+            bare = _bare_store_id(raw_id)
+            return f"store:{bare}" if bare else ""
+
+        # Reference-cycle dedup: skip re-importing a reference cycle already held so a
+        # repeated import stays idempotent (otherwise envelopes get double-weighted and
+        # cycle_count inflates). Keyed on the CANONICAL source id, so a legacy double-prefixed
+        # persisted value and a fresh single-prefixed import map to the same key.
+        existing_ref_sources: set[str] = set()
+        for c in self._data.get("reference_cycles", []):
+            if not isinstance(c, dict):
+                continue
+            meta = c.get("meta")
+            src = meta.get("source") if isinstance(meta, dict) else None
+            if src:
+                existing_ref_sources.add(_ref_dedup_key(src))
+
+        # ── Step 2: reference cycles (shape-only) ───────────────────────────────
+        # Each record is processed defensively: a single malformed record is skipped (not
+        # fatal) so a replace-mode import can never abort part-way and leave a wiped
+        # destination in an inconsistent state (the wipe above already happened).
+        if "reference_cycles" in cats:
+            for c in selected_refs:
+                try:
+                    orig = str(c.get("profile_name") or "")
+                    target = name_remap.get(orig, orig)
+                    if not target:
+                        continue
+                    src_meta = c.get("meta") if isinstance(c.get("meta"), dict) else {}
+                    raw_sid = src_meta.get("source") or c.get("id")
+                    dkey = _ref_dedup_key(raw_sid)
+                    if dkey and dkey in existing_ref_sources:
+                        continue  # already imported -> keep re-import idempotent
+                    _ensure_profile(target, c.get("duration") or 0)
+                    cid = self._add_reference_cycle_nosave(
+                        target,
+                        c.get("power_data") or [],
+                        {
+                            "store_cycle_id": _bare_store_id(raw_sid),
+                            "store_uploaded_at": src_meta.get("store_uploaded_at"),
+                            "sampling_interval": c.get("sampling_interval"),
+                        },
+                        id_pool=ref_id_pool,
+                    )
+                    if cid:
+                        if dkey:
+                            existing_ref_sources.add(dkey)
+                        touched.add(target)
+                        ref_imported += 1
+                except Exception:  # noqa: BLE001 - skip a malformed record, never abort the import
+                    malformed_skipped += 1
+                    self._logger.debug("selective import: skipped a malformed reference cycle", exc_info=True)
+
+        # ── Step 3: real cycles (reference-shape or real-history) ───────────────
+        if "real_cycles" in cats:
+            # Identity set (native ids + prior import provenance) for real-history dedup.
+            known_ids: set[str] = set()
+            for c in self._data.get("past_cycles", []):
+                if isinstance(c, dict):
+                    if c.get("id"):
+                        known_ids.add(str(c.get("id")))
+                    imp = (c.get("meta") or {}).get("imported_from")
+                    if imp:
+                        known_ids.add(str(imp))
+            for c in selected_past:
+              try:
+                orig = str(c.get("profile_name") or "")
+                target = name_remap.get(orig, orig)
+                if cycle_destination == "reference":
+                    raw_sid = c.get("id")
+                    dkey = _ref_dedup_key(raw_sid)
+                    if dkey and dkey in existing_ref_sources:
+                        continue  # already imported as a reference cycle
+                    _ensure_profile(target or "(imported)", c.get("duration") or 0)
+                    cid = self._add_reference_cycle_nosave(
+                        target or "(imported)", c.get("power_data") or [],
+                        {"store_cycle_id": _bare_store_id(raw_sid)}, id_pool=ref_id_pool,
+                    )
+                    if cid:
+                        if dkey:
+                            existing_ref_sources.add(dkey)
+                        touched.add(target or "(imported)")
+                        ref_imported += 1
+                else:  # real_history
+                    orig_id = str(c.get("id") or "")
+                    if orig_id and orig_id in known_ids:
+                        continue  # already imported / round-trip -> skip duplicate
+                    if c.get("start_time") is None or c.get("duration") is None:
+                        continue  # malformed real record (add_cycle needs both) -> skip, don't raise
+                    _ensure_profile(target, c.get("duration") or 0)
+                    cyc = dict(c)
+                    cyc["profile_name"] = target or None
+                    meta_c = dict(cyc.get("meta") or {})
+                    if orig_id:
+                        meta_c["imported_from"] = orig_id
+                    cyc["meta"] = meta_c
+                    cyc.pop("id", None)  # let _add_cycle_data assign a fresh, collision-safe id
+                    self._add_cycle_data(
+                        cyc, target=self._data.setdefault("past_cycles", []), id_pool=past_id_pool
+                    )
+                    if orig_id:
+                        known_ids.add(orig_id)
+                    if target:
+                        touched.add(target)
+                    real_imported += 1
+              except Exception:  # noqa: BLE001 - skip a malformed record, never abort the import
+                  malformed_skipped += 1
+                  self._logger.debug("selective import: skipped a malformed cycle", exc_info=True)
+
+        # ── Step 4: leaf categories (additive merge / replace) ──────────────────
+        for cat_id in cats:
+            if cat_id in _STRUCTURAL_CATEGORIES:
+                continue
+            if cat_id == "lifetime_stats" and mode == "merge":
+                continue  # never sum lifetime totals -- would double-count
+            for key in _EXPORT_CATEGORIES.get(cat_id, {}).get("keys", []):
+                if key not in data_dict:
+                    continue
+                src_val = data_dict.get(key)
+                if mode == "replace":
+                    self._data[key] = src_val
+                    continue
+                cur = self._data.get(key)
+                if isinstance(src_val, dict):
+                    base = cur if isinstance(cur, dict) else {}
+                    for k, v in src_val.items():
+                        base.setdefault(k, v)  # keep-mine on key collision
+                    self._data[key] = base
+                elif isinstance(src_val, list):
+                    base = cur if isinstance(cur, list) else []
+                    _merge_list_dedup(base, src_val)
+                    self._data[key] = base
+                elif cur is None:
+                    self._data[key] = src_val  # scalar: fill only when absent locally
+
+        # ── Step 5: envelopes -- carry for definition-only profiles, rebuild the rest ─
+        src_envs = data_dict.get("envelopes") if isinstance(data_dict.get("envelopes"), dict) else {}
+        local_envs = self._data.setdefault("envelopes", {})
+        for orig, new_name in name_remap.items():
+            if new_name in touched:
+                continue  # will be rebuilt from imported cycles
+            # Carry the file's envelope when the target has none, OR when the file
+            # overwrote the definition in place (replace/overwrite: the file wins, so its
+            # envelope must supersede the now-mismatched stale local one instead of being
+            # discarded — otherwise matching keeps using the old shape).
+            if orig in src_envs and (new_name not in local_envs or new_name in overwritten):
+                local_envs[new_name] = src_envs[orig]  # keep it matchable without raw traces
+        for p in sorted(touched):
+            await self.async_rebuild_envelope(p)
+
+        self._cached_sample_segments = {}
+        await self.async_save()
+
+        settings_out: dict[str, Any] = {}
+        if apply_settings and "settings" in cats and device_type_match:
+            settings_out = _shareable_settings(meta.get("entry_options") or {})
+
+        return {
+            "profiles_imported": created_profiles,
+            "real_cycles_imported": real_imported,
+            "reference_cycles_imported": ref_imported,
+            "conflicts_resolved": conflicts_resolved,
+            "skipped_cycles": malformed_skipped,
+            "categories_applied": sorted(cats),
+            "device_type_match": device_type_match,
+            "settings": settings_out,
+        }
 
     async def delete_cycle(self, cycle_id: str) -> bool:
         """Delete a cycle by ID."""

@@ -12,6 +12,10 @@ export interface AddMaintenanceEventResponse {
   event: Record<string, unknown>;
 }
 
+export interface AnalyzeImportResponse {
+  manifest: Record<string, unknown>;
+}
+
 export interface AnalyzeSplitResponse {
   segments: number[][];
   split_offsets: number[];
@@ -140,6 +144,10 @@ export interface GetDtwDebugResponse {
   dtw: DtwScores;
   stage4: DtwStage4Scores;
   warp_path: number[][];
+}
+
+export interface GetExportInventoryResponse {
+  manifest: Record<string, unknown>;
 }
 
 export interface GetFeedbacksResponse {
@@ -273,6 +281,11 @@ export interface GetShareableCyclesResponse {
 
 export interface GetSuggestionsResponse {
   suggestions: Record<string, unknown>[];
+}
+
+export interface ImportConfigSelectiveResponse {
+  success: boolean;
+  summary: Record<string, unknown>;
 }
 
 export interface ListTasksResponse {
@@ -671,6 +684,30 @@ export interface ImportConfigRequest {
   json_data: string;
 }
 
+export interface GetExportInventoryRequest {
+  entry_id: string;
+}
+
+export interface AnalyzeImportRequest {
+  entry_id: string;
+  json_data: string;
+}
+
+export interface ExportConfigSelectiveRequest {
+  entry_id: string;
+  selection: Record<string, unknown>;
+}
+
+export interface ImportConfigSelectiveRequest {
+  entry_id: string;
+  json_data: string;
+  selection: Record<string, unknown>;
+  mode?: "merge" | "replace";
+  conflict_resolutions?: Record<string, unknown>;
+  cycle_destination?: "reference" | "real_history";
+  apply_settings?: boolean;
+}
+
 export interface GetConstantsRequest {
 }
 
@@ -871,6 +908,8 @@ export interface StartPlaygroundCycleDetailRequest {
   entry_id: string;
   cycle_id: string;
   settings_override?: Record<string, unknown>;
+  stress_tail?: boolean;
+  stress_idle_w?: number | null;
 }
 
 export interface StoreStatusRequest {
@@ -1020,6 +1059,10 @@ export interface WashDataWsRequests {
   "ha_washdata/wipe_history": WipeHistoryRequest;
   "ha_washdata/export_config": ExportConfigRequest;
   "ha_washdata/import_config": ImportConfigRequest;
+  "ha_washdata/get_export_inventory": GetExportInventoryRequest;
+  "ha_washdata/analyze_import": AnalyzeImportRequest;
+  "ha_washdata/export_config_selective": ExportConfigSelectiveRequest;
+  "ha_washdata/import_config_selective": ImportConfigSelectiveRequest;
   "ha_washdata/get_constants": GetConstantsRequest;
   "ha_washdata/get_suggestions": GetSuggestionsRequest;
   "ha_washdata/apply_suggestions": ApplySuggestionsRequest;
@@ -1121,6 +1164,10 @@ export interface WashDataWsResponses {
   "ha_washdata/wipe_history": SuccessResponse;
   "ha_washdata/export_config": ExportConfigResponse;
   "ha_washdata/import_config": SuccessResponse;
+  "ha_washdata/get_export_inventory": GetExportInventoryResponse;
+  "ha_washdata/analyze_import": AnalyzeImportResponse;
+  "ha_washdata/export_config_selective": ExportConfigResponse;
+  "ha_washdata/import_config_selective": ImportConfigSelectiveResponse;
   "ha_washdata/get_constants": GetConstantsResponse;
   "ha_washdata/get_suggestions": GetSuggestionsResponse;
   "ha_washdata/apply_suggestions": ApplySuggestionsResponse;

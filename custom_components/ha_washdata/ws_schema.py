@@ -200,6 +200,19 @@ class ExportConfigResponse(TypedDict):
     json_data: str
 
 
+class GetExportInventoryResponse(TypedDict):
+    manifest: dict[str, Any]
+
+
+class AnalyzeImportResponse(TypedDict):
+    manifest: dict[str, Any]
+
+
+class ImportConfigSelectiveResponse(TypedDict):
+    success: bool
+    summary: dict[str, Any]
+
+
 # ─── Shared constants ──────────────────────────────────────────────────────────
 
 class GetConstantsResponse(TypedDict):
@@ -630,6 +643,10 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "wipe_history": SuccessResponse,
     "export_config": ExportConfigResponse,
     "import_config": SuccessResponse,
+    "get_export_inventory": GetExportInventoryResponse,
+    "analyze_import": AnalyzeImportResponse,
+    "export_config_selective": ExportConfigResponse,
+    "import_config_selective": ImportConfigSelectiveResponse,
     "get_constants": GetConstantsResponse,
     "get_suggestions": GetSuggestionsResponse,
     "apply_suggestions": ApplySuggestionsResponse,
@@ -835,6 +852,18 @@ WS_COMMANDS: dict[str, dict] = {
     "wipe_history": {"params": [_entry()]},
     "export_config": {"params": [_entry()]},
     "import_config": {"params": [_entry(), _p("json_data", "str")]},
+    "get_export_inventory": {"params": [_entry()]},
+    "analyze_import": {"params": [_entry(), _p("json_data", "str")]},
+    "export_config_selective": {"params": [_entry(), _p("selection", "dict")]},
+    "import_config_selective": {"params": [
+        _entry(),
+        _p("json_data", "str"),
+        _p("selection", "dict"),
+        _p("mode", "str", False, enum=["merge", "replace"]),
+        _p("conflict_resolutions", "dict", False),
+        _p("cycle_destination", "str", False, enum=["reference", "real_history"]),
+        _p("apply_settings", "bool", False),
+    ]},
     "get_constants": {"params": []},
     "get_suggestions": {"params": [_entry()]},
     "apply_suggestions": {"params": [_entry(), _p("keys", "list[str]")]},
@@ -946,6 +975,8 @@ WS_COMMANDS: dict[str, dict] = {
         _entry(),
         _p("cycle_id", "str"),
         _p("settings_override", "dict", False),
+        _p("stress_tail", "bool", False),
+        _p("stress_idle_w", "float|null", False),
     ]},
     # Community store (online features)
     "store_status": {"params": [_entry()]},

@@ -28,7 +28,9 @@
     "awaiting_n": "En attente d'approbation · {n} confirmés",
     "approved": "Approuvé",
     "awaiting": "En attente d'approbation",
-    "imported_tip": "Importé depuis la boutique communautaire. Utilisé uniquement pour la correspondance, non compté dans les statistiques."
+    "imported_tip": "Importé depuis la boutique communautaire. Utilisé uniquement pour la correspondance, non compté dans les statistiques.",
+    "not_importable": "n/a ici",
+    "exists": "existe déjà"
   },
   "btn": {
     "add_device": "+ Ajouter un appareil",
@@ -169,7 +171,14 @@
     "download_device": "Télécharger cette configuration",
     "share_device": "⬆ Partager cet appareil",
     "share_device_tip": "Partager cet appareil et ses cycles de référence enregistrés sur la boutique communautaire pour que d'autres utilisateurs du même modèle puissent les adopter",
-    "share_n": "Partager {n} cycle(s)"
+    "share_n": "Partager {n} cycle(s)",
+    "export_selected": "Exporter (choisir les données)",
+    "export_all": "Exporter tout rapidement",
+    "import_raw": "Avancé : tout remplacer depuis un JSON",
+    "download_export": "Télécharger l'export",
+    "analyze_import": "Analyser le fichier",
+    "import_selected": "Importer la sélection",
+    "back": "Retour"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -390,6 +399,7 @@
     "panel_default_tab": "Onglet par défaut",
     "panel_language": "Langue du panneau",
     "per_cycle_short": "cycle",
+    "pg_anti_wrinkle": "Anti-froissement",
     "pg_autofill_tip": "Remplir automatiquement la plage à partir de la valeur actuelle ({lo}–{hi})",
     "pg_best_value": "Meilleure valeur trouvée",
     "pg_current_value": "Valeur actuelle :",
@@ -515,6 +525,9 @@
     "pg_alert_unmatched": "Sans correspondance",
     "pg_alert_ambiguous": "Correspondance ambiguë",
     "pg_alert_energy": "Anomalie d'énergie",
+    "pg_alert_stress_cap": "Limite de sécurité atteinte",
+    "pg_alert_stress_ok": "Terminaison au repos : cycle arrêté",
+    "pg_alert_stress_warn": "Consommation en veille supérieure au seuil d'arrêt",
     "pg_newly_correct": "désormais correct",
     "pg_regressed": "régressé",
     "pg_end_timing_changed": "moment de fin modifié",
@@ -524,6 +537,12 @@
     "pg_sweep_param": "Paramètre",
     "pg_objective": "Objectif",
     "pg_steps": "Étapes",
+    "pg_stress_group": "Test de terminaison au repos",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Niveau de veille (W)",
+    "pg_stress_idle_w_desc": "Remplace le plancher de veille détecté automatiquement (laisser vide pour auto).",
+    "pg_stress_toggle": "Tester la terminaison au repos",
+    "pg_stress_toggle_desc": "Simule l'appareil maintenu à sa consommation en veille après la fin de l'enregistrement – indique si et quand WashData arrête le cycle.",
     "pg_sweep_2d": "Carte thermique 2D",
     "pg_sweep_param_y": "2e paramètre",
     "pg_obj_match": "Précision de correspondance",
@@ -566,7 +585,31 @@
     "task_split": "Division du cycle",
     "task_trim": "Rognage du cycle",
     "task_merge": "Fusion des cycles",
-    "task_rebuild": "Reconstruction des enveloppes"
+    "task_rebuild": "Reconstruction des enveloppes",
+    "cat_profiles": "Profils (programmes)",
+    "cat_real_cycles": "Cycles (historique d'utilisation)",
+    "cat_reference_cycles": "Cycles de référence (importés)",
+    "cat_custom_phases": "Phases personnalisées",
+    "cat_profile_groups": "Groupes de profils",
+    "cat_settings": "Réglages de détection & de reconnaissance",
+    "cat_matching_config": "Réglage de la reconnaissance",
+    "cat_ml_models": "Modèles ML",
+    "cat_feedback": "Retours & étiquettes de révision",
+    "cat_suggestions": "Suggestions",
+    "cat_maintenance_log": "Journal de maintenance",
+    "cat_history_logs": "Historique & journaux de modifications",
+    "cat_lifetime_stats": "Totaux cumulés",
+    "cycles_short": "cycles",
+    "import_mode": "Comment combiner",
+    "mode_merge": "Fusionner (garder les miens)",
+    "mode_replace": "Remplacer la sélection",
+    "cycle_destination": "Où placer les cycles importés ?",
+    "dest_reference": "Référence (forme uniquement)",
+    "dest_real_history": "Historique réel (compte dans les stats)",
+    "conflict_resolution": "Conflits de noms",
+    "conflict_import_copy": "Importer comme copie",
+    "conflict_keep_mine": "Garder le mien",
+    "conflict_overwrite": "Écraser"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -643,7 +686,9 @@
     "force_stop_msg": "Forcer l'arrêt du cycle actif maintenant ? Le cycle sera enregistré comme interrompu.",
     "store_import": "Importer un cycle de référence",
     "store_share": "Partager sur la boutique communautaire",
-    "store_share_device": "Partager cet appareil"
+    "store_share_device": "Partager cet appareil",
+    "export_select": "Exporter - choisir les données",
+    "import_wizard": "Importer - choisir les données"
   },
   "msg": {
     "appliance_monitor": "Moniteur d'appareils",
@@ -665,9 +710,10 @@
     "coverage_gap_similar_cycles": "{count} cycles similaires non étiquetés trouvés – créez un profil pour commencer à les identifier.",
     "cycles_deleted": "{count} cycle(s) supprimé(s)",
     "enough_data": "Suffisamment de données pour apprendre ({current}/{min} cycles).",
-    "export_description": "Exportez tous les profils et cycles vers JSON, ou restaurez à partir d'une exportation précédente.",
+    "export_description": "Choisissez précisément quels profils, cycles, réglages et autres exporter vers un JSON, ou analysez un fichier pour n'importer que les éléments souhaités.",
     "feedback_cycles_pending": "{n} cycle{s} à examiner",
     "feedback_prompt": "Confirmez que c'était correct, corrigez le programme ou ignorez-le.",
+    "feedback_relabel_hint": "Réétiqueter ce cycle le résout également.",
     "filter_by_profile": "Filtrer par profil…",
     "group_modal_help": "Programmes groupés de même forme qui diffèrent en température/essorage (les durées peuvent varier). L'appariement note le groupe comme un seul candidat, puis sélectionne le membre le mieux adapté. Choisissez-en au moins 2 ; la superposition montre à quel point ils se ressemblent.",
     "group_not_cohesive": "Ces profils ne sont pas suffisamment similaires pour être regroupés de manière fiable. La correspondance les traite donc individuellement jusqu'à ce que vous supprimiez la valeur aberrante ou divisiez le groupe.",
@@ -729,6 +775,7 @@
     "pg_restart_note": "Redémarrez Home Assistant pour activer les outils de simulation.",
     "pg_sim_progress": "{done} / {total} cycles",
     "pg_starting": "Démarrage…",
+    "pg_stress_synthetic": "la simulation de repos commence ici",
     "pg_sweep_intro": "Et si {param} était différent ? Testez {steps} valeurs sur vos {cycles} derniers cycles pour trouver le réglage où le plus de cycles sont correctement reconnus.",
     "pg_sweep_step": "Étape {done} / {total}",
     "pg_undetected": "{n} cycle{s} non détecté{s}",
@@ -837,6 +884,9 @@
     "pg_simulating": "Simulation du cycle…",
     "pg_canvas_empty2": "Choisissez un cycle ci-dessus et appuyez sur Exécuter pour le simuler. Survolez ensuite pour lire les valeurs, faites défiler pour zoomer et faites glisser pour vous déplacer.",
     "pg_apply_settings_confirm": "Enregistrer ces {n} réglage(s) sur cet appareil ? {list}",
+    "pg_stress_terminated_detail": "Stabilisé à ~{idle}W en veille -- le cycle s'est terminé {h}h {m}m plus tard via {reason}.",
+    "pg_stress_above_threshold_detail": "La consommation en veille ~{idle}W est égale ou supérieure au seuil d'arrêt effectif ({stop}W) -- le cycle n'a jamais été considéré comme inactif. Augmentez stop_threshold_w pour corriger.",
+    "pg_stress_hit_cap_detail": "Le cycle a duré {h}h {m}m sans s'arrêter -- arrêté de force par la limite de sécurité. Consommation en veille {idle}W contre un seuil d'arrêt de {stop}W.",
     "no_logs_match": "Aucun enregistrement de journal ne correspond à ces filtres.",
     "pg_analysis_hint2": "Sélectionnez un cycle et cliquez sur Exécuter pour charger l'analyse de correspondance.",
     "pg_analysis_empty2": "Cliquez sur Exécuter pour voir l'analyse de correspondance.",
@@ -864,9 +914,22 @@
     "store_share_device_intro": "Envoyez {brand} {model} avec les cycles de référence que vous sélectionnez. D'autres utilisateurs du même appareil peuvent adopter vos programmes. Les entrées sont examinées avant d'apparaître publiquement.",
     "share_profile_no_cycles": "Aucun cycle de référence -- marquez un cycle comme ⭐ dans l'onglet Cycles pour inclure ce profil",
     "advisory_phase_inconsistent": "'{name}' semble mélanger différents programmes ou températures - ses cycles chauffent pendant des durées très variables. Le diviser en profils distincts (p. ex. par température) améliorera la reconnaissance et les estimations de temps.",
-    "advisory_phase_inconsistent_title": "⚠ Programmes peut-être mélangés"
+    "advisory_phase_inconsistent_title": "⚠ Programmes peut-être mélangés",
+    "export_select_intro": "Cochez exactement ce qu'il faut inclure. Sélectionner des profils sans leurs cycles exporte tout de même un programme reconnaissable (sa forme apprise l'accompagne).",
+    "import_analyze_hint": "Chargez un fichier exporté (ou collez son JSON). WashData l'analyse et montre exactement ce qui peut être importé avant tout changement.",
+    "analyzing": "Analyse en cours…",
+    "device_type_mismatch_warn": "Cet export provient d'un autre type d'appareil ({src} au lieu de {local}). Les programmes et cycles peuvent tout de même être importés comme données de référence, mais les réglages spécifiques à l'appareil et l'import dans l'historique réel sont désactivés.",
+    "merge_hint": "Les éléments importés sont ajoutés ; rien de local n'est perdu. Les conflits de noms sont résolus ci-dessous.",
+    "replace_warn": "Chaque catégorie cochée est effacée et remplacée par le contenu du fichier. Les catégories non cochées restent intactes.",
+    "dest_reference_hint": "Les cycles importés améliorent uniquement la reconnaissance des programmes et n'affectent jamais les statistiques d'utilisation/d'énergie.",
+    "dest_real_history_hint": "Les cycles importés comptent comme l'historique propre de cet appareil et alimentent les statistiques d'énergie/d'utilisation. À utiliser pour déplacer un appareil vers une nouvelle installation."
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Absorber les impulsions de culbutage après la phase principale au lieu de les lire comme de nouveaux cycles",
+    "anti_wrinkle_exit_power": "La puissance doit tomber sous ce seuil entre les impulsions pour que l'anti-froissement reste actif",
+    "anti_wrinkle_idle_timeout": "Temps de silence autorisé entre deux impulsions de culbutage avant la fin de l'anti-froissement",
+    "anti_wrinkle_max_duration": "Une impulsion plus longue met fin à l'anti-froissement et ouvre un nouveau cycle",
+    "anti_wrinkle_max_power": "Une impulsion au-dessus de ce seuil met fin à l'anti-froissement et ouvre un nouveau cycle",
     "completion_min_seconds": "Plus courte exécution comptant comme un vrai cycle",
     "end_repeat_count": "Lectures basses consécutives avant la fin",
     "interrupted_min_seconds": "Cycles courts signalés comme interrompus",
@@ -984,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "La puissance doit tomber en dessous entre les impulsions pour que le mode antirides reste actif.",
       "label": "Seuil de puissance de sortie"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Durée pendant laquelle l'appareil peut rester silencieux entre deux impulsions de culbutage avant la fin du mode anti-froissement. Réglez-la au-dessus de l'intervalle le plus long que votre sèche-linge laisse entre les impulsions, sinon chaque impulsion ultérieure est lue comme un faux départ.",
+      "label": "Intervalle maximal entre impulsions"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Les impulsions plus longues sont traitées comme un véritable cycle plutôt que comme une chute antirides.",
@@ -1604,7 +1671,9 @@
     "store_device_shared_partial": "{n} cycle(s) partagé(s) ; {failed} n'ont pas pu être envoyés.",
     "store_device_shared_some_dup": "{created} cycle(s) partagé(s) ; {dup} étaient déjà dans la boutique.",
     "store_download_failed": "Échec du téléchargement : {error}",
-    "store_download_nothing": "Rien de nouveau à télécharger -- cette configuration est déjà sur votre appareil."
+    "store_download_nothing": "Rien de nouveau à télécharger -- cette configuration est déjà sur votre appareil.",
+    "export_selective_done": "Export téléchargé",
+    "import_selective_done": "{profiles} profil(s) et {cycles} cycle(s) importés"
   },
   "suggestion": {
     "both_agree": "WashData recommande",

@@ -314,76 +314,152 @@ def estimate_phase_progress(
         logger.debug("Insufficient data in current window for phase estimation")
         return None
 
-    best_progress: float | None = None
-    best_score = -1.0
-    in_bounds = False
-    best_time_window_start: float | None = None
+    # Slide the current window across the whole envelope grid and keep the
+    # best-scoring alignment. The scalar form below is the reference; the
+    # vectorized form computes the identical per-offset score in bulk (the grid is
+    # O(cycle length), so for a multi-hour cycle this scalar loop is ~thousands of
+    # corrcoef calls per update - the #311 live/Playground hot spot). The vectorized
+    # path falls back to the scalar loop on any error, so behavior can never regress.
+    def _scan_scalar() -> tuple[float | None, float, bool, float | None]:
+        b_progress: float | None = None
+        b_score = -1.0
+        b_in_bounds = False
+        b_tws: float | None = None
+        for i in range(len(time_grid) - 1):
+            time_window_start = float(time_grid[i])
+            envelope_window_start = i
+            envelope_window_end = min(
+                i + len(current_window_values), len(envelope_arrays["avg"])
+            )
+            if envelope_window_end <= envelope_window_start:
+                continue
+            avg_window = envelope_arrays["avg"][envelope_window_start:envelope_window_end]
+            min_window = envelope_arrays["min"][envelope_window_start:envelope_window_end]
+            max_window = envelope_arrays["max"][envelope_window_start:envelope_window_end]
+            if len(avg_window) != len(current_window_values):
+                x_old = np.linspace(0, 1, len(avg_window))
+                x_new = np.linspace(0, 1, len(current_window_values))
+                avg_window = np.interp(x_new, x_old, avg_window)
+                min_window = np.interp(x_new, x_old, min_window)
+                max_window = np.interp(x_new, x_old, max_window)
+            within_bounds = np.all(
+                (current_window_values >= min_window * 0.8)
+                & (current_window_values <= max_window * 1.2)
+            )
+            bounds_score = np.mean(
+                (current_window_values >= min_window)
+                & (current_window_values <= max_window)
+            )
+            try:
+                if np.std(current_window_values) > 0 and np.std(avg_window) > 0:
+                    correlation = np.corrcoef(current_window_values, avg_window)[0, 1]
+                else:
+                    correlation = 0.0
+                mae = np.mean(np.abs(current_window_values - avg_window))
+                max_power = max(np.max(avg_window), np.max(current_window_values), 1.0)
+                mae_normalized = 1.0 - min(mae / max_power, 1.0)
+                score = (
+                    0.4 * max(correlation, 0.0)
+                    + 0.3 * mae_normalized
+                    + 0.3 * bounds_score
+                )
+                time_diff = abs(time_window_start - current_duration)
+                time_penalty = min(1.0, time_diff / (target_duration * 0.3))
+                score = score * (1.0 - 0.4 * time_penalty)
+                if score > b_score:
+                    b_score = score
+                    b_progress = (time_window_start / target_duration) * 100.0
+                    b_in_bounds = bool(within_bounds)
+                    b_tws = float(time_window_start)
+            except Exception:  # pylint: disable=broad-exception-caught
+                continue
+        return b_progress, b_score, b_in_bounds, b_tws
 
-    for i in range(len(time_grid) - 1):
-        time_window_start = float(time_grid[i])
+    def _scan_vectorized() -> tuple[float | None, float, bool, float | None]:
+        from numpy.lib.stride_tricks import sliding_window_view
 
-        envelope_window_start = i
-        envelope_window_end = min(
-            i + len(current_window_values), len(envelope_arrays["avg"])
-        )
+        cur = np.asarray(current_window_values, dtype=float)
+        w = len(cur)
+        avg_arr = envelope_arrays["avg"]
+        min_arr = envelope_arrays["min"]
+        max_arr = envelope_arrays["max"]
+        length = len(avg_arr)
+        n = len(time_grid) - 1
+        if n <= 0 or w == 0:
+            return _scan_scalar()
 
-        if envelope_window_end <= envelope_window_start:
-            continue
+        scores = np.full(n, -np.inf, dtype=float)
+        within = np.zeros(n, dtype=bool)
 
-        avg_window = envelope_arrays["avg"][
-            envelope_window_start:envelope_window_end
-        ]
-        min_window = envelope_arrays["min"][
-            envelope_window_start:envelope_window_end
-        ]
-        max_window = envelope_arrays["max"][
-            envelope_window_start:envelope_window_end
-        ]
+        cur_mean = float(cur.mean())
+        cur_c = cur - cur_mean
+        cur_ss = float(cur_c @ cur_c)          # Σ(x-x̄)²  (== np.corrcoef numerator basis)
+        cur_std_pos = cur_ss > 0.0             # equivalent to np.std(cur) > 0
+        cur_max = float(cur.max())
+        tg = np.asarray(time_grid[:n], dtype=float)
+        time_penalty = np.minimum(1.0, np.abs(tg - current_duration) / (target_duration * 0.3))
 
-        if len(avg_window) != len(current_window_values):
-            x_old = np.linspace(0, 1, len(avg_window))
-            x_new = np.linspace(0, 1, len(current_window_values))
-            avg_window = np.interp(x_new, x_old, avg_window)
-            min_window = np.interp(x_new, x_old, min_window)
-            max_window = np.interp(x_new, x_old, max_window)
+        # Interior: full-width windows (no interpolation). i in [0, hi].
+        hi = min(length - w, n - 1)
+        if hi >= 0 and length >= w:
+            rows = hi + 1
+            A = sliding_window_view(avg_arr, w)[:rows]
+            Mn = sliding_window_view(min_arr, w)[:rows]
+            Mx = sliding_window_view(max_arr, w)[:rows]
+            row_mean = A.mean(axis=1)
+            A_c = A - row_mean[:, None]
+            row_ss = np.einsum("ij,ij->i", A_c, A_c)
+            dot = A_c @ cur_c
+            corr = np.zeros(rows, dtype=float)
+            good = (row_ss > 0.0) & cur_std_pos
+            corr[good] = dot[good] / np.sqrt(row_ss[good] * cur_ss)
+            mae = np.mean(np.abs(A - cur[None, :]), axis=1)
+            row_max = A.max(axis=1)
+            max_power = np.maximum(np.maximum(row_max, cur_max), 1.0)
+            mae_norm = 1.0 - np.minimum(mae / max_power, 1.0)
+            bounds_score = np.mean((cur[None, :] >= Mn) & (cur[None, :] <= Mx), axis=1)
+            within[:rows] = np.all(
+                (cur[None, :] >= Mn * 0.8) & (cur[None, :] <= Mx * 1.2), axis=1
+            )
+            sc = 0.4 * np.maximum(corr, 0.0) + 0.3 * mae_norm + 0.3 * bounds_score
+            scores[:rows] = sc * (1.0 - 0.4 * time_penalty[:rows])
 
-        within_bounds = np.all(
-            (current_window_values >= min_window * 0.8)
-            & (current_window_values <= max_window * 1.2)
-        )
-        bounds_score = np.mean(
-            (current_window_values >= min_window)
-            & (current_window_values <= max_window)
-        )
-
-        try:
-            if np.std(current_window_values) > 0 and np.std(avg_window) > 0:
-                correlation = np.corrcoef(current_window_values, avg_window)[0, 1]
+        # Tail: partial windows (i + w > length) need the same interp as the scalar
+        # path; there are at most w-1 of these, so a small loop is fine.
+        for i in range(max(hi + 1, 0), min(length, n)):
+            avg_window = np.interp(
+                np.linspace(0, 1, w), np.linspace(0, 1, length - i), avg_arr[i:length]
+            )
+            min_window = np.interp(
+                np.linspace(0, 1, w), np.linspace(0, 1, length - i), min_arr[i:length]
+            )
+            max_window = np.interp(
+                np.linspace(0, 1, w), np.linspace(0, 1, length - i), max_arr[i:length]
+            )
+            within[i] = bool(np.all((cur >= min_window * 0.8) & (cur <= max_window * 1.2)))
+            bounds_score = float(np.mean((cur >= min_window) & (cur <= max_window)))
+            if cur_std_pos and np.std(avg_window) > 0:
+                correlation = float(np.corrcoef(cur, avg_window)[0, 1])
             else:
                 correlation = 0.0
+            mae = float(np.mean(np.abs(cur - avg_window)))
+            max_power = max(float(np.max(avg_window)), cur_max, 1.0)
+            mae_norm = 1.0 - min(mae / max_power, 1.0)
+            score = 0.4 * max(correlation, 0.0) + 0.3 * mae_norm + 0.3 * bounds_score
+            scores[i] = score * (1.0 - 0.4 * float(time_penalty[i]))
 
-            mae = np.mean(np.abs(current_window_values - avg_window))
-            max_power = max(np.max(avg_window), np.max(current_window_values), 1.0)
-            mae_normalized = 1.0 - min(mae / max_power, 1.0)
+        best_i = int(np.argmax(scores))          # first max -> matches scalar `>` tie-break
+        b_score = float(scores[best_i])
+        if not np.isfinite(b_score):
+            return None, -1.0, False, None
+        b_tws = float(time_grid[best_i])
+        return (b_tws / target_duration) * 100.0, b_score, bool(within[best_i]), b_tws
 
-            score = (
-                0.4 * max(correlation, 0.0)
-                + 0.3 * mae_normalized
-                + 0.3 * bounds_score
-            )
-
-            time_diff = abs(time_window_start - current_duration)
-            time_penalty = min(1.0, time_diff / (target_duration * 0.3))
-
-            score = score * (1.0 - 0.4 * time_penalty)
-
-            if score > best_score:
-                best_score = score
-                best_progress = (time_window_start / target_duration) * 100.0
-                in_bounds = within_bounds
-                best_time_window_start = float(time_window_start)
-        except Exception:  # pylint: disable=broad-exception-caught
-            continue
+    try:
+        best_progress, best_score, in_bounds, best_time_window_start = _scan_vectorized()
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.debug("Vectorized phase scan failed (%s); using scalar path", e)
+        best_progress, best_score, in_bounds, best_time_window_start = _scan_scalar()
 
     if best_progress is None or best_score < 0.4:
         logger.debug("Phase detection failed: best_score=%.3f", best_score)

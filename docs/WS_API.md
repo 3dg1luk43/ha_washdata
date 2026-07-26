@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**98 commands.**
+**102 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -49,6 +49,10 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `wipe_history` | entry_id | `SuccessResponse` |
 | `export_config` | entry_id | `ExportConfigResponse` |
 | `import_config` | entry_id, json_data | `SuccessResponse` |
+| `get_export_inventory` | entry_id | `GetExportInventoryResponse` |
+| `analyze_import` | entry_id, json_data | `AnalyzeImportResponse` |
+| `export_config_selective` | entry_id, selection | `ExportConfigResponse` |
+| `import_config_selective` | entry_id, json_data, selection, mode?, conflict_resolutions?, cycle_destination?, apply_settings? | `ImportConfigSelectiveResponse` |
 | `get_constants` | — | `GetConstantsResponse` |
 | `get_suggestions` | entry_id | `GetSuggestionsResponse` |
 | `apply_suggestions` | entry_id, keys | `ApplySuggestionsResponse` |
@@ -87,7 +91,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_task_result` | task_id | `TaskSnapshot` |
 | `start_playground_history` | entry_id, cycle_ids?, settings_override? | `StartTaskResponse` |
 | `start_playground_sweep` | entry_id, param, values, objective, param_y?, values_y? | `StartTaskResponse` |
-| `start_playground_cycle_detail` | entry_id, cycle_id, settings_override? | `StartTaskResponse` |
+| `start_playground_cycle_detail` | entry_id, cycle_id, settings_override?, stress_tail?, stress_idle_w? | `StartTaskResponse` |
 | `store_status` | entry_id | `StoreStatusResponse` |
 | `store_connect` | entry_id, refresh_token, uid, name? | `StoreSimpleResponse` |
 | `store_disconnect` | entry_id | `StoreSimpleResponse` |
@@ -754,6 +758,71 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `success` | yes | bool |
+
+## `ha_washdata/get_export_inventory`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`GetExportInventoryResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `manifest` | yes | dict[str, any] |
+
+## `ha_washdata/analyze_import`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `json_data` | yes | str |
+
+**Response** (`AnalyzeImportResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `manifest` | yes | dict[str, any] |
+
+## `ha_washdata/export_config_selective`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `selection` | yes | dict |
+
+**Response** (`ExportConfigResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `json_data` | yes | str |
+
+## `ha_washdata/import_config_selective`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `json_data` | yes | str |
+| `selection` | yes | dict |
+| `mode` | no | str ('merge', 'replace') |
+| `conflict_resolutions` | no | dict |
+| `cycle_destination` | no | str ('reference', 'real_history') |
+| `apply_settings` | no | bool |
+
+**Response** (`ImportConfigSelectiveResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `summary` | yes | dict[str, any] |
 
 ## `ha_washdata/get_constants`
 
@@ -1447,6 +1516,8 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `entry_id` | yes | str |
 | `cycle_id` | yes | str |
 | `settings_override` | no | dict |
+| `stress_tail` | no | bool |
+| `stress_idle_w` | no | float\|null |
 
 **Response** (`StartTaskResponse`)
 
