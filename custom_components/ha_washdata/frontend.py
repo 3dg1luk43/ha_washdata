@@ -400,8 +400,14 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
             _do_register_panel(hass, src)
         )
 
+    task = hass.data[PANEL_TASK_KEY]
     try:
-        return bool(await asyncio.shield(hass.data[PANEL_TASK_KEY]))
+        result = bool(await asyncio.shield(task))
+        if not result and hass.data.get(PANEL_TASK_KEY) is task:
+            # Task completed but registration failed; clear so a later
+            # setup_entry can create a fresh task and retry.
+            hass.data.pop(PANEL_TASK_KEY, None)
+        return result
     except asyncio.CancelledError:
         # Re-raise when this caller was cancelled so HA setup propagates correctly;
         # otherwise a CancelledError came from the shielded inner task (not us),
@@ -411,7 +417,8 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
         return False
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.warning("WashData panel registration failed: %s", exc)
-        hass.data.pop(PANEL_TASK_KEY, None)
+        if hass.data.get(PANEL_TASK_KEY) is task:
+            hass.data.pop(PANEL_TASK_KEY, None)
         return False
 
 
