@@ -4208,7 +4208,19 @@ async def ws_get_power_history(
         cycle_start = getattr(detector, "current_cycle_start", None) if detector else None
         if cycle_start and trace:
             start_dt = trace[0][0]
+            start_ts = start_dt.timestamp()
             live = [[round((t - start_dt).total_seconds(), 1), round(float(p), 1)] for t, p in trace]
+            # Overlay any diag_buffer readings strictly newer than the last trace
+            # point. During STATE_ENDING the detector trace can lag the raw sensor
+            # by up to one sampling interval (readings are throttled; the diag_buffer
+            # records every reading before the throttle), so the chart would appear
+            # frozen at the last active reading until the next throttle-pass.
+            if diag is not None and live:
+                last_trace_ts = trace[-1][0].timestamp()
+                for raw_ts, raw_w in diag.power_samples(last_trace_ts + 0.1):
+                    offset_s = round(raw_ts - start_ts, 1)
+                    if offset_s > live[-1][0]:
+                        live.append([offset_s, round(float(raw_w), 1)])
             out["cycle_active"] = True
             out["live"] = _downsample(live)
             out["cycle_elapsed_s"] = live[-1][0] if live else 0.0
