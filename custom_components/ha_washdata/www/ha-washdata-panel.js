@@ -109,8 +109,6 @@ const _SETTINGS_SECTIONS = [
         doc: 'Energy (power x time) the appliance must consume before RUNNING. A brief high-power spike has very low energy and is ignored, preventing false starts.' },
       { key: 'completion_min_seconds', label: 'Min Cycle Duration', unit: 's', type: 'number', min: 0, def: 600, basic: true,
         doc: 'Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).' },
-      { key: 'running_dead_zone', label: 'Running Dead Zone', unit: 's', type: 'number', min: 0, def: 3,
-        doc: 'After a cycle starts, power dips within this window are ignored. Washing machines fill with cold water (dropping near 0 W before heating) - without this protection that fill phase looks like a cycle end. This does NOT skip data: the full power trace is recorded from T=0. The suggestion engine measures your machine\'s actual startup pattern and sizes this automatically.' },
     ] },
     { sub: 'Cycle End', fields: [
       { key: 'end_energy_threshold', label: 'End Energy', unit: 'Wh', type: 'number', step: 0.001, min: 0, def: 0.05,
@@ -5365,13 +5363,14 @@ class HaWashdataPanel extends HTMLElement {
       matching: this._t('lbl.pg_group_matching', {}, 'Program matching'),
     };
     let lastGroup = '';
-    const paramRows = fields.map(([key, fb, unit, desc, group]) => {
+    const paramRows = fields.map(([key, fb, unit, desc, group, type]) => {
       const lbl = this._t('setting.' + key + '.label', {}, fb);
       const liveVal = this._pgFieldVal(key, {});
       let curVal;
       if (key === 'start_threshold_w') curVal = this._pgThreshStart ?? liveVal;
       else if (key === 'stop_threshold_w') curVal = this._pgThreshStop ?? liveVal;
       else curVal = this._pgParamOverrides[key] ?? liveVal;
+      const isBool = type === 'bool';
       const isDrag = threshFields.has(key);
       const unitTxt = unit ? unit : '';
       const gc = groupColors[group] || '#2a78d6';
@@ -5390,7 +5389,9 @@ class HaWashdataPanel extends HTMLElement {
           ${desc ? `<div style="font-size:.72em;color:var(--secondary-text-color);line-height:1.3">${_esc(this._t('pg_desc.' + key, {}, desc))}</div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-          <input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" aria-label="${_esc(lbl)}" style="width:72px">
+          ${isBool
+            ? `<input class="wd-pg-param-chk" type="checkbox" data-pgkey="${_esc(key)}" data-pgtype="bool" aria-label="${_esc(lbl)}" ${curVal ? 'checked' : ''} style="width:18px;height:18px;margin:1px 27px 0 27px">`
+            : `<input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" aria-label="${_esc(lbl)}" style="width:72px">`}
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
         </div>
       </div>`;
@@ -7980,6 +7981,23 @@ class HaWashdataPanel extends HTMLElement {
       <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>
     </div>` : (isRef ? `<div class="wd-info" style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${this._t('msg.imported_readonly', {}, 'Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.')}</div>` : '');
 
+    // Pending-detection-feedback banner (Confirm / Correct… / Ignore). Built once
+    // and shown in BOTH Inspect and Review modes, so a cycle in the "needs review"
+    // queue exposes the resolve controls without the user having to discover Review
+    // mode (#331). Editors only; imported reference cycles never carry feedback.
+    const pendingFb = this._canEdit() ? (this._feedbacks || []).find(f => f.cycle_id === m.cycleId) : null;
+    const fbProf = pendingFb ? (pendingFb.detected_profile || pendingFb.profile_name || this._t('lbl.unknown', {}, 'Unknown')) : '';
+    const fbBanner = pendingFb ? `
+        <div class="wd-card" style="background:var(--secondary-background-color);border-left:3px solid var(--warning-color,#ff9800);margin:0 0 12px;padding:12px">
+          <div style="font-weight:600;margin-bottom:4px">⚠ ${this._t('msg.pending_feedback', {}, 'Pending detection feedback')}</div>
+          <p class="wd-info" style="margin:0 0 8px">${this._t('msg.unsure_detected_prefix', {}, 'WashData is unsure it detected')} <strong>${_esc(fbProf)}</strong>${pendingFb.confidence != null ? ` (${this._t('lbl.confidence', {}, 'confidence').toLowerCase()} ${(pendingFb.confidence * 100).toFixed(0)}%)` : ''}. ${this._t('msg.feedback_prompt', {}, 'Confirm it was right, correct the program, or ignore.')} ${this._t('msg.feedback_relabel_hint', {}, 'Re-labelling this cycle resolves it too.')}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="fb-confirm" data-cid="${_esc(m.cycleId)}">${this._t('btn.confirm', {}, 'Confirm')}</button>
+            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-correct" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(fbProf)}">${this._t('btn.correct', {}, 'Correct…')}</button>
+            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-ignore" data-cid="${_esc(m.cycleId)}">${this._t('btn.ignore', {}, 'Ignore')}</button>
+          </div>
+        </div>` : '';
+
     let controls = '';
     if (m.mode === 'view') {
       // Share to community store: only for recorded/golden reference cycles, and
@@ -7995,7 +8013,7 @@ class HaWashdataPanel extends HTMLElement {
         : isRef ? `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>`
         : `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="cyc-label">${this._t('btn.label', {}, 'Label')}</button>`;
-      controls = `<div class="wd-modal-actions">
+      controls = `${fbBanner}<div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
         ${shareBtn}
         ${editBtns}</div>`;
@@ -8058,21 +8076,8 @@ class HaWashdataPanel extends HTMLElement {
       ];
       const tagChecks = TAGS.map(([v, l]) => `<label class="wd-rev-tag"><input type="checkbox" class="wd-cyc-rev-tag" value="${v}" ${(rv.tags || []).includes(v) ? 'checked' : ''}> ${l}</label>`).join('');
       const reviewedBadge = rv.reviewed_at ? `<span style="font-size:.75em;color:var(--secondary-text-color)">${this._t('lbl.reviewed_on', {date: new Date(rv.reviewed_at).toLocaleDateString()}, `reviewed ${new Date(rv.reviewed_at).toLocaleDateString()}`)}</span>` : '';
-      // If this cycle has a pending detection feedback (the learning loop is
-      // unsure of the program it matched), surface Confirm/Correct/Ignore right
-      // here. This folds the old Feedbacks subtab into the unified review flow.
-      const pendingFb = (this._feedbacks || []).find(f => f.cycle_id === m.cycleId);
-      const fbProf = pendingFb ? (pendingFb.detected_profile || pendingFb.profile_name || this._t('lbl.unknown', {}, 'Unknown')) : '';
-      const fbBanner = pendingFb ? `
-        <div class="wd-card" style="background:var(--secondary-background-color);border-left:3px solid var(--warning-color,#ff9800);margin:0 0 12px;padding:12px">
-          <div style="font-weight:600;margin-bottom:4px">⚠ ${this._t('msg.pending_feedback', {}, 'Pending detection feedback')}</div>
-          <p class="wd-info" style="margin:0 0 8px">${this._t('msg.unsure_detected_prefix', {}, 'WashData is unsure it detected')} <strong>${_esc(fbProf)}</strong>${pendingFb.confidence != null ? ` (${this._t('lbl.confidence', {}, 'confidence').toLowerCase()} ${(pendingFb.confidence * 100).toFixed(0)}%)` : ''}. ${this._t('msg.feedback_prompt', {}, 'Confirm it was right, correct the program, or ignore.')}</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="fb-confirm" data-cid="${_esc(m.cycleId)}">${this._t('btn.confirm', {}, 'Confirm')}</button>
-            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-correct" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(fbProf)}">${this._t('btn.correct', {}, 'Correct…')}</button>
-            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-ignore" data-cid="${_esc(m.cycleId)}">${this._t('btn.ignore', {}, 'Ignore')}</button>
-          </div>
-        </div>` : '';
+      // Pending-feedback banner (Confirm/Correct/Ignore) is built in the shared
+      // scope above and rendered here as well as in Inspect mode (#331).
       const tProfile = _tip(this._t('msg.review_profile_tip', {}, 'The program this cycle is labelled as. If the auto-detected program was wrong, correct it here - labelling teaches matching for future cycles.'));
       const tQuality = _tip(this._t('msg.review_quality_tip', {}, 'How clean this cycle is. Good = a textbook example of this program; Bad = detected but noisy or atypical; Unusable = mis-detected (merged, truncated or spurious). Drives the health score and which cycles are allowed to train the model.'));
       const tRecorded = _tip(this._t('msg.review_recorded_tip', {}, 'Mark this as a hand-picked reference cycle for its program - the same role as a manually recorded cycle. Reference cycles are always kept, seed the matching template, and are never dropped by cleanup. (This is the "golden"/recorded flag; both are the same thing.)'));
@@ -8687,6 +8692,17 @@ class HaWashdataPanel extends HTMLElement {
     sr.querySelectorAll('[data-pgkey]').forEach(inp => {
       inp.addEventListener('input', () => {
         const key = inp.dataset.pgkey;
+        if (inp.dataset.pgtype === 'bool') {
+          const val = inp.checked;
+          if (key === 'start_threshold_w') this._pgThreshStart = val;
+          else if (key === 'stop_threshold_w') this._pgThreshStop = val;
+          else this._pgParamOverrides[key] = val;
+          this._render();
+          const again = sr.querySelector(`[data-pgkey="${key}"]`);
+          if (again) again.focus();
+          requestAnimationFrame(() => this._pgDrawCanvas());
+          return;
+        }
         const raw = inp.value.trim();
         if (!raw) {
           if (key === 'start_threshold_w') this._pgThreshStart = null;
@@ -10652,6 +10668,9 @@ class HaWashdataPanel extends HTMLElement {
             }
             this._showToast(this._t('toast.review_saved', {}, 'Review saved'));
             await this._fetchCycles(eid);
+            // A label change in review now resolves the pending feedback backend-side
+            // (#331), so refresh the queue rather than leaving a stale entry.
+            if (newLabel !== curLabel) await this._fetchFeedbacks(eid);
             await this._loadMlIndex(eid);
             if (this._modal && this._modal.cycleId === cid) this._modal.ml = (this._mlById || {})[cid] || this._modal.ml;
           } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
@@ -10798,7 +10817,9 @@ class HaWashdataPanel extends HTMLElement {
         ? (sr.getElementById('wd-new-profile-name')?.value?.trim() || null)
         : null;
       this._modal = null;
-      try { await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: m.cycleId, profile_name: profileName || null, new_profile_name: newName }); this._showToast(this._t('toast.cycle_labelled', {}, 'Cycle labelled')); await this._fetchCycles(eid); await this._fetchProfiles(eid); }
+      // Re-fetch feedbacks too: labelling a review cycle now resolves its pending
+      // feedback backend-side (#331), so the "needs review" queue must refresh.
+      try { await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: m.cycleId, profile_name: profileName || null, new_profile_name: newName }); this._showToast(this._t('toast.cycle_labelled', {}, 'Cycle labelled')); await this._fetchCycles(eid); await this._fetchProfiles(eid); await this._fetchFeedbacks(eid); }
       catch (e) { this._showToast(this._t('toast.label_failed', {error: e.message || e}, 'Label failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'create-profile-ok' && eid) {
@@ -10888,7 +10909,8 @@ class HaWashdataPanel extends HTMLElement {
           for (const cid of ids) await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: profileName || null });
           this._showToast(this._t('toast.relabel_done', { count: ids.length }, `Relabelled ${ids.length} cycle(s)`));
           this._cycleSel.clear(); this._selectMode = false;
-          await this._fetchCycles(eid); await this._fetchProfiles(eid);
+          // Bulk relabel resolves any pending feedback on those cycles (#331).
+          await this._fetchCycles(eid); await this._fetchProfiles(eid); await this._fetchFeedbacks(eid);
         } catch (e) { this._showToast(this._t('toast.relabel_failed', { error: e.message || e }, 'Relabel failed: ' + (e.message || e)), 'error'); }
       });
     }

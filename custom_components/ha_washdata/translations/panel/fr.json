@@ -712,6 +712,7 @@
     "export_description": "Choisissez précisément quels profils, cycles, réglages et autres exporter vers un JSON, ou analysez un fichier pour n'importer que les éléments souhaités.",
     "feedback_cycles_pending": "{n} cycle{s} à examiner",
     "feedback_prompt": "Confirmez que c'était correct, corrigez le programme ou ignorez-le.",
+    "feedback_relabel_hint": "Réétiqueter ce cycle le résout également.",
     "filter_by_profile": "Filtrer par profil…",
     "group_modal_help": "Programmes groupés de même forme qui diffèrent en température/essorage (les durées peuvent varier). L'appariement note le groupe comme un seul candidat, puis sélectionne le membre le mieux adapté. Choisissez-en au moins 2 ; la superposition montre à quel point ils se ressemblent.",
     "group_not_cohesive": "Ces profils ne sont pas suffisamment similaires pour être regroupés de manière fiable. La correspondance les traite donc individuellement jusqu'à ce que vous supprimiez la valeur aberrante ou divisiez le groupe.",

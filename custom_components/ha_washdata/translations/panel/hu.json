@@ -712,6 +712,7 @@
     "export_description": "Válaszd ki pontosan, mely profilokat, ciklusokat, beállításokat és egyebeket exportálsz JSON-ba, vagy elemezz egy fájlt, és csak a kívánt részeket importáld.",
     "feedback_cycles_pending": "{n} ciklus{s} áttekintésre vár",
     "feedback_prompt": "Erősítse meg, hogy helyes volt, javítsa ki a programot, vagy hagyja figyelmen kívül.",
+    "feedback_relabel_hint": "Ennek a ciklusnak az újracímkézése ezt is megoldja.",
     "filter_by_profile": "Szűrés profil szerint…",
     "group_modal_help": "Azonos alakú programok, amelyek hőmérséklete/centrifugálása különbözik (az időtartam változhat). Az egyezés pontozza a csoportot, mint egy jelöltet, majd kiválasztja a legmegfelelőbb tagot. Válasszon legalább 2-t; az átfedés megmutatja, mennyire hasonlítanak egymásra.",
     "group_not_cohesive": "Ezek a profilok nem eléggé hasonlóak ahhoz, hogy megbízhatóan csoportosítsák, ezért az egyeztetés egyenként kezeli őket, amíg el nem távolítja a kiugró értéket, vagy fel nem osztja a csoportot.",

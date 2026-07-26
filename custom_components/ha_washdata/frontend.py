@@ -203,13 +203,13 @@ class WashDataCardRegistration:
     async def async_register(self) -> CardRegisterResult:
         """Register card assets/resources and report registration outcome."""
         src = self._src_path()
-        if not src.exists():
+        if not await self.hass.async_add_executor_job(src.exists):
             _LOGGER.warning("Card file not found: %s", src)
             return CARD_FAILED
 
         _register_static_path(self.hass, INTEGRATION_URL, str(src))
 
-        version = get_cache_buster()
+        version = await self.hass.async_add_executor_job(get_cache_buster)
 
         # Try auto-registration of the lovelace resource
         # If lovelace is not yet loaded, wait for it

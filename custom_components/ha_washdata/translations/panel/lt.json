@@ -712,6 +712,7 @@
     "export_description": "Pasirinkite tiksliai, kuriuos profilius, ciklus, nustatymus ir kita eksportuoti į JSON, arba išanalizuokite failą ir importuokite tik norimas dalis.",
     "feedback_cycles_pending": "{n} cikl{s} peržiūrai",
     "feedback_prompt": "Patvirtinkite, kad tai buvo teisinga, pataisykite programą arba ignoruokite.",
+    "feedback_relabel_hint": "Šio ciklo pažymėjimas iš naujo taip pat išsprendžia peržiūrą.",
     "filter_by_profile": "Filtruoti pagal profilį…",
     "group_modal_help": "Grupuoti tos pačios formos programas, kurios skiriasi temperatūra / sukimu (trukmė gali skirtis). Atitikimas įvertina grupę kaip vieną kandidatą, tada parenka geriausiai tinkantį narį. Pasirinkite bent 2; perdanga parodo, kokie jie panašūs.",
     "group_not_cohesive": "Šie profiliai nėra pakankamai panašūs, kad būtų galima patikimai sugrupuoti, todėl derinant jie traktuojami atskirai, kol pašalinsite nuokrypį arba padalinsite grupę.",

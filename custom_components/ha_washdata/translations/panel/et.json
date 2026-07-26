@@ -712,6 +712,7 @@
     "export_description": "Vali täpselt, millised profiilid, tsüklid, seaded ja muu JSON-i eksportida, või analüüsi fail ja impordi ainult soovitud osad.",
     "feedback_cycles_pending": "{n} tsükkel{s} ülevaatamiseks",
     "feedback_prompt": "Kinnitage, et see oli õige, parandage programmi või ignoreerige.",
+    "feedback_relabel_hint": "Selle tsükli uuesti sildistamine lahendab ka selle.",
     "filter_by_profile": "Filtreeri profiili järgi…",
     "group_modal_help": "Rühmitage sama kujuga programme, mis erinevad temperatuuri/tsentrifuugimise poolest (kestus võib erineda). Matching annab rühmale ühe kandidaadi ja valib seejärel kõige sobivama liikme. Valige vähemalt 2; ülekate näitab, kui sarnased need on.",
     "group_not_cohesive": "Need profiilid ei ole piisavalt sarnased, et neid usaldusväärselt rühmitada, nii et sobitamine käsitleb neid üksikult, kuni eemaldate kõrvalekalde või jagate rühma.",

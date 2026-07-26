@@ -712,6 +712,7 @@
     "export_description": "Wählen Sie genau aus, welche Profile, Zyklen, Einstellungen und mehr nach JSON exportiert werden sollen, oder analysieren Sie eine Datei und importieren Sie nur die gewünschten Teile.",
     "feedback_cycles_pending": "{n} Zyklus{s} zur Überprüfung",
     "feedback_prompt": "Bestätigen Sie, dass es richtig war, korrigieren Sie das Programm oder ignorieren Sie es.",
+    "feedback_relabel_hint": "Das erneute Beschriften dieses Zyklus erledigt die Überprüfung ebenfalls.",
     "filter_by_profile": "Nach Profil filtern…",
     "group_modal_help": "Gruppieren Sie Programme mit derselben Form, die sich in Temperatur/Schleudergang unterscheiden (Dauer kann variieren). Matching bewertet die Gruppe als einen Kandidaten und wählt dann das am besten passende Mitglied aus. Wählen Sie mindestens 2; Die Überlagerung zeigt, wie ähnlich sie sind.",
     "group_not_cohesive": "Diese Profile sind nicht ähnlich genug, um zuverlässig gruppiert zu werden. Beim Matching werden sie daher einzeln behandelt, bis Sie den Ausreißer entfernen oder die Gruppe aufteilen.",

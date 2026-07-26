@@ -712,6 +712,7 @@
     "export_description": "Vyberte přesně, které profily, cykly, nastavení a další data exportovat do souboru JSON, nebo analyzujte soubor a importujte jen ty části, které chcete.",
     "feedback_cycles_pending": "{n} cyklus{s} ke kontrole",
     "feedback_prompt": "Potvrďte, že to bylo správné, opravte program nebo jej ignorujte.",
+    "feedback_relabel_hint": "Přeznačení tohoto cyklu jej také vyřeší.",
     "filter_by_profile": "Filtrovat podle profilu…",
     "group_modal_help": "Skupinové programy se stejným tvarem, které se liší teplotou/odstřeďováním (doba trvání se může lišit). Shoda hodnotí skupinu jako jednoho kandidáta a poté vybere nejlépe padnoucího člena. Vyberte alespoň 2; překrytí ukazuje, jak jsou si podobné.",
     "group_not_cohesive": "Tyto profily nejsou dostatečně podobné, aby se daly spolehlivě seskupit, takže shoda s nimi zachází individuálně, dokud neodstraníte odlehlou hodnotu nebo nerozdělíte skupinu.",

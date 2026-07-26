@@ -712,6 +712,7 @@
     "export_description": "Velg nøyaktig hvilke profiler, sykluser, innstillinger og mer som skal eksporteres til JSON, eller analyser en fil og importer bare delene du vil ha.",
     "feedback_cycles_pending": "{n} syklus{s} til gjennomgang",
     "feedback_prompt": "Bekreft at det var riktig, korriger programmet eller ignorer.",
+    "feedback_relabel_hint": "Å merke denne syklusen på nytt løser også gjennomgangen.",
     "filter_by_profile": "Filtrer etter profil…",
     "group_modal_help": "Grupper programmer med samme form som varierer i temperatur/spinn (varigheten kan variere). Matching scorer gruppen som én kandidat, og velger deretter det best passende medlemmet. Velg minst 2; overlegget viser hvor like de er.",
     "group_not_cohesive": "Disse profilene er ikke like nok til å gruppere pålitelig, så matching behandler dem individuelt inntil du fjerner uteliggeren eller deler gruppen.",
