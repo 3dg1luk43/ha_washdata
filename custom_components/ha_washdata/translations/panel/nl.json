@@ -712,6 +712,7 @@
     "export_description": "Kies precies welke profielen, cycli, instellingen en meer u naar JSON wilt exporteren, of analyseer een bestand en importeer alleen de onderdelen die u wilt.",
     "feedback_cycles_pending": "{n} cyclus{s} te beoordelen",
     "feedback_prompt": "Bevestig dat het goed was, corrigeer het programma of negeer het.",
+    "feedback_relabel_hint": "Deze cyclus opnieuw labelen lost de beoordeling ook op.",
     "filter_by_profile": "Filteren op profiel…",
     "group_modal_help": "Groepeer programma's met dezelfde vorm die verschillen in temperatuur/centrifugeren (duur kan variëren). Matching scoort de groep als één kandidaat en kiest vervolgens het best passende lid. Kies er minimaal 2; de overlay laat zien hoezeer ze op elkaar lijken.",
     "group_not_cohesive": "Deze profielen lijken niet voldoende op elkaar om betrouwbaar te kunnen worden gegroepeerd, dus bij het matchen worden ze individueel behandeld totdat u de uitbijter verwijdert of de groep opsplitst.",

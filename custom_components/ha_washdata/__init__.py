@@ -418,19 +418,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager = hass.data[DOMAIN][entry_id]
 
             # Assign existing profile or remove label
+            target_profile = profile_name if profile_name else None
             try:
-                if profile_name:
-                    await manager.profile_store.assign_profile_to_cycle(
-                        cycle_id, profile_name
-                    )
-                else:
-                    await manager.profile_store.assign_profile_to_cycle(cycle_id, None)
+                await manager.profile_store.assign_profile_to_cycle(
+                    cycle_id, target_profile
+                )
             except ValueError as exc:
                 raise ServiceValidationError(
                     translation_domain=DOMAIN,
                     translation_key="assign_profile_failed",
                     translation_placeholders={"error": str(exc)},
                 ) from exc
+
+            # A manual (re)label answers the "was this detected right?" question,
+            # so clear any pending feedback and drop it from the review queue (#331).
+            if hasattr(manager, "learning_manager"):
+                await manager.learning_manager.async_resolve_pending_from_label(
+                    cycle_id, target_profile
+                )
 
             manager.notify_update()
 

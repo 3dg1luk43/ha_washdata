@@ -712,6 +712,7 @@
     "export_description": "Veldu nákvæmlega hvaða prófíla, lotur, stillingar og fleira á að flytja út í JSON, eða greindu skrá og fluttu aðeins inn þá hluta sem þú vilt.",
     "feedback_cycles_pending": "{n} lota{s} til yfirferðar",
     "feedback_prompt": "Staðfestu að það væri rétt, leiðréttu forritið eða hunsa.",
+    "feedback_relabel_hint": "Að endurmerkja þessa lotu lýkur einnig yfirferðinni.",
     "filter_by_profile": "Sía eftir prófíl…",
     "group_modal_help": "Flokkaðu forrit með sömu lögun sem eru mismunandi hvað varðar hitastig/snúning (lengd getur verið mismunandi). Samsvörun skorar hópinn sem einn frambjóðanda og velur síðan þann sem hentar best. Veldu að minnsta kosti 2; yfirlagið sýnir hversu lík þau eru.",
     "group_not_cohesive": "Þessir snið eru ekki nógu lík til að hópa á áreiðanlegan hátt, þannig að samsvörun meðhöndlar þá hver fyrir sig þar til þú fjarlægir frávikið eða skiptir hópnum.",

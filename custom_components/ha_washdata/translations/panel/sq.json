@@ -712,6 +712,7 @@
     "export_description": "Zgjidhni saktësisht cilat profile, cikle, cilësime dhe të tjera do të eksportohen në JSON, ose analizoni një skedar dhe importoni vetëm pjesët që dëshironi.",
     "feedback_cycles_pending": "{n} cikël{s} për rishikim",
     "feedback_prompt": "Konfirmo nëse ishte i saktë, korrigjo programin ose injorojë.",
+    "feedback_relabel_hint": "Rietiketimi i këtij cikli e zgjidh atë gjithashtu.",
     "filter_by_profile": "Filtro sipas profilit…",
     "group_modal_help": "Gruponi programe me të njëjtën formë që ndryshojnë në temperaturë/centrifugim (kohëzgjatja mund të ndryshojë). Përputhja shënon grupin si një kandidat dhe më pas zgjedh anëtarin më të përshtatshëm. Zgjidhni të paktën 2; mbivendosja tregon se sa të ngjashëm janë.",
     "group_not_cohesive": "Këto profile nuk janë mjaft të ngjashme për t'u grupuar në mënyrë të besueshme, kështu që përputhja i trajton ato individualisht derisa të hiqni pjesën e jashtme ose të ndani grupin.",
