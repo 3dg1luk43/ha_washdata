@@ -403,6 +403,7 @@
     "pg_best_value": "Najdena najboljša vrednost",
     "pg_current_value": "Trenutna vrednost:",
     "pg_drag_hint": "Povlecite črto na grafu",
+    "pg_anti_wrinkle": "Zaščita pred gubami",
     "pg_dtw": "DTW",
     "pg_ev_ending": "Zaključevanje",
     "pg_ev_running": "Deluje",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Moč mora med impulzi pasti pod to vrednost, da način proti gubam ostane aktiven.",
       "label": "Prag izhodne moči"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Kako dolgo lahko stroj med dvema vrtilnima impulzoma ostane tiho, preden se način zaščite pred gubami konča. Nastavite ga nad najdaljši razmik, ki ga vaš sušilni stroj pusti med impulzi, sicer se vsak nadaljnji impulz obravnava kot lažni zagon.",
+      "label": "Maks. razmik med impulzi"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Utripi, ki so daljši od tega, se obravnavajo kot pravi cikel in ne kot sredstvo proti gubam.",
@@ -1765,6 +1770,11 @@
     "other": "Drugo"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Vsrkaj vrtilne impulze po glavni fazi, namesto da jih obravnavaš kot nove cikle",
+    "anti_wrinkle_exit_power": "Moč mora med impulzi pasti pod to vrednost, da zaščita pred gubami ostane aktivna",
+    "anti_wrinkle_idle_timeout": "Dovoljeni mir med dvema vrtilnima impulzoma, preden se zaščita pred gubami konča",
+    "anti_wrinkle_max_duration": "Daljši impulz konča zaščito pred gubami in odpre nov cikel",
+    "anti_wrinkle_max_power": "Impulz nad to vrednostjo konča zaščito pred gubami in odpre nov cikel",
     "completion_min_seconds": "Najkrajši zagon, ki šteje kot pravi cikel",
     "end_repeat_count": "Zaporedni nizki odčitki pred koncem",
     "interrupted_min_seconds": "Kratki cikli, označeni kot prekinjeni",

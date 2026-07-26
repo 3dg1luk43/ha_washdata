@@ -399,6 +399,7 @@
     "panel_default_tab": "Scheda predefinita",
     "panel_language": "Lingua del pannello",
     "per_cycle_short": "ciclo",
+    "pg_anti_wrinkle": "Antirughe",
     "pg_autofill_tip": "Compila automaticamente l'intervallo dal valore attuale ({lo}–{hi})",
     "pg_best_value": "Miglior valore trovato",
     "pg_current_value": "Valore attuale:",
@@ -924,6 +925,11 @@
     "dest_real_history_hint": "I cicli importati contano come cronologia propria di questo dispositivo e alimentano le statistiche di energia/utilizzo. Da usare per spostare un elettrodomestico su una nuova installazione."
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Assorbire gli impulsi di rotazione dopo la fase principale invece di leggerli come nuovi cicli",
+    "anti_wrinkle_exit_power": "La potenza deve scendere sotto questo valore tra gli impulsi affinché la modalità antirughe resti attiva",
+    "anti_wrinkle_idle_timeout": "Tempo di silenzio consentito tra due impulsi di rotazione prima che la modalità antirughe termini",
+    "anti_wrinkle_max_duration": "Un impulso più lungo di questo termina la modalità antirughe e apre un nuovo ciclo",
+    "anti_wrinkle_max_power": "Un impulso superiore a questo termina la modalità antirughe e apre un nuovo ciclo",
     "completion_min_seconds": "Esecuzione più breve che conta come ciclo reale",
     "end_repeat_count": "Letture basse consecutive prima della fine",
     "interrupted_min_seconds": "Cicli brevi contrassegnati come interrotti",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "La potenza deve scendere al di sotto di questo valore tra gli impulsi affinché la modalità antirughe rimanga attiva.",
       "label": "Soglia potenza uscita"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Per quanto tempo la macchina può rimanere silenziosa tra due impulsi di rotazione prima che la modalità antirughe termini. Impostalo sopra l'intervallo più lungo che la tua asciugatrice lascia tra gli impulsi, altrimenti ogni impulso successivo viene letto come una falsa partenza.",
+      "label": "Intervallo massimo tra impulsi"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Gli impulsi più lunghi vengono trattati come un vero e proprio ciclo piuttosto che come una caduta antirughe.",

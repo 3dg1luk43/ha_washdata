@@ -399,6 +399,7 @@
     "panel_default_tab": "デフォルトのタブ",
     "panel_language": "パネル言語",
     "per_cycle_short": "サイクル",
+    "pg_anti_wrinkle": "しわ防止",
     "pg_autofill_tip": "現在の値から範囲を自動入力（{lo}–{hi}）",
     "pg_best_value": "見つかった最適値",
     "pg_current_value": "現在の値:",
@@ -932,6 +933,11 @@
     "start_duration_threshold": "開始を確定するしきい値超えの秒数",
     "start_threshold_w": "開始とみなす最小ワット数",
     "stop_threshold_w": "これを下回ると停止とみなす",
+    "anti_wrinkle_enabled": "メインフェーズ後のタンブルパルスを新しいサイクルと解釈せず吸収する",
+    "anti_wrinkle_exit_power": "しわ防止を有効に保つには、パルス間の電力がこの値を下回る必要がある",
+    "anti_wrinkle_idle_timeout": "しわ防止が終了するまでに2つのタンブルパルスの間に許容される静止時間",
+    "anti_wrinkle_max_duration": "これより長いパルスはしわ防止を終了し、新しいサイクルを開始する",
+    "anti_wrinkle_max_power": "これを超えるパルスはしわ防止を終了し、新しいサイクルを開始する",
     "dtw_bandwidth": "ステージ 3: Sakoe-Chiba ワープバンド (0 = DTW 無効; デフォルト 0.2 = サイクル長の 20%)",
     "corr_weight": "ステージ 2: 曲線形状（相関）と電力レベル（MAE）のバランス; デフォルト 0.45",
     "duration_weight": "ステージ 4: 運転時間の一致が最終スコアにどれだけ影響するか（デフォルト 0.22）",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "しわ防止モードがアクティブな状態を維持するには、パルス間の電力がこれを下回る必要があります。",
       "label": "終了電力しきい値"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "最大パルス間隔",
+      "doc": "しわ防止モードが終了するまでに、機器が2つのタンブルパルスの間に静止していられる時間。乾燥機がパルス間に残す最長の間隔より長く設定してください。そうしないと、以降のパルスがすべて誤った開始として読み取られます。"
     },
     "anti_wrinkle_max_duration": {
       "doc": "これより長いパルスは、しわ防止タンブルではなく実際のサイクルとして扱われます。",

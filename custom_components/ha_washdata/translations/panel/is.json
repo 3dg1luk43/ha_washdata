@@ -608,7 +608,8 @@
     "conflict_resolution": "Nafnaárekstrar",
     "conflict_import_copy": "Flytja inn sem afrit",
     "conflict_keep_mine": "Halda mínum",
-    "conflict_overwrite": "Skrifa yfir"
+    "conflict_overwrite": "Skrifa yfir",
+    "pg_anti_wrinkle": "Hrukkuleysi"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -944,7 +945,12 @@
     "dtw_ddtw_scale": "Þrep 3: DDTW hálf-mettunarfjarlægð; minna = meira formnæmt (sjálfgefið 30)",
     "dtw_refine_top_n": "Þrep 3: frambjóðendur sem DTW endurgerir skor fyrir; hækkið í 7-9 ef rétt snið lendir á 4.-5. sæti (sjálfgefið 5)",
     "duration_scale": "Þrep 4: log-hlutfall þar sem samræmi í keyrslulengd helmingast; minna = strangara viðurlög (sjálfgefið 0,175)",
-    "energy_scale": "Þrep 4: log-hlutfall þar sem samræmi í orkunotkun helmingast; minna = strangara viðurlög (sjálfgefið 0,25)"
+    "energy_scale": "Þrep 4: log-hlutfall þar sem samræmi í orkunotkun helmingast; minna = strangara viðurlög (sjálfgefið 0,25)",
+    "anti_wrinkle_idle_timeout": "Leyfilegur kyrrðartími milli tveggja veltipúlsa áður en hrukkuleysi lýkur",
+    "anti_wrinkle_max_power": "Púls yfir þessu slekkur á hrukkuleysi og opnar nýja lotu",
+    "anti_wrinkle_enabled": "Fangar veltipúlsana eftir aðalfasann í stað þess að lesa þá sem nýjar lotur",
+    "anti_wrinkle_max_duration": "Púls sem er lengri en þetta slekkur á hrukkuleysi og opnar nýja lotu",
+    "anti_wrinkle_exit_power": "Aflið verður að falla undir þetta á milli púlsa til að hrukkuleysi haldist virkt"
   },
   "phase_desc": {
     "anti_crease": "Stundum hrynur stutt eftir að því er lokið til að draga úr hrukkum.",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Krafturinn verður að falla undir þetta á milli púlsa til að hrukkuvarnarstilling haldist virkur.",
       "label": "Útgönguaflþröskuldur"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Hversu lengi vélin má vera kyrr á milli tveggja veltipúlsa áður en hrukkuleysisstillingu lýkur. Stilltu það hærra en lengsta bilið sem þurrkarinn þinn skilur eftir á milli púlsa, annars er hver síðari púls lesinn sem röng ræsing.",
+      "label": "Hám. púlsbil"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Púlsar sem eru lengri en þetta eru meðhöndlaðir sem alvöru hringrás frekar en hrukkuvörn.",

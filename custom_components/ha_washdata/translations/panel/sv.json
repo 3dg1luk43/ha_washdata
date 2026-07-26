@@ -608,7 +608,8 @@
     "conflict_resolution": "Namnkonflikter",
     "conflict_import_copy": "Importera som kopia",
     "conflict_keep_mine": "Behåll mina",
-    "conflict_overwrite": "Skriv över"
+    "conflict_overwrite": "Skriv över",
+    "pg_anti_wrinkle": "Skrynkelskydd"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -944,7 +945,12 @@
     "dtw_ddtw_scale": "Steg 3: DDTW-halvmättnadsavstånd; lägre = mer formkänslig (standard 30)",
     "dtw_refine_top_n": "Steg 3: kandidater som DTW ompoängsätter; öka till 7-9 om rätt profil placerar sig 4-5:a (standard 5)",
     "duration_scale": "Steg 4: log-kvot där varaktighetsöverensstämmelse halveras; lägre = striktare straff (standard 0,175)",
-    "energy_scale": "Steg 4: log-kvot där energiöverensstämmelse halveras; lägre = striktare straff (standard 0,25)"
+    "energy_scale": "Steg 4: log-kvot där energiöverensstämmelse halveras; lägre = striktare straff (standard 0,25)",
+    "anti_wrinkle_idle_timeout": "Tillåten tyst tid mellan två tumlingspulser innan skrynkelskyddet avslutas",
+    "anti_wrinkle_max_power": "En puls över detta avslutar skrynkelskyddet och öppnar en ny cykel",
+    "anti_wrinkle_enabled": "Fånga upp tumlingspulserna efter huvudfasen i stället för att läsa dem som nya cykler",
+    "anti_wrinkle_max_duration": "En puls längre än detta avslutar skrynkelskyddet och öppnar en ny cykel",
+    "anti_wrinkle_exit_power": "Effekten måste sjunka under detta mellan pulserna för att skrynkelskyddet ska förbli aktivt"
   },
   "phase_desc": {
     "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Effekten måste sjunka under detta mellan pulserna för att anti-rynkläget ska förbli aktivt.",
       "label": "Avslutningseffekttröskel"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Hur länge maskinen får förbli tyst mellan två tumlingspulser innan skrynkelskyddsläget avslutas. Ställ in det högre än det längsta uppehåll din torktumlare lämnar mellan två pulser, annars läses varje senare puls som en falsk start.",
+      "label": "Maks. pulspaus"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulser längre än detta behandlas som en riktig cykel snarare än en anti-rynktumling.",

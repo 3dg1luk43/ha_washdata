@@ -399,6 +399,7 @@
     "panel_default_tab": "기본 탭",
     "panel_language": "패널 언어",
     "per_cycle_short": "사이클",
+    "pg_anti_wrinkle": "구김 방지",
     "pg_autofill_tip": "현재 값에서 범위 자동 채우기 ({lo}–{hi})",
     "pg_best_value": "찾은 최적 값",
     "pg_current_value": "현재 값:",
@@ -932,6 +933,11 @@
     "start_duration_threshold": "시작 확정을 위한 임계값 초과 초",
     "start_threshold_w": "시작으로 간주할 최소 와트",
     "stop_threshold_w": "이 값 미만이면 기기가 꺼진 것으로 간주",
+    "anti_wrinkle_enabled": "메인 단계 이후의 회전 펄스를 새 사이클로 인식하지 않고 흡수",
+    "anti_wrinkle_exit_power": "구김 방지가 활성 상태를 유지하려면 펄스 사이 전력이 이 값 아래로 떨어져야 함",
+    "anti_wrinkle_idle_timeout": "구김 방지가 끝나기 전 두 회전 펄스 사이에 허용되는 정지 시간",
+    "anti_wrinkle_max_duration": "이보다 긴 펄스는 구김 방지를 끝내고 새 사이클을 시작",
+    "anti_wrinkle_max_power": "이보다 높은 펄스는 구김 방지를 끝내고 새 사이클을 시작",
     "dtw_bandwidth": "Stage 3: Sakoe-Chiba 워프 대역폭 (0 = DTW 비활성; 기본값 0.2 = 사이클 길이의 20%)",
     "corr_weight": "Stage 2: 곡선 형태(상관관계)와 전력 수준(MAE) 사이의 균형; 기본값 0.45",
     "duration_weight": "Stage 4: 실행 시간 일치가 최종 점수에 미치는 영향(기본값 0.22)",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "주름 방지 모드가 활성 상태를 유지하려면 펄스 사이에 전력이 이 값 아래로 낮아져야 합니다.",
       "label": "종료 전력 임계값"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "최대 펄스 간격",
+      "doc": "구김 방지 모드가 종료되기 전에 기기가 두 회전 펄스 사이에서 정지 상태로 있을 수 있는 시간입니다. 건조기가 펄스 사이에 남기는 가장 긴 간격보다 높게 설정하십시오. 그렇지 않으면 이후의 모든 펄스가 잘못된 시작으로 인식됩니다."
     },
     "anti_wrinkle_max_duration": {
       "doc": "이보다 긴 펄스는 주름 방지 텀블이 아닌 실제 주기로 간주됩니다.",

@@ -399,6 +399,7 @@
     "panel_default_tab": "Skeda e parazgjedhur",
     "panel_language": "Gjuha e panelit",
     "per_cycle_short": "cikël",
+    "pg_anti_wrinkle": "Kundër rrudhave",
     "pg_autofill_tip": "Mbush automatikisht intervalin nga vlera aktuale ({lo}–{hi})",
     "pg_best_value": "Vlera më e mirë e gjetur",
     "pg_current_value": "Vlera aktuale:",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Fuqia duhet të bjerë nën këtë mes pulseve që modaliteti kundër rrudhave të qëndrojë aktiv.",
       "label": "Pragu i fuqisë së daljes"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "Hendeku maks. i pulseve",
+      "doc": "Sa gjatë mund të qëndrojë e qetë makina mes dy pulseve të rrotullimit para se të mbarojë modaliteti kundër rrudhave. Vendoseni mbi hendekun më të gjatë që lë tharësja juaj mes pulseve, përndryshe çdo puls i mëvonshëm lexohet si nisje e gabuar."
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulset më të gjata se kjo trajtohen si një cikël i vërtetë dhe jo si një rrëshqitje kundër rrudhave.",
@@ -1773,6 +1778,11 @@
     "start_duration_threshold": "Sekonda mbi prag për të konfirmuar nisjen",
     "start_threshold_w": "Watt minimalë për t'u llogaritur si nisur",
     "stop_threshold_w": "Nën këtë, makina llogaritet e fikur",
+    "anti_wrinkle_enabled": "Thith pulset e rrotullimit pas fazës kryesore në vend që t'i lexojë si cikle të reja",
+    "anti_wrinkle_exit_power": "Fuqia duhet të bjerë nën këtë mes pulseve që modaliteti kundër rrudhave të qëndrojë aktiv",
+    "anti_wrinkle_idle_timeout": "Koha e qetësisë e lejuar mes dy pulseve të rrotullimit para se të mbarojë modaliteti kundër rrudhave",
+    "anti_wrinkle_max_duration": "Një puls më i gjatë se ky e mbaron modalitetin kundër rrudhave dhe hap një cikël të ri",
+    "anti_wrinkle_max_power": "Një puls mbi këtë e mbaron modalitetin kundër rrudhave dhe hap një cikël të ri",
     "dtw_bandwidth": "Etapa 3: brez deformimi Sakoe-Chiba (0 = DTW joaktiv; parazgjedhja 0.2 = 20% e gjatësisë së ciklit)",
     "corr_weight": "Etapa 2: balancë mes formës së kurbës (korrelacion) dhe nivelit të fuqisë (MAE); parazgjedhja 0.45",
     "duration_weight": "Etapa 4: sa fortë ndikon marrëveshja e kohëzgjatjes në rezultatin final (parazgjedhja 0.22)",

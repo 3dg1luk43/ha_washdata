@@ -399,6 +399,7 @@
     "panel_default_tab": "Separador predefinido",
     "panel_language": "Idioma do painel",
     "per_cycle_short": "ciclo",
+    "pg_anti_wrinkle": "Anti-vincos",
     "pg_autofill_tip": "Preencher automaticamente o intervalo a partir do valor atual ({lo}–{hi})",
     "pg_best_value": "Melhor valor encontrado",
     "pg_current_value": "Valor atual:",
@@ -924,6 +925,11 @@
     "dest_real_history_hint": "Os ciclos importados contam como histórico próprio deste dispositivo e alimentam as estatísticas de energia/utilização. Use para mover um eletrodoméstico para uma nova instalação."
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Absorver os pulsos de rotação após a fase principal em vez de os ler como novos ciclos",
+    "anti_wrinkle_exit_power": "A potência deve descer abaixo deste valor entre pulsos para que o modo anti-vincos permaneça ativo",
+    "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de rotação antes de o modo anti-vincos terminar",
+    "anti_wrinkle_max_duration": "Um pulso mais longo do que isto termina o modo anti-vincos e abre um novo ciclo",
+    "anti_wrinkle_max_power": "Um pulso acima disto termina o modo anti-vincos e abre um novo ciclo",
     "completion_min_seconds": "Execução mais curta que conta como um ciclo real",
     "end_repeat_count": "Leituras baixas consecutivas antes de terminar",
     "interrupted_min_seconds": "Ciclos curtos marcados como interrompidos",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "A potência deve cair abaixo disso entre os pulsos para que o modo antirrugas permaneça ativo.",
       "label": "Limiar de Saída de Potência"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Durante quanto tempo a máquina pode permanecer em silêncio entre dois pulsos de rotação antes de o modo anti-vincos terminar. Defina-o acima do intervalo mais longo que a sua secadora deixa entre pulsos, caso contrário cada pulso posterior é lido como um falso arranque.",
+      "label": "Intervalo Máximo Entre Pulsos"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulsos mais longos do que isso são tratados como um ciclo real, e não como uma queda anti-rugas.",

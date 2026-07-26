@@ -399,6 +399,7 @@
     "panel_default_tab": "Onglet par défaut",
     "panel_language": "Langue du panneau",
     "per_cycle_short": "cycle",
+    "pg_anti_wrinkle": "Anti-froissement",
     "pg_autofill_tip": "Remplir automatiquement la plage à partir de la valeur actuelle ({lo}–{hi})",
     "pg_best_value": "Meilleure valeur trouvée",
     "pg_current_value": "Valeur actuelle :",
@@ -924,6 +925,11 @@
     "dest_real_history_hint": "Les cycles importés comptent comme l'historique propre de cet appareil et alimentent les statistiques d'énergie/d'utilisation. À utiliser pour déplacer un appareil vers une nouvelle installation."
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Absorber les impulsions de culbutage après la phase principale au lieu de les lire comme de nouveaux cycles",
+    "anti_wrinkle_exit_power": "La puissance doit tomber sous ce seuil entre les impulsions pour que l'anti-froissement reste actif",
+    "anti_wrinkle_idle_timeout": "Temps de silence autorisé entre deux impulsions de culbutage avant la fin de l'anti-froissement",
+    "anti_wrinkle_max_duration": "Une impulsion plus longue met fin à l'anti-froissement et ouvre un nouveau cycle",
+    "anti_wrinkle_max_power": "Une impulsion au-dessus de ce seuil met fin à l'anti-froissement et ouvre un nouveau cycle",
     "completion_min_seconds": "Plus courte exécution comptant comme un vrai cycle",
     "end_repeat_count": "Lectures basses consécutives avant la fin",
     "interrupted_min_seconds": "Cycles courts signalés comme interrompus",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "La puissance doit tomber en dessous entre les impulsions pour que le mode antirides reste actif.",
       "label": "Seuil de puissance de sortie"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Durée pendant laquelle l'appareil peut rester silencieux entre deux impulsions de culbutage avant la fin du mode anti-froissement. Réglez-la au-dessus de l'intervalle le plus long que votre sèche-linge laisse entre les impulsions, sinon chaque impulsion ultérieure est lue comme un faux départ.",
+      "label": "Intervalle maximal entre impulsions"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Les impulsions plus longues sont traitées comme un véritable cycle plutôt que comme une chute antirides.",

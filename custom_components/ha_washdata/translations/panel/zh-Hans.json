@@ -399,6 +399,7 @@
     "panel_default_tab": "默认标签",
     "panel_language": "面板语言",
     "per_cycle_short": "周期",
+    "pg_anti_wrinkle": "防皱",
     "pg_autofill_tip": "根据当前值自动填充范围（{lo}–{hi}）",
     "pg_best_value": "找到的最佳值",
     "pg_current_value": "当前值：",
@@ -932,6 +933,11 @@
     "start_duration_threshold": "确认启动所需的超阈值秒数",
     "start_threshold_w": "计为启动的最小瓦数",
     "stop_threshold_w": "低于此值机器计为关闭",
+    "anti_wrinkle_enabled": "吸收主阶段之后的翻滚脉冲，而不是将其识别为新周期",
+    "anti_wrinkle_exit_power": "脉冲之间的功率必须低于此值，防皱才能保持活动",
+    "anti_wrinkle_idle_timeout": "防皱结束前两次翻滚脉冲之间允许的静止时间",
+    "anti_wrinkle_max_duration": "长于此值的脉冲将结束防皱并开启新周期",
+    "anti_wrinkle_max_power": "高于此值的脉冲将结束防皱并开启新周期",
     "dtw_bandwidth": "Stage 3: Sakoe-Chiba 规整带宽 (0 = DTW 关闭; 默认 0.2 = 周期长度的 20%)",
     "corr_weight": "Stage 2: 曲线形状（相关性）与功率水平（MAE）之间的平衡; 默认 0.45",
     "duration_weight": "Stage 4: 运行时长一致性对最终得分的影响程度（默认 0.22）",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "脉冲之间的功率必须低于此值，抗皱模式才能保持活动状态。",
       "label": "退出功率阈值"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "最大脉冲间隔",
+      "doc": "防皱模式结束前，机器在两次翻滚脉冲之间可以保持静止的时长。请将其设置为高于烘干机在脉冲之间留出的最长间隔，否则之后的每个脉冲都会被识别为误启动。"
     },
     "anti_wrinkle_max_duration": {
       "doc": "比这更长的脉冲被视为真正的周期，而不是抗皱滚动。",

@@ -403,6 +403,7 @@
     "pg_best_value": "Nalezena nejlepší hodnota",
     "pg_current_value": "Aktuální hodnota:",
     "pg_drag_hint": "Táhněte čáru v grafu",
+    "pg_anti_wrinkle": "Ochrana před zmačkáním",
     "pg_dtw": "DTW",
     "pg_ev_ending": "Končí",
     "pg_ev_running": "Běží",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Příkon musí klesnout pod tuto hodnotu mezi impulzy, aby režim ochrany před mačkáním zůstal aktivní.",
       "label": "Práh výkonu pro ukončení"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Jak dlouho může stroj mezi dvěma impulzy bubnu zůstat v klidu, než skončí režim ochrany před zmačkáním. Nastavte ji nad nejdelší mezeru, kterou vaše sušička mezi impulzy nechává, jinak se každý další impulz vyhodnotí jako falešné spuštění.",
+      "label": "Max. mezera mezi impulzy"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Impulzy delší než toto jsou považovány za skutečný cyklus spíše než za otočení ochrany před mačkáním.",
@@ -1765,6 +1770,11 @@
     "other": "Jiné"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Pohltit impulzy bubnu po hlavní fázi místo čtení jako nové cykly",
+    "anti_wrinkle_exit_power": "Výkon musí mezi impulzy klesnout pod tuto hodnotu, aby ochrana před zmačkáním zůstala aktivní",
+    "anti_wrinkle_idle_timeout": "Povolený klid mezi dvěma impulzy bubnu, než ochrana před zmačkáním skončí",
+    "anti_wrinkle_max_duration": "Delší impulz ukončí ochranu před zmačkáním a otevře nový cyklus",
+    "anti_wrinkle_max_power": "Impulz nad touto hodnotou ukončí ochranu před zmačkáním a otevře nový cyklus",
     "completion_min_seconds": "Nejkratší běh, který se počítá jako skutečný cyklus",
     "end_repeat_count": "Nízká čtení za sebou před ukončením",
     "interrupted_min_seconds": "Krátké cykly označené jako přerušené",

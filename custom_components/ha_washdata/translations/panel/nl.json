@@ -608,7 +608,8 @@
     "conflict_resolution": "Naamconflicten",
     "conflict_import_copy": "Importeren als kopie",
     "conflict_keep_mine": "Die van mij behouden",
-    "conflict_overwrite": "Overschrijven"
+    "conflict_overwrite": "Overschrijven",
+    "pg_anti_wrinkle": "Anti-kreuk"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -944,7 +945,12 @@
     "dtw_ddtw_scale": "Stap 3: DDTW-halfsaturatieafstand; kleiner = gevoeliger voor vorm (standaard 30)",
     "dtw_refine_top_n": "Stap 3: kandidaten die door DTW opnieuw beoordeeld worden; verhoog naar 7-9 als het juiste profiel op de 4e-5e plaats staat (standaard 5)",
     "duration_scale": "Stap 4: log-verhouding waarbij de duurovereenkomst halveert; kleiner = strengere straf (standaard 0,175)",
-    "energy_scale": "Stap 4: log-verhouding waarbij de energieovereenkomst halveert; kleiner = strengere straf (standaard 0,25)"
+    "energy_scale": "Stap 4: log-verhouding waarbij de energieovereenkomst halveert; kleiner = strengere straf (standaard 0,25)",
+    "anti_wrinkle_idle_timeout": "Toegestane stille tijd tussen twee tuimelpulsen voordat anti-kreuk eindigt",
+    "anti_wrinkle_max_power": "Een puls boven dit niveau beëindigt anti-kreuk en opent een nieuwe cyclus",
+    "anti_wrinkle_enabled": "De tuimelpulsen na de hoofdfase opvangen in plaats van ze als nieuwe cycli te lezen",
+    "anti_wrinkle_max_duration": "Een puls die langer is dan dit beëindigt anti-kreuk en opent een nieuwe cyclus",
+    "anti_wrinkle_exit_power": "Het vermogen moet tussen de pulsen onder dit niveau vallen om anti-kreuk actief te houden"
   },
   "phase_desc": {
     "anti_crease": "Af en toe kort tuimelen na voltooiing om rimpels te verminderen.",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Het vermogen moet tussen de pulsen onder dit niveau liggen, anders blijft de antirimpelmodus actief.",
       "label": "Drempel uitgangsverwarming"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Hoe lang het apparaat tussen twee tuimelpulsen stil mag blijven voordat de anti-kreukmodus eindigt. Stel dit hoger in dan de langste pauze die uw droger tussen twee pulsen laat, anders wordt elke latere puls als valse start gelezen.",
+      "label": "Max. pulspauze"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulsaties langer dan dit worden behandeld als een echte cyclus in plaats van als een anti-rimpel-tuimelen.",

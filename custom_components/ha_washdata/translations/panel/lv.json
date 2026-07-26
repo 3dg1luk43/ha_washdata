@@ -300,6 +300,7 @@
     "poor": "⚠ Slikta profila kvalitāte"
   },
   "lbl": {
+    "pg_anti_wrinkle": "Pretgrumbu režīms",
     "actions": "Darbības",
     "activity": "Aktivitāte",
     "administrators": "Administratori",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Lai pretgrumbu režīms paliktu aktīvs, starp impulsiem jaudai ir jāsamazinās zem šī.",
       "label": "Izejas jaudas slieksnis"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Cik ilgi mašīna drīkst palikt klusa starp diviem griešanās impulsiem, pirms pretgrumbu režīms beidzas. Iestatiet to garāku par garāko atstarpi, ko jūsu žāvētājs atstāj starp impulsiem, citādi katrs nākamais impulss tiek uztverts kā kļūdains starts.",
+      "label": "Maks. atstarpe starp impulsiem"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pākšaugi, kas ir garāki par šo, tiek uzskatīti par īstu ciklu, nevis kā pretgrumbu izkrišanu.",
@@ -1765,6 +1770,11 @@
     "other": "Cits"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Absorbējiet griešanās impulsus pēc galvenās fāzes, nevis nolasiet tos kā jaunus ciklus",
+    "anti_wrinkle_exit_power": "Lai pretgrumbu režīms paliktu aktīvs, jaudai starp impulsiem jānokrītas zem šīs vērtības",
+    "anti_wrinkle_idle_timeout": "Atļautais klusuma laiks starp diviem griešanās impulsiem, pirms pretgrumbu režīms beidzas",
+    "anti_wrinkle_max_duration": "Impulss, kas garāks par šo, beidz pretgrumbu režīmu un sāk jaunu ciklu",
+    "anti_wrinkle_max_power": "Impulss, kas pārsniedz šo, beidz pretgrumbu režīmu un sāk jaunu ciklu",
     "completion_min_seconds": "Īsākais darbības laiks, kas skaitās par īstu ciklu",
     "end_repeat_count": "Zemi rādījumi pēc kārtas pirms beigām",
     "interrupted_min_seconds": "Īsi cikli tiek atzīmēti kā pārtraukti",

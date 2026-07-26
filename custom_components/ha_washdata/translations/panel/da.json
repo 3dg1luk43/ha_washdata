@@ -608,7 +608,8 @@
     "conflict_resolution": "Navnekonflikter",
     "conflict_import_copy": "Importér som kopi",
     "conflict_keep_mine": "Behold mine",
-    "conflict_overwrite": "Overskriv"
+    "conflict_overwrite": "Overskriv",
+    "pg_anti_wrinkle": "Anti-rynke"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -944,7 +945,12 @@
     "dtw_ddtw_scale": "Trin 3: DDTW-halvmætningsafstand; mindre = mere formfølsom (standard 30)",
     "dtw_refine_top_n": "Trin 3: kandidater DTW gen-scorer; hæv til 7-9 hvis korrekt profil placerer sig 4.-5. (standard 5)",
     "duration_scale": "Trin 4: log-forhold der varighedsoverensstemmelse halveres; lavere = strengere straf (standard 0,175)",
-    "energy_scale": "Trin 4: log-forhold der energioverensstemmelse halveres; lavere = strengere straf (standard 0,25)"
+    "energy_scale": "Trin 4: log-forhold der energioverensstemmelse halveres; lavere = strengere straf (standard 0,25)",
+    "anti_wrinkle_idle_timeout": "Tilladt stilletid mellem to tumle-pulser, før anti-rynke slutter",
+    "anti_wrinkle_max_power": "En puls over dette afslutter anti-rynke og åbner en ny cyklus",
+    "anti_wrinkle_enabled": "Opfange tumle-pulserne efter hovedfasen i stedet for at læse dem som nye cyklusser",
+    "anti_wrinkle_max_duration": "En puls længere end dette afslutter anti-rynke og åbner en ny cyklus",
+    "anti_wrinkle_exit_power": "Effekten skal falde under dette mellem pulserne, for at anti-rynke forbliver aktiv"
   },
   "phase_desc": {
     "anti_crease": "Lejlighedsvis korte tumblinger efter færdiggørelse for at reducere rynker.",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Strømmen skal falde under dette mellem pulserne for at anti-rynketilstand forbliver aktiv.",
       "label": "Udgangstærskel for effekt"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Hvor længe maskinen må forblive stille mellem to tumle-pulser, før anti-rynketilstand slutter. Sæt den højere end den længste pause, din tørretumbler efterlader mellem to pulser, ellers læses hver efterfølgende puls som en falsk start.",
+      "label": "Maks. pulspause"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Pulser længere end dette behandles som en ægte cyklus snarere end en anti-rynke tumbling.",

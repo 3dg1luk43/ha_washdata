@@ -300,6 +300,7 @@
     "poor": "⚠ Kehv profiili kvaliteet"
   },
   "lbl": {
+    "pg_anti_wrinkle": "Kortsudevastane",
     "actions": "Tegevused",
     "activity": "Tegevus",
     "administrators": "Administraatorid",
@@ -924,6 +925,11 @@
     "dest_real_history_hint": "Imporditud tsüklid arvestatakse selle seadme enda ajalooks ja need toidavad energia- ja kasutusstatistikat. Kasuta ühe seadme uude paigaldusse teisaldamiseks."
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Neelab pärast põhifaasi trummelimpulsid, selle asemel et lugeda neid uute tsüklitena",
+    "anti_wrinkle_exit_power": "Kortsudevastase režiimi aktiivsena püsimiseks peab võimsus impulsside vahel sellest allapoole langema",
+    "anti_wrinkle_idle_timeout": "Kahe trummelimpulsi vahel lubatud vaikuseaeg enne kortsudevastase režiimi lõppu",
+    "anti_wrinkle_max_duration": "Sellest pikem impulss lõpetab kortsudevastase režiimi ja avab uue tsükli",
+    "anti_wrinkle_max_power": "Sellest kõrgem impulss lõpetab kortsudevastase režiimi ja avab uue tsükli",
     "completion_min_seconds": "Lühim käivitus, mis loetakse päris tsükliks",
     "end_repeat_count": "Madalate näitude arv järjest enne lõpetamist",
     "interrupted_min_seconds": "Lühikesed tsüklid märgitakse katkestatuks",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Kortsudevastase režiimi aktiivseks püsimiseks peab võimsus impulsside vahel langema sellest allapoole.",
       "label": "Väljumise Võimsuse Lävi"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Kui kaua tohib masin kahe trummelimpulsi vahel vaikida, enne kui kortsudevastane režiim lõpeb. Seadke see kõrgemaks kui pikim paus, mille teie kuivati impulsside vahele jätab, muidu loetakse iga hilisem impulss valestardiks.",
+      "label": "Maksimaalne Impulsivahe"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Sellest pikemaid kaunvilju käsitletakse pigem tõelise tsüklina kui kortsudevastasena.",

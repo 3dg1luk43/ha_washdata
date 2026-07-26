@@ -300,6 +300,7 @@
     "poor": "⚠ Prasta profilio kokybė"
   },
   "lbl": {
+    "pg_anti_wrinkle": "Apsauga nuo raukšlių",
     "actions": "Veiksmai",
     "activity": "Veikla",
     "administrators": "Administratoriai",
@@ -1018,6 +1019,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Kad raukšlių mažinimo režimas išliktų aktyvus, tarp impulsų galia turi būti mažesnė.",
       "label": "Išėjimo galios slenkstis"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "doc": "Kiek ilgai mašina gali tylėti tarp dviejų būgninių impulsų, kol baigiasi apsaugos nuo raukšlių režimas. Nustatykite ilgesnį nei ilgiausias tarpas, kurį jūsų džiovyklė palieka tarp impulsų, antraip kiekvienas vėlesnis impulsas bus laikomas klaidingu paleidimu.",
+      "label": "Maks. tarpas tarp impulsų"
     },
     "anti_wrinkle_max_duration": {
       "doc": "Ilgesni impulsai laikomi tikru ciklu, o ne raukšlių mažinimu.",
@@ -1765,6 +1770,11 @@
     "other": "Kita"
   },
   "pg_desc": {
+    "anti_wrinkle_enabled": "Sugerkite būgninius impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
+    "anti_wrinkle_exit_power": "Kad apsauga nuo raukšlių išliktų aktyvi, galia tarp impulsų turi nukristi žemiau šios ribos",
+    "anti_wrinkle_idle_timeout": "Tylos laikas, leidžiamas tarp dviejų būgninių impulsų prieš pasibaigiant apsaugai nuo raukšlių",
+    "anti_wrinkle_max_duration": "Ilgesnis nei šis impulsas užbaigia apsaugą nuo raukšlių ir pradeda naują ciklą",
+    "anti_wrinkle_max_power": "Už šią didesnis impulsas užbaigia apsaugą nuo raukšlių ir pradeda naują ciklą",
     "completion_min_seconds": "Trumpiausias veikimas, laikomas tikru ciklu",
     "end_repeat_count": "Kiek žemų rodmenų iš eilės prieš pabaigą",
     "interrupted_min_seconds": "Trumpi ciklai pažymimi kaip pertraukti",

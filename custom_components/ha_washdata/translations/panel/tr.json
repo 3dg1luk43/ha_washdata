@@ -399,6 +399,7 @@
     "panel_default_tab": "Varsayılan sekme",
     "panel_language": "Panel dili",
     "per_cycle_short": "döngü",
+    "pg_anti_wrinkle": "Kırışıklık önleme",
     "pg_autofill_tip": "Geçerli değerden aralığı otomatik doldur ({lo}–{hi})",
     "pg_best_value": "Bulunan en iyi değer",
     "pg_current_value": "Geçerli değer:",
@@ -932,6 +933,11 @@
     "start_duration_threshold": "Başlangıcı onaylamak için eşik üstünde saniye",
     "start_threshold_w": "Başladı sayılması için minimum watt",
     "stop_threshold_w": "Bunun altında makine kapalı sayılır",
+    "anti_wrinkle_enabled": "Ana aşamadan sonraki takla darbelerini yeni döngü olarak okumak yerine emer",
+    "anti_wrinkle_exit_power": "Kırışıklık önlemenin etkin kalması için gücün darbeler arasında bunun altına düşmesi gerekir",
+    "anti_wrinkle_idle_timeout": "Kırışıklık önleme sona ermeden önce iki takla darbesi arasında izin verilen sessiz süre",
+    "anti_wrinkle_max_duration": "Bundan uzun bir darbe kırışıklık önlemeyi bitirir ve yeni bir döngü açar",
+    "anti_wrinkle_max_power": "Bunun üzerindeki bir darbe kırışıklık önlemeyi bitirir ve yeni bir döngü açar",
     "dtw_bandwidth": "Aşama 3: Sakoe-Chiba büküm bandı (0 = DTW kapalı; varsayılan 0.2 = döngü uzunluğunun %20'si)",
     "corr_weight": "Aşama 2: eğri şekli (korelasyon) ile güç düzeyi (MAE) arasındaki denge; varsayılan 0.45",
     "duration_weight": "Aşama 4: çalışma süresi uyumunun nihai puanı ne kadar etkilediği (varsayılan 0.22)",
@@ -1041,6 +1047,10 @@
     "anti_wrinkle_exit_power": {
       "doc": "Kırışıklık önleme modunun aktif kalması için darbeler arasında gücün bu değerin altına düşmesi gerekir.",
       "label": "Çıkış Gücü Eşiği"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "Maks. Darbe Aralığı",
+      "doc": "Kırışıklık önleme modu sona ermeden önce makinenin iki takla darbesi arasında ne kadar süre sessiz kalabileceği. Bunu kurutucunuzun darbeler arasında bıraktığı en uzun boşluğun üzerine ayarlayın, aksi halde sonraki her darbe hatalı başlangıç olarak okunur."
     },
     "anti_wrinkle_max_duration": {
       "doc": "Bundan daha uzun darbeler, kırışıklık önleyici bir takla yerine gerçek bir döngü olarak değerlendirilir.",
