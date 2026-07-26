@@ -712,6 +712,7 @@
     "export_description": "Valitse tarkalleen, mitkä profiilit, jaksot, asetukset ja muut viedään JSON-tiedostoon, tai analysoi tiedosto ja tuo vain haluamasi osat.",
     "feedback_cycles_pending": "{n} sykliä tarkistettavana",
     "feedback_prompt": "Vahvista, että se oli oikein, korjaa ohjelma tai jätä huomiotta.",
+    "feedback_relabel_hint": "Tämän syklin uudelleenmerkintä ratkaisee sen myös.",
     "filter_by_profile": "Suodata profiilin mukaan…",
     "group_modal_help": "Ryhmäohjelmat, joilla on sama muoto ja jotka eroavat lämpötilassa/linkouksessa (kesto voi vaihdella). Matching antaa ryhmän yhdeksi ehdokkaaksi ja valitsee sitten parhaiten sopivan jäsenen. Valitse vähintään 2; peittokuva osoittaa, kuinka samanlaisia ​​ne ovat.",
     "group_not_cohesive": "Nämä profiilit eivät ole riittävän samankaltaisia ​​ryhmittelemään niitä luotettavasti, joten vastaavuudessa käsitellään niitä yksitellen, kunnes poistat poikkeaman tai jaat ryhmän.",

@@ -693,6 +693,7 @@
     "export_select_intro": "Tick exactly what to include. Selecting profiles without their cycles still exports a matchable program (its learned shape travels along).",
     "feedback_cycles_pending": "{n} cycle{s} to review",
     "feedback_prompt": "Confirm it was right, correct the program, or ignore.",
+    "feedback_relabel_hint": "Re-labelling this cycle resolves it too.",
     "filter_by_profile": "Filter by profile…",
     "group_modal_help": "Group programs with the same shape that differ in temperature/spin (durations may vary). Matching scores the group as one candidate, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.",
     "group_not_cohesive": "These profiles aren't similar enough to group reliably, so matching treats them individually until you remove the outlier or split the group.",

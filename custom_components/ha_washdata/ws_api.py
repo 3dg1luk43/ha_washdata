@@ -2091,9 +2091,17 @@ async def ws_label_cycle(
             if not new_profile_name or not new_profile_name.strip():
                 connection.send_error(msg["id"], "invalid_format", "New profile name required")
                 return
-            await manager.profile_store.create_profile(new_profile_name.strip(), cycle_id)
+            applied_profile: str | None = new_profile_name.strip()
+            await manager.profile_store.create_profile(applied_profile, cycle_id)
         else:
+            applied_profile = profile_name
             await manager.profile_store.assign_profile_to_cycle(cycle_id, profile_name)
+        # Manually (re)labelling a cycle awaiting verification IS the user's answer,
+        # so resolve any pending feedback and drop it from the review queue (#331).
+        if hasattr(manager, "learning_manager"):
+            await manager.learning_manager.async_resolve_pending_from_label(
+                cycle_id, applied_profile
+            )
         manager.notify_update()
         _send_result(connection, msg["id"], "label_cycle", {"success": True})
     except ValueError as exc:

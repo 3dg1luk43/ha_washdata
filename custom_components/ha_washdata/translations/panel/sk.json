@@ -712,6 +712,7 @@
     "export_description": "Vyberte presne, ktoré profily, cykly, nastavenia a ďalšie údaje exportovať do súboru JSON, alebo analyzujte súbor a importujte len tie časti, ktoré chcete.",
     "feedback_cycles_pending": "{n} cyklov na kontrolu",
     "feedback_prompt": "Potvrďte správnosť, opravte program alebo ignorujte.",
+    "feedback_relabel_hint": "Opätovné označenie tohto cyklu ho tiež vyrieši.",
     "filter_by_profile": "Filtrovať podľa profilu…",
     "group_modal_help": "Skupinové programy s rovnakým tvarom, ktoré sa líšia teplotou/odstreďovaním (trvanie sa môže líšiť). Porovnanie ohodnotí skupinu ako jedného kandidáta a potom vyberie najlepšieho člena. Vyberte aspoň 2; prekrytie ukazuje, nakoľko sú si podobné.",
     "group_not_cohesive": "Tieto profily nie sú dostatočne podobné na to, aby sa dali spoľahlivo zoskupiť, takže zhoda s nimi zaobchádza individuálne, kým neodstránite odľahlú hodnotu alebo nerozdelíte skupinu.",
