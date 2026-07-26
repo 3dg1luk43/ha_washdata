@@ -186,7 +186,7 @@ Each links to its full deep-dive. Only the load-bearing facts are here.
 ### 4.10 Entities / config / services ([10](reference/10-entities-config-services.md))
 - 25 entities: 12 always-on sensors + conditional sensors (pump-runs, and 3 debug sensors + binary ambiguity behind `expose_debug_entities`) + dynamic per-profile count sensors + running binary sensor + program select + 5 buttons.
 - State sensor attributes: `samples_recorded`, `current_program_guess`, `sub_state`, `pump_stuck` (pump), and conditional `cycle_anomaly` / `overrun_ratio` / `last_cycle_*` / `ha_restart_gaps` / `maintenance_due`. Progress sensor adds `projected_energy_kwh` / `projected_cost`.
-- 13 registered services (`trigger_ml_training` only when `ENABLE_ML_TRAINING`). Config-entry schema at **v3.7**.
+- 13 registered services (`trigger_ml_training` only when `ENABLE_ML_TRAINING`). Config-entry schema at **v3.8** (3.7→3.8: strips dead `running_dead_zone` option).
 
 ### 4.11 Community Store ([11](reference/11-community-store.md))
 - Brand -> Device -> Program -> Reference cycles, Firestore REST backend; device auto-promotes at `confirmCount >= 5` (live-tunable). Three modules: account (global online toggle + GitHub creds + prefs), client (pure REST), `StoreBridge` (orchestration; no-raise `{"error":...}`).
@@ -243,6 +243,10 @@ new items 42-53 added and fixed in same session. Items 50-53 are the detection-t
 anti-crease standby-band finalize), each validated with the slow suite + a byte-identical
 `dtw_ab_eval` top-1 (88.36%, matcher untouched).
 
+**2026-07-26 additions (0.5.3 branch, issues #328/#329):** Items 57-59 added and fixed —
+`running_dead_zone` dead config retired (migration 3.7→3.8), live chart diag_buffer overlay,
+panel registration blocking-call + race (already fixed by earlier commits on 0.5.3).
+
 | # | Status | Kind | Short description |
 |---|---|---|---|
 | 23-26 | FIXED | CODE | phase-match occ_penalty, advisories, cold-start, docstrings |
@@ -272,6 +276,9 @@ anti-crease standby-band finalize), each validated with the slow suite + a byte-
 | 54 | ADDED | NOTE | Selective export/import (0.5.3): taxonomy + `_scan_data` + manifest + merge apply; 4 new WS commands |
 | 55 | ADDED | NOTE | Playground idle-termination test / stress tail (0.5.3): synthetic standby continuation through the real detector |
 | 56 | FIXED | CODE | 0.5.3 pre-release review pass (4 rounds, 14 findings): panel XSS, cache-caches-failures + unbounded growth, import guards/idempotency/O(N²)/replace-overwrite, playground mislabel, DTW fallback |
+| 57 | FIXED | CODE | `running_dead_zone` config existed since v0.3 but was NEVER wired to detection — retired in 0.5.3 (migration 3.7→3.8 strips it); `isBool` undefined in `_htmlPgParamRows` playground template |
+| 58 | FIXED | CODE | `get_power_history` live chart lagged raw sensor by one sampling interval during ENDING soak-bridge — fixed by overlaying `diag_buffer` tail onto detector trace before downsample |
+| 59 | FIXED | CODE | Panel registration blocking FS call (`scandir` on event loop) + multi-device race — already fixed in 0.5.3 by executor offload + shared `asyncio.Task` coalescing |
 
 ### 7.1 Documentation inaccuracies (fix in this pass)
 
