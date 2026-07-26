@@ -109,8 +109,6 @@ const _SETTINGS_SECTIONS = [
         doc: 'Energy (power x time) the appliance must consume before RUNNING. A brief high-power spike has very low energy and is ignored, preventing false starts.' },
       { key: 'completion_min_seconds', label: 'Min Cycle Duration', unit: 's', type: 'number', min: 0, def: 600, basic: true,
         doc: 'Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).' },
-      { key: 'running_dead_zone', label: 'Running Dead Zone', unit: 's', type: 'number', min: 0, def: 3,
-        doc: 'After a cycle starts, power dips within this window are ignored. Washing machines fill with cold water (dropping near 0 W before heating) - without this protection that fill phase looks like a cycle end. This does NOT skip data: the full power trace is recorded from T=0. The suggestion engine measures your machine\'s actual startup pattern and sizes this automatically.' },
     ] },
     { sub: 'Cycle End', fields: [
       { key: 'end_energy_threshold', label: 'End Energy', unit: 'Wh', type: 'number', step: 0.001, min: 0, def: 0.05,

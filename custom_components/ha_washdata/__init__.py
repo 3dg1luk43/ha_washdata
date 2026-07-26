@@ -103,6 +103,7 @@ from .const import (
     DEVICE_TYPE_OTHER,
     DEFAULT_START_DURATION_THRESHOLD,
     CONF_START_DURATION_THRESHOLD,
+    CONF_RUNNING_DEAD_ZONE,
 )
 from .log_utils import DeviceLoggerAdapter
 
@@ -137,7 +138,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         return False
 
-    if version == 3 and minor_version >= 7:
+    if version == 3 and minor_version >= 8:
         return True
 
     # 3.6 → 3.7: remove initial_profile stub key from entry.data.
@@ -149,7 +150,17 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         minor_version = 7
         _log.debug("Migrated WashData entry from 3.6 to 3.7")
 
-    if version == 3 and minor_version >= 7:
+    # 3.7 → 3.8: drop running_dead_zone from options (the setting was never
+    # wired to any detection logic and has been retired in 0.5.3).
+    if version == 3 and minor_version == 7:
+        new_opts = {k: v for k, v in entry.options.items() if k != CONF_RUNNING_DEAD_ZONE}
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=8
+        )
+        minor_version = 8
+        _log.debug("Migrated WashData entry from 3.7 to 3.8 (removed running_dead_zone)")
+
+    if version == 3 and minor_version >= 8:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -279,12 +290,16 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # so no stale removed value can linger there; the flow/manager read it from
         # options (options-first).
 
+    # Strip the now-retired running_dead_zone from options in the bulk path too
+    # (covers entries that migrate straight from v1/v2/early-v3 in one pass).
+    options.pop(CONF_RUNNING_DEAD_ZONE, None)
+
     hass.config_entries.async_update_entry(
         entry,
         data=data,
         options=options,
         version=3,
-        minor_version=7,
+        minor_version=8,
     )
     _log.info(
         "Migrated WashData entry from version %s.%s to 3.7", version, minor_version

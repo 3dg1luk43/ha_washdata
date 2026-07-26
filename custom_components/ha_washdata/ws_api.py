@@ -63,7 +63,6 @@ from .const import (
     CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PUMP_STUCK_DURATION,
     CONF_POWER_OFF_THRESHOLD_W,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
     CONF_SMOOTHING_WINDOW,
     CONF_START_DURATION_THRESHOLD,
@@ -76,7 +75,6 @@ from .const import (
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_OFF_DELAY_BY_DEVICE,
-    DEFAULT_RUNNING_DEAD_ZONE,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
     DEVICE_TYPES,
@@ -186,7 +184,6 @@ _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_END_ENERGY_THRESHOLD,
-    CONF_RUNNING_DEAD_ZONE,
     # Stage 1 detection suggestions
     CONF_SMOOTHING_WINDOW,
     CONF_START_DURATION_THRESHOLD,
@@ -209,7 +206,6 @@ _SUGGESTION_INT_KEYS: frozenset[str] = frozenset({
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_MIN_OFF_GAP,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_SMOOTHING_WINDOW,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_END_REPEAT_COUNT,
@@ -240,7 +236,6 @@ _ML_COMPARE_SETTINGS: tuple[tuple[str, str, str], ...] = (
     (CONF_STOP_THRESHOLD_W, "Stop Threshold", "W"),
     (CONF_START_THRESHOLD_W, "Start Threshold", "W"),
     (CONF_END_ENERGY_THRESHOLD, "End Energy Threshold", "Wh"),
-    (CONF_RUNNING_DEAD_ZONE, "Running Dead Zone", "s"),
     (CONF_MIN_POWER, "Min Power", "W"),
     (CONF_MIN_OFF_GAP, "Min Off Gap", "s"),
     (CONF_DURATION_TOLERANCE, "Duration Tolerance", ""),
@@ -5174,7 +5169,6 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
         completion_min_seconds=int(opts.get(CONF_COMPLETION_MIN_SECONDS, 600)),
         end_repeat_count=int(opts.get(CONF_END_REPEAT_COUNT, 1)),
         min_off_gap=int(opts.get(CONF_MIN_OFF_GAP, 60)),
-        running_dead_zone=int(opts.get(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE)),
         start_threshold_w=float(opts.get(CONF_START_THRESHOLD_W, min_power)),
         stop_threshold_w=float(
             opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)

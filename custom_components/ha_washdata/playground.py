@@ -64,7 +64,6 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_RUNNING_DEAD_ZONE,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
@@ -132,7 +131,6 @@ _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
     CONF_END_REPEAT_COUNT: ("end_repeat_count", int),
     CONF_START_THRESHOLD_W: ("start_threshold_w", float),
     CONF_STOP_THRESHOLD_W: ("stop_threshold_w", float),
-    CONF_RUNNING_DEAD_ZONE: ("running_dead_zone", int),
     CONF_START_DURATION_THRESHOLD: ("start_duration_threshold", float),
     CONF_INTERRUPTED_MIN_SECONDS: ("interrupted_min_seconds", int),
 }
