@@ -2859,8 +2859,21 @@ class WashDataManager:
             or prev_raw_power >= min_p  # genuine drop from active power
         )
 
+        # Anti-wrinkle tumble pulses must always reach the detector so they can
+        # reset the idle timer. In anti_wrinkle the watchdog injects synthetic 0 W
+        # keepalives (see _watchdog_check_stuck_cycle) whose timestamp bumps
+        # _last_reading_time — the very clock this throttle uses. Without this
+        # bypass a real pulse (>= min_power, so not is_low_power) arriving within
+        # _sampling_interval of a keepalive would be discarded, defeating the reset
+        # and letting the mode time out mid-tumble. Pulses are sparse and brief, so
+        # exempting them here cannot flood the detector.
+        is_anti_wrinkle_pulse = (
+            self.detector.state == STATE_ANTI_WRINKLE and power >= min_p
+        )
+
         if (
             not is_low_power
+            and not is_anti_wrinkle_pulse
             and self._last_reading_time
             and (now - self._last_reading_time).total_seconds() < self._sampling_interval
         ):
@@ -3000,10 +3013,57 @@ class WashDataManager:
 
     async def _handle_state_expiry(self, now: datetime) -> None:
         """Check if state and progress should be reset (auto-expiration)."""
+        # Anti-wrinkle idle-timeout keepalive. The detector's anti_wrinkle
+        # idle-timeout (anti_wrinkle_idle_timeout) and its 2 h safety cap advance
+        # ONLY from inside process_reading, i.e. they need incoming readings. But
+        # the watchdog - the timer that would inject keepalives during silence -
+        # is stopped for the whole anti_wrinkle tail: anti_wrinkle is entered via
+        # _finish_cycle, whose on_cycle_end callback calls _stop_watchdog(), and
+        # the watchdog is only restarted on the next cycle start. A publish-on-
+        # change power sensor goes completely silent once power flatlines at
+        # standby / 0 W after the last tumble pulse, so nothing advances the timer
+        # and the state hangs in anti_wrinkle until the next real reading
+        # (typically the following cycle). This state-expiry timer, by contrast,
+        # keeps ticking through anti_wrinkle (it is (re)armed by the cycle-end
+        # tail), so drive the idle-timeout from here: inject a 0 W keepalive on
+        # silence and let the detector's own idle logic close the tail into OFF.
+        # Injecting 0 W matches the low-power keepalive path and is safe - a steady
+        # sub-pulse baseline carries no tumble activity, so it should count toward
+        # the idle timeout; a real tumble pulse (which bypasses the sampling
+        # throttle in _async_power_changed) still resets it.
+        if self.detector.state == STATE_ANTI_WRINKLE:
+            # Gate on _last_real_reading_time (only genuine sensor readings bump
+            # it), NOT _last_reading_time which this keepalive also bumps. With
+            # off_delay equal to the 60 s state-expiry interval, gating on the
+            # self-bumped clock made the condition true only every OTHER tick, so
+            # keepalives fired half as often and the idle timer advanced at ~half
+            # real-time - roughly doubling the time to close. Real-silence gating
+            # fires a keepalive on every tick during genuine silence, so the idle
+            # timer advances in real time and the tail closes right at
+            # anti_wrinkle_idle_timeout. Fall back to _last_reading_time if no
+            # real reading has been recorded yet.
+            last_real = self._last_real_reading_time or self._last_reading_time
+            if (
+                last_real
+                and (now - last_real).total_seconds() > self._config.off_delay
+            ):
+                self._logger.debug(
+                    "State-expiry: anti-wrinkle real-silence (%.0fs > off_delay "
+                    "%ds). Injecting 0W keepalive to advance the idle timer.",
+                    (now - last_real).total_seconds(),
+                    self._config.off_delay,
+                )
+                self.detector.process_reading(0.0, now)
+                # Advance only the 'any-update' clock; leave
+                # _last_real_reading_time untouched so real-silence tracking holds.
+                self._last_reading_time = now
+                self._current_power = 0.0
+                self._notify_update()
+            return
+
         if (
             not self._cycle_completed_time
             or self.detector.state == STATE_RUNNING
-            or self.detector.state == STATE_ANTI_WRINKLE
             or self.detector.state == STATE_DELAY_WAIT
         ):
             # Cycle is running or not completed, don't reset
