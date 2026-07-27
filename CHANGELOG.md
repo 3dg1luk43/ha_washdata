@@ -5,6 +5,14 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.4 - 2026-07-27
+
+### Bug Fixes
+
+- **Two more blocking startup calls removed** ([#328](https://github.com/3dg1luk43/ha_washdata/issues/328), [#335](https://github.com/3dg1luk43/ha_washdata/issues/335)): 0.5.3 offloaded the `frontend.py` directory scan to the executor, but a second blocking read remained: `ws_api.py` parsed `manifest.json` at module level, and because that module is imported lazily inside `async_setup_entry` the file read ran on the event loop every first restart. The version is now fetched once from HA's already-loaded integration manifest (cached, no file I/O) during setup and stored in `hass.data`, so `ws_get_constants` reads it from there without ever touching the filesystem.
+
+- **Notifications to `notify.*` entity targets no longer crash with "extra keys not allowed"** (`manager.py`): When a notify target was configured as a `notify.*` entity (e.g. `notify.mobile_app_phone`), WashData routed the call through HA's newer `notify.send_message` entity service, which only accepts `message`, `title`, and `entity_id`. Mobile-app enrichment keys (tag, channel, priority, iOS Live Activity fields, icon, progress) were still bundled into a `data` sub-dict and appended to that call, causing a voluptuous schema rejection (`extra keys not allowed @ data['data']`) and a "Task exception was never retrieved" error in the HA log -- meaning the notification was silently dropped. When `svc_data` is non-empty the call now falls through to the legacy `notify.mobile_app_*` domain service, which uses `NOTIFY_SERVICE_SCHEMA` and accepts `data: dict`, so all enrichment keys arrive correctly.
+
 ## 0.5.3 - 2026-07-26
 
 ### Features

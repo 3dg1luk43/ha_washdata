@@ -92,16 +92,11 @@ from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
 _LOGGER = logging.getLogger(__name__)
 
-# Read once at import time (manifest.json is static) so ws_get_constants never does
-# blocking I/O on the event loop. Falls back to "" if the file is absent.
-try:
-    from pathlib import Path as _Path
-    _INTEGRATION_VERSION: str = json.loads(
-        (_Path(__file__).parent / "manifest.json").read_text(encoding="utf-8")
-    ).get("version", "")
-    del _Path
-except Exception:  # pragma: no cover  # pylint: disable=broad-exception-caught
-    _INTEGRATION_VERSION = ""
+# Populated once during async_setup_entry (stored in hass.data["ha_washdata_version"])
+# so ws_get_constants never does blocking I/O on the event loop.  A module-level
+# read_text() here would run on the event loop the first time ws_api is imported
+# inside async_setup_entry (#328/#335).
+_INTEGRATION_VERSION: str = ""
 
 # ─── WS response contract (Group H1) ────────────────────────────────────────────
 # Debug-only validation of every send_result payload against the TypedDict
@@ -3255,7 +3250,7 @@ def ws_get_constants(
         MATCH_ENERGY_SCALE,
     )
     _send_result(connection, msg["id"], "get_constants", {
-            "version": _INTEGRATION_VERSION,
+            "version": hass.data.get("ha_washdata_version", _INTEGRATION_VERSION),
             "icon_url": _BRAND_ICON_URL if hass.data.get(_BRAND_ICON_KEY) else None,
             "device_types": device_types,
             "state_colors": dict(STATE_COLORS),
