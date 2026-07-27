@@ -5175,15 +5175,18 @@ class WashDataManager:
                 if notify_service.startswith("notify.")
                 else None
             )
-            if state is not None and getattr(state, "domain", None) == "notify":
+            # notify.send_message (HA 2023.4+ entity service) only accepts
+            # message/title/entity_id — it has no 'data' sub-dict in its schema.
+            # Fall through to the legacy domain-service path when svc_data is
+            # non-empty (mobile extras, icon, iOS Live Activity keys, etc.) so
+            # they land in the 'data' dict that NOTIFY_SERVICE_SCHEMA accepts.
+            if state is not None and getattr(state, "domain", None) == "notify" and not svc_data:
                 service_data: dict[str, Any] = {
                     "entity_id": notify_service,
                     "message": message,
                 }
                 if title:
                     service_data["title"] = title
-                if svc_data:
-                    service_data["data"] = svc_data
                 self.hass.async_create_task(
                     self.hass.services.async_call(
                         "notify", "send_message", service_data
