@@ -277,6 +277,8 @@ def _wire_manager_for_power_change(
     detector.state = state
     detector.config = MagicMock()
     detector.config.min_power = 2.0
+    detector.config.anti_wrinkle_exit_power = 0.8
+    detector.config.stop_threshold_w = 2.0
     detector.current_cycle_start = dt_util.now() - timedelta(hours=1)
     detector.process_reading = MagicMock()
     manager.recorder = MagicMock()
@@ -323,11 +325,45 @@ def test_high_reading_in_running_is_still_throttled(
 def test_anti_wrinkle_low_baseline_does_not_bypass_throttle(
     hass: HomeAssistant, manager: WashDataManager
 ) -> None:
-    """A sub-min_power baseline reading in anti_wrinkle is NOT a pulse, so it does
-    not bypass the throttle (guards against flooding on polling sensors); the
-    state-expiry keepalive is what advances the idle timer during that quiet."""
+    """A reading below the effective-exit threshold in anti_wrinkle is NOT a pulse,
+    so it does not bypass the throttle (guards against flooding on polling
+    sensors); the state-expiry keepalive is what advances the idle timer during
+    that quiet."""
     detector = _wire_manager_for_power_change(manager, STATE_ANTI_WRINKLE)
 
     manager._async_power_changed(_make_power_event(1.0, 1.0, dt_util.now()))
+
+    detector.process_reading.assert_not_called()
+
+
+def test_anti_wrinkle_pulse_below_min_power_still_bypasses_throttle(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """Regression for the effective-exit mismatch: when
+    effective_exit = max(anti_wrinkle_exit_power, stop_threshold_w) is below
+    min_power, a real pulse in [effective_exit, min_power) still resets the
+    detector's idle timer, so it must bypass the throttle too. Here
+    effective_exit = 2.0 but min_power = 5.0; a 3.0 W pulse must reach the
+    detector even though it is below min_power."""
+    detector = _wire_manager_for_power_change(manager, STATE_ANTI_WRINKLE)
+    detector.config.min_power = 5.0  # above effective_exit (max(0.8, 2.0) = 2.0)
+
+    manager._async_power_changed(_make_power_event(3.0, 1.0, dt_util.now()))
+
+    detector.process_reading.assert_called_once()
+    assert detector.process_reading.call_args.args[0] == 3.0
+
+
+def test_anti_wrinkle_reading_below_effective_exit_stays_throttled(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """Contrast to the pulse regression: a reading strictly below effective_exit
+    does not reset the detector's idle timer, so it must NOT bypass the throttle.
+    With effective_exit = 2.0, a 1.5 W reading within the sampling window is
+    throttled."""
+    detector = _wire_manager_for_power_change(manager, STATE_ANTI_WRINKLE)
+    detector.config.min_power = 5.0
+
+    manager._async_power_changed(_make_power_event(1.5, 1.0, dt_util.now()))
 
     detector.process_reading.assert_not_called()

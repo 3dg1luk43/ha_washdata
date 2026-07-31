@@ -2860,15 +2860,24 @@ class WashDataManager:
         )
 
         # Anti-wrinkle tumble pulses must always reach the detector so they can
-        # reset the idle timer. In anti_wrinkle the watchdog injects synthetic 0 W
-        # keepalives (see _watchdog_check_stuck_cycle) whose timestamp bumps
+        # reset the idle timer. In anti_wrinkle the state-expiry timer injects
+        # synthetic 0 W keepalives (see _handle_state_expiry) whose timestamp bumps
         # _last_reading_time — the very clock this throttle uses. Without this
-        # bypass a real pulse (>= min_power, so not is_low_power) arriving within
-        # _sampling_interval of a keepalive would be discarded, defeating the reset
-        # and letting the mode time out mid-tumble. Pulses are sparse and brief, so
-        # exempting them here cannot flood the detector.
+        # bypass a real pulse arriving within _sampling_interval of a keepalive
+        # would be discarded, defeating the reset and letting the mode time out
+        # mid-tumble. The bypass threshold must match the detector's own idle-timer
+        # reset threshold — effective_exit = max(anti_wrinkle_exit_power,
+        # stop_threshold_w) — NOT min_power: when effective_exit < min_power, a real
+        # pulse in [effective_exit, min_power) resets the detector's idle timer but
+        # would otherwise be throttled here. Pulses are sparse and brief, so
+        # exempting them cannot flood the detector.
+        anti_wrinkle_exit_threshold = max(
+            float(self.detector.config.anti_wrinkle_exit_power),
+            float(self.detector.config.stop_threshold_w),
+        )
         is_anti_wrinkle_pulse = (
-            self.detector.state == STATE_ANTI_WRINKLE and power >= min_p
+            self.detector.state == STATE_ANTI_WRINKLE
+            and power >= anti_wrinkle_exit_threshold
         )
 
         if (
