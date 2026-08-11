@@ -1771,7 +1771,7 @@ class ProfileStore:
         if pairs[0][0] != 0.0:
             origin = pairs[0][0]
             pairs = [[p[0] - origin, p[1]] for p in pairs]
-        now = dt_util.now()
+        now = dt_util.as_utc(dt_util.now())
         store_id = str(meta.get("store_cycle_id") or "")
         cycle: CycleDict = {
             "profile_name": profile_name,
@@ -3860,9 +3860,11 @@ class ProfileStore:
                         if first_offset > 0:
                             # Leading zeros removed - Must shift start_time forward
                             try:
-                                start_dt = datetime.fromisoformat(cycle["start_time"])
+                                start_dt = _parse_start_dt(cycle["start_time"])
+                                if start_dt is None:
+                                    raise ValueError("unparseable start_time")
                                 new_start = start_dt + timedelta(seconds=first_offset)
-                                cycle["start_time"] = new_start.isoformat()
+                                cycle["start_time"] = dt_util.as_utc(new_start).isoformat()
 
                                 # Re-normalize offsets to 0
                                 shifted_data: list[list[float]] = []
@@ -6350,8 +6352,8 @@ class ProfileStore:
         for c in self._data.get("reference_cycles", []):
             if not isinstance(c, dict):
                 continue
-            meta = c.get("meta")
-            src = meta.get("source") if isinstance(meta, dict) else None
+            cyc_meta = c.get("meta")
+            src = cyc_meta.get("source") if isinstance(cyc_meta, dict) else None
             if src:
                 existing_ref_sources.add(_ref_dedup_key(src))
 
@@ -6622,6 +6624,20 @@ class ProfileStore:
         # Guard against a destructive trim (#366): an inverted/empty window would
         # produce a zero- or single-sample segment that collapses the cycle to
         # duration 0 / energy 0. Reject before touching the cycle.
+        if new_end_s <= new_start_s:
+            return False
+
+        # Snap both boundaries to the nearest real sample offset (#373). Trim
+        # inputs round to whole seconds, but sample offsets are frequently
+        # fractional -- a nominal 10 s cadence drifts, so ~3132.3 is the norm --
+        # and the [start, end] filter below is inclusive, so a whole-second entry
+        # lands just below the sample the user aimed at and silently drops it.
+        # Snapping against the full-resolution stored trace (independent of any
+        # client-side curve decimation) makes the kept window land exactly on the
+        # samples the boundaries name, on both ends.
+        offsets = [float(offset) for offset, _ in p_data]
+        new_start_s = min(offsets, key=lambda o: abs(o - new_start_s))
+        new_end_s = min(offsets, key=lambda o: abs(o - new_end_s))
         if new_end_s <= new_start_s:
             return False
 
@@ -6919,8 +6935,8 @@ class ProfileStore:
 
             # Create Cycle Record
             new_cycle: dict[str, Any] = {
-                "start_time": new_cycle_start.isoformat(),
-                "end_time": (new_cycle_start + timedelta(seconds=seg_dur)).isoformat(),
+                "start_time": dt_util.as_utc(new_cycle_start).isoformat(),
+                "end_time": dt_util.as_utc(new_cycle_start + timedelta(seconds=seg_dur)).isoformat(),
                 "duration": round(seg_dur, 1),
                 "status": "completed",
                 "power_data": p_data_abs,
@@ -7101,7 +7117,8 @@ class ProfileStore:
 
         new_dur = (final_end_dt - c1_start_dt).total_seconds()
 
-        c1["end_time"] = final_end_dt.isoformat()
+        c1["start_time"] = dt_util.as_utc(c1_start_dt).isoformat()
+        c1["end_time"] = dt_util.as_utc(final_end_dt).isoformat()
         c1["duration"] = round(new_dur, 1)
         c1["max_power"] = max_power
         c1["profile_name"] = target_profile
