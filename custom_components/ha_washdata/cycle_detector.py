@@ -301,6 +301,7 @@ class CycleDetector:
         self._end_spike_duration: float = 0.0  # cycle duration (s) when _end_spike_seen was last set
         self._match_ambiguous: bool = False  # last live match was ambiguous (gates predictive end)
         self._match_prefix_ambiguous: bool = False  # longer candidate with good shape exists (prefix guard)
+        self._last_smart_term_block_reason: str | None = None  # #346 diagnostic throttle
 
         # Anti-wrinkle tracking (dryers only)
         self._anti_wrinkle_candidate_start: datetime | None = None
@@ -687,6 +688,35 @@ class CycleDetector:
     def expected_duration_seconds(self) -> float:
         """Return the expected duration of the current cycle in seconds."""
         return self._expected_duration
+
+    @staticmethod
+    def _smart_term_block_reason(
+        current_duration: float,
+        expected: float,
+        smart_ratio: float,
+        is_confident: bool,
+        ambiguous: bool,
+        prefix_ambiguous: bool,
+    ) -> str | None:
+        """Why the Smart-Termination fast end-path did NOT fire, for diagnostics.
+
+        Returns None when the gate would pass, or when no expected duration is known
+        yet (nothing meaningful to report). Mirrors the gate's four conditions in
+        order so the first blocking reason is surfaced. Pure and side-effect-free;
+        the detector logs the result (throttled to reason changes) - no behaviour
+        change (#346).
+        """
+        if expected <= 0:
+            return None
+        if current_duration < expected * smart_ratio:
+            return "duration_not_reached"
+        if not is_confident:
+            return "low_confidence"
+        if ambiguous:
+            return "match_ambiguous"
+        if prefix_ambiguous:
+            return "prefix_ambiguous"
+        return None
 
     def process_reading(self, power: float, timestamp: datetime) -> None:
         """Process a new power reading using robust dt-aware logic."""
@@ -1347,6 +1377,31 @@ class CycleDetector:
                     # waits for the fallback timeout instead of getting an early
                     # close — an acceptable trade-off against the alternative of
                     # splitting a Normal wash into two separate cycle records.
+                    # Surface why the fast end-path is (not) firing, throttled to
+                    # reason changes so a stuck cycle's cause is visible in the log
+                    # without spamming every reading. Pure diagnostic (#346).
+                    _block_reason = self._smart_term_block_reason(
+                        current_duration,
+                        self._expected_duration,
+                        smart_ratio,
+                        is_confident_match,
+                        self._match_ambiguous,
+                        self._match_prefix_ambiguous,
+                    )
+                    if _block_reason != self._last_smart_term_block_reason:
+                        self._last_smart_term_block_reason = _block_reason
+                        if _block_reason is not None:
+                            self._logger.debug(
+                                "Smart Termination not applied (%s): dur=%.0fs/%.0fs conf=%.2f "
+                                "ambiguous=%s prefix_ambiguous=%s",
+                                _block_reason,
+                                current_duration,
+                                self._expected_duration * smart_ratio,
+                                getattr(self, "_last_match_confidence", 0.0),
+                                self._match_ambiguous,
+                                self._match_prefix_ambiguous,
+                            )
+
                     if (
                         current_duration >= (self._expected_duration * smart_ratio)
                         and is_confident_match

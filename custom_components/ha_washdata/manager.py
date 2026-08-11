@@ -1241,6 +1241,15 @@ class WashDataManager:
                                 "Smart Termination: near end of profile (%.0f/%.0fs). Releasing pause lock.",
                                 mapped_time, span,
                             )
+                        else:
+                            # Diagnostic (#346): the release is held; show how far the
+                            # trace mapped vs the 95%% release point (no behaviour change).
+                            self._logger.debug(
+                                "Smart Termination held for %s: mapped %.0f/%.0fs (%.0f%%) below 95%% release%s",
+                                current_matched, mapped_time, span,
+                                (100.0 * mapped_time / span) if span > 0 else 0.0,
+                                "" if span > 0 else " (envelope span unavailable)",
+                            )
                     except Exception as e:
                         self._logger.debug("Smart Termination alignment verification failed: %s", e)
                 else:

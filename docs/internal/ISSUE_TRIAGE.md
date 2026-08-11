@@ -466,4 +466,8 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   side, bounded 2x) in `async_verify_alignment` via new `_resample_trace_to_grid`, so mapped position
   tracks seconds not sample count. NOT the matcher path (dtw_ab_eval N/A). New
   `tests/test_issue_350_alignment_time_resample.py`; long_drying_pause + issue_112 green; fast 1377.
-  Register item 68. Maintainer choice: linear interp (ZOH left as future option).
+  Register item 68. Maintainer choice: linear interp (ZOH left as future option). (`0fe7e74`)
+- [DONE] #346 - two debug lines. Detector: pure `_smart_term_block_reason()` helper (unit-tested)
+  + throttled debug log of why the fast end-path didn't fire. Manager: debug log of mapped/release
+  fraction when the pause release is held. No behaviour change. New
+  `tests/test_issue_346_smart_term_debug.py`; fast 1383. Register item 69.
