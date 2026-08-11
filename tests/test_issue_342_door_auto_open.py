@@ -105,6 +105,23 @@ def test_door_close_cancels_pending_dwell(mock_hass):
     assert mgr._remove_door_end_dwell is None
 
 
+def test_cycle_end_cancels_stale_dwell(mock_hass):
+    """_on_cycle_end must cancel any pending door-end dwell so a stale timer
+    cannot fire during a subsequent new cycle (#342 edge case)."""
+    mgr = _make_manager(mock_hass, {CONF_DOOR_OPENS_AT_END: True})
+    cancel = MagicMock()
+    mgr._remove_door_end_dwell = cancel
+    cycle_data = {
+        "duration": 3600,
+        "max_power": 800,
+        "power_data": [[0.0, 800.0], [1800.0, 400.0], [3600.0, 0.0]],
+        "start_time": None,
+    }
+    mgr._on_cycle_end(cycle_data)
+    cancel.assert_called_once()
+    assert mgr._remove_door_end_dwell is None
+
+
 def test_door_open_without_flag_keeps_sticky_pause(mock_hass):
     mgr = _make_manager(mock_hass, {CONF_DOOR_OPENS_AT_END: False})
     mgr.detector.state = STATE_RUNNING

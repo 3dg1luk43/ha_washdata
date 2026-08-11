@@ -3823,6 +3823,7 @@ class WashDataManager:
         self._stop_watchdog()  # Stop active cycle watchdog
         self._stop_state_expiry_timer()  # Cancel any pending progress reset
         self._clear_timer_pause_notification()
+        self._cancel_door_end_dwell()  # Discard stale auto-open dwell (#342)
         prev_cycle_end_time = self._last_cycle_end_time
         self._last_cycle_end_time = dt_util.now()
         self._pump_stuck = False  # Reset for next pump cycle
