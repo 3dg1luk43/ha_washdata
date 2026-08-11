@@ -6937,6 +6937,10 @@ class ProfileStore:
         for name in touched:
             await self.async_rebuild_envelope(name)
 
+        # The original cycle is gone; drop its now-orphaned pending feedback so the
+        # "needs review" badge stays consistent with the review list (#362).
+        self.prune_orphaned_feedback()
+
         await self.async_save()
         self._logger.info("Interactive Split Applied to %s -> %s", cycle_id, new_ids)
         return new_ids
@@ -7126,6 +7130,10 @@ class ProfileStore:
                 c1["signature"] = dataclasses.asdict(sig)
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.warning("Failed to update signature for merged cycle %s: %s", new_id, e)
+
+        # Consumed cycles are gone; drop any pending feedback that pointed at them so
+        # the "needs review" badge does not keep counting non-existent cycles (#362).
+        self.prune_orphaned_feedback()
 
         await self.async_save()
         self._logger.info("Interactive Merge Applied: %s -> %s", cycle_ids, new_id)

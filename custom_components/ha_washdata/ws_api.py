@@ -1210,7 +1210,13 @@ def ws_get_devices(
                     except Exception:  # pylint: disable=broad-exception-caught
                         pass
                     try:
-                        info["feedback_count"] = len(store.get_pending_feedback() or {})
+                        # Count only pending feedback whose cycle still exists, so the
+                        # badge cannot outrun the review list after a cycle is deleted,
+                        # merged or split (#362). Defense-in-depth on top of the prune in
+                        # those mutation paths; also self-heals pre-existing orphans.
+                        _pend = store.get_pending_feedback() or {}
+                        _live = {c.get("id") for c in store.get_past_cycles()}
+                        info["feedback_count"] = sum(1 for cid in _pend if cid in _live)
                     except Exception:  # pylint: disable=broad-exception-caught
                         pass
                 info["is_user_paused"] = bool(getattr(manager, "is_user_paused", False))

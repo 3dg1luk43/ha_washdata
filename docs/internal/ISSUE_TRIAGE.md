@@ -488,7 +488,14 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   short-circuit, so a reviewed+pending cycle stays in the list (matching the header count) and can be
   resolved. Chose the frontend reorder over auto-resolving on quality-review (avoids a wrong training
   label). E2E `playwright-tests/tests/review-queue.spec.ts`; feedback-review E2E still green.
-  Register item 73.
+  Register item 73. (`3b53591`)
+- [DONE] #362 - (bug1) `prune_orphaned_feedback()` now called in `apply_merge_interactive` +
+  `apply_split_interactive`; `feedback_count` counts only live-cycle feedback (self-heals existing
+  orphans). (bug2) DE plural `feedback_cycles_pending` "Zykluss" -> "Zu überprüfen: {n}" (manual,
+  count-agnostic). Merge-is-gone premise invalid (multi-select exists); discoverability hint deferred.
+  New `tests/test_issue_362_merge_prunes_feedback.py`; fast 1391. Register item 74. NOTE for maintainer:
+  the `{s}`-suffix pluralization is a systemic i18n smell across languages - a proper per-key
+  singular/plural (or ICU) fix is a separate translation-maintenance task.
 
 ### Panel translation keys pending (final subagent pass, never machine-translate)
 - `setting.power_profile_interval_min.{label,doc}` (#367)
