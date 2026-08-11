@@ -538,3 +538,6 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
 - `btn.mute_suggestion`, `btn.reset_muted`, `msg.sug_muted`, `msg.sug_mute_failed`,
   `msg.sug_unmuted_all`, `msg.n_suggestions_muted` (#343)
 - `setting.door_opens_at_end.{label,doc}`, `setting.door_end_dwell_seconds.{label,doc}` (#342)
+- `lbl.font_size`, `msg.font_size_hint` (font-size slider)
+- HA-layer config/options descriptions (config.step.user/reconfigure, options.step.init) - panel-link
+  line added in EN; other languages carry the older link-less description until a subagent pass
