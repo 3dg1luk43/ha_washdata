@@ -423,3 +423,14 @@ Everything else has enough detail to act on directly.
 8. **Hard/risky:** #364 (after export), #334 (after export, A/B gated).
 9. **#344** after the reporter supplies the CSV schema; phased build.
 10. **Reply and refuse #368** with the automation redirect. Close #352.
+
+---
+
+## 7. Implementation progress (0.5.4)
+
+Updated as each issue is handled. Format: `[status] #N - note (commit)`.
+Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REFUSED.
+
+- [DONE] #328 - fix already in code (`11dc122`); reverified complete, added AST regression guard
+  `tests/test_issue_328_startup_blocking.py` (proven to catch both blocking-call regressions), bumped
+  `manifest.json` 0.5.3 -> 0.5.4 so the fix reaches users. Changelog entry already present.
