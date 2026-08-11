@@ -23,12 +23,19 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            // Each rule closes PRs carrying `label`, `graceDays` after the label was
-            // applied. PRs opened in parallel with a linked-but-not-yet-accepted issue
-            // (label "awaiting maintainer") are intentionally NOT listed here: they are
-            // parked, not auto-closed, so the maintainer can rescue them by accepting the
-            // issue. They stay open until the maintainer accepts it or closes the PR.
+            // Each rule closes PRs carrying `label`, `graceDays` after the label was applied.
             const RULES = [
+              {
+                label: 'awaiting maintainer',
+                graceDays: 1, // 24 hours: PR was opened in parallel with a not-yet-accepted issue
+                message: (pr) => [
+                  `Hi @${pr.user.login}! This PR has been automatically closed because it was opened before the linked issue was accepted, and no approval was received within 24 hours.`,
+                  '',
+                  'The required flow is: open an issue, **wait** for the maintainer to add the `accepted` label - this is where scope and approach are agreed - then open a PR. A PR opened in parallel with a fresh issue is not reviewed until the issue is accepted.',
+                  '',
+                  'You are welcome to open a new PR once the linked issue carries the `accepted` label. See [CONTRIBUTING.md](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs) for the full flow.',
+                ].join('\n'),
+              },
               {
                 label: 'needs description',
                 graceDays: 5,

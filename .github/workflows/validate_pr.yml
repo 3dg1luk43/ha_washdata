@@ -21,9 +21,10 @@ jobs:
   check-completeness:
     name: Check PR Description
     runs-on: ubuntu-latest
-    # Comments on and labels the PR (both via the issues API).
+    # Comments and labels the PR (issues API) and closes it when template is absent (pulls API).
     permissions:
       issues: write
+      pull-requests: write
     steps:
       - name: Validate PR template completeness
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
@@ -88,30 +89,39 @@ jobs:
             const TEMPLATE_HEADINGS = [/##\s*Description/i, /##\s*Type of Change/i, /##\s*Checklist/i, /##\s*Testing/i];
             const templatePresent = TEMPLATE_HEADINGS.some(re => re.test(prBody));
 
-            let body;
             if (!templatePresent) {
-              body = [
+              // Template deleted entirely: close immediately, no grace period.
+              const body = [
                 BOT_MARKER,
-                `Hi @${prAuthor}! This PR does not use the required pull request template - its sections have been removed or replaced.`,
+                `Hi @${prAuthor}! This PR has been automatically closed because the required pull request template was not used - its sections have been removed or replaced entirely.`,
                 '',
-                'Please edit the PR description to restore the template and fill it in: at minimum a real **Description** and at least one **Type of Change** box. Non-translation PRs also need a link to an issue that **already** carries the `accepted` label.',
+                'PRs that skip the template are not reviewed. Please open a new PR using the template and fill it in (at minimum a real **Description** and at least one **Type of Change** box).',
                 '',
-                '> This PR will be **automatically closed in 5 days** if the template is not restored and completed.',
+                `Non-translation PRs also need a link to an issue that **already** carries the \`accepted\` label. See [CONTRIBUTING.md](https://github.com/${owner}/${repo}/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs).`,
               ].join('\n');
-            } else {
-              const missing = [];
-              if (!descriptionOk) missing.push('**Description** - add a meaningful summary of your changes (remove or replace the template placeholder)');
-              if (!typeOk) missing.push('**Type of Change** - check at least one box that describes this PR');
-
-              body = [
-                BOT_MARKER,
-                `Hi @${prAuthor}! This PR's description appears incomplete. Please fill in the following before it can be reviewed:`,
-                '',
-                missing.map(m => `- ${m}`).join('\n'),
-                '',
-                '> This PR will be **automatically closed in 5 days** if these sections are not completed.',
-              ].join('\n');
+              if (existing) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+              } else {
+                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
+              }
+              await github.rest.pulls.update({ owner, repo, pull_number: prNumber, state: 'closed' });
+              console.log(`PR #${prNumber} closed immediately - template removed entirely.`);
+              return;
             }
+
+            // Template present but sections incomplete - 5-day grace via scheduler.
+            const missing = [];
+            if (!descriptionOk) missing.push('**Description** - add a meaningful summary of your changes (remove or replace the template placeholder)');
+            if (!typeOk) missing.push('**Type of Change** - check at least one box that describes this PR');
+
+            const body = [
+              BOT_MARKER,
+              `Hi @${prAuthor}! This PR's description appears incomplete. Please fill in the following before it can be reviewed:`,
+              '',
+              missing.map(m => `- ${m}`).join('\n'),
+              '',
+              '> This PR will be **automatically closed in 5 days** if these sections are not completed.',
+            ].join('\n');
 
             if (existing) {
               await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
