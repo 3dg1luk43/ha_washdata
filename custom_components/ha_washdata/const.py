@@ -182,6 +182,12 @@ CONF_PEAK_RATE_MESSAGE = "peak_rate_message"
 
 # Door sensor & pause
 CONF_DOOR_SENSOR_ENTITY = "door_sensor_entity"  # Optional binary_sensor for machine door
+# Auto-open dishwashers (AirDry etc.) pop the door at cycle end; a sustained
+# door-open then means the cycle finished, not a mid-cycle pause (#342).
+CONF_DOOR_OPENS_AT_END = "door_opens_at_end"
+CONF_DOOR_END_DWELL_SECONDS = "door_end_dwell_seconds"
+DEFAULT_DOOR_OPENS_AT_END = False
+DEFAULT_DOOR_END_DWELL_SECONDS = 60  # door must stay open this long to finalize
 CONF_PAUSE_CUTS_POWER = "pause_cuts_power"  # Also turn off switch entity when pausing
 CONF_SWITCH_ENTITY = "switch_entity"  # Optional switch entity toggled on pause/resume
 CONF_NOTIFY_UNLOAD_DELAY_MINUTES = "notify_unload_delay_minutes"  # Minutes before "laundry waiting" nag

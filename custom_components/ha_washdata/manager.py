@@ -182,6 +182,10 @@ from .const import (
     CONF_PEAK_RATE_MESSAGE,
     DEFAULT_PEAK_RATE_MESSAGE,
     CONF_DOOR_SENSOR_ENTITY,
+    CONF_DOOR_OPENS_AT_END,
+    CONF_DOOR_END_DWELL_SECONDS,
+    DEFAULT_DOOR_OPENS_AT_END,
+    DEFAULT_DOOR_END_DWELL_SECONDS,
     CONF_PAUSE_CUTS_POWER,
     CONF_SWITCH_ENTITY,
     CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
@@ -457,6 +461,15 @@ class WashDataManager:
         self._door_sensor_entity: str | None = config_entry.options.get(
             CONF_DOOR_SENSOR_ENTITY
         ) or None
+        # Auto-open dishwasher (#342): a sustained door-open at cycle end finalizes
+        # the cycle after a dwell instead of setting the sticky user-pause.
+        self._door_opens_at_end: bool = bool(
+            config_entry.options.get(CONF_DOOR_OPENS_AT_END, DEFAULT_DOOR_OPENS_AT_END)
+        )
+        self._door_end_dwell_seconds: int = int(
+            config_entry.options.get(CONF_DOOR_END_DWELL_SECONDS, DEFAULT_DOOR_END_DWELL_SECONDS)
+        )
+        self._remove_door_end_dwell: Any = None
         self._remove_door_sensor_listener = None
         self._is_clean_state: bool = False
         self._clean_state_start: datetime | None = None
@@ -2226,6 +2239,12 @@ class WashDataManager:
         # Reload door sensor / pause config
         self._pause_cuts_power = bool(config_entry.options.get(CONF_PAUSE_CUTS_POWER, False))
         self._door_sensor_entity = config_entry.options.get(CONF_DOOR_SENSOR_ENTITY) or None
+        self._door_opens_at_end = bool(
+            config_entry.options.get(CONF_DOOR_OPENS_AT_END, DEFAULT_DOOR_OPENS_AT_END)
+        )
+        self._door_end_dwell_seconds = int(
+            config_entry.options.get(CONF_DOOR_END_DWELL_SECONDS, DEFAULT_DOOR_END_DWELL_SECONDS)
+        )
         self._notify_unload_delay_minutes = int(
             config_entry.options.get(
                 CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
@@ -2324,6 +2343,7 @@ class WashDataManager:
         if self._remove_door_sensor_listener:
             self._remove_door_sensor_listener()
             self._remove_door_sensor_listener = None
+        self._cancel_door_end_dwell()
         if self._remove_notify_people_listener:
             self._remove_notify_people_listener()
             self._remove_notify_people_listener = None
@@ -2452,6 +2472,21 @@ class WashDataManager:
                 # so it does not linger on the phone after the laundry is taken.
                 self._clear_clean_notification()
                 self._notify_update()
+            elif (
+                self._door_opens_at_end
+                and self.detector.state in (STATE_RUNNING, STATE_ENDING)
+            ):
+                # Auto-open dishwasher (#342): the machine pops its door at the end.
+                # A sustained open means the cycle finished; a brief open (adding an
+                # item) does not. Arm a dwell timer instead of the sticky user-pause
+                # (which would strand the cycle in user_paused). If the door stays
+                # open past the dwell we finalize; if it closes first we cancel.
+                self._logger.debug(
+                    "Door opened on auto-open device: arming %ss end dwell",
+                    self._door_end_dwell_seconds,
+                )
+                self._arm_door_end_dwell()
+                self._notify_update()
             elif self.detector.state in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
                 # Door opened during active cycle → soft pause confirmation
                 self._logger.debug(
@@ -2462,7 +2497,43 @@ class WashDataManager:
                     self._is_user_paused = True
                     self._user_pause_start = dt_util.now()
                 self._notify_update()
-        # Door closing is intentionally not handled - no auto-resume
+        else:
+            # Door closed: cancel a pending auto-open finalize (it was a brief open,
+            # not the end-of-cycle door pop). No auto-resume otherwise (#342).
+            if self._remove_door_end_dwell is not None:
+                self._logger.debug("Door closed before end dwell: cancelling finalize")
+                self._cancel_door_end_dwell()
+                self._notify_update()
+
+    def _arm_door_end_dwell(self) -> None:
+        """(Re)arm the auto-open door-end dwell timer (#342)."""
+        self._cancel_door_end_dwell()
+        self._remove_door_end_dwell = async_call_later(
+            self.hass,
+            float(max(1, self._door_end_dwell_seconds)),
+            self._door_end_dwell_fired,
+        )
+
+    def _cancel_door_end_dwell(self) -> None:
+        """Cancel a pending auto-open door-end dwell timer, if any (#342)."""
+        if self._remove_door_end_dwell is not None:
+            self._remove_door_end_dwell()
+            self._remove_door_end_dwell = None
+
+    @callback
+    def _door_end_dwell_fired(self, _now: Any) -> None:
+        """The door stayed open past the dwell on an auto-open device: the cycle has
+        finished, so finalize it as completed (same path as the External End
+        Trigger). The dwell is cancelled on door-close, so reaching here means the
+        door is still open (#342)."""
+        self._remove_door_end_dwell = None
+        if self.detector.state in (STATE_RUNNING, STATE_ENDING):
+            self._logger.info(
+                "Door held open %ss on auto-open device: finalizing cycle",
+                self._door_end_dwell_seconds,
+            )
+            self.detector.user_stop()
+            self._notify_update()
 
     async def _setup_notify_people_listener(self) -> None:
         """Set up listener for person presence changes used by notification gating."""

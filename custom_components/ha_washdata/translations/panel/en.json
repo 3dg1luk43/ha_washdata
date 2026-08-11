@@ -1404,6 +1404,14 @@
     "notify_live_click_action": {
       "label": "Live Notification Tap Target",
       "doc": "Android only. Where a tap on the live-progress notification opens (e.g. /lovelace/laundry, or a full URL) instead of the app landing page. Leave blank for the default."
+    },
+    "door_opens_at_end": {
+      "label": "Door Opens Automatically At End",
+      "doc": "For dishwashers that pop the door open at the end of the cycle to dry (AirDry and similar). With this on, a door-open on a running cycle no longer pauses it forever; instead, if the door stays open for the dwell below, WashData treats the cycle as finished. A brief open (adding an item) is ignored. Requires a Door Sensor Entity."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Door-Open End Dwell",
+      "doc": "How long the door must stay open before WashData ends the cycle, when \"Door Opens Automatically At End\" is on. Long enough to ignore quickly adding a dish (default 60 s), short enough to end promptly once the machine pops the door."
     }
   },
   "setting_group": {

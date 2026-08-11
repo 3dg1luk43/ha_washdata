@@ -213,6 +213,10 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Door & Pause', fields: [
       { key: 'door_sensor_entity', label: 'Door Sensor Entity', type: 'entity', domain: 'binary_sensor',
         doc: 'Optional door binary sensor. Used to detect when the appliance has been opened/unloaded after a cycle.' },
+      { key: 'door_opens_at_end', label: 'Door Opens Automatically At End', type: 'checkbox',
+        doc: 'For dishwashers that pop the door open at the end of the cycle to dry (AirDry and similar). With this on, a door-open on a running cycle no longer pauses it forever; instead, if the door stays open for the dwell below, WashData treats the cycle as finished. A brief open (adding an item) is ignored. Requires a Door Sensor Entity.' },
+      { key: 'door_end_dwell_seconds', label: 'Door-Open End Dwell', unit: 's', type: 'number', min: 1, def: 60,
+        doc: 'How long the door must stay open before WashData ends the cycle, when "Door Opens Automatically At End" is on. Long enough to ignore quickly adding a dish (default 60 s), short enough to end promptly once the machine pops the door.' },
       { key: 'pause_cuts_power', label: 'Pause Also Cuts Power (via switch)', type: 'checkbox',
         doc: 'When a cycle is paused, also switch off the Switch Entity below. Only for appliances whose plug can safely be cut mid-cycle.' },
       { key: 'switch_entity', label: 'Switch Entity', type: 'entity', domain: 'switch',
