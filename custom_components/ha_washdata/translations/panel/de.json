@@ -711,7 +711,7 @@
     "cycles_deleted": "{count} Zyklen gelöscht",
     "enough_data": "Genügend Daten zum Lernen ({current}/{min} Zyklen).",
     "export_description": "Wählen Sie genau aus, welche Profile, Zyklen, Einstellungen und mehr nach JSON exportiert werden sollen, oder analysieren Sie eine Datei und importieren Sie nur die gewünschten Teile.",
-    "feedback_cycles_pending": "{n} Zyklus{s} zur Überprüfung",
+    "feedback_cycles_pending": "Zu überprüfen: {n}",
     "feedback_prompt": "Bestätigen Sie, dass es richtig war, korrigieren Sie das Programm oder ignorieren Sie es.",
     "feedback_relabel_hint": "Das erneute Beschriften dieses Zyklus erledigt die Überprüfung ebenfalls.",
     "filter_by_profile": "Nach Profil filtern…",
