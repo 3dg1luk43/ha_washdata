@@ -470,8 +470,21 @@ class WashDataCard extends HTMLElement {
     // 3. Details (Time / Pct)
     if (this._cfg.show_details !== false && !isInactive) {
       let remaining = "";
+      let remainingFormatted = false;
       if (this._cfg.time_entity) {
-        remaining = this._hass.states[this._cfg.time_entity]?.state;
+        const stObj = this._hass.states[this._cfg.time_entity];
+        if (stObj) {
+          // Respect the entity's Display Precision AND its own unit (#354):
+          // formatEntityState applies the user's per-entity precision and the
+          // entity's unit/device_class, so we neither dump raw float digits
+          // (e.g. "16.2833...") nor hardcode "min" for a seconds sensor.
+          if (typeof this._hass.formatEntityState === 'function') {
+            remaining = this._hass.formatEntityState(stObj);
+            remainingFormatted = true;
+          } else {
+            remaining = stObj.state;
+          }
+        }
       } else if (attr.time_remaining) {
         remaining = attr.time_remaining;
       }
@@ -486,8 +499,11 @@ class WashDataCard extends HTMLElement {
       if (this._cfg.display_mode === 'percentage' && pct) {
         parts.push(`${Math.round(pct)}%`);
       } else if (remaining) {
-        // Append 'min' if it is a number (WashData attribute is raw minutes)
-        if (!isNaN(remaining)) {
+        if (remainingFormatted) {
+          // Already carries the entity's unit + display precision (#354).
+          parts.push(remaining);
+        } else if (!isNaN(remaining)) {
+          // Raw WashData attribute is minutes; append the localized unit.
           parts.push(`${remaining} ${this._getTranslation("minutes")}`);
         } else {
           parts.push(remaining);
