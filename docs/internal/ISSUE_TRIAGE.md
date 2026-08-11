@@ -479,7 +479,11 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
 - [DONE] #347 - opt-in `sticky` + `clickAction` on the existing live notification via
   `_apply_live_notification_prefs` (both payloads), `clickAction` added to `_MOBILE_ONLY_EXTRA_KEYS`;
   new consts default off/empty (byte-identical payload). Panel Notifications fields. New
-  `tests/test_issue_347_live_notification_prefs.py`; settings E2E 15; fast 1390. Register item 71.
+  `tests/test_issue_347_live_notification_prefs.py`; settings E2E 15; fast 1390. Register item 71. (`323ff9d`)
+- [DONE] #354 - tile card formats the `time_entity` via `hass.formatEntityState` (respects per-entity
+  Display Precision + unit) instead of raw `.state` + hardcoded "min"; falls back on older HA. No card
+  test harness exists (not mounted in panel E2E), verified via `node --check` + manual UI guide.
+  Register item 72.
 
 ### Panel translation keys pending (final subagent pass, never machine-translate)
 - `setting.power_profile_interval_min.{label,doc}` (#367)
