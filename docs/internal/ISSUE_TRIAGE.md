@@ -457,4 +457,8 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   fix cannot be recovered (data was gone); the guard prevents any future loss. (`349f70c`)
 - [DONE] #359 - burger now shown whenever `dockedSidebar === 'always_hidden'` (new `wd-burger--force`
   class + CSS), not only below 870px. E2E `playwright-tests/tests/header.spec.ts` (fails pre-fix, passes
-  after, both projects). Register item 66. UI guide entry added.
+  after, both projects). Register item 66. UI guide entry added. (`d94e0bc`)
+- [DONE] #348 - release now divides mapped_time by the envelope's own span (new
+  `ProfileStore.envelope_time_span` sharing `_envelope_time_power` with `async_verify_alignment`), not
+  `avg_duration`, so the 0.95 threshold is reachable (ceiling 1.0). New
+  `tests/test_issue_348_verified_pause_span.py`; fast 1375. Register item 67. Pairs with #350 (next).

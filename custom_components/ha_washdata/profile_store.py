@@ -4501,6 +4501,56 @@ class ProfileStore:
             return cast(JSONDict, env) if isinstance(env, dict) else None
         return None
 
+    @staticmethod
+    def _envelope_time_power(
+        envelope: JSONDict | None,
+    ) -> tuple[list[float], list[float]] | None:
+        """Extract (time_grid, power) from an envelope's ``avg`` curve, or None.
+
+        Handles both the new ``[[t, p], ...]`` and legacy ``[p, ...]`` formats
+        (reconstructing the grid from ``time_grid`` / ``target_duration`` / a 60 s
+        fallback). Single source of the envelope time axis for both the alignment
+        worker and the Smart-Termination release span (#348), so the mapped position
+        and the span it is compared against always live on the same grid.
+        """
+        if not envelope:
+            return None
+        env_avg_raw = envelope.get("avg", [])
+        if not env_avg_raw:
+            return None
+        try:
+            if isinstance(env_avg_raw[0], (list, tuple)) and len(env_avg_raw[0]) >= 2:
+                env_points = cast(list[list[Any] | tuple[Any, ...]], env_avg_raw)
+                env_time = [float(p[0]) for p in env_points]
+                env_power = [float(p[1]) for p in env_points]
+            else:
+                env_values = cast(list[float | int], env_avg_raw)
+                env_power = [float(p) for p in env_values]
+                env_time_raw = envelope.get("time_grid")
+                env_time = cast(list[float], env_time_raw) if isinstance(env_time_raw, list) else None
+                if not env_time or len(env_time) != len(env_power):
+                    target_dur = float(envelope.get("target_duration", 0.0) or 0.0)
+                    if target_dur > 0:
+                        env_time = cast(list[float], np.linspace(0, target_dur, len(env_power)).tolist())
+                    else:
+                        env_time = [float(i * 60) for i in range(len(env_power))]
+        except (TypeError, ValueError, IndexError):
+            return None
+        return [float(t) for t in env_time], env_power
+
+    def envelope_time_span(self, profile_name: str) -> float:
+        """Total time span (seconds) of a profile's envelope grid, 0 if unavailable.
+
+        This is exactly the maximum value ``async_verify_alignment`` maps onto, so
+        dividing a mapped position by it yields a true 0..1 fraction through the
+        cycle - unlike ``avg_duration`` (a differently-derived trimmed mean) which
+        could push the 0.95 Smart-Termination release threshold out of reach (#348).
+        """
+        curves = self._envelope_time_power(self.get_envelope(profile_name))
+        if not curves or not curves[0]:
+            return 0.0
+        return float(curves[0][-1])
+
     def reference_curve(
         self, profile_name: str, n: int = REFERENCE_PROFILE_CURVE_POINTS
     ) -> JSONDict | None:
@@ -5203,43 +5253,21 @@ class ProfileStore:
         Verify if the current power trace aligns with an expected low-power region in the envelope.
         Returns: (is_confirmed_low_power, mapped_envelope_time, mapped_envelope_power)
         """
+        if not current_power_data:
+            return False, 0.0, 9999.0
+
+        # "avg" can be a list of [t, p] (new) or [p, ...] (legacy); the shared helper
+        # normalizes both to (time_grid, power) - identical to envelope_time_span so
+        # the mapped position and the release span live on the same grid (#348).
         envelope = self.get_envelope(profile_name)
-        if not envelope or not envelope.get("avg") or not current_power_data:
+        curves = self._envelope_time_power(envelope)
+        if curves is None:
+            if envelope and envelope.get("avg"):
+                self._logger.error(
+                    "Malformed envelope 'avg' data for %s", profile_name
+                )
             return False, 0.0, 9999.0
-
-        # Extract envelope curves
-        # "avg" can be list of [t, p] (new) or [p, ...] (legacy)
-        env_avg_raw = envelope.get("avg", [])
-        if not env_avg_raw:
-            return False, 0.0, 9999.0
-
-        try:
-            # Handle both formats: [[t, y], ...] (new) or [y, ...] (legacy)
-            if isinstance(env_avg_raw[0], (list, tuple)) and len(env_avg_raw[0]) >= 2:
-                # New format: [[t, y], ...]
-                env_points = cast(list[list[Any] | tuple[Any, ...]], env_avg_raw)
-                env_time = [float(p[0]) for p in env_points]
-                env_power = [float(p[1]) for p in env_points]
-            else:
-                # Legacy format: [y, ...]
-                env_values = cast(list[float | int], env_avg_raw)
-                env_power = [float(p) for p in env_values]
-                # Reconstruct time grid from envelope if available, or assume 60s intervals
-                env_time_raw = envelope.get("time_grid")
-                env_time = cast(list[float], env_time_raw) if isinstance(env_time_raw, list) else None
-                if not env_time or len(env_time) != len(env_power):
-                    target_dur = float(envelope.get("target_duration", 0.0) or 0.0)
-                    if target_dur > 0:
-                        env_time = cast(list[float], np.linspace(0, target_dur, len(env_power)).tolist())
-                    else:
-                        env_time = [float(i * 60) for i in range(len(env_power))]
-        except (TypeError, ValueError, IndexError) as e:
-            first_type_name = type(env_avg_raw[0]).__name__ if env_avg_raw else "None"
-            self._logger.error(
-                "Malformed envelope 'avg' data for %s. Type: %s, Length: %d, Error: %s",
-                profile_name, first_type_name, len(env_avg_raw), e
-            )
-            return False, 0.0, 9999.0
+        env_time, env_power = curves
 
         try:
             current_power_list = [float(x[1]) for x in current_power_data]
