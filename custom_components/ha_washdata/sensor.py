@@ -421,6 +421,7 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
             # duration display-format options, even while the appliance is idle
             # and the value is unknown (see issue #261).
             native_unit_of_measurement="min",
+            suggested_display_precision=0,
             icon="mdi:timer-sand",
         )
         super().__init__(manager, entry)
@@ -446,6 +447,7 @@ class WasherTotalDurationSensor(WasherBaseSensor):
             # See WasherTimeRemainingSensor / issue #261: keep the unit static so
             # the duration display-format options are available even while idle.
             native_unit_of_measurement="min",
+            suggested_display_precision=0,
             icon="mdi:timer-check-outline",
         )
         super().__init__(manager, entry)
@@ -531,6 +533,7 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
             translation_key="elapsed_time",
             native_unit_of_measurement="s",
             device_class=SensorDeviceClass.DURATION,
+            suggested_display_precision=0,
             icon="mdi:timer-outline",
         )
         super().__init__(manager, entry)

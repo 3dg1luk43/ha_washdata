@@ -485,8 +485,6 @@ class WashDataCard extends HTMLElement {
             remaining = stObj.state;
           }
         }
-      } else if (attr.time_remaining) {
-        remaining = attr.time_remaining;
       }
 
       let pct = "";
