@@ -167,6 +167,10 @@ from .const import (
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_NOTIFY_LIVE_CHRONOMETER,
+    CONF_NOTIFY_LIVE_STICKY,
+    CONF_NOTIFY_LIVE_CLICK_ACTION,
+    DEFAULT_NOTIFY_LIVE_STICKY,
+    DEFAULT_NOTIFY_LIVE_CLICK_ACTION,
     CONF_NOTIFY_REMINDER_MESSAGE,
     CONF_NOTIFY_TIMEOUT_SECONDS,
     CONF_NOTIFY_CHANNEL,
@@ -309,6 +313,7 @@ _MOBILE_ONLY_EXTRA_KEYS = (
     "priority",
     "actions",
     "sticky",
+    "clickAction",
     "subtitle",
     "content_state",
     "activity",
@@ -411,6 +416,8 @@ class WashDataManager:
         self._notify_live_interval_seconds = DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
         self._notify_live_overrun_percent = DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
         self._notify_live_chronometer = DEFAULT_NOTIFY_LIVE_CHRONOMETER
+        self._notify_live_sticky = DEFAULT_NOTIFY_LIVE_STICKY
+        self._notify_live_click_action = DEFAULT_NOTIFY_LIVE_CLICK_ACTION
         self._notify_timeout_seconds = DEFAULT_NOTIFY_TIMEOUT_SECONDS
         self._pending_notifications: list[dict[str, Any]] = []
         # Quiet-hours (do-not-disturb) hold queue + release timer. Finish-type
@@ -624,6 +631,17 @@ class WashDataManager:
                 DEFAULT_NOTIFY_LIVE_CHRONOMETER,
             )
         )
+        self._notify_live_sticky = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_STICKY, DEFAULT_NOTIFY_LIVE_STICKY
+            )
+        )
+        self._notify_live_click_action = str(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_CLICK_ACTION, DEFAULT_NOTIFY_LIVE_CLICK_ACTION
+            )
+            or ""
+        ).strip()
         self._notify_timeout_seconds = int(
             config_entry.options.get(
                 CONF_NOTIFY_TIMEOUT_SECONDS, DEFAULT_NOTIFY_TIMEOUT_SECONDS
@@ -2188,6 +2206,17 @@ class WashDataManager:
                 DEFAULT_NOTIFY_LIVE_CHRONOMETER,
             )
         )
+        self._notify_live_sticky = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_STICKY, DEFAULT_NOTIFY_LIVE_STICKY
+            )
+        )
+        self._notify_live_click_action = str(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_CLICK_ACTION, DEFAULT_NOTIFY_LIVE_CLICK_ACTION
+            )
+            or ""
+        ).strip()
         self._notify_timeout_seconds = int(
             config_entry.options.get(
                 CONF_NOTIFY_TIMEOUT_SECONDS, DEFAULT_NOTIFY_TIMEOUT_SECONDS
@@ -5577,6 +5606,20 @@ class WashDataManager:
         overrun_ratio = max(0, float(self._notify_live_overrun_percent)) / 100.0
         return max(1, int(np.ceil(estimated_updates * (1.0 + overrun_ratio))))
 
+    def _apply_live_notification_prefs(self, extra_vars: dict[str, Any]) -> None:
+        """Inject the user's opt-in live-notification data keys (#347).
+
+        ``sticky`` keeps the live notification on screen when tapped; ``clickAction``
+        gives the notification a tap target (e.g. a dashboard path). Both are
+        mobile-only keys forwarded only to ``mobile_app_*`` live targets. Defaults
+        (sticky off, empty clickAction) add nothing, so the payload is byte-identical
+        to before unless the user opts in.
+        """
+        if self._notify_live_sticky:
+            extra_vars["sticky"] = "true"
+        if self._notify_live_click_action:
+            extra_vars["clickAction"] = self._notify_live_click_action
+
     def _check_live_progress_notification(self) -> None:
         """Send throttled live progress notifications for compatible mobile targets."""
         if not self._notify_live_services and not self._notify_actions:
@@ -5620,6 +5663,7 @@ class WashDataManager:
             # Live Activity even before a profile is matched (mobile-only key).
             if not self._live_activity_started:
                 waiting_extra_vars["activity"] = "start"
+            self._apply_live_notification_prefs(waiting_extra_vars)
             sent = self._dispatch_notification(
                 msg,
                 event_type=NOTIFY_EVENT_LIVE,
@@ -5716,6 +5760,7 @@ class WashDataManager:
                 activity=activity_marker,
             )
         )
+        self._apply_live_notification_prefs(extra_vars)
         sent = self._dispatch_notification(
             msg,
             event_type=NOTIFY_EVENT_LIVE,
