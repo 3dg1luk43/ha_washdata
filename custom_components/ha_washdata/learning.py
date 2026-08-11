@@ -170,9 +170,11 @@ class LearningManager:
             locked = set()
 
         filtered_suggestions: dict[str, Any] = {}
+        any_locked_deleted = False
         for key, data in suggestions.items():
             if key in locked:
                 self.profile_store.delete_suggestion(key)
+                any_locked_deleted = True
                 continue
             if isinstance(data, dict) and "value" in data:
                 current_val = current_options.get(key)
@@ -206,6 +208,8 @@ class LearningManager:
             filtered_suggestions[key] = data
 
         if not filtered_suggestions:
+            if any_locked_deleted:
+                self.hass.async_create_task(self.profile_store.async_save())
             return
 
         self.suggestion_engine.apply_suggestions(filtered_suggestions)
