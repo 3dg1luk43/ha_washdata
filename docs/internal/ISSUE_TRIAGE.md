@@ -454,4 +454,7 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   collapse a cycle to 0 s. Frontend `_clockToOffset`/`_trimInputToOffset` return null (no-change) for
   empty/unparseable fields. New `tests/test_issue_366_trim_guard.py`; E2E cycles.spec 24/24; fast 1371.
   Register item 65. UI test steps in UI_TEST_GUIDE_0.5.4.md. Already-collapsed cycles from before the
-  fix cannot be recovered (data was gone); the guard prevents any future loss.
+  fix cannot be recovered (data was gone); the guard prevents any future loss. (`349f70c`)
+- [DONE] #359 - burger now shown whenever `dockedSidebar === 'always_hidden'` (new `wd-burger--force`
+  class + CSS), not only below 870px. E2E `playwright-tests/tests/header.spec.ts` (fails pre-fix, passes
+  after, both projects). Register item 66. UI guide entry added.
