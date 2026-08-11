@@ -502,12 +502,15 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   merged in 0.5.3. New `tests/test_issue_331_residual_marks_reviewed.py`; core #331 mock extended;
   fast 1395. Register item 75. Panel refresh confirmed via `_fetchAll`->`_loadMlIndex`.
 
-- [DONE-PARTIAL] #343 - per-setting MUTE/lock implemented (store `locked_suggestions` + learning
-  surface filter + WS `set_suggestion_lock` + panel mute button + muted banner + reset). Resolves the
-  core complaint ("stop re-suggesting"). New `tests/test_issue_343_suggestion_lock.py`; ws types
-  regenerated; settings E2E 15; fast 1399. Register item 76. DEFERRED (part 1, follow-up): the
-  anti-crease *sample exclusion* (drop the tail from the min-active statistic) - higher-risk numeric
-  change, needs tail-classification + A/B; better as its own pass.
+- [DONE] #343 - BOTH parts implemented:
+  (part 1, context-aware) `SuggestionEngine._strip_anti_crease_tail` excludes the post-cycle
+  anti-crease tail (everything after the last sample >= `anti_wrinkle_max_power`) from the min-active
+  statistic in `run_simulation` + `run_batch_simulation`; gated on eligible device + anti_wrinkle
+  enabled, guarded so it's byte-identical otherwise. So the tuner proposes real thresholds, not the
+  standby baseline. `tests/test_issue_343_anti_crease_exclusion.py`.
+  (part 2, mute) per-setting mute (store `locked_suggestions` + learning surface filter + WS
+  `set_suggestion_lock` + panel mute button/banner/reset). `tests/test_issue_343_suggestion_lock.py`.
+  ws types regenerated; settings E2E 15; fast 1403. Register item 76.
 
 ### Panel translation keys pending (final subagent pass, never machine-translate)
 - `setting.power_profile_interval_min.{label,doc}` (#367)

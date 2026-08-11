@@ -51,6 +51,9 @@ from .const import (
     CONF_START_DURATION_THRESHOLD,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_ENABLED,
+    DEFAULT_ANTI_WRINKLE_ENABLED,
+    DEFAULT_ANTI_WRINKLE_MAX_POWER,
     CONF_DEVICE_TYPE,
     CONF_PUMP_STUCK_DURATION,
     DEVICE_TYPE_DRYER,
@@ -1207,6 +1210,46 @@ class SuggestionEngine:
             },
         }
 
+    #: Device types where the anti-crease/anti-wrinkle tail must be excluded from
+    #: the stop/start min-active statistic (#343).
+    _ANTI_CREASE_DEVICE_TYPES = (
+        DEVICE_TYPE_WASHING_MACHINE,
+        DEVICE_TYPE_DRYER,
+        DEVICE_TYPE_WASHER_DRYER,
+    )
+
+    def _strip_anti_crease_tail(self, ordered_powers: "np.ndarray") -> "np.ndarray":
+        """Drop the post-cycle anti-crease tail from an ordered power trace (#343).
+
+        Stop/start thresholds detect the MAIN cycle; the anti-crease tumble-pulse
+        tail is governed by its own ``anti_wrinkle_*`` settings, but its near-zero
+        between-pulse baseline is the global minimum of the stored trace and used
+        to poison the min-active statistic (the tuner then proposes thresholds just
+        above that baseline, breaking end-detection).
+
+        The tail is everything after the last sample that reaches
+        ``anti_wrinkle_max_power`` - by the config's own rule a pulse above that
+        ends anti-wrinkle, so nothing in the tail can reach it. Returns the trace
+        unchanged when anti-crease is off, the device type is ineligible, or no
+        sample reaches the ceiling (no identifiable main phase) - so it can never
+        over-exclude for a non-anti-crease device or a gentle program.
+        """
+        if self.device_type not in self._ANTI_CREASE_DEVICE_TYPES:
+            return ordered_powers
+        options = self._entry_options()
+        if not options.get(CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED):
+            return ordered_powers
+        try:
+            max_power = float(options.get(CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER))
+        except (TypeError, ValueError):
+            max_power = DEFAULT_ANTI_WRINKLE_MAX_POWER
+        if max_power <= 0 or ordered_powers.size == 0:
+            return ordered_powers
+        above = np.flatnonzero(ordered_powers >= max_power)
+        if above.size == 0:
+            return ordered_powers  # no main high-power phase -> nothing to strip
+        return ordered_powers[: int(above[-1]) + 1]
+
     def run_simulation(self, cycle_data: dict[str, Any]) -> dict[str, Any]:
         """Replay a single cycle with varied parameters to find optimal settings.
 
@@ -1235,7 +1278,10 @@ class SuggestionEngine:
             return {}
 
         powers = np.array([p[1] for p in readings])
-        active_powers = powers[powers > 0.5]
+        # Exclude the anti-crease tail so its near-zero baseline does not poison the
+        # stop/start thresholds on anti-crease devices (#343). No-op otherwise.
+        main_powers = self._strip_anti_crease_tail(powers)
+        active_powers = main_powers[main_powers > 0.5]
 
         if len(active_powers) < 5:
             return {}
@@ -1327,7 +1373,11 @@ class SuggestionEngine:
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
         for readings in valid_cycles:
             powers = np.array([p for _, p in readings])
-            active = powers[powers > 0.5]
+            # Exclude the anti-crease tail from the per-cycle min-active statistic
+            # so its baseline does not drag the p05 threshold down (#343). No-op for
+            # non-anti-crease devices.
+            main_powers = self._strip_anti_crease_tail(powers)
+            active = main_powers[main_powers > 0.5]
             peak = float(np.max(powers)) if powers.size else 0.0
             active_thr = max(stop_thr, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
             if active.size > 0:
