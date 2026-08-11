@@ -502,6 +502,15 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   merged in 0.5.3. New `tests/test_issue_331_residual_marks_reviewed.py`; core #331 mock extended;
   fast 1395. Register item 75. Panel refresh confirmed via `_fetchAll`->`_loadMlIndex`.
 
+- [DONE-PARTIAL] #343 - per-setting MUTE/lock implemented (store `locked_suggestions` + learning
+  surface filter + WS `set_suggestion_lock` + panel mute button + muted banner + reset). Resolves the
+  core complaint ("stop re-suggesting"). New `tests/test_issue_343_suggestion_lock.py`; ws types
+  regenerated; settings E2E 15; fast 1399. Register item 76. DEFERRED (part 1, follow-up): the
+  anti-crease *sample exclusion* (drop the tail from the min-active statistic) - higher-risk numeric
+  change, needs tail-classification + A/B; better as its own pass.
+
 ### Panel translation keys pending (final subagent pass, never machine-translate)
 - `setting.power_profile_interval_min.{label,doc}` (#367)
 - `setting.notify_live_sticky.{label,doc}`, `setting.notify_live_click_action.{label,doc}` (#347)
+- `btn.mute_suggestion`, `btn.reset_muted`, `msg.sug_muted`, `msg.sug_mute_failed`,
+  `msg.sug_unmuted_all`, `msg.n_suggestions_muted` (#343)

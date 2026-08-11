@@ -724,6 +724,12 @@ export interface ClearSuggestionsRequest {
   entry_id: string;
 }
 
+export interface SetSuggestionLockRequest {
+  entry_id: string;
+  key: string;
+  locked: boolean;
+}
+
 export interface RunSuggestionAnalysisRequest {
   entry_id: string;
 }
@@ -1067,6 +1073,7 @@ export interface WashDataWsRequests {
   "ha_washdata/get_suggestions": GetSuggestionsRequest;
   "ha_washdata/apply_suggestions": ApplySuggestionsRequest;
   "ha_washdata/clear_suggestions": ClearSuggestionsRequest;
+  "ha_washdata/set_suggestion_lock": SetSuggestionLockRequest;
   "ha_washdata/run_suggestion_analysis": RunSuggestionAnalysisRequest;
   "ha_washdata/get_cycle_power_data": GetCyclePowerDataRequest;
   "ha_washdata/trim_cycle": TrimCycleRequest;
@@ -1172,6 +1179,7 @@ export interface WashDataWsResponses {
   "ha_washdata/get_suggestions": GetSuggestionsResponse;
   "ha_washdata/apply_suggestions": ApplySuggestionsResponse;
   "ha_washdata/clear_suggestions": SuccessResponse;
+  "ha_washdata/set_suggestion_lock": SuccessResponse;
   "ha_washdata/run_suggestion_analysis": RunSuggestionAnalysisResponse;
   "ha_washdata/get_cycle_power_data": GetCyclePowerDataResponse;
   "ha_washdata/trim_cycle": StartTaskResponse;

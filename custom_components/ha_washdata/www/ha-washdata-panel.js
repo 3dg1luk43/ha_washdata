@@ -770,6 +770,8 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 .wd-sug-sep { display: none; }
 .wd-sug-impact { display: none; }
 .wd-sug-use { border: none; background: var(--warning-color, #ff9800); color: var(--wd-white); border-radius: var(--wd-radius-sm); padding: 2px 8px; font-size: .92em; cursor: pointer; flex-shrink: 0; }
+.wd-sug-lock { border: none; background: transparent; color: var(--secondary-text-color); border-radius: var(--wd-radius-sm); padding: 2px 6px; font-size: .92em; cursor: pointer; flex-shrink: 0; opacity: .65; }
+.wd-sug-lock:hover { opacity: 1; background: rgba(255,152,0,.15); }
 .wd-conflict-err { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
 .wd-conflict-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .8em; color: var(--error-color, #b71c1c); padding: 5px 9px; border-left: 3px solid var(--error-color, #b71c1c); background: rgba(183,28,28,.07); border-radius: 0 5px 5px 0; }
 .wd-conflict-fix { border: 1px solid var(--error-color, #b71c1c); background: none; color: var(--error-color, #b71c1c); border-radius: var(--wd-radius-sm); padding: 1px 7px; font-size: .92em; cursor: pointer; white-space: nowrap; flex: none; }
@@ -1486,6 +1488,14 @@ function _field(f, value, extra) {
     sugHtml = `<div class="wd-sug"><span class="wd-sug-chip wd-sug-chip-cal">🤖 ${_esc(t('suggestion.calibrated_label', {}, 'Calibrated'))}</span><span class="wd-sug-val">${_esc(mlVal)}${_u}</span>${useBtn(mlVal)}${r}</div>`;
   }
 
+  // #343: a "mute" button on each suggestion card so the user can tell the
+  // auto-tuner to stop proposing this setting (e.g. a threshold that breaks an
+  // anti-crease-tuned device). Injected once just before the card's closing tag.
+  if (sugHtml && key) {
+    const lockTitle = _esc(t('btn.mute_suggestion', {}, "Stop suggesting this setting"));
+    const lockBtn = `<button type="button" class="wd-sug-lock" data-suglock="${key}" title="${lockTitle}" aria-label="${lockTitle}">🔕</button>`;
+    sugHtml = sugHtml.replace(/<\/div>\s*$/, lockBtn + '</div>');
+  }
   return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${chgDot}${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div>${sugHtml}</div>`;
 }
 
@@ -1717,6 +1727,7 @@ class HaWashdataPanel extends HTMLElement {
     this._profileGroups = { groups: [], suggestions: [], min_cohesion: 0.85 };
     this._profileEnvCache = {};
     this._suggestions = [];
+    this._lockedSuggestions = [];   // #343: setting keys the user muted from auto-tuning
     this._feedbacks = [];
     this._diag = null;
     this._phases = [];
@@ -2785,6 +2796,7 @@ class HaWashdataPanel extends HTMLElement {
     try {
       const res = await this._ws({ type: `${_DOMAIN}/get_suggestions`, entry_id: entryId });
       this._suggestions = res.suggestions || [];
+      this._lockedSuggestions = res.locked_suggestions || [];
     } catch (_) { this._suggestionsError = true; this._suggestions = []; }
   }
 
@@ -2847,7 +2859,7 @@ class HaWashdataPanel extends HTMLElement {
     this._settingsChangelog = null; this._settingsChangeByKey = {};
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
-    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = [];
+    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = []; this._lockedSuggestions = [];
     this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._setupStatus = null;       // per-device; re-fetched by _fetchTabData
@@ -4447,13 +4459,22 @@ class HaWashdataPanel extends HTMLElement {
 
     const formContent = q ? this._htmlSettingsSearch(o, q) : (sugOnly ? this._htmlSettingsSugOnly(o) : this._htmlSettingsSection(o));
 
+    // #343: muted-suggestions notice + reset. Muted keys have no visible card, so
+    // this is the only place the user can bring them back.
+    const mutedCount = (this._lockedSuggestions || []).length;
+    const mutedBanner = mutedCount ? `
+      <div class="wd-sug-banner" style="opacity:.92">
+        <span>🔕 ${this._t('msg.n_suggestions_muted', {count: mutedCount}, `${mutedCount} suggestion${mutedCount > 1 ? 's' : ''} muted; the auto-tuner will not propose these.`)}</span>
+        <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="sug-unmute-all">${this._t('btn.reset_muted', {}, 'Reset muted')}</button>
+      </div>` : '';
+
     return `
       ${suggestionsErrorBanner}
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
         <div class="wd-card-title" style="margin:0">${this._t('tab.settings', {}, 'Settings')}${this._mlSettingsLoading ? ` <span style="font-size:.6em;color:var(--secondary-text-color);font-weight:400">${this._t('msg.ml_loading', {}, 'loading ML…')}</span>` : ''}</div>
         ${analyzeBtn}
       </div>
-      ${confBanner}${banner}${basicNote}
+      ${confBanner}${banner}${mutedBanner}${basicNote}
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
         ${searchInput}
         <div class="wd-section-nav" style="flex:1;margin:0;margin-bottom:0">${nav}</div>
@@ -9262,6 +9283,23 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
     }));
 
+    // Suggestion "mute" (#343) -> tell the backend to stop proposing this setting.
+    sr.querySelectorAll('[data-suglock]').forEach(btn => btn.addEventListener('click', async () => {
+      const k = btn.dataset.suglock;
+      const dev = this._devices[this._selIdx];
+      const eid = dev && dev.entry_id;
+      if (!eid || !k) return;
+      try {
+        await this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: true });
+        this._suggestions = (this._suggestions || []).filter(s => s.key !== k);
+        if (!(this._lockedSuggestions || []).includes(k)) (this._lockedSuggestions = this._lockedSuggestions || []).push(k);
+        this._showToast(this._t('msg.sug_muted', {}, "Won't suggest this setting again"), 'info');
+        this._render();
+      } catch (_) {
+        this._showToast(this._t('msg.sug_mute_failed', {}, 'Could not mute suggestion'), 'error');
+      }
+    }));
+
     // Suggestion "Use" -> stage value into the field, then cascade-fix downstream conflicts.
     sr.querySelectorAll('[data-sugkey]').forEach(btn => btn.addEventListener('click', () => {
       const k = btn.dataset.sugkey, v = btn.dataset.sugval;
@@ -9598,6 +9636,19 @@ class HaWashdataPanel extends HTMLElement {
       this._busyRun('save-settings', async () => {
         try { await this._ws({ type: `${_DOMAIN}/clear_suggestions`, entry_id: eid }); this._suggestions = []; this._showToast(this._t('toast.suggestions_dismissed', {}, 'Suggestions dismissed')); }
         catch (e) { this._showToast(this._t('toast.error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
+      });
+
+    } else if (a === 'sug-unmute-all') {
+      // #343: un-mute every locked suggestion so the auto-tuner can propose them again.
+      this._busyRun('save-settings', async () => {
+        try {
+          for (const k of [...(this._lockedSuggestions || [])]) {
+            await this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: false });
+          }
+          this._lockedSuggestions = [];
+          await this._fetchSuggestions(eid);
+          this._showToast(this._t('msg.sug_unmuted_all', {}, 'Muted suggestions reset'), 'success');
+        } catch (e) { this._showToast(this._t('toast.error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'sug-analyze') {

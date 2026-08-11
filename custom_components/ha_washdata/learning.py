@@ -161,8 +161,19 @@ class LearningManager:
             and (len(past_cycles) - last_apply_count) < MIN_SUGGESTION_COOLDOWN_CYCLES
         )
 
+        # Locked keys (#343): the user has told the auto-tuner to stop proposing
+        # these (e.g. thresholds that break an anti-crease-tuned device). Drop them
+        # from the pending map so they never re-surface until unlocked.
+        try:
+            locked = set(self.profile_store.get_locked_suggestions())
+        except Exception:  # pylint: disable=broad-exception-caught
+            locked = set()
+
         filtered_suggestions: dict[str, Any] = {}
         for key, data in suggestions.items():
+            if key in locked:
+                self.profile_store.delete_suggestion(key)
+                continue
             if isinstance(data, dict) and "value" in data:
                 current_val = current_options.get(key)
                 suggested_val = data["value"]

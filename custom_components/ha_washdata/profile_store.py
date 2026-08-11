@@ -1302,6 +1302,31 @@ class ProfileStore:
         suggestions: JSONDict = self._data.setdefault("suggestions", {})
         suggestions.pop(key, None)
 
+    def get_locked_suggestions(self) -> list[str]:
+        """Return the setting keys the user has locked against auto-tuning (#343).
+
+        A locked key is never re-surfaced as a suggestion, so the auto-tuner stops
+        repeatedly proposing a value the user has rejected (e.g. a stop/start
+        threshold that breaks an anti-crease-tuned device). Never raises.
+        """
+        raw = self._data.get("locked_suggestions")
+        return [str(k) for k in raw] if isinstance(raw, list) else []
+
+    async def set_suggestion_locked(self, key: str, locked: bool) -> None:
+        """Lock or unlock a suggestion key and persist (#343).
+
+        Locking also drops any currently-pending suggestion for the key so it
+        disappears immediately; unlocking lets the auto-tuner surface it again.
+        """
+        cur = set(self.get_locked_suggestions())
+        if locked:
+            cur.add(key)
+            self.delete_suggestion(key)
+        else:
+            cur.discard(key)
+        self._data["locked_suggestions"] = sorted(cur)
+        await self.async_save()
+
     async def clear_suggestions(self) -> None:
         """Clear all pending suggestions and persist."""
         self._data["suggestions"] = {}

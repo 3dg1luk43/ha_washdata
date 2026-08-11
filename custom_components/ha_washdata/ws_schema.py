@@ -651,6 +651,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_suggestions": GetSuggestionsResponse,
     "apply_suggestions": ApplySuggestionsResponse,
     "clear_suggestions": SuccessResponse,
+    "set_suggestion_lock": SuccessResponse,
     "run_suggestion_analysis": RunSuggestionAnalysisResponse,
     "get_cycle_power_data": GetCyclePowerDataResponse,
     "trim_cycle": StartTaskResponse,
@@ -711,6 +712,8 @@ WS_RESPONSE_TYPES: dict[str, type] = {
 #: for these but does not flag extra keys.
 WS_OPEN_RESPONSES: frozenset[str] = frozenset({
     "run_suggestion_analysis",
+    # set_suggestion_lock returns the updated locked-key list alongside success.
+    "set_suggestion_lock",
     # Playground what-if responses carry nested/variant shapes (incl. an error
     # variant); skip strict extra-key validation.
     "run_playground_cycle_detail",
@@ -868,6 +871,7 @@ WS_COMMANDS: dict[str, dict] = {
     "get_suggestions": {"params": [_entry()]},
     "apply_suggestions": {"params": [_entry(), _p("keys", "list[str]")]},
     "clear_suggestions": {"params": [_entry()]},
+    "set_suggestion_lock": {"params": [_entry(), _p("key", "str"), _p("locked", "bool")]},
     "run_suggestion_analysis": {"params": [_entry()]},
     "get_cycle_power_data": {"params": [_entry(), _p("cycle_id", "str")]},
     "trim_cycle": {"params": [
