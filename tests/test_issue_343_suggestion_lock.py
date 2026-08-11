@@ -105,3 +105,36 @@ def test_locked_suggestion_is_not_surfaced(learning):
     surfaced = learning.suggestion_engine.apply_suggestions.call_args.args[0]
     assert "start_threshold_w" not in surfaced
     assert "stop_threshold_w" in surfaced
+
+
+def test_all_locked_triggers_save(mock_hass):
+    """When every incoming suggestion is locked the in-memory deletions must be
+    persisted: delete_suggestion only mutates _data in memory, so without an
+    async_save the pruned keys re-appear from disk on HA restart (regression guard)."""
+    entry = MagicMock()
+    entry.data = {}
+    entry.options = {}
+    mock_hass.config_entries.async_get_entry.return_value = entry
+    ps = MagicMock()
+    ps.get_past_cycles.return_value = []
+    ps.get_suggestion_apply_cycle_count.return_value = 0
+    ps.get_locked_suggestions.return_value = ["start_threshold_w", "stop_threshold_w"]
+    ps.delete_suggestion = MagicMock()
+    ps.async_save = AsyncMock()
+    mgr = LearningManager(mock_hass, "test_entry", ps, device_type="washing_machine")
+    mgr.suggestion_engine.apply_suggestions = MagicMock()
+
+    created_tasks = []
+    mock_hass.async_create_task = MagicMock(side_effect=lambda coro, *a: created_tasks.append(coro))
+
+    mgr._apply_suggestions_and_notify({
+        "start_threshold_w": {"value": 3.6},
+        "stop_threshold_w": {"value": 2.4},
+    })
+
+    # Both keys deleted in-memory.
+    assert ps.delete_suggestion.call_count == 2
+    # apply_suggestions NOT called (nothing to surface).
+    mgr.suggestion_engine.apply_suggestions.assert_not_called()
+    # A save task was scheduled so the deletions reach disk.
+    assert len(created_tasks) == 1
