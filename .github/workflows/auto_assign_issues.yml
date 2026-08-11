@@ -16,10 +16,43 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const issue = context.payload.issue;
+            const body = issue.body || '';
+            const labels = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name));
+
+            // Skip assignment for templateless issues from external contributors:
+            // issue_validator.yml will auto-close them immediately, so assigning
+            // creates noise. Same dual-signal logic as close-templateless-issues.
+            // Privileged authors (OWNER/MEMBER/COLLABORATOR/Bot) are always assigned.
+            const isPrivileged = ['OWNER', 'MEMBER', 'COLLABORATOR'].includes(issue.author_association)
+              || issue.user.type === 'Bot';
+
+            if (!isPrivileged) {
+              const TEMPLATE_LABELS = ['bug', 'feature request', 'documentation'];
+              const KNOWN_HEADINGS = [
+                'Describe the Bug', 'Device Type', 'Device Brand & Model',
+                'WashData Integration Version', 'Home Assistant Version',
+                'Reproduction Steps', 'Expected Behavior', 'Logs / Error Evidence',
+                'Additional Context', 'Before You Submit', 'Contributing a Fix',
+                'Problem or Motivation', 'Proposed Solution', 'Related Device Type',
+                'Alternatives Considered', 'Contributing an Implementation',
+                'Page / Section', 'What is Wrong or Missing?', 'Suggested Change',
+              ];
+              const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const hasTemplateLabel = labels.some(l => TEMPLATE_LABELS.includes(l));
+              const hasTemplateHeading = KNOWN_HEADINGS.some(
+                h => new RegExp('^#{1,6}\\s*' + escapeRe(h), 'im').test(body)
+              );
+              if (!hasTemplateLabel && !hasTemplateHeading) {
+                console.log(`#${issue.number}: templateless issue - skipping assignment (will be auto-closed).`);
+                return;
+              }
+            }
+
             await github.rest.issues.addAssignees({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.payload.issue.number,
+              issue_number: issue.number,
               assignees: [context.repo.owner],
             });
-            console.log(`#${context.payload.issue.number} assigned to @${context.repo.owner}`);
+            console.log(`#${issue.number} assigned to @${context.repo.owner}`);
