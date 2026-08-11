@@ -439,4 +439,8 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   bounds density, pure on-change plugs get no extra events). New `tests/test_issue_363_state_reported.py`.
   Fast suite 1364 green. Register item 62. NOTE for maintainer: remove the wrong `done` label from #329.
   Heartbeat/synthetic-injection fallback intentionally NOT added (higher risk, marginal benefit once the
-  plug's real reports are consumed); left as a possible follow-up.
+  plug's real reports are consumed); left as a possible follow-up. (`116e2d9`)
+- [DONE] #339 - keepalive in `_handle_state_expiry`: injects synthetic 0 W during a silent anti-wrinkle
+  tail (gated on `_last_real_reading_time > off_delay`, never bumped) so the detector's idle/2h-cap exits
+  the mode. Verified end-to-end (real detector exits ANTI_WRINKLE->OFF on injected 0 W). New
+  `tests/test_issue_339_anti_wrinkle_silent.py`. Fast suite 1367 green. Register item 63.
