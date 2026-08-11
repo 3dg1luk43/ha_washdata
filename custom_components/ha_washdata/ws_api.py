@@ -4126,6 +4126,14 @@ async def ws_set_user_prefs(
     # F2: per-user Basic/Advanced settings disclosure level.
     if p.get("settings_level") in ("basic", "advanced"):
         cur["settings_level"] = p["settings_level"]
+    # Panel font-size multiplier (accessibility). Coerce + clamp to safe bounds so a
+    # bad value can never break rendering; without this it was silently dropped and
+    # the setting vanished on refresh.
+    if "font_scale" in p:
+        try:
+            cur["font_scale"] = max(0.7, min(2.0, float(p["font_scale"])))
+        except (TypeError, ValueError):
+            cur.pop("font_scale", None)
     # Display prefs: cycle date format + panel language override (paired with the
     # panel's save-prefs payload; without these they would be silently dropped).
     if p.get("date_format") in _PREF_DATE_FORMATS:
