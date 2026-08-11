@@ -508,6 +508,7 @@ const _CSS = `
 .wd-gear-btn { background: transparent; border: none; color: inherit; cursor: pointer; padding: 5px; margin-left: 4px; border-radius: var(--wd-radius-md); flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; opacity: .8; }
 .wd-gear-btn:hover { background: rgba(255,255,255,.16); opacity: 1; }
 @media (max-width: 870px) { .wd-burger { display: inline-flex; } }
+.wd-burger.wd-burger--force { display: inline-flex; }
 .wd-header .wd-sub { font-size: .72em; opacity: .75; margin-top: 2px; }
 .wd-header .wd-ts { margin-left: auto; font-size: .7em; opacity: .65; white-space: nowrap; }
 .wd-body { max-width: 1160px; margin: 0 auto; padding: 20px 16px 60px; }
@@ -3481,7 +3482,11 @@ class HaWashdataPanel extends HTMLElement {
       <circle cx="12" cy="14" r="2"/>
     </svg>`;
     const ver = this._constants.version;
-    const burger = `<button class="wd-burger" id="wd-burger" aria-label="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}" title="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}">
+    // Force the burger visible whenever HA's sidebar is fully hidden, regardless of
+    // viewport width: on a wide tablet with "Always hide sidebar" the HA header (and
+    // its hamburger) is gone, so this burger is the only way back (#359).
+    const forceBurger = (this._hass && this._hass.dockedSidebar === 'always_hidden') ? ' wd-burger--force' : '';
+    const burger = `<button class="wd-burger${forceBurger}" id="wd-burger" aria-label="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}" title="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
     </button>`;
     return `
