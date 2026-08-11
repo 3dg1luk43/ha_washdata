@@ -178,7 +178,9 @@
     "download_export": "Shkarko eksportin",
     "analyze_import": "Analizo skedarin",
     "import_selected": "Importo të zgjedhurat",
-    "back": "Prapa"
+    "back": "Prapa",
+    "mute_suggestion": "Mos e sugjeroni këtë cilësim",
+    "reset_muted": "Rivendos të heshturat"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Përplasjet e emrave",
     "conflict_import_copy": "Importo si kopje",
     "conflict_keep_mine": "Mba të miat",
-    "conflict_overwrite": "Mbishkruaj"
+    "conflict_overwrite": "Mbishkruaj",
+    "font_size": "Madhësia e shkronjave të panelit"
   },
   "log": {
     "all_levels": "Të gjitha nivelet",
@@ -922,7 +925,12 @@
     "merge_hint": "Artikujt e importuar shtohen; asgjë lokale nuk humbet. Përplasjet e emrave zgjidhen më poshtë.",
     "replace_warn": "Çdo kategori e shënuar fshihet dhe zëvendësohet nga skedari. Kategoritë e pashënuara mbeten të paprekura.",
     "dest_reference_hint": "Ciklet e importuara vetëm përmirësojnë njohjen e programit dhe nuk ndikojnë kurrë në statistikat e përdorimit/energjisë.",
-    "dest_real_history_hint": "Ciklet e importuara llogariten si historik i vetë kësaj pajisjeje dhe ushqejnë statistikat e energjisë/përdorimit. Përdoreni për të zhvendosur një pajisje në një instalim të ri."
+    "dest_real_history_hint": "Ciklet e importuara llogariten si historik i vetë kësaj pajisjeje dhe ushqejnë statistikat e energjisë/përdorimit. Përdoreni për të zhvendosur një pajisje në një instalim të ri.",
+    "sug_muted": "Ky cilësim nuk do të sugjerohet më",
+    "sug_mute_failed": "Nuk mund të heshtte sugjerimi",
+    "sug_unmuted_all": "Sugjerime të heshtura u rivendosën",
+    "n_suggestions_muted": "{count} të heshtura; motori i sugjerimeve nuk do t'i propozojë këto.",
+    "font_size_hint": "Bëni gjithçka në këtë panel më të madhe ose më të vogël. Aplikohet për llogarinë tuaj në këtë pajisje."
   },
   "phase_desc": {
     "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1406,6 +1414,26 @@
     "energy_scale": {
       "label": "Saktësia e Energjisë",
       "doc": "Ashpërsia e ndëshkimit të marrëveshjes së energjisë së Etapës 4. Më i vogël = më i rreptë: një mospërputhje energjie ndëshkon më shumë. Parazgjedhja 0.25 është me qëllim më lejuese se Ashpërsia e Kohëzgjatjes sepse energjia ndryshon me ngarkesën. Çiftojeni me Peshën e Energjisë."
+    },
+    "power_profile_interval_min": {
+      "label": "Intervali i Profilit të Energjisë",
+      "doc": "Madhësia e kovës për atributin e sensorit power_profile (vargu i sheshtë me vat mesatare për slot) të konsumuar nga planifikues të jashtëm si EMHASS dhe tibber_prices. Kova më të vogla mbajnë pikat e shkurtra të energjisë të mprehta; kova më të mëdha zbuten forma. Parazgjedhja 15 min. Vetëm për lexim; nuk ndikon zbulimin."
+    },
+    "notify_live_sticky": {
+      "label": "Mbaj njoftimin live pas trokitjes",
+      "doc": "Vetëm Android. Bëni njoftimin e progresit live të vazhdueshëm (sticky) kështu që trokitja mbi të nuk e humb fijen e vazhdueshme. Off ruan sjelljen e parazgjedhur ku trokitja e humb atë."
+    },
+    "notify_live_click_action": {
+      "label": "Destinacioni i trokitjes së njoftimit live",
+      "doc": "Vetëm Android. Ku hap trokitja mbi njoftimin e progresit live (p.sh. /lovelace/laundry ose një URL e plotë) në vend të faqes kryesore të aplikacionit. Lëreni bosh për parazgjedhjen."
+    },
+    "door_opens_at_end": {
+      "label": "Dera hapet automatikisht në fund",
+      "doc": "Për pjatalarëset që hapin derën në fund të ciklit për t'u tharë (AirDry dhe të ngjashme). Kur kjo është aktive, hapja e derës gjatë një cikli nuk e ndal atë përgjithmonë; nëse dera qëndron hapur për kohën e pritjes më poshtë, WashData e trajton ciklin si të përfunduar. Një hapje e shkurtër (shtimi i një gjëje) injorohet. Kërkon një Entitet Sensori Dere."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Koha e pritjes me derë të hapur",
+      "doc": "Sa gjatë duhet të qëndrojë dera hapur përpara se WashData të përfundojë ciklin, kur \"Dera hapet automatikisht në fund\" është aktive. E gjatë sa të injorojë shtimin e shpejtë të një pjate (parazgjedhja 60 s), e shkurtër sa të përfundojë shpejt pasi makina hap derën."
     }
   },
   "setting_group": {

@@ -178,7 +178,9 @@
     "download_export": "Descarcă exportul",
     "analyze_import": "Analizează fișierul",
     "import_selected": "Importă selecția",
-    "back": "Înapoi"
+    "back": "Înapoi",
+    "mute_suggestion": "Nu mai sugerați această setare",
+    "reset_muted": "Resetați cele ignorate"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Conflicte de nume",
     "conflict_import_copy": "Importă drept copie",
     "conflict_keep_mine": "Păstrează-l pe al meu",
-    "conflict_overwrite": "Suprascrie"
+    "conflict_overwrite": "Suprascrie",
+    "font_size": "Dimensiunea fontului panoului"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -922,7 +925,12 @@
     "merge_hint": "Elementele importate sunt adăugate; nimic local nu se pierde. Conflictele de nume se rezolvă mai jos.",
     "replace_warn": "Fiecare categorie bifată este ștearsă și înlocuită cu conținutul fișierului. Categoriile nebifate rămân neatinse.",
     "dest_reference_hint": "Ciclurile importate îmbunătățesc doar recunoașterea programelor și nu afectează niciodată statisticile de utilizare/energie.",
-    "dest_real_history_hint": "Ciclurile importate contează ca istoric propriu al acestui dispozitiv și alimentează statisticile de energie/utilizare. Folosește pentru a muta un electrocasnic pe o instalare nouă."
+    "dest_real_history_hint": "Ciclurile importate contează ca istoric propriu al acestui dispozitiv și alimentează statisticile de energie/utilizare. Folosește pentru a muta un electrocasnic pe o instalare nouă.",
+    "sug_muted": "Această setare nu va mai fi sugerată",
+    "sug_mute_failed": "Nu s-a putut dezactiva sugestia",
+    "sug_unmuted_all": "Sugestiile dezactivate au fost resetate",
+    "n_suggestions_muted": "{count} dezactivate; reglajul automat nu le va propune.",
+    "font_size_hint": "Faceți tot din acest panou mai mare sau mai mic. Se aplică contului dvs. pe acest dispozitiv."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1406,6 +1414,26 @@
     "energy_scale": {
       "label": "Precizie Energie",
       "doc": "Rigoarea penalizării acordului de energie a Etapei 4. Mai mic = mai strict: o nepotrivire de energie afectează mai mult. Implicit 0.25 este intenționat mai permisiv decât Rigoarea Duratei deoarece energia variază în funcție de sarcină. Utilizați împreună cu Ponderea Energiei."
+    },
+    "power_profile_interval_min": {
+      "label": "Interval Profil Putere",
+      "doc": "Dimensiunea intervalului pentru atributul senzorului power_profile per profil (tabloul plat de wați medii per slot consumat de planificatoare externe precum EMHASS și tibber_prices). Intervalele mai mici păstrează vârfurile scurte de putere clare; intervalele mai mari netezesc forma. Implicit 15 min. Doar la citire; nu afectează detectarea."
+    },
+    "notify_live_sticky": {
+      "label": "Păstrați notificarea în timp real la atingere",
+      "doc": "Numai Android. Faceți notificarea de progres în timp real persistentă (fixată) astfel încât atingerea ei să nu o respingă. Dezactivat păstrează comportamentul implicit în care o atingere o respinge."
+    },
+    "notify_live_click_action": {
+      "label": "Destinație la atingerea notificării în timp real",
+      "doc": "Numai Android. Unde deschide o atingere pe notificarea de progres în timp real (de ex. /lovelace/laundry, sau un URL complet) în loc de pagina principală a aplicației. Lăsați necompletat pentru valoarea implicită."
+    },
+    "door_opens_at_end": {
+      "label": "Ușa se deschide automat la final",
+      "doc": "Pentru mașinile de spălat vase care deschid ușa la sfârșitul ciclului pentru uscare (AirDry și similare). Cu această opțiune activată, deschiderea ușii în timpul unui ciclu activ nu îl mai pune în pauză indefinit; în schimb, dacă ușa rămâne deschisă pentru durata de așteptare de mai jos, WashData consideră ciclul terminat. O deschidere scurtă (pentru a adăuga un obiect) este ignorată. Necesită o entitate senzor de ușă."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Durată de așteptare la deschiderea ușii",
+      "doc": "Cât timp trebuie să rămână ușa deschisă înainte ca WashData să termine ciclul, când opțiunea \"Ușa se deschide automat la final\" este activată. Destul de lungă pentru a ignora adăugarea rapidă a unui vas (implicit 60 s), destul de scurtă pentru a termina prompt odată ce mașina deschide ușa."
     }
   },
   "setting_group": {

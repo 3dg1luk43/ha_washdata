@@ -178,7 +178,9 @@
     "download_export": "Ladda ner export",
     "analyze_import": "Analysera fil",
     "import_selected": "Importera valda",
-    "back": "Tillbaka"
+    "back": "Tillbaka",
+    "mute_suggestion": "Sluta föreslå den här inställningen",
+    "reset_muted": "Återställ tysta förslag"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_import_copy": "Importera som kopia",
     "conflict_keep_mine": "Behåll mina",
     "conflict_overwrite": "Skriv över",
-    "pg_anti_wrinkle": "Skrynkelskydd"
+    "pg_anti_wrinkle": "Skrynkelskydd",
+    "font_size": "Panelens teckenstorlek"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -922,7 +925,12 @@
     "merge_hint": "Importerade objekt läggs till; inget lokalt går förlorat. Namnkonflikter löses nedan.",
     "replace_warn": "Varje ikryssad kategori raderas och ersätts från filen. Icke ikryssade kategorier lämnas orörda.",
     "dest_reference_hint": "Importerade cykler förbättrar bara programmatchning och påverkar aldrig användnings-/energistatistik.",
-    "dest_real_history_hint": "Importerade cykler räknas som den här apparatens egen historik och matar energi-/användningsstatistik. Använd detta för att flytta en apparat till en ny installation."
+    "dest_real_history_hint": "Importerade cykler räknas som den här apparatens egen historik och matar energi-/användningsstatistik. Använd detta för att flytta en apparat till en ny installation.",
+    "sug_muted": "Kommer inte att föreslå den här inställningen igen",
+    "sug_mute_failed": "Kunde inte tysta förslaget",
+    "sug_unmuted_all": "Tysta förslag återställda",
+    "n_suggestions_muted": "{count} tystade; auto-tunern föreslår inte dessa.",
+    "font_size_hint": "Gör allt i den här panelen större eller mindre. Gäller för ditt konto på den här enheten."
   },
   "pg_desc": {
     "completion_min_seconds": "Kortaste körning som räknas som en riktig cykel",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Energiskärpa",
       "doc": "Skärpan i Steg 4:s straff för energiöverensstämmelse. Lägre = striktare: en energiavvikelse straffas mer. Standard 0,25 är avsiktligt mer tillåtande än varaktighetsskärpan eftersom energiförbrukning varierar med last. Para ihop med Energivikt."
+    },
+    "power_profile_interval_min": {
+      "label": "Effektprofil-intervall",
+      "doc": "Storlek på bucket för effektprofilsensorns attribut power_profile (det platta arrayen med genomsnittliga wattvärden per slot som används av externa planerare som EMHASS och tibber_prices). Mindre buckets håller korta effekttoppar skarpa; större buckets jämnar ut kurvan. Standard 15 min. Endast för visning; påverkar inte detektering."
+    },
+    "notify_live_sticky": {
+      "label": "Behåll live-avisering vid tryck",
+      "doc": "Endast Android. Gör live-förloppsaviseringen kvarstående (sticky) så att ett tryck inte stänger den. Av: standardbeteende där ett tryck stänger aviseringen."
+    },
+    "notify_live_click_action": {
+      "label": "Tryckmål för live-avisering",
+      "doc": "Endast Android. Vart ett tryck på live-förloppsaviseringen öppnar (t.ex. /lovelace/laundry eller en fullständig URL) i stället för appens startsida. Lämna tomt för standard."
+    },
+    "door_opens_at_end": {
+      "label": "Dörren öppnas automatiskt vid avslut",
+      "doc": "För diskmaskiner som poppar upp dörren vid cykelslutet för torkning (AirDry och liknande). Med detta aktiverat sätter en döröppning under en aktiv cykel inte den på paus för evigt; om dörren förblir öppen under den konfigurerade uppehållstiden behandlar WashData cykeln som avslutad. En kort öppning (lägga till ett föremål) ignoreras. Kräver en dörrsensorenhet."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Dörröppningens uppehållstid vid avslut",
+      "doc": "Hur länge dörren måste förbli öppen innan WashData avslutar cykeln, när \"Dörren öppnas automatiskt vid avslut\" är aktiverat. Tillräckligt länge för att ignorera snabb tilläggning av ett fat (standard 60 s), tillräckligt kort för att avsluta snabbt när maskinen poppar upp dörren."
     }
   },
   "setting_group": {

@@ -64,6 +64,8 @@
     "discard": "Odrzuć",
     "discard_tip": "Odrzuć nagranie bez zapisywania",
     "dismiss": "Odrzuć",
+    "mute_suggestion": "Przestań sugerować to ustawienie",
+    "reset_muted": "Zresetuj wyciszone",
     "done": "Zrobione",
     "edit": "Edytuj",
     "export": "Eksportuj",
@@ -348,6 +350,7 @@
     "default_access_level": "Domyślny poziom dla użytkowników niewymienionych poniżej",
     "default_other": "Domyślne (inne urządzenia)",
     "default_tab": "Domyślna zakładka podczas otwierania panelu",
+    "font_size": "Rozmiar czcionki panelu",
     "delta": "Δ",
     "description": "Opis",
     "dtw_blend_w": "Waga mieszania",
@@ -789,6 +792,7 @@
     "preferences_admin": "Preferencje, panel i kontrola dostępu",
     "preferences_adv": "Preferencje",
     "prefs_personal": "Dotyczą one wyłącznie Twojego konta Home Assistant.",
+    "font_size_hint": "Powiększ lub pomniejsz wszystko w tym panelu. Dotyczy Twojego konta na tym urządzeniu.",
     "process_history_hint": "Ponownie uruchom dopasowywanie na wszystkich zapisanych cyklach, odśwież sugestie dostrajania, ponownie wytrenuj modele ML (jeśli włączone) i przelicz kondycję cykli. Uruchom po serii przeglądów.",
     "profile_deleted": "Profil usunięty",
     "profile_poor_health_detail": "Cykle przypisane do tego profilu mają niespójne kształty lub niską pewność. Rozważ przebudowę koperty lub przejrzenie oznakowanych cykli.",
@@ -821,6 +825,10 @@
     "split_intro": "Kliknij wykres, aby dodać lub usunąć punkt podziału albo automatycznie wykryć na podstawie pustych przerw. Każdy powstały segment może otrzymać swój własny profil.",
     "storage_diagnostics": "Statystyki przechowywania, konserwacja, eksport/import",
     "sug_staged": "Ustawiono {key} = {val}. Zapisz, aby zastosować.",
+    "sug_muted": "To ustawienie nie będzie więcej sugerowane",
+    "sug_mute_failed": "Nie udało się wyciszyć sugestii",
+    "sug_unmuted_all": "Wyciszone sugestie przywrócone",
+    "n_suggestions_muted": "{count} wyciszonych; automatyczny tuner nie będzie proponować tych ustawień.",
     "toast_auto_detect_enabled": "Automatyczne wykrywanie włączone",
     "toast_auto_label_complete": "Automatyczne oznaczanie zakończone",
     "toast_auto_label_failed": "Automatyczne oznaczanie nie powiodło się: {error}",
@@ -1406,6 +1414,26 @@
     "energy_scale": {
       "label": "Ostrość energii",
       "doc": "Ostrość kary za niezgodność energii w Etapie 4. Mniejszy = surowszy: niezgodność energii bardziej obniża wynik. Domyślna wartość 0,25 jest celowo bardziej łagodna niż Ostrość Czasu Trwania, ponieważ energia zmienia się z obciążeniem. Używaj razem z Wagą Energii."
+    },
+    "power_profile_interval_min": {
+      "label": "Interwał profilu mocy",
+      "doc": "Rozmiar segmentu dla atrybutu senzora power_profile na profil (płaska tablica średnich watów na slot zużywana przez zewnętrzne planerzy jak EMHASS i tibber_prices). Mniejsze segmenty zachowują krótkie skoki mocy ostre; większe segmenty wygładzają kształt. Domyślnie 15 min. Tylko do odczytu; nie wpływa na wykrywanie."
+    },
+    "notify_live_sticky": {
+      "label": "Zachowaj powiadomienie na żywo po dotknięciu",
+      "doc": "Tylko Android. Ustaw powiadomienie o postępie na żywo jako trwałe (przypięte), aby dotknięcie nie odrzucało aktywnego wątku. Wyłączone zachowuje domyślne zachowanie, gdzie dotknięcie odrzuca powiadomienie."
+    },
+    "notify_live_click_action": {
+      "label": "Cel dotknięcia powiadomienia na żywo",
+      "doc": "Tylko Android. Gdzie dotknięcie powiadomienia o postępie na żywo otwiera (np. /lovelace/laundry lub pełny URL) zamiast strony startowej aplikacji. Pozostaw puste dla wartości domyślnej."
+    },
+    "door_opens_at_end": {
+      "label": "Drzwi otwierają się automatycznie na końcu",
+      "doc": "Dla zmywarek, które na końcu cyklu otwierają drzwi w celu suszenia (AirDry i podobne). Po włączeniu otwarcie drzwi podczas działającego cyklu nie zatrzymuje go na zawsze; jeśli drzwi pozostaną otwarte przez czas oczekiwania poniżej, WashData uznaje cykl za zakończony. Krótkie otwarcie (dodawanie naczynia) jest ignorowane. Wymaga encji czujnika drzwi."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Czas otwarcia drzwi do zakończenia cyklu",
+      "doc": "Jak długo drzwi muszą pozostać otwarte, zanim WashData zakończy cykl, gdy włączone jest \"Drzwi otwierają się automatycznie na końcu\". Wystarczająco długo, aby zignorować szybkie dodawanie naczyń (domyślnie 60 s), wystarczająco krótko, aby szybko zakończyć, gdy maszyna otworzy drzwi."
     }
   },
   "setting_group": {

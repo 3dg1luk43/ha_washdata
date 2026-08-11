@@ -178,7 +178,9 @@
     "download_export": "Laadi eksport alla",
     "analyze_import": "Analüüsi faili",
     "import_selected": "Impordi valitud",
-    "back": "Tagasi"
+    "back": "Tagasi",
+    "mute_suggestion": "Lõpeta selle seade soovitamine",
+    "reset_muted": "Lähtesta vaigistatud"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Nimekonfliktid",
     "conflict_import_copy": "Impordi koopiana",
     "conflict_keep_mine": "Säilita minu omad",
-    "conflict_overwrite": "Kirjuta üle"
+    "conflict_overwrite": "Kirjuta üle",
+    "font_size": "Paneeli fondi suurus"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -922,7 +925,12 @@
     "merge_hint": "Imporditud üksused lisatakse; kohalikest andmetest ei lähe midagi kaotsi. Nimekonfliktid lahendatakse allpool.",
     "replace_warn": "Iga märgitud kategooria kustutatakse ja asendatakse failist. Märkimata kategooriaid ei puudutata.",
     "dest_reference_hint": "Imporditud tsüklid ainult parandavad programmide tuvastamist ega mõjuta kunagi kasutus- ega energiastatistikat.",
-    "dest_real_history_hint": "Imporditud tsüklid arvestatakse selle seadme enda ajalooks ja need toidavad energia- ja kasutusstatistikat. Kasuta ühe seadme uude paigaldusse teisaldamiseks."
+    "dest_real_history_hint": "Imporditud tsüklid arvestatakse selle seadme enda ajalooks ja need toidavad energia- ja kasutusstatistikat. Kasuta ühe seadme uude paigaldusse teisaldamiseks.",
+    "sug_muted": "Seda seadet enam ei soovitata",
+    "sug_mute_failed": "Soovituse vaigistamine ebaõnnestus",
+    "sug_unmuted_all": "Vaigistatud soovitused lähtestatud",
+    "n_suggestions_muted": "{count} vaigistatud; automaatne häälestaja ei paku neid enam.",
+    "font_size_hint": "Muuda kõik selles paneelil suuremaks või väiksemaks. Kehtib sinu kontole sellel seadmel."
   },
   "pg_desc": {
     "anti_wrinkle_enabled": "Neelab pärast põhifaasi trummelimpulsid, selle asemel et lugeda neid uute tsüklitena",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Energia teravus",
       "doc": "4. etapi energia vastavuse karistuse teravus. Väiksem = rangem: energia mittevastavus teeb rohkem kahju. Vaikimisi 0,25 on tahtlikult andelikum kui kestuse teravus, kuna energia varieerub koormuse järgi. Kasutage koos Energia kaaluga."
+    },
+    "power_profile_interval_min": {
+      "label": "Võimsusprofiilivahemik",
+      "doc": "Ämbri suurus profiili power_profile sensori atribuudile (tasane pesa kohta keskmiste vattide massiiv, mida kasutavad välised planeerijad nagu EMHASS ja tibber_prices). Väiksemad ämbrid hoiavad lühikesi võimsushüppeid teravana; suuremad ämbrid siluvad kuju. Vaikimisi 15 min. Ainult lugemisaeg; ei mõjuta tuvastust."
+    },
+    "notify_live_sticky": {
+      "label": "Hoia reaalajas teavitus puudutuse järel",
+      "doc": "Ainult Android. Tee reaalajas edenemise teavitus püsivaks (kleepuvaks), nii et selle puudutamine ei sulge käimasolevat lõime. Väljas hoiab vaikekäitumist, kus puudutamine teavituse sulgeb."
+    },
+    "notify_live_click_action": {
+      "label": "Reaalajas teavituse puudutamise sihtkoht",
+      "doc": "Ainult Android. Kuhu reaalajas edenemise teavituse puudutamine avab (nt /lovelace/laundry või täielik URL) rakenduse avalehe asemel. Vaikimisi jaoks jätke tühjaks."
+    },
+    "door_opens_at_end": {
+      "label": "Uks avaneb automaatselt lõpus",
+      "doc": "Nõudepesumasinatele, mis avavad tsükli lõpus ukse kuivatamiseks (AirDry ja sarnased). Selle sisselülitamisel ei peata ukse avamine käimasoleva tsükli ajal enam seda igaveseks; selle asemel, kui uks jääb alla sätestatud viibimisaja jooksul avatuks, loeb WashData tsükli lõppenuks. Lühike avamine (eseme lisamine) ignoreeritakse. Nõuab ukse anduri olendit."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Ukse avamise lõppviibimisaeg",
+      "doc": "Kui kaua uks peab jääma avatuks, enne kui WashData tsükli lõpetab, kui \"Uks avaneb automaatselt lõpus\" on sisse lülitatud. Piisavalt pikk, et kiire taldrikute lisamine ignoreeritaks (vaikimisi 60 s), piisavalt lühike, et lõpetada kiiresti, kui masin ukse avab."
     }
   },
   "setting_group": {

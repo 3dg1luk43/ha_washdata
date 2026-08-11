@@ -178,7 +178,9 @@
     "download_export": "Descargar exportación",
     "analyze_import": "Analizar archivo",
     "import_selected": "Importar lo seleccionado",
-    "back": "Atrás"
+    "back": "Atrás",
+    "mute_suggestion": "Dejar de sugerir este ajuste",
+    "reset_muted": "Restablecer silenciados"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Conflictos de nombres",
     "conflict_import_copy": "Importar como copia",
     "conflict_keep_mine": "Conservar el mío",
-    "conflict_overwrite": "Sobrescribir"
+    "conflict_overwrite": "Sobrescribir",
+    "font_size": "Tamaño de fuente del panel"
   },
   "log": {
     "all_levels": "Todos los niveles",
@@ -922,7 +925,12 @@
     "merge_hint": "Los elementos importados se añaden; no se pierde nada local. Los conflictos de nombres se resuelven abajo.",
     "replace_warn": "Cada categoría marcada se borra y se reemplaza con el contenido del archivo. Las categorías sin marcar quedan intactas.",
     "dest_reference_hint": "Los ciclos importados solo mejoran el reconocimiento de programas y nunca afectan a las estadísticas de uso/energía.",
-    "dest_real_history_hint": "Los ciclos importados cuentan como el historial propio de este dispositivo y alimentan las estadísticas de energía/uso. Úsalo para mover un electrodoméstico a una instalación nueva."
+    "dest_real_history_hint": "Los ciclos importados cuentan como el historial propio de este dispositivo y alimentan las estadísticas de energía/uso. Úsalo para mover un electrodoméstico a una instalación nueva.",
+    "sug_muted": "Este ajuste no volverá a sugerirse",
+    "sug_mute_failed": "No se pudo silenciar la sugerencia",
+    "sug_unmuted_all": "Sugerencias silenciadas restablecidas",
+    "n_suggestions_muted": "{count} silenciadas; el ajustador automático no propondrá estas.",
+    "font_size_hint": "Aumenta o reduce el tamaño de todo en este panel. Se aplica a tu cuenta en este dispositivo."
   },
   "pg_desc": {
     "anti_wrinkle_enabled": "Absorber los pulsos de volteo tras la fase principal en lugar de leerlos como nuevos ciclos",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Nitidez de energía",
       "doc": "Precisión de la penalización por concordancia de energía. Menor = más estricto: una discordancia de energía penaliza más. El predeterminado 0,25 es intencionalmente más indulgente que la Precisión de duración, porque la energía varía con la carga. Combinar con Peso de energía."
+    },
+    "power_profile_interval_min": {
+      "label": "Intervalo del perfil de potencia",
+      "doc": "Tamaño del intervalo para el atributo del sensor power_profile por perfil (la matriz plana de vatios medios por franja, consumida por planificadores externos como EMHASS y tibber_prices). Intervalos más pequeños mantienen nítidos los picos de potencia breves; intervalos más grandes suavizan la forma. Predeterminado 15 min. Solo de lectura; no afecta a la detección."
+    },
+    "notify_live_sticky": {
+      "label": "Mantener la notificación activa al pulsar",
+      "doc": "Solo Android. Hace que la notificación de progreso en vivo sea persistente (fija), de modo que pulsarla no la cierre. Desactivado mantiene el comportamiento predeterminado en el que un toque la cierra."
+    },
+    "notify_live_click_action": {
+      "label": "Destino al pulsar la notificación en vivo",
+      "doc": "Solo Android. Destino que se abre al pulsar la notificación de progreso en vivo (por ejemplo, /lovelace/lavandería, o una URL completa), en lugar de la página de inicio de la aplicación. Dejar en blanco para el valor predeterminado."
+    },
+    "door_opens_at_end": {
+      "label": "La puerta se abre automáticamente al final",
+      "doc": "Para lavavajillas que abren la puerta al final del ciclo para secar (AirDry y similares). Con esta opción activada, abrir la puerta durante un ciclo en marcha ya no lo pausa indefinidamente; en cambio, si la puerta permanece abierta el tiempo mínimo indicado abajo, WashData considera el ciclo finalizado. Una apertura breve (para añadir un elemento) se ignora. Requiere una entidad de sensor de puerta."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Tiempo mínimo de puerta abierta para finalizar",
+      "doc": "Cuánto tiempo debe permanecer abierta la puerta antes de que WashData finalice el ciclo, cuando «La puerta se abre automáticamente al final» está activada. Lo suficientemente largo como para ignorar añadir un elemento rápidamente (predeterminado 60 s), y lo suficientemente corto como para terminar pronto una vez que la máquina abra la puerta."
     }
   },
   "setting_group": {

@@ -178,7 +178,9 @@
     "download_export": "Atsisiųsti eksportą",
     "analyze_import": "Analizuoti failą",
     "import_selected": "Importuoti pasirinktus",
-    "back": "Atgal"
+    "back": "Atgal",
+    "mute_suggestion": "Nebesiūlyti šio nustatymo",
+    "reset_muted": "Atstatyti nutildytus"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Pavadinimų konfliktai",
     "conflict_import_copy": "Importuoti kaip kopiją",
     "conflict_keep_mine": "Išlaikyti manuosius",
-    "conflict_overwrite": "Perrašyti"
+    "conflict_overwrite": "Perrašyti",
+    "font_size": "Skydelio šrifto dydis"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -922,7 +925,12 @@
     "merge_hint": "Importuoti elementai pridedami; jokie vietiniai duomenys neprarandami. Pavadinimų konfliktai sprendžiami toliau.",
     "replace_warn": "Kiekviena pažymėta kategorija ištrinama ir pakeičiama iš failo. Nepažymėtos kategorijos lieka nepaliestos.",
     "dest_reference_hint": "Importuoti ciklai tik pagerina programų atpažinimą ir niekada neveikia naudojimo/energijos statistikos.",
-    "dest_real_history_hint": "Importuoti ciklai laikomi šio prietaiso paties istorija ir papildo energijos/naudojimo statistiką. Naudokite perkeliant vieną prietaisą į naują įdiegimą."
+    "dest_real_history_hint": "Importuoti ciklai laikomi šio prietaiso paties istorija ir papildo energijos/naudojimo statistiką. Naudokite perkeliant vieną prietaisą į naują įdiegimą.",
+    "sug_muted": "Šio nustatymo daugiau nebesiūlys",
+    "sug_mute_failed": "Nepavyko nutildyti pasiūlymo",
+    "sug_unmuted_all": "Nutildyti pasiūlymai atstatyti",
+    "n_suggestions_muted": "{count} nutildyti; automatinis derintuvas jų nebesiūlys.",
+    "font_size_hint": "Padidinkite arba sumažinkite visą tekstą šiame skydelyje. Galioja jūsų paskyrai šiame įrenginyje."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1406,6 +1414,26 @@
     "energy_scale": {
       "label": "Energijos ryškumas",
       "doc": "4 etapo energijos atitikimo bausmės ryškumas. Mažesnis = griežtesnis: energijos neatitikimas kenkia labiau. Numatytoji 0,25 sąmoningai atlaidesnė nei trukmės ryškumas, nes energija kinta priklausomai nuo apkrovos. Naudokite su Energijos svoriu."
+    },
+    "power_profile_interval_min": {
+      "label": "Galios profilio intervalas",
+      "doc": "Kibirio dydis profilio power_profile jutiklio atributui (plokščias per laiko atkarpas vidutinių vatų masyvas, naudojamas išorinių planavimo sistemų, pvz., EMHASS ir tibber_prices). Mažesni kibirai išlaiko trumpus galios šuolius aštresniais; didesni kibirai lygina formą. Numatytasis 15 min. Tik skaitymo metu; neturi įtakos aptikimui."
+    },
+    "notify_live_sticky": {
+      "label": "Išlaikyti tiesioginį pranešimą po paspaudimo",
+      "doc": "Tik Android. Padaryti tiesioginį pažangos pranešimą patvariu (klijuojamu), kad paspaudus nebus atsisakyta vykstančios gijos. Išjungus paliekama numatytoji elgsena, kai paspaudus pranešimas atsisakomas."
+    },
+    "notify_live_click_action": {
+      "label": "Tiesioginio pranešimo paspaudimo tikslas",
+      "doc": "Tik Android. Kur atidaroma paspaudus tiesioginės pažangos pranešimą (pvz., /lovelace/laundry arba visas URL), o ne programos pradžios puslapis. Palikite tuščią, kad naudotumėte numatytąjį."
+    },
+    "door_opens_at_end": {
+      "label": "Durys automatiškai atsidaromos pabaigoje",
+      "doc": "Indaplovėms, kurios ciklo pabaigoje atidaro duris džiovinimui (AirDry ir panašūs). Įjungus, durų atidarymas veikiančio ciklo metu nebepristabdo jo amžinai; vietoj to, jei durys lieka atviros toliau nurodytą laikotarpį, WashData traktuoja ciklą kaip baigtą. Trumpas atidarymas (dedant indą) ignoruojamas. Reikalingas durų jutiklio objektas."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Durų atidarymo pabaigos laukimas",
+      "doc": "Kiek laiko durys turi likti atviros, kad WashData užbaigtų ciklą, kai įjungta parinktis \"Durys automatiškai atsidaromos pabaigoje\". Pakankamai ilgai, kad ignoruotų greitai dedamą indą (numatytasis 60 s), pakankamai trumpai, kad greitai užbaigtų, kai prietaisas atidaro duris."
     }
   },
   "setting_group": {

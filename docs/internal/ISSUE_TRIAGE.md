@@ -532,12 +532,11 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   read-only "power-on time to finish by X" attribute.
 - [CLOSE] #352 - "Summer break" notice, not an issue.
 
-### Panel translation keys pending (final subagent pass, never machine-translate)
-- `setting.power_profile_interval_min.{label,doc}` (#367)
-- `setting.notify_live_sticky.{label,doc}`, `setting.notify_live_click_action.{label,doc}` (#347)
-- `btn.mute_suggestion`, `btn.reset_muted`, `msg.sug_muted`, `msg.sug_mute_failed`,
-  `msg.sug_unmuted_all`, `msg.n_suggestions_muted` (#343)
-- `setting.door_opens_at_end.{label,doc}`, `setting.door_end_dwell_seconds.{label,doc}` (#342)
-- `lbl.font_size`, `msg.font_size_hint` (font-size slider)
-- HA-layer config/options descriptions (config.step.user/reconfigure, options.step.init) - panel-link
-  line added in EN; other languages carry the older link-less description until a subagent pass
+### Panel translation keys (18 new keys + 3 HA-layer descriptions - subagent pass in progress)
+All 18 new panel keys + 3 HA config-flow descriptions being localized via subagents (never
+machine-translate). Keys: `setting.power_profile_interval_min.{label,doc}` (#367),
+`setting.notify_live_sticky/click_action.{label,doc}` (#347), mute-suggestion buttons/msgs
+(#343), `setting.door_opens_at_end/door_end_dwell_seconds.{label,doc}` (#342), `lbl.font_size`,
+`msg.font_size_hint` (font-size slider). HA-layer: config.step.user/reconfigure +
+options.step.init descriptions (panel-link addition). Completed so far: da, de, es, fr, is, it,
+ja, ko, nb, nl, pt, pt-BR, ro, sq, sv, tr, zh-Hans (17/34).

@@ -178,7 +178,9 @@
     "download_export": "Last ned eksport",
     "analyze_import": "Analyser fil",
     "import_selected": "Importer valgte",
-    "back": "Tilbake"
+    "back": "Tilbake",
+    "mute_suggestion": "Slutt å foreslå denne innstillingen",
+    "reset_muted": "Tilbakestill dempede forslag"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_import_copy": "Importer som kopi",
     "conflict_keep_mine": "Behold mine",
     "conflict_overwrite": "Overskriv",
-    "pg_anti_wrinkle": "Anti-rynke"
+    "pg_anti_wrinkle": "Anti-rynke",
+    "font_size": "Panelets skriftstørrelse"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -922,7 +925,12 @@
     "merge_hint": "Importerte elementer legges til; ingenting lokalt går tapt. Navnekonflikter løses nedenfor.",
     "replace_warn": "Hver avkrysset kategori slettes og erstattes fra filen. Ikke-avkryssede kategorier forblir uendret.",
     "dest_reference_hint": "Importerte sykluser forbedrer bare programgjenkjenning og påvirker aldri bruks-/energistatistikk.",
-    "dest_real_history_hint": "Importerte sykluser teller som dette apparatets egen historikk og mater energi-/bruksstatistikk. Bruk dette til å flytte ett apparat til en ny installasjon."
+    "dest_real_history_hint": "Importerte sykluser teller som dette apparatets egen historikk og mater energi-/bruksstatistikk. Bruk dette til å flytte ett apparat til en ny installasjon.",
+    "sug_muted": "Vil ikke foreslå denne innstillingen igjen",
+    "sug_mute_failed": "Kunne ikke dempe forslaget",
+    "sug_unmuted_all": "Dempede forslag tilbakestilt",
+    "n_suggestions_muted": "{count} dempet; autotuner vil ikke foreslå disse.",
+    "font_size_hint": "Gjør alt i dette panelet større eller mindre. Gjelder for kontoen din på denne enheten."
   },
   "pg_desc": {
     "completion_min_seconds": "Korteste kjøring som teller som en ekte syklus",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Energiskarphet",
       "doc": "Skarphet i Trinn 4 sitt straff for energioverensstemmelse. Lavere = strengere: et energiavvik straffes mer. Standard 0,25 er bevisst mer tillåtende enn varighetsskarphet fordi energi varierer med last. Par med Energivekt."
+    },
+    "power_profile_interval_min": {
+      "label": "Effektprofil-intervall",
+      "doc": "Bucket-størrelse for effektprofilsensorens attributt power_profile (det flate arrayet med gjennomsnittlige wattverdier per slot som brukes av eksterne planleggere som EMHASS og tibber_prices). Mindre buckets holder korte effekttopper skarpe; større buckets glatter kurven. Standard 15 min. Kun for visning; påvirker ikke deteksjon."
+    },
+    "notify_live_sticky": {
+      "label": "Behold live-varsel ved trykk",
+      "doc": "Kun Android. Gjør live-fremdriftsvarselet vedvarende (sticky) slik at et trykk ikke avviser det. Av: standardadferd der et trykk avviser varselet."
+    },
+    "notify_live_click_action": {
+      "label": "Trykkdestinasjon for live-varsel",
+      "doc": "Kun Android. Hvor et trykk på live-fremdriftsvarselet åpner (f.eks. /lovelace/laundry eller en full URL) i stedet for appens startside. La stå tomt for standard."
+    },
+    "door_opens_at_end": {
+      "label": "Dør åpnes automatisk ved avslutning",
+      "doc": "For oppvaskmaskiner som spretter opp døren på slutten av syklusen for tørking (AirDry og lignende). Med dette aktivert vil en døråpning under en aktiv syklus ikke sette den på pause for alltid; hvis døren forblir åpen i den konfigurerte oppholdstiden, behandler WashData syklusen som ferdig. En kort åpning (legge til et element) ignoreres. Krever en dørsensorenhet."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Dørens åpningstid ved avslutning",
+      "doc": "Hvor lenge døren må forbli åpen før WashData avslutter syklusen, når \"Dør åpnes automatisk ved avslutning\" er aktivert. Lang nok til å ignorere rask tillegging av et fat (standard 60 s), kort nok til å avslutte raskt når maskinen spretter opp døren."
     }
   },
   "setting_group": {

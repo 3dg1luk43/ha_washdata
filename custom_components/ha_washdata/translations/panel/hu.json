@@ -178,7 +178,9 @@
     "download_export": "Export letöltése",
     "analyze_import": "Fájl elemzése",
     "import_selected": "Kiválasztottak importálása",
-    "back": "Vissza"
+    "back": "Vissza",
+    "mute_suggestion": "Ne javasolja többé ezt a beállítást",
+    "reset_muted": "Elhallgatottak visszaállítása"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Névütközések",
     "conflict_import_copy": "Importálás másolatként",
     "conflict_keep_mine": "A sajátom megtartása",
-    "conflict_overwrite": "Felülírás"
+    "conflict_overwrite": "Felülírás",
+    "font_size": "Panel betűmérete"
   },
   "log": {
     "all_levels": "Minden szinten",
@@ -922,7 +925,12 @@
     "merge_hint": "Az importált elemek hozzáadódnak; semmi helyi adat nem vész el. A névütközéseket alább oldhatod fel.",
     "replace_warn": "Minden bejelölt kategória törlődik, és a fájlból cserélődik le. A be nem jelölt kategóriák érintetlenül maradnak.",
     "dest_reference_hint": "Az importált ciklusok csak a programfelismerést javítják, és soha nem befolyásolják a használati/energia-statisztikákat.",
-    "dest_real_history_hint": "Az importált ciklusok ennek a készüléknek a saját előzményeiként számítanak, és az energia-/használati statisztikákat táplálják. Egy készülék új telepítésre költöztetéséhez használd."
+    "dest_real_history_hint": "Az importált ciklusok ennek a készüléknek a saját előzményeiként számítanak, és az energia-/használati statisztikákat táplálják. Egy készülék új telepítésre költöztetéséhez használd.",
+    "sug_muted": "Ezt a beállítást nem javasolja többé",
+    "sug_mute_failed": "Nem sikerült elhallgattatni a javaslatot",
+    "sug_unmuted_all": "Az elhallgattatott javaslatok visszaállítva",
+    "n_suggestions_muted": "{count} elhallgattatva; az automatikus finomhangolás nem fogja javasolni ezeket.",
+    "font_size_hint": "Tegye nagyobbá vagy kisebbé mindent a panelen. Az ezen az eszközön lévő fiókjára vonatkozik."
   },
   "phase_desc": {
     "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1406,6 +1414,26 @@
     "energy_scale": {
       "label": "Energia Élesség",
       "doc": "A 4. szakasz energia-egyezési büntetésének élessége. Kisebb = szigorúbb: egy energia-eltérés jobban büntet. Az alapértelmezett 0.25 szándékosan megengedőbb az Időtartam Élességénél, mivel az energia változik a terheléssel. Párosítsa az Energia Súlyával."
+    },
+    "power_profile_interval_min": {
+      "label": "Teljesítményprofil-intervallum",
+      "doc": "A profilonkénti power_profile szenzorattribútum vödörmérete (az EMHASS és tibber_prices, illetve egyéb külső tervezők által felhasznált időköz-alapú átlagos vatt-tömb). A kisebb vödrök megőrzik a rövid teljesítménycsúcsokat; a nagyobbak simítják az alakot. Alapértelmezés: 15 perc. Csak olvasáskor; a felismerést nem befolyásolja."
+    },
+    "notify_live_sticky": {
+      "label": "Élő értesítés megtartása koppintás után",
+      "doc": "Csak Android esetén. Az élő folyamatértesítést tartóssá teszi (ragadóssá), hogy rákoppintva ne zárja be a folyamatban lévő szálat. Kikapcsolt állapotban az alapértelmezett viselkedés érvényes, ahol a koppintás elveti az értesítést."
+    },
+    "notify_live_click_action": {
+      "label": "Élő értesítés koppintási célhelye",
+      "doc": "Csak Android esetén. Az alkalmazás kezdőlapja helyett hová nyílik meg az élő folyamatértesítésre való koppintás (pl. /lovelace/laundry, vagy egy teljes URL). Az alapértelmezetthez hagyja üresen."
+    },
+    "door_opens_at_end": {
+      "label": "Az ajtó automatikusan kinyílik a végén",
+      "doc": "Olyan mosogatógépekhez, amelyek a ciklus végén kinyitják az ajtót szárítás céljából (AirDry és hasonlók). Ha ez be van kapcsolva, a futó ciklus közbeni ajtónyitás nem szünetelteti azt véglegesen; ehelyett ha az ajtó az alábbi időtartam erejéig nyitva marad, a WashData a ciklust befejezettnek tekinti. A rövid nyitás (tárgy betöltése) figyelmen kívül marad. Ajtóérzékelő entitás szükséges."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Ajtó-nyitásvégi várakozási idő",
+      "doc": "Mennyi ideig kell nyitva maradnia az ajtónak, mielőtt a WashData befejezi a ciklust, amikor az \"Ajtó automatikusan kinyílik a végén\" be van kapcsolva. Elég hosszú ahhoz, hogy figyelmen kívül hagyja a gyors edény betöltését (alapértelmezés: 60 s), elég rövid ahhoz, hogy gyorsan befejezzen, miután a gép kinyitja az ajtót."
     }
   },
   "setting_group": {

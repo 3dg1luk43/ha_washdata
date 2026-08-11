@@ -178,7 +178,9 @@
     "download_export": "Télécharger l'export",
     "analyze_import": "Analyser le fichier",
     "import_selected": "Importer la sélection",
-    "back": "Retour"
+    "back": "Retour",
+    "mute_suggestion": "Ne plus suggérer ce paramètre",
+    "reset_muted": "Réinitialiser les suggestions masquées"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Conflits de noms",
     "conflict_import_copy": "Importer comme copie",
     "conflict_keep_mine": "Garder le mien",
-    "conflict_overwrite": "Écraser"
+    "conflict_overwrite": "Écraser",
+    "font_size": "Taille de police du panneau"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -922,7 +925,12 @@
     "merge_hint": "Les éléments importés sont ajoutés ; rien de local n'est perdu. Les conflits de noms sont résolus ci-dessous.",
     "replace_warn": "Chaque catégorie cochée est effacée et remplacée par le contenu du fichier. Les catégories non cochées restent intactes.",
     "dest_reference_hint": "Les cycles importés améliorent uniquement la reconnaissance des programmes et n'affectent jamais les statistiques d'utilisation/d'énergie.",
-    "dest_real_history_hint": "Les cycles importés comptent comme l'historique propre de cet appareil et alimentent les statistiques d'énergie/d'utilisation. À utiliser pour déplacer un appareil vers une nouvelle installation."
+    "dest_real_history_hint": "Les cycles importés comptent comme l'historique propre de cet appareil et alimentent les statistiques d'énergie/d'utilisation. À utiliser pour déplacer un appareil vers une nouvelle installation.",
+    "sug_muted": "Ce paramètre ne sera plus suggéré",
+    "sug_mute_failed": "Impossible de masquer la suggestion",
+    "sug_unmuted_all": "Les suggestions masquées ont été réinitialisées",
+    "n_suggestions_muted": "{count} masquée(s) ; le réglage automatique ne proposera plus ces suggestions.",
+    "font_size_hint": "Agrandir ou réduire tout le contenu de ce panneau. S'applique à votre compte sur cet appareil."
   },
   "pg_desc": {
     "anti_wrinkle_enabled": "Absorber les impulsions de culbutage après la phase principale au lieu de les lire comme de nouveaux cycles",
@@ -1435,6 +1443,26 @@
     "energy_scale": {
       "label": "Précision énergie",
       "doc": "Précision de la pénalité de concordance d'énergie. Plus petit = plus strict : un écart d'énergie pénalise davantage. Le défaut 0,25 est intentionnellement plus indulgent que la Précision de durée, car l'énergie varie avec la charge. À combiner avec la Pondération d'énergie."
+    },
+    "power_profile_interval_min": {
+      "label": "Intervalle du profil de puissance",
+      "doc": "Taille des créneaux pour l'attribut de capteur power_profile par profil (le tableau plat de watts moyens par créneau consommé par des planificateurs externes tels que EMHASS et tibber_prices). Des créneaux plus petits conservent les pics de puissance courts et nets ; des créneaux plus grands lissent la forme. Par défaut 15 min. Lecture seule ; n'affecte pas la détection."
+    },
+    "notify_live_sticky": {
+      "label": "Conserver la notification en direct au toucher",
+      "doc": "Android uniquement. Rend la notification de progression en direct persistante (épinglée) afin que la toucher ne la ferme pas. Désactivé conserve le comportement par défaut où un toucher la ferme."
+    },
+    "notify_live_click_action": {
+      "label": "Destination au toucher de la notification en direct",
+      "doc": "Android uniquement. Où s'ouvre un toucher sur la notification de progression en direct (par exemple /lovelace/laundry, ou une URL complète) au lieu de la page d'accueil de l'application. Laissez vide pour la valeur par défaut."
+    },
+    "door_opens_at_end": {
+      "label": "La porte s'ouvre automatiquement en fin de cycle",
+      "doc": "Pour les lave-vaisselle qui ouvrent la porte en fin de cycle pour le séchage (AirDry et fonctions similaires). Avec cette option activée, une ouverture de porte sur un cycle en cours ne le met plus en pause indéfiniment ; si la porte reste ouverte pendant la durée d'attente ci-dessous, WashData considère le cycle comme terminé. Une ouverture brève (pour ajouter un article) est ignorée. Nécessite une entité capteur de porte."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Durée d'attente porte ouverte",
+      "doc": "Durée pendant laquelle la porte doit rester ouverte avant que WashData ne termine le cycle, lorsque « La porte s'ouvre automatiquement en fin de cycle » est activé. Assez longue pour ignorer l'ajout rapide d'un article (par défaut 60 s), assez courte pour terminer rapidement une fois que la machine ouvre la porte."
     }
   },
   "setting_group": {

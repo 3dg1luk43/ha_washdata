@@ -2918,7 +2918,6 @@ class WashDataManager:
         return latest
 
     @callback
-    @callback
     def _subscribe_power_sensor(self) -> None:
         """(Re)subscribe to the power sensor's state changes AND unchanged reports.
 
@@ -2945,6 +2944,7 @@ class WashDataManager:
             self.hass, [self.power_sensor_entity_id], self._async_power_changed
         )
 
+    @callback
     def _async_power_changed(self, event: Any) -> None:
         """Handle power sensor state change."""
         event_data = cast(dict[str, Any], getattr(event, "data", {}))

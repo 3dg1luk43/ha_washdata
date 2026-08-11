@@ -178,7 +178,9 @@
     "download_export": "下载导出文件",
     "analyze_import": "分析文件",
     "import_selected": "导入所选",
-    "back": "返回"
+    "back": "返回",
+    "mute_suggestion": "停止建议此设置",
+    "reset_muted": "重置已屏蔽"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "名称冲突",
     "conflict_import_copy": "作为副本导入",
     "conflict_keep_mine": "保留我的",
-    "conflict_overwrite": "覆盖"
+    "conflict_overwrite": "覆盖",
+    "font_size": "面板字体大小"
   },
   "log": {
     "all_levels": "所有级别",
@@ -922,7 +925,12 @@
     "merge_hint": "导入的项目会被添加，本地数据不会丢失。名称冲突将在下方解决。",
     "replace_warn": "每个勾选的类别都会被清除并用文件中的内容替换。未勾选的类别保持不变。",
     "dest_reference_hint": "导入的周期仅用于改进程序识别，绝不影响用量/能耗统计。",
-    "dest_real_history_hint": "导入的周期计为本设备自身的历史记录，并纳入能耗/用量统计。适用于将一台设备迁移到新的安装环境。"
+    "dest_real_history_hint": "导入的周期计为本设备自身的历史记录，并纳入能耗/用量统计。适用于将一台设备迁移到新的安装环境。",
+    "sug_muted": "将不再建议此设置",
+    "sug_mute_failed": "无法屏蔽建议",
+    "sug_unmuted_all": "已重置屏蔽的建议",
+    "n_suggestions_muted": "已屏蔽 {count} 项，自动调整器将不再提议这些设置。",
+    "font_size_hint": "调整此面板所有内容的字体大小，仅对您在此设备上的账户生效。"
   },
   "pg_desc": {
     "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "能耗锐度",
       "doc": "Stage 4 能耗一致性惩罚的锐度。越小越严格：能耗不匹配的惩罚越大。默认 0.25 有意比时长锐度更宽松，因为能耗会随负荷变化。请与能耗权重配合使用。"
+    },
+    "power_profile_interval_min": {
+      "label": "电力分布间隔",
+      "doc": "外部规划工具（如 EMHASS 和 tibber_prices）使用的 per-profile power_profile 传感器属性（每槽平均瓦数的数组）的桶大小。较小的桶保留短暂功率尖峰的细节，较大的桶平滑形状。默认 15 分钟。仅在读取时使用，不影响检测。"
+    },
+    "notify_live_sticky": {
+      "label": "点击后保留实时通知",
+      "doc": "仅限 Android。将实时进度通知设置为固定（常驻），点击时不会关闭正在进行的通知线程。关闭则恢复默认行为，点击后通知消失。"
+    },
+    "notify_live_click_action": {
+      "label": "实时通知点击目标",
+      "doc": "仅限 Android。点击实时进度通知时打开的位置（例如 /lovelace/laundry 或完整 URL），而非应用默认首页。留空使用默认值。"
+    },
+    "door_opens_at_end": {
+      "label": "结束时自动开门",
+      "doc": "适用于周期结束后自动弹开舱门进行干燥的洗碗机（AirDry 等功能）。开启后，正在运行的周期中门被打开不会导致周期永久暂停；若门持续敞开达到下方设定的停留时间，WashData 将视为周期已完成。短暂开门（例如放入餐具）将被忽略。需要配置门传感器实体。"
+    },
+    "door_end_dwell_seconds": {
+      "label": "门开放终止停留时间",
+      "doc": "在「结束时自动开门」开启时，WashData 终止周期前门需保持打开的时长。设置得足够长以忽略快速放入餐具的短暂开门（默认 60 秒），同时足够短以在机器弹开舱门后迅速结束。"
     }
   },
   "setting_group": {
