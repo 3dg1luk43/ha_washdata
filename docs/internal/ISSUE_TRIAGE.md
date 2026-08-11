@@ -517,6 +517,21 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   sensor; legacy pause-on-open kept otherwise. New `tests/test_issue_342_door_auto_open.py`; settings
   E2E 15; fast 1407. Register item 77.
 
+### Deferred / needs-info / refused (draft replies in `ISSUE_REPLIES_0.5.4.md`)
+- [HELD] #353 - external programme value binding. Accepted in principle (fits the passive model, ~70%
+  of the plumbing exists via the manual-program override), held for a dedicated design pass on the
+  per-device value->profile mapping UI (heterogeneous across integrations). Per user decision.
+- [NEEDS-INFO] #344 - import historical data. Want to build; asked reporter for the CSV column schema.
+  Phased plan (CSV ingest + background segmentation + review UI -> reference_cycles).
+- [NEEDS-INFO] #364 - smart-term prefix split. Real #288 regression; requested the case-2 cycle export
+  (`25ebafe290f7`) to reproduce + A/B a detection-critical fix.
+- [NEEDS-INFO] #334 - water-level fill role (`accepted`). Requested reporter's real top-loader exports
+  to validate the fill-separability gate before shipping the Stage-5 member-picker change.
+- [REFUSED] #368 - remote start. Out of scope for a passive monitor (safety/liability, unreliable across
+  appliances, already doable via HA automation). Draft reply offers the automation recipe + optional
+  read-only "power-on time to finish by X" attribute.
+- [CLOSE] #352 - "Summer break" notice, not an issue.
+
 ### Panel translation keys pending (final subagent pass, never machine-translate)
 - `setting.power_profile_interval_min.{label,doc}` (#367)
 - `setting.notify_live_sticky.{label,doc}`, `setting.notify_live_click_action.{label,doc}` (#347)
