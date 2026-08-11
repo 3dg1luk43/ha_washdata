@@ -483,7 +483,12 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
 - [DONE] #354 - tile card formats the `time_entity` via `hass.formatEntityState` (respects per-entity
   Display Precision + unit) instead of raw `.state` + hardcoded "min"; falls back on older HA. No card
   test harness exists (not mounted in panel E2E), verified via `node --check` + manual UI guide.
-  Register item 72.
+  Register item 72. (`f9b45c4`)
+- [DONE] #355 - panel `needsReview`/`reviewBadge` now check pending feedback BEFORE the reviewed
+  short-circuit, so a reviewed+pending cycle stays in the list (matching the header count) and can be
+  resolved. Chose the frontend reorder over auto-resolving on quality-review (avoids a wrong training
+  label). E2E `playwright-tests/tests/review-queue.spec.ts`; feedback-review E2E still green.
+  Register item 73.
 
 ### Panel translation keys pending (final subagent pass, never machine-translate)
 - `setting.power_profile_interval_min.{label,doc}` (#367)

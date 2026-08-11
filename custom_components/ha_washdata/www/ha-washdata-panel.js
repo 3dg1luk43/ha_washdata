@@ -3926,8 +3926,12 @@ class HaWashdataPanel extends HTMLElement {
     const isReviewed = c => { const m = mlOf(c); return !!(m && m.ml_review && m.ml_review.reviewed_at); };
     const isGolden = c => { const m = mlOf(c); return !!(m && m.ml_review && m.ml_review.golden); };
     const needsReview = c => {
-      if (isReviewed(c)) return false;
+      // Unresolved pending feedback ALWAYS needs review, even if an ML quality
+      // review was already saved: the two are separate, and the header counter
+      // counts pending feedback, so short-circuiting on reviewed_at here made the
+      // counter and the list disagree (#355). Pending feedback wins.
       if (fbIds.has(c.id)) return true;
+      if (isReviewed(c)) return false;
       const m = mlOf(c);
       const lbl = m && m.ml_quality_label;
       return ['uncertain', 'review'].includes(lbl) || ['force_stopped', 'interrupted'].includes(c.status);
@@ -3971,8 +3975,10 @@ class HaWashdataPanel extends HTMLElement {
       : '';
     const reviewBadge = c => {
       if (isGolden(c)) return ' <span title="' + _esc(this._t('badge.golden_cycle', {}, 'Recorded reference cycle')) + '" style="color:var(--warning-color,#ff9800)">⭐</span>';
-      if (isReviewed(c)) return ' <span title="' + _esc(this._t('badge.reviewed', {}, 'Reviewed')) + '" style="color:var(--success-color,#4caf50)">✓</span>';
+      // Pending feedback wins over the reviewed check, matching needsReview (#355):
+      // a reviewed cycle with unresolved feedback shows the feedback badge, not ✓.
       if (fbIds.has(c.id)) return ' <span title="' + _esc(this._t('badge.feedback_requested', {}, 'Feedback requested')) + '" style="color:var(--info-color,#2196f3)">💬</span>';
+      if (isReviewed(c)) return ' <span title="' + _esc(this._t('badge.reviewed', {}, 'Reviewed')) + '" style="color:var(--success-color,#4caf50)">✓</span>';
       if (needsReview(c)) return ' <span title="' + _esc(this._t('badge.needs_review', {}, 'Needs review')) + '" style="color:var(--error-color,#f44336)">●</span>';
       return '';
     };
