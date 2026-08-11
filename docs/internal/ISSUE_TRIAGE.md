@@ -461,4 +461,9 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
 - [DONE] #348 - release now divides mapped_time by the envelope's own span (new
   `ProfileStore.envelope_time_span` sharing `_envelope_time_power` with `async_verify_alignment`), not
   `avg_duration`, so the 0.95 threshold is reachable (ceiling 1.0). New
-  `tests/test_issue_348_verified_pause_span.py`; fast 1375. Register item 67. Pairs with #350 (next).
+  `tests/test_issue_348_verified_pause_span.py`; fast 1375. Register item 67. Pairs with #350 (next). (`393a937`)
+- [DONE] #350 - resample the live trace onto the envelope's time step (linear interp, matching build
+  side, bounded 2x) in `async_verify_alignment` via new `_resample_trace_to_grid`, so mapped position
+  tracks seconds not sample count. NOT the matcher path (dtw_ab_eval N/A). New
+  `tests/test_issue_350_alignment_time_resample.py`; long_drying_pause + issue_112 green; fast 1377.
+  Register item 68. Maintainer choice: linear interp (ZOH left as future option).

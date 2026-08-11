@@ -4538,6 +4538,33 @@ class ProfileStore:
             return None
         return [float(t) for t in env_time], env_power
 
+    @staticmethod
+    def _resample_trace_to_grid(
+        offsets: list[float], powers: list[float], env_time: list[float]
+    ) -> list[float]:
+        """Resample a live ``(offsets, powers)`` trace onto the envelope's uniform
+        time step, so its sample index maps to elapsed seconds on the envelope grid
+        (#350). Linear interpolation (matching the envelope build side), bounded at
+        2x the envelope length. Falls back to the raw powers when a grid cannot be
+        formed (too few points / non-positive step), leaving behavior unchanged.
+        """
+        if len(offsets) < 2 or len(env_time) < 2:
+            return list(powers)
+        diffs = np.diff(np.asarray(env_time, dtype=float))
+        pos = diffs[diffs > 0]
+        if pos.size == 0:
+            return list(powers)
+        step = float(np.median(pos))
+        span = float(env_time[-1])
+        t_max = min(float(offsets[-1]), 2.0 * span) if span > 0 else float(offsets[-1])
+        if step <= 0 or t_max <= 0:
+            return list(powers)
+        n = max(2, int(round(t_max / step)) + 1)
+        grid = np.arange(n, dtype=float) * step
+        return np.interp(
+            grid, np.asarray(offsets, dtype=float), np.asarray(powers, dtype=float)
+        ).tolist()
+
     def envelope_time_span(self, profile_name: str) -> float:
         """Total time span (seconds) of a profile's envelope grid, 0 if unavailable.
 
@@ -5269,10 +5296,19 @@ class ProfileStore:
             return False, 0.0, 9999.0
         env_time, env_power = curves
 
+        # Resample the live trace onto the envelope's own time step BEFORE alignment,
+        # so its sample index corresponds to elapsed SECONDS, not sample count (#350).
+        # The worker warps power-vs-power; with no shared time axis an irregularly or
+        # sparsely sampled tail (e.g. 0 W keepalives every off_delay) maps one grid
+        # step per sample regardless of wall-clock, so the position crawls - and a
+        # dense short prefix instead races to the end. Linear interpolation matches
+        # the envelope build side so the two curves stay comparable.
         try:
-            current_power_list = [float(x[1]) for x in current_power_data]
+            offsets = [float(x[0]) for x in current_power_data]
+            powers = [float(x[1]) for x in current_power_data]
         except Exception:  # pylint: disable=broad-exception-caught
             return False, 0.0, 9999.0
+        current_power_list = self._resample_trace_to_grid(offsets, powers, env_time)
 
         # Offload to worker
         mapped_time, mapped_power, score = await self.hass.async_add_executor_job(
