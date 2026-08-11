@@ -1228,14 +1228,19 @@ class WashDataManager:
                             current_matched
                         )
                     verified_pause = True
-                    # Smart Termination within Envelope block
+                    # Smart Termination within Envelope block. Compare the mapped
+                    # position against the envelope's OWN time span (not avg_duration,
+                    # a differently-derived trimmed mean): mapped_time is capped at the
+                    # grid span, so span/avg_duration < 1 would make the 0.95 release
+                    # unreachable and the cycle would hang to the deferral cap (#348).
                     try:
-                        profile = self.profile_store.get_profile(current_matched)
-                        if profile:
-                            avg_dur = profile.get("avg_duration", 0)
-                            if avg_dur > 0 and (mapped_time / avg_dur) > 0.95:
-                                verified_pause = False
-                                self._logger.info("Smart Termination: Near end of profile. Releasing pause lock.")
+                        span = self.profile_store.envelope_time_span(current_matched)
+                        if span > 0 and (mapped_time / span) > 0.95:
+                            verified_pause = False
+                            self._logger.info(
+                                "Smart Termination: near end of profile (%.0f/%.0fs). Releasing pause lock.",
+                                mapped_time, span,
+                            )
                     except Exception as e:
                         self._logger.debug("Smart Termination alignment verification failed: %s", e)
                 else:
