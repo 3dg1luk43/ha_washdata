@@ -6530,6 +6530,12 @@ class ProfileStore:
         new_start_s = max(0.0, float(new_start_s))
         new_end_s = float(new_end_s)
 
+        # Guard against a destructive trim (#366): an inverted/empty window would
+        # produce a zero- or single-sample segment that collapses the cycle to
+        # duration 0 / energy 0. Reject before touching the cycle.
+        if new_end_s <= new_start_s:
+            return False
+
         kept = sorted(
             (
                 (offset, power)
@@ -6546,6 +6552,13 @@ class ProfileStore:
         renorm: list[list[float]] = [
             [round(offset - base, 2), power] for offset, power in kept
         ]
+
+        # A window that keeps fewer than two samples (or whose kept span is zero)
+        # would collapse the cycle to duration 0 with no recovery. Reject here,
+        # BEFORE the start_time mutation below, so the stored cycle is untouched
+        # and the caller reports a failure instead of destroying data (#366).
+        if len(renorm) < 2 or round(renorm[-1][0], 1) <= 0.0:
+            return False
 
         # Advance start_time when trimming from the front
         if base > 0:
