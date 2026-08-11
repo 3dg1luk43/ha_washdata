@@ -510,10 +510,16 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   standby baseline. `tests/test_issue_343_anti_crease_exclusion.py`.
   (part 2, mute) per-setting mute (store `locked_suggestions` + learning surface filter + WS
   `set_suggestion_lock` + panel mute button/banner/reset). `tests/test_issue_343_suggestion_lock.py`.
-  ws types regenerated; settings E2E 15; fast 1403. Register item 76.
+  ws types regenerated; settings E2E 15; fast 1403. Register item 76. (`1ac228e` + `8a77d13`)
+- [DONE] #342 - `door_opens_at_end` + `door_end_dwell_seconds` options: a door-open on a
+  RUNNING/ENDING cycle arms a dwell timer instead of the sticky user-pause, finalizing via
+  `detector.user_stop()` (completed) if it stays open, cancelled on close. Opt-in, needs a door
+  sensor; legacy pause-on-open kept otherwise. New `tests/test_issue_342_door_auto_open.py`; settings
+  E2E 15; fast 1407. Register item 77.
 
 ### Panel translation keys pending (final subagent pass, never machine-translate)
 - `setting.power_profile_interval_min.{label,doc}` (#367)
 - `setting.notify_live_sticky.{label,doc}`, `setting.notify_live_click_action.{label,doc}` (#347)
 - `btn.mute_suggestion`, `btn.reset_muted`, `msg.sug_muted`, `msg.sug_mute_failed`,
   `msg.sug_unmuted_all`, `msg.n_suggestions_muted` (#343)
+- `setting.door_opens_at_end.{label,doc}`, `setting.door_end_dwell_seconds.{label,doc}` (#342)
