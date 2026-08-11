@@ -3030,10 +3030,34 @@ class WashDataManager:
 
     async def _handle_state_expiry(self, now: datetime) -> None:
         """Check if state and progress should be reset (auto-expiration)."""
+        # Anti-wrinkle keepalive (#339): the mode's idle-timeout and 2 h safety cap
+        # only advance inside CycleDetector.process_reading, and the watchdog is
+        # stopped for the whole anti-wrinkle tail. A publish-on-change plug can send
+        # one final 0 W reading and then go fully silent, so with no further events
+        # the mode is pinned in ANTI_WRINKLE for hours. This timer keeps ticking, so
+        # when the real sensor has been silent longer than off_delay we inject a
+        # synthetic 0 W reading, letting the detector's own logic exit the mode. Gate
+        # on _last_real_reading_time (a genuine tumble pulse still resets the idle
+        # timer via the normal handler) and never bump it here, so real silence stays
+        # detectable and a still-reporting plug drives itself.
+        if self.detector.state == STATE_ANTI_WRINKLE:
+            last_real = self._last_real_reading_time
+            if (
+                last_real is not None
+                and (now - last_real).total_seconds() > self._off_delay
+            ):
+                self._logger.debug(
+                    "Anti-wrinkle keepalive: sensor silent for %.0fs (> off_delay %ss), "
+                    "injecting synthetic 0 W so the idle/2h-cap timer can advance",
+                    (now - last_real).total_seconds(),
+                    self._off_delay,
+                )
+                self.detector.process_reading(0.0, now)
+                self._notify_update()
+            return
         if (
             not self._cycle_completed_time
             or self.detector.state == STATE_RUNNING
-            or self.detector.state == STATE_ANTI_WRINKLE
             or self.detector.state == STATE_DELAY_WAIT
         ):
             # Cycle is running or not completed, don't reset
