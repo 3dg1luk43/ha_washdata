@@ -40,6 +40,7 @@ from homeassistant.core import Context, Event, HomeAssistant, State, callback
 from homeassistant.helpers.event import (
     async_call_later,
     async_track_state_change_event,
+    async_track_state_report_event,
     async_track_time_interval,
 )
 from homeassistant.helpers.dispatcher import async_dispatcher_send
@@ -820,6 +821,7 @@ class WashDataManager:
         self._terminal_drop_refresh_n: int | None = None
 
         self._remove_listener = None
+        self._remove_report_listener = None  # state_reported (unchanged re-reports) #363/#329
         self._remove_external_trigger_listener = None  # External cycle end trigger
         self._remove_watchdog = None
         self._watchdog_interval = int(
@@ -1768,10 +1770,8 @@ class WashDataManager:
                 "Failed repairing profile sample references for %s", self.entry_id
             )
 
-        # Subscribe to power sensor updates
-        self._remove_listener = async_track_state_change_event(
-            self.hass, [self.power_sensor_entity_id], self._async_power_changed
-        )
+        # Subscribe to power sensor updates (state changes AND unchanged re-reports)
+        self._subscribe_power_sensor()
 
         # Attempt to restore state (BEFORE starting listener)
         await self._attempt_state_restoration()
@@ -1891,13 +1891,9 @@ class WashDataManager:
                     "Power sensor changed: %s -> %s", self.power_sensor_entity_id, new_sensor
                 )
                 self.power_sensor_entity_id = new_sensor
-                # Remove old listener
-                if self._remove_listener:
-                    self._remove_listener()
-                # Attach new listener
-                self._remove_listener = async_track_state_change_event(
-                    self.hass, [self.power_sensor_entity_id], self._async_power_changed
-                )
+                # Re-attach change + report listeners to the new sensor
+                # (helper removes the old ones first).
+                self._subscribe_power_sensor()
                 # Force update from new sensor
                 state = self.hass.states.get(self.power_sensor_entity_id)
                 if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
@@ -2277,6 +2273,9 @@ class WashDataManager:
             await asyncio.gather(*_to_await, return_exceptions=True)
         if self._remove_listener:
             self._remove_listener()
+        if self._remove_report_listener:
+            self._remove_report_listener()
+            self._remove_report_listener = None
         if self._remove_external_trigger_listener:
             self._remove_external_trigger_listener()
         if self._remove_door_sensor_listener:
@@ -2805,6 +2804,33 @@ class WashDataManager:
         return latest
 
     @callback
+    @callback
+    def _subscribe_power_sensor(self) -> None:
+        """(Re)subscribe to the power sensor's state changes AND unchanged reports.
+
+        HA fires EVENT_STATE_CHANGED only when the value (or attributes) change.
+        A plug that periodically re-reports the same value (Tasmota TelePeriod,
+        Zigbee max reporting interval) fires EVENT_STATE_REPORTED instead, which a
+        state_changed-only subscription never receives. Missing those reports means
+        a flat sub-threshold tail never advances the detector's end-of-cycle timer
+        (#363) and a finished cycle lags by the plug's reporting interval (#329).
+
+        Both events route into the same handler. Per HA, a single write fires either
+        state_changed (value/attrs differ) or state_reported (unchanged), never both,
+        so there is no double-counting. Report events carry ``new_state`` without an
+        ``old_state``; ``_async_power_changed`` already tolerates a missing old_state.
+        """
+        if self._remove_listener:
+            self._remove_listener()
+        if self._remove_report_listener:
+            self._remove_report_listener()
+        self._remove_listener = async_track_state_change_event(
+            self.hass, [self.power_sensor_entity_id], self._async_power_changed
+        )
+        self._remove_report_listener = async_track_state_report_event(
+            self.hass, [self.power_sensor_entity_id], self._async_power_changed
+        )
+
     def _async_power_changed(self, event: Any) -> None:
         """Handle power sensor state change."""
         event_data = cast(dict[str, Any], getattr(event, "data", {}))
@@ -2818,9 +2844,13 @@ class WashDataManager:
             return
 
         # Capture every raw sensor reading before any throttling or processing.
-        # Use the sensor's own last_updated timestamp so the trace reflects
-        # when the plug actually reported the value, not when we received it.
-        self.diag_buffer.record_power(power, new_state.last_updated)
+        # Use the sensor's own report timestamp so the trace reflects when the plug
+        # actually reported the value, not when we received it. last_reported
+        # advances on every write (incl. unchanged re-reports #363), whereas
+        # last_updated only advances on a value change, so an unchanged re-report
+        # would otherwise be stamped with a stale time.
+        report_ts = getattr(new_state, "last_reported", None) or new_state.last_updated
+        self.diag_buffer.record_power(power, report_ts)
 
         # RECORD MODE INTERCEPTION
         if self.recorder.is_recording:

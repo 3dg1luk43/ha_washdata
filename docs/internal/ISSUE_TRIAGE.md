@@ -433,4 +433,10 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
 
 - [DONE] #328 - fix already in code (`11dc122`); reverified complete, added AST regression guard
   `tests/test_issue_328_startup_blocking.py` (proven to catch both blocking-call regressions), bumped
-  `manifest.json` 0.5.3 -> 0.5.4 so the fix reaches users. Changelog entry already present.
+  `manifest.json` 0.5.3 -> 0.5.4 so the fix reaches users. Changelog entry already present. (`047e962`)
+- [DONE] #363 + #329 - same root cause. Added `_subscribe_power_sensor()` registering both
+  `state_changed` and `state_reported` on the power sensor (always-on: corrective, not risky - throttle
+  bounds density, pure on-change plugs get no extra events). New `tests/test_issue_363_state_reported.py`.
+  Fast suite 1364 green. Register item 62. NOTE for maintainer: remove the wrong `done` label from #329.
+  Heartbeat/synthetic-injection fallback intentionally NOT added (higher risk, marginal benefit once the
+  plug's real reports are consumed); left as a possible follow-up.
