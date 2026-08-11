@@ -90,9 +90,19 @@ body:
     attributes:
       label: Contributing an Implementation
       description: >
-        If you intend to implement this feature yourself and submit a PR, check the box below.
-        The maintainer will review and — if approved — add the `accepted` label to this issue.
-        **You must wait for that label before opening a PR**, otherwise the PR will be closed automatically.
+        Want to build this yourself? Please agree the work with the maintainer **before** you write any code.
+
+
+        **How it works:**
+
+        1. Tick the box below to flag that you intend to submit a PR.
+
+        2. Wait for the maintainer to review and add the `accepted` label. This is where scope and approach are agreed - the feature may already be planned, in progress, or intentionally out of scope.
+
+        3. Only after the `accepted` label is added should you open a PR referencing this issue.
+
+
+        **Do not** open a PR now, alongside this request. A PR opened in parallel with a not-yet-accepted issue skips the agree-first step and will not be considered - it is closed automatically. Do not start significant work before the label is added either, so you never build something that cannot be merged.
       options:
-        - label: I plan to submit a PR implementing this and will wait for the `accepted` label before opening it
+        - label: I plan to submit a PR implementing this, and I understand I must wait for the `accepted` label before opening it (opening one now / in parallel will be closed)
           required: false
