@@ -43,6 +43,10 @@ CONF_POWER_SENSOR = "power_sensor"
 CONF_NAME = "name"
 CONF_MIN_POWER = "min_power"
 CONF_OFF_DELAY = "off_delay"
+# Bucket size (minutes) for the per-profile `power_profile` sensor attribute that
+# external planners (EMHASS, tibber_prices) consume. Configurable so short sharp
+# spikes are not blurred by the fixed 15-min default (#367). Read-time only.
+CONF_POWER_PROFILE_INTERVAL_MIN = "power_profile_interval_min"
 CONF_NOTIFY_SERVICE = "notify_service"  # Deprecated - kept for migration only
 CONF_NOTIFY_ACTIONS = "notify_actions"
 CONF_NOTIFY_PEOPLE = "notify_people"
@@ -227,6 +231,7 @@ DEFAULT_NOTIFY_MILESTONE_MESSAGE = "{device} has completed {cycle_count} cycles!
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts
 DEFAULT_OFF_DELAY = 180  # Seconds (3 minutes, safer for 60s polling)
+DEFAULT_POWER_PROFILE_INTERVAL_MIN = 15  # power_profile attribute bucket (#367)
 DEFAULT_NAME = "Washing Machine"
 # Seconds without updates while active before forced stop (publish-on-change sockets)
 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 600  # 10 minutes
