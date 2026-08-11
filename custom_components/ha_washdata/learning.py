@@ -848,6 +848,38 @@ class LearningManager:
         """
         pending = self.profile_store.get_pending_feedback().get(cycle_id)
         if not pending:
+            # No detection feedback to resolve. A manual (re)label is still the user
+            # engaging with the cycle, so if it is sitting in the review queue only
+            # for an uncertain quality label or a force_stopped/interrupted status
+            # (no pending feedback, so it has no resolve buttons), stamp it reviewed
+            # to clear the red dot (#331 residual). The quality/label fields are left
+            # untouched, so no training signal is lost; normal cycles are not touched.
+            try:
+                cycle = next(
+                    (c for c in self.profile_store.get_past_cycles() if c.get("id") == cycle_id),
+                    None,
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                cycle = None
+            if cycle is not None:
+                rv = cycle.get("ml_review") if isinstance(cycle.get("ml_review"), dict) else {}
+                already_reviewed = bool(rv.get("reviewed_at"))
+                needs_review = (
+                    rv.get("label") in ("uncertain", "review")
+                    or rv.get("quality") in ("uncertain", "review")
+                    or cycle.get("status") in ("force_stopped", "interrupted")
+                )
+                if needs_review and not already_reviewed:
+                    try:
+                        await self.profile_store.set_cycle_review(cycle_id)
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        return False
+                    async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
+                    self._logger.info(
+                        "Marked cycle %s reviewed from manual label (no pending feedback; "
+                        "cleared needs-review red dot)", cycle_id
+                    )
+                    return True
             return False
 
         detected = pending.get("detected_profile")

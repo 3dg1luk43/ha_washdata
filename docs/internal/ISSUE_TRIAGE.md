@@ -495,7 +495,12 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   count-agnostic). Merge-is-gone premise invalid (multi-select exists); discoverability hint deferred.
   New `tests/test_issue_362_merge_prunes_feedback.py`; fast 1391. Register item 74. NOTE for maintainer:
   the `{s}`-suffix pluralization is a systemic i18n smell across languages - a proper per-key
-  singular/plural (or ICU) fix is a separate translation-maintenance task.
+  singular/plural (or ICU) fix is a separate translation-maintenance task. (`1243e63`)
+- [DONE] #331 residual - `async_resolve_pending_from_label` now stamps `reviewed_at` on a manual label
+  when there is no pending feedback but the cycle is in a needs-review state (uncertain quality label /
+  force_stopped/interrupted), clearing the red dot (quality label preserved). Core #331 was already
+  merged in 0.5.3. New `tests/test_issue_331_residual_marks_reviewed.py`; core #331 mock extended;
+  fast 1395. Register item 75. Panel refresh confirmed via `_fetchAll`->`_loadMlIndex`.
 
 ### Panel translation keys pending (final subagent pass, never machine-translate)
 - `setting.power_profile_interval_min.{label,doc}` (#367)
