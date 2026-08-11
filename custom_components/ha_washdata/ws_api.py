@@ -1086,6 +1086,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_constants,
         # Suggestions
         ws_get_suggestions, ws_apply_suggestions, ws_clear_suggestions, ws_run_suggestion_analysis,
+        ws_set_suggestion_lock,
         # Cycle curve / interactive editing
         ws_get_cycle_power_data, ws_trim_cycle, ws_analyze_split, ws_apply_split, ws_apply_merge,
         # Profile envelope / member cycles
@@ -3350,7 +3351,14 @@ def ws_get_suggestions(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error reading suggestions for %s: %s", entry_id, exc)
 
-    _send_result(connection, msg["id"], "get_suggestions", {"suggestions": out})
+    try:
+        locked = manager.profile_store.get_locked_suggestions()
+    except Exception:  # pylint: disable=broad-exception-caught
+        locked = []
+    _send_result(
+        connection, msg["id"], "get_suggestions",
+        {"suggestions": out, "locked_suggestions": locked},
+    )
 
 
 @websocket_api.websocket_command(
@@ -3430,6 +3438,38 @@ async def ws_clear_suggestions(
         await manager.profile_store.clear_suggestions()
         manager.notify_update()
         _send_result(connection, msg["id"], "clear_suggestions", {"success": True})
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/set_suggestion_lock",
+        vol.Required("entry_id"): str,
+        vol.Required("key"): str,
+        vol.Required("locked"): bool,
+    }
+)
+@websocket_api.async_response
+async def ws_set_suggestion_lock(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Lock or unlock a tuning suggestion key so the auto-tuner stops (or resumes)
+    proposing it (#343)."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        await manager.profile_store.set_suggestion_locked(msg["key"], bool(msg["locked"]))
+        manager.notify_update()
+        _send_result(
+            connection, msg["id"], "set_suggestion_lock",
+            {"success": True, "locked_suggestions": manager.profile_store.get_locked_suggestions()},
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 

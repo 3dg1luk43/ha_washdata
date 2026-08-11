@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.5.4 - 2026-07-27
 
+### Features
+
+- **You can now mute individual auto-tune suggestions** ([#343](https://github.com/3dg1luk43/ha_washdata/issues/343)) (`profile_store.py`, `learning.py`, `ws_api.py`, panel): The auto-tuner kept re-proposing the same values every cycle even after you dismissed them - most painfully on anti-crease/anti-wrinkle-tuned devices, where it repeatedly suggested stop/start thresholds just above the tumble-pulse baseline that break end-detection. Each suggestion card in Settings now has a mute button; muting a setting drops its pending suggestion immediately and stops the tuner ever proposing that setting again, until you reset it. A "N muted - Reset muted" banner in the Settings tab shows how many are muted and brings them back. Muting is per-setting and brand-agnostic, so it works for any unwanted suggestion. (A complementary enhancement - excluding the anti-crease tail from the statistics that generate those thresholds in the first place - is planned as a follow-up.)
+
 ### Bug Fixes
 
 - **Merging or splitting cycles no longer leaves a phantom "needs review" count** ([#362](https://github.com/3dg1luk43/ha_washdata/issues/362)) (`profile_store.py`, `ws_api.py`, panel): After merging two mis-split cycles (or splitting one), the consumed cycles were removed but their pending review-feedback entries were left behind, so the attention badge kept showing "N to review" while the review list - which matches feedback against real cycles - was empty, with no way to clear it. Merge and split now prune the feedback for the cycles they remove, and the badge counts only feedback whose cycle still exists (which also self-heals any entries already stuck from before this fix). Separately, the German "cycles to review" label rendered its plural incorrectly ("Zykluss") and now reads naturally. Note: the merge action itself was never removed - it is the multi-select action in the Cycles tab (select two or more cycles, then Merge).

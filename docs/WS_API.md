@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**102 commands.**
+**103 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -57,6 +57,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_suggestions` | entry_id | `GetSuggestionsResponse` |
 | `apply_suggestions` | entry_id, keys | `ApplySuggestionsResponse` |
 | `clear_suggestions` | entry_id | `SuccessResponse` |
+| `set_suggestion_lock` | entry_id, key, locked | `SuccessResponse` |
 | `run_suggestion_analysis` | entry_id | `RunSuggestionAnalysisResponse` |
 | `get_cycle_power_data` | entry_id, cycle_id | `GetCyclePowerDataResponse` |
 | `trim_cycle` | entry_id, cycle_id, start_s, end_s | `StartTaskResponse` |
@@ -887,6 +888,24 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `success` | yes | bool |
+
+## `ha_washdata/set_suggestion_lock`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `key` | yes | str |
+| `locked` | yes | bool |
+
+**Response** (`SuccessResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+
+_Open-ended: additional top-level keys from an upstream summary may be present._
 
 ## `ha_washdata/run_suggestion_analysis`
 
