@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData podešavanje",
-        "description": "Konfiguriš svoju mašinu za pranje veša ili drugi uređaj.\n\nSenzor snage je obavezan.\n\n**Dalje, bićeš upitan da li želiš da napraviš prvi profil.**",
+        "description": "Konfiguriši svoju mašinu za pranje veša ili drugi uređaj.\n\nSenzor snage je obavezan.\n\nNakon podešavanja, otvori WashData panel iz bočne trake (ili idi na [/ha-washdata](/ha-washdata)) za pregled ciklusa, podešavanje detekcije i upravljanje profilima.",
         "data": {
           "name": "Naziv uređaja",
           "device_type": "Tip uređaja",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Ponovo konfiguriši WashData",
-        "description": "Ažuriraj naziv uređaja, tip uređaja ili senzor snage.",
+        "description": "Ažuriraj naziv uređaja, tip uređaja ili senzor snage.\n\nWashData panel (bočna traka ili [/ha-washdata](/ha-washdata)) je mesto gde se upravljaju detekcija, ciklusi, profili i obaveštenja.",
         "data": {
           "name": "Naziv uređaja",
           "device_type": "Tip uređaja",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData podešavanja",
-        "description": "Sva podešavanja -- detekcija, podudaranje, tajming, obaveštenja, profili i ciklusi -- dostupna su u WashData panelu. Koristi ovaj obrazac samo da promeniš senzor snage, tip uređaja ili prag mirovanja.",
+        "description": "Preimenuj uređaj ili promeni njegova osnovna hardverska podešavanja. Sva podešavanja detekcije, podudaranja i obaveštenja nalaze se u [WashData panelu](/ha-washdata) (dostupan i iz bočne trake).",
         "data": {
           "name": "Naziv uređaja",
           "device_type": "Tip uređaja",

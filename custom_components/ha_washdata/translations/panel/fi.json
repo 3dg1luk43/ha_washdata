@@ -178,7 +178,9 @@
     "download_export": "Lataa vienti",
     "analyze_import": "Analysoi tiedosto",
     "import_selected": "Tuo valitut",
-    "back": "Takaisin"
+    "back": "Takaisin",
+    "mute_suggestion": "Lopeta tämän asetuksen ehdottaminen",
+    "reset_muted": "Palauta vaiennetut"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Nimien törmäykset",
     "conflict_import_copy": "Tuo kopiona",
     "conflict_keep_mine": "Säilytä omat",
-    "conflict_overwrite": "Korvaa"
+    "conflict_overwrite": "Korvaa",
+    "font_size": "Paneelin fonttikoko"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -922,7 +925,12 @@
     "merge_hint": "Tuodut kohteet lisätään; mitään paikallista ei menetetä. Nimien törmäykset ratkaistaan alla.",
     "replace_warn": "Jokainen rastitettu luokka tyhjennetään ja korvataan tiedostosta. Rastittamattomia luokkia ei kosketa.",
     "dest_reference_hint": "Tuodut jaksot vain parantavat ohjelmien tunnistusta eivätkä koskaan vaikuta käyttö- tai energiatilastoihin.",
-    "dest_real_history_hint": "Tuodut jaksot lasketaan tämän laitteen omaksi historiaksi ja syöttävät energia- ja käyttötilastoja. Käytä tätä, kun siirrät yhden laitteen uuteen asennukseen."
+    "dest_real_history_hint": "Tuodut jaksot lasketaan tämän laitteen omaksi historiaksi ja syöttävät energia- ja käyttötilastoja. Käytä tätä, kun siirrät yhden laitteen uuteen asennukseen.",
+    "sug_muted": "Tätä asetusta ei enää ehdoteta",
+    "sug_mute_failed": "Ehdotuksen vaimennus epäonnistui",
+    "sug_unmuted_all": "Vaiennetut ehdotukset palautettu",
+    "n_suggestions_muted": "{count} vaimennettu; automaattinen virittäjä ei ehdota näitä.",
+    "font_size_hint": "Suurenna tai pienennä kaikkea tässä paneelissa. Koskee tiliäsi tällä laitteella."
   },
   "pg_desc": {
     "anti_wrinkle_enabled": "Sulauta päävaiheen jälkeiset rumpupulssit sen sijaan, että lukisit ne uusina sykleinä",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Energian tarkkuus",
       "doc": "Vaiheen 4 energian yhdenmukaisuusrangaistuksen tarkkuus. Pienempi = tiukempi: energian poikkeama haittaa enemmän. Oletus 0,25 on tarkoituksellisesti sallivampi kuin kestotarkkuus koska energia vaihtelee kuorman mukaan. Yhdistä Energiapaino-asetukseen."
+    },
+    "power_profile_interval_min": {
+      "label": "Tehoprofiilin aikaväli",
+      "doc": "Säilön koko profiilin power_profile-sensorin attribuutille (tasainen kohtakohtainen keskivattimäärän matriisi, jota käyttävät ulkoiset suunnittelijat kuten EMHASS ja tibber_prices). Pienemmät säiliöt pitävät lyhyet tehopiikit terävinä; suuremmat säiliöt tasoittavat muodon. Oletus 15 min. Vain lukuaika; ei vaikuta tunnistukseen."
+    },
+    "notify_live_sticky": {
+      "label": "Pidä reaaliaikailmoitus napauttamisen jälkeen",
+      "doc": "Vain Android. Tee reaaliaikaisesta edistymisilmoituksesta pysyvä (sticky), jotta sen napauttaminen ei sulje käynnissä olevaa viestiketjua. Pois päältä säilyttää oletustoiminnan, jossa napautus sulkee ilmoituksen."
+    },
+    "notify_live_click_action": {
+      "label": "Reaaliaikailmoituksen napauttamiskohde",
+      "doc": "Vain Android. Mihin reaaliaikaisen edistymisilmoituksen napauttaminen avaa (esim. /lovelace/laundry tai koko URL) sovellusaloitussivun sijaan. Jätä tyhjäksi oletusmääränpäätä varten."
+    },
+    "door_opens_at_end": {
+      "label": "Ovi avautuu automaattisesti lopussa",
+      "doc": "Astianpesukoneille, jotka avaavat oven syklin lopussa kuivauksen ajaksi (AirDry ja vastaavat). Tämän ollessa päällä oven avautuminen käynnissä olevan syklin aikana ei enää pysäytä sitä pysyvästi; sen sijaan, jos ovi pysyy auki alla olevan odotusajan verran, WashData pitää syklin valmiina. Lyhyt avaus (tavaran lisääminen) ohitetaan. Vaatii ovisensorientiteetin."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Oven avauksen loppuviive",
+      "doc": "Kuinka kauan oven on pysyttävä auki ennen kuin WashData päättää syklin, kun \"Ovi avautuu automaattisesti lopussa\" on käytössä. Tarpeeksi kauan ohittamaan lautasen lisäämisen (oletus 60 s), tarpeeksi lyhyt päättämään nopeasti kun kone avaa oven."
     }
   },
   "setting_group": {

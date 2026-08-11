@@ -178,7 +178,9 @@
     "download_export": "Lejupielādēt eksportu",
     "analyze_import": "Analizēt failu",
     "import_selected": "Importēt atlasītos",
-    "back": "Atpakaļ"
+    "back": "Atpakaļ",
+    "mute_suggestion": "Pārtraukt ieteikt šo iestatījumu",
+    "reset_muted": "Atiestatīt klusinātos"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Nosaukumu konflikti",
     "conflict_import_copy": "Importēt kā kopiju",
     "conflict_keep_mine": "Paturēt manējos",
-    "conflict_overwrite": "Pārrakstīt"
+    "conflict_overwrite": "Pārrakstīt",
+    "font_size": "Paneļa fonta lielums"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -922,7 +925,12 @@
     "merge_hint": "Importētie vienumi tiek pievienoti; nekas no vietējiem datiem netiek zaudēts. Nosaukumu konflikti tiek risināti tālāk.",
     "replace_warn": "Katra atzīmētā kategorija tiek dzēsta un aizstāta no faila. Neatzīmētās kategorijas paliek neskartas.",
     "dest_reference_hint": "Importētie cikli tikai uzlabo programmu atpazīšanu un nekad neietekmē lietojuma/enerģijas statistiku.",
-    "dest_real_history_hint": "Importētie cikli tiek uzskaitīti kā šīs ierīces pašas vēsture un papildina enerģijas/lietojuma statistiku. Izmantojiet, pārvietojot vienu ierīci uz jaunu instalāciju."
+    "dest_real_history_hint": "Importētie cikli tiek uzskaitīti kā šīs ierīces pašas vēsture un papildina enerģijas/lietojuma statistiku. Izmantojiet, pārvietojot vienu ierīci uz jaunu instalāciju.",
+    "sug_muted": "Šis iestatījums vairs netiks ieteikts",
+    "sug_mute_failed": "Neizdevās klusināt ieteikumu",
+    "sug_unmuted_all": "Klusināto ieteikumu atiestatīšana pabeigta",
+    "n_suggestions_muted": "{count} klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
+    "font_size_hint": "Palieliniet vai samaziniet visu šajā panelī. Attiecas uz jūsu kontu šajā ierīcē."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1406,6 +1414,26 @@
     "energy_scale": {
       "label": "Enerģijas asums",
       "doc": "4. posma enerģijas atbilstības soda asums. Mazāks = bargāks: enerģijas neatbilstība kaitē vairāk. Noklusējums 0,25 ir apzināti piedodošāks nekā ilguma asums, jo enerģija mainās atkarībā no slodzes. Izmantojiet kopā ar Enerģijas svaru."
+    },
+    "power_profile_interval_min": {
+      "label": "Jaudas profila intervāls",
+      "doc": "Spaiņa lielums profilam power_profile sensora atribūtam (vienots vidējo vatu masīvs pa laika nišām, ko izmanto ārējie plānotāji, piemēram, EMHASS un tibber_prices). Mazāki spaini saglabā īsas jaudas pikas asas; lielāki spaini izlīdzina formu. Noklusējums 15 min. Tikai lasīšanas laikā; neietekmē noteikšanu."
+    },
+    "notify_live_sticky": {
+      "label": "Saglabāt tiešraides paziņojumu pēc pieskāriena",
+      "doc": "Tikai Android. Padarīt tiešraides progresa paziņojumu pastāvīgu (lipīgu), lai pieskāriens tam neatceltu notiekošo pavedienu. Izslēgts saglabā noklusēto uzvedību, kad pieskāriens paziņojumu noraida."
+    },
+    "notify_live_click_action": {
+      "label": "Tiešraides paziņojuma pieskāriena mērķis",
+      "doc": "Tikai Android. Kur atveras tiešraides progresa paziņojuma pieskāriens (piemēram, /lovelace/laundry vai pilns URL), nevis lietotnes sākumlapa. Atstājiet tukšu noklusējumam."
+    },
+    "door_opens_at_end": {
+      "label": "Durvis automātiski atveras beigās",
+      "doc": "Trauku mazgājamajām mašīnām, kuras cikla beigās atver durvis žāvēšanai (AirDry un līdzīgas). Ieslēgts, durvju atvēršana darbojošā ciklā vairs nepārtrauc to uz visiem laikiem; tā vietā, ja durvis paliek atvērtas norādīto uzturēšanās laiku zemāk, WashData uzskata ciklu par pabeigtu. Īsa atvēršana (pievienojot trauku) tiek ignorēta. Nepieciešams durvju sensora objekts."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Durvju atvēršanas beigu uzturēšanās laiks",
+      "doc": "Cik ilgi durvis jāpaliek atvērtām, lai WashData beigtu ciklu, kad ir ieslēgts iestatījums \"Durvis automātiski atveras beigās\". Pietiekami ilgi, lai ignorētu ātru trauka pievienošanu (noklusējums 60 s), pietiekami īsi, lai ātri beigtu, kad mašīna atver durvis."
     }
   },
   "setting_group": {

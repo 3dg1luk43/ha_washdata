@@ -178,7 +178,9 @@
     "download_export": "Sækja útflutning",
     "analyze_import": "Greina skrá",
     "import_selected": "Flytja inn valið",
-    "back": "Til baka"
+    "back": "Til baka",
+    "mute_suggestion": "Hætta að stinga upp á þessari stillingu",
+    "reset_muted": "Endurstilla þaggaðar tillögur"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_import_copy": "Flytja inn sem afrit",
     "conflict_keep_mine": "Halda mínum",
     "conflict_overwrite": "Skrifa yfir",
-    "pg_anti_wrinkle": "Hrukkuleysi"
+    "pg_anti_wrinkle": "Hrukkuleysi",
+    "font_size": "Leturstærð glugga"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -922,7 +925,12 @@
     "merge_hint": "Innfluttum atriðum er bætt við; ekkert staðbundið tapast. Nafnaárekstrar eru leystir hér að neðan.",
     "replace_warn": "Hver valinn flokkur er hreinsaður og settur í staðinn úr skránni. Óvaldir flokkar haldast óbreyttir.",
     "dest_reference_hint": "Innfluttar lotur bæta aðeins forritasamsvörun og hafa aldrei áhrif á notkunar-/orkutölfræði.",
-    "dest_real_history_hint": "Innfluttar lotur teljast sem eigin saga þessa tækis og fæða orku-/notkunartölfræði. Notaðu þetta til að flytja eitt tæki yfir í nýja uppsetningu."
+    "dest_real_history_hint": "Innfluttar lotur teljast sem eigin saga þessa tækis og fæða orku-/notkunartölfræði. Notaðu þetta til að flytja eitt tæki yfir í nýja uppsetningu.",
+    "sug_muted": "Mun ekki stinga upp á þessari stillingu aftur",
+    "sug_mute_failed": "Gat ekki þaggað tillögu",
+    "sug_unmuted_all": "Þaggaðar tillögur endurstilltar",
+    "n_suggestions_muted": "{count} þaggaðar; sjálfvirki stillirinn leggur ekki til þessar.",
+    "font_size_hint": "Gerðu allt á þessum glugga stærra eða minna. Gildir fyrir reikning þinn á þessum tæki."
   },
   "pg_desc": {
     "completion_min_seconds": "Stysta keyrsla sem telst raunveruleg lota",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Orkuskerpa",
       "doc": "Skerpa í viðurlögum Þreps 4 vegna samræmis í orkunotkun. Minna = strangara: frávik í orkunotkun skemmir meira. Sjálfgefið 0,25 er vísvitandi rýmra en keyrslulengdarskerpan vegna þess að orka breytist með álagi. Notaðu með Orkuþyngd."
+    },
+    "power_profile_interval_min": {
+      "label": "Aflaprófíl-bil",
+      "doc": "Fötustærð fyrir eigindið power_profile á prófílskynjaraskynjara (flatt fylki meðalwattsgilda á hólf sem notast af ytri skipuleggjendum eins og EMHASS og tibber_prices). Minni fötur halda stuttum aflgöllum skörpum; stærri fötur jafna út ferilinn. Sjálfgefið 15 mín. Eingöngu til birtingar; hefur engin áhrif á greiningu."
+    },
+    "notify_live_sticky": {
+      "label": "Halda lifandi tilkynningu við snertingu",
+      "doc": "Eingöngu Android. Gerir lifandi framvindutilkynningu viðvarandi (sticky) þannig að snertingar lokar henni ekki. Slökkt: sjálfgefin hegðun þar sem snertingar lokar tilkynningu."
+    },
+    "notify_live_click_action": {
+      "label": "Snertimarkmið lifandi tilkynningar",
+      "doc": "Eingöngu Android. Hvert snertingar á lifandi framvindutilkynningu opnar (t.d. /lovelace/laundry eða fulla vefslóð) í stað sjálfgefinna ræsiglugga forritsins. Skildu eftir autt fyrir sjálfgefið."
+    },
+    "door_opens_at_end": {
+      "label": "Hurð opnast sjálfkrafa í lok",
+      "doc": "Fyrir uppþvottavélar sem spretta hurðinni upp í lok hringsins til þurrkunar (AirDry og svipað). Þegar þetta er virkt setur hurðaropnun á yfirstandandi hring hann ekki í bið að eilífu; ef hurðin helst opin í stillt dvaltími meðhöndlar WashData hringinn sem lokinn. Stutt opnun (að bæta við fat) er hundsuð. Krefst hurðarskynjaraeiningar."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Dvaltími hurðar við lok",
+      "doc": "Hversu lengi hurðin þarf að vera opin áður en WashData lýkur hringnum, þegar \"Hurð opnast sjálfkrafa í lok\" er virkt. Nógu lengi til að hunsa hraða tilbúningu fats (sjálfgefið 60 s), nógu stutt til að ljúka fljótt þegar vél spretter hurðinni upp."
     }
   },
   "setting_group": {

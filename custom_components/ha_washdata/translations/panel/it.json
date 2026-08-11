@@ -178,7 +178,9 @@
     "download_export": "Scarica l'esportazione",
     "analyze_import": "Analizza il file",
     "import_selected": "Importa la selezione",
-    "back": "Indietro"
+    "back": "Indietro",
+    "mute_suggestion": "Non suggerire più questa impostazione",
+    "reset_muted": "Ripristina i silenziati"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Conflitti di nome",
     "conflict_import_copy": "Importa come copia",
     "conflict_keep_mine": "Mantieni il mio",
-    "conflict_overwrite": "Sovrascrivi"
+    "conflict_overwrite": "Sovrascrivi",
+    "font_size": "Dimensione testo del pannello"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -922,7 +925,12 @@
     "merge_hint": "Gli elementi importati vengono aggiunti; nulla di locale va perso. I conflitti di nome si risolvono qui sotto.",
     "replace_warn": "Ogni categoria spuntata viene cancellata e sostituita dal contenuto del file. Le categorie non spuntate restano invariate.",
     "dest_reference_hint": "I cicli importati migliorano solo il riconoscimento dei programmi e non influiscono mai sulle statistiche di utilizzo/energia.",
-    "dest_real_history_hint": "I cicli importati contano come cronologia propria di questo dispositivo e alimentano le statistiche di energia/utilizzo. Da usare per spostare un elettrodomestico su una nuova installazione."
+    "dest_real_history_hint": "I cicli importati contano come cronologia propria di questo dispositivo e alimentano le statistiche di energia/utilizzo. Da usare per spostare un elettrodomestico su una nuova installazione.",
+    "sug_muted": "Non verrà più suggerita questa impostazione",
+    "sug_mute_failed": "Impossibile silenziare il suggerimento",
+    "sug_unmuted_all": "Suggerimenti silenziati ripristinati",
+    "n_suggestions_muted": "{count} silenziati; il sistema di ottimizzazione automatica non proporrà questi.",
+    "font_size_hint": "Rendi tutto in questo pannello più grande o più piccolo. Si applica al tuo account su questo dispositivo."
   },
   "pg_desc": {
     "anti_wrinkle_enabled": "Assorbire gli impulsi di rotazione dopo la fase principale invece di leggerli come nuovi cicli",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Nitidezza energia",
       "doc": "Precisione della penalità di concordanza di energia. Minore = più severo: una discordanza di energia penalizza di più. Il predefinito 0,25 è intenzionalmente più indulgente della Precisione di durata, perché l'energia varia con il carico. Combinare con Peso energia."
+    },
+    "power_profile_interval_min": {
+      "label": "Intervallo profilo di potenza",
+      "doc": "Dimensione del bucket per l'attributo sensore power_profile per profilo (l'array piatto di watt medi per slot consumato dai pianificatori esterni come EMHASS e tibber_prices). Bucket più piccoli mantengono nitidi i picchi di potenza brevi; bucket più grandi smussano la forma. Predefinito 15 min. Solo in lettura; non influisce sul rilevamento."
+    },
+    "notify_live_sticky": {
+      "label": "Mantieni notifica live al tocco",
+      "doc": "Solo Android. Rende persistente (sticky) la notifica di avanzamento in tempo reale, in modo che toccandola non venga chiusa. Disattivato mantiene il comportamento predefinito in cui il tocco la chiude."
+    },
+    "notify_live_click_action": {
+      "label": "Destinazione tocco notifica live",
+      "doc": "Solo Android. Dove si apre un tocco sulla notifica di avanzamento in tempo reale (ad es. /lovelace/laundry o un URL completo) invece della pagina iniziale dell'app. Lascia vuoto per il valore predefinito."
+    },
+    "door_opens_at_end": {
+      "label": "Porta si apre automaticamente al termine",
+      "doc": "Per le lavastoviglie che aprono automaticamente lo sportello al termine del ciclo per asciugare (AirDry e simili). Con questa opzione attiva, un'apertura dello sportello durante un ciclo non lo mette più in pausa per sempre; invece, se lo sportello rimane aperto per il tempo di attesa indicato sotto, WashData considera il ciclo terminato. Un'apertura breve (per aggiungere un oggetto) viene ignorata. Richiede un'entità sensore della porta."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Attesa apertura porta al termine",
+      "doc": "Per quanto tempo lo sportello deve restare aperto prima che WashData termini il ciclo, quando \"Porta si apre automaticamente al termine\" è attiva. Abbastanza lungo da ignorare l'aggiunta rapida di un piatto (predefinito 60 s), abbastanza breve da terminare prontamente quando la macchina apre lo sportello."
     }
   },
   "setting_group": {

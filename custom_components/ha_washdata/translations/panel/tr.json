@@ -178,7 +178,9 @@
     "download_export": "Dışa aktarmayı indir",
     "analyze_import": "Dosyayı analiz et",
     "import_selected": "Seçileni içe aktar",
-    "back": "Geri"
+    "back": "Geri",
+    "mute_suggestion": "Bu ayarı önerme",
+    "reset_muted": "Susturulanları sıfırla"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Ad çakışmaları",
     "conflict_import_copy": "Kopya olarak içe aktar",
     "conflict_keep_mine": "Benimkini koru",
-    "conflict_overwrite": "Üzerine yaz"
+    "conflict_overwrite": "Üzerine yaz",
+    "font_size": "Panel yazı tipi boyutu"
   },
   "log": {
     "all_levels": "Tüm seviyeler",
@@ -922,7 +925,12 @@
     "merge_hint": "İçe aktarılan öğeler eklenir; yerel hiçbir şey kaybolmaz. Ad çakışmaları aşağıda çözülür.",
     "replace_warn": "İşaretlenen her kategori silinir ve dosyadan gelenle değiştirilir. İşaretlenmeyen kategorilere dokunulmaz.",
     "dest_reference_hint": "İçe aktarılan döngüler yalnızca program tanımayı iyileştirir ve kullanım/enerji istatistiklerini asla etkilemez.",
-    "dest_real_history_hint": "İçe aktarılan döngüler bu cihazın kendi geçmişi olarak sayılır ve enerji/kullanım istatistiklerini besler. Bir cihazı yeni bir kuruluma taşırken kullanın."
+    "dest_real_history_hint": "İçe aktarılan döngüler bu cihazın kendi geçmişi olarak sayılır ve enerji/kullanım istatistiklerini besler. Bir cihazı yeni bir kuruluma taşırken kullanın.",
+    "sug_muted": "Bu ayar bir daha önerilmeyecek",
+    "sug_mute_failed": "Öneri susturulamadı",
+    "sug_unmuted_all": "Susturulan öneriler sıfırlandı",
+    "n_suggestions_muted": "{count} susturuldu; öneri motoru bunları önermeyecek.",
+    "font_size_hint": "Bu paneldeki her şeyi büyütün veya küçültün. Bu cihazdaki hesabınıza uygulanır."
   },
   "pg_desc": {
     "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Enerji Keskinliği",
       "doc": "Aşama 4 enerji uyumu cezasının keskinliği. Küçük = daha sert: bir enerji uyumsuzluğu daha fazla zarara yol açar. Varsayılan 0.25, enerji yükle değiştiğinden Süre Keskinliğinden kasıtlı olarak daha gevşektir. Enerji Ağırlığı ile birlikte kullanın."
+    },
+    "power_profile_interval_min": {
+      "label": "Güç Profili Aralığı",
+      "doc": "EMHASS ve tibber_prices gibi harici planlayıcılar tarafından kullanılan düz slot başına ortalama watt dizisi olan power_profile sensör özelliği için kova boyutu. Küçük kovalar kısa güç ani artışlarını keskin tutar; büyük kovalar şekli düzler. Varsayılan 15 dakika. Yalnızca okuma zamanında kullanılır; algılamayı etkilemez."
+    },
+    "notify_live_sticky": {
+      "label": "Dokunuşta Canlı Bildirimi Koru",
+      "doc": "Yalnızca Android. Canlı ilerleme bildirimini kalıcı (yapışkan) hale getirerek üzerine dokunulduğunda devam eden bildirimin kapatılmasını önleyin. Kapalı olduğunda dokunmanın bildirimi kapattığı varsayılan davranış korunur."
+    },
+    "notify_live_click_action": {
+      "label": "Canlı Bildirim Dokunma Hedefi",
+      "doc": "Yalnızca Android. Canlı ilerleme bildirimine dokunulduğunda açılan yer (örn. /lovelace/laundry veya tam URL), uygulama açılış sayfası yerine. Varsayılan için boş bırakın."
+    },
+    "door_opens_at_end": {
+      "label": "Döngü Sonunda Kapı Otomatik Açılır",
+      "doc": "Döngü sonunda kurutmak için kapıyı açan (AirDry ve benzeri) bulaşık makineleri için. Bu açıkken, çalışan bir döngüde kapının açılması onu sonsuza kadar duraklatmaz; bunun yerine kapı aşağıdaki bekleme süresi kadar açık kalırsa WashData döngüyü tamamlanmış sayar. Kısa bir açılma (nesne ekleme) dikkate alınmaz. Kapı Sensörü Varlığı gerektirir."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Kapı Açık Bekleme Süresi",
+      "doc": "\"Döngü Sonunda Kapı Otomatik Açılır\" açık olduğunda WashData'nın döngüyü sonlandırması için kapının ne kadar süre açık kalması gerektiği. Bir tabağı hızla eklemeyi göz ardı edecek kadar uzun (varsayılan 60 sn), makine kapıyı açtıktan sonra zamanında sona erecek kadar kısa."
     }
   },
   "setting_group": {

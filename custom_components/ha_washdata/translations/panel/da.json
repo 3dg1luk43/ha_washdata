@@ -178,7 +178,9 @@
     "download_export": "Download eksport",
     "analyze_import": "Analysér fil",
     "import_selected": "Importér valgte",
-    "back": "Tilbage"
+    "back": "Tilbage",
+    "mute_suggestion": "Stop med at foreslå denne indstilling",
+    "reset_muted": "Nulstil undertrykte forslag"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_import_copy": "Importér som kopi",
     "conflict_keep_mine": "Behold mine",
     "conflict_overwrite": "Overskriv",
-    "pg_anti_wrinkle": "Anti-rynke"
+    "pg_anti_wrinkle": "Anti-rynke",
+    "font_size": "Panel-skriftstørrelse"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -922,7 +925,12 @@
     "merge_hint": "Importerede elementer tilføjes; intet lokalt går tabt. Navnekonflikter løses nedenfor.",
     "replace_warn": "Hver markeret kategori slettes og erstattes fra filen. Ikke-markerede kategorier forbliver uændrede.",
     "dest_reference_hint": "Importerede cyklusser forbedrer kun programgenkendelse og påvirker aldrig forbrugs-/energistatistik.",
-    "dest_real_history_hint": "Importerede cyklusser tæller som dette apparats egen historik og indgår i energi-/forbrugsstatistik. Brug dette til at flytte ét apparat til en ny installation."
+    "dest_real_history_hint": "Importerede cyklusser tæller som dette apparats egen historik og indgår i energi-/forbrugsstatistik. Brug dette til at flytte ét apparat til en ny installation.",
+    "sug_muted": "Vil ikke foreslå denne indstilling igen",
+    "sug_mute_failed": "Kunne ikke undertrykke forslaget",
+    "sug_unmuted_all": "Undertrykte forslag nulstillet",
+    "n_suggestions_muted": "{count} undertrykt; autotuner vil ikke foreslå disse.",
+    "font_size_hint": "Gør alt i dette panel større eller mindre. Gælder for din konto på denne enhed."
   },
   "pg_desc": {
     "completion_min_seconds": "Korteste kørsel, der tæller som en rigtig cyklus",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Energiskarphed",
       "doc": "Skarphed i Trin 4's straf for energioverensstemmelse. Lavere = strengere: et energiafvigelse skader mere. Standard 0,25 er bevidst mere tillåtende end varighedsskarphed fordi energi varierer med belastning. Par med Energivægt."
+    },
+    "power_profile_interval_min": {
+      "label": "Effektprofil-interval",
+      "doc": "Bucket-størrelse for effektprofilsensorens attribut power_profile (det flade array af gennemsnitlige watt-værdier pr. slot, der bruges af eksterne planlæggere som EMHASS og tibber_prices). Mindre buckets holder korte effektspidser skarpe; større buckets glatter kurven. Standard 15 min. Kun til visning; påvirker ikke detektering."
+    },
+    "notify_live_sticky": {
+      "label": "Behold live-notifikation ved tryk",
+      "doc": "Kun Android. Gør live-forløbsnotifikationen vedvarende (sticky), så et tryk ikke afviser den. Slukket: standardadfærd, hvor et tryk afviser notifikationen."
+    },
+    "notify_live_click_action": {
+      "label": "Trykdestination for live-notifikation",
+      "doc": "Kun Android. Hvor et tryk på live-forløbsnotifikationen åbner (f.eks. /lovelace/laundry eller en fuld URL) i stedet for app-startsiden. Lad stå blank for standard."
+    },
+    "door_opens_at_end": {
+      "label": "Dør åbner automatisk ved afslutning",
+      "doc": "Til opvaskemaskiner, der springer døren op ved afslutningen af cyklussen for at tørre (AirDry og lignende). Når dette er aktiveret, sætter en døråbning under en aktiv cyklus den ikke på pause for evigt; hvis døren forbliver åben i den konfigurerede opholdsperiode, betragter WashData cyklussen som afsluttet. En kort åbning (tilføjelse af en tallerken) ignoreres. Kræver en dørsensorenhed."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Dørens åbningstid ved afslutning",
+      "doc": "Hvor længe døren skal forblive åben, før WashData afslutter cyklussen, når \"Dør åbner automatisk ved afslutning\" er aktiveret. Lang nok til at ignorere hurtig tilføjelse af en tallerken (standard 60 s), kort nok til at afslutte hurtigt, når maskinen springer døren op."
     }
   },
   "setting_group": {

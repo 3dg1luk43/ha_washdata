@@ -178,7 +178,9 @@
     "download_export": "Transferir exportação",
     "analyze_import": "Analisar ficheiro",
     "import_selected": "Importar seleção",
-    "back": "Voltar"
+    "back": "Voltar",
+    "mute_suggestion": "Não sugerir mais esta definição",
+    "reset_muted": "Repor silenciados"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_resolution": "Conflitos de nomes",
     "conflict_import_copy": "Importar como cópia",
     "conflict_keep_mine": "Manter o meu",
-    "conflict_overwrite": "Substituir"
+    "conflict_overwrite": "Substituir",
+    "font_size": "Tamanho da letra do painel"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -922,7 +925,12 @@
     "merge_hint": "Os itens importados são adicionados; nada local é perdido. Os conflitos de nomes são resolvidos abaixo.",
     "replace_warn": "Cada categoria marcada é apagada e substituída pelo conteúdo do ficheiro. As categorias não marcadas ficam intactas.",
     "dest_reference_hint": "Os ciclos importados só melhoram o reconhecimento de programas e nunca afetam as estatísticas de utilização/energia.",
-    "dest_real_history_hint": "Os ciclos importados contam como histórico próprio deste dispositivo e alimentam as estatísticas de energia/utilização. Use para mover um eletrodoméstico para uma nova instalação."
+    "dest_real_history_hint": "Os ciclos importados contam como histórico próprio deste dispositivo e alimentam as estatísticas de energia/utilização. Use para mover um eletrodoméstico para uma nova instalação.",
+    "sug_muted": "Esta definição não será sugerida novamente",
+    "sug_mute_failed": "Não foi possível silenciar a sugestão",
+    "sug_unmuted_all": "Sugestões silenciadas repostas",
+    "n_suggestions_muted": "{count} silenciadas; o ajustador automático não proporá estas definições.",
+    "font_size_hint": "Torna tudo neste painel maior ou menor. Aplica-se à sua conta neste dispositivo."
   },
   "pg_desc": {
     "anti_wrinkle_enabled": "Absorver os pulsos de rotação após a fase principal em vez de os ler como novos ciclos",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Nitidez de energia",
       "doc": "Precisão da penalidade de concordância de energia. Menor = mais rigoroso: uma discordância de energia penaliza mais. A predefinição 0,25 é intencionalmente mais permissiva do que a Precisão de duração, porque a energia varia com a carga. Use em conjunto com o Peso de energia."
+    },
+    "power_profile_interval_min": {
+      "label": "Intervalo do Perfil de Potência",
+      "doc": "Tamanho do intervalo para o atributo do sensor power_profile por perfil (o array plano de watts médios por slot consumido por planeadores externos como EMHASS e tibber_prices). Intervalos menores mantêm os picos de potência curtos nítidos; intervalos maiores suavizam a forma. Predefinição: 15 min. Apenas de leitura; não afeta a deteção."
+    },
+    "notify_live_sticky": {
+      "label": "Manter a Notificação em Tempo Real ao Tocar",
+      "doc": "Apenas Android. Torna a notificação de progresso em tempo real persistente (fixada) para que ao tocar nela não a dispense. Desativado mantém o comportamento padrão em que o toque a dispensa."
+    },
+    "notify_live_click_action": {
+      "label": "Destino ao Tocar na Notificação em Tempo Real",
+      "doc": "Apenas Android. Para onde abre o toque na notificação de progresso em tempo real (por exemplo, /lovelace/lavandaria, ou um URL completo) em vez da página inicial da aplicação. Deixe em branco para a predefinição."
+    },
+    "door_opens_at_end": {
+      "label": "Porta Abre Automaticamente no Fim",
+      "doc": "Para máquinas de lavar louça que abrem a porta automaticamente no fim do ciclo para secar (AirDry e similares). Com esta opção ativa, a abertura da porta durante um ciclo em execução deixa de o pausar indefinidamente; em vez disso, se a porta permanecer aberta durante o tempo de espera indicado abaixo, o WashData considera o ciclo concluído. Uma abertura breve (ao adicionar um item) é ignorada. Requer uma Entidade do Sensor de Porta."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Tempo de Espera com Porta Aberta para Fim",
+      "doc": "Quanto tempo a porta tem de permanecer aberta antes de o WashData terminar o ciclo, quando a opção \"Porta Abre Automaticamente no Fim\" está ativa. Suficientemente longo para ignorar a adição rápida de um prato (predefinição: 60 s), suficientemente curto para terminar prontamente quando a máquina abre a porta."
     }
   },
   "setting_group": {

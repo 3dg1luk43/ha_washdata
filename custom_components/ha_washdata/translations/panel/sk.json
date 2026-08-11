@@ -64,6 +64,8 @@
     "discard": "Zahodiť",
     "discard_tip": "Zahodiť zaznamenaný priebeh bez uloženia",
     "dismiss": "Zamietnuť",
+    "mute_suggestion": "Prestať navrhovať toto nastavenie",
+    "reset_muted": "Obnoviť stíšené",
     "done": "Hotovo",
     "edit": "Upraviť",
     "export": "Exportovať",
@@ -348,6 +350,7 @@
     "default_access_level": "Predvolená úroveň pre používateľov, ktorí nie sú uvedení nižšie",
     "default_other": "Predvolené (iné zariadenia)",
     "default_tab": "Predvolená karta pri otváraní panela",
+    "font_size": "Veľkosť písma panela",
     "delta": "Δ",
     "description": "Popis",
     "dtw_blend_w": "Váha zmiešania",
@@ -789,6 +792,7 @@
     "preferences_admin": "Predvoľby, panel a kontrola prístupu",
     "preferences_adv": "Predvoľby",
     "prefs_personal": "Platí iba pre váš účet Home Assistant.",
+    "font_size_hint": "Zväčšite alebo zmenšite všetko v tomto paneli. Platí pre váš účet na tomto zariadení.",
     "process_history_hint": "Znova spustite párovanie pre všetky uložené cykly, obnovte návrhy ladenia, preškolte modely ML (ak sú povolené) a prepočítajte zdravie cyklov. Spustite po sérii recenzií.",
     "profile_deleted": "Profil odstránený",
     "profile_poor_health_detail": "Cykly priradené k tomuto profilu majú nekonzistentný tvar alebo nízku spoľahlivosť. Zvážte prestavbu obálky alebo kontrolu cyklov s označením.",
@@ -821,6 +825,10 @@
     "split_intro": "Kliknite na graf a pridajte alebo odstráňte bod rozdelenia, alebo automaticky zistite nečinné medzery. Každý výsledný segment môže mať vlastný profil.",
     "storage_diagnostics": "Štatistiky úložiska, údržba, export/import",
     "sug_staged": "Nastavené {key} = {val}. Uložte pre použitie.",
+    "sug_muted": "Toto nastavenie sa už nebude navrhovať",
+    "sug_mute_failed": "Nastavenie sa nepodarilo stíšiť",
+    "sug_unmuted_all": "Stíšené návrhy obnovené",
+    "n_suggestions_muted": "{count} stíšených; automatický ladiaci nástroj tieto nastavenia nebude navrhovať.",
     "toast_auto_detect_enabled": "Automatická detekcia zapnutá",
     "toast_auto_label_complete": "Automatické označovanie dokončené",
     "toast_auto_label_failed": "Automatické označovanie zlyhalo: {error}",
@@ -1406,6 +1414,26 @@
     "energy_scale": {
       "label": "Ostrost energie",
       "doc": "Ostrosť penalizácie za nezhodu energie vo Fáze 4. Menší = prísnejší: nezhoda energie viac znižuje skóre. Predvolená hodnota 0,25 je zámerne benevolentnejšia ako Ostrosť dĺžky trvania, pretože energia sa líši podľa záťaže. Kombinujte s Váhou energie."
+    },
+    "power_profile_interval_min": {
+      "label": "Interval výkonového profilu",
+      "doc": "Veľkosť segmentu pre atribút senzora power_profile pre daný profil (plochá sada priemerných wattov za slot spotrebovaná externými plánovačmi ako EMHASS a tibber_prices). Menšie segmenty zachovávajú krátke výkonové špičky ostré; väčšie segmenty vyhladzujú tvar. Predvolene 15 min. Iba pri načítaní; neovplyvňuje detekciu."
+    },
+    "notify_live_sticky": {
+      "label": "Zachovať živé oznámenie po klepnutí",
+      "doc": "Iba Android. Živé oznámenie priebehu nastavte ako trvalé (prilepené), aby jeho klepnutím nedošlo k zavretiu prebiehajúceho vlákna. Vypnuté zachováva predvolené správanie, kde klepnutie oznámenie zavrie."
+    },
+    "notify_live_click_action": {
+      "label": "Cieľ klepnutia na živé oznámenie",
+      "doc": "Iba Android. Kam klepnutie na živé oznámenie priebehu otvorí (napr. /lovelace/laundry alebo celá URL) namiesto vstupnej stránky aplikácie. Ponechajte prázdne pre predvolené nastavenie."
+    },
+    "door_opens_at_end": {
+      "label": "Dvere sa na konci automaticky otvoria",
+      "doc": "Pre umývačky riadu, ktoré na konci cyklu otvoria dvere za účelom sušenia (AirDry a podobné). Pri zapnutej funkcii otvorenie dverí počas bežiaceho cyklu už nezastaví cyklus natrvalo; ak dvere zostanú otvorené po dobu čakania nižšie, WashData cyklus ukončí. Krátke otvorenie (pridanie predmetu) sa ignoruje. Vyžaduje entitu senzora dverí."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Čakanie na otvorenie dverí pre ukončenie",
+      "doc": "Ako dlho musia dvere zostať otvorené, kým WashData ukončí cyklus, keď je zapnutá funkcia \"Dvere sa na konci automaticky otvoria\". Dostatočne dlho na ignorovanie rýchleho pridania riadu (predvolene 60 s), dostatočne krátko pre rýchle ukončenie po otvorení dverí spotrebičom."
     }
   },
   "setting_group": {

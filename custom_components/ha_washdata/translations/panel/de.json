@@ -178,7 +178,9 @@
     "download_export": "Export herunterladen",
     "analyze_import": "Datei analysieren",
     "import_selected": "Auswahl importieren",
-    "back": "Zurück"
+    "back": "Zurück",
+    "mute_suggestion": "Diese Einstellung nicht mehr vorschlagen",
+    "reset_muted": "Stummschaltungen zurücksetzen"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_import_copy": "Als Kopie importieren",
     "conflict_keep_mine": "Meine behalten",
     "conflict_overwrite": "Überschreiben",
-    "pg_anti_wrinkle": "Knitterschutz"
+    "pg_anti_wrinkle": "Knitterschutz",
+    "font_size": "Panel-Schriftgröße"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -922,7 +925,12 @@
     "merge_hint": "Importierte Elemente werden hinzugefügt; nichts Lokales geht verloren. Namenskonflikte werden unten aufgelöst.",
     "replace_warn": "Jede angekreuzte Kategorie wird gelöscht und aus der Datei ersetzt. Nicht angekreuzte Kategorien bleiben unverändert.",
     "dest_reference_hint": "Importierte Zyklen verbessern nur die Programmerkennung und beeinflussen niemals die Nutzungs-/Energiestatistik.",
-    "dest_real_history_hint": "Importierte Zyklen zählen als eigener Verlauf dieses Geräts und fließen in die Energie-/Nutzungsstatistik ein. Verwenden Sie dies, um ein Gerät in eine neue Installation zu übertragen."
+    "dest_real_history_hint": "Importierte Zyklen zählen als eigener Verlauf dieses Geräts und fließen in die Energie-/Nutzungsstatistik ein. Verwenden Sie dies, um ein Gerät in eine neue Installation zu übertragen.",
+    "sug_muted": "Diese Einstellung wird nicht mehr vorgeschlagen",
+    "sug_mute_failed": "Einstellung konnte nicht stummgeschaltet werden",
+    "sug_unmuted_all": "Stummgeschaltete Vorschläge zurückgesetzt",
+    "n_suggestions_muted": "{count} stummgeschaltet; der Autotuner schlägt diese nicht mehr vor.",
+    "font_size_hint": "Alles in diesem Panel vergrößern oder verkleinern. Gilt für Ihr Konto auf diesem Gerät."
   },
   "pg_desc": {
     "completion_min_seconds": "Kürzester Lauf, der als echter Zyklus zählt",
@@ -1434,6 +1442,26 @@
     "anti_wrinkle_idle_timeout": {
       "label": "Maximale Impulspause",
       "doc": "Wie lange das Gerät zwischen zwei Trommelimpulsen still bleiben darf, bevor der Knitterschutz-Modus endet. Höher setzen als die längste Pause, die Ihr Trockner zwischen zwei Impulsen lässt – sonst wird jeder weitere Impuls als Fehlstart gewertet."
+    },
+    "power_profile_interval_min": {
+      "label": "Leistungsprofil-Intervall",
+      "doc": "Bucket-Größe für das Attribut power_profile des profilbezogenen Sensors (ein flaches Array der durchschnittlichen Wattzahl pro Slot, das von externen Planern wie EMHASS und tibber_prices verwendet wird). Kleinere Buckets halten kurze Leistungsspitzen scharf; größere Buckets glätten die Kurve. Standard 15 Min. Nur zur Darstellung; hat keinen Einfluss auf die Erkennung."
+    },
+    "notify_live_sticky": {
+      "label": "Live-Benachrichtigung beim Antippen behalten",
+      "doc": "Nur Android. Die Live-Fortschrittsbenachrichtigung dauerhaft (sticky) anzeigen, sodass sie beim Antippen nicht ausgeblendet wird. Ausgeschaltet: Standardverhalten, bei dem ein Antippen die Benachrichtigung schließt."
+    },
+    "notify_live_click_action": {
+      "label": "Ziel beim Antippen der Live-Benachrichtigung",
+      "doc": "Nur Android. Wohin das Antippen der Live-Fortschrittsbenachrichtigung führt (z. B. /lovelace/laundry oder eine vollständige URL), statt zur Standard-App-Startseite. Leer lassen für Standard."
+    },
+    "door_opens_at_end": {
+      "label": "Tür öffnet sich am Ende automatisch",
+      "doc": "Für Geschirrspüler, die die Tür am Ende des Zyklus zum Trocknen aufspringen lassen (AirDry und ähnliche). Wenn aktiviert, unterbricht ein Türöffnen bei einem laufenden Zyklus diesen nicht dauerhaft; wenn die Tür für die eingestellte Verweildauer geöffnet bleibt, wertet WashData den Zyklus als abgeschlossen. Ein kurzes Öffnen (z. B. zum Nachlegen eines Geschirrstücks) wird ignoriert. Erfordert einen Türsensor."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Türöffnungs-Endverweildauer",
+      "doc": "Wie lange die Tür geöffnet bleiben muss, bevor WashData den Zyklus beendet, wenn \"Tür öffnet sich am Ende automatisch\" aktiv ist. Lang genug, um ein kurzes Öffnen zum Nachlegen eines Geschirrteils zu ignorieren (Standard 60 s), kurz genug, um den Zyklus zügig zu beenden, sobald die Maschine die Tür aufspringt."
     }
   },
   "setting_group": {

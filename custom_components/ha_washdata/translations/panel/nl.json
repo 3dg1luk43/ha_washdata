@@ -178,7 +178,9 @@
     "download_export": "Export downloaden",
     "analyze_import": "Bestand analyseren",
     "import_selected": "Selectie importeren",
-    "back": "Terug"
+    "back": "Terug",
+    "mute_suggestion": "Deze instelling niet meer voorstellen",
+    "reset_muted": "Gedempte suggesties herstellen"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -609,7 +611,8 @@
     "conflict_import_copy": "Importeren als kopie",
     "conflict_keep_mine": "Die van mij behouden",
     "conflict_overwrite": "Overschrijven",
-    "pg_anti_wrinkle": "Anti-kreuk"
+    "pg_anti_wrinkle": "Anti-kreuk",
+    "font_size": "Paneel lettergrootte"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -922,7 +925,12 @@
     "merge_hint": "Geïmporteerde items worden toegevoegd; er gaat lokaal niets verloren. Naamconflicten worden hieronder opgelost.",
     "replace_warn": "Elke aangevinkte categorie wordt gewist en vervangen vanuit het bestand. Niet-aangevinkte categorieën blijven ongewijzigd.",
     "dest_reference_hint": "Geïmporteerde cycli verbeteren alleen de programmaherkenning en hebben nooit invloed op de gebruiks-/energiestatistieken.",
-    "dest_real_history_hint": "Geïmporteerde cycli tellen als de eigen geschiedenis van dit apparaat en voeden de energie-/gebruiksstatistieken. Gebruik dit om één apparaat naar een nieuwe installatie te verplaatsen."
+    "dest_real_history_hint": "Geïmporteerde cycli tellen als de eigen geschiedenis van dit apparaat en voeden de energie-/gebruiksstatistieken. Gebruik dit om één apparaat naar een nieuwe installatie te verplaatsen.",
+    "sug_muted": "Deze instelling wordt niet meer voorgesteld",
+    "sug_mute_failed": "Instelling kon niet worden gedempt",
+    "sug_unmuted_all": "Gedempte suggesties hersteld",
+    "n_suggestions_muted": "{count} gedempt; de autotuner stelt deze niet meer voor.",
+    "font_size_hint": "Maak alles in dit paneel groter of kleiner. Geldt voor uw account op dit apparaat."
   },
   "pg_desc": {
     "completion_min_seconds": "Kortste run die als een echte cyclus telt",
@@ -1434,6 +1442,26 @@
     "energy_scale": {
       "label": "Energie-scherpte",
       "doc": "Scherpte van de energieovereenkomststraf. Kleiner = strenger: een energiemismatch kost meer punten. Standaard 0,25 is bewust meer vergevingsgezind dan Duurscherpte, omdat energie varieert met de belasting. Combineer met Energiegewicht."
+    },
+    "power_profile_interval_min": {
+      "label": "Vermogensprofiel-interval",
+      "doc": "Bucketgrootte voor het attribuut power_profile van de profielsensor (het platte array van gemiddelde wattwaarden per slot dat door externe planners zoals EMHASS en tibber_prices wordt gebruikt). Kleinere buckets houden korte vermogenspieken scherp; grotere buckets gladden de vorm. Standaard 15 min. Alleen voor weergave; heeft geen invloed op de detectie."
+    },
+    "notify_live_sticky": {
+      "label": "Live-melding bij aanraken behouden",
+      "doc": "Alleen Android. Maak de live-voortgangsmelding aanhoudend (sticky), zodat deze bij aanraken niet wordt gesloten. Uitgeschakeld: standaardgedrag waarbij een aanraking de melding sluit."
+    },
+    "notify_live_click_action": {
+      "label": "Aanraakdoel live-melding",
+      "doc": "Alleen Android. Waarheen een aanraking van de live-voortgangsmelding navigeert (bijv. /lovelace/laundry of een volledige URL) in plaats van de standaard startpagina van de app. Leeg laten voor standaard."
+    },
+    "door_opens_at_end": {
+      "label": "Deur opent automatisch aan het einde",
+      "doc": "Voor vaatwassers die aan het einde van de cyclus de deur openen om te drogen (AirDry en vergelijkbaar). Als dit is ingeschakeld, pauzeert een deur openen tijdens een actieve cyclus de cyclus niet permanent; als de deur de ingestelde verwijltijd lang open blijft, beschouwt WashData de cyclus als voltooid. Een korte opening (om een artikel toe te voegen) wordt genegeerd. Vereist een deursensorentiteit."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Deuropen-eindverwijltijd",
+      "doc": "Hoe lang de deur open moet blijven voordat WashData de cyclus beëindigt, wanneer \"Deur opent automatisch aan het einde\" is ingeschakeld. Lang genoeg om het snel toevoegen van een bord te negeren (standaard 60 s), kort genoeg om de cyclus snel te beëindigen zodra de machine de deur opent."
     }
   },
   "setting_group": {

@@ -64,6 +64,8 @@
     "discard": "Odbaci",
     "discard_tip": "Odbaci snimljeni trag bez pohrane",
     "dismiss": "Odbaci",
+    "mute_suggestion": "Prestani predlagati ovu postavku",
+    "reset_muted": "Poništi utišane",
     "done": "Gotovo",
     "edit": "Uredi",
     "export": "Izvoz",
@@ -348,6 +350,7 @@
     "default_access_level": "Zadani nivo za korisnike koji nisu navedeni ispod",
     "default_other": "Zadano (ostali uređaji)",
     "default_tab": "Podrazumevana kartica prilikom otvaranja panela",
+    "font_size": "Veličina fonta ploče",
     "delta": "Δ",
     "description": "Opis",
     "dtw_blend_w": "Težina miješanja",
@@ -789,6 +792,7 @@
     "preferences_admin": "Preference, panel i kontrola pristupa",
     "preferences_adv": "Postavke",
     "prefs_personal": "Ovo se odnosi samo na vaš račun Home Assistant.",
+    "font_size_hint": "Povećajte ili smanjite sve u ovoj ploči. Primjenjuje se na vaš račun na ovom uređaju.",
     "process_history_hint": "Ponovo pokrenite uparivanje na svim pohranjenim ciklusima, osvježite prijedloge podešavanja, ponovo trenirajte ML modele (ako su omogućeni) i preračunajte zdravlje ciklusa. Pokrenite nakon niza recenzija.",
     "profile_deleted": "Profil izbrisan",
     "profile_poor_health_detail": "Ciklusi koji su dodijeljeni ovom profilu imaju nedosljedne oblike ili nisku pouzdanost. Razmislite o ponovnoj izgradnji omotača ili pregledu označenih ciklusa.",
@@ -821,6 +825,10 @@
     "split_intro": "Kliknite na grafikon da biste dodali ili uklonili tačku razdvajanja, ili automatsko otkrivanje po prazninama u mirovanju. Svaki rezultujući segment može dobiti svoj profil.",
     "storage_diagnostics": "Statistika pohrane, održavanje, izvoz/uvoz",
     "sug_staged": "Postavljeno {key} = {val}. Sačuvajte za primjenu.",
+    "sug_muted": "Ova postavka više neće biti predlagana",
+    "sug_mute_failed": "Nije moguće utišati prijedlog",
+    "sug_unmuted_all": "Utišani prijedlozi poništeni",
+    "n_suggestions_muted": "{count} utišano; automatski podešavač neće predlagati ove postavke.",
     "toast_auto_detect_enabled": "Automatsko prepoznavanje omogućeno",
     "toast_auto_label_complete": "Automatsko označavanje završeno",
     "toast_auto_label_failed": "Automatsko označavanje neuspješno: {error}",
@@ -1406,6 +1414,26 @@
     "energy_scale": {
       "label": "Ostrina energije",
       "doc": "Oštrina kazne za nepodudaranje energije u Fazi 4. Manje = strože: nepodudaranje energije više snižava ocjenu. Zadana vrijednost 0,25 je namjerno blaža od Oštrine trajanja jer energija varira s opterećenjem. Koristite zajedno s Težinom energije."
+    },
+    "power_profile_interval_min": {
+      "label": "Interval profila snage",
+      "doc": "Veličina segmenta za atribut senzora power_profile po profilu (polje prosječnih vata po slotu koje koriste vanjski planeri poput EMHASS i tibber_prices). Manji segmenti zadržavaju kratke skokove snage oštrima; veći segmenti zaglađuju oblik. Zadano 15 min. Samo za čitanje; ne utječe na otkrivanje."
+    },
+    "notify_live_sticky": {
+      "label": "Zadrži živo obavještenje pri dodiru",
+      "doc": "Samo Android. Živo obavještenje o napretku postavite kao trajno (prikvačeno) kako dodir ne bi odbacio aktivnu nit. Isključeno zadržava zadano ponašanje gdje dodir odbacuje obavještenje."
+    },
+    "notify_live_click_action": {
+      "label": "Odredište dodira na živom obavještenju",
+      "doc": "Samo Android. Gdje dodir na živo obavještenje o napretku otvara (npr. /lovelace/laundry ili cijeli URL) umjesto početne stranice aplikacije. Ostavite prazno za zadano."
+    },
+    "door_opens_at_end": {
+      "label": "Vrata se automatski otvaraju na kraju",
+      "doc": "Za mašine za pranje sudova koje na kraju ciklusa otvaraju vrata radi sušenja (AirDry i slično). Kada je uključeno, otvaranje vrata za vrijeme pokrenuta ciklusa više ne zaustavlja ciklus zauvijek; ako vrata ostanu otvorena koliko je navedeno ispod, WashData smatra ciklus završenim. Kratko otvaranje (dodavanje predmeta) se zanemaruje. Zahtijeva entitet senzora vrata."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Zadržavanje otvorenih vrata za završetak",
+      "doc": "Koliko dugo vrata moraju ostati otvorena prije nego WashData završi ciklus, kada je uključena postavka \"Vrata se automatski otvaraju na kraju\". Dovoljno dugo da se ignorira brzo dodavanje posuđa (zadano 60 s), dovoljno kratko za brz završetak kad mašina otvori vrata."
     }
   },
   "setting_group": {
