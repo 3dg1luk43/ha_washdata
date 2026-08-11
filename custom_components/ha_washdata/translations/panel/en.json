@@ -1390,6 +1390,14 @@
     "power_profile_interval_min": {
       "label": "Power Profile Interval",
       "doc": "Bucket size for the per-profile power_profile sensor attribute (the flat per-slot average-watts array consumed by external planners such as EMHASS and tibber_prices). Smaller buckets keep short power spikes sharp; larger buckets smooth the shape. Default 15 min. Read-time only; does not affect detection."
+    },
+    "notify_live_sticky": {
+      "label": "Keep Live Notification On Tap",
+      "doc": "Android only. Make the live-progress notification persistent (sticky) so tapping it does not dismiss the ongoing thread. Off keeps the default behaviour where a tap dismisses it."
+    },
+    "notify_live_click_action": {
+      "label": "Live Notification Tap Target",
+      "doc": "Android only. Where a tap on the live-progress notification opens (e.g. /lovelace/laundry, or a full URL) instead of the app landing page. Leave blank for the default."
     }
   },
   "setting_group": {

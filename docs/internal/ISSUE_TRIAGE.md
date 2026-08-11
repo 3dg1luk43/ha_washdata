@@ -476,5 +476,11 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   Housekeeping. New `tests/test_issue_367_power_profile_interval.py`; settings E2E 15; fast 1386.
   Register item 70. Pending non-EN translation: `setting.power_profile_interval_min.{label,doc}`.
 
+- [DONE] #347 - opt-in `sticky` + `clickAction` on the existing live notification via
+  `_apply_live_notification_prefs` (both payloads), `clickAction` added to `_MOBILE_ONLY_EXTRA_KEYS`;
+  new consts default off/empty (byte-identical payload). Panel Notifications fields. New
+  `tests/test_issue_347_live_notification_prefs.py`; settings E2E 15; fast 1390. Register item 71.
+
 ### Panel translation keys pending (final subagent pass, never machine-translate)
 - `setting.power_profile_interval_min.{label,doc}` (#367)
+- `setting.notify_live_sticky.{label,doc}`, `setting.notify_live_click_action.{label,doc}` (#347)

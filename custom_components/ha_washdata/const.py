@@ -157,6 +157,10 @@ CONF_NOTIFY_PRE_COMPLETE_MESSAGE = "notify_pre_complete_message"
 CONF_NOTIFY_LIVE_INTERVAL_SECONDS = "notify_live_interval_seconds"
 CONF_NOTIFY_LIVE_OVERRUN_PERCENT = "notify_live_overrun_percent"
 CONF_NOTIFY_LIVE_CHRONOMETER = "notify_live_chronometer"
+# Opt-in data keys on the EXISTING live progress notification (#347): keep-on-tap
+# (sticky) and a tap target (clickAction). Not new notification types. Mobile-only.
+CONF_NOTIFY_LIVE_STICKY = "notify_live_sticky"
+CONF_NOTIFY_LIVE_CLICK_ACTION = "notify_live_click_action"
 CONF_NOTIFY_REMINDER_MESSAGE = "notify_reminder_message"  # Distinct one-time pre-end alert
 CONF_NOTIFY_TIMEOUT_SECONDS = "notify_timeout_seconds"  # Auto-dismiss after N seconds (0 = never)
 CONF_NOTIFY_CHANNEL = "notify_channel"  # Android channel for status/live/reminder
@@ -213,6 +217,8 @@ DEFAULT_NOTIFY_FIRE_EVENTS = True
 DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS = 300
 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
 DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
+DEFAULT_NOTIFY_LIVE_STICKY = False  # #347: off = today's behaviour (tap dismisses)
+DEFAULT_NOTIFY_LIVE_CLICK_ACTION = ""  # #347: empty = no tap target (today's behaviour)
 DEFAULT_NOTIFY_TIMEOUT_SECONDS = 0  # 0 = notifications never auto-dismiss
 DEFAULT_NOTIFY_CHANNEL = ""  # Empty = omit channel (companion app default)
 DEFAULT_NOTIFY_FINISH_CHANNEL = ""  # Empty = reuse status channel
