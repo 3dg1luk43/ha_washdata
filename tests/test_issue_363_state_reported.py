@@ -106,6 +106,25 @@ def test_subscribe_registers_both_change_and_report_listeners(manager: WashDataM
     assert manager._remove_report_listener is not None
 
 
+def test_power_handler_is_hass_callback(manager: WashDataManager) -> None:
+    """The power handler MUST run on the event loop, not an executor thread.
+
+    Regression guard: when the #363/#329 refactor extracted registration into
+    ``_subscribe_power_sensor``, the ``@callback`` decorator was accidentally
+    moved off ``_async_power_changed`` (and doubled onto ``_subscribe_power_sensor``).
+    An undecorated sync action is inferred by HA as an *executor* HassJob, so the
+    handler ran in a SyncWorker thread and every downstream loop-only call
+    (``async_dispatcher_send``, ``hass.async_create_task``, ``hass.bus.async_fire``)
+    raised a thread-safety error on HA 2026.8+, silently breaking matching,
+    notifications and state saves.
+    """
+    from homeassistant.core import is_callback
+
+    assert is_callback(manager._async_power_changed), (
+        "_async_power_changed must be @callback so HA runs it on the event loop"
+    )
+
+
 def test_resubscribe_removes_previous_listeners(manager: WashDataManager) -> None:
     """Re-subscribing tears down the prior change and report listeners (no leak)."""
     old_chg = MagicMock()
