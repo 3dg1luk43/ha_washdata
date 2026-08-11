@@ -46,13 +46,7 @@ _LOAD_LOCK_KEY = f"{DOMAIN}_online_load_lock"
 # plumbing carries it end-to-end with no further wiring.
 _DEFAULT_PREFS: dict[str, Any] = {
     "show_contributor": True,   # show "by <contributor>" attribution in the pickers
-    "font_scale": 1.0,          # panel font-size multiplier (accessibility), clamped [0.7, 2.0]
 }
-
-#: Hard bounds for the panel font-size multiplier, enforced server-side so a
-#: direct WS call can never store a value that breaks rendering.
-_FONT_SCALE_MIN = 0.7
-_FONT_SCALE_MAX = 2.0
 
 
 def _default() -> dict[str, Any]:
@@ -144,18 +138,8 @@ async def async_set_prefs(hass: HomeAssistant, patch: dict[str, Any]) -> dict[st
     prefs = data.get("prefs")
     prefs = dict(prefs) if isinstance(prefs, dict) else dict(_DEFAULT_PREFS)
     for k, v in (patch or {}).items():
-        if k not in _DEFAULT_PREFS:
-            continue
-        if isinstance(_DEFAULT_PREFS[k], bool):
-            prefs[k] = bool(v)
-        elif k == "font_scale":
-            # Coerce + clamp so a bad client value can never break the panel.
-            try:
-                prefs[k] = max(_FONT_SCALE_MIN, min(_FONT_SCALE_MAX, float(v)))
-            except (TypeError, ValueError):
-                prefs[k] = _DEFAULT_PREFS[k]
-        else:
-            prefs[k] = v
+        if k in _DEFAULT_PREFS:
+            prefs[k] = bool(v) if isinstance(_DEFAULT_PREFS[k], bool) else v
     data["prefs"] = prefs
     await _save(hass)
     return get_prefs(hass)
