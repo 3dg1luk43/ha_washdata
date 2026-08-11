@@ -69,7 +69,7 @@ body:
       label: WashData Integration Version
       description: >
         What version of WashData are you running? (found in HACS or Settings → Integrations).
-        Check the [Releases page](https://github.com/3dg1luk43/ha_washdata/releases) to see if a newer version is available — bugs already fixed in a later release won't be re-investigated.
+        Check the [Releases page](https://github.com/3dg1luk43/ha_washdata/releases) to see if a newer version is available - bugs already fixed in a later release won't be re-investigated.
       placeholder: "vX.Y.Z"
     validations:
       required: true
@@ -109,11 +109,11 @@ body:
     attributes:
       label: Logs / Error Evidence
       description: |
-        **This is required.** Paste any relevant logs, error messages, or console output here. This does not have to be debug-level logs — any evidence of what went wrong is helpful: a single error line from the HA logbook, a warning trace, or a full debug log session. Paste whatever you have.
+        **This is required.** Paste any relevant logs, error messages, or console output here. This does not have to be debug-level logs - any evidence of what went wrong is helpful: a single error line from the HA logbook, a warning trace, or a full debug log session. Paste whatever you have.
 
         > ⚠️ **Debug logs and the HA Diagnostics export are two different things.**
         > - **Logs** = text output from `Settings → System → Logs`. Paste short excerpts directly; attach long files.
-        > - **Diagnostics export** = the JSON file from `Settings → Devices → your device → Download Diagnostics`. Always attach as a file — never paste inline.
+        > - **Diagnostics export** = the JSON file from `Settings → Devices → your device → Download Diagnostics`. Always attach as a file - never paste inline.
 
         **To get the most useful logs**, enable debug logging by adding this to your `configuration.yaml` and restarting HA:
         ```yaml
@@ -127,7 +127,7 @@ body:
         - **Short output (< ~50 lines):** paste directly below.
         - **Long output:** download via `Settings → System → Logs → Download full log` and attach as a file.
 
-        If you only have a brief error line or warning from the HA logbook, paste that — it is far better than nothing.
+        If you only have a brief error line or warning from the HA logbook, paste that - it is far better than nothing.
 
         > **Tip:** Filter live logs by `ha_washdata` under `Settings → System → Logs` to quickly find relevant lines.
       placeholder: "Paste log output or error messages here, or describe what file(s) you have attached above..."
@@ -148,9 +148,19 @@ body:
     attributes:
       label: Contributing a Fix
       description: >
-        If you intend to submit a PR fixing this bug yourself, check the box below.
-        The maintainer will review and — if approved — add the `accepted` label to this issue.
-        **You must wait for that label before opening a PR**, otherwise the PR will be closed automatically.
+        Want to fix this yourself? Please agree the work with the maintainer **before** you write any code.
+
+
+        **How it works:**
+
+        1. Tick the box below to flag that you intend to submit a PR.
+
+        2. Wait for the maintainer to review and add the `accepted` label. This is where scope and approach are agreed - the fix may already be in progress, or need a different direction.
+
+        3. Only after the `accepted` label is added should you open a PR referencing this issue.
+
+
+        **Do not** open a PR now, alongside this issue. A PR opened in parallel with a not-yet-accepted issue skips the agree-first step and will not be considered - it is closed automatically. Do not start significant work before the label is added either, so you never build something that cannot be merged.
       options:
-        - label: I plan to submit a PR fixing this and will wait for the `accepted` label before opening it
+        - label: I plan to submit a PR fixing this, and I understand I must wait for the `accepted` label before opening it (opening one now / in parallel will be closed)
           required: false

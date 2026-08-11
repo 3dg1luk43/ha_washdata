@@ -24,26 +24,27 @@ jobs:
             const repo = context.repo.repo;
 
             // Each rule closes PRs carrying `label`, `graceDays` after the label was
-            // applied. PRs awaiting maintainer approval (label "awaiting maintainer")
-            // are intentionally NOT listed here — they stay open until the maintainer
-            // accepts the linked issue or closes the PR manually.
+            // applied. PRs opened in parallel with a linked-but-not-yet-accepted issue
+            // (label "awaiting maintainer") are intentionally NOT listed here: they are
+            // parked, not auto-closed, so the maintainer can rescue them by accepting the
+            // issue. They stay open until the maintainer accepts it or closes the PR.
             const RULES = [
               {
                 label: 'needs description',
                 graceDays: 5,
                 message: (pr) => [
-                  `Hi @${pr.user.login}! This PR has been automatically closed because the description was not completed within 5 days of the warning.`,
+                  `Hi @${pr.user.login}! This PR has been automatically closed because the required template was not filled in within 5 days of the warning.`,
                   '',
-                  "You're welcome to open a new PR once the template is filled in. See the PR template for guidance on what's required.",
+                  "You're welcome to open a new PR once the template is complete (a real Description and at least one Type of Change box). See the PR template for what's required.",
                 ].join('\n'),
               },
               {
                 label: 'needs accepted issue',
                 graceDays: 3,
                 message: (pr) => [
-                  `Hi @${pr.user.login}! This PR has been automatically closed because it was not linked to an issue with the \`accepted\` label within 3 days.`,
+                  `Hi @${pr.user.login}! This PR has been automatically closed because it was not linked to an issue carrying the \`accepted\` label within 3 days.`,
                   '',
-                  'Please open an issue, wait for it to receive the `accepted` label, then open a new PR referencing it. Thanks for contributing!',
+                  'The correct flow is: open an issue, **wait** for the maintainer to add the `accepted` label (do not open a PR in parallel with a fresh issue), then open a PR referencing it. See [CONTRIBUTING.md](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs) for the full flow. Thanks for contributing!',
                 ].join('\n'),
               },
             ];
@@ -56,7 +57,7 @@ jobs:
               per_page: 100,
             });
 
-            // When the label was applied — the grace runs from this, NOT from PR
+            // When the label was applied - the grace runs from this, NOT from PR
             // creation. A PR can be labeled long after it was opened, and measuring from
             // creation would close it earlier than the warning comment promises.
             const labelAppliedAt = async (prNumber, label) => {
@@ -94,7 +95,7 @@ jobs:
                 await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: rule.message(pr) });
                 await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
                 closed.add(pr.number);
-                console.log(`Closed PR #${pr.number} (${pr.title}) — rule: "${rule.label}".`);
+                console.log(`Closed PR #${pr.number} (${pr.title}) - rule: "${rule.label}".`);
               }
             }
 
