@@ -652,11 +652,21 @@ class SuggestionEngine:
         clean, _excl = select_clean_cycles(raw_cycles, stop_threshold_w=stop_thr)
         pause_based = self._suggest_off_delay_from_pauses(clean, stop_thr, device_floor)
 
-        reason_off_key: str | None = None
-        reason_off_params: dict[str, Any] | None = None
         if pause_based is not None:
             suggested_off_delay, reason_off, reason_off_key, reason_off_params = pause_based
-        else:
+            suggestions[CONF_OFF_DELAY] = {
+                "value": suggested_off_delay,
+                "reason": reason_off,
+                "reason_key": reason_off_key,
+                "reason_params": reason_off_params,
+            }
+        elif not self._is_anti_crease_enabled():
+            # Cadence fallback: p95_dt * 5. Safe for most devices, but on anti-crease
+            # devices the update gap is dominated by the inter-burst quiet period, so
+            # the result often exceeds the burst interval and resets the end timer on
+            # every tumble burst. Skip it when anti-crease is enabled (#343 gap B).
+            reason_off_key: str | None = None
+            reason_off_params: dict[str, Any] | None = None
             suggested_off_delay = int(max(device_floor, p95_dt * 5))
             reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
             reason_off_key = "suggestion.reason.off_delay_cadence"
@@ -672,13 +682,12 @@ class SuggestionEngine:
                     reason_off = f"Used generic safe minimum ({DEFAULT_OFF_DELAY}s)."
                     reason_off_key = "suggestion.reason.off_delay_generic_floor"
                     reason_off_params = {"floor": DEFAULT_OFF_DELAY}
-
-        suggestions[CONF_OFF_DELAY] = {
-            "value": suggested_off_delay,
-            "reason": reason_off,
-            "reason_key": reason_off_key,
-            "reason_params": reason_off_params,
-        }
+            suggestions[CONF_OFF_DELAY] = {
+                "value": suggested_off_delay,
+                "reason": reason_off,
+                "reason_key": reason_off_key,
+                "reason_params": reason_off_params,
+            }
 
         # 4. Profile Match Interval
         suggested_match = int(max(10, median_dt * 10))
@@ -901,9 +910,12 @@ class SuggestionEngine:
         }
 
         # --- min_power: keep the noise gate below the lowest genuine draw ---
+        # Strip the anti-crease tail before taking the per-cycle minimum so that the
+        # ~3 W between-burst baseline does not drag the p05 down on anti-crease
+        # devices and produce a noise gate below the real operating draw (#343 gap A).
         lowest_active: list[float] = []
         for c in clean:
-            readings = _cycle_readings(c)
+            readings = self._strip_anti_crease_readings(_cycle_readings(c))
             if len(readings) < 5:
                 continue
             active = np.array([p for _, p in readings if p > 0.5])
@@ -1101,7 +1113,11 @@ class SuggestionEngine:
         n_traced = 0
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
         for c in cycles:
-            readings = _cycle_readings(c)
+            # Strip the anti-crease tail before pause analysis so that the inter-burst
+            # quiet periods (up to 180-240 s on Miele/Bosch) are not counted as genuine
+            # intra-cycle pauses, which would inflate p95 beyond the burst interval and
+            # reset the end timer on every tumble burst (#343 gap C).
+            readings = self._strip_anti_crease_readings(_cycle_readings(c))
             if len(readings) < 10:
                 continue
             n_traced += 1
@@ -1250,6 +1266,42 @@ class SuggestionEngine:
             return ordered_powers  # no main high-power phase -> nothing to strip
         return ordered_powers[: int(above[-1]) + 1]
 
+    def _is_anti_crease_enabled(self) -> bool:
+        """True when anti-crease mode is active on an eligible device type."""
+        if self.device_type not in self._ANTI_CREASE_DEVICE_TYPES:
+            return False
+        options = self._entry_options()
+        return bool(options.get(CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED))
+
+    def _strip_anti_crease_readings(
+        self, readings: list[tuple[float, float]]
+    ) -> list[tuple[float, float]]:
+        """Time-domain equivalent of _strip_anti_crease_tail for (offset, power) pairs.
+
+        Returns the readings list trimmed to the last sample >= anti_wrinkle_max_power
+        so that pause-duration and min-power statistics ignore the anti-crease tail
+        (#343 gap B/C). No-op when anti-crease is off, the device type is ineligible,
+        or no sample reaches the ceiling.
+        """
+        if not readings:
+            return readings
+        if not self._is_anti_crease_enabled():
+            return readings
+        options = self._entry_options()
+        try:
+            max_power = float(options.get(CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER))
+        except (TypeError, ValueError):
+            max_power = DEFAULT_ANTI_WRINKLE_MAX_POWER
+        if max_power <= 0:
+            return readings
+        last_above = -1
+        for i, (_, p) in enumerate(readings):
+            if p >= max_power:
+                last_above = i
+        if last_above < 0:
+            return readings  # no main high-power phase identifiable
+        return readings[: last_above + 1]
+
     def run_simulation(self, cycle_data: dict[str, Any]) -> dict[str, Any]:
         """Replay a single cycle with varied parameters to find optimal settings.
 
@@ -1291,9 +1343,11 @@ class SuggestionEngine:
         suggested_stop = round(min_active * 0.8, 2)
         suggested_start = round(min_active * 1.2, 2)
 
-        # Energy suggestions
-        suggested_end_energy = 0.05
-
+        # end_energy_threshold is intentionally NOT suggested from a single cycle:
+        # a context-free 0.05 Wh was below the anti-crease baseline energy accumulated
+        # over the off_delay window, so the end gate never fired (#343 gap D). The
+        # batch path (run_batch_simulation) derives a cycle-energy-proportional floor
+        # from actual false-end events once 5+ cycles exist; use that instead.
         return {
             CONF_STOP_THRESHOLD_W: {
                 "value": suggested_stop,
@@ -1306,12 +1360,6 @@ class SuggestionEngine:
                 "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle.",
                 "reason_key": "suggestion.reason.min_active",
                 "reason_params": {"min": f"{min_active:.1f}"},
-            },
-            CONF_END_ENERGY_THRESHOLD: {
-                "value": suggested_end_energy,
-                "reason": "Default recommended baseline for end-of-cycle noise gate.",
-                "reason_key": "suggestion.reason.end_energy_default",
-                "reason_params": {},
             },
         }
 
