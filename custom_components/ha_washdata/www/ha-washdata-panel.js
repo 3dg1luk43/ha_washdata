@@ -9326,9 +9326,14 @@ class HaWashdataPanel extends HTMLElement {
   }
   _clockToOffset(clockStr) {
     const m = this._modal, st = m && m.curve && m.curve.start_time;
-    if (!st || !clockStr) return 0;
-    const start = new Date(st);
+    // Empty or unparseable input means "no change" (#366): returning 0 here used
+    // to silently drag an endpoint to the cycle start, and an empty End field
+    // collapsed the window to ~0 s. Signal no-change with null so the caller
+    // keeps the current value instead of destroying the cycle.
+    if (!st || !clockStr) return null;
     const p = String(clockStr).split(':').map(Number);
+    if (!p.length || p.some(n => !Number.isFinite(n))) return null;
+    const start = new Date(st);
     const dt = new Date(start);
     dt.setHours(p[0] || 0, p[1] || 0, p[2] || 0, 0);
     let off = (dt - start) / 1000;
@@ -9337,7 +9342,11 @@ class HaWashdataPanel extends HTMLElement {
     return Math.max(0, Math.min(full, off));
   }
   _trimInputToOffset(val) {
-    return (this._modal.timeMode === 'clock') ? this._clockToOffset(val) : _num(val, 0);
+    // Empty field -> null (no change), never a collapse-to-zero (#366).
+    if (val === '' || val == null) return null;
+    if (this._modal.timeMode === 'clock') return this._clockToOffset(val);
+    const n = _num(val, NaN);
+    return Number.isFinite(n) ? n : null;
   }
 
   _toggleSplit(x) {
@@ -9361,8 +9370,8 @@ class HaWashdataPanel extends HTMLElement {
 
     if (m.mode === 'trim') {
       const start = sr.getElementById('wd-trim-start'), end = sr.getElementById('wd-trim-end');
-      if (start) start.addEventListener('input', () => { m.trim.start = Math.max(0, Math.min(this._trimInputToOffset(start.value), m.trim.end - 1)); this._drawCycleEditor(); });
-      if (end) end.addEventListener('input', () => { m.trim.end = Math.min(m.curve.full_duration_s, Math.max(this._trimInputToOffset(end.value), m.trim.start + 1)); this._drawCycleEditor(); });
+      if (start) start.addEventListener('input', () => { const off = this._trimInputToOffset(start.value); if (off === null) return; m.trim.start = Math.max(0, Math.min(off, m.trim.end - 1)); this._drawCycleEditor(); });
+      if (end) end.addEventListener('input', () => { const off = this._trimInputToOffset(end.value); if (off === null) return; m.trim.end = Math.min(m.curve.full_duration_s, Math.max(off, m.trim.start + 1)); this._drawCycleEditor(); });
       cyc.addEventListener('pointerdown', e => {
         const wd = cyc._wd; if (!wd) return;
         const r = cyc.getBoundingClientRect(); const px = e.clientX - r.left;

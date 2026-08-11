@@ -449,3 +449,9 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   history (low-risk; consumers parse offsets fine). New `tests/test_issue_369_utc_timestamps.py`. Fast
   suite 1368 green. Register item 64. NOTE for maintainer: the "vor 2 Stunden" DISPLAY symptom is a
   separate likely start-vs-end misread (list renders start time) - reply to reporter to confirm.
+- [DONE] #366 - DATA LOSS fixed. Backend `trim_cycle_power_data` now rejects (before mutating) any trim
+  with `end<=start` or a kept window of <2 samples / non-positive duration, so a bad trim can never
+  collapse a cycle to 0 s. Frontend `_clockToOffset`/`_trimInputToOffset` return null (no-change) for
+  empty/unparseable fields. New `tests/test_issue_366_trim_guard.py`; E2E cycles.spec 24/24; fast 1371.
+  Register item 65. UI test steps in UI_TEST_GUIDE_0.5.4.md. Already-collapsed cycles from before the
+  fix cannot be recovered (data was gone); the guard prevents any future loss.
