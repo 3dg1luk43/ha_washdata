@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData Setup",
-        "description": "Configure your washing machine or other appliance.\n\nPower sensor is required.",
+        "description": "Configure your washing machine or other appliance.\n\nPower sensor is required.\n\nAfter setup, open the WashData panel from the sidebar (or go to [/ha-washdata](/ha-washdata)) to view cycles, tune detection and manage profiles.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "description": "Update the device name, appliance type, or power sensor.\n\nThe WashData panel (sidebar, or [/ha-washdata](/ha-washdata)) is where detection, cycles, profiles and notifications are managed.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "Rename the device or change its core hardware settings. All detection, matching and notification settings are in the WashData panel.",
+        "description": "Rename the device or change its core hardware settings. All detection, matching and notification settings are in the [WashData panel](/ha-washdata) (also reachable from the sidebar).",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",

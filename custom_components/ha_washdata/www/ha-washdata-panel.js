@@ -3283,9 +3283,21 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Access / panel-config helpers ───────────────────────────────────────────
 
+  // Apply the user's panel font-size multiplier (#accessibility). All panel sizes
+  // are em-relative and :host has no explicit font-size, so setting the host's
+  // font-size scales the whole panel. Clamped to the same bounds the backend
+  // enforces so a stale/bad value can never break rendering.
+  _applyFontScale(scale) {
+    let s = parseFloat(scale);
+    if (!isFinite(s)) s = 1.0;
+    s = Math.max(0.7, Math.min(2.0, s));
+    this.style.fontSize = (s === 1.0) ? '' : (Math.round(s * 1000) / 10) + '%';
+  }
+
   _applyPanelConfig() {
     const cfg = this._panelCfg;
     if (!cfg) return;
+    this._applyFontScale((cfg.prefs && cfg.prefs.font_scale) || 1.0);
     // lang_override arrives here (not at boot). If the user picked a language we
     // didn't eagerly load, fetch it now and re-render once it lands.
     const override = cfg.prefs && cfg.prefs.lang_override;
@@ -6813,6 +6825,14 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-field"><label>${this._t('lbl.cycle_date_display', {}, 'Cycle date display')}</label><select id="wd-pref-datefmt">${dateOptHtml}</select></div>
         <div class="wd-field"><label>${this._t('lbl.panel_language', {}, 'Panel language')}</label><select id="wd-pref-lang">${langOpts}</select></div>
       </div>
+      <div class="wd-field" style="margin-top:8px">
+        <label>${this._t('lbl.font_size', {}, 'Panel font size')}</label>
+        <div style="display:flex;align-items:center;gap:12px">
+          <input type="range" id="wd-pref-fontscale" min="0.85" max="1.5" step="0.05" value="${cur.font_scale || 1}" style="flex:1" aria-label="${_esc(this._t('lbl.font_size', {}, 'Panel font size'))}">
+          <span id="wd-pref-fontscale-val" style="min-width:3.2em;text-align:right;font-variant-numeric:tabular-nums">${Math.round((cur.font_scale || 1) * 100)}%</span>
+        </div>
+        <div class="wd-field-hint">${this._t('msg.font_size_hint', {}, 'Make everything in this panel larger or smaller. Applies to your account on this device.')}</div>
+      </div>
       <div class="wd-subhead">${this._t('hdr.status_graph', {}, 'Status Graph')}</div>
       ${_switchRow(`id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}`, this._t('lbl.show_expected', {}, 'Show expected curve overlay (matched profile, orange)'))}
       ${_switchRow(`id="wd-pref-raw" ${cur.show_raw ? 'checked' : ''}`, this._t('lbl.show_raw', {}, 'Show raw socket toggle in live power graph'))}
@@ -9266,6 +9286,21 @@ class HaWashdataPanel extends HTMLElement {
       }
     });
 
+    // Panel font-size slider (accessibility): live-preview while dragging, persist
+    // on release. All panel text is em-relative, so _applyFontScale scales it all.
+    const fontScaleInp = sr.getElementById('wd-pref-fontscale');
+    if (fontScaleInp) {
+      const fsVal = sr.getElementById('wd-pref-fontscale-val');
+      fontScaleInp.addEventListener('input', () => {
+        const v = parseFloat(fontScaleInp.value) || 1;
+        this._applyFontScale(v);
+        if (fsVal) fsVal.textContent = Math.round(v * 100) + '%';
+      });
+      fontScaleInp.addEventListener('change', () => {
+        this._setPref('font_scale', parseFloat(fontScaleInp.value) || 1);
+      });
+    }
+
     sr.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', e => this._onAction(e.currentTarget)));
     sr.querySelectorAll('[data-maction]').forEach(btn => btn.addEventListener('click', e => this._onModalAction(e.currentTarget.dataset.maction, e.currentTarget)));
     // A <select data-maction> commits via `change` (not `click`, esp. on keyboard
@@ -10348,7 +10383,8 @@ class HaWashdataPanel extends HTMLElement {
       const showRaw = !!sr.getElementById('wd-pref-raw')?.checked;
       const dateFmt = sr.getElementById('wd-pref-datefmt')?.value || 'relative';
       const langOverrideSave = sr.getElementById('wd-pref-lang')?.value || '';
-      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt, lang_override: langOverrideSave };
+      const fontScale = parseFloat(sr.getElementById('wd-pref-fontscale')?.value) || 1;
+      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt, lang_override: langOverrideSave, font_scale: fontScale };
       this._busyRun('save-prefs', async () => {
         try {
           await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs });

@@ -45,6 +45,26 @@ async def test_global_online_flag_toggles():
 
 
 @pytest.mark.asyncio
+async def test_font_scale_pref_stored_and_clamped():
+    """The panel font-size multiplier persists and is clamped to safe bounds so a
+    bad WS value can never break rendering (accessibility slider)."""
+    hass = _hass_online()
+    # default
+    assert store_account.get_prefs(hass)["font_scale"] == 1.0
+    # in-range value is kept
+    await store_account.async_set_prefs(hass, {"font_scale": 1.3})
+    assert store_account.get_prefs(hass)["font_scale"] == 1.3
+    # over/under range is clamped to the hard bounds
+    await store_account.async_set_prefs(hass, {"font_scale": 99})
+    assert store_account.get_prefs(hass)["font_scale"] == store_account._FONT_SCALE_MAX
+    await store_account.async_set_prefs(hass, {"font_scale": 0.01})
+    assert store_account.get_prefs(hass)["font_scale"] == store_account._FONT_SCALE_MIN
+    # garbage falls back to the default
+    await store_account.async_set_prefs(hass, {"font_scale": "huge"})
+    assert store_account.get_prefs(hass)["font_scale"] == 1.0
+
+
+@pytest.mark.asyncio
 async def test_global_account_round_trip_and_identity():
     hass = _hass_online()
     await store_account.async_set_account(hass, {"refresh_token": "SECRET", "uid": "u1", "name": "Alice"})
