@@ -2247,9 +2247,13 @@ class CycleDetector:
                 final_readings.append((end_time, last_p))
 
         start_ts = self._current_cycle_start.timestamp()
+        # Store timestamps in canonical UTC (#369). Reading timestamps arrive from
+        # dt_util.now() (HA-local-aware) while trim/split paths emit UTC, which left
+        # past_cycles with a mix of offsets. Normalizing here (instant-preserving)
+        # keeps stored cycles consistent and safe for cross-device/store transfer.
         cycle_data: dict[str, Any] = {
-            "start_time": self._current_cycle_start.isoformat(),
-            "end_time": end_time.isoformat(),
+            "start_time": dt_util.as_utc(self._current_cycle_start).isoformat(),
+            "end_time": dt_util.as_utc(end_time).isoformat(),
             "duration": duration,
             "max_power": self._cycle_max_power,
             "status": status,

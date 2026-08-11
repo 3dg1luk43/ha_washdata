@@ -443,4 +443,9 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
 - [DONE] #339 - keepalive in `_handle_state_expiry`: injects synthetic 0 W during a silent anti-wrinkle
   tail (gated on `_last_real_reading_time > off_delay`, never bumped) so the detector's idle/2h-cap exits
   the mode. Verified end-to-end (real detector exits ANTI_WRINKLE->OFF on injected 0 W). New
-  `tests/test_issue_339_anti_wrinkle_silent.py`. Fast suite 1367 green. Register item 63.
+  `tests/test_issue_339_anti_wrinkle_silent.py`. Fast suite 1367 green. Register item 63. (`8f91e5a`)
+- [DONE] #369 - normalize cycle `start_time`/`end_time` to canonical UTC on write
+  (`dt_util.as_utc(...).isoformat()` in `_finish_cycle`), instant-preserving. No migration of existing
+  history (low-risk; consumers parse offsets fine). New `tests/test_issue_369_utc_timestamps.py`. Fast
+  suite 1368 green. Register item 64. NOTE for maintainer: the "vor 2 Stunden" DISPLAY symptom is a
+  separate likely start-vs-end misread (list renders start time) - reply to reporter to confirm.
