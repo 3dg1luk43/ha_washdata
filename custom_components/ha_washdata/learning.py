@@ -170,11 +170,11 @@ class LearningManager:
             locked = set()
 
         filtered_suggestions: dict[str, Any] = {}
-        any_locked_deleted = False
+        any_deleted = False
         for key, data in suggestions.items():
             if key in locked:
                 self.profile_store.delete_suggestion(key)
-                any_locked_deleted = True
+                any_deleted = True
                 continue
             if isinstance(data, dict) and "value" in data:
                 current_val = current_options.get(key)
@@ -187,6 +187,7 @@ class LearningManager:
                         # Gate 1: exact equality → stale, delete so it doesn't linger.
                         if abs_delta < 1e-9:
                             self.profile_store.delete_suggestion(key)
+                            any_deleted = True
                             continue
 
                         # Gate 2: change too small to be meaningful → delete (noise).
@@ -194,6 +195,7 @@ class LearningManager:
                         if (rel_delta < MIN_SUGGESTION_REL_DELTA
                                 and abs_delta < _suggestion_min_abs_delta(key)):
                             self.profile_store.delete_suggestion(key)
+                            any_deleted = True
                             continue
 
                         # Gate 3: cooldown active → skip update without deleting.
@@ -208,7 +210,7 @@ class LearningManager:
             filtered_suggestions[key] = data
 
         if not filtered_suggestions:
-            if any_locked_deleted:
+            if any_deleted:
                 self.hass.async_create_task(self.profile_store.async_save())
             return
 
