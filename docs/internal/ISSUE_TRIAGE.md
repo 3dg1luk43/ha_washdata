@@ -470,4 +470,11 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
 - [DONE] #346 - two debug lines. Detector: pure `_smart_term_block_reason()` helper (unit-tested)
   + throttled debug log of why the fast end-path didn't fire. Manager: debug log of mapped/release
   fraction when the pause release is held. No behaviour change. New
-  `tests/test_issue_346_smart_term_debug.py`; fast 1383. Register item 69.
+  `tests/test_issue_346_smart_term_debug.py`; fast 1383. Register item 69. (`2419a62`)
+- [DONE] #367 - new `CONF_POWER_PROFILE_INTERVAL_MIN` (default 15), read in the profile-count sensor
+  (clamped >=1), passed as `interval_s` to `get_profile_power_profile`. Panel setting in Timing/
+  Housekeeping. New `tests/test_issue_367_power_profile_interval.py`; settings E2E 15; fast 1386.
+  Register item 70. Pending non-EN translation: `setting.power_profile_interval_min.{label,doc}`.
+
+### Panel translation keys pending (final subagent pass, never machine-translate)
+- `setting.power_profile_interval_min.{label,doc}` (#367)

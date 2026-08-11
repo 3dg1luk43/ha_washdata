@@ -56,6 +56,8 @@ from .const import (
     SIGNAL_WASHER_UPDATE,
     CONF_WATCHDOG_INTERVAL,
     CONF_EXPOSE_DEBUG_ENTITIES,
+    CONF_POWER_PROFILE_INTERVAL_MIN,
+    DEFAULT_POWER_PROFILE_INTERVAL_MIN,
     DEVICE_TYPE_PUMP,
     STATE_OFF,
     STATE_IDLE,
@@ -736,6 +738,21 @@ class WasherProfileCountSensor(WasherBaseSensor):
         def _to_min(sec: float) -> int:
             return int(sec / 60) if sec else 0
 
+        # power_profile bucket size (minutes) is configurable (#367); default 15.
+        # Clamp to >=1 (get_profile_power_profile returns [] for interval <= 0).
+        cfg_entry = getattr(self._manager, "config_entry", None)
+        interval_min = DEFAULT_POWER_PROFILE_INTERVAL_MIN
+        if cfg_entry is not None:
+            try:
+                interval_min = int(
+                    cfg_entry.options.get(
+                        CONF_POWER_PROFILE_INTERVAL_MIN, DEFAULT_POWER_PROFILE_INTERVAL_MIN
+                    )
+                )
+            except (TypeError, ValueError):
+                interval_min = DEFAULT_POWER_PROFILE_INTERVAL_MIN
+        interval_min = max(1, interval_min)
+
         return {
             "average_consumption_kwh": avg_energy,
             "total_consumption_kwh": total_energy,
@@ -751,9 +768,9 @@ class WasherProfileCountSensor(WasherBaseSensor):
             # Refreshes with the profile: the envelope is rebuilt on each new
             # labelled cycle, which bumps this sensor's cycle_count state.
             "power_profile": self._manager.profile_store.get_profile_power_profile(
-                self._profile_name
+                self._profile_name, interval_s=interval_min * 60.0
             ),
-            "power_profile_interval_min": 15,
+            "power_profile_interval_min": interval_min,
         }
 
 
