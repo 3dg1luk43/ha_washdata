@@ -848,6 +848,7 @@
     "trend_duration_shorter": "期間は短くなる傾向にあります ({pct}%/サイクル) - 最近の平均 {avg}",
     "trend_energy_down": "エネルギーは減少傾向にあります ({pct}%/サイクル)",
     "trend_energy_up": "エネルギーは増加傾向にあります ({pct}%/サイクル) - 最近の平均 {avg}",
+    "trim_destructive_confirm": "サイクルの{pct}%だけが残り、この操作は元に戻せません。続行しますか？",
     "trim_intro": "赤いハンドルをドラッグするか、値を入力します。窓の外側のものはすべて削除されます。",
     "tuning_suggestions_available": "{count} 観察されたサイクルから得られる調整提案。これらは関連するフィールドの横に表示されます。",
     "unsure_detected_prefix": "WashData が検出したかどうかは不明",

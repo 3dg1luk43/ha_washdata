@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Duur trending korter ({pct}%/cyclus) – recent gemiddelde {avg}",
     "trend_energy_down": "Energietrend omlaag ({pct}%/cyclus)",
     "trend_energy_up": "Energie stijgt ({pct}%/cyclus) – recent gemiddelde {avg}",
+    "trim_destructive_confirm": "Hiermee wordt slechts {pct}% van de cyclus behouden. Dit kan niet ongedaan worden gemaakt. Doorgaan?",
     "trim_intro": "Versleep de rode grepen of voer waarden in. Alles buiten het raam wordt verwijderd.",
     "tuning_suggestions_available": "{count} afstemmingssuggestie beschikbaar op basis van waargenomen cycli. Ze verschijnen naast de relevante velden.",
     "unsure_detected_prefix": "WashData weet niet zeker of het is gedetecteerd",

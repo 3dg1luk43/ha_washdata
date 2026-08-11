@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Kohëzgjatja në tendencë më e shkurtër ({pct}%/cikël) - mesatare e fundit {avg}",
     "trend_energy_down": "Tendenca e energjisë në rënie ({pct}%/cikël)",
     "trend_energy_up": "Tendenca e energjisë në rritje ({pct}%/cikël) - mesatarisht kohët e fundit {avg}",
+    "trim_destructive_confirm": "Kjo ruan vetëm {pct}% të ciklit dhe nuk mund të zhbëhet. Vazhdoni?",
     "trim_intro": "Zvarrit dorëzat e kuqe ose futo vlerat. Gjithçka jashtë dritares hiqet.",
     "tuning_suggestions_available": "Ofrohet {count} sugjerim akordimi nga ciklet e vëzhguara. Ato shfaqen pranë fushave përkatëse.",
     "unsure_detected_prefix": "WashData nuk është i sigurt se ka zbuluar",

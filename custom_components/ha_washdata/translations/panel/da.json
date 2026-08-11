@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Varighed, der trender kortere ({pct}%/cyklus) – seneste gennemsnit {avg}",
     "trend_energy_down": "Energi på vej ned ({pct} %/cyklus)",
     "trend_energy_up": "Energitrends op ({pct} %/cyklus) – seneste gennemsnit {avg}",
+    "trim_destructive_confirm": "Dermed bevares kun {pct}% af cyklussen. Dette kan ikke fortrydes. Fortsæt?",
     "trim_intro": "Træk i de røde håndtag, eller indtast værdier. Alt uden for vinduet fjernes.",
     "tuning_suggestions_available": "{count} indstillingsforslag tilgængeligt fra observerede cyklusser. De vises ved siden af ​​de relevante felter.",
     "unsure_detected_prefix": "WashData er usikker på, om det er registreret",

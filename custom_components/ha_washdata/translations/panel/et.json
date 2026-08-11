@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Kestus on lühem ({pct}%/tsükkel) – hiljutine keskmine {avg}",
     "trend_energy_down": "Energiatrend langeb ({pct}% tsükli kohta)",
     "trend_energy_up": "Energiatrend tõuseb ({pct}%/tsükkel) – hiljutine keskmine {avg}",
+    "trim_destructive_confirm": "See säilitab tsüklist ainult {pct}% ja seda ei saa tagasi võtta. Kas jätkata?",
     "trim_intro": "Lohistage punaseid käepidemeid või sisestage väärtused. Kõik väljaspool akent eemaldatakse.",
     "tuning_suggestions_available": "Vaadeldud tsüklitest on saadaval {count} häälestamise soovitus. Need kuvatakse asjakohaste väljade kõrval.",
     "unsure_detected_prefix": "WashData pole kindel, et see tuvastas",

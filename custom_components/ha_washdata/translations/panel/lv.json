@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Ilguma tendence ir īsāka ({pct}%/cikls) – nesenā vidējā {avg}",
     "trend_energy_down": "Enerģijas tendence samazinās ({pct}%/cikls)",
     "trend_energy_up": "Enerģijas tendence pieaug ({pct}%/ciklā) – nesenā vidējā {avg}",
+    "trim_destructive_confirm": "Tas saglabā tikai {pct}% no cikla, un šo nevar atsaukt. Turpināt?",
     "trim_intro": "Velciet sarkanos rokturus vai ievadiet vērtības. Viss, kas atrodas ārpus loga, tiek noņemts.",
     "tuning_suggestions_available": "No novērotajiem cikliem pieejams {count} regulēšanas ieteikums. Tie parādās blakus attiecīgajiem laukiem.",
     "unsure_detected_prefix": "WashData nav pārliecināts, ka tas ir atklāts",

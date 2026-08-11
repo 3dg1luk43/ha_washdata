@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Varaktighet trendar kortare ({pct}%/cykel) – senaste medelvärde {avg}",
     "trend_energy_down": "Energin går ned ({pct}%/cykel)",
     "trend_energy_up": "Energitrend uppåt ({pct}%/cykel) – senaste snitt {avg}",
+    "trim_destructive_confirm": "Endast {pct}% av cykeln behålls. Detta kan inte ångras. Fortsätta?",
     "trim_intro": "Dra de röda handtagen eller ange värden. Allt utanför fönstret tas bort.",
     "tuning_suggestions_available": "{count} inställningsförslag tillgängligt från observerade cykler. De visas bredvid de relevanta fälten.",
     "unsure_detected_prefix": "WashData är osäker på att den identifierade",

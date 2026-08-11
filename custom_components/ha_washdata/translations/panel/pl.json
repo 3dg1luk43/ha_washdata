@@ -853,6 +853,7 @@
     "trend_duration_shorter": "Trwanie w trendzie krótszym ({pct}%/cykl) – ostatnia średnia {avg}",
     "trend_energy_down": "Energia wykazuje tendencję spadkową ({pct}%/cykl)",
     "trend_energy_up": "Trend wzrostowy w zakresie energii ({pct}%/cykl) – ostatnia średnia {avg}",
+    "trim_destructive_confirm": "To zachowa tylko {pct}% cyklu i tej operacji nie można cofnąć. Kontynuować?",
     "trim_intro": "Przeciągnij czerwone uchwyty lub wprowadź wartości. Wszystko za oknem jest usuwane.",
     "tuning_suggestions_available": "Sugestia dostrojenia {count} dostępna z obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
     "unsure_detected_prefix": "WashData nie jest pewien, czy został wykryty",

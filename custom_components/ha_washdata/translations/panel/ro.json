@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Durata este în scădere ({pct}%/ciclu) – medie recentă {avg}",
     "trend_energy_down": "Energia este în scădere ({pct}%/ciclu)",
     "trend_energy_up": "Energia este în creștere ({pct}%/ciclu) – medie recentă {avg}",
+    "trim_destructive_confirm": "Se păstrează doar {pct}% din ciclu, iar această acțiune nu poate fi anulată. Continuați?",
     "trim_intro": "Trageți mânerele roșii sau introduceți valori. Tot ceea ce este în afara ferestrei este eliminat.",
     "tuning_suggestions_available": "{count} sugestie de ajustare disponibilă din ciclurile observate. Acestea apar lângă câmpurile relevante.",
     "unsure_detected_prefix": "WashData nu este sigur că a detectat",

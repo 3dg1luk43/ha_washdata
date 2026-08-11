@@ -848,6 +848,7 @@
     "trend_duration_shorter": "기간이 짧아지는 추세({pct}%/주기) – 최근 평균 {avg}",
     "trend_energy_down": "에너지 감소 추세({pct}%/주기)",
     "trend_energy_up": "에너지 상승 추세({pct}%/주기) – 최근 평균 {avg}",
+    "trim_destructive_confirm": "사이클의 {pct}%만 남으며 이 작업은 취소할 수 없습니다. 계속하시겠습니까?",
     "trim_intro": "빨간색 핸들을 드래그하거나 값을 입력합니다. 창 밖의 모든 것이 제거됩니다.",
     "tuning_suggestions_available": "관찰된 주기에서 사용할 수 있는 {count} 조정 제안입니다. 관련 필드 옆에 표시됩니다.",
     "unsure_detected_prefix": "WashData가 감지되었는지 확실하지 않습니다.",

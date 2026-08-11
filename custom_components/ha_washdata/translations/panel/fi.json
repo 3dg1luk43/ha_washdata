@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Kesto trendi lyhyempi ({pct}%/sykli) – viimeaikainen keskim. {avg}",
     "trend_energy_down": "Energia laskee ({pct} %/sykli)",
     "trend_energy_up": "Energiatrendi nousussa ({pct} %/sykli) – viimeaikainen keskiarvo {avg}",
+    "trim_destructive_confirm": "Tämä säilyttää vain {pct}% syklistä. Tätä ei voi kumota. Jatketaanko?",
     "trim_intro": "Vedä punaisia ​​kahvoja tai syötä arvot. Kaikki ikkunan ulkopuolella poistetaan.",
     "tuning_suggestions_available": "{count} viritysehdotus saatavilla havaituista sykleistä. Ne näkyvät asianmukaisten kenttien vieressä.",
     "unsure_detected_prefix": "WashData ei ole varma, onko se havaittu",

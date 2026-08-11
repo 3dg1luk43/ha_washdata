@@ -880,6 +880,7 @@
     "trend_duration_shorter": "Duration trending shorter ({pct}%/cycle) – recent avg {avg}",
     "trend_energy_down": "Energy trending down ({pct}%/cycle)",
     "trend_energy_up": "Energy trending up ({pct}%/cycle) – recent avg {avg}",
+    "trim_destructive_confirm": "This keeps only {pct}% of the cycle and cannot be undone. Continue?",
     "trim_intro": "Drag the red handles, or enter values. Everything outside the window is removed.",
     "tuning_suggestions_available": "{count} tuning suggestion available from observed cycles. They appear beside the relevant fields.",
     "unsure_detected_prefix": "WashData is unsure it detected",
