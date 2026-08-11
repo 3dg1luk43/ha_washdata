@@ -110,7 +110,8 @@ def test_build_segments_filters_offsets_too_close_together(store):
 @pytest.mark.asyncio
 async def test_apply_split_interactive_with_manual_segments(store):
     """Manual split (no idle gap in source) creates correct new cycles."""
-    start_dt = datetime(2026, 5, 11, 10, 0, 0)
+    from datetime import timezone
+    start_dt = datetime(2026, 5, 11, 10, 0, 0, tzinfo=timezone.utc)
     cycle = _make_cycle(start_dt, 3600.0)
     store._data["past_cycles"].append(cycle)
 
@@ -129,11 +130,11 @@ async def test_apply_split_interactive_with_manual_segments(store):
     cycles_sorted = sorted(cycles, key=lambda c: c["start_time"])
     c1, c2 = cycles_sorted
 
-    assert c1["start_time"] == start_dt.isoformat()
+    # split emits UTC ISO strings (+00:00) per #369 normalization
+    assert c1["start_time"] == "2026-05-11T10:00:00+00:00"
     assert c1["duration"] == 1800.0
 
-    expected_c2_start = (start_dt + timedelta(seconds=1800)).isoformat()
-    assert c2["start_time"] == expected_c2_start
+    assert c2["start_time"] == "2026-05-11T10:30:00+00:00"
     assert c2["duration"] == 1800.0
 
 

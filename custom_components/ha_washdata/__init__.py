@@ -302,7 +302,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         minor_version=8,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.7", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.8", version, minor_version
     )
     return True
 

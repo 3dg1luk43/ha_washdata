@@ -7829,7 +7829,7 @@ class HaWashdataPanel extends HTMLElement {
   _wizGroupIds(manifest, catId, prof) {
     const cat = (manifest.categories || {})[catId] || {};
     const g = (cat.groups || []).find(gr => gr.profile === prof);
-    return g ? g.cycles.map(cy => String(cy.id)).filter(id => id !== 'null') : [];
+    return g ? g.cycles.filter(cy => cy.id != null).map(cy => String(cy.id)) : [];
   }
 
   // tri-state {sel, total, state} for a category, for the checkbox rendering.
@@ -7903,11 +7903,13 @@ class HaWashdataPanel extends HTMLElement {
             <span class="wd-sd-cyc-meta">${_esc(cy.date ? _fmtDate(cy.date) : String(cy.id))}${cy.duration != null ? ' · ' + _fmtDuration(cy.duration) : ''}</span>
           </label>`).join('') : '';
           return `<div>
-            <label class="wd-sd-cyc">
-              <input type="checkbox" data-maction="wiz-toggle-cycgroup" data-cat="${cid}" data-prof="${_esc(g.profile)}" ${gall ? 'checked' : ''} ${gsome ? 'data-indeterminate="1"' : ''}>
-              <span class="wd-sd-cyc-meta"><strong>${_esc(g.profile || this._t('lbl.unlabelled', {}, 'Unlabelled'))}</strong> (${gsel}/${g.count})</span>
+            <div class="wd-sd-cyc" style="display:flex;align-items:center">
+              <label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" data-maction="wiz-toggle-cycgroup" data-cat="${cid}" data-prof="${_esc(g.profile)}" ${gall ? 'checked' : ''} ${gsome ? 'data-indeterminate="1"' : ''}>
+                <span class="wd-sd-cyc-meta"><strong>${_esc(g.profile || this._t('lbl.unlabelled', {}, 'Unlabelled'))}</strong> (${gsel}/${g.count})</span>
+              </label>
               <button type="button" class="wd-linkbtn" data-maction="wiz-expand" data-key="${_esc(key)}" style="margin-left:auto;background:none;border:none;color:var(--primary-color);cursor:pointer">${expanded ? '▾' : '▸'}</button>
-            </label>
+            </div>
             ${rows2}
           </div>`;
         }).join('')}</div>`;
@@ -9330,6 +9332,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!eid || !k) return;
       try {
         await this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: true });
+        if (!this._isActiveEntry(eid)) return;
         this._suggestions = (this._suggestions || []).filter(s => s.key !== k);
         if (!(this._lockedSuggestions || []).includes(k)) (this._lockedSuggestions = this._lockedSuggestions || []).push(k);
         this._showToast(this._t('msg.sug_muted', {}, "Won't suggest this setting again"), 'info');
@@ -9411,6 +9414,25 @@ class HaWashdataPanel extends HTMLElement {
     if (e) e.value = clock ? this._offsetToClock(m.trim.end) : Math.round(m.trim.end);
   }
 
+  // Snap the trim window to the nearest real sample offsets so the shaded
+  // preview and the eventual cut land on actual data points, not the sub-second
+  // gaps between them (#373). Sample offsets are frequently fractional while the
+  // inputs round to whole seconds, so without this the handle can sit just below
+  // the sample the user aimed at. The store re-snaps against the full-resolution
+  // trace before the irreversible write; this keeps the on-screen handles honest
+  // against the (possibly decimated) displayed samples.
+  _snapTrimBounds() {
+    const m = this._modal;
+    const samples = (m.curve && m.curve.samples) || [];
+    if (samples.length < 2) return;
+    const snap = (v) => samples.reduce(
+      (best, s) => (Math.abs(s[0] - v) < Math.abs(best - v) ? s[0] : best),
+      samples[0][0],
+    );
+    m.trim.start = snap(m.trim.start);
+    m.trim.end = snap(m.trim.end);
+  }
+
   // Trim-input value <-> cycle-offset seconds (supports the clock-time mode).
   _offsetToClock(offsetS) {
     const m = this._modal, st = m && m.curve && m.curve.start_time;
@@ -9431,8 +9453,13 @@ class HaWashdataPanel extends HTMLElement {
     const dt = new Date(start);
     dt.setHours(p[0] || 0, p[1] || 0, p[2] || 0, 0);
     let off = (dt - start) / 1000;
-    if (off < -1) off += 86400;  // entered a time past midnight
     const full = (m.curve && m.curve.full_duration_s) || 0;
+    // Only apply the past-midnight +24h correction when the shifted value still
+    // lands inside the cycle. An early START (a clock time before the cycle's
+    // actual start) would otherwise wrap forward a full day and clamp to the far
+    // end, collapsing the window to ~1s (#373). Left negative, the clamp below
+    // pins it to 0 -- i.e. "keep everything from the start".
+    if (off < -1 && off + 86400 <= full) off += 86400;
     return Math.max(0, Math.min(full, off));
   }
   _trimInputToOffset(val) {
@@ -9464,8 +9491,13 @@ class HaWashdataPanel extends HTMLElement {
 
     if (m.mode === 'trim') {
       const start = sr.getElementById('wd-trim-start'), end = sr.getElementById('wd-trim-end');
+      // 'input' tracks the live value for the preview; 'change' (blur/Enter)
+      // commits and snaps both handles to real samples (#373).
       if (start) start.addEventListener('input', () => { const off = this._trimInputToOffset(start.value); if (off === null) return; m.trim.start = Math.max(0, Math.min(off, m.trim.end - 1)); this._drawCycleEditor(); });
       if (end) end.addEventListener('input', () => { const off = this._trimInputToOffset(end.value); if (off === null) return; m.trim.end = Math.min(m.curve.full_duration_s, Math.max(off, m.trim.start + 1)); this._drawCycleEditor(); });
+      const commit = () => { this._snapTrimBounds(); this._syncTrimInputs(); this._drawCycleEditor(); };
+      if (start) start.addEventListener('change', commit);
+      if (end) end.addEventListener('change', commit);
       cyc.addEventListener('pointerdown', e => {
         const wd = cyc._wd; if (!wd) return;
         const r = cyc.getBoundingClientRect(); const px = e.clientX - r.left;
@@ -9479,7 +9511,7 @@ class HaWashdataPanel extends HTMLElement {
         else m.trim.end = Math.max(x, m.trim.start + 1);
         this._syncTrimInputs(); this._drawCycleEditor();
       });
-      const stop = () => { m.drag = null; };
+      const stop = () => { if (m.drag) { this._snapTrimBounds(); this._syncTrimInputs(); this._drawCycleEditor(); } m.drag = null; };
       cyc.addEventListener('pointerup', stop); cyc.addEventListener('pointercancel', stop);
     } else if (m.mode === 'split') {
       cyc.addEventListener('pointerdown', e => {
@@ -10831,6 +10863,12 @@ class HaWashdataPanel extends HTMLElement {
         // Backgrounded task (issue #311): recompute + envelope rebuild can stall a
         // low-power host, so run it via the registry with a header pill.
         const cid = m.cycleId, s = m.trim.start, e2 = m.trim.end;
+        // The trim is irreversible (no undo). Confirm before discarding the
+        // majority of the trace so an accidental collapse can't slip through on
+        // a single click (#373).
+        const full = (m.curve && m.curve.full_duration_s) || 0;
+        const keptPct = full > 0 ? Math.max(0, Math.round(((e2 - s) / full) * 100)) : 100;
+        if (keptPct < 50 && !confirm(this._t('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
         this._kickAndTrack(
           { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
           'cyc-trim-apply',
