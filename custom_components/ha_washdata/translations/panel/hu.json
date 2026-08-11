@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Az időtartam egyre rövidebb ({pct}%/ciklus) – legutóbbi átlag: {avg}",
     "trend_energy_down": "Az energia csökkenő tendenciája ({pct}%/ciklus)",
     "trend_energy_up": "Emelkedő energiatrend ({pct}%/ciklus) – legutóbbi átlag {avg}",
+    "trim_destructive_confirm": "Ez a ciklusnak csak {pct}%-át tartja meg, és nem vonható vissza. Folytatja?",
     "trim_intro": "Húzza el a piros fogantyúkat, vagy írjon be értékeket. Az ablakon kívül mindent eltávolítanak.",
     "tuning_suggestions_available": "{count} hangolási javaslat érhető el a megfigyelt ciklusokból. A megfelelő mezők mellett jelennek meg.",
     "unsure_detected_prefix": "A WashData nem biztos abban, hogy észlelte",

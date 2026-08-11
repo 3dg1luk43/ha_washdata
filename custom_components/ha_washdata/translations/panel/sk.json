@@ -853,6 +853,7 @@
     "trend_duration_shorter": "Trvanie je kratšie ({pct} %/cyklus) – posledný priemer {avg}",
     "trend_energy_down": "Energetický trend klesá ({pct} %/cyklus)",
     "trend_energy_up": "Energetický trend stúpa ({pct} %/cyklus) – posledný priemer {avg}",
+    "trim_destructive_confirm": "Týmto zostane len {pct}% cyklu a túto akciu nie je možné vrátiť späť. Pokračovať?",
     "trim_intro": "Potiahnite červené rukoväti alebo zadajte hodnoty. Všetko mimo okna sa odstráni.",
     "tuning_suggestions_available": "{count} návrh ladenia dostupný z pozorovaných cyklov. Zobrazujú sa vedľa príslušných polí.",
     "unsure_detected_prefix": "WashData si nie je istý, či zistil",

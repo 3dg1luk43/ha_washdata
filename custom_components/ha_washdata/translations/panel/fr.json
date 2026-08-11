@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Tendance de durée plus courte ({pct} %/cycle) – moyenne récente {avg}",
     "trend_energy_down": "Tendance à la baisse de l'énergie ({pct} %/cycle)",
     "trend_energy_up": "Tendance énergétique à la hausse ({pct} %/cycle) – moyenne récente {avg}",
+    "trim_destructive_confirm": "Cela ne conserve que {pct} % du cycle et est irréversible. Continuer ?",
     "trim_intro": "Faites glisser les poignées rouges ou entrez des valeurs. Tout ce qui se trouve à l'extérieur de la fenêtre est supprimé.",
     "tuning_suggestions_available": "{count} suggestion de réglage disponible à partir des cycles observés. Ils apparaissent à côté des champs concernés.",
     "unsure_detected_prefix": "WashData n'est pas sûr d'avoir été détecté",

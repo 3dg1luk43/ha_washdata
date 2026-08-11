@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Tímalengd styttist ({pct}%/lotu) – nýleg meðaltal {avg}",
     "trend_energy_down": "Orka á niðurleið ({pct}%/lotu)",
     "trend_energy_up": "Orka hækkar ({pct}%/lotu) – nýleg meðaltal {avg}",
+    "trim_destructive_confirm": "Aðeins {pct}% af lotunni verður eftir. Þetta er ekki hægt að afturkalla. Halda áfram?",
     "trim_intro": "Dragðu rauðu handföngin eða sláðu inn gildi. Allt fyrir utan gluggann er fjarlægt.",
     "tuning_suggestions_available": "{count} uppástunga að stilla í boði frá athuguðum lotum. Þau birtast við hlið viðkomandi reita.",
     "unsure_detected_prefix": "WashData er ekki viss um að það hafi fundist",

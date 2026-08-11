@@ -848,6 +848,7 @@
     "trend_duration_shorter": "时长趋势缩短（{pct}%/周期）– 近期平均 {avg}",
     "trend_energy_down": "能耗趋势下降（{pct}%/周期）",
     "trend_energy_up": "能耗趋势上升（{pct}%/周期）– 近期平均 {avg}",
+    "trim_destructive_confirm": "这将仅保留该周期的 {pct}%，且此操作无法撤销。是否继续？",
     "trim_intro": "拖动红色控制柄，或输入值。窗口外的所有内容将被移除。",
     "tuning_suggestions_available": "来自观察周期的 {count} 个调整建议可用。它们显示在相关字段旁边。",
     "unsure_detected_prefix": "WashData 不确定是否检测到",

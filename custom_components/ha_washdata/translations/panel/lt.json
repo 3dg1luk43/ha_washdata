@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Trukmė mažėja ({pct} %/ciklas) – pastaruoju metu vid. {avg}",
     "trend_energy_down": "Energijos mažėjimas ({pct} % per ciklą)",
     "trend_energy_up": "Energijos augimas ({pct} % per ciklą) – pastaruoju metu vid. {avg}",
+    "trim_destructive_confirm": "Bus išsaugota tik {pct}% ciklo ir to nebus galima atšaukti. Tęsti?",
     "trim_intro": "Vilkite raudonas rankenas arba įveskite vertes. Viskas, kas yra už lango, pašalinama.",
     "tuning_suggestions_available": "Galimas {count} derinimo pasiūlymas iš stebimų ciklų. Jie rodomi šalia atitinkamų laukų.",
     "unsure_detected_prefix": "„WashData“ nėra tikras, kad aptiko",

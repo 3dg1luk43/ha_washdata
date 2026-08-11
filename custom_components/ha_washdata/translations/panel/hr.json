@@ -853,6 +853,7 @@
     "trend_duration_shorter": "Trajanje je sve kraće ({pct}%/ciklus) – nedavni prosjek {avg}",
     "trend_energy_down": "Energija opada ({pct}%/ciklus)",
     "trend_energy_up": "Energija raste ({pct}%/ciklus) – nedavni prosjek {avg}",
+    "trim_destructive_confirm": "Ovo zadržava samo {pct}% ciklusa i ne može se poništiti. Nastaviti?",
     "trim_intro": "Povucite crvene ručice ili unesite vrijednosti. Sve izvan prozora je uklonjeno.",
     "tuning_suggestions_available": "{count} prijedlog podešavanja dostupan iz promatranih ciklusa. Pojavljuju se pored relevantnih polja.",
     "unsure_detected_prefix": "WashData nije siguran da je otkriven",

@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Duração com tendência decrescente ({pct}%/ciclo) – média recente {avg}",
     "trend_energy_down": "Energia com tendência decrescente ({pct}%/ciclo)",
     "trend_energy_up": "Energia com tendência crescente ({pct}%/ciclo) – média recente {avg}",
+    "trim_destructive_confirm": "Isso mantém apenas {pct}% do ciclo e esta ação não pode ser desfeita. Continuar?",
     "trim_intro": "Arraste as alças vermelhas ou insira valores. Tudo fora da janela é removido.",
     "tuning_suggestions_available": "{count} sugestão de ajuste disponível a partir dos ciclos observados. Aparecem ao lado dos campos relevantes.",
     "unsure_detected_prefix": "O WashData não tem certeza se detectou",

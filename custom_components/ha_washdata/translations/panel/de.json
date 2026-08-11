@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Dauer tendenziell kürzer ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
     "trend_energy_down": "Energie tendiert nach unten ({pct} %/Zyklus)",
     "trend_energy_up": "Energietrend steigt ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
+    "trim_destructive_confirm": "Dadurch werden nur {pct}% des Zyklus behalten. Dies kann nicht rückgängig gemacht werden. Fortfahren?",
     "trim_intro": "Ziehen Sie die roten Ziehpunkte oder geben Sie Werte ein. Alles außerhalb des Fensters wird entfernt.",
     "tuning_suggestions_available": "{count} Optimierungsvorschlag aus beobachteten Zyklen verfügbar. Sie erscheinen neben den relevanten Feldern.",
     "unsure_detected_prefix": "WashData ist sich nicht sicher, ob es erkannt wurde",

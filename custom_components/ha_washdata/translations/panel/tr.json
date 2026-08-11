@@ -848,6 +848,7 @@
     "trend_duration_shorter": "Süre eğilimi daha kısa (%{pct}/döngü) – son ortalama {avg}",
     "trend_energy_down": "Enerji düşüş eğiliminde (%{pct}/döngü)",
     "trend_energy_up": "Enerji yükseliş eğiliminde (%{pct}/döngü) – son ortalama {avg}",
+    "trim_destructive_confirm": "Bu, döngünün yalnızca %{pct}'ini korur ve bu işlem geri alınamaz. Devam edilsin mi?",
     "trim_intro": "Kırmızı tutamaçları sürükleyin veya değer girin. Pencerenin dışındaki her şey kaldırılır.",
     "tuning_suggestions_available": "Gözlemlenen döngülerden {count} ayarlama önerisi mevcut. İlgili alanların yanında görünürler.",
     "unsure_detected_prefix": "WashData algıladığından emin değil",
