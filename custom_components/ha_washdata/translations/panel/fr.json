@@ -1269,6 +1269,10 @@
       "doc": "Quelques minutes après la fin d'un cycle avant d'envoyer le rappel \"décharger la machine\" toujours en attente. Définissez 0 pour désactiver le rappel.",
       "label": "Délai de rappel de déchargement"
     },
+    "notify_unload_repeat": {
+      "doc": "Continue de renvoyer le rappel de déchargement toutes les \"Délai de rappel de déchargement\" minutes jusqu'à ce que vous ouvriez la porte ou appuyiez sur \"Arrêter les rappels\" dans la notification. Nécessite une Entité capteur de porte (le rappel lui-même en a besoin). Le bouton de rejet fonctionne sur les notifications de l'application compagnon (mobile) de Home Assistant.",
+      "label": "Répéter jusqu'à l'ouverture de la porte"
+    },
     "off_delay": {
       "doc": "Temps d'attente après la coupure de courant avant de déclarer le cycle terminé. Si le courant revient dans cette fenêtre, le cycle continue de manière transparente – cela comble les pauses entre les étapes de lavage. Les lave-vaisselle ont de longues phases de séchage (mise hors tension pendant 20 à 60 minutes), le délai d'arrêt doit donc être supérieur à ce délai pour que l'ensemble du lavage et du séchage se déroule en un seul cycle.",
       "label": "Délai d'arrêt"

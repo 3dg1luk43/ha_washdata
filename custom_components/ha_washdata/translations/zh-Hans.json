@@ -56,6 +56,7 @@
       "timer_default_message": "{device}：{minutes} 分钟定时器",
       "timer_pause_action_title": "恢复周期",
       "timer_pause_body_suffix": "周期已暂停。打开 WashData 面板以恢复。",
+      "unload_dismiss_action_title": "停止提醒",
       "notify_live_waiting_message": "{device}：尚未匹配到配置文件。",
       "vs_typical_longer": "比平常长 {pct}%",
       "vs_typical_shorter": "比平常短 {pct}%",

@@ -1241,6 +1241,10 @@
       "doc": "Minuta pasi përfundon një cikël përpara se të dërgoni alarmin rikujtues \"shkarkoni makinën\" ende në pritje. Vendosni 0 për të çaktivizuar kujtesën.",
       "label": "Vonesë njoftimi për shkarkim"
     },
+    "notify_unload_repeat": {
+      "doc": "Ridërgon kujtesën për shkarkim çdo \"Vonesë njoftimi për shkarkim\" minuta, derisa të hapni derën ose të prekni \"Ndalo kujtesat\" në njoftim. Kërkon Entitetin e sensorit të derës (ashtu si edhe vetë kujtesa). Butoni i largimit funksionon në njoftimet e aplikacionit-shoqërues (celular) të Home Assistant.",
+      "label": "Përsërit derisa të hapet dera"
+    },
     "off_delay": {
       "doc": "Koha për të pritur pasi të bjerë energjia përpara se të deklaroni ciklin të përfunduar. Nëse rryma rifillon brenda kësaj dritareje, cikli vazhdon pa probleme - kjo lidh pauzat midis fazave të larjes. Enëlarëset kanë faza të gjata tharjeje (fikje për 20-60 min), kështu që vonesa e fikjes duhet ta kalojë atë për të mbajtur të gjithë larjen+tharjen si një cikël.",
       "label": "Vonesë fikjeje"

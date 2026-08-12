@@ -1241,6 +1241,10 @@
       "doc": "Minuty po ukončení cyklu před odesláním stále čekající připomínky \"vyloučit stroj\". Nastavte 0 pro vypnutí připomínky.",
       "label": "Zpoždění připomínky vyložení"
     },
+    "notify_unload_repeat": {
+      "doc": "Znovu odesílá připomínku vyložení každých \"Zpoždění připomínky vyložení\" minut, dokud neotevřete dveře nebo v oznámení neklepnete na \"Přestat připomínat\". Vyžaduje Entitu senzoru dveří (stejně jako samotná připomínka). Tlačítko pro zrušení funguje u oznámení mobilní aplikace Home Assistant (companion app).",
+      "label": "Opakovat, dokud se neotevřou dveře"
+    },
     "off_delay": {
       "doc": "Čas čekání po poklesu příkonu před vyhlášením ukončení cyklu. Pokud se příkon obnoví v tomto okně, cyklus plynule pokračuje – to přemostí pauzy mezi fázemi praní. Myčky nádobí mají dlouhé fáze sušení (příkon vypnut po dobu 20–60 minut), takže zpozdění vypnutí musí tuto dobu překročit, aby byl celkový cyklus mytí+sušení zachován jako jeden.",
       "label": "Zpoždění vypnutí"

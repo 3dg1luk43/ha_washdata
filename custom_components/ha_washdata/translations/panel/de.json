@@ -1265,6 +1265,10 @@
       "doc": "Minuten nach dem Ende eines Zyklus, bevor die noch wartende Erinnerung „Maschine entladen“ gesendet wird. Stellen Sie 0 ein, um die Erinnerung zu deaktivieren.",
       "label": "Verzögerung der Entladeerinnerung"
     },
+    "notify_unload_repeat": {
+      "doc": "Die Entladeerinnerung wird alle \"Verzögerung der Entladeerinnerung\" Minuten erneut gesendet, bis Sie die Tür öffnen oder in der Benachrichtigung auf \"Nicht mehr erinnern\" tippen. Erfordert eine Türsensor-Entität (die Erinnerung selbst benötigt sie ohnehin). Die Schaltfläche zum Verwerfen funktioniert bei Benachrichtigungen der Home Assistant Companion-App (mobil).",
+      "label": "Wiederholen, bis die Tür geöffnet wird"
+    },
     "off_delay": {
       "doc": "Zeit, die nach einem Stromausfall gewartet werden muss, bevor der Zyklus als beendet erklärt wird. Wenn die Stromversorgung innerhalb dieses Fensters wiederhergestellt wird, läuft der Zyklus nahtlos weiter – dies überbrückt Pausen zwischen den Waschphasen. Geschirrspüler haben lange Trocknungsphasen (Ausschalten für 20–60 Minuten), daher muss die Ausschaltverzögerung länger sein, damit der gesamte Spül- und Trockenvorgang als ein Zyklus erfolgt.",
       "label": "Abschaltverzögerung"

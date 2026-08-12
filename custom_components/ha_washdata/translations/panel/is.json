@@ -1269,6 +1269,10 @@
       "doc": "Mínútum eftir að lotu lýkur áður en þú sendir áminninguna um „afferma vélina“ sem enn bíður. Stilltu 0 til að slökkva á áminningunni.",
       "label": "Losunarminni-seinkun"
     },
+    "notify_unload_repeat": {
+      "doc": "Heldur áfram að senda losunaráminninguna aftur á \"Losunarminni-seinkun\" mínútna fresti þar til þú opnar hurðina eða ýtir á \"Hætta að minna\" í tilkynningunni. Krefst Dyraskynjareiningar (áminningin sjálf gerir það). Hunsa-hnappurinn virkar á tilkynningum úr Home Assistant fylgiforritinu (farsíma).",
+      "label": "Endurtaka þar til hurðin opnast"
+    },
     "off_delay": {
       "doc": "Tími til að bíða eftir að kraftur minnkar áður en hringrásinni er lokið. Ef straumur fer aftur innan þessa glugga heldur hringrásin óaðfinnanlega áfram - þetta brúar hlé á milli þvottastiga. Uppþvottavélar eru með langa þurrkunarfasa (slökkt á slökkt í 20-60 mín) þannig að slökkvunartöfin verður að fara yfir það til að halda öllum þvotti+þurrkum sem einni lotu.",
       "label": "Slökkviðráð"

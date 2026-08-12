@@ -1269,6 +1269,10 @@
       "doc": "Minutter etter at en syklus avsluttes før du sender den fortsatt ventende påminnelsen om \"last av maskinen\". Sett 0 for å deaktivere påminnelsen.",
       "label": "Utlastingspåminnelsesforsinkelse"
     },
+    "notify_unload_repeat": {
+      "doc": "Fortsetter å sende utlastingspåminnelsen på nytt hvert \"Utlastingspåminnelsesforsinkelse\" minutt til du åpner døren eller trykker på \"Stopp påminnelser\" i varselet. Krever en Dørensorenhet (det gjør selve påminnelsen). Avvis-knappen fungerer på varsler fra Home Assistant companion-appen (mobil).",
+      "label": "Gjenta til døren åpnes"
+    },
     "off_delay": {
       "doc": "På tide å vente etter at strømmen faller før du erklærer at syklusen er fullført. Hvis strømmen gjenopptas innenfor dette vinduet, fortsetter syklusen sømløst - dette slår bro mellom pauser mellom vasketrinn. Oppvaskmaskiner har lange tørkefaser (strøm av i 20-60 min) så avslåingsforsinkelsen må overstige det for å holde hele vask+tørr som én syklus.",
       "label": "Av-forsinkelse"

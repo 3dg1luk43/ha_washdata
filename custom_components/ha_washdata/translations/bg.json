@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: таймер за {minutes} мин",
       "timer_pause_action_title": "Възобновяване на цикъла",
       "timer_pause_body_suffix": "Цикълът е на пауза. Отворете панела на WashData, за да го възобновите.",
+      "unload_dismiss_action_title": "Спри напомнянията",
       "notify_live_waiting_message": "{device}: Все още няма съвпадащ профил.",
       "vs_typical_longer": "{pct}% по-дълго от обичайното",
       "vs_typical_shorter": "{pct}% по-кратко от обичайното",

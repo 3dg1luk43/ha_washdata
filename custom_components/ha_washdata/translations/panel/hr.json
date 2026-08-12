@@ -1241,6 +1241,10 @@
       "doc": "Nekoliko minuta nakon završetka ciklusa prije slanja podsjetnika za \"istovar stroja\" koji još uvijek čeka. Postavite 0 da biste onemogućili podsjetnik.",
       "label": "Odgoda podsjetnika za istovar"
     },
+    "notify_unload_repeat": {
+      "doc": "Ponovno šalje podsjetnik za istovar svakih \"Odgoda podsjetnika za istovar\" minuta dok ne otvorite vrata ili ne dodirnete \"Prestani podsjećati\" na obavijesti. Zahtijeva Entitet senzora vrata (kao i sam podsjetnik). Gumb za odbacivanje radi na obavijestima mobilne aplikacije Home Assistant (companion app).",
+      "label": "Ponavljaj dok se vrata ne otvore"
+    },
     "off_delay": {
       "doc": "Vrijeme čekanja nakon pada struje prije nego što se proglasi da je ciklus završen. Ako se struja nastavi unutar ovog prozora, ciklus se nastavlja neprimjetno - ovo premošćuje pauze između faza pranja. Perilice posuđa imaju duge faze sušenja (isključivanje na 20-60 min) tako da odgoda isključivanja mora biti veća od te kako bi cijeli ciklus pranja+sušenja bio jedan ciklus.",
       "label": "Odgoda isključivanja"

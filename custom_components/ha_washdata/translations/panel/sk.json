@@ -1241,6 +1241,10 @@
       "doc": "Minúty po skončení cyklu pred odoslaním stále čakajúcej pripomienky „vyložiť stroj“. Ak chcete pripomienku deaktivovať, nastavte 0.",
       "label": "Oneskorenie pripomienky vyloženia"
     },
+    "notify_unload_repeat": {
+      "doc": "Znova odosiela pripomienku vyloženia každých \"Oneskorenie pripomienky vyloženia\" minút, kým neotvoríte dvere alebo v oznámení neťuknete na \"Prestať pripomínať\". Vyžaduje Entitu senzora dverí (rovnako ako samotná pripomienka). Tlačidlo na zrušenie funguje pri oznámeniach mobilnej aplikácie Home Assistant (companion app).",
+      "label": "Opakovať, kým sa neotvoria dvere"
+    },
     "off_delay": {
       "doc": "Čas čakania po poklese napájania pred vyhlásením cyklu za ukončený. Ak sa v rámci tohto okna obnoví napájanie, cyklus plynule pokračuje – premosťuje to prestávky medzi fázami umývania. Umývačky riadu majú dlhé fázy sušenia (vypnutie na 20-60 minút), takže oneskorenie vypnutia musí prekročiť túto hodnotu, aby celé umývanie + suché zostalo ako jeden cyklus.",
       "label": "Oneskorenie vypnutia"

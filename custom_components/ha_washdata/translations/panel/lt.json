@@ -1241,6 +1241,10 @@
       "doc": "Minutės po ciklo pabaigos prieš siunčiant vis dar laukiantį priminimą „iškrauti mašiną“. Norėdami išjungti priminimą, nustatykite 0.",
       "label": "Iškrovimo priminimo delsimas"
     },
+    "notify_unload_repeat": {
+      "doc": "Iškrovimo priminimas pakartotinai siunčiamas kas \"Iškrovimo priminimo delsimas\" minučių, kol neatidarysite durų arba pranešime nepaliesite \"Nustoti priminti\". Reikalingas Durų jutiklio objektas (kaip ir pačiam priminimui). Atmetimo mygtukas veikia Home Assistant mobiliosios (companion) programėlės pranešimuose.",
+      "label": "Kartoti, kol atsidarys durys"
+    },
     "off_delay": {
       "doc": "Laikas palaukti, kai nukrenta galia, prieš paskelbiant, kad ciklas baigtas. Jei maitinimas atnaujinamas šiame lange, ciklas tęsiasi sklandžiai – tai sujungia pauzes tarp plovimo etapų. Indaplovės turi ilgas džiovinimo fazes (maitinimas išjungiamas 20–60 min.), todėl išjungimo delsa turi būti didesnė už tą, kad visas plovimas+džiovinimas išliktų kaip vienas ciklas.",
       "label": "Išjungimo delsimas"

@@ -1241,6 +1241,10 @@
       "doc": "Dažas minūtes pēc cikla beigām, pirms tiek nosūtīts joprojām gaidošais atgādinājums \"izlādēt iekārtu\". Iestatiet 0, lai atspējotu atgādinājumu.",
       "label": "Izkraušanas atgādinājuma aizkave"
     },
+    "notify_unload_repeat": {
+      "doc": "Atkārtoti nosūta izkraušanas atgādinājumu ik pēc \"Izkraušanas atgādinājuma aizkave\" minūtēm, līdz atverat durvis vai paziņojumā pieskaraties \"Pārtraukt atgādināšanu\". Nepieciešama Durvju sensora entītija (tāpat kā pašam atgādinājumam). Atmešanas poga darbojas Home Assistant mobilās (companion) lietotnes paziņojumos.",
+      "label": "Atkārtot, līdz atveras durvis"
+    },
     "off_delay": {
       "doc": "Laiks gaidīt, kad jauda samazinās, pirms tiek paziņots, ka cikls ir pabeigts. Ja šajā logā tiek atsākta barošana, cikls turpinās nemanāmi – tas pārslēdz pauzes starp mazgāšanas posmiem. Trauku mazgājamām mašīnām ir garas žāvēšanas fāzes (izslēdziet strāvu uz 20–60 minūtēm), tāpēc izslēgšanas aizkavei ir jābūt lielākai par to, lai visa mazgāšana un žāvēšana būtu viens cikls.",
       "label": "Izslēgšanas aizkave"

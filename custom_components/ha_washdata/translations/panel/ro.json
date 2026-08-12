@@ -1241,6 +1241,10 @@
       "doc": "La câteva minute după încheierea unui ciclu, înainte de a trimite mementoul încă în așteptare „descărcați mașina”. Setați 0 pentru a dezactiva mementoul.",
       "label": "Întârziere Reamintire Descărcare"
     },
+    "notify_unload_repeat": {
+      "doc": "Continuă să retrimită mementoul de descărcare la fiecare \"Întârziere Reamintire Descărcare\" minute până când deschizi ușa sau atingi \"Oprește mementourile\" în notificare. Necesită o Entitate Senzor Ușă (mementoul în sine o necesită). Butonul de respingere funcționează pe notificările aplicației complementare (mobile) Home Assistant.",
+      "label": "Repetă Până la Deschiderea Ușii"
+    },
     "off_delay": {
       "doc": "Timp de așteptat după căderea energiei înainte de a declara ciclul încheiat. Dacă alimentarea se reia în această fereastră, ciclul continuă fără întreruperi - acest lucru face legătura între etapele de spălare. Mașinile de spălat vase au faze lungi de uscare (oprire pentru 20-60 de minute), așa că întârzierea de oprire trebuie să depășească aceasta pentru a menține întreaga spălare+uscare ca un singur ciclu.",
       "label": "Întârziere la Oprire"

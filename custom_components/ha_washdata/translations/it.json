@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: timer di {minutes} min",
       "timer_pause_action_title": "Riprendi ciclo",
       "timer_pause_body_suffix": "Il ciclo è in pausa. Apri il pannello WashData per riprendere.",
+      "unload_dismiss_action_title": "Interrompi promemoria",
       "notify_live_waiting_message": "{device}: nessun profilo ancora riconosciuto.",
       "vs_typical_longer": "{pct}% più lungo del solito",
       "vs_typical_shorter": "{pct}% più corto del solito",

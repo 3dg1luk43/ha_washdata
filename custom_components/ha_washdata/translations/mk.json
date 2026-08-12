@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: тајмер од {minutes} мин.",
       "timer_pause_action_title": "Продолжи со циклусот",
       "timer_pause_body_suffix": "Циклусот е паузиран. Отворете го WashData панелот за да продолжите.",
+      "unload_dismiss_action_title": "Престани да потсетуваш",
       "notify_live_waiting_message": "{device}: Сè уште нема совпаднат профил.",
       "vs_typical_longer": "{pct}% подолго од вообичаено",
       "vs_typical_shorter": "{pct}% пократко од вообичаено",

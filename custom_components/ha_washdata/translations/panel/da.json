@@ -1269,6 +1269,10 @@
       "doc": "Minutter efter en cyklus er afsluttet, før du sender den stadig ventende påmindelse om \"aflæs maskinen\". Indstil 0 for at deaktivere påmindelsen.",
       "label": "Forsinkelse for aflæsningspåmindelse"
     },
+    "notify_unload_repeat": {
+      "doc": "Bliv ved med at gensende aflæsningspåmindelsen hvert \"Forsinkelse for aflæsningspåmindelse\" minutter, indtil du åbner døren eller trykker på \"Stop påmindelser\" i notifikationen. Kræver en Dørsensorenhed (det gør selve påmindelsen). Knappen til at afvise virker på notifikationer fra Home Assistant companion-appen (mobil).",
+      "label": "Gentag indtil døren åbnes"
+    },
     "off_delay": {
       "doc": "Tid til at vente efter strømfald, før cyklussen erklæres afsluttet. Hvis strømmen genoptages inden for dette vindue, fortsætter cyklussen problemfrit - dette slår bro mellem pauser mellem vasketrinene. Opvaskemaskiner har lange tørrefaser (strøm fra i 20-60 min), så slukningsforsinkelsen skal overstige det for at holde hele vask+tør som én cyklus.",
       "label": "Slukkeforsinkelse"
