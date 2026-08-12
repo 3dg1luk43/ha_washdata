@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes} min. timer",
       "timer_pause_action_title": "Fortsett syklus",
       "timer_pause_body_suffix": "Syklusen er satt på pause. Åpne WashData-panelet for å fortsette.",
+      "unload_dismiss_action_title": "Stopp påminnelser",
       "notify_live_waiting_message": "{device}: Ingen profil gjenkjent ennå.",
       "vs_typical_longer": "{pct}% lengre enn vanlig",
       "vs_typical_shorter": "{pct}% kortere enn vanlig",

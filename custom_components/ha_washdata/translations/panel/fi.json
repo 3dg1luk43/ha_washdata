@@ -1269,6 +1269,10 @@
       "doc": "Minuutit syklin päättymisen jälkeen ennen edelleen odottavan koneen purkamisen muistutuksen lähettämistä. Aseta 0 poistaaksesi muistutuksen käytöstä.",
       "label": "Purkamismuistutuksen viive"
     },
+    "notify_unload_repeat": {
+      "doc": "Lähettää purkamismuistutuksen uudelleen \"Purkamismuistutuksen viive\" minuutin välein, kunnes avaat oven tai napautat ilmoituksen \"Lopeta muistuttaminen\" -painiketta. Vaatii ovianturin entiteetin (kuten itse muistutuskin). Hylkäyspainike toimii Home Assistant -kumppanisovelluksen (mobiili) ilmoituksissa.",
+      "label": "Toista kunnes ovi avautuu"
+    },
     "off_delay": {
       "doc": "Aika odottaa tehon putoamisen jälkeen ennen kuin sykli julistetaan päättyneeksi. Jos virta palaa tämän ikkunan sisällä, jakso jatkuu saumattomasti - tämä siltaa taukoja pesuvaiheiden välillä. Astianpesukoneissa on pitkät kuivausvaiheet (virta pois päältä 20-60 min), joten sammutusviiveen on oltava tätä suurempi, jotta koko pesu+kuivaus pysyy yhtenä jaksona.",
       "label": "Sammutusviive"

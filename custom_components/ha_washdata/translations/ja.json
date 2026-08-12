@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes} 分タイマー",
       "timer_pause_action_title": "サイクルを再開する",
       "timer_pause_body_suffix": "サイクルが一時停止中です。再開するには WashData パネルを開いてください。",
+      "unload_dismiss_action_title": "リマインダーを停止",
       "notify_live_waiting_message": "{device}: まだ一致するプロファイルがありません。",
       "vs_typical_longer": "通常より {pct}% 長い",
       "vs_typical_shorter": "通常より {pct}% 短い",

@@ -190,8 +190,10 @@ from .const import (
     CONF_SWITCH_ENTITY,
     CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
     CONF_NOTIFY_UNLOAD_MESSAGE,
+    CONF_NOTIFY_UNLOAD_REPEAT,
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_MESSAGE,
+    DEFAULT_NOTIFY_UNLOAD_REPEAT,
     CONF_NOTIFY_MILESTONES,
     CONF_NOTIFY_MILESTONE_MESSAGE,
     DEFAULT_NOTIFY_MILESTONES,
@@ -228,6 +230,7 @@ from .const import (
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     DEFAULT_MAX_DEFERRAL_SECONDS,
+    ENDING_HARD_FINALIZE_MIN_QUIET_S,
     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
     DEFAULT_END_ENERGY_THRESHOLD,
     DEVICE_COMPLETION_THRESHOLDS,
@@ -482,6 +485,18 @@ class WashDataManager:
                 CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
             )
         )
+        # Repeat the unload reminder until dismissed / door-open (opt-in, #374).
+        self._notify_unload_repeat: bool = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_UNLOAD_REPEAT, DEFAULT_NOTIFY_UNLOAD_REPEAT
+            )
+        )
+        # Set when the user taps the reminder's "stop reminding" action; timestamp of
+        # the last reminder sent, used to pace the repeats; and the mobile action
+        # listener remover (mirrors the timer-pause interactive-notification wiring).
+        self._unload_nag_dismissed: bool = False
+        self._last_unload_nag_time: datetime | None = None
+        self._remove_unload_action_listener: Any | None = None
         self._live_notification_cap = 0
         self._last_live_notification_time: datetime | None = None
         self._live_waiting_notification_sent = False
@@ -1297,6 +1312,42 @@ class WashDataManager:
             if current_power > stop_threshold * 10:
                 verified_pause = False
 
+            # --- Sustained-quiet release of an auto-detected pause (issue #375) ---
+            # An envelope-verified pause bridges a genuine low-power phase (e.g. a
+            # dishwasher's passive drying).  When the appliance instead goes truly
+            # silent at the real end, the envelope alignment can keep re-confirming
+            # against a long near-zero drying tail baked into the profile by earlier
+            # force-stopped cycles, and Smart Termination's >95%-of-span release is
+            # unreachable because the trace goes quiet BEFORE that learned tail ends.
+            # The flag then freezes True and every ENDING finalize backstop (all
+            # gated on `not _verified_pause`) is defeated, so the cycle hangs for
+            # hours until the watchdog's multi-hour silence limit force-ends it.
+            # Release the auto-pause once the cycle has completed its expected
+            # duration AND has been continuously sub-threshold for the finalize
+            # quiet floor: the drying (if any) is over, so let the normal end path
+            # finalize.  This mirrors the dishwasher `quiet_released` gate the
+            # detector already trusts in `_should_defer_finish`.  A real user pause
+            # is authoritative and re-asserted below, so it is never released here.
+            expected_dur = self.detector.expected_duration_seconds
+            time_below = getattr(self.detector, "_time_below_threshold", 0.0)
+            if (
+                verified_pause
+                and not self._is_user_paused
+                and expected_dur > 0
+                and current_duration >= expected_dur
+                and time_below >= ENDING_HARD_FINALIZE_MIN_QUIET_S
+            ):
+                self._logger.info(
+                    "Releasing auto-detected pause for %s: reached expected "
+                    "duration (%.0fs >= %.0fs) and sustained-quiet %.0fs - "
+                    "allowing normal cycle finish (issue #375).",
+                    current_matched or self._current_program,
+                    current_duration,
+                    expected_dur,
+                    time_below,
+                )
+                verified_pause = False
+
             # A user-initiated pause (Pause Cycle button, or the door-open soft
             # pause) stays in force until the user resumes (issue #306).  The
             # heuristics above only govern *auto-detected* low-power phases; without
@@ -1765,6 +1816,7 @@ class WashDataManager:
                     "timer_default_message": "{device}: {minutes} min timer",
                     "timer_pause_action_title": "Resume Cycle",
                     "timer_pause_body_suffix": "The cycle is paused. Open the WashData panel to resume.",
+                    "unload_dismiss_action_title": "Stop reminding",
                     "vs_typical_longer": "{pct}% longer than usual",
                     "vs_typical_shorter": "{pct}% shorter than usual",
                     "notify_live_waiting_message": "{device}: No profile matched yet.",
@@ -2250,6 +2302,11 @@ class WashDataManager:
                 CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
             )
         )
+        self._notify_unload_repeat = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_UNLOAD_REPEAT, DEFAULT_NOTIFY_UNLOAD_REPEAT
+            )
+        )
 
         # Re-subscribe to external cycle end trigger
         await self._setup_external_end_trigger()
@@ -2344,6 +2401,8 @@ class WashDataManager:
             self._remove_door_sensor_listener()
             self._remove_door_sensor_listener = None
         self._cancel_door_end_dwell()
+        # Drop the repeat-unload-reminder dismiss action listener (#374).
+        self._remove_unload_dismiss_listener()
         if self._remove_notify_people_listener:
             self._remove_notify_people_listener()
             self._remove_notify_people_listener = None
@@ -2468,6 +2527,7 @@ class WashDataManager:
                 self._is_clean_state = False
                 self._clean_state_start = None
                 self._notified_clean_laundry = False
+                self._reset_unload_nag_tracking()
                 # Dismiss a delivered clean reminder (and purge any queued ones)
                 # so it does not linger on the phone after the laundry is taken.
                 self._clear_clean_notification()
@@ -3179,15 +3239,27 @@ class WashDataManager:
 
         time_since_complete = (now - self._cycle_completed_time).total_seconds()
 
-        # Clean laundry nag notification
+        # Clean laundry nag notification. In repeat mode (#374) the reminder re-fires
+        # every delay-minutes and carries a "stop reminding" action; otherwise it is a
+        # single one-shot (the default, unchanged).
         if (
             self._is_clean_state
-            and not self._notified_clean_laundry
             and self._clean_state_start is not None
             and self._notify_unload_delay_minutes > 0
+            and not self._unload_nag_dismissed
         ):
-            time_in_clean = (now - self._clean_state_start).total_seconds()
-            if time_in_clean >= self._notify_unload_delay_minutes * 60:
+            delay_s = self._notify_unload_delay_minutes * 60
+            first_due = (
+                not self._notified_clean_laundry
+                and (now - self._clean_state_start).total_seconds() >= delay_s
+            )
+            repeat_due = (
+                self._notify_unload_repeat
+                and self._notified_clean_laundry
+                and self._last_unload_nag_time is not None
+                and (now - self._last_unload_nag_time).total_seconds() >= delay_s
+            )
+            if first_due or repeat_due:
                 if self._notify_finish_services or self._notify_actions:
                     duration_min = int(time_since_complete / 60)
                     msg_template = self.config_entry.options.get(
@@ -3200,35 +3272,53 @@ class WashDataManager:
                         duration=duration_min,
                         delay=self._notify_unload_delay_minutes,
                     )
+                    extra_vars: dict[str, Any] = {"tag": self._clean_tag}
+                    if self._notify_unload_repeat:
+                        # Actionable "stop reminding" button + sticky so the user can
+                        # end the repeats from the notification (mobile_app targets;
+                        # ignored by other platforms). Door-open still ends it too.
+                        extra_vars["actions"] = [
+                            {
+                                "action": self._unload_dismiss_action_id,
+                                "title": self._timer_ui_strings.get(
+                                    "unload_dismiss_action_title", "Stop reminding"
+                                ),
+                            }
+                        ]
+                        extra_vars["sticky"] = "true"
                     sent = self._dispatch_notification(
                         msg,
                         event_type=NOTIFY_EVENT_CLEAN,
-                        extra_vars={"tag": self._clean_tag},
+                        extra_vars=extra_vars,
                     )
                     if sent:
                         self._notified_clean_laundry = True
+                        self._last_unload_nag_time = now
+                        if self._notify_unload_repeat:
+                            self._ensure_unload_dismiss_listener()
                         self._logger.info(
-                            "Sent clean laundry nag notification (%.0f min after cycle end)",
+                            "Sent clean laundry nag notification (%.0f min after "
+                            "cycle end)%s",
                             time_since_complete / 60,
+                            " [repeat]" if repeat_due else "",
                         )
                     elif self._last_dispatch_deferred:
                         # Held for quiet-hours / presence delivery; the queued copy
                         # fires later. Mark handled so the 60s expiry tick doesn't
                         # enqueue a duplicate nag every minute for the whole window.
                         self._notified_clean_laundry = True
+                        self._last_unload_nag_time = now
                 else:
                     self._notified_clean_laundry = True
+                    self._last_unload_nag_time = now
 
         # Defer leaving the terminal state while a clean-state unload notification is
         # still pending. Without this guard the 30-min progress reset (or an early
         # power-off) fires before the unload nag, clearing _is_clean_state before the
-        # notification can fire. Both expiry modes below honour it.
-        nag_pending = (
-            self._is_clean_state
-            and not self._notified_clean_laundry
-            and self._notify_unload_delay_minutes > 0
-            and time_since_complete < self._notify_unload_delay_minutes * 60
-        )
+        # notification can fire. In repeat mode the hold persists across every repeat
+        # until the user dismisses it or opens the door. Both expiry modes below honour
+        # it (as does the power-off one-shot timer).
+        nag_pending = self._unload_nag_active(now)
 
         # Power-based Off detection (issue #284): opt-in, and only valid when the
         # threshold sits below stop_threshold_w (so it cannot fire while a cycle could
@@ -3315,6 +3405,7 @@ class WashDataManager:
         self._is_clean_state = False
         self._clean_state_start = None
         self._notified_clean_laundry = False
+        self._reset_unload_nag_tracking()
         self._power_off_below_since = None
         self._cancel_power_off_timer()
         self.detector.reset(STATE_OFF)
@@ -3370,14 +3461,7 @@ class WashDataManager:
         ).total_seconds() < cfg.power_off_delay:
             return
         # Honour the clean-laundry unload nag hold (mirrors the poll path).
-        if (
-            self._is_clean_state
-            and not self._notified_clean_laundry
-            and self._notify_unload_delay_minutes > 0
-            and self._cycle_completed_time is not None
-            and (dt_util.now() - self._cycle_completed_time).total_seconds()
-            < self._notify_unload_delay_minutes * 60
-        ):
+        if self._unload_nag_active(dt_util.now()):
             return
         self._logger.debug(
             "Power-based Off (one-shot timer): %.2fW below %.2fW for >= %.0fs in %s. "
@@ -3685,6 +3769,7 @@ class WashDataManager:
             self._is_clean_state = False
             self._clean_state_start = None
             self._notified_clean_laundry = False
+            self._reset_unload_nag_tracking()
             self._cycle_progress = 0.0
             self._power_off_below_since = None
             self._cancel_power_off_timer()
@@ -3728,6 +3813,7 @@ class WashDataManager:
                 self._clear_timer_pause_notification()
                 self._clean_state_start = None
                 self._notified_clean_laundry = False
+                self._reset_unload_nag_tracking()
 
                 self._start_watchdog()  # Start watchdog when cycle starts
 
@@ -4814,6 +4900,7 @@ class WashDataManager:
         self._is_clean_state = False
         self._clean_state_start = None
         self._notified_clean_laundry = False
+        self._reset_unload_nag_tracking()
         if self._door_sensor_entity:
             door_state = self.hass.states.get(self._door_sensor_entity)
             if door_state and door_state.state == "off":  # binary_sensor: off = closed
@@ -5928,6 +6015,9 @@ class WashDataManager:
         app instead of lingering. A clear for a non-existent tag is harmless, so
         this runs whenever the user has any clean/finish delivery configured.
         """
+        # Drop the repeat-reminder dismiss action listener too, so no stale mobile
+        # action stays wired once the reminder is gone (#374).
+        self._remove_unload_dismiss_listener()
         # Drop any still-queued clean entries so they cannot replay later — from
         # both the presence-hold queue and the quiet-hours queue (the nag can be
         # deferred into either).
@@ -5965,6 +6055,76 @@ class WashDataManager:
                 event_type=NOTIFY_EVENT_CLEAN,
                 extra_vars={"tag": self._clean_tag},
             )
+
+    @property
+    def _unload_dismiss_action_id(self) -> str:
+        """Stable mobile action ID for the unload-reminder dismiss button, per device."""
+        return f"UNLOAD_STOP_WD_{self.entry_id[:8].upper()}"
+
+    def _unload_nag_active(self, now: datetime) -> bool:
+        """Whether the terminal state must be held alive for the unload reminder.
+
+        Default (one-shot) behaviour: hold only until the single reminder is due, so
+        the 30-min progress reset / power-based Off cannot clear the Clean state before
+        the reminder fires. Repeat mode (``CONF_NOTIFY_UNLOAD_REPEAT``, #374): hold
+        indefinitely so the reminder keeps re-firing, until the user dismisses it from
+        the notification or opens the door (both release the hold).
+        """
+        if (
+            not self._is_clean_state
+            or self._notify_unload_delay_minutes <= 0
+            or self._cycle_completed_time is None
+        ):
+            return False
+        if self._notify_unload_repeat:
+            return not self._unload_nag_dismissed
+        return (
+            not self._notified_clean_laundry
+            and (now - self._cycle_completed_time).total_seconds()
+            < self._notify_unload_delay_minutes * 60
+        )
+
+    def _ensure_unload_dismiss_listener(self) -> None:
+        """Register the mobile action listener for the reminder's dismiss button (once).
+
+        Mirrors the timer-pause interactive notification wiring: a single
+        ``mobile_app_notification_action`` listener that matches this device's action
+        ID, marks the reminder dismissed, and clears the delivered card.
+        """
+        if self._remove_unload_action_listener is not None:
+            return
+        action_id = self._unload_dismiss_action_id
+
+        @callback
+        def _on_unload_action(event: Any) -> None:
+            if event.data.get("action") == action_id:
+                self._logger.debug(
+                    "Unload reminder dismissed via notification action"
+                )
+                self._unload_nag_dismissed = True
+                self._clear_clean_notification()
+                self._notify_update()
+
+        self._remove_unload_action_listener = self.hass.bus.async_listen(
+            "mobile_app_notification_action",
+            _on_unload_action,
+        )
+
+    def _remove_unload_dismiss_listener(self) -> None:
+        """Drop the unload-reminder dismiss action listener, if registered."""
+        if self._remove_unload_action_listener is not None:
+            self._remove_unload_action_listener()
+            self._remove_unload_action_listener = None
+
+    def _reset_unload_nag_tracking(self) -> None:
+        """Reset repeat-reminder tracking and drop the dismiss listener.
+
+        Called wherever the Clean state is cleared so the next cycle's reminder starts
+        fresh and no stale mobile action listener leaks.
+        """
+        self._remove_unload_dismiss_listener()
+        self._unload_nag_dismissed = False
+        self._last_unload_nag_time = None
 
     def _check_pre_completion_notification(self) -> None:
         """Check and send pre-completion notification."""

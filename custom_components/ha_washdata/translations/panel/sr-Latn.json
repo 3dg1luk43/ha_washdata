@@ -1241,6 +1241,10 @@
       "doc": "Nekoliko minuta nakon završetka ciklusa pre slanja podsetnika „istovarite mašinu“ koji još uvek čeka. Postavite 0 da biste onemogućili podsetnik.",
       "label": "Kašnjenje podsetnika za istovar"
     },
+    "notify_unload_repeat": {
+      "doc": "Ponovo šalje podsetnik za istovar svakih \"Kašnjenje podsetnika za istovar\" minuta dok ne otvorite vrata ili ne dodirnete \"Prestani da podsećaš\" na obaveštenju. Zahteva Entitetu senzora vrata (kao i sam podsetnik). Dugme za odbacivanje radi na obaveštenjima mobilne aplikacije Home Assistant (companion app).",
+      "label": "Ponavljaj dok se vrata ne otvore"
+    },
     "off_delay": {
       "doc": "Vreme za čekanje nakon pada struje pre nego što proglasimo ciklus završenim. Ako se napajanje nastavi unutar ovog prozora, ciklus se nastavlja bez problema - ovo premošćuje pauze između faza pranja. Mašine za pranje sudova imaju duge faze sušenja (isključenje na 20-60 min) tako da kašnjenje isključenja mora biti veće od toga da bi se celo pranje+suvo održalo kao jedan ciklus.",
       "label": "Kašnjenje isklopa"

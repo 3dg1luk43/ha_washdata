@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes} dk zamanlayıcı",
       "timer_pause_action_title": "Döngüyü Devam Ettir",
       "timer_pause_body_suffix": "Döngü duraklatıldı. Devam ettirmek için WashData panelini açın.",
+      "unload_dismiss_action_title": "Hatırlatmayı durdur",
       "notify_live_waiting_message": "{device}: Henüz eşleşen profil yok.",
       "vs_typical_longer": "olağandan %{pct} daha uzun",
       "vs_typical_shorter": "olağandan %{pct} daha kısa",

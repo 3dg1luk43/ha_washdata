@@ -1269,6 +1269,10 @@
       "doc": "Minutos después de que finaliza un ciclo antes de enviar el recordatorio de \"descargar la máquina\" que aún está en espera. Establezca 0 para desactivar el recordatorio.",
       "label": "Retardo del recordatorio de descarga"
     },
+    "notify_unload_repeat": {
+      "doc": "Sigue reenviando el recordatorio de descarga cada \"Retardo del recordatorio de descarga\" minutos hasta que abras la puerta o toques \"Dejar de recordar\" en la notificación. Requiere una Entidad de sensor de puerta (el propio recordatorio la necesita). El botón de descarte funciona en las notificaciones de la aplicación complementaria (móvil) de Home Assistant.",
+      "label": "Repetir hasta que se abra la puerta"
+    },
     "off_delay": {
       "doc": "Es tiempo de esperar después de que se corte la energía antes de declarar finalizado el ciclo. Si la energía se reanuda dentro de esta ventana, el ciclo continúa sin problemas; esto salva las pausas entre las etapas de lavado. Los lavavajillas tienen fases de secado largas (apagado durante 20 a 60 minutos), por lo que el retraso de apagado debe exceder eso para mantener todo el lavado y secado como un solo ciclo.",
       "label": "Retardo de apagado"

@@ -192,6 +192,9 @@ CONF_PAUSE_CUTS_POWER = "pause_cuts_power"  # Also turn off switch entity when p
 CONF_SWITCH_ENTITY = "switch_entity"  # Optional switch entity toggled on pause/resume
 CONF_NOTIFY_UNLOAD_DELAY_MINUTES = "notify_unload_delay_minutes"  # Minutes before "laundry waiting" nag
 CONF_NOTIFY_UNLOAD_MESSAGE = "notify_unload_message"  # Template for the clean-laundry nag message
+# Repeat the unload reminder every delay-minutes until the door opens or the user
+# taps the notification's "stop reminding" action (opt-in, #374).
+CONF_NOTIFY_UNLOAD_REPEAT = "notify_unload_repeat"
 
 # Quiet hours (do-not-disturb window). Both hours 0-23; unset/None (or start==end)
 # = feature off. When configured, finish-type notifications (finish, clean-laundry
@@ -230,6 +233,7 @@ DEFAULT_NOTIFY_CHANNEL = ""  # Empty = omit channel (companion app default)
 DEFAULT_NOTIFY_FINISH_CHANNEL = ""  # Empty = reuse status channel
 DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES = 60  # 1 hour before "still waiting" nag notification
 DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago - laundry is still inside."
+DEFAULT_NOTIFY_UNLOAD_REPEAT = False  # opt-in: re-send the unload reminder until dismissed (#374)
 DEFAULT_PEAK_RATE_MESSAGE = "Running at peak rate ({price}/kWh)."
 
 # Quiet hours default: feature off (both hours unset). See CONF_NOTIFY_QUIET_*.

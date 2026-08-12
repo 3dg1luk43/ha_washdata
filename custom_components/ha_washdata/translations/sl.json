@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: časovnik {minutes} min",
       "timer_pause_action_title": "Nadaljuj cikel",
       "timer_pause_body_suffix": "Cikel je zaustavljen. Odprite ploščo WashData za nadaljevanje.",
+      "unload_dismiss_action_title": "Nehaj opominjati",
       "notify_live_waiting_message": "{device}: Noben profil se še ne ujema.",
       "vs_typical_longer": "{pct}% dlje kot običajno",
       "vs_typical_shorter": "{pct}% krajše kot običajno",

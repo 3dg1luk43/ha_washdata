@@ -1269,6 +1269,10 @@
       "doc": "Minuter efter att en cykel har avslutats innan den fortfarande väntande påminnelsen om \"lasta av maskinen\" skickas. Ställ in 0 för att inaktivera påminnelsen.",
       "label": "Lossningspåminnelsefördröjning"
     },
+    "notify_unload_repeat": {
+      "doc": "Fortsätter att skicka lossningspåminnelsen igen var \"Lossningspåminnelsefördröjning\" minut tills du öppnar dörren eller trycker på \"Sluta påminna\" i aviseringen. Kräver en Dörrsensorentitet (det gör själva påminnelsen). Avfärda-knappen fungerar på aviseringar från Home Assistant companion-appen (mobil).",
+      "label": "Upprepa tills dörren öppnas"
+    },
     "off_delay": {
       "doc": "Dags att vänta efter strömavbrott innan man förklarar att cykeln är avslutad. Om strömmen återupptas inom detta fönster fortsätter cykeln sömlöst - detta överbryggar pauser mellan tvättstegen. Diskmaskiner har långa torkningsfaser (ström av i 20-60 min) så avstängningsfördröjningen måste överstiga den för att hålla hela tvätten+torr som en cykel.",
       "label": "Avfördröjning"

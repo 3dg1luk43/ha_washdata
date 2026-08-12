@@ -1269,6 +1269,10 @@
       "doc": "Minutid pärast tsükli lõppu enne veel ootava \"masina mahalaadimise\" meeldetuletuse saatmist. Meeldetuletuse keelamiseks määrake 0.",
       "label": "Mahalaadimise Meeldetuletuse Viivitus"
     },
+    "notify_unload_repeat": {
+      "doc": "Saadab mahalaadimise meeldetuletuse iga \"Mahalaadimise Meeldetuletuse Viivitus\" minuti järel uuesti, kuni avate ukse või puudutate teavituses nuppu \"Lõpeta meeldetuletused\". Nõuab ukse anduri olemit (nagu ka meeldetuletus ise). Loobumisnupp toimib Home Assistant kaaslasrakenduse (mobiili) teavitustes.",
+      "label": "Korda, kuni uks avaneb"
+    },
     "off_delay": {
       "doc": "Aeg oodata pärast võimsuse langemist, enne kui tsükkel lõppenuks kuulutatakse. Kui toide taastub selles aknas, jätkub tsükkel sujuvalt – see sillutab pause pesuetappide vahel. Nõudepesumasinal on pikad kuivatusfaasid (väljalülitamine 20-60 min), seega peab väljalülitamise viivitus ületama seda, et hoida kogu pesu+kuiv ühe tsüklina.",
       "label": "Väljalülitumise Viivitus"

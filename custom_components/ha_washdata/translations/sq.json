@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: kohëmatës {minutes} min",
       "timer_pause_action_title": "Rifillo ciklin",
       "timer_pause_body_suffix": "Cikli është në pauzë. Hapni panelin WashData për të vazhduar.",
+      "unload_dismiss_action_title": "Ndalo kujtesat",
       "notify_live_waiting_message": "{device}: Ende nuk është njohur asnjë profil.",
       "vs_typical_longer": "{pct}% më gjatë se zakonisht",
       "vs_typical_shorter": "{pct}% më shkurt se zakonisht",

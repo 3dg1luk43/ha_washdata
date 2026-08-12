@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: timer {minutes} min",
       "timer_pause_action_title": "Återuppta cykeln",
       "timer_pause_body_suffix": "Cykeln är pausad. Öppna WashData-panelen för att fortsätta.",
+      "unload_dismiss_action_title": "Sluta påminna",
       "notify_live_waiting_message": "{device}: Ingen profil matchad ännu.",
       "vs_typical_longer": "{pct}% längre än vanligt",
       "vs_typical_shorter": "{pct}% kortare än vanligt",

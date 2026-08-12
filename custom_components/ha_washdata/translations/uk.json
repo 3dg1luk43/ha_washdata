@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: таймер {minutes} хв",
       "timer_pause_action_title": "Відновити цикл",
       "timer_pause_body_suffix": "Цикл призупинено. Відкрийте панель WashData для відновлення.",
+      "unload_dismiss_action_title": "Не нагадувати",
       "notify_live_waiting_message": "{device}: Профіль ще не розпізнано.",
       "vs_typical_longer": "на {pct}% довше, ніж зазвичай",
       "vs_typical_shorter": "на {pct}% коротше, ніж зазвичай",

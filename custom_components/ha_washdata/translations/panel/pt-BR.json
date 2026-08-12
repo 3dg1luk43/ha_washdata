@@ -1241,6 +1241,10 @@
       "doc": "Minutos após o término de um ciclo, antes de enviar o lembrete de \"descarregar a máquina\" ainda em espera. Defina 0 para desativar o lembrete.",
       "label": "Atraso de Lembrete de Descarga"
     },
+    "notify_unload_repeat": {
+      "doc": "Continua reenviando o lembrete de descarga a cada \"Atraso de Lembrete de Descarga\" minutos até você abrir a porta ou tocar em \"Parar de lembrar\" na notificação. Requer uma Entidade do Sensor de Porta (o próprio lembrete a exige). O botão de dispensar funciona nas notificações do aplicativo complementar (móvel) do Home Assistant.",
+      "label": "Repetir Até a Porta Abrir"
+    },
     "off_delay": {
       "doc": "Tempo de espera após a queda de energia antes de declarar o término do ciclo. Se a energia for retomada dentro desta janela, o ciclo continua perfeitamente - isso faz a ponte entre as etapas de lavagem. As máquinas de lavar louça têm longas fases de secagem (desligadas por 20-60 minutos), portanto o atraso no desligamento deve exceder esse valor para manter toda a lavagem + secagem em um único ciclo.",
       "label": "Atraso de Desligamento"

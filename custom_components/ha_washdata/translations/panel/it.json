@@ -1269,6 +1269,10 @@
       "doc": "Minuti dopo la fine di un ciclo prima dell'invio del promemoria \"scaricare la macchina\" ancora in attesa. Impostare 0 per disabilitare il promemoria.",
       "label": "Ritardo promemoria scarico"
     },
+    "notify_unload_repeat": {
+      "doc": "Continua a inviare il promemoria di scarico ogni \"Ritardo promemoria scarico\" minuti finché non apri la porta o tocchi \"Interrompi promemoria\" nella notifica. Richiede un'Entità sensore porta (il promemoria stesso la richiede). Il pulsante di chiusura funziona sulle notifiche dell'app complementare (mobile) di Home Assistant.",
+      "label": "Ripeti finché la porta non si apre"
+    },
     "off_delay": {
       "doc": "È tempo di attendere dopo l'interruzione della corrente prima di dichiarare terminato il ciclo. Se l'alimentazione viene ripristinata entro questo intervallo, il ciclo continua senza interruzioni, consentendo di colmare le pause tra le fasi di lavaggio. Le lavastoviglie hanno fasi di asciugatura lunghe (spegnimento per 20-60 minuti), quindi il ritardo di spegnimento deve superare quello per mantenere l'intero ciclo di lavaggio+asciugatura come un ciclo.",
       "label": "Ritardo spegnimento"

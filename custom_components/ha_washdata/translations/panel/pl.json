@@ -1241,6 +1241,10 @@
       "doc": "Minuty po zakończeniu cyklu przed wysłaniem wciąż oczekującego przypomnienia o „rozładowaniu maszyny”. Ustaw 0, aby wyłączyć przypomnienie.",
       "label": "Opóźnienie Przypomnienia o Rozładunku"
     },
+    "notify_unload_repeat": {
+      "doc": "Ponownie wysyła przypomnienie o rozładunku co \"Opóźnienie Przypomnienia o Rozładunku\" minut, dopóki nie otworzysz drzwi lub nie dotkniesz \"Przestań przypominać\" w powiadomieniu. Wymaga Encji Czujnika Drzwi (tak jak samo przypomnienie). Przycisk odrzucenia działa w powiadomieniach aplikacji mobilnej Home Assistant (companion app).",
+      "label": "Powtarzaj, aż otworzą się drzwi"
+    },
     "off_delay": {
       "doc": "Czas oczekiwania po spadku mocy przed ogłoszeniem zakończenia cyklu. Jeżeli w tym oknie zasilanie zostanie przywrócone, cykl będzie przebiegał płynnie – eliminując przerwy pomiędzy etapami prania. Zmywarki mają długie fazy suszenia (wyłączenie zasilania na 20–60 minut), więc opóźnienie wyłączenia musi być dłuższe, aby całe pranie+suszenie trwało w jednym cyklu.",
       "label": "Opóźnienie Wyłączenia"

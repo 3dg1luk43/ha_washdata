@@ -1241,6 +1241,10 @@
       "doc": "Percekkel a ciklus lejárta után, mielőtt elküldené a még mindig várakozó \"üresd ki a gépet\" emlékeztetőt. Állítsa be a 0-t az emlékeztető letiltásához.",
       "label": "Kirakodási emlékeztető késleltetése"
     },
+    "notify_unload_repeat": {
+      "doc": "Újraküldi a kirakodási emlékeztetőt \"Kirakodási emlékeztető késleltetése\" percenként, amíg ki nem nyitja az ajtót, vagy meg nem érinti az \"Emlékeztetés leállítása\" gombot az értesítésen. Ajtóérzékelő entitást igényel (ahogyan maga az emlékeztető is). Az elvetés gomb a Home Assistant kísérőalkalmazás (mobil) értesítésein működik.",
+      "label": "Ismétlés az ajtó kinyitásáig"
+    },
     "off_delay": {
       "doc": "Várakozási idő a teljesítmény csökkenése után, mielőtt befejezettnek nyilvánítaná a ciklust. Ha az áramellátás ezen az ablakon belül folytatódik, a ciklus zökkenőmentesen folytatódik – ez áthidalja a szüneteket a mosási fázisok között. A mosogatógépek hosszú szárítási fázisokkal rendelkeznek (20-60 percre kikapcsolva), így a kikapcsolási késleltetésnek meg kell haladnia ezt, hogy az egész mosás+szárítás egy ciklusban maradjon.",
       "label": "Kikapcsolási késleltetés"

@@ -1241,6 +1241,10 @@
       "doc": "Minute po koncu cikla pred pošiljanjem še vedno čakajočega opomnika \"raztovarjanje stroja\". Nastavite 0, da onemogočite opomnik.",
       "label": "Zamuda opomnika za raztovarjanje"
     },
+    "notify_unload_repeat": {
+      "doc": "Znova pošilja opomnik za raztovarjanje vsakih \"Zamuda opomnika za raztovarjanje\" minut, dokler ne odprete vrat ali v obvestilu ne tapnete \"Nehaj opominjati\". Zahteva Entiteto senzorja vrat (tako kot sam opomnik). Gumb za opustitev deluje pri obvestilih mobilne aplikacije Home Assistant (companion app).",
+      "label": "Ponavljaj, dokler se vrata ne odprejo"
+    },
     "off_delay": {
       "doc": "Čas za čakanje po padcu moči, preden razglasite, da je cikel končan. Če se napajanje ponovno vzpostavi v tem oknu, se cikel nemoteno nadaljuje - to premosti premore med stopnjami pranja. Pomivalni stroji imajo dolge faze sušenja (izklop za 20–60 min), zato mora biti zakasnitev izklopa daljša od te, da ostane celotno pranje+sušenje kot en cikel.",
       "label": "Zamuda izklopa"

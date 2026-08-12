@@ -1269,6 +1269,10 @@
       "doc": "Hala bekleyen \"makineyi boşaltın\" hatırlatıcısı gönderilmeden önce bir döngü bittikten dakikalar sonra. Hatırlatıcıyı devre dışı bırakmak için 0'a ayarlayın.",
       "label": "Boşaltma Hatırlatıcısı Gecikmesi"
     },
+    "notify_unload_repeat": {
+      "doc": "Kapıyı açana veya bildirimdeki \"Hatırlatmayı durdur\" düğmesine dokunana kadar boşaltma hatırlatıcısını \"Boşaltma Hatırlatıcısı Gecikmesi\" dakikada bir yeniden gönderir. Bir Kapı Sensörü Varlığı gerektirir (hatırlatıcının kendisi de gerektirir). Kapatma düğmesi Home Assistant refakatçi uygulaması (mobil) bildirimlerinde çalışır.",
+      "label": "Kapı Açılana Kadar Tekrarla"
+    },
     "off_delay": {
       "doc": "Güç kesildikten sonra döngünün bittiğini bildirmeden önce beklenecek süre. Bu pencerede güç yeniden gelirse döngü sorunsuz bir şekilde devam eder; bu, yıkama aşamaları arasındaki duraklamaları köprüler. Bulaşık makinelerinin kurutma aşamaları uzundur (20-60 dakika boyunca güç kapalıdır), bu nedenle, tüm yıkama+kuruluğun tek bir döngüde tutulması için kapatma gecikmesinin bunu aşması gerekir.",
       "label": "Kapatma Gecikmesi"

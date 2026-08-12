@@ -1269,6 +1269,10 @@
       "doc": "Minuten nadat een cyclus is geëindigd voordat de nog wachtende herinnering voor het leegmaken van de machine wordt verzonden. Stel 0 in om de herinnering uit te schakelen.",
       "label": "Vertraging uitlaadherinnering"
     },
+    "notify_unload_repeat": {
+      "doc": "Blijft de uitlaadherinnering elke \"Vertraging uitlaadherinnering\" minuten opnieuw verzenden totdat u de deur opent of in de melding op \"Stop met herinneren\" tikt. Vereist een Deursensorentiteit (de herinnering zelf ook). De sluitknop werkt bij meldingen van de Home Assistant companion-app (mobiel).",
+      "label": "Herhalen tot de deur opengaat"
+    },
     "off_delay": {
       "doc": "Tijd om te wachten nadat de stroom is uitgevallen voordat de cyclus als voltooid wordt verklaard. Als de stroom binnen dit venster wordt hervat, gaat de cyclus naadloos verder - dit overbrugt pauzes tussen wasfasen. Vaatwassers hebben lange droogfasen (uitschakeling gedurende 20-60 minuten), dus de uitschakelvertraging moet groter zijn dan die om de hele was+droogcyclus als één cyclus te laten verlopen.",
       "label": "Uitschakelvertraging"

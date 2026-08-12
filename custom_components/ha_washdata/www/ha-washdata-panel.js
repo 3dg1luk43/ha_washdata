@@ -225,6 +225,8 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Unload Reminder', fields: [
       { key: 'notify_unload_delay_minutes', label: 'Unload Nag Delay', unit: 'min', type: 'number', min: 0, def: 60, basic: true,
         doc: 'Minutes after a cycle ends before sending the still-waiting "unload the machine" reminder. Set 0 to disable the reminder.' },
+      { key: 'notify_unload_repeat', label: 'Repeat Until Door Opens', type: 'checkbox',
+        doc: 'Keep re-sending the unload reminder every "Unload Nag Delay" minutes until you open the door or tap "Stop reminding" on the notification. Requires a Door Sensor Entity (the reminder itself does). The dismiss button works on Home Assistant companion-app (mobile) notifications.' },
       { key: 'pump_stuck_duration', label: 'Pump Stuck Duration', unit: 's', type: 'number', min: 0, def: 1800,
         onlyDeviceType: 'pump', doc: 'Seconds a pump may run continuously before it is flagged as possibly stuck (fires the stuck-pump event).' },
     ] },

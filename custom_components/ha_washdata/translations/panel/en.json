@@ -1237,6 +1237,10 @@
       "doc": "Minutes after a cycle ends before sending the still-waiting \"unload the machine\" reminder. Set 0 to disable the reminder.",
       "label": "Unload Nag Delay"
     },
+    "notify_unload_repeat": {
+      "doc": "Keep re-sending the unload reminder every \"Unload Nag Delay\" minutes until you open the door or tap \"Stop reminding\" on the notification. Requires a Door Sensor Entity (the reminder itself does). The dismiss button works on Home Assistant companion-app (mobile) notifications.",
+      "label": "Repeat Until Door Opens"
+    },
     "off_delay": {
       "doc": "Time to wait after power drops before declaring the cycle finished. If power resumes within this window the cycle continues seamlessly - this bridges pauses between wash stages. Dishwashers have long drying phases (power off for 20-60 min) so the off-delay must exceed that to keep the whole wash+dry as one cycle.",
       "label": "Off Delay"

@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: časovač {minutes} min",
       "timer_pause_action_title": "Obnoviť cyklus",
       "timer_pause_body_suffix": "Cyklus je pozastavený. Otvorte panel WashData na obnovenie.",
+      "unload_dismiss_action_title": "Prestať pripomínať",
       "notify_live_waiting_message": "{device}: Zatiaľ nebol rozpoznaný žiadny profil.",
       "vs_typical_longer": "o {pct}% dlhšie než zvyčajne",
       "vs_typical_shorter": "o {pct}% kratšie než zvyčajne",

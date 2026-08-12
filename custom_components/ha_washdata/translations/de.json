@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes}-Min.-Timer",
       "timer_pause_action_title": "Zyklus fortsetzen",
       "timer_pause_body_suffix": "Der Zyklus ist angehalten. Öffnen Sie das WashData-Panel, um fortzufahren.",
+      "unload_dismiss_action_title": "Nicht mehr erinnern",
       "notify_live_waiting_message": "{device}: Noch kein Profil erkannt.",
       "vs_typical_longer": "{pct}% länger als üblich",
       "vs_typical_shorter": "{pct}% kürzer als üblich",
