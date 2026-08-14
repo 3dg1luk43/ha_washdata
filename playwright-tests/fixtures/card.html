@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WashData Card E2E Shell</title>
+  <style>
+    /* HA CSS custom properties - just enough for the card to render */
+    :root {
+      --primary-color: #03a9f4;
+      --primary-text-color: #212121;
+      --secondary-text-color: #757575;
+      --card-background-color: #ffffff;
+      --primary-background-color: #fafafa;
+      --secondary-background-color: #e8e8e8;
+      --divider-color: rgba(0,0,0,0.12);
+      --warning-color: #ff9800;
+      --error-color: #f44336;
+      --success-color: #4caf50;
+      --info-color: #2196f3;
+      --teal-color: #009688;
+      --disabled-color: #bdbdbd;
+      --disabled-text-color: #9e9e9e;
+      --state-inactive-color: #9e9e9e;
+      --ha-card-border-radius: 12px;
+    }
+    body { margin: 0; font-family: Roboto, sans-serif; background: var(--primary-background-color); padding: 20px; }
+    #root { max-width: 460px; }
+    ha-washdata-card, ha-washdata-card-editor { display: block; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <!-- Loaded as a module so import.meta / top-level define run as in production. -->
+  <script type="module">
+    import '/card.js';
+
+    // Build a HomeAssistant-shaped object from plain data (functions cannot cross
+    // the Playwright evaluate boundary, so they are constructed here in page scope).
+    function makeHass(data) {
+      data = data || {};
+      window.__svc = [];
+      return {
+        locale: { language: data.language || 'en' },
+        language: data.language || 'en',
+        connection: {},
+        states: data.states || {},
+        entities: data.entities || {},
+        devices: data.devices || {},
+        config: { currency: data.currency || 'EUR' },
+        callWS: () => Promise.resolve({ state_colors: data.stateColors || {} }),
+        // Mirror HA: append the entity's unit when present, else the raw state.
+        formatEntityState: (o) => {
+          if (!o) return '';
+          const u = o.attributes && o.attributes.unit_of_measurement;
+          return u ? `${o.state} ${u}` : String(o.state);
+        },
+        callService: (d, s, sd, t) => { window.__svc.push({ domain: d, service: s, data: sd, target: t }); },
+      };
+    }
+
+    window.__mountCard = async (config, data) => {
+      const root = document.getElementById('root');
+      root.innerHTML = '';
+      const el = document.createElement('ha-washdata-card');
+      el.setConfig(config);
+      root.appendChild(el);
+      el.hass = makeHass(data);
+      window.__card = el;
+      // Give the async constants/translation fetch a tick to resolve + re-render.
+      await new Promise((r) => setTimeout(r, 60));
+      el.hass = makeHass(data); // second update after resources loaded
+      return true;
+    };
+
+    window.__mountEditor = async (config, data) => {
+      const root = document.getElementById('root');
+      root.innerHTML = '';
+      const el = document.createElement('ha-washdata-card-editor');
+      el.setConfig(config);
+      el.hass = makeHass(data);
+      root.appendChild(el);
+      window.__editor = el;
+      await new Promise((r) => setTimeout(r, 60));
+      return true;
+    };
+
+    window.__svcCalls = () => window.__svc || [];
+    window.__ready = true;
+  </script>
+</body>
+</html>

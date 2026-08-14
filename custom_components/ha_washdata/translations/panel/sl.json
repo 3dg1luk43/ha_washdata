@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entiteta ni najdena",
+    "running_long": "Traja predolgo",
+    "remaining": "preostalo",
+    "progress": "napredek",
+    "show_time_remaining": "Pokaži preostali čas",
+    "show_percentage": "Pokaži odstotek",
+    "layout": {
+      "tile": "Ploščica (kompaktno)",
+      "detail": "Podrobno (bogato)",
+      "glance": "Pregled (več naprav)"
+    },
+    "btn": {
+      "pause": "Premor",
+      "resume": "Nadaljuj",
+      "terminate": "Končaj cikel",
+      "record_start": "Začni snemanje",
+      "record_stop": "Ustavi snemanje",
+      "program": "Program",
+      "open_panel": "Odpri WashData"
+    },
+    "editor": {
+      "layout": "Postavitev",
+      "entity": "Entiteta naprave",
+      "entities": "Naprave",
+      "title": "Naslov",
+      "icon": "Ikona",
+      "show_state": "Pokaži stanje",
+      "show_program": "Pokaži program",
+      "show_progress_bar": "Pokaži vrstico napredka",
+      "spin_icon": "Vrti ikono med delovanjem",
+      "display_mode": "Vrstica s podrobnostmi",
+      "active_color": "Preglasitev aktivne barve",
+      "show_phase": "Pokaži fazo",
+      "show_energy": "Pokaži energijo in strošek",
+      "show_anomaly": "Pokaži opozorilo o prekoračitvi",
+      "show_sparkline": "Pokaži graf moči v živo",
+      "buttons": "Gumbi za dejanja",
+      "program_entity": "Entiteta programa (preglasitev)",
+      "time_entity": "Entiteta časa (preglasitev)",
+      "pct_entity": "Entiteta napredka (preglasitev)",
+      "power_entity": "Entiteta moči (preglasitev)",
+      "tap_action": "Dejanje ob dotiku",
+      "hold_action": "Dejanje ob zadržanju",
+      "double_tap_action": "Dejanje ob dvojnem dotiku"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} zaznanih nepravilnosti (npr. odprta vrata sredi cikla) – odprite, da jih vidite na grafu",
     "auto": "(samodejno zaznano)",
@@ -979,6 +1027,10 @@
     "unusable": "Neuporabno"
   },
   "section": {
+    "dishwasher": {
+      "label": "Pomivalni stroj",
+      "intro": "Obravnava konca cikla za pomivalne stroje, ki se običajno končajo z dolgo, skoraj tiho fazo sušenja pred kratkim končnim izčrpavanjem vode."
+    },
     "anti_wrinkle": {
       "intro": "Način zaščite pred gubami na oblačilih zazna kratke pulze pri nizki moči po glavni fazi in jih obdrži pripisane končanemu ciklu.",
       "label": "Zaščita pred gubami"
@@ -1021,6 +1073,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Sprostitev po tihi fazi sušenja",
+      "doc": "Ko cikel preseže svoje pričakovano trajanje, kako dolgo mora pomivalni stroj ostati tih (pod Pragom zaustavitve), preden WashData preneha čakati na končno izčrpavanje vode in zaključi cikel. Povečajte, če ima vaša naprava dolgo tiho fazo sušenja pred poznim končnim izčrpavanjem, ki ga zaznavanje spregleda - širše okno omogoča, da naučeno trajanje sledi sezonskemu premiku (hladnejša dovodna voda = daljši cikli), namesto da ostane zaklenjeno na starem povprečju. Čakanje lahko le skrajša glede na notranjo 30-minutno omejitev čakanja na končno izčrpavanje, nikoli ga ne podaljša."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Prepoznajte kratke vrtilne impulze nizke moči, ki jih oddaja sušilni stroj po glavni fazi segrevanja, in jih ohranite povezane s končanim ciklom, namesto da jih berete kot nove cikle.",
       "label": "Omogoči zaznavanje zaščite pred gubami"
@@ -1803,6 +1859,7 @@
     "other": "Drugo"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Pomivalni stroj: sekunde tišine po pričakovanem trajanju, preden se sprosti čakanje na končno izčrpavanje vode",
     "anti_wrinkle_enabled": "Vsrkaj vrtilne impulze po glavni fazi, namesto da jih obravnavaš kot nove cikle",
     "anti_wrinkle_exit_power": "Moč mora med impulzi pasti pod to vrednost, da zaščita pred gubami ostane aktivna",
     "anti_wrinkle_idle_timeout": "Dovoljeni mir med dvema vrtilnima impulzoma, preden se zaščita pred gubami konča",

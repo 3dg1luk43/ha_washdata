@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entitet ikke funnet",
+    "running_long": "Kjører lenger",
+    "remaining": "gjenstår",
+    "progress": "fremdrift",
+    "show_time_remaining": "Vis gjenstående tid",
+    "show_percentage": "Vis prosent",
+    "layout": {
+      "tile": "Flis (kompakt)",
+      "detail": "Detalj (fyldig)",
+      "glance": "Oversikt (flere enheter)"
+    },
+    "btn": {
+      "pause": "Pause",
+      "resume": "Fortsett",
+      "terminate": "Avslutt syklus",
+      "record_start": "Start opptak",
+      "record_stop": "Stopp opptak",
+      "program": "Program",
+      "open_panel": "Åpne WashData"
+    },
+    "editor": {
+      "layout": "Oppsett",
+      "entity": "Apparatentitet",
+      "entities": "Apparater",
+      "title": "Tittel",
+      "icon": "Ikon",
+      "show_state": "Vis tilstand",
+      "show_program": "Vis program",
+      "show_progress_bar": "Vis fremdriftslinje",
+      "spin_icon": "Roter ikon under kjøring",
+      "display_mode": "Detaljlinje",
+      "active_color": "Overstyr aktiv farge",
+      "show_phase": "Vis fase",
+      "show_energy": "Vis energi og kostnad",
+      "show_anomaly": "Vis varsel om lang kjøring",
+      "show_sparkline": "Vis sanntids effektgraf",
+      "buttons": "Handlingsknapper",
+      "program_entity": "Programentitet (overstyr)",
+      "time_entity": "Tidsentitet (overstyr)",
+      "pct_entity": "Fremdriftsentitet (overstyr)",
+      "power_entity": "Effektentitet (overstyr)",
+      "tap_action": "Trykkhandling",
+      "hold_action": "Holdhandling",
+      "double_tap_action": "Dobbelttrykkhandling"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} avvik oppdaget (f.eks. dør åpnet midt i syklusen) – åpne for å se dem på grafen",
     "auto": "(automatisk oppdaget)",
@@ -934,6 +982,7 @@
     "font_size_hint": "Gjør alt i dette panelet større eller mindre. Gjelder for kontoen din på denne enheten."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: stille sekunder etter forventet varighet før ventingen på tømming ved slutten av syklusen frigjøres",
     "completion_min_seconds": "Korteste kjøring som teller som en ekte syklus",
     "end_repeat_count": "Lave avlesninger på rad før avslutning",
     "interrupted_min_seconds": "Korte sykluser merkes som avbrutt",
@@ -1007,6 +1056,10 @@
     "unusable": "Ubrukelig"
   },
   "section": {
+    "dishwasher": {
+      "label": "Oppvaskmaskin",
+      "intro": "Håndtering av syklusslutt for oppvaskmaskiner, som vanligvis avsluttes med en lang, nesten lydløs tørkefase før en kort siste tømming."
+    },
     "anti_wrinkle": {
       "intro": "Anti-rynke-/anti-krøll-modus oppdager lavomsatt tumle-pulser etter hoveddelen og holder dem festet til den ferdige syklusen.",
       "label": "Anti-rynke"
@@ -1049,6 +1102,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Frigjøring etter stille tørkefase",
+      "doc": "Når syklusen passerer forventet varighet: hvor lenge oppvaskmaskinen må holde seg stille (under Stoppterskel) før WashData slutter å vente på en siste tømming og avslutter syklusen. Øk den hvis maskinen din har en lang stille tørkefase før en sen siste tømming som blir oversett - et bredere vindu lar den innlærte varigheten følge sesongvariasjoner (kaldere tilførselsvann = lengre sykluser) i stedet for å låse seg til det gamle gjennomsnittet. Den forkorter bare ventetiden i forhold til den interne grensen på 30 minutter for sluttoppen, aldri forlenger den."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Gjenkjenn de korte laveffekttrommelpulsene en tørketrommel sender ut etter hovedvarmefasen, og hold dem festet til den ferdige syklusen i stedet for å lese dem som nye sykluser.",
       "label": "Aktiver anti-rynke-deteksjon"

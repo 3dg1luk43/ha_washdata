@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entity not found",
+    "running_long": "Running long",
+    "remaining": "remaining",
+    "progress": "progress",
+    "show_time_remaining": "Show time remaining",
+    "show_percentage": "Show percentage",
+    "layout": {
+      "tile": "Tile (compact)",
+      "detail": "Detail (rich)",
+      "glance": "Glance (multiple devices)"
+    },
+    "btn": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "terminate": "End cycle",
+      "record_start": "Start recording",
+      "record_stop": "Stop recording",
+      "program": "Program",
+      "open_panel": "Open WashData"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Appliance entity",
+      "entities": "Appliances",
+      "title": "Title",
+      "icon": "Icon",
+      "show_state": "Show state",
+      "show_program": "Show program",
+      "show_progress_bar": "Show progress bar",
+      "spin_icon": "Spin icon while running",
+      "display_mode": "Detail line",
+      "active_color": "Active color override",
+      "show_phase": "Show phase",
+      "show_energy": "Show energy and cost",
+      "show_anomaly": "Show overrun warning",
+      "show_sparkline": "Show live power graph",
+      "buttons": "Action buttons",
+      "program_entity": "Program entity (override)",
+      "time_entity": "Time entity (override)",
+      "pct_entity": "Progress entity (override)",
+      "power_entity": "Power entity (override)",
+      "tap_action": "Tap action",
+      "hold_action": "Hold action",
+      "double_tap_action": "Double tap action"
+    }
+  },
   "badge": {
     "approved": "Approved",
     "artifact_tip": "{n} anomalies detected (e.g. door opened mid-cycle) – open to see them on the graph",

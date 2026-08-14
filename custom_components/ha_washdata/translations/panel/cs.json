@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entita nenalezena",
+    "running_long": "Běží dlouho",
+    "remaining": "zbývá",
+    "progress": "postup",
+    "show_time_remaining": "Zobrazit zbývající čas",
+    "show_percentage": "Zobrazit procenta",
+    "layout": {
+      "tile": "Dlaždice (kompaktní)",
+      "detail": "Detail (podrobný)",
+      "glance": "Přehled (více zařízení)"
+    },
+    "btn": {
+      "pause": "Pozastavit",
+      "resume": "Pokračovat",
+      "terminate": "Ukončit cyklus",
+      "record_start": "Spustit záznam",
+      "record_stop": "Zastavit záznam",
+      "program": "Program",
+      "open_panel": "Otevřít WashData"
+    },
+    "editor": {
+      "layout": "Rozvržení",
+      "entity": "Entita spotřebiče",
+      "entities": "Spotřebiče",
+      "title": "Název",
+      "icon": "Ikona",
+      "show_state": "Zobrazit stav",
+      "show_program": "Zobrazit program",
+      "show_progress_bar": "Zobrazit ukazatel průběhu",
+      "spin_icon": "Otáčet ikonu během běhu",
+      "display_mode": "Řádek s detaily",
+      "active_color": "Přepsání aktivní barvy",
+      "show_phase": "Zobrazit fázi",
+      "show_energy": "Zobrazit energii a náklady",
+      "show_anomaly": "Zobrazit varování o překročení",
+      "show_sparkline": "Zobrazit živý graf výkonu",
+      "buttons": "Akční tlačítka",
+      "program_entity": "Entita programu (přepsání)",
+      "time_entity": "Entita času (přepsání)",
+      "pct_entity": "Entita postupu (přepsání)",
+      "power_entity": "Entita výkonu (přepsání)",
+      "tap_action": "Akce klepnutí",
+      "hold_action": "Akce podržení",
+      "double_tap_action": "Akce dvojitého klepnutí"
+    }
+  },
   "badge": {
     "artifact_tip": "Zjištěno {n} anomálií (např. dveře otevřené uprostřed cyklu) – otevřete, abyste je viděli na grafu",
     "auto": "(automaticky zjištěno)",
@@ -979,6 +1027,10 @@
     "unusable": "Nepoužitelný"
   },
   "section": {
+    "dishwasher": {
+      "label": "Myčka nádobí",
+      "intro": "Zpracování konce cyklu u myček nádobí, které obvykle končí dlouhou téměř tichou fází sušení před krátkým závěrečným odčerpáním vody."
+    },
     "anti_wrinkle": {
       "intro": "Režim ochrany před zmačkáním detekuje krátké pulzy nízkého výkonu po hlavní fázi a připojuje je k dokončenému cyklu.",
       "label": "Ochrana před zmačkáním"
@@ -1021,6 +1073,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Uvolnění po tiché fázi sušení",
+      "doc": "Jakmile cyklus překročí svou očekávanou dobu trvání, jak dlouho musí myčka zůstat v klidu (pod Prahem zastavení), než WashData přestane čekat na závěrečné odčerpání vody a ukončí cyklus. Zvyšte hodnotu, pokud má váš spotřebič dlouhou tichou fázi sušení před pozdním závěrečným odčerpáním, které uniká detekci - širší okno umožňuje, aby naučená doba trvání sledovala sezonní posun (studenější přiváděná voda = delší cykly) místo toho, aby zůstala uzamčená na starém průměru. Čekání pouze zkracuje vzhledem k internímu 30minutovému limitu čekání na závěrečné odčerpání, nikdy jej neprodlužuje."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Rozpoznejte krátké impulzy s nízkým příkonem, které sušič emituje po hlavní tepelné fázi, a udržte je připojené k dokončenému cyklu místo čtení jako nové cykly.",
       "label": "Povolit detekci ochrany před zmačkáním"
@@ -1803,6 +1859,7 @@
     "other": "Jiné"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Myčka: tiché sekundy po očekávané době trvání, než se uvolní čekání na závěrečné odčerpání vody",
     "anti_wrinkle_enabled": "Pohltit impulzy bubnu po hlavní fázi místo čtení jako nové cykly",
     "anti_wrinkle_exit_power": "Výkon musí mezi impulzy klesnout pod tuto hodnotu, aby ochrana před zmačkáním zůstala aktivní",
     "anti_wrinkle_idle_timeout": "Povolený klid mezi dvěma impulzy bubnu, než ochrana před zmačkáním skončí",

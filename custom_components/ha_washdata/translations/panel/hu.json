@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "perc",
+    "entity_not_found": "Entitás nem található",
+    "running_long": "Sokáig fut",
+    "remaining": "hátralévő",
+    "progress": "haladás",
+    "show_time_remaining": "Hátralévő idő megjelenítése",
+    "show_percentage": "Százalék megjelenítése",
+    "layout": {
+      "tile": "Csempe (kompakt)",
+      "detail": "Részletes (gazdag)",
+      "glance": "Pillantás (több eszköz)"
+    },
+    "btn": {
+      "pause": "Szüneteltetés",
+      "resume": "Folytatás",
+      "terminate": "Ciklus befejezése",
+      "record_start": "Rögzítés indítása",
+      "record_stop": "Rögzítés leállítása",
+      "program": "Program",
+      "open_panel": "WashData megnyitása"
+    },
+    "editor": {
+      "layout": "Elrendezés",
+      "entity": "Készülék entitás",
+      "entities": "Készülékek",
+      "title": "Cím",
+      "icon": "Ikon",
+      "show_state": "Állapot megjelenítése",
+      "show_program": "Program megjelenítése",
+      "show_progress_bar": "Folyamatjelző megjelenítése",
+      "spin_icon": "Ikon forgatása futás közben",
+      "display_mode": "Részletsor",
+      "active_color": "Aktív szín felülbírálása",
+      "show_phase": "Fázis megjelenítése",
+      "show_energy": "Energia és költség megjelenítése",
+      "show_anomaly": "Túlfutás figyelmeztetés megjelenítése",
+      "show_sparkline": "Élő teljesítménygrafikon megjelenítése",
+      "buttons": "Műveleti gombok",
+      "program_entity": "Program entitás (felülbírálás)",
+      "time_entity": "Idő entitás (felülbírálás)",
+      "pct_entity": "Folyamat entitás (felülbírálás)",
+      "power_entity": "Teljesítmény entitás (felülbírálás)",
+      "tap_action": "Koppintás művelet",
+      "hold_action": "Nyomva tartás művelet",
+      "double_tap_action": "Dupla koppintás művelet"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} rendellenesség észlelve (pl. ajtónyitás a ciklus közepén) – nyissa meg, hogy megtekinthesse őket a grafikonon",
     "auto": "(automatikusan észlelve)",
@@ -979,6 +1027,10 @@
     "unusable": "Használhatatlan"
   },
   "section": {
+    "dishwasher": {
+      "label": "Mosogatógép",
+      "intro": "A ciklus végének kezelése mosogatógépekhez, amelyek jellemzően egy hosszú, szinte néma szárítási fázissal fejeződnek be egy rövid végső vízleeresztés előtt."
+    },
     "anti_wrinkle": {
       "intro": "A ránctalanító/gyűrőtlenítő mód alacsony teljesítményű dobpulzusokat érzékel a főfázis után, és a befejezett ciklushoz csatolja őket.",
       "label": "Ránctalanítás"
@@ -1021,6 +1073,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Passzív szárítás csendes feloldása",
+      "doc": "Miután a ciklus túllépi a várható időtartamát, mennyi ideig kell a mosogatógépnek csendben maradnia (a Leállítási küszöb alatt), mielőtt a WashData abbahagyja a végső vízleeresztésre való várakozást és befejezi a ciklust. Növelje, ha a gépének hosszú, néma szárítási fázisa van egy késői végső vízleeresztés előtt, amely kimarad - a szélesebb ablak lehetővé teszi, hogy a megtanult időtartam kövesse a szezonális eltolódást (hidegebb bevezetett víz = hosszabb ciklusok), ahelyett hogy a régi átlaghoz rögzülne. Csak lerövidítheti a várakozást a belső 30 perces végső-csúcs korláthoz képest, soha nem hosszabbítja meg."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Ismerje fel a szárítógép által a fő fűtési fázis után kibocsátott rövid, kis teljesítményű szárítópulzusokat, és tartsa őket a kész ciklushoz kapcsolva, ahelyett, hogy új ciklusként olvasná őket.",
       "label": "Ránctalanítás érzékelés engedélyezése"
@@ -1803,6 +1859,7 @@
     "other": "Egyéb"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Mosogatógép: csendes másodpercek a várható időtartam után, mielőtt a ciklus végi leeresztésre való várakozás feloldódik",
     "anti_wrinkle_enabled": "Nyelje el a fő fázis utáni szárítópulzusokat, ahelyett hogy új ciklusként olvasná őket",
     "anti_wrinkle_exit_power": "A ránctalanítás aktívan tartásához a teljesítménynek az impulzusok között ez alá kell csökkennie",
     "anti_wrinkle_idle_timeout": "Két szárítópulzus között engedélyezett csendes idő, mielőtt a ránctalanítás véget ér",

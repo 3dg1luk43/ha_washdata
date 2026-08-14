@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Objektas nerastas",
+    "running_long": "Veikia ilgai",
+    "remaining": "liko",
+    "progress": "eiga",
+    "show_time_remaining": "Rodyti likusį laiką",
+    "show_percentage": "Rodyti procentus",
+    "layout": {
+      "tile": "Plytelė (kompaktiška)",
+      "detail": "Detali (išsami)",
+      "glance": "Apžvalga (keli įrenginiai)"
+    },
+    "btn": {
+      "pause": "Pristabdyti",
+      "resume": "Tęsti",
+      "terminate": "Baigti ciklą",
+      "record_start": "Pradėti įrašymą",
+      "record_stop": "Sustabdyti įrašymą",
+      "program": "Programa",
+      "open_panel": "Atidaryti WashData"
+    },
+    "editor": {
+      "layout": "Išdėstymas",
+      "entity": "Prietaiso objektas",
+      "entities": "Prietaisai",
+      "title": "Pavadinimas",
+      "icon": "Piktograma",
+      "show_state": "Rodyti būseną",
+      "show_program": "Rodyti programą",
+      "show_progress_bar": "Rodyti eigos juostą",
+      "spin_icon": "Sukti piktogramą veikiant",
+      "display_mode": "Detalių eilutė",
+      "active_color": "Aktyvios spalvos pakeitimas",
+      "show_phase": "Rodyti fazę",
+      "show_energy": "Rodyti energiją ir kainą",
+      "show_anomaly": "Rodyti užsitęsimo įspėjimą",
+      "show_sparkline": "Rodyti tiesioginį galios grafiką",
+      "buttons": "Veiksmų mygtukai",
+      "program_entity": "Programos objektas (pakeitimas)",
+      "time_entity": "Laiko objektas (pakeitimas)",
+      "pct_entity": "Eigos objektas (pakeitimas)",
+      "power_entity": "Galios objektas (pakeitimas)",
+      "tap_action": "Palietimo veiksmas",
+      "hold_action": "Palaikymo veiksmas",
+      "double_tap_action": "Dvigubo palietimo veiksmas"
+    }
+  },
   "badge": {
     "artifact_tip": "Aptikta {n} anomalijų (pvz., durys atidarytos ciklo viduryje) – atidarykite, kad pamatytumėte juos diagramoje",
     "auto": "(aptikta automatiškai)",
@@ -979,6 +1027,10 @@
     "unusable": "Netinkamas naudoti"
   },
   "section": {
+    "dishwasher": {
+      "label": "Indaplovė",
+      "intro": "Ciklo pabaigos apdorojimas indaplovėms, kurios paprastai baigiasi ilga, beveik tylia džiovinimo faze prieš trumpą galutinį vandens išleidimą."
+    },
     "anti_wrinkle": {
       "intro": "Apsaugos nuo raukšlių režimas aptinka mažos galios sukimosi impulsus po pagrindinės fazės ir prideda juos prie baigto ciklo.",
       "label": "Apsauga nuo raukšlių"
@@ -1021,6 +1073,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Pasyvaus džiovinimo tylusis atleidimas",
+      "doc": "Kai ciklas viršija numatytą trukmę, kiek laiko indaplovė turi išlikti tyli (žemiau Sustabdymo slenkstis) prieš tai, kai WashData nustoja laukti galutinio vandens išleidimo ir užbaigia ciklą. Padidinkite, jei jūsų aparatas turi ilgą tylią džiovinimo fazę prieš vėlyvą galutinį vandens išleidimą, kuris praleidžiamas - platesnis langas leidžia išmoktai trukmei sekti sezoninį poslinkį (šaltesnis įleidžiamas vanduo = ilgesni ciklai), užuot užsifiksavus ties senuoju vidurkiu. Jis gali tik sutrumpinti laukimą, palyginti su vidiniu 30 minučių pabaigos smailės ribojimu, bet niekada jo nepailgina."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Atpažinkite trumpus mažos galios būgninius impulsus, kuriuos džiovyklė skleidžia po pagrindinės šildymo fazės, ir laikykite juos prijungtus prie baigto ciklo, o ne skaitykite juos kaip naujus ciklus.",
       "label": "Įjungti apsaugą nuo raukšlių"
@@ -1803,6 +1859,7 @@
     "other": "Kita"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Indaplovė: tylos sekundės po numatytos trukmės, kol atleidžiamas ciklo pabaigos vandens išleidimo laukimas",
     "anti_wrinkle_enabled": "Sugerkite būgninius impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
     "anti_wrinkle_exit_power": "Kad apsauga nuo raukšlių išliktų aktyvi, galia tarp impulsų turi nukristi žemiau šios ribos",
     "anti_wrinkle_idle_timeout": "Tylos laikas, leidžiamas tarp dviejų būgninių impulsų prieš pasibaigiant apsaugai nuo raukšlių",

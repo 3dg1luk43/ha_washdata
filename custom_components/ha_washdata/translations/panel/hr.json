@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entitet nije pronađen",
+    "running_long": "Traje predugo",
+    "remaining": "preostalo",
+    "progress": "napredak",
+    "show_time_remaining": "Prikaži preostalo vrijeme",
+    "show_percentage": "Prikaži postotak",
+    "layout": {
+      "tile": "Pločica (kompaktno)",
+      "detail": "Detaljno (bogato)",
+      "glance": "Pregled (više uređaja)"
+    },
+    "btn": {
+      "pause": "Pauziraj",
+      "resume": "Nastavi",
+      "terminate": "Završi ciklus",
+      "record_start": "Započni snimanje",
+      "record_stop": "Zaustavi snimanje",
+      "program": "Program",
+      "open_panel": "Otvori WashData"
+    },
+    "editor": {
+      "layout": "Izgled",
+      "entity": "Entitet uređaja",
+      "entities": "Uređaji",
+      "title": "Naslov",
+      "icon": "Ikona",
+      "show_state": "Prikaži stanje",
+      "show_program": "Prikaži program",
+      "show_progress_bar": "Prikaži traku napretka",
+      "spin_icon": "Vrti ikonu tijekom rada",
+      "display_mode": "Redak s detaljima",
+      "active_color": "Zamjena aktivne boje",
+      "show_phase": "Prikaži fazu",
+      "show_energy": "Prikaži energiju i trošak",
+      "show_anomaly": "Prikaži upozorenje o produljenju",
+      "show_sparkline": "Prikaži grafikon snage uživo",
+      "buttons": "Gumbi radnji",
+      "program_entity": "Entitet programa (zamjena)",
+      "time_entity": "Entitet vremena (zamjena)",
+      "pct_entity": "Entitet napretka (zamjena)",
+      "power_entity": "Entitet snage (zamjena)",
+      "tap_action": "Radnja dodira",
+      "hold_action": "Radnja držanja",
+      "double_tap_action": "Radnja dvostrukog dodira"
+    }
+  },
   "badge": {
     "artifact_tip": "Otkrivene su {n} anomalije (npr. vrata otvorena usred ciklusa) – otvorite da ih vidite na grafikonu",
     "auto": "(automatski otkriveno)",
@@ -979,6 +1027,10 @@
     "unusable": "Neupotrebljiv"
   },
   "section": {
+    "dishwasher": {
+      "label": "Perilica posuđa",
+      "intro": "Obrada kraja ciklusa za perilice posuđa, koje obično završavaju dugom, gotovo tihom fazom sušenja prije kratkog završnog ispumpavanja vode."
+    },
     "anti_wrinkle": {
       "intro": "Način anti-bore/anti-gužve otkriva impulse prevrtanja male snage nakon glavne faze i zadržava ih priključene na završeni ciklus.",
       "label": "Anti-bore"
@@ -1021,6 +1073,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Otpuštanje nakon tihe faze sušenja",
+      "doc": "Kada ciklus prijeđe svoje očekivano trajanje, koliko dugo perilica mora ostati tiha (ispod Praga zaustavljanja) prije nego što WashData prestane čekati na završno ispumpavanje vode i završi ciklus. Povećajte ako vaš uređaj ima dugu tihu fazu sušenja prije kasnog završnog ispumpavanja koje se propušta - šire okno omogućuje da naučeno trajanje prati sezonske promjene (hladnija dovodna voda = dulji ciklusi) umjesto da ostane zaključano na staroj prosječnoj vrijednosti. Čekanje samo skraćuje u odnosu na interno ograničenje završnog ispumpavanja od 30 minuta, nikada ga ne produljuje."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Prepoznajte kratke impulse male snage koje sušilica emitira nakon glavne faze zagrijavanja i držite ih vezanima uz završeni ciklus umjesto da ih čitate kao nove cikluse.",
       "label": "Omogući otkrivanje anti-bora"
@@ -1803,6 +1859,7 @@
     "other": "Ostalo"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Perilica posuđa: sekunde tišine nakon očekivanog trajanja prije nego što se otpusti čekanje na završno ispumpavanje vode",
     "anti_wrinkle_enabled": "Upij impulse bubnja nakon glavne faze, a ne čitaj ih kao nove cikluse",
     "anti_wrinkle_exit_power": "Snaga mora pasti ispod ove vrijednosti između impulsa da bi anti-bora ostala aktivna",
     "anti_wrinkle_idle_timeout": "Dopušteno vrijeme mirovanja između dva impulsa bubnja prije nego što anti-bora završi",

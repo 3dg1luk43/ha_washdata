@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "Min.",
+    "entity_not_found": "Entität nicht gefunden",
+    "running_long": "Läuft länger",
+    "remaining": "verbleibend",
+    "progress": "Fortschritt",
+    "show_time_remaining": "Verbleibende Zeit anzeigen",
+    "show_percentage": "Prozentsatz anzeigen",
+    "layout": {
+      "tile": "Kachel (kompakt)",
+      "detail": "Detail (ausführlich)",
+      "glance": "Überblick (mehrere Geräte)"
+    },
+    "btn": {
+      "pause": "Pausieren",
+      "resume": "Fortsetzen",
+      "terminate": "Zyklus beenden",
+      "record_start": "Aufnahme starten",
+      "record_stop": "Aufnahme stoppen",
+      "program": "Programm",
+      "open_panel": "WashData öffnen"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Geräteentität",
+      "entities": "Geräte",
+      "title": "Titel",
+      "icon": "Symbol",
+      "show_state": "Status anzeigen",
+      "show_program": "Programm anzeigen",
+      "show_progress_bar": "Fortschrittsbalken anzeigen",
+      "spin_icon": "Symbol während des Betriebs drehen",
+      "display_mode": "Detailzeile",
+      "active_color": "Aktivfarbe überschreiben",
+      "show_phase": "Phase anzeigen",
+      "show_energy": "Energie und Kosten anzeigen",
+      "show_anomaly": "Warnung bei Überlänge anzeigen",
+      "show_sparkline": "Live-Leistungsdiagramm anzeigen",
+      "buttons": "Aktionsschaltflächen",
+      "program_entity": "Programmentität (überschreiben)",
+      "time_entity": "Zeitentität (überschreiben)",
+      "pct_entity": "Fortschrittsentität (überschreiben)",
+      "power_entity": "Leistungsentität (überschreiben)",
+      "tap_action": "Tippen-Aktion",
+      "hold_action": "Halten-Aktion",
+      "double_tap_action": "Doppeltippen-Aktion"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} Anomalien erkannt (z. B. Tür mitten im Zyklus geöffnet) – öffnen Sie sie, um sie in der Grafik anzuzeigen",
     "auto": "(automatisch erkannt)",
@@ -934,6 +982,7 @@
     "font_size_hint": "Alles in diesem Panel vergrößern oder verkleinern. Gilt für Ihr Konto auf diesem Gerät."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
     "completion_min_seconds": "Kürzester Lauf, der als echter Zyklus zählt",
     "end_repeat_count": "Aufeinanderfolgende niedrige Messwerte vor dem Ende",
     "interrupted_min_seconds": "Kurze Zyklen werden als unterbrochen markiert",
@@ -1007,6 +1056,10 @@
     "unusable": "Unbrauchbar"
   },
   "section": {
+    "dishwasher": {
+      "label": "Geschirrspüler",
+      "intro": "Behandlung des Zyklusendes für Geschirrspüler, die typischerweise mit einer langen, nahezu stillen Trocknungsphase vor einem kurzen letzten Abpumpen enden."
+    },
     "anti_wrinkle": {
       "intro": "Knitterschutz-Modus erkennt Tumble-Impulse mit geringer Leistung nach der Hauptphase und hält sie dem abgeschlossenen Zyklus zugeordnet.",
       "label": "Knitterschutz"
@@ -1049,6 +1102,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Ruhefreigabe nach Passivtrocknung",
+      "doc": "Sobald der Zyklus seine erwartete Dauer überschreitet: wie lange der Geschirrspüler ruhig bleiben muss (unter dem Stoppschwellenwert), bevor WashData nicht mehr auf ein letztes Abpumpen wartet und den Zyklus beendet. Erhöhen Sie den Wert, wenn Ihre Maschine eine lange, stille Trocknungsphase vor einem späten letzten Abpumpen hat, das übersehen wird - ein größeres Fenster lässt die erlernte Dauer der saisonalen Drift folgen (kälteres Zulaufwasser = längere Zyklen), statt sich auf den alten Mittelwert festzulegen. Er verkürzt die Wartezeit gegenüber der internen 30-minütigen Obergrenze für die Endspitze nur, verlängert sie aber nie."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Erkennen Sie die kurzen, stromsparenden Wäscheimpulse, die ein Trockner nach der Hauptheizphase abgibt, und behalten Sie im Zusammenhang mit dem abgeschlossenen Zyklus bei, anstatt sie als neue Zyklen zu lesen.",
       "label": "Knitterschutzerkennung aktivieren"
