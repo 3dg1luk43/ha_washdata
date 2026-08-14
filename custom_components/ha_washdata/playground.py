@@ -350,6 +350,8 @@ def _matching_config(store: Any) -> dict[str, Any]:
         "min_duration_ratio": float(getattr(store, "_min_duration_ratio", 0.07)),
         "max_duration_ratio": float(getattr(store, "_max_duration_ratio", 1.5)),
         "dtw_bandwidth": float(getattr(store, "dtw_bandwidth", 0.2)),
+        # Mirror the live Stage-4 energy discriminator so the sim is byte-identical.
+        "energy_mode": str(getattr(store, "energy_mode", "mean")),
     }
     try:
         overrides = store._matching_overrides()  # pylint: disable=protected-access

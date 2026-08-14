@@ -1216,6 +1216,10 @@ class ProfileStore:
         self._match_threshold = match_threshold
         self._unmatch_threshold = unmatch_threshold
         self.dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
+        # Stage-4 energy-agreement mode ("mean"|"integrated"); the manager sets it
+        # from the device type via analysis.stage4_energy_mode. Default "mean"
+        # keeps behaviour byte-identical until wired.
+        self.energy_mode: str = "mean"
         self._save_debug_traces = save_debug_traces
 
         # Cache for resampled sample segments: key=(cycle_id, dt)
@@ -5217,6 +5221,7 @@ class ProfileStore:
                 "min_duration_ratio": self._min_duration_ratio,
                 "max_duration_ratio": self._max_duration_ratio,
                 "dtw_bandwidth": self.dtw_bandwidth,
+                "energy_mode": self.energy_mode,
                 # On-device tuned scoring weights (opt-in); empty = shipped defaults.
                 **self._matching_overrides(),
             }

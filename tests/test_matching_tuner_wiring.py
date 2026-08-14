@@ -33,7 +33,10 @@ _TUNER = "custom_components.ha_washdata.ml.matching_tuner.tune_matching_config"
 def _fake_mgr(mock_hass):
     store = MagicMock()
     store.set_matching_config = AsyncMock()
-    return types.SimpleNamespace(hass=mock_hass, profile_store=store, _logger=MagicMock())
+    return types.SimpleNamespace(
+        hass=mock_hass, profile_store=store, _logger=MagicMock(),
+        device_type="washing_machine",
+    )
 
 
 async def test_persists_promoted_override(mock_hass):

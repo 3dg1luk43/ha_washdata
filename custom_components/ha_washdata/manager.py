@@ -268,6 +268,7 @@ from .recorder import CycleRecorder
 from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
 from .time_utils import power_data_to_offsets
+from . import analysis
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
 from .phase_segmenter import phase_matching_enabled
@@ -581,6 +582,9 @@ class WashDataManager:
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
         )
+        # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
+        # mean power elsewhere (see analysis.stage4_energy_mode).
+        self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
         self.learning_manager = LearningManager(
             hass, self.entry_id, self.profile_store, self.device_type,
             device_name=config_entry.title,
@@ -2060,6 +2064,9 @@ class WashDataManager:
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
         )
+        # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
+        # mean power elsewhere (see analysis.stage4_energy_mode).
+        self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
 
         # Device default
         dev_def = DEVICE_COMPLETION_THRESHOLDS.get(
@@ -2920,7 +2927,9 @@ class WashDataManager:
         try:
             from .ml.matching_tuner import tune_matching_config
 
-            result = await self.hass.async_add_executor_job(tune_matching_config, cycles)
+            result = await self.hass.async_add_executor_job(
+                tune_matching_config, cycles, self.device_type
+            )
         except Exception as err:  # noqa: BLE001 - tuning must never break training
             self._logger.debug("Matching-config tuning failed: %s", err)
             return {"promoted": False, "reason": "exception", "error": str(err)}
