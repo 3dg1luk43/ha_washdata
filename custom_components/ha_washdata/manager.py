@@ -823,10 +823,18 @@ class WashDataManager:
 
         def profile_matcher_wrapper(
             readings: list[tuple[datetime, float]],
-        ) -> tuple[str | None, float, float, str | None]:
+        ) -> tuple[str | None, float, float, str | None] | None:
             """Wraps profile store matching logic with detector callback signature.
 
-            Returns: None (async offload)
+            The real match is offloaded to an async task that calls
+            ``detector.update_match`` later, so this returns ``None`` in that case -
+            the detector's contract is "None == async offload, I'll be called back"
+            (see ``_try_profile_match``). It must NOT return a placeholder tuple:
+            a non-empty tuple is truthy, so the detector would feed it straight into
+            ``update_match`` on every match tick, spuriously logging the
+            "invalid raw_expected_duration 0.0" debug line and momentarily zeroing
+            ``_last_match_confidence`` between real async updates. Only the manual
+            override path below returns a genuine synchronous tuple.
             """
             # Manual program override
             if self._manual_program_active and self._current_program:
@@ -850,13 +858,13 @@ class WashDataManager:
                 )
 
             if not readings:
-                return (None, 0.0, 0.0, None)
+                return None
 
             # Snapshotted for thread safety indirectly by task logic
             # We don't need a wrapper task if we unify with _update_estimates matching
             # but for now let's keep the detector callback as a trigger
             self._spawn_tracked(self._async_perform_combined_matching(readings))
-            return (None, 0.0, 0.0, None)
+            return None
 
         self.detector = CycleDetector(
             config,
@@ -5254,6 +5262,50 @@ class WashDataManager:
             return (finish_channel or status_channel) or None
         return status_channel or None
 
+    def _log_notification(
+        self,
+        event_type: str | None,
+        message: str,
+        *,
+        targets: str = "",
+        deferred_reason: str | None = None,
+        delivered: bool = True,
+    ) -> None:
+        """Emit one log line for a notification's send / defer / drop.
+
+        Every user-facing notification funnels through ``_dispatch_notification``,
+        so this is the single place that records what WashData notified about,
+        where it went, and whether it was delivered, deferred (quiet-hours /
+        presence hold), or dropped. Live-progress ticks are high-frequency in-place
+        updates of a single persistent card, so they log at DEBUG to keep the INFO
+        stream meaningful; every discrete notification (start/finish/milestone/
+        clean/pause/…) logs at INFO. Deferred items are re-dispatched when the
+        hold clears, so they log again as "sent" on actual delivery.
+        """
+        label = event_type or "notification"
+        # Countdown / finish messages can span multiple lines - collapse to one.
+        summary = " ".join(str(message).split())
+        if len(summary) > 200:
+            summary = summary[:197] + "..."
+        is_live = event_type == NOTIFY_EVENT_LIVE
+        if deferred_reason:
+            self._logger.debug(
+                "Notification deferred (%s) - %s: %s", label, deferred_reason, summary
+            )
+        elif not delivered:
+            self._logger.debug(
+                "Notification not delivered (%s) - no matching target: %s",
+                label, summary,
+            )
+        elif is_live:
+            self._logger.debug(
+                "Notification sent (%s) via %s: %s", label, targets, summary
+            )
+        else:
+            self._logger.info(
+                "Notification sent (%s) via %s: %s", label, targets, summary
+            )
+
     def _dispatch_notification(
         self,
         message: str,
@@ -5345,6 +5397,7 @@ class WashDataManager:
                 extra_vars=extra_vars,
             )
             self._last_dispatch_deferred = True
+            self._log_notification(event_type, message, deferred_reason="quiet hours")
             return False
 
         if (
@@ -5369,6 +5422,9 @@ class WashDataManager:
                     }
                 )
                 self._last_dispatch_deferred = True
+                self._log_notification(
+                    event_type, message, deferred_reason="nobody home"
+                )
                 return False
 
         actions_sent = False
@@ -5379,6 +5435,7 @@ class WashDataManager:
         # service/persistent-notification path entirely.
         services = self._get_services_for_event(event_type)
         if actions_sent and not services:
+            self._log_notification(event_type, message, targets="actions")
             return True
 
         service_sent = self._send_notification_service(
@@ -5389,6 +5446,20 @@ class WashDataManager:
             event_type=event_type,
             extra_vars=extra_vars,
         )
+
+        if actions_sent or service_sent:
+            targets: list[str] = []
+            if actions_sent:
+                targets.append("actions")
+            if service_sent:
+                # _send_notification_service falls back to a persistent
+                # notification only when no notify services are configured.
+                targets.extend(services if services else ["persistent_notification"])
+            self._log_notification(
+                event_type, message, targets=", ".join(targets)
+            )
+        else:
+            self._log_notification(event_type, message, delivered=False)
         return actions_sent or service_sent
 
     def _send_notification_service(
