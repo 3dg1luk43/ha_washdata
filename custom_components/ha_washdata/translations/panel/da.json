@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entitet ikke fundet",
+    "running_long": "Kører længere",
+    "remaining": "tilbage",
+    "progress": "fremgang",
+    "show_time_remaining": "Vis resterende tid",
+    "show_percentage": "Vis procent",
+    "layout": {
+      "tile": "Felt (kompakt)",
+      "detail": "Detalje (detaljeret)",
+      "glance": "Overblik (flere enheder)"
+    },
+    "btn": {
+      "pause": "Pause",
+      "resume": "Genoptag",
+      "terminate": "Afslut cyklus",
+      "record_start": "Start optagelse",
+      "record_stop": "Stop optagelse",
+      "program": "Program",
+      "open_panel": "Åbn WashData"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Apparatentitet",
+      "entities": "Apparater",
+      "title": "Titel",
+      "icon": "Ikon",
+      "show_state": "Vis tilstand",
+      "show_program": "Vis program",
+      "show_progress_bar": "Vis fremgangslinje",
+      "spin_icon": "Roter ikon under kørsel",
+      "display_mode": "Detaljelinje",
+      "active_color": "Tilsidesæt aktiv farve",
+      "show_phase": "Vis fase",
+      "show_energy": "Vis energi og omkostninger",
+      "show_anomaly": "Vis advarsel om lang kørsel",
+      "show_sparkline": "Vis live effektgraf",
+      "buttons": "Handlingsknapper",
+      "program_entity": "Programentitet (tilsidesæt)",
+      "time_entity": "Tidsentitet (tilsidesæt)",
+      "pct_entity": "Fremgangsentitet (tilsidesæt)",
+      "power_entity": "Effektentitet (tilsidesæt)",
+      "tap_action": "Tryk-handling",
+      "hold_action": "Hold-handling",
+      "double_tap_action": "Dobbelttryk-handling"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} registrerede anomalier (f.eks. dør åbnet midt i cyklus) – åben for at se dem på grafen",
     "auto": "(auto-detekteret)",
@@ -934,6 +982,7 @@
     "font_size_hint": "Gør alt i dette panel større eller mindre. Gælder for din konto på denne enhed."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",
     "completion_min_seconds": "Korteste kørsel, der tæller som en rigtig cyklus",
     "end_repeat_count": "Lave målinger i træk før afslutning",
     "interrupted_min_seconds": "Korte cyklusser markeres som afbrudt",
@@ -1007,6 +1056,10 @@
     "unusable": "Ubrugelig"
   },
   "section": {
+    "dishwasher": {
+      "label": "Opvaskemaskine",
+      "intro": "Håndtering af cyklusafslutning for opvaskemaskiner, der typisk slutter med en lang, næsten lydløs tørrefase før en kort sidste udpumpning."
+    },
     "anti_wrinkle": {
       "intro": "Anti-rynke-tilstand registrerer tumble-pulser med lav effekt efter den vigtigste fase og holder dem tilknyttet den afsluttede cyklus.",
       "label": "Anti-rynke"
@@ -1049,6 +1102,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Frigivelse efter stille tørrefase",
+      "doc": "Når cyklussen overskrider sin forventede varighed: hvor længe opvaskemaskinen skal forblive stille (under Stoptærskel), før WashData holder op med at vente på en sidste udpumpning og afslutter cyklussen. Hæv den, hvis din maskine har en lang stille tørrefase før en sen sidste udpumpning, der bliver overset - et bredere vindue lader den indlærte varighed følge sæsonudsving (koldere indløbsvand = længere cyklusser) i stedet for at låse sig til det gamle gennemsnit. Den forkorter kun ventetiden i forhold til den interne grænse på 30 minutter for slutspidsen, aldrig forlænger den."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Genkend de korte tørretumblerimpulser med lav effekt, som en tørretumbler udsender efter hovedvarmefasen, og hold dem fastgjort til den færdige cyklus i stedet for at læse dem som nye cyklusser.",
       "label": "Aktivér anti-rynke registrering"

@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Nie znaleziono encji",
+    "running_long": "Działa długo",
+    "remaining": "pozostało",
+    "progress": "postęp",
+    "show_time_remaining": "Pokaż pozostały czas",
+    "show_percentage": "Pokaż procenty",
+    "layout": {
+      "tile": "Kafelek (kompaktowy)",
+      "detail": "Szczegóły (rozbudowany)",
+      "glance": "Podgląd (wiele urządzeń)"
+    },
+    "btn": {
+      "pause": "Wstrzymaj",
+      "resume": "Wznów",
+      "terminate": "Zakończ cykl",
+      "record_start": "Rozpocznij nagrywanie",
+      "record_stop": "Zatrzymaj nagrywanie",
+      "program": "Program",
+      "open_panel": "Otwórz WashData"
+    },
+    "editor": {
+      "layout": "Układ",
+      "entity": "Encja urządzenia",
+      "entities": "Urządzenia",
+      "title": "Tytuł",
+      "icon": "Ikona",
+      "show_state": "Pokaż stan",
+      "show_program": "Pokaż program",
+      "show_progress_bar": "Pokaż pasek postępu",
+      "spin_icon": "Obracaj ikonę podczas działania",
+      "display_mode": "Wiersz szczegółów",
+      "active_color": "Zastąpienie koloru aktywnego",
+      "show_phase": "Pokaż fazę",
+      "show_energy": "Pokaż energię i koszt",
+      "show_anomaly": "Pokaż ostrzeżenie o przekroczeniu",
+      "show_sparkline": "Pokaż wykres mocy na żywo",
+      "buttons": "Przyciski akcji",
+      "program_entity": "Encja programu (zastąpienie)",
+      "time_entity": "Encja czasu (zastąpienie)",
+      "pct_entity": "Encja postępu (zastąpienie)",
+      "power_entity": "Encja mocy (zastąpienie)",
+      "tap_action": "Akcja dotknięcia",
+      "hold_action": "Akcja przytrzymania",
+      "double_tap_action": "Akcja podwójnego dotknięcia"
+    }
+  },
   "badge": {
     "artifact_tip": "Wykryto {n} anomalii (np. drzwi otwarte w połowie cyklu) – otwórz, aby zobaczyć je na wykresie",
     "auto": "(automatycznie wykryty)",
@@ -979,6 +1027,10 @@
     "unusable": "Nie nadaje się do użytku"
   },
   "section": {
+    "dishwasher": {
+      "label": "Zmywarka",
+      "intro": "Obsługa końca cyklu w zmywarkach, które zazwyczaj kończą długą, niemal cichą fazą suszenia przed krótkim końcowym odpompowaniem wody."
+    },
     "anti_wrinkle": {
       "intro": "Tryb antygniotowy wykrywa impulsy bębnowania przy niskiej mocy po fazie głównej i utrzymuje je przyłączone do zakończonego cyklu.",
       "label": "Antygniotowy"
@@ -1021,6 +1073,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Zwolnienie po cichej fazie suszenia",
+      "doc": "Gdy cykl przekroczy oczekiwany czas trwania, jak długo zmywarka musi pozostać cicha (poniżej Progu Zatrzymania), zanim WashData przestanie czekać na końcowe odpompowanie wody i zakończy cykl. Zwiększ tę wartość, jeśli Twoje urządzenie ma długą cichą fazę suszenia przed późnym końcowym odpompowaniem, które jest pomijane - szersze okno pozwala, aby wyuczony czas trwania podążał za sezonowym dryfem (chłodniejsza woda na wlocie = dłuższe cykle), zamiast trzymać się starej średniej. Może jedynie skrócić oczekiwanie względem wewnętrznego 30-minutowego limitu końcowego odpompowania, nigdy go nie wydłuża."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Rozpoznawaj krótkie impulsy suszenia o małej mocy, które suszarka emituje po głównej fazie nagrzewania, i pamiętaj o ich dołączeniu do zakończonego cyklu, zamiast odczytywać je jako nowe cykle.",
       "label": "Włącz Wykrywanie Antygniotowe"
@@ -1803,6 +1859,7 @@
     "other": "Inne"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy ciszy po oczekiwanym czasie trwania, zanim zwolnione zostanie oczekiwanie na końcowe odpompowanie wody",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",
     "anti_wrinkle_exit_power": "Moc musi spaść poniżej tej wartości pomiędzy impulsami, aby tryb antygniotowy pozostał aktywny",
     "anti_wrinkle_idle_timeout": "Dozwolony czas ciszy między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy",

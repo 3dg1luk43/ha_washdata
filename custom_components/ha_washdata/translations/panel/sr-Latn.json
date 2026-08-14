@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entitet nije pronađen",
+    "running_long": "Traje predugo",
+    "remaining": "preostalo",
+    "progress": "napredak",
+    "show_time_remaining": "Prikaži preostalo vreme",
+    "show_percentage": "Prikaži procenat",
+    "layout": {
+      "tile": "Pločica (kompaktno)",
+      "detail": "Detaljno (bogato)",
+      "glance": "Pregled (više uređaja)"
+    },
+    "btn": {
+      "pause": "Pauziraj",
+      "resume": "Nastavi",
+      "terminate": "Završi ciklus",
+      "record_start": "Započni snimanje",
+      "record_stop": "Zaustavi snimanje",
+      "program": "Program",
+      "open_panel": "Otvori WashData"
+    },
+    "editor": {
+      "layout": "Izgled",
+      "entity": "Entitet uređaja",
+      "entities": "Uređaji",
+      "title": "Naslov",
+      "icon": "Ikona",
+      "show_state": "Prikaži stanje",
+      "show_program": "Prikaži program",
+      "show_progress_bar": "Prikaži traku napretka",
+      "spin_icon": "Rotiraj ikonu tokom rada",
+      "display_mode": "Red sa detaljima",
+      "active_color": "Zamena aktivne boje",
+      "show_phase": "Prikaži fazu",
+      "show_energy": "Prikaži energiju i trošak",
+      "show_anomaly": "Prikaži upozorenje o produženju",
+      "show_sparkline": "Prikaži grafikon snage uživo",
+      "buttons": "Dugmad za radnje",
+      "program_entity": "Entitet programa (zamena)",
+      "time_entity": "Entitet vremena (zamena)",
+      "pct_entity": "Entitet napretka (zamena)",
+      "power_entity": "Entitet snage (zamena)",
+      "tap_action": "Radnja dodira",
+      "hold_action": "Radnja držanja",
+      "double_tap_action": "Radnja dvostrukog dodira"
+    }
+  },
   "badge": {
     "artifact_tip": "Otkriveno je {n} anomalija (npr. vrata otvorena usred ciklusa) – otvorite da ih vidite na grafikonu",
     "auto": "(automatski otkriveno)",
@@ -979,6 +1027,10 @@
     "unusable": "Neupotrebljivo"
   },
   "section": {
+    "dishwasher": {
+      "label": "Mašina za pranje sudova",
+      "intro": "Obrada kraja ciklusa za mašine za pranje sudova, koje se obično završavaju dugom, gotovo tihom fazom sušenja pre kratkog završnog ispumpavanja vode."
+    },
     "anti_wrinkle": {
       "intro": "Režim zaštite od gužvanja tkanine detektuje kratke pulseve tumblovanja pri niskoj snazi nakon glavne faze i drži ih pripisanim završenom ciklusu.",
       "label": "Zaštita od gužvanja"
@@ -1021,6 +1073,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Otpuštanje nakon tihe faze sušenja",
+      "doc": "Kada ciklus pređe svoje očekivano trajanje, koliko dugo mašina mora ostati tiha (ispod Praga zaustavljanja) pre nego što WashData prestane da čeka na završno ispumpavanje vode i završi ciklus. Povećajte ako vaš uređaj ima dugu tihu fazu sušenja pre kasnog završnog ispumpavanja koje se propušta - šire okno omogućava da naučeno trajanje prati sezonske promene (hladnija dovodna voda = duži ciklusi) umesto da ostane zaključano na staroj prosečnoj vrednosti. Čekanje samo skraćuje u odnosu na interno ograničenje završnog ispumpavanja od 30 minuta, nikada ga ne produžava."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Prepoznajte kratke impulse male snage koje mašina za sušenje emituje nakon glavne faze grejanja i držite ih povezanim sa završenim ciklusom umesto da ih čitate kao nove cikluse.",
       "label": "Omogući detekciju zaštite od gužvanja"
@@ -1803,6 +1859,7 @@
     "other": "Ostalo"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Mašina za pranje sudova: sekunde tišine nakon očekivanog trajanja pre nego što se otpusti čekanje na završno ispumpavanje vode",
     "completion_min_seconds": "Najkraće pokretanje koje se računa kao pravi ciklus",
     "end_repeat_count": "Niska očitavanja zaredom pre završetka",
     "interrupted_min_seconds": "Kratki ciklusi označeni kao prekinuti",

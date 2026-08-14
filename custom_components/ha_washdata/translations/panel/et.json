@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Olemit ei leitud",
+    "running_long": "Töötab kaua",
+    "remaining": "jäänud",
+    "progress": "edenemine",
+    "show_time_remaining": "Näita järelejäänud aega",
+    "show_percentage": "Näita protsenti",
+    "layout": {
+      "tile": "Paan (kompaktne)",
+      "detail": "Detailne (rikkalik)",
+      "glance": "Pilguheit (mitu seadet)"
+    },
+    "btn": {
+      "pause": "Peata",
+      "resume": "Jätka",
+      "terminate": "Lõpeta tsükkel",
+      "record_start": "Alusta salvestamist",
+      "record_stop": "Lõpeta salvestamine",
+      "program": "Programm",
+      "open_panel": "Ava WashData"
+    },
+    "editor": {
+      "layout": "Paigutus",
+      "entity": "Seadme olem",
+      "entities": "Seadmed",
+      "title": "Pealkiri",
+      "icon": "Ikoon",
+      "show_state": "Näita olekut",
+      "show_program": "Näita programmi",
+      "show_progress_bar": "Näita edenemisriba",
+      "spin_icon": "Pööra ikooni töötamise ajal",
+      "display_mode": "Detailirida",
+      "active_color": "Aktiivse värvi alistamine",
+      "show_phase": "Näita faasi",
+      "show_energy": "Näita energiat ja maksumust",
+      "show_anomaly": "Näita ületusaja hoiatust",
+      "show_sparkline": "Näita reaalajas võimsuse graafikut",
+      "buttons": "Tegevusnupud",
+      "program_entity": "Programmi olem (alistamine)",
+      "time_entity": "Aja olem (alistamine)",
+      "pct_entity": "Edenemise olem (alistamine)",
+      "power_entity": "Võimsuse olem (alistamine)",
+      "tap_action": "Puudutuse tegevus",
+      "hold_action": "Hoidmise tegevus",
+      "double_tap_action": "Topeltpuudutuse tegevus"
+    }
+  },
   "badge": {
     "artifact_tip": "Tuvastati {n} anomaaliat (nt uks avati tsükli keskel) – avage, et näha neid graafikul",
     "auto": "(tuvastatud automaatselt)",
@@ -934,6 +982,7 @@
     "font_size_hint": "Muuda kõik selles paneelil suuremaks või väiksemaks. Kehtib sinu kontole sellel seadmel."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
     "anti_wrinkle_enabled": "Neelab pärast põhifaasi trummelimpulsid, selle asemel et lugeda neid uute tsüklitena",
     "anti_wrinkle_exit_power": "Kortsudevastase režiimi aktiivsena püsimiseks peab võimsus impulsside vahel sellest allapoole langema",
     "anti_wrinkle_idle_timeout": "Kahe trummelimpulsi vahel lubatud vaikuseaeg enne kortsudevastase režiimi lõppu",
@@ -1007,6 +1056,10 @@
     "unusable": "Kasutuskõlbmatu"
   },
   "section": {
+    "dishwasher": {
+      "label": "Nõudepesumasin",
+      "intro": "Tsükli lõpu käsitlemine nõudepesumasinate jaoks, mis tavaliselt lõpevad pika, peaaegu hääletu kuivatusfaasiga enne lühikest lõplikku tühjendust."
+    },
     "anti_wrinkle": {
       "intro": "Kortsudevastane/kroomievastane režiim tuvastab madalvõimsusega trummelpulsid pärast põhifaasi ja hoiab need lõppenud tsükliga seotud.",
       "label": "Kortsudevastane"
@@ -1049,6 +1102,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Passiivkuivatuse vaikne vabastamine",
+      "doc": "Kui tsükkel ületab oma eeldatava kestuse, siis kui kaua peab nõudepesumasin püsima vaikne (allpool Peatumise Lävi), enne kui WashData lõpetab lõpliku tühjenduse ootamise ja lõpetab tsükli. Suurendage seda, kui teie masinal on pikk vaikne kuivatusfaas enne hilist lõplikku tühjendust, mis jääb märkamata - laiem aken laseb õpitud kestusel järgida hooajalist triivi (külmem sissevoolav vesi = pikemad tsüklid), selle asemel et lukustuda vana keskmise külge. See saab ooteaega üksnes lühendada võrreldes sisemise 30-minutilise lõpupiigi ülempiiriga, mitte kunagi seda pikendada."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Tuvastage lühikesed väikese võimsusega trummelimpulsid, mida kuivati ​​pärast peamist kuumutusfaasi kiirgab, ja hoidke need valmis tsükliga ühendatud, selle asemel, et lugeda neid uute tsüklitena.",
       "label": "Luba Kortsudevastane Tuvastamine"

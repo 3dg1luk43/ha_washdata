@@ -934,6 +934,7 @@
     "font_size_hint": "Rendi tutto in questo pannello più grande o più piccolo. Si applica al tuo account su questo dispositivo."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
     "anti_wrinkle_enabled": "Assorbire gli impulsi di rotazione dopo la fase principale invece di leggerli come nuovi cicli",
     "anti_wrinkle_exit_power": "La potenza deve scendere sotto questo valore tra gli impulsi affinché la modalità antirughe resti attiva",
     "anti_wrinkle_idle_timeout": "Tempo di silenzio consentito tra due impulsi di rotazione prima che la modalità antirughe termini",
@@ -1007,6 +1008,10 @@
     "unusable": "Inutilizzabile"
   },
   "section": {
+    "dishwasher": {
+      "label": "Lavastoviglie",
+      "intro": "Gestione del fine ciclo per le lavastoviglie, che di solito terminano con una lunga fase di asciugatura quasi silenziosa prima di un breve scarico finale."
+    },
     "anti_wrinkle": {
       "intro": "La modalità antirughe/antistropicciamento rileva gli impulsi di tumbling a bassa potenza dopo la fase principale e li mantiene collegati al ciclo completato.",
       "label": "Antirughe"
@@ -1049,6 +1054,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Rilascio al silenzio dell'asciugatura passiva",
+      "doc": "Una volta che il ciclo supera la sua durata prevista, per quanto tempo la lavastoviglie deve restare silenziosa (sotto la Soglia di arresto) prima che WashData smetta di attendere uno scarico finale e termini il ciclo. Aumentalo se la tua macchina ha una lunga fase di asciugatura silenziosa prima di uno scarico finale tardivo che non viene rilevato - una finestra più ampia consente alla durata appresa di seguire la deriva stagionale (acqua in ingresso più fredda = cicli più lunghi) invece di bloccarsi sulla vecchia media. Riduce soltanto l'attesa rispetto al limite interno di 30 minuti per il picco di fine, senza mai prolungarla."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Riconosci i brevi impulsi di asciugatrice a bassa potenza emessi da un'asciugatrice dopo la fase di riscaldamento principale e mantienili collegati al ciclo finito invece di leggerli come nuovi cicli.",
       "label": "Abilita rilevamento antirughe"
@@ -1976,6 +1985,54 @@
       "skip_forever": "Non mostrare più",
       "hide_guidance": "Nascondi guida",
       "show_guidance": "Mostra guida"
+    }
+  },
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entità non trovata",
+    "running_long": "In ritardo",
+    "remaining": "rimanente",
+    "progress": "avanzamento",
+    "show_time_remaining": "Mostra tempo rimanente",
+    "show_percentage": "Mostra percentuale",
+    "layout": {
+      "tile": "Riquadro (compatto)",
+      "detail": "Dettaglio (completo)",
+      "glance": "Panoramica (più dispositivi)"
+    },
+    "btn": {
+      "pause": "Pausa",
+      "resume": "Riprendi",
+      "terminate": "Termina ciclo",
+      "record_start": "Avvia registrazione",
+      "record_stop": "Interrompi registrazione",
+      "program": "Programma",
+      "open_panel": "Apri WashData"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Entità dell'elettrodomestico",
+      "entities": "Elettrodomestici",
+      "title": "Titolo",
+      "icon": "Icona",
+      "show_state": "Mostra stato",
+      "show_program": "Mostra programma",
+      "show_progress_bar": "Mostra barra di avanzamento",
+      "spin_icon": "Ruota l'icona durante il funzionamento",
+      "display_mode": "Riga di dettaglio",
+      "active_color": "Colore attivo personalizzato",
+      "show_phase": "Mostra fase",
+      "show_energy": "Mostra energia e costo",
+      "show_anomaly": "Mostra avviso di ritardo",
+      "show_sparkline": "Mostra grafico di potenza in tempo reale",
+      "buttons": "Pulsanti di azione",
+      "program_entity": "Entità programma (personalizzata)",
+      "time_entity": "Entità tempo (personalizzata)",
+      "pct_entity": "Entità avanzamento (personalizzata)",
+      "power_entity": "Entità potenza (personalizzata)",
+      "tap_action": "Azione al tocco",
+      "hold_action": "Azione alla pressione prolungata",
+      "double_tap_action": "Azione al doppio tocco"
     }
   }
 }

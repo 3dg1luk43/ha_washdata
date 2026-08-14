@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entiteti nuk u gjet",
+    "running_long": "Po zgjat",
+    "remaining": "mbetur",
+    "progress": "përparimi",
+    "show_time_remaining": "Shfaq kohën e mbetur",
+    "show_percentage": "Shfaq përqindjen",
+    "layout": {
+      "tile": "Pllakëz (kompakte)",
+      "detail": "Detaje (i pasur)",
+      "glance": "Vështrim (pajisje të shumta)"
+    },
+    "btn": {
+      "pause": "Pauzë",
+      "resume": "Vazhdo",
+      "terminate": "Përfundo ciklin",
+      "record_start": "Fillo regjistrimin",
+      "record_stop": "Ndalo regjistrimin",
+      "program": "Programi",
+      "open_panel": "Hap WashData"
+    },
+    "editor": {
+      "layout": "Paraqitja",
+      "entity": "Entiteti i pajisjes",
+      "entities": "Pajisjet",
+      "title": "Titulli",
+      "icon": "Ikona",
+      "show_state": "Shfaq gjendjen",
+      "show_program": "Shfaq programin",
+      "show_progress_bar": "Shfaq shiritin e progresit",
+      "spin_icon": "Rrotullo ikonën gjatë punës",
+      "display_mode": "Rreshti i detajeve",
+      "active_color": "Mbivendosje e ngjyrës aktive",
+      "show_phase": "Shfaq fazën",
+      "show_energy": "Shfaq energjinë dhe koston",
+      "show_anomaly": "Shfaq paralajmërimin e tejkalimit",
+      "show_sparkline": "Shfaq grafikun e drejtpërdrejtë të fuqisë",
+      "buttons": "Butonat e veprimeve",
+      "program_entity": "Entiteti i programit (mbivendosje)",
+      "time_entity": "Entiteti i kohës (mbivendosje)",
+      "pct_entity": "Entiteti i progresit (mbivendosje)",
+      "power_entity": "Entiteti i fuqisë (mbivendosje)",
+      "tap_action": "Veprimi me prekje",
+      "hold_action": "Veprimi me mbajtje",
+      "double_tap_action": "Veprimi me prekje të dyfishtë"
+    }
+  },
   "badge": {
     "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) – hapeni për t'i parë ato në grafik",
     "auto": "(zbuluar automatikisht)",
@@ -1018,6 +1066,10 @@
     "phase_eta": {
       "label": "Koha e Mbetur",
       "intro": "Kohë e mbetur e ndërgjegjshme për fazat, për makinat gjatësia e ciklit të të cilave varet nga temperatura ose centrifugimi."
+    },
+    "dishwasher": {
+      "label": "Pjatalarëse",
+      "intro": "Trajtimi i fundit të ciklit për pjatalarëset, të cilat zakonisht përfundojnë me një fazë të gjatë tharjeje pothuajse pa konsum energjie përpara një shkarkimi të shkurtër përfundimtar."
     }
   },
   "setting": {
@@ -1439,6 +1491,10 @@
     "door_end_dwell_seconds": {
       "label": "Koha e pritjes me derë të hapur",
       "doc": "Sa gjatë duhet të qëndrojë dera hapur përpara se WashData të përfundojë ciklin, kur \"Dera hapet automatikisht në fund\" është aktive. E gjatë sa të injorojë shtimin e shpejtë të një pjate (parazgjedhja 60 s), e shkurtër sa të përfundojë shpejt pasi makina hap derën."
+    },
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Lirim në qetësi gjatë tharjes pasive",
+      "doc": "Sapo cikli të kalojë kohëzgjatjen e tij të pritur, sa kohë duhet të qëndrojë e qetë pjatalarësja (nën Pragun e ndalimit) përpara se WashData të ndalojë pritjen për një shkarkim përfundimtar dhe ta mbyllë ciklin. Rriteni nëse makina juaj ka një fazë të gjatë tharjeje të heshtur përpara një shkarkimi përfundimtar të vonuar që po humbet - një dritare më e gjerë e lejon kohëzgjatjen e mësuar të ndjekë zhvendosjen sezonale (ujë hyrës më i ftohtë = cikle më të gjata) në vend që të bllokohet në mesataren e vjetër. Ai vetëm sa e shkurton pritjen në raport me kufirin e brendshëm 30-minutësh të kulmit të fundit, kurrë nuk e zgjat."
     }
   },
   "setting_group": {
@@ -1828,7 +1884,8 @@
     "dtw_ddtw_scale": "Etapa 3: distanca e gjysmë-ngopjes DDTW; më e vogël = më e ndjeshme ndaj formës (parazgjedhja 30)",
     "dtw_refine_top_n": "Etapa 3: kandidatë të rishënuara nga DTW; rriteni në 7-9 nëse profili i saktë renditet i 4-5 (parazgjedhja 5)",
     "duration_scale": "Etapa 4: raporti logaritmik ku marrëveshja e kohëzgjatjes gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.175)",
-    "energy_scale": "Etapa 4: raporti logaritmik ku marrëveshja e energjisë gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.25)"
+    "energy_scale": "Etapa 4: raporti logaritmik ku marrëveshja e energjisë gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.25)",
+    "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda qetësie pas kohëzgjatjes së pritur para se të lirohet pritja e shkarkimit në fund të ciklit"
   },
   "col": {
     "profile_tip": "Emri i programit të përputhur. I paetiketuar do të thotë se asnjë profil nuk u përputh në fund të ciklit.",

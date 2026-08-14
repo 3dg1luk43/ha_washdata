@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "분",
+    "entity_not_found": "엔티티를 찾을 수 없음",
+    "running_long": "지연 중",
+    "remaining": "남음",
+    "progress": "진행률",
+    "show_time_remaining": "남은 시간 표시",
+    "show_percentage": "백분율 표시",
+    "layout": {
+      "tile": "타일 (간단히)",
+      "detail": "상세 (풍부하게)",
+      "glance": "한눈에 보기 (여러 기기)"
+    },
+    "btn": {
+      "pause": "일시정지",
+      "resume": "재개",
+      "terminate": "주기 종료",
+      "record_start": "기록 시작",
+      "record_stop": "기록 중지",
+      "program": "프로그램",
+      "open_panel": "WashData 열기"
+    },
+    "editor": {
+      "layout": "레이아웃",
+      "entity": "기기 엔티티",
+      "entities": "기기",
+      "title": "제목",
+      "icon": "아이콘",
+      "show_state": "상태 표시",
+      "show_program": "프로그램 표시",
+      "show_progress_bar": "진행 표시줄 표시",
+      "spin_icon": "실행 중 아이콘 회전",
+      "display_mode": "상세 줄",
+      "active_color": "활성 색상 재정의",
+      "show_phase": "단계 표시",
+      "show_energy": "에너지 및 비용 표시",
+      "show_anomaly": "초과 경고 표시",
+      "show_sparkline": "실시간 전력 그래프 표시",
+      "buttons": "동작 버튼",
+      "program_entity": "프로그램 엔티티 (재정의)",
+      "time_entity": "시간 엔티티 (재정의)",
+      "pct_entity": "진행률 엔티티 (재정의)",
+      "power_entity": "전력 엔티티 (재정의)",
+      "tap_action": "탭 동작",
+      "hold_action": "길게 누르기 동작",
+      "double_tap_action": "두 번 탭 동작"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} 이상 현상이 감지되었습니다(예: 사이클 중간에 문이 열림) - 열어서 그래프에서 확인",
     "auto": "(자동 감지)",
@@ -959,7 +1007,8 @@
     "dtw_ddtw_scale": "Stage 3: DDTW 반포화 거리; 작을수록 형상에 민감(기본값 30)",
     "dtw_refine_top_n": "Stage 3: DTW가 재점수화하는 후보 수; 올바른 프로파일이 4-5위면 7-9로 높임(기본값 5)",
     "duration_scale": "Stage 4: 지속 시간 일치 점수가 반으로 줄어드는 로그 비율; 작을수록 엄격한 패널티(기본값 0.175)",
-    "energy_scale": "Stage 4: 에너지 일치 점수가 반으로 줄어드는 로그 비율; 작을수록 엄격한 패널티(기본값 0.25)"
+    "energy_scale": "Stage 4: 에너지 일치 점수가 반으로 줄어드는 로그 비율; 작을수록 엄격한 패널티(기본값 0.25)",
+    "dishwasher_end_spike_quiet_release": "식기세척기: 예상 소요 시간 이후 사이클 종료 배수 대기가 해제되기 전 조용히 유지되는 초"
   },
   "phase_desc": {
     "anti_crease": "메인 사이클 후 드럼이 간헐적으로 회전하여 의류 구김을 방지합니다.",
@@ -1046,6 +1095,10 @@
     "phase_eta": {
       "label": "남은 시간",
       "intro": "사이클 길이가 온도나 탈수에 따라 달라지는 기기를 위한, 단계를 고려한 남은 시간."
+    },
+    "dishwasher": {
+      "label": "식기세척기",
+      "intro": "식기세척기의 사이클 종료 처리입니다. 식기세척기는 일반적으로 짧은 최종 배수 전에 전력을 거의 소비하지 않는 긴 건조 단계로 끝납니다."
     }
   },
   "setting": {
@@ -1467,6 +1520,10 @@
     "door_end_dwell_seconds": {
       "label": "문 열림 종료 대기 시간",
       "doc": "\"종료 시 자동으로 문 열림\"이 켜져 있을 때, WashData가 사이클을 종료하기 전에 문이 열려 있어야 하는 시간입니다. 식기를 빨리 추가하는 경우(바로 닫힘)는 무시하면서도 기기가 문을 열었을 때 신속하게 종료할 수 있을 만큼 짧게 설정합니다(기본값 60초)."
+    },
+    "dishwasher_end_spike_quiet_release": {
+      "label": "자연 건조 조용 시 해제",
+      "doc": "사이클이 예상 소요 시간을 지난 후, WashData가 최종 배수를 더 이상 기다리지 않고 사이클을 종료하기까지 식기세척기가 조용한 상태(중지 임계값 미만)를 유지해야 하는 시간입니다. 늦게 발생하는 최종 배수 전에 긴 무음 건조 단계가 있고 그 배수가 감지되지 않고 있다면 값을 높이세요. 창을 넓히면 학습된 소요 시간이 예전 평균값에 고정되지 않고 계절적 변동(급수 온도가 낮을수록 사이클이 길어짐)을 따라갈 수 있습니다. 이 설정은 내부의 30분 종료 스파이크 상한에 비해 대기 시간을 단축할 수만 있고 연장하지는 않습니다."
     }
   },
   "setting_group": {

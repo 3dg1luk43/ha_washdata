@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entiteit niet gevonden",
+    "running_long": "Loopt langer",
+    "remaining": "resterend",
+    "progress": "voortgang",
+    "show_time_remaining": "Resterende tijd tonen",
+    "show_percentage": "Percentage tonen",
+    "layout": {
+      "tile": "Tegel (compact)",
+      "detail": "Detail (uitgebreid)",
+      "glance": "Overzicht (meerdere apparaten)"
+    },
+    "btn": {
+      "pause": "Pauzeren",
+      "resume": "Hervatten",
+      "terminate": "Cyclus beëindigen",
+      "record_start": "Opname starten",
+      "record_stop": "Opname stoppen",
+      "program": "Programma",
+      "open_panel": "WashData openen"
+    },
+    "editor": {
+      "layout": "Lay-out",
+      "entity": "Apparaatentiteit",
+      "entities": "Apparaten",
+      "title": "Titel",
+      "icon": "Pictogram",
+      "show_state": "Status tonen",
+      "show_program": "Programma tonen",
+      "show_progress_bar": "Voortgangsbalk tonen",
+      "spin_icon": "Pictogram laten draaien tijdens uitvoering",
+      "display_mode": "Detailregel",
+      "active_color": "Actieve kleur overschrijven",
+      "show_phase": "Fase tonen",
+      "show_energy": "Energie en kosten tonen",
+      "show_anomaly": "Waarschuwing voor uitloop tonen",
+      "show_sparkline": "Live vermogensgrafiek tonen",
+      "buttons": "Actieknoppen",
+      "program_entity": "Programma-entiteit (overschrijven)",
+      "time_entity": "Tijdentiteit (overschrijven)",
+      "pct_entity": "Voortgangsentiteit (overschrijven)",
+      "power_entity": "Vermogensentiteit (overschrijven)",
+      "tap_action": "Tikactie",
+      "hold_action": "Vasthoudactie",
+      "double_tap_action": "Dubbeltikactie"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} afwijkingen gedetecteerd (bijvoorbeeld de deur werd halverwege de cyclus geopend) – open om ze in de grafiek te zien",
     "auto": "(automatisch gedetecteerd)",
@@ -934,6 +982,7 @@
     "font_size_hint": "Maak alles in dit paneel groter of kleiner. Geldt voor uw account op dit apparaat."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Vaatwasser: stille seconden na de verwachte duur voordat de wachttijd op het wegpompen aan het einde van de cyclus wordt vrijgegeven",
     "completion_min_seconds": "Kortste run die als een echte cyclus telt",
     "end_repeat_count": "Opeenvolgende lage metingen voor het einde",
     "interrupted_min_seconds": "Korte cycli gemarkeerd als onderbroken",
@@ -1007,6 +1056,10 @@
     "unusable": "Onbruikbaar"
   },
   "section": {
+    "dishwasher": {
+      "label": "Vaatwasser",
+      "intro": "Afhandeling van het einde van de cyclus voor vaatwassers, die doorgaans eindigen met een lange, vrijwel stille droogfase vóór een kort laatste wegpompen."
+    },
     "anti_wrinkle": {
       "intro": "De anti-kreuk-/anti-vouw-modus detecteert lage-vermogen trommelimpulsen na de hoofdfase en houdt ze bevestigd aan de voltooide cyclus.",
       "label": "Anti-kreuk"
@@ -1049,6 +1102,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Vrijgave na stille droogfase",
+      "doc": "Zodra de cyclus zijn verwachte duur voorbij is: hoe lang de vaatwasser stil moet blijven (onder de Stopdrempel) voordat WashData niet langer op een laatste wegpompen wacht en de cyclus beëindigt. Verhoog dit als uw machine een lange stille droogfase heeft vóór een laat laatste wegpompen dat wordt gemist - een breder venster laat de geleerde duur de seizoensdrift volgen (kouder toevoerwater = langere cycli) in plaats van vast te houden aan het oude gemiddelde. Het verkort de wachttijd alleen ten opzichte van de interne limiet van 30 minuten voor de eindpiek, en verlengt die nooit."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Herken de korte tuimelpulsen met laag vermogen die een droger afgeeft na de hoofdverwarmingsfase en houd ze vast aan het voltooide programma in plaats van ze als nieuwe cycli te lezen.",
       "label": "Anti-kreuk detectie inschakelen"

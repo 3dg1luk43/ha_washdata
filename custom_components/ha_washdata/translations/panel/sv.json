@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entitet hittades inte",
+    "running_long": "Kör längre",
+    "remaining": "återstår",
+    "progress": "förlopp",
+    "show_time_remaining": "Visa återstående tid",
+    "show_percentage": "Visa procent",
+    "layout": {
+      "tile": "Bricka (kompakt)",
+      "detail": "Detalj (utförlig)",
+      "glance": "Överblick (flera enheter)"
+    },
+    "btn": {
+      "pause": "Pausa",
+      "resume": "Återuppta",
+      "terminate": "Avsluta cykel",
+      "record_start": "Starta inspelning",
+      "record_stop": "Stoppa inspelning",
+      "program": "Program",
+      "open_panel": "Öppna WashData"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Apparatentitet",
+      "entities": "Apparater",
+      "title": "Titel",
+      "icon": "Ikon",
+      "show_state": "Visa status",
+      "show_program": "Visa program",
+      "show_progress_bar": "Visa förloppsindikator",
+      "spin_icon": "Snurra ikon under körning",
+      "display_mode": "Detaljrad",
+      "active_color": "Åsidosätt aktiv färg",
+      "show_phase": "Visa fas",
+      "show_energy": "Visa energi och kostnad",
+      "show_anomaly": "Visa varning för lång körtid",
+      "show_sparkline": "Visa live-effektgraf",
+      "buttons": "Åtgärdsknappar",
+      "program_entity": "Programentitet (åsidosätt)",
+      "time_entity": "Tidsentitet (åsidosätt)",
+      "pct_entity": "Förloppsentitet (åsidosätt)",
+      "power_entity": "Effektentitet (åsidosätt)",
+      "tap_action": "Tryckåtgärd",
+      "hold_action": "Håll-åtgärd",
+      "double_tap_action": "Dubbeltryckningsåtgärd"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} anomalier upptäckta (t.ex. dörren öppnades mitt i cykeln) – öppna för att se dem i diagrammet",
     "auto": "(automatiskt identifierat)",
@@ -934,6 +982,7 @@
     "font_size_hint": "Gör allt i den här panelen större eller mindre. Gäller för ditt konto på den här enheten."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
     "completion_min_seconds": "Kortaste körning som räknas som en riktig cykel",
     "end_repeat_count": "Antal låga avläsningar i rad innan avslut",
     "interrupted_min_seconds": "Korta cykler markeras som avbrutna",
@@ -1007,6 +1056,10 @@
     "unusable": "Oanvändbar"
   },
   "section": {
+    "dishwasher": {
+      "label": "Diskmaskin",
+      "intro": "Hantering av cykelslut för diskmaskiner, som vanligtvis avslutas med en lång, nästan ljudlös torkfas före en kort sista tömning."
+    },
     "anti_wrinkle": {
       "intro": "Skrynkelskyddsläget identifierar korta lågeffektstumlingspulser efter huvudfasen och håller dem kopplade till den avslutade cykeln för att förhindra skrynklor i tvätten.",
       "label": "Skrynkelskydd"
@@ -1049,6 +1102,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Frisläpp efter tyst torkfas",
+      "doc": "När cykeln passerar sin förväntade varaktighet: hur länge diskmaskinen måste förbli tyst (under Stopptröskel) innan WashData slutar vänta på en sista tömning och avslutar cykeln. Höj värdet om din maskin har en lång tyst torkfas före en sen sista tömning som missas - ett bredare fönster låter den inlärda varaktigheten följa säsongsvariationer (kallare inloppsvatten = längre cykler) istället för att låsa sig vid det gamla medelvärdet. Det förkortar bara väntetiden i förhållande till den interna gränsen på 30 minuter för slutspiken, aldrig förlänger den."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Känn igen de korta torktumlarpulser med låg effekt en torktumlare avger efter huvuduppvärmningsfasen och håll dem kopplade till den färdiga cykeln istället för att läsa dem som nya cykler.",
       "label": "Aktivera skrynkelskyddsdetektering"

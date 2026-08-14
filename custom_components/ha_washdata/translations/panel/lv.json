@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entītija nav atrasta",
+    "running_long": "Darbojas ilgi",
+    "remaining": "atlicis",
+    "progress": "progress",
+    "show_time_remaining": "Rādīt atlikušo laiku",
+    "show_percentage": "Rādīt procentus",
+    "layout": {
+      "tile": "Elements (kompakts)",
+      "detail": "Detalizēts (bagātīgs)",
+      "glance": "Pārskats (vairākas ierīces)"
+    },
+    "btn": {
+      "pause": "Pauzēt",
+      "resume": "Turpināt",
+      "terminate": "Beigt ciklu",
+      "record_start": "Sākt ierakstīšanu",
+      "record_stop": "Apturēt ierakstīšanu",
+      "program": "Programma",
+      "open_panel": "Atvērt WashData"
+    },
+    "editor": {
+      "layout": "Izkārtojums",
+      "entity": "Ierīces entītija",
+      "entities": "Ierīces",
+      "title": "Nosaukums",
+      "icon": "Ikona",
+      "show_state": "Rādīt stāvokli",
+      "show_program": "Rādīt programmu",
+      "show_progress_bar": "Rādīt progresa joslu",
+      "spin_icon": "Griezt ikonu darbības laikā",
+      "display_mode": "Detaļu rinda",
+      "active_color": "Aktīvās krāsas aizstāšana",
+      "show_phase": "Rādīt fāzi",
+      "show_energy": "Rādīt enerģiju un izmaksas",
+      "show_anomaly": "Rādīt pārsnieguma brīdinājumu",
+      "show_sparkline": "Rādīt tiešo jaudas grafiku",
+      "buttons": "Darbību pogas",
+      "program_entity": "Programmas entītija (aizstāšana)",
+      "time_entity": "Laika entītija (aizstāšana)",
+      "pct_entity": "Progresa entītija (aizstāšana)",
+      "power_entity": "Jaudas entītija (aizstāšana)",
+      "tap_action": "Pieskāriena darbība",
+      "hold_action": "Turēšanas darbība",
+      "double_tap_action": "Dubultā pieskāriena darbība"
+    }
+  },
   "badge": {
     "artifact_tip": "Konstatētas {n} anomālijas (piemēram, durvis atvērtas cikla vidū) – atveriet, lai tās skatītu diagrammā",
     "auto": "(noteikts automātiski)",
@@ -979,6 +1027,10 @@
     "unusable": "Nelietojama"
   },
   "section": {
+    "dishwasher": {
+      "label": "Trauku mazgājamā mašīna",
+      "intro": "Cikla beigu apstrāde trauku mazgājamām mašīnām, kuras parasti beidzas ar ilgu, gandrīz klusu žāvēšanas fāzi pirms īsas galīgās ūdens izvadīšanas."
+    },
     "anti_wrinkle": {
       "intro": "Pretgrumbu/pretlocīšanas režīms atpazīst zemas jaudas kratīšanas impulsus pēc galvenās fāzes un pievieno tos pabeigtajam ciklam.",
       "label": "Pretgrumbu"
@@ -1021,6 +1073,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Pasīvās žāvēšanas klusā atbrīvošana",
+      "doc": "Kad cikls pārsniedz paredzēto ilgumu, cik ilgi trauku mazgājamai mašīnai jāpaliek klusai (zem Apstāšanās slieksnis), pirms WashData pārtrauc gaidīt galīgo ūdens izvadīšanu un pabeidz ciklu. Palieliniet to, ja jūsu mašīnai ir ilga klusa žāvēšanas fāze pirms vēlas galīgās ūdens izvadīšanas, kas tiek palaista garām - plašāks logs ļauj apgūtajam ilgumam sekot sezonālajai novirzei (aukstāks ieplūstošais ūdens = garāki cikli), nevis fiksēties pie vecā vidējā. Tas var tikai saīsināt gaidīšanu attiecībā pret iekšējo 30 minūšu beigu smailes ierobežojumu, nekad to nepagarina."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Atpazīstiet īsos mazjaudas veļas impulsus, ko žāvētājs izstaro pēc galvenās karsēšanas fāzes, un turiet tos pievienotus gatavajam ciklam, nevis nolasiet tos kā jaunus ciklus.",
       "label": "Iespējot pretgrumbu noteikšanu"
@@ -1803,6 +1859,7 @@
     "other": "Cits"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Trauku mazgājamā mašīna: klusās sekundes pēc paredzētā ilguma, pirms tiek atbrīvota cikla beigu ūdens izvadīšanas gaidīšana",
     "anti_wrinkle_enabled": "Absorbējiet griešanās impulsus pēc galvenās fāzes, nevis nolasiet tos kā jaunus ciklus",
     "anti_wrinkle_exit_power": "Lai pretgrumbu režīms paliktu aktīvs, jaudai starp impulsiem jānokrītas zem šīs vērtības",
     "anti_wrinkle_idle_timeout": "Atļautais klusuma laiks starp diviem griešanās impulsiem, pirms pretgrumbu režīms beidzas",

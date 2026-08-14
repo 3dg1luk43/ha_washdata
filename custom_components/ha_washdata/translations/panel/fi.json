@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entiteettiä ei löytynyt",
+    "running_long": "Käy pitkään",
+    "remaining": "jäljellä",
+    "progress": "edistyminen",
+    "show_time_remaining": "Näytä jäljellä oleva aika",
+    "show_percentage": "Näytä prosentti",
+    "layout": {
+      "tile": "Ruutu (kompakti)",
+      "detail": "Yksityiskohtainen (rikas)",
+      "glance": "Silmäys (useita laitteita)"
+    },
+    "btn": {
+      "pause": "Keskeytä",
+      "resume": "Jatka",
+      "terminate": "Lopeta jakso",
+      "record_start": "Aloita tallennus",
+      "record_stop": "Lopeta tallennus",
+      "program": "Ohjelma",
+      "open_panel": "Avaa WashData"
+    },
+    "editor": {
+      "layout": "Asettelu",
+      "entity": "Laitteen entiteetti",
+      "entities": "Laitteet",
+      "title": "Otsikko",
+      "icon": "Kuvake",
+      "show_state": "Näytä tila",
+      "show_program": "Näytä ohjelma",
+      "show_progress_bar": "Näytä edistymispalkki",
+      "spin_icon": "Pyöritä kuvaketta käynnissä ollessa",
+      "display_mode": "Yksityiskohtarivi",
+      "active_color": "Aktiivisen värin ohitus",
+      "show_phase": "Näytä vaihe",
+      "show_energy": "Näytä energia ja kustannukset",
+      "show_anomaly": "Näytä ylityksen varoitus",
+      "show_sparkline": "Näytä reaaliaikainen tehokaavio",
+      "buttons": "Toimintopainikkeet",
+      "program_entity": "Ohjelmaentiteetti (ohitus)",
+      "time_entity": "Aikaentiteetti (ohitus)",
+      "pct_entity": "Edistymisentiteetti (ohitus)",
+      "power_entity": "Tehoentiteetti (ohitus)",
+      "tap_action": "Napautustoiminto",
+      "hold_action": "Pitotoiminto",
+      "double_tap_action": "Kaksoisnapautustoiminto"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} poikkeavaa havaittu (esim. oven avautuminen kesken syklin) – avaa nähdäksesi ne kaaviossa",
     "auto": "(tunnistettu automaattisesti)",
@@ -934,6 +982,7 @@
     "font_size_hint": "Suurenna tai pienennä kaikkea tässä paneelissa. Koskee tiliäsi tällä laitteella."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
     "anti_wrinkle_enabled": "Sulauta päävaiheen jälkeiset rumpupulssit sen sijaan, että lukisit ne uusina sykleinä",
     "anti_wrinkle_exit_power": "Tehon on laskettava tämän alle pulssien välillä, jotta ryppyjenesto pysyy aktiivisena",
     "anti_wrinkle_idle_timeout": "Kahden rumpupulssin välillä sallittu hiljainen aika ennen kuin ryppyjenesto päättyy",
@@ -1007,6 +1056,10 @@
     "unusable": "Käyttämätön"
   },
   "section": {
+    "dishwasher": {
+      "label": "Astianpesukone",
+      "intro": "Syklin lopun käsittely astianpesukoneille, jotka tyypillisesti päättyvät pitkään, lähes hiljaiseen kuivausvaiheeseen ennen lyhyttä lopullista vedenpoistoa."
+    },
     "anti_wrinkle": {
       "intro": "Ryppyjenestotila tunnistaa lyhyet pienet pyörimisjaksot päävaiheen jälkeen ja pitää ne kiinnitettynä valmiiseen sykliin.",
       "label": "Ryppyjenesto"
@@ -1049,6 +1102,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Passiivikuivauksen hiljainen vapautus",
+      "doc": "Kun sykli ylittää odotetun kestonsa, kuinka kauan astianpesukoneen on pysyttävä hiljaisena (Pysäytyskynnys-arvon alapuolella) ennen kuin WashData lopettaa lopullisen vedenpoiston odottamisen ja päättää syklin. Nosta arvoa, jos koneessasi on pitkä hiljainen kuivausvaihe ennen myöhäistä lopullista vedenpoistoa, joka jää huomaamatta - laajempi ikkuna antaa opitun keston seurata kausivaihtelua (kylmempi tulovesi = pidemmät syklit) sen sijaan, että se lukittuisi vanhaan keskiarvoon. Se voi vain lyhentää odotusta suhteessa sisäiseen 30 minuutin loppupiikkirajaan, ei koskaan pidentää sitä."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Tunnista lyhyet vähätehoiset rumpupulssit, joita kuivausrumpu lähettää päälämpövaiheen jälkeen, ja pidä ne kiinni valmiissa jaksossa sen sijaan, että luet ne uusina jaksoina.",
       "label": "Ota ryppyjenesto käyttöön"

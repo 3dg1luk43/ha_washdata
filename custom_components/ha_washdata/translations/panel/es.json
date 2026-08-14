@@ -934,6 +934,7 @@
     "font_size_hint": "Aumenta o reduce el tamaño de todo en este panel. Se aplica a tu cuenta en este dispositivo."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
     "anti_wrinkle_enabled": "Absorber los pulsos de volteo tras la fase principal en lugar de leerlos como nuevos ciclos",
     "anti_wrinkle_exit_power": "La potencia debe caer por debajo de este valor entre pulsos para que el modo antiarrugas siga activo",
     "anti_wrinkle_idle_timeout": "Tiempo de silencio permitido entre dos pulsos de volteo antes de que finalice el modo antiarrugas",
@@ -1007,6 +1008,10 @@
     "unusable": "Inutilizable"
   },
   "section": {
+    "dishwasher": {
+      "label": "Lavavajillas",
+      "intro": "Gestión del final del ciclo para lavavajillas, que suelen terminar con una larga fase de secado casi silenciosa antes de un breve vaciado final."
+    },
     "anti_wrinkle": {
       "intro": "El modo antiarrugas/antipliegues detecta pulsos de volteo de baja potencia después de la fase principal y los mantiene unidos al ciclo terminado.",
       "label": "Antiarrugas"
@@ -1049,6 +1054,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Liberación en silencio del secado pasivo",
+      "doc": "Una vez que el ciclo supera su duración esperada, cuánto tiempo debe permanecer en silencio el lavavajillas (por debajo del Umbral de parada) antes de que WashData deje de esperar un vaciado final y finalice el ciclo. Auméntelo si su máquina tiene una larga fase de secado silenciosa antes de un vaciado final tardío que no se detecta - una ventana más amplia permite que la duración aprendida siga la deriva estacional (agua de entrada más fría = ciclos más largos) en lugar de fijarse en la media anterior. Solo acorta la espera respecto al tope interno de 30 minutos para el pico de fin, nunca la prolonga."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Reconozca los impulsos cortos de baja potencia que emite una secadora después de la fase de calentamiento principal y manténgalos adjuntos al ciclo finalizado en lugar de leerlos como ciclos nuevos.",
       "label": "Habilitar detección antiarrugas"
@@ -1976,6 +1985,54 @@
       "skip_forever": "No volver a mostrar",
       "hide_guidance": "Ocultar guía",
       "show_guidance": "Mostrar guía"
+    }
+  },
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entidad no encontrada",
+    "running_long": "Con retraso",
+    "remaining": "restante",
+    "progress": "progreso",
+    "show_time_remaining": "Mostrar tiempo restante",
+    "show_percentage": "Mostrar porcentaje",
+    "layout": {
+      "tile": "Mosaico (compacto)",
+      "detail": "Detalle (completo)",
+      "glance": "Vistazo (varios dispositivos)"
+    },
+    "btn": {
+      "pause": "Pausa",
+      "resume": "Reanudar",
+      "terminate": "Finalizar ciclo",
+      "record_start": "Iniciar grabación",
+      "record_stop": "Detener grabación",
+      "program": "Programa",
+      "open_panel": "Abrir WashData"
+    },
+    "editor": {
+      "layout": "Diseño",
+      "entity": "Entidad del electrodoméstico",
+      "entities": "Electrodomésticos",
+      "title": "Título",
+      "icon": "Icono",
+      "show_state": "Mostrar estado",
+      "show_program": "Mostrar programa",
+      "show_progress_bar": "Mostrar barra de progreso",
+      "spin_icon": "Girar el icono mientras funciona",
+      "display_mode": "Línea de detalle",
+      "active_color": "Color activo personalizado",
+      "show_phase": "Mostrar fase",
+      "show_energy": "Mostrar energía y costo",
+      "show_anomaly": "Mostrar aviso de retraso",
+      "show_sparkline": "Mostrar gráfico de potencia en directo",
+      "buttons": "Botones de acción",
+      "program_entity": "Entidad de programa (personalizada)",
+      "time_entity": "Entidad de tiempo (personalizada)",
+      "pct_entity": "Entidad de progreso (personalizada)",
+      "power_entity": "Entidad de potencia (personalizada)",
+      "tap_action": "Acción al tocar",
+      "hold_action": "Acción al mantener pulsado",
+      "double_tap_action": "Acción al tocar dos veces"
     }
   }
 }

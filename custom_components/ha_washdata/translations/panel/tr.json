@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "dk",
+    "entity_not_found": "Varlık bulunamadı",
+    "running_long": "Uzun sürüyor",
+    "remaining": "kalan",
+    "progress": "ilerleme",
+    "show_time_remaining": "Kalan süreyi göster",
+    "show_percentage": "Yüzdeyi göster",
+    "layout": {
+      "tile": "Döşeme (kompakt)",
+      "detail": "Ayrıntı (zengin)",
+      "glance": "Bakış (birden çok cihaz)"
+    },
+    "btn": {
+      "pause": "Duraklat",
+      "resume": "Devam et",
+      "terminate": "Döngüyü bitir",
+      "record_start": "Kaydı başlat",
+      "record_stop": "Kaydı durdur",
+      "program": "Program",
+      "open_panel": "WashData'yı aç"
+    },
+    "editor": {
+      "layout": "Düzen",
+      "entity": "Cihaz varlığı",
+      "entities": "Cihazlar",
+      "title": "Başlık",
+      "icon": "Simge",
+      "show_state": "Durumu göster",
+      "show_program": "Programı göster",
+      "show_progress_bar": "İlerleme çubuğunu göster",
+      "spin_icon": "Çalışırken simgeyi döndür",
+      "display_mode": "Ayrıntı satırı",
+      "active_color": "Etkin renk geçersiz kılma",
+      "show_phase": "Aşamayı göster",
+      "show_energy": "Enerji ve maliyeti göster",
+      "show_anomaly": "Aşım uyarısını göster",
+      "show_sparkline": "Canlı güç grafiğini göster",
+      "buttons": "Eylem düğmeleri",
+      "program_entity": "Program varlığı (geçersiz kıl)",
+      "time_entity": "Süre varlığı (geçersiz kıl)",
+      "pct_entity": "İlerleme varlığı (geçersiz kıl)",
+      "power_entity": "Güç varlığı (geçersiz kıl)",
+      "tap_action": "Dokunma eylemi",
+      "hold_action": "Basılı tutma eylemi",
+      "double_tap_action": "Çift dokunma eylemi"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} anormallik algılandı (ör. döngünün ortasında kapının açılması) – bunları grafikte görmek için açın",
     "auto": "(otomatik algılandı)",
@@ -959,7 +1007,8 @@
     "dtw_ddtw_scale": "Aşama 3: DDTW yarı doygunluk mesafesi; küçük = şekle daha duyarlı (varsayılan 30)",
     "dtw_refine_top_n": "Aşama 3: DTW'nin yeniden puanladığı aday sayısı; doğru profil 4-5. sıraya düşüyorsa 7-9'a yükseltin (varsayılan 5)",
     "duration_scale": "Aşama 4: süre uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.175)",
-    "energy_scale": "Aşama 4: enerji uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.25)"
+    "energy_scale": "Aşama 4: enerji uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.25)",
+    "dishwasher_end_spike_quiet_release": "Bulaşık makinesi: beklenen süreden sonra döngü sonu tahliye beklemesi bırakılmadan önceki sessiz saniyeler"
   },
   "phase_desc": {
     "anti_crease": "Kırışıklıkları azaltmak için tamamlandıktan sonra ara sıra kısa yuvarlanmalar.",
@@ -1046,6 +1095,10 @@
     "phase_eta": {
       "label": "Kalan Süre",
       "intro": "Çevrim uzunluğu sıcaklığa veya sıkmaya bağlı olan makineler için aşama farkındalıklı kalan süre."
+    },
+    "dishwasher": {
+      "label": "Bulaşık Makinesi",
+      "intro": "Bulaşık makineleri için döngü sonu işleme; bu makineler genellikle kısa bir son tahliyeden önce, neredeyse hiç güç çekmeyen uzun bir kurutma aşamasıyla biter."
     }
   },
   "setting": {
@@ -1467,6 +1520,10 @@
     "door_end_dwell_seconds": {
       "label": "Kapı Açık Bekleme Süresi",
       "doc": "\"Döngü Sonunda Kapı Otomatik Açılır\" açık olduğunda WashData'nın döngüyü sonlandırması için kapının ne kadar süre açık kalması gerektiği. Bir tabağı hızla eklemeyi göz ardı edecek kadar uzun (varsayılan 60 sn), makine kapıyı açtıktan sonra zamanında sona erecek kadar kısa."
+    },
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Pasif Kurutma Sessiz Serbest Bırakma",
+      "doc": "Döngü beklenen süresini aştıktan sonra, WashData bir son tahliye beklemeyi bırakıp döngüyü sonlandırmadan önce bulaşık makinesinin ne kadar süre sessiz (Durdurma Eşiği'nin altında) kalması gerektiğidir. Makineniz, gecikmeli bir son tahliyeden önce uzun ve sessiz bir kurutma aşamasına sahipse ve bu tahliye kaçırılıyorsa değeri artırın - daha geniş bir pencere, öğrenilen sürenin eski ortalamaya kilitlenmek yerine mevsimsel kaymayı (daha soğuk şebeke suyu = daha uzun döngüler) izlemesini sağlar. Bu ayar, dahili 30 dakikalık son tahliye tepesi sınırına göre beklemeyi yalnızca kısaltabilir, asla uzatamaz."
     }
   },
   "setting_group": {

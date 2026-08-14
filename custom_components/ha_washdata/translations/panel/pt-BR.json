@@ -979,6 +979,10 @@
     "unusable": "Inutilizável"
   },
   "section": {
+    "dishwasher": {
+      "label": "Lava-louças",
+      "intro": "Tratamento de fim de ciclo para lava-louças, que normalmente terminam com uma longa fase de secagem quase silenciosa antes de uma breve descarga final."
+    },
     "anti_wrinkle": {
       "intro": "O modo antiamasso detecta pulsos de giro de baixa potência após a fase principal e os mantém anexados ao ciclo terminado.",
       "label": "Antiamasso"
@@ -1021,6 +1025,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Liberação em silêncio da secagem passiva",
+      "doc": "Assim que o ciclo ultrapassa a duração esperada, por quanto tempo a lava-louças deve permanecer silenciosa (abaixo do Limite de Parada) antes de o WashData parar de aguardar uma descarga final e encerrar o ciclo. Aumente este valor se a sua máquina tiver uma longa fase de secagem silenciosa antes de uma descarga final tardia que está passando despercebida - uma janela mais ampla permite que a duração aprendida acompanhe a variação sazonal (água de entrada mais fria = ciclos mais longos) em vez de se fixar na média antiga. Ele apenas encurta a espera em relação ao limite interno de 30 minutos para o pico de fim, nunca a prolonga."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Reconheça os pulsos curtos de baixa potência que uma secadora emite após a fase de aquecimento principal e mantenha-os anexados ao ciclo finalizado, em vez de lê-los como novos ciclos.",
       "label": "Ativar Detecção Antiamasso"
@@ -1803,6 +1811,7 @@
     "other": "Outro"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Lava-louças: segundos de silêncio após a duração esperada antes de liberar a espera da descarga de fim de ciclo",
     "anti_wrinkle_enabled": "Absorver os pulsos de giro após a fase principal em vez de lê-los como novos ciclos",
     "anti_wrinkle_exit_power": "A potência deve cair abaixo deste valor entre os pulsos para que o modo antiamasso permaneça ativo",
     "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de giro antes de o modo antiamasso terminar",
@@ -1976,6 +1985,54 @@
       "skip_forever": "Não mostrar novamente",
       "hide_guidance": "Ocultar guia",
       "show_guidance": "Exibir guia"
+    }
+  },
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entidade não encontrada",
+    "running_long": "Em atraso",
+    "remaining": "restante",
+    "progress": "progresso",
+    "show_time_remaining": "Mostrar tempo restante",
+    "show_percentage": "Mostrar porcentagem",
+    "layout": {
+      "tile": "Bloco (compacto)",
+      "detail": "Detalhe (completo)",
+      "glance": "Visão geral (vários dispositivos)"
+    },
+    "btn": {
+      "pause": "Pausar",
+      "resume": "Retomar",
+      "terminate": "Encerrar ciclo",
+      "record_start": "Iniciar gravação",
+      "record_stop": "Parar gravação",
+      "program": "Programa",
+      "open_panel": "Abrir WashData"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Entidade do eletrodoméstico",
+      "entities": "Eletrodomésticos",
+      "title": "Título",
+      "icon": "Ícone",
+      "show_state": "Mostrar estado",
+      "show_program": "Mostrar programa",
+      "show_progress_bar": "Mostrar barra de progresso",
+      "spin_icon": "Girar o ícone durante o funcionamento",
+      "display_mode": "Linha de detalhe",
+      "active_color": "Cor ativa personalizada",
+      "show_phase": "Mostrar fase",
+      "show_energy": "Mostrar energia e custo",
+      "show_anomaly": "Mostrar aviso de atraso",
+      "show_sparkline": "Mostrar gráfico de potência ao vivo",
+      "buttons": "Botões de ação",
+      "program_entity": "Entidade de programa (personalizada)",
+      "time_entity": "Entidade de tempo (personalizada)",
+      "pct_entity": "Entidade de progresso (personalizada)",
+      "power_entity": "Entidade de potência (personalizada)",
+      "tap_action": "Ação ao tocar",
+      "hold_action": "Ação ao manter pressionado",
+      "double_tap_action": "Ação ao tocar duas vezes"
     }
   }
 }

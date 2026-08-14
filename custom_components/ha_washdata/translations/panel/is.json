@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "mín.",
+    "entity_not_found": "Eining fannst ekki",
+    "running_long": "Keyrir lengur",
+    "remaining": "eftir",
+    "progress": "framvinda",
+    "show_time_remaining": "Sýna tíma sem eftir er",
+    "show_percentage": "Sýna prósentu",
+    "layout": {
+      "tile": "Reitur (þjappað)",
+      "detail": "Nánar (ítarlegt)",
+      "glance": "Yfirlit (mörg tæki)"
+    },
+    "btn": {
+      "pause": "Gera hlé",
+      "resume": "Halda áfram",
+      "terminate": "Ljúka lotu",
+      "record_start": "Hefja upptöku",
+      "record_stop": "Stöðva upptöku",
+      "program": "Prógramm",
+      "open_panel": "Opna WashData"
+    },
+    "editor": {
+      "layout": "Útlit",
+      "entity": "Tækjaeining",
+      "entities": "Tæki",
+      "title": "Titill",
+      "icon": "Tákn",
+      "show_state": "Sýna stöðu",
+      "show_program": "Sýna prógramm",
+      "show_progress_bar": "Sýna framvindustiku",
+      "spin_icon": "Snúa tákni meðan á keyrslu stendur",
+      "display_mode": "Upplýsingalína",
+      "active_color": "Hnekkja virkum lit",
+      "show_phase": "Sýna fasa",
+      "show_energy": "Sýna orku og kostnað",
+      "show_anomaly": "Sýna viðvörun um langa keyrslu",
+      "show_sparkline": "Sýna rauntíma aflgraf",
+      "buttons": "Aðgerðahnappar",
+      "program_entity": "Prógramm-eining (hnekkja)",
+      "time_entity": "Tímaeining (hnekkja)",
+      "pct_entity": "Framvindueining (hnekkja)",
+      "power_entity": "Afleining (hnekkja)",
+      "tap_action": "Bankaðgerð",
+      "hold_action": "Haldaðgerð",
+      "double_tap_action": "Tvíbankaaðgerð"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} frávik fundust (t.d. hurð opnuð í miðjum lotu) – opnaðu til að sjá þau á línuritinu",
     "auto": "(sjálfvirkt greint)",
@@ -934,6 +982,7 @@
     "font_size_hint": "Gerðu allt á þessum glugga stærra eða minna. Gildir fyrir reikning þinn á þessum tæki."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
     "completion_min_seconds": "Stysta keyrsla sem telst raunveruleg lota",
     "end_repeat_count": "Lágir álestrar í röð áður en lýkur",
     "interrupted_min_seconds": "Stuttar lotur merktar sem truflaðar",
@@ -1007,6 +1056,10 @@
     "unusable": "Ónothæft"
   },
   "section": {
+    "dishwasher": {
+      "label": "Uppþvottavél",
+      "intro": "Meðhöndlun loka lotu fyrir uppþvottavélar, sem ljúka yfirleitt með löngum, næstum hljóðlátum þurrkfasa á undan stuttri lokaútdælingu."
+    },
     "anti_wrinkle": {
       "intro": "Hrukkuleysi-/krumpluleys-stilling greinir lágtaktsveltiboð eftir aðalfasann og heldur þeim tengdum við lokinni lotu.",
       "label": "Hrukkuleysi"
@@ -1049,6 +1102,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Losun eftir hljóðláta þurrkun",
+      "doc": "Þegar lotan fer fram úr áætlaðri lengd sinni: hversu lengi uppþvottavélin þarf að vera hljóðlát (undir Stöðvunarþröskuldi) áður en WashData hættir að bíða eftir lokaútdælingu og lýkur lotunni. Hækkaðu gildið ef vélin þín er með langan hljóðlátan þurrkfasa á undan seinni lokaútdælingu sem sleppur fram hjá - breiðari gluggi leyfir lærðu lengdinni að fylgja árstíðabundnum breytingum (kaldara innrennslisvatn = lengri lotur) í stað þess að festast við gamla meðaltalið. Það styttir aðeins biðtímann miðað við innra 30 mínútna hámark fyrir lokatoppinn, lengir hann aldrei."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Viðurkenndu stuttu lág-afls þurrkarapúlsana sem þurrkari gefur frá sér eftir aðalhitafasann og haltu þeim tengdum við lokið lotu í stað þess að lesa þá sem nýjar lotur.",
       "label": "Virkja hrukkuleysi-greiningu"

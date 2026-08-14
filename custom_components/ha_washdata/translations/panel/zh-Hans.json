@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "分钟",
+    "entity_not_found": "未找到实体",
+    "running_long": "运行超时",
+    "remaining": "剩余",
+    "progress": "进度",
+    "show_time_remaining": "显示剩余时间",
+    "show_percentage": "显示百分比",
+    "layout": {
+      "tile": "磁贴（紧凑）",
+      "detail": "详情（丰富）",
+      "glance": "概览（多个设备）"
+    },
+    "btn": {
+      "pause": "暂停",
+      "resume": "继续",
+      "terminate": "结束周期",
+      "record_start": "开始录制",
+      "record_stop": "停止录制",
+      "program": "程序",
+      "open_panel": "打开 WashData"
+    },
+    "editor": {
+      "layout": "布局",
+      "entity": "电器实体",
+      "entities": "电器",
+      "title": "标题",
+      "icon": "图标",
+      "show_state": "显示状态",
+      "show_program": "显示程序",
+      "show_progress_bar": "显示进度条",
+      "spin_icon": "运行时旋转图标",
+      "display_mode": "详情行",
+      "active_color": "活动颜色覆盖",
+      "show_phase": "显示阶段",
+      "show_energy": "显示能耗和费用",
+      "show_anomaly": "显示超时警告",
+      "show_sparkline": "显示实时功率图",
+      "buttons": "操作按钮",
+      "program_entity": "程序实体（覆盖）",
+      "time_entity": "时间实体（覆盖）",
+      "pct_entity": "进度实体（覆盖）",
+      "power_entity": "功率实体（覆盖）",
+      "tap_action": "点按操作",
+      "hold_action": "长按操作",
+      "double_tap_action": "双击操作"
+    }
+  },
   "badge": {
     "artifact_tip": "检测到 {n} 个异常（例如，门在周期中打开）– 打开以在图表上查看",
     "auto": "（自动检测）",
@@ -959,7 +1007,8 @@
     "dtw_ddtw_scale": "Stage 3: DDTW 半饱和距离; 越小对形状越敏感（默认 30）",
     "dtw_refine_top_n": "Stage 3: DTW 重新评分的候选数量; 若正确档案排在第 4-5 位则调高至 7-9（默认 5）",
     "duration_scale": "Stage 4: 时长一致性得分减半时的对数比率; 越小惩罚越严格（默认 0.175）",
-    "energy_scale": "Stage 4: 能耗一致性得分减半时的对数比率; 越小惩罚越严格（默认 0.25）"
+    "energy_scale": "Stage 4: 能耗一致性得分减半时的对数比率; 越小惩罚越严格（默认 0.25）",
+    "dishwasher_end_spike_quiet_release": "洗碗机：预期时长过后、解除周期结束排水等待之前保持静止的秒数"
   },
   "phase_desc": {
     "anti_crease": "完成后偶尔进行短暂的翻滚以减少皱纹。",
@@ -1046,6 +1095,10 @@
     "phase_eta": {
       "label": "剩余时间",
       "intro": "阶段感知的剩余时间，适用于周期长度取决于温度或脱水的机器。"
+    },
+    "dishwasher": {
+      "label": "洗碗机",
+      "intro": "洗碗机的周期结束处理。洗碗机通常在短暂的最终排水之前，会经历一个近乎无功耗的长时间干燥阶段。"
     }
   },
   "setting": {
@@ -1467,6 +1520,10 @@
     "door_end_dwell_seconds": {
       "label": "门开放终止停留时间",
       "doc": "在「结束时自动开门」开启时，WashData 终止周期前门需保持打开的时长。设置得足够长以忽略快速放入餐具的短暂开门（默认 60 秒），同时足够短以在机器弹开舱门后迅速结束。"
+    },
+    "dishwasher_end_spike_quiet_release": {
+      "label": "自然干燥静止释放",
+      "doc": "当周期超过其预期时长后，洗碗机必须保持静止（低于停止阈值）多长时间，WashData 才会停止等待最终排水并结束该周期。如果您的机器在较晚的最终排水之前有一个较长的近乎无声的干燥阶段，导致该次排水被漏检，请调高此值 - 更宽的窗口可让学习到的时长跟随季节性漂移（进水更冷 = 周期更长），而不是锁定在旧的平均值上。它只能相对于内部 30 分钟的结束尖峰上限缩短等待时间，绝不会延长。"
     }
   },
   "setting_group": {
