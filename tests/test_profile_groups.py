@@ -161,12 +161,43 @@ def test_grouped_snapshots_no_groups_is_noop(store):
     assert out == snaps and gm == {} and ms == {}
 
 
-def test_stage5_picks_member_by_mean_power(store):
+def test_stage5_picks_member_by_energy(store):
+    # Equal durations -> integrated energy is proportional to mean power, so the
+    # hotter (higher-energy) member still wins the basic case.
     ms = {"Hot": _snap("Hot", [2000.0] * 30, 1000), "Cold": _snap("Cold", [500.0] * 30, 1000)}
     chosen, fit, dur = store._stage5_pick_member([1900.0] * 30, 1000.0, ["Hot", "Cold"], ms)
     assert chosen == "Hot"
     assert dur == 1000.0
     assert fit is not None
+
+
+def test_stage5_uses_energy_not_peak_or_mean(store):
+    # The member-pick must select on integrated ENERGY (∫P·dt), not whole-cycle
+    # mean power or peak. Construct a decoy that matches the cycle's mean AND peak
+    # but has the WRONG energy (short duration), and a match with the wrong mean
+    # and peak but the RIGHT energy (long low-power). The old duration×mean×peak
+    # product picked the decoy; energy picks the match.
+    cur = [1000.0] * 30                       # mean 1000, peak 1000, dur 1000 -> energy 1.0M
+    ms = {
+        "Match": _snap("Match", [500.0] * 30, 2000),   # mean 500, peak 500, energy 1.0M
+        "Decoy": _snap("Decoy", [1000.0] * 30, 300),   # mean 1000, peak 1000, energy 0.3M
+    }
+    chosen, _fit, dur = store._stage5_pick_member(cur, 1000.0, ["Match", "Decoy"], ms)
+    assert chosen == "Match"
+    assert dur == 2000.0                       # duration of the chosen member is still returned
+
+
+def test_stage5_selection_ignores_duration_prefers_energy(store):
+    # A member whose duration matches the cycle exactly must NOT be preferred over
+    # one whose energy matches, because grouped members are duration-cohesive so
+    # duration is not the within-group discriminator.
+    cur = [1000.0] * 30                        # mean 1000, dur 1000 -> energy 1.0M
+    ms = {
+        "RightEnergy": _snap("RightEnergy", [2000.0] * 30, 500),  # energy 1.0M, dur 500
+        "RightDur": _snap("RightDur", [500.0] * 30, 1000),        # energy 0.5M, dur 1000 (==cur)
+    }
+    chosen, _fit, _dur = store._stage5_pick_member(cur, 1000.0, ["RightEnergy", "RightDur"], ms)
+    assert chosen == "RightEnergy"
 
 
 def test_suggest_skips_already_grouped(store):
