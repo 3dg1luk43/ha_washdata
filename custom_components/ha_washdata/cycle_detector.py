@@ -226,7 +226,7 @@ class CycleDetector:
         profile_matcher: (
             Callable[
                 [list[tuple[datetime, float]]],
-                tuple[str | None, float, float, str | None],
+                tuple[str | None, float, float, str | None] | None,
             ]
             | None
         ) = None,

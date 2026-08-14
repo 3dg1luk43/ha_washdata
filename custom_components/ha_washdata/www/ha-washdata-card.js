@@ -174,9 +174,20 @@ class WashDataCard extends HTMLElement {
     this._render();
   }
 
+  // Reserve enough vertical space for whatever the detail layout is showing, so
+  // the sections-view grid (which clips to the reserved rows) never cuts off the
+  // action buttons or the sparkline at the bottom of the card.
+  _detailRows() {
+    const f = this._flags();
+    let rows = 2; // header + progress bar + meta chips (content-hugging card)
+    if (f.buttons.length) rows += 1;
+    if (f.showSparkline) rows += 1;
+    return rows;
+  }
+
   getCardSize() {
     const layout = this._cfg && this._cfg.layout;
-    if (layout === "detail") return 2;
+    if (layout === "detail") return this._detailRows();
     if (layout === "glance") return this._glanceEntities().length || 1;
     return 1;
   }
@@ -184,7 +195,8 @@ class WashDataCard extends HTMLElement {
   getGridOptions() {
     const layout = this._cfg && this._cfg.layout;
     if (layout === "detail") {
-      return { rows: 2, min_rows: 2, columns: 12, min_columns: 6 };
+      const rows = this._detailRows();
+      return { rows, min_rows: rows, columns: 12, min_columns: 6 };
     }
     if (layout === "glance") {
       const n = Math.max(1, this._glanceEntities().length);
@@ -515,7 +527,6 @@ class WashDataCard extends HTMLElement {
       showEnergy: c.show_energy !== false,
       showAnomaly: c.show_anomaly !== false,
       showSparkline: !!c.show_sparkline,
-      spin: c.spin_icon !== false,
       displayMode: c.display_mode || "time",
       buttons: Array.isArray(c.buttons) ? c.buttons.filter((b) => BUTTON_ORDER.includes(b)) : [],
     };
@@ -546,8 +557,6 @@ class WashDataCard extends HTMLElement {
       ".secondary{color:var(--secondary-text-color);white-space:nowrap;text-overflow:ellipsis;overflow:hidden;line-height:1.2}" +
       ".bar{height:4px;border-radius:2px;background:var(--divider-color,rgba(128,128,128,.25));overflow:hidden}" +
       ".bar>i{display:block;height:100%;width:0;border-radius:2px;transition:width .5s ease,background-color .3s}" +
-      "@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}" +
-      ".spinning{animation:spin 2s linear infinite}" +
       ".chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:1px 8px;border-radius:10px;" +
       "background:rgba(128,128,128,.14);color:var(--secondary-text-color);white-space:nowrap}" +
       ".chip.warn{background:rgba(255,152,0,.16);color:var(--warning-color,#ff9800)}" +
@@ -597,9 +606,12 @@ class WashDataCard extends HTMLElement {
   _buildDetail() {
     const flags = this._flags();
     const style = this._baseStyle() +
-      ".detail{display:flex;flex-direction:column;gap:10px;padding:14px 16px;width:100%;box-sizing:border-box;height:100%}" +
-      ".detail .top{display:flex;align-items:center;gap:14px}" +
-      ".detail .icon-container{width:52px;height:52px}.detail .icon-container ha-icon{--mdc-icon-size:30px}" +
+      // The detail card hugs its content (height:auto) so a short cycle does not
+      // leave a large empty gap; the sections grid reserves rows via getGridOptions.
+      "ha-card.wd-detail{height:auto}" +
+      ".detail{display:flex;flex-direction:column;gap:8px;padding:12px 14px;width:100%;box-sizing:border-box}" +
+      ".detail .top{display:flex;align-items:center;gap:12px}" +
+      ".detail .icon-container{width:48px;height:48px}.detail .icon-container ha-icon{--mdc-icon-size:30px}" +
       ".detail .info{flex:1;min-width:0}" +
       ".detail .primary{font-size:16px}.detail .secondary{font-size:13px;margin-top:2px}" +
       ".detail .eta{text-align:right;flex-shrink:0}" +
@@ -607,10 +619,11 @@ class WashDataCard extends HTMLElement {
       ".detail .eta .lbl{font-size:11px;color:var(--secondary-text-color);text-transform:uppercase;letter-spacing:.04em}" +
       ".detail .bar{height:6px}" +
       ".detail .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}" +
-      ".detail canvas{width:100%;height:40px;display:block}";
+      ".detail .meta:empty{display:none}" +
+      ".detail canvas{width:100%;height:34px;display:block}";
     this.shadowRoot.innerHTML =
       "<style>" + style + "</style>" +
-      '<ha-card id="card"><div class="detail">' +
+      '<ha-card id="card" class="wd-detail"><div class="detail">' +
       '<div class="top">' +
       '<div class="icon-container" id="iconc"><ha-icon id="icon"></ha-icon></div>' +
       '<div class="info"><div class="primary" id="title"></div><div class="secondary" id="state"></div></div>' +
@@ -722,9 +735,6 @@ class WashDataCard extends HTMLElement {
     iconEl.setAttribute("icon", this._deviceTypeIcon());
     iconc.style.color = vm.color.fg;
     iconc.style.background = vm.color.bg;
-    const flags = this._flags();
-    if (vm.isRunning && flags.spin) iconEl.classList.add("spinning");
-    else iconEl.classList.remove("spinning");
   }
 
   _applyBar(vm) {
@@ -892,13 +902,19 @@ class WashDataCard extends HTMLElement {
       }
     }
     const pts = this._spark;
+    // Hide the canvas until there is a line to draw, so an early / idle cycle
+    // does not leave a blank 34px band above the buttons.
+    if (pts.length < 2) {
+      canvas.style.display = "none";
+      return;
+    }
+    canvas.style.display = "block";
     const w = canvas.clientWidth || 300;
-    const h = 40;
+    const h = 34;
     if (canvas.width !== w) canvas.width = w;
     if (canvas.height !== h) canvas.height = h;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, w, h);
-    if (pts.length < 2) return;
     const max = Math.max.apply(null, pts.map((p) => p.w)) || 1;
     const pad = 3;
     const dx = (w - pad * 2) / (pts.length - 1);
@@ -1205,7 +1221,6 @@ class WashDataCardEditor extends HTMLElement {
       { name: "show_state", selector: { boolean: {} } },
       { name: "show_program", selector: { boolean: {} } },
       { name: "show_progress_bar", selector: { boolean: {} } },
-      { name: "spin_icon", selector: { boolean: {} } },
       {
         name: "display_mode",
         selector: {
