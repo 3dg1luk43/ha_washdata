@@ -78,7 +78,6 @@ def _config_from_options(opts: dict) -> CycleDetectorConfig:
         start_duration_threshold=opts["start_duration_threshold"],
         start_energy_threshold=opts["start_energy_threshold"],
         end_energy_threshold=opts["end_energy_threshold"],
-        running_dead_zone=opts["running_dead_zone"],
         end_repeat_count=opts["end_repeat_count"],
         min_off_gap=opts["min_off_gap"],
         start_threshold_w=opts["start_threshold_w"],

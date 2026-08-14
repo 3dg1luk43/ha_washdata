@@ -572,6 +572,27 @@ def reconcile_suggestions(
             else:
                 adjust(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, round(max_r * 0.5, 2), "the max duration ratio")
 
+        # ── Rule 12: end_energy_threshold >= stop_threshold_w * off_delay / 3600 ──
+        # The energy end-gate is evaluated over an off_delay-long window, so it
+        # implies a wattage; below stop_threshold_w it forbids what the power gate
+        # allows and the cycle can only close via a fallback path (#376). Only ever
+        # RAISE end_energy to the implied floor (the safe direction that makes the
+        # end gate satisfiable); never lower stop_threshold_w, which would make
+        # start/end detection more aggressive.
+        stop_ee = eff(CONF_STOP_THRESHOLD_W)
+        off_delay_ee = eff(CONF_OFF_DELAY)
+        end_energy = eff(CONF_END_ENERGY_THRESHOLD)
+        if (
+            stop_ee is not None and off_delay_ee is not None and end_energy is not None
+            and off_delay_ee > 0 and end_energy < stop_ee * off_delay_ee / 3600.0
+            and in_out(CONF_END_ENERGY_THRESHOLD, CONF_STOP_THRESHOLD_W)
+        ):
+            adjust(
+                CONF_END_ENERGY_THRESHOLD,
+                round(stop_ee * off_delay_ee / 3600.0, 3),
+                "the stop threshold and off delay",
+            )
+
         if change_count[0] == prev_count:
             break
 
