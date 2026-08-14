@@ -2,34 +2,6 @@
 
 Copiable drafts for the maintainer to post (or adapt). No em dashes. Nothing here has been posted.
 
----
-
-## #368 - Remote start of washers/dryers  (recommend: REFUSE, with redirect)
-
-Thanks for the detailed proposal. I have thought about this carefully and I do not think autonomous
-remote start fits WashData, for a few reasons:
-
-- WashData is a passive power monitor. It observes a plug and interprets the power curve. It can cut/
-  restore power as an adjunct to an explicit user pause/resume, but autonomously energizing a heating
-  appliance on a timer is a real safety and liability step-change from that, and I do not want to own it.
-- It only works on the subset of appliances that resume when power returns. Many require a physical
-  button press after power is restored, so the feature would be unreliable across the user base.
-- The finish-by use case is already fully achievable in Home Assistant's automation layer, which is
-  where it belongs: WashData already exposes the learned average/total cycle duration, so an automation
-  can compute the power-on time and switch the plug on itself.
-
-Concretely, this recipe does what you want today (adjust to your entities):
-
-    trigger: time-based, fire at (target_finish_time - <learned average duration>)
-    action: switch.turn_on: switch.washer_plug
-
-If it would help, I am open to exposing a read-only "suggested power-on time to finish by X" as a sensor
-attribute so the automation is trivial to write, leaving the actual switching to you. Let me know if that
-would be useful and I will consider it. But the autonomous scheduler/interrupt itself I am going to
-decline.
-
----
-
 ## #344 - Import historical power data (CSV / recorder)  (NEEDS-INFO, then phased build)
 
 I like this and I want to build it. The engine pieces already exist (WashData can read recorder history
@@ -85,8 +57,3 @@ about 70% of the plumbing already exists. I am holding it briefly to design the 
 mapping properly, since the program strings differ across integrations (Home Connect, etc.) and the mapping
 UI is the part that needs care. I will follow up with a design.
 
----
-
-## #352 - "Summer break" notice
-
-Not an issue; can be closed.

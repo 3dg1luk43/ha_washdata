@@ -123,7 +123,7 @@ class CycleDetectorConfig:
     completion_min_seconds: int = 600
     start_duration_threshold: float = 5.0
     start_energy_threshold: float = 0.005
-    end_energy_threshold: float = 0.05  # 50 Wh threshold for "still active"
+    end_energy_threshold: float = 0.05  # 0.05 Wh (50 mWh) threshold for "still active"
     end_repeat_count: int = 1
     min_off_gap: int = 60
     start_threshold_w: float = 2.0
@@ -141,6 +141,11 @@ class CycleDetectorConfig:
     anti_wrinkle_max_duration: float = 60.0
     anti_wrinkle_exit_power: float = 0.8
     anti_wrinkle_idle_timeout: float = 120.0
+    # Dishwasher only: sustained-quiet seconds (after reaching expected duration)
+    # that release the end-of-cycle pump-out/drain wait early (#379). Defaults to
+    # the shipped constant; per-device configurable so a machine with a long silent
+    # passive-drying phase before its final drain can absorb profile drift.
+    dishwasher_end_spike_quiet_release: float = DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
     delay_detect_enabled: bool = False
     # Sustained seconds power must stay in the standby band (between
     # stop_threshold_w and start_threshold_w) before DELAY_WAIT engages.
@@ -1477,7 +1482,7 @@ class CycleDetector:
                             ) or (
                                 current_duration >= self._expected_duration
                                 and self._time_below_threshold
-                                >= DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+                                >= self._config.dishwasher_end_spike_quiet_release
                             )
                             if (
                                 self._config.device_type == "dishwasher"
@@ -2186,7 +2191,7 @@ class CycleDetector:
         quiet_released = (
             duration >= self._expected_duration
             and self._time_below_threshold
-            >= DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+            >= self._config.dishwasher_end_spike_quiet_release
         )
         if (
             self._config.device_type == "dishwasher"

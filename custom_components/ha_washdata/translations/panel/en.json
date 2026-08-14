@@ -912,6 +912,7 @@
     "duration_scale": "Stage 4: log-ratio where duration agreement halves; smaller = stricter penalty (default 0.175)",
     "energy_scale": "Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)",
     "anti_wrinkle_idle_timeout": "Quiet time allowed between two tumble pulses before anti-wrinkle ends",
+    "dishwasher_end_spike_quiet_release": "Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released",
     "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
     "anti_wrinkle_enabled": "Absorb the tumble pulses after the main phase instead of reading them as new cycles",
     "anti_wrinkle_max_duration": "A pulse longer than this ends anti-wrinkle and opens a new cycle",
@@ -978,6 +979,10 @@
     "detection": {
       "intro": "How a cycle is detected as starting, running and finishing.",
       "label": "Detection"
+    },
+    "dishwasher": {
+      "intro": "End-of-cycle handling for dishwashers, which typically finish with a long near-silent drying phase before a short final drain.",
+      "label": "Dishwasher"
     },
     "matching": {
       "intro": "How finished cycles are matched to learned profiles and labelled.",
@@ -1048,6 +1053,10 @@
     "device_type": {
       "doc": "Appliance class. Sets sensible detection defaults (thresholds, off-delay, end handling) tuned for that appliance type; change it only if the device was originally set up as the wrong type.",
       "label": "Device Type"
+    },
+    "dishwasher_end_spike_quiet_release": {
+      "doc": "Once the cycle passes its expected duration, how long the dishwasher must stay quiet (below the Stop Threshold) before WashData stops waiting for a final drain and ends the cycle. Raise it if your machine has a long silent drying phase before a late final drain that is being missed - a wider window lets the learned duration follow seasonal drift (colder inlet water = longer cycles) instead of locking to the old average. It only ever shortens the wait relative to the internal 30-minute end-spike cap, never extends it.",
+      "label": "Passive-Dry Quiet Release"
     },
     "door_sensor_entity": {
       "doc": "Optional door binary sensor. Used to detect when the appliance has been opened/unloaded after a cycle.",

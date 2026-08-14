@@ -269,7 +269,6 @@ def _load_export(filename: str):
         stop_threshold_w=float(opts.get("stop_threshold_w", 1.5)),
         end_energy_threshold=float(opts.get("end_energy_threshold", 0.05)),
         completion_min_seconds=int(opts.get("completion_min_seconds", 900)),
-        running_dead_zone=float(opts.get("running_dead_zone", 0)),
         min_duration_ratio=float(opts.get("profile_match_min_duration_ratio", 0.05)),
     )
     return store, cfg, opts, data

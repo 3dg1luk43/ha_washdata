@@ -193,6 +193,10 @@ const _SETTINGS_SECTIONS = [
     { key: 'anti_wrinkle_idle_timeout', label: 'Max Pulse Gap', unit: 's', type: 'number', step: 30, min: 0, def: 120,
       doc: 'How long the machine may stay quiet between two tumble pulses before anti-wrinkle mode ends. Set it above the longest gap your dryer leaves between pulses, otherwise every later pulse is read as a false start.' },
   ] },
+  { id: 'dishwasher', label: 'Dishwasher', intro: 'End-of-cycle handling for dishwashers, which typically finish with a long near-silent drying phase before a short final drain.', onlyDeviceTypes: ['dishwasher'], fields: [
+    { key: 'dishwasher_end_spike_quiet_release', label: 'Passive-Dry Quiet Release', unit: 's', type: 'number', step: 60, min: 0, def: 600,
+      doc: 'Once the cycle passes its expected duration, how long the dishwasher must stay quiet (below the Stop Threshold) before WashData stops waiting for a final drain and ends the cycle. Raise it if your machine has a long silent drying phase before a late final drain that is being missed - a wider window lets the learned duration follow seasonal drift (colder inlet water = longer cycles) instead of locking to the old average. It only ever shortens the wait relative to the internal 30-minute end-spike cap, never extends it.' },
+  ] },
   { id: 'delay', label: 'Delay Start', intro: 'Delayed-start detection identifies when an appliance is powered but has not yet begun its cycle.', fields: [
     { key: 'delay_start_detect_enabled', label: 'Enable Delay-Start Detection', type: 'checkbox',
       doc: 'Detect when the appliance is powered on and waiting (delayed start / standby) but has not begun its cycle, so standby draw is not mistaken for a running cycle.' },
@@ -478,6 +482,24 @@ const _SETTING_CONFLICTS = [
     fieldErrors: v => ({
       profile_match_min_duration_ratio: { msgKey: 'conflict.duration_ratio.min', msgVars: {max: v.profile_match_max_duration_ratio}, msgFb: `Must be less than Max Duration Ratio (${v.profile_match_max_duration_ratio})`, fixVal: +(v.profile_match_max_duration_ratio * 0.5).toFixed(2) },
       profile_match_max_duration_ratio: { msgKey: 'conflict.duration_ratio.max', msgVars: {min: v.profile_match_min_duration_ratio}, msgFb: `Must be greater than Min Duration Ratio (${v.profile_match_min_duration_ratio})`, fixVal: +(v.profile_match_min_duration_ratio * 2.0).toFixed(2) },
+    }),
+  },
+  {
+    // end_energy_threshold >= stop_threshold_w * off_delay / 3600  (#376)
+    // The energy gate is evaluated over an off_delay-long window, so it implies a
+    // wattage. Below this it forbids what stop_threshold_w (the power gate) allows,
+    // and the cycle can only close through a fallback path (smart termination,
+    // watchdog force-end) — surfacing only as an unexplained late completion.
+    keys: ['end_energy_threshold', 'stop_threshold_w', 'off_delay'],
+    check: v => v.end_energy_threshold != null && v.stop_threshold_w != null && v.off_delay != null
+      && v.off_delay > 0 && v.end_energy_threshold < v.stop_threshold_w * v.off_delay / 3600,
+    fieldErrors: v => ({
+      end_energy_threshold: { msgKey: 'conflict.end_energy.energy', msgVars: {w: v.stop_threshold_w, d: v.off_delay},
+        msgFb: `Too strict for Stop Threshold (${v.stop_threshold_w} W) over Off Delay (${v.off_delay} s); the cycle can only end through a fallback path`,
+        fixVal: +(v.stop_threshold_w * v.off_delay / 3600).toFixed(3) },
+      stop_threshold_w: { msgKey: 'conflict.end_energy.stop', msgVars: {e: v.end_energy_threshold, d: v.off_delay},
+        msgFb: `End Energy Threshold (${v.end_energy_threshold} Wh over ${v.off_delay} s) only permits ${+(v.end_energy_threshold * 3600 / v.off_delay).toFixed(2)} W`,
+        fixVal: +(v.end_energy_threshold * 3600 / v.off_delay).toFixed(1) },
     }),
   },
 ];
@@ -5288,6 +5310,7 @@ class HaWashdataPanel extends HTMLElement {
       ['anti_wrinkle_max_duration','Max Anti-Wrinkle Duration','s', 'A pulse longer than this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_exit_power', 'Anti-Wrinkle Exit Power','W', 'Power must fall below this between pulses for anti-wrinkle to stay active', 'advanced'],
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
+      ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released', 'advanced'],
       ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
       ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
       ['corr_weight',      'Correlation Weight', '', 'Stage 2: balance between curve shape (correlation) and power level (MAE); default 0.45', 'matching'],

@@ -111,6 +111,8 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
+    CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     CONF_DELAY_START_DETECT_ENABLED,
     CONF_DELAY_CONFIRM_SECONDS,
     CONF_DELAY_TIMEOUT_HOURS,
@@ -790,6 +792,12 @@ class WashDataManager:
                     CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT
                 )
             ),
+            dishwasher_end_spike_quiet_release=float(
+                config_entry.options.get(
+                    CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+                    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+                )
+            ),
             delay_detect_enabled=bool(
                 config_entry.options.get(
                     CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
@@ -805,6 +813,10 @@ class WashDataManager:
                     CONF_DELAY_TIMEOUT_HOURS, DEFAULT_DELAY_TIMEOUT_HOURS
                 )
             ) * 3600.0,
+            # #378: without this the detector keeps the WASHING_MACHINE default and
+            # every non-washing-machine device runs the washing-machine detection
+            # path (the whole dishwasher/#43 branch is otherwise dead in production).
+            device_type=self.device_type,
         )
         self._config = config
 
@@ -2115,6 +2127,12 @@ class WashDataManager:
                 CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT
             )
         )
+        new_dishwasher_end_spike_quiet_release = float(
+            config_entry.options.get(
+                CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+                DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+            )
+        )
         new_delay_detect_enabled = bool(
             config_entry.options.get(
                 CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
@@ -2132,6 +2150,9 @@ class WashDataManager:
         ) * 3600.0
 
         # Apply all detector config updates
+        # #378: keep the detector's device_type in sync when the appliance type
+        # is changed in the UI, so the correct detection branch runs after reload.
+        self.detector.config.device_type = self.device_type
         self.detector.config.min_power = new_min_power
         self.detector.config.off_delay = new_off_delay
         self.detector.config.smoothing_window = new_smoothing
@@ -2150,6 +2171,7 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_max_duration = new_anti_wrinkle_max_duration
         self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
         self.detector.config.anti_wrinkle_idle_timeout = new_anti_wrinkle_idle_timeout
+        self.detector.config.dishwasher_end_spike_quiet_release = new_dishwasher_end_spike_quiet_release
         self.detector.config.delay_detect_enabled = new_delay_detect_enabled
         self.detector.config.delay_confirm_seconds = new_delay_confirm_seconds
         self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds

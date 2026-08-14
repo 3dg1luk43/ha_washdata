@@ -78,7 +78,6 @@ def washing_machine_config():
         interrupted_min_seconds=150,
         completion_min_seconds=600,
         start_duration_threshold=5.0,
-        running_dead_zone=0,
         end_repeat_count=1,
     )
 
@@ -128,7 +127,6 @@ def mock_socket_config():
         interrupted_min_seconds=150,
         completion_min_seconds=600,
         start_duration_threshold=5.0,
-        running_dead_zone=0,
         end_repeat_count=1,
     )
 

@@ -620,6 +620,27 @@ def compute_envelope_worker(
         if len(offsets) < 3:
             continue
 
+        # Stored offsets are rounded to 0.1s, so two readings less than 0.1s apart
+        # collapse onto the same offset.  A single such duplicate must not discard the
+        # whole trace (#377): drop the duplicate sample(s) instead of the cycle.  Only
+        # exact duplicates are collapsed here; a genuinely out-of-order (decreasing)
+        # offset - which sorted storage never produces - is left for the strict check
+        # below to reject, exactly as before.
+        if offsets.size > 1:
+            diffs = np.diff(offsets)
+            if np.any(diffs == 0):
+                keep = np.concatenate(([True], diffs != 0))
+                dropped = int((~keep).sum())
+                offsets = offsets[keep]
+                values = values[keep]
+                _LOGGER.debug(
+                    "compute_envelope_worker: dropped %d duplicate sample offset(s) "
+                    "from a cycle trace (0.1s offset rounding)",
+                    dropped,
+                )
+            if len(offsets) < 3:
+                continue
+
         if not np.all(np.diff(offsets) > 0):
             continue
 
