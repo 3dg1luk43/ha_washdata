@@ -4613,7 +4613,7 @@ class ProfileStore:
         t_max = min(float(off_arr[-1]), 2.0 * span) if span > 0 else float(off_arr[-1])
         if step <= 0 or t_max <= 0:
             return list(powers)
-        n = max(2, int(round(t_max / step)) + 1)
+        n = max(2, round(t_max / step) + 1)
         grid = np.arange(n, dtype=float) * step
         return np.interp(grid, off_arr, pow_arr).tolist()
 
