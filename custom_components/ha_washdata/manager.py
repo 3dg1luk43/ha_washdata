@@ -1784,6 +1784,24 @@ class WashDataManager:
                     if self._is_user_paused:
                         self.detector.set_verified_pause(True)
 
+                    # Auto-open dishwasher: if we restored into ENDING while the door
+                    # is already open, arm the end-dwell now. _on_state_change is not
+                    # called during restoration, so the ENDING+open-door guard there
+                    # would not fire (#342 restart edge case).
+                    if (
+                        self.detector.state == STATE_ENDING
+                        and self._door_opens_at_end
+                        and self._door_sensor_entity
+                        and self._remove_door_end_dwell is None
+                    ):
+                        door_state = self.hass.states.get(self._door_sensor_entity)
+                        if door_state and door_state.state == "on":
+                            self._logger.debug(
+                                "Restored ENDING with door open: arming %ss end dwell",
+                                self._door_end_dwell_seconds,
+                            )
+                            self._arm_door_end_dwell()
+
                     # Record the restart gap so the Cycles tab can shade it and
                     # anomaly detection can surface it.  Only meaningful when
                     # last_save is known and the dark period exceeds 30 s.
@@ -6162,8 +6180,14 @@ class WashDataManager:
             if n.get("event_type") != NOTIFY_EVENT_CLEAN
         ]
 
-        services = self._get_services_for_event(NOTIFY_EVENT_CLEAN)
-        if not services and not self._notify_actions:
+        # Only mobile_app targets understand the "clear_notification" marker;
+        # non-mobile targets (email, Telegram, etc.) would receive it as a
+        # literal message. Mirror the pattern from _cancel_timer_mobile_notification.
+        mobile_services = [
+            s for s in self._get_services_for_event(NOTIFY_EVENT_CLEAN)
+            if self._is_mobile_notify_service(s)
+        ]
+        if not mobile_services and not self._notify_actions:
             return
 
         if self._notify_actions:
@@ -6180,10 +6204,10 @@ class WashDataManager:
                     "tag": self._clean_tag,
                 }
             )
-        if services:
+        if mobile_services:
             self._send_notification_service(
                 "clear_notification",
-                services=services,
+                services=mobile_services,
                 event_type=NOTIFY_EVENT_CLEAN,
                 extra_vars={"tag": self._clean_tag},
             )
