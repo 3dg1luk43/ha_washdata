@@ -5331,7 +5331,8 @@ class WashDataManager:
                 "Notification sent (%s) via %s: %s", label, targets, summary
             )
         else:
-            self._logger.info(
+            self._logger.info("Notification sent (%s)", label)
+            self._logger.debug(
                 "Notification sent (%s) via %s: %s", label, targets, summary
             )
 
