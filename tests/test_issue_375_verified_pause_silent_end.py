@@ -104,7 +104,10 @@ def manager(hass: HomeAssistant, mock_entry: Any) -> WashDataManager:
         mgr.detector.set_verified_pause = MagicMock()
         mgr.detector.update_match = MagicMock()
         mgr.detector.expected_duration_seconds = EXPECTED_S
+        # Observed (gap-free) quiet drives the release now; set both tallies to the
+        # same value since these cases have no telemetry outage.
         mgr.detector._time_below_threshold = ENDING_HARD_FINALIZE_MIN_QUIET_S + 1200.0
+        mgr.detector._time_below_threshold_gapfree = ENDING_HARD_FINALIZE_MIN_QUIET_S + 1200.0
         mgr.detector._verified_pause = True  # frozen auto-pause from the envelope
 
         mgr._match_persistence = 3
@@ -149,6 +152,7 @@ async def test_insufficient_quiet_keeps_pause(manager: WashDataManager) -> None:
     """Past expected but not yet continuously quiet: hold, so a brief dip after a
     genuinely long program is not read as the end."""
     manager.detector._time_below_threshold = ENDING_HARD_FINALIZE_MIN_QUIET_S - 60.0
+    manager.detector._time_below_threshold_gapfree = ENDING_HARD_FINALIZE_MIN_QUIET_S - 60.0
     manager.profile_store.async_match_profile = AsyncMock(return_value=_make_result(None))
 
     await manager._async_do_perform_matching(_make_readings(EXPECTED_S + 2000.0))

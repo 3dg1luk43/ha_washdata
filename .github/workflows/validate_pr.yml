@@ -317,7 +317,7 @@ jobs:
               '',
               'This PR is **not yet linked to an issue with the `accepted` label**. To have your contribution considered, please follow this process:',
               '',
-              `1. **Open an issue** - create a [Bug Report](https://github.com/${owner}/${repo}/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/${owner}/${repo}/issues/new?template=feature_request.yml) describing what you want to fix or build.`,
+              `1. **Open an issue** - create a [Bug Report](https://github.com/${owner}/${repo}/issues/new?template=bug_report.yml), [Feature Request](https://github.com/${owner}/${repo}/issues/new?template=feature_request.yml), or [Documentation](https://github.com/${owner}/${repo}/issues/new?template=documentation.yml) issue describing what you want to fix, build, or document.`,
               '2. **Indicate your intent** - check the box at the bottom of the issue form confirming you plan to submit a PR.',
               '3. **Wait for the `accepted` label** - the maintainer reviews the issue and agrees the work with you first. Opening the PR before this happens skips the agree-first step.',
               '4. **Then link it here** - once the issue is accepted, edit this PR description to include `Closes #NNN`, and the check passes.',

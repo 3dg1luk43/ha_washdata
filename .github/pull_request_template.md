@@ -6,7 +6,7 @@
 > WashData does **not** accept unsolicited code. Work must be agreed with the maintainer *before* you write it, so you never spend time on something that is already in progress, already rejected, or headed in a direction that will not be merged.
 >
 > **Required flow for every non-translation PR:**
-> 1. Open a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml) and tick the "I plan to submit a PR" box.
+> 1. Open a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml), [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml), or [Documentation](https://github.com/3dg1luk43/ha_washdata/issues/new?template=documentation.yml) issue and tick the "I plan to submit a PR" box.
 > 2. **Wait** for the maintainer to add the `accepted` label. This is where you agree on scope and approach.
 > 3. *Only then* open this PR, referencing that already-accepted issue.
 >
