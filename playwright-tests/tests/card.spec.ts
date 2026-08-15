@@ -28,6 +28,8 @@ const RUN: Record<string, unknown> = {
     'sensor.wm_current_power': { state: '420', attributes: { unit_of_measurement: 'W' } },
     'select.wm_program': { state: 'Cotton 40', attributes: { options: ['Eco', 'Cotton 40'] } },
     'button.wm_pause': { state: '2026-01-01T00:00:00+00:00', attributes: {} },
+    'button.wm_resume': { state: '2026-01-01T00:00:00+00:00', attributes: {} },
+    'button.wm_terminate': { state: '2026-01-01T00:00:00+00:00', attributes: {} },
   },
   entities: {
     'sensor.wm_state': { device_id: 'd1', platform: 'ha_washdata', translation_key: 'washer_state' },
@@ -37,6 +39,8 @@ const RUN: Record<string, unknown> = {
     'sensor.wm_current_power': { device_id: 'd1', platform: 'ha_washdata', translation_key: 'current_power' },
     'select.wm_program': { device_id: 'd1', platform: 'ha_washdata', translation_key: 'program_select' },
     'button.wm_pause': { device_id: 'd1', platform: 'ha_washdata', translation_key: 'pause_cycle' },
+    'button.wm_resume': { device_id: 'd1', platform: 'ha_washdata', translation_key: 'resume_cycle' },
+    'button.wm_terminate': { device_id: 'd1', platform: 'ha_washdata', translation_key: 'force_end_cycle' },
   },
   devices: { d1: { name: 'Washing Machine' } },
 };
