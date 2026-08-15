@@ -4579,9 +4579,11 @@ class ProfileStore:
                         env_time = cast(list[float], np.linspace(0, target_dur, len(env_power)).tolist())
                     else:
                         env_time = [float(i * 60) for i in range(len(env_power))]
+            # Inside the try: a stored time_grid with non-numeric entries must
+            # yield the safe None fallback, not propagate to async_verify_alignment.
+            return [float(t) for t in env_time], env_power
         except (TypeError, ValueError, IndexError):
             return None
-        return [float(t) for t in env_time], env_power
 
     @staticmethod
     def _resample_trace_to_grid(

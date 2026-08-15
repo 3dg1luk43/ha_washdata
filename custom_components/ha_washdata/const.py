@@ -514,16 +514,6 @@ MATCH_ENERGY_WEIGHT = 0.22
 MATCH_DURATION_SCALE = 0.175       # ~ln ratio at which duration agreement halves
 MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
 
-# Device types whose Stage-4 "energy agreement" compares INTEGRATED energy
-# (mean power x duration) instead of mean power. On these, same-base program
-# variants differ mainly in temperature/spin at roughly equal duration, so
-# integrated energy (which mean power dilutes) is the right discriminator -
-# validated on real store data (washer top-1 +3.4pp, FP down). Other device
-# types (dishwasher/dryer/...) keep mean power, because their programs are
-# distinguished by duration and integrated energy would conflate the two axes
-# (validated: it regresses there). See register item 99 / the cycle-variant
-# discrimination spec.
-STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES = ("washing_machine", "washer_dryer")
 
 # States
 STATE_OFF = "off"
@@ -583,6 +573,21 @@ DEVICE_TYPE_GENERIC = "generic"
 # Config entries whose stored device_type is no longer supported are migrated
 # to this bucket on load (see __init__.py), preserving their tuned options.
 DEVICE_TYPE_OTHER = "other"
+
+# Device types whose Stage-4 "energy agreement" compares INTEGRATED energy
+# (mean power x duration) instead of mean power. On these, same-base program
+# variants differ mainly in temperature/spin at roughly equal duration, so
+# integrated energy (which mean power dilutes) is the right discriminator -
+# validated on real store data (washer top-1 +3.4pp, FP down). Other device
+# types (dishwasher/dryer/...) keep mean power, because their programs are
+# distinguished by duration and integrated energy would conflate the two axes
+# (validated: it regresses there). See register item 99 / the cycle-variant
+# discrimination spec. Defined from the device-type constants above (not string
+# literals) so it can never drift from them.
+STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES = (
+    DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_WASHER_DRYER,
+)
 
 DEVICE_TYPES = {
     DEVICE_TYPE_WASHING_MACHINE: "Washing Machine",
