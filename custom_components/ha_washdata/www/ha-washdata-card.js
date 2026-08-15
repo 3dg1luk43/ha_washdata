@@ -117,7 +117,7 @@ class WashDataCard extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._cfg = null;
     this._hass = null;
-    this._layout = null; // layout the current shell was built for
+    this._builtSig = null; // structure signature the current shell was built for
     this._constantsLoaded = false;
     this._langEnsured = "";
     this._constants = null;
@@ -161,12 +161,32 @@ class WashDataCard extends HTMLElement {
       throw new Error("Please define entities for the glance layout");
     }
     this._cfg = { ...config, layout };
-    // Force a shell rebuild if the layout changed.
-    if (this._layout !== layout) {
-      this._layout = null;
+    // Rebuild the shell when the structural signature changes - not only on a
+    // layout switch, but also when the progress bar, sparkline, buttons, or the
+    // glance entity count change (HA reuses the element and re-calls setConfig on
+    // editor edits / Lovelace reloads). Otherwise the _update* helpers early-return
+    // because their elements don't exist and the new options only appear after a
+    // layout switch or page reload (removed entities also leave orphan glance rows).
+    if (this._builtSig !== this._structureSig()) {
+      this._builtSig = null;
       if (this.shadowRoot) this.shadowRoot.innerHTML = "";
     }
     this._render();
+  }
+
+  // Signature of every config field that changes which elements the shell emits
+  // (see _buildTile/_buildDetail/_buildGlance). A change here forces a rebuild.
+  _structureSig() {
+    const c = this._cfg || {};
+    const f = this._flags();
+    const layout = c.layout || "tile";
+    return [
+      layout,
+      f.showBar ? "bar" : "",
+      f.showSparkline ? "spark" : "",
+      f.buttons.join("+"),
+      layout === "glance" ? String(this._glanceEntities().length) : "",
+    ].join("|");
   }
 
   set hass(hass) {
@@ -544,10 +564,10 @@ class WashDataCard extends HTMLElement {
   // ── Rendering ─────────────────────────────────────────────────────────────
   _render() {
     if (!this.shadowRoot || !this._cfg) return;
-    const layout = this._cfg.layout || "tile";
-    if (this._layout !== layout) {
-      this._build(layout);
-      this._layout = layout;
+    const sig = this._structureSig();
+    if (this._builtSig !== sig) {
+      this._build(this._cfg.layout || "tile");
+      this._builtSig = sig;
     }
     this._update();
   }

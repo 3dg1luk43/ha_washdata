@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "home-assistant": {
-      "type": "http",
-      "url": "http://localhost:9584/servers/home-assistant/mcp"
-    }
-  }
-}
