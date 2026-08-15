@@ -4610,6 +4610,9 @@ class ProfileStore:
         pow_arr = np.asarray(powers, dtype=float)
         order = np.argsort(off_arr, kind="stable")
         off_arr, pow_arr = off_arr[order], pow_arr[order]
+        # Remove duplicate offsets; np.unique keeps the first occurrence after sorting.
+        off_arr, unique_idx = np.unique(off_arr, return_index=True)
+        pow_arr = pow_arr[unique_idx]
         return np.interp(grid, off_arr, pow_arr).tolist()
 
     def envelope_time_span(self, profile_name: str) -> float:

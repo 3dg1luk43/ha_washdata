@@ -73,20 +73,24 @@ def make_manager(mock_hass: Any) -> Callable[[dict[str, Any]], WashDataManager]:
 def test_service_notification_logs_at_info_with_target(
     make_manager: Callable[..., WashDataManager], caplog: pytest.LogCaptureFixture
 ) -> None:
-    """A delivered service notification logs one INFO line naming the target."""
+    """A delivered service notification logs event label at INFO; target+body at DEBUG."""
     mgr = make_manager({"notify_finish_services": ["notify.mobile_app_pixel"]})
-    with caplog.at_level(logging.INFO, logger=_MANAGER_LOGGER):
+    with caplog.at_level(logging.DEBUG, logger=_MANAGER_LOGGER):
         mgr._dispatch_notification(
             "All done", event_type=NOTIFY_EVENT_FINISH,
             extra_vars={"tag": mgr._lifecycle_tag},
         )
-    records = [r for r in caplog.records if "Notification sent" in r.message]
-    assert len(records) == 1
-    rec = records[0]
-    assert rec.levelno == logging.INFO
-    assert "finish" in rec.message
-    assert "notify.mobile_app_pixel" in rec.message
-    assert "All done" in rec.message
+    sent = [r for r in caplog.records if "Notification sent" in r.message]
+    # Exactly one INFO line (label-only) and one DEBUG line (target + body).
+    info_records = [r for r in sent if r.levelno == logging.INFO]
+    debug_records = [r for r in sent if r.levelno == logging.DEBUG]
+    assert len(info_records) == 1
+    assert len(debug_records) == 1
+    assert "finish" in info_records[0].message
+    # Target and body stay out of INFO to prevent PII leaking into bug reports.
+    assert "notify.mobile_app_pixel" not in info_records[0].message
+    assert "notify.mobile_app_pixel" in debug_records[0].message
+    assert "All done" in debug_records[0].message
 
 
 def test_persistent_fallback_is_named_in_log(
@@ -94,11 +98,12 @@ def test_persistent_fallback_is_named_in_log(
 ) -> None:
     """With no notify service configured the persistent-notification fallback is logged."""
     mgr = make_manager({})
-    with caplog.at_level(logging.INFO, logger=_MANAGER_LOGGER):
+    with caplog.at_level(logging.DEBUG, logger=_MANAGER_LOGGER):
         mgr._dispatch_notification("Started", event_type=NOTIFY_EVENT_START)
-    records = [r for r in caplog.records if "Notification sent" in r.message]
-    assert len(records) == 1
-    assert "persistent_notification" in records[0].message
+    sent = [r for r in caplog.records if "Notification sent" in r.message]
+    # Target name appears in the DEBUG record only (kept out of INFO to avoid PII leakage).
+    debug_records = [r for r in sent if r.levelno == logging.DEBUG]
+    assert any("persistent_notification" in r.message for r in debug_records)
 
 
 def test_live_progress_logs_at_debug(
