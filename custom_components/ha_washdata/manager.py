@@ -1353,7 +1353,15 @@ class WashDataManager:
             # detector already trusts in `_should_defer_finish`.  A real user pause
             # is authoritative and re-asserted below, so it is never released here.
             expected_dur = self.detector.expected_duration_seconds
-            time_below = getattr(self.detector, "_time_below_threshold", 0.0)
+            # Gap-free tally only: a telemetry outage is unobserved time and must
+            # not satisfy the quiet floor that releases the auto-detected pause
+            # (mirrors the detector's dishwasher quiet-release gates). Fall back to
+            # the plain tally if the attribute is missing (older detector).
+            time_below = getattr(
+                self.detector,
+                "_time_below_threshold_gapfree",
+                getattr(self.detector, "_time_below_threshold", 0.0),
+            )
             if (
                 verified_pause
                 and not self._is_user_paused

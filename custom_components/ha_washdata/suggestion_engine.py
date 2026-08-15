@@ -938,9 +938,8 @@ class SuggestionEngine:
         # ~3 W between-burst baseline does not drag the p05 down on anti-crease
         # devices and produce a noise gate below the real operating draw (#343 gap A).
         lowest_active: list[float] = []
-        _anti_crease_opts = self._entry_options()
         for c in clean:
-            readings = self._strip_anti_crease_readings(_cycle_readings(c), options=_anti_crease_opts)
+            readings = self._strip_anti_crease_readings(_cycle_readings(c), options=options)
             if len(readings) < 5:
                 continue
             active = np.array([p for _, p in readings if p > 0.5])
@@ -1263,9 +1262,9 @@ class SuggestionEngine:
 
     def _strip_anti_crease_tail(
         self,
-        ordered_powers: "np.ndarray",
+        ordered_powers: np.ndarray,
         options: dict[str, Any] | None = None,
-    ) -> "np.ndarray":
+    ) -> np.ndarray:
         """Drop the post-cycle anti-crease tail from an ordered power trace (#343).
 
         Stop/start thresholds detect the MAIN cycle; the anti-crease tumble-pulse

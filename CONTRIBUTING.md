@@ -155,7 +155,7 @@ Review open PRs and provide constructive feedback. Even experienced contributors
 
 **Translations are the only exception** (including PRs opened automatically by [GitLocalize](https://gitlocalize.com/repo/10819)): no issue, no label, no waiting. Everything else - bug fixes, features, refactors, documentation, tests - goes through this flow:
 
-1. **Open an issue.** Create a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml) describing what you want to change. Blank issues are disabled - you must pick a template and fill it in.
+1. **Open an issue.** Create a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml), [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml), or [Documentation](https://github.com/3dg1luk43/ha_washdata/issues/new?template=documentation.yml) issue describing what you want to change. Blank issues are disabled - you must pick a template and fill it in.
 2. **Say you want to build it.** Tick the "Contributing a Fix" / "Contributing an Implementation" box in the issue form.
 3. **Wait for the `accepted` label.** The maintainer reviews the issue and, if they agree the work should go ahead and that you should be the one to do it, adds the `accepted` label. Only the maintainer can apply it. **This step is the conversation** - use it to confirm scope and approach before you start coding.
 4. **Then open your PR**, referencing the already-accepted issue with `Closes #NNN`.
