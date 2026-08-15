@@ -82,6 +82,32 @@ def test_default_field_matches_shipped_constant():
     )
 
 
+def test_outage_gap_does_not_satisfy_quiet_release():
+    """A telemetry outage is unobserved time and must not count as quiet: a low
+    sample after a long dropout cannot release the dishwasher end wait. Only the
+    gap-free (observed) quiet tally gates the release."""
+    expected = 6000.0
+    det = _make_detector(quiet_release=600.0)
+    det.process_reading(120.0, _dt(0))
+    det.process_reading(120.0, _dt(30))
+    for t in range(60, int(expected) + 1, 30):
+        det.process_reading(120.0, _dt(t))
+    det.update_match(("dishwasher_program", 0.6, expected, None, False))
+
+    # Telemetry outage: the plug goes silent for 900 s (>> the 600 s release),
+    # then reports 0 W and continues at normal cadence for only 300 s.
+    det.process_reading(0.0, _dt(expected + 900))
+    for t in range(int(expected) + 930, int(expected) + 900 + 330, 30):
+        det.process_reading(0.0, _dt(t))
+
+    # The 900 s gap must NOT be credited as observed quiet, so with only ~300 s of
+    # real quiet the cycle is still waiting (pre-fix, the gap-inclusive tally would
+    # have crossed 600 s and finalized).
+    assert det._time_below_threshold_gapfree < 600.0
+    assert det._time_below_threshold >= 600.0  # the plain tally did absorb the gap
+    assert det.state != STATE_FINISHED
+
+
 def test_shorter_quiet_release_finalizes_sooner():
     """A shorter quiet-release ends the cycle sooner than a longer one, same trace."""
     expected = 6000.0

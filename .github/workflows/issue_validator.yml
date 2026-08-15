@@ -285,7 +285,10 @@ jobs:
             // 4. Logs / Error Evidence - must contain actual log/error output, an attached file, or a clear N/A with stated reason
             const logMatch = body.match(/###\s*Logs \/ Error Evidence\s*\n+([\s\S]*?)(?=\n###|$)/);
             const logContent = logMatch ? logMatch[1].trim() : '';
-            const logIsExplainedNA = /^n\/?a/i.test(logContent);
+            // Accept "N/A" / "NA" only when a reason follows on the same line
+            // (e.g. "N/A - crashes before logs"), not a bare "N/A".
+            const logIsExplainedNA =
+              /^n\/?a(?:[ \t]*[-:][ \t]*|[ \t]+)\S[^\r\n]*$/i.test(logContent);
             // Detect GitHub file attachments (pasted as markdown links)
             const hasAttachment = /https:\/\/github\.com\/[^)]+\/files\//.test(logContent) ||
               /https:\/\/github\.com\/user-attachments\//.test(logContent);
