@@ -5300,16 +5300,25 @@ class WashDataManager:
         deferred_reason: str | None = None,
         delivered: bool = True,
     ) -> None:
-        """Emit one log line for a notification's send / defer / drop.
+        """Emit log lines for a notification's send / defer / drop.
 
         Every user-facing notification funnels through ``_dispatch_notification``,
         so this is the single place that records what WashData notified about,
         where it went, and whether it was delivered, deferred (quiet-hours /
-        presence hold), or dropped. Live-progress ticks are high-frequency in-place
-        updates of a single persistent card, so they log at DEBUG to keep the INFO
-        stream meaningful; every discrete notification (start/finish/milestone/
-        clean/pause/…) logs at INFO. Deferred items are re-dispatched when the
-        hold clears, so they log again as "sent" on actual delivery.
+        presence hold), or dropped.
+
+        Log contract (regression-locked by ``test_manager_notification_logging``):
+        - **INFO** ``"Notification sent (<event>)"`` — one line per discrete
+          notification (start/finish/milestone/clean/pause/…). Target list and
+          message body are omitted to prevent entity-ID PII from leaking into
+          bug-report logs.
+        - **DEBUG** ``"Notification sent (<event>) via <targets>: <summary>"`` —
+          full target list and truncated message body for troubleshooting.
+        - **DEBUG** for live-progress ticks (high-frequency in-place updates).
+        - **DEBUG** for deferred (quiet-hours/presence hold) and not-delivered paths.
+
+        Deferred items are re-dispatched when the hold clears and log again as
+        "sent" on actual delivery.
         """
         label = event_type or "notification"
         # Countdown / finish messages can span multiple lines - collapse to one.

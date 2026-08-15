@@ -4601,11 +4601,8 @@ class ProfileStore:
             return list(powers)
         step = float(np.median(pos))
         span = float(env_time[-1])
-        t_max = min(float(offsets[-1]), 2.0 * span) if span > 0 else float(offsets[-1])
-        if step <= 0 or t_max <= 0:
-            return list(powers)
-        n = max(2, int(round(t_max / step)) + 1)
-        grid = np.arange(n, dtype=float) * step
+        # Sort and deduplicate before computing t_max so the grid span reflects the
+        # true maximum offset even when the raw trace is non-monotonic.
         off_arr = np.asarray(offsets, dtype=float)
         pow_arr = np.asarray(powers, dtype=float)
         order = np.argsort(off_arr, kind="stable")
@@ -4613,6 +4610,11 @@ class ProfileStore:
         # Remove duplicate offsets; np.unique keeps the first occurrence after sorting.
         off_arr, unique_idx = np.unique(off_arr, return_index=True)
         pow_arr = pow_arr[unique_idx]
+        t_max = min(float(off_arr[-1]), 2.0 * span) if span > 0 else float(off_arr[-1])
+        if step <= 0 or t_max <= 0:
+            return list(powers)
+        n = max(2, int(round(t_max / step)) + 1)
+        grid = np.arange(n, dtype=float) * step
         return np.interp(grid, off_arr, pow_arr).tolist()
 
     def envelope_time_span(self, profile_name: str) -> float:
