@@ -86,11 +86,39 @@ def test_door_open_arms_dwell_not_sticky_pause(mock_hass):
     assert mgr._is_user_paused is False
 
 
+def _set_door_state(mgr, state: str) -> None:
+    """Point the manager's hass at a door sensor reading ``state``."""
+    door = MagicMock(); door.state = state
+    mgr.hass.states.get = MagicMock(return_value=door)
+
+
 def test_dwell_fires_finalizes_via_user_stop(mock_hass):
     mgr = _make_manager(mock_hass, {CONF_DOOR_OPENS_AT_END: True})
     mgr.detector.state = STATE_RUNNING
+    _set_door_state(mgr, "on")  # door still open when the dwell fires
+    mgr._is_user_paused = False
     mgr._door_end_dwell_fired(None)
     mgr.detector.user_stop.assert_called_once()
+
+
+def test_dwell_does_not_finalize_when_door_closed(mock_hass):
+    """A missed close event: if the door reads closed when the dwell fires, do
+    not finalize (re-validation guard, #342)."""
+    mgr = _make_manager(mock_hass, {CONF_DOOR_OPENS_AT_END: True})
+    mgr.detector.state = STATE_RUNNING
+    _set_door_state(mgr, "off")
+    mgr._door_end_dwell_fired(None)
+    mgr.detector.user_stop.assert_not_called()
+
+
+def test_dwell_does_not_finalize_when_user_paused(mock_hass):
+    """A user pause landing mid-dwell must block auto-open finalization (#342)."""
+    mgr = _make_manager(mock_hass, {CONF_DOOR_OPENS_AT_END: True})
+    mgr.detector.state = STATE_RUNNING
+    _set_door_state(mgr, "on")
+    mgr._is_user_paused = True
+    mgr._door_end_dwell_fired(None)
+    mgr.detector.user_stop.assert_not_called()
 
 
 def test_door_close_cancels_pending_dwell(mock_hass):
