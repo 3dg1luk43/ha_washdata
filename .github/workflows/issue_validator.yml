@@ -65,7 +65,7 @@ jobs:
             ];
             const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const hasTemplateHeading = KNOWN_HEADINGS.some(
-              h => new RegExp('^#{1,6}\\s*' + escapeRe(h) + '(?=\\s|$)', 'im').test(body)
+              h => new RegExp('^#{1,6}[ \\t]+' + escapeRe(h) + '(?=[ \\t]|$)', 'im').test(body)
             );
 
             // Only close when BOTH signals are absent. Requiring both protects real
