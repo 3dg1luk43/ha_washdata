@@ -656,8 +656,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             from homeassistant.loader import async_get_integration as _aget_integration  # pylint: disable=import-outside-toplevel
             _integ = await _aget_integration(hass, DOMAIN)
             hass.data["ha_washdata_version"] = _integ.manifest.get("version", "") or ""
-        except Exception:  # pylint: disable=broad-exception-caught
-            hass.data["ha_washdata_version"] = ""
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            # Don't cache a transient loader failure - leave the key unset so a
+            # later setup retries (ws_get_constants falls back to the module version).
+            _LOGGER.debug("Could not load ha_washdata version from manifest: %s", err)
 
     async_register_commands(hass)
     hass.data["ha_washdata_ws_registered"] = True

@@ -231,6 +231,7 @@ class GetConstantsResponse(TypedDict):
 
 class GetSuggestionsResponse(TypedDict):
     suggestions: list[dict[str, Any]]
+    locked_suggestions: list[str]
 
 
 class ApplySuggestionsResponse(TypedDict):

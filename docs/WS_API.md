@@ -858,6 +858,7 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `suggestions` | yes | list[dict[str, any]] |
+| `locked_suggestions` | yes | list[str] |
 
 ## `ha_washdata/apply_suggestions`
 

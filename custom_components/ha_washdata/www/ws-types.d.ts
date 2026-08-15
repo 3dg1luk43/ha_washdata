@@ -281,6 +281,7 @@ export interface GetShareableCyclesResponse {
 
 export interface GetSuggestionsResponse {
   suggestions: Record<string, unknown>[];
+  locked_suggestions: string[];
 }
 
 export interface ImportConfigSelectiveResponse {

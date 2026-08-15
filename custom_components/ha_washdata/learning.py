@@ -889,7 +889,10 @@ class LearningManager:
                 if needs_review and not already_reviewed:
                     try:
                         await self.profile_store.set_cycle_review(cycle_id)
-                    except Exception:  # pylint: disable=broad-exception-caught
+                    except Exception as err:  # pylint: disable=broad-exception-caught
+                        self._logger.debug(
+                            "set_cycle_review failed for cycle %s: %s", cycle_id, err
+                        )
                         return False
                     async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
                     self._logger.info(

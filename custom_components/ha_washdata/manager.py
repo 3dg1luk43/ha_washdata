@@ -5604,12 +5604,21 @@ class WashDataManager:
                 if notify_service.startswith("notify.")
                 else None
             )
-            # notify.send_message (HA 2023.4+ entity service) only accepts
-            # message/title/entity_id — it has no 'data' sub-dict in its schema.
-            # Fall through to the legacy domain-service path when svc_data is
-            # non-empty (mobile extras, icon, iOS Live Activity keys, etc.) so
-            # they land in the 'data' dict that NOTIFY_SERVICE_SCHEMA accepts.
-            if state is not None and getattr(state, "domain", None) == "notify" and not svc_data:
+            # A notify *entity* (has a state, domain "notify") only registers the
+            # entity service notify.send_message — NOT a legacy notify.<object_id>
+            # domain service. So route entity targets through send_message
+            # regardless of svc_data; that schema accepts only entity_id/message/
+            # title, so drop any unsupported extras (icon, mobile/iOS keys) rather
+            # than fall through to a legacy service that would raise ServiceNotFound
+            # and silently drop the notification. Legacy notify.mobile_app_* targets
+            # have no entity state (state is None) and correctly take the else path.
+            if state is not None and getattr(state, "domain", None) == "notify":
+                if svc_data:
+                    self._logger.debug(
+                        "Notify entity %s: dropping %d unsupported payload key(s) "
+                        "(%s) - notify.send_message accepts only message/title",
+                        notify_service, len(svc_data), ", ".join(sorted(svc_data)),
+                    )
                 service_data: dict[str, Any] = {
                     "entity_id": notify_service,
                     "message": message,

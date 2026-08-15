@@ -3015,11 +3015,12 @@ async def ws_get_export_inventory(
     entry = _get_entry(hass, entry_id)
     try:
         opts = dict(entry.options) if entry else {}
-        # Offload the whole-store scan off the event loop: a large store's inventory
-        # walk (profiles + real/reference cycles) can take tens of ms.
-        manifest = await hass.async_add_executor_job(
-            manager.profile_store.get_export_inventory, opts
-        )
+        # Run the inventory scan synchronously on the event loop. It's a fast walk
+        # (counts + small per-cycle {id,date,duration} dicts) and staying on the loop
+        # is inherently safe from concurrent mutation - offloading it to an executor
+        # would read the live, mutable store lists from another thread and could raise
+        # "list changed size during iteration" without a full (expensive) snapshot.
+        manifest = manager.profile_store.get_export_inventory(opts)
         _send_result(connection, msg["id"], "get_export_inventory", {"manifest": manifest})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))

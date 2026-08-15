@@ -585,7 +585,7 @@ def reconcile_suggestions(
         if (
             stop_ee is not None and off_delay_ee is not None and end_energy is not None
             and off_delay_ee > 0 and end_energy < stop_ee * off_delay_ee / 3600.0
-            and in_out(CONF_END_ENERGY_THRESHOLD, CONF_STOP_THRESHOLD_W)
+            and in_out(CONF_END_ENERGY_THRESHOLD, CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY)
         ):
             adjust(
                 CONF_END_ENERGY_THRESHOLD,
