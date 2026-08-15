@@ -2652,16 +2652,36 @@ class WashDataManager:
     def _door_end_dwell_fired(self, _now: Any) -> None:
         """The door stayed open past the dwell on an auto-open device: the cycle has
         finished, so finalize it as completed (same path as the External End
-        Trigger). The dwell is cancelled on door-close, so reaching here means the
-        door is still open (#342)."""
+        Trigger). The dwell is normally cancelled on door-close, but re-validate the
+        live conditions here defensively — a close event could have been missed, or a
+        user pause could have landed mid-dwell — before finalizing (#342)."""
         self._remove_door_end_dwell = None
-        if self.detector.state in (STATE_RUNNING, STATE_ENDING):
+        door_state = (
+            self.hass.states.get(self._door_sensor_entity)
+            if self._door_sensor_entity
+            else None
+        )
+        if (
+            self.detector.state in (STATE_RUNNING, STATE_ENDING)
+            and self._door_opens_at_end
+            and not self._is_user_paused
+            and door_state is not None
+            and door_state.state == "on"
+        ):
             self._logger.info(
                 "Door held open %ss on auto-open device: finalizing cycle",
                 self._door_end_dwell_seconds,
             )
             self.detector.user_stop()
             self._notify_update()
+        else:
+            self._logger.debug(
+                "Door-end dwell fired but conditions no longer hold "
+                "(state=%s, door=%s, user_paused=%s): not finalizing",
+                self.detector.state,
+                getattr(door_state, "state", None),
+                self._is_user_paused,
+            )
 
     async def _setup_notify_people_listener(self) -> None:
         """Set up listener for person presence changes used by notification gating."""
@@ -2846,7 +2866,11 @@ class WashDataManager:
             return {"ok": False, "reason": "ml_training_disabled"}
 
         opts = {**self.config_entry.data, **self.config_entry.options}
-        cycles = self.profile_store.get_past_cycles()
+        # Snapshot on the event loop before any executor offload (training +
+        # matcher tuning): get_past_cycles() returns the live mutable list, so a
+        # concurrent cycle add / retention trim could otherwise change the input
+        # mid-run.
+        cycles = list(self.profile_store.get_past_cycles())
 
         if not force:
             # Don't train mid-cycle; wait for a quiet moment.
@@ -6936,6 +6960,10 @@ class WashDataManager:
                     self._user_pause_start = None
                     self.detector.set_verified_pause(prev_verified)
                     return False
+
+        # A user pause overrides an auto-open dwell: cancel it so the pending timer
+        # can't finalize the cycle out from under the pause (#342).
+        self._cancel_door_end_dwell()
 
         snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
         self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
