@@ -238,6 +238,11 @@ class ApplySuggestionsResponse(TypedDict):
     applied: list[str]
 
 
+class SetSuggestionLockResponse(TypedDict):
+    success: bool
+    locked_suggestions: list[str]
+
+
 class RunSuggestionAnalysisResponse(TypedDict, total=False):
     """``success`` plus whatever the analysis pass reports (e.g. ``count``)."""
 
@@ -651,7 +656,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_suggestions": GetSuggestionsResponse,
     "apply_suggestions": ApplySuggestionsResponse,
     "clear_suggestions": SuccessResponse,
-    "set_suggestion_lock": SuccessResponse,
+    "set_suggestion_lock": SetSuggestionLockResponse,
     "run_suggestion_analysis": RunSuggestionAnalysisResponse,
     "get_cycle_power_data": GetCyclePowerDataResponse,
     "trim_cycle": StartTaskResponse,

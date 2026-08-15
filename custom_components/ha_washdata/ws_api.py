@@ -3457,12 +3457,16 @@ async def ws_set_suggestion_lock(
     """Lock or unlock a tuning suggestion key so the auto-tuner stops (or resumes)
     proposing it (#343)."""
     entry_id: str = msg["entry_id"]
+    key: str = msg["key"]
+    if key not in _SUGGESTION_KEYS:
+        connection.send_error(msg["id"], "invalid_key", f"Unknown suggestion key: {key!r}")
+        return
     manager = _get_manager(hass, entry_id)
     if manager is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
     try:
-        await manager.profile_store.set_suggestion_locked(msg["key"], bool(msg["locked"]))
+        await manager.profile_store.set_suggestion_locked(key, bool(msg["locked"]))
         manager.notify_update()
         _send_result(
             connection, msg["id"], "set_suggestion_lock",

@@ -4606,9 +4606,11 @@ class ProfileStore:
             return list(powers)
         n = max(2, int(round(t_max / step)) + 1)
         grid = np.arange(n, dtype=float) * step
-        return np.interp(
-            grid, np.asarray(offsets, dtype=float), np.asarray(powers, dtype=float)
-        ).tolist()
+        off_arr = np.asarray(offsets, dtype=float)
+        pow_arr = np.asarray(powers, dtype=float)
+        order = np.argsort(off_arr, kind="stable")
+        off_arr, pow_arr = off_arr[order], pow_arr[order]
+        return np.interp(grid, off_arr, pow_arr).tolist()
 
     def envelope_time_span(self, profile_name: str) -> float:
         """Total time span (seconds) of a profile's envelope grid, 0 if unavailable.

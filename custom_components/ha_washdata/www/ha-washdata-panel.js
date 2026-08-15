@@ -9456,6 +9456,12 @@ class HaWashdataPanel extends HTMLElement {
     );
     m.trim.start = snap(m.trim.start);
     m.trim.end = snap(m.trim.end);
+    if (m.trim.end <= m.trim.start) {
+      const startIdx = samples.findIndex((s) => s[0] === m.trim.start);
+      if (startIdx >= 0 && startIdx + 1 < samples.length) {
+        m.trim.end = samples[startIdx + 1][0];
+      }
+    }
   }
 
   // Trim-input value <-> cycle-offset seconds (supports the clock-time mode).
@@ -9738,12 +9744,19 @@ class HaWashdataPanel extends HTMLElement {
       // #343: un-mute every locked suggestion so the auto-tuner can propose them again.
       this._busyRun('save-settings', async () => {
         try {
-          for (const k of [...(this._lockedSuggestions || [])]) {
-            await this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: false });
-          }
-          this._lockedSuggestions = [];
+          const keys = [...(this._lockedSuggestions || [])];
+          const results = await Promise.allSettled(
+            keys.map(k => this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: false }))
+          );
+          const failed = results.filter(r => r.status === 'rejected').length;
+          const lastOk = results.slice().reverse().find(r => r.status === 'fulfilled');
+          this._lockedSuggestions = (lastOk && lastOk.value && lastOk.value.locked_suggestions) || [];
           await this._fetchSuggestions(eid);
-          this._showToast(this._t('msg.sug_unmuted_all', {}, 'Muted suggestions reset'), 'success');
+          if (failed) {
+            this._showToast(this._t('toast.error', {error: `${failed} suggestion(s) failed to unlock`}, `${failed} suggestion(s) failed to unlock`), 'error');
+          } else {
+            this._showToast(this._t('msg.sug_unmuted_all', {}, 'Muted suggestions reset'), 'success');
+          }
         } catch (e) { this._showToast(this._t('toast.error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       });
 

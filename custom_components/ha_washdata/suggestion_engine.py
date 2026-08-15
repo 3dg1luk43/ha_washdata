@@ -686,12 +686,10 @@ class SuggestionEngine:
             # devices the update gap is dominated by the inter-burst quiet period, so
             # the result often exceeds the burst interval and resets the end timer on
             # every tumble burst. Skip it when anti-crease is enabled (#343 gap B).
-            reason_off_key: str | None = None
-            reason_off_params: dict[str, Any] | None = None
             suggested_off_delay = int(max(device_floor, p95_dt * 5))
             reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
-            reason_off_key = "suggestion.reason.off_delay_cadence"
-            reason_off_params = {"p95": f"{p95_dt:.1f}"}
+            reason_off_key: str = "suggestion.reason.off_delay_cadence"
+            reason_off_params: dict[str, Any] = {"p95": f"{p95_dt:.1f}"}
             if suggested_off_delay == device_floor:
                 if self.device_type and self.device_type in DEFAULT_OFF_DELAY_BY_DEVICE:
                     reason_off = (
@@ -935,8 +933,9 @@ class SuggestionEngine:
         # ~3 W between-burst baseline does not drag the p05 down on anti-crease
         # devices and produce a noise gate below the real operating draw (#343 gap A).
         lowest_active: list[float] = []
+        _anti_crease_opts = self._entry_options()
         for c in clean:
-            readings = self._strip_anti_crease_readings(_cycle_readings(c))
+            readings = self._strip_anti_crease_readings(_cycle_readings(c), options=_anti_crease_opts)
             if len(readings) < 5:
                 continue
             active = np.array([p for _, p in readings if p > 0.5])
@@ -1133,12 +1132,13 @@ class SuggestionEngine:
         pause_durations: list[float] = []
         n_traced = 0
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
+        _anti_crease_opts = self._entry_options()
         for c in cycles:
             # Strip the anti-crease tail before pause analysis so that the inter-burst
             # quiet periods (up to 180-240 s on Miele/Bosch) are not counted as genuine
             # intra-cycle pauses, which would inflate p95 beyond the burst interval and
             # reset the end timer on every tumble burst (#343 gap C).
-            readings = self._strip_anti_crease_readings(_cycle_readings(c))
+            readings = self._strip_anti_crease_readings(_cycle_readings(c), options=_anti_crease_opts)
             if len(readings) < 10:
                 continue
             n_traced += 1
@@ -1255,7 +1255,11 @@ class SuggestionEngine:
         DEVICE_TYPE_WASHER_DRYER,
     )
 
-    def _strip_anti_crease_tail(self, ordered_powers: "np.ndarray") -> "np.ndarray":
+    def _strip_anti_crease_tail(
+        self,
+        ordered_powers: "np.ndarray",
+        options: dict[str, Any] | None = None,
+    ) -> "np.ndarray":
         """Drop the post-cycle anti-crease tail from an ordered power trace (#343).
 
         Stop/start thresholds detect the MAIN cycle; the anti-crease tumble-pulse
@@ -1270,14 +1274,17 @@ class SuggestionEngine:
         unchanged when anti-crease is off, the device type is ineligible, or no
         sample reaches the ceiling (no identifiable main phase) - so it can never
         over-exclude for a non-anti-crease device or a gentle program.
+
+        Pass ``options`` when calling from a loop to avoid repeated config-entry
+        reads (``hass.config_entries.async_get_entry`` is loop-affine).
         """
         if self.device_type not in self._ANTI_CREASE_DEVICE_TYPES:
             return ordered_powers
-        options = self._entry_options()
-        if not options.get(CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED):
+        opts = options if options is not None else self._entry_options()
+        if not opts.get(CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED):
             return ordered_powers
         try:
-            max_power = float(options.get(CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER))
+            max_power = float(opts.get(CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER))
         except (TypeError, ValueError):
             max_power = DEFAULT_ANTI_WRINKLE_MAX_POWER
         if max_power <= 0 or ordered_powers.size == 0:
@@ -1287,15 +1294,17 @@ class SuggestionEngine:
             return ordered_powers  # no main high-power phase -> nothing to strip
         return ordered_powers[: int(above[-1]) + 1]
 
-    def _is_anti_crease_enabled(self) -> bool:
+    def _is_anti_crease_enabled(self, options: dict[str, Any] | None = None) -> bool:
         """True when anti-crease mode is active on an eligible device type."""
         if self.device_type not in self._ANTI_CREASE_DEVICE_TYPES:
             return False
-        options = self._entry_options()
-        return bool(options.get(CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED))
+        opts = options if options is not None else self._entry_options()
+        return bool(opts.get(CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED))
 
     def _strip_anti_crease_readings(
-        self, readings: list[tuple[float, float]]
+        self,
+        readings: list[tuple[float, float]],
+        options: dict[str, Any] | None = None,
     ) -> list[tuple[float, float]]:
         """Time-domain equivalent of _strip_anti_crease_tail for (offset, power) pairs.
 
@@ -1303,14 +1312,17 @@ class SuggestionEngine:
         so that pause-duration and min-power statistics ignore the anti-crease tail
         (#343 gap B/C). No-op when anti-crease is off, the device type is ineligible,
         or no sample reaches the ceiling.
+
+        Pass ``options`` when calling from a loop to avoid repeated config-entry
+        reads (``hass.config_entries.async_get_entry`` is loop-affine).
         """
         if not readings:
             return readings
-        if not self._is_anti_crease_enabled():
+        opts = options if options is not None else self._entry_options()
+        if not self._is_anti_crease_enabled(opts):
             return readings
-        options = self._entry_options()
         try:
-            max_power = float(options.get(CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER))
+            max_power = float(opts.get(CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER))
         except (TypeError, ValueError):
             max_power = DEFAULT_ANTI_WRINKLE_MAX_POWER
         if max_power <= 0:
@@ -1404,7 +1416,8 @@ class SuggestionEngine:
         """
         _BATCH_MIN_CYCLES = 5
 
-        stop_thr = self._current_stop_threshold(self._entry_options())
+        _batch_opts = self._entry_options()
+        stop_thr = self._current_stop_threshold(_batch_opts)
         cycles, _excluded = select_clean_cycles(cycles, stop_threshold_w=stop_thr)
 
         valid_cycles: list[list[tuple[float, float]]] = []
@@ -1445,7 +1458,7 @@ class SuggestionEngine:
             # Exclude the anti-crease tail from the per-cycle min-active statistic
             # so its baseline does not drag the p05 threshold down (#343). No-op for
             # non-anti-crease devices.
-            main_powers = self._strip_anti_crease_tail(powers)
+            main_powers = self._strip_anti_crease_tail(powers, options=_batch_opts)
             active = main_powers[main_powers > 0.5]
             peak = float(np.max(powers)) if powers.size else 0.0
             active_thr = max(stop_thr, _CLEAN_ACTIVE_FLOOR_RATIO * peak)

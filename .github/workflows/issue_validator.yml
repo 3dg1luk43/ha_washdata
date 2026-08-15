@@ -36,7 +36,7 @@ jobs:
       github.event.issue.user.type != 'Bot'
     steps:
       - name: Close issue when no template was used
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.0.1
         with:
           script: |
             const issue = context.payload.issue;
@@ -120,7 +120,7 @@ jobs:
 
     steps:
       - name: Handle /fine command
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.0.1
         with:
           script: |
             const issueNumber = context.payload.issue.number;
@@ -158,7 +158,7 @@ jobs:
 
     steps:
       - name: Swap labels on reporter response
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.0.1
         with:
           script: |
             const issueNumber = context.payload.issue.number;
@@ -190,7 +190,7 @@ jobs:
 
     steps:
       - name: Validate bug report completeness
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.0.1
         with:
           script: |
             const isDryRun = context.eventName === 'workflow_dispatch';
