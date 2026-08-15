@@ -718,8 +718,6 @@ WS_RESPONSE_TYPES: dict[str, type] = {
 #: for these but does not flag extra keys.
 WS_OPEN_RESPONSES: frozenset[str] = frozenset({
     "run_suggestion_analysis",
-    # set_suggestion_lock returns the updated locked-key list alongside success.
-    "set_suggestion_lock",
     # Playground what-if responses carry nested/variant shapes (incl. an error
     # variant); skip strict extra-key validation.
     "run_playground_cycle_detail",

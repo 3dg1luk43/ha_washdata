@@ -84,6 +84,7 @@ jobs:
                 }
               } catch (e) {
                 console.warn(`Could not fetch events for PR #${prNumber}: ${e.message}`);
+                return undefined; // lookup FAILED - distinct from "no label event" (null)
               }
               return appliedAt;
             };
@@ -96,6 +97,7 @@ jobs:
                 if (!pr.labels.some(l => l.name === rule.label)) continue;
 
                 const appliedAt = await labelAppliedAt(pr.number, rule.label);
+                if (appliedAt === undefined) continue; // events lookup failed - skip, retry next run
                 const anchor = appliedAt ? new Date(appliedAt) : new Date(pr.created_at);
                 if (anchor >= cutoff) continue; // still within grace
 

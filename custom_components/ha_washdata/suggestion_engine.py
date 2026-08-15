@@ -674,7 +674,9 @@ class SuggestionEngine:
         _op_opts = self._entry_options()
         stop_thr = self._current_stop_threshold(_op_opts)
         clean, _excl = select_clean_cycles(raw_cycles, stop_threshold_w=stop_thr)
-        pause_based = self._suggest_off_delay_from_pauses(clean, stop_thr, device_floor)
+        pause_based = self._suggest_off_delay_from_pauses(
+            clean, stop_thr, device_floor, options=_op_opts
+        )
 
         if pause_based is not None:
             suggested_off_delay, reason_off, reason_off_key, reason_off_params = pause_based
@@ -1123,6 +1125,7 @@ class SuggestionEngine:
         cycles: list[dict[str, Any]],
         stop_threshold_w: float,
         device_floor: int,
+        options: dict[str, Any] | None = None,
     ) -> tuple[int, str, str, dict[str, Any]] | None:
         """Off-delay sized to outlast the longest genuine intra-cycle pause.
 
@@ -1135,7 +1138,7 @@ class SuggestionEngine:
         pause_durations: list[float] = []
         n_traced = 0
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
-        _anti_crease_opts = self._entry_options()
+        _anti_crease_opts = options if options is not None else self._entry_options()
         for c in cycles:
             # Strip the anti-crease tail before pause analysis so that the inter-burst
             # quiet periods (up to 180-240 s on Miele/Bosch) are not counted as genuine

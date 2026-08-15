@@ -281,6 +281,11 @@ class CycleDetector:
         self._energy_since_idle_wh: float = 0.0
         self._time_above_threshold: float = 0.0
         self._time_below_threshold: float = 0.0
+        # As above, but restarts whenever an outage-sized gap breaks the observed
+        # quiet tail, so it counts only quiet WashData actually saw. Used by the
+        # dishwasher quiet-release gates so a single low sample after a telemetry
+        # dropout can't satisfy them without the quiet having been observed.
+        self._time_below_threshold_gapfree: float = 0.0
         self._last_process_time: datetime | None = None
 
         # New State Machine trackers
@@ -632,6 +637,7 @@ class CycleDetector:
         # (ANTI_WRINKLE needs to track idle time to determine true-off)
         if target_state != STATE_ANTI_WRINKLE:
             self._time_below_threshold = 0.0
+            self._time_below_threshold_gapfree = 0.0
         self._last_match_time = None
         self._matched_profile = None
         # Clear stale match state so the next cycle starts with clean defaults.
@@ -786,6 +792,7 @@ class CycleDetector:
         if is_high:
             self._time_above_threshold += dt
             self._time_below_threshold = 0.0
+            self._time_below_threshold_gapfree = 0.0
             # Energy integration (trapezoidal approx for this single step)
             # prev_p = self._last_power if self._last_power is not None else power
             # step_wh = ((power + prev_p) / 2.0) * (dt / 3600.0)
@@ -797,6 +804,16 @@ class CycleDetector:
             self._last_active_time = timestamp
         else:
             self._time_below_threshold += dt
+            # Gap-free tally: an outage-sized step is unobserved time, so restart
+            # the observed-quiet tally from this sample instead of crediting the
+            # gap. Ceiling mirrors energy_gap_threshold_s (clip(10x cadence, 60,
+            # 3600)) but reuses the maintained p95 cadence to stay O(1) in this
+            # per-reading hot path.
+            outage_ceiling = min(3600.0, max(60.0, 10.0 * self._p95_dt))
+            if dt > outage_ceiling:
+                self._time_below_threshold_gapfree = 0.0
+            else:
+                self._time_below_threshold_gapfree += dt
             self._time_above_threshold = 0.0
 
         self._time_in_state += dt
@@ -1481,7 +1498,7 @@ class CycleDetector:
                                 + DISHWASHER_END_SPIKE_WAIT_SECONDS
                             ) or (
                                 current_duration >= self._expected_duration
-                                and self._time_below_threshold
+                                and self._time_below_threshold_gapfree
                                 >= self._config.dishwasher_end_spike_quiet_release
                             )
                             if (
@@ -2190,7 +2207,7 @@ class CycleDetector:
         # passive-drying phase that still precedes a late pump-out deferred.
         quiet_released = (
             duration >= self._expected_duration
-            and self._time_below_threshold
+            and self._time_below_threshold_gapfree
             >= self._config.dishwasher_end_spike_quiet_release
         )
         if (
@@ -2393,6 +2410,7 @@ class CycleDetector:
             "accumulated_energy_wh": self._energy_since_idle_wh,
             "time_above": self._time_above_threshold,
             "time_below": self._time_below_threshold,
+            "time_below_gapfree": self._time_below_threshold_gapfree,
             "cycle_max_power": self._cycle_max_power,
             "last_active_time": (
                 self._last_active_time.isoformat() if self._last_active_time else None
@@ -2430,6 +2448,12 @@ class CycleDetector:
             self._energy_since_idle_wh = snapshot.get("accumulated_energy_wh", 0.0)
             self._time_above_threshold = snapshot.get("time_above", 0.0)
             self._time_below_threshold = snapshot.get("time_below", 0.0)
+            # Old snapshots lack the gap-free tally; default it to the plain
+            # below-threshold value so a restored dishwasher isn't forced to
+            # re-observe the whole quiet window after an upgrade.
+            self._time_below_threshold_gapfree = snapshot.get(
+                "time_below_gapfree", self._time_below_threshold
+            )
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
             # Sanitize via the same helper as update_match so the class
             # invariant on _expected_duration holds across restarts and the

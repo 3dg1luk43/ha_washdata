@@ -907,8 +907,6 @@ _None._
 | `success` | yes | bool |
 | `locked_suggestions` | yes | list[str] |
 
-_Open-ended: additional top-level keys from an upstream summary may be present._
-
 ## `ha_washdata/run_suggestion_analysis`
 
 **Request parameters**
