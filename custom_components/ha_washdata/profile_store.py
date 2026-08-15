@@ -5705,6 +5705,7 @@ class ProfileStore:
         self._data["profiles"] = {}
         self._data["envelopes"] = {}
         self._data["suggestions"] = {}
+        self._data["locked_suggestions"] = []
         self._data["feedback_history"] = {}
         self._data["pending_feedback"] = {}
         self._data["auto_adjustments"] = []
