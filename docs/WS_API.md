@@ -57,7 +57,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_suggestions` | entry_id | `GetSuggestionsResponse` |
 | `apply_suggestions` | entry_id, keys | `ApplySuggestionsResponse` |
 | `clear_suggestions` | entry_id | `SuccessResponse` |
-| `set_suggestion_lock` | entry_id, key, locked | `SuccessResponse` |
+| `set_suggestion_lock` | entry_id, key, locked | `SetSuggestionLockResponse` |
 | `run_suggestion_analysis` | entry_id | `RunSuggestionAnalysisResponse` |
 | `get_cycle_power_data` | entry_id, cycle_id | `GetCyclePowerDataResponse` |
 | `trim_cycle` | entry_id, cycle_id, start_s, end_s | `StartTaskResponse` |
@@ -899,11 +899,12 @@ _None._
 | `key` | yes | str |
 | `locked` | yes | bool |
 
-**Response** (`SuccessResponse`)
+**Response** (`SetSuggestionLockResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
 | `success` | yes | bool |
+| `locked_suggestions` | yes | list[str] |
 
 _Open-ended: additional top-level keys from an upstream summary may be present._
 

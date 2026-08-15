@@ -3347,6 +3347,8 @@ class WashDataManager:
                         # enqueue a duplicate nag every minute for the whole window.
                         self._notified_clean_laundry = True
                         self._last_unload_nag_time = now
+                        if self._notify_unload_repeat:
+                            self._ensure_unload_dismiss_listener()
                 else:
                     self._notified_clean_laundry = True
                     self._last_unload_nag_time = now

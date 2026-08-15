@@ -355,6 +355,11 @@ export interface RunSuggestionAnalysisResponse {
   count?: number;
 }
 
+export interface SetSuggestionLockResponse {
+  success: boolean;
+  locked_suggestions: string[];
+}
+
 export interface StartTaskResponse {
   task_id: string;
 }
@@ -1179,7 +1184,7 @@ export interface WashDataWsResponses {
   "ha_washdata/get_suggestions": GetSuggestionsResponse;
   "ha_washdata/apply_suggestions": ApplySuggestionsResponse;
   "ha_washdata/clear_suggestions": SuccessResponse;
-  "ha_washdata/set_suggestion_lock": SuccessResponse;
+  "ha_washdata/set_suggestion_lock": SetSuggestionLockResponse;
   "ha_washdata/run_suggestion_analysis": RunSuggestionAnalysisResponse;
   "ha_washdata/get_cycle_power_data": GetCyclePowerDataResponse;
   "ha_washdata/trim_cycle": StartTaskResponse;

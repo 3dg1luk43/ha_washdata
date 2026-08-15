@@ -118,7 +118,8 @@ class WashDataCard extends HTMLElement {
     this._cfg = null;
     this._hass = null;
     this._layout = null; // layout the current shell was built for
-    this._resourcesRequested = false;
+    this._constantsLoaded = false;
+    this._langEnsured = "";
     this._constants = null;
     // Rolling in-memory buffer of {t, w} power samples for the live sparkline.
     this._spark = [];
@@ -241,16 +242,24 @@ class WashDataCard extends HTMLElement {
   }
 
   _ensureResources() {
-    if (this._resourcesRequested || !this._hass) return;
-    this._resourcesRequested = true;
+    if (!this._hass) return;
     const lang = this._lang();
-    Promise.all([
-      loadConstants(this._hass).then((c) => {
-        this._constants = c;
-      }),
-      loadPanelLang("en"),
-      lang && lang !== "en" ? loadPanelLang(lang) : Promise.resolve(),
-    ])
+    const needsConstants = !this._constantsLoaded;
+    const needsLang = lang !== this._langEnsured;
+    if (!needsConstants && !needsLang) return;
+    const tasks = [];
+    if (needsConstants) {
+      this._constantsLoaded = true;
+      tasks.push(
+        loadConstants(this._hass).then((c) => { this._constants = c; }),
+        loadPanelLang("en"),
+      );
+    }
+    if (needsLang) {
+      this._langEnsured = lang;
+      if (lang && lang !== "en") tasks.push(loadPanelLang(lang));
+    }
+    Promise.all(tasks)
       .then(() => this._update())
       .catch(() => {
         /* card degrades gracefully to English fallbacks + theme colors */
@@ -1165,7 +1174,11 @@ class WashDataCardEditor extends HTMLElement {
 
   set hass(hass) {
     this._hass = hass;
-    if (!_panelTrans["en"]) loadPanelLang("en").then(() => this._render());
+    const lang = this._lang();
+    const jobs = [];
+    if (!_panelTrans["en"]) jobs.push(loadPanelLang("en"));
+    if (lang && lang !== "en" && !_panelTrans[lang]) jobs.push(loadPanelLang(lang));
+    if (jobs.length) Promise.all(jobs).then(() => this._render());
     if (this._form) this._form.hass = hass;
   }
 

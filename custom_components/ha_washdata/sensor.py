@@ -764,7 +764,7 @@ class WasherProfileCountSensor(WasherBaseSensor):
             "min_length_min": _to_min(profile.get("min_duration", 0)),
             "max_length_min": _to_min(profile.get("max_duration", 0)),
             "consistency_min": consistency_min,
-            # Average power (W) per 15-min slot of this profile's learned shape,
+            # Average power (W) per configured interval of this profile's learned shape,
             # e.g. [2200, 2200, 800, ...] - the flat array external planners such
             # as tibber_prices' `power_profile` consume to pick the cheapest run
             # window (issue #272). Empty until the profile has a learned envelope.
