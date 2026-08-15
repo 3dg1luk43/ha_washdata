@@ -2353,8 +2353,13 @@ class WashDataManager:
         # Re-subscribe to external cycle end trigger
         await self._setup_external_end_trigger()
 
-        # Re-subscribe to door sensor
+        # Re-subscribe to door sensor. Cancel any dwell armed for the previous door
+        # config first — after a sensor/auto-open/dwell change the old sensor may no
+        # longer emit the close event that cancels it, so a stale timer could finalize
+        # the cycle on outdated config. Re-evaluate for the new configuration after.
+        self._cancel_door_end_dwell()
         await self._setup_door_sensor_listener()
+        self._maybe_arm_door_end_dwell_if_open()
 
         # Re-subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
@@ -6227,7 +6232,13 @@ class WashDataManager:
         ):
             return False
         if self._notify_unload_repeat:
-            return not self._unload_nag_dismissed
+            # Only hold indefinitely when a delivery channel exists — otherwise no
+            # reminder (and no dismiss button) is ever sent (dispatch is gated on the
+            # same condition), so the hold would strand the Clean state forever.
+            return (
+                bool(self._notify_finish_services or self._notify_actions)
+                and not self._unload_nag_dismissed
+            )
         return (
             not self._notified_clean_laundry
             and (now - self._cycle_completed_time).total_seconds()
