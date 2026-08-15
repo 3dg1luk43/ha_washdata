@@ -41,7 +41,7 @@ jobs:
               const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
               const hasTemplateLabel = labels.some(l => TEMPLATE_LABELS.includes(l));
               const hasTemplateHeading = KNOWN_HEADINGS.some(
-                h => new RegExp('^#{1,6}\\s*' + escapeRe(h), 'im').test(body)
+                h => new RegExp('^#{1,6}[ \\t]+' + escapeRe(h) + '(?=[ \\t]|$)', 'im').test(body)
               );
               if (!hasTemplateLabel && !hasTemplateHeading) {
                 console.log(`#${issue.number}: templateless issue - skipping assignment (will be auto-closed).`);
