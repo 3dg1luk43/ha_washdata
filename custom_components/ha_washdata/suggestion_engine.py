@@ -669,7 +669,10 @@ class SuggestionEngine:
         # cadence only sets a lower sanity bound, so fall back to it when we do
         # not yet have enough traces to measure pauses.
         raw_cycles = self.profile_store.get_past_cycles()[-100:]
-        stop_thr = self._current_stop_threshold(self._entry_options())
+        # Resolve the config entry once (loop-affine; this runs in an executor) and
+        # reuse it for both the stop threshold and the anti-crease check below.
+        _op_opts = self._entry_options()
+        stop_thr = self._current_stop_threshold(_op_opts)
         clean, _excl = select_clean_cycles(raw_cycles, stop_threshold_w=stop_thr)
         pause_based = self._suggest_off_delay_from_pauses(clean, stop_thr, device_floor)
 
@@ -681,7 +684,7 @@ class SuggestionEngine:
                 "reason_key": reason_off_key,
                 "reason_params": reason_off_params,
             }
-        elif not self._is_anti_crease_enabled():
+        elif not self._is_anti_crease_enabled(_op_opts):
             # Cadence fallback: p95_dt * 5. Safe for most devices, but on anti-crease
             # devices the update gap is dominated by the inter-burst quiet period, so
             # the result often exceeds the burst interval and resets the end timer on

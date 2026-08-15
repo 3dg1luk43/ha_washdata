@@ -9460,6 +9460,10 @@ class HaWashdataPanel extends HTMLElement {
       const startIdx = samples.findIndex((s) => s[0] === m.trim.start);
       if (startIdx >= 0 && startIdx + 1 < samples.length) {
         m.trim.end = samples[startIdx + 1][0];
+      } else if (startIdx > 0) {
+        // Start snapped to the last sample: pull start back to the previous
+        // sample instead, so the window always has positive width.
+        m.trim.start = samples[startIdx - 1][0];
       }
     }
   }
