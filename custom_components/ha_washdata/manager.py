@@ -1784,23 +1784,10 @@ class WashDataManager:
                     if self._is_user_paused:
                         self.detector.set_verified_pause(True)
 
-                    # Auto-open dishwasher: if we restored into ENDING while the door
-                    # is already open, arm the end-dwell now. _on_state_change is not
-                    # called during restoration, so the ENDING+open-door guard there
-                    # would not fire (#342 restart edge case).
-                    if (
-                        self.detector.state == STATE_ENDING
-                        and self._door_opens_at_end
-                        and self._door_sensor_entity
-                        and self._remove_door_end_dwell is None
-                    ):
-                        door_state = self.hass.states.get(self._door_sensor_entity)
-                        if door_state and door_state.state == "on":
-                            self._logger.debug(
-                                "Restored ENDING with door open: arming %ss end dwell",
-                                self._door_end_dwell_seconds,
-                            )
-                            self._arm_door_end_dwell()
+                    # Auto-open dishwasher: arm the dwell if we restored into ENDING
+                    # with the door already open. _on_state_change is not called
+                    # during restoration, so the transition guard there would not fire.
+                    self._maybe_arm_door_end_dwell_if_open()
 
                     # Record the restart gap so the Cycles tab can shade it and
                     # anomaly detection can surface it.  Only meaningful when
@@ -2619,6 +2606,27 @@ class WashDataManager:
                 self._logger.debug("Door closed before end dwell: cancelling finalize")
                 self._cancel_door_end_dwell()
                 self._notify_update()
+
+    def _maybe_arm_door_end_dwell_if_open(self) -> None:
+        """Arm the end-dwell timer when in ENDING with the door already open.
+
+        Called from both ``_on_state_change`` (live transition) and the
+        snapshot-restoration path (where ``_on_state_change`` is not invoked).
+        """
+        if not (
+            self.detector.state == STATE_ENDING
+            and self._door_opens_at_end
+            and self._door_sensor_entity
+            and self._remove_door_end_dwell is None
+        ):
+            return
+        door_state = self.hass.states.get(self._door_sensor_entity)
+        if door_state and door_state.state == "on":
+            self._logger.debug(
+                "Door already open on ENDING: arming %ss end dwell",
+                self._door_end_dwell_seconds,
+            )
+            self._arm_door_end_dwell()
 
     def _arm_door_end_dwell(self) -> None:
         """(Re)arm the auto-open door-end dwell timer (#342)."""
@@ -3935,23 +3943,9 @@ class WashDataManager:
                 # Ensure watchdog is running
                 self._start_watchdog()
 
-        # Auto-open dishwasher: if the cycle enters ENDING while the door is already
-        # open (e.g. the open event was missed during an HA restart, or the door popped
-        # at end-of-cycle just as the power-based ENDING transition fired), arm the
-        # end-dwell now so the cycle still finalises on schedule (#342).
-        if (
-            new_state == STATE_ENDING
-            and self._door_opens_at_end
-            and self._door_sensor_entity
-            and self._remove_door_end_dwell is None
-        ):
-            door_state = self.hass.states.get(self._door_sensor_entity)
-            if door_state and door_state.state == "on":
-                self._logger.debug(
-                    "Transitioned to ENDING: door already open, arming %ss end dwell",
-                    self._door_end_dwell_seconds,
-                )
-                self._arm_door_end_dwell()
+        # Auto-open dishwasher: arm the dwell if ENDING while the door is already
+        # open (door event missed, or door popped just as ENDING fired) (#342).
+        self._maybe_arm_door_end_dwell_if_open()
 
         # Stop watchdog when transitioning to OFF from any active state
         if new_state == STATE_OFF:
