@@ -3015,7 +3015,11 @@ async def ws_get_export_inventory(
     entry = _get_entry(hass, entry_id)
     try:
         opts = dict(entry.options) if entry else {}
-        manifest = manager.profile_store.get_export_inventory(opts)
+        # Offload the whole-store scan off the event loop: a large store's inventory
+        # walk (profiles + real/reference cycles) can take tens of ms.
+        manifest = await hass.async_add_executor_job(
+            manager.profile_store.get_export_inventory, opts
+        )
         _send_result(connection, msg["id"], "get_export_inventory", {"manifest": manifest})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))

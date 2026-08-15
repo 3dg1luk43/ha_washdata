@@ -1454,12 +1454,14 @@ class SuggestionEngine:
         false_end_energies: list[float] = []
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
         for readings in valid_cycles:
-            powers = np.array([p for _, p in readings])
-            # Exclude the anti-crease tail from the per-cycle min-active statistic
-            # so its baseline does not drag the p05 threshold down (#343). No-op for
-            # non-anti-crease devices.
-            main_powers = self._strip_anti_crease_tail(powers, options=_batch_opts)
-            active = main_powers[main_powers > 0.5]
+            # Exclude the post-cycle anti-crease tail before ANY per-cycle statistic
+            # so its low-power baseline drags neither the p05 min-active threshold nor
+            # the end-energy / false-end floors below the main cycle (#343). No-op for
+            # non-anti-crease devices. Trim the (offset, power) readings once so the
+            # threshold stat and the energy scan consume the same main-cycle data.
+            main_readings = self._strip_anti_crease_readings(readings, options=_batch_opts)
+            powers = np.array([p for _, p in main_readings])
+            active = powers[powers > 0.5]
             peak = float(np.max(powers)) if powers.size else 0.0
             active_thr = max(stop_thr, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
             if active.size > 0:
@@ -1471,9 +1473,9 @@ class SuggestionEngine:
             in_pause = False
             pause_energy = 0.0
             stop_w = stop_thr
-            for i in range(1, len(readings)):
-                t0, p0 = readings[i - 1]
-                t1, p1 = readings[i]
+            for i in range(1, len(main_readings)):
+                t0, p0 = main_readings[i - 1]
+                t1, p1 = main_readings[i]
                 dt_s = t1 - t0
                 # Guard against non-positive or excessively large time gaps
                 if dt_s <= 0 or dt_s > max_gap_s:
