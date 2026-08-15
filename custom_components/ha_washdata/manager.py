@@ -3917,6 +3917,24 @@ class WashDataManager:
                 # Ensure watchdog is running
                 self._start_watchdog()
 
+        # Auto-open dishwasher: if the cycle enters ENDING while the door is already
+        # open (e.g. the open event was missed during an HA restart, or the door popped
+        # at end-of-cycle just as the power-based ENDING transition fired), arm the
+        # end-dwell now so the cycle still finalises on schedule (#342).
+        if (
+            new_state == STATE_ENDING
+            and self._door_opens_at_end
+            and self._door_sensor_entity
+            and self._remove_door_end_dwell is None
+        ):
+            door_state = self.hass.states.get(self._door_sensor_entity)
+            if door_state and door_state.state == "on":
+                self._logger.debug(
+                    "Transitioned to ENDING: door already open, arming %ss end dwell",
+                    self._door_end_dwell_seconds,
+                )
+                self._arm_door_end_dwell()
+
         # Stop watchdog when transitioning to OFF from any active state
         if new_state == STATE_OFF:
             self._stop_watchdog()  # Stop watchdog regardless of previous state
