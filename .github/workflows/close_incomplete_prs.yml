@@ -28,6 +28,9 @@ jobs:
               {
                 label: 'awaiting maintainer',
                 graceDays: 1, // 24 hours: PR was opened in parallel with a not-yet-accepted issue
+                // Closes purely because the linked issue was not accepted, so it must be
+                // revalidated first - see acceptedIssueLinked() below.
+                requiresAcceptedIssue: true,
                 message: (pr) => [
                   `Hi @${pr.user.login}! This PR has been automatically closed because it was opened before the linked issue was accepted, and no approval was received within 24 hours.`,
                   '',
@@ -48,6 +51,7 @@ jobs:
               {
                 label: 'needs accepted issue',
                 graceDays: 3,
+                requiresAcceptedIssue: true,
                 message: (pr) => [
                   `Hi @${pr.user.login}! This PR has been automatically closed because it was not linked to an issue carrying the \`accepted\` label within 3 days.`,
                   '',
@@ -89,6 +93,37 @@ jobs:
               return appliedAt;
             };
 
+            // Does the PR body link an issue that carries `accepted` RIGHT NOW?
+            // validate_pr.yml only runs on pull_request events, so a maintainer
+            // accepting the issue afterwards never clears the PR's label - without
+            // this recheck the scheduler would close a PR that has since become
+            // legitimate. Extraction mirrors validate_pr.yml's patterns.
+            const acceptedIssueLinked = async (prBody) => {
+              const issueNums = new Set();
+              const patterns = [
+                /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+#(\d+)/gi,
+                new RegExp(`github\\.com/${owner}/${repo}/issues/(\\d+)`, 'gi'),
+                /#(\d+)/g,
+              ];
+              for (const pat of patterns) {
+                let m;
+                while ((m = pat.exec(prBody || '')) !== null) issueNums.add(Number(m[1]));
+              }
+              let lookupFailed = false;
+              for (const num of issueNums) {
+                try {
+                  const issue = await github.rest.issues.get({ owner, repo, issue_number: num });
+                  if (issue.data.pull_request) continue; // a PR reference, not an issue
+                  if (issue.data.labels.some(l => l.name === 'accepted')) return true;
+                } catch (e) {
+                  // 404 = not a real issue (fine). Anything else is an API failure and
+                  // must not be read as "definitely not accepted".
+                  if (e.status !== 404) lookupFailed = true;
+                }
+              }
+              return lookupFailed ? undefined : false;
+            };
+
             const closed = new Set();
             for (const rule of RULES) {
               const cutoff = new Date(Date.now() - rule.graceDays * 24 * 60 * 60 * 1000);
@@ -100,6 +135,23 @@ jobs:
                 if (appliedAt === undefined) continue; // events lookup failed - skip, retry next run
                 const anchor = appliedAt ? new Date(appliedAt) : new Date(pr.created_at);
                 if (anchor >= cutoff) continue; // still within grace
+
+                // Last check before an irreversible close: the linked issue may have
+                // been accepted since the label was applied.
+                if (rule.requiresAcceptedIssue) {
+                  const accepted = await acceptedIssueLinked(pr.body);
+                  if (accepted === undefined) {
+                    console.log(`Skipped PR #${pr.number} - issue lookup failed, retrying next run.`);
+                    continue;
+                  }
+                  if (accepted) {
+                    await github.rest.issues.removeLabel({
+                      owner, repo, issue_number: pr.number, name: rule.label,
+                    }).catch(() => {});
+                    console.log(`Skipped PR #${pr.number} - linked issue is now accepted; cleared "${rule.label}".`);
+                    continue;
+                  }
+                }
 
                 await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: rule.message(pr) });
                 await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });

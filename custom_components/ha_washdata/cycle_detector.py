@@ -772,6 +772,12 @@ class CycleDetector:
                 )
                 # Fall through: the state machine will start a new cycle.
 
+        # Snapshot the cadence BEFORE folding this reading in: the gap-free tally
+        # below classifies `dt` against a ceiling derived from the cadence, and an
+        # outage that has already widened p95 would raise the very threshold that
+        # is supposed to catch it (a 120 s gap after a 10 s cadence lifts p95 to
+        # ~15.5 s -> ceiling 155 s -> the gap counts as observed quiet).
+        prior_p95_dt = self._p95_dt
         self._update_cadence(dt)
         self._last_process_time = timestamp
 
@@ -808,8 +814,9 @@ class CycleDetector:
             # the observed-quiet tally from this sample instead of crediting the
             # gap. Ceiling mirrors energy_gap_threshold_s (clip(10x cadence, 60,
             # 3600)) but reuses the maintained p95 cadence to stay O(1) in this
-            # per-reading hot path.
-            outage_ceiling = min(3600.0, max(60.0, 10.0 * self._p95_dt))
+            # per-reading hot path. Uses the cadence as it stood BEFORE this
+            # reading, so a gap cannot widen its own acceptance threshold.
+            outage_ceiling = min(3600.0, max(60.0, 10.0 * prior_p95_dt))
             if dt > outage_ceiling:
                 self._time_below_threshold_gapfree = 0.0
             else:
@@ -2448,11 +2455,14 @@ class CycleDetector:
             self._energy_since_idle_wh = snapshot.get("accumulated_energy_wh", 0.0)
             self._time_above_threshold = snapshot.get("time_above", 0.0)
             self._time_below_threshold = snapshot.get("time_below", 0.0)
-            # Old snapshots lack the gap-free tally; default it to the plain
-            # below-threshold value so a restored dishwasher isn't forced to
-            # re-observe the whole quiet window after an upgrade.
-            self._time_below_threshold_gapfree = snapshot.get(
-                "time_below_gapfree", self._time_below_threshold
+            # Old snapshots lack the gap-free tally, and the plain value they do
+            # carry may already include outage-sized intervals — the exact
+            # contamination this field exists to exclude — so it must NOT be used
+            # as the fallback. 0.0 is also the honest value on a restore in
+            # general: the restart itself is unobserved time (the manager records
+            # it as a restart gap), so no quiet observed before it still counts.
+            self._time_below_threshold_gapfree = float(
+                snapshot.get("time_below_gapfree", 0.0) or 0.0
             )
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
             # Sanitize via the same helper as update_match so the class

@@ -106,6 +106,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Auto-tune suggestion passes read their settings safely** (`suggestion_engine.py`, `learning.py`, `ws_api.py`): The suggestion generators run on a background thread but read the device's configuration directly, which is only safe to touch from Home Assistant's event loop, and the read merged two separate config mappings that could be swapped out mid-read. Configuration is now captured on the event loop immediately before each background pass, so every generator in a pass sees one consistent snapshot.
 
 
+- **A mid-length sensor dropout is no longer credited as quiet time** (`cycle_detector.py`): The gap-free quiet tally added above decides whether a reading gap is a real outage by comparing it against ten times the sensor's typical reporting interval. That interval was being updated with the current gap *before* the comparison, so a dropout inflated the very threshold meant to catch it - a two-minute dropout on a ten-second cadence lifted the threshold to about 155 s and slipped through as observed quiet. Very long outages were still caught, so the practical effect was limited to gaps roughly 10-25x the normal cadence. The threshold is now taken from the cadence as it stood *before* the gap. This also fixes a related blind spot: in the first few readings after a reset the threshold was derived from the current gap itself, which no gap can ever exceed, so no outage was detectable at all in that window.
+
+- **A restored cycle no longer inherits quiet time it never observed** (`cycle_detector.py`): When Home Assistant restarts mid-cycle, the saved state is restored. Snapshots written before this release carry only the older quiet-time counter, which can itself include outage intervals, and that value was being used to seed the new gap-free counter - so a dishwasher could release its end-of-cycle drain wait immediately after a restart without ever observing the configured quiet period. The gap-free counter now starts from zero on restore, which is also the honest value in general: the restart gap is itself unobserved time. Snapshots written by this release and later carry the counter through a restart unchanged.
+
+- **Playground simulations now honour the dishwasher drain-wait setting** (`ws_api.py`): The Playground built its simulated detector without passing the per-device Passive-Dry Quiet Release value, so a replay always used the shipped 600 s default unless you explicitly overrode it in the Playground itself. Simulations of a machine with a tuned value therefore did not match its live behaviour.
+
+- **"Clear all data" now also clears saved Playground presets** (`profile_store.py`): Playground presets survived a full data wipe, leaving watt- and second-scale values from the removed configuration behind.
+
+
 ## 0.5.3 - 2026-07-26
 
 ### Features

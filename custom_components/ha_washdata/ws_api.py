@@ -39,6 +39,7 @@ from .const import (
     CONF_NAME,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_DEVICE_TYPE,
+    CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
@@ -71,6 +72,7 @@ from .const import (
     CONF_SWITCH_ENTITY,
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_DEVICE_TYPE,
+    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DEFAULT_MAINTENANCE_REMINDER_CYCLES,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
@@ -5231,6 +5233,12 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
         start_threshold_w=float(opts.get(CONF_START_THRESHOLD_W, min_power)),
         stop_threshold_w=float(
             opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)
+        ),
+        dishwasher_end_spike_quiet_release=float(
+            opts.get(
+                CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+                DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+            )
         ),
     )
 

@@ -5798,6 +5798,7 @@ class ProfileStore:
         self._data["ml_model_versions"] = {}
         self._data["profile_groups"] = {}
         self._data["maintenance_log"] = []
+        self._data["playground_presets"] = {}
         self._data["matching_config"] = {}
         self._data["match_ranking_history"] = []
         self._data["ml_last_training_run"] = None
