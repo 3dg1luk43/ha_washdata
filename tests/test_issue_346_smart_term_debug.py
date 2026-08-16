@@ -67,3 +67,43 @@ def test_prefix_ambiguous():
         current_duration=1000.0, expected=1000.0, smart_ratio=0.98,
         is_confident=True, ambiguous=False, prefix_ambiguous=True,
     ) == "prefix_ambiguous"
+
+
+def test_reset_clears_the_block_reason_throttle():
+    """A new cycle must be able to emit its first diagnostic.
+
+    The DEBUG line is throttled to fire only when the reason CHANGES. Carrying
+    the previous cycle's reason across ``reset()`` swallowed the new cycle's very
+    first "Smart Termination not applied" line whenever it happened to be blocked
+    for the same reason - the common case, since the same appliance tends to hit
+    the same gate.
+    """
+    from unittest.mock import Mock
+
+    from custom_components.ha_washdata.cycle_detector import CycleDetectorConfig
+
+    det = CycleDetector(CycleDetectorConfig(min_power=5.0, off_delay=120), Mock(), Mock())
+    det._last_smart_term_block_reason = "duration_not_reached"
+
+    det.reset()
+
+    assert det._last_smart_term_block_reason is None
+
+
+def test_anti_wrinkle_reset_also_clears_the_block_reason_throttle():
+    """The ANTI_WRINKLE reset path is a cycle boundary too.
+
+    That branch deliberately preserves the below-threshold tallies; the
+    diagnostic throttle is not one of them and must still clear.
+    """
+    from unittest.mock import Mock
+
+    from custom_components.ha_washdata.const import STATE_ANTI_WRINKLE
+    from custom_components.ha_washdata.cycle_detector import CycleDetectorConfig
+
+    det = CycleDetector(CycleDetectorConfig(min_power=5.0, off_delay=120), Mock(), Mock())
+    det._last_smart_term_block_reason = "low_confidence"
+
+    det.reset(STATE_ANTI_WRINKLE)
+
+    assert det._last_smart_term_block_reason is None

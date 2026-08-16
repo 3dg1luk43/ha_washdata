@@ -5543,6 +5543,13 @@ async def ws_save_playground_preset(
     except ValueError as exc:
         connection.send_error(msg["id"], "invalid_format", str(exc))
         return
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        # The store write can fail (disk full, permissions). Without this the
+        # exception escapes the handler and the client never gets a reply, so the
+        # panel's save button spins forever instead of reporting the failure.
+        _LOGGER.warning("Saving playground preset failed for %s: %s", entry_id, exc)
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+        return
     _send_result(connection, msg["id"], "save_playground_preset", {
         "success": True,
         "presets": _playground_preset_list(store),
@@ -5569,7 +5576,12 @@ async def ws_delete_playground_preset(
     if store is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
-    removed = await store.async_delete_playground_preset(msg["name"])
+    try:
+        removed = await store.async_delete_playground_preset(msg["name"])
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.warning("Deleting playground preset failed for %s: %s", entry_id, exc)
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+        return
     _send_result(connection, msg["id"], "delete_playground_preset", {
         "success": removed,
         "presets": _playground_preset_list(store),
