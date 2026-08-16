@@ -300,6 +300,15 @@ def sanitize_setting_values(values: Any) -> dict[str, Any]:
             continue
         if isinstance(coerced, float) and not math.isfinite(coerced):
             continue
+        # Every Playground setting is a physical quantity - watts, seconds, a
+        # count, or a ratio - so a negative value is structurally meaningless and
+        # would make the replayed detector behave in ways the live one never can
+        # (e.g. an off_delay that expires before it starts). Rejected rather than
+        # clamped: silently rewriting a value the user typed would make the sim
+        # disagree with the control panel showing it back.
+        if isinstance(coerced, (int, float)) and not isinstance(coerced, bool):
+            if coerced < 0:
+                continue
         out[key] = coerced
     return out
 

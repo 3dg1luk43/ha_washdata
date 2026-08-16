@@ -312,9 +312,9 @@ class LearningManager:
     async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]]) -> None:
         """Run multi-cycle batch simulation asynchronously."""
         try:
-            self.suggestion_engine.refresh_options_snapshot()
+            engine = self.suggestion_engine.for_job()
             new_suggestions = await self.hass.async_add_executor_job(
-                self.suggestion_engine.run_batch_simulation, cycles
+                engine.run_batch_simulation, cycles
             )
             if new_suggestions:
                 self._apply_suggestions_and_notify(new_suggestions)
@@ -331,9 +331,9 @@ class LearningManager:
         try:
             # Simulation runner derives optimal thresholds
             # Offload to executor since simulation can be heavy (CPU bound)
-            self.suggestion_engine.refresh_options_snapshot()
+            engine = self.suggestion_engine.for_job()
             new_suggestions = await self.hass.async_add_executor_job(
-                self.suggestion_engine.run_simulation, cycle_data
+                engine.run_simulation, cycle_data
             )
             if new_suggestions:
                 self._apply_suggestions_and_notify(new_suggestions)
@@ -361,8 +361,10 @@ class LearningManager:
         # Throttle before dispatching so repeated readings within the window do
         # not schedule overlapping passes.
         self._last_suggestion_update = now
+        # Bind the config snapshot here, on the loop, not inside the executor job.
+        engine = self.suggestion_engine.for_job()
         self._dispatch_scan_and_apply(
-            lambda: self.suggestion_engine.generate_operational_suggestions(p95, median),
+            lambda: engine.generate_operational_suggestions(p95, median),
             "Operational",
         )
 
@@ -373,7 +375,7 @@ class LearningManager:
         offloaded to an executor thread by ``_dispatch_scan_and_apply``.
         """
         self._dispatch_scan_and_apply(
-            self.suggestion_engine.generate_model_suggestions,
+            self.suggestion_engine.for_job().generate_model_suggestions,
             "Model",
         )
 
@@ -396,7 +398,6 @@ class LearningManager:
         except RuntimeError:
             # No running event loop: run inline (synchronous callers / unit tests).
             try:
-                self.suggestion_engine.refresh_options_snapshot()
                 suggestions = generate()
             except Exception as e:  # pylint: disable=broad-exception-caught
                 self._logger.error("%s suggestion pass failed: %s", label, e)
@@ -411,7 +412,6 @@ class LearningManager:
     ) -> None:
         """Offload ``generate`` to an executor thread, then apply on the loop."""
         try:
-            self.suggestion_engine.refresh_options_snapshot()
             suggestions = await self.hass.async_add_executor_job(generate)
             if suggestions:
                 self._apply_suggestions_and_notify(suggestions)
@@ -429,9 +429,9 @@ class LearningManager:
     async def _async_run_detection_suggestions(self) -> None:
         """Run the detection-suggestion pass off the event loop."""
         try:
-            self.suggestion_engine.refresh_options_snapshot()
+            engine = self.suggestion_engine.for_job()
             new_suggestions = await self.hass.async_add_executor_job(
-                self.suggestion_engine.generate_detection_suggestions
+                engine.generate_detection_suggestions
             )
             if new_suggestions:
                 self._apply_suggestions_and_notify(new_suggestions)
@@ -453,24 +453,22 @@ class LearningManager:
             model = self._sample_interval_model
             if model.count >= 20 and model.p95 is not None and model.median is not None:
                 p95, median = model.p95, model.median
-                self.suggestion_engine.refresh_options_snapshot()
                 op = await self.hass.async_add_executor_job(
-                    self.suggestion_engine.generate_operational_suggestions, p95, median
+                    self.suggestion_engine.for_job().generate_operational_suggestions,
+                    p95, median
                 )
                 if op:
                     self._apply_suggestions_and_notify(op)
-            self.suggestion_engine.refresh_options_snapshot()
             model_sug = await self.hass.async_add_executor_job(
-                self.suggestion_engine.generate_model_suggestions
+                self.suggestion_engine.for_job().generate_model_suggestions
             )
             if model_sug:
                 self._apply_suggestions_and_notify(model_sug)
             await self._async_run_detection_suggestions()
             # Snapshot the live cycles list before handing it to the executor.
             cycles = list(self.profile_store.get_past_cycles())
-            self.suggestion_engine.refresh_options_snapshot()
             batch = await self.hass.async_add_executor_job(
-                self.suggestion_engine.run_batch_simulation, cycles
+                self.suggestion_engine.for_job().run_batch_simulation, cycles
             )
             if batch:
                 self._apply_suggestions_and_notify(batch)

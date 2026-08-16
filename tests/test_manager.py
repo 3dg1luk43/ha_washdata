@@ -638,6 +638,64 @@ def test_notify_entity_dispatched_via_send_message(
     assert payload["title"] == "WashData"
 
 
+def test_notify_entity_dismiss_marker_is_not_delivered(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """A dismiss marker must never be shown as text on a notify entity target.
+
+    "clear_notification" is a companion-app sentinel meaning "dismiss the card
+    with this tag"; it is carried BY the tag. notify.send_message accepts only
+    entity_id/message/title, so the tag is dropped - delivering the marker anyway
+    would show the user a card whose body literally reads "clear_notification".
+    Before entity targets were routed to send_message these calls always carried a
+    tag, so they took the legacy-service path where the tag works.
+    """
+    manager._notify_finish_services = ["notify.mobile_app_phone"]
+    manager._notify_actions = []
+
+    notify_state = MagicMock()
+    notify_state.domain = "notify"
+    notify_state.entity_id = "notify.mobile_app_phone"
+    notify_state.state = "unknown"
+    mock_hass.states.get = MagicMock(return_value=notify_state)
+
+    sent = manager._send_notification_service(
+        "clear_notification",
+        services=["notify.mobile_app_phone"],
+        event_type=NOTIFY_EVENT_FINISH,
+        extra_vars={"tag": "washdata_finish_1"},
+    )
+
+    mock_hass.services.async_call.assert_not_called()
+    assert sent is False
+
+
+def test_notify_entity_still_delivers_a_real_message_with_a_tag(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """The dismiss-marker guard must not swallow ordinary tagged notifications."""
+    manager._notify_finish_services = ["notify.mobile_app_phone"]
+    manager._notify_actions = []
+
+    notify_state = MagicMock()
+    notify_state.domain = "notify"
+    notify_state.entity_id = "notify.mobile_app_phone"
+    notify_state.state = "unknown"
+    mock_hass.states.get = MagicMock(return_value=notify_state)
+
+    manager._send_notification_service(
+        "Cycle finished",
+        services=["notify.mobile_app_phone"],
+        event_type=NOTIFY_EVENT_FINISH,
+        extra_vars={"tag": "washdata_finish_1"},
+    )
+
+    mock_hass.services.async_call.assert_called_once()
+    _domain, service, payload = mock_hass.services.async_call.call_args[0]
+    assert service == "send_message"
+    assert payload["message"] == "Cycle finished"
+
+
 def test_legacy_notify_service_still_dispatched_as_service(
     manager: WashDataManager, mock_hass: Any
 ) -> None:

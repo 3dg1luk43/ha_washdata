@@ -4668,7 +4668,9 @@ def _compute_ml_comparison(
     }
 
 
-def _build_settings_comparison(manager: Any, merged: dict[str, Any]) -> dict[str, Any]:
+def _build_settings_comparison(
+    manager: Any, merged: dict[str, Any], engine: Any = None
+) -> dict[str, Any]:
     """Build the enriched Classic-vs-ML settings comparison (executor-safe).
 
     Runs both the classic :class:`SuggestionEngine` and the
@@ -4684,8 +4686,13 @@ def _build_settings_comparison(manager: Any, merged: dict[str, Any]) -> dict[str
     except Exception:  # pylint: disable=broad-exception-caught
         return {}
 
-    learning = getattr(manager, "learning_manager", None)
-    classic = getattr(learning, "suggestion_engine", None)
+    # `engine` is a for_job() copy prepared on the event loop with the config
+    # snapshot already bound; fall back to the shared engine only for callers that
+    # did not supply one (its _entry_options() then does a live read).
+    classic = engine
+    if classic is None:
+        learning = getattr(manager, "learning_manager", None)
+        classic = getattr(learning, "suggestion_engine", None)
     if classic is None:
         return {}
 
@@ -4825,16 +4832,16 @@ async def ws_get_ml_comparison(
         # Stage 3: replace the basic off_delay-only comparison with the full
         # Classic-vs-ML settings table when ML suggestions are unlocked.
         if ENABLE_ML_SUGGESTIONS:
-            # Hand the engine this handler's already-merged view before the
-            # executor hop: reading the config entry is loop-affine, so its
-            # generators must not re-read it from the worker thread.
-            classic = getattr(
+            # Bind this handler's already-merged view to a throwaway engine copy
+            # before the executor hop: reading the config entry is loop-affine, so
+            # the generators must not re-read it from the worker thread, and a
+            # copy keeps concurrent jobs from clobbering each other's snapshot.
+            shared = getattr(
                 getattr(manager, "learning_manager", None), "suggestion_engine", None
             )
-            if classic is not None:
-                classic._options_snapshot = merged  # pylint: disable=protected-access
+            job_engine = shared.for_job(merged) if shared is not None else None
             enriched = await hass.async_add_executor_job(
-                _build_settings_comparison, manager, merged
+                _build_settings_comparison, manager, merged, job_engine
             )
             if enriched:
                 result["settings_comparison"] = enriched
