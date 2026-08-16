@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import copy
 import logging
 import math
 from datetime import datetime
@@ -690,17 +691,25 @@ class SuggestionEngine:
         self._options_snapshot: dict[str, Any] | None = None
 
     @callback
-    def refresh_options_snapshot(self) -> dict[str, Any]:
-        """Capture the config entry options; call on the event loop only.
+    def for_job(self, options: dict[str, Any] | None = None) -> "SuggestionEngine":
+        """A throwaway engine bound to one config snapshot; loop-only.
 
         Every generator below runs in an executor thread, but reading the config
         entry is loop-affine: ``async_get_entry`` walks loop-owned state, and the
-        two-mapping merge in :meth:`_entry_options` can tear if
+        two-mapping merge in :meth:`_read_entry_options` can tear if
         ``async_update_entry`` replaces ``data``/``options`` between the reads.
-        Snapshotting here means the executor work sees one coherent view.
+
+        The snapshot is bound to a **shallow copy** rather than to ``self`` so
+        concurrent jobs cannot overwrite each other's view, and so the shared
+        engine never holds a snapshot that a later loop-side caller would silently
+        read as stale. The copy shares ``profile_store``/``hass`` deliberately -
+        the generators only read them.
         """
-        self._options_snapshot = self._read_entry_options()
-        return self._options_snapshot
+        job = copy.copy(self)
+        job._options_snapshot = (
+            dict(options) if options is not None else self._read_entry_options()
+        )
+        return job
 
     def generate_operational_suggestions(self, p95_dt: float, median_dt: float) -> dict[str, Any]:
         """Generate suggestions for operational parameters based on cadence."""
@@ -915,10 +924,11 @@ class SuggestionEngine:
         return suggestions
 
     def _entry_options(self) -> dict[str, Any]:
-        """Config options for this pass: the loop-captured snapshot when present.
+        """Config options for this pass: the job-bound snapshot when present.
 
-        Falls back to a live read for loop-side callers that never dispatch to an
-        executor (the panel's settings comparison, tests).
+        Only a :meth:`for_job` copy carries a snapshot; on the shared engine this
+        is always ``None``, so loop-side callers (tests, direct calls) get a live
+        read and can never observe a stale snapshot left by a finished job.
         """
         snapshot = self._options_snapshot
         if snapshot is not None:

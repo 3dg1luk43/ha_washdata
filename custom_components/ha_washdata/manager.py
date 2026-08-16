@@ -275,6 +275,12 @@ from .phase_segmenter import phase_matching_enabled
 
 _LOGGER = logging.getLogger(__name__)
 
+# Sentinel "message" understood by the Home Assistant companion app as "dismiss the
+# card carrying this tag" rather than as text to display. It is only meaningful
+# alongside a `tag`, and only on mobile_app targets - see _send_notification_service,
+# which must never deliver it as a visible message.
+_CLEAR_NOTIFICATION_MARKER = "clear_notification"
+
 # Finish-type notification events that would wake someone and are therefore gated by
 # the quiet-hours (do-not-disturb) window. Live-progress ticks (NOTIFY_EVENT_LIVE)
 # and the start notification (NOTIFY_EVENT_START) are intentionally excluded.
@@ -5632,6 +5638,20 @@ class WashDataManager:
             # and silently drop the notification. Legacy notify.mobile_app_* targets
             # have no entity state (state is None) and correctly take the else path.
             if state is not None and getattr(state, "domain", None) == "notify":
+                # A dismiss marker is carried *by* its tag, and send_message cannot
+                # carry one - delivering it anyway would show the user a card whose
+                # body literally reads "clear_notification". There is no way to
+                # dismiss an entity-target card, so skip the send entirely. (Before
+                # entity targets were routed here, these calls always had a tag and
+                # so took the legacy-service path, where the tag works.)
+                if message == _CLEAR_NOTIFICATION_MARKER and ev.get("tag"):
+                    self._logger.debug(
+                        "Notify entity %s: skipping dismiss marker (tag=%s) - "
+                        "notify.send_message cannot carry a tag, so it would be "
+                        "delivered as visible text",
+                        notify_service, ev.get("tag"),
+                    )
+                    continue
                 if svc_data:
                     self._logger.debug(
                         "Notify entity %s: dropping %d unsupported payload key(s) "
@@ -5665,6 +5685,14 @@ class WashDataManager:
 
         if not sent:
             if event_type == NOTIFY_EVENT_LIVE:
+                return False
+            # A dismiss marker is not content: if no target could carry it, there is
+            # nothing to show. Falling through would post a persistent-notification
+            # card whose body reads "clear_notification" - the same leak the entity
+            # branch above guards against, just via the other exit. The callers that
+            # send this marker dismiss their own persistent notification separately
+            # (_pn_dismiss), so nothing is lost by returning early.
+            if message == _CLEAR_NOTIFICATION_MARKER:
                 return False
             # Reuse the notification's tag as a stable persistent-notification id so
             # the HA notifications tab collapses the lifecycle thread to one entry
@@ -6176,7 +6204,7 @@ class WashDataManager:
             {
                 "device": self.config_entry.title,
                 "program": "",  # Cleared marker
-                "message": "clear_notification",  # Clear marker for action handlers
+                "message": _CLEAR_NOTIFICATION_MARKER,  # Clear marker for action handlers
                 "title": "",  # Clear title
                 "icon": None,
                 "event_type": NOTIFY_EVENT_LIVE,
@@ -6192,7 +6220,7 @@ class WashDataManager:
 
         if clear_services:
             self._send_notification_service(
-                "clear_notification",
+                _CLEAR_NOTIFICATION_MARKER,
                 services=self._notify_live_services,
                 event_type=NOTIFY_EVENT_LIVE,
                 extra_vars={
@@ -6246,7 +6274,7 @@ class WashDataManager:
                 {
                     "device": self.config_entry.title,
                     "program": "",
-                    "message": "clear_notification",
+                    "message": _CLEAR_NOTIFICATION_MARKER,
                     "title": "",
                     "icon": None,
                     "event_type": NOTIFY_EVENT_CLEAN,
@@ -6257,7 +6285,7 @@ class WashDataManager:
             )
         if mobile_services:
             self._send_notification_service(
-                "clear_notification",
+                _CLEAR_NOTIFICATION_MARKER,
                 services=mobile_services,
                 event_type=NOTIFY_EVENT_CLEAN,
                 extra_vars={"tag": self._clean_tag},
@@ -6655,7 +6683,7 @@ class WashDataManager:
             mobile_services = [s for s in services if self._is_mobile_notify_service(s)]
             if mobile_services:
                 self._send_notification_service(
-                    "clear_notification",
+                    _CLEAR_NOTIFICATION_MARKER,
                     services=mobile_services,
                     event_type=NOTIFY_EVENT_TIMER,
                     extra_vars={"tag": self._timer_pause_mobile_tag},

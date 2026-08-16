@@ -115,6 +115,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **"Clear all data" now also clears saved Playground presets** (`profile_store.py`): Playground presets survived a full data wipe, leaving watt- and second-scale values from the removed configuration behind.
 
 
+- **Dismissing a notification no longer shows a stray "clear_notification" message** (`manager.py`): WashData dismisses its own notification cards (the live-progress card, the clean-laundry reminder, the pause reminder) by re-sending them with a special marker body that the companion app understands as "remove the card with this tag". When notify *entity* targets were switched to Home Assistant's `notify.send_message` service earlier in this release, that service turned out to be unable to carry the tag - so instead of dismissing anything, the marker was delivered to the user as a visible notification whose text read `clear_notification`. Entity targets now skip the dismiss send entirely (there is no way to dismiss such a card), and the marker can never fall through to a persistent-notification card either. Regular notifications to entity targets are unaffected.
+
+
 ## 0.5.3 - 2026-07-26
 
 ### Features

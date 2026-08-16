@@ -19,6 +19,7 @@ gating, and bounded-override invariants. Pure/NumPy; fast suite."""
 from __future__ import annotations
 
 import random
+from unittest.mock import patch
 
 import pytest
 
@@ -88,3 +89,64 @@ def test_multi_split_gate_fields_and_invariants():
     else:
         # Not promoted -> no override applied.
         assert out["config"] is None
+
+
+def test_integrated_energy_mode_for_washing_machine():
+    """A washer/washer-dryer tunes under Stage-4 integrated-energy mode.
+
+    ``tune_matching_config`` takes ``device_type`` so it tunes under the SAME
+    energy mode the live matcher will use (`stage4_energy_mode`); tuning weights
+    under "mean" and then running under "integrated" would optimise the wrong
+    objective. Every other test here omits ``device_type`` and so only ever
+    exercised the default "mean" path.
+    """
+    from custom_components.ha_washdata.analysis import stage4_energy_mode
+
+    assert stage4_energy_mode("washing_machine") == "integrated"
+
+    out = tune_matching_config(
+        _dataset(), "washing_machine", min_cycles=10, min_targets=6, seed=1
+    )
+    assert "promoted" in out
+    assert 0.0 <= out["baseline_test_top1"] <= 1.0
+    assert 0.0 <= out["tuned_test_top1"] <= 1.0
+    if out["promoted"]:
+        assert set(out["config"]).issubset(
+            {"corr_weight", "duration_weight", "energy_weight", "dtw_ensemble_w"}
+        )
+        assert out["tuned_test_top1"] >= out["baseline_test_top1"]
+
+
+def test_device_type_reaches_the_scoring_config():
+    """The device gate is threaded into the matcher config, not silently dropped.
+
+    Asserted at the seam rather than on the tuning *outcome*: the synthetic
+    corpus here separates perfectly (top-1 1.0 in both modes), so nothing is ever
+    promoted and the two results are legitimately identical. Observing the
+    energy_mode the tuner actually scores under is the real invariant.
+    """
+    from custom_components.ha_washdata.ml import matching_tuner
+
+    seen: list[str] = []
+    real = matching_tuner.analysis.stage4_energy_mode
+
+    def _spy(device_type=None):
+        mode = real(device_type)
+        seen.append(mode)
+        return mode
+
+    with patch.object(matching_tuner.analysis, "stage4_energy_mode", _spy):
+        tune_matching_config(
+            _dataset(), "washing_machine", min_cycles=10, min_targets=6, seed=1
+        )
+        assert seen == ["integrated"]
+
+        seen.clear()
+        tune_matching_config(
+            _dataset(), "dishwasher", min_cycles=10, min_targets=6, seed=1
+        )
+        assert seen == ["mean"]
+
+        seen.clear()
+        tune_matching_config(_dataset(), min_cycles=10, min_targets=6, seed=1)
+        assert seen == ["mean"]  # no device type -> shipped default
