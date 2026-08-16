@@ -1727,6 +1727,17 @@ class WashDataManager:
 
                 self.detector.restore_state_snapshot(active_snapshot_to_restore)
 
+                # Anti-wrinkle keepalive anchor (#339). The keepalive in
+                # _handle_state_expiry needs a "sensor last spoke" timestamp, but
+                # _last_real_reading_time is only ever set by a live reading, so a
+                # restart into ANTI_WRINKLE with an already-silent plug leaves it
+                # None and the keepalive can never fire -- pinning the mode until
+                # the next cycle. The snapshot save is driven by real readings, so
+                # last_save is the best available proxy. Scoped to ANTI_WRINKLE so
+                # no other timer sees a synthetic anchor.
+                if self.detector.state == STATE_ANTI_WRINKLE and last_save:
+                    self._last_real_reading_time = last_save
+
                 # Restore if in any active state (Running, Paused, Ending)
                 if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
                     # Restore manual program flag if present

@@ -19,11 +19,12 @@
 from __future__ import annotations
 
 import logging
+import math
 from datetime import datetime
 from typing import Any, TYPE_CHECKING, cast
 
 import numpy as np
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 
 from .const import (
     CONF_WATCHDOG_INTERVAL,
@@ -587,9 +588,14 @@ def reconcile_suggestions(
             and off_delay_ee > 0 and end_energy < stop_ee * off_delay_ee / 3600.0
             and in_out(CONF_END_ENERGY_THRESHOLD, CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY)
         ):
+            # Round the floor UP at adjust()'s own 2-decimal precision. Rounding
+            # to-nearest would land *below* the floor (stop=2 W, off_delay=60 s ->
+            # 0.0333 Wh -> 0.03 Wh), the next fixpoint pass would then see the same
+            # violation, find the value unchanged, and return a map that still
+            # breaks Rule 12.
             adjust(
                 CONF_END_ENERGY_THRESHOLD,
-                round(stop_ee * off_delay_ee / 3600.0, 3),
+                math.ceil(stop_ee * off_delay_ee / 36.0) / 100.0,
                 "the stop threshold and off delay",
             )
 
@@ -629,6 +635,22 @@ class SuggestionEngine:
         self.entry_id = entry_id
         self.profile_store = profile_store
         self.device_type = device_type
+        # Loop-affine config snapshot, refreshed by refresh_options_snapshot()
+        # immediately before an executor dispatch. See _entry_options().
+        self._options_snapshot: dict[str, Any] | None = None
+
+    @callback
+    def refresh_options_snapshot(self) -> dict[str, Any]:
+        """Capture the config entry options; call on the event loop only.
+
+        Every generator below runs in an executor thread, but reading the config
+        entry is loop-affine: ``async_get_entry`` walks loop-owned state, and the
+        two-mapping merge in :meth:`_entry_options` can tear if
+        ``async_update_entry`` replaces ``data``/``options`` between the reads.
+        Snapshotting here means the executor work sees one coherent view.
+        """
+        self._options_snapshot = self._read_entry_options()
+        return self._options_snapshot
 
     def generate_operational_suggestions(self, p95_dt: float, median_dt: float) -> dict[str, Any]:
         """Generate suggestions for operational parameters based on cadence."""
@@ -835,6 +857,17 @@ class SuggestionEngine:
         return suggestions
 
     def _entry_options(self) -> dict[str, Any]:
+        """Config options for this pass: the loop-captured snapshot when present.
+
+        Falls back to a live read for loop-side callers that never dispatch to an
+        executor (the panel's settings comparison, tests).
+        """
+        snapshot = self._options_snapshot
+        if snapshot is not None:
+            return snapshot
+        return self._read_entry_options()
+
+    def _read_entry_options(self) -> dict[str, Any]:
         """Best-effort read of the current config entry options."""
         try:
             entry = self.hass.config_entries.async_get_entry(self.entry_id)

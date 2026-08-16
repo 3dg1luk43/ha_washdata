@@ -118,7 +118,7 @@ Found a bug? Open an issue using our [bug report template](.github/ISSUE_TEMPLAT
 - Clear description of the issue
 - Steps to reproduce
 - Your WashData version and Home Assistant version
-- Any logs or error evidence - a single error line from the HA logbook is fine; you don't need full debug-level output
+- Any logs or error evidence - a few lines from the HA log showing the actual error text are enough (paste the full entry, not a truncated fragment); you don't need debug-level output, and an attached log file also counts
 
 If you also want to submit a fix yourself, check the **"Contributing a Fix"** box at the bottom of the form and follow the [contributor PR flow](#contributor-pr-flow-non-translation-prs) below. **Do not open a PR yet** - wait for the `accepted` label first.
 

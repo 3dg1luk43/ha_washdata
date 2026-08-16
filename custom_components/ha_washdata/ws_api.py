@@ -4848,6 +4848,14 @@ async def ws_get_ml_comparison(
         # Stage 3: replace the basic off_delay-only comparison with the full
         # Classic-vs-ML settings table when ML suggestions are unlocked.
         if ENABLE_ML_SUGGESTIONS:
+            # Hand the engine this handler's already-merged view before the
+            # executor hop: reading the config entry is loop-affine, so its
+            # generators must not re-read it from the worker thread.
+            classic = getattr(
+                getattr(manager, "learning_manager", None), "suggestion_engine", None
+            )
+            if classic is not None:
+                classic._options_snapshot = merged  # pylint: disable=protected-access
             enriched = await hass.async_add_executor_job(
                 _build_settings_comparison, manager, merged
             )

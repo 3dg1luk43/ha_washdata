@@ -128,3 +128,38 @@ async def test_valid_wide_trim_still_succeeds(store):
     # START = 10 snaps to 10.3; END = 200 snaps to the nearest sample (195.7).
     assert cycle["power_data"][0][0] == 0.0
     assert cycle["meta"]["trim"] == [10.3, 195.7]
+
+
+@pytest.mark.asyncio
+async def test_snap_never_widens_beyond_the_requested_window(store):
+    """Snapping must not keep samples the user asked to remove.
+
+    Nearest-in-either-direction snapping could move a boundary *outward* by up to
+    half a sample interval. On a coarse trace that silently kept data outside the
+    requested window while ``meta["trim"]`` recorded the widened bounds.
+    """
+    # Coarse 60 s cadence (a dishwasher reporting rate), samples at 0..300.
+    coarse = [float(i * 60) for i in range(6)]
+    store._data["past_cycles"][0]["power_data"] = [[o, 100.0] for o in coarse]
+    store._data["past_cycles"][0]["duration"] = coarse[-1]
+
+    # 25 is nearer to 0 than to 60, and 275 is nearer to 300 than to 240, so
+    # nearest-snapping would expand the window to the whole cycle [0, 300].
+    ok = await store.trim_cycle_power_data("cyc1", 25.0, 275.0)
+    assert ok is True
+    cycle = store._data["past_cycles"][0]
+    assert cycle["meta"]["trim"] == [60.0, 240.0]
+    assert len(cycle["power_data"]) == 4
+
+
+@pytest.mark.asyncio
+async def test_window_with_no_usable_samples_is_rejected(store):
+    """A window that snaps inward to fewer than two samples preserves the cycle."""
+    coarse = [0.0, 100.0]
+    original = [[o, 100.0] for o in coarse]
+    store._data["past_cycles"][0]["power_data"] = [list(p) for p in original]
+    store._data["past_cycles"][0]["duration"] = coarse[-1]
+
+    ok = await store.trim_cycle_power_data("cyc1", 40.0, 60.0)
+    assert ok is False
+    assert store._data["past_cycles"][0]["power_data"] == original
