@@ -123,3 +123,82 @@ def test_shorter_quiet_release_finalizes_sooner():
     # only thing that differs: short has released and finished, long is still waiting.
     assert short.state == STATE_FINISHED, "300 s quiet-release should have finalized"
     assert long.state != STATE_FINISHED, "1200 s quiet-release should still be waiting"
+
+
+def test_gap_cannot_widen_its_own_outage_ceiling():
+    """A moderate outage must be caught even though it inflates the p95 cadence.
+
+    The gap-free tally classifies a step against ``clip(10x p95_cadence, 60, 3600)``.
+    If the cadence is updated with the current step *before* that comparison, the
+    gap raises the very ceiling meant to catch it: a 120 s dropout on a 10 s
+    cadence lifts p95 to ~15.5 s, so the ceiling becomes 155 s and the outage is
+    credited as 120 s of "observed" quiet. The ceiling must come from the cadence
+    as it stood before the step.
+    """
+    det = _make_detector(quiet_release=600.0)
+    # Steady 10 s cadence so p95 is a clean 10 s before the dropout.
+    for t in range(0, 201, 10):
+        det.process_reading(120.0, _dt(t))
+    assert det._p95_dt == 10.0
+
+    # Drop to 0 W and immediately suffer a 120 s dropout: 12x the cadence, well
+    # past the 100 s ceiling that a 10 s cadence implies, but under the 155 s one
+    # the inflated cadence would have produced.
+    det.process_reading(0.0, _dt(210))
+    det.process_reading(0.0, _dt(330))
+
+    # The outage restarts the observed-quiet tally from this sample: the 10 s
+    # seen before the dropout is discarded too, because we cannot know what the
+    # appliance did during the dark period. Pre-fix this read 130.0 (the inflated
+    # ceiling accepted the gap and credited all of it).
+    assert det._time_below_threshold_gapfree == 0.0
+    # The plain tally still absorbs it, proving the two tallies diverged here.
+    assert det._time_below_threshold == 130.0
+
+
+def test_short_gap_within_cadence_still_counts_as_quiet():
+    """A normal-cadence step is observed time and must keep accumulating."""
+    det = _make_detector(quiet_release=600.0)
+    for t in range(0, 201, 10):
+        det.process_reading(120.0, _dt(t))
+
+    for t in range(210, 271, 10):
+        det.process_reading(0.0, _dt(t))
+
+    # Seven 10 s steps (210..270 inclusive) of genuine, gap-free quiet.
+    assert det._time_below_threshold_gapfree == 70.0
+    assert det._time_below_threshold == 70.0
+
+
+def test_legacy_snapshot_does_not_seed_gapfree_quiet():
+    """An old snapshot's `time_below` must not become gap-free quiet.
+
+    Pre-0.5.4 snapshots carry only `time_below`, which may itself include
+    outage-sized intervals - exactly what the gap-free tally exists to exclude.
+    Seeding from it would let the next low sample release the dishwasher end wait
+    without the configured quiet period ever being observed. A restore is also a
+    telemetry gap in its own right (the manager records it as a restart gap), so
+    0.0 is the honest starting point either way.
+    """
+    det = _make_detector(quiet_release=600.0)
+    det.restore_state_snapshot({
+        "state": STATE_RUNNING,
+        "time_below": 5400.0,  # legacy tally, possibly outage-inflated
+    })
+    assert det._time_below_threshold == 5400.0
+    assert det._time_below_threshold_gapfree == 0.0
+
+
+def test_snapshot_roundtrip_preserves_gapfree_quiet():
+    """A current snapshot carries the gap-free tally through a restart."""
+    det = _make_detector(quiet_release=600.0)
+    for t in range(0, 201, 10):
+        det.process_reading(120.0, _dt(t))
+    for t in range(210, 271, 10):
+        det.process_reading(0.0, _dt(t))
+    snapshot = det.get_state_snapshot()
+    assert snapshot["time_below_gapfree"] == 70.0
+
+    restored = _make_detector(quiet_release=600.0)
+    restored.restore_state_snapshot(snapshot)
+    assert restored._time_below_threshold_gapfree == 70.0
