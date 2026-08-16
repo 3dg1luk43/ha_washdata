@@ -1817,6 +1817,7 @@
       "min_active": "In base alla potenza attiva minima ({min}W) osservata nell'ultimo ciclo.",
       "min_duration_ratio": "Mantenuto il più basso possibile affinché un programma venga riconosciuto presto nel ciclo; i limiti di confidenza e ambiguità impediscono decisioni premature.",
       "min_off_gap": "In base a {gaps} intervalli tra cicli osservati (p05={p05}s). Minimo del dispositivo: {floor}s.",
+      "min_off_gap_bridge": "Dimensionato per coprire il periodo di silenzio più lungo all'interno di un ciclo: {span}s + 60s di margine, da {spans} intervalli coperti su {cycles} cicli puliti (resta sotto il tuo intervallo minimo di {ceiling}s tra due carichi consecutivi).",
       "min_power": "40% della potenza attiva più bassa al p05 ({p05}W) su {cycles} cicli puliti, mantenendo la soglia di spegnimento sotto il consumo reale.{excl}",
       "ml_auto_label": "Confidenza più bassa che il modello di qualità ha comunque valutato come pulita (p10 di {cycles} cicli puliti = {p10}).",
       "ml_end_repeat": "{false}/{total} cicli ({pct}%) hanno avuto una pausa che il rilevatore di fine ha valutato >50%; richiedere {val} conferma/e di fine.",
@@ -1833,7 +1834,7 @@
       "thr_batch": "Mantenuto appena sopra la potenza attiva più bassa al p05 su {cycles} cicli ({p05}W) affinché un avvio venga rilevato il prima possibile e la soglia di arresto resti sotto la potenza di funzionamento più bassa della macchina.",
       "tol_per_profile": "p75 della varianza di durata per profilo su {profiles} profili ({cycles} cicli); i profili stretti non vengono penalizzati.",
       "tol_pooled": "In base alla varianza di durata aggregata di {cycles} cicli etichettati di recente (deviazione p95={dev}).",
-      "watchdog": "Mantenuto il più basso possibile in sicurezza (3x l'intervallo di aggiornamento p95 di {p95}s, min 30s) per rilevare rapidamente i blocchi senza arresti falsi."
+      "watchdog": "Mantenuto il più basso possibile in sicurezza (poco sopra l'intervallo di aggiornamento p95 di {p95}s, min 30s) per rilevare rapidamente i blocchi senza arresti falsi."
     },
     "exclusions": {
       "summary": "Esclusi {total} cicli rilevati male: {parts}.",

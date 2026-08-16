@@ -1836,6 +1836,7 @@
       "min_active": "Pagrįsta mažiausia aktyvia galia ({min}W), stebėta paskutiniame cikle.",
       "min_duration_ratio": "Paliktas kuo mažesnis, kad programa būtų atpažinta ciklo pradžioje; patikimumo ir dviprasmiškumo slenksčiai neleidžia patvirtinti per anksti.",
       "min_off_gap": "Pagrįsta {gaps} stebimais tarpcikliniais tarpais (p05={p05}s). Prietaiso apatinė riba: {floor}s.",
+      "min_off_gap_bridge": "Nustatyta taip, kad perdengtų ilgiausią tylos tarpsnį ciklo viduje: {span}s + 60s buferis, iš {spans} perdengtų tarpų per {cycles} švarius ciklus (lieka žemiau trumpiausio jūsų tarpo tarp dviejų paleidimų iš eilės, kuris yra {ceiling}s).",
       "min_power": "40% p05 mažiausios aktyvios galios ({p05}W) per {cycles} švarius ciklus, išlaikant išjungimo slenkstį žemiau realaus suvartojimo.{excl}",
       "ml_auto_label": "Mažiausias patikimumas, kurį kokybės modelis vis dar įvertino kaip švarų (p10 iš {cycles} švarių ciklų = {p10}).",
       "ml_end_repeat": "{false}/{total} ciklų ({pct}%) turėjo pauzę, kurią pabaigos detektorius įvertino >50%; reikalauti {val} pabaigos patvirtinimo(-ų).",
@@ -1852,7 +1853,7 @@
       "thr_batch": "Paliktas šiek tiek virš p05 mažiausios aktyvios galios per {cycles} ciklus ({p05}W), kad pradžia būtų aptikta kuo anksčiau, o sustabdymo slenkstis liktų žemiau mažiausios veikiančios mašinos galios.",
       "tol_per_profile": "p75 kiekvieno profilio trukmės dispersijos per {profiles} profilius ({cycles} ciklai); stabilūs profiliai nebaudžiami.",
       "tol_pooled": "Pagrįsta sujungta {cycles} naujausių pažymėtų ciklų trukmės dispersija (p95 nuokrypis={dev}).",
-      "watchdog": "Paliktas kuo mažesnis, kiek saugu (3x p95 atnaujinimo tarpas {p95}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
+      "watchdog": "Paliktas kuo mažesnis, kiek saugu (vos didesnis nei p95 atnaujinimo tarpas {p95}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
     },
     "exclusions": {
       "summary": "Neįtraukta {total} klaidingai aptiktų ciklų: {parts}.",

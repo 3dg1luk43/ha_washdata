@@ -1732,6 +1732,7 @@
       "min_active": "Byggt á lægsta virka afli ({min}W) sem mældist í síðustu lotu.",
       "min_duration_ratio": "Haldið eins lágu og hægt er svo að kerfi greinist snemma í lotunni; vissu- og tvíræðnimörkin koma í veg fyrir ótímabærar ákvarðanir.",
       "min_off_gap": "Byggt á {gaps} mældum millibilum milli lota (p05={p05}s). Lágmark tækis: {floor}s.",
+      "min_off_gap_bridge": "Stærðin valin til að brúa lengsta kyrrðartímabilið innan lotu: {span}s + 60s biðminni, úr {spans} brúuðum bilum yfir {cycles} hreinar lotur (helst undir stysta bilinu þínu, {ceiling}s, milli tveggja keyrslna).",
       "min_power": "40% af lægsta virka afli við p05 ({p05}W) yfir {cycles} hreinar lotur, sem heldur slökkviþröskuldinum undir raunverulegri notkun.{excl}",
       "ml_auto_label": "Lægsta vissa sem gæðalíkanið mat samt sem hreint (p10 af {cycles} hreinum lotum = {p10}).",
       "ml_end_repeat": "{false}/{total} lotur ({pct}%) höfðu hlé sem lokagreinirinn gaf einkunnina >50%; krefst {val} staðfestinga á lokum.",
@@ -1748,7 +1749,7 @@
       "thr_batch": "Haldið rétt yfir lægsta virka afli við p05 yfir {cycles} lotur ({p05}W) svo að ræsing náist eins snemma og hægt er og stöðvunarþröskuldurinn haldist undir lægsta gangafli vélarinnar.",
       "tol_per_profile": "p75 af dreifni lengdar á hvert snið yfir {profiles} snið ({cycles} lotur); þröngum sniðum er ekki refsað.",
       "tol_pooled": "Byggt á sameinaðri dreifni lengdar {cycles} nýjustu merktu lota (p95 frávik={dev}).",
-      "watchdog": "Haldið eins lágu og óhætt er (3x p95-uppfærslubilið {p95}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana."
+      "watchdog": "Haldið eins lágu og óhætt er (rétt yfir p95-uppfærslubilinu {p95}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana."
     },
     "exclusions": {
       "summary": "Útilokaði {total} ranggreindar lotur: {parts}.",

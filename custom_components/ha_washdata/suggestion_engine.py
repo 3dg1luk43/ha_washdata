@@ -92,6 +92,56 @@ _MAX_PAUSE_GAP_H = 1.0                  # a gap > this (hours) between samples i
 _MIN_RESUME_ACTIVE_S = 120.0
 
 
+def _measured_off_delay_floor(device_floor: int) -> int:
+    """Lower bound for an off_delay suggestion backed by *measured* pauses.
+
+    ``DEFAULT_OFF_DELAY_BY_DEVICE`` is a blind prior for devices we have no
+    traces for: the dishwasher entry (1800 s) is sized to bridge a passive
+    drying phase.  Once real intra-cycle pauses have been measured that prior is
+    stale evidence, and clamping the measurement up to it is actively harmful -
+    off_delay is *never* what holds a cycle together (every finalize path in
+    ``cycle_detector`` uses ``max(off_delay, min_off_gap)``, and min_off_gap
+    keeps its own 3600 s dishwasher floor).  Solo uses of off_delay are the
+    end-gate energy lookback window, the watchdog's keepalive cadence and the
+    Rule-12 end_energy_threshold coupling - all of which get *worse* as it
+    grows: a 1800 s window sweeps standby blips into the end gate and holds the
+    cycle open long past the real end.
+
+    So a measured suggestion is floored at the generic ``DEFAULT_OFF_DELAY``,
+    while device priors that are *below* it (e.g. pumps at 20 s, which cut off
+    sharply) are still honoured.
+    """
+    return min(int(device_floor), DEFAULT_OFF_DELAY)
+
+
+#: Evidence bar for a *measured* ``min_off_gap`` proposal. Below this we keep the
+#: conservative per-device prior rather than guess from a thin sample.
+_MIN_GAP_MIN_TRACED_CYCLES = 5
+_MIN_GAP_MIN_SPANS = 3
+#: Absolute sanity cap, mirroring the inter-cycle-gap path.
+_MIN_GAP_ABS_CAP = 3600
+
+
+def _bridged_spans(
+    points: list[tuple[float, float]], active_thr: float, max_gap_s: float
+) -> list[float]:
+    """Quiet spans a cycle has to survive to stay whole, in seconds.
+
+    The mirror image of the off-delay pause scan: here *any* resumption counts
+    (``min_resume_active_s=0``), including a dishwasher's short terminal
+    pump-out. That blip is deliberately excluded from the off-delay statistic -
+    it must not inflate the end-gate window - but it is exactly what
+    ``min_off_gap`` exists to bridge, because if the cycle closes before it
+    lands, the pump-out is recorded as a separate ghost cycle (#43).
+    """
+    return [
+        points[resume_idx][0] - low_start
+        for low_start, resume_idx in _resumed_low_runs(
+            points, active_thr, max_gap_s, min_resume_active_s=0.0
+        )
+    ]
+
+
 def _resumed_low_runs(
     points: list[tuple[float, float]],
     active_thr: float,
@@ -657,14 +707,20 @@ class SuggestionEngine:
         suggestions: dict[str, dict[str, Any]] = {}
 
         # 1. Watchdog Interval
-        # Goal: as LOW (responsive) as safely possible so a stalled cycle is
-        # caught quickly. The only hard constraint is that it must sit above the
-        # normal update cadence to avoid false stops, so target just above p95
-        # (3x) rather than a very conservative multiple.
-        suggested_watchdog = int(max(30, round(p95_dt * 3)))
+        # This is only the *tick period* of the background timer - it is never
+        # itself a staleness threshold, so it cannot cause a false stop (those
+        # are gated by no_update_active_timeout / the device low-power floor in
+        # ``manager._watchdog_check_stuck_cycle``).  It does bound how late the
+        # 0 W keepalive injection and the timeout checks can fire, so every extra
+        # second is pure end-detection lag.  Tick just past the p95 update gap -
+        # matching DEFAULT_WATCHDOG_INTERVAL's documented "2 x sampling + 1"
+        # derivation for a publish-on-change sensor that skips at most one
+        # sample.  The old 3x multiple polled ~6x slower than the sensor updates
+        # and delayed end detection for no safety benefit.
+        suggested_watchdog = int(max(30, math.ceil(p95_dt) + 1))
         suggestions[CONF_WATCHDOG_INTERVAL] = {
             "value": suggested_watchdog,
-            "reason": f"Kept as low as safe (3x the p95 update gap of {p95_dt:.1f}s, min 30s) so stalls are caught quickly without false stops.",
+            "reason": f"Kept as low as safe (just above the p95 update gap of {p95_dt:.1f}s, min 30s) so stalls are caught quickly without false stops.",
             "reason_key": "suggestion.reason.watchdog",
             "reason_params": {"p95": f"{p95_dt:.1f}"},
         }
@@ -849,8 +905,10 @@ class SuggestionEngine:
                     "reason_params": {"p95": f"{p95_ratio:.2f}"},
                 }
 
-        # Min-off-gap: derived from observed inter-cycle gaps
-        min_off_gap = self._suggest_min_off_gap(cycles)
+        # Min-off-gap: measured bridge requirement, capped by back-to-back headroom
+        min_off_gap = self._suggest_min_off_gap(
+            cycles, stop_threshold_w=stop_thr, gap_cycles=raw_cycles
+        )
         if min_off_gap is not None:
             suggestions[CONF_MIN_OFF_GAP] = min_off_gap
 
@@ -1163,9 +1221,14 @@ class SuggestionEngine:
 
         Collects every low-power segment that *resumed* (a proven pause, not the
         trailing wind-down) across clean cycles and sets off_delay to the p95
-        pause length plus a 60 s buffer, floored by the device minimum. Returns
-        ``None`` when too few traces exist, so the caller falls back to the
-        update-cadence heuristic.
+        pause length plus a 60 s buffer. Returns ``None`` when too few traces
+        exist, so the caller falls back to the update-cadence heuristic.
+
+        The floor is :func:`_measured_off_delay_floor` (the *generic* minimum),
+        not ``device_floor``: once real pauses have been measured the blind
+        per-device prior is stale evidence and must not override the
+        measurement. ``device_floor`` still applies on the caller's no-data
+        fallback path.
         """
         pause_durations: list[float] = []
         n_traced = 0
@@ -1198,11 +1261,12 @@ class SuggestionEngine:
             return None
 
         p95_pause = float(np.percentile(pause_durations, 95))
-        value = int(max(device_floor, round(p95_pause + 60.0)))
+        floor = _measured_off_delay_floor(device_floor)
+        value = int(max(floor, round(p95_pause + 60.0)))
         reason = (
             f"Sized to outlast real pauses: p95 intra-cycle pause {p95_pause:.0f}s "
             f"+ 60s buffer, from {len(pause_durations)} pauses across {n_traced} "
-            f"clean cycles (floor {device_floor}s)."
+            f"clean cycles (floor {floor}s)."
         )
         return (
             value,
@@ -1212,17 +1276,67 @@ class SuggestionEngine:
                 "p95": f"{p95_pause:.0f}",
                 "pauses": len(pause_durations),
                 "cycles": n_traced,
-                "floor": device_floor,
+                "floor": floor,
             },
         )
 
     def _suggest_min_off_gap(
-        self, cycles: list[dict[str, Any]]
+        self,
+        cycles: list[dict[str, Any]],
+        stop_threshold_w: float | None = None,
+        gap_cycles: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any] | None:
-        """Derive a min_off_gap suggestion from observed inter-cycle gaps."""
+        """Size ``min_off_gap`` from what the cycles actually need to bridge.
+
+        ``min_off_gap`` is bounded from two sides and both bounds are measurable:
+
+        * **must not split** - it has to outlast the longest quiet span *inside*
+          a cycle that is followed by more of that same cycle (see
+          :func:`_bridged_spans`). This is the requirement, so it sets the value.
+        * **must not merge** - it has to stay under the shortest gap the user
+          leaves between two separate loads, because a high reading while the
+          previous cycle is still in ENDING revives that cycle rather than
+          starting a new one (``cycle_detector`` STATE_ENDING). This is a
+          *ceiling*, not a target.
+
+        The previous implementation derived the value from the ceiling
+        (``p05_inter_cycle_gap * 0.8``) and then floored it with the blind
+        per-device prior. That proposed a value sitting right against the merge
+        boundary with no evidence any bridging was needed - on a real washer
+        export it lands at ~1748 s against a measured need of ~1271 s and a real
+        inter-load gap of 181 s, i.e. it guarantees back-to-back loads merge
+        (#296). It also suppressed itself whenever the result equalled the
+        device floor, so a dishwasher user was never told their 3600 s prior was
+        1.7x what their machine measurably needs.
+
+        When the two bounds conflict (the cycle needs more bridging than the
+        user's own turnaround allows) no suggestion is made: that machine cannot
+        be separated by a quiet-gap rule at all and needs the event-based
+        splitters instead (anti-crease finalize, dishwasher end-spike), so the
+        safe move is to leave the current value alone. Splitting a cycle
+        corrupts the learned profile; merging produces one visibly over-long
+        record the user can correct.
+
+        ``cycles`` supplies the bridge measurement and must be clean;
+        ``gap_cycles`` supplies the merge ceiling and must be the *unfiltered*
+        history (defaults to ``cycles``). The distinction matters: dropping a
+        mis-detected cycle silently fuses its two neighbouring gaps into one long
+        gap, which inflates the ceiling and would let the proposal sail past the
+        user's real turnaround. On a real washer export that is the difference
+        between a 1748 s and a 181 s ceiling.
+
+        Falls back to the historical inter-cycle-gap heuristic when there are too
+        few traces to measure a bridge requirement.
+
+        Validated with ``devtools/min_off_gap_eval.py``: replaying all 152 clean
+        cycles across the ``cycle_data/`` corpus through a real unmatched
+        ``CycleDetector`` at the proposed value produces zero splits (the only
+        trace that splits is tron4r's known back-to-back *merged* 206-min cycle,
+        where splitting is the correct outcome).
+        """
         # Only consider completed, labeled cycles with valid timestamps
         timed_cycles: list[tuple[float, float]] = []
-        for c in cycles:
+        for c in (cycles if gap_cycles is None else gap_cycles):
             if not isinstance(c, dict):
                 continue
             if c.get("status") not in ("completed", "force_stopped"):
@@ -1257,15 +1371,59 @@ class SuggestionEngine:
             return None
 
         gaps_arr = np.array(gaps)
-        # Use the 5th-percentile gap as the safe minimum, with device-type floor
+        # 5th percentile, kept only for the no-evidence fallback path's reason text.
         p05_gap = float(np.percentile(gaps_arr, 5))
         device_floor = (
             DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(self.device_type, DEFAULT_MIN_OFF_GAP)
             if self.device_type is not None
             else DEFAULT_MIN_OFF_GAP
         )
-        # Add a 20% safety margin so we never split a real gap into two cycles
-        suggested = int(max(device_floor, min(p05_gap * 0.8, 3600)))
+        # Merge ceiling: the SHORTEST turnaround this user has actually run, less a
+        # 20% margin.  Deliberately not a percentile - these distributions are
+        # strongly skewed (one 181 s turnaround, then a jump to 5000 s+), so p05
+        # interpolates straight past the single tight pair that is precisely the
+        # merge case we must not propose through.  Tolerating it as an "outlier"
+        # would be tolerating the bug.  Erring low only ever suppresses a
+        # suggestion, which leaves the user's current value in place.
+        ceiling = int(min(float(gaps_arr.min()) * 0.8, _MIN_GAP_ABS_CAP))
+
+        # --- Preferred: size from the measured bridge requirement ---------------
+        bridge = self._measured_bridge_requirement(cycles, stop_threshold_w)
+        if bridge is not None:
+            longest, n_spans, n_traced = bridge
+            needed = int(
+                min(
+                    _MIN_GAP_ABS_CAP,
+                    max(DEFAULT_MIN_OFF_GAP, round(longest + 60.0)),
+                )
+            )
+            if needed > ceiling:
+                # The cycle needs more bridging than this user's turnaround
+                # allows - no quiet-gap value satisfies both. Leave it alone.
+                return None
+            reason = (
+                f"Sized to bridge the longest quiet stretch inside a cycle: "
+                f"{longest:.0f}s + 60s buffer, from {n_spans} bridged gaps across "
+                f"{n_traced} clean cycles (stays under your {ceiling}s "
+                f"back-to-back headroom)."
+            )
+            return {
+                "value": needed,
+                "reason": reason,
+                "reason_key": "suggestion.reason.min_off_gap_bridge",
+                "reason_params": {
+                    "span": f"{longest:.0f}",
+                    "spans": n_spans,
+                    "cycles": n_traced,
+                    "ceiling": ceiling,
+                },
+            }
+
+        # --- Fallback: no trace evidence, keep the conservative prior ----------
+        # Unchanged from the historical heuristic (p05-based, device floor wins),
+        # because with no measured bridge requirement the blind prior is still the
+        # best evidence available.
+        suggested = int(max(device_floor, min(p05_gap * 0.8, _MIN_GAP_ABS_CAP)))
         # When the data-derived value is equal to the device floor, we have no
         # useful signal to surface - return None to suppress a misleading suggestion.
         if suggested == device_floor:
@@ -1284,6 +1442,51 @@ class SuggestionEngine:
                 "floor": device_floor,
             },
         }
+
+    def _measured_bridge_requirement(
+        self,
+        cycles: list[dict[str, Any]],
+        stop_threshold_w: float | None = None,
+    ) -> tuple[float, int, int] | None:
+        """Longest quiet span these cycles had to bridge to stay whole.
+
+        Returns ``(longest_span_s, n_spans, n_traced)`` or ``None`` when there is
+        not enough traced history to trust the measurement.
+
+        The statistic is the **maximum**, not a percentile: ``min_off_gap`` has to
+        outlast the *longest* gap a cycle ever has to survive, and a percentile
+        under-shoots it. On washers the bridged-span distribution is dominated by
+        thousands of sampling-jitter dips, so p95 collapses to ~100 s while the
+        real phase gap is ~1300 s. Outliers are bounded by construction:
+        ``select_clean_cycles`` has already dropped mis-detected cycles,
+        :func:`_resumed_low_runs` abandons any run straddling an outage-sized
+        sampling gap, and the caller clamps the result under both
+        ``_MIN_GAP_ABS_CAP`` and the user's own back-to-back headroom.
+        """
+        stop_thr = (
+            float(stop_threshold_w)
+            if stop_threshold_w is not None
+            else self._current_stop_threshold(self._entry_options())
+        )
+        max_gap_s = _MAX_PAUSE_GAP_H * 3600
+        spans: list[float] = []
+        n_traced = 0
+        for c in cycles:
+            if not isinstance(c, dict):
+                continue
+            readings = _cycle_readings(c)
+            if len(readings) < 10:
+                continue
+            peak = max((p for _, p in readings), default=0.0)
+            if peak <= 0:
+                continue
+            n_traced += 1
+            active_thr = max(stop_thr, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
+            spans.extend(_bridged_spans(readings, active_thr, max_gap_s))
+
+        if n_traced < _MIN_GAP_MIN_TRACED_CYCLES or len(spans) < _MIN_GAP_MIN_SPANS:
+            return None
+        return (max(spans), len(spans), n_traced)
 
     #: Device types where the anti-crease/anti-wrinkle tail must be excluded from
     #: the stop/start min-active statistic (#343).
@@ -1456,6 +1659,9 @@ class SuggestionEngine:
 
         _batch_opts = self._entry_options()
         stop_thr = self._current_stop_threshold(_batch_opts)
+        # Keep the unfiltered list: the min_off_gap merge ceiling must see the
+        # user's real turnaround, which dropping a cycle would fuse away.
+        raw_cycles = list(cycles)
         cycles, _excluded = select_clean_cycles(cycles, stop_threshold_w=stop_thr)
 
         valid_cycles: list[list[tuple[float, float]]] = []
@@ -1608,7 +1814,9 @@ class SuggestionEngine:
             "reason_params": reason_end_params,
         }
 
-        min_off_gap = self._suggest_min_off_gap(cycles)
+        min_off_gap = self._suggest_min_off_gap(
+            cycles, stop_threshold_w=stop_thr, gap_cycles=raw_cycles
+        )
         if min_off_gap is not None:
             suggestions[CONF_MIN_OFF_GAP] = min_off_gap
 
@@ -1798,7 +2006,12 @@ class MLSuggestionEngine:
         end_feat_fn: Any,
         device_floor: int,
     ) -> dict[str, Any] | None:
-        """Off-delay from end-detector-confirmed pauses (P(end) < 0.4)."""
+        """Off-delay from end-detector-confirmed pauses (P(end) < 0.4).
+
+        Floored by :func:`_measured_off_delay_floor` for the same reason as the
+        classic twin: a model-verified pause measurement outranks the blind
+        per-device prior.
+        """
         confirmed: list[float] = []
         n_cycles = 0
         for c in clean:
@@ -1815,20 +2028,21 @@ class MLSuggestionEngine:
         if n_cycles < 5 or len(confirmed) < 3:
             return None
         p95 = float(np.percentile(confirmed, 95))
-        value = int(max(device_floor, round(p95 + 60.0)))
+        floor = _measured_off_delay_floor(device_floor)
+        value = int(max(floor, round(p95 + 60.0)))
         return {
             "value": value,
             "reason": (
                 f"End-detector-confirmed pauses: p95 {p95:.0f}s + 60s buffer, from "
                 f"{len(confirmed)} model-verified pauses across {n_cycles} cycles "
-                f"(floor {device_floor}s)."
+                f"(floor {floor}s)."
             ),
             "reason_key": "suggestion.reason.ml_off_delay",
             "reason_params": {
                 "p95": f"{p95:.0f}",
                 "pauses": len(confirmed),
                 "cycles": n_cycles,
-                "floor": device_floor,
+                "floor": floor,
             },
         }
 

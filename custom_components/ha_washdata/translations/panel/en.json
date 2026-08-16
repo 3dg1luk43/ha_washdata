@@ -1666,7 +1666,7 @@
       }
     },
     "reason": {
-      "watchdog": "Kept as low as safe (3x the p95 update gap of {p95}s, min 30s) so stalls are caught quickly without false stops.",
+      "watchdog": "Kept as low as safe (just above the p95 update gap of {p95}s, min 30s) so stalls are caught quickly without false stops.",
       "no_update_timeout": "Based on observed update cadence (p95={p95}s) * 20 (min 60s).",
       "off_delay_cadence": "Based on observed update cadence (p95={p95}s) * 5",
       "off_delay_device_floor": "Used device-specific safe minimum for {device} ({floor}s).",
@@ -1687,6 +1687,7 @@
       "profile_match_threshold": "p10 confidence of {cycles} correct auto-labels ({p10}); safe live-commit floor.",
       "end_repeat_count": "{false}/{total} clean cycles ({pct}%) had a >60s internal pause that resumed; require {val} end confirmation(s).",
       "min_off_gap": "Based on {gaps} observed inter-cycle gaps (p05={p05}s). Device floor: {floor}s.",
+      "min_off_gap_bridge": "Sized to bridge the longest quiet stretch inside a cycle: {span}s + 60s buffer, from {spans} bridged gaps across {cycles} clean cycles (stays under your {ceiling}s back-to-back headroom).",
       "min_active": "Based on minimum active power ({min}W) observed in last cycle.",
       "end_energy_default": "Default recommended baseline for end-of-cycle noise gate.",
       "dead_zone_from_dip": "Based on early power dip detected at {s}s.",

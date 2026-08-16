@@ -1818,6 +1818,7 @@
       "min_active": "D'après la puissance active minimale ({min}W) observée lors du dernier cycle.",
       "min_duration_ratio": "Maintenu aussi bas que possible pour qu'un programme soit reconnu tôt dans le cycle ; les seuils de confiance et d'ambiguïté empêchent les décisions prématurées.",
       "min_off_gap": "D'après {gaps} intervalles entre cycles observés (p05={p05}s). Plancher de l'appareil : {floor}s.",
+      "min_off_gap_bridge": "Dimensionné pour couvrir la plus longue période calme au sein d'un cycle : {span}s + 60s de marge, à partir de {spans} intervalles couverts sur {cycles} cycles propres (reste sous votre intervalle minimal de {ceiling}s entre deux charges consécutives).",
       "min_power": "40% de la puissance active la plus basse au p05 ({p05}W) sur {cycles} cycles propres, pour garder le seuil d'arrêt sous la consommation réelle.{excl}",
       "ml_auto_label": "Confiance la plus basse encore jugée propre par le modèle de qualité (p10 de {cycles} cycles propres = {p10}).",
       "ml_end_repeat": "{false}/{total} cycles ({pct}%) ont eu une pause que le détecteur de fin a notée >50% ; exiger {val} confirmation(s) de fin.",
@@ -1834,7 +1835,7 @@
       "thr_batch": "Maintenu juste au-dessus de la puissance active la plus basse au p05 sur {cycles} cycles ({p05}W) pour qu'un démarrage soit détecté le plus tôt possible et que le seuil d'arrêt reste sous la puissance de fonctionnement la plus basse de la machine.",
       "tol_per_profile": "p75 de la variance de durée par profil sur {profiles} profils ({cycles} cycles) ; les profils resserrés ne sont pas pénalisés.",
       "tol_pooled": "D'après la variance de durée regroupée de {cycles} cycles récemment étiquetés (écart p95={dev}).",
-      "watchdog": "Maintenu aussi bas que possible en toute sécurité (3x l'écart de mise à jour p95 de {p95}s, min 30s) pour détecter rapidement les blocages sans faux arrêts."
+      "watchdog": "Maintenu aussi bas que possible en toute sécurité (juste au-dessus de l'écart de mise à jour p95 de {p95}s, min 30s) pour détecter rapidement les blocages sans faux arrêts."
     },
     "exclusions": {
       "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",

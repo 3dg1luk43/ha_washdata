@@ -1732,6 +1732,7 @@
       "min_active": "Perustuu pienimpään aktiiviseen tehoon ({min}W), joka havaittiin viime jaksossa.",
       "min_duration_ratio": "Pidetään mahdollisimman matalana, jotta ohjelma tunnistetaan jakson alkuvaiheessa; luottamus- ja epäselvyysrajat estävät ennenaikaiset päätökset.",
       "min_off_gap": "Perustuu {gaps} havaittuun jaksojen väliseen taukoon (p05={p05}s). Laitteen alaraja: {floor}s.",
+      "min_off_gap_bridge": "Mitoitettu siltaamaan jakson pisin hiljainen vaihe: {span}s + 60s puskuri, {spans} sillatusta katkosta {cycles} puhtaan jakson joukossa (pysyy alle {ceiling}s, joka on lyhin peräkkäisten käynnistysten välinen taukosi).",
       "min_power": "40% pienimmästä aktiivisesta tehosta p05:ssä ({p05}W) {cycles} puhtaan jakson joukossa, mikä pitää sammutuskynnyksen todellisen kulutuksen alapuolella.{excl}",
       "ml_auto_label": "Pienin luottamus, jonka laatumalli arvioi vielä puhtaaksi (p10 {cycles} puhtaasta jaksosta = {p10}).",
       "ml_end_repeat": "{false}/{total} jaksosta ({pct}%) sisälsi tauon, jolle loppudetektori antoi >50%; vaatii {val} loppuvahvistusta.",
@@ -1748,7 +1749,7 @@
       "thr_batch": "Pidetään juuri pienimmän aktiivisen tehon yläpuolella p05:ssä {cycles} jakson joukossa ({p05}W), jotta käynnistys havaitaan mahdollisimman aikaisin ja pysäytyskynnys pysyy koneen pienimmän käyntitehon alapuolella.",
       "tol_per_profile": "p75 profiilikohtaisesta keston varianssista {profiles} profiilin joukossa ({cycles} jaksoa); tiiviitä profiileja ei rangaista.",
       "tol_pooled": "Perustuu {cycles} viimeisimmän merkityn jakson yhdistettyyn keston varianssiin (p95 poikkeama={dev}).",
-      "watchdog": "Pidetään niin matalana kuin on turvallista (3x p95-päivitysväli {p95}s, väh. 30s), jotta pysähdykset havaitaan nopeasti ilman vääriä pysäytyksiä."
+      "watchdog": "Pidetään niin matalana kuin on turvallista (hieman yli p95-päivitysvälin {p95}s, väh. 30s), jotta pysähdykset havaitaan nopeasti ilman vääriä pysäytyksiä."
     },
     "exclusions": {
       "summary": "Suljettu pois {total} väärin tunnistettua sykliä: {parts}.",

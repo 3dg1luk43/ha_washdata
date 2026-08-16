@@ -1732,6 +1732,7 @@
       "min_active": "Basert på laveste aktive effekt ({min}W) observert i siste syklus.",
       "min_duration_ratio": "Holdt så lav som mulig slik at et program gjenkjennes tidlig i syklusen; konfidens- og tvetydighetsgrensene hindrer forhastede beslutninger.",
       "min_off_gap": "Basert på {gaps} observerte mellomrom mellom sykluser (p05={p05}s). Enhetsgulv: {floor}s.",
+      "min_off_gap_bridge": "Dimensjonert for å bygge bro over den lengste stille perioden i en syklus: {span}s + 60s buffer, fra {spans} dekkede mellomrom på tvers av {cycles} rene sykluser (holder seg under ditt korteste mellomrom på {ceiling}s mellom to kjøringer).",
       "min_power": "40% av den laveste aktive effekten ved p05 ({p05}W) på tvers av {cycles} rene sykluser, noe som holder av-terskelen under reelt forbruk.{excl}",
       "ml_auto_label": "Laveste konfidens som kvalitetsmodellen fortsatt vurderte som ren (p10 av {cycles} rene sykluser = {p10}).",
       "ml_end_repeat": "{false}/{total} sykluser ({pct}%) hadde en pause som sluttdetektoren vurderte til >50%; krever {val} sluttbekreftelse(r).",
@@ -1748,7 +1749,7 @@
       "thr_batch": "Holdt like over den laveste aktive effekten ved p05 på tvers av {cycles} sykluser ({p05}W) slik at en start fanges så tidlig som mulig og stoppterskelen holder seg under maskinens laveste driftseffekt.",
       "tol_per_profile": "p75 for varighetsvariansen per profil på tvers av {profiles} profiler ({cycles} sykluser); stramme profiler straffes ikke.",
       "tol_pooled": "Basert på samlet varighetsvarians for {cycles} nyeste merkede sykluser (p95 avvik={dev}).",
-      "watchdog": "Holdt så lavt som forsvarlig (3x p95-oppdateringsmellomrommet på {p95}s, min 30s) slik at stans fanges raskt uten falske stopp."
+      "watchdog": "Holdt så lavt som forsvarlig (like over p95-oppdateringsmellomrommet på {p95}s, min 30s) slik at stans fanges raskt uten falske stopp."
     },
     "exclusions": {
       "summary": "Ekskluderte {total} feildetekterte syklus(er): {parts}.",

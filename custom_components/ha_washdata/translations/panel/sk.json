@@ -1703,6 +1703,7 @@
       "min_active": "Na základe minimálneho činného výkonu ({min}W) zaznamenaného v poslednom cykle.",
       "min_duration_ratio": "Ponechané čo najnižšie, aby sa program rozpoznal skoro v cykle; prahy istoty a nejednoznačnosti bránia predčasnému potvrdeniu.",
       "min_off_gap": "Na základe {gaps} pozorovaných medzier medzi cyklami (p05={p05}s). Minimum zariadenia: {floor}s.",
+      "min_off_gap_bridge": "Nastavené tak, aby preklenulo najdlhší tichý úsek vnútri cyklu: {span}s + rezerva 60s, z {spans} preklenutých medzier naprieč {cycles} čistými cyklami (zostáva pod {ceiling}s, najkratšou medzerou, ktorú necháte medzi dvoma dávkami).",
       "min_power": "40% najnižšieho činného výkonu p05 ({p05}W) naprieč {cycles} čistými cyklami, aby prah vypnutia zostal pod skutočným odberom.{excl}",
       "ml_auto_label": "Najnižšia istota, pri ktorej model kvality stále hodnotil cyklus ako čistý (p10 z {cycles} čistých cyklov = {p10}).",
       "ml_end_repeat": "{false}/{total} cyklov ({pct}%) malo pauzu, ktorú detektor konca ohodnotil nad 50%; vyžadovať {val} potvrdení konca.",
@@ -1719,7 +1720,7 @@
       "thr_batch": "Ponechané tesne nad najnižším činným výkonom p05 naprieč {cycles} cyklami ({p05}W), aby sa štart zachytil čo najskôr a prah zastavenia zostal pod najnižším prevádzkovým výkonom stroja.",
       "tol_per_profile": "p75 rozptylu dĺžky podľa profilu naprieč {profiles} profilmi ({cycles} cyklov); konzistentné profily nie sú penalizované.",
       "tol_pooled": "Na základe zlúčeného rozptylu dĺžky {cycles} nedávnych označených cyklov (odchýlka p95={dev}).",
-      "watchdog": "Ponechané čo najnižšie pri zachovaní bezpečnosti (3x interval aktualizácie p95 vo výške {p95}s, min. 30s), aby sa zaseknutia rýchlo odhalili bez falošných zastavení."
+      "watchdog": "Ponechané čo najnižšie pri zachovaní bezpečnosti (tesne nad intervalom aktualizácie p95 vo výške {p95}s, min. 30s), aby sa zaseknutia rýchlo odhalili bez falošných zastavení."
     },
     "exclusions": {
       "summary": "Vylúčených {total} chybne zistených cyklov: {parts}.",

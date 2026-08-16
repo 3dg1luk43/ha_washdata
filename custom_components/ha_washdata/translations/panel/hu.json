@@ -1836,6 +1836,7 @@
       "min_active": "Az utolsó ciklusban megfigyelt legkisebb aktív teljesítmény ({min}W) alapján.",
       "min_duration_ratio": "A lehető legalacsonyabbra állítva, hogy a program a ciklus elején felismerhető legyen; a megbízhatósági és bizonytalansági küszöbök megakadályozzák a korai megerősítést.",
       "min_off_gap": "{gaps} megfigyelt ciklusközi szünet alapján (p05={p05}s). Készülék alsó korlátja: {floor}s.",
+      "min_off_gap_bridge": "Úgy méretezve, hogy áthidalja a cikluson belüli leghosszabb csendes szakaszt: {span}s + 60s ráhagyás, {spans} áthidalt szünetből {cycles} tiszta cikluson át ({ceiling}s alatt marad, ami a két egymást követő indítás között hagyott legrövidebb szüneted).",
       "min_power": "A(z) {cycles} tiszta ciklus p05 legkisebb aktív teljesítményének ({p05}W) 40%-a, hogy a kikapcsolási küszöb a valós fogyasztás alatt maradjon.{excl}",
       "ml_auto_label": "A legalacsonyabb megbízhatóság, amelyet a minőségi modell még tisztának minősített (a(z) {cycles} tiszta ciklus p10 értéke = {p10}).",
       "ml_end_repeat": "{false}/{total} ciklusban ({pct}%) volt olyan szünet, amelyet a végérzékelő >50%-ra értékelt; {val} végmegerősítés szükséges.",
@@ -1852,7 +1853,7 @@
       "thr_batch": "Éppen a p05 legkisebb aktív teljesítmény fölött tartva {cycles} cikluson át ({p05}W), hogy az indítás a lehető legkorábban észlelhető legyen, a leállítási küszöb pedig a gép legkisebb üzemi teljesítménye alatt maradjon.",
       "tol_per_profile": "A profilonkénti időtartam-szórás p75 értéke {profiles} profilon át ({cycles} ciklus); a stabil profilok nem kapnak büntetést.",
       "tol_pooled": "{cycles} legutóbbi címkézett ciklus összevont időtartam-szórása alapján (p95 szórás={dev}).",
-      "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (a p95 frissítési szünet 3-szorosa, {p95}s, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül."
+      "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (épp a p95 frissítési szünet, azaz {p95}s felett, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül."
     },
     "exclusions": {
       "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",

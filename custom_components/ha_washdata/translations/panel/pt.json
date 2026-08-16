@@ -1817,6 +1817,7 @@
       "min_active": "Com base na potência ativa mínima ({min}W) observada no último ciclo.",
       "min_duration_ratio": "Mantido o mais baixo possível para que um programa seja reconhecido cedo no ciclo; os limiares de confiança e ambiguidade evitam decisões prematuras.",
       "min_off_gap": "Com base em {gaps} intervalos entre ciclos observados (p05={p05}s). Mínimo do dispositivo: {floor}s.",
+      "min_off_gap_bridge": "Dimensionado para cobrir o período de silêncio mais longo dentro de um ciclo: {span}s + 60s de margem, a partir de {spans} intervalos cobertos ao longo de {cycles} ciclos limpos (mantém-se abaixo do seu intervalo mínimo de {ceiling}s entre cargas consecutivas).",
       "min_power": "40% da potência ativa mais baixa no p05 ({p05}W) ao longo de {cycles} ciclos limpos, mantendo o limiar de desligamento abaixo do consumo real.{excl}",
       "ml_auto_label": "Confiança mais baixa que o modelo de qualidade ainda classificou como limpa (p10 de {cycles} ciclos limpos = {p10}).",
       "ml_end_repeat": "{false}/{total} ciclos ({pct}%) tiveram uma pausa que o detetor de fim pontuou >50%; exigir {val} confirmação(ões) de fim.",
@@ -1833,7 +1834,7 @@
       "thr_batch": "Mantido logo acima da potência ativa mais baixa no p05 ao longo de {cycles} ciclos ({p05}W) para que um arranque seja captado o mais cedo possível e o limiar de paragem se mantenha abaixo da potência de funcionamento mais baixa da máquina.",
       "tol_per_profile": "p75 da variância de duração por perfil em {profiles} perfis ({cycles} ciclos); os perfis restritos não são penalizados.",
       "tol_pooled": "Com base na variância de duração agrupada de {cycles} ciclos rotulados recentes (desvio p95={dev}).",
-      "watchdog": "Mantido o mais baixo que é seguro (3x o intervalo de atualização p95 de {p95}s, mín. 30s) para detetar rapidamente os bloqueios sem paragens falsas."
+      "watchdog": "Mantido o mais baixo que é seguro (ligeiramente acima do intervalo de atualização p95 de {p95}s, mín. 30s) para detetar rapidamente os bloqueios sem paragens falsas."
     },
     "exclusions": {
       "summary": "Excluído(s) {total} ciclo(s) mal detetado(s): {parts}.",
