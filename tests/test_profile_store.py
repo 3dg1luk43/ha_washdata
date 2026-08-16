@@ -352,6 +352,41 @@ async def test_playground_preset_rejects_empty_input_and_enforces_cap(store):
 
 
 @pytest.mark.asyncio
+async def test_playground_preset_overlong_name_is_deletable(store):
+    """A name past the length cap must delete with the same input that saved it.
+
+    Save clamped to PLAYGROUND_PRESET_NAME_MAX while delete did not, so an
+    over-long name was stored under a truncated key and looked up in full - the
+    preset became undeletable and permanently consumed one of the cap slots.
+    """
+    from custom_components.ha_washdata.const import PLAYGROUND_PRESET_NAME_MAX
+
+    long_name = "x" * (PLAYGROUND_PRESET_NAME_MAX + 25)
+    await store.async_save_playground_preset(long_name, {"off_delay": 300})
+    stored = list(store.get_playground_presets())
+    assert len(stored) == 1
+    assert len(stored[0]) == PLAYGROUND_PRESET_NAME_MAX
+
+    assert await store.async_delete_playground_preset(long_name) is True
+    assert store.get_playground_presets() == {}
+
+
+@pytest.mark.asyncio
+async def test_playground_preset_key_has_no_trailing_space(store):
+    """Clamping must not bake a trailing space into the stored key.
+
+    The cut can land mid-space, so the normalizer strips again after truncating.
+    """
+    from custom_components.ha_washdata.const import PLAYGROUND_PRESET_NAME_MAX
+
+    name = "y" * (PLAYGROUND_PRESET_NAME_MAX - 1) + "   tail"
+    await store.async_save_playground_preset(name, {"off_delay": 300})
+    key = next(iter(store.get_playground_presets()))
+    assert key == key.strip()
+    assert await store.async_delete_playground_preset(name) is True
+
+
+@pytest.mark.asyncio
 async def test_playground_presets_self_heal_corrupt_store_key(store):
     store._data["playground_presets"] = ["not", "a", "dict"]
     assert store.get_playground_presets() == {}

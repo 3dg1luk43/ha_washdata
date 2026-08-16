@@ -2226,13 +2226,18 @@ class CycleDetector:
             < (self._expected_duration + DISHWASHER_END_SPIKE_WAIT_SECONDS)
             and not quiet_released
         ):
+            # Report the gap-free tally: that is what `quiet_released` above reads,
+            # and after a telemetry outage the two diverge - logging the plain one
+            # would show quiet time that played no part in the decision.
             self._logger.debug(
                 "Deferring cycle finish: dishwasher waiting for end-of-cycle "
-                "pump-out (%.0fs < expected %.0fs + %.0fs wait, quiet %.0fs, profile: %s)",
+                "pump-out (%.0fs < expected %.0fs + %.0fs wait, observed quiet "
+                "%.0fs of %.0fs needed, profile: %s)",
                 duration,
                 self._expected_duration,
                 DISHWASHER_END_SPIKE_WAIT_SECONDS,
-                self._time_below_threshold,
+                self._time_below_threshold_gapfree,
+                self._config.dishwasher_end_spike_quiet_release,
                 self._matched_profile,
             )
             return True

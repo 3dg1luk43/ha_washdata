@@ -118,6 +118,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dismissing a notification no longer shows a stray "clear_notification" message** (`manager.py`): WashData dismisses its own notification cards (the live-progress card, the clean-laundry reminder, the pause reminder) by re-sending them with a special marker body that the companion app understands as "remove the card with this tag". When notify *entity* targets were switched to Home Assistant's `notify.send_message` service earlier in this release, that service turned out to be unable to carry the tag - so instead of dismissing anything, the marker was delivered to the user as a visible notification whose text read `clear_notification`. Entity targets now skip the dismiss send entirely (there is no way to dismiss such a card), and the marker can never fall through to a persistent-notification card either. Regular notifications to entity targets are unaffected.
 
 
+- **A Playground preset with a very long name can be deleted again** (`profile_store.py`): Saving a preset trimmed its name to the 60-character limit, but deleting one looked the name up untrimmed. A preset saved under a longer name was therefore stored under a shortened key that the delete never matched, so it could not be removed and permanently occupied one of the ten preset slots. Both paths now derive the storage key the same way, and a name whose trim lands on a space no longer keeps a trailing space in the key.
+
+
 ## 0.5.3 - 2026-07-26
 
 ### Features
