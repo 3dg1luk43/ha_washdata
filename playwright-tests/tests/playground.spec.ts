@@ -89,6 +89,81 @@ test('workbench: editing a param reveals Save-to-settings and it persists', asyn
   await assertWsCalled(page, 'ha_washdata/set_options');
 });
 
+// ─── Settings control panel: live source, presets, per-setting publish ───────
+
+test('control panel: loads the integration\'s live settings on tab entry', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await expect(page.locator('.wd-pg-ctrl')).toBeVisible({ timeout: 8_000 });
+  await assertWsCalled(page, 'ha_washdata/get_playground_settings');
+  // Fields pre-fill from the LIVE effective values, not from a schema default.
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey="off_delay"]')).toHaveValue('120');
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey="min_off_gap"]')).toHaveValue('180');
+  await expect(page.locator('.wd-pg-ctrl')).toContainText('Matches live settings');
+});
+
+test('control panel: editing a value marks it changed and reveals its publish button', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const inp = page.locator('.wd-pg-param-inp[data-pgkey="off_delay"]');
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('222');
+  await expect(page.locator('.wd-pg-ctrl')).toContainText('1 changed');
+  const pub = page.locator('.wd-pg-pub[data-pgkey="off_delay"]');
+  await expect(pub).toBeVisible();
+  page.once('dialog', d => d.accept());   // confirm()
+  await pub.click();
+  await assertWsCalled(page, 'ha_washdata/set_options');
+  // Published value becomes the new baseline, so the field is back "at live".
+  await expect(page.locator('.wd-pg-ctrl')).toContainText('Matches live settings');
+});
+
+test('control panel: sandbox-only matcher knobs get no publish button', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const corr = page.locator('.wd-pg-param-inp[data-pgkey="corr_weight"]');
+  await expect(corr).toBeVisible({ timeout: 8_000 });
+  await corr.fill('0.6');
+  // It IS a staged change (the sim honours it) but it is not a real config option.
+  await expect(page.locator('.wd-pg-ctrl')).toContainText('1 changed');
+  await expect(page.locator('.wd-pg-pub[data-pgkey="corr_weight"]')).toHaveCount(0);
+  // ...and the bulk publish button must not offer it either.
+  await expect(page.locator('button[data-action="pg-apply-settings"]')).toHaveCount(0);
+});
+
+test('control panel: Load live settings discards sandbox edits', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const inp = page.locator('.wd-pg-param-inp[data-pgkey="off_delay"]');
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('999');
+  await expect(page.locator('.wd-pg-ctrl')).toContainText('1 changed');
+  page.once('dialog', d => d.accept());   // discard confirmation
+  await page.locator('button[data-action="pg-load-live"]').click();
+  await expect(inp).toHaveValue('120');
+  await expect(page.locator('.wd-pg-ctrl')).toContainText('Matches live settings');
+});
+
+test('control panel: save a preset, then load it back', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const inp = page.locator('.wd-pg-param-inp[data-pgkey="off_delay"]');
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('222');
+  await page.locator('#wd-pg-preset-name').fill('My preset');
+  await page.locator('button[data-action="pg-preset-save"]').click();
+  await assertWsCalled(page, 'ha_washdata/save_playground_preset');
+  // The saved preset is selectable; loading it overwrites the sandbox values.
+  await inp.fill('120');
+  await page.locator('#wd-pg-preset-sel').selectOption('My preset');
+  await page.locator('button[data-action="pg-preset-load"]').click();
+  await expect(inp).toHaveValue('222');
+});
+
+test('control panel: delete a preset', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await expect(page.locator('#wd-pg-preset-sel')).toBeVisible({ timeout: 8_000 });
+  await page.locator('#wd-pg-preset-sel').selectOption('Quiet nights');
+  page.once('dialog', d => d.accept());   // confirm()
+  await page.locator('button[data-action="pg-preset-delete"]').click();
+  await assertWsCalled(page, 'ha_washdata/delete_playground_preset');
+});
+
 // ─── "Across your cycles" drawer: History + Optimize sub-tabs ────────────────
 
 test('drawer: History and Optimize sub-tabs are present; History is default', async ({ page }) => {

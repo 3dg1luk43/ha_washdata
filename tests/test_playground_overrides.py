@@ -223,3 +223,75 @@ def test_build_sim_config_ignores_a_malformed_boolean_override():
     assert cfg.anti_wrinkle_enabled is False
     # A well-formed one still applies.
     assert playground.build_sim_config(base, {"anti_wrinkle_enabled": 1}).anti_wrinkle_enabled is True
+
+
+# ─── Settings control panel: live effective values + preset sanitizing ─────────
+
+
+def test_effective_settings_reads_back_what_build_sim_config_writes():
+    """The control panel's baseline must be the exact inverse of the override
+    application, so "no staged edit" renders the values the sim actually runs."""
+    base = CycleDetectorConfig(
+        min_power=7.5,
+        off_delay=240,
+        min_off_gap=1800,          # device-type default the panel schema cannot know
+        start_threshold_w=33.0,
+        stop_threshold_w=4.5,
+        completion_min_seconds=900,
+        end_repeat_count=2,
+        start_duration_threshold=8.0,
+        interrupted_min_seconds=200,
+        anti_wrinkle_enabled=True,
+    )
+    match_config = {"min_duration_ratio": 0.2, "max_duration_ratio": 1.2, "dtw_bandwidth": 0.15}
+    eff = playground.effective_settings(base, match_config)
+
+    # Detection keys come off the live detector config.
+    assert eff["off_delay"] == 240
+    assert eff["min_off_gap"] == 1800
+    assert eff["start_threshold_w"] == 33.0
+    assert eff["anti_wrinkle_enabled"] is True
+    # Matching keys come off the live matcher config...
+    assert eff["profile_match_min_duration_ratio"] == 0.2
+    assert eff["dtw_bandwidth"] == 0.15
+    # ...and fall back to the canonical const.py defaults when it doesn't carry them.
+    assert eff["corr_weight"] == playground.MATCH_DEFAULTS_BY_OPTION["corr_weight"]
+    assert eff["duration_weight"] == playground.MATCH_DEFAULTS_BY_OPTION["duration_weight"]
+
+    # Round-trip: applying the effective map as an override changes nothing.
+    assert playground.build_sim_config(base, eff) == base
+
+
+def test_effective_settings_covers_every_editable_key():
+    eff = playground.effective_settings(CycleDetectorConfig(min_power=2.0, off_delay=180), {})
+    assert set(eff) == set(playground.SETTING_KEYS)
+
+
+def test_publishable_keys_exclude_sandbox_only_matcher_knobs():
+    # Stage 1 duration ratios are real options; the Stage 2-4 scoring knobs are not
+    # (no CONF_* behind them), so publishing them would write dead option keys.
+    assert "profile_match_min_duration_ratio" in playground.PUBLISHABLE_SETTING_KEYS
+    assert "profile_match_max_duration_ratio" in playground.PUBLISHABLE_SETTING_KEYS
+    assert "off_delay" in playground.PUBLISHABLE_SETTING_KEYS
+    for sandbox_key in (
+        "corr_weight", "keep_min_score", "dtw_bandwidth", "dtw_blend",
+        "dtw_ensemble_w", "dtw_ddtw_scale", "dtw_refine_top_n",
+        "duration_weight", "energy_weight", "duration_scale", "energy_scale",
+    ):
+        assert sandbox_key not in playground.PUBLISHABLE_SETTING_KEYS
+    assert playground.PUBLISHABLE_SETTING_KEYS <= playground.SETTING_KEYS
+
+
+def test_sanitize_setting_values_drops_unknown_and_malformed_entries():
+    out = playground.sanitize_setting_values({
+        "off_delay": "300",              # coerced to int
+        "corr_weight": 0.6,              # sandbox key: kept (presets may hold it)
+        "anti_wrinkle_enabled": "true",  # coerced to bool
+        "unknown_key": 1,                # not an editable key
+        "min_off_gap": "not-a-number",   # un-coercible
+        "start_threshold_w": None,       # cleared value
+        "stop_threshold_w": float("inf"),  # non-finite
+    })
+    assert out == {"off_delay": 300, "corr_weight": 0.6, "anti_wrinkle_enabled": True}
+    assert playground.sanitize_setting_values(None) == {}
+    assert playground.sanitize_setting_values("nope") == {}

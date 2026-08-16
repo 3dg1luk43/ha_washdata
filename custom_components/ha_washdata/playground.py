@@ -75,19 +75,24 @@ from .const import (
     CONF_STOP_THRESHOLD_W,
     CYCLE_OVERRUN_ANOMALY_RATIO,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
+    DEFAULT_DTW_BANDWIDTH,
     DEFAULT_MATCH_PERSISTENCE,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_NOTIFY_MILESTONES,
+    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     MATCH_CORR_WEIGHT,
     MATCH_DDTW_DIST_SCALE,
     MATCH_DTW_BLEND,
     MATCH_DTW_DIST_SCALE,
     MATCH_DTW_ENSEMBLE_W,
+    MATCH_DTW_REFINE_TOP_N,
     MATCH_DTW_RESAMPLE_N,
     MATCH_DURATION_SCALE,
     MATCH_DURATION_WEIGHT,
     MATCH_ENERGY_SCALE,
     MATCH_ENERGY_WEIGHT,
+    MATCH_KEEP_MIN_SCORE,
     MATCH_MAE_PEAK_FLOOR,
     MATCH_MAE_REF_PEAK,
     MATCH_MAE_SCALE,
@@ -200,6 +205,103 @@ _MATCH_OVERRIDE_KEYS: dict[str, tuple[str, Callable[[Any], Any]]] = {
     "duration_scale": ("duration_scale", float),
     "energy_scale": ("energy_scale", float),
 }
+
+
+# Canonical default for every matching override key, keyed by the OPTION key the
+# Playground uses. The Stage 2-4 entries are code constants (not stored options),
+# so this table is the only place the panel can read them from; ``ws_get_constants``
+# ships it as ``pg_match_defaults`` and ``effective_settings`` falls back to it for
+# any key the live matcher config does not carry.
+MATCH_DEFAULTS_BY_OPTION: dict[str, Any] = {
+    CONF_PROFILE_MATCH_MIN_DURATION_RATIO: DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_PROFILE_MATCH_MAX_DURATION_RATIO: DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    "corr_weight": MATCH_CORR_WEIGHT,
+    "keep_min_score": MATCH_KEEP_MIN_SCORE,
+    "dtw_bandwidth": DEFAULT_DTW_BANDWIDTH,
+    "dtw_blend": MATCH_DTW_BLEND,
+    "dtw_ensemble_w": MATCH_DTW_ENSEMBLE_W,
+    "dtw_ddtw_scale": MATCH_DDTW_DIST_SCALE,
+    "dtw_refine_top_n": MATCH_DTW_REFINE_TOP_N,
+    "duration_weight": MATCH_DURATION_WEIGHT,
+    "energy_weight": MATCH_ENERGY_WEIGHT,
+    "duration_scale": MATCH_DURATION_SCALE,
+    "energy_scale": MATCH_ENERGY_SCALE,
+}
+
+# Every option key the Playground control panel may carry (detection + matching).
+# This is the allow-list for a saved Playground preset: anything else submitted by
+# a client is dropped rather than stored.
+SETTING_KEYS: frozenset[str] = frozenset(_OVERRIDE_FIELD_MAP) | frozenset(_MATCH_OVERRIDE_KEYS)
+
+# The subset a user may publish from the Playground back into the live config:
+# exactly the override keys that are REAL config-entry options (``CONF_*``). The
+# Stage 2-4 scoring knobs above are sandbox-only code constants - there is no
+# option behind them, so writing them into ``entry.options`` would create dead
+# keys the integration never reads. The panel gates its publish buttons on this
+# list (shipped by ``get_playground_settings``).
+PUBLISHABLE_SETTING_KEYS: frozenset[str] = frozenset(_OVERRIDE_FIELD_MAP) | {
+    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+}
+
+
+def effective_settings(
+    base_config: CycleDetectorConfig, match_config: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Option-keyed view of the values a simulation runs with when NO override is
+    staged - i.e. the device's live, fully-resolved settings.
+
+    The exact inverse of ``build_sim_config`` / ``apply_match_overrides``: it reads
+    back the same fields those two write, so the Playground control panel shows the
+    values the integration actually uses (device-type defaults included) instead of
+    a static schema default that may have drifted. Never raises.
+    """
+    out: dict[str, Any] = {}
+    for opt_key, (field, coerce) in _OVERRIDE_FIELD_MAP.items():
+        value = getattr(base_config, field, None)
+        if value is None:
+            continue
+        try:
+            out[opt_key] = coerce(value)
+        except (TypeError, ValueError):  # pragma: no cover - defensive
+            continue
+    cfg = match_config or {}
+    for opt_key, (cfg_key, coerce) in _MATCH_OVERRIDE_KEYS.items():
+        value = cfg.get(cfg_key, MATCH_DEFAULTS_BY_OPTION.get(opt_key))
+        if value is None:
+            continue
+        try:
+            out[opt_key] = coerce(value)
+        except (TypeError, ValueError):  # pragma: no cover - defensive
+            continue
+    return out
+
+
+def sanitize_setting_values(values: Any) -> dict[str, Any]:
+    """Filter a client-supplied settings map down to storable Playground values.
+
+    Keeps only keys in :data:`SETTING_KEYS`, coerced with the same coercers the
+    simulation uses, so a preset can never carry an unknown key or a value that
+    would be silently ignored at replay time. Never raises.
+    """
+    if not isinstance(values, dict):
+        return {}
+    out: dict[str, Any] = {}
+    for key, value in values.items():
+        if value is None:
+            continue
+        mapping = _OVERRIDE_FIELD_MAP.get(key) or _MATCH_OVERRIDE_KEYS.get(key)
+        if mapping is None:
+            continue
+        _target, coerce = mapping
+        try:
+            coerced = coerce(value)
+        except (TypeError, ValueError):
+            continue
+        if isinstance(coerced, float) and not math.isfinite(coerced):
+            continue
+        out[key] = coerced
+    return out
 
 
 def apply_match_overrides(

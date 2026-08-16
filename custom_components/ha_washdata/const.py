@@ -1051,3 +1051,10 @@ PLAYGROUND_STRESS_MAX_SPARSE_STEPS: int = 15         # max sparse steps → max 
 PLAYGROUND_STRESS_MAX_IDLE_W: float = 100000.0       # upper bound for a manual idle override
                                                      # (far beyond any appliance; guards against
                                                      # inf/absurd values corrupting synthesis)
+
+# ─── Playground setting presets (sandbox snapshots, per device) ────────────────
+# Named snapshots of the Playground control panel's values, stored under the
+# "playground_presets" store key. They never touch the live config: publishing a
+# value to entry.options is always an explicit, per-setting user action.
+PLAYGROUND_PRESET_MAX: int = 30                      # per-device cap (keeps the store small)
+PLAYGROUND_PRESET_NAME_MAX: int = 60                 # preset name length cap

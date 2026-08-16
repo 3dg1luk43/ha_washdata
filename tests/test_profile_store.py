@@ -307,3 +307,53 @@ async def test_create_profile_already_exists(store):
     await store.create_profile("ProfileX", c2_id)
     assert store.get_profiles()["ProfileX"]["avg_duration"] == 200
     assert store.get_profiles()["ProfileX"]["sample_cycle_id"] == c2_id
+
+
+# ─── Playground presets (sandbox setting snapshots, per device) ────────────────
+
+
+@pytest.mark.asyncio
+async def test_playground_preset_save_load_and_delete(store):
+    """A preset round-trips through the store and never touches live config."""
+    assert store.get_playground_presets() == {}
+
+    rec = await store.async_save_playground_preset("Quiet nights", {"off_delay": 300})
+    assert rec["values"] == {"off_delay": 300}
+    assert rec["created_at"] and rec["updated_at"]
+    assert list(store.get_playground_presets()) == ["Quiet nights"]
+
+    # Overwriting keeps the original creation timestamp.
+    again = await store.async_save_playground_preset("Quiet nights", {"off_delay": 420})
+    assert again["created_at"] == rec["created_at"]
+    assert store.get_playground_presets()["Quiet nights"]["values"] == {"off_delay": 420}
+
+    assert await store.async_delete_playground_preset("Quiet nights") is True
+    assert store.get_playground_presets() == {}
+    # Deleting a name that is gone is a no-op, not an error.
+    assert await store.async_delete_playground_preset("Quiet nights") is False
+
+
+@pytest.mark.asyncio
+async def test_playground_preset_rejects_empty_input_and_enforces_cap(store):
+    from custom_components.ha_washdata.const import PLAYGROUND_PRESET_MAX
+
+    with pytest.raises(ValueError):
+        await store.async_save_playground_preset("   ", {"off_delay": 300})
+    with pytest.raises(ValueError):
+        await store.async_save_playground_preset("Empty", {})
+
+    for i in range(PLAYGROUND_PRESET_MAX):
+        await store.async_save_playground_preset(f"p{i}", {"off_delay": 100 + i})
+    with pytest.raises(ValueError):
+        await store.async_save_playground_preset("one too many", {"off_delay": 999})
+    # An existing name may still be overwritten at the cap.
+    await store.async_save_playground_preset("p0", {"off_delay": 111})
+    assert len(store.get_playground_presets()) == PLAYGROUND_PRESET_MAX
+
+
+@pytest.mark.asyncio
+async def test_playground_presets_self_heal_corrupt_store_key(store):
+    store._data["playground_presets"] = ["not", "a", "dict"]
+    assert store.get_playground_presets() == {}
+    await store.async_save_playground_preset("ok", {"off_delay": 300})
+    assert list(store.get_playground_presets()) == ["ok"]

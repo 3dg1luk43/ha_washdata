@@ -81,6 +81,7 @@ from .const import (
     DOMAIN,
     ENABLE_ML_SUGGESTIONS,
     ENABLE_ML_TRAINING,
+    PLAYGROUND_PRESET_MAX,
     SHOW_ML_LAB,
     STATE_COLORS,
 )
@@ -1112,6 +1113,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_pause_cycle, ws_resume_cycle, ws_terminate_cycle,
         # Playground (F3): DTW visualizer
         ws_get_dtw_debug,
+        # Playground settings control panel: live values + named presets
+        ws_get_playground_settings, ws_save_playground_preset, ws_delete_playground_preset,
         # Playground redesign: faithful single-cycle sim + history table + sweep
         ws_run_playground_cycle_detail, ws_run_playground_history,
         ws_run_playground_sweep,
@@ -3244,21 +3247,6 @@ def ws_get_constants(
     from .frontend import BRAND_ICON_URL as _BRAND_ICON_URL, BRAND_ICON_REGISTERED_KEY as _BRAND_ICON_KEY  # pylint: disable=import-outside-toplevel
     from .const import STORE_WEB_ORIGIN
     from . import store_account
-    from .const import (  # pylint: disable=import-outside-toplevel
-        DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-        DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-        DEFAULT_DTW_BANDWIDTH,
-        MATCH_CORR_WEIGHT,
-        MATCH_KEEP_MIN_SCORE,
-        MATCH_DTW_BLEND,
-        MATCH_DTW_ENSEMBLE_W,
-        MATCH_DDTW_DIST_SCALE,
-        MATCH_DTW_REFINE_TOP_N,
-        MATCH_DURATION_WEIGHT,
-        MATCH_ENERGY_WEIGHT,
-        MATCH_DURATION_SCALE,
-        MATCH_ENERGY_SCALE,
-    )
     _send_result(connection, msg["id"], "get_constants", {
             "version": hass.data.get("ha_washdata_version", _INTEGRATION_VERSION),
             "icon_url": _BRAND_ICON_URL if hass.data.get(_BRAND_ICON_KEY) else None,
@@ -3270,22 +3258,9 @@ def ws_get_constants(
             "PROFILE_MIN_WARMUP_CYCLES": CONF_PROFILE_MIN_WARMUP_CYCLES,
             # Canonical matcher defaults for the Playground's matcher-param fields, so
             # the panel's _PG_MATCH_DEFAULTS table cannot silently drift from const.py.
-            # The panel keeps that table only as an offline fallback.
-            "pg_match_defaults": {
-                "profile_match_min_duration_ratio": DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-                "profile_match_max_duration_ratio": DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-                "corr_weight": MATCH_CORR_WEIGHT,
-                "keep_min_score": MATCH_KEEP_MIN_SCORE,
-                "dtw_bandwidth": DEFAULT_DTW_BANDWIDTH,
-                "dtw_blend": MATCH_DTW_BLEND,
-                "dtw_ensemble_w": MATCH_DTW_ENSEMBLE_W,
-                "dtw_ddtw_scale": MATCH_DDTW_DIST_SCALE,
-                "dtw_refine_top_n": MATCH_DTW_REFINE_TOP_N,
-                "duration_weight": MATCH_DURATION_WEIGHT,
-                "energy_weight": MATCH_ENERGY_WEIGHT,
-                "duration_scale": MATCH_DURATION_SCALE,
-                "energy_scale": MATCH_ENERGY_SCALE,
-            },
+            # The panel keeps that table only as an offline fallback. Single source:
+            # playground.MATCH_DEFAULTS_BY_OPTION (also used by effective_settings).
+            "pg_match_defaults": dict(playground.MATCH_DEFAULTS_BY_OPTION),
             # Community store: the panel opens <origin>/connect.html for the GitHub
             # handoff and validates postMessage against new URL(origin).origin.
             "store_online_available": True,
@@ -5467,6 +5442,123 @@ async def ws_get_dtw_debug(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("DTW debug failed for %s: %s", entry_id, exc)
         connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+# ─── Playground settings control panel (live values + presets) ─────────────────
+
+
+def _playground_preset_list(store: Any) -> list[dict[str, Any]]:
+    """Presets as a name-sorted list for the panel dropdown."""
+    presets = store.get_playground_presets()
+    out: list[dict[str, Any]] = []
+    for name, record in presets.items():
+        if not isinstance(record, dict):
+            continue
+        out.append({
+            "name": name,
+            "values": dict(record.get("values") or {}),
+            "created_at": record.get("created_at"),
+            "updated_at": record.get("updated_at"),
+        })
+    out.sort(key=lambda p: str(p["name"]).lower())
+    return out
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_playground_settings",
+        vol.Required("entry_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_get_playground_settings(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the device's LIVE effective Playground settings plus saved presets.
+
+    ``effective`` is read back off the same live detector/matcher config the
+    simulation uses, so the control panel always opens on what the integration is
+    really running - never on a stale schema default. ``publishable`` lists the
+    keys the panel may write back to the config entry.
+    """
+    entry_id: str = msg["entry_id"]
+    ctx = _playground_context(hass, entry_id)
+    if ctx is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    _manager, store, base_config, _options, _price = ctx
+    try:
+        match_config = playground._matching_config(store)  # noqa: SLF001
+    except Exception:  # pylint: disable=broad-exception-caught
+        match_config = {}
+    _send_result(connection, msg["id"], "get_playground_settings", {
+        "effective": playground.effective_settings(base_config, match_config),
+        "presets": _playground_preset_list(store),
+        "publishable": sorted(playground.PUBLISHABLE_SETTING_KEYS),
+        "preset_limit": PLAYGROUND_PRESET_MAX,
+    })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/save_playground_preset",
+        vol.Required("entry_id"): str,
+        vol.Required("name"): str,
+        vol.Required("values"): dict,
+    }
+)
+@websocket_api.async_response
+async def ws_save_playground_preset(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Save (or overwrite) a named snapshot of the Playground's settings."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    store = getattr(manager, "profile_store", None) if manager else None
+    if store is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    values = playground.sanitize_setting_values(msg["values"])
+    try:
+        await store.async_save_playground_preset(msg["name"], values)
+    except ValueError as exc:
+        connection.send_error(msg["id"], "invalid_format", str(exc))
+        return
+    _send_result(connection, msg["id"], "save_playground_preset", {
+        "success": True,
+        "presets": _playground_preset_list(store),
+    })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/delete_playground_preset",
+        vol.Required("entry_id"): str,
+        vol.Required("name"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_delete_playground_preset(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Delete a saved Playground settings preset."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    store = getattr(manager, "profile_store", None) if manager else None
+    if store is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    removed = await store.async_delete_playground_preset(msg["name"])
+    _send_result(connection, msg["id"], "delete_playground_preset", {
+        "success": removed,
+        "presets": _playground_preset_list(store),
+    })
 
 
 # ─── Background-task registry (progress / cancel / reconnect-safe results) ──────
