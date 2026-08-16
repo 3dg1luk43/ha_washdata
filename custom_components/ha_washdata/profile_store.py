@@ -2357,6 +2357,18 @@ class ProfileStore:
             return cast(dict[str, JSONDict], self._data["playground_presets"])
         return cast(dict[str, JSONDict], raw)
 
+    @staticmethod
+    def _playground_preset_key(name: str) -> str:
+        """Canonical storage key for a Playground preset name.
+
+        Save and delete MUST derive the key the same way: truncating only on save
+        meant a name longer than the cap was stored truncated but looked up in
+        full, leaving a preset that could never be deleted. The trailing strip()
+        runs after the clamp so a cut landing mid-space cannot bake a trailing
+        space into the key.
+        """
+        return (name or "").strip()[:PLAYGROUND_PRESET_NAME_MAX].strip()
+
     async def async_save_playground_preset(
         self, name: str, values: dict[str, Any]
     ) -> JSONDict:
@@ -2367,7 +2379,7 @@ class ProfileStore:
         be a cycle). Raises ``ValueError`` for an empty name, an empty value map, or
         when the per-device preset cap is reached by a NEW name.
         """
-        name = (name or "").strip()[:PLAYGROUND_PRESET_NAME_MAX]
+        name = self._playground_preset_key(name)
         if not name:
             raise ValueError("Preset name is required")
         if not isinstance(values, dict) or not values:
@@ -2397,7 +2409,7 @@ class ProfileStore:
     async def async_delete_playground_preset(self, name: str) -> bool:
         """Remove a Playground preset by name; report whether one was removed."""
         presets = self.get_playground_presets()
-        if presets.pop((name or "").strip(), None) is None:
+        if presets.pop(self._playground_preset_key(name), None) is None:
             return False
         await self.async_save()
         self._logger.info("Deleted playground preset %r", name)
