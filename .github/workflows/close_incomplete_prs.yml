@@ -124,6 +124,11 @@ jobs:
               return lookupFailed ? undefined : false;
             };
 
+            // Kept in sync with validate_pr.yml: the two labels its accepted branch
+            // clears, and the marker on the notice comment it posts and deletes.
+            const ACCEPTED_ISSUE_LABELS = ['needs accepted issue', 'awaiting maintainer'];
+            const ISSUE_LINK_BOT_MARKER = '<!-- pr-validator-issue-link-bot -->';
+
             const closed = new Set();
             for (const rule of RULES) {
               const cutoff = new Date(Date.now() - rule.graceDays * 24 * 60 * 60 * 1000);
@@ -145,10 +150,28 @@ jobs:
                     continue;
                   }
                   if (accepted) {
-                    await github.rest.issues.removeLabel({
-                      owner, repo, issue_number: pr.number, name: rule.label,
-                    }).catch(() => {});
-                    console.log(`Skipped PR #${pr.number} - linked issue is now accepted; cleared "${rule.label}".`);
+                    // Mirror validate_pr.yml's accepted branch exactly: BOTH
+                    // accepted-issue labels come off and the stale "not yet
+                    // accepted" notice is deleted. Clearing only rule.label would
+                    // leave the other label to trip a later rule, and leave a
+                    // comment on the PR that now contradicts its state.
+                    for (const name of ACCEPTED_ISSUE_LABELS) {
+                      await github.rest.issues.removeLabel({
+                        owner, repo, issue_number: pr.number, name,
+                      }).catch(() => {});
+                    }
+                    try {
+                      const prComments = await github.paginate(github.rest.issues.listComments, {
+                        owner, repo, issue_number: pr.number, per_page: 100,
+                      });
+                      const notice = prComments.find(c => c.body && c.body.includes(ISSUE_LINK_BOT_MARKER));
+                      if (notice) {
+                        await github.rest.issues.deleteComment({ owner, repo, comment_id: notice.id });
+                      }
+                    } catch (e) {
+                      console.warn(`Could not clear the issue-link notice on PR #${pr.number}: ${e.message}`);
+                    }
+                    console.log(`Skipped PR #${pr.number} - linked issue is now accepted; cleared labels + notice.`);
                     continue;
                   }
                 }

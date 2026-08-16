@@ -647,6 +647,11 @@ class CycleDetector:
         self._last_match_confidence = 0.0
         self._match_ambiguous = False
         self._match_prefix_ambiguous = False
+        # Per-cycle diagnostic throttle (#346): the "Smart Termination not applied"
+        # line only logs when the reason CHANGES. Carrying the previous cycle's
+        # reason across a reset swallows the new cycle's very first diagnostic
+        # whenever it happens to be blocked for the same reason.
+        self._last_smart_term_block_reason = None
         self._ignore_power_until_idle = False  # Reset lockout
         self._lockout_high_seconds = 0.0
         # Clear the verified-pause flag so it can't leak into the next cycle (B6):
