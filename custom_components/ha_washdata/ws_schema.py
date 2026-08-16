@@ -443,6 +443,31 @@ class GetDtwDebugResponse(TypedDict):
     warp_path: list[list[int]]
 
 
+class PlaygroundPreset(TypedDict):
+    """One saved Playground settings snapshot."""
+
+    name: str
+    values: dict[str, Any]
+    created_at: Any
+    updated_at: Any
+
+
+class GetPlaygroundSettingsResponse(TypedDict):
+    """Live effective Playground settings + the device's saved presets."""
+
+    effective: dict[str, Any]
+    presets: list[PlaygroundPreset]
+    publishable: list[str]
+    preset_limit: int
+
+
+class PlaygroundPresetsResponse(TypedDict):
+    """Acknowledgement carrying the post-mutation preset list."""
+
+    success: bool
+    presets: list[PlaygroundPreset]
+
+
 class TaskSnapshot(TypedDict, total=False):
     id: str
     entry_id: str
@@ -686,6 +711,9 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "run_playground_history": RunPlaygroundHistoryResponse,
     "run_playground_sweep": RunPlaygroundSweepResponse,
     "get_dtw_debug": GetDtwDebugResponse,
+    "get_playground_settings": GetPlaygroundSettingsResponse,
+    "save_playground_preset": PlaygroundPresetsResponse,
+    "delete_playground_preset": PlaygroundPresetsResponse,
     "list_tasks": ListTasksResponse,
     "subscribe_tasks": SubscribeTasksResponse,
     "cancel_task": CancelTaskResponse,
@@ -962,6 +990,13 @@ WS_COMMANDS: dict[str, dict] = {
         _p("cycle_id", "str"),
         _p("profile_name", "str|null", False),
     ]},
+    "get_playground_settings": {"params": [_entry()]},
+    "save_playground_preset": {"params": [
+        _entry(),
+        _p("name", "str"),
+        _p("values", "dict"),
+    ]},
+    "delete_playground_preset": {"params": [_entry(), _p("name", "str")]},
     "list_tasks": {"params": [_p("entry_id", "str|null", False)]},
     "subscribe_tasks": {"params": [_p("entry_id", "str|null", False)]},
     "cancel_task": {"params": [_p("task_id", "str")]},

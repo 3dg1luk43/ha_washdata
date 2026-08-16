@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**103 commands.**
+**106 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -86,6 +86,9 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `run_playground_history` | entry_id, cycle_ids?, settings_override?, concurrency? | `RunPlaygroundHistoryResponse` |
 | `run_playground_sweep` | entry_id, param, values, objective, cycle_ids?, concurrency?, param_y?, values_y? | `RunPlaygroundSweepResponse` |
 | `get_dtw_debug` | entry_id, cycle_id, profile_name? | `GetDtwDebugResponse` |
+| `get_playground_settings` | entry_id | `GetPlaygroundSettingsResponse` |
+| `save_playground_preset` | entry_id, name, values | `PlaygroundPresetsResponse` |
+| `delete_playground_preset` | entry_id, name | `PlaygroundPresetsResponse` |
 | `list_tasks` | entry_id? | `ListTasksResponse` |
 | `subscribe_tasks` | entry_id? | `SubscribeTasksResponse` |
 | `cancel_task` | task_id | `CancelTaskResponse` |
@@ -1420,6 +1423,56 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `dtw` | yes | DtwScores |
 | `stage4` | yes | DtwStage4Scores |
 | `warp_path` | yes | list[list[number]] |
+
+## `ha_washdata/get_playground_settings`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`GetPlaygroundSettingsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `effective` | yes | dict[str, any] |
+| `presets` | yes | list[PlaygroundPreset] |
+| `publishable` | yes | list[str] |
+| `preset_limit` | yes | number |
+
+## `ha_washdata/save_playground_preset`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `name` | yes | str |
+| `values` | yes | dict |
+
+**Response** (`PlaygroundPresetsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `presets` | yes | list[PlaygroundPreset] |
+
+## `ha_washdata/delete_playground_preset`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `name` | yes | str |
+
+**Response** (`PlaygroundPresetsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `presets` | yes | list[PlaygroundPreset] |
 
 ## `ha_washdata/list_tasks`
 

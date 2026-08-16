@@ -49,6 +49,8 @@ from .const import (
     PHASE_HEAT_CV_WARN,
     PHASE_HEAT_OCC_MIXED_LO,
     PHASE_HEAT_OCC_MIXED_HI,
+    PLAYGROUND_PRESET_MAX,
+    PLAYGROUND_PRESET_NAME_MAX,
     REFERENCE_PROFILE_CURVE_POINTS,
     SHAPE_DRIFT_MIN_CYCLES,
     SHAPE_DRIFT_RESAMPLE_N,
@@ -1265,6 +1267,7 @@ class ProfileStore:
             "ml_model_versions": {},  # On-device trained model specs (Stage 4)
             "profile_groups": {},  # Named groups of near-duplicate profiles (Stage 5)
             "maintenance_log": [],  # User-logged maintenance events (Group E)
+            "playground_presets": {},  # Named Playground setting snapshots (sandbox only)
         }
 
 
@@ -2333,6 +2336,71 @@ class ProfileStore:
             return False
         self._data["maintenance_log"] = remaining
         await self.async_save()
+        return True
+
+    # ─── Playground presets ────────────────────────────────────────────────────
+    # Named snapshots of the Playground's settings control panel. Sandbox data:
+    # nothing here ever reaches the live detector or matcher - the user publishes
+    # individual values to entry.options explicitly (ws_set_options) if they want
+    # them live. Stored per device because the values are device-scale (watts,
+    # seconds tuned for THIS appliance).
+
+    def get_playground_presets(self) -> dict[str, JSONDict]:
+        """Return the mutable playground-presets mapping (name -> record).
+
+        Each record is ``{"values": {...}, "created_at": iso, "updated_at": iso}``.
+        Self-heals a corrupt/missing key to an empty mapping. Never raises.
+        """
+        raw = self._data.setdefault("playground_presets", {})
+        if not isinstance(raw, dict):
+            self._data["playground_presets"] = {}
+            return cast(dict[str, JSONDict], self._data["playground_presets"])
+        return cast(dict[str, JSONDict], raw)
+
+    async def async_save_playground_preset(
+        self, name: str, values: dict[str, Any]
+    ) -> JSONDict:
+        """Create or overwrite a named Playground preset and persist it.
+
+        ``values`` must already be sanitized by ``playground.sanitize_setting_values``
+        (the store deliberately does not import the playground module - that would
+        be a cycle). Raises ``ValueError`` for an empty name, an empty value map, or
+        when the per-device preset cap is reached by a NEW name.
+        """
+        name = (name or "").strip()[:PLAYGROUND_PRESET_NAME_MAX]
+        if not name:
+            raise ValueError("Preset name is required")
+        if not isinstance(values, dict) or not values:
+            raise ValueError("Preset has no settings to save")
+        presets = self.get_playground_presets()
+        existing = presets.get(name)
+        if existing is None and len(presets) >= PLAYGROUND_PRESET_MAX:
+            raise ValueError(
+                f"Preset limit reached ({PLAYGROUND_PRESET_MAX}); delete one first"
+            )
+        now = dt_util.now().isoformat()
+        created = now
+        if isinstance(existing, dict) and isinstance(existing.get("created_at"), str):
+            created = existing["created_at"]
+        record: JSONDict = {
+            "values": dict(values),
+            "created_at": created,
+            "updated_at": now,
+        }
+        presets[name] = record
+        await self.async_save()
+        self._logger.info(
+            "Saved playground preset %r with %d values", name, len(values)
+        )
+        return record
+
+    async def async_delete_playground_preset(self, name: str) -> bool:
+        """Remove a Playground preset by name; report whether one was removed."""
+        presets = self.get_playground_presets()
+        if presets.pop((name or "").strip(), None) is None:
+            return False
+        await self.async_save()
+        self._logger.info("Deleted playground preset %r", name)
         return True
 
     def cycles_since_maintenance(self, event_type: str) -> int:

@@ -214,6 +214,13 @@ export interface GetPhaseCatalogResponse {
   device_type: string | null;
 }
 
+export interface GetPlaygroundSettingsResponse {
+  effective: Record<string, unknown>;
+  presets: PlaygroundPreset[];
+  publishable: string[];
+  preset_limit: number;
+}
+
 export interface GetPowerHistoryResponse {
   cycle_active?: boolean;
   cycle_elapsed_s?: number;
@@ -295,6 +302,18 @@ export interface ListTasksResponse {
 
 export interface OkResponse {
   ok: boolean;
+}
+
+export interface PlaygroundPreset {
+  name: string;
+  values: Record<string, unknown>;
+  created_at: unknown;
+  updated_at: unknown;
+}
+
+export interface PlaygroundPresetsResponse {
+  success: boolean;
+  presets: PlaygroundPreset[];
 }
 
 export interface ProfileEnvelope {
@@ -885,6 +904,21 @@ export interface GetDtwDebugRequest {
   profile_name?: string | null;
 }
 
+export interface GetPlaygroundSettingsRequest {
+  entry_id: string;
+}
+
+export interface SavePlaygroundPresetRequest {
+  entry_id: string;
+  name: string;
+  values: Record<string, unknown>;
+}
+
+export interface DeletePlaygroundPresetRequest {
+  entry_id: string;
+  name: string;
+}
+
 export interface ListTasksRequest {
   entry_id?: string | null;
 }
@@ -1108,6 +1142,9 @@ export interface WashDataWsRequests {
   "ha_washdata/run_playground_history": RunPlaygroundHistoryRequest;
   "ha_washdata/run_playground_sweep": RunPlaygroundSweepRequest;
   "ha_washdata/get_dtw_debug": GetDtwDebugRequest;
+  "ha_washdata/get_playground_settings": GetPlaygroundSettingsRequest;
+  "ha_washdata/save_playground_preset": SavePlaygroundPresetRequest;
+  "ha_washdata/delete_playground_preset": DeletePlaygroundPresetRequest;
   "ha_washdata/list_tasks": ListTasksRequest;
   "ha_washdata/subscribe_tasks": SubscribeTasksRequest;
   "ha_washdata/cancel_task": CancelTaskRequest;
@@ -1214,6 +1251,9 @@ export interface WashDataWsResponses {
   "ha_washdata/run_playground_history": RunPlaygroundHistoryResponse;
   "ha_washdata/run_playground_sweep": RunPlaygroundSweepResponse;
   "ha_washdata/get_dtw_debug": GetDtwDebugResponse;
+  "ha_washdata/get_playground_settings": GetPlaygroundSettingsResponse;
+  "ha_washdata/save_playground_preset": PlaygroundPresetsResponse;
+  "ha_washdata/delete_playground_preset": PlaygroundPresetsResponse;
   "ha_washdata/list_tasks": ListTasksResponse;
   "ha_washdata/subscribe_tasks": SubscribeTasksResponse;
   "ha_washdata/cancel_task": CancelTaskResponse;

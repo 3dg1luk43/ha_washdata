@@ -1136,6 +1136,16 @@ button.wd-profile-card { display: block; }
 .wd-pg-cand-track { flex: 1; height: 7px; background: var(--secondary-background-color); border-radius: var(--wd-radius-sm); overflow: hidden; }
 .wd-pg-cand-fill { height: 100%; border-radius: var(--wd-radius-sm); }
 .wd-pg-cand-pct { flex: 0 0 34px; text-align: right; color: var(--secondary-text-color); }
+/* Playground: settings control panel (live-settings source + named presets) */
+.wd-pg-ctrl { border: 1px solid var(--divider-color, rgba(127,127,127,.25)); border-radius: var(--wd-radius-md, 10px); padding: 8px 10px; margin: 0 0 10px; background: var(--secondary-background-color); }
+.wd-pg-ctrl .wd-btn { white-space: nowrap; }
+.wd-pg-preset-sel { min-width: 150px; max-width: 220px; font-size: .82em; }
+.wd-pg-preset-name { flex: 1 1 150px; min-width: 120px; max-width: 220px; font-size: .82em; }
+/* Per-setting publish arrow. The empty slot keeps every row's value column aligned
+   whether or not that row currently has a publishable change. */
+.wd-pg-pub { width: 20px; height: 20px; flex: 0 0 20px; padding: 0; border: none; border-radius: 5px; cursor: pointer; background: var(--primary-color); color: var(--text-primary-color, #fff); font-size: .8em; line-height: 1; }
+.wd-pg-pub:hover { filter: brightness(1.15); }
+.wd-pg-pub-slot { width: 20px; flex: 0 0 20px; display: inline-block; }
 /* Playground: unified workbench (graph+settings always on top) + "Across your
    cycles" drawer with History/Optimize sub-tabs. */
 .wd-pg-drawer { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); }
@@ -1854,6 +1864,16 @@ class HaWashdataPanel extends HTMLElement {
     this._pgThreshStart = null;     // null = use live option; number = dragged override (W)
     this._pgThreshStop = null;      // same for stop threshold
     this._pgParamOverrides = {};    // other params: off_delay, min_off_gap, etc.
+    // Settings control panel: the device's LIVE effective values (what the running
+    // detector/matcher actually use, device-type defaults resolved server-side) are
+    // the baseline every field renders against; the three states above are the diff
+    // on top of it. Loaded from get_playground_settings on tab entry.
+    this._pgEffective = null;       // {key: value} live baseline; null = not loaded yet
+    this._pgPublishable = null;     // keys that are real config options (publish allow-list)
+    this._pgPresets = [];           // saved sandbox snapshots [{name, values, ...}]
+    this._pgPresetLimit = 0;        // server-side per-device preset cap
+    this._pgPresetSel = '';         // selected preset name in the dropdown
+    this._pgPresetName = '';        // "save as" name input buffer (survives re-render)
     this._pgView = null;            // {min,max} time-axis zoom window (seconds); null = full
     this._pgHoverT = null;          // hovered time (seconds) for cursor readout; null = none
     this._pgMap = null;             // current time<->x mapping, set by _pgDrawCanvas
@@ -2899,6 +2919,9 @@ class HaWashdataPanel extends HTMLElement {
     this._pgCycleId = ''; this._pgProfileName = '';
     this._pgPowerPts = null; this._pgDtwData = null; this._pgEnvData = null;
     this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
+    // Live baseline + presets are per-device; re-fetched by _fetchTabData.
+    this._pgEffective = null; this._pgPublishable = null;
+    this._pgPresets = []; this._pgPresetSel = ''; this._pgPresetName = ''; this._pgPresetLimit = 0;
     this._pgView = null; this._pgHoverT = null; this._pgLoadSeq++;
     this._pgNeedsRestart = false; this._pgLoading = false;
     this._pgDetail = null; this._pgHistory = null; this._pgSweepNew = null;
@@ -3084,6 +3107,11 @@ class HaWashdataPanel extends HTMLElement {
         this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'advanced' && this._panelSubtab === 'ml') this._renderPreservingFormEdits(); });
       } else if (this._tab === 'playground') {
         try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (!this._isActiveEntry(eid)) return; this._opts = r.options || {}; } catch (_) {}
+        // Always open on the integration's CURRENT settings: the backend reads them
+        // back off the live detector/matcher config, so no stale schema default can
+        // leak into the sandbox.
+        await this._pgFetchSettings(eid);
+        if (!this._isActiveEntry(eid)) return;
         await this._fetchCycles(eid);
         if (!this._profiles.length) await this._fetchProfiles(eid);
         // Auto-select most recent cycle on first load. Profile defaults to
@@ -5327,11 +5355,19 @@ class HaWashdataPanel extends HTMLElement {
     ];
   }
 
-  // Resolve a pre-fill value for an override field: staged override → live option
-  // → field default (settings schema) → matcher constant default → ''.
+  // Resolve a pre-fill value for an override field: staged override → the live
+  // effective value from the backend → stored option → field default (settings
+  // schema) → matcher constant default → ''.
+  //
+  // The effective value comes first because it is the ONLY source that resolves
+  // device-type defaults (e.g. a dishwasher's min_off_gap) the way the running
+  // integration does; the option/schema fallbacks below it only matter on an older
+  // backend that has no get_playground_settings command.
   _pgFieldVal(key, store) {
     const s = store || {};
     if (s[key] !== undefined) return s[key];
+    const eff = this._pgEffective || {};
+    if (eff[key] !== undefined && eff[key] !== null) return eff[key];
     const o = this._opts || {};
     if (o[key] !== undefined && o[key] !== null) return o[key];
     const f = _FIELD_BY_KEY[key] || {};
@@ -5343,6 +5379,233 @@ class HaWashdataPanel extends HTMLElement {
     if (be[key] !== undefined) return be[key];
     if (_PG_MATCH_DEFAULTS[key] !== undefined) return _PG_MATCH_DEFAULTS[key];
     return '';
+  }
+
+  // ── Playground settings control panel ───────────────────────────────────────
+  // Load live → edit in the sandbox → save/load a named preset → publish single
+  // values back. The staged-override maps stay the single source of "what the
+  // user changed"; this block only decides what they are measured against.
+
+  // Fetch the device's live effective settings + its saved presets. Tolerant of an
+  // older backend (command unknown): the field pre-fill silently falls back to the
+  // stored-option chain in _pgFieldVal.
+  async _pgFetchSettings(entryId) {
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/get_playground_settings`, entry_id: entryId });
+      if (!this._isActiveEntry(entryId)) return;
+      this._pgEffective = r.effective || {};
+      this._pgPublishable = Array.isArray(r.publishable) ? r.publishable : null;
+      this._pgPresets = Array.isArray(r.presets) ? r.presets : [];
+      this._pgPresetLimit = r.preset_limit || 0;
+      if (this._pgPresetSel && !this._pgPresets.some(p => p.name === this._pgPresetSel)) this._pgPresetSel = '';
+    } catch (e) {
+      if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+    }
+  }
+
+  // Every value the control panel currently shows (live baseline + staged edits).
+  // This is what a "save preset" snapshots, so a preset is a complete setup rather
+  // than a sparse diff that would mean something different on another baseline.
+  _pgCurrentValues() {
+    const out = {};
+    for (const [key] of this._pgOverrideFields()) {
+      const v = this._pgFieldVal(key, {});
+      if (v !== '' && v !== null && v !== undefined) out[key] = v;
+    }
+    if (this._pgThreshStart != null) out.start_threshold_w = this._pgThreshStart;
+    if (this._pgThreshStop != null) out.stop_threshold_w = this._pgThreshStop;
+    for (const [k, v] of Object.entries(this._pgParamOverrides || {})) out[k] = v;
+    return out;
+  }
+
+  // Staged value for one key, or undefined when the field is at the live baseline.
+  _pgStagedVal(key) {
+    if (key === 'start_threshold_w') return this._pgThreshStart ?? undefined;
+    if (key === 'stop_threshold_w') return this._pgThreshStop ?? undefined;
+    return this._pgParamOverrides[key];
+  }
+
+  _pgSetStaged(key, val) {
+    if (key === 'start_threshold_w') this._pgThreshStart = val;
+    else if (key === 'stop_threshold_w') this._pgThreshStop = val;
+    else this._pgParamOverrides[key] = val;
+  }
+
+  _pgClearStaged(key) {
+    if (key === 'start_threshold_w') this._pgThreshStart = null;
+    else if (key === 'stop_threshold_w') this._pgThreshStop = null;
+    else delete this._pgParamOverrides[key];
+  }
+
+  // Keys the user changed away from the live baseline (a staged value equal to the
+  // live one is not a change and is never published).
+  _pgChangedKeys() {
+    const live = this._pgEffective || {};
+    const keys = [];
+    for (const [key] of this._pgOverrideFields()) {
+      const staged = this._pgStagedVal(key);
+      if (staged === undefined || staged === null) continue;
+      const base = live[key];
+      if (base !== undefined && base !== null && this._pgSameVal(staged, base)) continue;
+      keys.push(key);
+    }
+    return keys;
+  }
+
+  // Loose numeric/bool equality: input fields yield strings and floats can carry
+  // representation noise, so compare on value, not on type.
+  _pgSameVal(a, b) {
+    if (typeof a === 'boolean' || typeof b === 'boolean') return !!a === !!b;
+    const na = parseFloat(a), nb = parseFloat(b);
+    if (!isNaN(na) && !isNaN(nb)) return Math.abs(na - nb) < 1e-9;
+    return String(a) === String(b);
+  }
+
+  // Can this key be written back to the live config? The backend ships the
+  // allow-list (real CONF_* options only); the settings-schema membership test is
+  // the offline fallback. The Stage 2-4 matcher knobs are sandbox-only constants
+  // with no option behind them, so they are never publishable.
+  _pgIsPublishable(key) {
+    if (Array.isArray(this._pgPublishable)) return this._pgPublishable.includes(key);
+    return !!_FIELD_BY_KEY[key];
+  }
+
+  _htmlPgControlPanel() {
+    const changed = this._pgChangedKeys();
+    const canEdit = this._canEdit();
+    const loaded = !!this._pgEffective;
+    const publishable = changed.filter(k => this._pgIsPublishable(k));
+
+    const status = !loaded
+      ? `<span style="color:var(--secondary-text-color)">${this._t('msg.pg_live_unavailable', {}, 'Live settings unavailable — showing defaults.')}</span>`
+      : (changed.length
+        ? `<span style="color:var(--warning-color,#ff9800);font-weight:600">${this._t('msg.pg_n_changed', {n: changed.length}, changed.length + ' changed vs live settings')}</span>`
+        : `<span style="color:var(--success-color,#4caf50)">✓ ${this._t('msg.pg_matches_live', {}, 'Matches live settings')}</span>`);
+
+    const presetOpts = `<option value="">${_esc(this._t('lbl.pg_preset_none', {}, 'Select a preset…'))}</option>`
+      + (this._pgPresets || []).map(p => `<option value="${_esc(p.name)}" ${this._pgPresetSel === p.name ? 'selected' : ''}>${_esc(p.name)}</option>`).join('');
+    const hasSel = !!this._pgPresetSel;
+    const atLimit = this._pgPresetLimit > 0 && (this._pgPresets || []).length >= this._pgPresetLimit
+      && !(this._pgPresets || []).some(p => p.name === (this._pgPresetName || '').trim());
+
+    const presetRow = `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      <select id="wd-pg-preset-sel" class="wd-pg-preset-sel" aria-label="${_esc(this._t('lbl.pg_preset', {}, 'Playground preset'))}">${presetOpts}</select>
+      <button class="wd-btn wd-btn-sm" data-action="pg-preset-load" ${hasSel ? '' : 'disabled'} title="${_esc(this._t('btn.pg_preset_load_tip', {}, 'Replace the Playground values with this preset (live settings are untouched)'))}">${this._t('btn.pg_preset_load', {}, 'Load preset')}</button>
+      ${canEdit ? `<button class="wd-btn wd-btn-sm wd-btn-danger" data-action="pg-preset-delete" ${hasSel ? '' : 'disabled'} aria-label="${_esc(this._t('btn.pg_preset_delete', {}, 'Delete preset'))}" title="${_esc(this._t('btn.pg_preset_delete', {}, 'Delete preset'))}">🗑</button>` : ''}
+    </div>`;
+
+    const saveRow = canEdit ? `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      <input id="wd-pg-preset-name" type="text" class="wd-pg-preset-name" maxlength="60" value="${_esc(this._pgPresetName || '')}" placeholder="${_esc(this._t('lbl.pg_preset_name', {}, 'New preset name'))}" aria-label="${_esc(this._t('lbl.pg_preset_name', {}, 'New preset name'))}">
+      <button class="wd-btn wd-btn-sm" data-action="pg-preset-save" ${(this._pgPresetName || '').trim() && !atLimit ? '' : 'disabled'} title="${_esc(this._t('btn.pg_preset_save_tip', {}, 'Save every value below as a named preset for this device'))}">${this._t('btn.pg_preset_save', {}, 'Save as preset')}</button>
+      ${atLimit ? `<span style="font-size:.72em;color:var(--warning-color,#ff9800)">${this._t('msg.pg_preset_limit', {n: this._pgPresetLimit}, 'Preset limit reached (' + this._pgPresetLimit + ')')}</span>` : ''}
+    </div>` : '';
+
+    const publishBtn = (canEdit && publishable.length)
+      ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-apply-settings" title="${_esc(this._t('btn.pg_apply_to_settings_tip', {}, 'Copy the values you edited here into this device\'s live settings'))}">${this._t('btn.pg_publish_all', {n: publishable.length}, 'Publish ' + publishable.length + ' to integration')}</button>`
+      : '';
+
+    return `<div class="wd-pg-ctrl">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="wd-subhead" style="margin:0">${this._t('hdr.pg_settings_source', {}, 'Settings source')}</span>
+        <span style="font-size:.75em">${status}</span>
+      </div>
+      <p class="wd-info" style="margin:4px 0 0;font-size:.72em">${this._t('msg.pg_ctrl_intro', {}, 'Values start from this device\'s live integration settings. Edits stay in the Playground until you publish them.')}</p>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
+        <button class="wd-btn wd-btn-sm" data-action="pg-load-live" title="${_esc(this._t('btn.pg_load_live_tip', {}, 'Re-read the integration\'s current settings and drop every Playground edit'))}">⟳ ${this._t('btn.pg_load_live', {}, 'Load live settings')}</button>
+        ${publishBtn}
+      </div>
+      ${presetRow}
+      ${saveRow}
+    </div>`;
+  }
+
+  // Replace the sandbox values with a preset: stage only what differs from the live
+  // baseline, so the graph's before/after diff keeps meaning "vs the integration".
+  _pgApplyPresetValues(values) {
+    this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
+    const live = this._pgEffective || {};
+    for (const [key, val] of Object.entries(values || {})) {
+      if (val === null || val === undefined) continue;
+      const base = live[key];
+      if (base !== undefined && base !== null && this._pgSameVal(val, base)) continue;
+      this._pgSetStaged(key, val);
+    }
+  }
+
+  async _pgSavePreset() {
+    const dev = this._devices[this._selIdx];
+    const name = (this._pgPresetName || '').trim();
+    if (!dev || !this._canEdit() || !name) return;
+    if ((this._pgPresets || []).some(p => p.name === name)
+      && !confirm(this._t('msg.pg_preset_overwrite', {name}, `Overwrite the preset "${name}"?`))) return;
+    await this._busyRun('pg-preset-save', async () => {
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/save_playground_preset`, entry_id: dev.entry_id, name, values: this._pgCurrentValues() });
+        this._pgPresets = Array.isArray(r.presets) ? r.presets : this._pgPresets;
+        this._pgPresetSel = name;
+        this._pgPresetName = '';
+        this._showToast(this._t('toast.pg_preset_saved', {name}, `Preset "${name}" saved`));
+      } catch (e) {
+        this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
+      }
+    });
+    this._render();
+  }
+
+  async _pgDeletePreset() {
+    const dev = this._devices[this._selIdx];
+    const name = this._pgPresetSel;
+    if (!dev || !this._canEdit() || !name) return;
+    if (!confirm(this._t('msg.pg_preset_delete_confirm', {name}, `Delete the preset "${name}"?`))) return;
+    await this._busyRun('pg-preset-delete', async () => {
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/delete_playground_preset`, entry_id: dev.entry_id, name });
+        this._pgPresets = Array.isArray(r.presets) ? r.presets : (this._pgPresets || []).filter(p => p.name !== name);
+        this._pgPresetSel = '';
+      } catch (e) {
+        this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      }
+    });
+    this._render();
+  }
+
+  // Re-read the integration's settings and discard every sandbox edit.
+  async _pgLoadLive() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const changed = this._pgChangedKeys();
+    if (changed.length && !confirm(this._t('msg.pg_load_live_confirm', {n: changed.length}, `Discard ${changed.length} Playground edit(s) and reload the integration's current settings?`))) return;
+    await this._busyRun('pg-load-live', async () => {
+      this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
+      await this._pgFetchSettings(dev.entry_id);
+    });
+    this._render();
+    requestAnimationFrame(() => this._pgDrawCanvas());
+  }
+
+  // Publish exactly one edited value into the device's live settings.
+  async _pgPublishOne(key) {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._canEdit() || !key || !this._pgIsPublishable(key)) return;
+    const val = this._pgStagedVal(key);
+    if (val === undefined || val === null) return;
+    const lbl = this._t('setting.' + key + '.label', {}, key);
+    if (!confirm(this._t('msg.pg_publish_one_confirm', {label: lbl, value: val}, `Save ${lbl} = ${val} to this device's settings?`))) return;
+    await this._busyRun('pg-publish-' + key, async () => {
+      try {
+        await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { [key]: val } });
+        this._opts = { ...this._opts, [key]: val };
+        // The published value IS the live baseline now: fold it into the effective
+        // map and drop the staged edit, so the field reads "matches live" without
+        // waiting for the entry reload to come back around.
+        if (this._pgEffective) this._pgEffective = { ...this._pgEffective, [key]: val };
+        this._pgClearStaged(key);
+        this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
+      } catch (e) {
+        this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
+      }
+    });
+    this._render();
   }
 
   _htmlPlayground() {
@@ -5470,6 +5733,15 @@ class HaWashdataPanel extends HTMLElement {
         </div>`;
         lastGroup = group;
       }
+      // Per-setting publish: only for keys that are real integration options AND
+      // only once this field actually differs from the live value. Sandbox-only
+      // matcher knobs never get one (there is no option to write them to).
+      const staged = this._pgStagedVal(key);
+      const isChanged = staged !== undefined && staged !== null
+        && !(liveVal !== '' && liveVal !== null && liveVal !== undefined && this._pgSameVal(staged, liveVal));
+      const pubBtn = (this._canEdit() && isChanged && this._pgIsPublishable(key))
+        ? `<button class="wd-pg-pub" data-action="pg-publish-one" data-pgkey="${_esc(key)}" aria-label="${_esc(this._t('btn.pg_publish_one', {label: lbl}, 'Publish ' + lbl + ' to the integration'))}" title="${_esc(this._t('btn.pg_publish_one', {label: lbl}, 'Publish ' + lbl + ' to the integration'))}">↑</button>`
+        : `<span class="wd-pg-pub-slot" aria-hidden="true"></span>`;
       return `${header}<div style="display:flex;align-items:flex-start;gap:6px;margin:0 0 6px 11px">
         <div style="flex:1;min-width:0">
           <div style="font-size:.82em;font-weight:600;margin-bottom:1px">${_esc(lbl)}${isDrag ? ` <span style="color:${gc};font-size:.85em" title="${_esc(this._t('lbl.pg_drag_hint', {}, 'Drag line on graph'))}">↕</span>` : ''}</div>
@@ -5480,14 +5752,10 @@ class HaWashdataPanel extends HTMLElement {
             ? `<input class="wd-pg-param-chk" type="checkbox" data-pgkey="${_esc(key)}" data-pgtype="bool" aria-label="${_esc(lbl)}" ${curVal ? 'checked' : ''} style="width:18px;height:18px;margin:1px 27px 0 27px">`
             : `<input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" aria-label="${_esc(lbl)}" style="width:72px">`}
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
+          ${pubBtn}
         </div>
       </div>`;
     }).join('');
-    const hasOverrides = Object.keys(this._pgParamOverrides || {}).length > 0
-      || this._pgThreshStart != null || this._pgThreshStop != null;
-    const applyBtn = (this._canEdit() && hasOverrides)
-      ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-apply-settings" title="${_esc(this._t('btn.pg_apply_to_settings_tip', {}, 'Copy the values you edited here into this device\'s live settings'))}">${this._t('btn.pg_apply_to_settings', {}, 'Save to settings')}</button>`
-      : '';
     const stressGc = '#c0392b';
     const stressHeader = `<div style="display:flex;align-items:center;gap:8px;margin:12px 0 5px">
       <div style="width:3px;height:14px;border-radius:2px;background:${stressGc};flex-shrink:0"></div>
@@ -5515,9 +5783,9 @@ class HaWashdataPanel extends HTMLElement {
     const stressGroup = `${stressHeader}${stressToggle}${stressIdleField}`;
     return `<div class="wd-pg-params">
       <div class="wd-subhead" style="margin:0 0 6px">${this._t('hdr.pg_detection_params', {}, 'Detection settings')}</div>
+      ${this._htmlPgControlPanel()}
       ${paramRows}${stressGroup}
       <div style="display:flex;gap:6px;margin:8px 0 4px;align-items:center;flex-wrap:wrap">
-        ${applyBtn}
         <button class="wd-btn wd-btn-sm" data-action="pg-reset-params">${this._t('btn.reset', {}, 'Reset')}</button>
         ${this._pgDetailBusy ? `<span class="wd-spin" style="align-self:center"></span>` : ''}
       </div>
@@ -5788,15 +6056,20 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // Transfer everything the user edited in the Playground into the device's live
-  // settings in one click, so they don't retype it in the Settings tab. Every
-  // override key is a real settable option (that is why the matching group is
-  // limited to the two duration-ratio settings), so this is a plain set_options.
+  // settings in one click, so they don't retype it in the Settings tab.
+  //
+  // Only PUBLISHABLE keys go out: the Stage 2-4 matcher knobs in the params list
+  // are sandbox-only scoring constants with no config option behind them, so
+  // writing them would leave dead keys in entry.options that nothing ever reads.
+  // Values already equal to the live setting are skipped as well.
   async _pgApplyToSettings() {
     const dev = this._devices[this._selIdx];
     if (!dev || !this._canEdit()) return;
-    const opts = { ...this._pgParamOverrides };
-    if (this._pgThreshStart != null) opts.start_threshold_w = this._pgThreshStart;
-    if (this._pgThreshStop != null) opts.stop_threshold_w = this._pgThreshStop;
+    const opts = {};
+    for (const key of this._pgChangedKeys()) {
+      if (!this._pgIsPublishable(key)) continue;
+      opts[key] = this._pgStagedVal(key);
+    }
     const keys = Object.keys(opts);
     if (!keys.length) return;
     const labels = keys.map(k => this._t('setting.' + k + '.label', {}, k)).join(', ');
@@ -5805,8 +6078,11 @@ class HaWashdataPanel extends HTMLElement {
       try {
         await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: opts });
         this._opts = { ...this._opts, ...opts };
-        // Clear the staged overrides: they are the live baseline now.
-        this._pgParamOverrides = {}; this._pgThreshStart = null; this._pgThreshStop = null;
+        // The published values ARE the live baseline now; clear only those staged
+        // edits. Sandbox-only matcher edits are deliberately left in place - they
+        // were not published, so dropping them would lose the user's tuning.
+        if (this._pgEffective) this._pgEffective = { ...this._pgEffective, ...opts };
+        for (const key of keys) this._pgClearStaged(key);
         this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
       } catch (e) {
         this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
@@ -6541,7 +6817,9 @@ class HaWashdataPanel extends HTMLElement {
 
   _pgUpdateParamInput(key, val) {
     const sr = this.shadowRoot;
-    const inp = sr && sr.querySelector(`[data-pgkey="${key}"]`);
+    // input[...] specifically: the publish button in the same row also carries
+    // data-pgkey, and must never be mistaken for the value field.
+    const inp = sr && sr.querySelector(`input[data-pgkey="${key}"]`);
     if (!inp) return;
     if (inp.dataset.pgtype === 'bool') inp.checked = !!val;
     else inp.value = typeof val === 'number' ? Math.round(val) : val;
@@ -8790,8 +9068,9 @@ class HaWashdataPanel extends HTMLElement {
       pgCanvas.addEventListener('dblclick', () => { this._pgView = null; this._pgDrawCanvas(); });
     }
 
-    // F3: Param input fields → sync to threshold state + redraw
-    sr.querySelectorAll('[data-pgkey]').forEach(inp => {
+    // F3: Param input fields → sync to threshold state + redraw. Scoped to inputs:
+    // the per-row publish button shares the data-pgkey hook.
+    sr.querySelectorAll('input[data-pgkey]').forEach(inp => {
       inp.addEventListener('input', () => {
         const key = inp.dataset.pgkey;
         if (inp.dataset.pgtype === 'bool') {
@@ -8800,7 +9079,7 @@ class HaWashdataPanel extends HTMLElement {
           else if (key === 'stop_threshold_w') this._pgThreshStop = val;
           else this._pgParamOverrides[key] = val;
           this._render();
-          const again = sr.querySelector(`[data-pgkey="${key}"]`);
+          const again = sr.querySelector(`input[data-pgkey="${key}"]`);
           if (again) again.focus();
           requestAnimationFrame(() => this._pgDrawCanvas());
           return;
@@ -8825,7 +9104,7 @@ class HaWashdataPanel extends HTMLElement {
         const caret = inp.selectionStart;
         const rawVal = inp.value;
         this._render();
-        const again = sr.querySelector(`[data-pgkey="${key}"]`);
+        const again = sr.querySelector(`input[data-pgkey="${key}"]`);
         if (again) {
           again.value = rawVal;   // restore raw text incl. trailing "." the browser strips
           again.focus();
@@ -8858,6 +9137,19 @@ class HaWashdataPanel extends HTMLElement {
     // F3: Profile selector
     const pgProfSel = sr.getElementById('wd-pg-prof-sel');
     if (pgProfSel) pgProfSel.addEventListener('change', () => { this._pgProfileName = pgProfSel.value; this._pgLoad(); });
+
+    // F3: Settings control panel — preset picker + "save as" name buffer. Both keep
+    // their value in state so a re-render (any param edit) cannot reset them.
+    const pgPresetSel = sr.getElementById('wd-pg-preset-sel');
+    if (pgPresetSel) pgPresetSel.addEventListener('change', () => { this._pgPresetSel = pgPresetSel.value; this._render(); });
+    const pgPresetName = sr.getElementById('wd-pg-preset-name');
+    if (pgPresetName) pgPresetName.addEventListener('input', () => {
+      this._pgPresetName = pgPresetName.value;
+      const caret = pgPresetName.selectionStart;
+      this._render();
+      const again = sr.getElementById('wd-pg-preset-name');
+      if (again) { again.focus(); try { again.setSelectionRange(caret, caret); } catch (_) {} }
+    });
 
     // F3: Sim cycle count
     const pgSimN = sr.getElementById('wd-pg-simn');
@@ -10351,6 +10643,22 @@ class HaWashdataPanel extends HTMLElement {
       this._render(); requestAnimationFrame(() => this._pgDrawCanvas());
     } else if (a === 'pg-apply-settings') {
       this._pgApplyToSettings();
+    } else if (a === 'pg-load-live') {
+      this._pgLoadLive();
+    } else if (a === 'pg-preset-save') {
+      this._pgSavePreset();
+    } else if (a === 'pg-preset-load') {
+      const preset = (this._pgPresets || []).find(p => p.name === this._pgPresetSel);
+      if (preset) {
+        this._pgApplyPresetValues(preset.values);
+        this._showToast(this._t('toast.pg_preset_loaded', {name: preset.name}, `Preset "${preset.name}" loaded`));
+        this._render();
+        requestAnimationFrame(() => this._pgDrawCanvas());
+      }
+    } else if (a === 'pg-preset-delete') {
+      this._pgDeletePreset();
+    } else if (a === 'pg-publish-one') {
+      this._pgPublishOne(btn.dataset.pgkey);
     } else if (a === 'cyc-compare') {
       const ids = Array.from(this._cycleSel);
       if (ids.length < 2) return;
