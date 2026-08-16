@@ -1703,6 +1703,7 @@
       "min_active": "Na temelju najmanje radne snage ({min}W) uočene u posljednjem ciklusu.",
       "min_duration_ratio": "Zadržano što nižim kako bi se program prepoznao rano u ciklusu; pragovi pouzdanosti i dvosmislenosti sprječavaju prijevremene potvrde.",
       "min_off_gap": "Na temelju {gaps} uočenih razmaka između ciklusa (p05={p05}s). Donja granica uređaja: {floor}s.",
+      "min_off_gap_bridge": "Postavljeno tako da premosti najdulji tihi odsječak unutar ciklusa: {span}s + 60s rezerve, iz {spans} premoštenih razmaka kroz {cycles} čistih ciklusa (ostaje ispod vašeg najkraćeg razmaka između dva uzastopna pokretanja, koji iznosi {ceiling}s).",
       "min_power": "40 % najniže radne snage p05 ({p05}W) kroz {cycles} čistih ciklusa, čime prag isključenja ostaje ispod stvarne potrošnje.{excl}",
       "ml_auto_label": "Najniža pouzdanost koju je model kvalitete još ocijenio čistom (p10 od {cycles} čistih ciklusa = {p10}).",
       "ml_end_repeat": "{false}/{total} ciklusa ({pct}%) imalo je pauzu koju je detektor kraja ocijenio s >50 %; zatraži {val} potvrdu/potvrde kraja.",
@@ -1719,7 +1720,7 @@
       "thr_batch": "Zadržano tik iznad najniže radne snage p05 kroz {cycles} ciklusa ({p05}W) kako bi se početak uhvatio što ranije, a prag zaustavljanja ostao ispod najniže radne snage stroja.",
       "tol_per_profile": "p75 varijance trajanja po profilu kroz {profiles} profila ({cycles} ciklusa); dosljedni profili nisu kažnjeni.",
       "tol_pooled": "Na temelju objedinjene varijance trajanja {cycles} novijih označenih ciklusa (p95 odstupanje={dev}).",
-      "watchdog": "Zadržano što nižim uz sigurnost (3x razmak ažuriranja p95 od {p95}s, najmanje 30s) kako bi se zastoji brzo uhvatili bez lažnih zaustavljanja."
+      "watchdog": "Zadržano što nižim uz sigurnost (tik iznad razmaka ažuriranja p95 od {p95}s, najmanje 30s) kako bi se zastoji brzo uhvatili bez lažnih zaustavljanja."
     },
     "exclusions": {
       "summary": "Isključeno {total} pogrešno otkrivenih ciklusa: {parts}.",

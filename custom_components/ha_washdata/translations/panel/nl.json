@@ -1732,6 +1732,7 @@
       "min_active": "Op basis van het minimale actieve vermogen ({min}W) dat in de laatste cyclus is waargenomen.",
       "min_duration_ratio": "Zo laag mogelijk gehouden zodat een programma vroeg in de cyclus wordt herkend; de betrouwbaarheids- en ambiguïteitsdrempels voorkomen voortijdige beslissingen.",
       "min_off_gap": "Op basis van {gaps} waargenomen tussenpozen tussen cycli (p05={p05}s). Ondergrens van het apparaat: {floor}s.",
+      "min_off_gap_bridge": "Zo gedimensioneerd dat de langste stille periode binnen een cyclus wordt overbrugd: {span}s + 60s buffer, uit {spans} overbrugde tussenpozen over {cycles} schone cycli (blijft onder uw kortste tussenpoos van {ceiling}s tussen twee opeenvolgende ladingen).",
       "min_power": "40% van het laagste actieve vermogen op p05 ({p05}W) over {cycles} schone cycli, zodat de uitschakeldrempel onder het werkelijke verbruik blijft.{excl}",
       "ml_auto_label": "Laagste betrouwbaarheid die het kwaliteitsmodel nog als schoon beoordeelde (p10 van {cycles} schone cycli = {p10}).",
       "ml_end_repeat": "{false}/{total} cycli ({pct}%) hadden een pauze die de einddetector >50% scoorde; vereis {val} eindbevestiging(en).",
@@ -1748,7 +1749,7 @@
       "thr_batch": "Net boven het laagste actieve vermogen op p05 over {cycles} cycli ({p05}W) gehouden zodat een start zo vroeg mogelijk wordt opgemerkt en de stopdrempel onder het laagste draaivermogen van de machine blijft.",
       "tol_per_profile": "p75 van de duurvariantie per profiel over {profiles} profielen ({cycles} cycli); strakke profielen worden niet benadeeld.",
       "tol_pooled": "Op basis van de gebundelde duurvariantie van {cycles} recent gelabelde cycli (p95-afwijking={dev}).",
-      "watchdog": "Zo laag als veilig gehouden (3x de p95-updatekloof van {p95}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops."
+      "watchdog": "Zo laag als veilig gehouden (net boven de p95-updatekloof van {p95}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops."
     },
     "exclusions": {
       "summary": "{total} verkeerd gedetecteerde cyclus(sen) uitgesloten: {parts}.",

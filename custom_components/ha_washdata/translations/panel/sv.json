@@ -1732,6 +1732,7 @@
       "min_active": "Baserat på lägsta aktiva effekt ({min}W) som observerades i senaste cykeln.",
       "min_duration_ratio": "Hålls så låg som möjligt så att ett program känns igen tidigt i cykeln; konfidens- och tvetydighetsgränserna förhindrar förhastade beslut.",
       "min_off_gap": "Baserat på {gaps} observerade mellanrum mellan cykler (p05={p05}s). Enhetsgolv: {floor}s.",
+      "min_off_gap_bridge": "Dimensionerad för att överbrygga den längsta tysta perioden inom en cykel: {span}s + 60s buffert, från {spans} överbryggade mellanrum över {cycles} rena cykler (håller sig under ditt kortaste mellanrum på {ceiling}s mellan två körningar).",
       "min_power": "40% av den lägsta aktiva effekten vid p05 ({p05}W) över {cycles} rena cykler, vilket håller av-tröskeln under verklig förbrukning.{excl}",
       "ml_auto_label": "Lägsta konfidens som kvalitetsmodellen fortfarande bedömde som ren (p10 av {cycles} rena cykler = {p10}).",
       "ml_end_repeat": "{false}/{total} cykler ({pct}%) hade en paus som slutdetektorn bedömde till >50%; kräver {val} slutbekräftelse(r).",
@@ -1748,7 +1749,7 @@
       "thr_batch": "Hålls precis över den lägsta aktiva effekten vid p05 över {cycles} cykler ({p05}W) så att en start fångas så tidigt som möjligt och stopptröskeln stannar under maskinens lägsta driftseffekt.",
       "tol_per_profile": "p75 för varaktighetsvariansen per profil över {profiles} profiler ({cycles} cykler); snäva profiler bestraffas inte.",
       "tol_pooled": "Baserat på sammanslagen varaktighetsvarians för {cycles} senaste märkta cykler (p95 avvikelse={dev}).",
-      "watchdog": "Hålls så lågt som är säkert (3x p95-uppdateringsmellanrummet på {p95}s, min 30s) så att stillestånd upptäcks snabbt utan falska stopp."
+      "watchdog": "Hålls så lågt som är säkert (strax över p95-uppdateringsmellanrummet på {p95}s, min 30s) så att stillestånd upptäcks snabbt utan falska stopp."
     },
     "exclusions": {
       "summary": "Uteslöt {total} feldetekterade cykler: {parts}.",

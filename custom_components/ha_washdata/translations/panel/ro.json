@@ -1788,6 +1788,7 @@
       "min_active": "Pe baza puterii active minime ({min}W) observate în ultimul ciclu.",
       "min_duration_ratio": "Păstrat cât mai mic posibil, astfel încât un program să fie recunoscut devreme în ciclu; pragurile de încredere și de ambiguitate previn confirmările premature.",
       "min_off_gap": "Pe baza a {gaps} intervale între cicluri observate (p05={p05}s). Limita inferioară a dispozitivului: {floor}s.",
+      "min_off_gap_bridge": "Dimensionat pentru a acoperi cea mai lungă perioadă de liniște din interiorul unui ciclu: {span}s + 60s marjă, din {spans} intervale acoperite pe {cycles} cicluri curate (rămâne sub intervalul dvs. minim de {ceiling}s dintre două încărcături consecutive).",
       "min_power": "40% din cea mai mică putere activă p05 ({p05}W) pe {cycles} cicluri curate, menținând pragul de oprire sub consumul real.{excl}",
       "ml_auto_label": "Cea mai mică încredere pe care modelul de calitate a considerat-o încă drept curată (p10 din {cycles} cicluri curate = {p10}).",
       "ml_end_repeat": "{false}/{total} cicluri ({pct}%) au avut o pauză pe care detectorul de sfârșit a evaluat-o la >50%; necesită {val} confirmare(i) de sfârșit.",
@@ -1804,7 +1805,7 @@
       "thr_batch": "Păstrat chiar deasupra celei mai mici puteri active p05 pe {cycles} cicluri ({p05}W), astfel încât o pornire să fie surprinsă cât mai devreme posibil, iar pragul de oprire să rămână sub cea mai mică putere de funcționare a mașinii.",
       "tol_per_profile": "p75 al varianței duratei per profil pe {profiles} profiluri ({cycles} cicluri); profilurile stabile nu sunt penalizate.",
       "tol_pooled": "Pe baza varianței combinate a duratei a {cycles} cicluri recente etichetate (deviație p95={dev}).",
-      "watchdog": "Păstrat cât mai mic în siguranță (de 3x intervalul de actualizare p95 de {p95}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
+      "watchdog": "Păstrat cât mai mic în siguranță (puțin peste intervalul de actualizare p95 de {p95}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
     },
     "exclusions": {
       "summary": "Excluse {total} cicluri detectate greșit: {parts}.",

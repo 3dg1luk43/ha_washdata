@@ -1788,6 +1788,7 @@
       "min_active": "Com base na potência ativa mínima ({min}W) observada no último ciclo.",
       "min_duration_ratio": "Mantido o mais baixo possível para que um programa seja reconhecido logo no início do ciclo; os limiares de confiança e de ambiguidade evitam confirmações prematuras.",
       "min_off_gap": "Com base em {gaps} intervalos entre ciclos observados (p05={p05}s). Piso do dispositivo: {floor}s.",
+      "min_off_gap_bridge": "Dimensionado para cobrir o período de silêncio mais longo dentro de um ciclo: {span}s + margem de 60s, de {spans} intervalos cobertos em {cycles} ciclos limpos (fica abaixo do seu intervalo mínimo de {ceiling}s entre cargas consecutivas).",
       "min_power": "40% da menor potência ativa p05 ({p05}W) em {cycles} ciclos limpos, mantendo o limiar de desligamento abaixo do consumo real.{excl}",
       "ml_auto_label": "Menor confiança que o modelo de qualidade ainda classificou como limpa (p10 de {cycles} ciclos limpos = {p10}).",
       "ml_end_repeat": "{false}/{total} ciclos ({pct}%) tiveram uma pausa que o detector de fim pontuou em >50%; exigir {val} confirmação(ões) de fim.",
@@ -1804,7 +1805,7 @@
       "thr_batch": "Mantido logo acima da menor potência ativa p05 em {cycles} ciclos ({p05}W) para que um início seja captado o mais cedo possível e o limiar de parada permaneça abaixo da menor potência de funcionamento da máquina.",
       "tol_per_profile": "p75 da variância de duração por perfil em {profiles} perfis ({cycles} ciclos); perfis consistentes não são penalizados.",
       "tol_pooled": "Com base na variância de duração agregada de {cycles} ciclos rotulados recentes (desvio p95={dev}).",
-      "watchdog": "Mantido tão baixo quanto é seguro (3x o intervalo de atualização p95 de {p95}s, mín. 30s) para que travamentos sejam detectados rapidamente sem paradas falsas."
+      "watchdog": "Mantido tão baixo quanto é seguro (logo acima do intervalo de atualização p95 de {p95}s, mín. 30s) para que travamentos sejam detectados rapidamente sem paradas falsas."
     },
     "exclusions": {
       "summary": "Excluído(s) {total} ciclo(s) mal detectado(s): {parts}.",

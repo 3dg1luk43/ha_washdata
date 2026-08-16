@@ -1836,6 +1836,7 @@
       "min_active": "Bazuar në fuqinë minimale aktive ({min}W) të vëzhguar në ciklin e fundit.",
       "min_duration_ratio": "Mbahet sa më i ulët që një program të njihet herët në cikël; pragjet e besueshmërisë dhe të paqartësisë parandalojnë konfirmimet e parakohshme.",
       "min_off_gap": "Bazuar në {gaps} boshllëqe të vëzhguara ndërmjet cikleve (p05={p05}s). Kufiri minimal i pajisjes: {floor}s.",
+      "min_off_gap_bridge": "Përcaktuar që të kapërcejë periudhën më të gjatë të qetësisë brenda ciklit: {span}s + 60s rezervë, nga {spans} boshllëqe të kapërcyera në {cycles} cikle të pastra (qëndron nën {ceiling}s, pauza më e shkurtër që lini midis dy nisjeve të njëpasnjëshme).",
       "min_power": "40% e fuqisë aktive më të ulët p05 ({p05}W) në {cycles} cikle të pastra, duke e mbajtur pragun e fikjes nën konsumin real.{excl}",
       "ml_auto_label": "Besueshmëria më e ulët që modeli i cilësisë e vlerësoi ende si të pastër (p10 e {cycles} cikleve të pastra = {p10}).",
       "ml_end_repeat": "{false}/{total} cikle ({pct}%) patën një pauzë që zbuluesi i fundit e vlerësoi >50%; kërkohen {val} konfirmim(e) fundi.",
@@ -1852,7 +1853,7 @@
       "thr_batch": "Mbahet pak mbi fuqinë aktive më të ulët p05 në {cycles} cikle ({p05}W) që një nisje të kapet sa më herët të jetë e mundur dhe pragu i ndalimit të mbetet nën fuqinë më të ulët të punës së makinës.",
       "tol_per_profile": "p75 e variancës së kohëzgjatjes për profil në {profiles} profile ({cycles} cikle); profilet e qëndrueshme nuk penalizohen.",
       "tol_pooled": "Bazuar në variancën e bashkuar të kohëzgjatjes së {cycles} cikleve të fundit të etiketuara (devijimi p95={dev}).",
-      "watchdog": "Mbahet sa më i ulët në mënyrë të sigurt (3x boshllëku i përditësimit p95 prej {p95}s, min. 30s) që bllokimet të kapen shpejt pa ndalime të rreme."
+      "watchdog": "Mbahet sa më i ulët në mënyrë të sigurt (pak mbi boshllëkun e përditësimit p95 prej {p95}s, min. 30s) që bllokimet të kapen shpejt pa ndalime të rreme."
     },
     "exclusions": {
       "summary": "U përjashtuan {total} cikle të zbuluar gabimisht: {parts}.",

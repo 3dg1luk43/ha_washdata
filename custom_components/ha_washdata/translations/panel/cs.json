@@ -1703,6 +1703,7 @@
       "min_active": "Na základě minimálního činného výkonu ({min}W) zaznamenaného v posledním cyklu.",
       "min_duration_ratio": "Ponecháno co nejnižší, aby byl program rozpoznán brzy v cyklu; prahy jistoty a nejednoznačnosti brání předčasnému potvrzení.",
       "min_off_gap": "Na základě {gaps} pozorovaných mezer mezi cykly (p05={p05}s). Minimum zařízení: {floor}s.",
+      "min_off_gap_bridge": "Nastaveno tak, aby překlenulo nejdelší tichý úsek uvnitř cyklu: {span}s + rezerva 60s, z {spans} překlenutých mezer napříč {cycles} čistými cykly (zůstává pod {ceiling}s, nejkratší mezerou, kterou necháváte mezi dvěma dávkami).",
       "min_power": "40% nejnižšího činného výkonu p05 ({p05}W) napříč {cycles} čistými cykly, aby práh vypnutí zůstal pod skutečným odběrem.{excl}",
       "ml_auto_label": "Nejnižší jistota, při které model kvality stále hodnotil cyklus jako čistý (p10 z {cycles} čistých cyklů = {p10}).",
       "ml_end_repeat": "{false}/{total} cyklů ({pct}%) mělo pauzu, kterou detektor konce ohodnotil nad 50%; vyžadovat {val} potvrzení konce.",
@@ -1719,7 +1720,7 @@
       "thr_batch": "Ponecháno těsně nad nejnižším činným výkonem p05 napříč {cycles} cykly ({p05}W), aby byl start zachycen co nejdříve a práh zastavení zůstal pod nejnižším provozním výkonem stroje.",
       "tol_per_profile": "p75 rozptylu délky podle profilu napříč {profiles} profily ({cycles} cyklů); konzistentní profily nejsou penalizovány.",
       "tol_pooled": "Na základě sloučeného rozptylu délky {cycles} nedávných označených cyklů (odchylka p95={dev}).",
-      "watchdog": "Ponecháno co nejnižší při zachování bezpečnosti (3x interval aktualizace p95 ve výši {p95}s, min. 30s), aby byla zaseknutí rychle odhalena bez falešných zastavení."
+      "watchdog": "Ponecháno co nejnižší při zachování bezpečnosti (těsně nad intervalem aktualizace p95 ve výši {p95}s, min. 30s), aby byla zaseknutí rychle odhalena bez falešných zastavení."
     },
     "exclusions": {
       "summary": "Vyloučeno {total} chybně detekovaných cyklů: {parts}.",

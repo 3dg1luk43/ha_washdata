@@ -1865,6 +1865,7 @@
       "min_active": "Põhineb viimases tsüklis täheldatud madalaimal aktiivvõimsusel ({min}W).",
       "min_duration_ratio": "Hoitakse võimalikult madal, et programm tuvastataks tsükli alguses varakult; usaldus- ja mitmetimõistetavuse lävid hoiavad ära enneaegsed otsused.",
       "min_off_gap": "Põhineb {gaps} täheldatud tsüklitevahelisel pausil (p05={p05}s). Seadme alampiir: {floor}s.",
+      "min_off_gap_bridge": "Mõõdetud nii, et katab tsükli pikima vaikse lõigu: {span}s + 60s puhver, {spans} sillatud vahest {cycles} puhta tsükli lõikes (jääb alla teie lühima järjestikuste käivituste vahelise pausi, mis on {ceiling}s).",
       "min_power": "40% madalaimast aktiivvõimsusest p05 juures ({p05}W) {cycles} puhta tsükli lõikes, hoides väljalülituse läve alla tegeliku tarbimise.{excl}",
       "ml_auto_label": "Madalaim usaldusväärsus, mida kvaliteedimudel hindas veel puhtaks (p10 {cycles} puhtast tsüklist = {p10}).",
       "ml_end_repeat": "{false}/{total} tsüklist ({pct}%) sisaldas pausi, millele lõputuvastaja andis >50%; nõuab {val} lõpukinnitust.",
@@ -1881,7 +1882,7 @@
       "thr_batch": "Hoitakse veidi üle madalaima aktiivvõimsuse p05 juures {cycles} tsükli lõikes ({p05}W), et käivitus tuvastataks võimalikult vara ja seiskamislävi jääks alla masina madalaima töövõimsuse.",
       "tol_per_profile": "p75 profiilipõhisest kestuse dispersioonist {profiles} profiili lõikes ({cycles} tsüklit); kitsaid profiile ei karistata.",
       "tol_pooled": "Põhineb {cycles} viimase märgistatud tsükli koondkestuse dispersioonil (p95 hälve={dev}).",
-      "watchdog": "Hoitakse nii madal kui ohutu (3x p95 uuendusintervall {p95}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta."
+      "watchdog": "Hoitakse nii madal kui ohutu (veidi üle p95 uuendusintervalli {p95}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta."
     },
     "exclusions": {
       "summary": "Välja jäetud {total} valesti tuvastatud tsüklit: {parts}.",

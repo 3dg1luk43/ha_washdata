@@ -1817,6 +1817,7 @@
       "min_active": "Según la potencia activa mínima ({min}W) observada en el último ciclo.",
       "min_duration_ratio": "Se mantiene lo más bajo posible para que un programa se reconozca pronto en el ciclo; los umbrales de confianza y ambigüedad evitan decisiones prematuras.",
       "min_off_gap": "Según {gaps} intervalos entre ciclos observados (p05={p05}s). Mínimo del dispositivo: {floor}s.",
+      "min_off_gap_bridge": "Dimensionado para cubrir el periodo de silencio más largo dentro de un ciclo: {span}s + 60s de margen, a partir de {spans} intervalos cubiertos en {cycles} ciclos limpios (se mantiene por debajo de su intervalo mínimo de {ceiling}s entre cargas consecutivas).",
       "min_power": "40% de la potencia activa más baja en el p05 ({p05}W) en {cycles} ciclos limpios, manteniendo el umbral de apagado por debajo del consumo real.{excl}",
       "ml_auto_label": "Confianza más baja que el modelo de calidad aún consideró limpia (p10 de {cycles} ciclos limpios = {p10}).",
       "ml_end_repeat": "{false}/{total} ciclos ({pct}%) tuvieron una pausa que el detector de fin puntuó >50%; se requieren {val} confirmación(es) de fin.",
@@ -1833,7 +1834,7 @@
       "thr_batch": "Se mantiene justo por encima de la potencia activa más baja en el p05 en {cycles} ciclos ({p05}W) para captar un arranque lo antes posible y que el umbral de parada quede por debajo de la potencia de funcionamiento más baja de la máquina.",
       "tol_per_profile": "p75 de la varianza de duración por perfil en {profiles} perfiles ({cycles} ciclos); los perfiles ajustados no se penalizan.",
       "tol_pooled": "Según la varianza de duración agrupada de {cycles} ciclos etiquetados recientes (desviación p95={dev}).",
-      "watchdog": "Se mantiene lo más bajo que resulta seguro (3x el intervalo de actualización p95 de {p95}s, mín. 30s) para detectar rápido los bloqueos sin paradas falsas."
+      "watchdog": "Se mantiene lo más bajo que resulta seguro (justo por encima del intervalo de actualización p95 de {p95}s, mín. 30s) para detectar rápido los bloqueos sin paradas falsas."
     },
     "exclusions": {
       "summary": "Excluido(s) {total} ciclo(s) mal detectado(s): {parts}.",

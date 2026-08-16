@@ -1865,6 +1865,7 @@
       "min_active": "Son çevrimde gözlemlenen minimum aktif güce ({min}W) dayalı.",
       "min_duration_ratio": "Bir programın çevrimin başında tanınabilmesi için olabildiğince düşük tutuldu; güven ve belirsizlik eşikleri erken kesinleşmeyi önler.",
       "min_off_gap": "Gözlemlenen {gaps} çevrimler arası boşluğa dayalı (p05={p05}s). Cihaz alt sınırı: {floor}s.",
+      "min_off_gap_bridge": "Çevrim içindeki en uzun sessiz aralığı köprülemek üzere boyutlandırıldı: {span}s + 60s tampon, {cycles} temiz çevrim boyunca köprülenen {spans} boşluktan (iki ardışık çalıştırma arasında bıraktığınız en kısa süre olan {ceiling}s'nin altında kalır).",
       "min_power": "{cycles} temiz çevrim boyunca p05 en düşük aktif gücün ({p05}W) %40'ı; kapalı eşiğini gerçek çekişin altında tutar.{excl}",
       "ml_auto_label": "Kalite modelinin hâlâ temiz olarak değerlendirdiği en düşük güven değeri ({cycles} temiz çevrimin p10'u = {p10}).",
       "ml_end_repeat": "{false}/{total} çevrimde (%{pct}) çevrim sonu algılayıcısının 50%'nin üzerinde puanladığı bir duraklama vardı; {val} son doğrulaması gerektir.",
@@ -1881,7 +1882,7 @@
       "thr_batch": "{cycles} çevrim boyunca p05 en düşük aktif gücün ({p05}W) hemen üzerinde tutuldu; böylece başlangıç olabildiğince erken yakalanır ve durdurma eşiği makinenin en düşük çalışma gücünün altında kalır.",
       "tol_per_profile": "{profiles} profil boyunca ({cycles} çevrim) profil başına süre varyansının p75'i; tutarlı profiller cezalandırılmaz.",
       "tol_pooled": "{cycles} son etiketli çevrimin birleştirilmiş süre varyansına dayalı (p95 sapma={dev}).",
-      "watchdog": "Güvenli olduğu kadar düşük tutuldu ({p95}s'lik p95 güncelleme boşluğunun 3 katı, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır."
+      "watchdog": "Güvenli olduğu kadar düşük tutuldu ({p95}s'lik p95 güncelleme boşluğunun hemen üzerinde, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır."
     },
     "exclusions": {
       "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",

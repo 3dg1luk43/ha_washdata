@@ -1732,6 +1732,7 @@
       "min_active": "Basierend auf der minimalen aktiven Leistung ({min}W), die im letzten Zyklus beobachtet wurde.",
       "min_duration_ratio": "So niedrig wie möglich gehalten, damit ein Programm früh im Zyklus erkannt wird; die Konfidenz- und Mehrdeutigkeitsschranken verhindern vorzeitige Festlegungen.",
       "min_off_gap": "Basierend auf {gaps} beobachteten Pausen zwischen Zyklen (p05={p05}s). Geräte-Untergrenze: {floor}s.",
+      "min_off_gap_bridge": "So bemessen, dass die längste Ruhephase innerhalb eines Zyklus überbrückt wird: {span}s + 60s Puffer, aus {spans} überbrückten Lücken über {cycles} saubere Zyklen (bleibt unter Ihrem kürzesten Abstand von {ceiling}s zwischen zwei Ladungen).",
       "min_power": "40% der p05-niedrigsten aktiven Leistung ({p05}W) über {cycles} saubere Zyklen, sodass die Aus-Schwelle unter der tatsächlichen Leistungsaufnahme bleibt.{excl}",
       "ml_auto_label": "Niedrigste Konfidenz, die das Qualitätsmodell noch als sauber bewertet hat (p10 von {cycles} sauberen Zyklen = {p10}).",
       "ml_end_repeat": "{false}/{total} Zyklen ({pct}%) hatten eine Pause, die der Endedetektor mit >50% bewertete; {val} Endbestätigung(en) erforderlich.",
@@ -1748,7 +1749,7 @@
       "thr_batch": "Knapp über der p05-niedrigsten aktiven Leistung über {cycles} Zyklen ({p05}W) gehalten, damit ein Start so früh wie möglich erkannt wird und die Stopp-Schwelle unter der niedrigsten Betriebsleistung der Maschine bleibt.",
       "tol_per_profile": "p75 der Dauervarianz pro Profil über {profiles} Profile ({cycles} Zyklen); enge Profile werden nicht benachteiligt.",
       "tol_pooled": "Basierend auf der zusammengefassten Dauervarianz von {cycles} kürzlich gelabelten Zyklen (p95-Abweichung={dev}).",
-      "watchdog": "So niedrig wie sicher gehalten (3x die p95-Aktualisierungslücke von {p95}s, min 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
+      "watchdog": "So niedrig wie sicher gehalten (knapp über der p95-Aktualisierungslücke von {p95}s, min 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
     },
     "exclusions": {
       "summary": "{total} falsch erkannte Zyklen ausgeschlossen: {parts}.",

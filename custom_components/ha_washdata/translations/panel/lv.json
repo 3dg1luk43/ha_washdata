@@ -1836,6 +1836,7 @@
       "min_active": "Pamatots ar minimālo aktīvo jaudu ({min}W), kas novērota pēdējā ciklā.",
       "min_duration_ratio": "Saglabāts pēc iespējas zemāks, lai programma tiktu atpazīta cikla sākumā; ticamības un neskaidrības sliekšņi novērš pāragru apstiprināšanu.",
       "min_off_gap": "Pamatots ar {gaps} novērotiem starpciklu intervāliem (p05={p05}s). Ierīces apakšējā robeža: {floor}s.",
+      "min_off_gap_bridge": "Aprēķināts, lai pārsegtu garāko kluso posmu cikla iekšienē: {span}s + 60s buferis, no {spans} pārsegtiem intervāliem {cycles} tīros ciklos (paliek zem jūsu īsākā intervāla starp divām secīgām palaišanas reizēm, kas ir {ceiling}s).",
       "min_power": "40% no p05 zemākās aktīvās jaudas ({p05}W) {cycles} tīros ciklos, saglabājot izslēgšanas slieksni zem reālā patēriņa.{excl}",
       "ml_auto_label": "Zemākā ticamība, ko kvalitātes modelis vēl novērtēja kā tīru (p10 no {cycles} tīriem cikliem = {p10}).",
       "ml_end_repeat": "{false}/{total} ciklu ({pct}%) bija pauze, ko beigu detektors novērtēja >50%; pieprasīt {val} beigu apstiprinājumu(s).",
@@ -1852,7 +1853,7 @@
       "thr_batch": "Saglabāts nedaudz virs p05 zemākās aktīvās jaudas {cycles} ciklos ({p05}W), lai sākums tiktu uztverts pēc iespējas agrāk un apturēšanas slieksnis paliktu zem mašīnas zemākās darbības jaudas.",
       "tol_per_profile": "p75 no katra profila ilguma dispersijas {profiles} profilos ({cycles} cikli); stabili profili netiek sodīti.",
       "tol_pooled": "Pamatots ar apvienoto ilguma dispersiju {cycles} nesen marķētiem cikliem (p95 novirze={dev}).",
-      "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (3x p95 atjaunināšanas intervāls {p95}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas."
+      "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (tikai nedaudz virs p95 atjaunināšanas intervāla {p95}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas."
     },
     "exclusions": {
       "summary": "Izslēgti {total} kļūdaini atpazīti cikli: {parts}.",

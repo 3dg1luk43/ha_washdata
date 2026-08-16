@@ -1732,6 +1732,7 @@
       "min_active": "Baseret på laveste aktive effekt ({min}W) observeret i sidste cyklus.",
       "min_duration_ratio": "Holdt så lav som muligt, så et program genkendes tidligt i cyklussen; konfidens- og tvetydighedsgrænserne forhindrer forhastede beslutninger.",
       "min_off_gap": "Baseret på {gaps} observerede mellemrum mellem cyklusser (p05={p05}s). Enhedsgulv: {floor}s.",
+      "min_off_gap_bridge": "Dimensioneret til at bygge bro over den længste stille periode i en cyklus: {span}s + 60s buffer, fra {spans} dækkede mellemrum på tværs af {cycles} rene cyklusser (holder sig under dit korteste mellemrum på {ceiling}s mellem to kørsler).",
       "min_power": "40% af den laveste aktive effekt ved p05 ({p05}W) på tværs af {cycles} rene cyklusser, hvilket holder sluk-tærsklen under reelt forbrug.{excl}",
       "ml_auto_label": "Laveste konfidens, som kvalitetsmodellen stadig vurderede som ren (p10 af {cycles} rene cyklusser = {p10}).",
       "ml_end_repeat": "{false}/{total} cyklusser ({pct}%) havde en pause, som slutdetektoren vurderede til >50%; kræver {val} slutbekræftelse(r).",
@@ -1748,7 +1749,7 @@
       "thr_batch": "Holdt lige over den laveste aktive effekt ved p05 på tværs af {cycles} cyklusser ({p05}W), så en start fanges så tidligt som muligt, og stoptærsklen forbliver under maskinens laveste driftseffekt.",
       "tol_per_profile": "p75 for varighedsvariansen pr. profil på tværs af {profiles} profiler ({cycles} cyklusser); stramme profiler straffes ikke.",
       "tol_pooled": "Baseret på samlet varighedsvarians for {cycles} seneste mærkede cyklusser (p95 afvigelse={dev}).",
-      "watchdog": "Holdt så lavt som forsvarligt (3x p95-opdateringsmellemrummet på {p95}s, min 30s), så stilstande fanges hurtigt uden falske stop."
+      "watchdog": "Holdt så lavt som forsvarligt (lige over p95-opdateringsmellemrummet på {p95}s, min 30s), så stilstande fanges hurtigt uden falske stop."
     },
     "exclusions": {
       "summary": "{total} fejldetekterede cyklus(ser) udelukket: {parts}.",

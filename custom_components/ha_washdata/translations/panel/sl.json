@@ -1703,6 +1703,7 @@
       "min_active": "Na podlagi najmanjše delovne moči ({min}W), opažene v zadnjem ciklu.",
       "min_duration_ratio": "Ohranjeno čim nižje, da se program prepozna zgodaj v ciklu; pragova zaupanja in dvoumnosti preprečujeta prezgodnje potrditve.",
       "min_off_gap": "Na podlagi {gaps} opaženih vrzeli med cikli (p05={p05}s). Spodnja meja naprave: {floor}s.",
+      "min_off_gap_bridge": "Nastavljeno tako, da premosti najdaljši tihi odsek znotraj cikla: {span}s + 60s rezerve, iz {spans} premoščenih vrzeli čez {cycles} čistih ciklov (ostane pod vašo najkrajšo vrzeljo med zaporednima zagonoma, ki znaša {ceiling}s).",
       "min_power": "40 % najnižje delovne moči p05 ({p05}W) čez {cycles} čistih ciklov, da prag izklopa ostane pod dejansko porabo.{excl}",
       "ml_auto_label": "Najnižje zaupanje, ki ga je model kakovosti še ocenil kot čisto (p10 od {cycles} čistih ciklov = {p10}).",
       "ml_end_repeat": "{false}/{total} ciklov ({pct}%) je imelo premor, ki ga je detektor konca ocenil z >50 %; zahtevaj {val} potrditev konca.",
@@ -1719,7 +1720,7 @@
       "thr_batch": "Ohranjeno tik nad najnižjo delovno močjo p05 čez {cycles} ciklov ({p05}W), da se začetek zazna čim prej in da prag ustavitve ostane pod najnižjo delovno močjo naprave.",
       "tol_per_profile": "p75 variance trajanja po posameznih profilih čez {profiles} profilov ({cycles} ciklov); dosledni profili niso kaznovani.",
       "tol_pooled": "Na podlagi združene variance trajanja {cycles} nedavnih označenih ciklov (p95 odklon={dev}).",
-      "watchdog": "Ohranjeno tako nizko, kot je varno (3x vrzel posodobitve p95 {p95}s, najmanj 30s), da se zastoji hitro zaznajo brez lažnih ustavitev."
+      "watchdog": "Ohranjeno tako nizko, kot je varno (tik nad vrzeljo posodobitve p95 {p95}s, najmanj 30s), da se zastoji hitro zaznajo brez lažnih ustavitev."
     },
     "exclusions": {
       "summary": "Izključeno {total} napačno zaznanih ciklov: {parts}.",

@@ -1703,6 +1703,7 @@
       "min_active": "Na podstawie minimalnej mocy czynnej ({min}W) zaobserwowanej w ostatnim cyklu.",
       "min_duration_ratio": "Utrzymane jak najniżej, aby program był rozpoznawany na wczesnym etapie cyklu; progi pewności i niejednoznaczności zapobiegają przedwczesnym decyzjom.",
       "min_off_gap": "Na podstawie {gaps} zaobserwowanych przerw między cyklami (p05={p05}s). Minimum urządzenia: {floor}s.",
+      "min_off_gap_bridge": "Dobrane tak, aby pokryć najdłuższy cichy odcinek wewnątrz cyklu: {span}s + zapas 60s, z {spans} pokrytych przerw w {cycles} poprawnych cyklach (pozostaje poniżej {ceiling}s, czyli najkrótszej przerwy, jaką zostawiasz między kolejnymi uruchomieniami).",
       "min_power": "40% najniższej mocy czynnej p05 ({p05}W) w {cycles} poprawnych cyklach, tak aby próg wyłączenia pozostał poniżej rzeczywistego poboru.{excl}",
       "ml_auto_label": "Najniższa pewność, przy której model jakości nadal uznawał cykl za poprawny (p10 z {cycles} poprawnych cykli = {p10}).",
       "ml_end_repeat": "{false}/{total} cykli ({pct}%) miało pauzę, którą detektor końca ocenił powyżej 50%; wymagaj {val} potwierdzeń zakończenia.",
@@ -1719,7 +1720,7 @@
       "thr_batch": "Utrzymane tuż powyżej najniższej mocy czynnej p05 w {cycles} cyklach ({p05}W), aby start był wykrywany jak najwcześniej, a próg zatrzymania pozostawał poniżej najniższej mocy pracy urządzenia.",
       "tol_per_profile": "p75 wariancji czasu trwania na profil w {profiles} profilach ({cycles} cykli); spójne profile nie są karane.",
       "tol_pooled": "Na podstawie łącznej wariancji czasu trwania {cycles} ostatnich oznaczonych cykli (odchylenie p95={dev}).",
-      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (3x przerwa aktualizacji p95 wynosząca {p95}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań."
+      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (tuż powyżej przerwy aktualizacji p95 wynoszącej {p95}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań."
     },
     "exclusions": {
       "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",
