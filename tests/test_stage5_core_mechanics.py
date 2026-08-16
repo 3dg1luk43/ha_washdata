@@ -177,6 +177,20 @@ def test_reconcile_end_energy_raised_when_stop_suggested() -> None:
     assert CONF_END_ENERGY_THRESHOLD in changed
 
 
+def test_reconcile_end_energy_floor_survives_rounding() -> None:
+    # The implied floor (2.0*60/3600 = 0.0333 Wh) is not representable at the two
+    # decimals adjust() persists. Rounding to-nearest lands on 0.03 - below the
+    # floor - and the next fixpoint pass finds the value already set and stops, so
+    # the returned map would still violate Rule 12. The floor must round UP.
+    s = {CONF_STOP_THRESHOLD_W: _sug(2.0)}
+    out, changed = reconcile_suggestions(
+        s, {CONF_OFF_DELAY: 60, CONF_END_ENERGY_THRESHOLD: 0.01}
+    )
+    assert CONF_END_ENERGY_THRESHOLD in changed
+    assert out[CONF_END_ENERGY_THRESHOLD]["value"] >= 2.0 * 60 / 3600.0
+    assert out[CONF_END_ENERGY_THRESHOLD]["value"] == pytest.approx(0.04)
+
+
 def test_reconcile_end_energy_consistent_pair_unchanged() -> None:
     # end_energy already clears the implied floor (2.0*180/3600 = 0.1); no change.
     s = {CONF_STOP_THRESHOLD_W: _sug(2.0), CONF_END_ENERGY_THRESHOLD: _sug(0.2)}

@@ -95,6 +95,12 @@ _LOGGER = logging.getLogger(__name__)
 # and reference selection so degenerate cycles never become the matching template.
 _DEGENERATE_POWER_FLOOR = 15.0  # watts
 
+# How far outside the requested trim window a stored sample may still be snapped
+# to. Trim boundaries arrive quantized to whole seconds (panel number input, the
+# trim_cycle service), so one second is exactly the input's own resolution -- it
+# absorbs that rounding without letting the kept window grow measurably.
+_TRIM_SNAP_TOLERANCE_S = 1.0
+
 JSONDict: TypeAlias = dict[str, Any]
 CycleDict: TypeAlias = dict[str, Any]
 
@@ -6656,17 +6662,27 @@ class ProfileStore:
         if new_end_s <= new_start_s:
             return False
 
-        # Snap both boundaries to the nearest real sample offset (#373). Trim
-        # inputs round to whole seconds, but sample offsets are frequently
-        # fractional -- a nominal 10 s cadence drifts, so ~3132.3 is the norm --
-        # and the [start, end] filter below is inclusive, so a whole-second entry
-        # lands just below the sample the user aimed at and silently drops it.
-        # Snapping against the full-resolution stored trace (independent of any
-        # client-side curve decimation) makes the kept window land exactly on the
-        # samples the boundaries name, on both ends.
+        # Snap both boundaries to a real sample offset (#373). Trim inputs round
+        # to whole seconds, but sample offsets are frequently fractional -- a
+        # nominal 10 s cadence drifts, so ~3132.3 is the norm -- and the
+        # [start, end] filter below is inclusive, so a whole-second entry lands
+        # just below the sample the user aimed at and silently drops it. Snapping
+        # against the full-resolution stored trace (independent of any client-side
+        # curve decimation) makes the kept window land on the samples the
+        # boundaries name, on both ends.
+        #
+        # Snap *inward*, tolerating only the whole-second input quantization
+        # (_TRIM_SNAP_TOLERANCE_S). Nearest-in-either-direction snapping could
+        # widen the window by up to half a sample interval per side -- on a
+        # coarse trace (samples at 0 s and 100 s, request 40-60 s) that silently
+        # kept the entire cycle while meta["trim"] claimed a narrow window.
         offsets = [float(offset) for offset, _ in p_data]
-        new_start_s = min(offsets, key=lambda o: abs(o - new_start_s))
-        new_end_s = min(offsets, key=lambda o: abs(o - new_end_s))
+        starts = [o for o in offsets if o >= new_start_s - _TRIM_SNAP_TOLERANCE_S]
+        ends = [o for o in offsets if o <= new_end_s + _TRIM_SNAP_TOLERANCE_S]
+        if not starts or not ends:
+            return False
+        new_start_s = min(starts)
+        new_end_s = max(ends)
         if new_end_s <= new_start_s:
             return False
 

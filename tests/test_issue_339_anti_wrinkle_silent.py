@@ -122,3 +122,47 @@ async def test_keepalive_does_not_touch_last_real_reading_time(manager: WashData
     await manager._handle_state_expiry(now)
 
     assert manager._last_real_reading_time == stale
+
+
+@pytest.mark.asyncio
+async def test_restore_into_anti_wrinkle_seeds_keepalive_anchor(
+    mock_hass: Any, mock_entry: Any
+) -> None:
+    """A restart into ANTI_WRINKLE must leave the keepalive able to fire.
+
+    ``_last_real_reading_time`` is only ever set by a live sensor reading, so
+    after a restart into the tail with an already-silent plug it is None and the
+    keepalive's guard can never be satisfied - the mode stays pinned exactly as
+    in the original report. The restore path seeds the anchor from the snapshot's
+    last-save time (which is itself driven by real readings).
+    """
+    mock_hass.config_entries.async_get_entry.return_value = mock_entry
+    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
+    with patch("custom_components.ha_washdata.manager.ProfileStore"), \
+         patch("custom_components.ha_washdata.manager.CycleDetector"):
+        mgr = WashDataManager(mock_hass, mock_entry)
+    mgr._notify_update = MagicMock()
+    mgr._start_watchdog = MagicMock()
+
+    now = datetime.now(timezone.utc)
+    last_save = now - timedelta(seconds=mgr._off_delay + 600)
+
+    mgr.profile_store.get_active_cycle = MagicMock(return_value={"state": STATE_ANTI_WRINKLE})
+    mgr.profile_store.get_last_active_save = MagicMock(return_value=last_save)
+    mgr.profile_store.async_clear_active_cycle = AsyncMock()
+    mock_hass.states.get = MagicMock(return_value=None)
+
+    def _restore(snapshot: dict[str, Any]) -> None:
+        mgr.detector.state = snapshot.get("state")
+
+    mgr.detector.restore_state_snapshot = MagicMock(side_effect=_restore)
+
+    assert mgr._last_real_reading_time is None
+    await mgr._attempt_state_restoration()
+    assert mgr._last_real_reading_time == last_save
+
+    # And the keepalive can now actually fire for the silent plug.
+    mgr.detector.process_reading = MagicMock()
+    await mgr._handle_state_expiry(now)
+    mgr.detector.process_reading.assert_called_once()
+    assert mgr.detector.process_reading.call_args.args[0] == 0.0
