@@ -22,6 +22,7 @@ import collections
 import functools
 import json
 import logging
+import math
 import os
 import re
 import time
@@ -1378,6 +1379,19 @@ async def ws_set_options(
     )
     if effective_device_type != DEVICE_TYPE_PUMP:
         new_options.pop(CONF_PUMP_STUCK_DURATION, None)
+
+    # Numeric-finite validation for fields that the cycle-detector float()-casts at
+    # build time; coerce bad submissions to the compiled default so storage stays clean.
+    if CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE in new_options:
+        try:
+            _qr = float(new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE])
+            if not math.isfinite(_qr):
+                raise ValueError("non-finite")
+            new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = _qr
+        except (TypeError, ValueError):
+            new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = (
+                DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+            )
 
     # Partition identity out of options: the display name is carried by the
     # entry title, never persisted in options (matches the config-flow invariant
@@ -5215,6 +5229,16 @@ async def ws_terminate_cycle(
 
 # ─── Playground (F3): headless what-if replay + DTW visualizer ──────────────────
 
+
+def _safe_float_finite(value: Any, default: float) -> float:
+    """Convert ``value`` to a finite float, falling back to ``default`` on failure."""
+    try:
+        v = float(value)
+        return v if math.isfinite(v) else default
+    except (TypeError, ValueError):
+        return default
+
+
 def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
     """Resolve the device's live CycleDetectorConfig as the simulation base.
 
@@ -5241,10 +5265,9 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
         stop_threshold_w=float(
             opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)
         ),
-        dishwasher_end_spike_quiet_release=float(
-            opts.get(CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE)
-            if opts.get(CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE) is not None
-            else DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+        dishwasher_end_spike_quiet_release=_safe_float_finite(
+            opts.get(CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE),
+            DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
         ),
     )
 

@@ -896,6 +896,7 @@ class LearningManager:
                     rv.get("label") in ("uncertain", "review")
                     or rv.get("quality") in ("uncertain", "review")
                     or cycle.get("status") in ("force_stopped", "interrupted")
+                    or (cycle.get("ml_health") or {}).get("label") in ("uncertain", "review")
                 )
                 if needs_review and not already_reviewed:
                     try:

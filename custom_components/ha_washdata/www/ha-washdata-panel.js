@@ -2846,9 +2846,12 @@ class HaWashdataPanel extends HTMLElement {
     this._suggestionsError = false;
     try {
       const res = await this._ws({ type: `${_DOMAIN}/get_suggestions`, entry_id: entryId });
+      if (!this._isActiveEntry(entryId)) return;  // device switched mid-flight
       this._suggestions = res.suggestions || [];
       this._lockedSuggestions = res.locked_suggestions || [];
-    } catch (_) { this._suggestionsError = true; this._suggestions = []; }
+    } catch (_) {
+      if (this._isActiveEntry(entryId)) { this._suggestionsError = true; this._suggestions = []; }
+    }
   }
 
   async _fetchProfiles(entryId) {
@@ -10128,6 +10131,7 @@ class HaWashdataPanel extends HTMLElement {
           const results = await Promise.allSettled(
             keys.map(k => this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: false }))
           );
+          if (!this._isActiveEntry(eid)) return;  // device switched mid-flight
           const failed = results.filter(r => r.status === 'rejected').length;
           const lastOk = results.slice().reverse().find(r => r.status === 'fulfilled');
           this._lockedSuggestions = (lastOk && lastOk.value && lastOk.value.locked_suggestions) || [];

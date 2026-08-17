@@ -2640,13 +2640,15 @@ class WashDataManager:
                 self._notify_update()
 
     def _maybe_arm_door_end_dwell_if_open(self) -> None:
-        """Arm the end-dwell timer when in ENDING with the door already open.
+        """Arm the end-dwell timer when in RUNNING or ENDING with the door already open.
 
         Called from both ``_on_state_change`` (live transition) and the
         snapshot-restoration path (where ``_on_state_change`` is not invoked).
+        Matches the state set accepted by ``_handle_door_sensor_change`` so that
+        restoring a RUNNING snapshot with the door already open re-arms the dwell.
         """
         if not (
-            self.detector.state == STATE_ENDING
+            self.detector.state in (STATE_RUNNING, STATE_ENDING)
             and self._door_opens_at_end
             and self._door_sensor_entity
             and self._remove_door_end_dwell is None
