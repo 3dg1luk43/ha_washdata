@@ -164,6 +164,39 @@ test('control panel: delete a preset', async ({ page }) => {
   await assertWsCalled(page, 'ha_washdata/delete_playground_preset');
 });
 
+test('control panel: Load suggested stages classic suggestion values', async ({ page }) => {
+  await clickTab(page, 'playground');
+  // Mock has classic_suggestions: {off_delay: 90, min_off_gap: 240}.
+  // off_delay live baseline is 120 → staged value should become 90.
+  const btn = page.locator('button[data-action="pg-load-suggested"]');
+  await expect(btn).toBeVisible({ timeout: 8_000 });
+  await btn.click();
+  // off_delay field should now read 90 (staged override differs from live 120).
+  const inp = page.locator('input[data-pgkey="off_delay"]');
+  await expect(inp).toHaveValue('90');
+});
+
+test('control panel: Load Calibrated (ML) stages ML suggestion values', async ({ page }) => {
+  await clickTab(page, 'playground');
+  // Mock has ml_suggestions: {off_delay: 85, end_repeat_count: 2}.
+  const btn = page.locator('button[data-action="pg-load-calibrated"]');
+  await expect(btn).toBeVisible({ timeout: 8_000 });
+  await btn.click();
+  const inp = page.locator('input[data-pgkey="off_delay"]');
+  await expect(inp).toHaveValue('85');
+});
+
+test('control panel: suggestion buttons show the suggestion count in their label', async ({ page }) => {
+  // Mock returns 2 classic and 2 ML suggestions — count must appear in label.
+  await clickTab(page, 'playground');
+  const classic = page.locator('button[data-action="pg-load-suggested"]');
+  await expect(classic).toBeVisible({ timeout: 8_000 });
+  await expect(classic).toContainText('(2)');
+  const ml = page.locator('button[data-action="pg-load-calibrated"]');
+  await expect(ml).toBeVisible();
+  await expect(ml).toContainText('(2)');
+});
+
 // ─── "Across your cycles" drawer: History + Optimize sub-tabs ────────────────
 
 test('drawer: History and Optimize sub-tabs are present; History is default', async ({ page }) => {

@@ -5507,11 +5507,62 @@ async def ws_get_playground_settings(
         match_config = playground._matching_config(store)  # noqa: SLF001
     except Exception:  # pylint: disable=broad-exception-caught
         match_config = {}
+
+    # Classic suggestions from the store (periodic analysis results), filtered to
+    # keys the Playground actually exposes — cheap dict read, no executor needed.
+    raw_sugg: dict[str, Any] = {}
+    try:
+        raw_sugg = store.get_suggestions() or {}
+    except Exception:  # pylint: disable=broad-exception-caught
+        pass
+    classic_sugg: dict[str, Any] = {}
+    for key in playground.SETTING_KEYS:
+        item = raw_sugg.get(key)
+        if isinstance(item, dict) and item.get("value") is not None:
+            val = item["value"]
+            try:
+                classic_sugg[key] = int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
+            except (TypeError, ValueError):
+                pass
+
+    # ML suggestions — computed on-demand; executor-offloaded because it runs
+    # statistics across all clean cycles. None when the feature is disabled.
+    ml_sugg: dict[str, Any] | None = None
+    if ENABLE_ML_SUGGESTIONS:
+        ml_sugg = {}
+        try:
+            learning = getattr(_manager, "learning_manager", None)
+            classic_engine = getattr(learning, "suggestion_engine", None)
+            if classic_engine is not None:
+                _pg_setting_keys = playground.SETTING_KEYS
+                _pg_int_keys = _SUGGESTION_INT_KEYS
+
+                def _run_ml_sugg() -> dict[str, Any]:
+                    from .suggestion_engine import MLSuggestionEngine as _ML  # pylint: disable=import-outside-toplevel
+                    raw = _ML(classic_engine).generate_ml_suggestions() or {}
+                    out: dict[str, Any] = {}
+                    for k in _pg_setting_keys:
+                        entry = raw.get(k)
+                        if isinstance(entry, dict) and entry.get("value") is not None:
+                            v = entry["value"]
+                            try:
+                                out[k] = int(float(v)) if k in _pg_int_keys else round(float(v), 4)
+                            except (TypeError, ValueError):
+                                pass
+                    return out
+
+                ml_sugg = await hass.async_add_executor_job(_run_ml_sugg)
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
+
     _send_result(connection, msg["id"], "get_playground_settings", {
         "effective": playground.effective_settings(base_config, match_config),
         "presets": _playground_preset_list(store),
         "publishable": sorted(playground.PUBLISHABLE_SETTING_KEYS),
         "preset_limit": PLAYGROUND_PRESET_MAX,
+        "classic_suggestions": classic_sugg,
+        "ml_suggestions": ml_sugg,
+        "ml_suggestions_enabled": ENABLE_ML_SUGGESTIONS,
     })
 
 
