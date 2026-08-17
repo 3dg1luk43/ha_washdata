@@ -100,6 +100,7 @@ export interface GetConstantsResponse {
   store_online_available: boolean;
   store_online_enabled: boolean;
   store_web_origin: string;
+  pg_match_defaults: Record<string, unknown>;
 }
 
 export interface GetCyclePowerDataResponse {

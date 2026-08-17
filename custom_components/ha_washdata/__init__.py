@@ -657,9 +657,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _integ = await _aget_integration(hass, DOMAIN)
             hass.data["ha_washdata_version"] = _integ.manifest.get("version", "") or ""
         except Exception as err:  # pylint: disable=broad-exception-caught
-            # Don't cache a transient loader failure - leave the key unset so a
-            # later setup retries (ws_get_constants falls back to the module version).
             _LOGGER.debug("Could not load ha_washdata version from manifest: %s", err)
+            # Fall back to reading manifest.json off the event loop so that
+            # ws_get_constants never serves an empty version string.
+            def _read_manifest_version() -> str:
+                try:
+                    return json.loads(
+                        (Path(__file__).parent / "manifest.json").read_text(encoding="utf-8")
+                    ).get("version") or ""
+                except Exception:  # pylint: disable=broad-exception-caught
+                    return ""
+            hass.data["ha_washdata_version"] = await hass.async_add_executor_job(
+                _read_manifest_version
+            )
 
     async_register_commands(hass)
     hass.data["ha_washdata_ws_registered"] = True

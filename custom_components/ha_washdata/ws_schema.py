@@ -225,6 +225,7 @@ class GetConstantsResponse(TypedDict):
     store_online_available: bool
     store_online_enabled: bool
     store_web_origin: str
+    pg_match_defaults: dict[str, Any]
 
 
 # ─── Suggestions ───────────────────────────────────────────────────────────────
