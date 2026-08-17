@@ -176,10 +176,10 @@ jobs:
                   }
                 }
 
-                await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: rule.message(pr) });
                 await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
                 closed.add(pr.number);
                 console.log(`Closed PR #${pr.number} (${pr.title}) - rule: "${rule.label}".`);
+                await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: rule.message(pr) });
               }
             }
 

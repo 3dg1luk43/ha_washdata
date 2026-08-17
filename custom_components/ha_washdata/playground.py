@@ -320,7 +320,8 @@ def apply_match_overrides(
     ``settings_override`` overlaid onto the matcher-config keys they drive.
     Unknown/None/malformed values are ignored, so a detection-only override leaves
     matching byte-identical to the live config."""
-    if not settings_override:
+    settings_override = sanitize_setting_values(settings_override)
+    if not isinstance(settings_override, dict) or not settings_override:
         return match_config
     out = dict(match_config)
     for opt_key, (cfg_key, coerce) in _MATCH_OVERRIDE_KEYS.items():
