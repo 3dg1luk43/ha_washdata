@@ -45,7 +45,7 @@ pip install paho-mqtt
 # Fast suite (default) – ~30s, skips real-data replays and benchmarks
 ./run_tests.sh
 
-# Playwright E2E browser tests (panel UI; ~30s, 320 tests across chromium + mobile-chrome)
+# Playwright E2E browser tests (panel UI; ~30s, 332 tests across chromium + mobile-chrome)
 ./run_tests.sh --e2e
 
 # Everything (fast + slow + benchmark + E2E, ~12 min)
@@ -79,7 +79,7 @@ opt-in for releases and CI (`--slow`, `--bench`, `--e2e`, or `--all`).
 | **fast**    | (none)                 | Unit & integration tests with mocked dependencies, issue reproducers         | ✅ runs  |
 | **slow**    | `@pytest.mark.slow`    | Real-data replays from `cycle_data/`, stress simulations, full HA flow       | ❌ `--slow` |
 | **benchmark** | `@pytest.mark.benchmark` | Performance characterization (timing prints, no functional assertions)    | ❌ `--bench` |
-| **e2e**     | Playwright (`playwright-tests/`) | Full panel UI across chromium + mobile-chrome (320 tests). Required for any panel change. | ❌ `--e2e` |
+| **e2e**     | Playwright (`playwright-tests/`) | Full panel UI across chromium + mobile-chrome (332 tests). Required for any panel change. | ❌ `--e2e` |
 
 Run the browser suite with `./run_tests.sh --e2e`, or directly:
 `cd playwright-tests && npx playwright test` (single spec:
