@@ -5531,7 +5531,7 @@ class HaWashdataPanel extends HTMLElement {
     const saveRow = canEdit ? `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
       <input id="wd-pg-preset-name" type="text" class="wd-pg-preset-name" maxlength="60" value="${_esc(this._pgPresetName || '')}" placeholder="${_esc(this._t('lbl.pg_preset_name', {}, 'New preset name'))}" aria-label="${_esc(this._t('lbl.pg_preset_name', {}, 'New preset name'))}">
       <button class="wd-btn wd-btn-sm" data-action="pg-preset-save" ${(this._pgPresetName || '').trim() && !atLimit ? '' : 'disabled'} title="${_esc(this._t('btn.pg_preset_save_tip', {}, 'Save every value below as a named preset for this device'))}">${this._t('btn.pg_preset_save', {}, 'Save as preset')}</button>
-      ${atLimit ? `<span style="font-size:.72em;color:var(--warning-color,#ff9800)">${this._t('msg.pg_preset_limit', {n: this._pgPresetLimit}, 'Preset limit reached (' + this._pgPresetLimit + ')')}</span>` : ''}
+      <span id="wd-pg-preset-limit-note" style="font-size:.72em;color:var(--warning-color,#ff9800)${atLimit ? '' : ';display:none'}">${this._t('msg.pg_preset_limit', {n: this._pgPresetLimit}, 'Preset limit reached (' + this._pgPresetLimit + ')')}</span>
     </div>` : '';
 
     const publishBtn = (canEdit && publishable.length)
@@ -9221,10 +9221,18 @@ class HaWashdataPanel extends HTMLElement {
     const pgPresetName = sr.getElementById('wd-pg-preset-name');
     if (pgPresetName) pgPresetName.addEventListener('input', () => {
       this._pgPresetName = pgPresetName.value;
-      const caret = pgPresetName.selectionStart;
-      this._render();
-      const again = sr.getElementById('wd-pg-preset-name');
-      if (again) { again.focus(); try { again.setSelectionRange(caret, caret); } catch (_) {} }
+      // Only the save button's disabled state and the preset-limit note depend on
+      // the typed name, so patch those two in place. A full _render() per keystroke
+      // rebuilt the entire panel DOM and repainted the Playground canvases, and is
+      // what forced the caret save/restore workaround this replaces.
+      const name = (this._pgPresetName || '').trim();
+      const atLimitNow = this._pgPresetLimit > 0
+        && (this._pgPresets || []).length >= this._pgPresetLimit
+        && !(this._pgPresets || []).some(p => p.name === name);
+      const saveBtn = sr.querySelector('[data-action="pg-preset-save"]');
+      if (saveBtn) saveBtn.disabled = !(name && !atLimitNow);
+      const limitNote = sr.getElementById('wd-pg-preset-limit-note');
+      if (limitNote) limitNote.style.display = atLimitNow ? '' : 'none';
     });
 
     // F3: Sim cycle count

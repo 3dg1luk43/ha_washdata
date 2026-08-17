@@ -457,12 +457,14 @@ class PlaygroundPreset(TypedDict):
     updated_at: Any
 
 
-class GetPlaygroundSettingsResponse(TypedDict, total=False):
+class GetPlaygroundSettingsResponse(TypedDict):
     """Live effective Playground settings + the device's saved presets.
 
     ``classic_suggestions`` and ``ml_suggestions`` are filtered to keys the
     Playground exposes so the panel can stage them directly.  ``ml_suggestions``
-    is ``None`` when ``ENABLE_ML_SUGGESTIONS`` is off.
+    is ``None`` when ``ENABLE_ML_SUGGESTIONS`` is off - the key is still always
+    present, so every field here is required (total=True) and
+    ``_validate_ws_contract()`` can catch a handler that drops one.
     """
 
     effective: dict[str, Any]

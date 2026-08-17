@@ -2695,6 +2695,31 @@ class WashDataManager:
             and door_state is not None
             and door_state.state == "on"
         ):
+            # The end-of-cycle door pop follows the power drop, so an appliance still
+            # drawing above the stop threshold means the door was opened mid-cycle
+            # (loading a dish and walking off) rather than at the end - finalizing
+            # there would record a running cycle as completed.
+            #
+            # Re-arm rather than abandon: the dwell is one-shot, so dropping it here
+            # would permanently lose the door-based finalize for a machine that just
+            # happens to be mid-pulse when the timer lands (fan/zeolite drying can
+            # draw with the door already popped), leaving the cycle to the power
+            # timeout that #342 exists to short-circuit. Re-arming is asymmetric: it
+            # can only ever delay the finalize, never skip it.
+            stop_thr = 0.0
+            try:
+                stop_thr = float(getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0)
+            except (TypeError, ValueError):
+                stop_thr = 0.0
+            if stop_thr > 0.0 and self._current_power >= stop_thr:
+                self._logger.debug(
+                    "Door-end dwell fired but power %.1fW is still at/above the stop "
+                    "threshold %.1fW: treating as a mid-cycle door open, re-arming",
+                    self._current_power,
+                    stop_thr,
+                )
+                self._arm_door_end_dwell()
+                return
             self._logger.info(
                 "Door held open %ss on auto-open device: finalizing cycle",
                 self._door_end_dwell_seconds,

@@ -220,13 +220,13 @@ export interface GetPhaseCatalogResponse {
 }
 
 export interface GetPlaygroundSettingsResponse {
-  effective?: Record<string, unknown>;
-  presets?: PlaygroundPreset[];
-  publishable?: string[];
-  preset_limit?: number;
-  classic_suggestions?: Record<string, unknown>;
-  ml_suggestions?: Record<string, unknown> | null;
-  ml_suggestions_enabled?: boolean;
+  effective: Record<string, unknown>;
+  presets: PlaygroundPreset[];
+  publishable: string[];
+  preset_limit: number;
+  classic_suggestions: Record<string, unknown>;
+  ml_suggestions: Record<string, unknown> | null;
+  ml_suggestions_enabled: boolean;
 }
 
 export interface GetPowerHistoryResponse {

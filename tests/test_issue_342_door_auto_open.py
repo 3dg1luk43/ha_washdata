@@ -101,6 +101,39 @@ def test_dwell_fires_finalizes_via_user_stop(mock_hass):
     mgr.detector.user_stop.assert_called_once()
 
 
+def test_dwell_does_not_finalize_while_still_drawing_power(mock_hass):
+    """A mid-cycle door open on a still-drawing appliance must not be recorded as a
+    completed cycle: the end-of-cycle door pop only happens after power drops, so
+    power at/above the stop threshold means the user opened the door mid-cycle.
+
+    The dwell must be RE-ARMED rather than dropped - it is a one-shot timer, so
+    abandoning it would permanently lose the door-based finalize for a machine that
+    is merely mid-pulse (fan/zeolite drying can draw with the door popped open)."""
+    mgr = _make_manager(mock_hass, {CONF_DOOR_OPENS_AT_END: True})
+    mgr.detector.state = STATE_RUNNING
+    mgr.detector.config.stop_threshold_w = 2.0
+    _set_door_state(mgr, "on")
+    mgr._is_user_paused = False
+    mgr._current_power = 45.0          # still washing
+    with patch.object(mgr_mod, "async_call_later", return_value=lambda: None) as later:
+        mgr._door_end_dwell_fired(None)
+    mgr.detector.user_stop.assert_not_called()
+    later.assert_called_once()          # re-armed, not abandoned
+
+
+def test_dwell_finalizes_once_power_has_dropped(mock_hass):
+    """The legitimate auto-open path is unaffected: the door pop follows the power
+    drop, so a quiet appliance with the door held open still finalizes."""
+    mgr = _make_manager(mock_hass, {CONF_DOOR_OPENS_AT_END: True})
+    mgr.detector.state = STATE_RUNNING
+    mgr.detector.config.stop_threshold_w = 2.0
+    _set_door_state(mgr, "on")
+    mgr._is_user_paused = False
+    mgr._current_power = 0.4           # below the stop threshold
+    mgr._door_end_dwell_fired(None)
+    mgr.detector.user_stop.assert_called_once()
+
+
 def test_dwell_does_not_finalize_when_door_closed(mock_hass):
     """A missed close event: if the door reads closed when the dwell fires, do
     not finalize (re-validation guard, #342)."""
