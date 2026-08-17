@@ -5242,10 +5242,9 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
             opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)
         ),
         dishwasher_end_spike_quiet_release=float(
-            opts.get(
-                CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
-                DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
-            )
+            opts.get(CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE)
+            if opts.get(CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE) is not None
+            else DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
         ),
     )
 
