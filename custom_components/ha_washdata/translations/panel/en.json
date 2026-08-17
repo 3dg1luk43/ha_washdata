@@ -1671,7 +1671,7 @@
       }
     },
     "reason": {
-      "watchdog": "Kept as low as safe (just above the p95 update gap of {p95}s, min 30s) so stalls are caught quickly without false stops.",
+      "watchdog": "Kept as low as safe (just above the p95 update gap of {p95}s and at least 2x the sampling interval of {median}s, min 30s) so stalls are caught quickly without false stops.",
       "no_update_timeout": "Based on observed update cadence (p95={p95}s) * 20 (min 60s).",
       "off_delay_cadence": "Based on observed update cadence (p95={p95}s) * 5",
       "off_delay_device_floor": "Used device-specific safe minimum for {device} ({floor}s).",

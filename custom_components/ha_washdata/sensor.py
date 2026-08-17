@@ -752,7 +752,7 @@ class WasherProfileCountSensor(WasherBaseSensor):
                         CONF_POWER_PROFILE_INTERVAL_MIN, DEFAULT_POWER_PROFILE_INTERVAL_MIN
                     )
                 )
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 interval_min = DEFAULT_POWER_PROFILE_INTERVAL_MIN
         interval_min = max(1, interval_min)
 

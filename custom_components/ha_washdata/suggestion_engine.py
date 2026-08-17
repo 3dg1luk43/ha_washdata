@@ -741,7 +741,7 @@ class SuggestionEngine:
                 f" so stalls are caught quickly without false stops."
             ),
             "reason_key": "suggestion.reason.watchdog",
-            "reason_params": {"p95": f"{p95_dt:.1f}"},
+            "reason_params": {"p95": f"{p95_dt:.1f}", "median": f"{median_dt:.1f}"},
         }
 
         # 2. No Update Timeout

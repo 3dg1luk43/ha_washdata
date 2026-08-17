@@ -499,7 +499,7 @@ const _SETTING_CONFLICTS = [
         fixVal: +(v.stop_threshold_w * v.off_delay / 3600).toFixed(3) },
       stop_threshold_w: { msgKey: 'conflict.end_energy.stop', msgVars: {e: v.end_energy_threshold, d: v.off_delay},
         msgFb: `End Energy Threshold (${v.end_energy_threshold} Wh over ${v.off_delay} s) only permits ${+(v.end_energy_threshold * 3600 / v.off_delay).toFixed(2)} W`,
-        fixVal: +(v.end_energy_threshold * 3600 / v.off_delay).toFixed(1) },
+        fixVal: Math.floor(v.end_energy_threshold * 3600 / v.off_delay * 10) / 10 },
     }),
   },
 ];
@@ -3596,7 +3596,7 @@ class HaWashdataPanel extends HTMLElement {
   _htmlBody() {
     if (!this._devices.length)
       return `<div class="wd-empty"><div class="wd-icon">🧺</div>${this._t('msg.no_devices', {}, 'No WashData devices configured yet.')}</div>`;
-    const mlSugCount = this._mlSugKeys(this._opts).size;
+    const mlSugCount = this._mlSugKeys().size;
     const sugDot = (this._suggestions.length || mlSugCount) ? ' 💡' : '';
     const confIndicator = this._conflictKeysFromOpts().size > 0 ? ' ⚠' : '';
     const pgBusy = this._busy.has('pg-sim') || this._busy.has('pg-sweep');
@@ -3687,7 +3687,7 @@ class HaWashdataPanel extends HTMLElement {
       const n = _confKeys.size, s = n > 1 ? 's' : '';
       attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n, s}, `${n} setting conflict${s}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></button>`);
     }
-    const _mlSugCount = this._mlSugKeys(this._opts).size;
+    const _mlSugCount = this._mlSugKeys().size;
     if ((dev.suggestions_count || _mlSugCount) && this._canEdit()) {
       const total = (dev.suggestions_count || 0) + _mlSugCount;
       const parts = [];
@@ -5574,6 +5574,7 @@ class HaWashdataPanel extends HTMLElement {
     await this._busyRun('pg-preset-save', async () => {
       try {
         const r = await this._ws({ type: `${_DOMAIN}/save_playground_preset`, entry_id: dev.entry_id, name, values: this._pgCurrentValues() });
+        if (!this._isActiveEntry(dev.entry_id)) return;
         this._pgPresets = Array.isArray(r.presets) ? r.presets : this._pgPresets;
         this._pgPresetSel = name;
         this._pgPresetName = '';
@@ -5593,6 +5594,7 @@ class HaWashdataPanel extends HTMLElement {
     await this._busyRun('pg-preset-delete', async () => {
       try {
         const r = await this._ws({ type: `${_DOMAIN}/delete_playground_preset`, entry_id: dev.entry_id, name });
+        if (!this._isActiveEntry(dev.entry_id)) return;
         this._pgPresets = Array.isArray(r.presets) ? r.presets : (this._pgPresets || []).filter(p => p.name !== name);
         this._pgPresetSel = '';
       } catch (e) {
@@ -5655,6 +5657,7 @@ class HaWashdataPanel extends HTMLElement {
     await this._busyRun('pg-publish-' + key, async () => {
       try {
         await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { [key]: val } });
+        if (!this._isActiveEntry(dev.entry_id)) return;
         this._opts = { ...this._opts, [key]: val };
         // The published value IS the live baseline now: fold it into the effective
         // map and drop the staged edit, so the field reads "matches live" without
@@ -6138,6 +6141,7 @@ class HaWashdataPanel extends HTMLElement {
     await this._busyRun('pg-apply-settings', async () => {
       try {
         await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: opts });
+        if (!this._isActiveEntry(dev.entry_id)) return;
         this._opts = { ...this._opts, ...opts };
         // The published values ARE the live baseline now; clear only those staged
         // edits. Sandbox-only matcher edits are deliberately left in place - they
