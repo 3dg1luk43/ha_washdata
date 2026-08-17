@@ -18,7 +18,10 @@ Note: Despite the name, WashData also works well for other appliances (e.g., dry
 - [Test 3: Learning Feedback System](#test-3-learning-feedback-system)
 - [Test 4: Cycle Status Classification](#test-4-cycle-status-classification)
 - [Test 5: Publish-on-Change Sockets](#test-5-publish-on-change-sockets)
-- [Test 6: Data-Driven Verification (Real Data)](#test-6-data-driven-verification-real-data)
+- [Test 6: Profile Switching Verification](#test-6-profile-switching-verification)
+- [Test 7: Data-Driven Verification (Real Data)](#test-7-data-driven-verification-real-data)
+- [Test 8: Comprehensive Logic Verification](#test-8-comprehensive-logic-verification)
+- [Test 9: Empty Profile Safety (Edge Case)](#test-9-empty-profile-safety-edge-case)
 - [Mock Socket Reference](#mock-socket-reference)
 - [Debugging](#debugging)
 
@@ -42,7 +45,7 @@ pip install paho-mqtt
 # Fast suite (default) – ~30s, skips real-data replays and benchmarks
 ./run_tests.sh
 
-# Playwright E2E browser tests (panel UI; ~30s, 210 tests across chromium + mobile-chrome)
+# Playwright E2E browser tests (panel UI; ~30s, 320 tests across chromium + mobile-chrome)
 ./run_tests.sh --e2e
 
 # Everything (fast + slow + benchmark + E2E, ~12 min)
@@ -76,7 +79,7 @@ opt-in for releases and CI (`--slow`, `--bench`, `--e2e`, or `--all`).
 | **fast**    | (none)                 | Unit & integration tests with mocked dependencies, issue reproducers         | ✅ runs  |
 | **slow**    | `@pytest.mark.slow`    | Real-data replays from `cycle_data/`, stress simulations, full HA flow       | ❌ `--slow` |
 | **benchmark** | `@pytest.mark.benchmark` | Performance characterization (timing prints, no functional assertions)    | ❌ `--bench` |
-| **e2e**     | Playwright (`playwright-tests/`) | Full panel UI across chromium + mobile-chrome (210 tests). Required for any panel change. | ❌ `--e2e` |
+| **e2e**     | Playwright (`playwright-tests/`) | Full panel UI across chromium + mobile-chrome (320 tests). Required for any panel change. | ❌ `--e2e` |
 
 Run the browser suite with `./run_tests.sh --e2e`, or directly:
 `cd playwright-tests && npx playwright test` (single spec:
@@ -131,7 +134,10 @@ def test_dtw_lite_performance():
 `tests/repro/test_smart_termination.py`,
 `tests/test_verify_alignment.py`, `tests/test_real_data.py`,
 `tests/test_real_data_suggestions.py`, `tests/test_trailing_zero_impact.py`,
-`tests/test_integration_flow.py`
+`tests/test_integration_flow.py`, `tests/test_reprocessing.py`,
+`tests/test_phase_segmenter.py`, `tests/test_playground_detail.py`,
+`tests/test_issue_offdelay_smart_debounce.py`, `tests/test_matching_tuner.py`,
+`tests/test_issue_296_anticrease_back_to_back.py`
 
 **benchmark:** `tests/test_benchmark_matching.py`,
 `tests/test_analysis_bench.py::test_dtw_lite_performance`

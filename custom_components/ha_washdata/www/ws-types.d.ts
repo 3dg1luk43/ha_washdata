@@ -91,6 +91,8 @@ export interface ExportConfigResponse {
 }
 
 export interface GetConstantsResponse {
+  version: string;
+  icon_url: string | null;
   device_types: Record<string, unknown>[];
   state_colors: Record<string, unknown>;
   ml_lab_enabled: boolean;
@@ -100,6 +102,7 @@ export interface GetConstantsResponse {
   store_online_available: boolean;
   store_online_enabled: boolean;
   store_web_origin: string;
+  store_prefs: Record<string, unknown>;
   pg_match_defaults: Record<string, unknown>;
 }
 
@@ -115,6 +118,7 @@ export interface GetCyclePowerDataResponse {
   energy_kwh?: number | null;
   artifacts?: Record<string, unknown>[];
   restart_gaps?: unknown[];
+  is_reference?: boolean;
 }
 
 export interface GetDeviceCyclesResponse {
@@ -285,6 +289,7 @@ export interface GetSetupStatusResponse {
 export interface GetShareableCyclesResponse {
   items?: unknown[];
   phase_programs?: unknown[];
+  all_programs?: unknown[];
 }
 
 export interface GetSuggestionsResponse {
