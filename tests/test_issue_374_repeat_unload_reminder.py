@@ -32,7 +32,11 @@ import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
-from custom_components.ha_washdata.const import NOTIFY_EVENT_CLEAN, STATE_FINISHED
+from custom_components.ha_washdata.const import (
+    NOTIFY_EVENT_CLEAN,
+    NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS,
+    STATE_FINISHED,
+)
 from custom_components.ha_washdata.manager import WashDataManager
 
 DELAY_MIN = 5
@@ -204,3 +208,43 @@ def test_reset_clears_repeat_tracking(manager: WashDataManager) -> None:
     assert manager._unload_nag_dismissed is False
     assert manager._last_unload_nag_time is None
     assert manager._remove_unload_action_listener is None
+
+
+@pytest.mark.asyncio
+async def test_repeat_mode_is_bounded_and_releases_the_hold(
+    manager: WashDataManager,
+) -> None:
+    """Repeat mode must not remind (or hold Clean state) forever.
+
+    The in-notification "Stop reminding" button is mobile_app-only, so a user whose
+    only target is a non-mobile platform has the door sensor as their sole escape.
+    If that sensor never reports open, an unbounded repeat would re-fire forever AND
+    pin the entity in Clean state, permanently suppressing the power-based Off
+    detection. NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS bounds both.
+    """
+    manager._notify_unload_repeat = True
+    base = manager._clean_state_start
+
+    # Drive well past the cap without ever dismissing or opening the door.
+    for i in range(1, NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS + 20):
+        await _expiry(manager, base + timedelta(seconds=DELAY_S * i + 1))
+
+    assert manager._dispatch_notification.call_count == NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS
+    assert manager._unload_nag_count == NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS
+    # The terminal-state hold is released, so Off / progress-reset can proceed.
+    assert manager._unload_nag_active(dt_util.now()) is False
+
+
+@pytest.mark.asyncio
+async def test_repeat_counter_resets_between_cycles(manager: WashDataManager) -> None:
+    """The bound is per clean-state episode, not for the lifetime of the device."""
+    manager._notify_unload_repeat = True
+    base = manager._clean_state_start
+
+    for i in range(1, 4):
+        await _expiry(manager, base + timedelta(seconds=DELAY_S * i + 1))
+    assert manager._unload_nag_count == 3
+
+    manager._reset_unload_nag_tracking()
+    assert manager._unload_nag_count == 0
+    assert manager._unload_nag_active(dt_util.now()) is True

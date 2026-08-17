@@ -121,6 +121,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **A Playground preset with a very long name can be deleted again** (`profile_store.py`): Saving a preset trimmed its name to the 60-character limit, but deleting one looked the name up untrimmed. A preset saved under a longer name was therefore stored under a shortened key that the delete never matched, so it could not be removed and permanently occupied one of the 30 preset slots. Both paths now derive the storage key the same way, and a name whose trim lands on a space no longer keeps a trailing space in the key.
 
 
+- **The repeating unload reminder now stops after a safety limit** ([#374](https://github.com/3dg1luk43/ha_washdata/issues/374)) (`manager.py`, `const.py`): The opt-in "Repeat Until Door Opens" reminder had no upper bound. Its "Stop reminding" button only exists on Home Assistant companion-app targets, so anyone whose only notification target is a different platform had the door sensor as their sole way to end it - and if that sensor never reported the door opening (offline, or nobody home for a while), the reminder re-fired forever and held the appliance in the Clean state indefinitely, which also suppressed power-based Off detection for as long as it lasted. The reminder now stops after 48 repeats, roughly two days at the default one-hour spacing and far beyond any useful reminder window, after which the appliance returns to Off normally. Opening the door or tapping "Stop reminding" still ends it immediately as before, and the counter resets for each new cycle.
+
+
 ## 0.5.3 - 2026-07-26
 
 ### Features
