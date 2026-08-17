@@ -496,7 +496,7 @@ const _SETTING_CONFLICTS = [
     fieldErrors: v => ({
       end_energy_threshold: { msgKey: 'conflict.end_energy.energy', msgVars: {w: v.stop_threshold_w, d: v.off_delay},
         msgFb: `Too strict for Stop Threshold (${v.stop_threshold_w} W) over Off Delay (${v.off_delay} s); the cycle can only end through a fallback path`,
-        fixVal: +(v.stop_threshold_w * v.off_delay / 3600).toFixed(3) },
+        fixVal: Math.ceil(v.stop_threshold_w * v.off_delay / 3600 * 1000) / 1000 },
       stop_threshold_w: { msgKey: 'conflict.end_energy.stop', msgVars: {e: v.end_energy_threshold, d: v.off_delay},
         msgFb: `End Energy Threshold (${v.end_energy_threshold} Wh over ${v.off_delay} s) only permits ${+(v.end_energy_threshold * 3600 / v.off_delay).toFixed(2)} W`,
         fixVal: Math.floor(v.end_energy_threshold * 3600 / v.off_delay * 10) / 10 },
