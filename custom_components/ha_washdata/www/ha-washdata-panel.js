@@ -4650,8 +4650,13 @@ class HaWashdataPanel extends HTMLElement {
       extra.suggestion = { suggested: sug.suggested, current: sug.current, reason: sug.reason, reason_key: sug.reason_key, reason_params: rp };
     }
 
+    // A muted key (#343) must hide its Calibrated (ML) recommendation too - the
+    // mute is per-setting, not per-engine, so an ML-only suggestion would
+    // otherwise stay visible (and counted) after the user muted it.
     const mlc = (this._mlSettings || {})[f.key];
-    if (mlc && mlc.ml_value != null) extra.mlSuggestion = { value: mlc.ml_value, reason: mlc.ml_reason, reason_key: mlc.ml_reason_key, reason_params: mlc.ml_reason_params };
+    if (mlc && mlc.ml_value != null && !(this._lockedSuggestions || []).includes(f.key)) {
+      extra.mlSuggestion = { value: mlc.ml_value, reason: mlc.ml_reason, reason_key: mlc.ml_reason_key, reason_params: mlc.ml_reason_params };
+    }
 
     extra.useBtnLabel = this._t('btn.use', {}, 'Use');
     extra.t = this._t.bind(this);
@@ -5111,8 +5116,13 @@ class HaWashdataPanel extends HTMLElement {
   // Calibrated suggestions surface everywhere classic (observed) suggestions do.
   _mlSugKeys(eff) {
     const cur = eff || Object.assign({}, this._opts, this._pendingSettings || {});
+    // Muted keys (#343) are excluded so the banner count, section dots, tab bulb
+    // and the "Show only" filter all follow the mute state the same way the
+    // classic suggestions do (which are dropped from this._suggestions on mute).
+    const locked = new Set(this._lockedSuggestions || []);
     const keys = new Set();
     for (const [key, mlc] of Object.entries(this._mlSettings || {})) {
+      if (locked.has(key)) continue;
       if (mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, cur[key])) keys.add(key);
     }
     return keys;
