@@ -847,6 +847,7 @@ _None._
 | `store_online_available` | yes | bool |
 | `store_online_enabled` | yes | bool |
 | `store_web_origin` | yes | str |
+| `pg_match_defaults` | yes | dict[str, any] |
 
 ## `ha_washdata/get_suggestions`
 

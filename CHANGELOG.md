@@ -123,6 +123,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **The repeating unload reminder now stops after a safety limit** ([#374](https://github.com/3dg1luk43/ha_washdata/issues/374)) (`manager.py`, `const.py`): The opt-in "Repeat Until Door Opens" reminder had no upper bound. Its "Stop reminding" button only exists on Home Assistant companion-app targets, so anyone whose only notification target is a different platform had the door sensor as their sole way to end it - and if that sensor never reported the door opening (offline, or nobody home for a while), the reminder re-fired forever and held the appliance in the Clean state indefinitely, which also suppressed power-based Off detection for as long as it lasted. The reminder now stops after 48 repeats, roughly two days at the default one-hour spacing and far beyond any useful reminder window, after which the appliance returns to Off normally. Opening the door or tapping "Stop reminding" still ends it immediately as before, and the counter resets for each new cycle.
 
+- **The integration version is always populated even when HA's manifest loader fails** (`__init__.py`): `ws_get_constants` reads the integration version from `hass.data`; if the `async_get_integration` call that populates it during setup fails, the field was left absent and the panel received an empty version string. The exception path now falls back to reading `manifest.json` off the event loop via the executor, so `ws_get_constants` always returns a non-empty version. Normal startup is unchanged.
+
+- **`pg_match_defaults` is now declared in the WS response contract** (`ws_schema.py`, `www/ws-types.d.ts`): The `get_constants` handler added `pg_match_defaults` to its response payload but the field was missing from `GetConstantsResponse` in both the Python TypedDict and the TypeScript interface, so the contract validator flagged it as an undeclared field and typed consumers had no definition to rely on. Both schemas now include the field.
+
+- **The issue-validator log-evidence guidance states the 50-character minimum explicitly** (`.github/workflows/issue_validator.yml`): The validator rejected log sections shorter than 50 characters, but the comment posted to the reporter only said "a few lines of error text are enough" - a reporter who pasted a single short error string would be rejected without understanding why. The guidance now says "more than 50 characters" so the requirement is explicit.
+
 
 ## 0.5.3 - 2026-07-26
 
