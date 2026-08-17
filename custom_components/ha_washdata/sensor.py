@@ -743,17 +743,15 @@ class WasherProfileCountSensor(WasherBaseSensor):
 
         # power_profile bucket size (minutes) is configurable (#367); default 15.
         # Clamp to >=1 (get_profile_power_profile returns [] for interval <= 0).
-        cfg_entry = getattr(self._manager, "config_entry", None)
         interval_min = DEFAULT_POWER_PROFILE_INTERVAL_MIN
-        if cfg_entry is not None:
-            try:
-                interval_min = int(
-                    cfg_entry.options.get(
-                        CONF_POWER_PROFILE_INTERVAL_MIN, DEFAULT_POWER_PROFILE_INTERVAL_MIN
-                    )
+        try:
+            interval_min = int(
+                self._entry.options.get(
+                    CONF_POWER_PROFILE_INTERVAL_MIN, DEFAULT_POWER_PROFILE_INTERVAL_MIN
                 )
-            except (TypeError, ValueError, OverflowError):
-                interval_min = DEFAULT_POWER_PROFILE_INTERVAL_MIN
+            )
+        except (TypeError, ValueError, OverflowError):
+            interval_min = DEFAULT_POWER_PROFILE_INTERVAL_MIN
         interval_min = max(1, interval_min)
 
         return {

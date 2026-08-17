@@ -35,9 +35,9 @@ def _make_sensor(options: dict) -> WasherProfileCountSensor:
     manager = MagicMock()
     manager.profile_store.get_profile.return_value = {"cycle_count": 3, "avg_duration": 3600}
     manager.profile_store.get_profile_power_profile.return_value = [100.0, 50.0]
-    manager.config_entry.options = options
     entry = MagicMock()
     entry.entry_id = "e1"
+    entry.options = options
     return WasherProfileCountSensor(manager, entry, "P", 3)
 
 

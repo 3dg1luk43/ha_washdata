@@ -14,7 +14,7 @@ Note: Despite the name, WashData also works well for other appliances (e.g., dry
 - [Quick Start](#quick-start)
 - [Test Categories (fast / slow / benchmark)](#test-categories-fast--slow--benchmark)
 - [Test 1: Cycle Duration Variance](#test-1-cycle-duration-variance)
-- [Test 2: Progress Management](#test-2-progress-management)
+- [Test 2: Progress Management](#test-2-progress-management-100--0)
 - [Test 3: Learning Feedback System](#test-3-learning-feedback-system)
 - [Test 4: Cycle Status Classification](#test-4-cycle-status-classification)
 - [Test 5: Publish-on-Change Sockets](#test-5-publish-on-change-sockets)
@@ -542,142 +542,142 @@ sensor.washdata_learning_stats:
 
 ---
 
-  ## Test 4: Cycle Status Classification
+## Test 4: Cycle Status Classification
 
-  ### Goal
+### Goal
 
-  Verify that natural finishes show ✓ (completed or force_stopped) and abnormal endings show ✗ (interrupted).
+Verify that natural finishes show ✓ (completed or force_stopped) and abnormal endings show ✗ (interrupted).
 
-  ### Steps
+### Steps
 
-  1. Normal completion (✓ completed):
-    - Run a normal cycle with the mock socket (e.g., LONG) and let it finish.
-    - Verify status in logs/diagnostics shows `status: completed`.
+1. Normal completion (✓ completed):
+  - Run a normal cycle with the mock socket (e.g., LONG) and let it finish.
+  - Verify status in logs/diagnostics shows `status: completed`.
 
-  2. Watchdog finish while low-power waiting (✓ force_stopped):
-    - Stop mock publishing right after entering low-power wait phase.
-    - Ensure no updates for ≥ `off_delay`; the manager will call `force_end()`.
-    - Verify status shows `status: force_stopped` (treated as ✓ in UI).
+2. Watchdog finish while low-power waiting (✓ force_stopped):
+  - Stop mock publishing right after entering low-power wait phase.
+  - Ensure no updates for ≥ `off_delay`; the manager will call `force_end()`.
+  - Verify status shows `status: force_stopped` (treated as ✓ in UI).
 
-  3. Interrupted (✗ interrupted):
-    - Start a cycle, then abruptly cut power to 0W early (e.g., after ~60s).
-    - Or use a fault profile (e.g., `LONG_INCOMPLETE`) and stop updates before low-power wait.
-    - Verify status shows `status: interrupted`.
+3. Interrupted (✗ interrupted):
+  - Start a cycle, then abruptly cut power to 0W early (e.g., after ~60s).
+  - Or use a fault profile (e.g., `LONG_INCOMPLETE`) and stop updates before low-power wait.
+  - Verify status shows `status: interrupted`.
 
-  ### Verify
+### Verify
 
-  ```bash
-  grep -i "status:\|force_end\|interrupted" /config/home-assistant.log
-  ```
+```bash
+grep -i "status:\|force_end\|interrupted" /config/home-assistant.log
+```
 
-  Expected lines:
-  - `status: completed` or `status: force_stopped` for ✓ cases
-  - `status: interrupted` for abnormal endings
+Expected lines:
+- `status: completed` or `status: force_stopped` for ✓ cases
+- `status: interrupted` for abnormal endings
 
-  ---
+---
 
-  ## Test 5: Publish-on-Change Sockets
+## Test 5: Publish-on-Change Sockets
 
-  ### Goal
+### Goal
 
-  Validate watchdog behavior with devices that publish every ~60s and pause when values are steady.
+Validate watchdog behavior with devices that publish every ~60s and pause when values are steady.
 
-  ### Steps
+### Steps
 
-  1. Configure `no_update_active_timeout` (e.g., 600s) in Options.
-  2. Run a cycle and simulate 60s publishing intervals (`--sample 60`).
-  3. During an active phase, pause updates for < `no_update_active_timeout` (e.g., 5 minutes when timeout is 10 minutes).
-  4. Confirm the cycle is NOT force-ended while power is still high.
-  5. Enter low-power wait and pause updates for ≥ `off_delay`; confirm the cycle is completed (✓) even without new publishes.
+1. Configure `no_update_active_timeout` (e.g., 600s) in Options.
+2. Run a cycle and simulate 60s publishing intervals (`--sample 60`).
+3. During an active phase, pause updates for < `no_update_active_timeout` (e.g., 5 minutes when timeout is 10 minutes).
+4. Confirm the cycle is NOT force-ended while power is still high.
+5. Enter low-power wait and pause updates for ≥ `off_delay`; confirm the cycle is completed (✓) even without new publishes.
 
-  ### Verify
+### Verify
 
-  ```bash
-  grep -i "watchdog\|no_update_active_timeout\|low-power wait" /config/home-assistant.log
-  ```
+```bash
+grep -i "watchdog\|no_update_active_timeout\|low-power wait" /config/home-assistant.log
+```
 
-  Expected behavior:
-  - Active but no updates < timeout → no force-end.
-  - Low-power wait ≥ off_delay without updates → natural completion (✓).
+Expected behavior:
+- Active but no updates < timeout → no force-end.
+- Low-power wait ≥ off_delay without updates → natural completion (✓).
 
-  ---
+---
 
-  ## Test 6: Profile Switching Verification
+## Test 6: Profile Switching Verification
 
-  ### Goal
-  Verify the system correctly switches profiles when a better match is found mid-cycle (e.g. initial match was weak, then strong match appears).
+### Goal
+Verify the system correctly switches profiles when a better match is found mid-cycle (e.g. initial match was weak, then strong match appears).
 
-  ### Steps
-  1.  **Start Cycle**: Begin a cycle that looks like Profile A initially.
-  2.  **Verify A**: Check `sensor.<name>_program` is "Profile A".
-  3.  **Change Pattern**: Emit data that strongly matches Profile B (e.g., specific spin pattern).
-  4.  **Verify Switch**: 
-      - Check logs for "Switching to profile 'Profile B' (reason: high_confidence_override)".
-      - Verify `sensor.<name>_program` changes to "Profile B".
-  
-  ---
+### Steps
+1.  **Start Cycle**: Begin a cycle that looks like Profile A initially.
+2.  **Verify A**: Check `sensor.<name>_program` is "Profile A".
+3.  **Change Pattern**: Emit data that strongly matches Profile B (e.g., specific spin pattern).
+4.  **Verify Switch**: 
+    - Check logs for "Switching to profile 'Profile B' (reason: high_confidence_override)".
+    - Verify `sensor.<name>_program` changes to "Profile B".
 
-  ## Test 7: Data-Driven Verification (Real Data)
+---
 
-  ### Goal
-  Verify the integration robustness against real-world data anomalies (sampling gaps, noise) using recorded traces from actual appliances.
+## Test 7: Data-Driven Verification (Real Data)
 
-  ### How to Run
-  The repository includes a dedicated test suite `tests/test_real_data.py` that replays CSV/JSON data files through the `CycleDetector` state machine.
+### Goal
+Verify the integration robustness against real-world data anomalies (sampling gaps, noise) using recorded traces from actual appliances.
 
-  ```bash
-  # Run the data-driven test suite
-  pytest tests/test_real_data.py -v
-  ```
+### How to Run
+The repository includes a dedicated test suite `tests/test_real_data.py` that replays CSV/JSON data files through the `CycleDetector` state machine.
 
-  ### Data Sources
-  - `cycle_data/dishwasher-power.csv` (Dishwasher drying phase logic)
-  - `cycle_data/real-washing-machine.json` (Real washing machine trace)
-  - `cycle_data/test-mock-socket.json` (High-frequency mock data)
+```bash
+# Run the data-driven test suite
+pytest tests/test_real_data.py -v
+```
 
-  ### What it Verifies
-  1. **Phase Detection**: Correctly identifies "Drying" phases even with 0W power gaps.
-  2. **Cycle Consistency**: Ensures varying sampling rates don't cause fragmented cycles.
-  3. **High-Frequency Stability**: Verifies 2s sampling rate doesn't overwhelm the detector.
+### Data Sources
+- `cycle_data/dishwasher-power.csv` (Dishwasher drying phase logic)
+- `cycle_data/real-washing-machine.json` (Real washing machine trace)
+- `cycle_data/test-mock-socket.json` (High-frequency mock data)
 
-  To add your own data, export a cycle JSON and add a new test case in `tests/test_real_data.py`.
- 
-  ---
- 
-  ## Test 8: Comprehensive Logic Verification
- 
-  ### Goal
-  Verify the internal logic of the `WashDataManager` regarding profile switching, unmatching, and time prediction without needing a full-blown simulation. This runs a granular suite of scenario-based unit tests.
- 
-  ### How to Run
-  ```bash
-  pytest tests/test_logic_comprehensive.py -v
-  ```
- 
-  ### Scenarios Covered
-  1. **Initial Match**: "detecting..." -> Matched Profile.
-  2. **Strong Override**: Switching to a significantly better match mid-cycle.
-  3. **Weak Improvement**: Ignoring marginal confidence gains to prevent thrashing.
-  4. **Unmatching**: Reverting to "detecting..." when confidence collapses (drastic change).
-  5. **Variance Locking**: FREEZING the time estimate during high-variance phases (e.g., heating).
-  6. **Normal Prediction**: Updating estimates smoothly during low-variance phases.
- 
-  ---
- 
-  ## Test 9: Empty Profile Safety (Edge Case)
- 
-  ### Goal
-  Verify that the maintenance cleanup logic does NOT delete "Empty Profiles" (created by the user but not yet trained with a cycle), which was a previously fixed bug.
- 
-  ### How to Run
-  ```bash
-  pytest tests/test_empty_profile_deletion.py -v
-  ```
- 
-  ### Expected Result
-  - **Passed**: The test confirms empty profiles are preserved while broken references are deleted.
- 
-  ---
+### What it Verifies
+1. **Phase Detection**: Correctly identifies "Drying" phases even with 0W power gaps.
+2. **Cycle Consistency**: Ensures varying sampling rates don't cause fragmented cycles.
+3. **High-Frequency Stability**: Verifies 2s sampling rate doesn't overwhelm the detector.
+
+To add your own data, export a cycle JSON and add a new test case in `tests/test_real_data.py`.
+
+---
+
+## Test 8: Comprehensive Logic Verification
+
+### Goal
+Verify the internal logic of the `WashDataManager` regarding profile switching, unmatching, and time prediction without needing a full-blown simulation. This runs a granular suite of scenario-based unit tests.
+
+### How to Run
+```bash
+pytest tests/test_logic_comprehensive.py -v
+```
+
+### Scenarios Covered
+1. **Initial Match**: "detecting..." -> Matched Profile.
+2. **Strong Override**: Switching to a significantly better match mid-cycle.
+3. **Weak Improvement**: Ignoring marginal confidence gains to prevent thrashing.
+4. **Unmatching**: Reverting to "detecting..." when confidence collapses (drastic change).
+5. **Variance Locking**: FREEZING the time estimate during high-variance phases (e.g., heating).
+6. **Normal Prediction**: Updating estimates smoothly during low-variance phases.
+
+---
+
+## Test 9: Empty Profile Safety (Edge Case)
+
+### Goal
+Verify that the maintenance cleanup logic does NOT delete "Empty Profiles" (created by the user but not yet trained with a cycle), which was a previously fixed bug.
+
+### How to Run
+```bash
+pytest tests/test_empty_profile_deletion.py -v
+```
+
+### Expected Result
+- **Passed**: The test confirms empty profiles are preserved while broken references are deleted.
+
+---
 
 ## Mock Socket Reference
 
