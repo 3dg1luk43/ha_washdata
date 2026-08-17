@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData-asetukset",
-        "description": "Määritä pesukoneesi tai muu laite.\n\nTehoanturi tarvitaan.\n\n**Seuraavaksi sinulta kysytään, haluatko luoda ensimmäisen profiilisi.**",
+        "description": "Määritä pesukoneesi tai muu laite.\n\nTehoanturi tarvitaan.\n\nAsetuksen jälkeen avaa WashData-paneeli sivupalkista (tai siirry osoitteeseen [/ha-washdata](/ha-washdata)) nähdäksesi syklit, säätääksesi tunnistuksen ja hallitaksesi profiileja.",
         "data": {
           "name": "Laitteen nimi",
           "device_type": "Laitteen tyyppi",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Konfiguroi WashData uudelleen",
-        "description": "Päivitä laitteen nimi, laitteen tyyppi tai tehoanturi.",
+        "description": "Päivitä laitteen nimi, laitteen tyyppi tai tehoanturi.\n\nWashData-paneelissa (sivupalkki tai [/ha-washdata](/ha-washdata)) hallitaan tunnistusta, syklejä, profiileja ja ilmoituksia.",
         "data": {
           "name": "Laitteen nimi",
           "device_type": "Laitteen tyyppi",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData-asetukset",
-        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
+        "description": "Nimeä laite uudelleen tai muuta sen ydinlaitteiston asetuksia. Kaikki tunnistus-, täsmäytys- ja ilmoitusasetukset ovat [WashData-paneelissa](/ha-washdata) (saavutettavissa myös sivupalkista).",
         "data": {
           "name": "Laitteen nimi",
           "device_type": "Laitteen tyyppi",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes} min ajastin",
       "timer_pause_action_title": "Jatka sykliä",
       "timer_pause_body_suffix": "Sykli on keskeytetty. Avaa WashData-paneeli jatkaaksesi.",
+      "unload_dismiss_action_title": "Lopeta muistuttaminen",
       "notify_live_waiting_message": "{device}: Yhtään profiilia ei ole vielä tunnistettu.",
       "vs_typical_longer": "{pct}% tavallista pidempi",
       "vs_typical_shorter": "{pct}% tavallista lyhyempi",

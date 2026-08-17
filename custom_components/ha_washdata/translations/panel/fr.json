@@ -92,6 +92,19 @@
     "pause_cycle_tip": "Mettre en pause le cycle en cours – l'appareil reprendra là où il s'est arrêté",
     "pg_apply_device": "Appliquer à l'appareil",
     "pg_autofill": "Remplissage automatique",
+    "pg_load_calibrated": "Charger Calibré (ML) ({n})",
+    "pg_load_calibrated_tip": "Charger les paramètres calibrés par ML comme valeurs de remplacement dans le Bac à sable",
+    "pg_load_live": "Charger les réglages actifs",
+    "pg_load_live_tip": "Relire les réglages actuels de l'intégration et abandonner toutes les modifications faites dans le Bac à sable",
+    "pg_load_suggested": "Charger les suggestions ({n})",
+    "pg_load_suggested_tip": "Charger les suggestions actuelles du réglage automatique comme valeurs de remplacement dans le Bac à sable",
+    "pg_preset_delete": "Supprimer le préréglage",
+    "pg_preset_load": "Charger le préréglage",
+    "pg_preset_load_tip": "Remplacer les valeurs du Bac à sable par ce préréglage (les réglages actifs ne sont pas modifiés)",
+    "pg_preset_save": "Enregistrer comme préréglage",
+    "pg_preset_save_tip": "Enregistrer toutes les valeurs ci-dessous comme préréglage nommé pour cet appareil",
+    "pg_publish_all": "Enregistrer {n} réglage(s) dans l'intégration",
+    "pg_publish_one": "Enregistrer {label} dans l'intégration",
     "play": "Lire",
     "process": "Processus",
     "process_history": "Traiter maintenant",
@@ -178,7 +191,9 @@
     "download_export": "Télécharger l'export",
     "analyze_import": "Analyser le fichier",
     "import_selected": "Importer la sélection",
-    "back": "Retour"
+    "back": "Retour",
+    "mute_suggestion": "Ne plus suggérer ce paramètre",
+    "reset_muted": "Réinitialiser les suggestions masquées"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -275,6 +290,7 @@
     "no_automations": "Aucun automatisme ne fait encore référence à cet appareil.",
     "panel_settings": "Paramètres du panneau",
     "param_sweep": "Balayage de paramètre",
+    "pg_settings_source": "Origine des réglages",
     "phase_catalog": "Catalogue de phases",
     "playground": "Bac à sable",
     "process_history": "Historique du processus",
@@ -415,6 +431,9 @@
     "pg_match_score": "Score de correspondance",
     "pg_pct_of": "{p}% sur {total}",
     "pg_poor_match": "Correspondance médiocre",
+    "pg_preset": "Préréglage du Bac à sable",
+    "pg_preset_name": "Nom du nouveau préréglage",
+    "pg_preset_none": "Sélectionner un préréglage…",
     "pg_strong_match": "Correspondance forte",
     "pg_tile_ambiguous": "Ambigu",
     "pg_tile_ambiguous_tip": "Cycles avec une quasi-égalité entre deux programmes",
@@ -609,7 +628,8 @@
     "conflict_resolution": "Conflits de noms",
     "conflict_import_copy": "Importer comme copie",
     "conflict_keep_mine": "Garder le mien",
-    "conflict_overwrite": "Écraser"
+    "conflict_overwrite": "Écraser",
+    "font_size": "Taille de police du panneau"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -771,7 +791,17 @@
     "pg_apply_confirm": "Appliquer la meilleure valeur : {label} = {value} ?",
     "pg_canvas_empty": "Sélectionnez un cycle ci-dessus, puis appuyez sur Charger pour voir sa courbe de puissance.",
     "pg_chart_caption": "Taux de détection/correspondance selon les valeurs de {param}",
+    "pg_ctrl_intro": "Les valeurs partent des réglages actifs de cet appareil dans l'intégration. Les modifications restent dans le Bac à sable tant que vous ne les enregistrez pas dans l'intégration.",
+    "pg_live_unavailable": "Réglages actifs indisponibles, affichage des valeurs par défaut.",
+    "pg_load_live_confirm": "Abandonner {n} modification(s) du Bac à sable et recharger les réglages actuels de l'intégration ?",
     "pg_match_rate": "{pct}% de taux de correspondance sur {total} cycles",
+    "pg_matches_live": "Identique aux réglages actifs",
+    "pg_n_changed": "{n} valeur(s) modifiée(s) par rapport aux réglages actifs",
+    "pg_sugg_none": "Toutes les suggestions correspondent déjà aux réglages actuels",
+    "pg_preset_delete_confirm": "Supprimer le préréglage « {name} » ?",
+    "pg_preset_limit": "Limite de préréglages atteinte ({n})",
+    "pg_preset_overwrite": "Écraser le préréglage « {name} » ?",
+    "pg_publish_one_confirm": "Enregistrer {label} = {value} dans les réglages de cet appareil ?",
     "pg_restart_note": "Redémarrez Home Assistant pour activer les outils de simulation.",
     "pg_sim_progress": "{done} / {total} cycles",
     "pg_starting": "Démarrage…",
@@ -845,6 +875,7 @@
     "trend_duration_shorter": "Tendance de durée plus courte ({pct} %/cycle) – moyenne récente {avg}",
     "trend_energy_down": "Tendance à la baisse de l'énergie ({pct} %/cycle)",
     "trend_energy_up": "Tendance énergétique à la hausse ({pct} %/cycle) – moyenne récente {avg}",
+    "trim_destructive_confirm": "Cela ne conserve que {pct} % du cycle et est irréversible. Continuer ?",
     "trim_intro": "Faites glisser les poignées rouges ou entrez des valeurs. Tout ce qui se trouve à l'extérieur de la fenêtre est supprimé.",
     "tuning_suggestions_available": "{count} suggestion de réglage disponible à partir des cycles observés. Ils apparaissent à côté des champs concernés.",
     "unsure_detected_prefix": "WashData n'est pas sûr d'avoir été détecté",
@@ -922,9 +953,15 @@
     "merge_hint": "Les éléments importés sont ajoutés ; rien de local n'est perdu. Les conflits de noms sont résolus ci-dessous.",
     "replace_warn": "Chaque catégorie cochée est effacée et remplacée par le contenu du fichier. Les catégories non cochées restent intactes.",
     "dest_reference_hint": "Les cycles importés améliorent uniquement la reconnaissance des programmes et n'affectent jamais les statistiques d'utilisation/d'énergie.",
-    "dest_real_history_hint": "Les cycles importés comptent comme l'historique propre de cet appareil et alimentent les statistiques d'énergie/d'utilisation. À utiliser pour déplacer un appareil vers une nouvelle installation."
+    "dest_real_history_hint": "Les cycles importés comptent comme l'historique propre de cet appareil et alimentent les statistiques d'énergie/d'utilisation. À utiliser pour déplacer un appareil vers une nouvelle installation.",
+    "sug_muted": "Ce paramètre ne sera plus suggéré",
+    "sug_mute_failed": "Impossible de masquer la suggestion",
+    "sug_unmuted_all": "Les suggestions masquées ont été réinitialisées",
+    "n_suggestions_muted": "{count} masquée(s) ; le réglage automatique ne proposera plus ces suggestions.",
+    "font_size_hint": "Agrandir ou réduire tout le contenu de ce panneau. S'applique à votre compte sur cet appareil."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",
     "anti_wrinkle_enabled": "Absorber les impulsions de culbutage après la phase principale au lieu de les lire comme de nouveaux cycles",
     "anti_wrinkle_exit_power": "La puissance doit tomber sous ce seuil entre les impulsions pour que l'anti-froissement reste actif",
     "anti_wrinkle_idle_timeout": "Temps de silence autorisé entre deux impulsions de culbutage avant la fin de l'anti-froissement",
@@ -998,6 +1035,10 @@
     "unusable": "Inutilisable"
   },
   "section": {
+    "dishwasher": {
+      "label": "Lave-vaisselle",
+      "intro": "Gestion de fin de cycle pour les lave-vaisselle, qui se terminent généralement par une longue phase de séchage quasi silencieuse avant une brève vidange finale."
+    },
     "anti_wrinkle": {
       "intro": "Le mode anti-froissement détecte les courtes impulsions de culbutage à faible puissance après la phase principale et les maintient rattachées au cycle terminé.",
       "label": "Anti-froissement"
@@ -1040,6 +1081,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Libération au silence du séchage passif",
+      "doc": "Une fois que le cycle dépasse sa durée prévue, combien de temps le lave-vaisselle doit rester silencieux (sous le Seuil d'arrêt) avant que WashData cesse d'attendre une vidange finale et termine le cycle. Augmentez cette valeur si votre machine a une longue phase de séchage silencieuse avant une vidange finale tardive qui n'est pas détectée - une fenêtre plus large permet à la durée apprise de suivre la dérive saisonnière (eau d'arrivée plus froide = cycles plus longs) au lieu de se figer sur l'ancienne moyenne. Elle ne fait que raccourcir l'attente par rapport au plafond interne de 30 minutes pour le pic de fin, jamais la prolonger."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Reconnaissez les courtes impulsions de culbutage de faible puissance qu'un sèche-linge émet après la phase de chauffage principale et conservez-les attachées au cycle terminé au lieu de les lire comme de nouveaux cycles.",
       "label": "Activer la détection anti-froissement"
@@ -1260,6 +1305,10 @@
       "doc": "Quelques minutes après la fin d'un cycle avant d'envoyer le rappel \"décharger la machine\" toujours en attente. Définissez 0 pour désactiver le rappel.",
       "label": "Délai de rappel de déchargement"
     },
+    "notify_unload_repeat": {
+      "doc": "Continue de renvoyer le rappel de déchargement toutes les \"Délai de rappel de déchargement\" minutes jusqu'à ce que vous ouvriez la porte ou appuyiez sur \"Arrêter les rappels\" dans la notification. Nécessite une Entité capteur de porte (le rappel lui-même en a besoin). Le bouton de rejet fonctionne sur les notifications de l'application compagnon (mobile) de Home Assistant.",
+      "label": "Répéter jusqu'à l'ouverture de la porte"
+    },
     "off_delay": {
       "doc": "Temps d'attente après la coupure de courant avant de déclarer le cycle terminé. Si le courant revient dans cette fenêtre, le cycle continue de manière transparente – cela comble les pauses entre les étapes de lavage. Les lave-vaisselle ont de longues phases de séchage (mise hors tension pendant 20 à 60 minutes), le délai d'arrêt doit donc être supérieur à ce délai pour que l'ensemble du lavage et du séchage se déroule en un seul cycle.",
       "label": "Délai d'arrêt"
@@ -1435,6 +1484,26 @@
     "energy_scale": {
       "label": "Précision énergie",
       "doc": "Précision de la pénalité de concordance d'énergie. Plus petit = plus strict : un écart d'énergie pénalise davantage. Le défaut 0,25 est intentionnellement plus indulgent que la Précision de durée, car l'énergie varie avec la charge. À combiner avec la Pondération d'énergie."
+    },
+    "power_profile_interval_min": {
+      "label": "Intervalle du profil de puissance",
+      "doc": "Taille des créneaux pour l'attribut de capteur power_profile par profil (le tableau plat de watts moyens par créneau consommé par des planificateurs externes tels que EMHASS et tibber_prices). Des créneaux plus petits conservent les pics de puissance courts et nets ; des créneaux plus grands lissent la forme. Par défaut 15 min. Lecture seule ; n'affecte pas la détection."
+    },
+    "notify_live_sticky": {
+      "label": "Conserver la notification en direct au toucher",
+      "doc": "Android uniquement. Rend la notification de progression en direct persistante (épinglée) afin que la toucher ne la ferme pas. Désactivé conserve le comportement par défaut où un toucher la ferme."
+    },
+    "notify_live_click_action": {
+      "label": "Destination au toucher de la notification en direct",
+      "doc": "Android uniquement. Où s'ouvre un toucher sur la notification de progression en direct (par exemple /lovelace/laundry, ou une URL complète) au lieu de la page d'accueil de l'application. Laissez vide pour la valeur par défaut."
+    },
+    "door_opens_at_end": {
+      "label": "La porte s'ouvre automatiquement en fin de cycle",
+      "doc": "Pour les lave-vaisselle qui ouvrent la porte en fin de cycle pour le séchage (AirDry et fonctions similaires). Avec cette option activée, une ouverture de porte sur un cycle en cours ne le met plus en pause indéfiniment ; si la porte reste ouverte pendant la durée d'attente ci-dessous, WashData considère le cycle comme terminé. Une ouverture brève (pour ajouter un article) est ignorée. Nécessite une entité capteur de porte."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Durée d'attente porte ouverte",
+      "doc": "Durée pendant laquelle la porte doit rester ouverte avant que WashData ne termine le cycle, lorsque « La porte s'ouvre automatiquement en fin de cycle » est activé. Assez longue pour ignorer l'ajout rapide d'un article (par défaut 60 s), assez courte pour terminer rapidement une fois que la machine ouvre la porte."
     }
   },
   "setting_group": {
@@ -1605,6 +1674,10 @@
     "name_required": "Nom requis",
     "no_split_found": "Aucun espace vide trouvé sur lequel se diviser",
     "panel_settings_saved": "Paramètres du panneau enregistrés",
+    "pg_preset_loaded": "Préréglage « {name} » chargé",
+    "pg_preset_saved": "Préréglage « {name} » enregistré",
+    "pg_sugg_loaded": "{n} valeur(s) suggérée(s) chargée(s) - lancez le Bac à sable pour comparer",
+    "pg_sugg_ml_loaded": "{n} valeur(s) calibrée(s) ML chargée(s) - lancez le Bac à sable pour comparer",
     "phase_name_required": "Le nom de la phase est obligatoire",
     "phase_updated": "Phase mise à jour",
     "phases_saved": "Phases enregistrées",
@@ -1752,6 +1825,7 @@
       "min_active": "D'après la puissance active minimale ({min}W) observée lors du dernier cycle.",
       "min_duration_ratio": "Maintenu aussi bas que possible pour qu'un programme soit reconnu tôt dans le cycle ; les seuils de confiance et d'ambiguïté empêchent les décisions prématurées.",
       "min_off_gap": "D'après {gaps} intervalles entre cycles observés (p05={p05}s). Plancher de l'appareil : {floor}s.",
+      "min_off_gap_bridge": "Dimensionné pour couvrir la plus longue période calme au sein d'un cycle : {span}s + 60s de marge, à partir de {spans} intervalles couverts sur {cycles} cycles propres (reste sous votre intervalle minimal de {ceiling}s entre deux charges consécutives).",
       "min_power": "40% de la puissance active la plus basse au p05 ({p05}W) sur {cycles} cycles propres, pour garder le seuil d'arrêt sous la consommation réelle.{excl}",
       "ml_auto_label": "Confiance la plus basse encore jugée propre par le modèle de qualité (p10 de {cycles} cycles propres = {p10}).",
       "ml_end_repeat": "{false}/{total} cycles ({pct}%) ont eu une pause que le détecteur de fin a notée >50% ; exiger {val} confirmation(s) de fin.",
@@ -1768,7 +1842,7 @@
       "thr_batch": "Maintenu juste au-dessus de la puissance active la plus basse au p05 sur {cycles} cycles ({p05}W) pour qu'un démarrage soit détecté le plus tôt possible et que le seuil d'arrêt reste sous la puissance de fonctionnement la plus basse de la machine.",
       "tol_per_profile": "p75 de la variance de durée par profil sur {profiles} profils ({cycles} cycles) ; les profils resserrés ne sont pas pénalisés.",
       "tol_pooled": "D'après la variance de durée regroupée de {cycles} cycles récemment étiquetés (écart p95={dev}).",
-      "watchdog": "Maintenu aussi bas que possible en toute sécurité (3x l'écart de mise à jour p95 de {p95}s, min 30s) pour détecter rapidement les blocages sans faux arrêts."
+      "watchdog": "Maintenu aussi bas que possible en toute sécurité (juste au-dessus de l'écart de mise à jour p95 de {p95}s, min 30s) pour détecter rapidement les blocages sans faux arrêts."
     },
     "exclusions": {
       "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",
@@ -1944,6 +2018,54 @@
       "skip_forever": "Ne plus afficher",
       "hide_guidance": "Masquer le guide",
       "show_guidance": "Afficher le guide"
+    }
+  },
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entité introuvable",
+    "running_long": "Dépassement",
+    "remaining": "restant",
+    "progress": "progression",
+    "show_time_remaining": "Afficher le temps restant",
+    "show_percentage": "Afficher le pourcentage",
+    "layout": {
+      "tile": "Tuile (compact)",
+      "detail": "Détail (complet)",
+      "glance": "Aperçu (plusieurs appareils)"
+    },
+    "btn": {
+      "pause": "Pause",
+      "resume": "Reprendre",
+      "terminate": "Terminer le cycle",
+      "record_start": "Commencer l'enregistrement",
+      "record_stop": "Arrêter l'enregistrement",
+      "program": "Programme",
+      "open_panel": "Ouvrir WashData"
+    },
+    "editor": {
+      "layout": "Disposition",
+      "entity": "Entité de l'appareil",
+      "entities": "Appareils",
+      "title": "Titre",
+      "icon": "Icône",
+      "show_state": "Afficher l'état",
+      "show_program": "Afficher le programme",
+      "show_progress_bar": "Afficher la barre de progression",
+      "spin_icon": "Faire tourner l'icône pendant le fonctionnement",
+      "display_mode": "Ligne de détail",
+      "active_color": "Couleur active personnalisée",
+      "show_phase": "Afficher la phase",
+      "show_energy": "Afficher l'énergie et le coût",
+      "show_anomaly": "Afficher l'avertissement de dépassement",
+      "show_sparkline": "Afficher le graphique de puissance en direct",
+      "buttons": "Boutons d'action",
+      "program_entity": "Entité de programme (personnalisée)",
+      "time_entity": "Entité de temps (personnalisée)",
+      "pct_entity": "Entité de progression (personnalisée)",
+      "power_entity": "Entité de puissance (personnalisée)",
+      "tap_action": "Action au toucher",
+      "hold_action": "Action au maintien",
+      "double_tap_action": "Action au double toucher"
     }
   }
 }

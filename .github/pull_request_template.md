@@ -1,12 +1,28 @@
-> [!IMPORTANT]
-> **Translation PRs are exempt from the requirement below** (including those opened automatically by [GitLocalize](https://gitlocalize.com/repo/10819)).
-> For all other PRs: you must reference an issue that carries the `accepted` label.
-> If no accepted issue is linked, this PR will be closed automatically.
-> To get your work accepted: open a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml) first, indicate you plan to submit a PR, and wait for the maintainer to add the `accepted` label before opening this PR.
+# Pull Request
+
+> [!CAUTION]
+> **STOP - do not open this PR unless you already have an `accepted` issue.**
+>
+> WashData does **not** accept unsolicited code. Work must be agreed with the maintainer *before* you write it, so you never spend time on something that is already in progress, already rejected, or headed in a direction that will not be merged.
+>
+> **Required flow for every non-translation PR:**
+> 1. Open a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml), [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml), or [Documentation](https://github.com/3dg1luk43/ha_washdata/issues/new?template=documentation.yml) issue and tick the "I plan to submit a PR" box.
+> 2. **Wait** for the maintainer to add the `accepted` label. This is where you agree on scope and approach.
+> 3. *Only then* open this PR, referencing that already-accepted issue.
+>
+> **These PRs are not considered and will be closed automatically:**
+> - PRs that link **no** issue.
+> - PRs opened **in parallel** with a brand-new, not-yet-accepted issue (opening the PR alongside the issue skips the review-and-agree step and will not be reviewed).
+> - PRs where this template is deleted or left unfilled.
+>
+> **Exemption:** Translation PRs (including those opened automatically by [GitLocalize](https://gitlocalize.com/repo/10819)) skip all of the above.
 
 ## Linked Accepted Issue (required for non-translation PRs)
 
-Closes #<!-- issue number — must have the `accepted` label -->
+<!-- The issue below must ALREADY carry the `accepted` label BEFORE you open this PR.
+     Linking a fresh, unaccepted issue does not qualify - see the flow above. -->
+
+Closes #<!-- issue number - must have the `accepted` label -->
 
 ## Description
 
@@ -60,6 +76,7 @@ Describe the breaking change and how to migrate...
 
 <!-- Ensure these before submitting -->
 
+- [ ] **The issue I link above already had the `accepted` label before I opened this PR** (or this is a translation PR)
 - [ ] My code follows the project's code standards (PEP 8, type hints)
 - [ ] I've added/updated docstrings for new functions/classes
 - [ ] I've added corresponding tests (if applicable)
@@ -106,8 +123,9 @@ After:
 **Thank you for contributing to WashData!** 🙏
 
 Before hitting submit, please make sure:
-1. ✅ PR title clearly describes the change
-2. ✅ Description is detailed enough for reviewers to understand
-3. ✅ Tests pass locally
-4. ✅ You've reviewed the [CONTRIBUTING.md](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md) guide
-5. ✅ You've read our [Code of Conduct](https://github.com/3dg1luk43/ha_washdata/blob/main/CODE_OF_CONDUCT.md)
+1. ✅ Your linked issue **already carries the `accepted` label** (translation PRs exempt)
+2. ✅ PR title clearly describes the change
+3. ✅ Description is detailed enough for reviewers to understand
+4. ✅ Tests pass locally
+5. ✅ You've reviewed the [CONTRIBUTING.md](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md) guide
+6. ✅ You've read our [Code of Conduct](https://github.com/3dg1luk43/ha_washdata/blob/main/CODE_OF_CONDUCT.md)

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Nastavitev WashData",
-        "description": "Konfigurirajte svoj pralni stroj ali drugo napravo.\n\nPotreben je senzor moči.\n\n**Nato boste pozvani, ali želite ustvariti svoj prvi profil.**",
+        "description": "Konfigurirajte svoj pralni stroj ali drugo napravo.\n\nSenzor moči je obvezen.\n\nPo nastavitvi odprite ploščo WashData s stranske vrstice (ali pojdite na [/ha-washdata](/ha-washdata)) za ogled ciklov, prilagoditev zaznavanja in upravljanje profilov.",
         "data": {
           "name": "Ime naprave",
           "device_type": "Vrsta naprave",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Ponovno konfigurirajte WashData",
-        "description": "Posodobite ime naprave, vrsto naprave ali senzor moči.",
+        "description": "Posodobite ime naprave, vrsto naprave ali senzor moči.\n\nPlosca WashData (stranska vrstica ali [/ha-washdata](/ha-washdata)) je namenjena upravljanju zaznavanja, ciklov, profilov in obvestil.",
         "data": {
           "name": "Ime naprave",
           "device_type": "Vrsta naprave",
@@ -49,13 +49,14 @@
           "min_power": "Najmanjši prag moči (W)"
         },
         "title": "Nastavitve WashData",
-        "description": "Preimenujte napravo ali spremenite njene osnovne nastavitve strojne opreme. Vse nastavitve zaznavanja, ujemanja in obveščanja so na plošči WashData."
+        "description": "Preimenujte napravo ali spremenite njene osnovne nastavitve strojne opreme. Vse nastavitve zaznavanja, ujemanja in obveščanja so na [plošči WashData](/ha-washdata) (dostopna tudi s stranske vrstice)."
       }
     },
     "error": {
       "timer_default_message": "{device}: časovnik {minutes} min",
       "timer_pause_action_title": "Nadaljuj cikel",
       "timer_pause_body_suffix": "Cikel je zaustavljen. Odprite ploščo WashData za nadaljevanje.",
+      "unload_dismiss_action_title": "Nehaj opominjati",
       "notify_live_waiting_message": "{device}: Noben profil se še ne ujema.",
       "vs_typical_longer": "{pct}% dlje kot običajno",
       "vs_typical_shorter": "{pct}% krajše kot običajno",

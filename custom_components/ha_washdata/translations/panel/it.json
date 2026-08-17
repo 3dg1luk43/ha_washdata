@@ -92,6 +92,19 @@
     "pause_cycle_tip": "Metti in pausa il ciclo in corso – l'elettrodomestico riprenderà da dove si era fermato",
     "pg_apply_device": "Applica al dispositivo",
     "pg_autofill": "Compilazione automatica",
+    "pg_load_calibrated": "Carica Calibrato (ML) ({n})",
+    "pg_load_calibrated_tip": "Carica le impostazioni calibrate da ML come sostituzioni nel Playground",
+    "pg_load_live": "Carica le impostazioni attive",
+    "pg_load_live_tip": "Rileggi le impostazioni attuali dell'integrazione e scarta tutte le modifiche fatte nel Playground",
+    "pg_load_suggested": "Carica suggerimenti ({n})",
+    "pg_load_suggested_tip": "Carica i suggerimenti attuali dell'ottimizzatore automatico come sostituzioni nel Playground",
+    "pg_preset_delete": "Elimina preimpostazione",
+    "pg_preset_load": "Carica preimpostazione",
+    "pg_preset_load_tip": "Sostituisci i valori del Playground con questa preimpostazione (le impostazioni attive non vengono toccate)",
+    "pg_preset_save": "Salva come preimpostazione",
+    "pg_preset_save_tip": "Salva tutti i valori qui sotto come preimpostazione con nome per questo dispositivo",
+    "pg_publish_all": "Salva {n} impostazioni nell'integrazione",
+    "pg_publish_one": "Salva {label} nell'integrazione",
     "play": "Riproduci",
     "process": "Processo",
     "process_history": "Elabora ora",
@@ -178,7 +191,9 @@
     "download_export": "Scarica l'esportazione",
     "analyze_import": "Analizza il file",
     "import_selected": "Importa la selezione",
-    "back": "Indietro"
+    "back": "Indietro",
+    "mute_suggestion": "Non suggerire più questa impostazione",
+    "reset_muted": "Ripristina i silenziati"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -275,6 +290,7 @@
     "no_automations": "Nessuna automazione fa ancora riferimento a questo dispositivo.",
     "panel_settings": "Impostazioni del pannello",
     "param_sweep": "Scansione parametri",
+    "pg_settings_source": "Origine delle impostazioni",
     "phase_catalog": "Catalogo delle fasi",
     "playground": "Playground",
     "process_history": "Storia del processo",
@@ -415,6 +431,9 @@
     "pg_match_score": "Punteggio di abbinamento",
     "pg_pct_of": "{p}% di {total}",
     "pg_poor_match": "Abbinamento scarso",
+    "pg_preset": "Preimpostazione del Playground",
+    "pg_preset_name": "Nome della nuova preimpostazione",
+    "pg_preset_none": "Seleziona una preimpostazione…",
     "pg_strong_match": "Abbinamento forte",
     "pg_tile_ambiguous": "Ambiguo",
     "pg_tile_ambiguous_tip": "Cicli con un quasi pareggio tra due programmi",
@@ -609,7 +628,8 @@
     "conflict_resolution": "Conflitti di nome",
     "conflict_import_copy": "Importa come copia",
     "conflict_keep_mine": "Mantieni il mio",
-    "conflict_overwrite": "Sovrascrivi"
+    "conflict_overwrite": "Sovrascrivi",
+    "font_size": "Dimensione testo del pannello"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -771,7 +791,17 @@
     "pg_apply_confirm": "Applicare il valore migliore: {label} = {value}?",
     "pg_canvas_empty": "Seleziona un ciclo qui sopra, quindi premi Carica per vederne la curva di potenza.",
     "pg_chart_caption": "Tasso di rilevamento/abbinamento sui valori di {param}",
+    "pg_ctrl_intro": "I valori partono dalle impostazioni attive di questo dispositivo nell'integrazione. Le modifiche restano nel Playground finché non le salvi nell'integrazione.",
+    "pg_live_unavailable": "Impostazioni attive non disponibili, vengono mostrati i valori predefiniti.",
+    "pg_load_live_confirm": "Scartare {n} modifiche del Playground e ricaricare le impostazioni attuali dell'integrazione?",
     "pg_match_rate": "{pct}% di tasso di abbinamento su {total} cicli",
+    "pg_matches_live": "Corrisponde alle impostazioni attive",
+    "pg_n_changed": "{n} valori diversi dalle impostazioni attive",
+    "pg_sugg_none": "Tutti i suggerimenti corrispondono già alle impostazioni attuali",
+    "pg_preset_delete_confirm": "Eliminare la preimpostazione \"{name}\"?",
+    "pg_preset_limit": "Limite di preimpostazioni raggiunto ({n})",
+    "pg_preset_overwrite": "Sovrascrivere la preimpostazione \"{name}\"?",
+    "pg_publish_one_confirm": "Salvare {label} = {value} nelle impostazioni di questo dispositivo?",
     "pg_restart_note": "Riavvia Home Assistant per abilitare gli strumenti di simulazione.",
     "pg_sim_progress": "{done} / {total} cicli",
     "pg_starting": "Avvio…",
@@ -845,6 +875,7 @@
     "trend_duration_shorter": "La durata tendenzialmente è più breve ({pct}%/ciclo) – media recente {avg}",
     "trend_energy_down": "Energia in diminuzione ({pct}%/ciclo)",
     "trend_energy_up": "Energia in aumento ({pct}%/ciclo) – media recente {avg}",
+    "trim_destructive_confirm": "Questo mantiene solo il {pct}% del ciclo e l'operazione non può essere annullata. Continuare?",
     "trim_intro": "Trascina le maniglie rosse o inserisci i valori. Tutto fuori dalla finestra viene rimosso.",
     "tuning_suggestions_available": "{count} suggerimento di ottimizzazione disponibile dai cicli osservati. Appaiono accanto ai campi pertinenti.",
     "unsure_detected_prefix": "WashData non è sicuro di averlo rilevato",
@@ -922,9 +953,15 @@
     "merge_hint": "Gli elementi importati vengono aggiunti; nulla di locale va perso. I conflitti di nome si risolvono qui sotto.",
     "replace_warn": "Ogni categoria spuntata viene cancellata e sostituita dal contenuto del file. Le categorie non spuntate restano invariate.",
     "dest_reference_hint": "I cicli importati migliorano solo il riconoscimento dei programmi e non influiscono mai sulle statistiche di utilizzo/energia.",
-    "dest_real_history_hint": "I cicli importati contano come cronologia propria di questo dispositivo e alimentano le statistiche di energia/utilizzo. Da usare per spostare un elettrodomestico su una nuova installazione."
+    "dest_real_history_hint": "I cicli importati contano come cronologia propria di questo dispositivo e alimentano le statistiche di energia/utilizzo. Da usare per spostare un elettrodomestico su una nuova installazione.",
+    "sug_muted": "Non verrà più suggerita questa impostazione",
+    "sug_mute_failed": "Impossibile silenziare il suggerimento",
+    "sug_unmuted_all": "Suggerimenti silenziati ripristinati",
+    "n_suggestions_muted": "{count} silenziati; il sistema di ottimizzazione automatica non proporrà questi.",
+    "font_size_hint": "Rendi tutto in questo pannello più grande o più piccolo. Si applica al tuo account su questo dispositivo."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
     "anti_wrinkle_enabled": "Assorbire gli impulsi di rotazione dopo la fase principale invece di leggerli come nuovi cicli",
     "anti_wrinkle_exit_power": "La potenza deve scendere sotto questo valore tra gli impulsi affinché la modalità antirughe resti attiva",
     "anti_wrinkle_idle_timeout": "Tempo di silenzio consentito tra due impulsi di rotazione prima che la modalità antirughe termini",
@@ -998,6 +1035,10 @@
     "unusable": "Inutilizzabile"
   },
   "section": {
+    "dishwasher": {
+      "label": "Lavastoviglie",
+      "intro": "Gestione del fine ciclo per le lavastoviglie, che di solito terminano con una lunga fase di asciugatura quasi silenziosa prima di un breve scarico finale."
+    },
     "anti_wrinkle": {
       "intro": "La modalità antirughe/antistropicciamento rileva gli impulsi di tumbling a bassa potenza dopo la fase principale e li mantiene collegati al ciclo completato.",
       "label": "Antirughe"
@@ -1040,6 +1081,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Rilascio al silenzio dell'asciugatura passiva",
+      "doc": "Una volta che il ciclo supera la sua durata prevista, per quanto tempo la lavastoviglie deve restare silenziosa (sotto la Soglia di arresto) prima che WashData smetta di attendere uno scarico finale e termini il ciclo. Aumentalo se la tua macchina ha una lunga fase di asciugatura silenziosa prima di uno scarico finale tardivo che non viene rilevato - una finestra più ampia consente alla durata appresa di seguire la deriva stagionale (acqua in ingresso più fredda = cicli più lunghi) invece di bloccarsi sulla vecchia media. Riduce soltanto l'attesa rispetto al limite interno di 30 minuti per il picco di fine, senza mai prolungarla."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Riconosci i brevi impulsi di asciugatrice a bassa potenza emessi da un'asciugatrice dopo la fase di riscaldamento principale e mantienili collegati al ciclo finito invece di leggerli come nuovi cicli.",
       "label": "Abilita rilevamento antirughe"
@@ -1260,6 +1305,10 @@
       "doc": "Minuti dopo la fine di un ciclo prima dell'invio del promemoria \"scaricare la macchina\" ancora in attesa. Impostare 0 per disabilitare il promemoria.",
       "label": "Ritardo promemoria scarico"
     },
+    "notify_unload_repeat": {
+      "doc": "Continua a inviare il promemoria di scarico ogni \"Ritardo promemoria scarico\" minuti finché non apri la porta o tocchi \"Interrompi promemoria\" nella notifica. Richiede un'Entità sensore porta (il promemoria stesso la richiede). Il pulsante di chiusura funziona sulle notifiche dell'app complementare (mobile) di Home Assistant.",
+      "label": "Ripeti finché la porta non si apre"
+    },
     "off_delay": {
       "doc": "È tempo di attendere dopo l'interruzione della corrente prima di dichiarare terminato il ciclo. Se l'alimentazione viene ripristinata entro questo intervallo, il ciclo continua senza interruzioni, consentendo di colmare le pause tra le fasi di lavaggio. Le lavastoviglie hanno fasi di asciugatura lunghe (spegnimento per 20-60 minuti), quindi il ritardo di spegnimento deve superare quello per mantenere l'intero ciclo di lavaggio+asciugatura come un ciclo.",
       "label": "Ritardo spegnimento"
@@ -1434,6 +1483,26 @@
     "energy_scale": {
       "label": "Nitidezza energia",
       "doc": "Precisione della penalità di concordanza di energia. Minore = più severo: una discordanza di energia penalizza di più. Il predefinito 0,25 è intenzionalmente più indulgente della Precisione di durata, perché l'energia varia con il carico. Combinare con Peso energia."
+    },
+    "power_profile_interval_min": {
+      "label": "Intervallo profilo di potenza",
+      "doc": "Dimensione del bucket per l'attributo sensore power_profile per profilo (l'array piatto di watt medi per slot consumato dai pianificatori esterni come EMHASS e tibber_prices). Bucket più piccoli mantengono nitidi i picchi di potenza brevi; bucket più grandi smussano la forma. Predefinito 15 min. Solo in lettura; non influisce sul rilevamento."
+    },
+    "notify_live_sticky": {
+      "label": "Mantieni notifica live al tocco",
+      "doc": "Solo Android. Rende persistente (sticky) la notifica di avanzamento in tempo reale, in modo che toccandola non venga chiusa. Disattivato mantiene il comportamento predefinito in cui il tocco la chiude."
+    },
+    "notify_live_click_action": {
+      "label": "Destinazione tocco notifica live",
+      "doc": "Solo Android. Dove si apre un tocco sulla notifica di avanzamento in tempo reale (ad es. /lovelace/laundry o un URL completo) invece della pagina iniziale dell'app. Lascia vuoto per il valore predefinito."
+    },
+    "door_opens_at_end": {
+      "label": "Porta si apre automaticamente al termine",
+      "doc": "Per le lavastoviglie che aprono automaticamente lo sportello al termine del ciclo per asciugare (AirDry e simili). Con questa opzione attiva, un'apertura dello sportello durante un ciclo non lo mette più in pausa per sempre; invece, se lo sportello rimane aperto per il tempo di attesa indicato sotto, WashData considera il ciclo terminato. Un'apertura breve (per aggiungere un oggetto) viene ignorata. Richiede un'entità sensore della porta."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Attesa apertura porta al termine",
+      "doc": "Per quanto tempo lo sportello deve restare aperto prima che WashData termini il ciclo, quando \"Porta si apre automaticamente al termine\" è attiva. Abbastanza lungo da ignorare l'aggiunta rapida di un piatto (predefinito 60 s), abbastanza breve da terminare prontamente quando la macchina apre lo sportello."
     }
   },
   "setting_group": {
@@ -1604,6 +1673,10 @@
     "name_required": "Nome richiesto",
     "no_split_found": "Non è stato trovato alcun intervallo inattivo su cui dividere",
     "panel_settings_saved": "Impostazioni del pannello salvate",
+    "pg_preset_loaded": "Preimpostazione \"{name}\" caricata",
+    "pg_preset_saved": "Preimpostazione \"{name}\" salvata",
+    "pg_sugg_loaded": "{n} valore/i suggerito/i caricato/i - avvia il Playground per confrontare",
+    "pg_sugg_ml_loaded": "{n} valore/i calibrato/i ML caricato/i - avvia il Playground per confrontare",
     "phase_name_required": "Il nome della fase è obbligatorio",
     "phase_updated": "Fase aggiornata",
     "phases_saved": "Fasi salvate",
@@ -1751,6 +1824,7 @@
       "min_active": "In base alla potenza attiva minima ({min}W) osservata nell'ultimo ciclo.",
       "min_duration_ratio": "Mantenuto il più basso possibile affinché un programma venga riconosciuto presto nel ciclo; i limiti di confidenza e ambiguità impediscono decisioni premature.",
       "min_off_gap": "In base a {gaps} intervalli tra cicli osservati (p05={p05}s). Minimo del dispositivo: {floor}s.",
+      "min_off_gap_bridge": "Dimensionato per coprire il periodo di silenzio più lungo all'interno di un ciclo: {span}s + 60s di margine, da {spans} intervalli coperti su {cycles} cicli puliti (resta sotto il tuo intervallo minimo di {ceiling}s tra due carichi consecutivi).",
       "min_power": "40% della potenza attiva più bassa al p05 ({p05}W) su {cycles} cicli puliti, mantenendo la soglia di spegnimento sotto il consumo reale.{excl}",
       "ml_auto_label": "Confidenza più bassa che il modello di qualità ha comunque valutato come pulita (p10 di {cycles} cicli puliti = {p10}).",
       "ml_end_repeat": "{false}/{total} cicli ({pct}%) hanno avuto una pausa che il rilevatore di fine ha valutato >50%; richiedere {val} conferma/e di fine.",
@@ -1767,7 +1841,7 @@
       "thr_batch": "Mantenuto appena sopra la potenza attiva più bassa al p05 su {cycles} cicli ({p05}W) affinché un avvio venga rilevato il prima possibile e la soglia di arresto resti sotto la potenza di funzionamento più bassa della macchina.",
       "tol_per_profile": "p75 della varianza di durata per profilo su {profiles} profili ({cycles} cicli); i profili stretti non vengono penalizzati.",
       "tol_pooled": "In base alla varianza di durata aggregata di {cycles} cicli etichettati di recente (deviazione p95={dev}).",
-      "watchdog": "Mantenuto il più basso possibile in sicurezza (3x l'intervallo di aggiornamento p95 di {p95}s, min 30s) per rilevare rapidamente i blocchi senza arresti falsi."
+      "watchdog": "Mantenuto il più basso possibile in sicurezza (poco sopra l'intervallo di aggiornamento p95 di {p95}s, min 30s) per rilevare rapidamente i blocchi senza arresti falsi."
     },
     "exclusions": {
       "summary": "Esclusi {total} cicli rilevati male: {parts}.",
@@ -1943,6 +2017,54 @@
       "skip_forever": "Non mostrare più",
       "hide_guidance": "Nascondi guida",
       "show_guidance": "Mostra guida"
+    }
+  },
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entità non trovata",
+    "running_long": "In ritardo",
+    "remaining": "rimanente",
+    "progress": "avanzamento",
+    "show_time_remaining": "Mostra tempo rimanente",
+    "show_percentage": "Mostra percentuale",
+    "layout": {
+      "tile": "Riquadro (compatto)",
+      "detail": "Dettaglio (completo)",
+      "glance": "Panoramica (più dispositivi)"
+    },
+    "btn": {
+      "pause": "Pausa",
+      "resume": "Riprendi",
+      "terminate": "Termina ciclo",
+      "record_start": "Avvia registrazione",
+      "record_stop": "Interrompi registrazione",
+      "program": "Programma",
+      "open_panel": "Apri WashData"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Entità dell'elettrodomestico",
+      "entities": "Elettrodomestici",
+      "title": "Titolo",
+      "icon": "Icona",
+      "show_state": "Mostra stato",
+      "show_program": "Mostra programma",
+      "show_progress_bar": "Mostra barra di avanzamento",
+      "spin_icon": "Ruota l'icona durante il funzionamento",
+      "display_mode": "Riga di dettaglio",
+      "active_color": "Colore attivo personalizzato",
+      "show_phase": "Mostra fase",
+      "show_energy": "Mostra energia e costo",
+      "show_anomaly": "Mostra avviso di ritardo",
+      "show_sparkline": "Mostra grafico di potenza in tempo reale",
+      "buttons": "Pulsanti di azione",
+      "program_entity": "Entità programma (personalizzata)",
+      "time_entity": "Entità tempo (personalizzata)",
+      "pct_entity": "Entità avanzamento (personalizzata)",
+      "power_entity": "Entità potenza (personalizzata)",
+      "tap_action": "Azione al tocco",
+      "hold_action": "Azione alla pressione prolungata",
+      "double_tap_action": "Azione al doppio tocco"
     }
   }
 }

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData-Setup",
-        "description": "Konfigurieren Sie Ihre Waschmaschine oder ein anderes Gerät.\n\nLeistungssensor ist erforderlich.\n\n**Als nächstes werden Sie gefragt, ob Sie Ihr erstes Profil erstellen möchten.**",
+        "description": "Konfigurieren Sie Ihre Waschmaschine oder ein anderes Gerät.\n\nLeistungssensor ist erforderlich.\n\nNach der Einrichtung öffnen Sie das WashData-Panel über die Seitenleiste (oder gehen Sie zu [/ha-washdata](/ha-washdata)), um Zyklen anzuzeigen, die Erkennung anzupassen und Profile zu verwalten.",
         "data": {
           "name": "Gerätename",
           "device_type": "Gerätetyp",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "description": "Aktualisieren Sie den Gerätenamen, den Gerätetyp oder den Leistungssensor.\n\nDas WashData-Panel (Seitenleiste oder [/ha-washdata](/ha-washdata)) ist der Ort, an dem Erkennung, Zyklen, Profile und Benachrichtigungen verwaltet werden.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
+        "description": "Benennen Sie das Gerät um oder ändern Sie seine grundlegenden Hardware-Einstellungen. Alle Erkennungs-, Abgleich- und Benachrichtigungseinstellungen befinden sich im [WashData-Panel](/ha-washdata) (auch über die Seitenleiste erreichbar).",
         "data": {
           "name": "Name des Geräts",
           "device_type": "Device Type",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes}-Min.-Timer",
       "timer_pause_action_title": "Zyklus fortsetzen",
       "timer_pause_body_suffix": "Der Zyklus ist angehalten. Öffnen Sie das WashData-Panel, um fortzufahren.",
+      "unload_dismiss_action_title": "Nicht mehr erinnern",
       "notify_live_waiting_message": "{device}: Noch kein Profil erkannt.",
       "vs_typical_longer": "{pct}% länger als üblich",
       "vs_typical_shorter": "{pct}% kürzer als üblich",

@@ -5,6 +5,11 @@ Scope: `custom_components/ha_washdata/profile_store.py` (6182 lines) and
 referenced live in `const.py` unless noted. File:line anchors use the form
 `profile_store.py:NNNN` / `analysis.py:NNNN` / `const.py:NNNN`.
 
+> **Accuracy caveat.** Originally accurate as of 2026-07-18 (0.5.1); content
+> corrected 2026-08-17 for 0.5.4 (sync `match_profile` removed; Stage-4
+> `energy_mode`; worker duration-ratio fallbacks; confidence framing). Line anchors
+> may still reflect 0.5.1 and have drifted as the files grew.
+
 ---
 
 ## 0. Executive orientation
@@ -68,8 +73,11 @@ if profile_duration > 0:
     if ratio < min_duration_ratio or ratio > max_duration_ratio:
         continue
 ```
-- `min_duration_ratio` / `max_duration_ratio` come from `config`
-  (`.get(...,0.07)` / `.get(...,1.3)` fallbacks — analysis.py:273-274).
+- `min_duration_ratio` / `max_duration_ratio` come from `config`, falling back to
+  the const defaults `DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO` (0.10) /
+  `DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO` (1.5) when absent (analysis.py, top of
+  `compute_matches_worker`). (The old hardcoded `0.07` / `1.3` literal fallbacks
+  were replaced by the const defaults.)
 - Live values are set by `manager` on the store via
   `ProfileStore.set_duration_ratio_limits` (profile_store.py:2928) and passed
   through in the `config` dict built at profile_store.py:4640-4646 /
@@ -171,7 +179,7 @@ cand["score"] = MATCH_DTW_BLEND * core + (1 - MATCH_DTW_BLEND) * dtw_score
 Tuning provenance (const.py:407-427, CLAUDE.md): leave-one-out top-1 — off 62%,
 legacy 66%, scaled 70%, ddtw 69%, ensemble 71%, ensemble+top-5 refine 72.5%.
 
-### 4.3 Stage 4 — Duration + (mean-power) energy agreement (analysis.py:363-393)
+### 4.3 Stage 4 - Duration + energy agreement (mean-power or integrated) (analysis.py:363-393)
 Weight sanitization (analysis.py:373-378): drop non-finite weights → 0; clamp
 negatives → 0; if `dur_w + en_w > 1`, scale both down proportionally;
 `shape_w = max(0, 1 - dur_w - en_w)`. Guarantees a convex combination in [0,1].
@@ -180,10 +188,13 @@ Runs `if (dur_w > 0 or en_w > 0) and candidates and current_duration > 0`. With
 defaults (`MATCH_DURATION_WEIGHT = MATCH_ENERGY_WEIGHT = 0.22`, const.py:456-457)
 it **always runs**.
 ```
-cur_energy = mean(curr_arr)                       # MEAN POWER (W), NOT Wh
+integrated = config.get("energy_mode", "mean") == "integrated"
+cur_mean   = mean(curr_arr)                        # whole-cycle mean power (W)
+cur_energy = cur_mean * current_duration if integrated else cur_mean
 for cand:
     dur_ag = _agreement(current_duration, prof_dur, dur_scale)
-    cand_energy = mean(sample)                     # mean power of the template
+    cand_mean   = mean(sample)                      # mean power of the template
+    cand_energy = cand_mean * prof_dur if integrated else cand_mean
     en_ag  = _agreement(cur_energy, cand_energy, en_scale)
     cand["shape_score"] = cand["score"]            # pre-Stage-4 (post-DTW) score
     cand["score"] = shape_w*score + dur_w*dur_ag + en_w*en_ag
@@ -193,10 +204,16 @@ for cand:
 Scales: `MATCH_DURATION_SCALE = 0.175`, `MATCH_ENERGY_SCALE = 0.25`
 (const.py:458-459). Then re-sort.
 
-**Important**: the "energy" term uses **mean power** (`np.mean`), explicitly not
-`Σ P·dt` — see the inline comment analysis.py:380 ("mean power (W) — no duration
-multiplication"). Duration is handled by the separate duration term, so mean
-power captures the level/temperature signal without double-counting duration.
+**Important**: the "energy" term is **mode-dependent**. Default `energy_mode="mean"`
+compares whole-cycle **mean power** (W, `np.mean`), which avoids double-counting
+duration (the separate duration term already carries length). But for
+`washing_machine`/`washer_dryer` the manager sets `energy_mode="integrated"` (via
+`analysis.stage4_energy_mode` + `STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES`, const.py),
+so the term compares true **integrated energy** (`mean * duration`, i.e. `Σ P·dt`).
+On those types same-base temp/spin variants share duration, so integrated energy is
+the clean temp discriminator; dishwasher/dryer keep mean power because their
+programs differ in duration where integrated energy would conflate the axes. See
+CLAUDE.md register item 100.
 
 Per-candidate score-history fields after the full pipeline:
 `original_score` (post-Stage-2, pre-DTW), `shape_score` (post-DTW, pre-Stage-4),
@@ -282,13 +299,13 @@ Fields: `best_profile`, `confidence`, `expected_duration`, `matched_phase`,
 `warping_path`) and converts numpy scalars/arrays — keeps event payloads under
 the 32 KB HA limit.
 
-- **`confidence` = `best["score"]`** (profile_store.py:4729) = the **final,
-  post-Stage-4 blended score** of the top candidate. Range [0,1]; a similarity
-  score, not a calibrated probability.
-  - **DISCREPANCY vs CLAUDE.md** ("Match confidence: `MatchResult.confidence` is
-    the raw Stage-2/3 similarity score of the top candidate"). In code the value
-    reflects Stage-4 (duration+mean-power agreement) too. The pre-Stage-4 value
-    is available per-candidate as `shape_score`; pre-DTW as `original_score`.
+- **`confidence` = `best["score"]`** (profile_store.py) = the **final,
+  post-Stage-4 blended score** of the top candidate (Stage-2 similarity as refined
+  by Stage-3 DTW and Stage-4 duration+energy agreement). Range [0,1]; a similarity
+  score, not a calibrated probability. The pre-Stage-4 value is available
+  per-candidate as `shape_score`; pre-DTW as `original_score`. (Current CLAUDE.md
+  documents this same post-Stage-4 composition, so there is no longer a discrepancy
+  here.)
 - `is_prefix_ambiguous` (profile_store.py:4720-4725): True when any non-winning
   candidate is `> SMART_TERM_LANDSCAPE_RATIO` (1.5×, const.py:437) longer than
   the matched profile AND its `shape_score` ≥ `SMART_TERM_LANDSCAPE_MIN_SHAPE`
@@ -297,16 +314,16 @@ the 32 KB HA limit.
 - No-candidate path returns `MatchResult(None,...,is_confident_mismatch=True,
   mismatch_reason="all_rejected")` (profile_store.py:4673).
 
-### 4.7 The two match entry points
-- **`async_match_profile`** (profile_store.py:4456) — the production path:
-  adaptive resample of current trace (`resample_adaptive(min_dt=5.0,
+### 4.7 The match entry point
+- **`async_match_profile`** (profile_store.py) is now the **only** entry point (the
+  production path): adaptive resample of current trace (`resample_adaptive(min_dt=5.0,
   gap_s=21600)`, requires ≥12 samples on the longest segment); builds snapshots
   choosing template per profile (see §7); Stage-5 grouping; executor offload;
   full result reconstruction. Also merges `_matching_overrides()` into config.
-- **`match_profile`** (profile_store.py:4739) — sync wrapper for executor tasks:
-  simpler snapshot build (always `decompress_power_data` of `sample_cycle_id`,
-  no envelope-avg preference, no cache), **NO Stage-5 grouping**, no phase/
-  prefix-ambiguity resolution. Used where a synchronous call is required.
+- **The old sync `match_profile` wrapper has been removed** (0.5.4). It formerly did
+  a simpler snapshot build with NO Stage-5 grouping and no phase/prefix-ambiguity
+  resolution; there is no longer a sync-path shortcut, so every match goes through
+  the full grouped/reconstructed async pipeline.
 
 ---
 
@@ -635,8 +652,7 @@ Test pattern: call `_async_migrate_func(old, 1, data)` directly (not
 
 | Symbol | Caller(s) |
 |---|---|
-| `async_match_profile` | manager.py:918, 2877, 4056 |
-| `match_profile` (sync) | executor-task usage (self-contained) |
+| `async_match_profile` | manager.py:918, 2877, 4056 (only entry point; sync `match_profile` removed in 0.5.4) |
 | `record_match_ranking_snapshot` | manager.py:1046 |
 | `confirm_match_ranking_snapshots` | manager.py:4082 |
 | `is_terminal_drop` / `terminal_drop_baseline` | manager.py:253/3729/3782; decision surfaced via cycle_detector.py:1322/1488 |
@@ -654,25 +670,30 @@ Test pattern: call `_async_migrate_func(old, 1, data)` directly (not
 
 ## 15. Code / CLAUDE.md discrepancies & notable gotchas
 
-1. **Confidence composition** — CLAUDE.md: confidence = "raw Stage-2/3 similarity
-   score". Code: `confidence = best["score"]` = the **post-Stage-4** blended
-   score (includes duration + mean-power agreement). `shape_score` is pre-Stage-4;
-   `original_score` is pre-DTW. (§4.6)
+1. **Confidence composition (no longer a discrepancy).** `confidence = best["score"]`
+   = the **post-Stage-4** blended score (includes duration + energy agreement).
+   `shape_score` is pre-Stage-4; `original_score` is pre-DTW. Current CLAUDE.md now
+   documents this same composition, so the earlier "raw Stage-2/3" mismatch is
+   resolved. (§4.6)
 2. **Storage migration doc lag** — CLAUDE.md storage list stops at v7→v8; code is
    at **v11** (v9 lifetime keys, v10 reference_cycles, v11 phase-profile marker).
    (§11)
-3. **"Energy" agreement is mean power (W), not Wh** — Stage 4 uses `np.mean` of
-   power, not `integrate_wh`. Deliberate (avoids double-counting duration), but
-   the name "energy" in config/const (`MATCH_ENERGY_WEIGHT`/`energy_agreement`)
-   is misleading. (§4.3)
-4. **Two default sets for the duration gate** — `ProfileStore.__init__`
-   (0.50/1.50, profile_store.py:898-899), `compute_matches_worker` `.get()`
-   fallbacks (0.07/1.3, analysis.py:273-274), and `const` defaults (0.10/1.5).
-   Live behaviour is whatever `manager` pushes via `set_duration_ratio_limits`;
-   the constructor/worker fallbacks only apply if that never runs. (§2, §4.1)
-5. **Stage 5 only in the async path** — `match_profile` (sync) skips grouping and
-   the member-selection safeguards. Any consumer relying on the sync path gets
-   individual-profile matching only. (§4.7)
+3. **"Energy" agreement is mode-dependent.** Default `energy_mode="mean"` compares
+   mean power (W, `np.mean`), not `integrate_wh`. For `washing_machine`/`washer_dryer`
+   the manager sets `energy_mode="integrated"`, so the term compares true integrated
+   energy (`mean * duration`). The mean-power default deliberately avoids
+   double-counting duration; the integrated mode is opt-in per device type via
+   `STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES`. (§4.3)
+4. **Two default sets for the duration gate.** `ProfileStore.__init__`
+   (0.50/1.50, profile_store.py) and the const defaults `DEFAULT_PROFILE_MATCH_*`
+   (0.10/1.5), which are now also the `compute_matches_worker` `.get()` fallbacks
+   (the old hardcoded 0.07/1.3 worker fallbacks were removed). Live behaviour is
+   whatever `manager` pushes via `set_duration_ratio_limits`; the constructor/worker
+   fallbacks only apply if that never runs. (§2, §4.1)
+5. **Stage 5 always runs (single async path).** The old sync `match_profile`
+   wrapper (which skipped grouping and the member-selection safeguards) was removed
+   in 0.5.4; `async_match_profile` is the only entry point, so every match gets
+   Stage-5 grouping. (§4.7)
 6. **`check_phase_match` param is named `duration` but is fed a progress-scaled
    pseudo-duration** by `progress.current_phase` — not a bug, but a subtle
    coupling a doc-writer must state precisely. (§10)

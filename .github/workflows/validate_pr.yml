@@ -21,9 +21,10 @@ jobs:
   check-completeness:
     name: Check PR Description
     runs-on: ubuntu-latest
-    # Comments on and labels the PR (both via the issues API).
+    # Comments and labels the PR (issues API) and closes it when template is absent (pulls API).
     permissions:
       issues: write
+      pull-requests: write
     steps:
       - name: Validate PR template completeness
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
@@ -44,7 +45,7 @@ jobs:
             }
 
             if (pr.state === 'closed') {
-              console.log('PR is closed — skipping completeness check.');
+              console.log('PR is closed - skipping completeness check.');
               return;
             }
 
@@ -82,9 +83,40 @@ jobs:
               return;
             }
 
+            // Distinguish "template deleted wholesale" from "template present but
+            // incomplete". If none of the template's section headings survive, the
+            // contributor removed the template entirely - a firmer, distinct message.
+            const TEMPLATE_HEADINGS = [/##\s*Description/i, /##\s*Type of Change/i, /##\s*Checklist/i, /##\s*Testing/i];
+            const templatePresent = TEMPLATE_HEADINGS.some(re => re.test(prBody));
+
+            if (!templatePresent) {
+              // Template deleted entirely: close immediately, no grace period.
+              const body = [
+                BOT_MARKER,
+                `Hi @${prAuthor}! This PR has been automatically closed because the required pull request template was not used - its sections have been removed or replaced entirely.`,
+                '',
+                'PRs that skip the template are not reviewed. Please open a new PR using the template and fill it in (at minimum a real **Description** and at least one **Type of Change** box).',
+                '',
+                `Non-translation PRs also need a link to an issue that **already** carries the \`accepted\` label. See [CONTRIBUTING.md](https://github.com/${owner}/${repo}/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs).`,
+              ].join('\n');
+              // Close FIRST, then post the notice. The notice text asserts the PR
+              // was closed, so if the close call failed after the comment landed the
+              // PR would sit open carrying a false "has been automatically closed"
+              // message.
+              await github.rest.pulls.update({ owner, repo, pull_number: prNumber, state: 'closed' });
+              if (existing) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+              } else {
+                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
+              }
+              console.log(`PR #${prNumber} closed immediately - template removed entirely.`);
+              return;
+            }
+
+            // Template present but sections incomplete - 5-day grace via scheduler.
             const missing = [];
-            if (!descriptionOk) missing.push('**Description** — add a meaningful summary of your changes (remove or replace the template placeholder)');
-            if (!typeOk) missing.push('**Type of Change** — check at least one box that describes this PR');
+            if (!descriptionOk) missing.push('**Description** - add a meaningful summary of your changes (remove or replace the template placeholder)');
+            if (!typeOk) missing.push('**Type of Change** - check at least one box that describes this PR');
 
             const body = [
               BOT_MARKER,
@@ -132,8 +164,11 @@ jobs:
               return;
             }
 
-            if (pr.state === 'closed') {
-              console.log('PR already closed — skipping issue link check.');
+            // Re-fetch current state: the event payload's state may be stale if
+            // another job (check-pr-template, close_incomplete_prs) ran first.
+            const { data: currentPr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            if (currentPr.state === 'closed') {
+              console.log('PR is currently closed - skipping issue link check.');
               return;
             }
 
@@ -143,7 +178,7 @@ jobs:
             // exempt from the accepted-issue requirement. A UI-text change necessarily
             // edits strings.json (the source of truth) AND regenerates every
             // translations/*.json file, so strings.json counts as a localization asset
-            // too — otherwise a one-line UI string fix would be wrongly treated as a code
+            // too - otherwise a one-line UI string fix would be wrongly treated as a code
             // PR just because of the retranslation churn it drags along.
             //
             // Paginate the file list: listFiles returns only the first page (30) by
@@ -163,11 +198,16 @@ jobs:
             }
 
             if (isLocalizationPR) {
-              console.log('Localization-only PR (translations/strings.json) — skipping issue link check.');
+              console.log('Localization-only PR (translations/strings.json) - skipping issue link check.');
               return;
             }
 
-            // Extract all issue number references from the PR body
+            // Extract all issue number references from the PR body. Use the
+            // re-fetched body, not the event payload's: the contributor may have
+            // edited the description to add the issue reference after the event
+            // fired, and scanning the stale copy would warn about a link that is
+            // already there.
+            const bodyForExtraction = currentPr.body || prBody;
             const issueNums = new Set();
             const patterns = [
               /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+#(\d+)/gi,
@@ -176,7 +216,7 @@ jobs:
             ];
             for (const pat of patterns) {
               let m;
-              while ((m = pat.exec(prBody)) !== null) {
+              while ((m = pat.exec(bodyForExtraction)) !== null) {
                 issueNums.add(Number(m[1]));
               }
             }
@@ -226,7 +266,7 @@ jobs:
               }
             };
 
-            // Case 1 — linked to an accepted issue: pass and clear any prior warning.
+            // Case 1 - linked to an accepted issue: pass and clear any prior warning.
             if (hasAccepted) {
               console.log('PR is linked to an accepted issue. ✓');
               await removeLabelSafe(NEEDS_ISSUE_LABEL);
@@ -237,7 +277,7 @@ jobs:
               return;
             }
 
-            // Case 2 — an issue is linked but not yet accepted: wait on the maintainer.
+            // Case 2 - an issue is linked but not yet accepted: wait on the maintainer.
             // Do NOT close; ping the maintainer once per (issue, PR) pair.
             if (referencedIssues.length > 0) {
               await removeLabelSafe(NEEDS_ISSUE_LABEL); // not on the auto-close track
@@ -247,11 +287,13 @@ jobs:
               const plural = referencedIssues.length > 1;
               await upsertNotice([
                 BOT_MARKER,
-                `Hi @${prAuthor}! This PR references ${issueList}, which ${plural ? 'have' : 'has'} not yet received the \`accepted\` label.`,
+                `Hi @${prAuthor}! This PR references ${issueList}, which ${plural ? 'have' : 'has'} not yet been accepted (no \`accepted\` label).`,
                 '',
-                `@${owner} has been notified and will review the linked ${plural ? 'issues' : 'issue'}. Once the \`accepted\` label is added there, this PR will pass the check automatically.`,
+                `**This looks like a PR opened in parallel with a fresh issue.** Per our [contribution flow](https://github.com/${owner}/${repo}/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs), work is meant to be agreed with the maintainer *before* it is written: the linked ${plural ? 'issues need' : 'issue needs'} the \`accepted\` label **first**, then the PR. Opened this way, the PR is **not reviewed yet**.`,
                 '',
-                'Nothing more is needed from you for now — thanks for your patience!',
+                `@${owner} has been pinged to review the linked ${plural ? 'issues' : 'issue'}. If the work is approved, the \`accepted\` label is added and this check passes automatically. If it is not approved, this PR will be closed along with the ${plural ? 'issues' : 'issue'}.`,
+                '',
+                'Nothing more is needed from you for now, and no code changes will move this forward until the issue is accepted. Thanks for your patience!',
               ].join('\n'));
 
               for (const issue of referencedIssues) {
@@ -265,7 +307,7 @@ jobs:
                     issue_number: issue.number,
                     body: [
                       PING_MARKER,
-                      `@${owner} — PR #${prNumber} by @${prAuthor} is linked to this issue and is **waiting for your approval**.`,
+                      `@${owner} - PR #${prNumber} by @${prAuthor} is linked to this issue and is **waiting for your approval**.`,
                       '',
                       'If you approve this work, add the `accepted` label to this issue and the PR check will pass automatically.',
                     ].join('\n'),
@@ -278,7 +320,7 @@ jobs:
               return;
             }
 
-            // Case 3 — no valid issue linked at all: warn and start the 3-day grace.
+            // Case 3 - no valid issue linked at all: warn and start the 3-day grace.
             await removeLabelSafe(AWAITING_LABEL);
             await addLabelSafe(NEEDS_ISSUE_LABEL);
             await upsertNotice([
@@ -287,12 +329,13 @@ jobs:
               '',
               'This PR is **not yet linked to an issue with the `accepted` label**. To have your contribution considered, please follow this process:',
               '',
-              `1. **Open an issue** — create a [Bug Report](https://github.com/${owner}/${repo}/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/${owner}/${repo}/issues/new?template=feature_request.yml) describing what you want to fix or build.`,
-              '2. **Indicate your intent** — check the box at the bottom of the issue form confirming you plan to submit a PR.',
-              '3. **Reference it here** — edit this PR description to include `Closes #NNN`. The maintainer will then be pinged to review and approve.',
+              `1. **Open an issue** - create a [Bug Report](https://github.com/${owner}/${repo}/issues/new?template=bug_report.yml), [Feature Request](https://github.com/${owner}/${repo}/issues/new?template=feature_request.yml), or [Documentation](https://github.com/${owner}/${repo}/issues/new?template=documentation.yml) issue describing what you want to fix, build, or document.`,
+              '2. **Indicate your intent** - check the box at the bottom of the issue form confirming you plan to submit a PR.',
+              '3. **Wait for the `accepted` label** - the maintainer reviews the issue and agrees the work with you first. Opening the PR before this happens skips the agree-first step.',
+              '4. **Then link it here** - once the issue is accepted, edit this PR description to include `Closes #NNN`, and the check passes.',
               '',
               '> **Localization PRs** (files under `translations/` and `strings.json`) are exempt and can be opened directly. Prefer submitting translations via [GitLocalize](https://gitlocalize.com/repo/10819), which opens PRs automatically.',
               '',
-              '> ⏳ This PR will be **automatically closed in 3 days** if no issue is linked. Linking an issue stops the timer.',
+              '> ⏳ This PR will be **automatically closed in 3 days** if no issue is linked. Linking an issue moves it off the auto-close track, but note the issue must reach the `accepted` label before the PR is reviewed - a PR opened in parallel with a brand-new issue is not considered until then.',
             ].join('\n'));
-            console.log(`PR #${prNumber} flagged — no accepted issue linked (3-day grace started).`);
+            console.log(`PR #${prNumber} flagged - no accepted issue linked (3-day grace started).`);

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configuration des données de lavage",
-        "description": "Configurez votre lave-linge ou autre appareil.\n\nUn capteur de puissance est requis.\n\n**Ensuite, il vous sera demandé si vous souhaitez créer votre premier profil.**",
+        "description": "Configurez votre lave-linge ou autre appareil.\n\nUn capteur de puissance est requis.\n\nUne fois la configuration terminée, ouvrez le panneau WashData depuis la barre latérale (ou accédez à [/ha-washdata](/ha-washdata)) pour consulter les cycles, affiner la détection et gérer les profils.",
         "data": {
           "name": "Nom de l'appareil",
           "device_type": "Type d'appareil",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigurer WashData",
-        "description": "Mettez à jour le nom de l'appareil, le type d'appareil ou le capteur de puissance.",
+        "description": "Mettez à jour le nom de l'appareil, le type d'appareil ou le capteur de puissance.\n\nLe panneau WashData (barre latérale ou [/ha-washdata](/ha-washdata)) permet de gérer la détection, les cycles, les profils et les notifications.",
         "data": {
           "name": "Nom de l'appareil",
           "device_type": "Type d'appareil",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "Paramètres WashData",
-        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
+        "description": "Renommez l'appareil ou modifiez ses paramètres matériels de base. Tous les paramètres de détection, de correspondance et de notification se trouvent dans le [panneau WashData](/ha-washdata) (également accessible depuis la barre latérale).",
         "data": {
           "name": "Nom du périphérique",
           "device_type": "Type d'appareil",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device} : minuterie de {minutes} min",
       "timer_pause_action_title": "Reprendre le cycle",
       "timer_pause_body_suffix": "Le cycle est en pause. Ouvrez le panneau WashData pour reprendre.",
+      "unload_dismiss_action_title": "Arrêter les rappels",
       "notify_live_waiting_message": "{device} : aucun profil reconnu pour le moment.",
       "vs_typical_longer": "{pct}% plus long que d'habitude",
       "vs_typical_shorter": "{pct}% plus court que d'habitude",

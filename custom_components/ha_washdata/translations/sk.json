@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Nastavenie WashData",
-        "description": "Nakonfigurujte si práčku alebo iný spotrebič.\n\nVyžaduje sa snímač napájania.\n\n**Ďalej sa vás spýta, či si chcete vytvoriť svoj prvý profil.**",
+        "description": "Nakonfigurujte si práčku alebo iný spotrebič.\n\nSnímač výkonu je povinný.\n\nPo nastavení otvorte panel WashData z bočného panelu (alebo prejdite na [/ha-washdata](/ha-washdata)) na zobrazenie cyklov, ladenie detekcie a správu profilov.",
         "data": {
           "name": "Názov zariadenia",
           "device_type": "Typ zariadenia",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "description": "Aktualizujte názov zariadenia, typ spotrebiča alebo snímač výkonu.\n\nPanel WashData (bočný panel alebo [/ha-washdata](/ha-washdata)) slúži na správu detekcie, cyklov, profilov a oznámení.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
+        "description": "Premenujte zariadenie alebo zmeňte jeho základné hardvérové nastavenia. Všetky nastavenia detekcie, párovania a oznámení sú na [paneli WashData](/ha-washdata) (dostupný aj z bočného panelu).",
         "data": {
           "name": "Názov zariadenia",
           "device_type": "Device Type",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: časovač {minutes} min",
       "timer_pause_action_title": "Obnoviť cyklus",
       "timer_pause_body_suffix": "Cyklus je pozastavený. Otvorte panel WashData na obnovenie.",
+      "unload_dismiss_action_title": "Prestať pripomínať",
       "notify_live_waiting_message": "{device}: Zatiaľ nebol rozpoznaný žiadny profil.",
       "vs_typical_longer": "o {pct}% dlhšie než zvyčajne",
       "vs_typical_shorter": "o {pct}% kratšie než zvyčajne",

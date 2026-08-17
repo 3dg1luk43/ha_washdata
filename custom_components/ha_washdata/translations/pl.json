@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Konfiguracja WashData",
-        "description": "Skonfiguruj swoją pralkę lub inne urządzenie.\n\nWymagany jest czujnik mocy.\n\n**Następnie zostaniesz zapytany, czy chcesz utworzyć swój pierwszy profil.**",
+        "description": "Skonfiguruj swoją pralkę lub inne urządzenie.\n\nCzujnik mocy jest wymagany.\n\nPo konfiguracji otwórz panel WashData z paska bocznego (lub przejdź do [/ha-washdata](/ha-washdata)), aby przeglądać cykle, dostosowywać wykrywanie i zarządzać profilami.",
         "data": {
           "name": "Nazwa urządzenia",
           "device_type": "Typ urządzenia",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Rekonfiguracja WashData",
-        "description": "Zaktualizuj nazwę urządzenia, typ urządzenia lub czujnik mocy.",
+        "description": "Zaktualizuj nazwę urządzenia, typ urządzenia lub czujnik mocy.\n\nPanel WashData (pasek boczny lub [/ha-washdata](/ha-washdata)) służy do zarządzania wykrywaniem, cyklami, profilami i powiadomieniami.",
         "data": {
           "name": "Nazwa urządzenia",
           "device_type": "Typ urządzenia",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "Ustawienia WashData",
-        "description": "Wszystkie ustawienia -- wykrywanie, dopasowanie, timing, powiadomienia, profile i cykle -- są dostępne w panelu WashData. Użyj tego formularza tylko do zmiany czujnika mocy, typu urządzenia lub progu trybu gotowości.",
+        "description": "Zmień nazwę urządzenia lub zmień jego podstawowe ustawienia sprzętowe. Wszystkie ustawienia wykrywania, dopasowania i powiadomień znajdują się w [panelu WashData](/ha-washdata) (dostępny również z paska bocznego).",
         "data": {
           "name": "Nazwa urządzenia",
           "device_type": "Typ urządzenia",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: timer {minutes} min",
       "timer_pause_action_title": "Wznów cykl",
       "timer_pause_body_suffix": "Cykl jest wstrzymany. Otwórz panel WashData, aby wznowić.",
+      "unload_dismiss_action_title": "Przestań przypominać",
       "notify_live_waiting_message": "{device}: Nie rozpoznano jeszcze żadnego profilu.",
       "vs_typical_longer": "o {pct}% dłużej niż zwykle",
       "vs_typical_shorter": "o {pct}% krócej niż zwykle",

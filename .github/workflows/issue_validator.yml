@@ -19,6 +19,96 @@ permissions:
   issues: write
 
 jobs:
+  close-templateless-issues:
+    runs-on: ubuntu-latest
+    # Strict "no template at all" gate. This closes only genuinely free-form issues
+    # (blank_issues_enabled is false, but the API / some mobile paths can still bypass
+    # the chooser). Issues that DID use a template but tweaked or omitted a field still
+    # carry a template label and its section headings, so they fall through to the
+    # completeness validators below, not here. Maintainers, members, collaborators and
+    # bots are exempt.
+    if: >
+      github.event_name == 'issues' &&
+      (github.event.action == 'opened' || github.event.action == 'reopened') &&
+      github.event.issue.author_association != 'OWNER' &&
+      github.event.issue.author_association != 'MEMBER' &&
+      github.event.issue.author_association != 'COLLABORATOR' &&
+      github.event.issue.user.type != 'Bot'
+    steps:
+      - name: Close issue when no template was used
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.0.1
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const body = issue.body || '';
+
+            // Signal 1: a label one of our templates auto-applies. At `opened` time the
+            // only labels present are those the chosen template set, so a missing label
+            // is strong evidence no template was used.
+            const TEMPLATE_LABELS = ['bug', 'feature request', 'documentation'];
+            const labels = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name));
+            const hasTemplateLabel = labels.some(l => TEMPLATE_LABELS.includes(l));
+
+            // Signal 2: a section heading GitHub renders from one of our issue-form
+            // field labels (rendered as `### Label`). Prefix match, so trailing text
+            // (e.g. "(if device-specific)") still counts.
+            const KNOWN_HEADINGS = [
+              'Describe the Bug', 'Device Type', 'Device Brand & Model',
+              'WashData Integration Version', 'Home Assistant Version',
+              'Reproduction Steps', 'Expected Behavior', 'Logs / Error Evidence',
+              'Additional Context', 'Before You Submit', 'Contributing a Fix',
+              'Problem or Motivation', 'Proposed Solution', 'Related Device Type',
+              'Alternatives Considered', 'Contributing an Implementation',
+              'Page / Section', 'What is Wrong or Missing?', 'Suggested Change',
+            ];
+            const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const hasTemplateHeading = KNOWN_HEADINGS.some(
+              h => new RegExp('^#{1,6}[ \\t]+' + escapeRe(h) + '(?=[ \\t]|$)', 'im').test(body)
+            );
+
+            // Only close when BOTH signals are absent. Requiring both protects real
+            // template issues from ever being closed (a renamed field the heading list
+            // misses is still caught by its label, and vice-versa).
+            if (hasTemplateLabel || hasTemplateHeading) {
+              console.log(`#${issue.number}: template detected (label=${hasTemplateLabel}, heading=${hasTemplateHeading}) - leaving open.`);
+              return;
+            }
+
+            const MARKER = '<!-- templateless-issue-autoclose -->';
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: issue.number, per_page: 100,
+            });
+            const alreadyNoticed = comments.some(c => c.body && c.body.includes(MARKER));
+
+            if (!alreadyNoticed) {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: issue.number,
+                body: [
+                  MARKER,
+                  `Hi @${issue.user.login}, this issue was opened **without using one of our issue templates**, so it has been closed automatically.`,
+                  '',
+                  'Free-form issues cannot be triaged: the templates collect the details we need (version, device, logs, reproduction steps) before anything can be investigated. **Issues that skip the template entirely are not dealt with.**',
+                  '',
+                  'Please open a new issue using one of the templates and fill it in:',
+                  `- [🐛 Bug Report](https://github.com/${owner}/${repo}/issues/new?template=bug_report.yml)`,
+                  `- [✨ Feature Request](https://github.com/${owner}/${repo}/issues/new?template=feature_request.yml)`,
+                  `- [📚 Documentation](https://github.com/${owner}/${repo}/issues/new?template=documentation.yml)`,
+                  '',
+                  `> Just have a question or want to float an idea? Use [Discussions](https://github.com/${owner}/${repo}/discussions) instead. Translation fixes go to [GitLocalize](https://gitlocalize.com/repo/10819).`,
+                ].join('\n'),
+              });
+            }
+
+            if (issue.state === 'open') {
+              await github.rest.issues.update({
+                owner, repo, issue_number: issue.number,
+                state: 'closed', state_reason: 'not_planned',
+              });
+            }
+            console.log(`#${issue.number}: closed - no issue template used.`);
+
   handle-fine-command:
     runs-on: ubuntu-latest
     if: >
@@ -30,7 +120,7 @@ jobs:
 
     steps:
       - name: Handle /fine command
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.0.1
         with:
           script: |
             const issueNumber = context.payload.issue.number;
@@ -68,7 +158,7 @@ jobs:
 
     steps:
       - name: Swap labels on reporter response
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.0.1
         with:
           script: |
             const issueNumber = context.payload.issue.number;
@@ -100,7 +190,7 @@ jobs:
 
     steps:
       - name: Validate bug report completeness
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.0.1
         with:
           script: |
             const isDryRun = context.eventName === 'workflow_dispatch';
@@ -176,7 +266,7 @@ jobs:
                   if (suggestPre)    parts.push(`\`${latestPre.tag_name}\` (pre-release)`);
                   problems.push(
                     `**Outdated version** (\`${version}\`): the current release${parts.length > 1 ? 's are' : ' is'} ${parts.join(' and ')}. ` +
-                    `Please upgrade and confirm the bug still exists on the latest version before we investigate — ` +
+                    `Please upgrade and confirm the bug still exists on the latest version before we investigate - ` +
                     `it may already be fixed. If it still reproduces, update this field with the version you tested.`
                   );
                 }
@@ -195,7 +285,10 @@ jobs:
             // 4. Logs / Error Evidence - must contain actual log/error output, an attached file, or a clear N/A with stated reason
             const logMatch = body.match(/###\s*Logs \/ Error Evidence\s*\n+([\s\S]*?)(?=\n###|$)/);
             const logContent = logMatch ? logMatch[1].trim() : '';
-            const logIsExplainedNA = /^n\/?a/i.test(logContent);
+            // Accept "N/A" / "NA" only when a reason follows on the same line
+            // (e.g. "N/A - crashes before logs"), not a bare "N/A".
+            const logIsExplainedNA =
+              /^n\/?a(?:[ \t]*[-:][ \t]*|[ \t]+)\S[^\r\n]*$/i.test(logContent);
             // Detect GitHub file attachments (pasted as markdown links)
             const hasAttachment = /https:\/\/github\.com\/[^)]+\/files\//.test(logContent) ||
               /https:\/\/github\.com\/user-attachments\//.test(logContent);
@@ -206,10 +299,10 @@ jobs:
             if (!hasLogs && !logIsExplainedNA) {
               problems.push(
                 '**Logs / Error Evidence** are missing or appear empty. This is the most important piece of information for diagnosing bugs. ' +
-                'Please paste any relevant logs, error messages, or console output — debug logs if you have them, but even a single error line from the HA logbook is helpful. ' +
+                'Please paste any relevant logs, error messages, or console output. At least one complete log line is enough - the section must contain more than 50 characters of actual error text (a bare `Error: null` passes the placeholder check but fails the length gate; paste the surrounding context). Debug logs are ideal when available. ' +
                 'See the **Logs / Error Evidence** section of the issue form for instructions on enabling debug logging. ' +
                 'If logs are **genuinely not applicable** to this report (for example: a documentation typo, a translation string fix, or a pure UI/config-flow layout issue where no runtime code path is exercised), ' +
-                'replace the placeholder with `N/A` followed by a short one-line reason — for example: `N/A - typo in README, no runtime behavior involved`. ' +
+                'replace the placeholder with `N/A` followed by a short one-line reason - for example: `N/A - typo in README, no runtime behavior involved`. ' +
                 'Do not write `N/A` just because collecting logs is inconvenient; bug reports without logs and without a valid N/A reason cannot be investigated.'
               );
             }

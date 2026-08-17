@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entītija nav atrasta",
+    "running_long": "Darbojas ilgi",
+    "remaining": "atlicis",
+    "progress": "progress",
+    "show_time_remaining": "Rādīt atlikušo laiku",
+    "show_percentage": "Rādīt procentus",
+    "layout": {
+      "tile": "Elements (kompakts)",
+      "detail": "Detalizēts (bagātīgs)",
+      "glance": "Pārskats (vairākas ierīces)"
+    },
+    "btn": {
+      "pause": "Pauzēt",
+      "resume": "Turpināt",
+      "terminate": "Beigt ciklu",
+      "record_start": "Sākt ierakstīšanu",
+      "record_stop": "Apturēt ierakstīšanu",
+      "program": "Programma",
+      "open_panel": "Atvērt WashData"
+    },
+    "editor": {
+      "layout": "Izkārtojums",
+      "entity": "Ierīces entītija",
+      "entities": "Ierīces",
+      "title": "Nosaukums",
+      "icon": "Ikona",
+      "show_state": "Rādīt stāvokli",
+      "show_program": "Rādīt programmu",
+      "show_progress_bar": "Rādīt progresa joslu",
+      "spin_icon": "Griezt ikonu darbības laikā",
+      "display_mode": "Detaļu rinda",
+      "active_color": "Aktīvās krāsas aizstāšana",
+      "show_phase": "Rādīt fāzi",
+      "show_energy": "Rādīt enerģiju un izmaksas",
+      "show_anomaly": "Rādīt pārsnieguma brīdinājumu",
+      "show_sparkline": "Rādīt tiešo jaudas grafiku",
+      "buttons": "Darbību pogas",
+      "program_entity": "Programmas entītija (aizstāšana)",
+      "time_entity": "Laika entītija (aizstāšana)",
+      "pct_entity": "Progresa entītija (aizstāšana)",
+      "power_entity": "Jaudas entītija (aizstāšana)",
+      "tap_action": "Pieskāriena darbība",
+      "hold_action": "Turēšanas darbība",
+      "double_tap_action": "Dubultā pieskāriena darbība"
+    }
+  },
   "badge": {
     "artifact_tip": "Konstatētas {n} anomālijas (piemēram, durvis atvērtas cikla vidū) – atveriet, lai tās skatītu diagrammā",
     "auto": "(noteikts automātiski)",
@@ -92,6 +140,19 @@
     "pause_cycle_tip": "Pauzēt pašreizējo ciklu – ierīce turpinās no pārtraukuma vietas",
     "pg_apply_device": "Lietot ierīcei",
     "pg_autofill": "Automātiskā aizpilde",
+    "pg_load_calibrated": "Ielādēt kalibrētos (ML) ({n})",
+    "pg_load_calibrated_tip": "Ielādēt ML kalibrētos iestatījumus kā izmēģinājumu laukuma aizstājumus",
+    "pg_load_live": "Ielādēt aktīvos iestatījumus",
+    "pg_load_live_tip": "No jauna nolasīt pašreizējos integrācijas iestatījumus un atmest visas izmēģinājumu laukuma izmaiņas",
+    "pg_load_suggested": "Ielādēt ieteiktos ({n})",
+    "pg_load_suggested_tip": "Ielādēt automātiskā pielāgotāja pašreizējos ieteikumus kā izmēģinājumu laukuma aizstājumus",
+    "pg_preset_delete": "Dzēst priekšiestatījumu",
+    "pg_preset_load": "Ielādēt priekšiestatījumu",
+    "pg_preset_load_tip": "Aizstāt izmēģinājumu laukuma vērtības ar šo priekšiestatījumu (aktīvie iestatījumi netiek mainīti)",
+    "pg_preset_save": "Saglabāt kā priekšiestatījumu",
+    "pg_preset_save_tip": "Saglabāt visas tālāk norādītās vērtības kā nosauktu šīs ierīces priekšiestatījumu",
+    "pg_publish_all": "Saglabāt iestatījumos ({n})",
+    "pg_publish_one": "Saglabāt \"{label}\" integrācijas iestatījumos",
     "play": "Atskaņot",
     "process": "Apstrādāt",
     "process_history": "Apstrādāt tūlīt",
@@ -178,7 +239,9 @@
     "download_export": "Lejupielādēt eksportu",
     "analyze_import": "Analizēt failu",
     "import_selected": "Importēt atlasītos",
-    "back": "Atpakaļ"
+    "back": "Atpakaļ",
+    "mute_suggestion": "Pārtraukt ieteikt šo iestatījumu",
+    "reset_muted": "Atiestatīt klusinātos"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -275,6 +338,7 @@
     "no_automations": "Vēl neviena automatizācija neatsaucas uz šo ierīci.",
     "panel_settings": "Paneļa iestatījumi",
     "param_sweep": "Parametru skenēšana",
+    "pg_settings_source": "Iestatījumu avots",
     "phase_catalog": "Fāzes katalogs",
     "playground": "Izmēģinājumu laukums",
     "process_history": "Procesa vēsture",
@@ -415,6 +479,9 @@
     "pg_match_score": "Atbilstības rezultāts",
     "pg_pct_of": "{p}% no {total}",
     "pg_poor_match": "Slikta atbilstība",
+    "pg_preset": "Izmēģinājumu laukuma priekšiestatījums",
+    "pg_preset_name": "Jauna priekšiestatījuma nosaukums",
+    "pg_preset_none": "Atlasiet priekšiestatījumu…",
     "pg_strong_match": "Spēcīga atbilstība",
     "pg_tile_ambiguous": "Neviennozīmīgi",
     "pg_tile_ambiguous_tip": "Cikli, kuros divas programmas ir gandrīz vienādas",
@@ -609,7 +676,8 @@
     "conflict_resolution": "Nosaukumu konflikti",
     "conflict_import_copy": "Importēt kā kopiju",
     "conflict_keep_mine": "Paturēt manējos",
-    "conflict_overwrite": "Pārrakstīt"
+    "conflict_overwrite": "Pārrakstīt",
+    "font_size": "Paneļa fonta lielums"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -771,7 +839,17 @@
     "pg_apply_confirm": "Lietot labāko vērtību: {label} = {value}?",
     "pg_canvas_empty": "Atlasiet ciklu augšpusē, pēc tam nospiediet Ielādēt, lai redzētu tā jaudas līkni.",
     "pg_chart_caption": "Noteikšanas/atbilstības rādītājs pēc {param} vērtībām",
+    "pg_ctrl_intro": "Vērtības tiek ņemtas no šīs ierīces aktīvajiem integrācijas iestatījumiem. Izmaiņas paliek izmēģinājumu laukumā, līdz tās saglabājat iestatījumos.",
+    "pg_live_unavailable": "Aktīvie iestatījumi nav pieejami, tiek rādītas noklusējuma vērtības.",
+    "pg_load_live_confirm": "Vai atmest izmēģinājumu laukuma izmaiņas ({n}) un no jauna ielādēt pašreizējos integrācijas iestatījumus?",
     "pg_match_rate": "{pct}% atbilstības rādītājs {total} ciklos",
+    "pg_matches_live": "Atbilst aktīvajiem iestatījumiem",
+    "pg_n_changed": "Atšķirību no aktīvajiem iestatījumiem: {n}",
+    "pg_sugg_none": "Visi ieteikumi jau atbilst pašreizējiem iestatījumiem",
+    "pg_preset_delete_confirm": "Vai dzēst priekšiestatījumu \"{name}\"?",
+    "pg_preset_limit": "Sasniegts priekšiestatījumu ierobežojums ({n})",
+    "pg_preset_overwrite": "Vai pārrakstīt priekšiestatījumu \"{name}\"?",
+    "pg_publish_one_confirm": "Vai saglabāt {label} = {value} šīs ierīces iestatījumos?",
     "pg_restart_note": "Restartējiet Home Assistant, lai iespējotu simulācijas rīkus.",
     "pg_sim_progress": "{done} / {total} cikli",
     "pg_starting": "Sākas…",
@@ -845,6 +923,7 @@
     "trend_duration_shorter": "Ilguma tendence ir īsāka ({pct}%/cikls) – nesenā vidējā {avg}",
     "trend_energy_down": "Enerģijas tendence samazinās ({pct}%/cikls)",
     "trend_energy_up": "Enerģijas tendence pieaug ({pct}%/ciklā) – nesenā vidējā {avg}",
+    "trim_destructive_confirm": "Tas saglabā tikai {pct}% no cikla, un šo nevar atsaukt. Turpināt?",
     "trim_intro": "Velciet sarkanos rokturus vai ievadiet vērtības. Viss, kas atrodas ārpus loga, tiek noņemts.",
     "tuning_suggestions_available": "No novērotajiem cikliem pieejams {count} regulēšanas ieteikums. Tie parādās blakus attiecīgajiem laukiem.",
     "unsure_detected_prefix": "WashData nav pārliecināts, ka tas ir atklāts",
@@ -922,7 +1001,12 @@
     "merge_hint": "Importētie vienumi tiek pievienoti; nekas no vietējiem datiem netiek zaudēts. Nosaukumu konflikti tiek risināti tālāk.",
     "replace_warn": "Katra atzīmētā kategorija tiek dzēsta un aizstāta no faila. Neatzīmētās kategorijas paliek neskartas.",
     "dest_reference_hint": "Importētie cikli tikai uzlabo programmu atpazīšanu un nekad neietekmē lietojuma/enerģijas statistiku.",
-    "dest_real_history_hint": "Importētie cikli tiek uzskaitīti kā šīs ierīces pašas vēsture un papildina enerģijas/lietojuma statistiku. Izmantojiet, pārvietojot vienu ierīci uz jaunu instalāciju."
+    "dest_real_history_hint": "Importētie cikli tiek uzskaitīti kā šīs ierīces pašas vēsture un papildina enerģijas/lietojuma statistiku. Izmantojiet, pārvietojot vienu ierīci uz jaunu instalāciju.",
+    "sug_muted": "Šis iestatījums vairs netiks ieteikts",
+    "sug_mute_failed": "Neizdevās klusināt ieteikumu",
+    "sug_unmuted_all": "Klusināto ieteikumu atiestatīšana pabeigta",
+    "n_suggestions_muted": "{count} klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
+    "font_size_hint": "Palieliniet vai samaziniet visu šajā panelī. Attiecas uz jūsu kontu šajā ierīcē."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -970,6 +1054,10 @@
     "unusable": "Nelietojama"
   },
   "section": {
+    "dishwasher": {
+      "label": "Trauku mazgājamā mašīna",
+      "intro": "Cikla beigu apstrāde trauku mazgājamām mašīnām, kuras parasti beidzas ar ilgu, gandrīz klusu žāvēšanas fāzi pirms īsas galīgās ūdens izvadīšanas."
+    },
     "anti_wrinkle": {
       "intro": "Pretgrumbu/pretlocīšanas režīms atpazīst zemas jaudas kratīšanas impulsus pēc galvenās fāzes un pievieno tos pabeigtajam ciklam.",
       "label": "Pretgrumbu"
@@ -1012,6 +1100,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Pasīvās žāvēšanas klusā atbrīvošana",
+      "doc": "Kad cikls pārsniedz paredzēto ilgumu, cik ilgi trauku mazgājamai mašīnai jāpaliek klusai (zem Apstāšanās slieksnis), pirms WashData pārtrauc gaidīt galīgo ūdens izvadīšanu un pabeidz ciklu. Palieliniet to, ja jūsu mašīnai ir ilga klusa žāvēšanas fāze pirms vēlas galīgās ūdens izvadīšanas, kas tiek palaista garām - plašāks logs ļauj apgūtajam ilgumam sekot sezonālajai novirzei (aukstāks ieplūstošais ūdens = garāki cikli), nevis fiksēties pie vecā vidējā. Tas var tikai saīsināt gaidīšanu attiecībā pret iekšējo 30 minūšu beigu smailes ierobežojumu, nekad to nepagarina."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Atpazīstiet īsos mazjaudas veļas impulsus, ko žāvētājs izstaro pēc galvenās karsēšanas fāzes, un turiet tos pievienotus gatavajam ciklam, nevis nolasiet tos kā jaunus ciklus.",
       "label": "Iespējot pretgrumbu noteikšanu"
@@ -1232,6 +1324,10 @@
       "doc": "Dažas minūtes pēc cikla beigām, pirms tiek nosūtīts joprojām gaidošais atgādinājums \"izlādēt iekārtu\". Iestatiet 0, lai atspējotu atgādinājumu.",
       "label": "Izkraušanas atgādinājuma aizkave"
     },
+    "notify_unload_repeat": {
+      "doc": "Atkārtoti nosūta izkraušanas atgādinājumu ik pēc \"Izkraušanas atgādinājuma aizkave\" minūtēm, līdz atverat durvis vai paziņojumā pieskaraties \"Pārtraukt atgādināšanu\". Nepieciešama Durvju sensora entītija (tāpat kā pašam atgādinājumam). Atmešanas poga darbojas Home Assistant mobilās (companion) lietotnes paziņojumos.",
+      "label": "Atkārtot, līdz atveras durvis"
+    },
     "off_delay": {
       "doc": "Laiks gaidīt, kad jauda samazinās, pirms tiek paziņots, ka cikls ir pabeigts. Ja šajā logā tiek atsākta barošana, cikls turpinās nemanāmi – tas pārslēdz pauzes starp mazgāšanas posmiem. Trauku mazgājamām mašīnām ir garas žāvēšanas fāzes (izslēdziet strāvu uz 20–60 minūtēm), tāpēc izslēgšanas aizkavei ir jābūt lielākai par to, lai visa mazgāšana un žāvēšana būtu viens cikls.",
       "label": "Izslēgšanas aizkave"
@@ -1406,6 +1502,26 @@
     "energy_scale": {
       "label": "Enerģijas asums",
       "doc": "4. posma enerģijas atbilstības soda asums. Mazāks = bargāks: enerģijas neatbilstība kaitē vairāk. Noklusējums 0,25 ir apzināti piedodošāks nekā ilguma asums, jo enerģija mainās atkarībā no slodzes. Izmantojiet kopā ar Enerģijas svaru."
+    },
+    "power_profile_interval_min": {
+      "label": "Jaudas profila intervāls",
+      "doc": "Spaiņa lielums profilam power_profile sensora atribūtam (vienots vidējo vatu masīvs pa laika nišām, ko izmanto ārējie plānotāji, piemēram, EMHASS un tibber_prices). Mazāki spaini saglabā īsas jaudas pikas asas; lielāki spaini izlīdzina formu. Noklusējums 15 min. Tikai lasīšanas laikā; neietekmē noteikšanu."
+    },
+    "notify_live_sticky": {
+      "label": "Saglabāt tiešraides paziņojumu pēc pieskāriena",
+      "doc": "Tikai Android. Padarīt tiešraides progresa paziņojumu pastāvīgu (lipīgu), lai pieskāriens tam neatceltu notiekošo pavedienu. Izslēgts saglabā noklusēto uzvedību, kad pieskāriens paziņojumu noraida."
+    },
+    "notify_live_click_action": {
+      "label": "Tiešraides paziņojuma pieskāriena mērķis",
+      "doc": "Tikai Android. Kur atveras tiešraides progresa paziņojuma pieskāriens (piemēram, /lovelace/laundry vai pilns URL), nevis lietotnes sākumlapa. Atstājiet tukšu noklusējumam."
+    },
+    "door_opens_at_end": {
+      "label": "Durvis automātiski atveras beigās",
+      "doc": "Trauku mazgājamajām mašīnām, kuras cikla beigās atver durvis žāvēšanai (AirDry un līdzīgas). Ieslēgts, durvju atvēršana darbojošā ciklā vairs nepārtrauc to uz visiem laikiem; tā vietā, ja durvis paliek atvērtas norādīto uzturēšanās laiku zemāk, WashData uzskata ciklu par pabeigtu. Īsa atvēršana (pievienojot trauku) tiek ignorēta. Nepieciešams durvju sensora objekts."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Durvju atvēršanas beigu uzturēšanās laiks",
+      "doc": "Cik ilgi durvis jāpaliek atvērtām, lai WashData beigtu ciklu, kad ir ieslēgts iestatījums \"Durvis automātiski atveras beigās\". Pietiekami ilgi, lai ignorētu ātru trauka pievienošanu (noklusējums 60 s), pietiekami īsi, lai ātri beigtu, kad mašīna atver durvis."
     }
   },
   "setting_group": {
@@ -1576,6 +1692,10 @@
     "name_required": "Nepieciešams vārds",
     "no_split_found": "Nav atrastas tukšgaitas spraugas, uz kurām varētu sadalīties",
     "panel_settings_saved": "Paneļa iestatījumi ir saglabāti",
+    "pg_preset_loaded": "Priekšiestatījums \"{name}\" ielādēts",
+    "pg_preset_saved": "Priekšiestatījums \"{name}\" saglabāts",
+    "pg_sugg_loaded": "Ielādētas {n} ieteiktās vērtības - palaidiet izmēģinājumu laukumu salīdzināšanai",
+    "pg_sugg_ml_loaded": "Ielādētas {n} ML kalibrētas vērtības - palaidiet izmēģinājumu laukumu salīdzināšanai",
     "phase_name_required": "Nepieciešams fāzes nosaukums",
     "phase_updated": "Fāze atjaunināta",
     "phases_saved": "Fāzes saglabātas",
@@ -1723,6 +1843,7 @@
       "min_active": "Pamatots ar minimālo aktīvo jaudu ({min}W), kas novērota pēdējā ciklā.",
       "min_duration_ratio": "Saglabāts pēc iespējas zemāks, lai programma tiktu atpazīta cikla sākumā; ticamības un neskaidrības sliekšņi novērš pāragru apstiprināšanu.",
       "min_off_gap": "Pamatots ar {gaps} novērotiem starpciklu intervāliem (p05={p05}s). Ierīces apakšējā robeža: {floor}s.",
+      "min_off_gap_bridge": "Aprēķināts, lai pārsegtu garāko kluso posmu cikla iekšienē: {span}s + 60s buferis, no {spans} pārsegtiem intervāliem {cycles} tīros ciklos (paliek zem jūsu īsākā intervāla starp divām secīgām palaišanas reizēm, kas ir {ceiling}s).",
       "min_power": "40% no p05 zemākās aktīvās jaudas ({p05}W) {cycles} tīros ciklos, saglabājot izslēgšanas slieksni zem reālā patēriņa.{excl}",
       "ml_auto_label": "Zemākā ticamība, ko kvalitātes modelis vēl novērtēja kā tīru (p10 no {cycles} tīriem cikliem = {p10}).",
       "ml_end_repeat": "{false}/{total} ciklu ({pct}%) bija pauze, ko beigu detektors novērtēja >50%; pieprasīt {val} beigu apstiprinājumu(s).",
@@ -1739,7 +1860,7 @@
       "thr_batch": "Saglabāts nedaudz virs p05 zemākās aktīvās jaudas {cycles} ciklos ({p05}W), lai sākums tiktu uztverts pēc iespējas agrāk un apturēšanas slieksnis paliktu zem mašīnas zemākās darbības jaudas.",
       "tol_per_profile": "p75 no katra profila ilguma dispersijas {profiles} profilos ({cycles} cikli); stabili profili netiek sodīti.",
       "tol_pooled": "Pamatots ar apvienoto ilguma dispersiju {cycles} nesen marķētiem cikliem (p95 novirze={dev}).",
-      "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (3x p95 atjaunināšanas intervāls {p95}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas."
+      "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (tikai nedaudz virs p95 atjaunināšanas intervāla {p95}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas."
     },
     "exclusions": {
       "summary": "Izslēgti {total} kļūdaini atpazīti cikli: {parts}.",
@@ -1770,6 +1891,7 @@
     "other": "Cits"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Trauku mazgājamā mašīna: klusās sekundes pēc paredzētā ilguma, pirms tiek atbrīvota cikla beigu ūdens izvadīšanas gaidīšana",
     "anti_wrinkle_enabled": "Absorbējiet griešanās impulsus pēc galvenās fāzes, nevis nolasiet tos kā jaunus ciklus",
     "anti_wrinkle_exit_power": "Lai pretgrumbu režīms paliktu aktīvs, jaudai starp impulsiem jānokrītas zem šīs vērtības",
     "anti_wrinkle_idle_timeout": "Atļautais klusuma laiks starp diviem griešanās impulsiem, pirms pretgrumbu režīms beidzas",

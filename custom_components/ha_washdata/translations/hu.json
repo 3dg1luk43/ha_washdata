@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData beállítása",
-        "description": "Állítsa be a mosógépet vagy más készüléket.\n\nTeljesítményérzékelő szükséges.\n\n**Ezután a rendszer megkérdezi, hogy szeretné-e létrehozni első profilját.**",
+        "description": "Állítsa be a mosógépet vagy más készüléket.\n\nTeljesítményérzékelő szükséges.\n\nA beállítás után nyissa meg a WashData panelt az oldalsávból (vagy lépjen ide: [/ha-washdata](/ha-washdata)), ahol megtekintheti a ciklusokat, finomhangolhatja a felismerést és kezelheti a profilokat.",
         "data": {
           "name": "Eszköz neve",
           "device_type": "Eszköz típusa",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "description": "Frissítse az eszköz nevét, a készülék típusát vagy a teljesítményérzékelőt.\n\nA WashData panel (oldalsáv vagy [/ha-washdata](/ha-washdata)) a felismerés, ciklusok, profilok és értesítések kezelésére szolgál.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
+        "description": "Nevezze át az eszközt, vagy módosítsa az alap hardverbeállításait. Az összes felismerési, egyeztetési és értesítési beállítás a [WashData panelen](/ha-washdata) található (az oldalsávból is elérhető).",
         "data": {
           "name": "Eszköz neve",
           "device_type": "Device Type",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes} perces időzítő",
       "timer_pause_action_title": "Ciklus folytatása",
       "timer_pause_body_suffix": "A ciklus szünetel. A folytatáshoz nyissa meg a WashData-panelt.",
+      "unload_dismiss_action_title": "Emlékeztetés leállítása",
       "notify_live_waiting_message": "{device}: Még nincs illeszkedő profil.",
       "vs_typical_longer": "{pct}%-kal hosszabb a szokásosnál",
       "vs_typical_shorter": "{pct}%-kal rövidebb a szokásosnál",

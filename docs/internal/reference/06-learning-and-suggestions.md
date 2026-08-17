@@ -8,6 +8,10 @@ constants they consume from `const.py`.
 All line anchors are `file:line`. Files were read in full; no source was
 modified.
 
+> **Accuracy caveat.** Originally accurate as of 2026-07-18 (0.5.1); content
+> corrected 2026-08-17 for 0.5.4 (the §3 `MatchResult.confidence` description). Line
+> anchors may still reflect 0.5.1 and have drifted as the files grew.
+
 ---
 
 ## 1. Module map & responsibilities
@@ -187,9 +191,12 @@ Both signals are attached to `cycle_data` during `_async_process_cycle_end`,
 
 ## 3. Confidence math & data
 
-- `MatchResult.confidence` (per CLAUDE.md / matching docs) is the raw Stage-2/3
-  similarity score of the top candidate (0–1); a similarity score, **not** a
-  calibrated probability. The learning loop treats it as the routing scalar.
+- `MatchResult.confidence` is `best["score"]`, the **final post-Stage-4 blended
+  score** of the top candidate (Stage-2 similarity as refined by Stage-3 DTW and
+  Stage-4 duration+energy agreement), 0-1; a similarity score, **not** a calibrated
+  probability. (See doc 02 §4.6 and current CLAUDE.md, which agree.) The learning
+  loop treats it as an opaque routing scalar, so its internal composition does not
+  change the feedback logic.
 - `confidence` flows in from `manager._last_match_confidence` (set on each match:
   `manager.py:1145,1158,1250,2893`) via `match_confidence` at cycle end
   (`manager.py:4024`).

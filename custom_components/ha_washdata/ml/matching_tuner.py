@@ -156,6 +156,7 @@ def _grid() -> list[dict[str, Any]]:
 
 def tune_matching_config(
     cycles: list[dict[str, Any]],
+    device_type: str | None = None,
     *,
     min_cycles: int = 25,
     # Kept intentionally low so per-device tuning becomes useful early; the noise
@@ -206,7 +207,9 @@ def tune_matching_config(
     if not holdout_pool:
         return {"promoted": False, "reason": "too few targets", "n_targets": len(targets)}
 
-    base = {**_BASE_CFG}
+    # Tune under the same Stage-4 energy mode production uses for this device type,
+    # so promoted weights are consistent with the live matcher.
+    base = {**_BASE_CFG, "energy_mode": analysis.stage4_energy_mode(device_type)}
     # Candidate: the grid config with the best top-1 on the SEARCH pool only.
     best_search = _top1(by_profile, search_pool, base)
     best_cfg = base

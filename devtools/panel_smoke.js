@@ -54,6 +54,7 @@ function check(label, fn) {
   try { fn(); console.log('  ok   ' + label); }
   catch (e) { failures++; console.log('  FAIL ' + label + ' -> ' + e.message); }
 }
+function near(a, b, msg) { if (Math.abs(a - b) > 1e-6) throw new Error((msg || 'value') + ': ' + a + ' != ' + b); }
 
 // Load the panel as an ES module (matching production, where HA imports it via
 // import()), so import.meta.url resolves. Wrap the rest in an async IIFE.
@@ -197,6 +198,29 @@ check('modal: store-share-device (tree)', () => {
   return el._htmlModal();
 });
 check('modal: store-share-device (empty)', () => { el._shareableCycles = []; el._sharePhasePrograms = []; el._modal = { type: 'store-share-device', selected: new Set(), includePhases: new Set(), includeSettings: false }; return el._htmlModal(); });
+
+// Trim clock-mode + sample-snapping guards (issue #373). Build start_time from
+// local Date components so getHours()/setHours() stay timezone-agnostic.
+check('trim: _clockToOffset day-shift guard (#373 B)', () => {
+  const base = new Date(2026, 7, 8, 21, 0, 0);  // local 21:00:00, cycle runs 2h33m
+  el._modal = { type: 'cycle-detail', mode: 'trim', loaded: true, curve: { start_time: base.toISOString(), full_duration_s: 9180 } };
+  near(el._clockToOffset('21:00:00'), 0, 'exact start');
+  near(el._clockToOffset('21:30:00'), 1800, 'after start');
+  near(el._clockToOffset('20:59:58'), 0, 'two seconds early must clamp to 0, not wrap to end');
+  near(el._clockToOffset('20:44:00'), 0, 'early start (the #366 field value) must clamp to 0');
+});
+check('trim: _clockToOffset legit past-midnight still shifts (#373 B)', () => {
+  const base = new Date(2026, 7, 8, 23, 0, 0);  // local 23:00, cycle runs 2h -> 01:00 next day
+  el._modal = { type: 'cycle-detail', mode: 'trim', loaded: true, curve: { start_time: base.toISOString(), full_duration_s: 7200 } };
+  near(el._clockToOffset('00:30:00'), 5400, 'past-midnight time inside the cycle must shift +24h');
+});
+check('trim: _snapTrimBounds snaps to real sample offsets (#373 A)', () => {
+  el._modal = { type: 'cycle-detail', mode: 'trim', loaded: true, trim: { start: 9, end: 29 },
+    curve: { samples: [[0, 1], [10.3, 2], [20.6, 3], [30.9, 4]], full_duration_s: 30.9 } };
+  el._snapTrimBounds();
+  near(el._modal.trim.start, 10.3, 'start snapped');
+  near(el._modal.trim.end, 30.9, 'end snapped');
+});
 el._modal = null;
 
 console.log(failures ? `\nSMOKE FAILED (${failures})` : '\nSMOKE OK');

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configuração WashData",
-        "description": "Configure sua máquina de lavar ou outro eletrodoméstico.\n\nSensor de potência é necessário.\n\n**Em seguida, você será perguntado se deseja criar seu primeiro perfil.**",
+        "description": "Configure sua máquina de lavar ou outro eletrodoméstico.\n\nSensor de potência é necessário.\n\nApós a configuração, abra o painel WashData pela barra lateral (ou acesse [/ha-washdata](/ha-washdata)) para visualizar ciclos, ajustar a detecção e gerenciar perfis.",
         "data": {
           "name": "Nome do dispositivo",
           "device_type": "Tipo de dispositivo",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "description": "Atualize o nome do dispositivo, o tipo de eletrodoméstico ou o sensor de potência.\n\nO painel WashData (barra lateral ou [/ha-washdata](/ha-washdata)) é onde detecção, ciclos, perfis e notificações são gerenciados.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
+        "description": "Renomeie o dispositivo ou altere suas configurações principais de hardware. Todas as configurações de detecção, correspondência e notificação estão no [painel WashData](/ha-washdata) (também acessível pela barra lateral).",
         "data": {
           "name": "Nome do dispositivo",
           "device_type": "Device Type",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: timer de {minutes} min",
       "timer_pause_action_title": "Retomar ciclo",
       "timer_pause_body_suffix": "O ciclo está pausado. Abra o painel WashData para retomar.",
+      "unload_dismiss_action_title": "Parar de lembrar",
       "notify_live_waiting_message": "{device}: Nenhum perfil identificado ainda.",
       "vs_typical_longer": "{pct}% mais longo que o normal",
       "vs_typical_shorter": "{pct}% mais curto que o normal",

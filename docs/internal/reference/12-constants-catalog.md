@@ -1,9 +1,11 @@
 # WashData `const.py` — Complete Constant Catalog
 
-Source: `/root/ha_washdata/custom_components/ha_washdata/const.py` (886 lines).
-Integration version (`manifest.json`): **0.5.1**.
+Source: `/root/ha_washdata/custom_components/ha_washdata/const.py` (1068 lines).
+Integration version (`manifest.json`): **0.5.4**.
 
-**Counts:** 298 module-level assignments + 5 `TerminationReason` enum members = **303 named constants/keys cataloged** (of which `CONF_*` = 102, `DEFAULT_*` = 83).
+**Counts (approximate, from the 2026-07-18 pass):** ~298 module-level assignments + 5 `TerminationReason` enum members = ~**303 named constants/keys cataloged** (of which `CONF_*` ≈ 102, `DEFAULT_*` ≈ 83). These totals predate the 0.5.4 additions and are no longer exact.
+
+> Content-corrected 2026-08-17 for 0.5.4 (header metadata; `running_dead_zone` retired). The constant **values** below were re-verified against `const.py` and are accurate; only stale metadata and the `running_dead_zone` entries were changed.
 
 **Important cross-file note:** `CONF_ENABLE_ML_MODELS` (`"enable_ml_models"`) is referenced by `const.py` comments but is **defined in `ml/engine.py:46`, not in `const.py`.** The panel toggle "Apply smart models during a cycle" writes this key; `ml_models_enabled(options)` (`ml/engine.py:56`) reads it. It is documented in the Feature-flag section below for completeness but does not add to the const.py count.
 
@@ -112,7 +114,7 @@ All are `CONF_*` string-key constants. "Panel-settable" = editable in the panel 
 | `CONF_MATCH_PERSISTENCE` | `match_persistence` | `DEFAULT_MATCH_PERSISTENCE` = `3` | Yes | Consecutive matches needed to commit a match (bypassed by ML early-commit). |
 | `CONF_COMPLETION_MIN_SECONDS` | `completion_min_seconds` | `DEFAULT_COMPLETION_MIN_SECONDS` = `600` s (per-device via `DEVICE_COMPLETION_THRESHOLDS`) | Yes | Min runtime to count as a completed cycle. Shareable. |
 | `CONF_NOTIFY_BEFORE_END_MINUTES` | `notify_before_end_minutes` | `DEFAULT_NOTIFY_BEFORE_END_MINUTES` = `0` (disabled) | Yes | Pre-completion "almost done" notification lead time. |
-| `CONF_RUNNING_DEAD_ZONE` | `running_dead_zone` | `DEFAULT_RUNNING_DEAD_ZONE` = `3` s | Yes | Seconds after start where power dips are ignored. Shareable. |
+| `CONF_RUNNING_DEAD_ZONE` | `running_dead_zone` | (no default; removed) | **Removed 0.5.3** | Migration-only stub (`const.py:87`, "REMOVED in 0.5.3 - was never wired to detection"). No longer panel-settable or shareable. |
 | `CONF_END_REPEAT_COUNT` | `end_repeat_count` | `DEFAULT_END_REPEAT_COUNT` = `1` (no repeat) | Yes | Times the end condition must repeat before ending (plug-robustness). |
 | `CONF_MIN_OFF_GAP` | `min_off_gap` | `DEFAULT_MIN_OFF_GAP` = `60` s (per-device via `DEFAULT_MIN_OFF_GAP_BY_DEVICE`) | Yes | Min quiet gap to separate two cycles (soak-bridging). Shareable. |
 | `CONF_START_ENERGY_THRESHOLD` | `start_energy_threshold` | per-device via `DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE` | Yes | Wh required to confirm a real start (noise rejection). Shareable. |
@@ -273,7 +275,7 @@ Note: deprecated 0.4.5 drain-spike keys (`delay_drain_*`) are stripped during co
 | `DEFAULT_MAX_FULL_TRACES_UNLABELED` | `20` | — |
 | `DEFAULT_WATCHDOG_INTERVAL` | `30` s | Derived: `2*sampling_interval + 1`. |
 | `DEFAULT_MATCH_PERSISTENCE` | `3` | — |
-| `DEFAULT_RUNNING_DEAD_ZONE` | `3` s | — |
+| `DEFAULT_RUNNING_DEAD_ZONE` | *(removed in 0.5.3)* | Constant no longer exists; the setting was retired. |
 | `DEFAULT_END_REPEAT_COUNT` | `1` | No repeat required. |
 
 ### Matching & Termination Stability (const.py:265-267)
@@ -616,7 +618,7 @@ Staged-rollout gates: when `False`, the corresponding panel UI *and* background 
 | `QC_EDITED` | `2` | — | Provenance code: trimmed/edited from a detected cycle. |
 | `QC_MANUAL` | `3` | — | Provenance code: plain detected cycle flagged golden by hand. |
 
-**`SHAREABLE_SETTING_KEYS` members:** `CONF_MIN_POWER`, `CONF_OFF_DELAY`, `CONF_START_THRESHOLD_W`, `CONF_STOP_THRESHOLD_W`, `CONF_START_DURATION_THRESHOLD`, `CONF_START_ENERGY_THRESHOLD`, `CONF_COMPLETION_MIN_SECONDS`, `CONF_RUNNING_DEAD_ZONE`, `CONF_MIN_OFF_GAP`, `CONF_END_ENERGY_THRESHOLD`, `CONF_POWER_OFF_THRESHOLD_W`, `CONF_POWER_OFF_DELAY`, `CONF_PROFILE_MATCH_THRESHOLD`, `CONF_PROFILE_UNMATCH_THRESHOLD`, `CONF_PROFILE_MATCH_INTERVAL`, `CONF_PROFILE_MATCH_MIN_DURATION_RATIO`, `CONF_PROFILE_MATCH_MAX_DURATION_RATIO`, `CONF_PROFILE_DURATION_TOLERANCE`, `CONF_DURATION_TOLERANCE`, `CONF_AUTO_LABEL_CONFIDENCE`, `CONF_LEARNING_CONFIDENCE`.
+**`SHAREABLE_SETTING_KEYS` members (20):** `CONF_MIN_POWER`, `CONF_OFF_DELAY`, `CONF_START_THRESHOLD_W`, `CONF_STOP_THRESHOLD_W`, `CONF_START_DURATION_THRESHOLD`, `CONF_START_ENERGY_THRESHOLD`, `CONF_COMPLETION_MIN_SECONDS`, `CONF_MIN_OFF_GAP`, `CONF_END_ENERGY_THRESHOLD`, `CONF_POWER_OFF_THRESHOLD_W`, `CONF_POWER_OFF_DELAY`, `CONF_PROFILE_MATCH_THRESHOLD`, `CONF_PROFILE_UNMATCH_THRESHOLD`, `CONF_PROFILE_MATCH_INTERVAL`, `CONF_PROFILE_MATCH_MIN_DURATION_RATIO`, `CONF_PROFILE_MATCH_MAX_DURATION_RATIO`, `CONF_PROFILE_DURATION_TOLERANCE`, `CONF_DURATION_TOLERANCE`, `CONF_AUTO_LABEL_CONFIDENCE`, `CONF_LEARNING_CONFIDENCE`. (`CONF_RUNNING_DEAD_ZONE` was removed from the allow-list in 0.5.3.)
 
 ---
 

@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "mín.",
+    "entity_not_found": "Eining fannst ekki",
+    "running_long": "Keyrir lengur",
+    "remaining": "eftir",
+    "progress": "framvinda",
+    "show_time_remaining": "Sýna tíma sem eftir er",
+    "show_percentage": "Sýna prósentu",
+    "layout": {
+      "tile": "Reitur (þjappað)",
+      "detail": "Nánar (ítarlegt)",
+      "glance": "Yfirlit (mörg tæki)"
+    },
+    "btn": {
+      "pause": "Gera hlé",
+      "resume": "Halda áfram",
+      "terminate": "Ljúka lotu",
+      "record_start": "Hefja upptöku",
+      "record_stop": "Stöðva upptöku",
+      "program": "Prógramm",
+      "open_panel": "Opna WashData"
+    },
+    "editor": {
+      "layout": "Útlit",
+      "entity": "Tækjaeining",
+      "entities": "Tæki",
+      "title": "Titill",
+      "icon": "Tákn",
+      "show_state": "Sýna stöðu",
+      "show_program": "Sýna prógramm",
+      "show_progress_bar": "Sýna framvindustiku",
+      "spin_icon": "Snúa tákni meðan á keyrslu stendur",
+      "display_mode": "Upplýsingalína",
+      "active_color": "Hnekkja virkum lit",
+      "show_phase": "Sýna fasa",
+      "show_energy": "Sýna orku og kostnað",
+      "show_anomaly": "Sýna viðvörun um langa keyrslu",
+      "show_sparkline": "Sýna rauntíma aflgraf",
+      "buttons": "Aðgerðahnappar",
+      "program_entity": "Prógramm-eining (hnekkja)",
+      "time_entity": "Tímaeining (hnekkja)",
+      "pct_entity": "Framvindueining (hnekkja)",
+      "power_entity": "Afleining (hnekkja)",
+      "tap_action": "Bankaðgerð",
+      "hold_action": "Haldaðgerð",
+      "double_tap_action": "Tvíbankaaðgerð"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} frávik fundust (t.d. hurð opnuð í miðjum lotu) – opnaðu til að sjá þau á línuritinu",
     "auto": "(sjálfvirkt greint)",
@@ -92,6 +140,19 @@
     "pause_cycle_tip": "Gerðu hlé á gengandi lotu – tækið mun halda áfram þar sem það stoppaði",
     "pg_apply_device": "Beita á tæki",
     "pg_autofill": "Fylla sjálfkrafa",
+    "pg_load_calibrated": "Hlaða kvarðaðar (ML) ({n})",
+    "pg_load_calibrated_tip": "Flytur ML-kvarðaðar stillingar sem hnekki á tilraunasvæðið",
+    "pg_load_live": "Sækja virkar stillingar",
+    "pg_load_live_tip": "Lesa núverandi stillingar samþættingarinnar aftur og henda öllum breytingum á tilraunasvæðinu",
+    "pg_load_suggested": "Hlaða tillögur ({n})",
+    "pg_load_suggested_tip": "Flytur núverandi tillögur sjálfvirkrar stillingar sem hnekki á tilraunasvæðið",
+    "pg_preset_delete": "Eyða forstillingu",
+    "pg_preset_load": "Hlaða forstillingu",
+    "pg_preset_load_tip": "Skipta gildunum á tilraunasvæðinu út fyrir þessa forstillingu (virku stillingarnar haldast óbreyttar)",
+    "pg_preset_save": "Vista sem forstillingu",
+    "pg_preset_save_tip": "Vista öll gildin hér að neðan sem nefnda forstillingu fyrir þetta tæki",
+    "pg_publish_all": "Vista {n} í samþættinguna",
+    "pg_publish_one": "Vista {label} í samþættinguna",
     "play": "Spila",
     "process": "Vinna",
     "process_history": "Vinnið núna",
@@ -178,7 +239,9 @@
     "download_export": "Sækja útflutning",
     "analyze_import": "Greina skrá",
     "import_selected": "Flytja inn valið",
-    "back": "Til baka"
+    "back": "Til baka",
+    "mute_suggestion": "Hætta að stinga upp á þessari stillingu",
+    "reset_muted": "Endurstilla þaggaðar tillögur"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -275,8 +338,9 @@
     "no_automations": "Engar sjálfvirkni vísar til þessa tækis ennþá.",
     "panel_settings": "Pallborðsstillingar",
     "param_sweep": "Færibreytuyfirferð",
+    "pg_settings_source": "Uppruni stillinga",
     "phase_catalog": "Áfangaskrá",
-    "playground": "Leikvöllur",
+    "playground": "Tilraunasvæði",
     "process_history": "Ferlissaga",
     "settings_history": "Stillingasaga",
     "status": "Staða",
@@ -410,6 +474,9 @@
     "pg_group_detection": "Skynjunarkveikjur",
     "pg_group_timing": "Tímasetningarreglur",
     "pg_idle": "Aðgerðalaus",
+    "pg_preset": "Forstilling tilraunasvæðis",
+    "pg_preset_name": "Nafn á nýrri forstillingu",
+    "pg_preset_none": "Veldu forstillingu…",
     "pg_stress_group": "Próf á aðgerðalausum lokum",
     "pg_stress_idle_auto": "Auto",
     "pg_stress_idle_w": "Aðgerðalaust stig (W)",
@@ -609,7 +676,8 @@
     "conflict_import_copy": "Flytja inn sem afrit",
     "conflict_keep_mine": "Halda mínum",
     "conflict_overwrite": "Skrifa yfir",
-    "pg_anti_wrinkle": "Hrukkuleysi"
+    "pg_anti_wrinkle": "Hrukkuleysi",
+    "font_size": "Leturstærð glugga"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -771,7 +839,17 @@
     "pg_apply_confirm": "Beita besta gildi: {label} = {value}?",
     "pg_canvas_empty": "Veldu lotu að ofan og ýttu svo á Hlaða til að sjá aflferil hennar.",
     "pg_chart_caption": "Greiningar-/samsvörunarhlutfall eftir gildum {param}",
+    "pg_ctrl_intro": "Gildin byrja á virkum stillingum þessa tækis í samþættingunni. Breytingar haldast á tilraunasvæðinu þar til þú vistar þær í samþættinguna.",
+    "pg_live_unavailable": "Virkar stillingar eru ekki tiltækar, sjálfgefin gildi eru sýnd.",
+    "pg_load_live_confirm": "Henda {n} breytingu(m) á tilraunasvæðinu og hlaða núverandi stillingum samþættingarinnar aftur?",
     "pg_match_rate": "{pct}% samsvörunarhlutfall á {total} lotum",
+    "pg_matches_live": "Samsvarar virkum stillingum",
+    "pg_n_changed": "{n} breytt miðað við virkar stillingar",
+    "pg_sugg_none": "Allar tillögur stemma nú þegar við virkar stillingar",
+    "pg_preset_delete_confirm": "Eyða forstillingunni \"{name}\"?",
+    "pg_preset_limit": "Hámarksfjölda forstillinga náð ({n})",
+    "pg_preset_overwrite": "Skrifa yfir forstillinguna \"{name}\"?",
+    "pg_publish_one_confirm": "Vista {label} = {value} í stillingar þessa tækis?",
     "pg_restart_note": "Endurræstu Home Assistant til að virkja hermitólin.",
     "pg_sim_progress": "{done} / {total} lotur",
     "pg_starting": "Ræsir…",
@@ -784,8 +862,8 @@
     "pg_verdict_ok": "Ásættanlegt: sumar lotur misstust. Prófaðu að lækka upphafsþröskuldinn.",
     "phase_catalog_intro": "Nafngreindir hlutar hringrásar (Forþvottur, Upphitun, Snúning…). Úthlutaðu þeim á prófíl frá stjórnborði þess.",
     "phase_ranges_intro": "Áfangasvið (mínútur frá upphafi lotu) lögð yfir meðalferilinn. Breyttu gildum til að forskoða í beinni.",
-    "playground_intro": "Öruggt leiksvæði til að spila fyrri lotur aftur með mismunandi stillingum, bera saman tvær uppsetningar hlið við hlið og skoða hvernig lota samræmist sniði. Ekkert hér breytir raungögnunum þínum fyrr en þú beitir því sérstaklega.",
-    "playground_needs_restart": "Endurræstu Home Assistant til að virkja Leiksvæðistólin.",
+    "playground_intro": "Öruggt tilraunasvæði til að spila fyrri lotur aftur með mismunandi stillingum, bera saman tvær uppsetningar hlið við hlið og skoða hvernig lota samræmist sniði. Ekkert hér breytir raungögnunum þínum fyrr en þú beitir því sérstaklega.",
+    "playground_needs_restart": "Endurræstu Home Assistant til að virkja tólin á Tilraunasvæðinu.",
     "preferences_admin": "Óskir, pallborð og aðgangsstýring",
     "preferences_adv": "Óskir",
     "prefs_personal": "Þetta á aðeins við um Home Assistant reikninginn þinn.",
@@ -845,6 +923,7 @@
     "trend_duration_shorter": "Tímalengd styttist ({pct}%/lotu) – nýleg meðaltal {avg}",
     "trend_energy_down": "Orka á niðurleið ({pct}%/lotu)",
     "trend_energy_up": "Orka hækkar ({pct}%/lotu) – nýleg meðaltal {avg}",
+    "trim_destructive_confirm": "Aðeins {pct}% af lotunni verður eftir. Þetta er ekki hægt að afturkalla. Halda áfram?",
     "trim_intro": "Dragðu rauðu handföngin eða sláðu inn gildi. Allt fyrir utan gluggann er fjarlægt.",
     "tuning_suggestions_available": "{count} uppástunga að stilla í boði frá athuguðum lotum. Þau birtast við hlið viðkomandi reita.",
     "unsure_detected_prefix": "WashData er ekki viss um að það hafi fundist",
@@ -922,9 +1001,15 @@
     "merge_hint": "Innfluttum atriðum er bætt við; ekkert staðbundið tapast. Nafnaárekstrar eru leystir hér að neðan.",
     "replace_warn": "Hver valinn flokkur er hreinsaður og settur í staðinn úr skránni. Óvaldir flokkar haldast óbreyttir.",
     "dest_reference_hint": "Innfluttar lotur bæta aðeins forritasamsvörun og hafa aldrei áhrif á notkunar-/orkutölfræði.",
-    "dest_real_history_hint": "Innfluttar lotur teljast sem eigin saga þessa tækis og fæða orku-/notkunartölfræði. Notaðu þetta til að flytja eitt tæki yfir í nýja uppsetningu."
+    "dest_real_history_hint": "Innfluttar lotur teljast sem eigin saga þessa tækis og fæða orku-/notkunartölfræði. Notaðu þetta til að flytja eitt tæki yfir í nýja uppsetningu.",
+    "sug_muted": "Mun ekki stinga upp á þessari stillingu aftur",
+    "sug_mute_failed": "Gat ekki þaggað tillögu",
+    "sug_unmuted_all": "Þaggaðar tillögur endurstilltar",
+    "n_suggestions_muted": "{count} þaggaðar; sjálfvirki stillirinn leggur ekki til þessar.",
+    "font_size_hint": "Gerðu allt á þessum glugga stærra eða minna. Gildir fyrir reikning þinn á þessum tæki."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
     "completion_min_seconds": "Stysta keyrsla sem telst raunveruleg lota",
     "end_repeat_count": "Lágir álestrar í röð áður en lýkur",
     "interrupted_min_seconds": "Stuttar lotur merktar sem truflaðar",
@@ -998,6 +1083,10 @@
     "unusable": "Ónothæft"
   },
   "section": {
+    "dishwasher": {
+      "label": "Uppþvottavél",
+      "intro": "Meðhöndlun loka lotu fyrir uppþvottavélar, sem ljúka yfirleitt með löngum, næstum hljóðlátum þurrkfasa á undan stuttri lokaútdælingu."
+    },
     "anti_wrinkle": {
       "intro": "Hrukkuleysi-/krumpluleys-stilling greinir lágtaktsveltiboð eftir aðalfasann og heldur þeim tengdum við lokinni lotu.",
       "label": "Hrukkuleysi"
@@ -1040,6 +1129,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Losun eftir hljóðláta þurrkun",
+      "doc": "Þegar lotan fer fram úr áætlaðri lengd sinni: hversu lengi uppþvottavélin þarf að vera hljóðlát (undir Stöðvunarþröskuldi) áður en WashData hættir að bíða eftir lokaútdælingu og lýkur lotunni. Hækkaðu gildið ef vélin þín er með langan hljóðlátan þurrkfasa á undan seinni lokaútdælingu sem sleppur fram hjá - breiðari gluggi leyfir lærðu lengdinni að fylgja árstíðabundnum breytingum (kaldara innrennslisvatn = lengri lotur) í stað þess að festast við gamla meðaltalið. Það styttir aðeins biðtímann miðað við innra 30 mínútna hámark fyrir lokatoppinn, lengir hann aldrei."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Viðurkenndu stuttu lág-afls þurrkarapúlsana sem þurrkari gefur frá sér eftir aðalhitafasann og haltu þeim tengdum við lokið lotu í stað þess að lesa þá sem nýjar lotur.",
       "label": "Virkja hrukkuleysi-greiningu"
@@ -1260,6 +1353,10 @@
       "doc": "Mínútum eftir að lotu lýkur áður en þú sendir áminninguna um „afferma vélina“ sem enn bíður. Stilltu 0 til að slökkva á áminningunni.",
       "label": "Losunarminni-seinkun"
     },
+    "notify_unload_repeat": {
+      "doc": "Heldur áfram að senda losunaráminninguna aftur á \"Losunarminni-seinkun\" mínútna fresti þar til þú opnar hurðina eða ýtir á \"Hætta að minna\" í tilkynningunni. Krefst Dyraskynjareiningar (áminningin sjálf gerir það). Hunsa-hnappurinn virkar á tilkynningum úr Home Assistant fylgiforritinu (farsíma).",
+      "label": "Endurtaka þar til hurðin opnast"
+    },
     "off_delay": {
       "doc": "Tími til að bíða eftir að kraftur minnkar áður en hringrásinni er lokið. Ef straumur fer aftur innan þessa glugga heldur hringrásin óaðfinnanlega áfram - þetta brúar hlé á milli þvottastiga. Uppþvottavélar eru með langa þurrkunarfasa (slökkt á slökkt í 20-60 mín) þannig að slökkvunartöfin verður að fara yfir það til að halda öllum þvotti+þurrkum sem einni lotu.",
       "label": "Slökkviðráð"
@@ -1434,6 +1531,26 @@
     "energy_scale": {
       "label": "Orkuskerpa",
       "doc": "Skerpa í viðurlögum Þreps 4 vegna samræmis í orkunotkun. Minna = strangara: frávik í orkunotkun skemmir meira. Sjálfgefið 0,25 er vísvitandi rýmra en keyrslulengdarskerpan vegna þess að orka breytist með álagi. Notaðu með Orkuþyngd."
+    },
+    "power_profile_interval_min": {
+      "label": "Aflaprófíl-bil",
+      "doc": "Fötustærð fyrir eigindið power_profile á prófílskynjaraskynjara (flatt fylki meðalwattsgilda á hólf sem notast af ytri skipuleggjendum eins og EMHASS og tibber_prices). Minni fötur halda stuttum aflgöllum skörpum; stærri fötur jafna út ferilinn. Sjálfgefið 15 mín. Eingöngu til birtingar; hefur engin áhrif á greiningu."
+    },
+    "notify_live_sticky": {
+      "label": "Halda lifandi tilkynningu við snertingu",
+      "doc": "Eingöngu Android. Gerir lifandi framvindutilkynningu viðvarandi (sticky) þannig að snertingar lokar henni ekki. Slökkt: sjálfgefin hegðun þar sem snertingar lokar tilkynningu."
+    },
+    "notify_live_click_action": {
+      "label": "Snertimarkmið lifandi tilkynningar",
+      "doc": "Eingöngu Android. Hvert snertingar á lifandi framvindutilkynningu opnar (t.d. /lovelace/laundry eða fulla vefslóð) í stað sjálfgefinna ræsiglugga forritsins. Skildu eftir autt fyrir sjálfgefið."
+    },
+    "door_opens_at_end": {
+      "label": "Hurð opnast sjálfkrafa í lok",
+      "doc": "Fyrir uppþvottavélar sem spretta hurðinni upp í lok hringsins til þurrkunar (AirDry og svipað). Þegar þetta er virkt setur hurðaropnun á yfirstandandi hring hann ekki í bið að eilífu; ef hurðin helst opin í stillt dvaltími meðhöndlar WashData hringinn sem lokinn. Stutt opnun (að bæta við fat) er hundsuð. Krefst hurðarskynjaraeiningar."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Dvaltími hurðar við lok",
+      "doc": "Hversu lengi hurðin þarf að vera opin áður en WashData lýkur hringnum, þegar \"Hurð opnast sjálfkrafa í lok\" er virkt. Nógu lengi til að hunsa hraða tilbúningu fats (sjálfgefið 60 s), nógu stutt til að ljúka fljótt þegar vél spretter hurðinni upp."
     }
   },
   "setting_group": {
@@ -1620,6 +1737,7 @@
       "min_active": "Byggt á lægsta virka afli ({min}W) sem mældist í síðustu lotu.",
       "min_duration_ratio": "Haldið eins lágu og hægt er svo að kerfi greinist snemma í lotunni; vissu- og tvíræðnimörkin koma í veg fyrir ótímabærar ákvarðanir.",
       "min_off_gap": "Byggt á {gaps} mældum millibilum milli lota (p05={p05}s). Lágmark tækis: {floor}s.",
+      "min_off_gap_bridge": "Stærðin valin til að brúa lengsta kyrrðartímabilið innan lotu: {span}s + 60s biðminni, úr {spans} brúuðum bilum yfir {cycles} hreinar lotur (helst undir stysta bilinu þínu, {ceiling}s, milli tveggja keyrslna).",
       "min_power": "40% af lægsta virka afli við p05 ({p05}W) yfir {cycles} hreinar lotur, sem heldur slökkviþröskuldinum undir raunverulegri notkun.{excl}",
       "ml_auto_label": "Lægsta vissa sem gæðalíkanið mat samt sem hreint (p10 af {cycles} hreinum lotum = {p10}).",
       "ml_end_repeat": "{false}/{total} lotur ({pct}%) höfðu hlé sem lokagreinirinn gaf einkunnina >50%; krefst {val} staðfestinga á lokum.",
@@ -1636,7 +1754,7 @@
       "thr_batch": "Haldið rétt yfir lægsta virka afli við p05 yfir {cycles} lotur ({p05}W) svo að ræsing náist eins snemma og hægt er og stöðvunarþröskuldurinn haldist undir lægsta gangafli vélarinnar.",
       "tol_per_profile": "p75 af dreifni lengdar á hvert snið yfir {profiles} snið ({cycles} lotur); þröngum sniðum er ekki refsað.",
       "tol_pooled": "Byggt á sameinaðri dreifni lengdar {cycles} nýjustu merktu lota (p95 frávik={dev}).",
-      "watchdog": "Haldið eins lágu og óhætt er (3x p95-uppfærslubilið {p95}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana."
+      "watchdog": "Haldið eins lágu og óhætt er (rétt yfir p95-uppfærslubilinu {p95}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana."
     },
     "exclusions": {
       "summary": "Útilokaði {total} ranggreindar lotur: {parts}.",
@@ -1670,7 +1788,7 @@
     "subtab_phase_catalog": "Áfangaskrá",
     "subtab_profiles": "Snið",
     "maintenance": "Viðhald",
-    "playground": "Leiksvæði",
+    "playground": "Tilraunasvæði",
     "store": "Verslun"
   },
   "tag": {
@@ -1716,6 +1834,10 @@
     "name_required": "Nafn krafist",
     "no_split_found": "Engar aðgerðalausar eyður fundust til að skipta á",
     "panel_settings_saved": "Pallborðsstillingar vistaðar",
+    "pg_preset_loaded": "Forstillingin \"{name}\" var hlaðin",
+    "pg_preset_saved": "Forstillingin \"{name}\" var vistuð",
+    "pg_sugg_loaded": "{n} tillögugildi flutt yfir - keyrðu tilraunasvæðið til að bera saman",
+    "pg_sugg_ml_loaded": "{n} ML-kvarðað gildi flutt yfir - keyrðu tilraunasvæðið til að bera saman",
     "phase_name_required": "Fasaheiti er áskilið",
     "phase_updated": "Áfangi uppfærður",
     "phases_saved": "Áfangar vistaðir",

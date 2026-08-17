@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configuración de WashData",
-        "description": "Configura tu lavadora u otro electrodoméstico.\n\nSe requiere un sensor de potencia.\n\n**A continuación, se te preguntará si deseas crear tu primer perfil.**",
+        "description": "Configura tu lavadora u otro electrodoméstico.\n\nSe requiere un sensor de potencia.\n\nTras la configuración, abre el panel de WashData desde la barra lateral (o ve a [/ha-washdata](/ha-washdata)) para ver los ciclos, ajustar la detección y gestionar los perfiles.",
         "data": {
           "name": "Nombre del dispositivo",
           "device_type": "Tipo de dispositivo",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigurar WashData",
-        "description": "Actualiza el nombre del dispositivo, el tipo de electrodoméstico o el sensor de potencia.",
+        "description": "Actualiza el nombre del dispositivo, el tipo de electrodoméstico o el sensor de potencia.\n\nEl panel de WashData (barra lateral, o [/ha-washdata](/ha-washdata)) es donde se gestionan la detección, los ciclos, los perfiles y las notificaciones.",
         "data": {
           "name": "Nombre del dispositivo",
           "device_type": "Tipo de dispositivo",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "Ajustes de WashData",
-        "description": "Todos los ajustes — detección, coincidencia, temporización, notificaciones, perfiles y ciclos — están disponibles en el panel de WashData. Usa este formulario solo para cambiar el sensor de potencia, el tipo de dispositivo o el umbral en espera.",
+        "description": "Cambia el nombre del dispositivo o su configuración de hardware principal. Todos los ajustes de detección, coincidencia y notificaciones están en el [panel de WashData](/ha-washdata) (también accesible desde la barra lateral).",
         "data": {
           "name": "Nombre del dispositivo",
           "device_type": "Tipo de dispositivo",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: temporizador de {minutes} min",
       "timer_pause_action_title": "Reanudar ciclo",
       "timer_pause_body_suffix": "El ciclo está en pausa. Abre el panel de WashData para reanudarlo.",
+      "unload_dismiss_action_title": "Dejar de recordar",
       "notify_live_waiting_message": "{device}: todavía no se ha reconocido ningún perfil.",
       "vs_typical_longer": "{pct}% más largo de lo habitual",
       "vs_typical_shorter": "{pct}% más corto de lo habitual",

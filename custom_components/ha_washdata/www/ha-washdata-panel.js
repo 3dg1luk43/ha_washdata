@@ -171,6 +171,8 @@ const _SETTINGS_SECTIONS = [
         doc: 'After finishing, hold progress at 100% for this long so Completed is visible on dashboards before resetting to Idle.' },
       { key: 'auto_maintenance', label: 'Auto Maintenance (nightly cleanup)', type: 'checkbox', def: true,
         doc: 'Run nightly housekeeping: rebuild profile envelopes, recompute cycle health, prune debug traces and retain the most recent cycles.' },
+      { key: 'power_profile_interval_min', label: 'Power Profile Interval', unit: 'min', type: 'number', min: 1, def: 15,
+        doc: 'Bucket size for the per-profile power_profile sensor attribute (the flat per-slot average-watts array consumed by external planners such as EMHASS and tibber_prices). Smaller buckets keep short power spikes sharp; larger buckets smooth the shape. Default 15 min. Read-time only; does not affect detection.' },
     ] },
     { sub: 'Debug', fields: [
       { key: 'expose_debug_entities', label: 'Expose Debug Entities', type: 'checkbox',
@@ -190,6 +192,10 @@ const _SETTINGS_SECTIONS = [
       doc: 'Power must fall below this between pulses for anti-wrinkle mode to stay active.' },
     { key: 'anti_wrinkle_idle_timeout', label: 'Max Pulse Gap', unit: 's', type: 'number', step: 30, min: 0, def: 120,
       doc: 'How long the machine may stay quiet between two tumble pulses before anti-wrinkle mode ends. Set it above the longest gap your dryer leaves between pulses, otherwise every later pulse is read as a false start.' },
+  ] },
+  { id: 'dishwasher', label: 'Dishwasher', intro: 'End-of-cycle handling for dishwashers, which typically finish with a long near-silent drying phase before a short final drain.', onlyDeviceTypes: ['dishwasher'], fields: [
+    { key: 'dishwasher_end_spike_quiet_release', label: 'Passive-Dry Quiet Release', unit: 's', type: 'number', step: 60, min: 0, def: 600,
+      doc: 'Once the cycle passes its expected duration, how long the dishwasher must stay quiet (below the Stop Threshold) before WashData stops waiting for a final drain and ends the cycle. Raise it if your machine has a long silent drying phase before a late final drain that is being missed - a wider window lets the learned duration follow seasonal drift (colder inlet water = longer cycles) instead of locking to the old average. It only ever shortens the wait relative to the internal 30-minute end-spike cap, never extends it.' },
   ] },
   { id: 'delay', label: 'Delay Start', intro: 'Delayed-start detection identifies when an appliance is powered but has not yet begun its cycle.', fields: [
     { key: 'delay_start_detect_enabled', label: 'Enable Delay-Start Detection', type: 'checkbox',
@@ -211,6 +217,10 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Door & Pause', fields: [
       { key: 'door_sensor_entity', label: 'Door Sensor Entity', type: 'entity', domain: 'binary_sensor',
         doc: 'Optional door binary sensor. Used to detect when the appliance has been opened/unloaded after a cycle.' },
+      { key: 'door_opens_at_end', label: 'Door Opens Automatically At End', type: 'checkbox',
+        doc: 'For dishwashers that pop the door open at the end of the cycle to dry (AirDry and similar). With this on, a door-open on a running cycle no longer pauses it forever; instead, if the door stays open for the dwell below, WashData treats the cycle as finished. A brief open (adding an item) is ignored. Requires a Door Sensor Entity.' },
+      { key: 'door_end_dwell_seconds', label: 'Door-Open End Dwell', unit: 's', type: 'number', min: 1, def: 60,
+        doc: 'How long the door must stay open before WashData ends the cycle, when "Door Opens Automatically At End" is on. Long enough to ignore quickly adding a dish (default 60 s), short enough to end promptly once the machine pops the door.' },
       { key: 'pause_cuts_power', label: 'Pause Also Cuts Power (via switch)', type: 'checkbox',
         doc: 'When a cycle is paused, also switch off the Switch Entity below. Only for appliances whose plug can safely be cut mid-cycle.' },
       { key: 'switch_entity', label: 'Switch Entity', type: 'entity', domain: 'switch',
@@ -219,6 +229,8 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Unload Reminder', fields: [
       { key: 'notify_unload_delay_minutes', label: 'Unload Nag Delay', unit: 'min', type: 'number', min: 0, def: 60, basic: true,
         doc: 'Minutes after a cycle ends before sending the still-waiting "unload the machine" reminder. Set 0 to disable the reminder.' },
+      { key: 'notify_unload_repeat', label: 'Repeat Until Door Opens', type: 'checkbox',
+        doc: 'Keep re-sending the unload reminder every "Unload Nag Delay" minutes until you open the door or tap "Stop reminding" on the notification. Requires a Door Sensor Entity (the reminder itself does). The dismiss button works on Home Assistant companion-app (mobile) notifications.' },
       { key: 'pump_stuck_duration', label: 'Pump Stuck Duration', unit: 's', type: 'number', min: 0, def: 1800,
         onlyDeviceType: 'pump', doc: 'Seconds a pump may run continuously before it is flagged as possibly stuck (fires the stuck-pump event).' },
     ] },
@@ -247,6 +259,10 @@ const _SETTINGS_SECTIONS = [
         doc: 'If a cycle runs past its estimate by more than this percentage, send an overrun alert.' },
       { key: 'notify_live_chronometer', label: 'Use Live Chronometer', type: 'checkbox',
         doc: 'Show a live-updating countdown timer in the notification (on platforms that support it) instead of a static estimate.' },
+      { key: 'notify_live_sticky', label: 'Keep Live Notification On Tap', type: 'checkbox',
+        doc: 'Android only. Make the live-progress notification persistent (sticky) so tapping it does not dismiss the ongoing thread. Off keeps the default behaviour where a tap dismisses it.' },
+      { key: 'notify_live_click_action', label: 'Live Notification Tap Target', type: 'text', optional: true,
+        doc: 'Android only. Where a tap on the live-progress notification opens (e.g. /lovelace/laundry, or a full URL) instead of the app landing page. Leave blank for the default.' },
       { key: 'notify_timeout_seconds', label: 'Auto-Dismiss After', unit: 's', type: 'number', min: 0, def: 0,
         doc: 'Automatically dismiss the notification after this many seconds (on platforms that support it). 0 keeps it until dismissed manually.' },
     ] },
@@ -468,6 +484,24 @@ const _SETTING_CONFLICTS = [
       profile_match_max_duration_ratio: { msgKey: 'conflict.duration_ratio.max', msgVars: {min: v.profile_match_min_duration_ratio}, msgFb: `Must be greater than Min Duration Ratio (${v.profile_match_min_duration_ratio})`, fixVal: +(v.profile_match_min_duration_ratio * 2.0).toFixed(2) },
     }),
   },
+  {
+    // end_energy_threshold >= stop_threshold_w * off_delay / 3600  (#376)
+    // The energy gate is evaluated over an off_delay-long window, so it implies a
+    // wattage. Below this it forbids what stop_threshold_w (the power gate) allows,
+    // and the cycle can only close through a fallback path (smart termination,
+    // watchdog force-end) — surfacing only as an unexplained late completion.
+    keys: ['end_energy_threshold', 'stop_threshold_w', 'off_delay'],
+    check: v => v.end_energy_threshold != null && v.stop_threshold_w != null && v.off_delay != null
+      && v.off_delay > 0 && v.end_energy_threshold < v.stop_threshold_w * v.off_delay / 3600,
+    fieldErrors: v => ({
+      end_energy_threshold: { msgKey: 'conflict.end_energy.energy', msgVars: {w: v.stop_threshold_w, d: v.off_delay},
+        msgFb: `Too strict for Stop Threshold (${v.stop_threshold_w} W) over Off Delay (${v.off_delay} s); the cycle can only end through a fallback path`,
+        fixVal: Math.ceil(v.stop_threshold_w * v.off_delay / 3600 * 1000) / 1000 },
+      stop_threshold_w: { msgKey: 'conflict.end_energy.stop', msgVars: {e: v.end_energy_threshold, d: v.off_delay},
+        msgFb: `End Energy Threshold (${v.end_energy_threshold} Wh over ${v.off_delay} s) only permits ${+(v.end_energy_threshold * 3600 / v.off_delay).toFixed(2)} W`,
+        fixVal: Math.floor(v.end_energy_threshold * 3600 / v.off_delay * 10) / 10 },
+    }),
+  },
 ];
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
@@ -508,6 +542,7 @@ const _CSS = `
 .wd-gear-btn { background: transparent; border: none; color: inherit; cursor: pointer; padding: 5px; margin-left: 4px; border-radius: var(--wd-radius-md); flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; opacity: .8; }
 .wd-gear-btn:hover { background: rgba(255,255,255,.16); opacity: 1; }
 @media (max-width: 870px) { .wd-burger { display: inline-flex; } }
+.wd-burger.wd-burger--force { display: inline-flex; }
 .wd-header .wd-sub { font-size: .72em; opacity: .75; margin-top: 2px; }
 .wd-header .wd-ts { margin-left: auto; font-size: .7em; opacity: .65; white-space: nowrap; }
 .wd-body { max-width: 1160px; margin: 0 auto; padding: 20px 16px 60px; }
@@ -763,6 +798,8 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 .wd-sug-sep { display: none; }
 .wd-sug-impact { display: none; }
 .wd-sug-use { border: none; background: var(--warning-color, #ff9800); color: var(--wd-white); border-radius: var(--wd-radius-sm); padding: 2px 8px; font-size: .92em; cursor: pointer; flex-shrink: 0; }
+.wd-sug-lock { border: none; background: transparent; color: var(--secondary-text-color); border-radius: var(--wd-radius-sm); padding: 2px 6px; font-size: .92em; cursor: pointer; flex-shrink: 0; opacity: .65; }
+.wd-sug-lock:hover { opacity: 1; background: rgba(255,152,0,.15); }
 .wd-conflict-err { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
 .wd-conflict-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .8em; color: var(--error-color, #b71c1c); padding: 5px 9px; border-left: 3px solid var(--error-color, #b71c1c); background: rgba(183,28,28,.07); border-radius: 0 5px 5px 0; }
 .wd-conflict-fix { border: 1px solid var(--error-color, #b71c1c); background: none; color: var(--error-color, #b71c1c); border-radius: var(--wd-radius-sm); padding: 1px 7px; font-size: .92em; cursor: pointer; white-space: nowrap; flex: none; }
@@ -1099,6 +1136,16 @@ button.wd-profile-card { display: block; }
 .wd-pg-cand-track { flex: 1; height: 7px; background: var(--secondary-background-color); border-radius: var(--wd-radius-sm); overflow: hidden; }
 .wd-pg-cand-fill { height: 100%; border-radius: var(--wd-radius-sm); }
 .wd-pg-cand-pct { flex: 0 0 34px; text-align: right; color: var(--secondary-text-color); }
+/* Playground: settings control panel (live-settings source + named presets) */
+.wd-pg-ctrl { border: 1px solid var(--divider-color, rgba(127,127,127,.25)); border-radius: var(--wd-radius-md, 10px); padding: 8px 10px; margin: 0 0 10px; background: var(--secondary-background-color); }
+.wd-pg-ctrl .wd-btn { white-space: nowrap; }
+.wd-pg-preset-sel { min-width: 150px; max-width: 220px; font-size: .82em; }
+.wd-pg-preset-name { flex: 1 1 150px; min-width: 120px; max-width: 220px; font-size: .82em; }
+/* Per-setting publish arrow. The empty slot keeps every row's value column aligned
+   whether or not that row currently has a publishable change. */
+.wd-pg-pub { width: 20px; height: 20px; flex: 0 0 20px; padding: 0; border: none; border-radius: 5px; cursor: pointer; background: var(--primary-color); color: var(--text-primary-color, #fff); font-size: .8em; line-height: 1; }
+.wd-pg-pub:hover { filter: brightness(1.15); }
+.wd-pg-pub-slot { width: 20px; flex: 0 0 20px; display: inline-block; }
 /* Playground: unified workbench (graph+settings always on top) + "Across your
    cycles" drawer with History/Optimize sub-tabs. */
 .wd-pg-drawer { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--divider-color, rgba(127,127,127,.25)); }
@@ -1479,6 +1526,14 @@ function _field(f, value, extra) {
     sugHtml = `<div class="wd-sug"><span class="wd-sug-chip wd-sug-chip-cal">🤖 ${_esc(t('suggestion.calibrated_label', {}, 'Calibrated'))}</span><span class="wd-sug-val">${_esc(mlVal)}${_u}</span>${useBtn(mlVal)}${r}</div>`;
   }
 
+  // #343: a "mute" button on each suggestion card so the user can tell the
+  // auto-tuner to stop proposing this setting (e.g. a threshold that breaks an
+  // anti-crease-tuned device). Injected once just before the card's closing tag.
+  if (sugHtml && key) {
+    const lockTitle = _esc(t('btn.mute_suggestion', {}, "Stop suggesting this setting"));
+    const lockBtn = `<button type="button" class="wd-sug-lock" data-suglock="${key}" title="${lockTitle}" aria-label="${lockTitle}">🔕</button>`;
+    sugHtml = sugHtml.replace(/<\/div>\s*$/, lockBtn + '</div>');
+  }
   return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${chgDot}${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div>${sugHtml}</div>`;
 }
 
@@ -1710,6 +1765,7 @@ class HaWashdataPanel extends HTMLElement {
     this._profileGroups = { groups: [], suggestions: [], min_cohesion: 0.85 };
     this._profileEnvCache = {};
     this._suggestions = [];
+    this._lockedSuggestions = [];   // #343: setting keys the user muted from auto-tuning
     this._feedbacks = [];
     this._diag = null;
     this._phases = [];
@@ -1808,6 +1864,19 @@ class HaWashdataPanel extends HTMLElement {
     this._pgThreshStart = null;     // null = use live option; number = dragged override (W)
     this._pgThreshStop = null;      // same for stop threshold
     this._pgParamOverrides = {};    // other params: off_delay, min_off_gap, etc.
+    // Settings control panel: the device's LIVE effective values (what the running
+    // detector/matcher actually use, device-type defaults resolved server-side) are
+    // the baseline every field renders against; the three states above are the diff
+    // on top of it. Loaded from get_playground_settings on tab entry.
+    this._pgEffective = null;       // {key: value} live baseline; null = not loaded yet
+    this._pgPublishable = null;     // keys that are real config options (publish allow-list)
+    this._pgPresets = [];           // saved sandbox snapshots [{name, values, ...}]
+    this._pgPresetLimit = 0;        // server-side per-device preset cap
+    this._pgPresetSel = '';         // selected preset name in the dropdown
+    this._pgPresetName = '';        // "save as" name input buffer (survives re-render)
+    this._pgSuggClassic = {};       // classic auto-tuner suggestions {key: value}
+    this._pgSuggMl = null;          // ML-calibrated suggestions {key: value} or null (disabled)
+    this._pgMlSuggEnabled = false;  // ENABLE_ML_SUGGESTIONS server flag
     this._pgView = null;            // {min,max} time-axis zoom window (seconds); null = full
     this._pgHoverT = null;          // hovered time (seconds) for cursor readout; null = none
     this._pgMap = null;             // current time<->x mapping, set by _pgDrawCanvas
@@ -2777,8 +2846,12 @@ class HaWashdataPanel extends HTMLElement {
     this._suggestionsError = false;
     try {
       const res = await this._ws({ type: `${_DOMAIN}/get_suggestions`, entry_id: entryId });
+      if (!this._isActiveEntry(entryId)) return;  // device switched mid-flight
       this._suggestions = res.suggestions || [];
-    } catch (_) { this._suggestionsError = true; this._suggestions = []; }
+      this._lockedSuggestions = res.locked_suggestions || [];
+    } catch (_) {
+      if (this._isActiveEntry(entryId)) { this._suggestionsError = true; this._suggestions = []; }
+    }
   }
 
   async _fetchProfiles(entryId) {
@@ -2840,7 +2913,7 @@ class HaWashdataPanel extends HTMLElement {
     this._settingsChangelog = null; this._settingsChangeByKey = {};
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
-    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = [];
+    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = []; this._lockedSuggestions = [];
     this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._setupStatus = null;       // per-device; re-fetched by _fetchTabData
@@ -2852,6 +2925,10 @@ class HaWashdataPanel extends HTMLElement {
     this._pgCycleId = ''; this._pgProfileName = '';
     this._pgPowerPts = null; this._pgDtwData = null; this._pgEnvData = null;
     this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
+    // Live baseline + presets are per-device; re-fetched by _fetchTabData.
+    this._pgEffective = null; this._pgPublishable = null;
+    this._pgPresets = []; this._pgPresetSel = ''; this._pgPresetName = ''; this._pgPresetLimit = 0;
+    this._pgSuggClassic = {}; this._pgSuggMl = null; this._pgMlSuggEnabled = false;
     this._pgView = null; this._pgHoverT = null; this._pgLoadSeq++;
     this._pgNeedsRestart = false; this._pgLoading = false;
     this._pgDetail = null; this._pgHistory = null; this._pgSweepNew = null;
@@ -3037,6 +3114,11 @@ class HaWashdataPanel extends HTMLElement {
         this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'advanced' && this._panelSubtab === 'ml') this._renderPreservingFormEdits(); });
       } else if (this._tab === 'playground') {
         try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (!this._isActiveEntry(eid)) return; this._opts = r.options || {}; } catch (_) {}
+        // Always open on the integration's CURRENT settings: the backend reads them
+        // back off the live detector/matcher config, so no stale schema default can
+        // leak into the sandbox.
+        await this._pgFetchSettings(eid);
+        if (!this._isActiveEntry(eid)) return;
         await this._fetchCycles(eid);
         if (!this._profiles.length) await this._fetchProfiles(eid);
         // Auto-select most recent cycle on first load. Profile defaults to
@@ -3260,9 +3342,21 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Access / panel-config helpers ───────────────────────────────────────────
 
+  // Apply the user's panel font-size multiplier (#accessibility). All panel sizes
+  // are em-relative and :host has no explicit font-size, so setting the host's
+  // font-size scales the whole panel. Clamped to the same bounds the backend
+  // enforces so a stale/bad value can never break rendering.
+  _applyFontScale(scale) {
+    let s = parseFloat(scale);
+    if (!isFinite(s)) s = 1.0;
+    s = Math.max(0.7, Math.min(2.0, s));
+    this.style.fontSize = (s === 1.0) ? '' : (Math.round(s * 1000) / 10) + '%';
+  }
+
   _applyPanelConfig() {
     const cfg = this._panelCfg;
     if (!cfg) return;
+    this._applyFontScale((cfg.prefs && cfg.prefs.font_scale) || 1.0);
     // lang_override arrives here (not at boot). If the user picked a language we
     // didn't eagerly load, fetch it now and re-render once it lands.
     const override = cfg.prefs && cfg.prefs.lang_override;
@@ -3481,7 +3575,11 @@ class HaWashdataPanel extends HTMLElement {
       <circle cx="12" cy="14" r="2"/>
     </svg>`;
     const ver = this._constants.version;
-    const burger = `<button class="wd-burger" id="wd-burger" aria-label="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}" title="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}">
+    // Force the burger visible whenever HA's sidebar is fully hidden, regardless of
+    // viewport width: on a wide tablet with "Always hide sidebar" the HA header (and
+    // its hamburger) is gone, so this burger is the only way back (#359).
+    const forceBurger = (this._hass && this._hass.dockedSidebar === 'always_hidden') ? ' wd-burger--force' : '';
+    const burger = `<button class="wd-burger${forceBurger}" id="wd-burger" aria-label="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}" title="${_esc(this._t('hdr.toggle_sidebar', {}, 'Toggle Home Assistant sidebar'))}">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
     </button>`;
     return `
@@ -3501,9 +3599,7 @@ class HaWashdataPanel extends HTMLElement {
   _htmlBody() {
     if (!this._devices.length)
       return `<div class="wd-empty"><div class="wd-icon">🧺</div>${this._t('msg.no_devices', {}, 'No WashData devices configured yet.')}</div>`;
-    const mlSugCount = Object.entries(this._mlSettings || {}).filter(([key, mlc]) =>
-      mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, this._opts[key])
-    ).length;
+    const mlSugCount = this._mlSugKeys().size;
     const sugDot = (this._suggestions.length || mlSugCount) ? ' 💡' : '';
     const confIndicator = this._conflictKeysFromOpts().size > 0 ? ' ⚠' : '';
     const pgBusy = this._busy.has('pg-sim') || this._busy.has('pg-sweep');
@@ -3594,9 +3690,7 @@ class HaWashdataPanel extends HTMLElement {
       const n = _confKeys.size, s = n > 1 ? 's' : '';
       attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n, s}, `${n} setting conflict${s}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></button>`);
     }
-    const _mlSugCount = Object.entries(this._mlSettings || {}).filter(([key, mlc]) =>
-      mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, this._opts[key])
-    ).length;
+    const _mlSugCount = this._mlSugKeys().size;
     if ((dev.suggestions_count || _mlSugCount) && this._canEdit()) {
       const total = (dev.suggestions_count || 0) + _mlSugCount;
       const parts = [];
@@ -3915,8 +4009,12 @@ class HaWashdataPanel extends HTMLElement {
     const isReviewed = c => { const m = mlOf(c); return !!(m && m.ml_review && m.ml_review.reviewed_at); };
     const isGolden = c => { const m = mlOf(c); return !!(m && m.ml_review && m.ml_review.golden); };
     const needsReview = c => {
-      if (isReviewed(c)) return false;
+      // Unresolved pending feedback ALWAYS needs review, even if an ML quality
+      // review was already saved: the two are separate, and the header counter
+      // counts pending feedback, so short-circuiting on reviewed_at here made the
+      // counter and the list disagree (#355). Pending feedback wins.
       if (fbIds.has(c.id)) return true;
+      if (isReviewed(c)) return false;
       const m = mlOf(c);
       const lbl = m && m.ml_quality_label;
       return ['uncertain', 'review'].includes(lbl) || ['force_stopped', 'interrupted'].includes(c.status);
@@ -3960,8 +4058,10 @@ class HaWashdataPanel extends HTMLElement {
       : '';
     const reviewBadge = c => {
       if (isGolden(c)) return ' <span title="' + _esc(this._t('badge.golden_cycle', {}, 'Recorded reference cycle')) + '" style="color:var(--warning-color,#ff9800)">⭐</span>';
-      if (isReviewed(c)) return ' <span title="' + _esc(this._t('badge.reviewed', {}, 'Reviewed')) + '" style="color:var(--success-color,#4caf50)">✓</span>';
+      // Pending feedback wins over the reviewed check, matching needsReview (#355):
+      // a reviewed cycle with unresolved feedback shows the feedback badge, not ✓.
       if (fbIds.has(c.id)) return ' <span title="' + _esc(this._t('badge.feedback_requested', {}, 'Feedback requested')) + '" style="color:var(--info-color,#2196f3)">💬</span>';
+      if (isReviewed(c)) return ' <span title="' + _esc(this._t('badge.reviewed', {}, 'Reviewed')) + '" style="color:var(--success-color,#4caf50)">✓</span>';
       if (needsReview(c)) return ' <span title="' + _esc(this._t('badge.needs_review', {}, 'Needs review')) + '" style="color:var(--error-color,#f44336)">●</span>';
       return '';
     };
@@ -4356,7 +4456,12 @@ class HaWashdataPanel extends HTMLElement {
     const level = this._settingsLevel();
     const basicMode = level === 'basic';
 
-    const sugKeys = new Set((this._suggestions || []).map(s => s.key));
+    const classicSugKeys = new Set((this._suggestions || []).map(s => s.key));
+    // Calibrated (ML) recommendations that still differ from the effective value
+    // count as tuning suggestions too, so the section dots + banner surface them,
+    // mirroring the tab bulb and the "Show only" filter, which already include ML.
+    const mlSugKeys = this._mlSugKeys(o);
+    const sugKeys = new Set([...classicSugKeys, ...mlSugKeys]);
     const secHasSug = (sec) => {
       const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
       return fields.some(f => sugKeys.has(f.key));
@@ -4407,18 +4512,26 @@ class HaWashdataPanel extends HTMLElement {
         <span>⚠ ${this._t('conflict.settings_banner', {n: confCount, s}, `${confCount} setting conflict${s} — check the highlighted sections and fix before saving.`)}</span>
         <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="conf-goto-section">${this._t('conflict.settings_banner_btn', {}, 'Go to first')}</button>
       </div>` : '';
-    const sugCount = this._suggestions.length;
+    // Combined tuning-suggestion count: classic (observed) + Calibrated (ML) keys
+    // not already covered by a classic suggestion. Apply-all / Dismiss act on the
+    // classic engine only, so they render solely when a classic suggestion exists;
+    // Calibrated recommendations are applied individually via their "Use" button.
+    const classicSugCount = this._suggestions.length;
+    const mlOnlyCount = [...mlSugKeys].filter(k => !classicSugKeys.has(k)).length;
+    const sugCount = classicSugCount + mlOnlyCount;
     const sugOnly = this._settingsSugOnly && !this._settingsSearch;
+    const applyAllBtn = classicSugCount ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">${this._t('btn.apply_all', {}, 'Apply all')}</button>` : '';
+    const dismissBtn = classicSugCount ? `<button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="sug-dismiss">${this._t('btn.dismiss', {}, 'Dismiss')}</button>` : '';
     const banner = sugCount ? (sugOnly ? `
       <div class="wd-sug-banner">
         <span>💡 ${this._t('msg.showing_suggestions', {count: sugCount}, `Showing ${sugCount} setting${sugCount > 1 ? 's' : ''} with suggestions.`)} <span style="text-decoration:underline;cursor:pointer" data-action="sug-show-all">${this._t('msg.show_all_settings', {}, 'Show all settings')}</span>.</span>
-        <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">${this._t('btn.apply_all', {}, 'Apply all')}</button>
+        ${applyAllBtn}
       </div>` : `
       <div class="wd-sug-banner">
         <span>💡 ${this._t('msg.tuning_suggestions_available', {count: sugCount}, `${sugCount} tuning suggestion${sugCount > 1 ? 's' : ''} available from observed cycles. They appear beside the relevant fields.`)}</span>
         <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="goto-suggestions">${this._t('btn.show_only', {}, 'Show only')}</button>
-        <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">${this._t('btn.apply_all', {}, 'Apply all')}</button>
-        <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="sug-dismiss">${this._t('btn.dismiss', {}, 'Dismiss')}</button>
+        ${applyAllBtn}
+        ${dismissBtn}
       </div>`) : '';
 
     const analyzeBusy = this._busy.has('sug-analyze');
@@ -4430,13 +4543,22 @@ class HaWashdataPanel extends HTMLElement {
 
     const formContent = q ? this._htmlSettingsSearch(o, q) : (sugOnly ? this._htmlSettingsSugOnly(o) : this._htmlSettingsSection(o));
 
+    // #343: muted-suggestions notice + reset. Muted keys have no visible card, so
+    // this is the only place the user can bring them back.
+    const mutedCount = (this._lockedSuggestions || []).length;
+    const mutedBanner = mutedCount ? `
+      <div class="wd-sug-banner" style="opacity:.92">
+        <span>🔕 ${this._t('msg.n_suggestions_muted', {count: mutedCount}, `${mutedCount} suggestion${mutedCount > 1 ? 's' : ''} muted; the auto-tuner will not propose these.`)}</span>
+        <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="sug-unmute-all">${this._t('btn.reset_muted', {}, 'Reset muted')}</button>
+      </div>` : '';
+
     return `
       ${suggestionsErrorBanner}
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
         <div class="wd-card-title" style="margin:0">${this._t('tab.settings', {}, 'Settings')}${this._mlSettingsLoading ? ` <span style="font-size:.6em;color:var(--secondary-text-color);font-weight:400">${this._t('msg.ml_loading', {}, 'loading ML…')}</span>` : ''}</div>
         ${analyzeBtn}
       </div>
-      ${confBanner}${banner}${basicNote}
+      ${confBanner}${banner}${mutedBanner}${basicNote}
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
         ${searchInput}
         <div class="wd-section-nav" style="flex:1;margin:0;margin-bottom:0">${nav}</div>
@@ -4531,8 +4653,13 @@ class HaWashdataPanel extends HTMLElement {
       extra.suggestion = { suggested: sug.suggested, current: sug.current, reason: sug.reason, reason_key: sug.reason_key, reason_params: rp };
     }
 
+    // A muted key (#343) must hide its Calibrated (ML) recommendation too - the
+    // mute is per-setting, not per-engine, so an ML-only suggestion would
+    // otherwise stay visible (and counted) after the user muted it.
     const mlc = (this._mlSettings || {})[f.key];
-    if (mlc && mlc.ml_value != null) extra.mlSuggestion = { value: mlc.ml_value, reason: mlc.ml_reason, reason_key: mlc.ml_reason_key, reason_params: mlc.ml_reason_params };
+    if (mlc && mlc.ml_value != null && !(this._lockedSuggestions || []).includes(f.key)) {
+      extra.mlSuggestion = { value: mlc.ml_value, reason: mlc.ml_reason, reason_key: mlc.ml_reason_key, reason_params: mlc.ml_reason_params };
+    }
 
     extra.useBtnLabel = this._t('btn.use', {}, 'Use');
     extra.t = this._t.bind(this);
@@ -4986,16 +5113,29 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // Cross-section view showing only the fields that have active suggestions.
+  // Setting keys with a Calibrated (ML) recommendation that still differs from the
+  // effective current value (staged edit if present, else the saved option). Shared
+  // by the settings banner, section dots, tab bulb, and the "Show only" filter so
+  // Calibrated suggestions surface everywhere classic (observed) suggestions do.
+  _mlSugKeys(eff) {
+    const cur = eff || Object.assign({}, this._opts, this._pendingSettings || {});
+    // Muted keys (#343) are excluded so the banner count, section dots, tab bulb
+    // and the "Show only" filter all follow the mute state the same way the
+    // classic suggestions do (which are dropped from this._suggestions on mute).
+    const locked = new Set(this._lockedSuggestions || []);
+    const keys = new Set();
+    for (const [key, mlc] of Object.entries(this._mlSettings || {})) {
+      if (locked.has(key)) continue;
+      if (mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, cur[key])) keys.add(key);
+    }
+    return keys;
+  }
+
   _htmlSettingsSugOnly(o) {
     const sugKeys = new Set((this._suggestions || []).map(s => s.key));
-    // Include ML-recommended settings (same key shape used by the sug-count badge)
-    // so the "Show only" filter surfaces ML-only recommendations too.
-    for (const [key, mlc] of Object.entries(this._mlSettings || {})) {
-      // Compare against the effective current form value (staged edit if present,
-      // else the saved option) so the filter reflects what the user has staged.
-      const cur = (this._pendingSettings && key in this._pendingSettings) ? this._pendingSettings[key] : this._opts[key];
-      if (mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, cur)) sugKeys.add(key);
-    }
+    // Include Calibrated (ML) recommendations so the "Show only" filter surfaces
+    // ML-only recommendations too (same set the banner + section dots use).
+    for (const k of this._mlSugKeys(o)) sugKeys.add(k);
     if (!sugKeys.size) return `<p class="wd-info" style="padding:12px">${this._t('msg.no_suggestions', {}, 'No active suggestions.')}</p>`;
     const currentDeviceType = (this._opts && this._opts.device_type) || '';
     const sections = _SETTINGS_SECTIONS.filter(s => {
@@ -5232,6 +5372,7 @@ class HaWashdataPanel extends HTMLElement {
       ['anti_wrinkle_max_duration','Max Anti-Wrinkle Duration','s', 'A pulse longer than this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_exit_power', 'Anti-Wrinkle Exit Power','W', 'Power must fall below this between pulses for anti-wrinkle to stay active', 'advanced'],
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
+      ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released', 'advanced'],
       ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
       ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
       ['corr_weight',      'Correlation Weight', '', 'Stage 2: balance between curve shape (correlation) and power level (MAE); default 0.45', 'matching'],
@@ -5248,11 +5389,19 @@ class HaWashdataPanel extends HTMLElement {
     ];
   }
 
-  // Resolve a pre-fill value for an override field: staged override → live option
-  // → field default (settings schema) → matcher constant default → ''.
+  // Resolve a pre-fill value for an override field: staged override → the live
+  // effective value from the backend → stored option → field default (settings
+  // schema) → matcher constant default → ''.
+  //
+  // The effective value comes first because it is the ONLY source that resolves
+  // device-type defaults (e.g. a dishwasher's min_off_gap) the way the running
+  // integration does; the option/schema fallbacks below it only matter on an older
+  // backend that has no get_playground_settings command.
   _pgFieldVal(key, store) {
     const s = store || {};
     if (s[key] !== undefined) return s[key];
+    const eff = this._pgEffective || {};
+    if (eff[key] !== undefined && eff[key] !== null) return eff[key];
     const o = this._opts || {};
     if (o[key] !== undefined && o[key] !== null) return o[key];
     const f = _FIELD_BY_KEY[key] || {};
@@ -5264,6 +5413,277 @@ class HaWashdataPanel extends HTMLElement {
     if (be[key] !== undefined) return be[key];
     if (_PG_MATCH_DEFAULTS[key] !== undefined) return _PG_MATCH_DEFAULTS[key];
     return '';
+  }
+
+  // ── Playground settings control panel ───────────────────────────────────────
+  // Load live → edit in the sandbox → save/load a named preset → publish single
+  // values back. The staged-override maps stay the single source of "what the
+  // user changed"; this block only decides what they are measured against.
+
+  // Fetch the device's live effective settings + its saved presets. Tolerant of an
+  // older backend (command unknown): the field pre-fill silently falls back to the
+  // stored-option chain in _pgFieldVal.
+  async _pgFetchSettings(entryId) {
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/get_playground_settings`, entry_id: entryId });
+      if (!this._isActiveEntry(entryId)) return;
+      this._pgEffective = r.effective || {};
+      this._pgPublishable = Array.isArray(r.publishable) ? r.publishable : null;
+      this._pgPresets = Array.isArray(r.presets) ? r.presets : [];
+      this._pgPresetLimit = r.preset_limit || 0;
+      if (this._pgPresetSel && !this._pgPresets.some(p => p.name === this._pgPresetSel)) this._pgPresetSel = '';
+      this._pgSuggClassic = (r.classic_suggestions && typeof r.classic_suggestions === 'object') ? r.classic_suggestions : {};
+      this._pgSuggMl = (r.ml_suggestions && typeof r.ml_suggestions === 'object') ? r.ml_suggestions : null;
+      this._pgMlSuggEnabled = !!r.ml_suggestions_enabled;
+    } catch (e) {
+      if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
+    }
+  }
+
+  // Every value the control panel currently shows (live baseline + staged edits).
+  // This is what a "save preset" snapshots, so a preset is a complete setup rather
+  // than a sparse diff that would mean something different on another baseline.
+  _pgCurrentValues() {
+    const out = {};
+    for (const [key] of this._pgOverrideFields()) {
+      const v = this._pgFieldVal(key, {});
+      if (v !== '' && v !== null && v !== undefined) out[key] = v;
+    }
+    if (this._pgThreshStart != null) out.start_threshold_w = this._pgThreshStart;
+    if (this._pgThreshStop != null) out.stop_threshold_w = this._pgThreshStop;
+    for (const [k, v] of Object.entries(this._pgParamOverrides || {})) out[k] = v;
+    return out;
+  }
+
+  // Staged value for one key, or undefined when the field is at the live baseline.
+  _pgStagedVal(key) {
+    if (key === 'start_threshold_w') return this._pgThreshStart ?? undefined;
+    if (key === 'stop_threshold_w') return this._pgThreshStop ?? undefined;
+    return this._pgParamOverrides[key];
+  }
+
+  _pgSetStaged(key, val) {
+    if (key === 'start_threshold_w') this._pgThreshStart = val;
+    else if (key === 'stop_threshold_w') this._pgThreshStop = val;
+    else this._pgParamOverrides[key] = val;
+  }
+
+  _pgClearStaged(key) {
+    if (key === 'start_threshold_w') this._pgThreshStart = null;
+    else if (key === 'stop_threshold_w') this._pgThreshStop = null;
+    else delete this._pgParamOverrides[key];
+  }
+
+  // Keys the user changed away from the live baseline (a staged value equal to the
+  // live one is not a change and is never published).
+  _pgChangedKeys() {
+    const live = this._pgEffective || {};
+    const keys = [];
+    for (const [key] of this._pgOverrideFields()) {
+      const staged = this._pgStagedVal(key);
+      if (staged === undefined || staged === null) continue;
+      const base = live[key];
+      if (base !== undefined && base !== null && this._pgSameVal(staged, base)) continue;
+      keys.push(key);
+    }
+    return keys;
+  }
+
+  // Loose numeric/bool equality: input fields yield strings and floats can carry
+  // representation noise, so compare on value, not on type.
+  _pgSameVal(a, b) {
+    if (typeof a === 'boolean' || typeof b === 'boolean') return !!a === !!b;
+    const na = parseFloat(a), nb = parseFloat(b);
+    if (!isNaN(na) && !isNaN(nb)) return Math.abs(na - nb) < 1e-9;
+    return String(a) === String(b);
+  }
+
+  // Can this key be written back to the live config? The backend ships the
+  // allow-list (real CONF_* options only); the settings-schema membership test is
+  // the offline fallback. The Stage 2-4 matcher knobs are sandbox-only constants
+  // with no option behind them, so they are never publishable.
+  _pgIsPublishable(key) {
+    if (Array.isArray(this._pgPublishable)) return this._pgPublishable.includes(key);
+    return !!_FIELD_BY_KEY[key];
+  }
+
+  _htmlPgControlPanel() {
+    const changed = this._pgChangedKeys();
+    const canEdit = this._canEdit();
+    const loaded = !!this._pgEffective;
+    const publishable = changed.filter(k => this._pgIsPublishable(k));
+
+    const status = !loaded
+      ? `<span style="color:var(--secondary-text-color)">${this._t('msg.pg_live_unavailable', {}, 'Live settings unavailable — showing defaults.')}</span>`
+      : (changed.length
+        ? `<span style="color:var(--warning-color,#ff9800);font-weight:600">${this._t('msg.pg_n_changed', {n: changed.length}, changed.length + ' changed vs live settings')}</span>`
+        : `<span style="color:var(--success-color,#4caf50)">✓ ${this._t('msg.pg_matches_live', {}, 'Matches live settings')}</span>`);
+
+    const presetOpts = `<option value="">${_esc(this._t('lbl.pg_preset_none', {}, 'Select a preset…'))}</option>`
+      + (this._pgPresets || []).map(p => `<option value="${_esc(p.name)}" ${this._pgPresetSel === p.name ? 'selected' : ''}>${_esc(p.name)}</option>`).join('');
+    const hasSel = !!this._pgPresetSel;
+    const atLimit = this._pgPresetLimit > 0 && (this._pgPresets || []).length >= this._pgPresetLimit
+      && !(this._pgPresets || []).some(p => p.name === (this._pgPresetName || '').trim());
+
+    const presetRow = `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      <select id="wd-pg-preset-sel" class="wd-pg-preset-sel" aria-label="${_esc(this._t('lbl.pg_preset', {}, 'Playground preset'))}">${presetOpts}</select>
+      <button class="wd-btn wd-btn-sm" data-action="pg-preset-load" ${hasSel ? '' : 'disabled'} title="${_esc(this._t('btn.pg_preset_load_tip', {}, 'Replace the Playground values with this preset (live settings are untouched)'))}">${this._t('btn.pg_preset_load', {}, 'Load preset')}</button>
+      ${canEdit ? `<button class="wd-btn wd-btn-sm wd-btn-danger" data-action="pg-preset-delete" ${hasSel ? '' : 'disabled'} aria-label="${_esc(this._t('btn.pg_preset_delete', {}, 'Delete preset'))}" title="${_esc(this._t('btn.pg_preset_delete', {}, 'Delete preset'))}">🗑</button>` : ''}
+    </div>`;
+
+    const saveRow = canEdit ? `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      <input id="wd-pg-preset-name" type="text" class="wd-pg-preset-name" maxlength="60" value="${_esc(this._pgPresetName || '')}" placeholder="${_esc(this._t('lbl.pg_preset_name', {}, 'New preset name'))}" aria-label="${_esc(this._t('lbl.pg_preset_name', {}, 'New preset name'))}">
+      <button class="wd-btn wd-btn-sm" data-action="pg-preset-save" ${(this._pgPresetName || '').trim() && !atLimit ? '' : 'disabled'} title="${_esc(this._t('btn.pg_preset_save_tip', {}, 'Save every value below as a named preset for this device'))}">${this._t('btn.pg_preset_save', {}, 'Save as preset')}</button>
+      <span id="wd-pg-preset-limit-note" style="font-size:.72em;color:var(--warning-color,#ff9800)${atLimit ? '' : ';display:none'}">${this._t('msg.pg_preset_limit', {n: this._pgPresetLimit}, 'Preset limit reached (' + this._pgPresetLimit + ')')}</span>
+    </div>` : '';
+
+    const publishBtn = (canEdit && publishable.length)
+      ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-apply-settings" title="${_esc(this._t('btn.pg_apply_to_settings_tip', {}, 'Copy the values you edited here into this device\'s live settings'))}">${this._t('btn.pg_publish_all', {n: publishable.length}, 'Publish ' + publishable.length + ' to integration')}</button>`
+      : '';
+
+    const suggClassicCount = Object.keys(this._pgSuggClassic || {}).length;
+    const suggMlCount = Object.keys(this._pgSuggMl || {}).length;
+    const suggClassicBtn = suggClassicCount > 0
+      ? `<button class="wd-btn wd-btn-sm" data-action="pg-load-suggested" title="${_esc(this._t('btn.pg_load_suggested_tip', {}, 'Stage the auto-tuner\'s current suggestions as Playground overrides'))}">↓ ${this._t('btn.pg_load_suggested', {n: suggClassicCount}, 'Load suggested (' + suggClassicCount + ')')}</button>`
+      : '';
+    const suggMlBtn = (this._pgMlSuggEnabled && suggMlCount > 0)
+      ? `<button class="wd-btn wd-btn-sm" data-action="pg-load-calibrated" title="${_esc(this._t('btn.pg_load_calibrated_tip', {}, 'Stage ML-calibrated suggestions as Playground overrides'))}">↓ ${this._t('btn.pg_load_calibrated', {n: suggMlCount}, 'Load Calibrated (ML) (' + suggMlCount + ')')}</button>`
+      : '';
+
+    return `<div class="wd-pg-ctrl">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="wd-subhead" style="margin:0">${this._t('hdr.pg_settings_source', {}, 'Settings source')}</span>
+        <span style="font-size:.75em">${status}</span>
+      </div>
+      <p class="wd-info" style="margin:4px 0 0;font-size:.72em">${this._t('msg.pg_ctrl_intro', {}, 'Values start from this device\'s live integration settings. Edits stay in the Playground until you publish them.')}</p>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
+        <button class="wd-btn wd-btn-sm" data-action="pg-load-live" title="${_esc(this._t('btn.pg_load_live_tip', {}, 'Re-read the integration\'s current settings and drop every Playground edit'))}">⟳ ${this._t('btn.pg_load_live', {}, 'Load live settings')}</button>
+        ${suggClassicBtn}${suggMlBtn}
+        ${publishBtn}
+      </div>
+      ${presetRow}
+      ${saveRow}
+    </div>`;
+  }
+
+  // Replace the sandbox values with a preset: stage only what differs from the live
+  // baseline, so the graph's before/after diff keeps meaning "vs the integration".
+  _pgApplyPresetValues(values) {
+    this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
+    const live = this._pgEffective || {};
+    for (const [key, val] of Object.entries(values || {})) {
+      if (val === null || val === undefined) continue;
+      const base = live[key];
+      if (base !== undefined && base !== null && this._pgSameVal(val, base)) continue;
+      this._pgSetStaged(key, val);
+    }
+  }
+
+  async _pgSavePreset() {
+    const dev = this._devices[this._selIdx];
+    const name = (this._pgPresetName || '').trim();
+    if (!dev || !this._canEdit() || !name) return;
+    if ((this._pgPresets || []).some(p => p.name === name)
+      && !confirm(this._t('msg.pg_preset_overwrite', {name}, `Overwrite the preset "${name}"?`))) return;
+    await this._busyRun('pg-preset-save', async () => {
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/save_playground_preset`, entry_id: dev.entry_id, name, values: this._pgCurrentValues() });
+        if (!this._isActiveEntry(dev.entry_id)) return;
+        this._pgPresets = Array.isArray(r.presets) ? r.presets : this._pgPresets;
+        this._pgPresetSel = name;
+        this._pgPresetName = '';
+        this._showToast(this._t('toast.pg_preset_saved', {name}, `Preset "${name}" saved`));
+      } catch (e) {
+        this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
+      }
+    });
+    this._render();
+  }
+
+  async _pgDeletePreset() {
+    const dev = this._devices[this._selIdx];
+    const name = this._pgPresetSel;
+    if (!dev || !this._canEdit() || !name) return;
+    if (!confirm(this._t('msg.pg_preset_delete_confirm', {name}, `Delete the preset "${name}"?`))) return;
+    await this._busyRun('pg-preset-delete', async () => {
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/delete_playground_preset`, entry_id: dev.entry_id, name });
+        if (!this._isActiveEntry(dev.entry_id)) return;
+        this._pgPresets = Array.isArray(r.presets) ? r.presets : (this._pgPresets || []).filter(p => p.name !== name);
+        this._pgPresetSel = '';
+      } catch (e) {
+        this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      }
+    });
+    this._render();
+  }
+
+  // Re-read the integration's settings and discard every sandbox edit.
+  async _pgLoadLive() {
+    const dev = this._devices[this._selIdx];
+    if (!dev) return;
+    const changed = this._pgChangedKeys();
+    if (changed.length && !confirm(this._t('msg.pg_load_live_confirm', {n: changed.length}, `Discard ${changed.length} Playground edit(s) and reload the integration's current settings?`))) return;
+    await this._busyRun('pg-load-live', async () => {
+      this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
+      await this._pgFetchSettings(dev.entry_id);
+    });
+    this._render();
+    requestAnimationFrame(() => this._pgDrawCanvas());
+  }
+
+  // Stage suggested values as Playground overrides (additive merge - does not
+  // reset existing edits, unlike _pgApplyPresetValues which does a full replace).
+  _pgLoadSuggested(source) {
+    const vals = source === 'ml' ? (this._pgSuggMl || {}) : (this._pgSuggClassic || {});
+    const live = this._pgEffective || {};
+    let staged = 0;
+    for (const [key, val] of Object.entries(vals)) {
+      if (val === null || val === undefined) continue;
+      // Skip values already at the live baseline — staging them would show as a
+      // "change" in the diff view but produce no actual difference in simulation.
+      const base = live[key];
+      if (base !== undefined && base !== null && this._pgSameVal(val, base)) continue;
+      this._pgSetStaged(key, val);
+      staged++;
+    }
+    if (staged === 0) {
+      this._showToast(this._t('msg.pg_sugg_none', {}, 'All suggestions already match the current settings'));
+    } else {
+      const msgKey = source === 'ml' ? 'toast.pg_sugg_ml_loaded' : 'toast.pg_sugg_loaded';
+      const fallback = source === 'ml'
+        ? `Staged ${staged} ML-calibrated value(s) - run the Playground to compare`
+        : `Staged ${staged} suggested value(s) - run the Playground to compare`;
+      this._showToast(this._t(msgKey, {n: staged}, fallback));
+    }
+    this._render();
+    requestAnimationFrame(() => this._pgDrawCanvas());
+  }
+
+  // Publish exactly one edited value into the device's live settings.
+  async _pgPublishOne(key) {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._canEdit() || !key || !this._pgIsPublishable(key)) return;
+    const val = this._pgStagedVal(key);
+    if (val === undefined || val === null) return;
+    const lbl = this._t('setting.' + key + '.label', {}, key);
+    if (!confirm(this._t('msg.pg_publish_one_confirm', {label: lbl, value: val}, `Save ${lbl} = ${val} to this device's settings?`))) return;
+    await this._busyRun('pg-publish-' + key, async () => {
+      try {
+        await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { [key]: val } });
+        if (!this._isActiveEntry(dev.entry_id)) return;
+        this._opts = { ...this._opts, [key]: val };
+        // The published value IS the live baseline now: fold it into the effective
+        // map and drop the staged edit, so the field reads "matches live" without
+        // waiting for the entry reload to come back around.
+        if (this._pgEffective) this._pgEffective = { ...this._pgEffective, [key]: val };
+        this._pgClearStaged(key);
+        this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
+      } catch (e) {
+        this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
+      }
+    });
+    this._render();
   }
 
   _htmlPlayground() {
@@ -5391,6 +5811,15 @@ class HaWashdataPanel extends HTMLElement {
         </div>`;
         lastGroup = group;
       }
+      // Per-setting publish: only for keys that are real integration options AND
+      // only once this field actually differs from the live value. Sandbox-only
+      // matcher knobs never get one (there is no option to write them to).
+      const staged = this._pgStagedVal(key);
+      const isChanged = staged !== undefined && staged !== null
+        && !(liveVal !== '' && liveVal !== null && liveVal !== undefined && this._pgSameVal(staged, liveVal));
+      const pubBtn = (this._canEdit() && isChanged && this._pgIsPublishable(key))
+        ? `<button class="wd-pg-pub" data-action="pg-publish-one" data-pgkey="${_esc(key)}" aria-label="${_esc(this._t('btn.pg_publish_one', {label: lbl}, 'Publish ' + lbl + ' to the integration'))}" title="${_esc(this._t('btn.pg_publish_one', {label: lbl}, 'Publish ' + lbl + ' to the integration'))}">↑</button>`
+        : `<span class="wd-pg-pub-slot" aria-hidden="true"></span>`;
       return `${header}<div style="display:flex;align-items:flex-start;gap:6px;margin:0 0 6px 11px">
         <div style="flex:1;min-width:0">
           <div style="font-size:.82em;font-weight:600;margin-bottom:1px">${_esc(lbl)}${isDrag ? ` <span style="color:${gc};font-size:.85em" title="${_esc(this._t('lbl.pg_drag_hint', {}, 'Drag line on graph'))}">↕</span>` : ''}</div>
@@ -5401,14 +5830,10 @@ class HaWashdataPanel extends HTMLElement {
             ? `<input class="wd-pg-param-chk" type="checkbox" data-pgkey="${_esc(key)}" data-pgtype="bool" aria-label="${_esc(lbl)}" ${curVal ? 'checked' : ''} style="width:18px;height:18px;margin:1px 27px 0 27px">`
             : `<input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" aria-label="${_esc(lbl)}" style="width:72px">`}
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
+          ${pubBtn}
         </div>
       </div>`;
     }).join('');
-    const hasOverrides = Object.keys(this._pgParamOverrides || {}).length > 0
-      || this._pgThreshStart != null || this._pgThreshStop != null;
-    const applyBtn = (this._canEdit() && hasOverrides)
-      ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-apply-settings" title="${_esc(this._t('btn.pg_apply_to_settings_tip', {}, 'Copy the values you edited here into this device\'s live settings'))}">${this._t('btn.pg_apply_to_settings', {}, 'Save to settings')}</button>`
-      : '';
     const stressGc = '#c0392b';
     const stressHeader = `<div style="display:flex;align-items:center;gap:8px;margin:12px 0 5px">
       <div style="width:3px;height:14px;border-radius:2px;background:${stressGc};flex-shrink:0"></div>
@@ -5436,9 +5861,9 @@ class HaWashdataPanel extends HTMLElement {
     const stressGroup = `${stressHeader}${stressToggle}${stressIdleField}`;
     return `<div class="wd-pg-params">
       <div class="wd-subhead" style="margin:0 0 6px">${this._t('hdr.pg_detection_params', {}, 'Detection settings')}</div>
+      ${this._htmlPgControlPanel()}
       ${paramRows}${stressGroup}
       <div style="display:flex;gap:6px;margin:8px 0 4px;align-items:center;flex-wrap:wrap">
-        ${applyBtn}
         <button class="wd-btn wd-btn-sm" data-action="pg-reset-params">${this._t('btn.reset', {}, 'Reset')}</button>
         ${this._pgDetailBusy ? `<span class="wd-spin" style="align-self:center"></span>` : ''}
       </div>
@@ -5709,15 +6134,20 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // Transfer everything the user edited in the Playground into the device's live
-  // settings in one click, so they don't retype it in the Settings tab. Every
-  // override key is a real settable option (that is why the matching group is
-  // limited to the two duration-ratio settings), so this is a plain set_options.
+  // settings in one click, so they don't retype it in the Settings tab.
+  //
+  // Only PUBLISHABLE keys go out: the Stage 2-4 matcher knobs in the params list
+  // are sandbox-only scoring constants with no config option behind them, so
+  // writing them would leave dead keys in entry.options that nothing ever reads.
+  // Values already equal to the live setting are skipped as well.
   async _pgApplyToSettings() {
     const dev = this._devices[this._selIdx];
     if (!dev || !this._canEdit()) return;
-    const opts = { ...this._pgParamOverrides };
-    if (this._pgThreshStart != null) opts.start_threshold_w = this._pgThreshStart;
-    if (this._pgThreshStop != null) opts.stop_threshold_w = this._pgThreshStop;
+    const opts = {};
+    for (const key of this._pgChangedKeys()) {
+      if (!this._pgIsPublishable(key)) continue;
+      opts[key] = this._pgStagedVal(key);
+    }
     const keys = Object.keys(opts);
     if (!keys.length) return;
     const labels = keys.map(k => this._t('setting.' + k + '.label', {}, k)).join(', ');
@@ -5725,9 +6155,13 @@ class HaWashdataPanel extends HTMLElement {
     await this._busyRun('pg-apply-settings', async () => {
       try {
         await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: opts });
+        if (!this._isActiveEntry(dev.entry_id)) return;
         this._opts = { ...this._opts, ...opts };
-        // Clear the staged overrides: they are the live baseline now.
-        this._pgParamOverrides = {}; this._pgThreshStart = null; this._pgThreshStop = null;
+        // The published values ARE the live baseline now; clear only those staged
+        // edits. Sandbox-only matcher edits are deliberately left in place - they
+        // were not published, so dropping them would lose the user's tuning.
+        if (this._pgEffective) this._pgEffective = { ...this._pgEffective, ...opts };
+        for (const key of keys) this._pgClearStaged(key);
         this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
       } catch (e) {
         this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
@@ -6462,7 +6896,9 @@ class HaWashdataPanel extends HTMLElement {
 
   _pgUpdateParamInput(key, val) {
     const sr = this.shadowRoot;
-    const inp = sr && sr.querySelector(`[data-pgkey="${key}"]`);
+    // input[...] specifically: the publish button in the same row also carries
+    // data-pgkey, and must never be mistaken for the value field.
+    const inp = sr && sr.querySelector(`input[data-pgkey="${key}"]`);
     if (!inp) return;
     if (inp.dataset.pgtype === 'bool') inp.checked = !!val;
     else inp.value = typeof val === 'number' ? Math.round(val) : val;
@@ -6770,6 +7206,14 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-field"><label>${this._t('lbl.default_tab', {}, 'Default tab when opening the panel')}</label><select id="wd-pref-tab">${opts}</select></div>
         <div class="wd-field"><label>${this._t('lbl.cycle_date_display', {}, 'Cycle date display')}</label><select id="wd-pref-datefmt">${dateOptHtml}</select></div>
         <div class="wd-field"><label>${this._t('lbl.panel_language', {}, 'Panel language')}</label><select id="wd-pref-lang">${langOpts}</select></div>
+      </div>
+      <div class="wd-field" style="margin-top:8px">
+        <label>${this._t('lbl.font_size', {}, 'Panel font size')}</label>
+        <div style="display:flex;align-items:center;gap:12px">
+          <input type="range" id="wd-pref-fontscale" min="0.85" max="1.5" step="0.05" value="${cur.font_scale || 1}" style="flex:1" aria-label="${_esc(this._t('lbl.font_size', {}, 'Panel font size'))}">
+          <span id="wd-pref-fontscale-val" style="min-width:3.2em;text-align:right;font-variant-numeric:tabular-nums">${Math.round((cur.font_scale || 1) * 100)}%</span>
+        </div>
+        <div class="wd-field-hint">${this._t('msg.font_size_hint', {}, 'Make everything in this panel larger or smaller. Applies to your account on this device.')}</div>
       </div>
       <div class="wd-subhead">${this._t('hdr.status_graph', {}, 'Status Graph')}</div>
       ${_switchRow(`id="wd-pref-expected" ${(cur.show_expected !== false) ? 'checked' : ''}`, this._t('lbl.show_expected', {}, 'Show expected curve overlay (matched profile, orange)'))}
@@ -7767,7 +8211,7 @@ class HaWashdataPanel extends HTMLElement {
   _wizGroupIds(manifest, catId, prof) {
     const cat = (manifest.categories || {})[catId] || {};
     const g = (cat.groups || []).find(gr => gr.profile === prof);
-    return g ? g.cycles.map(cy => String(cy.id)).filter(id => id !== 'null') : [];
+    return g ? g.cycles.filter(cy => cy.id != null).map(cy => String(cy.id)) : [];
   }
 
   // tri-state {sel, total, state} for a category, for the checkbox rendering.
@@ -7841,11 +8285,13 @@ class HaWashdataPanel extends HTMLElement {
             <span class="wd-sd-cyc-meta">${_esc(cy.date ? _fmtDate(cy.date) : String(cy.id))}${cy.duration != null ? ' · ' + _fmtDuration(cy.duration) : ''}</span>
           </label>`).join('') : '';
           return `<div>
-            <label class="wd-sd-cyc">
-              <input type="checkbox" data-maction="wiz-toggle-cycgroup" data-cat="${cid}" data-prof="${_esc(g.profile)}" ${gall ? 'checked' : ''} ${gsome ? 'data-indeterminate="1"' : ''}>
-              <span class="wd-sd-cyc-meta"><strong>${_esc(g.profile || this._t('lbl.unlabelled', {}, 'Unlabelled'))}</strong> (${gsel}/${g.count})</span>
+            <div class="wd-sd-cyc" style="display:flex;align-items:center">
+              <label style="flex:1;display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" data-maction="wiz-toggle-cycgroup" data-cat="${cid}" data-prof="${_esc(g.profile)}" ${gall ? 'checked' : ''} ${gsome ? 'data-indeterminate="1"' : ''}>
+                <span class="wd-sd-cyc-meta"><strong>${_esc(g.profile || this._t('lbl.unlabelled', {}, 'Unlabelled'))}</strong> (${gsel}/${g.count})</span>
+              </label>
               <button type="button" class="wd-linkbtn" data-maction="wiz-expand" data-key="${_esc(key)}" style="margin-left:auto;background:none;border:none;color:var(--primary-color);cursor:pointer">${expanded ? '▾' : '▸'}</button>
-            </label>
+            </div>
             ${rows2}
           </div>`;
         }).join('')}</div>`;
@@ -8701,8 +9147,9 @@ class HaWashdataPanel extends HTMLElement {
       pgCanvas.addEventListener('dblclick', () => { this._pgView = null; this._pgDrawCanvas(); });
     }
 
-    // F3: Param input fields → sync to threshold state + redraw
-    sr.querySelectorAll('[data-pgkey]').forEach(inp => {
+    // F3: Param input fields → sync to threshold state + redraw. Scoped to inputs:
+    // the per-row publish button shares the data-pgkey hook.
+    sr.querySelectorAll('input[data-pgkey]').forEach(inp => {
       inp.addEventListener('input', () => {
         const key = inp.dataset.pgkey;
         if (inp.dataset.pgtype === 'bool') {
@@ -8711,7 +9158,7 @@ class HaWashdataPanel extends HTMLElement {
           else if (key === 'stop_threshold_w') this._pgThreshStop = val;
           else this._pgParamOverrides[key] = val;
           this._render();
-          const again = sr.querySelector(`[data-pgkey="${key}"]`);
+          const again = sr.querySelector(`input[data-pgkey="${key}"]`);
           if (again) again.focus();
           requestAnimationFrame(() => this._pgDrawCanvas());
           return;
@@ -8736,7 +9183,7 @@ class HaWashdataPanel extends HTMLElement {
         const caret = inp.selectionStart;
         const rawVal = inp.value;
         this._render();
-        const again = sr.querySelector(`[data-pgkey="${key}"]`);
+        const again = sr.querySelector(`input[data-pgkey="${key}"]`);
         if (again) {
           again.value = rawVal;   // restore raw text incl. trailing "." the browser strips
           again.focus();
@@ -8769,6 +9216,27 @@ class HaWashdataPanel extends HTMLElement {
     // F3: Profile selector
     const pgProfSel = sr.getElementById('wd-pg-prof-sel');
     if (pgProfSel) pgProfSel.addEventListener('change', () => { this._pgProfileName = pgProfSel.value; this._pgLoad(); });
+
+    // F3: Settings control panel — preset picker + "save as" name buffer. Both keep
+    // their value in state so a re-render (any param edit) cannot reset them.
+    const pgPresetSel = sr.getElementById('wd-pg-preset-sel');
+    if (pgPresetSel) pgPresetSel.addEventListener('change', () => { this._pgPresetSel = pgPresetSel.value; this._render(); });
+    const pgPresetName = sr.getElementById('wd-pg-preset-name');
+    if (pgPresetName) pgPresetName.addEventListener('input', () => {
+      this._pgPresetName = pgPresetName.value;
+      // Only the save button's disabled state and the preset-limit note depend on
+      // the typed name, so patch those two in place. A full _render() per keystroke
+      // rebuilt the entire panel DOM and repainted the Playground canvases, and is
+      // what forced the caret save/restore workaround this replaces.
+      const name = (this._pgPresetName || '').trim();
+      const atLimitNow = this._pgPresetLimit > 0
+        && (this._pgPresets || []).length >= this._pgPresetLimit
+        && !(this._pgPresets || []).some(p => p.name === name);
+      const saveBtn = sr.querySelector('[data-action="pg-preset-save"]');
+      if (saveBtn) saveBtn.disabled = !(name && !atLimitNow);
+      const limitNote = sr.getElementById('wd-pg-preset-limit-note');
+      if (limitNote) limitNote.style.display = atLimitNow ? '' : 'none';
+    });
 
     // F3: Sim cycle count
     const pgSimN = sr.getElementById('wd-pg-simn');
@@ -9224,6 +9692,21 @@ class HaWashdataPanel extends HTMLElement {
       }
     });
 
+    // Panel font-size slider (accessibility): live-preview while dragging, persist
+    // on release. All panel text is em-relative, so _applyFontScale scales it all.
+    const fontScaleInp = sr.getElementById('wd-pref-fontscale');
+    if (fontScaleInp) {
+      const fsVal = sr.getElementById('wd-pref-fontscale-val');
+      fontScaleInp.addEventListener('input', () => {
+        const v = parseFloat(fontScaleInp.value) || 1;
+        this._applyFontScale(v);
+        if (fsVal) fsVal.textContent = Math.round(v * 100) + '%';
+      });
+      fontScaleInp.addEventListener('change', () => {
+        this._setPref('font_scale', parseFloat(fontScaleInp.value) || 1);
+      });
+    }
+
     sr.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', e => this._onAction(e.currentTarget)));
     sr.querySelectorAll('[data-maction]').forEach(btn => btn.addEventListener('click', e => this._onModalAction(e.currentTarget.dataset.maction, e.currentTarget)));
     // A <select data-maction> commits via `change` (not `click`, esp. on keyboard
@@ -9243,6 +9726,24 @@ class HaWashdataPanel extends HTMLElement {
       const name = btn.dataset.name || '';
       this._modal = { type: 'create-profile', prefillName: name };
       this._render();
+    }));
+
+    // Suggestion "mute" (#343) -> tell the backend to stop proposing this setting.
+    sr.querySelectorAll('[data-suglock]').forEach(btn => btn.addEventListener('click', async () => {
+      const k = btn.dataset.suglock;
+      const dev = this._devices[this._selIdx];
+      const eid = dev && dev.entry_id;
+      if (!eid || !k) return;
+      try {
+        await this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: true });
+        if (!this._isActiveEntry(eid)) return;
+        this._suggestions = (this._suggestions || []).filter(s => s.key !== k);
+        if (!(this._lockedSuggestions || []).includes(k)) (this._lockedSuggestions = this._lockedSuggestions || []).push(k);
+        this._showToast(this._t('msg.sug_muted', {}, "Won't suggest this setting again"), 'info');
+        this._render();
+      } catch (_) {
+        this._showToast(this._t('msg.sug_mute_failed', {}, 'Could not mute suggestion'), 'error');
+      }
     }));
 
     // Suggestion "Use" -> stage value into the field, then cascade-fix downstream conflicts.
@@ -9317,6 +9818,35 @@ class HaWashdataPanel extends HTMLElement {
     if (e) e.value = clock ? this._offsetToClock(m.trim.end) : Math.round(m.trim.end);
   }
 
+  // Snap the trim window to the nearest real sample offsets so the shaded
+  // preview and the eventual cut land on actual data points, not the sub-second
+  // gaps between them (#373). Sample offsets are frequently fractional while the
+  // inputs round to whole seconds, so without this the handle can sit just below
+  // the sample the user aimed at. The store re-snaps against the full-resolution
+  // trace before the irreversible write; this keeps the on-screen handles honest
+  // against the (possibly decimated) displayed samples.
+  _snapTrimBounds() {
+    const m = this._modal;
+    const samples = (m.curve && m.curve.samples) || [];
+    if (samples.length < 2) return;
+    const snap = (v) => samples.reduce(
+      (best, s) => (Math.abs(s[0] - v) < Math.abs(best - v) ? s[0] : best),
+      samples[0][0],
+    );
+    m.trim.start = snap(m.trim.start);
+    m.trim.end = snap(m.trim.end);
+    if (m.trim.end <= m.trim.start) {
+      const startIdx = samples.findIndex((s) => s[0] === m.trim.start);
+      if (startIdx >= 0 && startIdx + 1 < samples.length) {
+        m.trim.end = samples[startIdx + 1][0];
+      } else if (startIdx > 0) {
+        // Start snapped to the last sample: pull start back to the previous
+        // sample instead, so the window always has positive width.
+        m.trim.start = samples[startIdx - 1][0];
+      }
+    }
+  }
+
   // Trim-input value <-> cycle-offset seconds (supports the clock-time mode).
   _offsetToClock(offsetS) {
     const m = this._modal, st = m && m.curve && m.curve.start_time;
@@ -9326,18 +9856,32 @@ class HaWashdataPanel extends HTMLElement {
   }
   _clockToOffset(clockStr) {
     const m = this._modal, st = m && m.curve && m.curve.start_time;
-    if (!st || !clockStr) return 0;
-    const start = new Date(st);
+    // Empty or unparseable input means "no change" (#366): returning 0 here used
+    // to silently drag an endpoint to the cycle start, and an empty End field
+    // collapsed the window to ~0 s. Signal no-change with null so the caller
+    // keeps the current value instead of destroying the cycle.
+    if (!st || !clockStr) return null;
     const p = String(clockStr).split(':').map(Number);
+    if (!p.length || p.some(n => !Number.isFinite(n))) return null;
+    const start = new Date(st);
     const dt = new Date(start);
     dt.setHours(p[0] || 0, p[1] || 0, p[2] || 0, 0);
     let off = (dt - start) / 1000;
-    if (off < -1) off += 86400;  // entered a time past midnight
     const full = (m.curve && m.curve.full_duration_s) || 0;
+    // Only apply the past-midnight +24h correction when the shifted value still
+    // lands inside the cycle. An early START (a clock time before the cycle's
+    // actual start) would otherwise wrap forward a full day and clamp to the far
+    // end, collapsing the window to ~1s (#373). Left negative, the clamp below
+    // pins it to 0 -- i.e. "keep everything from the start".
+    if (off < -1 && off + 86400 <= full) off += 86400;
     return Math.max(0, Math.min(full, off));
   }
   _trimInputToOffset(val) {
-    return (this._modal.timeMode === 'clock') ? this._clockToOffset(val) : _num(val, 0);
+    // Empty field -> null (no change), never a collapse-to-zero (#366).
+    if (val === '' || val == null) return null;
+    if (this._modal.timeMode === 'clock') return this._clockToOffset(val);
+    const n = _num(val, NaN);
+    return Number.isFinite(n) ? n : null;
   }
 
   _toggleSplit(x) {
@@ -9361,8 +9905,13 @@ class HaWashdataPanel extends HTMLElement {
 
     if (m.mode === 'trim') {
       const start = sr.getElementById('wd-trim-start'), end = sr.getElementById('wd-trim-end');
-      if (start) start.addEventListener('input', () => { m.trim.start = Math.max(0, Math.min(this._trimInputToOffset(start.value), m.trim.end - 1)); this._drawCycleEditor(); });
-      if (end) end.addEventListener('input', () => { m.trim.end = Math.min(m.curve.full_duration_s, Math.max(this._trimInputToOffset(end.value), m.trim.start + 1)); this._drawCycleEditor(); });
+      // 'input' tracks the live value for the preview; 'change' (blur/Enter)
+      // commits and snaps both handles to real samples (#373).
+      if (start) start.addEventListener('input', () => { const off = this._trimInputToOffset(start.value); if (off === null) return; m.trim.start = Math.max(0, Math.min(off, m.trim.end - 1)); this._drawCycleEditor(); });
+      if (end) end.addEventListener('input', () => { const off = this._trimInputToOffset(end.value); if (off === null) return; m.trim.end = Math.min(m.curve.full_duration_s, Math.max(off, m.trim.start + 1)); this._drawCycleEditor(); });
+      const commit = () => { this._snapTrimBounds(); this._syncTrimInputs(); this._drawCycleEditor(); };
+      if (start) start.addEventListener('change', commit);
+      if (end) end.addEventListener('change', commit);
       cyc.addEventListener('pointerdown', e => {
         const wd = cyc._wd; if (!wd) return;
         const r = cyc.getBoundingClientRect(); const px = e.clientX - r.left;
@@ -9376,7 +9925,7 @@ class HaWashdataPanel extends HTMLElement {
         else m.trim.end = Math.max(x, m.trim.start + 1);
         this._syncTrimInputs(); this._drawCycleEditor();
       });
-      const stop = () => { m.drag = null; };
+      const stop = () => { if (m.drag) { this._snapTrimBounds(); this._syncTrimInputs(); this._drawCycleEditor(); } m.drag = null; };
       cyc.addEventListener('pointerup', stop); cyc.addEventListener('pointercancel', stop);
     } else if (m.mode === 'split') {
       cyc.addEventListener('pointerdown', e => {
@@ -9572,6 +10121,27 @@ class HaWashdataPanel extends HTMLElement {
       this._busyRun('save-settings', async () => {
         try { await this._ws({ type: `${_DOMAIN}/clear_suggestions`, entry_id: eid }); this._suggestions = []; this._showToast(this._t('toast.suggestions_dismissed', {}, 'Suggestions dismissed')); }
         catch (e) { this._showToast(this._t('toast.error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
+      });
+
+    } else if (a === 'sug-unmute-all') {
+      // #343: un-mute every locked suggestion so the auto-tuner can propose them again.
+      this._busyRun('save-settings', async () => {
+        try {
+          const keys = [...(this._lockedSuggestions || [])];
+          const results = await Promise.allSettled(
+            keys.map(k => this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: false }))
+          );
+          if (!this._isActiveEntry(eid)) return;  // device switched mid-flight
+          const failed = results.filter(r => r.status === 'rejected').length;
+          const lastOk = results.slice().reverse().find(r => r.status === 'fulfilled');
+          this._lockedSuggestions = (lastOk && lastOk.value && lastOk.value.locked_suggestions) || [];
+          await this._fetchSuggestions(eid);
+          if (failed) {
+            this._showToast(this._t('toast.error', {error: `${failed} suggestion(s) failed to unlock`}, `${failed} suggestion(s) failed to unlock`), 'error');
+          } else {
+            this._showToast(this._t('msg.sug_unmuted_all', {}, 'Muted suggestions reset'), 'success');
+          }
+        } catch (e) { this._showToast(this._t('toast.error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'sug-analyze') {
@@ -10161,6 +10731,26 @@ class HaWashdataPanel extends HTMLElement {
       this._render(); requestAnimationFrame(() => this._pgDrawCanvas());
     } else if (a === 'pg-apply-settings') {
       this._pgApplyToSettings();
+    } else if (a === 'pg-load-live') {
+      this._pgLoadLive();
+    } else if (a === 'pg-load-suggested') {
+      this._pgLoadSuggested('classic');
+    } else if (a === 'pg-load-calibrated') {
+      this._pgLoadSuggested('ml');
+    } else if (a === 'pg-preset-save') {
+      this._pgSavePreset();
+    } else if (a === 'pg-preset-load') {
+      const preset = (this._pgPresets || []).find(p => p.name === this._pgPresetSel);
+      if (preset) {
+        this._pgApplyPresetValues(preset.values);
+        this._showToast(this._t('toast.pg_preset_loaded', {name: preset.name}, `Preset "${preset.name}" loaded`));
+        this._render();
+        requestAnimationFrame(() => this._pgDrawCanvas());
+      }
+    } else if (a === 'pg-preset-delete') {
+      this._pgDeletePreset();
+    } else if (a === 'pg-publish-one') {
+      this._pgPublishOne(btn.dataset.pgkey);
     } else if (a === 'cyc-compare') {
       const ids = Array.from(this._cycleSel);
       if (ids.length < 2) return;
@@ -10267,7 +10857,8 @@ class HaWashdataPanel extends HTMLElement {
       const showRaw = !!sr.getElementById('wd-pref-raw')?.checked;
       const dateFmt = sr.getElementById('wd-pref-datefmt')?.value || 'relative';
       const langOverrideSave = sr.getElementById('wd-pref-lang')?.value || '';
-      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt, lang_override: langOverrideSave };
+      const fontScale = parseFloat(sr.getElementById('wd-pref-fontscale')?.value) || 1;
+      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt, lang_override: langOverrideSave, font_scale: fontScale };
       this._busyRun('save-prefs', async () => {
         try {
           await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs });
@@ -10714,6 +11305,12 @@ class HaWashdataPanel extends HTMLElement {
         // Backgrounded task (issue #311): recompute + envelope rebuild can stall a
         // low-power host, so run it via the registry with a header pill.
         const cid = m.cycleId, s = m.trim.start, e2 = m.trim.end;
+        // The trim is irreversible (no undo). Confirm before discarding the
+        // majority of the trace so an accidental collapse can't slip through on
+        // a single click (#373).
+        const full = (m.curve && m.curve.full_duration_s) || 0;
+        const keptPct = full > 0 ? Math.max(0, Math.round(((e2 - s) / full) * 100)) : 100;
+        if (keptPct < 50 && !confirm(this._t('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
         this._kickAndTrack(
           { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
           'cyc-trim-apply',

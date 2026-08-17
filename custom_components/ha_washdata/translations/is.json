@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData uppsetning",
-        "description": "Stilltu þvottavélina þína eða annað tæki.\n\nKraftur skynjari er nauðsynlegur.\n\n**Þá verður þú spurður hvort þú viljir búa til fyrsta prófílinn þinn.**",
+        "description": "Stilltu þvottavélina þína eða annað tæki.\n\nKraftskynjari er nauðsynlegur.\n\nEftir uppsetningu skaltu opna WashData-spjaldið frá hliðarstikunni (eða fara á [/ha-washdata](/ha-washdata)) til að skoða hringrás, stilla skynjun og stjórna sniðum.",
         "data": {
           "name": "Nafn tækis",
           "device_type": "Tegund tækis",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "description": "Uppfærðu heiti tækisins, tegund tækis eða kraftskynjara.\n\nWashData-spjaldið (hliðarstikan eða [/ha-washdata](/ha-washdata)) er þar sem skynjun, hringrás, sniðmát og tilkynningar eru stjórnað.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
+        "description": "Endurnefndu tækið eða breyttu grunnstillingum vélbúnaðar. Allar stillingar fyrir skynjun, samsvörun og tilkynningar eru í [WashData-spjaldinu](/ha-washdata) (einnig aðgengilegt frá hliðarstikunni).",
         "data": {
           "name": "Nafn tækis",
           "device_type": "Device Type",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes} mín tímataki",
       "timer_pause_action_title": "Halda áfram hringrás",
       "timer_pause_body_suffix": "Hringrásin er í bið. Opnaðu WashData-gluggann til að halda áfram.",
+      "unload_dismiss_action_title": "Hætta að minna",
       "notify_live_waiting_message": "{device}: Ekkert snið hefur enn verið greint.",
       "vs_typical_longer": "{pct}% lengri en venjulega",
       "vs_typical_shorter": "{pct}% styttri en venjulega",

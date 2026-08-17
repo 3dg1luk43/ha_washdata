@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Objektas nerastas",
+    "running_long": "Veikia ilgai",
+    "remaining": "liko",
+    "progress": "eiga",
+    "show_time_remaining": "Rodyti likusį laiką",
+    "show_percentage": "Rodyti procentus",
+    "layout": {
+      "tile": "Plytelė (kompaktiška)",
+      "detail": "Detali (išsami)",
+      "glance": "Apžvalga (keli įrenginiai)"
+    },
+    "btn": {
+      "pause": "Pristabdyti",
+      "resume": "Tęsti",
+      "terminate": "Baigti ciklą",
+      "record_start": "Pradėti įrašymą",
+      "record_stop": "Sustabdyti įrašymą",
+      "program": "Programa",
+      "open_panel": "Atidaryti WashData"
+    },
+    "editor": {
+      "layout": "Išdėstymas",
+      "entity": "Prietaiso objektas",
+      "entities": "Prietaisai",
+      "title": "Pavadinimas",
+      "icon": "Piktograma",
+      "show_state": "Rodyti būseną",
+      "show_program": "Rodyti programą",
+      "show_progress_bar": "Rodyti eigos juostą",
+      "spin_icon": "Sukti piktogramą veikiant",
+      "display_mode": "Detalių eilutė",
+      "active_color": "Aktyvios spalvos pakeitimas",
+      "show_phase": "Rodyti fazę",
+      "show_energy": "Rodyti energiją ir kainą",
+      "show_anomaly": "Rodyti užsitęsimo įspėjimą",
+      "show_sparkline": "Rodyti tiesioginį galios grafiką",
+      "buttons": "Veiksmų mygtukai",
+      "program_entity": "Programos objektas (pakeitimas)",
+      "time_entity": "Laiko objektas (pakeitimas)",
+      "pct_entity": "Eigos objektas (pakeitimas)",
+      "power_entity": "Galios objektas (pakeitimas)",
+      "tap_action": "Palietimo veiksmas",
+      "hold_action": "Palaikymo veiksmas",
+      "double_tap_action": "Dvigubo palietimo veiksmas"
+    }
+  },
   "badge": {
     "artifact_tip": "Aptikta {n} anomalijų (pvz., durys atidarytos ciklo viduryje) – atidarykite, kad pamatytumėte juos diagramoje",
     "auto": "(aptikta automatiškai)",
@@ -92,6 +140,19 @@
     "pause_cycle_tip": "Pristabdyti veikiantį ciklą – prietaisas tęsis nuo tos vietos, kur sustojo",
     "pg_apply_device": "Taikyti įrenginiui",
     "pg_autofill": "Automatinis užpildymas",
+    "pg_load_calibrated": "Įkelti kalibruotus (ML) ({n})",
+    "pg_load_calibrated_tip": "Įkelti ML kalibruotus nustatymus kaip bandymų aikštelės perrašymus",
+    "pg_load_live": "Įkelti aktyvius nustatymus",
+    "pg_load_live_tip": "Iš naujo nuskaityti dabartinius integracijos nustatymus ir atmesti visus bandymų aikštelės pakeitimus",
+    "pg_load_suggested": "Įkelti siūlomus ({n})",
+    "pg_load_suggested_tip": "Įkelti dabartines automatinio derintuvo rekomendacijas kaip bandymų aikštelės perrašymus",
+    "pg_preset_delete": "Ištrinti rinkinį",
+    "pg_preset_load": "Įkelti rinkinį",
+    "pg_preset_load_tip": "Pakeisti bandymų aikštelės reikšmes šiuo rinkiniu (aktyvūs nustatymai nekeičiami)",
+    "pg_preset_save": "Išsaugoti kaip rinkinį",
+    "pg_preset_save_tip": "Išsaugoti visas toliau esančias reikšmes kaip pavadintą šio įrenginio nustatymų rinkinį",
+    "pg_publish_all": "Įrašyti į nustatymus ({n})",
+    "pg_publish_one": "Įrašyti „{label}“ į integracijos nustatymus",
     "play": "Leisti",
     "process": "Apdoroti",
     "process_history": "Apdorokite dabar",
@@ -178,7 +239,9 @@
     "download_export": "Atsisiųsti eksportą",
     "analyze_import": "Analizuoti failą",
     "import_selected": "Importuoti pasirinktus",
-    "back": "Atgal"
+    "back": "Atgal",
+    "mute_suggestion": "Nebesiūlyti šio nustatymo",
+    "reset_muted": "Atstatyti nutildytus"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -275,6 +338,7 @@
     "no_automations": "Dar jokia automatika nenurodo šio įrenginio.",
     "panel_settings": "Skydelio nustatymai",
     "param_sweep": "Parametrų skenavimas",
+    "pg_settings_source": "Nustatymų šaltinis",
     "phase_catalog": "Fazių katalogas",
     "playground": "Bandymų aikštelė",
     "process_history": "Proceso istorija",
@@ -415,6 +479,9 @@
     "pg_match_score": "Atitikties balas",
     "pg_pct_of": "{p}% iš {total}",
     "pg_poor_match": "Prasta atitiktis",
+    "pg_preset": "Bandymų aikštelės rinkinys",
+    "pg_preset_name": "Naujo rinkinio pavadinimas",
+    "pg_preset_none": "Pasirinkite rinkinį…",
     "pg_strong_match": "Stipri atitiktis",
     "pg_tile_ambiguous": "Dviprasmiška",
     "pg_tile_ambiguous_tip": "Ciklai, kuriuose dvi programos beveik lygios",
@@ -609,7 +676,8 @@
     "conflict_resolution": "Pavadinimų konfliktai",
     "conflict_import_copy": "Importuoti kaip kopiją",
     "conflict_keep_mine": "Išlaikyti manuosius",
-    "conflict_overwrite": "Perrašyti"
+    "conflict_overwrite": "Perrašyti",
+    "font_size": "Skydelio šrifto dydis"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -771,7 +839,17 @@
     "pg_apply_confirm": "Taikyti geriausią reikšmę: {label} = {value}?",
     "pg_canvas_empty": "Pasirinkite ciklą aukščiau, tada paspauskite „Įkelti“, kad pamatytumėte jo galios kreivę.",
     "pg_chart_caption": "Aptikimo / atitikties rodiklis pagal {param} reikšmes",
+    "pg_ctrl_intro": "Reikšmės imamos iš aktyvių šio įrenginio integracijos nustatymų. Pakeitimai lieka bandymų aikštelėje, kol jų neįrašysite į nustatymus.",
+    "pg_live_unavailable": "Aktyvūs nustatymai nepasiekiami, rodomos numatytosios reikšmės.",
+    "pg_load_live_confirm": "Atmesti bandymų aikštelės pakeitimus ({n}) ir iš naujo įkelti dabartinius integracijos nustatymus?",
     "pg_match_rate": "{pct}% atitikties rodiklis iš {total} ciklų",
+    "pg_matches_live": "Sutampa su aktyviais nustatymais",
+    "pg_n_changed": "Skirtumų nuo aktyvių nustatymų: {n}",
+    "pg_sugg_none": "Visi pasiūlymai jau atitinka dabartinius nustatymus",
+    "pg_preset_delete_confirm": "Ištrinti rinkinį „{name}“?",
+    "pg_preset_limit": "Pasiekta rinkinių riba ({n})",
+    "pg_preset_overwrite": "Perrašyti rinkinį „{name}“?",
+    "pg_publish_one_confirm": "Įrašyti {label} = {value} į šio įrenginio nustatymus?",
     "pg_restart_note": "Iš naujo paleiskite „Home Assistant“, kad įjungtumėte simuliavimo įrankius.",
     "pg_sim_progress": "{done} / {total} ciklai",
     "pg_starting": "Pradedama…",
@@ -845,6 +923,7 @@
     "trend_duration_shorter": "Trukmė mažėja ({pct} %/ciklas) – pastaruoju metu vid. {avg}",
     "trend_energy_down": "Energijos mažėjimas ({pct} % per ciklą)",
     "trend_energy_up": "Energijos augimas ({pct} % per ciklą) – pastaruoju metu vid. {avg}",
+    "trim_destructive_confirm": "Bus išsaugota tik {pct}% ciklo ir to nebus galima atšaukti. Tęsti?",
     "trim_intro": "Vilkite raudonas rankenas arba įveskite vertes. Viskas, kas yra už lango, pašalinama.",
     "tuning_suggestions_available": "Galimas {count} derinimo pasiūlymas iš stebimų ciklų. Jie rodomi šalia atitinkamų laukų.",
     "unsure_detected_prefix": "„WashData“ nėra tikras, kad aptiko",
@@ -922,7 +1001,12 @@
     "merge_hint": "Importuoti elementai pridedami; jokie vietiniai duomenys neprarandami. Pavadinimų konfliktai sprendžiami toliau.",
     "replace_warn": "Kiekviena pažymėta kategorija ištrinama ir pakeičiama iš failo. Nepažymėtos kategorijos lieka nepaliestos.",
     "dest_reference_hint": "Importuoti ciklai tik pagerina programų atpažinimą ir niekada neveikia naudojimo/energijos statistikos.",
-    "dest_real_history_hint": "Importuoti ciklai laikomi šio prietaiso paties istorija ir papildo energijos/naudojimo statistiką. Naudokite perkeliant vieną prietaisą į naują įdiegimą."
+    "dest_real_history_hint": "Importuoti ciklai laikomi šio prietaiso paties istorija ir papildo energijos/naudojimo statistiką. Naudokite perkeliant vieną prietaisą į naują įdiegimą.",
+    "sug_muted": "Šio nustatymo daugiau nebesiūlys",
+    "sug_mute_failed": "Nepavyko nutildyti pasiūlymo",
+    "sug_unmuted_all": "Nutildyti pasiūlymai atstatyti",
+    "n_suggestions_muted": "{count} nutildyti; automatinis derintuvas jų nebesiūlys.",
+    "font_size_hint": "Padidinkite arba sumažinkite visą tekstą šiame skydelyje. Galioja jūsų paskyrai šiame įrenginyje."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -970,6 +1054,10 @@
     "unusable": "Netinkamas naudoti"
   },
   "section": {
+    "dishwasher": {
+      "label": "Indaplovė",
+      "intro": "Ciklo pabaigos apdorojimas indaplovėms, kurios paprastai baigiasi ilga, beveik tylia džiovinimo faze prieš trumpą galutinį vandens išleidimą."
+    },
     "anti_wrinkle": {
       "intro": "Apsaugos nuo raukšlių režimas aptinka mažos galios sukimosi impulsus po pagrindinės fazės ir prideda juos prie baigto ciklo.",
       "label": "Apsauga nuo raukšlių"
@@ -1012,6 +1100,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Pasyvaus džiovinimo tylusis atleidimas",
+      "doc": "Kai ciklas viršija numatytą trukmę, kiek laiko indaplovė turi išlikti tyli (žemiau Sustabdymo slenkstis) prieš tai, kai WashData nustoja laukti galutinio vandens išleidimo ir užbaigia ciklą. Padidinkite, jei jūsų aparatas turi ilgą tylią džiovinimo fazę prieš vėlyvą galutinį vandens išleidimą, kuris praleidžiamas - platesnis langas leidžia išmoktai trukmei sekti sezoninį poslinkį (šaltesnis įleidžiamas vanduo = ilgesni ciklai), užuot užsifiksavus ties senuoju vidurkiu. Jis gali tik sutrumpinti laukimą, palyginti su vidiniu 30 minučių pabaigos smailės ribojimu, bet niekada jo nepailgina."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Atpažinkite trumpus mažos galios būgninius impulsus, kuriuos džiovyklė skleidžia po pagrindinės šildymo fazės, ir laikykite juos prijungtus prie baigto ciklo, o ne skaitykite juos kaip naujus ciklus.",
       "label": "Įjungti apsaugą nuo raukšlių"
@@ -1232,6 +1324,10 @@
       "doc": "Minutės po ciklo pabaigos prieš siunčiant vis dar laukiantį priminimą „iškrauti mašiną“. Norėdami išjungti priminimą, nustatykite 0.",
       "label": "Iškrovimo priminimo delsimas"
     },
+    "notify_unload_repeat": {
+      "doc": "Iškrovimo priminimas pakartotinai siunčiamas kas \"Iškrovimo priminimo delsimas\" minučių, kol neatidarysite durų arba pranešime nepaliesite \"Nustoti priminti\". Reikalingas Durų jutiklio objektas (kaip ir pačiam priminimui). Atmetimo mygtukas veikia Home Assistant mobiliosios (companion) programėlės pranešimuose.",
+      "label": "Kartoti, kol atsidarys durys"
+    },
     "off_delay": {
       "doc": "Laikas palaukti, kai nukrenta galia, prieš paskelbiant, kad ciklas baigtas. Jei maitinimas atnaujinamas šiame lange, ciklas tęsiasi sklandžiai – tai sujungia pauzes tarp plovimo etapų. Indaplovės turi ilgas džiovinimo fazes (maitinimas išjungiamas 20–60 min.), todėl išjungimo delsa turi būti didesnė už tą, kad visas plovimas+džiovinimas išliktų kaip vienas ciklas.",
       "label": "Išjungimo delsimas"
@@ -1406,6 +1502,26 @@
     "energy_scale": {
       "label": "Energijos ryškumas",
       "doc": "4 etapo energijos atitikimo bausmės ryškumas. Mažesnis = griežtesnis: energijos neatitikimas kenkia labiau. Numatytoji 0,25 sąmoningai atlaidesnė nei trukmės ryškumas, nes energija kinta priklausomai nuo apkrovos. Naudokite su Energijos svoriu."
+    },
+    "power_profile_interval_min": {
+      "label": "Galios profilio intervalas",
+      "doc": "Kibirio dydis profilio power_profile jutiklio atributui (plokščias per laiko atkarpas vidutinių vatų masyvas, naudojamas išorinių planavimo sistemų, pvz., EMHASS ir tibber_prices). Mažesni kibirai išlaiko trumpus galios šuolius aštresniais; didesni kibirai lygina formą. Numatytasis 15 min. Tik skaitymo metu; neturi įtakos aptikimui."
+    },
+    "notify_live_sticky": {
+      "label": "Išlaikyti tiesioginį pranešimą po paspaudimo",
+      "doc": "Tik Android. Padaryti tiesioginį pažangos pranešimą patvariu (klijuojamu), kad paspaudus nebus atsisakyta vykstančios gijos. Išjungus paliekama numatytoji elgsena, kai paspaudus pranešimas atsisakomas."
+    },
+    "notify_live_click_action": {
+      "label": "Tiesioginio pranešimo paspaudimo tikslas",
+      "doc": "Tik Android. Kur atidaroma paspaudus tiesioginės pažangos pranešimą (pvz., /lovelace/laundry arba visas URL), o ne programos pradžios puslapis. Palikite tuščią, kad naudotumėte numatytąjį."
+    },
+    "door_opens_at_end": {
+      "label": "Durys automatiškai atsidaromos pabaigoje",
+      "doc": "Indaplovėms, kurios ciklo pabaigoje atidaro duris džiovinimui (AirDry ir panašūs). Įjungus, durų atidarymas veikiančio ciklo metu nebepristabdo jo amžinai; vietoj to, jei durys lieka atviros toliau nurodytą laikotarpį, WashData traktuoja ciklą kaip baigtą. Trumpas atidarymas (dedant indą) ignoruojamas. Reikalingas durų jutiklio objektas."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Durų atidarymo pabaigos laukimas",
+      "doc": "Kiek laiko durys turi likti atviros, kad WashData užbaigtų ciklą, kai įjungta parinktis \"Durys automatiškai atsidaromos pabaigoje\". Pakankamai ilgai, kad ignoruotų greitai dedamą indą (numatytasis 60 s), pakankamai trumpai, kad greitai užbaigtų, kai prietaisas atidaro duris."
     }
   },
   "setting_group": {
@@ -1576,6 +1692,10 @@
     "name_required": "Reikalingas vardas",
     "no_split_found": "Nerasta tuščiosios eigos spragų, dėl kurių būtų galima suskaidyti",
     "panel_settings_saved": "Skydelio nustatymai išsaugoti",
+    "pg_preset_loaded": "Rinkinys „{name}“ įkeltas",
+    "pg_preset_saved": "Rinkinys „{name}” išsaugotas",
+    "pg_sugg_loaded": "Įkelta {n} siūlomų reikšmių - paleiskite bandymų aikštelę palyginti",
+    "pg_sugg_ml_loaded": "Įkelta {n} ML kalibruotų reikšmių - paleiskite bandymų aikštelę palyginti",
     "phase_name_required": "Būtinas fazės pavadinimas",
     "phase_updated": "Atnaujintas etapas",
     "phases_saved": "Fazės išsaugotos",
@@ -1723,6 +1843,7 @@
       "min_active": "Pagrįsta mažiausia aktyvia galia ({min}W), stebėta paskutiniame cikle.",
       "min_duration_ratio": "Paliktas kuo mažesnis, kad programa būtų atpažinta ciklo pradžioje; patikimumo ir dviprasmiškumo slenksčiai neleidžia patvirtinti per anksti.",
       "min_off_gap": "Pagrįsta {gaps} stebimais tarpcikliniais tarpais (p05={p05}s). Prietaiso apatinė riba: {floor}s.",
+      "min_off_gap_bridge": "Nustatyta taip, kad perdengtų ilgiausią tylos tarpsnį ciklo viduje: {span}s + 60s buferis, iš {spans} perdengtų tarpų per {cycles} švarius ciklus (lieka žemiau trumpiausio jūsų tarpo tarp dviejų paleidimų iš eilės, kuris yra {ceiling}s).",
       "min_power": "40% p05 mažiausios aktyvios galios ({p05}W) per {cycles} švarius ciklus, išlaikant išjungimo slenkstį žemiau realaus suvartojimo.{excl}",
       "ml_auto_label": "Mažiausias patikimumas, kurį kokybės modelis vis dar įvertino kaip švarų (p10 iš {cycles} švarių ciklų = {p10}).",
       "ml_end_repeat": "{false}/{total} ciklų ({pct}%) turėjo pauzę, kurią pabaigos detektorius įvertino >50%; reikalauti {val} pabaigos patvirtinimo(-ų).",
@@ -1739,7 +1860,7 @@
       "thr_batch": "Paliktas šiek tiek virš p05 mažiausios aktyvios galios per {cycles} ciklus ({p05}W), kad pradžia būtų aptikta kuo anksčiau, o sustabdymo slenkstis liktų žemiau mažiausios veikiančios mašinos galios.",
       "tol_per_profile": "p75 kiekvieno profilio trukmės dispersijos per {profiles} profilius ({cycles} ciklai); stabilūs profiliai nebaudžiami.",
       "tol_pooled": "Pagrįsta sujungta {cycles} naujausių pažymėtų ciklų trukmės dispersija (p95 nuokrypis={dev}).",
-      "watchdog": "Paliktas kuo mažesnis, kiek saugu (3x p95 atnaujinimo tarpas {p95}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
+      "watchdog": "Paliktas kuo mažesnis, kiek saugu (vos didesnis nei p95 atnaujinimo tarpas {p95}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
     },
     "exclusions": {
       "summary": "Neįtraukta {total} klaidingai aptiktų ciklų: {parts}.",
@@ -1770,6 +1891,7 @@
     "other": "Kita"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Indaplovė: tylos sekundės po numatytos trukmės, kol atleidžiamas ciklo pabaigos vandens išleidimo laukimas",
     "anti_wrinkle_enabled": "Sugerkite būgninius impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
     "anti_wrinkle_exit_power": "Kad apsauga nuo raukšlių išliktų aktyvi, galia tarp impulsų turi nukristi žemiau šios ribos",
     "anti_wrinkle_idle_timeout": "Tylos laikas, leidžiamas tarp dviejų būgninių impulsų prieš pasibaigiant apsaugai nuo raukšlių",

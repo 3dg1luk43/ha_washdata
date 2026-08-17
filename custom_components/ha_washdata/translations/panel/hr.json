@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entitet nije pronađen",
+    "running_long": "Traje predugo",
+    "remaining": "preostalo",
+    "progress": "napredak",
+    "show_time_remaining": "Prikaži preostalo vrijeme",
+    "show_percentage": "Prikaži postotak",
+    "layout": {
+      "tile": "Pločica (kompaktno)",
+      "detail": "Detaljno (bogato)",
+      "glance": "Pregled (više uređaja)"
+    },
+    "btn": {
+      "pause": "Pauziraj",
+      "resume": "Nastavi",
+      "terminate": "Završi ciklus",
+      "record_start": "Započni snimanje",
+      "record_stop": "Zaustavi snimanje",
+      "program": "Program",
+      "open_panel": "Otvori WashData"
+    },
+    "editor": {
+      "layout": "Izgled",
+      "entity": "Entitet uređaja",
+      "entities": "Uređaji",
+      "title": "Naslov",
+      "icon": "Ikona",
+      "show_state": "Prikaži stanje",
+      "show_program": "Prikaži program",
+      "show_progress_bar": "Prikaži traku napretka",
+      "spin_icon": "Vrti ikonu tijekom rada",
+      "display_mode": "Redak s detaljima",
+      "active_color": "Zamjena aktivne boje",
+      "show_phase": "Prikaži fazu",
+      "show_energy": "Prikaži energiju i trošak",
+      "show_anomaly": "Prikaži upozorenje o produljenju",
+      "show_sparkline": "Prikaži grafikon snage uživo",
+      "buttons": "Gumbi radnji",
+      "program_entity": "Entitet programa (zamjena)",
+      "time_entity": "Entitet vremena (zamjena)",
+      "pct_entity": "Entitet napretka (zamjena)",
+      "power_entity": "Entitet snage (zamjena)",
+      "tap_action": "Radnja dodira",
+      "hold_action": "Radnja držanja",
+      "double_tap_action": "Radnja dvostrukog dodira"
+    }
+  },
   "badge": {
     "artifact_tip": "Otkrivene su {n} anomalije (npr. vrata otvorena usred ciklusa) – otvorite da ih vidite na grafikonu",
     "auto": "(automatski otkriveno)",
@@ -64,6 +112,21 @@
     "discard": "Odbaci",
     "discard_tip": "Odbaci snimljeni trag bez pohrane",
     "dismiss": "Odbaci",
+    "mute_suggestion": "Prestani predlagati ovu postavku",
+    "pg_load_calibrated": "Učitaj kalibrirano (ML) ({n})",
+    "pg_load_calibrated_tip": "Učitaj ML-kalibrirane postavke kao zamjene u pješčaniku",
+    "pg_load_live": "Učitaj aktivne postavke",
+    "pg_load_live_tip": "Ponovno učitaj trenutne postavke integracije i odbaci sve izmjene u pješčaniku",
+    "pg_load_suggested": "Učitaj predloženo ({n})",
+    "pg_load_suggested_tip": "Učitaj aktualne prijedloge automatskog podešavanja kao zamjene u pješčaniku",
+    "pg_preset_delete": "Izbriši preset",
+    "pg_preset_load": "Učitaj preset",
+    "pg_preset_load_tip": "Zamijeni vrijednosti u pješčaniku ovim presetom (aktivne postavke ostaju nepromijenjene)",
+    "pg_preset_save": "Spremi kao preset",
+    "pg_preset_save_tip": "Spremi sve vrijednosti ispod kao imenovani preset za ovaj uređaj",
+    "pg_publish_all": "Spremi u integraciju ({n})",
+    "pg_publish_one": "Spremi {label} u integraciju",
+    "reset_muted": "Poništi utišane",
     "done": "Gotovo",
     "edit": "Uredi",
     "export": "Izvezi",
@@ -275,6 +338,7 @@
     "no_automations": "Još nijedna automatizacija ne spominje ovaj uređaj.",
     "panel_settings": "Postavke ploče",
     "param_sweep": "Pretraživanje parametra",
+    "pg_settings_source": "Izvor postavki",
     "phase_catalog": "Katalog faza",
     "playground": "Pješčanik",
     "process_history": "Povijest procesa",
@@ -348,6 +412,7 @@
     "default_access_level": "Zadana razina za korisnike koji nisu dolje navedeni",
     "default_other": "Zadano (ostali uređaji)",
     "default_tab": "Zadana kartica pri otvaranju ploče",
+    "font_size": "Veličina fonta ploče",
     "delta": "Δ",
     "description": "Opis",
     "dtw_blend_w": "Težina miješanja",
@@ -415,6 +480,9 @@
     "pg_match_score": "Rezultat podudaranja",
     "pg_pct_of": "{p}% od {total}",
     "pg_poor_match": "Loše podudaranje",
+    "pg_preset": "Preset pješčanika",
+    "pg_preset_name": "Ime novog preseta",
+    "pg_preset_none": "Odaberite preset…",
     "pg_strong_match": "Snažno podudaranje",
     "pg_tile_ambiguous": "Nejasno",
     "pg_tile_ambiguous_tip": "Ciklusi s gotovo izjednačenim rezultatom između dva programa",
@@ -771,7 +839,17 @@
     "pg_apply_confirm": "Primijeniti najbolju vrijednost: {label} = {value}?",
     "pg_canvas_empty": "Odaberite ciklus iznad, zatim pritisnite Učitaj za prikaz njegovog tijeka snage.",
     "pg_chart_caption": "Stopa otkrivanja/podudaranja po vrijednostima {param}",
+    "pg_ctrl_intro": "Vrijednosti polaze od aktivnih postavki integracije za ovaj uređaj. Izmjene ostaju u pješčaniku dok ih ne spremite u integraciju.",
+    "pg_live_unavailable": "Aktivne postavke nisu dostupne, prikazane su zadane vrijednosti.",
+    "pg_load_live_confirm": "Odbaciti izmjene u pješčaniku ({n}) i ponovno učitati trenutne postavke integracije?",
     "pg_match_rate": "{pct}% stopa podudaranja na {total} ciklusa",
+    "pg_matches_live": "Podudara se s aktivnim postavkama",
+    "pg_n_changed": "Promijenjeno u odnosu na aktivne postavke: {n}",
+    "pg_sugg_none": "Svi prijedlozi već odgovaraju trenutnim postavkama",
+    "pg_preset_delete_confirm": "Izbrisati preset \"{name}\"?",
+    "pg_preset_limit": "Dosegnut limit preseta ({n})",
+    "pg_preset_overwrite": "Prepisati preset \"{name}\"?",
+    "pg_publish_one_confirm": "Spremiti {label} = {value} u postavke ovog uređaja?",
     "pg_restart_note": "Ponovno pokrenite Home Assistant kako biste omogućili alate za simulaciju.",
     "pg_sim_progress": "{done} / {total} ciklusa",
     "pg_starting": "Pokretanje…",
@@ -789,6 +867,7 @@
     "preferences_admin": "Postavke, panel i kontrola pristupa",
     "preferences_adv": "Postavke",
     "prefs_personal": "Ovo se odnosi samo na vaš račun Home Assistant.",
+    "font_size_hint": "Povećajte ili smanjite sve u ovoj ploči. Primjenjuje se na vaš račun na ovom uređaju.",
     "process_history_hint": "Ponovo pokrenite uparivanje na svim pohranjenim ciklusima, osvježite prijedloge podešavanja, ponovo trenirajte ML modele (ako su omogućeni) i preračunajte zdravlje ciklusa. Pokrenite nakon niza recenzija.",
     "profile_deleted": "Profil izbrisan",
     "profile_poor_health_detail": "Ciklusi dodijeljeni ovom profilu imaju nedosljedne oblike ili nisku pouzdanost. Razmislite o ponovnoj izradi omotnice ili pregledu označenih ciklusa.",
@@ -821,6 +900,10 @@
     "split_intro": "Pritisnite grafikon da biste dodali ili uklonili točku razdvajanja ili automatsko otkrivanje praznina u mirovanju. Svaki rezultirajući segment može dobiti svoj profil.",
     "storage_diagnostics": "Statistika pohrane, održavanje, izvoz/uvoz",
     "sug_staged": "Postavljeno {key} = {val}. Spremi za primjenu.",
+    "sug_muted": "Ova postavka više neće biti predlagana",
+    "sug_mute_failed": "Nije moguće utišati prijedlog",
+    "sug_unmuted_all": "Utišani prijedlozi poništeni",
+    "n_suggestions_muted": "{count} utišano; automatski podešavač neće predlagati ove postavke.",
     "toast_auto_detect_enabled": "Automatsko otkrivanje omogućeno",
     "toast_auto_label_complete": "Automatsko označavanje dovršeno",
     "toast_auto_label_failed": "Automatsko označavanje neuspješno: {error}",
@@ -845,6 +928,7 @@
     "trend_duration_shorter": "Trajanje je sve kraće ({pct}%/ciklus) – nedavni prosjek {avg}",
     "trend_energy_down": "Energija opada ({pct}%/ciklus)",
     "trend_energy_up": "Energija raste ({pct}%/ciklus) – nedavni prosjek {avg}",
+    "trim_destructive_confirm": "Ovo zadržava samo {pct}% ciklusa i ne može se poništiti. Nastaviti?",
     "trim_intro": "Povucite crvene ručice ili unesite vrijednosti. Sve izvan prozora je uklonjeno.",
     "tuning_suggestions_available": "{count} prijedlog podešavanja dostupan iz promatranih ciklusa. Pojavljuju se pored relevantnih polja.",
     "unsure_detected_prefix": "WashData nije siguran da je otkriven",
@@ -970,6 +1054,10 @@
     "unusable": "Neupotrebljiv"
   },
   "section": {
+    "dishwasher": {
+      "label": "Perilica posuđa",
+      "intro": "Obrada kraja ciklusa za perilice posuđa, koje obično završavaju dugom, gotovo tihom fazom sušenja prije kratkog završnog ispumpavanja vode."
+    },
     "anti_wrinkle": {
       "intro": "Način anti-bore/anti-gužve otkriva impulse prevrtanja male snage nakon glavne faze i zadržava ih priključene na završeni ciklus.",
       "label": "Anti-bore"
@@ -1012,6 +1100,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Otpuštanje nakon tihe faze sušenja",
+      "doc": "Kada ciklus prijeđe svoje očekivano trajanje, koliko dugo perilica mora ostati tiha (ispod Praga zaustavljanja) prije nego što WashData prestane čekati na završno ispumpavanje vode i završi ciklus. Povećajte ako vaš uređaj ima dugu tihu fazu sušenja prije kasnog završnog ispumpavanja koje se propušta - šire okno omogućuje da naučeno trajanje prati sezonske promjene (hladnija dovodna voda = dulji ciklusi) umjesto da ostane zaključano na staroj prosječnoj vrijednosti. Čekanje samo skraćuje u odnosu na interno ograničenje završnog ispumpavanja od 30 minuta, nikada ga ne produljuje."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Prepoznajte kratke impulse male snage koje sušilica emitira nakon glavne faze zagrijavanja i držite ih vezanima uz završeni ciklus umjesto da ih čitate kao nove cikluse.",
       "label": "Omogući otkrivanje anti-bora"
@@ -1232,6 +1324,10 @@
       "doc": "Nekoliko minuta nakon završetka ciklusa prije slanja podsjetnika za \"istovar stroja\" koji još uvijek čeka. Postavite 0 da biste onemogućili podsjetnik.",
       "label": "Odgoda podsjetnika za istovar"
     },
+    "notify_unload_repeat": {
+      "doc": "Ponovno šalje podsjetnik za istovar svakih \"Odgoda podsjetnika za istovar\" minuta dok ne otvorite vrata ili ne dodirnete \"Prestani podsjećati\" na obavijesti. Zahtijeva Entitet senzora vrata (kao i sam podsjetnik). Gumb za odbacivanje radi na obavijestima mobilne aplikacije Home Assistant (companion app).",
+      "label": "Ponavljaj dok se vrata ne otvore"
+    },
     "off_delay": {
       "doc": "Vrijeme čekanja nakon pada struje prije nego što se proglasi da je ciklus završen. Ako se struja nastavi unutar ovog prozora, ciklus se nastavlja neprimjetno - ovo premošćuje pauze između faza pranja. Perilice posuđa imaju duge faze sušenja (isključivanje na 20-60 min) tako da odgoda isključivanja mora biti veća od te kako bi cijeli ciklus pranja+sušenja bio jedan ciklus.",
       "label": "Odgoda isključivanja"
@@ -1406,6 +1502,26 @@
     "energy_scale": {
       "label": "Oštrina energije",
       "doc": "Oštrina kazne za nepodudaranje energije u Fazi 4. Manje = strože: nepodudaranje energije više snižava ocjenu. Zadana vrijednost 0,25 je namjerno blaža od Oštrine trajanja jer energija varira s opterećenjem. Koristite zajedno s Težinom energije."
+    },
+    "power_profile_interval_min": {
+      "label": "Interval profila snage",
+      "doc": "Veličina segmenta za atribut senzora power_profile po profilu (polje prosječnih vata po slotu koje koriste vanjski planeri poput EMHASS i tibber_prices). Manji segmenti zadržavaju kratke skokove snage oštrima; veći segmenti zaglađuju oblik. Zadano 15 min. Samo za čitanje; ne utječe na otkrivanje."
+    },
+    "notify_live_sticky": {
+      "label": "Zadrži živu obavijest pri dodiru",
+      "doc": "Samo Android. Živu obavijest o napretku postavite kao trajnu (prikvačenu) kako dodir ne bi odbacio aktivnu nit. Isključeno zadržava zadano ponašanje gdje dodir odbacuje obavijest."
+    },
+    "notify_live_click_action": {
+      "label": "Odredište dodira na živoj obavijesti",
+      "doc": "Samo Android. Gdje dodir na živu obavijest o napretku otvara (npr. /lovelace/laundry ili cijeli URL) umjesto početne stranice aplikacije. Ostavite prazno za zadano."
+    },
+    "door_opens_at_end": {
+      "label": "Vrata se automatski otvaraju na kraju",
+      "doc": "Za perilice posuđa koje na kraju ciklusa otvaraju vrata radi sušenja (AirDry i slično). Kada je uključeno, otvaranje vrata za vrijeme pokrenuta ciklusa više ne zaustavlja ciklus zauvijek; umjesto toga, ako vrata ostanu otvorena koliko je navedeno ispod, WashData smatra ciklus završenim. Kratko otvaranje (dodavanje predmeta) se zanemaruje. Zahtijeva entitet senzora vrata."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Zadržavanje otvorenih vrata za završetak",
+      "doc": "Koliko dugo vrata moraju ostati otvorena prije nego WashData završi ciklus, kada je uključena postavka \"Vrata se automatski otvaraju na kraju\". Dovoljno dugo da se ignorira brzo dodavanje posuđa (zadano 60 s), dovoljno kratko za brz završetak kad perilica otvori vrata."
     }
   },
   "setting_group": {
@@ -1592,6 +1708,7 @@
       "min_active": "Na temelju najmanje radne snage ({min}W) uočene u posljednjem ciklusu.",
       "min_duration_ratio": "Zadržano što nižim kako bi se program prepoznao rano u ciklusu; pragovi pouzdanosti i dvosmislenosti sprječavaju prijevremene potvrde.",
       "min_off_gap": "Na temelju {gaps} uočenih razmaka između ciklusa (p05={p05}s). Donja granica uređaja: {floor}s.",
+      "min_off_gap_bridge": "Postavljeno tako da premosti najdulji tihi odsječak unutar ciklusa: {span}s + 60s rezerve, iz {spans} premoštenih razmaka kroz {cycles} čistih ciklusa (ostaje ispod vašeg najkraćeg razmaka između dva uzastopna pokretanja, koji iznosi {ceiling}s).",
       "min_power": "40 % najniže radne snage p05 ({p05}W) kroz {cycles} čistih ciklusa, čime prag isključenja ostaje ispod stvarne potrošnje.{excl}",
       "ml_auto_label": "Najniža pouzdanost koju je model kvalitete još ocijenio čistom (p10 od {cycles} čistih ciklusa = {p10}).",
       "ml_end_repeat": "{false}/{total} ciklusa ({pct}%) imalo je pauzu koju je detektor kraja ocijenio s >50 %; zatraži {val} potvrdu/potvrde kraja.",
@@ -1608,7 +1725,7 @@
       "thr_batch": "Zadržano tik iznad najniže radne snage p05 kroz {cycles} ciklusa ({p05}W) kako bi se početak uhvatio što ranije, a prag zaustavljanja ostao ispod najniže radne snage stroja.",
       "tol_per_profile": "p75 varijance trajanja po profilu kroz {profiles} profila ({cycles} ciklusa); dosljedni profili nisu kažnjeni.",
       "tol_pooled": "Na temelju objedinjene varijance trajanja {cycles} novijih označenih ciklusa (p95 odstupanje={dev}).",
-      "watchdog": "Zadržano što nižim uz sigurnost (3x razmak ažuriranja p95 od {p95}s, najmanje 30s) kako bi se zastoji brzo uhvatili bez lažnih zaustavljanja."
+      "watchdog": "Zadržano što nižim uz sigurnost (tik iznad razmaka ažuriranja p95 od {p95}s, najmanje 30s) kako bi se zastoji brzo uhvatili bez lažnih zaustavljanja."
     },
     "exclusions": {
       "summary": "Isključeno {total} pogrešno otkrivenih ciklusa: {parts}.",
@@ -1688,6 +1805,10 @@
     "name_required": "Ime je potrebno",
     "no_split_found": "Nisu pronađeni razmaci u praznom hodu za cijepanje",
     "panel_settings_saved": "Postavke ploče su spremljene",
+    "pg_preset_loaded": "Preset \"{name}\" učitan",
+    "pg_preset_saved": "Preset \"{name}\" spremljen",
+    "pg_sugg_loaded": "Učitano {n} predloženih vrijednosti - pokrenite pješčanik za usporedbu",
+    "pg_sugg_ml_loaded": "Učitano {n} ML-kalibriranih vrijednosti - pokrenite pješčanik za usporedbu",
     "phase_name_required": "Potreban je naziv faze",
     "phase_updated": "Faza ažurirana",
     "phases_saved": "Faze spremljene",
@@ -1770,6 +1891,7 @@
     "other": "Ostalo"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Perilica posuđa: sekunde tišine nakon očekivanog trajanja prije nego što se otpusti čekanje na završno ispumpavanje vode",
     "anti_wrinkle_enabled": "Upij impulse bubnja nakon glavne faze, a ne čitaj ih kao nove cikluse",
     "anti_wrinkle_exit_power": "Snaga mora pasti ispod ove vrijednosti između impulsa da bi anti-bora ostala aktivna",
     "anti_wrinkle_idle_timeout": "Dopušteno vrijeme mirovanja između dva impulsa bubnja prije nego što anti-bora završi",

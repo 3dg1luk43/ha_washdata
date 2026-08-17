@@ -18,12 +18,14 @@
 
 from __future__ import annotations
 
+import copy
 import logging
+import math
 from datetime import datetime
 from typing import Any, TYPE_CHECKING, cast
 
 import numpy as np
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 
 from .const import (
     CONF_WATCHDOG_INTERVAL,
@@ -51,6 +53,9 @@ from .const import (
     CONF_START_DURATION_THRESHOLD,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_ANTI_WRINKLE_ENABLED,
+    DEFAULT_ANTI_WRINKLE_ENABLED,
+    DEFAULT_ANTI_WRINKLE_MAX_POWER,
     CONF_DEVICE_TYPE,
     CONF_PUMP_STUCK_DURATION,
     DEVICE_TYPE_DRYER,
@@ -86,6 +91,56 @@ _MAX_PAUSE_GAP_H = 1.0                  # a gap > this (hours) between samples i
 # off_delay to 1999 s).  A genuine mid-cycle pause is followed by minutes of real
 # washing; a terminal blip is followed by the cycle ending.
 _MIN_RESUME_ACTIVE_S = 120.0
+
+
+def _measured_off_delay_floor(device_floor: int) -> int:
+    """Lower bound for an off_delay suggestion backed by *measured* pauses.
+
+    ``DEFAULT_OFF_DELAY_BY_DEVICE`` is a blind prior for devices we have no
+    traces for: the dishwasher entry (1800 s) is sized to bridge a passive
+    drying phase.  Once real intra-cycle pauses have been measured that prior is
+    stale evidence, and clamping the measurement up to it is actively harmful -
+    off_delay is *never* what holds a cycle together (every finalize path in
+    ``cycle_detector`` uses ``max(off_delay, min_off_gap)``, and min_off_gap
+    keeps its own 3600 s dishwasher floor).  Solo uses of off_delay are the
+    end-gate energy lookback window, the watchdog's keepalive cadence and the
+    Rule-12 end_energy_threshold coupling - all of which get *worse* as it
+    grows: a 1800 s window sweeps standby blips into the end gate and holds the
+    cycle open long past the real end.
+
+    So a measured suggestion is floored at the generic ``DEFAULT_OFF_DELAY``,
+    while device priors that are *below* it (e.g. pumps at 20 s, which cut off
+    sharply) are still honoured.
+    """
+    return min(int(device_floor), DEFAULT_OFF_DELAY)
+
+
+#: Evidence bar for a *measured* ``min_off_gap`` proposal. Below this we keep the
+#: conservative per-device prior rather than guess from a thin sample.
+_MIN_GAP_MIN_TRACED_CYCLES = 5
+_MIN_GAP_MIN_SPANS = 3
+#: Absolute sanity cap, mirroring the inter-cycle-gap path.
+_MIN_GAP_ABS_CAP = 3600
+
+
+def _bridged_spans(
+    points: list[tuple[float, float]], active_thr: float, max_gap_s: float
+) -> list[float]:
+    """Quiet spans a cycle has to survive to stay whole, in seconds.
+
+    The mirror image of the off-delay pause scan: here *any* resumption counts
+    (``min_resume_active_s=0``), including a dishwasher's short terminal
+    pump-out. That blip is deliberately excluded from the off-delay statistic -
+    it must not inflate the end-gate window - but it is exactly what
+    ``min_off_gap`` exists to bridge, because if the cycle closes before it
+    lands, the pump-out is recorded as a separate ghost cycle (#43).
+    """
+    return [
+        points[resume_idx][0] - low_start
+        for low_start, resume_idx in _resumed_low_runs(
+            points, active_thr, max_gap_s, min_resume_active_s=0.0
+        )
+    ]
 
 
 def _resumed_low_runs(
@@ -569,6 +624,32 @@ def reconcile_suggestions(
             else:
                 adjust(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, round(max_r * 0.5, 2), "the max duration ratio")
 
+        # ── Rule 12: end_energy_threshold >= stop_threshold_w * off_delay / 3600 ──
+        # The energy end-gate is evaluated over an off_delay-long window, so it
+        # implies a wattage; below stop_threshold_w it forbids what the power gate
+        # allows and the cycle can only close via a fallback path (#376). Only ever
+        # RAISE end_energy to the implied floor (the safe direction that makes the
+        # end gate satisfiable); never lower stop_threshold_w, which would make
+        # start/end detection more aggressive.
+        stop_ee = eff(CONF_STOP_THRESHOLD_W)
+        off_delay_ee = eff(CONF_OFF_DELAY)
+        end_energy = eff(CONF_END_ENERGY_THRESHOLD)
+        if (
+            stop_ee is not None and off_delay_ee is not None and end_energy is not None
+            and off_delay_ee > 0 and end_energy < stop_ee * off_delay_ee / 3600.0
+            and in_out(CONF_END_ENERGY_THRESHOLD, CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY)
+        ):
+            # Round the floor UP at adjust()'s own 2-decimal precision. Rounding
+            # to-nearest would land *below* the floor (stop=2 W, off_delay=60 s ->
+            # 0.0333 Wh -> 0.03 Wh), the next fixpoint pass would then see the same
+            # violation, find the value unchanged, and return a map that still
+            # breaks Rule 12.
+            adjust(
+                CONF_END_ENERGY_THRESHOLD,
+                math.ceil(stop_ee * off_delay_ee / 36.0) / 100.0,
+                "the stop threshold and off delay",
+            )
+
         if change_count[0] == prev_count:
             break
 
@@ -605,22 +686,62 @@ class SuggestionEngine:
         self.entry_id = entry_id
         self.profile_store = profile_store
         self.device_type = device_type
+        # Loop-affine config snapshot, refreshed by refresh_options_snapshot()
+        # immediately before an executor dispatch. See _entry_options().
+        self._options_snapshot: dict[str, Any] | None = None
+
+    @callback
+    def for_job(self, options: dict[str, Any] | None = None) -> "SuggestionEngine":
+        """A throwaway engine bound to one config snapshot; loop-only.
+
+        Every generator below runs in an executor thread, but reading the config
+        entry is loop-affine: ``async_get_entry`` walks loop-owned state, and the
+        two-mapping merge in :meth:`_read_entry_options` can tear if
+        ``async_update_entry`` replaces ``data``/``options`` between the reads.
+
+        The snapshot is bound to a **shallow copy** rather than to ``self`` so
+        concurrent jobs cannot overwrite each other's view, and so the shared
+        engine never holds a snapshot that a later loop-side caller would silently
+        read as stale. The copy shares ``profile_store``/``hass`` deliberately -
+        the generators only read them.
+        """
+        job = copy.copy(self)
+        job._options_snapshot = (
+            dict(options) if options is not None else self._read_entry_options()
+        )
+        return job
 
     def generate_operational_suggestions(self, p95_dt: float, median_dt: float) -> dict[str, Any]:
         """Generate suggestions for operational parameters based on cadence."""
         suggestions: dict[str, dict[str, Any]] = {}
 
         # 1. Watchdog Interval
-        # Goal: as LOW (responsive) as safely possible so a stalled cycle is
-        # caught quickly. The only hard constraint is that it must sit above the
-        # normal update cadence to avoid false stops, so target just above p95
-        # (3x) rather than a very conservative multiple.
-        suggested_watchdog = int(max(30, round(p95_dt * 3)))
+        # This is only the *tick period* of the background timer - it is never
+        # itself a staleness threshold, so it cannot cause a false stop (those
+        # are gated by no_update_active_timeout / the device low-power floor in
+        # ``manager._watchdog_check_stuck_cycle``).  It does bound how late the
+        # 0 W keepalive injection and the timeout checks can fire, so every extra
+        # second is pure end-detection lag.  Tick just past the p95 update gap -
+        # matching DEFAULT_WATCHDOG_INTERVAL's documented "2 x sampling + 1"
+        # derivation for a publish-on-change sensor that skips at most one
+        # sample.  The old 3x multiple polled ~6x slower than the sensor updates
+        # and delayed end detection for no safety benefit.
+        # Floor at 2 x median + 1 so the suggestion pre-satisfies reconciler
+        # Rule 3a (watchdog >= 2 x sampling_interval) when CONF_SAMPLING_INTERVAL
+        # is suggested from the same median_dt.  Without this, a regular sensor
+        # (p95 ≈ median) would produce ceil(p95)+1 which Rule 3a then silently
+        # overwrites, leaving a stored value whose reason text no longer matches.
+        suggested_watchdog = int(max(30, max(math.ceil(p95_dt) + 1,
+                                            2 * math.ceil(median_dt) + 1)))
         suggestions[CONF_WATCHDOG_INTERVAL] = {
             "value": suggested_watchdog,
-            "reason": f"Kept as low as safe (3x the p95 update gap of {p95_dt:.1f}s, min 30s) so stalls are caught quickly without false stops.",
+            "reason": (
+                f"Kept as low as safe (just above the p95 update gap of {p95_dt:.1f}s"
+                f" and at least 2x the sampling interval of {median_dt:.1f}s, min 30s)"
+                f" so stalls are caught quickly without false stops."
+            ),
             "reason_key": "suggestion.reason.watchdog",
-            "reason_params": {"p95": f"{p95_dt:.1f}"},
+            "reason_params": {"p95": f"{p95_dt:.1f}", "median": f"{median_dt:.1f}"},
         }
 
         # 2. No Update Timeout
@@ -645,19 +766,32 @@ class SuggestionEngine:
         # cadence only sets a lower sanity bound, so fall back to it when we do
         # not yet have enough traces to measure pauses.
         raw_cycles = self.profile_store.get_past_cycles()[-100:]
-        stop_thr = self._current_stop_threshold(self._entry_options())
+        # Resolve the config entry once (loop-affine; this runs in an executor) and
+        # reuse it for both the stop threshold and the anti-crease check below.
+        _op_opts = self._entry_options()
+        stop_thr = self._current_stop_threshold(_op_opts)
         clean, _excl = select_clean_cycles(raw_cycles, stop_threshold_w=stop_thr)
-        pause_based = self._suggest_off_delay_from_pauses(clean, stop_thr, device_floor)
+        pause_based = self._suggest_off_delay_from_pauses(
+            clean, stop_thr, device_floor, options=_op_opts
+        )
 
-        reason_off_key: str | None = None
-        reason_off_params: dict[str, Any] | None = None
         if pause_based is not None:
             suggested_off_delay, reason_off, reason_off_key, reason_off_params = pause_based
-        else:
+            suggestions[CONF_OFF_DELAY] = {
+                "value": suggested_off_delay,
+                "reason": reason_off,
+                "reason_key": reason_off_key,
+                "reason_params": reason_off_params,
+            }
+        elif not self._is_anti_crease_enabled(_op_opts):
+            # Cadence fallback: p95_dt * 5. Safe for most devices, but on anti-crease
+            # devices the update gap is dominated by the inter-burst quiet period, so
+            # the result often exceeds the burst interval and resets the end timer on
+            # every tumble burst. Skip it when anti-crease is enabled (#343 gap B).
             suggested_off_delay = int(max(device_floor, p95_dt * 5))
             reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
-            reason_off_key = "suggestion.reason.off_delay_cadence"
-            reason_off_params = {"p95": f"{p95_dt:.1f}"}
+            reason_off_key: str = "suggestion.reason.off_delay_cadence"
+            reason_off_params: dict[str, Any] = {"p95": f"{p95_dt:.1f}"}
             if suggested_off_delay == device_floor:
                 if self.device_type and self.device_type in DEFAULT_OFF_DELAY_BY_DEVICE:
                     reason_off = (
@@ -669,13 +803,12 @@ class SuggestionEngine:
                     reason_off = f"Used generic safe minimum ({DEFAULT_OFF_DELAY}s)."
                     reason_off_key = "suggestion.reason.off_delay_generic_floor"
                     reason_off_params = {"floor": DEFAULT_OFF_DELAY}
-
-        suggestions[CONF_OFF_DELAY] = {
-            "value": suggested_off_delay,
-            "reason": reason_off,
-            "reason_key": reason_off_key,
-            "reason_params": reason_off_params,
-        }
+            suggestions[CONF_OFF_DELAY] = {
+                "value": suggested_off_delay,
+                "reason": reason_off,
+                "reason_key": reason_off_key,
+                "reason_params": reason_off_params,
+            }
 
         # 4. Profile Match Interval
         suggested_match = int(max(10, median_dt * 10))
@@ -791,14 +924,28 @@ class SuggestionEngine:
                     "reason_params": {"p95": f"{p95_ratio:.2f}"},
                 }
 
-        # Min-off-gap: derived from observed inter-cycle gaps
-        min_off_gap = self._suggest_min_off_gap(cycles)
+        # Min-off-gap: measured bridge requirement, capped by back-to-back headroom
+        min_off_gap = self._suggest_min_off_gap(
+            cycles, stop_threshold_w=stop_thr, gap_cycles=raw_cycles
+        )
         if min_off_gap is not None:
             suggestions[CONF_MIN_OFF_GAP] = min_off_gap
 
         return suggestions
 
     def _entry_options(self) -> dict[str, Any]:
+        """Config options for this pass: the job-bound snapshot when present.
+
+        Only a :meth:`for_job` copy carries a snapshot; on the shared engine this
+        is always ``None``, so loop-side callers (tests, direct calls) get a live
+        read and can never observe a stale snapshot left by a finished job.
+        """
+        snapshot = self._options_snapshot
+        if snapshot is not None:
+            return snapshot
+        return self._read_entry_options()
+
+    def _read_entry_options(self) -> dict[str, Any]:
         """Best-effort read of the current config entry options."""
         try:
             entry = self.hass.config_entries.async_get_entry(self.entry_id)
@@ -898,9 +1045,12 @@ class SuggestionEngine:
         }
 
         # --- min_power: keep the noise gate below the lowest genuine draw ---
+        # Strip the anti-crease tail before taking the per-cycle minimum so that the
+        # ~3 W between-burst baseline does not drag the p05 down on anti-crease
+        # devices and produce a noise gate below the real operating draw (#343 gap A).
         lowest_active: list[float] = []
         for c in clean:
-            readings = _cycle_readings(c)
+            readings = self._strip_anti_crease_readings(_cycle_readings(c), options=options)
             if len(readings) < 5:
                 continue
             active = np.array([p for _, p in readings if p > 0.5])
@@ -1085,27 +1235,38 @@ class SuggestionEngine:
         cycles: list[dict[str, Any]],
         stop_threshold_w: float,
         device_floor: int,
+        options: dict[str, Any] | None = None,
     ) -> tuple[int, str, str, dict[str, Any]] | None:
         """Off-delay sized to outlast the longest genuine intra-cycle pause.
 
         Collects every low-power segment that *resumed* (a proven pause, not the
         trailing wind-down) across clean cycles and sets off_delay to the p95
-        pause length plus a 60 s buffer, floored by the device minimum. Returns
-        ``None`` when too few traces exist, so the caller falls back to the
-        update-cadence heuristic.
+        pause length plus a 60 s buffer. Returns ``None`` when too few traces
+        exist, so the caller falls back to the update-cadence heuristic.
+
+        The floor is :func:`_measured_off_delay_floor` (the *generic* minimum),
+        not ``device_floor``: once real pauses have been measured the blind
+        per-device prior is stale evidence and must not override the
+        measurement. ``device_floor`` still applies on the caller's no-data
+        fallback path.
         """
         pause_durations: list[float] = []
         n_traced = 0
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
+        _anti_crease_opts = options if options is not None else self._entry_options()
         for c in cycles:
-            readings = _cycle_readings(c)
+            # Strip the anti-crease tail before pause analysis so that the inter-burst
+            # quiet periods (up to 180-240 s on Miele/Bosch) are not counted as genuine
+            # intra-cycle pauses, which would inflate p95 beyond the burst interval and
+            # reset the end timer on every tumble burst (#343 gap C).
+            readings = self._strip_anti_crease_readings(_cycle_readings(c), options=_anti_crease_opts)
             if len(readings) < 10:
                 continue
-            n_traced += 1
             powers = [p for _, p in readings]
             peak = max(powers) if powers else 0.0
             if peak <= 0:
                 continue
+            n_traced += 1
             active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
             # Genuine intra-cycle pauses only: a low run that resumed into
             # sustained activity.  A terminal drying/pump-out blip that does not
@@ -1120,11 +1281,12 @@ class SuggestionEngine:
             return None
 
         p95_pause = float(np.percentile(pause_durations, 95))
-        value = int(max(device_floor, round(p95_pause + 60.0)))
+        floor = _measured_off_delay_floor(device_floor)
+        value = int(max(floor, round(p95_pause + 60.0)))
         reason = (
             f"Sized to outlast real pauses: p95 intra-cycle pause {p95_pause:.0f}s "
             f"+ 60s buffer, from {len(pause_durations)} pauses across {n_traced} "
-            f"clean cycles (floor {device_floor}s)."
+            f"clean cycles (floor {floor}s)."
         )
         return (
             value,
@@ -1134,17 +1296,67 @@ class SuggestionEngine:
                 "p95": f"{p95_pause:.0f}",
                 "pauses": len(pause_durations),
                 "cycles": n_traced,
-                "floor": device_floor,
+                "floor": floor,
             },
         )
 
     def _suggest_min_off_gap(
-        self, cycles: list[dict[str, Any]]
+        self,
+        cycles: list[dict[str, Any]],
+        stop_threshold_w: float | None = None,
+        gap_cycles: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any] | None:
-        """Derive a min_off_gap suggestion from observed inter-cycle gaps."""
+        """Size ``min_off_gap`` from what the cycles actually need to bridge.
+
+        ``min_off_gap`` is bounded from two sides and both bounds are measurable:
+
+        * **must not split** - it has to outlast the longest quiet span *inside*
+          a cycle that is followed by more of that same cycle (see
+          :func:`_bridged_spans`). This is the requirement, so it sets the value.
+        * **must not merge** - it has to stay under the shortest gap the user
+          leaves between two separate loads, because a high reading while the
+          previous cycle is still in ENDING revives that cycle rather than
+          starting a new one (``cycle_detector`` STATE_ENDING). This is a
+          *ceiling*, not a target.
+
+        The previous implementation derived the value from the ceiling
+        (``p05_inter_cycle_gap * 0.8``) and then floored it with the blind
+        per-device prior. That proposed a value sitting right against the merge
+        boundary with no evidence any bridging was needed - on a real washer
+        export it lands at ~1748 s against a measured need of ~1271 s and a real
+        inter-load gap of 181 s, i.e. it guarantees back-to-back loads merge
+        (#296). It also suppressed itself whenever the result equalled the
+        device floor, so a dishwasher user was never told their 3600 s prior was
+        1.7x what their machine measurably needs.
+
+        When the two bounds conflict (the cycle needs more bridging than the
+        user's own turnaround allows) no suggestion is made: that machine cannot
+        be separated by a quiet-gap rule at all and needs the event-based
+        splitters instead (anti-crease finalize, dishwasher end-spike), so the
+        safe move is to leave the current value alone. Splitting a cycle
+        corrupts the learned profile; merging produces one visibly over-long
+        record the user can correct.
+
+        ``cycles`` supplies the bridge measurement and must be clean;
+        ``gap_cycles`` supplies the merge ceiling and must be the *unfiltered*
+        history (defaults to ``cycles``). The distinction matters: dropping a
+        mis-detected cycle silently fuses its two neighbouring gaps into one long
+        gap, which inflates the ceiling and would let the proposal sail past the
+        user's real turnaround. On a real washer export that is the difference
+        between a 1748 s and a 181 s ceiling.
+
+        Falls back to the historical inter-cycle-gap heuristic when there are too
+        few traces to measure a bridge requirement.
+
+        Validated with ``devtools/min_off_gap_eval.py``: replaying all 152 clean
+        cycles across the ``cycle_data/`` corpus through a real unmatched
+        ``CycleDetector`` at the proposed value produces zero splits (the only
+        trace that splits is tron4r's known back-to-back *merged* 206-min cycle,
+        where splitting is the correct outcome).
+        """
         # Only consider completed, labeled cycles with valid timestamps
         timed_cycles: list[tuple[float, float]] = []
-        for c in cycles:
+        for c in (cycles if gap_cycles is None else gap_cycles):
             if not isinstance(c, dict):
                 continue
             if c.get("status") not in ("completed", "force_stopped"):
@@ -1179,15 +1391,59 @@ class SuggestionEngine:
             return None
 
         gaps_arr = np.array(gaps)
-        # Use the 5th-percentile gap as the safe minimum, with device-type floor
+        # 5th percentile, kept only for the no-evidence fallback path's reason text.
         p05_gap = float(np.percentile(gaps_arr, 5))
         device_floor = (
             DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(self.device_type, DEFAULT_MIN_OFF_GAP)
             if self.device_type is not None
             else DEFAULT_MIN_OFF_GAP
         )
-        # Add a 20% safety margin so we never split a real gap into two cycles
-        suggested = int(max(device_floor, min(p05_gap * 0.8, 3600)))
+        # Merge ceiling: the SHORTEST turnaround this user has actually run, less a
+        # 20% margin.  Deliberately not a percentile - these distributions are
+        # strongly skewed (one 181 s turnaround, then a jump to 5000 s+), so p05
+        # interpolates straight past the single tight pair that is precisely the
+        # merge case we must not propose through.  Tolerating it as an "outlier"
+        # would be tolerating the bug.  Erring low only ever suppresses a
+        # suggestion, which leaves the user's current value in place.
+        ceiling = int(min(float(gaps_arr.min()) * 0.8, _MIN_GAP_ABS_CAP))
+
+        # --- Preferred: size from the measured bridge requirement ---------------
+        bridge = self._measured_bridge_requirement(cycles, stop_threshold_w)
+        if bridge is not None:
+            longest, n_spans, n_traced = bridge
+            needed = int(
+                min(
+                    _MIN_GAP_ABS_CAP,
+                    max(DEFAULT_MIN_OFF_GAP, round(longest + 60.0)),
+                )
+            )
+            if needed > ceiling:
+                # The cycle needs more bridging than this user's turnaround
+                # allows - no quiet-gap value satisfies both. Leave it alone.
+                return None
+            reason = (
+                f"Sized to bridge the longest quiet stretch inside a cycle: "
+                f"{longest:.0f}s + 60s buffer, from {n_spans} bridged gaps across "
+                f"{n_traced} clean cycles (stays under your {ceiling}s "
+                f"back-to-back headroom)."
+            )
+            return {
+                "value": needed,
+                "reason": reason,
+                "reason_key": "suggestion.reason.min_off_gap_bridge",
+                "reason_params": {
+                    "span": f"{longest:.0f}",
+                    "spans": n_spans,
+                    "cycles": n_traced,
+                    "ceiling": ceiling,
+                },
+            }
+
+        # --- Fallback: no trace evidence, keep the conservative prior ----------
+        # Unchanged from the historical heuristic (p05-based, device floor wins),
+        # because with no measured bridge requirement the blind prior is still the
+        # best evidence available.
+        suggested = int(max(device_floor, min(p05_gap * 0.8, _MIN_GAP_ABS_CAP)))
         # When the data-derived value is equal to the device floor, we have no
         # useful signal to surface - return None to suppress a misleading suggestion.
         if suggested == device_floor:
@@ -1206,6 +1462,139 @@ class SuggestionEngine:
                 "floor": device_floor,
             },
         }
+
+    def _measured_bridge_requirement(
+        self,
+        cycles: list[dict[str, Any]],
+        stop_threshold_w: float | None = None,
+    ) -> tuple[float, int, int] | None:
+        """Longest quiet span these cycles had to bridge to stay whole.
+
+        Returns ``(longest_span_s, n_spans, n_traced)`` or ``None`` when there is
+        not enough traced history to trust the measurement.
+
+        The statistic is the **maximum**, not a percentile: ``min_off_gap`` has to
+        outlast the *longest* gap a cycle ever has to survive, and a percentile
+        under-shoots it. On washers the bridged-span distribution is dominated by
+        thousands of sampling-jitter dips, so p95 collapses to ~100 s while the
+        real phase gap is ~1300 s. Outliers are bounded by construction:
+        ``select_clean_cycles`` has already dropped mis-detected cycles,
+        :func:`_resumed_low_runs` abandons any run straddling an outage-sized
+        sampling gap, and the caller clamps the result under both
+        ``_MIN_GAP_ABS_CAP`` and the user's own back-to-back headroom.
+        """
+        stop_thr = (
+            float(stop_threshold_w)
+            if stop_threshold_w is not None
+            else self._current_stop_threshold(self._entry_options())
+        )
+        max_gap_s = _MAX_PAUSE_GAP_H * 3600
+        spans: list[float] = []
+        n_traced = 0
+        for c in cycles:
+            if not isinstance(c, dict):
+                continue
+            readings = _cycle_readings(c)
+            if len(readings) < 10:
+                continue
+            peak = max((p for _, p in readings), default=0.0)
+            if peak <= 0:
+                continue
+            n_traced += 1
+            active_thr = max(stop_thr, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
+            spans.extend(_bridged_spans(readings, active_thr, max_gap_s))
+
+        if n_traced < _MIN_GAP_MIN_TRACED_CYCLES or len(spans) < _MIN_GAP_MIN_SPANS:
+            return None
+        return (max(spans), len(spans), n_traced)
+
+    #: Device types where the anti-crease/anti-wrinkle tail must be excluded from
+    #: the stop/start min-active statistic (#343).
+    _ANTI_CREASE_DEVICE_TYPES = (
+        DEVICE_TYPE_WASHING_MACHINE,
+        DEVICE_TYPE_DRYER,
+        DEVICE_TYPE_WASHER_DRYER,
+    )
+
+    def _strip_anti_crease_tail(
+        self,
+        ordered_powers: np.ndarray,
+        options: dict[str, Any] | None = None,
+    ) -> np.ndarray:
+        """Drop the post-cycle anti-crease tail from an ordered power trace (#343).
+
+        Stop/start thresholds detect the MAIN cycle; the anti-crease tumble-pulse
+        tail is governed by its own ``anti_wrinkle_*`` settings, but its near-zero
+        between-pulse baseline is the global minimum of the stored trace and used
+        to poison the min-active statistic (the tuner then proposes thresholds just
+        above that baseline, breaking end-detection).
+
+        The tail is everything after the last sample that reaches
+        ``anti_wrinkle_max_power`` - by the config's own rule a pulse above that
+        ends anti-wrinkle, so nothing in the tail can reach it. Returns the trace
+        unchanged when anti-crease is off, the device type is ineligible, or no
+        sample reaches the ceiling (no identifiable main phase) - so it can never
+        over-exclude for a non-anti-crease device or a gentle program.
+
+        Pass ``options`` when calling from a loop to avoid repeated config-entry
+        reads (``hass.config_entries.async_get_entry`` is loop-affine).
+        """
+        if self.device_type not in self._ANTI_CREASE_DEVICE_TYPES:
+            return ordered_powers
+        opts = options if options is not None else self._entry_options()
+        if not opts.get(CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED):
+            return ordered_powers
+        try:
+            max_power = float(opts.get(CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER))
+        except (TypeError, ValueError):
+            max_power = DEFAULT_ANTI_WRINKLE_MAX_POWER
+        if max_power <= 0 or ordered_powers.size == 0:
+            return ordered_powers
+        above = np.flatnonzero(ordered_powers >= max_power)
+        if above.size == 0:
+            return ordered_powers  # no main high-power phase -> nothing to strip
+        return ordered_powers[: int(above[-1]) + 1]
+
+    def _is_anti_crease_enabled(self, options: dict[str, Any] | None = None) -> bool:
+        """True when anti-crease mode is active on an eligible device type."""
+        if self.device_type not in self._ANTI_CREASE_DEVICE_TYPES:
+            return False
+        opts = options if options is not None else self._entry_options()
+        return bool(opts.get(CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED))
+
+    def _strip_anti_crease_readings(
+        self,
+        readings: list[tuple[float, float]],
+        options: dict[str, Any] | None = None,
+    ) -> list[tuple[float, float]]:
+        """Time-domain equivalent of _strip_anti_crease_tail for (offset, power) pairs.
+
+        Returns the readings list trimmed to the last sample >= anti_wrinkle_max_power
+        so that pause-duration and min-power statistics ignore the anti-crease tail
+        (#343 gap B/C). No-op when anti-crease is off, the device type is ineligible,
+        or no sample reaches the ceiling.
+
+        Pass ``options`` when calling from a loop to avoid repeated config-entry
+        reads (``hass.config_entries.async_get_entry`` is loop-affine).
+        """
+        if not readings:
+            return readings
+        opts = options if options is not None else self._entry_options()
+        if not self._is_anti_crease_enabled(opts):
+            return readings
+        try:
+            max_power = float(opts.get(CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER))
+        except (TypeError, ValueError):
+            max_power = DEFAULT_ANTI_WRINKLE_MAX_POWER
+        if max_power <= 0:
+            return readings
+        last_above = -1
+        for i, (_, p) in enumerate(readings):
+            if p >= max_power:
+                last_above = i
+        if last_above < 0:
+            return readings  # no main high-power phase identifiable
+        return readings[: last_above + 1]
 
     def run_simulation(self, cycle_data: dict[str, Any]) -> dict[str, Any]:
         """Replay a single cycle with varied parameters to find optimal settings.
@@ -1235,7 +1624,10 @@ class SuggestionEngine:
             return {}
 
         powers = np.array([p[1] for p in readings])
-        active_powers = powers[powers > 0.5]
+        # Exclude the anti-crease tail so its near-zero baseline does not poison the
+        # stop/start thresholds on anti-crease devices (#343). No-op otherwise.
+        main_powers = self._strip_anti_crease_tail(powers)
+        active_powers = main_powers[main_powers > 0.5]
 
         if len(active_powers) < 5:
             return {}
@@ -1245,9 +1637,11 @@ class SuggestionEngine:
         suggested_stop = round(min_active * 0.8, 2)
         suggested_start = round(min_active * 1.2, 2)
 
-        # Energy suggestions
-        suggested_end_energy = 0.05
-
+        # end_energy_threshold is intentionally NOT suggested from a single cycle:
+        # a context-free 0.05 Wh was below the anti-crease baseline energy accumulated
+        # over the off_delay window, so the end gate never fired (#343 gap D). The
+        # batch path (run_batch_simulation) derives a cycle-energy-proportional floor
+        # from actual false-end events once 5+ cycles exist; use that instead.
         return {
             CONF_STOP_THRESHOLD_W: {
                 "value": suggested_stop,
@@ -1260,12 +1654,6 @@ class SuggestionEngine:
                 "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle.",
                 "reason_key": "suggestion.reason.min_active",
                 "reason_params": {"min": f"{min_active:.1f}"},
-            },
-            CONF_END_ENERGY_THRESHOLD: {
-                "value": suggested_end_energy,
-                "reason": "Default recommended baseline for end-of-cycle noise gate.",
-                "reason_key": "suggestion.reason.end_energy_default",
-                "reason_params": {},
             },
         }
 
@@ -1289,7 +1677,11 @@ class SuggestionEngine:
         """
         _BATCH_MIN_CYCLES = 5
 
-        stop_thr = self._current_stop_threshold(self._entry_options())
+        _batch_opts = self._entry_options()
+        stop_thr = self._current_stop_threshold(_batch_opts)
+        # Keep the unfiltered list: the min_off_gap merge ceiling must see the
+        # user's real turnaround, which dropping a cycle would fuse away.
+        raw_cycles = list(cycles)
         cycles, _excluded = select_clean_cycles(cycles, stop_threshold_w=stop_thr)
 
         valid_cycles: list[list[tuple[float, float]]] = []
@@ -1326,7 +1718,13 @@ class SuggestionEngine:
         false_end_energies: list[float] = []
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
         for readings in valid_cycles:
-            powers = np.array([p for _, p in readings])
+            # Exclude the post-cycle anti-crease tail before ANY per-cycle statistic
+            # so its low-power baseline drags neither the p05 min-active threshold nor
+            # the end-energy / false-end floors below the main cycle (#343). No-op for
+            # non-anti-crease devices. Trim the (offset, power) readings once so the
+            # threshold stat and the energy scan consume the same main-cycle data.
+            main_readings = self._strip_anti_crease_readings(readings, options=_batch_opts)
+            powers = np.array([p for _, p in main_readings])
             active = powers[powers > 0.5]
             peak = float(np.max(powers)) if powers.size else 0.0
             active_thr = max(stop_thr, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
@@ -1339,9 +1737,9 @@ class SuggestionEngine:
             in_pause = False
             pause_energy = 0.0
             stop_w = stop_thr
-            for i in range(1, len(readings)):
-                t0, p0 = readings[i - 1]
-                t1, p1 = readings[i]
+            for i in range(1, len(main_readings)):
+                t0, p0 = main_readings[i - 1]
+                t1, p1 = main_readings[i]
                 dt_s = t1 - t0
                 # Guard against non-positive or excessively large time gaps
                 if dt_s <= 0 or dt_s > max_gap_s:
@@ -1436,7 +1834,9 @@ class SuggestionEngine:
             "reason_params": reason_end_params,
         }
 
-        min_off_gap = self._suggest_min_off_gap(cycles)
+        min_off_gap = self._suggest_min_off_gap(
+            cycles, stop_threshold_w=stop_thr, gap_cycles=raw_cycles
+        )
         if min_off_gap is not None:
             suggestions[CONF_MIN_OFF_GAP] = min_off_gap
 
@@ -1626,7 +2026,12 @@ class MLSuggestionEngine:
         end_feat_fn: Any,
         device_floor: int,
     ) -> dict[str, Any] | None:
-        """Off-delay from end-detector-confirmed pauses (P(end) < 0.4)."""
+        """Off-delay from end-detector-confirmed pauses (P(end) < 0.4).
+
+        Floored by :func:`_measured_off_delay_floor` for the same reason as the
+        classic twin: a model-verified pause measurement outranks the blind
+        per-device prior.
+        """
         confirmed: list[float] = []
         n_cycles = 0
         for c in clean:
@@ -1643,20 +2048,21 @@ class MLSuggestionEngine:
         if n_cycles < 5 or len(confirmed) < 3:
             return None
         p95 = float(np.percentile(confirmed, 95))
-        value = int(max(device_floor, round(p95 + 60.0)))
+        floor = _measured_off_delay_floor(device_floor)
+        value = int(max(floor, round(p95 + 60.0)))
         return {
             "value": value,
             "reason": (
                 f"End-detector-confirmed pauses: p95 {p95:.0f}s + 60s buffer, from "
                 f"{len(confirmed)} model-verified pauses across {n_cycles} cycles "
-                f"(floor {device_floor}s)."
+                f"(floor {floor}s)."
             ),
             "reason_key": "suggestion.reason.ml_off_delay",
             "reason_params": {
                 "p95": f"{p95:.0f}",
                 "pauses": len(confirmed),
                 "cycles": n_cycles,
-                "floor": device_floor,
+                "floor": floor,
             },
         }
 

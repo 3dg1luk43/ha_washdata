@@ -216,6 +216,8 @@ class ImportConfigSelectiveResponse(TypedDict):
 # ─── Shared constants ──────────────────────────────────────────────────────────
 
 class GetConstantsResponse(TypedDict):
+    version: str
+    icon_url: str | None
     device_types: list[dict[str, Any]]
     state_colors: dict[str, Any]
     ml_lab_enabled: bool
@@ -225,17 +227,25 @@ class GetConstantsResponse(TypedDict):
     store_online_available: bool
     store_online_enabled: bool
     store_web_origin: str
+    store_prefs: dict[str, Any]
+    pg_match_defaults: dict[str, Any]
 
 
 # ─── Suggestions ───────────────────────────────────────────────────────────────
 
 class GetSuggestionsResponse(TypedDict):
     suggestions: list[dict[str, Any]]
+    locked_suggestions: list[str]
 
 
 class ApplySuggestionsResponse(TypedDict):
     success: bool
     applied: list[str]
+
+
+class SetSuggestionLockResponse(TypedDict):
+    success: bool
+    locked_suggestions: list[str]
 
 
 class RunSuggestionAnalysisResponse(TypedDict, total=False):
@@ -262,6 +272,7 @@ class GetCyclePowerDataResponse(TypedDict, total=False):
     energy_kwh: float | None
     artifacts: list[dict[str, Any]]
     restart_gaps: list[Any]
+    is_reference: bool
 
 
 class AnalyzeSplitResponse(TypedDict):
@@ -437,6 +448,41 @@ class GetDtwDebugResponse(TypedDict):
     warp_path: list[list[int]]
 
 
+class PlaygroundPreset(TypedDict):
+    """One saved Playground settings snapshot."""
+
+    name: str
+    values: dict[str, Any]
+    created_at: Any
+    updated_at: Any
+
+
+class GetPlaygroundSettingsResponse(TypedDict):
+    """Live effective Playground settings + the device's saved presets.
+
+    ``classic_suggestions`` and ``ml_suggestions`` are filtered to keys the
+    Playground exposes so the panel can stage them directly.  ``ml_suggestions``
+    is ``None`` when ``ENABLE_ML_SUGGESTIONS`` is off - the key is still always
+    present, so every field here is required (total=True) and
+    ``_validate_ws_contract()`` can catch a handler that drops one.
+    """
+
+    effective: dict[str, Any]
+    presets: list[PlaygroundPreset]
+    publishable: list[str]
+    preset_limit: int
+    classic_suggestions: dict[str, Any]
+    ml_suggestions: dict[str, Any] | None
+    ml_suggestions_enabled: bool
+
+
+class PlaygroundPresetsResponse(TypedDict):
+    """Acknowledgement carrying the post-mutation preset list."""
+
+    success: bool
+    presets: list[PlaygroundPreset]
+
+
 class TaskSnapshot(TypedDict, total=False):
     id: str
     entry_id: str
@@ -585,6 +631,7 @@ class GetShareableCyclesResponse(TypedDict, total=False):
     plus the programs that carry a local phase map."""
     items: list
     phase_programs: list
+    all_programs: list
 
 
 class GetSetupStatusResponse(TypedDict, total=False):
@@ -651,6 +698,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_suggestions": GetSuggestionsResponse,
     "apply_suggestions": ApplySuggestionsResponse,
     "clear_suggestions": SuccessResponse,
+    "set_suggestion_lock": SetSuggestionLockResponse,
     "run_suggestion_analysis": RunSuggestionAnalysisResponse,
     "get_cycle_power_data": GetCyclePowerDataResponse,
     "trim_cycle": StartTaskResponse,
@@ -679,6 +727,9 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "run_playground_history": RunPlaygroundHistoryResponse,
     "run_playground_sweep": RunPlaygroundSweepResponse,
     "get_dtw_debug": GetDtwDebugResponse,
+    "get_playground_settings": GetPlaygroundSettingsResponse,
+    "save_playground_preset": PlaygroundPresetsResponse,
+    "delete_playground_preset": PlaygroundPresetsResponse,
     "list_tasks": ListTasksResponse,
     "subscribe_tasks": SubscribeTasksResponse,
     "cancel_task": CancelTaskResponse,
@@ -868,6 +919,7 @@ WS_COMMANDS: dict[str, dict] = {
     "get_suggestions": {"params": [_entry()]},
     "apply_suggestions": {"params": [_entry(), _p("keys", "list[str]")]},
     "clear_suggestions": {"params": [_entry()]},
+    "set_suggestion_lock": {"params": [_entry(), _p("key", "str"), _p("locked", "bool")]},
     "run_suggestion_analysis": {"params": [_entry()]},
     "get_cycle_power_data": {"params": [_entry(), _p("cycle_id", "str")]},
     "trim_cycle": {"params": [
@@ -954,6 +1006,13 @@ WS_COMMANDS: dict[str, dict] = {
         _p("cycle_id", "str"),
         _p("profile_name", "str|null", False),
     ]},
+    "get_playground_settings": {"params": [_entry()]},
+    "save_playground_preset": {"params": [
+        _entry(),
+        _p("name", "str"),
+        _p("values", "dict"),
+    ]},
+    "delete_playground_preset": {"params": [_entry(), _p("name", "str")]},
     "list_tasks": {"params": [_p("entry_id", "str|null", False)]},
     "subscribe_tasks": {"params": [_p("entry_id", "str|null", False)]},
     "cancel_task": {"params": [_p("task_id", "str")]},

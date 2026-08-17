@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData-instellingen",
-        "description": "Configureer uw wasmachine of ander apparaat.\n\nVermogenssensor is vereist.\n\n**Vervolgens wordt u gevraagd of u uw eerste profiel wilt aanmaken.**",
+        "description": "Configureer uw wasmachine of ander apparaat.\n\nVermogenssensor is vereist.\n\nNa de installatie opent u het WashData-paneel via de zijbalk (of ga naar [/ha-washdata](/ha-washdata)) om cycli te bekijken, detectie af te stellen en profielen te beheren.",
         "data": {
           "name": "Apparaatnaam",
           "device_type": "Apparaattype",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "WashData opnieuw configureren",
-        "description": "Werk de apparaatnaam, het type apparaat of de vermogenssensor bij.",
+        "description": "Werk de apparaatnaam, het type apparaat of de vermogenssensor bij.\n\nHet WashData-paneel (zijbalk of [/ha-washdata](/ha-washdata)) is waar detectie, cycli, profielen en meldingen worden beheerd.",
         "data": {
           "name": "Apparaatnaam",
           "device_type": "Apparaattype",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData-instellingen",
-        "description": "Alle instellingen -- detectie, overeenkomst, timing, meldingen, profielen en cycli -- zijn beschikbaar in het WashData-paneel. Gebruik dit formulier alleen om de vermogenssensor, het apparaattype of de standbydrempel te wijzigen.",
+        "description": "Geef het apparaat een nieuwe naam of wijzig de basishardware-instellingen. Alle instellingen voor detectie, matching en meldingen bevinden zich in het [WashData-paneel](/ha-washdata) (ook bereikbaar via de zijbalk).",
         "data": {
           "name": "Apparaatnaam",
           "device_type": "Apparaattype",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: timer van {minutes} min.",
       "timer_pause_action_title": "Hervat cyclus",
       "timer_pause_body_suffix": "De cyclus is gepauzeerd. Open het WashData-paneel om te hervatten.",
+      "unload_dismiss_action_title": "Stop met herinneren",
       "notify_live_waiting_message": "{device}: nog geen profiel herkend.",
       "vs_typical_longer": "{pct}% langer dan gebruikelijk",
       "vs_typical_shorter": "{pct}% korter dan gebruikelijk",

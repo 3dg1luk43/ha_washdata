@@ -123,7 +123,7 @@ class CycleDetectorConfig:
     completion_min_seconds: int = 600
     start_duration_threshold: float = 5.0
     start_energy_threshold: float = 0.005
-    end_energy_threshold: float = 0.05  # 50 Wh threshold for "still active"
+    end_energy_threshold: float = 0.05  # 0.05 Wh (50 mWh) threshold for "still active"
     end_repeat_count: int = 1
     min_off_gap: int = 60
     start_threshold_w: float = 2.0
@@ -141,6 +141,11 @@ class CycleDetectorConfig:
     anti_wrinkle_max_duration: float = 60.0
     anti_wrinkle_exit_power: float = 0.8
     anti_wrinkle_idle_timeout: float = 120.0
+    # Dishwasher only: sustained-quiet seconds (after reaching expected duration)
+    # that release the end-of-cycle pump-out/drain wait early (#379). Defaults to
+    # the shipped constant; per-device configurable so a machine with a long silent
+    # passive-drying phase before its final drain can absorb profile drift.
+    dishwasher_end_spike_quiet_release: float = DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
     delay_detect_enabled: bool = False
     # Sustained seconds power must stay in the standby band (between
     # stop_threshold_w and start_threshold_w) before DELAY_WAIT engages.
@@ -221,7 +226,7 @@ class CycleDetector:
         profile_matcher: (
             Callable[
                 [list[tuple[datetime, float]]],
-                tuple[str | None, float, float, str | None],
+                tuple[str | None, float, float, str | None] | None,
             ]
             | None
         ) = None,
@@ -276,6 +281,11 @@ class CycleDetector:
         self._energy_since_idle_wh: float = 0.0
         self._time_above_threshold: float = 0.0
         self._time_below_threshold: float = 0.0
+        # As above, but restarts whenever an outage-sized gap breaks the observed
+        # quiet tail, so it counts only quiet WashData actually saw. Used by the
+        # dishwasher quiet-release gates so a single low sample after a telemetry
+        # dropout can't satisfy them without the quiet having been observed.
+        self._time_below_threshold_gapfree: float = 0.0
         self._last_process_time: datetime | None = None
 
         # New State Machine trackers
@@ -301,6 +311,7 @@ class CycleDetector:
         self._end_spike_duration: float = 0.0  # cycle duration (s) when _end_spike_seen was last set
         self._match_ambiguous: bool = False  # last live match was ambiguous (gates predictive end)
         self._match_prefix_ambiguous: bool = False  # longer candidate with good shape exists (prefix guard)
+        self._last_smart_term_block_reason: str | None = None  # #346 diagnostic throttle
 
         # Anti-wrinkle tracking (dryers only)
         self._anti_wrinkle_candidate_start: datetime | None = None
@@ -626,6 +637,7 @@ class CycleDetector:
         # (ANTI_WRINKLE needs to track idle time to determine true-off)
         if target_state != STATE_ANTI_WRINKLE:
             self._time_below_threshold = 0.0
+            self._time_below_threshold_gapfree = 0.0
         self._last_match_time = None
         self._matched_profile = None
         # Clear stale match state so the next cycle starts with clean defaults.
@@ -635,6 +647,11 @@ class CycleDetector:
         self._last_match_confidence = 0.0
         self._match_ambiguous = False
         self._match_prefix_ambiguous = False
+        # Per-cycle diagnostic throttle (#346): the "Smart Termination not applied"
+        # line only logs when the reason CHANGES. Carrying the previous cycle's
+        # reason across a reset swallows the new cycle's very first diagnostic
+        # whenever it happens to be blocked for the same reason.
+        self._last_smart_term_block_reason = None
         self._ignore_power_until_idle = False  # Reset lockout
         self._lockout_high_seconds = 0.0
         # Clear the verified-pause flag so it can't leak into the next cycle (B6):
@@ -688,6 +705,35 @@ class CycleDetector:
         """Return the expected duration of the current cycle in seconds."""
         return self._expected_duration
 
+    @staticmethod
+    def _smart_term_block_reason(
+        current_duration: float,
+        expected: float,
+        smart_ratio: float,
+        is_confident: bool,
+        ambiguous: bool,
+        prefix_ambiguous: bool,
+    ) -> str | None:
+        """Why the Smart-Termination fast end-path did NOT fire, for diagnostics.
+
+        Returns None when the gate would pass, or when no expected duration is known
+        yet (nothing meaningful to report). Mirrors the gate's four conditions in
+        order so the first blocking reason is surfaced. Pure and side-effect-free;
+        the detector logs the result (throttled to reason changes) - no behaviour
+        change (#346).
+        """
+        if expected <= 0:
+            return None
+        if current_duration < expected * smart_ratio:
+            return "duration_not_reached"
+        if not is_confident:
+            return "low_confidence"
+        if ambiguous:
+            return "match_ambiguous"
+        if prefix_ambiguous:
+            return "prefix_ambiguous"
+        return None
+
     def process_reading(self, power: float, timestamp: datetime) -> None:
         """Process a new power reading using robust dt-aware logic."""
 
@@ -731,6 +777,12 @@ class CycleDetector:
                 )
                 # Fall through: the state machine will start a new cycle.
 
+        # Snapshot the cadence BEFORE folding this reading in: the gap-free tally
+        # below classifies `dt` against a ceiling derived from the cadence, and an
+        # outage that has already widened p95 would raise the very threshold that
+        # is supposed to catch it (a 120 s gap after a 10 s cadence lifts p95 to
+        # ~15.5 s -> ceiling 155 s -> the gap counts as observed quiet).
+        prior_p95_dt = self._p95_dt
         self._update_cadence(dt)
         self._last_process_time = timestamp
 
@@ -751,6 +803,7 @@ class CycleDetector:
         if is_high:
             self._time_above_threshold += dt
             self._time_below_threshold = 0.0
+            self._time_below_threshold_gapfree = 0.0
             # Energy integration (trapezoidal approx for this single step)
             # prev_p = self._last_power if self._last_power is not None else power
             # step_wh = ((power + prev_p) / 2.0) * (dt / 3600.0)
@@ -762,6 +815,17 @@ class CycleDetector:
             self._last_active_time = timestamp
         else:
             self._time_below_threshold += dt
+            # Gap-free tally: an outage-sized step is unobserved time, so restart
+            # the observed-quiet tally from this sample instead of crediting the
+            # gap. Ceiling mirrors energy_gap_threshold_s (clip(10x cadence, 60,
+            # 3600)) but reuses the maintained p95 cadence to stay O(1) in this
+            # per-reading hot path. Uses the cadence as it stood BEFORE this
+            # reading, so a gap cannot widen its own acceptance threshold.
+            outage_ceiling = min(3600.0, max(60.0, 10.0 * prior_p95_dt))
+            if dt > outage_ceiling:
+                self._time_below_threshold_gapfree = 0.0
+            else:
+                self._time_below_threshold_gapfree += dt
             self._time_above_threshold = 0.0
 
         self._time_in_state += dt
@@ -1347,6 +1411,31 @@ class CycleDetector:
                     # waits for the fallback timeout instead of getting an early
                     # close — an acceptable trade-off against the alternative of
                     # splitting a Normal wash into two separate cycle records.
+                    # Surface why the fast end-path is (not) firing, throttled to
+                    # reason changes so a stuck cycle's cause is visible in the log
+                    # without spamming every reading. Pure diagnostic (#346).
+                    _block_reason = self._smart_term_block_reason(
+                        current_duration,
+                        self._expected_duration,
+                        smart_ratio,
+                        is_confident_match,
+                        self._match_ambiguous,
+                        self._match_prefix_ambiguous,
+                    )
+                    if _block_reason != self._last_smart_term_block_reason:
+                        self._last_smart_term_block_reason = _block_reason
+                        if _block_reason is not None:
+                            self._logger.debug(
+                                "Smart Termination not applied (%s): dur=%.0fs/%.0fs conf=%.2f "
+                                "ambiguous=%s prefix_ambiguous=%s",
+                                _block_reason,
+                                current_duration,
+                                self._expected_duration * smart_ratio,
+                                getattr(self, "_last_match_confidence", 0.0),
+                                self._match_ambiguous,
+                                self._match_prefix_ambiguous,
+                            )
+
                     if (
                         current_duration >= (self._expected_duration * smart_ratio)
                         and is_confident_match
@@ -1421,8 +1510,8 @@ class CycleDetector:
                                 + DISHWASHER_END_SPIKE_WAIT_SECONDS
                             ) or (
                                 current_duration >= self._expected_duration
-                                and self._time_below_threshold
-                                >= DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+                                and self._time_below_threshold_gapfree
+                                >= self._config.dishwasher_end_spike_quiet_release
                             )
                             if (
                                 self._config.device_type == "dishwasher"
@@ -2130,8 +2219,8 @@ class CycleDetector:
         # passive-drying phase that still precedes a late pump-out deferred.
         quiet_released = (
             duration >= self._expected_duration
-            and self._time_below_threshold
-            >= DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+            and self._time_below_threshold_gapfree
+            >= self._config.dishwasher_end_spike_quiet_release
         )
         if (
             self._config.device_type == "dishwasher"
@@ -2142,13 +2231,18 @@ class CycleDetector:
             < (self._expected_duration + DISHWASHER_END_SPIKE_WAIT_SECONDS)
             and not quiet_released
         ):
+            # Report the gap-free tally: that is what `quiet_released` above reads,
+            # and after a telemetry outage the two diverge - logging the plain one
+            # would show quiet time that played no part in the decision.
             self._logger.debug(
                 "Deferring cycle finish: dishwasher waiting for end-of-cycle "
-                "pump-out (%.0fs < expected %.0fs + %.0fs wait, quiet %.0fs, profile: %s)",
+                "pump-out (%.0fs < expected %.0fs + %.0fs wait, observed quiet "
+                "%.0fs of %.0fs needed, profile: %s)",
                 duration,
                 self._expected_duration,
                 DISHWASHER_END_SPIKE_WAIT_SECONDS,
-                self._time_below_threshold,
+                self._time_below_threshold_gapfree,
+                self._config.dishwasher_end_spike_quiet_release,
                 self._matched_profile,
             )
             return True
@@ -2247,9 +2341,13 @@ class CycleDetector:
                 final_readings.append((end_time, last_p))
 
         start_ts = self._current_cycle_start.timestamp()
+        # Store timestamps in canonical UTC (#369). Reading timestamps arrive from
+        # dt_util.now() (HA-local-aware) while trim/split paths emit UTC, which left
+        # past_cycles with a mix of offsets. Normalizing here (instant-preserving)
+        # keeps stored cycles consistent and safe for cross-device/store transfer.
         cycle_data: dict[str, Any] = {
-            "start_time": self._current_cycle_start.isoformat(),
-            "end_time": end_time.isoformat(),
+            "start_time": dt_util.as_utc(self._current_cycle_start).isoformat(),
+            "end_time": dt_util.as_utc(end_time).isoformat(),
             "duration": duration,
             "max_power": self._cycle_max_power,
             "status": status,
@@ -2329,6 +2427,7 @@ class CycleDetector:
             "accumulated_energy_wh": self._energy_since_idle_wh,
             "time_above": self._time_above_threshold,
             "time_below": self._time_below_threshold,
+            "time_below_gapfree": self._time_below_threshold_gapfree,
             "cycle_max_power": self._cycle_max_power,
             "last_active_time": (
                 self._last_active_time.isoformat() if self._last_active_time else None
@@ -2366,6 +2465,15 @@ class CycleDetector:
             self._energy_since_idle_wh = snapshot.get("accumulated_energy_wh", 0.0)
             self._time_above_threshold = snapshot.get("time_above", 0.0)
             self._time_below_threshold = snapshot.get("time_below", 0.0)
+            # Old snapshots lack the gap-free tally, and the plain value they do
+            # carry may already include outage-sized intervals — the exact
+            # contamination this field exists to exclude — so it must NOT be used
+            # as the fallback. 0.0 is also the honest value on a restore in
+            # general: the restart itself is unobserved time (the manager records
+            # it as a restart gap), so no quiet observed before it still counts.
+            self._time_below_threshold_gapfree = float(
+                snapshot.get("time_below_gapfree", 0.0) or 0.0
+            )
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
             # Sanitize via the same helper as update_match so the class
             # invariant on _expected_duration holds across restarts and the

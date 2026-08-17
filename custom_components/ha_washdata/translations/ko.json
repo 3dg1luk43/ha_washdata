@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData 설정",
-        "description": "세탁기 또는 기타 가전제품을 구성하세요.\n\n전력 센서가 필요합니다.\n\n**다음으로 첫 번째 프로필을 만들지 여부를 묻는 메시지가 표시됩니다.**",
+        "description": "세탁기 또는 기타 가전제품을 구성하세요.\n\n전력 센서가 필요합니다.\n\n설정 후, 사이드바에서 WashData 패널을 열거나 [/ha-washdata](/ha-washdata)로 이동하여 사이클 확인, 검출 조정 및 프로파일 관리를 하세요.",
         "data": {
           "name": "장치 이름",
           "device_type": "장치 유형",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "장치 이름, 기기 유형 또는 전원 센서를 업데이트합니다.",
+        "description": "장치 이름, 가전 유형 또는 전력 센서를 업데이트합니다.\n\nWashData 패널(사이드바 또는 [/ha-washdata](/ha-washdata))에서 검출, 사이클, 프로파일 및 알림을 관리합니다.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "감지, 매칭, 타이밍, 알림, 프로필, 주기 등 모든 설정을 WashData 패널에서 사용할 수 있습니다. 전원 센서, 장치 유형 또는 대기 임계값을 변경하는 경우에만 이 양식을 사용하십시오.",
+        "description": "장치 이름을 변경하거나 핵심 하드웨어 설정을 변경합니다. 모든 검출, 매칭 및 알림 설정은 [WashData 패널](/ha-washdata)에서 확인할 수 있습니다(사이드바에서도 접근 가능).",
         "data": {
           "name": "장치 이름",
           "device_type": "Device Type",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes}분 타이머",
       "timer_pause_action_title": "사이클 재개",
       "timer_pause_body_suffix": "사이클이 일시 정지되었습니다. 재개하려면 WashData 패널을 여세요.",
+      "unload_dismiss_action_title": "알림 중지",
       "notify_live_waiting_message": "{device}: 아직 일치하는 프로필이 없습니다.",
       "vs_typical_longer": "평소보다 {pct}% 더 김",
       "vs_typical_shorter": "평소보다 {pct}% 더 짧음",

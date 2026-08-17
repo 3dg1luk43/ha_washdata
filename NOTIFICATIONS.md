@@ -283,7 +283,7 @@ event_type: ha_washdata_cycle_started
 data:
   entry_id: 01KR1WGJYHJBTT5MEGS0VRXC4D     # config-entry id, stable across restarts
   device_name: Waschmaschine                # the integration title you configured
-  device_type: washing_machine              # washing_machine | dryer | washer_dryer | dishwasher | air_fryer | bread_maker | pump | other
+  device_type: washing_machine              # washing_machine | dryer | washer_dryer | dishwasher | air_fryer | bread_maker | pump | generic | other
   program: "detecting..."                   # may resolve to a profile name later in the cycle
   start_time: "2026-05-09T07:43:08.626640+02:00"
 ```
@@ -313,8 +313,8 @@ data:
     energy_wh: 1564.04                      # integrated energy over the cycle
     cost: 0.42                              # energy cost frozen at completion (your HA currency); absent if no price is configured
     energy_price: 0.27                      # price per kWh used to compute `cost` (absent if no price is configured)
-    status: completed                       # completed | aborted | timeout
-    termination_reason: timeout             # off_delay | smart_termination | timeout | force_end | zombie | ghost_suppressed
+    status: completed                       # completed | interrupted | force_stopped
+    termination_reason: timeout             # timeout | smart | force_stopped | user | terminal_drop
     profile_name: null                      # null when no profile was matched
     sampling_interval: 43                   # mean seconds between power readings
     device_type: washing_machine

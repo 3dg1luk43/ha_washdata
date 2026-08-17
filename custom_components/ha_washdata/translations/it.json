@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configurazione WashData",
-        "description": "Configura la tua lavatrice o altro elettrodomestico.\n\nÈ richiesto il sensore di potenza.\n\n**Successivamente ti verrà chiesto se desideri creare il tuo primo profilo.**",
+        "description": "Configura la tua lavatrice o altro elettrodomestico.\n\nÈ richiesto il sensore di potenza.\n\nDopo la configurazione, apri il pannello WashData dalla barra laterale (o vai su [/ha-washdata](/ha-washdata)) per visualizzare i cicli, regolare il rilevamento e gestire i profili.",
         "data": {
           "name": "Nome dispositivo",
           "device_type": "Tipo di dispositivo",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "description": "Aggiorna il nome del dispositivo, il tipo di elettrodomestico o il sensore di potenza.\n\nIl pannello WashData (barra laterale, o [/ha-washdata](/ha-washdata)) è dove vengono gestiti rilevamento, cicli, profili e notifiche.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
+        "description": "Rinomina il dispositivo o modifica le sue impostazioni hardware principali. Tutte le impostazioni di rilevamento, corrispondenza e notifica si trovano nel [pannello WashData](/ha-washdata) (accessibile anche dalla barra laterale).",
         "data": {
           "name": "Nome del dispositivo",
           "device_type": "Device Type",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: timer di {minutes} min",
       "timer_pause_action_title": "Riprendi ciclo",
       "timer_pause_body_suffix": "Il ciclo è in pausa. Apri il pannello WashData per riprendere.",
+      "unload_dismiss_action_title": "Interrompi promemoria",
       "notify_live_waiting_message": "{device}: nessun profilo ancora riconosciuto.",
       "vs_typical_longer": "{pct}% più lungo del solito",
       "vs_typical_shorter": "{pct}% più corto del solito",

@@ -302,7 +302,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         minor_version=8,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.7", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.8", version, minor_version
     )
     return True
 
@@ -646,6 +646,33 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await async_load_panel_config(hass)  # self-guards; safe to call repeatedly
     from . import store_account  # pylint: disable=import-outside-toplevel
     await store_account.async_load(hass)  # integration-wide online flag + account
+
+    # Cache the integration version from HA's already-loaded manifest (no file IO).
+    # ws_get_constants reads it from hass.data; we can't do a module-level read_text
+    # in ws_api.py because the module is imported lazily inside this coroutine and the
+    # IO runs on the event loop (#328/#335).
+    if "ha_washdata_version" not in hass.data:
+        try:
+            from homeassistant.loader import async_get_integration as _aget_integration  # pylint: disable=import-outside-toplevel
+            _integ = await _aget_integration(hass, DOMAIN)
+            hass.data["ha_washdata_version"] = _integ.manifest.get("version", "") or ""
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Could not load ha_washdata version from manifest: %s", err)
+            # Fall back to reading manifest.json off the event loop.  Only
+            # write the key when the read succeeds so that a double failure
+            # (loader + file) leaves the key absent rather than storing ""
+            # (which would shadow _INTEGRATION_VERSION in ws_get_constants).
+            def _read_manifest_version() -> str:
+                try:
+                    return json.loads(
+                        (Path(__file__).parent / "manifest.json").read_text(encoding="utf-8")
+                    ).get("version") or ""
+                except Exception:  # pylint: disable=broad-exception-caught
+                    return ""
+            _fallback_version = await hass.async_add_executor_job(_read_manifest_version)
+            if _fallback_version:
+                hass.data["ha_washdata_version"] = _fallback_version
+
     async_register_commands(hass)
     hass.data["ha_washdata_ws_registered"] = True
 

@@ -1,10 +1,12 @@
 # 09 — Playground Backend: Technical Reference
 
-**File:** `custom_components/ha_washdata/playground.py` (1861 lines)
+**File:** `custom_components/ha_washdata/playground.py` (1948 lines)
 **WS wiring:** `custom_components/ha_washdata/ws_api.py` (lines ~4868–5421)
 **Design specs:**
 - `docs/superpowers/specs/2026-07-13-playground-simulation-redesign-design.md`
 - `docs/superpowers/specs/2026-07-13-playground-unification-design.md`
+
+> Content-corrected 2026-08-17 for 0.5.4 (override maps expanded, legacy batch path removed). Line anchors may still reflect the original 2026-07-18 / 0.5.1 pass.
 
 ---
 
@@ -54,31 +56,48 @@ Maps `CONF_*` option keys (as sent by the panel) to `(CycleDetectorConfig field 
 | `settings_override` key | `CycleDetectorConfig` field | Type |
 |---|---|---|
 | `CONF_MIN_POWER` | `min_power` | float |
+| `CONF_ANTI_WRINKLE_ENABLED` | `anti_wrinkle_enabled` | bool |
+| `CONF_ANTI_WRINKLE_MAX_POWER` | `anti_wrinkle_max_power` | float |
+| `CONF_ANTI_WRINKLE_MAX_DURATION` | `anti_wrinkle_max_duration` | float |
+| `CONF_ANTI_WRINKLE_EXIT_POWER` | `anti_wrinkle_exit_power` | float |
+| `CONF_ANTI_WRINKLE_IDLE_TIMEOUT` | `anti_wrinkle_idle_timeout` | float |
+| `CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE` | `dishwasher_end_spike_quiet_release` | float |
 | `CONF_OFF_DELAY` | `off_delay` | int |
 | `CONF_MIN_OFF_GAP` | `min_off_gap` | int |
 | `CONF_COMPLETION_MIN_SECONDS` | `completion_min_seconds` | int |
 | `CONF_END_REPEAT_COUNT` | `end_repeat_count` | int |
 | `CONF_START_THRESHOLD_W` | `start_threshold_w` | float |
 | `CONF_STOP_THRESHOLD_W` | `stop_threshold_w` | float |
-| `CONF_RUNNING_DEAD_ZONE` | `running_dead_zone` | int |
 | `CONF_START_DURATION_THRESHOLD` | `start_duration_threshold` | float |
-| `CONF_ABRUPT_DROP_WATTS` | `abrupt_drop_watts` | float |
 | `CONF_INTERRUPTED_MIN_SECONDS` | `interrupted_min_seconds` | int |
 
 Unknown keys, `None` values, and un-coercible values are silently ignored. `base` config is never mutated.
+
+(`CONF_RUNNING_DEAD_ZONE` was removed from this map in 0.5.3 when the setting was retired, and `CONF_ABRUPT_DROP_WATTS` was dropped as dead detection config. The anti-wrinkle keys and `CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE` were added.)
 
 ### 3.2 `_MATCH_OVERRIDE_KEYS` — Matching Overrides
 
 Maps `settings_override` keys to `(match_config dict key, coerce function)`. Used by `apply_match_overrides()`.
 
-| `settings_override` key | `match_config` key | Type |
-|---|---|---|
-| `CONF_PROFILE_MATCH_MIN_DURATION_RATIO` | `min_duration_ratio` | float |
-| `CONF_PROFILE_MATCH_MAX_DURATION_RATIO` | `max_duration_ratio` | float |
+| `settings_override` key | `match_config` key | Type | Scope |
+|---|---|---|---|
+| `CONF_PROFILE_MATCH_MIN_DURATION_RATIO` | `min_duration_ratio` | float | Real setting (Stage 1 duration gate) |
+| `CONF_PROFILE_MATCH_MAX_DURATION_RATIO` | `max_duration_ratio` | float | Real setting (Stage 1 duration gate) |
+| `corr_weight` | `corr_weight` | float | Sandbox-only (Stage 2) |
+| `keep_min_score` | `keep_min_score` | float | Sandbox-only (Stage 2) |
+| `dtw_bandwidth` | `dtw_bandwidth` | float | Sandbox-only (Stage 3) |
+| `dtw_blend` | `dtw_blend` | float | Sandbox-only (Stage 3) |
+| `dtw_ensemble_w` | `dtw_ensemble_w` | float | Sandbox-only (Stage 3) |
+| `dtw_ddtw_scale` | `dtw_ddtw_scale` | float | Sandbox-only (Stage 3) |
+| `dtw_refine_top_n` | `dtw_refine_top_n` | int | Sandbox-only (Stage 3) |
+| `duration_weight` | `duration_weight` | float | Sandbox-only (Stage 4) |
+| `energy_weight` | `energy_weight` | float | Sandbox-only (Stage 4) |
+| `duration_scale` | `duration_scale` | float | Sandbox-only (Stage 4) |
+| `energy_scale` | `energy_scale` | float | Sandbox-only (Stage 4) |
 
-**Design intent:** Only the two duration-gate knobs that users can actually set in Settings are exposed. ML-tuned scoring weights (`corr_weight`, `duration_weight`, `energy_weight`, `dtw_bandwidth`, `dtw_ensemble_w`) are intentionally NOT overridable here so Playground values map 1:1 to what the user can apply for real.
+**Design intent (updated 0.5.4):** The two duration-gate ratios are real user settings, so a good value found in the Playground can be applied for real. The remaining Stage 2-4 scoring/DTW weights are the ML-tuned defaults, NOT persistent settings; they are now exposed as **sandbox-only** overrides so power users can experiment with how each matcher stage scores their own cycles. They never persist: a `match_config` built from them lives only for the simulation. Anything else in `settings_override` is ignored.
 
-**Discrepancy vs. unification design spec:** The `2026-07-13-playground-unification-design.md` spec (section "Settings scope") says the frontend should expose `dtw_bandwidth`, `corr_weight`, `duration_weight`, `energy_weight` as "Program matching" overrides, pre-filled from `_pgDetail.match_config`. The current `_MATCH_OVERRIDE_KEYS` does not include these — they are not yet wired in the backend. The spec says they *were planned* for the frontend panel only, but the backend map would need updating if that is implemented.
+**History:** Earlier versions (and the original 2026-07-13 unification spec) exposed only `min_duration_ratio` / `max_duration_ratio` and deliberately withheld the scoring weights. The scoring/DTW knobs were subsequently wired in as sandbox-only overrides, which is what the map now reflects.
 
 ---
 
@@ -367,19 +386,9 @@ Error codes: `"cycle_not_found"`, `"no_profile"`, `"cycle_no_data"`, `"profile_n
 
 ---
 
-## 10. `_simulate_one()` — Legacy Batch Replay (used by `run_playground_batch`)
+## 10. Legacy batch path (`_simulate_one` / `run_playground_batch`) - REMOVED
 
-```python
-def _simulate_one(cycle, sim_config, snapshots, match_config, store=None,
-                  group_members=None, member_snaps=None) -> dict
-```
-(line 344)
-
-Returns `{cycle_id, profile_name, events, outcome}`. This is the simpler batch variant; it does NOT compute a per-step series (no progress/remaining/notification logic). Its event log captures state transitions, match events, and cycle end but not progress or notification markers. It also does NOT implement the persistence-gated commit (the batch version emits raw match events).
-
-Cycle outcome fields: `detected`, `detected_duration_s`, `stored_duration_s`, `match_profile`, `match_correct`, `ambiguous`, `termination_reason`, `status`, `detected_count`.
-
-Note: `run_playground_history` and `run_playground_sweep` now route through `simulate_cycle_detail` (via `_run_rows`), not through `_simulate_one`. `run_playground_batch` still uses `_simulate_one` directly. This is the primary difference between the batch and history paths.
+The older batch replay helpers `_simulate_one()` and `run_playground_batch()` have been **removed** from `playground.py`. Both `run_playground_history` and `run_playground_sweep` route every cycle through `simulate_cycle_detail` (via `_run_rows`), so there is a single faithful replay path: batch/sweep callers just pass `compute_series=False` to skip the per-step series work. The persistence-gated commit (`decide_commit`) and Stage-5 group resolution therefore apply on every path, including batch and sweep.
 
 ---
 
@@ -452,21 +461,22 @@ All three tasks:
 These are all keys the panel can pass in `settings_override` that have any effect on a simulation run:
 
 **Detection knobs** (via `_OVERRIDE_FIELD_MAP`, affect `CycleDetectorConfig`):
-1. `CONF_MIN_POWER` — minimum power threshold (float W)
-2. `CONF_OFF_DELAY` — off-delay timeout (int seconds)
-3. `CONF_MIN_OFF_GAP` — minimum off gap for soak bridging (int seconds)
-4. `CONF_COMPLETION_MIN_SECONDS` — minimum cycle duration to count as complete (int seconds)
-5. `CONF_END_REPEAT_COUNT` — number of below-threshold readings before ending (int)
-6. `CONF_START_THRESHOLD_W` — power to cross to start a cycle (float W)
-7. `CONF_STOP_THRESHOLD_W` — power to fall below to end a cycle (float W)
-8. `CONF_RUNNING_DEAD_ZONE` — running dead-zone seconds (int)
-9. `CONF_START_DURATION_THRESHOLD` — minimum seconds above threshold to confirm a start (float)
-10. `CONF_ABRUPT_DROP_WATTS` — drop magnitude to classify as abrupt end (float W)
-11. `CONF_INTERRUPTED_MIN_SECONDS` — minimum seconds below threshold for interrupted status (int)
+1. `CONF_MIN_POWER` - minimum power threshold (float W)
+2. `CONF_OFF_DELAY` - off-delay timeout (int seconds)
+3. `CONF_MIN_OFF_GAP` - minimum off gap for soak bridging (int seconds)
+4. `CONF_COMPLETION_MIN_SECONDS` - minimum cycle duration to count as complete (int seconds)
+5. `CONF_END_REPEAT_COUNT` - number of below-threshold readings before ending (int)
+6. `CONF_START_THRESHOLD_W` - power to cross to start a cycle (float W)
+7. `CONF_STOP_THRESHOLD_W` - power to fall below to end a cycle (float W)
+8. `CONF_START_DURATION_THRESHOLD` - minimum seconds above threshold to confirm a start (float)
+9. `CONF_INTERRUPTED_MIN_SECONDS` - minimum seconds below threshold for interrupted status (int)
+10. `CONF_ANTI_WRINKLE_ENABLED` / `CONF_ANTI_WRINKLE_MAX_POWER` / `CONF_ANTI_WRINKLE_MAX_DURATION` / `CONF_ANTI_WRINKLE_EXIT_POWER` / `CONF_ANTI_WRINKLE_IDLE_TIMEOUT` - dryer anti-wrinkle shielding knobs
+11. `CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE` - dishwasher pump-out quiet-release seconds
 
-**Matching knobs** (via `_MATCH_OVERRIDE_KEYS`, affect Stage-1 duration gate):
-12. `CONF_PROFILE_MATCH_MIN_DURATION_RATIO` — minimum allowed duration ratio (float)
-13. `CONF_PROFILE_MATCH_MAX_DURATION_RATIO` — maximum allowed duration ratio (float)
+**Matching knobs** (via `_MATCH_OVERRIDE_KEYS`):
+12. `CONF_PROFILE_MATCH_MIN_DURATION_RATIO` - minimum allowed duration ratio (float, real setting)
+13. `CONF_PROFILE_MATCH_MAX_DURATION_RATIO` - maximum allowed duration ratio (float, real setting)
+14. Sandbox-only scoring/DTW weights: `corr_weight`, `keep_min_score`, `dtw_bandwidth`, `dtw_blend`, `dtw_ensemble_w`, `dtw_ddtw_scale`, `dtw_refine_top_n`, `duration_weight`, `energy_weight`, `duration_scale`, `energy_scale`
 
 All other keys in `settings_override` are silently ignored.
 
@@ -474,21 +484,21 @@ All other keys in `settings_override` are silently ignored.
 
 ## 13. Code vs. CLAUDE.md / Design Spec Discrepancies
 
-### 13.1 Unification spec: 3 dropped detection keys were to be added to `_OVERRIDE_FIELD_MAP`
+### 13.1 `_OVERRIDE_FIELD_MAP` composition (0.5.4)
 
-The `2026-07-13-playground-unification-design.md` spec notes that `_pgOverrideFields()` showed 9 detection knobs but `_OVERRIDE_FIELD_MAP` honoured only 6, and specifies adding `CONF_START_DURATION_THRESHOLD`, `CONF_ABRUPT_DROP_WATTS`, `CONF_INTERRUPTED_MIN_SECONDS`. **Status: FIXED** — all three appear in `_OVERRIDE_FIELD_MAP` (lines 129–131). The spec issue is resolved in the current code.
+The `2026-07-13-playground-unification-design.md` spec once flagged that `_pgOverrideFields()` showed more detection knobs than `_OVERRIDE_FIELD_MAP` honoured. The map now covers `CONF_START_DURATION_THRESHOLD` and `CONF_INTERRUPTED_MIN_SECONDS`, but `CONF_ABRUPT_DROP_WATTS` was later dropped (dead detection config) and `CONF_RUNNING_DEAD_ZONE` was removed in 0.5.3 along with the setting itself. The map additionally gained the anti-wrinkle knobs (`CONF_ANTI_WRINKLE_ENABLED` / `_MAX_POWER` / `_MAX_DURATION` / `_EXIT_POWER` / `_IDLE_TIMEOUT`) and `CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE`.
 
-### 13.2 Unification spec: matching overrides to include scoring weights
+### 13.2 Matching overrides now include the scoring weights
 
-The spec says the frontend should expose `dtw_bandwidth`, `corr_weight`, `duration_weight`, `energy_weight` as overridable, pre-filled from `detail_payload.match_config`. The backend `_MATCH_OVERRIDE_KEYS` currently only exposes `min_duration_ratio` / `max_duration_ratio`. Adding the scoring weights would require: (a) adding them to `_MATCH_OVERRIDE_KEYS`, (b) updating `apply_match_overrides` to also write them into `match_config` under their `analysis.compute_matches_worker` key names, (c) including the effective `match_config` in the detail payload's `config_summary`. This is NOT currently done.
+This is **implemented** as of 0.5.4. Beyond the two duration ratios, `_MATCH_OVERRIDE_KEYS` now maps the Stage 2-4 scoring/DTW knobs (`corr_weight`, `keep_min_score`, `dtw_bandwidth`, `dtw_blend`, `dtw_ensemble_w`, `dtw_ddtw_scale`, `dtw_refine_top_n`, `duration_weight`, `energy_weight`, `duration_scale`, `energy_scale`) onto the matcher config as **sandbox-only** overrides that never persist. `ws_get_playground_settings` ships their canonical defaults (`MATCH_DEFAULTS_BY_OPTION`) so the panel can pre-fill the controls.
 
 ### 13.3 CLAUDE.md mentions `_pg_history_task` / `_pg_sweep_task` but not `_pg_detail_task`
 
 The CLAUDE.md entry in `playground.py` says "History/optimize run as detached, registry-tracked background tasks... Kicked off by `start_playground_history` / `start_playground_sweep`." The single-cycle detail also runs as a chunked background task via `_pg_detail_task` / `ws_start_playground_cycle_detail` (added for issue #311), but this is not mentioned in CLAUDE.md. Doc gap only, not a code issue.
 
-### 13.4 `run_playground_batch` vs. `run_playground_history`
+### 13.4 Single replay path (`run_playground_batch` removed)
 
-`run_playground_batch` (line 559) uses the older `_simulate_one` path (no series, no persistence-gated commit, no progress events). `run_playground_history` uses the newer `simulate_cycle_detail` path (via `_run_rows`). Both exist. The WS handlers expose `run_playground_history` and `start_playground_history` (which use the newer path), but `run_playground_batch` is also defined and could be called internally. The design spec describes only the history/sweep table view, implying `run_playground_batch` is legacy infrastructure. Its WS command name is not listed in the `ws_api.py` registration list at line 454; it may no longer have a WS endpoint.
+`run_playground_batch` and its `_simulate_one` helper have been removed. `run_playground_history` and `run_playground_sweep` both replay through `simulate_cycle_detail` (via `_run_rows`) with `compute_series=False`, so there is one faithful path for interactive, history, and sweep runs.
 
 ### 13.5 Design spec `compute_progress` signature vs. actual
 
@@ -551,9 +561,9 @@ WS: start_playground_history → task_id
 
 2. **`_build_match_snapshots` called once per run**, passed as `prebuilt=` to each cycle in a batch. This is the dominant cost reduction for multi-cycle runs.
 
-3. **Stage-5 group resolution** is replicated in the Playground (both `_simulate_one` and `_DetailSim._matcher`). A winning `__group__*` aggregate is resolved via `store._stage5_pick_member`. Logged as `"group_resolved"` event.
+3. **Stage-5 group resolution** is replicated in the Playground (`_DetailSim._matcher`). A winning `__group__*` aggregate is resolved via `store._stage5_pick_member`. Logged as `"group_resolved"` event.
 
-4. **Persistence-gated commit** is implemented in the detail sim (`decide_commit`) but NOT in the legacy batch `_simulate_one`. The detail sim mirrors the live manager; the batch sim does not.
+4. **Persistence-gated commit** is implemented in the detail sim (`decide_commit`), which mirrors the live manager. Since batch/sweep now reuse the same detail sim path, they get the same persistence-gated commit.
 
 5. **`compute_series=False`** for all batch/sweep calls. Progress/remaining/phase computation is skipped; only the outcome row is produced.
 

@@ -92,6 +92,75 @@ test('suggestion banner appears when device has suggestions', async ({ page }) =
   await expect(banner).toBeVisible({ timeout: 5_000 });
 });
 
+test('Calibrated (ML-only) suggestion surfaces the tuning banner', async ({ page }) => {
+  // Regression: a device with only a Calibrated (ML) recommendation and no classic
+  // suggestion must still surface "tuning suggestions available" when Settings opens.
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_suggestions': { suggestions: [] },
+    // off_delay default is 120 in options.json; 371 differs -> a live ML suggestion.
+    'ha_washdata/get_ml_comparison': {
+      settings_comparison: { off_delay: { ml_value: 371, ml_reason: 'ML reason' } },
+    },
+  });
+  await clickTab(page, 'settings');
+  // Banner visible even though there are zero classic suggestions.
+  const banner = page.locator('.wd-sug-banner').first();
+  await expect(banner).toBeVisible({ timeout: 8_000 });
+  await expect(banner).toContainText(/tuning suggestion/i);
+  // Apply-all / Dismiss act on the classic engine only -> hidden when ML-only.
+  await expect(page.locator('.wd-sug-banner [data-action="sug-apply-all"]')).toHaveCount(0);
+  await expect(page.locator('.wd-sug-banner [data-action="sug-dismiss"]')).toHaveCount(0);
+  // The Calibrated pill still renders beside the off_delay field.
+  const calPill = page.locator('.wd-field[data-field="off_delay"] .wd-sug-chip-cal').first();
+  await expect(calPill).toBeVisible({ timeout: 5_000 });
+});
+
+test('mute button renders inside the suggestion card', async ({ page }) => {
+  // The mute button (#343) is injected into the suggestion markup by a trailing
+  // `</div>` regex in _htmlSugWidget, which implicitly assumes every branch
+  // (single / split / agree-collapse) ends with a matching closing div. This
+  // asserts the button actually lands INSIDE .wd-sug so a future markup change
+  // to any branch cannot silently drop or misplace it.
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_suggestions': {
+      suggestions: [
+        { key: 'off_delay', suggested: 371, current: 180, reason: 'Test reason' },
+      ],
+    },
+  });
+  await clickTab(page, 'settings');
+  const field = page.locator('.wd-field[data-field="off_delay"]').first();
+  await expect(field).toBeVisible({ timeout: 8_000 });
+  // Nested inside the suggestion card, not a sibling that escaped the replace().
+  const mute = field.locator('.wd-sug [data-suglock="off_delay"]').first();
+  await expect(mute).toBeVisible({ timeout: 3_000 });
+});
+
+test('a muted key hides its Calibrated (ML) recommendation too', async ({ page }) => {
+  // Regression: the mute is per-setting, not per-engine. A key returned in
+  // locked_suggestions must not surface an ML recommendation card either, and
+  // must not count toward the tuning banner.
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_suggestions': { suggestions: [], locked_suggestions: ['off_delay'] },
+    'ha_washdata/get_ml_comparison': {
+      settings_comparison: { off_delay: { ml_value: 371, ml_reason: 'ML reason' } },
+    },
+  });
+  await clickTab(page, 'settings');
+  const field = page.locator('.wd-field[data-field="off_delay"]').first();
+  await expect(field).toBeVisible({ timeout: 8_000 });
+  // No Calibrated pill for a muted key ...
+  await expect(field.locator('.wd-sug-chip-cal')).toHaveCount(0);
+  // ... and no "N tuning suggestions available" banner, since the only ML key is
+  // muted. The separate "N muted - Reset muted" banner is expected and shares the
+  // .wd-sug-banner class, so assert on the tuning wording rather than the count.
+  await expect(page.locator('.wd-sug-banner')).not.toContainText(/tuning suggestion/i);
+  await expect(page.locator('.wd-sug-banner [data-action="sug-unmute-all"]')).toBeVisible();
+});
+
 test('suggestion widget appears beside the relevant field', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
