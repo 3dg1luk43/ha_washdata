@@ -131,9 +131,27 @@ jobs:
                 if (anchor >= cutoff) continue; // still within grace
 
                 // Last check before an irreversible close: the linked issue may have
-                // been accepted since the label was applied.
+                // been accepted since the label was applied. Re-fetch the PR because
+                // `prs` came from a single `pulls.list` at the top of the run - by now
+                // the contributor may have edited the body to reference an accepted
+                // issue, had the label removed, or closed the PR themselves. Acting on
+                // the stale snapshot would close a PR that no longer matches the rule.
                 if (rule.requiresAcceptedIssue) {
-                  const accepted = await acceptedIssueLinked(pr.body);
+                  let currentPr;
+                  try {
+                    ({ data: currentPr } = await github.rest.pulls.get({
+                      owner, repo, pull_number: pr.number,
+                    }));
+                  } catch (e) {
+                    console.warn(`Could not re-fetch PR #${pr.number}: ${e.message} - skipping, retry next run.`);
+                    continue;
+                  }
+                  if (currentPr.state !== 'open'
+                      || !currentPr.labels.some(l => l.name === rule.label)) {
+                    console.log(`Skipped PR #${pr.number} - no longer open or no longer carries "${rule.label}".`);
+                    continue;
+                  }
+                  const accepted = await acceptedIssueLinked(currentPr.body);
                   if (accepted === undefined) {
                     console.log(`Skipped PR #${pr.number} - issue lookup failed, retrying next run.`);
                     continue;

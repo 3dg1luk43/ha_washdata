@@ -5513,8 +5513,10 @@ async def ws_get_playground_settings(
     raw_sugg: dict[str, Any] = {}
     try:
         raw_sugg = store.get_suggestions() or {}
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug(
+            "Could not read Playground classic suggestions for %s: %s", entry_id, exc
+        )
     classic_sugg: dict[str, Any] = {}
     for key in playground.SETTING_KEYS:
         item = raw_sugg.get(key)
@@ -5553,8 +5555,10 @@ async def ws_get_playground_settings(
                     return out
 
                 ml_sugg = await hass.async_add_executor_job(_run_ml_sugg)
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug(
+                "Could not generate Playground ML suggestions for %s: %s", entry_id, exc
+            )
 
     _send_result(connection, msg["id"], "get_playground_settings", {
         "effective": playground.effective_settings(base_config, match_config),

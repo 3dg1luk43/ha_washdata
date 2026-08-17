@@ -99,12 +99,16 @@ jobs:
                 '',
                 `Non-translation PRs also need a link to an issue that **already** carries the \`accepted\` label. See [CONTRIBUTING.md](https://github.com/${owner}/${repo}/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs).`,
               ].join('\n');
+              // Close FIRST, then post the notice. The notice text asserts the PR
+              // was closed, so if the close call failed after the comment landed the
+              // PR would sit open carrying a false "has been automatically closed"
+              // message.
+              await github.rest.pulls.update({ owner, repo, pull_number: prNumber, state: 'closed' });
               if (existing) {
                 await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
               } else {
                 await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
               }
-              await github.rest.pulls.update({ owner, repo, pull_number: prNumber, state: 'closed' });
               console.log(`PR #${prNumber} closed immediately - template removed entirely.`);
               return;
             }
