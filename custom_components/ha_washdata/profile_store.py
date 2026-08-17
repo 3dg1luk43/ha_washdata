@@ -5450,8 +5450,23 @@ class ProfileStore:
         try:
             offsets = [float(x[0]) for x in current_power_data]
             powers = [float(x[1]) for x in current_power_data]
-        except Exception:  # pylint: disable=broad-exception-caught
-            return False, 0.0, 9999.0
+        except (TypeError, ValueError, IndexError):
+            # A legacy ISO-timestamped trace (x[0] is a string) lands here. The
+            # signature admits ``list[tuple[Any, ...]]``, so normalize through the
+            # shared helper instead of bailing out: returning early skipped
+            # alignment entirely, which silently reduced the legacy-envelope guard
+            # in tests/repro/test_issue_112.py to a no-op. Production callers pass
+            # offsets and never reach this branch, so the fast path is unchanged.
+            normalized = power_data_to_offsets(
+                cast(list[list[Any] | tuple[Any, ...]], current_power_data)
+            )
+            if not normalized:
+                return False, 0.0, 9999.0
+            try:
+                offsets = [float(x[0]) for x in normalized]
+                powers = [float(x[1]) for x in normalized]
+            except (TypeError, ValueError, IndexError):
+                return False, 0.0, 9999.0
         current_power_list = self._resample_trace_to_grid(offsets, powers, env_time)
 
         # Offload to worker

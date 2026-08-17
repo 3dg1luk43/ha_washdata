@@ -1441,13 +1441,13 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `effective` | no | dict[str, any] |
-| `presets` | no | list[PlaygroundPreset] |
-| `publishable` | no | list[str] |
-| `preset_limit` | no | number |
-| `classic_suggestions` | no | dict[str, any] |
-| `ml_suggestions` | no | dict[str, any] \| null |
-| `ml_suggestions_enabled` | no | bool |
+| `effective` | yes | dict[str, any] |
+| `presets` | yes | list[PlaygroundPreset] |
+| `publishable` | yes | list[str] |
+| `preset_limit` | yes | number |
+| `classic_suggestions` | yes | dict[str, any] |
+| `ml_suggestions` | yes | dict[str, any] \| null |
+| `ml_suggestions_enabled` | yes | bool |
 
 ## `ha_washdata/save_playground_preset`
 

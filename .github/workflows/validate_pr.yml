@@ -202,7 +202,12 @@ jobs:
               return;
             }
 
-            // Extract all issue number references from the PR body
+            // Extract all issue number references from the PR body. Use the
+            // re-fetched body, not the event payload's: the contributor may have
+            // edited the description to add the issue reference after the event
+            // fired, and scanning the stale copy would warn about a link that is
+            // already there.
+            const bodyForExtraction = currentPr.body || prBody;
             const issueNums = new Set();
             const patterns = [
               /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+#(\d+)/gi,
@@ -211,7 +216,7 @@ jobs:
             ];
             for (const pat of patterns) {
               let m;
-              while ((m = pat.exec(prBody)) !== null) {
+              while ((m = pat.exec(bodyForExtraction)) !== null) {
                 issueNums.add(Number(m[1]));
               }
             }
