@@ -1874,6 +1874,9 @@ class HaWashdataPanel extends HTMLElement {
     this._pgPresetLimit = 0;        // server-side per-device preset cap
     this._pgPresetSel = '';         // selected preset name in the dropdown
     this._pgPresetName = '';        // "save as" name input buffer (survives re-render)
+    this._pgSuggClassic = {};       // classic auto-tuner suggestions {key: value}
+    this._pgSuggMl = null;          // ML-calibrated suggestions {key: value} or null (disabled)
+    this._pgMlSuggEnabled = false;  // ENABLE_ML_SUGGESTIONS server flag
     this._pgView = null;            // {min,max} time-axis zoom window (seconds); null = full
     this._pgHoverT = null;          // hovered time (seconds) for cursor readout; null = none
     this._pgMap = null;             // current time<->x mapping, set by _pgDrawCanvas
@@ -2922,6 +2925,7 @@ class HaWashdataPanel extends HTMLElement {
     // Live baseline + presets are per-device; re-fetched by _fetchTabData.
     this._pgEffective = null; this._pgPublishable = null;
     this._pgPresets = []; this._pgPresetSel = ''; this._pgPresetName = ''; this._pgPresetLimit = 0;
+    this._pgSuggClassic = {}; this._pgSuggMl = null; this._pgMlSuggEnabled = false;
     this._pgView = null; this._pgHoverT = null; this._pgLoadSeq++;
     this._pgNeedsRestart = false; this._pgLoading = false;
     this._pgDetail = null; this._pgHistory = null; this._pgSweepNew = null;
@@ -5415,6 +5419,9 @@ class HaWashdataPanel extends HTMLElement {
       this._pgPresets = Array.isArray(r.presets) ? r.presets : [];
       this._pgPresetLimit = r.preset_limit || 0;
       if (this._pgPresetSel && !this._pgPresets.some(p => p.name === this._pgPresetSel)) this._pgPresetSel = '';
+      this._pgSuggClassic = (r.classic_suggestions && typeof r.classic_suggestions === 'object') ? r.classic_suggestions : {};
+      this._pgSuggMl = (r.ml_suggestions && typeof r.ml_suggestions === 'object') ? r.ml_suggestions : null;
+      this._pgMlSuggEnabled = !!r.ml_suggestions_enabled;
     } catch (e) {
       if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
     }
@@ -5521,6 +5528,14 @@ class HaWashdataPanel extends HTMLElement {
       ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-apply-settings" title="${_esc(this._t('btn.pg_apply_to_settings_tip', {}, 'Copy the values you edited here into this device\'s live settings'))}">${this._t('btn.pg_publish_all', {n: publishable.length}, 'Publish ' + publishable.length + ' to integration')}</button>`
       : '';
 
+    const suggClassicCount = Object.keys(this._pgSuggClassic || {}).length;
+    const suggMlCount = Object.keys(this._pgSuggMl || {}).length;
+    const hasSugg = suggClassicCount > 0 || (this._pgMlSuggEnabled && suggMlCount > 0);
+    const suggRow = hasSugg ? `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      ${suggClassicCount > 0 ? `<button class="wd-btn wd-btn-sm" data-action="pg-load-suggested" title="${_esc(this._t('btn.pg_load_suggested_tip', {}, 'Stage the auto-tuner\'s current suggestions as Playground overrides'))}">↓ ${this._t('btn.pg_load_suggested', {n: suggClassicCount}, 'Load suggested (' + suggClassicCount + ')')}</button>` : ''}
+      ${(this._pgMlSuggEnabled && suggMlCount > 0) ? `<button class="wd-btn wd-btn-sm" data-action="pg-load-calibrated" title="${_esc(this._t('btn.pg_load_calibrated_tip', {}, 'Stage ML-calibrated suggestions as Playground overrides'))}">↓ ${this._t('btn.pg_load_calibrated', {n: suggMlCount}, 'Load Calibrated (ML) (' + suggMlCount + ')')}</button>` : ''}
+    </div>` : '';
+
     return `<div class="wd-pg-ctrl">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <span class="wd-subhead" style="margin:0">${this._t('hdr.pg_settings_source', {}, 'Settings source')}</span>
@@ -5531,6 +5546,7 @@ class HaWashdataPanel extends HTMLElement {
         <button class="wd-btn wd-btn-sm" data-action="pg-load-live" title="${_esc(this._t('btn.pg_load_live_tip', {}, 'Re-read the integration\'s current settings and drop every Playground edit'))}">⟳ ${this._t('btn.pg_load_live', {}, 'Load live settings')}</button>
         ${publishBtn}
       </div>
+      ${suggRow}
       ${presetRow}
       ${saveRow}
     </div>`;
@@ -5596,6 +5612,34 @@ class HaWashdataPanel extends HTMLElement {
       this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
       await this._pgFetchSettings(dev.entry_id);
     });
+    this._render();
+    requestAnimationFrame(() => this._pgDrawCanvas());
+  }
+
+  // Stage suggested values as Playground overrides (additive merge - does not
+  // reset existing edits, unlike _pgApplyPresetValues which does a full replace).
+  _pgLoadSuggested(source) {
+    const vals = source === 'ml' ? (this._pgSuggMl || {}) : (this._pgSuggClassic || {});
+    const live = this._pgEffective || {};
+    let staged = 0;
+    for (const [key, val] of Object.entries(vals)) {
+      if (val === null || val === undefined) continue;
+      // Skip values already at the live baseline — staging them would show as a
+      // "change" in the diff view but produce no actual difference in simulation.
+      const base = live[key];
+      if (base !== undefined && base !== null && this._pgSameVal(val, base)) continue;
+      this._pgSetStaged(key, val);
+      staged++;
+    }
+    if (staged === 0) {
+      this._showToast(this._t('msg.pg_sugg_none', {}, 'All suggestions already match the current settings'));
+    } else {
+      const msgKey = source === 'ml' ? 'toast.pg_sugg_ml_loaded' : 'toast.pg_sugg_loaded';
+      const fallback = source === 'ml'
+        ? `Staged ${staged} ML-calibrated value(s) - run the Playground to compare`
+        : `Staged ${staged} suggested value(s) - run the Playground to compare`;
+      this._showToast(this._t(msgKey, {n: staged}, fallback));
+    }
     this._render();
     requestAnimationFrame(() => this._pgDrawCanvas());
   }
@@ -10662,6 +10706,10 @@ class HaWashdataPanel extends HTMLElement {
       this._pgApplyToSettings();
     } else if (a === 'pg-load-live') {
       this._pgLoadLive();
+    } else if (a === 'pg-load-suggested') {
+      this._pgLoadSuggested('classic');
+    } else if (a === 'pg-load-calibrated') {
+      this._pgLoadSuggested('ml');
     } else if (a === 'pg-preset-save') {
       this._pgSavePreset();
     } else if (a === 'pg-preset-load') {

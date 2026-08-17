@@ -457,13 +457,21 @@ class PlaygroundPreset(TypedDict):
     updated_at: Any
 
 
-class GetPlaygroundSettingsResponse(TypedDict):
-    """Live effective Playground settings + the device's saved presets."""
+class GetPlaygroundSettingsResponse(TypedDict, total=False):
+    """Live effective Playground settings + the device's saved presets.
+
+    ``classic_suggestions`` and ``ml_suggestions`` are filtered to keys the
+    Playground exposes so the panel can stage them directly.  ``ml_suggestions``
+    is ``None`` when ``ENABLE_ML_SUGGESTIONS`` is off.
+    """
 
     effective: dict[str, Any]
     presets: list[PlaygroundPreset]
     publishable: list[str]
     preset_limit: int
+    classic_suggestions: dict[str, Any]
+    ml_suggestions: dict[str, Any] | None
+    ml_suggestions_enabled: bool
 
 
 class PlaygroundPresetsResponse(TypedDict):

@@ -181,6 +181,9 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
       'profile_match_min_duration_ratio', 'profile_match_max_duration_ratio',
     ],
     preset_limit: 30,
+    classic_suggestions: { off_delay: 90, min_off_gap: 240 },
+    ml_suggestions: { off_delay: 85, end_repeat_count: 2 },
+    ml_suggestions_enabled: true,
   },
   'ha_washdata/save_playground_preset': {
     success: true,
