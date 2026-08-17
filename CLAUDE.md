@@ -26,7 +26,7 @@ pip install -r requirements-dev.txt
 # Run benchmark tests only
 ./run_tests.sh --bench
 
-# Run Playwright E2E browser tests only (210 tests across chromium + mobile-chrome, ~30s)
+# Run Playwright E2E browser tests only (320 tests across chromium + mobile-chrome, ~30s)
 ./run_tests.sh --e2e
 
 # Run everything (fast + slow + benchmark + E2E, ~12 min)

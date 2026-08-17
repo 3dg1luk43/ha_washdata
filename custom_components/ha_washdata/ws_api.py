@@ -5502,7 +5502,7 @@ async def ws_get_playground_settings(
     if ctx is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
-    _manager, store, base_config, _options, _price = ctx
+    _manager, store, base_config, options, _price = ctx
     try:
         match_config = playground._matching_config(store)  # noqa: SLF001
     except Exception:  # pylint: disable=broad-exception-caught
@@ -5536,10 +5536,11 @@ async def ws_get_playground_settings(
             if classic_engine is not None:
                 _pg_setting_keys = playground.SETTING_KEYS
                 _pg_int_keys = _SUGGESTION_INT_KEYS
+                job_engine = classic_engine.for_job(options)
 
                 def _run_ml_sugg() -> dict[str, Any]:
                     from .suggestion_engine import MLSuggestionEngine as _ML  # pylint: disable=import-outside-toplevel
-                    raw = _ML(classic_engine).generate_ml_suggestions() or {}
+                    raw = _ML(job_engine).generate_ml_suggestions() or {}
                     out: dict[str, Any] = {}
                     for k in _pg_setting_keys:
                         entry = raw.get(k)

@@ -169,12 +169,14 @@ class LearningManager:
         except Exception:  # pylint: disable=broad-exception-caught
             locked = set()
 
+        existing_suggestions = self.profile_store.get_suggestions()
         filtered_suggestions: dict[str, Any] = {}
         any_deleted = False
         for key, data in suggestions.items():
             if key in locked:
-                self.profile_store.delete_suggestion(key)
-                any_deleted = True
+                if key in existing_suggestions:
+                    self.profile_store.delete_suggestion(key)
+                    any_deleted = True
                 continue
             if isinstance(data, dict) and "value" in data:
                 current_val = current_options.get(key)

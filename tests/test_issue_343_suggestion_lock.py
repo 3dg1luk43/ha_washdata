@@ -88,6 +88,7 @@ def learning(mock_hass):
     ps.get_past_cycles.return_value = []
     ps.get_suggestion_apply_cycle_count.return_value = 0
     ps.get_locked_suggestions.return_value = ["start_threshold_w"]
+    ps.get_suggestions.return_value = {"start_threshold_w": {"value": 3.6}}
     ps.delete_suggestion = MagicMock()
     mgr = LearningManager(mock_hass, "test_entry", ps, device_type="washing_machine")
     mgr.suggestion_engine.apply_suggestions = MagicMock()
@@ -119,6 +120,7 @@ def test_all_locked_triggers_save(mock_hass):
     ps.get_past_cycles.return_value = []
     ps.get_suggestion_apply_cycle_count.return_value = 0
     ps.get_locked_suggestions.return_value = ["start_threshold_w", "stop_threshold_w"]
+    ps.get_suggestions.return_value = {"start_threshold_w": {"value": 3.6}, "stop_threshold_w": {"value": 2.4}}
     ps.delete_suggestion = MagicMock()
     ps.async_save = AsyncMock()
     mgr = LearningManager(mock_hass, "test_entry", ps, device_type="washing_machine")
