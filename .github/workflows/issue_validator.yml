@@ -299,7 +299,7 @@ jobs:
             if (!hasLogs && !logIsExplainedNA) {
               problems.push(
                 '**Logs / Error Evidence** are missing or appear empty. This is the most important piece of information for diagnosing bugs. ' +
-                'Please paste any relevant logs, error messages, or console output. At least one complete log line is enough - the section must contain more than 50 characters of actual error text (a bare `Error: null` passes the placeholder check but fails the length gate; paste the surrounding context). Debug logs are ideal when available. ' + +
+                'Please paste any relevant logs, error messages, or console output. At least one complete log line is enough - the section must contain more than 50 characters of actual error text (a bare `Error: null` passes the placeholder check but fails the length gate; paste the surrounding context). Debug logs are ideal when available. ' +
                 'See the **Logs / Error Evidence** section of the issue form for instructions on enabling debug logging. ' +
                 'If logs are **genuinely not applicable** to this report (for example: a documentation typo, a translation string fix, or a pure UI/config-flow layout issue where no runtime code path is exercised), ' +
                 'replace the placeholder with `N/A` followed by a short one-line reason - for example: `N/A - typo in README, no runtime behavior involved`. ' +

@@ -342,6 +342,7 @@ def build_sim_config(
     Unknown keys and un-coercible values are ignored so a malformed override can
     never break a simulation. ``base`` is left untouched.
     """
+    settings_override = sanitize_setting_values(settings_override)
     if not isinstance(settings_override, dict) or not settings_override:
         return base
     changes: dict[str, Any] = {}

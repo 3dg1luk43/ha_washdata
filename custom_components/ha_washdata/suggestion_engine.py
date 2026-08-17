@@ -1252,11 +1252,11 @@ class SuggestionEngine:
             readings = self._strip_anti_crease_readings(_cycle_readings(c), options=_anti_crease_opts)
             if len(readings) < 10:
                 continue
-            n_traced += 1
             powers = [p for _, p in readings]
             peak = max(powers) if powers else 0.0
             if peak <= 0:
                 continue
+            n_traced += 1
             active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
             # Genuine intra-cycle pauses only: a low run that resumed into
             # sustained activity.  A terminal drying/pump-out blip that does not
