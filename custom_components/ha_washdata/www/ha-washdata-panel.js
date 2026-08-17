@@ -3592,9 +3592,7 @@ class HaWashdataPanel extends HTMLElement {
   _htmlBody() {
     if (!this._devices.length)
       return `<div class="wd-empty"><div class="wd-icon">🧺</div>${this._t('msg.no_devices', {}, 'No WashData devices configured yet.')}</div>`;
-    const mlSugCount = Object.entries(this._mlSettings || {}).filter(([key, mlc]) =>
-      mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, this._opts[key])
-    ).length;
+    const mlSugCount = this._mlSugKeys(this._opts).size;
     const sugDot = (this._suggestions.length || mlSugCount) ? ' 💡' : '';
     const confIndicator = this._conflictKeysFromOpts().size > 0 ? ' ⚠' : '';
     const pgBusy = this._busy.has('pg-sim') || this._busy.has('pg-sweep');
@@ -3685,9 +3683,7 @@ class HaWashdataPanel extends HTMLElement {
       const n = _confKeys.size, s = n > 1 ? 's' : '';
       attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n, s}, `${n} setting conflict${s}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></button>`);
     }
-    const _mlSugCount = Object.entries(this._mlSettings || {}).filter(([key, mlc]) =>
-      mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, this._opts[key])
-    ).length;
+    const _mlSugCount = this._mlSugKeys(this._opts).size;
     if ((dev.suggestions_count || _mlSugCount) && this._canEdit()) {
       const total = (dev.suggestions_count || 0) + _mlSugCount;
       const parts = [];
@@ -4453,7 +4449,12 @@ class HaWashdataPanel extends HTMLElement {
     const level = this._settingsLevel();
     const basicMode = level === 'basic';
 
-    const sugKeys = new Set((this._suggestions || []).map(s => s.key));
+    const classicSugKeys = new Set((this._suggestions || []).map(s => s.key));
+    // Calibrated (ML) recommendations that still differ from the effective value
+    // count as tuning suggestions too, so the section dots + banner surface them,
+    // mirroring the tab bulb and the "Show only" filter, which already include ML.
+    const mlSugKeys = this._mlSugKeys(o);
+    const sugKeys = new Set([...classicSugKeys, ...mlSugKeys]);
     const secHasSug = (sec) => {
       const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
       return fields.some(f => sugKeys.has(f.key));
@@ -4504,18 +4505,26 @@ class HaWashdataPanel extends HTMLElement {
         <span>⚠ ${this._t('conflict.settings_banner', {n: confCount, s}, `${confCount} setting conflict${s} — check the highlighted sections and fix before saving.`)}</span>
         <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="conf-goto-section">${this._t('conflict.settings_banner_btn', {}, 'Go to first')}</button>
       </div>` : '';
-    const sugCount = this._suggestions.length;
+    // Combined tuning-suggestion count: classic (observed) + Calibrated (ML) keys
+    // not already covered by a classic suggestion. Apply-all / Dismiss act on the
+    // classic engine only, so they render solely when a classic suggestion exists;
+    // Calibrated recommendations are applied individually via their "Use" button.
+    const classicSugCount = this._suggestions.length;
+    const mlOnlyCount = [...mlSugKeys].filter(k => !classicSugKeys.has(k)).length;
+    const sugCount = classicSugCount + mlOnlyCount;
     const sugOnly = this._settingsSugOnly && !this._settingsSearch;
+    const applyAllBtn = classicSugCount ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">${this._t('btn.apply_all', {}, 'Apply all')}</button>` : '';
+    const dismissBtn = classicSugCount ? `<button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="sug-dismiss">${this._t('btn.dismiss', {}, 'Dismiss')}</button>` : '';
     const banner = sugCount ? (sugOnly ? `
       <div class="wd-sug-banner">
         <span>💡 ${this._t('msg.showing_suggestions', {count: sugCount}, `Showing ${sugCount} setting${sugCount > 1 ? 's' : ''} with suggestions.`)} <span style="text-decoration:underline;cursor:pointer" data-action="sug-show-all">${this._t('msg.show_all_settings', {}, 'Show all settings')}</span>.</span>
-        <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">${this._t('btn.apply_all', {}, 'Apply all')}</button>
+        ${applyAllBtn}
       </div>` : `
       <div class="wd-sug-banner">
         <span>💡 ${this._t('msg.tuning_suggestions_available', {count: sugCount}, `${sugCount} tuning suggestion${sugCount > 1 ? 's' : ''} available from observed cycles. They appear beside the relevant fields.`)}</span>
         <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="goto-suggestions">${this._t('btn.show_only', {}, 'Show only')}</button>
-        <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="sug-apply-all">${this._t('btn.apply_all', {}, 'Apply all')}</button>
-        <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="sug-dismiss">${this._t('btn.dismiss', {}, 'Dismiss')}</button>
+        ${applyAllBtn}
+        ${dismissBtn}
       </div>`) : '';
 
     const analyzeBusy = this._busy.has('sug-analyze');
@@ -5092,16 +5101,24 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // Cross-section view showing only the fields that have active suggestions.
+  // Setting keys with a Calibrated (ML) recommendation that still differs from the
+  // effective current value (staged edit if present, else the saved option). Shared
+  // by the settings banner, section dots, tab bulb, and the "Show only" filter so
+  // Calibrated suggestions surface everywhere classic (observed) suggestions do.
+  _mlSugKeys(eff) {
+    const cur = eff || Object.assign({}, this._opts, this._pendingSettings || {});
+    const keys = new Set();
+    for (const [key, mlc] of Object.entries(this._mlSettings || {})) {
+      if (mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, cur[key])) keys.add(key);
+    }
+    return keys;
+  }
+
   _htmlSettingsSugOnly(o) {
     const sugKeys = new Set((this._suggestions || []).map(s => s.key));
-    // Include ML-recommended settings (same key shape used by the sug-count badge)
-    // so the "Show only" filter surfaces ML-only recommendations too.
-    for (const [key, mlc] of Object.entries(this._mlSettings || {})) {
-      // Compare against the effective current form value (staged edit if present,
-      // else the saved option) so the filter reflects what the user has staged.
-      const cur = (this._pendingSettings && key in this._pendingSettings) ? this._pendingSettings[key] : this._opts[key];
-      if (mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, cur)) sugKeys.add(key);
-    }
+    // Include Calibrated (ML) recommendations so the "Show only" filter surfaces
+    // ML-only recommendations too (same set the banner + section dots use).
+    for (const k of this._mlSugKeys(o)) sugKeys.add(k);
     if (!sugKeys.size) return `<p class="wd-info" style="padding:12px">${this._t('msg.no_suggestions', {}, 'No active suggestions.')}</p>`;
     const currentDeviceType = (this._opts && this._opts.device_type) || '';
     const sections = _SETTINGS_SECTIONS.filter(s => {
