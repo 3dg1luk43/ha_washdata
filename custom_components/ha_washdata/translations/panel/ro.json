@@ -92,6 +92,19 @@
     "pause_cycle_tip": "Puneți în pauză ciclul în curs – aparatul va relua de unde a rămas",
     "pg_apply_device": "Aplicați pe dispozitiv",
     "pg_autofill": "Completare automată",
+    "pg_load_calibrated": "Încarcă Calibrat (ML) ({n})",
+    "pg_load_calibrated_tip": "Încarcă setările calibrate de ML ca substituiri în Zona de test",
+    "pg_load_live": "Încarcă setările active",
+    "pg_load_live_tip": "Recitește setările actuale ale integrării și renunță la toate modificările făcute în Zona de test",
+    "pg_load_suggested": "Încarcă sugestii ({n})",
+    "pg_load_suggested_tip": "Încarcă sugestiile curente ale optimizatorului automat ca substituiri în Zona de test",
+    "pg_preset_delete": "Șterge presetarea",
+    "pg_preset_load": "Încarcă presetarea",
+    "pg_preset_load_tip": "Înlocuiește valorile din Zona de test cu această presetare (setările active rămân neatinse)",
+    "pg_preset_save": "Salvează ca presetare",
+    "pg_preset_save_tip": "Salvează toate valorile de mai jos ca presetare denumită pentru acest dispozitiv",
+    "pg_publish_all": "Salvează {n} setări în integrare",
+    "pg_publish_one": "Salvează {label} în integrare",
     "play": "Redați",
     "process": "Procesați",
     "process_history": "Procesați acum",
@@ -178,7 +191,9 @@
     "download_export": "Descarcă exportul",
     "analyze_import": "Analizează fișierul",
     "import_selected": "Importă selecția",
-    "back": "Înapoi"
+    "back": "Înapoi",
+    "mute_suggestion": "Nu mai sugerați această setare",
+    "reset_muted": "Resetați cele ignorate"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -275,6 +290,7 @@
     "no_automations": "Nicio automatizare nu face referire încă la acest dispozitiv.",
     "panel_settings": "Setări panou",
     "param_sweep": "Scanare parametri",
+    "pg_settings_source": "Sursa setărilor",
     "phase_catalog": "Catalog de faze",
     "playground": "Zonă de test",
     "process_history": "Istoricul procesării",
@@ -415,6 +431,9 @@
     "pg_match_score": "Scor de potrivire",
     "pg_pct_of": "{p}% din {total}",
     "pg_poor_match": "Potrivire proastă",
+    "pg_preset": "Presetare din Zona de test",
+    "pg_preset_name": "Numele noii presetări",
+    "pg_preset_none": "Selectează o presetare…",
     "pg_strong_match": "Potrivire puternică",
     "pg_tile_ambiguous": "Ambigue",
     "pg_tile_ambiguous_tip": "Cicluri cu un rezultat aproape egal între două programe",
@@ -609,7 +628,8 @@
     "conflict_resolution": "Conflicte de nume",
     "conflict_import_copy": "Importă drept copie",
     "conflict_keep_mine": "Păstrează-l pe al meu",
-    "conflict_overwrite": "Suprascrie"
+    "conflict_overwrite": "Suprascrie",
+    "font_size": "Dimensiunea fontului panoului"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -771,7 +791,17 @@
     "pg_apply_confirm": "Aplicați cea mai bună valoare: {label} = {value}?",
     "pg_canvas_empty": "Selectați un ciclu de mai sus, apoi apăsați Încărcați pentru a vedea curba sa de putere.",
     "pg_chart_caption": "Rata de detectare/potrivire în funcție de valorile {param}",
+    "pg_ctrl_intro": "Valorile pornesc de la setările active ale acestui dispozitiv din integrare. Modificările rămân în Zona de test până când le salvezi în integrare.",
+    "pg_live_unavailable": "Setările active nu sunt disponibile, se afișează valorile implicite.",
+    "pg_load_live_confirm": "Renunți la {n} modificări din Zona de test și reîncarci setările actuale ale integrării?",
     "pg_match_rate": "{pct}% rată de potrivire pe {total} cicluri",
+    "pg_matches_live": "Identice cu setările active",
+    "pg_n_changed": "{n} valori diferite față de setările active",
+    "pg_sugg_none": "Toate sugestiile corespund deja setărilor actuale",
+    "pg_preset_delete_confirm": "Ștergi presetarea \"{name}\"?",
+    "pg_preset_limit": "Limita de presetări a fost atinsă ({n})",
+    "pg_preset_overwrite": "Suprascrii presetarea \"{name}\"?",
+    "pg_publish_one_confirm": "Salvezi {label} = {value} în setările acestui dispozitiv?",
     "pg_restart_note": "Reporniți Home Assistant pentru a activa instrumentele de simulare.",
     "pg_sim_progress": "{done} / {total} cicluri",
     "pg_starting": "Se pornește…",
@@ -845,6 +875,7 @@
     "trend_duration_shorter": "Durata este în scădere ({pct}%/ciclu) – medie recentă {avg}",
     "trend_energy_down": "Energia este în scădere ({pct}%/ciclu)",
     "trend_energy_up": "Energia este în creștere ({pct}%/ciclu) – medie recentă {avg}",
+    "trim_destructive_confirm": "Se păstrează doar {pct}% din ciclu, iar această acțiune nu poate fi anulată. Continuați?",
     "trim_intro": "Trageți mânerele roșii sau introduceți valori. Tot ceea ce este în afara ferestrei este eliminat.",
     "tuning_suggestions_available": "{count} sugestie de ajustare disponibilă din ciclurile observate. Acestea apar lângă câmpurile relevante.",
     "unsure_detected_prefix": "WashData nu este sigur că a detectat",
@@ -922,7 +953,12 @@
     "merge_hint": "Elementele importate sunt adăugate; nimic local nu se pierde. Conflictele de nume se rezolvă mai jos.",
     "replace_warn": "Fiecare categorie bifată este ștearsă și înlocuită cu conținutul fișierului. Categoriile nebifate rămân neatinse.",
     "dest_reference_hint": "Ciclurile importate îmbunătățesc doar recunoașterea programelor și nu afectează niciodată statisticile de utilizare/energie.",
-    "dest_real_history_hint": "Ciclurile importate contează ca istoric propriu al acestui dispozitiv și alimentează statisticile de energie/utilizare. Folosește pentru a muta un electrocasnic pe o instalare nouă."
+    "dest_real_history_hint": "Ciclurile importate contează ca istoric propriu al acestui dispozitiv și alimentează statisticile de energie/utilizare. Folosește pentru a muta un electrocasnic pe o instalare nouă.",
+    "sug_muted": "Această setare nu va mai fi sugerată",
+    "sug_mute_failed": "Nu s-a putut dezactiva sugestia",
+    "sug_unmuted_all": "Sugestiile dezactivate au fost resetate",
+    "n_suggestions_muted": "{count} dezactivate; reglajul automat nu le va propune.",
+    "font_size_hint": "Faceți tot din acest panou mai mare sau mai mic. Se aplică contului dvs. pe acest dispozitiv."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -970,6 +1006,10 @@
     "unusable": "Inutilizabil"
   },
   "section": {
+    "dishwasher": {
+      "label": "Mașină de spălat vase",
+      "intro": "Gestionarea sfârșitului de ciclu pentru mașinile de spălat vase, care de obicei se termină cu o fază lungă de uscare aproape silențioasă înainte de o scurtă evacuare finală."
+    },
     "anti_wrinkle": {
       "intro": "Modul anti-șifonare detectează pulsuri de tumblare la putere redusă după faza principală și le menține atașate ciclului terminat.",
       "label": "Anti-Șifonare"
@@ -1012,6 +1052,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Eliberare la liniște în uscarea pasivă",
+      "doc": "După ce ciclul depășește durata așteptată, cât timp trebuie să rămână silențioasă mașina de spălat vase (sub Prag de Oprire) înainte ca WashData să nu mai aștepte o evacuare finală și să încheie ciclul. Măriți-l dacă mașina are o fază lungă de uscare silențioasă înainte de o evacuare finală întârziată care nu este detectată - o fereastră mai largă permite duratei învățate să urmeze variația sezonieră (apă de alimentare mai rece = cicluri mai lungi) în loc să se fixeze pe media veche. Doar scurtează așteptarea față de plafonul intern de 30 de minute pentru vârful de final, fără a o prelungi vreodată."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Recunoașteți impulsurile scurte de rufe de putere redusă pe care le emite un uscător după faza principală de căldură și mențineți-le atașate la ciclul terminat în loc să le citiți ca cicluri noi.",
       "label": "Activați Detectarea Anti-Șifonare"
@@ -1232,6 +1276,10 @@
       "doc": "La câteva minute după încheierea unui ciclu, înainte de a trimite mementoul încă în așteptare „descărcați mașina”. Setați 0 pentru a dezactiva mementoul.",
       "label": "Întârziere Reamintire Descărcare"
     },
+    "notify_unload_repeat": {
+      "doc": "Continuă să retrimită mementoul de descărcare la fiecare \"Întârziere Reamintire Descărcare\" minute până când deschizi ușa sau atingi \"Oprește mementourile\" în notificare. Necesită o Entitate Senzor Ușă (mementoul în sine o necesită). Butonul de respingere funcționează pe notificările aplicației complementare (mobile) Home Assistant.",
+      "label": "Repetă Până la Deschiderea Ușii"
+    },
     "off_delay": {
       "doc": "Timp de așteptat după căderea energiei înainte de a declara ciclul încheiat. Dacă alimentarea se reia în această fereastră, ciclul continuă fără întreruperi - acest lucru face legătura între etapele de spălare. Mașinile de spălat vase au faze lungi de uscare (oprire pentru 20-60 de minute), așa că întârzierea de oprire trebuie să depășească aceasta pentru a menține întreaga spălare+uscare ca un singur ciclu.",
       "label": "Întârziere la Oprire"
@@ -1406,6 +1454,26 @@
     "energy_scale": {
       "label": "Precizie Energie",
       "doc": "Rigoarea penalizării acordului de energie a Etapei 4. Mai mic = mai strict: o nepotrivire de energie afectează mai mult. Implicit 0.25 este intenționat mai permisiv decât Rigoarea Duratei deoarece energia variază în funcție de sarcină. Utilizați împreună cu Ponderea Energiei."
+    },
+    "power_profile_interval_min": {
+      "label": "Interval Profil Putere",
+      "doc": "Dimensiunea intervalului pentru atributul senzorului power_profile per profil (tabloul plat de wați medii per slot consumat de planificatoare externe precum EMHASS și tibber_prices). Intervalele mai mici păstrează vârfurile scurte de putere clare; intervalele mai mari netezesc forma. Implicit 15 min. Doar la citire; nu afectează detectarea."
+    },
+    "notify_live_sticky": {
+      "label": "Păstrați notificarea în timp real la atingere",
+      "doc": "Numai Android. Faceți notificarea de progres în timp real persistentă (fixată) astfel încât atingerea ei să nu o respingă. Dezactivat păstrează comportamentul implicit în care o atingere o respinge."
+    },
+    "notify_live_click_action": {
+      "label": "Destinație la atingerea notificării în timp real",
+      "doc": "Numai Android. Unde deschide o atingere pe notificarea de progres în timp real (de ex. /lovelace/laundry, sau un URL complet) în loc de pagina principală a aplicației. Lăsați necompletat pentru valoarea implicită."
+    },
+    "door_opens_at_end": {
+      "label": "Ușa se deschide automat la final",
+      "doc": "Pentru mașinile de spălat vase care deschid ușa la sfârșitul ciclului pentru uscare (AirDry și similare). Cu această opțiune activată, deschiderea ușii în timpul unui ciclu activ nu îl mai pune în pauză indefinit; în schimb, dacă ușa rămâne deschisă pentru durata de așteptare de mai jos, WashData consideră ciclul terminat. O deschidere scurtă (pentru a adăuga un obiect) este ignorată. Necesită o entitate senzor de ușă."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Durată de așteptare la deschiderea ușii",
+      "doc": "Cât timp trebuie să rămână ușa deschisă înainte ca WashData să termine ciclul, când opțiunea \"Ușa se deschide automat la final\" este activată. Destul de lungă pentru a ignora adăugarea rapidă a unui vas (implicit 60 s), destul de scurtă pentru a termina prompt odată ce mașina deschide ușa."
     }
   },
   "setting_group": {
@@ -1576,6 +1644,10 @@
     "name_required": "Numele este obligatoriu",
     "no_split_found": "Nu au fost găsite pauze de inactivitate pentru divizare",
     "panel_settings_saved": "Setările panoului au fost salvate",
+    "pg_preset_loaded": "Presetarea \"{name}\" a fost încărcată",
+    "pg_preset_saved": "Presetarea \"{name}\" a fost salvată",
+    "pg_sugg_loaded": "{n} valoare/valori sugerate incarcate - rulați Zona de test pentru comparație",
+    "pg_sugg_ml_loaded": "{n} valoare/valori calibrate ML incarcate - rulați Zona de test pentru comparație",
     "phase_name_required": "Numele fazei este obligatoriu",
     "phase_updated": "Fază actualizată",
     "phases_saved": "Faze salvate",
@@ -1723,6 +1795,7 @@
       "min_active": "Pe baza puterii active minime ({min}W) observate în ultimul ciclu.",
       "min_duration_ratio": "Păstrat cât mai mic posibil, astfel încât un program să fie recunoscut devreme în ciclu; pragurile de încredere și de ambiguitate previn confirmările premature.",
       "min_off_gap": "Pe baza a {gaps} intervale între cicluri observate (p05={p05}s). Limita inferioară a dispozitivului: {floor}s.",
+      "min_off_gap_bridge": "Dimensionat pentru a acoperi cea mai lungă perioadă de liniște din interiorul unui ciclu: {span}s + 60s marjă, din {spans} intervale acoperite pe {cycles} cicluri curate (rămâne sub intervalul dvs. minim de {ceiling}s dintre două încărcături consecutive).",
       "min_power": "40% din cea mai mică putere activă p05 ({p05}W) pe {cycles} cicluri curate, menținând pragul de oprire sub consumul real.{excl}",
       "ml_auto_label": "Cea mai mică încredere pe care modelul de calitate a considerat-o încă drept curată (p10 din {cycles} cicluri curate = {p10}).",
       "ml_end_repeat": "{false}/{total} cicluri ({pct}%) au avut o pauză pe care detectorul de sfârșit a evaluat-o la >50%; necesită {val} confirmare(i) de sfârșit.",
@@ -1739,7 +1812,7 @@
       "thr_batch": "Păstrat chiar deasupra celei mai mici puteri active p05 pe {cycles} cicluri ({p05}W), astfel încât o pornire să fie surprinsă cât mai devreme posibil, iar pragul de oprire să rămână sub cea mai mică putere de funcționare a mașinii.",
       "tol_per_profile": "p75 al varianței duratei per profil pe {profiles} profiluri ({cycles} cicluri); profilurile stabile nu sunt penalizate.",
       "tol_pooled": "Pe baza varianței combinate a duratei a {cycles} cicluri recente etichetate (deviație p95={dev}).",
-      "watchdog": "Păstrat cât mai mic în siguranță (de 3x intervalul de actualizare p95 de {p95}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
+      "watchdog": "Păstrat cât mai mic în siguranță (puțin peste intervalul de actualizare p95 de {p95}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
     },
     "exclusions": {
       "summary": "Excluse {total} cicluri detectate greșit: {parts}.",
@@ -1770,6 +1843,7 @@
     "other": "Altele"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Mașină de spălat vase: secunde de liniște după durata așteptată înainte de a elibera așteptarea evacuării de la sfârșitul ciclului",
     "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",
     "anti_wrinkle_exit_power": "Puterea trebuie să scadă sub această valoare între impulsuri pentru ca modul anti-șifonare să rămână activ",
     "anti_wrinkle_idle_timeout": "Timp de liniște permis între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie",
@@ -1943,6 +2017,54 @@
       "skip_forever": "Nu mai afișa",
       "hide_guidance": "Ascundeți ghidul",
       "show_guidance": "Afișați ghidul"
+    }
+  },
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entitate negăsită",
+    "running_long": "Întârziere",
+    "remaining": "rămas",
+    "progress": "progres",
+    "show_time_remaining": "Afișează timpul rămas",
+    "show_percentage": "Afișează procentajul",
+    "layout": {
+      "tile": "Dală (compact)",
+      "detail": "Detaliat (complet)",
+      "glance": "Sumar (mai multe dispozitive)"
+    },
+    "btn": {
+      "pause": "Pauză",
+      "resume": "Reluare",
+      "terminate": "Încheie ciclul",
+      "record_start": "Porniți înregistrarea",
+      "record_stop": "Opriți înregistrarea",
+      "program": "Program",
+      "open_panel": "Deschide WashData"
+    },
+    "editor": {
+      "layout": "Aspect",
+      "entity": "Entitatea aparatului",
+      "entities": "Aparate",
+      "title": "Titlu",
+      "icon": "Pictogramă",
+      "show_state": "Afișează starea",
+      "show_program": "Afișează programul",
+      "show_progress_bar": "Afișează bara de progres",
+      "spin_icon": "Rotește pictograma în timpul funcționării",
+      "display_mode": "Linie de detaliu",
+      "active_color": "Culoare activă personalizată",
+      "show_phase": "Afișează faza",
+      "show_energy": "Afișează energia și costul",
+      "show_anomaly": "Afișează avertismentul de întârziere",
+      "show_sparkline": "Afișează graficul de putere în timp real",
+      "buttons": "Butoane de acțiune",
+      "program_entity": "Entitate de program (personalizată)",
+      "time_entity": "Entitate de timp (personalizată)",
+      "pct_entity": "Entitate de progres (personalizată)",
+      "power_entity": "Entitate de putere (personalizată)",
+      "tap_action": "Acțiune la atingere",
+      "hold_action": "Acțiune la apăsare lungă",
+      "double_tap_action": "Acțiune la atingere dublă"
     }
   }
 }

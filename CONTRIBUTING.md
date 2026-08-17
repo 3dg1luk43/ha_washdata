@@ -109,6 +109,8 @@ For full mock testing guide, see [TESTING.md](TESTING.md).
 
 ## Types of Contributions
 
+> **Always use a template.** Every issue must be opened through one of the templates below (blank issues are disabled). A free-form issue that skips the template entirely is closed automatically with a pointer back here, because it lacks the details needed to triage it. An issue that *uses* a template but leaves a field blank is not auto-closed for that reason - the completeness checks will just ask you to fill in what is missing.
+
 ### 🐛 Bug Reports
 
 Found a bug? Open an issue using our [bug report template](.github/ISSUE_TEMPLATE/bug_report.yml). Include:
@@ -116,9 +118,9 @@ Found a bug? Open an issue using our [bug report template](.github/ISSUE_TEMPLAT
 - Clear description of the issue
 - Steps to reproduce
 - Your WashData version and Home Assistant version
-- Any logs or error evidence — a single error line from the HA logbook is fine; you don't need full debug-level output
+- Any logs or error evidence - a few lines from the HA log showing the actual error text are enough (paste the full entry, not a truncated fragment); you don't need debug-level output, and an attached log file also counts
 
-If you also want to submit a fix yourself, check the **"Contributing a Fix"** box at the bottom of the form and follow the [contributor PR flow](#contributor-pr-flow-non-translation-prs) below.
+If you also want to submit a fix yourself, check the **"Contributing a Fix"** box at the bottom of the form and follow the [contributor PR flow](#contributor-pr-flow-non-translation-prs) below. **Do not open a PR yet** - wait for the `accepted` label first.
 
 ### ✨ Feature Requests
 
@@ -128,21 +130,17 @@ Have an idea? Open an issue using our [feature request template](.github/ISSUE_T
 - Why it would be useful
 - How it should work (with examples if possible)
 
-If you also want to implement it yourself, check the **"Contributing an Implementation"** box at the bottom of the form and follow the [contributor PR flow](#contributor-pr-flow-non-translation-prs) below.
+If you also want to implement it yourself, check the **"Contributing an Implementation"** box at the bottom of the form and follow the [contributor PR flow](#contributor-pr-flow-non-translation-prs) below. **Do not start building or open a PR yet** - wait for the `accepted` label first, so you do not invest effort in something that will not be merged.
 
 ### 🌍 Translations
 
-**Submit translations via GitLocalize** — no GitHub fork required.
+**Submit translations via GitLocalize** - no GitHub fork required.
 
 See [Localization & Translations](#localization--translations) section below.
 
 ### 📚 Documentation
 
-Improve READMEs, guides, or docstrings:
-
-1. Edit the relevant `.md` or `.py` file
-2. Submit a PR with clear changes
-3. Documentation improvements are always welcome!
+Improve READMEs, guides, or docstrings. Documentation changes are welcome, but they go through the **same [contributor PR flow](#contributor-pr-flow-non-translation-prs) as code** - open a [Documentation issue](https://github.com/3dg1luk43/ha_washdata/issues/new?template=documentation.yml) first, tick the PR-intent box, and wait for the `accepted` label before opening a PR. (Only translations skip this.)
 
 ### 🔍 Code Review
 
@@ -152,14 +150,23 @@ Review open PRs and provide constructive feedback. Even experienced contributors
 
 ## Contributor PR Flow (Non-Translation PRs)
 
-**Translation PRs (including those opened automatically by GitLocalize) are exempt** — no issue required, no label needed. All other PRs must go through this flow:
+> **The golden rule: agree the work with the maintainer *before* you write any code.**
+> WashData does not accept unsolicited PRs. Every non-translation change must be discussed and approved up front, so you never invest effort in something that is already being worked on, already decided against, or that needs a different approach than the one you have in mind.
 
-1. **Open an issue** — create a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml) describing what you want to fix or build.
-2. **Indicate your intent** — check the "Contributing a Fix" / "Contributing an Implementation" checkbox at the bottom of the issue form.
-3. **Wait for the `accepted` label** — the maintainer will review and add the `accepted` label to the issue if they approve you working on it. Only the maintainer can apply this label.
-4. **Open your PR** — once the issue is accepted, open a PR and reference the issue number (e.g. `Closes #NNN`).
+**Translations are the only exception** (including PRs opened automatically by [GitLocalize](https://gitlocalize.com/repo/10819)): no issue, no label, no waiting. Everything else - bug fixes, features, refactors, documentation, tests - goes through this flow:
 
-> **Why?** This prevents contributors from spending time on work that is already in the development pipeline, or on changes the maintainer would not merge. If you skip this step, an automated check will close your PR immediately with a pointer back to this flow.
+1. **Open an issue.** Create a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml), [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml), or [Documentation](https://github.com/3dg1luk43/ha_washdata/issues/new?template=documentation.yml) issue describing what you want to change. Blank issues are disabled - you must pick a template and fill it in.
+2. **Say you want to build it.** Tick the "Contributing a Fix" / "Contributing an Implementation" box in the issue form.
+3. **Wait for the `accepted` label.** The maintainer reviews the issue and, if they agree the work should go ahead and that you should be the one to do it, adds the `accepted` label. Only the maintainer can apply it. **This step is the conversation** - use it to confirm scope and approach before you start coding.
+4. **Then open your PR**, referencing the already-accepted issue with `Closes #NNN`.
+
+### What gets a PR closed automatically
+
+- **No linked issue.** A PR with no `accepted` issue behind it is closed after a short grace period.
+- **A PR opened in parallel with the issue.** Opening a PR at the same time as (or right after) a brand-new issue that has not been accepted yet defeats the entire purpose of the flow, which is to agree the work *first*. Such PRs are not reviewed - the linked issue must **already** carry the `accepted` label at the moment you open the PR.
+- **A missing or empty template.** Deleting the PR template, or leaving its sections blank, means the PR cannot be reviewed, and it is closed.
+
+> **Why so strict?** The maintainer is a volunteer, often with unreleased work in progress that is not visible on the tracker. A surprise PR that duplicates that work, conflicts with it, or takes an approach that will not be merged wastes everyone's time. A short issue and a quick "go ahead" protects you from building something that is rejected on arrival.
 
 ---
 
@@ -167,7 +174,7 @@ Review open PRs and provide constructive feedback. Even experienced contributors
 
 ### Before You Start
 
-1. **Follow the contributor flow above** (for non-translation PRs): open an issue, get the `accepted` label, then come back here.
+1. **Follow the contributor flow above** (for non-translation PRs): open an issue, get the `accepted` label, *then* start work and come back here. If you have not been through that flow, stop and do it first - a PR without a pre-accepted issue is closed automatically.
 
 2. **Sync with upstream**: Ensure your branch is up-to-date with `main`
    ```bash
@@ -205,7 +212,7 @@ Review open PRs and provide constructive feedback. Even experienced contributors
 2. **Open a Pull Request** on GitHub with:
    - Clear title describing the change
    - Detailed description (use our PR template)
-   - Reference the accepted issue: `Closes #NNN` (required — see [contributor PR flow](#contributor-pr-flow-non-translation-prs))
+   - Reference the accepted issue: `Closes #NNN` (required - see [contributor PR flow](#contributor-pr-flow-non-translation-prs))
    - Screenshots for UI changes
 
 3. **Respond to reviews**:
@@ -350,32 +357,32 @@ Fixes #123
 
 ### Submitting a translation via GitLocalize
 
-Translations are managed through **[GitLocalize](https://gitlocalize.com/repo/10819)** — a web-based translation platform where you can contribute without ever touching a fork or opening a PR manually.
+Translations are managed through **[GitLocalize](https://gitlocalize.com/repo/10819)** - a web-based translation platform where you can contribute without ever touching a fork or opening a PR manually.
 
 1. **Visit the project on GitLocalize:** https://gitlocalize.com/repo/10819
 2. Select your language (or request a new one using the platform's "Add language" feature).
-3. Translate or correct strings in the browser editor — full context is shown alongside each key.
+3. Translate or correct strings in the browser editor - full context is shown alongside each key.
 4. Submit your changes; GitLocalize will open a PR to this repo automatically.
 
-> **Do NOT open a GitHub issue to report a bad translation** — go to GitLocalize and correct it there.
+> **Do NOT open a GitHub issue to report a bad translation** - go to GitLocalize and correct it there.
 
 ### What to keep in mind when translating
 
-- **Preserve `{placeholder}` tokens exactly** — e.g. `{device}`, `{duration}` must appear verbatim in your translated string.
-- **Domain context matters** — "match" means a *detected program run*, not a sports match; "logs" means *diagnostic output*, not lumber. Translate with that context in mind.
-- **Do not use automated machine translation** — machine translators produce domain-wrong output and have corrupted WashData's translation files in the past. All work must be done by a fluent speaker who understands the appliance-monitoring domain.
+- **Preserve `{placeholder}` tokens exactly** - e.g. `{device}`, `{duration}` must appear verbatim in your translated string.
+- **Domain context matters** - "match" means a *detected program run*, not a sports match; "logs" means *diagnostic output*, not lumber. Translate with that context in mind.
+- **Do not use automated machine translation** - machine translators produce domain-wrong output and have corrupted WashData's translation files in the past. All work must be done by a fluent speaker who understands the appliance-monitoring domain.
 
 ### Adding a brand-new language
 
-If your language is not yet listed on GitLocalize, use the platform's "Add language" feature to request it. Once set up, all subsequent work happens on GitLocalize — no manual file copying or forking required.
+If your language is not yet listed on GitLocalize, use the platform's "Add language" feature to request it. Once set up, all subsequent work happens on GitLocalize - no manual file copying or forking required.
 
 ### For maintainers: adding new translation keys
 
-When a new key is added to `en.json` / `strings.json`, GitLocalize automatically detects it and marks it as "needs translation" for every language on the platform — community translators pick it up from there.
+When a new key is added to `en.json` / `strings.json`, GitLocalize automatically detects it and marks it as "needs translation" for every language on the platform - community translators pick it up from there.
 
 Maintainer steps after adding a key:
-1. Run `python3 devtools/sync_translations.py` — removes deprecated keys from all non-English HA-layer files (safe, no network).
-2. Translate the new keys into all languages via **Claude subagents with explicit domain context** — never via `translate.py` or any machine translator. See the "Translation maintenance" section of `CLAUDE.md` for the full procedure.
+1. Run `python3 devtools/sync_translations.py` - removes deprecated keys from all non-English HA-layer files (safe, no network).
+2. Translate the new keys into all languages via **Claude subagents with explicit domain context** - never via `translate.py` or any machine translator. See the "Translation maintenance" section of `CLAUDE.md` for the full procedure.
 
 ---
 
@@ -419,4 +426,4 @@ This software is provided free of charge. No contributor is required to assign c
 to the maintainer; you retain copyright in your own contributions while granting the project
 the right to distribute them under AGPL-3.0-or-later.
 
-**Last Updated**: 2026-07-16
+**Last Updated**: 2026-08-11

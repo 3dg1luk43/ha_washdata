@@ -32,15 +32,22 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
+from custom_components.ha_washdata.suggestion_engine import (
+    SuggestionEngine,
+    _measured_off_delay_floor,
+)
 from custom_components.ha_washdata.const import (
+    CONF_MIN_OFF_GAP,
+    DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     CONF_DURATION_TOLERANCE,
     CONF_END_ENERGY_THRESHOLD,
     CONF_OFF_DELAY,
     CONF_PROFILE_DURATION_TOLERANCE,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
+    CONF_WATCHDOG_INTERVAL,
     DEFAULT_OFF_DELAY,
+    DEFAULT_OFF_DELAY_BY_DEVICE,
 )
 
 
@@ -137,6 +144,192 @@ def test_off_delay_falls_back_to_cadence_without_traces() -> None:
     # cadence path: max(device_floor, 20*5=100); washing_machine floor >= that or 100
     assert off >= DEFAULT_OFF_DELAY or off == 100
     assert "pause" not in out[CONF_OFF_DELAY]["reason"].lower()
+
+
+def test_off_delay_measurement_beats_dishwasher_device_floor() -> None:
+    """A measured p95 pause must not be clamped up to the 1800s blind prior.
+
+    Real-world regression: a dishwasher with a measured p95 intra-cycle pause of
+    ~240s was suggested off_delay=1800 purely because of
+    DEFAULT_OFF_DELAY_BY_DEVICE. The oversized end-gate lookback then swept
+    standby blips into the energy gate and held cycles open ~20 min past the
+    real end.
+    """
+    cycles = [
+        _cycle(_trace_with_pause(pause_len_s=240.0), cid=f"d{i}") for i in range(6)
+    ]
+    out = _engine(cycles, device_type="dishwasher").generate_operational_suggestions(
+        p95_dt=30.0, median_dt=30.0
+    )
+    off = out[CONF_OFF_DELAY]["value"]
+    assert "pause" in out[CONF_OFF_DELAY]["reason"].lower()
+    # Tracks the measurement (~240 + 60), nowhere near the 1800s device prior.
+    assert 240 <= off <= 400, f"expected ~p95(240)+60, got {off}"
+    assert out[CONF_OFF_DELAY]["reason_params"]["floor"] == DEFAULT_OFF_DELAY
+
+
+def test_off_delay_without_traces_keeps_dishwasher_device_floor() -> None:
+    """With no measurement the conservative per-device prior still applies."""
+    out = _engine([], device_type="dishwasher").generate_operational_suggestions(
+        p95_dt=30.0, median_dt=30.0
+    )
+    assert out[CONF_OFF_DELAY]["value"] == DEFAULT_OFF_DELAY_BY_DEVICE["dishwasher"]
+
+
+def test_off_delay_measured_floor_honours_lower_device_priors() -> None:
+    """Device priors *below* the generic default (pumps, 20s) are not raised."""
+    assert _measured_off_delay_floor(20) == 20
+    assert _measured_off_delay_floor(1800) == DEFAULT_OFF_DELAY
+
+
+# ---------------------------------------------------------------------------
+# 1b. watchdog interval
+# ---------------------------------------------------------------------------
+
+
+def test_watchdog_tracks_update_cadence_not_a_multiple_of_it() -> None:
+    """Watchdog is a tick period, not a threshold: keep it near the cadence.
+
+    It can never cause a false stop (staleness is gated by
+    no_update_active_timeout), but every extra second is end-detection lag, so
+    the old 3x-p95 multiple was pure latency.
+    """
+    out = _engine([]).generate_operational_suggestions(p95_dt=60.3, median_dt=30.1)
+    wd = out[CONF_WATCHDOG_INTERVAL]["value"]
+    # max(ceil(60.3)+1=62, 2*ceil(30.1)+1=63) → 63
+    assert wd == 63, f"expected max(ceil(60.3)+1, 2*ceil(30.1)+1), got {wd}"
+    # Still above the p95 gap so a normal skipped sample never looks stale.
+    assert wd > 60.3
+    # Also satisfies reconciler Rule 3a (>= 2 * sampling interval).
+    assert wd >= 2 * 31  # 2 * ceil(30.1)
+
+
+def test_watchdog_never_below_30s() -> None:
+    out = _engine([]).generate_operational_suggestions(p95_dt=2.0, median_dt=2.0)
+    assert out[CONF_WATCHDOG_INTERVAL]["value"] == 30
+
+
+# ---------------------------------------------------------------------------
+# 1c. min_off_gap: measured bridge requirement vs back-to-back headroom
+# ---------------------------------------------------------------------------
+
+
+def _trace_with_terminal_blip(
+    peak: float = 2000.0,
+    quiet_start: float = 6300.0,
+    quiet_len_s: float = 2340.0,
+    blip_len_s: float = 90.0,
+    duration: float = 9000.0,
+    step: float = 30.0,
+) -> list[list[float]]:
+    """A dishwasher-shaped trace: wash, long passive-dry quiet, terminal pump-out.
+
+    The blip after the quiet stretch is what `min_off_gap` must bridge - if the
+    cycle closes first, the pump-out is recorded as a separate ghost cycle (#43).
+    It lands at ~96% of the cycle, as real dishwashers do: a dead run resuming
+    before 90% is classified `mid_restart` by `select_clean_cycles` and dropped.
+    """
+    pts: list[list[float]] = []
+    t = 0.0
+    ramp_s = 300.0  # real cycles ramp in; a cold start at peak trips `high_start`
+    while t <= duration:
+        if t < ramp_s:
+            p = round(peak * (t / ramp_s), 1)
+        elif t < quiet_start:
+            p = peak
+        elif t < quiet_start + quiet_len_s:
+            p = 0.0
+        elif t < quiet_start + quiet_len_s + blip_len_s:
+            p = 60.0
+        else:
+            p = 0.0
+        pts.append([round(t, 1), p])
+        t += step
+    return pts
+
+
+def _timed_cycles(n: int, gap_s: float, *, traced: bool = True) -> list[dict[str, Any]]:
+    """`n` dishwasher cycles of 9000 s separated by `gap_s` of idle time."""
+    from datetime import datetime, timedelta, timezone
+
+    base = datetime(2026, 1, 1, 6, 0, 0, tzinfo=timezone.utc)
+    out: list[dict[str, Any]] = []
+    for i in range(n):
+        start = base + timedelta(seconds=i * (9000.0 + gap_s))
+        end = start + timedelta(seconds=9000.0)
+        out.append(
+            _cycle(
+                _trace_with_terminal_blip() if traced else [],
+                cid=f"g{i}",
+                duration=9000.0,
+                start_time=start.isoformat(),
+                end_time=end.isoformat(),
+            )
+        )
+    return out
+
+
+def test_min_off_gap_sized_from_measured_bridge_not_device_prior() -> None:
+    """The measured bridge requirement beats the blind 3600s dishwasher prior."""
+    cycles = _timed_cycles(6, gap_s=6 * 3600)  # one load per ~4h: ample headroom
+    eng = _engine(cycles, device_type="dishwasher")
+    out = eng._suggest_min_off_gap(cycles, stop_threshold_w=2.0, gap_cycles=cycles)
+
+    assert out is not None
+    # ~2100s quiet stretch + 60s buffer, far under the 3600s blind prior.
+    assert 2300 <= out["value"] <= 2500, out
+    assert out["reason_key"] == "suggestion.reason.min_off_gap_bridge"
+    assert out["value"] < DEFAULT_MIN_OFF_GAP_BY_DEVICE["dishwasher"]
+
+
+def test_min_off_gap_suppressed_when_bridge_exceeds_turnaround() -> None:
+    """No quiet-gap value can both bridge the cycle and separate the next load."""
+    cycles = _timed_cycles(6, gap_s=600.0)  # next load 10 min later
+    eng = _engine(cycles, device_type="dishwasher")
+    assert eng._suggest_min_off_gap(cycles, stop_threshold_w=2.0, gap_cycles=cycles) is None
+
+
+def test_min_off_gap_ceiling_is_shortest_turnaround_not_a_percentile() -> None:
+    """A single tight turnaround must veto the proposal.
+
+    These gap distributions are strongly skewed, so a 5th percentile interpolates
+    straight past the one back-to-back pair that is exactly the merge case.
+    """
+    cycles = _timed_cycles(6, gap_s=6 * 3600)
+    # Pull the last cycle forward so it starts 10 min after the previous one ends.
+    from datetime import datetime, timedelta
+
+    prev_end = datetime.fromisoformat(cycles[-2]["end_time"])
+    cycles[-1]["start_time"] = (prev_end + timedelta(seconds=600)).isoformat()
+    cycles[-1]["end_time"] = (prev_end + timedelta(seconds=600 + 9000)).isoformat()
+
+    eng = _engine(cycles, device_type="dishwasher")
+    assert eng._suggest_min_off_gap(cycles, stop_threshold_w=2.0, gap_cycles=cycles) is None
+
+
+def test_min_off_gap_bridge_reaches_the_public_suggestion_pass() -> None:
+    """End-to-end through generate_model_suggestions (covers the call wiring).
+
+    The merge ceiling must be fed the *unfiltered* history; passing the cleaned
+    list instead fuses a dropped cycle's two neighbouring gaps into one long gap
+    and inflates the ceiling.
+    """
+    cycles = _timed_cycles(6, gap_s=6 * 3600)
+    out = _engine(cycles, device_type="dishwasher").generate_model_suggestions()
+    assert CONF_MIN_OFF_GAP in out
+    assert out[CONF_MIN_OFF_GAP]["reason_key"] == "suggestion.reason.min_off_gap_bridge"
+    assert out[CONF_MIN_OFF_GAP]["value"] < DEFAULT_MIN_OFF_GAP_BY_DEVICE["dishwasher"]
+
+
+def test_min_off_gap_falls_back_to_gap_heuristic_without_traces() -> None:
+    """With no power traces the historical inter-cycle-gap path is unchanged."""
+    cycles = _timed_cycles(6, gap_s=6 * 3600, traced=False)
+    eng = _engine(cycles, device_type="washing_machine")
+    out = eng._suggest_min_off_gap(cycles, stop_threshold_w=2.0, gap_cycles=cycles)
+    # Old behaviour: gap-derived, capped at 3600, reported via the original key.
+    assert out is not None
+    assert out["reason_key"] == "suggestion.reason.min_off_gap"
+    assert out["value"] == 3600
 
 
 # ---------------------------------------------------------------------------

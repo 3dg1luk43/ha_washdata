@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData セットアップ",
-        "description": "洗濯機またはその他の家電製品を設定します。\n\n電力センサーが必要です。\n\n**次に、最初のプロファイルを作成するかどうか確認されます。**",
+        "description": "洗濯機またはその他の家電製品を設定します。\n\n電力センサーが必要です。\n\nセットアップ後、サイドバーの WashData パネルを開くか（または [/ha-washdata](/ha-washdata) にアクセスして）、サイクルの確認、検出の調整、プロファイルの管理を行ってください。",
         "data": {
           "name": "デバイス名",
           "device_type": "デバイスの種類",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "デバイス名、アプライアンスのタイプ、または電力センサーを更新します。",
+        "description": "デバイス名、家電の種類、または電力センサーを更新します。\n\nWashData パネル（サイドバー、または [/ha-washdata](/ha-washdata)）で、検出、サイクル、プロファイル、通知を管理できます。",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "すべての設定 (検出、マッチング、タイミング、通知、プロファイル、サイクル) は、WashData パネルで利用できます。このフォームは、パワー センサー、デバイス タイプ、またはスタンバイしきい値を変更する場合にのみ使用してください。",
+        "description": "デバイス名を変更するか、主要なハードウェア設定を変更します。すべての検出・照合・通知の設定は [WashData パネル](/ha-washdata) で確認できます（サイドバーからもアクセス可能）。",
         "data": {
           "name": "デバイス名",
           "device_type": "Device Type",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes} 分タイマー",
       "timer_pause_action_title": "サイクルを再開する",
       "timer_pause_body_suffix": "サイクルが一時停止中です。再開するには WashData パネルを開いてください。",
+      "unload_dismiss_action_title": "リマインダーを停止",
       "notify_live_waiting_message": "{device}: まだ一致するプロファイルがありません。",
       "vs_typical_longer": "通常より {pct}% 長い",
       "vs_typical_shorter": "通常より {pct}% 短い",

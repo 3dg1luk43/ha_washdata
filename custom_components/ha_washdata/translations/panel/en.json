@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entity not found",
+    "running_long": "Running long",
+    "remaining": "remaining",
+    "progress": "progress",
+    "show_time_remaining": "Show time remaining",
+    "show_percentage": "Show percentage",
+    "layout": {
+      "tile": "Tile (compact)",
+      "detail": "Detail (rich)",
+      "glance": "Glance (multiple devices)"
+    },
+    "btn": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "terminate": "End cycle",
+      "record_start": "Start recording",
+      "record_stop": "Stop recording",
+      "program": "Program",
+      "open_panel": "Open WashData"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Appliance entity",
+      "entities": "Appliances",
+      "title": "Title",
+      "icon": "Icon",
+      "show_state": "Show state",
+      "show_program": "Show program",
+      "show_progress_bar": "Show progress bar",
+      "spin_icon": "Spin icon while running",
+      "display_mode": "Detail line",
+      "active_color": "Active color override",
+      "show_phase": "Show phase",
+      "show_energy": "Show energy and cost",
+      "show_anomaly": "Show overrun warning",
+      "show_sparkline": "Show live power graph",
+      "buttons": "Action buttons",
+      "program_entity": "Program entity (override)",
+      "time_entity": "Time entity (override)",
+      "pct_entity": "Progress entity (override)",
+      "power_entity": "Power entity (override)",
+      "tap_action": "Tap action",
+      "hold_action": "Hold action",
+      "double_tap_action": "Double tap action"
+    }
+  },
   "badge": {
     "approved": "Approved",
     "artifact_tip": "{n} anomalies detected (e.g. door opened mid-cycle) – open to see them on the graph",
@@ -72,6 +120,21 @@
     "discard_tip": "Discard the recorded trace without saving",
     "disconnect": "Disconnect",
     "dismiss": "Dismiss",
+    "mute_suggestion": "Stop suggesting this setting",
+    "pg_load_calibrated": "Load Calibrated (ML) ({n})",
+    "pg_load_calibrated_tip": "Stage ML-calibrated settings as Playground overrides",
+    "pg_load_live": "Load live settings",
+    "pg_load_live_tip": "Re-read the integration's current settings and drop every Playground edit",
+    "pg_load_suggested": "Load suggested ({n})",
+    "pg_load_suggested_tip": "Stage the auto-tuner's current suggestions as Playground overrides",
+    "pg_preset_delete": "Delete preset",
+    "pg_preset_load": "Load preset",
+    "pg_preset_load_tip": "Replace the Playground values with this preset (live settings are untouched)",
+    "pg_preset_save": "Save as preset",
+    "pg_preset_save_tip": "Save every value below as a named preset for this device",
+    "pg_publish_all": "Publish {n} to integration",
+    "pg_publish_one": "Publish {label} to the integration",
+    "reset_muted": "Reset muted",
     "done": "Done",
     "download_device": "Download this setup",
     "download_export": "Download export",
@@ -274,6 +337,7 @@
     "no_automations": "No automations reference this device yet.",
     "panel_settings": "Panel Settings",
     "param_sweep": "Parameter sweep",
+    "pg_settings_source": "Settings source",
     "phase_catalog": "Phase Catalog",
     "playground": "Playground",
     "process_history": "Process History",
@@ -370,6 +434,7 @@
     "default_access_level": "Default level for users not listed below",
     "default_other": "Default (other devices)",
     "default_tab": "Default tab when opening the panel",
+    "font_size": "Panel font size",
     "delta": "Δ",
     "description": "Description",
     "dest_real_history": "Real history (counts in stats)",
@@ -466,6 +531,9 @@
     "pg_group_matching": "Program matching",
     "pg_group_timing": "Timing rules",
     "pg_idle": "Idle",
+    "pg_preset": "Playground preset",
+    "pg_preset_name": "New preset name",
+    "pg_preset_none": "Select a preset…",
     "pg_stress_group": "Idle termination test",
     "pg_stress_idle_auto": "Auto",
     "pg_stress_idle_w": "Idle level (W)",
@@ -768,6 +836,16 @@
     "pg_analysis_hint2": "Pick a cycle and press Run to load match analysis.",
     "pg_apply_confirm": "Apply best value: {label} = {value}?",
     "pg_apply_settings_confirm": "Save these {n} setting(s) to this device? {list}",
+    "pg_ctrl_intro": "Values start from this device's live integration settings. Edits stay in the Playground until you publish them.",
+    "pg_live_unavailable": "Live settings unavailable, showing defaults.",
+    "pg_load_live_confirm": "Discard {n} Playground edit(s) and reload the integration's current settings?",
+    "pg_matches_live": "Matches live settings",
+    "pg_n_changed": "{n} changed vs live settings",
+    "pg_sugg_none": "All suggestions already match the current settings",
+    "pg_preset_delete_confirm": "Delete the preset \"{name}\"?",
+    "pg_preset_limit": "Preset limit reached ({n})",
+    "pg_preset_overwrite": "Overwrite the preset \"{name}\"?",
+    "pg_publish_one_confirm": "Save {label} = {value} to this device's settings?",
     "pg_stress_terminated_detail": "Settled to ~{idle}W idle -- cycle ended {h}h {m}m later via {reason}.",
     "pg_stress_above_threshold_detail": "Idle draw ~{idle}W is at or above the effective stop threshold ({stop}W) -- the cycle never registered as quiet. Raise stop_threshold_w to fix.",
     "pg_stress_hit_cap_detail": "Cycle ran {h}h {m}m without stopping -- force-stopped by the safety cap. Idle draw {idle}W vs stop threshold {stop}W.",
@@ -800,6 +878,7 @@
     "preferences_admin": "Preferences, panel & access control",
     "preferences_adv": "Preferences",
     "prefs_personal": "These apply to your Home Assistant account only.",
+    "font_size_hint": "Make everything in this panel larger or smaller. Applies to your account on this device.",
     "process_history_hint": "Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), and recompute cycle health. Run this after a batch of reviews.",
     "profile_deleted": "Profile deleted",
     "profile_poor_health_detail": "Cycles assigned to this profile have inconsistent shapes or low confidence. Consider rebuilding the envelope or reviewing labelled cycles.",
@@ -845,6 +924,10 @@
     "store_share_device_intro": "Upload {brand} {model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.",
     "store_share_intro": "Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly.",
     "sug_staged": "Set {key} = {val}. Save to apply.",
+    "sug_muted": "Won't suggest this setting again",
+    "sug_mute_failed": "Could not mute suggestion",
+    "sug_unmuted_all": "Muted suggestions reset",
+    "n_suggestions_muted": "{count} muted; the auto-tuner will not propose these.",
     "tail_trim_hint": "Remove this many seconds from the end",
     "toast_auto_detect_enabled": "Auto-detect enabled",
     "toast_auto_label_complete": "Auto-label complete",
@@ -872,6 +955,7 @@
     "trend_duration_shorter": "Duration trending shorter ({pct}%/cycle) – recent avg {avg}",
     "trend_energy_down": "Energy trending down ({pct}%/cycle)",
     "trend_energy_up": "Energy trending up ({pct}%/cycle) – recent avg {avg}",
+    "trim_destructive_confirm": "This keeps only {pct}% of the cycle and cannot be undone. Continue?",
     "trim_intro": "Drag the red handles, or enter values. Everything outside the window is removed.",
     "tuning_suggestions_available": "{count} tuning suggestion available from observed cycles. They appear beside the relevant fields.",
     "unsure_detected_prefix": "WashData is unsure it detected",
@@ -903,6 +987,7 @@
     "duration_scale": "Stage 4: log-ratio where duration agreement halves; smaller = stricter penalty (default 0.175)",
     "energy_scale": "Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)",
     "anti_wrinkle_idle_timeout": "Quiet time allowed between two tumble pulses before anti-wrinkle ends",
+    "dishwasher_end_spike_quiet_release": "Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released",
     "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
     "anti_wrinkle_enabled": "Absorb the tumble pulses after the main phase instead of reading them as new cycles",
     "anti_wrinkle_max_duration": "A pulse longer than this ends anti-wrinkle and opens a new cycle",
@@ -969,6 +1054,10 @@
     "detection": {
       "intro": "How a cycle is detected as starting, running and finishing.",
       "label": "Detection"
+    },
+    "dishwasher": {
+      "intro": "End-of-cycle handling for dishwashers, which typically finish with a long near-silent drying phase before a short final drain.",
+      "label": "Dishwasher"
     },
     "matching": {
       "intro": "How finished cycles are matched to learned profiles and labelled.",
@@ -1039,6 +1128,10 @@
     "device_type": {
       "doc": "Appliance class. Sets sensible detection defaults (thresholds, off-delay, end handling) tuned for that appliance type; change it only if the device was originally set up as the wrong type.",
       "label": "Device Type"
+    },
+    "dishwasher_end_spike_quiet_release": {
+      "doc": "Once the cycle passes its expected duration, how long the dishwasher must stay quiet (below the Stop Threshold) before WashData stops waiting for a final drain and ends the cycle. Raise it if your machine has a long silent drying phase before a late final drain that is being missed - a wider window lets the learned duration follow seasonal drift (colder inlet water = longer cycles) instead of locking to the old average. It only ever shortens the wait relative to the internal 30-minute end-spike cap, never extends it.",
+      "label": "Passive-Dry Quiet Release"
     },
     "door_sensor_entity": {
       "doc": "Optional door binary sensor. Used to detect when the appliance has been opened/unloaded after a cycle.",
@@ -1228,6 +1321,10 @@
       "doc": "Minutes after a cycle ends before sending the still-waiting \"unload the machine\" reminder. Set 0 to disable the reminder.",
       "label": "Unload Nag Delay"
     },
+    "notify_unload_repeat": {
+      "doc": "Keep re-sending the unload reminder every \"Unload Nag Delay\" minutes until you open the door or tap \"Stop reminding\" on the notification. Requires a Door Sensor Entity (the reminder itself does). The dismiss button works on Home Assistant companion-app (mobile) notifications.",
+      "label": "Repeat Until Door Opens"
+    },
     "off_delay": {
       "doc": "Time to wait after power drops before declaring the cycle finished. If power resumes within this window the cycle continues seamlessly - this bridges pauses between wash stages. Dishwashers have long drying phases (power off for 20-60 min) so the off-delay must exceed that to keep the whole wash+dry as one cycle.",
       "label": "Off Delay"
@@ -1386,6 +1483,26 @@
     "anti_wrinkle_idle_timeout": {
       "label": "Max Pulse Gap",
       "doc": "How long the machine may stay quiet between two tumble pulses before anti-wrinkle mode ends. Set it above the longest gap your dryer leaves between pulses, otherwise every later pulse is read as a false start."
+    },
+    "power_profile_interval_min": {
+      "label": "Power Profile Interval",
+      "doc": "Bucket size for the per-profile power_profile sensor attribute (the flat per-slot average-watts array consumed by external planners such as EMHASS and tibber_prices). Smaller buckets keep short power spikes sharp; larger buckets smooth the shape. Default 15 min. Read-time only; does not affect detection."
+    },
+    "notify_live_sticky": {
+      "label": "Keep Live Notification On Tap",
+      "doc": "Android only. Make the live-progress notification persistent (sticky) so tapping it does not dismiss the ongoing thread. Off keeps the default behaviour where a tap dismisses it."
+    },
+    "notify_live_click_action": {
+      "label": "Live Notification Tap Target",
+      "doc": "Android only. Where a tap on the live-progress notification opens (e.g. /lovelace/laundry, or a full URL) instead of the app landing page. Leave blank for the default."
+    },
+    "door_opens_at_end": {
+      "label": "Door Opens Automatically At End",
+      "doc": "For dishwashers that pop the door open at the end of the cycle to dry (AirDry and similar). With this on, a door-open on a running cycle no longer pauses it forever; instead, if the door stays open for the dwell below, WashData treats the cycle as finished. A brief open (adding an item) is ignored. Requires a Door Sensor Entity."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Door-Open End Dwell",
+      "doc": "How long the door must stay open before WashData ends the cycle, when \"Door Opens Automatically At End\" is on. Long enough to ignore quickly adding a dish (default 60 s), short enough to end promptly once the machine pops the door."
     }
   },
   "setting_group": {
@@ -1554,7 +1671,7 @@
       }
     },
     "reason": {
-      "watchdog": "Kept as low as safe (3x the p95 update gap of {p95}s, min 30s) so stalls are caught quickly without false stops.",
+      "watchdog": "Kept as low as safe (just above the p95 update gap of {p95}s and at least 2x the sampling interval of {median}s, min 30s) so stalls are caught quickly without false stops.",
       "no_update_timeout": "Based on observed update cadence (p95={p95}s) * 20 (min 60s).",
       "off_delay_cadence": "Based on observed update cadence (p95={p95}s) * 5",
       "off_delay_device_floor": "Used device-specific safe minimum for {device} ({floor}s).",
@@ -1575,6 +1692,7 @@
       "profile_match_threshold": "p10 confidence of {cycles} correct auto-labels ({p10}); safe live-commit floor.",
       "end_repeat_count": "{false}/{total} clean cycles ({pct}%) had a >60s internal pause that resumed; require {val} end confirmation(s).",
       "min_off_gap": "Based on {gaps} observed inter-cycle gaps (p05={p05}s). Device floor: {floor}s.",
+      "min_off_gap_bridge": "Sized to bridge the longest quiet stretch inside a cycle: {span}s + 60s buffer, from {spans} bridged gaps across {cycles} clean cycles (stays under your {ceiling}s back-to-back headroom).",
       "min_active": "Based on minimum active power ({min}W) observed in last cycle.",
       "end_energy_default": "Default recommended baseline for end-of-cycle noise gate.",
       "dead_zone_from_dip": "Based on early power dip detected at {s}s.",
@@ -1678,6 +1796,10 @@
     "no_split_found": "No idle gaps found to split on",
     "panel_settings_saved": "Panel settings saved",
     "pause_no_cycle": "No active cycle to pause",
+    "pg_preset_loaded": "Preset \"{name}\" loaded",
+    "pg_preset_saved": "Preset \"{name}\" saved",
+    "pg_sugg_loaded": "Staged {n} suggested value(s) - run the Playground to compare",
+    "pg_sugg_ml_loaded": "Staged {n} ML-calibrated value(s) - run the Playground to compare",
     "pg_run_gone": "That run is no longer available.",
     "phase_name_required": "Phase name is required",
     "phase_updated": "Phase updated",

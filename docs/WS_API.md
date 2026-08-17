@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**102 commands.**
+**106 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -57,6 +57,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_suggestions` | entry_id | `GetSuggestionsResponse` |
 | `apply_suggestions` | entry_id, keys | `ApplySuggestionsResponse` |
 | `clear_suggestions` | entry_id | `SuccessResponse` |
+| `set_suggestion_lock` | entry_id, key, locked | `SetSuggestionLockResponse` |
 | `run_suggestion_analysis` | entry_id | `RunSuggestionAnalysisResponse` |
 | `get_cycle_power_data` | entry_id, cycle_id | `GetCyclePowerDataResponse` |
 | `trim_cycle` | entry_id, cycle_id, start_s, end_s | `StartTaskResponse` |
@@ -85,6 +86,9 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `run_playground_history` | entry_id, cycle_ids?, settings_override?, concurrency? | `RunPlaygroundHistoryResponse` |
 | `run_playground_sweep` | entry_id, param, values, objective, cycle_ids?, concurrency?, param_y?, values_y? | `RunPlaygroundSweepResponse` |
 | `get_dtw_debug` | entry_id, cycle_id, profile_name? | `GetDtwDebugResponse` |
+| `get_playground_settings` | entry_id | `GetPlaygroundSettingsResponse` |
+| `save_playground_preset` | entry_id, name, values | `PlaygroundPresetsResponse` |
+| `delete_playground_preset` | entry_id, name | `PlaygroundPresetsResponse` |
 | `list_tasks` | entry_id? | `ListTasksResponse` |
 | `subscribe_tasks` | entry_id? | `SubscribeTasksResponse` |
 | `cancel_task` | task_id | `CancelTaskResponse` |
@@ -834,6 +838,8 @@ _None._
 
 | Field | Always present | Type |
 | --- | --- | --- |
+| `version` | yes | str |
+| `icon_url` | yes | str \| null |
 | `device_types` | yes | list[dict[str, any]] |
 | `state_colors` | yes | dict[str, any] |
 | `ml_lab_enabled` | yes | bool |
@@ -843,6 +849,8 @@ _None._
 | `store_online_available` | yes | bool |
 | `store_online_enabled` | yes | bool |
 | `store_web_origin` | yes | str |
+| `store_prefs` | yes | dict[str, any] |
+| `pg_match_defaults` | yes | dict[str, any] |
 
 ## `ha_washdata/get_suggestions`
 
@@ -857,6 +865,7 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `suggestions` | yes | list[dict[str, any]] |
+| `locked_suggestions` | yes | list[str] |
 
 ## `ha_washdata/apply_suggestions`
 
@@ -887,6 +896,23 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `success` | yes | bool |
+
+## `ha_washdata/set_suggestion_lock`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `key` | yes | str |
+| `locked` | yes | bool |
+
+**Response** (`SetSuggestionLockResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `locked_suggestions` | yes | list[str] |
 
 ## `ha_washdata/run_suggestion_analysis`
 
@@ -929,6 +955,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `energy_kwh` | no | number \| null |
 | `artifacts` | no | list[dict[str, any]] |
 | `restart_gaps` | no | list[any] |
+| `is_reference` | no | bool |
 
 ## `ha_washdata/trim_cycle`
 
@@ -1402,6 +1429,59 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `stage4` | yes | DtwStage4Scores |
 | `warp_path` | yes | list[list[number]] |
 
+## `ha_washdata/get_playground_settings`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`GetPlaygroundSettingsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `effective` | yes | dict[str, any] |
+| `presets` | yes | list[PlaygroundPreset] |
+| `publishable` | yes | list[str] |
+| `preset_limit` | yes | number |
+| `classic_suggestions` | yes | dict[str, any] |
+| `ml_suggestions` | yes | dict[str, any] \| null |
+| `ml_suggestions_enabled` | yes | bool |
+
+## `ha_washdata/save_playground_preset`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `name` | yes | str |
+| `values` | yes | dict |
+
+**Response** (`PlaygroundPresetsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `presets` | yes | list[PlaygroundPreset] |
+
+## `ha_washdata/delete_playground_preset`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `name` | yes | str |
+
+**Response** (`PlaygroundPresetsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `presets` | yes | list[PlaygroundPreset] |
+
 ## `ha_washdata/list_tasks`
 
 **Request parameters**
@@ -1862,3 +1942,4 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | --- | --- | --- |
 | `items` | no | list |
 | `phase_programs` | no | list |
+| `all_programs` | no | list |

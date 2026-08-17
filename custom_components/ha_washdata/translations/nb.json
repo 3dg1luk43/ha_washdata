@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData-oppsett",
-        "description": "Konfigurer vaskemaskinen eller annet apparat.\n\nStrømsensor er nødvendig.\n\n**Deretter vil du bli spurt om du vil opprette din første profil.**",
+        "description": "Konfigurer vaskemaskinen din eller et annet apparat.\n\nStrømsensor er nødvendig.\n\nEtter oppsett åpner du WashData-panelet fra sidefeltet (eller gå til [/ha-washdata](/ha-washdata)) for å se sykluser, justere registrering og administrere profiler.",
         "data": {
           "name": "Enhetsnavn",
           "device_type": "Enhetstype",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Rekonfigurer WashData",
-        "description": "Oppdater enhetsnavnet, apparattype eller strømsensor.",
+        "description": "Oppdater enhetsnavnet, apparattypen eller strømsensoren.\n\nWashData-panelet (sidefeltet eller [/ha-washdata](/ha-washdata)) er der registrering, sykluser, profiler og varsler administreres.",
         "data": {
           "name": "Enhetsnavn",
           "device_type": "Enhetstype",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData-innstillinger",
-        "description": "Alle innstillinger -- deteksjon, samsvar, timing, varsler, profiler og sykluser -- er tilgjengelige i WashData-panelet. Bruk dette skjemaet kun til å endre strømsensoren, enhetstype eller standbyterskelen.",
+        "description": "Gi enheten nytt navn eller endre de grunnleggende maskinvareinnstillingene. Alle innstillinger for registrering, matching og varsler finnes i [WashData-panelet](/ha-washdata) (også tilgjengelig fra sidefeltet).",
         "data": {
           "name": "Enhetsnavn",
           "device_type": "Enhetstype",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes} min. timer",
       "timer_pause_action_title": "Fortsett syklus",
       "timer_pause_body_suffix": "Syklusen er satt på pause. Åpne WashData-panelet for å fortsette.",
+      "unload_dismiss_action_title": "Stopp påminnelser",
       "notify_live_waiting_message": "{device}: Ingen profil gjenkjent ennå.",
       "vs_typical_longer": "{pct}% lengre enn vanlig",
       "vs_typical_shorter": "{pct}% kortere enn vanlig",

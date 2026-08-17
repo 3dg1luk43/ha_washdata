@@ -43,6 +43,10 @@ CONF_POWER_SENSOR = "power_sensor"
 CONF_NAME = "name"
 CONF_MIN_POWER = "min_power"
 CONF_OFF_DELAY = "off_delay"
+# Bucket size (minutes) for the per-profile `power_profile` sensor attribute that
+# external planners (EMHASS, tibber_prices) consume. Configurable so short sharp
+# spikes are not blurred by the fixed 15-min default (#367). Read-time only.
+CONF_POWER_PROFILE_INTERVAL_MIN = "power_profile_interval_min"
 CONF_NOTIFY_SERVICE = "notify_service"  # Deprecated - kept for migration only
 CONF_NOTIFY_ACTIONS = "notify_actions"
 CONF_NOTIFY_PEOPLE = "notify_people"
@@ -132,6 +136,7 @@ CONF_ANTI_WRINKLE_MAX_POWER = "anti_wrinkle_max_power"  # W threshold for anti-w
 CONF_ANTI_WRINKLE_MAX_DURATION = "anti_wrinkle_max_duration"  # Seconds to treat as anti-wrinkle
 CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true-off exit
 CONF_ANTI_WRINKLE_IDLE_TIMEOUT = "anti_wrinkle_idle_timeout"  # Seconds below exit power before anti-wrinkle ends
+CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE = "dishwasher_end_spike_quiet_release"  # Dishwasher: sustained-quiet seconds after expected duration that release the end-of-cycle drain wait early (#379)
 CONF_DELAY_START_DETECT_ENABLED = "delay_start_detect_enabled"  # Enable delayed-start detection
 CONF_DELAY_CONFIRM_SECONDS = "delay_confirm_seconds"  # Seconds power must stay in standby band before DELAY_WAIT engages
 CONF_DELAY_TIMEOUT_HOURS = "delay_timeout_hours"  # Safety timeout (hours) while waiting to start
@@ -153,6 +158,10 @@ CONF_NOTIFY_PRE_COMPLETE_MESSAGE = "notify_pre_complete_message"
 CONF_NOTIFY_LIVE_INTERVAL_SECONDS = "notify_live_interval_seconds"
 CONF_NOTIFY_LIVE_OVERRUN_PERCENT = "notify_live_overrun_percent"
 CONF_NOTIFY_LIVE_CHRONOMETER = "notify_live_chronometer"
+# Opt-in data keys on the EXISTING live progress notification (#347): keep-on-tap
+# (sticky) and a tap target (clickAction). Not new notification types. Mobile-only.
+CONF_NOTIFY_LIVE_STICKY = "notify_live_sticky"
+CONF_NOTIFY_LIVE_CLICK_ACTION = "notify_live_click_action"
 CONF_NOTIFY_REMINDER_MESSAGE = "notify_reminder_message"  # Distinct one-time pre-end alert
 CONF_NOTIFY_TIMEOUT_SECONDS = "notify_timeout_seconds"  # Auto-dismiss after N seconds (0 = never)
 CONF_NOTIFY_CHANNEL = "notify_channel"  # Android channel for status/live/reminder
@@ -174,10 +183,19 @@ CONF_PEAK_RATE_MESSAGE = "peak_rate_message"
 
 # Door sensor & pause
 CONF_DOOR_SENSOR_ENTITY = "door_sensor_entity"  # Optional binary_sensor for machine door
+# Auto-open dishwashers (AirDry etc.) pop the door at cycle end; a sustained
+# door-open then means the cycle finished, not a mid-cycle pause (#342).
+CONF_DOOR_OPENS_AT_END = "door_opens_at_end"
+CONF_DOOR_END_DWELL_SECONDS = "door_end_dwell_seconds"
+DEFAULT_DOOR_OPENS_AT_END = False
+DEFAULT_DOOR_END_DWELL_SECONDS = 60  # door must stay open this long to finalize
 CONF_PAUSE_CUTS_POWER = "pause_cuts_power"  # Also turn off switch entity when pausing
 CONF_SWITCH_ENTITY = "switch_entity"  # Optional switch entity toggled on pause/resume
 CONF_NOTIFY_UNLOAD_DELAY_MINUTES = "notify_unload_delay_minutes"  # Minutes before "laundry waiting" nag
 CONF_NOTIFY_UNLOAD_MESSAGE = "notify_unload_message"  # Template for the clean-laundry nag message
+# Repeat the unload reminder every delay-minutes until the door opens or the user
+# taps the notification's "stop reminding" action (opt-in, #374).
+CONF_NOTIFY_UNLOAD_REPEAT = "notify_unload_repeat"
 
 # Quiet hours (do-not-disturb window). Both hours 0-23; unset/None (or start==end)
 # = feature off. When configured, finish-type notifications (finish, clean-laundry
@@ -209,11 +227,22 @@ DEFAULT_NOTIFY_FIRE_EVENTS = True
 DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS = 300
 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
 DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
+DEFAULT_NOTIFY_LIVE_STICKY = False  # #347: off = today's behaviour (tap dismisses)
+DEFAULT_NOTIFY_LIVE_CLICK_ACTION = ""  # #347: empty = no tap target (today's behaviour)
 DEFAULT_NOTIFY_TIMEOUT_SECONDS = 0  # 0 = notifications never auto-dismiss
 DEFAULT_NOTIFY_CHANNEL = ""  # Empty = omit channel (companion app default)
 DEFAULT_NOTIFY_FINISH_CHANNEL = ""  # Empty = reuse status channel
 DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES = 60  # 1 hour before "still waiting" nag notification
 DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago - laundry is still inside."
+DEFAULT_NOTIFY_UNLOAD_REPEAT = False  # opt-in: re-send the unload reminder until dismissed (#374)
+# Safety bound on repeat mode (#374). The reminder is meant to run "until the door
+# opens", and the in-notification "Stop reminding" button is mobile_app-only - so a
+# user whose only notify target is non-mobile has the door sensor as their sole
+# escape. If that sensor never reports open (offline, or nobody home), the reminder
+# would re-fire forever AND pin the entity in Clean state, blocking the power-based
+# Off detection indefinitely. 48 reminders is ~2 days at the 60-minute default, far
+# past any legitimate reminder window, so normal use never reaches it.
+NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS = 48
 DEFAULT_PEAK_RATE_MESSAGE = "Running at peak rate ({price}/kWh)."
 
 # Quiet hours default: feature off (both hours unset). See CONF_NOTIFY_QUIET_*.
@@ -227,6 +256,7 @@ DEFAULT_NOTIFY_MILESTONE_MESSAGE = "{device} has completed {cycle_count} cycles!
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts
 DEFAULT_OFF_DELAY = 180  # Seconds (3 minutes, safer for 60s polling)
+DEFAULT_POWER_PROFILE_INTERVAL_MIN = 15  # power_profile attribute bucket (#367)
 DEFAULT_NAME = "Washing Machine"
 # Seconds without updates while active before forced stop (publish-on-change sockets)
 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 600  # 10 minutes
@@ -492,6 +522,7 @@ MATCH_ENERGY_WEIGHT = 0.22
 MATCH_DURATION_SCALE = 0.175       # ~ln ratio at which duration agreement halves
 MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
 
+
 # States
 STATE_OFF = "off"
 STATE_DELAY_WAIT = "delay_wait"
@@ -550,6 +581,21 @@ DEVICE_TYPE_GENERIC = "generic"
 # Config entries whose stored device_type is no longer supported are migrated
 # to this bucket on load (see __init__.py), preserving their tuned options.
 DEVICE_TYPE_OTHER = "other"
+
+# Device types whose Stage-4 "energy agreement" compares INTEGRATED energy
+# (mean power x duration) instead of mean power. On these, same-base program
+# variants differ mainly in temperature/spin at roughly equal duration, so
+# integrated energy (which mean power dilutes) is the right discriminator -
+# validated on real store data (washer top-1 +3.4pp, FP down). Other device
+# types (dishwasher/dryer/...) keep mean power, because their programs are
+# distinguished by duration and integrated energy would conflate the two axes
+# (validated: it regresses there). See register item 99 / the cycle-variant
+# discrimination spec. Defined from the device-type constants above (not string
+# literals) so it can never drift from them.
+STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES = (
+    DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_WASHER_DRYER,
+)
 
 DEVICE_TYPES = {
     DEVICE_TYPE_WASHING_MACHINE: "Washing Machine",
@@ -1013,3 +1059,10 @@ PLAYGROUND_STRESS_MAX_SPARSE_STEPS: int = 15         # max sparse steps → max 
 PLAYGROUND_STRESS_MAX_IDLE_W: float = 100000.0       # upper bound for a manual idle override
                                                      # (far beyond any appliance; guards against
                                                      # inf/absurd values corrupting synthesis)
+
+# ─── Playground setting presets (sandbox snapshots, per device) ────────────────
+# Named snapshots of the Playground control panel's values, stored under the
+# "playground_presets" store key. They never touch the live config: publishing a
+# value to entry.options is always an explicit, per-setting user action.
+PLAYGROUND_PRESET_MAX: int = 30                      # per-device cap (keeps the store small)
+PLAYGROUND_PRESET_NAME_MAX: int = 60                 # preset name length cap

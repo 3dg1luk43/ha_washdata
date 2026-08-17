@@ -22,6 +22,7 @@ import collections
 import functools
 import json
 import logging
+import math
 import os
 import re
 import time
@@ -39,6 +40,7 @@ from .const import (
     CONF_NAME,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_DEVICE_TYPE,
+    CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
@@ -71,6 +73,7 @@ from .const import (
     CONF_SWITCH_ENTITY,
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_DEVICE_TYPE,
+    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DEFAULT_MAINTENANCE_REMINDER_CYCLES,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
@@ -81,6 +84,7 @@ from .const import (
     DOMAIN,
     ENABLE_ML_SUGGESTIONS,
     ENABLE_ML_TRAINING,
+    PLAYGROUND_PRESET_MAX,
     SHOW_ML_LAB,
     STATE_COLORS,
 )
@@ -92,16 +96,11 @@ from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
 _LOGGER = logging.getLogger(__name__)
 
-# Read once at import time (manifest.json is static) so ws_get_constants never does
-# blocking I/O on the event loop. Falls back to "" if the file is absent.
-try:
-    from pathlib import Path as _Path
-    _INTEGRATION_VERSION: str = json.loads(
-        (_Path(__file__).parent / "manifest.json").read_text(encoding="utf-8")
-    ).get("version", "")
-    del _Path
-except Exception:  # pragma: no cover  # pylint: disable=broad-exception-caught
-    _INTEGRATION_VERSION = ""
+# Populated once during async_setup_entry (stored in hass.data["ha_washdata_version"])
+# so ws_get_constants never does blocking I/O on the event loop.  A module-level
+# read_text() here would run on the event loop the first time ws_api is imported
+# inside async_setup_entry (#328/#335).
+_INTEGRATION_VERSION: str = ""
 
 # ─── WS response contract (Group H1) ────────────────────────────────────────────
 # Debug-only validation of every send_result payload against the TypedDict
@@ -1091,6 +1090,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_constants,
         # Suggestions
         ws_get_suggestions, ws_apply_suggestions, ws_clear_suggestions, ws_run_suggestion_analysis,
+        ws_set_suggestion_lock,
         # Cycle curve / interactive editing
         ws_get_cycle_power_data, ws_trim_cycle, ws_analyze_split, ws_apply_split, ws_apply_merge,
         # Profile envelope / member cycles
@@ -1116,6 +1116,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_pause_cycle, ws_resume_cycle, ws_terminate_cycle,
         # Playground (F3): DTW visualizer
         ws_get_dtw_debug,
+        # Playground settings control panel: live values + named presets
+        ws_get_playground_settings, ws_save_playground_preset, ws_delete_playground_preset,
         # Playground redesign: faithful single-cycle sim + history table + sweep
         ws_run_playground_cycle_detail, ws_run_playground_history,
         ws_run_playground_sweep,
@@ -1215,7 +1217,13 @@ def ws_get_devices(
                     except Exception:  # pylint: disable=broad-exception-caught
                         pass
                     try:
-                        info["feedback_count"] = len(store.get_pending_feedback() or {})
+                        # Count only pending feedback whose cycle still exists, so the
+                        # badge cannot outrun the review list after a cycle is deleted,
+                        # merged or split (#362). Defense-in-depth on top of the prune in
+                        # those mutation paths; also self-heals pre-existing orphans.
+                        _pend = store.get_pending_feedback() or {}
+                        _live = {c.get("id") for c in store.get_past_cycles()}
+                        info["feedback_count"] = sum(1 for cid in _pend if cid in _live)
                     except Exception:  # pylint: disable=broad-exception-caught
                         pass
                 info["is_user_paused"] = bool(getattr(manager, "is_user_paused", False))
@@ -1371,6 +1379,19 @@ async def ws_set_options(
     )
     if effective_device_type != DEVICE_TYPE_PUMP:
         new_options.pop(CONF_PUMP_STUCK_DURATION, None)
+
+    # Numeric-finite validation for fields that the cycle-detector float()-casts at
+    # build time; coerce bad submissions to the compiled default so storage stays clean.
+    if CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE in new_options:
+        try:
+            _qr = float(new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE])
+            if not math.isfinite(_qr):
+                raise ValueError("non-finite")
+            new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = _qr
+        except (TypeError, ValueError):
+            new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = (
+                DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+            )
 
     # Partition identity out of options: the display name is carried by the
     # entry title, never persisted in options (matches the config-flow invariant
@@ -3013,9 +3034,12 @@ async def ws_get_export_inventory(
     entry = _get_entry(hass, entry_id)
     try:
         opts = dict(entry.options) if entry else {}
-        manifest = await hass.async_add_executor_job(
-            manager.profile_store.get_export_inventory, opts
-        )
+        # Run the inventory scan synchronously on the event loop. It's a fast walk
+        # (counts + small per-cycle {id,date,duration} dicts) and staying on the loop
+        # is inherently safe from concurrent mutation - offloading it to an executor
+        # would read the live, mutable store lists from another thread and could raise
+        # "list changed size during iteration" without a full (expensive) snapshot.
+        manifest = manager.profile_store.get_export_inventory(opts)
         _send_result(connection, msg["id"], "get_export_inventory", {"manifest": manifest})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
@@ -3239,23 +3263,8 @@ def ws_get_constants(
     from .frontend import BRAND_ICON_URL as _BRAND_ICON_URL, BRAND_ICON_REGISTERED_KEY as _BRAND_ICON_KEY  # pylint: disable=import-outside-toplevel
     from .const import STORE_WEB_ORIGIN
     from . import store_account
-    from .const import (  # pylint: disable=import-outside-toplevel
-        DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-        DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-        DEFAULT_DTW_BANDWIDTH,
-        MATCH_CORR_WEIGHT,
-        MATCH_KEEP_MIN_SCORE,
-        MATCH_DTW_BLEND,
-        MATCH_DTW_ENSEMBLE_W,
-        MATCH_DDTW_DIST_SCALE,
-        MATCH_DTW_REFINE_TOP_N,
-        MATCH_DURATION_WEIGHT,
-        MATCH_ENERGY_WEIGHT,
-        MATCH_DURATION_SCALE,
-        MATCH_ENERGY_SCALE,
-    )
     _send_result(connection, msg["id"], "get_constants", {
-            "version": _INTEGRATION_VERSION,
+            "version": hass.data.get("ha_washdata_version", _INTEGRATION_VERSION),
             "icon_url": _BRAND_ICON_URL if hass.data.get(_BRAND_ICON_KEY) else None,
             "device_types": device_types,
             "state_colors": dict(STATE_COLORS),
@@ -3265,22 +3274,9 @@ def ws_get_constants(
             "PROFILE_MIN_WARMUP_CYCLES": CONF_PROFILE_MIN_WARMUP_CYCLES,
             # Canonical matcher defaults for the Playground's matcher-param fields, so
             # the panel's _PG_MATCH_DEFAULTS table cannot silently drift from const.py.
-            # The panel keeps that table only as an offline fallback.
-            "pg_match_defaults": {
-                "profile_match_min_duration_ratio": DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-                "profile_match_max_duration_ratio": DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-                "corr_weight": MATCH_CORR_WEIGHT,
-                "keep_min_score": MATCH_KEEP_MIN_SCORE,
-                "dtw_bandwidth": DEFAULT_DTW_BANDWIDTH,
-                "dtw_blend": MATCH_DTW_BLEND,
-                "dtw_ensemble_w": MATCH_DTW_ENSEMBLE_W,
-                "dtw_ddtw_scale": MATCH_DDTW_DIST_SCALE,
-                "dtw_refine_top_n": MATCH_DTW_REFINE_TOP_N,
-                "duration_weight": MATCH_DURATION_WEIGHT,
-                "energy_weight": MATCH_ENERGY_WEIGHT,
-                "duration_scale": MATCH_DURATION_SCALE,
-                "energy_scale": MATCH_ENERGY_SCALE,
-            },
+            # The panel keeps that table only as an offline fallback. Single source:
+            # playground.MATCH_DEFAULTS_BY_OPTION (also used by effective_settings).
+            "pg_match_defaults": dict(playground.MATCH_DEFAULTS_BY_OPTION),
             # Community store: the panel opens <origin>/connect.html for the GitHub
             # handoff and validates postMessage against new URL(origin).origin.
             "store_online_available": True,
@@ -3349,7 +3345,14 @@ def ws_get_suggestions(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error reading suggestions for %s: %s", entry_id, exc)
 
-    _send_result(connection, msg["id"], "get_suggestions", {"suggestions": out})
+    try:
+        locked = manager.profile_store.get_locked_suggestions()
+    except Exception:  # pylint: disable=broad-exception-caught
+        locked = []
+    _send_result(
+        connection, msg["id"], "get_suggestions",
+        {"suggestions": out, "locked_suggestions": locked},
+    )
 
 
 @websocket_api.websocket_command(
@@ -3429,6 +3432,42 @@ async def ws_clear_suggestions(
         await manager.profile_store.clear_suggestions()
         manager.notify_update()
         _send_result(connection, msg["id"], "clear_suggestions", {"success": True})
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/set_suggestion_lock",
+        vol.Required("entry_id"): str,
+        vol.Required("key"): str,
+        vol.Required("locked"): bool,
+    }
+)
+@websocket_api.async_response
+async def ws_set_suggestion_lock(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Lock or unlock a tuning suggestion key so the auto-tuner stops (or resumes)
+    proposing it (#343)."""
+    entry_id: str = msg["entry_id"]
+    key: str = msg["key"]
+    if key not in _SUGGESTION_KEYS:
+        connection.send_error(msg["id"], "invalid_key", f"Unknown suggestion key: {key!r}")
+        return
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        await manager.profile_store.set_suggestion_locked(key, bool(msg["locked"]))
+        manager.notify_update()
+        _send_result(
+            connection, msg["id"], "set_suggestion_lock",
+            {"success": True, "locked_suggestions": manager.profile_store.get_locked_suggestions()},
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -4085,6 +4124,14 @@ async def ws_set_user_prefs(
     # F2: per-user Basic/Advanced settings disclosure level.
     if p.get("settings_level") in ("basic", "advanced"):
         cur["settings_level"] = p["settings_level"]
+    # Panel font-size multiplier (accessibility). Coerce + clamp to safe bounds so a
+    # bad value can never break rendering; without this it was silently dropped and
+    # the setting vanished on refresh.
+    if "font_scale" in p:
+        try:
+            cur["font_scale"] = max(0.7, min(2.0, float(p["font_scale"])))
+        except (TypeError, ValueError):
+            cur.pop("font_scale", None)
     # Display prefs: cycle date format + panel language override (paired with the
     # panel's save-prefs payload; without these they would be silently dropped).
     if p.get("date_format") in _PREF_DATE_FORMATS:
@@ -4635,7 +4682,9 @@ def _compute_ml_comparison(
     }
 
 
-def _build_settings_comparison(manager: Any, merged: dict[str, Any]) -> dict[str, Any]:
+def _build_settings_comparison(
+    manager: Any, merged: dict[str, Any], engine: Any = None
+) -> dict[str, Any]:
     """Build the enriched Classic-vs-ML settings comparison (executor-safe).
 
     Runs both the classic :class:`SuggestionEngine` and the
@@ -4651,8 +4700,13 @@ def _build_settings_comparison(manager: Any, merged: dict[str, Any]) -> dict[str
     except Exception:  # pylint: disable=broad-exception-caught
         return {}
 
-    learning = getattr(manager, "learning_manager", None)
-    classic = getattr(learning, "suggestion_engine", None)
+    # `engine` is a for_job() copy prepared on the event loop with the config
+    # snapshot already bound; fall back to the shared engine only for callers that
+    # did not supply one (its _entry_options() then does a live read).
+    classic = engine
+    if classic is None:
+        learning = getattr(manager, "learning_manager", None)
+        classic = getattr(learning, "suggestion_engine", None)
     if classic is None:
         return {}
 
@@ -4792,8 +4846,16 @@ async def ws_get_ml_comparison(
         # Stage 3: replace the basic off_delay-only comparison with the full
         # Classic-vs-ML settings table when ML suggestions are unlocked.
         if ENABLE_ML_SUGGESTIONS:
+            # Bind this handler's already-merged view to a throwaway engine copy
+            # before the executor hop: reading the config entry is loop-affine, so
+            # the generators must not re-read it from the worker thread, and a
+            # copy keeps concurrent jobs from clobbering each other's snapshot.
+            shared = getattr(
+                getattr(manager, "learning_manager", None), "suggestion_engine", None
+            )
+            job_engine = shared.for_job(merged) if shared is not None else None
             enriched = await hass.async_add_executor_job(
-                _build_settings_comparison, manager, merged
+                _build_settings_comparison, manager, merged, job_engine
             )
             if enriched:
                 result["settings_comparison"] = enriched
@@ -5167,6 +5229,16 @@ async def ws_terminate_cycle(
 
 # ─── Playground (F3): headless what-if replay + DTW visualizer ──────────────────
 
+
+def _safe_float_finite(value: Any, default: float) -> float:
+    """Convert ``value`` to a finite float, falling back to ``default`` on failure."""
+    try:
+        v = float(value)
+        return v if math.isfinite(v) else default
+    except (TypeError, ValueError):
+        return default
+
+
 def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
     """Resolve the device's live CycleDetectorConfig as the simulation base.
 
@@ -5192,6 +5264,10 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
         start_threshold_w=float(opts.get(CONF_START_THRESHOLD_W, min_power)),
         stop_threshold_w=float(
             opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)
+        ),
+        dishwasher_end_spike_quiet_release=_safe_float_finite(
+            opts.get(CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE),
+            DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
         ),
     )
 
@@ -5403,6 +5479,191 @@ async def ws_get_dtw_debug(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("DTW debug failed for %s: %s", entry_id, exc)
         connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+# ─── Playground settings control panel (live values + presets) ─────────────────
+
+
+def _playground_preset_list(store: Any) -> list[dict[str, Any]]:
+    """Presets as a name-sorted list for the panel dropdown."""
+    presets = store.get_playground_presets()
+    out: list[dict[str, Any]] = []
+    for name, record in presets.items():
+        if not isinstance(record, dict):
+            continue
+        out.append({
+            "name": name,
+            "values": dict(record.get("values") or {}),
+            "created_at": record.get("created_at"),
+            "updated_at": record.get("updated_at"),
+        })
+    out.sort(key=lambda p: str(p["name"]).lower())
+    return out
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_playground_settings",
+        vol.Required("entry_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_get_playground_settings(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the device's LIVE effective Playground settings plus saved presets.
+
+    ``effective`` is read back off the same live detector/matcher config the
+    simulation uses, so the control panel always opens on what the integration is
+    really running - never on a stale schema default. ``publishable`` lists the
+    keys the panel may write back to the config entry.
+    """
+    entry_id: str = msg["entry_id"]
+    ctx = _playground_context(hass, entry_id)
+    if ctx is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    _manager, store, base_config, options, _price = ctx
+    try:
+        match_config = playground._matching_config(store)  # noqa: SLF001
+    except Exception:  # pylint: disable=broad-exception-caught
+        match_config = {}
+
+    # Classic suggestions from the store (periodic analysis results), filtered to
+    # keys the Playground actually exposes — cheap dict read, no executor needed.
+    raw_sugg: dict[str, Any] = {}
+    try:
+        raw_sugg = store.get_suggestions() or {}
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug(
+            "Could not read Playground classic suggestions for %s: %s", entry_id, exc
+        )
+    classic_sugg: dict[str, Any] = {}
+    for key in playground.SETTING_KEYS:
+        item = raw_sugg.get(key)
+        if isinstance(item, dict) and item.get("value") is not None:
+            val = item["value"]
+            try:
+                classic_sugg[key] = int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
+            except (TypeError, ValueError):
+                pass
+
+    # ML suggestions — computed on-demand; executor-offloaded because it runs
+    # statistics across all clean cycles. None when the feature is disabled.
+    ml_sugg: dict[str, Any] | None = None
+    if ENABLE_ML_SUGGESTIONS:
+        ml_sugg = {}
+        try:
+            learning = getattr(_manager, "learning_manager", None)
+            classic_engine = getattr(learning, "suggestion_engine", None)
+            if classic_engine is not None:
+                _pg_setting_keys = playground.SETTING_KEYS
+                _pg_int_keys = _SUGGESTION_INT_KEYS
+                job_engine = classic_engine.for_job(options)
+
+                def _run_ml_sugg() -> dict[str, Any]:
+                    from .suggestion_engine import MLSuggestionEngine as _ML  # pylint: disable=import-outside-toplevel
+                    raw = _ML(job_engine).generate_ml_suggestions() or {}
+                    out: dict[str, Any] = {}
+                    for k in _pg_setting_keys:
+                        entry = raw.get(k)
+                        if isinstance(entry, dict) and entry.get("value") is not None:
+                            v = entry["value"]
+                            try:
+                                out[k] = int(float(v)) if k in _pg_int_keys else round(float(v), 4)
+                            except (TypeError, ValueError):
+                                pass
+                    return out
+
+                ml_sugg = await hass.async_add_executor_job(_run_ml_sugg)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug(
+                "Could not generate Playground ML suggestions for %s: %s", entry_id, exc
+            )
+
+    _send_result(connection, msg["id"], "get_playground_settings", {
+        "effective": playground.effective_settings(base_config, match_config),
+        "presets": _playground_preset_list(store),
+        "publishable": sorted(playground.PUBLISHABLE_SETTING_KEYS),
+        "preset_limit": PLAYGROUND_PRESET_MAX,
+        "classic_suggestions": classic_sugg,
+        "ml_suggestions": ml_sugg,
+        "ml_suggestions_enabled": ENABLE_ML_SUGGESTIONS,
+    })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/save_playground_preset",
+        vol.Required("entry_id"): str,
+        vol.Required("name"): str,
+        vol.Required("values"): dict,
+    }
+)
+@websocket_api.async_response
+async def ws_save_playground_preset(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Save (or overwrite) a named snapshot of the Playground's settings."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    store = getattr(manager, "profile_store", None) if manager else None
+    if store is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    values = playground.sanitize_setting_values(msg["values"])
+    try:
+        await store.async_save_playground_preset(msg["name"], values)
+    except ValueError as exc:
+        connection.send_error(msg["id"], "invalid_format", str(exc))
+        return
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        # The store write can fail (disk full, permissions). Without this the
+        # exception escapes the handler and the client never gets a reply, so the
+        # panel's save button spins forever instead of reporting the failure.
+        _LOGGER.warning("Saving playground preset failed for %s: %s", entry_id, exc)
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+        return
+    _send_result(connection, msg["id"], "save_playground_preset", {
+        "success": True,
+        "presets": _playground_preset_list(store),
+    })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/delete_playground_preset",
+        vol.Required("entry_id"): str,
+        vol.Required("name"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_delete_playground_preset(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Delete a saved Playground settings preset."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    store = getattr(manager, "profile_store", None) if manager else None
+    if store is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        removed = await store.async_delete_playground_preset(msg["name"])
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.warning("Deleting playground preset failed for %s: %s", entry_id, exc)
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+        return
+    _send_result(connection, msg["id"], "delete_playground_preset", {
+        "success": removed,
+        "presets": _playground_preset_list(store),
+    })
 
 
 # ─── Background-task registry (progress / cancel / reconnect-safe results) ──────

@@ -41,7 +41,21 @@ from .const import (
     MATCH_MAE_PEAK_FLOOR,
     MATCH_MAE_REF_PEAK,
     MATCH_MAE_SCALE,
+    STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES,
 )
+
+
+def stage4_energy_mode(device_type: str | None) -> str:
+    """Return the Stage-4 ``energy_mode`` for a device type.
+
+    ``"integrated"`` for device types in
+    ``STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES`` (washing machine / washer-dryer),
+    where same-duration temperature/spin variants make integrated energy the
+    right discriminator; ``"mean"`` (the historical default) otherwise. Single
+    source of truth for the gate, used by the manager, Playground and matching
+    tuner so all three stay consistent with the live matcher.
+    """
+    return "integrated" if device_type in STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES else "mean"
 
 
 def _agreement(observed: float, expected: float, scale: float) -> float:
@@ -426,12 +440,18 @@ def compute_matches_worker(
         dur_w, en_w = dur_w / de_sum, en_w / de_sum
     shape_w = max(0.0, 1.0 - dur_w - en_w)
     if (dur_w > 0 or en_w > 0) and candidates and current_duration > 0:
-        cur_energy = float(np.mean(curr_arr))  # mean power (W) — no duration multiplication
+        # energy_mode: "mean" (default) compares whole-cycle mean power (W);
+        # "integrated" compares true integrated energy (mean x duration). Opt-in so
+        # the historical default is byte-for-byte preserved. See register item 99.
+        integrated = config.get("energy_mode", "mean") == "integrated"
+        cur_mean = float(np.mean(curr_arr))
+        cur_energy = cur_mean * current_duration if integrated else cur_mean
         for cand in candidates:
             prof_dur = float(cand.get("profile_duration") or 0.0)
             dur_ag = _agreement(current_duration, prof_dur, dur_scale)
             sample = cand.get("sample") or []
-            cand_energy = float(np.mean(sample)) if sample else 0.0
+            cand_mean = float(np.mean(sample)) if sample else 0.0
+            cand_energy = cand_mean * prof_dur if integrated else cand_mean
             en_ag = _agreement(cur_energy, cand_energy, en_scale)
             cand["shape_score"] = float(cand["score"])
             cand["score"] = float(
@@ -619,6 +639,27 @@ def compute_envelope_worker(
         values = values[finite_mask]
         if len(offsets) < 3:
             continue
+
+        # Stored offsets are rounded to 0.1s, so two readings less than 0.1s apart
+        # collapse onto the same offset.  A single such duplicate must not discard the
+        # whole trace (#377): drop the duplicate sample(s) instead of the cycle.  Only
+        # exact duplicates are collapsed here; a genuinely out-of-order (decreasing)
+        # offset - which sorted storage never produces - is left for the strict check
+        # below to reject, exactly as before.
+        if offsets.size > 1:
+            diffs = np.diff(offsets)
+            if np.any(diffs == 0):
+                keep = np.concatenate(([True], diffs != 0))
+                dropped = int((~keep).sum())
+                offsets = offsets[keep]
+                values = values[keep]
+                _LOGGER.debug(
+                    "compute_envelope_worker: dropped %d duplicate sample offset(s) "
+                    "from a cycle trace (0.1s offset rounding)",
+                    dropped,
+                )
+            if len(offsets) < 3:
+                continue
 
         if not np.all(np.diff(offsets) > 0):
             continue

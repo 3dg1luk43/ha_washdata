@@ -41,6 +41,7 @@ from custom_components.ha_washdata.const import (
     CONF_LEARNING_CONFIDENCE,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
+    CONF_END_ENERGY_THRESHOLD,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_OFF_DELAY,
     CONF_PROFILE_MATCH_THRESHOLD,
@@ -158,6 +159,43 @@ def test_reconcile_gap_raised_when_off_delay_suggested() -> None:
     assert out[CONF_OFF_DELAY]["value"] == 300.0
     assert out[CONF_MIN_OFF_GAP]["value"] == 300.0
     assert CONF_MIN_OFF_GAP in changed
+
+
+def test_reconcile_end_energy_raised_when_stop_suggested() -> None:
+    # stop_threshold_w is suggested (2.0) with a dishwasher-length off_delay (1800);
+    # gate 2 (energy over off_delay) then implies 2.0*1800/3600 = 1.0 Wh, so the
+    # current end_energy of 0.05 Wh forbids what the power gate allows (#376). Rule
+    # 12 cascade-raises end_energy to the implied floor; stop is never lowered.
+    s = {CONF_STOP_THRESHOLD_W: _sug(2.0)}
+    out, changed = reconcile_suggestions(
+        s, {CONF_OFF_DELAY: 1800, CONF_END_ENERGY_THRESHOLD: 0.05}
+    )
+    assert CONF_END_ENERGY_THRESHOLD in out
+    assert out[CONF_END_ENERGY_THRESHOLD].get("cascade") is True
+    assert out[CONF_END_ENERGY_THRESHOLD]["value"] == pytest.approx(1.0)
+    assert out[CONF_STOP_THRESHOLD_W]["value"] == 2.0  # anchor unchanged
+    assert CONF_END_ENERGY_THRESHOLD in changed
+
+
+def test_reconcile_end_energy_floor_survives_rounding() -> None:
+    # The implied floor (2.0*60/3600 = 0.0333 Wh) is not representable at the two
+    # decimals adjust() persists. Rounding to-nearest lands on 0.03 - below the
+    # floor - and the next fixpoint pass finds the value already set and stops, so
+    # the returned map would still violate Rule 12. The floor must round UP.
+    s = {CONF_STOP_THRESHOLD_W: _sug(2.0)}
+    out, changed = reconcile_suggestions(
+        s, {CONF_OFF_DELAY: 60, CONF_END_ENERGY_THRESHOLD: 0.01}
+    )
+    assert CONF_END_ENERGY_THRESHOLD in changed
+    assert out[CONF_END_ENERGY_THRESHOLD]["value"] >= 2.0 * 60 / 3600.0
+    assert out[CONF_END_ENERGY_THRESHOLD]["value"] == pytest.approx(0.04)
+
+
+def test_reconcile_end_energy_consistent_pair_unchanged() -> None:
+    # end_energy already clears the implied floor (2.0*180/3600 = 0.1); no change.
+    s = {CONF_STOP_THRESHOLD_W: _sug(2.0), CONF_END_ENERGY_THRESHOLD: _sug(0.2)}
+    out, changed = reconcile_suggestions(s, {CONF_OFF_DELAY: 180})
+    assert CONF_END_ENERGY_THRESHOLD not in changed
 
 
 def test_reconcile_watchdog_and_timeout() -> None:

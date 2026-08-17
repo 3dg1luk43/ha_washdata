@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configurare WashData",
-        "description": "Configurați mașina de spălat sau alt aparat.\n\nEste necesar un senzor de putere.\n\n**În continuare, veți fi întrebat dacă doriți să vă creați primul profil.**",
+        "description": "Configurați mașina de spălat sau alt aparat.\n\nEste necesar un senzor de putere.\n\nDupă configurare, deschideți panoul WashData din bara laterală (sau accesați [/ha-washdata](/ha-washdata)) pentru a vizualiza ciclurile, a ajusta detectarea și a gestiona profilurile.",
         "data": {
           "name": "Numele dispozitivului",
           "device_type": "Tip de dispozitiv",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "description": "Actualizați numele dispozitivului, tipul aparatului sau senzorul de putere.\n\nPanoul WashData (bara laterală sau [/ha-washdata](/ha-washdata)) este locul unde se gestionează detectarea, ciclurile, profilurile și notificările.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
+        "description": "Redenumiți dispozitivul sau modificați setările hardware de bază. Toate setările de detectare, potrivire și notificare se află în [panoul WashData](/ha-washdata) (accesibil și din bara laterală).",
         "data": {
           "name": "Numele dispozitivului",
           "device_type": "Device Type",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: cronometru de {minutes} min",
       "timer_pause_action_title": "Reluați ciclul",
       "timer_pause_body_suffix": "Ciclul este în pauză. Deschideți panoul WashData pentru a relua.",
+      "unload_dismiss_action_title": "Oprește mementourile",
       "notify_live_waiting_message": "{device}: Niciun profil nu a fost recunoscut încă.",
       "vs_typical_longer": "cu {pct}% mai mult decât de obicei",
       "vs_typical_shorter": "cu {pct}% mai puțin decât de obicei",

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Konfigurimi WashData",
-        "description": "Konfiguro makinën larëse ose pajisje tjetër.\n\nKërkohet sensori i fuqisë.\n\n**Më pas, do të pyeteni nëse dëshironi të krijoni profilin tuaj të parë.**",
+        "description": "Konfiguro makinën larëse ose pajisje tjetër.\n\nKërkohet sensori i fuqisë.\n\nPas konfigurimit, hap panelin WashData nga shiriti anësor (ose shko te [/ha-washdata](/ha-washdata)) për të parë ciklet, rregulluar zbulimin dhe menaxhuar profilet.",
         "data": {
           "name": "Emri i pajisjes",
           "device_type": "Lloji i pajisjes",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Rikonfiguro WashData",
-        "description": "Përditëso emrin e pajisjes, llojin e pajisjes ose sensorin e fuqisë.",
+        "description": "Përditëso emrin e pajisjes, llojin e pajisjes ose sensorin e fuqisë.\n\nPaneli WashData (shiriti anësor, ose [/ha-washdata](/ha-washdata)) është ku menaxhohen zbulimi, ciklet, profilet dhe njoftimet.",
         "data": {
           "name": "Emri i pajisjes",
           "device_type": "Lloji i pajisjes",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "Cilësimet WashData",
-        "description": "Të gjitha cilësimet -- zbulimi, përputhja, koha, njoftimet, profilet dhe ciklet -- janë të disponueshme në panelin WashData. Përdorni këtë formular vetëm për të ndryshuar sensorin e fuqisë, llojin e pajisjes ose pragun e gatishmërisë.",
+        "description": "Riemërtoni pajisjen ose ndryshoni cilësimet e saj bazë të harduerit. Të gjitha cilësimet e zbulimit, përputhjes dhe njoftimeve janë në [panelin WashData](/ha-washdata) (i arritshëm edhe nga shiriti anësor).",
         "data": {
           "name": "Emri i pajisjes",
           "device_type": "Lloji i pajisjes",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: kohëmatës {minutes} min",
       "timer_pause_action_title": "Rifillo ciklin",
       "timer_pause_body_suffix": "Cikli është në pauzë. Hapni panelin WashData për të vazhduar.",
+      "unload_dismiss_action_title": "Ndalo kujtesat",
       "notify_live_waiting_message": "{device}: Ende nuk është njohur asnjë profil.",
       "vs_typical_longer": "{pct}% më gjatë se zakonisht",
       "vs_typical_shorter": "{pct}% më shkurt se zakonisht",

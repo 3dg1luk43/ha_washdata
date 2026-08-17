@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Nie znaleziono encji",
+    "running_long": "Działa długo",
+    "remaining": "pozostało",
+    "progress": "postęp",
+    "show_time_remaining": "Pokaż pozostały czas",
+    "show_percentage": "Pokaż procenty",
+    "layout": {
+      "tile": "Kafelek (kompaktowy)",
+      "detail": "Szczegóły (rozbudowany)",
+      "glance": "Podgląd (wiele urządzeń)"
+    },
+    "btn": {
+      "pause": "Wstrzymaj",
+      "resume": "Wznów",
+      "terminate": "Zakończ cykl",
+      "record_start": "Rozpocznij nagrywanie",
+      "record_stop": "Zatrzymaj nagrywanie",
+      "program": "Program",
+      "open_panel": "Otwórz WashData"
+    },
+    "editor": {
+      "layout": "Układ",
+      "entity": "Encja urządzenia",
+      "entities": "Urządzenia",
+      "title": "Tytuł",
+      "icon": "Ikona",
+      "show_state": "Pokaż stan",
+      "show_program": "Pokaż program",
+      "show_progress_bar": "Pokaż pasek postępu",
+      "spin_icon": "Obracaj ikonę podczas działania",
+      "display_mode": "Wiersz szczegółów",
+      "active_color": "Zastąpienie koloru aktywnego",
+      "show_phase": "Pokaż fazę",
+      "show_energy": "Pokaż energię i koszt",
+      "show_anomaly": "Pokaż ostrzeżenie o przekroczeniu",
+      "show_sparkline": "Pokaż wykres mocy na żywo",
+      "buttons": "Przyciski akcji",
+      "program_entity": "Encja programu (zastąpienie)",
+      "time_entity": "Encja czasu (zastąpienie)",
+      "pct_entity": "Encja postępu (zastąpienie)",
+      "power_entity": "Encja mocy (zastąpienie)",
+      "tap_action": "Akcja dotknięcia",
+      "hold_action": "Akcja przytrzymania",
+      "double_tap_action": "Akcja podwójnego dotknięcia"
+    }
+  },
   "badge": {
     "artifact_tip": "Wykryto {n} anomalii (np. drzwi otwarte w połowie cyklu) – otwórz, aby zobaczyć je na wykresie",
     "auto": "(automatycznie wykryty)",
@@ -64,6 +112,21 @@
     "discard": "Odrzuć",
     "discard_tip": "Odrzuć nagranie bez zapisywania",
     "dismiss": "Odrzuć",
+    "mute_suggestion": "Przestań sugerować to ustawienie",
+    "pg_load_calibrated": "Wczytaj skalibrowane (ML) ({n})",
+    "pg_load_calibrated_tip": "Załaduj ustawienia skalibrowane przez ML jako nadpisania w piaskownicy",
+    "pg_load_live": "Wczytaj aktywne ustawienia",
+    "pg_load_live_tip": "Wczytaj ponownie bieżące ustawienia integracji i odrzuć wszystkie zmiany z piaskownicy",
+    "pg_load_suggested": "Wczytaj sugerowane ({n})",
+    "pg_load_suggested_tip": "Załaduj bieżące sugestie automatycznego dostrajania jako nadpisania w piaskownicy",
+    "pg_preset_delete": "Usuń preset",
+    "pg_preset_load": "Wczytaj preset",
+    "pg_preset_load_tip": "Zastąp wartości w piaskownicy tym presetem (aktywne ustawienia pozostają nietknięte)",
+    "pg_preset_save": "Zapisz jako preset",
+    "pg_preset_save_tip": "Zapisz wszystkie poniższe wartości jako nazwany preset dla tego urządzenia",
+    "pg_publish_all": "Zapisz w integracji ({n})",
+    "pg_publish_one": "Zapisz {label} w integracji",
+    "reset_muted": "Zresetuj wyciszone",
     "done": "Zrobione",
     "edit": "Edytuj",
     "export": "Eksportuj",
@@ -275,6 +338,7 @@
     "no_automations": "Żadna automatyzacja nie odwołuje się jeszcze do tego urządzenia.",
     "panel_settings": "Ustawienia panelu",
     "param_sweep": "Przemiatanie parametru",
+    "pg_settings_source": "Źródło ustawień",
     "phase_catalog": "Katalog faz",
     "playground": "Piaskownica",
     "process_history": "Historia procesu",
@@ -348,6 +412,7 @@
     "default_access_level": "Domyślny poziom dla użytkowników niewymienionych poniżej",
     "default_other": "Domyślne (inne urządzenia)",
     "default_tab": "Domyślna zakładka podczas otwierania panelu",
+    "font_size": "Rozmiar czcionki panelu",
     "delta": "Δ",
     "description": "Opis",
     "dtw_blend_w": "Waga mieszania",
@@ -415,6 +480,9 @@
     "pg_match_score": "Wynik dopasowania",
     "pg_pct_of": "{p}% z {total}",
     "pg_poor_match": "Kiepskie dopasowanie",
+    "pg_preset": "Preset piaskownicy",
+    "pg_preset_name": "Nazwa nowego presetu",
+    "pg_preset_none": "Wybierz preset…",
     "pg_strong_match": "Silne dopasowanie",
     "pg_tile_ambiguous": "Niejednoznaczny",
     "pg_tile_ambiguous_tip": "Cykle z niemal równym dopasowaniem do dwóch programów",
@@ -771,7 +839,17 @@
     "pg_apply_confirm": "Zastosować najlepszą wartość: {label} = {value}?",
     "pg_canvas_empty": "Wybierz cykl powyżej, a następnie naciśnij Wczytaj, aby zobaczyć jego przebieg mocy.",
     "pg_chart_caption": "Współczynnik wykrywania/dopasowania dla wartości {param}",
+    "pg_ctrl_intro": "Wartości pochodzą z aktywnych ustawień integracji dla tego urządzenia. Zmiany pozostają w piaskownicy, dopóki nie zapiszesz ich w integracji.",
+    "pg_live_unavailable": "Aktywne ustawienia niedostępne, wyświetlane są wartości domyślne.",
+    "pg_load_live_confirm": "Odrzucić zmiany w piaskownicy ({n}) i wczytać ponownie bieżące ustawienia integracji?",
     "pg_match_rate": "{pct}% skuteczności dopasowania na {total} cyklach",
+    "pg_matches_live": "Zgodne z aktywnymi ustawieniami",
+    "pg_n_changed": "Zmienione względem aktywnych ustawień: {n}",
+    "pg_sugg_none": "Wszystkie sugestie już odpowiadają bieżącym ustawieniom",
+    "pg_preset_delete_confirm": "Usunąć preset \"{name}\"?",
+    "pg_preset_limit": "Osiągnięto limit presetów ({n})",
+    "pg_preset_overwrite": "Nadpisać preset \"{name}\"?",
+    "pg_publish_one_confirm": "Zapisać {label} = {value} w ustawieniach tego urządzenia?",
     "pg_restart_note": "Uruchom ponownie Home Assistant, aby włączyć narzędzia symulacji.",
     "pg_sim_progress": "{done} / {total} cykli",
     "pg_starting": "Rozpoczynanie…",
@@ -789,6 +867,7 @@
     "preferences_admin": "Preferencje, panel i kontrola dostępu",
     "preferences_adv": "Preferencje",
     "prefs_personal": "Dotyczą one wyłącznie Twojego konta Home Assistant.",
+    "font_size_hint": "Powiększ lub pomniejsz wszystko w tym panelu. Dotyczy Twojego konta na tym urządzeniu.",
     "process_history_hint": "Ponownie uruchom dopasowywanie na wszystkich zapisanych cyklach, odśwież sugestie dostrajania, ponownie wytrenuj modele ML (jeśli włączone) i przelicz kondycję cykli. Uruchom po serii przeglądów.",
     "profile_deleted": "Profil usunięty",
     "profile_poor_health_detail": "Cykle przypisane do tego profilu mają niespójne kształty lub niską pewność. Rozważ przebudowę koperty lub przejrzenie oznakowanych cykli.",
@@ -821,6 +900,10 @@
     "split_intro": "Kliknij wykres, aby dodać lub usunąć punkt podziału albo automatycznie wykryć na podstawie pustych przerw. Każdy powstały segment może otrzymać swój własny profil.",
     "storage_diagnostics": "Statystyki przechowywania, konserwacja, eksport/import",
     "sug_staged": "Ustawiono {key} = {val}. Zapisz, aby zastosować.",
+    "sug_muted": "To ustawienie nie będzie więcej sugerowane",
+    "sug_mute_failed": "Nie udało się wyciszyć sugestii",
+    "sug_unmuted_all": "Wyciszone sugestie przywrócone",
+    "n_suggestions_muted": "{count} wyciszonych; automatyczny tuner nie będzie proponować tych ustawień.",
     "toast_auto_detect_enabled": "Automatyczne wykrywanie włączone",
     "toast_auto_label_complete": "Automatyczne oznaczanie zakończone",
     "toast_auto_label_failed": "Automatyczne oznaczanie nie powiodło się: {error}",
@@ -845,6 +928,7 @@
     "trend_duration_shorter": "Trwanie w trendzie krótszym ({pct}%/cykl) – ostatnia średnia {avg}",
     "trend_energy_down": "Energia wykazuje tendencję spadkową ({pct}%/cykl)",
     "trend_energy_up": "Trend wzrostowy w zakresie energii ({pct}%/cykl) – ostatnia średnia {avg}",
+    "trim_destructive_confirm": "To zachowa tylko {pct}% cyklu i tej operacji nie można cofnąć. Kontynuować?",
     "trim_intro": "Przeciągnij czerwone uchwyty lub wprowadź wartości. Wszystko za oknem jest usuwane.",
     "tuning_suggestions_available": "Sugestia dostrojenia {count} dostępna z obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
     "unsure_detected_prefix": "WashData nie jest pewien, czy został wykryty",
@@ -970,6 +1054,10 @@
     "unusable": "Nie nadaje się do użytku"
   },
   "section": {
+    "dishwasher": {
+      "label": "Zmywarka",
+      "intro": "Obsługa końca cyklu w zmywarkach, które zazwyczaj kończą długą, niemal cichą fazą suszenia przed krótkim końcowym odpompowaniem wody."
+    },
     "anti_wrinkle": {
       "intro": "Tryb antygniotowy wykrywa impulsy bębnowania przy niskiej mocy po fazie głównej i utrzymuje je przyłączone do zakończonego cyklu.",
       "label": "Antygniotowy"
@@ -1012,6 +1100,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Zwolnienie po cichej fazie suszenia",
+      "doc": "Gdy cykl przekroczy oczekiwany czas trwania, jak długo zmywarka musi pozostać cicha (poniżej Progu Zatrzymania), zanim WashData przestanie czekać na końcowe odpompowanie wody i zakończy cykl. Zwiększ tę wartość, jeśli Twoje urządzenie ma długą cichą fazę suszenia przed późnym końcowym odpompowaniem, które jest pomijane - szersze okno pozwala, aby wyuczony czas trwania podążał za sezonowym dryfem (chłodniejsza woda na wlocie = dłuższe cykle), zamiast trzymać się starej średniej. Może jedynie skrócić oczekiwanie względem wewnętrznego 30-minutowego limitu końcowego odpompowania, nigdy go nie wydłuża."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Rozpoznawaj krótkie impulsy suszenia o małej mocy, które suszarka emituje po głównej fazie nagrzewania, i pamiętaj o ich dołączeniu do zakończonego cyklu, zamiast odczytywać je jako nowe cykle.",
       "label": "Włącz Wykrywanie Antygniotowe"
@@ -1232,6 +1324,10 @@
       "doc": "Minuty po zakończeniu cyklu przed wysłaniem wciąż oczekującego przypomnienia o „rozładowaniu maszyny”. Ustaw 0, aby wyłączyć przypomnienie.",
       "label": "Opóźnienie Przypomnienia o Rozładunku"
     },
+    "notify_unload_repeat": {
+      "doc": "Ponownie wysyła przypomnienie o rozładunku co \"Opóźnienie Przypomnienia o Rozładunku\" minut, dopóki nie otworzysz drzwi lub nie dotkniesz \"Przestań przypominać\" w powiadomieniu. Wymaga Encji Czujnika Drzwi (tak jak samo przypomnienie). Przycisk odrzucenia działa w powiadomieniach aplikacji mobilnej Home Assistant (companion app).",
+      "label": "Powtarzaj, aż otworzą się drzwi"
+    },
     "off_delay": {
       "doc": "Czas oczekiwania po spadku mocy przed ogłoszeniem zakończenia cyklu. Jeżeli w tym oknie zasilanie zostanie przywrócone, cykl będzie przebiegał płynnie – eliminując przerwy pomiędzy etapami prania. Zmywarki mają długie fazy suszenia (wyłączenie zasilania na 20–60 minut), więc opóźnienie wyłączenia musi być dłuższe, aby całe pranie+suszenie trwało w jednym cyklu.",
       "label": "Opóźnienie Wyłączenia"
@@ -1406,6 +1502,26 @@
     "energy_scale": {
       "label": "Ostrość energii",
       "doc": "Ostrość kary za niezgodność energii w Etapie 4. Mniejszy = surowszy: niezgodność energii bardziej obniża wynik. Domyślna wartość 0,25 jest celowo bardziej łagodna niż Ostrość Czasu Trwania, ponieważ energia zmienia się z obciążeniem. Używaj razem z Wagą Energii."
+    },
+    "power_profile_interval_min": {
+      "label": "Interwał profilu mocy",
+      "doc": "Rozmiar segmentu dla atrybutu senzora power_profile na profil (płaska tablica średnich watów na slot zużywana przez zewnętrzne planerzy jak EMHASS i tibber_prices). Mniejsze segmenty zachowują krótkie skoki mocy ostre; większe segmenty wygładzają kształt. Domyślnie 15 min. Tylko do odczytu; nie wpływa na wykrywanie."
+    },
+    "notify_live_sticky": {
+      "label": "Zachowaj powiadomienie na żywo po dotknięciu",
+      "doc": "Tylko Android. Ustaw powiadomienie o postępie na żywo jako trwałe (przypięte), aby dotknięcie nie odrzucało aktywnego wątku. Wyłączone zachowuje domyślne zachowanie, gdzie dotknięcie odrzuca powiadomienie."
+    },
+    "notify_live_click_action": {
+      "label": "Cel dotknięcia powiadomienia na żywo",
+      "doc": "Tylko Android. Gdzie dotknięcie powiadomienia o postępie na żywo otwiera (np. /lovelace/laundry lub pełny URL) zamiast strony startowej aplikacji. Pozostaw puste dla wartości domyślnej."
+    },
+    "door_opens_at_end": {
+      "label": "Drzwi otwierają się automatycznie na końcu",
+      "doc": "Dla zmywarek, które na końcu cyklu otwierają drzwi w celu suszenia (AirDry i podobne). Po włączeniu otwarcie drzwi podczas działającego cyklu nie zatrzymuje go na zawsze; jeśli drzwi pozostaną otwarte przez czas oczekiwania poniżej, WashData uznaje cykl za zakończony. Krótkie otwarcie (dodawanie naczynia) jest ignorowane. Wymaga encji czujnika drzwi."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Czas otwarcia drzwi do zakończenia cyklu",
+      "doc": "Jak długo drzwi muszą pozostać otwarte, zanim WashData zakończy cykl, gdy włączone jest \"Drzwi otwierają się automatycznie na końcu\". Wystarczająco długo, aby zignorować szybkie dodawanie naczyń (domyślnie 60 s), wystarczająco krótko, aby szybko zakończyć, gdy maszyna otworzy drzwi."
     }
   },
   "setting_group": {
@@ -1592,6 +1708,7 @@
       "min_active": "Na podstawie minimalnej mocy czynnej ({min}W) zaobserwowanej w ostatnim cyklu.",
       "min_duration_ratio": "Utrzymane jak najniżej, aby program był rozpoznawany na wczesnym etapie cyklu; progi pewności i niejednoznaczności zapobiegają przedwczesnym decyzjom.",
       "min_off_gap": "Na podstawie {gaps} zaobserwowanych przerw między cyklami (p05={p05}s). Minimum urządzenia: {floor}s.",
+      "min_off_gap_bridge": "Dobrane tak, aby pokryć najdłuższy cichy odcinek wewnątrz cyklu: {span}s + zapas 60s, z {spans} pokrytych przerw w {cycles} poprawnych cyklach (pozostaje poniżej {ceiling}s, czyli najkrótszej przerwy, jaką zostawiasz między kolejnymi uruchomieniami).",
       "min_power": "40% najniższej mocy czynnej p05 ({p05}W) w {cycles} poprawnych cyklach, tak aby próg wyłączenia pozostał poniżej rzeczywistego poboru.{excl}",
       "ml_auto_label": "Najniższa pewność, przy której model jakości nadal uznawał cykl za poprawny (p10 z {cycles} poprawnych cykli = {p10}).",
       "ml_end_repeat": "{false}/{total} cykli ({pct}%) miało pauzę, którą detektor końca ocenił powyżej 50%; wymagaj {val} potwierdzeń zakończenia.",
@@ -1608,7 +1725,7 @@
       "thr_batch": "Utrzymane tuż powyżej najniższej mocy czynnej p05 w {cycles} cyklach ({p05}W), aby start był wykrywany jak najwcześniej, a próg zatrzymania pozostawał poniżej najniższej mocy pracy urządzenia.",
       "tol_per_profile": "p75 wariancji czasu trwania na profil w {profiles} profilach ({cycles} cykli); spójne profile nie są karane.",
       "tol_pooled": "Na podstawie łącznej wariancji czasu trwania {cycles} ostatnich oznaczonych cykli (odchylenie p95={dev}).",
-      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (3x przerwa aktualizacji p95 wynosząca {p95}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań."
+      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (tuż powyżej przerwy aktualizacji p95 wynoszącej {p95}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań."
     },
     "exclusions": {
       "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",
@@ -1688,6 +1805,10 @@
     "name_required": "Wymagane imię i nazwisko",
     "no_split_found": "Nie znaleziono żadnych wolnych luk, które można by podzielić",
     "panel_settings_saved": "Ustawienia panelu zostały zapisane",
+    "pg_preset_loaded": "Preset \"{name}\" wczytany",
+    "pg_preset_saved": "Preset \"{name}\" zapisany",
+    "pg_sugg_loaded": "Załadowano {n} sugerowanych wartości - uruchom piaskownicę, aby porównać",
+    "pg_sugg_ml_loaded": "Załadowano {n} wartości skalibrowanych przez ML - uruchom piaskownicę, aby porównać",
     "phase_name_required": "Nazwa fazy jest wymagana",
     "phase_updated": "Faza zaktualizowana",
     "phases_saved": "Fazy ​​zapisane",
@@ -1770,6 +1891,7 @@
     "other": "Inne"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy ciszy po oczekiwanym czasie trwania, zanim zwolnione zostanie oczekiwanie na końcowe odpompowanie wody",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",
     "anti_wrinkle_exit_power": "Moc musi spaść poniżej tej wartości pomiędzy impulsami, aby tryb antygniotowy pozostał aktywny",
     "anti_wrinkle_idle_timeout": "Dozwolony czas ciszy między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy",

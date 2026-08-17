@@ -125,14 +125,20 @@ async def test_smart_termination_with_manager(mock_hass, mock_entry, data_file):
         ts = start_time + timedelta(seconds=offset)
         readings.append((ts, p))
 
-    # Pad end with low power to simulate the "stuck" phase
-    # Let's add 90 mins of 30s updates (5400s) to exceed min_off_gap (now 3600s for dishwashers)
+    # Pad end with a genuinely-off tail to simulate the finished "stuck" phase.
+    # 90 mins of 30s updates (5400s) to exceed min_off_gap (now 3600s for dishwashers).
+    # NB: this must be ~0 W, not a residual 1 W. On the dishwasher detection path
+    # (now correctly wired via #378), the energy end-gate is evaluated over an
+    # off_delay-long window, so a *constant* 1 W tail sits above the implied floor
+    # (end_energy_threshold 0.05 Wh over 1800 s => ~0.1 W) and the appliance is
+    # legitimately NOT "off" — the detector rightly defers instead of finalizing
+    # (that 1 W-vs-gate contradiction is issue #376, not a finished cycle). A
+    # truly-off tail isolates the verified_pause-release behaviour this test targets.
     last_offset = float(power_rows[-1][0])
     for i in range(1, 180): # 90 mins
         offset = last_offset + (i * 30)
         ts = start_time + timedelta(seconds=offset)
-        # 1W - low enough to trigger ending, but verified_pause would block it
-        readings.append((ts, 1.0))
+        readings.append((ts, 0.0))
 
     # Better approach: Construct manager normally, but patch the Store's persistence
     with patch("custom_components.ha_washdata.profile_store.WashDataStore.async_load", return_value=store_data), \

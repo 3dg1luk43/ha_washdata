@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData 设置",
-        "description": "配置您的洗衣机或其他设备。\n\n需要功率传感器。\n\n**接下来，系统会询问您是否要创建您的第一个个人资料。**",
+        "description": "配置您的洗衣机或其他家电设备。\n\n需要功率传感器。\n\n设置完成后，请从侧边栏打开 WashData 面板（或访问 [/ha-washdata](/ha-washdata)）来查看周期、调整检测参数和管理配置文件。",
         "data": {
           "name": "设备名称",
           "device_type": "设备类型",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "重新配置 WashData",
-        "description": "更新设备名称、设备类型或功率传感器。",
+        "description": "更新设备名称、家电类型或功率传感器。\n\nWashData 面板（侧边栏或 [/ha-washdata](/ha-washdata)）用于管理检测、周期、配置文件和通知。",
         "data": {
           "name": "设备名称",
           "device_type": "设备类型",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData 设置",
-        "description": "所有设置——检测、匹配、计时、通知、配置文件和周期——都可以在 WashData 面板中使用。仅使用此表单来更改功率传感器、设备类型或待机阈值。",
+        "description": "重命名设备或更改其核心硬件设置。所有检测、匹配和通知设置均在 [WashData 面板](/ha-washdata) 中（也可从侧边栏访问）。",
         "data": {
           "name": "设备名称",
           "device_type": "设备类型",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}：{minutes} 分钟定时器",
       "timer_pause_action_title": "恢复周期",
       "timer_pause_body_suffix": "周期已暂停。打开 WashData 面板以恢复。",
+      "unload_dismiss_action_title": "停止提醒",
       "notify_live_waiting_message": "{device}：尚未匹配到配置文件。",
       "vs_typical_longer": "比平常长 {pct}%",
       "vs_typical_shorter": "比平常短 {pct}%",

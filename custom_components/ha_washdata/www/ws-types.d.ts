@@ -91,6 +91,8 @@ export interface ExportConfigResponse {
 }
 
 export interface GetConstantsResponse {
+  version: string;
+  icon_url: string | null;
   device_types: Record<string, unknown>[];
   state_colors: Record<string, unknown>;
   ml_lab_enabled: boolean;
@@ -100,6 +102,8 @@ export interface GetConstantsResponse {
   store_online_available: boolean;
   store_online_enabled: boolean;
   store_web_origin: string;
+  store_prefs: Record<string, unknown>;
+  pg_match_defaults: Record<string, unknown>;
 }
 
 export interface GetCyclePowerDataResponse {
@@ -114,6 +118,7 @@ export interface GetCyclePowerDataResponse {
   energy_kwh?: number | null;
   artifacts?: Record<string, unknown>[];
   restart_gaps?: unknown[];
+  is_reference?: boolean;
 }
 
 export interface GetDeviceCyclesResponse {
@@ -214,6 +219,16 @@ export interface GetPhaseCatalogResponse {
   device_type: string | null;
 }
 
+export interface GetPlaygroundSettingsResponse {
+  effective: Record<string, unknown>;
+  presets: PlaygroundPreset[];
+  publishable: string[];
+  preset_limit: number;
+  classic_suggestions: Record<string, unknown>;
+  ml_suggestions: Record<string, unknown> | null;
+  ml_suggestions_enabled: boolean;
+}
+
 export interface GetPowerHistoryResponse {
   cycle_active?: boolean;
   cycle_elapsed_s?: number;
@@ -277,10 +292,12 @@ export interface GetSetupStatusResponse {
 export interface GetShareableCyclesResponse {
   items?: unknown[];
   phase_programs?: unknown[];
+  all_programs?: unknown[];
 }
 
 export interface GetSuggestionsResponse {
   suggestions: Record<string, unknown>[];
+  locked_suggestions: string[];
 }
 
 export interface ImportConfigSelectiveResponse {
@@ -294,6 +311,18 @@ export interface ListTasksResponse {
 
 export interface OkResponse {
   ok: boolean;
+}
+
+export interface PlaygroundPreset {
+  name: string;
+  values: Record<string, unknown>;
+  created_at: unknown;
+  updated_at: unknown;
+}
+
+export interface PlaygroundPresetsResponse {
+  success: boolean;
+  presets: PlaygroundPreset[];
 }
 
 export interface ProfileEnvelope {
@@ -353,6 +382,11 @@ export interface RunPlaygroundSweepResponse {
 export interface RunSuggestionAnalysisResponse {
   success?: boolean;
   count?: number;
+}
+
+export interface SetSuggestionLockResponse {
+  success: boolean;
+  locked_suggestions: string[];
 }
 
 export interface StartTaskResponse {
@@ -724,6 +758,12 @@ export interface ClearSuggestionsRequest {
   entry_id: string;
 }
 
+export interface SetSuggestionLockRequest {
+  entry_id: string;
+  key: string;
+  locked: boolean;
+}
+
 export interface RunSuggestionAnalysisRequest {
   entry_id: string;
 }
@@ -871,6 +911,21 @@ export interface GetDtwDebugRequest {
   entry_id: string;
   cycle_id: string;
   profile_name?: string | null;
+}
+
+export interface GetPlaygroundSettingsRequest {
+  entry_id: string;
+}
+
+export interface SavePlaygroundPresetRequest {
+  entry_id: string;
+  name: string;
+  values: Record<string, unknown>;
+}
+
+export interface DeletePlaygroundPresetRequest {
+  entry_id: string;
+  name: string;
 }
 
 export interface ListTasksRequest {
@@ -1067,6 +1122,7 @@ export interface WashDataWsRequests {
   "ha_washdata/get_suggestions": GetSuggestionsRequest;
   "ha_washdata/apply_suggestions": ApplySuggestionsRequest;
   "ha_washdata/clear_suggestions": ClearSuggestionsRequest;
+  "ha_washdata/set_suggestion_lock": SetSuggestionLockRequest;
   "ha_washdata/run_suggestion_analysis": RunSuggestionAnalysisRequest;
   "ha_washdata/get_cycle_power_data": GetCyclePowerDataRequest;
   "ha_washdata/trim_cycle": TrimCycleRequest;
@@ -1095,6 +1151,9 @@ export interface WashDataWsRequests {
   "ha_washdata/run_playground_history": RunPlaygroundHistoryRequest;
   "ha_washdata/run_playground_sweep": RunPlaygroundSweepRequest;
   "ha_washdata/get_dtw_debug": GetDtwDebugRequest;
+  "ha_washdata/get_playground_settings": GetPlaygroundSettingsRequest;
+  "ha_washdata/save_playground_preset": SavePlaygroundPresetRequest;
+  "ha_washdata/delete_playground_preset": DeletePlaygroundPresetRequest;
   "ha_washdata/list_tasks": ListTasksRequest;
   "ha_washdata/subscribe_tasks": SubscribeTasksRequest;
   "ha_washdata/cancel_task": CancelTaskRequest;
@@ -1172,6 +1231,7 @@ export interface WashDataWsResponses {
   "ha_washdata/get_suggestions": GetSuggestionsResponse;
   "ha_washdata/apply_suggestions": ApplySuggestionsResponse;
   "ha_washdata/clear_suggestions": SuccessResponse;
+  "ha_washdata/set_suggestion_lock": SetSuggestionLockResponse;
   "ha_washdata/run_suggestion_analysis": RunSuggestionAnalysisResponse;
   "ha_washdata/get_cycle_power_data": GetCyclePowerDataResponse;
   "ha_washdata/trim_cycle": StartTaskResponse;
@@ -1200,6 +1260,9 @@ export interface WashDataWsResponses {
   "ha_washdata/run_playground_history": RunPlaygroundHistoryResponse;
   "ha_washdata/run_playground_sweep": RunPlaygroundSweepResponse;
   "ha_washdata/get_dtw_debug": GetDtwDebugResponse;
+  "ha_washdata/get_playground_settings": GetPlaygroundSettingsResponse;
+  "ha_washdata/save_playground_preset": PlaygroundPresetsResponse;
+  "ha_washdata/delete_playground_preset": PlaygroundPresetsResponse;
   "ha_washdata/list_tasks": ListTasksResponse;
   "ha_washdata/subscribe_tasks": SubscribeTasksResponse;
   "ha_washdata/cancel_task": CancelTaskResponse;

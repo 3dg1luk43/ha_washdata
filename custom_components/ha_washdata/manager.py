@@ -40,6 +40,7 @@ from homeassistant.core import Context, Event, HomeAssistant, State, callback
 from homeassistant.helpers.event import (
     async_call_later,
     async_track_state_change_event,
+    async_track_state_report_event,
     async_track_time_interval,
 )
 from homeassistant.helpers.dispatcher import async_dispatcher_send
@@ -110,6 +111,8 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
+    CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     CONF_DELAY_START_DETECT_ENABLED,
     CONF_DELAY_CONFIRM_SECONDS,
     CONF_DELAY_TIMEOUT_HOURS,
@@ -166,6 +169,10 @@ from .const import (
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_NOTIFY_LIVE_CHRONOMETER,
+    CONF_NOTIFY_LIVE_STICKY,
+    CONF_NOTIFY_LIVE_CLICK_ACTION,
+    DEFAULT_NOTIFY_LIVE_STICKY,
+    DEFAULT_NOTIFY_LIVE_CLICK_ACTION,
     CONF_NOTIFY_REMINDER_MESSAGE,
     CONF_NOTIFY_TIMEOUT_SECONDS,
     CONF_NOTIFY_CHANNEL,
@@ -177,12 +184,19 @@ from .const import (
     CONF_PEAK_RATE_MESSAGE,
     DEFAULT_PEAK_RATE_MESSAGE,
     CONF_DOOR_SENSOR_ENTITY,
+    CONF_DOOR_OPENS_AT_END,
+    CONF_DOOR_END_DWELL_SECONDS,
+    DEFAULT_DOOR_OPENS_AT_END,
+    DEFAULT_DOOR_END_DWELL_SECONDS,
     CONF_PAUSE_CUTS_POWER,
     CONF_SWITCH_ENTITY,
     CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
     CONF_NOTIFY_UNLOAD_MESSAGE,
+    CONF_NOTIFY_UNLOAD_REPEAT,
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_MESSAGE,
+    DEFAULT_NOTIFY_UNLOAD_REPEAT,
+    NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS,
     CONF_NOTIFY_MILESTONES,
     CONF_NOTIFY_MILESTONE_MESSAGE,
     DEFAULT_NOTIFY_MILESTONES,
@@ -219,6 +233,7 @@ from .const import (
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     DEFAULT_MAX_DEFERRAL_SECONDS,
+    ENDING_HARD_FINALIZE_MIN_QUIET_S,
     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
     DEFAULT_END_ENERGY_THRESHOLD,
     DEVICE_COMPLETION_THRESHOLDS,
@@ -254,11 +269,18 @@ from .recorder import CycleRecorder
 from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
 from .time_utils import power_data_to_offsets
+from . import analysis
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
 from .phase_segmenter import phase_matching_enabled
 
 _LOGGER = logging.getLogger(__name__)
+
+# Sentinel "message" understood by the Home Assistant companion app as "dismiss the
+# card carrying this tag" rather than as text to display. It is only meaningful
+# alongside a `tag`, and only on mobile_app targets - see _send_notification_service,
+# which must never deliver it as a visible message.
+_CLEAR_NOTIFICATION_MARKER = "clear_notification"
 
 # Finish-type notification events that would wake someone and are therefore gated by
 # the quiet-hours (do-not-disturb) window. Live-progress ticks (NOTIFY_EVENT_LIVE)
@@ -308,6 +330,7 @@ _MOBILE_ONLY_EXTRA_KEYS = (
     "priority",
     "actions",
     "sticky",
+    "clickAction",
     "subtitle",
     "content_state",
     "activity",
@@ -410,6 +433,8 @@ class WashDataManager:
         self._notify_live_interval_seconds = DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
         self._notify_live_overrun_percent = DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
         self._notify_live_chronometer = DEFAULT_NOTIFY_LIVE_CHRONOMETER
+        self._notify_live_sticky = DEFAULT_NOTIFY_LIVE_STICKY
+        self._notify_live_click_action = DEFAULT_NOTIFY_LIVE_CLICK_ACTION
         self._notify_timeout_seconds = DEFAULT_NOTIFY_TIMEOUT_SECONDS
         self._pending_notifications: list[dict[str, Any]] = []
         # Quiet-hours (do-not-disturb) hold queue + release timer. Finish-type
@@ -449,6 +474,15 @@ class WashDataManager:
         self._door_sensor_entity: str | None = config_entry.options.get(
             CONF_DOOR_SENSOR_ENTITY
         ) or None
+        # Auto-open dishwasher (#342): a sustained door-open at cycle end finalizes
+        # the cycle after a dwell instead of setting the sticky user-pause.
+        self._door_opens_at_end: bool = bool(
+            config_entry.options.get(CONF_DOOR_OPENS_AT_END, DEFAULT_DOOR_OPENS_AT_END)
+        )
+        self._door_end_dwell_seconds: int = int(
+            config_entry.options.get(CONF_DOOR_END_DWELL_SECONDS, DEFAULT_DOOR_END_DWELL_SECONDS)
+        )
+        self._remove_door_end_dwell: Any = None
         self._remove_door_sensor_listener = None
         self._is_clean_state: bool = False
         self._clean_state_start: datetime | None = None
@@ -461,6 +495,19 @@ class WashDataManager:
                 CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
             )
         )
+        # Repeat the unload reminder until dismissed / door-open (opt-in, #374).
+        self._notify_unload_repeat: bool = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_UNLOAD_REPEAT, DEFAULT_NOTIFY_UNLOAD_REPEAT
+            )
+        )
+        # Set when the user taps the reminder's "stop reminding" action; timestamp of
+        # the last reminder sent, used to pace the repeats; and the mobile action
+        # listener remover (mirrors the timer-pause interactive-notification wiring).
+        self._unload_nag_dismissed: bool = False
+        self._last_unload_nag_time: datetime | None = None
+        self._unload_nag_count: int = 0  # repeat-mode safety bound (#374)
+        self._remove_unload_action_listener: Any | None = None
         self._live_notification_cap = 0
         self._last_live_notification_time: datetime | None = None
         self._live_waiting_notification_sent = False
@@ -543,6 +590,9 @@ class WashDataManager:
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
         )
+        # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
+        # mean power elsewhere (see analysis.stage4_energy_mode).
+        self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
         self.learning_manager = LearningManager(
             hass, self.entry_id, self.profile_store, self.device_type,
             device_name=config_entry.title,
@@ -623,6 +673,17 @@ class WashDataManager:
                 DEFAULT_NOTIFY_LIVE_CHRONOMETER,
             )
         )
+        self._notify_live_sticky = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_STICKY, DEFAULT_NOTIFY_LIVE_STICKY
+            )
+        )
+        self._notify_live_click_action = str(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_CLICK_ACTION, DEFAULT_NOTIFY_LIVE_CLICK_ACTION
+            )
+            or ""
+        ).strip()
         self._notify_timeout_seconds = int(
             config_entry.options.get(
                 CONF_NOTIFY_TIMEOUT_SECONDS, DEFAULT_NOTIFY_TIMEOUT_SECONDS
@@ -743,6 +804,12 @@ class WashDataManager:
                     CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT
                 )
             ),
+            dishwasher_end_spike_quiet_release=float(
+                config_entry.options.get(
+                    CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+                    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+                )
+            ),
             delay_detect_enabled=bool(
                 config_entry.options.get(
                     CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
@@ -758,16 +825,28 @@ class WashDataManager:
                     CONF_DELAY_TIMEOUT_HOURS, DEFAULT_DELAY_TIMEOUT_HOURS
                 )
             ) * 3600.0,
+            # #378: without this the detector keeps the WASHING_MACHINE default and
+            # every non-washing-machine device runs the washing-machine detection
+            # path (the whole dishwasher/#43 branch is otherwise dead in production).
+            device_type=self.device_type,
         )
         self._config = config
 
 
         def profile_matcher_wrapper(
             readings: list[tuple[datetime, float]],
-        ) -> tuple[str | None, float, float, str | None]:
+        ) -> tuple[str | None, float, float, str | None] | None:
             """Wraps profile store matching logic with detector callback signature.
 
-            Returns: None (async offload)
+            The real match is offloaded to an async task that calls
+            ``detector.update_match`` later, so this returns ``None`` in that case -
+            the detector's contract is "None == async offload, I'll be called back"
+            (see ``_try_profile_match``). It must NOT return a placeholder tuple:
+            a non-empty tuple is truthy, so the detector would feed it straight into
+            ``update_match`` on every match tick, spuriously logging the
+            "invalid raw_expected_duration 0.0" debug line and momentarily zeroing
+            ``_last_match_confidence`` between real async updates. Only the manual
+            override path below returns a genuine synchronous tuple.
             """
             # Manual program override
             if self._manual_program_active and self._current_program:
@@ -791,13 +870,13 @@ class WashDataManager:
                 )
 
             if not readings:
-                return (None, 0.0, 0.0, None)
+                return None
 
             # Snapshotted for thread safety indirectly by task logic
             # We don't need a wrapper task if we unify with _update_estimates matching
             # but for now let's keep the detector callback as a trigger
             self._spawn_tracked(self._async_perform_combined_matching(readings))
-            return (None, 0.0, 0.0, None)
+            return None
 
         self.detector = CycleDetector(
             config,
@@ -820,6 +899,7 @@ class WashDataManager:
         self._terminal_drop_refresh_n: int | None = None
 
         self._remove_listener = None
+        self._remove_report_listener = None  # state_reported (unchanged re-reports) #363/#329
         self._remove_external_trigger_listener = None  # External cycle end trigger
         self._remove_watchdog = None
         self._watchdog_interval = int(
@@ -1226,14 +1306,28 @@ class WashDataManager:
                             current_matched
                         )
                     verified_pause = True
-                    # Smart Termination within Envelope block
+                    # Smart Termination within Envelope block. Compare the mapped
+                    # position against the envelope's OWN time span (not avg_duration,
+                    # a differently-derived trimmed mean): mapped_time is capped at the
+                    # grid span, so span/avg_duration < 1 would make the 0.95 release
+                    # unreachable and the cycle would hang to the deferral cap (#348).
                     try:
-                        profile = self.profile_store.get_profile(current_matched)
-                        if profile:
-                            avg_dur = profile.get("avg_duration", 0)
-                            if avg_dur > 0 and (mapped_time / avg_dur) > 0.95:
-                                verified_pause = False
-                                self._logger.info("Smart Termination: Near end of profile. Releasing pause lock.")
+                        span = self.profile_store.envelope_time_span(current_matched)
+                        if span > 0 and (mapped_time / span) > 0.95:
+                            verified_pause = False
+                            self._logger.info(
+                                "Smart Termination: near end of profile (%.0f/%.0fs). Releasing pause lock.",
+                                mapped_time, span,
+                            )
+                        else:
+                            # Diagnostic (#346): the release is held; show how far the
+                            # trace mapped vs the 95%% release point (no behaviour change).
+                            self._logger.debug(
+                                "Smart Termination held for %s: mapped %.0f/%.0fs (%.0f%%) below 95%% release%s",
+                                current_matched, mapped_time, span,
+                                (100.0 * mapped_time / span) if span > 0 else 0.0,
+                                "" if span > 0 else " (envelope span unavailable)",
+                            )
                     except Exception as e:
                         self._logger.debug("Smart Termination alignment verification failed: %s", e)
                 else:
@@ -1248,6 +1342,50 @@ class WashDataManager:
             stop_threshold = getattr(self.detector.config, "stop_threshold_w", 5.0)
 
             if current_power > stop_threshold * 10:
+                verified_pause = False
+
+            # --- Sustained-quiet release of an auto-detected pause (issue #375) ---
+            # An envelope-verified pause bridges a genuine low-power phase (e.g. a
+            # dishwasher's passive drying).  When the appliance instead goes truly
+            # silent at the real end, the envelope alignment can keep re-confirming
+            # against a long near-zero drying tail baked into the profile by earlier
+            # force-stopped cycles, and Smart Termination's >95%-of-span release is
+            # unreachable because the trace goes quiet BEFORE that learned tail ends.
+            # The flag then freezes True and every ENDING finalize backstop (all
+            # gated on `not _verified_pause`) is defeated, so the cycle hangs for
+            # hours until the watchdog's multi-hour silence limit force-ends it.
+            # Release the auto-pause once the cycle has completed its expected
+            # duration AND has been continuously sub-threshold for the finalize
+            # quiet floor: the drying (if any) is over, so let the normal end path
+            # finalize.  This mirrors the dishwasher `quiet_released` gate the
+            # detector already trusts in `_should_defer_finish`.  A real user pause
+            # is authoritative and re-asserted below, so it is never released here.
+            expected_dur = self.detector.expected_duration_seconds
+            # Gap-free tally only: a telemetry outage is unobserved time and must
+            # not satisfy the quiet floor that releases the auto-detected pause
+            # (mirrors the detector's dishwasher quiet-release gates). Fall back to
+            # the plain tally if the attribute is missing (older detector).
+            time_below = getattr(
+                self.detector,
+                "_time_below_threshold_gapfree",
+                getattr(self.detector, "_time_below_threshold", 0.0),
+            )
+            if (
+                verified_pause
+                and not self._is_user_paused
+                and expected_dur > 0
+                and current_duration >= expected_dur
+                and time_below >= ENDING_HARD_FINALIZE_MIN_QUIET_S
+            ):
+                self._logger.info(
+                    "Releasing auto-detected pause for %s: reached expected "
+                    "duration (%.0fs >= %.0fs) and sustained-quiet %.0fs - "
+                    "allowing normal cycle finish (issue #375).",
+                    current_matched or self._current_program,
+                    current_duration,
+                    expected_dur,
+                    time_below,
+                )
                 verified_pause = False
 
             # A user-initiated pause (Pause Cycle button, or the door-open soft
@@ -1597,6 +1735,17 @@ class WashDataManager:
 
                 self.detector.restore_state_snapshot(active_snapshot_to_restore)
 
+                # Anti-wrinkle keepalive anchor (#339). The keepalive in
+                # _handle_state_expiry needs a "sensor last spoke" timestamp, but
+                # _last_real_reading_time is only ever set by a live reading, so a
+                # restart into ANTI_WRINKLE with an already-silent plug leaves it
+                # None and the keepalive can never fire -- pinning the mode until
+                # the next cycle. The snapshot save is driven by real readings, so
+                # last_save is the best available proxy. Scoped to ANTI_WRINKLE so
+                # no other timer sees a synthetic anchor.
+                if self.detector.state == STATE_ANTI_WRINKLE and last_save:
+                    self._last_real_reading_time = last_save
+
                 # Restore if in any active state (Running, Paused, Ending)
                 if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
                     # Restore manual program flag if present
@@ -1662,6 +1811,11 @@ class WashDataManager:
                     if self._is_user_paused:
                         self.detector.set_verified_pause(True)
 
+                    # Auto-open dishwasher: arm the dwell if we restored into ENDING
+                    # with the door already open. _on_state_change is not called
+                    # during restoration, so the transition guard there would not fire.
+                    self._maybe_arm_door_end_dwell_if_open()
+
                     # Record the restart gap so the Cycles tab can shade it and
                     # anomaly detection can surface it.  Only meaningful when
                     # last_save is known and the dark period exceeds 30 s.
@@ -1718,6 +1872,7 @@ class WashDataManager:
                     "timer_default_message": "{device}: {minutes} min timer",
                     "timer_pause_action_title": "Resume Cycle",
                     "timer_pause_body_suffix": "The cycle is paused. Open the WashData panel to resume.",
+                    "unload_dismiss_action_title": "Stop reminding",
                     "vs_typical_longer": "{pct}% longer than usual",
                     "vs_typical_shorter": "{pct}% shorter than usual",
                     "notify_live_waiting_message": "{device}: No profile matched yet.",
@@ -1768,10 +1923,8 @@ class WashDataManager:
                 "Failed repairing profile sample references for %s", self.entry_id
             )
 
-        # Subscribe to power sensor updates
-        self._remove_listener = async_track_state_change_event(
-            self.hass, [self.power_sensor_entity_id], self._async_power_changed
-        )
+        # Subscribe to power sensor updates (state changes AND unchanged re-reports)
+        self._subscribe_power_sensor()
 
         # Attempt to restore state (BEFORE starting listener)
         await self._attempt_state_restoration()
@@ -1891,13 +2044,9 @@ class WashDataManager:
                     "Power sensor changed: %s -> %s", self.power_sensor_entity_id, new_sensor
                 )
                 self.power_sensor_entity_id = new_sensor
-                # Remove old listener
-                if self._remove_listener:
-                    self._remove_listener()
-                # Attach new listener
-                self._remove_listener = async_track_state_change_event(
-                    self.hass, [self.power_sensor_entity_id], self._async_power_changed
-                )
+                # Re-attach change + report listeners to the new sensor
+                # (helper removes the old ones first).
+                self._subscribe_power_sensor()
                 # Force update from new sensor
                 state = self.hass.states.get(self.power_sensor_entity_id)
                 if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
@@ -1947,6 +2096,9 @@ class WashDataManager:
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
         )
+        # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
+        # mean power elsewhere (see analysis.stage4_energy_mode).
+        self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
 
         # Device default
         dev_def = DEVICE_COMPLETION_THRESHOLDS.get(
@@ -2022,6 +2174,12 @@ class WashDataManager:
                 CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT
             )
         )
+        new_dishwasher_end_spike_quiet_release = float(
+            config_entry.options.get(
+                CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+                DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+            )
+        )
         new_delay_detect_enabled = bool(
             config_entry.options.get(
                 CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
@@ -2039,6 +2197,9 @@ class WashDataManager:
         ) * 3600.0
 
         # Apply all detector config updates
+        # #378: keep the detector's device_type in sync when the appliance type
+        # is changed in the UI, so the correct detection branch runs after reload.
+        self.detector.config.device_type = self.device_type
         self.detector.config.min_power = new_min_power
         self.detector.config.off_delay = new_off_delay
         self.detector.config.smoothing_window = new_smoothing
@@ -2057,6 +2218,7 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_max_duration = new_anti_wrinkle_max_duration
         self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
         self.detector.config.anti_wrinkle_idle_timeout = new_anti_wrinkle_idle_timeout
+        self.detector.config.dishwasher_end_spike_quiet_release = new_dishwasher_end_spike_quiet_release
         self.detector.config.delay_detect_enabled = new_delay_detect_enabled
         self.detector.config.delay_confirm_seconds = new_delay_confirm_seconds
         self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds
@@ -2178,6 +2340,17 @@ class WashDataManager:
                 DEFAULT_NOTIFY_LIVE_CHRONOMETER,
             )
         )
+        self._notify_live_sticky = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_STICKY, DEFAULT_NOTIFY_LIVE_STICKY
+            )
+        )
+        self._notify_live_click_action = str(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_CLICK_ACTION, DEFAULT_NOTIFY_LIVE_CLICK_ACTION
+            )
+            or ""
+        ).strip()
         self._notify_timeout_seconds = int(
             config_entry.options.get(
                 CONF_NOTIFY_TIMEOUT_SECONDS, DEFAULT_NOTIFY_TIMEOUT_SECONDS
@@ -2187,17 +2360,33 @@ class WashDataManager:
         # Reload door sensor / pause config
         self._pause_cuts_power = bool(config_entry.options.get(CONF_PAUSE_CUTS_POWER, False))
         self._door_sensor_entity = config_entry.options.get(CONF_DOOR_SENSOR_ENTITY) or None
+        self._door_opens_at_end = bool(
+            config_entry.options.get(CONF_DOOR_OPENS_AT_END, DEFAULT_DOOR_OPENS_AT_END)
+        )
+        self._door_end_dwell_seconds = int(
+            config_entry.options.get(CONF_DOOR_END_DWELL_SECONDS, DEFAULT_DOOR_END_DWELL_SECONDS)
+        )
         self._notify_unload_delay_minutes = int(
             config_entry.options.get(
                 CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
+            )
+        )
+        self._notify_unload_repeat = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_UNLOAD_REPEAT, DEFAULT_NOTIFY_UNLOAD_REPEAT
             )
         )
 
         # Re-subscribe to external cycle end trigger
         await self._setup_external_end_trigger()
 
-        # Re-subscribe to door sensor
+        # Re-subscribe to door sensor. Cancel any dwell armed for the previous door
+        # config first — after a sensor/auto-open/dwell change the old sensor may no
+        # longer emit the close event that cancels it, so a stale timer could finalize
+        # the cycle on outdated config. Re-evaluate for the new configuration after.
+        self._cancel_door_end_dwell()
         await self._setup_door_sensor_listener()
+        self._maybe_arm_door_end_dwell_if_open()
 
         # Re-subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
@@ -2277,11 +2466,17 @@ class WashDataManager:
             await asyncio.gather(*_to_await, return_exceptions=True)
         if self._remove_listener:
             self._remove_listener()
+        if self._remove_report_listener:
+            self._remove_report_listener()
+            self._remove_report_listener = None
         if self._remove_external_trigger_listener:
             self._remove_external_trigger_listener()
         if self._remove_door_sensor_listener:
             self._remove_door_sensor_listener()
             self._remove_door_sensor_listener = None
+        self._cancel_door_end_dwell()
+        # Drop the repeat-unload-reminder dismiss action listener (#374).
+        self._remove_unload_dismiss_listener()
         if self._remove_notify_people_listener:
             self._remove_notify_people_listener()
             self._remove_notify_people_listener = None
@@ -2406,9 +2601,25 @@ class WashDataManager:
                 self._is_clean_state = False
                 self._clean_state_start = None
                 self._notified_clean_laundry = False
+                self._reset_unload_nag_tracking()
                 # Dismiss a delivered clean reminder (and purge any queued ones)
                 # so it does not linger on the phone after the laundry is taken.
                 self._clear_clean_notification()
+                self._notify_update()
+            elif (
+                self._door_opens_at_end
+                and self.detector.state in (STATE_RUNNING, STATE_ENDING)
+            ):
+                # Auto-open dishwasher (#342): the machine pops its door at the end.
+                # A sustained open means the cycle finished; a brief open (adding an
+                # item) does not. Arm a dwell timer instead of the sticky user-pause
+                # (which would strand the cycle in user_paused). If the door stays
+                # open past the dwell we finalize; if it closes first we cancel.
+                self._logger.debug(
+                    "Door opened on auto-open device: arming %ss end dwell",
+                    self._door_end_dwell_seconds,
+                )
+                self._arm_door_end_dwell()
                 self._notify_update()
             elif self.detector.state in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
                 # Door opened during active cycle → soft pause confirmation
@@ -2420,7 +2631,111 @@ class WashDataManager:
                     self._is_user_paused = True
                     self._user_pause_start = dt_util.now()
                 self._notify_update()
-        # Door closing is intentionally not handled - no auto-resume
+        else:
+            # Door closed: cancel a pending auto-open finalize (it was a brief open,
+            # not the end-of-cycle door pop). No auto-resume otherwise (#342).
+            if self._remove_door_end_dwell is not None:
+                self._logger.debug("Door closed before end dwell: cancelling finalize")
+                self._cancel_door_end_dwell()
+                self._notify_update()
+
+    def _maybe_arm_door_end_dwell_if_open(self) -> None:
+        """Arm the end-dwell timer when in RUNNING or ENDING with the door already open.
+
+        Called from both ``_on_state_change`` (live transition) and the
+        snapshot-restoration path (where ``_on_state_change`` is not invoked).
+        Matches the state set accepted by ``_handle_door_sensor_change`` so that
+        restoring a RUNNING snapshot with the door already open re-arms the dwell.
+        """
+        if not (
+            self.detector.state in (STATE_RUNNING, STATE_ENDING)
+            and self._door_opens_at_end
+            and self._door_sensor_entity
+            and self._remove_door_end_dwell is None
+        ):
+            return
+        door_state = self.hass.states.get(self._door_sensor_entity)
+        if door_state and door_state.state == "on":
+            self._logger.debug(
+                "Door already open on ENDING: arming %ss end dwell",
+                self._door_end_dwell_seconds,
+            )
+            self._arm_door_end_dwell()
+
+    def _arm_door_end_dwell(self) -> None:
+        """(Re)arm the auto-open door-end dwell timer (#342)."""
+        self._cancel_door_end_dwell()
+        self._remove_door_end_dwell = async_call_later(
+            self.hass,
+            float(max(1, self._door_end_dwell_seconds)),
+            self._door_end_dwell_fired,
+        )
+
+    def _cancel_door_end_dwell(self) -> None:
+        """Cancel a pending auto-open door-end dwell timer, if any (#342)."""
+        if self._remove_door_end_dwell is not None:
+            self._remove_door_end_dwell()
+            self._remove_door_end_dwell = None
+
+    @callback
+    def _door_end_dwell_fired(self, _now: Any) -> None:
+        """The door stayed open past the dwell on an auto-open device: the cycle has
+        finished, so finalize it as completed (same path as the External End
+        Trigger). The dwell is normally cancelled on door-close, but re-validate the
+        live conditions here defensively — a close event could have been missed, or a
+        user pause could have landed mid-dwell — before finalizing (#342)."""
+        self._remove_door_end_dwell = None
+        door_state = (
+            self.hass.states.get(self._door_sensor_entity)
+            if self._door_sensor_entity
+            else None
+        )
+        if (
+            self.detector.state in (STATE_RUNNING, STATE_ENDING)
+            and self._door_opens_at_end
+            and not self._is_user_paused
+            and door_state is not None
+            and door_state.state == "on"
+        ):
+            # The end-of-cycle door pop follows the power drop, so an appliance still
+            # drawing above the stop threshold means the door was opened mid-cycle
+            # (loading a dish and walking off) rather than at the end - finalizing
+            # there would record a running cycle as completed.
+            #
+            # Re-arm rather than abandon: the dwell is one-shot, so dropping it here
+            # would permanently lose the door-based finalize for a machine that just
+            # happens to be mid-pulse when the timer lands (fan/zeolite drying can
+            # draw with the door already popped), leaving the cycle to the power
+            # timeout that #342 exists to short-circuit. Re-arming is asymmetric: it
+            # can only ever delay the finalize, never skip it.
+            stop_thr = 0.0
+            try:
+                stop_thr = float(getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0)
+            except (TypeError, ValueError):
+                stop_thr = 0.0
+            if stop_thr > 0.0 and self._current_power >= stop_thr:
+                self._logger.debug(
+                    "Door-end dwell fired but power %.1fW is still at/above the stop "
+                    "threshold %.1fW: treating as a mid-cycle door open, re-arming",
+                    self._current_power,
+                    stop_thr,
+                )
+                self._arm_door_end_dwell()
+                return
+            self._logger.info(
+                "Door held open %ss on auto-open device: finalizing cycle",
+                self._door_end_dwell_seconds,
+            )
+            self.detector.user_stop()
+            self._notify_update()
+        else:
+            self._logger.debug(
+                "Door-end dwell fired but conditions no longer hold "
+                "(state=%s, door=%s, user_paused=%s): not finalizing",
+                self.detector.state,
+                getattr(door_state, "state", None),
+                self._is_user_paused,
+            )
 
     async def _setup_notify_people_listener(self) -> None:
         """Set up listener for person presence changes used by notification gating."""
@@ -2605,7 +2920,11 @@ class WashDataManager:
             return {"ok": False, "reason": "ml_training_disabled"}
 
         opts = {**self.config_entry.data, **self.config_entry.options}
-        cycles = self.profile_store.get_past_cycles()
+        # Snapshot on the event loop before any executor offload (training +
+        # matcher tuning): get_past_cycles() returns the live mutable list, so a
+        # concurrent cycle add / retention trim could otherwise change the input
+        # mid-run.
+        cycles = list(self.profile_store.get_past_cycles())
 
         if not force:
             # Don't train mid-cycle; wait for a quiet moment.
@@ -2717,7 +3036,9 @@ class WashDataManager:
         try:
             from .ml.matching_tuner import tune_matching_config
 
-            result = await self.hass.async_add_executor_job(tune_matching_config, cycles)
+            result = await self.hass.async_add_executor_job(
+                tune_matching_config, cycles, self.device_type
+            )
         except Exception as err:  # noqa: BLE001 - tuning must never break training
             self._logger.debug("Matching-config tuning failed: %s", err)
             return {"promoted": False, "reason": "exception", "error": str(err)}
@@ -2805,6 +3126,33 @@ class WashDataManager:
         return latest
 
     @callback
+    def _subscribe_power_sensor(self) -> None:
+        """(Re)subscribe to the power sensor's state changes AND unchanged reports.
+
+        HA fires EVENT_STATE_CHANGED only when the value (or attributes) change.
+        A plug that periodically re-reports the same value (Tasmota TelePeriod,
+        Zigbee max reporting interval) fires EVENT_STATE_REPORTED instead, which a
+        state_changed-only subscription never receives. Missing those reports means
+        a flat sub-threshold tail never advances the detector's end-of-cycle timer
+        (#363) and a finished cycle lags by the plug's reporting interval (#329).
+
+        Both events route into the same handler. Per HA, a single write fires either
+        state_changed (value/attrs differ) or state_reported (unchanged), never both,
+        so there is no double-counting. Report events carry ``new_state`` without an
+        ``old_state``; ``_async_power_changed`` already tolerates a missing old_state.
+        """
+        if self._remove_listener:
+            self._remove_listener()
+        if self._remove_report_listener:
+            self._remove_report_listener()
+        self._remove_listener = async_track_state_change_event(
+            self.hass, [self.power_sensor_entity_id], self._async_power_changed
+        )
+        self._remove_report_listener = async_track_state_report_event(
+            self.hass, [self.power_sensor_entity_id], self._async_power_changed
+        )
+
+    @callback
     def _async_power_changed(self, event: Any) -> None:
         """Handle power sensor state change."""
         event_data = cast(dict[str, Any], getattr(event, "data", {}))
@@ -2818,9 +3166,13 @@ class WashDataManager:
             return
 
         # Capture every raw sensor reading before any throttling or processing.
-        # Use the sensor's own last_updated timestamp so the trace reflects
-        # when the plug actually reported the value, not when we received it.
-        self.diag_buffer.record_power(power, new_state.last_updated)
+        # Use the sensor's own report timestamp so the trace reflects when the plug
+        # actually reported the value, not when we received it. last_reported
+        # advances on every write (incl. unchanged re-reports #363), whereas
+        # last_updated only advances on a value change, so an unchanged re-report
+        # would otherwise be stamped with a stale time.
+        report_ts = getattr(new_state, "last_reported", None) or new_state.last_updated
+        self.diag_buffer.record_power(power, report_ts)
 
         # RECORD MODE INTERCEPTION
         if self.recorder.is_recording:
@@ -3000,10 +3352,34 @@ class WashDataManager:
 
     async def _handle_state_expiry(self, now: datetime) -> None:
         """Check if state and progress should be reset (auto-expiration)."""
+        # Anti-wrinkle keepalive (#339): the mode's idle-timeout and 2 h safety cap
+        # only advance inside CycleDetector.process_reading, and the watchdog is
+        # stopped for the whole anti-wrinkle tail. A publish-on-change plug can send
+        # one final 0 W reading and then go fully silent, so with no further events
+        # the mode is pinned in ANTI_WRINKLE for hours. This timer keeps ticking, so
+        # when the real sensor has been silent longer than off_delay we inject a
+        # synthetic 0 W reading, letting the detector's own logic exit the mode. Gate
+        # on _last_real_reading_time (a genuine tumble pulse still resets the idle
+        # timer via the normal handler) and never bump it here, so real silence stays
+        # detectable and a still-reporting plug drives itself.
+        if self.detector.state == STATE_ANTI_WRINKLE:
+            last_real = self._last_real_reading_time
+            if (
+                last_real is not None
+                and (now - last_real).total_seconds() > self._off_delay
+            ):
+                self._logger.debug(
+                    "Anti-wrinkle keepalive: sensor silent for %.0fs (> off_delay %ss), "
+                    "injecting synthetic 0 W so the idle/2h-cap timer can advance",
+                    (now - last_real).total_seconds(),
+                    self._off_delay,
+                )
+                self.detector.process_reading(0.0, now)
+                self._notify_update()
+            return
         if (
             not self._cycle_completed_time
             or self.detector.state == STATE_RUNNING
-            or self.detector.state == STATE_ANTI_WRINKLE
             or self.detector.state == STATE_DELAY_WAIT
         ):
             # Cycle is running or not completed, don't reset
@@ -3011,15 +3387,28 @@ class WashDataManager:
 
         time_since_complete = (now - self._cycle_completed_time).total_seconds()
 
-        # Clean laundry nag notification
+        # Clean laundry nag notification. In repeat mode (#374) the reminder re-fires
+        # every delay-minutes and carries a "stop reminding" action; otherwise it is a
+        # single one-shot (the default, unchanged).
         if (
             self._is_clean_state
-            and not self._notified_clean_laundry
             and self._clean_state_start is not None
             and self._notify_unload_delay_minutes > 0
+            and not self._unload_nag_dismissed
         ):
-            time_in_clean = (now - self._clean_state_start).total_seconds()
-            if time_in_clean >= self._notify_unload_delay_minutes * 60:
+            delay_s = self._notify_unload_delay_minutes * 60
+            first_due = (
+                not self._notified_clean_laundry
+                and (now - self._clean_state_start).total_seconds() >= delay_s
+            )
+            repeat_due = (
+                self._notify_unload_repeat
+                and self._notified_clean_laundry
+                and self._unload_nag_count < NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS
+                and self._last_unload_nag_time is not None
+                and (now - self._last_unload_nag_time).total_seconds() >= delay_s
+            )
+            if first_due or repeat_due:
                 if self._notify_finish_services or self._notify_actions:
                     duration_min = int(time_since_complete / 60)
                     msg_template = self.config_entry.options.get(
@@ -3032,35 +3421,58 @@ class WashDataManager:
                         duration=duration_min,
                         delay=self._notify_unload_delay_minutes,
                     )
+                    extra_vars: dict[str, Any] = {"tag": self._clean_tag}
+                    if self._notify_unload_repeat:
+                        # Actionable "stop reminding" button + sticky so the user can
+                        # end the repeats from the notification (mobile_app targets;
+                        # ignored by other platforms). Door-open still ends it too.
+                        extra_vars["actions"] = [
+                            {
+                                "action": self._unload_dismiss_action_id,
+                                "title": self._timer_ui_strings.get(
+                                    "unload_dismiss_action_title", "Stop reminding"
+                                ),
+                            }
+                        ]
+                        extra_vars["sticky"] = "true"
                     sent = self._dispatch_notification(
                         msg,
                         event_type=NOTIFY_EVENT_CLEAN,
-                        extra_vars={"tag": self._clean_tag},
+                        extra_vars=extra_vars,
                     )
                     if sent:
                         self._notified_clean_laundry = True
+                        self._last_unload_nag_time = now
+                        self._unload_nag_count += 1
+                        if self._notify_unload_repeat:
+                            self._ensure_unload_dismiss_listener()
                         self._logger.info(
-                            "Sent clean laundry nag notification (%.0f min after cycle end)",
+                            "Sent clean laundry nag notification (%.0f min after "
+                            "cycle end)%s",
                             time_since_complete / 60,
+                            " [repeat]" if repeat_due else "",
                         )
                     elif self._last_dispatch_deferred:
                         # Held for quiet-hours / presence delivery; the queued copy
                         # fires later. Mark handled so the 60s expiry tick doesn't
                         # enqueue a duplicate nag every minute for the whole window.
                         self._notified_clean_laundry = True
+                        self._last_unload_nag_time = now
+                        self._unload_nag_count += 1
+                        if self._notify_unload_repeat:
+                            self._ensure_unload_dismiss_listener()
                 else:
                     self._notified_clean_laundry = True
+                    self._last_unload_nag_time = now
+                    self._unload_nag_count += 1
 
         # Defer leaving the terminal state while a clean-state unload notification is
         # still pending. Without this guard the 30-min progress reset (or an early
         # power-off) fires before the unload nag, clearing _is_clean_state before the
-        # notification can fire. Both expiry modes below honour it.
-        nag_pending = (
-            self._is_clean_state
-            and not self._notified_clean_laundry
-            and self._notify_unload_delay_minutes > 0
-            and time_since_complete < self._notify_unload_delay_minutes * 60
-        )
+        # notification can fire. In repeat mode the hold persists across every repeat
+        # until the user dismisses it or opens the door. Both expiry modes below honour
+        # it (as does the power-off one-shot timer).
+        nag_pending = self._unload_nag_active(now)
 
         # Power-based Off detection (issue #284): opt-in, and only valid when the
         # threshold sits below stop_threshold_w (so it cannot fire while a cycle could
@@ -3147,6 +3559,7 @@ class WashDataManager:
         self._is_clean_state = False
         self._clean_state_start = None
         self._notified_clean_laundry = False
+        self._reset_unload_nag_tracking()
         self._power_off_below_since = None
         self._cancel_power_off_timer()
         self.detector.reset(STATE_OFF)
@@ -3202,14 +3615,7 @@ class WashDataManager:
         ).total_seconds() < cfg.power_off_delay:
             return
         # Honour the clean-laundry unload nag hold (mirrors the poll path).
-        if (
-            self._is_clean_state
-            and not self._notified_clean_laundry
-            and self._notify_unload_delay_minutes > 0
-            and self._cycle_completed_time is not None
-            and (dt_util.now() - self._cycle_completed_time).total_seconds()
-            < self._notify_unload_delay_minutes * 60
-        ):
+        if self._unload_nag_active(dt_util.now()):
             return
         self._logger.debug(
             "Power-based Off (one-shot timer): %.2fW below %.2fW for >= %.0fs in %s. "
@@ -3517,6 +3923,7 @@ class WashDataManager:
             self._is_clean_state = False
             self._clean_state_start = None
             self._notified_clean_laundry = False
+            self._reset_unload_nag_tracking()
             self._cycle_progress = 0.0
             self._power_off_below_since = None
             self._cancel_power_off_timer()
@@ -3560,6 +3967,7 @@ class WashDataManager:
                 self._clear_timer_pause_notification()
                 self._clean_state_start = None
                 self._notified_clean_laundry = False
+                self._reset_unload_nag_tracking()
 
                 self._start_watchdog()  # Start watchdog when cycle starts
 
@@ -3622,6 +4030,10 @@ class WashDataManager:
                 # Ensure watchdog is running
                 self._start_watchdog()
 
+        # Auto-open dishwasher: arm the dwell if ENDING while the door is already
+        # open (door event missed, or door popped just as ENDING fired) (#342).
+        self._maybe_arm_door_end_dwell_if_open()
+
         # Stop watchdog when transitioning to OFF from any active state
         if new_state == STATE_OFF:
             self._stop_watchdog()  # Stop watchdog regardless of previous state
@@ -3655,6 +4067,7 @@ class WashDataManager:
         self._stop_watchdog()  # Stop active cycle watchdog
         self._stop_state_expiry_timer()  # Cancel any pending progress reset
         self._clear_timer_pause_notification()
+        self._cancel_door_end_dwell()  # Discard stale auto-open dwell (#342)
         prev_cycle_end_time = self._last_cycle_end_time
         self._last_cycle_end_time = dt_util.now()
         self._pump_stuck = False  # Reset for next pump cycle
@@ -4645,6 +5058,7 @@ class WashDataManager:
         self._is_clean_state = False
         self._clean_state_start = None
         self._notified_clean_laundry = False
+        self._reset_unload_nag_tracking()
         if self._door_sensor_entity:
             door_state = self.hass.states.get(self._door_sensor_entity)
             if door_state and door_state.state == "off":  # binary_sensor: off = closed
@@ -4976,6 +5390,60 @@ class WashDataManager:
             return (finish_channel or status_channel) or None
         return status_channel or None
 
+    def _log_notification(
+        self,
+        event_type: str | None,
+        message: str,
+        *,
+        targets: str = "",
+        deferred_reason: str | None = None,
+        delivered: bool = True,
+    ) -> None:
+        """Emit log lines for a notification's send / defer / drop.
+
+        Every user-facing notification funnels through ``_dispatch_notification``,
+        so this is the single place that records what WashData notified about,
+        where it went, and whether it was delivered, deferred (quiet-hours /
+        presence hold), or dropped.
+
+        Log contract (regression-locked by ``test_manager_notification_logging``):
+        - **INFO** ``"Notification sent (<event>)"`` — one line per discrete
+          notification (start/finish/milestone/clean/pause/…). Target list and
+          message body are omitted to prevent entity-ID PII from leaking into
+          bug-report logs.
+        - **DEBUG** ``"Notification sent (<event>) via <targets>: <summary>"`` —
+          full target list and truncated message body for troubleshooting.
+        - **DEBUG** for live-progress ticks (high-frequency in-place updates).
+        - **DEBUG** for deferred (quiet-hours/presence hold) and not-delivered paths.
+
+        Deferred items are re-dispatched when the hold clears and log again as
+        "sent" on actual delivery.
+        """
+        label = event_type or "notification"
+        # Countdown / finish messages can span multiple lines - collapse to one.
+        summary = " ".join(str(message).split())
+        if len(summary) > 200:
+            summary = summary[:197] + "..."
+        is_live = event_type == NOTIFY_EVENT_LIVE
+        if deferred_reason:
+            self._logger.debug(
+                "Notification deferred (%s) - %s: %s", label, deferred_reason, summary
+            )
+        elif not delivered:
+            self._logger.debug(
+                "Notification not delivered (%s) - no matching target: %s",
+                label, summary,
+            )
+        elif is_live:
+            self._logger.debug(
+                "Notification sent (%s) via %s: %s", label, targets, summary
+            )
+        else:
+            self._logger.info("Notification sent (%s)", label)
+            self._logger.debug(
+                "Notification sent (%s) via %s: %s", label, targets, summary
+            )
+
     def _dispatch_notification(
         self,
         message: str,
@@ -5067,6 +5535,7 @@ class WashDataManager:
                 extra_vars=extra_vars,
             )
             self._last_dispatch_deferred = True
+            self._log_notification(event_type, message, deferred_reason="quiet hours")
             return False
 
         if (
@@ -5091,6 +5560,9 @@ class WashDataManager:
                     }
                 )
                 self._last_dispatch_deferred = True
+                self._log_notification(
+                    event_type, message, deferred_reason="nobody home"
+                )
                 return False
 
         actions_sent = False
@@ -5101,6 +5573,7 @@ class WashDataManager:
         # service/persistent-notification path entirely.
         services = self._get_services_for_event(event_type)
         if actions_sent and not services:
+            self._log_notification(event_type, message, targets="actions")
             return True
 
         service_sent = self._send_notification_service(
@@ -5111,6 +5584,20 @@ class WashDataManager:
             event_type=event_type,
             extra_vars=extra_vars,
         )
+
+        if actions_sent or service_sent:
+            targets: list[str] = []
+            if actions_sent:
+                targets.append("actions")
+            if service_sent:
+                # _send_notification_service falls back to a persistent
+                # notification only when no notify services are configured.
+                targets.extend(services if services else ["persistent_notification"])
+            self._log_notification(
+                event_type, message, targets=", ".join(targets)
+            )
+        else:
+            self._log_notification(event_type, message, delivered=False)
         return actions_sent or service_sent
 
     def _send_notification_service(
@@ -5175,15 +5662,41 @@ class WashDataManager:
                 if notify_service.startswith("notify.")
                 else None
             )
+            # A notify *entity* (has a state, domain "notify") only registers the
+            # entity service notify.send_message — NOT a legacy notify.<object_id>
+            # domain service. So route entity targets through send_message
+            # regardless of svc_data; that schema accepts only entity_id/message/
+            # title, so drop any unsupported extras (icon, mobile/iOS keys) rather
+            # than fall through to a legacy service that would raise ServiceNotFound
+            # and silently drop the notification. Legacy notify.mobile_app_* targets
+            # have no entity state (state is None) and correctly take the else path.
             if state is not None and getattr(state, "domain", None) == "notify":
+                # A dismiss marker is carried *by* its tag, and send_message cannot
+                # carry one - delivering it anyway would show the user a card whose
+                # body literally reads "clear_notification". There is no way to
+                # dismiss an entity-target card, so skip the send entirely. (Before
+                # entity targets were routed here, these calls always had a tag and
+                # so took the legacy-service path, where the tag works.)
+                if message == _CLEAR_NOTIFICATION_MARKER and ev.get("tag"):
+                    self._logger.debug(
+                        "Notify entity %s: skipping dismiss marker (tag=%s) - "
+                        "notify.send_message cannot carry a tag, so it would be "
+                        "delivered as visible text",
+                        notify_service, ev.get("tag"),
+                    )
+                    continue
+                if svc_data:
+                    self._logger.debug(
+                        "Notify entity %s: dropping %d unsupported payload key(s) "
+                        "(%s) - notify.send_message accepts only message/title",
+                        notify_service, len(svc_data), ", ".join(sorted(svc_data)),
+                    )
                 service_data: dict[str, Any] = {
                     "entity_id": notify_service,
                     "message": message,
                 }
                 if title:
                     service_data["title"] = title
-                if svc_data:
-                    service_data["data"] = svc_data
                 self.hass.async_create_task(
                     self.hass.services.async_call(
                         "notify", "send_message", service_data
@@ -5205,6 +5718,14 @@ class WashDataManager:
 
         if not sent:
             if event_type == NOTIFY_EVENT_LIVE:
+                return False
+            # A dismiss marker is not content: if no target could carry it, there is
+            # nothing to show. Falling through would post a persistent-notification
+            # card whose body reads "clear_notification" - the same leak the entity
+            # branch above guards against, just via the other exit. The callers that
+            # send this marker dismiss their own persistent notification separately
+            # (_pn_dismiss), so nothing is lost by returning early.
+            if message == _CLEAR_NOTIFICATION_MARKER:
                 return False
             # Reuse the notification's tag as a stable persistent-notification id so
             # the HA notifications tab collapses the lifecycle thread to one entry
@@ -5506,6 +6027,20 @@ class WashDataManager:
         overrun_ratio = max(0, float(self._notify_live_overrun_percent)) / 100.0
         return max(1, int(np.ceil(estimated_updates * (1.0 + overrun_ratio))))
 
+    def _apply_live_notification_prefs(self, extra_vars: dict[str, Any]) -> None:
+        """Inject the user's opt-in live-notification data keys (#347).
+
+        ``sticky`` keeps the live notification on screen when tapped; ``clickAction``
+        gives the notification a tap target (e.g. a dashboard path). Both are
+        mobile-only keys forwarded only to ``mobile_app_*`` live targets. Defaults
+        (sticky off, empty clickAction) add nothing, so the payload is byte-identical
+        to before unless the user opts in.
+        """
+        if self._notify_live_sticky:
+            extra_vars["sticky"] = "true"
+        if self._notify_live_click_action:
+            extra_vars["clickAction"] = self._notify_live_click_action
+
     def _check_live_progress_notification(self) -> None:
         """Send throttled live progress notifications for compatible mobile targets."""
         if not self._notify_live_services and not self._notify_actions:
@@ -5549,6 +6084,7 @@ class WashDataManager:
             # Live Activity even before a profile is matched (mobile-only key).
             if not self._live_activity_started:
                 waiting_extra_vars["activity"] = "start"
+            self._apply_live_notification_prefs(waiting_extra_vars)
             sent = self._dispatch_notification(
                 msg,
                 event_type=NOTIFY_EVENT_LIVE,
@@ -5645,6 +6181,7 @@ class WashDataManager:
                 activity=activity_marker,
             )
         )
+        self._apply_live_notification_prefs(extra_vars)
         sent = self._dispatch_notification(
             msg,
             event_type=NOTIFY_EVENT_LIVE,
@@ -5700,7 +6237,7 @@ class WashDataManager:
             {
                 "device": self.config_entry.title,
                 "program": "",  # Cleared marker
-                "message": "clear_notification",  # Clear marker for action handlers
+                "message": _CLEAR_NOTIFICATION_MARKER,  # Clear marker for action handlers
                 "title": "",  # Clear title
                 "icon": None,
                 "event_type": NOTIFY_EVENT_LIVE,
@@ -5716,7 +6253,7 @@ class WashDataManager:
 
         if clear_services:
             self._send_notification_service(
-                "clear_notification",
+                _CLEAR_NOTIFICATION_MARKER,
                 services=self._notify_live_services,
                 event_type=NOTIFY_EVENT_LIVE,
                 extra_vars={
@@ -5740,6 +6277,9 @@ class WashDataManager:
         app instead of lingering. A clear for a non-existent tag is harmless, so
         this runs whenever the user has any clean/finish delivery configured.
         """
+        # Drop the repeat-reminder dismiss action listener too, so no stale mobile
+        # action stays wired once the reminder is gone (#374).
+        self._remove_unload_dismiss_listener()
         # Drop any still-queued clean entries so they cannot replay later — from
         # both the presence-hold queue and the quiet-hours queue (the nag can be
         # deferred into either).
@@ -5752,8 +6292,14 @@ class WashDataManager:
             if n.get("event_type") != NOTIFY_EVENT_CLEAN
         ]
 
-        services = self._get_services_for_event(NOTIFY_EVENT_CLEAN)
-        if not services and not self._notify_actions:
+        # Only mobile_app targets understand the "clear_notification" marker;
+        # non-mobile targets (email, Telegram, etc.) would receive it as a
+        # literal message. Mirror the pattern from _cancel_timer_mobile_notification.
+        mobile_services = [
+            s for s in self._get_services_for_event(NOTIFY_EVENT_CLEAN)
+            if self._is_mobile_notify_service(s)
+        ]
+        if not mobile_services and not self._notify_actions:
             return
 
         if self._notify_actions:
@@ -5761,7 +6307,7 @@ class WashDataManager:
                 {
                     "device": self.config_entry.title,
                     "program": "",
-                    "message": "clear_notification",
+                    "message": _CLEAR_NOTIFICATION_MARKER,
                     "title": "",
                     "icon": None,
                     "event_type": NOTIFY_EVENT_CLEAN,
@@ -5770,13 +6316,95 @@ class WashDataManager:
                     "tag": self._clean_tag,
                 }
             )
-        if services:
+        if mobile_services:
             self._send_notification_service(
-                "clear_notification",
-                services=services,
+                _CLEAR_NOTIFICATION_MARKER,
+                services=mobile_services,
                 event_type=NOTIFY_EVENT_CLEAN,
                 extra_vars={"tag": self._clean_tag},
             )
+
+    @property
+    def _unload_dismiss_action_id(self) -> str:
+        """Stable mobile action ID for the unload-reminder dismiss button, per device."""
+        return f"UNLOAD_STOP_WD_{self.entry_id[:8].upper()}"
+
+    def _unload_nag_active(self, now: datetime) -> bool:
+        """Whether the terminal state must be held alive for the unload reminder.
+
+        Default (one-shot) behaviour: hold only until the single reminder is due, so
+        the 30-min progress reset / power-based Off cannot clear the Clean state before
+        the reminder fires. Repeat mode (``CONF_NOTIFY_UNLOAD_REPEAT``, #374): hold
+        indefinitely so the reminder keeps re-firing, until the user dismisses it from
+        the notification or opens the door (both release the hold).
+        """
+        if (
+            not self._is_clean_state
+            or self._notify_unload_delay_minutes <= 0
+            or self._cycle_completed_time is None
+        ):
+            return False
+        if self._notify_unload_repeat:
+            # Only hold while a delivery channel exists — otherwise no reminder (and
+            # no dismiss button) is ever sent (dispatch is gated on the same
+            # condition), so the hold would strand the Clean state forever.
+            # Also bounded by NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS: the "Stop
+            # reminding" button is mobile_app-only, so a non-mobile target leaves
+            # the door sensor as the only escape, and a sensor that never reports
+            # open would pin Clean state (and suppress power-based Off) forever.
+            return (
+                bool(self._notify_finish_services or self._notify_actions)
+                and not self._unload_nag_dismissed
+                and self._unload_nag_count < NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS
+            )
+        return (
+            not self._notified_clean_laundry
+            and (now - self._cycle_completed_time).total_seconds()
+            < self._notify_unload_delay_minutes * 60
+        )
+
+    def _ensure_unload_dismiss_listener(self) -> None:
+        """Register the mobile action listener for the reminder's dismiss button (once).
+
+        Mirrors the timer-pause interactive notification wiring: a single
+        ``mobile_app_notification_action`` listener that matches this device's action
+        ID, marks the reminder dismissed, and clears the delivered card.
+        """
+        if self._remove_unload_action_listener is not None:
+            return
+        action_id = self._unload_dismiss_action_id
+
+        @callback
+        def _on_unload_action(event: Any) -> None:
+            if event.data.get("action") == action_id:
+                self._logger.debug(
+                    "Unload reminder dismissed via notification action"
+                )
+                self._unload_nag_dismissed = True
+                self._clear_clean_notification()
+                self._notify_update()
+
+        self._remove_unload_action_listener = self.hass.bus.async_listen(
+            "mobile_app_notification_action",
+            _on_unload_action,
+        )
+
+    def _remove_unload_dismiss_listener(self) -> None:
+        """Drop the unload-reminder dismiss action listener, if registered."""
+        if self._remove_unload_action_listener is not None:
+            self._remove_unload_action_listener()
+            self._remove_unload_action_listener = None
+
+    def _reset_unload_nag_tracking(self) -> None:
+        """Reset repeat-reminder tracking and drop the dismiss listener.
+
+        Called wherever the Clean state is cleared so the next cycle's reminder starts
+        fresh and no stale mobile action listener leaks.
+        """
+        self._remove_unload_dismiss_listener()
+        self._unload_nag_dismissed = False
+        self._last_unload_nag_time = None
+        self._unload_nag_count = 0
 
     def _check_pre_completion_notification(self) -> None:
         """Check and send pre-completion notification."""
@@ -6094,7 +6722,7 @@ class WashDataManager:
             mobile_services = [s for s in services if self._is_mobile_notify_service(s)]
             if mobile_services:
                 self._send_notification_service(
-                    "clear_notification",
+                    _CLEAR_NOTIFICATION_MARKER,
                     services=mobile_services,
                     event_type=NOTIFY_EVENT_TIMER,
                     extra_vars={"tag": self._timer_pause_mobile_tag},
@@ -6427,6 +7055,10 @@ class WashDataManager:
                     self._user_pause_start = None
                     self.detector.set_verified_pause(prev_verified)
                     return False
+
+        # A user pause overrides an auto-open dwell: cancel it so the pending timer
+        # can't finalize the cycle out from under the pause (#342).
+        self._cancel_door_end_dwell()
 
         snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
         self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))

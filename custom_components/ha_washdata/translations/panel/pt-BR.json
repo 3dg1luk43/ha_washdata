@@ -92,6 +92,19 @@
     "pause_cycle_tip": "Pausar o ciclo em andamento – o eletrodoméstico retomará onde parou",
     "pg_apply_device": "Aplicar ao dispositivo",
     "pg_autofill": "Preencher automaticamente",
+    "pg_load_calibrated": "Carregar Calibrado (ML) ({n})",
+    "pg_load_calibrated_tip": "Carregar as configurações calibradas por ML como substituições na Área de testes",
+    "pg_load_live": "Carregar as configurações ativas",
+    "pg_load_live_tip": "Reler as configurações atuais da integração e descartar todas as edições feitas na Área de testes",
+    "pg_load_suggested": "Carregar sugestões ({n})",
+    "pg_load_suggested_tip": "Carregar as sugestões atuais do ajustador automático como substituições na Área de testes",
+    "pg_preset_delete": "Excluir predefinição",
+    "pg_preset_load": "Carregar predefinição",
+    "pg_preset_load_tip": "Substituir os valores da Área de testes por esta predefinição (as configurações ativas não são alteradas)",
+    "pg_preset_save": "Salvar como predefinição",
+    "pg_preset_save_tip": "Salvar todos os valores abaixo como uma predefinição nomeada para este dispositivo",
+    "pg_publish_all": "Salvar {n} configuração(ões) na integração",
+    "pg_publish_one": "Salvar {label} na integração",
     "play": "Reproduzir",
     "process": "Processar",
     "process_history": "Processar agora",
@@ -178,7 +191,9 @@
     "download_export": "Baixar exportação",
     "analyze_import": "Analisar arquivo",
     "import_selected": "Importar seleção",
-    "back": "Voltar"
+    "back": "Voltar",
+    "mute_suggestion": "Parar de sugerir esta configuração",
+    "reset_muted": "Redefinir silenciados"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -275,6 +290,7 @@
     "no_automations": "Ainda não há automações que referenciem este dispositivo.",
     "panel_settings": "Configurações do painel",
     "param_sweep": "Varredura de parâmetros",
+    "pg_settings_source": "Origem das configurações",
     "phase_catalog": "Catálogo de fases",
     "playground": "Área de testes",
     "process_history": "Histórico de processamento",
@@ -415,6 +431,9 @@
     "pg_match_score": "Pontuação de correspondência",
     "pg_pct_of": "{p}% de {total}",
     "pg_poor_match": "Correspondência ruim",
+    "pg_preset": "Predefinição da Área de testes",
+    "pg_preset_name": "Nome da nova predefinição",
+    "pg_preset_none": "Selecione uma predefinição…",
     "pg_strong_match": "Correspondência forte",
     "pg_tile_ambiguous": "Ambíguo",
     "pg_tile_ambiguous_tip": "Ciclos com empate quase perfeito entre dois programas",
@@ -609,7 +628,8 @@
     "conflict_resolution": "Conflitos de nomes",
     "conflict_import_copy": "Importar como cópia",
     "conflict_keep_mine": "Manter o meu",
-    "conflict_overwrite": "Sobrescrever"
+    "conflict_overwrite": "Sobrescrever",
+    "font_size": "Tamanho da fonte do painel"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -771,7 +791,17 @@
     "pg_apply_confirm": "Aplicar o melhor valor: {label} = {value}?",
     "pg_canvas_empty": "Selecione um ciclo acima e pressione Carregar para ver o rastro de potência.",
     "pg_chart_caption": "Taxa de detecção/correspondência ao longo dos valores de {param}",
+    "pg_ctrl_intro": "Os valores partem das configurações ativas deste dispositivo na integração. As edições ficam na Área de testes até você salvá-las na integração.",
+    "pg_live_unavailable": "Configurações ativas indisponíveis, exibindo os valores padrão.",
+    "pg_load_live_confirm": "Descartar {n} edição(ões) da Área de testes e recarregar as configurações atuais da integração?",
     "pg_match_rate": "{pct}% de taxa de correspondência em {total} ciclos",
+    "pg_matches_live": "Corresponde às configurações ativas",
+    "pg_n_changed": "{n} valor(es) diferente(s) das configurações ativas",
+    "pg_sugg_none": "Todas as sugestões já correspondem às configurações atuais",
+    "pg_preset_delete_confirm": "Excluir a predefinição \"{name}\"?",
+    "pg_preset_limit": "Limite de predefinições atingido ({n})",
+    "pg_preset_overwrite": "Sobrescrever a predefinição \"{name}\"?",
+    "pg_publish_one_confirm": "Salvar {label} = {value} nas configurações deste dispositivo?",
     "pg_restart_note": "Reinicie o Home Assistant para ativar as ferramentas de simulação.",
     "pg_sim_progress": "{done} / {total} ciclos",
     "pg_starting": "Iniciando…",
@@ -845,6 +875,7 @@
     "trend_duration_shorter": "Duração com tendência decrescente ({pct}%/ciclo) – média recente {avg}",
     "trend_energy_down": "Energia com tendência decrescente ({pct}%/ciclo)",
     "trend_energy_up": "Energia com tendência crescente ({pct}%/ciclo) – média recente {avg}",
+    "trim_destructive_confirm": "Isso mantém apenas {pct}% do ciclo e esta ação não pode ser desfeita. Continuar?",
     "trim_intro": "Arraste as alças vermelhas ou insira valores. Tudo fora da janela é removido.",
     "tuning_suggestions_available": "{count} sugestão de ajuste disponível a partir dos ciclos observados. Aparecem ao lado dos campos relevantes.",
     "unsure_detected_prefix": "O WashData não tem certeza se detectou",
@@ -922,7 +953,12 @@
     "merge_hint": "Os itens importados são adicionados; nada local é perdido. Os conflitos de nomes são resolvidos abaixo.",
     "replace_warn": "Cada categoria marcada é apagada e substituída pelo conteúdo do arquivo. As categorias não marcadas ficam intactas.",
     "dest_reference_hint": "Os ciclos importados só melhoram o reconhecimento de programas e nunca afetam as estatísticas de uso/energia.",
-    "dest_real_history_hint": "Os ciclos importados contam como histórico próprio deste dispositivo e alimentam as estatísticas de energia/uso. Use para mover um eletrodoméstico para uma nova instalação."
+    "dest_real_history_hint": "Os ciclos importados contam como histórico próprio deste dispositivo e alimentam as estatísticas de energia/uso. Use para mover um eletrodoméstico para uma nova instalação.",
+    "sug_muted": "Não vai sugerir esta configuração novamente",
+    "sug_mute_failed": "Não foi possível silenciar a sugestão",
+    "sug_unmuted_all": "Sugestões silenciadas redefinidas",
+    "n_suggestions_muted": "{count} silenciadas; o ajuste automático não irá propô-las.",
+    "font_size_hint": "Amplie ou reduza o texto neste painel. Aplica-se à sua conta neste dispositivo."
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -970,6 +1006,10 @@
     "unusable": "Inutilizável"
   },
   "section": {
+    "dishwasher": {
+      "label": "Lava-louças",
+      "intro": "Tratamento de fim de ciclo para lava-louças, que normalmente terminam com uma longa fase de secagem quase silenciosa antes de uma breve descarga final."
+    },
     "anti_wrinkle": {
       "intro": "O modo antiamasso detecta pulsos de giro de baixa potência após a fase principal e os mantém anexados ao ciclo terminado.",
       "label": "Antiamasso"
@@ -1012,6 +1052,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Liberação em silêncio da secagem passiva",
+      "doc": "Assim que o ciclo ultrapassa a duração esperada, por quanto tempo a lava-louças deve permanecer silenciosa (abaixo do Limite de Parada) antes de o WashData parar de aguardar uma descarga final e encerrar o ciclo. Aumente este valor se a sua máquina tiver uma longa fase de secagem silenciosa antes de uma descarga final tardia que está passando despercebida - uma janela mais ampla permite que a duração aprendida acompanhe a variação sazonal (água de entrada mais fria = ciclos mais longos) em vez de se fixar na média antiga. Ele apenas encurta a espera em relação ao limite interno de 30 minutos para o pico de fim, nunca a prolonga."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Reconheça os pulsos curtos de baixa potência que uma secadora emite após a fase de aquecimento principal e mantenha-os anexados ao ciclo finalizado, em vez de lê-los como novos ciclos.",
       "label": "Ativar Detecção Antiamasso"
@@ -1232,6 +1276,10 @@
       "doc": "Minutos após o término de um ciclo, antes de enviar o lembrete de \"descarregar a máquina\" ainda em espera. Defina 0 para desativar o lembrete.",
       "label": "Atraso de Lembrete de Descarga"
     },
+    "notify_unload_repeat": {
+      "doc": "Continua reenviando o lembrete de descarga a cada \"Atraso de Lembrete de Descarga\" minutos até você abrir a porta ou tocar em \"Parar de lembrar\" na notificação. Requer uma Entidade do Sensor de Porta (o próprio lembrete a exige). O botão de dispensar funciona nas notificações do aplicativo complementar (móvel) do Home Assistant.",
+      "label": "Repetir Até a Porta Abrir"
+    },
     "off_delay": {
       "doc": "Tempo de espera após a queda de energia antes de declarar o término do ciclo. Se a energia for retomada dentro desta janela, o ciclo continua perfeitamente - isso faz a ponte entre as etapas de lavagem. As máquinas de lavar louça têm longas fases de secagem (desligadas por 20-60 minutos), portanto o atraso no desligamento deve exceder esse valor para manter toda a lavagem + secagem em um único ciclo.",
       "label": "Atraso de Desligamento"
@@ -1406,6 +1454,26 @@
     "energy_scale": {
       "label": "Nitidez de energia",
       "doc": "Precisão da penalidade de concordância de energia. Menor = mais rigoroso: uma discordância de energia penaliza mais. O padrão 0,25 é intencionalmente mais permissivo do que a Precisão de duração, porque a energia varia com a carga. Use em conjunto com o Peso de energia."
+    },
+    "power_profile_interval_min": {
+      "label": "Intervalo do Perfil de Potência",
+      "doc": "Tamanho do intervalo para o atributo de sensor power_profile por perfil (a matriz plana de watts médios por slot consumida por planejadores externos como EMHASS e tibber_prices). Intervalos menores preservam picos curtos de potência com mais nitidez; intervalos maiores suavizam o perfil. Padrão: 15 min. Apenas em tempo de leitura; não afeta a detecção."
+    },
+    "notify_live_sticky": {
+      "label": "Manter Notificação ao Vivo ao Toque",
+      "doc": "Apenas Android. Torna a notificação de progresso ao vivo persistente (fixada) para que tocá-la não dispense o encadeamento em andamento. Desativado mantém o comportamento padrão, em que um toque a dispensa."
+    },
+    "notify_live_click_action": {
+      "label": "Destino de Toque da Notificação ao Vivo",
+      "doc": "Apenas Android. Para onde um toque na notificação de progresso ao vivo abre (por exemplo, /lovelace/lavanderia, ou uma URL completa) em vez da página inicial do aplicativo. Deixe em branco para o padrão."
+    },
+    "door_opens_at_end": {
+      "label": "Porta Abre Automaticamente ao Final",
+      "doc": "Para máquinas de lavar louça que abrem a porta automaticamente ao final do ciclo para secar (AirDry e similares). Com esta opção ativa, a abertura de porta durante um ciclo em execução não o pausa indefinidamente; em vez disso, se a porta permanecer aberta pelo tempo de espera configurado abaixo, o WashData considera o ciclo como concluído. Uma abertura breve (para adicionar um item) é ignorada. Requer uma Entidade de Sensor de Porta."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Tempo de Espera da Porta Aberta",
+      "doc": "Por quanto tempo a porta deve permanecer aberta antes de o WashData encerrar o ciclo, quando a opção \"Porta Abre Automaticamente ao Final\" está ativa. Longo o suficiente para ignorar a adição rápida de um prato (padrão 60 s), curto o suficiente para encerrar prontamente assim que a máquina abre a porta."
     }
   },
   "setting_group": {
@@ -1576,6 +1644,10 @@
     "name_required": "Nome obrigatório",
     "no_split_found": "Nenhum intervalo de inatividade encontrado para dividir",
     "panel_settings_saved": "Configurações do painel salvas",
+    "pg_preset_loaded": "Predefinição \"{name}\" carregada",
+    "pg_preset_saved": "Predefinição \"{name}\" salva",
+    "pg_sugg_loaded": "{n} valor(es) sugerido(s) carregado(s) - execute a Área de testes para comparar",
+    "pg_sugg_ml_loaded": "{n} valor(es) calibrado(s) por ML carregado(s) - execute a Área de testes para comparar",
     "phase_name_required": "O nome da fase é obrigatório",
     "phase_updated": "Fase atualizada",
     "phases_saved": "Fases salvas",
@@ -1723,6 +1795,7 @@
       "min_active": "Com base na potência ativa mínima ({min}W) observada no último ciclo.",
       "min_duration_ratio": "Mantido o mais baixo possível para que um programa seja reconhecido logo no início do ciclo; os limiares de confiança e de ambiguidade evitam confirmações prematuras.",
       "min_off_gap": "Com base em {gaps} intervalos entre ciclos observados (p05={p05}s). Piso do dispositivo: {floor}s.",
+      "min_off_gap_bridge": "Dimensionado para cobrir o período de silêncio mais longo dentro de um ciclo: {span}s + margem de 60s, de {spans} intervalos cobertos em {cycles} ciclos limpos (fica abaixo do seu intervalo mínimo de {ceiling}s entre cargas consecutivas).",
       "min_power": "40% da menor potência ativa p05 ({p05}W) em {cycles} ciclos limpos, mantendo o limiar de desligamento abaixo do consumo real.{excl}",
       "ml_auto_label": "Menor confiança que o modelo de qualidade ainda classificou como limpa (p10 de {cycles} ciclos limpos = {p10}).",
       "ml_end_repeat": "{false}/{total} ciclos ({pct}%) tiveram uma pausa que o detector de fim pontuou em >50%; exigir {val} confirmação(ões) de fim.",
@@ -1739,7 +1812,7 @@
       "thr_batch": "Mantido logo acima da menor potência ativa p05 em {cycles} ciclos ({p05}W) para que um início seja captado o mais cedo possível e o limiar de parada permaneça abaixo da menor potência de funcionamento da máquina.",
       "tol_per_profile": "p75 da variância de duração por perfil em {profiles} perfis ({cycles} ciclos); perfis consistentes não são penalizados.",
       "tol_pooled": "Com base na variância de duração agregada de {cycles} ciclos rotulados recentes (desvio p95={dev}).",
-      "watchdog": "Mantido tão baixo quanto é seguro (3x o intervalo de atualização p95 de {p95}s, mín. 30s) para que travamentos sejam detectados rapidamente sem paradas falsas."
+      "watchdog": "Mantido tão baixo quanto é seguro (logo acima do intervalo de atualização p95 de {p95}s, mín. 30s) para que travamentos sejam detectados rapidamente sem paradas falsas."
     },
     "exclusions": {
       "summary": "Excluído(s) {total} ciclo(s) mal detectado(s): {parts}.",
@@ -1770,6 +1843,7 @@
     "other": "Outro"
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Lava-louças: segundos de silêncio após a duração esperada antes de liberar a espera da descarga de fim de ciclo",
     "anti_wrinkle_enabled": "Absorver os pulsos de giro após a fase principal em vez de lê-los como novos ciclos",
     "anti_wrinkle_exit_power": "A potência deve cair abaixo deste valor entre os pulsos para que o modo antiamasso permaneça ativo",
     "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de giro antes de o modo antiamasso terminar",
@@ -1943,6 +2017,54 @@
       "skip_forever": "Não mostrar novamente",
       "hide_guidance": "Ocultar guia",
       "show_guidance": "Exibir guia"
+    }
+  },
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entidade não encontrada",
+    "running_long": "Em atraso",
+    "remaining": "restante",
+    "progress": "progresso",
+    "show_time_remaining": "Mostrar tempo restante",
+    "show_percentage": "Mostrar porcentagem",
+    "layout": {
+      "tile": "Bloco (compacto)",
+      "detail": "Detalhe (completo)",
+      "glance": "Visão geral (vários dispositivos)"
+    },
+    "btn": {
+      "pause": "Pausar",
+      "resume": "Retomar",
+      "terminate": "Encerrar ciclo",
+      "record_start": "Iniciar gravação",
+      "record_stop": "Parar gravação",
+      "program": "Programa",
+      "open_panel": "Abrir WashData"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Entidade do eletrodoméstico",
+      "entities": "Eletrodomésticos",
+      "title": "Título",
+      "icon": "Ícone",
+      "show_state": "Mostrar estado",
+      "show_program": "Mostrar programa",
+      "show_progress_bar": "Mostrar barra de progresso",
+      "spin_icon": "Girar o ícone durante o funcionamento",
+      "display_mode": "Linha de detalhe",
+      "active_color": "Cor ativa personalizada",
+      "show_phase": "Mostrar fase",
+      "show_energy": "Mostrar energia e custo",
+      "show_anomaly": "Mostrar aviso de atraso",
+      "show_sparkline": "Mostrar gráfico de potência ao vivo",
+      "buttons": "Botões de ação",
+      "program_entity": "Entidade de programa (personalizada)",
+      "time_entity": "Entidade de tempo (personalizada)",
+      "pct_entity": "Entidade de progresso (personalizada)",
+      "power_entity": "Entidade de potência (personalizada)",
+      "tap_action": "Ação ao tocar",
+      "hold_action": "Ação ao manter pressionado",
+      "double_tap_action": "Ação ao tocar duas vezes"
     }
   }
 }

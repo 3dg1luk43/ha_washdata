@@ -103,26 +103,7 @@ Prevents a single cycle from being split into two if there is a short pause.
 
 ---
 
-## 5. Abrupt Interruption Logic
-
-### `abrupt_drop_watts`
-
-Detects if a cycle was manually cancelled or failed, rather than finishing naturally.
-- A "Natural" finish usually involves power tapering off or dropping from a low state.
-- An "Interruption" happens when high power (e.g. 2000W heater) suddenly cuts to zero.
-- If the drop size > `abrupt_drop_watts`, the status is flagged as `Interrupted`.
-
-![Abrupt Drop](docs/images/suggest/param_abrupt_drop.png)
-
-## 6. Sensor Protection & Logic
-
-### `running_dead_zone`
-
-Ignores sensor noise immediately after the cycle starts.
-- For the first few seconds (default 3s) after detection, any power dip to 0W is ignored.
-- Prevents immediate self-termination if the appliance cycles relays during boot.
-
-![Dead Zone](docs/images/suggest/param_dead_zone.png)
+## 5. Sensor Protection & Logic
 
 ### `no_update_active_timeout` (Watchdog)
 
@@ -135,7 +116,7 @@ Failsafe for when your smart plug drops off the network.
 
 ---
 
-## 7. Advanced Profile Logic
+## 6. Advanced Profile Logic
 
 ### `end_energy_threshold` (The Tail Check)
 
@@ -165,7 +146,7 @@ A time-based filter complementing `start_energy_threshold`.
 
 ---
 
-## 8. User Experience & Notifications
+## 7. User Experience & Notifications
 
 ### `notify_before_end_minutes`
 
@@ -200,7 +181,7 @@ Self-Learning Trigger.
 
 ---
 
-## 9. Timing & Performance
+## 8. Timing & Performance
 
 ### `sampling_interval`
 
@@ -229,7 +210,7 @@ Consecutive low-power readings required before ending a cycle.
 
 ---
 
-## 10. Profile Matching Thresholds
+## 9. Profile Matching Thresholds
 
 ### `profile_match_threshold`
 
@@ -247,7 +228,7 @@ The score below which a *previously matched* profile is rejected mid-cycle.
 
 ---
 
-## 11. Learning & Feedback
+## 10. Learning & Feedback
 
 ### `duration_tolerance`
 
@@ -270,19 +251,7 @@ Confidence threshold for automatic labeling.
 
 ---
 
-## 12. Interruption Detection (Advanced)
-
-### `abrupt_drop_ratio`
-
-Relative power drop detection (0.0–1.0).
-- Complements `abrupt_drop_watts` for different appliance sizes.
-- A drop is "abrupt" if it's *either* > `abrupt_drop_watts` *or* > `abrupt_drop_ratio` of the current power.
-- **Example**: 0.6 means a 60% drop (e.g., 500W → 200W) is considered abrupt.
-- **Default: 0.6**
-
----
-
-## 13. Time-Remaining Estimation
+## 11. Time-Remaining Estimation
 
 ### `enable_phase_matching` (Phase-aware time remaining)
 

@@ -23,27 +23,28 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            // Each rule closes PRs carrying `label`, `graceDays` after the label was
-            // applied. PRs awaiting maintainer approval (label "awaiting maintainer")
-            // are intentionally NOT listed here — they stay open until the maintainer
-            // accepts the linked issue or closes the PR manually.
+            // Each rule closes PRs carrying `label`, `graceDays` after the label was applied.
+            // NOTE: `awaiting maintainer` is intentionally NOT here -- validate_pr.yml documents
+            // that the auto-closer ignores AWAITING PRs so the maintainer can review a
+            // linked-but-unapproved issue at their own pace without the PR being force-closed.
             const RULES = [
               {
                 label: 'needs description',
                 graceDays: 5,
                 message: (pr) => [
-                  `Hi @${pr.user.login}! This PR has been automatically closed because the description was not completed within 5 days of the warning.`,
+                  `Hi @${pr.user.login}! This PR has been automatically closed because the required template was not filled in within 5 days of the warning.`,
                   '',
-                  "You're welcome to open a new PR once the template is filled in. See the PR template for guidance on what's required.",
+                  "You're welcome to open a new PR once the template is complete (a real Description and at least one Type of Change box). See the PR template for what's required.",
                 ].join('\n'),
               },
               {
                 label: 'needs accepted issue',
                 graceDays: 3,
+                requiresAcceptedIssue: true,
                 message: (pr) => [
-                  `Hi @${pr.user.login}! This PR has been automatically closed because it was not linked to an issue with the \`accepted\` label within 3 days.`,
+                  `Hi @${pr.user.login}! This PR has been automatically closed because it was not linked to an issue carrying the \`accepted\` label within 3 days.`,
                   '',
-                  'Please open an issue, wait for it to receive the `accepted` label, then open a new PR referencing it. Thanks for contributing!',
+                  'The correct flow is: open an issue, **wait** for the maintainer to add the `accepted` label (do not open a PR in parallel with a fresh issue), then open a PR referencing it. See [CONTRIBUTING.md](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs) for the full flow. Thanks for contributing!',
                 ].join('\n'),
               },
             ];
@@ -56,7 +57,7 @@ jobs:
               per_page: 100,
             });
 
-            // When the label was applied — the grace runs from this, NOT from PR
+            // When the label was applied - the grace runs from this, NOT from PR
             // creation. A PR can be labeled long after it was opened, and measuring from
             // creation would close it earlier than the warning comment promises.
             const labelAppliedAt = async (prNumber, label) => {
@@ -76,9 +77,46 @@ jobs:
                 }
               } catch (e) {
                 console.warn(`Could not fetch events for PR #${prNumber}: ${e.message}`);
+                return undefined; // lookup FAILED - distinct from "no label event" (null)
               }
               return appliedAt;
             };
+
+            // Does the PR body link an issue that carries `accepted` RIGHT NOW?
+            // validate_pr.yml only runs on pull_request events, so a maintainer
+            // accepting the issue afterwards never clears the PR's label - without
+            // this recheck the scheduler would close a PR that has since become
+            // legitimate. Extraction mirrors validate_pr.yml's patterns.
+            const acceptedIssueLinked = async (prBody) => {
+              const issueNums = new Set();
+              const patterns = [
+                /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+#(\d+)/gi,
+                new RegExp(`github\\.com/${owner}/${repo}/issues/(\\d+)`, 'gi'),
+                /#(\d+)/g,
+              ];
+              for (const pat of patterns) {
+                let m;
+                while ((m = pat.exec(prBody || '')) !== null) issueNums.add(Number(m[1]));
+              }
+              let lookupFailed = false;
+              for (const num of issueNums) {
+                try {
+                  const issue = await github.rest.issues.get({ owner, repo, issue_number: num });
+                  if (issue.data.pull_request) continue; // a PR reference, not an issue
+                  if (issue.data.labels.some(l => l.name === 'accepted')) return true;
+                } catch (e) {
+                  // 404 = not a real issue (fine). Anything else is an API failure and
+                  // must not be read as "definitely not accepted".
+                  if (e.status !== 404) lookupFailed = true;
+                }
+              }
+              return lookupFailed ? undefined : false;
+            };
+
+            // Kept in sync with validate_pr.yml: the two labels its accepted branch
+            // clears, and the marker on the notice comment it posts and deletes.
+            const ACCEPTED_ISSUE_LABELS = ['needs accepted issue', 'awaiting maintainer'];
+            const ISSUE_LINK_BOT_MARKER = '<!-- pr-validator-issue-link-bot -->';
 
             const closed = new Set();
             for (const rule of RULES) {
@@ -88,13 +126,66 @@ jobs:
                 if (!pr.labels.some(l => l.name === rule.label)) continue;
 
                 const appliedAt = await labelAppliedAt(pr.number, rule.label);
+                if (appliedAt === undefined) continue; // events lookup failed - skip, retry next run
                 const anchor = appliedAt ? new Date(appliedAt) : new Date(pr.created_at);
                 if (anchor >= cutoff) continue; // still within grace
 
-                await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: rule.message(pr) });
+                // Last check before an irreversible close: re-fetch the PR to avoid
+                // acting on the stale pulls.list snapshot taken at the top of the run.
+                // The contributor may have edited the description, had the label removed,
+                // or already closed the PR themselves — all rules benefit from this.
+                let currentPr;
+                try {
+                  ({ data: currentPr } = await github.rest.pulls.get({
+                    owner, repo, pull_number: pr.number,
+                  }));
+                } catch (e) {
+                  console.warn(`Could not re-fetch PR #${pr.number}: ${e.message} - skipping, retry next run.`);
+                  continue;
+                }
+                if (currentPr.state !== 'open'
+                    || !currentPr.labels.some(l => l.name === rule.label)) {
+                  console.log(`Skipped PR #${pr.number} - no longer open or no longer carries "${rule.label}".`);
+                  continue;
+                }
+
+                if (rule.requiresAcceptedIssue) {
+                  const accepted = await acceptedIssueLinked(currentPr.body);
+                  if (accepted === undefined) {
+                    console.log(`Skipped PR #${pr.number} - issue lookup failed, retrying next run.`);
+                    continue;
+                  }
+                  if (accepted) {
+                    // Mirror validate_pr.yml's accepted branch exactly: BOTH
+                    // accepted-issue labels come off and the stale "not yet
+                    // accepted" notice is deleted. Clearing only rule.label would
+                    // leave the other label to trip a later rule, and leave a
+                    // comment on the PR that now contradicts its state.
+                    for (const name of ACCEPTED_ISSUE_LABELS) {
+                      await github.rest.issues.removeLabel({
+                        owner, repo, issue_number: pr.number, name,
+                      }).catch(() => {});
+                    }
+                    try {
+                      const prComments = await github.paginate(github.rest.issues.listComments, {
+                        owner, repo, issue_number: pr.number, per_page: 100,
+                      });
+                      const notice = prComments.find(c => c.body && c.body.includes(ISSUE_LINK_BOT_MARKER));
+                      if (notice) {
+                        await github.rest.issues.deleteComment({ owner, repo, comment_id: notice.id });
+                      }
+                    } catch (e) {
+                      console.warn(`Could not clear the issue-link notice on PR #${pr.number}: ${e.message}`);
+                    }
+                    console.log(`Skipped PR #${pr.number} - linked issue is now accepted; cleared labels + notice.`);
+                    continue;
+                  }
+                }
+
                 await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
                 closed.add(pr.number);
-                console.log(`Closed PR #${pr.number} (${pr.title}) — rule: "${rule.label}".`);
+                console.log(`Closed PR #${pr.number} (${pr.title}) - rule: "${rule.label}".`);
+                await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: rule.message(pr) });
               }
             }
 

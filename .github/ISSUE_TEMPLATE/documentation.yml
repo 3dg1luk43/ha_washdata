@@ -8,7 +8,7 @@ body:
       value: |
         Thanks for helping improve our documentation!
 
-        If you are able to fix the issue yourself, a **Pull Request is preferred** over an issue. See the contribution guide for details.
+        Want to fix it yourself? Open this issue first and tick the box below. Wait for the maintainer to add the `accepted` label before opening a PR - documentation PRs go through the same [contributor flow](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs) as code (a PR opened without an accepted issue, or in parallel with a fresh one, is closed automatically). The only exception is translations, which are handled on [GitLocalize](https://gitlocalize.com/repo/10819).
 
   - type: checkboxes
     id: preflight
@@ -17,7 +17,7 @@ body:
       options:
         - label: I have checked that this documentation problem has not already been reported.
           required: true
-        - label: I am not able to (or not sure how to) submit a pull request to fix this myself.
+        - label: I plan to submit a PR fixing this, and I understand I must wait for the `accepted` label first (leave unchecked if you just want to report it).
           required: false
 
   - type: input

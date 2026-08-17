@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "Min.",
+    "entity_not_found": "Entität nicht gefunden",
+    "running_long": "Läuft länger",
+    "remaining": "verbleibend",
+    "progress": "Fortschritt",
+    "show_time_remaining": "Verbleibende Zeit anzeigen",
+    "show_percentage": "Prozentsatz anzeigen",
+    "layout": {
+      "tile": "Kachel (kompakt)",
+      "detail": "Detail (ausführlich)",
+      "glance": "Überblick (mehrere Geräte)"
+    },
+    "btn": {
+      "pause": "Pausieren",
+      "resume": "Fortsetzen",
+      "terminate": "Zyklus beenden",
+      "record_start": "Aufnahme starten",
+      "record_stop": "Aufnahme stoppen",
+      "program": "Programm",
+      "open_panel": "WashData öffnen"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Geräteentität",
+      "entities": "Geräte",
+      "title": "Titel",
+      "icon": "Symbol",
+      "show_state": "Status anzeigen",
+      "show_program": "Programm anzeigen",
+      "show_progress_bar": "Fortschrittsbalken anzeigen",
+      "spin_icon": "Symbol während des Betriebs drehen",
+      "display_mode": "Detailzeile",
+      "active_color": "Aktivfarbe überschreiben",
+      "show_phase": "Phase anzeigen",
+      "show_energy": "Energie und Kosten anzeigen",
+      "show_anomaly": "Warnung bei Überlänge anzeigen",
+      "show_sparkline": "Live-Leistungsdiagramm anzeigen",
+      "buttons": "Aktionsschaltflächen",
+      "program_entity": "Programmentität (überschreiben)",
+      "time_entity": "Zeitentität (überschreiben)",
+      "pct_entity": "Fortschrittsentität (überschreiben)",
+      "power_entity": "Leistungsentität (überschreiben)",
+      "tap_action": "Tippen-Aktion",
+      "hold_action": "Halten-Aktion",
+      "double_tap_action": "Doppeltippen-Aktion"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} Anomalien erkannt (z. B. Tür mitten im Zyklus geöffnet) – öffnen Sie sie, um sie in der Grafik anzuzeigen",
     "auto": "(automatisch erkannt)",
@@ -92,6 +140,19 @@
     "pause_cycle_tip": "Laufenden Zyklus anhalten – das Gerät setzt dort fort, wo es aufgehört hat",
     "pg_apply_device": "Auf Gerät anwenden",
     "pg_autofill": "Automatisch ausfüllen",
+    "pg_load_calibrated": "Kalibrierte (ML) laden ({n})",
+    "pg_load_calibrated_tip": "Lädt ML-kalibrierte Einstellungen als Testbereich-Überschreibungen",
+    "pg_load_live": "Aktive Einstellungen laden",
+    "pg_load_live_tip": "Die aktuellen Einstellungen der Integration neu einlesen und alle Änderungen im Testbereich verwerfen",
+    "pg_load_suggested": "Vorschläge laden ({n})",
+    "pg_load_suggested_tip": "Lädt die aktuellen Vorschläge des Auto-Tuners als Testbereich-Überschreibungen",
+    "pg_preset_delete": "Voreinstellung löschen",
+    "pg_preset_load": "Voreinstellung laden",
+    "pg_preset_load_tip": "Die Werte im Testbereich durch diese Voreinstellung ersetzen (die aktiven Einstellungen bleiben unverändert)",
+    "pg_preset_save": "Als Voreinstellung speichern",
+    "pg_preset_save_tip": "Alle Werte unten als benannte Voreinstellung für dieses Gerät speichern",
+    "pg_publish_all": "{n} in Integration übernehmen",
+    "pg_publish_one": "{label} in die Integration übernehmen",
     "play": "Abspielen",
     "process": "Verarbeiten",
     "process_history": "Jetzt verarbeiten",
@@ -178,7 +239,9 @@
     "download_export": "Export herunterladen",
     "analyze_import": "Datei analysieren",
     "import_selected": "Auswahl importieren",
-    "back": "Zurück"
+    "back": "Zurück",
+    "mute_suggestion": "Diese Einstellung nicht mehr vorschlagen",
+    "reset_muted": "Stummschaltungen zurücksetzen"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -275,6 +338,7 @@
     "no_automations": "Noch keine Automatisierungen verweisen auf dieses Gerät.",
     "panel_settings": "Panel-Einstellungen",
     "param_sweep": "Parameter-Sweep",
+    "pg_settings_source": "Herkunft der Einstellungen",
     "phase_catalog": "Phasenkatalog",
     "playground": "Testbereich",
     "process_history": "Prozesshistorie",
@@ -410,6 +474,9 @@
     "pg_group_detection": "Erkennungsauslöser",
     "pg_group_timing": "Zeitregeln",
     "pg_idle": "Leerlauf",
+    "pg_preset": "Testbereich-Voreinstellung",
+    "pg_preset_name": "Name der neuen Voreinstellung",
+    "pg_preset_none": "Voreinstellung auswählen…",
     "pg_stress_group": "Leerlauferkennungstest",
     "pg_stress_idle_auto": "Auto",
     "pg_stress_idle_w": "Leerlaufpegel (W)",
@@ -609,7 +676,8 @@
     "conflict_import_copy": "Als Kopie importieren",
     "conflict_keep_mine": "Meine behalten",
     "conflict_overwrite": "Überschreiben",
-    "pg_anti_wrinkle": "Knitterschutz"
+    "pg_anti_wrinkle": "Knitterschutz",
+    "font_size": "Panel-Schriftgröße"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -711,7 +779,7 @@
     "cycles_deleted": "{count} Zyklen gelöscht",
     "enough_data": "Genügend Daten zum Lernen ({current}/{min} Zyklen).",
     "export_description": "Wählen Sie genau aus, welche Profile, Zyklen, Einstellungen und mehr nach JSON exportiert werden sollen, oder analysieren Sie eine Datei und importieren Sie nur die gewünschten Teile.",
-    "feedback_cycles_pending": "{n} Zyklus{s} zur Überprüfung",
+    "feedback_cycles_pending": "Zu überprüfen: {n}",
     "feedback_prompt": "Bestätigen Sie, dass es richtig war, korrigieren Sie das Programm oder ignorieren Sie es.",
     "feedback_relabel_hint": "Das erneute Beschriften dieses Zyklus erledigt die Überprüfung ebenfalls.",
     "filter_by_profile": "Nach Profil filtern…",
@@ -771,7 +839,17 @@
     "pg_apply_confirm": "Besten Wert anwenden: {label} = {value}?",
     "pg_canvas_empty": "Wählen Sie oben einen Zyklus aus und drücken Sie dann auf Laden, um seine Leistungskurve anzuzeigen.",
     "pg_chart_caption": "Erkennungs-/Zuordnungsrate über die Werte von {param}",
+    "pg_ctrl_intro": "Die Werte stammen zunächst aus den aktiven Einstellungen dieses Geräts in der Integration. Änderungen bleiben im Testbereich, bis sie in die Integration übernommen werden.",
+    "pg_live_unavailable": "Aktive Einstellungen nicht verfügbar, es werden Standardwerte angezeigt.",
+    "pg_load_live_confirm": "{n} Änderung(en) im Testbereich verwerfen und die aktuellen Einstellungen der Integration neu laden?",
     "pg_match_rate": "{pct}% Zuordnungsrate bei {total} Zyklen",
+    "pg_matches_live": "Stimmt mit den aktiven Einstellungen überein",
+    "pg_n_changed": "{n} gegenüber den aktiven Einstellungen geändert",
+    "pg_sugg_none": "Alle Vorschläge stimmen bereits mit den aktuellen Einstellungen überein",
+    "pg_preset_delete_confirm": "Die Voreinstellung \"{name}\" löschen?",
+    "pg_preset_limit": "Maximale Anzahl an Voreinstellungen erreicht ({n})",
+    "pg_preset_overwrite": "Die Voreinstellung \"{name}\" überschreiben?",
+    "pg_publish_one_confirm": "{label} = {value} in den Einstellungen dieses Geräts speichern?",
     "pg_restart_note": "Starten Sie Home Assistant neu, um die Simulationstools zu aktivieren.",
     "pg_sim_progress": "{done} / {total} Zyklen",
     "pg_starting": "Wird gestartet…",
@@ -845,6 +923,7 @@
     "trend_duration_shorter": "Dauer tendenziell kürzer ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
     "trend_energy_down": "Energie tendiert nach unten ({pct} %/Zyklus)",
     "trend_energy_up": "Energietrend steigt ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
+    "trim_destructive_confirm": "Dadurch werden nur {pct}% des Zyklus behalten. Dies kann nicht rückgängig gemacht werden. Fortfahren?",
     "trim_intro": "Ziehen Sie die roten Ziehpunkte oder geben Sie Werte ein. Alles außerhalb des Fensters wird entfernt.",
     "tuning_suggestions_available": "{count} Optimierungsvorschlag aus beobachteten Zyklen verfügbar. Sie erscheinen neben den relevanten Feldern.",
     "unsure_detected_prefix": "WashData ist sich nicht sicher, ob es erkannt wurde",
@@ -922,9 +1001,15 @@
     "merge_hint": "Importierte Elemente werden hinzugefügt; nichts Lokales geht verloren. Namenskonflikte werden unten aufgelöst.",
     "replace_warn": "Jede angekreuzte Kategorie wird gelöscht und aus der Datei ersetzt. Nicht angekreuzte Kategorien bleiben unverändert.",
     "dest_reference_hint": "Importierte Zyklen verbessern nur die Programmerkennung und beeinflussen niemals die Nutzungs-/Energiestatistik.",
-    "dest_real_history_hint": "Importierte Zyklen zählen als eigener Verlauf dieses Geräts und fließen in die Energie-/Nutzungsstatistik ein. Verwenden Sie dies, um ein Gerät in eine neue Installation zu übertragen."
+    "dest_real_history_hint": "Importierte Zyklen zählen als eigener Verlauf dieses Geräts und fließen in die Energie-/Nutzungsstatistik ein. Verwenden Sie dies, um ein Gerät in eine neue Installation zu übertragen.",
+    "sug_muted": "Diese Einstellung wird nicht mehr vorgeschlagen",
+    "sug_mute_failed": "Einstellung konnte nicht stummgeschaltet werden",
+    "sug_unmuted_all": "Stummgeschaltete Vorschläge zurückgesetzt",
+    "n_suggestions_muted": "{count} stummgeschaltet; der Autotuner schlägt diese nicht mehr vor.",
+    "font_size_hint": "Alles in diesem Panel vergrößern oder verkleinern. Gilt für Ihr Konto auf diesem Gerät."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
     "completion_min_seconds": "Kürzester Lauf, der als echter Zyklus zählt",
     "end_repeat_count": "Aufeinanderfolgende niedrige Messwerte vor dem Ende",
     "interrupted_min_seconds": "Kurze Zyklen werden als unterbrochen markiert",
@@ -998,6 +1083,10 @@
     "unusable": "Unbrauchbar"
   },
   "section": {
+    "dishwasher": {
+      "label": "Geschirrspüler",
+      "intro": "Behandlung des Zyklusendes für Geschirrspüler, die typischerweise mit einer langen, nahezu stillen Trocknungsphase vor einem kurzen letzten Abpumpen enden."
+    },
     "anti_wrinkle": {
       "intro": "Knitterschutz-Modus erkennt Tumble-Impulse mit geringer Leistung nach der Hauptphase und hält sie dem abgeschlossenen Zyklus zugeordnet.",
       "label": "Knitterschutz"
@@ -1040,6 +1129,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Ruhefreigabe nach Passivtrocknung",
+      "doc": "Sobald der Zyklus seine erwartete Dauer überschreitet: wie lange der Geschirrspüler ruhig bleiben muss (unter dem Stoppschwellenwert), bevor WashData nicht mehr auf ein letztes Abpumpen wartet und den Zyklus beendet. Erhöhen Sie den Wert, wenn Ihre Maschine eine lange, stille Trocknungsphase vor einem späten letzten Abpumpen hat, das übersehen wird - ein größeres Fenster lässt die erlernte Dauer der saisonalen Drift folgen (kälteres Zulaufwasser = längere Zyklen), statt sich auf den alten Mittelwert festzulegen. Er verkürzt die Wartezeit gegenüber der internen 30-minütigen Obergrenze für die Endspitze nur, verlängert sie aber nie."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Erkennen Sie die kurzen, stromsparenden Wäscheimpulse, die ein Trockner nach der Hauptheizphase abgibt, und behalten Sie im Zusammenhang mit dem abgeschlossenen Zyklus bei, anstatt sie als neue Zyklen zu lesen.",
       "label": "Knitterschutzerkennung aktivieren"
@@ -1256,6 +1349,10 @@
       "doc": "Minuten nach dem Ende eines Zyklus, bevor die noch wartende Erinnerung „Maschine entladen“ gesendet wird. Stellen Sie 0 ein, um die Erinnerung zu deaktivieren.",
       "label": "Verzögerung der Entladeerinnerung"
     },
+    "notify_unload_repeat": {
+      "doc": "Die Entladeerinnerung wird alle \"Verzögerung der Entladeerinnerung\" Minuten erneut gesendet, bis Sie die Tür öffnen oder in der Benachrichtigung auf \"Nicht mehr erinnern\" tippen. Erfordert eine Türsensor-Entität (die Erinnerung selbst benötigt sie ohnehin). Die Schaltfläche zum Verwerfen funktioniert bei Benachrichtigungen der Home Assistant Companion-App (mobil).",
+      "label": "Wiederholen, bis die Tür geöffnet wird"
+    },
     "off_delay": {
       "doc": "Zeit, die nach einem Stromausfall gewartet werden muss, bevor der Zyklus als beendet erklärt wird. Wenn die Stromversorgung innerhalb dieses Fensters wiederhergestellt wird, läuft der Zyklus nahtlos weiter – dies überbrückt Pausen zwischen den Waschphasen. Geschirrspüler haben lange Trocknungsphasen (Ausschalten für 20–60 Minuten), daher muss die Ausschaltverzögerung länger sein, damit der gesamte Spül- und Trockenvorgang als ein Zyklus erfolgt.",
       "label": "Abschaltverzögerung"
@@ -1434,6 +1531,26 @@
     "anti_wrinkle_idle_timeout": {
       "label": "Maximale Impulspause",
       "doc": "Wie lange das Gerät zwischen zwei Trommelimpulsen still bleiben darf, bevor der Knitterschutz-Modus endet. Höher setzen als die längste Pause, die Ihr Trockner zwischen zwei Impulsen lässt – sonst wird jeder weitere Impuls als Fehlstart gewertet."
+    },
+    "power_profile_interval_min": {
+      "label": "Leistungsprofil-Intervall",
+      "doc": "Bucket-Größe für das Attribut power_profile des profilbezogenen Sensors (ein flaches Array der durchschnittlichen Wattzahl pro Slot, das von externen Planern wie EMHASS und tibber_prices verwendet wird). Kleinere Buckets halten kurze Leistungsspitzen scharf; größere Buckets glätten die Kurve. Standard 15 Min. Nur zur Darstellung; hat keinen Einfluss auf die Erkennung."
+    },
+    "notify_live_sticky": {
+      "label": "Live-Benachrichtigung beim Antippen behalten",
+      "doc": "Nur Android. Die Live-Fortschrittsbenachrichtigung dauerhaft (sticky) anzeigen, sodass sie beim Antippen nicht ausgeblendet wird. Ausgeschaltet: Standardverhalten, bei dem ein Antippen die Benachrichtigung schließt."
+    },
+    "notify_live_click_action": {
+      "label": "Ziel beim Antippen der Live-Benachrichtigung",
+      "doc": "Nur Android. Wohin das Antippen der Live-Fortschrittsbenachrichtigung führt (z. B. /lovelace/laundry oder eine vollständige URL), statt zur Standard-App-Startseite. Leer lassen für Standard."
+    },
+    "door_opens_at_end": {
+      "label": "Tür öffnet sich am Ende automatisch",
+      "doc": "Für Geschirrspüler, die die Tür am Ende des Zyklus zum Trocknen aufspringen lassen (AirDry und ähnliche). Wenn aktiviert, unterbricht ein Türöffnen bei einem laufenden Zyklus diesen nicht dauerhaft; wenn die Tür für die eingestellte Verweildauer geöffnet bleibt, wertet WashData den Zyklus als abgeschlossen. Ein kurzes Öffnen (z. B. zum Nachlegen eines Geschirrstücks) wird ignoriert. Erfordert einen Türsensor."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Türöffnungs-Endverweildauer",
+      "doc": "Wie lange die Tür geöffnet bleiben muss, bevor WashData den Zyklus beendet, wenn \"Tür öffnet sich am Ende automatisch\" aktiv ist. Lang genug, um ein kurzes Öffnen zum Nachlegen eines Geschirrteils zu ignorieren (Standard 60 s), kurz genug, um den Zyklus zügig zu beenden, sobald die Maschine die Tür aufspringt."
     }
   },
   "setting_group": {
@@ -1620,6 +1737,7 @@
       "min_active": "Basierend auf der minimalen aktiven Leistung ({min}W), die im letzten Zyklus beobachtet wurde.",
       "min_duration_ratio": "So niedrig wie möglich gehalten, damit ein Programm früh im Zyklus erkannt wird; die Konfidenz- und Mehrdeutigkeitsschranken verhindern vorzeitige Festlegungen.",
       "min_off_gap": "Basierend auf {gaps} beobachteten Pausen zwischen Zyklen (p05={p05}s). Geräte-Untergrenze: {floor}s.",
+      "min_off_gap_bridge": "So bemessen, dass die längste Ruhephase innerhalb eines Zyklus überbrückt wird: {span}s + 60s Puffer, aus {spans} überbrückten Lücken über {cycles} saubere Zyklen (bleibt unter Ihrem kürzesten Abstand von {ceiling}s zwischen zwei Ladungen).",
       "min_power": "40% der p05-niedrigsten aktiven Leistung ({p05}W) über {cycles} saubere Zyklen, sodass die Aus-Schwelle unter der tatsächlichen Leistungsaufnahme bleibt.{excl}",
       "ml_auto_label": "Niedrigste Konfidenz, die das Qualitätsmodell noch als sauber bewertet hat (p10 von {cycles} sauberen Zyklen = {p10}).",
       "ml_end_repeat": "{false}/{total} Zyklen ({pct}%) hatten eine Pause, die der Endedetektor mit >50% bewertete; {val} Endbestätigung(en) erforderlich.",
@@ -1636,7 +1754,7 @@
       "thr_batch": "Knapp über der p05-niedrigsten aktiven Leistung über {cycles} Zyklen ({p05}W) gehalten, damit ein Start so früh wie möglich erkannt wird und die Stopp-Schwelle unter der niedrigsten Betriebsleistung der Maschine bleibt.",
       "tol_per_profile": "p75 der Dauervarianz pro Profil über {profiles} Profile ({cycles} Zyklen); enge Profile werden nicht benachteiligt.",
       "tol_pooled": "Basierend auf der zusammengefassten Dauervarianz von {cycles} kürzlich gelabelten Zyklen (p95-Abweichung={dev}).",
-      "watchdog": "So niedrig wie sicher gehalten (3x die p95-Aktualisierungslücke von {p95}s, min 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
+      "watchdog": "So niedrig wie sicher gehalten (knapp über der p95-Aktualisierungslücke von {p95}s, min 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
     },
     "exclusions": {
       "summary": "{total} falsch erkannte Zyklen ausgeschlossen: {parts}.",
@@ -1716,6 +1834,10 @@
     "name_required": "Name erforderlich",
     "no_split_found": "Es wurden keine Leerlauflücken zum Aufspalten gefunden",
     "panel_settings_saved": "Panel-Einstellungen gespeichert",
+    "pg_preset_loaded": "Voreinstellung \"{name}\" geladen",
+    "pg_preset_saved": "Voreinstellung \"{name}\" gespeichert",
+    "pg_sugg_loaded": "{n} Vorschlagswert(e) in den Testbereich geladen - Testbereich ausführen, um zu vergleichen",
+    "pg_sugg_ml_loaded": "{n} ML-kalibrierten Wert(e) in den Testbereich geladen - Testbereich ausführen, um zu vergleichen",
     "phase_name_required": "Phasenname ist erforderlich",
     "phase_updated": "Phase aktualisiert",
     "phases_saved": "Phasen gespeichert",

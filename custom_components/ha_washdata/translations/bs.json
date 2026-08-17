@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData Setup",
-        "description": "Konfigurišite svoju mašinu za pranje veša ili drugi uređaj.\n\nPotreban je senzor snage.\n\n**Slijedeće ćete biti upitani da li želite da kreirate svoj prvi profil.**",
+        "description": "Konfigurišite svoju mašinu za pranje veša ili drugi uređaj.\n\nSenzor snage je obavezan.\n\nNakon postavljanja otvorite WashData panel s bočne trake (ili idite na [/ha-washdata](/ha-washdata)) za pregled ciklusa, podešavanje otkrivanja i upravljanje profilima.",
         "data": {
           "name": "Naziv uređaja",
           "device_type": "Tip uređaja",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.",
+        "description": "Ažurirajte naziv uređaja, tip uređaja ili senzor snage.\n\nWashData panel (bočna traka ili [/ha-washdata](/ha-washdata)) služi za upravljanje otkrivanjem, ciklusima, profilima i obavještenjima.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "All settings -- detection, matching, timing, notifications, profiles, and cycles -- are available in the WashData panel. Use this form only to change the power sensor, device type, or standby threshold.",
+        "description": "Preimenujte uređaj ili promijenite njegove osnovne postavke hardvera. Sve postavke otkrivanja, podudaranja i obavještavanja nalaze se na [WashData panelu](/ha-washdata) (dostupan i s bočne trake).",
         "data": {
           "name": "Naziv uređaja",
           "device_type": "Device Type",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: tajmer od {minutes} min",
       "timer_pause_action_title": "Nastavi ciklus",
       "timer_pause_body_suffix": "Ciklus je pauziran. Otvorite WashData panel da biste nastavili.",
+      "unload_dismiss_action_title": "Prestani podsjećati",
       "notify_live_waiting_message": "{device}: Nijedan profil još nije podudaran.",
       "vs_typical_longer": "{pct}% duže nego obično",
       "vs_typical_shorter": "{pct}% kraće nego obično",

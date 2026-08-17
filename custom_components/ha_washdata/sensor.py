@@ -56,6 +56,8 @@ from .const import (
     SIGNAL_WASHER_UPDATE,
     CONF_WATCHDOG_INTERVAL,
     CONF_EXPOSE_DEBUG_ENTITIES,
+    CONF_POWER_PROFILE_INTERVAL_MIN,
+    DEFAULT_POWER_PROFILE_INTERVAL_MIN,
     DEVICE_TYPE_PUMP,
     STATE_OFF,
     STATE_IDLE,
@@ -419,6 +421,7 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
             # duration display-format options, even while the appliance is idle
             # and the value is unknown (see issue #261).
             native_unit_of_measurement="min",
+            suggested_display_precision=0,
             icon="mdi:timer-sand",
         )
         super().__init__(manager, entry)
@@ -444,6 +447,7 @@ class WasherTotalDurationSensor(WasherBaseSensor):
             # See WasherTimeRemainingSensor / issue #261: keep the unit static so
             # the duration display-format options are available even while idle.
             native_unit_of_measurement="min",
+            suggested_display_precision=0,
             icon="mdi:timer-check-outline",
         )
         super().__init__(manager, entry)
@@ -529,6 +533,7 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
             translation_key="elapsed_time",
             native_unit_of_measurement="s",
             device_class=SensorDeviceClass.DURATION,
+            suggested_display_precision=0,
             icon="mdi:timer-outline",
         )
         super().__init__(manager, entry)
@@ -736,6 +741,19 @@ class WasherProfileCountSensor(WasherBaseSensor):
         def _to_min(sec: float) -> int:
             return int(sec / 60) if sec else 0
 
+        # power_profile bucket size (minutes) is configurable (#367); default 15.
+        # Clamp to >=1 (get_profile_power_profile returns [] for interval <= 0).
+        interval_min = DEFAULT_POWER_PROFILE_INTERVAL_MIN
+        try:
+            interval_min = int(
+                self._entry.options.get(
+                    CONF_POWER_PROFILE_INTERVAL_MIN, DEFAULT_POWER_PROFILE_INTERVAL_MIN
+                )
+            )
+        except (TypeError, ValueError, OverflowError):
+            interval_min = DEFAULT_POWER_PROFILE_INTERVAL_MIN
+        interval_min = max(1, interval_min)
+
         return {
             "average_consumption_kwh": avg_energy,
             "total_consumption_kwh": total_energy,
@@ -744,16 +762,16 @@ class WasherProfileCountSensor(WasherBaseSensor):
             "min_length_min": _to_min(profile.get("min_duration", 0)),
             "max_length_min": _to_min(profile.get("max_duration", 0)),
             "consistency_min": consistency_min,
-            # Average power (W) per 15-min slot of this profile's learned shape,
+            # Average power (W) per configured interval of this profile's learned shape,
             # e.g. [2200, 2200, 800, ...] - the flat array external planners such
             # as tibber_prices' `power_profile` consume to pick the cheapest run
             # window (issue #272). Empty until the profile has a learned envelope.
             # Refreshes with the profile: the envelope is rebuilt on each new
             # labelled cycle, which bumps this sensor's cycle_count state.
             "power_profile": self._manager.profile_store.get_profile_power_profile(
-                self._profile_name
+                self._profile_name, interval_s=interval_min * 60.0
             ),
-            "power_profile_interval_min": 15,
+            "power_profile_interval_min": interval_min,
         }
 
 

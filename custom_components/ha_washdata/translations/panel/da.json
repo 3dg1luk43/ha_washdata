@@ -1,4 +1,52 @@
 {
+  "card": {
+    "min": "min",
+    "entity_not_found": "Entitet ikke fundet",
+    "running_long": "Kører længere",
+    "remaining": "tilbage",
+    "progress": "fremgang",
+    "show_time_remaining": "Vis resterende tid",
+    "show_percentage": "Vis procent",
+    "layout": {
+      "tile": "Felt (kompakt)",
+      "detail": "Detalje (detaljeret)",
+      "glance": "Overblik (flere enheder)"
+    },
+    "btn": {
+      "pause": "Pause",
+      "resume": "Genoptag",
+      "terminate": "Afslut cyklus",
+      "record_start": "Start optagelse",
+      "record_stop": "Stop optagelse",
+      "program": "Program",
+      "open_panel": "Åbn WashData"
+    },
+    "editor": {
+      "layout": "Layout",
+      "entity": "Apparatentitet",
+      "entities": "Apparater",
+      "title": "Titel",
+      "icon": "Ikon",
+      "show_state": "Vis tilstand",
+      "show_program": "Vis program",
+      "show_progress_bar": "Vis fremgangslinje",
+      "spin_icon": "Roter ikon under kørsel",
+      "display_mode": "Detaljelinje",
+      "active_color": "Tilsidesæt aktiv farve",
+      "show_phase": "Vis fase",
+      "show_energy": "Vis energi og omkostninger",
+      "show_anomaly": "Vis advarsel om lang kørsel",
+      "show_sparkline": "Vis live effektgraf",
+      "buttons": "Handlingsknapper",
+      "program_entity": "Programentitet (tilsidesæt)",
+      "time_entity": "Tidsentitet (tilsidesæt)",
+      "pct_entity": "Fremgangsentitet (tilsidesæt)",
+      "power_entity": "Effektentitet (tilsidesæt)",
+      "tap_action": "Tryk-handling",
+      "hold_action": "Hold-handling",
+      "double_tap_action": "Dobbelttryk-handling"
+    }
+  },
   "badge": {
     "artifact_tip": "{n} registrerede anomalier (f.eks. dør åbnet midt i cyklus) – åben for at se dem på grafen",
     "auto": "(auto-detekteret)",
@@ -92,6 +140,19 @@
     "pause_cycle_tip": "Sæt den kørende cyklus på pause – apparatet genoptager, hvor det slap",
     "pg_apply_device": "Anvend på enhed",
     "pg_autofill": "Autoudfyld",
+    "pg_load_calibrated": "Indlæs kalibrerede (ML) ({n})",
+    "pg_load_calibrated_tip": "Indlæser ML-kalibrerede indstillinger som legeplads-tilsidesættelser",
+    "pg_load_live": "Indlæs aktive indstillinger",
+    "pg_load_live_tip": "Genindlæs integrationens aktuelle indstillinger, og kassér alle ændringer i legepladsen",
+    "pg_load_suggested": "Indlæs forslag ({n})",
+    "pg_load_suggested_tip": "Indlæser auto-tunerens aktuelle forslag som legeplads-tilsidesættelser",
+    "pg_preset_delete": "Slet forudindstilling",
+    "pg_preset_load": "Indlæs forudindstilling",
+    "pg_preset_load_tip": "Erstat værdierne i legepladsen med denne forudindstilling (de aktive indstillinger røres ikke)",
+    "pg_preset_save": "Gem som forudindstilling",
+    "pg_preset_save_tip": "Gem alle værdier nedenfor som en navngiven forudindstilling for denne enhed",
+    "pg_publish_all": "Gem {n} i integrationen",
+    "pg_publish_one": "Gem {label} i integrationen",
     "play": "Afspil",
     "process": "Behandl",
     "process_history": "Behandl nu",
@@ -178,7 +239,9 @@
     "download_export": "Download eksport",
     "analyze_import": "Analysér fil",
     "import_selected": "Importér valgte",
-    "back": "Tilbage"
+    "back": "Tilbage",
+    "mute_suggestion": "Stop med at foreslå denne indstilling",
+    "reset_muted": "Nulstil undertrykte forslag"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -275,6 +338,7 @@
     "no_automations": "Ingen automatiseringer refererer til denne enhed endnu.",
     "panel_settings": "Panelindstillinger",
     "param_sweep": "Parametersweep",
+    "pg_settings_source": "Indstillingernes kilde",
     "phase_catalog": "Fasekatalog",
     "playground": "Legeplads",
     "process_history": "Proceshistorie",
@@ -410,6 +474,9 @@
     "pg_group_detection": "Registreringsudløsere",
     "pg_group_timing": "Tidsregler",
     "pg_idle": "Inaktiv",
+    "pg_preset": "Forudindstilling til legepladsen",
+    "pg_preset_name": "Navn på ny forudindstilling",
+    "pg_preset_none": "Vælg en forudindstilling…",
     "pg_stress_group": "Test af inaktiv afslutning",
     "pg_stress_idle_auto": "Auto",
     "pg_stress_idle_w": "Inaktivt niveau (W)",
@@ -609,7 +676,8 @@
     "conflict_import_copy": "Importér som kopi",
     "conflict_keep_mine": "Behold mine",
     "conflict_overwrite": "Overskriv",
-    "pg_anti_wrinkle": "Anti-rynke"
+    "pg_anti_wrinkle": "Anti-rynke",
+    "font_size": "Panel-skriftstørrelse"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -771,7 +839,17 @@
     "pg_apply_confirm": "Anvend bedste værdi: {label} = {value}?",
     "pg_canvas_empty": "Vælg en cyklus ovenfor, og tryk derefter på Indlæs for at se dens effektkurve.",
     "pg_chart_caption": "Registrerings-/matchrate på tværs af værdier for {param}",
+    "pg_ctrl_intro": "Værdierne tager udgangspunkt i denne enheds aktive indstillinger i integrationen. Ændringer bliver i legepladsen, indtil du gemmer dem i integrationen.",
+    "pg_live_unavailable": "Aktive indstillinger er ikke tilgængelige, viser standardværdier.",
+    "pg_load_live_confirm": "Kassér {n} ændring(er) i legepladsen, og genindlæs integrationens aktuelle indstillinger?",
     "pg_match_rate": "{pct}% matchrate på {total} cyklusser",
+    "pg_matches_live": "Svarer til de aktive indstillinger",
+    "pg_n_changed": "{n} ændret i forhold til de aktive indstillinger",
+    "pg_sugg_none": "Alle forslag stemmer allerede overens med de aktive indstillinger",
+    "pg_preset_delete_confirm": "Slet forudindstillingen \"{name}\"?",
+    "pg_preset_limit": "Grænsen for forudindstillinger er nået ({n})",
+    "pg_preset_overwrite": "Overskriv forudindstillingen \"{name}\"?",
+    "pg_publish_one_confirm": "Gem {label} = {value} i denne enheds indstillinger?",
     "pg_restart_note": "Genstart Home Assistant for at aktivere simuleringsværktøjerne.",
     "pg_sim_progress": "{done} / {total} cyklusser",
     "pg_starting": "Starter…",
@@ -845,6 +923,7 @@
     "trend_duration_shorter": "Varighed, der trender kortere ({pct}%/cyklus) – seneste gennemsnit {avg}",
     "trend_energy_down": "Energi på vej ned ({pct} %/cyklus)",
     "trend_energy_up": "Energitrends op ({pct} %/cyklus) – seneste gennemsnit {avg}",
+    "trim_destructive_confirm": "Dermed bevares kun {pct}% af cyklussen. Dette kan ikke fortrydes. Fortsæt?",
     "trim_intro": "Træk i de røde håndtag, eller indtast værdier. Alt uden for vinduet fjernes.",
     "tuning_suggestions_available": "{count} indstillingsforslag tilgængeligt fra observerede cyklusser. De vises ved siden af ​​de relevante felter.",
     "unsure_detected_prefix": "WashData er usikker på, om det er registreret",
@@ -922,9 +1001,15 @@
     "merge_hint": "Importerede elementer tilføjes; intet lokalt går tabt. Navnekonflikter løses nedenfor.",
     "replace_warn": "Hver markeret kategori slettes og erstattes fra filen. Ikke-markerede kategorier forbliver uændrede.",
     "dest_reference_hint": "Importerede cyklusser forbedrer kun programgenkendelse og påvirker aldrig forbrugs-/energistatistik.",
-    "dest_real_history_hint": "Importerede cyklusser tæller som dette apparats egen historik og indgår i energi-/forbrugsstatistik. Brug dette til at flytte ét apparat til en ny installation."
+    "dest_real_history_hint": "Importerede cyklusser tæller som dette apparats egen historik og indgår i energi-/forbrugsstatistik. Brug dette til at flytte ét apparat til en ny installation.",
+    "sug_muted": "Vil ikke foreslå denne indstilling igen",
+    "sug_mute_failed": "Kunne ikke undertrykke forslaget",
+    "sug_unmuted_all": "Undertrykte forslag nulstillet",
+    "n_suggestions_muted": "{count} undertrykt; autotuner vil ikke foreslå disse.",
+    "font_size_hint": "Gør alt i dette panel større eller mindre. Gælder for din konto på denne enhed."
   },
   "pg_desc": {
+    "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",
     "completion_min_seconds": "Korteste kørsel, der tæller som en rigtig cyklus",
     "end_repeat_count": "Lave målinger i træk før afslutning",
     "interrupted_min_seconds": "Korte cyklusser markeres som afbrudt",
@@ -998,6 +1083,10 @@
     "unusable": "Ubrugelig"
   },
   "section": {
+    "dishwasher": {
+      "label": "Opvaskemaskine",
+      "intro": "Håndtering af cyklusafslutning for opvaskemaskiner, der typisk slutter med en lang, næsten lydløs tørrefase før en kort sidste udpumpning."
+    },
     "anti_wrinkle": {
       "intro": "Anti-rynke-tilstand registrerer tumble-pulser med lav effekt efter den vigtigste fase og holder dem tilknyttet den afsluttede cyklus.",
       "label": "Anti-rynke"
@@ -1040,6 +1129,10 @@
     }
   },
   "setting": {
+    "dishwasher_end_spike_quiet_release": {
+      "label": "Frigivelse efter stille tørrefase",
+      "doc": "Når cyklussen overskrider sin forventede varighed: hvor længe opvaskemaskinen skal forblive stille (under Stoptærskel), før WashData holder op med at vente på en sidste udpumpning og afslutter cyklussen. Hæv den, hvis din maskine har en lang stille tørrefase før en sen sidste udpumpning, der bliver overset - et bredere vindue lader den indlærte varighed følge sæsonudsving (koldere indløbsvand = længere cyklusser) i stedet for at låse sig til det gamle gennemsnit. Den forkorter kun ventetiden i forhold til den interne grænse på 30 minutter for slutspidsen, aldrig forlænger den."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Genkend de korte tørretumblerimpulser med lav effekt, som en tørretumbler udsender efter hovedvarmefasen, og hold dem fastgjort til den færdige cyklus i stedet for at læse dem som nye cyklusser.",
       "label": "Aktivér anti-rynke registrering"
@@ -1260,6 +1353,10 @@
       "doc": "Minutter efter en cyklus er afsluttet, før du sender den stadig ventende påmindelse om \"aflæs maskinen\". Indstil 0 for at deaktivere påmindelsen.",
       "label": "Forsinkelse for aflæsningspåmindelse"
     },
+    "notify_unload_repeat": {
+      "doc": "Bliv ved med at gensende aflæsningspåmindelsen hvert \"Forsinkelse for aflæsningspåmindelse\" minutter, indtil du åbner døren eller trykker på \"Stop påmindelser\" i notifikationen. Kræver en Dørsensorenhed (det gør selve påmindelsen). Knappen til at afvise virker på notifikationer fra Home Assistant companion-appen (mobil).",
+      "label": "Gentag indtil døren åbnes"
+    },
     "off_delay": {
       "doc": "Tid til at vente efter strømfald, før cyklussen erklæres afsluttet. Hvis strømmen genoptages inden for dette vindue, fortsætter cyklussen problemfrit - dette slår bro mellem pauser mellem vasketrinene. Opvaskemaskiner har lange tørrefaser (strøm fra i 20-60 min), så slukningsforsinkelsen skal overstige det for at holde hele vask+tør som én cyklus.",
       "label": "Slukkeforsinkelse"
@@ -1434,6 +1531,26 @@
     "energy_scale": {
       "label": "Energiskarphed",
       "doc": "Skarphed i Trin 4's straf for energioverensstemmelse. Lavere = strengere: et energiafvigelse skader mere. Standard 0,25 er bevidst mere tillåtende end varighedsskarphed fordi energi varierer med belastning. Par med Energivægt."
+    },
+    "power_profile_interval_min": {
+      "label": "Effektprofil-interval",
+      "doc": "Bucket-størrelse for effektprofilsensorens attribut power_profile (det flade array af gennemsnitlige watt-værdier pr. slot, der bruges af eksterne planlæggere som EMHASS og tibber_prices). Mindre buckets holder korte effektspidser skarpe; større buckets glatter kurven. Standard 15 min. Kun til visning; påvirker ikke detektering."
+    },
+    "notify_live_sticky": {
+      "label": "Behold live-notifikation ved tryk",
+      "doc": "Kun Android. Gør live-forløbsnotifikationen vedvarende (sticky), så et tryk ikke afviser den. Slukket: standardadfærd, hvor et tryk afviser notifikationen."
+    },
+    "notify_live_click_action": {
+      "label": "Trykdestination for live-notifikation",
+      "doc": "Kun Android. Hvor et tryk på live-forløbsnotifikationen åbner (f.eks. /lovelace/laundry eller en fuld URL) i stedet for app-startsiden. Lad stå blank for standard."
+    },
+    "door_opens_at_end": {
+      "label": "Dør åbner automatisk ved afslutning",
+      "doc": "Til opvaskemaskiner, der springer døren op ved afslutningen af cyklussen for at tørre (AirDry og lignende). Når dette er aktiveret, sætter en døråbning under en aktiv cyklus den ikke på pause for evigt; hvis døren forbliver åben i den konfigurerede opholdsperiode, betragter WashData cyklussen som afsluttet. En kort åbning (tilføjelse af en tallerken) ignoreres. Kræver en dørsensorenhed."
+    },
+    "door_end_dwell_seconds": {
+      "label": "Dørens åbningstid ved afslutning",
+      "doc": "Hvor længe døren skal forblive åben, før WashData afslutter cyklussen, når \"Dør åbner automatisk ved afslutning\" er aktiveret. Lang nok til at ignorere hurtig tilføjelse af en tallerken (standard 60 s), kort nok til at afslutte hurtigt, når maskinen springer døren op."
     }
   },
   "setting_group": {
@@ -1620,6 +1737,7 @@
       "min_active": "Baseret på laveste aktive effekt ({min}W) observeret i sidste cyklus.",
       "min_duration_ratio": "Holdt så lav som muligt, så et program genkendes tidligt i cyklussen; konfidens- og tvetydighedsgrænserne forhindrer forhastede beslutninger.",
       "min_off_gap": "Baseret på {gaps} observerede mellemrum mellem cyklusser (p05={p05}s). Enhedsgulv: {floor}s.",
+      "min_off_gap_bridge": "Dimensioneret til at bygge bro over den længste stille periode i en cyklus: {span}s + 60s buffer, fra {spans} dækkede mellemrum på tværs af {cycles} rene cyklusser (holder sig under dit korteste mellemrum på {ceiling}s mellem to kørsler).",
       "min_power": "40% af den laveste aktive effekt ved p05 ({p05}W) på tværs af {cycles} rene cyklusser, hvilket holder sluk-tærsklen under reelt forbrug.{excl}",
       "ml_auto_label": "Laveste konfidens, som kvalitetsmodellen stadig vurderede som ren (p10 af {cycles} rene cyklusser = {p10}).",
       "ml_end_repeat": "{false}/{total} cyklusser ({pct}%) havde en pause, som slutdetektoren vurderede til >50%; kræver {val} slutbekræftelse(r).",
@@ -1636,7 +1754,7 @@
       "thr_batch": "Holdt lige over den laveste aktive effekt ved p05 på tværs af {cycles} cyklusser ({p05}W), så en start fanges så tidligt som muligt, og stoptærsklen forbliver under maskinens laveste driftseffekt.",
       "tol_per_profile": "p75 for varighedsvariansen pr. profil på tværs af {profiles} profiler ({cycles} cyklusser); stramme profiler straffes ikke.",
       "tol_pooled": "Baseret på samlet varighedsvarians for {cycles} seneste mærkede cyklusser (p95 afvigelse={dev}).",
-      "watchdog": "Holdt så lavt som forsvarligt (3x p95-opdateringsmellemrummet på {p95}s, min 30s), så stilstande fanges hurtigt uden falske stop."
+      "watchdog": "Holdt så lavt som forsvarligt (lige over p95-opdateringsmellemrummet på {p95}s, min 30s), så stilstande fanges hurtigt uden falske stop."
     },
     "exclusions": {
       "summary": "{total} fejldetekterede cyklus(ser) udelukket: {parts}.",
@@ -1716,6 +1834,10 @@
     "name_required": "Navn påkrævet",
     "no_split_found": "Ingen ledige mellemrum fundet at dele på",
     "panel_settings_saved": "Panelindstillinger gemt",
+    "pg_preset_loaded": "Forudindstillingen \"{name}\" er indlæst",
+    "pg_preset_saved": "Forudindstillingen \"{name}\" er gemt",
+    "pg_sugg_loaded": "{n} foreslåede(t) værdi(er) indlæst - kør legepladsen for at sammenligne",
+    "pg_sugg_ml_loaded": "{n} ML-kalibrerede(t) værdi(er) indlæst - kør legepladsen for at sammenligne",
     "phase_name_required": "Fasenavn er påkrævet",
     "phase_updated": "Fase opdateret",
     "phases_saved": "Faser gemt",

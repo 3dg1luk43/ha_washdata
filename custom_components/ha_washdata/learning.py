@@ -161,8 +161,23 @@ class LearningManager:
             and (len(past_cycles) - last_apply_count) < MIN_SUGGESTION_COOLDOWN_CYCLES
         )
 
+        # Locked keys (#343): the user has told the auto-tuner to stop proposing
+        # these (e.g. thresholds that break an anti-crease-tuned device). Drop them
+        # from the pending map so they never re-surface until unlocked.
+        try:
+            locked = set(self.profile_store.get_locked_suggestions())
+        except Exception:  # pylint: disable=broad-exception-caught
+            locked = set()
+
+        existing_suggestions = self.profile_store.get_suggestions()
         filtered_suggestions: dict[str, Any] = {}
+        any_deleted = False
         for key, data in suggestions.items():
+            if key in locked:
+                if key in existing_suggestions:
+                    self.profile_store.delete_suggestion(key)
+                    any_deleted = True
+                continue
             if isinstance(data, dict) and "value" in data:
                 current_val = current_options.get(key)
                 suggested_val = data["value"]
@@ -174,6 +189,7 @@ class LearningManager:
                         # Gate 1: exact equality → stale, delete so it doesn't linger.
                         if abs_delta < 1e-9:
                             self.profile_store.delete_suggestion(key)
+                            any_deleted = True
                             continue
 
                         # Gate 2: change too small to be meaningful → delete (noise).
@@ -181,6 +197,7 @@ class LearningManager:
                         if (rel_delta < MIN_SUGGESTION_REL_DELTA
                                 and abs_delta < _suggestion_min_abs_delta(key)):
                             self.profile_store.delete_suggestion(key)
+                            any_deleted = True
                             continue
 
                         # Gate 3: cooldown active → skip update without deleting.
@@ -195,6 +212,8 @@ class LearningManager:
             filtered_suggestions[key] = data
 
         if not filtered_suggestions:
+            if any_deleted:
+                self.hass.async_create_task(self.profile_store.async_save())
             return
 
         self.suggestion_engine.apply_suggestions(filtered_suggestions)
@@ -295,8 +314,9 @@ class LearningManager:
     async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]]) -> None:
         """Run multi-cycle batch simulation asynchronously."""
         try:
+            engine = self.suggestion_engine.for_job()
             new_suggestions = await self.hass.async_add_executor_job(
-                self.suggestion_engine.run_batch_simulation, cycles
+                engine.run_batch_simulation, cycles
             )
             if new_suggestions:
                 self._apply_suggestions_and_notify(new_suggestions)
@@ -313,8 +333,9 @@ class LearningManager:
         try:
             # Simulation runner derives optimal thresholds
             # Offload to executor since simulation can be heavy (CPU bound)
+            engine = self.suggestion_engine.for_job()
             new_suggestions = await self.hass.async_add_executor_job(
-                self.suggestion_engine.run_simulation, cycle_data
+                engine.run_simulation, cycle_data
             )
             if new_suggestions:
                 self._apply_suggestions_and_notify(new_suggestions)
@@ -342,8 +363,10 @@ class LearningManager:
         # Throttle before dispatching so repeated readings within the window do
         # not schedule overlapping passes.
         self._last_suggestion_update = now
+        # Bind the config snapshot here, on the loop, not inside the executor job.
+        engine = self.suggestion_engine.for_job()
         self._dispatch_scan_and_apply(
-            lambda: self.suggestion_engine.generate_operational_suggestions(p95, median),
+            lambda: engine.generate_operational_suggestions(p95, median),
             "Operational",
         )
 
@@ -354,7 +377,7 @@ class LearningManager:
         offloaded to an executor thread by ``_dispatch_scan_and_apply``.
         """
         self._dispatch_scan_and_apply(
-            self.suggestion_engine.generate_model_suggestions,
+            self.suggestion_engine.for_job().generate_model_suggestions,
             "Model",
         )
 
@@ -408,8 +431,9 @@ class LearningManager:
     async def _async_run_detection_suggestions(self) -> None:
         """Run the detection-suggestion pass off the event loop."""
         try:
+            engine = self.suggestion_engine.for_job()
             new_suggestions = await self.hass.async_add_executor_job(
-                self.suggestion_engine.generate_detection_suggestions
+                engine.generate_detection_suggestions
             )
             if new_suggestions:
                 self._apply_suggestions_and_notify(new_suggestions)
@@ -432,12 +456,13 @@ class LearningManager:
             if model.count >= 20 and model.p95 is not None and model.median is not None:
                 p95, median = model.p95, model.median
                 op = await self.hass.async_add_executor_job(
-                    self.suggestion_engine.generate_operational_suggestions, p95, median
+                    self.suggestion_engine.for_job().generate_operational_suggestions,
+                    p95, median
                 )
                 if op:
                     self._apply_suggestions_and_notify(op)
             model_sug = await self.hass.async_add_executor_job(
-                self.suggestion_engine.generate_model_suggestions
+                self.suggestion_engine.for_job().generate_model_suggestions
             )
             if model_sug:
                 self._apply_suggestions_and_notify(model_sug)
@@ -445,7 +470,7 @@ class LearningManager:
             # Snapshot the live cycles list before handing it to the executor.
             cycles = list(self.profile_store.get_past_cycles())
             batch = await self.hass.async_add_executor_job(
-                self.suggestion_engine.run_batch_simulation, cycles
+                self.suggestion_engine.for_job().run_batch_simulation, cycles
             )
             if batch:
                 self._apply_suggestions_and_notify(batch)
@@ -844,10 +869,49 @@ class LearningManager:
         affected envelopes), so this only records the feedback response and removes
         the pending entry - it deliberately does NOT re-label or rebuild again.
 
-        Returns True when a pending entry existed and was resolved.
+        Returns True when a pending entry existed and was resolved, OR when no
+        pending feedback was found but the cycle was sitting in the review queue
+        (uncertain quality / force_stopped / interrupted) and was marked reviewed.
+        Returns False when there was nothing to resolve or update.
         """
         pending = self.profile_store.get_pending_feedback().get(cycle_id)
         if not pending:
+            # No detection feedback to resolve. A manual (re)label is still the user
+            # engaging with the cycle, so if it is sitting in the review queue only
+            # for an uncertain quality label or a force_stopped/interrupted status
+            # (no pending feedback, so it has no resolve buttons), stamp it reviewed
+            # to clear the red dot (#331 residual). The quality/label fields are left
+            # untouched, so no training signal is lost; normal cycles are not touched.
+            try:
+                cycle = next(
+                    (c for c in self.profile_store.get_past_cycles() if c.get("id") == cycle_id),
+                    None,
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                cycle = None
+            if cycle is not None:
+                rv = cycle.get("ml_review") if isinstance(cycle.get("ml_review"), dict) else {}
+                already_reviewed = bool(rv.get("reviewed_at"))
+                needs_review = (
+                    rv.get("label") in ("uncertain", "review")
+                    or rv.get("quality") in ("uncertain", "review")
+                    or cycle.get("status") in ("force_stopped", "interrupted")
+                    or (cycle.get("ml_health") or {}).get("label") in ("uncertain", "review")
+                )
+                if needs_review and not already_reviewed:
+                    try:
+                        await self.profile_store.set_cycle_review(cycle_id)
+                    except Exception as err:  # pylint: disable=broad-exception-caught
+                        self._logger.debug(
+                            "set_cycle_review failed for cycle %s: %s", cycle_id, err
+                        )
+                        return False
+                    async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
+                    self._logger.info(
+                        "Marked cycle %s reviewed from manual label (no pending feedback; "
+                        "cleared needs-review red dot)", cycle_id
+                    )
+                    return True
             return False
 
         detected = pending.get("detected_profile")

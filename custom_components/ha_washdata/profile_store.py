@@ -49,6 +49,8 @@ from .const import (
     PHASE_HEAT_CV_WARN,
     PHASE_HEAT_OCC_MIXED_LO,
     PHASE_HEAT_OCC_MIXED_HI,
+    PLAYGROUND_PRESET_MAX,
+    PLAYGROUND_PRESET_NAME_MAX,
     REFERENCE_PROFILE_CURVE_POINTS,
     SHAPE_DRIFT_MIN_CYCLES,
     SHAPE_DRIFT_RESAMPLE_N,
@@ -94,6 +96,12 @@ _LOGGER = logging.getLogger(__name__)
 # Used together with a relative (10% of median peak) test in envelope rebuild
 # and reference selection so degenerate cycles never become the matching template.
 _DEGENERATE_POWER_FLOOR = 15.0  # watts
+
+# How far outside the requested trim window a stored sample may still be snapped
+# to. Trim boundaries arrive quantized to whole seconds (panel number input, the
+# trim_cycle service), so one second is exactly the input's own resolution -- it
+# absorbs that rounding without letting the kept window grow measurably.
+_TRIM_SNAP_TOLERANCE_S = 1.0
 
 JSONDict: TypeAlias = dict[str, Any]
 CycleDict: TypeAlias = dict[str, Any]
@@ -1216,6 +1224,10 @@ class ProfileStore:
         self._match_threshold = match_threshold
         self._unmatch_threshold = unmatch_threshold
         self.dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
+        # Stage-4 energy-agreement mode ("mean"|"integrated"); the manager sets it
+        # from the device type via analysis.stage4_energy_mode. Default "mean"
+        # keeps behaviour byte-identical until wired.
+        self.energy_mode: str = "mean"
         self._save_debug_traces = save_debug_traces
 
         # Cache for resampled sample segments: key=(cycle_id, dt)
@@ -1255,6 +1267,7 @@ class ProfileStore:
             "ml_model_versions": {},  # On-device trained model specs (Stage 4)
             "profile_groups": {},  # Named groups of near-duplicate profiles (Stage 5)
             "maintenance_log": [],  # User-logged maintenance events (Group E)
+            "playground_presets": {},  # Named Playground setting snapshots (sandbox only)
         }
 
 
@@ -1301,6 +1314,31 @@ class ProfileStore:
         """Remove a single suggestion entry by key."""
         suggestions: JSONDict = self._data.setdefault("suggestions", {})
         suggestions.pop(key, None)
+
+    def get_locked_suggestions(self) -> list[str]:
+        """Return the setting keys the user has locked against auto-tuning (#343).
+
+        A locked key is never re-surfaced as a suggestion, so the auto-tuner stops
+        repeatedly proposing a value the user has rejected (e.g. a stop/start
+        threshold that breaks an anti-crease-tuned device). Never raises.
+        """
+        raw = self._data.get("locked_suggestions")
+        return [str(k) for k in raw] if isinstance(raw, list) else []
+
+    async def set_suggestion_locked(self, key: str, locked: bool) -> None:
+        """Lock or unlock a suggestion key and persist (#343).
+
+        Locking also drops any currently-pending suggestion for the key so it
+        disappears immediately; unlocking lets the auto-tuner surface it again.
+        """
+        cur = set(self.get_locked_suggestions())
+        if locked:
+            cur.add(key)
+            self.delete_suggestion(key)
+        else:
+            cur.discard(key)
+        self._data["locked_suggestions"] = sorted(cur)
+        await self.async_save()
 
     async def clear_suggestions(self) -> None:
         """Clear all pending suggestions and persist."""
@@ -1746,7 +1784,7 @@ class ProfileStore:
         if pairs[0][0] != 0.0:
             origin = pairs[0][0]
             pairs = [[p[0] - origin, p[1]] for p in pairs]
-        now = dt_util.now()
+        now = dt_util.as_utc(dt_util.now())
         store_id = str(meta.get("store_cycle_id") or "")
         cycle: CycleDict = {
             "profile_name": profile_name,
@@ -2010,14 +2048,31 @@ class ProfileStore:
         self, current_power: list[float], current_duration: float,
         members: list[str], member_snaps: dict[str, dict[str, Any]],
     ) -> tuple[str, float | None, float | None]:
-        """Within a winning group, pick the member whose duration + mean power +
-        peak best match the cycle (temperature -> mean power, spin -> peak).
+        """Within a winning group, pick the member whose integrated ENERGY best
+        matches the cycle.
+
+        Group members already share shape and duration (that is what the cohesion
+        gate collapses them for), so the within-group discriminator is temperature
+        / spin, and the clean signal for that is integrated energy (Sum P*dt) --
+        NOT whole-cycle mean power (diluted, because hotter cycles also run longer)
+        nor peak (dominated by the ~constant heating-element draw, so it is flat
+        across variants). Validated on real store data (leave-one-cycle-out member
+        pick, 196 cycles): energy-only 73.3% vs the old duration*mean*peak product
+        63.3%; adding any duration term back regressed it (grouped members are
+        duration-cohesive, so duration only adds noise). Duration is still returned
+        (for ETA and the overrun guard) but is intentionally not part of selection.
+
         Returns (member_name, individual_fit_score, member_avg_duration). The fit
         score is the chosen member's own alignment score, used as a sanity check."""
         cur = np.asarray(current_power, dtype=float)
         if cur.size == 0 or not members:
             return (members[0] if members else ""), None, None
-        cur_mp = float(cur.mean()); cur_pk = float(cur.max())
+        # Energy proxy = mean power * duration; the 1/3600 Wh factor cancels in the
+        # log-ratio, so this is exact up to that constant.  This proxy equals the
+        # true integral only because `current_power` is already resampled onto a
+        # uniform grid by the matcher; raw or irregular traces must use
+        # signal_processing.integrate_wh instead.
+        cur_energy = float(cur.mean()) * float(current_duration)
 
         def agree(a: float, b: float, scale: float) -> float:
             if a <= 0 or b <= 0:
@@ -2033,9 +2088,9 @@ class ProfileStore:
             if sp.size == 0:
                 continue
             md = float(snap.get("avg_duration") or 0.0)
-            sc = (agree(current_duration, md, 0.15)
-                  * agree(cur_mp, float(sp.mean()), 0.20)
-                  * agree(cur_pk, float(sp.max()), 0.20))
+            mem_energy = float(sp.mean()) * md
+            # Scale 0.30 is validated as insensitive over 0.25-0.40 on real data.
+            sc = agree(cur_energy, mem_energy, 0.30)
             if sc > best_sc:
                 best_sc, best_m, best_dur = sc, m, md
         fit = None
@@ -2284,6 +2339,83 @@ class ProfileStore:
             return False
         self._data["maintenance_log"] = remaining
         await self.async_save()
+        return True
+
+    # ─── Playground presets ────────────────────────────────────────────────────
+    # Named snapshots of the Playground's settings control panel. Sandbox data:
+    # nothing here ever reaches the live detector or matcher - the user publishes
+    # individual values to entry.options explicitly (ws_set_options) if they want
+    # them live. Stored per device because the values are device-scale (watts,
+    # seconds tuned for THIS appliance).
+
+    def get_playground_presets(self) -> dict[str, JSONDict]:
+        """Return the mutable playground-presets mapping (name -> record).
+
+        Each record is ``{"values": {...}, "created_at": iso, "updated_at": iso}``.
+        Self-heals a corrupt/missing key to an empty mapping. Never raises.
+        """
+        raw = self._data.setdefault("playground_presets", {})
+        if not isinstance(raw, dict):
+            self._data["playground_presets"] = {}
+            return cast(dict[str, JSONDict], self._data["playground_presets"])
+        return cast(dict[str, JSONDict], raw)
+
+    @staticmethod
+    def _playground_preset_key(name: str) -> str:
+        """Canonical storage key for a Playground preset name.
+
+        Save and delete MUST derive the key the same way: truncating only on save
+        meant a name longer than the cap was stored truncated but looked up in
+        full, leaving a preset that could never be deleted. The trailing strip()
+        runs after the clamp so a cut landing mid-space cannot bake a trailing
+        space into the key.
+        """
+        return (name or "").strip()[:PLAYGROUND_PRESET_NAME_MAX].strip()
+
+    async def async_save_playground_preset(
+        self, name: str, values: dict[str, Any]
+    ) -> JSONDict:
+        """Create or overwrite a named Playground preset and persist it.
+
+        ``values`` must already be sanitized by ``playground.sanitize_setting_values``
+        (the store deliberately does not import the playground module - that would
+        be a cycle). Raises ``ValueError`` for an empty name, an empty value map, or
+        when the per-device preset cap is reached by a NEW name.
+        """
+        name = self._playground_preset_key(name)
+        if not name:
+            raise ValueError("Preset name is required")
+        if not isinstance(values, dict) or not values:
+            raise ValueError("Preset has no settings to save")
+        presets = self.get_playground_presets()
+        existing = presets.get(name)
+        if existing is None and len(presets) >= PLAYGROUND_PRESET_MAX:
+            raise ValueError(
+                f"Preset limit reached ({PLAYGROUND_PRESET_MAX}); delete one first"
+            )
+        now = dt_util.now().isoformat()
+        created = now
+        if isinstance(existing, dict) and isinstance(existing.get("created_at"), str):
+            created = existing["created_at"]
+        record: JSONDict = {
+            "values": dict(values),
+            "created_at": created,
+            "updated_at": now,
+        }
+        presets[name] = record
+        await self.async_save()
+        self._logger.info(
+            "Saved playground preset %r with %d values", name, len(values)
+        )
+        return record
+
+    async def async_delete_playground_preset(self, name: str) -> bool:
+        """Remove a Playground preset by name; report whether one was removed."""
+        presets = self.get_playground_presets()
+        if presets.pop(self._playground_preset_key(name), None) is None:
+            return False
+        await self.async_save()
+        self._logger.info("Deleted playground preset %r", name)
         return True
 
     def cycles_since_maintenance(self, event_type: str) -> int:
@@ -3835,9 +3967,11 @@ class ProfileStore:
                         if first_offset > 0:
                             # Leading zeros removed - Must shift start_time forward
                             try:
-                                start_dt = datetime.fromisoformat(cycle["start_time"])
+                                start_dt = _parse_start_dt(cycle["start_time"])
+                                if start_dt is None:
+                                    raise ValueError("unparseable start_time")
                                 new_start = start_dt + timedelta(seconds=first_offset)
-                                cycle["start_time"] = new_start.isoformat()
+                                cycle["start_time"] = dt_util.as_utc(new_start).isoformat()
 
                                 # Re-normalize offsets to 0
                                 shifted_data: list[list[float]] = []
@@ -4501,6 +4635,92 @@ class ProfileStore:
             return cast(JSONDict, env) if isinstance(env, dict) else None
         return None
 
+    @staticmethod
+    def _envelope_time_power(
+        envelope: JSONDict | None,
+    ) -> tuple[list[float], list[float]] | None:
+        """Extract (time_grid, power) from an envelope's ``avg`` curve, or None.
+
+        Handles both the new ``[[t, p], ...]`` and legacy ``[p, ...]`` formats
+        (reconstructing the grid from ``time_grid`` / ``target_duration`` / a 60 s
+        fallback). Single source of the envelope time axis for both the alignment
+        worker and the Smart-Termination release span (#348), so the mapped position
+        and the span it is compared against always live on the same grid.
+        """
+        if not envelope:
+            return None
+        env_avg_raw = envelope.get("avg", [])
+        if not env_avg_raw:
+            return None
+        try:
+            if isinstance(env_avg_raw[0], (list, tuple)) and len(env_avg_raw[0]) >= 2:
+                env_points = cast(list[list[Any] | tuple[Any, ...]], env_avg_raw)
+                env_time = [float(p[0]) for p in env_points]
+                env_power = [float(p[1]) for p in env_points]
+            else:
+                env_values = cast(list[float | int], env_avg_raw)
+                env_power = [float(p) for p in env_values]
+                env_time_raw = envelope.get("time_grid")
+                env_time = cast(list[float], env_time_raw) if isinstance(env_time_raw, list) else None
+                if not env_time or len(env_time) != len(env_power):
+                    target_dur = float(envelope.get("target_duration", 0.0) or 0.0)
+                    if target_dur > 0:
+                        env_time = cast(list[float], np.linspace(0, target_dur, len(env_power)).tolist())
+                    else:
+                        env_time = [float(i * 60) for i in range(len(env_power))]
+            # Inside the try: a stored time_grid with non-numeric entries must
+            # yield the safe None fallback, not propagate to async_verify_alignment.
+            return [float(t) for t in env_time], env_power
+        except (TypeError, ValueError, IndexError):
+            return None
+
+    @staticmethod
+    def _resample_trace_to_grid(
+        offsets: list[float], powers: list[float], env_time: list[float]
+    ) -> list[float]:
+        """Resample a live ``(offsets, powers)`` trace onto the envelope's uniform
+        time step, so its sample index maps to elapsed seconds on the envelope grid
+        (#350). Linear interpolation (matching the envelope build side), bounded at
+        2x the envelope length. Falls back to the raw powers when a grid cannot be
+        formed (too few points / non-positive step), leaving behavior unchanged.
+        """
+        if len(offsets) < 2 or len(env_time) < 2:
+            return list(powers)
+        diffs = np.diff(np.asarray(env_time, dtype=float))
+        pos = diffs[diffs > 0]
+        if pos.size == 0:
+            return list(powers)
+        step = float(np.median(pos))
+        span = float(env_time[-1])
+        # Sort and deduplicate before computing t_max so the grid span reflects the
+        # true maximum offset even when the raw trace is non-monotonic.
+        off_arr = np.asarray(offsets, dtype=float)
+        pow_arr = np.asarray(powers, dtype=float)
+        order = np.argsort(off_arr, kind="stable")
+        off_arr, pow_arr = off_arr[order], pow_arr[order]
+        # Remove duplicate offsets; np.unique keeps the first occurrence after sorting.
+        off_arr, unique_idx = np.unique(off_arr, return_index=True)
+        pow_arr = pow_arr[unique_idx]
+        t_max = min(float(off_arr[-1]), 2.0 * span) if span > 0 else float(off_arr[-1])
+        if step <= 0 or t_max <= 0:
+            return list(powers)
+        n = max(2, round(t_max / step) + 1)
+        grid = np.arange(n, dtype=float) * step
+        return np.interp(grid, off_arr, pow_arr).tolist()
+
+    def envelope_time_span(self, profile_name: str) -> float:
+        """Total time span (seconds) of a profile's envelope grid, 0 if unavailable.
+
+        This is exactly the maximum value ``async_verify_alignment`` maps onto, so
+        dividing a mapped position by it yields a true 0..1 fraction through the
+        cycle - unlike ``avg_duration`` (a differently-derived trimmed mean) which
+        could push the 0.95 Smart-Termination release threshold out of reach (#348).
+        """
+        curves = self._envelope_time_power(self.get_envelope(profile_name))
+        if not curves or not curves[0]:
+            return 0.0
+        return float(curves[0][-1])
+
     def reference_curve(
         self, profile_name: str, n: int = REFERENCE_PROFILE_CURVE_POINTS
     ) -> JSONDict | None:
@@ -5099,6 +5319,7 @@ class ProfileStore:
                 "min_duration_ratio": self._min_duration_ratio,
                 "max_duration_ratio": self._max_duration_ratio,
                 "dtw_bandwidth": self.dtw_bandwidth,
+                "energy_mode": self.energy_mode,
                 # On-device tuned scoring weights (opt-in); empty = shipped defaults.
                 **self._matching_overrides(),
             }
@@ -5203,48 +5424,50 @@ class ProfileStore:
         Verify if the current power trace aligns with an expected low-power region in the envelope.
         Returns: (is_confirmed_low_power, mapped_envelope_time, mapped_envelope_power)
         """
+        if not current_power_data:
+            return False, 0.0, 9999.0
+
+        # "avg" can be a list of [t, p] (new) or [p, ...] (legacy); the shared helper
+        # normalizes both to (time_grid, power) - identical to envelope_time_span so
+        # the mapped position and the release span live on the same grid (#348).
         envelope = self.get_envelope(profile_name)
-        if not envelope or not envelope.get("avg") or not current_power_data:
+        curves = self._envelope_time_power(envelope)
+        if curves is None:
+            if envelope and envelope.get("avg"):
+                self._logger.error(
+                    "Malformed envelope 'avg' data for %s", profile_name
+                )
             return False, 0.0, 9999.0
+        env_time, env_power = curves
 
-        # Extract envelope curves
-        # "avg" can be list of [t, p] (new) or [p, ...] (legacy)
-        env_avg_raw = envelope.get("avg", [])
-        if not env_avg_raw:
-            return False, 0.0, 9999.0
-
+        # Resample the live trace onto the envelope's own time step BEFORE alignment,
+        # so its sample index corresponds to elapsed SECONDS, not sample count (#350).
+        # The worker warps power-vs-power; with no shared time axis an irregularly or
+        # sparsely sampled tail (e.g. 0 W keepalives every off_delay) maps one grid
+        # step per sample regardless of wall-clock, so the position crawls - and a
+        # dense short prefix instead races to the end. Linear interpolation matches
+        # the envelope build side so the two curves stay comparable.
         try:
-            # Handle both formats: [[t, y], ...] (new) or [y, ...] (legacy)
-            if isinstance(env_avg_raw[0], (list, tuple)) and len(env_avg_raw[0]) >= 2:
-                # New format: [[t, y], ...]
-                env_points = cast(list[list[Any] | tuple[Any, ...]], env_avg_raw)
-                env_time = [float(p[0]) for p in env_points]
-                env_power = [float(p[1]) for p in env_points]
-            else:
-                # Legacy format: [y, ...]
-                env_values = cast(list[float | int], env_avg_raw)
-                env_power = [float(p) for p in env_values]
-                # Reconstruct time grid from envelope if available, or assume 60s intervals
-                env_time_raw = envelope.get("time_grid")
-                env_time = cast(list[float], env_time_raw) if isinstance(env_time_raw, list) else None
-                if not env_time or len(env_time) != len(env_power):
-                    target_dur = float(envelope.get("target_duration", 0.0) or 0.0)
-                    if target_dur > 0:
-                        env_time = cast(list[float], np.linspace(0, target_dur, len(env_power)).tolist())
-                    else:
-                        env_time = [float(i * 60) for i in range(len(env_power))]
-        except (TypeError, ValueError, IndexError) as e:
-            first_type_name = type(env_avg_raw[0]).__name__ if env_avg_raw else "None"
-            self._logger.error(
-                "Malformed envelope 'avg' data for %s. Type: %s, Length: %d, Error: %s",
-                profile_name, first_type_name, len(env_avg_raw), e
+            offsets = [float(x[0]) for x in current_power_data]
+            powers = [float(x[1]) for x in current_power_data]
+        except (TypeError, ValueError, IndexError):
+            # A legacy ISO-timestamped trace (x[0] is a string) lands here. The
+            # signature admits ``list[tuple[Any, ...]]``, so normalize through the
+            # shared helper instead of bailing out: returning early skipped
+            # alignment entirely, which silently reduced the legacy-envelope guard
+            # in tests/repro/test_issue_112.py to a no-op. Production callers pass
+            # offsets and never reach this branch, so the fast path is unchanged.
+            normalized = power_data_to_offsets(
+                cast(list[list[Any] | tuple[Any, ...]], current_power_data)
             )
-            return False, 0.0, 9999.0
-
-        try:
-            current_power_list = [float(x[1]) for x in current_power_data]
-        except Exception:  # pylint: disable=broad-exception-caught
-            return False, 0.0, 9999.0
+            if not normalized:
+                return False, 0.0, 9999.0
+            try:
+                offsets = [float(x[0]) for x in normalized]
+                powers = [float(x[1]) for x in normalized]
+            except (TypeError, ValueError, IndexError):
+                return False, 0.0, 9999.0
+        current_power_list = self._resample_trace_to_grid(offsets, powers, env_time)
 
         # Offload to worker
         mapped_time, mapped_power, score = await self.hass.async_add_executor_job(
@@ -5593,6 +5816,7 @@ class ProfileStore:
         self._data["profiles"] = {}
         self._data["envelopes"] = {}
         self._data["suggestions"] = {}
+        self._data["locked_suggestions"] = []
         self._data["feedback_history"] = {}
         self._data["pending_feedback"] = {}
         self._data["auto_adjustments"] = []
@@ -5604,6 +5828,7 @@ class ProfileStore:
         self._data["ml_model_versions"] = {}
         self._data["profile_groups"] = {}
         self._data["maintenance_log"] = []
+        self._data["playground_presets"] = {}
         self._data["matching_config"] = {}
         self._data["match_ranking_history"] = []
         self._data["ml_last_training_run"] = None
@@ -6261,8 +6486,8 @@ class ProfileStore:
         for c in self._data.get("reference_cycles", []):
             if not isinstance(c, dict):
                 continue
-            meta = c.get("meta")
-            src = meta.get("source") if isinstance(meta, dict) else None
+            cyc_meta = c.get("meta")
+            src = cyc_meta.get("source") if isinstance(cyc_meta, dict) else None
             if src:
                 existing_ref_sources.add(_ref_dedup_key(src))
 
@@ -6530,6 +6755,36 @@ class ProfileStore:
         new_start_s = max(0.0, float(new_start_s))
         new_end_s = float(new_end_s)
 
+        # Guard against a destructive trim (#366): an inverted/empty window would
+        # produce a zero- or single-sample segment that collapses the cycle to
+        # duration 0 / energy 0. Reject before touching the cycle.
+        if new_end_s <= new_start_s:
+            return False
+
+        # Snap both boundaries to a real sample offset (#373). Trim inputs round
+        # to whole seconds, but sample offsets are frequently fractional -- a
+        # nominal 10 s cadence drifts, so ~3132.3 is the norm -- and the
+        # [start, end] filter below is inclusive, so a whole-second entry lands
+        # just below the sample the user aimed at and silently drops it. Snapping
+        # against the full-resolution stored trace (independent of any client-side
+        # curve decimation) makes the kept window land on the samples the
+        # boundaries name, on both ends.
+        #
+        # Snap *inward*, tolerating only the whole-second input quantization
+        # (_TRIM_SNAP_TOLERANCE_S). Nearest-in-either-direction snapping could
+        # widen the window by up to half a sample interval per side -- on a
+        # coarse trace (samples at 0 s and 100 s, request 40-60 s) that silently
+        # kept the entire cycle while meta["trim"] claimed a narrow window.
+        offsets = [float(offset) for offset, _ in p_data]
+        starts = [o for o in offsets if o >= new_start_s - _TRIM_SNAP_TOLERANCE_S]
+        ends = [o for o in offsets if o <= new_end_s + _TRIM_SNAP_TOLERANCE_S]
+        if not starts or not ends:
+            return False
+        new_start_s = min(starts)
+        new_end_s = max(ends)
+        if new_end_s <= new_start_s:
+            return False
+
         kept = sorted(
             (
                 (offset, power)
@@ -6546,6 +6801,13 @@ class ProfileStore:
         renorm: list[list[float]] = [
             [round(offset - base, 2), power] for offset, power in kept
         ]
+
+        # A window that keeps fewer than two samples (or whose kept span is zero)
+        # would collapse the cycle to duration 0 with no recovery. Reject here,
+        # BEFORE the start_time mutation below, so the stored cycle is untouched
+        # and the caller reports a failure instead of destroying data (#366).
+        if len(renorm) < 2 or round(renorm[-1][0], 1) <= 0.0:
+            return False
 
         # Advance start_time when trimming from the front
         if base > 0:
@@ -6817,8 +7079,8 @@ class ProfileStore:
 
             # Create Cycle Record
             new_cycle: dict[str, Any] = {
-                "start_time": new_cycle_start.isoformat(),
-                "end_time": (new_cycle_start + timedelta(seconds=seg_dur)).isoformat(),
+                "start_time": dt_util.as_utc(new_cycle_start).isoformat(),
+                "end_time": dt_util.as_utc(new_cycle_start + timedelta(seconds=seg_dur)).isoformat(),
                 "duration": round(seg_dur, 1),
                 "status": "completed",
                 "power_data": p_data_abs,
@@ -6859,6 +7121,10 @@ class ProfileStore:
                     touched.add(seg_prof)
         for name in touched:
             await self.async_rebuild_envelope(name)
+
+        # The original cycle is gone; drop its now-orphaned pending feedback so the
+        # "needs review" badge stays consistent with the review list (#362).
+        self.prune_orphaned_feedback()
 
         await self.async_save()
         self._logger.info("Interactive Split Applied to %s -> %s", cycle_id, new_ids)
@@ -6995,7 +7261,8 @@ class ProfileStore:
 
         new_dur = (final_end_dt - c1_start_dt).total_seconds()
 
-        c1["end_time"] = final_end_dt.isoformat()
+        c1["start_time"] = dt_util.as_utc(c1_start_dt).isoformat()
+        c1["end_time"] = dt_util.as_utc(final_end_dt).isoformat()
         c1["duration"] = round(new_dur, 1)
         c1["max_power"] = max_power
         c1["profile_name"] = target_profile
@@ -7049,6 +7316,10 @@ class ProfileStore:
                 c1["signature"] = dataclasses.asdict(sig)
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.warning("Failed to update signature for merged cycle %s: %s", new_id, e)
+
+        # Consumed cycles are gone; drop any pending feedback that pointed at them so
+        # the "needs review" badge does not keep counting non-existent cycles (#362).
+        self.prune_orphaned_feedback()
 
         await self.async_save()
         self._logger.info("Interactive Merge Applied: %s -> %s", cycle_ids, new_id)

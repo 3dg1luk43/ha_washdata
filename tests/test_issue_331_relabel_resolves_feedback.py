@@ -40,6 +40,7 @@ class _MockStore:
     def __init__(self):
         self.feedback: dict = {}
         self.pending: dict = {}
+        self.cycles: list = []
         self.saved = 0
 
     def get_feedback_history(self):
@@ -47,6 +48,13 @@ class _MockStore:
 
     def get_pending_feedback(self):
         return self.pending
+
+    def get_past_cycles(self):
+        return self.cycles
+
+    async def set_cycle_review(self, cycle_id, **kw):
+        self.saved += 1
+        return True
 
     async def async_save(self):
         self.saved += 1

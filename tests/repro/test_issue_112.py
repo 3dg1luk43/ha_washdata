@@ -81,6 +81,13 @@ async def test_verify_alignment_with_legacy_envelope(store):
     assert isinstance(is_confirmed, bool)
     assert isinstance(mapped_time, (int, float))
     assert isinstance(mapped_power, (int, float))
+    # ...and it must actually REACH alignment. (False, 0.0, 9999.0) is the early
+    # bail-out sentinel: the ISO-timestamped trace above used to hit it, because
+    # float("2026-02-06T12:00:00") raised and the handler returned before the
+    # legacy-envelope path this test exists to guard ever ran. Without this
+    # assertion the test passed vacuously.
+    assert (is_confirmed, mapped_time, mapped_power) != (False, 0.0, 9999.0)
+    assert mapped_power != 9999.0
 
 @pytest.mark.asyncio
 async def test_verify_alignment_with_malformed_envelope(store):

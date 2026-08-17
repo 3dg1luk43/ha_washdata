@@ -1,0 +1,26 @@
+# Blank issues are disabled: every issue MUST go through one of the templates
+# below. A blank / template-less report cannot be triaged and will be closed
+# automatically, so we remove the option entirely.
+blank_issues_enabled: false
+
+contact_links:
+  - name: 💬 Questions, ideas & general discussion
+    url: https://github.com/3dg1luk43/ha_washdata/discussions
+    about: >
+      Not sure if it is a bug? Want to float an idea before opening a formal
+      request? Ask here first. Please do NOT open an issue just to ask a
+      question - use Discussions.
+
+  - name: 🌍 Translations (GitLocalize)
+    url: https://gitlocalize.com/repo/10819
+    about: >
+      Translations are handled entirely on GitLocalize, which opens PRs for you
+      automatically. Do NOT open an issue (or a manual PR) to report or fix a
+      translation - correct it directly on GitLocalize.
+
+  - name: 🛠️ Want to submit code? Read this first
+    url: https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs
+    about: >
+      Before writing any code, open a Bug Report or Feature Request and wait for
+      the maintainer to add the `accepted` label. PRs opened without a
+      pre-accepted issue are closed automatically.

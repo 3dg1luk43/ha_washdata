@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData häälestus",
-        "description": "Seadistage oma pesumasin või muu seade.\n\nVajalik on võimsusandur.\n\n**Järgmisena küsitakse teilt, kas soovite luua oma esimese profiili.**",
+        "description": "Seadistage oma pesumasin või muu seade.\n\nVajalik on võimsusandur.\n\nPärast seadistamist avage WashData paneel külgribalt (või minge [/ha-washdata](/ha-washdata)), et vaadata tsükleid, häälestada tuvastust ja hallata profiile.",
         "data": {
           "name": "Seadme nimi",
           "device_type": "Seadme tüüp",
@@ -19,7 +19,7 @@
       },
       "reconfigure": {
         "title": "WashData uuesti seadistamine",
-        "description": "Uuendage seadme nime, seadmetüüpi või võimsusandurit.",
+        "description": "Uuendage seadme nime, seadmetüüpi või võimsusandurit.\n\nWashData paneelis (külgriba või [/ha-washdata](/ha-washdata)) hallatakse tuvastust, tsükleid, profiile ja teavitusi.",
         "data": {
           "name": "Seadme nimi",
           "device_type": "Seadme tüüp",
@@ -43,7 +43,7 @@
     "step": {
       "init": {
         "title": "WashData seadistused",
-        "description": "Kõik seadistused — tuvastamine, sobitamine, ajastamine, teated, profiilid ja tsüklid — on saadaval WashData paneelil. Kasutage seda vormi ainult võimsusanduri, seadmetüübi või ooterežiimi läve muutmiseks.",
+        "description": "Nimetage seade ümber või muutke selle põhilisi riistvara seadeid. Kõik tuvastus-, sobitamis- ja teavitusseaded asuvad [WashData paneelil](/ha-washdata) (ligipääsetav ka külgribalt).",
         "data": {
           "name": "Seadme nimi",
           "device_type": "Seadme tüüp",
@@ -56,6 +56,7 @@
       "timer_default_message": "{device}: {minutes} min taimer",
       "timer_pause_action_title": "Tsükli jätkamine",
       "timer_pause_body_suffix": "Tsükkel on peatatud. Jätkamiseks avage WashData paneel.",
+      "unload_dismiss_action_title": "Lõpeta meeldetuletused",
       "notify_live_waiting_message": "{device}: Ühtki profiili pole veel tuvastatud.",
       "vs_typical_longer": "{pct}% tavapärasest pikem",
       "vs_typical_shorter": "{pct}% tavapärasest lühem",
