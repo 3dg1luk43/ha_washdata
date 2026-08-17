@@ -8,6 +8,10 @@ the "phase-matching Phase 0-6" commit series.
 All paths are absolute. All line anchors are `file:line` against the tree as of
 branch `0.5.1` HEAD (`2183fa6`, "Phase 6 — panel toggle + advisory surfacing").
 
+> **Accuracy caveat.** Content corrected 2026-08-17 for 0.5.4: `_OCC_PENALTY` value,
+> the D5 `occ_penalty` fix, and the D10 advisory-rendering fix (see §5, §11). Line
+> anchors may still reflect 0.5.1.
+
 > **Two distinct feature layers share the word "phase" — keep them apart:**
 >
 > 1. **Legacy per-profile phase *ranges*** (user-drawn time bands mapped to phase
@@ -357,8 +361,10 @@ numpy import), HA-free, never raises.
   dominates as the temperature discriminator.
 - `_DUR_SCALE = 0.35` (per-role duration log-ratio agreement scale).
 - `_EN_SCALE = 0.40` (per-role energy scale).
-- `_OCC_PENALTY = 0.5` — **structural-mismatch multiplier. ⚠ Currently a no-op —
-  see §D5.**
+- `_OCC_PENALTY = 0.0` (structural-mismatch multiplier; config-overridable via
+  `occ_penalty`). At the default 0.0 a structural miss scores agreement 0 for that
+  role (full penalty); raise toward 1.0 to soften. The override is now live (the old
+  `* 0.0` bug is fixed, see §D5).
 
 ### 5.2 Data classes
 
@@ -404,10 +410,11 @@ if no observed segments or no candidates.
   (`:223-224`).
 - For each candidate, over the union of observed+candidate roles (`:228-263`):
   - weight `w = weights.get(role, 0.1)`; skip if `w<=0`.
-  - **Observed role the candidate lacks** (`stat is None`, `:237-242`): structural
-    miss — adds `w*occ_pen*0.0` (=0) to num, `w` to den (⇒ agreement 0 for it).
-  - **Candidate role not yet observed** (`:243-250`): if partial → neutral (skip,
-    a future phase); if completed → structural miss (num += 0, den += w).
+  - **Observed role the candidate lacks** (`stat is None`): structural
+    miss - adds `w*occ_pen` to num, `w` to den (⇒ agreement `occ_pen` for it;
+    `occ_pen` defaults to `_OCC_PENALTY = 0.0`, i.e. agreement 0 = full penalty).
+  - **Candidate role not yet observed**: if partial → neutral (skip,
+    a future phase); if completed → structural miss (num += `w*occ_pen`, den += w).
   - **Open (in-progress) role** (`:251-257`): one-sided — agreement `1.0` while
     `obs.dur <= stat.dur_mean` (not yet exceeded), else `_agree(obs.dur,
     stat.dur_mean, dur_scale)`. This is why a larger-heating variant is not ruled
@@ -726,14 +733,12 @@ segmenter reuses the single gap-aware energy integrator, per the project's
   different concern.) Potential quality gap: a phase-ETA can fire off a
   single-cycle prior.
 
-- **§D5 — `occ_penalty` / `_OCC_PENALTY` is a dead no-op.** In
-  `match_phase_profiles`, both structural-miss branches add `num += w * occ_pen *
-  0.0` (`phase_match.py:240, 248`) — always `0` regardless of `occ_pen`. So a
-  structural mismatch scores agreement 0 for that role (full penalty), and the
-  `_OCC_PENALTY = 0.5` constant + the `config["occ_penalty"]` override have **no
-  effect**. Almost certainly intended to be `num += w * occ_pen` (a *partial*
-  penalty). Behaviorally the matcher applies a *harder* structural penalty than
-  the constant implies. Worth flagging as a likely bug.
+- **§D5 [RESOLVED 0.5.4] `occ_penalty` no-op fixed.** The structural-miss branches
+  in `match_phase_profiles` now add `num += w * occ_pen` (the earlier `* 0.0` that
+  made it a dead no-op is gone), so the `config["occ_penalty"]` override takes
+  effect. `_OCC_PENALTY` was also changed `0.5 -> 0.0`, so the DEFAULT behaviour is
+  unchanged (a structural miss still scores agreement 0 = full penalty), but a
+  device/config can now soften the penalty toward 1.0. No longer a bug.
 
 - **§D6 — Phase matcher has no ambiguity gate.** Spec §7 called for reusing
   `MATCH_AMBIGUITY_MARGIN` to report "uncertain" and never commit a variant on an
@@ -764,18 +769,14 @@ segmenter reuses the single gap-aware energy integrator, per the project's
   rebuilds exist at `async_load:2973-2976` but are conditional on power-data
   corruption, not the version bump.)
 
-- **§D10 — `profile_advisories` is fetched but never rendered.** The panel stores
-  `this._profileAdvisories = r.profile_advisories` (`panel.js:2662`) and resets it
-  (`:2713`) but **renders it nowhere** — `_htmlProfiles` doesn't reference it, and
-  the Setup Card (`_htmlSetupCard`) is driven by `compute_setup_phase`, not
-  advisories. The Phase-6 commit (`2183fa6`) claims the `phase_inconsistent`
-  advisory "already surfaces via ... Profiles tab, no extra JS," and CLAUDE.md
-  says advisories show as a "Recommendations" banner in the Profiles tab — but
-  that banner appears to have been removed/consolidated by the earlier commit
-  `943861d` ("remove ... three Profiles-tab banners (consolidated into Setup
-  Card)"). **Net effect: the Phase-5 mixed-profile advisory is computed and served
-  but has no visible surface in the current panel.** High-value finding for the
-  doc update / a follow-up fix.
+- **§D10 [RESOLVED (partially) 0.5.4] `profile_advisories` now rendered.** The panel
+  still stores `this._profileAdvisories = r.profile_advisories` and resets it, but it
+  now also **consumes** the advisory: `www/ha-washdata-panel.js` looks up the
+  per-profile `phase_inconsistent` advisory (`(this._profileAdvisories || []).find(a
+  => a && a.profile === m.name && a.code === 'phase_inconsistent')`) and surfaces it
+  on the profile. So the Phase-5 mixed-profile advisory now has a visible surface for
+  the `phase_inconsistent` code. (Whether every other advisory code is rendered was
+  not exhaustively re-audited, hence "partially".)
 
 - **§D11 — Stale line anchors in the spec.** Spec references
   `check_phase_match` at `profile_store.py:4667` (actual `4864`),

@@ -4,13 +4,15 @@
 **Files read:** `__init__.py`, `config_flow.py`, `sensor.py`, `binary_sensor.py`, `select.py`, `button.py`, `services.yaml`, `intents.py`, `recorder.py`, `setup_advisor.py`, `diagnostics.py`, `diag_buffer.py`, `log_utils.py`
 **Integration constants source:** `const.py`
 
+> Content-corrected 2026-08-17 for 0.5.4 (config schema 3.8, running_dead_zone retired). Line anchors may still reflect the original 2026-07-18 / 0.5.1 pass.
+
 ---
 
 ## 1. Config Entry Schema
 
 ### Versions
 
-- **Current version:** `3.7` (class `ConfigFlow`: `VERSION = 3`, `MINOR_VERSION = 7`)
+- **Current version:** `3.8` (class `ConfigFlow`: `VERSION = 3`, `MINOR_VERSION = 8`)
 - **Storage version:** `11` (`STORAGE_VERSION` in `const.py:713`)
 
 ### Identity keys (stored in `entry.data`)
@@ -63,13 +65,14 @@ Docstring: "stub that redirects users to the WashData panel." Presents the same 
 
 ## 3. Config Entry Migration (`async_migrate_entry`, `__init__.py:133-300`)
 
-The function migrates any version ≤ 3.6 → 3.7. Returns `False` for version > 3. All steps are deterministic and idempotent.
+The function migrates any version ≤ 3.7 → 3.8. Returns `False` for version > 3. All steps are deterministic and idempotent.
 
 ### Step-by-step
 
 | Step | What happens |
 |------|-------------|
-| **3.6 → 3.7** (lines 149-155) | Remove `"initial_profile"` stub key from `entry.data`. Fast path: if already 3.7, returns True immediately. |
+| **3.6 → 3.7** (lines 145-151) | Remove `"initial_profile"` stub key from `entry.data`. |
+| **3.7 → 3.8** (lines 153-161) | Drop `running_dead_zone` from `entry.options` (setting retired in 0.5.3; was never wired to detection). Fast path: if already 3.8, returns True immediately. |
 | **Core settings: data → options** (lines 164-174) | Move `min_power`, `off_delay`, `device_type`, `power_sensor`, `notify_service` from `entry.data` into `entry.options` if missing from options. |
 | **Legacy notify_service → per-event lists** (lines 176-189) | If a single `CONF_NOTIFY_SERVICE` string exists, populate `notify_start_services`, `notify_finish_services`, and (if `NOTIFY_EVENT_LIVE` was in legacy `notify_events`) `notify_live_services`. |
 | **Option defaults backfill** (lines 190-250) | `setdefault` for ~30 options: progress_reset_delay, learning_confidence, duration_tolerance, auto_label_confidence, no_update_active_timeout, smoothing_window, profile_duration_tolerance, interrupted_min_seconds, abrupt_drop_watts, abrupt_drop_ratio, abrupt_high_load_factor, device_type, start_duration_threshold, profile_match_interval, profile_match_min/max_duration_ratio, max_past_cycles, max_full_traces_per_profile, max_full_traces_unlabeled, watchdog_interval, auto_tune_noise_events_threshold, completion_min_seconds, notify_before_end_minutes, notify_actions, notify_people, notify_only_when_home, notify_fire_events, notify_live_interval_seconds, notify_live_overrun_percent, notify_timeout_seconds, notify_channel, notify_finish_channel, notify_reminder_message |
@@ -77,7 +80,7 @@ The function migrates any version ≤ 3.6 → 3.7. Returns `False` for version >
 | **Drain-spike key removal** (lines 261-269) | Pop `delay_drain_min_power`, `delay_drain_max_power`, `delay_drain_max_duration` from options (3.4 obsolete). |
 | **Suppress-feedback removal** (lines 271-274) | Pop `suppress_feedback_notifications` from options (3.6 inert). |
 | **Removed device-type remap** (lines 276-288) | If `device_type` is `coffee_machine`, `ev`, `heat_pump`, or `oven` → remap to `DEVICE_TYPE_OTHER` ("other" / Threshold Device). All tuned options preserved. |
-| **Final write** (lines 290-296) | `async_update_entry(data=data, options=options, version=3, minor_version=7)` |
+| **Final write** (lines 290-302) | `async_update_entry(data=data, options=options, version=3, minor_version=8)` |
 
 ---
 
@@ -216,7 +219,7 @@ Present only when projection is available (omitted when idle/early in cycle).
 | `suggested_option_keys` | sorted list of option keys with suggestions |
 | `suggestions` | full suggestions dict |
 
-Suggestion keys monitored: `min_power`, `off_delay`, `watchdog_interval`, `no_update_active_timeout`, `sampling_interval`, `profile_match_interval`, `auto_label_confidence`, `duration_tolerance`, `profile_duration_tolerance`, `profile_match_min/max_duration_ratio`, `min_off_gap`, `stop_threshold_w`, `start_threshold_w`, `end_energy_threshold`, `running_dead_zone`.
+Suggestion keys monitored: `min_power`, `off_delay`, `watchdog_interval`, `no_update_active_timeout`, `sampling_interval`, `profile_match_interval`, `auto_label_confidence`, `duration_tolerance`, `profile_duration_tolerance`, `profile_match_min/max_duration_ratio`, `min_off_gap`, `stop_threshold_w`, `start_threshold_w`, `end_energy_threshold`. (`running_dead_zone` was removed in 0.5.3.)
 
 #### Profile Count Sensor Attributes
 

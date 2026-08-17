@@ -216,6 +216,8 @@ class ImportConfigSelectiveResponse(TypedDict):
 # ─── Shared constants ──────────────────────────────────────────────────────────
 
 class GetConstantsResponse(TypedDict):
+    version: str
+    icon_url: str | None
     device_types: list[dict[str, Any]]
     state_colors: dict[str, Any]
     ml_lab_enabled: bool
@@ -225,6 +227,7 @@ class GetConstantsResponse(TypedDict):
     store_online_available: bool
     store_online_enabled: bool
     store_web_origin: str
+    store_prefs: dict[str, Any]
     pg_match_defaults: dict[str, Any]
 
 
@@ -269,6 +272,7 @@ class GetCyclePowerDataResponse(TypedDict, total=False):
     energy_kwh: float | None
     artifacts: list[dict[str, Any]]
     restart_gaps: list[Any]
+    is_reference: bool
 
 
 class AnalyzeSplitResponse(TypedDict):
@@ -617,6 +621,7 @@ class GetShareableCyclesResponse(TypedDict, total=False):
     plus the programs that carry a local phase map."""
     items: list
     phase_programs: list
+    all_programs: list
 
 
 class GetSetupStatusResponse(TypedDict, total=False):

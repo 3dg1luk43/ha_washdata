@@ -1,16 +1,18 @@
 # WashData WebSocket API — Engineering Reference
 
 **Files covered:**
-- `custom_components/ha_washdata/ws_api.py` (5420 lines) — all WS command handlers + RBAC
+- `custom_components/ha_washdata/ws_api.py` (5988 lines) — all WS command handlers + RBAC
 - `custom_components/ha_washdata/ws_schema.py` (1024 lines) — typed request/response contract
 - `custom_components/ha_washdata/frontend.py` (400 lines) — panel + static path registration
-- `custom_components/ha_washdata/task_registry.py` (244 lines) — background-task lifecycle
+- `custom_components/ha_washdata/task_registry.py` (288 lines) — background-task lifecycle
+
+> Content-corrected 2026-08-17 for 0.5.4 (command inventory, counts, task-kind list). Line anchors below may still reflect the original 2026-07-18 / 0.5.1 pass.
 
 ---
 
 ## 1. Overview
 
-The integration exposes **99 WebSocket commands** under the `ha_washdata/` namespace, all registered via `ws_api.async_register_commands()`. The count of 99 comes from the `WS_COMMANDS` dict in `ws_schema.py` (`ws_schema.py:750-1006`), and it is confirmed to match exactly by `tests/test_ws_contract.py` (which asserts one-to-one correspondence between commands in `ws_api.py` and keys in `WS_COMMANDS`).
+The integration exposes **106 WebSocket commands** under the `ha_washdata/` namespace, all registered via `ws_api.async_register_commands()`. The count of 106 comes from the `WS_COMMANDS` dict in `ws_schema.py`, and it is confirmed to match exactly by `tests/test_ws_contract.py` (which asserts one-to-one correspondence between commands in `ws_api.py` and keys in `WS_COMMANDS`).
 
 All commands use the wire format `{"type": "ha_washdata/<command>", ...params}`.
 
@@ -236,7 +238,6 @@ Four levels in ascending order: `none` / `read` / `edit` / `full`.
 
 | Command | Line | Params | Handler type | Response | Notes |
 |---|---|---|---|---|---|
-| `run_playground_simulation` | 4795 | `entry_id` R, `cycle_ids` O, `settings_override` O, `concurrency` O | `@async_response` | `{results, summary}` | Synchronous (inline) executor-offloaded batch; **deprecated** by `start_playground_history` |
 | `run_playground_cycle_detail` | 4866 | `entry_id` R, `cycle_id` R, `settings_override` O | `@async_response` | `{cycle_id, series, events, alerts, outcome, error?}` | Single-cycle faithful replay; inline (synchronous); superseded by `start_playground_cycle_detail` for long cycles |
 | `run_playground_history` | 4906 | `entry_id` R, `cycle_ids` O, `settings_override` O, `concurrency` O | `@async_response` | `{rows, summary, baseline_rows, baseline_summary, diff?}` | Inline executor batch; superseded by `start_playground_history` |
 | `run_playground_sweep` | 4950 | `entry_id` R, `param` R, `values` R, `objective` R, `cycle_ids` O, `concurrency` O, `param_y` O, `values_y` O | `@async_response` | `{param, objective, points, current_value, best_value, best_metric?, ...}` or 2D grid | Inline; superseded by `start_playground_sweep` |
@@ -279,6 +280,21 @@ All store commands gate on `online_features_enabled(hass)` — returns `{"enable
 | `store_download_device` | 964 | `entry_id` R, `device_id` R, `include_settings` O | `@async_response` | `StoreDownloadDeviceResponse` | edit | Adopt a community bundle |
 | `get_shareable_cycles` | 1001 | `entry_id` R | `@async_response` | `{items, phase_programs, all_programs}` | edit | Recorded/golden cycles eligible for sharing |
 
+### 4.20 Selective Export/Import, Playground Presets, Suggestion Lock
+
+Eight commands that postdate the 0.5.1 pass and were missing from the inventory above:
+
+| Command | Line | Notes |
+|---|---|---|
+| `get_export_inventory` | 3009 | Per-category data inventory (profiles/cycles/settings counts) for the selective-export wizard tree |
+| `export_config_selective` | 3097 | Exports only the user-chosen subset instead of the whole store |
+| `analyze_import` | 3042 | Dry-run: parses an export payload and describes what it contains, no mutation |
+| `import_config_selective` | 3141 | Imports only the user-chosen subset from an analyzed payload |
+| `get_playground_settings` | 5489 | Live effective Playground settings + saved presets + publishable-key list |
+| `save_playground_preset` | 5528 | Persists a named Playground override preset (bounded by `PLAYGROUND_PRESET_MAX`) |
+| `delete_playground_preset` | 5567 | Removes a saved Playground preset |
+| `set_suggestion_lock` | 3434 | Locks/unlocks a suggestion key so the analyser stops re-proposing it |
+
 ---
 
 ## 5. Per-Entry Write Lock (`ws_api.py:309-325`)
@@ -307,7 +323,7 @@ Prevents interleaving mutations that would corrupt cycle IDs or clobber the stor
 
 ## 7. Background Task Internals
 
-Six task kinds run through the registry:
+Nine task kinds run through the registry:
 
 | Kind | Spawned by | Phases / chunks |
 |---|---|---|
@@ -472,7 +488,7 @@ Commands whose response splats an upstream dict and has an open-ended key set �
 
 ## 13. Summary Reference Table (count)
 
-Total commands in `WS_COMMANDS`: **99** — confirmed to match the "99 commands" figure in the schema module docstring and the test-contract assertion.
+Total commands in `WS_COMMANDS`: **106**. Confirmed by `tests/test_ws_contract.py`, which asserts the registered commands match `WS_COMMANDS` exactly.
 
 By area:
 
@@ -497,4 +513,6 @@ By area:
 | Playground (inline + background tasks + DTW debug) | 8 |
 | Background task registry | 4 |
 | Community store | 19 |
-| **Total** | **99** |
+| **Total** | **106** |
+
+> The per-area figures above are approximate and predate the 0.5.4 additions (selective export/import, playground presets, suggestion lock); the authoritative total is 106, enforced by `tests/test_ws_contract.py`.

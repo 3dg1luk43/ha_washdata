@@ -2,6 +2,8 @@
 
 **Files covered:** `store.py` (471 lines), `store_client.py` (858 lines), `store_account.py` (187 lines), plus cross-references in `ws_api.py`, `profile_store.py`, `const.py`, and `setup_advisor.py`. Documentation from `docs/STORE.md` and the four design specs in `docs/superpowers/specs/`.
 
+> Content-corrected 2026-08-17 for 0.5.4 (running_dead_zone no longer shareable; allow-list is 20 keys). Line anchors may still reflect the original 2026-07-18 / 0.5.1 pass.
+
 ---
 
 ## 1. Architecture Overview
@@ -266,7 +268,7 @@ Device bundle
 Phase units are **absolute seconds**. On download, phase ranges replace the local profile's phase ranges (not merged). The rationale: phases are authored against a specific cycle's timeline; runtime adaptation to local cycle-length variance is handled by the progress-fraction phase indexer in `manager._current_phase_from_progress`.
 
 ### Shareable settings allow-list
-Defined at `const.py:763-790` as `SHAREABLE_SETTING_KEYS`. Contains only recognition/matching thresholds: `min_power`, `off_delay`, `start_threshold_w`, `stop_threshold_w`, `start_duration_threshold`, `start_energy_threshold`, `completion_min_seconds`, `running_dead_zone`, `min_off_gap`, `end_energy_threshold`, `power_off_threshold_w`, `power_off_delay`, `profile_match_threshold`, `profile_unmatch_threshold`, `profile_match_interval`, `profile_match_min/max_duration_ratio`, `profile_duration_tolerance`, `duration_tolerance`, `auto_label_confidence`, `learning_confidence`. **Excluded by design:** entity IDs, notify services, energy price, sampling cadence, EMA smoothing, housekeeping timers, anti-wrinkle, drain, plug-robustness. All values are plain numbers (no PII, no HA topology leakage).
+Defined in `const.py` as `SHAREABLE_SETTING_KEYS` (20 keys). Contains only recognition/matching thresholds: `min_power`, `off_delay`, `start_threshold_w`, `stop_threshold_w`, `start_duration_threshold`, `start_energy_threshold`, `completion_min_seconds`, `min_off_gap`, `end_energy_threshold`, `power_off_threshold_w`, `power_off_delay`, `profile_match_threshold`, `profile_unmatch_threshold`, `profile_match_interval`, `profile_match_min/max_duration_ratio`, `profile_duration_tolerance`, `duration_tolerance`, `auto_label_confidence`, `learning_confidence`. (`running_dead_zone` was removed from the allow-list in 0.5.3 when the setting was retired.) **Excluded by design:** entity IDs, notify services, energy price, sampling cadence, EMA smoothing, housekeeping timers, anti-wrinkle, drain, plug-robustness. All values are plain numbers (no PII, no HA topology leakage).
 
 Settings filtering is applied **twice** (defense in depth): once in the WS handler at upload (`ws_api.py:953-955`) and once inside `StoreClient.upload_reference_cycle` at the Firestore boundary (`store_client.py:614-620`). On download, filtered again in `ws_store_download_device` (`ws_api.py:985-993`).
 
@@ -377,7 +379,7 @@ The `2026-07-17-adoption-guidance-system-design.md` had three open questions wit
 | `DEFAULT_ENABLE_ONLINE_FEATURES` | `False` | Master gate default |
 | `SUPPORTED_CYCLE_SCHEMA_VERSIONS` | `{1}` | Accepted trace format versions |
 | `QC_RECORDING` / `QC_EDITED` / `QC_MANUAL` | `1` / `2` / `3` | Provenance codes |
-| `SHAREABLE_SETTING_KEYS` | (21-key tuple) | Allow-list for settings bundling |
+| `SHAREABLE_SETTING_KEYS` | (20-key tuple) | Allow-list for settings bundling |
 
 ---
 

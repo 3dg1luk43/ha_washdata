@@ -1,10 +1,10 @@
 # WashData Panel Frontend — Exhaustive Technical Reference
 
 **Files assessed:**
-- `custom_components/ha_washdata/www/ha-washdata-panel.js` — 10,478 lines / ~692 KB
-- `custom_components/ha_washdata/www/ha-washdata-card.js` — 634 lines
+- `custom_components/ha_washdata/www/ha-washdata-panel.js` — 11,734 lines
+- `custom_components/ha_washdata/www/ha-washdata-card.js` — 1,324 lines
 
-Assessment date: 2026-07-18
+Assessment date: 2026-07-18 (content-corrected 2026-08-17 for 0.5.4: WS command list completed with 8 added commands to 102, line counts refreshed; line anchors may still reflect the 0.5.1 pass)
 
 ---
 
@@ -448,10 +448,11 @@ Saved via `ha_washdata/set_panel_config` (RBAC nested in panel config).
 
 ## 14. Complete WS Command List
 
-All 87 unique `${_DOMAIN}/...` commands the panel calls:
+All 102 unique `${_DOMAIN}/...` commands the panel calls:
 
 ```
 add_maintenance_event
+analyze_import
 analyze_split
 apply_merge
 apply_split
@@ -465,17 +466,20 @@ create_profile
 delete_cycle
 delete_maintenance_event
 delete_phase
+delete_playground_preset
 delete_profile
 delete_profile_group
 discard_recording
 dismiss_all_feedbacks
 export_config
+export_config_selective
 get_constants
 get_cycle_power_data
 get_device_cycles
 get_devices
 get_diagnostics
 get_dtw_debug
+get_export_inventory
 get_feedbacks
 get_logs
 get_maintenance_log
@@ -485,6 +489,7 @@ get_ml_training_status
 get_options
 get_panel_config
 get_phase_catalog
+get_playground_settings
 get_power_history
 get_profile_cycles
 get_profile_envelope
@@ -498,6 +503,7 @@ get_shareable_cycles
 get_suggestions
 get_task_result
 import_config
+import_config_selective
 label_cycle
 pause_cycle
 process_recording
@@ -510,12 +516,14 @@ resume_cycle
 revert_matching_config
 revert_ml_models
 run_suggestion_analysis
+save_playground_preset
 save_profile_group
 set_ml_review
 set_options
 set_panel_config
 set_profile_phases
 set_program
+set_suggestion_lock
 set_user_prefs
 start_playground_cycle_detail
 start_playground_history

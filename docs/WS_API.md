@@ -838,6 +838,8 @@ _None._
 
 | Field | Always present | Type |
 | --- | --- | --- |
+| `version` | yes | str |
+| `icon_url` | yes | str \| null |
 | `device_types` | yes | list[dict[str, any]] |
 | `state_colors` | yes | dict[str, any] |
 | `ml_lab_enabled` | yes | bool |
@@ -847,6 +849,7 @@ _None._
 | `store_online_available` | yes | bool |
 | `store_online_enabled` | yes | bool |
 | `store_web_origin` | yes | str |
+| `store_prefs` | yes | dict[str, any] |
 | `pg_match_defaults` | yes | dict[str, any] |
 
 ## `ha_washdata/get_suggestions`
@@ -952,6 +955,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `energy_kwh` | no | number \| null |
 | `artifacts` | no | list[dict[str, any]] |
 | `restart_gaps` | no | list[any] |
+| `is_reference` | no | bool |
 
 ## `ha_washdata/trim_cycle`
 
@@ -1935,3 +1939,4 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | --- | --- | --- |
 | `items` | no | list |
 | `phase_programs` | no | list |
+| `all_programs` | no | list |

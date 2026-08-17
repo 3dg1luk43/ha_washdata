@@ -54,11 +54,11 @@ python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 
 ### Core Components
 
-**`manager.py`** (~6360 lines) - Central orchestrator. Listens to power sensor state changes from Home Assistant, feeds readings to `CycleDetector`, triggers async profile matching every 5 minutes, and updates all entities. This is the "brain" of the integration. (Note: the `task_registry` wiring for long background operations lives in `ws_api.py`, not here; `manager.py` runs its own long jobs, e.g. scheduled ML training / health recompute, as plain executor/`async_create_task` jobs.)
+**`manager.py`** (~7180 lines) - Central orchestrator. Listens to power sensor state changes from Home Assistant, feeds readings to `CycleDetector`, triggers async profile matching every 5 minutes, and updates all entities. This is the "brain" of the integration. (Note: the `task_registry` wiring for long background operations lives in `ws_api.py`, not here; `manager.py` runs its own long jobs, e.g. scheduled ML training / health recompute, as plain executor/`async_create_task` jobs.)
 
-**`cycle_detector.py`** (~1970 lines) - State machine with states: `OFF → STARTING → RUNNING ↔ PAUSED → ENDING → OFF`. Uses configurable power thresholds and energy gates to detect cycle start/stop. Handles edge cases like dryer anti-wrinkle mode and external triggers.
+**`cycle_detector.py`** (~2570 lines) - State machine with states: `OFF → STARTING → RUNNING ↔ PAUSED → ENDING → OFF`. Uses configurable power thresholds and energy gates to detect cycle start/stop. Handles edge cases like dryer anti-wrinkle mode and external triggers.
 
-**`profile_store.py`** (~6180 lines) - Stores learned profiles (power-consumption signatures for programs like "Cotton 40°C", "Eco", etc.) and orchestrates the matching pipeline (the numeric Stages 1-4 run in `analysis.py::compute_matches_worker`; profile_store adds the Stage-5 grouping and reconstructs the `MatchResult`). (The panel renders all charts client-side in JS; the old server-side `generate_*_svg` helpers were config-flow-era and have been removed.)
+**`profile_store.py`** (~7310 lines) - Stores learned profiles (power-consumption signatures for programs like "Cotton 40°C", "Eco", etc.) and orchestrates the matching pipeline (the numeric Stages 1-4 run in `analysis.py::compute_matches_worker`; profile_store adds the Stage-5 grouping and reconstructs the `MatchResult`). (The panel renders all charts client-side in JS; the old server-side `generate_*_svg` helpers were config-flow-era and have been removed.)
 1. Fast Reject (simple statistics)
 2. Core Similarity (NumPy correlation)
 3. DTW Refinement (Dynamic Time Warping; `compute_dtw_lite` in `analysis.py`, using resampling helpers from `signal_processing.py`)
@@ -73,9 +73,9 @@ Also exposes several **pure-statistics (no ML)** per-profile heuristics that nev
 
 Also manages **match ranking history** (`record_match_ranking_snapshot` / `confirm_match_ranking_snapshots` / `get_match_ranking_history`): compact per-cycle snapshots of live_match feature scalars + the top-1 candidate captured during every non-ambiguous profile match. Labels are back-filled at cycle end with the confirmed profile name. Retained up to `MATCH_RANKING_HISTORY_MAX` (500) snapshots — ~6–12 months of typical usage. These snapshots are the training dataset for `live_match` on-device retraining; `training_task.py:_live_match_dataset()` derives 1/0 labels by comparing `top1_profile` to `confirmed_label`.
 
-**`config_flow.py`** (~280 lines) - Minimal HA config flow: initial setup, reconfigure, and a small options flow (device type, power sensor, min power). The 180+ tunables are edited in the **panel** and persisted via the `ws_set_options` WebSocket command (`ws_api.py`), not through multi-dialog HA flows.
+**`config_flow.py`** (~260 lines) - Minimal HA config flow: initial setup, reconfigure, and a small options flow (device type, power sensor, min power). The 180+ tunables are edited in the **panel** and persisted via the `ws_set_options` WebSocket command (`ws_api.py`), not through multi-dialog HA flows.
 
-**`__init__.py`** (~850 lines) - Integration entry point. Registers services (`label_cycle`, `create_profile`, `delete_profile`, `auto_label_cycles`, `trim_cycle`, `submit_cycle_feedback`, `record_start/stop`, `export_config`, `import_config`, `pause_cycle`, `resume_cycle`, and — behind `ENABLE_ML_TRAINING` — `trigger_ml_training`), handles config migration, and wires together all components. All registered services must have matching entries in `services.yaml` and `strings.json`.
+**`__init__.py`** (~1100 lines) - Integration entry point. Registers services (`label_cycle`, `create_profile`, `delete_profile`, `auto_label_cycles`, `trim_cycle`, `submit_cycle_feedback`, `record_start/stop`, `export_config`, `import_config`, `pause_cycle`, `resume_cycle`, and — behind `ENABLE_ML_TRAINING` — `trigger_ml_training`), handles config migration, and wires together all components. All registered services must have matching entries in `services.yaml` and `strings.json`.
 
 ### Supporting Modules
 
@@ -208,7 +208,7 @@ Panel `{lang}.json` files are served as-is (no rebuild). Step 1 is fast and netw
 
 **Two separate migration layers — test them separately:**
 
-1. **Config entry migration** (`async_migrate_entry` in `__init__.py`, config schema v1→3.7): tested in `tests/test_migration_harness.py`. Covers key moves (data→options), notify_service→per-event lists, device type remapping (incl. coffee/EV/heat-pump/oven → Threshold Device), drain-spike key removal, the v3.6→v3.7 `initial_profile` stub removal, idempotency.
+1. **Config entry migration** (`async_migrate_entry` in `__init__.py`, config schema v1→3.8): tested in `tests/test_migration_harness.py`. Covers key moves (data→options), notify_service→per-event lists, device type remapping (incl. coffee/EV/heat-pump/oven → Threshold Device), drain-spike key removal, the v3.6→v3.7 `initial_profile` stub removal, and the v3.7→v3.8 `running_dead_zone` option removal (the key was never wired to detection), idempotency.
 
 2. **Storage migration** (`WashDataStore._async_migrate_func` in `profile_store.py`, storage v1→11, `STORAGE_VERSION = 11` in `const.py`): tested in `tests/test_migration_v032.py`. Call `_async_migrate_func(old_version, 1, data)` **directly** — do not go through `ProfileStore.async_load()` (which requires file I/O). Pattern for adding a new storage version (e.g. v12):
    ```python
@@ -257,12 +257,7 @@ Resolved:
 - ~~Gate predictive end when match is ambiguous~~ — done. `cycle_detector._match_ambiguous` is set from `result.is_ambiguous` on every match update; the Smart Termination block at `_STATE_ENDING` checks `and not self._match_ambiguous` before firing, so ambiguous matches fall through to the power-based timeout.
 
 Open:
-1. Per-device defaults: don't leak dicts into the Options schema.
-2. `cycle_detector._abrupt_drop` is never set `True` — the INTERRUPTED classification branch at L1732 is dead code; `abrupt_drop_watts`/`abrupt_drop_ratio` config fields are vestigial. See register item 27.
-3. `features.CycleSignature.event_density` is always 0.0 (event detector removed); kept for signature back-compat but is a zero-variance ML column. See register item 28.
-4. `auto_label_cycles` service schema default (0.70) does not match Python handler default (0.75). See register item 30.
-5. `WashDataStore.get_storage_stats()` and `WashDataStore.async_clear_debug_data()` are dead code — callers always reach the `ProfileStore` versions. The `WashDataStore` version also has blocking I/O on the event loop. See register item 39.
-6. `reconcile_suggestions` produces 5 keys (`profile_unmatch_threshold`, `power_off_threshold_w`, `anti_wrinkle_exit_power`, `anti_wrinkle_max_power`, `pump_stuck_duration`) that `ws_apply_suggestions` silently drops (missing from `_SUGGESTION_KEYS`). See register item 40.
+- None currently tracked here. The six items previously listed have all since been fixed: the options-schema dict leak (per-device defaults), the dead `cycle_detector._abrupt_drop` branch + vestigial `abrupt_drop_watts`/`abrupt_drop_ratio` (register item 27), the always-0.0 `features.CycleSignature.event_density` column (item 28), the `auto_label_cycles` schema/handler default mismatch now both 0.75 (item 30), the dead `WashDataStore.get_storage_stats()`/`async_clear_debug_data()` (item 39), and the dropped `reconcile_suggestions` keys now present in `_SUGGESTION_KEYS` (item 40). The `[FIXED]` register in `docs/internal/INTEGRATION_REFERENCE.md §7` is the live tech-debt tracker.
 
 ## Internal Reference Documentation
 
