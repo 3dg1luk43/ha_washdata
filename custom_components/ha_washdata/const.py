@@ -235,6 +235,14 @@ DEFAULT_NOTIFY_FINISH_CHANNEL = ""  # Empty = reuse status channel
 DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES = 60  # 1 hour before "still waiting" nag notification
 DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago - laundry is still inside."
 DEFAULT_NOTIFY_UNLOAD_REPEAT = False  # opt-in: re-send the unload reminder until dismissed (#374)
+# Safety bound on repeat mode (#374). The reminder is meant to run "until the door
+# opens", and the in-notification "Stop reminding" button is mobile_app-only - so a
+# user whose only notify target is non-mobile has the door sensor as their sole
+# escape. If that sensor never reports open (offline, or nobody home), the reminder
+# would re-fire forever AND pin the entity in Clean state, blocking the power-based
+# Off detection indefinitely. 48 reminders is ~2 days at the 60-minute default, far
+# past any legitimate reminder window, so normal use never reaches it.
+NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS = 48
 DEFAULT_PEAK_RATE_MESSAGE = "Running at peak rate ({price}/kWh)."
 
 # Quiet hours default: feature off (both hours unset). See CONF_NOTIFY_QUIET_*.

@@ -196,6 +196,7 @@ from .const import (
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_MESSAGE,
     DEFAULT_NOTIFY_UNLOAD_REPEAT,
+    NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS,
     CONF_NOTIFY_MILESTONES,
     CONF_NOTIFY_MILESTONE_MESSAGE,
     DEFAULT_NOTIFY_MILESTONES,
@@ -505,6 +506,7 @@ class WashDataManager:
         # listener remover (mirrors the timer-pause interactive-notification wiring).
         self._unload_nag_dismissed: bool = False
         self._last_unload_nag_time: datetime | None = None
+        self._unload_nag_count: int = 0  # repeat-mode safety bound (#374)
         self._remove_unload_action_listener: Any | None = None
         self._live_notification_cap = 0
         self._last_live_notification_time: datetime | None = None
@@ -3375,6 +3377,7 @@ class WashDataManager:
             repeat_due = (
                 self._notify_unload_repeat
                 and self._notified_clean_laundry
+                and self._unload_nag_count < NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS
                 and self._last_unload_nag_time is not None
                 and (now - self._last_unload_nag_time).total_seconds() >= delay_s
             )
@@ -3413,6 +3416,7 @@ class WashDataManager:
                     if sent:
                         self._notified_clean_laundry = True
                         self._last_unload_nag_time = now
+                        self._unload_nag_count += 1
                         if self._notify_unload_repeat:
                             self._ensure_unload_dismiss_listener()
                         self._logger.info(
@@ -3427,11 +3431,13 @@ class WashDataManager:
                         # enqueue a duplicate nag every minute for the whole window.
                         self._notified_clean_laundry = True
                         self._last_unload_nag_time = now
+                        self._unload_nag_count += 1
                         if self._notify_unload_repeat:
                             self._ensure_unload_dismiss_listener()
                 else:
                     self._notified_clean_laundry = True
                     self._last_unload_nag_time = now
+                    self._unload_nag_count += 1
 
         # Defer leaving the terminal state while a clean-state unload notification is
         # still pending. Without this guard the 30-min progress reset (or an early
@@ -6312,12 +6318,17 @@ class WashDataManager:
         ):
             return False
         if self._notify_unload_repeat:
-            # Only hold indefinitely when a delivery channel exists — otherwise no
-            # reminder (and no dismiss button) is ever sent (dispatch is gated on the
-            # same condition), so the hold would strand the Clean state forever.
+            # Only hold while a delivery channel exists — otherwise no reminder (and
+            # no dismiss button) is ever sent (dispatch is gated on the same
+            # condition), so the hold would strand the Clean state forever.
+            # Also bounded by NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS: the "Stop
+            # reminding" button is mobile_app-only, so a non-mobile target leaves
+            # the door sensor as the only escape, and a sensor that never reports
+            # open would pin Clean state (and suppress power-based Off) forever.
             return (
                 bool(self._notify_finish_services or self._notify_actions)
                 and not self._unload_nag_dismissed
+                and self._unload_nag_count < NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS
             )
         return (
             not self._notified_clean_laundry
@@ -6366,6 +6377,7 @@ class WashDataManager:
         self._remove_unload_dismiss_listener()
         self._unload_nag_dismissed = False
         self._last_unload_nag_time = None
+        self._unload_nag_count = 0
 
     def _check_pre_completion_notification(self) -> None:
         """Check and send pre-completion notification."""
