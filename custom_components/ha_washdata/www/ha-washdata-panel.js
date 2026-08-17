@@ -5540,11 +5540,12 @@ class HaWashdataPanel extends HTMLElement {
 
     const suggClassicCount = Object.keys(this._pgSuggClassic || {}).length;
     const suggMlCount = Object.keys(this._pgSuggMl || {}).length;
-    const hasSugg = suggClassicCount > 0 || (this._pgMlSuggEnabled && suggMlCount > 0);
-    const suggRow = hasSugg ? `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
-      ${suggClassicCount > 0 ? `<button class="wd-btn wd-btn-sm" data-action="pg-load-suggested" title="${_esc(this._t('btn.pg_load_suggested_tip', {}, 'Stage the auto-tuner\'s current suggestions as Playground overrides'))}">↓ ${this._t('btn.pg_load_suggested', {n: suggClassicCount}, 'Load suggested (' + suggClassicCount + ')')}</button>` : ''}
-      ${(this._pgMlSuggEnabled && suggMlCount > 0) ? `<button class="wd-btn wd-btn-sm" data-action="pg-load-calibrated" title="${_esc(this._t('btn.pg_load_calibrated_tip', {}, 'Stage ML-calibrated suggestions as Playground overrides'))}">↓ ${this._t('btn.pg_load_calibrated', {n: suggMlCount}, 'Load Calibrated (ML) (' + suggMlCount + ')')}</button>` : ''}
-    </div>` : '';
+    const suggClassicBtn = suggClassicCount > 0
+      ? `<button class="wd-btn wd-btn-sm" data-action="pg-load-suggested" title="${_esc(this._t('btn.pg_load_suggested_tip', {}, 'Stage the auto-tuner\'s current suggestions as Playground overrides'))}">↓ ${this._t('btn.pg_load_suggested', {n: suggClassicCount}, 'Load suggested (' + suggClassicCount + ')')}</button>`
+      : '';
+    const suggMlBtn = (this._pgMlSuggEnabled && suggMlCount > 0)
+      ? `<button class="wd-btn wd-btn-sm" data-action="pg-load-calibrated" title="${_esc(this._t('btn.pg_load_calibrated_tip', {}, 'Stage ML-calibrated suggestions as Playground overrides'))}">↓ ${this._t('btn.pg_load_calibrated', {n: suggMlCount}, 'Load Calibrated (ML) (' + suggMlCount + ')')}</button>`
+      : '';
 
     return `<div class="wd-pg-ctrl">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
@@ -5554,9 +5555,9 @@ class HaWashdataPanel extends HTMLElement {
       <p class="wd-info" style="margin:4px 0 0;font-size:.72em">${this._t('msg.pg_ctrl_intro', {}, 'Values start from this device\'s live integration settings. Edits stay in the Playground until you publish them.')}</p>
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
         <button class="wd-btn wd-btn-sm" data-action="pg-load-live" title="${_esc(this._t('btn.pg_load_live_tip', {}, 'Re-read the integration\'s current settings and drop every Playground edit'))}">⟳ ${this._t('btn.pg_load_live', {}, 'Load live settings')}</button>
+        ${suggClassicBtn}${suggMlBtn}
         ${publishBtn}
       </div>
-      ${suggRow}
       ${presetRow}
       ${saveRow}
     </div>`;
