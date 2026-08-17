@@ -726,10 +726,20 @@ class SuggestionEngine:
         # derivation for a publish-on-change sensor that skips at most one
         # sample.  The old 3x multiple polled ~6x slower than the sensor updates
         # and delayed end detection for no safety benefit.
-        suggested_watchdog = int(max(30, math.ceil(p95_dt) + 1))
+        # Floor at 2 x median + 1 so the suggestion pre-satisfies reconciler
+        # Rule 3a (watchdog >= 2 x sampling_interval) when CONF_SAMPLING_INTERVAL
+        # is suggested from the same median_dt.  Without this, a regular sensor
+        # (p95 ≈ median) would produce ceil(p95)+1 which Rule 3a then silently
+        # overwrites, leaving a stored value whose reason text no longer matches.
+        suggested_watchdog = int(max(30, max(math.ceil(p95_dt) + 1,
+                                            2 * math.ceil(median_dt) + 1)))
         suggestions[CONF_WATCHDOG_INTERVAL] = {
             "value": suggested_watchdog,
-            "reason": f"Kept as low as safe (just above the p95 update gap of {p95_dt:.1f}s, min 30s) so stalls are caught quickly without false stops.",
+            "reason": (
+                f"Kept as low as safe (just above the p95 update gap of {p95_dt:.1f}s"
+                f" and at least 2x the sampling interval of {median_dt:.1f}s, min 30s)"
+                f" so stalls are caught quickly without false stops."
+            ),
             "reason_key": "suggestion.reason.watchdog",
             "reason_params": {"p95": f"{p95_dt:.1f}"},
         }

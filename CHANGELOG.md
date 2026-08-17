@@ -127,7 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`pg_match_defaults` is now declared in the WS response contract** (`ws_schema.py`, `www/ws-types.d.ts`): The `get_constants` handler added `pg_match_defaults` to its response payload but the field was missing from `GetConstantsResponse` in both the Python TypedDict and the TypeScript interface, so the contract validator flagged it as an undeclared field and typed consumers had no definition to rely on. Both schemas now include the field.
 
-- **The issue-validator log-evidence guidance states the 50-character minimum explicitly** (`.github/workflows/issue_validator.yml`): The validator rejected log sections shorter than 50 characters, but the comment posted to the reporter only said "a few lines of error text are enough" - a reporter who pasted a single short error string would be rejected without understanding why. The guidance now says "more than 50 characters" so the requirement is explicit.
+- **The issue-validator log-evidence guidance states the 50-character minimum explicitly** (`.github/workflows/issue_validator.yml`): The validator rejected log sections of 50 characters or fewer, but the comment posted to the reporter only said "a few lines of error text are enough" - a reporter who pasted a single short error string would be rejected without understanding why. The guidance now says "more than 50 characters" so the requirement is explicit.
 
 
 ## 0.5.3 - 2026-07-26

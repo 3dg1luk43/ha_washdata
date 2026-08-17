@@ -196,9 +196,12 @@ def test_watchdog_tracks_update_cadence_not_a_multiple_of_it() -> None:
     """
     out = _engine([]).generate_operational_suggestions(p95_dt=60.3, median_dt=30.1)
     wd = out[CONF_WATCHDOG_INTERVAL]["value"]
-    assert wd == 62, f"expected ceil(60.3)+1, got {wd}"
+    # max(ceil(60.3)+1=62, 2*ceil(30.1)+1=63) → 63
+    assert wd == 63, f"expected max(ceil(60.3)+1, 2*ceil(30.1)+1), got {wd}"
     # Still above the p95 gap so a normal skipped sample never looks stale.
     assert wd > 60.3
+    # Also satisfies reconciler Rule 3a (>= 2 * sampling interval).
+    assert wd >= 2 * 31  # 2 * ceil(30.1)
 
 
 def test_watchdog_never_below_30s() -> None:
