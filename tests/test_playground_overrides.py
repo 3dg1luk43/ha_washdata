@@ -119,6 +119,25 @@ def test_apply_match_overrides_noop_without_matching_keys():
     assert playground.apply_match_overrides(mc, None) is mc
 
 
+def test_apply_match_overrides_rejects_negative_and_nonfinite_values():
+    """sanitize_setting_values drops negative/non-finite values before they reach the matcher."""
+    import math
+    base = {"min_duration_ratio": 0.1, "dtw_bandwidth": 0.2}
+    # Negative values must not be applied.
+    out = playground.apply_match_overrides(dict(base), {"min_duration_ratio": -0.5})
+    assert out["min_duration_ratio"] == base["min_duration_ratio"]
+    # NaN must not be applied.
+    out = playground.apply_match_overrides(dict(base), {"dtw_bandwidth": float("nan")})
+    assert out["dtw_bandwidth"] == base["dtw_bandwidth"]
+    # Infinity must not be applied.
+    out = playground.apply_match_overrides(dict(base), {"dtw_bandwidth": float("inf")})
+    assert out["dtw_bandwidth"] == base["dtw_bandwidth"]
+    # Base config must be left untouched after each call.
+    original = dict(base)
+    playground.apply_match_overrides(base, {"min_duration_ratio": -99, "dtw_bandwidth": float("nan")})
+    assert base == original
+
+
 def test_decide_commit_persistence_and_hold():
     """The Playground match report mirrors the manager: commit only after N
     consecutive non-ambiguous top-1s, then HOLD through a one-off wobble."""

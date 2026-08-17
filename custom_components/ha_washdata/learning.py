@@ -867,7 +867,10 @@ class LearningManager:
         affected envelopes), so this only records the feedback response and removes
         the pending entry - it deliberately does NOT re-label or rebuild again.
 
-        Returns True when a pending entry existed and was resolved.
+        Returns True when a pending entry existed and was resolved, OR when no
+        pending feedback was found but the cycle was sitting in the review queue
+        (uncertain quality / force_stopped / interrupted) and was marked reviewed.
+        Returns False when there was nothing to resolve or update.
         """
         pending = self.profile_store.get_pending_feedback().get(cycle_id)
         if not pending:
