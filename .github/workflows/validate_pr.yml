@@ -160,8 +160,11 @@ jobs:
               return;
             }
 
-            if (pr.state === 'closed') {
-              console.log('PR already closed - skipping issue link check.');
+            // Re-fetch current state: the event payload's state may be stale if
+            // another job (check-pr-template, close_incomplete_prs) ran first.
+            const { data: currentPr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            if (currentPr.state === 'closed') {
+              console.log('PR is currently closed - skipping issue link check.');
               return;
             }
 

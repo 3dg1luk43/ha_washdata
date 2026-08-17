@@ -2068,7 +2068,10 @@ class ProfileStore:
         if cur.size == 0 or not members:
             return (members[0] if members else ""), None, None
         # Energy proxy = mean power * duration; the 1/3600 Wh factor cancels in the
-        # log-ratio, so this is exact up to that constant.
+        # log-ratio, so this is exact up to that constant.  This proxy equals the
+        # true integral only because `current_power` is already resampled onto a
+        # uniform grid by the matcher; raw or irregular traces must use
+        # signal_processing.integrate_wh instead.
         cur_energy = float(cur.mean()) * float(current_duration)
 
         def agree(a: float, b: float, scale: float) -> float:
