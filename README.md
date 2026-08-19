@@ -24,7 +24,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Full-screen management panel** - A **WashData** sidebar entry for live status, cycle and profile management, settings, diagnostics, and logs. Replaces the old multi-screen options flow.
 - **Many appliance types** - Washing machines, dryers, washer-dryer combos, dishwashers, air fryers, bread makers, and pumps/sump pumps, each with tuned defaults; plus two catch-all buckets you tune yourself: **Other (Advanced)** (full profile matching and learning with neutral defaults) and **Threshold Device** (threshold-only detection, no profile matching).
 - **Per-cycle energy & cost** - Energy and cost tracked for every cycle; cost is frozen at the price in effect when the cycle finished, so later price changes don't rewrite history. Per-profile **average cost** and a lifetime **Energy dashboard** sensor (`sensor.<name>_energy_total`) come built in.
-- **Automation-first notifications** - Ready-made per-event push alerts, or your own Home Assistant automations driven by WashData's cycle events - found and created from the panel. **Quiet hours**, **cycle milestones**, and richer finish-message variables included. See [NOTIFICATIONS.md](NOTIFICATIONS.md).
+- **Automation-first notifications** - Ready-made per-event push alerts, or your own Home Assistant automations driven by WashData's cycle events - found and created from the panel. **Quiet hours**, **cycle milestones**, and richer finish-message variables included. See [Notifications & Events](https://github.com/3dg1luk43/ha_washdata/wiki/Notifications-and-Events).
 - **Ask your assistant** - "Is my washer done?" / "How long until the dryer finishes?" answered through Home Assistant's voice/text Assist. See [Ask Home Assistant](#ask-home-assistant).
 - **Pause/Resume, Door & Clean state** - Pause/resume active cycles (optionally cutting power), add-clothes support via a door sensor, and a "laundry still waiting" reminder after a cycle ends.
 - **Robust & self-correcting** - Energy-gated start/end detection, ghost-cycle suppression that persists across restarts, dishwasher end-spike handling, and learning feedback that refines estimates over time.
@@ -142,7 +142,7 @@ Once profiles are created, WashData starts **matching** new cycles automatically
 
 If "Auto-Detect" isn't working perfectly, use the panel's **Settings** tab to tune the logic for your specific machine (each field has a hover tooltip, and observed-cycle suggestions appear inline).
 
-> 📊 **[Click here for a Visual Guide to these settings](SETTINGS_VISUALIZED.md)** - Graphs explaining what the numbers actually do.
+> 📊 **[Click here for a Visual Guide to these settings](https://github.com/3dg1luk43/ha_washdata/wiki/Settings-Visual-Guide)** - Graphs explaining what the numbers actually do.
 
 | Problem | Likely Cause | Solution |
 | :--- | :--- | :--- |
@@ -179,9 +179,18 @@ Phases are descriptive labels for distinct power stages within a cycle (e.g., "P
 
 ## 📊 Documentation & References
 
-- 🔔 **[NOTIFICATIONS.md](NOTIFICATIONS.md)** - Every notification option explained, the two ways to send notifications (per-event targets and native automations), how to build automations on WashData's cycle events (with the `{{ trigger.event.data.* }}` variables), the cycle notification lifecycle, message placeholders, companion-app payload keys, the full Events reference, and entity attributes.
-- 📗 **[IMPLEMENTATION.md](IMPLEMENTATION.md)** - Deep dive into NumPy matching, State Machine logic, and Learning algorithms.
-- 🧪 **[TESTING.md](TESTING.md)** - How to test with the virtual socket.
+Full documentation lives in the **[WashData Wiki](https://github.com/3dg1luk43/ha_washdata/wiki)**.
+
+- 🔔 **[Notifications & Events](https://github.com/3dg1luk43/ha_washdata/wiki/Notifications-and-Events)** - Every notification option explained, the two ways to send notifications (per-event targets and native automations), how to build automations on WashData's cycle events (with the `{{ trigger.event.data.* }}` variables), the cycle notification lifecycle, message placeholders, companion-app payload keys, the full Events reference, and entity attributes.
+- 📊 **[Settings Visual Guide](https://github.com/3dg1luk43/ha_washdata/wiki/Settings-Visual-Guide)** - Graphs explaining what each detection/matching setting actually does.
+- 🏪 **[Community Store](https://github.com/3dg1luk43/ha_washdata/wiki/Community-Store)** - Full guide to browsing, adopting, and sharing appliance setups.
+- 📗 **[Implementation Details](https://github.com/3dg1luk43/ha_washdata/wiki/Implementation-Details)** - Deep dive into NumPy matching, State Machine logic, and Learning algorithms.
+- 🔌 **[WebSocket API](https://github.com/3dg1luk43/ha_washdata/wiki/WebSocket-API)** - Full WebSocket API reference for all panel commands.
+- 🤖 **[ML Subsystem](https://github.com/3dg1luk43/ha_washdata/wiki/ML-Subsystem)** - The experimental on-device ML subsystem.
+- 🧪 **[Testing](https://github.com/3dg1luk43/ha_washdata/wiki/Testing)** - How to run the test suite and use the virtual MQTT socket.
+- 🛠️ **[Developer Tools](https://github.com/3dg1luk43/ha_washdata/wiki/Developer-Tools)** - Offline diagnostic analyser and other dev utilities.
+- 📋 **[Changelog](https://github.com/3dg1luk43/ha_washdata/wiki/Changelog)** - Full version history and release notes.
+- 🗺️ **[Roadmap](https://github.com/3dg1luk43/ha_washdata/wiki/Roadmap)** - Feature roadmap organized by group, with implementation status.
 
 ### The WashData panel
 
@@ -199,7 +208,7 @@ Everything is managed from the **WashData** panel in the Home Assistant sidebar.
 
 The integration's **Configure** dialog ([Settings → Devices & Services → WashData](https://my.home-assistant.io/redirect/integration/?domain=ha_washdata)) is now a small stub with just device type, power sensor, and minimum power - everything else lives in the panel. (The panel itself is a custom sidebar entry at `/ha-washdata`; open it from the Home Assistant sidebar.)
 
-> **Notifications are built on automations.** The old built-in custom-action editor has been removed; instead, Settings → Notifications → **Automations** lists the automations that use a device and creates new ones (blank, or prefilled with a cycle trigger). Any custom actions from an older setup keep firing and can be **converted to an automation or removed** from that section. See **[NOTIFICATIONS.md](NOTIFICATIONS.md)**.
+> **Notifications are built on automations.** The old built-in custom-action editor has been removed; instead, Settings → Notifications → **Automations** lists the automations that use a device and creates new ones (blank, or prefilled with a cycle trigger). Any custom actions from an older setup keep firing and can be **converted to an automation or removed** from that section. See **[Notifications & Events](https://github.com/3dg1luk43/ha_washdata/wiki/Notifications-and-Events)**.
 
 ### 🖥️ Panel Walkthrough
 
@@ -357,7 +366,7 @@ Per-user RBAC. Enable per-user control, set the fallback level for unlisted user
 
 ### Entities Provided
 - **`sensor.<name>_state`**: Current status. Possible values: `idle`, `starting`, `running`, `paused`, `user_paused`, `ending`, `finished`, `anti_wrinkle`, `interrupted`, `force_stopped`, `rinse`, `clean`, `delay_wait`, `unknown`.
-- **`sensor.<name>_program`**: Best-matched profile name. While a cycle is matched it also carries a `reference_profile` attribute - a compact `[[offset_s, watts], ...]` curve of the program's expected power over time (with `duration_s` and `cycle_count`) for energy-management automations; see [NOTIFICATIONS.md](NOTIFICATIONS.md#entity-attributes-useful-in-automations).
+- **`sensor.<name>_program`**: Best-matched profile name. While a cycle is matched it also carries a `reference_profile` attribute - a compact `[[offset_s, watts], ...]` curve of the program's expected power over time (with `duration_s` and `cycle_count`) for energy-management automations; see [Notifications & Events](https://github.com/3dg1luk43/ha_washdata/wiki/Notifications-and-Events#entity-attributes-useful-in-automations).
 - **`sensor.<name>_time_remaining`**: Smart countdown (locks during high-variance phases).
 - **`sensor.<name>_total_duration`**: Total predicted duration (Elapsed + Remaining). Ideal for `timer-bar-card`.
 - **`sensor.<name>_cycle_progress`**: 0–100% (resets after unload timeout).
@@ -404,7 +413,7 @@ copy it to `<config>/custom_sentences/en/ha_washdata.yaml` and restart Home Assi
 It maps a wide set of phrases to the `HaWashdataStatus` intent, with an optional `{name}`
 slot to pick an appliance when you have more than one. The intent works immediately from
 automations and the Assist pipeline; the sentence pack is only what teaches Assist which
-phrases to route to it. See [NOTIFICATIONS.md](NOTIFICATIONS.md) for the exact YAML.
+phrases to route to it. See [Notifications & Events](https://github.com/3dg1luk43/ha_washdata/wiki/Notifications-and-Events) for the exact YAML.
 
 ### Notifications & Events
 
@@ -419,7 +428,7 @@ In an automation you template against the event data, e.g.
 
 Every notification option, how to build automations with these variables, the cycle
 notification lifecycle, message placeholders, companion-app payload keys, and the full
-event payload reference are documented in **[NOTIFICATIONS.md](NOTIFICATIONS.md)**.
+event payload reference are documented in **[Notifications & Events](https://github.com/3dg1luk43/ha_washdata/wiki/Notifications-and-Events)**.
 
 ### 🤝 Contribute Training Data
 
@@ -454,7 +463,7 @@ The [WashData Community Store](https://3dg1luk43.github.io/washdata-store) is a 
 
 **Sharing your programs:** When you have programs with golden reference cycles (cycles marked ⭐ in the Cycles tab, or captured via Record Mode), the **Share this device** button uploads them to the store. Contributions are reviewed; once five distinct users confirm a setup works for their machine, it is auto-approved. Phase maps and detection settings can optionally be bundled with the share.
 
-See **[docs/STORE.md](docs/STORE.md)** for the full guide, including privacy details, contribution tips, and step-by-step instructions.
+See **[Community Store](https://github.com/3dg1luk43/ha_washdata/wiki/Community-Store)** for the full guide, including privacy details, contribution tips, and step-by-step instructions.
 
 ### Supported Languages
 🇦🇱 Shqip • 🇧🇦 Bosanski • 🇧🇬 Български • 🇭🇷 Hrvatski • 🇨🇿 Čeština • 🇩🇰 Dansk • 🇳🇱 Nederlands • 🇬🇧 English • 🇪🇪 Eesti • 🇫🇮 Suomi • 🇫🇷 Français • 🇩🇪 Deutsch • 🇬🇷 Ελληνικά • 🇭🇺 Magyar • 🇮🇸 Íslenska • 🇮🇹 Italiano • 🇯🇵 日本語 • 🇰🇷 한국어 • 🇱🇻 Latviešu • 🇱🇹 Lietuvių • 🇲🇰 Македонски • 🇳🇴 Norsk • 🇵🇱 Polski • 🇵🇹 Português • 🇧🇷 Português (BR) • 🇷🇴 Română • 🇷🇺 Русский • 🇷🇸 Srpski • 🇸🇰 Slovenčina • 🇸🇮 Slovenščina • 🇪🇸 Español • 🇸🇪 Svenska • 🇹🇷 Türkçe • 🇺🇦 Українська • 🇨🇳 简体中文
