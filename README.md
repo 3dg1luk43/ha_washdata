@@ -185,12 +185,12 @@ Full documentation lives in the **[WashData Wiki](https://github.com/3dg1luk43/h
 - 📊 **[Settings Visual Guide](https://github.com/3dg1luk43/ha_washdata/wiki/Settings-Visual-Guide)** - Graphs explaining what each detection/matching setting actually does.
 - 🏪 **[Community Store](https://github.com/3dg1luk43/ha_washdata/wiki/Community-Store)** - Full guide to browsing, adopting, and sharing appliance setups.
 - 📗 **[Implementation Details](https://github.com/3dg1luk43/ha_washdata/wiki/Implementation-Details)** - Deep dive into NumPy matching, State Machine logic, and Learning algorithms.
-- 🔌 **[WebSocket API](https://github.com/3dg1luk43/ha_washdata/wiki/WebSocket-API)** - Full WebSocket API reference for all panel commands.
+- 🔌 **[WebSocket API](docs/WS_API.md)** - Full WebSocket API reference for all panel commands.
 - 🤖 **[ML Subsystem](https://github.com/3dg1luk43/ha_washdata/wiki/ML-Subsystem)** - The experimental on-device ML subsystem.
 - 🧪 **[Testing](https://github.com/3dg1luk43/ha_washdata/wiki/Testing)** - How to run the test suite and use the virtual MQTT socket.
 - 🛠️ **[Developer Tools](https://github.com/3dg1luk43/ha_washdata/wiki/Developer-Tools)** - Offline diagnostic analyser and other dev utilities.
-- 📋 **[Changelog](https://github.com/3dg1luk43/ha_washdata/wiki/Changelog)** - Full version history and release notes.
-- 🗺️ **[Roadmap](https://github.com/3dg1luk43/ha_washdata/wiki/Roadmap)** - Feature roadmap organized by group, with implementation status.
+- 📋 **[Changelog](CHANGELOG.md)** - Full version history and release notes.
+- 🗺️ **[Roadmap](docs/plans/ROADMAP.md)** - Feature roadmap organized by group, with implementation status.
 
 ### The WashData panel
 
