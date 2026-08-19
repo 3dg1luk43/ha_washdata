@@ -64,14 +64,23 @@ class LovelaceResourceItem(TypedDict, total=False):
 
 
 def get_cache_buster(filename: str = CARD_NAME) -> str:
-    """Generate a stable cache buster based on a www asset's mtime.
+    """Generate a stable cache buster for a www asset.
 
-    Also considers the translations/panel/ directory mtime so that
-    translation-only releases (e.g. GitLocalize merges) still bust the
-    browser cache for both the panel JS and the per-language JSON files.
+    Folds in the manifest.json version string so that every release produces a
+    different URL even when the package manager (e.g. HACS) preserves original
+    file mtimes from the release archive.  The mtime path is kept as a secondary
+    signal so translation-only GitLocalize merges still bust the cache.
     """
+    import hashlib
+    import json
+
+    base = Path(__file__).parent
     try:
-        base = Path(__file__).parent
+        manifest_version = json.loads((base / "manifest.json").read_text())["version"]
+    except Exception:  # pylint: disable=broad-exception-caught
+        manifest_version = ""
+
+    try:
         src_mtime = os.path.getmtime(base / "www" / filename)
         try:
             panel_dir = base / "translations" / "panel"
@@ -81,10 +90,12 @@ def get_cache_buster(filename: str = CARD_NAME) -> str:
             )
         except OSError:
             trans_mtime = 0.0
-        return str(int(max(src_mtime, trans_mtime)))
+        mtime_part = str(int(max(src_mtime, trans_mtime)))
     except OSError:
-        # Deterministic fallback when file is unavailable.
-        return "1"
+        mtime_part = "1"
+
+    raw = f"{manifest_version}:{mtime_part}"
+    return hashlib.sha1(raw.encode()).hexdigest()[:10]
 
 
 def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> None:
@@ -207,7 +218,23 @@ class WashDataCardRegistration:
             _LOGGER.warning("Card file not found: %s", src)
             return CARD_FAILED
 
-        _register_static_path(self.hass, INTEGRATION_URL, str(src))
+        # The static route MUST exist before the Lovelace resource is published:
+        # the resource is what makes every browser fetch this URL, and a fetch
+        # that lands before the route is registered 404s, so the module never
+        # runs its customElements.define() and the dashboard reports
+        # "Custom element not found: ha-washdata-card".  Awaiting here (rather
+        # than the old fire-and-forget task) both orders the two steps and
+        # surfaces a genuine registration failure instead of swallowing it.
+        try:
+            await _async_register_path(self.hass, INTEGRATION_URL, str(src))
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.warning(
+                "Failed to register card static path %s -> %s: %s",
+                INTEGRATION_URL,
+                src,
+                exc,
+            )
+            return CARD_FAILED
 
         version = await self.hass.async_add_executor_job(get_cache_buster)
 
