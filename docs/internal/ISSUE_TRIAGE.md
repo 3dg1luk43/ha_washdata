@@ -44,7 +44,7 @@ Verdicts: **FIX** (real bug, fix it), **IMPLEMENT** (FR that fits, build it),
 | 343 | Auto-tune re-suggests thresholds that break anti-crease | IMPLEMENT | M | no |
 | 342 | Door sensor support for dishwashers that auto-open | IMPLEMENT | M | no |
 | 353 | Consume external "programme" value from smart appliance | IMPLEMENT | M | no |
-| 364 | Smart-term splits wash at shorter prefix profile (cf #288) | FIX | L | no (needs export) |
+| 364 | Smart-term splits wash at shorter prefix profile (cf #288) | **FIXED 0.5.5** | L | yes (existing tron4r export + 19-device corpus) |
 | 334 | Water-level variants indistinguishable, no fill role | IMPLEMENT (`accepted`) | L | no (needs export) |
 | 344 | Import historical power data (CSV / recorder) | NEEDS-INFO then phased | L-XL | no |
 | 368 | Remote start of washers/dryers | REFUSE | n/a | no |
@@ -262,6 +262,19 @@ near-empty offset range. **Fix:** backend reject/no-op sub-2-sample or sub-MIN t
 and/or stash a one-slot pre-trim backup for undo; frontend treat empty input as "no change", disable Apply
 below a threshold, derive offsets from the graph handles. Preserve the #330 overnight `+86400` behavior.
 Regression test a clock-mode trim on a `+00:00` cycle. See Batch D.
+
+#### #364 - Smart-term splits wash at shorter prefix profile (cf #288)  [FIXED 0.5.5]
+
+**RESOLVED.** See INTEGRATION_REFERENCE.md register items 135-140. Two corrections to the analysis
+below, both measured on the real corpus: (i) #364's premise is wrong - the #288 guard was *born* in
+0.5.0 (`2bff2d8`) and never removed, so this is a leaky guard, not a regression; (ii) the leak
+weighting below is backwards. Leak (2) is the WEAK one (with the actual Stage-2 formula 31/34
+partial-long traces already clear 0.40 either way); the dominant leak is (3), the 1.5x ratio - the
+reporter's 13 programmes have neighbour ratios of only 1.12-1.48, so the guard was inert on that
+device. Prefix scoring therefore had to *replace* the ratio, not sit behind it. A second finalize path
+was also missed below: `_maybe_finalize_anticrease_tail` stamps SMART straight from RUNNING and only
+needs 180 s under `anti_wrinkle_max_power` (400 W), which a washer's whole wash phase satisfies - that,
+not the ENDING block, best explains the 100-165 W report. Original triage retained for the record:
 
 #### #364 - Smart-term splits wash at shorter prefix profile (cf #288)  [L, needs export]
 The #288 prefix guard (`_match_prefix_ambiguous`) has three leaks that reproduce both reported Miele cases:
@@ -523,8 +536,11 @@ Status: DONE (implemented + tested + committed), WIP, DEFERRED (needs-info), REF
   per-device value->profile mapping UI (heterogeneous across integrations). Per user decision.
 - [NEEDS-INFO] #344 - import historical data. Want to build; asked reporter for the CSV column schema.
   Phased plan (CSV ingest + background segmentation + review UI -> reference_cycles).
-- [NEEDS-INFO] #364 - smart-term prefix split. Real #288 regression; requested the case-2 cycle export
-  (`25ebafe290f7`) to reproduce + A/B a detection-critical fix.
+- [FIXED 0.5.5] #364 - smart-term prefix split. NOT a #288 regression: that guard was born in 0.5.0
+  (`2bff2d8`) and is intact - it is a leaky guard, and there was a SECOND SMART path nobody had counted
+  (`_maybe_finalize_anticrease_tail`, straight from RUNNING at up to 400 W). Fixed without the requested
+  export: the same user's earlier export in `cycle_data/tron4r/` plus the full 19-device corpus were
+  enough to sweep both thresholds (`devtools/prefix_guard_eval.py`). Register items 135-140.
 - [NEEDS-INFO] #334 - water-level fill role (`accepted`). Requested reporter's real top-loader exports
   to validate the fill-separability gate before shipping the Stage-5 member-picker change.
 - [REFUSED] #368 - remote start. Out of scope for a passive monitor (safety/liability, unreliable across

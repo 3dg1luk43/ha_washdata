@@ -58,6 +58,10 @@ from .const import (
     SHAREABLE_SETTING_KEYS,
     SMART_TERM_LANDSCAPE_RATIO,
     SMART_TERM_LANDSCAPE_MIN_SHAPE,
+    SMART_TERM_PREFIX_MARGIN,
+    SMART_TERM_PREFIX_MIN_RATIO,
+    SMART_TERM_PREFIX_MIN_SHAPE,
+    SMART_TERM_TAIL_WINDOW_FRAC,
     STORAGE_KEY,
     STORAGE_VERSION,
     DEFAULT_MAX_PAST_CYCLES,
@@ -359,6 +363,12 @@ class MatchResult:
     is_confident_mismatch: bool = False
     mismatch_reason: str | None = None
     is_prefix_ambiguous: bool = False
+    # The LEGACY (#288-only, full-envelope shape) half of the verdict above.
+    # `is_prefix_ambiguous` is widened by #364's prefix scoring, which is safe for
+    # the ENDING Smart-Termination gate (a false fire only delays the finish) but
+    # NOT for the anti-crease finalize, where blocking can re-hang a cycle the way
+    # #296 described. That consumer reads this narrower flag instead.
+    is_prefix_ambiguous_full_shape: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary with JSON-serializable types, excluding heavy arrays."""
@@ -871,6 +881,60 @@ def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     if len(candidates) > 1:
         margin = candidates[0]["score"] - candidates[1]["score"]
     return margin, margin < MATCH_AMBIGUITY_MARGIN
+
+
+def _match_prefix_ambiguity(
+    candidates: list[dict], best_duration: float
+) -> tuple[bool, bool]:
+    """``(full_shape_hit, prefix_fit_hit)`` for the prefix-landscape guard.
+
+    Both terms answer the same question - "might this trace be a *prefix* of a
+    longer programme rather than a complete short one?" - by two different routes,
+    and either one blocks Smart Termination:
+
+    * ``full_shape_hit`` (#288, unchanged): a non-winning candidate is at least
+      ``SMART_TERM_LANDSCAPE_RATIO`` longer than the winner and still scored
+      ``SMART_TERM_LANDSCAPE_MIN_SHAPE`` against its **full** envelope.
+    * ``prefix_fit_hit`` (#364): a longer candidate's score against its curve
+      **truncated to the elapsed duration** (``prefix_score``, computed in
+      ``analysis.annotate_prefix_scores``) beats the winner's own score by
+      ``SMART_TERM_PREFIX_MARGIN``. The margin is the load-bearing term - it is
+      scale-free, and asks whether the longer programme explains the trace
+      materially better than the short one does. The absolute floor only rejects
+      candidates that fit nothing.
+
+    The full-envelope term alone has three structural false negatives on real
+    devices (see the #364 block in const.py); the prefix term exists because a
+    trace part-way through a longer programme cannot score well against that
+    programme's whole curve. Returned separately because the widened verdict is
+    only safe for the ENDING gate - see ``MatchResult.is_prefix_ambiguous_full_shape``.
+
+    Pure function, no I/O. ``prefix_score`` absent (Stage 4 skipped, a mocked
+    executor, an older snapshot) degrades to the legacy term alone, so this can
+    never fire *less* often than the #288 predicate did.
+    """
+    if best_duration <= 0 or len(candidates) < 2:
+        return False, False
+    best_score = float(candidates[0].get("score") or 0.0)
+    full_shape_hit = False
+    prefix_fit_hit = False
+    for cand in candidates[1:]:
+        prof_dur = float(cand.get("profile_duration") or 0)
+        if prof_dur > best_duration * SMART_TERM_LANDSCAPE_RATIO and float(
+            cand.get("shape_score", cand.get("score", 0))
+        ) >= SMART_TERM_LANDSCAPE_MIN_SHAPE:
+            full_shape_hit = True
+        prefix_score = cand.get("prefix_score")
+        if (
+            prefix_score is not None
+            and prof_dur > best_duration * SMART_TERM_PREFIX_MIN_RATIO
+            and float(prefix_score) >= SMART_TERM_PREFIX_MIN_SHAPE
+            and float(prefix_score) >= best_score + SMART_TERM_PREFIX_MARGIN
+        ):
+            prefix_fit_hit = True
+        if full_shape_hit and prefix_fit_hit:
+            break
+    return full_shape_hit, prefix_fit_hit
 
 
 # ── Selective export/import taxonomy ────────────────────────────────────────────
@@ -2137,6 +2201,7 @@ class ProfileStore:
         n = 200
         agg_curves: dict[str, list[np.ndarray]] = {}
         agg_durs: dict[str, list[float]] = {}
+        agg_spans: dict[str, list[float]] = {}
         member_snaps: dict[str, dict[str, Any]] = {}
         out: list[dict[str, Any]] = []
         for s in snapshots:
@@ -2151,15 +2216,21 @@ class ProfileStore:
                 agg_curves.setdefault(g, []).append(
                     np.interp(np.linspace(0, 1, n), np.linspace(0, 1, arr.size), arr)
                 )
-                agg_durs.setdefault(g, []).append(float(s.get("avg_duration") or 0.0))
+                _dur = float(s.get("avg_duration") or 0.0)
+                agg_durs.setdefault(g, []).append(_dur)
+                # Members are resampled onto a normalized 0..1 axis above, so the
+                # aggregate's own time span is the mean of its members' (#364).
+                agg_spans.setdefault(g, []).append(float(s.get("sample_span_s") or _dur))
         group_members: dict[str, list[str]] = {}
         for g, curves in agg_curves.items():
             key = f"__group__{g}"
             durs = [d for d in agg_durs[g] if d > 0]
+            spans = [v for v in agg_spans.get(g, []) if v > 0]
             out.append({
                 "name": key,
                 "avg_duration": float(np.mean(durs)) if durs else 0.0,
                 "sample_power": np.mean(np.array(curves), axis=0).tolist(),
+                "sample_span_s": float(np.mean(spans)) if spans else 0.0,
             })
             group_members[key] = [m for m in member_to_group if member_to_group[m] == g and m in member_snaps]
         return out, group_members, member_snaps
@@ -4849,6 +4920,60 @@ class ProfileStore:
             return 0.0
         return float(curves[0][-1])
 
+    def profile_tail_power(
+        self,
+        profile_name: str,
+        window_frac: float = SMART_TERM_TAIL_WINDOW_FRAC,
+    ) -> float | None:
+        """Mean power (W) a profile draws over the last ``window_frac`` of its own
+        run, or None when the profile has no usable trace.  Never raises.
+
+        This is the reference level the Smart-Termination power-plausibility guard
+        compares the live trailing power against (#364).  Both Smart-Termination
+        paths key on ``elapsed >= 0.98 * expected``; when the matcher has locked onto
+        a *shorter* look-alike profile that anchor lands mid-wash, and neither path
+        asks whether the appliance is still working.  "Several times what this
+        programme draws at its own end" is the signal that it is.
+
+        Prefers the profile's envelope average curve; falls back to the sample
+        cycle's raw trace, because a thinly-trained profile (one labelled cycle, so
+        no envelope) is still a match candidate and would otherwise get no guard at
+        all.  Pure statistics, no ML - same never-raises contract as
+        ``compute_envelope_conformance``.
+        """
+        try:
+            frac = min(max(float(window_frac), 0.01), 1.0)
+
+            curves = self._envelope_time_power(self.get_envelope(profile_name))
+            if curves and len(curves[0]) >= 2:
+                env_time, env_power = curves
+                cutoff = float(env_time[-1]) * (1.0 - frac)
+                tail = [p for t, p in zip(env_time, env_power) if t >= cutoff]
+                if tail:
+                    return float(np.mean(tail))
+
+            profile = self.get_profiles().get(profile_name)
+            if not isinstance(profile, dict):
+                return None
+            sample_id = profile.get("sample_cycle_id")
+            if not sample_id:
+                return None
+            cycle, _ = self.find_stored_cycle(str(sample_id))
+            if not cycle:
+                return None
+            points = cycle.get("power_data") or []
+            if len(points) < 2 or not isinstance(points[0], (list, tuple)):
+                return None
+            offsets = [float(pt[0]) for pt in points]
+            powers = [float(pt[1]) for pt in points]
+            cutoff = offsets[-1] * (1.0 - frac)
+            tail = [p for t, p in zip(offsets, powers) if t >= cutoff]
+            if not tail:
+                return None
+            return float(np.mean(tail))
+        except Exception:  # noqa: BLE001
+            return None
+
     def reference_curve(
         self, profile_name: str, n: int = REFERENCE_PROFILE_CURVE_POINTS
     ) -> JSONDict | None:
@@ -5389,6 +5514,12 @@ class ProfileStore:
                         "name": name,
                         "avg_duration": float(avg_duration),
                         "sample_power": avg_y,
+                        # True wall-clock span of `sample_power` (#364). NOT the same
+                        # as avg_duration, which prefers target_duration / the
+                        # profile's rolling mean - so index fraction only equals time
+                        # fraction against this. Needed to truncate the curve to an
+                        # elapsed duration for prefix scoring.
+                        "sample_span_s": float(_env_ts_duration or avg_duration),
                     })
                     continue
 
@@ -5431,7 +5562,12 @@ class ProfileStore:
                     "name": name,
                     "avg_duration": float(avg_dur),
                     "sample_power": sample_seg.power.tolist(),
-                    "sample_dt": used_dt
+                    "sample_dt": used_dt,
+                    # True wall-clock span of `sample_power` (#364). _get_cached_sample_segment
+                    # keeps only the LONGEST gap-free segment, so a cycle with an internal
+                    # outage yields a curve covering less than avg_dur - truncating by a
+                    # fraction of avg_dur would then cut the wrong place.
+                    "sample_span_s": float(_seg_ts_duration or avg_dur),
                 })
 
             if skipped_profiles:
@@ -5526,12 +5662,10 @@ class ProfileStore:
         # current trace may be a prefix of that longer program, not a complete
         # short cycle. Signal cycle_detector to block Smart Termination; the
         # power-based fallback timeout will decide instead.
-        best_dur = best_duration or 0.0
-        is_prefix_ambiguous = best_dur > 0 and any(
-            float(c.get("profile_duration") or 0) > best_dur * SMART_TERM_LANDSCAPE_RATIO
-            and float(c.get("shape_score", c.get("score", 0))) >= SMART_TERM_LANDSCAPE_MIN_SHAPE
-            for c in candidates[1:]
+        full_shape_hit, prefix_fit_hit = _match_prefix_ambiguity(
+            candidates, best_duration or 0.0
         )
+        is_prefix_ambiguous = full_shape_hit or prefix_fit_hit
 
         return MatchResult(
             best_name,
@@ -5543,6 +5677,7 @@ class ProfileStore:
             margin,
             ranking=candidates[:5],  # populate ranking (consumed for training snapshots)
             is_prefix_ambiguous=is_prefix_ambiguous,
+            is_prefix_ambiguous_full_shape=full_shape_hit,
         )
 
     async def async_verify_alignment(
