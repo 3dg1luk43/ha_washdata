@@ -141,6 +141,59 @@ async def test_static_path_registered_even_when_lovelace_deferred():
     )
 
 
+class _LegacyHttp:
+    """An HA http object with neither static-path API (no supported HA is this old)."""
+
+
+class _LegacyHass(_FakeHass):
+    def __init__(self, http):
+        super().__init__()
+        self.http = http
+
+
+@pytest.mark.asyncio
+async def test_legacy_fallback_failure_propagates():
+    """A legacy fallback that registered nothing must not report success.
+
+    ``_async_register_path`` only reaches the sync helper when the modern API is
+    missing.  Returning quietly there is the silent half of #384: the caller
+    would go on to publish a Lovelace resource for a URL that 404s forever.
+    """
+    hass = _LegacyHass(_LegacyHttp())
+
+    with pytest.raises(RuntimeError):
+        await fe._async_register_path(hass, "/x/y.js", "/tmp/y.js")
+
+
+@pytest.mark.asyncio
+async def test_legacy_fallback_success_is_accepted():
+    """The shim is still honoured where it genuinely works."""
+    calls: list[tuple[str, str]] = []
+
+    class _WorkingLegacyHttp:
+        def register_static_path(self, url_path, path, cache_headers=True):
+            calls.append((url_path, path))
+
+    hass = _LegacyHass(_WorkingLegacyHttp())
+
+    await fe._async_register_path(hass, "/x/y.js", "/tmp/y.js")
+    assert calls == [("/x/y.js", "/tmp/y.js")]
+
+
+@pytest.mark.asyncio
+async def test_legacy_fallback_raising_helper_propagates():
+    """A sync helper that raises is a real failure, not a fallback to nothing."""
+
+    class _BoomLegacyHttp:
+        def register_static_path(self, *_args, **_kwargs):
+            raise RuntimeError("cannot register static path after app has started")
+
+    hass = _LegacyHass(_BoomLegacyHttp())
+
+    with pytest.raises(RuntimeError):
+        await fe._async_register_path(hass, "/x/y.js", "/tmp/y.js")
+
+
 def test_cache_buster_changes_with_manifest_version():
     """Two releases must never produce the same cache-buster for one mtime.
 

@@ -241,6 +241,29 @@ def test_ensure_gzip_regenerates_when_stale(tmp_path: Path) -> None:
     assert gzip.decompress(gz.read_bytes()) == b"updated content\n"
 
 
+def test_ensure_gzip_drops_a_stale_sibling_when_the_rebuild_fails(tmp_path: Path) -> None:
+    """A failed rebuild must not leave the previous .gz behind.
+
+    aiohttp serves a pre-compressed sibling on existence alone, so keeping the
+    old one after a failed rebuild is the stale-content case this function exists
+    to prevent. Losing compression is the safe half of that trade.
+    """
+    from unittest.mock import patch
+
+    target = tmp_path / "asset.js"
+    target.write_text("previous release\n")
+    fe._ensure_gzip(target)
+    gz = tmp_path / "asset.js.gz"
+    assert gz.is_file()
+
+    target.write_text("new release\n")
+    with patch("shutil.copyfileobj", side_effect=OSError("no space left on device")):
+        fe._ensure_gzip(target)  # must not raise
+
+    assert not gz.exists(), "a stale .gz must be removed when it cannot be rebuilt"
+    assert not list(tmp_path.glob("*.tmp*"))
+
+
 def test_ensure_gzip_leaves_no_temp_files(tmp_path: Path) -> None:
     target = tmp_path / "asset.js"
     target.write_text("data\n" * 100)
