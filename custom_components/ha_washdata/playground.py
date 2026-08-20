@@ -947,7 +947,10 @@ class _DetailSim:
             phase_result = None
             if len(trace) >= 10 and program != "detecting...":
                 phase_result = progress_mod.estimate_phase_progress(
-                    self.store, trace, offset, program
+                    self.store, trace, offset, program,
+                    quiet_threshold_w=float(
+                        getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0
+                    ),
                 )
             ml_pct = progress_mod.ml_progress_percent(
                 self.store, self.options, matched_dur, trace, program, self._end_exp_fn
