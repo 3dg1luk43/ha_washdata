@@ -26,10 +26,14 @@ pip install -r requirements-dev.txt
 # Run benchmark tests only
 ./run_tests.sh --bench
 
-# Run Playwright E2E browser tests only (332 tests across chromium + mobile-chrome, ~30s)
+# Run Playwright E2E browser tests only (336 tests across chromium + mobile-chrome, ~30s)
 ./run_tests.sh --e2e
 
-# Run everything (fast + slow + benchmark + E2E, ~12 min)
+# Same E2E suite against the minified build artifacts (the bytes users download).
+# Fails fast if the build is stale rather than silently testing old code.
+./run_tests.sh --e2e-min
+
+# Run everything (fast + slow + benchmark + E2E readable + E2E min, ~13 min)
 ./run_tests.sh --all
 
 # Run a single test file
@@ -311,4 +315,4 @@ Deep-dive files under `docs/internal/reference/` are supplementary detail — th
 - Translation strings live in `custom_components/ha_washdata/translations/` (25+ languages); `strings.json` is the source of truth
 - Tests in `tests/` reproduce specific GitHub issues (e.g., `test_issue_*.py`) - maintain this pattern for bug fixes
 - Test suite is split into **fast / slow / benchmark / e2e** categories (see `TESTING.md`). The default `./run_tests.sh` runs only the fast pytest subset (~30s). Mark new pytest tests `slow` if they replay `cycle_data/` traces, fan out over many cycles, boot full HA, or take >1.5s — use `pytestmark = pytest.mark.slow` at module level, or `@pytest.mark.slow` per test.
-- **Playwright E2E tests** live in `playwright-tests/` and cover the full panel UI across chromium and mobile-chrome (332 tests, ~30s). Run with `./run_tests.sh --e2e` or `cd playwright-tests && npx playwright test`. The test server (`serve.mjs`) and WS mock infrastructure (`helpers/`) start automatically. E2E tests are included in `--all`. When adding panel features, add or update the matching spec in `playwright-tests/tests/`.
+- **Playwright E2E tests** live in `playwright-tests/` and cover the full panel UI across chromium and mobile-chrome (336 tests, ~30s). Run with `./run_tests.sh --e2e` or `cd playwright-tests && npx playwright test`. The test server (`serve.mjs`) and WS mock infrastructure (`helpers/`) start automatically. E2E tests are included in `--all`. When adding panel features, add or update the matching spec in `playwright-tests/tests/`. The same suite can be run against the **minified build** via `./run_tests.sh --e2e-min` (or `PANEL_BUILD=min npx playwright test`), which `--all` and `devtools/release_check.sh` both do — minification is a real transform, so the readable-source run alone does not prove the shipped bundle works. `playwright.config.ts` uses port 4568 in that mode so `reuseExistingServer` cannot hand the run a server still serving readable sources.

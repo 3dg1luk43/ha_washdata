@@ -10413,6 +10413,19 @@ class HaWashdataPanel extends HTMLElement {
     if (!dev) return;
     const eid = dev.entry_id;
 
+    // Prefix-grouped dispatch: these action families live in dedicated sub-methods.
+    // dev / eid / sr stay derived here and are passed in, never re-derived.
+    if (a.startsWith('sug-')) return this._onActSuggestions(a, btn, dev, eid, sr);
+    if (a.startsWith('ml-')) return this._onActMl(a, btn, dev, eid);
+    if (a.startsWith('store-')) return this._onActStore(a, btn, dev, eid, sr);
+    if (a.startsWith('auto-')) return this._onActAuto(a, btn, dev, eid, sr);
+    if (a.startsWith('maint-')) return this._onActMaintenance(a, btn, dev, eid, sr);
+    // 'pg-new' / 'pg-edit' / 'pg-suggest' are profile-GROUP actions handled in the
+    // chain below, not Playground ones, so they are excluded from the pg- prefix.
+    if (a.startsWith('pg-') && a !== 'pg-new' && a !== 'pg-edit' && a !== 'pg-suggest') {
+      return this._onActPlayground(a, btn, dev, eid);
+    }
+
     if (a === 'open-cycle') {
       const cid = btn.dataset.cid;
       // Cycles opened from the "needs review" queue jump straight to Review mode.
@@ -10453,7 +10466,387 @@ class HaWashdataPanel extends HTMLElement {
         this._render();
       });
 
-    } else if (a === 'sug-apply-all') {
+    } else if (a === 'create-profile') {
+      this._modal = { type: 'create-profile' }; this._render();
+
+    } else if (a === 'setup-cta') {
+      // Setup card primary / secondary CTA — navigate to the relevant panel section.
+      const ctaAction = btn.dataset.ctaAction || '';
+      let params = {};
+      try { params = JSON.parse(btn.dataset.ctaParams || '{}'); } catch (_) {}
+      this._dispatchSetupCta(ctaAction, params);
+
+    } else if (a === 'setup-skip') {
+      // Setup card step skip (snooze 14 days or never).
+      const stepKey = btn.dataset.step;
+      const snooze = btn.dataset.snooze; // "never" or "14d"
+      if (stepKey) {
+        let val;
+        if (snooze === 'never') {
+          val = 'never';
+        } else {
+          const until = new Date();
+          until.setDate(until.getDate() + 14);
+          val = until.toISOString();
+        }
+        this._setPref(stepKey, val);
+        this._reloadSetupStatus(); // async fire-and-forget; calls _render() when done
+      }
+
+    } else if (a === 'hide-setup-card') {
+      // Setup card permanent hide (only offered when dismissible, i.e. phase 3/4).
+      // Keep _setupStatus so _htmlSetupCard can collapse to the phase-3 chip
+      // immediately (nulling it here would hide the card entirely instead — the
+      // sibling setup-skip / expand-setup handlers also leave the status intact).
+      this._setPref('setup_card_dismissed', true);
+      this._render();
+
+    } else if (a === 'expand-setup') {
+      // Phase 3/4 chip tapped — restore full guidance card by clearing the pref.
+      this._setPref('setup_card_dismissed', false);
+      this._render();
+
+    } else if (a === 'set-settings-level') {
+      // F2: switch the Settings tab between Basic and Advanced disclosure.
+      const lvl = (btn.type === 'checkbox' ? btn.checked : btn.dataset.slevel === 'advanced') ? 'advanced' : 'basic';
+      if (lvl !== this._pref('settings_level', 'basic')) {
+        this._snapshotFormToPending(sr);  // keep in-progress edits across re-render
+        this._setPref('settings_level', lvl);
+        this._render();
+      }
+
+    } else if (a === 'pg-new' || a === 'pg-edit' || a === 'pg-suggest') {
+      if (a === 'pg-new') {
+        this._modal = { type: 'profile-group', orig: null, name: '', members: [] };
+      } else if (a === 'pg-edit') {
+        const gname = btn.dataset.gname;
+        const g = ((this._profileGroups || {}).groups || []).find(x => x.name === gname);
+        this._modal = { type: 'profile-group', orig: gname, name: gname, members: g ? [...(g.members || [])] : [] };
+      } else {
+        const s = ((this._profileGroups || {}).suggestions || [])[parseInt(btn.dataset.idx, 10)] || null;
+        if (!s) return;
+        this._modal = { type: 'profile-group', orig: s.existing_group || null, name: s.existing_group || '', members: [...(s.members || [])] };
+      }
+      this._render();
+      // Fetch every profile's envelope so ticked members render on the overlay.
+      this._ensureProfileEnvs(eid, (this._profiles || []).map(p => p.name)).then(() => {
+        if (this._modal && this._modal.type === 'profile-group') this._render();
+      });
+
+    } else if (a === 'rebuild-envelopes') {
+      // Backgrounded task (issue #311): rebuilding every profile serially can
+      // stall a low-power host, so run it via the registry with a header pill.
+      this._kickAndTrack(
+        { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
+        'rebuild-envelopes',
+        async () => { this._showToast(this._t('toast.envelopes_rebuilt', {}, 'Envelopes rebuilt')); await this._fetchProfiles(eid); },
+      );
+
+    } else if (a === 'rec-start') {
+      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
+    } else if (a === 'rec-stop') {
+      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
+    } else if (a === 'rec-process-open') {
+      this._fetchProfiles(eid).then(() => { this._modal = { type: 'process-recording' }; this._render(); });
+    } else if (a === 'rec-discard') {
+      this._modal = { type: 'confirm', title: this._t('modal.discard_recording_title', {}, 'Discard Recording'), message: this._t('modal.discard_recording_msg', {}, 'Discard the saved recording? This cannot be undone.'), okLabel: this._t('btn.discard', {}, 'Discard'),
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._t('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
+      this._render();
+
+    } else if (a === 'fb-confirm') {
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
+    } else if (a === 'fb-ignore') {
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
+    } else if (a === 'fb-correct') {
+      this._fetchProfiles(eid).then(() => { this._modal = { type: 'correct-feedback', cycleId: btn.dataset.cid, detectedProfile: btn.dataset.prof }; this._render(); });
+    } else if (a === 'fb-dismiss-all') {
+      this._modal = { type: 'confirm', title: this._t('modal.dismiss_all_title', {}, 'Dismiss All Feedbacks'), message: this._t('modal.dismiss_all_msg', {count: this._feedbacks.length}, `Dismiss all ${this._feedbacks.length} pending feedback requests?`), okLabel: this._t('modal.dismiss_all_ok', {}, 'Dismiss All'),
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast(this._t('toast.feedback_all_dismissed', {}, 'All feedbacks dismissed')); await this._fetchFeedbacks(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } } };
+      this._render();
+
+    } else if (a === 'create-phase') {
+      this._modal = { type: 'create-phase', deviceType: btn.dataset.dtype }; this._render();
+    } else if (a === 'edit-phase') {
+      this._modal = { type: 'edit-phase', phaseId: btn.dataset.pid, phaseName: btn.dataset.pname, phaseDesc: btn.dataset.pdesc, isDefault: btn.dataset.pisdefault === 'true' }; this._render();
+    } else if (a === 'del-phase') {
+      const pname = btn.dataset.pname, pid = btn.dataset.pid;
+      this._modal = { type: 'confirm', title: this._t('modal.delete_phase_title', {}, 'Delete Phase'), message: this._t('modal.delete_phase_msg', {name: pname}, `Delete phase "${pname}"?`), okLabel: this._t('btn.delete', {}, 'Delete'),
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(this._t('toast.phase_deleted', {name: pname}, `Phase "${pname}" deleted`)); await this._fetchPhases(eid); } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); } } };
+      this._render();
+
+    } else if (a === 'diag-refresh') {
+      this._fetchToolsData(eid).then(() => this._render());
+
+    } else if (a === 'reprocess-history') {
+      this._modal = { type: 'confirm', title: this._t('modal.process_history_title', {}, 'Process History'), message: this._t('modal.process_history_msg', {}, 'Re-run matching, refresh suggestions, retrain ML (if enabled) and recompute cycle health across all stored cycles. This may take a while.'), okLabel: this._t('modal.process_history_ok', {}, 'Process'),
+        onOk: () => this._kickAndTrack({ type: `${_DOMAIN}/reprocess_history`, entry_id: eid }, 'reprocess', async (r) => {
+          const nc = r.count || 0;
+          const bits = [this._t('toast.processed_cycles', {n: nc}, nc + ' cycles')];
+          if (r.suggestions != null) bits.push(this._t('toast.processed_suggestions', {n: r.suggestions}, r.suggestions + ' suggestion(s)'));
+          const np = (r.ml_training && r.ml_training.ok && (r.ml_training.promoted || []).length) || 0;
+          if (np) bits.push(this._t('toast.processed_models', {n: np}, np + ' model(s) promoted'));
+          this._showToast(this._t('toast.processed', {bits: bits.join(', ')}, 'Processed ' + bits.join(', ')));
+          await this._fetchToolsData(eid);
+        }) };
+      this._render();
+    } else if (a === 'clear-debug') {
+      this._modal = { type: 'confirm', title: this._t('modal.clear_debug_title', {}, 'Clear Debug Data'), message: this._t('modal.clear_debug_msg', {}, 'Delete all stored debug traces?'), okLabel: this._t('status.clear', {}, 'Clear'),
+        onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._t('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
+      this._render();
+    } else if (a === 'wipe-history') {
+      this._modal = { type: 'confirm', title: this._t('modal.wipe_all_title', {}, 'Wipe All Data'), message: this._t('modal.wipe_all_msg', {}, '⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.'), okLabel: this._t('modal.wipe_all_ok', {}, 'Wipe Everything'),
+        onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
+      this._render();
+
+    } else if (a === 'export-config') {
+      this._ws({ type: `${_DOMAIN}/export_config`, entry_id: eid }).then(r => {
+        const blob = new Blob([r.json_data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a2 = document.createElement('a');
+        a2.href = url; a2.download = `washdata_export_${eid.slice(0, 8)}.json`;
+        document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
+        this._showToast(this._t('toast.export_downloaded', {}, 'Export downloaded'));
+      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
+    } else if (a === 'export-select-open') {
+      // Open the export wizard: fetch this device's inventory, default everything on.
+      this._modal = { type: 'export-select', inventory: null, loading: true, sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }, expanded: new Set() };
+      this._render();
+      (async () => {
+        let inv = null;
+        try { const r = await this._ws({ type: `${_DOMAIN}/get_export_inventory`, entry_id: eid }); inv = (r && r.manifest) || null; }
+        catch (e) { this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'); }
+        if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'export-select') return;
+        if (!inv) { this._modal = null; this._render(); return; }
+        this._modal.inventory = inv;
+        this._modal.sel = this._wizInitSel({ categories: inv }, false);
+        this._modal.loading = false;
+        this._render();
+      })();
+    } else if (a === 'cyc-select-toggle') {
+      this._selectMode = !this._selectMode;
+      if (!this._selectMode) this._cycleSel.clear();
+      this._render();
+    } else if (a === 'cyc-auto-open') {
+      this._modal = { type: 'auto-label' }; this._render();
+    } else if (a === 'cyc-merge') {
+      const ids = Array.from(this._cycleSel);
+      if (ids.length < 2) return;
+      this._fetchProfiles(eid).then(() => { this._modal = { type: 'merge-cycles', ids }; this._render(); });
+    } else if (a === 'cyc-relabel') {
+      // D6: bulk relabel — reuse the existing profile picker.
+      const ids = Array.from(this._cycleSel);
+      if (!ids.length) return;
+      this._fetchProfiles(eid).then(() => { this._modal = { type: 'bulk-relabel', ids }; this._render(); });
+    } else if (a === 'cyc-load-more') {
+      // D3: append the next page, preserving current sort/filter.
+      this._busyRun('cyc-load-more', async () => {
+        try { await this._loadMoreCycles(eid); }
+        catch (e) { this._showToast(this._t('toast.load_more_failed', { error: e.message || e }, 'Could not load more: ' + (e.message || e)), 'error'); }
+      });
+    } else if (a === 'task-cancel') {
+      const tid = btn.dataset.taskId;
+      if (tid) {
+        this._cancellingTasks.add(tid);
+        this._updateTaskPills();
+        this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {
+          // Cancel request itself failed (dropped socket, etc.) — re-enable the
+          // ✕ so the user can retry instead of leaving the pill stuck "Cancelling…".
+          this._cancellingTasks.delete(tid);
+          this._updateTaskPills();
+        });
+      }
+    } else if (a === 'cyc-compare') {
+      const ids = Array.from(this._cycleSel);
+      if (ids.length < 2) return;
+      // Open the overlay modal immediately (loading state), then fetch each
+      // selected cycle's trace in parallel and fill it in as they arrive.
+      this._modal = { type: 'compare-cycles', ids, cycles: {}, hidden: new Set(), overlays: [], loaded: false };
+      if (!this._profiles.length) this._fetchProfiles(eid);
+      this._render();
+      Promise.all(ids.map(cid =>
+        this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
+          .then(r => ({ cid, r })).catch(() => ({ cid, r: null }))
+      )).then(results => {
+        if (!this._modal || this._modal.type !== 'compare-cycles') return;
+        results.forEach(({ cid, r }) => { if (r) this._modal.cycles[cid] = r; });
+        this._modal.loaded = true;
+        this._render();
+      });
+    } else if (a === 'cyc-bulk-del') {
+      // D4: optimistic delete with a 10s Undo window (no confirm dialog).
+      const ids = Array.from(this._cycleSel);
+      if (!ids.length) return;
+      this._deleteCyclesWithUndo(eid, ids);
+    } else if (a === 'retry-cycles') {
+      this._fetchCycles(eid).then(() => this._render());
+    } else if (a === 'retry-profiles') {
+      Promise.all([this._fetchProfiles(eid), this._fetchProfileGroups(eid)]).then(() => this._render());
+    } else if (a === 'retry-suggestions') {
+      this._fetchSuggestions(eid).then(() => this._render());
+    } else if (a === 'goto-suggestions') {
+      this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
+    } else if (a === 'goto-conflicts') {
+      this._tab = 'settings'; this._fetchTabData();
+    } else if (a === 'conf-goto-section') {
+      const confKeys = this._conflictKeysFromOpts();
+      for (const sec of _SETTINGS_SECTIONS) {
+        const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
+        if (fields.some(f => confKeys.has(f.key))) { this._settingsSec = sec.id; this._render(); break; }
+      }
+    } else if (a === 'toggle-settings-history') {
+      this._settingsHistoryOpen = !this._settingsHistoryOpen;
+      this._render();
+
+    } else if (a === 'settings-revert-key') {
+      const key = btn.dataset.key;
+      const val = JSON.parse(btn.dataset.val);
+      if (!key) return;
+      const eid = dev.entry_id;
+      this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { [key]: val } })
+        .then(() => this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }))
+        .then(r => { this._opts = r.options || {}; return this._fetchSettingsChangelog(eid); })
+        .then(() => {
+          this._showToast(this._t('msg.toast_reverted', { key: this._t('setting.' + key + '.label', {}, key) }, '{key} reverted'), 'success');
+          this._render();
+        })
+        .catch(e => this._showToast(this._t('msg.toast_error', { error: e.message || e }, 'Error: ' + (e.message || e)), 'error'));
+
+    } else if (a === 'toggle-log-drawer') {
+      this._logOpen = !this._logOpen;
+      try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
+      this._render();
+      if (this._logOpen) this._fetchLogs().then(() => { if (this._logOpen) this._render(); });
+    } else if (a === 'open-advanced') {
+      // Overview action cards navigate to the Advanced tab at a given subtab.
+      const sub = btn.dataset.sub;
+      if (sub) this._panelSubtab = sub;
+      this._tab = 'advanced';
+      this._render();
+      if (this._panelSubtab === 'diagnostics' && !this._diag) this._fetchToolsData(eid).then(() => { if (this._tab === 'advanced') this._render(); });
+      else if (this._panelSubtab === 'logs') this._fetchLogs().then(() => { if (this._tab === 'advanced') this._render(); });
+      else if (this._panelSubtab === 'maintenance') this._fetchMaintenance(eid).then(() => { if (this._tab === 'advanced') this._render(); });
+      else if (this._panelSubtab === 'ml') this._fetchTabData();
+    } else if (a === 'add-device') {
+      this._navigate(`/config/integrations/integration/${_DOMAIN}`);
+    } else if (a === 'goto-feedbacks') {
+      this._tab = 'history'; this._cycleFilter = { ...this._cycleFilter, status: 'needs_review' }; this._fetchTabData();
+    } else if (a === 'goto-recording') {
+      this._tab = 'status'; this._fetchTabData();
+    } else if (a === 'logs-refresh') {
+      this._fetchLogs().then(() => this._render());
+    } else if (a === 'logs-export') {
+      this._ws({ type: `${_DOMAIN}/get_logs`, limit: 500 }).then(r => {
+        const lines = (r.logs || []).map(x => `${new Date(x.ts * 1000).toISOString()} ${x.level} ${x.msg}`).join('\n');
+        const blob = new Blob([lines], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a2 = document.createElement('a');
+        a2.href = url; a2.download = `washdata_logs_${Date.now()}.txt`;
+        document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
+        this._showToast(this._t('toast.logs_exported', {}, 'Logs exported'));
+      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
+    } else if (a === 'import-config-open') {
+      // Open the import wizard at the paste/upload step.
+      this._modal = { type: 'import-wizard', step: 'input', jsonText: '', manifest: null, error: null,
+        sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() },
+        expanded: new Set(), mode: 'merge', cycleDest: 'reference', conflicts: {} };
+      this._render();
+    } else if (a === 'import-config-raw') {
+      // Advanced fallback: the legacy raw-JSON whole-store replace.
+      this._modal = { type: 'import-config' }; this._render();
+
+    } else if (a === 'save-prefs') {
+      const dt = sr.getElementById('wd-pref-tab')?.value || '';
+      const dbg = !!sr.getElementById('wd-pref-debug')?.checked;
+      const showExpected = sr.getElementById('wd-pref-expected') ? !!sr.getElementById('wd-pref-expected').checked : true;
+      const showRaw = !!sr.getElementById('wd-pref-raw')?.checked;
+      const dateFmt = sr.getElementById('wd-pref-datefmt')?.value || 'relative';
+      const langOverrideSave = sr.getElementById('wd-pref-lang')?.value || '';
+      const fontScale = parseFloat(sr.getElementById('wd-pref-fontscale')?.value) || 1;
+      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt, lang_override: langOverrideSave, font_scale: fontScale };
+      this._busyRun('save-prefs', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs });
+          if (this._panelCfg) this._panelCfg.prefs = { ...(this._panelCfg.prefs || {}), ...prefs };
+          // Language may have changed: ensure the (now effective) language file is
+          // loaded, then re-render so the new strings take effect immediately.
+          const effLang = langOverrideSave || (this._hass && this._hass.locale && this._hass.locale.language);
+          await this._loadPanelLang(effLang);
+          this._render();
+          this._showToast(this._t('toast.preferences_saved', {}, 'Preferences saved'));
+        } catch (e) { this._showToast(this._t('toast.save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+      });
+
+    } else if (a === 'save-panel') {
+      const panel = {
+        default_tab: sr.getElementById('wd-ps-deftab')?.value || 'status',
+        hidden_tabs: Array.from(sr.querySelectorAll('[data-hidetab]')).filter(c => c.checked).map(c => c.dataset.hidetab),
+      };
+      this._busyRun('save-panel', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/set_panel_config`, panel });
+          this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
+          this._tabInitialized = true;  // keep the user on the current tab
+          this._applyPanelConfig();
+          this._showToast(this._t('toast.panel_settings_saved', {}, 'Panel settings saved'));
+        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+      });
+
+    } else if (a === 'pause-cycle') {
+      this._ws({ type: `${_DOMAIN}/pause_cycle`, entry_id: eid })
+        .then(r => {
+          if (r && r.ok === false) { this._showToast(this._t('toast.pause_no_cycle', {}, 'No active cycle to pause'), 'error'); return; }
+          this._showToast(this._t('toast.cycle_paused', {}, 'Cycle paused'));
+          return this._fetchAll();
+        })
+        .catch(e => this._showToast(this._t('toast.pause_failed', {error: e.message || e}, 'Pause failed: ' + (e.message || e)), 'error'));
+
+    } else if (a === 'resume-cycle') {
+      this._ws({ type: `${_DOMAIN}/resume_cycle`, entry_id: eid })
+        .then(r => {
+          if (r && r.ok === false) { this._showToast(this._t('toast.resume_no_cycle', {}, 'No paused cycle to resume'), 'error'); return; }
+          this._showToast(this._t('toast.cycle_resumed', {}, 'Cycle resumed'));
+          return this._fetchAll();
+        })
+        .catch(e => this._showToast(this._t('msg.toast_resume_failed', {error: e.message || e}, 'Resume failed: ' + (e.message || e)), 'error'));
+
+    } else if (a === 'terminate-cycle') {
+      this._modal = {
+        type: 'confirm',
+        title: this._t('modal.force_stop_title', {}, 'Force Stop Cycle'),
+        message: this._t('modal.force_stop_msg', {}, 'Force-stop the active cycle now? The cycle will be saved as interrupted.'),
+        okLabel: this._t('btn.force_stop', {}, 'Force Stop'),
+        onOk: async () => {
+          try {
+            await this._ws({ type: `${_DOMAIN}/terminate_cycle`, entry_id: eid });
+            this._showToast(this._t('toast.cycle_force_stopped', {}, 'Cycle force-stopped'));
+            await this._fetchAll();
+          } catch (e) { this._showToast(this._t('msg.toast_force_stop_failed', {error: e.message || e}, 'Force stop failed: ' + (e.message || e)), 'error'); }
+        },
+      };
+      this._render();
+
+    } else if (a === 'save-rbac') {
+      const enabled = !!sr.getElementById('wd-rbac-enabled')?.checked;
+      const default_level = sr.getElementById('wd-rbac-default')?.value || 'none';
+      const usersMap = {};
+      sr.querySelectorAll('[data-rbacuser]').forEach(el => {
+        const uid = el.dataset.rbacuser, dev = el.dataset.rbacdev, val = el.value;
+        if (!usersMap[uid]) usersMap[uid] = { default: 'none', devices: {} };
+        if (dev === '__default__') usersMap[uid].default = val;
+        else if (val && val !== 'inherit') usersMap[uid].devices[dev] = val;
+      });
+      this._busyRun('save-rbac', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/set_panel_config`, rbac: { enabled, default_level, users: usersMap } });
+          this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
+          this._showToast(this._t('toast.access_saved', {}, 'Access control saved'));
+        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+      });
+    }
+  }
+
+  _onActSuggestions(a, btn, dev, eid, sr) {
+    if (a === 'sug-apply-all') {
       const keys = this._suggestions.map(s => s.key);
       this._busyRun('save-settings', async () => {
         try {
@@ -10508,8 +10901,11 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchSuggestions(eid);
         } catch (e) { this._showToast(this._t('toast.analysis_failed', {error: e.message || e}, 'Analysis failed: ' + (e.message || e)), 'error'); }
       });
+    }
+  }
 
-    } else if (a === 'ml-train-now') {
+  _onActMl(a, btn, dev, eid) {
+    if (a === 'ml-train-now') {
       // Detached, registry-tracked task: a header pill shows progress and it
       // survives a dropped socket; the result loads when it settles.
       this._kickAndTrack({ type: `${_DOMAIN}/trigger_ml_training`, entry_id: eid }, 'ml-train-now:' + eid, async (r) => {
@@ -10539,9 +10935,12 @@ class HaWashdataPanel extends HTMLElement {
           await this._loadMlTrainingStatus(eid);
         } catch (e) { this._showToast(this._t('msg.toast_revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
       });
+    }
+  }
 
+  _onActStore(a, btn, dev, eid, sr) {
     // ── Community Store ──────────────────────────────────────────────────────
-    } else if (a === 'store-toggle-online') {
+    if (a === 'store-toggle-online') {
       // Online features are integration-wide: persist via the global store_set_online.
       const on = !!btn.checked;
       this._busyRun('store-account', async () => {
@@ -10807,8 +11206,11 @@ class HaWashdataPanel extends HTMLElement {
         brand: this._opts.store_brand || '', model: this._opts.store_model || '', origin: location.origin,
       }).toString();
       window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');
+    }
+  }
 
-    } else if (a === 'auto-new') {
+  _onActAuto(a, btn, dev, eid, sr) {
+    if (a === 'auto-new') {
       this._navigate('/config/automation/edit/new');
 
     } else if (a === 'auto-new-started') {
@@ -10849,119 +11251,11 @@ class HaWashdataPanel extends HTMLElement {
         try { await this._ws({ type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid, confidence_threshold: thr }); this._showToast(this._t('toast.auto_label_complete', {}, 'Auto-label complete')); await this._fetchCycles(eid); }
         catch (e) { this._showToast(this._t('toast.auto_label_failed', {error: e.message || e}, 'Auto-label failed: ' + (e.message || e)), 'error'); }
       });
+    }
+  }
 
-    } else if (a === 'create-profile') {
-      this._modal = { type: 'create-profile' }; this._render();
-
-    } else if (a === 'setup-cta') {
-      // Setup card primary / secondary CTA — navigate to the relevant panel section.
-      const ctaAction = btn.dataset.ctaAction || '';
-      let params = {};
-      try { params = JSON.parse(btn.dataset.ctaParams || '{}'); } catch (_) {}
-      this._dispatchSetupCta(ctaAction, params);
-
-    } else if (a === 'setup-skip') {
-      // Setup card step skip (snooze 14 days or never).
-      const stepKey = btn.dataset.step;
-      const snooze = btn.dataset.snooze; // "never" or "14d"
-      if (stepKey) {
-        let val;
-        if (snooze === 'never') {
-          val = 'never';
-        } else {
-          const until = new Date();
-          until.setDate(until.getDate() + 14);
-          val = until.toISOString();
-        }
-        this._setPref(stepKey, val);
-        this._reloadSetupStatus(); // async fire-and-forget; calls _render() when done
-      }
-
-    } else if (a === 'hide-setup-card') {
-      // Setup card permanent hide (only offered when dismissible, i.e. phase 3/4).
-      // Keep _setupStatus so _htmlSetupCard can collapse to the phase-3 chip
-      // immediately (nulling it here would hide the card entirely instead — the
-      // sibling setup-skip / expand-setup handlers also leave the status intact).
-      this._setPref('setup_card_dismissed', true);
-      this._render();
-
-    } else if (a === 'expand-setup') {
-      // Phase 3/4 chip tapped — restore full guidance card by clearing the pref.
-      this._setPref('setup_card_dismissed', false);
-      this._render();
-
-    } else if (a === 'set-settings-level') {
-      // F2: switch the Settings tab between Basic and Advanced disclosure.
-      const lvl = (btn.type === 'checkbox' ? btn.checked : btn.dataset.slevel === 'advanced') ? 'advanced' : 'basic';
-      if (lvl !== this._pref('settings_level', 'basic')) {
-        this._snapshotFormToPending(sr);  // keep in-progress edits across re-render
-        this._setPref('settings_level', lvl);
-        this._render();
-      }
-
-    } else if (a === 'pg-new' || a === 'pg-edit' || a === 'pg-suggest') {
-      if (a === 'pg-new') {
-        this._modal = { type: 'profile-group', orig: null, name: '', members: [] };
-      } else if (a === 'pg-edit') {
-        const gname = btn.dataset.gname;
-        const g = ((this._profileGroups || {}).groups || []).find(x => x.name === gname);
-        this._modal = { type: 'profile-group', orig: gname, name: gname, members: g ? [...(g.members || [])] : [] };
-      } else {
-        const s = ((this._profileGroups || {}).suggestions || [])[parseInt(btn.dataset.idx, 10)] || null;
-        if (!s) return;
-        this._modal = { type: 'profile-group', orig: s.existing_group || null, name: s.existing_group || '', members: [...(s.members || [])] };
-      }
-      this._render();
-      // Fetch every profile's envelope so ticked members render on the overlay.
-      this._ensureProfileEnvs(eid, (this._profiles || []).map(p => p.name)).then(() => {
-        if (this._modal && this._modal.type === 'profile-group') this._render();
-      });
-
-    } else if (a === 'rebuild-envelopes') {
-      // Backgrounded task (issue #311): rebuilding every profile serially can
-      // stall a low-power host, so run it via the registry with a header pill.
-      this._kickAndTrack(
-        { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
-        'rebuild-envelopes',
-        async () => { this._showToast(this._t('toast.envelopes_rebuilt', {}, 'Envelopes rebuilt')); await this._fetchProfiles(eid); },
-      );
-
-    } else if (a === 'rec-start') {
-      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
-    } else if (a === 'rec-stop') {
-      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
-    } else if (a === 'rec-process-open') {
-      this._fetchProfiles(eid).then(() => { this._modal = { type: 'process-recording' }; this._render(); });
-    } else if (a === 'rec-discard') {
-      this._modal = { type: 'confirm', title: this._t('modal.discard_recording_title', {}, 'Discard Recording'), message: this._t('modal.discard_recording_msg', {}, 'Discard the saved recording? This cannot be undone.'), okLabel: this._t('btn.discard', {}, 'Discard'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._t('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
-      this._render();
-
-    } else if (a === 'fb-confirm') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
-    } else if (a === 'fb-ignore') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
-    } else if (a === 'fb-correct') {
-      this._fetchProfiles(eid).then(() => { this._modal = { type: 'correct-feedback', cycleId: btn.dataset.cid, detectedProfile: btn.dataset.prof }; this._render(); });
-    } else if (a === 'fb-dismiss-all') {
-      this._modal = { type: 'confirm', title: this._t('modal.dismiss_all_title', {}, 'Dismiss All Feedbacks'), message: this._t('modal.dismiss_all_msg', {count: this._feedbacks.length}, `Dismiss all ${this._feedbacks.length} pending feedback requests?`), okLabel: this._t('modal.dismiss_all_ok', {}, 'Dismiss All'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast(this._t('toast.feedback_all_dismissed', {}, 'All feedbacks dismissed')); await this._fetchFeedbacks(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } } };
-      this._render();
-
-    } else if (a === 'create-phase') {
-      this._modal = { type: 'create-phase', deviceType: btn.dataset.dtype }; this._render();
-    } else if (a === 'edit-phase') {
-      this._modal = { type: 'edit-phase', phaseId: btn.dataset.pid, phaseName: btn.dataset.pname, phaseDesc: btn.dataset.pdesc, isDefault: btn.dataset.pisdefault === 'true' }; this._render();
-    } else if (a === 'del-phase') {
-      const pname = btn.dataset.pname, pid = btn.dataset.pid;
-      this._modal = { type: 'confirm', title: this._t('modal.delete_phase_title', {}, 'Delete Phase'), message: this._t('modal.delete_phase_msg', {name: pname}, `Delete phase "${pname}"?`), okLabel: this._t('btn.delete', {}, 'Delete'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(this._t('toast.phase_deleted', {name: pname}, `Phase "${pname}" deleted`)); await this._fetchPhases(eid); } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); } } };
-      this._render();
-
-    } else if (a === 'diag-refresh') {
-      this._fetchToolsData(eid).then(() => this._render());
-
-    } else if (a === 'maint-add') {
+  _onActMaintenance(a, btn, dev, eid, sr) {
+    if (a === 'maint-add') {
       const eventType = sr.getElementById('wd-maint-type')?.value || '';
       const date = sr.getElementById('wd-maint-date')?.value || '';
       const notes = (sr.getElementById('wd-maint-notes')?.value || '').trim();
@@ -11003,74 +11297,11 @@ class HaWashdataPanel extends HTMLElement {
           this._render();
         } catch (e) { this._showToast(this._t('toast.reminders_save_failed', { error: e.message || e }, 'Could not save reminders: ' + (e.message || e)), 'error'); }
       });
+    }
+  }
 
-    } else if (a === 'reprocess-history') {
-      this._modal = { type: 'confirm', title: this._t('modal.process_history_title', {}, 'Process History'), message: this._t('modal.process_history_msg', {}, 'Re-run matching, refresh suggestions, retrain ML (if enabled) and recompute cycle health across all stored cycles. This may take a while.'), okLabel: this._t('modal.process_history_ok', {}, 'Process'),
-        onOk: () => this._kickAndTrack({ type: `${_DOMAIN}/reprocess_history`, entry_id: eid }, 'reprocess', async (r) => {
-          const nc = r.count || 0;
-          const bits = [this._t('toast.processed_cycles', {n: nc}, nc + ' cycles')];
-          if (r.suggestions != null) bits.push(this._t('toast.processed_suggestions', {n: r.suggestions}, r.suggestions + ' suggestion(s)'));
-          const np = (r.ml_training && r.ml_training.ok && (r.ml_training.promoted || []).length) || 0;
-          if (np) bits.push(this._t('toast.processed_models', {n: np}, np + ' model(s) promoted'));
-          this._showToast(this._t('toast.processed', {bits: bits.join(', ')}, 'Processed ' + bits.join(', ')));
-          await this._fetchToolsData(eid);
-        }) };
-      this._render();
-    } else if (a === 'clear-debug') {
-      this._modal = { type: 'confirm', title: this._t('modal.clear_debug_title', {}, 'Clear Debug Data'), message: this._t('modal.clear_debug_msg', {}, 'Delete all stored debug traces?'), okLabel: this._t('status.clear', {}, 'Clear'),
-        onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._t('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
-      this._render();
-    } else if (a === 'wipe-history') {
-      this._modal = { type: 'confirm', title: this._t('modal.wipe_all_title', {}, 'Wipe All Data'), message: this._t('modal.wipe_all_msg', {}, '⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.'), okLabel: this._t('modal.wipe_all_ok', {}, 'Wipe Everything'),
-        onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
-      this._render();
-
-    } else if (a === 'export-config') {
-      this._ws({ type: `${_DOMAIN}/export_config`, entry_id: eid }).then(r => {
-        const blob = new Blob([r.json_data], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a2 = document.createElement('a');
-        a2.href = url; a2.download = `washdata_export_${eid.slice(0, 8)}.json`;
-        document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
-        this._showToast(this._t('toast.export_downloaded', {}, 'Export downloaded'));
-      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
-    } else if (a === 'export-select-open') {
-      // Open the export wizard: fetch this device's inventory, default everything on.
-      this._modal = { type: 'export-select', inventory: null, loading: true, sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }, expanded: new Set() };
-      this._render();
-      (async () => {
-        let inv = null;
-        try { const r = await this._ws({ type: `${_DOMAIN}/get_export_inventory`, entry_id: eid }); inv = (r && r.manifest) || null; }
-        catch (e) { this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'); }
-        if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'export-select') return;
-        if (!inv) { this._modal = null; this._render(); return; }
-        this._modal.inventory = inv;
-        this._modal.sel = this._wizInitSel({ categories: inv }, false);
-        this._modal.loading = false;
-        this._render();
-      })();
-    } else if (a === 'cyc-select-toggle') {
-      this._selectMode = !this._selectMode;
-      if (!this._selectMode) this._cycleSel.clear();
-      this._render();
-    } else if (a === 'cyc-auto-open') {
-      this._modal = { type: 'auto-label' }; this._render();
-    } else if (a === 'cyc-merge') {
-      const ids = Array.from(this._cycleSel);
-      if (ids.length < 2) return;
-      this._fetchProfiles(eid).then(() => { this._modal = { type: 'merge-cycles', ids }; this._render(); });
-    } else if (a === 'cyc-relabel') {
-      // D6: bulk relabel — reuse the existing profile picker.
-      const ids = Array.from(this._cycleSel);
-      if (!ids.length) return;
-      this._fetchProfiles(eid).then(() => { this._modal = { type: 'bulk-relabel', ids }; this._render(); });
-    } else if (a === 'cyc-load-more') {
-      // D3: append the next page, preserving current sort/filter.
-      this._busyRun('cyc-load-more', async () => {
-        try { await this._loadMoreCycles(eid); }
-        catch (e) { this._showToast(this._t('toast.load_more_failed', { error: e.message || e }, 'Could not load more: ' + (e.message || e)), 'error'); }
-      });
-    } else if (a === 'pg-analysis-tab') {
+  _onActPlayground(a, btn, dev, eid) {
+    if (a === 'pg-analysis-tab') {
       const tab = btn.dataset.subtab || 'history';
       if (tab !== this._pgAnalysisTab) { this._pgAnalysisTab = tab; this._render(); requestAnimationFrame(() => this._drawPlaygroundCanvases()); }
     } else if (a === 'pg-run-history') {
@@ -11079,18 +11310,6 @@ class HaWashdataPanel extends HTMLElement {
       this._pgBatchCancel = true;
       const tid = this._pgHistoryTaskId || this._pgSweepTaskId;
       if (tid) this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
-    } else if (a === 'task-cancel') {
-      const tid = btn.dataset.taskId;
-      if (tid) {
-        this._cancellingTasks.add(tid);
-        this._updateTaskPills();
-        this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {
-          // Cancel request itself failed (dropped socket, etc.) — re-enable the
-          // ✕ so the user can retry instead of leaving the pill stuck "Cancelling…".
-          this._cancellingTasks.delete(tid);
-          this._updateTaskPills();
-        });
-      }
     } else if (a === 'pg-load-run') {
       const tid = btn.dataset.taskId;
       if (!tid) return;
@@ -11146,193 +11365,6 @@ class HaWashdataPanel extends HTMLElement {
       this._pgDeletePreset();
     } else if (a === 'pg-publish-one') {
       this._pgPublishOne(btn.dataset.pgkey);
-    } else if (a === 'cyc-compare') {
-      const ids = Array.from(this._cycleSel);
-      if (ids.length < 2) return;
-      // Open the overlay modal immediately (loading state), then fetch each
-      // selected cycle's trace in parallel and fill it in as they arrive.
-      this._modal = { type: 'compare-cycles', ids, cycles: {}, hidden: new Set(), overlays: [], loaded: false };
-      if (!this._profiles.length) this._fetchProfiles(eid);
-      this._render();
-      Promise.all(ids.map(cid =>
-        this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
-          .then(r => ({ cid, r })).catch(() => ({ cid, r: null }))
-      )).then(results => {
-        if (!this._modal || this._modal.type !== 'compare-cycles') return;
-        results.forEach(({ cid, r }) => { if (r) this._modal.cycles[cid] = r; });
-        this._modal.loaded = true;
-        this._render();
-      });
-    } else if (a === 'cyc-bulk-del') {
-      // D4: optimistic delete with a 10s Undo window (no confirm dialog).
-      const ids = Array.from(this._cycleSel);
-      if (!ids.length) return;
-      this._deleteCyclesWithUndo(eid, ids);
-    } else if (a === 'retry-cycles') {
-      this._fetchCycles(eid).then(() => this._render());
-    } else if (a === 'retry-profiles') {
-      Promise.all([this._fetchProfiles(eid), this._fetchProfileGroups(eid)]).then(() => this._render());
-    } else if (a === 'retry-suggestions') {
-      this._fetchSuggestions(eid).then(() => this._render());
-    } else if (a === 'goto-suggestions') {
-      this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
-    } else if (a === 'goto-conflicts') {
-      this._tab = 'settings'; this._fetchTabData();
-    } else if (a === 'conf-goto-section') {
-      const confKeys = this._conflictKeysFromOpts();
-      for (const sec of _SETTINGS_SECTIONS) {
-        const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
-        if (fields.some(f => confKeys.has(f.key))) { this._settingsSec = sec.id; this._render(); break; }
-      }
-    } else if (a === 'toggle-settings-history') {
-      this._settingsHistoryOpen = !this._settingsHistoryOpen;
-      this._render();
-
-    } else if (a === 'settings-revert-key') {
-      const key = btn.dataset.key;
-      const val = JSON.parse(btn.dataset.val);
-      if (!key) return;
-      const eid = dev.entry_id;
-      this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { [key]: val } })
-        .then(() => this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }))
-        .then(r => { this._opts = r.options || {}; return this._fetchSettingsChangelog(eid); })
-        .then(() => {
-          this._showToast(this._t('msg.toast_reverted', { key: this._t('setting.' + key + '.label', {}, key) }, '{key} reverted'), 'success');
-          this._render();
-        })
-        .catch(e => this._showToast(this._t('msg.toast_error', { error: e.message || e }, 'Error: ' + (e.message || e)), 'error'));
-
-    } else if (a === 'toggle-log-drawer') {
-      this._logOpen = !this._logOpen;
-      try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
-      this._render();
-      if (this._logOpen) this._fetchLogs().then(() => { if (this._logOpen) this._render(); });
-    } else if (a === 'open-advanced') {
-      // Overview action cards navigate to the Advanced tab at a given subtab.
-      const sub = btn.dataset.sub;
-      if (sub) this._panelSubtab = sub;
-      this._tab = 'advanced';
-      this._render();
-      if (this._panelSubtab === 'diagnostics' && !this._diag) this._fetchToolsData(eid).then(() => { if (this._tab === 'advanced') this._render(); });
-      else if (this._panelSubtab === 'logs') this._fetchLogs().then(() => { if (this._tab === 'advanced') this._render(); });
-      else if (this._panelSubtab === 'maintenance') this._fetchMaintenance(eid).then(() => { if (this._tab === 'advanced') this._render(); });
-      else if (this._panelSubtab === 'ml') this._fetchTabData();
-    } else if (a === 'add-device') {
-      this._navigate(`/config/integrations/integration/${_DOMAIN}`);
-    } else if (a === 'goto-feedbacks') {
-      this._tab = 'history'; this._cycleFilter = { ...this._cycleFilter, status: 'needs_review' }; this._fetchTabData();
-    } else if (a === 'goto-recording') {
-      this._tab = 'status'; this._fetchTabData();
-    } else if (a === 'logs-refresh') {
-      this._fetchLogs().then(() => this._render());
-    } else if (a === 'logs-export') {
-      this._ws({ type: `${_DOMAIN}/get_logs`, limit: 500 }).then(r => {
-        const lines = (r.logs || []).map(x => `${new Date(x.ts * 1000).toISOString()} ${x.level} ${x.msg}`).join('\n');
-        const blob = new Blob([lines], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a2 = document.createElement('a');
-        a2.href = url; a2.download = `washdata_logs_${Date.now()}.txt`;
-        document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
-        this._showToast(this._t('toast.logs_exported', {}, 'Logs exported'));
-      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
-    } else if (a === 'import-config-open') {
-      // Open the import wizard at the paste/upload step.
-      this._modal = { type: 'import-wizard', step: 'input', jsonText: '', manifest: null, error: null,
-        sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() },
-        expanded: new Set(), mode: 'merge', cycleDest: 'reference', conflicts: {} };
-      this._render();
-    } else if (a === 'import-config-raw') {
-      // Advanced fallback: the legacy raw-JSON whole-store replace.
-      this._modal = { type: 'import-config' }; this._render();
-
-    } else if (a === 'save-prefs') {
-      const dt = sr.getElementById('wd-pref-tab')?.value || '';
-      const dbg = !!sr.getElementById('wd-pref-debug')?.checked;
-      const showExpected = sr.getElementById('wd-pref-expected') ? !!sr.getElementById('wd-pref-expected').checked : true;
-      const showRaw = !!sr.getElementById('wd-pref-raw')?.checked;
-      const dateFmt = sr.getElementById('wd-pref-datefmt')?.value || 'relative';
-      const langOverrideSave = sr.getElementById('wd-pref-lang')?.value || '';
-      const fontScale = parseFloat(sr.getElementById('wd-pref-fontscale')?.value) || 1;
-      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt, lang_override: langOverrideSave, font_scale: fontScale };
-      this._busyRun('save-prefs', async () => {
-        try {
-          await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs });
-          if (this._panelCfg) this._panelCfg.prefs = { ...(this._panelCfg.prefs || {}), ...prefs };
-          // Language may have changed: ensure the (now effective) language file is
-          // loaded, then re-render so the new strings take effect immediately.
-          const effLang = langOverrideSave || (this._hass && this._hass.locale && this._hass.locale.language);
-          await this._loadPanelLang(effLang);
-          this._render();
-          this._showToast(this._t('toast.preferences_saved', {}, 'Preferences saved'));
-        } catch (e) { this._showToast(this._t('toast.save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
-      });
-
-    } else if (a === 'save-panel') {
-      const panel = {
-        default_tab: sr.getElementById('wd-ps-deftab')?.value || 'status',
-        hidden_tabs: Array.from(sr.querySelectorAll('[data-hidetab]')).filter(c => c.checked).map(c => c.dataset.hidetab),
-      };
-      this._busyRun('save-panel', async () => {
-        try {
-          await this._ws({ type: `${_DOMAIN}/set_panel_config`, panel });
-          this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
-          this._tabInitialized = true;  // keep the user on the current tab
-          this._applyPanelConfig();
-          this._showToast(this._t('toast.panel_settings_saved', {}, 'Panel settings saved'));
-        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
-      });
-
-    } else if (a === 'pause-cycle') {
-      this._ws({ type: `${_DOMAIN}/pause_cycle`, entry_id: eid })
-        .then(r => {
-          if (r && r.ok === false) { this._showToast(this._t('toast.pause_no_cycle', {}, 'No active cycle to pause'), 'error'); return; }
-          this._showToast(this._t('toast.cycle_paused', {}, 'Cycle paused'));
-          return this._fetchAll();
-        })
-        .catch(e => this._showToast(this._t('toast.pause_failed', {error: e.message || e}, 'Pause failed: ' + (e.message || e)), 'error'));
-
-    } else if (a === 'resume-cycle') {
-      this._ws({ type: `${_DOMAIN}/resume_cycle`, entry_id: eid })
-        .then(r => {
-          if (r && r.ok === false) { this._showToast(this._t('toast.resume_no_cycle', {}, 'No paused cycle to resume'), 'error'); return; }
-          this._showToast(this._t('toast.cycle_resumed', {}, 'Cycle resumed'));
-          return this._fetchAll();
-        })
-        .catch(e => this._showToast(this._t('msg.toast_resume_failed', {error: e.message || e}, 'Resume failed: ' + (e.message || e)), 'error'));
-
-    } else if (a === 'terminate-cycle') {
-      this._modal = {
-        type: 'confirm',
-        title: this._t('modal.force_stop_title', {}, 'Force Stop Cycle'),
-        message: this._t('modal.force_stop_msg', {}, 'Force-stop the active cycle now? The cycle will be saved as interrupted.'),
-        okLabel: this._t('btn.force_stop', {}, 'Force Stop'),
-        onOk: async () => {
-          try {
-            await this._ws({ type: `${_DOMAIN}/terminate_cycle`, entry_id: eid });
-            this._showToast(this._t('toast.cycle_force_stopped', {}, 'Cycle force-stopped'));
-            await this._fetchAll();
-          } catch (e) { this._showToast(this._t('msg.toast_force_stop_failed', {error: e.message || e}, 'Force stop failed: ' + (e.message || e)), 'error'); }
-        },
-      };
-      this._render();
-
-    } else if (a === 'save-rbac') {
-      const enabled = !!sr.getElementById('wd-rbac-enabled')?.checked;
-      const default_level = sr.getElementById('wd-rbac-default')?.value || 'none';
-      const usersMap = {};
-      sr.querySelectorAll('[data-rbacuser]').forEach(el => {
-        const uid = el.dataset.rbacuser, dev = el.dataset.rbacdev, val = el.value;
-        if (!usersMap[uid]) usersMap[uid] = { default: 'none', devices: {} };
-        if (dev === '__default__') usersMap[uid].default = val;
-        else if (val && val !== 'inherit') usersMap[uid].devices[dev] = val;
-      });
-      this._busyRun('save-rbac', async () => {
-        try {
-          await this._ws({ type: `${_DOMAIN}/set_panel_config`, rbac: { enabled, default_level, users: usersMap } });
-          this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
-          this._showToast(this._t('toast.access_saved', {}, 'Access control saved'));
-        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
-      });
     }
   }
 
@@ -11384,190 +11416,15 @@ class HaWashdataPanel extends HTMLElement {
       }
     }
 
-    // ---- Community Store: import a reference cycle ----
-    if (m && m.type === 'store-import') {
-      if (action === 'store-import-mode-new') { m.mode = 'new'; this._render(); return; }
-      if (action === 'store-import-mode-merge') { m.mode = 'merge'; this._render(); return; }
-      if (action === 'store-import-ok') {
-        const msg = { type: `${_DOMAIN}/store_import_cycle`, entry_id: eid, cycle_id: m.cycleId };
-        if (m.mode === 'merge') {
-          const target = sr.getElementById('wd-store-import-target')?.value || '';
-          if (!target) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to merge into'), 'error'); return; }
-          msg.target_profile = target;
-        } else {
-          const name = (sr.getElementById('wd-store-import-name')?.value || '').trim() || m.program;
-          if (!name) { this._showToast(this._t('toast.store_name_required', {}, 'Enter a profile name'), 'error'); return; }
-          msg.new_profile_name = name;
-        }
-        await this._busyRun('store-import', async () => {
-          try {
-            const r = await this._ws(msg);
-            if (r && r.error) { this._showToast(this._t('toast.store_import_failed', {error: r.error}, 'Import failed: ' + r.error), 'error'); return; }
-            this._modal = null;
-            this._showToast(this._t('toast.store_imported', {profile: (r && r.profile) || ''}, `Imported into ${(r && r.profile) || 'profile'}`));
-            await this._fetchProfiles(eid);
-          } catch (e) { this._showToast(this._t('toast.store_import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
+    // NB: 'import-ok' (the legacy raw-JSON import modal) is deliberately NOT in this
+    // list, so the 'import-' names are matched one by one rather than by prefix.
+    if (action.startsWith('store-import-') || action === 'store-share-ok'
+        || action.startsWith('wiz-') || action.startsWith('imp-')
+        || action === 'import-back' || action === 'import-analyze' || action === 'import-apply-ok') {
+      return this._onMActImport(action, btn, m, eid, sr);
     }
 
-    // ---- Community Store: share a golden cycle ----
-    if (m && m.type === 'store-share') {
-      if (action === 'store-share-ok') {
-        const program = (sr.getElementById('wd-store-share-prog')?.value || '').trim();
-        const description = (sr.getElementById('wd-store-share-desc')?.value || '').trim();
-        if (!program) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to share into'), 'error'); return; }
-        await this._busyRun('store-share', async () => {
-          try {
-            const r = await this._ws({ type: `${_DOMAIN}/store_upload_cycle`, entry_id: eid, local_cycle_id: m.cycleId, program, description });
-            if (r && r.error) {
-              if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
-              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
-              return;
-            }
-            this._modal = null;
-            this._showToast(this._t('toast.store_shared', {}, 'Shared to the community store - pending review.'));
-          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-    }
-
-    // ---- Community Store: share a whole device bundle ----
-    if (m && m.type === 'store-share-device') {
-      if (action === 'sd-toggle-cyc') {
-        const cid = btn.dataset.cid;
-        if (m.selected.has(cid)) m.selected.delete(cid); else m.selected.add(cid);
-        this._render();
-        return;
-      }
-      if (action === 'sd-toggle-prof') {
-        const prog = btn.dataset.prog;
-        const grp = this._shareableByProgram().find(g => g.program === prog);
-        if (grp) {
-          const all = grp.cycles.every(c => m.selected.has(c.id));
-          grp.cycles.forEach(c => { if (all) m.selected.delete(c.id); else m.selected.add(c.id); });
-        }
-        this._render();
-        return;
-      }
-      if (action === 'sd-toggle-phases') {
-        const prog = btn.dataset.prog;
-        if (!m.includePhases) m.includePhases = new Set();
-        if (m.includePhases.has(prog)) m.includePhases.delete(prog); else m.includePhases.add(prog);
-        this._render();
-        return;
-      }
-      if (action === 'sd-toggle-settings') { m.includeSettings = !m.includeSettings; this._render(); return; }
-      if (action === 'sd-toggle-consent') { m.consented = !m.consented; this._render(); return; }
-      if (action === 'sd-toggle-guide') { m.guideOpen = !m.guideOpen; this._render(); return; }
-      if (action === 'store-share-device-ok') {
-        // Build the {local_cycle_id, program} items from the model selection,
-        // resolving each cycle's program from the fetched shareable list.
-        const progById = new Map();
-        (this._shareableCycles || []).forEach(c => progById.set(c.id, (c.profile_name || '').trim()));
-        const items = Array.from(m.selected)
-          .map(cid => ({ local_cycle_id: cid, program: progById.get(cid) || '' }))
-          .filter(it => it.program);
-        if (!items.length) { this._showToast(this._t('toast.share_device_none_sel', {}, 'Select at least one cycle to share'), 'error'); return; }
-        // Only send phases for programs that both opted in AND have a selected cycle.
-        const selectedProgs = new Set(items.map(it => it.program));
-        const includePhases = Array.from(m.includePhases || []).filter(p => selectedProgs.has(p));
-        await this._busyRun('store-share-device', async () => {
-          try {
-            const r = await this._ws({ type: `${_DOMAIN}/store_upload_device`, entry_id: eid, items, include_phases: includePhases, include_settings: !!m.includeSettings });
-            // Pre-flight gate error (not connected / no appliance): keep the modal open.
-            if (r && r.error) {
-              if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
-              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
-              return;
-            }
-            const n = (r && r.cycle_ids && r.cycle_ids.length) || 0;
-            const failed = (r && r.errors && r.errors.length) || 0;
-            const dup = (r && r.duplicates) || 0;
-            const created = (r && r.created != null) ? r.created : n;
-            if (!n) {
-              // Nothing uploaded: surface the first error and keep the modal for retry.
-              const why = (r && r.errors && r.errors[0]) || (r && r.detail) || 'upload_failed';
-              this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error');
-              return;
-            }
-            this._modal = null;
-            if (failed) this._showToast(this._t('toast.store_device_shared_partial', {n, failed}, `Shared ${n} cycle(s); ${failed} could not be uploaded.`), 'info');
-            else if (dup && !created) this._showToast(this._t('toast.store_device_shared_all_dup', {n: dup}, `All ${dup} cycle(s) were already in the community store.`), 'info');
-            else if (dup) this._showToast(this._t('toast.store_device_shared_some_dup', {created, dup}, `Shared ${created} cycle(s); ${dup} were already in the store.`));
-            else this._showToast(this._t('toast.store_device_shared', {n: created}, `Shared ${created} cycle(s) to the community store - pending review.`));
-          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-    }
-
-    // ---- Selective export / import wizard ----
-    if (m && (m.type === 'export-select' || m.type === 'import-wizard')) {
-      // The manifest that backs the tree: inventory for export, analyze result for import.
-      const man = m.type === 'export-select' ? { categories: m.inventory || {} } : (m.manifest || { categories: {} });
-      if (action === 'wiz-toggle-all') {
-        const cats = man.categories || {};
-        const importableOnly = m.type === 'import-wizard';
-        // If everything is already selected, clear; otherwise select all selectable.
-        let allSel = true;
-        this._wizCatOrder().filter(cid => cats[cid] && cats[cid].present).forEach(cid => {
-          if (importableOnly && cats[cid].importable === false) return;
-          if (this._wizCatState(m, cid, man).state !== 'all') allSel = false;
-        });
-        m.sel = allSel
-          ? { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }
-          : this._wizInitSel(man, importableOnly);
-        this._render();
-        return;
-      }
-      if (action === 'wiz-toggle-cat') {
-        const cid = btn.dataset.cat;
-        const st = this._wizCatState(m, cid, man);
-        const turnOn = st.state !== 'all';
-        if (cid === 'profiles') {
-          const items = (man.categories.profiles && man.categories.profiles.items) || [];
-          m.sel.profiles = new Set(turnOn ? items.map(i => i.name) : []);
-        } else if (cid === 'real_cycles' || cid === 'reference_cycles') {
-          const set = new Set();
-          if (turnOn) ((man.categories[cid] && man.categories[cid].groups) || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) set.add(String(cy.id)); }));
-          if (cid === 'real_cycles') m.sel.realIds = set; else m.sel.refIds = set;
-        } else if (turnOn) { m.sel.cats.add(cid); } else { m.sel.cats.delete(cid); }
-        this._render();
-        return;
-      }
-      if (action === 'wiz-toggle-profile') {
-        const name = btn.dataset.name;
-        if (m.sel.profiles.has(name)) m.sel.profiles.delete(name); else m.sel.profiles.add(name);
-        this._render();
-        return;
-      }
-      if (action === 'wiz-toggle-cycgroup') {
-        const cid = btn.dataset.cat; const prof = btn.dataset.prof;
-        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
-        const ids = this._wizGroupIds(man, cid, prof);
-        const all = ids.length > 0 && ids.every(id => set.has(id));
-        ids.forEach(id => { if (all) set.delete(id); else set.add(id); });
-        this._render();
-        return;
-      }
-      if (action === 'wiz-toggle-cyc') {
-        const cid = btn.dataset.cat; const id = btn.dataset.cid;
-        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
-        if (set.has(id)) set.delete(id); else set.add(id);
-        this._render();
-        return;
-      }
-      if (action === 'wiz-expand') {
-        const key = btn.dataset.key;
-        if (!m.expanded) m.expanded = new Set();
-        if (m.expanded.has(key)) m.expanded.delete(key); else m.expanded.add(key);
-        this._render();
-        return;
-      }
-    }
+    if (action.startsWith('sd-') || action === 'store-share-device-ok') return this._onMActStoreShare(action, btn, m, eid);
 
     // Export wizard: generate + download the filtered JSON.
     if (m && m.type === 'export-select' && action === 'export-generate' && eid) {
@@ -11587,153 +11444,7 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
 
-    // Import wizard: step machine + toggles + apply.
-    if (m && m.type === 'import-wizard') {
-      if (action === 'import-back') {
-        m.step = 'input'; m.error = null; this._render();
-        return;
-      }
-      if (action === 'imp-mode-merge') { m.mode = 'merge'; this._render(); return; }
-      if (action === 'imp-mode-replace') { m.mode = 'replace'; this._render(); return; }
-      if (action === 'imp-dest-reference') { m.cycleDest = 'reference'; this._render(); return; }
-      if (action === 'imp-dest-real') { if ((m.manifest || {}).real_history_allowed !== false) { m.cycleDest = 'real_history'; this._render(); } return; }
-      if (action === 'imp-conflict') { m.conflicts[btn.dataset.prof] = btn.value; return; }
-      if (action === 'import-analyze' && eid) {
-        const ta = sr.getElementById('wd-import-json');
-        const jsonText = ta ? ta.value : (m.jsonText || '');
-        m.jsonText = jsonText;
-        if (!jsonText.trim()) { this._showToast(this._t('toast.json_required', {}, 'JSON data is required'), 'error'); return; }
-        m.step = 'analyze'; m.error = null; this._render();
-        try {
-          const r = await this._ws({ type: `${_DOMAIN}/analyze_import`, entry_id: eid, json_data: jsonText });
-          if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'import-wizard') return;
-          const manifest = (r && r.manifest) || {};
-          if (manifest.error) { m.step = 'input'; m.error = manifest.error; this._render(); return; }
-          m.manifest = manifest;
-          m.sel = this._wizInitSel(manifest, true);
-          // Default every conflicting profile to the safest resolution.
-          m.conflicts = {};
-          ((manifest.categories && manifest.categories.profiles && manifest.categories.profiles.items) || [])
-            .forEach(i => { if (i.conflict) m.conflicts[i.name] = 'import_as_copy'; });
-          m.step = 'select';
-          this._render();
-        } catch (e) {
-          if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'import-wizard') return;
-          m.step = 'input'; m.error = (e && e.message) || String(e); this._render();
-        }
-        return;
-      }
-      if (action === 'import-apply-ok' && eid) {
-        const selection = this._wizSelectionPayload(m);
-        await this._busyRun('import-wizard', async () => {
-          try {
-            const r = await this._ws({ type: `${_DOMAIN}/import_config_selective`, entry_id: eid,
-              json_data: m.jsonText, selection, mode: m.mode,
-              conflict_resolutions: m.conflicts, cycle_destination: m.cycleDest, apply_settings: true });
-            const s = (r && r.summary) || {};
-            this._modal = null;
-            this._showToast(this._t('toast.import_selective_done', {
-              profiles: s.profiles_imported || 0,
-              cycles: (s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0),
-            }, `Imported ${s.profiles_imported || 0} profile(s) and ${(s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0)} cycle(s)`));
-            await this._fetchCycles(eid);
-            await this._fetchProfiles(eid);
-          } catch (e) { this._showToast(this._t('toast.import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-    }
-
-
-    // ---- Cycle inspector ----
-    if (m && m.type === 'cycle-detail') {
-      if (action === 'cyc-view') { m.mode = 'view'; this._render(); return; }
-      if (action === 'cyc-trim') { m.mode = 'trim'; if (!m.trim || m.trim.end <= 0) m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
-      if (action === 'cyc-split') { m.mode = 'split'; this._render(); return; }
-      if (action === 'cyc-review') { m.mode = 'review'; this._render(); return; }
-      if (action === 'cyc-review-save') {
-        const cid = m.cycleId;
-        const quality = sr.getElementById('wd-cyc-rev-quality')?.value || '';
-        const golden = !!sr.getElementById('wd-cyc-rev-golden')?.checked;
-        const notes = sr.getElementById('wd-cyc-rev-notes')?.value || '';
-        const tags = Array.from(sr.querySelectorAll('.wd-cyc-rev-tag')).filter(cb => cb.checked).map(cb => cb.value);
-        const newLabel = sr.getElementById('wd-cyc-rev-label')?.value ?? '';
-        const curLabel = (m.curve && m.curve.profile_name) || '';
-        await this._busyRun('cyc-review-save', async () => {
-          try {
-            await this._ws({ type: `${_DOMAIN}/set_ml_review`, entry_id: eid, cycle_id: cid, quality, golden, tags, notes });
-            if (newLabel !== curLabel) {
-              await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: newLabel || null });
-            }
-            this._showToast(this._t('toast.review_saved', {}, 'Review saved'));
-            await this._fetchCycles(eid);
-            // A label change in review now resolves the pending feedback backend-side
-            // (#331), so refresh the queue rather than leaving a stale entry.
-            if (newLabel !== curLabel) await this._fetchFeedbacks(eid);
-            await this._loadMlIndex(eid);
-            if (this._modal && this._modal.cycleId === cid) this._modal.ml = (this._mlById || {})[cid] || this._modal.ml;
-          } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-      if (action === 'trim-mode-s') { m.timeMode = 's'; this._render(); return; }
-      if (action === 'trim-mode-clock') { m.timeMode = 'clock'; this._render(); return; }
-      if (action === 'cyc-reset-trim') { m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
-      if (action === 'cyc-clear-split') { m.split = { offsets: [], profiles: [] }; this._render(); return; }
-      if (action === 'cyc-label') { if (!this._profiles.length) await this._fetchProfiles(eid); this._modal = { type: 'label-cycle', cycleId: m.cycleId }; this._render(); return; }
-      if (action === 'cyc-delete') {
-        // D4: optimistic delete with Undo (close the inspector first).
-        const cid = m.cycleId;
-        this._modal = null; this._render();
-        this._deleteCyclesWithUndo(eid, [cid]);
-        return;
-      }
-      if (action === 'cyc-auto-split') {
-        const gap = parseInt(sr.getElementById('wd-split-gap')?.value || '900', 10);
-        await this._busyRun('cyc-auto', async () => {
-          try { const r = await this._ws({ type: `${_DOMAIN}/analyze_split`, entry_id: eid, cycle_id: m.cycleId, gap_seconds: gap }); m.split.offsets = (r.split_offsets || []).slice(); m.split.profiles = []; if (!m.split.offsets.length) this._showToast(this._t('toast.no_split_found', {}, 'No idle gaps found to split on'), 'info'); }
-          catch (e) { this._showToast(this._t('toast.auto_detect_failed', {error: e.message || e}, 'Auto-detect failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-      if (action === 'cyc-apply-trim') {
-        // Backgrounded task (issue #311): recompute + envelope rebuild can stall a
-        // low-power host, so run it via the registry with a header pill.
-        const cid = m.cycleId, s = m.trim.start, e2 = m.trim.end;
-        // The trim is irreversible (no undo). Confirm before discarding the
-        // majority of the trace so an accidental collapse can't slip through on
-        // a single click (#373).
-        const full = (m.curve && m.curve.full_duration_s) || 0;
-        const keptPct = full > 0 ? Math.max(0, Math.round(((e2 - s) / full) * 100)) : 100;
-        if (keptPct < 50 && !confirm(this._t('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
-        this._kickAndTrack(
-          { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
-          'cyc-trim-apply',
-          async () => {
-            this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed'));
-            await this._closeCycleDetail(eid);
-            await this._fetchCycles(eid);
-          },
-        );
-        return;
-      }
-      if (action === 'cyc-apply-split') {
-        // Backgrounded task (issue #311): per-segment extraction + affected
-        // envelope rebuilds can stall a low-power host, so run it via the registry.
-        const cid = m.cycleId, offs = m.split.offsets.slice(), profs = m.split.profiles.slice();
-        this._kickAndTrack(
-          { type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs },
-          'cyc-split-apply',
-          async (result) => {
-            this._showToast(this._t('toast.split_complete', {count: (result.new_ids || []).length}, `Split into ${(result.new_ids || []).length} cycles`));
-            await this._closeCycleDetail(eid);
-            await this._fetchCycles(eid);
-            await this._fetchProfiles(eid);
-          },
-        );
-        return;
-      }
-    }
+    if (action.startsWith('cyc-') || action.startsWith('trim-mode-')) return this._onMActCycleDetail(action, m, eid, sr);
 
     // ---- Profile control panel ----
     if (m && m.type === 'profile-panel') {
@@ -11746,68 +11457,7 @@ class HaWashdataPanel extends HTMLElement {
         }
         return;
       }
-      if (action === 'pp-phase-add') {
-        const full = (m.env && m.env.target_duration) || (m.env && m.env.avg && m.env.avg.length ? m.env.avg[m.env.avg.length - 1][0] : 600);
-        const last = m.phases.length ? m.phases[m.phases.length - 1].end : 0;
-        const st = Math.min(last, full);
-        m.phases.push({ name: m.catalog[0] || '', start: st, end: Math.min(st + Math.max(60, full * 0.1), full) });
-        this._render(); return;
-      }
-      if (action === 'pp-phase-rm') { const i = +((btn && btn.dataset.idx) || -1); if (i >= 0) { m.phases.splice(i, 1); this._render(); } return; }
-      if (action === 'pp-phase-save') {
-        const phases = m.phases.filter(p => p.name).map(p => ({ name: p.name, start: p.start, end: p.end }));
-        await this._busyRun('pp-phase-save', async () => {
-          try { await this._ws({ type: `${_DOMAIN}/set_profile_phases`, entry_id: eid, profile_name: m.name, phases }); this._showToast(this._t('toast.phases_saved', {}, 'Phases saved')); }
-          catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-      if (action === 'pp-cleanup-del') {
-        const sel = m.cleanup ? Array.from(m.cleanup.selected) : [];
-        if (!sel.length) return;
-        await this._busyRun('pp-cleanup-del', async () => {
-          try {
-            for (const cid of sel) await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid });
-            this._showToast(this._t('toast.cycles_deleted', {count: sel.length}, `Deleted ${sel.length} cycle(s)`));
-            const r = await this._ws({ type: `${_DOMAIN}/get_profile_cycles`, entry_id: eid, profile_name: m.name });
-            if (this._modal) this._modal.cleanup = { cycles: r.cycles || [], selected: new Set() };
-            await this._fetchProfiles(eid);
-          } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-      if (action === 'pp-rename') {
-        const nn = sr.getElementById('wd-pp-rename')?.value?.trim();
-        const dur = parseFloat(sr.getElementById('wd-pp-dur')?.value || '0');
-        if (!nn) { this._showToast(this._t('msg.toast_name_required', {}, 'Name required'), 'error'); return; }
-        try {
-          await this._ws({ type: `${_DOMAIN}/rename_profile`, entry_id: eid, profile_name: m.name, new_name: nn, manual_duration_min: dur > 0 ? dur : null });
-          this._showToast(this._t('toast.profile_renamed', {}, 'Profile renamed')); m.name = nn; await this._fetchProfiles(eid);
-          m.stats = (this._profiles || []).find(p => p.name === nn) || m.stats; this._render();
-        } catch (e) { this._showToast(this._t('toast.rename_failed', {error: e.message || e}, 'Rename failed: ' + (e.message || e)), 'error'); }
-        return;
-      }
-      if (action === 'pp-rebuild') {
-        // Backgrounded task (issue #311): rebuild runs via the registry; the
-        // profile's fresh envelope is fetched only once the task has settled.
-        this._kickAndTrack(
-          { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
-          'pp-rebuild',
-          async () => {
-            try {
-              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name });
-              if (this._modal) this._modal.env = r.envelope;
-            } catch (_) { /* modal may have closed */ }
-            this._showToast(this._t('toast.envelope_rebuilt', {}, 'Envelope rebuilt'));
-          },
-        );
-        return;
-      }
-      if (action === 'pp-delete') {
-        // D4: optimistic delete with Undo (close the profile panel first).
-        this._deleteProfileWithUndo(eid, m.name);
-        return;
-      }
+      return this._onMActProfilePanel(action, btn, m, eid, sr);
     }
 
     // ---- Simple form modals ----
@@ -11918,6 +11568,411 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchCycles(eid); await this._fetchProfiles(eid); await this._fetchFeedbacks(eid);
         } catch (e) { this._showToast(this._t('toast.relabel_failed', { error: e.message || e }, 'Relabel failed: ' + (e.message || e)), 'error'); }
       });
+    }
+  }
+
+  async _onMActImport(action, btn, m, eid, sr) {
+    // ---- Community Store: import a reference cycle ----
+    if (m && m.type === 'store-import') {
+      if (action === 'store-import-mode-new') { m.mode = 'new'; this._render(); return; }
+      if (action === 'store-import-mode-merge') { m.mode = 'merge'; this._render(); return; }
+      if (action === 'store-import-ok') {
+        const msg = { type: `${_DOMAIN}/store_import_cycle`, entry_id: eid, cycle_id: m.cycleId };
+        if (m.mode === 'merge') {
+          const target = sr.getElementById('wd-store-import-target')?.value || '';
+          if (!target) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to merge into'), 'error'); return; }
+          msg.target_profile = target;
+        } else {
+          const name = (sr.getElementById('wd-store-import-name')?.value || '').trim() || m.program;
+          if (!name) { this._showToast(this._t('toast.store_name_required', {}, 'Enter a profile name'), 'error'); return; }
+          msg.new_profile_name = name;
+        }
+        await this._busyRun('store-import', async () => {
+          try {
+            const r = await this._ws(msg);
+            if (r && r.error) { this._showToast(this._t('toast.store_import_failed', {error: r.error}, 'Import failed: ' + r.error), 'error'); return; }
+            this._modal = null;
+            this._showToast(this._t('toast.store_imported', {profile: (r && r.profile) || ''}, `Imported into ${(r && r.profile) || 'profile'}`));
+            await this._fetchProfiles(eid);
+          } catch (e) { this._showToast(this._t('toast.store_import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+
+    // ---- Community Store: share a golden cycle ----
+    if (m && m.type === 'store-share') {
+      if (action === 'store-share-ok') {
+        const program = (sr.getElementById('wd-store-share-prog')?.value || '').trim();
+        const description = (sr.getElementById('wd-store-share-desc')?.value || '').trim();
+        if (!program) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to share into'), 'error'); return; }
+        await this._busyRun('store-share', async () => {
+          try {
+            const r = await this._ws({ type: `${_DOMAIN}/store_upload_cycle`, entry_id: eid, local_cycle_id: m.cycleId, program, description });
+            if (r && r.error) {
+              if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
+              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
+              return;
+            }
+            this._modal = null;
+            this._showToast(this._t('toast.store_shared', {}, 'Shared to the community store - pending review.'));
+          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+
+    // ---- Selective export / import wizard ----
+    if (m && (m.type === 'export-select' || m.type === 'import-wizard')) {
+      // The manifest that backs the tree: inventory for export, analyze result for import.
+      const man = m.type === 'export-select' ? { categories: m.inventory || {} } : (m.manifest || { categories: {} });
+      if (action === 'wiz-toggle-all') {
+        const cats = man.categories || {};
+        const importableOnly = m.type === 'import-wizard';
+        // If everything is already selected, clear; otherwise select all selectable.
+        let allSel = true;
+        this._wizCatOrder().filter(cid => cats[cid] && cats[cid].present).forEach(cid => {
+          if (importableOnly && cats[cid].importable === false) return;
+          if (this._wizCatState(m, cid, man).state !== 'all') allSel = false;
+        });
+        m.sel = allSel
+          ? { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }
+          : this._wizInitSel(man, importableOnly);
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-cat') {
+        const cid = btn.dataset.cat;
+        const st = this._wizCatState(m, cid, man);
+        const turnOn = st.state !== 'all';
+        if (cid === 'profiles') {
+          const items = (man.categories.profiles && man.categories.profiles.items) || [];
+          m.sel.profiles = new Set(turnOn ? items.map(i => i.name) : []);
+        } else if (cid === 'real_cycles' || cid === 'reference_cycles') {
+          const set = new Set();
+          if (turnOn) ((man.categories[cid] && man.categories[cid].groups) || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) set.add(String(cy.id)); }));
+          if (cid === 'real_cycles') m.sel.realIds = set; else m.sel.refIds = set;
+        } else if (turnOn) { m.sel.cats.add(cid); } else { m.sel.cats.delete(cid); }
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-profile') {
+        const name = btn.dataset.name;
+        if (m.sel.profiles.has(name)) m.sel.profiles.delete(name); else m.sel.profiles.add(name);
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-cycgroup') {
+        const cid = btn.dataset.cat; const prof = btn.dataset.prof;
+        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
+        const ids = this._wizGroupIds(man, cid, prof);
+        const all = ids.length > 0 && ids.every(id => set.has(id));
+        ids.forEach(id => { if (all) set.delete(id); else set.add(id); });
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-cyc') {
+        const cid = btn.dataset.cat; const id = btn.dataset.cid;
+        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
+        if (set.has(id)) set.delete(id); else set.add(id);
+        this._render();
+        return;
+      }
+      if (action === 'wiz-expand') {
+        const key = btn.dataset.key;
+        if (!m.expanded) m.expanded = new Set();
+        if (m.expanded.has(key)) m.expanded.delete(key); else m.expanded.add(key);
+        this._render();
+        return;
+      }
+    }
+
+    // Import wizard: step machine + toggles + apply.
+    if (m && m.type === 'import-wizard') {
+      if (action === 'import-back') {
+        m.step = 'input'; m.error = null; this._render();
+        return;
+      }
+      if (action === 'imp-mode-merge') { m.mode = 'merge'; this._render(); return; }
+      if (action === 'imp-mode-replace') { m.mode = 'replace'; this._render(); return; }
+      if (action === 'imp-dest-reference') { m.cycleDest = 'reference'; this._render(); return; }
+      if (action === 'imp-dest-real') { if ((m.manifest || {}).real_history_allowed !== false) { m.cycleDest = 'real_history'; this._render(); } return; }
+      if (action === 'imp-conflict') { m.conflicts[btn.dataset.prof] = btn.value; return; }
+      if (action === 'import-analyze' && eid) {
+        const ta = sr.getElementById('wd-import-json');
+        const jsonText = ta ? ta.value : (m.jsonText || '');
+        m.jsonText = jsonText;
+        if (!jsonText.trim()) { this._showToast(this._t('toast.json_required', {}, 'JSON data is required'), 'error'); return; }
+        m.step = 'analyze'; m.error = null; this._render();
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/analyze_import`, entry_id: eid, json_data: jsonText });
+          if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'import-wizard') return;
+          const manifest = (r && r.manifest) || {};
+          if (manifest.error) { m.step = 'input'; m.error = manifest.error; this._render(); return; }
+          m.manifest = manifest;
+          m.sel = this._wizInitSel(manifest, true);
+          // Default every conflicting profile to the safest resolution.
+          m.conflicts = {};
+          ((manifest.categories && manifest.categories.profiles && manifest.categories.profiles.items) || [])
+            .forEach(i => { if (i.conflict) m.conflicts[i.name] = 'import_as_copy'; });
+          m.step = 'select';
+          this._render();
+        } catch (e) {
+          if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'import-wizard') return;
+          m.step = 'input'; m.error = (e && e.message) || String(e); this._render();
+        }
+        return;
+      }
+      if (action === 'import-apply-ok' && eid) {
+        const selection = this._wizSelectionPayload(m);
+        await this._busyRun('import-wizard', async () => {
+          try {
+            const r = await this._ws({ type: `${_DOMAIN}/import_config_selective`, entry_id: eid,
+              json_data: m.jsonText, selection, mode: m.mode,
+              conflict_resolutions: m.conflicts, cycle_destination: m.cycleDest, apply_settings: true });
+            const s = (r && r.summary) || {};
+            this._modal = null;
+            this._showToast(this._t('toast.import_selective_done', {
+              profiles: s.profiles_imported || 0,
+              cycles: (s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0),
+            }, `Imported ${s.profiles_imported || 0} profile(s) and ${(s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0)} cycle(s)`));
+            await this._fetchCycles(eid);
+            await this._fetchProfiles(eid);
+          } catch (e) { this._showToast(this._t('toast.import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+  }
+
+  async _onMActStoreShare(action, btn, m, eid) {
+    // ---- Community Store: share a whole device bundle ----
+    if (m && m.type === 'store-share-device') {
+      if (action === 'sd-toggle-cyc') {
+        const cid = btn.dataset.cid;
+        if (m.selected.has(cid)) m.selected.delete(cid); else m.selected.add(cid);
+        this._render();
+        return;
+      }
+      if (action === 'sd-toggle-prof') {
+        const prog = btn.dataset.prog;
+        const grp = this._shareableByProgram().find(g => g.program === prog);
+        if (grp) {
+          const all = grp.cycles.every(c => m.selected.has(c.id));
+          grp.cycles.forEach(c => { if (all) m.selected.delete(c.id); else m.selected.add(c.id); });
+        }
+        this._render();
+        return;
+      }
+      if (action === 'sd-toggle-phases') {
+        const prog = btn.dataset.prog;
+        if (!m.includePhases) m.includePhases = new Set();
+        if (m.includePhases.has(prog)) m.includePhases.delete(prog); else m.includePhases.add(prog);
+        this._render();
+        return;
+      }
+      if (action === 'sd-toggle-settings') { m.includeSettings = !m.includeSettings; this._render(); return; }
+      if (action === 'sd-toggle-consent') { m.consented = !m.consented; this._render(); return; }
+      if (action === 'sd-toggle-guide') { m.guideOpen = !m.guideOpen; this._render(); return; }
+      if (action === 'store-share-device-ok') {
+        // Build the {local_cycle_id, program} items from the model selection,
+        // resolving each cycle's program from the fetched shareable list.
+        const progById = new Map();
+        (this._shareableCycles || []).forEach(c => progById.set(c.id, (c.profile_name || '').trim()));
+        const items = Array.from(m.selected)
+          .map(cid => ({ local_cycle_id: cid, program: progById.get(cid) || '' }))
+          .filter(it => it.program);
+        if (!items.length) { this._showToast(this._t('toast.share_device_none_sel', {}, 'Select at least one cycle to share'), 'error'); return; }
+        // Only send phases for programs that both opted in AND have a selected cycle.
+        const selectedProgs = new Set(items.map(it => it.program));
+        const includePhases = Array.from(m.includePhases || []).filter(p => selectedProgs.has(p));
+        await this._busyRun('store-share-device', async () => {
+          try {
+            const r = await this._ws({ type: `${_DOMAIN}/store_upload_device`, entry_id: eid, items, include_phases: includePhases, include_settings: !!m.includeSettings });
+            // Pre-flight gate error (not connected / no appliance): keep the modal open.
+            if (r && r.error) {
+              if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
+              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
+              return;
+            }
+            const n = (r && r.cycle_ids && r.cycle_ids.length) || 0;
+            const failed = (r && r.errors && r.errors.length) || 0;
+            const dup = (r && r.duplicates) || 0;
+            const created = (r && r.created != null) ? r.created : n;
+            if (!n) {
+              // Nothing uploaded: surface the first error and keep the modal for retry.
+              const why = (r && r.errors && r.errors[0]) || (r && r.detail) || 'upload_failed';
+              this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error');
+              return;
+            }
+            this._modal = null;
+            if (failed) this._showToast(this._t('toast.store_device_shared_partial', {n, failed}, `Shared ${n} cycle(s); ${failed} could not be uploaded.`), 'info');
+            else if (dup && !created) this._showToast(this._t('toast.store_device_shared_all_dup', {n: dup}, `All ${dup} cycle(s) were already in the community store.`), 'info');
+            else if (dup) this._showToast(this._t('toast.store_device_shared_some_dup', {created, dup}, `Shared ${created} cycle(s); ${dup} were already in the store.`));
+            else this._showToast(this._t('toast.store_device_shared', {n: created}, `Shared ${created} cycle(s) to the community store - pending review.`));
+          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+  }
+
+  async _onMActCycleDetail(action, m, eid, sr) {
+    // ---- Cycle inspector ----
+    if (m && m.type === 'cycle-detail') {
+      if (action === 'cyc-view') { m.mode = 'view'; this._render(); return; }
+      if (action === 'cyc-trim') { m.mode = 'trim'; if (!m.trim || m.trim.end <= 0) m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
+      if (action === 'cyc-split') { m.mode = 'split'; this._render(); return; }
+      if (action === 'cyc-review') { m.mode = 'review'; this._render(); return; }
+      if (action === 'cyc-review-save') {
+        const cid = m.cycleId;
+        const quality = sr.getElementById('wd-cyc-rev-quality')?.value || '';
+        const golden = !!sr.getElementById('wd-cyc-rev-golden')?.checked;
+        const notes = sr.getElementById('wd-cyc-rev-notes')?.value || '';
+        const tags = Array.from(sr.querySelectorAll('.wd-cyc-rev-tag')).filter(cb => cb.checked).map(cb => cb.value);
+        const newLabel = sr.getElementById('wd-cyc-rev-label')?.value ?? '';
+        const curLabel = (m.curve && m.curve.profile_name) || '';
+        await this._busyRun('cyc-review-save', async () => {
+          try {
+            await this._ws({ type: `${_DOMAIN}/set_ml_review`, entry_id: eid, cycle_id: cid, quality, golden, tags, notes });
+            if (newLabel !== curLabel) {
+              await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: newLabel || null });
+            }
+            this._showToast(this._t('toast.review_saved', {}, 'Review saved'));
+            await this._fetchCycles(eid);
+            // A label change in review now resolves the pending feedback backend-side
+            // (#331), so refresh the queue rather than leaving a stale entry.
+            if (newLabel !== curLabel) await this._fetchFeedbacks(eid);
+            await this._loadMlIndex(eid);
+            if (this._modal && this._modal.cycleId === cid) this._modal.ml = (this._mlById || {})[cid] || this._modal.ml;
+          } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+      if (action === 'trim-mode-s') { m.timeMode = 's'; this._render(); return; }
+      if (action === 'trim-mode-clock') { m.timeMode = 'clock'; this._render(); return; }
+      if (action === 'cyc-reset-trim') { m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
+      if (action === 'cyc-clear-split') { m.split = { offsets: [], profiles: [] }; this._render(); return; }
+      if (action === 'cyc-label') { if (!this._profiles.length) await this._fetchProfiles(eid); this._modal = { type: 'label-cycle', cycleId: m.cycleId }; this._render(); return; }
+      if (action === 'cyc-delete') {
+        // D4: optimistic delete with Undo (close the inspector first).
+        const cid = m.cycleId;
+        this._modal = null; this._render();
+        this._deleteCyclesWithUndo(eid, [cid]);
+        return;
+      }
+      if (action === 'cyc-auto-split') {
+        const gap = parseInt(sr.getElementById('wd-split-gap')?.value || '900', 10);
+        await this._busyRun('cyc-auto', async () => {
+          try { const r = await this._ws({ type: `${_DOMAIN}/analyze_split`, entry_id: eid, cycle_id: m.cycleId, gap_seconds: gap }); m.split.offsets = (r.split_offsets || []).slice(); m.split.profiles = []; if (!m.split.offsets.length) this._showToast(this._t('toast.no_split_found', {}, 'No idle gaps found to split on'), 'info'); }
+          catch (e) { this._showToast(this._t('toast.auto_detect_failed', {error: e.message || e}, 'Auto-detect failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+      if (action === 'cyc-apply-trim') {
+        // Backgrounded task (issue #311): recompute + envelope rebuild can stall a
+        // low-power host, so run it via the registry with a header pill.
+        const cid = m.cycleId, s = m.trim.start, e2 = m.trim.end;
+        // The trim is irreversible (no undo). Confirm before discarding the
+        // majority of the trace so an accidental collapse can't slip through on
+        // a single click (#373).
+        const full = (m.curve && m.curve.full_duration_s) || 0;
+        const keptPct = full > 0 ? Math.max(0, Math.round(((e2 - s) / full) * 100)) : 100;
+        if (keptPct < 50 && !confirm(this._t('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
+          'cyc-trim-apply',
+          async () => {
+            this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed'));
+            await this._closeCycleDetail(eid);
+            await this._fetchCycles(eid);
+          },
+        );
+        return;
+      }
+      if (action === 'cyc-apply-split') {
+        // Backgrounded task (issue #311): per-segment extraction + affected
+        // envelope rebuilds can stall a low-power host, so run it via the registry.
+        const cid = m.cycleId, offs = m.split.offsets.slice(), profs = m.split.profiles.slice();
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs },
+          'cyc-split-apply',
+          async (result) => {
+            this._showToast(this._t('toast.split_complete', {count: (result.new_ids || []).length}, `Split into ${(result.new_ids || []).length} cycles`));
+            await this._closeCycleDetail(eid);
+            await this._fetchCycles(eid);
+            await this._fetchProfiles(eid);
+          },
+        );
+        return;
+      }
+    }
+  }
+
+  async _onMActProfilePanel(action, btn, m, eid, sr) {
+    if (m && m.type === 'profile-panel') {
+      if (action === 'pp-phase-add') {
+        const full = (m.env && m.env.target_duration) || (m.env && m.env.avg && m.env.avg.length ? m.env.avg[m.env.avg.length - 1][0] : 600);
+        const last = m.phases.length ? m.phases[m.phases.length - 1].end : 0;
+        const st = Math.min(last, full);
+        m.phases.push({ name: m.catalog[0] || '', start: st, end: Math.min(st + Math.max(60, full * 0.1), full) });
+        this._render(); return;
+      }
+      if (action === 'pp-phase-rm') { const i = +((btn && btn.dataset.idx) || -1); if (i >= 0) { m.phases.splice(i, 1); this._render(); } return; }
+      if (action === 'pp-phase-save') {
+        const phases = m.phases.filter(p => p.name).map(p => ({ name: p.name, start: p.start, end: p.end }));
+        await this._busyRun('pp-phase-save', async () => {
+          try { await this._ws({ type: `${_DOMAIN}/set_profile_phases`, entry_id: eid, profile_name: m.name, phases }); this._showToast(this._t('toast.phases_saved', {}, 'Phases saved')); }
+          catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+      if (action === 'pp-cleanup-del') {
+        const sel = m.cleanup ? Array.from(m.cleanup.selected) : [];
+        if (!sel.length) return;
+        await this._busyRun('pp-cleanup-del', async () => {
+          try {
+            for (const cid of sel) await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid });
+            this._showToast(this._t('toast.cycles_deleted', {count: sel.length}, `Deleted ${sel.length} cycle(s)`));
+            const r = await this._ws({ type: `${_DOMAIN}/get_profile_cycles`, entry_id: eid, profile_name: m.name });
+            if (this._modal) this._modal.cleanup = { cycles: r.cycles || [], selected: new Set() };
+            await this._fetchProfiles(eid);
+          } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+      if (action === 'pp-rename') {
+        const nn = sr.getElementById('wd-pp-rename')?.value?.trim();
+        const dur = parseFloat(sr.getElementById('wd-pp-dur')?.value || '0');
+        if (!nn) { this._showToast(this._t('msg.toast_name_required', {}, 'Name required'), 'error'); return; }
+        try {
+          await this._ws({ type: `${_DOMAIN}/rename_profile`, entry_id: eid, profile_name: m.name, new_name: nn, manual_duration_min: dur > 0 ? dur : null });
+          this._showToast(this._t('toast.profile_renamed', {}, 'Profile renamed')); m.name = nn; await this._fetchProfiles(eid);
+          m.stats = (this._profiles || []).find(p => p.name === nn) || m.stats; this._render();
+        } catch (e) { this._showToast(this._t('toast.rename_failed', {error: e.message || e}, 'Rename failed: ' + (e.message || e)), 'error'); }
+        return;
+      }
+      if (action === 'pp-rebuild') {
+        // Backgrounded task (issue #311): rebuild runs via the registry; the
+        // profile's fresh envelope is fetched only once the task has settled.
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
+          'pp-rebuild',
+          async () => {
+            try {
+              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name });
+              if (this._modal) this._modal.env = r.envelope;
+            } catch (_) { /* modal may have closed */ }
+            this._showToast(this._t('toast.envelope_rebuilt', {}, 'Envelope rebuilt'));
+          },
+        );
+        return;
+      }
+      if (action === 'pp-delete') {
+        // D4: optimistic delete with Undo (close the profile panel first).
+        this._deleteProfileWithUndo(eid, m.name);
+        return;
+      }
     }
   }
 
