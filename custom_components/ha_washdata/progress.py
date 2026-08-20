@@ -314,6 +314,14 @@ def estimate_phase_progress(
         logger.debug("Insufficient data in current window for phase estimation")
         return None
 
+    if float(np.std(current_window_values)) == 0.0:
+        # A flat window (long passive-dry tail at 0 W) has no shape to match: the
+        # scan below then picks the offset by time penalty alone, which is capped
+        # at 40% and loses to the zero pad at the end of the envelope. Decline, so
+        # the caller falls back to the linear (clock) estimate.
+        logger.debug("Flat current window, skipping phase estimation")
+        return None
+
     # Slide the current window across the whole envelope grid and keep the
     # best-scoring alignment. The scalar form below is the reference; the
     # vectorized form computes the identical per-offset score in bulk (the grid is
