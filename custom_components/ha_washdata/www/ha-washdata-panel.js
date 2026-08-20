@@ -1813,6 +1813,12 @@ class HaWashdataPanel extends HTMLElement {
     this._mlLoading = false;
     this._mlSettings = {};        // conf key -> {classic_value, ml_value, ml_reason, ...}
     this._mlSettingsLoading = false;
+    // Last-seen Calibrated (ML) comparison + muted keys per entry_id. The ML
+    // comparison is expensive and only fetched for the device being viewed, so
+    // these keep the device-pill badges of already-visited devices from blanking
+    // out when the selection moves on. Keyed by entry_id, never cleared on switch.
+    this._mlSettingsByEntry = {};
+    this._lockedByEntry = {};
     this._mlTrainingStatus = null; // {enabled, running, last_trained, cycle_count, min_cycles, ...}
     this._setupStatus = null;      // result of ws_get_setup_status
     // UI state
@@ -2864,6 +2870,7 @@ class HaWashdataPanel extends HTMLElement {
       for (const c of (d && d.cycles) || []) idx[c.id] = c;
       this._mlById = idx;
       this._mlSettings = (d && d.settings_comparison) || this._mlSettings;
+      this._mlSettingsByEntry[entryId] = this._mlSettings;
     } catch (_) { /* leave prior index */ }
   }
 
@@ -2877,6 +2884,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._isActiveEntry(entryId)) return;  // device switched mid-flight — drop stale response
       this._mlComparison = d;
       this._mlSettings = (d && d.settings_comparison) || {};
+      this._mlSettingsByEntry[entryId] = this._mlSettings;
     } catch (_) { /* leave prior */ }
   }
 
@@ -2918,6 +2926,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._isActiveEntry(entryId)) return;  // device switched mid-flight
       this._suggestions = res.suggestions || [];
       this._lockedSuggestions = res.locked_suggestions || [];
+      this._lockedByEntry[entryId] = this._lockedSuggestions;
     } catch (_) {
       if (this._isActiveEntry(entryId)) { this._suggestionsError = true; this._suggestions = []; }
     }
@@ -3720,7 +3729,8 @@ class HaWashdataPanel extends HTMLElement {
       const badges = [];
       const confN = this._conflictCountForOpts(d.options || {});
       if (confN) badges.push(`<span class="wd-dbadge conf">⚠ ${confN}</span>`);
-      if (d.suggestions_count) badges.push(`<span class="wd-dbadge sug">💡 ${d.suggestions_count}</span>`);
+      const sugN = this._sugCountsForDevice(d).total;
+      if (sugN) badges.push(`<span class="wd-dbadge sug">💡 ${sugN}</span>`);
       if (d.feedback_count) badges.push(`<span class="wd-dbadge fb">💬 ${d.feedback_count}</span>`);
       return `<button class="wd-devcard ${i === this._selIdx ? 'active' : ''}" data-idx="${i}">
         <span class="wd-devdot ${rec || running ? 'run' : ''}" style="background:${dotColor}"></span>
@@ -3767,12 +3777,12 @@ class HaWashdataPanel extends HTMLElement {
       const n = _confKeys.size, s = n > 1 ? 's' : '';
       attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n}, `Setting conflicts: ${n}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></button>`);
     }
-    const _mlSugCount = this._mlSugKeys().size;
-    if ((dev.suggestions_count || _mlSugCount) && this._canEdit()) {
-      const total = (dev.suggestions_count || 0) + _mlSugCount;
+    const _sugC = this._sugCountsForDevice(dev);
+    if (_sugC.total && this._canEdit()) {
+      const total = _sugC.total;
       const parts = [];
-      if (dev.suggestions_count) parts.push(this._t('lbl.n_classic_suggestions', {n: dev.suggestions_count}, `${dev.suggestions_count} classic`));
-      if (_mlSugCount) parts.push(this._t('lbl.n_ml_suggestions', {n: _mlSugCount}, `${_mlSugCount} ML`));
+      if (_sugC.classic) parts.push(this._t('lbl.n_classic_suggestions', {n: _sugC.classic}, `${_sugC.classic} classic`));
+      if (_sugC.ml) parts.push(this._t('lbl.n_ml_suggestions', {n: _sugC.ml}, `${_sugC.ml} ML`));
       attn.push(`<button class="wd-attn-card" type="button" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('lbl.n_tuning_suggestions', {n: total}, `${total} tuning suggestion${total > 1 ? 's' : ''}`)}</div><div class="wd-attn-sub">${parts.join(' · ')} · ${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></button>`);
     }
     const attnHtml = attn.length ? `<div class="wd-attn">${attn.join('')}</div>` : '';
@@ -5360,13 +5370,48 @@ class HaWashdataPanel extends HTMLElement {
     // Muted keys (#343) are excluded so the banner count, section dots, tab bulb
     // and the "Show only" filter all follow the mute state the same way the
     // classic suggestions do (which are dropped from this._suggestions on mute).
-    const locked = new Set(this._lockedSuggestions || []);
+    return this._mlSugKeysFrom(this._mlSettings, cur, this._lockedSuggestions);
+  }
+
+  // Same rule for an arbitrary (comparison, current values, muted keys) triple,
+  // so the device-pill badges can score a device that is not the selected one
+  // from the per-entry caches.
+  _mlSugKeysFrom(mlSettings, cur, locked) {
+    const muted = new Set(locked || []);
+    const vals = cur || {};
     const keys = new Set();
-    for (const [key, mlc] of Object.entries(this._mlSettings || {})) {
-      if (locked.has(key)) continue;
-      if (mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, cur[key])) keys.add(key);
+    for (const [key, mlc] of Object.entries(mlSettings || {})) {
+      if (muted.has(key)) continue;
+      if (mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, vals[key])) keys.add(key);
     }
     return keys;
+  }
+
+  // Tuning-suggestion counts for one entry of the device list: classic (observed,
+  // counted by the backend) plus the Calibrated (ML) recommendations that no
+  // classic suggestion already covers. Same arithmetic as the Settings tab
+  // banner, so the pill badge, the Overview attention card and the banner agree.
+  _sugCountsForDevice(dev) {
+    if (!dev) return { classic: 0, ml: 0, total: 0 };
+    const sel = this._devices[this._selIdx];
+    const isSel = !!(sel && sel.entry_id === dev.entry_id);
+    // Keys let us drop an ML recommendation for a key that already has a classic
+    // suggestion; a payload carrying only the count (older backend, test mocks)
+    // falls back to adding the two.
+    const cKeys = Array.isArray(dev.suggestion_keys) ? dev.suggestion_keys : null;
+    const classic = cKeys ? cKeys.length : (dev.suggestions_count || 0);
+    // Staged (unsaved) edits count for the selected device only; every other
+    // device is scored against its saved options, which the poll keeps fresh.
+    const cur = isSel
+      ? Object.assign({}, dev.options || {}, this._opts, this._pendingSettings || {})
+      : (dev.options || {});
+    const mlKeys = this._mlSugKeysFrom(
+      isSel ? this._mlSettings : this._mlSettingsByEntry[dev.entry_id],
+      cur,
+      isSel ? this._lockedSuggestions : this._lockedByEntry[dev.entry_id],
+    );
+    const ml = cKeys ? [...mlKeys].filter(k => !cKeys.includes(k)).length : mlKeys.size;
+    return { classic, ml, total: classic + ml };
   }
 
   _htmlSettingsSugOnly(o) {

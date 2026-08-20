@@ -1220,6 +1220,10 @@ def ws_get_devices(
             "current_power_w": None,
             "cycle_progress_pct": None,
             "suggestions_count": 0,
+            # Which keys those are, so the panel can merge them with the
+            # Calibrated (ML) recommendations it computes client-side without
+            # double-counting a key both engines suggest.
+            "suggestion_keys": [],
             "feedback_count": 0,
             "recording": False,
             "is_user_paused": False,
@@ -1253,11 +1257,24 @@ def ws_get_devices(
                 store = getattr(manager, "profile_store", None)
                 if store is not None:
                     try:
+                        # Same filters as ws_get_suggestions (muted keys and
+                        # no-op values dropped) so the device-pill badge can
+                        # never disagree with the Settings tab banner.
                         raw = store.get_suggestions() or {}
-                        info["suggestions_count"] = sum(
-                            1 for k in _SUGGESTION_KEYS
-                            if isinstance(raw.get(k), dict) and raw[k].get("value") is not None
-                        )
+                        merged = {**entry.data, **entry.options}
+                        try:
+                            muted = set(store.get_locked_suggestions() or [])
+                        except Exception:  # pylint: disable=broad-exception-caught
+                            muted = set()
+                        keys = [
+                            k for k in _SUGGESTION_KEYS
+                            if k not in muted
+                            and isinstance(raw.get(k), dict)
+                            and raw[k].get("value") is not None
+                            and not _suggestion_equivalent(raw[k]["value"], merged.get(k))
+                        ]
+                        info["suggestion_keys"] = keys
+                        info["suggestions_count"] = len(keys)
                     except Exception:  # pylint: disable=broad-exception-caught
                         pass
                     try:

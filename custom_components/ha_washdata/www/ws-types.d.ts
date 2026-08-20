@@ -54,6 +54,7 @@ export interface DeviceInfo {
   current_power_w: number | null;
   cycle_progress_pct: number | null;
   suggestions_count: number;
+  suggestion_keys: string[];
   feedback_count: number;
   recording: boolean;
   is_user_paused: boolean;
