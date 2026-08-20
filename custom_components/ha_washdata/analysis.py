@@ -538,15 +538,15 @@ def compute_dtw_path(
     if n == 0 or m == 0:
         return []
 
-    # Pre-flight memory guard: the cost matrix is (n+1)×(m+1) float64.  An
+    # Pre-flight memory guard: the cost matrix is (n+1)x(m+1) float64.  An
     # uncapped call from a 1 Hz long cycle can request >1 GB here.  If the
     # allocation would exceed ~80 MB, skip DTW and return an empty path so
     # the caller falls back to linear interpolation (graceful degrade rather
     # than OOM-killing Home Assistant — issue #388).
-    _DTW_CELL_BUDGET = 10_000_000  # 10 M cells × 8 B ≈ 80 MB
+    _DTW_CELL_BUDGET = 10_000_000  # 10 M cells x 8 B ≈ 80 MB
     if (n + 1) * (m + 1) > _DTW_CELL_BUDGET:
         _LOGGER.warning(
-            "DTW cost matrix %d×%d would need %.0f MB — skipping DTW refinement "
+            "DTW cost matrix %dx%d would need %.0f MB — skipping DTW refinement "
             "(cap compute_envelope_worker inputs via MAX_ALIGN_GRID_POINTS to prevent this)",
             n, m, (n + 1) * (m + 1) * 8 / 1e6,
         )
@@ -751,7 +751,11 @@ def compute_envelope_worker(
 
     for offsets, values, dur in normalized_curves:
         this_dur = dur
-        this_num_points = max(10, int(this_dur / align_dt))
+        # Cap this grid too, not just the reference one: a cycle far longer than the
+        # median would otherwise size its own grid past the cap and push the cost
+        # matrix over compute_dtw_path's budget, which silently drops the outlier
+        # back to plain interpolation. Capping keeps DTW alignment available for it.
+        this_num_points = min(MAX_ALIGN_GRID_POINTS, max(10, int(this_dur / align_dt)))
         this_grid = np.linspace(0.0, this_dur, this_num_points)
         this_array = np.interp(this_grid, offsets, values)
 

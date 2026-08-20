@@ -140,8 +140,14 @@ def _ensure_gzip(path: Path) -> None:
     client sends a matching Accept-Encoding, which cuts these assets by ~75% -- but
     it only checks that the sibling EXISTS, never that it is current. A stale .gz
     would therefore be served as if it were the real file (and cached for a month),
-    so the sibling is always regenerated from the exact file being served whenever
-    it is missing or older. Best-effort: a read-only install just serves uncompressed.
+    so the sibling is unconditionally rebuilt from the exact file being served.
+
+    Rebuilding unconditionally rather than comparing mtimes is deliberate: the .gz
+    is not shipped, so it is written at install time, while an update can restore
+    an *older* source mtime from the release archive (the same mtime-preservation
+    ``get_cache_buster`` works around). "Newer .gz" therefore does not imply "current
+    .gz", and the cost of being sure is one gzip of ~1 MB, once per HA start, in an
+    executor. Best-effort: a read-only install just serves uncompressed.
     """
     import gzip
     import shutil
@@ -149,8 +155,6 @@ def _ensure_gzip(path: Path) -> None:
 
     gz = path.with_suffix(path.suffix + ".gz")
     try:
-        if gz.is_file() and gz.stat().st_mtime >= path.stat().st_mtime:
-            return
         # Compress to a temp file in the same directory, then atomically replace, so
         # a concurrent request can never observe a half-written .gz.
         fd, tmp_name = tempfile.mkstemp(dir=str(path.parent), suffix=".gz.tmp")

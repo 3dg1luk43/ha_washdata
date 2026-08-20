@@ -488,9 +488,9 @@ MATCH_DTW_RESAMPLE_N = 200         # common grid length for "scaled"/"ddtw" DTW
 MATCH_DDTW_DIST_SCALE = 30.0       # half-saturation for derivative-DTW distance
 MATCH_DTW_ENSEMBLE_W = 0.7         # weight on L1 vs DDTW in "ensemble" mode
 # Envelope alignment grid cap: maximum number of time-grid points used by
-# compute_envelope_worker. The DTW cost matrix is (n+1)×(m+1)×8 B float64;
+# compute_envelope_worker. The DTW cost matrix is (n+1)x(m+1)x8 B float64;
 # both n and m derive from this cap, so memory is bounded to roughly
-# MAX_ALIGN_GRID_POINTS² × 8 B ≈ 32 MB at 2000 — regardless of cycle duration
+# MAX_ALIGN_GRID_POINTS² x 8 B ≈ 32 MB at 2000 — regardless of cycle duration
 # or recording density. Without this cap a 4 h cycle at 1 Hz asks for 1.81 GB
 # in a single np.full, which OOM-kills Home Assistant (issue #388).
 MAX_ALIGN_GRID_POINTS = 2000

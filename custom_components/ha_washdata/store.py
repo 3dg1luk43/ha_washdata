@@ -185,7 +185,12 @@ class StoreBridge:
 
     async def connect(self, refresh_token: str, uid: str, name: str | None) -> dict[str, Any]:
         # Validate the refresh token by exchanging it once before persisting.
-        if not await self._client.ensure_id_token(refresh_token):
+        # ensure_id_token writes the client-wide _last_error slot on failure, so it
+        # takes the same lock the upload paths use: otherwise a sign-in failing here
+        # could overwrite the reason a concurrent share is about to report.
+        async with self._client.write_lock:
+            token = await self._client.ensure_id_token(refresh_token)
+        if not token:
             return {"error": "token_invalid"}
         await store_account.async_set_account(self._hass, {"refresh_token": refresh_token, "uid": uid, "name": name})
         return store_account.get_identity(self._hass)
@@ -243,14 +248,16 @@ class StoreBridge:
         acct = store_account.get_account(self._hass)
         if not acct.get("refresh_token"):
             return {"error": "not_connected"}
-        res = await self._client.confirm_device(acct["refresh_token"], acct.get("uid", ""), device_id)
+        async with self._client.write_lock:  # writes _last_error; see connect()
+            res = await self._client.confirm_device(acct["refresh_token"], acct.get("uid", ""), device_id)
         return res if res else {"error": "confirm_failed"}
 
     async def rate_device(self, device_id: str, rating: int) -> dict[str, Any]:
         acct = store_account.get_account(self._hass)
         if not acct.get("refresh_token"):
             return {"error": "not_connected"}
-        ok = await self._client.rate_device(acct["refresh_token"], acct.get("uid", ""), device_id, rating)
+        async with self._client.write_lock:  # writes _last_error; see connect()
+            ok = await self._client.rate_device(acct["refresh_token"], acct.get("uid", ""), device_id, rating)
         return {"ok": True} if ok else {"error": "rate_failed"}
 
     # ── import / share (target this device's ProfileStore) ───────────────────────
