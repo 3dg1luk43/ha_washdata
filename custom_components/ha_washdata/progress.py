@@ -227,12 +227,21 @@ def estimate_phase_progress(
     current_duration: float,
     profile_name: str,
     logger: logging.Logger | None = None,
+    quiet_threshold_w: float = 0.0,
 ) -> tuple[float, float] | None:
     """Estimate cycle progress by analyzing which phase we're in.
 
     Uses cached statistical envelope built from ALL cycles labeled with this
     profile, normalized by TIME to account for different sampling rates. Returns
     ``(progress_pct, variance_watts)`` or ``None`` if estimation fails.
+
+    ``quiet_threshold_w`` is the detector's own off-noise floor
+    (``CycleDetectorConfig.stop_threshold_w``, itself derived from the configured
+    minimum power). A window that never rises above it is *not* the appliance
+    doing something, so it carries no phase information and the scan declines
+    rather than guessing (#386); a dead-flat window declines for the same reason
+    at any power level. The default 0.0 leaves only the flatness rule for callers
+    that do not know the floor.
     """
     logger = logger or _LOGGER
     # Get cached envelope (fast - already computed and stored)
@@ -314,6 +323,56 @@ def estimate_phase_progress(
         logger.debug("Insufficient data in current window for phase estimation")
         return None
 
+    # Two window shapes carry no information the scan can align on, and both
+    # mislocate badly when it tries anyway (#386): the correlation term is dead or
+    # is noise on the plug's last reported digit, the MAE/bounds terms then score
+    # every similar stretch of the envelope alike, and the only term left that
+    # knows the clock is the time penalty - which is capped at 40%.
+    #   * BELOW THE OFF FLOOR. The appliance is not drawing anything the detector
+    #     would call active, so there is nothing to locate. Catches a quiet tail
+    #     whatever jitter the plug puts on its last digit.
+    #   * DEAD FLAT. No shape at any power level, e.g. a steady plateau reported
+    #     by a plug that re-reports unchanged values. Replay says these mislocate
+    #     too (a late offset wins on level alone), and the cost of declining is
+    #     within noise, so a plateau defers to the clock as well.
+    # Declining hands the caller its linear (clock) estimate, which is what ran
+    # before phase-aware progress existed.
+    quiet_w = float(quiet_threshold_w or 0.0)
+    window_max = float(np.max(current_window_values))
+    window_flat = float(np.std(current_window_values)) == 0.0
+    if window_max <= quiet_w or window_flat:
+        logger.debug(
+            "Uninformative current window (max=%.2fW, off-floor=%.2fW, flat=%s), "
+            "skipping phase estimation",
+            window_max,
+            quiet_w,
+            window_flat,
+        )
+        return None
+
+    # The envelope's trailing all-zero stretch is an artefact of averaging cycles
+    # that ended at different times (real dishwasher envelopes carry 30+ min of
+    # it). It is a perfect fit for any quiet window of any length, while the true
+    # region scores 0 on bounds because the drain pump smears across cycles and
+    # keeps the envelope's own min above zero - so a near-zero reading is drawn to
+    # the pad and progress collapses to the 99% clamp (#386). Offsets inside the
+    # pad are not candidate alignments: the scan stops at the last offset where
+    # the envelope is still active.
+    active_offsets = np.flatnonzero(envelope_arrays["max"] > 0.0)
+    active_len = int(active_offsets[-1]) + 1 if active_offsets.size else 0
+    # A malformed envelope can carry bands of differing length; never index past
+    # the shortest of the three the scan slices in lockstep.
+    active_len = min(
+        active_len,
+        len(envelope_arrays["avg"]),
+        len(envelope_arrays["min"]),
+        len(envelope_arrays["max"]),
+    )
+    scan_n = min(len(time_grid) - 1, active_len)
+    if scan_n <= 0:
+        logger.debug("Envelope has no active offsets, cannot estimate phase")
+        return None
+
     # Slide the current window across the whole envelope grid and keep the
     # best-scoring alignment. The scalar form below is the reference; the
     # vectorized form computes the identical per-offset score in bulk (the grid is
@@ -325,12 +384,10 @@ def estimate_phase_progress(
         b_score = -1.0
         b_in_bounds = False
         b_tws: float | None = None
-        for i in range(len(time_grid) - 1):
+        for i in range(scan_n):
             time_window_start = float(time_grid[i])
             envelope_window_start = i
-            envelope_window_end = min(
-                i + len(current_window_values), len(envelope_arrays["avg"])
-            )
+            envelope_window_end = min(i + len(current_window_values), active_len)
             if envelope_window_end <= envelope_window_start:
                 continue
             avg_window = envelope_arrays["avg"][envelope_window_start:envelope_window_end]
@@ -383,8 +440,8 @@ def estimate_phase_progress(
         avg_arr = envelope_arrays["avg"]
         min_arr = envelope_arrays["min"]
         max_arr = envelope_arrays["max"]
-        length = len(avg_arr)
-        n = len(time_grid) - 1
+        length = active_len
+        n = scan_n
         if n <= 0 or w == 0:
             return _scan_scalar()
 

@@ -6742,6 +6742,9 @@ class WashDataManager:
             current_duration,
             profile_name,
             self._logger,
+            quiet_threshold_w=float(
+                getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0
+            ),
         )
 
     def _notify_update(self) -> None:
