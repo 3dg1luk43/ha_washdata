@@ -44,11 +44,39 @@ cd playwright-tests && npx playwright test tests/settings.spec.ts   # single spe
 cd playwright-tests && npx playwright test --ui                      # interactive UI mode
 
 # Syntax check
-python3 -m compileall custom_components/ha_washdata tests/ --quiet
+python3 -m compileall custom_components/ha_washdata tests/ -q
+
+# Rebuild the shipped minified panel/card bundles (REQUIRED after editing www/*.js)
+node devtools/build_panel.mjs
+node devtools/build_panel.mjs --check     # verify only; non-zero if stale
+
+# Release preflight: artifacts, version agreement, translations, tests
+devtools/release_check.sh                 # verify only (what CI runs)
+devtools/release_check.sh --fix           # regenerate artifacts instead of failing
+devtools/release_check.sh --full --tag v0.5.5   # + slow, E2E, and tag agreement
 
 # Run mock MQTT socket (simulates appliance power cycles for manual testing)
 python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 ```
+
+### Generated files - never hand-edit, always regenerate
+
+| File | Generator | Gate |
+|------|-----------|------|
+| `www/ha-washdata-panel.min.js`, `www/ha-washdata-card.min.js`, `www/build-manifest.json` | `node devtools/build_panel.mjs` | `tests/test_panel_build.py`, CI, `release_check.sh` |
+| `www/ws-types.d.ts`, `docs/WS_API.md` | `python3 devtools/generate_ws_types.py` | `tests/test_ws_contract.py` |
+
+The `.min.js` files and `build-manifest.json` **are committed** - they are what users
+download. `frontend.py` serves a `.min.js` only while its recorded source hash still
+matches the source on disk, so a forgotten rebuild degrades to the readable file rather
+than serving stale code; the tests and CI fail so it does not go unnoticed. After editing
+`www/*.js`, rebuild and commit the artifacts in the same commit.
+
+`devtools/` declares `"type": "module"`, so any new CommonJS script there must be named
+`.cjs` (this is what once broke `run_tests.sh` via `panel_smoke.js`).
+
+See the [Developer Tools wiki page](https://github.com/3dg1luk43/ha_washdata/wiki/Developer-Tools#releasing-release_checksh)
+for the full release procedure.
 
 ## Architecture
 

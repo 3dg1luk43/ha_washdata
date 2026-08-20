@@ -502,6 +502,8 @@ _READ_WRITE_COMMANDS = frozenset({
     "store_get_cycles",
     "store_get_device_quality",
     "store_get_device_profiles",
+    "store_get_catalog_entry",
+    "store_refresh_catalog",
 })
 
 _LOG_BUFFER_KEY = "ha_washdata_log_buffer"
@@ -804,6 +806,46 @@ async def ws_store_get_device_quality(hass, connection, msg):
         return
     manager, _ = ctx
     _send_result(connection, msg["id"], "store_get_device_quality", await manager.store_bridge.get_device_quality(msg["device_id"]))
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_get_catalog_entry", vol.Required("entry_id"): str,
+    vol.Required("brand"): str, vol.Required("model"): str, vol.Required("appliance_type"): str,
+})
+@websocket_api.async_response
+async def ws_store_get_catalog_entry(hass, connection, msg):
+    """Resolve just this appliance's catalog brand + device documents, by id.
+
+    Two point reads, replacing the brand list + device list the settings form used to
+    download purely to locate these two rows (measured: 128 documents, 119 KB). The
+    pickers still fetch the full lists, but only when the user opens one.
+    """
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_get_catalog_entry", {"disabled": True})
+        return
+    manager, _ = ctx
+    res = await manager.store_bridge.catalog_entry(msg["brand"], msg["model"], msg["appliance_type"])
+    _send_result(connection, msg["id"], "store_get_catalog_entry", res)
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_refresh_catalog", vol.Required("entry_id"): str,
+})
+@websocket_api.async_response
+async def ws_store_refresh_catalog(hass, connection, msg):
+    """Drop the cached catalog so the next browse re-reads the store.
+
+    The cache is deliberately long-lived (the catalog is near-static and every read is
+    charged against a shared free-tier budget), so this is the escape hatch for "someone
+    told me my brand was just approved".
+    """
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_refresh_catalog", {"disabled": True})
+        return
+    manager, _ = ctx
+    _send_result(connection, msg["id"], "store_refresh_catalog", manager.store_bridge.refresh_catalog())
 
 
 @websocket_api.websocket_command({
@@ -1138,6 +1180,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_store_list_brands, ws_store_get_device_quality, ws_store_get_device_profiles,
         ws_store_confirm_device, ws_store_rate_device, ws_store_set_online,
         ws_store_set_prefs,
+        # Catalog identity badges (point reads) + manual cache refresh
+        ws_store_get_catalog_entry, ws_store_refresh_catalog,
     ]
     for handler in handlers:
         websocket_api.async_register_command(hass, _guard(handler))

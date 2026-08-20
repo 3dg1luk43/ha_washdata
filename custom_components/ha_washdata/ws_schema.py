@@ -606,6 +606,25 @@ class StoreDeviceProfilesResponse(TypedDict, total=False):
     disabled: bool
 
 
+class StoreCatalogEntryResponse(TypedDict, total=False):
+    """One appliance's catalog identity: its brand + device documents, resolved by id.
+
+    ``brand`` / ``device`` are None when that entry is not in the catalog yet (not an
+    error -- it just means nobody has contributed it). Backs the settings form's status
+    badges without downloading the brand/device lists.
+    """
+    device_id: str
+    brand: dict | None
+    device: dict | None
+    disabled: bool
+
+
+class StoreRefreshCatalogResponse(TypedDict, total=False):
+    """Acknowledgement that the cached catalog was dropped."""
+    ok: bool
+    disabled: bool
+
+
 class StoreUploadDeviceResponse(TypedDict, total=False):
     """Result of sharing a whole-device bundle (multi-profile, multi-cycle)."""
     ok: bool
@@ -752,6 +771,8 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_set_online": StoreOnlineResponse,
     "store_set_prefs": StorePrefsResponse,
     "store_get_device_profiles": StoreDeviceProfilesResponse,
+    "store_get_catalog_entry": StoreCatalogEntryResponse,
+    "store_refresh_catalog": StoreRefreshCatalogResponse,
     "store_upload_device": StoreUploadDeviceResponse,
     "store_download_device": StoreDownloadDeviceResponse,
     "get_shareable_cycles": GetShareableCyclesResponse,
@@ -1054,6 +1075,8 @@ WS_COMMANDS: dict[str, dict] = {
     "store_get_cycles": {"params": [_entry(), _p("profile_id", "str")]},
     "store_get_device_quality": {"params": [_entry(), _p("device_id", "str")]},
     "store_get_device_profiles": {"params": [_entry(), _p("brand", "str"), _p("model", "str"), _p("appliance_type", "str")]},
+    "store_get_catalog_entry": {"params": [_entry(), _p("brand", "str"), _p("model", "str"), _p("appliance_type", "str")]},
+    "store_refresh_catalog": {"params": [_entry()]},
     "store_confirm_device": {"params": [_entry(), _p("device_id", "str")]},
     "store_rate_device": {"params": [_entry(), _p("device_id", "str"), _p("rating", "int")]},
     "store_set_online": {"params": [_entry(), _p("enabled", "bool")]},

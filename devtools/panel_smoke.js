@@ -22,10 +22,14 @@
  * surface without a browser. Exit non-zero on any failure.
  *
  *   node devtools/panel_smoke.js
+ *
+ * ESM, not CommonJS: devtools/package.json declares "type": "module" (the panel build
+ * script needs it), which makes Node parse every .js in this directory as a module.
  */
-'use strict';
-const path = require('path');
-const { pathToFileURL } = require('url');
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function fakeEl() {
   const el = {
