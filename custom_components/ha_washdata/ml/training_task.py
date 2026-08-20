@@ -34,7 +34,6 @@ Label sources (no manual labelling required to start):
 """
 from __future__ import annotations
 
-import importlib
 import logging
 from typing import Any
 
@@ -542,11 +541,14 @@ def _holdout_split(
 
 
 def _embedded_module(capability: str):
+    """Embedded baseline module for a capability, via the shared engine cache."""
     module_name = _CAPABILITIES.get(capability, (None, None))[0]
     if module_name is None:
         return None
     try:
-        return importlib.import_module(f"{__package__}.{module_name}")
+        from .engine import _load_model_module
+
+        return _load_model_module(module_name)
     except Exception:  # pylint: disable=broad-exception-caught
         return None
 

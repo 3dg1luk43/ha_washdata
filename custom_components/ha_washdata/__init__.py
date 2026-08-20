@@ -387,6 +387,29 @@ async def _migrate_online_to_global(hass: HomeAssistant, entry: ConfigEntry, man
                 pass
 
 
+async def _async_preload_ml_modules(hass: HomeAssistant) -> None:
+    """Import the ML modules off the event loop (issue #328).
+
+    ``ml.engine.resolve_scorer`` / ``resolve_regressor`` are called from the event
+    loop (live matching, end detection, quality gating), and Home Assistant flags
+    the lazy ``importlib.import_module`` they used to do there as a blocking call.
+    Warming the module cache once per setup in the import executor makes every
+    later resolution a ``sys.modules`` lookup. Best effort: a failure here only
+    means ML stays inert, so it must never block setup.
+    """
+
+    def _preload() -> None:
+        # pylint: disable=import-outside-toplevel
+        from .ml.engine import preload_models
+
+        preload_models()
+
+    try:
+        await hass.async_add_import_executor_job(_preload)
+    except Exception:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("ML module preload failed", exc_info=True)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WashData from a config entry."""
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
@@ -398,6 +421,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
 
     hass.data.setdefault(DOMAIN, {})
+
+    # Warm the ML module cache before anything can score in the event loop.
+    await _async_preload_ml_modules(hass)
 
     # Migration: Remove old auto_maintenance switch entity (now in settings)
     # pylint: disable=import-outside-toplevel
