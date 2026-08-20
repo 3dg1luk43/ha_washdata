@@ -71,6 +71,12 @@ e2e_min_check() {
         echo "Warning: node not found, skipping minified E2E tests."
         return 0
     fi
+    # build_panel.mjs needs its own dependencies (esbuild); without them the
+    # --check below fails on a fresh clone before a single test has run.
+    if [ ! -d "devtools/node_modules" ]; then
+        echo "Installing panel build dependencies..."
+        npm ci --prefix devtools --silent || exit 1
+    fi
     echo "Verifying panel build is current..."
     node devtools/build_panel.mjs --check || {
         echo "Refusing to run the minified E2E suite against a stale build."

@@ -26,12 +26,14 @@ jobs:
     name: Preflight
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.13"
           cache: pip
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "20"
       - name: Install
@@ -40,10 +42,27 @@ jobs:
           npm ci --prefix devtools
       - name: Resolve the version under test
         id: ver
+        env:
+          # Never interpolate a dispatch input into shell code: it would let anyone
+          # who can dispatch this workflow run arbitrary commands on the runner.
+          TAG_INPUT: ${{ inputs.tag }}
+          # Only a tag push carries a version in the ref name. A manual run happens on
+          # a BRANCH, whose name is not a version, so there is nothing to compare
+          # against and the documented manifest.json default applies instead.
+          REF_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
         run: |
-          TAG="${{ inputs.tag }}"
-          [ -z "$TAG" ] && TAG="${GITHUB_REF_NAME}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Verifying against: $TAG"
+          TAG="${TAG_INPUT:-$REF_TAG}"
+          # Matches this workflow's own tag filters (v* / [0-9]*) and, by excluding
+          # every shell metacharacter, keeps the value safe to pass on as an argument.
+          if [ -n "$TAG" ] && ! printf '%s' "$TAG" | grep -Eq '^v?[0-9][A-Za-z0-9._-]*$'; then
+            echo "Not a version tag: $TAG" >&2
+            exit 1
+          fi
+          printf 'tag=%s\n' "$TAG" >> "$GITHUB_OUTPUT"
+          echo "Verifying against: ${TAG:-manifest.json}"
       - name: Release preflight
-        run: bash devtools/release_check.sh --tag "${{ steps.ver.outputs.tag }}"
+        env:
+          # Empty when no tag was resolved: release_check.sh then skips the tag
+          # comparison and verifies manifest.json against the CHANGELOG only.
+          WANT_TAG: ${{ steps.ver.outputs.tag }}
+        run: bash devtools/release_check.sh --tag "$WANT_TAG"

@@ -189,14 +189,37 @@ def test_ensure_gzip_matches_served_bytes(tmp_path: Path) -> None:
     assert gz.stat().st_size < target.stat().st_size
 
 
-def test_ensure_gzip_is_a_noop_when_fresh(tmp_path: Path) -> None:
+def test_ensure_gzip_rewrites_an_up_to_date_sibling(tmp_path: Path) -> None:
+    """The .gz is rebuilt every call; freshness is never assumed from mtimes."""
     target = tmp_path / "asset.js"
     target.write_text("const x = 1;\n" * 500)
     fe._ensure_gzip(target)
     gz = tmp_path / "asset.js.gz"
     stamp = gz.stat().st_mtime_ns
     fe._ensure_gzip(target)
-    assert gz.stat().st_mtime_ns == stamp
+    assert gz.stat().st_mtime_ns != stamp
+    assert gzip.decompress(gz.read_bytes()) == target.read_bytes()
+
+
+def test_ensure_gzip_regenerates_when_source_mtime_is_older(tmp_path: Path) -> None:
+    """A newer .gz does not mean a current .gz.
+
+    The .gz is not shipped, so it is written at install time, while an update can
+    restore an older source mtime out of the release archive (the mtime preservation
+    ``get_cache_buster`` already works around). An mtime comparison would keep the
+    previous release's JavaScript and serve it for a month.
+    """
+    target = tmp_path / "asset.js"
+    target.write_text("previous release\n")
+    fe._ensure_gzip(target)
+    gz = tmp_path / "asset.js.gz"
+
+    target.write_text("new release\n")
+    old = gz.stat().st_mtime - 10
+    os.utime(target, (old, old))
+
+    fe._ensure_gzip(target)
+    assert gzip.decompress(gz.read_bytes()) == b"new release\n"
 
 
 def test_ensure_gzip_regenerates_when_stale(tmp_path: Path) -> None:

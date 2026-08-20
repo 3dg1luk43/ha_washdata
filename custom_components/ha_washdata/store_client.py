@@ -297,6 +297,11 @@ class StoreClient:
         the other's failure reason. Holding this across the whole upload-then-read
         sequence keeps that attribution correct; it also naturally rate-limits concurrent
         uploads, which the store's free tier appreciates.
+
+        Every caller that can reach a ``_last_error`` writer must hold it, not just the
+        ones that read it back: ``ensure_id_token`` also writes the slot, so connect /
+        confirm / rate take it too (see ``store.WashDataStore``). It is NOT reentrant --
+        take it around a client call, never inside one.
         """
         return self._write_lock
 
