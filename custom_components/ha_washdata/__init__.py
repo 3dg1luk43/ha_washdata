@@ -106,6 +106,7 @@ from .const import (
     CONF_RUNNING_DEAD_ZONE,
 )
 from .log_utils import DeviceLoggerAdapter
+from .options_utils import has_null_options, strip_null_options
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -383,7 +384,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # pylint: disable=import-outside-toplevel
     from .manager import WashDataManager
 
-    manager = WashDataManager(hass, entry)
+    try:
+        manager = WashDataManager(hass, entry)
+    except TypeError:
+        # An option stored as null (builds before the ws_set_options strip wrote the
+        # changelog's null when a never-saved setting was reverted) is handed back by
+        # options.get(key, DEFAULT) as-is, so a numeric cast raises here and the entry
+        # can never set up. Repair those options once and build again; any other
+        # TypeError is a real bug and re-raises. Only entries that actually fail are
+        # touched, so a healthy null (a cleared picker) is left alone.
+        if not has_null_options(entry.options):
+            raise
+        cleaned = strip_null_options(entry.options)
+        _log.warning(
+            "Setup failed with option(s) %s stored as null; dropping them so the "
+            "compiled defaults apply again",
+            sorted(set(entry.options) - set(cleaned)),
+        )
+        hass.config_entries.async_update_entry(entry, options=cleaned)
+        manager = WashDataManager(hass, entry)
     hass.data[DOMAIN][entry.entry_id] = manager
 
     await manager.async_setup()

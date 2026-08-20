@@ -91,6 +91,7 @@ from .const import (
 from . import playground
 from . import task_registry
 from .cycle_detector import CycleDetectorConfig
+from .options_utils import strip_null_options
 from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
@@ -1437,6 +1438,15 @@ async def ws_set_options(
                 DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
             )
 
+    # A None outside the clearable selectors means "not set", not a value: the
+    # per-setting Revert sends the changelog's `old`, which is null for a setting
+    # never saved before. Stored, it would survive options.get(key, DEFAULT) and
+    # break the float()/int() casts at setup, so drop the key and let the default
+    # apply again; this also cleans nulls persisted by earlier builds.
+    _pre_strip_keys = set(new_options)
+    new_options = strip_null_options(new_options)
+    dropped_null_keys = _pre_strip_keys - set(new_options)
+
     # Partition identity out of options: the display name is carried by the
     # entry title, never persisted in options (matches the config-flow invariant
     # that CONF_NAME is absent from options).
@@ -1453,8 +1463,13 @@ async def ws_set_options(
     # that rebuilds the store). A changelog failure must never block the save.
     try:
         old_effective = {**entry.data, **entry.options}
+        # Keys dropped by the null-strip above are recorded as a change to None
+        # ("reverted to unset") so the history still shows what happened; a
+        # None -> None no-op is skipped by _diff_option_changes.
         submitted_post = {
-            k: new_options[k] for k in msg["options"] if k in new_options
+            k: new_options.get(k)
+            for k in msg["options"]
+            if k in new_options or k in dropped_null_keys
         }
         changes = _diff_option_changes(old_effective, submitted_post)
         if changes:
