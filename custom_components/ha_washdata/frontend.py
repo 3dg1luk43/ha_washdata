@@ -149,6 +149,10 @@ def _ensure_gzip(path: Path) -> None:
     .gz", and the cost of being sure is ~25 ms for the panel and ~1 ms for the card,
     once per HA start, in an executor. Best-effort: a read-only install just serves
     uncompressed.
+
+    If the rebuild fails, any existing sibling is removed rather than left behind:
+    aiohttp would keep serving it, which is the stale-content case this function
+    exists to prevent. Losing compression is the safe half of that trade.
     """
     import gzip
     import shutil
@@ -171,6 +175,10 @@ def _ensure_gzip(path: Path) -> None:
         _LOGGER.debug("Wrote compressed asset %s", gz.name)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Could not pre-compress %s (%s); serving uncompressed", path, exc)
+        try:
+            gz.unlink(missing_ok=True)
+        except OSError:  # read-only dir: nothing was ever written there either
+            pass
 
 
 def _prepare_asset(source_name: str, www: Path | None = None) -> Path:
@@ -256,46 +264,35 @@ def get_cache_buster(filename: str = CARD_NAME) -> str:
     return hashlib.sha1(raw.encode()).hexdigest()[:10]
 
 
-def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> None:
-    """Register a static path with the HA HTTP component, compatible with multiple HA versions."""
-    try:
-        # pylint: disable=import-outside-toplevel
-        from homeassistant.components.http import StaticPathConfig
+def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> bool:
+    """Register a static path through the legacy sync HA HTTP helper.
 
-        if hasattr(hass.http, "async_register_static_paths"):
+    Only reached from :func:`_async_register_path` when the modern
+    ``async_register_static_paths`` API is unavailable, which no supported Home
+    Assistant hits (hacs.json floors the requirement at 2026.5.0, and the sync
+    helper was removed upstream well before that).
 
-            async def _safe_register():
-                try:
-                    await hass.http.async_register_static_paths(
-                        [StaticPathConfig(url_path, path, True)]
-                    )
-                except Exception as exc:  # pylint: disable=broad-exception-caught
-                    _LOGGER.debug(
-                        "Failed to async register static path %s -> %s: %s",
-                        url_path,
-                        path,
-                        exc,
-                    )
-
-            hass.async_create_task(_safe_register())
-            return
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug(
-            "Async static path registration not available; falling back to "
-            "sync registration for %s -> %s (%s)",
-            url_path,
-            path,
-            exc,
-        )
-
-    # Fallback for older HA
+    Returns True only when a registration actually happened. Reporting the
+    outcome is the point: a route that was never registered but is treated as
+    success leaves the Lovelace resource pointing at a permanently 404ing URL,
+    which is issue #384 in its silent form.
+    """
     try:
         http_obj = cast(Any, hass.http)
         register_static_path = getattr(http_obj, "register_static_path", None)
-        if callable(register_static_path):
-            register_static_path(url_path, path, cache_headers=True)
-    except Exception:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Failed to register static path %s -> %s", url_path, path)
+        if not callable(register_static_path):
+            _LOGGER.debug(
+                "No usable static-path API for %s -> %s (neither "
+                "async_register_static_paths nor register_static_path)",
+                url_path,
+                path,
+            )
+            return False
+        register_static_path(url_path, path, cache_headers=True)
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Failed to register static path %s -> %s (%s)", url_path, path, exc)
+        return False
 
 
 async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
@@ -471,16 +468,20 @@ async def _async_register_path(hass: HomeAssistant, url_path: str, path: str) ->
     back to the legacy sync helper only when that API is absent — not on a
     genuine registration failure.  An already-registered path is treated as
     success (benign on integration reload); any other exception propagates so
-    the caller can decide whether to report failure.
+    the caller can decide whether to report failure.  A legacy fallback that
+    could not register either propagates as well: silently returning would
+    publish a Lovelace resource for a URL that 404s (issue #384).
     """
     try:
         from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
     except ImportError:
-        _register_static_path(hass, url_path, path)
+        if not _register_static_path(hass, url_path, path):
+            raise
         return
 
     if not hasattr(hass.http, "async_register_static_paths"):
-        _register_static_path(hass, url_path, path)
+        if not _register_static_path(hass, url_path, path):
+            raise RuntimeError(f"no usable static-path API to serve {url_path}")
         return
 
     try:
