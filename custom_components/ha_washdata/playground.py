@@ -412,12 +412,21 @@ def _build_match_snapshots(
     try:
         data = getattr(store, "_data", {}) or {}
         profiles = data.get("profiles", {}) or {}
-        # Include imported reference cycles: an import-only profile samples from
-        # reference_cycles, so without them it would be dropped as a candidate and
-        # the Playground auto-detect would never match a downloaded profile.
-        past = data.get("past_cycles", []) or []
-        refs = data.get("reference_cycles", []) or []
-        by_id = {c.get("id"): c for c in (list(past) + list(refs)) if isinstance(c, dict)}
+        # Include every cycle the live matcher would consider, via the store's own
+        # evidence view: an import-only profile samples from reference_cycles or
+        # backfill_cycles, so a snapshot pool built from past_cycles alone would drop it
+        # as a candidate and the Playground's auto-detect would never match a downloaded
+        # or backfilled profile - silently reporting it as unmatched. Reading the same
+        # gated view the matcher reads also keeps the sandbox honest when the user has
+        # excluded a category from shaping profiles.
+        try:
+            pool = store.iter_evidence_cycles()
+        except Exception:  # pylint: disable=broad-exception-caught
+            # Older store without the evidence view: fall back to the raw lists.
+            pool = list(data.get("past_cycles", []) or []) + list(
+                data.get("reference_cycles", []) or []
+            )
+        by_id = {c.get("id"): c for c in pool if isinstance(c, dict)}
         for name, profile in profiles.items():
             if not isinstance(profile, dict):
                 continue

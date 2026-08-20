@@ -78,7 +78,8 @@
     "awaiting": "Laukiama patvirtinimo",
     "imported_tip": "Importuota iš bendruomenės parduotuvės. Naudojama tik atitikčiai, neįskaičiuojama į statistiką.",
     "not_importable": "čia nepasiekiama",
-    "exists": "jau yra"
+    "exists": "jau yra",
+    "backfilled_tip": "Aptikta importuotoje galios istorijoje. Turi įtakos tik programų atpažinimui, neįskaičiuojama į statistiką."
   },
   "btn": {
     "set_brand_model": "Nustatyti prekės ženklą ir modelį",
@@ -243,7 +244,12 @@
     "import_selected": "Importuoti pasirinktus",
     "back": "Atgal",
     "mute_suggestion": "Nebesiūlyti šio nustatymo",
-    "reset_muted": "Atstatyti nutildytus"
+    "reset_muted": "Atstatyti nutildytus",
+    "import_power_history": "Importuoti galios istoriją",
+    "hist_read_recorder": "Nuskaityti iš Home Assistant",
+    "hist_scan": "Ieškoti ciklų",
+    "hist_import_n": "Importuoti ciklus ({n})",
+    "hist_goto_cycles": "Parodyti ciklus"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -358,7 +364,8 @@
     "pg_outcome": "Simuliacijos rezultatas",
     "pg_across_cycles": "Per visus jūsų ciklus",
     "community_store": "Bendruomenės parduotuvė",
-    "online_account": "Bendruomenės parduotuvė ir interneto funkcijos"
+    "online_account": "Bendruomenės parduotuvė ir interneto funkcijos",
+    "import_power_history": "Galios istorijos importavimas"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -680,7 +687,25 @@
     "conflict_import_copy": "Importuoti kaip kopiją",
     "conflict_keep_mine": "Išlaikyti manuosius",
     "conflict_overwrite": "Perrašyti",
-    "font_size": "Skydelio šrifto dydis"
+    "font_size": "Skydelio šrifto dydis",
+    "hist_csv_data": "CSV duomenys",
+    "hist_from_recorder": "Arba nuskaitykite iš Home Assistant",
+    "days": "d.",
+    "hist_keep": "Palikti šį ciklą",
+    "hist_looks_complete": "užbaigtas",
+    "peak_power_short": "Pikas",
+    "shape": "Forma",
+    "hist_skip_idle": "niekas neveikė",
+    "hist_skip_sparse": "per reti rodmenys",
+    "hist_skip_short": "per mažai rodmenų",
+    "hist_skip_long": "nėra pakankamai ilgos pauzės padalijimui",
+    "hist_reason_short": "trumpesnis nei trumpiausias tikras šio prietaiso ciklas",
+    "hist_reason_no_end": "niekada tvarkingai nepasibaigė",
+    "task_history_import": "Skenuojama galios istorija",
+    "task_history_import_apply": "Importuojami ciklai",
+    "evidence_real_cycles": "Šio prietaiso atlikti ciklai",
+    "evidence_reference_cycles": "Atsisiųsti iš bendruomenės parduotuvės",
+    "evidence_backfill_cycles": "Rasti importuotoje galios istorijoje"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -759,7 +784,8 @@
     "store_share": "Bendrinti bendruomenės parduotuvėje",
     "store_share_device": "Bendrinti šį įrenginį",
     "export_select": "Eksportas - pasirinkti duomenis",
-    "import_wizard": "Importas - pasirinkti duomenis"
+    "import_wizard": "Importas - pasirinkti duomenis",
+    "history_import": "Galios istorijos importavimas"
   },
   "msg": {
     "tail_trim_hint": "Kiek sekundžių pašalinti nuo galo",
@@ -1013,7 +1039,28 @@
     "sug_mute_failed": "Nepavyko nutildyti pasiūlymo",
     "sug_unmuted_all": "Nutildyti pasiūlymai atstatyti",
     "n_suggestions_muted": "{count} nutildyti; automatinis derintuvas jų nebesiūlys.",
-    "font_size_hint": "Padidinkite arba sumažinkite visą tekstą šiame skydelyje. Galioja jūsų paskyrai šiame įrenginyje."
+    "font_size_hint": "Padidinkite arba sumažinkite visą tekstą šiame skydelyje. Galioja jūsų paskyrai šiame įrenginyje.",
+    "import_history_description": "Išmanųjį kištuką turėjote dar prieš WashData? Įkelkite jo galios sensoriaus istorijos eksportą arba nuskaitykite ją tiesiai iš Home Assistant, ir įprastas aptikimas peržiūrės tuos duomenis, todėl ankstesni ciklai atsiras jūsų „Ciklai“ sąraše ir juos bus galima pavadinti.",
+    "hist_input_hint": "Įkelkite CSV, atsisiųstą iš „Istorijos“ skydelio (objektas, būsena, paskutinis pakeitimas), arba leiskite WashData nuskaityti sensoriaus istoriją tiesiogiai. Tada aptikimas vykdomas lygiai taip pat kaip realiu laiku, o jūs pasirenkate, kuriuos rastus ciklus palikti.",
+    "hist_recorder_hint": "Home Assistant pagal numatytuosius nustatymus išsamią istoriją saugo 10 dienų, o vėliau tik valandinius vidurkius, kurie yra per stambūs, kad iš jų būtų galima aptikti ciklus. CSV eksportas gali pasiekti senesnius duomenis tik tuo atveju, jei jūsų recorder buvo nustatytas saugoti ilgiau.",
+    "hist_scanning": "Jūsų istorija leidžiama per detektorių. Tai vykdoma fone - galite užverti šį dialogą ir sugrįžti vėliau.",
+    "hist_imported_count": "Importuota ciklų: {n}.",
+    "hist_duplicates": "Jau anksčiau importuota ir praleista: {n}.",
+    "hist_capped": "Pasiektas šio įrenginio importuotų ciklų limitas; likusieji neišsaugoti.",
+    "hist_next_step": "Jie yra jūsų „Ciklai“ sąraše, pažymėti kaip importuota istorija. Atverkite vieną ir paspauskite „Pažymėti“, kad nurodytumėte jo programą.",
+    "hist_rows_read": "Nuskaityta rodmenų: {n}",
+    "hist_breaks": "Tarpai, kai sensorius buvo nepasiekiamas: {n}",
+    "hist_other_entity": "Praleisti kitų objektų rodmenys: {n}",
+    "hist_skipped_spans": "Praleistos atkarpos",
+    "hist_settings_used": "Aptikta naudojant esamus šio įrenginio nustatymus (minimali galia {w} W, išjungimo delsimas {s} s).",
+    "hist_none_found": "Toje istorijoje nepavyko aptikti nė vieno ciklo.",
+    "hist_found": "Rasta ciklų: {n}. Atžymėkite tai, kas neatrodo kaip tikras paleidimas - kol neimportuojate, nieko neišsaugoma.",
+    "hist_scan_capped": "Rodomi tik pirmieji kandidatai (rasta: {n}).",
+    "hist_recorder_empty": "Home Assistant neturi išsamios šio sensoriaus istorijos tuo laikotarpiu.",
+    "hist_scan_failed": "Skenavimas nepavyko.",
+    "hist_scan_expired": "To skenavimo rezultatų jau nėra. Nuskenuokite dar kartą.",
+    "hist_import_failed": "Importavimas nepavyko.",
+    "imported_history_readonly": "Aptikta importuotoje galios istorijoje. Tai daro įtaką programų atpažinimui, bet neįskaičiuojama į jūsų statistiką, o ciklo negalima apkarpyti ar padalyti. Paspauskite „Pažymėti“, kad nurodytumėte programą."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1529,6 +1576,10 @@
     "door_end_dwell_seconds": {
       "label": "Durų atidarymo pabaigos laukimas",
       "doc": "Kiek laiko durys turi likti atviros, kad WashData užbaigtų ciklą, kai įjungta parinktis \"Durys automatiškai atsidaromos pabaigoje\". Pakankamai ilgai, kad ignoruotų greitai dedamą indą (numatytasis 60 s), pakankamai trumpai, kad greitai užbaigtų, kai prietaisas atidaro duris."
+    },
+    "profile_evidence_sources": {
+      "label": "Ciklai, formuojantys programą",
+      "doc": "Kurie ciklai naudojami kiekvienos programos galios kreivei sudaryti ir baigtam ciklui su ja palyginti. Atžymėjus tam tikrą rūšį, ji nebeturi įtakos jūsų programoms, tačiau nieko neištrinama - ciklai lieka sąraše Ciklai ir juos vis tiek galima pažymėti arba ištrinti. Naudinga, jei nepasitikite importuotais duomenimis. Statistikai tai neturi įtakos: joje visada įskaičiuojami tik tie ciklai, kuriuos šis prietaisas tikrai atliko. Visų žymių pašalinimas ignoruojamas, nes programa be jokių ciklų niekada negalėtų būti atpažinta."
     }
   },
   "setting_group": {
@@ -1612,6 +1663,9 @@
     },
     "basic_configuration": {
       "label": "Pagrindinė konfigūracija"
+    },
+    "profile_evidence": {
+      "label": "Profilio duomenys"
     }
   },
   "status": {
@@ -1636,7 +1690,8 @@
     "trimming": "Apkarpoma…",
     "splitting": "Padalijama…",
     "deleting": "Trinama…",
-    "imported": "Importuota"
+    "imported": "Importuota",
+    "preparing": "Ruošiama…"
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1772,7 +1827,9 @@
     "store_download_failed": "Atsisiuntimas nepavyko: {error}",
     "store_download_nothing": "Nieko naujo atsisiųsti -- ši konfigūracija jau yra jūsų įrenginyje.",
     "export_selective_done": "Eksportas atsisiųstas",
-    "import_selective_done": "Importuota {profiles} profilių ir {cycles} ciklų"
+    "import_selective_done": "Importuota {profiles} profilių ir {cycles} ciklų",
+    "hist_csv_required": "Pirmiausia įkelkite CSV failą arba įklijuokite jo turinį",
+    "file_read_failed": "Nepavyko nuskaityti to failo"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",

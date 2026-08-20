@@ -78,7 +78,8 @@
         "awaiting": "Onay bekleniyor",
         "imported_tip": "Topluluk mağazasından içe aktarıldı. Yalnızca eşleştirme için kullanılır, istatistiklere sayılmaz.",
         "not_importable": "burada geçersiz",
-        "exists": "mevcut"
+        "exists": "mevcut",
+        "backfilled_tip": "İçe aktarılan güç geçmişinde algılandı. Yalnızca program eşleştirmesini etkiler, istatistiklere sayılmaz."
     },
     "btn": {
         "set_brand_model": "Marka ve modeli ayarla",
@@ -243,7 +244,12 @@
         "import_selected": "Seçileni içe aktar",
         "back": "Geri",
         "mute_suggestion": "Bu ayarı önerme",
-        "reset_muted": "Susturulanları sıfırla"
+        "reset_muted": "Susturulanları sıfırla",
+        "import_power_history": "Güç geçmişini içe aktar",
+        "hist_read_recorder": "Home Assistant'tan oku",
+        "hist_scan": "Döngüleri tara",
+        "hist_import_n": "{n} döngüyü içe aktar",
+        "hist_goto_cycles": "Döngüleri göster"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -358,7 +364,8 @@
         "pg_outcome": "Simülasyon sonucu",
         "pg_across_cycles": "Tüm döngülerinizde",
         "community_store": "Topluluk Mağazası",
-        "online_account": "Topluluk Mağazası ve çevrimiçi özellikler"
+        "online_account": "Topluluk Mağazası ve çevrimiçi özellikler",
+        "import_power_history": "Güç geçmişini içe aktar"
     },
     "health": {
         "fair": "Kabul edilebilir profil kalitesi",
@@ -680,7 +687,25 @@
         "conflict_import_copy": "Kopya olarak içe aktar",
         "conflict_keep_mine": "Benimkini koru",
         "conflict_overwrite": "Üzerine yaz",
-        "font_size": "Panel yazı tipi boyutu"
+        "font_size": "Panel yazı tipi boyutu",
+        "hist_csv_data": "CSV verisi",
+        "hist_from_recorder": "Veya Home Assistant'tan okuyun",
+        "days": "gün",
+        "hist_keep": "Bu döngüyü sakla",
+        "hist_looks_complete": "tamamlanmış",
+        "peak_power_short": "Tepe",
+        "shape": "Şekil",
+        "hist_skip_idle": "hiçbir şey çalışmıyor",
+        "hist_skip_sparse": "okumalar birbirinden çok uzak",
+        "hist_skip_short": "çok az okuma",
+        "hist_skip_long": "bölmeye yetecek kadar uzun bir ara yok",
+        "hist_reason_short": "bu cihazın en kısa gerçek döngüsünden daha kısa",
+        "hist_reason_no_end": "hiç düzgün şekilde bitmedi",
+        "task_history_import": "Güç geçmişi taraması",
+        "task_history_import_apply": "Döngüleri içe aktarma",
+        "evidence_real_cycles": "Bu makinenin çalıştırdığı döngüler",
+        "evidence_reference_cycles": "Topluluk mağazasından indirilenler",
+        "evidence_backfill_cycles": "İçe aktarılan güç geçmişinde bulunanlar"
     },
     "log": {
         "all_levels": "Tüm seviyeler",
@@ -759,7 +784,8 @@
         "store_share": "Topluluk mağazasında paylaş",
         "store_share_device": "Bu cihazı paylaş",
         "export_select": "Dışa aktarma - veri seçin",
-        "import_wizard": "İçe aktarma - veri seçin"
+        "import_wizard": "İçe aktarma - veri seçin",
+        "history_import": "Güç geçmişini içe aktar"
     },
     "msg": {
         "tail_trim_hint": "Sondan kaldırılacak saniye sayısı",
@@ -1013,7 +1039,28 @@
         "sug_mute_failed": "Öneri susturulamadı",
         "sug_unmuted_all": "Susturulan öneriler sıfırlandı",
         "n_suggestions_muted": "{count} susturuldu; öneri motoru bunları önermeyecek.",
-        "font_size_hint": "Bu paneldeki her şeyi büyütün veya küçültün. Bu cihazdaki hesabınıza uygulanır."
+        "font_size_hint": "Bu paneldeki her şeyi büyütün veya küçültün. Bu cihazdaki hesabınıza uygulanır.",
+        "import_history_description": "WashData'dan önce de akıllı bir priziniz var mıydı? Güç sensörünün geçmiş dışa aktarımını yükleyin veya doğrudan Home Assistant'tan okutun; normal algılama bunun üzerinde çalışır ve geçmiş döngüler adlandırılmaya hazır şekilde Döngüler listenizde görünür.",
+        "hist_input_hint": "Geçmiş panelinden indirdiğiniz bir CSV dosyasını yükleyin (entity, state, last changed) veya WashData'nın sensörün geçmişini doğrudan okumasına izin verin. Ardından algılama, tıpkı canlı çalışırken olduğu gibi bunun üzerinde çalışır ve bulunan döngülerden hangilerini saklayacağınızı siz seçersiniz.",
+        "hist_recorder_hint": "Home Assistant varsayılan olarak ayrıntılı geçmişi 10 gün tutar, sonrasında yalnızca saatlik ortalamaları saklar; bunlar döngü algılamak için fazla kabadır. Bir CSV dışa aktarımı, yalnızca recorder daha uzun süre saklayacak şekilde ayarlandıysa daha geriye gidebilir.",
+        "hist_scanning": "Geçmişiniz algılayıcı üzerinden yeniden oynatılıyor. Bu işlem arka planda çalışır - bu pencereyi kapatıp daha sonra geri dönebilirsiniz.",
+        "hist_imported_count": "{n} döngü içe aktarıldı.",
+        "hist_duplicates": "{n} tanesi daha önce içe aktarılmıştı ve atlandı.",
+        "hist_capped": "İçe aktarılan döngüler için cihaz başına sınıra ulaşıldı; kalanlar kaydedilmedi.",
+        "hist_next_step": "Döngüler listenizde, içe aktarılmış geçmiş olarak işaretli halde duruyorlar. Birini açın ve ait olduğu programı adlandırmak için Etiketle'yi kullanın.",
+        "hist_rows_read": "{n} okuma alındı",
+        "hist_breaks": "sensörün kullanılamadığı {n} boşluk",
+        "hist_other_entity": "diğer varlıklara ait {n} okuma yoksayıldı",
+        "hist_skipped_spans": "Atlanan aralıklar",
+        "hist_settings_used": "Bu cihazın mevcut ayarlarıyla algılandı (minimum güç {w} W, kapatma gecikmesi {s} s).",
+        "hist_none_found": "Bu geçmişte hiçbir döngü algılanamadı.",
+        "hist_found": "{n} döngü bulundu. Gerçek bir çalışma gibi görünmeyenlerin işaretini kaldırın - içe aktarana kadar hiçbir şey kaydedilmez.",
+        "hist_scan_capped": "Yalnızca ilk adaylar gösteriliyor (toplam {n} bulundu).",
+        "hist_recorder_empty": "Home Assistant'ta bu sensör için o aralıkta ayrıntılı geçmiş yok.",
+        "hist_scan_failed": "Tarama başarısız oldu.",
+        "hist_scan_expired": "Bu tarama artık kullanılamıyor. Lütfen yeniden tarayın.",
+        "hist_import_failed": "İçe aktarma başarısız oldu.",
+        "imported_history_readonly": "İçe aktarılan güç geçmişinde algılandı. Program eşleştirmesini etkiler ancak istatistiklerinize sayılmaz, kırpılamaz veya bölünemez. Programını adlandırmak için etiketleyin."
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1558,6 +1605,10 @@
         "dishwasher_end_spike_quiet_release": {
             "label": "Pasif Kurutma Sessiz Serbest Bırakma",
             "doc": "Döngü beklenen süresini aştıktan sonra, WashData bir son tahliye beklemeyi bırakıp döngüyü sonlandırmadan önce bulaşık makinesinin ne kadar süre sessiz (Durdurma Eşiği'nin altında) kalması gerektiğidir. Makineniz, gecikmeli bir son tahliyeden önce uzun ve sessiz bir kurutma aşamasına sahipse ve bu tahliye kaçırılıyorsa değeri artırın - daha geniş bir pencere, öğrenilen sürenin eski ortalamaya kilitlenmek yerine mevsimsel kaymayı (daha soğuk şebeke suyu = daha uzun döngüler) izlemesini sağlar. Bu ayar, dahili 30 dakikalık son tahliye tepesi sınırına göre beklemeyi yalnızca kısaltabilir, asla uzatamaz."
+        },
+        "profile_evidence_sources": {
+            "label": "Bir programı şekillendiren döngüler",
+            "doc": "Her programın güç eğrisini oluşturmak ve tamamlanmış bir döngüyü onunla eşleştirmek için hangi döngülerin kullanılacağı. Bir türün işaretini kaldırmak, hiçbir şey silmeden onun programlarınızı şekillendirmesini durdurur - döngüler Döngüler listenizde kalır ve yine etiketlenebilir veya kaldırılabilir. İçe aktarılan verilere güvenmiyorsanız kullanışlıdır. İstatistikler etkilenmez: her zaman yalnızca bu makinenin gerçekten çalıştırdığı döngüleri sayarlar. Her şeyin işaretini kaldırmak yok sayılır, çünkü arkasında hiç döngü olmayan bir program asla eşleşemez."
         }
     },
     "setting_group": {
@@ -1641,6 +1692,9 @@
         },
         "basic_configuration": {
             "label": "Temel yapılandırma"
+        },
+        "profile_evidence": {
+            "label": "Profil Kaynakları"
         }
     },
     "status": {
@@ -1665,7 +1719,8 @@
         "trimming": "Kırpılıyor…",
         "splitting": "Bölünüyor…",
         "deleting": "Siliniyor…",
-        "imported": "İçe aktarıldı"
+        "imported": "İçe aktarıldı",
+        "preparing": "Hazırlanıyor…"
     },
     "tab": {
         "advanced": "Gelişmiş",
@@ -1801,7 +1856,9 @@
         "store_download_failed": "İndirme başarısız: {error}",
         "store_download_nothing": "İndirilecek yeni bir şey yok - bu kurulum zaten cihazınızda.",
         "export_selective_done": "Dışa aktarma indirildi",
-        "import_selective_done": "{profiles} profil ve {cycles} döngü içe aktarıldı"
+        "import_selective_done": "{profiles} profil ve {cycles} döngü içe aktarıldı",
+        "hist_csv_required": "Önce bir CSV dosyası yükleyin veya içeriğini yapıştırın",
+        "file_read_failed": "Bu dosya okunamadı"
     },
     "suggestion": {
         "both_agree": "WashData öneriyor",

@@ -78,7 +78,8 @@
     "awaiting": "Bíður samþykkis",
     "imported_tip": "Flutt inn úr samfélagsversluninni. Aðeins notað til samsvörunar, ekki talið með í tölfræði.",
     "not_importable": "ekki hér",
-    "exists": "til staðar"
+    "exists": "til staðar",
+    "backfilled_tip": "Greint í innfluttri aflsögu. Hefur aðeins áhrif á kerfissamsvörun, telst ekki með í tölfræði."
   },
   "btn": {
     "set_brand_model": "Stilla vörumerki og gerð",
@@ -243,7 +244,12 @@
     "import_selected": "Flytja inn valið",
     "back": "Til baka",
     "mute_suggestion": "Hætta að stinga upp á þessari stillingu",
-    "reset_muted": "Endurstilla þaggaðar tillögur"
+    "reset_muted": "Endurstilla þaggaðar tillögur",
+    "import_power_history": "Flytja inn aflsögu",
+    "hist_read_recorder": "Lesa úr Home Assistant",
+    "hist_scan": "Leita að lotum",
+    "hist_import_n": "Flytja inn {n} lotur",
+    "hist_goto_cycles": "Sýndu mér loturnar"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -358,7 +364,8 @@
     "pg_outcome": "Niðurstaða hermunar",
     "pg_across_cycles": "Yfir lotur þínar",
     "community_store": "Samfélagsverslun",
-    "online_account": "Samfélagsverslun og nettengdir eiginleikar"
+    "online_account": "Samfélagsverslun og nettengdir eiginleikar",
+    "import_power_history": "Flytja inn aflsögu"
   },
   "health": {
     "fair": "Viðunanlegt prófíl",
@@ -680,7 +687,25 @@
     "conflict_keep_mine": "Halda mínum",
     "conflict_overwrite": "Skrifa yfir",
     "pg_anti_wrinkle": "Hrukkuleysi",
-    "font_size": "Leturstærð glugga"
+    "font_size": "Leturstærð glugga",
+    "hist_csv_data": "CSV-gögn",
+    "hist_from_recorder": "Eða lestu hana úr Home Assistant",
+    "days": "dagar",
+    "hist_keep": "Halda þessari lotu",
+    "hist_looks_complete": "fullgerð",
+    "peak_power_short": "Toppur",
+    "shape": "Lögun",
+    "hist_skip_idle": "ekkert í gangi",
+    "hist_skip_sparse": "of langt á milli mælinga",
+    "hist_skip_short": "of fáar mælingar",
+    "hist_skip_long": "ekkert hlé nógu langt til að skipta á",
+    "hist_reason_short": "styttri en stysta raunverulega lota þessa heimilistækis",
+    "hist_reason_no_end": "lauk aldrei með eðlilegum hætti",
+    "task_history_import": "Skanna aflsögu",
+    "task_history_import_apply": "Flyt inn lotur",
+    "evidence_real_cycles": "Lotur sem þessi vél hefur keyrt",
+    "evidence_reference_cycles": "Hlaðnar niður úr samfélagsversluninni",
+    "evidence_backfill_cycles": "Fundnar í innfluttri aflsögu"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -759,7 +784,8 @@
     "store_share": "Deila í samfélagsverslun",
     "store_share_device": "Deila þessu tæki",
     "export_select": "Útflutningur - velja gögn",
-    "import_wizard": "Innflutningur - velja gögn"
+    "import_wizard": "Innflutningur - velja gögn",
+    "history_import": "Flytja inn aflsögu"
   },
   "msg": {
     "tail_trim_hint": "Fjarlægðu þennan fjölda sekúndna frá lokum",
@@ -1013,7 +1039,28 @@
     "sug_mute_failed": "Gat ekki þaggað tillögu",
     "sug_unmuted_all": "Þaggaðar tillögur endurstilltar",
     "n_suggestions_muted": "{count} þaggaðar; sjálfvirki stillirinn leggur ekki til þessar.",
-    "font_size_hint": "Gerðu allt á þessum glugga stærra eða minna. Gildir fyrir reikning þinn á þessum tæki."
+    "font_size_hint": "Gerðu allt á þessum glugga stærra eða minna. Gildir fyrir reikning þinn á þessum tæki.",
+    "import_history_description": "Varstu þegar með snjalltengil áður en þú fékkst WashData? Hlaðdu upp söguútflutningi frá aflmælinum hans, eða láttu lesa hana beint úr Home Assistant, og venjuleg greining fer yfir hana svo eldri lotur birtast í Hringrásir-listanum þínum, tilbúnar til að fá heiti.",
+    "hist_input_hint": "Hlaðdu upp CSV-skrá sem þú hlóðst niður úr Saga-spjaldinu (eining, staða, síðast breytt), eða láttu WashData lesa sögu mælisins beint. Greiningin fer svo yfir hana alveg eins og í beinni, og þú velur hvaða lotur á að halda af þeim sem finnast.",
+    "hist_recorder_hint": "Home Assistant heldur nákvæmri sögu í 10 daga sjálfgefið og eftir það aðeins klukkustundarmeðaltölum, sem eru of grófgerð til að greina lotur úr. CSV-útflutningur nær aðeins lengra til baka ef recorder var stilltur á að halda meiru.",
+    "hist_scanning": "Sagan þín er spiluð í gegnum greininguna. Þetta gengur í bakgrunni - þú getur lokað þessum glugga og komið til baka síðar.",
+    "hist_imported_count": "{n} lotur fluttar inn.",
+    "hist_duplicates": "{n} voru þegar fluttar inn og var sleppt.",
+    "hist_capped": "Hámarki innfluttra lota fyrir hvert tæki var náð; það sem eftir stóð var ekki vistað.",
+    "hist_next_step": "Þær eru í Hringrásir-listanum þínum, merktar sem innflutt saga. Opnaðu eina og notaðu Merki til að gefa kerfinu sem hún tilheyrir heiti.",
+    "hist_rows_read": "{n} mælingar lesnar",
+    "hist_breaks": "{n} göt þar sem mælirinn var ekki tiltækur",
+    "hist_other_entity": "{n} mælingum fyrir aðrar einingar var sleppt",
+    "hist_skipped_spans": "Bil sem var sleppt",
+    "hist_settings_used": "Greint með núverandi stillingum þessa tækis (lágmarksafl {w} W, slökkviðráð {s} s).",
+    "hist_none_found": "Engar lotur greindust í þeirri sögu.",
+    "hist_found": "Fann {n} lotur. Taktu hakið af öllu sem lítur ekki út eins og raunveruleg keyrsla - ekkert er vistað fyrr en þú flytur inn.",
+    "hist_scan_capped": "Aðeins fyrstu lotutillögurnar eru sýndar ({n} fundust).",
+    "hist_recorder_empty": "Home Assistant hefur enga nákvæma sögu fyrir þennan mæli á því tímabili.",
+    "hist_scan_failed": "Skönnun mistókst.",
+    "hist_scan_expired": "Sú skönnun er ekki lengur tiltæk. Skannaðu aftur.",
+    "hist_import_failed": "Innflutningur mistókst.",
+    "imported_history_readonly": "Greint í innfluttri aflsögu. Hún hefur áhrif á kerfissamsvörun en telst ekki með í tölfræðinni þinni og ekki er hægt að klippa hana til eða skipta henni. Merktu hana til að gefa kerfinu heiti."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
@@ -1558,6 +1605,10 @@
     "door_end_dwell_seconds": {
       "label": "Dvaltími hurðar við lok",
       "doc": "Hversu lengi hurðin þarf að vera opin áður en WashData lýkur hringnum, þegar \"Hurð opnast sjálfkrafa í lok\" er virkt. Nógu lengi til að hunsa hraða tilbúningu fats (sjálfgefið 60 s), nógu stutt til að ljúka fljótt þegar vél spretter hurðinni upp."
+    },
+    "profile_evidence_sources": {
+      "label": "Lotur sem móta kerfi",
+      "doc": "Hvaða lotur eru notaðar til að byggja upp aflferil hvers kerfis og til að finna samsvörun við hann fyrir lokna lotu. Ef hakið er tekið af einni gerð hefur hún ekki lengur áhrif á kerfin þín, án þess að neinu sé eytt - loturnar verða áfram í Hringrásir-listanum þínum og enn má merkja þær eða fjarlægja. Gagnlegt ef þú treystir ekki innfluttum gögnum. Tölfræðin verður óbreytt: hún telur alltaf aðeins þær lotur sem þessi vél hefur í raun keyrt. Sé hakið tekið af öllu er það hunsað, því kerfi sem hefur engar lotur að baki gæti aldrei fundið samsvörun."
     }
   },
   "setting_group": {
@@ -1641,6 +1692,9 @@
     },
     "basic_configuration": {
       "label": "Grunnstillingar"
+    },
+    "profile_evidence": {
+      "label": "Grunnur sniða"
     }
   },
   "status": {
@@ -1665,7 +1719,8 @@
     "trimming": "Klippi til…",
     "splitting": "Skipti…",
     "deleting": "Eyði…",
-    "imported": "Flutt inn"
+    "imported": "Flutt inn",
+    "preparing": "Undirbý…"
   },
   "suggestion": {
     "both_agree": "WashData mælir með",
@@ -1914,7 +1969,9 @@
     "store_download_failed": "Niðurhal mistókst: {error}",
     "store_download_nothing": "Ekkert nýtt til að hlaða niður -- þessi uppsetning er þegar á tækinu þínu.",
     "export_selective_done": "Útflutningur sóttur",
-    "import_selective_done": "Flutti inn {profiles} prófíl(a) og {cycles} lotu(r)"
+    "import_selective_done": "Flutti inn {profiles} prófíl(a) og {cycles} lotu(r)",
+    "hist_csv_required": "Hlaðdu fyrst inn CSV-skrá eða límdu innihald hennar",
+    "file_read_failed": "Gat ekki lesið þá skrá"
   },
   "trend": {
     "down": "Stefnir niður",

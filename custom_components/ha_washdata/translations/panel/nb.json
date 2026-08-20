@@ -78,7 +78,8 @@
     "awaiting": "Venter på godkjenning",
     "imported_tip": "Importert fra fellesskapsbutikken. Brukes kun til matching, telles ikke med i statistikken.",
     "not_importable": "ikke her",
-    "exists": "finnes"
+    "exists": "finnes",
+    "backfilled_tip": "Oppdaget i importert effekthistorikk. Påvirker bare programmatching, telles ikke med i statistikken."
   },
   "btn": {
     "set_brand_model": "Angi merke og modell",
@@ -243,7 +244,12 @@
     "import_selected": "Importer valgte",
     "back": "Tilbake",
     "mute_suggestion": "Slutt å foreslå denne innstillingen",
-    "reset_muted": "Tilbakestill dempede forslag"
+    "reset_muted": "Tilbakestill dempede forslag",
+    "import_power_history": "Importer effekthistorikk",
+    "hist_read_recorder": "Les fra Home Assistant",
+    "hist_scan": "Søk etter sykluser",
+    "hist_import_n": "Importer {n} sykluser",
+    "hist_goto_cycles": "Vis meg syklusene"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -358,7 +364,8 @@
     "pg_outcome": "Simuleringsresultat",
     "pg_across_cycles": "På tvers av syklusene dine",
     "community_store": "Fellesskapsbutikk",
-    "online_account": "Fellesskapsbutikk og nettfunksjoner"
+    "online_account": "Fellesskapsbutikk og nettfunksjoner",
+    "import_power_history": "Importer effekthistorikk"
   },
   "health": {
     "fair": "Akseptabel profilkvalitet",
@@ -680,7 +687,25 @@
     "conflict_keep_mine": "Behold mine",
     "conflict_overwrite": "Overskriv",
     "pg_anti_wrinkle": "Anti-rynke",
-    "font_size": "Panelets skriftstørrelse"
+    "font_size": "Panelets skriftstørrelse",
+    "hist_csv_data": "CSV-data",
+    "hist_from_recorder": "Eller les den fra Home Assistant",
+    "days": "dager",
+    "hist_keep": "Behold denne syklusen",
+    "hist_looks_complete": "komplett",
+    "peak_power_short": "Topp",
+    "shape": "Form",
+    "hist_skip_idle": "ingenting kjørte",
+    "hist_skip_sparse": "avlesninger for langt fra hverandre",
+    "hist_skip_short": "for få avlesninger",
+    "hist_skip_long": "ingen pause lang nok å dele på",
+    "hist_reason_short": "kortere enn dette apparatets korteste virkelige syklus",
+    "hist_reason_no_end": "avsluttet aldri rent",
+    "task_history_import": "Søker gjennom effekthistorikk",
+    "task_history_import_apply": "Importerer sykluser",
+    "evidence_real_cycles": "Sykluser denne maskinen har kjørt",
+    "evidence_reference_cycles": "Lastet ned fra fellesskapsbutikken",
+    "evidence_backfill_cycles": "Funnet i importert effekthistorikk"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -759,7 +784,8 @@
     "store_share": "Del i fellesskapsbutikken",
     "store_share_device": "Del dette apparatet",
     "export_select": "Eksport - velg data",
-    "import_wizard": "Import - velg data"
+    "import_wizard": "Import - velg data",
+    "history_import": "Importer effekthistorikk"
   },
   "msg": {
     "tail_trim_hint": "Fjern så mange sekunder fra slutten",
@@ -1013,7 +1039,28 @@
     "sug_mute_failed": "Kunne ikke dempe forslaget",
     "sug_unmuted_all": "Dempede forslag tilbakestilt",
     "n_suggestions_muted": "{count} dempet; autotuner vil ikke foreslå disse.",
-    "font_size_hint": "Gjør alt i dette panelet større eller mindre. Gjelder for kontoen din på denne enheten."
+    "font_size_hint": "Gjør alt i dette panelet større eller mindre. Gjelder for kontoen din på denne enheten.",
+    "import_history_description": "Hadde du allerede en smartplugg før du tok i bruk WashData? Last opp en historikkeksport fra effektsensoren, eller la den leses rett fra Home Assistant, og den vanlige deteksjonen kjører over den slik at tidligere sykluser dukker opp i Sykluser-listen din, klare til å navngis.",
+    "hist_input_hint": "Last opp en CSV-fil lastet ned fra Historikk-panelet (entitet, tilstand, sist endret), eller la WashData lese sensorens historikk direkte. Deteksjonen kjører deretter over den akkurat som live, og du velger hvilke av syklusene den finner du vil beholde.",
+    "hist_recorder_hint": "Home Assistant beholder detaljert historikk i 10 dager som standard og deretter bare timesgjennomsnitt, som er for grove å oppdage sykluser fra. En CSV-eksport rekker bare lenger tilbake hvis recorderen din var satt til å beholde mer.",
+    "hist_scanning": "Historikken din spilles gjennom deteksjonen. Dette kjører i bakgrunnen - du kan lukke denne dialogen og komme tilbake til den senere.",
+    "hist_imported_count": "{n} sykluser importert.",
+    "hist_duplicates": "{n} var allerede importert og ble hoppet over.",
+    "hist_capped": "Grensen per enhet for importerte sykluser ble nådd; resten ble ikke lagret.",
+    "hist_next_step": "De ligger i Sykluser-listen din, merket som importert historikk. Åpne en og bruk Merk for å navngi programmet den hører til.",
+    "hist_rows_read": "{n} avlesninger lest",
+    "hist_breaks": "{n} hull der sensoren var utilgjengelig",
+    "hist_other_entity": "{n} avlesninger for andre entiteter ignorert",
+    "hist_skipped_spans": "Utelatte strekninger",
+    "hist_settings_used": "Oppdaget med denne enhetens gjeldende innstillinger (minimum effekt {w} W, av-forsinkelse {s} s).",
+    "hist_none_found": "Ingen sykluser kunne oppdages i den historikken.",
+    "hist_found": "Fant {n} sykluser. Fjern avkryssingen for alt som ikke ser ut som en virkelig kjøring - ingenting lagres før du importerer.",
+    "hist_scan_capped": "Bare de første kandidatene vises ({n} ble funnet).",
+    "hist_recorder_empty": "Home Assistant har ingen detaljert historikk for denne sensoren i det vinduet.",
+    "hist_scan_failed": "Søket mislyktes.",
+    "hist_scan_expired": "Det søket er ikke lenger tilgjengelig. Søk på nytt.",
+    "hist_import_failed": "Importen mislyktes.",
+    "imported_history_readonly": "Oppdaget i importert effekthistorikk. Den påvirker programmatching, men telles ikke med i statistikken din og kan ikke beskjæres eller deles. Merk den for å navngi programmet."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: stille sekunder etter forventet varighet før ventingen på tømming ved slutten av syklusen frigjøres",
@@ -1558,6 +1605,10 @@
     "door_end_dwell_seconds": {
       "label": "Dørens åpningstid ved avslutning",
       "doc": "Hvor lenge døren må forbli åpen før WashData avslutter syklusen, når \"Dør åpnes automatisk ved avslutning\" er aktivert. Lang nok til å ignorere rask tillegging av et fat (standard 60 s), kort nok til å avslutte raskt når maskinen spretter opp døren."
+    },
+    "profile_evidence_sources": {
+      "label": "Sykluser som former et program",
+      "doc": "Hvilke sykluser som brukes til å bygge opp effektkurven for hvert program, og til å matche en ferdig syklus mot den. Fjerner du haken for en type, former den ikke lenger programmene dine, uten at noe slettes - syklusene blir liggende i Sykluser-listen din og kan fortsatt merkes eller fjernes. Nyttig hvis du ikke stoler på importerte data. Statistikken påvirkes ikke: den teller alltid bare syklusene denne maskinen faktisk har kjørt. Å fjerne alle hakene blir ignorert, siden et program uten sykluser bak seg aldri kunne matche."
     }
   },
   "setting_group": {
@@ -1641,6 +1692,9 @@
     },
     "basic_configuration": {
       "label": "Grunnleggende konfigurasjon"
+    },
+    "profile_evidence": {
+      "label": "Profilgrunnlag"
     }
   },
   "status": {
@@ -1665,7 +1719,8 @@
     "trimming": "Beskjærer…",
     "splitting": "Deler opp…",
     "deleting": "Sletter…",
-    "imported": "Importert"
+    "imported": "Importert",
+    "preparing": "Forbereder…"
   },
   "suggestion": {
     "both_agree": "WashData anbefaler",
@@ -1914,7 +1969,9 @@
     "store_download_failed": "Nedlasting mislyktes: {error}",
     "store_download_nothing": "Ingenting nytt å laste ned -- dette oppsettet er allerede på apparatet ditt.",
     "export_selective_done": "Eksport lastet ned",
-    "import_selective_done": "Importerte {profiles} profil(er) og {cycles} syklus(er)"
+    "import_selective_done": "Importerte {profiles} profil(er) og {cycles} syklus(er)",
+    "hist_csv_required": "Last inn en CSV-fil eller lim inn innholdet først",
+    "file_read_failed": "Kunne ikke lese den filen"
   },
   "trend": {
     "down": "Trender nedover",

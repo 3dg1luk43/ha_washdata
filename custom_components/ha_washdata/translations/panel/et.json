@@ -78,7 +78,8 @@
     "awaiting": "Ootab heakskiitu",
     "imported_tip": "Imporditud kogukonna poest. Kasutatakse ainult sobitamiseks, ei arvestata statistikas.",
     "not_importable": "pole saadaval",
-    "exists": "on olemas"
+    "exists": "on olemas",
+    "backfilled_tip": "Tuvastatud imporditud võimsuse ajaloos. Mõjutab ainult programmide sobitamist, statistikas ei arvestata."
   },
   "btn": {
     "set_brand_model": "Määra bränd ja mudel",
@@ -243,7 +244,12 @@
     "import_selected": "Impordi valitud",
     "back": "Tagasi",
     "mute_suggestion": "Lõpeta selle seade soovitamine",
-    "reset_muted": "Lähtesta vaigistatud"
+    "reset_muted": "Lähtesta vaigistatud",
+    "import_power_history": "Impordi võimsuse ajalugu",
+    "hist_read_recorder": "Loe Home Assistantist",
+    "hist_scan": "Otsi tsükleid",
+    "hist_import_n": "Impordi tsüklid ({n})",
+    "hist_goto_cycles": "Näita tsükleid"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -358,7 +364,8 @@
     "pg_outcome": "Simulatsiooni tulemus",
     "pg_across_cycles": "Sinu tsüklite lõikes",
     "community_store": "Kogukonna pood",
-    "online_account": "Kogukonna pood ja veebifunktsioonid"
+    "online_account": "Kogukonna pood ja veebifunktsioonid",
+    "import_power_history": "Võimsuse ajaloo import"
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -680,7 +687,25 @@
     "conflict_import_copy": "Impordi koopiana",
     "conflict_keep_mine": "Säilita minu omad",
     "conflict_overwrite": "Kirjuta üle",
-    "font_size": "Paneeli fondi suurus"
+    "font_size": "Paneeli fondi suurus",
+    "hist_csv_data": "CSV-andmed",
+    "hist_from_recorder": "Või loe see Home Assistantist",
+    "days": "päeva",
+    "hist_keep": "Säilita see tsükkel",
+    "hist_looks_complete": "lõpetatud",
+    "peak_power_short": "Tipp",
+    "shape": "Kuju",
+    "hist_skip_idle": "miski ei töötanud",
+    "hist_skip_sparse": "näidud liiga hõredad",
+    "hist_skip_short": "liiga vähe näite",
+    "hist_skip_long": "pole piisavalt pikka pausi, kust jagada",
+    "hist_reason_short": "lühem kui selle seadme lühim tegelik tsükkel",
+    "hist_reason_no_end": "ei lõppenud korralikult",
+    "task_history_import": "Võimsuse ajaloo skannimine",
+    "task_history_import_apply": "Tsüklite importimine",
+    "evidence_real_cycles": "Selle seadme tehtud tsüklid",
+    "evidence_reference_cycles": "Kogukonna poest alla laaditud",
+    "evidence_backfill_cycles": "Leitud imporditud võimsuse ajaloos"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -759,7 +784,8 @@
     "store_share": "Jaga kogukonna poodi",
     "store_share_device": "Jaga seda seadet",
     "export_select": "Eksport - vali andmed",
-    "import_wizard": "Import - vali andmed"
+    "import_wizard": "Import - vali andmed",
+    "history_import": "Võimsuse ajaloo import"
   },
   "msg": {
     "tail_trim_hint": "Mitu sekundit lõpust eemaldada",
@@ -1013,7 +1039,28 @@
     "sug_mute_failed": "Soovituse vaigistamine ebaõnnestus",
     "sug_unmuted_all": "Vaigistatud soovitused lähtestatud",
     "n_suggestions_muted": "{count} vaigistatud; automaatne häälestaja ei paku neid enam.",
-    "font_size_hint": "Muuda kõik selles paneelil suuremaks või väiksemaks. Kehtib sinu kontole sellel seadmel."
+    "font_size_hint": "Muuda kõik selles paneelil suuremaks või väiksemaks. Kehtib sinu kontole sellel seadmel.",
+    "import_history_description": "Kas nutipistik oli sul olemas juba enne WashDatat? Laadi üles selle võimsusanduri ajaloo eksport või loe see otse Home Assistantist, ja tavaline tuvastus töötab need andmed läbi, nii et möödunud tsüklid ilmuvad sinu Tsüklite loendisse ja neile saab nime anda.",
+    "hist_input_hint": "Laadi üles Ajaloo paneelilt alla laaditud CSV (olem, olek, viimane muutus) või lase WashDatal anduri ajalugu otse lugeda. Seejärel töötab tuvastus need andmed läbi täpselt nii nagu reaalajas ja sina valid, millised leitud tsüklid alles jäävad.",
+    "hist_recorder_hint": "Home Assistant hoiab üksikasjalikku ajalugu vaikimisi 10 päeva ja pärast seda ainult tunniseid keskmisi, mis on tsüklite tuvastamiseks liiga jämedad. CSV-eksport ulatub kaugemale minevikku ainult siis, kui sinu recorder oli seatud rohkem säilitama.",
+    "hist_scanning": "Sinu ajalugu jooksutatakse detektorist läbi. See toimub taustal - võid selle akna sulgeda ja hiljem tagasi tulla.",
+    "hist_imported_count": "Imporditud tsükleid: {n}.",
+    "hist_duplicates": "Juba varem imporditud ja vahele jäetud: {n}.",
+    "hist_capped": "Seadme imporditud tsüklite piirmäär sai täis; ülejäänuid ei salvestatud.",
+    "hist_next_step": "Need on sinu Tsüklite loendis, märgitud imporditud ajaloona. Ava üks ja kasuta nuppu Sildista, et määrata selle programm.",
+    "hist_rows_read": "Loetud näite: {n}",
+    "hist_breaks": "Katkestusi, kus andur ei olnud saadaval: {n}",
+    "hist_other_entity": "Eiratud muude olemite näite: {n}",
+    "hist_skipped_spans": "Vahele jäetud lõigud",
+    "hist_settings_used": "Tuvastatud selle seadme praeguste seadetega (Minimaalne Võimsus {w} W, Väljalülitumise Viivitus {s} s).",
+    "hist_none_found": "Sellest ajaloost ei õnnestunud ühtegi tsüklit tuvastada.",
+    "hist_found": "Leitud tsükleid: {n}. Eemalda linnuke kõigelt, mis ei tundu tegelik käitus - enne importimist ei salvestata midagi.",
+    "hist_scan_capped": "Kuvatakse ainult esimesed kandidaadid (leiti: {n}).",
+    "hist_recorder_empty": "Home Assistantil pole selle anduri kohta sellest ajavahemikust üksikasjalikku ajalugu.",
+    "hist_scan_failed": "Skannimine ebaõnnestus.",
+    "hist_scan_expired": "See skannimistulemus pole enam saadaval. Palun skanni uuesti.",
+    "hist_import_failed": "Import ebaõnnestus.",
+    "imported_history_readonly": "Tuvastatud imporditud võimsuse ajaloos. See mõjutab programmide sobitamist, kuid ei arvestata sinu statistikas ning seda ei saa kärpida ega poolitada. Kasuta nuppu Sildista, et määrata programm."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
@@ -1558,6 +1605,10 @@
     "door_end_dwell_seconds": {
       "label": "Ukse avamise lõppviibimisaeg",
       "doc": "Kui kaua uks peab jääma avatuks, enne kui WashData tsükli lõpetab, kui \"Uks avaneb automaatselt lõpus\" on sisse lülitatud. Piisavalt pikk, et kiire taldrikute lisamine ignoreeritaks (vaikimisi 60 s), piisavalt lühike, et lõpetada kiiresti, kui masin ukse avab."
+    },
+    "profile_evidence_sources": {
+      "label": "Programmi kujundavad tsüklid",
+      "doc": "Milliseid tsükleid kasutatakse iga programmi võimsuskõvera koostamiseks ja lõpetatud tsükli sellega sobitamiseks. Kui mõne liigi märke eemaldad, ei kujunda see enam sinu programme, kuid midagi ei kustutata - tsüklid jäävad Tsüklite loendisse ning neid saab endiselt sildistada või eemaldada. Kasulik, kui sa imporditud andmeid ei usalda. Statistikat see ei mõjuta: seal arvestatakse alati ainult neid tsükleid, mida see seade tegelikult käivitas. Kõigi märkide eemaldamist eiratakse, sest ilma ühegi tsüklita programm ei saaks kunagi sobituda."
     }
   },
   "setting_group": {
@@ -1641,6 +1692,9 @@
     },
     "basic_configuration": {
       "label": "Põhiseaded"
+    },
+    "profile_evidence": {
+      "label": "Profiili alusandmed"
     }
   },
   "status": {
@@ -1665,7 +1719,8 @@
     "trimming": "Kärpimine…",
     "splitting": "Lõhestamine…",
     "deleting": "Kustutamine…",
-    "imported": "Imporditud"
+    "imported": "Imporditud",
+    "preparing": "Ettevalmistamine…"
   },
   "tab": {
     "advanced": "Täpsemalt",
@@ -1801,7 +1856,9 @@
     "store_download_failed": "Allalaadimine ebaõnnestus: {error}",
     "store_download_nothing": "Midagi uut alla laadida pole - see seadistus on juba teie seadmel.",
     "export_selective_done": "Eksport alla laaditud",
-    "import_selective_done": "Imporditud {profiles} profiili ja {cycles} tsüklit"
+    "import_selective_done": "Imporditud {profiles} profiili ja {cycles} tsüklit",
+    "hist_csv_required": "Laadi esmalt CSV-fail või kleebi selle sisu",
+    "file_read_failed": "Seda faili ei õnnestunud lugeda"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",

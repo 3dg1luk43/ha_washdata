@@ -203,6 +203,29 @@ check('modal: store-share-device (tree)', () => {
 });
 check('modal: store-share-device (empty)', () => { el._shareableCycles = []; el._sharePhasePrograms = []; el._modal = { type: 'store-share-device', selected: new Set(), includePhases: new Set(), includeSettings: false }; return el._htmlModal(); });
 
+// #344 import wizard: every step, including the empty-result and error paths.
+const _histBase = { type: 'history-import', csvText: '', days: 10, token: 't', scanTaskId: null, applyTaskId: null, result: null, accept: new Set(), done: null, error: null };
+check('modal: history-import input', () => { el._modal = { ..._histBase, step: 'input' }; return el._htmlModal(); });
+check('modal: history-import input (error)', () => { el._modal = { ..._histBase, step: 'input', error: 'entity_not_in_file' }; return el._htmlModal(); });
+check('modal: history-import scanning', () => { el._modal = { ..._histBase, step: 'scan', scanTaskId: 'task1' }; el._tasks = { task1: { id: 'task1', kind: 'history_import', done: 40, total: 100, state: 'running' } }; return el._htmlModal(); });
+check('modal: history-import review', () => {
+  el._modal = { ..._histBase, step: 'review', accept: new Set([0]), result: {
+    segments: [
+      { index: 0, start_time: new Date().toISOString(), duration_s: 4464, status: 'completed', peak_w: 2165, energy_wh: 1096, accept: true, reason: null, curve: [10, 900, 1800, 400, 5] },
+      { index: 1, start_time: new Date().toISOString(), duration_s: 300, status: 'interrupted', peak_w: 400, energy_wh: 20, accept: false, reason: 'shorter_than_minimum', curve: [5, 40, 10] },
+    ],
+    skipped: [{ reason: 'idle', span_s: 3600 }, { reason: 'sparse', span_s: 86400 }],
+    parse: { rows_total: 2358, first: new Date().toISOString(), last: new Date().toISOString(), breaks: 8, rows_other_entity: 0 },
+    settings: { min_power: 2, off_delay: 300, min_off_gap: 480, device_type: 'washing_machine' },
+    found: 2, capped: false,
+  } };
+  const h = el._htmlModal();
+  el._drawHistorySparklines();
+  return h;
+});
+check('modal: history-import review (nothing found)', () => { el._modal = { ..._histBase, step: 'review', result: { segments: [], skipped: [{ reason: 'sparse', span_s: 86400 }], parse: { rows_total: 114 } } }; return el._htmlModal(); });
+check('modal: history-import done', () => { el._modal = { ..._histBase, step: 'done', done: { imported: 3, duplicates: 1, capped: false } }; return el._htmlModal(); });
+
 // Trim clock-mode + sample-snapping guards (issue #373). Build start_time from
 // local Date components so getHours()/setHours() stay timezone-agnostic.
 check('trim: _clockToOffset day-shift guard (#373 B)', () => {

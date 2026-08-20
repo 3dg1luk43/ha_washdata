@@ -879,7 +879,13 @@ GROUP_MIN_COHESION = 0.80
 # v11 is a marker-only bump: per-phase profiles (envelope["phase_profile"]) are
 # derived cache populated by async_rebuild_envelope, so no data migration is
 # needed - they self-populate on the next envelope rebuild.
-STORAGE_VERSION = 11
+# v12: initialize `backfill_cycles`, the third cycle list (issue #344). Cycles
+# recovered from raw power history predating the integration are auto-detected and
+# unverified, so they belong in neither `past_cycles` (which feeds lifetime stats, ML
+# training labels and the feedback queue, and is retention-evicted oldest-first) nor
+# `reference_cycles` (curated community-store templates, golden by construction).
+# Additive `setdefault`, so it is idempotent and loses nothing.
+STORAGE_VERSION = 12
 STORAGE_KEY = "ha_washdata"
 
 # Notification events
@@ -1073,3 +1079,65 @@ PLAYGROUND_STRESS_MAX_IDLE_W: float = 100000.0       # upper bound for a manual 
 # value to entry.options is always an explicit, per-setting user action.
 PLAYGROUND_PRESET_MAX: int = 30                      # per-device cap (keeps the store small)
 PLAYGROUND_PRESET_NAME_MAX: int = 60                 # preset name length cap
+
+# ─── Historical power-data import (issue #344) ─────────────────────────────────
+# An HA history export (or a recorder read) is a *change-based* stream: a steady
+# 0 W emits no rows at all, so it cannot be fed to the detector as-is (doing so
+# produces multi-day `force_stopped` blobs). `history_import.py` pre-segments the
+# stream into activity blocks first; these constants govern that pre-pass.
+# ─── Which cycle categories count as evidence for a profile ────────────────────
+# A profile's envelope (its average curve + duration/energy spread) and the matching
+# template are built from stored cycles. By default all three categories count. Untick a
+# category and it stops shaping profiles - useful when you do not trust imported data -
+# without deleting anything: the cycles remain stored, listed and deletable.
+#
+# This gates *evidence* only (`ProfileStore.iter_evidence_cycles`), never
+# `iter_stored_cycles`/`find_stored_cycle`. Profile garbage collection and sample repair
+# delete or re-point a profile whose sample cycle resolves to nothing, so they must keep
+# seeing every stored cycle: a cycle excluded from evidence is still a stored cycle, and
+# gating those lookups would destroy a backfill-only profile the moment someone unticked
+# imported history.
+CONF_PROFILE_EVIDENCE_SOURCES = "profile_evidence_sources"
+EVIDENCE_REAL_CYCLES = "real_cycles"
+EVIDENCE_REFERENCE_CYCLES = "reference_cycles"
+EVIDENCE_BACKFILL_CYCLES = "backfill_cycles"
+# Names match the export taxonomy (`_EXPORT_CATEGORIES`) so one vocabulary describes both.
+PROFILE_EVIDENCE_SOURCES = (
+    EVIDENCE_REAL_CYCLES,
+    EVIDENCE_REFERENCE_CYCLES,
+    EVIDENCE_BACKFILL_CYCLES,
+)
+# All three: the pre-setting behaviour, so an upgrade changes nothing.
+DEFAULT_PROFILE_EVIDENCE_SOURCES = list(PROFILE_EVIDENCE_SOURCES)
+
+HISTORY_IMPORT_MAX_BYTES: int = 32 * 1024 * 1024     # staged upload cap (~32 MiB of CSV text)
+HISTORY_IMPORT_MAX_ROWS: int = 500_000               # parsed-row cap (≈ a month at 5 s)
+HISTORY_IMPORT_CHUNK_BYTES: int = 512 * 1024         # per-WS-message upload chunk (frame cap is 4 MiB)
+HISTORY_IMPORT_CHUNK_SAMPLES: int = 4000             # samples replayed per executor job
+HISTORY_IMPORT_MIN_BLOCK_SAMPLES: int = 20           # floor for the per-block sample gate
+HISTORY_IMPORT_MAX_MEDIAN_INTERVAL_S: float = 120.0  # floor for the per-block cadence gate; the
+                                                     # effective gate is
+                                                     # max(this, 4 x sampling_interval) so a plug
+                                                     # that legitimately reports every 60 s is not
+                                                     # rejected
+HISTORY_IMPORT_EDGE_GAP_S: float = 60.0              # leading samples this far from the block body
+                                                     # are hourly-average debris and are trimmed
+                                                     # (leading edge ONLY - trimming the trailing
+                                                     # edge eats a real cycle's low-power tail)
+HISTORY_IMPORT_MAX_BLOCK_SPAN_S: float = 12 * 3600.0 # a block longer than this can only produce the
+                                                     # detector's 8 h `force_stopped` blob, so it is
+                                                     # reported rather than replayed
+HISTORY_IMPORT_DENSIFY_STEP_S: float = 30.0          # cadence of the synthetic samples inserted into
+                                                     # a carried-forward *quiet* gap, so the
+                                                     # detector's gap-free quiet tally can accrue
+                                                     # exactly as it does live
+HISTORY_IMPORT_TAIL_STEP_S: float = 30.0             # synthetic quiet-tail cadence used to close the
+                                                     # last cycle of a block
+HISTORY_IMPORT_MAX_SEGMENTS: int = 60                # candidates surfaced by one scan
+HISTORY_IMPORT_MAX_TOTAL_CYCLES: int = 200           # total backfilled cycles kept per device
+                                                     # (`backfill_cycles` has no retention pass and
+                                                     # the whole store blob is rewritten on every
+                                                     # throttled active-cycle save)
+HISTORY_IMPORT_RECORDER_MAX_DAYS: int = 14           # HA's default `purge_keep_days` is 10, so
+                                                     # asking for more only costs recorder time
+HISTORY_IMPORT_SOURCE: str = "history_import"        # `meta.source` marker on imported cycles

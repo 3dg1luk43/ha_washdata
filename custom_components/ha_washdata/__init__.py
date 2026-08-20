@@ -1152,8 +1152,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await asyncio.gather(*_cancelled_tasks, return_exceptions=True)
 
         # Release the per-entry write lock so it doesn't block the next setup.
-        from .ws_api import _WS_WRITE_LOCKS_KEY
+        from .ws_api import _WS_WRITE_LOCKS_KEY, async_clear_history_import
         hass.data.get(_WS_WRITE_LOCKS_KEY, {}).pop(entry.entry_id, None)
+
+        # Drop any staged history import (uploaded CSV text or a finished scan's
+        # traces). Nothing else owns that memory, so without this an abandoned upload
+        # would live for the lifetime of the process.
+        async_clear_history_import(hass, entry.entry_id)
 
         # When the last WashData entry is removed, tear down the shared panel/sidebar
         # so no stale registration flags or sidebar entry linger.

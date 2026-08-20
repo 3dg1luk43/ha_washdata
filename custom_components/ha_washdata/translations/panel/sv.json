@@ -78,7 +78,8 @@
     "awaiting": "Väntar på godkännande",
     "imported_tip": "Importerad från gemenskapsbutiken. Används endast för matchning, räknas inte in i statistiken.",
     "not_importable": "ej här",
-    "exists": "finns"
+    "exists": "finns",
+    "backfilled_tip": "Detekterad i importerad effekthistorik. Påverkar bara programmatchningen, räknas inte in i statistiken."
   },
   "btn": {
     "set_brand_model": "Ange märke och modell",
@@ -243,7 +244,12 @@
     "import_selected": "Importera valda",
     "back": "Tillbaka",
     "mute_suggestion": "Sluta föreslå den här inställningen",
-    "reset_muted": "Återställ tysta förslag"
+    "reset_muted": "Återställ tysta förslag",
+    "import_power_history": "Importera effekthistorik",
+    "hist_read_recorder": "Läs från Home Assistant",
+    "hist_scan": "Sök efter cykler",
+    "hist_import_n": "Importera {n} cykler",
+    "hist_goto_cycles": "Visa mig cyklerna"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -358,7 +364,8 @@
     "pg_outcome": "Simuleringsresultat",
     "pg_across_cycles": "Över dina cykler",
     "community_store": "Gemenskapsbutik",
-    "online_account": "Gemenskapsbutik och onlinefunktioner"
+    "online_account": "Gemenskapsbutik och onlinefunktioner",
+    "import_power_history": "Importera effekthistorik"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -680,7 +687,25 @@
     "conflict_keep_mine": "Behåll mina",
     "conflict_overwrite": "Skriv över",
     "pg_anti_wrinkle": "Skrynkelskydd",
-    "font_size": "Panelens teckenstorlek"
+    "font_size": "Panelens teckenstorlek",
+    "hist_csv_data": "CSV-data",
+    "hist_from_recorder": "Eller läs den från Home Assistant",
+    "days": "dagar",
+    "hist_keep": "Behåll den här cykeln",
+    "hist_looks_complete": "komplett",
+    "peak_power_short": "Topp",
+    "shape": "Form",
+    "hist_skip_idle": "inget kördes",
+    "hist_skip_sparse": "avläsningar för långt ifrån varandra",
+    "hist_skip_short": "för få avläsningar",
+    "hist_skip_long": "ingen paus lång nog att dela på",
+    "hist_reason_short": "kortare än den här apparatens kortaste verkliga cykel",
+    "hist_reason_no_end": "avslutades aldrig rent",
+    "task_history_import": "Söker igenom effekthistorik",
+    "task_history_import_apply": "Importerar cykler",
+    "evidence_real_cycles": "Cykler den här maskinen har kört",
+    "evidence_reference_cycles": "Nedladdade från gemenskapsbutiken",
+    "evidence_backfill_cycles": "Hittade i importerad effekthistorik"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -759,7 +784,8 @@
     "store_share": "Dela till gemenskapsbutiken",
     "store_share_device": "Dela den här apparaten",
     "export_select": "Export - välj data",
-    "import_wizard": "Import - välj data"
+    "import_wizard": "Import - välj data",
+    "history_import": "Importera effekthistorik"
   },
   "msg": {
     "tail_trim_hint": "Ta bort så här många sekunder från slutet",
@@ -1013,7 +1039,28 @@
     "sug_mute_failed": "Kunde inte tysta förslaget",
     "sug_unmuted_all": "Tysta förslag återställda",
     "n_suggestions_muted": "{count} tystade; auto-tunern föreslår inte dessa.",
-    "font_size_hint": "Gör allt i den här panelen större eller mindre. Gäller för ditt konto på den här enheten."
+    "font_size_hint": "Gör allt i den här panelen större eller mindre. Gäller för ditt konto på den här enheten.",
+    "import_history_description": "Hade du redan en smart kontakt innan du började med WashData? Ladda upp en historikexport från dess effektsensor, eller låt den läsas direkt från Home Assistant, och den vanliga detekteringen körs över den så att tidigare cykler dyker upp i din Cykler-lista, klara att namnges.",
+    "hist_input_hint": "Ladda upp en CSV-fil som hämtats från Historik-panelen (entitet, tillstånd, senast ändrad), eller låt WashData läsa sensorns historik direkt. Detekteringen körs sedan över den precis som live, och du väljer vilka av cyklerna den hittar du vill behålla.",
+    "hist_recorder_hint": "Home Assistant sparar detaljerad historik i 10 dagar som standard och därefter bara timmedelvärden, som är för grova för att detektera cykler ur. En CSV-export räcker längre tillbaka bara om din recorder var inställd på att spara mer.",
+    "hist_scanning": "Din historik spelas upp genom detekteringen. Detta körs i bakgrunden - du kan stänga den här dialogen och komma tillbaka till den senare.",
+    "hist_imported_count": "{n} cykler importerade.",
+    "hist_duplicates": "{n} var redan importerade och hoppades över.",
+    "hist_capped": "Gränsen per enhet för importerade cykler nåddes; resten sparades inte.",
+    "hist_next_step": "De finns i din Cykler-lista, märkta som importerad historik. Öppna en och använd Märk för att namnge programmet den hör till.",
+    "hist_rows_read": "{n} avläsningar lästa",
+    "hist_breaks": "{n} luckor där sensorn var otillgänglig",
+    "hist_other_entity": "{n} avläsningar för andra entiteter ignorerade",
+    "hist_skipped_spans": "Överhoppade sträckor",
+    "hist_settings_used": "Detekterad med den här enhetens nuvarande inställningar (minimieffekt {w} W, avfördröjning {s} s).",
+    "hist_none_found": "Inga cykler kunde detekteras i den historiken.",
+    "hist_found": "Hittade {n} cykler. Avmarkera allt som inte ser ut som en verklig körning - inget sparas förrän du importerar.",
+    "hist_scan_capped": "Endast de första kandidaterna visas ({n} hittades).",
+    "hist_recorder_empty": "Home Assistant har ingen detaljerad historik för den här sensorn i det tidsfönstret.",
+    "hist_scan_failed": "Sökningen misslyckades.",
+    "hist_scan_expired": "Den sökningen är inte längre tillgänglig. Sök igen.",
+    "hist_import_failed": "Importen misslyckades.",
+    "imported_history_readonly": "Detekterad i importerad effekthistorik. Den påverkar programmatchningen men räknas inte in i din statistik och kan inte beskäras eller delas. Märk den för att namnge programmet."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
@@ -1558,6 +1605,10 @@
     "door_end_dwell_seconds": {
       "label": "Dörröppningens uppehållstid vid avslut",
       "doc": "Hur länge dörren måste förbli öppen innan WashData avslutar cykeln, när \"Dörren öppnas automatiskt vid avslut\" är aktiverat. Tillräckligt länge för att ignorera snabb tilläggning av ett fat (standard 60 s), tillräckligt kort för att avsluta snabbt när maskinen poppar upp dörren."
+    },
+    "profile_evidence_sources": {
+      "label": "Cykler som formar ett program",
+      "doc": "Vilka cykler som används för att bygga upp effektkurvan för varje program och för att matcha en avslutad cykel mot den. Avmarkerar du en typ formar den inte längre dina program, utan att något tas bort - cyklerna ligger kvar i din Cykler-lista och kan fortfarande märkas eller tas bort. Praktiskt om du inte litar på importerade data. Statistiken påverkas inte: den räknar alltid bara de cykler som den här maskinen verkligen har kört. Att avmarkera allt ignoreras, eftersom ett program utan cykler bakom sig aldrig skulle kunna matcha."
     }
   },
   "setting_group": {
@@ -1641,6 +1692,9 @@
     },
     "basic_configuration": {
       "label": "Grundkonfiguration"
+    },
+    "profile_evidence": {
+      "label": "Profilunderlag"
     }
   },
   "status": {
@@ -1665,7 +1719,8 @@
     "trimming": "Beskär…",
     "splitting": "Delar upp…",
     "deleting": "Raderar…",
-    "imported": "Importerad"
+    "imported": "Importerad",
+    "preparing": "Förbereder…"
   },
   "suggestion": {
     "both_agree": "WashData rekommenderar",
@@ -1914,7 +1969,9 @@
     "store_download_failed": "Nedladdning misslyckades: {error}",
     "store_download_nothing": "Inget nytt att ladda ner -- den här inställningen finns redan på din apparat.",
     "export_selective_done": "Export nedladdad",
-    "import_selective_done": "Importerade {profiles} profil(er) och {cycles} cykel/cykler"
+    "import_selective_done": "Importerade {profiles} profil(er) och {cycles} cykel/cykler",
+    "hist_csv_required": "Ladda in en CSV-fil eller klistra in dess innehåll först",
+    "file_read_failed": "Kunde inte läsa den filen"
   },
   "trend": {
     "down": "Nedåtgående trend",

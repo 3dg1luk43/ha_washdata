@@ -78,7 +78,8 @@
     "awaiting": "Čeká na schválení",
     "imported_tip": "Importováno z komunitního obchodu. Používá se pouze pro porovnávání, nezapočítává se do statistik.",
     "not_importable": "nedostupné",
-    "exists": "existuje"
+    "exists": "existuje",
+    "backfilled_tip": "Detekováno v importované historii výkonu. Ovlivňuje pouze přiřazování programů, nezapočítává se do statistik."
   },
   "btn": {
     "set_brand_model": "Nastavit značku a model",
@@ -243,7 +244,12 @@
     "download_export": "Stáhnout export",
     "analyze_import": "Analyzovat soubor",
     "import_selected": "Importovat vybrané",
-    "back": "Zpět"
+    "back": "Zpět",
+    "import_power_history": "Importovat historii výkonu",
+    "hist_read_recorder": "Načíst z Home Assistant",
+    "hist_scan": "Vyhledat cykly",
+    "hist_import_n": "Importovat cykly: {n}",
+    "hist_goto_cycles": "Zobrazit cykly"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -358,7 +364,8 @@
     "pg_outcome": "Výsledek simulace",
     "pg_across_cycles": "Napříč vašimi cykly",
     "community_store": "Komunitní obchod",
-    "online_account": "Komunitní obchod a online funkce"
+    "online_account": "Komunitní obchod a online funkce",
+    "import_power_history": "Import historie výkonu"
   },
   "health": {
     "fair": "Přijatelná shoda",
@@ -680,7 +687,25 @@
     "conflict_resolution": "Konflikty názvů",
     "conflict_import_copy": "Importovat jako kopii",
     "conflict_keep_mine": "Ponechat moje",
-    "conflict_overwrite": "Přepsat"
+    "conflict_overwrite": "Přepsat",
+    "hist_csv_data": "Data CSV",
+    "hist_from_recorder": "Nebo ji načtěte z Home Assistant",
+    "days": "dní",
+    "hist_keep": "Zachovat tento cyklus",
+    "hist_looks_complete": "dokončený",
+    "peak_power_short": "Špička",
+    "shape": "Tvar",
+    "hist_skip_idle": "nic neběželo",
+    "hist_skip_sparse": "měření příliš daleko od sebe",
+    "hist_skip_short": "příliš málo měření",
+    "hist_skip_long": "žádná dost dlouhá pauza pro rozdělení",
+    "hist_reason_short": "kratší než nejkratší skutečný cyklus tohoto spotřebiče",
+    "hist_reason_no_end": "nikdy řádně neskončil",
+    "task_history_import": "Prohledávání historie výkonu",
+    "task_history_import_apply": "Import cyklů",
+    "evidence_real_cycles": "Cykly, které tento spotřebič provedl",
+    "evidence_reference_cycles": "Stažené z komunitního obchodu",
+    "evidence_backfill_cycles": "Nalezené v importované historii výkonu"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -759,7 +784,8 @@
     "store_share": "Sdílet do komunitního obchodu",
     "store_share_device": "Sdílet nastavení zařízení",
     "export_select": "Export - vybrat data",
-    "import_wizard": "Import - vybrat data"
+    "import_wizard": "Import - vybrat data",
+    "history_import": "Import historie výkonu"
   },
   "msg": {
     "tail_trim_hint": "Kolik sekund odstranit z konce",
@@ -1013,7 +1039,28 @@
     "merge_hint": "Importované položky se přidají; nic místního se neztratí. Konflikty názvů se řeší níže.",
     "replace_warn": "Každá zaškrtnutá kategorie se vymaže a nahradí daty ze souboru. Nezaškrtnuté kategorie zůstanou beze změny.",
     "dest_reference_hint": "Importované cykly pouze zlepšují rozpoznávání programů a nikdy neovlivňují statistiky spotřeby/energie.",
-    "dest_real_history_hint": "Importované cykly se počítají jako vlastní historie tohoto zařízení a přispívají do statistik energie/spotřeby. Použijte při přesunu jednoho spotřebiče do nové instalace."
+    "dest_real_history_hint": "Importované cykly se počítají jako vlastní historie tohoto zařízení a přispívají do statistik energie/spotřeby. Použijte při přesunu jednoho spotřebiče do nové instalace.",
+    "import_history_description": "Měli jste chytrou zástrčku už před WashData? Nahrajte export historie jejího snímače výkonu nebo ji načtěte přímo z Home Assistant a proběhne nad ní běžná detekce, takže se dřívější cykly objeví v seznamu Cykly připravené k pojmenování.",
+    "hist_input_hint": "Nahrajte CSV stažené z panelu Historie (entita, stav, poslední změna), nebo nechte WashData načíst historii snímače přímo. Detekce pak proběhne úplně stejně jako naživo a vy vyberete, které z nalezených cyklů zachovat.",
+    "hist_recorder_hint": "Home Assistant ve výchozím nastavení uchovává podrobnou historii 10 dní a poté už jen hodinové průměry, které jsou pro detekci cyklů příliš hrubé. Export CSV může sahat dále do minulosti jen tehdy, pokud byla vaše integrace recorder nastavena na delší uchovávání.",
+    "hist_scanning": "Přehráváme vaši historii přes detektor. Běží to na pozadí - tento dialog můžete zavřít a vrátit se k němu později.",
+    "hist_imported_count": "Importované cykly: {n}.",
+    "hist_duplicates": "Již dříve importováno a přeskočeno: {n}.",
+    "hist_capped": "Byl dosažen limit importovaných cyklů na zařízení; zbytek nebyl uložen.",
+    "hist_next_step": "Najdete je v seznamu Cykly, označené jako importovaná historie. Otevřete některý z nich a tlačítkem Označit pojmenujte program, ke kterému patří.",
+    "hist_rows_read": "Přečtená měření: {n}",
+    "hist_breaks": "Mezery, kdy byl snímač nedostupný: {n}",
+    "hist_other_entity": "Ignorovaná měření jiných entit: {n}",
+    "hist_skipped_spans": "Přeskočené úseky",
+    "hist_settings_used": "Detekováno s aktuálním nastavením tohoto zařízení (minimální výkon {w} W, zpoždění vypnutí {s} s).",
+    "hist_none_found": "V této historii se nepodařilo detekovat žádné cykly.",
+    "hist_found": "Nalezené cykly: {n}. Odškrtněte vše, co nevypadá jako skutečný běh - dokud neprovedete import, nic se neuloží.",
+    "hist_scan_capped": "Zobrazují se jen první kandidáti (nalezeno bylo {n}).",
+    "hist_recorder_empty": "Home Assistant nemá pro tento snímač v daném období žádnou podrobnou historii.",
+    "hist_scan_failed": "Vyhledávání se nezdařilo.",
+    "hist_scan_expired": "Toto vyhledávání už není dostupné. Spusťte je prosím znovu.",
+    "hist_import_failed": "Import se nezdařil.",
+    "imported_history_readonly": "Detekováno v importované historii výkonu. Ovlivňuje přiřazování programů, ale nezapočítává se do vašich statistik a nelze jej oříznout ani rozdělit. Označením mu přiřaďte program."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1529,6 +1576,10 @@
     "door_end_dwell_seconds": {
       "label": "Čekání na otevření dveří pro ukončení",
       "doc": "Jak dlouho musí dveře zůstat otevřené, než WashData ukončí cyklus, pokud je zapnuta funkce \"Dveře se na konci automaticky otevřou\". Dostatečně dlouhé k ignorování rychlého přidání nádobí (výchozí 60 s), dostatečně krátké pro rychlé ukončení po otevření dveří spotřebičem."
+    },
+    "profile_evidence_sources": {
+      "label": "Cykly tvořící program",
+      "doc": "Které cykly se používají k sestavení křivky výkonu každého programu a k přiřazení dokončeného cyklu k ní. Když některý druh odškrtnete, přestane ovlivňovat vaše programy, ale nic se nesmaže - cykly zůstanou v seznamu Cykly a stále je lze označit nebo odstranit. Užitečné, pokud nedůvěřujete importovaným datům. Statistiky to neovlivní: vždy počítají jen cykly, které tento spotřebič skutečně provedl. Odškrtnutí všech možností se ignoruje, protože program bez cyklů by nikdy nemohl být přiřazen."
     }
   },
   "setting_group": {
@@ -1612,6 +1663,9 @@
     },
     "basic_configuration": {
       "label": "Základní konfigurace"
+    },
+    "profile_evidence": {
+      "label": "Podklady profilu"
     }
   },
   "status": {
@@ -1636,7 +1690,8 @@
     "trimming": "Ořezávání…",
     "splitting": "Rozdělování…",
     "deleting": "Mazání…",
-    "imported": "Importováno"
+    "imported": "Importováno",
+    "preparing": "Příprava…"
   },
   "suggestion": {
     "both_agree": "WashData doporučuje",
@@ -1885,7 +1940,9 @@
     "store_download_failed": "Stahování selhalo: {error}",
     "store_download_nothing": "Nic ke stažení -- všechny profily na tomto zařízení již existují",
     "export_selective_done": "Export stažen",
-    "import_selective_done": "Importováno {profiles} profilů a {cycles} cyklů"
+    "import_selective_done": "Importováno {profiles} profilů a {cycles} cyklů",
+    "hist_csv_required": "Nejprve načtěte soubor CSV nebo vložte jeho obsah",
+    "file_read_failed": "Tento soubor se nepodařilo přečíst"
   },
   "trend": {
     "down": "Klesající trend",
