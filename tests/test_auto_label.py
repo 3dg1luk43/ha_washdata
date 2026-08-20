@@ -162,3 +162,150 @@ async def test_auto_label_cycles_no_overwrite(store):
     
     c1 = store._data["past_cycles"][0]
     assert c1["profile_name"] == "WrongProfile"
+
+
+# ─── Backfilled history cycles (issue #344) ───────────────────────────────────
+#
+# An import that leaves dozens of unnamed cycles to hand-label is barely better than no
+# import, so the same pass has to reach them. The gate is identical; the write is not -
+# a backfilled cycle goes through `_relabel_non_real_cycle`, which owns the stale-sample
+# and empty-profile bookkeeping the plain `past_cycles` mutation does not need.
+
+def _confident(profile="DetectedProfile", confidence=0.9, ambiguous=False):
+    return MatchResult(
+        best_profile=profile, confidence=confidence, expected_duration=3600.0,
+        matched_phase=None, candidates=[], is_ambiguous=ambiguous, ambiguity_margin=0.0,
+    )
+
+
+@pytest.fixture
+def backfill_store(store):
+    """A store holding one unlabelled backfilled cycle and a profile to match it to."""
+    store._data["profiles"] = {"DetectedProfile": {"avg_duration": 3600}}
+    store._data["backfill_cycles"] = [
+        {"id": "b1", "profile_name": None, "duration": 3600, "power_data": [],
+         "meta": {"source": "history_import"}},
+    ]
+    store.async_rebuild_envelope = AsyncMock(return_value=True)
+    return store
+
+
+@pytest.mark.asyncio
+async def test_auto_label_labels_a_backfilled_cycle(backfill_store):
+    store = backfill_store
+    with patch.object(store, "async_match_profile", return_value=_confident()), \
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data",
+               return_value=[("t", 1.0)] * 20):
+        stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=False)
+
+    assert stats["labeled"] == 1
+    b1 = store.get_backfill_cycles()[0]
+    assert b1["profile_name"] == "DetectedProfile"
+    # Provenance the mover does not set, and which the Cycles list needs.
+    assert b1["label_source"] == "auto_label_backfill"
+    assert b1["match_confidence"] == pytest.approx(0.9)
+    # Stays where it was: never promoted into real history, never into usage stats.
+    assert store.get_past_cycles() == []
+    assert store.get_lifetime_cycle_count() == 0
+    assert store.get_lifetime_energy_wh() == 0
+    # A labelled backfill cycle exists to shape the envelope, so it is rebuilt.
+    store.async_rebuild_envelope.assert_awaited_with("DetectedProfile")
+
+
+@pytest.mark.asyncio
+async def test_auto_label_marks_backfill_distinctly_from_real_cycles(backfill_store):
+    """The two sources must not be conflated: only one of them was ever observed."""
+    store = backfill_store
+    store._data["past_cycles"] = [
+        {"id": "c1", "profile_name": None, "duration": 3600, "power_data": []},
+    ]
+    with patch.object(store, "async_match_profile", return_value=_confident()), \
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data",
+               return_value=[("t", 1.0)] * 20):
+        stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=False)
+
+    assert stats["labeled"] == 2
+    assert store.get_past_cycles()[0]["label_source"] == "auto_label_service"
+    assert store.get_backfill_cycles()[0]["label_source"] == "auto_label_backfill"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("result", "why"),
+    [(_confident(confidence=0.5), "below threshold"), (_confident(ambiguous=True), "ambiguous")],
+)
+async def test_auto_label_skips_a_backfilled_cycle_it_is_unsure_about(backfill_store, result, why):
+    """Same safeguards as a real cycle: a guess that feeds an envelope must be confident."""
+    store = backfill_store
+    with patch.object(store, "async_match_profile", return_value=result), \
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data",
+               return_value=[("t", 1.0)] * 20):
+        stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=False)
+
+    assert (stats["labeled"], stats["skipped"]) == (0, 1), why
+    assert store.get_backfill_cycles()[0]["profile_name"] is None
+    assert "label_source" not in store.get_backfill_cycles()[0]
+    store.async_rebuild_envelope.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_auto_label_leaves_an_already_labelled_backfill_cycle_alone(backfill_store):
+    store = backfill_store
+    store.get_backfill_cycles()[0].update({"profile_name": "Mine", "label_source": "manual"})
+
+    with patch.object(store, "async_match_profile", return_value=_confident()), \
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data",
+               return_value=[("t", 1.0)] * 20):
+        stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=False)
+
+    assert stats["total"] == 0
+    b1 = store.get_backfill_cycles()[0]
+    assert (b1["profile_name"], b1["label_source"]) == ("Mine", "manual")
+
+
+@pytest.mark.asyncio
+async def test_overwrite_relabels_a_backfill_cycle_and_preserves_the_first_guess(backfill_store):
+    """Relabelling is where the non-real write path earns its keep: the cycle leaves a
+    profile, which may need its sample pointer cleared or be dropped entirely."""
+    store = backfill_store
+    store._data["profiles"]["OldProfile"] = {"avg_duration": 3600, "sample_cycle_id": "b1"}
+    store.get_backfill_cycles()[0].update(
+        {"profile_name": "OldProfile", "label_source": "auto_label_backfill"}
+    )
+
+    with patch.object(store, "async_match_profile", return_value=_confident()), \
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data",
+               return_value=[("t", 1.0)] * 20):
+        stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=True)
+
+    assert stats["relabeled"] == 1
+    b1 = store.get_backfill_cycles()[0]
+    assert b1["profile_name"] == "DetectedProfile"
+    # The earlier guess is recorded once, so a wrong auto-label stays recoverable.
+    assert b1["original_auto_label"] == "OldProfile"
+    # OldProfile had no other cycle, so it is dropped rather than left sampleless for
+    # sample repair to re-populate by stealing an unrelated cycle.
+    assert "OldProfile" not in store._data["profiles"]
+    assert store.get_past_cycles() == []
+
+
+@pytest.mark.asyncio
+async def test_bulk_labelling_saves_once_not_once_per_cycle(backfill_store):
+    """`_assign_reference_cycle_profile` saves per call; a bulk pass must not."""
+    store = backfill_store
+    store._data["backfill_cycles"] = [
+        {"id": f"b{i}", "profile_name": None, "duration": 3600, "power_data": [],
+         "meta": {"source": "history_import"}}
+        for i in range(6)
+    ]
+    store.async_save = AsyncMock()
+
+    with patch.object(store, "async_match_profile", return_value=_confident()), \
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data",
+               return_value=[("t", 1.0)] * 20):
+        stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=False)
+
+    assert stats["labeled"] == 6
+    assert store.async_save.await_count == 1
+    # One rebuild for the one profile they all landed on, not one per cycle.
+    assert store.async_rebuild_envelope.await_count == 1

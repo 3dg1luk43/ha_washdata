@@ -96,6 +96,7 @@ class GetDeviceCyclesResponse(TypedDict):
     entry_id: str
     cycles: list[dict[str, Any]]
     reference_cycles: list[dict[str, Any]]
+    backfill_cycles: list[dict[str, Any]]
     total: int
     has_more: bool
 
@@ -514,6 +515,29 @@ class StartTaskResponse(TypedDict):
     task_id: str
 
 
+class HistoryImportBeginResponse(TypedDict):
+    """Staging slot opened for a CSV upload (issue #344)."""
+
+    token: str
+    max_bytes: int
+    chunk_bytes: int
+
+
+class HistoryImportChunkResponse(TypedDict):
+    received_bytes: int
+    next_seq: int
+
+
+class HistoryImportRecorderResponse(TypedDict):
+    """Staging slot filled from the recorder instead of an upload."""
+
+    token: str
+    rows: int
+    entity_id: str
+    days: int
+    truncated: bool
+
+
 class SubscribeTasksResponse(TypedDict, total=False):
     """Empty ack for the ``subscribe_tasks`` subscription; the live data arrives
     as ``{"type": "task", "task": TaskSnapshot}`` event messages, not in this
@@ -757,6 +781,11 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "start_playground_history": StartTaskResponse,
     "start_playground_sweep": StartTaskResponse,
     "start_playground_cycle_detail": StartTaskResponse,
+    "history_import_begin": HistoryImportBeginResponse,
+    "history_import_chunk": HistoryImportChunkResponse,
+    "history_import_recorder": HistoryImportRecorderResponse,
+    "start_history_import_scan": StartTaskResponse,
+    "apply_history_import": StartTaskResponse,
     "store_status": StoreStatusResponse,
     "store_connect": StoreSimpleResponse,
     "store_disconnect": StoreSimpleResponse,
@@ -1028,7 +1057,10 @@ WS_COMMANDS: dict[str, dict] = {
         _p("cycle_id", "str"),
         _p("profile_name", "str|null", False),
     ]},
-    "get_playground_settings": {"params": [_entry()]},
+    "get_playground_settings": {"params": [
+        _entry(),
+        _p("include_suggestions", "bool", False),
+    ]},
     "save_playground_preset": {"params": [
         _entry(),
         _p("name", "str"),
@@ -1058,6 +1090,20 @@ WS_COMMANDS: dict[str, dict] = {
         _p("settings_override", "dict", False),
         _p("stress_tail", "bool", False),
         _p("stress_idle_w", "float|null", False),
+    ]},
+    "history_import_begin": {"params": [_entry()]},
+    "history_import_chunk": {"params": [
+        _entry(),
+        _p("token", "str"),
+        _p("seq", "int"),
+        _p("text", "str"),
+    ]},
+    "history_import_recorder": {"params": [_entry(), _p("days", "int", False)]},
+    "start_history_import_scan": {"params": [_entry(), _p("token", "str")]},
+    "apply_history_import": {"params": [
+        _entry(),
+        _p("scan_task_id", "str"),
+        _p("accept", "list"),
     ]},
     # Community store (online features)
     "store_status": {"params": [_entry()]},

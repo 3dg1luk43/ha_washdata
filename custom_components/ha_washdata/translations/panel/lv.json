@@ -78,7 +78,8 @@
     "awaiting": "Gaida apstiprinājumu",
     "imported_tip": "Importēts no kopienas veikala. Izmanto tikai saskaņošanai, netiek ieskaitīts statistikā.",
     "not_importable": "šeit nav pieejams",
-    "exists": "jau eksistē"
+    "exists": "jau eksistē",
+    "backfilled_tip": "Noteikts importētā jaudas vēsturē. Ietekmē tikai programmu saskaņošanu, netiek ieskaitīts statistikā."
   },
   "btn": {
     "set_brand_model": "Iestatīt zīmolu un modeli",
@@ -243,7 +244,12 @@
     "import_selected": "Importēt atlasītos",
     "back": "Atpakaļ",
     "mute_suggestion": "Pārtraukt ieteikt šo iestatījumu",
-    "reset_muted": "Atiestatīt klusinātos"
+    "reset_muted": "Atiestatīt klusinātos",
+    "import_power_history": "Importēt jaudas vēsturi",
+    "hist_read_recorder": "Nolasīt no Home Assistant",
+    "hist_scan": "Meklēt ciklus",
+    "hist_import_n": "Importēt ciklus ({n})",
+    "hist_goto_cycles": "Parādīt ciklus"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -358,7 +364,8 @@
     "pg_outcome": "Simulācijas rezultāts",
     "pg_across_cycles": "Pa visiem jūsu cikliem",
     "community_store": "Kopienas veikals",
-    "online_account": "Kopienas veikals un tiešsaistes funkcijas"
+    "online_account": "Kopienas veikals un tiešsaistes funkcijas",
+    "import_power_history": "Jaudas vēstures importēšana"
   },
   "health": {
     "fair": "Pieņemama profila kvalitāte",
@@ -680,7 +687,25 @@
     "conflict_import_copy": "Importēt kā kopiju",
     "conflict_keep_mine": "Paturēt manējos",
     "conflict_overwrite": "Pārrakstīt",
-    "font_size": "Paneļa fonta lielums"
+    "font_size": "Paneļa fonta lielums",
+    "hist_csv_data": "CSV dati",
+    "hist_from_recorder": "Vai nolasiet to no Home Assistant",
+    "days": "dienas",
+    "hist_keep": "Saglabāt šo ciklu",
+    "hist_looks_complete": "pabeigts",
+    "peak_power_short": "Maksimums",
+    "shape": "Forma",
+    "hist_skip_idle": "nekas nedarbojās",
+    "hist_skip_sparse": "rādījumi pārāk reti",
+    "hist_skip_short": "pārāk maz rādījumu",
+    "hist_skip_long": "nav pietiekami garas pauzes, kur sadalīt",
+    "hist_reason_short": "īsāks par šīs iekārtas īsāko īsto ciklu",
+    "hist_reason_no_end": "nekad netika korekti pabeigts",
+    "task_history_import": "Jaudas vēstures skenēšana",
+    "task_history_import_apply": "Ciklu importēšana",
+    "evidence_real_cycles": "Šīs ierīces izpildītie cikli",
+    "evidence_reference_cycles": "Lejupielādēti no kopienas veikala",
+    "evidence_backfill_cycles": "Atrasti importētā jaudas vēsturē"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -759,7 +784,8 @@
     "store_share": "Kopīgot kopienas veikalā",
     "store_share_device": "Kopīgot šo ierīci",
     "export_select": "Eksports - izvēlēties datus",
-    "import_wizard": "Imports - izvēlēties datus"
+    "import_wizard": "Imports - izvēlēties datus",
+    "history_import": "Jaudas vēstures importēšana"
   },
   "msg": {
     "tail_trim_hint": "Cik sekundes noņemt no beigām",
@@ -1013,7 +1039,28 @@
     "sug_mute_failed": "Neizdevās klusināt ieteikumu",
     "sug_unmuted_all": "Klusināto ieteikumu atiestatīšana pabeigta",
     "n_suggestions_muted": "{count} klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
-    "font_size_hint": "Palieliniet vai samaziniet visu šajā panelī. Attiecas uz jūsu kontu šajā ierīcē."
+    "font_size_hint": "Palieliniet vai samaziniet visu šajā panelī. Attiecas uz jūsu kontu šajā ierīcē.",
+    "import_history_description": "Viedā kontaktdakša jums bija jau pirms WashData? Augšupielādējiet tās jaudas sensora vēstures eksportu vai nolasiet to tieši no Home Assistant, un parastā noteikšana izies tam cauri, tāpēc iepriekšējie cikli parādīsies jūsu Ciklu sarakstā gatavi nosaukšanai.",
+    "hist_input_hint": "Augšupielādējiet CSV, kas lejupielādēts no Vēstures paneļa (entītija, stāvoklis, pēdējās izmaiņas), vai ļaujiet WashData nolasīt sensora vēsturi tieši. Pēc tam noteikšana izies tam cauri tieši tāpat kā reāllaikā, un jūs izvēlaties, kurus no atrastajiem cikliem paturēt.",
+    "hist_recorder_hint": "Home Assistant pēc noklusējuma glabā detalizētu vēsturi 10 dienas, bet pēc tam tikai vidējās vērtības pa stundām, kas ir pārāk rupjas, lai no tām noteiktu ciklus. CSV eksports var sniegties tālāk pagātnē tikai tad, ja jūsu recorder bija iestatīts glabāt vairāk.",
+    "hist_scanning": "Jūsu vēsture tiek izlaista caur detektoru. Tas notiek fonā - varat aizvērt šo dialogu un atgriezties vēlāk.",
+    "hist_imported_count": "Importēti cikli: {n}.",
+    "hist_duplicates": "Jau iepriekš importēti un izlaisti: {n}.",
+    "hist_capped": "Sasniegts ierīces importēto ciklu ierobežojums; pārējie netika saglabāti.",
+    "hist_next_step": "Tie ir jūsu Ciklu sarakstā, atzīmēti kā importēta vēsture. Atveriet vienu un izmantojiet pogu Iezīmēt, lai norādītu tā programmu.",
+    "hist_rows_read": "Nolasīti rādījumi: {n}",
+    "hist_breaks": "Pārtraukumi, kad sensors nebija pieejams: {n}",
+    "hist_other_entity": "Izlaisti citu entītiju rādījumi: {n}",
+    "hist_skipped_spans": "Izlaistie posmi",
+    "hist_settings_used": "Noteikts, izmantojot šīs ierīces pašreizējos iestatījumus (minimālā jauda {w} W, izslēgšanas aizkave {s} s).",
+    "hist_none_found": "Šajā vēsturē nevienu ciklu nebija iespējams noteikt.",
+    "hist_found": "Atrasti cikli: {n}. Noņemiet atzīmi visam, kas neizskatās pēc īstas darbības - līdz importēšanai nekas netiek saglabāts.",
+    "hist_scan_capped": "Tiek parādīti tikai pirmie kandidāti (atrasti: {n}).",
+    "hist_recorder_empty": "Home Assistant nav detalizētas vēstures par šo sensoru šajā periodā.",
+    "hist_scan_failed": "Skenēšana neizdevās.",
+    "hist_scan_expired": "Šī skenēšana vairs nav pieejama. Lūdzu, skenējiet vēlreiz.",
+    "hist_import_failed": "Importēšana neizdevās.",
+    "imported_history_readonly": "Noteikts importētā jaudas vēsturē. Tas ietekmē programmu saskaņošanu, bet netiek ieskaitīts jūsu statistikā, un to nevar apgriezt vai sadalīt. Izmantojiet pogu Iezīmēt, lai norādītu programmu."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1529,6 +1576,10 @@
     "door_end_dwell_seconds": {
       "label": "Durvju atvēršanas beigu uzturēšanās laiks",
       "doc": "Cik ilgi durvis jāpaliek atvērtām, lai WashData beigtu ciklu, kad ir ieslēgts iestatījums \"Durvis automātiski atveras beigās\". Pietiekami ilgi, lai ignorētu ātru trauka pievienošanu (noklusējums 60 s), pietiekami īsi, lai ātri beigtu, kad mašīna atver durvis."
+    },
+    "profile_evidence_sources": {
+      "label": "Cikli, kas veido programmu",
+      "doc": "Kuri cikli tiek izmantoti katras programmas jaudas līknes izveidei un pabeigta cikla saskaņošanai ar to. Ja kādam veidam noņemat atzīmi, tas vairs neietekmē jūsu programmas, taču nekas netiek dzēsts - cikli paliek sarakstā Cikli, un tos joprojām var iezīmēt vai izņemt. Noderīgi, ja neuzticaties importētajiem datiem. Statistiku tas neietekmē: tajā vienmēr tiek ieskaitīti tikai tie cikli, ko šī ierīce patiešām ir izpildījusi. Visu atzīmju noņemšana tiek ignorēta, jo programma bez neviena cikla nekad nevarētu tikt saskaņota."
     }
   },
   "setting_group": {
@@ -1612,6 +1663,9 @@
     },
     "basic_configuration": {
       "label": "Pamatkonfigurācija"
+    },
+    "profile_evidence": {
+      "label": "Profila pamatdati"
     }
   },
   "status": {
@@ -1636,7 +1690,8 @@
     "trimming": "Apgriež…",
     "splitting": "Sadala…",
     "deleting": "Dzēš…",
-    "imported": "Importēts"
+    "imported": "Importēts",
+    "preparing": "Sagatavo…"
   },
   "tab": {
     "advanced": "Papildu",
@@ -1772,7 +1827,9 @@
     "store_download_failed": "Lejupielāde neizdevās: {error}",
     "store_download_nothing": "Nav nekā jauna lejupielādei - šis iestatījums jau ir jūsų ierīcē.",
     "export_selective_done": "Eksports lejupielādēts",
-    "import_selective_done": "Importēti {profiles} profili un {cycles} cikli"
+    "import_selective_done": "Importēti {profiles} profili un {cycles} cikli",
+    "hist_csv_required": "Vispirms ielādējiet CSV failu vai ielīmējiet tā saturu",
+    "file_read_failed": "Šo failu nevarēja nolasīt"
   },
   "suggestion": {
     "both_agree": "WashData iesaka",

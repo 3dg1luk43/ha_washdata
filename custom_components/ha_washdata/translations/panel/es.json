@@ -30,7 +30,8 @@
     "awaiting": "A la espera de aprobación",
     "imported_tip": "Importado de la tienda de la comunidad. Se usa solo para la coincidencia, no cuenta en las estadísticas.",
     "not_importable": "n/d aquí",
-    "exists": "ya existe"
+    "exists": "ya existe",
+    "backfilled_tip": "Detectado en un historial de potencia importado. Solo influye en la coincidencia de programas, no cuenta en las estadísticas."
   },
   "btn": {
     "set_brand_model": "Definir marca y modelo",
@@ -195,7 +196,12 @@
     "import_selected": "Importar lo seleccionado",
     "back": "Atrás",
     "mute_suggestion": "Dejar de sugerir este ajuste",
-    "reset_muted": "Restablecer silenciados"
+    "reset_muted": "Restablecer silenciados",
+    "import_power_history": "Importar historial de potencia",
+    "hist_read_recorder": "Leer desde Home Assistant",
+    "hist_scan": "Buscar ciclos",
+    "hist_import_n": "Importar {n} ciclos",
+    "hist_goto_cycles": "Ver los ciclos"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -310,7 +316,8 @@
     "pg_outcome": "Resultado de la simulación",
     "pg_across_cycles": "En todos tus ciclos",
     "community_store": "Tienda de la comunidad",
-    "online_account": "Tienda de la comunidad y funciones en línea"
+    "online_account": "Tienda de la comunidad y funciones en línea",
+    "import_power_history": "Importar historial de potencia"
   },
   "health": {
     "fair": "Calidad de perfil aceptable",
@@ -632,7 +639,25 @@
     "conflict_import_copy": "Importar como copia",
     "conflict_keep_mine": "Conservar el mío",
     "conflict_overwrite": "Sobrescribir",
-    "font_size": "Tamaño de fuente del panel"
+    "font_size": "Tamaño de fuente del panel",
+    "hist_csv_data": "Datos CSV",
+    "hist_from_recorder": "O léalo desde Home Assistant",
+    "days": "días",
+    "hist_keep": "Conservar este ciclo",
+    "hist_looks_complete": "completo",
+    "peak_power_short": "Pico",
+    "shape": "Forma",
+    "hist_skip_idle": "nada en funcionamiento",
+    "hist_skip_sparse": "lecturas demasiado separadas",
+    "hist_skip_short": "muy pocas lecturas",
+    "hist_skip_long": "ninguna pausa lo bastante larga para dividir",
+    "hist_reason_short": "más corto que el ciclo real más corto de este electrodoméstico",
+    "hist_reason_no_end": "nunca terminó de forma limpia",
+    "task_history_import": "Analizando el historial de potencia",
+    "task_history_import_apply": "Importando ciclos",
+    "evidence_real_cycles": "Ciclos que ejecutó esta máquina",
+    "evidence_reference_cycles": "Descargados de la tienda de la comunidad",
+    "evidence_backfill_cycles": "Encontrados en un historial de potencia importado"
   },
   "log": {
     "all_levels": "Todos los niveles",
@@ -711,7 +736,8 @@
     "store_share": "Compartir en la tienda de la comunidad",
     "store_share_device": "Compartir este dispositivo",
     "export_select": "Exportar - elegir datos",
-    "import_wizard": "Importar - elegir datos"
+    "import_wizard": "Importar - elegir datos",
+    "history_import": "Importar historial de potencia"
   },
   "msg": {
     "tail_trim_hint": "Número de segundos que se eliminarán del final",
@@ -965,7 +991,28 @@
     "sug_mute_failed": "No se pudo silenciar la sugerencia",
     "sug_unmuted_all": "Sugerencias silenciadas restablecidas",
     "n_suggestions_muted": "{count} silenciadas; el ajustador automático no propondrá estas.",
-    "font_size_hint": "Aumenta o reduce el tamaño de todo en este panel. Se aplica a tu cuenta en este dispositivo."
+    "font_size_hint": "Aumenta o reduce el tamaño de todo en este panel. Se aplica a tu cuenta en este dispositivo.",
+    "import_history_description": "¿Ya tenía un enchufe inteligente antes de WashData? Cargue una exportación del historial de su sensor de potencia, o léalo directamente desde Home Assistant: la detección normal se ejecuta sobre esos datos, así que los ciclos pasados aparecen en su lista de Ciclos listos para nombrar.",
+    "hist_input_hint": "Cargue un CSV descargado del panel Historial (entidad, estado, último cambio), o deje que WashData lea directamente el historial del sensor. Después la detección se ejecuta sobre él igual que en directo, y usted elige cuáles de los ciclos encontrados conservar.",
+    "hist_recorder_hint": "Home Assistant guarda el historial detallado durante 10 días de forma predeterminada y, a partir de ahí, solo promedios por hora, demasiado imprecisos para detectar ciclos. Una exportación CSV puede llegar más atrás solo si Home Assistant está configurado para conservar más historial.",
+    "hist_scanning": "Se está reproduciendo su historial a través del detector. Esto se ejecuta en segundo plano: puede cerrar este diálogo y volver más tarde.",
+    "hist_imported_count": "{n} ciclos importados.",
+    "hist_duplicates": "{n} ya se habían importado y se omitieron.",
+    "hist_capped": "Se alcanzó el límite de ciclos importados por dispositivo; el resto no se guardó.",
+    "hist_next_step": "Están en su lista de Ciclos, marcados como historial importado. Abra uno y use Etiquetar para indicar el programa al que pertenece.",
+    "hist_rows_read": "{n} lecturas leídas",
+    "hist_breaks": "{n} huecos en los que el sensor no estaba disponible",
+    "hist_other_entity": "{n} lecturas de otras entidades ignoradas",
+    "hist_skipped_spans": "Tramos omitidos",
+    "hist_settings_used": "Detectado con los ajustes actuales de este dispositivo (potencia mínima {w} W, retardo de apagado {s} s).",
+    "hist_none_found": "No se pudo detectar ningún ciclo en ese historial.",
+    "hist_found": "Se encontraron {n} ciclos. Desmarque todo lo que no parezca un ciclo real: no se guarda nada hasta que importe.",
+    "hist_scan_capped": "Solo se muestran los primeros candidatos (se encontraron {n}).",
+    "hist_recorder_empty": "Home Assistant no tiene historial detallado de este sensor en ese periodo.",
+    "hist_scan_failed": "El análisis falló.",
+    "hist_scan_expired": "Ese análisis ya no está disponible. Vuelva a analizar el historial.",
+    "hist_import_failed": "La importación falló.",
+    "imported_history_readonly": "Detectado en un historial de potencia importado. Influye en la coincidencia de programas, pero no cuenta en sus estadísticas y no se puede recortar ni dividir. Etiquételo para indicar el programa."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
@@ -1510,6 +1557,10 @@
     "door_end_dwell_seconds": {
       "label": "Tiempo mínimo de puerta abierta para finalizar",
       "doc": "Cuánto tiempo debe permanecer abierta la puerta antes de que WashData finalice el ciclo, cuando «La puerta se abre automáticamente al final» está activada. Lo suficientemente largo como para ignorar añadir un elemento rápidamente (predeterminado 60 s), y lo suficientemente corto como para terminar pronto una vez que la máquina abra la puerta."
+    },
+    "profile_evidence_sources": {
+      "label": "Ciclos que forman un programa",
+      "doc": "Qué ciclos se usan para construir la curva de potencia de cada programa y para comparar con ella un ciclo terminado. Al desmarcar un tipo, este deja de dar forma a sus programas sin que se borre nada - los ciclos siguen en su lista de Ciclos y aún se pueden etiquetar o eliminar. Útil si no confía en los datos importados. Las estadísticas no se ven afectadas: siempre cuentan solo los ciclos que esta máquina ejecutó realmente. Desmarcar todo se ignora, ya que un programa sin ciclos detrás nunca podría coincidir."
     }
   },
   "setting_group": {
@@ -1593,6 +1644,9 @@
     },
     "basic_configuration": {
       "label": "Configuración básica"
+    },
+    "profile_evidence": {
+      "label": "Base de los perfiles"
     }
   },
   "status": {
@@ -1617,7 +1671,8 @@
     "trimming": "Recortando…",
     "splitting": "Dividiendo…",
     "deleting": "Eliminando…",
-    "imported": "Importado"
+    "imported": "Importado",
+    "preparing": "Preparando…"
   },
   "tab": {
     "advanced": "Avanzado",
@@ -1753,7 +1808,9 @@
     "store_download_failed": "Error al descargar: {error}",
     "store_download_nothing": "Nada nuevo que descargar - esta configuración ya está en tu dispositivo.",
     "export_selective_done": "Exportación descargada",
-    "import_selective_done": "Se importaron {profiles} perfil(es) y {cycles} ciclo(s)"
+    "import_selective_done": "Se importaron {profiles} perfil(es) y {cycles} ciclo(s)",
+    "hist_csv_required": "Cargue primero un archivo CSV o pegue su contenido",
+    "file_read_failed": "No se pudo leer ese archivo"
   },
   "suggestion": {
     "both_agree": "WashData recomienda",

@@ -54,6 +54,7 @@ from homeassistant.helpers import translation
 from .const import (
     DOMAIN,
     CONF_POWER_SENSOR,
+    CONF_PROFILE_EVIDENCE_SOURCES,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_NOTIFY_SERVICE,
@@ -142,6 +143,7 @@ from .const import (
     DEFAULT_SAMPLING_INTERVAL,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_POWER_OFF_THRESHOLD_W,
+    DEFAULT_PROFILE_EVIDENCE_SOURCES,
     DEFAULT_POWER_OFF_DELAY,
     DEFAULT_LEARNING_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
@@ -593,6 +595,11 @@ class WashDataManager:
         # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
+        # Which cycle categories may shape a profile. The store cannot read entry
+        # options, so the manager pushes this in (same as energy_mode above).
+        self.profile_store.evidence_sources = config_entry.options.get(
+            CONF_PROFILE_EVIDENCE_SOURCES, DEFAULT_PROFILE_EVIDENCE_SOURCES
+        )
         self.learning_manager = LearningManager(
             hass, self.entry_id, self.profile_store, self.device_type,
             device_name=config_entry.title,
@@ -2099,6 +2106,20 @@ class WashDataManager:
         # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
+        # Which cycle categories may shape a profile. Changing it changes every
+        # profile's curve, so rebuild them all now: envelopes are otherwise only rebuilt
+        # on a cycle end or a label change, so the user would tick the box and see
+        # nothing happen for days.
+        _prev_evidence = self.profile_store.evidence_sources
+        self.profile_store.evidence_sources = config_entry.options.get(
+            CONF_PROFILE_EVIDENCE_SOURCES, DEFAULT_PROFILE_EVIDENCE_SOURCES
+        )
+        if self.profile_store.evidence_sources != _prev_evidence:
+            self._logger.info(
+                "Profile evidence sources changed %s -> %s; rebuilding all envelopes",
+                list(_prev_evidence), list(self.profile_store.evidence_sources),
+            )
+            self.hass.async_create_task(self.profile_store.async_rebuild_all_envelopes())
 
         # Device default
         dev_def = DEVICE_COMPLETION_THRESHOLDS.get(

@@ -148,6 +148,11 @@ const _SETTINGS_SECTIONS = [
       { key: 'duration_tolerance', label: 'Estimate Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
         doc: 'Tolerance for time-remaining estimates (learning feedback, not matching). If the actual duration is within +/-X% of the estimate it counts as a good match.' },
     ] },
+    { sub: 'Profile Evidence', fields: [
+      { key: 'profile_evidence_sources', label: 'Cycles that shape a program', type: 'checkboxlist', def: ['real_cycles', 'reference_cycles', 'backfill_cycles'],
+        choices: [['real_cycles', 'Cycles this machine ran'], ['reference_cycles', 'Downloaded from the community store'], ['backfill_cycles', 'Found in imported power history']],
+        doc: 'Which cycles are used to build each program\'s power curve, and to match a finished cycle against it. Unticking a kind stops it shaping your programs without deleting anything - the cycles stay in your Cycles list and can still be labelled or removed. Useful if you do not trust imported data. Statistics are unaffected: they always count only the cycles this machine actually ran. Unticking everything is ignored, since a program with no cycles behind it could never match.' },
+    ] },
     { sub: 'Auto-Labeling', fields: [
       { key: 'auto_label_confidence', label: 'Auto-Label Confidence', type: 'number', step: 0.01, min: 0, max: 1, def: 0.9,
         doc: 'If the match score at cycle end is at or above this, the program is labeled automatically without any confirmation prompt. Raise it to require higher certainty before auto-labeling; lower it to automate more. Works in conjunction with Learning Confidence below it.' },
@@ -1435,6 +1440,16 @@ function _field(f, value, extra) {
     // Structured value (list/object) edited as JSON text; round-trips on save.
     const jt = (v === '' || v == null) ? '' : (typeof v === 'string' ? v : JSON.stringify(v, null, 2));
     input = `<textarea data-opt="${key}" data-ftype="json" rows="3" placeholder='${_esc(extra.t('placeholder.json_buttons', {}, '[{"action":"ID","title":"Label"}]'))}'>${_esc(jt)}</textarea>`;
+  } else if (f.type === 'checkboxlist') {
+    // Several checkboxes writing ONE option as a list of the ticked values. The inner
+    // boxes carry data-choice, never data-opt, so the collectors below see one field.
+    const chosen = Array.isArray(value) ? value.map(String) : [];
+    input = `<div data-opt="${key}" data-ftype="checkboxlist" class="wd-checkboxlist">` +
+      (f.choices || []).map(([val, lbl]) =>
+        `<label class="wd-switch-lbl" style="display:flex;align-items:center;gap:8px;margin:2px 0">` +
+        `<span class="wd-switch"><input type="checkbox" data-choice="${_esc(val)}" ${chosen.includes(String(val)) ? 'checked' : ''}><span class="wd-switch-slider"></span></span>` +
+        `<span class="wd-switch-text">${_esc(extra.t ? extra.t('lbl.evidence_' + val, {}, lbl) : lbl)}</span></label>`
+      ).join('') + `</div>`;
   } else if (f.type === 'entitylist') {
     // Chip/pill multi-picker: existing values as removable pills + a combobox
     // add-input. Managed by DOM (no re-render) and collected on save.
@@ -2108,6 +2123,12 @@ class HaWashdataPanel extends HTMLElement {
     this._updateTaskPills();
     this._pgAdoptTask(t);
     this._onTrackedTaskProgress(t);
+    // The history-import wizard reads its own progress and results off this stream, so
+    // a closed dialog or a dropped socket cannot lose a run.
+    if (t.kind === 'history_import' || t.kind === 'history_import_apply') {
+      if (t.state === 'running') { if (this._modal && this._modal.type === 'history-import') this._render(); }
+      else this._histTaskFinished(t);
+    }
     this._settleTaskCallback(t);
   }
 
@@ -2306,6 +2327,8 @@ class HaWashdataPanel extends HTMLElement {
       rebuild: this._t('lbl.task_rebuild', {}, 'Rebuilding envelopes'),
       reprocess: this._t('lbl.task_reprocess', {}, 'Reprocessing'),
       ml_training: this._t('lbl.task_ml_training', {}, 'Learning'),
+      history_import: this._t('lbl.task_history_import', {}, 'Scanning power history'),
+      history_import_apply: this._t('lbl.task_history_import_apply', {}, 'Importing cycles'),
     };
     return m[kind] || kind;
   }
@@ -2614,9 +2637,11 @@ class HaWashdataPanel extends HTMLElement {
     try {
       const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: _CYCLE_PAGE_SIZE, offset: 0 });
       this._cycles = res.cycles || [];
-      // Imported store recordings are returned once (first page) and kept out of
-      // the paginated `cycles`/offset math so "Load more" stays correct.
-      this._refCycles = res.reference_cycles || [];
+      // Imported store recordings and cycles recovered from raw power history are
+      // returned once (first page) and kept out of the paginated `cycles`/offset math
+      // so "Load more" stays correct. They share one panel array because they share the
+      // table; each row carries `cycle_origin` so badges and wording can differ.
+      this._refCycles = [...(res.reference_cycles || []), ...(res.backfill_cycles || [])];
       this._cycleOffset = this._cycles.length;
       this._cyclesTotal = (res.total != null) ? res.total : this._cycles.length;
       this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : false;
@@ -3199,14 +3224,28 @@ class HaWashdataPanel extends HTMLElement {
         this._opts = r.options || {};
         this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'advanced' && this._panelSubtab === 'ml') this._renderPreservingFormEdits(); });
       } else if (this._tab === 'playground') {
-        try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (!this._isActiveEntry(eid)) return; this._opts = r.options || {}; } catch (_) {}
-        // Always open on the integration's CURRENT settings: the backend reads them
-        // back off the live detector/matcher config, so no stale schema default can
-        // leak into the sandbox.
-        await this._pgFetchSettings(eid);
+        // These four are independent of each other, so they go out together rather
+        // than in series: on a slow host the tab used to wait out four sequential
+        // round-trips before rendering anything.
+        //
+        // Settings are fetched WITHOUT suggestions (see _pgFetchSuggestions): they only
+        // label two buttons, and computing them runs statistics over every clean cycle.
+        await Promise.all([
+          (async () => {
+            try {
+              const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
+              if (this._isActiveEntry(eid)) this._opts = r.options || {};
+            } catch (_) {}
+          })(),
+          // Always open on the integration's CURRENT settings: the backend reads them
+          // back off the live detector/matcher config, so no stale schema default can
+          // leak into the sandbox.
+          this._pgFetchSettings(eid, false),
+          this._fetchCycles(eid),
+          this._profiles.length ? Promise.resolve() : this._fetchProfiles(eid),
+        ]);
         if (!this._isActiveEntry(eid)) return;
-        await this._fetchCycles(eid);
-        if (!this._profiles.length) await this._fetchProfiles(eid);
+        this._pgFetchSuggestions(eid);
         // Auto-select most recent cycle on first load. Profile defaults to
         // auto-detect ('') so the sim shows what the matcher WOULD pick, not the
         // cycle's stored label.
@@ -3537,6 +3576,7 @@ class HaWashdataPanel extends HTMLElement {
     this._drawStatusCurve();
     this._drawModalCanvas();
     this._drawProfileSparklines();  // D2
+    this._drawHistorySparklines();  // #344 import review
     this._drawPlaygroundCanvases(); // F3
     ['wd-status-canvas', 'wd-cyc-canvas', 'wd-compare-canvas', 'wd-env-canvas', 'wd-phase-canvas', 'wd-spag-canvas', 'wd-pgroup-canvas']
       .forEach(id => this._attachHover(id));
@@ -4140,9 +4180,14 @@ class HaWashdataPanel extends HTMLElement {
       : s === 'interrupted' ? 'var(--error-color, #f44336)'
       : s === 'force_stopped' ? 'var(--warning-color, #ff9800)' : 'var(--secondary-text-color)';
 
-    const importedBadge = c => c.is_reference
-      ? ` <span title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="color:var(--info-color,#2196f3)">📥</span>`
-      : '';
+    const importedBadge = c => {
+      if (!c.is_reference) return '';
+      const fromHistory = c.cycle_origin === 'backfill';
+      const tip = fromHistory
+        ? this._t('badge.backfilled_tip', {}, 'Detected in imported power history. Shapes program matching only, not counted in stats.')
+        : this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.');
+      return ` <span title="${_esc(tip)}" style="color:var(--info-color,#2196f3)">${fromHistory ? '🕗' : '📥'}</span>`;
+    };
     const reviewBadge = c => {
       if (isGolden(c)) return ' <span title="' + _esc(this._t('badge.golden_cycle', {}, 'Recorded reference cycle')) + '" style="color:var(--warning-color,#ff9800)">⭐</span>';
       // Pending feedback wins over the reviewed check, matching needsReview (#355):
@@ -4357,32 +4402,37 @@ class HaWashdataPanel extends HTMLElement {
   }
 
 
+  // Paint one power curve into a small canvas. Shared by the profile-card
+  // signature sparklines (D2) and the import-review candidate rows (#344), so the two
+  // cannot drift apart.
+  _paintSparkline(cv, curve) {
+    if (!cv || !Array.isArray(curve) || curve.length < 3) return;
+    const primary = (getComputedStyle(this).getPropertyValue('--primary-color') || '#03a9f4').trim() || '#03a9f4';
+    const dpr = window.devicePixelRatio || 1;
+    const rect = cv.getBoundingClientRect();
+    const w = cv.width = Math.max(1, Math.round((rect.width || 64) * dpr));
+    const h = cv.height = Math.max(1, Math.round((rect.height || 20) * dpr));
+    const ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+    const max = Math.max(...curve, 1), pad = 2 * dpr;
+    const X = i => pad + (curve.length === 1 ? 0 : (i / (curve.length - 1)) * (w - 2 * pad));
+    const Y = v => h - pad - (Math.max(0, v) / max) * (h - 2 * pad);
+    ctx.beginPath();
+    curve.forEach((v, i) => { const x = X(i), y = Y(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    ctx.strokeStyle = primary; ctx.lineWidth = 1.5 * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+  }
+
   // D2: paint every profile-card sparkline after a render.
   _drawProfileSparklines() {
     const sr = this.shadowRoot;
     if (!sr) return;
     const canvases = sr.querySelectorAll('canvas[data-spark-prof]');
     if (!canvases.length) return;
-    const primary = (getComputedStyle(this).getPropertyValue('--primary-color') || '#03a9f4').trim() || '#03a9f4';
     const byName = {};
     for (const p of (this._profiles || [])) byName[p.name] = p;
     canvases.forEach(cv => {
-      const name = cv.dataset.sparkProf;
-      const curve = (byName[name] && byName[name].signature_curve) || [];
-      if (!Array.isArray(curve) || curve.length < 3) return;
-      const dpr = window.devicePixelRatio || 1;
-      const rect = cv.getBoundingClientRect();
-      const w = cv.width = Math.max(1, Math.round((rect.width || 64) * dpr));
-      const h = cv.height = Math.max(1, Math.round((rect.height || 20) * dpr));
-      const ctx = cv.getContext('2d');
-      ctx.clearRect(0, 0, w, h);
-      const max = Math.max(...curve, 1), pad = 2 * dpr;
-      const X = i => pad + (curve.length === 1 ? 0 : (i / (curve.length - 1)) * (w - 2 * pad));
-      const Y = v => h - pad - (Math.max(0, v) / max) * (h - 2 * pad);
-      // Filled area + line, matching the appliance's power signature.
-      ctx.beginPath();
-      curve.forEach((v, i) => { const x = X(i), y = Y(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
-      ctx.strokeStyle = primary; ctx.lineWidth = 1.5 * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+      const prof = byName[cv.dataset.sparkProf];
+      this._paintSparkline(cv, (prof && prof.signature_curve) || []);
     });
   }
 
@@ -5706,21 +5756,45 @@ class HaWashdataPanel extends HTMLElement {
   // Fetch the device's live effective settings + its saved presets. Tolerant of an
   // older backend (command unknown): the field pre-fill silently falls back to the
   // stored-option chain in _pgFieldVal.
-  async _pgFetchSettings(entryId) {
+  async _pgFetchSettings(entryId, includeSuggestions = true) {
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/get_playground_settings`, entry_id: entryId });
+      const r = await this._ws({
+        type: `${_DOMAIN}/get_playground_settings`, entry_id: entryId,
+        include_suggestions: includeSuggestions,
+      });
       if (!this._isActiveEntry(entryId)) return;
       this._pgEffective = r.effective || {};
       this._pgPublishable = Array.isArray(r.publishable) ? r.publishable : null;
       this._pgPresets = Array.isArray(r.presets) ? r.presets : [];
       this._pgPresetLimit = r.preset_limit || 0;
       if (this._pgPresetSel && !this._pgPresets.some(p => p.name === this._pgPresetSel)) this._pgPresetSel = '';
-      this._pgSuggClassic = (r.classic_suggestions && typeof r.classic_suggestions === 'object') ? r.classic_suggestions : {};
-      this._pgSuggMl = (r.ml_suggestions && typeof r.ml_suggestions === 'object') ? r.ml_suggestions : null;
-      this._pgMlSuggEnabled = !!r.ml_suggestions_enabled;
+      if (includeSuggestions) this._pgApplySuggestions(r);
     } catch (e) {
       if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
     }
+  }
+
+  _pgApplySuggestions(r) {
+    this._pgSuggClassic = (r.classic_suggestions && typeof r.classic_suggestions === 'object') ? r.classic_suggestions : {};
+    this._pgSuggMl = (r.ml_suggestions && typeof r.ml_suggestions === 'object') ? r.ml_suggestions : null;
+    this._pgMlSuggEnabled = !!r.ml_suggestions_enabled;
+  }
+
+  // Suggestions label the two "Load suggested" buttons and nothing else, and the ML set
+  // runs statistics over every clean cycle - real work that used to sit on the critical
+  // path of opening the tab, ahead of two more round-trips. Fetched in the background
+  // instead; the buttons render only once their count is non-zero, so they appear when
+  // the data lands rather than holding up the whole tab.
+  async _pgFetchSuggestions(entryId) {
+    try {
+      const r = await this._ws({
+        type: `${_DOMAIN}/get_playground_settings`, entry_id: entryId,
+        include_suggestions: true,
+      });
+      if (!this._isActiveEntry(entryId)) return;
+      this._pgApplySuggestions(r);
+      if (this._tab === 'playground') this._render();
+    } catch (_) { /* the buttons simply stay hidden */ }
   }
 
   // Every value the control panel currently shows (live baseline + staged edits).
@@ -7345,6 +7419,13 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-secondary" data-action="export-config">${this._t('btn.export_all', {}, 'Quick export everything')}</button>
           <button class="wd-btn wd-btn-secondary" data-action="import-config-raw">${this._t('btn.import_raw', {}, 'Advanced: replace all from JSON')}</button>
         </div>
+      </div>
+      <div class="wd-card">
+        <div class="wd-card-title">${this._t('hdr.import_power_history', {}, 'Import power history')}</div>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.import_history_description', {}, 'Already had a smart plug before WashData? Upload a history export of its power sensor, or read it straight from Home Assistant, and the normal detection runs over it so past cycles turn up in your Cycles list ready to name.')}</p>
+        <div class="wd-card-actions">
+          <button class="wd-btn wd-btn-primary" data-action="hist-import-open">${this._t('btn.import_power_history', {}, 'Import power history')}</button>
+        </div>
       </div>` : `<div class="wd-card"><p class="wd-info">${this._t('msg.maintenance_requires_access', {}, 'Maintenance and export/import require full access.')}</p></div>`}`;
   }
 
@@ -8334,6 +8415,7 @@ class HaWashdataPanel extends HTMLElement {
     if (m.type === 'gear-settings') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlGearModal(m)}</div></div>`;
     if (m.type === 'export-select') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlExportSelectModal(m)}</div></div>`;
     if (m.type === 'import-wizard') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlImportWizardModal(m)}</div></div>`;
+    if (m.type === 'history-import') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlHistoryImportModal(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
@@ -8788,6 +8870,178 @@ class HaWashdataPanel extends HTMLElement {
       </div>`;
   }
 
+  // ── Import power history (#344) ───────────────────────────────────────────────
+  //
+  // Four steps: stage the data, scan it in the background, review what was found,
+  // then write only the rows the user kept. Nothing is stored before the review step.
+  // Parsing lives in Python so one implementation is under test; the panel only ships
+  // the text up in frame-sized chunks.
+
+  _histSkipReason(reason) {
+    const map = {
+      idle: this._t('lbl.hist_skip_idle', {}, 'nothing running'),
+      sparse: this._t('lbl.hist_skip_sparse', {}, 'readings too far apart'),
+      too_few_samples: this._t('lbl.hist_skip_short', {}, 'too few readings'),
+      too_long: this._t('lbl.hist_skip_long', {}, 'no break long enough to split on'),
+    };
+    return map[reason] || reason || '';
+  }
+
+  _histSegReason(reason) {
+    const map = {
+      shorter_than_minimum: this._t('lbl.hist_reason_short', {}, 'shorter than this appliance\'s shortest real cycle'),
+      no_clean_end: this._t('lbl.hist_reason_no_end', {}, 'never ended cleanly'),
+    };
+    return map[reason] || '';
+  }
+
+  _htmlHistoryImportModal(m) {
+    const title = `<h2 id="wd-modal-title">${this._t('modal.history_import', {}, 'Import power history')}</h2>`;
+    const err = m.error ? `<p class="wd-info" style="color:var(--error-color)">${_esc(m.error)}</p>` : '';
+
+    if (m.step === 'input') {
+      const busy = this._busy.has('hist-import');
+      const dis = busy ? 'disabled' : '';
+      return `${title}
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.hist_input_hint', {}, 'Upload a CSV downloaded from the History panel (entity, state, last changed), or let WashData read the sensor\'s history directly. Detection then runs over it exactly as it does live, and you choose which of the cycles it finds to keep.')}</p>
+        <div class="wd-field"><label>${this._t('lbl.load_from_file', {}, 'Load from file')}</label><input type="file" id="wd-hist-file" accept=".csv,text/csv,text/plain" ${dis}></div>
+        <div class="wd-field"><label>${this._t('lbl.hist_csv_data', {}, 'CSV data')}</label><textarea id="wd-hist-csv" style="min-height:96px;font-family:monospace;font-size:.78em" placeholder="entity_id,state,last_changed" ${dis}>${_esc(m.csvText || '')}</textarea></div>
+        <div class="wd-field">
+          <label>${this._t('lbl.hist_from_recorder', {}, 'Or read it from Home Assistant')}</label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input type="number" id="wd-hist-days" min="1" max="14" step="1" value="${_esc(String(m.days || 10))}" style="width:88px" ${dis}>
+            <span class="wd-info">${this._t('lbl.days', {}, 'days')}</span>
+            <button class="wd-btn wd-btn-secondary" data-maction="hist-recorder" ${dis}>${this._t('btn.hist_read_recorder', {}, 'Read from Home Assistant')}</button>
+          </div>
+          <div class="wd-field-hint">${this._t('msg.hist_recorder_hint', {}, 'Home Assistant keeps detailed history for 10 days by default and only hourly averages after that, which are too coarse to detect cycles from. A CSV export can reach further back only if your recorder was set to keep more.')}</div>
+        </div>
+        ${err}
+        <div class="wd-modal-actions">
+          <button class="wd-btn wd-btn-secondary" data-maction="cancel" ${dis}>${this._t('btn.cancel', {}, 'Cancel')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="hist-scan" ${dis}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.hist_scan', {}, 'Scan for cycles')}</button>
+        </div>`;
+    }
+
+    if (m.step === 'scan') {
+      const t = m.scanTaskId ? (this._tasks || {})[m.scanTaskId] : null;
+      const pct = (t && t.total > 0) ? Math.round((t.done / t.total) * 100) : null;
+      return `${title}
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.hist_scanning', {}, 'Replaying your history through the detector. This runs in the background - you can close this dialog and come back to it.')}</p>
+        <div class="wd-prog-bg" style="margin-bottom:8px"><div class="wd-prog-fill" style="width:${pct == null ? 0 : pct}%"></div></div>
+        <p class="wd-info">${pct == null ? this._t('status.preparing', {}, 'Preparing…') : `${pct}%`}</p>
+        ${err}
+        <div class="wd-modal-actions">
+          <button class="wd-btn wd-btn-secondary" data-maction="hist-cancel-scan">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        </div>`;
+    }
+
+    if (m.step === 'done') {
+      const d = m.done || {};
+      const lines = [
+        this._t('msg.hist_imported_count', { n: d.imported || 0 }, `${d.imported || 0} cycles imported.`),
+        d.duplicates ? this._t('msg.hist_duplicates', { n: d.duplicates }, `${d.duplicates} were already imported and were skipped.`) : '',
+        d.capped ? this._t('msg.hist_capped', {}, 'The per-device limit for imported cycles was reached; the rest were not stored.') : '',
+      ].filter(Boolean);
+      return `${title}
+        ${lines.map(l => `<p class="wd-info">${_esc(l)}</p>`).join('')}
+        <p class="wd-info">${this._t('msg.hist_next_step', {}, 'They are in your Cycles list, tagged as imported history. Open one and use Label to name the program it belongs to.')}</p>
+        <div class="wd-modal-actions">
+          <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="hist-goto-cycles">${this._t('btn.hist_goto_cycles', {}, 'Show me the cycles')}</button>
+        </div>`;
+    }
+
+    // step === 'review'
+    const res = m.result || {};
+    const segs = res.segments || [];
+    const parse = res.parse || {};
+    const busy = this._busy.has('hist-apply');
+    const accept = m.accept || new Set();
+
+    // Account for every row the file contained, so "nothing found" is explained
+    // rather than just reported.
+    const facts = [];
+    if (parse.rows_total) facts.push(this._t('msg.hist_rows_read', { n: parse.rows_total }, `${parse.rows_total} readings read`));
+    if (parse.first && parse.last) facts.push(`${_fmtDate(parse.first)} – ${_fmtDate(parse.last)}`);
+    if (parse.breaks) facts.push(this._t('msg.hist_breaks', { n: parse.breaks }, `${parse.breaks} gaps where the sensor was unavailable`));
+    if (parse.rows_other_entity) facts.push(this._t('msg.hist_other_entity', { n: parse.rows_other_entity }, `${parse.rows_other_entity} readings for other entities ignored`));
+    const skipped = res.skipped || [];
+    const skippedByReason = {};
+    skipped.forEach(sk => { skippedByReason[sk.reason] = (skippedByReason[sk.reason] || 0) + 1; });
+    const skipLine = Object.entries(skippedByReason)
+      .map(([reason, n]) => `${n} × ${this._histSkipReason(reason)}`).join(', ');
+
+    const settings = res.settings || {};
+    const settingsLine = settings.min_power != null
+      ? this._t('msg.hist_settings_used', { w: settings.min_power, s: settings.off_delay },
+          `Detected using this device's current settings (minimum power ${settings.min_power} W, off delay ${settings.off_delay} s).`)
+      : '';
+
+    if (!segs.length) {
+      return `${title}
+        <p class="wd-info">${this._t('msg.hist_none_found', {}, 'No cycles could be detected in that history.')}</p>
+        ${facts.length ? `<p class="wd-info">${_esc(facts.join(' · '))}</p>` : ''}
+        ${skipLine ? `<p class="wd-info">${this._t('msg.hist_skipped_spans', {}, 'Skipped stretches')}: ${_esc(skipLine)}</p>` : ''}
+        ${settingsLine ? `<p class="wd-info">${_esc(settingsLine)}</p>` : ''}
+        <div class="wd-modal-actions">
+          <button class="wd-btn wd-btn-secondary" data-maction="hist-back">${this._t('btn.back', {}, 'Back')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+        </div>`;
+    }
+
+    const rows = segs.map(seg => {
+      const on = accept.has(seg.index);
+      const reason = this._histSegReason(seg.reason);
+      return `<tr data-hist-row="${seg.index}" style="${on ? '' : 'opacity:.55'}">
+        <td><input type="checkbox" data-hist-pick="${seg.index}" ${on ? 'checked' : ''} aria-label="${_esc(this._t('lbl.hist_keep', {}, 'Keep this cycle'))}"></td>
+        <td>${_esc(_fmtDate(seg.start_time))}</td>
+        <td>${_esc(_fmtDuration(seg.duration_s))}</td>
+        <td>${seg.energy_wh != null ? _esc((seg.energy_wh / 1000).toFixed(2)) + ' kWh' : '–'}</td>
+        <td>${_esc(String(Math.round(seg.peak_w)))} W</td>
+        <td><canvas class="wd-prof-spark" data-hist-spark="${seg.index}" width="64" height="20" aria-hidden="true"></canvas></td>
+        <td>${reason ? `<span title="${_esc(reason)}" style="color:var(--warning-color,#ff9800)">⚠</span> <span class="wd-info">${_esc(reason)}</span>` : `<span class="wd-info">${_esc(this._t('lbl.hist_looks_complete', {}, 'complete'))}</span>`}</td>
+      </tr>`;
+    }).join('');
+
+    const allOn = segs.every(seg => accept.has(seg.index));
+    return `${title}
+      <p class="wd-info" style="margin-bottom:8px">${this._t('msg.hist_found', { n: segs.length }, `Found ${segs.length} cycles. Untick anything that does not look like a real run - nothing is stored until you import.`)}</p>
+      ${facts.length ? `<p class="wd-info" style="margin-bottom:4px">${_esc(facts.join(' · '))}</p>` : ''}
+      ${skipLine ? `<p class="wd-info" style="margin-bottom:4px">${this._t('msg.hist_skipped_spans', {}, 'Skipped stretches')}: ${_esc(skipLine)}</p>` : ''}
+      ${settingsLine ? `<p class="wd-info" style="margin-bottom:12px">${_esc(settingsLine)}</p>` : ''}
+      <div style="margin-bottom:8px"><button class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="hist-toggle-all">${allOn ? this._t('btn.select_none', {}, 'Select none') : this._t('btn.select_all', {}, 'Select all')}</button></div>
+      <div class="wd-table-wrap">
+        <table class="wd-table"><thead><tr>
+          <th></th>
+          <th>${this._t('lbl.date', {}, 'Date')}</th>
+          <th>${this._t('lbl.duration', {}, 'Duration')}</th>
+          <th>${this._t('lbl.energy', {}, 'Energy')}</th>
+          <th>${this._t('lbl.peak_power_short', {}, 'Peak')}</th>
+          <th>${this._t('lbl.shape', {}, 'Shape')}</th>
+          <th>${this._t('lbl.notes', {}, 'Notes')}</th>
+        </tr></thead><tbody>${rows}</tbody></table>
+      </div>
+      ${res.capped ? `<p class="wd-info">${this._t('msg.hist_scan_capped', { n: res.found }, `Only the first candidates are shown (${res.found} were found).`)}</p>` : ''}
+      ${err}
+      <div class="wd-modal-actions">
+        <button class="wd-btn wd-btn-secondary" data-maction="hist-back" ${busy ? 'disabled' : ''}>${this._t('btn.back', {}, 'Back')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="hist-apply" ${busy || !accept.size ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.hist_import_n', { n: accept.size }, `Import ${accept.size} cycles`)}</button>
+      </div>`;
+  }
+
+  // Paint the candidate sparklines after a render (same painter as profile cards).
+  _drawHistorySparklines() {
+    const sr = this.shadowRoot;
+    if (!sr) return;
+    const m = this._modal;
+    const segs = (m && m.result && m.result.segments) || [];
+    const byIndex = {};
+    segs.forEach(seg => { byIndex[String(seg.index)] = seg.curve || []; });
+    sr.querySelectorAll('canvas[data-hist-spark]').forEach(cv => {
+      this._paintSparkline(cv, byIndex[cv.dataset.histSpark] || []);
+    });
+  }
+
   // Interactive cycle inspector: view / trim / split.
   _htmlCycleModal(m) {
     if (!m.loaded) {
@@ -8795,7 +9049,14 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button></div>`;
     }
     const cur = m.curve || {};
-    const isRef = !!cur.is_reference;  // imported store recording: read-only except delete
+    const isRef = !!cur.is_reference;  // lives in reference_cycles: outside usage stats
+    // Capabilities come from the backend (`_reference_capabilities`), which derives them
+    // from which list the cycle lives in. An imported cycle can be labelled - that is how
+    // a program gets named from imported history (#344) - but not trimmed, split or
+    // reviewed, because those store functions only operate on past_cycles.
+    const canLabel = cur.labelable !== false;
+    const canEditCycle = cur.editable !== false;
+    const fromHistory = cur.cycle_origin === 'backfill';
     const full = cur.full_duration_s || cur.duration || 0;
     const kwh = cur.energy_kwh != null ? cur.energy_kwh : null;
     // ML health chip (higher = better) shown when an ML assessment is attached.
@@ -8829,12 +9090,14 @@ class HaWashdataPanel extends HTMLElement {
       : '';
     // Imported recordings are read-only (they seed matching templates only), so
     // the edit mode-bar is hidden and a short note explains why.
-    const modeBar = (this._canEdit() && !isRef) ? `<div class="wd-mode-bar">
+    const modeBar = (this._canEdit() && canEditCycle) ? `<div class="wd-mode-bar">
       <button class="wd-btn wd-btn-sm ${m.mode === 'view' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-view">${this._t('btn.inspect', {}, 'Inspect')}</button>
       <button class="wd-btn wd-btn-sm ${m.mode === 'trim' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-trim">${this._t('btn.trim', {}, 'Trim')}</button>
       <button class="wd-btn wd-btn-sm ${m.mode === 'split' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-split">${this._t('btn.split', {}, 'Split')}</button>
       <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>
-    </div>` : (isRef ? `<div class="wd-info" style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${this._t('msg.imported_readonly', {}, 'Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.')}</div>` : '');
+    </div>` : (isRef ? `<div class="wd-info" style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${fromHistory
+      ? this._t('msg.imported_history_readonly', {}, 'Detected in imported power history. It shapes program matching but is not counted in your statistics, and cannot be trimmed or split. Label it to name the program.')
+      : this._t('msg.imported_readonly', {}, 'Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.')}</div>` : '');
 
     // Pending-detection-feedback banner (Confirm / Correct… / Ignore). Built once
     // and shown in BOTH Inspect and Review modes, so a cycle in the "needs review"
@@ -8862,12 +9125,14 @@ class HaWashdataPanel extends HTMLElement {
       const shareBtn = canShare
         ? `<button class="wd-btn wd-btn-secondary" data-action="store-share-cycle" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(cur.profile_name || '')}">${this._t('btn.share_to_store', {}, 'Share to store')}</button>`
         : '';
-      // Imported recordings support Delete (remove a bad import) but not Label
-      // (relabelling only applies to real cycles that feed usage stats).
+      // Delete removes a bad import; Label is offered whenever the backend says the
+      // cycle can carry one, which includes imported cycles - naming the programs found
+      // in imported history is the point of that import (#344), and the store handles
+      // labelling a reference cycle in place.
       const editBtns = !this._canEdit() ? ''
-        : isRef ? `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>`
-        : `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>
-        <button class="wd-btn wd-btn-primary" data-maction="cyc-label">${this._t('btn.label', {}, 'Label')}</button>`;
+        : `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>${canLabel
+          ? `\n        <button class="wd-btn wd-btn-primary" data-maction="cyc-label">${this._t('btn.label', {}, 'Label')}</button>`
+          : ''}`;
       controls = `${fbBanner}<div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
         ${shareBtn}
@@ -10010,6 +10275,30 @@ class HaWashdataPanel extends HTMLElement {
         }, { once: true });
       });
     }
+    const histFile = sr.getElementById('wd-hist-file');
+    if (histFile) histFile.addEventListener('change', () => {
+      const f = histFile.files && histFile.files[0];
+      if (!f) return;
+      const m = this._modal;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const ta = sr.getElementById('wd-hist-csv');
+        const text = String(reader.result || '');
+        if (ta) ta.value = text;
+        if (m && m.type === 'history-import') m.csvText = text;
+      };
+      reader.onerror = () => this._showToast(
+        this._t('toast.file_read_failed', {}, 'Could not read that file'), 'error');
+      reader.readAsText(f);
+    });
+    sr.querySelectorAll('[data-hist-pick]').forEach(box => box.addEventListener('change', () => {
+      const m = this._modal;
+      if (!m || m.type !== 'history-import') return;
+      const index = parseInt(box.dataset.histPick, 10);
+      if (box.checked) m.accept.add(index); else m.accept.delete(index);
+      this._render();
+      requestAnimationFrame(() => this._drawHistorySparklines());
+    }));
     const impFile = sr.getElementById('wd-import-file');
     if (impFile) impFile.addEventListener('change', () => {
       const f = impFile.files && impFile.files[0];
@@ -10795,6 +11084,16 @@ class HaWashdataPanel extends HTMLElement {
         sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() },
         expanded: new Set(), mode: 'merge', cycleDest: 'reference', conflicts: {} };
       this._render();
+    } else if (a === 'hist-import-open') {
+      // Open the power-history import wizard at the upload step. Every field is
+      // initialised here so the render-smoke harness (which calls every modal
+      // renderer) never meets a half-built state.
+      this._modal = {
+        type: 'history-import', step: 'input', csvText: '', days: 10, token: null,
+        scanTaskId: null, applyTaskId: null, result: null, accept: new Set(),
+        done: null, error: null,
+      };
+      this._render();
     } else if (a === 'import-config-raw') {
       // Advanced fallback: the legacy raw-JSON whole-store replace.
       this._modal = { type: 'import-config' }; this._render();
@@ -11469,6 +11768,8 @@ class HaWashdataPanel extends HTMLElement {
       return this._onMActImport(action, btn, m, eid, sr);
     }
 
+    if (action.startsWith('hist-')) return this._onMActHistoryImport(action, btn, m, eid, sr);
+
     if (action.startsWith('sd-') || action === 'store-share-device-ok') return this._onMActStoreShare(action, btn, m, eid);
 
     // Export wizard: generate + download the filtered JSON.
@@ -11613,6 +11914,220 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchCycles(eid); await this._fetchProfiles(eid); await this._fetchFeedbacks(eid);
         } catch (e) { this._showToast(this._t('toast.relabel_failed', { error: e.message || e }, 'Relabel failed: ' + (e.message || e)), 'error'); }
       });
+    }
+  }
+
+  // ── Import power history (#344): upload, scan, review, apply ─────────────────
+
+  // Ship the staged text in frame-sized chunks. Home Assistant builds its WebSocket
+  // with aiohttp's default 4 MiB frame cap, and ten days of 5-second data is 5-8 MB of
+  // text - an over-cap frame is not rejected, it closes the connection and takes every
+  // subscription with it. Chunks are split on line boundaries so the server never has to
+  // reassemble a partial row.
+  async _histUpload(eid, text) {
+    const begun = await this._ws({ type: `${_DOMAIN}/history_import_begin`, entry_id: eid });
+    const limit = Math.max(4096, begun.chunk_bytes || 512 * 1024);
+    let seq = 0;
+    let from = 0;
+    while (from < text.length) {
+      let to = Math.min(text.length, from + limit);
+      if (to < text.length) {
+        const nl = text.lastIndexOf('\n', to);
+        if (nl > from) to = nl + 1;
+      }
+      await this._ws({
+        type: `${_DOMAIN}/history_import_chunk`, entry_id: eid,
+        token: begun.token, seq, text: text.slice(from, to),
+      });
+      seq += 1;
+      from = to;
+    }
+    return begun.token;
+  }
+
+  async _histStartScan(eid, m, token) {
+    m.token = token;
+    m.step = 'scan';
+    m.error = null;
+    this._render();
+    const started = await this._ws({
+      type: `${_DOMAIN}/start_history_import_scan`, entry_id: eid, token,
+    });
+    m.scanTaskId = started.task_id;
+    this._addProvisionalTask(started.task_id, 'history_import', eid, 0);
+    if (!this._tasksSubscribed) this._pollTaskGeneric(started.task_id);
+    // A short history can finish before this reply arrives, in which case the task
+    // event fired while we still had no id to match it against. Adopt the current
+    // snapshot so a fast scan is never lost.
+    this._histAdopt(started.task_id);
+  }
+
+  // Pick up a task that may already have settled. Safe to call for a running task.
+  async _histAdopt(taskId) {
+    if (!taskId) return;
+    let snap = (this._tasks || {})[taskId];
+    if (!snap || snap.state === 'running') {
+      try {
+        snap = await this._ws({ type: `${_DOMAIN}/get_task_result`, task_id: taskId });
+      } catch (_) { return; }
+    }
+    if (snap && snap.state && snap.state !== 'running') this._histTaskFinished(snap);
+  }
+
+  // Called from the task-registry snapshot handler when one of our tasks finishes, so a
+  // dropped socket or a closed dialog cannot lose the run.
+  async _histTaskFinished(task) {
+    const m = this._modal;
+    if (!m || m.type !== 'history-import') return;
+    // Both the task-event stream and the post-start adoption can deliver the same
+    // terminal snapshot; settle each task once. The id is only marked once it is known
+    // to be one of ours - an event that arrives before the start reply recorded the id
+    // must not burn it, or the adoption that follows would be a no-op and the wizard
+    // would sit on the progress step forever.
+    if (task.id !== m.scanTaskId && task.id !== m.applyTaskId) return;
+    this._histSettled = this._histSettled || new Set();
+    if (this._histSettled.has(task.id)) return;
+    this._histSettled.add(task.id);
+    if (task.id === m.scanTaskId) {
+      if (task.state === 'error') {
+        m.step = 'input';
+        m.error = task.error || this._t('msg.hist_scan_failed', {}, 'Scanning failed.');
+        this._render();
+        return;
+      }
+      try {
+        const res = task.result ? task : await this._ws({ type: `${_DOMAIN}/get_task_result`, task_id: task.id });
+        m.result = res.result || {};
+        m.accept = new Set((m.result.segments || []).filter(seg => seg.accept).map(seg => seg.index));
+        m.step = 'review';
+        this._render();
+        requestAnimationFrame(() => this._drawHistorySparklines());
+      } catch (e) {
+        m.step = 'input';
+        m.error = String((e && e.message) || e);
+        this._render();
+      }
+      return;
+    }
+    if (task.id === m.applyTaskId) {
+      if (task.state === 'error') {
+        m.error = task.error === 'scan_expired'
+          ? this._t('msg.hist_scan_expired', {}, 'That scan is no longer available. Please scan again.')
+          : (task.error || this._t('msg.hist_import_failed', {}, 'Import failed.'));
+        m.step = 'review';
+        this._render();
+        return;
+      }
+      try {
+        const res = task.result ? task : await this._ws({ type: `${_DOMAIN}/get_task_result`, task_id: task.id });
+        m.done = res.result || {};
+      } catch (_) { m.done = {}; }
+      m.step = 'done';
+      this._render();
+      const dev = this._devices[this._selIdx];
+      if (dev) { this._fetchCycles(dev.entry_id); this._fetchProfiles(dev.entry_id); }
+    }
+  }
+
+  async _onMActHistoryImport(action, btn, m, eid, sr) {
+    if (!m || m.type !== 'history-import' || !eid) return;
+
+    if (action === 'hist-scan') {
+      const ta = sr.getElementById('wd-hist-csv');
+      const text = ta ? ta.value : (m.csvText || '');
+      if (!text.trim()) {
+        this._showToast(this._t('toast.hist_csv_required', {}, 'Load a CSV file or paste its contents first'), 'error');
+        return;
+      }
+      m.csvText = text;
+      await this._busyRun('hist-import', async () => {
+        try {
+          const token = await this._histUpload(eid, text);
+          await this._histStartScan(eid, m, token);
+        } catch (e) {
+          m.error = String((e && e.message) || e);
+          this._render();
+        }
+      });
+      return;
+    }
+
+    if (action === 'hist-recorder') {
+      const daysInput = sr.getElementById('wd-hist-days');
+      const days = Math.max(1, Math.min(14, parseInt(daysInput && daysInput.value, 10) || 10));
+      m.days = days;
+      await this._busyRun('hist-import', async () => {
+        try {
+          const res = await this._ws({
+            type: `${_DOMAIN}/history_import_recorder`, entry_id: eid, days,
+          });
+          if (!res.rows) {
+            m.error = this._t('msg.hist_recorder_empty', {}, 'Home Assistant has no detailed history for this sensor in that window.');
+            this._render();
+            return;
+          }
+          await this._histStartScan(eid, m, res.token);
+        } catch (e) {
+          m.error = String((e && e.message) || e);
+          this._render();
+        }
+      });
+      return;
+    }
+
+    if (action === 'hist-cancel-scan') {
+      if (m.scanTaskId) {
+        try { await this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: m.scanTaskId }); } catch (_) {}
+      }
+      m.step = 'input';
+      m.scanTaskId = null;
+      this._render();
+      return;
+    }
+
+    if (action === 'hist-back') {
+      m.step = 'input';
+      m.result = null;
+      m.error = null;
+      this._render();
+      return;
+    }
+
+    if (action === 'hist-toggle-all') {
+      const segs = (m.result && m.result.segments) || [];
+      const allOn = segs.every(seg => m.accept.has(seg.index));
+      m.accept = allOn ? new Set() : new Set(segs.map(seg => seg.index));
+      this._render();
+      requestAnimationFrame(() => this._drawHistorySparklines());
+      return;
+    }
+
+    if (action === 'hist-apply') {
+      if (!m.accept || !m.accept.size) return;
+      await this._busyRun('hist-apply', async () => {
+        try {
+          const res = await this._ws({
+            type: `${_DOMAIN}/apply_history_import`, entry_id: eid,
+            scan_task_id: m.scanTaskId, accept: [...m.accept].sort((a, b) => a - b),
+          });
+          m.applyTaskId = res.task_id;
+          this._addProvisionalTask(res.task_id, 'history_import_apply', eid, m.accept.size);
+          if (!this._tasksSubscribed) this._pollTaskGeneric(res.task_id);
+          this._histAdopt(res.task_id);
+        } catch (e) {
+          m.error = String((e && e.message) || e);
+          this._render();
+        }
+      });
+      return;
+    }
+
+    if (action === 'hist-goto-cycles') {
+      this._modal = null;
+      this._tab = 'history';
+      this._cycleFilter = { ...(this._cycleFilter || {}), status: 'imported' };
+      this._fetchTabData();
+      return;
     }
   }
 
@@ -12038,6 +12553,7 @@ class HaWashdataPanel extends HTMLElement {
       const f = _FIELD_BY_KEY[key];
       const ftype = (f && f.type) || el.dataset.ftype || 'text';
       if (el.type === 'checkbox') { this._pendingSettings[key] = el.checked; return; }
+      if (ftype === 'checkboxlist') { this._pendingSettings[key] = Array.from(el.querySelectorAll('[data-choice]')).filter(c => c.checked).map(c => c.dataset.choice); return; }
       if (ftype === 'entitylist') {
         this._pendingSettings[key] = Array.from(el.querySelectorAll('.wd-pill')).map(p => p.dataset.val).filter(Boolean);
         return;
@@ -12096,6 +12612,10 @@ class HaWashdataPanel extends HTMLElement {
     sr.querySelectorAll('#wd-settings-form [data-opt]').forEach(el => {
       const key = el.dataset.opt;
       if (el.type === 'checkbox') { vals[key] = el.checked; return; }
+      if (el.dataset.ftype === 'checkboxlist') {
+        vals[key] = Array.from(el.querySelectorAll('[data-choice]')).filter(c => c.checked).map(c => c.dataset.choice);
+        return;
+      }
       const n = parseFloat(el.value);
       if (!isNaN(n)) vals[key] = n;
       else if (el.value !== '') vals[key] = el.value;
@@ -12223,6 +12743,7 @@ class HaWashdataPanel extends HTMLElement {
       const f = _FIELD_BY_KEY[key];
       const ftype = (f && f.type) || el.dataset.ftype || 'text';
       if (el.type === 'checkbox') { updates[key] = el.checked; return; }
+      if (ftype === 'checkboxlist') { updates[key] = Array.from(el.querySelectorAll('[data-choice]')).filter(c => c.checked).map(c => c.dataset.choice); return; }
       if (ftype === 'entitylist') { updates[key] = Array.from(el.querySelectorAll('.wd-pill')).map(p => p.dataset.val).filter(Boolean); return; }
       if (ftype === 'timerlist') {
         updates[key] = Array.from(el.querySelectorAll('.wd-timer-row')).map(row => ({

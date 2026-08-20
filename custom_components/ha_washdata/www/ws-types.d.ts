@@ -126,6 +126,7 @@ export interface GetDeviceCyclesResponse {
   entry_id: string;
   cycles: Record<string, unknown>[];
   reference_cycles: Record<string, unknown>[];
+  backfill_cycles: Record<string, unknown>[];
   total: number;
   has_more: boolean;
 }
@@ -299,6 +300,25 @@ export interface GetShareableCyclesResponse {
 export interface GetSuggestionsResponse {
   suggestions: Record<string, unknown>[];
   locked_suggestions: string[];
+}
+
+export interface HistoryImportBeginResponse {
+  token: string;
+  max_bytes: number;
+  chunk_bytes: number;
+}
+
+export interface HistoryImportChunkResponse {
+  received_bytes: number;
+  next_seq: number;
+}
+
+export interface HistoryImportRecorderResponse {
+  token: string;
+  rows: number;
+  entity_id: string;
+  days: number;
+  truncated: boolean;
 }
 
 export interface ImportConfigSelectiveResponse {
@@ -928,6 +948,7 @@ export interface GetDtwDebugRequest {
 
 export interface GetPlaygroundSettingsRequest {
   entry_id: string;
+  include_suggestions?: boolean;
 }
 
 export interface SavePlaygroundPresetRequest {
@@ -978,6 +999,33 @@ export interface StartPlaygroundCycleDetailRequest {
   settings_override?: Record<string, unknown>;
   stress_tail?: boolean;
   stress_idle_w?: number | null;
+}
+
+export interface HistoryImportBeginRequest {
+  entry_id: string;
+}
+
+export interface HistoryImportChunkRequest {
+  entry_id: string;
+  token: string;
+  seq: number;
+  text: string;
+}
+
+export interface HistoryImportRecorderRequest {
+  entry_id: string;
+  days?: number;
+}
+
+export interface StartHistoryImportScanRequest {
+  entry_id: string;
+  token: string;
+}
+
+export interface ApplyHistoryImportRequest {
+  entry_id: string;
+  scan_task_id: string;
+  accept: unknown[];
 }
 
 export interface StoreStatusRequest {
@@ -1185,6 +1233,11 @@ export interface WashDataWsRequests {
   "ha_washdata/start_playground_history": StartPlaygroundHistoryRequest;
   "ha_washdata/start_playground_sweep": StartPlaygroundSweepRequest;
   "ha_washdata/start_playground_cycle_detail": StartPlaygroundCycleDetailRequest;
+  "ha_washdata/history_import_begin": HistoryImportBeginRequest;
+  "ha_washdata/history_import_chunk": HistoryImportChunkRequest;
+  "ha_washdata/history_import_recorder": HistoryImportRecorderRequest;
+  "ha_washdata/start_history_import_scan": StartHistoryImportScanRequest;
+  "ha_washdata/apply_history_import": ApplyHistoryImportRequest;
   "ha_washdata/store_status": StoreStatusRequest;
   "ha_washdata/store_connect": StoreConnectRequest;
   "ha_washdata/store_disconnect": StoreDisconnectRequest;
@@ -1296,6 +1349,11 @@ export interface WashDataWsResponses {
   "ha_washdata/start_playground_history": StartTaskResponse;
   "ha_washdata/start_playground_sweep": StartTaskResponse;
   "ha_washdata/start_playground_cycle_detail": StartTaskResponse;
+  "ha_washdata/history_import_begin": HistoryImportBeginResponse;
+  "ha_washdata/history_import_chunk": HistoryImportChunkResponse;
+  "ha_washdata/history_import_recorder": HistoryImportRecorderResponse;
+  "ha_washdata/start_history_import_scan": StartTaskResponse;
+  "ha_washdata/apply_history_import": StartTaskResponse;
   "ha_washdata/store_status": StoreStatusResponse;
   "ha_washdata/store_connect": StoreSimpleResponse;
   "ha_washdata/store_disconnect": StoreSimpleResponse;

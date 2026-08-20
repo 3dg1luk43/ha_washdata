@@ -78,7 +78,8 @@
     "awaiting": "Čeka odobrenje",
     "imported_tip": "Uvezeno iz zajedničke trgovine. Koristi se samo za podudaranje, ne broji se u statistiku.",
     "not_importable": "nije dostupno",
-    "exists": "postoji"
+    "exists": "postoji",
+    "backfilled_tip": "Otkriveno u uvezenoj povijesti snage. Utječe samo na podudaranje programa, ne broji se u statistiku."
   },
   "btn": {
     "set_brand_model": "Postavi marku i model",
@@ -243,7 +244,12 @@
     "download_export": "Preuzmi izvoz",
     "analyze_import": "Analiziraj datoteku",
     "import_selected": "Uvezi odabrano",
-    "back": "Natrag"
+    "back": "Natrag",
+    "import_power_history": "Uvezi povijest snage",
+    "hist_read_recorder": "Pročitaj iz Home Assistant",
+    "hist_scan": "Traži cikluse",
+    "hist_import_n": "Uvezi cikluse: {n}",
+    "hist_goto_cycles": "Prikaži cikluse"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -358,7 +364,8 @@
     "pg_outcome": "Ishod simulacije",
     "pg_across_cycles": "Kroz sve vaše cikluse",
     "community_store": "Zajednička trgovina",
-    "online_account": "Zajednička trgovina i online značajke"
+    "online_account": "Zajednička trgovina i online značajke",
+    "import_power_history": "Uvoz povijesti snage"
   },
   "health": {
     "fair": "Prihvatljiva kvaliteta profila",
@@ -680,7 +687,25 @@
     "conflict_resolution": "Sukobi naziva",
     "conflict_import_copy": "Uvezi kao kopiju",
     "conflict_keep_mine": "Zadrži moje",
-    "conflict_overwrite": "Prepiši"
+    "conflict_overwrite": "Prepiši",
+    "hist_csv_data": "CSV podaci",
+    "hist_from_recorder": "Ili je pročitajte iz Home Assistant",
+    "days": "dana",
+    "hist_keep": "Zadrži ovaj ciklus",
+    "hist_looks_complete": "završen",
+    "peak_power_short": "Vrh",
+    "shape": "Oblik",
+    "hist_skip_idle": "ništa nije radilo",
+    "hist_skip_sparse": "prerijetka očitanja",
+    "hist_skip_short": "premalo očitanja",
+    "hist_skip_long": "nema dovoljno duge pauze za dijeljenje",
+    "hist_reason_short": "kraći od najkraćeg stvarnog ciklusa ovog uređaja",
+    "hist_reason_no_end": "nikada se nije uredno završio",
+    "task_history_import": "Pretraživanje povijesti snage",
+    "task_history_import_apply": "Uvoz ciklusa",
+    "evidence_real_cycles": "Ciklusi koje je izvršio ovaj uređaj",
+    "evidence_reference_cycles": "Preuzeti iz zajedničke trgovine",
+    "evidence_backfill_cycles": "Nađeni u uvezenoj povijesti snage"
   },
   "log": {
     "all_levels": "Sve razine",
@@ -759,7 +784,8 @@
     "store_share": "Podijeli u zajedničku trgovinu",
     "store_share_device": "Podijeli postavke uređaja",
     "export_select": "Izvoz - odaberi podatke",
-    "import_wizard": "Uvoz - odaberi podatke"
+    "import_wizard": "Uvoz - odaberi podatke",
+    "history_import": "Uvoz povijesti snage"
   },
   "msg": {
     "tail_trim_hint": "Uklonite ovoliko sekundi s kraja",
@@ -1013,7 +1039,28 @@
     "merge_hint": "Uvezene stavke se dodaju; ništa lokalno se ne gubi. Sukobi naziva rješavaju se u nastavku.",
     "replace_warn": "Svaka označena kategorija briše se i zamjenjuje podacima iz datoteke. Neoznačene kategorije ostaju nepromijenjene.",
     "dest_reference_hint": "Uvezeni ciklusi samo poboljšavaju prepoznavanje programa i nikada ne utječu na statistiku potrošnje/energije.",
-    "dest_real_history_hint": "Uvezeni ciklusi računaju se kao vlastita povijest ovog uređaja i pridonose statistici energije/potrošnje. Koristite pri premještanju jednog uređaja na novu instalaciju."
+    "dest_real_history_hint": "Uvezeni ciklusi računaju se kao vlastita povijest ovog uređaja i pridonose statistici energije/potrošnje. Koristite pri premještanju jednog uređaja na novu instalaciju.",
+    "import_history_description": "Imali ste pametni utikač i prije WashData? Učitajte izvoz povijesti njegovog senzora snage ili je pročitajte izravno iz Home Assistant, a uobičajeno otkrivanje proći će kroz te podatke, pa će se prošli ciklusi pojaviti u vašem popisu Ciklusi, spremni za imenovanje.",
+    "hist_input_hint": "Učitajte CSV preuzet s ploče Povijest (entitet, stanje, zadnja promjena) ili pustite WashData da izravno pročita povijest senzora. Otkrivanje se zatim izvodi jednako kao i uživo, a vi odabirete koje od nađenih ciklusa zadržati.",
+    "hist_recorder_hint": "Home Assistant standardno čuva detaljnu povijest 10 dana, a nakon toga samo satne prosjeke, koji su previše grubi za otkrivanje ciklusa. Izvoz u CSV može dosegnuti dalje u prošlost samo ako je vaša integracija recorder postavljena na dulje čuvanje.",
+    "hist_scanning": "Vašu povijest ponovno provodimo kroz detektor. Ovo se izvodi u pozadini - možete zatvoriti ovaj dijalog i vratiti se kasnije.",
+    "hist_imported_count": "Uvezeni ciklusi: {n}.",
+    "hist_duplicates": "Već prije uvezeno i preskočeno: {n}.",
+    "hist_capped": "Dosegnuto je ograničenje uvezenih ciklusa po uređaju; ostatak nije spremljen.",
+    "hist_next_step": "Nalaze se u vašem popisu Ciklusi, označeni kao uvezena povijest. Otvorite jedan i tipkom Označi mu dodijelite naziv programa kojem pripada.",
+    "hist_rows_read": "Pročitana očitanja: {n}",
+    "hist_breaks": "Praznine u kojima senzor nije bio dostupan: {n}",
+    "hist_other_entity": "Zanemarena očitanja drugih entiteta: {n}",
+    "hist_skipped_spans": "Preskočeni odsječci",
+    "hist_settings_used": "Otkriveno s trenutnim postavkama ovog uređaja (minimalna snaga {w} W, odgoda isključivanja {s} s).",
+    "hist_none_found": "U toj povijesti nije bilo moguće otkriti nijedan ciklus.",
+    "hist_found": "Nađeni ciklusi: {n}. Odznačite sve što ne izgleda kao stvarni rad - ništa se ne sprema dok ne uvezete.",
+    "hist_scan_capped": "Prikazani su samo prvi kandidati (nađeno je {n}).",
+    "hist_recorder_empty": "Home Assistant nema detaljnu povijest za ovaj senzor u tom razdoblju.",
+    "hist_scan_failed": "Pretraživanje nije uspjelo.",
+    "hist_scan_expired": "To pretraživanje više nije dostupno. Pokrenite ga ponovno.",
+    "hist_import_failed": "Uvoz nije uspio.",
+    "imported_history_readonly": "Otkriveno u uvezenoj povijesti snage. Utječe na podudaranje programa, ali se ne broji u vašu statistiku i ne može se obrezati ni podijeliti. Označite ga da mu dodijelite program."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka prevrtanja nakon završetka kako bi se smanjile bore.",
@@ -1529,6 +1576,10 @@
     "door_end_dwell_seconds": {
       "label": "Zadržavanje otvorenih vrata za završetak",
       "doc": "Koliko dugo vrata moraju ostati otvorena prije nego WashData završi ciklus, kada je uključena postavka \"Vrata se automatski otvaraju na kraju\". Dovoljno dugo da se ignorira brzo dodavanje posuđa (zadano 60 s), dovoljno kratko za brz završetak kad perilica otvori vrata."
+    },
+    "profile_evidence_sources": {
+      "label": "Ciklusi koji oblikuju program",
+      "doc": "Koji se ciklusi koriste za izgradnju krivulje snage svakog programa i za podudaranje završenog ciklusa s njom. Kada odznačite neku vrstu, ona više ne utječe na vaše programe, ali se ništa ne briše - ciklusi ostaju na popisu Ciklusi i još ih je moguće označiti ili ukloniti. Korisno ako ne vjerujete uvezenim podacima. Na statistiku to ne utječe: uvijek se broje samo ciklusi koje je ovaj uređaj stvarno izvršio. Odznačavanje svega se ignorira jer se program bez ikakvih ciklusa nikada ne bi mogao podudarati."
     }
   },
   "setting_group": {
@@ -1612,6 +1663,9 @@
     },
     "basic_configuration": {
       "label": "Osnovna konfiguracija"
+    },
+    "profile_evidence": {
+      "label": "Osnova profila"
     }
   },
   "status": {
@@ -1636,7 +1690,8 @@
     "trimming": "Obrezivanje…",
     "splitting": "Dijeljenje…",
     "deleting": "Brisanje…",
-    "imported": "Uvezeno"
+    "imported": "Uvezeno",
+    "preparing": "Priprema…"
   },
   "suggestion": {
     "both_agree": "WashData preporučuje",
@@ -1885,7 +1940,9 @@
     "store_download_failed": "Preuzimanje nije uspjelo: {error}",
     "store_download_nothing": "Nema ništa za preuzimanje -- svi profili već postoje na ovom uređaju",
     "export_selective_done": "Izvoz preuzet",
-    "import_selective_done": "Uvezeno {profiles} profila i {cycles} ciklusa"
+    "import_selective_done": "Uvezeno {profiles} profila i {cycles} ciklusa",
+    "hist_csv_required": "Najprije učitajte CSV datoteku ili zalijepite njezin sadržaj",
+    "file_read_failed": "Nije bilo moguće pročitati tu datoteku"
   },
   "trend": {
     "down": "Trend pada",

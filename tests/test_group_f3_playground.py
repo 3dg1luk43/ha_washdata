@@ -281,3 +281,94 @@ def test_playground_history_is_read_level():
     # run_playground_history does not start with get_, so it must be
     # explicitly whitelisted to gate at the 'read' level.
     assert "run_playground_history" in ws_api._READ_WRITE_COMMANDS
+
+
+# ─── Playground tab-open cost (lazy suggestions) ──────────────────────────────
+#
+# `get_playground_settings` is the only fetch the tab makes before it can render, and it
+# used to compute the auto-tuner AND ML suggestion sets on every open - statistics over
+# every clean cycle - purely to label two buttons. `include_suggestions=False` keeps that
+# off the critical path; the panel fetches them in the background afterwards.
+
+@pytest.mark.asyncio
+async def test_playground_settings_can_skip_suggestion_computation():
+    import inspect as _inspect
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    from custom_components.ha_washdata import ws_api
+    from custom_components.ha_washdata.cycle_detector import CycleDetectorConfig
+
+    hass = MagicMock()
+    hass.data = {}
+
+    async def _exec(fn, *a, **k):
+        return await fn(*a, **k) if _inspect.iscoroutinefunction(fn) else fn(*a, **k)
+
+    hass.async_add_executor_job = AsyncMock(side_effect=_exec)
+
+    store = MagicMock()
+    store.get_suggestions = MagicMock(return_value={"off_delay": {"value": 240}})
+    ml_engine_used = MagicMock()
+    manager = MagicMock()
+    manager.profile_store = store
+    manager.learning_manager = SimpleNamespace(suggestion_engine=ml_engine_used)
+    manager.detector = SimpleNamespace(
+        config=CycleDetectorConfig(min_power=2.0, off_delay=300, device_type="washing_machine")
+    )
+    manager._resolve_energy_price = MagicMock(return_value=None)
+    entry = SimpleNamespace(entry_id="e", options={"device_type": "washing_machine"}, data={})
+
+    async def _call(include):
+        conn = MagicMock()
+        sent: dict = {}
+        conn.send_result = MagicMock(side_effect=lambda _i, payload: sent.update(payload))
+        with patch.object(ws_api, "_get_manager", return_value=manager), \
+             patch.object(ws_api, "_get_entry", return_value=entry):
+            await ws_api.ws_get_playground_settings.__wrapped__(
+                hass, conn, {"id": 1, "entry_id": "e", "include_suggestions": include}
+            )
+        return sent
+
+    # Opted out: no suggestions computed, and the store is not even read for them.
+    store.get_suggestions.reset_mock()
+    lean = await _call(False)
+    assert lean["classic_suggestions"] == {}
+    assert lean["ml_suggestions"] is None
+    assert store.get_suggestions.call_count == 0
+    # The values the fields actually need are still there.
+    assert "effective" in lean and "presets" in lean
+
+    # Opted in (the default for every other caller): suggestions are read.
+    full = await _call(True)
+    assert store.get_suggestions.call_count == 1
+    assert full["classic_suggestions"].get("off_delay") == 240
+
+
+def test_playground_snapshots_include_every_evidence_category():
+    """A profile sampled from a backfilled cycle must still be a Playground candidate.
+
+    The snapshot pool was built from `past_cycles + reference_cycles`, so such a profile
+    produced no candidate at all and the sandbox reported the cycle as unmatched - a wrong
+    answer that would have been read as a matcher problem.
+    """
+    from unittest.mock import MagicMock
+
+    from custom_components.ha_washdata import playground as pg
+
+    store = MagicMock()
+    backfilled = {
+        "id": "b1", "profile_name": "Cotton 40", "duration": 3600,
+        "power_data": [[float(i * 60), 1500.0] for i in range(61)],
+    }
+    store._data = {
+        "profiles": {"Cotton 40": {"avg_duration": 3600, "sample_cycle_id": "b1"}},
+        "past_cycles": [], "reference_cycles": [], "backfill_cycles": [backfilled],
+    }
+    store.iter_evidence_cycles = MagicMock(return_value=[backfilled])
+    store._grouped_snapshots = MagicMock(side_effect=lambda snaps: (snaps, {}, {}))
+
+    snaps, _config, _members, _member_snaps = pg._build_match_snapshots(store)
+
+    assert [s["name"] for s in snaps] == ["Cotton 40"]
+    store.iter_evidence_cycles.assert_called_once()

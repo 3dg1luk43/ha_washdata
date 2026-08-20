@@ -262,3 +262,42 @@ test('revert button appears when changes have been staged', async ({ page }) => 
   const revertBtn = page.locator('#wd-settings-revert').first();
   await expect(revertBtn).toBeVisible({ timeout: 3_000 });
 });
+
+// ─── Profile evidence (which cycles shape a program) ──────────────────────────
+//
+// A `checkboxlist` field: several checkboxes writing ONE option as a list of the ticked
+// values. The inner boxes carry data-choice, never data-opt, so the save collector must
+// see a single field - if that ever regresses, three bogus option keys get persisted.
+
+async function openProfileEvidence(page) {
+  const sec = page.locator('button[data-sec="matching"]').first();
+  await expect(sec).toBeVisible({ timeout: 8_000 });
+  await sec.click();
+  const field = page.locator('[data-opt="profile_evidence_sources"]').first();
+  await expect(field).toBeVisible({ timeout: 8_000 });
+  return field;
+}
+
+test('profile evidence renders one checkbox per cycle category, all ticked by default', async ({ page }) => {
+  const field = await openProfileEvidence(page);
+  await expect(field.locator('[data-choice]')).toHaveCount(3);
+  for (const choice of ['real_cycles', 'reference_cycles', 'backfill_cycles']) {
+    await expect(field.locator(`[data-choice="${choice}"]`)).toBeChecked();
+  }
+});
+
+test('unticking a category saves the option as the remaining list', async ({ page }) => {
+  const field = await openProfileEvidence(page);
+  // The input itself is visually hidden behind the switch slider, as every other
+  // switch in this panel is; the label is the clickable affordance.
+  await field.locator('label:has([data-choice="backfill_cycles"])').click();
+  await expect(field.locator('[data-choice="backfill_cycles"]')).not.toBeChecked();
+
+  await page.locator('#wd-settings-save').first().click();
+  const calls = await assertWsCalled(page, 'ha_washdata/set_options');
+  const options = calls[calls.length - 1].options as Record<string, unknown>;
+  expect(options.profile_evidence_sources).toEqual(['real_cycles', 'reference_cycles']);
+  // One option key, not one per checkbox.
+  expect(options).not.toHaveProperty('real_cycles');
+  expect(options).not.toHaveProperty('backfill_cycles');
+});

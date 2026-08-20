@@ -30,7 +30,8 @@
     "awaiting": "În așteptarea aprobării",
     "imported_tip": "Importat din magazinul comunității. Folosit doar pentru potrivire, necontabilizat în statistici.",
     "not_importable": "n/a aici",
-    "exists": "există deja"
+    "exists": "există deja",
+    "backfilled_tip": "Detectat într-un istoric de putere importat. Influențează doar potrivirea programelor, nu este contabilizat în statistici."
   },
   "btn": {
     "set_brand_model": "Stabiliți marca și modelul",
@@ -195,7 +196,12 @@
     "import_selected": "Importă selecția",
     "back": "Înapoi",
     "mute_suggestion": "Nu mai sugerați această setare",
-    "reset_muted": "Resetați cele ignorate"
+    "reset_muted": "Resetați cele ignorate",
+    "import_power_history": "Importați istoricul de putere",
+    "hist_read_recorder": "Citiți din Home Assistant",
+    "hist_scan": "Căutați cicluri",
+    "hist_import_n": "Importați {n} cicluri",
+    "hist_goto_cycles": "Vedeți ciclurile"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -310,7 +316,8 @@
     "pg_outcome": "Rezultatul simulării",
     "pg_across_cycles": "În toate ciclurile tale",
     "community_store": "Magazinul comunității",
-    "online_account": "Magazinul comunității și funcții online"
+    "online_account": "Magazinul comunității și funcții online",
+    "import_power_history": "Importați istoricul de putere"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -632,7 +639,25 @@
     "conflict_import_copy": "Importă drept copie",
     "conflict_keep_mine": "Păstrează-l pe al meu",
     "conflict_overwrite": "Suprascrie",
-    "font_size": "Dimensiunea fontului panoului"
+    "font_size": "Dimensiunea fontului panoului",
+    "hist_csv_data": "Date CSV",
+    "hist_from_recorder": "Sau citiți-l din Home Assistant",
+    "days": "zile",
+    "hist_keep": "Păstrați acest ciclu",
+    "hist_looks_complete": "complet",
+    "peak_power_short": "Vârf",
+    "shape": "Formă",
+    "hist_skip_idle": "nimic în funcțiune",
+    "hist_skip_sparse": "citiri prea îndepărtate între ele",
+    "hist_skip_short": "prea puține citiri",
+    "hist_skip_long": "nicio pauză suficient de lungă pentru divizare",
+    "hist_reason_short": "mai scurt decât cel mai scurt ciclu real al acestui aparat",
+    "hist_reason_no_end": "nu s-a încheiat niciodată curat",
+    "task_history_import": "Se analizează istoricul de putere",
+    "task_history_import_apply": "Se importă ciclurile",
+    "evidence_real_cycles": "Cicluri rulate de această mașină",
+    "evidence_reference_cycles": "Descărcate din magazinul comunității",
+    "evidence_backfill_cycles": "Găsite într-un istoric de putere importat"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -711,7 +736,8 @@
     "store_share": "Partajați în magazinul comunității",
     "store_share_device": "Partajați acest dispozitiv",
     "export_select": "Exportă - alege datele",
-    "import_wizard": "Importă - alege datele"
+    "import_wizard": "Importă - alege datele",
+    "history_import": "Importați istoricul de putere"
   },
   "msg": {
     "tail_trim_hint": "Numărul de secunde de eliminat de la sfârșit",
@@ -965,7 +991,28 @@
     "sug_mute_failed": "Nu s-a putut dezactiva sugestia",
     "sug_unmuted_all": "Sugestiile dezactivate au fost resetate",
     "n_suggestions_muted": "{count} dezactivate; reglajul automat nu le va propune.",
-    "font_size_hint": "Faceți tot din acest panou mai mare sau mai mic. Se aplică contului dvs. pe acest dispozitiv."
+    "font_size_hint": "Faceți tot din acest panou mai mare sau mai mic. Se aplică contului dvs. pe acest dispozitiv.",
+    "import_history_description": "Aveați deja o priză inteligentă înainte de WashData? Încărcați un export al istoricului senzorului său de putere sau citiți-l direct din Home Assistant: detectarea obișnuită rulează pe aceste date, astfel încât ciclurile anterioare apar în lista dvs. Cicluri, pregătite pentru a fi denumite.",
+    "hist_input_hint": "Încărcați un CSV descărcat din panoul Istoric (entitate, stare, ultima modificare) sau lăsați WashData să citească direct istoricul senzorului. Detectarea rulează apoi exact ca în timp real, iar dvs. alegeți care dintre ciclurile găsite să fie păstrate.",
+    "hist_recorder_hint": "Home Assistant păstrează implicit istoricul detaliat timp de 10 zile, iar după aceea doar medii orare, prea grosiere pentru a detecta cicluri. Un export CSV poate ajunge mai departe în trecut doar dacă Home Assistant este configurat să păstreze mai mult istoric.",
+    "hist_scanning": "Istoricul dvs. este reluat prin detector. Această operațiune rulează în fundal: puteți închide această fereastră și reveni mai târziu.",
+    "hist_imported_count": "{n} cicluri importate.",
+    "hist_duplicates": "{n} fuseseră deja importate și au fost omise.",
+    "hist_capped": "Limita de cicluri importate pentru acest dispozitiv a fost atinsă; restul nu au fost salvate.",
+    "hist_next_step": "Se află în lista dvs. Cicluri, marcate ca istoric importat. Deschideți unul și folosiți Etichetează pentru a indica programul căruia îi aparține.",
+    "hist_rows_read": "{n} citiri preluate",
+    "hist_breaks": "{n} întreruperi în care senzorul nu a fost disponibil",
+    "hist_other_entity": "{n} citiri pentru alte entități ignorate",
+    "hist_skipped_spans": "Porțiuni omise",
+    "hist_settings_used": "Detectat cu setările actuale ale acestui dispozitiv (putere minimă {w} W, întârziere la oprire {s} s).",
+    "hist_none_found": "Nu a putut fi detectat niciun ciclu în acel istoric.",
+    "hist_found": "S-au găsit {n} cicluri. Debifați tot ce nu pare un ciclu real: nimic nu este salvat până la import.",
+    "hist_scan_capped": "Sunt afișați doar primii candidați (au fost găsiți {n}).",
+    "hist_recorder_empty": "Home Assistant nu are istoric detaliat pentru acest senzor în acea perioadă.",
+    "hist_scan_failed": "Analiza a eșuat.",
+    "hist_scan_expired": "Acea analiză nu mai este disponibilă. Reluați analiza.",
+    "hist_import_failed": "Importul a eșuat.",
+    "imported_history_readonly": "Detectat într-un istoric de putere importat. Influențează potrivirea programelor, dar nu este contabilizat în statisticile dvs. și nu poate fi tăiat sau divizat. Etichetați-l pentru a indica programul."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1481,6 +1528,10 @@
     "door_end_dwell_seconds": {
       "label": "Durată de așteptare la deschiderea ușii",
       "doc": "Cât timp trebuie să rămână ușa deschisă înainte ca WashData să termine ciclul, când opțiunea \"Ușa se deschide automat la final\" este activată. Destul de lungă pentru a ignora adăugarea rapidă a unui vas (implicit 60 s), destul de scurtă pentru a termina prompt odată ce mașina deschide ușa."
+    },
+    "profile_evidence_sources": {
+      "label": "Ciclurile care formează un program",
+      "doc": "Ce cicluri sunt folosite pentru a construi curba de putere a fiecărui program și pentru a compara un ciclu încheiat cu ea. Debifarea unui tip face ca acesta să nu mai modeleze programele dvs., fără a șterge nimic - ciclurile rămân în lista dvs. Cicluri și pot fi în continuare etichetate sau eliminate. Util dacă nu aveți încredere în datele importate. Statisticile nu sunt afectate: ele numără întotdeauna doar ciclurile pe care această mașină le-a rulat efectiv. Debifarea tuturor este ignorată, deoarece un program fără cicluri în spate nu s-ar putea potrivi niciodată."
     }
   },
   "setting_group": {
@@ -1564,6 +1615,9 @@
     },
     "basic_configuration": {
       "label": "Configurație de bază"
+    },
+    "profile_evidence": {
+      "label": "Baza Profilurilor"
     }
   },
   "status": {
@@ -1588,7 +1642,8 @@
     "trimming": "Se taie…",
     "splitting": "Se divide…",
     "deleting": "Se șterge…",
-    "imported": "Importat"
+    "imported": "Importat",
+    "preparing": "Se pregătește…"
   },
   "tab": {
     "advanced": "Avansat",
@@ -1724,7 +1779,9 @@
     "store_download_failed": "Descărcare eșuată: {error}",
     "store_download_nothing": "Nimic nou de descărcat - această configurație este deja pe dispozitivul dvs.",
     "export_selective_done": "Export descărcat",
-    "import_selective_done": "Importate {profiles} profil(uri) și {cycles} ciclu(ri)"
+    "import_selective_done": "Importate {profiles} profil(uri) și {cycles} ciclu(ri)",
+    "hist_csv_required": "Încărcați mai întâi un fișier CSV sau lipiți conținutul acestuia",
+    "file_read_failed": "Fișierul nu a putut fi citit"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",

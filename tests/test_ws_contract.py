@@ -104,7 +104,10 @@ def test_detached_task_runners_are_plain_coroutines():
     would error even though training ran). ``test_every_registered_handler_is_decorated``
     can't catch this because these runners are not in the registration list.
     """
-    for name in ("_ml_training_task", "_reprocess_task", "_pg_history_task", "_pg_sweep_task"):
+    for name in (
+        "_ml_training_task", "_reprocess_task", "_pg_history_task", "_pg_sweep_task",
+        "_history_import_scan_task", "_history_import_apply_task",
+    ):
         fn = getattr(ws_api, name)
         assert inspect.iscoroutinefunction(fn), (
             f"{name} must stay a plain coroutine (no @async_response); it is called "

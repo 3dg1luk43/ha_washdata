@@ -78,7 +78,8 @@
         "awaiting": "Jóváhagyásra vár",
         "imported_tip": "A közösségi boltból importálva. Csak egyeztetéshez használatos, a statisztikába nem számít bele.",
         "not_importable": "itt nem elérhető",
-        "exists": "létezik"
+        "exists": "létezik",
+        "backfilled_tip": "Importált teljesítményelőzményekben észlelve. Csak a programegyeztetést befolyásolja, a statisztikába nem számít bele."
     },
     "btn": {
         "set_brand_model": "Márka és modell megadása",
@@ -243,7 +244,12 @@
         "import_selected": "Kiválasztottak importálása",
         "back": "Vissza",
         "mute_suggestion": "Ne javasolja többé ezt a beállítást",
-        "reset_muted": "Elhallgatottak visszaállítása"
+        "reset_muted": "Elhallgatottak visszaállítása",
+        "import_power_history": "Teljesítményelőzmények importálása",
+        "hist_read_recorder": "Beolvasás a Home Assistantból",
+        "hist_scan": "Ciklusok keresése",
+        "hist_import_n": "{n} ciklus importálása",
+        "hist_goto_cycles": "Ciklusok megjelenítése"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -358,7 +364,8 @@
         "pg_outcome": "Szimuláció eredménye",
         "pg_across_cycles": "Az összes ciklusban",
         "community_store": "Közösségi bolt",
-        "online_account": "Közösségi bolt és online funkciók"
+        "online_account": "Közösségi bolt és online funkciók",
+        "import_power_history": "Teljesítményelőzmények importálása"
     },
     "health": {
         "fair": "Elfogadható profilminőség",
@@ -680,7 +687,25 @@
         "conflict_import_copy": "Importálás másolatként",
         "conflict_keep_mine": "A sajátom megtartása",
         "conflict_overwrite": "Felülírás",
-        "font_size": "Panel betűmérete"
+        "font_size": "Panel betűmérete",
+        "hist_csv_data": "CSV-adatok",
+        "hist_from_recorder": "Vagy olvassa be a Home Assistantból",
+        "days": "nap",
+        "hist_keep": "Ciklus megtartása",
+        "hist_looks_complete": "teljes",
+        "peak_power_short": "Csúcs",
+        "shape": "Alak",
+        "hist_skip_idle": "nem futott semmi",
+        "hist_skip_sparse": "túl ritka mérések",
+        "hist_skip_short": "túl kevés mérés",
+        "hist_skip_long": "nincs elég hosszú szünet a felosztáshoz",
+        "hist_reason_short": "rövidebb, mint a készülék legrövidebb valódi ciklusa",
+        "hist_reason_no_end": "soha nem fejeződött be tisztán",
+        "task_history_import": "Teljesítményelőzmények vizsgálata",
+        "task_history_import_apply": "Ciklusok importálása",
+        "evidence_real_cycles": "A gép által lefuttatott ciklusok",
+        "evidence_reference_cycles": "Letöltve a közösségi boltból",
+        "evidence_backfill_cycles": "Importált teljesítményelőzményekben találva"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -759,7 +784,8 @@
         "store_share": "Megosztás a közösségi boltban",
         "store_share_device": "Eszköz megosztása",
         "export_select": "Exportálás - adatok kiválasztása",
-        "import_wizard": "Importálás - adatok kiválasztása"
+        "import_wizard": "Importálás - adatok kiválasztása",
+        "history_import": "Teljesítményelőzmények importálása"
     },
     "msg": {
         "tail_trim_hint": "Ennyi másodperc eltávolítása a végéről",
@@ -1013,7 +1039,28 @@
         "sug_mute_failed": "Nem sikerült elhallgattatni a javaslatot",
         "sug_unmuted_all": "Az elhallgattatott javaslatok visszaállítva",
         "n_suggestions_muted": "{count} elhallgattatva; az automatikus finomhangolás nem fogja javasolni ezeket.",
-        "font_size_hint": "Tegye nagyobbá vagy kisebbé mindent a panelen. Az ezen az eszközön lévő fiókjára vonatkozik."
+        "font_size_hint": "Tegye nagyobbá vagy kisebbé mindent a panelen. Az ezen az eszközön lévő fiókjára vonatkozik.",
+        "import_history_description": "Volt már okoskonnektora a WashData előtt? Töltse fel a teljesítményérzékelő előzmény-exportját, vagy olvassa be közvetlenül a Home Assistantból: a szokásos észlelés lefut rajta, így a régi ciklusok megjelennek a Ciklusok listában, készen az elnevezésre.",
+        "hist_input_hint": "Töltsön fel az Előzmények panelről letöltött CSV-t (entity, state, last changed), vagy hagyja, hogy a WashData közvetlenül beolvassa az érzékelő előzményeit. Ezután pontosan ugyanaz az észlelés fut le rajta, mint élőben, és Ön választja ki, mely megtalált ciklusokat tartja meg.",
+        "hist_recorder_hint": "A Home Assistant alapértelmezés szerint 10 napig tart meg részletes előzményeket, utána már csak óránkénti átlagokat, amelyek túl durvák a ciklusok észleléséhez. A CSV-export csak akkor nyúlhat vissza korábbra, ha a recorder többet tartott meg.",
+        "hist_scanning": "Az előzményeket újra lejátsszuk az észlelőn keresztül. Ez a háttérben fut - bezárhatja ezt a párbeszédpanelt, és később visszatérhet hozzá.",
+        "hist_imported_count": "{n} ciklus importálva.",
+        "hist_duplicates": "{n} korábban már importálva volt, ezért kimaradt.",
+        "hist_capped": "Elérte az eszközre vonatkozó importált ciklus korlátot; a többi nem lett eltárolva.",
+        "hist_next_step": "A Ciklusok listában találhatók, importált előzményként megjelölve. Nyisson meg egyet, és a Címkézés funkcióval adja meg a hozzá tartozó programot.",
+        "hist_rows_read": "{n} mérés beolvasva",
+        "hist_breaks": "{n} szakasz, ahol az érzékelő nem volt elérhető",
+        "hist_other_entity": "{n} más entitáshoz tartozó mérés kihagyva",
+        "hist_skipped_spans": "Kihagyott szakaszok",
+        "hist_settings_used": "Az eszköz jelenlegi beállításaival észlelve (minimális teljesítmény {w} W, kikapcsolási késleltetés {s} s).",
+        "hist_none_found": "Az adott előzményekben nem sikerült ciklust észlelni.",
+        "hist_found": "{n} ciklus található. Vegye ki a jelölést mindenről, ami nem tűnik valódi futásnak - importálásig semmi nem kerül eltárolásra.",
+        "hist_scan_capped": "Csak az első találatok láthatók (összesen {n} volt).",
+        "hist_recorder_empty": "A Home Assistantnak nincs részletes előzménye erről az érzékelőről abban az időszakban.",
+        "hist_scan_failed": "A vizsgálat nem sikerült.",
+        "hist_scan_expired": "Ez a vizsgálat már nem elérhető. Kérjük, futtassa újra.",
+        "hist_import_failed": "Az importálás nem sikerült.",
+        "imported_history_readonly": "Importált teljesítményelőzményekben észlelve. Befolyásolja a programegyeztetést, de nem számít bele a statisztikákba, és nem vágható vagy osztható. Címkézze fel a hozzá tartozó program megadásához."
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1529,6 +1576,10 @@
         "door_end_dwell_seconds": {
             "label": "Ajtó-nyitásvégi várakozási idő",
             "doc": "Mennyi ideig kell nyitva maradnia az ajtónak, mielőtt a WashData befejezi a ciklust, amikor az \"Ajtó automatikusan kinyílik a végén\" be van kapcsolva. Elég hosszú ahhoz, hogy figyelmen kívül hagyja a gyors edény betöltését (alapértelmezés: 60 s), elég rövid ahhoz, hogy gyorsan befejezzen, miután a gép kinyitja az ajtót."
+        },
+        "profile_evidence_sources": {
+            "label": "A programot alakító ciklusok",
+            "doc": "Mely ciklusok szolgálnak az egyes programok teljesítménygörbéjének felépítéséhez, és egy befejezett ciklus ahhoz való egyeztetéséhez. Ha egy fajta jelölését kikapcsolja, az többé nem alakítja a programjait, de semmi nem törlődik - a ciklusok a Ciklusok listában maradnak, és továbbra is címkézhetők vagy eltávolíthatók. Akkor hasznos, ha nem bízik az importált adatokban. A statisztikákra nincs hatással: azok mindig csak azokat a ciklusokat számolják, amelyeket ez a gép valóban lefuttatott. Ha mindent kikapcsol, azt figyelmen kívül hagyjuk, mert egy ciklusok nélküli program soha nem tudna egyezni."
         }
     },
     "setting_group": {
@@ -1612,6 +1663,9 @@
         },
         "basic_configuration": {
             "label": "Alapkonfiguráció"
+        },
+        "profile_evidence": {
+            "label": "Profil alapja"
         }
     },
     "status": {
@@ -1636,7 +1690,8 @@
         "trimming": "Vágás…",
         "splitting": "Felosztás…",
         "deleting": "Törlés…",
-        "imported": "Importált"
+        "imported": "Importált",
+        "preparing": "Előkészítés…"
     },
     "tab": {
         "advanced": "Fejlett",
@@ -1772,7 +1827,9 @@
         "store_download_failed": "Letöltés sikertelen: {error}",
         "store_download_nothing": "Nincs új letöltendő - ez a beállítás már megvan az eszközön.",
         "export_selective_done": "Export letöltve",
-        "import_selective_done": "{profiles} profil és {cycles} ciklus importálva"
+        "import_selective_done": "{profiles} profil és {cycles} ciklus importálva",
+        "hist_csv_required": "Először töltsön be egy CSV-fájlt, vagy illessze be a tartalmát",
+        "file_read_failed": "A fájl nem olvasható"
     },
     "suggestion": {
         "both_agree": "A WashData javasolja",

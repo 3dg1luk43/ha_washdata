@@ -264,3 +264,30 @@ test('playground tab renders without overflow on mobile', async ({ page }) => {
   });
   expect(overflow).toBeLessThanOrEqual(1);
 });
+
+// ─── Tab-open cost ────────────────────────────────────────────────────────────
+//
+// Opening the tab used to wait out four sequential round-trips, one of which computed
+// auto-tuner and ML suggestions server-side (statistics over every clean cycle) purely to
+// label two buttons. The fetches now go out together and the suggestions follow in the
+// background.
+
+test('opening the tab does not block on suggestion computation', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const calls = await assertWsCalled(page, 'ha_washdata/get_playground_settings');
+  // The first (blocking) call opts out; a background call then asks for them.
+  expect(calls[0]).toHaveProperty('include_suggestions', false);
+  await expect.poll(async () => {
+    const all = await page.evaluate(() => (window as any).__ws_calls
+      .filter((c: any) => c.type === 'ha_washdata/get_playground_settings')
+      .map((c: any) => c.include_suggestions));
+    return all.includes(true);
+  }, { timeout: 8_000 }).toBe(true);
+});
+
+test('the load-suggested button appears once the counts arrive', async ({ page }) => {
+  await clickTab(page, 'playground');
+  // The mock answers both calls with the same payload, so the button is present after
+  // the background fetch settles - it is gated on a non-zero count, not on the fetch.
+  await expect(page.locator('button[data-action="pg-load-suggested"]')).toBeVisible({ timeout: 8_000 });
+});
