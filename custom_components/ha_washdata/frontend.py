@@ -146,8 +146,9 @@ def _ensure_gzip(path: Path) -> None:
     is not shipped, so it is written at install time, while an update can restore
     an *older* source mtime from the release archive (the same mtime-preservation
     ``get_cache_buster`` works around). "Newer .gz" therefore does not imply "current
-    .gz", and the cost of being sure is one gzip of ~1 MB, once per HA start, in an
-    executor. Best-effort: a read-only install just serves uncompressed.
+    .gz", and the cost of being sure is ~25 ms for the panel and ~1 ms for the card,
+    once per HA start, in an executor. Best-effort: a read-only install just serves
+    uncompressed.
     """
     import gzip
     import shutil
