@@ -52,6 +52,61 @@ _MODEL_MODULES = {
     "end": "cycle_end_detector_model",
 }
 
+# Modules the live ML paths import lazily besides the baselines themselves.
+_SIBLING_MODULES = ("trainer", "feature_extraction")
+
+# Imported baseline model modules, keyed by module name. Importing a module is a
+# blocking call Home Assistant forbids inside the event loop, and every
+# resolve_scorer() consumer (live matching, end detection, quality gating) runs
+# there - so the modules are imported once from an import executor at setup
+# (:func:`preload_models`) and every later resolution is a dict lookup. A failed
+# import is cached as ``None`` so a broken install warns once instead of retrying
+# the import on every inference.
+_MODULE_CACHE: dict[str, object | None] = {}
+
+
+def _load_model_module(module_name: str):
+    """Return the embedded model module, importing it at most once.
+
+    Safe to call from the event loop *after* :func:`preload_models` has run (the
+    import is then already satisfied from ``sys.modules``); the first call should
+    happen in an executor thread.
+    """
+    if module_name in _MODULE_CACHE:
+        return _MODULE_CACHE[module_name]
+    try:
+        module = importlib.import_module(f"{__package__}.{module_name}")
+    except Exception as exc:  # noqa: BLE001 - a missing model must not break setup
+        _LOGGER.warning(
+            "Failed to load embedded model module %r: %s", module_name, exc
+        )
+        module = None
+    _MODULE_CACHE[module_name] = module
+    return module
+
+
+def preload_models() -> None:
+    """Import everything the live ML paths touch. Call from an executor thread.
+
+    ``resolve_scorer`` / ``resolve_regressor`` are called from the event loop, so
+    the imports they need (the embedded baselines plus ``trainer`` /
+    ``feature_extraction``) must already be in ``sys.modules`` by then - Home
+    Assistant flags a blocking ``importlib.import_module`` in the loop (issue
+    #328). Also warms the manifest cache, which reads a file. Never raises;
+    idempotent, so calling it once per config entry is cheap.
+    """
+    for module_name in _MODEL_MODULES.values():
+        _load_model_module(module_name)
+    for sibling in _SIBLING_MODULES:
+        try:
+            importlib.import_module(f"{__package__}.{sibling}")
+        except Exception as exc:  # noqa: BLE001 - best effort warm-up
+            _LOGGER.warning("Failed to preload ML module %r: %s", sibling, exc)
+    try:
+        available_models()
+    except Exception:  # noqa: BLE001 - manifest warm-up is best effort
+        pass
+
 
 def ml_models_enabled(options: Mapping[str, object] | None) -> bool:
     """True when the user has opted into experimental ML models."""
@@ -73,20 +128,16 @@ def resolve_scorer(capability: str, store: object | None):
     def _baseline():
         """Resolve the shipped embedded baseline scorer for this capability.
 
-        Kept as a lazily-invoked helper so the baseline module is only imported
-        when the on-device spec is absent *or* fails at call time - preserving the
-        original "baseline only loaded when needed" semantics.
+        Kept as a lazily-invoked helper so the baseline module is only looked up
+        when the on-device spec is absent *or* fails at call time. The lookup hits
+        the module cache warmed by :func:`preload_models`, so no import happens in
+        the event loop.
         """
         module_name = _MODEL_MODULES.get(capability)
         if module_name is None:
             return (None, None)
-        try:
-            module = importlib.import_module(f"{__package__}.{module_name}")
-        except Exception as exc:  # noqa: BLE001
-            _LOGGER.warning(
-                "Failed to load embedded baseline for capability %r: %s",
-                capability, exc,
-            )
+        module = _load_model_module(module_name)
+        if module is None:
             return (None, None)
 
         def _baseline_score(feats, _m=module):
@@ -125,7 +176,7 @@ def resolve_scorer(capability: str, store: object | None):
                 module_name = _MODEL_MODULES.get(capability)
                 if module_name is not None:
                     try:
-                        _bm = importlib.import_module(f"{__package__}.{module_name}")
+                        _bm = _load_model_module(module_name)
                         _expected = list(getattr(_bm, "FEATURE_COLUMNS", []))
                         _stored = list(spec.get("feature_columns") or [])
                         if _expected and _stored and _stored != _expected:
@@ -241,12 +292,17 @@ def available_models() -> list[dict[str, object]]:
     if _MANIFEST_MODELS_CACHE is not None:
         return _MANIFEST_MODELS_CACHE
     manifest = Path(__file__).resolve().parent / "promoted_manifest.json"
+    # A missing / unreadable manifest is cached as [] too: this is a shipped file
+    # that cannot appear at runtime, and the read is a blocking open() that some
+    # callers make from the event loop.
     if not manifest.exists():
-        return []
+        _MANIFEST_MODELS_CACHE = []
+        return _MANIFEST_MODELS_CACHE
     try:
         payload = json.loads(manifest.read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        return []
+        _MANIFEST_MODELS_CACHE = []
+        return _MANIFEST_MODELS_CACHE
     models = payload.get("models")
     result = models if isinstance(models, list) else []
     _MANIFEST_MODELS_CACHE = result

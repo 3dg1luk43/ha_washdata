@@ -269,3 +269,35 @@ def test_manifest_declares_conversation_dependency():
     assert "conversation" in manifest["dependencies"]
     # Valid JSON with the expected shape.
     assert manifest["domain"] == DOMAIN
+
+
+async def test_executor_failure_never_reads_on_the_event_loop():
+    """A failing executor keeps English defaults instead of reading inline.
+
+    The template files are loaded through ``async_add_executor_job`` because
+    ``open()`` is a blocking call Home Assistant forbids in the event loop. A
+    broad ``except`` around that await used to fall back to reading inline, so a
+    genuine executor failure (e.g. "cannot schedule new futures after shutdown")
+    would do the blocking read on the loop after all.
+    """
+
+    class _NoExecutorHass(_FakeHass):
+        async def async_add_executor_job(self, target, *args):
+            raise RuntimeError("cannot schedule new futures after shutdown")
+
+    hass = _NoExecutorHass({"e1": _make_manager("Washer", STATE_RUNNING, time_remaining=1800)})
+    with patch.object(intents, "_load_intent_file") as loader:
+        templates = await intents._localized_templates(hass, "de")
+    loader.assert_not_called()
+    assert templates == intents.DEFAULT_TEMPLATES
+
+
+async def test_hass_without_executor_still_loads_templates():
+    """The minimal test stand-in (no executor at all) still reads inline."""
+    hass = _FakeHass({})
+    with patch.object(
+        intents, "_load_intent_file", side_effect=lambda lang: {"error": "boom"}
+    ) as loader:
+        templates = await intents._localized_templates(hass, "en")
+    assert loader.called
+    assert templates["error"] == "boom"

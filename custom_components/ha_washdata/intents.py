@@ -294,8 +294,9 @@ async def _localized_templates(
 
     English base first, then the language's base subtag, then the full tag (so
     ``pt-BR`` overrides ``pt`` overrides ``en``). File reads are offloaded to the
-    executor when the hass supports it, with a synchronous fallback (minimal test
-    hass). Falls back to :data:`DEFAULT_TEMPLATES` on any failure.
+    executor when the hass supports it, with a synchronous fallback for a hass that
+    has no executor (the minimal test stand-in). Falls back to
+    :data:`DEFAULT_TEMPLATES` on any failure.
     """
     templates = dict(DEFAULT_TEMPLATES)
     lang = language or "en"
@@ -305,8 +306,15 @@ async def _localized_templates(
             continue
         try:
             loaded = await hass.async_add_executor_job(_load_intent_file, lg)
-        except Exception:  # noqa: BLE001 - minimal test hass has no executor
+        except (AttributeError, TypeError):
+            # Only a hass without a usable executor (the minimal test stand-in)
+            # reads on the loop. A broad except here would also catch a real
+            # executor failure - e.g. "cannot schedule new futures after
+            # shutdown" - and then do the blocking open() on the event loop,
+            # which is exactly what the offload exists to prevent.
             loaded = _load_intent_file(lg)
+        except Exception:  # noqa: BLE001 - a real executor failure keeps English
+            loaded = {}
         for key, value in (loaded or {}).items():
             if isinstance(value, str) and value:
                 templates[key] = value
