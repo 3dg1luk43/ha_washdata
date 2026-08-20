@@ -80,6 +80,7 @@ class DeviceInfo(TypedDict):
     current_power_w: float | None
     cycle_progress_pct: float | None
     suggestions_count: int
+    suggestion_keys: list[str]
     feedback_count: int
     recording: bool
     is_user_paused: bool

@@ -56,6 +56,7 @@ test('attention card with suggestions appears when device has suggestions', asyn
       devices: [{
         ...require('../fixtures/mock-data/device-idle.json').devices[0],
         suggestions_count: 3,
+        suggestion_keys: ['off_delay', 'stop_threshold_w', 'min_off_gap'],
       }],
     },
   });
@@ -70,6 +71,7 @@ test('clicking the suggestion attention card switches to settings tab', async ({
       devices: [{
         ...require('../fixtures/mock-data/device-idle.json').devices[0],
         suggestions_count: 2,
+        suggestion_keys: ['off_delay', 'stop_threshold_w'],
       }],
     },
   });
@@ -79,6 +81,54 @@ test('clicking the suggestion attention card switches to settings tab', async ({
   // Should end up on the settings tab
   const settingsTab = page.locator('button.wd-tab[data-tab="settings"].active');
   await expect(settingsTab).toBeVisible({ timeout: 5_000 });
+});
+
+test('device pill badge counts a Calibrated (ML) suggestion', async ({ page }) => {
+  // Regression: the pill badge used to render the backend classic count only, so a
+  // device whose only tuning suggestions were Calibrated (ML) ones showed no bulb
+  // while the Settings tab banner announced them.
+  const base = require('../fixtures/mock-data/device-idle.json').devices[0];
+  await bootPanel(page, {
+    'ha_washdata/get_devices': {
+      devices: [
+        { ...base, suggestions_count: 0, suggestion_keys: [] },
+        { ...base, entry_id: 'test-entry-002', title: 'Second Washer', suggestions_count: 0, suggestion_keys: [] },
+      ],
+    },
+    'ha_washdata/get_suggestions': { suggestions: [] },
+    // off_delay is 120 in options.json, so 371 is a live ML recommendation.
+    'ha_washdata/get_ml_comparison': {
+      settings_comparison: { off_delay: { ml_value: 371, ml_reason: 'ML reason' } },
+    },
+  });
+  // Opening Settings is what loads the (expensive) Calibrated comparison.
+  await clickTab(page, 'settings');
+  const activeBadge = page.locator('.wd-devcard.active .wd-dbadge.sug');
+  await expect(activeBadge).toHaveText(/1/, { timeout: 8_000 });
+  // Scoped per device: the other pill has no comparison fetched, so no bulb.
+  await expect(page.locator('.wd-devcard:not(.active) .wd-dbadge.sug')).toHaveCount(0);
+});
+
+test('device pill badge does not double-count a key both engines suggest', async ({ page }) => {
+  const base = require('../fixtures/mock-data/device-idle.json').devices[0];
+  await bootPanel(page, {
+    'ha_washdata/get_devices': {
+      devices: [
+        { ...base, suggestions_count: 1, suggestion_keys: ['off_delay'] },
+        { ...base, entry_id: 'test-entry-002', title: 'Second Washer', suggestions_count: 0, suggestion_keys: [] },
+      ],
+    },
+    'ha_washdata/get_suggestions': {
+      suggestions: [{ key: 'off_delay', suggested: 371, current: 120, reason: 'Classic reason' }],
+    },
+    'ha_washdata/get_ml_comparison': {
+      settings_comparison: { off_delay: { ml_value: 371, ml_reason: 'ML reason' } },
+    },
+  });
+  await clickTab(page, 'settings');
+  const banner = page.locator('.wd-sug-banner').first();
+  await expect(banner).toContainText('1 tuning suggestion', { timeout: 8_000 });
+  await expect(page.locator('.wd-devcard.active .wd-dbadge.sug')).toHaveText(/1/);
 });
 
 test('feedback attention card appears when device has pending feedbacks', async ({ page }) => {
