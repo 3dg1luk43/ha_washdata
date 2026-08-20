@@ -81,6 +81,8 @@
     "exists": "bestaat"
   },
   "btn": {
+    "set_brand_model": "Merk en model instellen",
+    "refresh_catalog": "Catalogus vernieuwen",
     "add_device": "+ Apparaat toevoegen",
     "add_device_tip": "Voeg nog een WashData-apparaat toe",
     "add_maintenance": "Onderhoudsgebeurtenis toevoegen",
@@ -90,7 +92,7 @@
     "apply_label": "Etiket toepassen",
     "apply_set_b": "Set B toepassen",
     "apply_split": "Splitsing toepassen",
-    "apply_trim": "Pas trimmen toe",
+    "apply_trim": "Bijsnijden toepassen",
     "auto_detect_split": "Automatische detectie",
     "auto_label_cycles": "Cycli automatisch labelen",
     "auto_label_cycles_tip": "Wijs automatisch profielnamen toe aan ongelabelde cycli waarvan de matchbetrouwbaarheid de drempel haalt",
@@ -209,8 +211,8 @@
     "stop": "Stoppen",
     "submit_correction": "Correctie indienen",
     "train_now": "Train nu",
-    "trim": "Trimmen",
-    "trim_split": "Trimmen/splitsen",
+    "trim": "Bijsnijden",
+    "trim_split": "Bijsnijden / splitsen",
     "undo": "Ongedaan maken",
     "use": "Gebruik",
     "wipe_all": "Wis alle gegevens",
@@ -253,7 +255,7 @@
       "start": "Moet onder het maximale anti-kreuk-vermogen ({max} W) liggen"
     },
     "attn_sub": "Los conflicten op voor het opslaan",
-    "attn_title": "{n} instellingsconflict{s}",
+    "attn_title": "Instellingsconflicten: {n}",
     "confidence": {
       "auto": "Moet op of boven de overeenkomstdrempel ({match}) liggen",
       "learning": "Moet op of onder de overeenkomstdrempel ({match}) liggen",
@@ -296,14 +298,14 @@
       "match": "Moet boven de niet-overeenkomstdrempel ({un}) liggen",
       "unmatch": "Moet onder de overeenkomstdrempel ({match}) liggen; anders wordt een bevestigde overeenkomst direct ongedaan gemaakt"
     },
-    "cascade_toast": "Ook {n} instelling{s} aangepast voor consistentie.",
+    "cascade_toast": "Andere instellingen aangepast voor consistentie: {n}",
     "suggestion_resolves": "Pas hieronder de openstaande suggestie ({val}) toe om dit op te lossen",
     "use_fix": "Gebruik {val}",
     "watchdog": {
       "interval": "Moet minimaal 2x het bemonsteringsinterval ({si} s) zijn",
       "sampling": "Bemonsteringsinterval moet maximaal de helft van het watchdog-interval ({wi} s) zijn"
     },
-    "settings_banner": "{n} instellingsconflict{s} – controleer de gemarkeerde secties en los ze op voor het opslaan.",
+    "settings_banner": "Instellingsconflicten: {n}. Controleer de gemarkeerde secties en los ze op voordat u opslaat.",
     "settings_banner_btn": "Ga naar eerste"
   },
   "hdr": {
@@ -364,6 +366,7 @@
     "poor": "⚠ Slechte profielkwaliteit"
   },
   "lbl": {
+    "drag_to_resize": "Sleep om het formaat te wijzigen",
     "actions": "Acties",
     "activity": "Activiteit",
     "administrators": "Beheerders",
@@ -450,7 +453,7 @@
     "metric": "Metriek",
     "mode_existing_profile": "Toevoegen aan bestaand profiel",
     "mode_new_profile": "Nieuw profiel maken",
-    "models_fine_tuned": "({count} model{plural} verfijnd)",
+    "models_fine_tuned": "(verfijnde modellen: {count})",
     "n_classic_suggestions": "{n} klassiek",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} geselecteerd",
@@ -759,6 +762,11 @@
     "import_wizard": "Import - gegevens kiezen"
   },
   "msg": {
+    "tail_trim_hint": "Dit aantal seconden aan het einde verwijderen",
+    "store_sibling_hint": "Niets gedeeld voor precies uw model? Een nauw verwant model van hetzelfde merk is meestal een goed startpunt.",
+    "store_declare_appliance": "Laat WashData weten welk apparaat u bezit, dan toont dit tabblad de setups die anderen ervoor hebben gedeeld. U kunt hierboven ook een merk invoeren om rond te kijken.",
+    "refresh_catalog_hint": "De merken- en apparatenlijsten van de community worden in de cache opgeslagen zodat de communitystore binnen zijn daglimiet blijft. Vernieuw om vermeldingen op te halen die anderen hebben toegevoegd of goedgekeurd.",
+    "head_trim_hint": "Dit aantal seconden aan het begin verwijderen",
     "appliance_monitor": "Apparaatmonitor",
     "artifact_dip_detail": "Daalde onder de gebruikelijke vermogensband voor ~{n}s.",
     "artifact_footer": "Gemarkeerd in de bovenstaande grafiek. Dit zijn tijdelijke artefacten (bijvoorbeeld de deur die halverwege de cyclus wordt geopend), en niet noodzakelijkerwijs problemen.",
@@ -769,7 +777,7 @@
     "automations_intro": "WashData activeert {start} / {end}-gebeurtenissen en stelt entiteiten beschikbaar, waardoor meldingen en acties het best als gewone Home Assistant-automatiseringen worden gebouwd. Automatiseringen die dit apparaat gebruiken, worden hieronder weergegeven.",
     "cleanup_intro": "Elke gelabelde cyclus wordt overlay. Vink uitschieters aan en verwijder deze om het profiel op te schonen.",
     "clear_debug_hint": "Verwijder opgeslagen foutopsporingsgegevens om ruimte vrij te maken.",
-    "collecting_data": "Gegevens worden verzameld: nog {need} cyclus{plural} voordat verfijning kan beginnen ({current}/{min}).",
+    "collecting_data": "Gegevens worden verzameld. Nog benodigde cycli voordat verfijning kan beginnen: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlay-profielen (vaag)",
     "compare_profiles_tip": "Leg andere profielenveloppen op het schema hierboven om te zien welke het beste bij deze cyclus past.",
     "compare_selected_cycles": "Geselecteerde cycli (vast) – tonen/verbergen",
@@ -779,7 +787,7 @@
     "cycles_deleted": "{count} cyclus(sen) verwijderd",
     "enough_data": "Voldoende gegevens om van te leren ({current}/{min} cycli).",
     "export_description": "Kies precies welke profielen, cycli, instellingen en meer u naar JSON wilt exporteren, of analyseer een bestand en importeer alleen de onderdelen die u wilt.",
-    "feedback_cycles_pending": "{n} cyclus{s} te beoordelen",
+    "feedback_cycles_pending": "Te beoordelen: {n}",
     "feedback_prompt": "Bevestig dat het goed was, corrigeer het programma of negeer het.",
     "feedback_relabel_hint": "Deze cyclus opnieuw labelen lost de beoordeling ook op.",
     "filter_by_profile": "Filteren op profiel…",
@@ -856,7 +864,6 @@
     "pg_stress_synthetic": "inactieve simulatie begint hier",
     "pg_sweep_intro": "Wat als {param} anders was? Test {steps} waarden over je laatste {cycles} cycli om de instelling te vinden waarbij de meeste cycli correct worden herkend.",
     "pg_sweep_step": "Stap {done} / {total}",
-    "pg_undetected": "{n} cyclus{s} niet gedetecteerd",
     "pg_verdict_bad": "Vereist aandacht: veel cycli worden niet gedetecteerd.",
     "pg_verdict_good": "Goed afgestemd: de meeste cycli worden correct herkend en gematcht.",
     "pg_verdict_ok": "Acceptabel: sommige cycli gemist. Probeer de startdrempel te verlagen.",
@@ -896,7 +903,7 @@
     "shape_drift_detail": "Het vermogenspatroon voor dit profiel is in de loop van de tijd verschoven – mogelijk slijtage van het apparaat of onderhoud nodig (bijv. ontkalken, filterreiniging).",
     "show_all_settings": "Toon alle instellingen",
     "showing_suggestions": "Instelling {count} met suggesties weergegeven.",
-    "split_intro": "Klik op de grafiek om een ​​splitspunt toe te voegen of te verwijderen, of om automatisch gaten in de grafiek te detecteren. Elk resulterend segment kan zijn eigen profiel krijgen.",
+    "split_intro": "Klik op de grafiek om een splitspunt toe te voegen of te verwijderen, of om automatisch gaten in de grafiek te detecteren. Elk resulterend segment kan zijn eigen profiel krijgen.",
     "storage_diagnostics": "Opslagstatistieken, onderhoud, export/import",
     "sug_staged": "{key} = {val} ingesteld. Sla op om toe te passen.",
     "toast_auto_detect_enabled": "Automatische detectie ingeschakeld",
@@ -924,7 +931,7 @@
     "trend_energy_down": "Energietrend omlaag ({pct}%/cyclus)",
     "trend_energy_up": "Energie stijgt ({pct}%/cyclus) – recent gemiddelde {avg}",
     "trim_destructive_confirm": "Hiermee wordt slechts {pct}% van de cyclus behouden. Dit kan niet ongedaan worden gemaakt. Doorgaan?",
-    "trim_intro": "Versleep de rode grepen of voer waarden in. Alles buiten het raam wordt verwijderd.",
+    "trim_intro": "Versleep de rode handgrepen of voer waarden in. Alles buiten het venster wordt verwijderd.",
     "tuning_suggestions_available": "{count} afstemmingssuggestie beschikbaar op basis van waargenomen cycli. Ze verschijnen naast de relevante velden.",
     "unsure_detected_prefix": "WashData weet niet zeker of het is gedetecteerd",
     "updated": "Bijgewerkt",
@@ -1162,7 +1169,7 @@
       "label": "Automatisch onderhoud (nachtelijke opruiming)"
     },
     "completion_min_seconds": {
-      "doc": "Cycli korter dan dit worden weggegooid als spookcycli (testruns, de deur openen om een ​​sok toe te voegen).",
+      "doc": "Cycli korter dan dit worden weggegooid als spookcycli (testruns, de deur openen om een sok toe te voegen).",
       "label": "Min. cyclusduur"
     },
     "delay_confirm_seconds": {
@@ -1246,7 +1253,7 @@
       "label": "Minimaal vermogen"
     },
     "ml_training_enabled": {
-      "doc": "Bestudeer uw beoordeelde cycli regelmatig van de ene op de andere dag en stem de modellen af ​​op deze specifieke machine. Een verandering wordt alleen behouden als deze daadwerkelijk beter scoort op aanhoudende cycli, dus dit kan alleen maar helpen of hetzelfde blijven - nooit achteruitgaan.",
+      "doc": "Bestudeer uw beoordeelde cycli regelmatig van de ene op de andere dag en stem de modellen af op deze specifieke machine. Een verandering wordt alleen behouden als deze daadwerkelijk beter scoort op aanhoudende cycli, dus dit kan alleen maar helpen of hetzelfde blijven - nooit achteruitgaan.",
       "label": "Leren van deze machine"
     },
     "ml_training_hour": {
@@ -1266,7 +1273,7 @@
       "label": "Apparaatnaam"
     },
     "no_update_active_timeout": {
-      "doc": "Als er gedurende deze tijd geen stroomupdates arriveren tijdens het gebruik, ga er dan van uit dat de stekker offline is gevallen en forceer een stop om een ​​zombiecyclus te voorkomen. Standaard 600 s maakt cloud- of mesh-vertraging mogelijk.",
+      "doc": "Als er gedurende deze tijd geen stroomupdates arriveren tijdens het gebruik, ga er dan van uit dat de stekker offline is gevallen en forceer een stop om een zombiecyclus te voorkomen. Standaard 600 s maakt cloud- of mesh-vertraging mogelijk.",
       "label": "Time-out zonder update"
     },
     "notify_before_end_minutes": {
@@ -1394,7 +1401,7 @@
       "label": "Min. duurverhouding"
     },
     "profile_match_threshold": {
-      "doc": "Minimale gelijkheidsscore (0-1) vereist aan het einde van de cyclus om een ​​programma-identificatie te accepteren. Verhoog het om verkeerde identificaties te verminderen; verlaag het als de programma's van uw machine niet overeenkomen. Standaard 0,4 is een conservatief uitgangspunt.",
+      "doc": "Minimale gelijkheidsscore (0-1) vereist aan het einde van de cyclus om een programma-identificatie te accepteren. Verhoog het om verkeerde identificaties te verminderen; verlaag het als de programma's van uw machine niet overeenkomen. Standaard 0,4 is een conservatief uitgangspunt.",
       "label": "Afstemmingsdrempel"
     },
     "profile_unmatch_threshold": {
@@ -1426,7 +1433,7 @@
       "label": "Afvlakkingsvenster"
     },
     "start_duration_threshold": {
-      "doc": "Het vermogen moet zo lang boven de startdrempel blijven om een ​​echte start te bevestigen, waardoor wordt voorkomen dat aan/uit-schakelaars van een fractie van een seconde een cyclus starten.",
+      "doc": "Het vermogen moet zo lang boven de startdrempel blijven om een echte start te bevestigen, waardoor wordt voorkomen dat aan/uit-schakelaars van een fractie van een seconde een cyclus starten.",
       "label": "Startduur"
     },
     "start_energy_threshold": {
@@ -1754,7 +1761,7 @@
       "thr_batch": "Net boven het laagste actieve vermogen op p05 over {cycles} cycli ({p05}W) gehouden zodat een start zo vroeg mogelijk wordt opgemerkt en de stopdrempel onder het laagste draaivermogen van de machine blijft.",
       "tol_per_profile": "p75 van de duurvariantie per profiel over {profiles} profielen ({cycles} cycli); strakke profielen worden niet benadeeld.",
       "tol_pooled": "Op basis van de gebundelde duurvariantie van {cycles} recent gelabelde cycli (p95-afwijking={dev}).",
-      "watchdog": "Zo laag als veilig gehouden (net boven de p95-updatekloof van {p95}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops."
+      "watchdog": "Zo laag als veilig gehouden (net boven de p95-updatekloof van {p95}s en minstens 2x het meetinterval van {median}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops."
     },
     "exclusions": {
       "summary": "{total} verkeerd gedetecteerde cyclus(sen) uitgesloten: {parts}.",
@@ -1801,6 +1808,7 @@
     "wrong_profile": "Verkeerd profiel"
   },
   "toast": {
+    "catalog_refreshed": "Communitycatalogus vernieuwd",
     "access_saved": "Toegangscontrole opgeslagen",
     "all_wiped": "Alle gegevens gewist",
     "analysis_complete_none": "Analyse voltooid: geen nieuwe suggesties",
@@ -1812,7 +1820,7 @@
     "cycle_labelled": "Cyclus gelabeld",
     "cycle_paused": "Cyclus onderbroken",
     "cycle_resumed": "Cyclus hervat",
-    "cycle_trimmed": "Cyclus ingekort",
+    "cycle_trimmed": "Cyclus bijgesneden",
     "cycles_merged": "Cycli samengevoegd",
     "envelope_rebuilt": "Envelop opnieuw opgebouwd",
     "envelopes_rebuilt": "Enveloppen opnieuw opgebouwd",
@@ -1955,6 +1963,10 @@
     "finished": "De cyclus bereikte een eindtoestand en stopte."
   },
   "store": {
+    "your_model_tip": "Dit is het apparaat dat u bij Instellingen hebt opgegeven",
+    "your_model": "Uw apparaat",
+    "search_brand_ph": "Zoeken op merk…",
+    "programs_count": "Programma's: {n}",
     "browse": "Bladeren",
     "device": "Apparaat",
     "favorites": "Favorieten",

@@ -33,6 +33,8 @@
     "exists": "există deja"
   },
   "btn": {
+    "set_brand_model": "Stabiliți marca și modelul",
+    "refresh_catalog": "Actualizați catalogul",
     "add_device": "+ Adăugați dispozitiv",
     "add_device_tip": "Adăugați un alt dispozitiv WashData",
     "add_maintenance": "Adăugați eveniment de întreținere",
@@ -205,8 +207,8 @@
       "start": "Trebuie să fie sub Puterea maximă anti-șifonare ({max} W)"
     },
     "attn_sub": "Rezolvați conflictele înainte de salvare",
-    "attn_title": "{n} conflict{s} de setări",
-    "settings_banner": "{n} conflict{s} de setări – verificați secțiunile evidențiate și remediați înainte de salvare.",
+    "attn_title": "Conflicte de setări: {n}",
+    "settings_banner": "Conflicte de setări: {n}. Verificați secțiunile evidențiate și remediați-le înainte de salvare.",
     "settings_banner_btn": "Salt la primul",
     "confidence": {
       "auto": "Trebuie să fie cel puțin egal cu Pragul de potrivire ({match})",
@@ -250,7 +252,7 @@
       "match": "Trebuie să fie peste Pragul de non-potrivire ({un})",
       "unmatch": "Trebuie să fie sub Pragul de potrivire ({match}); altfel o potrivire confirmată este anulată instantaneu"
     },
-    "cascade_toast": "De asemenea, s-au ajustat {n} setare{s} pentru consecvență.",
+    "cascade_toast": "Alte setări ajustate pentru consecvență: {n}",
     "suggestion_resolves": "Aplicați sugestia în așteptare ({val}) de mai jos pentru a remedia aceasta",
     "use_fix": "Folosiți {val}",
     "watchdog": {
@@ -316,6 +318,7 @@
     "poor": "⚠ Calitate slabă a profilului"
   },
   "lbl": {
+    "drag_to_resize": "Trageți pentru redimensionare",
     "actions": "Acțiuni",
     "activity": "Activitate",
     "administrators": "Administratori",
@@ -402,7 +405,7 @@
     "metric": "Metrică",
     "mode_existing_profile": "Adăugați la profilul existent",
     "mode_new_profile": "Creați un profil nou",
-    "models_fine_tuned": "({count} model{plural} reglat fin)",
+    "models_fine_tuned": "(modele ajustate: {count})",
     "n_classic_suggestions": "{n} clasice",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} selectate",
@@ -602,7 +605,7 @@
     "show_contributor": "Afișați numele contribuitorilor",
     "task_pg_detail": "Simulare ciclu",
     "task_split": "Se divide ciclul",
-    "task_trim": "Se decupează ciclul",
+    "task_trim": "Se taie ciclul",
     "task_merge": "Se îmbină ciclurile",
     "task_rebuild": "Se reconstruiesc anvelopele",
     "cat_profiles": "Profiluri (programe)",
@@ -711,6 +714,11 @@
     "import_wizard": "Importă - alege datele"
   },
   "msg": {
+    "tail_trim_hint": "Numărul de secunde de eliminat de la sfârșit",
+    "store_sibling_hint": "Nu există nimic partajat pentru modelul dvs. exact? Un model foarte apropiat de la aceeași marcă este de obicei un bun punct de plecare.",
+    "store_declare_appliance": "Indicați în WashData ce aparat dețineți, iar această filă va afișa configurațiile pe care alte persoane le-au partajat pentru el. Puteți și să scrieți o marcă mai sus pentru a explora.",
+    "refresh_catalog_hint": "Listele de mărci și aparate ale comunității sunt păstrate în cache pentru a menține magazinul partajat în limita zilnică. Actualizați pentru a prelua intrările adăugate sau aprobate de alții.",
+    "head_trim_hint": "Numărul de secunde de eliminat de la început",
     "appliance_monitor": "Monitor de aparate",
     "artifact_dip_detail": "A scăzut sub banda de putere obișnuită timp de ~{n}s.",
     "artifact_footer": "Evidențiate în graficul de mai sus. Acestea sunt artefacte tranzitorii (de exemplu, ușa deschisă la jumătatea ciclului), nu neapărat probleme.",
@@ -721,7 +729,7 @@
     "automations_intro": "WashData declanșează evenimente {start} / {end} și expune entități, astfel că notificările și acțiunile sunt cel mai bine construite ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
     "cleanup_intro": "Toate ciclurile etichetate suprapuse. Bifați valorile aberante și ștergeți pentru a curăța profilul.",
     "clear_debug_hint": "Eliminați datele de depanare stocate pentru a elibera spațiu.",
-    "collecting_data": "Se colectează date - mai sunt necesare {need} ciclu{plural} înainte ca reglajul fin să poată începe ({current}/{min}).",
+    "collecting_data": "Se colectează date. Cicluri încă necesare înainte ca reglajul fin să poată începe: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Suprapuneți profiluri (estompat)",
     "compare_profiles_tip": "Suprapuneți alte plicuri de profil pe graficul de mai sus pentru a vedea care dintre ele se potrivește cel mai bine acestui ciclu.",
     "compare_selected_cycles": "Cicluri selectate (solid) – afișați / ascundeți",
@@ -731,7 +739,7 @@
     "cycles_deleted": "{count} ciclu(ri) șterse",
     "enough_data": "Date suficiente pentru a învăța ({current}/{min} cicluri).",
     "export_description": "Alege exact ce profiluri, cicluri, setări și altele să exporți în JSON, sau analizează un fișier și importă doar părțile dorite.",
-    "feedback_cycles_pending": "{n} ciclu{s} de revizuit",
+    "feedback_cycles_pending": "De revizuit: {n}",
     "feedback_prompt": "Confirmați că a fost corect, corectați programul sau ignorați.",
     "feedback_relabel_hint": "Și reetichetarea acestui ciclu îl rezolvă.",
     "filter_by_profile": "Filtrează după profil…",
@@ -808,7 +816,6 @@
     "pg_stress_synthetic": "simularea în repaus începe aici",
     "pg_sweep_intro": "Ce-ar fi dacă {param} ar fi diferit? Testați {steps} valori pe ultimele {cycles} cicluri pentru a găsi setarea la care se potrivesc corect cele mai multe cicluri.",
     "pg_sweep_step": "Pasul {done} / {total}",
-    "pg_undetected": "{n} ciclu{s} nedetectat",
     "pg_verdict_bad": "Necesită atenție: multe cicluri rămân nedetectate.",
     "pg_verdict_good": "Bine reglat: majoritatea ciclurilor sunt identificate și potrivite corect.",
     "pg_verdict_ok": "Acceptabil: unele cicluri au fost ratate. Încercați să reduceți pragul de pornire.",
@@ -1611,6 +1618,7 @@
     "wrong_profile": "Profil greșit"
   },
   "toast": {
+    "catalog_refreshed": "Catalogul comunității a fost actualizat",
     "access_saved": "Controlul accesului a fost salvat",
     "all_wiped": "Toate datele au fost șterse",
     "analysis_complete_none": "Analiză finalizată: nicio sugestie nouă",
@@ -1812,7 +1820,7 @@
       "thr_batch": "Păstrat chiar deasupra celei mai mici puteri active p05 pe {cycles} cicluri ({p05}W), astfel încât o pornire să fie surprinsă cât mai devreme posibil, iar pragul de oprire să rămână sub cea mai mică putere de funcționare a mașinii.",
       "tol_per_profile": "p75 al varianței duratei per profil pe {profiles} profiluri ({cycles} cicluri); profilurile stabile nu sunt penalizate.",
       "tol_pooled": "Pe baza varianței combinate a duratei a {cycles} cicluri recente etichetate (deviație p95={dev}).",
-      "watchdog": "Păstrat cât mai mic în siguranță (puțin peste intervalul de actualizare p95 de {p95}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
+      "watchdog": "Păstrat cât mai mic în siguranță (puțin peste intervalul de actualizare p95 de {p95}s și cel puțin 2x intervalul de eșantionare de {median}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
     },
     "exclusions": {
       "summary": "Excluse {total} cicluri detectate greșit: {parts}.",
@@ -1907,6 +1915,10 @@
     "finished": "Ciclul a ajuns într-o stare finală și s-a încheiat."
   },
   "store": {
+    "your_model_tip": "Acesta este aparatul pe care l-ați declarat în Setări",
+    "your_model": "Al dvs.",
+    "search_brand_ph": "Căutați după marcă…",
+    "programs_count": "Programe: {n}",
     "browse": "Răsfoiți",
     "device": "Dispozitiv",
     "favorites": "Favorite",
@@ -1962,7 +1974,7 @@
       "apply": "Se divide ciclul"
     },
     "trim": {
-      "apply": "Se decupează ciclul"
+      "apply": "Se taie ciclul"
     },
     "merge": {
       "apply": "Se îmbină ciclurile"

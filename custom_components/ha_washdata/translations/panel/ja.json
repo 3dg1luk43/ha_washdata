@@ -81,6 +81,8 @@
         "exists": "既存"
     },
     "btn": {
+        "set_brand_model": "ブランドとモデルを設定",
+        "refresh_catalog": "カタログを更新",
         "add_device": "+ デバイスを追加",
         "add_device_tip": "別の WashData デバイスを追加する",
         "add_maintenance": "メンテナンスイベントを追加",
@@ -253,7 +255,7 @@
             "start": "しわ防止最大電力 ({max} W) を下回る必要があります"
         },
         "attn_sub": "保存する前に競合を解消してください",
-        "attn_title": "{n}件の設定競合{s}",
+        "attn_title": "設定の競合: {n}",
         "confidence": {
             "auto": "マッチしきい値 ({match}) 以上である必要があります",
             "learning": "マッチしきい値 ({match}) 以下である必要があります",
@@ -296,14 +298,14 @@
             "match": "アンマッチしきい値 ({un}) を上回る必要があります",
             "unmatch": "マッチしきい値 ({match}) を下回る必要があります。そうでないと確定した一致が即座に解除されます"
         },
-        "cascade_toast": "整合性のため、さらに{n}件の設定{s}も自動調整しました。",
+        "cascade_toast": "整合性のため調整した他の設定: {n}",
         "suggestion_resolves": "下の保留中の提案（{val}）を適用してこれを修正してください",
         "use_fix": "{val} を使用",
         "watchdog": {
             "interval": "サンプリング間隔 ({si} 秒) の少なくとも 2 倍である必要があります",
             "sampling": "サンプリング間隔はウォッチドッグ間隔 ({wi} 秒) の半分以下である必要があります"
         },
-        "settings_banner": "{n} 件の設定競合{s} – 強調表示されたセクションを確認し、保存前に修正してください。",
+        "settings_banner": "設定の競合: {n}。強調表示されたセクションを確認し、保存前に修正してください。",
         "settings_banner_btn": "最初へ"
     },
     "hdr": {
@@ -364,6 +366,7 @@
         "poor": "⚠ プロファイル品質: 低"
     },
     "lbl": {
+        "drag_to_resize": "ドラッグしてサイズ変更",
         "actions": "アクション",
         "activity": "活動",
         "administrators": "管理者",
@@ -434,7 +437,7 @@
         "from": "開始",
         "gap_s": "ギャップ (秒)",
         "group_name": "グループ名",
-        "head_trim": "ヘッドトリム (秒)",
+        "head_trim": "先頭のトリム (秒)",
         "health": "健康",
         "hide_tabs": "管理者以外のタブを非表示にする",
         "in_use": "使用中",
@@ -450,7 +453,7 @@
         "metric": "指標",
         "mode_existing_profile": "既存のプロファイルに追加",
         "mode_new_profile": "新しいプロファイルの作成",
-        "models_fine_tuned": "（{count}モデル{plural}微調整済み）",
+        "models_fine_tuned": "（微調整済みモデル: {count}）",
         "n_classic_suggestions": "{n} クラシック",
         "n_ml_suggestions": "{n} ML",
         "n_selected": "{n} 件選択中",
@@ -532,7 +535,7 @@
         "stage3": "ステージ 3 – DTW",
         "stage4": "ステージ 4 – 一致度",
         "status": "状態",
-        "tail_trim": "テールトリム (秒)",
+        "tail_trim": "末尾のトリム (秒)",
         "timer_auto_pause": "自動一時停止",
         "timer_min": "分",
         "timer_msg_placeholder": "メッセージ (オプション、{device}/{program}/{minutes})",
@@ -759,6 +762,11 @@
         "import_wizard": "インポート - データを選択"
     },
     "msg": {
+        "tail_trim_hint": "末尾から削除する秒数",
+        "store_sibling_hint": "お使いの機種そのものが共有されていない場合は、同じブランドの近い機種から始めるとうまくいくことが多いです。",
+        "store_declare_appliance": "お使いの家電を WashData に指定すると、このタブに他のユーザーが共有したプログラムや録音が表示されます。上でブランド名を入力して見て回ることもできます。",
+        "refresh_catalog_hint": "コミュニティのブランドと家電の一覧はキャッシュされ、共有ストアが 1 日あたりの読み取り上限内に収まるようにしています。更新すると、他のユーザーが追加または承認した項目を取得できます。",
+        "head_trim_hint": "先頭から削除する秒数",
         "appliance_monitor": "アプライアンスモニター",
         "artifact_dip_detail": "通常の電力帯の下側に約{n}秒間落ちました。",
         "artifact_footer": "上のグラフで強調表示されています。これらは一時的なアーチファクト (サイクルの途中でドアが開いたなど) であり、必ずしも問題があるわけではありません。",
@@ -769,7 +777,7 @@
         "automations_intro": "WashData は {start} / {end} イベントを発火しエンティティを公開するため、通知やアクションは通常の Home Assistant オートメーションとして構築するのが最適です。このデバイスを使用するオートメーションは以下に表示されます。",
         "cleanup_intro": "すべてのラベル付きサイクルがオーバーレイされます。外れ値にチェックを入れて削除し、プロファイルをクリーンアップします。",
         "clear_debug_hint": "保存されているデバッグ データを削除して領域を解放します。",
-        "collecting_data": "データを収集中です。微調整を開始するにはあと {need} サイクル{plural}必要です（{current}/{min}）。",
+        "collecting_data": "データを収集中です。微調整を開始するために必要な残りサイクル数: {need}（{current}/{min}）。",
         "compare_overlay_profiles": "オーバーレイプロファイル (淡い)",
         "compare_profiles_tip": "他のプロファイル エンベロープを上のチャートに重ねて、どれがこのサイクルに最も適合するかを確認します。",
         "compare_selected_cycles": "選択されたサイクル (実線) – 表示/非表示",
@@ -779,7 +787,7 @@
         "cycles_deleted": "{count} 件のサイクルを削除しました",
         "enough_data": "学習に十分なデータがあります（{current}/{min} サイクル）。",
         "export_description": "JSONにエクスポートするプロファイル、サイクル、設定などを正確に選択するか、ファイルを解析して必要な部分だけをインポートできます。",
-        "feedback_cycles_pending": "レビューが必要なサイクル: {n}件{s}",
+        "feedback_cycles_pending": "要レビュー: {n}",
         "feedback_prompt": "それが正しかったことを確認し、プログラムを修正するか、無視してください。",
         "feedback_relabel_hint": "このサイクルを再ラベル付けすると、これも解決します。",
         "filter_by_profile": "プロファイルでフィルター…",
@@ -827,7 +835,7 @@
         "no_profiles_yet": "まだプロフィールはありません。ラベル付きサイクルからサイクルを作成します。",
         "no_profiles_yet_short": "まだプロフィールはありません。",
         "no_settings_match": "「{q}」に一致する設定はありません",
-        "no_split_points": "まだ分​​割ポイントはありません。",
+        "no_split_points": "まだ分 割ポイントはありません。",
         "no_suggestions": "積極的な提案はありません。",
         "notify_services_hint": "{entity} サービス ID を使用してください（複数はカンマ区切り）。テンプレート変数：{vars}。",
         "old_actions_warning": "古いアクション エディター (現在は削除されています) で構成されています。これらは引き続きサイクル イベントで起動されますが、ここでは編集できなくなりました。それらを通常のオートメーションに変換するか、削除します。",
@@ -856,12 +864,11 @@
         "pg_stress_synthetic": "待機シミュレーションはここから開始",
         "pg_sweep_intro": "もし {param} が違っていたら? 最も多くのサイクルが正しくマッチする設定を見つけるため、直近 {cycles} サイクルにわたって {steps} 個の値をテストします。",
         "pg_sweep_step": "ステップ {done} / {total}",
-        "pg_undetected": "{n} 件のサイクル{s}が未検出",
         "pg_verdict_bad": "要注意: 多くのサイクルが検出されずに終わっています。",
         "pg_verdict_good": "よく調整されています: ほとんどのサイクルが正しく識別・マッチされています。",
         "pg_verdict_ok": "許容範囲: 一部のサイクルを見逃しています。開始しきい値を下げてみてください。",
         "phase_catalog_intro": "サイクルの名前付きセグメント (前洗浄、加熱、脱水など)。コントロール パネルからプロファイルにそれらを割り当てます。",
-        "phase_ranges_intro": "位相範囲 (サイクル開始からの分) が平均曲線に重ねられます。値を編​​集してライブでプレビューします。",
+        "phase_ranges_intro": "位相範囲 (サイクル開始からの分) が平均曲線に重ねられます。値を編 集してライブでプレビューします。",
         "playground_intro": "過去のサイクルを異なる設定で再生し、2 つの構成を並べて比較し、サイクルがプロフィールにどう整合するかを確認できる安全なサンドボックスです。明示的に適用するまで、ここでの操作が実データを変更することはありません。",
         "playground_needs_restart": "プレイグラウンドツールを有効にするには Home Assistant を再起動してください。",
         "preferences_admin": "設定、パネル、アクセス制御",
@@ -1214,7 +1221,7 @@
             "label": "デバッグエンティティを公開"
         },
         "external_end_trigger": {
-            "doc": "状態の変化がサイクルの終了を示すバイナリ センサー (例: アプライアンスの「完了」接触またはコンパニオン統合)​​。",
+            "doc": "状態の変化がサイクルの終了を示すバイナリ センサー (例: アプライアンスの「完了」接触またはコンパニオン統合)。",
             "label": "外部トリガーエンティティ"
         },
         "external_end_trigger_enabled": {
@@ -1338,7 +1345,7 @@
             "label": "開始サービス"
         },
         "notify_timeout_seconds": {
-            "doc": "この秒数が経過すると、通知が自動的に閉じられます (通知をサポートしているプラ​​ットフォームの場合)。 0 は手動で終了するまで保持します。",
+            "doc": "この秒数が経過すると、通知が自動的に閉じられます (通知をサポートしているプラ ットフォームの場合)。 0 は手動で終了するまで保持します。",
             "label": "自動消去まで"
         },
         "notify_title": {
@@ -1386,7 +1393,7 @@
             "label": "最大時間比率"
         },
         "profile_match_min_duration_ratio": {
-            "doc": "プロファイルに対する最小サイクル長。 0.9 は、サイクルがプロファイル期間の少なくとも 90% でな​​ければ一致しないことを意味します。",
+            "doc": "プロファイルに対する最小サイクル長。 0.9 は、サイクルがプロファイル期間の少なくとも 90% でな ければ一致しないことを意味します。",
             "label": "最小時間比率"
         },
         "profile_match_threshold": {
@@ -1688,6 +1695,7 @@
         "wrong_profile": "間違ったプロフィール"
     },
     "toast": {
+        "catalog_refreshed": "コミュニティカタログを更新しました",
         "access_saved": "アクセス制御が保存されました",
         "all_wiped": "すべてのデータが消去されました",
         "analysis_complete_none": "分析が完了しました: 新しい提案はありません",
@@ -1699,7 +1707,7 @@
         "cycle_labelled": "サイクルラベル付き",
         "cycle_paused": "サイクルが一時停止されました",
         "cycle_resumed": "サイクルが再開されました",
-        "cycle_trimmed": "サイクルトリム",
+        "cycle_trimmed": "サイクルをトリミングしました",
         "cycles_merged": "統合されたサイクル",
         "envelope_rebuilt": "再構築されたエンベロープ",
         "envelopes_rebuilt": "再構築された封筒",
@@ -1708,7 +1716,7 @@
         "feedback_confirmed": "フィードバックが確認されました",
         "feedback_dismissed": "フィードバックは却下されました",
         "group_deleted": "グループが削除されました",
-        "group_name_required": "グループ名は必​​須です",
+        "group_name_required": "グループ名は必 須です",
         "group_saved": "グループが保存されました",
         "import_successful": "インポートは成功しました。統合のリロード",
         "json_required": "JSONデータは必須です",
@@ -1889,7 +1897,7 @@
             "thr_batch": "{cycles} サイクルにわたる p05 の最低稼働電力（{p05}W）のすぐ上に設定。これにより開始をできるだけ早く捉え、停止しきい値は機器の最低稼働電力を下回ったままになります。",
             "tol_per_profile": "{profiles} 件のプロファイル（{cycles} サイクル）にわたるプロファイルごとの時間分散の p75。ばらつきの小さいプロファイルは不利になりません。",
             "tol_pooled": "{cycles} 件の直近のラベル付きサイクルの統合時間分散に基づく（p95 偏差={dev}）。",
-            "watchdog": "安全な範囲でできるだけ低く設定（p95 の更新間隔 {p95}s をわずかに上回る値、最小 30s）。誤った停止なしに停滞を素早く検出します。"
+            "watchdog": "安全な範囲でできるだけ低く設定（p95 の更新間隔 {p95}s をわずかに上回り、かつサンプリング間隔 {median}s の 2 倍以上、最小 30s）。誤った停止なしに停滞を素早く検出します。"
         },
         "exclusions": {
             "summary": "{total} 件の誤検出サイクルを除外しました: {parts}。",
@@ -1955,6 +1963,10 @@
         "finished": "サイクルが終了状態に達して終了しました。"
     },
     "store": {
+        "your_model_tip": "設定で指定した家電です",
+        "your_model": "自分の機種",
+        "search_brand_ph": "ブランドで検索…",
+        "programs_count": "プログラム: {n}",
         "browse": "閲覧",
         "device": "デバイス",
         "favorites": "お気に入り",
@@ -1993,6 +2005,7 @@
         "add_profile": "コミュニティサイトでこの家電のプロファイルを追加してください"
     },
     "task": {
+        "cancelling": "キャンセル中...",
         "reprocess": {
             "matching": "再処理: サイクルのマッチング",
             "golden": "再処理: 基準サイクルの補完",

@@ -231,7 +231,7 @@
     },
     "trim_cycle": {
       "name": "Podrezivanje ciklusa",
-      "description": "Skratite podatke o snazi ​​prošlog ciklusa na određeni vremenski prozor.",
+      "description": "Skratite podatke o snazi prošlog ciklusa na određeni vremenski prozor.",
       "fields": {
         "device_id": {
           "name": "Uređaj",

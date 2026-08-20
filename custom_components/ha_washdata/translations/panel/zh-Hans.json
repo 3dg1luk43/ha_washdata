@@ -81,6 +81,8 @@
         "exists": "已存在"
     },
     "btn": {
+        "set_brand_model": "设置品牌和型号",
+        "refresh_catalog": "刷新目录",
         "add_device": "+ 添加设备",
         "add_device_tip": "添加另一个 WashData 设备",
         "add_maintenance": "添加维护事件",
@@ -253,7 +255,7 @@
             "start": "必须低于防皱最大功率 ({max} W)"
         },
         "attn_sub": "保存前请解决冲突",
-        "attn_title": "{n} 个设置冲突{s}",
+        "attn_title": "设置冲突：{n}",
         "confidence": {
             "auto": "必须不低于匹配阈值 ({match})",
             "learning": "必须不超过匹配阈值 ({match})",
@@ -296,14 +298,14 @@
             "match": "必须高于不匹配阈值 ({un})",
             "unmatch": "必须低于匹配阈值 ({match})；否则已确认的匹配会立即取消"
         },
-        "cascade_toast": "为保持一致性，还自动调整了 {n} 项设置{s}。",
+        "cascade_toast": "为保持一致性而调整的其他设置：{n}",
         "suggestion_resolves": "应用下方的待处理建议（{val}）以修复此问题",
         "use_fix": "使用 {val}",
         "watchdog": {
             "interval": "应至少为采样间隔 ({si} 秒) 的 2 倍",
             "sampling": "采样间隔应最多为看门狗间隔 ({wi} 秒) 的一半"
         },
-        "settings_banner": "{n} 个设置冲突{s} – 请检查高亮显示的部分，并在保存前修复。",
+        "settings_banner": "设置冲突：{n}。请检查高亮显示的部分，并在保存前修复。",
         "settings_banner_btn": "前往第一处"
     },
     "hdr": {
@@ -364,6 +366,7 @@
         "poor": "⚠ 配置文件质量差"
     },
     "lbl": {
+        "drag_to_resize": "拖动以调整大小",
         "actions": "操作",
         "activity": "活动",
         "administrators": "管理员",
@@ -434,7 +437,7 @@
         "from": "起始",
         "gap_s": "间隔（秒）",
         "group_name": "组名称",
-        "head_trim": "头部裁剪（秒）",
+        "head_trim": "开头裁剪（秒）",
         "health": "健康",
         "hide_tabs": "对非管理员隐藏标签",
         "in_use": "使用中",
@@ -450,7 +453,7 @@
         "metric": "指标",
         "mode_existing_profile": "添加到现有配置文件",
         "mode_new_profile": "创建新配置文件",
-        "models_fine_tuned": "（{count}个模型{plural}已微调）",
+        "models_fine_tuned": "（已微调的模型：{count}）",
         "n_classic_suggestions": "{n} 经典",
         "n_ml_suggestions": "{n} ML",
         "n_selected": "已选 {n} 个",
@@ -532,7 +535,7 @@
         "stage3": "阶段 3 – DTW",
         "stage4": "阶段 4 – 一致度",
         "status": "状态",
-        "tail_trim": "尾部裁剪（秒）",
+        "tail_trim": "末尾裁剪（秒）",
         "timer_auto_pause": "自动暂停",
         "timer_min": "分钟",
         "timer_msg_placeholder": "消息（可选，{device}/{program}/{minutes}）",
@@ -759,6 +762,11 @@
         "import_wizard": "导入 - 选择数据"
     },
     "msg": {
+        "tail_trim_hint": "从末尾移除的秒数",
+        "store_sibling_hint": "没有与您型号完全一致的分享内容？同品牌中相近的型号通常是不错的起点。",
+        "store_declare_appliance": "告知 WashData 您拥有哪台家电，此标签页便会显示其他用户为它分享的程序和录制。您也可以在上方输入品牌名称随意浏览。",
+        "refresh_catalog_hint": "社区品牌和家电列表已缓存，以便共享商店保持在每日读取额度内。刷新可获取他人新增或已批准的条目。",
+        "head_trim_hint": "从开头移除的秒数",
         "appliance_monitor": "设备监控",
         "artifact_dip_detail": "跌破通常功率范围约 {n} 秒。",
         "artifact_footer": "在上图中高亮显示。这些是瞬态异常（例如门在周期中打开），不一定是问题。",
@@ -769,7 +777,7 @@
         "automations_intro": "WashData 触发 {start} / {end} 事件并公开实体，因此通知和操作最好构建为常规 Home Assistant 自动化。使用此设备的自动化显示在下方。",
         "cleanup_intro": "显示所有已标记周期的叠加。勾选离群值并删除以清理配置文件。",
         "clear_debug_hint": "删除存储的调试数据以释放空间。",
-        "collecting_data": "正在收集数据，还需要 {need} 个周期{plural}才能开始微调（{current}/{min}）。",
+        "collecting_data": "正在收集数据。开始微调前还需要的周期数：{need}（{current}/{min}）。",
         "compare_overlay_profiles": "叠加配置文件（浅色）",
         "compare_profiles_tip": "将其他配置文件包络叠加在上方图表上，看哪个最适合此周期。",
         "compare_selected_cycles": "选中的周期（实线）– 显示/隐藏",
@@ -779,7 +787,7 @@
         "cycles_deleted": "已删除 {count} 个周期",
         "enough_data": "有足够数据可供学习（{current}/{min} 个循环）。",
         "export_description": "精确选择要导出到 JSON 的配置文件、周期、设置等，或分析文件并仅导入所需的部分。",
-        "feedback_cycles_pending": "{n} 个周期{s}待审查",
+        "feedback_cycles_pending": "待审查：{n}",
         "feedback_prompt": "确认正确、修正程序或忽略。",
         "feedback_relabel_hint": "重新标记此周期也会解决它。",
         "filter_by_profile": "按配置文件筛选…",
@@ -856,7 +864,6 @@
         "pg_stress_synthetic": "待机模拟从此处开始",
         "pg_sweep_intro": "如果 {param} 不同会怎样？在最近 {cycles} 个周期上测试 {steps} 个值，找到能正确匹配最多周期的设置。",
         "pg_sweep_step": "步骤 {done} / {total}",
-        "pg_undetected": "{n} 个周期{s}未检测到",
         "pg_verdict_bad": "需要注意: 许多周期未被检测到。",
         "pg_verdict_good": "调校良好: 大多数周期都被正确识别和匹配。",
         "pg_verdict_ok": "尚可: 漏掉了一些周期。可尝试降低启动阈值。",
@@ -1290,7 +1297,7 @@
             "label": "结束服务"
         },
         "notify_fire_events": {
-            "doc": "还在循环开始/结束时触发 ha_​​washdata_* 事件，以便您可以构建自己的自动化。",
+            "doc": "还在循环开始/结束时触发 ha_washdata_* 事件，以便您可以构建自己的自动化。",
             "label": "为通知触发 HA 事件"
         },
         "notify_icon": {
@@ -1688,6 +1695,7 @@
         "wrong_profile": "错误配置文件"
     },
     "toast": {
+        "catalog_refreshed": "社区目录已刷新",
         "access_saved": "已保存访问控制",
         "all_wiped": "所有数据已清除",
         "analysis_complete_none": "分析完成：没有新建议",
@@ -1889,7 +1897,7 @@
             "thr_batch": "保持在 {cycles} 个周期中 p05 最低工作功率（{p05}W）略上方，以便尽早捕捉到启动，同时使停止阈值保持在设备最低运行功率之下。",
             "tol_per_profile": "{profiles} 个配置文件（{cycles} 个周期）中每个配置文件时长方差的 p75；波动小的配置文件不受惩罚。",
             "tol_pooled": "基于 {cycles} 个近期已标注周期的合并时长方差（p95 偏差={dev}）。",
-            "watchdog": "在安全范围内保持尽可能低（略高于 p95 更新间隔 {p95}s，最小 30s），以便快速捕捉到停滞而不产生误停止。"
+            "watchdog": "在安全范围内保持尽可能低（略高于 p95 更新间隔 {p95}s，且至少为采样间隔 {median}s 的 2 倍，最小 30s），以便快速捕捉到停滞而不产生误停止。"
         },
         "exclusions": {
             "summary": "已排除 {total} 个误检测周期：{parts}。",
@@ -1955,6 +1963,10 @@
         "finished": "循环到达终止状态并已结束。"
     },
     "store": {
+        "your_model_tip": "这是您在设置中指定的家电",
+        "your_model": "您的型号",
+        "search_brand_ph": "按品牌搜索…",
+        "programs_count": "程序：{n}",
         "browse": "浏览",
         "device": "设备",
         "favorites": "收藏",

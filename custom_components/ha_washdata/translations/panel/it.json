@@ -33,6 +33,8 @@
     "exists": "esiste già"
   },
   "btn": {
+    "set_brand_model": "Imposta marca e modello",
+    "refresh_catalog": "Aggiorna catalogo",
     "add_device": "+ Aggiungi dispositivo",
     "add_device_tip": "Aggiungi un altro dispositivo WashData",
     "add_maintenance": "Aggiungi evento di manutenzione",
@@ -42,7 +44,7 @@
     "apply_label": "Applica etichetta",
     "apply_set_b": "Applica set B",
     "apply_split": "Applica divisione",
-    "apply_trim": "Applicare Rifinitura",
+    "apply_trim": "Applica ritaglio",
     "auto_detect_split": "Rilevamento automatico",
     "auto_label_cycles": "Cicli di etichettatura automatica",
     "auto_label_cycles_tip": "Assegna automaticamente nomi di profilo ai cicli senza etichetta la cui confidenza di corrispondenza supera la soglia",
@@ -161,8 +163,8 @@
     "stop": "Ferma",
     "submit_correction": "Invia correzione",
     "train_now": "Allenati adesso",
-    "trim": "Ordinare",
-    "trim_split": "Taglia/Dividi",
+    "trim": "Ritaglia",
+    "trim_split": "Ritaglia / Dividi",
     "undo": "Annulla",
     "use": "Usa",
     "wipe_all": "Cancella tutti i dati",
@@ -205,8 +207,8 @@
       "start": "Deve essere inferiore alla Potenza massima anti-grinze ({max} W)"
     },
     "attn_sub": "Correggi i conflitti prima di salvare",
-    "attn_title": "{n} conflitto{s} nelle impostazioni",
-    "settings_banner": "{n} conflitto{s} nelle impostazioni – controlla le sezioni evidenziate e correggile prima di salvare.",
+    "attn_title": "Conflitti nelle impostazioni: {n}",
+    "settings_banner": "Conflitti nelle impostazioni: {n}. Controlla le sezioni evidenziate e correggile prima di salvare.",
     "settings_banner_btn": "Vai al primo",
     "confidence": {
       "auto": "Deve essere maggiore o uguale alla Soglia di corrispondenza ({match})",
@@ -250,7 +252,7 @@
       "match": "Deve essere superiore alla Soglia di non corrispondenza ({un})",
       "unmatch": "Deve essere inferiore alla Soglia di corrispondenza ({match}); altrimenti una corrispondenza confermata viene annullata istantaneamente"
     },
-    "cascade_toast": "Adattate anche {n} impostazione{s} per coerenza.",
+    "cascade_toast": "Altre impostazioni adattate per coerenza: {n}",
     "suggestion_resolves": "Applica la proposta in attesa ({val}) in basso per correggere questo",
     "use_fix": "Usa {val}",
     "watchdog": {
@@ -316,6 +318,7 @@
     "poor": "⚠ Qualità profilo scarsa"
   },
   "lbl": {
+    "drag_to_resize": "Trascina per ridimensionare",
     "actions": "Azioni",
     "activity": "Attività",
     "administrators": "Amministratori",
@@ -386,7 +389,7 @@
     "from": "Da",
     "gap_s": "Divario/i",
     "group_name": "Nome del gruppo",
-    "head_trim": "Taglio della testa",
+    "head_trim": "Ritaglio iniziale (s)",
     "health": "Salute",
     "hide_tabs": "Nascondi le schede per i non amministratori",
     "in_use": "In uso",
@@ -402,7 +405,7 @@
     "metric": "Metrica",
     "mode_existing_profile": "Aggiungi al profilo esistente",
     "mode_new_profile": "Crea nuovo profilo",
-    "models_fine_tuned": "({count} modello{plural} ottimizzato)",
+    "models_fine_tuned": "(modelli ottimizzati: {count})",
     "n_classic_suggestions": "{n} classico",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} selezionati",
@@ -484,7 +487,7 @@
     "stage3": "Fase 3 – DTW",
     "stage4": "Fase 4 – concordanza",
     "status": "Stato",
-    "tail_trim": "Taglio(i) di coda",
+    "tail_trim": "Ritaglio finale (s)",
     "timer_auto_pause": "Pausa automatica",
     "timer_min": "min",
     "timer_msg_placeholder": "Messaggio (facoltativo, {device}/{program}/{minutes})",
@@ -711,6 +714,11 @@
     "import_wizard": "Importa - scegli i dati"
   },
   "msg": {
+    "tail_trim_hint": "Numero di secondi da rimuovere dalla fine",
+    "store_sibling_hint": "Non c'è nulla di condiviso per il tuo modello esatto? Un modello molto simile della stessa marca è di solito un buon punto di partenza.",
+    "store_declare_appliance": "Indica a WashData quale elettrodomestico possiedi e questa scheda mostrerà le configurazioni che altre persone hanno condiviso per esso. Puoi anche digitare una marca qui sopra per dare un'occhiata.",
+    "refresh_catalog_hint": "Gli elenchi di marche ed elettrodomestici della community sono memorizzati nella cache per mantenere lo store condiviso entro il suo limite giornaliero. Aggiorna per recuperare le voci aggiunte o approvate da altri utenti.",
+    "head_trim_hint": "Numero di secondi da rimuovere dall'inizio",
     "appliance_monitor": "Monitor degli elettrodomestici",
     "artifact_dip_detail": "È sceso sotto la banda di potenza normale per ~{n}s.",
     "artifact_footer": "Evidenziato nel grafico sopra. Si tratta di artefatti temporanei (ad esempio la porta aperta a metà ciclo), non necessariamente problemi.",
@@ -721,7 +729,7 @@
     "automations_intro": "WashData genera gli eventi {start} / {end} ed espone entità, quindi le notifiche e le azioni si costruiscono al meglio come normali automatizzazioni di Home Assistant. Le automatizzazioni che utilizzano questo dispositivo appaiono di seguito.",
     "cleanup_intro": "Ogni ciclo etichettato è sovrapposto. Spunta i valori anomali ed elimina per ripulire il profilo.",
     "clear_debug_hint": "Rimuovi i dati di debug archiviati per liberare spazio.",
-    "collecting_data": "Raccolta dati - ancora {need} ciclo{plural} prima che l'ottimizzazione possa iniziare ({current}/{min}).",
+    "collecting_data": "Raccolta dati. Cicli ancora necessari prima che l'ottimizzazione possa iniziare: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Profili sovrapposti (debole)",
     "compare_profiles_tip": "Sovrapponi altri involucri del profilo sulla tabella sopra per vedere quale si adatta meglio a questo ciclo.",
     "compare_selected_cycles": "Cicli selezionati (fissi) – mostra/nascondi",
@@ -731,7 +739,7 @@
     "cycles_deleted": "{count} ciclo/i eliminato/i",
     "enough_data": "Dati sufficienti per apprendere ({current}/{min} cicli).",
     "export_description": "Scegli esattamente quali profili, cicli, impostazioni e altro esportare in JSON, oppure analizza un file e importa solo le parti che vuoi.",
-    "feedback_cycles_pending": "{n} ciclo{s} da revisionare",
+    "feedback_cycles_pending": "Da revisionare: {n}",
     "feedback_prompt": "Conferma che fosse corretto, correggi il programma o ignoralo.",
     "feedback_relabel_hint": "Anche rietichettare questo ciclo lo risolve.",
     "filter_by_profile": "Filtra per profilo…",
@@ -808,7 +816,6 @@
     "pg_stress_synthetic": "la simulazione in standby inizia qui",
     "pg_sweep_intro": "E se {param} fosse diverso? Testa {steps} valori sui tuoi ultimi {cycles} cicli per trovare l'impostazione in cui il maggior numero di cicli viene riconosciuto correttamente.",
     "pg_sweep_step": "Passaggio {done} / {total}",
-    "pg_undetected": "{n} ciclo{s} non rilevato",
     "pg_verdict_bad": "Richiede attenzione: molti cicli non vengono rilevati.",
     "pg_verdict_good": "Ben regolato: la maggior parte dei cicli viene identificata e riconosciuta correttamente.",
     "pg_verdict_ok": "Accettabile: alcuni cicli mancati. Prova ad abbassare la soglia di avvio.",
@@ -1607,7 +1614,7 @@
     "analyzing": "Analisi…",
     "resetting": "Reimpostazione…",
     "reverting": "Ripristino…",
-    "trimming": "Rifinitura…",
+    "trimming": "Ritaglio…",
     "splitting": "Divisione…",
     "deleting": "Eliminazione…",
     "imported": "Importato"
@@ -1640,6 +1647,7 @@
     "wrong_profile": "Profilo sbagliato"
   },
   "toast": {
+    "catalog_refreshed": "Catalogo della community aggiornato",
     "access_saved": "Controllo accessi salvato",
     "all_wiped": "Tutti i dati cancellati",
     "analysis_complete_none": "Analisi completata: nessun nuovo suggerimento",
@@ -1651,7 +1659,7 @@
     "cycle_labelled": "Ciclo etichettato",
     "cycle_paused": "Ciclo in pausa",
     "cycle_resumed": "Ciclo ripreso",
-    "cycle_trimmed": "Ciclo tagliato",
+    "cycle_trimmed": "Ciclo ritagliato",
     "cycles_merged": "Cicli uniti",
     "envelope_rebuilt": "Busta ricostruita",
     "envelopes_rebuilt": "Buste ricostruite",
@@ -1841,7 +1849,7 @@
       "thr_batch": "Mantenuto appena sopra la potenza attiva più bassa al p05 su {cycles} cicli ({p05}W) affinché un avvio venga rilevato il prima possibile e la soglia di arresto resti sotto la potenza di funzionamento più bassa della macchina.",
       "tol_per_profile": "p75 della varianza di durata per profilo su {profiles} profili ({cycles} cicli); i profili stretti non vengono penalizzati.",
       "tol_pooled": "In base alla varianza di durata aggregata di {cycles} cicli etichettati di recente (deviazione p95={dev}).",
-      "watchdog": "Mantenuto il più basso possibile in sicurezza (poco sopra l'intervallo di aggiornamento p95 di {p95}s, min 30s) per rilevare rapidamente i blocchi senza arresti falsi."
+      "watchdog": "Mantenuto il più basso possibile in sicurezza (poco sopra l'intervallo di aggiornamento p95 di {p95}s e almeno 2x l'intervallo di campionamento di {median}s, min 30s) per rilevare rapidamente i blocchi senza arresti falsi."
     },
     "exclusions": {
       "summary": "Esclusi {total} cicli rilevati male: {parts}.",
@@ -1907,6 +1915,10 @@
     "finished": "Il ciclo ha raggiunto lo stato finale e si è concluso."
   },
   "store": {
+    "your_model_tip": "Questo è l'elettrodomestico che hai dichiarato nelle Impostazioni",
+    "your_model": "Il tuo",
+    "search_brand_ph": "Cerca per marca…",
+    "programs_count": "Programmi: {n}",
     "browse": "Sfoglia",
     "device": "Dispositivo",
     "favorites": "Preferiti",

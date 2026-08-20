@@ -81,6 +81,8 @@
         "exists": "létezik"
     },
     "btn": {
+        "set_brand_model": "Márka és modell megadása",
+        "refresh_catalog": "Katalógus frissítése",
         "add_device": "+ Eszköz hozzáadása",
         "add_device_tip": "Adjon hozzá egy másik WashData eszközt",
         "add_maintenance": "Karbantartási esemény hozzáadása",
@@ -253,8 +255,8 @@
             "start": "A Ránctalanítás maximális teljesítménye alatt kell lennie ({max} W)"
         },
         "attn_sub": "Mentés előtt javítsa az ütközéseket",
-        "attn_title": "{n} beállítási ütközés{s}",
-        "settings_banner": "{n} beállítási ütközés{s} – ellenőrizze a kijelölt szakaszokat és javítsa ki mentés előtt.",
+        "attn_title": "Beállítási ütközések: {n}",
+        "settings_banner": "Beállítási ütközések: {n}. Ellenőrizze a kijelölt szakaszokat, és javítsa ki őket mentés előtt.",
         "settings_banner_btn": "Ugrás az elsőhöz",
         "confidence": {
             "auto": "Legalább az Egyezési küszöb értékén kell lennie ({match})",
@@ -298,7 +300,7 @@
             "match": "A Nem egyező küszöb felett kell lennie ({un})",
             "unmatch": "Az Egyezési küszöb alatt kell lennie ({match}); különben egy megerősített egyezés azonnal visszavonódik"
         },
-        "cascade_toast": "Konzisztencia megőrzése érdekében {n} beállítás is automatikusan módosult.",
+        "cascade_toast": "A konzisztencia érdekében módosított további beállítások: {n}",
         "suggestion_resolves": "A javításhoz alkalmazza az alábbi függőben lévő javaslatot ({val})",
         "use_fix": "Használja a következőt: {val}",
         "watchdog": {
@@ -364,6 +366,7 @@
         "poor": "⚠ Gyenge profilminőség"
     },
     "lbl": {
+        "drag_to_resize": "Húzza az átméretezéshez",
         "pg_anti_wrinkle": "Ránctalanítás",
         "actions": "Akciók",
         "activity": "Tevékenység",
@@ -435,7 +438,7 @@
         "from": "Ettől",
         "gap_s": "rés(ek)",
         "group_name": "Csoport neve",
-        "head_trim": "Fejszegély(ek)",
+        "head_trim": "Vágás az elejéről (s)",
         "health": "Egészség",
         "hide_tabs": "Lapok elrejtése nem rendszergazdák számára",
         "in_use": "Használatban",
@@ -451,7 +454,7 @@
         "metric": "Mérőszám",
         "mode_existing_profile": "Hozzáadás a meglévő profilhoz",
         "mode_new_profile": "Új profil létrehozása",
-        "models_fine_tuned": "({count} modell finomhangolva)",
+        "models_fine_tuned": "(finomhangolt modellek: {count})",
         "n_classic_suggestions": "{n} klasszikus",
         "n_ml_suggestions": "{n} ML",
         "n_selected": "{n} kijelölve",
@@ -532,7 +535,7 @@
         "stage3": "3. szakasz – DTW",
         "stage4": "4. szakasz – egyezés",
         "status": "Állapot",
-        "tail_trim": "Farokszegély(ek)",
+        "tail_trim": "Vágás a végéről (s)",
         "timer_auto_pause": "Automatikus szünet",
         "timer_min": "min",
         "timer_msg_placeholder": "Üzenet (nem kötelező, {device}/{program}/{minutes})",
@@ -759,6 +762,11 @@
         "import_wizard": "Importálás - adatok kiválasztása"
     },
     "msg": {
+        "tail_trim_hint": "Ennyi másodperc eltávolítása a végéről",
+        "store_sibling_hint": "Pontosan az Ön modelljéhez nincs semmi megosztva? Ugyanannak a márkának egy közeli modellje általában jó kiindulópont.",
+        "store_declare_appliance": "Adja meg a WashDatának, hogy melyik készülék az Öné, és ez a lap megjeleníti a mások által hozzá megosztott programokat és felvételeket. Fent egy márkát is beírhat, ha csak körül szeretne nézni.",
+        "refresh_catalog_hint": "A közösségi márka- és készüléklisták gyorsítótárba kerülnek, hogy a megosztott bolt a napi lekérdezési keretén belül maradjon. Frissítsen a mások által hozzáadott vagy jóváhagyott bejegyzések betöltéséhez.",
+        "head_trim_hint": "Ennyi másodperc eltávolítása az elejéről",
         "appliance_monitor": "Készülék monitor",
         "artifact_dip_detail": "~{n}s-re a szokásos energiasáv alá esett.",
         "artifact_footer": "A fenti grafikonon kiemelve. Ezek átmeneti műtermékek (pl. a ciklus közepén kinyílt ajtó), nem feltétlenül problémák.",
@@ -769,7 +777,7 @@
         "automations_intro": "A WashData {start} / {end} eseményeket küld és entitásokat tesz elérhetővé, ezért az értesítések és műveletek legjobban normál Home Assistant automatizálásként építhetők fel. Az ezt az eszközt használó automatizálások alább jelennek meg.",
         "cleanup_intro": "Minden címkézett ciklus átfedi. Jelölje be a kiugró értékeket, és törölje a profilt a profil megtisztításához.",
         "clear_debug_hint": "Távolítsa el a tárolt hibakeresési adatokat, hogy helyet szabadítson fel.",
-        "collecting_data": "Adatgyűjtés folyamatban - még {need} ciklus szükséges a finomhangolás megkezdéséhez ({current}/{min}).",
+        "collecting_data": "Adatgyűjtés folyamatban. A finomhangolás megkezdéséhez még szükséges ciklusok: {need} ({current}/{min}).",
         "compare_overlay_profiles": "Fedőprofilok (halvány)",
         "compare_profiles_tip": "Fedjen rá más profilborítékokat a fenti diagramra, hogy megtudja, melyik illik legjobban ehhez a ciklushoz.",
         "compare_selected_cycles": "Kiválasztott ciklusok (folytonos) – megjelenítés/elrejtés",
@@ -779,7 +787,7 @@
         "cycles_deleted": "{count} ciklus törölve",
         "enough_data": "Elegendő adat a tanuláshoz ({current}/{min} ciklus).",
         "export_description": "Válaszd ki pontosan, mely profilokat, ciklusokat, beállításokat és egyebeket exportálsz JSON-ba, vagy elemezz egy fájlt, és csak a kívánt részeket importáld.",
-        "feedback_cycles_pending": "{n} ciklus{s} áttekintésre vár",
+        "feedback_cycles_pending": "Áttekintésre vár: {n}",
         "feedback_prompt": "Erősítse meg, hogy helyes volt, javítsa ki a programot, vagy hagyja figyelmen kívül.",
         "feedback_relabel_hint": "Ennek a ciklusnak az újracímkézése ezt is megoldja.",
         "filter_by_profile": "Szűrés profil szerint…",
@@ -856,7 +864,6 @@
         "pg_stress_synthetic": "az üresjárati szimuláció itt kezdődik",
         "pg_sweep_intro": "Mi lenne, ha a {param} más lenne? Teszteljen {steps} értéket az utolsó {cycles} cikluson, hogy megtalálja azt a beállítást, ahol a legtöbb ciklus helyesen egyezik.",
         "pg_sweep_step": "{done} / {total}. lépés",
-        "pg_undetected": "{n} nem észlelt ciklus",
         "pg_verdict_bad": "Figyelmet igényel: sok ciklus észrevétlen marad.",
         "pg_verdict_good": "Jól hangolva: a legtöbb ciklust helyesen azonosítja és párosítja.",
         "pg_verdict_ok": "Elfogadható: néhány ciklus kimaradt. Próbálja meg csökkenteni az indítási küszöböt.",
@@ -1659,6 +1666,7 @@
         "wrong_profile": "Rossz profil"
     },
     "toast": {
+        "catalog_refreshed": "A közösségi katalógus frissítve",
         "access_saved": "A hozzáférés-szabályozás mentve",
         "all_wiped": "Minden adat törölve",
         "analysis_complete_none": "Az elemzés kész: nincs új javaslat",
@@ -1860,7 +1868,7 @@
             "thr_batch": "Éppen a p05 legkisebb aktív teljesítmény fölött tartva {cycles} cikluson át ({p05}W), hogy az indítás a lehető legkorábban észlelhető legyen, a leállítási küszöb pedig a gép legkisebb üzemi teljesítménye alatt maradjon.",
             "tol_per_profile": "A profilonkénti időtartam-szórás p75 értéke {profiles} profilon át ({cycles} ciklus); a stabil profilok nem kapnak büntetést.",
             "tol_pooled": "{cycles} legutóbbi címkézett ciklus összevont időtartam-szórása alapján (p95 szórás={dev}).",
-            "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (épp a p95 frissítési szünet, azaz {p95}s felett, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül."
+            "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (épp a p95 frissítési szünet, azaz {p95}s felett, és legalább a mintavételezési intervallum ({median}s) kétszerese, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül."
         },
         "exclusions": {
             "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",
@@ -1955,6 +1963,10 @@
         "finished": "A ciklus elérte a végállapotot és befejeződött."
     },
     "store": {
+        "your_model_tip": "Ez az a készülék, amelyet a Beállításokban megadott",
+        "your_model": "Az Öné",
+        "search_brand_ph": "Keresés márka szerint…",
+        "programs_count": "Programok: {n}",
         "browse": "Böngészés",
         "device": "Készülék",
         "favorites": "Kedvencek",

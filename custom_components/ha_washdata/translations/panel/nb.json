@@ -81,6 +81,8 @@
     "exists": "finnes"
   },
   "btn": {
+    "set_brand_model": "Angi merke og modell",
+    "refresh_catalog": "Oppdater katalog",
     "add_device": "+ Legg til enhet",
     "add_device_tip": "Legg til en annen WashData-enhet",
     "add_maintenance": "Legg til vedlikeholdshendelse",
@@ -90,7 +92,7 @@
     "apply_label": "Påfør etikett",
     "apply_set_b": "Bruk sett B",
     "apply_split": "Påfør Split",
-    "apply_trim": "Påfør Trim",
+    "apply_trim": "Bruk beskjæring",
     "auto_detect_split": "Automatisk gjenkjenning",
     "auto_label_cycles": "Automatiske etikettsykluser",
     "auto_label_cycles_tip": "Tilordne automatisk profilnavn til umerkede sykluser der matchkonfidensen overstiger terskelen",
@@ -209,8 +211,8 @@
     "stop": "Stopp",
     "submit_correction": "Send inn rettelse",
     "train_now": "Tren nå",
-    "trim": "Trim",
-    "trim_split": "Trim / Splitt",
+    "trim": "Beskjær",
+    "trim_split": "Beskjær / Splitt",
     "undo": "Angre",
     "use": "Bruk",
     "wipe_all": "Tørk alle data",
@@ -253,7 +255,7 @@
       "start": "Må være under maksimal anti-krøll-effekt ({max} W)"
     },
     "attn_sub": "Rett konflikter før du lagrer",
-    "attn_title": "{n} innstillingskonflikt{s}",
+    "attn_title": "Innstillingskonflikter: {n}",
     "confidence": {
       "auto": "Må være ved eller over matchingsterskelen ({match})",
       "learning": "Må være ved eller under matchingsterskelen ({match})",
@@ -296,14 +298,14 @@
       "match": "Må være over avmatch-terskelen ({un})",
       "unmatch": "Må være under matchingsterskelen ({match}); ellers avmatchs en bekreftet match øyeblikkelig"
     },
-    "cascade_toast": "Også {n} innstilling{s} justert for konsistens.",
+    "cascade_toast": "Andre innstillinger justert for konsistens: {n}",
     "suggestion_resolves": "Bruk forslaget nedenfor ({val}) for å løse dette",
     "use_fix": "Bruk {val}",
     "watchdog": {
       "interval": "Bør være minst 2x samplingsintervallet ({si} s)",
       "sampling": "Samplingsintervall bør være høyst halvparten av vaktbikkjeintervallet ({wi} s)"
     },
-    "settings_banner": "{n} innstillingskonflikt{s} – sjekk de fremhevede seksjonene og rett dem opp før du lagrer.",
+    "settings_banner": "Innstillingskonflikter: {n}. Sjekk de fremhevede seksjonene og rett dem opp før du lagrer.",
     "settings_banner_btn": "Gå til første"
   },
   "hdr": {
@@ -364,6 +366,7 @@
     "poor": "⚠ Dårlig profilkvalitet"
   },
   "lbl": {
+    "drag_to_resize": "Dra for å endre størrelse",
     "actions": "Handlinger",
     "activity": "Aktivitet",
     "administrators": "Administratorer",
@@ -450,7 +453,7 @@
     "metric": "Metrikk",
     "mode_existing_profile": "Legg til i eksisterende profil",
     "mode_new_profile": "Opprett ny profil",
-    "models_fine_tuned": "({count} modell{plural} finjustert)",
+    "models_fine_tuned": "(finjusterte modeller: {count})",
     "n_classic_suggestions": "{n} klassisk",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} valgt",
@@ -759,6 +762,11 @@
     "import_wizard": "Import - velg data"
   },
   "msg": {
+    "tail_trim_hint": "Fjern så mange sekunder fra slutten",
+    "store_sibling_hint": "Er ingenting delt for nøyaktig din modell? En nært beslektet modell fra samme merke er vanligvis et godt utgangspunkt.",
+    "store_declare_appliance": "Fortell WashData hvilket apparat du har, så viser denne fanen oppsettene andre har delt for det. Du kan også skrive et merke ovenfor for å se deg rundt.",
+    "refresh_catalog_hint": "Fellesskapets lister over merker og apparater mellomlagres for at fellesskapsbutikken skal holde seg innenfor sin daglige grense. Oppdater for å hente bidrag som andre har lagt til eller godkjent.",
+    "head_trim_hint": "Fjern så mange sekunder fra starten",
     "appliance_monitor": "Apparatmonitor",
     "artifact_dip_detail": "Falt under det vanlige effektbåndet i ~{n}s.",
     "artifact_footer": "Fremhevet på grafen over. Dette er forbigående artefakter (f.eks. døren åpnet midt i syklusen), ikke nødvendigvis problemer.",
@@ -769,7 +777,7 @@
     "automations_intro": "WashData utløser {start} / {end}-hendelser og gjør entiteter tilgjengelige, slik at varsler og handlinger best bygges som vanlige Home Assistant-automatiseringer. Automatiseringer som bruker denne enheten, vises nedenfor.",
     "cleanup_intro": "Hver merket syklus er lagt over. Kryss av for uteliggere og slett for å rydde opp i profilen.",
     "clear_debug_hint": "Fjern lagrede feilsøkingsdata for å frigjøre plass.",
-    "collecting_data": "Samler inn data: {need} syklus{plural} til før finjustering kan starte ({current}/{min}).",
+    "collecting_data": "Samler inn data. Sykluser som mangler før finjustering kan starte: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overleggsprofiler (svak)",
     "compare_profiles_tip": "Legg over andre profilkonvolutter på diagrammet ovenfor for å se hvilken som passer best til denne syklusen.",
     "compare_selected_cycles": "Valgte sykluser (fast) – vis / skjul",
@@ -779,7 +787,7 @@
     "cycles_deleted": "{count} syklus(er) slettet",
     "enough_data": "Nok data til å lære av ({current}/{min} sykluser).",
     "export_description": "Velg nøyaktig hvilke profiler, sykluser, innstillinger og mer som skal eksporteres til JSON, eller analyser en fil og importer bare delene du vil ha.",
-    "feedback_cycles_pending": "{n} syklus{s} til gjennomgang",
+    "feedback_cycles_pending": "Til gjennomgang: {n}",
     "feedback_prompt": "Bekreft at det var riktig, korriger programmet eller ignorer.",
     "feedback_relabel_hint": "Å merke denne syklusen på nytt løser også gjennomgangen.",
     "filter_by_profile": "Filtrer etter profil…",
@@ -856,7 +864,6 @@
     "pg_stress_synthetic": "inaktiv simulering starter her",
     "pg_sweep_intro": "Hva om {param} var annerledes? Test {steps} verdier på tvers av dine siste {cycles} sykluser for å finne innstillingen der flest sykluser blir riktig matchet.",
     "pg_sweep_step": "Trinn {done} / {total}",
-    "pg_undetected": "{n} syklus{s} ikke oppdaget",
     "pg_verdict_bad": "Trenger oppmerksomhet: mange sykluser blir ikke oppdaget.",
     "pg_verdict_good": "Godt innstilt: de fleste sykluser blir riktig identifisert og matchet.",
     "pg_verdict_ok": "Akseptabelt: noen sykluser ble oversett. Prøv å senke startterskelen.",
@@ -1754,7 +1761,7 @@
       "thr_batch": "Holdt like over den laveste aktive effekten ved p05 på tvers av {cycles} sykluser ({p05}W) slik at en start fanges så tidlig som mulig og stoppterskelen holder seg under maskinens laveste driftseffekt.",
       "tol_per_profile": "p75 for varighetsvariansen per profil på tvers av {profiles} profiler ({cycles} sykluser); stramme profiler straffes ikke.",
       "tol_pooled": "Basert på samlet varighetsvarians for {cycles} nyeste merkede sykluser (p95 avvik={dev}).",
-      "watchdog": "Holdt så lavt som forsvarlig (like over p95-oppdateringsmellomrommet på {p95}s, min 30s) slik at stans fanges raskt uten falske stopp."
+      "watchdog": "Holdt så lavt som forsvarlig (like over p95-oppdateringsmellomrommet på {p95}s og minst 2x samplingsintervallet på {median}s, min. 30s) slik at stans fanges raskt uten falske stopp."
     },
     "exclusions": {
       "summary": "Ekskluderte {total} feildetekterte syklus(er): {parts}.",
@@ -1801,6 +1808,7 @@
     "wrong_profile": "Feil profil"
   },
   "toast": {
+    "catalog_refreshed": "Fellesskapskatalogen er oppdatert",
     "access_saved": "Tilgangskontroll lagret",
     "all_wiped": "Alle data slettet",
     "analysis_complete_none": "Analysen er fullført: ingen nye forslag",
@@ -1812,7 +1820,7 @@
     "cycle_labelled": "Syklus merket",
     "cycle_paused": "Syklus stoppet",
     "cycle_resumed": "Syklusen ble gjenopptatt",
-    "cycle_trimmed": "Syklus trimmet",
+    "cycle_trimmed": "Syklus beskjært",
     "cycles_merged": "Sykluser slått sammen",
     "envelope_rebuilt": "Konvolutt gjenoppbygd",
     "envelopes_rebuilt": "Konvolutter gjenoppbygd",
@@ -1955,6 +1963,10 @@
     "finished": "Syklusen nådde en sluttilstand og stoppet."
   },
   "store": {
+    "your_model_tip": "Dette er apparatet du har angitt i Innstillinger",
+    "your_model": "Ditt apparat",
+    "search_brand_ph": "Søk etter merke…",
+    "programs_count": "Programmer: {n}",
     "browse": "Bla gjennom",
     "device": "Enhet",
     "favorites": "Favoritter",

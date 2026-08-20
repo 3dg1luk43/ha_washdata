@@ -81,6 +81,8 @@
     "exists": "vorhanden"
   },
   "btn": {
+    "set_brand_model": "Marke und Modell festlegen",
+    "refresh_catalog": "Katalog aktualisieren",
     "add_device": "+ Gerät hinzufügen",
     "add_device_tip": "Fügen Sie ein weiteres WashData-Gerät hinzu",
     "add_maintenance": "Wartungsereignis hinzufügen",
@@ -90,7 +92,7 @@
     "apply_label": "Etikett anwenden",
     "apply_set_b": "Set B anwenden",
     "apply_split": "Teilung anwenden",
-    "apply_trim": "Trimmen anwenden",
+    "apply_trim": "Zuschnitt anwenden",
     "auto_detect_split": "Automatische Erkennung",
     "auto_label_cycles": "Auto-Label-Zyklen",
     "auto_label_cycles_tip": "Weist unbeschrifteten Zyklen, deren Übereinstimmungskonfidens den Schwellenwert überschreitet, automatisch Profilnamen zu",
@@ -209,8 +211,8 @@
     "stop": "Stopp",
     "submit_correction": "Korrektur einreichen",
     "train_now": "Trainiere jetzt",
-    "trim": "Trimmen",
-    "trim_split": "Trimmen / Teilen",
+    "trim": "Zuschneiden",
+    "trim_split": "Zuschneiden / Teilen",
     "undo": "Rückgängig",
     "use": "Verwenden",
     "wipe_all": "Alle Daten löschen",
@@ -253,7 +255,7 @@
       "start": "Muss unter der maximalen Knitterschutz-Leistung ({max} W) liegen"
     },
     "attn_sub": "Konflikte vor dem Speichern beheben",
-    "attn_title": "{n} Einstellungskonflikt{s}",
+    "attn_title": "Einstellungskonflikte: {n}",
     "confidence": {
       "auto": "Muss beim oder über dem Übereinstimmungsschwellenwert ({match}) liegen",
       "learning": "Muss beim oder unter dem Übereinstimmungsschwellenwert ({match}) liegen",
@@ -296,14 +298,14 @@
       "match": "Muss über dem Nicht-Übereinstimmungs-Schwellenwert ({un}) liegen",
       "unmatch": "Muss unter dem Übereinstimmungsschwellenwert ({match}) liegen; andernfalls wird eine bestätigte Übereinstimmung sofort aufgehoben"
     },
-    "cascade_toast": "Außerdem {n} Einstellung{s} zur Konsistenz angepasst.",
+    "cascade_toast": "Andere Einstellungen zur Konsistenz angepasst: {n}",
     "suggestion_resolves": "Unten den ausstehenden Vorschlag ({val}) übernehmen, um dies zu beheben",
     "use_fix": "Verwende {val}",
     "watchdog": {
       "interval": "Sollte mindestens das 2-fache des Abtastintervalls ({si} s) betragen",
       "sampling": "Abtastintervall sollte höchstens die Hälfte des Watchdog-Intervalls ({wi} s) betragen"
     },
-    "settings_banner": "{n} Einstellungskonflikt{s} – markierte Abschnitte prüfen und vor dem Speichern beheben.",
+    "settings_banner": "Einstellungskonflikte: {n}. Prüfen Sie die markierten Abschnitte und beheben Sie sie vor dem Speichern.",
     "settings_banner_btn": "Zum ersten"
   },
   "hdr": {
@@ -364,6 +366,7 @@
     "poor": "⚠ Schlechte Übereinstimmungsqualität"
   },
   "lbl": {
+    "drag_to_resize": "Zum Ändern der Größe ziehen",
     "actions": "Aktionen",
     "activity": "Aktivität",
     "administrators": "Administratoren",
@@ -450,7 +453,7 @@
     "metric": "Metrik",
     "mode_existing_profile": "Zum vorhandenen Profil hinzufügen",
     "mode_new_profile": "Neues Profil erstellen",
-    "models_fine_tuned": "({count} Modell{plural} feinabgestimmt)",
+    "models_fine_tuned": "(feinabgestimmte Modelle: {count})",
     "n_classic_suggestions": "{n} klassisch",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} ausgewählt",
@@ -759,6 +762,11 @@
     "import_wizard": "Import - Daten wählen"
   },
   "msg": {
+    "tail_trim_hint": "So viele Sekunden vom Ende entfernen",
+    "store_sibling_hint": "Für Ihr genaues Modell ist nichts geteilt? Ein nah verwandtes Modell derselben Marke ist meist ein guter Ausgangspunkt.",
+    "store_declare_appliance": "Teilen Sie WashData mit, welches Gerät Sie besitzen, dann zeigt dieser Tab die Setups, die andere dafür geteilt haben. Sie können oben auch eine Marke eingeben, um sich umzusehen.",
+    "refresh_catalog_hint": "Die Marken- und Gerätelisten der Community werden zwischengespeichert, damit der Community-Store sein Tageslimit einhält. Aktualisieren Sie, um Einträge zu übernehmen, die andere hinzugefügt oder freigegeben haben.",
+    "head_trim_hint": "So viele Sekunden vom Anfang entfernen",
     "appliance_monitor": "Gerätemonitor",
     "artifact_dip_detail": "Sank unter das übliche Leistungsband für ~{n}s.",
     "artifact_footer": "In der Grafik oben hervorgehoben. Hierbei handelt es sich um vorübergehende Artefakte (z. B. das Öffnen der Tür mitten im Zyklus), nicht unbedingt um Probleme.",
@@ -769,7 +777,7 @@
     "automations_intro": "WashData löst {start} / {end}-Ereignisse aus und stellt Entitäten bereit, sodass Benachrichtigungen und Aktionen am besten als normale Home Assistant-Automatisierungen eingerichtet werden. Automatisierungen, die dieses Gerät verwenden, werden unten angezeigt.",
     "cleanup_intro": "Jeder beschriftete Zyklus überlagert. Markieren Sie Ausreißer und löschen Sie sie, um das Profil zu bereinigen.",
     "clear_debug_hint": "Entfernen Sie gespeicherte Debug-Daten, um Speicherplatz freizugeben.",
-    "collecting_data": "Daten werden gesammelt: noch {need} Zyklus{plural} bis zum Start der Feinabstimmung ({current}/{min}).",
+    "collecting_data": "Daten werden gesammelt. Noch benötigte Zyklen bis zum Start der Feinabstimmung: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlay-Profile (schwach)",
     "compare_profiles_tip": "Überlagern Sie andere Profilumschläge in der Tabelle oben, um zu sehen, welcher am besten zu diesem Zyklus passt.",
     "compare_selected_cycles": "Ausgewählte Zyklen (durchgehend) – ein-/ausblenden",
@@ -856,7 +864,6 @@
     "pg_stress_synthetic": "Leerlaufsimulation beginnt hier",
     "pg_sweep_intro": "Was wäre, wenn {param} anders wäre? Testen Sie {steps} Werte über Ihre letzten {cycles} Zyklen, um die Einstellung zu finden, bei der die meisten Zyklen korrekt zugeordnet werden.",
     "pg_sweep_step": "Schritt {done} / {total}",
-    "pg_undetected": "{n} Zyklus{s} nicht erkannt",
     "pg_verdict_bad": "Erfordert Aufmerksamkeit: viele Zyklen bleiben unerkannt.",
     "pg_verdict_good": "Gut abgestimmt: die meisten Zyklen werden korrekt erkannt und zugeordnet.",
     "pg_verdict_ok": "Akzeptabel: einige Zyklen wurden verpasst. Versuchen Sie, den Startschwellenwert zu senken.",
@@ -1754,7 +1761,7 @@
       "thr_batch": "Knapp über der p05-niedrigsten aktiven Leistung über {cycles} Zyklen ({p05}W) gehalten, damit ein Start so früh wie möglich erkannt wird und die Stopp-Schwelle unter der niedrigsten Betriebsleistung der Maschine bleibt.",
       "tol_per_profile": "p75 der Dauervarianz pro Profil über {profiles} Profile ({cycles} Zyklen); enge Profile werden nicht benachteiligt.",
       "tol_pooled": "Basierend auf der zusammengefassten Dauervarianz von {cycles} kürzlich gelabelten Zyklen (p95-Abweichung={dev}).",
-      "watchdog": "So niedrig wie sicher gehalten (knapp über der p95-Aktualisierungslücke von {p95}s, min 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
+      "watchdog": "So niedrig wie sicher gehalten (knapp über der p95-Aktualisierungslücke von {p95}s und mindestens 2x dem Abtastintervall von {median}s, min. 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
     },
     "exclusions": {
       "summary": "{total} falsch erkannte Zyklen ausgeschlossen: {parts}.",
@@ -1801,6 +1808,7 @@
     "wrong_profile": "Falsches Profil"
   },
   "toast": {
+    "catalog_refreshed": "Community-Katalog aktualisiert",
     "access_saved": "Zugangskontrolle gespeichert",
     "all_wiped": "Alle Daten gelöscht",
     "analysis_complete_none": "Analyse abgeschlossen: keine neuen Vorschläge",
@@ -1812,7 +1820,7 @@
     "cycle_labelled": "Zyklus beschriftet",
     "cycle_paused": "Zyklus pausiert",
     "cycle_resumed": "Der Zyklus wurde fortgesetzt",
-    "cycle_trimmed": "Zyklus getrimmt",
+    "cycle_trimmed": "Zyklus zugeschnitten",
     "cycles_merged": "Zyklen verschmolzen",
     "envelope_rebuilt": "Umschlag neu aufgebaut",
     "envelopes_rebuilt": "Umschläge neu aufgebaut",
@@ -1955,6 +1963,10 @@
     "finished": "Der Zyklus hat einen Endzustand erreicht und wurde beendet."
   },
   "store": {
+    "your_model_tip": "Dies ist das Gerät, das Sie in den Einstellungen angegeben haben",
+    "your_model": "Ihr Gerät",
+    "search_brand_ph": "Nach Marke suchen…",
+    "programs_count": "Programme: {n}",
     "browse": "Durchsuchen",
     "device": "Gerät",
     "favorites": "Favoriten",
