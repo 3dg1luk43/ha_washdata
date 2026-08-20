@@ -106,6 +106,7 @@ from .const import (
     CONF_RUNNING_DEAD_ZONE,
 )
 from .log_utils import DeviceLoggerAdapter
+from .options_utils import strip_null_options
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -138,7 +139,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         return False
 
-    if version == 3 and minor_version >= 8:
+    if version == 3 and minor_version >= 9:
         return True
 
     # 3.6 → 3.7: remove initial_profile stub key from entry.data.
@@ -160,7 +161,34 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         minor_version = 8
         _log.debug("Migrated WashData entry from 3.7 to 3.8 (removed running_dead_zone)")
 
-    if version == 3 and minor_version >= 8:
+    # 3.8 → 3.9: drop options persisted as null. A never-saved setting has no
+    # entry in options, so the per-setting Revert used to send the changelog's
+    # `old` (null) and ws_set_options stored it verbatim - and a stored None
+    # survives options.get(key, DEFAULT), so the numeric casts that build
+    # CycleDetectorConfig raised TypeError and the entry could never be set up
+    # again without hand-editing .storage (#389). ws_set_options and the import
+    # path now strip on write; this heals entries already carrying one. Healing
+    # here rather than on a setup failure keeps it deterministic, covers the
+    # crash classes a null produces outside a numeric cast (a null power_sensor
+    # raises AttributeError inside hass.states.get(None)), and never rewrites the
+    # entry mid-setup.
+    if version == 3 and minor_version == 8:
+        new_opts = strip_null_options(entry.options)
+        dropped = sorted(set(entry.options) - set(new_opts))
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=9
+        )
+        minor_version = 9
+        if dropped:
+            _log.warning(
+                "Migrated WashData entry from 3.8 to 3.9: dropped option(s) %s "
+                "stored as null so the compiled defaults apply again",
+                dropped,
+            )
+        else:
+            _log.debug("Migrated WashData entry from 3.8 to 3.9 (no null options)")
+
+    if version == 3 and minor_version >= 9:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -294,15 +322,19 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # (covers entries that migrate straight from v1/v2/early-v3 in one pass).
     options.pop(CONF_RUNNING_DEAD_ZONE, None)
 
+    # Same for an option persisted as null (3.8 -> 3.9), so a one-pass legacy
+    # migration lands on the current schema rather than needing a second call.
+    options = strip_null_options(options)
+
     hass.config_entries.async_update_entry(
         entry,
         data=data,
         options=options,
         version=3,
-        minor_version=8,
+        minor_version=9,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.8", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.9", version, minor_version
     )
     return True
 
