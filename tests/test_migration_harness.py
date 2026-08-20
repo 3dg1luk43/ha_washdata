@@ -92,7 +92,7 @@ async def test_migration_with_harness_moves_and_preserves_fields(
     hass.config_entries.async_update_entry.assert_called_once()
 
     assert legacy_entry.version == 3
-    assert legacy_entry.minor_version == 8
+    assert legacy_entry.minor_version == 9
 
     assert legacy_entry.options[CONF_MIN_POWER] == 5.0
     assert legacy_entry.options[CONF_OFF_DELAY] == 120
@@ -124,7 +124,7 @@ async def test_migration_with_harness_moves_and_preserves_fields(
 async def test_migration_is_idempotent_after_first_run(
     hass: HomeAssistant, legacy_entry: DummyEntry
 ) -> None:
-    """Once migrated to 3.6, additional migration calls should no-op."""
+    """Once migrated to the current schema, additional calls should no-op."""
 
     def _apply_update(entry: DummyEntry, **kwargs: Any) -> None:
         entry.data = kwargs["data"]
@@ -147,8 +147,8 @@ async def test_migration_is_idempotent_after_first_run(
 
 @pytest.mark.asyncio
 async def test_migration_latest_version_is_noop(hass: HomeAssistant) -> None:
-    """Entries already at 3.7 should not trigger updates."""
-    entry = DummyEntry(version=3, minor_version=8, data={}, options={})
+    """Entries already at the current schema should not trigger updates."""
+    entry = DummyEntry(version=3, minor_version=9, data={}, options={})
     hass.config_entries.async_update_entry = MagicMock()
 
     migrated = await async_migrate_entry(hass, entry)
@@ -182,7 +182,7 @@ async def test_migration_remaps_removed_device_types_to_other(
     assert entry.options[CONF_DEVICE_TYPE] == "other"
     # Tuned options are preserved through the remap.
     assert entry.options[CONF_MIN_POWER] == 7.0
-    assert entry.minor_version == 8
+    assert entry.minor_version == 9
 
 
 @pytest.mark.asyncio
@@ -236,7 +236,7 @@ async def test_migration_strips_suppress_feedback_notifications(
     # Unrelated tuned options survive the strip.
     assert entry.options[CONF_DEVICE_TYPE] == "dishwasher"
     assert entry.options[CONF_MIN_POWER] == 9.0
-    assert entry.minor_version == 8
+    assert entry.minor_version == 9
 
 
 @pytest.mark.asyncio
@@ -269,7 +269,7 @@ async def test_migrate_3_6_to_3_7_removes_initial_profile(hass: HomeAssistant) -
     assert entry.data["name"] == "Washer"
     assert entry.data["power_sensor"] == "sensor.power"
     assert entry.version == 3
-    assert entry.minor_version == 8
+    assert entry.minor_version == 9
 
 
 @pytest.mark.asyncio
@@ -294,7 +294,7 @@ async def test_migrate_3_6_to_3_7_no_initial_profile_is_noop(hass: HomeAssistant
 
     result = await async_migrate_entry(hass, entry)
     assert result is True
-    assert entry.minor_version == 8
+    assert entry.minor_version == 9
     assert entry.data["name"] == "Washer"
     assert entry.data["power_sensor"] == "sensor.power"
 
@@ -325,7 +325,7 @@ async def test_migrate_3_7_to_3_8_removes_running_dead_zone(hass: HomeAssistant)
 
     result = await async_migrate_entry(hass, entry)
     assert result is True
-    assert entry.minor_version == 8
+    assert entry.minor_version == 9
     assert CONF_RUNNING_DEAD_ZONE not in entry.options
     assert entry.options["off_delay"] == 120
     assert entry.options["min_power"] == 2.0
@@ -353,5 +353,97 @@ async def test_migrate_3_7_to_3_8_idempotent_no_dead_zone(hass: HomeAssistant) -
 
     result = await async_migrate_entry(hass, entry)
     assert result is True
-    assert entry.minor_version == 8
+    assert entry.minor_version == 9
     assert entry.options["off_delay"] == 120
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_8_to_3_9_drops_null_options(hass: HomeAssistant) -> None:
+    """3.8 → 3.9: an option persisted as null is dropped so the default applies.
+
+    A never-saved setting has no entry in options, so the panel's per-setting
+    Revert sent the changelog's ``old`` (null) and it was stored verbatim - and a
+    stored None survives ``options.get(key, DEFAULT)``, so the numeric casts that
+    build ``CycleDetectorConfig`` raised ``TypeError`` and the entry could never
+    be set up again (#389).
+    """
+    entry = DummyEntry(
+        version=3,
+        minor_version=8,
+        data={},
+        options={
+            "power_off_threshold_w": None,
+            "power_off_delay": None,
+            CONF_MIN_POWER: 2.0,
+            "notify_channel": "",
+        },
+    )
+
+    def _apply_update(e: DummyEntry, **kwargs: Any) -> None:
+        if "options" in kwargs:
+            e.options = kwargs["options"]
+        if "minor_version" in kwargs:
+            e.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
+
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.minor_version == 9
+    assert "power_off_threshold_w" not in entry.options
+    assert "power_off_delay" not in entry.options
+    assert entry.options[CONF_MIN_POWER] == 2.0
+    # An empty string is a real stored value (a cleared notify channel), not a null.
+    assert entry.options["notify_channel"] == ""
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_8_to_3_9_drops_a_null_power_sensor(hass: HomeAssistant) -> None:
+    """A null power_sensor is dropped too, so the entry.data binding applies again.
+
+    None is not a supported binding: ``async_setup`` raises ``AttributeError``
+    inside ``hass.states.get(None)``, which no numeric-cast guard would catch.
+    """
+    entry = DummyEntry(
+        version=3,
+        minor_version=8,
+        data={CONF_POWER_SENSOR: "sensor.washer_power"},
+        options={CONF_POWER_SENSOR: None},
+    )
+
+    def _apply_update(e: DummyEntry, **kwargs: Any) -> None:
+        if "options" in kwargs:
+            e.options = kwargs["options"]
+        if "minor_version" in kwargs:
+            e.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
+
+    assert await async_migrate_entry(hass, entry) is True
+    assert CONF_POWER_SENSOR not in entry.options
+    assert (
+        entry.options.get(CONF_POWER_SENSOR, entry.data.get(CONF_POWER_SENSOR))
+        == "sensor.washer_power"
+    )
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_8_to_3_9_keeps_clean_options_untouched(
+    hass: HomeAssistant,
+) -> None:
+    """3.8 → 3.9 only bumps the version when there is no null to drop."""
+    entry = DummyEntry(
+        version=3, minor_version=8, data={}, options={CONF_OFF_DELAY: 120}
+    )
+
+    def _apply_update(e: DummyEntry, **kwargs: Any) -> None:
+        if "options" in kwargs:
+            e.options = kwargs["options"]
+        if "minor_version" in kwargs:
+            e.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
+
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.minor_version == 9
+    assert entry.options == {CONF_OFF_DELAY: 120}
+    assert hass.config_entries.async_update_entry.call_count == 1
