@@ -1568,6 +1568,22 @@ const _DIAGRAM_BY_KEY = {
   sampling_interval: 'sampling',
 };
 
+// Rect that really clips an absolutely-positioned popover: the viewport
+// intersected with every ancestor that scrolls or hides its overflow. `.wd-modal`
+// only declares `overflow-y: auto`, but CSS promotes the unset axis to `auto` as
+// well, so it clips horizontally too, which is what cut the help bubbles in half
+// (#385).
+function _clipRectFor(el) {
+  let left = 0, right = window.innerWidth;
+  for (let a = el.parentElement; a; a = a.parentElement) {
+    if (getComputedStyle(a).overflowX === 'visible') continue;
+    const r = a.getBoundingClientRect();
+    if (r.left > left) left = r.left;
+    if (r.right < right) right = r.right;
+  }
+  return { left, right };
+}
+
 // Tooltip popover with an optional JS-drawn SVG diagram above the text.
 function _tip(text, diagram) {
   const dg = diagram ? _diagram(diagram) : '';
@@ -1845,6 +1861,8 @@ class HaWashdataPanel extends HTMLElement {
     this._undoSeq = 0;
     // Bound modal keydown handler (Escape / Tab-trap); attached once in _boot.
     this._kbdHandler = null;
+    // Bound help-bubble edge nudge (#385); attached once in _boot.
+    this._tipHandler = null;
     // D7: settings changelog cache
     this._settingsChangelog = null;
     this._settingsChangeByKey = {};
@@ -1945,6 +1963,14 @@ class HaWashdataPanel extends HTMLElement {
         this._kbdHandler = (e) => this._onKeydown(e);
         this.shadowRoot.addEventListener('keydown', this._kbdHandler);
       }
+      if (this.shadowRoot && !this._tipHandler) {
+        this._tipHandler = (e) => {
+          const t = e.target;
+          const anchor = t && t.closest ? t.closest('.wd-tip') : null;
+          if (anchor) this._positionTip(anchor);
+        };
+        this.shadowRoot.addEventListener('pointerover', this._tipHandler);
+      }
     }
     this._onResize = () => this._resizeLogsPage();
     window.addEventListener('resize', this._onResize);
@@ -1960,6 +1986,7 @@ class HaWashdataPanel extends HTMLElement {
     this._flushPendingDeletes();
     // Remove the modal keydown listener.
     if (this._kbdHandler && this.shadowRoot) { this.shadowRoot.removeEventListener('keydown', this._kbdHandler); this._kbdHandler = null; }
+    if (this._tipHandler && this.shadowRoot) { this.shadowRoot.removeEventListener('pointerover', this._tipHandler); this._tipHandler = null; }
     // Remove the community-store OAuth message listener.
     if (this._storeConnectListener) { window.removeEventListener('message', this._storeConnectListener); this._storeConnectListener = null; }
   }
@@ -1980,6 +2007,14 @@ class HaWashdataPanel extends HTMLElement {
     // survives every _render() innerHTML swap. Removed on disconnect.
     this._kbdHandler = (e) => this._onKeydown(e);
     shadow.addEventListener('keydown', this._kbdHandler);
+    // Same deal for the help-bubble edge nudge (#385): delegated on the shadow
+    // root so it survives every innerHTML swap.
+    this._tipHandler = (e) => {
+      const t = e.target;
+      const anchor = t && t.closest ? t.closest('.wd-tip') : null;
+      if (anchor) this._positionTip(anchor);
+    };
+    shadow.addEventListener('pointerover', this._tipHandler);
     // Load per-user-language panel translations before first render.
     // Falls back to JS-embedded strings if the fetch fails.
     this._loadPanelTranslations().catch(() => {}).finally(() => {
@@ -7900,6 +7935,33 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _hideGraphTip() { if (this._hoverRafId) { cancelAnimationFrame(this._hoverRafId); this._hoverRafId = null; this._hoverPending = null; } if (this._gtip) this._gtip.style.display = 'none'; this._syncSpagRowHighlight(null); }
+
+  // #385: keep an "i" help popover inside whatever clips it. The CSS centres the
+  // bubble on its 15px anchor (`left:50%` + `translateX(-50%)`), so an anchor near
+  // a container edge (every label in the cycle modal's Review tab) pushed half
+  // of it outside the modal, where the overflow cut the text off mid-word. Nudge
+  // it back along the x axis on hover, keeping the centred position preferred.
+  _positionTip(anchor) {
+    const pop = anchor.querySelector('.wd-tip-pop');
+    if (!pop) return;
+    // Always measure from the unshifted position so repeat hovers can't stack up.
+    pop.style.transform = '';
+    // On the first hover the :hover rule may not have been applied yet, so lay
+    // the bubble out invisibly just to measure it.
+    const hidden = !pop.offsetWidth;
+    const prev = hidden ? pop.style.cssText : '';
+    if (hidden) { pop.style.visibility = 'hidden'; pop.style.display = 'block'; }
+    const r = pop.getBoundingClientRect();
+    if (hidden) pop.style.cssText = prev;
+    if (!r.width) return;
+    const clip = _clipRectFor(anchor);
+    const gap = 6;                                   // breathing room at the edge
+    const min = clip.left + gap;
+    const max = clip.right - gap - r.width;
+    const left = max < min ? min : Math.min(Math.max(r.left, min), max);
+    const shift = Math.round(left - r.left);
+    if (shift) pop.style.transform = `translateX(calc(-50% + ${shift}px))`;
+  }
 
   _syncSpagRowHighlight(cid) {
     if (cid === this._spagHoverCid) return;

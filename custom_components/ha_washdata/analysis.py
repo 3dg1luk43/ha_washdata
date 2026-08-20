@@ -41,6 +41,7 @@ from .const import (
     MATCH_MAE_PEAK_FLOOR,
     MATCH_MAE_REF_PEAK,
     MATCH_MAE_SCALE,
+    MAX_ALIGN_GRID_POINTS,
     STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES,
 )
 
@@ -537,6 +538,20 @@ def compute_dtw_path(
     if n == 0 or m == 0:
         return []
 
+    # Pre-flight memory guard: the cost matrix is (n+1)×(m+1) float64.  An
+    # uncapped call from a 1 Hz long cycle can request >1 GB here.  If the
+    # allocation would exceed ~80 MB, skip DTW and return an empty path so
+    # the caller falls back to linear interpolation (graceful degrade rather
+    # than OOM-killing Home Assistant — issue #388).
+    _DTW_CELL_BUDGET = 10_000_000  # 10 M cells × 8 B ≈ 80 MB
+    if (n + 1) * (m + 1) > _DTW_CELL_BUDGET:
+        _LOGGER.warning(
+            "DTW cost matrix %d×%d would need %.0f MB — skipping DTW refinement "
+            "(cap compute_envelope_worker inputs via MAX_ALIGN_GRID_POINTS to prevent this)",
+            n, m, (n + 1) * (m + 1) * 8 / 1e6,
+        )
+        return []
+
     w = max(1, int(min(n, m) * band_width_ratio))
     try:
         cost_matrix = _dtw_cost_matrix_vectorized(x, y, n, m, w)
@@ -701,6 +716,9 @@ def compute_envelope_worker(
 
     align_dt = avg_sample_rate
     num_points = max(50, int(target_duration / align_dt))
+    if num_points > MAX_ALIGN_GRID_POINTS:
+        num_points = MAX_ALIGN_GRID_POINTS
+        align_dt = target_duration / num_points  # re-derive so per-cycle grids inherit the cap
     time_grid = np.linspace(0.0, target_duration, num_points)
 
     # Robust reference curve: the pointwise MEDIAN across all cycles resampled
