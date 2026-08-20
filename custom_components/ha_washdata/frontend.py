@@ -31,6 +31,18 @@ CARD_NAME = "ha-washdata-card.js"
 INTEGRATION_URL = f"/{LOCAL_SUBDIR}/{CARD_NAME}"
 CARD_REGISTERED = "registered"
 
+# Minified build artifacts produced by devtools/build_panel.mjs, and the manifest
+# recording which source each was built from.  These are an optimisation only:
+# every asset is ALWAYS served at its readable-source URL, and _resolve_asset()
+# falls back to the readable source whenever the artifact is missing, stale, or
+# hand-edited.  So a forgotten rebuild degrades to a bigger download, never to
+# wrong code -- which is why the URL must not encode which variant was chosen.
+BUILD_MANIFEST_NAME = "build-manifest.json"
+
+# source name -> {"serving", "minified", "bytes"} for whatever was last registered.
+# Module level (not per-entry): the frontend assets are registered once per HA start.
+_SERVED_ASSETS: dict[str, dict] = {}
+
 # Full-screen panel constants
 PANEL_JS_NAME = "ha-washdata-panel.js"
 PANEL_JS_URL = f"/{LOCAL_SUBDIR}/{PANEL_JS_NAME}"
@@ -63,6 +75,137 @@ class LovelaceResourceItem(TypedDict, total=False):
     res_type: str
 
 
+def _sha256_file(path: Path) -> str:
+    """SHA-256 of a file, streamed so a large asset never lands in memory twice."""
+    import hashlib
+
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 256), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _resolve_asset(source_name: str, www: Path | None = None) -> Path:
+    """Return the file to serve for ``source_name``: minified build, or source.
+
+    The minified artifact is used only when the manifest proves it was built from
+    exactly the bytes currently on disk AND has not been modified since. Any doubt
+    -- no manifest, no artifact, changed source, tampered artifact, unreadable
+    anything -- resolves to the readable source. Blocking I/O; call in an executor.
+
+    ``www`` overrides the asset directory (tests only); production always uses the
+    integration's own www/.
+    """
+    import json
+
+    if www is None:
+        www = Path(__file__).parent / "www"
+    source = www / source_name
+
+    try:
+        manifest = json.loads((www / BUILD_MANIFEST_NAME).read_text())
+        entry = manifest["assets"][source_name]
+        artifact = www / entry["artifact"]
+        if not artifact.is_file():
+            return source
+        if _sha256_file(source) != entry["source_sha256"]:
+            _LOGGER.debug(
+                "%s changed since the last panel build; serving readable source "
+                "(run devtools/build_panel.mjs to refresh the minified build)",
+                source_name,
+            )
+            return source
+        if _sha256_file(artifact) != entry["artifact_sha256"]:
+            _LOGGER.warning(
+                "Minified asset %s does not match its build manifest; serving "
+                "readable source instead",
+                entry["artifact"],
+            )
+            return source
+        return artifact
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug(
+            "No usable minified build for %s (%s); serving readable source",
+            source_name,
+            exc,
+        )
+        return source
+
+
+def _ensure_gzip(path: Path) -> None:
+    """Keep a fresh ``<path>.gz`` beside ``path`` so aiohttp can serve it.
+
+    aiohttp's FileResponse transparently serves a pre-compressed sibling when the
+    client sends a matching Accept-Encoding, which cuts these assets by ~75% -- but
+    it only checks that the sibling EXISTS, never that it is current. A stale .gz
+    would therefore be served as if it were the real file (and cached for a month),
+    so the sibling is always regenerated from the exact file being served whenever
+    it is missing or older. Best-effort: a read-only install just serves uncompressed.
+    """
+    import gzip
+    import shutil
+    import tempfile
+
+    gz = path.with_suffix(path.suffix + ".gz")
+    try:
+        if gz.is_file() and gz.stat().st_mtime >= path.stat().st_mtime:
+            return
+        # Compress to a temp file in the same directory, then atomically replace, so
+        # a concurrent request can never observe a half-written .gz.
+        fd, tmp_name = tempfile.mkstemp(dir=str(path.parent), suffix=".gz.tmp")
+        os.close(fd)
+        tmp = Path(tmp_name)
+        try:
+            with open(path, "rb") as src, gzip.open(str(tmp), "wb", compresslevel=9) as dst:
+                shutil.copyfileobj(src, dst)
+            os.replace(tmp, gz)
+        except BaseException:
+            tmp.unlink(missing_ok=True)
+            raise
+        _LOGGER.debug("Wrote compressed asset %s", gz.name)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Could not pre-compress %s (%s); serving uncompressed", path, exc)
+
+
+def _prepare_asset(source_name: str, www: Path | None = None) -> Path:
+    """Resolve the best variant of an asset and make sure its .gz is current.
+
+    Also records the outcome so it can be reported without a browser: because both
+    variants are served at the SAME url, the only ways to tell from outside are the
+    response size and its hash, which is awkward to ask of a bug reporter. See
+    ``served_asset_report``.
+    """
+    served = _resolve_asset(source_name, www)
+    _ensure_gzip(served)
+    try:
+        _SERVED_ASSETS[source_name] = {
+            "serving": served.name,
+            "minified": served.name != source_name,
+            "bytes": served.stat().st_size,
+        }
+    except OSError:
+        pass
+    _LOGGER.info(
+        "Serving %s as %s (%s, %.1f KB)",
+        source_name,
+        served.name,
+        "minified build" if served.name != source_name else "readable source",
+        (served.stat().st_size / 1024) if served.is_file() else 0.0,
+    )
+    return served
+
+
+def served_asset_report() -> dict[str, dict]:
+    """Which variant of each frontend asset is actually being served.
+
+    Populated by :func:`_prepare_asset` at registration time. Surfaced in
+    diagnostics so "is the minified panel live?" is answerable from a diagnostics
+    download instead of from browser devtools and a hash comparison.
+    """
+    return {k: dict(v) for k, v in _SERVED_ASSETS.items()}
+
+
 def get_cache_buster(filename: str = CARD_NAME) -> str:
     """Generate a stable cache buster for a www asset.
 
@@ -90,7 +233,17 @@ def get_cache_buster(filename: str = CARD_NAME) -> str:
             )
         except OSError:
             trans_mtime = 0.0
-        mtime_part = str(int(max(src_mtime, trans_mtime)))
+        # A rebuild changes the minified artifact and the manifest but not the
+        # source, so fold both in: otherwise switching between the readable and
+        # minified variant would reuse a URL the browser has already cached.
+        try:
+            build_mtime = max(
+                os.path.getmtime(base / "www" / BUILD_MANIFEST_NAME),
+                os.path.getmtime(_resolve_asset(filename)),
+            )
+        except OSError:
+            build_mtime = 0.0
+        mtime_part = str(int(max(src_mtime, trans_mtime, build_mtime)))
     except OSError:
         mtime_part = "1"
 
@@ -218,6 +371,11 @@ class WashDataCardRegistration:
             _LOGGER.warning("Card file not found: %s", src)
             return CARD_FAILED
 
+        # Serve the minified build when it is provably current. The URL stays
+        # INTEGRATION_URL either way, so the Lovelace resource never has to be
+        # migrated and dashboards cannot end up pointing at a variant that moved.
+        src = await self.hass.async_add_executor_job(_prepare_asset, CARD_NAME)
+
         # The static route MUST exist before the Lovelace resource is published:
         # the resource is what makes every browser fetch this URL, and a fetch
         # that lands before the route is registered 404s, so the module never
@@ -340,7 +498,10 @@ async def _do_register_panel(hass: HomeAssistant, src: Path) -> bool:
     # ── Phase 1: static paths ────────────────────────────────────────────────
     try:
         # Panel JS (primary asset — must be available before the sidebar fires).
-        await _async_register_path(hass, PANEL_JS_URL, str(src))
+        # Served at PANEL_JS_URL regardless of which variant won, so the sidebar's
+        # module_url never has to change and a stale build cannot strand the panel.
+        served = await hass.async_add_executor_job(_prepare_asset, PANEL_JS_NAME)
+        await _async_register_path(hass, PANEL_JS_URL, str(served))
 
         # Per-language translation files.
         trans_src = Path(__file__).parent / "translations" / PANEL_TRANSLATIONS_DIRNAME

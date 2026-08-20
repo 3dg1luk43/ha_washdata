@@ -1,0 +1,19 @@
+{
+  "generator": "esbuild 0.25.12",
+  "assets": {
+    "ha-washdata-panel.js": {
+      "artifact": "ha-washdata-panel.min.js",
+      "source_sha256": "434220b9748ddc4b10e7aee0d0c8512006de4f5c50e7951d4673f12e25e9f3cb",
+      "artifact_sha256": "9457bf6c9527a816f8134454b9148d3463236cc124c51d82ffe300634d07bbf7",
+      "source_bytes": 803075,
+      "artifact_bytes": 541761
+    },
+    "ha-washdata-card.js": {
+      "artifact": "ha-washdata-card.min.js",
+      "source_sha256": "71a6d762af2ab78525a3bc169d6bfa682ce5f79ab3bd23a808059102a1d223e3",
+      "artifact_sha256": "f7e8ab6492010f5ad6875e0c2969a5fe43ff3040ac96ada665cd61016963ea16",
+      "source_bytes": 50627,
+      "artifact_bytes": 29435
+    }
+  }
+}

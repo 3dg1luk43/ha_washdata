@@ -1,0 +1,88 @@
+name: Tests
+
+# The panel ships as a generated artifact: `www/ha-washdata-panel.js` is the source
+# of truth and `devtools/build_panel.mjs` produces the `*.min.js` that is actually
+# served. `frontend.py` only serves an artifact whose recorded source hash still
+# matches disk, so a forgotten rebuild fails safe (users get the larger readable
+# file) rather than shipping stale code -- but a release that quietly loses
+# minification for everyone is still a bug. This workflow is what stops a stale
+# bundle, an out-of-date WS contract, or a failing suite from reaching main.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Compile
+        run: python -m compileall -q custom_components/ha_washdata tests
+      - name: Fast suite
+        run: python -m pytest tests/ -q
+      # Slow tests replay real traces from cycle_data/, which is gitignored and so
+      # absent in CI; they are a local/maintainer gate, not a CI one.
+
+  generated-artifacts:
+    name: Generated artifacts are current
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install build tooling
+        run: npm ci --prefix devtools
+      - name: Minified panel/card artifacts match their sources
+        run: node devtools/build_panel.mjs --check
+      - name: WS type artifacts match ws_schema.py
+        run: python devtools/generate_ws_types.py --check
+      - name: Panel JS parses and renders
+        run: |
+          node --check custom_components/ha_washdata/www/ha-washdata-panel.js
+          node --check custom_components/ha_washdata/www/ha-washdata-card.js
+          node devtools/panel_smoke.js
+
+  e2e:
+    name: Panel E2E
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: playwright-tests/package-lock.json
+      - name: Install
+        run: npm ci --prefix playwright-tests
+      - name: Install browsers
+        run: npx --prefix playwright-tests playwright install --with-deps chromium
+      - name: E2E against the readable source
+        run: npx playwright test --reporter=dot
+        working-directory: playwright-tests
+      # The bundle users actually receive has to work, not just the source it was
+      # built from: a minifier that renamed something the panel reaches by name
+      # would pass every other check here.
+      - name: E2E against the minified bundle
+        run: PANEL_BUILD=min npx playwright test --reporter=dot
+        working-directory: playwright-tests

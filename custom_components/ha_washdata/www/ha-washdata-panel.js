@@ -1259,6 +1259,27 @@ function _fmtDate(ts, mode) {
   if (isNaN(ms)) return '-';
   return (mode || _datePref) === 'relative' ? _relTime(ms) : _fmtAbsDate(ms);
 }
+// Home Assistant rejects a WebSocket command with a plain {code, message} object,
+// which every browser console renders as a collapsed "Object". That made a panel
+// fetch failure unreportable: the user sees `fetch error: Object` and has to expand
+// it by hand to learn anything. Render the identity inline instead.
+//
+// The common case worth recognising is `unknown_command` right after a Home Assistant
+// restart: the sidebar panel loads and starts polling before the integration has
+// finished setting up and registering its commands, so the first few polls fail and
+// then it self-heals. Saying so beats leaving the user to guess.
+function _wsErrText(err) {
+  if (err == null) return 'unknown error';
+  if (err instanceof Error) return `${err.name}: ${err.message}`;
+  const code = err.code != null ? String(err.code) : '';
+  const msg = err.message != null ? String(err.message) : '';
+  if (!code && !msg) { try { return JSON.stringify(err); } catch (_) { return String(err); } }
+  const hint = code === 'unknown_command'
+    ? ' (the integration is probably still starting up; this should stop on its own)'
+    : '';
+  return `${code || 'error'}${msg ? ': ' + msg : ''}${hint}`;
+}
+
 function _esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
@@ -1826,7 +1847,13 @@ class HaWashdataPanel extends HTMLElement {
     this._panelSubtab = 'maintenance';
     this._gearTab = 'prefs';
     // Store-backed brand/model picker cache (Basic > Device info).
-    this._catalog = { brands: undefined, devices: undefined, forBrand: null, approvedOnly: false };
+    // brandsFull: the whole brand collection is local, so every search is in-memory.
+    // brandPrefixes: prefixes already resolved server-side (a completed "bo" covers "bos").
+    this._catalog = { brands: undefined, devices: undefined, forBrand: null, approvedOnly: false,
+                      brandsFull: false, brandPrefixes: [] };
+    // Resolved catalog identity for the saved brand/model (two point reads), which is
+    // all the status badges need. Keyed on brand|model|type so it self-invalidates.
+    this._catalogEntry = null;
     this._maintenance = null;          // cached maintenance log/reminders (Advanced → Maintenance)
     this._logs = [];
     this._logLevel = '';
@@ -2471,6 +2498,7 @@ class HaWashdataPanel extends HTMLElement {
       }
 
       const res = await this._ws({ type: `${_DOMAIN}/get_devices` });
+      this._lastFetchErr = null;   // recovered: report the next failure even if identical
       this._devices = res.devices || [];
       this._lastRefresh = new Date();
       // Restore the last-used device on the first paint (selIdx is still 0).
@@ -2544,7 +2572,13 @@ class HaWashdataPanel extends HTMLElement {
         this._fetchLogs().then(() => this._refreshLogDrawer()).catch(() => {});
       }
     } catch (err) {
-      console.warn('[WashData panel] fetch error:', err);
+      // Collapse repeats: a poll failure is usually transient and identical every
+      // 5 s, and six copies of the same line buries whatever else is in the console.
+      const text = _wsErrText(err);
+      if (text !== this._lastFetchErr) {
+        this._lastFetchErr = text;
+        console.warn('[WashData panel] fetch error -', text, err);
+      }
     } finally {
       this._loading = false;
       // The 5s poll must never clobber editing on another tab or inside a modal.
@@ -2982,7 +3016,13 @@ class HaWashdataPanel extends HTMLElement {
     // previous device's appliance type, so reusing them could save an invalid
     // brand/model combo. Brands are type-agnostic, so keep them loaded (reloading
     // them without a re-render is what left the brand dropdown empty).
-    this._catalog = { brands: this._catalog.brands, devices: undefined, forBrand: null, approvedOnly: this._catalog.approvedOnly };
+    clearTimeout(this._brandSearchTimer); this._brandSearchTimer = null;
+    this._catalog = {
+      brands: this._catalog.brands, devices: undefined, forBrand: null,
+      approvedOnly: this._catalog.approvedOnly,
+      // Which brand prefixes have already been resolved travels with the rows.
+      brandsFull: this._catalog.brandsFull, brandPrefixes: this._catalog.brandPrefixes,
+    };
     if (this._entityListCache) delete this._entityListCache.store_model;
     const dev = this._devices[this._selIdx];
     if (dev) await this._fetchSuggestions(dev.entry_id);
@@ -3140,8 +3180,10 @@ class HaWashdataPanel extends HTMLElement {
         await this._loadStoreStatus(eid);
         if (!this._isActiveEntry(eid)) return;
         this._ensureStoreConnectListener();
-        // Kick off the initial browse in the background (renders its own spinner).
-        if (this._onlineEnabled()) this._storeSearch(this._storeQuery);
+        // Kick off the initial browse in the background (renders its own spinner). It
+        // opens on the declared brand -- the useful, and cheapest, default: the query
+        // then shares a cache key with the Settings model picker.
+        if (this._onlineEnabled()) this._storeSearch(this._storeBrandScope());
       } else if (this._tab === 'advanced' && this._panelSubtab === 'ml') {
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
         if (!this._isActiveEntry(eid)) return;  // device switched mid-flight — drop stale response
@@ -3180,7 +3222,7 @@ class HaWashdataPanel extends HTMLElement {
         }
       }
     } catch (err) {
-      console.warn('[WashData panel] tab data fetch error:', err);
+      console.warn('[WashData panel] tab data fetch error -', _wsErrText(err), err);
     } finally {
       this._tabLoading = false;
       this._render();
@@ -3193,7 +3235,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._isActiveEntry(eid)) return;  // device switched mid-flight — drop stale result
       this._diag = r.stats || {};
     } catch (err) {
-      console.warn('[WashData panel] tools fetch error:', err);
+      console.warn('[WashData panel] tools fetch error -', _wsErrText(err), err);
       this._diag = { _error: String(err && err.message || err) };
     }
   }
@@ -3203,7 +3245,7 @@ class HaWashdataPanel extends HTMLElement {
       const r = await this._ws({ type: `${_DOMAIN}/get_maintenance_log`, entry_id: eid });
       this._maintenance = r || {};
     } catch (err) {
-      console.warn('[WashData panel] maintenance fetch error:', err);
+      console.warn('[WashData panel] maintenance fetch error -', _wsErrText(err), err);
       this._maintenance = { _error: String(err && err.message || err) };
     }
   }
@@ -3215,7 +3257,7 @@ class HaWashdataPanel extends HTMLElement {
       const r = await this._ws({ type: `${_DOMAIN}/get_logs`, level: null, limit: 500 });
       this._logs = r.logs || [];
     } catch (err) {
-      console.warn('[WashData panel] logs fetch error:', err);
+      console.warn('[WashData panel] logs fetch error -', _wsErrText(err), err);
     }
   }
 
@@ -4744,14 +4786,16 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _renderBrandPicker(key, val, label, doc, ph) {
-    if (this._catalog.brands === undefined) { this._catalog.brands = null; this._loadCatalogBrands(); }
+    // The badge comes from the resolved catalog ENTRY (one point read), not from the
+    // brand list: fetching all ~84 brands to find one row was the store's single
+    // largest read source. The list is loaded only when the user opens the combo.
+    this._ensureCatalogEntry();
     const brands = Array.isArray(this._catalog.brands) ? this._catalog.brands : [];
     // Feed the shared custom combobox (works in the shadow DOM, unlike a native
     // <datalist>). The combo reads this cache live, so async loads appear.
     this._entityListCache = this._entityListCache || {};
     this._entityListCache[key] = brands.map(b => b.brand).filter(Boolean);
-    const match = brands.find(b => String(b.brand || '').toLowerCase() === val.toLowerCase());
-    const tag = this._statusTag(match);
+    const tag = this._statusTag(this._catalogEntryFor(val, 'brand'));
     const loading = this._catalog.brands === null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
     return `<div class="wd-field"><label>${_esc(label)} ${doc ? _tip(doc) : ''}${tag}${loading}</label>
       <div class="wd-combo-row">
@@ -4770,11 +4814,15 @@ class HaWashdataPanel extends HTMLElement {
         <input type="text" id="wd-store-model" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" disabled>
         <div class="wd-field-hint">${_esc(this._t('msg.pick_brand_first', {}, 'Pick an appliance brand first.'))}</div></div>`;
     }
-    if (this._catalog.forBrand !== brand) { this._catalog.forBrand = brand; this._catalog.devices = null; this._loadCatalogDevices(brand); }
+    // As in the brand picker: the badge + community actions come from the resolved
+    // catalog entry (one point read), so simply opening Settings no longer downloads
+    // this brand's whole device list. That list is fetched on combo focus.
+    this._ensureCatalogEntry();
+    if (this._catalog.forBrand !== brand) { this._catalog.forBrand = brand; this._catalog.devices = undefined; }
     const devices = Array.isArray(this._catalog.devices) ? this._catalog.devices : [];
     this._entityListCache = this._entityListCache || {};
     this._entityListCache[key] = devices.map(d => d.model).filter(Boolean);
-    const match = devices.find(d => String(d.model || '').toLowerCase() === val.toLowerCase());
+    const match = this._catalogEntryFor(val, 'device');
     const tag = this._statusTag(match);
     const loading = this._catalog.devices === null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
     // Details + community actions for the resolved device.
@@ -4852,21 +4900,176 @@ class HaWashdataPanel extends HTMLElement {
     return groups;
   }
 
+  // ── Catalog identity (badges) vs catalog lists (pickers) ────────────────────
+  // These are two different reads and it matters which one runs. Resolving the
+  // appliance the user already saved needs exactly two documents, both of which have
+  // deterministic ids, so it is a point read. Offering every alternative to pick from
+  // needs whole collections. Rendering the Settings tab only ever needed the former,
+  // but used to trigger the latter -- measured at 128 documents / 119 KB per open,
+  // against a daily read budget the whole community shares.
+
+  // Which appliance the currently-rendered entry describes. Included in the key so a
+  // device switch (or an edit to brand/model/type) re-resolves instead of showing the
+  // previous appliance's badge.
+  _catalogEntryKey() {
+    const o = this._opts || {};
+    return [
+      (o.store_brand || '').trim().toLowerCase(),
+      (o.store_model || '').trim().toLowerCase(),
+      o.device_type || '',
+    ].join('|');
+  }
+
+  // Kick off the two point reads if this appliance's identity is not already resolved.
+  // Safe to call from render (it self-dedupes on the key and never re-enters).
+  _ensureCatalogEntry() {
+    const want = this._catalogEntryKey();
+    const cur = this._catalogEntry;
+    if (cur && cur.key === want) return;
+    this._catalogEntry = { key: want, brand: null, device: null, deviceId: null, loading: true };
+    this._loadCatalogEntry(want);
+  }
+
+  // The resolved brand/device doc, but only when it actually describes the value being
+  // rendered -- a half-typed model must not keep showing the saved model's badge.
+  _catalogEntryFor(val, which) {
+    const e = this._catalogEntry;
+    if (!e || e.key !== this._catalogEntryKey()) return null;
+    const rec = which === 'brand' ? e.brand : e.device;
+    if (!rec) return null;
+    const field = which === 'brand' ? rec.brand : rec.model;
+    return String(field || '').toLowerCase() === String(val || '').trim().toLowerCase() ? rec : null;
+  }
+
+  async _loadCatalogEntry(wantKey) {
+    const dev = this._devices[this._selIdx];
+    const o = this._opts || {};
+    const brand = (o.store_brand || '').trim();
+    const model = (o.store_model || '').trim();
+    if (!dev || !this._onlineEnabled() || !brand || !model) {
+      if (this._catalogEntry && this._catalogEntry.key === wantKey) this._catalogEntry.loading = false;
+      return;
+    }
+    let res = null;
+    try {
+      res = await this._ws({
+        type: `${_DOMAIN}/store_get_catalog_entry`, entry_id: dev.entry_id,
+        brand, model, appliance_type: o.device_type || '',
+      });
+    } catch (_) { /* leave unresolved: the badge is decoration, not state */ }
+    // Drop a response that a device switch or a further edit has already superseded.
+    if (!this._catalogEntry || this._catalogEntry.key !== wantKey) return;
+    this._catalogEntry = {
+      key: wantKey, loading: false,
+      brand: (res && res.brand) || null,
+      device: (res && res.device) || null,
+      deviceId: (res && res.device_id) || null,
+    };
+    if (this._isActiveEntry(dev.entry_id)) this._renderPreservingFormEdits();
+  }
+
+  // Surface a just-loaded candidate list without a re-render when the user is typing in
+  // that picker. Dispatching `input` runs the combobox's own showDrop handler (which reads
+  // _entityListCache live), so the options appear while focus and caret stay put; a
+  // re-render here would rebuild the input mid-keystroke. Falls back to a normal render
+  // when the field is not focused, which is what clears the "Loading..." hint.
+  _refreshComboAfterLoad(inputId, entryId, mayReopen = true) {
+    const inp = this.shadowRoot && this.shadowRoot.getElementById(inputId);
+    if (inp && this.shadowRoot.activeElement === inp) {
+      // mayReopen=false after a failed load: re-dispatching would re-arm the search
+      // debounce and turn a persistent failure into a request loop.
+      if (mayReopen) inp.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+    if (this._isActiveEntry(entryId)) this._render();
+  }
+
+  // Load the picker's candidate list on first interaction with that picker. Called from
+  // the combobox's focus/input path rather than from render, so a user who opens Settings
+  // to change an unrelated setting never pays for the catalog at all.
+  _ensureCatalogList(optKey, q) {
+    if (!this._onlineEnabled()) return;
+    if (optKey === 'store_brand') { this._ensureBrandCandidates(q); return; }
+    if (optKey === 'store_model') {
+      const brand = String((this._opts || {}).store_brand || '').trim();
+      if (!brand) return;
+      if (this._catalog.forBrand !== brand || this._catalog.devices === undefined) {
+        this._catalog.forBrand = brand;
+        this._catalog.devices = null;
+        this._loadCatalogDevices(brand);
+      }
+    }
+  }
+
+  // Resolve brand candidates for what is currently typed, as cheaply as possible.
+  //
+  // The field opens pre-filled with the saved brand, so the very first focus already has
+  // a search term -- which the backend answers with a `brand_lc` range query reading only
+  // the matching documents (3 for "bo" against 84 for the whole collection). Clearing the
+  // field is the explicit "show me everything" gesture and is the only path that fetches
+  // the full list. Typing is debounced, and a prefix whose matches are already covered by
+  // a completed broader query never queries at all.
+  _ensureBrandCandidates(q) {
+    const prefix = String(q || '').trim().toLowerCase();
+    if (this._catalog.brandsFull) return;   // whole collection is already local
+    if (!prefix) {
+      // Clearing the field supersedes any prefix search still sitting in the debounce:
+      // the full list answers it, so letting it fire would spend a read for nothing.
+      clearTimeout(this._brandSearchTimer); this._brandSearchTimer = null;
+      if (this._catalog.brands === undefined) { this._catalog.brands = null; this._loadCatalogBrands(''); }
+      return;
+    }
+    const done = this._catalog.brandPrefixes || (this._catalog.brandPrefixes = []);
+    // A completed query for "bo" already returned every brand starting with "bos".
+    if (done.some(p => prefix.startsWith(p))) return;
+    clearTimeout(this._brandSearchTimer);
+    this._brandSearchTimer = setTimeout(() => this._loadCatalogBrands(prefix), 250);
+  }
+
+  // Prefix results are PARTIAL, so they are unioned into the candidate list rather than
+  // replacing it: typing "bo" and then backspacing to "b" must not drop the rows the
+  // broader query already produced.
+  _mergeBrandCandidates(rows) {
+    const have = new Map(
+      (Array.isArray(this._catalog.brands) ? this._catalog.brands : [])
+        .map(b => [String(b.id != null ? b.id : b.brand), b]));
+    for (const r of rows || []) have.set(String(r.id != null ? r.id : r.brand), r);
+    this._catalog.brands = Array.from(have.values())
+      .sort((a, b) => String(a.brand || '').localeCompare(String(b.brand || '')));
+  }
+
   // Feed the combobox candidate cache directly (no re-render): the combo reads it
   // live, so options appear without rebuilding the input the user is typing in.
-  async _loadCatalogBrands() {
+  async _loadCatalogBrands(query = '') {
     this._entityListCache = this._entityListCache || {};
+    let failed = false;
     const dev = this._devices[this._selIdx];
     if (!dev || !this._onlineEnabled()) { this._catalog.brands = []; this._entityListCache.store_brand = []; return; }
+    if (query && this._catalog.brandsFull) return;   // the full list already covers it
+    if (this._catalog.brands === undefined) this._catalog.brands = null;  // show the loading hint
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/store_list_brands`, entry_id: dev.entry_id, include_pending: !this._catalog.approvedOnly });
-      this._catalog.brands = (r && r.items) || [];
-    } catch (_) { this._catalog.brands = []; }
+      const r = await this._ws({
+        type: `${_DOMAIN}/store_list_brands`, entry_id: dev.entry_id,
+        query: query || null, include_pending: !this._catalog.approvedOnly,
+      });
+      const rows = (r && r.items) || [];
+      if (query) {
+        this._mergeBrandCandidates(rows);
+        (this._catalog.brandPrefixes || (this._catalog.brandPrefixes = [])).push(query);
+      } else {
+        this._catalog.brands = rows;
+        this._catalog.brandsFull = true;   // every later search is answered in memory
+      }
+    } catch (_) {
+      if (!Array.isArray(this._catalog.brands)) this._catalog.brands = [];
+      failed = true;
+    }
     this._entityListCache.store_brand = (this._catalog.brands || []).map(b => b.brand).filter(Boolean);
-    // Re-render so the picker shows the loaded brands + clears the "Loading…" hint
-    // (the combo also reads the cache live on focus, but a stale device switch left
-    // it looking empty until the next paint).
-    if (this._isActiveEntry(dev.entry_id)) this._render();
+    // On failure do NOT re-dispatch `input`: that is what re-arms the debounce, and a
+    // query that keeps failing would then retry ~4x/second for as long as the field has
+    // focus. Backing off means the dropdown simply does not update until the user types
+    // again (which is itself the retry) or the field loses focus.
+    this._refreshComboAfterLoad('wd-store-brand', dev.entry_id, !failed);
   }
 
   async _loadCatalogDevices(brand) {
@@ -4878,7 +5081,7 @@ class HaWashdataPanel extends HTMLElement {
       if (this._catalog.forBrand === brand) this._catalog.devices = (r && r.items) || [];
     } catch (_) { if (this._catalog.forBrand === brand) this._catalog.devices = []; }
     this._entityListCache.store_model = (this._catalog.devices || []).map(d => d.model).filter(Boolean);
-    if (this._isActiveEntry(dev.entry_id)) this._render();
+    this._refreshComboAfterLoad('wd-store-model', dev.entry_id);
   }
 
   // Load the appliance's profiles into the open Share dialog (dropdown + resolved
@@ -7359,24 +7562,54 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlStoreBrands() {
     const items = this._storeDevices || [];
+    const mine = String((this._opts || {}).store_model || '').trim().toLowerCase();
     const rows = items.map(d => {
       const title = `${_esc(d.brand || '')} ${_esc(d.model || '')}`.trim() || this._t('store.device', {}, 'Device');
       const type = d.applianceType ? `<span class="wd-store-chip">${_esc(this._deviceTypeLabel(d.applianceType))}</span>` : '';
+      const isMine = mine && String(d.model || '').toLowerCase() === mine;
+      const yours = isMine ? `<span class="wd-tag wd-tag-approved" title="${_esc(this._t('store.your_model_tip', {}, 'This is the appliance you declared in Settings'))}">${this._t('store.your_model', {}, 'Yours')}</span>` : '';
+      // Only ever claim content, never absence: these counters under-report (see
+      // _storeItemHasContent), so a missing chip means "unknown", not "empty".
+      const nProg = Number(d.profileCount) || 0;
+      const progChip = nProg > 0
+        ? `<span class="wd-store-chip">${this._t('store.programs_count', {n: nProg}, `Programs: ${nProg}`)}</span>`
+        : '';
       return `<button class="wd-store-row" data-action="store-open-device" data-device-id="${_esc(d.id)}">
         <span class="wd-store-row-main">
-          <span class="wd-store-row-title">${title}${this._statusTag(d)}</span>
-          <span class="wd-store-row-sub">${type}<span class="wd-store-fav" title="${_esc(this._t('store.favorites', {}, 'Favourites'))}">★ ${d.favoriteCount || 0}</span></span>
+          <span class="wd-store-row-title">${title}${yours}${this._statusTag(d)}</span>
+          <span class="wd-store-row-sub">${type}${progChip}<span class="wd-store-fav" title="${_esc(this._t('store.favorites', {}, 'Favourites'))}">★ ${d.favoriteCount || 0}</span></span>
         </span>
         <span class="wd-store-row-arrow" aria-hidden="true">›</span>
       </button>`;
     }).join('');
+
+    // Nothing to scope the catalog to yet. Declaring the appliance is what makes this tab
+    // useful AND is itself the catalog search (the Settings pickers query the same data),
+    // so point there rather than showing an unscoped list the user cannot act on.
+    if (!this._storeBrandScope()) {
+      return `
+        <div class="wd-store-search">
+          <input type="text" id="wd-store-q" placeholder="${_esc(this._t('store.search_brand_ph', {}, 'Search by brand…'))}" value="" autocomplete="off" spellcheck="false">
+          <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-search">${this._t('btn.search', {}, 'Search')}</button>
+        </div>
+        <p class="wd-info" style="margin-bottom:10px">${this._t('msg.store_declare_appliance', {}, 'Tell WashData which appliance you own and this tab shows the setups other people have shared for it. You can also type a brand above to look around.')}</p>
+        <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-goto-identity">${this._t('btn.set_brand_model', {}, 'Set brand & model')}</button>`;
+    }
+
+    const empty = `<p class="wd-info">${this._t('store.no_results', {}, 'No matching appliances found. Try a different search.')}</p>`;
     const list = this._storeLoading ? this._htmlStoreLoading()
-      : (items.length ? `<div class="wd-store-rows">${rows}</div>` : `<p class="wd-info">${this._t('store.no_results', {}, 'No matching appliances found. Try a different search.')}</p>`);
+      : (items.length ? `<div class="wd-store-rows">${rows}</div>` : empty);
+    // The exact model is empty far more often than not, so say plainly that the other
+    // rows are worth a look rather than letting the user conclude the store is empty.
+    const siblingHint = (!this._storeLoading && items.length > 1)
+      ? `<p class="wd-info" style="margin-bottom:8px">${this._t('msg.store_sibling_hint', {}, 'Nothing shared for your exact model? A closely-related model from the same brand is usually a good starting point.')}</p>`
+      : '';
     return `
       <div class="wd-store-search">
-        <input type="text" id="wd-store-q" placeholder="${_esc(this._t('store.search_ph', {}, 'Search by brand or model…'))}" value="${_esc(this._storeQuery)}" autocomplete="off" spellcheck="false">
+        <input type="text" id="wd-store-q" placeholder="${_esc(this._t('store.search_brand_ph', {}, 'Search by brand…'))}" value="${_esc(this._storeQuery)}" autocomplete="off" spellcheck="false">
         <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-search">${this._t('btn.search', {}, 'Search')}</button>
       </div>
+      ${siblingHint}
       ${list}`;
   }
 
@@ -7500,10 +7733,19 @@ class HaWashdataPanel extends HTMLElement {
   // one-line list entry + a store_account default; no bespoke handler needed.
   _htmlStorePrefs(busy) {
     const prefs = (this._constants && this._constants.storePrefs) || {};
-    return _STORE_PREFS.map(p => {
+    const rows = _STORE_PREFS.map(p => {
       const checked = prefs[p.key] !== false;  // defaults on; get_constants sends the full set
       return _switchRow(`data-action="store-toggle-pref" data-pref="${_esc(p.key)}" ${checked ? 'checked' : ''} ${busy ? 'disabled' : ''}`, this._t(p.labelKey, {}, p.labelFb), _tip(this._t(p.docKey, {}, p.docFb)));
     }).join('');
+    // The catalog is cached for an hour because every read is charged against a quota the
+    // whole community shares. Your own contributions clear it immediately; this is the
+    // escape hatch for someone else's (e.g. a brand you were told was just approved).
+    const refreshing = this._busy.has('store-refresh-catalog');
+    return rows + `
+      <div class="wd-field" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px">
+        <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="store-refresh-catalog" ${refreshing || busy ? 'disabled' : ''}>${refreshing ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.refresh_catalog', {}, 'Refresh catalog')}</button>
+        <span class="wd-info" style="margin:0;flex:1;min-width:180px">${this._t('msg.refresh_catalog_hint', {}, 'The community brand and appliance lists are cached to keep the shared store within its daily budget. Refresh to pick up entries added or approved by others.')}</span>
+      </div>`;
   }
 
   // ── Community Store data ─────────────────────────────────────────────────────
@@ -7518,6 +7760,15 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { /* leave prior status */ }
   }
 
+  // The brand the browse list is scoped to: whatever the user typed, else the appliance
+  // they declared. Browsing is deliberately brand-scoped -- an unscoped list of one
+  // appliance type is ~140 catalog entries, and a washing machine has no use for
+  // dishwashers. Scoping also lands on the SAME cache key the Settings model picker
+  // uses, so opening one after the other costs nothing.
+  _storeBrandScope() {
+    return String(this._storeQuery || (this._opts || {}).store_brand || '').trim();
+  }
+
   async _storeSearch(query) {
     const dev = this._devices[this._selIdx];
     if (!dev) return;
@@ -7525,17 +7776,51 @@ class HaWashdataPanel extends HTMLElement {
     this._storeQuery = query || '';
     this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null;
     this._storeProfiles = []; this._storeCycles = [];
+    const brand = this._storeBrandScope();
+    // Nothing to scope to yet: show the "tell us what you own" state rather than spend a
+    // read on a list the user cannot act on (see _htmlStoreBrands).
+    if (!brand) { this._storeDevices = []; this._storeLoading = false; this._render(); return; }
     this._storeLoading = true; this._render();
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/store_search_devices`, entry_id: eid, query: this._storeQuery, appliance_type: this._storeApplianceType() });
+      const r = await this._ws({
+        type: `${_DOMAIN}/store_search_devices`, entry_id: eid,
+        query: brand, appliance_type: this._storeApplianceType(),
+        // Pending entries are 93% of the catalog and are publicly readable (shown with
+        // an "awaiting approval" tag), so approved-only made this tab show 15 of 564
+        // devices -- about 6 per appliance type.
+        include_pending: true,
+      });
       if (!this._isActiveEntry(eid)) return;
       if (r && r.disabled) { this._storeStatus = { enabled: false }; this._storeDevices = []; }
-      else this._storeDevices = (r && r.items) || [];
+      else this._storeDevices = this._sortStoreDevices((r && r.items) || []);
     } catch (e) {
       if (this._isActiveEntry(eid)) { this._storeDevices = []; this._showToast(this._t('toast.store_search_failed', {error: e.message || e}, 'Search failed: ' + (e.message || e)), 'error'); }
     } finally {
       if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); }
     }
+  }
+
+  // Own model first, then entries that carry shared programs, then the rest (each group
+  // keeping the server's favourite-count order). The user's exact model has nothing
+  // shared about 70% of the time, so the sibling models have to be visible -- but their
+  // own machine still has to be easy to find in a 44-row list.
+  _sortStoreDevices(items) {
+    const mine = String((this._opts || {}).store_model || '').trim().toLowerCase();
+    const rank = (d) => {
+      if (mine && String(d.model || '').toLowerCase() === mine) return 0;
+      return this._storeItemHasContent(d) ? 1 : 2;
+    };
+    return items
+      .map((d, i) => ({ d, i }))
+      .sort((a, b) => (rank(a.d) - rank(b.d)) || (a.i - b.i))
+      .map((x) => x.d);
+  }
+
+  // True only when a positive count says so. These counters are contributor-maintained
+  // and under-report where an increment was denied, so absent/zero means "unknown", not
+  // "empty" -- the UI must never tell a user an entry is empty on a stale zero.
+  _storeItemHasContent(d) {
+    return (Number(d && d.profileCount) || 0) > 0 || (Number(d && d.cycleCount) || 0) > 0;
   }
 
   // Attach the GitHub-connect popup message listener exactly once. The popup
@@ -7561,6 +7846,8 @@ class HaWashdataPanel extends HTMLElement {
         if (d.model) patch.store_model = d.model;
         this._opts = { ...this._opts, ...patch };
         this._catalog.brands = undefined; this._catalog.devices = undefined; this._catalog.forBrand = null;
+        this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
+        this._catalogEntry = null;
         this._showToast(this._t('toast.appliance_added', {}, 'Appliance added - awaiting approval'));
         this._render();
         return;
@@ -7568,6 +7855,8 @@ class HaWashdataPanel extends HTMLElement {
       if (d.type === 'washdata-brand-created') {
         if (d.brand) this._opts = { ...this._opts, store_brand: d.brand };
         this._catalog.brands = undefined;  // reload the brand catalog so it is pickable
+        this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
+        this._catalogEntry = null;         // and re-resolve the badge for the new brand
         this._showToast(this._t('toast.brand_added', {}, 'Brand added - awaiting approval'));
         this._render();
         return;
@@ -9076,9 +9365,8 @@ class HaWashdataPanel extends HTMLElement {
       // _snapshotFormToPending call; it would override _opts in the render since
       // Object.assign merges pending last. Clear it so _opts wins.
       delete this._pendingSettings.store_brand;
-      this._catalog.forBrand = v; this._catalog.devices = null;
+      this._catalog.forBrand = v; this._catalog.devices = undefined;
       this._render();                 // enable + reset the model field (input has blurred)
-      this._loadCatalogDevices(v);    // patches #wd-model-dl in place, no re-render
     });
     const modelInput = sr.getElementById('wd-store-model');
     if (modelInput) modelInput.addEventListener('change', () => {
@@ -9407,6 +9695,11 @@ class HaWashdataPanel extends HTMLElement {
       const optKey = inp.dataset.opt || combo.closest('[data-opt]')?.dataset.opt;
 
       const showDrop = (q) => {
+        // Opening the store brand/model combo is the moment the user actually needs the
+        // catalog, so that is when it is fetched -- rendering the form no longer does it.
+        // This costs nothing here: the fetch fills _entityListCache, which is read live
+        // below, so the options appear on the next keystroke or focus without a re-render.
+        this._ensureCatalogList(optKey, q);
         // Read the candidate list live so async-loaded options (e.g. the store
         // brand/model catalog) appear without re-wiring the combobox.
         const entities = (this._entityListCache || {})[optKey] || [];
@@ -10276,6 +10569,38 @@ class HaWashdataPanel extends HTMLElement {
         }
       });
 
+    } else if (a === 'store-goto-identity') {
+      this._tab = 'settings';
+      this._settingsSec = 'basic';   // the Device info group lives in Basic
+      this._fetchTabData();
+      // Focus the brand picker once the Settings form has rendered. Focusing it also
+      // opens its dropdown, which is what loads the brand catalog (_ensureCatalogList).
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const el = this.shadowRoot && this.shadowRoot.getElementById('wd-store-brand');
+        if (el) { el.focus(); el.scrollIntoView({ block: 'center' }); }
+      }));
+
+    } else if (a === 'store-refresh-catalog') {
+      // Drop the backend's cached catalog AND every local copy of it, so the next time a
+      // picker is opened it genuinely re-reads the store.
+      this._busyRun('store-refresh-catalog', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/store_refresh_catalog`, entry_id: eid });
+          clearTimeout(this._brandSearchTimer); this._brandSearchTimer = null;
+          this._catalog.brands = undefined; this._catalog.devices = undefined;
+          this._catalog.forBrand = null;
+          this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
+          this._catalogEntry = null;
+          if (this._entityListCache) {
+            delete this._entityListCache.store_brand;
+            delete this._entityListCache.store_model;
+          }
+          this._showToast(this._t('toast.catalog_refreshed', {}, 'Community catalog refreshed'));
+        } catch (e) {
+          this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+        }
+      });
+
     } else if (a === 'store-connect') {
       const origin = this._constants.storeWebOrigin;
       if (!origin) { this._showToast(this._t('toast.store_unavailable', {}, 'The community store is not available.'), 'error'); return; }
@@ -10320,8 +10645,16 @@ class HaWashdataPanel extends HTMLElement {
         try {
           const r = await this._ws({ type: `${_DOMAIN}/store_confirm_device`, entry_id: eid, device_id: did });
           if (r && r.error) { this._showToast(this._t('toast.store_error', {error: r.error}, 'Error: ' + r.error), 'error'); return; }
-          const d = (this._catalog.devices || []).find(x => String(x.id) === String(did));
-          if (d && r) { d.confirmCount = r.confirmCount; d.status = r.status; }
+          // Patch every copy of the row the UI may be showing: the picker's badge now
+          // reads the resolved catalog entry, while the Store tab reads the browse list.
+          const rows = [
+            ...(this._catalog.devices || []),
+            ...(this._storeDevices || []),
+            (this._catalogEntry && this._catalogEntry.device) || null,
+          ];
+          for (const d of rows) {
+            if (r && d && String(d.id) === String(did)) { d.confirmCount = r.confirmCount; d.status = r.status; }
+          }
           this._showToast(r && r.status === 'approved' ? this._t('toast.device_approved', {}, 'Approved by the community') : this._t('toast.thanks_confirming', {}, 'Thanks for confirming'));
           this._render();
         } catch (e2) { this._showToast(this._t('toast.store_error', {error: e2.message || e2}, 'Error: ' + (e2.message || e2)), 'error'); }

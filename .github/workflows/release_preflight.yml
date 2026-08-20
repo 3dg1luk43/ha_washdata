@@ -1,0 +1,49 @@
+name: Release Preflight
+
+# Runs the same checks as `devtools/release_check.sh` against a pushed tag, so a
+# release that disagrees with itself is caught at the tag rather than by a user.
+#
+# The check this workflow exists for is the one nothing else can do: that the tag,
+# manifest.json's `version` (what HACS and Home Assistant report) and the top
+# CHANGELOG heading all say the same thing. The generated-artifact checks overlap
+# with the Tests workflow on purpose -- a tag can be pushed from a commit that
+# never ran it.
+
+on:
+  push:
+    tags: ["v*", "[0-9]*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Version to verify against (e.g. 0.5.5). Defaults to manifest.json."
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install
+        run: |
+          pip install -r requirements-dev.txt
+          npm ci --prefix devtools
+      - name: Resolve the version under test
+        id: ver
+        run: |
+          TAG="${{ inputs.tag }}"
+          [ -z "$TAG" ] && TAG="${GITHUB_REF_NAME}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Verifying against: $TAG"
+      - name: Release preflight
+        run: bash devtools/release_check.sh --tag "${{ steps.ver.outputs.tag }}"

@@ -30,7 +30,7 @@ from homeassistant.core import HomeAssistant
 
 from . import store_account
 from .const import QC_EDITED, QC_MANUAL, QC_RECORDING
-from .store_client import StoreClient, device_id, profile_id, trace_hash
+from .store_client import device_id, get_client, profile_id, trace_hash
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -158,7 +158,10 @@ class StoreBridge:
     def __init__(self, hass: Any, profile_store: Any) -> None:
         self._hass = hass
         self._ps = profile_store
-        self._client = StoreClient(hass)
+        # One client for the whole install, not one per appliance: the catalog it reads is
+        # public and device-agnostic, so a per-bridge client made an N-appliance install
+        # issue N cold-cache copies of the same brand/device queries. See get_client.
+        self._client = get_client(hass)
 
     def _fire_download_telemetry(self, cycle_ids: list[str]) -> None:
         """Fire best-effort download/adoption telemetry as a detached background task.
@@ -203,6 +206,22 @@ class StoreBridge:
         return await self._client.search_devices(
             brand, appliance_type, model_query=model_query, include_pending=include_pending,
         )
+
+    async def catalog_entry(self, brand: str, model: str, appliance_type: str) -> dict[str, Any]:
+        """The catalog identity of one appliance -- its brand + device documents, resolved
+        by deterministic id, for the settings form's status badges.
+
+        The badges used to be a by-product of the pickers' full brand/device *lists*, which
+        meant simply opening the Settings tab downloaded the catalog. Two point reads answer
+        the same question, so the lists are now only fetched when the user actually opens a
+        picker. Maps the HA device type to the catalog type first.
+        """
+        return await self._client.catalog_entry(brand, model, store_appliance_type(appliance_type))
+
+    def refresh_catalog(self) -> dict[str, Any]:
+        """Drop the cached catalog so the next read is fresh (panel "refresh" action)."""
+        self._client.refresh_catalog()
+        return {"ok": True}
 
     async def get_profiles(self, device_id: str) -> list[dict[str, Any]]:
         return await self._client.get_profiles(device_id)
@@ -293,12 +312,15 @@ class StoreBridge:
         downsampled = await self._hass.async_add_executor_job(
             _downsample, [[p[0], p[1]] for p in pts]
         )
-        new_id = await self._client.upload_reference_cycle(
-            acct["refresh_token"], acct.get("uid", ""), acct.get("name"),
-            meta, downsampled, stats, derive_qc(cyc),
-        )
-        if not new_id:
-            return {"error": "upload_failed", "detail": self._client.last_error()}
+        # The client is shared install-wide, and last_error() is a single slot, so the
+        # write and the read that interprets it have to be one critical section.
+        async with self._client.write_lock:
+            new_id = await self._client.upload_reference_cycle(
+                acct["refresh_token"], acct.get("uid", ""), acct.get("name"),
+                meta, downsampled, stats, derive_qc(cyc),
+            )
+            if not new_id:
+                return {"error": "upload_failed", "detail": self._client.last_error()}
         return {"store_cycle_id": new_id}
 
     async def share_device(
@@ -366,14 +388,15 @@ class StoreBridge:
         # to the allow-list by the WS layer, which owns entry.options).
         if isinstance(settings, dict) and settings:
             device_meta["settings"] = dict(settings)
-        res = await self._client.upload_device_bundle(
-            acct["refresh_token"], acct.get("uid", ""), acct.get("name"), device_meta, bundle_items,
-        )
-        # Return the raw bundle result ({ok, cycle_ids, errors}) so the caller can
-        # tell a partial upload (some cycle_ids present) from a total failure.
-        # Only a pre-flight gate short-circuits with an {"error": ...} marker above.
-        if not res.get("ok") and not res.get("cycle_ids"):
-            res = {**res, "detail": self._client.last_error()}
+        async with self._client.write_lock:  # see share_cycle
+            res = await self._client.upload_device_bundle(
+                acct["refresh_token"], acct.get("uid", ""), acct.get("name"), device_meta, bundle_items,
+            )
+            # Return the raw bundle result ({ok, cycle_ids, errors}) so the caller can
+            # tell a partial upload (some cycle_ids present) from a total failure.
+            # Only a pre-flight gate short-circuits with an {"error": ...} marker above.
+            if not res.get("ok") and not res.get("cycle_ids"):
+                res = {**res, "detail": self._client.last_error()}
         return res
 
     async def download_device(self, device_id_: str, device_type: str = "") -> dict[str, Any]:

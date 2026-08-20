@@ -393,6 +393,13 @@ export interface StartTaskResponse {
   task_id: string;
 }
 
+export interface StoreCatalogEntryResponse {
+  device_id?: string;
+  brand?: Record<string, unknown> | null;
+  device?: Record<string, unknown> | null;
+  disabled?: boolean;
+}
+
 export interface StoreConfirmResponse {
   confirmed?: boolean;
   confirmCount?: number;
@@ -444,6 +451,11 @@ export interface StorePrefsResponse {
 export interface StoreQualityResponse {
   avg?: number | null;
   count?: number;
+  disabled?: boolean;
+}
+
+export interface StoreRefreshCatalogResponse {
+  ok?: boolean;
   disabled?: boolean;
 }
 
@@ -1018,6 +1030,17 @@ export interface StoreGetDeviceProfilesRequest {
   appliance_type: string;
 }
 
+export interface StoreGetCatalogEntryRequest {
+  entry_id: string;
+  brand: string;
+  model: string;
+  appliance_type: string;
+}
+
+export interface StoreRefreshCatalogRequest {
+  entry_id: string;
+}
+
 export interface StoreConfirmDeviceRequest {
   entry_id: string;
   device_id: string;
@@ -1170,6 +1193,8 @@ export interface WashDataWsRequests {
   "ha_washdata/store_get_cycles": StoreGetCyclesRequest;
   "ha_washdata/store_get_device_quality": StoreGetDeviceQualityRequest;
   "ha_washdata/store_get_device_profiles": StoreGetDeviceProfilesRequest;
+  "ha_washdata/store_get_catalog_entry": StoreGetCatalogEntryRequest;
+  "ha_washdata/store_refresh_catalog": StoreRefreshCatalogRequest;
   "ha_washdata/store_confirm_device": StoreConfirmDeviceRequest;
   "ha_washdata/store_rate_device": StoreRateDeviceRequest;
   "ha_washdata/store_set_online": StoreSetOnlineRequest;
@@ -1285,6 +1310,8 @@ export interface WashDataWsResponses {
   "ha_washdata/store_set_online": StoreOnlineResponse;
   "ha_washdata/store_set_prefs": StorePrefsResponse;
   "ha_washdata/store_get_device_profiles": StoreDeviceProfilesResponse;
+  "ha_washdata/store_get_catalog_entry": StoreCatalogEntryResponse;
+  "ha_washdata/store_refresh_catalog": StoreRefreshCatalogResponse;
   "ha_washdata/store_upload_device": StoreUploadDeviceResponse;
   "ha_washdata/store_download_device": StoreDownloadDeviceResponse;
   "ha_washdata/get_shareable_cycles": GetShareableCyclesResponse;

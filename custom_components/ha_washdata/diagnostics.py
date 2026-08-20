@@ -82,8 +82,14 @@ async def async_get_config_entry_diagnostics(
         entry_options=dict(entry.options),
     )
 
+    from .frontend import served_asset_report
+
     return {
         "entry": _redact(entry.as_dict()),
+        # Which panel/card variant is actually being served. Both are served at the
+        # same URL by design, so without this a bug report cannot tell us whether the
+        # reporter was running the minified bundle or the readable fallback.
+        "frontend_assets": served_asset_report(),
         "manager_state": {
             "current_state": manager.check_state(),
             "current_program": manager.current_program,
