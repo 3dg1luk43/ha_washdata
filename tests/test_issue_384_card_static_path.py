@@ -194,6 +194,50 @@ async def test_legacy_fallback_raising_helper_propagates():
         await fe._async_register_path(hass, "/x/y.js", "/tmp/y.js")
 
 
+def test_cache_buster_has_sub_second_resolution():
+    """Two rebuilds inside the same second must not reuse a token.
+
+    ``getmtime()`` returns float seconds and the token used to truncate that to
+    whole seconds, so a same-second rebuild (a normal development cycle) produced
+    an identical URL and left the browser on the immutably-cached previous
+    artifact.
+    """
+    import os
+
+    real_stat = os.stat
+    offset = {"ns": 0}
+
+    class _Bumped:
+        """Real stat result with st_mtime_ns shifted inside the same second."""
+
+        def __init__(self, st, ns):
+            self._st = st
+            self._ns = ns
+
+        def __getattr__(self, name):
+            return getattr(self._st, name)
+
+        @property
+        def st_mtime_ns(self):
+            return self._st.st_mtime_ns + self._ns
+
+    def _fake_stat(path, *args, **kwargs):
+        # Shift every input, so the test does not depend on which file happens to
+        # hold the newest mtime in a given checkout.
+        st = real_stat(path, *args, **kwargs)
+        return _Bumped(st, offset["ns"]) if offset["ns"] else st
+
+    with patch.object(os, "stat", _fake_stat):
+        before = fe.get_cache_buster()
+        offset["ns"] = 1_000_000  # +1 ms: same whole second, different rebuild
+        after = fe.get_cache_buster()
+
+    assert before != after, (
+        "a rebuild less than a second after the previous one must still produce a "
+        "new cache buster"
+    )
+
+
 def test_cache_buster_changes_with_manifest_version():
     """Two releases must never produce the same cache-buster for one mtime.
 
