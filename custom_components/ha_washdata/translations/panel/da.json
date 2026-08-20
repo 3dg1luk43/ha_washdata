@@ -81,6 +81,8 @@
     "exists": "findes"
   },
   "btn": {
+    "set_brand_model": "Angiv mærke og model",
+    "refresh_catalog": "Opdater katalog",
     "add_device": "+ Tilføj enhed",
     "add_device_tip": "Tilføj en anden WashData-enhed",
     "add_maintenance": "Tilføj vedligeholdelseshændelse",
@@ -90,7 +92,7 @@
     "apply_label": "Påfør etiket",
     "apply_set_b": "Anvend sæt B",
     "apply_split": "Påfør Split",
-    "apply_trim": "Påfør Trim",
+    "apply_trim": "Anvend beskæring",
     "auto_detect_split": "Automatisk registrering",
     "auto_label_cycles": "Auto-label cyklusser",
     "auto_label_cycles_tip": "Tildel automatisk profilnavne til umærkede cyklusser, hvis matchkonfidens overstiger tærsklen",
@@ -209,8 +211,8 @@
     "stop": "Stop",
     "submit_correction": "Send rettelse",
     "train_now": "Træn nu",
-    "trim": "Trim",
-    "trim_split": "Trim / Split",
+    "trim": "Beskær",
+    "trim_split": "Beskær / Opdel",
     "undo": "Fortryd",
     "use": "Brug",
     "wipe_all": "Slet alle data",
@@ -253,7 +255,7 @@
       "start": "Skal være under antikrøl-maksimumeffekten ({max} W)"
     },
     "attn_sub": "Ret konflikter inden du gemmer",
-    "attn_title": "{n} indstillingskonflikt{s}",
+    "attn_title": "Indstillingskonflikter: {n}",
     "confidence": {
       "auto": "Skal være på eller over matchningstærsklen ({match})",
       "learning": "Skal være på eller under matchningstærsklen ({match})",
@@ -296,14 +298,14 @@
       "match": "Skal være over ikke-matchningstærsklen ({un})",
       "unmatch": "Skal være under matchningstærsklen ({match}); ellers ophæves en bekræftet matchning øjeblikkeligt"
     },
-    "cascade_toast": "Desuden {n} indstilling{s} justeret for konsistens.",
+    "cascade_toast": "Andre indstillinger justeret for konsistens: {n}",
     "suggestion_resolves": "Anvend forslaget nedenfor ({val}) for at løse dette",
     "use_fix": "Brug {val}",
     "watchdog": {
       "interval": "Bør være mindst 2x samplingsintervallet ({si} s)",
       "sampling": "Samplingsinterval bør højst være halvdelen af watchdog-intervallet ({wi} s)"
     },
-    "settings_banner": "{n} indstillingskonflikt{s} – tjek de fremhævede sektioner og ret dem inden du gemmer.",
+    "settings_banner": "Indstillingskonflikter: {n}. Tjek de fremhævede sektioner og ret dem, inden du gemmer.",
     "settings_banner_btn": "Gå til første"
   },
   "hdr": {
@@ -364,6 +366,7 @@
     "poor": "⚠ Dårlig matchkvalitet"
   },
   "lbl": {
+    "drag_to_resize": "Træk for at ændre størrelse",
     "actions": "Handlinger",
     "activity": "Aktivitet",
     "administrators": "Administratorer",
@@ -450,7 +453,7 @@
     "metric": "Metrik",
     "mode_existing_profile": "Føj til eksisterende profil",
     "mode_new_profile": "Opret ny profil",
-    "models_fine_tuned": "({count} model{plural} finjusteret)",
+    "models_fine_tuned": "(finjusterede modeller: {count})",
     "n_classic_suggestions": "{n} klassisk",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} valgt",
@@ -759,6 +762,11 @@
     "import_wizard": "Import - vælg data"
   },
   "msg": {
+    "tail_trim_hint": "Fjern så mange sekunder fra slutningen",
+    "store_sibling_hint": "Er der intet delt til netop din model? En nært beslægtet model fra samme mærke er normalt et godt udgangspunkt.",
+    "store_declare_appliance": "Fortæl WashData, hvilket apparat du har, så viser denne fane de opsætninger, andre har delt til det. Du kan også skrive et mærke ovenfor for at se dig omkring.",
+    "refresh_catalog_hint": "Fællesskabets lister over mærker og apparater gemmes i cachen, så fællesskabsbutikken holder sig inden for sin daglige grænse. Opdater for at hente bidrag, som andre har tilføjet eller godkendt.",
+    "head_trim_hint": "Fjern så mange sekunder fra starten",
     "appliance_monitor": "Apparat monitor",
     "artifact_dip_detail": "Faldt under det normale effektbånd i ~{n}s.",
     "artifact_footer": "Fremhævet på grafen ovenfor. Disse er forbigående artefakter (f.eks. døren åbnet midt i cyklussen), ikke nødvendigvis problemer.",
@@ -769,7 +777,7 @@
     "automations_intro": "WashData udløser {start} / {end}-hændelser og stiller entiteter til rådighed, så notifikationer og handlinger bedst bygges som normale Home Assistant-automatiseringer. Automatiseringer, der bruger denne enhed, vises nedenfor.",
     "cleanup_intro": "Hver mærket cyklus overlejret. Sæt kryds ved afvigelser og slet for at rydde op i profilen.",
     "clear_debug_hint": "Fjern gemte fejlretningsdata for at frigøre plads.",
-    "collecting_data": "Indsamler data: {need} cyklus{plural} mere, før finjustering kan starte ({current}/{min}).",
+    "collecting_data": "Indsamler data. Cyklusser der stadig mangler, før finjustering kan starte: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlejringsprofiler (svage)",
     "compare_profiles_tip": "Overlæg andre profilkonvolutter på skemaet ovenfor for at se, hvilken der passer bedst til denne cyklus.",
     "compare_selected_cycles": "Valgte cyklusser (fast) – vis/skjul",
@@ -779,7 +787,7 @@
     "cycles_deleted": "{count} cyklus(ser) slettet",
     "enough_data": "Nok data til at lære af ({current}/{min} cyklusser).",
     "export_description": "Vælg præcis hvilke profiler, cyklusser, indstillinger og mere der skal eksporteres til JSON, eller analysér en fil og importér kun de dele, du vil have.",
-    "feedback_cycles_pending": "{n} cyklus{s} til gennemgang",
+    "feedback_cycles_pending": "Til gennemgang: {n}",
     "feedback_prompt": "Bekræft, at det var rigtigt, ret programmet, eller ignorer.",
     "feedback_relabel_hint": "At mærke denne cyklus om løser også gennemgangen.",
     "filter_by_profile": "Filtrer efter profil…",
@@ -856,7 +864,6 @@
     "pg_stress_synthetic": "inaktiv simulering begynder her",
     "pg_sweep_intro": "Hvad hvis {param} var anderledes? Test {steps} værdier på tværs af dine seneste {cycles} cyklusser for at finde indstillingen, hvor flest cyklusser matches korrekt.",
     "pg_sweep_step": "Trin {done} / {total}",
-    "pg_undetected": "{n} cyklus{s} ikke registreret",
     "pg_verdict_bad": "Kræver opmærksomhed: mange cyklusser bliver ikke registreret.",
     "pg_verdict_good": "Godt indstillet: de fleste cyklusser identificeres og matches korrekt.",
     "pg_verdict_ok": "Acceptabelt: nogle cyklusser blev overset. Prøv at sænke starttærsklen.",
@@ -925,7 +932,7 @@
     "trend_energy_up": "Energitrends op ({pct} %/cyklus) – seneste gennemsnit {avg}",
     "trim_destructive_confirm": "Dermed bevares kun {pct}% af cyklussen. Dette kan ikke fortrydes. Fortsæt?",
     "trim_intro": "Træk i de røde håndtag, eller indtast værdier. Alt uden for vinduet fjernes.",
-    "tuning_suggestions_available": "{count} indstillingsforslag tilgængeligt fra observerede cyklusser. De vises ved siden af ​​de relevante felter.",
+    "tuning_suggestions_available": "{count} indstillingsforslag tilgængeligt fra observerede cyklusser. De vises ved siden af de relevante felter.",
     "unsure_detected_prefix": "WashData er usikker på, om det er registreret",
     "updated": "Opdateret",
     "warmup_badge": "Lærer stadig ({done}/{needed} cyklusser)",
@@ -1166,7 +1173,7 @@
       "label": "Minimum cyklusvarighed"
     },
     "delay_confirm_seconds": {
-      "doc": "Strømmen skal forblive i standby-båndet så længe, ​​før apparatet behandles som ventende på at starte i stedet for at køre.",
+      "doc": "Strømmen skal forblive i standby-båndet så længe, før apparatet behandles som ventende på at starte i stedet for at køre.",
       "label": "Bekræftelsessekunder"
     },
     "delay_start_detect_enabled": {
@@ -1194,7 +1201,7 @@
       "label": "Anvend smarte modeller under en cyklus"
     },
     "end_energy_threshold": {
-      "doc": "Under nedtællingen af ​​slukket forsinkelse sammenlignes akkumuleret energi (watt x tid) med denne tærskel. Hvis det overskrides, nulstilles nedtællingen - ved at holde anti-krøl tumblere og opvaskemaskinens tørrehaler fastgjort til cyklussen i stedet for at afkorte dem. Hæv den, hvis cyklusser slutter for tidligt under nedkøling; sænk den, hvis detektionen er træg.",
+      "doc": "Under nedtællingen af slukket forsinkelse sammenlignes akkumuleret energi (watt x tid) med denne tærskel. Hvis det overskrides, nulstilles nedtællingen - ved at holde anti-krøl tumblere og opvaskemaskinens tørrehaler fastgjort til cyklussen i stedet for at afkorte dem. Hæv den, hvis cyklusser slutter for tidligt under nedkøling; sænk den, hvis detektionen er træg.",
       "label": "Slutenergi"
     },
     "end_repeat_count": {
@@ -1222,7 +1229,7 @@
       "label": "Ekstern udløserenhed"
     },
     "external_end_trigger_enabled": {
-      "doc": "Lad en ekstern binær sensor signalere slutningen af ​​en cyklus, ud over den indbyggede strømbaserede detektering.",
+      "doc": "Lad en ekstern binær sensor signalere slutningen af en cyklus, ud over den indbyggede strømbaserede detektering.",
       "label": "Aktivér ekstern slutudløser"
     },
     "external_end_trigger_inverted": {
@@ -1242,7 +1249,7 @@
       "label": "Minimum slukket mellemrum"
     },
     "min_power": {
-      "doc": "Absolut minimumseffekt anses for aktiv. Aflæsninger under dette behandles som 0 W (standby), hvilket frafiltrerer fantombelastningen af ​​smarte stik og standby-LED'er.",
+      "doc": "Absolut minimumseffekt anses for aktiv. Aflæsninger under dette behandles som 0 W (standby), hvilket frafiltrerer fantombelastningen af smarte stik og standby-LED'er.",
       "label": "Minimumseffekt"
     },
     "ml_training_enabled": {
@@ -1402,7 +1409,7 @@
       "label": "Fejlmatchtærskel"
     },
     "progress_reset_delay": {
-      "doc": "Når du er færdig, skal du holde status på 100 % så længe, ​​så fuldført er synlig på dashboards, før du nulstiller til inaktiv.",
+      "doc": "Når du er færdig, skal du holde status på 100 % så længe, så fuldført er synlig på dashboards, før du nulstiller til inaktiv.",
       "label": "Forsinkelse ved nulstilling af fremskridt"
     },
     "pump_stuck_duration": {
@@ -1410,7 +1417,7 @@
       "label": "Varighed for fastklemt pumpe"
     },
     "running_dead_zone": {
-      "doc": "Efter en cyklus starter, ignoreres strømfald i dette vindue. Vaskemaskiner fyldes med koldt vand (falder i nærheden af ​​0 W før opvarmning) - uden denne beskyttelse ligner påfyldningsfasen en cyklusafslutning. Dette springer IKKE data over: sporet med fuld effekt registreres fra T=0. Forslagsmotoren måler din maskines faktiske opstartsmønster og størrelser dette automatisk.",
+      "doc": "Efter en cyklus starter, ignoreres strømfald i dette vindue. Vaskemaskiner fyldes med koldt vand (falder i nærheden af 0 W før opvarmning) - uden denne beskyttelse ligner påfyldningsfasen en cyklusafslutning. Dette springer IKKE data over: sporet med fuld effekt registreres fra T=0. Forslagsmotoren måler din maskines faktiske opstartsmønster og størrelser dette automatisk.",
       "label": "Kørende dødzone"
     },
     "sampling_interval": {
@@ -1438,7 +1445,7 @@
       "label": "Starttærskel"
     },
     "stop_threshold_w": {
-      "doc": "Strømmen skal falde til under dette niveau, før nedtællingen af ​​slukket forsinkelse begynder. Indstil den under starttærsklen - mellemrummet mellem dem er hysteresebåndet, der forhindrer flimmer. Hvis den er indstillet for højt, vil laveffektfaser (skyllestop, anti-krøl) fejlagtigt udløse slutsekvensen.",
+      "doc": "Strømmen skal falde til under dette niveau, før nedtællingen af slukket forsinkelse begynder. Indstil den under starttærsklen - mellemrummet mellem dem er hysteresebåndet, der forhindrer flimmer. Hvis den er indstillet for højt, vil laveffektfaser (skyllestop, anti-krøl) fejlagtigt udløse slutsekvensen.",
       "label": "Stoptærskel"
     },
     "switch_entity": {
@@ -1754,7 +1761,7 @@
       "thr_batch": "Holdt lige over den laveste aktive effekt ved p05 på tværs af {cycles} cyklusser ({p05}W), så en start fanges så tidligt som muligt, og stoptærsklen forbliver under maskinens laveste driftseffekt.",
       "tol_per_profile": "p75 for varighedsvariansen pr. profil på tværs af {profiles} profiler ({cycles} cyklusser); stramme profiler straffes ikke.",
       "tol_pooled": "Baseret på samlet varighedsvarians for {cycles} seneste mærkede cyklusser (p95 afvigelse={dev}).",
-      "watchdog": "Holdt så lavt som forsvarligt (lige over p95-opdateringsmellemrummet på {p95}s, min 30s), så stilstande fanges hurtigt uden falske stop."
+      "watchdog": "Holdt så lavt som forsvarligt (lige over p95-opdateringsmellemrummet på {p95}s og mindst 2x samplingintervallet på {median}s, min. 30s), så stilstande fanges hurtigt uden falske stop."
     },
     "exclusions": {
       "summary": "{total} fejldetekterede cyklus(ser) udelukket: {parts}.",
@@ -1801,6 +1808,7 @@
     "wrong_profile": "Forkert profil"
   },
   "toast": {
+    "catalog_refreshed": "Fællesskabskataloget er opdateret",
     "access_saved": "Adgangskontrol gemt",
     "all_wiped": "Alle data slettet",
     "analysis_complete_none": "Analyse færdig: ingen nye forslag",
@@ -1812,7 +1820,7 @@
     "cycle_labelled": "Cyklus mærket",
     "cycle_paused": "Cyklus sat på pause",
     "cycle_resumed": "Cyklus genoptaget",
-    "cycle_trimmed": "Cyklus trimmet",
+    "cycle_trimmed": "Cyklus beskåret",
     "cycles_merged": "Cykler slået sammen",
     "envelope_rebuilt": "Konvolut genopbygget",
     "envelopes_rebuilt": "Konvolutter genopbygget",
@@ -1955,6 +1963,10 @@
     "finished": "Cyklussen nåede en sluttilstand og stoppede."
   },
   "store": {
+    "your_model_tip": "Dette er det apparat, du har angivet i Indstillinger",
+    "your_model": "Dit apparat",
+    "search_brand_ph": "Søg efter mærke…",
+    "programs_count": "Programmer: {n}",
     "browse": "Gennemse",
     "device": "Enhed",
     "favorites": "Favoritter",

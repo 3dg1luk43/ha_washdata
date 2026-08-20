@@ -81,6 +81,8 @@
     "exists": "jau eksistē"
   },
   "btn": {
+    "set_brand_model": "Iestatīt zīmolu un modeli",
+    "refresh_catalog": "Atsvaidzināt katalogu",
     "add_device": "+ Pievienot ierīci",
     "add_device_tip": "Pievienojiet citu WashData ierīci",
     "add_maintenance": "Pievienot apkopes notikumu",
@@ -253,8 +255,8 @@
       "start": "Jābūt zem maksimālās pretgrumbu jaudas ({max} W)"
     },
     "attn_sub": "Pirms saglabāšanas novērsiet konfliktus",
-    "attn_title": "{n} iestatījumu konflikts{s}",
-    "settings_banner": "{n} iestatījumu konflikts{s} – pārbaudiet iezīmētās sadaļas un labojiet pirms saglabāšanas.",
+    "attn_title": "Iestatījumu konflikti: {n}",
+    "settings_banner": "Iestatījumu konflikti: {n}. Pārbaudiet iezīmētās sadaļas un labojiet tās pirms saglabāšanas.",
     "settings_banner_btn": "Doties uz pirmo",
     "confidence": {
       "auto": "Jābūt vienādam vai virs atbilstības sliekšņa ({match})",
@@ -298,7 +300,7 @@
       "match": "Jābūt virs neatbilstības sliekšņa ({un})",
       "unmatch": "Jābūt zem atbilstības sliekšņa ({match}); pretējā gadījumā apstiprināta atbilstība uzreiz tiek atcelta"
     },
-    "cascade_toast": "Automātiski tika koriģēti arī {n} iestatījumi konsekvences labad.",
+    "cascade_toast": "Konsekvences labad pielāgoti arī citi iestatījumi: {n}",
     "suggestion_resolves": "Lai to labotu, lietojiet zemāk esošo gaidošo ieteikumu ({val})",
     "use_fix": "Izmantot {val}",
     "watchdog": {
@@ -364,6 +366,7 @@
     "poor": "⚠ Slikta profila kvalitāte"
   },
   "lbl": {
+    "drag_to_resize": "Velciet, lai mainītu izmēru",
     "pg_anti_wrinkle": "Pretgrumbu režīms",
     "actions": "Darbības",
     "activity": "Aktivitāte",
@@ -435,7 +438,7 @@
     "from": "No",
     "gap_s": "Atstarpe (s)",
     "group_name": "Grupas nosaukums",
-    "head_trim": "Galvas apdare (-es)",
+    "head_trim": "Apgriešana no sākuma (s)",
     "health": "Veselība",
     "hide_tabs": "Slēpt cilnes, kas nav administratori",
     "in_use": "Lietošanā",
@@ -451,7 +454,7 @@
     "metric": "Metrika",
     "mode_existing_profile": "Pievienot esošajam profilam",
     "mode_new_profile": "Izveidot jaunu profilu",
-    "models_fine_tuned": "({count} modeļi precizēti)",
+    "models_fine_tuned": "(precizētie modeļi: {count})",
     "n_classic_suggestions": "{n} klasiskais",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "Atlasīti: {n}",
@@ -532,7 +535,7 @@
     "stage3": "3. posms – DTW",
     "stage4": "4. posms – atbilstība",
     "status": "Statuss",
-    "tail_trim": "Astes apdare (-es)",
+    "tail_trim": "Apgriešana no beigām (s)",
     "timer_auto_pause": "Automātiska pauze",
     "timer_min": "min",
     "timer_msg_placeholder": "Ziņojums (neobligāti, {device}/{program}/{minutes})",
@@ -759,6 +762,11 @@
     "import_wizard": "Imports - izvēlēties datus"
   },
   "msg": {
+    "tail_trim_hint": "Cik sekundes noņemt no beigām",
+    "store_sibling_hint": "Jūsu precīzajam modelim nekas nav kopīgots? Tuvs tā paša zīmola modelis parasti ir labs sākumpunkts.",
+    "store_declare_appliance": "Norādiet WashData, kura ierīce jums pieder, un šajā cilnē tiks parādītas citu tai kopīgotās programmas un ieraksti. Varat arī augšā ievadīt zīmolu un vienkārši paskatīties apkārt.",
+    "refresh_catalog_hint": "Kopienas zīmolu un ierīču saraksti tiek saglabāti kešatmiņā, lai kopīgotais veikals nepārsniegtu savu dienas pieprasījumu limitu. Atsvaidziniet, lai iegūtu citu pievienotos vai apstiprinātos ierakstus.",
+    "head_trim_hint": "Cik sekundes noņemt no sākuma",
     "appliance_monitor": "Ierīces monitors",
     "artifact_dip_detail": "Krita zem parastā jaudas joslas ~{n}s.",
     "artifact_footer": "Izcelts augstāk esošajā grafikā. Tie ir pārejoši artefakti (piemēram, durvis atvērtas cikla vidū), ne vienmēr problēmas.",
@@ -769,7 +777,7 @@
     "automations_intro": "WashData aktivizē {start} / {end} notikumus un atklāj entītijas, tāpēc paziņojumus un darbības vislabāk veidot kā parastas Home Assistant automatizācijas. Zemāk redzamas automatizācijas, kas izmanto šo ierīci.",
     "cleanup_intro": "Katrs iezīmētais cikls ir pārklāts. Atzīmējiet izņēmumus un izdzēsiet, lai notīrītu profilu.",
     "clear_debug_hint": "Noņemiet saglabātos atkļūdošanas datus, lai atbrīvotu vietu.",
-    "collecting_data": "Datu vākšana - nepieciešami vēl {need} cikli, lai varētu sākt precizēšanu ({current}/{min}).",
+    "collecting_data": "Notiek datu vākšana. Vēl nepieciešamie cikli, lai varētu sākt precizēšanu: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Pārklājuma profili (blāvi)",
     "compare_profiles_tip": "Iepriekš redzamajā diagrammā pārklājiet citas profila aploksnes, lai redzētu, kura no tām vislabāk atbilst šim ciklam.",
     "compare_selected_cycles": "Atlasītie cikli (pastāvīgi) – parādīt/slēpt",
@@ -779,7 +787,7 @@
     "cycles_deleted": "Dzēsti cikli: {count}",
     "enough_data": "Pietiek datu mācīšanai ({current}/{min} cikli).",
     "export_description": "Izvēlieties precīzi, kurus profilus, ciklus, iestatījumus un citus datus eksportēt uz JSON, vai analizējiet failu un importējiet tikai vēlamās daļas.",
-    "feedback_cycles_pending": "{n} cikl{s} pārskatīšanai",
+    "feedback_cycles_pending": "Pārskatīšanai: {n}",
     "feedback_prompt": "Apstipriniet, ka tas bija pareizi, labojiet programmu vai ignorējiet.",
     "feedback_relabel_hint": "Šī cikla atkārtota marķēšana arī to atrisina.",
     "filter_by_profile": "Filtrēt pēc profila…",
@@ -856,7 +864,6 @@
     "pg_stress_synthetic": "dīkstāves simulācija sākas šeit",
     "pg_sweep_intro": "Kā būtu, ja {param} atšķirtos? Pārbaudiet {steps} vērtības pēdējos {cycles} ciklos, lai atrastu iestatījumu, kurā pareizi tiek saskaņoti visvairāk ciklu.",
     "pg_sweep_step": "Solis {done} / {total}",
-    "pg_undetected": "Neatklāti cikli: {n}",
     "pg_verdict_bad": "Nepieciešama uzmanība: daudzi cikli netiek noteikti.",
     "pg_verdict_good": "Labi noregulēts: lielākā daļa ciklu tiek pareizi identificēti un saskaņoti.",
     "pg_verdict_ok": "Pieņemami: daži cikli palaisti garām. Mēģiniet pazemināt sākuma slieksni.",
@@ -1417,7 +1424,7 @@
       "label": "Slēdža entītija"
     },
     "watchdog_interval": {
-      "doc": "Cik bieži fona sargsuns pārbauda, ​​vai sensori nav apstājušies un vai nav pagājis noildzes laiks. Noklusējums 30 s.",
+      "doc": "Cik bieži fona sargsuns pārbauda, vai sensori nav apstājušies un vai nav pagājis noildzes laiks. Noklusējums 30 s.",
       "label": "Sargsuna intervāls"
     },
     "notify_milestone_message": {
@@ -1659,6 +1666,7 @@
     "wrong_profile": "Nepareizs profils"
   },
   "toast": {
+    "catalog_refreshed": "Kopienas katalogs atsvaidzināts",
     "access_saved": "Piekļuves kontrole saglabāta",
     "all_wiped": "Visi dati ir izdzēsti",
     "analysis_complete_none": "Analīze pabeigta: nav jaunu ieteikumu",
@@ -1860,7 +1868,7 @@
       "thr_batch": "Saglabāts nedaudz virs p05 zemākās aktīvās jaudas {cycles} ciklos ({p05}W), lai sākums tiktu uztverts pēc iespējas agrāk un apturēšanas slieksnis paliktu zem mašīnas zemākās darbības jaudas.",
       "tol_per_profile": "p75 no katra profila ilguma dispersijas {profiles} profilos ({cycles} cikli); stabili profili netiek sodīti.",
       "tol_pooled": "Pamatots ar apvienoto ilguma dispersiju {cycles} nesen marķētiem cikliem (p95 novirze={dev}).",
-      "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (tikai nedaudz virs p95 atjaunināšanas intervāla {p95}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas."
+      "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (tikai nedaudz virs p95 atjaunināšanas intervāla {p95}s un vismaz 2x paraugu ņemšanas intervāls {median}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas."
     },
     "exclusions": {
       "summary": "Izslēgti {total} kļūdaini atpazīti cikli: {parts}.",
@@ -1955,6 +1963,10 @@
     "finished": "Cikls sasniedza gala stāvokli un beidzās."
   },
   "store": {
+    "your_model_tip": "Šī ir ierīce, ko norādījāt iestatījumos",
+    "your_model": "Jūsu modelis",
+    "search_brand_ph": "Meklēt pēc zīmola…",
+    "programs_count": "Programmas: {n}",
     "browse": "Pārlūkot",
     "device": "Ierīce",
     "favorites": "Izlase",

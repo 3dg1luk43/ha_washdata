@@ -81,6 +81,8 @@
     "exists": "existuje"
   },
   "btn": {
+    "set_brand_model": "Nastaviť značku a model",
+    "refresh_catalog": "Obnoviť katalóg",
     "add_device": "+ Pridať zariadenie",
     "add_device_tip": "Pridajte ďalšie zariadenie WashData",
     "add_maintenance": "Pridať udalosť údržby",
@@ -234,7 +236,7 @@
     "download_device": "Stiahnuť nastavenie zariadenia",
     "share_device": "Zdieľať nastavenie zariadenia",
     "share_device_tip": "Zdieľať programy a nastavenia tohto zariadenia s komunitou",
-    "share_n": "Zdieľať {n} program{s}",
+    "share_n": "Zdieľať cykly: {n}",
     "export_selected": "Export (vybrať údaje)",
     "export_all": "Rýchly export všetkého",
     "import_raw": "Pokročilé: nahradiť všetko zo súboru JSON",
@@ -253,7 +255,7 @@
       "start": "Musí byť pod Max. výkonom ochrany pred krčením ({max} W)"
     },
     "attn_sub": "Pred uložením opravte konflikty",
-    "attn_title": "{n} konflikt{s} nastavení",
+    "attn_title": "Konflikty nastavení: {n}",
     "confidence": {
       "auto": "Musí byť na úrovni alebo nad Prahom zhody ({match})",
       "learning": "Musí byť na úrovni alebo pod Prahom zhody ({match})",
@@ -296,14 +298,14 @@
       "match": "Musí byť nad Prahom nezhody ({un})",
       "unmatch": "Musí byť pod Prahom zhody ({match}); inak sa potvrdená zhoda ihneď zruší"
     },
-    "cascade_toast": "Bolo tiež automaticky upravených {n} nastavení pre zachovanie konzistencie.",
+    "cascade_toast": "Ďalšie nastavenia upravené pre zachovanie konzistencie: {n}",
     "suggestion_resolves": "Uplatnite nižšie čakajúci návrh ({val}) na vyriešenie tohto konfliktu",
     "use_fix": "Použiť {val}",
     "watchdog": {
       "interval": "Mal by byť aspoň 2× Interval vzorkovania ({si} s)",
       "sampling": "Interval vzorkovania by mal byť najviac polovica Intervalu watchdog ({wi} s)"
     },
-    "settings_banner": "{n} konflikt{s} nastavení – skontrolujte zvýraznené sekcie a opravte pred uložením.",
+    "settings_banner": "Konflikty nastavení: {n}. Skontrolujte zvýraznené sekcie a opravte ich pred uložením.",
     "settings_banner_btn": "Prejsť na prvý"
   },
   "hdr": {
@@ -364,6 +366,7 @@
     "poor": "⚠ Zlá kvalita profilu"
   },
   "lbl": {
+    "drag_to_resize": "Potiahnutím zmeníte veľkosť",
     "actions": "Akcie",
     "activity": "Aktivita",
     "administrators": "Administrátori",
@@ -451,7 +454,7 @@
     "metric": "Metrika",
     "mode_existing_profile": "Pridať k existujúcemu profilu",
     "mode_new_profile": "Vytvoriť nový profil",
-    "models_fine_tuned": "({count} modelov doladených)",
+    "models_fine_tuned": "(doladené modely: {count})",
     "n_classic_suggestions": "{n} klasické",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} vybraných",
@@ -759,6 +762,11 @@
     "import_wizard": "Import - vybrať údaje"
   },
   "msg": {
+    "tail_trim_hint": "Koľko sekúnd odstrániť z konca",
+    "store_sibling_hint": "Pre váš konkrétny model nie je nič zdieľané? Veľmi podobný model od tej istej značky je zvyčajne dobrý východiskový bod.",
+    "store_declare_appliance": "Povedzte WashData, aký spotrebič máte, a táto karta zobrazí nastavenia, ktoré pre neho zdieľali ostatní používatelia. Môžete tiež zadať značku vyššie a poobzerať sa.",
+    "refresh_catalog_hint": "Zoznamy značiek a spotrebičov z komunity sa ukladajú do medzipamäte, aby zdieľaný obchod neprekročil svoj denný limit dotazov. Obnovením načítate položky, ktoré ostatní pridali alebo schválili.",
+    "head_trim_hint": "Koľko sekúnd odstrániť zo začiatku",
     "appliance_monitor": "Monitor spotrebiča",
     "artifact_dip_detail": "Poklesol pod bežné pásmo výkonu počas ~{n} s.",
     "artifact_footer": "Zvýraznené na grafe vyššie. Sú to prechodné artefakty (napr. dvere otvorené uprostred cyklu), nie nevyhnutne problémy.",
@@ -769,7 +777,7 @@
     "automations_intro": "WashData spúšťa udalosti {start} / {end} a sprístupňuje entity, takže notifikácie a akcie sa najlepšie vytvárajú ako bežné automatizácie Home Assistant. Automatizácie používajúce toto zariadenie sú zobrazené nižšie.",
     "cleanup_intro": "Všetky označené cykly naložené. Označte odchýlky a odstráňte pre vyčistenie profilu.",
     "clear_debug_hint": "Odstráňte uložené údaje ladenia, aby ste uvoľnili miesto.",
-    "collecting_data": "Zbieranie dát: ešte {need} cyklov do spustenia doladenia ({current}/{min}).",
+    "collecting_data": "Zbieranie dát. Zostávajúce cykly do spustenia doladenia: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Prekryté profily (bledé)",
     "compare_profiles_tip": "Prekryte ostatné profilové obálky v tabuľke vyššie, aby ste videli, ktorá z nich najlepšie vyhovuje tomuto cyklu.",
     "compare_selected_cycles": "Vybraté cykly (tučné) – zobraziť / skryť",
@@ -779,7 +787,7 @@
     "cycles_deleted": "Odstránených cyklov: {count}",
     "enough_data": "Dostatok dát na učenie ({current}/{min} cyklov).",
     "export_description": "Vyberte presne, ktoré profily, cykly, nastavenia a ďalšie údaje exportovať do súboru JSON, alebo analyzujte súbor a importujte len tie časti, ktoré chcete.",
-    "feedback_cycles_pending": "{n} cyklov na kontrolu",
+    "feedback_cycles_pending": "Na kontrolu: {n}",
     "feedback_prompt": "Potvrďte správnosť, opravte program alebo ignorujte.",
     "feedback_relabel_hint": "Opätovné označenie tohto cyklu ho tiež vyrieši.",
     "filter_by_profile": "Filtrovať podľa profilu…",
@@ -856,7 +864,6 @@
     "pg_stress_synthetic": "simulácia nečinnosti začína tu",
     "pg_sweep_intro": "Čo keby bol {param} iný? Otestujte {steps} hodnôt na vašich posledných {cycles} cykloch a nájdite nastavenie, pri ktorom je správne priradených najviac cyklov.",
     "pg_sweep_step": "Krok {done} / {total}",
-    "pg_undetected": "{n} nezistených cyklov",
     "pg_verdict_bad": "Vyžaduje pozornosť: mnoho cyklov zostáva nezistených.",
     "pg_verdict_good": "Dobre vyladené: väčšina cyklov je správne rozpoznaná a priradená.",
     "pg_verdict_ok": "Prijateľné: niektoré cykly neboli zachytené. Skúste znížiť prah spustenia.",
@@ -991,12 +998,12 @@
     "share_consent": "Zdieľate skutočné dáta zo svojho spotrebiča. Nezdieľajte, ak sú vaše vzorce používania súkromné.",
     "share_device_none": "Zatiaľ nie sú nastavené žiadne zariadenia. Najprv pridajte zariadenie.",
     "share_guideline_naming": "Používajte zrozumiteľné názvy programov (napr. 'Cotton 40', 'Eco 60'), aby ich ostatní mohli identifikovať",
-    "share_guideline_quality": "Zdieľajte iba profily s ⭐ referenčnými cyklami alebo aspoň {n} potvrdenými spusteniami",
+    "share_guideline_quality": "Zdieľajte iba cykly, ktoré prebehli normálne: bez prerušení uprostred cyklu, otvorenia dvierok alebo krátkych výpadkov napájania.",
     "share_guideline_review": "Pred zdieľaním skontrolujte svoje profily -- odstráňte tie, ktoré vyzerajú zle",
     "share_guidelines_title": "Pred zdieľaním",
     "store_download_device_intro": "Stiahnuť nastavenie zariadenia komunity a použiť ho na nové alebo existujúce zariadenie",
-    "store_share_device_intro": "Zdieľať programy vášho zariadenia (profily + referenčné cykly) s komunitou. Nastavenia sú voliteľné.",
-    "share_profile_no_cycles": "Profil '{p}' nemá žiadne ⭐ referenčné cykly -- bude preskočený, ak nemáte {n}+ potvrdených spustení",
+    "store_share_device_intro": "Nahrajte {brand} {model} s referenčnými cyklami, ktoré vyberiete. Ostatní s rovnakým spotrebičom môžu vaše programy prevziať. Záznamy sú pred zverejnením skontrolované.",
+    "share_profile_no_cycles": "Žiadne referenčné cykly. Ak chcete zahrnúť tento profil, označte cyklus ako ⭐ na karte Cykly",
     "advisory_phase_inconsistent": "Zdá sa, že '{name}' mieša rôzne programy alebo teploty - jeho cykly sa ohrievajú veľmi rôzne dlho. Rozdelenie na samostatné profily (napr. podľa teploty) zlepší zhodu aj odhady času.",
     "advisory_phase_inconsistent_title": "⚠ Možno zmiešané programy",
     "export_select_intro": "Zaškrtnite presne to, čo sa má zahrnúť. Výber profilov bez ich cyklov aj tak exportuje rozpoznateľný program (jeho naučená krivka sa prenesie spolu s ním).",
@@ -1725,7 +1732,7 @@
       "thr_batch": "Ponechané tesne nad najnižším činným výkonom p05 naprieč {cycles} cyklami ({p05}W), aby sa štart zachytil čo najskôr a prah zastavenia zostal pod najnižším prevádzkovým výkonom stroja.",
       "tol_per_profile": "p75 rozptylu dĺžky podľa profilu naprieč {profiles} profilmi ({cycles} cyklov); konzistentné profily nie sú penalizované.",
       "tol_pooled": "Na základe zlúčeného rozptylu dĺžky {cycles} nedávnych označených cyklov (odchýlka p95={dev}).",
-      "watchdog": "Ponechané čo najnižšie pri zachovaní bezpečnosti (tesne nad intervalom aktualizácie p95 vo výške {p95}s, min. 30s), aby sa zaseknutia rýchlo odhalili bez falošných zastavení."
+      "watchdog": "Ponechané čo najnižšie pri zachovaní bezpečnosti (tesne nad intervalom aktualizácie p95 vo výške {p95}s a aspoň 2x nad intervalom vzorkovania {median}s, min. 30s), aby sa zaseknutia rýchlo odhalili bez falešných zastavení."
     },
     "exclusions": {
       "summary": "Vylúčených {total} chybne zistených cyklov: {parts}.",
@@ -1772,6 +1779,7 @@
     "wrong_profile": "Nesprávny profil"
   },
   "toast": {
+    "catalog_refreshed": "Katalóg komunity obnovený",
     "access_saved": "Kontrola prístupu uložená",
     "all_wiped": "Všetky dáta vymazané",
     "analysis_complete_none": "Analýza dokončená: žiadne nové návrhy",
@@ -1865,15 +1873,15 @@
     "rating_saved": "Hodnotenie kvality uložené",
     "brand_added": "Značka pridaná, čaká na schválenie",
     "profile_added": "Profil pridaný, čaká na schválenie",
-    "saved_except_conflicts": "Nastavenia uložené -- {n} nastavenie{s} preskočené kvôli konfliktom",
+    "saved_except_conflicts": "Uložené. Opravte zvýraznené konflikty, aby sa uložil zvyšok.",
     "share_device_none_sel": "Vyberte aspoň jeden program na zdieľanie",
-    "store_device_downloaded": "Nastavenie zariadenia stiahnuté: {created} profil{c} vytvorený, {dup} už existovalo",
-    "store_device_downloaded_phases": "Nastavenie zariadenia stiahnuté: {created} profil{c} vytvorený, {dup} už existovalo, mapa fáz použitá",
-    "store_device_downloaded_settings": "Nastavenie zariadenia stiahnuté: {created} profil{c} vytvorený, {dup} už existovalo, nastavenia použité",
-    "store_device_shared": "Nastavenie zariadenia zdieľané: {n} program{s} nahraný",
-    "store_device_shared_all_dup": "Nič nové na zdieľanie -- všetky programy v obchode už existujú",
-    "store_device_shared_partial": "Čiastočné zdieľanie: {n} program{s} nahraný, {failed} preskočené",
-    "store_device_shared_some_dup": "Nastavenie zariadenia zdieľané: {n} program{s} nahraný ({dup} už existovalo)",
+    "store_device_downloaded": "Pridaných programov: {p}, nahrávok: {c}",
+    "store_device_downloaded_phases": "Pridaných programov: {p}, nahrávok: {c}, máp fáz: {ph}",
+    "store_device_downloaded_settings": "Pridaných programov: {p}, nahrávok: {c}, máp fáz: {ph}, nastavení: {s}",
+    "store_device_shared": "Zdieľané do komunitného obchodu (cyklov: {n}), čaká na kontrolu.",
+    "store_device_shared_all_dup": "Všetky vybrané cykly ({n}) už v komunitnom obchode sú.",
+    "store_device_shared_partial": "Zdieľaných cyklov: {n}; {failed} sa nepodarilo nahrať.",
+    "store_device_shared_some_dup": "Zdieľaných cyklov: {created}; už v obchode: {dup}.",
     "store_download_failed": "Sťahovanie zlyhalo: {error}",
     "store_download_nothing": "Nič na stiahnutie -- všetky profily na tomto zariadení už existujú",
     "export_selective_done": "Export stiahnutý",
@@ -1955,6 +1963,10 @@
     "finished": "Cyklus dosiahol koncový stav a skončil."
   },
   "store": {
+    "your_model_tip": "Toto je spotrebič, ktorý ste zadali v Nastaveniach",
+    "your_model": "Vaše",
+    "search_brand_ph": "Hľadať podľa značky…",
+    "programs_count": "Programy: {n}",
     "browse": "Prehliadať",
     "device": "Zariadenie",
     "favorites": "Obľúbené",

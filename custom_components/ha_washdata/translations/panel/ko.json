@@ -81,6 +81,8 @@
         "exists": "존재함"
     },
     "btn": {
+        "set_brand_model": "브랜드 및 모델 설정",
+        "refresh_catalog": "카탈로그 새로 고침",
         "add_device": "+ 장치 추가",
         "add_device_tip": "다른 WashData 장치 추가",
         "add_maintenance": "유지보수 이벤트 추가",
@@ -90,7 +92,7 @@
         "apply_label": "라벨 적용",
         "apply_set_b": "세트 B 적용",
         "apply_split": "분할 적용",
-        "apply_trim": "트림 적용",
+        "apply_trim": "자르기 적용",
         "auto_detect_split": "자동 감지",
         "auto_label_cycles": "사이클 자동 라벨 지정",
         "auto_label_cycles_tip": "일치 신뢰도가 임계값을 초과하는 미라벨 주기에 프로필 이름을 자동으로 할당합니다",
@@ -209,8 +211,8 @@
         "stop": "정지",
         "submit_correction": "정정사항 제출",
         "train_now": "지금 훈련",
-        "trim": "다듬기",
-        "trim_split": "다듬기/분할",
+        "trim": "자르기",
+        "trim_split": "자르기/분할",
         "undo": "실행 취소",
         "use": "사용",
         "wipe_all": "모든 데이터 지우기",
@@ -253,7 +255,7 @@
             "start": "구김 방지 최대 전력 ({max} W) 미만이어야 합니다"
         },
         "attn_sub": "저장하기 전에 충돌을 해결하세요",
-        "attn_title": "설정 충돌 {n}건{s}",
+        "attn_title": "설정 충돌: {n}",
         "confidence": {
             "auto": "매칭 임계값 ({match}) 이상이어야 합니다",
             "learning": "매칭 임계값 ({match}) 이하이어야 합니다",
@@ -296,14 +298,14 @@
             "match": "언매칭 임계값 ({un}) 이상이어야 합니다",
             "unmatch": "매칭 임계값 ({match}) 미만이어야 합니다. 그렇지 않으면 확정된 일치가 즉시 해제됩니다"
         },
-        "cascade_toast": "일관성을 위해 {n}개 설정{s}을 추가로 자동 조정했습니다.",
+        "cascade_toast": "일관성을 위해 조정된 다른 설정: {n}",
         "suggestion_resolves": "이 문제를 해결하려면 아래의 보류 중인 제안({val})을 적용하세요",
         "use_fix": "{val} 사용",
         "watchdog": {
             "interval": "샘플링 간격 ({si} 초)의 최소 2배이어야 합니다",
             "sampling": "샘플링 간격은 워치독 간격 ({wi} 초)의 절반 이하이어야 합니다"
         },
-        "settings_banner": "{n}건의 설정 충돌{s} – 강조 표시된 섹션을 확인하고 저장 전에 수정하세요.",
+        "settings_banner": "설정 충돌: {n}. 강조 표시된 섹션을 확인하고 저장 전에 수정하세요.",
         "settings_banner_btn": "첫 번째로"
     },
     "hdr": {
@@ -364,6 +366,7 @@
         "poor": "⚠ 프로파일 품질: 불량"
     },
     "lbl": {
+        "drag_to_resize": "드래그하여 크기 조정",
         "actions": "작업",
         "activity": "활동",
         "administrators": "관리자",
@@ -434,7 +437,7 @@
         "from": "시작",
         "gap_s": "간격(초)",
         "group_name": "그룹 이름",
-        "head_trim": "헤드 트림(초)",
+        "head_trim": "시작 부분 자르기(초)",
         "health": "건강",
         "hide_tabs": "관리자가 아닌 사용자를 위한 탭 숨기기",
         "in_use": "사용 중",
@@ -450,7 +453,7 @@
         "metric": "지표",
         "mode_existing_profile": "기존 프로필에 추가",
         "mode_new_profile": "새 프로필 만들기",
-        "models_fine_tuned": "({count}개 모델{plural} 미세 조정됨)",
+        "models_fine_tuned": "(미세 조정된 모델: {count})",
         "n_classic_suggestions": "{n} 클래식",
         "n_ml_suggestions": "{n} ML",
         "n_selected": "{n}개 선택됨",
@@ -532,7 +535,7 @@
         "stage3": "3단계 – DTW",
         "stage4": "4단계 – 일치도",
         "status": "상태",
-        "tail_trim": "테일 트림(초)",
+        "tail_trim": "끝부분 자르기(초)",
         "timer_auto_pause": "자동 일시중지",
         "timer_min": "분",
         "timer_msg_placeholder": "메시지(선택사항, {device}/{program}/{minutes})",
@@ -650,7 +653,7 @@
         "show_contributor": "기여자 이름 표시",
         "task_pg_detail": "사이클 시뮬레이션",
         "task_split": "사이클 분할 중",
-        "task_trim": "사이클 트리밍 중",
+        "task_trim": "사이클 자르는 중",
         "task_merge": "사이클 병합 중",
         "task_rebuild": "엔벨로프 재구성 중",
         "cat_profiles": "프로필(프로그램)",
@@ -759,6 +762,11 @@
         "import_wizard": "가져오기 - 데이터 선택"
     },
     "msg": {
+        "tail_trim_hint": "끝부분에서 제거할 초 수",
+        "store_sibling_hint": "정확히 같은 모델로 공유된 항목이 없나요? 같은 브랜드의 비슷한 모델이 보통 좋은 출발점이 됩니다.",
+        "store_declare_appliance": "보유한 가전제품을 WashData에 지정하면 이 탭에 다른 사용자가 공유한 프로그램과 녹음이 표시됩니다. 위에 브랜드를 입력해 둘러볼 수도 있습니다.",
+        "refresh_catalog_hint": "커뮤니티 브랜드 및 가전제품 목록은 공유 스토어가 일일 조회 한도를 넘지 않도록 캐시됩니다. 새로 고치면 다른 사용자가 추가하거나 승인한 항목을 가져옵니다.",
+        "head_trim_hint": "시작 부분에서 제거할 초 수",
         "appliance_monitor": "가전제품 모니터",
         "artifact_dip_detail": "일반 전력 범위 아래로 약 {n}초 동안 내려갔습니다.",
         "artifact_footer": "위 그래프에 강조표시되어 있습니다. 이는 일시적인 아티팩트(예: 사이클 중간에 문이 열림)이며 반드시 문제가 되는 것은 아닙니다.",
@@ -769,7 +777,7 @@
         "automations_intro": "WashData는 {start} / {end} 이벤트를 발생시키고 엔티티를 노출하므로, 알림과 동작은 일반 Home Assistant 자동화로 구축하는 것이 가장 좋습니다. 이 기기를 사용하는 자동화가 아래에 표시됩니다.",
         "cleanup_intro": "라벨이 붙은 모든 사이클이 중첩됩니다. 이상값을 선택하고 삭제하여 프로필을 정리하세요.",
         "clear_debug_hint": "저장된 디버그 데이터를 제거하여 여유 공간을 확보하세요.",
-        "collecting_data": "데이터 수집 중입니다. 미세 조정을 시작하려면 {need}번의 사이클{plural}이 더 필요합니다（{current}/{min}）。",
+        "collecting_data": "데이터 수집 중입니다. 미세 조정을 시작하기까지 더 필요한 사이클: {need} ({current}/{min}).",
         "compare_overlay_profiles": "오버레이 프로필(희미함)",
         "compare_profiles_tip": "위 차트에 다른 프로필 봉투를 겹쳐서 어느 것이 이 주기에 가장 적합한지 확인하세요.",
         "compare_selected_cycles": "선택한 주기(단색) – 표시/숨기기",
@@ -779,7 +787,7 @@
         "cycles_deleted": "{count}개 사이클이 삭제되었습니다",
         "enough_data": "학습할 충분한 데이터가 있습니다（{current}/{min}사이클）。",
         "export_description": "JSON으로 내보낼 프로필, 사이클, 설정 등을 정확히 선택하거나, 파일을 분석하여 원하는 부분만 가져올 수 있습니다.",
-        "feedback_cycles_pending": "검토가 필요한 사이클 {n}개{s}",
+        "feedback_cycles_pending": "검토 대기: {n}",
         "feedback_prompt": "그것이 옳았는지 확인하고, 프로그램을 수정하거나, 무시하십시오.",
         "feedback_relabel_hint": "이 사이클을 다시 라벨 지정하면 이것도 해결됩니다.",
         "filter_by_profile": "프로필로 필터링…",
@@ -856,7 +864,6 @@
         "pg_stress_synthetic": "대기 시뮬레이션이 여기서 시작됩니다",
         "pg_sweep_intro": "{param}이(가) 달랐다면 어땠을까요? 가장 많은 사이클이 올바르게 매칭되는 설정을 찾기 위해 최근 {cycles}개 사이클에서 {steps}개 값을 테스트합니다.",
         "pg_sweep_step": "단계 {done} / {total}",
-        "pg_undetected": "{n}개 사이클{s} 미감지",
         "pg_verdict_bad": "주의 필요: 많은 사이클이 감지되지 않고 있습니다.",
         "pg_verdict_good": "잘 조정됨: 대부분의 사이클이 올바르게 식별되고 매칭됩니다.",
         "pg_verdict_ok": "양호: 일부 사이클을 놓쳤습니다. 시작 임계값을 낮춰 보세요.",
@@ -1655,7 +1662,7 @@
         "analyzing": "분석 중…",
         "resetting": "재설정 중…",
         "reverting": "되돌리는 중…",
-        "trimming": "다듬는 중…",
+        "trimming": "자르는 중…",
         "splitting": "분할 중…",
         "deleting": "삭제 중…",
         "imported": "가져옴"
@@ -1688,6 +1695,7 @@
         "wrong_profile": "잘못된 프로필"
     },
     "toast": {
+        "catalog_refreshed": "커뮤니티 카탈로그를 새로 고쳤습니다",
         "access_saved": "액세스 제어가 저장되었습니다.",
         "all_wiped": "모든 데이터가 지워졌습니다.",
         "analysis_complete_none": "분석 완료: 새로운 제안 없음",
@@ -1699,7 +1707,7 @@
         "cycle_labelled": "라벨이 붙은 사이클",
         "cycle_paused": "주기가 일시중지됨",
         "cycle_resumed": "사이클 재개",
-        "cycle_trimmed": "주기가 잘림",
+        "cycle_trimmed": "사이클을 잘랐습니다",
         "cycles_merged": "사이클이 병합되었습니다.",
         "envelope_rebuilt": "봉투 재구축",
         "envelopes_rebuilt": "봉투 재구축",
@@ -1889,7 +1897,7 @@
             "thr_batch": "{cycles} 사이클의 p05 최저 활성 전력({p05}W) 바로 위로 유지합니다. 그래서 시작을 최대한 빨리 포착하고, 정지 임계값은 기기의 최저 작동 전력보다 낮게 유지됩니다.",
             "tol_per_profile": "{profiles}개 프로필({cycles} 사이클)의 프로필별 시간 분산 p75. 편차가 작은 프로필은 불이익을 받지 않습니다.",
             "tol_pooled": "{cycles}개 최근 라벨 사이클의 통합 시간 분산 기반(p95 편차={dev}).",
-            "watchdog": "안전한 범위에서 최대한 낮게 유지(p95 업데이트 간격 {p95}s보다 약간 큰 값, 최소 30s). 잘못된 정지 없이 멈춤을 빠르게 감지합니다."
+            "watchdog": "안전한 범위에서 최대한 낮게 유지(p95 업데이트 간격 {p95}s보다 약간 크고, 샘플링 간격 {median}s의 2배 이상, 최소 30s). 잘못된 정지 없이 멈춤을 빠르게 감지합니다."
         },
         "exclusions": {
             "summary": "잘못 감지된 사이클 {total}개를 제외했습니다: {parts}.",
@@ -1955,6 +1963,10 @@
         "finished": "사이클이 종료 상태에 도달하여 끝났습니다."
     },
     "store": {
+        "your_model_tip": "설정에서 지정한 가전제품입니다",
+        "your_model": "내 기기",
+        "search_brand_ph": "브랜드로 검색…",
+        "programs_count": "프로그램: {n}",
         "browse": "탐색",
         "device": "기기",
         "favorites": "즐겨찾기",
@@ -2010,7 +2022,7 @@
             "apply": "사이클 분할 중"
         },
         "trim": {
-            "apply": "사이클 트리밍 중"
+            "apply": "사이클 자르는 중"
         },
         "merge": {
             "apply": "사이클 병합 중"

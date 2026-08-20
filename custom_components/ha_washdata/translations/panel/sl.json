@@ -81,6 +81,8 @@
     "exists": "obstaja"
   },
   "btn": {
+    "set_brand_model": "Nastavi znamko in model",
+    "refresh_catalog": "Osveži katalog",
     "add_device": "+ Dodaj napravo",
     "add_device_tip": "Dodajte drugo napravo WashData",
     "add_maintenance": "Dodaj dogodek vzdrževanja",
@@ -234,7 +236,7 @@
     "download_device": "Prenesi nastavitve naprave",
     "share_device": "Deli nastavitve naprave",
     "share_device_tip": "Deli programe in nastavitve te naprave s skupnostjo",
-    "share_n": "Deli {n} program{s}",
+    "share_n": "Deli cikle ({n})",
     "export_selected": "Izvoz (izberi podatke)",
     "export_all": "Hitri izvoz vsega",
     "import_raw": "Napredno: zamenjaj vse iz datoteke JSON",
@@ -253,7 +255,7 @@
       "start": "Mora biti pod Maks. močjo zaščite pred gubami ({max} W)"
     },
     "attn_sub": "Pred shranjevanjem odpravite konflikte",
-    "attn_title": "{n} konflikt{s} nastavitev",
+    "attn_title": "Konflikti nastavitev: {n}",
     "confidence": {
       "auto": "Mora biti enak ali nad Pragom ujemanja ({match})",
       "learning": "Mora biti enak ali pod Pragom ujemanja ({match})",
@@ -296,14 +298,14 @@
       "match": "Mora biti nad Pragom neujemanja ({un})",
       "unmatch": "Mora biti pod Pragom ujemanja ({match}); sicer se potrjeno ujemanje takoj razveljavi"
     },
-    "cascade_toast": "Samodejno je bilo prilagojenih {n} nastavitev za doslednost.",
+    "cascade_toast": "Druge nastavitve, prilagojene za doslednost: {n}",
     "suggestion_resolves": "Uveljavite čakajoči predlog ({val}) spodaj za odpravo tega konflikta",
     "use_fix": "Uporabi {val}",
     "watchdog": {
       "interval": "Mora biti vsaj 2× Interval vzorčenja ({si} s)",
       "sampling": "Interval vzorčenja mora biti največ polovica Intervala nadzornika ({wi} s)"
     },
-    "settings_banner": "{n} konflikt{s} nastavitev – preverite označene razdelke in popravite pred shranjevanjem.",
+    "settings_banner": "Konflikti nastavitev: {n}. Preverite označene razdelke in jih popravite pred shranjevanjem.",
     "settings_banner_btn": "Pojdi na prvega"
   },
   "hdr": {
@@ -364,6 +366,7 @@
     "poor": "⚠ Slaba kakovost profila"
   },
   "lbl": {
+    "drag_to_resize": "Povlecite za spremembo velikosti",
     "actions": "Dejanja",
     "activity": "Aktivnost",
     "administrators": "Skrbniki",
@@ -451,7 +454,7 @@
     "metric": "Meritev",
     "mode_existing_profile": "Dodaj k obstoječemu profilu",
     "mode_new_profile": "Ustvari nov profil",
-    "models_fine_tuned": "({count} modelov prilagojenih)",
+    "models_fine_tuned": "(natančno prilagojeni modeli: {count})",
     "n_classic_suggestions": "{n} klasično",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} izbranih",
@@ -759,6 +762,11 @@
     "import_wizard": "Uvoz - izberi podatke"
   },
   "msg": {
+    "tail_trim_hint": "Odstranite toliko sekund s konca",
+    "store_sibling_hint": "Za vaš točni model ni nič deljenega? Tesno soroden model iste znamke je običajno dobro izhodišče.",
+    "store_declare_appliance": "Povejte integraciji WashData, katero napravo imate, in ta zavihek bo prikazal konfiguracije, ki so jih zanjo delili drugi. Zgoraj lahko tudi vpišete znamko in pregledate katalog.",
+    "refresh_catalog_hint": "Seznama znamk in naprav skupnosti sta shranjena v predpomnilniku, da skupnostna trgovina ostane v okviru svoje dnevne omejitve. Osvežite, da prevzamete vnose, ki so jih dodali ali odobrili drugi.",
+    "head_trim_hint": "Odstranite toliko sekund z začetka",
     "appliance_monitor": "Monitor naprave",
     "artifact_dip_detail": "Padel pod normalni pas moči za ~{n} s.",
     "artifact_footer": "Označeno na zgornjem grafu. To so prehodni artefakti (npr. vrata so se odprla sredi cikla), ne pa nujno težave.",
@@ -769,7 +777,7 @@
     "automations_intro": "WashData sproži dogodke {start} / {end} in razkrije entitete, zato je obvestila in dejanja najbolje graditi kot navadne avtomatizacije Home Assistant. Spodaj so prikazane avtomatizacije, ki uporabljajo to napravo.",
     "cleanup_intro": "Vsi označeni cikli naloženi. Označi odmike in briši za čiščenje profila.",
     "clear_debug_hint": "Odstranite shranjene podatke za odpravljanje napak, da sprostite prostor.",
-    "collecting_data": "Zbiranje podatkov: še {need} ciklov pred začetkom finega nastavljanja ({current}/{min}).",
+    "collecting_data": "Zbiranje podatkov. Še potrebnih ciklov pred začetkom natančnega prilagajanja: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Prekriti profili (bledi)",
     "compare_profiles_tip": "Prekrijte druge ovojnice profila na zgornji tabeli, da vidite, katera najbolj ustreza temu ciklu.",
     "compare_selected_cycles": "Izbrani cikli (polni) – prikaži / skrij",
@@ -779,7 +787,7 @@
     "cycles_deleted": "Izbrisanih ciklov: {count}",
     "enough_data": "Dovolj podatkov za učenje ({current}/{min} ciklov).",
     "export_description": "Izberite natančno, katere profile, cikle, nastavitve in drugo želite izvoziti v datoteko JSON, ali analizirajte datoteko in uvozite samo želene dele.",
-    "feedback_cycles_pending": "{n} ciklov za pregled",
+    "feedback_cycles_pending": "Za pregled: {n}",
     "feedback_prompt": "Potrdite pravilnost, popravite program ali prezrite.",
     "feedback_relabel_hint": "Ponovno označevanje tega cikla ga prav tako razreši.",
     "filter_by_profile": "Filtriraj po profilu…",
@@ -856,7 +864,6 @@
     "pg_stress_synthetic": "simulacija mirovanja se začne tukaj",
     "pg_sweep_intro": "Kaj če bi bil {param} drugačen? Preizkusite {steps} vrednosti na svojih zadnjih {cycles} ciklih in poiščite nastavitev, pri kateri se pravilno ujema največ ciklov.",
     "pg_sweep_step": "Korak {done} / {total}",
-    "pg_undetected": "{n} nezaznanih ciklov",
     "pg_verdict_bad": "Zahteva pozornost: veliko ciklov ostaja nezaznanih.",
     "pg_verdict_good": "Dobro nastavljeno: večina ciklov je pravilno prepoznanih in ujemanih.",
     "pg_verdict_ok": "Sprejemljivo: nekateri cikli so bili spregledani. Poskusite znižati prag zagona.",
@@ -991,12 +998,12 @@
     "share_consent": "Delite dejanske podatke svojega aparata. Ne delite, če so vaši vzorci uporabe zasebni.",
     "share_device_none": "Še ni nastavljenih naprav. Najprej dodajte napravo.",
     "share_guideline_naming": "Uporabite jasna imena programov (npr. 'Cotton 40', 'Eco 60'), da jih drugi lažje prepoznajo",
-    "share_guideline_quality": "Delite samo profile z ⭐ referenčnimi cikli ali vsaj {n} potrjenimi zagoni",
+    "share_guideline_quality": "Delite samo cikle, ki so se normalno zaključili -- brez prekinitev sredi cikla, odpiranja vrat ali nihanj napajanja.",
     "share_guideline_review": "Preglejte profile pred deljenjem -- odstranite tiste, ki izgledajo napačni",
     "share_guidelines_title": "Pred deljenjem",
     "store_download_device_intro": "Prenesi nastavitve skupnostne naprave in jih uporabi za novo ali obstoječo napravo",
-    "store_share_device_intro": "Deli programe svoje naprave (profile + referenčne cikle) s skupnostjo. Nastavitve so neobvezne.",
-    "share_profile_no_cycles": "Profil '{p}' nima ⭐ referenčnih ciklov -- preskočen bo, razen če imate {n}+ potrjenih zagonov",
+    "store_share_device_intro": "Naložite {brand} {model} z referenčnimi cikli, ki jih izberete. Drugi z enako napravo lahko prevzamejo vaše programe. Vnosi so pregledani pred javno objavo.",
+    "share_profile_no_cycles": "Ni referenčnih ciklov - označite cikel z ⭐ v zavihku Cikli, da vključite ta profil",
     "advisory_phase_inconsistent": "Videti je, da '{name}' meša različne programe ali temperature - njegovi cikli se segrevajo zelo različno dolgo. Če ga razdelite na ločene profile (npr. po temperaturi), boste izboljšali ujemanje in ocene časa.",
     "advisory_phase_inconsistent_title": "⚠ Morda pomešani programi",
     "export_select_intro": "Označite natančno, kaj naj bo vključeno. Izbira profilov brez njihovih ciklov še vedno izvozi prepoznaven program (njegova naučena oblika se prenese z njim).",
@@ -1377,7 +1384,7 @@
       "label": "Zamuda ponastavitve napredka"
     },
     "pump_stuck_duration": {
-      "doc": "Nekaj ​​sekund lahko črpalka deluje neprekinjeno, preden je označena kot morebitna zastoj (sproži dogodek zastoja črpalke).",
+      "doc": "Nekaj sekund lahko črpalka deluje neprekinjeno, preden je označena kot morebitna zastoj (sproži dogodek zastoja črpalke).",
       "label": "Trajanje zataknjenosti črpalke"
     },
     "running_dead_zone": {
@@ -1725,7 +1732,7 @@
       "thr_batch": "Ohranjeno tik nad najnižjo delovno močjo p05 čez {cycles} ciklov ({p05}W), da se začetek zazna čim prej in da prag ustavitve ostane pod najnižjo delovno močjo naprave.",
       "tol_per_profile": "p75 variance trajanja po posameznih profilih čez {profiles} profilov ({cycles} ciklov); dosledni profili niso kaznovani.",
       "tol_pooled": "Na podlagi združene variance trajanja {cycles} nedavnih označenih ciklov (p95 odklon={dev}).",
-      "watchdog": "Ohranjeno tako nizko, kot je varno (tik nad vrzeljo posodobitve p95 {p95}s, najmanj 30s), da se zastoji hitro zaznajo brez lažnih ustavitev."
+      "watchdog": "Ohranjeno tako nizko, kot je varno (tik nad vrzeljo posodobitve p95 {p95}s in vsaj 2× interval vzorčenja {median}s, najmanj 30s), da se zastoji hitro zaznajo brez lažnih ustavitev."
     },
     "exclusions": {
       "summary": "Izključeno {total} napačno zaznanih ciklov: {parts}.",
@@ -1772,6 +1779,7 @@
     "wrong_profile": "Napačen profil"
   },
   "toast": {
+    "catalog_refreshed": "Katalog skupnosti je osvežen",
     "access_saved": "Nadzor dostopa shranjen",
     "all_wiped": "Vsi podatki izbrisani",
     "analysis_complete_none": "Analiza zaključena: ni novih predlogov",
@@ -1865,15 +1873,15 @@
     "rating_saved": "Ocena kakovosti shranjena",
     "brand_added": "Znamka dodana, čaka na odobritev",
     "profile_added": "Profil dodan, čaka na odobritev",
-    "saved_except_conflicts": "Nastavitve shranjene -- {n} nastavitev{s} preskočena zaradi konfliktov",
+    "saved_except_conflicts": "Shranjeno. Popravite označene konflikte, da shranite še ostalo.",
     "share_device_none_sel": "Izberite vsaj en program za deljenje",
-    "store_device_downloaded": "Nastavitve naprave prenesene: {created} profil{c} ustvarjen, {dup} že obstaja",
-    "store_device_downloaded_phases": "Nastavitve naprave prenesene: {created} profil{c} ustvarjen, {dup} že obstaja, fazna karta uporabljena",
-    "store_device_downloaded_settings": "Nastavitve naprave prenesene: {created} profil{c} ustvarjen, {dup} že obstaja, nastavitve uporabljene",
-    "store_device_shared": "Nastavitve naprave deljene: {n} program{s} naložen",
-    "store_device_shared_all_dup": "Nič novega za deljenje -- vsi programi že obstajajo v trgovini",
-    "store_device_shared_partial": "Delno deljenje: {n} program{s} naložen, {failed} preskočenih",
-    "store_device_shared_some_dup": "Nastavitve naprave deljene: {n} program{s} naložen ({dup} že obstaja)",
+    "store_device_downloaded": "Dodano: programi {p}, posnetki {c}",
+    "store_device_downloaded_phases": "Dodano: programi {p}, posnetki {c}, fazne karte {ph}",
+    "store_device_downloaded_settings": "Dodano: programi {p}, posnetki {c}, fazne karte {ph}, nastavitve {s}",
+    "store_device_shared": "Cikli, deljeni v skupnostno trgovino: {n}. Čaka na pregled.",
+    "store_device_shared_all_dup": "Vsi cikli ({n}) so bili že v skupnostni trgovini.",
+    "store_device_shared_partial": "Deljeni cikli: {n}; ni bilo mogoče naložiti: {failed}.",
+    "store_device_shared_some_dup": "Deljeni cikli: {created}; že v trgovini: {dup}.",
     "store_download_failed": "Prenos ni uspel: {error}",
     "store_download_nothing": "Ni ničesar za prenos -- vsi profili že obstajajo na tej napravi",
     "export_selective_done": "Izvoz prenesen",
@@ -1955,6 +1963,10 @@
     "finished": "Cikel je dosegel končno stanje in se je končal."
   },
   "store": {
+    "your_model_tip": "To je naprava, ki ste jo navedli v Nastavitvah",
+    "your_model": "Vaša",
+    "search_brand_ph": "Iskanje po znamki…",
+    "programs_count": "Programi: {n}",
     "browse": "Brskaj",
     "device": "Naprava",
     "favorites": "Priljubljeni",

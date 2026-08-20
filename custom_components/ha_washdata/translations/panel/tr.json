@@ -81,6 +81,8 @@
         "exists": "mevcut"
     },
     "btn": {
+        "set_brand_model": "Marka ve modeli ayarla",
+        "refresh_catalog": "Kataloğu yenile",
         "add_device": "+ Cihaz ekle",
         "add_device_tip": "Başka bir WashData cihazı ekleyin",
         "add_maintenance": "Bakım kaydı ekle",
@@ -253,8 +255,8 @@
             "start": "Kırışıklık Önleme Maks. Gücü'nün altında olmalıdır ({max} W)"
         },
         "attn_sub": "Kaydetmeden önce çakışmaları düzeltin",
-        "attn_title": "{n} ayar çakışması{s}",
-        "settings_banner": "{n} ayar çakışması{s} – vurgulanan bölümleri kontrol edin ve kaydetmeden önce düzeltin.",
+        "attn_title": "Ayar çakışmaları: {n}",
+        "settings_banner": "Ayar çakışmaları: {n}. Vurgulanan bölümleri kontrol edin ve kaydetmeden önce düzeltin.",
         "settings_banner_btn": "İlkine git",
         "confidence": {
             "auto": "Eşleşme Eşiğinde veya üzerinde olmalıdır ({match})",
@@ -298,7 +300,7 @@
             "match": "Eşleşmeme Eşiğinin üzerinde olmalıdır ({un})",
             "unmatch": "Eşleşme Eşiğinin altında olmalıdır ({match}); aksi takdirde onaylanan bir eşleşme anında iptal olur"
         },
-        "cascade_toast": "Tutarlılık için {n} ayar{s} daha otomatik olarak düzenlendi.",
+        "cascade_toast": "Tutarlılık için düzenlenen diğer ayarlar: {n}",
         "suggestion_resolves": "Bunu düzeltmek için aşağıdaki bekleyen öneriyi ({val}) etkinleştirin",
         "use_fix": "{val} kullan",
         "watchdog": {
@@ -364,6 +366,7 @@
         "poor": "⚠ Düşük profil kalitesi"
     },
     "lbl": {
+        "drag_to_resize": "Yeniden boyutlandırmak için sürükleyin",
         "actions": "Eylemler",
         "activity": "Aktivite",
         "administrators": "Yöneticiler",
@@ -434,7 +437,7 @@
         "from": "Başlangıç",
         "gap_s": "Boşluk (s)",
         "group_name": "Grup adı",
-        "head_trim": "Baş Kırpma (s)",
+        "head_trim": "Baştan Kırpma (s)",
         "health": "Sağlık",
         "hide_tabs": "Yönetici olmayanlar için sekmeleri gizle",
         "in_use": "Kullanımda",
@@ -450,7 +453,7 @@
         "metric": "Metrik",
         "mode_existing_profile": "Mevcut Profile Ekle",
         "mode_new_profile": "Yeni Profil Oluştur",
-        "models_fine_tuned": "({count} model{plural} ince ayarlı)",
+        "models_fine_tuned": "(ince ayarlı modeller: {count})",
         "n_classic_suggestions": "{n} klasik",
         "n_ml_suggestions": "{n} ML",
         "n_selected": "{n} seçili",
@@ -532,7 +535,7 @@
         "stage3": "Aşama 3 – DTW",
         "stage4": "Aşama 4 – uyum",
         "status": "Durum",
-        "tail_trim": "Kuyruk Kırpma (s)",
+        "tail_trim": "Sondan Kırpma (s)",
         "timer_auto_pause": "Otomatik duraklatma",
         "timer_min": "dk.",
         "timer_msg_placeholder": "Mesaj (isteğe bağlı, {device}/{program}/{minutes})",
@@ -759,6 +762,11 @@
         "import_wizard": "İçe aktarma - veri seçin"
     },
     "msg": {
+        "tail_trim_hint": "Sondan kaldırılacak saniye sayısı",
+        "store_sibling_hint": "Tam olarak sizin modeliniz için paylaşılmış bir şey yok mu? Aynı markanın yakın bir modeli genellikle iyi bir başlangıç noktasıdır.",
+        "store_declare_appliance": "WashData'ya hangi cihaza sahip olduğunuzu bildirin; bu sekme, başkalarının o cihaz için paylaştığı programları ve kayıtları gösterir. Ayrıca yukarıya bir marka yazıp göz atabilirsiniz.",
+        "refresh_catalog_hint": "Topluluk marka ve cihaz listeleri, paylaşılan mağazanın günlük okuma kotası içinde kalması için önbelleğe alınır. Başkalarının eklediği veya onayladığı kayıtları almak için yenileyin.",
+        "head_trim_hint": "Baştan kaldırılacak saniye sayısı",
         "appliance_monitor": "Cihaz monitörü",
         "artifact_dip_detail": "Normal güç bandının altında yaklaşık ~{n} saniye sürdü.",
         "artifact_footer": "Yukarıdaki grafikte vurgulanmıştır. Bunlar geçici eserlerdir (örn. döngünün ortasında kapının açılması), mutlaka sorun teşkil etmez.",
@@ -769,7 +777,7 @@
         "automations_intro": "WashData, {start} / {end} olaylarını tetikler ve varlıkları gösterir; bu nedenle bildirimler ve eylemler en iyi şekilde normal Home Assistant otomasyonları olarak oluşturulur. Bu cihazı kullanan otomasyonlar aşağıda görünür.",
         "cleanup_intro": "Tüm etiketli döngüler üst üste bindirilmiş. Aykırı değerleri işaretleyip silerek profili temizleyin.",
         "clear_debug_hint": "Saklanan hata ayıklama verilerini kaldırarak boş alan açın.",
-        "collecting_data": "Veri toplanıyor: ince ayar başlamadan önce {need} döngü{plural} daha gerekiyor ({current}/{min}).",
+        "collecting_data": "Veri toplanıyor. İnce ayarın başlaması için gereken döngü sayısı: {need} ({current}/{min}).",
         "compare_overlay_profiles": "Profilleri üst üste bindirin (soluk)",
         "compare_profiles_tip": "Hangisinin bu döngüye en uygun olduğunu görmek için diğer profil zarflarını yukarıdaki tabloya yerleştirin.",
         "compare_selected_cycles": "Seçili döngüler (katı) – göster / gizle",
@@ -779,7 +787,7 @@
         "cycles_deleted": "{count} döngü silindi",
         "enough_data": "Öğrenmek için yeterli veri ({current}/{min} döngü).",
         "export_description": "JSON'a dışa aktarılacak profilleri, döngüleri, ayarları ve daha fazlasını tam olarak seçin ya da bir dosyayı analiz edip yalnızca istediğiniz kısımları içe aktarın.",
-        "feedback_cycles_pending": "İncelenecek {n} döngü{s}",
+        "feedback_cycles_pending": "İncelenecek: {n}",
         "feedback_prompt": "Doğru olduğunu onaylayın, programı düzeltin veya yoksayın.",
         "feedback_relabel_hint": "Bu döngüyü yeniden etiketlemek de bunu çözer.",
         "filter_by_profile": "Profile göre filtrele…",
@@ -856,7 +864,6 @@
         "pg_stress_synthetic": "bekleme simülasyonu burada başlar",
         "pg_sweep_intro": "{param} farklı olsaydı ne olurdu? En çok döngünün doğru şekilde eşleştirildiği ayarı bulmak için son {cycles} döngünüzde {steps} değeri test edin.",
         "pg_sweep_step": "Adım {done} / {total}",
-        "pg_undetected": "{n} döngü{s} algılanmadı",
         "pg_verdict_bad": "Dikkat gerekiyor: birçok döngü algılanmadan geçiyor.",
         "pg_verdict_good": "İyi ayarlanmış: çoğu döngü doğru şekilde tanımlanıp eşleştiriliyor.",
         "pg_verdict_ok": "Kabul edilebilir: bazı döngüler kaçırıldı. Başlangıç eşiğini düşürmeyi deneyin.",
@@ -1390,7 +1397,7 @@
             "label": "Min. Süre Oranı"
         },
         "profile_match_threshold": {
-            "doc": "Bir program tanımlamasını kabul etmek için döngü sonunda gereken minimum benzerlik puanı (0-1). Yanlış tanımlamaları azaltmak için kaldırın; makinenizin programları eşleşmiyorsa düşürün. Varsayılan 0,4 ihtiyatlı bir başlangıç ​​noktasıdır.",
+            "doc": "Bir program tanımlamasını kabul etmek için döngü sonunda gereken minimum benzerlik puanı (0-1). Yanlış tanımlamaları azaltmak için kaldırın; makinenizin programları eşleşmiyorsa düşürün. Varsayılan 0,4 ihtiyatlı bir başlangıç noktasıdır.",
             "label": "Eşleşme Eşiği"
         },
         "profile_unmatch_threshold": {
@@ -1434,7 +1441,7 @@
             "label": "Başlangıç Eşiği"
         },
         "stop_threshold_w": {
-            "doc": "Düşmede gecikme geri sayımı başlamadan önce güç bu seviyenin altına düşmelidir. Bunu Başlangıç ​​Eşiğinin altına ayarlayın; aralarındaki boşluk, titremeyi önleyen histerezis bandıdır. Çok yükseğe ayarlanırsa, düşük güçlü fazlar (durulamada bekletme, kırışık önleme) hatalı şekilde bitiş sırasını tetikler.",
+            "doc": "Düşmede gecikme geri sayımı başlamadan önce güç bu seviyenin altına düşmelidir. Bunu Başlangıç Eşiğinin altına ayarlayın; aralarındaki boşluk, titremeyi önleyen histerezis bandıdır. Çok yükseğe ayarlanırsa, düşük güçlü fazlar (durulamada bekletme, kırışık önleme) hatalı şekilde bitiş sırasını tetikler.",
             "label": "Durdurma Eşiği"
         },
         "switch_entity": {
@@ -1688,6 +1695,7 @@
         "wrong_profile": "Yanlış profil"
     },
     "toast": {
+        "catalog_refreshed": "Topluluk kataloğu yenilendi",
         "access_saved": "Erişim denetimi kaydedildi",
         "all_wiped": "Tüm veriler silindi",
         "analysis_complete_none": "Analiz tamamlandı: yeni öneri yok",
@@ -1889,7 +1897,7 @@
             "thr_batch": "{cycles} çevrim boyunca p05 en düşük aktif gücün ({p05}W) hemen üzerinde tutuldu; böylece başlangıç olabildiğince erken yakalanır ve durdurma eşiği makinenin en düşük çalışma gücünün altında kalır.",
             "tol_per_profile": "{profiles} profil boyunca ({cycles} çevrim) profil başına süre varyansının p75'i; tutarlı profiller cezalandırılmaz.",
             "tol_pooled": "{cycles} son etiketli çevrimin birleştirilmiş süre varyansına dayalı (p95 sapma={dev}).",
-            "watchdog": "Güvenli olduğu kadar düşük tutuldu ({p95}s'lik p95 güncelleme boşluğunun hemen üzerinde, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır."
+            "watchdog": "Güvenli olduğu kadar düşük tutuldu (p95 güncelleme boşluğu {p95}s değerinin hemen üzerinde ve örnekleme aralığı {median}s değerinin en az 2 katı, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır."
         },
         "exclusions": {
             "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",
@@ -1955,6 +1963,10 @@
         "finished": "Döngü, son duruma ulaştı ve sona erdi."
     },
     "store": {
+        "your_model_tip": "Bu, Ayarlar'da belirttiğiniz cihazdır",
+        "your_model": "Sizinki",
+        "search_brand_ph": "Markaya göre ara…",
+        "programs_count": "Programlar: {n}",
         "browse": "Göz at",
         "device": "Cihaz",
         "favorites": "Favoriler",

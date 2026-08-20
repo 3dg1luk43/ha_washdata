@@ -81,6 +81,8 @@
         "exists": "ekziston"
     },
     "btn": {
+        "set_brand_model": "Cakto markën dhe modelin",
+        "refresh_catalog": "Rifresko katalogun",
         "add_device": "+ Shto pajisje",
         "add_device_tip": "Shto një pajisje tjetër WashData",
         "add_maintenance": "Shto ngjarje mirëmbajtjeje",
@@ -209,8 +211,8 @@
         "stop": "Ndalo",
         "submit_correction": "Dërgo korrigjimin",
         "train_now": "Trajno tani",
-        "trim": "Priti",
-        "trim_split": "Priti / Ndaj",
+        "trim": "Prerje",
+        "trim_split": "Prerje / Ndarje",
         "undo": "Zhbëj",
         "use": "Përdor",
         "wipe_all": "Fshi të gjitha të dhënat",
@@ -253,7 +255,7 @@
             "start": "Duhet të jetë nën Fuqinë Maks. Kundër Rrudhave ({max} W)"
         },
         "attn_sub": "Rregulloni konfliktet para se të ruani",
-        "attn_title": "{n} konflikt{s} cilësimi",
+        "attn_title": "Konflikte cilësimesh: {n}",
         "confidence": {
             "auto": "Duhet të jetë në ose mbi Pragun e Përputhjes ({match})",
             "learning": "Duhet të jetë në ose nën Pragun e Përputhjes ({match})",
@@ -296,14 +298,14 @@
             "match": "Duhet të jetë mbi Pragun e Mosperputhjeve ({un})",
             "unmatch": "Duhet të jetë nën Pragun e Përputhjes ({match}); përndryshe një përputhje e konfirmuar zhbëhet menjëherë"
         },
-        "cascade_toast": "U rregulluan edhe {n} cilësim{s} për konsistencë.",
+        "cascade_toast": "Cilësime të tjera të rregulluara për konsistencë: {n}",
         "suggestion_resolves": "Zbato sugjerimin e pritshëm ({val}) më poshtë për ta rregulluar këtë",
         "use_fix": "Përdor {val}",
         "watchdog": {
             "interval": "Duhet të jetë të paktën 2× Intervali i Kampionimit ({si} s)",
             "sampling": "Intervali i Kampionimit duhet të jetë të paktën gjysma e Intervalit të Rojtarit ({wi} s)"
         },
-        "settings_banner": "{n} konflikt{s} cilësimi – kontrolloni seksionet e theksuara dhe korrigjojini para ruajtjes.",
+        "settings_banner": "Konflikte cilësimesh: {n}. Kontrolloni seksionet e theksuara dhe korrigjojini para ruajtjes.",
         "settings_banner_btn": "Shko te i pari"
     },
     "hdr": {
@@ -364,6 +366,7 @@
         "poor": "⚠ Cilësi e keqe e profilit"
     },
     "lbl": {
+        "drag_to_resize": "Tërhiqni për të ndryshuar madhësinë",
         "actions": "Veprime",
         "activity": "Aktivitet",
         "administrators": "Administratorë",
@@ -434,7 +437,7 @@
         "from": "Nga",
         "gap_s": "Ndërrimi (s)",
         "group_name": "Emri i grupit",
-        "head_trim": "Prerja e kreut (s)",
+        "head_trim": "Prerje në fillim (s)",
         "health": "Shëndeti",
         "hide_tabs": "Fshih skedat për jo-administratorët",
         "in_use": "Në përdorim",
@@ -450,7 +453,7 @@
         "metric": "Metrika",
         "mode_existing_profile": "Shto te profili ekzistues",
         "mode_new_profile": "Krijo profil të ri",
-        "models_fine_tuned": "({count} model{plural} të sintonizuar)",
+        "models_fine_tuned": "(modele të rregulluara mirë: {count})",
         "n_classic_suggestions": "{n} klasike",
         "n_ml_suggestions": "{n} ML",
         "n_selected": "{n} të zgjedhura",
@@ -532,7 +535,7 @@
         "stage3": "Etapa 3 – DTW",
         "stage4": "Etapa 4 – përputhja",
         "status": "Statusi",
-        "tail_trim": "Prerja e fundit (s)",
+        "tail_trim": "Prerje në fund (s)",
         "timer_auto_pause": "Auto-pauzë",
         "timer_min": "min",
         "timer_msg_placeholder": "Mesazh (opsionale, {device}/{program}/{minutes})",
@@ -759,6 +762,11 @@
         "import_wizard": "Importo - zgjidh të dhënat"
     },
     "msg": {
+        "tail_trim_hint": "Hiqni kaq sekonda nga fundi",
+        "store_sibling_hint": "Nuk ka asgjë të ndarë për modelin tuaj të saktë? Një model i afërt i të njëjtës markë është zakonisht një pikënisje e mirë.",
+        "store_declare_appliance": "Përcaktoni në WashData pajisjen që zotëroni dhe kjo skedë shfaq konfigurimet që të tjerët kanë ndarë për të. Mund edhe të shkruani një markë më lart për t'i hedhur një sy katalogut.",
+        "refresh_catalog_hint": "Listat e markave dhe pajisjeve të komunitetit mbahen në kujtesën e përkohshme, që dyqani i komunitetit të mbetet brenda kufirit të tij ditor. Rifreskoni për të marrë hyrjet e shtuara ose të miratuara nga të tjerët.",
+        "head_trim_hint": "Hiqni kaq sekonda nga fillimi",
         "appliance_monitor": "Monitor i pajisjes",
         "artifact_dip_detail": "Ra nën brezin e zakonshëm të fuqisë për ~{n} s.",
         "artifact_footer": "E theksuar në grafikun e mësipërm. Këto janë objekte kalimtare (p.sh. dera e hapur në mes të ciklit), jo domosdoshmërisht probleme.",
@@ -769,7 +777,7 @@
         "automations_intro": "WashData ndez ngjarje {start} / {end} dhe ekspozon entitete, kështu njoftimet dhe veprimet ndërtohen më mirë si automatizime normale të Home Assistant. Automatizimi që përdorin këtë pajisje shfaqen më poshtë.",
         "cleanup_intro": "Çdo cikël i etiketuar mbivendosur. Shëno outlier-ët dhe fshi për të pastruar profilin.",
         "clear_debug_hint": "Hiqni të dhënat e ruajtura të korrigjimit për të liruar hapësirën.",
-        "collecting_data": "Duke mbledhur të dhëna: nevojiten edhe {need} cikël{plural} para se të fillojë sintonizimi i imët ({current}/{min}).",
+        "collecting_data": "Duke mbledhur të dhëna. Cikle që nevojiten para se të fillojë rregullimi i hollë: {need} ({current}/{min}).",
         "compare_overlay_profiles": "Mbivendos profilet (të zbetura)",
         "compare_profiles_tip": "Mbivendosni zarfat e tjerë të profileve në grafikun e mësipërm për të parë se cili i përshtatet më mirë këtij cikli.",
         "compare_selected_cycles": "Ciklet e zgjedhura (solide) – shfaq / fshih",
@@ -779,7 +787,7 @@
         "cycles_deleted": "{count} cikël(e) u fshinë",
         "enough_data": "Të dhëna të mjaftueshme për të mësuar ({current}/{min} cikle).",
         "export_description": "Zgjidhni saktësisht cilat profile, cikle, cilësime dhe të tjera do të eksportohen në JSON, ose analizoni një skedar dhe importoni vetëm pjesët që dëshironi.",
-        "feedback_cycles_pending": "{n} cikël{s} për rishikim",
+        "feedback_cycles_pending": "Për rishikim: {n}",
         "feedback_prompt": "Konfirmo nëse ishte i saktë, korrigjo programin ose injorojë.",
         "feedback_relabel_hint": "Rietiketimi i këtij cikli e zgjidh atë gjithashtu.",
         "filter_by_profile": "Filtro sipas profilit…",
@@ -856,7 +864,6 @@
         "pg_stress_synthetic": "simulimi i gjendjes statike fillon këtu",
         "pg_sweep_intro": "Po sikur {param} të ishte ndryshe? Testoni {steps} vlera në {cycles} ciklet tuaja të fundit për të gjetur cilësimin ku përputhen saktë sa më shumë cikle.",
         "pg_sweep_step": "Hapi {done} / {total}",
-        "pg_undetected": "{n} cikël{s} të pazbuluar",
         "pg_verdict_bad": "Kërkon vëmendje: shumë cikle mbeten të pazbuluara.",
         "pg_verdict_good": "Rregulluar mirë: shumica e cikleve identifikohen dhe përputhen saktë.",
         "pg_verdict_ok": "I pranueshëm: disa cikle munguan. Provoni të ulni pragun e fillimit.",
@@ -1626,7 +1633,7 @@
         "analyzing": "Po analizohet…",
         "resetting": "Po rivendoset…",
         "reverting": "Po kthehet…",
-        "trimming": "Po pritet…",
+        "trimming": "Duke prerë…",
         "splitting": "Po ndahet…",
         "deleting": "Po fshihet…",
         "imported": "Importuar"
@@ -1659,6 +1666,7 @@
         "wrong_profile": "Profil i gabuar"
     },
     "toast": {
+        "catalog_refreshed": "Katalogu i komunitetit u rifreskua",
         "access_saved": "Kontrolli i aksesit u ruajt",
         "all_wiped": "Të gjitha të dhënat u fshien",
         "analysis_complete_none": "Analiza e plotë: asnjë sugjerim i ri",
@@ -1670,7 +1678,7 @@
         "cycle_labelled": "Cikli u etiketua",
         "cycle_paused": "Cikli u ndal",
         "cycle_resumed": "Cikli u vazhdua",
-        "cycle_trimmed": "Cikli u prit",
+        "cycle_trimmed": "Cikli u pre",
         "cycles_merged": "Ciklet u bashkuan",
         "envelope_rebuilt": "Zarfi u rindërtua",
         "envelopes_rebuilt": "Zarfet u rindërtuan",
@@ -1860,7 +1868,7 @@
             "thr_batch": "Mbahet pak mbi fuqinë aktive më të ulët p05 në {cycles} cikle ({p05}W) që një nisje të kapet sa më herët të jetë e mundur dhe pragu i ndalimit të mbetet nën fuqinë më të ulët të punës së makinës.",
             "tol_per_profile": "p75 e variancës së kohëzgjatjes për profil në {profiles} profile ({cycles} cikle); profilet e qëndrueshme nuk penalizohen.",
             "tol_pooled": "Bazuar në variancën e bashkuar të kohëzgjatjes së {cycles} cikleve të fundit të etiketuara (devijimi p95={dev}).",
-            "watchdog": "Mbahet sa më i ulët në mënyrë të sigurt (pak mbi boshllëkun e përditësimit p95 prej {p95}s, min. 30s) që bllokimet të kapen shpejt pa ndalime të rreme."
+            "watchdog": "Mbahet sa më i ulët në mënyrë të sigurt (pak mbi boshllëkun e përditësimit p95 prej {p95}s dhe të paktën 2× intervalin e kampionimit prej {median}s, min. 30s) që bllokimet të kapen shpejt pa ndalime të rreme."
         },
         "exclusions": {
             "summary": "U përjashtuan {total} cikle të zbuluar gabimisht: {parts}.",
@@ -1955,6 +1963,10 @@
         "finished": "Cikli arriti gjendjen përfundimtare dhe përfundoi."
     },
     "store": {
+        "your_model_tip": "Kjo është pajisja që deklaruat te Cilësimet",
+        "your_model": "E juaja",
+        "search_brand_ph": "Kërko sipas markës…",
+        "programs_count": "Programe: {n}",
         "browse": "Shfleto",
         "device": "Pajisja",
         "favorites": "Të preferuarat",
@@ -1993,6 +2005,7 @@
         "add_profile": "Shtoni një profil për këtë pajisje në sitin e komunitetit"
     },
     "task": {
+        "cancelling": "Po anulohet...",
         "reprocess": {
             "matching": "Ripërpunim: përputhja e cikleve",
             "golden": "Ripërpunim: shënimi i cikleve referues",

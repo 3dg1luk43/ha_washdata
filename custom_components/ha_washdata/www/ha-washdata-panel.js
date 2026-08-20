@@ -3761,11 +3761,11 @@ class HaWashdataPanel extends HTMLElement {
 
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
-    if (dev.feedback_count && this._canEdit()) attn.push(`<button class="wd-attn-card" type="button" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count, s: dev.feedback_count > 1 ? 's' : ''}, `${dev.feedback_count} cycle${dev.feedback_count > 1 ? 's' : ''} to review`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></button>`);
+    if (dev.feedback_count && this._canEdit()) attn.push(`<button class="wd-attn-card" type="button" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count}, `To review: ${dev.feedback_count}`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></button>`);
     const _confKeys = this._conflictKeysFromOpts();
     if (_confKeys.size && this._canEdit()) {
       const n = _confKeys.size, s = n > 1 ? 's' : '';
-      attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n, s}, `${n} setting conflict${s}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></button>`);
+      attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n}, `Setting conflicts: ${n}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></button>`);
     }
     const _mlSugCount = this._mlSugKeys().size;
     if ((dev.suggestions_count || _mlSugCount) && this._canEdit()) {
@@ -4586,7 +4586,7 @@ class HaWashdataPanel extends HTMLElement {
     const s = confCount !== 1 ? 's' : '';
     const confBanner = confCount ? `
       <div class="wd-sug-banner" style="background:rgba(183,28,28,.10);border-color:rgba(183,28,28,.4);color:var(--error-color,#b71c1c)">
-        <span>⚠ ${this._t('conflict.settings_banner', {n: confCount, s}, `${confCount} setting conflict${s} — check the highlighted sections and fix before saving.`)}</span>
+        <span>⚠ ${this._t('conflict.settings_banner', {n: confCount}, `Setting conflicts: ${confCount}. Check the highlighted sections and fix them before saving.`)}</span>
         <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="conf-goto-section">${this._t('conflict.settings_banner_btn', {}, 'Go to first')}</button>
       </div>` : '';
     // Combined tuning-suggestion count: classic (observed) + Calibrated (ML) keys
@@ -5440,7 +5440,7 @@ class HaWashdataPanel extends HTMLElement {
     }
     const nModels = Object.keys(st.on_device_models || {}).length;
     const source = nModels
-      ? `<span style="color:var(--success-color,#4caf50);font-weight:600">${this._t('ml.personalized', {}, '● Personalized to this machine')}</span> <span style="color:var(--secondary-text-color)">${this._t('lbl.models_fine_tuned', {count: nModels, plural: nModels > 1 ? 's' : ''}, '(' + nModels + ' model' + (nModels > 1 ? 's' : '') + ' fine-tuned)')}</span>`
+      ? `<span style="color:var(--success-color,#4caf50);font-weight:600">${this._t('ml.personalized', {}, '● Personalized to this machine')}</span> <span style="color:var(--secondary-text-color)">${this._t('lbl.models_fine_tuned', {count: nModels}, '(fine-tuned models: ' + nModels + ')')}</span>`
       : `<span style="color:var(--secondary-text-color)">${this._t('ml.builtin_models', {}, '● Using built-in models')}</span>`;
     const cyc = st.cycle_count || 0, min = st.min_cycles || 0;
     const enough = cyc >= min;
@@ -5449,7 +5449,7 @@ class HaWashdataPanel extends HTMLElement {
     const need = Math.max(0, min - cyc);
     const dataLine = enough
       ? this._t('msg.enough_data', {current: cyc, min: min}, `Enough data to learn from (${cyc}/${min} cycles).`)
-      : this._t('msg.collecting_data', {need: need, current: cyc, min: min, plural: need === 1 ? '' : 's'}, `Collecting data — ${need} more cycle${need === 1 ? '' : 's'} before fine-tuning can start (${cyc}/${min}).`);
+      : this._t('msg.collecting_data', {need: need, current: cyc, min: min}, `Collecting data. Cycles still needed before fine-tuning can start: ${need} (${cyc}/${min}).`);
     const bar = `<div style="height:8px;border-radius:6px;background:var(--secondary-background-color);overflow:hidden;margin:8px 0"><div style="width:${pct}%;height:100%;background:${barCol}"></div></div>`;
     const last = st.last_trained ? _fmtDate(st.last_trained) : 'never';
     const state = running
@@ -12105,7 +12105,7 @@ class HaWashdataPanel extends HTMLElement {
     this._snapshotFormToPending(sr);
     if (autoChanged.size > 0) {
       const n = autoChanged.size, s = n > 1 ? 's' : '';
-      this._showToast(this._t('conflict.cascade_toast', {n, s}, `Also adjusted ${n} setting${s} for consistency.`), 'success');
+      this._showToast(this._t('conflict.cascade_toast', {n}, `Other settings adjusted for consistency: ${n}`), 'success');
     }
   }
 

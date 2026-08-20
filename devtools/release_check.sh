@@ -166,6 +166,89 @@ PY
 if [[ -z "$WS_BAD" ]]; then pass "no edge whitespace in translation values"
 else fail "translation values with leading/trailing whitespace" "$WS_BAD"; fi
 
+# A translation that drops or renames a {placeholder} makes Home Assistant fail its own
+# placeholder validation at startup for that locale -- and the error names the key, not
+# the language, so it is miserable to track down. Compare every language against English.
+PH_BAD=$(PH_LAYER=translations "$PY" - <<'PHPY'
+import json, re
+from pathlib import Path
+PH = re.compile(r"\{[a-zA-Z_][a-zA-Z0-9_]*\}")
+
+
+def flat(node, prefix=""):
+    out = {}
+    for k, v in (node or {}).items():
+        key = f"{prefix}.{k}" if prefix else k
+        if isinstance(v, dict):
+            out.update(flat(v, key))
+        else:
+            out[key] = v
+    return out
+
+
+bad = []
+import os
+LAYER = os.environ["PH_LAYER"]
+for d in (LAYER,):
+    root = Path("custom_components/ha_washdata") / d
+    en_file = root / "en.json"
+    if not en_file.is_file():
+        continue
+    en = flat(json.loads(en_file.read_text(encoding="utf-8")))
+    for p in sorted(root.glob("*.json")):
+        if p.stem in ("en", ".translation-locks"):
+            continue
+        try:
+            other = flat(json.loads(p.read_text(encoding="utf-8")))
+        except Exception:
+            continue  # malformed files are reported by the parse check above
+        for key, val in other.items():
+            src = en.get(key)
+            if not isinstance(src, str) or not isinstance(val, str):
+                continue
+            want, got = set(PH.findall(src)), set(PH.findall(val))
+            if want != got:
+                missing = ", ".join(sorted(want - got)) or "-"
+                extra = ", ".join(sorted(got - want)) or "-"
+                bad.append(f"{p.name}:{key} missing[{missing}] unexpected[{extra}]")
+print("\n".join(bad[:12]))
+PHPY
+)
+if [[ -z "$PH_BAD" ]]; then pass "HA-layer translation placeholders match English"
+else fail "HA-layer translations with mismatched {placeholders}" "$PH_BAD"; fi
+
+# Panel layer: same comparison, but a mismatch there only renders a literal "{n}" or drops
+# a value rather than failing startup, and 219 predate this check. Counted, not blocking.
+PH_PANEL=$(PH_LAYER=translations/panel "$PY" -c '
+import json, os, re
+from pathlib import Path
+PH = re.compile(r"\{[a-zA-Z_][a-zA-Z0-9_]*\}")
+def flat(node, prefix=""):
+    out = {}
+    for k, v in (node or {}).items():
+        key = f"{prefix}.{k}" if prefix else k
+        if isinstance(v, dict): out.update(flat(v, key))
+        else: out[key] = v
+    return out
+root = Path("custom_components/ha_washdata") / os.environ["PH_LAYER"]
+en = flat(json.loads((root / "en.json").read_text(encoding="utf-8")))
+n = 0
+langs = set()
+for p in sorted(root.glob("*.json")):
+    if p.stem in ("en", ".translation-locks"): continue
+    try: other = flat(json.loads(p.read_text(encoding="utf-8")))
+    except Exception: continue
+    for key, val in other.items():
+        src = en.get(key)
+        if isinstance(src, str) and isinstance(val, str) and set(PH.findall(src)) != set(PH.findall(val)):
+            n += 1; langs.add(p.stem)
+print(f"{n} {len(langs)}" if n else "")
+')
+if [[ -z "$PH_PANEL" ]]; then pass "panel translation placeholders match English"
+else printf '  \033[33mwarn\033[0m  panel placeholder drift: %s value(s) across %s language(s)\n' $PH_PANEL
+     printf '        -> cosmetic (renders a literal {n} or drops a value); pre-existing, needs a translation pass\n'
+fi
+
 # ── 5. code health ───────────────────────────────────────────────────────────
 head_ "Code"
 if "$PY" -m compileall -q custom_components/ha_washdata tests >/dev/null 2>&1; then pass "python compiles"

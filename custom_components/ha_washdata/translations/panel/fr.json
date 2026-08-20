@@ -33,6 +33,8 @@
     "exists": "existe déjà"
   },
   "btn": {
+    "set_brand_model": "Définir la marque et le modèle",
+    "refresh_catalog": "Rafraîchir le catalogue",
     "add_device": "+ Ajouter un appareil",
     "add_device_tip": "Ajouter un autre appareil WashData",
     "add_maintenance": "Ajouter un événement d'entretien",
@@ -205,8 +207,8 @@
       "start": "Doit être inférieur à la Puissance max anti-froissage ({max} W)"
     },
     "attn_sub": "Corriger les conflits avant d'enregistrer",
-    "attn_title": "{n} conflit{s} de paramètres",
-    "settings_banner": "{n} conflit{s} de paramètres – vérifiez les sections surlignées et corrigez avant d'enregistrer.",
+    "attn_title": "Conflits de paramètres : {n}",
+    "settings_banner": "Conflits de paramètres : {n}. Vérifiez les sections surlignées et corrigez-les avant d'enregistrer.",
     "settings_banner_btn": "Aller au premier",
     "confidence": {
       "auto": "Doit être supérieur ou égal au Seuil de correspondance ({match})",
@@ -250,7 +252,7 @@
       "match": "Doit être supérieur au Seuil de non-correspondance ({un})",
       "unmatch": "Doit être inférieur au Seuil de correspondance ({match}) ; sinon une correspondance confirmée est immédiatement annulée"
     },
-    "cascade_toast": "Également {n} paramètre{s} mis à jour pour la cohérence.",
+    "cascade_toast": "Autres paramètres ajustés pour la cohérence : {n}",
     "suggestion_resolves": "Appliquez la suggestion en attente ({val}) ci-dessous pour corriger ceci",
     "use_fix": "Utiliser {val}",
     "watchdog": {
@@ -316,6 +318,7 @@
     "poor": "⚠ Qualité de profil médiocre"
   },
   "lbl": {
+    "drag_to_resize": "Faites glisser pour redimensionner",
     "actions": "Actions",
     "activity": "Activité",
     "administrators": "Administrateurs",
@@ -402,7 +405,7 @@
     "metric": "Métrique",
     "mode_existing_profile": "Ajouter au profil existant",
     "mode_new_profile": "Créer un nouveau profil",
-    "models_fine_tuned": "({count} modèle{plural} affiné{plural})",
+    "models_fine_tuned": "(modèles affinés : {count})",
     "n_classic_suggestions": "{n} classique",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} sélectionné(s)",
@@ -711,6 +714,11 @@
     "import_wizard": "Importer - choisir les données"
   },
   "msg": {
+    "tail_trim_hint": "Nombre de secondes à supprimer à la fin",
+    "store_sibling_hint": "Rien de partagé pour votre modèle exact ? Un modèle proche de la même marque constitue généralement un bon point de départ.",
+    "store_declare_appliance": "Indiquez à WashData l'appareil que vous possédez et cet onglet affichera les configurations que d'autres personnes ont partagées pour celui-ci. Vous pouvez aussi saisir une marque ci-dessus pour explorer.",
+    "refresh_catalog_hint": "Les listes de marques et d'appareils de la communauté sont mises en cache afin de maintenir la boutique partagée dans son quota quotidien. Rafraîchissez pour récupérer les entrées ajoutées ou approuvées par d'autres utilisateurs.",
+    "head_trim_hint": "Nombre de secondes à supprimer au début",
     "appliance_monitor": "Moniteur d'appareils",
     "artifact_dip_detail": "Est tombé en dessous de la bande de puissance habituelle pendant environ {n} s.",
     "artifact_footer": "Mis en évidence sur le graphique ci-dessus. Il s’agit d’artefacts transitoires (par exemple la porte ouverte en cours de cycle), pas nécessairement de problèmes.",
@@ -721,7 +729,7 @@
     "automations_intro": "WashData déclenche les événements {start} / {end} et expose des entités, les notifications et actions sont donc mieux construites comme des automatisations Home Assistant normales. Les automatisations utilisant cet appareil apparaissent ci-dessous.",
     "cleanup_intro": "Chaque cycle étiqueté superposé. Cochez les valeurs aberrantes et supprimez-les pour nettoyer le profil.",
     "clear_debug_hint": "Supprimez les données de débogage stockées pour libérer de l'espace.",
-    "collecting_data": "Collecte de données - encore {need} cycle{plural} avant que l'affinage puisse commencer ({current}/{min}).",
+    "collecting_data": "Collecte de données. Cycles encore nécessaires avant que l'affinage puisse commencer : {need} ({current}/{min}).",
     "compare_overlay_profiles": "Profils de superposition (faible)",
     "compare_profiles_tip": "Superposez d'autres enveloppes de profil sur le graphique ci-dessus pour voir laquelle correspond le mieux à ce cycle.",
     "compare_selected_cycles": "Cycles sélectionnés (solides) – afficher/masquer",
@@ -731,7 +739,7 @@
     "cycles_deleted": "{count} cycle(s) supprimé(s)",
     "enough_data": "Suffisamment de données pour apprendre ({current}/{min} cycles).",
     "export_description": "Choisissez précisément quels profils, cycles, réglages et autres exporter vers un JSON, ou analysez un fichier pour n'importer que les éléments souhaités.",
-    "feedback_cycles_pending": "{n} cycle{s} à examiner",
+    "feedback_cycles_pending": "À réviser : {n}",
     "feedback_prompt": "Confirmez que c'était correct, corrigez le programme ou ignorez-le.",
     "feedback_relabel_hint": "Réétiqueter ce cycle le résout également.",
     "filter_by_profile": "Filtrer par profil…",
@@ -808,7 +816,6 @@
     "pg_stress_synthetic": "la simulation de repos commence ici",
     "pg_sweep_intro": "Et si {param} était différent ? Testez {steps} valeurs sur vos {cycles} derniers cycles pour trouver le réglage où le plus de cycles sont correctement reconnus.",
     "pg_sweep_step": "Étape {done} / {total}",
-    "pg_undetected": "{n} cycle{s} non détecté{s}",
     "pg_verdict_bad": "Nécessite une attention: de nombreux cycles ne sont pas détectés.",
     "pg_verdict_good": "Bien réglé: la plupart des cycles sont correctement identifiés et reconnus.",
     "pg_verdict_ok": "Acceptable: certains cycles manqués. Essayez d'abaisser le seuil de démarrage.",
@@ -1158,7 +1165,7 @@
       "label": "Entité de prix de l'énergie"
     },
     "energy_price_static": {
-      "doc": "Prix ​​fixe par kWh utilisé pour les chiffres de coût lorsqu'aucune entité de prix en direct n'est définie ci-dessus.",
+      "doc": "Prix fixe par kWh utilisé pour les chiffres de coût lorsqu'aucune entité de prix en direct n'est définie ci-dessus.",
       "label": "Prix de l'énergie statique (par kWh)"
     },
     "energy_sensor": {
@@ -1641,6 +1648,7 @@
     "wrong_profile": "Mauvais profil"
   },
   "toast": {
+    "catalog_refreshed": "Catalogue de la communauté rafraîchi",
     "access_saved": "Contrôle d'accès enregistré",
     "all_wiped": "Toutes les données effacées",
     "analysis_complete_none": "Analyse terminée : aucune nouvelle suggestion",
@@ -1652,7 +1660,7 @@
     "cycle_labelled": "Cycle labellisé",
     "cycle_paused": "Cycle en pause",
     "cycle_resumed": "Cycle repris",
-    "cycle_trimmed": "Cycle coupé",
+    "cycle_trimmed": "Cycle rogné",
     "cycles_merged": "Cycles fusionnés",
     "envelope_rebuilt": "Enveloppe reconstruite",
     "envelopes_rebuilt": "Enveloppes reconstruites",
@@ -1842,7 +1850,7 @@
       "thr_batch": "Maintenu juste au-dessus de la puissance active la plus basse au p05 sur {cycles} cycles ({p05}W) pour qu'un démarrage soit détecté le plus tôt possible et que le seuil d'arrêt reste sous la puissance de fonctionnement la plus basse de la machine.",
       "tol_per_profile": "p75 de la variance de durée par profil sur {profiles} profils ({cycles} cycles) ; les profils resserrés ne sont pas pénalisés.",
       "tol_pooled": "D'après la variance de durée regroupée de {cycles} cycles récemment étiquetés (écart p95={dev}).",
-      "watchdog": "Maintenu aussi bas que possible en toute sécurité (juste au-dessus de l'écart de mise à jour p95 de {p95}s, min 30s) pour détecter rapidement les blocages sans faux arrêts."
+      "watchdog": "Maintenu aussi bas que possible en toute sécurité (juste au-dessus de l'écart de mise à jour p95 de {p95}s et au moins 2x l'intervalle d'échantillonnage de {median}s, min 30s) pour détecter rapidement les blocages sans faux arrêts."
     },
     "exclusions": {
       "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",
@@ -1908,6 +1916,10 @@
     "finished": "Le cycle a atteint son état final et s'est terminé."
   },
   "store": {
+    "your_model_tip": "C'est l'appareil que vous avez déclaré dans les Paramètres",
+    "your_model": "Le vôtre",
+    "search_brand_ph": "Rechercher par marque…",
+    "programs_count": "Programmes : {n}",
     "browse": "Parcourir",
     "device": "Appareil",
     "favorites": "Favoris",

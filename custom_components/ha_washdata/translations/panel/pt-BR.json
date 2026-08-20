@@ -33,6 +33,8 @@
     "exists": "já existe"
   },
   "btn": {
+    "set_brand_model": "Definir marca e modelo",
+    "refresh_catalog": "Atualizar catálogo",
     "add_device": "+ Adicionar dispositivo",
     "add_device_tip": "Adicionar outro dispositivo WashData",
     "add_maintenance": "Adicionar evento de manutenção",
@@ -205,8 +207,8 @@
       "start": "Deve ser abaixo da Potência máxima antiamassado ({max} W)"
     },
     "attn_sub": "Corrija os conflitos antes de salvar",
-    "attn_title": "{n} conflito{s} de configurações",
-    "settings_banner": "{n} conflito{s} de configurações – verifique as seções destacadas e corrija antes de salvar.",
+    "attn_title": "Conflitos de configurações: {n}",
+    "settings_banner": "Conflitos de configurações: {n}. Verifique as seções destacadas e corrija-os antes de salvar.",
     "settings_banner_btn": "Ir para o primeiro",
     "confidence": {
       "auto": "Deve ser maior ou igual ao Limiar de correspondência ({match})",
@@ -250,7 +252,7 @@
       "match": "Deve ser acima do Limiar de não correspondência ({un})",
       "unmatch": "Deve ser abaixo do Limiar de correspondência ({match}); caso contrário, uma correspondência confirmada é imediatamente desfeita"
     },
-    "cascade_toast": "Também foram aplicados {n} ajuste{s} por consistência.",
+    "cascade_toast": "Outras configurações ajustadas por consistência: {n}",
     "suggestion_resolves": "Aplique a sugestão pendente ({val}) abaixo para corrigir este conflito",
     "use_fix": "Usar {val}",
     "watchdog": {
@@ -316,6 +318,7 @@
     "poor": "⚠ Qualidade de perfil fraca"
   },
   "lbl": {
+    "drag_to_resize": "Arraste para redimensionar",
     "actions": "Ações",
     "activity": "Atividade",
     "administrators": "Administradores",
@@ -402,7 +405,7 @@
     "metric": "Métrica",
     "mode_existing_profile": "Adicionar a perfil existente",
     "mode_new_profile": "Criar novo perfil",
-    "models_fine_tuned": "({count} modelo{plural} ajustado{plural})",
+    "models_fine_tuned": "(modelos ajustados: {count})",
     "n_classic_suggestions": "{n} clássico",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} selecionados",
@@ -711,6 +714,11 @@
     "import_wizard": "Importar - escolher dados"
   },
   "msg": {
+    "tail_trim_hint": "Número de segundos a remover do final",
+    "store_sibling_hint": "Nada compartilhado para o seu modelo exato? Um modelo muito parecido da mesma marca costuma ser um bom ponto de partida.",
+    "store_declare_appliance": "Informe ao WashData qual eletrodoméstico você tem e esta aba mostrará as configurações que outras pessoas compartilharam para ele. Você também pode digitar uma marca acima para dar uma olhada.",
+    "refresh_catalog_hint": "As listas de marcas e eletrodomésticos da comunidade ficam em cache para manter a loja compartilhada dentro do seu limite diário. Atualize para obter as entradas adicionadas ou aprovadas por outras pessoas.",
+    "head_trim_hint": "Número de segundos a remover do início",
     "appliance_monitor": "Monitor de eletrodoméstico",
     "artifact_dip_detail": "Caiu abaixo da banda de potência habitual por ~{n}s.",
     "artifact_footer": "Destacadas no gráfico acima. São artefatos transitórios (por exemplo, a porta foi aberta no meio do ciclo), não necessariamente problemas.",
@@ -721,7 +729,7 @@
     "automations_intro": "O WashData dispara eventos {start} / {end} e expõe entidades, portanto as notificações e ações são melhor criadas como automatizações normais do Home Assistant. As automatizações que usam este dispositivo aparecem abaixo.",
     "cleanup_intro": "Todos os ciclos rotulados sobrepostos. Marque os valores discrepantes e exclua para limpar o perfil.",
     "clear_debug_hint": "Remova os dados de depuração armazenados para liberar espaço.",
-    "collecting_data": "Coletando dados - {need} ciclo{plural} a mais antes que o ajuste fino possa começar ({current}/{min}).",
+    "collecting_data": "Coletando dados. Ciclos ainda necessários para que o ajuste fino possa começar: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Sobrepor perfis (fraco)",
     "compare_profiles_tip": "Sobreponha outros envelopes de perfil no gráfico acima para ver qual deles melhor se adapta a este ciclo.",
     "compare_selected_cycles": "Ciclos selecionados (sólido) – mostrar / ocultar",
@@ -731,7 +739,7 @@
     "cycles_deleted": "{count} ciclo(s) excluído(s)",
     "enough_data": "Dados suficientes para aprender ({current}/{min} ciclos).",
     "export_description": "Escolha exatamente quais perfis, ciclos, configurações e mais exportar para JSON, ou analise um arquivo e importe apenas as partes que quiser.",
-    "feedback_cycles_pending": "{n} ciclo{s} para revisar",
+    "feedback_cycles_pending": "Para revisar: {n}",
     "feedback_prompt": "Confirme que estava correto, corrija o programa ou ignore.",
     "feedback_relabel_hint": "Rotular novamente este ciclo também o resolve.",
     "filter_by_profile": "Filtrar por perfil…",
@@ -808,7 +816,6 @@
     "pg_stress_synthetic": "a simulação de espera começa aqui",
     "pg_sweep_intro": "E se {param} fosse diferente? Teste {steps} valores nos seus últimos {cycles} ciclos para encontrar a configuração em que o maior número de ciclos é correspondido corretamente.",
     "pg_sweep_step": "Etapa {done} / {total}",
-    "pg_undetected": "{n} ciclo{s} sem detecção",
     "pg_verdict_bad": "Requer atenção: muitos ciclos estão passando sem detecção.",
     "pg_verdict_good": "Bem ajustado: a maioria dos ciclos é identificada e correspondida corretamente.",
     "pg_verdict_ok": "Aceitável: alguns ciclos não foram detectados. Tente reduzir o limite de início.",
@@ -1169,7 +1176,7 @@
       "label": "Potência Mínima"
     },
     "ml_training_enabled": {
-      "doc": "Estude periodicamente seus ciclos revisados ​​durante a noite e ajuste os modelos para esta máquina específica. Uma mudança só é mantida quando realmente obtém resultados melhores em ciclos prolongados, portanto, isso só pode ajudar ou permanecer igual - nunca regredir.",
+      "doc": "Estude periodicamente seus ciclos revisados durante a noite e ajuste os modelos para esta máquina específica. Uma mudança só é mantida quando realmente obtém resultados melhores em ciclos prolongados, portanto, isso só pode ajudar ou permanecer igual - nunca regredir.",
       "label": "Aprender com esta máquina"
     },
     "ml_training_hour": {
@@ -1269,7 +1276,7 @@
       "label": "Dispensar Automaticamente Após"
     },
     "notify_title": {
-      "doc": "Título da notificação. Variáveis ​​de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Título da notificação. Variáveis de modelo: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
       "label": "Título da Notificação"
     },
     "notify_unload_delay_minutes": {
@@ -1369,7 +1376,7 @@
       "label": "Entidade do Switch"
     },
     "watchdog_interval": {
-      "doc": "Com que frequência o watchdog em segundo plano verifica sensores paralisados ​​e tempos limite decorridos. Padrão 30 seg.",
+      "doc": "Com que frequência o watchdog em segundo plano verifica sensores paralisados e tempos limite decorridos. Padrão 30 seg.",
       "label": "Intervalo do Watchdog"
     },
     "notify_milestone_message": {
@@ -1611,6 +1618,7 @@
     "wrong_profile": "Perfil errado"
   },
   "toast": {
+    "catalog_refreshed": "Catálogo da comunidade atualizado",
     "access_saved": "Controle de acesso salvo",
     "all_wiped": "Todos os dados apagados",
     "analysis_complete_none": "Análise concluída: sem novas sugestões",
@@ -1812,7 +1820,7 @@
       "thr_batch": "Mantido logo acima da menor potência ativa p05 em {cycles} ciclos ({p05}W) para que um início seja captado o mais cedo possível e o limiar de parada permaneça abaixo da menor potência de funcionamento da máquina.",
       "tol_per_profile": "p75 da variância de duração por perfil em {profiles} perfis ({cycles} ciclos); perfis consistentes não são penalizados.",
       "tol_pooled": "Com base na variância de duração agregada de {cycles} ciclos rotulados recentes (desvio p95={dev}).",
-      "watchdog": "Mantido tão baixo quanto é seguro (logo acima do intervalo de atualização p95 de {p95}s, mín. 30s) para que travamentos sejam detectados rapidamente sem paradas falsas."
+      "watchdog": "Mantido tão baixo quanto é seguro (logo acima do intervalo de atualização p95 de {p95}s e pelo menos 2x o intervalo de amostragem de {median}s, mín. 30s) para que travamentos sejam detectados rapidamente sem paradas falsas."
     },
     "exclusions": {
       "summary": "Excluído(s) {total} ciclo(s) mal detectado(s): {parts}.",
@@ -1907,6 +1915,10 @@
     "finished": "O ciclo atingiu um estado final e foi encerrado."
   },
   "store": {
+    "your_model_tip": "Este é o eletrodoméstico que você declarou em Configurações",
+    "your_model": "Seu",
+    "search_brand_ph": "Pesquisar por marca…",
+    "programs_count": "Programas: {n}",
     "browse": "Navegar",
     "device": "Dispositivo",
     "favorites": "Favoritos",

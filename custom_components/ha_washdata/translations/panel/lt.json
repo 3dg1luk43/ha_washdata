@@ -81,6 +81,8 @@
     "exists": "jau yra"
   },
   "btn": {
+    "set_brand_model": "Nustatyti prekės ženklą ir modelį",
+    "refresh_catalog": "Atnaujinti katalogą",
     "add_device": "+ Pridėti įrenginį",
     "add_device_tip": "Pridėkite kitą WashData įrenginį",
     "add_maintenance": "Pridėti priežiūros įvykį",
@@ -253,8 +255,8 @@
       "start": "Turi būti žemiau maksimalios apsaugos nuo raukšlių galios ({max} W)"
     },
     "attn_sub": "Prieš išsaugant ištaisykite konfliktus",
-    "attn_title": "{n} nustatymų konfliktas{s}",
-    "settings_banner": "{n} nustatymų konfliktas{s} – patikrinkite pažymėtas sekcijas ir ištaisykite prieš išsaugant.",
+    "attn_title": "Nustatymų konfliktai: {n}",
+    "settings_banner": "Nustatymų konfliktai: {n}. Patikrinkite pažymėtas sekcijas ir ištaisykite jas prieš išsaugant.",
     "settings_banner_btn": "Eiti į pirmą",
     "confidence": {
       "auto": "Turi būti lygus arba aukščiau atitikimo slenksčio ({match})",
@@ -298,7 +300,7 @@
       "match": "Turi būti aukščiau neatitikimo slenksčio ({un})",
       "unmatch": "Turi būti žemiau atitikimo slenksčio ({match}); priešingu atveju patvirtintas atitikimas iškart panaikinamas"
     },
-    "cascade_toast": "Taip pat automatiškai pakoreguoti {n} nustatymai dėl nuoseklumo.",
+    "cascade_toast": "Dėl nuoseklumo pakoreguoti ir kiti nustatymai: {n}",
     "suggestion_resolves": "Pritaikykite žemiau esantį laukiantį pasiūlymą ({val}), kad tai ištaisytumėte",
     "use_fix": "Naudoti {val}",
     "watchdog": {
@@ -364,6 +366,7 @@
     "poor": "⚠ Prasta profilio kokybė"
   },
   "lbl": {
+    "drag_to_resize": "Vilkite, kad pakeistumėte dydį",
     "pg_anti_wrinkle": "Apsauga nuo raukšlių",
     "actions": "Veiksmai",
     "activity": "Veikla",
@@ -435,7 +438,7 @@
     "from": "Nuo",
     "gap_s": "Tarpas (-iai)",
     "group_name": "Grupės pavadinimas",
-    "head_trim": "Galvos apdaila (-ai)",
+    "head_trim": "Apkarpymas nuo pradžios (s)",
     "health": "Sveikata",
     "hide_tabs": "Slėpti skirtukus ne administratoriams",
     "in_use": "Naudojamas",
@@ -451,7 +454,7 @@
     "metric": "Metrika",
     "mode_existing_profile": "Pridėti prie esamo profilio",
     "mode_new_profile": "Sukurti naują profilį",
-    "models_fine_tuned": "({count} modeliai tiksliai sureguliuoti)",
+    "models_fine_tuned": "(tiksliai suderinti modeliai: {count})",
     "n_classic_suggestions": "{n} klasikinis",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "Pasirinkta: {n}",
@@ -532,7 +535,7 @@
     "stage3": "3 etapas – DTW",
     "stage4": "4 etapas – atitikimas",
     "status": "Būsena",
-    "tail_trim": "Uodegos apdaila (-ai)",
+    "tail_trim": "Apkarpymas nuo galo (s)",
     "timer_auto_pause": "Automatinis pristabdymas",
     "timer_min": "min",
     "timer_msg_placeholder": "Pranešimas (pasirenkama, {device}/{program}/{minutes})",
@@ -759,6 +762,11 @@
     "import_wizard": "Importas - pasirinkti duomenis"
   },
   "msg": {
+    "tail_trim_hint": "Kiek sekundžių pašalinti nuo galo",
+    "store_sibling_hint": "Jūsų tiksliam modeliui nieko nebendrinta? Artimas to paties prekės ženklo modelis paprastai yra gera pradžia.",
+    "store_declare_appliance": "Nurodykite WashData, kurį prietaisą turite, ir šiame skirtuke bus rodomos kitų jam bendrintos programos bei įrašai. Taip pat galite viršuje įrašyti prekės ženklą ir tiesiog pasižiūrėti.",
+    "refresh_catalog_hint": "Bendruomenės prekės ženklų ir prietaisų sąrašai laikomi podėlyje, kad bendrinama parduotuvė neviršytų savo dienos užklausų limito. Atnaujinkite, kad pamatytumėte kitų pridėtus ar patvirtintus įrašus.",
+    "head_trim_hint": "Kiek sekundžių pašalinti nuo pradžios",
     "appliance_monitor": "Prietaisų monitorius",
     "artifact_dip_detail": "Nukrito žemiau įprastos galios juostos maždaug {n}s.",
     "artifact_footer": "Paryškinta aukščiau esančiame grafike. Tai yra trumpalaikiai artefaktai (pvz., durys atidarytos ciklo viduryje), nebūtinai problemos.",
@@ -769,7 +777,7 @@
     "automations_intro": "WashData paleidžia {start} / {end} įvykius ir atskleidžia esybes, todėl pranešimai ir veiksmai geriausiai kuriami kaip įprasti Home Assistant automatizavimai. Žemiau rodomi automatizavimai, naudojantys šį prietaisą.",
     "cleanup_intro": "Kiekvienas pažymėtas ciklas padengtas. Pažymėkite nuokrypius ir ištrinkite, kad išvalytumėte profilį.",
     "clear_debug_hint": "Pašalinkite saugomus derinimo duomenis, kad atlaisvintumėte vietos.",
-    "collecting_data": "Renkami duomenys - reikia dar {need} ciklų, kad galėtų prasidėti tikslus derinimas ({current}/{min}).",
+    "collecting_data": "Renkami duomenys. Dar reikia ciklų, kad galėtų prasidėti tikslus derinimas: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Perdangos profiliai (blankūs)",
     "compare_profiles_tip": "Aukščiau pateiktoje diagramoje uždėkite kitus profilio vokus, kad sužinotumėte, kuris iš jų geriausiai tinka šiam ciklui.",
     "compare_selected_cycles": "Pasirinkti ciklai (vientisas) – rodyti / slėpti",
@@ -779,7 +787,7 @@
     "cycles_deleted": "Ištrinta ciklų: {count}",
     "enough_data": "Pakankamai duomenų mokymui ({current}/{min} ciklų).",
     "export_description": "Pasirinkite tiksliai, kuriuos profilius, ciklus, nustatymus ir kita eksportuoti į JSON, arba išanalizuokite failą ir importuokite tik norimas dalis.",
-    "feedback_cycles_pending": "{n} cikl{s} peržiūrai",
+    "feedback_cycles_pending": "Peržiūrai: {n}",
     "feedback_prompt": "Patvirtinkite, kad tai buvo teisinga, pataisykite programą arba ignoruokite.",
     "feedback_relabel_hint": "Šio ciklo pažymėjimas iš naujo taip pat išsprendžia peržiūrą.",
     "filter_by_profile": "Filtruoti pagal profilį…",
@@ -856,7 +864,6 @@
     "pg_stress_synthetic": "budėjimo imitacija prasideda čia",
     "pg_sweep_intro": "O kas, jei {param} būtų kitokia? Išbandykite {steps} reikšmes paskutiniuose {cycles} cikluose ir raskite nustatymą, su kuriuo teisingai atitinka daugiausiai ciklų.",
     "pg_sweep_step": "Žingsnis {done} / {total}",
-    "pg_undetected": "Neaptikta ciklų: {n}",
     "pg_verdict_bad": "Reikia dėmesio: daugelis ciklų lieka neaptikti.",
     "pg_verdict_good": "Gerai suderinta: dauguma ciklų teisingai atpažįstami ir atitinkami.",
     "pg_verdict_ok": "Priimtina: kai kurie ciklai praleisti. Pabandykite sumažinti paleidimo slenkstį.",
@@ -1659,6 +1666,7 @@
     "wrong_profile": "Neteisingas profilis"
   },
   "toast": {
+    "catalog_refreshed": "Bendruomenės katalogas atnaujintas",
     "access_saved": "Prieigos valdymas išsaugotas",
     "all_wiped": "Visi duomenys ištrinti",
     "analysis_complete_none": "Analizė baigta: jokių naujų pasiūlymų",
@@ -1860,7 +1868,7 @@
       "thr_batch": "Paliktas šiek tiek virš p05 mažiausios aktyvios galios per {cycles} ciklus ({p05}W), kad pradžia būtų aptikta kuo anksčiau, o sustabdymo slenkstis liktų žemiau mažiausios veikiančios mašinos galios.",
       "tol_per_profile": "p75 kiekvieno profilio trukmės dispersijos per {profiles} profilius ({cycles} ciklai); stabilūs profiliai nebaudžiami.",
       "tol_pooled": "Pagrįsta sujungta {cycles} naujausių pažymėtų ciklų trukmės dispersija (p95 nuokrypis={dev}).",
-      "watchdog": "Paliktas kuo mažesnis, kiek saugu (vos didesnis nei p95 atnaujinimo tarpas {p95}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
+      "watchdog": "Paliktas kuo mažesnis, kiek saugu (vos didesnis nei p95 atnaujinimo tarpas {p95}s ir bent 2x mėginių ėmimo intervalas {median}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
     },
     "exclusions": {
       "summary": "Neįtraukta {total} klaidingai aptiktų ciklų: {parts}.",
@@ -1955,6 +1963,10 @@
     "finished": "Ciklas pasiekė galutinę būseną ir baigėsi."
   },
   "store": {
+    "your_model_tip": "Tai prietaisas, kurį nurodėte nustatymuose",
+    "your_model": "Jūsų modelis",
+    "search_brand_ph": "Ieškoti pagal prekės ženklą…",
+    "programs_count": "Programos: {n}",
     "browse": "Naršyti",
     "device": "Prietaisas",
     "favorites": "Mėgstamiausi",

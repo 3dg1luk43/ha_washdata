@@ -81,6 +81,8 @@
     "exists": "on jo"
   },
   "btn": {
+    "set_brand_model": "Aseta merkki ja malli",
+    "refresh_catalog": "Päivitä luettelo",
     "add_device": "+ Lisää laite",
     "add_device_tip": "Lisää toinen WashData-laite",
     "add_maintenance": "Lisää huoltotapahtuma",
@@ -253,7 +255,7 @@
       "start": "Täytyy olla alle ryppyjeneston enimmäistehon ({max} W)"
     },
     "attn_sub": "Korjaa ristiriidat ennen tallentamista",
-    "attn_title": "{n} asetusten ristiriita{s}",
+    "attn_title": "Asetusten ristiriitoja: {n}",
     "confidence": {
       "auto": "Täytyy olla vähintään täsmäytyskynnys ({match})",
       "learning": "Täytyy olla enintään täsmäytyskynnys ({match})",
@@ -296,14 +298,14 @@
       "match": "Täytyy olla yli eritäsmäytyskynnyksen ({un})",
       "unmatch": "Täytyy olla alle täsmäytyskynnyksen ({match}); muuten vahvistettu vastaavuus purkautuu heti"
     },
-    "cascade_toast": "Myös {n} asetusta muutettiin johdonmukaisuuden vuoksi.",
+    "cascade_toast": "Muita asetuksia muutettiin johdonmukaisuuden vuoksi: {n}",
     "suggestion_resolves": "Ota alla oleva ehdotus ({val}) käyttöön tämän korjaamiseksi",
     "use_fix": "Käytä {val}",
     "watchdog": {
       "interval": "Tulisi olla vähintään 2x näytteenottoväli ({si} s)",
       "sampling": "Näytteenottovälin tulee olla enintään puolet tarkkailijavälistä ({wi} s)"
     },
-    "settings_banner": "{n} asetusten ristiriita{s} – tarkista korostetut osiot ja korjaa ne ennen tallentamista.",
+    "settings_banner": "Asetusten ristiriitoja: {n}. Tarkista korostetut osiot ja korjaa ne ennen tallentamista.",
     "settings_banner_btn": "Siirry ensimmäiseen"
   },
   "hdr": {
@@ -364,6 +366,7 @@
     "poor": "⚠ Heikko profiililaatu"
   },
   "lbl": {
+    "drag_to_resize": "Vedä muuttaaksesi kokoa",
     "pg_anti_wrinkle": "Ryppyjenesto",
     "actions": "Toiminnot",
     "activity": "Toiminta",
@@ -435,7 +438,7 @@
     "from": "Mistä",
     "gap_s": "aukko (t)",
     "group_name": "Ryhmän nimi",
-    "head_trim": "Pään leikkaus (s)",
+    "head_trim": "Leikkaus alusta (s)",
     "health": "Terveys",
     "hide_tabs": "Piilota välilehdet muille kuin järjestelmänvalvojille",
     "in_use": "Käytössä",
@@ -451,7 +454,7 @@
     "metric": "Mittari",
     "mode_existing_profile": "Lisää olemassa olevaan profiiliin",
     "mode_new_profile": "Luo uusi profiili",
-    "models_fine_tuned": "({count} mallia hienosäädetty)",
+    "models_fine_tuned": "(hienosäädetyt mallit: {count})",
     "n_classic_suggestions": "{n} klassinen",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} valittu",
@@ -532,7 +535,7 @@
     "stage3": "Vaihe 3 – DTW",
     "stage4": "Vaihe 4 – vastaavuus",
     "status": "Tila",
-    "tail_trim": "Hännän leikkaus (s)",
+    "tail_trim": "Leikkaus lopusta (s)",
     "timer_auto_pause": "Automaattinen tauko",
     "timer_min": "min",
     "timer_msg_placeholder": "Viesti (valinnainen, {device}/{program}/{minutes})",
@@ -650,7 +653,7 @@
     "show_contributor": "Näytä osallistujien nimet",
     "task_pg_detail": "Simuloidaan sykliä",
     "task_split": "Jaetaan sykliä",
-    "task_trim": "Rajataan sykliä",
+    "task_trim": "Leikataan sykliä",
     "task_merge": "Yhdistetään syklejä",
     "task_rebuild": "Rakennetaan tehoalueita uudelleen",
     "cat_profiles": "Profiilit (ohjelmat)",
@@ -759,6 +762,11 @@
     "import_wizard": "Tuonti - valitse tiedot"
   },
   "msg": {
+    "tail_trim_hint": "Kuinka monta sekuntia poistetaan lopusta",
+    "store_sibling_hint": "Eikö juuri sinun mallillesi ole jaettu mitään? Saman merkin läheinen malli on yleensä hyvä lähtökohta.",
+    "store_declare_appliance": "Kerro WashDatalle, mikä laite sinulla on, niin tämä välilehti näyttää muiden sille jakamat ohjelmat ja tallennukset. Voit myös kirjoittaa merkin nimen yläkenttään ja katsella ympärillesi.",
+    "refresh_catalog_hint": "Yhteisön merkki- ja laiteluettelot on tallennettu välimuistiin, jotta jaettu kauppa pysyy päivittäisen kyselykuotansa rajoissa. Päivitä nähdäksesi muiden lisäämät tai hyväksymät merkinnät.",
+    "head_trim_hint": "Kuinka monta sekuntia poistetaan alusta",
     "appliance_monitor": "Laitteen näyttö",
     "artifact_dip_detail": "Alitti tavallisen tehon alarajan noin {n} sekunnin ajan.",
     "artifact_footer": "Korostettu yllä olevassa kaaviossa. Nämä ovat ohimeneviä esineitä (esim. ovi avautui kesken syklin), eivät välttämättä ongelmia.",
@@ -769,7 +777,7 @@
     "automations_intro": "WashData laukaisee {start} / {end}-tapahtumat ja tarjoaa entiteetit, joten ilmoitukset ja toiminnot kannattaa rakentaa tavallisina Home Assistant -automaatioina. Tätä laitetta käyttävät automaatiot näkyvät alla.",
     "cleanup_intro": "Jokainen merkitty sykli peitetään. Tyhjennä profiili valitsemalla poikkeamat ja poistamalla ne.",
     "clear_debug_hint": "Poista tallennetut virheenkorjaustiedot vapauttaaksesi tilaa.",
-    "collecting_data": "Kerätään tietoja - vielä {need} sykliä tarvitaan ennen hienosäädön käynnistymistä ({current}/{min}).",
+    "collecting_data": "Kerätään tietoja. Syklejä tarvitaan vielä ennen hienosäädön aloittamista: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Päällekkäiset profiilit (himmeä)",
     "compare_profiles_tip": "Aseta muut profiilikuoret yllä olevaan kaavioon nähdäksesi, mikä sopii parhaiten tähän jaksoon.",
     "compare_selected_cycles": "Valitut jaksot (kiinteä) – näytä/piilota",
@@ -779,12 +787,12 @@
     "cycles_deleted": "{count} sykli(ä) poistettu",
     "enough_data": "Tarpeeksi tietoja oppimiseen ({current}/{min} sykliä).",
     "export_description": "Valitse tarkalleen, mitkä profiilit, jaksot, asetukset ja muut viedään JSON-tiedostoon, tai analysoi tiedosto ja tuo vain haluamasi osat.",
-    "feedback_cycles_pending": "{n} sykliä tarkistettavana",
+    "feedback_cycles_pending": "Tarkistettavana: {n}",
     "feedback_prompt": "Vahvista, että se oli oikein, korjaa ohjelma tai jätä huomiotta.",
     "feedback_relabel_hint": "Tämän syklin uudelleenmerkintä ratkaisee sen myös.",
     "filter_by_profile": "Suodata profiilin mukaan…",
-    "group_modal_help": "Ryhmäohjelmat, joilla on sama muoto ja jotka eroavat lämpötilassa/linkouksessa (kesto voi vaihdella). Matching antaa ryhmän yhdeksi ehdokkaaksi ja valitsee sitten parhaiten sopivan jäsenen. Valitse vähintään 2; peittokuva osoittaa, kuinka samanlaisia ​​ne ovat.",
-    "group_not_cohesive": "Nämä profiilit eivät ole riittävän samankaltaisia ​​ryhmittelemään niitä luotettavasti, joten vastaavuudessa käsitellään niitä yksitellen, kunnes poistat poikkeaman tai jaat ryhmän.",
+    "group_modal_help": "Ryhmäohjelmat, joilla on sama muoto ja jotka eroavat lämpötilassa/linkouksessa (kesto voi vaihdella). Matching antaa ryhmän yhdeksi ehdokkaaksi ja valitsee sitten parhaiten sopivan jäsenen. Valitse vähintään 2; peittokuva osoittaa, kuinka samanlaisia ne ovat.",
+    "group_not_cohesive": "Nämä profiilit eivät ole riittävän samankaltaisia ryhmittelemään niitä luotettavasti, joten vastaavuudessa käsitellään niitä yksitellen, kunnes poistat poikkeaman tai jaat ryhmän.",
     "group_preview_hint": "Valitse vähintään 2 jäsentä esikatsellaksesi ja vertaillaksesi tehokäyriä.",
     "import_intro": "Lataa viety tiedosto tai liitä JSON-hyötykuorma alle.",
     "legacy_actions_title": "{count} vanha muokattu toiminto on edelleen käynnissä",
@@ -856,7 +864,6 @@
     "pg_stress_synthetic": "valmiustilan simulaatio alkaa tästä",
     "pg_sweep_intro": "Entä jos {param} olisi erilainen? Testaa {steps} arvoa viimeisten {cycles} syklin perusteella löytääksesi asetuksen, jolla useimmat syklit täsmätään oikein.",
     "pg_sweep_step": "Vaihe {done} / {total}",
-    "pg_undetected": "{n} sykliä tunnistamatta",
     "pg_verdict_bad": "Vaatii huomiota: monet syklit jäävät tunnistamatta.",
     "pg_verdict_good": "Hyvin viritetty: useimmat syklit tunnistetaan ja täsmätään oikein.",
     "pg_verdict_ok": "Hyväksyttävä: osa sykleistä jäi huomaamatta. Kokeile laskea aloituskynnystä.",
@@ -924,7 +931,7 @@
     "trend_energy_down": "Energia laskee ({pct} %/sykli)",
     "trend_energy_up": "Energiatrendi nousussa ({pct} %/sykli) – viimeaikainen keskiarvo {avg}",
     "trim_destructive_confirm": "Tämä säilyttää vain {pct}% syklistä. Tätä ei voi kumota. Jatketaanko?",
-    "trim_intro": "Vedä punaisia ​​kahvoja tai syötä arvot. Kaikki ikkunan ulkopuolella poistetaan.",
+    "trim_intro": "Vedä punaisia kahvoja tai syötä arvot. Kaikki ikkunan ulkopuolella oleva poistetaan.",
     "tuning_suggestions_available": "{count} viritysehdotus saatavilla havaituista sykleistä. Ne näkyvät asianmukaisten kenttien vieressä.",
     "unsure_detected_prefix": "WashData ei ole varma, onko se havaittu",
     "updated": "Päivitetty",
@@ -1190,7 +1197,7 @@
       "label": "Arviotoleranssi"
     },
     "enable_ml_models": {
-      "doc": "Kun sykli on käynnissä, anna mallien tarkentaa reaaliaikaisia ​​tuloksia: vakaampi jäljellä oleva aika- ja energia-/kustannusarvio ja ennenaikaisen pysäytyksen eston varoitus päätteen havaitsemisessa (se voi vain viivästyttää maalia, ei koskaan lopettaa yhtä aikaisin ja on rajallinen). Käyttää hienosäädettyjä mallejasi, kun niitä on saatavilla, muuten sisäänrakennettuja. Off = vain klassinen tehopohjainen logiikka (vielä luotettava).",
+      "doc": "Kun sykli on käynnissä, anna mallien tarkentaa reaaliaikaisia tuloksia: vakaampi jäljellä oleva aika- ja energia-/kustannusarvio ja ennenaikaisen pysäytyksen eston varoitus päätteen havaitsemisessa (se voi vain viivästyttää maalia, ei koskaan lopettaa yhtä aikaisin ja on rajallinen). Käyttää hienosäädettyjä mallejasi, kun niitä on saatavilla, muuten sisäänrakennettuja. Off = vain klassinen tehopohjainen logiikka (vielä luotettava).",
       "label": "Käytä älykkäitä malleja syklin aikana"
     },
     "end_energy_threshold": {
@@ -1314,7 +1321,7 @@
       "label": "Suoran yliajan % ennen hälytystä"
     },
     "notify_live_services": {
-      "doc": "notify.* -palvelut vaativat reaaliaikaisia ​​edistymispäivityksiä syklin aikana. Jätä tyhjäksi, jos haluat poistaa live-edistymisilmoitukset käytöstä.",
+      "doc": "notify.* -palvelut vaativat reaaliaikaisia edistymispäivityksiä syklin aikana. Jätä tyhjäksi, jos haluat poistaa live-edistymisilmoitukset käytöstä.",
       "label": "Suoran edistymisen palvelut"
     },
     "notify_only_when_home": {
@@ -1754,7 +1761,7 @@
       "thr_batch": "Pidetään juuri pienimmän aktiivisen tehon yläpuolella p05:ssä {cycles} jakson joukossa ({p05}W), jotta käynnistys havaitaan mahdollisimman aikaisin ja pysäytyskynnys pysyy koneen pienimmän käyntitehon alapuolella.",
       "tol_per_profile": "p75 profiilikohtaisesta keston varianssista {profiles} profiilin joukossa ({cycles} jaksoa); tiiviitä profiileja ei rangaista.",
       "tol_pooled": "Perustuu {cycles} viimeisimmän merkityn jakson yhdistettyyn keston varianssiin (p95 poikkeama={dev}).",
-      "watchdog": "Pidetään niin matalana kuin on turvallista (hieman yli p95-päivitysvälin {p95}s, väh. 30s), jotta pysähdykset havaitaan nopeasti ilman vääriä pysäytyksiä."
+      "watchdog": "Pidetään niin matalana kuin on turvallista (hieman yli p95-päivitysvälin {p95}s ja vähintään 2x näytteenottoväli {median}s, väh. 30s), jotta pysähdykset havaitaan nopeasti ilman vääriä pysäytyksiä."
     },
     "exclusions": {
       "summary": "Suljettu pois {total} väärin tunnistettua sykliä: {parts}.",
@@ -1801,6 +1808,7 @@
     "wrong_profile": "Väärä profiili"
   },
   "toast": {
+    "catalog_refreshed": "Yhteisön luettelo päivitetty",
     "access_saved": "Kulunvalvonta tallennettu",
     "all_wiped": "Kaikki tiedot pyyhitty",
     "analysis_complete_none": "Analyysi valmis: ei uusia ehdotuksia",
@@ -1812,7 +1820,7 @@
     "cycle_labelled": "Sykli merkitty",
     "cycle_paused": "Jakso keskeytetty",
     "cycle_resumed": "Kierto jatkui",
-    "cycle_trimmed": "Pyörä trimmattu",
+    "cycle_trimmed": "Sykli leikattu",
     "cycles_merged": "Syklit yhdistettiin",
     "envelope_rebuilt": "Kirjekuori uusittu",
     "envelopes_rebuilt": "Kirjekuoret uusittu",
@@ -1955,6 +1963,10 @@
     "finished": "Jakso saavutti lopputilan ja päättyi."
   },
   "store": {
+    "your_model_tip": "Tämä on laite, jonka määritit asetuksissa",
+    "your_model": "Omasi",
+    "search_brand_ph": "Hae merkin mukaan…",
+    "programs_count": "Ohjelmat: {n}",
     "browse": "Selaa",
     "device": "Laite",
     "favorites": "Suosikit",
@@ -2010,7 +2022,7 @@
       "apply": "Jaetaan sykliä"
     },
     "trim": {
-      "apply": "Rajataan sykliä"
+      "apply": "Leikataan sykliä"
     },
     "merge": {
       "apply": "Yhdistetään syklejä"
