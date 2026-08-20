@@ -226,6 +226,11 @@ def get_cache_buster(filename: str = CARD_NAME) -> str:
     different URL even when the package manager (e.g. HACS) preserves original
     file mtimes from the release archive.  The mtime path is kept as a secondary
     signal so translation-only GitLocalize merges still bust the cache.
+
+    Timestamps are read in nanoseconds (``st_mtime_ns``): ``getmtime()`` returns
+    float seconds, and truncating that to whole seconds made two rebuilds inside
+    the same second - which is a normal development cycle - produce the same
+    token, leaving the browser on the immutably-cached previous artifact.
     """
     import hashlib
     import json
@@ -237,26 +242,26 @@ def get_cache_buster(filename: str = CARD_NAME) -> str:
         manifest_version = ""
 
     try:
-        src_mtime = os.path.getmtime(base / "www" / filename)
+        src_mtime = os.stat(base / "www" / filename).st_mtime_ns
         try:
             panel_dir = base / "translations" / "panel"
             trans_mtime = max(
-                (os.path.getmtime(f) for f in panel_dir.iterdir() if f.is_file()),
-                default=0.0,
+                (os.stat(f).st_mtime_ns for f in panel_dir.iterdir() if f.is_file()),
+                default=0,
             )
         except OSError:
-            trans_mtime = 0.0
+            trans_mtime = 0
         # A rebuild changes the minified artifact and the manifest but not the
         # source, so fold both in: otherwise switching between the readable and
         # minified variant would reuse a URL the browser has already cached.
         try:
             build_mtime = max(
-                os.path.getmtime(base / "www" / BUILD_MANIFEST_NAME),
-                os.path.getmtime(_resolve_asset(filename)),
+                os.stat(base / "www" / BUILD_MANIFEST_NAME).st_mtime_ns,
+                os.stat(_resolve_asset(filename)).st_mtime_ns,
             )
         except OSError:
-            build_mtime = 0.0
-        mtime_part = str(int(max(src_mtime, trans_mtime, build_mtime)))
+            build_mtime = 0
+        mtime_part = str(max(src_mtime, trans_mtime, build_mtime))
     except OSError:
         mtime_part = "1"
 
