@@ -786,6 +786,16 @@ class WashDataManager:
                     CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
                 )
             ),
+            # `profile_match_threshold` was stored on the ProfileStore and never read
+            # anywhere, so the #288 workaround (raise it so near-duplicate profiles
+            # stop being trusted mid-cycle) silently did nothing. Wire it to the gate
+            # it was always documented to control; the default is the value that used
+            # to be hard-coded there, so nothing changes unless it was tuned.
+            match_confidence_threshold=float(
+                config_entry.options.get(
+                    CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
+                )
+            ),
             anti_wrinkle_enabled=bool(
                 config_entry.options.get(
                     CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED
@@ -1434,10 +1444,15 @@ class WashDataManager:
 
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
+            # Element 8 is the narrow #288-only prefix verdict and element 9 the
+            # matched profile's own tail power level, both for the #364 guards. The
+            # detector tolerates shorter tuples, so other callers stay valid.
             self.detector.update_match(
                 (profile_name, confidence, matched_duration, phase_name,
                  result.is_confident_mismatch, result.is_ambiguous,
-                 result.is_prefix_ambiguous)
+                 result.is_prefix_ambiguous,
+                 result.is_prefix_ambiguous_full_shape,
+                 self.profile_store.profile_tail_power(profile_name) if profile_name else None)
             )
 
             # --- LOGGING (Unified) ---
@@ -2098,6 +2113,13 @@ class WashDataManager:
         self.detector.config.match_interval = int(
             config_entry.options.get(
                 CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
+            )
+        )
+        # Keep the detector's copy in sync so a panel edit takes effect without a
+        # restart, exactly like min_duration_ratio below.
+        self.detector.config.match_confidence_threshold = float(
+            config_entry.options.get(
+                CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
             )
         )
         self.profile_store.dtw_bandwidth = float(

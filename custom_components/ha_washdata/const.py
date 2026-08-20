@@ -506,6 +506,70 @@ MATCH_AMBIGUITY_MARGIN = 0.05
 SMART_TERM_LANDSCAPE_RATIO = 1.5       # candidate must be >= 1.5× the matched duration
 SMART_TERM_LANDSCAPE_MIN_SHAPE = 0.40  # minimum shape score (pre-Stage-4) to qualify
 
+# Issue #364: the landscape guard above has three structural false negatives, all
+# reproduced by field reports on a multi-programme Miele washer:
+#   (1) it needs a longer profile to EXIST in the candidate pool, so an untrained
+#       longer programme is uncatchable;
+#   (2) it qualifies the longer candidate on its shape score against its FULL
+#       envelope, but a trace that is only part-way through a longer programme
+#       scores poorly against that programme's whole curve;
+#   (3) the 1.5 ratio is knife-edge - on a real 13-programme washer the observed
+#       neighbour ratios are 1.12-1.48, so the guard never fires at all.
+#
+# Two independent additions, both shorten-only (they can only ever BLOCK an early
+# finish, never end a cycle sooner).
+#
+# (a) Prefix scoring (fixes 2 + 3).  A longer candidate is re-scored against its own
+# curve TRUNCATED to the elapsed duration, which is an apples-to-apples comparison
+# and lands on the same 0-1 scale as `shape_score` (same find_best_alignment, same
+# DTW blend).  Because it compares equal-length series over the whole overlap it
+# reads systematically higher than the full-envelope score, so it gets its OWN
+# threshold rather than reusing SMART_TERM_LANDSCAPE_MIN_SHAPE.  The load-bearing
+# term is the MARGIN over the winner ("the longer programme explains this trace at
+# least this much better than the short one does"), which is scale-free; the floor
+# only rejects candidates that fit nothing.  Measured on 20 real cycles + 7
+# envelopes (37 prefix-cut positives vs 17 genuine-cycle negatives): margin 0.15
+# catches 26/37 splits for 1/17 false blocks, while simply lowering the ratio to
+# 1.35/1.15 costs 2/17 and 4/17 false blocks for no measured gain.
+SMART_TERM_PREFIX_MARGIN = 0.15        # prefix score must beat the winner by this
+SMART_TERM_PREFIX_MIN_SHAPE = 0.40     # absolute floor on the prefix score
+SMART_TERM_PREFIX_MIN_RATIO = 1.10     # noise guard: ignore near-equal durations
+SMART_TERM_PREFIX_MAX_CANDIDATES = 3   # cap prefix scorings per match (cost control)
+SMART_TERM_PREFIX_MIN_POINTS = 12      # mirrors the matcher's >=12-sample floor
+SMART_TERM_PREFIX_MIN_COVERAGE = 0.90  # template span must cover >=90% of its duration
+
+# (b) Power plausibility (fixes 1, the untrained case, which no candidate-pool guard
+# can reach).  Both Smart-Termination paths key on `elapsed >= 0.98 * expected` and
+# neither checks whether the appliance is still WORKING, so a mis-matched shorter
+# profile finalises a cycle mid-wash.  Compare the trailing mean power against what
+# the matched profile itself draws at its own end: if we are drawing several times
+# that, this is not the end of anything.
+#
+# The two windows must cover the same FRACTION of the run, or the comparison is not
+# like-for-like.  A fixed 300 s trailing window is 4% of a cotton wash but a third
+# of a 15-minute "Spin & Drain", whose trailing mean is then the spin itself while
+# its profile tail is the quiet moment after the pump stops - ratios of 45-310x on
+# perfectly normal cycle ends.  So the trailing window is
+# `expected_duration * SMART_TERM_TAIL_WINDOW_FRAC`, clamped; that alone is strictly
+# better at every threshold (e.g. at 4.0x: false blocks 5% -> 3%).
+#
+# Swept with devtools/prefix_guard_eval.py over the whole cycle_data corpus (19
+# devices, 225 labelled cycles, leave-one-out): 114 folds where a shorter profile
+# is winning mid-cycle (the #364 split condition) vs 165 genuine cycle ends.
+#   ratio  caught      false-blocked
+#   3.0    27%         8%
+#   3.5    25%         4%   <- shipped, the knee
+#   4.0    20%         3%
+# 3.0 -> 3.5 halves the false blocks for 2pp of catch, and the reported cases sit
+# at 4-8x so they stay caught.  A false block only costs a later finish (the
+# power-based fallback timeout still ends the cycle); a miss costs a split cycle.
+# ~1 in 5 of the remaining false blocks had a wrong top-1 anyway, where blocking is right.
+SMART_TERM_TAIL_MAX_RATIO = 3.5        # block while trailing mean > this x profile tail
+SMART_TERM_TAIL_WINDOW_S = 300.0       # upper clamp on the trailing window
+SMART_TERM_TAIL_WINDOW_MIN_S = 60.0    # lower clamp (short programmes)
+SMART_TERM_TAIL_MIN_POINTS = 3         # too few samples -> no opinion, do not block
+SMART_TERM_TAIL_WINDOW_FRAC = 0.05     # both windows = last 5% of the run
+
 # Number of points in the compact reference-profile curve exposed on the
 # `_program` sensor (`profile_store.reference_curve`). Chosen so the resulting
 # `[[offset_s, watts], ...]` attribute stays comfortably under ~1 KB regardless

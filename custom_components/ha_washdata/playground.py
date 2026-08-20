@@ -115,7 +115,11 @@ from .const import (
     TerminationReason,
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
-from .profile_store import _ambiguity_from_candidates, decompress_power_data
+from .profile_store import (
+    _ambiguity_from_candidates,
+    _match_prefix_ambiguity,
+    decompress_power_data,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -924,7 +928,26 @@ class _DetailSim:
 
         # The DETECTOR still receives the RAW top-1, so detection / smart-termination
         # behaviour is byte-identical to before this reporting change.
-        return (raw_name, raw_conf, raw_expected, None, False, bool(is_ambiguous))
+        # Elements 7-9 (#364): without them the prefix-landscape and power-plausibility
+        # guards were never exercised in a simulation, so the exact failure the
+        # Playground exists to reproduce was invisible here.
+        full_shape_hit, prefix_fit_hit = _match_prefix_ambiguity(candidates, raw_expected)
+        tail_power = (
+            self.store.profile_tail_power(raw_name)
+            if (self.store is not None and raw_name)
+            else None
+        )
+        return (
+            raw_name,
+            raw_conf,
+            raw_expected,
+            None,
+            False,
+            bool(is_ambiguous),
+            bool(full_shape_hit or prefix_fit_hit),
+            bool(full_shape_hit),
+            tail_power,
+        )
 
     def _sample(self, ts: datetime) -> None:
         if not self.compute_series:
