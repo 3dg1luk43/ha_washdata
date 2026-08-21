@@ -6688,26 +6688,32 @@ async def _history_import_apply_task(
     if scan is None or scan.entry_id != entry_id or scan.kind != "history_import":
         reg.finish(task, state=task_registry.STATE_ERROR, error="scan_expired")
         return
-    slot = _history_staging(hass).get(entry_id)
-    if not isinstance(slot, dict) or slot.get("scan_task_id") != scan_task_id:
-        # The registry keeps only the last 30 finished tasks per entry, and an entry
-        # reload clears the staging area, so a scan can legitimately be gone by now.
-        reg.finish(task, state=task_registry.STATE_ERROR, error="scan_expired")
-        return
-    cycles: list[dict[str, Any]] = list(slot.get("cycles") or [])
-    # Dedupe the client-supplied indices (order-preserving): a repeated index would
-    # visit the same candidate twice, and one whose dedup_key is None (unparseable
-    # start_time/duration) is not caught by the in-loop dedup set, so the second visit
-    # would store a second copy under a fresh id.
-    wanted = list(dict.fromkeys(i for i in accept if 0 <= i < len(cycles)))
-    if not wanted:
-        reg.finish(task, state=task_registry.STATE_DONE, result={"imported": 0, "duplicates": 0})
-        return
-
     try:
         async with _entry_write_lock(hass, entry_id):
             if _get_manager(hass, entry_id) is not manager:
                 reg.finish(task, state=task_registry.STATE_ERROR, error="device reloaded")
+                return
+            # Validate AND read the staging slot under the lock, not before it: two
+            # concurrent applies must not both pass a pre-lock check and each persist the
+            # same candidate (one whose dedup_key is None bypasses existing_dedup_keys),
+            # and the slot must not be swapped between the check and the read.
+            slot = _history_staging(hass).get(entry_id)
+            if not isinstance(slot, dict) or slot.get("scan_task_id") != scan_task_id:
+                # The registry keeps only the last 30 finished tasks per entry, and an
+                # entry reload clears the staging area, so a scan can legitimately be
+                # gone by now.
+                reg.finish(task, state=task_registry.STATE_ERROR, error="scan_expired")
+                return
+            cycles: list[dict[str, Any]] = list(slot.get("cycles") or [])
+            # Dedupe the client-supplied indices (order-preserving): a repeated index
+            # would visit the same candidate twice, and one whose dedup_key is None is
+            # not caught by the in-loop dedup set, so it would store a second copy.
+            wanted = list(dict.fromkeys(i for i in accept if 0 <= i < len(cycles)))
+            if not wanted:
+                reg.finish(
+                    task, state=task_registry.STATE_DONE,
+                    result={"imported": 0, "duplicates": 0},
+                )
                 return
             store = manager.profile_store
             target = store.get_backfill_cycles()
@@ -6745,6 +6751,11 @@ async def _history_import_apply_task(
             # Read the total inside the lock: another task could append to the same
             # backfill list after the lock releases, inflating a count read outside it.
             total_backfill = len(target)
+            # Consume the slot we applied - but only if it is still that same object.
+            # A fresh upload (which does not take this lock) can replace the slot during
+            # the async_save() await above; clearing unconditionally would discard it.
+            if _history_staging(hass).get(entry_id) is slot:
+                async_clear_history_import(hass, entry_id)
         manager.notify_update()
         reg.finish(
             task,
@@ -6756,7 +6767,6 @@ async def _history_import_apply_task(
                 "total_backfill": total_backfill,
             },
         )
-        async_clear_history_import(hass, entry_id)
     except asyncio.CancelledError:
         reg.finish(task, state=task_registry.STATE_CANCELLED)
         raise
