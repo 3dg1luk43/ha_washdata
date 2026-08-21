@@ -556,6 +556,8 @@ class HistoryImportRecorderResponse(TypedDict):
     rows: int
     entity_id: str
     days: int
+    # Oldest day actually queried (ISO date), for "read since <date>".
+    start_date: str
     truncated: bool
 
 

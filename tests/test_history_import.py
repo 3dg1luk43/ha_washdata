@@ -165,12 +165,50 @@ def test_parse_error_markers(text, error):
     assert hi.parse_history_csv(text) == {"error": error} or hi.parse_history_csv(text)["error"] == error
 
 
-def test_parse_reports_missing_entity_rather_than_empty_result():
-    text = f"entity_id,state,last_changed\nsensor.other,5,2026-05-01T08:00:00Z\n"
+def test_parse_reads_a_single_entity_file_that_is_not_the_configured_sensor():
+    """A one-entity export is unambiguous even when the id differs from the device's
+    configured sensor (renamed entity, a template sensor in front of the plug, an export
+    taken under the old id). Dead-ending on `entity_not_in_file` there left users with a
+    valid file and no way to import it; the substitution is recorded instead."""
+    text = (
+        "entity_id,state,last_changed\n"
+        "sensor.other,5,2026-05-01T08:00:00Z\n"
+        "sensor.other,900,2026-05-01T08:00:05Z\n"
+    )
+    result = hi.parse_history_csv(text, entity_id=ENTITY)
+    assert not isinstance(result, dict), result
+    assert [p for _, p in result.readings] == [5.0, 900.0]
+    assert result.entity_id == "sensor.other"
+    assert result.entity_substituted_from == ENTITY
+    assert result.report()["entity_substituted_from"] == ENTITY
+
+
+def test_parse_still_reports_a_missing_entity_when_the_file_holds_several():
+    """With more than one entity the choice is genuinely ambiguous - guessing would
+    interleave two appliances' readings - so the error stands."""
+    text = (
+        "entity_id,state,last_changed\n"
+        "sensor.other,5,2026-05-01T08:00:00Z\n"
+        "sensor.second,7,2026-05-01T08:00:05Z\n"
+    )
     result = hi.parse_history_csv(text, entity_id=ENTITY)
     assert isinstance(result, dict)
     assert result["error"] == "entity_not_in_file"
-    assert result["entities"] == ["sensor.other"]
+    assert result["entities"] == ["sensor.other", "sensor.second"]
+
+
+def test_parse_matches_the_entity_case_insensitively():
+    """An export round-tripped through a spreadsheet can differ in case alone; that is
+    the same appliance, not a different one (and must not read as a substitution)."""
+    text = (
+        "entity_id,state,last_changed\n"
+        f"{ENTITY.upper()},5,2026-05-01T08:00:00Z\n"
+        f"{ENTITY.upper()},900,2026-05-01T08:00:05Z\n"
+    )
+    result = hi.parse_history_csv(text, entity_id=ENTITY)
+    assert not isinstance(result, dict), result
+    assert [p for _, p in result.readings] == [5.0, 900.0]
+    assert result.entity_substituted_from is None
 
 
 def test_parse_row_cap_truncates_instead_of_exploding():

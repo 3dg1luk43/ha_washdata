@@ -109,6 +109,9 @@ class ParsedHistory:
     samples: list[Sample] = field(default_factory=list)
     entities: list[str] = field(default_factory=list)
     entity_id: str | None = None
+    # Set when the file held a single entity that was not the configured sensor and it
+    # was read anyway; carries the id that was asked for, so the review UI can say so.
+    entity_substituted_from: str | None = None
     rows_total: int = 0
     rows_parsed: int = 0
     rows_non_numeric: int = 0
@@ -136,6 +139,7 @@ class ParsedHistory:
             "truncated": self.truncated,
             "entities": list(self.entities),
             "entity_id": self.entity_id,
+            "entity_substituted_from": self.entity_substituted_from,
             "first": readings[0][0].isoformat() if readings else None,
             "last": readings[-1][0].isoformat() if readings else None,
             "peak_w": round(max(powers), 1) if powers else 0.0,
@@ -213,6 +217,7 @@ def parse_history_csv(
             return {"error": "missing_columns"}
 
         out = ParsedHistory(entity_id=entity_id)
+        _wanted_entity = (entity_id or "").strip().casefold()
         entities: dict[str, int] = {}
         rows: list[Sample] = []
         for row in reader:
@@ -223,7 +228,10 @@ def parse_history_csv(
             row_entity = str(row.get(entity_key) or "").strip() if entity_key else ""
             if row_entity:
                 entities[row_entity] = entities.get(row_entity, 0) + 1
-            if entity_id and row_entity and row_entity != entity_id:
+            # Case/whitespace-insensitive: entity ids are lowercase by convention, but an
+            # export that round-tripped through a spreadsheet can differ in case alone,
+            # which must not read as "a different appliance".
+            if entity_id and row_entity and row_entity.casefold() != _wanted_entity:
                 out.rows_other_entity += 1
                 continue
             timestamp = _parse_ts(str(row.get(time_key) or ""))
@@ -253,7 +261,23 @@ def parse_history_csv(
             rows.append((timestamp, max(0.0, power)))
 
         out.entities = sorted(entities)
-        if entity_id and entities and entity_id not in entities:
+        if (
+            entity_id
+            and entities
+            and _wanted_entity not in {e.casefold() for e in entities}
+        ):
+            # The configured sensor is not in the file. With exactly ONE entity in it the
+            # upload is still unambiguous - the user picked this file for this device, and
+            # a renamed entity, a template/helper sensor in front of the plug, or an export
+            # taken under the old id all land here - so honour it and record the
+            # substitution instead of dead-ending. The error is kept for a MULTI-entity
+            # file, where guessing which appliance to read would corrupt detection.
+            if len(entities) == 1:
+                only = next(iter(entities))
+                retry = parse_history_csv(text, entity_id=only, max_rows=max_rows)
+                if isinstance(retry, ParsedHistory):
+                    retry.entity_substituted_from = entity_id
+                return retry
             return {"error": "entity_not_in_file", "entities": out.entities}
         if not rows:
             return {"error": "no_readings"}

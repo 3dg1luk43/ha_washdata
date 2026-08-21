@@ -99,6 +99,7 @@ from .const import (
     HISTORY_IMPORT_MAX_ROWS,
     HISTORY_IMPORT_MAX_SEGMENTS,
     HISTORY_IMPORT_MAX_TOTAL_CYCLES,
+    HISTORY_IMPORT_RECORDER_EMPTY_DAY_STOP,
     HISTORY_IMPORT_RECORDER_MAX_DAYS,
     PLAYGROUND_PRESET_MAX,
     SHOW_ML_LAB,
@@ -6476,6 +6477,9 @@ def ws_history_import_chunk(
     {
         vol.Required("type"): "ha_washdata/history_import_recorder",
         vol.Required("entry_id"): str,
+        # Either a start date (what the panel sends: "import since <date>") or a plain
+        # day count. `start_date` wins when both are present.
+        vol.Optional("start_date"): vol.Any(None, str),
         vol.Optional("days", default=10): vol.All(
             vol.Coerce(int), vol.Range(min=1, max=HISTORY_IMPORT_RECORDER_MAX_DAYS)
         ),
@@ -6508,13 +6512,44 @@ async def ws_history_import_recorder(
         connection.send_error(msg["id"], "not_found", "This device has no power sensor configured")
         return
 
-    days = int(msg["days"])
     now = dt_util.now()
+    days = int(msg.get("days") or 10)
+    start_date = msg.get("start_date")
+    if start_date:
+        # "Import since <date>" - resolve to a day count so the windowed read below is
+        # unchanged. The date is read as a LOCAL calendar day (it comes from a date
+        # picker, where the user means their own midnight), and clamped to the supported
+        # range: a future date reads today, an older one is capped at the maximum.
+        try:
+            parsed_date = dt_util.parse_date(str(start_date))
+        except Exception:  # pylint: disable=broad-exception-caught
+            parsed_date = None
+        if parsed_date is None:
+            connection.send_error(msg["id"], "invalid_format", "Not a valid start date")
+            return
+        span = (now.date() - parsed_date).days + 1
+        days = max(1, min(HISTORY_IMPORT_RECORDER_MAX_DAYS, span))
     rows: list[tuple[float, float]] = []
-    for day in range(days, 0, -1):
+    # Walk BACKWARDS from today, not forwards from the oldest requested day: the window can
+    # now be years (a recorder configured to keep full-resolution states that long), and
+    # starting at the far end would issue thousands of empty queries before reaching any
+    # data - and, on truncation, would keep the OLDEST rows rather than the most recent.
+    # `samples_from_readings` sorts, so the accumulation order does not matter downstream.
+    empty_run = 0
+    for day in range(1, days + 1):
         window_start = now - timedelta(days=day)
         window_end = now - timedelta(days=day - 1)
-        rows.extend(await _recorder_power(hass, entity_id, window_start, end_dt=window_end))
+        day_rows = await _recorder_power(hass, entity_id, window_start, end_dt=window_end)
+        if day_rows:
+            empty_run = 0
+            rows.extend(day_rows)
+        else:
+            # Inside the retention window a day always yields at least the carried
+            # start-time state, so a run of empty days means the recorder is purged past
+            # here and every further query would be wasted.
+            empty_run += 1
+            if empty_run >= HISTORY_IMPORT_RECORDER_EMPTY_DAY_STOP:
+                break
         if len(rows) > HISTORY_IMPORT_MAX_ROWS:
             break
 
@@ -6533,6 +6568,9 @@ async def ws_history_import_recorder(
         "rows": len(rows[:HISTORY_IMPORT_MAX_ROWS]),
         "entity_id": entity_id,
         "days": days,
+        # The oldest day actually queried, so the panel can report the range it really
+        # got rather than echoing back what was asked for.
+        "start_date": (now - timedelta(days=days - 1)).date().isoformat(),
         "truncated": len(rows) > HISTORY_IMPORT_MAX_ROWS,
     })
 

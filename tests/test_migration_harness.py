@@ -540,6 +540,41 @@ async def test_migrate_3_9_to_3_10_preserves_deliberate_values(hass: HomeAssista
 
 
 @pytest.mark.asyncio
+async def test_migrate_3_9_to_3_10_only_heals_values_invalid_for_the_device(
+    hass: HomeAssistant,
+) -> None:
+    """The heal is narrow by construction: it rewrites 30/5 only where the device's own
+    resolved default differs, i.e. only where those values break the panel's
+    watchdog>=2*sampling / start_duration>=sampling gates. On a fast-sampling device the
+    same 30/5 are valid and are left exactly as the user has them."""
+    coarse = DummyEntry(
+        version=3, minor_version=9, data={},
+        options={
+            CONF_DEVICE_TYPE: "dryer",  # 30 s sampling -> 30/5 are below the gates
+            CONF_WATCHDOG_INTERVAL: 30,
+            CONF_START_DURATION_THRESHOLD: 5,
+        },
+    )
+    fast = DummyEntry(
+        version=3, minor_version=9, data={},
+        options={
+            CONF_DEVICE_TYPE: "dishwasher",  # 2 s sampling -> 30/5 already clear the gates
+            CONF_WATCHDOG_INTERVAL: 30,
+            CONF_START_DURATION_THRESHOLD: 5,
+        },
+    )
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+
+    assert await async_migrate_entry(hass, coarse) is True
+    assert await async_migrate_entry(hass, fast) is True
+
+    assert (coarse.options[CONF_WATCHDOG_INTERVAL],
+            coarse.options[CONF_START_DURATION_THRESHOLD]) == (61, 30)
+    assert (fast.options[CONF_WATCHDOG_INTERVAL],
+            fast.options[CONF_START_DURATION_THRESHOLD]) == (30, 5)
+
+
+@pytest.mark.asyncio
 async def test_migrate_3_9_to_3_10_null_device_type_is_treated_as_washing_machine(
     hass: HomeAssistant,
 ) -> None:
