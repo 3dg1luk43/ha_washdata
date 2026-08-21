@@ -84,6 +84,21 @@ def test_unknown_capability_returns_none() -> None:
     assert score_fn is None and source is None
 
 
+def test_available_models_tolerates_a_non_dict_manifest(monkeypatch) -> None:
+    """A manifest that decodes to a list/scalar must not make available_models raise.
+
+    payload.get("models") would AttributeError (not caught by the OSError/ValueError
+    handler), failing every call. It must cache and return []."""
+    from custom_components.ha_washdata.ml import engine
+
+    monkeypatch.setattr(engine, "_MANIFEST_MODELS_CACHE", None)
+    monkeypatch.setattr(engine.json, "loads", lambda *_a, **_k: ["not", "a", "dict"])
+    try:
+        assert engine.available_models() == []
+    finally:
+        engine._MANIFEST_MODELS_CACHE = None  # don't poison other tests
+
+
 @pytest.mark.parametrize("module_name", MODEL_MODULES)
 def test_embedded_model_matches_lab_parity_fixtures(module_name: str) -> None:
     """The embedded model must reproduce the lab's scores bit-for-bit.
