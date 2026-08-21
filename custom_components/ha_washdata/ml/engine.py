@@ -319,6 +319,12 @@ def available_models() -> list[dict[str, object]]:
     except (OSError, ValueError):
         _MANIFEST_MODELS_CACHE = []
         return _MANIFEST_MODELS_CACHE
+    # A manifest that decodes to a list/scalar rather than an object would make the
+    # .get() below raise AttributeError - not caught above, so available_models()
+    # would fail on every call. Cache [] to keep the never-raises / cache contract.
+    if not isinstance(payload, dict):
+        _MANIFEST_MODELS_CACHE = []
+        return _MANIFEST_MODELS_CACHE
     models = payload.get("models")
     result = models if isinstance(models, list) else []
     _MANIFEST_MODELS_CACHE = result
