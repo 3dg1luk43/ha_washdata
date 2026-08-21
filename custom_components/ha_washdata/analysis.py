@@ -546,6 +546,13 @@ def prefix_shape_score(
     Same scale as ``shape_score`` by construction: identical Stage-2 formula
     (``find_best_alignment``) and identical Stage-3 DTW blend, only the reference
     array differs. Returns None when the template cannot be truncated meaningfully.
+
+    NB prefix scoring normalizes on the shared resample ``grid`` (both series are
+    resampled to it), so it does not support the non-default ``dtw_mode="legacy"``
+    absolute-watt/length normalization - under which cross-candidate prefix scores of
+    differing native length would not be comparable. This is inert in production: the
+    default is ``"ensemble"`` and the live ProfileStore path never sets ``dtw_mode``;
+    ``"legacy"`` exists only for the devtools re-sweep harness.
     """
     arr = np.asarray(sample, dtype=float)
     k = _prefix_point_count(arr.size, current_duration, sample_span_s)

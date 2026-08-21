@@ -38,6 +38,8 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock
 
+import pytest
+
 from custom_components.ha_washdata.const import (
     DEVICE_TYPE_WASHING_MACHINE,
     STATE_ENDING,
@@ -344,3 +346,33 @@ def test_tail_power_survives_snapshot_roundtrip() -> None:
     assert older._match_prefix_ambiguous is True
     assert older._match_prefix_ambiguous_full_shape is True
     assert older._matched_tail_power is None
+
+
+def test_trailing_mean_ignores_a_stale_reading_across_an_outage_gap():
+    """A high reading held across an unobserved telemetry outage must not dominate
+    the trailing mean (explicit gap handling).
+
+    Worked from CodeRabbit's example: a stale 2000 W sample, a long dropout, then a
+    quiet 5 W tail. Every observed recent reading is 5 W, so the trailing mean must
+    reflect the clean tail, not the pre-gap spike - otherwise
+    _smart_term_power_plausible wrongly blocks termination and can hold an
+    anti-crease cycle open to the safety cap.
+    """
+    det = _make_detector([])
+    # 10 s-cadence 5 W tail (>= SMART_TERM_TAIL_MIN_POINTS points), preceded by one
+    # stale 2000 W reading and a ~280 s unobserved gap.
+    readings = [(_dt(0), 2000.0)]
+    readings += [(_dt(290 + 10 * i), 5.0) for i in range(11)]  # 290..390 s
+    det._power_readings = readings
+
+    mean = det._trailing_mean_power(_dt(390), 1000.0)
+    assert mean is not None
+    assert mean == pytest.approx(5.0, abs=0.5), mean
+
+
+def test_trailing_mean_is_unchanged_without_a_gap():
+    """With no outage-sized gap the mean is the ordinary time-weighted integral."""
+    det = _make_detector([])
+    det._power_readings = [(_dt(10 * i), 100.0) for i in range(11)]  # 0..100 s, all 100 W
+    mean = det._trailing_mean_power(_dt(100), 1000.0)
+    assert mean == pytest.approx(100.0), mean

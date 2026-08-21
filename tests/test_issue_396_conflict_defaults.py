@@ -159,6 +159,21 @@ def test_reconcile_still_lowers_match_when_it_was_not_proposed():
     assert out[CONF_PROFILE_MATCH_THRESHOLD].get("cascade") is True
 
 
+def test_reconcile_raises_auto_ceiling_to_the_learning_floor():
+    # Top of the ladder: learning <= auto. A high learning suggestion above a lower
+    # auto ceiling must lift the ceiling (conservative), not be left contradicting
+    # the declared ordering.
+    out, changed = reconcile_suggestions(
+        {
+            CONF_LEARNING_CONFIDENCE: {"value": 0.9, "reason": "few high-conf manual labels"},
+            CONF_AUTO_LABEL_CONFIDENCE: {"value": 0.5, "reason": "lower auto labels"},
+        },
+        {},
+    )
+    assert out[CONF_LEARNING_CONFIDENCE]["value"] == 0.9
+    assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] == 0.9
+
+
 # ---------------------------------------------------------------------------
 # ws_get_options exposes the device-resolved cadence defaults
 # ---------------------------------------------------------------------------

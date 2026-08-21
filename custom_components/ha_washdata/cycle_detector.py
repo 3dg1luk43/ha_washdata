@@ -552,9 +552,23 @@ class CycleDetector:
             if (timestamp - ts).total_seconds() > window_s:
                 break
             window.append((ts, float(power)))
+        window.reverse()
+        # Explicit gap handling (energy-integration rule): a reading held across an
+        # unobserved outage would dominate the trapezoid - e.g. a stale 2000 W sample
+        # 290 s before a 284 s dropout, then 5 W, integrates to ~1000 W though every
+        # observed recent reading is 5 W, wrongly blocking termination. So drop
+        # everything up to and including the most recent outage-sized gap and judge
+        # only the clean contiguous tail, the same ceiling the standby / anti-crease
+        # window scans reject a holed window with.
+        if len(window) >= 2:
+            max_gap = self._outage_threshold_s()
+            cut = 0
+            for i in range(1, len(window)):
+                if (window[i][0] - window[i - 1][0]).total_seconds() > max_gap:
+                    cut = i
+            window = window[cut:]
         if len(window) < SMART_TERM_TAIL_MIN_POINTS:
             return None
-        window.reverse()
         span = (window[-1][0] - window[0][0]).total_seconds()
         if span <= 0:
             return None
