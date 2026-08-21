@@ -201,8 +201,14 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # is left absent so the runtime device-resolved default applies.
     if version == 3 and minor_version == 9:
         new_opts = dict(entry.options)
-        _dt = new_opts.get(
-            CONF_DEVICE_TYPE, entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+        # `or` (not `.get(..., default)`) so a present-but-null device type also falls
+        # through to the data value / DEFAULT_DEVICE_TYPE: a null would otherwise resolve
+        # to the coarse scalar defaults and wrongly heal a washing-machine-equivalent
+        # entry's 30/5 up to 61/30.
+        _dt = (
+            new_opts.get(CONF_DEVICE_TYPE)
+            or entry.data.get(CONF_DEVICE_TYPE)
+            or DEFAULT_DEVICE_TYPE
         )
         _healed = []
         if new_opts.get(CONF_WATCHDOG_INTERVAL) == 30:
@@ -272,6 +278,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(
         CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
     )
+    # setdefault does not replace a present-but-null value; a null device type would
+    # then miss the per-type maps and fall through to the coarse scalar defaults (30/61)
+    # instead of the washing-machine defaults DEFAULT_DEVICE_TYPE stands for (5/30).
+    # Coerce it here (an explicit type is truthy and preserved) so both resolvers below
+    # see a real device type.
+    if not options.get(CONF_DEVICE_TYPE):
+        options[CONF_DEVICE_TYPE] = DEFAULT_DEVICE_TYPE
     options.setdefault(
         CONF_START_DURATION_THRESHOLD,
         resolve_start_duration_default(options[CONF_DEVICE_TYPE]),
