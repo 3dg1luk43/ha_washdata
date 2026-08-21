@@ -351,6 +351,21 @@ async def test_re_importing_the_same_history_skips_duplicates():
 
 
 @pytest.mark.asyncio
+async def test_apply_dedupes_repeated_accept_indices():
+    """A client that sends the same index twice must not store the candidate twice
+    (a candidate with a None dedup_key would slip past the in-loop dedup set)."""
+    hass, conn = _hass(), _conn()
+    manager, entry = _manager(hass), _entry()
+    token = await _upload(hass, conn, manager, _csv())
+    scan = await _scan(hass, conn, manager, entry, token)
+
+    applied = await _apply(hass, conn, manager, scan.id, [1, 1, 1])
+
+    assert applied.result["imported"] == 1
+    assert len(manager.profile_store.get_backfill_cycles()) == 1
+
+
+@pytest.mark.asyncio
 async def test_apply_rejects_a_foreign_scan_task():
     """`get_task_result` is not entry-scoped, so ownership is checked here."""
     hass, conn = _hass(), _conn()
