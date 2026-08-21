@@ -38,6 +38,7 @@ from custom_components.ha_washdata.const import (
     CONF_OFF_DELAY,
     CONF_POWER_SENSOR,
     CONF_RUNNING_DEAD_ZONE,
+    DEFAULT_DEVICE_TYPE,
     DEFAULT_NOTIFY_REMINDER_MESSAGE,
     DEFAULT_NOTIFY_TIMEOUT_SECONDS,
     DOMAIN,
@@ -536,3 +537,58 @@ async def test_migrate_3_9_to_3_10_preserves_deliberate_values(hass: HomeAssista
     assert entry.minor_version == 10
     assert entry.options[CONF_WATCHDOG_INTERVAL] == 90
     assert entry.options[CONF_START_DURATION_THRESHOLD] == 45
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_9_to_3_10_null_device_type_is_treated_as_washing_machine(
+    hass: HomeAssistant,
+) -> None:
+    """A present-but-null device type must resolve to DEFAULT_DEVICE_TYPE (washing
+    machine), not the coarse scalar fallback - otherwise the seeded 30/5 would be
+    wrongly 'healed' up to the coarse 61/30."""
+    entry = DummyEntry(
+        version=3, minor_version=9, data={},
+        options={
+            CONF_DEVICE_TYPE: None,
+            CONF_WATCHDOG_INTERVAL: 30,
+            CONF_START_DURATION_THRESHOLD: 5,
+        },
+    )
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.minor_version == 10
+    # washing-machine resolves to the same 30/5, so no (wrong) coarse heal.
+    assert entry.options[CONF_WATCHDOG_INTERVAL] == 30
+    assert entry.options[CONF_START_DURATION_THRESHOLD] == 5
+
+
+@pytest.mark.asyncio
+async def test_legacy_migration_null_device_type_seeds_washing_machine_defaults(
+    hass: HomeAssistant,
+) -> None:
+    """The one-pass legacy path seeds cadence defaults from the device type; a null
+    device type is coerced to DEFAULT_DEVICE_TYPE so it seeds the washing-machine 5/30,
+    not the coarse 30/61."""
+    entry = DummyEntry(
+        version=1, minor_version=1,
+        data={CONF_POWER_SENSOR: "sensor.p", CONF_MIN_POWER: 5.0},
+        options={CONF_DEVICE_TYPE: None},
+    )
+
+    def _apply_update(e: DummyEntry, **kwargs: Any) -> None:
+        if "data" in kwargs:
+            e.data = kwargs["data"]
+        if "options" in kwargs:
+            e.options = kwargs["options"]
+        if "version" in kwargs:
+            e.version = kwargs["version"]
+        if "minor_version" in kwargs:
+            e.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
+
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.options[CONF_DEVICE_TYPE] == DEFAULT_DEVICE_TYPE
+    assert entry.options[CONF_START_DURATION_THRESHOLD] == 5
+    assert entry.options[CONF_WATCHDOG_INTERVAL] == 30
