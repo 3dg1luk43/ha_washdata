@@ -171,6 +171,18 @@ def test_reconcile_rounding_preserves_the_inequality():
     assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] >= out[CONF_PROFILE_MATCH_THRESHOLD]["value"]
 
 
+def test_reconcile_directional_rounding_is_fp_exact_at_cent_boundaries():
+    # Binary FP could nudge an already-2dp value off its cent (0.58*100 = 57.9999...),
+    # making floor return 0.57. Decimal quantization keeps a value that raises to a
+    # 2dp bound unchanged rather than over/under-shooting.
+    out, _ = reconcile_suggestions(
+        {CONF_PROFILE_MATCH_THRESHOLD: {"value": 0.58, "reason": "tighten"}},
+        {CONF_AUTO_LABEL_CONFIDENCE: 0.57},
+    )
+    # raising auto to match 0.58 must land exactly on 0.58, not 0.59.
+    assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] == 0.58
+
+
 def test_reconcile_raises_auto_ceiling_to_the_learning_floor():
     # Top of the ladder: learning <= auto. A high learning suggestion above a lower
     # auto ceiling must lift the ceiling (conservative), not be left contradicting

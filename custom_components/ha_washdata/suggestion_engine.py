@@ -21,6 +21,7 @@ from __future__ import annotations
 import copy
 import logging
 import math
+from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 from datetime import datetime
 from typing import Any, TYPE_CHECKING, cast
 
@@ -495,9 +496,10 @@ def reconcile_suggestions(
         non-ladder rule byte-identical.
         """
         if round_dir == "up":
-            rounded = math.ceil(new_value * 100.0) / 100.0
+            # Decimal(str(x)) so binary FP can't nudge e.g. 0.07 to 0.0700001 and ceil to 0.08.
+            rounded = float(Decimal(str(new_value)).quantize(Decimal("0.01"), rounding=ROUND_CEILING))
         elif round_dir == "down":
-            rounded = math.floor(new_value * 100.0) / 100.0
+            rounded = float(Decimal(str(new_value)).quantize(Decimal("0.01"), rounding=ROUND_FLOOR))
         else:
             rounded = round(new_value, 2)
         entry = out.get(key)
