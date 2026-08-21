@@ -86,6 +86,10 @@ class DeviceInfo(TypedDict):
     is_user_paused: bool
     manual_program: bool
     options: dict[str, Any]
+    # Device-resolved defaults for the cadence/ratio fields whose default varies by
+    # device type (#396/#393), so the device-list conflict/suggestion badges can score
+    # an unset field against the value the integration would use (matches the Settings tab).
+    option_defaults: dict[str, Any]
 
 
 class GetDevicesResponse(TypedDict):

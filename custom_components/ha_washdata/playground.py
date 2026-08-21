@@ -417,7 +417,14 @@ def _build_match_snapshots(
     snapshots: list[dict[str, Any]] = []
     try:
         data = getattr(store, "_data", {}) or {}
-        profiles = data.get("profiles", {}) or {}
+        # Snapshot the profiles dict before iterating: this runs in an executor thread
+        # (ws_api dispatches _build_match_snapshots via async_add_executor_job) while the
+        # event loop may add/remove a profile (cycle-end creation, GC, auto-label), and a
+        # live `.items()` walk would raise "dictionary changed size during iteration" -
+        # the same race get_export_inventory was moved on-loop to avoid. dict() is a cheap
+        # shallow copy of the top-level mapping (values are read-only here). iter_evidence_
+        # cycles() below returns a fresh list, so its .extend() is already snapshot-safe.
+        profiles = dict(data.get("profiles", {}) or {})
         # Include every cycle the live matcher would consider, via the store's own
         # evidence view: an import-only profile samples from reference_cycles or
         # backfill_cycles, so a snapshot pool built from past_cycles alone would drop it

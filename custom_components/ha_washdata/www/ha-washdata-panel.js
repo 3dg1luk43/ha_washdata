@@ -1448,7 +1448,13 @@ function _field(f, value, extra) {
   } else if (f.type === 'checkboxlist') {
     // Several checkboxes writing ONE option as a list of the ticked values. The inner
     // boxes carry data-choice, never data-opt, so the collectors below see one field.
-    const chosen = Array.isArray(value) ? value.map(String) : [];
+    // An empty stored value is not a valid "none" state - the backend treats an empty
+    // evidence selection as all-three (a profile with no cycles could never match), so
+    // render the field's default set rather than all-unchecked, which would tell the
+    // user matching is starved while it is actually using every source.
+    const chosen = (Array.isArray(value) && value.length)
+      ? value.map(String)
+      : (Array.isArray(f.def) ? f.def.map(String) : []);
     input = `<div data-opt="${key}" data-ftype="checkboxlist" class="wd-checkboxlist">` +
       (f.choices || []).map(([val, lbl]) =>
         `<label class="wd-switch-lbl" style="display:flex;align-items:center;gap:8px;margin:2px 0">` +
@@ -3774,7 +3780,7 @@ class HaWashdataPanel extends HTMLElement {
       const dotColor = rec ? 'var(--error-color, #f44336)' : this._stateColor(st);
       const label = rec ? this._t('status.recording', {}, 'Recording') : this._stateLabel(st);
       const badges = [];
-      const confN = this._conflictCountForOpts(d.options || {});
+      const confN = this._conflictCountForOpts(d.options || {}, d.option_defaults || {});
       if (confN) badges.push(`<span class="wd-dbadge conf">⚠ ${confN}</span>`);
       const sugN = this._sugCountsForDevice(d).total;
       if (sugN) badges.push(`<span class="wd-dbadge sug">💡 ${sugN}</span>`);
@@ -5430,7 +5436,10 @@ class HaWashdataPanel extends HTMLElement {
   // by the settings banner, section dots, tab bulb, and the "Show only" filter so
   // Calibrated suggestions surface everywhere classic (observed) suggestions do.
   _mlSugKeys(eff) {
-    const cur = eff || Object.assign({}, this._opts, this._pendingSettings || {});
+    // Fall back to the device-resolved defaults for an unset field (#396) so an ML
+    // value equal to that default is not counted as differing from "current" - which
+    // would badge a phantom suggestion whose "Use" value already equals what runs.
+    const cur = eff || Object.assign({}, this._optDefaults, this._opts, this._pendingSettings || {});
     // Muted keys (#343) are excluded so the banner count, section dots, tab bulb
     // and the "Show only" filter all follow the mute state the same way the
     // classic suggestions do (which are dropped from this._suggestions on mute).
@@ -5466,9 +5475,11 @@ class HaWashdataPanel extends HTMLElement {
     const classic = cKeys ? cKeys.length : (dev.suggestions_count || 0);
     // Staged (unsaved) edits count for the selected device only; every other
     // device is scored against its saved options, which the poll keeps fresh.
+    // Device-resolved defaults (#396) sit under the saved options so an unset field
+    // scores against the value the integration would actually use, not `undefined`.
     const cur = isSel
-      ? Object.assign({}, dev.options || {}, this._opts, this._pendingSettings || {})
-      : (dev.options || {});
+      ? Object.assign({}, dev.option_defaults || {}, dev.options || {}, this._opts, this._pendingSettings || {})
+      : Object.assign({}, dev.option_defaults || {}, dev.options || {});
     const mlKeys = this._mlSugKeysFrom(
       isSel ? this._mlSettings : this._mlSettingsByEntry[dev.entry_id],
       cur,
@@ -12585,7 +12596,7 @@ class HaWashdataPanel extends HTMLElement {
       const f = _FIELD_BY_KEY[key];
       const ftype = (f && f.type) || el.dataset.ftype || 'text';
       if (el.type === 'checkbox') { this._pendingSettings[key] = el.checked; return; }
-      if (ftype === 'checkboxlist') { this._pendingSettings[key] = Array.from(el.querySelectorAll('[data-choice]')).filter(c => c.checked).map(c => c.dataset.choice); return; }
+      if (ftype === 'checkboxlist') { this._pendingSettings[key] = this._collectCheckboxlist(el, key); return; }
       if (ftype === 'entitylist') {
         this._pendingSettings[key] = Array.from(el.querySelectorAll('.wd-pill')).map(p => p.dataset.val).filter(Boolean);
         return;
@@ -12619,33 +12630,57 @@ class HaWashdataPanel extends HTMLElement {
     });
   }
 
+  // Collect a checkboxlist field's ticked choices. An empty result on a field whose
+  // default is a non-empty set (profile_evidence_sources) is normalised to that default:
+  // an empty evidence selection is not a valid "none" - the backend silently uses all
+  // three - so persisting/staging [] would leave the UI showing all-unchecked while
+  // matching used every source (#2). The default set is the honest, stored value.
+  _collectCheckboxlist(el, key) {
+    const chosen = Array.from(el.querySelectorAll('[data-choice]'))
+      .filter(c => c.checked).map(c => c.dataset.choice);
+    if (chosen.length) return chosen;
+    const f = _FIELD_BY_KEY[key];
+    return (f && Array.isArray(f.def) && f.def.length) ? f.def.slice() : chosen;
+  }
+
   // Compute conflicting field keys from any options dict (used by device cards and section dots).
-  _conflictKeysForOpts(opts) {
+  // `defaults` supplies the device-resolved value for a field the user never set
+  // (#396: sampling/watchdog/start_duration/smart-term ratio resolve per device type
+  // and are sent by the backend as `defaults`/`option_defaults`, never stored in
+  // options). Merging them UNDER `opts` means a cross-section rule (watchdog>=2*sampling)
+  // sees the value the integration would actually use even when the partner field's
+  // section was never opened this session - otherwise the unset partner reads as
+  // `undefined`, the rule's `!= null` guard short-circuits, and the conflict is missed.
+  _conflictKeysForOpts(opts, defaults) {
+    const v = Object.assign({}, defaults || {}, opts);
     const keys = new Set();
     for (const rule of _SETTING_CONFLICTS) {
-      if (!rule.check(opts)) continue;
-      for (const key of Object.keys(rule.fieldErrors(opts))) keys.add(key);
+      if (!rule.check(v)) continue;
+      for (const key of Object.keys(rule.fieldErrors(v))) keys.add(key);
     }
     return keys;
   }
 
-  _conflictCountForOpts(opts) { return this._conflictKeysForOpts(opts).size; }
+  _conflictCountForOpts(opts, defaults) { return this._conflictKeysForOpts(opts, defaults).size; }
 
   // section-pill dots to surface saved-settings conflicts without needing the form.
   _conflictKeysFromOpts() {
-    return this._conflictKeysForOpts(Object.assign({}, this._opts, this._pendingSettings));
+    return this._conflictKeysForOpts(
+      Object.assign({}, this._opts, this._pendingSettings), this._optDefaults
+    );
   }
 
-  // Collect current numeric form values from DOM, falling back to saved opts for
-  // fields not rendered in the current section (cross-section conflicts).
+  // Collect current numeric form values from DOM, falling back to saved opts (and
+  // the device-resolved defaults for unset fields, #396) for fields not rendered in
+  // the current section (cross-section conflicts).
   _readSettingsFormValues(sr) {
-    const vals = Object.assign({}, this._opts, this._pendingSettings);
+    const vals = Object.assign({}, this._optDefaults, this._opts, this._pendingSettings);
     if (!sr) return vals;
     sr.querySelectorAll('#wd-settings-form [data-opt]').forEach(el => {
       const key = el.dataset.opt;
       if (el.type === 'checkbox') { vals[key] = el.checked; return; }
       if (el.dataset.ftype === 'checkboxlist') {
-        vals[key] = Array.from(el.querySelectorAll('[data-choice]')).filter(c => c.checked).map(c => c.dataset.choice);
+        vals[key] = this._collectCheckboxlist(el, key);
         return;
       }
       const n = parseFloat(el.value);
@@ -12775,7 +12810,7 @@ class HaWashdataPanel extends HTMLElement {
       const f = _FIELD_BY_KEY[key];
       const ftype = (f && f.type) || el.dataset.ftype || 'text';
       if (el.type === 'checkbox') { updates[key] = el.checked; return; }
-      if (ftype === 'checkboxlist') { updates[key] = Array.from(el.querySelectorAll('[data-choice]')).filter(c => c.checked).map(c => c.dataset.choice); return; }
+      if (ftype === 'checkboxlist') { updates[key] = this._collectCheckboxlist(el, key); return; }
       if (ftype === 'entitylist') { updates[key] = Array.from(el.querySelectorAll('.wd-pill')).map(p => p.dataset.val).filter(Boolean); return; }
       if (ftype === 'timerlist') {
         updates[key] = Array.from(el.querySelectorAll('.wd-timer-row')).map(row => ({
@@ -12809,6 +12844,21 @@ class HaWashdataPanel extends HTMLElement {
       if (ftype === 'entity' || ftype === 'device') { const t = String(val).trim(); updates[key] = t ? t : null; return; }
       updates[key] = val;  // text, textarea, select, devicetype
     });
+
+    // #396/#393: the cadence/ratio fields render their runtime-resolved default when
+    // unset (from _optDefaults). Persisting that default back as an explicit option
+    // pins the value against future default changes and defeats "unset -> resolve per
+    // device type", so drop a field that is (a) not already an explicit option and
+    // (b) still equal to the resolved default - the backend resolves the identical
+    // value, so runtime behaviour is unchanged. A value the user actually changed away
+    // from the default (or a field they had already set) is untouched and still saves.
+    const _od = this._optDefaults || {};
+    for (const k of Object.keys(_od)) {
+      if (!(k in this._opts) && (k in updates)
+          && JSON.stringify(updates[k]) === JSON.stringify(_od[k])) {
+        delete updates[k];
+      }
+    }
 
     if (this._invalidJson) {
       this._showToast(this._t('toast.invalid_json', {key: this._invalidJson}, `"${this._invalidJson}" is not valid JSON - fix it or clear the field before saving.`), 'error');

@@ -103,6 +103,23 @@ def test_valueless_suggestion_entry_is_ignored():
     assert dev["suggestion_keys"] == []
 
 
+def test_option_defaults_reported_per_device_type():
+    """The device-list conflict/suggestion badges score an unset cadence/ratio field
+    against the value the integration would actually use (#396/#393), so get_devices
+    carries the device-resolved defaults per device - matching the Settings tab."""
+    # Unset device_type -> washing_machine (fast-sampling wet appliance).
+    od = _call_get_devices({}, {})["option_defaults"]
+    assert od["sampling_interval"] == 2.0
+    assert od["watchdog_interval"] == 30
+    assert od["start_duration_threshold"] == 5.0
+    assert od["smart_termination_duration_ratio"] == 0.98
+    # A coarse-sampling type resolves to the higher watchdog/start defaults.
+    coarse = _call_get_devices({}, {"device_type": "dryer"})["option_defaults"]
+    assert coarse["sampling_interval"] == 30.0
+    assert coarse["watchdog_interval"] == 61
+    assert coarse["start_duration_threshold"] == 30.0
+
+
 def test_keys_are_reported_even_when_no_manager_is_loaded():
     # Contract: the field always exists, so the panel never has to guard on it.
     entry = SimpleNamespace(entry_id="e1", title="Washer", data={}, options={})
