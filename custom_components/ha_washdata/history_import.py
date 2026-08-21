@@ -235,9 +235,15 @@ def parse_history_csv(
                 rows.append((timestamp, None))
                 continue
             try:
-                # A locale-formatted export writes 1234,5 - only safe to reinterpret
-                # when the comma cannot be a delimiter artefact.
-                power = float(raw_value.replace(",", ".") if raw_value.count(",") == 1 else raw_value)
+                # A locale-formatted export writes 1234,5 (comma = decimal point). But a
+                # single comma followed by exactly three digits is more likely a thousands
+                # group ("1,234" is 1234, not 1.234), which is too ambiguous to rewrite: a
+                # wrong guess stores a value 1000x off, so leave it and let float() drop it.
+                _frac = raw_value.split(",", 1)[1] if raw_value.count(",") == 1 else ""
+                _decimal_comma = raw_value.count(",") == 1 and not (
+                    len(_frac) == 3 and _frac.isdigit()
+                )
+                power = float(raw_value.replace(",", ".") if _decimal_comma else raw_value)
             except ValueError:
                 out.rows_non_numeric += 1
                 continue

@@ -124,7 +124,11 @@ def _prefix_fires(cands: list[dict], best_dur: float, margin: float) -> bool:
     """The prefix term at an arbitrary margin (production uses the constant)."""
     if best_dur <= 0 or len(cands) < 2:
         return False
-    best_score = float(cands[0].get("score") or 0.0)
+    # Winner's shape score (same scale as prefix_score); blended score only as fallback.
+    _best_shape = cands[0].get("shape_score")
+    best_score = float(
+        (_best_shape if _best_shape is not None else cands[0].get("score")) or 0.0
+    )
     for c in cands[1:]:
         ps = c.get("prefix_score")
         if ps is None:

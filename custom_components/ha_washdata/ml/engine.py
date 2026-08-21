@@ -326,6 +326,8 @@ def available_models() -> list[dict[str, object]]:
         _MANIFEST_MODELS_CACHE = []
         return _MANIFEST_MODELS_CACHE
     models = payload.get("models")
-    result = models if isinstance(models, list) else []
+    # Keep only dict entries so the return honours its list[dict] contract even for a
+    # malformed manifest like {"models": [null]}.
+    result = [m for m in models if isinstance(m, dict)] if isinstance(models, list) else []
     _MANIFEST_MODELS_CACHE = result
     return result

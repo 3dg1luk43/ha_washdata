@@ -561,7 +561,11 @@ class CycleDetector:
         # only the clean contiguous tail, the same ceiling the standby / anti-crease
         # window scans reject a holed window with.
         if len(window) >= 2:
-            max_gap = self._outage_threshold_s()
+            # O(1) ceiling from the maintained p95 cadence (mirrors energy_gap_threshold_s
+            # = clip(10x cadence, 60, 3600)), NOT _outage_threshold_s() which rebuilds a
+            # NumPy array from every reading - this runs on the per-reading ENDING /
+            # anti-crease path, same reasoning as the gap-free tally at L1006.
+            max_gap = min(3600.0, max(60.0, 10.0 * self._p95_dt))
             cut = 0
             for i in range(1, len(window)):
                 if (window[i][0] - window[i - 1][0]).total_seconds() > max_gap:
@@ -1572,6 +1576,10 @@ class CycleDetector:
                         getattr(self, "_last_match_confidence", 0.0)
                         >= self._config.match_confidence_threshold
                     )
+                    # Compute the #364 power-plausibility once per reading and reuse it
+                    # for the diagnostic reason and the gate below - the helper walks the
+                    # trailing window, so calling it two/three times per reading is waste.
+                    _power_plausible = self._smart_term_power_plausible(timestamp)
 
                     # Gate the predictive end on match certainty.
                     # _match_ambiguous: top-1 vs top-2 score gap is too small to
@@ -1596,7 +1604,7 @@ class CycleDetector:
                         is_confident_match,
                         self._match_ambiguous,
                         self._match_prefix_ambiguous,
-                        self._smart_term_power_plausible(timestamp),
+                        _power_plausible,
                     )
                     if _block_reason != self._last_smart_term_block_reason:
                         self._last_smart_term_block_reason = _block_reason
@@ -1623,7 +1631,7 @@ class CycleDetector:
                         # several times what this profile draws at its own end, the
                         # match is a shorter look-alike and we are mid-wash. Block;
                         # the power-based fallback timeout decides instead.
-                        and self._smart_term_power_plausible(timestamp)
+                        and _power_plausible
                     ):
                         # Dynamic confirmation window
                         if self._config.device_type == "dishwasher":
@@ -2143,18 +2151,20 @@ class CycleDetector:
             return False
         if self._cycle_max_power <= float(self._config.anti_wrinkle_max_power):
             return False  # never a hot/energetic cycle - leave low-power programs alone
+        # Cheap clock test first, so the trailing-power scan below is skipped for the
+        # whole mid-wash phase (it only matters once we are past-expected).
+        start = self._current_cycle_start
+        if start is None:
+            return False
+        current_duration = (timestamp - start).total_seconds()
+        if current_duration < self._expected_duration * ANTI_CREASE_FINALIZE_RATIO:
+            return False
         # #364: "past expected" only means "past the wash" when expected belongs to
         # the RIGHT profile. A whole washer wash phase sits below
         # anti_wrinkle_max_power, so with a mis-matched shorter profile this gate
         # would open mid-wash. Requiring the trailing power to look like this
         # profile's own tail restores the guarantee the ratio alone used to give.
         if not self._smart_term_power_plausible(timestamp):
-            return False
-        start = self._current_cycle_start
-        if start is None:
-            return False
-        current_duration = (timestamp - start).total_seconds()
-        if current_duration < self._expected_duration * ANTI_CREASE_FINALIZE_RATIO:
             return False
         return True
 
