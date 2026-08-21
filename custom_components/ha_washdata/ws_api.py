@@ -86,6 +86,7 @@ from .const import (
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_OFF_DELAY_BY_DEVICE,
+    DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
     DEVICE_TYPES,
@@ -227,6 +228,22 @@ _SUGGESTION_INT_KEYS: frozenset[str] = frozenset({
     CONF_END_REPEAT_COUNT,
     CONF_PUMP_STUCK_DURATION,
 })
+
+
+def _coerce_suggested(key: str, val: Any) -> Any:
+    """Round a raw suggestion value the way the UI would apply it.
+
+    Int keys are floored to int, everything else rounded to 4 dp - the same
+    coercion ``ws_get_suggestions`` does before the equivalence test. The device
+    pill's badge filter must use it too, or a value like 30.4 for an int key with
+    a current 30 is hidden in the Settings list (30 == 30) but still counted on
+    the pill, leaving a badge the user cannot clear. Returns the raw value
+    unchanged if it is not numeric.
+    """
+    try:
+        return int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
+    except (TypeError, ValueError):
+        return val
 
 
 def _suggestion_equivalent(suggested: Any, current: Any) -> bool:
@@ -591,7 +608,10 @@ _READ_WRITE_COMMANDS = frozenset({
     "store_get_device_quality",
     "store_get_device_profiles",
     "store_get_catalog_entry",
-    "store_refresh_catalog",
+    # NB: store_refresh_catalog is deliberately NOT here. It drops the install-wide
+    # catalog cache in the shared StoreClient, so a read-level user could bust the
+    # 1-hour TTL that protects the free-tier read budget on repeat. It defaults to
+    # 'edit', like the other install-wide store actions above read level.
 })
 
 _LOG_BUFFER_KEY = "ha_washdata_log_buffer"
@@ -1362,7 +1382,11 @@ def ws_get_devices(
                             if k not in muted
                             and isinstance(raw.get(k), dict)
                             and raw[k].get("value") is not None
-                            and not _suggestion_equivalent(raw[k]["value"], merged.get(k))
+                            # Coerce first, exactly like ws_get_suggestions, so the pill
+                            # and the Settings list agree on int-key rounding.
+                            and not _suggestion_equivalent(
+                                _coerce_suggested(k, raw[k]["value"]), merged.get(k)
+                            )
                         ]
                         info["suggestion_keys"] = keys
                         info["suggestions_count"] = len(keys)
@@ -3539,9 +3563,7 @@ def ws_get_suggestions(
             if not isinstance(item, dict) or item.get("value") is None:
                 continue
             val = item["value"]
-            suggested = (
-                int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
-            )
+            suggested = _coerce_suggested(key, val)
             current = merged.get(key)
             # Hide suggestions that would not change the current value.
             if _suggestion_equivalent(suggested, current):
@@ -5495,6 +5517,11 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
                 str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
             ),
         ),
+        # Match the live detector's tuned gate, not the dataclass 0.4, so the sim's
+        # Smart-Termination / anti-crease confidence checks reproduce production.
+        match_confidence_threshold=_safe_float_finite(
+            opts.get(CONF_PROFILE_MATCH_THRESHOLD), DEFAULT_PROFILE_MATCH_THRESHOLD
+        ),
     )
 
 
@@ -6606,7 +6633,9 @@ async def _history_import_scan_task(
         reg.finish(task, state=task_registry.STATE_CANCELLED)
         raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("History-import scan failed for %s: %s", entry_id, exc)
+        # Task-level failure at WARNING like the other task runners, so it lands in the
+        # default HA log and the panel Logs view (sub-step failures stay at debug).
+        _LOGGER.warning("History-import scan failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
 
 
@@ -6725,7 +6754,9 @@ async def _history_import_apply_task(
         reg.finish(task, state=task_registry.STATE_CANCELLED)
         raise
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("History-import apply failed for %s: %s", entry_id, exc)
+        # A failed apply is a failed data write; log at WARNING like the other task
+        # runners so it is visible in the default HA log and the panel Logs view.
+        _LOGGER.warning("History-import apply failed for %s: %s", entry_id, exc)
         reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
 
 

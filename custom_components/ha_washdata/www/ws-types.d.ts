@@ -124,6 +124,9 @@ export interface GetCyclePowerDataResponse {
   artifacts?: Record<string, unknown>[];
   restart_gaps?: unknown[];
   is_reference?: boolean;
+  labelable?: boolean;
+  editable?: boolean;
+  cycle_origin?: string;
 }
 
 export interface GetDeviceCyclesResponse {

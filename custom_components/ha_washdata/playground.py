@@ -934,11 +934,16 @@ class _DetailSim:
         # guards were never exercised in a simulation, so the exact failure the
         # Playground exists to reproduce was invisible here.
         full_shape_hit, prefix_fit_hit = _match_prefix_ambiguity(candidates, raw_expected)
-        tail_power = (
-            self.store.profile_tail_power(raw_name)
-            if (self.store is not None and raw_name)
-            else None
-        )
+        # Guard the store call like iter_evidence_cycles above: on an older store or a
+        # partial test double without profile_tail_power the AttributeError would
+        # bubble through _try_profile_match, which drops the match at debug - so EVERY
+        # match in the sim would be silently reported as unmatched.
+        tail_power = None
+        if self.store is not None and raw_name:
+            try:
+                tail_power = self.store.profile_tail_power(raw_name)
+            except Exception:  # pylint: disable=broad-exception-caught
+                tail_power = None
         return (
             raw_name,
             raw_conf,

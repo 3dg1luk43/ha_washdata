@@ -168,8 +168,6 @@ Uses `homeassistant.helpers.storage.Store` (JSON). Stores profiles, cycle histor
 | shareable to the store | golden only | no | never |
 | retention eviction (`_enforce_retention_data`, cap 200, oldest first) | yes | no | no (capped per import instead) |
 
-Every "find a cycle by id" / "is this id still real?" lookup must go through `ProfileStore.iter_stored_cycles()` or `find_stored_cycle(id) -> (cycle, origin)`. Do **not** open-code a `past + reference` union: profile GC (`cleanup_orphaned_profiles`) and sample repair (`async_repair_profile_samples`) delete or re-point a profile whose `sample_cycle_id` resolves to nothing, so one forgotten list silently destroys an import-only profile.
-
 **Two views over those lists, and they are not interchangeable:**
 
 - `iter_stored_cycles()` / `find_stored_cycle(id) -> (cycle, origin)` — **everything**. Every "find a cycle by id" / "is this id still real?" lookup goes through these. Do **not** open-code a `past + reference` union: profile GC (`cleanup_orphaned_profiles`) and sample repair (`async_repair_profile_samples`) delete or re-point a profile whose `sample_cycle_id` resolves to nothing, so one forgotten list silently destroys an import-only profile.

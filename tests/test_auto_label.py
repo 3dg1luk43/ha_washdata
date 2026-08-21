@@ -249,6 +249,64 @@ async def test_auto_label_skips_a_backfilled_cycle_it_is_unsure_about(backfill_s
 
 
 @pytest.mark.asyncio
+async def test_manual_relabel_of_a_backfill_cycle_marks_it_manual(backfill_store):
+    """A user relabel of a non-real cycle must stamp provenance like the real path.
+
+    Without the manual stamp the cycle keeps its auto label_source, and a later
+    auto_label_cycles(overwrite=True) would silently overwrite the correction.
+    """
+    store = backfill_store
+    store._data["profiles"]["Mine"] = {"avg_duration": 3600}
+    b1 = store.get_backfill_cycles()[0]
+    b1.update({"profile_name": "DetectedProfile", "label_source": "auto_label_backfill"})
+
+    await store.assign_profile_to_cycle("b1", "Mine")
+
+    assert b1["profile_name"] == "Mine"
+    assert b1["label_source"] == "manual"
+    # The first (auto) guess is preserved once so the correction stays recoverable.
+    assert b1["original_auto_label"] == "DetectedProfile"
+
+
+@pytest.mark.asyncio
+async def test_overwrite_leaves_a_manually_labelled_backfill_cycle_alone(backfill_store):
+    """auto_label_cycles(overwrite=True) must not clobber a manual correction."""
+    store = backfill_store
+    store.get_backfill_cycles()[0].update(
+        {"profile_name": "Mine", "label_source": "manual"}
+    )
+
+    with patch.object(store, "async_match_profile", return_value=_confident()), \
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data",
+               return_value=[("t", 1.0)] * 20):
+        stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=True)
+
+    assert stats["relabeled"] == 0
+    assert stats["skipped"] == 1
+    b1 = store.get_backfill_cycles()[0]
+    assert (b1["profile_name"], b1["label_source"]) == ("Mine", "manual")
+
+
+@pytest.mark.asyncio
+async def test_overwrite_leaves_a_manually_labelled_real_cycle_alone(store):
+    """The same protection applies to real cycles: manual is ground truth."""
+    store._data["profiles"] = {"Mine": {"avg_duration": 3600}}
+    store._data["past_cycles"] = [
+        {"id": "c1", "profile_name": "Mine", "label_source": "manual",
+         "duration": 3600, "power_data": []},
+    ]
+
+    with patch.object(store, "async_match_profile", return_value=_confident()), \
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data",
+               return_value=[("t", 1.0)] * 20):
+        stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=True)
+
+    assert stats["relabeled"] == 0
+    assert stats["skipped"] == 1
+    assert store.get_past_cycles()[0]["profile_name"] == "Mine"
+
+
+@pytest.mark.asyncio
 async def test_auto_label_leaves_an_already_labelled_backfill_cycle_alone(backfill_store):
     store = backfill_store
     store.get_backfill_cycles()[0].update({"profile_name": "Mine", "label_source": "manual"})

@@ -2164,7 +2164,10 @@ class WashDataManager:
                 "Profile evidence sources changed %s -> %s; rebuilding all envelopes",
                 list(_prev_evidence), list(self.profile_store.evidence_sources),
             )
-            self.hass.async_create_task(self.profile_store.async_rebuild_all_envelopes())
+            # Tracked, not fire-and-forget: this writes to the ProfileStore, so a
+            # reload/unload mid-rebuild must be able to cancel it before the store is
+            # swapped out (see _spawn_tracked).
+            self._spawn_tracked(self.profile_store.async_rebuild_all_envelopes())
 
         # Device default
         dev_def = DEVICE_COMPLETION_THRESHOLDS.get(
