@@ -231,6 +231,7 @@ from .const import (
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
     resolve_start_duration_default,
+    resolve_smart_termination_duration_ratio_default,
     CONF_MATCH_PERSISTENCE,
     DEFAULT_MATCH_PERSISTENCE,
     DEFAULT_MATCH_REVERT_RATIO,
@@ -840,9 +841,7 @@ class WashDataManager:
             smart_termination_duration_ratio=float(
                 config_entry.options.get(
                     CONF_SMART_TERMINATION_DURATION_RATIO,
-                    DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE.get(
-                        self.device_type, DEFAULT_SMART_TERMINATION_DURATION_RATIO
-                    ),
+                    resolve_smart_termination_duration_ratio_default(self.device_type),
                 )
             ),
             delay_detect_enabled=bool(
@@ -2251,9 +2250,7 @@ class WashDataManager:
         new_smart_termination_duration_ratio = float(
             config_entry.options.get(
                 CONF_SMART_TERMINATION_DURATION_RATIO,
-                DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE.get(
-                    self.device_type, DEFAULT_SMART_TERMINATION_DURATION_RATIO
-                ),
+                resolve_smart_termination_duration_ratio_default(self.device_type),
             )
         )
         new_delay_detect_enabled = bool(
