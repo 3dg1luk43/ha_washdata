@@ -995,8 +995,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     if key in entry_data:
                         new_data[key] = entry_data[key]
 
-                # Update all options from import
+                # Update all options from import, then strip any option persisted as
+                # null: an export taken from an already-broken entry (or a hand-edited
+                # file) can carry a `null`, which `.get()` hands back verbatim and the
+                # numeric casts that build CycleDetectorConfig then raise on - the #389
+                # bricked-setup failure. The WS import paths already do this; the legacy
+                # import_config service is the last writer that did not.
                 new_options.update(entry_options)
+                new_options = strip_null_options(new_options)
 
                 hass.config_entries.async_update_entry(
                     entry,
