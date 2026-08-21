@@ -1064,6 +1064,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
+    "smart_termination_duration_ratio": "Osa vastendatud programmi eeldatavast kestusest, milleni tsükkel peab jõudma, enne kui nutikas lõpetamine tohib selle ennetähtaegselt lõpetada; vähendage seda koormusest või temperatuurist sõltuvatel masinatel",
     "anti_wrinkle_enabled": "Neelab pärast põhifaasi trummelimpulsid, selle asemel et lugeda neid uute tsüklitena",
     "anti_wrinkle_exit_power": "Kortsudevastase režiimi aktiivsena püsimiseks peab võimsus impulsside vahel sellest allapoole langema",
     "anti_wrinkle_idle_timeout": "Kahe trummelimpulsi vahel lubatud vaikuseaeg enne kortsudevastase režiimi lõppu",
@@ -1474,6 +1475,10 @@
     "save_debug_traces": {
       "doc": "Salvestage iga tsükli täielik võimsusjälg ja vastavad silumisandmed. Kasulik tõrkeotsinguks, kuid suurendab salvestusruumi mahtu.",
       "label": "Salvesta Silumise Jäljed"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Kui kaugele vastendatud programmi eeldatavast kestusest peab tsükkel jõudma, enne kui nutikas lõpetamine tohib selle võimsuse langedes ennetähtaegselt lõpetada. Eeldatav kestus on programmi keskmine, seega seadmetel, mille tööaeg kõigub palju - pesumasinad külma talvise vs sooja suvise sissevoolava veega, andurkuivatusega kuivatid, koormusest sõltuvad programmid - lõpeb umbes pool kõigist tsüklitest sellest keskmisest lühemalt ega saa kunagi kiiret lõpetamist, lõppedes alles tagavara-aegumise kaudu minuteid hiljem. Vähendage seda (nt 0,85) neil masinatel, et varajane lõpetamine ikkagi käivituks; tõstke seda 1,0 poole, et olla ettevaatlikum. Jätke tühjaks vaikeväärtuse jaoks (0,98 või nõudepesumasinatel 0,99). See saab tsükli üksnes varem lõpetada, mitte kunagi hiljem, ega käivitu kunagi ebaselge või madala kindlusega vaste korral.",
+      "label": "Nutika lõpetamise suhe"
     },
     "smoothing_window": {
       "doc": "Kui palju toorvõimsussignaali tasandatakse. Madal (2) on tundlik, kuid lärmakas; kõrge (5) silub naelu, kuid lisab mahajäämust.",

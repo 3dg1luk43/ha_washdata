@@ -1064,6 +1064,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
+    "smart_termination_duration_ratio": "Hlutfall af væntanlegri lengd samsvaraða kerfisins sem lota þarf að ná áður en snjöll lokun má ljúka henni snemma; lækkaðu það fyrir álags- eða hitaháðar vélar",
     "completion_min_seconds": "Stysta keyrsla sem telst raunveruleg lota",
     "end_repeat_count": "Lágir álestrar í röð áður en lýkur",
     "interrupted_min_seconds": "Stuttar lotur merktar sem truflaðar",
@@ -1474,6 +1475,10 @@
     "save_debug_traces": {
       "doc": "Geymdu fulla aflrekningu og samsvarandi villuleitargögn fyrir hverja lotu. Gagnlegt fyrir bilanaleit en eykur geymslustærð.",
       "label": "Vista villuleitarspor"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Hversu langt inn í væntanlega lengd samsvaraða kerfisins lota þarf að vera komin áður en snjöll lokun má ljúka henni snemma þegar aflið fellur. Væntanlega lengdin er meðaltal kerfisins, þannig að á tækjum þar sem keyrslutími er mjög breytilegur - þvottavélar með köldu inntaksvatni að vetri á móti heitu að sumri, þurrkarar með rakaskynjara, álagsháð kerfi - ljúka um það bil helmingur allra keyrslna styttri en það meðaltal og fá aldrei hina hröðu lokun, heldur ljúka fyrst mínútum síðar með vara-tímamörkunum. Lækkaðu þetta gildi (t.d. 0,85) á slíkum vélum svo að snemmbúna lokunin virkist samt; hækkaðu það í átt að 1,0 til að vera varkárari. Skildu eftir autt fyrir sjálfgefið gildi (0,98, eða 0,99 fyrir uppþvottavélar). Hún getur aðeins lokið lotu fyrr, aldrei síðar, og virkist aldrei við óljósa eða óörugga samsvörun.",
+      "label": "Hlutfall snjallrar lokunar"
     },
     "smoothing_window": {
       "doc": "Hversu mikið hráorkumerkið er sléttað. Low (2) er móttækilegur en hávær; hár (5) sléttir toppa en bætir við töf.",

@@ -1446,6 +1446,10 @@
       "doc": "Išsaugokite visą galios pėdsaką ir atitinkamus kiekvieno ciklo derinimo duomenis. Naudinga trikčių šalinimui, bet padidina saugyklos dydį.",
       "label": "Įrašyti derinimo pėdsakus"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Kaip toli į atitiktos programos numatytą trukmę ciklas turi būti pažengęs, kad išmanusis užbaigimas galėtų jį užbaigti anksčiau, kai sumažėja galia. Numatyta trukmė yra programos vidurkis, todėl prietaisuose, kurių veikimo laikas labai svyruoja - skalbyklės su šaltu žiemos ir šiltu vasaros tiekiamu vandeniu, jutiklinio džiovinimo džiovyklės, nuo apkrovos priklausančios programos - maždaug pusė visų paleidimų baigiasi trumpiau nei šis vidurkis ir niekada nesulaukia greito užbaigimo, o baigiasi tik per atsarginį skirtąjį laiką, kelias minutes vėliau. Sumažinkite tai (pvz., 0,85) tose mašinose, kad ankstyvas užbaigimas vis tiek suveiktų; padidinkite jį link 1,0, kad veiktų atsargiau. Palikite tuščią numatytajai vertei (0,98 arba 0,99 indaplovėms). Jis gali užbaigti ciklą tik anksčiau, niekada ne vėliau, ir niekada nesuveikia esant neaiškiai ar mažo patikimumo atitikčiai.",
+      "label": "Išmaniojo užbaigimo santykis"
+    },
     "smoothing_window": {
       "doc": "Kiek išlyginamas neapdorotos galios signalas. Žemas (2) yra jautrus, bet triukšmingas; aukštas (5) išlygina smailes, bet padidina atsilikimą.",
       "label": "Išlyginimo langas"
@@ -1957,6 +1961,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Indaplovė: tylos sekundės po numatytos trukmės, kol atleidžiamas ciklo pabaigos vandens išleidimo laukimas",
+    "smart_termination_duration_ratio": "Atitiktos programos numatytos trukmės dalis, kurią ciklas turi pasiekti, kad išmanusis užbaigimas galėtų jį užbaigti anksčiau; sumažinkite ją nuo apkrovos ar temperatūros priklausančioms mašinoms",
     "anti_wrinkle_enabled": "Sugerkite būgninius impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
     "anti_wrinkle_exit_power": "Kad apsauga nuo raukšlių išliktų aktyvi, galia tarp impulsų turi nukristi žemiau šios ribos",
     "anti_wrinkle_idle_timeout": "Tylos laikas, leidžiamas tarp dviejų būgninių impulsų prieš pasibaigiant apsaugai nuo raukšlių",

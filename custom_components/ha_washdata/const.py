@@ -137,6 +137,7 @@ CONF_ANTI_WRINKLE_MAX_DURATION = "anti_wrinkle_max_duration"  # Seconds to treat
 CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true-off exit
 CONF_ANTI_WRINKLE_IDLE_TIMEOUT = "anti_wrinkle_idle_timeout"  # Seconds below exit power before anti-wrinkle ends
 CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE = "dishwasher_end_spike_quiet_release"  # Dishwasher: sustained-quiet seconds after expected duration that release the end-of-cycle drain wait early (#379)
+CONF_SMART_TERMINATION_DURATION_RATIO = "smart_termination_duration_ratio"  # Fraction of the matched profile's expected (mean) duration that Smart Termination requires before it may fire (#393)
 CONF_DELAY_START_DETECT_ENABLED = "delay_start_detect_enabled"  # Enable delayed-start detection
 CONF_DELAY_CONFIRM_SECONDS = "delay_confirm_seconds"  # Seconds power must stay in standby band before DELAY_WAIT engages
 CONF_DELAY_TIMEOUT_HOURS = "delay_timeout_hours"  # Safety timeout (hours) while waiting to start
@@ -844,6 +845,20 @@ STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS = 300.0
 # a washer's longest legitimate mid-cycle soak trough while capping the pathology.
 WASHER_SMART_TERMINATION_DEBOUNCE_MAX_SECONDS = 600.0
 
+# Fraction of the matched profile's expected (mean) duration that Smart Termination
+# requires before it may fire (#393).  self._expected_duration is the profile's
+# outlier-filtered ARITHMETIC MEAN, so a fixed 0.98 gate against a mean is
+# structurally unreachable for appliances whose runtime depends on load, fill level
+# or inlet temperature - about half of those cycles are shorter than their own mean
+# by construction and can never take the fast path.  Exposed as the per-device
+# CONF_SMART_TERMINATION_DURATION_RATIO option (range 0.50-1.00; empty = default).
+# The default is device-type-resolved: dishwashers keep the conservative 0.99
+# (their programs are fixed, so the spread is small) while everything else keeps
+# 0.98.  The dishwasher pump-out relief (0.90 once the terminal pump-out spike is
+# confirmed) is combined with the configured value via min(), so the option can
+# only ever LOOSEN the gate, never tighten it.
+DEFAULT_SMART_TERMINATION_DURATION_RATIO = 0.98
+
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
     DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
@@ -916,6 +931,15 @@ DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
 # Default profile match min duration ratio by device type
 DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 0.10,
+}
+
+# Default Smart-Termination duration ratio by device type (#393).  Dishwashers run
+# fixed programs (measured spread +4%/+17% around the mean), so the conservative
+# 0.99 gate is defensible there; every other type keeps the scalar
+# DEFAULT_SMART_TERMINATION_DURATION_RATIO (0.98).  Resolved in the config builder,
+# never in the gate, so playground.effective_settings() always sees a real float.
+DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE = {
+    DEVICE_TYPE_DISHWASHER: 0.99,
 }
 
 # Profile groups (Stage 5): the matcher only collapses a group into one

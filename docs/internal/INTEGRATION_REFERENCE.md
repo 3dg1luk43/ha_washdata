@@ -270,8 +270,22 @@ itself (a power-plausibility guard on BOTH SMART paths plus prefix scoring repla
 re-create the #296 hang); 140 is the test-mirror lesson. Validated with the new `devtools/prefix_guard_eval.py`
 plus a byte-identical `dtw_ab_eval` before/after (grouped, top-1/MRR **and** recall/FP).
 
+**2026-08-21 addition (0.5.5 branch, issue #393 - configurable Smart-Termination ratio):** Item 141. The
+Smart-Termination duration gate compared against `_expected_duration`, the profile's outlier-filtered **mean**,
+via a hard-coded ratio (0.98, dishwasher 0.99). Because ~half the cycles of a load-/temperature-dependent
+appliance are shorter than their own mean by construction, the fast path was structurally unreachable for them.
+Made it the per-device option `smart_termination_duration_ratio` (range 0.50-1.00; empty = default), resolved to
+the device-type default in the config builder (**not** in the gate, so `playground.effective_settings()` never
+skips a None-valued field). The gate math was extracted into the pure static `CycleDetector._resolve_smart_ratio`
+(mirrors the `_smart_term_block_reason` precedent for unit-testability); the dishwasher 0.90 pump-out relief is
+folded in via `min()`, so a configured value can only ever loosen the gate. NB: `profile_match_threshold` (the
+gate's separate `is_confident_match` input, un-deaded by #364) is deliberately untouched here - raising it to
+satisfy the #396 conflict rule would tighten this same gate. 22 tests in
+`test_smart_termination_duration_ratio.py`; localized x35.
+
 | # | Status | Kind | Short description |
 |---|---|---|---|
+| 141 | FIXED | CODE | #393 Smart-Termination ratio is now the per-device `smart_termination_duration_ratio` option (device-default resolved in the config builder; `_resolve_smart_ratio` helper; dishwasher pump-out relief via `min()`) |
 | 135-140 | FIXED | CODE | #364 Smart-Termination split: power-plausibility guard on both SMART paths + prefix scoring replaces the 1.5x ratio; `profile_match_threshold` un-deaded; Playground can replay it |
 | 23-26 | FIXED | CODE | phase-match occ_penalty, advisories, cold-start, docstrings |
 | 27 | FIXED | CODE | `_abrupt_drop` never set True - dead branch + vestigial config fields |

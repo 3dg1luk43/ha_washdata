@@ -1446,6 +1446,10 @@
             "doc": "Sačuvajte puni trag napajanja i odgovarajuće podatke za otklanjanje grešaka za svaki ciklus. Korisno za rješavanje problema, ali povećava veličinu skladišta.",
             "label": "Sačuvati tragove otklanjanja grešaka"
         },
+        "smart_termination_duration_ratio": {
+            "doc": "Koliko daleko u očekivanom trajanju podudarajućeg programa ciklus mora biti prije nego što ga Pametni završetak može ranije završiti nakon pada snage. Očekivano trajanje je prosjek programa, pa kod uređaja čije vrijeme rada jako varira - mašine za pranje rublja s hladnom dovodnom vodom zimi u odnosu na toplu ljeti, sušilice sa senzorskim sušenjem, programi ovisni o količini rublja - otprilike polovina svih pokretanja završi kraće od tog prosjeka i nikada ne dobije brzo završavanje, već završi tek putem rezervnog vremenskog ograničenja, nekoliko minuta kasnije. Kod takvih mašina smanjite ovu vrijednost (npr. 0,85) kako bi se ranije završavanje ipak pokrenulo; povećajte je prema 1,0 za oprezniji pristup. Ostavite prazno za zadanu vrijednost (0,98, ili 0,99 za mašine za pranje posuđa). Ciklus može uvijek samo ranije završiti, nikada kasnije, i nikada se ne pokreće kod nejasnog podudaranja ili podudaranja niske pouzdanosti.",
+            "label": "Omjer pametnog završetka"
+        },
         "smoothing_window": {
             "doc": "Koliko je signal sirove snage izglađen. Niska (2) je odzivna, ali bučna; high (5) izglađuje šiljke, ali dodaje zaostajanje.",
             "label": "Prozor izglađivanja"
@@ -1957,6 +1961,7 @@
     },
     "pg_desc": {
         "dishwasher_end_spike_quiet_release": "Mašina za pranje posuđa: sekunde tišine nakon očekivanog trajanja prije nego što se otpusti čekanje na završno ispumpavanje vode",
+        "smart_termination_duration_ratio": "Udio očekivanog trajanja podudarajućeg programa koji ciklus mora dostići prije nego što ga Pametni završetak može ranije završiti; smanjite ga za mašine ovisne o količini rublja ili temperaturi",
         "anti_wrinkle_enabled": "Upij impulse bubnja nakon glavne faze, a ne čitaj ih kao nove cikluse",
         "anti_wrinkle_exit_power": "Snaga mora pasti ispod ove vrijednosti između impulsa da bi anti-gužvanje ostalo aktivno",
         "anti_wrinkle_idle_timeout": "Dozvoljeno vrijeme mirovanja između dva impulsa bubnja prije nego što se anti-gužvanje završi",

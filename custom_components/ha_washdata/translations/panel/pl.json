@@ -1446,6 +1446,10 @@
       "doc": "Przechowuj ślad pełnej mocy i pasujące dane debugowania dla każdego cyklu. Przydatne do rozwiązywania problemów, ale zwiększa rozmiar pamięci.",
       "label": "Zapisuj Ślady Debugowania"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Jak daleko w oczekiwanym czasie trwania dopasowanego programu musi znajdować się cykl, zanim Inteligentne zakończenie może go zakończyć wcześniej po spadku mocy. Oczekiwany czas trwania to średnia programu, więc w urządzeniach, których czas pracy bardzo się waha - pralki z zimną wodą dopływową zimą wobec ciepłej latem, suszarki z suszeniem czujnikowym, programy zależne od wsadu - około połowa wszystkich uruchomień kończy się krócej niż ta średnia i nigdy nie doczeka się szybkiego zakończenia, kończąc dopiero przez awaryjny limit czasu, kilka minut później. W takich maszynach obniż tę wartość (np. 0,85), aby wcześniejsze zakończenie nadal się uruchamiało; zwiększ ją w stronę 1,0, aby zachować większą ostrożność. Pozostaw puste dla wartości domyślnej (0,98, a dla zmywarek 0,99). Może jedynie zakończyć cykl wcześniej, nigdy później, i nigdy nie uruchamia się przy niejednoznacznym dopasowaniu lub dopasowaniu o niskiej pewności.",
+      "label": "Współczynnik inteligentnego zakończenia"
+    },
     "smoothing_window": {
       "doc": "W jakim stopniu surowy sygnał mocy jest wygładzany. Niski (2) reaguje, ale jest głośny; wysoki (5) wygładza skoki, ale dodaje opóźnienia.",
       "label": "Okno Wygładzania"
@@ -1957,6 +1961,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy ciszy po oczekiwanym czasie trwania, zanim zwolnione zostanie oczekiwanie na końcowe odpompowanie wody",
+    "smart_termination_duration_ratio": "Ułamek oczekiwanego czasu trwania dopasowanego programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej; obniż go w przypadku maszyn zależnych od wsadu lub temperatury",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",
     "anti_wrinkle_exit_power": "Moc musi spaść poniżej tej wartości pomiędzy impulsami, aby tryb antygniotowy pozostał aktywny",
     "anti_wrinkle_idle_timeout": "Dozwolony czas ciszy między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy",

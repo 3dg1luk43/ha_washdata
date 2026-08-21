@@ -1446,6 +1446,10 @@
       "doc": "Ukládejte plný záznam příkonu a ladicí data párování pro každý cyklus. Užitečné pro odstraňování problémů, ale zvyšuje velikost úložiště.",
       "label": "Uložit ladící stopy"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Jak daleko v očekávané době trvání přiřazeného programu musí cyklus být, než jej Chytré ukončení může po poklesu příkonu ukončit dříve. Očekávaná doba trvání je průměr programu, takže u spotřebičů, jejichž doba běhu hodně kolísá - pračky se studenou přiváděnou vodou v zimě oproti teplé v létě, sušičky se senzorovým sušením, programy závislé na náplni - skončí zhruba polovina všech běhů dříve než tento průměr a nikdy se rychlého ukončení nedočká, takže skončí až o několik minut později přes záložní časový limit. U takových strojů tuto hodnotu snižte (např. 0,85), aby se dřívější ukončení přesto spustilo; pro opatrnější chování ji zvyšte směrem k 1,0. Ponechte prázdné pro výchozí hodnotu (0,98, u myček nádobí 0,99). Cyklus může vždy jen ukončit dříve, nikdy později, a nikdy se nespustí u nejednoznačné shody nebo shody s nízkou spolehlivostí.",
+      "label": "Poměr chytrého ukončení"
+    },
     "smoothing_window": {
       "doc": "Míra vyhlazení nezpracovaného signálu příkonu. Nízká hodnota (2) je citlivá, ale hlučná; vysoká (5) vyhlazuje špičky, ale přidává zpozdění.",
       "label": "Okno vyhlazení"
@@ -1957,6 +1961,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Myčka: tiché sekundy po očekávané době trvání, než se uvolní čekání na závěrečné odčerpání vody",
+    "smart_termination_duration_ratio": "Zlomek očekávané doby trvání přiřazeného programu, kterého musí cyklus dosáhnout, než jej Chytré ukončení může ukončit dříve; snižte jej u strojů závislých na náplni nebo teplotě",
     "anti_wrinkle_enabled": "Pohltit impulzy bubnu po hlavní fázi místo čtení jako nové cykly",
     "anti_wrinkle_exit_power": "Výkon musí mezi impulzy klesnout pod tuto hodnotu, aby ochrana před zmačkáním zůstala aktivní",
     "anti_wrinkle_idle_timeout": "Povolený klid mezi dvěma impulzy bubnu, než ochrana před zmačkáním skončí",

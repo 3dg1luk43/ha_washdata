@@ -48,6 +48,7 @@ from .const import (
     DEVICE_TYPE_WASHER_DRYER,
     DEFAULT_MAX_DEFERRAL_SECONDS,
     DEFAULT_DEFER_FINISH_CONFIDENCE,
+    DEFAULT_SMART_TERMINATION_DURATION_RATIO,
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
@@ -158,6 +159,13 @@ class CycleDetectorConfig:
     # the shipped constant; per-device configurable so a machine with a long silent
     # passive-drying phase before its final drain can absorb profile drift.
     dishwasher_end_spike_quiet_release: float = DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+    # Fraction of the matched profile's expected (mean) duration Smart Termination
+    # requires before it may fire (#393). Device-type-resolved in the manager's
+    # config builder (0.99 dishwasher / 0.98 other), so this field always carries a
+    # real float - never None - which is what playground.effective_settings() relies
+    # on. The dishwasher pump-out relief is combined via min(), so a configured value
+    # can only loosen the gate.
+    smart_termination_duration_ratio: float = DEFAULT_SMART_TERMINATION_DURATION_RATIO
     delay_detect_enabled: bool = False
     # Sustained seconds power must stay in the standby band (between
     # stop_threshold_w and start_threshold_w) before DELAY_WAIT engages.
@@ -857,6 +865,39 @@ class CycleDetector:
             return "still_active"
         return None
 
+    @staticmethod
+    def _resolve_smart_ratio(
+        device_type: str,
+        configured_ratio: float,
+        end_spike_seen: bool,
+        end_spike_duration: float,
+        expected_duration: float,
+    ) -> float:
+        """Resolve the Smart-Termination duration-ratio gate (#393).
+
+        ``configured_ratio`` is the per-device option, already resolved in the
+        config builder to the device-type default (0.99 dishwasher / 0.98 other)
+        unless the user tuned it - so it is always a real float here.
+
+        For a dishwasher whose most-recent in-ENDING spike landed at >=90% of the
+        expected duration, that spike is the terminal pump-out (not a mid-cycle
+        rinse drain): once it is confirmed the gate is loosened to the 0.90
+        pump-out relief, because individual cycles can be a few % shorter than the
+        rolling average and still terminate cleanly. Keeping the configured gate
+        for spikes at <90% prevents premature closes during the passive Dry phase
+        that follows the pre-final-rinse drain. The relief is combined with the
+        configured value via ``min()`` so a configured ratio can only ever LOOSEN
+        the gate, never tighten it. Pure and side-effect-free (unit-testable).
+        """
+        if (
+            device_type == "dishwasher"
+            and end_spike_seen
+            and expected_duration > 0
+            and end_spike_duration >= expected_duration * 0.90
+        ):
+            return min(configured_ratio, 0.90)
+        return configured_ratio
+
     def process_reading(self, power: float, timestamp: datetime) -> None:
         """Process a new power reading using robust dt-aware logic."""
 
@@ -1496,26 +1537,18 @@ class CycleDetector:
                     # 1. Require higher duration ratio for Smart path
                     # 2. Require debounce to be measured FROM entry into ENDING state
 
-                    if self._config.device_type == "dishwasher":
-                        # If the most-recent in-ENDING spike occurred at ≥90% of
-                        # expected, it is the terminal pump-out, not a mid-cycle
-                        # rinse drain.  Once that pump-out is confirmed, we don't
-                        # need to wait for 99% of the rolling avg — individual
-                        # cycles can be up to ~7% shorter than avg_duration and
-                        # still terminate cleanly.  Keeping the 0.99 gate for
-                        # spikes at <90% prevents premature closes during the
-                        # passive Dry phase that follows the pre-final-rinse drain.
-                        _esp_dur = getattr(self, "_end_spike_duration", 0.0)
-                        if (
-                            getattr(self, "_end_spike_seen", False)
-                            and self._expected_duration > 0
-                            and _esp_dur >= self._expected_duration * 0.90
-                        ):
-                            smart_ratio = 0.90  # pump-out confirmed near end
-                        else:
-                            smart_ratio = 0.99  # conservative: wait for expected duration
-                    else:
-                        smart_ratio = 0.98
+                    # Per-appliance configurable gate (#393): the ratio is resolved
+                    # in the config builder to the device-type default (0.99
+                    # dishwasher / 0.98 other) unless the user tuned it, and the
+                    # dishwasher pump-out relief is folded in via a pure helper so
+                    # the gate logic stays unit-testable (see _resolve_smart_ratio).
+                    smart_ratio = self._resolve_smart_ratio(
+                        self._config.device_type,
+                        self._config.smart_termination_duration_ratio,
+                        getattr(self, "_end_spike_seen", False),
+                        getattr(self, "_end_spike_duration", 0.0),
+                        self._expected_duration,
+                    )
 
                     is_confident_match = (
                         getattr(self, "_last_match_confidence", 0.0)

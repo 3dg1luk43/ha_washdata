@@ -1064,6 +1064,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: stille sekunder etter forventet varighet før ventingen på tømming ved slutten av syklusen frigjøres",
+    "smart_termination_duration_ratio": "Andel av det gjenkjente programmets forventede varighet som en syklus må nå før smart avslutning kan avslutte den tidlig; senk den for last- eller temperaturavhengige maskiner",
     "completion_min_seconds": "Korteste kjøring som teller som en ekte syklus",
     "end_repeat_count": "Lave avlesninger på rad før avslutning",
     "interrupted_min_seconds": "Korte sykluser merkes som avbrutt",
@@ -1474,6 +1475,10 @@
     "save_debug_traces": {
       "doc": "Lagre full effektsporing og samsvarende feilsøkingsdata for hver syklus. Nyttig for feilsøking, men øker lagringsstørrelsen.",
       "label": "Lagre feilsøkingsspor"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Hvor langt inn i det gjenkjente programmets forventede varighet en syklus må være før smart avslutning kan avslutte den tidlig når effekten faller. Den forventede varigheten er programmets gjennomsnitt, så på apparater med sterkt varierende kjøretid - vaskemaskiner med kaldt vinter- kontra varmt sommerinnløpsvann, tørketromler med fuktsensor, lastavhengige programmer - avslutter omtrent halvparten av alle kjøringer kortere enn dette gjennomsnittet og får aldri den raske avslutningen, men avsluttes først minutter senere via reserve-tidsavbruddet. Senk denne verdien (f.eks. 0,85) på slike maskiner slik at den tidlige avslutningen fortsatt utløses; øk den mot 1,0 for å være mer forsiktig. La feltet stå tomt for standarden (0,98, eller 0,99 for oppvaskmaskiner). Den kan bare avslutte en syklus tidligere, aldri senere, og utløses aldri ved en tvetydig eller usikker gjenkjenning.",
+      "label": "Forhold for smart avslutning"
     },
     "smoothing_window": {
       "doc": "Hvor mye råeffektsignalet jevnes ut. Lav (2) er responsiv, men støyende; høy (5) jevner ut pigger, men legger til etterslep.",

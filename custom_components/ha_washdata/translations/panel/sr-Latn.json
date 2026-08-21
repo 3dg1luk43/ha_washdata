@@ -1525,6 +1525,10 @@
     "show_contributor": {
       "doc": "Prikaži ime saradnika na profilima preuzetim iz prodavnice zajednice"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Koliko duboko u očekivano trajanje podudarenog programa ciklus mora da odmakne pre nego što Pametno završavanje sme da ga okonča ranije kad snaga opadne. Očekivano trajanje je prosek programa, pa kod uređaja čije vreme rada dosta varira - mašine za pranje veša pri hladnoj zimskoj i toploj letnjoj dovodnoj vodi, mašine za sušenje sa senzorom vlage, programi zavisni od količine veša - oko polovine svih ciklusa završi kraće od tog proseka i nikada ne dobije brzi završetak, već se okonča tek preko rezervnog tajmauta sa nekoliko minuta zakašnjenja. Smanjite ovu vrednost (npr. 0.85) na takvim mašinama da bi se rano završavanje ipak aktiviralo; povećajte je ka 1.0 za oprezniji rad. Ostavite prazno za podrazumevanu vrednost (0.98, ili 0.99 za mašine za pranje sudova). Može samo da okonča ciklus ranije, nikada kasnije, i nikada se ne aktivira pri dvosmislenom ili nepouzdanom podudaranju.",
+      "label": "Koeficijent pametnog završavanja"
+    },
     "enable_phase_matching": {
       "label": "Preostalo vreme prilagođeno fazama",
       "doc": "Deli svaki aktivni ciklus na faze (zagrevanje, pranje, centrifuga) i raspoređuje preostalo vreme po fazama, u kombinaciji sa klasičnom procenom - oslanjajući se na raspored po fazama na početku ciklusa, a na klasičnu procenu pri kraju. Ovo prilagođava odbrojavanje tome koliko se vaša mašina zaista greje i radi, što je najuočljivije u prvoj polovini ciklusa. Isključeno = samo klasična procena. Utiče samo na prikaz preostalog vremena; podudaranje programa i detekcija ciklusa ostaju nepromenjeni."
@@ -1957,6 +1961,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Mašina za pranje sudova: sekunde tišine nakon očekivanog trajanja pre nego što se otpusti čekanje na završno ispumpavanje vode",
+    "smart_termination_duration_ratio": "Deo očekivanog trajanja podudarenog programa koji ciklus mora da dostigne pre nego što Pametno završavanje sme da ga okonča ranije; smanjite ga za mašine zavisne od količine veša ili temperature",
     "completion_min_seconds": "Najkraće pokretanje koje se računa kao pravi ciklus",
     "end_repeat_count": "Niska očitavanja zaredom pre završetka",
     "interrupted_min_seconds": "Kratki ciklusi označeni kao prekinuti",

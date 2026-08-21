@@ -1398,6 +1398,10 @@
       "doc": "Armazene o rastreamento de energia completo e os dados de depuração correspondentes para cada ciclo. Útil para solução de problemas, mas aumenta o tamanho do armazenamento.",
       "label": "Salvar Rastros de Depuração"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Até que ponto um ciclo deve ter avançado na duração esperada do programa correspondente antes de o Encerramento inteligente poder encerrá-lo mais cedo assim que a potência cai. A duração esperada é a média do programa, então em aparelhos cujo tempo de funcionamento varia muito - lavadoras conforme a água de entrada fria no inverno ou morna no verão, secadoras com sensor de umidade, programas que dependem da carga - cerca de metade das execuções termina mais cedo do que essa média e nunca recebe o fim rápido, terminando apenas pelo tempo limite de reserva com minutos de atraso. Reduza este valor (p. ex. 0,85) nessas máquinas para que o fim antecipado continue disparando; aumente-o para perto de 1,0 para ser mais conservador. Deixe vazio para o valor padrão (0,98, ou 0,99 para lava-louças). Ele só pode encerrar um ciclo mais cedo, nunca mais tarde, e nunca dispara em uma correspondência ambígua ou de baixa confiança.",
+      "label": "Proporção de encerramento inteligente"
+    },
     "smoothing_window": {
       "doc": "Quanto o sinal de potência bruta é suavizado. Baixo (2) é responsivo, mas barulhento; alto (5) suaviza os picos, mas adiciona atraso.",
       "label": "Janela de Suavização"
@@ -1909,6 +1913,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lava-louças: segundos de silêncio após a duração esperada antes de liberar a espera da descarga de fim de ciclo",
+    "smart_termination_duration_ratio": "Fração da duração esperada do programa correspondente que um ciclo deve atingir antes de o Encerramento inteligente poder encerrá-lo mais cedo; reduza-a para máquinas que dependem da carga ou da temperatura",
     "anti_wrinkle_enabled": "Absorver os pulsos de giro após a fase principal em vez de lê-los como novos ciclos",
     "anti_wrinkle_exit_power": "A potência deve cair abaixo deste valor entre os pulsos para que o modo antiamasso permaneça ativo",
     "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de giro antes de o modo antiamasso terminar",

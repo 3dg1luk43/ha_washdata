@@ -1016,6 +1016,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
+    "smart_termination_duration_ratio": "Frazione della durata prevista del programma corrispondente che un ciclo deve raggiungere prima che la Terminazione intelligente possa concluderlo in anticipo; abbassala per le macchine che dipendono dal carico o dalla temperatura",
     "anti_wrinkle_enabled": "Assorbire gli impulsi di rotazione dopo la fase principale invece di leggerli come nuovi cicli",
     "anti_wrinkle_exit_power": "La potenza deve scendere sotto questo valore tra gli impulsi affinché la modalità antirughe resti attiva",
     "anti_wrinkle_idle_timeout": "Tempo di silenzio consentito tra due impulsi di rotazione prima che la modalità antirughe termini",
@@ -1426,6 +1427,10 @@
     "save_debug_traces": {
       "doc": "Memorizzare la traccia di potenza completa e i dati di debug corrispondenti per ciascun ciclo. Utile per la risoluzione dei problemi ma aumenta le dimensioni dello spazio di archiviazione.",
       "label": "Salva tracce di debug"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Quanto un ciclo deve essere avanzato nella durata prevista del programma corrispondente prima che la Terminazione intelligente possa concluderlo in anticipo una volta che la potenza cala. La durata prevista è la media del programma, quindi sugli apparecchi il cui tempo di funzionamento varia molto - lavatrici a seconda dell'acqua di ingresso fredda d'inverno o tiepida d'estate, asciugatrici con sensore di umidità, programmi che dipendono dal carico - circa la metà dei cicli termina prima di quella media e non ottiene mai la conclusione rapida, terminando solo tramite il timeout di riserva con minuti di ritardo. Abbassa questo valore (ad es. 0,85) su quelle macchine affinché la conclusione anticipata si attivi comunque; alzalo verso 1,0 per essere più prudente. Lascia vuoto per il valore predefinito (0,98, o 0,99 per le lavastoviglie). Può solo concludere un ciclo prima, mai dopo, e non si attiva mai su una corrispondenza ambigua o a bassa affidabilità.",
+      "label": "Rapporto di terminazione intelligente"
     },
     "smoothing_window": {
       "doc": "Quanto viene attenuato il segnale di potenza grezza. Basso (2) è reattivo ma rumoroso; alto (5) attenua i picchi ma aggiunge ritardo.",

@@ -1446,6 +1446,10 @@
       "doc": "Saglabājiet pilnas jaudas izsekošanu un atbilstošos atkļūdošanas datus katram ciklam. Noderīgs problēmu novēršanai, bet palielina krātuves apjomu.",
       "label": "Saglabāt atkļūdošanas pēdas"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Cik tālu atbilstošās programmas paredzētajā ilgumā ciklam jābūt nonākušam, pirms vieda pabeigšana drīkst to pabeigt agrāk, kad jauda samazinās. Paredzētais ilgums ir programmas vidējais rādītājs, tāpēc ierīcēs, kuru darbības laiks stipri mainās - veļas mašīnas ar aukstu ziemas un siltu vasaras ieplūstošo ūdeni, žāvētāji ar sensora žāvēšanu, no slodzes atkarīgas programmas - apmēram puse no visiem cikliem beidzas īsāk par šo vidējo un nekad nesaņem ātro pabeigšanu, beidzoties tikai caur rezerves noildzi, dažas minūtes vēlāk. Samaziniet to (piem., 0,85) šajās mašīnās, lai agrā pabeigšana tomēr nostrādātu; palieliniet to virzienā uz 1,0, lai būtu piesardzīgāks. Atstājiet tukšu noklusējuma vērtībai (0,98 vai 0,99 trauku mazgājamām mašīnām). Tā var pabeigt ciklu tikai agrāk, nekad ne vēlāk, un nekad nenostrādā pie neskaidras vai zemas pārliecības atbilstības.",
+      "label": "Viedas pabeigšanas attiecība"
+    },
     "smoothing_window": {
       "doc": "Cik daudz neapstrādāts jaudas signāls ir izlīdzināts. Zems (2) ir atsaucīgs, bet trokšņains; augsts (5) izlīdzina tapas, bet palielina nobīdi.",
       "label": "Izlīdzināšanas logs"
@@ -1957,6 +1961,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Trauku mazgājamā mašīna: klusās sekundes pēc paredzētā ilguma, pirms tiek atbrīvota cikla beigu ūdens izvadīšanas gaidīšana",
+    "smart_termination_duration_ratio": "Atbilstošās programmas paredzētā ilguma daļa, kas ciklam jāsasniedz, pirms vieda pabeigšana drīkst to pabeigt agrāk; samaziniet to no slodzes vai temperatūras atkarīgām mašīnām",
     "anti_wrinkle_enabled": "Absorbējiet griešanās impulsus pēc galvenās fāzes, nevis nolasiet tos kā jaunus ciklus",
     "anti_wrinkle_exit_power": "Lai pretgrumbu režīms paliktu aktīvs, jaudai starp impulsiem jānokrītas zem šīs vērtības",
     "anti_wrinkle_idle_timeout": "Atļautais klusuma laiks starp diviem griešanās impulsiem, pirms pretgrumbu režīms beidzas",
