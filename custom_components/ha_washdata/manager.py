@@ -2502,6 +2502,26 @@ class WashDataManager:
                 "Updated sampling interval: %.1fs -> %.1fs", old_sampling, new_sampling
             )
 
+        # Watchdog cadence: like sampling above, this was only read at construction, so a
+        # changed CONF_WATCHDOG_INTERVAL (or a device-type change selecting a new default)
+        # otherwise kept the old cadence until the manager was recreated. Re-arm an active
+        # watchdog so the new interval takes effect mid-cycle.
+        old_watchdog = self._watchdog_interval
+        new_watchdog = int(
+            config_entry.options.get(
+                CONF_WATCHDOG_INTERVAL,
+                resolve_watchdog_interval_default(self.device_type),
+            )
+        )
+        if old_watchdog != new_watchdog:
+            self._watchdog_interval = new_watchdog
+            self._logger.info(
+                "Updated watchdog interval: %ds -> %ds", old_watchdog, new_watchdog
+            )
+            if self._remove_watchdog:  # active cycle: cancel and re-register at the new cadence
+                self._stop_watchdog()
+                self._start_watchdog()
+
         # RESTORE STATE (only if recent enough, otherwise treat as stale)
         await self._attempt_state_restoration()
 

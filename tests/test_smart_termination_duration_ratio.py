@@ -118,6 +118,16 @@ def test_relief_ignored_when_expected_unknown():
     assert CycleDetector._resolve_smart_ratio("dishwasher", 0.99, True, 900.0, 0.0) == 0.99
 
 
+def test_out_of_range_configured_ratio_is_clamped():
+    # A value persisted by an import / older schema is read unclamped by the manager;
+    # _resolve_smart_ratio clamps to the documented [0.50, 1.00] range so a 0.0 can't
+    # drop the duration floor and let Smart Termination fire immediately.
+    assert CycleDetector._resolve_smart_ratio("washing_machine", 0.0, False, 0.0, 1000.0) == 0.5
+    assert CycleDetector._resolve_smart_ratio("washing_machine", 2.0, False, 0.0, 1000.0) == 1.0
+    # A clamped-up dishwasher value still gets the pump-out relief.
+    assert CycleDetector._resolve_smart_ratio("dishwasher", 0.0, True, 950.0, 1000.0) == 0.5
+
+
 # ---------------------------------------------------------------------------
 # The gate mirror: a lower ratio unblocks the fast path at a duration the
 # default blocks. _smart_term_block_reason mirrors the gate's conditions in

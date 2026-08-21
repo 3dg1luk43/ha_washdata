@@ -911,6 +911,11 @@ class CycleDetector:
         configured value via ``min()`` so a configured ratio can only ever LOOSEN
         the gate, never tighten it. Pure and side-effect-free (unit-testable).
         """
+        # Clamp to the documented [0.50, 1.00] range (the WS write path clamps, but a
+        # value persisted by an import or an older schema is read here unclamped): a
+        # 0.0 would drop the duration floor entirely and let Smart Termination fire the
+        # moment its other conditions pass.
+        configured_ratio = min(1.0, max(0.5, configured_ratio))
         if (
             device_type == "dishwasher"
             and end_spike_seen

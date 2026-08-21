@@ -307,27 +307,26 @@ def available_models() -> list[dict[str, object]]:
     global _MANIFEST_MODELS_CACHE
     if _MANIFEST_MODELS_CACHE is not None:
         return _MANIFEST_MODELS_CACHE
-    manifest = Path(__file__).resolve().parent / "promoted_manifest.json"
-    # A missing / unreadable manifest is cached as [] too: this is a shipped file
-    # that cannot appear at runtime, and the read is a blocking open() that some
-    # callers make from the event loop.
-    if not manifest.exists():
-        _MANIFEST_MODELS_CACHE = []
-        return _MANIFEST_MODELS_CACHE
+    # Outer guard so EVERY failure caches a result: an unhandled exception here (from
+    # warm-up in preload_models, whose caller swallows it) would leave the cache cold,
+    # and the next event-loop caller would retry Path.exists()/read_text() - re-creating
+    # the blocking-call warning preload exists to prevent (#328).
     try:
-        payload = json.loads(manifest.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        _MANIFEST_MODELS_CACHE = []
-        return _MANIFEST_MODELS_CACHE
-    # A manifest that decodes to a list/scalar rather than an object would make the
-    # .get() below raise AttributeError - not caught above, so available_models()
-    # would fail on every call. Cache [] to keep the never-raises / cache contract.
-    if not isinstance(payload, dict):
-        _MANIFEST_MODELS_CACHE = []
-        return _MANIFEST_MODELS_CACHE
-    models = payload.get("models")
-    # Keep only dict entries so the return honours its list[dict] contract even for a
-    # malformed manifest like {"models": [null]}.
-    result = [m for m in models if isinstance(m, dict)] if isinstance(models, list) else []
+        manifest = Path(__file__).resolve().parent / "promoted_manifest.json"
+        # A missing manifest is cached as [] too: this is a shipped file that cannot
+        # appear at runtime, and the read is a blocking open() some callers make on
+        # the event loop.
+        if not manifest.exists():
+            result: list[dict[str, object]] = []
+        else:
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+            # A manifest decoding to a list/scalar would make .get() raise; keep only
+            # dict model entries so the return honours its list[dict] contract even for
+            # a malformed manifest like {"models": [null]}.
+            models = payload.get("models") if isinstance(payload, dict) else None
+            result = [m for m in models if isinstance(m, dict)] if isinstance(models, list) else []
+    except Exception as exc:  # noqa: BLE001 - never raise / never leave the cache cold
+        _LOGGER.debug("Could not read the promoted model manifest (%s); caching empty", exc)
+        result = []
     _MANIFEST_MODELS_CACHE = result
     return result

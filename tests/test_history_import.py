@@ -444,6 +444,24 @@ def test_accept_default_follows_the_cycle_status(status, accept, reason):
     assert len(row["curve"]) <= 60
 
 
+def test_preview_curve_spans_the_whole_segment():
+    """With curve_points < len(powers) < 2*curve_points, floor-division stride kept
+    every sample and the [:curve_points] slice showed only the head. Ceiling stride
+    must span the trace so the last curve point reflects the end of the cycle."""
+    # 100 ramped samples (power == index), curve_points defaults to 60.
+    cycle = {
+        "start_time": T0.isoformat(),
+        "end_time": (T0 + timedelta(minutes=50)).isoformat(),
+        "duration": 3000.0,
+        "status": "completed",
+        "termination_reason": "timeout",
+        "power_data": [[float(i * 30), float(i)] for i in range(100)],
+    }
+    row = hi.summarize_segment(cycle, index=0, completion_min_s=600.0)
+    # The final preview point must come from near the end (index ~98), not index 59.
+    assert row["curve"][-1] >= 90.0
+
+
 def test_scan_runner_is_resumable_in_small_chunks():
     """The WS task walks the scan in executor-sized bites; the result must not depend on
     the chunk size."""
