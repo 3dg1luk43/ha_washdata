@@ -12534,7 +12534,12 @@ class HaWashdataPanel extends HTMLElement {
         if (!nn) { this._showToast(this._t('msg.toast_name_required', {}, 'Name required'), 'error'); return; }
         try {
           await this._ws({ type: `${_DOMAIN}/rename_profile`, entry_id: eid, profile_name: m.name, new_name: nn, manual_duration_min: dur > 0 ? dur : null });
-          this._showToast(this._t('toast.profile_renamed', {}, 'Profile renamed')); m.name = nn; await this._fetchProfiles(eid);
+          this._showToast(this._t('toast.profile_renamed', {}, 'Profile renamed')); m.name = nn;
+          // rename_profile also rewrites the member name inside any profile group
+          // (profile_store.update_profile step 4); re-fetch groups too or the stale
+          // old name leaves the renamed profile looking removed from its group, and
+          // resaving that stale modal would drop it for real.
+          await Promise.all([this._fetchProfiles(eid), this._fetchProfileGroups(eid)]);
           m.stats = (this._profiles || []).find(p => p.name === nn) || m.stats; this._render();
         } catch (e) { this._showToast(this._t('toast.rename_failed', {error: e.message || e}, 'Rename failed: ' + (e.message || e)), 'error'); }
         return;
