@@ -920,6 +920,7 @@
     "review_recorded_tip": "Marker dette som en håndplukket referencecyklus for dets program - samme rolle som en manuelt optaget cyklus. Referencecyklusser opbevares altid, danner grundlag for matchskabelonen og droppes aldrig ved oprydning. (Dette er det \"gyldne\"/optagede flag; begge er det samme.)",
     "review_tags_tip": "Valgfrie flag, der beskriver, hvad der gik galt med denne cyklus, så træning og oprydning kan forklare det.",
     "review_to_cycles": "Åbn køen Cycles review",
+    "samples_decimated": "Viser {shown} af {total} prøver (udtyndet til visning; spidser bevares). Et bredt hul her er udtynding, ikke manglende data.",
     "saving_triggers_reload": "Gemning udløser en genindlæsning af integration. HA-enheder kan kortvarigt vises som utilgængelige.",
     "search_placeholder": "Søgeindstillinger...",
     "see_recorder": "Se optager-widget nedenfor",

@@ -920,6 +920,7 @@
     "review_recorded_tip": "Markeer dit als een zorgvuldig uitgekozen referentiecyclus voor het programma - dezelfde rol als een handmatig geregistreerde cyclus. Referentiecycli worden altijd bewaard, voorzien van de overeenkomende sjabloon en worden nooit verwijderd door opschoning. (Dit is de \"gouden\"/opgenomen vlag; beide zijn hetzelfde.)",
     "review_tags_tip": "Optionele vlaggen die beschrijven wat er mis is gegaan in deze cyclus, zodat training en opruiming hiervan een verklaring kunnen zijn.",
     "review_to_cycles": "Open de wachtrij voor het beoordelen van cycli",
+    "samples_decimated": "{shown} van {total} metingen weergegeven (uitgedund voor weergave; pieken behouden). Een brede leemte hier is uitdunning, geen ontbrekende gegevens.",
     "saving_triggers_reload": "Opslaan activeert een herladen van de integratie. HA-entiteiten kunnen kort worden weergegeven als niet beschikbaar.",
     "search_placeholder": "Zoekinstellingen…",
     "see_recorder": "Zie recorderwidget hieronder",

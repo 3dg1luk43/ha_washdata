@@ -20,6 +20,8 @@ export interface AnalyzeSplitResponse {
   segments: number[][];
   split_offsets: number[];
   samples: number[][];
+  sample_count: number;
+  decimated: boolean;
   full_duration_s: number;
 }
 
@@ -110,6 +112,8 @@ export interface GetConstantsResponse {
 export interface GetCyclePowerDataResponse {
   cycle_id?: string;
   samples?: number[][];
+  sample_count?: number;
+  decimated?: boolean;
   full_duration_s?: number;
   start_time?: string | null;
   end_time?: string | null;

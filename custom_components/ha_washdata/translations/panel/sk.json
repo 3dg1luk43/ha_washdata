@@ -921,6 +921,7 @@
     "review_recorded_tip": "Označte to ako ručne vybraný referenčný cyklus pre svoj program – rovnakú úlohu ako manuálne zaznamenaný cyklus. Referenčné cykly sa vždy uchovávajú, nasadzujú zodpovedajúcu šablónu a pri čistení sa nikdy nezrušia. (Toto je zlatá/zaznamenaná vlajka; obe sú to isté.)",
     "review_tags_tip": "Voliteľné príznaky popisujúce, čo sa v tomto cykle pokazilo, aby to tréning a čistenie mohli zohľadniť.",
     "review_to_cycles": "Otvoriť front kontroly cyklov",
+    "samples_decimated": "Zobrazených {shown} z {total} vzoriek (preriedené pre zobrazenie; špičky zachované). Široká medzera tu znamená preriedenie, nie chýbajúce dáta.",
     "saving_triggers_reload": "Uloženie spustí opätovné načítanie integrácie. Entity HA sa môžu nakrátko zobraziť ako nedostupné.",
     "search_placeholder": "Hľadať nastavenia…",
     "see_recorder": "Pozrite si widget nahrávania nižšie",

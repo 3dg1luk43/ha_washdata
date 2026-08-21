@@ -921,6 +921,7 @@
     "review_recorded_tip": "Označite ovo kao ručno odabran referentni ciklus za njegov program - istu ulogu kao i ručno snimljeni ciklus. Referentni ciklusi se uvek čuvaju, postavljaju odgovarajući šablon i nikada se ne ispuštaju čišćenjem. (Ovo je \"zlatna\"/snimljena zastavica; obe su ista stvar.)",
     "review_tags_tip": "Opcionalne zastavice koje opisuju šta je pošlo po zlu sa ovim ciklusom, tako da obuka i čišćenje mogu da budu odgovorni za to.",
     "review_to_cycles": "Otvori red za pregled Ciklusa",
+    "samples_decimated": "Prikazano {shown} od {total} uzoraka (proređeno za prikaz; pikovi zadržani). Široki razmak ovde je proređivanje, a ne nedostajući podaci.",
     "saving_triggers_reload": "Čuvanje pokreće ponovni pun integracije. HA entiteti mogu se kratko prikazati kao nedostupni.",
     "search_placeholder": "Pretraži podešavanja…",
     "see_recorder": "Pogledaj widget za snimanje ispod",

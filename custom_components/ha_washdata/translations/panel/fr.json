@@ -872,6 +872,7 @@
     "review_recorded_tip": "Marquez-le comme un cycle de référence trié sur le volet pour son programme - le même rôle qu'un cycle enregistré manuellement. Les cycles de référence sont toujours conservés, amorcent le modèle correspondant et ne sont jamais supprimés lors du nettoyage. (C'est le drapeau « doré »/enregistré ; les deux sont la même chose.)",
     "review_tags_tip": "Indicateurs facultatifs décrivant ce qui n'a pas fonctionné avec ce cycle, afin que la formation et le nettoyage puissent en tenir compte.",
     "review_to_cycles": "Ouvrir la file d'attente de révision des cycles",
+    "samples_decimated": "Affichage de {shown} sur {total} échantillons (réduits pour l'affichage ; pics conservés). Un grand écart ici est dû à la réduction, pas à des données manquantes.",
     "saving_triggers_reload": "L'enregistrement déclenche un rechargement de l'intégration. Les entités HA peuvent apparaître brièvement comme indisponibles.",
     "search_placeholder": "Paramètres de recherche…",
     "see_recorder": "Voir le widget enregistreur ci-dessous",

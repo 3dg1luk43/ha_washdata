@@ -255,11 +255,17 @@ _ML_COMPARE_SETTINGS: tuple[tuple[str, str, str], ...] = (
 
 
 def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
-    """Reduce a [(offset_s, watts), ...] series to <= max_points via striding.
+    """Reduce a [(offset_s, watts), ...] series to ~max_points, preserving extrema.
 
-    Keeps the first and last samples so the time axis is preserved. Power curves
-    can hold thousands of points; the panel only needs enough to draw a faithful
-    line, and WebSocket payloads should stay lean.
+    Splits the series into contiguous buckets and keeps each bucket's MIN and MAX
+    power sample (in time order), plus the global first and last. Two points per
+    bucket, so ~max_points/2 buckets keeps the payload at the same budget striding
+    used. Unlike striding this never drops a single-sample load peak (it is its
+    bucket's max) or a lone 0 W self-shutdown sample between two non-zero readings
+    (a zero is always its bucket's min) - the signals that carry the meaning.
+
+    Power curves can hold thousands of points; the panel only needs enough to draw
+    a faithful line, and WebSocket payloads should stay lean.
     """
     try:
         pairs = list(samples or [])
@@ -275,20 +281,24 @@ def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
     if n <= max_points:
         return [_pt(it) for it in pairs]
 
-    step = n / float(max_points)
-    out: list[list[float]] = []
-    last_i = -1
-    idx = 0.0
-    while int(idx) < n:
-        i = int(idx)
-        if i != last_i:
-            out.append(_pt(pairs[i]))
-            last_i = i
-        idx += step
-    last_pt = _pt(pairs[-1])
-    if not out or out[-1][0] != last_pt[0]:
-        out.append(last_pt)
-    return out
+    nbuckets = max(1, max_points // 2)
+    keep: set[int] = {0, n - 1}
+    for b in range(nbuckets):
+        lo = (b * n) // nbuckets
+        hi = ((b + 1) * n) // nbuckets
+        if hi <= lo:
+            continue
+        min_i = max_i = lo
+        min_v = max_v = float(pairs[lo][1])
+        for i in range(lo + 1, hi):
+            v = float(pairs[i][1])
+            if v < min_v:
+                min_v, min_i = v, i
+            elif v > max_v:
+                max_v, max_i = v, i
+        keep.add(min_i)
+        keep.add(max_i)
+    return [_pt(pairs[i]) for i in sorted(keep)]
 
 
 async def _recorder_power(
@@ -3740,9 +3750,15 @@ async def ws_get_cycle_power_data(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error getting cycle power data %s: %s", cycle_id, exc)
 
+    _ds = _downsample(samples)
     _send_result(connection, msg["id"], "get_cycle_power_data", {
             "cycle_id": cycle_id,
-            "samples": _downsample(samples),
+            "samples": _ds,
+            # Declare thinning (#395) so a gap from decimation is not mistaken for
+            # a gap from a sensor that stopped reporting: the panel can show
+            # "N of M samples" and disambiguate the two.
+            "sample_count": len(samples),
+            "decimated": len(_ds) < len(samples),
             "full_duration_s": round(float(samples[-1][0]), 1) if samples else 0.0,
             **meta,
         },
@@ -3867,12 +3883,16 @@ async def ws_analyze_split(
         split_offsets = (
             [round(float(s[1]), 1) for s in segs[:-1]] if segs and len(segs) > 1 else []
         )
+        _ds = _downsample(samples)
         _send_result(connection, msg["id"], "analyze_split", {
                 "segments": [
                     [round(float(a), 1), round(float(b), 1)] for a, b in (segs or [])
                 ],
                 "split_offsets": split_offsets,
-                "samples": _downsample(samples),
+                "samples": _ds,
+                # Declare thinning (#395); see ws_get_cycle_power_data.
+                "sample_count": len(samples),
+                "decimated": len(_ds) < len(samples),
                 "full_duration_s": round(float(samples[-1][0]), 1) if samples else 0.0,
             },
         )

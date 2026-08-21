@@ -920,6 +920,7 @@
         "review_recorded_tip": "Bunu, programı için özenle seçilmiş bir referans döngüsü olarak işaretleyin; manuel olarak kaydedilen bir döngüyle aynı rol. Referans döngüleri her zaman tutulur, eşleşen şablonun çekirdeği oluşturulur ve hiçbir zaman temizleme işlemi nedeniyle bırakılmaz. (Bu \"altın\"/kaydedilmiş bayraktır; ikisi de aynı şeydir.)",
         "review_tags_tip": "Bu döngüde neyin yanlış gittiğini açıklayan isteğe bağlı bayraklar, böylece eğitim ve temizlik bunu açıklayabilir.",
         "review_to_cycles": "Döngü inceleme kuyruğunu aç",
+        "samples_decimated": "{total} örnekten {shown} tanesi gösteriliyor (görüntü için seyreltildi; tepe noktaları korundu). Buradaki geniş bir boşluk seyreltmedir, eksik veri değildir.",
         "saving_triggers_reload": "Kaydetme bir entegrasyon yeniden yüklemesini tetikler. HA varlıkları kısa süreliğine kullanılamaz olarak görünebilir.",
         "search_placeholder": "Ayar ara…",
         "see_recorder": "Aşağıdaki kaydedici widget'ına bakın",

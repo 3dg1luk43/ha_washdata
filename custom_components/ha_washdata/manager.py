@@ -3284,8 +3284,24 @@ class WashDataManager:
         ):
             return
 
-        # Track observed power readings for learning
-        self.learning_manager.process_power_reading(power, now, self._last_reading_time)
+        # Track observed power readings for learning - only while a cycle is
+        # active (#394). An appliance is idle ~98% of the time; running the 5-min
+        # auto-tune pass and training the sample-interval cadence model on the
+        # standby heartbeat is constant background work (a store rewrite every few
+        # minutes) that buys nothing AND skews every operational suggestion, since
+        # the idle publish-on-change heartbeat is not the in-cycle sampling
+        # cadence those suggestions are sized from. The detector below still
+        # receives EVERY reading, so the next cycle's start is never missed - only
+        # the learning call is gated.
+        if self.detector.state in (
+            STATE_STARTING,
+            STATE_RUNNING,
+            STATE_PAUSED,
+            STATE_ENDING,
+        ):
+            self.learning_manager.process_power_reading(
+                power, now, self._last_reading_time
+            )
         self._last_reading_time = now
         self._last_real_reading_time = now # Track real update
         self._current_power = power

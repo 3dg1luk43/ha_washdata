@@ -920,6 +920,7 @@
     "review_recorded_tip": "Markera detta som en handplockad referenscykel för sitt program - samma roll som en manuellt inspelad cykel. Referenscykler hålls alltid, såddar den matchande mallen och släpps aldrig vid rengöring. (Detta är den \"gyllene\"/inspelade flaggan; båda är samma sak.)",
     "review_tags_tip": "Valfria flaggor som beskriver vad som gick fel med den här cykeln, så träning och städning kan förklara det.",
     "review_to_cycles": "Öppna granskningskön för Cykler",
+    "samples_decimated": "Visar {shown} av {total} sampel (gallrat för visning; toppar behålls). En bred lucka här är gallring, inte saknade data.",
     "saving_triggers_reload": "Sparande utlöser en integration-omladdning. HA-enheter kan kortvarigt visas som otillgängliga.",
     "search_placeholder": "Sök inställningar…",
     "see_recorder": "Se inspelningswidgeten nedan",

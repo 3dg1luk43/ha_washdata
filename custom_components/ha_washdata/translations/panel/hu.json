@@ -920,6 +920,7 @@
         "review_recorded_tip": "Jelölje meg ezt a programhoz tartozó, kézzel kiválasztott referenciaciklusként – ugyanaz a szerep, mint egy kézzel rögzített ciklus. A referenciaciklusokat mindig megőrizzük, a megfelelő sablont vetjük be, és soha nem vetik el őket a tisztítás során. (Ez az \"arany\"/rekord zászló; mindkettő ugyanaz.)",
         "review_tags_tip": "Opcionális jelzők, amelyek leírják, hogy mi hibázott ebben a ciklusban, így a képzés és a tisztítás megmagyarázhatja.",
         "review_to_cycles": "Nyissa meg a Ciklusok áttekintési sort",
+        "samples_decimated": "{shown}/{total} minta megjelenítése (megjelenítéshez ritkítva; a csúcsok megtartva). Az itt látható széles hézag ritkítás, nem hiányzó adat.",
         "saving_triggers_reload": "A mentés az integráció újratöltését indítja el. A HA entitások rövid időre elérhetetlenként jelenhetnek meg.",
         "search_placeholder": "Keresési beállítások…",
         "see_recorder": "Lásd alább a felvevő widgetet",

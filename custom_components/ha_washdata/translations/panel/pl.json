@@ -921,6 +921,7 @@
     "review_recorded_tip": "Oznacz to jako ręcznie wybrany cykl referencyjny dla swojego programu – pełni tę samą rolę, co cykl nagrany ręcznie. Cykle referencyjne są zawsze zachowywane, zaszczepiają pasujący szablon i nigdy nie są usuwane podczas czyszczenia. (To jest „złota”/nagrana flaga; obie są tym samym.)",
     "review_tags_tip": "Opcjonalne flagi opisujące, co poszło nie tak w tym cyklu, więc szkolenie i czyszczenie mogą to wyjaśnić.",
     "review_to_cycles": "Otwórz kolejkę przeglądu Cykli",
+    "samples_decimated": "Wyświetlanie {shown} z {total} próbek (przerzedzone do wyświetlania; szczyty zachowane). Szeroka przerwa oznacza tu przerzedzenie, a nie brakujące dane.",
     "saving_triggers_reload": "Zapisanie powoduje przeładowanie integracji. Jednostki HA mogą przez chwilę być wyświetlane jako niedostępne.",
     "search_placeholder": "Ustawienia wyszukiwania…",
     "see_recorder": "Zobacz widżet rejestratora poniżej",

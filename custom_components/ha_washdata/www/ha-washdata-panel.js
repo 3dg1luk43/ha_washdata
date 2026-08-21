@@ -9269,9 +9269,19 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-info" style="margin:6px 0 0;font-size:.75em">${this._t('msg.restart_gap_footer', {}, 'Highlighted on the graph. Power data is missing for these intervals — matching used only real readings.')}</div>
       </div>`;
     }
+    // Thinning caption (#395): the graph draws a decimated copy of the stored
+    // trace, so a wide gap between drawn points can look like missing sensor data.
+    // Declare it when the server thinned the curve so the two are not confused.
+    let decNote = '';
+    if (cur.decimated) {
+      const shownN = (cur.samples || []).length;
+      const totalN = cur.sample_count || shownN;
+      decNote = `<div class="wd-info" style="margin:4px 0 0;font-size:.72em;color:var(--secondary-text-color)">${this._t('msg.samples_decimated', {shown: shownN, total: totalN}, `Showing ${shownN} of ${totalN} samples (thinned for display; peaks kept). A wide gap here is thinning, not missing data.`)}</div>`;
+    }
     return `<h2>${this._t('lbl.cycle', {}, 'Cycle')} · ${_esc(_fmtDate(cur.start_time))}</h2>
       ${meta}${modeBar}
       <div class="wd-canvas-wrap"><canvas id="wd-cyc-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_cycle_chart', {}, 'Cycle power trace'))}"></canvas></div>
+      ${decNote}
       ${artifactBox}
       ${restartGapBox}
       ${controls}`;

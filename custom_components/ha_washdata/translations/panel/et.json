@@ -920,6 +920,7 @@
     "review_recorded_tip": "Märkige see oma programmi jaoks käsitsi valitud võrdlustsükliks – sama roll kui käsitsi salvestatud tsüklil. Võrdlustsüklid jäetakse alati alles, külvatakse sobiv mall ja neid ei jäeta kunagi puhastamise käigus maha. (See on \"kuldne\" / salvestatud lipp; mõlemad on samad.)",
     "review_tags_tip": "Valikulised lipud, mis kirjeldavad, mis selle tsükliga valesti läks, nii et koolitus ja puhastamine võivad seda arvesse võtta.",
     "review_to_cycles": "Avage tsüklite ülevaatuse järjekord",
+    "samples_decimated": "Kuvatakse {shown}/{total} näidet (kuvamiseks hõrendatud; tipud säilitatud). Lai vahe siin on hõrendamine, mitte puuduvad andmed.",
     "saving_triggers_reload": "Salvestamine käivitab integratsiooni uuesti laadimise. HA olemid võivad hetkeks kuvada kui kättesaamatud.",
     "search_placeholder": "Otsinguseaded…",
     "see_recorder": "Vaadake salvesti vidinat allpool",

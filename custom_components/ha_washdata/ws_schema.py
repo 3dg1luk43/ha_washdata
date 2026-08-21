@@ -260,11 +260,15 @@ class RunSuggestionAnalysisResponse(TypedDict, total=False):
 # ─── Cycle curve / interactive editing ─────────────────────────────────────────
 
 class GetCyclePowerDataResponse(TypedDict, total=False):
-    """``cycle_id`` / ``samples`` / ``full_duration_s`` are always present; the
-    metadata keys are present only when the cycle is found."""
+    """``cycle_id`` / ``samples`` / ``sample_count`` / ``decimated`` /
+    ``full_duration_s`` are always present; the metadata keys are present only
+    when the cycle is found. ``sample_count`` is the stored point count and
+    ``decimated`` is True when ``samples`` was thinned below it (#395)."""
 
     cycle_id: str
     samples: list[list[float]]
+    sample_count: int
+    decimated: bool
     full_duration_s: float
     start_time: str | None
     end_time: str | None
@@ -281,6 +285,8 @@ class AnalyzeSplitResponse(TypedDict):
     segments: list[list[float]]
     split_offsets: list[float]
     samples: list[list[float]]
+    sample_count: int
+    decimated: bool
     full_duration_s: float
 
 

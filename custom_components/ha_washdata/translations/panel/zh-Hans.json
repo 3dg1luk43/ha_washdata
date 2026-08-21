@@ -920,6 +920,7 @@
         "review_recorded_tip": "将此标记为其程序的精选参考周期 – 与手动录制周期的作用相同。参考周期始终保留，为匹配模板提供种子，且不会被清理删除。（这是“黄金”/录制标志；两者是同一件事。）",
         "review_tags_tip": "描述此周期出现问题的可选标志，以便训练和清理可以考虑这些问题。",
         "review_to_cycles": "打开周期审查队列",
+        "samples_decimated": "正在显示 {total} 个样本中的 {shown} 个（为显示而抽稀；保留峰值）。此处的较大间隔是抽稀，而非缺失数据。",
         "saving_triggers_reload": "保存会触发集成重载。HA 实体可能短暂显示为不可用。",
         "search_placeholder": "搜索设置…",
         "see_recorder": "查看下方的录制小部件",

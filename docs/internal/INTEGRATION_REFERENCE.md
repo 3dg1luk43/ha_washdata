@@ -283,8 +283,29 @@ gate's separate `is_confident_match` input, un-deaded by #364) is deliberately u
 satisfy the #396 conflict rule would tighten this same gate. 22 tests in
 `test_smart_termination_duration_ratio.py`; localized x35.
 
+**2026-08-21 addition (0.5.5 branch, issue #395 - preserve peaks when thinning curves):** Item 143.
+`ws_api._downsample` strided (kept every n-th point), so a single-sample load peak or a lone 0 W self-shutdown
+sample could vanish from the drawn curve (measured: peak off-curve in 14/49 curves). Rewrote it to keep each
+bucket's min AND max (time-ordered) + global first/last, at the same budget - a peak is a bucket max, a zero is
+a bucket min, so neither can fall through. All 7 callers benefit. Also declared the thinning: `sample_count` +
+`decimated` added to `GetCyclePowerDataResponse` / `AnalyzeSplitResponse` (regen `ws-types.d.ts` + `WS_API.md`
+via `generate_ws_types.py`), and the cycle-detail modal shows "Showing N of M samples" (`msg.samples_decimated`,
+localized x35) so a thinning gap is not read as a sensor dropout. Trade-off: flat plateaus collapse to 1-2 pts,
+so drawn points can sit further apart - which the declaration mitigates. Tests: `test_curve_decimation.py` (10).
+Part 2 of the FR (larger single-curve budget) was declined by the maintainer. There is a separate peak-preserving
+LTTB `_downsample` in `store.py` (community-upload path) - a different algorithm, not touched.
+
+**2026-08-21 addition (0.5.5 branch, issue #394 - skip idle learning pass):** Item 142. `manager._async_power_changed`
+called `learning_manager.process_power_reading` unconditionally, so the 5-min operational-suggestion pass ran + rewrote
+the store around the clock while idle (~98% of the time), and the sampling-cadence model was trained on the idle
+publish-on-change heartbeat (not the in-cycle rate), oversizing every operational suggestion. The learning call is now
+gated on `detector.state in (STARTING, RUNNING, PAUSED, ENDING)`; `detector.process_reading` stays unconditional (it
+must catch the next cycle start). Pin test `test_issue_394_idle_learning_gate.py` (10) locks the split so it can't be
+folded back together. No runtime dependency on the idle-trained model (it feeds only user-facing suggestions).
+
 | # | Status | Kind | Short description |
 |---|---|---|---|
+| 142 | FIXED | CODE | #394 learning/auto-tune pass gated on active detector state (was every reading, incl. idle - constant store rewrites + cadence model skewed by the standby heartbeat); detector still sees every reading |
 | 141 | FIXED | CODE | #393 Smart-Termination ratio is now the per-device `smart_termination_duration_ratio` option (device-default resolved in the config builder; `_resolve_smart_ratio` helper; dishwasher pump-out relief via `min()`) |
 | 135-140 | FIXED | CODE | #364 Smart-Termination split: power-plausibility guard on both SMART paths + prefix scoring replaces the 1.5x ratio; `profile_match_threshold` un-deaded; Playground can replay it |
 | 23-26 | FIXED | CODE | phase-match occ_penalty, advisories, cold-start, docstrings |

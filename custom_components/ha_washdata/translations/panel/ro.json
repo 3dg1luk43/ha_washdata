@@ -872,6 +872,7 @@
     "review_recorded_tip": "Marcați acest lucru ca un ciclu de referință ales manual pentru programul său – același rol ca un ciclu înregistrat manual. Ciclurile de referință sunt întotdeauna păstrate, generează șablonul de potrivire și nu sunt niciodată eliminate de curățare. (Acesta este steagul \"de aur\"/înregistrat; ambele sunt același lucru.)",
     "review_tags_tip": "Semnale opționale care descriu ce a mers prost cu acest ciclu, astfel încât antrenamentul și curățarea pot ține cont de acest lucru.",
     "review_to_cycles": "Deschideți coada de revizuire a Ciclurilor",
+    "samples_decimated": "Se afișează {shown} din {total} eșantioane (reduse pentru afișare; vârfurile păstrate). Un spațiu mare aici se datorează reducerii, nu unor date lipsă.",
     "saving_triggers_reload": "Salvarea declanșează o reîncărcare a integrării. Entitățile HA pot apărea pe scurt ca indisponibile.",
     "search_placeholder": "Căutați setări…",
     "see_recorder": "Consultați widgetul de înregistrare de mai jos",
