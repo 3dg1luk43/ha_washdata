@@ -1232,6 +1232,25 @@ function _fmtEnergy(kwh) {
 // user's persisted "Cycle date display" preference by _render() on each paint.
 let _datePref = 'relative';
 
+// ─── History-import date picker helpers ──────────────────────────────────────
+// The recorder read is bounded by a start DATE ("import since ..."), which is what a
+// user actually knows, rather than a day count they have to work out. These produce
+// LOCAL calendar days in the `yyyy-mm-dd` form <input type="date"> requires (toISOString
+// would shift across the UTC boundary and offer "tomorrow" or skip today).
+const _HIST_MAX_DAYS = 3700;  // mirrors HISTORY_IMPORT_RECORDER_MAX_DAYS (~10 years)
+function _histDayStr(d) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+function _histShiftDays(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return _histDayStr(d);
+}
+function _histToday() { return _histDayStr(new Date()); }
+function _histDefaultSince() { return _histShiftDays(10); }  // HA's default purge_keep_days
+function _histMinSince() { return _histShiftDays(_HIST_MAX_DAYS - 1); }
+
 // Locale-aware "3 hours ago" / "in 2 days" formatting. Intl handles localization,
 // so this needs no translation strings; falls back to absolute if unsupported.
 function _relTime(ms) {
@@ -8935,11 +8954,11 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-field">
           <label>${this._t('lbl.hist_from_recorder', {}, 'Or read it from Home Assistant')}</label>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <input type="number" id="wd-hist-days" min="1" max="14" step="1" value="${_esc(String(m.days || 10))}" style="width:88px" ${dis}>
-            <span class="wd-info">${this._t('lbl.days', {}, 'days')}</span>
+            <span class="wd-info">${this._t('lbl.hist_since', {}, 'Since')}</span>
+            <input type="date" id="wd-hist-since" value="${_esc(m.since || _histDefaultSince())}" min="${_esc(_histMinSince())}" max="${_esc(_histToday())}" ${dis}>
             <button class="wd-btn wd-btn-secondary" data-maction="hist-recorder" ${dis}>${this._t('btn.hist_read_recorder', {}, 'Read from Home Assistant')}</button>
           </div>
-          <div class="wd-field-hint">${this._t('msg.hist_recorder_hint', {}, 'Home Assistant keeps detailed history for 10 days by default and only hourly averages after that, which are too coarse to detect cycles from. A CSV export can reach further back only if your recorder was set to keep more.')}</div>
+          <div class="wd-field-hint">${this._t('msg.hist_recorder_hint', {}, 'Reads from the date you pick up to now. Home Assistant keeps detailed history for 10 days by default and only hourly averages after that, which are too coarse to detect cycles from - pick a date further back only if your recorder is set to keep more.')}</div>
         </div>
         ${err}
         <div class="wd-modal-actions">
@@ -8991,6 +9010,15 @@ class HaWashdataPanel extends HTMLElement {
     if (parse.first && parse.last) facts.push(`${_fmtDate(parse.first)} – ${_fmtDate(parse.last)}`);
     if (parse.breaks) facts.push(this._t('msg.hist_breaks', { n: parse.breaks }, `${parse.breaks} gaps where the sensor was unavailable`));
     if (parse.rows_other_entity) facts.push(this._t('msg.hist_other_entity', { n: parse.rows_other_entity }, `${parse.rows_other_entity} readings for other entities ignored`));
+    // The file held one sensor and it was not this device's: it was read anyway, but say
+    // so plainly - it is the difference between "my export" and "the wrong export".
+    if (parse.entity_substituted_from) {
+      facts.push(this._t(
+        'msg.hist_entity_substituted',
+        { used: parse.entity_id || '?', wanted: parse.entity_substituted_from },
+        `read ${parse.entity_id || '?'} (this device is configured for ${parse.entity_substituted_from})`,
+      ));
+    }
     const skipped = res.skipped || [];
     const skippedByReason = {};
     skipped.forEach(sk => { skippedByReason[sk.reason] = (skippedByReason[sk.reason] || 0) + 1; });
@@ -11126,7 +11154,7 @@ class HaWashdataPanel extends HTMLElement {
       // initialised here so the render-smoke harness (which calls every modal
       // renderer) never meets a half-built state.
       this._modal = {
-        type: 'history-import', step: 'input', csvText: '', days: 10, token: null,
+        type: 'history-import', step: 'input', csvText: '', since: _histDefaultSince(), token: null,
         scanTaskId: null, applyTaskId: null, result: null, accept: new Set(),
         done: null, error: null,
       };
@@ -12091,13 +12119,13 @@ class HaWashdataPanel extends HTMLElement {
     }
 
     if (action === 'hist-recorder') {
-      const daysInput = sr.getElementById('wd-hist-days');
-      const days = Math.max(1, Math.min(14, parseInt(daysInput && daysInput.value, 10) || 10));
-      m.days = days;
+      const sinceInput = sr.getElementById('wd-hist-since');
+      const since = (sinceInput && sinceInput.value) || _histDefaultSince();
+      m.since = since;
       await this._busyRun('hist-import', async () => {
         try {
           const res = await this._ws({
-            type: `${_DOMAIN}/history_import_recorder`, entry_id: eid, days,
+            type: `${_DOMAIN}/history_import_recorder`, entry_id: eid, start_date: since,
           });
           if (!res.rows) {
             m.error = this._t('msg.hist_recorder_empty', {}, 'Home Assistant has no detailed history for this sensor in that window.');

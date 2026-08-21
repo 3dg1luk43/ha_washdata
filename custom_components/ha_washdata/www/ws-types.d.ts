@@ -327,6 +327,7 @@ export interface HistoryImportRecorderResponse {
   rows: number;
   entity_id: string;
   days: number;
+  start_date: string;
   truncated: boolean;
 }
 

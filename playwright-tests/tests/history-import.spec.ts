@@ -46,7 +46,15 @@ test('the wizard opens from Diagnostics with both ingest routes', async ({ page 
   await openWizard(page);
   await expect(page.locator('#wd-hist-file')).toBeVisible();
   await expect(page.locator('button[data-maction="hist-recorder"]')).toBeVisible();
-  await expect(page.locator('#wd-hist-days')).toHaveValue('10');
+  // The recorder read is bounded by a start DATE, defaulting to 10 days back (HA's
+  // default purge_keep_days), not by a day count the user has to work out.
+  const since = page.locator('#wd-hist-since');
+  await expect(since).toHaveAttribute('type', 'date');
+  const tenDaysAgo = new Date();
+  tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const expected = `${tenDaysAgo.getFullYear()}-${pad(tenDaysAgo.getMonth() + 1)}-${pad(tenDaysAgo.getDate())}`;
+  await expect(since).toHaveValue(expected);
 });
 
 test('scanning stages the text in chunks and starts a background task', async ({ page }) => {
@@ -112,10 +120,10 @@ test('applying sends only the kept candidates and reports the outcome', async ({
 
 test('reading from Home Assistant skips the upload and scans directly', async ({ page }) => {
   await openWizard(page);
-  await page.locator('#wd-hist-days').fill('7');
+  await page.locator('#wd-hist-since').fill('2026-01-05');
   await page.locator('button[data-maction="hist-recorder"]').first().click();
   const calls = await assertWsCalled(page, 'ha_washdata/history_import_recorder');
-  expect(calls[0]).toHaveProperty('days', 7);
+  expect(calls[0]).toHaveProperty('start_date', '2026-01-05');
   await assertWsNotCalled(page, 'ha_washdata/history_import_chunk');
   await expect(page.locator('table.wd-table tr[data-hist-row]').first()).toBeVisible({ timeout: 8_000 });
 });

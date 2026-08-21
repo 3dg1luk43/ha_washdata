@@ -1673,6 +1673,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `rows` | yes | number |
 | `entity_id` | yes | str |
 | `days` | yes | number |
+| `start_date` | yes | str |
 | `truncated` | yes | bool |
 
 ## `ha_washdata/start_history_import_scan`

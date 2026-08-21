@@ -1028,6 +1028,15 @@ GROUP_MIN_COHESION = 0.80
 STORAGE_VERSION = 12
 STORAGE_KEY = "ha_washdata"
 
+# ─── Config-entry schema version (NOT the storage version above) ───────────────
+# Single source for the config-entry schema: `ConfigFlow.VERSION`/`MINOR_VERSION`, every
+# stepwise block in `async_migrate_entry`, and the `minor_version=` the one-pass legacy
+# migration writes all read from here. They must move together - a bump that misses one
+# leaves an entry a version short, which then re-migrates on every start - and repeating
+# the literals in three places is what made that easy to do.
+CONFIG_ENTRY_VERSION = 3
+CONFIG_ENTRY_MINOR_VERSION = 10
+
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"
 EVENT_CYCLE_ENDED = "ha_washdata_cycle_ended"
@@ -1280,6 +1289,19 @@ HISTORY_IMPORT_MAX_TOTAL_CYCLES: int = 200           # total backfilled cycles k
                                                      # (`backfill_cycles` has no retention pass and
                                                      # the whole store blob is rewritten on every
                                                      # throttled active-cycle save)
-HISTORY_IMPORT_RECORDER_MAX_DAYS: int = 14           # HA's default `purge_keep_days` is 10, so
-                                                     # asking for more only costs recorder time
+HISTORY_IMPORT_RECORDER_MAX_DAYS: int = 3700         # ~10 years. HA's default `purge_keep_days`
+                                                     # is 10, but a recorder configured to keep
+                                                     # full-resolution states for years is a real
+                                                     # setup and must not be capped out of reach.
+                                                     # Reaching past what the recorder holds simply
+                                                     # returns fewer rows; the real guard is
+                                                     # HISTORY_IMPORT_MAX_ROWS, which stops the
+                                                     # day-by-day read as soon as enough accrues.
+HISTORY_IMPORT_RECORDER_EMPTY_DAY_STOP: int = 30     # consecutive empty days that end the walk.
+                                                     # Within the retention window a day always
+                                                     # yields at least the carried start-time state,
+                                                     # so a run of truly empty days means the
+                                                     # recorder has been purged past this point -
+                                                     # without this, a 10-year request would issue
+                                                     # thousands of pointless queries.
 HISTORY_IMPORT_SOURCE: str = "history_import"        # `meta.source` marker on imported cycles

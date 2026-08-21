@@ -33,6 +33,8 @@ from homeassistant.helpers import device_registry as dr
 
 from .const import (
     DOMAIN,
+    CONFIG_ENTRY_MINOR_VERSION,
+    CONFIG_ENTRY_VERSION,
     SERVICE_SUBMIT_FEEDBACK,
     CONF_LINKED_DEVICE,
     CONF_MIN_POWER,
@@ -135,13 +137,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     version = entry.version or 1
     minor_version = entry.minor_version or 1
 
-    if version > 3:
+    if version > CONFIG_ENTRY_VERSION:
         _log.error(
             "Refusing to migrate unsupported future schema %s.%s", version, minor_version
         )
         return False
 
-    if version == 3 and minor_version >= 10:
+    if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
         return True
 
     # 3.6 → 3.7: remove initial_profile stub key from entry.data.
@@ -221,17 +223,19 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             if _resolved != 5:
                 new_opts[CONF_START_DURATION_THRESHOLD] = _resolved
                 _healed.append(CONF_START_DURATION_THRESHOLD)
+        # The newest step's target tracks the constant (the earlier 6->7/7->8/8->9
+        # blocks keep their literals: a historical step is forever about those two).
         hass.config_entries.async_update_entry(
-            entry, options=new_opts, minor_version=10
+            entry, options=new_opts, minor_version=CONFIG_ENTRY_MINOR_VERSION
         )
-        minor_version = 10
+        minor_version = CONFIG_ENTRY_MINOR_VERSION
         _log.debug(
             "Migrated WashData entry from 3.9 to 3.10 (healed seeded cadence "
             "defaults: %s)",
             _healed or "none",
         )
 
-    if version == 3 and minor_version >= 10:
+    if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -386,11 +390,12 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry,
         data=data,
         options=options,
-        version=3,
-        minor_version=10,
+        version=CONFIG_ENTRY_VERSION,
+        minor_version=CONFIG_ENTRY_MINOR_VERSION,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.10", version, minor_version
+        "Migrated WashData entry from version %s.%s to %s.%s",
+        version, minor_version, CONFIG_ENTRY_VERSION, CONFIG_ENTRY_MINOR_VERSION,
     )
     return True
 

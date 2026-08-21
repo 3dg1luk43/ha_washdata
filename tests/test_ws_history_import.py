@@ -227,6 +227,73 @@ async def test_recorder_ingest_uses_the_devices_own_entity_in_day_windows():
     assert slot["source"] == "recorder"
 
 
+@pytest.mark.asyncio
+async def test_recorder_ingest_accepts_a_start_date():
+    """The panel asks "import since <date>" rather than making the user work out a day
+    count; the date resolves to the same windowed read."""
+    from datetime import timedelta as _td
+
+    from homeassistant.util import dt as dt_util
+
+    hass, conn = _hass(), _conn()
+    manager = _manager(hass)
+    calls: list[tuple] = []
+
+    async def _fake_recorder(_hass, entity_id, start_dt, *, end_dt=None):
+        calls.append((entity_id, start_dt, end_dt))
+        return [(start_dt.timestamp(), 100.0)]
+
+    # Anchor on the same clock the handler uses, so the assertion cannot straddle a
+    # local-vs-UTC date boundary.
+    since = dt_util.now().date() - _td(days=4)
+    with patch.object(ws_api, "_get_manager", return_value=manager), \
+         patch.object(ws_api, "_recorder_power", side_effect=_fake_recorder):
+        await ws_api.ws_history_import_recorder.__wrapped__(
+            hass, conn, {"id": 1, "entry_id": "e", "start_date": since.isoformat()}
+        )
+    payload = conn.send_result.call_args.args[1]
+    assert payload["days"] == 5                  # the picked day is included
+    assert payload["start_date"] == since.isoformat()
+    assert len(calls) == 5
+
+
+@pytest.mark.asyncio
+async def test_recorder_ingest_rejects_an_unparseable_start_date():
+    hass, conn = _hass(), _conn()
+    manager = _manager(hass)
+    with patch.object(ws_api, "_get_manager", return_value=manager):
+        await ws_api.ws_history_import_recorder.__wrapped__(
+            hass, conn, {"id": 1, "entry_id": "e", "start_date": "not-a-date"}
+        )
+    assert conn.send_error.call_args.args[1] == "invalid_format"
+
+
+@pytest.mark.asyncio
+async def test_recorder_ingest_stops_after_a_run_of_empty_days():
+    """A 10-year window must not issue thousands of pointless queries: inside the
+    retention window a day always yields at least the carried start-time state, so a run
+    of empty days means the recorder is purged past that point."""
+    hass, conn = _hass(), _conn()
+    manager = _manager(hass)
+    calls: list[tuple] = []
+
+    async def _fake_recorder(_hass, entity_id, start_dt, *, end_dt=None):
+        calls.append((entity_id, start_dt, end_dt))
+        # Two days of data, then nothing (a 10-day recorder asked for 10 years).
+        return [(start_dt.timestamp(), 100.0)] if len(calls) <= 2 else []
+
+    with patch.object(ws_api, "_get_manager", return_value=manager), \
+         patch.object(ws_api, "_recorder_power", side_effect=_fake_recorder):
+        await ws_api.ws_history_import_recorder.__wrapped__(
+            hass, conn, {"id": 1, "entry_id": "e", "days": 3700}
+        )
+    payload = conn.send_result.call_args.args[1]
+    assert payload["rows"] == 2
+    # 2 with data + the empty-day run, nowhere near the 3700 requested.
+    assert len(calls) == 2 + ws_api.HISTORY_IMPORT_RECORDER_EMPTY_DAY_STOP
+    assert len(calls) < 100
+
+
 # ─── Scan ─────────────────────────────────────────────────────────────────────
 
 
