@@ -264,9 +264,9 @@
     "attn_title": "Inställningskonflikter: {n}",
     "confidence": {
       "auto": "Måste vara vid eller över matchningströskel ({match})",
-      "learning": "Måste vara vid eller under matchningströskel ({match})",
+      "learning": "Måste vara vid eller över matchningströskel ({match})",
       "match_for_auto": "Måste vara vid eller under automatisk-märknings-konfidensen ({alc})",
-      "match_for_learning": "Måste vara vid eller över inlärningskonfidensen ({lc})"
+      "match_for_learning": "Måste vara vid eller under inlärningskonfidensen ({lc})"
     },
     "duration_ratio": {
       "max": "Måste vara större än minimal varaktighetskvot ({min})",

@@ -105,6 +105,10 @@ class GetDeviceCyclesResponse(TypedDict):
 
 class GetOptionsResponse(TypedDict):
     options: dict[str, Any]
+    # Device-resolved defaults for the cadence settings whose default varies by
+    # device type (sampling_interval / watchdog_interval / start_duration_threshold),
+    # used by the panel as the render + conflict-check fallback for an unset field (#396).
+    defaults: dict[str, Any]
 
 
 class GetSettingsChangelogResponse(TypedDict):

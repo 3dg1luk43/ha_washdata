@@ -168,6 +168,7 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `options` | yes | dict[str, any] |
+| `defaults` | yes | dict[str, any] |
 
 ## `ha_washdata/set_options`
 

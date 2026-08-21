@@ -221,7 +221,11 @@ def test_reconcile_confidence_ordering() -> None:
     lc = out[CONF_LEARNING_CONFIDENCE]["value"]
     mt = out[CONF_PROFILE_MATCH_THRESHOLD]["value"]
     al = out[CONF_AUTO_LABEL_CONFIDENCE]["value"]
-    assert lc <= mt <= al
+    # #396: the confidence ladder is unmatch < match < learning < auto_label, so
+    # the enforced invariants are match <= learning and match <= auto_label
+    # (the old rule flagged learning ABOVE match, which was backwards).
+    assert mt <= lc
+    assert mt <= al
 
 
 def test_reconcile_coherent_set_unchanged() -> None:

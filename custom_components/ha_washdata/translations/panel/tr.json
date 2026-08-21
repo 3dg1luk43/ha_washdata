@@ -266,9 +266,9 @@
         "settings_banner_btn": "İlkine git",
         "confidence": {
             "auto": "Eşleşme Eşiğinde veya üzerinde olmalıdır ({match})",
-            "learning": "Eşleşme Eşiğinde veya altında olmalıdır ({match})",
+            "learning": "Eşleşme Eşiğinde veya üzerinde olmalıdır ({match})",
             "match_for_auto": "Otomatik Etiket Güveni'nde veya altında olmalıdır ({alc})",
-            "match_for_learning": "Öğrenme Güveni'nde veya üzerinde olmalıdır ({lc})"
+            "match_for_learning": "Öğrenme Güveni'nde veya altında olmalıdır ({lc})"
         },
         "duration_ratio": {
             "max": "Min. Süre Oranından büyük olmalıdır ({min})",

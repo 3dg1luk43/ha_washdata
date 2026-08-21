@@ -264,9 +264,9 @@
     "attn_title": "Konflikty ustawień: {n}",
     "confidence": {
       "auto": "Musi być równy lub wyższy niż Próg Dopasowania ({match})",
-      "learning": "Musi być równy lub niższy niż Próg Dopasowania ({match})",
+      "learning": "Musi być równy lub wyższy niż Próg Dopasowania ({match})",
       "match_for_auto": "Musi być równy lub niższy niż Pewność Automatycznego Etykietowania ({alc})",
-      "match_for_learning": "Musi być równy lub wyższy niż Pewność Uczenia ({lc})"
+      "match_for_learning": "Musi być równy lub niższy niż Pewność Uczenia ({lc})"
     },
     "duration_ratio": {
       "max": "Musi być większy niż Minimalna Proporcja Czasu Trwania ({min})",

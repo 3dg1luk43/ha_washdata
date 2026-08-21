@@ -283,6 +283,24 @@ gate's separate `is_confident_match` input, un-deaded by #364) is deliberately u
 satisfy the #396 conflict rule would tighten this same gate. 22 tests in
 `test_smart_termination_duration_ratio.py`; localized x35.
 
+**2026-08-21 addition (0.5.5 branch, issue #396 - shipped defaults violate the panel's own rules):** Item 144.
+Three default pairs tripped the panel's `_SETTING_CONFLICTS` (also enforced server-side in
+`suggestion_engine.reconcile_suggestions`). Three distinct root causes, three fixes: (a) the confidence rule was
+BACKWARDS - the correct ladder is unmatch(0.35) < match(0.4) < learning(0.6) < auto_label(0.9), but the rule
+demanded learning <= match; inverted to learning >= match in BOTH the panel and reconcile Rule 5 (defaults were
+right). (b) `DEFAULT_SAMPLING_INTERVAL_BY_DEVICE` was DEAD (never consumed) so every device ran at the coarse 30 s
+scalar, leaving watchdog(30)/start_duration(5) below the watchdog>=2*sampling / start_duration>=sampling gates AND
+undersampling wet appliances live; added `resolve_sampling_interval_default` / `resolve_watchdog_interval_default`
+(max(30, 2*s+1)) / `resolve_start_duration_default` (max(5, s)) in const, wired at manager init+reload; **behavior
+change: washers/washer-dryers/dishwashers now keep 2 s live readings** (matcher untouched - dtw_ab_eval flat 88.4%
+byte-identical). (c) fixed the stale `DEFAULT_WATCHDOG_INTERVAL` "2*sampling+1" comment. Panel: `ws_get_options`
+now returns a device-resolved `defaults` map; `_renderField` + conflict-eval use it so an unset field shows/validates
+the real effective default (no spurious warnings). Migration config-schema **3.9 -> 3.10** heals seeded
+watchdog=30/start_duration=5 on old entries where they still equal the old default (`MINOR_VERSION` bumped in
+config_flow). NB: FR's "profile_match_threshold is inert, remove it" premise was stale - it's live since bcccf64;
+left at 0.4. Tests: `test_issue_396_conflict_defaults.py` (9) + 4 migration tests + updated reconcile-ordering test;
+2 flipped conflict-message keys re-translated x35.
+
 **2026-08-21 addition (0.5.5 branch, issue #395 - preserve peaks when thinning curves):** Item 143.
 `ws_api._downsample` strided (kept every n-th point), so a single-sample load peak or a lone 0 W self-shutdown
 sample could vanish from the drawn curve (measured: peak off-curve in 14/49 curves). Rewrote it to keep each

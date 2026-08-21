@@ -264,9 +264,9 @@
         "attn_title": "Konflikti postavki: {n}",
         "confidence": {
             "auto": "Mora biti na razini ili iznad Praga podudaranja ({match})",
-            "learning": "Mora biti na razini ili ispod Praga podudaranja ({match})",
+            "learning": "Mora biti na razini ili iznad Praga podudaranja ({match})",
             "match_for_auto": "Mora biti na razini ili ispod Pouzdanosti automatskog označavanja ({alc})",
-            "match_for_learning": "Mora biti na razini ili iznad Pouzdanosti učenja ({lc})"
+            "match_for_learning": "Mora biti na razini ili ispod Pouzdanosti učenja ({lc})"
         },
         "duration_ratio": {
             "max": "Mora biti veće od Min. omjera trajanja ({min})",

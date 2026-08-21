@@ -264,9 +264,9 @@
     "attn_title": "Árekstrar í stillingum: {n}",
     "confidence": {
       "auto": "Verður að vera við eða yfir Samsvarþröskuldi ({match})",
-      "learning": "Verður að vera við eða undir Samsvarþröskuldi ({match})",
+      "learning": "Verður að vera við eða yfir Samsvarþröskuldi ({match})",
       "match_for_auto": "Verður að vera við eða undir Sjálfvirkri merkingaöryggi ({alc})",
-      "match_for_learning": "Verður að vera við eða yfir Námsöryggi ({lc})"
+      "match_for_learning": "Verður að vera við eða undir Námsöryggi ({lc})"
     },
     "duration_ratio": {
       "max": "Verður að vera meira en Lágm. lengdarhlutfall ({min})",

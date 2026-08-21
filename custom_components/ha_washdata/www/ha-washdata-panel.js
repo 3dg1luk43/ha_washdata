@@ -429,12 +429,15 @@ const _SETTING_CONFLICTS = [
     }),
   },
   {
-    // learning_confidence <= profile_match_threshold
+    // learning_confidence >= profile_match_threshold (#396): the verify-band floor
+    // must sit at or above the live match-trust gate. The correct confidence ladder
+    // is unmatch < match < learning < auto_label; flagging learning BELOW match
+    // (the old rule) was backwards and tripped the shipped defaults (0.6 vs 0.4).
     keys: ['learning_confidence', 'profile_match_threshold'],
-    check: v => v.learning_confidence != null && v.profile_match_threshold != null && v.learning_confidence > v.profile_match_threshold,
+    check: v => v.learning_confidence != null && v.profile_match_threshold != null && v.learning_confidence < v.profile_match_threshold,
     fieldErrors: v => ({
-      learning_confidence:    { msgKey: 'conflict.confidence.learning',  msgVars: {match: v.profile_match_threshold}, msgFb: `Must be at or below Match Threshold (${v.profile_match_threshold})`, fixVal: +(v.profile_match_threshold).toFixed(2) },
-      profile_match_threshold: { msgKey: 'conflict.confidence.match_for_learning', msgVars: {lc: v.learning_confidence}, msgFb: `Must be at or above Learning Confidence (${v.learning_confidence})`, fixVal: +(v.learning_confidence).toFixed(2) },
+      learning_confidence:    { msgKey: 'conflict.confidence.learning',  msgVars: {match: v.profile_match_threshold}, msgFb: `Must be at or above Match Threshold (${v.profile_match_threshold})`, fixVal: +(v.profile_match_threshold).toFixed(2) },
+      profile_match_threshold: { msgKey: 'conflict.confidence.match_for_learning', msgVars: {lc: v.learning_confidence}, msgFb: `Must be at or below Learning Confidence (${v.learning_confidence})`, fixVal: +(v.learning_confidence).toFixed(2) },
     }),
   },
   {
@@ -1825,6 +1828,7 @@ class HaWashdataPanel extends HTMLElement {
     this._phases = [];
     this._recState = null;
     this._opts = {};
+    this._optDefaults = {};  // device-resolved cadence defaults from get_options (#396)
     this._mlComparison = null;
     this._mlById = {};
     this._mlLoading = false;
@@ -3018,7 +3022,7 @@ class HaWashdataPanel extends HTMLElement {
     this._settingsChangelog = null; this._settingsChangeByKey = {};
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
-    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = []; this._lockedSuggestions = [];
+    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._optDefaults = {}; this._suggestions = []; this._lockedSuggestions = [];
     this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._setupStatus = null;       // per-device; re-fetched by _fetchTabData
@@ -3183,6 +3187,7 @@ class HaWashdataPanel extends HTMLElement {
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
         if (!this._isActiveEntry(eid)) return;  // device switched mid-flight — drop stale response
         this._opts = r.options || {};
+        this._optDefaults = r.defaults || {};  // device-resolved cadence defaults (#396)
         await this._fetchSuggestions(eid);
         // D7: "What changed" — load the settings changelog (best-effort; older
         // backends without this command simply show no change markers).
@@ -4753,7 +4758,14 @@ class HaWashdataPanel extends HTMLElement {
     if (f.onlyDeviceType && (o.device_type || 'washing_machine') !== f.onlyDeviceType) return '';
     if (f.type === 'storebrand' || f.type === 'storemodel') return this._renderStorePicker(f, o);
     let value = o[f.key];
-    if (value === undefined) value = f.def;
+    // Prefer a device-resolved default from the backend (#396: cadence settings
+    // whose default varies by device type) over the static schema literal, so an
+    // unset field shows - and the conflict validator checks - the value the
+    // integration would actually use.
+    if (value === undefined) {
+      const od = this._optDefaults;
+      value = (od && od[f.key] != null) ? od[f.key] : f.def;
+    }
     const extra = {};
 
     if (f.type === 'devicetype') extra.opts = this._deviceTypeOpts(value || o.device_type);
@@ -10389,6 +10401,7 @@ class HaWashdataPanel extends HTMLElement {
         this._pendingSettings = {};
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: dev.entry_id });
         this._opts = r.options || {};
+        this._optDefaults = r.defaults || {};  // #396
         await this._fetchSuggestions(dev.entry_id);
         this._render();
       }
@@ -11051,7 +11064,7 @@ class HaWashdataPanel extends HTMLElement {
       const eid = dev.entry_id;
       this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { [key]: val } })
         .then(() => this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }))
-        .then(r => { this._opts = r.options || {}; return this._fetchSettingsChangelog(eid); })
+        .then(r => { this._opts = r.options || {}; this._optDefaults = r.defaults || {}; return this._fetchSettingsChangelog(eid); })
         .then(() => {
           this._showToast(this._t('msg.toast_reverted', { key: this._t('setting.' + key + '.label', {}, key) }, '{key} reverted'), 'success');
           this._render();
@@ -11212,6 +11225,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchSuggestions(eid);
           const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
           this._opts = r.options || {};
+          this._optDefaults = r.defaults || {};  // #396
           this._prevOpts = null;
           this._cascadePending = {};
           this._preCascadeOpts = null;

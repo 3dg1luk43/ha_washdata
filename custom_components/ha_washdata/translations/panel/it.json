@@ -218,9 +218,9 @@
     "settings_banner_btn": "Vai al primo",
     "confidence": {
       "auto": "Deve essere maggiore o uguale alla Soglia di corrispondenza ({match})",
-      "learning": "Deve essere minore o uguale alla Soglia di corrispondenza ({match})",
+      "learning": "Deve essere maggiore o uguale alla Soglia di corrispondenza ({match})",
       "match_for_auto": "Deve essere minore o uguale alla Confidenza di etichettatura automatica ({alc})",
-      "match_for_learning": "Deve essere maggiore o uguale alla Confidenza di apprendimento ({lc})"
+      "match_for_learning": "Deve essere minore o uguale alla Confidenza di apprendimento ({lc})"
     },
     "duration_ratio": {
       "max": "Deve essere superiore al Rapporto di durata minimo ({min})",

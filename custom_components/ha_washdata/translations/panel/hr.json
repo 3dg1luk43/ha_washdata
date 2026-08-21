@@ -264,9 +264,9 @@
     "attn_title": "Sukobi postavki: {n}",
     "confidence": {
       "auto": "Mora biti jednak ili iznad Praga podudaranja ({match})",
-      "learning": "Mora biti jednak ili ispod Praga podudaranja ({match})",
+      "learning": "Mora biti jednak ili iznad Praga podudaranja ({match})",
       "match_for_auto": "Mora biti jednak ili ispod Pouzdanosti za automatsko označavanje ({alc})",
-      "match_for_learning": "Mora biti jednak ili iznad Pouzdanosti učenja ({lc})"
+      "match_for_learning": "Mora biti jednak ili ispod Pouzdanosti učenja ({lc})"
     },
     "duration_ratio": {
       "max": "Mora biti veći od Min. omjera trajanja ({min})",

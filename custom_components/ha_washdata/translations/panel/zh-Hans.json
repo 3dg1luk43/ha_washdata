@@ -264,9 +264,9 @@
         "attn_title": "设置冲突：{n}",
         "confidence": {
             "auto": "必须不低于匹配阈值 ({match})",
-            "learning": "必须不超过匹配阈值 ({match})",
+            "learning": "必须不低于匹配阈值 ({match})",
             "match_for_auto": "必须不超过自动标记置信度 ({alc})",
-            "match_for_learning": "必须不低于学习置信度 ({lc})"
+            "match_for_learning": "必须不超过学习置信度 ({lc})"
         },
         "duration_ratio": {
             "max": "必须大于最小时长比例 ({min})",

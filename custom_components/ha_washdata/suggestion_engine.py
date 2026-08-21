@@ -564,16 +564,18 @@ def reconcile_suggestions(
         if sampling is not None and start_dur is not None and start_dur < sampling and in_out(CONF_SAMPLING_INTERVAL, CONF_START_DURATION_THRESHOLD):
             adjust(CONF_START_DURATION_THRESHOLD, sampling, "the sampling interval")
 
-        # ── Rule 5: learning_confidence <= match_threshold <= auto_label ───────
-        # Reconcile top-down (match<=auto first) so a lower fix cannot re-break
-        # the ordering already set above.
+        # ── Rule 5: match_threshold <= learning_confidence, match <= auto_label ─
+        # The confidence ladder is unmatch < match < learning < auto_label (#396):
+        # the verify-band floor (learning) sits AT OR ABOVE the live match-trust
+        # gate (match), which itself sits at or below the auto-label ceiling.
+        # Reconcile match<=auto first so a later fix cannot re-break the ordering.
         match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
         auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
         if match_thr is not None and auto is not None and match_thr > auto and in_out(CONF_PROFILE_MATCH_THRESHOLD, CONF_AUTO_LABEL_CONFIDENCE):
             adjust(CONF_PROFILE_MATCH_THRESHOLD, auto, "the auto-label confidence")
             match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
         learn = eff(CONF_LEARNING_CONFIDENCE)
-        if learn is not None and match_thr is not None and learn > match_thr and in_out(CONF_LEARNING_CONFIDENCE, CONF_PROFILE_MATCH_THRESHOLD):
+        if learn is not None and match_thr is not None and learn < match_thr and in_out(CONF_LEARNING_CONFIDENCE, CONF_PROFILE_MATCH_THRESHOLD):
             adjust(CONF_LEARNING_CONFIDENCE, match_thr, "the profile match threshold")
 
         # ── Rule 6: profile_unmatch_threshold < profile_match_threshold ────────

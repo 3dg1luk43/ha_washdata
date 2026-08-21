@@ -266,9 +266,9 @@
     "settings_banner_btn": "Mine esimesele",
     "confidence": {
       "auto": "Peab olema vähemalt vaste läve tasemel ({match})",
-      "learning": "Peab olema kuni vaste läve ({match})",
+      "learning": "Peab olema vähemalt vaste läve tasemel ({match})",
       "match_for_auto": "Peab olema kuni automaatse sildi usalduse ({alc})",
-      "match_for_learning": "Peab olema vähemalt õppimise usalduse tasemel ({lc})"
+      "match_for_learning": "Peab olema kuni õppimise usalduse tasemel ({lc})"
     },
     "duration_ratio": {
       "max": "Peab olema suurem kui minimaalse kestuse suhe ({min})",

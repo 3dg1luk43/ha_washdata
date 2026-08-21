@@ -264,9 +264,9 @@
     "attn_title": "Indstillingskonflikter: {n}",
     "confidence": {
       "auto": "Skal være på eller over matchningstærsklen ({match})",
-      "learning": "Skal være på eller under matchningstærsklen ({match})",
+      "learning": "Skal være på eller over matchningstærsklen ({match})",
       "match_for_auto": "Skal være på eller under auto-label-konfidensniveauet ({alc})",
-      "match_for_learning": "Skal være på eller over læringskonfidensniveauet ({lc})"
+      "match_for_learning": "Skal være på eller under læringskonfidensniveauet ({lc})"
     },
     "duration_ratio": {
       "max": "Skal være større end den minimale varighedsratio ({min})",

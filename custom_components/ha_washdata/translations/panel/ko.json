@@ -264,9 +264,9 @@
         "attn_title": "설정 충돌: {n}",
         "confidence": {
             "auto": "매칭 임계값 ({match}) 이상이어야 합니다",
-            "learning": "매칭 임계값 ({match}) 이하이어야 합니다",
+            "learning": "매칭 임계값 ({match}) 이상이어야 합니다",
             "match_for_auto": "자동 라벨 신뢰도 ({alc}) 이하이어야 합니다",
-            "match_for_learning": "학습 신뢰도 ({lc}) 이상이어야 합니다"
+            "match_for_learning": "학습 신뢰도 ({lc}) 이하이어야 합니다"
         },
         "duration_ratio": {
             "max": "최소 기간 비율 ({min}) 보다 커야 합니다",

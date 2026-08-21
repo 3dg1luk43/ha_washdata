@@ -266,9 +266,9 @@
     "settings_banner_btn": "Doties uz pirmo",
     "confidence": {
       "auto": "Jābūt vienādam vai virs atbilstības sliekšņa ({match})",
-      "learning": "Jābūt vienādam vai zem atbilstības sliekšņa ({match})",
+      "learning": "Jābūt vienādam vai virs atbilstības sliekšņa ({match})",
       "match_for_auto": "Jābūt vienādam vai zem automātiskās marķēšanas pārliecības ({alc})",
-      "match_for_learning": "Jābūt vienādam vai virs mācīšanās pārliecības ({lc})"
+      "match_for_learning": "Jābūt vienādam vai zem mācīšanās pārliecības ({lc})"
     },
     "duration_ratio": {
       "max": "Jābūt lielākam par minimālo ilguma attiecību ({min})",
