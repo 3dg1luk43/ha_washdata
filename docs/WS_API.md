@@ -967,6 +967,9 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `artifacts` | no | list[dict[str, any]] |
 | `restart_gaps` | no | list[any] |
 | `is_reference` | no | bool |
+| `labelable` | no | bool |
+| `editable` | no | bool |
+| `cycle_origin` | no | str |
 
 ## `ha_washdata/trim_cycle`
 

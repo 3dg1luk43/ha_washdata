@@ -572,8 +572,18 @@ def reconcile_suggestions(
         match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
         auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
         if match_thr is not None and auto is not None and match_thr > auto and in_out(CONF_PROFILE_MATCH_THRESHOLD, CONF_AUTO_LABEL_CONFIDENCE):
-            adjust(CONF_PROFILE_MATCH_THRESHOLD, auto, "the auto-label confidence")
-            match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
+            # Anchor on whichever the engine actually proposed, like every other
+            # two-sided rule. match_threshold now drives detection (it is
+            # CycleDetectorConfig.match_confidence_threshold), so when the engine
+            # deliberately RAISED it, lift the auto-label ceiling to keep it rather
+            # than silently undoing the raise; only cascade it downward when it was
+            # not the proposed key.
+            if is_original(CONF_PROFILE_MATCH_THRESHOLD):
+                adjust(CONF_AUTO_LABEL_CONFIDENCE, match_thr, "the profile match threshold")
+                auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
+            else:
+                adjust(CONF_PROFILE_MATCH_THRESHOLD, auto, "the auto-label confidence")
+                match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
         learn = eff(CONF_LEARNING_CONFIDENCE)
         if learn is not None and match_thr is not None and learn < match_thr and in_out(CONF_LEARNING_CONFIDENCE, CONF_PROFILE_MATCH_THRESHOLD):
             adjust(CONF_LEARNING_CONFIDENCE, match_thr, "the profile match threshold")

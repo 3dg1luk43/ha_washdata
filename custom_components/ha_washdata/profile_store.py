@@ -6214,8 +6214,23 @@ class ProfileStore:
         The cycle stays in its own list (out of usage stats); only which profile envelope
         it seeds changes. Rebuilds the old and new envelopes. ``profile_name=None`` clears
         the label (the cycle then seeds nothing).
+
+        This is the *manual* (user-driven) relabel path, so it stamps provenance exactly
+        like the real-cycle path in ``assign_profile_to_cycle``: preserve the original
+        auto-guess once, then mark the label ``manual``. Without the manual stamp a later
+        ``auto_label_cycles(overwrite=True)`` would still see an auto ``label_source`` on a
+        backfilled cycle and silently overwrite the user's correction.
         """
-        for name in self._relabel_non_real_cycle(ref, profile_name):
+        old_profile = ref.get("profile_name")
+        # Preserve the original auto-assigned label before the first manual relabel.
+        if profile_name and old_profile and not ref.get("original_auto_label"):
+            if ref.get("label_source", "") in _AUTO_LABEL_SOURCES:
+                ref["original_auto_label"] = old_profile
+        touched = self._relabel_non_real_cycle(ref, profile_name)
+        # _relabel_non_real_cycle only moves profile_name (it is shared with the auto
+        # bulk path, which sets its own source); stamp the manual provenance here.
+        ref["label_source"] = "manual" if profile_name else None
+        for name in touched:
             await self.async_rebuild_envelope(name)
         await self.async_save()
         self._logger.info(
@@ -6272,6 +6287,13 @@ class ProfileStore:
         touched: set[str] = set()
 
         for cycle, is_backfill in candidates:
+            # Never overwrite a user's manual label, even with overwrite=True: a manual
+            # correction is exactly the ground truth this pass should defer to (real and
+            # non-real alike - the non-real manual relabel now stamps this too).
+            if cycle.get("label_source") == "manual":
+                stats["skipped"] += 1
+                continue
+
             # Reconstruct power data for matching
             power_data = decompress_power_data(cycle)
             if not power_data or len(power_data) < 10:

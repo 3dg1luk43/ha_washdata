@@ -191,20 +191,25 @@ def _prepare_asset(source_name: str, www: Path | None = None) -> Path:
     """
     served = _resolve_asset(source_name, www)
     _ensure_gzip(served)
+    # Stat once and reuse: a second, unguarded stat()/is_file() below could raise if
+    # the file vanished between the two calls and fail the whole registration, even
+    # though the asset was resolved and compressed fine.
     try:
+        size = served.stat().st_size
+    except OSError:
+        size = None
+    if size is not None:
         _SERVED_ASSETS[source_name] = {
             "serving": served.name,
             "minified": served.name != source_name,
-            "bytes": served.stat().st_size,
+            "bytes": size,
         }
-    except OSError:
-        pass
     _LOGGER.info(
         "Serving %s as %s (%s, %.1f KB)",
         source_name,
         served.name,
         "minified build" if served.name != source_name else "readable source",
-        (served.stat().st_size / 1024) if served.is_file() else 0.0,
+        (size / 1024) if size is not None else 0.0,
     )
     return served
 
@@ -266,7 +271,8 @@ def get_cache_buster(filename: str = CARD_NAME) -> str:
         mtime_part = "1"
 
     raw = f"{manifest_version}:{mtime_part}"
-    return hashlib.sha1(raw.encode()).hexdigest()[:10]
+    # Not a security primitive - just a short, stable URL token - so tell Ruff (S324).
+    return hashlib.sha1(raw.encode(), usedforsecurity=False).hexdigest()[:10]
 
 
 def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> bool:

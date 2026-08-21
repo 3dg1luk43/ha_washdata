@@ -134,6 +134,31 @@ def test_reconcile_does_not_touch_defaults():
     assert CONF_LEARNING_CONFIDENCE not in changed
 
 
+def test_reconcile_preserves_an_engine_proposed_match_raise():
+    # match_threshold is a live detection knob. When the engine deliberately raises
+    # it above the current auto-label ceiling, reconcile must keep the raise and lift
+    # the ceiling to it, not silently discard it by lowering match to auto.
+    out, changed = reconcile_suggestions(
+        {CONF_PROFILE_MATCH_THRESHOLD: {"value": 0.7, "reason": "tighten"}},
+        {CONF_AUTO_LABEL_CONFIDENCE: 0.5},
+    )
+    assert out[CONF_PROFILE_MATCH_THRESHOLD]["value"] == 0.7
+    assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] == 0.7
+    assert out[CONF_AUTO_LABEL_CONFIDENCE].get("cascade") is True
+    assert CONF_PROFILE_MATCH_THRESHOLD not in changed
+
+
+def test_reconcile_still_lowers_match_when_it_was_not_proposed():
+    # When only auto is proposed (below the live match), the ladder is enforced by
+    # cascading match down: match was not the engine's own proposal here.
+    out, changed = reconcile_suggestions(
+        {CONF_AUTO_LABEL_CONFIDENCE: {"value": 0.5, "reason": "loosen"}},
+        {CONF_PROFILE_MATCH_THRESHOLD: 0.7},
+    )
+    assert out[CONF_PROFILE_MATCH_THRESHOLD]["value"] == 0.5
+    assert out[CONF_PROFILE_MATCH_THRESHOLD].get("cascade") is True
+
+
 # ---------------------------------------------------------------------------
 # ws_get_options exposes the device-resolved cadence defaults
 # ---------------------------------------------------------------------------

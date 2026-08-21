@@ -707,9 +707,13 @@ class CycleDetector:
                 bool(result_seq[7]) if len(result_seq) >= 8 else self._match_prefix_ambiguous
             )
             # Element 9 (#364): the matched profile's own tail power level. Absent
-            # or non-finite leaves the power-plausibility guard inert.
-            if len(result_seq) >= 9:
-                self._matched_tail_power = self._sanitize_tail_power(result_seq[8])
+            # or non-finite leaves the power-plausibility guard inert - so a shorter
+            # tuple (Playground, older callers, most tests) must CLEAR it, not keep
+            # the previous match's value: retaining it would let the guard compare
+            # the live tail against the wrong profile and block a valid termination.
+            self._matched_tail_power = (
+                self._sanitize_tail_power(result_seq[8]) if len(result_seq) >= 9 else None
+            )
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
