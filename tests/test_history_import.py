@@ -487,3 +487,24 @@ def test_fixture_is_the_reporters_export():
     assert sum(1 for row in rows if row["state"] in ("unavailable", "unknown")) == 8
     hourly = [row for row in rows if row["last_changed"].endswith(":00:00.000Z")]
     assert len(hourly) > 100  # the long-term-statistics region
+
+
+def test_dedup_key_accepts_a_numeric_unix_start_time():
+    """Legacy cycles store start_time as a numeric unix timestamp. dedup_key must
+    derive a key for both formats, else a re-import of the same history is not seen
+    as a duplicate and a second copy is stored."""
+    from datetime import datetime, timezone
+
+    ts = datetime(2026, 8, 1, 12, 0, 0, tzinfo=timezone.utc)
+    iso_key = hi.dedup_key(ts.isoformat(), 3600)
+    num_key = hi.dedup_key(ts.timestamp(), 3600)  # float unix seconds
+    str_num_key = hi.dedup_key(str(ts.timestamp()), 3600)  # numeric-as-string
+
+    assert iso_key is not None
+    assert num_key == iso_key
+    assert str_num_key == iso_key
+
+
+def test_dedup_key_rejects_unparseable_start_time():
+    assert hi.dedup_key("not a timestamp", 3600) is None
+    assert hi.dedup_key(None, 3600) is None

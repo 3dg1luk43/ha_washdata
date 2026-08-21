@@ -6738,6 +6738,9 @@ async def _history_import_apply_task(
             # "capped" means the cap decided where we stopped - not the user cancelling,
             # and not the duplicates that were legitimately skipped.
             capped = not task.cancel_requested and imported < (len(wanted) - duplicates)
+            # Read the total inside the lock: another task could append to the same
+            # backfill list after the lock releases, inflating a count read outside it.
+            total_backfill = len(target)
         manager.notify_update()
         reg.finish(
             task,
@@ -6746,7 +6749,7 @@ async def _history_import_apply_task(
                 "imported": imported,
                 "duplicates": duplicates,
                 "capped": capped,
-                "total_backfill": len(store.get_backfill_cycles()),
+                "total_backfill": total_backfill,
             },
         )
         async_clear_history_import(hass, entry_id)

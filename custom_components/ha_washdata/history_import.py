@@ -783,6 +783,33 @@ def build_scan(
 # ─── Persistence ──────────────────────────────────────────────────────────────
 
 
+def _dedup_start_dt(start_time: Any) -> datetime | None:
+    """Coerce a stored ``start_time`` into a datetime for the dedup key.
+
+    Mirrors ``profile_store._parse_start_dt`` (kept local so this module stays
+    hass-free and import-light): datetime as-is, a numeric unix timestamp (int/float
+    or numeric string, the legacy storage format) via ``fromtimestamp``, otherwise an
+    ISO-8601 string via ``_parse_ts``.
+    """
+    if isinstance(start_time, datetime):
+        return start_time
+    if isinstance(start_time, (int, float)) and not isinstance(start_time, bool):
+        try:
+            return datetime.fromtimestamp(float(start_time), tz=timezone.utc)
+        except (OSError, OverflowError, ValueError):
+            return None
+    text = str(start_time or "").strip()
+    if not text:
+        return None
+    parsed = _parse_ts(text)
+    if parsed is not None:
+        return parsed
+    try:
+        return datetime.fromtimestamp(float(text), tz=timezone.utc)
+    except (TypeError, ValueError, OSError, OverflowError):
+        return None
+
+
 def dedup_key(start_time: Any, duration: Any) -> tuple[int, int] | None:
     """Identity of a cycle for re-import detection: its start second and whole seconds.
 
@@ -793,8 +820,13 @@ def dedup_key(start_time: Any, duration: Any) -> tuple[int, int] | None:
 
     Rounded to whole seconds so a re-export whose timestamps differ in fractions, or
     whose duration was recomputed, still matches.
+
+    Accepts both storage formats for ``start_time``: an ISO-8601 string (current) and
+    a numeric unix timestamp (legacy cycles, per ``profile_store._parse_start_dt``).
+    Without the numeric fallback a legacy cycle produced no key, so a re-import of the
+    same history was not seen as a duplicate and a second copy was stored.
     """
-    parsed = _parse_ts(str(start_time)) if not isinstance(start_time, datetime) else start_time
+    parsed = _dedup_start_dt(start_time)
     if parsed is None:
         return None
     try:

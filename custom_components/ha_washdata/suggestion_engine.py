@@ -587,6 +587,16 @@ def reconcile_suggestions(
         learn = eff(CONF_LEARNING_CONFIDENCE)
         if learn is not None and match_thr is not None and learn < match_thr and in_out(CONF_LEARNING_CONFIDENCE, CONF_PROFILE_MATCH_THRESHOLD):
             adjust(CONF_LEARNING_CONFIDENCE, match_thr, "the profile match threshold")
+        # Top of the ladder: learning <= auto. `_add_confidence_suggestions` derives the
+        # two independently (learning from p05 of manual labels, auto from p15 of
+        # uncorrected auto-labels), so a device with few high-confidence manual labels can
+        # yield learning > auto. Cascade-RAISE the auto ceiling to the verify floor (the
+        # conservative direction — never lower the verify band); keeps the full declared
+        # ordering intact instead of enforcing only its middle two rungs.
+        learn = eff(CONF_LEARNING_CONFIDENCE)
+        auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
+        if learn is not None and auto is not None and learn > auto and in_out(CONF_LEARNING_CONFIDENCE, CONF_AUTO_LABEL_CONFIDENCE):
+            adjust(CONF_AUTO_LABEL_CONFIDENCE, learn, "the learning confidence")
 
         # ── Rule 6: profile_unmatch_threshold < profile_match_threshold ────────
         unmatch = eff(CONF_PROFILE_UNMATCH_THRESHOLD)

@@ -85,6 +85,18 @@ def _load_model_module(module_name: str):
     return module
 
 
+def _sibling_attr(module_name: str, attr: str):
+    """Fetch ``attr`` from an embedded sibling module via the cache, or None.
+
+    Resolution paths run in the event loop, so they must never re-import: this hits
+    the ``_MODULE_CACHE`` warmed by :func:`preload_models` (which stores ``None`` on a
+    failed import). A missing module or attribute returns None, and the caller falls
+    back to the baseline / inert path rather than triggering a blocking loop import.
+    """
+    module = _load_model_module(module_name)
+    return getattr(module, attr, None) if module is not None else None
+
+
 def preload_models() -> None:
     """Import everything the live ML paths touch. Call from an executor thread.
 
@@ -97,11 +109,11 @@ def preload_models() -> None:
     """
     for module_name in _MODEL_MODULES.values():
         _load_model_module(module_name)
+    # Cache the siblings too (module-or-None), so a failed import is recorded once
+    # here and the event-loop resolvers read it from the cache instead of retrying
+    # a blocking import (issue #328).
     for sibling in _SIBLING_MODULES:
-        try:
-            importlib.import_module(f"{__package__}.{sibling}")
-        except Exception as exc:  # noqa: BLE001 - best effort warm-up
-            _LOGGER.warning("Failed to preload ML module %r: %s", sibling, exc)
+        _load_model_module(sibling)
     try:
         available_models()
     except Exception:  # noqa: BLE001 - manifest warm-up is best effort
@@ -189,7 +201,9 @@ def resolve_scorer(capability: str, store: object | None):
                     except Exception:  # noqa: BLE001 - schema check must not break inference
                         pass
 
-                from .trainer import score_spec
+                score_spec = _sibling_attr("trainer", "score_spec")
+                if score_spec is None:
+                    return _baseline()
 
                 def _on_device_score(feats, _s=spec):
                     # A malformed / dimensionally-incompatible promoted spec must
@@ -240,8 +254,8 @@ def resolve_regressor(capability: str, store: object | None):
         if isinstance(spec, dict) and spec.get("kind") == "standardized_linear":
             # Feature-column schema guard for regression specs.
             try:
-                from .feature_extraction import PROGRESS_FEATURE_COLUMNS
-                _expected_r = list(PROGRESS_FEATURE_COLUMNS)
+                _prog_cols = _sibling_attr("feature_extraction", "PROGRESS_FEATURE_COLUMNS")
+                _expected_r = list(_prog_cols or [])
                 _stored_r = list(spec.get("feature_columns") or [])
                 if _expected_r and _stored_r and _stored_r != _expected_r:
                     _LOGGER.warning(
@@ -253,7 +267,9 @@ def resolve_regressor(capability: str, store: object | None):
             except Exception:  # noqa: BLE001 - schema check must not break inference
                 pass
 
-            from .trainer import predict_value_spec
+            predict_value_spec = _sibling_attr("trainer", "predict_value_spec")
+            if predict_value_spec is None:
+                return (None, None)
 
             def _on_device_predict(feats, _s=spec):
                 # A malformed / incompatible promoted regression spec must never
