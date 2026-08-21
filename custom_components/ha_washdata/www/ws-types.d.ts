@@ -62,6 +62,7 @@ export interface DeviceInfo {
   is_user_paused: boolean;
   manual_program: boolean;
   options: Record<string, unknown>;
+  option_defaults: Record<string, unknown>;
 }
 
 export interface DismissAllFeedbacksResponse {

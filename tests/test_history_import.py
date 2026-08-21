@@ -319,6 +319,27 @@ def test_densifying_a_quiet_gap_separates_two_cycles():
     assert [round(c["duration"] / 60.0, 1) for c in seg.captured] == [39.9, 39.9]
 
 
+def test_zero_stop_threshold_still_accrues_quiet_and_densifies():
+    """``stop_threshold_w == 0`` is a valid (if degenerate) panel value - the Stop
+    Threshold field allows ``min=0``. With no positive quiet level nothing reads as
+    quiet (power is clamped >= 0), so block quiet-accrual and gap densification both
+    silently no-op and two cycles a few minutes apart inside one block could merge. A
+    small positive floor keeps them working; any positive configured value is used as-is.
+    """
+    # Floor applies only at 0; every positive threshold is preserved exactly.
+    assert hi._quiet_threshold(washer_config(stop_threshold_w=0.0)) == hi._HISTORY_IMPORT_MIN_QUIET_W
+    assert hi._quiet_threshold(washer_config(stop_threshold_w=0.0)) > 0.0
+    assert hi._quiet_threshold(washer_config(stop_threshold_w=3.0)) == 3.0
+
+    config = washer_config(stop_threshold_w=0.0)
+    samples = build_stream(idle_s=600.0)  # below the block cut threshold
+    blocks, _ = hi.find_activity_blocks(samples, config)
+    assert len(blocks) == 1  # short gap: densify must re-insert the quiet, not the cut
+    dense = hi.densify_quiet_gaps(blocks[0], config)
+    # Synthetic quiet samples were inserted - defeated entirely when quiet_w == 0.
+    assert len(dense) > len(blocks[0].samples)
+
+
 def test_a_standby_floor_above_the_stop_threshold_still_cuts():
     """The floor-independent cut rule.
 

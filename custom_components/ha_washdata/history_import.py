@@ -347,8 +347,16 @@ def cut_threshold_s(config: CycleDetectorConfig) -> float:
     return max(60.0, float(config.min_off_gap or 0.0) + float(config.off_delay or 0.0))
 
 
+# Fallback "off" level when stop_threshold_w is 0. The panel allows min=0 for that
+# field, but a 0 threshold makes nothing read as quiet (power is clamped >= 0), so block
+# quiet-accrual and gap densification would both silently no-op and two cycles a few
+# minutes apart inside one block could merge. Any positive configured value is used as-is.
+_HISTORY_IMPORT_MIN_QUIET_W = 1.0
+
+
 def _quiet_threshold(config: CycleDetectorConfig) -> float:
-    return max(0.0, float(config.stop_threshold_w or 0.0))
+    stop = float(config.stop_threshold_w or 0.0)
+    return stop if stop > 0.0 else _HISTORY_IMPORT_MIN_QUIET_W
 
 
 def _active_threshold(config: CycleDetectorConfig) -> float:

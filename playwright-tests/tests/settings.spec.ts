@@ -301,3 +301,22 @@ test('unticking a category saves the option as the remaining list', async ({ pag
   expect(options).not.toHaveProperty('real_cycles');
   expect(options).not.toHaveProperty('backfill_cycles');
 });
+
+test('unticking every evidence category saves the full default set, not an empty list', async ({ page }) => {
+  // An empty evidence selection is not a valid "none": the backend silently falls back
+  // to all three (a profile with no cycles can never match), so persisting [] would
+  // leave the UI showing all-unchecked while matching used every source. Saving must
+  // normalise an empty pick back to the default set.
+  const field = await openProfileEvidence(page);
+  for (const choice of ['real_cycles', 'reference_cycles', 'backfill_cycles']) {
+    await field.locator(`label:has([data-choice="${choice}"])`).click();
+    await expect(field.locator(`[data-choice="${choice}"]`)).not.toBeChecked();
+  }
+
+  await page.locator('#wd-settings-save').first().click();
+  const calls = await assertWsCalled(page, 'ha_washdata/set_options');
+  const options = calls[calls.length - 1].options as Record<string, unknown>;
+  expect(options.profile_evidence_sources).toEqual(
+    ['real_cycles', 'reference_cycles', 'backfill_cycles'],
+  );
+});

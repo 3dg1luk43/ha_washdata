@@ -1340,6 +1340,12 @@ def ws_get_devices(
             "is_user_paused": False,
             "manual_program": False,
             "options": dict(entry.options),
+            # Device-resolved defaults for the cadence/ratio fields (#396/#393) so the
+            # device-list conflict/suggestion badges score an unset field against the
+            # value the integration would actually use, matching the Settings tab.
+            "option_defaults": _resolved_option_defaults(
+                {**entry.data, **entry.options}.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+            ),
         }
 
         if manager is not None:
@@ -1492,6 +1498,28 @@ def ws_get_device_cycles(
 
 # ─── Settings ─────────────────────────────────────────────────────────────────
 
+
+def _resolved_option_defaults(device_type: str) -> dict[str, Any]:
+    """Device-resolved defaults for the cadence/ratio settings whose default varies
+    by device type (#396/#393).
+
+    The panel uses these as the render/conflict-check/suggestion-comparison fallback
+    for an unset field, so it shows - and validates against - the value the
+    integration would actually use, not a static schema literal that would spuriously
+    trip (or silently miss) the watchdog>=2*sampling / start_duration>=sampling rules
+    on a coarse-sampling device type. Shared by ws_get_options (current device) and
+    ws_get_devices (per device) so the two never diverge.
+    """
+    return {
+        CONF_SAMPLING_INTERVAL: resolve_sampling_interval_default(device_type),
+        CONF_WATCHDOG_INTERVAL: resolve_watchdog_interval_default(device_type),
+        CONF_START_DURATION_THRESHOLD: resolve_start_duration_default(device_type),
+        CONF_SMART_TERMINATION_DURATION_RATIO: (
+            resolve_smart_termination_duration_ratio_default(device_type)
+        ),
+    }
+
+
 @websocket_api.websocket_command(
     {vol.Required("type"): "ha_washdata/get_options", vol.Required("entry_id"): str}
 )
@@ -1514,18 +1542,11 @@ def ws_get_options(
     # spuriously trip the panel's own watchdog>=2*sampling / start_duration>=sampling
     # rules on a coarse-sampling device type.
     device_type = options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
-    defaults = {
-        CONF_SAMPLING_INTERVAL: resolve_sampling_interval_default(device_type),
-        CONF_WATCHDOG_INTERVAL: resolve_watchdog_interval_default(device_type),
-        CONF_START_DURATION_THRESHOLD: resolve_start_duration_default(device_type),
-        # #393: the Smart-Termination ratio field has no static schema default (its
-        # default is device-specific), so the panel pre-populates it from here.
-        CONF_SMART_TERMINATION_DURATION_RATIO: (
-            resolve_smart_termination_duration_ratio_default(device_type)
-        ),
-    }
     _send_result(
-        connection, msg["id"], "get_options", {"options": options, "defaults": defaults}
+        connection,
+        msg["id"],
+        "get_options",
+        {"options": options, "defaults": _resolved_option_defaults(device_type)},
     )
 
 
