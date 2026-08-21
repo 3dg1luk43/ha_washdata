@@ -3731,6 +3731,20 @@ class WashDataManager:
         if not self._last_reading_time:
             return
 
+        # Refresh the remaining-time / progress estimate on the watchdog cadence
+        # (sampling-derived: max(30, 2*sampling+1)s), independently of incoming power
+        # events. A publish-on-change plug emits nothing during a flat low-power tail
+        # (e.g. a dishwasher's ~30 min drying phase at 0 W), so the event-driven
+        # _update_remaining_only never runs and the displayed countdown freezes at
+        # whatever value it last showed. The estimate is wall-clock based
+        # (net_elapsed_seconds), so this tick advances it correctly with zero new
+        # readings; it no-ops until a profile is matched. Kept ahead of the
+        # keepalive/force-end branches below so even a verified-pause drying tail
+        # (which skips those branches) still ticks down.
+        if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            self._update_remaining_only()
+            self._notify_update()
+
         time_since_any_update = (now - self._last_reading_time).total_seconds()
 
         # Calculate time since REAL update (if available, else fallback to any update)
