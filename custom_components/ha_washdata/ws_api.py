@@ -81,6 +81,7 @@ from .const import (
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
     resolve_start_duration_default,
+    resolve_smart_termination_duration_ratio_default,
     DEFAULT_MAINTENANCE_REMINDER_CYCLES,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
@@ -1493,6 +1494,11 @@ def ws_get_options(
         CONF_SAMPLING_INTERVAL: resolve_sampling_interval_default(device_type),
         CONF_WATCHDOG_INTERVAL: resolve_watchdog_interval_default(device_type),
         CONF_START_DURATION_THRESHOLD: resolve_start_duration_default(device_type),
+        # #393: the Smart-Termination ratio field has no static schema default (its
+        # default is device-specific), so the panel pre-populates it from here.
+        CONF_SMART_TERMINATION_DURATION_RATIO: (
+            resolve_smart_termination_duration_ratio_default(device_type)
+        ),
     }
     _send_result(
         connection, msg["id"], "get_options", {"options": options, "defaults": defaults}
@@ -5485,9 +5491,8 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
         ),
         smart_termination_duration_ratio=_safe_float_finite(
             opts.get(CONF_SMART_TERMINATION_DURATION_RATIO),
-            DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE.get(
-                str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)),
-                DEFAULT_SMART_TERMINATION_DURATION_RATIO,
+            resolve_smart_termination_duration_ratio_default(
+                str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
             ),
         ),
     )

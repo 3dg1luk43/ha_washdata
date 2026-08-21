@@ -981,6 +981,19 @@ DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 0.99,
 }
 
+
+def resolve_smart_termination_duration_ratio_default(device_type: str) -> float:
+    """Device-resolved Smart-Termination duration ratio default (#393).
+
+    Single source of truth shared by the manager (config build/reload), the
+    Playground fallback config and the panel (via ws_get_options), so the value
+    the panel pre-populates always matches the one the detector actually uses:
+    0.99 for dishwashers (fixed programs), 0.98 for everything else.
+    """
+    return DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE.get(
+        device_type, DEFAULT_SMART_TERMINATION_DURATION_RATIO
+    )
+
 # Profile groups (Stage 5): the matcher only collapses a group into one
 # aggregate candidate when its members' minimum pairwise shape similarity is at
 # least this. Similarity is DTW/Sakoe-Chiba on peak-normalised envelopes, so it

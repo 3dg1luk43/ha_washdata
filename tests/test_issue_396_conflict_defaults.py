@@ -39,6 +39,7 @@ from custom_components.ha_washdata.const import (
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_SAMPLING_INTERVAL,
+    CONF_SMART_TERMINATION_DURATION_RATIO,
     CONF_START_DURATION_THRESHOLD,
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
@@ -159,6 +160,8 @@ def test_ws_get_options_defaults_for_coarse_device():
     assert d[CONF_SAMPLING_INTERVAL] == 30.0
     assert d[CONF_WATCHDOG_INTERVAL] == 61
     assert d[CONF_START_DURATION_THRESHOLD] == 30.0
+    # #393: the Smart-Termination ratio field is pre-populated from here (0.98 non-dishwasher)
+    assert d[CONF_SMART_TERMINATION_DURATION_RATIO] == 0.98
 
 
 def test_ws_get_options_defaults_for_wet_device():
@@ -167,3 +170,10 @@ def test_ws_get_options_defaults_for_wet_device():
     assert d[CONF_SAMPLING_INTERVAL] == 2.0
     assert d[CONF_WATCHDOG_INTERVAL] == 30
     assert d[CONF_START_DURATION_THRESHOLD] == 5.0
+    assert d[CONF_SMART_TERMINATION_DURATION_RATIO] == 0.98
+
+
+def test_ws_get_options_smart_termination_default_for_dishwasher():
+    # #393: dishwashers pre-populate the conservative 0.99 gate.
+    payload = _run_get_options("dishwasher")
+    assert payload["defaults"][CONF_SMART_TERMINATION_DURATION_RATIO] == 0.99
