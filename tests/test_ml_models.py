@@ -99,6 +99,22 @@ def test_available_models_tolerates_a_non_dict_manifest(monkeypatch) -> None:
         engine._MANIFEST_MODELS_CACHE = None  # don't poison other tests
 
 
+def test_available_models_drops_non_dict_entries(monkeypatch) -> None:
+    """A manifest like {"models": [null, {...}]} must not return the null entry -
+    the declared return is list[dict]."""
+    from custom_components.ha_washdata.ml import engine
+
+    monkeypatch.setattr(engine, "_MANIFEST_MODELS_CACHE", None)
+    monkeypatch.setattr(
+        engine.json, "loads",
+        lambda *_a, **_k: {"models": [None, {"name": "x"}, 7, {"name": "y"}]},
+    )
+    try:
+        assert engine.available_models() == [{"name": "x"}, {"name": "y"}]
+    finally:
+        engine._MANIFEST_MODELS_CACHE = None
+
+
 @pytest.mark.parametrize("module_name", MODEL_MODULES)
 def test_embedded_model_matches_lab_parity_fixtures(module_name: str) -> None:
     """The embedded model must reproduce the lab's scores bit-for-bit.

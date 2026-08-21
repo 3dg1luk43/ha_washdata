@@ -428,9 +428,14 @@ def _build_match_snapshots(
         try:
             pool = store.iter_evidence_cycles()
         except Exception:  # pylint: disable=broad-exception-caught
-            # Older store without the evidence view: fall back to the raw lists.
-            pool = list(data.get("past_cycles", []) or []) + list(
-                data.get("reference_cycles", []) or []
+            # Older store without the evidence view: fall back to the raw lists. Include
+            # backfill_cycles too (the evidence view does), else a profile whose sample
+            # lives only in imported history has no snapshot and the sim reports it
+            # unmatched though live matching can use it.
+            pool = (
+                list(data.get("past_cycles", []) or [])
+                + list(data.get("reference_cycles", []) or [])
+                + list(data.get("backfill_cycles", []) or [])
             )
         by_id = {c.get("id"): c for c in pool if isinstance(c, dict)}
         for name, profile in profiles.items():

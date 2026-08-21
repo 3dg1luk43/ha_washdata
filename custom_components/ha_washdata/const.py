@@ -1241,7 +1241,9 @@ CONF_PROFILE_EVIDENCE_SOURCES = "profile_evidence_sources"
 EVIDENCE_REAL_CYCLES = "real_cycles"
 EVIDENCE_REFERENCE_CYCLES = "reference_cycles"
 EVIDENCE_BACKFILL_CYCLES = "backfill_cycles"
-# Names match the export taxonomy (`_EXPORT_CATEGORIES`) so one vocabulary describes both.
+# `real_cycles`/`reference_cycles` match the export taxonomy (`_EXPORT_CATEGORIES`); the
+# evidence view adds `backfill_cycles`, which the selective-export wizard does not yet
+# enumerate (whole-store export still round-trips it).
 PROFILE_EVIDENCE_SOURCES = (
     EVIDENCE_REAL_CYCLES,
     EVIDENCE_REFERENCE_CYCLES,

@@ -199,6 +199,31 @@ def test_prefix_term_ignores_a_marginal_improvement():
     assert _match_prefix_ambiguity(cands, 5372.0) == (False, False)
 
 
+def test_prefix_margin_is_measured_against_the_winner_shape_score():
+    """prefix_score is a shape-scale value (no Stage-4), so the margin must be taken
+    against the winner's shape_score, not its blended score. Here the winner's blended
+    score is dragged down by Stage-4 (0.55) but its shape fits well (0.70): the longer
+    candidate's 0.80 prefix beats the blended score by the margin yet not the shape
+    score, so the guard must NOT fire - the short profile genuinely fits."""
+    cands = [
+        {"name": "Quick", "profile_duration": 2760.0, "score": 0.55, "shape_score": 0.70},
+        {"name": "Normal", "profile_duration": 5280.0, "score": 0.30,
+         "shape_score": 0.20, "prefix_score": 0.80},
+    ]
+    # 0.80 >= 0.55 + 0.15 (blended) but 0.80 < 0.70 + 0.15 (shape) -> no doubt.
+    assert _match_prefix_ambiguity(cands, 2760.0) == (False, False)
+
+
+def test_prefix_margin_falls_back_to_score_without_a_shape_score():
+    """An older snapshot without shape_score on the winner still uses the blended score."""
+    cands = [
+        {"name": "Quick", "profile_duration": 2760.0, "score": 0.55},
+        {"name": "Normal", "profile_duration": 5280.0, "score": 0.30, "prefix_score": 0.80},
+    ]
+    # 0.80 >= 0.55 + 0.15 -> fires on the blended-score fallback.
+    assert _match_prefix_ambiguity(cands, 2760.0) == (False, True)
+
+
 def test_missing_prefix_score_degrades_to_the_legacy_verdict():
     """A mocked executor, an older snapshot, or a config where Stage 6 bailed must
     reproduce the #288 behaviour exactly - never fire less often than before."""

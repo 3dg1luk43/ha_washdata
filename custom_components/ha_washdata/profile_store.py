@@ -915,7 +915,14 @@ def _match_prefix_ambiguity(
     """
     if best_duration <= 0 or len(candidates) < 2:
         return False, False
-    best_score = float(candidates[0].get("score") or 0.0)
+    # Compare against the winner's SHAPE score, not its blended final score: prefix_score
+    # is a shape-scale value (Stage-2 + Stage-3, no Stage-4 duration/energy agreement), so
+    # measuring the margin against the blended score mixed scales and made 0.15 too strict.
+    # Fall back to the blended score only when shape_score is absent (older snapshot).
+    _best_shape = candidates[0].get("shape_score")
+    best_score = float(
+        (_best_shape if _best_shape is not None else candidates[0].get("score")) or 0.0
+    )
     full_shape_hit = False
     prefix_fit_hit = False
     for cand in candidates[1:]:
@@ -7028,6 +7035,7 @@ class ProfileStore:
         stops influencing the matcher template. Returns False when neither list carries
         that id.
         """
+        cycle: CycleDict | None = None
         for key in ("reference_cycles", "backfill_cycles"):
             items = cast(list[CycleDict], self._data.get(key, []))
             cycle = next((c for c in items if c.get("id") == cycle_id), None)
