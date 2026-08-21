@@ -159,6 +159,18 @@ def test_reconcile_still_lowers_match_when_it_was_not_proposed():
     assert out[CONF_PROFILE_MATCH_THRESHOLD].get("cascade") is True
 
 
+def test_reconcile_rounding_preserves_the_inequality():
+    # adjust() rounds to 2 dp; a naive round() could land back on a violating value
+    # (raise auto to 0.901 -> round 0.90, still < match 0.901). Raising must ceil.
+    out, _ = reconcile_suggestions(
+        {CONF_PROFILE_MATCH_THRESHOLD: {"value": 0.901, "reason": "tighten"}},
+        {CONF_AUTO_LABEL_CONFIDENCE: 0.90},
+    )
+    assert out[CONF_PROFILE_MATCH_THRESHOLD]["value"] == 0.901
+    assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] == 0.91  # ceil(0.901) -> 0.91 >= match
+    assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] >= out[CONF_PROFILE_MATCH_THRESHOLD]["value"]
+
+
 def test_reconcile_raises_auto_ceiling_to_the_learning_floor():
     # Top of the ladder: learning <= auto. A high learning suggestion above a lower
     # auto ceiling must lift the ceiling (conservative), not be left contradicting

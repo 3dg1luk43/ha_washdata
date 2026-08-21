@@ -6695,7 +6695,11 @@ async def _history_import_apply_task(
         reg.finish(task, state=task_registry.STATE_ERROR, error="scan_expired")
         return
     cycles: list[dict[str, Any]] = list(slot.get("cycles") or [])
-    wanted = [i for i in accept if 0 <= i < len(cycles)]
+    # Dedupe the client-supplied indices (order-preserving): a repeated index would
+    # visit the same candidate twice, and one whose dedup_key is None (unparseable
+    # start_time/duration) is not caught by the in-loop dedup set, so the second visit
+    # would store a second copy under a fresh id.
+    wanted = list(dict.fromkeys(i for i in accept if 0 <= i < len(cycles)))
     if not wanted:
         reg.finish(task, state=task_registry.STATE_DONE, result={"imported": 0, "duplicates": 0})
         return
