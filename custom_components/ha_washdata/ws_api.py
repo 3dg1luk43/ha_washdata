@@ -42,6 +42,7 @@ from .const import (
     CONF_COMPLETION_MIN_SECONDS,
     CONF_DEVICE_TYPE,
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+    CONF_SMART_TERMINATION_DURATION_RATIO,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
@@ -75,6 +76,8 @@ from .const import (
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_DEVICE_TYPE,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+    DEFAULT_SMART_TERMINATION_DURATION_RATIO,
+    DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
     DEFAULT_MAINTENANCE_REMINDER_CYCLES,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
@@ -1536,6 +1539,26 @@ async def ws_set_options(
             new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = (
                 DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
             )
+
+    # Smart-Termination duration ratio (#393): fraction of expected duration, so it
+    # is meaningless outside [0.50, 1.00] - clamp valid submissions to the range.
+    # An empty or non-numeric value drops the key so the device-type default
+    # (resolved in the config builder, 0.99 dishwasher / 0.98 other) applies again;
+    # coercing to a single scalar default here would be wrong for dishwashers.
+    if CONF_SMART_TERMINATION_DURATION_RATIO in new_options:
+        _raw_str = new_options[CONF_SMART_TERMINATION_DURATION_RATIO]
+        if _raw_str in (None, ""):
+            new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+        else:
+            try:
+                _str = float(_raw_str)
+                if not math.isfinite(_str):
+                    raise ValueError("non-finite")
+                new_options[CONF_SMART_TERMINATION_DURATION_RATIO] = min(
+                    1.0, max(0.5, _str)
+                )
+            except (TypeError, ValueError):
+                new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
 
     # A None outside the clearable selectors means "not set", not a value: the
     # per-setting Revert sends the changelog's `old`, which is null for a setting
@@ -5422,6 +5445,13 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
         dishwasher_end_spike_quiet_release=_safe_float_finite(
             opts.get(CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE),
             DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+        ),
+        smart_termination_duration_ratio=_safe_float_finite(
+            opts.get(CONF_SMART_TERMINATION_DURATION_RATIO),
+            DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE.get(
+                str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)),
+                DEFAULT_SMART_TERMINATION_DURATION_RATIO,
+            ),
         ),
     )
 

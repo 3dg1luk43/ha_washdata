@@ -54,6 +54,7 @@ from .const import (
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+    CONF_SMART_TERMINATION_DURATION_RATIO,
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_COMPLETION_MIN_SECONDS,
@@ -172,6 +173,7 @@ _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
     CONF_ANTI_WRINKLE_EXIT_POWER: ("anti_wrinkle_exit_power", float),
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT: ("anti_wrinkle_idle_timeout", float),
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE: ("dishwasher_end_spike_quiet_release", float),
+    CONF_SMART_TERMINATION_DURATION_RATIO: ("smart_termination_duration_ratio", float),
     CONF_OFF_DELAY: ("off_delay", int),
     CONF_MIN_OFF_GAP: ("min_off_gap", int),
     CONF_COMPLETION_MIN_SECONDS: ("completion_min_seconds", int),
@@ -1391,6 +1393,7 @@ def _sim_config_summary(config: CycleDetectorConfig) -> dict[str, Any]:
         "anti_wrinkle_exit_power": getattr(config, "anti_wrinkle_exit_power", None),
         "anti_wrinkle_idle_timeout": getattr(config, "anti_wrinkle_idle_timeout", None),
         "dishwasher_end_spike_quiet_release": getattr(config, "dishwasher_end_spike_quiet_release", None),
+        "smart_termination_duration_ratio": getattr(config, "smart_termination_duration_ratio", None),
     }
 
 

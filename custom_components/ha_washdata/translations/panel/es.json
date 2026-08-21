@@ -1016,6 +1016,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
+    "smart_termination_duration_ratio": "Fracción de la duración esperada del programa coincidente que un ciclo debe alcanzar antes de que la Terminación inteligente pueda finalizarlo antes de tiempo; redúzcala para máquinas que dependen de la carga o la temperatura",
     "anti_wrinkle_enabled": "Absorber los pulsos de volteo tras la fase principal en lugar de leerlos como nuevos ciclos",
     "anti_wrinkle_exit_power": "La potencia debe caer por debajo de este valor entre pulsos para que el modo antiarrugas siga activo",
     "anti_wrinkle_idle_timeout": "Tiempo de silencio permitido entre dos pulsos de volteo antes de que finalice el modo antiarrugas",
@@ -1426,6 +1427,10 @@
     "save_debug_traces": {
       "doc": "Almacene el seguimiento de potencia total y los datos de depuración coincidentes para cada ciclo. Útil para solucionar problemas pero aumenta el tamaño de almacenamiento.",
       "label": "Guardar trazas de depuración"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Cuánto debe haber avanzado un ciclo dentro de la duración esperada del programa coincidente antes de que la Terminación inteligente pueda finalizarlo antes de tiempo una vez que la potencia cae. La duración esperada es el promedio del programa, por lo que en aparatos cuyo tiempo de funcionamiento varía mucho - lavadoras según el agua de entrada fría en invierno o templada en verano, secadoras con sensor de humedad, programas que dependen de la carga - cerca de la mitad de las ejecuciones terminan antes que ese promedio y nunca obtienen el final rápido, finalizando solo mediante el tiempo de espera de reserva con minutos de retraso. Baje este valor (p. ej. 0,85) en esas máquinas para que el final anticipado siga activándose; súbalo hacia 1,0 para ser más conservador. Déjelo vacío para el valor predeterminado (0,98, o 0,99 para lavavajillas). Solo puede finalizar un ciclo antes, nunca después, y nunca se activa en una coincidencia ambigua o de baja confianza.",
+      "label": "Proporción de terminación inteligente"
     },
     "smoothing_window": {
       "doc": "Cuánto se suaviza la señal de potencia bruta. Bajo (2) responde pero es ruidoso; alto (5) suaviza los picos pero agrega retraso.",

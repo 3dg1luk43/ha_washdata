@@ -1398,6 +1398,10 @@
       "doc": "Stocați urmărirea completă a puterii și datele de depanare corespunzătoare pentru fiecare ciclu. Util pentru depanare, dar mărește dimensiunea de stocare.",
       "label": "Salvați Urmele de Depanare"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Cât de mult trebuie să fi avansat un ciclu în durata așteptată a programului corespunzător înainte ca Terminarea inteligentă să îl poată încheia mai devreme odată ce puterea scade. Durata așteptată este media programului, așa că pe aparatele al căror timp de funcționare variază mult - mașini de spălat în funcție de apa de alimentare rece iarna sau caldă vara, uscătoare cu senzor de umiditate, programe care depind de încărcătură - aproximativ jumătate dintre rulări se termină mai devreme decât acea medie și nu beneficiază niciodată de încheierea rapidă, terminându-se doar prin expirarea de rezervă cu minute întârziere. Reduceți această valoare (de ex. 0,85) pe acele mașini pentru ca încheierea anticipată să se declanșeze totuși; măriți-o spre 1,0 pentru a fi mai conservator. Lăsați gol pentru valoarea implicită (0,98 sau 0,99 pentru mașinile de spălat vase). Poate doar să încheie un ciclu mai devreme, niciodată mai târziu, și nu se declanșează niciodată la o potrivire ambiguă sau cu încredere scăzută.",
+      "label": "Raport de terminare inteligentă"
+    },
     "smoothing_window": {
       "doc": "Cât de mult este netezit semnalul de putere brută. Scăzut (2) este receptiv, dar zgomotos; ridicat (5) netezește vârfurile, dar adaugă lag.",
       "label": "Fereastră de Netezire"
@@ -1909,6 +1913,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Mașină de spălat vase: secunde de liniște după durata așteptată înainte de a elibera așteptarea evacuării de la sfârșitul ciclului",
+    "smart_termination_duration_ratio": "Fracțiunea din durata așteptată a programului corespunzător pe care un ciclu trebuie să o atingă înainte ca Terminarea inteligentă să îl poată încheia mai devreme; reduceți-o pentru mașinile care depind de încărcătură sau de temperatură",
     "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",
     "anti_wrinkle_exit_power": "Puterea trebuie să scadă sub această valoare între impulsuri pentru ca modul anti-șifonare să rămână activ",
     "anti_wrinkle_idle_timeout": "Timp de liniște permis între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie",

@@ -1521,6 +1521,10 @@
         "show_contributor": {
             "doc": "Shfaq atribuimin \"nga <kontribuesi>\" në pajisjet dhe ciklet referuese të komunitetit."
         },
+        "smart_termination_duration_ratio": {
+            "doc": "Sa larg brenda kohëzgjatjes së pritur të programit të përputhur duhet të ketë ecur një cikël përpara se Përfundimi i Zgjuar të mund ta mbyllë atë herët sapo bie fuqia. Kohëzgjatja e pritur është mesatarja e programit, prandaj te pajisjet kohëzgjatja e të cilave ndryshon shumë - makinat larëse me ujë hyrës të ftohtë në dimër dhe të ngrohtë në verë, tharëset me sensor lagështie, programet që varen nga ngarkesa - rreth gjysma e të gjitha nisjeve përfundojnë më shkurt se ajo mesatare dhe nuk e marrin kurrë përfundimin e shpejtë, duke mbaruar vetëm përmes afatit rezervë me disa minuta vonesë. Uleni këtë vlerë (p.sh. 0.85) te këto makina që përfundimi i hershëm të aktivizohet gjithsesi; ngrijeni drejt 1.0 për një sjellje më konservatore. Lëreni bosh për vlerën e parazgjedhur (0.98, ose 0.99 për pjatalarëset). Ai mund vetëm ta mbyllë një cikël më herët, kurrë më vonë, dhe nuk aktivizohet kurrë në një përputhje të paqartë ose me besim të ulët.",
+            "label": "Raporti i Përfundimit të Zgjuar"
+        },
         "enable_phase_matching": {
             "label": "Kohë e mbetur e ndërgjegjshme për fazat",
             "doc": "Ndan çdo cikël që po funksionon në faza (ngrohje, larje, centrifugim) dhe shpërndan kohën e mbetur për çdo fazë, e përzier me vlerësimin klasik - duke u mbështetur te shpërndarja sipas fazave në fillim të ciklit dhe te vlerësimi klasik afër fundit. Kjo e personalizon numërimin mbrapsht sipas kohës që makina juaj në të vërtetë ngroh dhe punon, gjë që vihet re më së shumti në gjysmën e parë të një cikli. Off = vetëm vlerësimi klasik. Preket vetëm shfaqja e kohës së mbetur; përputhja e programeve dhe zbulimi i ciklit mbeten të pandryshuara."
@@ -1982,7 +1986,8 @@
         "dtw_refine_top_n": "Etapa 3: kandidatë të rishënuara nga DTW; rriteni në 7-9 nëse profili i saktë renditet i 4-5 (parazgjedhja 5)",
         "duration_scale": "Etapa 4: raporti logaritmik ku marrëveshja e kohëzgjatjes gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.175)",
         "energy_scale": "Etapa 4: raporti logaritmik ku marrëveshja e energjisë gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.25)",
-        "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda qetësie pas kohëzgjatjes së pritur para se të lirohet pritja e shkarkimit në fund të ciklit"
+        "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda qetësie pas kohëzgjatjes së pritur para se të lirohet pritja e shkarkimit në fund të ciklit",
+        "smart_termination_duration_ratio": "Pjesa e kohëzgjatjes së pritur të programit të përputhur që një cikël duhet të arrijë përpara se Përfundimi i Zgjuar të mund ta mbyllë atë herët; uleni për makina që varen nga ngarkesa ose temperatura"
     },
     "col": {
         "profile_tip": "Emri i programit të përputhur. I paetiketuar do të thotë se asnjë profil nuk u përputh në fund të ciklit.",

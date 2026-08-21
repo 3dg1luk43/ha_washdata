@@ -1446,6 +1446,10 @@
       "doc": "Shranite celotno sled moči in ustrezne podatke o odpravljanju napak za vsak cikel. Uporabno za odpravljanje težav, vendar poveča velikost pomnilnika.",
       "label": "Shrani sledove za odpravljanje napak"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Kako daleč v pričakovanem trajanju ujemajočega programa mora biti cikel, preden ga Pametni zaključek lahko po padcu moči predčasno konča. Pričakovano trajanje je povprečje programa, zato se pri napravah, katerih čas delovanja močno niha - pralni stroji s hladno dovodno vodo pozimi v primerjavi s toplo poleti, sušilni stroji s senzorskim sušenjem, programi, odvisni od količine perila - približno polovica vseh zagonov konča prej kot to povprečje in nikoli ne dobi hitrega zaključka, temveč se konča šele prek nadomestnega časovnega zamika, nekaj minut prepozno. Pri takih strojih to vrednost znižajte (npr. 0,85), da se predčasni zaključek vseeno sproži; za bolj konservativno delovanje jo zvišajte proti 1,0. Pustite prazno za privzeto vrednost (0,98 ali 0,99 za pomivalne stroje). Cikel lahko vedno le predčasno konča, nikoli pozneje, in se nikoli ne sproži pri nejasnem ujemanju ali ujemanju z nizko zanesljivostjo.",
+      "label": "Razmerje pametnega zaključka"
+    },
     "smoothing_window": {
       "doc": "Koliko je zglajen signal neobdelane moči. Nizka (2) je odzivna, a hrupna; visoko (5) zgladi konice, vendar doda zamik.",
       "label": "Okno glajenja"
@@ -1957,6 +1961,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Pomivalni stroj: sekunde tišine po pričakovanem trajanju, preden se sprosti čakanje na končno izčrpavanje vode",
+    "smart_termination_duration_ratio": "Delež pričakovanega trajanja ujemajočega programa, ki ga mora cikel doseči, preden ga Pametni zaključek lahko predčasno konča; znižajte ga pri strojih, odvisnih od količine perila ali temperature",
     "anti_wrinkle_enabled": "Vsrkaj vrtilne impulze po glavni fazi, namesto da jih obravnavaš kot nove cikle",
     "anti_wrinkle_exit_power": "Moč mora med impulzi pasti pod to vrednost, da zaščita pred gubami ostane aktivna",
     "anti_wrinkle_idle_timeout": "Dovoljeni mir med dvema vrtilnima impulzoma, preden se zaščita pred gubami konča",

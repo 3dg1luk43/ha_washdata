@@ -1089,7 +1089,8 @@
         "dtw_refine_top_n": "Aşama 3: DTW'nin yeniden puanladığı aday sayısı; doğru profil 4-5. sıraya düşüyorsa 7-9'a yükseltin (varsayılan 5)",
         "duration_scale": "Aşama 4: süre uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.175)",
         "energy_scale": "Aşama 4: enerji uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.25)",
-        "dishwasher_end_spike_quiet_release": "Bulaşık makinesi: beklenen süreden sonra döngü sonu tahliye beklemesi bırakılmadan önceki sessiz saniyeler"
+        "dishwasher_end_spike_quiet_release": "Bulaşık makinesi: beklenen süreden sonra döngü sonu tahliye beklemesi bırakılmadan önceki sessiz saniyeler",
+        "smart_termination_duration_ratio": "Eşleşen programın beklenen süresinin, Akıllı Sonlandırma'nın döngüyü erken bitirebilmesi için döngünün ulaşması gereken kesri; yüke veya sıcaklığa bağlı makinelerde düşürün"
     },
     "phase_desc": {
         "anti_crease": "Kırışıklıkları azaltmak için tamamlandıktan sonra ara sıra kısa yuvarlanmalar.",
@@ -1470,6 +1471,10 @@
         "save_debug_traces": {
             "doc": "Her döngü için tam güç takibini ve eşleşen hata ayıklama verilerini saklayın. Sorun giderme için kullanışlıdır ancak depolama boyutunu artırır.",
             "label": "Hata Ayıklama İzlerini Kaydet"
+        },
+        "smart_termination_duration_ratio": {
+            "doc": "Güç düştüğünde Akıllı Sonlandırma'nın bir döngüyü erken bitirebilmesi için, döngünün eşleşen programın beklenen süresinin ne kadarına ilerlemiş olması gerektiğini belirler. Beklenen süre, programın ortalamasıdır; bu nedenle çalışma süresi çok değişen cihazlarda (kışın soğuk, yazın sıcak şebeke suyuyla çalışan çamaşır makineleri, sensörle kurutan kurutucular, yüke bağlı programlar) tüm çalışmaların yaklaşık yarısı bu ortalamadan daha kısa biter ve hızlı bitişi hiç alamaz, yalnızca yedek zaman aşımıyla dakikalar sonra sona erer. Bu makinelerde erken bitişin yine de devreye girmesi için bu değeri düşürün (örn. 0,85); daha ihtiyatlı olmak için 1,0'a doğru yükseltin. Varsayılan (0,98, bulaşık makineleri için 0,99) için boş bırakın. Bir döngüyü yalnızca daha erken bitirebilir, asla daha geç bitiremez ve belirsiz veya düşük güvenilirlikli bir eşleşmede asla devreye girmez.",
+            "label": "Akıllı Sonlandırma Oranı"
         },
         "smoothing_window": {
             "doc": "Ham güç sinyalinin ne kadar yumuşatıldığı. Düşük (2) duyarlıdır ancak gürültülüdür; yüksek (5) ani artışları yumuşatır ancak gecikme ekler.",

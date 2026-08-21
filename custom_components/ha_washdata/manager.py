@@ -114,6 +114,9 @@ from .const import (
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+    CONF_SMART_TERMINATION_DURATION_RATIO,
+    DEFAULT_SMART_TERMINATION_DURATION_RATIO,
+    DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
     CONF_DELAY_START_DETECT_ENABLED,
     CONF_DELAY_CONFIRM_SECONDS,
     CONF_DELAY_TIMEOUT_HOURS,
@@ -825,6 +828,17 @@ class WashDataManager:
                 config_entry.options.get(
                     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
                     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+                )
+            ),
+            # #393: resolve the device-type default HERE (not in the gate) so the
+            # field always carries a real float - playground.effective_settings()
+            # skips a None-valued field, which would desync the sim from the detector.
+            smart_termination_duration_ratio=float(
+                config_entry.options.get(
+                    CONF_SMART_TERMINATION_DURATION_RATIO,
+                    DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE.get(
+                        self.device_type, DEFAULT_SMART_TERMINATION_DURATION_RATIO
+                    ),
                 )
             ),
             delay_detect_enabled=bool(
@@ -2223,6 +2237,14 @@ class WashDataManager:
                 DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
             )
         )
+        new_smart_termination_duration_ratio = float(
+            config_entry.options.get(
+                CONF_SMART_TERMINATION_DURATION_RATIO,
+                DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE.get(
+                    self.device_type, DEFAULT_SMART_TERMINATION_DURATION_RATIO
+                ),
+            )
+        )
         new_delay_detect_enabled = bool(
             config_entry.options.get(
                 CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
@@ -2262,6 +2284,7 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
         self.detector.config.anti_wrinkle_idle_timeout = new_anti_wrinkle_idle_timeout
         self.detector.config.dishwasher_end_spike_quiet_release = new_dishwasher_end_spike_quiet_release
+        self.detector.config.smart_termination_duration_ratio = new_smart_termination_duration_ratio
         self.detector.config.delay_detect_enabled = new_delay_detect_enabled
         self.detector.config.delay_confirm_seconds = new_delay_confirm_seconds
         self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds

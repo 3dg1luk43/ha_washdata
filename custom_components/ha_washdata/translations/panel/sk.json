@@ -1446,6 +1446,10 @@
       "doc": "Uložte úplnú stopu výkonu a zodpovedajúce údaje ladenia pre každý cyklus. Užitočné pri riešení problémov, ale zvyšuje veľkosť úložiska.",
       "label": "Uložiť ladiace záznamy"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Ako ďaleko v očakávanej dobe trvania priradeného programu musí byť cyklus, než ho Inteligentné ukončenie môže po poklese príkonu ukončiť skôr. Očakávaná doba trvania je priemer programu, takže pri spotrebičoch, ktorých doba behu veľmi kolíše - práčky so studenou prívodnou vodou v zime oproti teplej v lete, sušičky so senzorovým sušením, programy závislé od náplne - skončí približne polovica všetkých behov skôr než tento priemer a nikdy sa rýchleho ukončenia nedočká, takže skončí až o niekoľko minút neskôr cez záložný časový limit. Pri takýchto strojoch túto hodnotu znížte (napr. 0,85), aby sa skoršie ukončenie napriek tomu spustilo; pre opatrnejšie správanie ju zvýšte smerom k 1,0. Ponechajte prázdne pre predvolenú hodnotu (0,98, pri umývačkách riadu 0,99). Cyklus môže vždy len ukončiť skôr, nikdy neskôr, a nikdy sa nespustí pri nejednoznačnej zhode alebo zhode s nízkou spoľahlivosťou.",
+      "label": "Pomer inteligentného ukončenia"
+    },
     "smoothing_window": {
       "doc": "Ako veľmi je vyhladený signál surového výkonu. Nízka (2) reaguje, ale je hlučná; vysoká (5) vyhladzuje hroty, ale pridáva oneskorenie.",
       "label": "Okno vyhladzovania"
@@ -1957,6 +1961,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Umývačka: tiché sekundy po očakávanom trvaní, než sa uvoľní čakanie na záverečné odčerpanie vody",
+    "smart_termination_duration_ratio": "Zlomok očakávanej doby trvania priradeného programu, ktorý musí cyklus dosiahnuť, než ho Inteligentné ukončenie môže ukončiť skôr; znížte ho pri strojoch závislých od náplne alebo teploty",
     "anti_wrinkle_enabled": "Pohltiť impulzy bubna po hlavnej fáze namiesto ich čítania ako nové cykly",
     "anti_wrinkle_exit_power": "Výkon musí medzi impulzmi klesnúť pod túto hodnotu, aby ochrana pred krčením zostala aktívna",
     "anti_wrinkle_idle_timeout": "Povolený pokoj medzi dvoma impulzmi bubna, než sa ochrana pred krčením skončí",

@@ -1064,6 +1064,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
+    "smart_termination_duration_ratio": "Andel av det matchade programmets förväntade varaktighet som en cykel måste nå innan smart avslutning får avsluta den i förtid; sänk den för last- eller temperaturberoende maskiner",
     "completion_min_seconds": "Kortaste körning som räknas som en riktig cykel",
     "end_repeat_count": "Antal låga avläsningar i rad innan avslut",
     "interrupted_min_seconds": "Korta cykler markeras som avbrutna",
@@ -1474,6 +1475,10 @@
     "save_debug_traces": {
       "doc": "Lagra spårningen av full effekt och matchande felsökningsdata för varje cykel. Användbar för felsökning men ökar lagringsstorleken.",
       "label": "Spara felsökningsspår"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Hur långt in i det matchade programmets förväntade varaktighet en cykel måste vara innan smart avslutning får avsluta den i förtid när effekten sjunker. Den förväntade varaktigheten är programmets genomsnitt, så på apparater vars körtid varierar mycket - tvättmaskiner med kallt vinter- kontra varmt sommarinloppsvatten, torktumlare med fuktsensor, lastberoende program - avslutas ungefär hälften av alla körningar kortare än det genomsnittet och får aldrig den snabba avslutningen, utan avslutas först minuter senare via reserv-timeouten. Sänk detta värde (t.ex. 0,85) på sådana maskiner så att den tidiga avslutningen ändå utlöses; höj det mot 1,0 för att vara mer försiktig. Lämna tomt för standardvärdet (0,98, eller 0,99 för diskmaskiner). Den kan bara avsluta en cykel tidigare, aldrig senare, och utlöses aldrig vid en tvetydig eller osäker matchning.",
+      "label": "Kvot för smart avslutning"
     },
     "smoothing_window": {
       "doc": "Hur mycket råeffektsignalen utjämnas. Låg (2) är lyhörd men bullrig; hög (5) jämnar ut spikar men lägger till eftersläpning.",

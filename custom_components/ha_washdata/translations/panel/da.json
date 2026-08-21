@@ -1064,6 +1064,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",
+    "smart_termination_duration_ratio": "Andel af det genkendte programs forventede varighed, som en cyklus skal nå, før smart afslutning må afslutte den tidligt; sænk den for belastnings- eller temperaturafhængige maskiner",
     "completion_min_seconds": "Korteste kørsel, der tæller som en rigtig cyklus",
     "end_repeat_count": "Lave målinger i træk før afslutning",
     "interrupted_min_seconds": "Korte cyklusser markeres som afbrudt",
@@ -1474,6 +1475,10 @@
     "save_debug_traces": {
       "doc": "Gem fuld effektsporing og matchende fejlretningsdata for hver cyklus. Nyttig til fejlfinding, men øger lagerstørrelsen.",
       "label": "Gem fejlretningsspor"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Hvor langt en cyklus skal være inde i det genkendte programs forventede varighed, før smart afslutning må afslutte den tidligt, når effekten falder. Den forventede varighed er programmets gennemsnit, så på apparater med stærkt varierende køretid - vaskemaskiner med koldt vinter- kontra varmt sommerindløbsvand, tørretumblere med fugtsensor, belastningsafhængige programmer - slutter omkring halvdelen af alle kørsler kortere end dette gennemsnit og får aldrig den hurtige afslutning, men slutter først minutter senere via reserve-timeoutet. Sænk denne værdi (f.eks. 0,85) på sådanne maskiner, så den tidlige afslutning stadig udløses; hæv den mod 1,0 for at være mere forsigtig. Lad feltet stå tomt for standarden (0,98 eller 0,99 for opvaskemaskiner). Den kan kun afslutte en cyklus tidligere, aldrig senere, og udløses aldrig ved en tvetydig eller usikker genkendelse.",
+      "label": "Forhold for smart afslutning"
     },
     "smoothing_window": {
       "doc": "Hvor meget råeffektsignalet udjævnes. Lav (2) er lydhør, men støjende; høj (5) udglatter pigge, men tilføjer forsinkelse.",

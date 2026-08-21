@@ -1064,6 +1064,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
+    "smart_termination_duration_ratio": "Anteil der erwarteten Dauer des zugeordneten Programms, den ein Zyklus erreichen muss, bevor die intelligente Beendigung ihn vorzeitig beenden darf; bei last- oder temperaturabhängigen Geräten senken",
     "completion_min_seconds": "Kürzester Lauf, der als echter Zyklus zählt",
     "end_repeat_count": "Aufeinanderfolgende niedrige Messwerte vor dem Ende",
     "interrupted_min_seconds": "Kurze Zyklen werden als unterbrochen markiert",
@@ -1470,6 +1471,10 @@
     "save_debug_traces": {
       "doc": "Speichern Sie für jeden Zyklus die vollständige Leistungsverfolgung und die entsprechenden Debug-Daten. Nützlich zur Fehlerbehebung, erhöht jedoch die Speichergröße.",
       "label": "Debug-Traces speichern"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Wie weit ein Zyklus in die erwartete Dauer des zugeordneten Programms fortgeschritten sein muss, bevor die intelligente Beendigung ihn bei einem Leistungsabfall vorzeitig beenden darf. Die erwartete Dauer ist der Durchschnitt des Programms; bei Geräten mit stark schwankender Laufzeit - Waschmaschinen bei kaltem Winter- gegenüber warmem Sommer-Zulaufwasser, Trockner mit Feuchtesensor, lastabhängige Programme - endet daher etwa die Hälfte aller Läufe kürzer als dieser Durchschnitt und erhält nie die schnelle Beendigung, sondern endet erst Minuten später über den Rückfall-Timeout. Senken Sie diesen Wert (z. B. 0,85) bei solchen Geräten, damit die vorzeitige Beendigung dennoch auslöst; erhöhen Sie ihn Richtung 1,0, um vorsichtiger zu sein. Leer lassen für den Standard (0,98 bzw. 0,99 für Geschirrspüler). Er kann einen Zyklus nur früher beenden, niemals später, und löst nie bei einer mehrdeutigen oder unsicheren Zuordnung aus.",
+      "label": "Verhältnis für intelligente Beendigung"
     },
     "smoothing_window": {
       "doc": "Wie stark wird das Rohleistungssignal geglättet? Niedrig (2) reagiert, ist aber laut; Hoch (5) glättet Spitzen, fügt aber Verzögerung hinzu.",

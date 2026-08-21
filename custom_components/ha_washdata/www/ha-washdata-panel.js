@@ -115,6 +115,8 @@ const _SETTINGS_SECTIONS = [
         doc: 'During the off-delay countdown, accumulated energy (watts x time) is compared to this threshold. If exceeded, the countdown resets - keeping anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Raise it if cycles end too early during cool-down; lower it if detection is sluggish.' },
       { key: 'end_repeat_count', label: 'End Repeat Count', type: 'number', min: 1, def: 1,
         doc: 'Number of consecutive below-stop-threshold readings required before the cycle ends. 1 is fine for most plugs. Raise to 2-3 if your smart plug occasionally reports a false-zero sample mid-cycle and your cycles are ending prematurely.' },
+      { key: 'smart_termination_duration_ratio', label: 'Smart Termination Ratio', type: 'number', step: 0.01, min: 0.5, max: 1.0,
+        doc: 'How far into the matched program\'s expected duration a cycle must be before Smart Termination may end it early once power drops. The expected duration is the program\'s average, so on appliances whose runtime varies a lot - washers on cold winter vs warm summer inlet water, sensor-dry dryers, load-dependent programs - about half of all runs finish shorter than that average and never get the fast finish, ending only via the fallback timeout minutes late. Lower this (e.g. 0.85) on those machines so the early finish still fires; raise it toward 1.0 to be more conservative. Leave empty for the default (0.98, or 0.99 for dishwashers). It can only ever end a cycle earlier, never later, and never fires on an ambiguous or low-confidence match.' },
     ] },
     { sub: 'Power Off', fields: [
       { key: 'power_off_threshold_w', label: 'Power Off Threshold', unit: 'W', type: 'number', step: 0.1, min: 0, def: 0,
@@ -5706,6 +5708,7 @@ class HaWashdataPanel extends HTMLElement {
       ['anti_wrinkle_exit_power', 'Anti-Wrinkle Exit Power','W', 'Power must fall below this between pulses for anti-wrinkle to stay active', 'advanced'],
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
       ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released', 'advanced'],
+      ['smart_termination_duration_ratio', 'Smart Termination Ratio', '', 'Fraction of the matched program\'s expected duration a cycle must reach before Smart Termination may end it early; lower it for load- or temperature-dependent machines', 'advanced'],
       ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
       ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
       ['corr_weight',      'Correlation Weight', '', 'Stage 2: balance between curve shape (correlation) and power level (MAE); default 0.45', 'matching'],

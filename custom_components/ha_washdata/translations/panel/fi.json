@@ -1064,6 +1064,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
+    "smart_termination_duration_ratio": "Osuus täsmätyn ohjelman odotetusta kestosta, joka syklin on saavutettava ennen kuin älykäs lopetus voi päättää sen ennenaikaisesti; laske sitä kuormasta tai lämpötilasta riippuvilla koneilla",
     "anti_wrinkle_enabled": "Sulauta päävaiheen jälkeiset rumpupulssit sen sijaan, että lukisit ne uusina sykleinä",
     "anti_wrinkle_exit_power": "Tehon on laskettava tämän alle pulssien välillä, jotta ryppyjenesto pysyy aktiivisena",
     "anti_wrinkle_idle_timeout": "Kahden rumpupulssin välillä sallittu hiljainen aika ennen kuin ryppyjenesto päättyy",
@@ -1474,6 +1475,10 @@
     "save_debug_traces": {
       "doc": "Tallenna täyden tehon jäljitys ja vastaavat virheenkorjaustiedot jokaiselle jaksolle. Hyödyllinen vianetsinnässä, mutta lisää tallennustilaa.",
       "label": "Tallenna virheenkorjausjäljet"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Kuinka pitkälle täsmätyn ohjelman odotettuun kestoon syklin on edettävä, ennen kuin älykäs lopetus voi päättää sen ennenaikaisesti tehon pudottua. Odotettu kesto on ohjelman keskiarvo, joten laitteilla, joiden ajoaika vaihtelee paljon - pesukoneet kylmällä talven tulovedellä vs. lämpimällä kesän tulovedellä, anturikuivaavat kuivausrummut, kuormasta riippuvat ohjelmat - noin puolet kaikista ajoista päättyy tätä keskiarvoa lyhyempinä eivätkä koskaan saa nopeaa lopetusta, vaan päättyvät vasta vara-aikakatkaisun kautta minuutteja myöhässä. Laske tätä (esim. 0,85) näissä koneissa, jotta ennenaikainen lopetus silti laukeaa; nosta sitä kohti arvoa 1,0 ollaksesi varovaisempi. Jätä tyhjäksi käyttääksesi oletusta (0,98, tai astianpesukoneilla 0,99). Se voi ainoastaan päättää syklin aiemmin, ei koskaan myöhemmin, eikä koskaan laukea epäselvässä tai matalan varmuuden täsmäyksessä.",
+      "label": "Älykkään lopetuksen suhde"
     },
     "smoothing_window": {
       "doc": "Kuinka paljon raakatehosignaali tasoittuu. Matala (2) on herkkä, mutta meluisa; korkea (5) tasoittaa piikkejä, mutta lisää viivettä.",

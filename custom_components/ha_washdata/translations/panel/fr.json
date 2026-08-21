@@ -1016,6 +1016,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",
+    "smart_termination_duration_ratio": "Fraction de la durée prévue du programme correspondant qu'un cycle doit atteindre avant que la Terminaison intelligente puisse le terminer plus tôt ; abaissez-la pour les machines dépendant de la charge ou de la température",
     "anti_wrinkle_enabled": "Absorber les impulsions de culbutage après la phase principale au lieu de les lire comme de nouveaux cycles",
     "anti_wrinkle_exit_power": "La puissance doit tomber sous ce seuil entre les impulsions pour que l'anti-froissement reste actif",
     "anti_wrinkle_idle_timeout": "Temps de silence autorisé entre deux impulsions de culbutage avant la fin de l'anti-froissement",
@@ -1426,6 +1427,10 @@
     "save_debug_traces": {
       "doc": "Stockez la trace de puissance complète et les données de débogage correspondantes pour chaque cycle. Utile pour le dépannage mais augmente la taille du stockage.",
       "label": "Enregistrer les traces de débogage"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "À quel point un cycle doit avoir progressé dans la durée prévue du programme correspondant avant que la Terminaison intelligente puisse le terminer plus tôt une fois la puissance retombée. La durée prévue est la moyenne du programme ; ainsi, sur les appareils dont le temps de fonctionnement varie beaucoup - lave-linge selon l'eau d'arrivée froide en hiver ou tiède en été, sèche-linge à sonde d'humidité, programmes dépendant de la charge - environ la moitié des cycles se terminent plus tôt que cette moyenne et ne bénéficient jamais de la fin rapide, s'achevant seulement via le délai de secours avec plusieurs minutes de retard. Abaissez cette valeur (p. ex. 0,85) sur ces machines pour que la fin anticipée se déclenche quand même ; augmentez-la vers 1,0 pour être plus prudent. Laissez vide pour la valeur par défaut (0,98, ou 0,99 pour les lave-vaisselle). Elle ne peut que terminer un cycle plus tôt, jamais plus tard, et ne se déclenche jamais sur une correspondance ambiguë ou peu fiable.",
+      "label": "Ratio de terminaison intelligente"
     },
     "smoothing_window": {
       "doc": "Dans quelle mesure le signal de puissance brute est lissé. Low (2) est réactif mais bruyant ; high (5) lisse les pointes mais ajoute du décalage.",

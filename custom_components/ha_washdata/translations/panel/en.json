@@ -1039,6 +1039,7 @@
     "energy_scale": "Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)",
     "anti_wrinkle_idle_timeout": "Quiet time allowed between two tumble pulses before anti-wrinkle ends",
     "dishwasher_end_spike_quiet_release": "Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released",
+    "smart_termination_duration_ratio": "Fraction of the matched program's expected duration a cycle must reach before Smart Termination may end it early; lower it for load- or temperature-dependent machines",
     "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
     "anti_wrinkle_enabled": "Absorb the tumble pulses after the main phase instead of reading them as new cycles",
     "anti_wrinkle_max_duration": "A pulse longer than this ends anti-wrinkle and opens a new cycle",
@@ -1522,6 +1523,10 @@
     },
     "show_contributor": {
       "doc": "Show the \"by <contributor>\" attribution on community appliances and reference cycles."
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "How far into the matched program's expected duration a cycle must be before Smart Termination may end it early once power drops. The expected duration is the program's average, so on appliances whose runtime varies a lot - washers on cold winter vs warm summer inlet water, sensor-dry dryers, load-dependent programs - about half of all runs finish shorter than that average and never get the fast finish, ending only via the fallback timeout minutes late. Lower this (e.g. 0.85) on those machines so the early finish still fires; raise it toward 1.0 to be more conservative. Leave empty for the default (0.98, or 0.99 for dishwashers). It can only ever end a cycle earlier, never later, and never fires on an ambiguous or low-confidence match.",
+      "label": "Smart Termination Ratio"
     },
     "smoothing_window": {
       "doc": "How much the raw power signal is smoothed. Low (2) is responsive but noisy; high (5) smooths spikes but adds lag.",

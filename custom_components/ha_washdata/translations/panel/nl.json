@@ -1064,6 +1064,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Vaatwasser: stille seconden na de verwachte duur voordat de wachttijd op het wegpompen aan het einde van de cyclus wordt vrijgegeven",
+    "smart_termination_duration_ratio": "Deel van de verwachte duur van het herkende programma dat een cyclus moet bereiken voordat de slimme beëindiging hem vroegtijdig mag afsluiten; verlaag deze voor belasting- of temperatuurafhankelijke machines",
     "completion_min_seconds": "Kortste run die als een echte cyclus telt",
     "end_repeat_count": "Opeenvolgende lage metingen voor het einde",
     "interrupted_min_seconds": "Korte cycli gemarkeerd als onderbroken",
@@ -1474,6 +1475,10 @@
     "save_debug_traces": {
       "doc": "Bewaar de volledige vermogenstrace en overeenkomende foutopsporingsgegevens voor elke cyclus. Handig voor het oplossen van problemen, maar vergroot de opslaggrootte.",
       "label": "Foutopsporingssporen opslaan"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Hoe ver een cyclus in de verwachte duur van het herkende programma moet zijn voordat de slimme beëindiging hem vroegtijdig mag afsluiten zodra het vermogen daalt. De verwachte duur is het gemiddelde van het programma, dus bij apparaten waarvan de looptijd sterk varieert - wasmachines met koud toevoerwater in de winter versus warm in de zomer, drogers met vochtsensor, belastingafhankelijke programma's - eindigt ongeveer de helft van alle draaien korter dan dat gemiddelde en krijgt nooit de snelle beëindiging, maar eindigt pas minuten later via de fallback-time-out. Verlaag deze waarde (bijv. 0,85) op zulke machines zodat de vroegtijdige beëindiging toch wordt geactiveerd; verhoog hem richting 1,0 om voorzichtiger te zijn. Laat leeg voor de standaard (0,98, of 0,99 voor vaatwassers). Hij kan een cyclus alleen eerder beëindigen, nooit later, en wordt nooit geactiveerd bij een dubbelzinnige of onzekere herkenning.",
+      "label": "Verhouding slimme beëindiging"
     },
     "smoothing_window": {
       "doc": "Hoeveel het ruwe stroomsignaal wordt afgevlakt. Laag (2) is responsief maar luidruchtig; hoog (5) verzacht pieken maar voegt vertraging toe.",

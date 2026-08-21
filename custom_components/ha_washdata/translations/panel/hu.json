@@ -1446,6 +1446,10 @@
             "doc": "Tárolja a teljes teljesítmény nyomkövetést és a megfelelő hibakeresési adatokat minden ciklushoz. Hasznos hibaelhárításhoz, de növeli a tárhely méretét.",
             "label": "Hibakeresési nyomok mentése"
         },
+        "smart_termination_duration_ratio": {
+            "doc": "Mennyire kell előrehaladnia a ciklusnak az egyeztetett program várható időtartamán belül, mielőtt az intelligens leállítás a teljesítmény csökkenésekor korábban befejezheti azt. A várható időtartam a program átlaga, így azokon a készülékeken, amelyek futásideje sokat ingadozik - mosógépek hideg téli és meleg nyári befolyó vízzel, szárazságérzékelős szárítógépek, terheléstől függő programok - az összes futás nagyjából fele ennél az átlagnál rövidebben fejeződik be, és soha nem kapja meg a gyors befejezést, csak a tartalék időtúllépésen keresztül ér véget, percekkel később. Csökkentse ezt (pl. 0.85) ezeken a gépeken, hogy a korai befejezés így is elinduljon; emelje 1.0 felé az óvatosabb működéshez. Hagyja üresen az alapértelmezett értékhez (0.98, mosogatógépeknél 0.99). Csak korábban fejezhet be egy ciklust, soha nem később, és soha nem indul el bizonytalan vagy alacsony megbízhatóságú egyezésnél.",
+            "label": "Intelligens leállítási arány"
+        },
         "smoothing_window": {
             "doc": "Mennyire van simítva a nyers teljesítményjel. Alacsony (2) érzékeny, de zajos; magas (5) kisimítja a tüskéket, de növeli a késést.",
             "label": "Simítási ablak"
@@ -1957,6 +1961,7 @@
     },
     "pg_desc": {
         "dishwasher_end_spike_quiet_release": "Mosogatógép: csendes másodpercek a várható időtartam után, mielőtt a ciklus végi leeresztésre való várakozás feloldódik",
+        "smart_termination_duration_ratio": "Az egyeztetett program várható időtartamának hányada, amelyet a ciklusnak el kell érnie, mielőtt az intelligens leállítás korábban befejezheti; csökkentse a terheléstől vagy hőmérséklettől függő gépeknél",
         "anti_wrinkle_enabled": "Nyelje el a fő fázis utáni szárítópulzusokat, ahelyett hogy új ciklusként olvasná őket",
         "anti_wrinkle_exit_power": "A ránctalanítás aktívan tartásához a teljesítménynek az impulzusok között ez alá kell csökkennie",
         "anti_wrinkle_idle_timeout": "Két szárítópulzus között engedélyezett csendes idő, mielőtt a ránctalanítás véget ér",
