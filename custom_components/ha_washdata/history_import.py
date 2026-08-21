@@ -651,7 +651,11 @@ def summarize_segment(
     else:
         accept, reason = False, "no_clean_end"
 
-    step = max(1, len(powers) // max(1, curve_points))
+    # Ceiling division so the stride always spans the whole trace. Floor division
+    # gives step=1 when curve_points < len(powers) < 2*curve_points, and the [:curve_points]
+    # slice below would then show only the first curve_points samples (the head of the
+    # cycle) instead of the full shape.
+    step = max(1, -(-len(powers) // max(1, curve_points)))
     return {
         "index": index,
         "start_time": cycle_data.get("start_time"),

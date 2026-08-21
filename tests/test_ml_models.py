@@ -99,6 +99,24 @@ def test_available_models_tolerates_a_non_dict_manifest(monkeypatch) -> None:
         engine._MANIFEST_MODELS_CACHE = None  # don't poison other tests
 
 
+def test_available_models_caches_empty_on_an_unexpected_failure(monkeypatch) -> None:
+    """Any warm-up failure must assign the cache, else an event-loop caller retries the
+    blocking manifest read (#328). A non-OSError/ValueError from read_text is caught."""
+    from custom_components.ha_washdata.ml import engine
+
+    monkeypatch.setattr(engine, "_MANIFEST_MODELS_CACHE", None)
+
+    def _boom(*_a, **_k):
+        raise RuntimeError("unexpected")
+
+    monkeypatch.setattr(engine.json, "loads", _boom)
+    try:
+        assert engine.available_models() == []
+        assert engine._MANIFEST_MODELS_CACHE == []  # cache assigned, not left cold
+    finally:
+        engine._MANIFEST_MODELS_CACHE = None
+
+
 def test_available_models_drops_non_dict_entries(monkeypatch) -> None:
     """A manifest like {"models": [null, {...}]} must not return the null entry -
     the declared return is list[dict]."""
