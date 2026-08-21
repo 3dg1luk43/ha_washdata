@@ -920,6 +920,7 @@
     "review_recorded_tip": "Merkitse tämä käsin valituksi referenssijaksoksi ohjelmaansa varten - sama rooli kuin manuaalisesti tallennetulla jaksolla. Vertailusyklit säilytetään aina, siemennä vastaava malli, eikä niitä koskaan pudoteta puhdistuksen yhteydessä. (Tämä on \"kultainen\" / tallennettu lippu; molemmat ovat sama asia.)",
     "review_tags_tip": "Valinnaiset liput, jotka kuvaavat, mikä meni pieleen tässä syklissä, joten koulutus ja siivous voivat selittää sen.",
     "review_to_cycles": "Avaa Cycles tarkistusjono",
+    "samples_decimated": "Näytetään {shown}/{total} näytettä (harvennettu näyttöä varten; huiput säilytetty). Leveä väli tässä johtuu harvennuksesta, ei puuttuvasta datasta.",
     "saving_triggers_reload": "Tallentaminen käynnistää integroinnin uudelleenlatauksen. HA-entiteetit voivat hetken näkyä poissa käytöstä.",
     "search_placeholder": "Hakuasetukset…",
     "see_recorder": "Katso tallennin-widget alta",

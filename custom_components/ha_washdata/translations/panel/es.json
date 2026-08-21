@@ -872,6 +872,7 @@
     "review_recorded_tip": "Marque esto como un ciclo de referencia cuidadosamente seleccionado para su programa: la misma función que un ciclo registrado manualmente. Los ciclos de referencia siempre se mantienen, generan la plantilla coincidente y nunca se eliminan durante la limpieza. (Esta es la bandera \"dorada\"/grabada; ambas son lo mismo).",
     "review_tags_tip": "Banderas opcionales que describen lo que salió mal en este ciclo, para que el entrenamiento y la limpieza puedan explicarlo.",
     "review_to_cycles": "Abrir la cola de revisión de Ciclos",
+    "samples_decimated": "Mostrando {shown} de {total} muestras (reducidas para la visualización; se conservan los picos). Un hueco amplio aquí se debe a la reducción, no a datos faltantes.",
     "saving_triggers_reload": "Al guardar se activa una recarga de integración. Las entidades HA pueden aparecer brevemente como no disponibles.",
     "search_placeholder": "Configuración de búsqueda…",
     "see_recorder": "Vea el widget de grabadora a continuación",

@@ -950,6 +950,7 @@
     "review_recorded_tip": "Mark this as a hand-picked reference cycle for its program - the same role as a manually recorded cycle. Reference cycles are always kept, seed the matching template, and are never dropped by cleanup. (This is the \"golden\"/recorded flag; both are the same thing.)",
     "review_tags_tip": "Optional flags describing what went wrong with this cycle, so training and cleanup can account for it.",
     "review_to_cycles": "Open the Cycles review queue",
+    "samples_decimated": "Showing {shown} of {total} samples (thinned for display; peaks kept). A wide gap here is thinning, not missing data.",
     "saving_triggers_reload": "Saving triggers an integration reload. HA entities may briefly show as unavailable.",
     "search_placeholder": "Search settings…",
     "see_recorder": "See recorder widget below",

@@ -920,6 +920,7 @@
         "review_recorded_tip": "Shënojeni këtë si një cikël referimi të zgjedhur vetë për programin e tij - i njëjti rol si një cikël i regjistruar manualisht. Ciklet e referencës mbahen gjithmonë, vendosin shabllonin që përputhet dhe nuk hiqen kurrë nga pastrimi. (Ky është flamuri \"i artë\"/regjistruar; të dy janë e njëjta gjë.)",
         "review_tags_tip": "Flamujt opsionalë që përshkruajnë atë që shkoi keq me këtë cikël, kështu që trajnimi dhe pastrimi mund të jenë përgjegjës për këtë.",
         "review_to_cycles": "Hap radhën e rishikimit të Cikleve",
+        "samples_decimated": "Duke shfaqur {shown} nga {total} kampione (të holluara për shfaqje; kulmet janë ruajtur). Një hapësirë e gjerë këtu është hollim, jo të dhëna që mungojnë.",
         "saving_triggers_reload": "Ruajtja aktivizon ringarkimin e integrimit. Njësitë HA mund të shfaqen shkurtimisht si të padisponueshme.",
         "search_placeholder": "Kërko cilësime…",
         "see_recorder": "Shiko veglën e regjistruesit më poshtë",

@@ -921,6 +921,7 @@
     "review_recorded_tip": "Označite to kot ročno izbran referenčni cikel za svoj program – enaka vloga kot ročno posnet cikel. Referenčni cikli so vedno shranjeni, zasejejo ujemajočo se predlogo in se nikoli ne izbrišejo s čiščenjem. (To je zlata/posneta zastava; obe sta enaki.)",
     "review_tags_tip": "Neobvezne zastavice, ki opisujejo, kaj je šlo narobe s tem ciklom, tako da lahko to pojasnita usposabljanje in čiščenje.",
     "review_to_cycles": "Odpri čakalno vrsto pregleda ciklov",
+    "samples_decimated": "Prikazanih {shown} od {total} vzorcev (razredčeno za prikaz; konice ohranjene). Široka vrzel tukaj pomeni razredčitev, ne manjkajočih podatkov.",
     "saving_triggers_reload": "Shranjevanje sproži ponovni zagon integracije. Entitete HA se lahko za kratek čas prikažejo kot nedostopne.",
     "search_placeholder": "Iskanje nastavitev…",
     "see_recorder": "Glejte pripomoček za snemanje spodaj",

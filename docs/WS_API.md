@@ -954,6 +954,8 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | --- | --- | --- |
 | `cycle_id` | no | str |
 | `samples` | no | list[list[number]] |
+| `sample_count` | no | number |
+| `decimated` | no | bool |
 | `full_duration_s` | no | number |
 | `start_time` | no | str \| null |
 | `end_time` | no | str \| null |
@@ -999,6 +1001,8 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `segments` | yes | list[list[number]] |
 | `split_offsets` | yes | list[number] |
 | `samples` | yes | list[list[number]] |
+| `sample_count` | yes | number |
+| `decimated` | yes | bool |
 | `full_duration_s` | yes | number |
 
 ## `ha_washdata/apply_split`

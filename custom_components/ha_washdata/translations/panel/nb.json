@@ -920,6 +920,7 @@
     "review_recorded_tip": "Merk dette som en håndplukket referansesyklus for programmet - samme rolle som en manuelt registrert syklus. Referansesykluser beholdes alltid, setter den matchende malen, og blir aldri droppet ved opprydding. (Dette er det \"gyldne\"/innspilte flagget; begge er det samme.)",
     "review_tags_tip": "Valgfrie flagg som beskriver hva som gikk galt med denne syklusen, slik at trening og opprydding kan forklare det.",
     "review_to_cycles": "Åpne Cycles review-køen",
+    "samples_decimated": "Viser {shown} av {total} prøver (tynnet ut for visning; topper beholdes). Et bredt hull her er uttynning, ikke manglende data.",
     "saving_triggers_reload": "Lagring utløser en ny integrasjon. HA-enheter kan kort vises som utilgjengelige.",
     "search_placeholder": "Søkeinnstillinger...",
     "see_recorder": "Se opptaker-widget nedenfor",

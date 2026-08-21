@@ -920,6 +920,7 @@
     "review_recorded_tip": "Atzīmējiet to kā manuāli izvēlētu atsauces ciklu savai programmai – tāda pati loma kā manuāli ierakstītam ciklam. Atsauces cikli vienmēr tiek saglabāti, ievietojiet atbilstošo veidni, un tīrīšanas laikā tie nekad netiek atmesti. (Šis ir \"zelta\"/ierakstītais karogs; abi ir viens un tas pats.)",
     "review_tags_tip": "Izvēles karodziņi, kas apraksta, kas šajā ciklā nogāja greizi, tāpēc apmācība un tīrīšana var to izskaidrot.",
     "review_to_cycles": "Atveriet ciklu pārskatīšanas rindu",
+    "samples_decimated": "Rāda {shown} no {total} paraugiem (attēlošanai retināts; virsotnes saglabātas). Plaša atstarpe šeit ir retināšana, nevis trūkstoši dati.",
     "saving_triggers_reload": "Saglabāšana aktivizē integrācijas atkārtotu ielādi. HA entītijas var īslaicīgi parādīties kā nepieejamas.",
     "search_placeholder": "Meklēšanas iestatījumi…",
     "see_recorder": "Skatiet ierakstītāja logrīku zemāk",

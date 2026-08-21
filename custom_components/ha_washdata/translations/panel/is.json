@@ -920,6 +920,7 @@
     "review_recorded_tip": "Merktu þetta sem handvalda viðmiðunarlotu fyrir kerfið sem hún tilheyrir - sama hlutverk og handvirkt skráð lota. Viðmiðunarlotum er alltaf haldið, þær móta samsvörunarsniðmátið og þeim er aldrei sleppt við hreinsun. (Þetta er „gyllti“/skráði fáninn; hvort tveggja er það sama.)",
     "review_tags_tip": "Valfrjálsir fánar sem lýsa því sem fór úrskeiðis við þessa lotu, svo þjálfun og hreinsun getur gert grein fyrir því.",
     "review_to_cycles": "Opnaðu Cycles review biðröðina",
+    "samples_decimated": "Sýnir {shown} af {total} sýnum (grisjað fyrir birtingu; toppum haldið). Breið eyða hér stafar af grisjun, ekki af gögnum sem vantar.",
     "saving_triggers_reload": "Vistun kallar á endurhleðslu samþættingar. HA einingar gætu sýnt stuttlega sem ófáanlegur.",
     "search_placeholder": "Leitarstillingar...",
     "see_recorder": "Sjá upptökugræju hér að neðan",

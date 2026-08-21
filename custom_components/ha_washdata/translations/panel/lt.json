@@ -920,6 +920,7 @@
     "review_recorded_tip": "Pažymėkite tai kaip savo programos etaloninį ciklą – tą patį vaidmenį kaip ir rankiniu būdu įrašytą ciklą. Etaloniniai ciklai visada išsaugomi, imamasi atitinkamo šablono ir niekada nenuleidžiami valant. (Tai yra „auksinė“ / įrašyta vėliava; abi yra tas pats.)",
     "review_tags_tip": "Pasirenkamos vėliavėlės, nurodančios, kas nutiko šiame cikle, todėl mokymai ir valymas gali tai paaiškinti.",
     "review_to_cycles": "Atidarykite ciklų peržiūros eilę",
+    "samples_decimated": "Rodoma {shown} iš {total} pavyzdžių (praretinta rodymui; smailės išsaugotos). Platus tarpas čia yra praretinimas, o ne trūkstami duomenys.",
     "saving_triggers_reload": "Išsaugojus suaktyvinamas integracijos įkėlimas iš naujo. HA objektai trumpam gali būti rodomi kaip nepasiekiami.",
     "search_placeholder": "Paieškos nustatymai…",
     "see_recorder": "Žiūrėkite įrašymo valdiklį žemiau",

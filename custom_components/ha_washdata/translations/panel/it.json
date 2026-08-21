@@ -872,6 +872,7 @@
     "review_recorded_tip": "Contrassegnalo come ciclo di riferimento selezionato manualmente per il suo programma: lo stesso ruolo di un ciclo registrato manualmente. I cicli di riferimento vengono sempre mantenuti, seminano il modello corrispondente e non vengono mai eliminati dalla pulizia. (Questa è la bandiera \"d'oro\"/registrata; entrambe sono la stessa cosa.)",
     "review_tags_tip": "Flag facoltativi che descrivono cosa è andato storto in questo ciclo, in modo che l'addestramento e la pulizia possano tenerne conto.",
     "review_to_cycles": "Apri la coda di revisione dei cicli",
+    "samples_decimated": "Visualizzazione di {shown} di {total} campioni (ridotti per la visualizzazione; picchi mantenuti). Un ampio spazio vuoto qui è dovuto alla riduzione, non a dati mancanti.",
     "saving_triggers_reload": "Il salvataggio attiva un ricaricamento dell'integrazione. Le entità HA potrebbero essere visualizzate brevemente come non disponibili.",
     "search_placeholder": "Cerca impostazioni...",
     "see_recorder": "Vedi il widget del registratore di seguito",

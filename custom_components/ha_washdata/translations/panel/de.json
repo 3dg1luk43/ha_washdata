@@ -920,6 +920,7 @@
     "review_recorded_tip": "Markieren Sie dies als handverlesenen Referenzzyklus für sein Programm – die gleiche Rolle wie ein manuell aufgezeichneter Zyklus. Referenzzyklen bleiben immer erhalten, setzen die passende Vorlage als Seed und werden bei der Bereinigung niemals gelöscht. (Dies ist die „goldene“/aufgezeichnete Flagge; beide sind dasselbe.)",
     "review_tags_tip": "Optionale Flags, die beschreiben, was bei diesem Zyklus schief gelaufen ist, damit Training und Bereinigung dafür verantwortlich sein können.",
     "review_to_cycles": "Öffnen Sie die Cycles-Bewertungswarteschlange",
+    "samples_decimated": "Es werden {shown} von {total} Messwerten angezeigt (für die Anzeige ausgedünnt; Spitzen bleiben erhalten). Eine breite Lücke hier ist Ausdünnung, keine fehlenden Daten.",
     "saving_triggers_reload": "Durch das Speichern wird ein Neuladen der Integration ausgelöst. HA-Entitäten werden möglicherweise kurzzeitig als nicht verfügbar angezeigt.",
     "search_placeholder": "Einstellungen durchsuchen…",
     "see_recorder": "Siehe Rekorder-Widget unten",

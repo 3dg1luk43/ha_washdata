@@ -872,6 +872,7 @@
     "review_recorded_tip": "Marque este ciclo como referência escolhida a dedo para seu programa – o mesmo papel de um ciclo gravado manualmente. Os ciclos de referência são sempre mantidos, alimentam o modelo de correspondência e nunca são removidos pela limpeza. (Esta é a bandeira \"dourada\"/gravada; ambas são a mesma coisa.)",
     "review_tags_tip": "Etiquetas opcionais que descrevem o que deu errado com este ciclo, para que o treinamento e a limpeza possam levar isso em conta.",
     "review_to_cycles": "Abrir a fila de revisão de Ciclos",
+    "samples_decimated": "Mostrando {shown} de {total} amostras (reduzidas para exibição; picos mantidos). Um intervalo grande aqui se deve à redução, não a dados faltantes.",
     "saving_triggers_reload": "Salvar aciona um recarregamento da integração. As entidades do HA podem ficar brevemente indisponíveis.",
     "search_placeholder": "Pesquisar configurações…",
     "see_recorder": "Veja o widget de gravação abaixo",
