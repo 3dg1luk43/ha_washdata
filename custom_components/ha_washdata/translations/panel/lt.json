@@ -266,9 +266,9 @@
     "settings_banner_btn": "Eiti į pirmą",
     "confidence": {
       "auto": "Turi būti lygus arba aukščiau atitikimo slenksčio ({match})",
-      "learning": "Turi būti lygus arba žemiau atitikimo slenksčio ({match})",
+      "learning": "Turi būti lygus arba aukščiau atitikimo slenksčio ({match})",
       "match_for_auto": "Turi būti lygus arba žemiau automatinio žymėjimo pasitikėjimo ({alc})",
-      "match_for_learning": "Turi būti lygus arba aukščiau mokymosi pasitikėjimo ({lc})"
+      "match_for_learning": "Turi būti lygus arba žemiau mokymosi pasitikėjimo ({lc})"
     },
     "duration_ratio": {
       "max": "Turi būti daugiau nei minimalaus trukmės santykio ({min})",

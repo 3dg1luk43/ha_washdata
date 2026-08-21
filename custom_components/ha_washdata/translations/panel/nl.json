@@ -264,9 +264,9 @@
     "attn_title": "Instellingsconflicten: {n}",
     "confidence": {
       "auto": "Moet op of boven de overeenkomstdrempel ({match}) liggen",
-      "learning": "Moet op of onder de overeenkomstdrempel ({match}) liggen",
+      "learning": "Moet op of boven de overeenkomstdrempel ({match}) liggen",
       "match_for_auto": "Moet op of onder het automatisch-label-betrouwbaarheidsniveau ({alc}) liggen",
-      "match_for_learning": "Moet op of boven het leerbetrouwbaarheidsniveau ({lc}) liggen"
+      "match_for_learning": "Moet op of onder het leerbetrouwbaarheidsniveau ({lc}) liggen"
     },
     "duration_ratio": {
       "max": "Moet groter zijn dan de minimale duurverhouding ({min})",

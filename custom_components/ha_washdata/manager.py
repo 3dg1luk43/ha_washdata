@@ -228,6 +228,9 @@ from .const import (
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
     DEFAULT_WATCHDOG_INTERVAL,
+    resolve_sampling_interval_default,
+    resolve_watchdog_interval_default,
+    resolve_start_duration_default,
     CONF_MATCH_PERSISTENCE,
     DEFAULT_MATCH_PERSISTENCE,
     DEFAULT_MATCH_REVERT_RATIO,
@@ -717,7 +720,8 @@ class WashDataManager:
 
         start_duration_threshold = float(
             config_entry.options.get(
-                CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD
+                CONF_START_DURATION_THRESHOLD,
+                resolve_start_duration_default(self.device_type),
             )
         )
         end_repeat_count = int(
@@ -934,13 +938,19 @@ class WashDataManager:
         self._remove_external_trigger_listener = None  # External cycle end trigger
         self._remove_watchdog = None
         self._watchdog_interval = int(
-            config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
+            config_entry.options.get(
+                CONF_WATCHDOG_INTERVAL,
+                resolve_watchdog_interval_default(self.device_type),
+            )
         )
         self._match_persistence = int(
             config_entry.options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE)
         )
         self._sampling_interval = float(
-            config_entry.options.get(CONF_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL)
+            config_entry.options.get(
+                CONF_SAMPLING_INTERVAL,
+                resolve_sampling_interval_default(self.device_type),
+            )
         )
         self._noise_events_threshold = int(
             config_entry.options.get(
@@ -2167,7 +2177,8 @@ class WashDataManager:
 
         new_start_threshold = float(
             config_entry.options.get(
-                CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD
+                CONF_START_DURATION_THRESHOLD,
+                resolve_start_duration_default(self.device_type),
             )
         )
         new_end_repeat_count = int(
@@ -2480,7 +2491,10 @@ class WashDataManager:
         # Update sampling interval
         old_sampling = self._sampling_interval
         new_sampling = float(
-            config_entry.options.get(CONF_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL)
+            config_entry.options.get(
+                CONF_SAMPLING_INTERVAL,
+                resolve_sampling_interval_default(self.device_type),
+            )
         )
         if old_sampling != new_sampling:
             self._sampling_interval = new_sampling

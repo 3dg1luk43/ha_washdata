@@ -78,6 +78,9 @@ from .const import (
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
+    resolve_sampling_interval_default,
+    resolve_watchdog_interval_default,
+    resolve_start_duration_default,
     DEFAULT_MAINTENANCE_REMINDER_CYCLES,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
@@ -1479,7 +1482,21 @@ def ws_get_options(
         connection.send_error(msg["id"], "not_found", f"Entry {msg['entry_id']!r} not found")
         return
     options = {**entry.data, **entry.options}
-    _send_result(connection, msg["id"], "get_options", {"options": options})
+    # Device-resolved defaults for the cadence settings whose defaults vary by
+    # device type (#396). The panel uses these as the render/conflict-check
+    # fallback for an unset field so it shows (and validates against) the value the
+    # integration would actually use - not a static schema literal that would
+    # spuriously trip the panel's own watchdog>=2*sampling / start_duration>=sampling
+    # rules on a coarse-sampling device type.
+    device_type = options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+    defaults = {
+        CONF_SAMPLING_INTERVAL: resolve_sampling_interval_default(device_type),
+        CONF_WATCHDOG_INTERVAL: resolve_watchdog_interval_default(device_type),
+        CONF_START_DURATION_THRESHOLD: resolve_start_duration_default(device_type),
+    }
+    _send_result(
+        connection, msg["id"], "get_options", {"options": options, "defaults": defaults}
+    )
 
 
 @websocket_api.websocket_command(

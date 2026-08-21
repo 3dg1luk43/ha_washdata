@@ -264,9 +264,9 @@
         "attn_title": "設定の競合: {n}",
         "confidence": {
             "auto": "マッチしきい値 ({match}) 以上である必要があります",
-            "learning": "マッチしきい値 ({match}) 以下である必要があります",
+            "learning": "マッチしきい値 ({match}) 以上である必要があります",
             "match_for_auto": "自動ラベル信頼度 ({alc}) 以下である必要があります",
-            "match_for_learning": "学習信頼度 ({lc}) 以上である必要があります"
+            "match_for_learning": "学習信頼度 ({lc}) 以下である必要があります"
         },
         "duration_ratio": {
             "max": "最小時間比率 ({min}) より大きい必要があります",

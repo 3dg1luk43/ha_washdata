@@ -264,9 +264,9 @@
     "attn_title": "Asetusten ristiriitoja: {n}",
     "confidence": {
       "auto": "Täytyy olla vähintään täsmäytyskynnys ({match})",
-      "learning": "Täytyy olla enintään täsmäytyskynnys ({match})",
+      "learning": "Täytyy olla vähintään täsmäytyskynnys ({match})",
       "match_for_auto": "Täytyy olla enintään automaattimerkinnän varmuus ({alc})",
-      "match_for_learning": "Täytyy olla vähintään oppimisen varmuus ({lc})"
+      "match_for_learning": "Täytyy olla enintään oppimisen varmuus ({lc})"
     },
     "duration_ratio": {
       "max": "Täytyy olla yli vähimmäiskestosuhteen ({min})",

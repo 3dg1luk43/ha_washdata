@@ -218,9 +218,9 @@
     "settings_banner_btn": "Aller au premier",
     "confidence": {
       "auto": "Doit être supérieur ou égal au Seuil de correspondance ({match})",
-      "learning": "Doit être inférieur ou égal au Seuil de correspondance ({match})",
+      "learning": "Doit être supérieur ou égal au Seuil de correspondance ({match})",
       "match_for_auto": "Doit être inférieur ou égal à la Confiance d'étiquetage automatique ({alc})",
-      "match_for_learning": "Doit être supérieur ou égal à la Confiance d'apprentissage ({lc})"
+      "match_for_learning": "Doit être inférieur ou égal à la Confiance d'apprentissage ({lc})"
     },
     "duration_ratio": {
       "max": "Doit être supérieur au Ratio de durée min ({min})",

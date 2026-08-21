@@ -264,9 +264,9 @@
     "attn_title": "Innstillingskonflikter: {n}",
     "confidence": {
       "auto": "Må være ved eller over matchingsterskelen ({match})",
-      "learning": "Må være ved eller under matchingsterskelen ({match})",
+      "learning": "Må være ved eller over matchingsterskelen ({match})",
       "match_for_auto": "Må være ved eller under auto-merke-konfidensen ({alc})",
-      "match_for_learning": "Må være ved eller over læringskonfidensen ({lc})"
+      "match_for_learning": "Må være ved eller under læringskonfidensen ({lc})"
     },
     "duration_ratio": {
       "max": "Må være større enn min varighetsforhold ({min})",

@@ -264,9 +264,9 @@
     "attn_title": "Konflikty nastavení: {n}",
     "confidence": {
       "auto": "Musí byť na úrovni alebo nad Prahom zhody ({match})",
-      "learning": "Musí byť na úrovni alebo pod Prahom zhody ({match})",
+      "learning": "Musí byť na úrovni alebo nad Prahom zhody ({match})",
       "match_for_auto": "Musí byť na úrovni alebo pod Spoľahlivosťou autooznačovania ({alc})",
-      "match_for_learning": "Musí byť na úrovni alebo nad Spoľahlivosťou učenia ({lc})"
+      "match_for_learning": "Musí byť na úrovni alebo pod Spoľahlivosťou učenia ({lc})"
     },
     "duration_ratio": {
       "max": "Musí byť väčší ako Min. pomer trvania ({min})",

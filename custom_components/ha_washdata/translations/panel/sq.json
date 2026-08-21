@@ -264,9 +264,9 @@
         "attn_title": "Konflikte cilësimesh: {n}",
         "confidence": {
             "auto": "Duhet të jetë në ose mbi Pragun e Përputhjes ({match})",
-            "learning": "Duhet të jetë në ose nën Pragun e Përputhjes ({match})",
+            "learning": "Duhet të jetë në ose mbi Pragun e Përputhjes ({match})",
             "match_for_auto": "Duhet të jetë në ose nën Besueshmërinë e Etiketimit Automatik ({alc})",
-            "match_for_learning": "Duhet të jetë në ose mbi Besueshmërinë e të Mësuarit ({lc})"
+            "match_for_learning": "Duhet të jetë në ose nën Besueshmërinë e të Mësuarit ({lc})"
         },
         "duration_ratio": {
             "max": "Duhet të jetë më i madh se Raporti Min. i Kohëzgjatjes ({min})",

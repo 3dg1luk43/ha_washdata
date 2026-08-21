@@ -103,6 +103,8 @@ from .const import (
     DEVICE_TYPE_OTHER,
     DEFAULT_START_DURATION_THRESHOLD,
     CONF_START_DURATION_THRESHOLD,
+    resolve_watchdog_interval_default,
+    resolve_start_duration_default,
     CONF_RUNNING_DEAD_ZONE,
 )
 from .log_utils import DeviceLoggerAdapter
@@ -139,7 +141,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         return False
 
-    if version == 3 and minor_version >= 9:
+    if version == 3 and minor_version >= 10:
         return True
 
     # 3.6 → 3.7: remove initial_profile stub key from entry.data.
@@ -188,7 +190,42 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         else:
             _log.debug("Migrated WashData entry from 3.8 to 3.9 (no null options)")
 
-    if version == 3 and minor_version >= 9:
+    # 3.9 → 3.10: heal cadence defaults that violate the panel's own conflict rules
+    # (#396). The pre-3.9 legacy migration seeded watchdog_interval=30 and
+    # start_duration_threshold=5 into options. With sampling_interval now resolved
+    # per device type, those seeded values fall below the watchdog>=2*sampling and
+    # start_duration>=sampling gates on the coarse (30 s) sampling device types.
+    # Replace them with the device-resolved default ONLY where they still equal the
+    # old scalar default (30 / 5) - i.e. a value the migration seeded, never a
+    # deliberate user choice (both violated the rule). A never-seeded (absent) key
+    # is left absent so the runtime device-resolved default applies.
+    if version == 3 and minor_version == 9:
+        new_opts = dict(entry.options)
+        _dt = new_opts.get(
+            CONF_DEVICE_TYPE, entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+        )
+        _healed = []
+        if new_opts.get(CONF_WATCHDOG_INTERVAL) == 30:
+            _resolved = resolve_watchdog_interval_default(_dt)
+            if _resolved != 30:
+                new_opts[CONF_WATCHDOG_INTERVAL] = _resolved
+                _healed.append(CONF_WATCHDOG_INTERVAL)
+        if new_opts.get(CONF_START_DURATION_THRESHOLD) == 5:
+            _resolved = resolve_start_duration_default(_dt)
+            if _resolved != 5:
+                new_opts[CONF_START_DURATION_THRESHOLD] = _resolved
+                _healed.append(CONF_START_DURATION_THRESHOLD)
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=10
+        )
+        minor_version = 10
+        _log.debug(
+            "Migrated WashData entry from 3.9 to 3.10 (healed seeded cadence "
+            "defaults: %s)",
+            _healed or "none",
+        )
+
+    if version == 3 and minor_version >= 10:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -235,7 +272,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(
         CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
     )
-    options.setdefault(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD)
+    options.setdefault(
+        CONF_START_DURATION_THRESHOLD,
+        resolve_start_duration_default(options[CONF_DEVICE_TYPE]),
+    )
 
     options.setdefault(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL)
     options.setdefault(
@@ -251,7 +291,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(
         CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED
     )
-    options.setdefault(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
+    options.setdefault(
+        CONF_WATCHDOG_INTERVAL,
+        resolve_watchdog_interval_default(options[CONF_DEVICE_TYPE]),
+    )
     options.setdefault(
         CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD
     )
@@ -331,10 +374,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data=data,
         options=options,
         version=3,
-        minor_version=9,
+        minor_version=10,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.9", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.10", version, minor_version
     )
     return True
 

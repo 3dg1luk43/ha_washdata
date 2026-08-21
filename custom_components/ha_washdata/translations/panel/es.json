@@ -218,9 +218,9 @@
     "settings_banner_btn": "Ir al primero",
     "confidence": {
       "auto": "Debe ser mayor o igual al Umbral de coincidencia ({match})",
-      "learning": "Debe ser menor o igual al Umbral de coincidencia ({match})",
+      "learning": "Debe ser mayor o igual al Umbral de coincidencia ({match})",
       "match_for_auto": "Debe ser menor o igual a la Confianza de etiquetado automático ({alc})",
-      "match_for_learning": "Debe ser mayor o igual a la Confianza de aprendizaje ({lc})"
+      "match_for_learning": "Debe ser menor o igual a la Confianza de aprendizaje ({lc})"
     },
     "duration_ratio": {
       "max": "Debe ser mayor que el Ratio de duración mínimo ({min})",

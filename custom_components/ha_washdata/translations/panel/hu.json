@@ -266,9 +266,9 @@
         "settings_banner_btn": "Ugrás az elsőhöz",
         "confidence": {
             "auto": "Legalább az Egyezési küszöb értékén kell lennie ({match})",
-            "learning": "Legfeljebb az Egyezési küszöb értékén lehet ({match})",
+            "learning": "Legalább az Egyezési küszöb értékén kell lennie ({match})",
             "match_for_auto": "Legfeljebb az Automatikus jelölési megbízhatóság értékén lehet ({alc})",
-            "match_for_learning": "Legalább a Tanulási megbízhatóság értékén kell lennie ({lc})"
+            "match_for_learning": "Legfeljebb a Tanulási megbízhatóság értékén lehet ({lc})"
         },
         "duration_ratio": {
             "max": "Nagyobb kell lennie a Min. időtartam aránynál ({min})",

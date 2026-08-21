@@ -264,9 +264,9 @@
     "attn_title": "Konflikti nastavitev: {n}",
     "confidence": {
       "auto": "Mora biti enak ali nad Pragom ujemanja ({match})",
-      "learning": "Mora biti enak ali pod Pragom ujemanja ({match})",
+      "learning": "Mora biti enak ali nad Pragom ujemanja ({match})",
       "match_for_auto": "Mora biti enak ali pod Zaupanjem samodejnega označevanja ({alc})",
-      "match_for_learning": "Mora biti enak ali nad Zaupanjem učenja ({lc})"
+      "match_for_learning": "Mora biti enak ali pod Zaupanjem učenja ({lc})"
     },
     "duration_ratio": {
       "max": "Mora biti večje od Min. razmerja trajanja ({min})",

@@ -264,9 +264,9 @@
     "attn_title": "Einstellungskonflikte: {n}",
     "confidence": {
       "auto": "Muss beim oder über dem Übereinstimmungsschwellenwert ({match}) liegen",
-      "learning": "Muss beim oder unter dem Übereinstimmungsschwellenwert ({match}) liegen",
+      "learning": "Muss beim oder über dem Übereinstimmungsschwellenwert ({match}) liegen",
       "match_for_auto": "Muss beim oder unter der Auto-Label-Konfidenz ({alc}) liegen",
-      "match_for_learning": "Muss beim oder über der Lernkonfidenz ({lc}) liegen"
+      "match_for_learning": "Muss beim oder unter der Lernkonfidenz ({lc}) liegen"
     },
     "duration_ratio": {
       "max": "Muss größer als das minimale Dauerverhältnis ({min}) sein",

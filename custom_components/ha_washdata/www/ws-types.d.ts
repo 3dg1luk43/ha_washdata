@@ -209,6 +209,7 @@ export interface GetMlTrainingStatusResponse {
 
 export interface GetOptionsResponse {
   options: Record<string, unknown>;
+  defaults: Record<string, unknown>;
 }
 
 export interface GetPanelConfigResponse {

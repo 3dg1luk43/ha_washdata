@@ -264,9 +264,9 @@
     "attn_title": "Konflikty nastavení: {n}",
     "confidence": {
       "auto": "Musí být na nebo nad Prahem shody ({match})",
-      "learning": "Musí být na nebo pod Prahem shody ({match})",
+      "learning": "Musí být na nebo nad Prahem shody ({match})",
       "match_for_auto": "Musí být na nebo pod Důvěrou auto-označení ({alc})",
-      "match_for_learning": "Musí být na nebo nad Důvěrou učení ({lc})"
+      "match_for_learning": "Musí být na nebo pod Důvěrou učení ({lc})"
     },
     "duration_ratio": {
       "max": "Musí být větší než Min. poměr délky ({min})",

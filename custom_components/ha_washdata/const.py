@@ -298,7 +298,8 @@ DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.5
 DEFAULT_MAX_PAST_CYCLES = 200
 DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
-DEFAULT_WATCHDOG_INTERVAL = 30  # Derived: 2 * sampling_interval + 1
+DEFAULT_WATCHDOG_INTERVAL = 30  # Floor; effective default is resolved per device
+# as max(this, 2*sampling_interval + 1) - see resolve_watchdog_interval_default (#396).
 DEFAULT_MATCH_PERSISTENCE = 3
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 
@@ -927,6 +928,44 @@ DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 2.0,
     DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
 }
+
+
+def resolve_sampling_interval_default(device_type: str) -> float:
+    """Device-resolved default sampling interval (#396).
+
+    Single source of truth for the sampling default, so the manager, the panel
+    (via ws_get_options) and the config migration all agree. Wet appliances
+    sample fast (2 s) to capture the rapid 0<->150 W oscillation; everything else
+    keeps the coarse 30 s scalar.
+    """
+    return DEFAULT_SAMPLING_INTERVAL_BY_DEVICE.get(device_type, DEFAULT_SAMPLING_INTERVAL)
+
+
+def resolve_watchdog_interval_default(device_type: str) -> int:
+    """Device-resolved watchdog tick default (#396).
+
+    The panel enforces watchdog_interval >= 2*sampling_interval (a publish-on-change
+    sensor can skip a sample, so the staleness tick must be coarser than the
+    sampling gap). Derived as max(DEFAULT_WATCHDOG_INTERVAL, 2*sampling+1): 30 for
+    the fast/pump types (30 already clears 2*2 / 2*10), 61 for the 30 s-sampling
+    types. Never smaller than the 30 s floor so a fast-sampling device does not get
+    an over-aggressive watchdog.
+    """
+    sampling = resolve_sampling_interval_default(device_type)
+    return int(max(DEFAULT_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0))
+
+
+def resolve_start_duration_default(device_type: str) -> float:
+    """Device-resolved start-debounce default (#396).
+
+    The panel enforces start_duration_threshold >= sampling_interval (a debounce
+    shorter than one sample lets a single spike open a cycle). Derived as
+    max(DEFAULT_START_DURATION_THRESHOLD, sampling): 5 s for the fast types, the
+    sampling interval for the coarser ones.
+    """
+    sampling = resolve_sampling_interval_default(device_type)
+    return max(DEFAULT_START_DURATION_THRESHOLD, sampling)
+
 
 # Default profile match min duration ratio by device type
 DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE = {
