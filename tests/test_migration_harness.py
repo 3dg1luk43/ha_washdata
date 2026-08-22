@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -537,6 +538,39 @@ async def test_migrate_3_9_to_3_10_preserves_deliberate_values(hass: HomeAssista
     assert entry.minor_version == 10
     assert entry.options[CONF_WATCHDOG_INTERVAL] == 90
     assert entry.options[CONF_START_DURATION_THRESHOLD] == 45
+
+
+def test_stepwise_migration_targets_are_literals_not_the_current_constant() -> None:
+    """Each stepwise block must advance to exactly N+1, written as a literal.
+
+    The blocks form a chain: a step sets minor_version so the NEXT block picks it up. A
+    step that wrote `CONFIG_ENTRY_MINOR_VERSION` ("whatever is current") would, after a
+    future bump, jump an old entry straight past the newly-added step and never run it -
+    the step would then apply only to entries that already sat on the previous version.
+    Only the one-pass legacy write at the end means "land on current".
+    """
+    import re
+
+    src = (Path(__file__).resolve().parents[1]
+           / "custom_components" / "ha_washdata" / "__init__.py").read_text()
+    body = src.split("async def async_migrate_entry", 1)[1].split("\nasync def ", 1)[0]
+
+    # Every stepwise block is `if version == 3 and minor_version == N:` ... and the
+    # update it performs must name N+1 literally.
+    steps = re.findall(
+        r"minor_version == (\d+):(.*?)(?=\n    if version|\n    # ─|\Z)", body, re.S
+    )
+    assert steps, "no stepwise migration blocks found - did the shape change?"
+    for from_v, block in steps:
+        if "async_update_entry" not in block:
+            continue
+        assert f"minor_version={int(from_v) + 1}" in block, (
+            f"the {from_v} -> {int(from_v) + 1} step must write the literal "
+            f"{int(from_v) + 1}, not a constant: a future bump would skip the next step"
+        )
+        assert "minor_version=CONFIG_ENTRY_MINOR_VERSION" not in block, (
+            f"step from {from_v} writes CONFIG_ENTRY_MINOR_VERSION; use the literal"
+        )
 
 
 @pytest.mark.asyncio

@@ -223,12 +223,16 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             if _resolved != 5:
                 new_opts[CONF_START_DURATION_THRESHOLD] = _resolved
                 _healed.append(CONF_START_DURATION_THRESHOLD)
-        # The newest step's target tracks the constant (the earlier 6->7/7->8/8->9
-        # blocks keep their literals: a historical step is forever about those two).
+        # LITERAL 10, not CONFIG_ENTRY_MINOR_VERSION, like every other step. These
+        # blocks form a chain - each advances minor_version to exactly N+1 so the next
+        # block picks it up - so a step that wrote "whatever is current" would, after a
+        # future bump to 11, jump a 3.9 entry straight to 11 and skip the new 3.10->3.11
+        # step entirely. Only the one-pass legacy write at the end means "land on
+        # current" and uses the constant.
         hass.config_entries.async_update_entry(
-            entry, options=new_opts, minor_version=CONFIG_ENTRY_MINOR_VERSION
+            entry, options=new_opts, minor_version=10
         )
-        minor_version = CONFIG_ENTRY_MINOR_VERSION
+        minor_version = 10
         _log.debug(
             "Migrated WashData entry from 3.9 to 3.10 (healed seeded cadence "
             "defaults: %s)",

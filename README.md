@@ -190,7 +190,7 @@ Full documentation lives in the **[WashData Wiki](https://github.com/3dg1luk43/h
 - 🧪 **[Testing](https://github.com/3dg1luk43/ha_washdata/wiki/Testing)** - How to run the test suite and use the virtual MQTT socket.
 - 🛠️ **[Developer Tools](https://github.com/3dg1luk43/ha_washdata/wiki/Developer-Tools)** - Offline diagnostic analyser and other dev utilities.
 - 📋 **[Changelog](CHANGELOG.md)** - Full version history and release notes.
-- 🗺️ **[Roadmap](docs/plans/ROADMAP.md)** - Feature roadmap organized by group, with implementation status.
+- 🗺️ **[Roadmap](https://github.com/3dg1luk43/ha_washdata/wiki/Roadmap)** - Feature roadmap organized by group, with implementation status.
 
 ### The WashData panel
 

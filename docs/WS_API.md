@@ -98,7 +98,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `start_playground_cycle_detail` | entry_id, cycle_id, settings_override?, stress_tail?, stress_idle_w? | `StartTaskResponse` |
 | `history_import_begin` | entry_id | `HistoryImportBeginResponse` |
 | `history_import_chunk` | entry_id, token, seq, text | `HistoryImportChunkResponse` |
-| `history_import_recorder` | entry_id, days? | `HistoryImportRecorderResponse` |
+| `history_import_recorder` | entry_id, start_date?, days? | `HistoryImportRecorderResponse` |
 | `start_history_import_scan` | entry_id, token | `StartTaskResponse` |
 | `apply_history_import` | entry_id, scan_task_id, accept | `StartTaskResponse` |
 | `store_status` | entry_id | `StoreStatusResponse` |
@@ -1663,6 +1663,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | Param | Required | Type |
 | --- | --- | --- |
 | `entry_id` | yes | str |
+| `start_date` | no | str\|null |
 | `days` | no | int |
 
 **Response** (`HistoryImportRecorderResponse`)
