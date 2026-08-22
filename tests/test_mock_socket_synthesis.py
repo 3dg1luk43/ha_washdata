@@ -17,7 +17,23 @@
 
 import pytest
 import random
-from devtools.mqtt_mock_socket import CycleSynthesizer
+
+# `devtools/mqtt_mock_socket.py` is the manual-testing MQTT mock: a NiceGUI app whose
+# module scope imports nicegui (and decorates a page with @ui.page at import time).
+# nicegui is deliberately NOT in requirements-dev.txt - that file is a single pinned
+# pytest-homeassistant-custom-component plus numpy, and pulling a web GUI framework into
+# every CI run for one synthesis test is the wrong trade.
+#
+# The skip must be an importorskip, not a bare import: a plain ImportError here
+# INTERRUPTS COLLECTION of the whole suite, so a missing optional devtools dependency
+# silently took all ~1800 tests with it (which is exactly what happened in CI - the
+# release preflight reported "fast suite failed" while nothing had run).
+pytest.importorskip(
+    "nicegui",
+    reason="devtools mock-socket GUI dependency; install nicegui to run these",
+)
+
+from devtools.mqtt_mock_socket import CycleSynthesizer  # noqa: E402
 
 def test_synthesizer_amplitude_scaling():
     """Test that amplitude scaling can be applied."""
