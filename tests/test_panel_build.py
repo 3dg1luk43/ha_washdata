@@ -287,3 +287,38 @@ def test_prepare_asset_returns_served_path_and_compresses(tmp_path: Path) -> Non
     served = fe._prepare_asset("asset.js", www)
     assert served.name == "asset.min.js"
     assert (www / "asset.min.js.gz").is_file()
+
+
+# ─── pre-commit hook ──────────────────────────────────────────────────────────
+# The hook is the earliest of the three gates on the generated bundles (hook ->
+# CI/`Checks` -> `release_check.sh`). It is a shell script git runs, so nothing else
+# would notice it breaking; these lock its contract.
+
+_REPO = Path(fe.__file__).resolve().parents[2]
+_HOOK = _REPO / "devtools" / "hooks" / "pre-commit"
+
+
+def test_pre_commit_hook_is_present_and_executable() -> None:
+    assert _HOOK.is_file(), f"{_HOOK} missing"
+    assert os.access(_HOOK, os.X_OK), f"{_HOOK} is not executable (chmod +x)"
+    installer = _REPO / "devtools" / "install_hooks.sh"
+    assert installer.is_file() and os.access(installer, os.X_OK)
+
+
+def test_pre_commit_hook_verifies_the_staged_tree_not_the_working_tree() -> None:
+    """The miss this hook exists for is "rebuilt, but only the source was staged" -
+    a working-tree check would pass on it. Lock the two things that make it a staged
+    check: it materialises `git show :<path>` blobs, and points the verifier at them
+    with --www."""
+    body = _HOOK.read_text()
+    assert 'git show ":$WWW_REL/$f"' in body, "hook must read STAGED blobs"
+    assert "--check --www" in body, "hook must verify the staged snapshot, not www/"
+    # Fast path: an unrelated commit must not pay for node at all.
+    assert "git diff --cached --name-only" in body
+
+
+def test_build_script_supports_the_www_override_the_hook_relies_on() -> None:
+    """`--www` is the seam between the hook and the verifier; if it is dropped the hook
+    silently checks the working tree instead of the commit."""
+    script = (_REPO / "devtools" / "build_panel.mjs").read_text()
+    assert "'--www'" in script
