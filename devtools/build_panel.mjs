@@ -20,8 +20,11 @@
  *     minified bundle that does not actually work cannot be released.
  *
  * Usage:
- *   node build_panel.mjs           # build artifacts + manifest
- *   node build_panel.mjs --check   # verify artifacts are current; exit 1 if not
+ *   node build_panel.mjs                 # build artifacts + manifest
+ *   node build_panel.mjs --check         # verify artifacts are current; exit 1 if not
+ *   node build_panel.mjs --check --www D # verify a different www/ (the pre-commit hook
+ *                                        # points this at the STAGED snapshot, so a
+ *                                        # rebuild that was never staged still fails)
  */
 
 import { createHash } from 'node:crypto';
@@ -31,7 +34,14 @@ import { fileURLToPath } from 'node:url';
 import * as esbuild from 'esbuild';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const WWW = path.join(__dirname, '..', 'custom_components', 'ha_washdata', 'www');
+// `--www <dir>` verifies an alternative asset directory. Only --check honours it: a
+// build always writes the real tree. The pre-commit hook uses it to check the staged
+// blobs rather than the working tree, which is the only way to catch the common miss -
+// source rebuilt and staged, artifact rebuilt but left unstaged.
+const wwwFlag = process.argv.indexOf('--www');
+const WWW = wwwFlag !== -1 && process.argv[wwwFlag + 1]
+  ? path.resolve(process.argv[wwwFlag + 1])
+  : path.join(__dirname, '..', 'custom_components', 'ha_washdata', 'www');
 const MANIFEST = path.join(WWW, 'build-manifest.json');
 
 // Assets to minify. `source` is the readable file kept in git; `artifact` is the

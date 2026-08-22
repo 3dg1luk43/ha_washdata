@@ -54,6 +54,10 @@ python3 -m compileall custom_components/ha_washdata tests/ -q
 node devtools/build_panel.mjs
 node devtools/build_panel.mjs --check     # verify only; non-zero if stale
 
+# Install the tracked git hooks (recommended, once per clone). pre-commit refuses a
+# commit whose *.min.js were not rebuilt from the sources being committed.
+./devtools/install_hooks.sh
+
 # Release preflight: artifacts, version agreement, translations, tests
 devtools/release_check.sh                 # verify only (what CI runs)
 devtools/release_check.sh --fix           # regenerate artifacts instead of failing
@@ -67,7 +71,7 @@ python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 
 | File | Generator | Gate |
 |------|-----------|------|
-| `www/ha-washdata-panel.min.js`, `www/ha-washdata-card.min.js`, `www/build-manifest.json` | `node devtools/build_panel.mjs` | `tests/test_panel_build.py`, CI, `release_check.sh` |
+| `www/ha-washdata-panel.min.js`, `www/ha-washdata-card.min.js`, `www/build-manifest.json` | `node devtools/build_panel.mjs` | `devtools/hooks/pre-commit`, `tests/test_panel_build.py`, CI, `release_check.sh` |
 | `www/ws-types.d.ts`, `docs/WS_API.md` | `python3 devtools/generate_ws_types.py` | `tests/test_ws_contract.py` |
 
 The `.min.js` files and `build-manifest.json` **are committed** - they are what users
@@ -75,6 +79,14 @@ download. `frontend.py` serves a `.min.js` only while its recorded source hash s
 matches the source on disk, so a forgotten rebuild degrades to the readable file rather
 than serving stale code; the tests and CI fail so it does not go unnoticed. After editing
 `www/*.js`, rebuild and commit the artifacts in the same commit.
+
+Three gates enforce that, earliest first: **`devtools/hooks/pre-commit`** (install once
+with `./devtools/install_hooks.sh`) -> the **Checks** CI workflow -> `release_check.sh`.
+The hook verifies the **staged** tree, not the working tree: it materialises the staged
+blobs into a temp directory and runs `build_panel.mjs --check --www <dir>` there, because
+the usual miss is rebuilding and then committing only the source. It is a no-op for a
+commit that touches no `www/` asset, and `git commit --no-verify` bypasses it for a
+deliberate WIP commit.
 
 `devtools/` declares `"type": "module"`, so any new CommonJS script there must be named
 `.cjs` (this is what once broke `run_tests.sh` via `panel_smoke.js`).
