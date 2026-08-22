@@ -24,7 +24,7 @@ pytest_plugins = ["pytest_homeassistant_custom_component"]
 # import tests.mock_imports  # pylint: disable=unused-import
 
 @pytest.fixture
-def mock_hass():
+def mock_hass(tmp_path_factory):
     """Mock Home Assistant instance."""
     hass = MagicMock()
     hass.data = {}
@@ -35,7 +35,13 @@ def mock_hass():
         return target(*args)
 
     hass.async_add_executor_job = MagicMock(side_effect=_async_executor_mock)
-    hass.config.path = lambda *args: "/mock/path/" + "/".join(args)
+    # A REAL temp dir, not a fabricated "/mock/path" absolute path. Most tests patch
+    # WashDataStore so nothing is written, but the ones that don't (test_smart_history)
+    # reach HA's Store and actually save - which only succeeded because the developer
+    # happened to be root, and failed on CI with
+    # `PermissionError: [Errno 13] Permission denied: '/mock'`.
+    _config_dir = tmp_path_factory.mktemp("ha_config")
+    hass.config.path = lambda *args: str(_config_dir.joinpath(*args))
     return hass
 
 @pytest.fixture
