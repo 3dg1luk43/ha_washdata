@@ -971,11 +971,22 @@ class _DetailSim:
         # bubble through _try_profile_match, which drops the match at debug - so EVERY
         # match in the sim would be silently reported as unmatched.
         tail_power = None
+        terminal_high = None
         if self.store is not None and raw_name:
             try:
                 tail_power = self.store.profile_tail_power(raw_name)
             except Exception:  # pylint: disable=broad-exception-caught
                 tail_power = None
+            # Element 10 (#399), guarded the same way: the anti-crease spin guard is
+            # only meaningful for a device that runs anti-wrinkle at all.
+            det = getattr(self, "detector", None)
+            if det is not None and det.config.anti_wrinkle_enabled:
+                try:
+                    terminal_high = self.store.profile_terminal_high_block(
+                        raw_name, det.config.anti_wrinkle_max_power
+                    )
+                except Exception:  # pylint: disable=broad-exception-caught
+                    terminal_high = None
         return (
             raw_name,
             raw_conf,
@@ -986,6 +997,7 @@ class _DetailSim:
             bool(full_shape_hit or prefix_fit_hit),
             bool(full_shape_hit),
             tail_power,
+            terminal_high,
         )
 
     def _sample(self, ts: datetime) -> None:

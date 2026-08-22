@@ -4859,18 +4859,23 @@ class ProfileStore:
     @staticmethod
     def _envelope_time_power(
         envelope: JSONDict | None,
+        curve_key: str = "avg",
     ) -> tuple[list[float], list[float]] | None:
-        """Extract (time_grid, power) from an envelope's ``avg`` curve, or None.
+        """Extract (time_grid, power) from an envelope curve, or None.
 
         Handles both the new ``[[t, p], ...]`` and legacy ``[p, ...]`` formats
         (reconstructing the grid from ``time_grid`` / ``target_duration`` / a 60 s
         fallback). Single source of the envelope time axis for both the alignment
         worker and the Smart-Termination release span (#348), so the mapped position
         and the span it is compared against always live on the same grid.
+
+        ``curve_key`` selects the band: ``"avg"`` (the default, every existing
+        caller) or ``"max"``, which #399 uses to ask whether ANY member of the
+        profile ends with a high-power block.
         """
         if not envelope:
             return None
-        env_avg_raw = envelope.get("avg", [])
+        env_avg_raw = envelope.get(curve_key, [])
         if not env_avg_raw:
             return None
         try:
@@ -4997,6 +5002,79 @@ class ProfileStore:
             if not tail:
                 return None
             return float(np.mean(tail))
+        except Exception:  # noqa: BLE001
+            return None
+
+    def profile_terminal_high_block(
+        self,
+        profile_name: str,
+        threshold_w: float,
+    ) -> tuple[float, float] | None:
+        """Position and length of the LAST contiguous run above ``threshold_w`` in a
+        profile's own trace: ``(start_frac, seconds)``, or None (#399).
+
+        ``start_frac`` is where that run begins as a fraction of the profile's span,
+        so the caller can map it onto a live cycle whose expected duration differs
+        from the trace it was built from. This is what tells the anti-crease
+        finalise that a programme ends with a spin, and roughly how long that spin
+        runs, so it can wait for the live counterpart instead of closing the wash
+        seconds before it.
+
+        Reads the envelope's ``max`` band first - a spin recorded by ANY member is
+        a spin this programme can have - and falls back to the sample cycle's raw
+        trace, because a thinly-trained profile (one labelled cycle, so no envelope)
+        is still a match candidate and would otherwise get no guard at all. Pure
+        statistics, never raises; same contract as ``profile_tail_power``.
+        """
+        try:
+            level = float(threshold_w)
+            if not (level > 0):
+                return None
+
+            curves = self._envelope_time_power(self.get_envelope(profile_name), "max")
+            if not curves or len(curves[0]) < 2:
+                profile = self.get_profiles().get(profile_name)
+                if not isinstance(profile, dict):
+                    return None
+                sample_id = profile.get("sample_cycle_id")
+                if not sample_id:
+                    return None
+                cycle, _ = self.find_stored_cycle(str(sample_id))
+                if not cycle:
+                    return None
+                # Through decompress_power_data, not raw power_data: a legacy cycle
+                # stores (iso_string, power) pairs (see profile_tail_power).
+                points = decompress_power_data(cycle)
+                if len(points) < 2:
+                    return None
+                times = [float(pt[0]) for pt in points]
+                powers = [float(pt[1]) for pt in points]
+            else:
+                times, powers = curves
+
+            span = float(times[-1]) - float(times[0])
+            if span <= 0:
+                return None
+            # Walk back to the last sample above the level, then back to the start
+            # of the contiguous run it belongs to.
+            last = None
+            for i in range(len(powers) - 1, -1, -1):
+                if powers[i] > level:
+                    last = i
+                    break
+            if last is None:
+                return None  # this programme never draws above the level
+            first = last
+            while first > 0 and powers[first - 1] > level:
+                first -= 1
+            start_frac = (float(times[first]) - float(times[0])) / span
+            # The block covers the interval up to the sample AFTER its last one, so
+            # a single-sample spike still has a length (its own step).
+            end_i = min(last + 1, len(times) - 1)
+            seconds = float(times[end_i]) - float(times[first])
+            if seconds <= 0:
+                return None
+            return (min(max(start_frac, 0.0), 1.0), seconds)
         except Exception:  # noqa: BLE001
             return None
 

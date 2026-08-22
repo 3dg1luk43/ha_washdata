@@ -1474,14 +1474,22 @@ class WashDataManager:
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
             # Element 8 is the narrow #288-only prefix verdict and element 9 the
-            # matched profile's own tail power level, both for the #364 guards. The
-            # detector tolerates shorter tuples, so other callers stay valid.
+            # matched profile's own tail power level, both for the #364 guards;
+            # element 10 is its terminal high-power block for the #399 anti-crease
+            # guard. The detector tolerates shorter tuples, so other callers stay
+            # valid.
+            terminal_high = None
+            if profile_name and self.detector.config.anti_wrinkle_enabled:
+                terminal_high = self.profile_store.profile_terminal_high_block(
+                    profile_name, self.detector.config.anti_wrinkle_max_power
+                )
             self.detector.update_match(
                 (profile_name, confidence, matched_duration, phase_name,
                  result.is_confident_mismatch, result.is_ambiguous,
                  result.is_prefix_ambiguous,
                  result.is_prefix_ambiguous_full_shape,
-                 self.profile_store.profile_tail_power(profile_name) if profile_name else None)
+                 self.profile_store.profile_tail_power(profile_name) if profile_name else None,
+                 terminal_high)
             )
 
             # --- LOGGING (Unified) ---
