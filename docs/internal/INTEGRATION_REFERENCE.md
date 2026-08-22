@@ -428,13 +428,27 @@ measuring positions. #399's reporter showed that trailing quiet ranges 0-613 s a
 the same machine, which is what makes `profile_tail_power`'s last-5% mean swing two orders of magnitude; left in, it
 would push a genuine terminal spin below `ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC` and silently disarm the guard on exactly
 the machine that reported the bug.
-(c) **Known remaining split, deliberate and unmeasured:** Stage 2 scores the best-offset overlap and Stage 3 resamples
-BOTH series to `MATCH_DTW_RESAMPLE_N` - i.e. a 40%-complete cycle is stretched to full length and warped against the
-whole candidate - while Stages 4/5 are now genuinely prefix-anchored. `prefix_shape_score` (Stage 6) already computes
-the truncated shape but is documented as never touching `score`. Making the shape stages prefix-aware under
-`in_progress` is the obvious next step and is what #400's reporter is pointing at; it is a bigger change than 147 and
-must be measured with `dtw_ab_eval --checkpoints` plus `prefix_guard_eval --in-progress` before it goes anywhere near
-the ranking.
+(c) **The shape stages are prefix-aware too now (item 151).** Stage 2 scored the best-offset overlap and Stage 3
+resampled BOTH series to `MATCH_DTW_RESAMPLE_N` - a 40%-complete cycle stretched to full length and warped against the
+whole candidate - while Stages 4/5 had become prefix-anchored. Both shape stages now score the candidate truncated to
+the elapsed time on a shared grid, via the extracted `analysis.prefix_shape_arrays`, which is also what
+`prefix_shape_score` (Stage 6, #364) uses - one definition of "the same stretch of both curves", two consumers, so the
+guard and the ranking can never drift apart. `sample` on the candidate stays the FULL template because Stage 4 takes
+its own prefix of it; the truncated pair is transient scratch (`_shape_pair`) popped before the ranking is built,
+since that dict is serialised into the store and over the WS.
+
+**Measured** (`dtw_ab_eval --checkpoints`): mid-cycle top-1 **62.6% -> 71.5%** on top of the scalar prefix, i.e.
+**56.2% -> 71.5%** against pre-#400. Dishwasher 62.5 -> 81.5, washing_machine 49.4 -> 60.6, washer_dryer 44.4 -> 53.2
+(-0.3 vs scalars, 333 folds, noise). Complete-cycle flat top-1 **88.4%, unchanged** - `in_progress` is off at cycle
+end so the whole path is inert there. #364 guards: split-risk folds **114 (pre-#400) -> 88 -> 73**, false blocks
+**8% -> 6% -> 4%**.
+
+**`MATCH_PREFIX_SHAPE_MAX_RATIO = 0.7` is the load-bearing constant.** Truncation also discards "I have already run
+longer than everything you have shown me", which is the discriminator at the end of a short programme against its
+longer sibling - the same cliff the rejected duration credit fell off. Sweep: 0.6 -> 69.8%, **0.7 -> 71.0%**,
+0.8 -> 70.5%, 1.0 -> 70.4% overall, but at **0.8 and above** the 90% checkpoint falls to 75.1% and the `test-clone`
+dishwasher export **loses Smart Termination**. At 0.6-0.7 all four dishwasher exports are byte-identical to before.
+`prefix_guard_eval --no-prefix-shape` reads the operating point without it.
 
 **Also fixed while measuring 147:** the Playground's `SimRunner._matcher` fed the matcher a sample-weighted series
 where `async_match_profile` has always resampled onto a uniform time grid. On a change-based plug a quiet stretch
@@ -451,6 +465,7 @@ left as written (it is a dated design record) - this is the correction of record
 
 | # | Status | Kind | Short description |
 |---|---|---|---|
+| 151 | FIXED | CODE | #400 shape half: Stages 2/3 now score the candidate truncated to the elapsed time (shared `prefix_shape_arrays`), gated at `MATCH_PREFIX_SHAPE_MAX_RATIO=0.7`; mid-cycle top-1 62.6% -> 71.5% |
 | 150 | NOTE | DOC | #334 design doc's storage bump reads `v11 -> v12`; `STORAGE_VERSION` is already 12, so it is now `v12 -> v13` |
 | 149 | FIXED | CODE | #399 anti-crease finalize split a wash 16 s before its own spin; new terminal-high-block guard (event-based, delay-only, capped) in `_is_anticrease_tail` |
 | 148 | FIXED | CODE | #400 profile group was scored as a mean of member curves; members now scored individually and collapsed to the best member before the ambiguity check |

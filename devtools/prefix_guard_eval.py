@@ -93,11 +93,10 @@ def _match_config() -> dict:
     # will actually see in production rather than under the pre-#400 one.
     if "--in-progress" in sys.argv:
         cfg["in_progress"] = True
-        # --prefix-shape: also score SHAPE on the truncated template (experimental,
-        # #400 follow-up). Only meaningful together with --in-progress.
-        if "--prefix-shape" in sys.argv:
-            cfg["prefix_shape"] = True
-            cfg["prefix_shape_max_ratio"] = 0.7
+        # Shipped default also scores SHAPE on the truncated template (#400);
+        # --no-prefix-shape reads the operating point without it.
+        if "--no-prefix-shape" in sys.argv:
+            cfg["prefix_shape"] = False
     return cfg
 
 

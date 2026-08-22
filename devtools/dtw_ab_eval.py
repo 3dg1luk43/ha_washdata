@@ -712,8 +712,10 @@ def _run_checkpoints(by_source: dict) -> None:
                     row[3] += 1
                     variants = (
                         base,
+                        # prefix_shape is ON by default for a live match now, so the
+                        # scalars-only column has to switch it off explicitly.
+                        {**base, "in_progress": True, "prefix_shape": False},
                         {**base, "in_progress": True},
-                        {**base, "in_progress": True, "prefix_shape": True},
                     )
                     for i, cfg in enumerate(variants):
                         cands = analysis.compute_matches_worker(pw, elapsed, snaps, cfg)
@@ -747,8 +749,8 @@ def _run_checkpoints(by_source: dict) -> None:
                 grand[i] += sub[i]
     if grand[3]:
         _line("ALL DEVICES", "ALL", grand)
-    print("whole = today; scalars = #400 Stage-4/5 prefix (shipped); "
-          "+shape = experimental prefix Stage-2/3 on top")
+    print("whole = pre-#400; scalars = Stage-4/5 prefix only; "
+          "+shape = shipped (Stage-2/3 prefix as well)")
 
 
 def _run_grouped(by_source: dict) -> None:

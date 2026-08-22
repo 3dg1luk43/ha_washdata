@@ -609,6 +609,15 @@ MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
 # ambiguous and blocks Smart Termination (measured on four real exports; #393 is
 # about finishing on time, so that is not a trade worth 0.7pp).
 MATCH_DURATION_SCALE_OVERRUN = 0.05
+# Issue #400, shape half: while a cycle is running, Stages 2 and 3 score it against
+# each candidate TRUNCATED to the elapsed time (reusing the #364 prefix machinery),
+# but only while it is still clearly mid-run. Past this fraction of a candidate's
+# own span the truncation starts discarding the very thing that separates a short
+# programme from its longer sibling at the end - "I have already run longer than
+# everything you have shown me". Measured on cycle_data: mid-cycle top-1 62.6% ->
+# 71.0% at 0.7; at 0.8 the 90% checkpoint drops and a real dishwasher export loses
+# Smart Termination, the same cliff the rejected duration credit fell off.
+MATCH_PREFIX_SHAPE_MAX_RATIO = 0.7
 
 
 # States
