@@ -1229,11 +1229,6 @@ PLAYGROUND_STRESS_MAX_IDLE_W: float = 100000.0       # upper bound for a manual 
 PLAYGROUND_PRESET_MAX: int = 30                      # per-device cap (keeps the store small)
 PLAYGROUND_PRESET_NAME_MAX: int = 60                 # preset name length cap
 
-# ─── Historical power-data import (issue #344) ─────────────────────────────────
-# An HA history export (or a recorder read) is a *change-based* stream: a steady
-# 0 W emits no rows at all, so it cannot be fed to the detector as-is (doing so
-# produces multi-day `force_stopped` blobs). `history_import.py` pre-segments the
-# stream into activity blocks first; these constants govern that pre-pass.
 # ─── Which cycle categories count as evidence for a profile ────────────────────
 # A profile's envelope (its average curve + duration/energy spread) and the matching
 # template are built from stored cycles. By default all three categories count. Untick a
@@ -1261,6 +1256,11 @@ PROFILE_EVIDENCE_SOURCES = (
 # All three: the pre-setting behaviour, so an upgrade changes nothing.
 DEFAULT_PROFILE_EVIDENCE_SOURCES = list(PROFILE_EVIDENCE_SOURCES)
 
+# ─── Historical power-data import (issue #344) ─────────────────────────────────
+# An HA history export (or a recorder read) is a *change-based* stream: a steady
+# 0 W emits no rows at all, so it cannot be fed to the detector as-is (doing so
+# produces multi-day `force_stopped` blobs). `history_import.py` pre-segments the
+# stream into activity blocks first; these constants govern that pre-pass.
 HISTORY_IMPORT_MAX_BYTES: int = 32 * 1024 * 1024     # staged upload cap (~32 MiB of CSV text)
 HISTORY_IMPORT_MAX_ROWS: int = 500_000               # parsed-row cap (≈ a month at 5 s)
 HISTORY_IMPORT_CHUNK_BYTES: int = 512 * 1024         # per-WS-message upload chunk (frame cap is 4 MiB)

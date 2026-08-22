@@ -6325,23 +6325,34 @@ class ProfileStore:
 
                 label_source = "auto_label_backfill" if is_backfill else "auto_label_service"
 
-                def _apply(target: CycleDict = cycle, backfill: bool = is_backfill) -> None:
+                def _apply(
+                    target: CycleDict = cycle,
+                    backfill: bool = is_backfill,
+                    match: MatchResult = result,
+                    source: str = label_source,
+                    ranking: list[dict[str, Any]] = ranking_top5,
+                ) -> None:
                     """Move the label, then stamp the provenance the mover does not.
 
                     `_relabel_non_real_cycle` only moves `profile_name`, so without this
                     an auto-labelled imported cycle would carry no confidence for the
                     Cycles list to show and no marker saying the matcher guessed it.
+
+                    EVERY loop value it reads is bound as a default, not closed over: the
+                    call happens in the same iteration today, but a later change that
+                    defers it (collect the callables, run them after the loop) would
+                    otherwise silently apply the LAST iteration's match to every cycle.
                     """
                     if backfill:
                         touched.update(
-                            self._relabel_non_real_cycle(target, result.best_profile)
+                            self._relabel_non_real_cycle(target, match.best_profile)
                         )
                     else:
-                        target["profile_name"] = result.best_profile
-                    target["match_confidence"] = float(result.confidence)
-                    target["label_source"] = label_source
-                    if ranking_top5:
-                        target["match_ranking_top5"] = ranking_top5
+                        target["profile_name"] = match.best_profile
+                    target["match_confidence"] = float(match.confidence)
+                    target["label_source"] = source
+                    if ranking:
+                        target["match_ranking_top5"] = ranking
 
                 # If overwriting, check if new match is different and better/valid
                 if current_label:

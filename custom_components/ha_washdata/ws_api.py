@@ -6536,10 +6536,17 @@ async def ws_history_import_recorder(
     # data - and, on truncation, would keep the OLDEST rows rather than the most recent.
     # `samples_from_readings` sorts, so the accumulation order does not matter downstream.
     empty_run = 0
+    # The loop can stop early (empty-day run, or the row cap), so the requested `days` is
+    # not what was read. Track the oldest window actually queried and report THAT, or the
+    # panel would name a range it never looked at.
+    oldest_queried = now
+    queried_days = 0
     for day in range(1, days + 1):
         window_start = now - timedelta(days=day)
         window_end = now - timedelta(days=day - 1)
         day_rows = await _recorder_power(hass, entity_id, window_start, end_dt=window_end)
+        oldest_queried = window_start
+        queried_days += 1
         if day_rows:
             empty_run = 0
             rows.extend(day_rows)
@@ -6567,10 +6574,10 @@ async def ws_history_import_recorder(
         "token": token,
         "rows": len(rows[:HISTORY_IMPORT_MAX_ROWS]),
         "entity_id": entity_id,
-        "days": days,
-        # The oldest day actually queried, so the panel can report the range it really
-        # got rather than echoing back what was asked for.
-        "start_date": (now - timedelta(days=days - 1)).date().isoformat(),
+        # Both describe the window actually read, not the one asked for: counted from
+        # the loop itself, so an early stop cannot report days that were never queried.
+        "days": queried_days,
+        "start_date": oldest_queried.date().isoformat(),
         "truncated": len(rows) > HISTORY_IMPORT_MAX_ROWS,
     })
 
