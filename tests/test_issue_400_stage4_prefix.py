@@ -125,3 +125,56 @@ def test_duration_term_penalises_overrun_harder_than_the_symmetric_scale():
     off = analysis.compute_matches_worker(_CURVE, elapsed, snaps, cfg)[0]
     on = analysis.compute_matches_worker(_CURVE, elapsed, snaps, {**cfg, "in_progress": True})[0]
     assert on["score"] < off["score"]
+
+
+# ── the shape half: Stages 2/3 score the same truncated stretch ─────────────
+
+
+def _shape_cfg(**over) -> dict:
+    """Shape only: no duration/energy terms, so any difference is Stage 2/3."""
+    cfg = _cfg(duration_weight=0.0, energy_weight=0.0, dtw_bandwidth=0.2)
+    cfg.update(over)
+    return cfg
+
+
+def test_prefix_shape_is_on_by_default_for_a_live_match():
+    """A live match compares the trace against each candidate truncated to the
+    elapsed time; opting out reproduces the whole-curve score."""
+    on = _by_name(analysis.compute_matches_worker(
+        _live_trace(), ELAPSED, _snaps(), _shape_cfg(in_progress=True)))
+    off = _by_name(analysis.compute_matches_worker(
+        _live_trace(), ELAPSED, _snaps(), _shape_cfg(in_progress=True, prefix_shape=False)))
+    assert on["long"]["score"] != off["long"]["score"]
+
+
+def test_prefix_shape_is_inert_at_cycle_end():
+    """Not a live match: the whole curve is the right reference, so nothing moves."""
+    a = analysis.compute_matches_worker(_live_trace(), ELAPSED, _snaps(), _shape_cfg())
+    b = analysis.compute_matches_worker(
+        _live_trace(), ELAPSED, _snaps(), _shape_cfg(prefix_shape=True))
+    assert [c["score"] for c in a] == [c["score"] for c in b]
+
+
+def test_prefix_shape_stops_before_the_end_of_a_candidate():
+    """Past MATCH_PREFIX_SHAPE_MAX_RATIO of a candidate's span the truncation would
+    discard 'I have already run longer than everything you have shown me', which is
+    what separates a short program from its longer sibling at the end. Measured: at
+    0.8 and above a real dishwasher export loses Smart Termination."""
+    from custom_components.ha_washdata.const import MATCH_PREFIX_SHAPE_MAX_RATIO
+
+    assert MATCH_PREFIX_SHAPE_MAX_RATIO == 0.7
+    late = LONG_DUR * 0.95   # well past the cutoff for both candidates
+    live = _CURVE[: int(round(N * 0.95))]
+    on = analysis.compute_matches_worker(live, late, _snaps(), _shape_cfg(in_progress=True))
+    off = analysis.compute_matches_worker(
+        live, late, _snaps(), _shape_cfg(in_progress=True, prefix_shape=False))
+    assert [c["score"] for c in on] == [c["score"] for c in off]
+
+
+def test_shape_scratch_never_leaks_into_the_ranking():
+    """The truncated pair is numpy scratch for two stages; the candidate dicts are
+    serialised into the store and over the WS."""
+    cands = analysis.compute_matches_worker(
+        _live_trace(), ELAPSED, _snaps(), _cfg(in_progress=True))
+    assert cands
+    assert all("_shape_pair" not in c for c in cands)
