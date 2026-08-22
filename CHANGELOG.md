@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.5.6 - 2026-08-22
 
+### Fixes
+
+- **A wash is no longer split in two just before its final spin** ([#399](https://github.com/3dg1luk43/ha_washdata/issues/399)): On a machine with anti-crease handling, a program whose final spin falls in the last couple of percent of its usual length - after a long quiet rinse stretch - could be closed seconds before that spin, and the spin was then recorded as a second, separate cycle. WashData now checks whether the matched program itself ends with a high-power spin and, if it does, waits until this run has actually had it. The wait can only ever delay a finish, clears itself as soon as the spin happens, and gives up after a while so a program that genuinely skips its spin still finishes normally.
+
+- **The right program is recognised much sooner while a cycle is running** ([#400](https://github.com/3dg1luk43/ha_washdata/issues/400)): A running cycle was compared against each program's *complete* duration and energy, so a long program halfway through looked just like a finished short one - and the short one often won, taking the time remaining with it. A running cycle is now compared against the same stretch of each program instead. Measured on real appliance data, the correct program is identified mid-cycle far more often (56% to 63% overall; dishwashers, washing machines and washer-dryers all improve), while end-of-cycle labelling is unchanged.
+
+- **Programs grouped as variants of each other are matched on their own curves** ([#400](https://github.com/3dg1luk43/ha_washdata/issues/400)): A group of near-duplicate programs (for example the same wash at 30 and 40 degrees) was matched against the average of its members - a curve belonging to no real program, which could cost the whole family the match. Each member is now matched on its own curve and the family is formed afterwards, so grouping still keeps close variants from confusing each other without blurring what they look like.
+
 ### Features
 
 - **Unlabel cycles from a program without deleting them**: The per-program Cleanup tab (Profiles - click a program - Cleanup) now has an **Unlabel selected** button beside **Delete selected**. Tick the outliers dragging a program's learned curve off and remove them from that program while keeping them in your history, ready to be named again or left for auto-labelling. Both buttons act on the same tick boxes, and whichever is running locks the other out.

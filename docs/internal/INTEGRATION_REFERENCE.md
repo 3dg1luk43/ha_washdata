@@ -353,8 +353,87 @@ review). Tested by `tests/test_issue_validator_workflow.py` (11), which extracts
 the YAML and runs it under `devtools/issue_validator_harness.mjs` against a stubbed GitHub API - no mirrored copy
 to drift (register item 140's lesson). Forward-looking only: #399 still needs its `bug` label added once by hand.
 
+**2026-08-22 additions (0.5.6 branch, issues #399 / #400 - anti-crease split and mid-cycle matching):**
+Items 147-149.
+
+**147 - Stage 4 graded a running cycle against whole-profile figures (#400).** `analysis.compute_matches_worker`
+blended duration and energy agreement computed from the cycle SO FAR against each candidate's COMPLETE duration and
+energy, so a long programme 40% through was numerically indistinguishable from a finished short one and lost to it.
+Item 100 (integrated energy for washing_machine/washer_dryer) amplifies it, because integrated mode multiplies the
+candidate figure by the candidate's own duration; item 100 was validated on complete cycles only, so this is its
+missing half rather than a reversal. Fix, opt-in via `config["in_progress"]`: `_prefix_mean` integrates each
+candidate's template only up to the elapsed time (deliberately NOT `_prefix_point_count` - its 12-sample floor exists
+because Stage 6 *correlates* the prefix, and applying it here would silently restore whole-template energy for the
+first few percent of every cycle), and a candidate the cycle has already outlasted is penalised on the sharper
+`MATCH_DURATION_SCALE_OVERRUN`. Set on exactly one production call site
+(`manager._async_do_perform_matching`) and on the Playground replay; both final-match sites
+(`_run_final_match_from_cycle_data`, `_async_process_cycle_end`) keep the whole-cycle comparison, which is the correct
+one at cycle end. **Measured** (`dtw_ab_eval --checkpoints`, new; leave-one-out at 10..90% of each labelled cycle with
+the production energy mode per device type): mid-cycle top-1 **56.2% -> 62.6%**, dishwasher +5.6, washer_dryer +9.0,
+washing_machine +6.6, and every type's 90% checkpoint improves. Complete-cycle flat top-1 **88.4%, unchanged**.
+NB a real dip remains at the dishwasher 40-50% checkpoints (-9.0 / -24.1); the aggregate and the end-of-cycle
+behaviour are positive and the commit path is persistence-gated, so it was documented rather than chased.
+**Rejected sub-change:** suppressing the duration penalty *below* a candidate's duration ("elapsed says nothing about
+a candidate we have not reached"). Worth only +0.7pp mid-cycle over prefix energy alone, costs 3.7pp at the 90%
+checkpoint, and near the end of a short programme it hands its longer sibling full duration agreement - which put a
+dishwasher's 50 deg and 65 deg inside `MATCH_AMBIGUITY_MARGIN` and **blocked Smart Termination on four real exports**.
+The rationale is recorded in `const.py` beside the constant so it is not re-attempted.
+
+**148 - a profile group was scored as the mean of its member curves (#400).** `_grouped_snapshots` collapsed a
+cohesive group into one aggregate snapshot BEFORE scoring. On a temperature family - same silhouette, the whole
+difference being how long the second heating burst runs - that averaged curve belongs to no member (half-height
+heating block, an energy figure neither member reaches), roughly doubling the MAE, so the correct family could lose
+the program-level match outright and Stage-5 member selection never ran. Members are now scored on their own curves
+and each family is collapsed afterwards by the new pure `collapse_group_candidates`, to one candidate carrying its
+best member's score. The collapse runs **before** `_ambiguity_from_candidates` - siblings sitting next to each other
+in the ranking is exactly what grouping exists to stop reading as an ambiguous top-2 - and the winner keeps the
+`__group__` name, so `_stage5_pick_member` still chooses the reported member. **Item 99 and the #334 design's
+Stage-5-local plan are untouched by construction**: the picker is not modified, and `dtw_ab_eval`'s new
+`bestmem`/`bmGROUP` columns are identical to the mean-curve `grouped`/`GROUP` columns on this corpus (87.8% / 92.6%),
+whose clusters differ in shape rather than energy. Deliberately NOT done: adding an energy term to `group_cohesion`
+(the reporter's alternative). Cohesion exists to collapse temp/spin families precisely because energy is what
+separates their members; gating on energy would stop those families grouping at all, disabling item 99 and design
+Phases 3-5.
+
+**149 - the anti-crease finalize never looked ahead in the matched profile's own trace (#399).**
+`_is_anticrease_tail`'s two conditions both look backwards (elapsed >= 0.98x expected;
+`ANTI_CREASE_CONFIRM_WINDOW_S` at or below `anti_wrinkle_max_power`), so an Electrolux Delicate 30 whose final spin
+lands 16 s past the 98% mark - preceded by a long 30-230 W rinse stretch - was finalised into anti-wrinkle and the
+spin opened a SECOND cycle record, which then fed the truncated fragment back into the profile and pulled
+`avg_duration` down for the next run. Neither #364 guard catches it: `_smart_term_power_plausible` needs the trailing
+mean above 3.5x the profile's tail (the cycle drew 10-32 W) and `_match_prefix_ambiguous_full_shape` needs a longer
+look-alike (the matched profile was the correct one). New `ProfileStore.profile_terminal_high_block(profile, W)`
+reports where a profile's own last contiguous run above the level starts (as a fraction of its span) and how long it
+lasts, from the envelope's `max` band with a sample-cycle fallback for a one-sample profile; the manager pushes it as
+**element 10** of the `update_match` tuple exactly as element 9 was added for #364, and
+`_anticrease_spin_pending` blocks the finalise while that block is terminal
+(`ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC`) and this cycle has produced less than `ANTI_CREASE_TERMINAL_MATCH_FRAC` of its
+high-power seconds at or past the same position. **Event-based on purpose:** the reporter's own proposal (refuse while
+`max(envelope["max"][pos:]) > anti_wrinkle_max_power`, mapped from elapsed) delays their finalise by 16 s and splits
+the wash anyway, because a run's spin can arrive hundreds of seconds later than the profile's - the same
+load-dependent spread behind #393. Placed in `_is_anticrease_tail` **only**, never in the shared
+`_anticrease_gate_open` (a false block there also kills the match freeze, which is the #296 hang), delay-only, and
+capped at `ANTI_CREASE_SPIN_WAIT_MAX_RATIO` x expected so a programme that skips its spin cannot hang.
+
+**Also fixed while measuring 147:** the Playground's `SimRunner._matcher` fed the matcher a sample-weighted series
+where `async_match_profile` has always resampled onto a uniform time grid. On a change-based plug a quiet stretch
+emits almost no rows, so its mean power described the reporting cadence as much as the appliance. Latent until Stage 4
+started comparing like with like, then it flipped a dishwasher onto its hotter sibling **in the sim only**. The sim now
+mirrors production; `dtw_ab_eval._prefix_at` resamples the same way, and `prefix_guard_eval` gained `--in-progress` so
+the #364 operating point can be read under the ranking production will actually see (mid-cycle "shorter profile
+winning" folds **114 -> 88**, caught 50% vs 52%, false blocks **6% vs 8%**).
+
+**150 - stale storage version in the #334 design doc.** `docs/superpowers/specs/2026-08-14-cycle-variant-discrimination-design.md`
+Phase 1 and section 12 say the `phase_profile` cache bump is `v11 -> v12`; `STORAGE_VERSION` is already **12**
+(#344 `backfill_cycles`), so that step is now `v12 -> v13`. Noticed while checking #400 against the design; the doc is
+left as written (it is a dated design record) - this is the correction of record.
+
 | # | Status | Kind | Short description |
 |---|---|---|---|
+| 150 | NOTE | DOC | #334 design doc's storage bump reads `v11 -> v12`; `STORAGE_VERSION` is already 12, so it is now `v12 -> v13` |
+| 149 | FIXED | CODE | #399 anti-crease finalize split a wash 16 s before its own spin; new terminal-high-block guard (event-based, delay-only, capped) in `_is_anticrease_tail` |
+| 148 | FIXED | CODE | #400 profile group was scored as a mean of member curves; members now scored individually and collapsed to the best member before the ambiguity check |
+| 147 | FIXED | CODE | #400 Stage 4 graded a running cycle against whole-profile duration/energy; opt-in `in_progress` prefix comparison (mid-cycle top-1 56.2% -> 62.6%, complete-cycle unchanged) |
 | 146 | FIXED | CODE | Issue-triage bot skipped API-filed bug reports (#399/#400): template label never applied off the web form, and field regexes were `###`-only |
 | 145 | FIXED | CODE | Profile Cleanup tab could only delete ticked cycles; added bulk **Unlabel selected** (reuses `label_cycle` with a null profile, shared selection + busy lock with delete) |
 | 142 | FIXED | CODE | #394 learning/auto-tune pass gated on active detector state (was every reading, incl. idle - constant store rewrites + cadence model skewed by the standby heartbeat); detector still sees every reading |
