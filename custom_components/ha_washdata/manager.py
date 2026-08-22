@@ -1054,9 +1054,15 @@ class WashDataManager:
             current_duration = (end_time - start_time).total_seconds()
 
             # 1. RUN BETTER ASYNC MATCHING
+            # in_progress: this is the live match on a cycle that is still running,
+            # so Stage 4 grades each candidate on the same elapsed stretch instead
+            # of on its complete duration/energy (#400). The two final-match paths
+            # (_run_final_match_from_cycle_data, _async_process_cycle_end) leave it
+            # off - there the cycle really is complete.
             result = await self.profile_store.async_match_profile(
                  readings,
-                 current_duration
+                 current_duration,
+                 in_progress=True,
             )
 
             # 2. UPDATE MANAGER STATE (Estimates, Program Name, etc.)

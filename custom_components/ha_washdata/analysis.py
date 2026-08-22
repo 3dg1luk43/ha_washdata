@@ -34,6 +34,7 @@ from .const import (
     MATCH_DTW_REFINE_TOP_N,
     MATCH_DTW_RESAMPLE_N,
     MATCH_DURATION_SCALE,
+    MATCH_DURATION_SCALE_OVERRUN,
     MATCH_DURATION_WEIGHT,
     MATCH_ENERGY_SCALE,
     MATCH_ENERGY_WEIGHT,
@@ -390,6 +391,9 @@ def compute_matches_worker(
     dur_weight = float(config.get("duration_weight", MATCH_DURATION_WEIGHT))
     en_weight = float(config.get("energy_weight", MATCH_ENERGY_WEIGHT))
     dur_scale = float(config.get("duration_scale", MATCH_DURATION_SCALE))
+    dur_overrun_scale = float(
+        config.get("duration_overrun_scale", MATCH_DURATION_SCALE_OVERRUN)
+    )
     en_scale = float(config.get("energy_scale", MATCH_ENERGY_SCALE))
 
     curr_arr = np.array(current_power)
@@ -484,14 +488,40 @@ def compute_matches_worker(
         # "integrated" compares true integrated energy (mean x duration). Opt-in so
         # the historical default is byte-for-byte preserved. See register item 99.
         integrated = config.get("energy_mode", "mean") == "integrated"
+        # #400: while the cycle is still running, compare like with like. Both
+        # terms below describe the cycle SO FAR; without this they are graded
+        # against each candidate's COMPLETE duration and energy, which makes a long
+        # program 40% through numerically indistinguishable from a finished short
+        # one. Opt-in (live match path only) so the final match at cycle end - where
+        # the whole-cycle figures are the right comparison - is byte-identical.
+        in_progress = bool(config.get("in_progress"))
         cur_mean = float(np.mean(curr_arr))
         cur_energy = cur_mean * current_duration if integrated else cur_mean
         for cand in candidates:
             prof_dur = float(cand.get("profile_duration") or 0.0)
-            dur_ag = _agreement(current_duration, prof_dur, dur_scale)
+            if in_progress and prof_dur > 0 and current_duration <= prof_dur:
+                # Not there yet: elapsed time carries no information about this
+                # candidate, so it must not count against it.
+                dur_ag = 1.0
+            elif in_progress:
+                dur_ag = _agreement(current_duration, prof_dur, dur_overrun_scale)
+            else:
+                dur_ag = _agreement(current_duration, prof_dur, dur_scale)
             sample = cand.get("sample") or []
-            cand_mean = float(np.mean(sample)) if sample else 0.0
-            cand_energy = cand_mean * prof_dur if integrated else cand_mean
+            if in_progress:
+                cand_mean, cand_span = _prefix_mean(
+                    sample,
+                    current_duration,
+                    float(cand.get("sample_span_s") or prof_dur or 0.0),
+                    prof_dur,
+                )
+            else:
+                cand_mean = float(np.mean(sample)) if sample else 0.0
+                cand_span = prof_dur
+            # In integrated mode the candidate figure must cover the same stretch of
+            # time as cur_energy does, so a prefix mean is scaled by the elapsed
+            # duration and a whole-template mean by the candidate's own duration.
+            cand_energy = cand_mean * cand_span if integrated else cand_mean
             en_ag = _agreement(cur_energy, cand_energy, en_scale)
             cand["shape_score"] = float(cand["score"])
             cand["score"] = float(
@@ -508,6 +538,32 @@ def compute_matches_worker(
     annotate_prefix_scores(candidates, curr_arr, current_duration, config)
 
     return candidates
+
+def _prefix_mean(
+    sample: list[float] | np.ndarray,
+    current_duration: float,
+    sample_span_s: float,
+    profile_duration: float,
+) -> tuple[float, float]:
+    """Mean power of ``sample`` over its leading ``current_duration`` seconds, and
+    the span that mean covers - the Stage-4 like-for-like pair for a cycle that is
+    still running (#400).
+
+    Falls back to the whole template (and the candidate's own duration) when the
+    cycle has already outlasted it: that candidate has finished, so its total is
+    the honest comparison. Deliberately NOT ``_prefix_point_count``: that helper's
+    12-sample floor exists because Stage 6 *correlates* the prefix, while a mean
+    over a handful of leading samples is perfectly well defined - applying the
+    floor here would silently restore whole-template energy for the first few
+    percent of every cycle, which is exactly the window #400 is about.
+    """
+    if len(sample) == 0:
+        return 0.0, profile_duration
+    if sample_span_s > 0 and current_duration < sample_span_s:
+        k = max(1, int(round(len(sample) * (current_duration / sample_span_s))))
+        return float(np.mean(sample[:k])), current_duration
+    return float(np.mean(sample)), profile_duration
+
 
 def _prefix_point_count(
     n_points: int, current_duration: float, sample_span_s: float
