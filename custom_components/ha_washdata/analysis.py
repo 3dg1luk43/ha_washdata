@@ -499,11 +499,11 @@ def compute_matches_worker(
         cur_energy = cur_mean * current_duration if integrated else cur_mean
         for cand in candidates:
             prof_dur = float(cand.get("profile_duration") or 0.0)
-            if in_progress and prof_dur > 0 and current_duration <= prof_dur:
-                # Not there yet: elapsed time carries no information about this
-                # candidate, so it must not count against it.
-                dur_ag = 1.0
-            elif in_progress:
+            if in_progress and prof_dur > 0 and current_duration > prof_dur:
+                # The cycle has outlasted this candidate: real evidence against it,
+                # penalised on the sharper scale. Below a candidate's duration the
+                # term is unchanged - suppressing the penalty there was measured and
+                # rejected (see MATCH_DURATION_SCALE_OVERRUN in const.py).
                 dur_ag = _agreement(current_duration, prof_dur, dur_overrun_scale)
             else:
                 dur_ag = _agreement(current_duration, prof_dur, dur_scale)
