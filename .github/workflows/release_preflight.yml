@@ -33,6 +33,11 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
+          # REQUIRED: `cache: pip` globs for requirements.txt / pyproject.toml, neither
+          # of which this repo has, and a miss is a hard step FAILURE - not a skipped
+          # cache. That failed the whole job before a single check ran, so the preflight
+          # reported red without ever verifying anything (v0.5.5).
+          cache-dependency-path: requirements-dev.txt
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "20"
