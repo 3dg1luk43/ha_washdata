@@ -119,6 +119,7 @@ from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .profile_store import (
     _ambiguity_from_candidates,
     _match_prefix_ambiguity,
+    collapse_group_candidates,
     decompress_power_data,
 )
 
@@ -902,6 +903,10 @@ class _DetailSim:
             # Hold any committed match on a transient miss (as the manager does).
             self.last_match.update(ambiguous=False)
             return (None, 0.0, 0.0, None, False, False)
+        # Mirror of async_match_profile: members are scored individually, then each
+        # cohesive family is collapsed to its best member before anything reads the
+        # ranking (#400).
+        candidates = collapse_group_candidates(candidates, self.group_members or {})
         if self.group_members and candidates[0].get("name", "").startswith("__group__"):
             gkey = candidates[0]["name"]
             members = self.group_members.get(gkey, [])
