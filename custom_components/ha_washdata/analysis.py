@@ -509,7 +509,7 @@ def compute_matches_worker(
                 dur_ag = _agreement(current_duration, prof_dur, dur_scale)
             sample = cand.get("sample") or []
             if in_progress:
-                cand_mean, cand_span = _prefix_mean(
+                cand_mean, cand_span = prefix_mean(
                     sample,
                     current_duration,
                     float(cand.get("sample_span_s") or prof_dur or 0.0),
@@ -539,7 +539,7 @@ def compute_matches_worker(
 
     return candidates
 
-def _prefix_mean(
+def prefix_mean(
     sample: list[float] | np.ndarray,
     current_duration: float,
     sample_span_s: float,
@@ -548,6 +548,9 @@ def _prefix_mean(
     """Mean power of ``sample`` over its leading ``current_duration`` seconds, and
     the span that mean covers - the Stage-4 like-for-like pair for a cycle that is
     still running (#400).
+
+    The Stage-4 like-for-like pair, and the same pair Stage 5 uses to choose between
+    a group's members while a cycle is running - one definition, two callers.
 
     Falls back to the whole template (and the candidate's own duration) when the
     cycle has already outlasted it: that candidate has finished, so its total is

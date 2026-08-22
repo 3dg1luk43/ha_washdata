@@ -934,7 +934,8 @@ class _DetailSim:
             if members and self.store is not None:
                 try:
                     member_name, _, member_dur = self.store._stage5_pick_member(  # noqa: SLF001
-                        list(powers), duration, members, self.member_snaps or {}
+                        list(powers), duration, members, self.member_snaps or {},
+                        in_progress=bool(self.match_config.get("in_progress")),
                     )
                     # Carry the member's duration as well, exactly as
                     # `async_match_profile` relabels the winner: leaving the group's

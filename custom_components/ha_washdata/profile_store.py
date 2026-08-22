@@ -2260,6 +2260,7 @@ class ProfileStore:
     def _stage5_pick_member(
         self, current_power: list[float], current_duration: float,
         members: list[str], member_snaps: dict[str, dict[str, Any]],
+        in_progress: bool = False,
     ) -> tuple[str, float | None, float | None]:
         """Within a winning group, pick the member whose integrated ENERGY best
         matches the cycle.
@@ -2274,6 +2275,15 @@ class ProfileStore:
         63.3%; adding any duration term back regressed it (grouped members are
         duration-cohesive, so duration only adds noise). Duration is still returned
         (for ETA and the overrun guard) but is intentionally not part of selection.
+
+        ``in_progress`` marks a live, still-running cycle and makes the comparison
+        like-for-like, exactly as Stage 4 does (#400): each member is integrated
+        only up to the elapsed time via the shared ``analysis.prefix_mean``. Without
+        it the partial cycle's energy is graded against every member's COMPLETE
+        energy, and since a partial figure is always the smaller one the group
+        resolves to its coolest member for most of every run - the same defect this
+        stage exists to fix, one stage later. Off at cycle end, where the whole-cycle
+        comparison is the correct one and item 99's validation applies unchanged.
 
         Returns (member_name, individual_fit_score, member_avg_duration). The fit
         score is the chosen member's own alignment score, used as a sanity check."""
@@ -2301,7 +2311,13 @@ class ProfileStore:
             if sp.size == 0:
                 continue
             md = float(snap.get("avg_duration") or 0.0)
-            mem_energy = float(sp.mean()) * md
+            if in_progress:
+                mem_mean, mem_span = analysis.prefix_mean(
+                    sp, current_duration, float(snap.get("sample_span_s") or md or 0.0), md
+                )
+                mem_energy = mem_mean * mem_span
+            else:
+                mem_energy = float(sp.mean()) * md
             # Scale 0.30 is validated as insensitive over 0.25-0.40 on real data.
             sc = agree(cur_energy, mem_energy, 0.30)
             if sc > best_sc:
@@ -5052,6 +5068,26 @@ class ProfileStore:
             else:
                 times, powers = curves
 
+            # Trim trailing near-silence before measuring positions. How much idle
+            # tail a stored trace carries is a property of the capture, not the
+            # appliance - the same programme on the same machine ranges from 0 s to
+            # 613 s of trailing quiet in the #399 reporter's own store - and it is
+            # what makes profile_tail_power's last-5% mean swing by two orders of
+            # magnitude. Left in, it would push a genuine terminal spin below
+            # ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC and silently disarm the guard.
+            # Floor is relative to the trace's own peak, so it needs no config and
+            # keeps a real low-power tumble tail (which legitimately means the block
+            # is not terminal).
+            peak = max(powers) if powers else 0.0
+            quiet_floor = max(1.0, peak * 0.02)
+            end = len(powers) - 1
+            while end > 0 and powers[end] <= quiet_floor:
+                end -= 1
+            if end < 1:
+                return None
+            times = times[: end + 1]
+            powers = powers[: end + 1]
+
             span = float(times[-1]) - float(times[0])
             if span <= 0:
                 return None
@@ -5750,7 +5786,8 @@ class ProfileStore:
         # Stage 5: if a group won, pick the best-fitting member.
         if best_name in group_members:
             chosen, member_fit, member_dur = self._stage5_pick_member(
-                current_power_list, current_duration, group_members[best_name], member_snaps
+                current_power_list, current_duration, group_members[best_name], member_snaps,
+                in_progress=in_progress,
             )
             best_name = chosen
             if member_dur:
