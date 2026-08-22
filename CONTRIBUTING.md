@@ -86,14 +86,15 @@ pip install -r requirements-dev.txt
 ```
 
 Installs the repo's tracked hooks. The `pre-commit` hook refuses a commit whose
-minified panel/card bundles (`www/*.min.js`, `build-manifest.json`) were not rebuilt
-from the sources being committed - those artifacts are generated but **committed**,
-because they are the bytes users download. It checks the staged tree, so rebuilding
-and then committing only the source is caught too. It does nothing on commits that
-touch no `www/` asset; bypass a single deliberate WIP commit with
-`git commit --no-verify`.
+minified panel/card bundles (`custom_components/ha_washdata/www/*.min.js` and
+`build-manifest.json`) were not rebuilt from the sources being committed - those
+artifacts are generated but **committed**, because they are the bytes users download.
+It checks the staged tree, so rebuilding and then committing only the source is caught
+too. It does nothing on commits that touch no asset in that directory; bypass a single
+deliberate WIP commit with `git commit --no-verify`.
 
-After editing `www/ha-washdata-panel.js` or `www/ha-washdata-card.js`:
+After editing `custom_components/ha_washdata/www/ha-washdata-panel.js` or
+`custom_components/ha_washdata/www/ha-washdata-card.js`:
 
 ```bash
 node devtools/build_panel.mjs
