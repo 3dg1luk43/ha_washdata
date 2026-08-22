@@ -251,3 +251,26 @@ def test_terminal_high_block_never_raises() -> None:
     assert ps.profile_terminal_high_block("P", 400.0) is None
     assert ps.profile_terminal_high_block("missing", 400.0) is None
     assert ps.profile_terminal_high_block("P", 0.0) is None
+
+
+def test_terminal_high_block_ignores_a_recorded_idle_tail() -> None:
+    """How much trailing quiet a stored trace carries is a property of the capture,
+    not the appliance (the reporter's own store ranges 0-613 s for the same
+    programme). It must not move the spin's position and disarm the guard."""
+    ps = _store()
+    ps._data["profiles"] = {"P": {"avg_duration": EXPECTED}}
+    tight = _trace(PROFILE_SPIN_START, PROFILE_SPIN_END)
+    ps._data["envelopes"] = {"P": {"max": tight}}
+    without_tail = ps.profile_terminal_high_block("P", 400.0)
+
+    step = EXPECTED / 199
+    with_tail = list(tight) + [[tight[-1][0] + (i + 1) * step, 0.0] for i in range(20)]
+    ps._data["envelopes"] = {"P": {"max": with_tail}}
+    ps._data["profiles"] = {"P2": {"avg_duration": EXPECTED}}
+    ps._data["envelopes"]["P2"] = {"max": with_tail}
+    padded = ps.profile_terminal_high_block("P2", 400.0)
+
+    assert without_tail is not None and padded is not None
+    assert abs(padded[0] - without_tail[0]) < 0.01     # same position
+    assert padded[0] >= 0.90                            # still reads as terminal
+    assert abs(padded[1] - without_tail[1]) < 40        # same block length

@@ -415,6 +415,27 @@ load-dependent spread behind #393. Placed in `_is_anticrease_tail` **only**, nev
 `_anticrease_gate_open` (a false block there also kills the match freeze, which is the #296 hang), delay-only, and
 capped at `ANTI_CREASE_SPIN_WAIT_MAX_RATIO` x expected so a programme that skips its spin cannot hang.
 
+**Follow-up on 147-149 (same day, prompted by the reporters' 0.5.5 retests).** Three coherence gaps closed so the
+pipeline tells one story about time:
+(a) **Stage 5 was still whole-vs-partial.** `_stage5_pick_member` compared the running cycle's energy against each
+member's COMPLETE energy - the exact defect 147 fixes at Stage 4, surviving one stage later in the stage whose whole
+job is the energy discriminator. Since a partial figure is always the smaller one, a group resolved to its coolest
+member for most of every run. It now takes the same `analysis.prefix_mean` (renamed from `_prefix_mean` and made
+public precisely so there is ONE definition, not a Stage-4 copy and a Stage-5 copy) under the same `in_progress` flag,
+so cycle end - and item 99's validation - are untouched.
+(b) **`profile_terminal_high_block` now trims trailing near-silence** (floor = 2% of the trace's own peak) before
+measuring positions. #399's reporter showed that trailing quiet ranges 0-613 s across traces of the same programme on
+the same machine, which is what makes `profile_tail_power`'s last-5% mean swing two orders of magnitude; left in, it
+would push a genuine terminal spin below `ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC` and silently disarm the guard on exactly
+the machine that reported the bug.
+(c) **Known remaining split, deliberate and unmeasured:** Stage 2 scores the best-offset overlap and Stage 3 resamples
+BOTH series to `MATCH_DTW_RESAMPLE_N` - i.e. a 40%-complete cycle is stretched to full length and warped against the
+whole candidate - while Stages 4/5 are now genuinely prefix-anchored. `prefix_shape_score` (Stage 6) already computes
+the truncated shape but is documented as never touching `score`. Making the shape stages prefix-aware under
+`in_progress` is the obvious next step and is what #400's reporter is pointing at; it is a bigger change than 147 and
+must be measured with `dtw_ab_eval --checkpoints` plus `prefix_guard_eval --in-progress` before it goes anywhere near
+the ranking.
+
 **Also fixed while measuring 147:** the Playground's `SimRunner._matcher` fed the matcher a sample-weighted series
 where `async_match_profile` has always resampled onto a uniform time grid. On a change-based plug a quiet stretch
 emits almost no rows, so its mean power described the reporting cadence as much as the appliance. Latent until Stage 4

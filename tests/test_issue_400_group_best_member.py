@@ -211,3 +211,43 @@ async def test_match_reports_a_member_chosen_by_stage5(store):
     assert not any(
         str(c.get("name", "")).startswith("__group__") for c in result.ranking
     )
+
+
+# ── Stage 5 must compare like with like too ─────────────────────────────────
+
+
+def test_member_pick_mid_cycle_is_not_biased_to_the_coolest_member(store):
+    """A partial cycle's energy graded against each member's COMPLETE energy is
+    always the smaller number, so mid-run the group resolved to its coolest member
+    whatever was actually running - the #400 defect, one stage later. With the
+    like-for-like comparison the hotter member wins its own cycle back."""
+    # Heating that is still running at the checkpoint, so the partial energy is
+    # genuinely far below the whole - the situation the bias needs.
+    hot_curve = _block(0.20, 0.60)
+    cold_curve = _block(0.20, 0.30)
+    snaps = {
+        "Hot": _snap("Hot", hot_curve, DUR_40),
+        "Cold": _snap("Cold", cold_curve, DUR_30),
+    }
+    live = hot_curve[:80]                      # a Hot run, 40% in
+    elapsed = DUR_40 * 80 / N
+
+    whole, _fit, _dur = store._stage5_pick_member(live, elapsed, ["Hot", "Cold"], snaps)
+    like, _fit2, _dur2 = store._stage5_pick_member(
+        live, elapsed, ["Hot", "Cold"], snaps, in_progress=True
+    )
+    assert whole == "Cold"   # the bias, pinned
+    assert like == "Hot"
+
+
+def test_member_pick_at_cycle_end_is_unchanged(store):
+    """in_progress is off at cycle end, so item 99's validated behaviour (and its
+    tests) are untouched."""
+    hot_curve = _block(0.20, 0.60)
+    snaps = {
+        "Hot": _snap("Hot", hot_curve, DUR_40),
+        "Cold": _snap("Cold", _block(0.20, 0.30), DUR_30),
+    }
+    chosen, _fit, dur = store._stage5_pick_member(hot_curve, DUR_40, ["Hot", "Cold"], snaps)
+    assert chosen == "Hot"
+    assert dur == DUR_40
