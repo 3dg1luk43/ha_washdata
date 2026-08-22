@@ -215,6 +215,8 @@
     "trim": "Beskær",
     "trim_split": "Beskær / Opdel",
     "undo": "Fortryd",
+    "unlabel_selected": "Fjern mærkning ({n})",
+    "unlabel_selected_tip": "Fjerner profilmærkningen fra de valgte cyklusser. De bliver i din historik og kan mærkes igen senere - de påvirker bare ikke længere denne profil.",
     "use": "Brug",
     "wipe_all": "Slet alle data",
     "delete_selected": "Slet valgte ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Steg over det normale effektbånd i ~{n}s.",
     "auto_label_intro": "Tildel profiler til umærkede cyklusser, hvis matchkonfidens rydder tærsklen.",
     "automations_intro": "WashData udløser {start} / {end}-hændelser og stiller entiteter til rådighed, så notifikationer og handlinger bedst bygges som normale Home Assistant-automatiseringer. Automatiseringer, der bruger denne enhed, vises nedenfor.",
-    "cleanup_intro": "Hver mærket cyklus overlejret. Sæt kryds ved afvigelser og slet for at rydde op i profilen.",
+    "cleanup_intro": "Hver mærket cyklus overlejret. Sæt kryds ved afvigelser, og fjern derefter deres mærkning (de bliver i historikken, men påvirker ikke længere denne profil), eller slet dem helt.",
     "clear_debug_hint": "Fjern gemte fejlretningsdata for at frigøre plads.",
     "collecting_data": "Indsamler data. Cyklusser der stadig mangler, før finjustering kan starte: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlejringsprofiler (svage)",
@@ -1728,7 +1730,8 @@
     "splitting": "Opdeler…",
     "deleting": "Sletter…",
     "imported": "Importeret",
-    "preparing": "Forbereder…"
+    "preparing": "Forbereder…",
+    "unlabelling": "Fjerner mærkning…"
   },
   "suggestion": {
     "both_agree": "WashData anbefaler",
@@ -1979,7 +1982,9 @@
     "export_selective_done": "Eksport downloadet",
     "import_selective_done": "Importerede {profiles} profil(er) og {cycles} cyklus(ser)",
     "hist_csv_required": "Indlæs først en CSV-fil eller indsæt dens indhold",
-    "file_read_failed": "Kunne ikke læse den fil"
+    "file_read_failed": "Kunne ikke læse den fil",
+    "unlabel_done": "Fjernede mærkning fra {count} cyklus(ser)",
+    "unlabel_failed": "Fjernelse af mærkning mislykkedes: {error}"
   },
   "trend": {
     "down": "Trend nedad",

@@ -215,6 +215,8 @@
     "trim": "Bijsnijden",
     "trim_split": "Bijsnijden / splitsen",
     "undo": "Ongedaan maken",
+    "unlabel_selected": "Label van selectie verwijderen ({n})",
+    "unlabel_selected_tip": "Verwijdert het profiellabel van de geselecteerde cycli. Ze blijven in je geschiedenis staan en kunnen later opnieuw worden gelabeld - ze beïnvloeden dit profiel alleen niet meer.",
     "use": "Gebruik",
     "wipe_all": "Wis alle gegevens",
     "delete_selected": "Selectie verwijderen ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Trad boven de gebruikelijke vermogensband voor ~{n}s.",
     "auto_label_intro": "Wijs profielen toe aan niet-gelabelde cycli waarvan het matchvertrouwen de drempel overschrijdt.",
     "automations_intro": "WashData activeert {start} / {end}-gebeurtenissen en stelt entiteiten beschikbaar, waardoor meldingen en acties het best als gewone Home Assistant-automatiseringen worden gebouwd. Automatiseringen die dit apparaat gebruiken, worden hieronder weergegeven.",
-    "cleanup_intro": "Elke gelabelde cyclus wordt overlay. Vink uitschieters aan en verwijder deze om het profiel op te schonen.",
+    "cleanup_intro": "Alle gelabelde cycli over elkaar heen weergegeven. Vink uitschieters aan en verwijder dan hun label (ze blijven in de geschiedenis, maar beïnvloeden dit profiel niet meer) of verwijder ze definitief.",
     "clear_debug_hint": "Verwijder opgeslagen foutopsporingsgegevens om ruimte vrij te maken.",
     "collecting_data": "Gegevens worden verzameld. Nog benodigde cycli voordat verfijning kan beginnen: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlay-profielen (vaag)",
@@ -1728,7 +1730,8 @@
     "splitting": "Splitsen…",
     "deleting": "Verwijderen…",
     "imported": "Geïmporteerd",
-    "preparing": "Voorbereiden…"
+    "preparing": "Voorbereiden…",
+    "unlabelling": "Label verwijderen…"
   },
   "suggestion": {
     "both_agree": "WashData raadt aan",
@@ -1979,7 +1982,9 @@
     "export_selective_done": "Export gedownload",
     "import_selective_done": "{profiles} profiel(en) en {cycles} cyclus(sen) geïmporteerd",
     "hist_csv_required": "Laad eerst een CSV-bestand of plak de inhoud ervan",
-    "file_read_failed": "Kon dat bestand niet lezen"
+    "file_read_failed": "Kon dat bestand niet lezen",
+    "unlabel_done": "Label verwijderd van {count} cyclus(sen)",
+    "unlabel_failed": "Label verwijderen mislukt: {error}"
   },
   "trend": {
     "down": "Trend naar beneden",

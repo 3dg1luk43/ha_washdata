@@ -217,6 +217,8 @@
     "trim": "Przytnij",
     "trim_split": "Przytnij / Podziel",
     "undo": "Cofnij",
+    "unlabel_selected": "Usuń etykietę z zaznaczonych ({n})",
+    "unlabel_selected_tip": "Usuwa etykietę profilu z zaznaczonych cykli. Pozostaną w Twojej historii i można je później oznaczyć ponownie - przestaną tylko kształtować ten profil.",
     "use": "Użyj",
     "wipe_all": "Wyczyść wszystkie dane",
     "delete_selected": "Usuń zaznaczone ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Moc przekroczyła normalny zakres przez ~{n}s.",
     "auto_label_intro": "Przypisz profile do nieoznakowanych cykli, których pewność dopasowania przekracza próg.",
     "automations_intro": "WashData uruchamia zdarzenia {start} / {end} i udostępnia encje, więc powiadomienia i akcje najlepiej budować jako normalne automatyzacje Home Assistant. Automatyzacje korzystające z tego urządzenia są widoczne poniżej.",
-    "cleanup_intro": "Każdy oznaczony cykl został nałożony. Zaznacz wartości odstające i usuń, aby oczyścić profil.",
+    "cleanup_intro": "Wszystkie oznaczone cykle nałożone na siebie. Zaznacz odstające cykle, a następnie usuń im etykietę (zostaną w historii, ale przestaną kształtować ten profil) albo usuń je całkowicie.",
     "clear_debug_hint": "Usuń zapisane dane debugowania, aby zwolnić miejsce.",
     "collecting_data": "Zbieranie danych. Brakujące cykle do rozpoczęcia dostrajania: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Profile nakładkowe (słabe)",
@@ -1698,7 +1700,8 @@
     "splitting": "Dzielenie…",
     "deleting": "Usuwanie…",
     "imported": "Zaimportowano",
-    "preparing": "Przygotowywanie…"
+    "preparing": "Przygotowywanie…",
+    "unlabelling": "Usuwanie etykiety…"
   },
   "suggestion": {
     "both_agree": "WashData zaleca",
@@ -1949,7 +1952,9 @@
     "export_selective_done": "Eksport pobrany",
     "import_selective_done": "Zaimportowano {profiles} profil(e) i {cycles} cykl(e)",
     "hist_csv_required": "Najpierw wczytaj plik CSV lub wklej jego zawartość",
-    "file_read_failed": "Nie udało się odczytać tego pliku"
+    "file_read_failed": "Nie udało się odczytać tego pliku",
+    "unlabel_done": "Usunięto etykietę z {count} cykli",
+    "unlabel_failed": "Usunięcie etykiety nie powiodło się: {error}"
   },
   "trend": {
     "down": "Trend w dół",

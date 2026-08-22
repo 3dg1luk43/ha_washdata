@@ -215,6 +215,8 @@
         "trim": "Prerje",
         "trim_split": "Prerje / Ndarje",
         "undo": "Zhbëj",
+        "unlabel_selected": "Hiq etiketën nga të zgjedhurat ({n})",
+        "unlabel_selected_tip": "Heq etiketën e profilit nga ciklet e zgjedhura. Ato mbeten në historikun tuaj dhe mund të etiketohen sërish më vonë - thjesht nuk e formësojnë më këtë profil.",
         "use": "Përdor",
         "wipe_all": "Fshi të gjitha të dhënat",
         "delete_selected": "Fshi të zgjedhurat ({n})",
@@ -802,7 +804,7 @@
         "artifact_spike_detail": "Shkoi mbi brezin e zakonshëm të fuqisë për ~{n} s.",
         "auto_label_intro": "Cakto profile te ciklet e paetiketuara që besueshmëria e tyre e përputhjes tejkalon pragun.",
         "automations_intro": "WashData ndez ngjarje {start} / {end} dhe ekspozon entitete, kështu njoftimet dhe veprimet ndërtohen më mirë si automatizime normale të Home Assistant. Automatizimi që përdorin këtë pajisje shfaqen më poshtë.",
-        "cleanup_intro": "Çdo cikël i etiketuar mbivendosur. Shëno outlier-ët dhe fshi për të pastruar profilin.",
+        "cleanup_intro": "Çdo cikël i etiketuar është mbivendosur. Shëno outlier-ët, pastaj hiq etiketën e tyre (mbeten në historik, por nuk e formësojnë më këtë profil) ose fshiji përfundimisht.",
         "clear_debug_hint": "Hiqni të dhënat e ruajtura të korrigjimit për të liruar hapësirën.",
         "collecting_data": "Duke mbledhur të dhëna. Cikle që nevojiten para se të fillojë rregullimi i hollë: {need} ({current}/{min}).",
         "compare_overlay_profiles": "Mbivendos profilet (të zbetura)",
@@ -1698,7 +1700,8 @@
         "splitting": "Po ndahet…",
         "deleting": "Po fshihet…",
         "imported": "Importuar",
-        "preparing": "Po përgatitet…"
+        "preparing": "Po përgatitet…",
+        "unlabelling": "Po hiqet etiketa…"
     },
     "tab": {
         "advanced": "I avancuar",
@@ -1836,7 +1839,9 @@
         "export_selective_done": "Eksporti u shkarkua",
         "import_selective_done": "U importuan {profiles} profil(e) dhe {cycles} cikël(cikle)",
         "hist_csv_required": "Ngarkoni së pari një skedar CSV ose ngjitni përmbajtjen e tij",
-        "file_read_failed": "Skedari nuk mund të lexohej"
+        "file_read_failed": "Skedari nuk mund të lexohej",
+        "unlabel_done": "U hoq etiketa nga {count} cikël(e)",
+        "unlabel_failed": "Heqja e etiketës dështoi: {error}"
     },
     "suggestion": {
         "both_agree": "WashData rekomandon",

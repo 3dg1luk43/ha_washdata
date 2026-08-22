@@ -321,8 +321,23 @@ gated on `detector.state in (STARTING, RUNNING, PAUSED, ENDING)`; `detector.proc
 must catch the next cycle start). Pin test `test_issue_394_idle_learning_gate.py` (10) locks the split so it can't be
 folded back together. No runtime dependency on the idle-trained model (it feeds only user-facing suggestions).
 
+**2026-08-22 addition (post-0.5.5, panel - bulk unlabel in profile Cleanup):** Item 145. The per-profile
+Cleanup tab could only *delete* the cycles it let you tick, so pulling an outlier out of a program's evidence
+meant destroying real history (and its lifetime energy / cycle count). Added `pp-cleanup-unlabel` beside
+`pp-cleanup-del` in the same `.wd-modal-actions` row, backed by the existing `ha_washdata/label_cycle` with
+`profile_name: null` (same command the Cycles tab's bulk relabel already loops), so no new WS command and no
+new store path: `ProfileStore.assign_profile_to_cycle(cid, None)` handles all three cycle lists, and
+`learning.async_resolve_pending_from_label` still resolves the pending feedback - hence the unlabel path
+refetches cycles + feedbacks where the delete path only refetches profiles. Both buttons share one selection
+and one busy lock (`clBusy`) so an unlabel cannot race a delete over the same ids. `_wireCleanup`'s targeted
+(scroll-preserving) checkbox update now refreshes both button captions, not just delete. `msg.cleanup_intro`
+was rewritten since "tick outliers and delete" no longer describes the tab. 4 E2E specs in
+`playwright-tests/tests/profiles.spec.ts`; 6 keys localized x35. NB: `ws_get_profile_cycles` reads
+`past_cycles` only, so this tab never lists reference/backfill cycles.
+
 | # | Status | Kind | Short description |
 |---|---|---|---|
+| 145 | FIXED | CODE | Profile Cleanup tab could only delete ticked cycles; added bulk **Unlabel selected** (reuses `label_cycle` with a null profile, shared selection + busy lock with delete) |
 | 142 | FIXED | CODE | #394 learning/auto-tune pass gated on active detector state (was every reading, incl. idle - constant store rewrites + cadence model skewed by the standby heartbeat); detector still sees every reading |
 | 141 | FIXED | CODE | #393 Smart-Termination ratio is now the per-device `smart_termination_duration_ratio` option (device-default resolved in the config builder; `_resolve_smart_ratio` helper; dishwasher pump-out relief via `min()`) |
 | 135-140 | FIXED | CODE | #364 Smart-Termination split: power-plausibility guard on both SMART paths + prefix scoring replaces the 1.5x ratio; `profile_match_threshold` un-deaded; Playground can replay it |

@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { bootPanel, clickTab, assertWsCalled, setHandler } from '../helpers/panel';
+import { bootPanel, clickTab, assertWsCalled, assertWsNotCalled, setHandler } from '../helpers/panel';
 import profilesData from '../fixtures/mock-data/profiles.json';
 
 test.beforeEach(async ({ page }) => {
@@ -100,4 +100,88 @@ test('profiles grid is responsive on mobile', async ({ page }) => {
   });
   // On 390px with minmax(280px, 1fr), should be 1 column
   expect(cols).toBe(1);
+});
+
+// ── Profile panel → Cleanup tab: bulk unlabel / delete ────────────────────────
+
+const CLEANUP_CYCLES = {
+  cycles: [
+    {
+      cycle_id: 'clean-1', start_time: '2026-08-01T10:00:00+00:00',
+      duration: 3600, status: 'completed', energy_kwh: 0.92,
+      samples: [[0, 0], [60, 820], [1800, 1200], [3600, 0]],
+    },
+    {
+      cycle_id: 'clean-2', start_time: '2026-08-02T10:00:00+00:00',
+      duration: 3500, status: 'completed', energy_kwh: 0.85,
+      samples: [[0, 0], [60, 760], [1750, 1140], [3500, 0]],
+    },
+  ],
+};
+
+/** Open the first profile's control panel and switch to its Cleanup tab. */
+async function openCleanupTab(page: import('@playwright/test').Page): Promise<void> {
+  await clickTab(page, 'profiles');
+  await setHandler(page, 'ha_washdata/get_profile_cycles', CLEANUP_CYCLES);
+  await setHandler(page, 'ha_washdata/get_profile_envelope', { envelope: null });
+  await page.locator('.wd-profile-card').first().click();
+  await expect(page.locator('.wd-modal')).toBeVisible({ timeout: 5_000 });
+  const cleanupTab = page.locator('.wd-modal [data-maction="pp-tab-cleanup"]');
+  await expect(cleanupTab).toBeVisible({ timeout: 5_000 });
+  await cleanupTab.click();
+  await expect(page.locator('.wd-modal [data-maction="pp-cleanup-del"]')).toBeVisible({ timeout: 5_000 });
+}
+
+test('cleanup tab offers unlabel next to delete in the same actions row', async ({ page }) => {
+  await openCleanupTab(page);
+  const row = page.locator('.wd-modal .wd-modal-actions').filter({
+    has: page.locator('[data-maction="pp-cleanup-del"]'),
+  });
+  await expect(row.locator('[data-maction="pp-cleanup-unlabel"]')).toBeVisible({ timeout: 5_000 });
+  await expect(row.locator('[data-maction="pp-cleanup-unlabel"]')).toContainText('Unlabel');
+});
+
+test('both cleanup actions stay disabled until a cycle is ticked', async ({ page }) => {
+  await openCleanupTab(page);
+  const unlabel = page.locator('.wd-modal [data-maction="pp-cleanup-unlabel"]');
+  const del = page.locator('.wd-modal [data-maction="pp-cleanup-del"]');
+  await expect(unlabel).toBeDisabled();
+  await expect(del).toBeDisabled();
+
+  await page.locator('.wd-modal input[data-cleanidx="0"]').check();
+  await expect(unlabel).toBeEnabled();
+  await expect(del).toBeEnabled();
+  await expect(unlabel).toContainText('1');
+  await expect(del).toContainText('1');
+});
+
+test('unlabel selected sends label_cycle with a null profile per cycle', async ({ page }) => {
+  await openCleanupTab(page);
+  await page.locator('.wd-modal input[data-cleanidx="0"]').check();
+  await page.locator('.wd-modal input[data-cleanidx="1"]').check();
+  await page.locator('.wd-modal [data-maction="pp-cleanup-unlabel"]').click();
+
+  await expect
+    .poll(async () => (await page.evaluate(() => window.__get_calls('ha_washdata/label_cycle'))).length, {
+      timeout: 5_000,
+    })
+    .toBe(2);
+  const calls = await page.evaluate(() => window.__get_calls('ha_washdata/label_cycle'));
+  expect(calls.map((c: any) => c.cycle_id).sort()).toEqual(['clean-1', 'clean-2']);
+  for (const c of calls as any[]) expect(c.profile_name).toBeNull();
+});
+
+test('unlabel selected never deletes cycles and refreshes the profile', async ({ page }) => {
+  await openCleanupTab(page);
+  const before = (await page.evaluate(() => window.__get_calls('ha_washdata/get_profile_cycles'))).length;
+  await page.locator('.wd-modal input[data-cleanidx="0"]').check();
+  await page.locator('.wd-modal [data-maction="pp-cleanup-unlabel"]').click();
+
+  await expect
+    .poll(async () => (await page.evaluate(() => window.__get_calls('ha_washdata/get_profile_cycles'))).length, {
+      timeout: 5_000,
+    })
+    .toBeGreaterThan(before);
+  await assertWsNotCalled(page, 'ha_washdata/delete_cycle');
+  await assertWsCalled(page, 'ha_washdata/get_profiles');
 });

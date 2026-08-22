@@ -215,6 +215,8 @@
     "trim": "Apkarpyti",
     "trim_split": "Apkarpyti / padalinti",
     "undo": "Anuliuoti",
+    "unlabel_selected": "Panaikinti pasirinktų žymėjimą ({n})",
+    "unlabel_selected_tip": "Pašalina profilio žymėjimą iš pasirinktų ciklų. Jie lieka jūsų istorijoje ir juos vėliau galima pažymėti iš naujo - tiesiog nustoja formuoti šį profilį.",
     "use": "Naudokite",
     "wipe_all": "Išvalykite visus duomenis",
     "delete_selected": "Ištrinti pasirinktus ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Viršijo įprastą galios juostą maždaug {n}s.",
     "auto_label_intro": "Priskirkite profilius nepažymėtiems ciklams, kurių atitikties patikimumas pašalina slenkstį.",
     "automations_intro": "WashData paleidžia {start} / {end} įvykius ir atskleidžia esybes, todėl pranešimai ir veiksmai geriausiai kuriami kaip įprasti Home Assistant automatizavimai. Žemiau rodomi automatizavimai, naudojantys šį prietaisą.",
-    "cleanup_intro": "Kiekvienas pažymėtas ciklas padengtas. Pažymėkite nuokrypius ir ištrinkite, kad išvalytumėte profilį.",
+    "cleanup_intro": "Visi pažymėti ciklai rodomi vienas ant kito. Pažymėkite nuokrypius ir panaikinkite jų žymėjimą (jie liks istorijoje, bet nebeformuos šio profilio) arba ištrinkite juos visiškai.",
     "clear_debug_hint": "Pašalinkite saugomus derinimo duomenis, kad atlaisvintumėte vietos.",
     "collecting_data": "Renkami duomenys. Dar reikia ciklų, kad galėtų prasidėti tikslus derinimas: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Perdangos profiliai (blankūs)",
@@ -1698,7 +1700,8 @@
     "splitting": "Padalijama…",
     "deleting": "Trinama…",
     "imported": "Importuota",
-    "preparing": "Ruošiama…"
+    "preparing": "Ruošiama…",
+    "unlabelling": "Naikinamas žymėjimas…"
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1836,7 +1839,9 @@
     "export_selective_done": "Eksportas atsisiųstas",
     "import_selective_done": "Importuota {profiles} profilių ir {cycles} ciklų",
     "hist_csv_required": "Pirmiausia įkelkite CSV failą arba įklijuokite jo turinį",
-    "file_read_failed": "Nepavyko nuskaityti to failo"
+    "file_read_failed": "Nepavyko nuskaityti to failo",
+    "unlabel_done": "Panaikintas žymėjimas ciklams: {count}",
+    "unlabel_failed": "Nepavyko panaikinti žymėjimo: {error}"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",

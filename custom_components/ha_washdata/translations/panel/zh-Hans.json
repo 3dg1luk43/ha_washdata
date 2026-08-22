@@ -215,6 +215,8 @@
         "trim": "裁剪",
         "trim_split": "裁剪 / 拆分",
         "undo": "撤销",
+        "unlabel_selected": "取消标记所选（{n}）",
+        "unlabel_selected_tip": "从所选周期中移除配置文件标签。这些周期仍留在您的历史中，之后可以重新标记，只是不再用于构建此配置文件。",
         "use": "使用",
         "wipe_all": "清除所有数据",
         "delete_selected": "删除所选（{n}）",
@@ -802,7 +804,7 @@
         "artifact_spike_detail": "超出通常功率范围约 {n} 秒。",
         "auto_label_intro": "为置信度达到阈值的未标记周期分配配置文件。",
         "automations_intro": "WashData 触发 {start} / {end} 事件并公开实体，因此通知和操作最好构建为常规 Home Assistant 自动化。使用此设备的自动化显示在下方。",
-        "cleanup_intro": "显示所有已标记周期的叠加。勾选离群值并删除以清理配置文件。",
+        "cleanup_intro": "显示所有已标记周期的叠加。勾选离群值，然后取消其标记（仍留在历史中，但不再用于构建此配置文件）或将其彻底删除。",
         "clear_debug_hint": "删除存储的调试数据以释放空间。",
         "collecting_data": "正在收集数据。开始微调前还需要的周期数：{need}（{current}/{min}）。",
         "compare_overlay_profiles": "叠加配置文件（浅色）",
@@ -1728,7 +1730,8 @@
         "splitting": "拆分中…",
         "deleting": "删除中…",
         "imported": "已导入",
-        "preparing": "正在准备…"
+        "preparing": "正在准备…",
+        "unlabelling": "取消标记中…"
     },
     "tab": {
         "advanced": "高级",
@@ -1866,7 +1869,9 @@
         "export_selective_done": "导出已下载",
         "import_selective_done": "已导入 {profiles} 个配置文件和 {cycles} 个周期",
         "hist_csv_required": "请先加载 CSV 文件或粘贴其内容",
-        "file_read_failed": "无法读取该文件"
+        "file_read_failed": "无法读取该文件",
+        "unlabel_done": "已取消标记 {count} 个周期",
+        "unlabel_failed": "取消标记失败：{error}"
     },
     "suggestion": {
         "both_agree": "WashData建议",

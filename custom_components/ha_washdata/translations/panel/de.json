@@ -215,6 +215,8 @@
     "trim": "Zuschneiden",
     "trim_split": "Zuschneiden / Teilen",
     "undo": "Rückgängig",
+    "unlabel_selected": "Beschriftung entfernen ({n})",
+    "unlabel_selected_tip": "Entfernt die Profilbeschriftung von den ausgewählten Zyklen. Sie bleiben in Ihrem Verlauf und können später erneut beschriftet werden - sie beeinflussen dieses Profil dann einfach nicht mehr.",
     "use": "Verwenden",
     "wipe_all": "Alle Daten löschen",
     "delete_selected": "Auswahl löschen ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Überstieg das übliche Leistungsband für ~{n}s.",
     "auto_label_intro": "Weisen Sie Profile unbeschrifteten Zyklen zu, deren Übereinstimmungskonfidenz den Schwellenwert überschreitet.",
     "automations_intro": "WashData löst {start} / {end}-Ereignisse aus und stellt Entitäten bereit, sodass Benachrichtigungen und Aktionen am besten als normale Home Assistant-Automatisierungen eingerichtet werden. Automatisierungen, die dieses Gerät verwenden, werden unten angezeigt.",
-    "cleanup_intro": "Jeder beschriftete Zyklus überlagert. Markieren Sie Ausreißer und löschen Sie sie, um das Profil zu bereinigen.",
+    "cleanup_intro": "Jeder beschriftete Zyklus überlagert. Markieren Sie Ausreißer und entfernen Sie dann deren Beschriftung (bleiben im Verlauf, beeinflussen dieses Profil aber nicht mehr) oder löschen Sie sie ganz.",
     "clear_debug_hint": "Entfernen Sie gespeicherte Debug-Daten, um Speicherplatz freizugeben.",
     "collecting_data": "Daten werden gesammelt. Noch benötigte Zyklen bis zum Start der Feinabstimmung: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlay-Profile (schwach)",
@@ -1728,7 +1730,8 @@
     "splitting": "Wird geteilt…",
     "deleting": "Wird gelöscht…",
     "imported": "Importiert",
-    "preparing": "Wird vorbereitet…"
+    "preparing": "Wird vorbereitet…",
+    "unlabelling": "Beschriftung wird entfernt…"
   },
   "suggestion": {
     "both_agree": "WashData empfiehlt",
@@ -1979,7 +1982,9 @@
     "export_selective_done": "Export heruntergeladen",
     "import_selective_done": "{profiles} Profil(e) und {cycles} Zyklus/Zyklen importiert",
     "hist_csv_required": "Laden Sie zuerst eine CSV-Datei oder fügen Sie deren Inhalt ein",
-    "file_read_failed": "Diese Datei konnte nicht gelesen werden"
+    "file_read_failed": "Diese Datei konnte nicht gelesen werden",
+    "unlabel_done": "Beschriftung von {count} Zyklen entfernt",
+    "unlabel_failed": "Entfernen der Beschriftung fehlgeschlagen: {error}"
   },
   "trend": {
     "down": "Abwärtstrend",

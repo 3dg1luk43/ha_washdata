@@ -217,6 +217,8 @@
     "trim": "Obreži",
     "trim_split": "Obreži / Razdeli",
     "undo": "Razveljavi",
+    "unlabel_selected": "Odstrani oznako izbranim ({n})",
+    "unlabel_selected_tip": "Odstrani oznako profila z izbranih ciklov. Ostanejo v vaši zgodovini in jih je mogoče pozneje znova označiti - le tega profila ne oblikujejo več.",
     "use": "Uporabi",
     "wipe_all": "Izbriši vse podatke",
     "delete_selected": "Izbriši izbrano ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Presegl normalni pas moči za ~{n} s.",
     "auto_label_intro": "Dodelite profile neoznačenim ciklom, katerih ujemanje presega prag.",
     "automations_intro": "WashData sproži dogodke {start} / {end} in razkrije entitete, zato je obvestila in dejanja najbolje graditi kot navadne avtomatizacije Home Assistant. Spodaj so prikazane avtomatizacije, ki uporabljajo to napravo.",
-    "cleanup_intro": "Vsi označeni cikli naloženi. Označi odmike in briši za čiščenje profila.",
+    "cleanup_intro": "Vsi označeni cikli so prekriti drug čez drugega. Obkljukajte odstopajoče cikle in jim nato odstranite oznako (ostanejo v zgodovini, a tega profila ne oblikujejo več) ali jih izbrišite.",
     "clear_debug_hint": "Odstranite shranjene podatke za odpravljanje napak, da sprostite prostor.",
     "collecting_data": "Zbiranje podatkov. Še potrebnih ciklov pred začetkom natančnega prilagajanja: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Prekriti profili (bledi)",
@@ -1698,7 +1700,8 @@
     "splitting": "Deljenje…",
     "deleting": "Brisanje…",
     "imported": "Uvoženo",
-    "preparing": "Pripravljanje…"
+    "preparing": "Pripravljanje…",
+    "unlabelling": "Odstranjevanje oznake…"
   },
   "suggestion": {
     "both_agree": "WashData priporoča",
@@ -1949,7 +1952,9 @@
     "export_selective_done": "Izvoz prenesen",
     "import_selective_done": "Uvoženih {profiles} profilov in {cycles} ciklov",
     "hist_csv_required": "Najprej naložite datoteko CSV ali prilepite njeno vsebino",
-    "file_read_failed": "Te datoteke ni bilo mogoče prebrati"
+    "file_read_failed": "Te datoteke ni bilo mogoče prebrati",
+    "unlabel_done": "Odstranjena oznaka za {count} ciklov",
+    "unlabel_failed": "Odstranjevanje oznake ni uspelo: {error}"
   },
   "trend": {
     "down": "Padajoči trend",

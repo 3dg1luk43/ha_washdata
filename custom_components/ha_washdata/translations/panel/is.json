@@ -215,6 +215,8 @@
     "trim": "Klippa til",
     "trim_split": "Klippa til / Skipta",
     "undo": "Afturkalla",
+    "unlabel_selected": "Fjarlægja merkingu ({n})",
+    "unlabel_selected_tip": "Fjarlægir prófílmerkinguna af völdum lotum. Þær verða áfram í sögunni þinni og hægt er að merkja þær aftur síðar - þær hafa bara ekki lengur áhrif á þennan prófíl.",
     "use": "Notaðu",
     "wipe_all": "Þurrkaðu öll gögn",
     "delete_selected": "Eyða völdum ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Fór yfir venjulegt aflband í ~{n}s.",
     "auto_label_intro": "Úthlutaðu sniðum á ómerktar lotur þar sem samsvörun þeirra hreinsar þröskuldinn.",
     "automations_intro": "WashData sendir {start} / {end} atburði og birtir einingar, þannig að tilkynningar og aðgerðir eru best smíðaðar sem venjulegar Home Assistant sjálfvirkingar. Sjálfvirkingar sem nota þetta tæki birtast hér að neðan.",
-    "cleanup_intro": "Sérhver merkt hringrás lögð yfir. Merktu við frávik og eyddu til að hreinsa upp prófílinn.",
+    "cleanup_intro": "Allar merktar lotur lagðar hver yfir aðra. Merktu við frávik og fjarlægðu síðan merkingu þeirra (þær haldast í sögunni en hafa ekki lengur áhrif á þennan prófíl) eða eyddu þeim alveg.",
     "clear_debug_hint": "Fjarlægðu vistuð villuleitargögn til að losa um pláss.",
     "collecting_data": "Safnar gögnum. Lotur sem vantar áður en fínstilling getur hafist: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Yfirlagssnið (dauft)",
@@ -1728,7 +1730,8 @@
     "splitting": "Skipti…",
     "deleting": "Eyði…",
     "imported": "Flutt inn",
-    "preparing": "Undirbý…"
+    "preparing": "Undirbý…",
+    "unlabelling": "Fjarlægi merkingu…"
   },
   "suggestion": {
     "both_agree": "WashData mælir með",
@@ -1979,7 +1982,9 @@
     "export_selective_done": "Útflutningur sóttur",
     "import_selective_done": "Flutti inn {profiles} prófíl(a) og {cycles} lotu(r)",
     "hist_csv_required": "Hlaðdu fyrst inn CSV-skrá eða límdu innihald hennar",
-    "file_read_failed": "Gat ekki lesið þá skrá"
+    "file_read_failed": "Gat ekki lesið þá skrá",
+    "unlabel_done": "Fjarlægði merkingu af {count} lotu(m)",
+    "unlabel_failed": "Fjarlæging merkingar mistókst: {error}"
   },
   "trend": {
     "down": "Stefnir niður",

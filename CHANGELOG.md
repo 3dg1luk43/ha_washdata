@@ -5,6 +5,12 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Features
+
+- **Unlabel cycles from a program without deleting them**: The per-program Cleanup tab (Profiles - click a program - Cleanup) now has an **Unlabel selected** button beside **Delete selected**. Tick the outliers dragging a program's learned curve off and remove them from that program while keeping them in your history, ready to be named again or left for auto-labelling. Both buttons act on the same tick boxes, and whichever is running locks the other out.
+
 ## 0.5.5 - 2026-08-19
 
 ### Features

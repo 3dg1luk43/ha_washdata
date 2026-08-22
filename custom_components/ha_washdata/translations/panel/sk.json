@@ -217,6 +217,8 @@
     "trim": "Orezať",
     "trim_split": "Orezať / Rozdeliť",
     "undo": "Späť",
+    "unlabel_selected": "Odobrať štítok vybraným ({n})",
+    "unlabel_selected_tip": "Odstráni z vybraných cyklov štítok profilu. Zostanú vo vašej histórii a možno ich neskôr znova označiť - len prestanú tvoriť tento profil.",
     "use": "Použiť",
     "wipe_all": "Vymazať všetky dáta",
     "delete_selected": "Odstrániť vybrané ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Bol nad bežným pásmom výkonu počas ~{n} s.",
     "auto_label_intro": "Priradiť profily neoznačeným cyklom, ktorých zhoda prekračuje prah.",
     "automations_intro": "WashData spúšťa udalosti {start} / {end} a sprístupňuje entity, takže notifikácie a akcie sa najlepšie vytvárajú ako bežné automatizácie Home Assistant. Automatizácie používajúce toto zariadenie sú zobrazené nižšie.",
-    "cleanup_intro": "Všetky označené cykly naložené. Označte odchýlky a odstráňte pre vyčistenie profilu.",
+    "cleanup_intro": "Všetky označené cykly navrstvené na seba. Zaškrtnite odchýlené cykly a potom im odoberte štítok (zostanú v histórii, ale už netvoria tento profil), alebo ich rovno odstráňte.",
     "clear_debug_hint": "Odstráňte uložené údaje ladenia, aby ste uvoľnili miesto.",
     "collecting_data": "Zbieranie dát. Zostávajúce cykly do spustenia doladenia: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Prekryté profily (bledé)",
@@ -1698,7 +1700,8 @@
     "splitting": "Rozdeľovanie…",
     "deleting": "Odstraňovanie…",
     "imported": "Importované",
-    "preparing": "Príprava…"
+    "preparing": "Príprava…",
+    "unlabelling": "Odoberanie štítka…"
   },
   "suggestion": {
     "both_agree": "WashData odporúča",
@@ -1949,7 +1952,9 @@
     "export_selective_done": "Export stiahnutý",
     "import_selective_done": "Importovaných {profiles} profilov a {cycles} cyklov",
     "hist_csv_required": "Najprv načítajte súbor CSV alebo prilepte jeho obsah",
-    "file_read_failed": "Tento súbor sa nepodarilo prečítať"
+    "file_read_failed": "Tento súbor sa nepodarilo prečítať",
+    "unlabel_done": "Odobratý štítok pre {count} cyklov",
+    "unlabel_failed": "Odobratie štítka zlyhalo: {error}"
   },
   "trend": {
     "down": "Klesajúci trend",

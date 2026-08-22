@@ -247,6 +247,8 @@
     "trim": "Trim",
     "trim_split": "Trim / Split",
     "undo": "Undo",
+    "unlabel_selected": "Unlabel selected ({n})",
+    "unlabel_selected_tip": "Remove the profile label from the selected cycles. They stay in your history and can be labelled again later - they just stop shaping this profile.",
     "use": "Use",
     "wipe_all": "Wipe All Data"
   },
@@ -766,7 +768,7 @@
     "artifact_spike_detail": "Drew above the usual power band for ~{n}s.",
     "auto_label_intro": "Assign profiles to unlabelled cycles whose match confidence clears the threshold.",
     "automations_intro": "WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.",
-    "cleanup_intro": "Every labelled cycle overlaid. Tick outliers and delete to clean up the profile.",
+    "cleanup_intro": "Every labelled cycle overlaid. Tick outliers, then unlabel them (kept in history, but no longer shaping this profile) or delete them outright.",
     "clear_debug_hint": "Remove stored debug data to free space.",
     "collecting_data": "Collecting data. Cycles still needed before fine-tuning can start: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlay profiles (faint)",
@@ -1677,7 +1679,8 @@
     "saving": "Saving…",
     "splitting": "Splitting…",
     "training": "Training…",
-    "trimming": "Trimming…"
+    "trimming": "Trimming…",
+    "unlabelling": "Unlabelling…"
   },
   "suggestion": {
     "both_agree": "WashData recommends",
@@ -1924,7 +1927,9 @@
     "suggestions_applied": "Suggestions applied; integration reloading",
     "suggestions_dismissed": "Suggestions dismissed",
     "task_cancelled": "Cancelled.",
-    "thanks_confirming": "Thanks for confirming"
+    "thanks_confirming": "Thanks for confirming",
+    "unlabel_done": "Unlabelled {count} cycle(s)",
+    "unlabel_failed": "Unlabel failed: {error}"
   },
   "trend": {
     "down": "Trending down",

@@ -217,6 +217,8 @@
     "trim": "Oříznout",
     "trim_split": "Oříznout / Rozdělit",
     "undo": "Zpět",
+    "unlabel_selected": "Odznačit vybrané ({n})",
+    "unlabel_selected_tip": "Odebere u vybraných cyklů štítek profilu. Zůstanou ve vaší historii a lze je později znovu označit - jen přestanou tvořit tento profil.",
     "use": "Použít",
     "wipe_all": "Vymazat všechna data",
     "delete_selected": "Smazat vybrané ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Překročil obvyklé pásmo výkonu po dobu ~{n} s.",
     "auto_label_intro": "Přiřaďte profily neoznačeným cyklům, jejichž spolehlivost shody překročí prahovou hodnotu.",
     "automations_intro": "WashData vyvolává události {start} / {end} a zpřístupňuje entity. Oznámení a akce se nejlépe nastavují jako standardní automatizace Home Assistant. Automatizace používající toto zařízení se zobrazují níže.",
-    "cleanup_intro": "Každý označený cyklus se překrývá. Zaškrtnutím odlehlých hodnot a odstraněním se profil vyčistí.",
+    "cleanup_intro": "Všechny označené cykly překryté přes sebe. Zaškrtněte odlehlé cykly a pak je odznačte (zůstanou v historii, ale už netvoří tento profil), nebo je rovnou smažte.",
     "clear_debug_hint": "Odstraňte uložená ladicí data, abyste uvolnili místo.",
     "collecting_data": "Shromažďování dat. Zbývající cykly do zahájení doladění: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Překryvné profily (slabé)",
@@ -1698,7 +1700,8 @@
     "splitting": "Rozdělování…",
     "deleting": "Mazání…",
     "imported": "Importováno",
-    "preparing": "Příprava…"
+    "preparing": "Příprava…",
+    "unlabelling": "Odznačování…"
   },
   "suggestion": {
     "both_agree": "WashData doporučuje",
@@ -1949,7 +1952,9 @@
     "export_selective_done": "Export stažen",
     "import_selective_done": "Importováno {profiles} profilů a {cycles} cyklů",
     "hist_csv_required": "Nejprve načtěte soubor CSV nebo vložte jeho obsah",
-    "file_read_failed": "Tento soubor se nepodařilo přečíst"
+    "file_read_failed": "Tento soubor se nepodařilo přečíst",
+    "unlabel_done": "Odznačeno cyklů: {count}",
+    "unlabel_failed": "Odznačení selhalo: {error}"
   },
   "trend": {
     "down": "Klesající trend",
