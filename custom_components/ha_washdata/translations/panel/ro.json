@@ -167,6 +167,8 @@
     "trim": "Tăiați",
     "trim_split": "Tăiați / Divizați",
     "undo": "Anulați",
+    "unlabel_selected": "Eliminați eticheta selecției ({n})",
+    "unlabel_selected_tip": "Elimină eticheta de profil de la ciclurile selectate. Rămân în istoricul dvs. și pot fi etichetate din nou mai târziu; doar nu mai influențează acest profil.",
     "use": "Utilizați",
     "wipe_all": "Ștergeți toate datele",
     "delete_selected": "Ștergeți selecția ({n})",
@@ -754,7 +756,7 @@
     "artifact_spike_detail": "A depășit banda de putere obișnuită timp de ~{n}s.",
     "auto_label_intro": "Atribuiți profiluri ciclurilor neetichetate a căror încredere de potrivire depășește pragul.",
     "automations_intro": "WashData declanșează evenimente {start} / {end} și expune entități, astfel că notificările și acțiunile sunt cel mai bine construite ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
-    "cleanup_intro": "Toate ciclurile etichetate suprapuse. Bifați valorile aberante și ștergeți pentru a curăța profilul.",
+    "cleanup_intro": "Toate ciclurile etichetate suprapuse. Bifați valorile aberante, apoi eliminați-le eticheta (rămân în istoric, dar nu mai influențează acest profil) sau ștergeți-le definitiv.",
     "clear_debug_hint": "Eliminați datele de depanare stocate pentru a elibera spațiu.",
     "collecting_data": "Se colectează date. Cicluri încă necesare înainte ca reglajul fin să poată începe: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Suprapuneți profiluri (estompat)",
@@ -1650,7 +1652,8 @@
     "splitting": "Se divide…",
     "deleting": "Se șterge…",
     "imported": "Importat",
-    "preparing": "Se pregătește…"
+    "preparing": "Se pregătește…",
+    "unlabelling": "Se elimină eticheta…"
   },
   "tab": {
     "advanced": "Avansat",
@@ -1788,7 +1791,9 @@
     "export_selective_done": "Export descărcat",
     "import_selective_done": "Importate {profiles} profil(uri) și {cycles} ciclu(ri)",
     "hist_csv_required": "Încărcați mai întâi un fișier CSV sau lipiți conținutul acestuia",
-    "file_read_failed": "Fișierul nu a putut fi citit"
+    "file_read_failed": "Fișierul nu a putut fi citit",
+    "unlabel_done": "Etichetă eliminată de la {count} ciclu(ri)",
+    "unlabel_failed": "Eliminarea etichetei a eșuat: {error}"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",

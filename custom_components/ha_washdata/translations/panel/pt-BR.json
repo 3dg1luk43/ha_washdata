@@ -167,6 +167,8 @@
     "trim": "Recortar",
     "trim_split": "Recortar / Dividir",
     "undo": "Desfazer",
+    "unlabel_selected": "Remover rótulo dos selecionados ({n})",
+    "unlabel_selected_tip": "Remove o rótulo de perfil dos ciclos selecionados. Eles continuam no seu histórico e poderão ser rotulados novamente depois; apenas deixam de influenciar este perfil.",
     "use": "Usar",
     "wipe_all": "Apagar todos os dados",
     "delete_selected": "Excluir selecionados ({n})",
@@ -754,7 +756,7 @@
     "artifact_spike_detail": "Ultrapassou a banda de potência habitual por ~{n}s.",
     "auto_label_intro": "Atribua perfis a ciclos sem rótulo cuja confiança de correspondência supere o limite.",
     "automations_intro": "O WashData dispara eventos {start} / {end} e expõe entidades, portanto as notificações e ações são melhor criadas como automatizações normais do Home Assistant. As automatizações que usam este dispositivo aparecem abaixo.",
-    "cleanup_intro": "Todos os ciclos rotulados sobrepostos. Marque os valores discrepantes e exclua para limpar o perfil.",
+    "cleanup_intro": "Todos os ciclos rotulados sobrepostos. Marque os valores discrepantes e depois remova o rótulo deles (permanecem no histórico, mas deixam de influenciar este perfil) ou exclua-os de vez.",
     "clear_debug_hint": "Remova os dados de depuração armazenados para liberar espaço.",
     "collecting_data": "Coletando dados. Ciclos ainda necessários para que o ajuste fino possa começar: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Sobrepor perfis (fraco)",
@@ -1650,7 +1652,8 @@
     "splitting": "Dividindo…",
     "deleting": "Excluindo…",
     "imported": "Importado",
-    "preparing": "Preparando…"
+    "preparing": "Preparando…",
+    "unlabelling": "Removendo rótulo…"
   },
   "tab": {
     "advanced": "Avançado",
@@ -1788,7 +1791,9 @@
     "export_selective_done": "Exportação baixada",
     "import_selective_done": "Importados {profiles} perfil(is) e {cycles} ciclo(s)",
     "hist_csv_required": "Carregue primeiro um arquivo CSV ou cole o conteúdo dele",
-    "file_read_failed": "Não foi possível ler esse arquivo"
+    "file_read_failed": "Não foi possível ler esse arquivo",
+    "unlabel_done": "Rótulo removido de {count} ciclo(s)",
+    "unlabel_failed": "Falha ao remover o rótulo: {error}"
   },
   "suggestion": {
     "both_agree": "WashData recomenda",

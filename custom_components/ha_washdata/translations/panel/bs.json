@@ -217,6 +217,8 @@
         "trim": "Skrati",
         "trim_split": "Skrati / Podijeli",
         "undo": "Poništi",
+        "unlabel_selected": "Ukloni oznaku s odabranih ({n})",
+        "unlabel_selected_tip": "Uklanja oznaku profila s odabranih ciklusa. Ostaju u vašoj historiji i mogu se kasnije ponovo označiti - samo prestaju formirati ovaj profil.",
         "use": "Koristi",
         "wipe_all": "Obriši sve podatke",
         "delete_selected": "Izbriši odabrano ({n})",
@@ -802,7 +804,7 @@
         "artifact_spike_detail": "Prešao iznad uobičajenog pojasa snage za ~{n}s.",
         "auto_label_intro": "Dodijelite profile neoznačenim ciklusima čija pouzdanost podudaranja briše prag.",
         "automations_intro": "WashData pokreće događaje {start} / {end} i izlaže entitete, pa je obavijesti i radnje najbolje graditi kao normalne automatizacije Home Assistanta. Automatizacije koje koriste ovaj uređaj prikazane su ispod.",
-        "cleanup_intro": "Svaki označeni ciklus se preklapa. Označite nedostatke i izbrišite da biste očistili profil.",
+        "cleanup_intro": "Svi označeni ciklusi prikazani jedan preko drugog. Označite odstupajuće cikluse, a zatim im uklonite oznaku (ostaju u historiji, ali više ne formiraju ovaj profil) ili ih izbrišite.",
         "clear_debug_hint": "Uklonite pohranjene podatke za otklanjanje grešaka kako biste oslobodili prostor.",
         "collecting_data": "Prikupljanje podataka. Još potrebnih ciklusa prije početka finog podešavanja: {need} ({current}/{min}).",
         "compare_overlay_profiles": "Profili preklapanja (slabi)",
@@ -1698,7 +1700,8 @@
         "splitting": "Dijeljenje…",
         "deleting": "Brisanje…",
         "imported": "Uvezeno",
-        "preparing": "Priprema…"
+        "preparing": "Priprema…",
+        "unlabelling": "Uklanjanje oznake…"
     },
     "suggestion": {
         "both_agree": "WashData preporučuje",
@@ -1949,7 +1952,9 @@
         "export_selective_done": "Izvoz preuzet",
         "import_selective_done": "Uvezeno {profiles} profila i {cycles} ciklusa",
         "hist_csv_required": "Prvo učitajte CSV fajl ili zalijepite njegov sadržaj",
-        "file_read_failed": "Nije bilo moguće pročitati taj fajl"
+        "file_read_failed": "Nije bilo moguće pročitati taj fajl",
+        "unlabel_done": "Uklonjena oznaka s ciklusa: {count}",
+        "unlabel_failed": "Uklanjanje oznake nije uspjelo: {error}"
     },
     "trend": {
         "down": "Opadajući trend",

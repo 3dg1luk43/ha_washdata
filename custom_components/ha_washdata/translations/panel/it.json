@@ -167,6 +167,8 @@
     "trim": "Ritaglia",
     "trim_split": "Ritaglia / Dividi",
     "undo": "Annulla",
+    "unlabel_selected": "Rimuovi etichetta dai selezionati ({n})",
+    "unlabel_selected_tip": "Rimuove l'etichetta di profilo dai cicli selezionati. Restano nella tua cronologia e potranno essere rietichettati in seguito; smettono semplicemente di influenzare questo profilo.",
     "use": "Usa",
     "wipe_all": "Cancella tutti i dati",
     "delete_selected": "Elimina selezionati ({n})",
@@ -754,7 +756,7 @@
     "artifact_spike_detail": "Ha superato la banda di potenza normale per ~{n}s.",
     "auto_label_intro": "Assegnare profili a cicli senza etichetta la cui confidenza di corrispondenza supera la soglia.",
     "automations_intro": "WashData genera gli eventi {start} / {end} ed espone entità, quindi le notifiche e le azioni si costruiscono al meglio come normali automatizzazioni di Home Assistant. Le automatizzazioni che utilizzano questo dispositivo appaiono di seguito.",
-    "cleanup_intro": "Ogni ciclo etichettato è sovrapposto. Spunta i valori anomali ed elimina per ripulire il profilo.",
+    "cleanup_intro": "Ogni ciclo etichettato è sovrapposto. Spunta i valori anomali, poi rimuovi la loro etichetta (restano nella cronologia, ma non influenzano più questo profilo) oppure eliminali del tutto.",
     "clear_debug_hint": "Rimuovi i dati di debug archiviati per liberare spazio.",
     "collecting_data": "Raccolta dati. Cicli ancora necessari prima che l'ottimizzazione possa iniziare: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Profili sovrapposti (debole)",
@@ -1680,7 +1682,8 @@
     "splitting": "Divisione…",
     "deleting": "Eliminazione…",
     "imported": "Importato",
-    "preparing": "Preparazione…"
+    "preparing": "Preparazione…",
+    "unlabelling": "Rimozione etichetta…"
   },
   "tab": {
     "advanced": "Avanzato",
@@ -1818,7 +1821,9 @@
     "export_selective_done": "Esportazione scaricata",
     "import_selective_done": "Importati {profiles} profilo/i e {cycles} ciclo/i",
     "hist_csv_required": "Carica prima un file CSV o incolla il suo contenuto",
-    "file_read_failed": "Impossibile leggere quel file"
+    "file_read_failed": "Impossibile leggere quel file",
+    "unlabel_done": "Etichetta rimossa da {count} cicli",
+    "unlabel_failed": "Rimozione dell'etichetta non riuscita: {error}"
   },
   "suggestion": {
     "both_agree": "WashData consiglia",

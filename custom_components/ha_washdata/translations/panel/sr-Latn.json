@@ -217,6 +217,8 @@
     "trim": "Iseci",
     "trim_split": "Iseci / Podeli",
     "undo": "Opozovi",
+    "unlabel_selected": "Ukloni oznaku sa izabranih ({n})",
+    "unlabel_selected_tip": "Uklanja oznaku profila sa izabranih ciklusa. Ostaju u vašoj istoriji i mogu ponovo da se označe kasnije - samo prestaju da oblikuju ovaj profil.",
     "use": "Koristi",
     "wipe_all": "Obriši sve podatke",
     "delete_selected": "Izbriši izabrano ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Prešao uobičajeni opseg snage za ~{n} s.",
     "auto_label_intro": "Dodeli profile neoznačenim ciklusima čija pouzdanost podudaranja prelazi prag.",
     "automations_intro": "WashData okida događaje {start} / {end} i izlaže entitete, pa je obaveštenja i akcije najbolje graditi kao normalne automatizacije Home Assistanta. Automatizacije koje koriste ovaj uređaj prikazane su ispod.",
-    "cleanup_intro": "Svaki označeni ciklus je prekriven. Označi outlier-e i izbriši za čišćenje profila.",
+    "cleanup_intro": "Svaki označeni ciklus je prikazan preklopljeno. Označi odstupanja, pa im ukloni oznaku (ostaju u istoriji, ali više ne oblikuju ovaj profil) ili ih izbriši u potpunosti.",
     "clear_debug_hint": "Uklonite sačuvane podatke za otklanjanje grešaka da biste oslobodili prostor.",
     "collecting_data": "Prikupljanje podataka. Još potrebnih ciklusa pre početka finog podešavanja: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Preklapanje profila (bledi)",
@@ -1698,7 +1700,8 @@
     "splitting": "Deljenje…",
     "deleting": "Brisanje…",
     "imported": "Uvezeno",
-    "preparing": "Priprema…"
+    "preparing": "Priprema…",
+    "unlabelling": "Uklanjanje oznake…"
   },
   "suggestion": {
     "both_agree": "WashData preporučuje",
@@ -1949,7 +1952,9 @@
     "export_selective_done": "Izvoz preuzet",
     "import_selective_done": "Uvezeno {profiles} profil(a) i {cycles} ciklus(a)",
     "hist_csv_required": "Prvo učitajte CSV datoteku ili nalepite njen sadržaj",
-    "file_read_failed": "Nije bilo moguće pročitati tu datoteku"
+    "file_read_failed": "Nije bilo moguće pročitati tu datoteku",
+    "unlabel_done": "Uklonjena oznaka sa {count} ciklus(a)",
+    "unlabel_failed": "Uklanjanje oznake nije uspelo: {error}"
   },
   "trend": {
     "down": "Opadajući trend",

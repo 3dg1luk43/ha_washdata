@@ -215,6 +215,8 @@
         "trim": "Vágás",
         "trim_split": "Vágás / Felosztás",
         "undo": "Visszavonás",
+        "unlabel_selected": "Kijelöltek címkéjének eltávolítása ({n})",
+        "unlabel_selected_tip": "Eltávolítja a profilcímkét a kijelölt ciklusokról. A ciklusok az előzményekben maradnak, és később újra címkézhetők - csak már nem alakítják ezt a profilt.",
         "use": "Használat",
         "wipe_all": "Törölje az összes adatot",
         "delete_selected": "Kijelöltek törlése ({n})",
@@ -802,7 +804,7 @@
         "artifact_spike_detail": "~{n}s-re a szokásos energiasáv felett volt.",
         "auto_label_intro": "Rendeljen hozzá profilokat címkézetlen ciklusokhoz, amelyek egyezési megbízhatósága törli a küszöböt.",
         "automations_intro": "A WashData {start} / {end} eseményeket küld és entitásokat tesz elérhetővé, ezért az értesítések és műveletek legjobban normál Home Assistant automatizálásként építhetők fel. Az ezt az eszközt használó automatizálások alább jelennek meg.",
-        "cleanup_intro": "Minden címkézett ciklus átfedi. Jelölje be a kiugró értékeket, és törölje a profilt a profil megtisztításához.",
+        "cleanup_intro": "Minden címkézett ciklus egymásra vetítve. Jelölje be a kiugró értékeket, majd távolítsa el a címkéjüket (az előzményekben maradnak, de már nem alakítják ezt a profilt), vagy törölje őket véglegesen.",
         "clear_debug_hint": "Távolítsa el a tárolt hibakeresési adatokat, hogy helyet szabadítson fel.",
         "collecting_data": "Adatgyűjtés folyamatban. A finomhangolás megkezdéséhez még szükséges ciklusok: {need} ({current}/{min}).",
         "compare_overlay_profiles": "Fedőprofilok (halvány)",
@@ -1698,7 +1700,8 @@
         "splitting": "Felosztás…",
         "deleting": "Törlés…",
         "imported": "Importált",
-        "preparing": "Előkészítés…"
+        "preparing": "Előkészítés…",
+        "unlabelling": "Címke eltávolítása…"
     },
     "tab": {
         "advanced": "Fejlett",
@@ -1836,7 +1839,9 @@
         "export_selective_done": "Export letöltve",
         "import_selective_done": "{profiles} profil és {cycles} ciklus importálva",
         "hist_csv_required": "Először töltsön be egy CSV-fájlt, vagy illessze be a tartalmát",
-        "file_read_failed": "A fájl nem olvasható"
+        "file_read_failed": "A fájl nem olvasható",
+        "unlabel_done": "{count} ciklus címkéje eltávolítva",
+        "unlabel_failed": "A címke eltávolítása sikertelen: {error}"
     },
     "suggestion": {
         "both_agree": "A WashData javasolja",

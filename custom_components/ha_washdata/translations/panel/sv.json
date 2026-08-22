@@ -215,6 +215,8 @@
     "trim": "Beskär",
     "trim_split": "Beskär / Dela",
     "undo": "Ångra",
+    "unlabel_selected": "Ta bort märkning ({n})",
+    "unlabel_selected_tip": "Tar bort profilmärkningen från de valda cyklerna. De ligger kvar i din historik och kan märkas igen senare - de påverkar bara inte längre den här profilen.",
     "use": "Använd",
     "wipe_all": "Rensa all data",
     "delete_selected": "Radera valda ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Drog över det normala effektbandet i ~{n} s.",
     "auto_label_intro": "Tilldela profiler till omärkta cykler vars matchningskonfidens överstiger tröskeln.",
     "automations_intro": "WashData utlöser {start} / {end}-händelser och tillhandahåller entiteter – aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
-    "cleanup_intro": "Alla märkta cykler är överlagda. Kryssa i avvikare och ta bort dem för att rensa profilen.",
+    "cleanup_intro": "Alla märkta cykler är överlagrade. Kryssa i avvikare och ta sedan bort deras märkning (de ligger kvar i historiken men påverkar inte längre den här profilen) eller radera dem helt.",
     "clear_debug_hint": "Ta bort lagrad felsökningsdata för att frigöra utrymme.",
     "collecting_data": "Samlar in data. Cykler som återstår innan finjustering kan starta: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Lägg över profiler (svag)",
@@ -1728,7 +1730,8 @@
     "splitting": "Delar upp…",
     "deleting": "Raderar…",
     "imported": "Importerad",
-    "preparing": "Förbereder…"
+    "preparing": "Förbereder…",
+    "unlabelling": "Tar bort märkning…"
   },
   "suggestion": {
     "both_agree": "WashData rekommenderar",
@@ -1979,7 +1982,9 @@
     "export_selective_done": "Export nedladdad",
     "import_selective_done": "Importerade {profiles} profil(er) och {cycles} cykel/cykler",
     "hist_csv_required": "Ladda in en CSV-fil eller klistra in dess innehåll först",
-    "file_read_failed": "Kunde inte läsa den filen"
+    "file_read_failed": "Kunde inte läsa den filen",
+    "unlabel_done": "Märkningen togs bort från {count} cykler",
+    "unlabel_failed": "Borttagning av märkning misslyckades: {error}"
   },
   "trend": {
     "down": "Nedåtgående trend",

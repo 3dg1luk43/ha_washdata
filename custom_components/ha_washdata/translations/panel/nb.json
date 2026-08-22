@@ -215,6 +215,8 @@
     "trim": "Beskjær",
     "trim_split": "Beskjær / Splitt",
     "undo": "Angre",
+    "unlabel_selected": "Fjern merking ({n})",
+    "unlabel_selected_tip": "Fjerner profilmerkingen fra de valgte syklusene. De blir liggende i historikken din og kan merkes på nytt senere - de påvirker bare ikke lenger denne profilen.",
     "use": "Bruk",
     "wipe_all": "Tørk alle data",
     "delete_selected": "Slett valgte ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Gikk over det vanlige effektbåndet i ~{n}s.",
     "auto_label_intro": "Tilordne profiler til umerkede sykluser hvis matchkonfidens klarerer terskelen.",
     "automations_intro": "WashData utløser {start} / {end}-hendelser og gjør entiteter tilgjengelige, slik at varsler og handlinger best bygges som vanlige Home Assistant-automatiseringer. Automatiseringer som bruker denne enheten, vises nedenfor.",
-    "cleanup_intro": "Hver merket syklus er lagt over. Kryss av for uteliggere og slett for å rydde opp i profilen.",
+    "cleanup_intro": "Hver merket syklus er lagt over. Kryss av for uteliggere, og fjern deretter merkingen deres (de blir liggende i historikken, men påvirker ikke lenger denne profilen), eller slett dem helt.",
     "clear_debug_hint": "Fjern lagrede feilsøkingsdata for å frigjøre plass.",
     "collecting_data": "Samler inn data. Sykluser som mangler før finjustering kan starte: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overleggsprofiler (svak)",
@@ -1728,7 +1730,8 @@
     "splitting": "Deler opp…",
     "deleting": "Sletter…",
     "imported": "Importert",
-    "preparing": "Forbereder…"
+    "preparing": "Forbereder…",
+    "unlabelling": "Fjerner merking…"
   },
   "suggestion": {
     "both_agree": "WashData anbefaler",
@@ -1979,7 +1982,9 @@
     "export_selective_done": "Eksport lastet ned",
     "import_selective_done": "Importerte {profiles} profil(er) og {cycles} syklus(er)",
     "hist_csv_required": "Last inn en CSV-fil eller lim inn innholdet først",
-    "file_read_failed": "Kunne ikke lese den filen"
+    "file_read_failed": "Kunne ikke lese den filen",
+    "unlabel_done": "Merking fjernet fra {count} syklus(er)",
+    "unlabel_failed": "Fjerning av merking mislyktes: {error}"
   },
   "trend": {
     "down": "Trender nedover",

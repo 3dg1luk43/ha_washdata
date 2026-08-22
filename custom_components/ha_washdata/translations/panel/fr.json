@@ -167,6 +167,8 @@
     "trim": "Rogner",
     "trim_split": "Rogner / Diviser",
     "undo": "Annuler",
+    "unlabel_selected": "Retirer l'étiquette de la sélection ({n})",
+    "unlabel_selected_tip": "Retire l'étiquette de profil des cycles sélectionnés. Ils restent dans votre historique et pourront être réétiquetés plus tard ; ils cessent simplement d'influencer ce profil.",
     "use": "Utiliser",
     "wipe_all": "Effacer toutes les données",
     "delete_selected": "Supprimer la sélection ({n})",
@@ -754,7 +756,7 @@
     "artifact_spike_detail": "A dépassé la bande de puissance habituelle pendant environ {n} s.",
     "auto_label_intro": "Attribuez des profils à des cycles non étiquetés dont la confiance de correspondance efface le seuil.",
     "automations_intro": "WashData déclenche les événements {start} / {end} et expose des entités, les notifications et actions sont donc mieux construites comme des automatisations Home Assistant normales. Les automatisations utilisant cet appareil apparaissent ci-dessous.",
-    "cleanup_intro": "Chaque cycle étiqueté superposé. Cochez les valeurs aberrantes et supprimez-les pour nettoyer le profil.",
+    "cleanup_intro": "Chaque cycle étiqueté superposé. Cochez les valeurs aberrantes, puis retirez-leur l'étiquette (conservés dans l'historique, mais n'influençant plus ce profil) ou supprimez-les définitivement.",
     "clear_debug_hint": "Supprimez les données de débogage stockées pour libérer de l'espace.",
     "collecting_data": "Collecte de données. Cycles encore nécessaires avant que l'affinage puisse commencer : {need} ({current}/{min}).",
     "compare_overlay_profiles": "Profils de superposition (faible)",
@@ -1681,7 +1683,8 @@
     "splitting": "Fractionnement…",
     "deleting": "Suppression…",
     "imported": "Importé",
-    "preparing": "Préparation…"
+    "preparing": "Préparation…",
+    "unlabelling": "Retrait de l'étiquette…"
   },
   "tab": {
     "advanced": "Avancé",
@@ -1819,7 +1822,9 @@
     "export_selective_done": "Export téléchargé",
     "import_selective_done": "{profiles} profil(s) et {cycles} cycle(s) importés",
     "hist_csv_required": "Chargez d'abord un fichier CSV ou collez son contenu",
-    "file_read_failed": "Impossible de lire ce fichier"
+    "file_read_failed": "Impossible de lire ce fichier",
+    "unlabel_done": "Étiquette retirée de {count} cycle(s)",
+    "unlabel_failed": "Échec du retrait de l'étiquette : {error}"
   },
   "suggestion": {
     "both_agree": "WashData recommande",

@@ -215,6 +215,8 @@
         "trim": "자르기",
         "trim_split": "자르기/분할",
         "undo": "실행 취소",
+        "unlabel_selected": "선택 항목 라벨 해제 ({n})",
+        "unlabel_selected_tip": "선택한 사이클에서 프로필 라벨을 해제합니다. 사이클은 기록에 그대로 남아 있고 나중에 다시 라벨을 지정할 수 있으며, 이 프로필을 형성하지 않게 될 뿐입니다.",
         "use": "사용",
         "wipe_all": "모든 데이터 지우기",
         "delete_selected": "선택 항목 삭제 ({n})",
@@ -802,7 +804,7 @@
         "artifact_spike_detail": "일반 전력 범위 위로 약 {n}초 동안 나타났습니다.",
         "auto_label_intro": "일치 신뢰도가 임계값을 클리어하는 레이블이 없는 주기에 프로필을 할당합니다.",
         "automations_intro": "WashData는 {start} / {end} 이벤트를 발생시키고 엔티티를 노출하므로, 알림과 동작은 일반 Home Assistant 자동화로 구축하는 것이 가장 좋습니다. 이 기기를 사용하는 자동화가 아래에 표시됩니다.",
-        "cleanup_intro": "라벨이 붙은 모든 사이클이 중첩됩니다. 이상값을 선택하고 삭제하여 프로필을 정리하세요.",
+        "cleanup_intro": "라벨이 붙은 모든 사이클을 겹쳐서 보여줍니다. 이상값을 선택한 다음 라벨을 해제하거나(기록에는 남지만 더 이상 이 프로필을 형성하지 않습니다) 완전히 삭제하세요.",
         "clear_debug_hint": "저장된 디버그 데이터를 제거하여 여유 공간을 확보하세요.",
         "collecting_data": "데이터 수집 중입니다. 미세 조정을 시작하기까지 더 필요한 사이클: {need} ({current}/{min}).",
         "compare_overlay_profiles": "오버레이 프로필(희미함)",
@@ -1728,7 +1730,8 @@
         "splitting": "분할 중…",
         "deleting": "삭제 중…",
         "imported": "가져옴",
-        "preparing": "준비 중…"
+        "preparing": "준비 중…",
+        "unlabelling": "라벨 해제 중…"
     },
     "tab": {
         "advanced": "고급",
@@ -1866,7 +1869,9 @@
         "export_selective_done": "내보내기 다운로드 완료",
         "import_selective_done": "{profiles}개 프로필과 {cycles}개 사이클을 가져왔습니다",
         "hist_csv_required": "먼저 CSV 파일을 불러오거나 내용을 붙여넣으세요",
-        "file_read_failed": "해당 파일을 읽을 수 없습니다"
+        "file_read_failed": "해당 파일을 읽을 수 없습니다",
+        "unlabel_done": "{count}개 사이클의 라벨을 해제했습니다",
+        "unlabel_failed": "라벨 해제 실패: {error}"
     },
     "suggestion": {
         "both_agree": "WashData 권장",

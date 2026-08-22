@@ -215,6 +215,8 @@
         "trim": "Kırp",
         "trim_split": "Kırp / Böl",
         "undo": "Geri al",
+        "unlabel_selected": "Seçilenlerin etiketini kaldır ({n})",
+        "unlabel_selected_tip": "Seçili döngülerden profil etiketini kaldırır. Döngüler geçmişinizde kalır ve daha sonra tekrar etiketlenebilir - yalnızca bu profili şekillendirmeyi bırakırlar.",
         "use": "Kullan",
         "wipe_all": "Tüm Verileri Sil",
         "delete_selected": "Seçilenleri sil ({n})",
@@ -802,7 +804,7 @@
         "artifact_spike_detail": "Normal güç bandının üzerinde yaklaşık ~{n} saniye sürdü.",
         "auto_label_intro": "Eşleşme güveni eşiği geçen etiketsiz döngülere profil atayın.",
         "automations_intro": "WashData, {start} / {end} olaylarını tetikler ve varlıkları gösterir; bu nedenle bildirimler ve eylemler en iyi şekilde normal Home Assistant otomasyonları olarak oluşturulur. Bu cihazı kullanan otomasyonlar aşağıda görünür.",
-        "cleanup_intro": "Tüm etiketli döngüler üst üste bindirilmiş. Aykırı değerleri işaretleyip silerek profili temizleyin.",
+        "cleanup_intro": "Tüm etiketli döngüler üst üste bindirilmiş. Aykırı değerleri işaretleyin, ardından etiketlerini kaldırın (geçmişte kalırlar ama artık bu profili şekillendirmezler) veya tamamen silin.",
         "clear_debug_hint": "Saklanan hata ayıklama verilerini kaldırarak boş alan açın.",
         "collecting_data": "Veri toplanıyor. İnce ayarın başlaması için gereken döngü sayısı: {need} ({current}/{min}).",
         "compare_overlay_profiles": "Profilleri üst üste bindirin (soluk)",
@@ -1728,7 +1730,8 @@
         "splitting": "Bölünüyor…",
         "deleting": "Siliniyor…",
         "imported": "İçe aktarıldı",
-        "preparing": "Hazırlanıyor…"
+        "preparing": "Hazırlanıyor…",
+        "unlabelling": "Etiket kaldırılıyor…"
     },
     "tab": {
         "advanced": "Gelişmiş",
@@ -1866,7 +1869,9 @@
         "export_selective_done": "Dışa aktarma indirildi",
         "import_selective_done": "{profiles} profil ve {cycles} döngü içe aktarıldı",
         "hist_csv_required": "Önce bir CSV dosyası yükleyin veya içeriğini yapıştırın",
-        "file_read_failed": "Bu dosya okunamadı"
+        "file_read_failed": "Bu dosya okunamadı",
+        "unlabel_done": "{count} döngünün etiketi kaldırıldı",
+        "unlabel_failed": "Etiket kaldırma başarısız: {error}"
     },
     "suggestion": {
         "both_agree": "WashData öneriyor",

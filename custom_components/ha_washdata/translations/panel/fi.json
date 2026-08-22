@@ -215,6 +215,8 @@
     "trim": "Leikkaa",
     "trim_split": "Leikkaa / jaa",
     "undo": "Kumoa",
+    "unlabel_selected": "Poista valittujen merkintä ({n})",
+    "unlabel_selected_tip": "Poistaa profiilimerkinnän valituista sykleistä. Ne säilyvät historiassasi ja ne voidaan merkitä myöhemmin uudelleen - ne eivät vain enää muovaa tätä profiilia.",
     "use": "Käytä",
     "wipe_all": "Pyyhi kaikki tiedot",
     "delete_selected": "Poista valitut ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Ylitti tavallisen tehon ylärajan noin {n} sekunnin ajan.",
     "auto_label_intro": "Määritä profiilit nimeämättömille sykleille, joiden osuvuusvarmuus tyhjentää kynnyksen.",
     "automations_intro": "WashData laukaisee {start} / {end}-tapahtumat ja tarjoaa entiteetit, joten ilmoitukset ja toiminnot kannattaa rakentaa tavallisina Home Assistant -automaatioina. Tätä laitetta käyttävät automaatiot näkyvät alla.",
-    "cleanup_intro": "Jokainen merkitty sykli peitetään. Tyhjennä profiili valitsemalla poikkeamat ja poistamalla ne.",
+    "cleanup_intro": "Kaikki merkityt syklit näkyvät päällekkäin. Valitse poikkeamat ja poista niiden merkintä (ne säilyvät historiassa, mutta eivät enää muovaa tätä profiilia) tai poista ne kokonaan.",
     "clear_debug_hint": "Poista tallennetut virheenkorjaustiedot vapauttaaksesi tilaa.",
     "collecting_data": "Kerätään tietoja. Syklejä tarvitaan vielä ennen hienosäädön aloittamista: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Päällekkäiset profiilit (himmeä)",
@@ -1728,7 +1730,8 @@
     "splitting": "Jaetaan…",
     "deleting": "Poistetaan…",
     "imported": "Tuotu",
-    "preparing": "Valmistellaan…"
+    "preparing": "Valmistellaan…",
+    "unlabelling": "Poistetaan merkintää…"
   },
   "suggestion": {
     "both_agree": "WashData suosittelee",
@@ -1979,7 +1982,9 @@
     "export_selective_done": "Vienti ladattu",
     "import_selective_done": "Tuotu {profiles} profiilia ja {cycles} jaksoa",
     "hist_csv_required": "Lataa ensin CSV-tiedosto tai liitä sen sisältö",
-    "file_read_failed": "Tiedostoa ei voitu lukea"
+    "file_read_failed": "Tiedostoa ei voitu lukea",
+    "unlabel_done": "{count} syklin merkintä poistettu",
+    "unlabel_failed": "Merkinnän poisto epäonnistui: {error}"
   },
   "trend": {
     "down": "Trendikäs alaspäin",

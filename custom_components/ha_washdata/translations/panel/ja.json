@@ -215,6 +215,8 @@
         "trim": "トリム",
         "trim_split": "トリム/分割",
         "undo": "元に戻す",
+        "unlabel_selected": "選択項目のラベルを解除（{n}）",
+        "unlabel_selected_tip": "選択したサイクルからプロファイルのラベルを解除します。サイクルは履歴に残り、後で再びラベル付けできます。このプロファイルを形づくらなくなるだけです。",
         "use": "使用",
         "wipe_all": "すべてのデータを消去",
         "delete_selected": "選択項目を削除（{n}）",
@@ -802,7 +804,7 @@
         "artifact_spike_detail": "通常の電力帯の上側に約{n}秒間現れました。",
         "auto_label_intro": "一致信頼度がしきい値をクリアするラベルのないサイクルにプロファイルを割り当てます。",
         "automations_intro": "WashData は {start} / {end} イベントを発火しエンティティを公開するため、通知やアクションは通常の Home Assistant オートメーションとして構築するのが最適です。このデバイスを使用するオートメーションは以下に表示されます。",
-        "cleanup_intro": "すべてのラベル付きサイクルがオーバーレイされます。外れ値にチェックを入れて削除し、プロファイルをクリーンアップします。",
+        "cleanup_intro": "ラベル付きのサイクルをすべて重ねて表示します。外れ値にチェックを入れて、ラベルを解除する（履歴には残りますが、このプロファイルを形づくらなくなります）か、完全に削除します。",
         "clear_debug_hint": "保存されているデバッグ データを削除して領域を解放します。",
         "collecting_data": "データを収集中です。微調整を開始するために必要な残りサイクル数: {need}（{current}/{min}）。",
         "compare_overlay_profiles": "オーバーレイプロファイル (淡い)",
@@ -1728,7 +1730,8 @@
         "splitting": "分割中…",
         "deleting": "削除中…",
         "imported": "インポート済み",
-        "preparing": "準備中…"
+        "preparing": "準備中…",
+        "unlabelling": "ラベル解除中…"
     },
     "tab": {
         "advanced": "高度な",
@@ -1866,7 +1869,9 @@
         "export_selective_done": "エクスポートをダウンロードしました",
         "import_selective_done": "{profiles} 件のプロファイルと {cycles} 件のサイクルをインポートしました",
         "hist_csv_required": "先に CSV ファイルを読み込むか、内容を貼り付けてください",
-        "file_read_failed": "そのファイルを読み込めませんでした"
+        "file_read_failed": "そのファイルを読み込めませんでした",
+        "unlabel_done": "{count} 件のサイクルのラベルを解除しました",
+        "unlabel_failed": "ラベルの解除に失敗しました: {error}"
     },
     "suggestion": {
         "both_agree": "WashDataの推奨",

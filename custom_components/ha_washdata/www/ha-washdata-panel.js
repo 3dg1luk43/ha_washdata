@@ -9477,11 +9477,19 @@ class HaWashdataPanel extends HTMLElement {
         ${_th(this._t('lbl.status', {}, 'Status'), 'status', clCol === 'status', clDir, 'cleanupsort')}
         ${canEdit ? '<th></th>' : ''}
       </tr></thead>`;
-      const busy = this._busy.has('pp-cleanup-del');
-      body = `<p class="wd-info" style="margin-bottom:10px">${this._t('msg.cleanup_intro', {}, 'Every labelled cycle overlaid. Tick outliers and delete to clean up the profile.')}</p>
+      const busyDel = this._busy.has('pp-cleanup-del');
+      const busyUnl = this._busy.has('pp-cleanup-unlabel');
+      // Both actions fan out to one WS call per selected cycle, so whichever is
+      // running locks the other out - an unlabel racing a delete would re-label
+      // cycles that are already gone and rebuild the envelope from a stale set.
+      const clBusy = busyDel || busyUnl;
+      body = `<p class="wd-info" style="margin-bottom:10px">${this._t('msg.cleanup_intro', {}, 'Every labelled cycle overlaid. Tick outliers, then unlabel them (kept in history, but no longer shaping this profile) or delete them outright.')}</p>
         ${allCyc.length ? `<div class="wd-canvas-wrap"><canvas id="wd-spag-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_spaghetti_chart', {}, 'Overlaid cycle power traces'))}"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_cycles_profile', {}, 'No cycles for this profile.')}</p>`}
         ${allCyc.length ? `<div class="wd-table-wrap" style="max-height:420px;overflow:auto;margin:10px 0"><table class="wd-table">${thead}<tbody>${rows}</tbody></table></div>` : ''}
-        ${canEdit ? `<div class="wd-modal-actions"><button class="wd-btn wd-btn-danger" data-maction="pp-cleanup-del" ${busy || sel.size === 0 ? 'disabled' : ''}>${busy ? ('<span class="wd-spin"></span> ' + this._t('status.deleting', {}, 'Deleting…')) : this._t('btn.delete_selected', {n: sel.size}, `Delete selected (${sel.size})`)}</button></div>` : ''}`;
+        ${canEdit ? `<div class="wd-modal-actions">
+          <button class="wd-btn wd-btn-secondary" data-maction="pp-cleanup-unlabel" ${clBusy || sel.size === 0 ? 'disabled' : ''} title="${_esc(this._t('btn.unlabel_selected_tip', {}, 'Remove the profile label from the selected cycles. They stay in your history and can be labelled again later - they just stop shaping this profile.'))}">${busyUnl ? ('<span class="wd-spin"></span> ' + this._t('status.unlabelling', {}, 'Unlabelling…')) : this._t('btn.unlabel_selected', {n: sel.size}, `Unlabel selected (${sel.size})`)}</button>
+          <button class="wd-btn wd-btn-danger" data-maction="pp-cleanup-del" ${clBusy || sel.size === 0 ? 'disabled' : ''}>${busyDel ? ('<span class="wd-spin"></span> ' + this._t('status.deleting', {}, 'Deleting…')) : this._t('btn.delete_selected', {n: sel.size}, `Delete selected (${sel.size})`)}</button>
+        </div>` : ''}`;
     } else if (m.tab === 'danger') {
       const busyR = this._busy.has('pp-rebuild');
       const curDurMin = (m.stats && m.stats.avg_duration) ? Math.round(m.stats.avg_duration / 60) : 0;
@@ -10769,10 +10777,17 @@ class HaWashdataPanel extends HTMLElement {
       if (el.checked) m.cleanup.selected.add(c.cycle_id); else m.cleanup.selected.delete(c.cycle_id);
       // Targeted update — avoid full re-render that resets scroll position.
       const sel = m.cleanup.selected;
-      const delBtn = sr.querySelector('[data-maction="pp-cleanup-del"]');
-      if (delBtn && !this._busy.has('pp-cleanup-del')) {
-        delBtn.disabled = sel.size === 0;
-        delBtn.textContent = this._t('btn.delete_selected', {n: sel.size}, `Delete selected (${sel.size})`);
+      if (!this._busy.has('pp-cleanup-del') && !this._busy.has('pp-cleanup-unlabel')) {
+        const acts = [
+          ['pp-cleanup-unlabel', 'btn.unlabel_selected', `Unlabel selected (${sel.size})`],
+          ['pp-cleanup-del', 'btn.delete_selected', `Delete selected (${sel.size})`],
+        ];
+        for (const [act, key, fb] of acts) {
+          const b = sr.querySelector(`[data-maction="${act}"]`);
+          if (!b) continue;
+          b.disabled = sel.size === 0;
+          b.textContent = this._t(key, {n: sel.size}, fb);
+        }
       }
       this._drawSpaghetti();
     }));
@@ -12564,6 +12579,28 @@ class HaWashdataPanel extends HTMLElement {
             if (this._modal) this._modal.cleanup = { cycles: r.cycles || [], selected: new Set() };
             await this._fetchProfiles(eid);
           } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+      if (action === 'pp-cleanup-unlabel') {
+        // Non-destructive half of the cleanup selection: strip the profile label but
+        // keep the cycles. label_cycle with a null profile is the same command the
+        // Cycles tab's bulk relabel uses, so it also resolves any pending feedback and
+        // clears the review queue for those cycles (#331) — hence the wider refetch.
+        const sel = m.cleanup ? Array.from(m.cleanup.selected) : [];
+        if (!sel.length) return;
+        await this._busyRun('pp-cleanup-unlabel', async () => {
+          try {
+            for (const cid of sel) await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: null });
+            this._showToast(this._t('toast.unlabel_done', {count: sel.length}, `Unlabelled ${sel.length} cycle(s)`));
+            const r = await this._ws({ type: `${_DOMAIN}/get_profile_cycles`, entry_id: eid, profile_name: m.name });
+            // Only adopt the fresh list if this very modal is still the open one; the
+            // user may have closed it or moved to another profile while we ran.
+            if (this._modal === m) m.cleanup = { cycles: r.cycles || [], selected: new Set() };
+            await this._fetchProfiles(eid);
+            await this._fetchCycles(eid);
+            await this._fetchFeedbacks(eid);
+          } catch (e) { this._showToast(this._t('toast.unlabel_failed', {error: e.message || e}, 'Unlabel failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }

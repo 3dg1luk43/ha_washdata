@@ -215,6 +215,8 @@
     "trim": "Kärbi",
     "trim_split": "Kärbi / Poolita",
     "undo": "Võta tagasi",
+    "unlabel_selected": "Eemalda valitute märgistus ({n})",
+    "unlabel_selected_tip": "Eemaldab profiilimärgistuse valitud tsüklitelt. Need jäävad sinu ajalukku ja neid saab hiljem uuesti märgistada - nad lihtsalt ei kujunda enam seda profiili.",
     "use": "Kasutage",
     "wipe_all": "Pühkige kõik andmed",
     "delete_selected": "Kustuta valitud ({n})",
@@ -802,7 +804,7 @@
     "artifact_spike_detail": "Ületas tavapärase võimsusriba umbes {n}s jooksul.",
     "auto_label_intro": "Määrake profiilid märgistamata tsüklitele, mille sobivuse usaldus eemaldab läve.",
     "automations_intro": "WashData käivitab {start} / {end} sündmusi ja avaldab olemeid, seega on teated ja toimingud kõige paremini ehitada tavaliste Home Assistanti automaatikana. Seda seadet kasutavad automaatikad kuvatakse allpool.",
-    "cleanup_intro": "Iga märgistatud tsükkel on kaetud. Profiili puhastamiseks märkige kõrvalekalded ja kustutage.",
+    "cleanup_intro": "Kõik märgistatud tsüklid on kohakuti kuvatud. Märgi kõrvalekalded ja eemalda nende märgistus (need jäävad ajalukku, kuid ei kujunda enam seda profiili) või kustuta need täielikult.",
     "clear_debug_hint": "Ruumi vabastamiseks eemaldage salvestatud silumisandmed.",
     "collecting_data": "Andmete kogumine. Tsükleid on enne peenhäälestuse algust veel vaja: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Ülekatteprofiilid (nõrkjad)",
@@ -1728,7 +1730,8 @@
     "splitting": "Lõhestamine…",
     "deleting": "Kustutamine…",
     "imported": "Imporditud",
-    "preparing": "Ettevalmistamine…"
+    "preparing": "Ettevalmistamine…",
+    "unlabelling": "Märgistuse eemaldamine…"
   },
   "tab": {
     "advanced": "Täpsemalt",
@@ -1866,7 +1869,9 @@
     "export_selective_done": "Eksport alla laaditud",
     "import_selective_done": "Imporditud {profiles} profiili ja {cycles} tsüklit",
     "hist_csv_required": "Laadi esmalt CSV-fail või kleebi selle sisu",
-    "file_read_failed": "Seda faili ei õnnestunud lugeda"
+    "file_read_failed": "Seda faili ei õnnestunud lugeda",
+    "unlabel_done": "{count} tsükli märgistus eemaldatud",
+    "unlabel_failed": "Märgistuse eemaldamine ebaõnnestus: {error}"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",
