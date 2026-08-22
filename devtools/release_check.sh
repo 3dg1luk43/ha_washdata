@@ -270,13 +270,26 @@ else
 fi
 
 # ── 6. tests ─────────────────────────────────────────────────────────────────
+# A suite failure prints its tail. Swallowing it entirely meant a CI log said only
+# "fast suite failed" with no way to tell a real regression from a collection error -
+# and a collection error takes the WHOLE suite with it, so "failed" can mean "nothing
+# ran at all" (v0.5.5: a missing optional devtools import did exactly that).
+run_suite() {
+  local label="$1" out
+  shift
+  if out=$("$@" 2>&1); then
+    pass "$label"
+  else
+    fail "$label failed" "$*"
+    printf '%s\n' "$out" | tail -25 | sed 's/^/        | /'
+  fi
+}
+
 head_ "Tests"
-if "$PY" -m pytest tests/ -q >/dev/null 2>&1; then pass "fast suite"
-else fail "fast suite failed" "$PY -m pytest tests/ -q"; fi
+run_suite "fast suite" "$PY" -m pytest tests/ -q
 
 if [[ $FULL -eq 1 ]]; then
-  if "$PY" -m pytest tests/ -q -m slow >/dev/null 2>&1; then pass "slow suite"
-  else fail "slow suite failed" "$PY -m pytest tests/ -q -m slow"; fi
+  run_suite "slow suite" "$PY" -m pytest tests/ -q -m slow
   if command -v npx >/dev/null 2>&1; then
     if (cd playwright-tests && npx playwright test --reporter=dot >/dev/null 2>&1); then pass "E2E suite"
     else fail "E2E suite failed" "cd playwright-tests && npx playwright test"; fi
