@@ -335,8 +335,27 @@ was rewritten since "tick outliers and delete" no longer describes the tab. 4 E2
 `playwright-tests/tests/profiles.spec.ts`; 6 keys localized x35. NB: `ws_get_profile_cycles` reads
 `past_cycles` only, so this tab never lists reference/backfill cycles.
 
+**2026-08-22 addition (repo CI - issue triage bot skipped two real bug reports):** Item 146. Issues #399 and
+#400 (both filed against 0.5.4, so both should have drawn the "outdated version" nudge) got no bot response at
+all. Two independent defects in `.github/workflows/issue_validator.yml`: (a) `validate-bug-report` was gated on
+`contains(github.event.issue.labels.*.name, 'bug')`, but GitHub applies an issue form's `labels:` **only** on the
+web-form path - both issues were posted over the API with a pasted template body and arrived with zero labels, so
+the job showed `skipped` in both runs; (b) latent - all four field extractors were anchored to `###` (the level
+the web form renders at) while both bodies used `##`, so even with the label every field would have read "missing"
+and the bot would have posted a bogus four-item complaint instead of the version nudge. Fixes: a new
+`restore-template-label` job re-applies the template label from the body's own distinctive headings (>=2 hits and
+a clear winner required; opened/reopened only, so it cannot fight a maintainer's deliberate label removal); the
+`bug` gate moved out of the job `if:` and into the script, which re-fetches the issue because the payload's label
+list predates the restore job (`needs:` + `always()`); and the extractors became heading-level agnostic via shared
+`fieldLine`/`fieldBlock` helpers. NB the multi-line helper ends on `(?![\s\S])`, not `$` - the `m` flag needed for
+`^` makes `$` match every line end and would truncate the Logs field to one line (caught by the tests, not by
+review). Tested by `tests/test_issue_validator_workflow.py` (11), which extracts the **shipped** script text from
+the YAML and runs it under `devtools/issue_validator_harness.mjs` against a stubbed GitHub API - no mirrored copy
+to drift (register item 140's lesson). Forward-looking only: #399 still needs its `bug` label added once by hand.
+
 | # | Status | Kind | Short description |
 |---|---|---|---|
+| 146 | FIXED | CODE | Issue-triage bot skipped API-filed bug reports (#399/#400): template label never applied off the web form, and field regexes were `###`-only |
 | 145 | FIXED | CODE | Profile Cleanup tab could only delete ticked cycles; added bulk **Unlabel selected** (reuses `label_cycle` with a null profile, shared selection + busy lock with delete) |
 | 142 | FIXED | CODE | #394 learning/auto-tune pass gated on active detector state (was every reading, incl. idle - constant store rewrites + cadence model skewed by the standby heartbeat); detector still sees every reading |
 | 141 | FIXED | CODE | #393 Smart-Termination ratio is now the per-device `smart_termination_duration_ratio` option (device-default resolved in the config builder; `_resolve_smart_ratio` helper; dishwasher pump-out relief via `min()`) |
