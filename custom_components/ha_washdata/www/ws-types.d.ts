@@ -1024,6 +1024,7 @@ export interface HistoryImportChunkRequest {
 
 export interface HistoryImportRecorderRequest {
   entry_id: string;
+  start_date?: string | null;
   days?: number;
 }
 

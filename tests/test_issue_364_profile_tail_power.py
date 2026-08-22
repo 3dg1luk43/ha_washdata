@@ -146,3 +146,26 @@ async def test_malformed_envelope_falls_through_to_the_sample_cycle(
         "envelopes": {"Cotton 60": {"avg": []}},
     })
     assert store.profile_tail_power("Cotton 60") == pytest.approx(20.0, abs=1.0)
+
+
+async def test_tail_power_reads_a_legacy_iso_sample_trace(mock_hass: HomeAssistant) -> None:
+    """A legacy cycle stores (iso_string, power) pairs, not (offset, power).
+
+    Reading `power_data` raw made `float(pt[0])` raise on the ISO string, the broad
+    except returned None, and the #364 guard silently stayed inert for that profile.
+    The `isinstance(points[0], (list, tuple))` check never caught it, because
+    `[iso_str, power]` IS a list. Going through `decompress_power_data` - the idiom
+    every other trace read in profile_store uses - normalises both formats.
+    """
+    base = "2026-05-01T08:%02d:%02d+00:00"
+    iso_curve = [
+        [base % (i // 6, (i % 6) * 10), 2000.0 if i < 6 else 20.0] for i in range(12)
+    ]
+    store = _store(mock_hass, {
+        "profiles": {"Legacy": {"sample_cycle_id": "old1"}},
+        "past_cycles": [{"id": "old1", "power_data": iso_curve}],
+        "envelopes": {},
+    })
+    tail = store.profile_tail_power("Legacy")
+    assert tail is not None, "a legacy ISO trace must not leave the guard inert"
+    assert tail == pytest.approx(20.0, abs=1.0)

@@ -1121,7 +1121,13 @@ WS_COMMANDS: dict[str, dict] = {
         _p("seq", "int"),
         _p("text", "str"),
     ]},
-    "history_import_recorder": {"params": [_entry(), _p("days", "int", False)]},
+    "history_import_recorder": {"params": [
+        _entry(),
+        # Either bound: `start_date` (an ISO local calendar day, what the panel's date
+        # picker sends) wins over the legacy `days` count when both are present.
+        _p("start_date", "str|null", False),
+        _p("days", "int", False),
+    ]},
     "start_history_import_scan": {"params": [_entry(), _p("token", "str")]},
     "apply_history_import": {"params": [
         _entry(),

@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Smaller store and panel fixes**: a failed brand search backs off instead of retrying ~4x/second; a failed panel refresh shows the real error instead of a collapsed `Object`; diagnostics report which frontend bundle is being served; `./run_tests.sh` runs again (the render-smoke harness is now ESM); and store document ids are percent-encoded.
 
-- **Panel and card are minified and served pre-compressed**: esbuild produces `*.min.js` (served only while its recorded hash matches the source, else the readable file falls in) plus an atomically-rebuilt `.gz` sibling. Panel 766 to 522 KB (-32%) to 131 KB gzipped (-83%); card 49 to 29 to ~8 KB.
+- **Panel and card are minified and served pre-compressed**: esbuild produces `*.min.js` (served only while its recorded hash matches the source, else the readable file is served instead) plus an atomically-rebuilt `.gz` sibling. Panel 766 to 522 KB (-32%) to 131 KB gzipped (-83%); card 49 to 29 to ~8 KB.
 
 - **The learning / auto-tune pass no longer runs while idle** ([#394](https://github.com/3dg1luk43/ha_washdata/issues/394)): It ran on a 5-minute timer around the clock although appliances are idle ~98% of the time, and it trained its cadence model on the idle reporting rate - oversizing the watchdog / timeout / match-interval suggestions. It now runs only during an active cycle (the detector still receives every reading), so those suggestions reflect real in-cycle timing.
 

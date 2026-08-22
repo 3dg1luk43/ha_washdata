@@ -464,6 +464,11 @@ def _build_match_snapshots(
                     "name": name,
                     "avg_duration": float(avg_dur),
                     "sample_power": [p for _, p in sample_p],
+                    # The trace's own time span, which is NOT avg_duration (a trimmed
+                    # mean across cycles). `analysis._prefix_point_count` converts
+                    # elapsed time to an index with it, so omitting it made the sim
+                    # truncate the prefix at a different point than production.
+                    "sample_span_s": float(sample_p[-1][0] - sample_p[0][0]),
                 }
             )
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -899,10 +904,17 @@ class _DetailSim:
             members = self.group_members.get(gkey, [])
             if members and self.store is not None:
                 try:
-                    member_name, _, _ = self.store._stage5_pick_member(  # noqa: SLF001
+                    member_name, _, member_dur = self.store._stage5_pick_member(  # noqa: SLF001
                         list(powers), duration, members, self.member_snaps or {}
                     )
-                    candidates[0] = dict(candidates[0], name=member_name)
+                    # Carry the member's duration as well, exactly as
+                    # `async_match_profile` relabels the winner: leaving the group's
+                    # aggregate duration here fed the wrong expected value to the
+                    # detector AND to the #364 prefix guard below.
+                    resolved = dict(candidates[0], name=member_name)
+                    if member_dur:
+                        resolved["profile_duration"] = float(member_dur)
+                    candidates[0] = resolved
                 except Exception:  # pylint: disable=broad-exception-caught
                     pass
         best = candidates[0]

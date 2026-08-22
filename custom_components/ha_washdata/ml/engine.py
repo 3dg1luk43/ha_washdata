@@ -39,7 +39,7 @@ import importlib
 import json
 import logging
 from pathlib import Path
-from typing import Mapping
+from typing import Any, Mapping
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ _SIBLING_MODULES = ("trainer", "feature_extraction")
 _MODULE_CACHE: dict[str, object | None] = {}
 
 
-def _load_model_module(module_name: str):
+def _load_model_module(module_name: str) -> Any | None:
     """Return the embedded model module, importing it at most once.
 
     Safe to call from the event loop *after* :func:`preload_models` has run (the
@@ -85,7 +85,7 @@ def _load_model_module(module_name: str):
     return module
 
 
-def _sibling_attr(module_name: str, attr: str):
+def _sibling_attr(module_name: str, attr: str) -> Any | None:
     """Fetch ``attr`` from an embedded sibling module via the cache, or None.
 
     Resolution paths run in the event loop, so they must never re-import: this hits
@@ -114,10 +114,10 @@ def preload_models() -> None:
     # a blocking import (issue #328).
     for sibling in _SIBLING_MODULES:
         _load_model_module(sibling)
-    try:
-        available_models()
-    except Exception:  # noqa: BLE001 - manifest warm-up is best effort
-        pass
+    # No guard needed: available_models() carries its own outer try/except and caches
+    # [] on every failure path, so it cannot raise here (and a try/except/pass around it
+    # would be unreachable code that Ruff flags as S110/SIM105).
+    available_models()
 
 
 def ml_models_enabled(options: Mapping[str, object] | None) -> bool:

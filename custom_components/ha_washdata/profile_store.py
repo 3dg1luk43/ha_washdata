@@ -4968,8 +4968,12 @@ class ProfileStore:
             cycle, _ = self.find_stored_cycle(str(sample_id))
             if not cycle:
                 return None
-            points = cycle.get("power_data") or []
-            if len(points) < 2 or not isinstance(points[0], (list, tuple)):
+            # Through decompress_power_data, not raw power_data: a legacy cycle stores
+            # (iso_string, power) pairs, and float() on the ISO string would raise into
+            # the broad except below, silently leaving the #364 guard inert for that
+            # profile. The isinstance check does not catch it - [iso_str, power] is a list.
+            points = decompress_power_data(cycle)
+            if len(points) < 2:
                 return None
             offsets = [float(pt[0]) for pt in points]
             powers = [float(pt[1]) for pt in points]
