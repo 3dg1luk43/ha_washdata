@@ -752,6 +752,29 @@ STANDBY_BAND_FLATNESS_FLOOR_W = 2.0   # absolute flatness floor for low-peak dev
 ANTI_CREASE_FINALIZE_RATIO = 0.98      # elapsed must reach 98% of expected duration
 ANTI_CREASE_CONFIRM_WINDOW_S = 180.0   # recent window that must hold no reading > max_power
 
+# Issue #399: both conditions above look BACKWARDS, so a wash whose final spin
+# lands just past 0.98 x expected - preceded by more than the confirm window below
+# `anti_wrinkle_max_power` (a delicate/rinse stretch) - was finalised seconds
+# before its own spin, and the spin then opened a second cycle record. The guard
+# asks the matched profile whether it ends with a high-power block and, if so,
+# refuses to finalise until THIS run has produced its counterpart.
+#
+# Deliberately event-based, not clock-based: blocking merely until elapsed passes
+# the profile's own last high sample delays the reported finalise by 16 s and then
+# splits the wash anyway, because a run's spin can sit hundreds of seconds later
+# than the profile's (load-dependent duration). Asymmetric like the other
+# anti-crease guards - it can only ever DELAY a finalise - and bounded by the cap
+# below so a program that legitimately skips its spin can never hang.
+ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC = 0.90   # profile's last high block must START this
+                                            # late in its run to count as terminal;
+                                            # a genuinely low-power tail (the #296
+                                            # Miele tumble) never arms the guard
+ANTI_CREASE_TERMINAL_MATCH_FRAC = 0.5       # live high-power seconds after that
+                                            # position, as a fraction of the
+                                            # profile's own block, that count as
+                                            # "this run has had its spin"
+ANTI_CREASE_SPIN_WAIT_MAX_RATIO = 1.25      # never block past this x expected
+
 # Device Type Defaults
 # Device Type Defaults (Maps)
 

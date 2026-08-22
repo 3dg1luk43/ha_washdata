@@ -73,6 +73,9 @@ from .const import (
     STANDBY_BAND_FLATNESS_FLOOR_W,
     ANTI_CREASE_FINALIZE_RATIO,
     ANTI_CREASE_CONFIRM_WINDOW_S,
+    ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC,
+    ANTI_CREASE_TERMINAL_MATCH_FRAC,
+    ANTI_CREASE_SPIN_WAIT_MAX_RATIO,
 )
 
 # The dishwasher end-spike wait window is shared between two code paths
@@ -339,6 +342,13 @@ class CycleDetector:
         # Mean power the matched profile draws over the last few % of its own run
         # (profile_store.profile_tail_power). None = no opinion, guard stays inert.
         self._matched_tail_power: float | None = None
+        # (start_frac, seconds) of the matched profile's own terminal high-power
+        # block, from profile_store.profile_terminal_high_block. None = the profile
+        # has no such block (or we have no opinion) and the guard stays inert (#399).
+        self._matched_terminal_high: tuple[float, float] | None = None
+        # One-shot per cycle, so the held-finalise reason is visible in the log
+        # without repeating it on every reading.
+        self._anticrease_spin_wait_logged: bool = False
         self._last_smart_term_block_reason: str | None = None  # #346 diagnostic throttle
 
         # Anti-wrinkle tracking (dryers only)
@@ -539,6 +549,27 @@ class CycleDetector:
             return None
         return value
 
+    @staticmethod
+    def _sanitize_terminal_high(raw: Any) -> tuple[float, float] | None:
+        """Coerce ``raw`` into a ``(start_frac, seconds)`` pair, else None (#399).
+
+        None means "no opinion", which leaves ``_anticrease_spin_pending`` inert and
+        the anti-crease finalise exactly as it behaved before the guard existed.
+        """
+        if raw is None:
+            return None
+        try:
+            start_frac, seconds = raw  # type: ignore[misc]
+            start_frac = float(start_frac)
+            seconds = float(seconds)
+        except (TypeError, ValueError):
+            return None
+        if not math.isfinite(start_frac) or not math.isfinite(seconds):
+            return None
+        if not 0.0 <= start_frac <= 1.0 or seconds <= 0:
+            return None
+        return (start_frac, seconds)
+
     def _trailing_mean_power(self, timestamp: datetime, window_s: float) -> float | None:
         """Time-weighted mean power over the trailing ``window_s``, or None when
         there are too few samples to judge.
@@ -732,6 +763,13 @@ class CycleDetector:
             self._matched_tail_power = (
                 self._sanitize_tail_power(result_seq[8]) if len(result_seq) >= 9 else None
             )
+            # Element 10 (#399): the matched profile's own terminal high-power
+            # block. Cleared by a shorter tuple for the same reason as element 9 -
+            # keeping the previous profile's block would make the anti-crease guard
+            # wait for a spin the newly-matched program does not have.
+            self._matched_terminal_high = (
+                self._sanitize_terminal_high(result_seq[9]) if len(result_seq) >= 10 else None
+            )
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -744,6 +782,7 @@ class CycleDetector:
             self._match_prefix_ambiguous = False
             self._match_prefix_ambiguous_full_shape = False
             self._matched_tail_power = None
+            self._matched_terminal_high = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -797,6 +836,8 @@ class CycleDetector:
         self._match_prefix_ambiguous = False
         self._match_prefix_ambiguous_full_shape = False
         self._matched_tail_power = None
+        self._matched_terminal_high = None
+        self._anticrease_spin_wait_logged = False
         # Per-cycle diagnostic throttle (#346): the "Smart Termination not applied"
         # line only logs when the reason CHANGES. Carrying the previous cycle's
         # reason across a reset swallows the new cycle's very first diagnostic
@@ -2215,6 +2256,12 @@ class CycleDetector:
         """
         if not self._anticrease_gate_open(timestamp):
             return False
+        # #399: only the finalise, never _anticrease_gate_open. A false block in the
+        # shared gate would also kill the match freeze, and because the tumble bursts
+        # recur faster than off_delay neither the fallback timeout nor
+        # ENDING_HARD_FINALIZE could then close the cycle - that is the #296 hang.
+        if self._anticrease_spin_pending(timestamp):
+            return False
         max_power = float(self._config.anti_wrinkle_max_power)
         # Walk the tail; readings are chronological so we can break once outside the
         # window (O(window), not O(n)).
@@ -2253,6 +2300,91 @@ class CycleDetector:
         if max(window) > max_power:
             return False  # a heating / high-spin reading in the window - still washing
         return True
+
+    def _anticrease_spin_pending(self, timestamp: datetime) -> bool:
+        """Whether the matched profile still owes this run a terminal high-power
+        event - i.e. the anti-crease finalise must wait (#399).
+
+        ``_is_anticrease_tail``'s two conditions both look backwards: past expected,
+        and quiet for the confirm window. A programme whose final spin lands just
+        past 0.98 x expected, after a long sub-``anti_wrinkle_max_power`` rinse
+        stretch, satisfies both while the spin is still ahead - so the wash was
+        finalised into anti-wrinkle and the spin opened a SECOND cycle record.
+
+        The profile carries the missing information: where its own last high-power
+        block sits and how long it runs. If that block is terminal (starts at or
+        after ``ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC`` of the profile) and this run
+        has not yet produced a comparable amount of high-power time at or after the
+        same position, the spin is still ahead.
+
+        Deliberately compares EVENTS, not clock positions: mapping the profile's
+        last high sample onto elapsed time and clearing there delays the reported
+        finalise by 16 s and then splits the wash anyway, because a run's spin can
+        arrive hundreds of seconds later than the profile's (the same
+        load-dependent duration spread behind #393).
+
+        Delay-only and bounded: never blocks past
+        ``ANTI_CREASE_SPIN_WAIT_MAX_RATIO`` x expected, and fails open on any
+        missing input, so it cannot reproduce the #296 hang.
+        """
+        block = self._matched_terminal_high
+        if block is None:
+            return False
+        start_frac, block_seconds = block
+        if start_frac < ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC:
+            return False  # the profile's tail is genuinely low-power (#296 shape)
+        expected = self._expected_duration
+        start = self._current_cycle_start
+        if expected <= 0 or start is None:
+            return False
+        current_duration = (timestamp - start).total_seconds()
+        if current_duration >= expected * ANTI_CREASE_SPIN_WAIT_MAX_RATIO:
+            return False  # cap: waited long enough, let the finalise through
+        needed = block_seconds * ANTI_CREASE_TERMINAL_MATCH_FRAC
+        if needed <= 0:
+            return False
+        seen = self._high_power_seconds_since(start_frac * expected)
+        if seen >= needed:
+            return False
+        if not self._anticrease_spin_wait_logged:
+            self._anticrease_spin_wait_logged = True
+            self._logger.debug(
+                "Anti-crease finalize held: '%s' ends with a %.0fs block above %.0fW "
+                "at %.0f%% of its run; this cycle has %.0fs of it so far (elapsed "
+                "%.0fs of %.0fs expected).",
+                self._matched_profile,
+                block_seconds,
+                float(self._config.anti_wrinkle_max_power),
+                start_frac * 100.0,
+                seen,
+                current_duration,
+                expected,
+            )
+        return True
+
+    def _high_power_seconds_since(self, offset_s: float) -> float:
+        """Seconds this cycle has spent above ``anti_wrinkle_max_power`` at or after
+        ``offset_s`` from its start (#399).
+
+        Walks the readings backwards and stops at the offset, so the scan is bounded
+        by the tail of the trace rather than its whole length. Each reading covers
+        the interval up to the following one, which matches how the profile's own
+        block length is measured.
+        """
+        start = self._current_cycle_start
+        if start is None or not self._power_readings:
+            return 0.0
+        ceiling = float(self._config.anti_wrinkle_max_power)
+        total = 0.0
+        readings = self._power_readings
+        for i in range(len(readings) - 1, -1, -1):
+            ts, power = readings[i]
+            elapsed = (ts - start).total_seconds()
+            if elapsed < offset_s:
+                break
+            if float(power) > ceiling and i + 1 < len(readings):
+                total += (readings[i + 1][0] - ts).total_seconds()
+        return total
 
     def _maybe_finalize_anticrease_tail(self, timestamp: datetime) -> bool:
         """Finalise a cycle that has entered the anti-crease tail into
@@ -2652,6 +2784,7 @@ class CycleDetector:
             "match_prefix_ambiguous": self._match_prefix_ambiguous,
             "match_prefix_ambiguous_full_shape": self._match_prefix_ambiguous_full_shape,
             "matched_tail_power": self._matched_tail_power,
+            "matched_terminal_high": self._matched_terminal_high,
             "ml_defer_start_duration": self._ml_defer_start_duration,
         }
 
@@ -2721,6 +2854,9 @@ class CycleDetector:
             )
             self._matched_tail_power = self._sanitize_tail_power(
                 snapshot.get("matched_tail_power")
+            )
+            self._matched_terminal_high = self._sanitize_terminal_high(
+                snapshot.get("matched_terminal_high")
             )
             self._ml_defer_start_duration = snapshot.get("ml_defer_start_duration")
 
