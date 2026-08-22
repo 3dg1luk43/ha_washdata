@@ -708,37 +708,47 @@ def _run_checkpoints(by_source: dict) -> None:
                     if cut is None:
                         continue
                     pw, elapsed = cut
-                    row = res.setdefault((dev, f), [0, 0, 0])
-                    row[2] += 1
-                    for i, cfg in enumerate((base, {**base, "in_progress": True})):
+                    row = res.setdefault((dev, f), [0, 0, 0, 0])
+                    row[3] += 1
+                    variants = (
+                        base,
+                        {**base, "in_progress": True},
+                        {**base, "in_progress": True, "prefix_shape": True},
+                    )
+                    for i, cfg in enumerate(variants):
                         cands = analysis.compute_matches_worker(pw, elapsed, snaps, cfg)
                         if cands and cands[0]["name"] == name:
                             row[i] += 1
     devices = sorted({k[0] for k in res})
     print("\n=== MID-CYCLE top-1 (#400) ===")
-    print(f"{'device':<16}{'elapsed':>8}{'n':>6}{'whole-cycle':>13}{'like-for-like':>15}{'delta':>8}")
-    grand = [0, 0, 0]
+    print(f"{'device':<16}{'elapsed':>8}{'n':>6}{'whole':>8}{'scalars':>9}{'+shape':>9}"
+          f"{'d(sc)':>7}{'d(sh)':>7}")
+
+    def _line(label: str, tag: str, row: list[int]) -> None:
+        n = row[3]
+        a, b, c = (row[0] / n * 100, row[1] / n * 100, row[2] / n * 100)
+        print(f"{label:<16}{tag:>8}{n:>6}{a:>7.1f}%{b:>8.1f}%{c:>8.1f}%"
+              f"{b - a:>+7.1f}{c - a:>+7.1f}")
+
+    grand = [0, 0, 0, 0]
     for dev in devices:
-        sub = [0, 0, 0]
+        sub = [0, 0, 0, 0]
         for f in fracs:
             row = res.get((dev, f))
             if not row:
                 continue
-            for i in range(3):
+            for i in range(4):
                 sub[i] += row[i]
-            a = row[0] / row[2] * 100
-            b = row[1] / row[2] * 100
-            print(f"{dev:<16}{int(f*100):>7}%{row[2]:>6}{a:>12.1f}%{b:>14.1f}%{b - a:>+7.1f}")
-        if sub[2]:
-            a = sub[0] / sub[2] * 100
-            b = sub[1] / sub[2] * 100
-            print(f"{dev:<16}{'ALL':>8}{sub[2]:>6}{a:>12.1f}%{b:>14.1f}%{b - a:>+7.1f}\n")
-            for i in range(3):
+            _line(dev, f"{int(f*100)}%", row)
+        if sub[3]:
+            _line(dev, "ALL", sub)
+            print()
+            for i in range(4):
                 grand[i] += sub[i]
-    if grand[2]:
-        a = grand[0] / grand[2] * 100
-        b = grand[1] / grand[2] * 100
-        print(f"{'ALL DEVICES':<16}{'ALL':>8}{grand[2]:>6}{a:>12.1f}%{b:>14.1f}%{b - a:>+7.1f}")
+    if grand[3]:
+        _line("ALL DEVICES", "ALL", grand)
+    print("whole = today; scalars = #400 Stage-4/5 prefix (shipped); "
+          "+shape = experimental prefix Stage-2/3 on top")
 
 
 def _run_grouped(by_source: dict) -> None:

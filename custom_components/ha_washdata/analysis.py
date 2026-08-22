@@ -395,6 +395,15 @@ def compute_matches_worker(
         config.get("duration_overrun_scale", MATCH_DURATION_SCALE_OVERRUN)
     )
     en_scale = float(config.get("energy_scale", MATCH_ENERGY_SCALE))
+    # #400: while the cycle is still running, Stage 4 compares like with like. Both
+    # of its terms describe the cycle SO FAR; without this they are graded against
+    # each candidate's COMPLETE duration and energy, which makes a long program 40%
+    # through numerically indistinguishable from a finished short one. Opt-in (live
+    # match path only) so the final match at cycle end - where the whole-cycle
+    # figures are the right comparison - is byte-identical.
+    in_progress = bool(config.get("in_progress"))
+    # Experimental, default off: see the prefix-shape block after Stage 4.
+    in_progress_shape = in_progress and bool(config.get("prefix_shape"))
 
     curr_arr = np.array(current_power)
 
@@ -488,13 +497,6 @@ def compute_matches_worker(
         # "integrated" compares true integrated energy (mean x duration). Opt-in so
         # the historical default is byte-for-byte preserved. See register item 99.
         integrated = config.get("energy_mode", "mean") == "integrated"
-        # #400: while the cycle is still running, compare like with like. Both
-        # terms below describe the cycle SO FAR; without this they are graded
-        # against each candidate's COMPLETE duration and energy, which makes a long
-        # program 40% through numerically indistinguishable from a finished short
-        # one. Opt-in (live match path only) so the final match at cycle end - where
-        # the whole-cycle figures are the right comparison - is byte-identical.
-        in_progress = bool(config.get("in_progress"))
         cur_mean = float(np.mean(curr_arr))
         cur_energy = cur_mean * current_duration if integrated else cur_mean
         for cand in candidates:
@@ -529,6 +531,54 @@ def compute_matches_worker(
                 + dur_w * dur_ag
                 + en_w * en_ag
             )
+        candidates.sort(key=lambda x: x["score"], reverse=True)
+
+    # EXPERIMENTAL, default OFF (#400 follow-up): score SHAPE on the truncated
+    # candidate too, not just the Stage-4 scalars. Stage 2 compares the best-offset
+    # overlap and Stage 3 resamples both series to a fixed length - so mid-cycle a
+    # 40%-complete trace is stretched to full size and warped against the whole
+    # candidate, while Stages 4/5 are prefix-anchored. This closes that split by
+    # reusing prefix_shape_score, which is the same Stage-2 formula and the same
+    # Stage-3 blend against the truncated template. Applied after the normal
+    # pipeline (so a candidate dropped by keep_min on its whole-curve score never
+    # gets here - fine for measurement, would be reordered if this ships).
+    #
+    # Measured on cycle_data (dtw_ab_eval --checkpoints, leave-one-out): mid-cycle
+    # top-1 62.6% -> 71.0% at prefix_shape_max_ratio=0.7, on top of the shipped
+    # scalar prefix. The cutoff matters: at 0.8 and above the truncation also
+    # discards "this candidate is longer than everything I have seen", which is the
+    # end-of-cycle discriminator - the 90% checkpoint falls to 75.1% and a real
+    # dishwasher export loses Smart Termination, the same way the rejected duration
+    # credit did. At 0.6-0.7 all four dishwasher exports are byte-identical to today
+    # and the #364 guard's split-risk population drops 88 -> 73 folds.
+    if in_progress_shape and candidates:
+        _peak = float(np.max(curr_arr)) if curr_arr.size else 0.0
+        # Only while the cycle is clearly mid-run: truncating the template also
+        # throws away "this candidate is longer than everything I have seen", which
+        # is the discriminator at the end of a short programme against its longer
+        # sibling.
+        _max_ratio = float(config.get("prefix_shape_max_ratio", 1.0))
+        for cand in candidates:
+            _span = float(cand.get("sample_span_s") or cand.get("profile_duration") or 0.0)
+            if _span > 0 and current_duration / _span > _max_ratio:
+                continue
+            ps = prefix_shape_score(
+                curr_arr,
+                cand.get("sample") or [],
+                current_duration,
+                _span,
+                _peak,
+                config,
+            )
+            if ps is None:
+                continue  # cycle already covers the whole template: nothing to truncate
+            shape_w_local = max(0.0, 1.0 - dur_w - en_w)
+            # Swap the shape component out of the blended score, leaving the Stage-4
+            # duration/energy contributions exactly as computed above.
+            cand["score"] = float(
+                cand["score"] - shape_w_local * cand["shape_score"] + shape_w_local * ps
+            )
+            cand["prefix_shape_score"] = float(ps)
         candidates.sort(key=lambda x: x["score"], reverse=True)
 
     # Stage 6 (#364): prefix scores for the few candidates materially LONGER than
