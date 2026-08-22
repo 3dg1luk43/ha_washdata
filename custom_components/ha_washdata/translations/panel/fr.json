@@ -30,9 +30,12 @@
     "awaiting": "En attente d'approbation",
     "imported_tip": "Importé depuis la boutique communautaire. Utilisé uniquement pour la correspondance, non compté dans les statistiques.",
     "not_importable": "n/a ici",
-    "exists": "existe déjà"
+    "exists": "existe déjà",
+    "backfilled_tip": "Détecté dans un historique de puissance importé. Influence uniquement la correspondance des programmes, non compté dans les statistiques."
   },
   "btn": {
+    "set_brand_model": "Définir la marque et le modèle",
+    "refresh_catalog": "Rafraîchir le catalogue",
     "add_device": "+ Ajouter un appareil",
     "add_device_tip": "Ajouter un autre appareil WashData",
     "add_maintenance": "Ajouter un événement d'entretien",
@@ -193,7 +196,12 @@
     "import_selected": "Importer la sélection",
     "back": "Retour",
     "mute_suggestion": "Ne plus suggérer ce paramètre",
-    "reset_muted": "Réinitialiser les suggestions masquées"
+    "reset_muted": "Réinitialiser les suggestions masquées",
+    "import_power_history": "Importer l'historique de puissance",
+    "hist_read_recorder": "Lire depuis Home Assistant",
+    "hist_scan": "Rechercher des cycles",
+    "hist_import_n": "Importer {n} cycles",
+    "hist_goto_cycles": "Voir les cycles"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -205,14 +213,14 @@
       "start": "Doit être inférieur à la Puissance max anti-froissage ({max} W)"
     },
     "attn_sub": "Corriger les conflits avant d'enregistrer",
-    "attn_title": "{n} conflit{s} de paramètres",
-    "settings_banner": "{n} conflit{s} de paramètres – vérifiez les sections surlignées et corrigez avant d'enregistrer.",
+    "attn_title": "Conflits de paramètres : {n}",
+    "settings_banner": "Conflits de paramètres : {n}. Vérifiez les sections surlignées et corrigez-les avant d'enregistrer.",
     "settings_banner_btn": "Aller au premier",
     "confidence": {
       "auto": "Doit être supérieur ou égal au Seuil de correspondance ({match})",
-      "learning": "Doit être inférieur ou égal au Seuil de correspondance ({match})",
+      "learning": "Doit être supérieur ou égal au Seuil de correspondance ({match})",
       "match_for_auto": "Doit être inférieur ou égal à la Confiance d'étiquetage automatique ({alc})",
-      "match_for_learning": "Doit être supérieur ou égal à la Confiance d'apprentissage ({lc})"
+      "match_for_learning": "Doit être inférieur ou égal à la Confiance d'apprentissage ({lc})"
     },
     "duration_ratio": {
       "max": "Doit être supérieur au Ratio de durée min ({min})",
@@ -250,7 +258,7 @@
       "match": "Doit être supérieur au Seuil de non-correspondance ({un})",
       "unmatch": "Doit être inférieur au Seuil de correspondance ({match}) ; sinon une correspondance confirmée est immédiatement annulée"
     },
-    "cascade_toast": "Également {n} paramètre{s} mis à jour pour la cohérence.",
+    "cascade_toast": "Autres paramètres ajustés pour la cohérence : {n}",
     "suggestion_resolves": "Appliquez la suggestion en attente ({val}) ci-dessous pour corriger ceci",
     "use_fix": "Utiliser {val}",
     "watchdog": {
@@ -308,7 +316,8 @@
     "pg_outcome": "Résultat de la simulation",
     "pg_across_cycles": "Sur l'ensemble de vos cycles",
     "community_store": "Boutique communautaire",
-    "online_account": "Boutique communautaire et fonctionnalités en ligne"
+    "online_account": "Boutique communautaire et fonctionnalités en ligne",
+    "import_power_history": "Importer l'historique de puissance"
   },
   "health": {
     "fair": "Qualité de profil acceptable",
@@ -316,6 +325,7 @@
     "poor": "⚠ Qualité de profil médiocre"
   },
   "lbl": {
+    "drag_to_resize": "Faites glisser pour redimensionner",
     "actions": "Actions",
     "activity": "Activité",
     "administrators": "Administrateurs",
@@ -402,7 +412,7 @@
     "metric": "Métrique",
     "mode_existing_profile": "Ajouter au profil existant",
     "mode_new_profile": "Créer un nouveau profil",
-    "models_fine_tuned": "({count} modèle{plural} affiné{plural})",
+    "models_fine_tuned": "(modèles affinés : {count})",
     "n_classic_suggestions": "{n} classique",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} sélectionné(s)",
@@ -629,7 +639,26 @@
     "conflict_import_copy": "Importer comme copie",
     "conflict_keep_mine": "Garder le mien",
     "conflict_overwrite": "Écraser",
-    "font_size": "Taille de police du panneau"
+    "font_size": "Taille de police du panneau",
+    "hist_csv_data": "Données CSV",
+    "hist_from_recorder": "Ou le lire depuis Home Assistant",
+    "hist_since": "Depuis le",
+    "days": "jours",
+    "hist_keep": "Conserver ce cycle",
+    "hist_looks_complete": "complet",
+    "peak_power_short": "Crête",
+    "shape": "Forme",
+    "hist_skip_idle": "rien en fonctionnement",
+    "hist_skip_sparse": "mesures trop espacées",
+    "hist_skip_short": "trop peu de mesures",
+    "hist_skip_long": "aucune pause assez longue pour découper",
+    "hist_reason_short": "plus court que le cycle réel le plus court de cet appareil",
+    "hist_reason_no_end": "ne s'est jamais terminé proprement",
+    "task_history_import": "Analyse de l'historique de puissance",
+    "task_history_import_apply": "Importation des cycles",
+    "evidence_real_cycles": "Cycles effectués par cette machine",
+    "evidence_reference_cycles": "Téléchargés depuis la boutique communautaire",
+    "evidence_backfill_cycles": "Trouvés dans un historique de puissance importé"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -708,9 +737,15 @@
     "store_share": "Partager sur la boutique communautaire",
     "store_share_device": "Partager cet appareil",
     "export_select": "Exporter - choisir les données",
-    "import_wizard": "Importer - choisir les données"
+    "import_wizard": "Importer - choisir les données",
+    "history_import": "Importer l'historique de puissance"
   },
   "msg": {
+    "tail_trim_hint": "Nombre de secondes à supprimer à la fin",
+    "store_sibling_hint": "Rien de partagé pour votre modèle exact ? Un modèle proche de la même marque constitue généralement un bon point de départ.",
+    "store_declare_appliance": "Indiquez à WashData l'appareil que vous possédez et cet onglet affichera les configurations que d'autres personnes ont partagées pour celui-ci. Vous pouvez aussi saisir une marque ci-dessus pour explorer.",
+    "refresh_catalog_hint": "Les listes de marques et d'appareils de la communauté sont mises en cache afin de maintenir la boutique partagée dans son quota quotidien. Rafraîchissez pour récupérer les entrées ajoutées ou approuvées par d'autres utilisateurs.",
+    "head_trim_hint": "Nombre de secondes à supprimer au début",
     "appliance_monitor": "Moniteur d'appareils",
     "artifact_dip_detail": "Est tombé en dessous de la bande de puissance habituelle pendant environ {n} s.",
     "artifact_footer": "Mis en évidence sur le graphique ci-dessus. Il s’agit d’artefacts transitoires (par exemple la porte ouverte en cours de cycle), pas nécessairement de problèmes.",
@@ -721,7 +756,7 @@
     "automations_intro": "WashData déclenche les événements {start} / {end} et expose des entités, les notifications et actions sont donc mieux construites comme des automatisations Home Assistant normales. Les automatisations utilisant cet appareil apparaissent ci-dessous.",
     "cleanup_intro": "Chaque cycle étiqueté superposé. Cochez les valeurs aberrantes et supprimez-les pour nettoyer le profil.",
     "clear_debug_hint": "Supprimez les données de débogage stockées pour libérer de l'espace.",
-    "collecting_data": "Collecte de données - encore {need} cycle{plural} avant que l'affinage puisse commencer ({current}/{min}).",
+    "collecting_data": "Collecte de données. Cycles encore nécessaires avant que l'affinage puisse commencer : {need} ({current}/{min}).",
     "compare_overlay_profiles": "Profils de superposition (faible)",
     "compare_profiles_tip": "Superposez d'autres enveloppes de profil sur le graphique ci-dessus pour voir laquelle correspond le mieux à ce cycle.",
     "compare_selected_cycles": "Cycles sélectionnés (solides) – afficher/masquer",
@@ -731,7 +766,7 @@
     "cycles_deleted": "{count} cycle(s) supprimé(s)",
     "enough_data": "Suffisamment de données pour apprendre ({current}/{min} cycles).",
     "export_description": "Choisissez précisément quels profils, cycles, réglages et autres exporter vers un JSON, ou analysez un fichier pour n'importer que les éléments souhaités.",
-    "feedback_cycles_pending": "{n} cycle{s} à examiner",
+    "feedback_cycles_pending": "À réviser : {n}",
     "feedback_prompt": "Confirmez que c'était correct, corrigez le programme ou ignorez-le.",
     "feedback_relabel_hint": "Réétiqueter ce cycle le résout également.",
     "filter_by_profile": "Filtrer par profil…",
@@ -808,7 +843,6 @@
     "pg_stress_synthetic": "la simulation de repos commence ici",
     "pg_sweep_intro": "Et si {param} était différent ? Testez {steps} valeurs sur vos {cycles} derniers cycles pour trouver le réglage où le plus de cycles sont correctement reconnus.",
     "pg_sweep_step": "Étape {done} / {total}",
-    "pg_undetected": "{n} cycle{s} non détecté{s}",
     "pg_verdict_bad": "Nécessite une attention: de nombreux cycles ne sont pas détectés.",
     "pg_verdict_good": "Bien réglé: la plupart des cycles sont correctement identifiés et reconnus.",
     "pg_verdict_ok": "Acceptable: certains cycles manqués. Essayez d'abaisser le seuil de démarrage.",
@@ -839,6 +873,7 @@
     "review_recorded_tip": "Marquez-le comme un cycle de référence trié sur le volet pour son programme - le même rôle qu'un cycle enregistré manuellement. Les cycles de référence sont toujours conservés, amorcent le modèle correspondant et ne sont jamais supprimés lors du nettoyage. (C'est le drapeau « doré »/enregistré ; les deux sont la même chose.)",
     "review_tags_tip": "Indicateurs facultatifs décrivant ce qui n'a pas fonctionné avec ce cycle, afin que la formation et le nettoyage puissent en tenir compte.",
     "review_to_cycles": "Ouvrir la file d'attente de révision des cycles",
+    "samples_decimated": "Affichage de {shown} sur {total} échantillons (réduits pour l'affichage ; pics conservés). Un grand écart ici est dû à la réduction, pas à des données manquantes.",
     "saving_triggers_reload": "L'enregistrement déclenche un rechargement de l'intégration. Les entités HA peuvent apparaître brièvement comme indisponibles.",
     "search_placeholder": "Paramètres de recherche…",
     "see_recorder": "Voir le widget enregistreur ci-dessous",
@@ -958,10 +993,33 @@
     "sug_mute_failed": "Impossible de masquer la suggestion",
     "sug_unmuted_all": "Les suggestions masquées ont été réinitialisées",
     "n_suggestions_muted": "{count} masquée(s) ; le réglage automatique ne proposera plus ces suggestions.",
-    "font_size_hint": "Agrandir ou réduire tout le contenu de ce panneau. S'applique à votre compte sur cet appareil."
+    "font_size_hint": "Agrandir ou réduire tout le contenu de ce panneau. S'applique à votre compte sur cet appareil.",
+    "import_history_description": "Vous aviez déjà une prise connectée avant WashData ? Chargez un export de l'historique de son capteur de puissance, ou lisez-le directement depuis Home Assistant : la détection habituelle s'applique à ces données, si bien que vos cycles passés apparaissent dans votre liste Cycles, prêts à être nommés.",
+    "hist_input_hint": "Chargez un CSV téléchargé depuis le panneau Historique (entité, état, dernière modification), ou laissez WashData lire directement l'historique du capteur. La détection s'exécute ensuite exactement comme en direct, et vous choisissez lesquels des cycles trouvés conserver.",
+    "hist_recorder_hint": "Lit depuis la date que vous choisissez jusqu'à maintenant. Home Assistant conserve l'historique détaillé pendant 10 jours par défaut, puis seulement des moyennes horaires, trop grossières pour y détecter des cycles - ne choisissez une date plus ancienne que si le recorder de Home Assistant est configuré pour en conserver davantage.",
+    "hist_scanning": "Votre historique est rejoué dans le détecteur. Cela s'exécute en arrière-plan : vous pouvez fermer cette fenêtre et y revenir plus tard.",
+    "hist_imported_count": "{n} cycles importés.",
+    "hist_duplicates": "{n} avaient déjà été importés et ont été ignorés.",
+    "hist_capped": "La limite de cycles importés par appareil a été atteinte ; le reste n'a pas été enregistré.",
+    "hist_next_step": "Ils sont dans votre liste Cycles, marqués comme historique importé. Ouvrez-en un et utilisez Étiqueter pour nommer le programme auquel il correspond.",
+    "hist_rows_read": "{n} mesures lues",
+    "hist_breaks": "{n} coupures où le capteur était indisponible",
+    "hist_other_entity": "{n} mesures d'autres entités ignorées",
+    "hist_entity_substituted": "{used} lu (cet appareil est configuré pour {wanted})",
+    "hist_skipped_spans": "Plages ignorées",
+    "hist_settings_used": "Détecté avec les réglages actuels de cet appareil (puissance minimale {w} W, délai d'arrêt {s} s).",
+    "hist_none_found": "Aucun cycle n'a pu être détecté dans cet historique.",
+    "hist_found": "{n} cycles trouvés. Décochez tout ce qui ne ressemble pas à un cycle réel : rien n'est enregistré avant l'importation.",
+    "hist_scan_capped": "Seuls les premiers candidats sont affichés ({n} ont été trouvés).",
+    "hist_recorder_empty": "Home Assistant n'a pas d'historique détaillé pour ce capteur sur cette période.",
+    "hist_scan_failed": "L'analyse a échoué.",
+    "hist_scan_expired": "Cette analyse n'est plus disponible. Veuillez relancer l'analyse.",
+    "hist_import_failed": "L'importation a échoué.",
+    "imported_history_readonly": "Détecté dans un historique de puissance importé. Il influence la correspondance des programmes mais n'est pas compté dans vos statistiques, et ne peut être ni rogné ni divisé. Étiquetez-le pour nommer le programme."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",
+    "smart_termination_duration_ratio": "Fraction de la durée prévue du programme correspondant qu'un cycle doit atteindre avant que la Terminaison intelligente puisse le terminer plus tôt ; abaissez-la pour les machines dépendant de la charge ou de la température",
     "anti_wrinkle_enabled": "Absorber les impulsions de culbutage après la phase principale au lieu de les lire comme de nouveaux cycles",
     "anti_wrinkle_exit_power": "La puissance doit tomber sous ce seuil entre les impulsions pour que l'anti-froissement reste actif",
     "anti_wrinkle_idle_timeout": "Temps de silence autorisé entre deux impulsions de culbutage avant la fin de l'anti-froissement",
@@ -1158,7 +1216,7 @@
       "label": "Entité de prix de l'énergie"
     },
     "energy_price_static": {
-      "doc": "Prix ​​fixe par kWh utilisé pour les chiffres de coût lorsqu'aucune entité de prix en direct n'est définie ci-dessus.",
+      "doc": "Prix fixe par kWh utilisé pour les chiffres de coût lorsqu'aucune entité de prix en direct n'est définie ci-dessus.",
       "label": "Prix de l'énergie statique (par kWh)"
     },
     "energy_sensor": {
@@ -1373,6 +1431,10 @@
       "doc": "Stockez la trace de puissance complète et les données de débogage correspondantes pour chaque cycle. Utile pour le dépannage mais augmente la taille du stockage.",
       "label": "Enregistrer les traces de débogage"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "À quel point un cycle doit avoir progressé dans la durée prévue du programme correspondant avant que la Terminaison intelligente puisse le terminer plus tôt une fois la puissance retombée. La durée prévue est la moyenne du programme ; ainsi, sur les appareils dont le temps de fonctionnement varie beaucoup - lave-linge selon l'eau d'arrivée froide en hiver ou tiède en été, sèche-linge à sonde d'humidité, programmes dépendant de la charge - environ la moitié des cycles se terminent plus tôt que cette moyenne et ne bénéficient jamais de la fin rapide, s'achevant seulement via le délai de secours avec plusieurs minutes de retard. Abaissez cette valeur (p. ex. 0,85) sur ces machines pour que la fin anticipée se déclenche quand même ; augmentez-la vers 1,0 pour être plus prudent. Laissez vide pour la valeur par défaut (0,98, ou 0,99 pour les lave-vaisselle). Elle ne peut que terminer un cycle plus tôt, jamais plus tard, et ne se déclenche jamais sur une correspondance ambiguë ou peu fiable.",
+      "label": "Ratio de terminaison intelligente"
+    },
     "smoothing_window": {
       "doc": "Dans quelle mesure le signal de puissance brute est lissé. Low (2) est réactif mais bruyant ; high (5) lisse les pointes mais ajoute du décalage.",
       "label": "Fenêtre de lissage"
@@ -1504,6 +1566,10 @@
     "door_end_dwell_seconds": {
       "label": "Durée d'attente porte ouverte",
       "doc": "Durée pendant laquelle la porte doit rester ouverte avant que WashData ne termine le cycle, lorsque « La porte s'ouvre automatiquement en fin de cycle » est activé. Assez longue pour ignorer l'ajout rapide d'un article (par défaut 60 s), assez courte pour terminer rapidement une fois que la machine ouvre la porte."
+    },
+    "profile_evidence_sources": {
+      "label": "Cycles qui façonnent un programme",
+      "doc": "Quels cycles servent à construire la courbe de puissance de chaque programme et à y comparer un cycle terminé. Décocher un type l'empêche de façonner vos programmes sans rien supprimer - les cycles restent dans votre liste Cycles et peuvent toujours être étiquetés ou supprimés. Utile si vous ne faites pas confiance aux données importées. Les statistiques ne sont pas concernées : elles ne comptent toujours que les cycles que cette machine a réellement effectués. Décocher tout est ignoré, car un programme sans aucun cycle derrière lui ne pourrait jamais correspondre."
     }
   },
   "setting_group": {
@@ -1587,6 +1653,9 @@
     },
     "basic_configuration": {
       "label": "Configuration de base"
+    },
+    "profile_evidence": {
+      "label": "Base des profils"
     }
   },
   "status": {
@@ -1611,7 +1680,8 @@
     "trimming": "Rognage…",
     "splitting": "Fractionnement…",
     "deleting": "Suppression…",
-    "imported": "Importé"
+    "imported": "Importé",
+    "preparing": "Préparation…"
   },
   "tab": {
     "advanced": "Avancé",
@@ -1641,6 +1711,7 @@
     "wrong_profile": "Mauvais profil"
   },
   "toast": {
+    "catalog_refreshed": "Catalogue de la communauté rafraîchi",
     "access_saved": "Contrôle d'accès enregistré",
     "all_wiped": "Toutes les données effacées",
     "analysis_complete_none": "Analyse terminée : aucune nouvelle suggestion",
@@ -1652,7 +1723,7 @@
     "cycle_labelled": "Cycle labellisé",
     "cycle_paused": "Cycle en pause",
     "cycle_resumed": "Cycle repris",
-    "cycle_trimmed": "Cycle coupé",
+    "cycle_trimmed": "Cycle rogné",
     "cycles_merged": "Cycles fusionnés",
     "envelope_rebuilt": "Enveloppe reconstruite",
     "envelopes_rebuilt": "Enveloppes reconstruites",
@@ -1746,7 +1817,9 @@
     "store_download_failed": "Échec du téléchargement : {error}",
     "store_download_nothing": "Rien de nouveau à télécharger -- cette configuration est déjà sur votre appareil.",
     "export_selective_done": "Export téléchargé",
-    "import_selective_done": "{profiles} profil(s) et {cycles} cycle(s) importés"
+    "import_selective_done": "{profiles} profil(s) et {cycles} cycle(s) importés",
+    "hist_csv_required": "Chargez d'abord un fichier CSV ou collez son contenu",
+    "file_read_failed": "Impossible de lire ce fichier"
   },
   "suggestion": {
     "both_agree": "WashData recommande",
@@ -1842,7 +1915,7 @@
       "thr_batch": "Maintenu juste au-dessus de la puissance active la plus basse au p05 sur {cycles} cycles ({p05}W) pour qu'un démarrage soit détecté le plus tôt possible et que le seuil d'arrêt reste sous la puissance de fonctionnement la plus basse de la machine.",
       "tol_per_profile": "p75 de la variance de durée par profil sur {profiles} profils ({cycles} cycles) ; les profils resserrés ne sont pas pénalisés.",
       "tol_pooled": "D'après la variance de durée regroupée de {cycles} cycles récemment étiquetés (écart p95={dev}).",
-      "watchdog": "Maintenu aussi bas que possible en toute sécurité (juste au-dessus de l'écart de mise à jour p95 de {p95}s, min 30s) pour détecter rapidement les blocages sans faux arrêts."
+      "watchdog": "Maintenu aussi bas que possible en toute sécurité (juste au-dessus de l'écart de mise à jour p95 de {p95}s et au moins 2x l'intervalle d'échantillonnage de {median}s, min 30s) pour détecter rapidement les blocages sans faux arrêts."
     },
     "exclusions": {
       "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",
@@ -1908,6 +1981,10 @@
     "finished": "Le cycle a atteint son état final et s'est terminé."
   },
   "store": {
+    "your_model_tip": "C'est l'appareil que vous avez déclaré dans les Paramètres",
+    "your_model": "Le vôtre",
+    "search_brand_ph": "Rechercher par marque…",
+    "programs_count": "Programmes : {n}",
     "browse": "Parcourir",
     "device": "Appareil",
     "favorites": "Favoris",

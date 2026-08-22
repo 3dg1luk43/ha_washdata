@@ -79,7 +79,30 @@ workspace overrides to `.venv\\Scripts\\python.exe` (and use that interpreter fo
 pip install -r requirements-dev.txt
 ```
 
-### 3. Syntax Check
+### 3. Install Git Hooks (recommended)
+
+```bash
+./devtools/install_hooks.sh
+```
+
+Installs the repo's tracked hooks. The `pre-commit` hook refuses a commit whose
+minified panel/card bundles (`custom_components/ha_washdata/www/*.min.js` and
+`build-manifest.json`) were not rebuilt from the sources being committed - those
+artifacts are generated but **committed**, because they are the bytes users download.
+It checks the staged tree, so rebuilding and then committing only the source is caught
+too. It does nothing on commits that touch no asset in that directory; bypass a single
+deliberate WIP commit with `git commit --no-verify`.
+
+After editing `custom_components/ha_washdata/www/ha-washdata-panel.js` or
+`custom_components/ha_washdata/www/ha-washdata-card.js`:
+
+```bash
+node devtools/build_panel.mjs
+git add custom_components/ha_washdata/www/*.min.js \
+        custom_components/ha_washdata/www/build-manifest.json
+```
+
+### 4. Syntax Check
 
 Verify your Python code before committing:
 
@@ -87,7 +110,7 @@ Verify your Python code before committing:
 python3 -m compileall custom_components/ha_washdata tests/ --quiet
 ```
 
-### 4. Run Tests Locally
+### 5. Run Tests Locally
 
 ```bash
 ./run_tests.sh
@@ -95,7 +118,7 @@ python3 -m compileall custom_components/ha_washdata tests/ --quiet
 pytest tests/ -v
 ```
 
-### 5. Testing with Mock Socket
+### 6. Testing with Mock Socket
 
 To simulate a washing machine with power readings:
 

@@ -1,0 +1,62 @@
+name: Checks
+
+# Cheap, fast-failing checks only. The Python suite and the Playwright E2E suite
+# are deliberately NOT run here: they are a local/maintainer gate
+# (`./run_tests.sh`, `./run_tests.sh --all`, `devtools/release_check.sh --full`).
+# Runner minutes on this repo are shared with the issue/PR automation workflows,
+# which are the ones that have to stay responsive, and re-running ~1500 pytest
+# cases plus two full browser suites on every push to every branch was consuming
+# the budget they need.
+#
+# What is kept is the set of checks that are (a) seconds rather than minutes and
+# (b) catch a class of breakage no human reliably catches by eye -- a *generated*
+# file that no longer matches its source. The panel ships as a generated
+# artifact: `www/ha-washdata-panel.js` is the source of truth and
+# `devtools/build_panel.mjs` produces the `*.min.js` that is actually served.
+# `frontend.py` only serves an artifact whose recorded source hash still matches
+# disk, so a forgotten rebuild fails safe (users get the larger readable file)
+# rather than shipping stale code -- but a release that quietly loses
+# minification for everyone is still a bug. Same for the WS type artifacts.
+#
+# The panel parse/smoke step is here for the same reason: a stray backtick in the
+# panel's CSS-in-template-literal blanks the whole panel at runtime, and it costs
+# a second to rule out.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generated-artifacts:
+    name: Generated artifacts are current
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.13"
+      - name: Install build tooling
+        run: npm ci --prefix devtools
+      - name: Minified panel/card artifacts match their sources
+        run: node devtools/build_panel.mjs --check
+      - name: WS type artifacts match ws_schema.py
+        run: python devtools/generate_ws_types.py --check
+      - name: Panel JS parses and renders
+        run: |
+          node --check custom_components/ha_washdata/www/ha-washdata-panel.js
+          node --check custom_components/ha_washdata/www/ha-washdata-card.js
+          node devtools/panel_smoke.js

@@ -1,6 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 
+// When PANEL_BUILD=min the server serves the minified artifacts instead of the
+// readable sources. Use a different port so that reuseExistingServer cannot
+// accidentally hand a "min" test run an already-running "readable" server (or
+// vice versa) — the port mismatch makes the reuse check fail gracefully.
+const PORT = process.env.PANEL_BUILD === 'min' ? 4568 : 4567;
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -13,7 +19,7 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: 'http://localhost:4567',
+    baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     // Playwright auto-pierces open shadow DOM (mode:'open') — no extra config.
@@ -22,8 +28,9 @@ export default defineConfig({
 
   webServer: {
     command: 'node serve.mjs',
-    url: 'http://localhost:4567',
+    url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
+    env: { PORT: String(PORT) },
     cwd: path.join(__dirname),
   },
 

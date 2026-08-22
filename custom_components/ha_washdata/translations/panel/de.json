@@ -78,9 +78,12 @@
     "awaiting": "Warten auf Freigabe",
     "imported_tip": "Aus dem Community-Store importiert. Wird nur für den Abgleich verwendet, zählt nicht in die Statistik.",
     "not_importable": "hier n. v.",
-    "exists": "vorhanden"
+    "exists": "vorhanden",
+    "backfilled_tip": "Im importierten Leistungsverlauf erkannt. Beeinflusst nur die Programmzuordnung, zählt nicht in die Statistik."
   },
   "btn": {
+    "set_brand_model": "Marke und Modell festlegen",
+    "refresh_catalog": "Katalog aktualisieren",
     "add_device": "+ Gerät hinzufügen",
     "add_device_tip": "Fügen Sie ein weiteres WashData-Gerät hinzu",
     "add_maintenance": "Wartungsereignis hinzufügen",
@@ -90,7 +93,7 @@
     "apply_label": "Etikett anwenden",
     "apply_set_b": "Set B anwenden",
     "apply_split": "Teilung anwenden",
-    "apply_trim": "Trimmen anwenden",
+    "apply_trim": "Zuschnitt anwenden",
     "auto_detect_split": "Automatische Erkennung",
     "auto_label_cycles": "Auto-Label-Zyklen",
     "auto_label_cycles_tip": "Weist unbeschrifteten Zyklen, deren Übereinstimmungskonfidens den Schwellenwert überschreitet, automatisch Profilnamen zu",
@@ -209,8 +212,8 @@
     "stop": "Stopp",
     "submit_correction": "Korrektur einreichen",
     "train_now": "Trainiere jetzt",
-    "trim": "Trimmen",
-    "trim_split": "Trimmen / Teilen",
+    "trim": "Zuschneiden",
+    "trim_split": "Zuschneiden / Teilen",
     "undo": "Rückgängig",
     "use": "Verwenden",
     "wipe_all": "Alle Daten löschen",
@@ -241,7 +244,12 @@
     "import_selected": "Auswahl importieren",
     "back": "Zurück",
     "mute_suggestion": "Diese Einstellung nicht mehr vorschlagen",
-    "reset_muted": "Stummschaltungen zurücksetzen"
+    "reset_muted": "Stummschaltungen zurücksetzen",
+    "import_power_history": "Leistungsverlauf importieren",
+    "hist_read_recorder": "Aus Home Assistant lesen",
+    "hist_scan": "Nach Zyklen suchen",
+    "hist_import_n": "{n} Zyklen importieren",
+    "hist_goto_cycles": "Zeig mir die Zyklen"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,12 +261,12 @@
       "start": "Muss unter der maximalen Knitterschutz-Leistung ({max} W) liegen"
     },
     "attn_sub": "Konflikte vor dem Speichern beheben",
-    "attn_title": "{n} Einstellungskonflikt{s}",
+    "attn_title": "Einstellungskonflikte: {n}",
     "confidence": {
       "auto": "Muss beim oder über dem Übereinstimmungsschwellenwert ({match}) liegen",
-      "learning": "Muss beim oder unter dem Übereinstimmungsschwellenwert ({match}) liegen",
+      "learning": "Muss beim oder über dem Übereinstimmungsschwellenwert ({match}) liegen",
       "match_for_auto": "Muss beim oder unter der Auto-Label-Konfidenz ({alc}) liegen",
-      "match_for_learning": "Muss beim oder über der Lernkonfidenz ({lc}) liegen"
+      "match_for_learning": "Muss beim oder unter der Lernkonfidenz ({lc}) liegen"
     },
     "duration_ratio": {
       "max": "Muss größer als das minimale Dauerverhältnis ({min}) sein",
@@ -296,14 +304,14 @@
       "match": "Muss über dem Nicht-Übereinstimmungs-Schwellenwert ({un}) liegen",
       "unmatch": "Muss unter dem Übereinstimmungsschwellenwert ({match}) liegen; andernfalls wird eine bestätigte Übereinstimmung sofort aufgehoben"
     },
-    "cascade_toast": "Außerdem {n} Einstellung{s} zur Konsistenz angepasst.",
+    "cascade_toast": "Andere Einstellungen zur Konsistenz angepasst: {n}",
     "suggestion_resolves": "Unten den ausstehenden Vorschlag ({val}) übernehmen, um dies zu beheben",
     "use_fix": "Verwende {val}",
     "watchdog": {
       "interval": "Sollte mindestens das 2-fache des Abtastintervalls ({si} s) betragen",
       "sampling": "Abtastintervall sollte höchstens die Hälfte des Watchdog-Intervalls ({wi} s) betragen"
     },
-    "settings_banner": "{n} Einstellungskonflikt{s} – markierte Abschnitte prüfen und vor dem Speichern beheben.",
+    "settings_banner": "Einstellungskonflikte: {n}. Prüfen Sie die markierten Abschnitte und beheben Sie sie vor dem Speichern.",
     "settings_banner_btn": "Zum ersten"
   },
   "hdr": {
@@ -356,7 +364,8 @@
     "pg_outcome": "Simulationsergebnis",
     "pg_across_cycles": "Über deine Zyklen hinweg",
     "community_store": "Community-Store",
-    "online_account": "Community-Store und Onlinefunktionen"
+    "online_account": "Community-Store und Onlinefunktionen",
+    "import_power_history": "Leistungsverlauf importieren"
   },
   "health": {
     "fair": "Akzeptable Übereinstimmungsqualität",
@@ -364,6 +373,7 @@
     "poor": "⚠ Schlechte Übereinstimmungsqualität"
   },
   "lbl": {
+    "drag_to_resize": "Zum Ändern der Größe ziehen",
     "actions": "Aktionen",
     "activity": "Aktivität",
     "administrators": "Administratoren",
@@ -450,7 +460,7 @@
     "metric": "Metrik",
     "mode_existing_profile": "Zum vorhandenen Profil hinzufügen",
     "mode_new_profile": "Neues Profil erstellen",
-    "models_fine_tuned": "({count} Modell{plural} feinabgestimmt)",
+    "models_fine_tuned": "(feinabgestimmte Modelle: {count})",
     "n_classic_suggestions": "{n} klassisch",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} ausgewählt",
@@ -677,7 +687,26 @@
     "conflict_keep_mine": "Meine behalten",
     "conflict_overwrite": "Überschreiben",
     "pg_anti_wrinkle": "Knitterschutz",
-    "font_size": "Panel-Schriftgröße"
+    "font_size": "Panel-Schriftgröße",
+    "hist_csv_data": "CSV-Daten",
+    "hist_from_recorder": "Oder aus Home Assistant lesen",
+    "hist_since": "Seit",
+    "days": "Tage",
+    "hist_keep": "Diesen Zyklus behalten",
+    "hist_looks_complete": "vollständig",
+    "peak_power_short": "Spitze",
+    "shape": "Form",
+    "hist_skip_idle": "nichts in Betrieb",
+    "hist_skip_sparse": "Messwerte zu weit auseinander",
+    "hist_skip_short": "zu wenige Messwerte",
+    "hist_skip_long": "keine Pause lang genug zum Aufteilen",
+    "hist_reason_short": "kürzer als der kürzeste echte Zyklus dieses Geräts",
+    "hist_reason_no_end": "wurde nie sauber beendet",
+    "task_history_import": "Leistungsverlauf wird durchsucht",
+    "task_history_import_apply": "Zyklen werden importiert",
+    "evidence_real_cycles": "Zyklen, die diese Maschine ausgeführt hat",
+    "evidence_reference_cycles": "Aus dem Community-Store heruntergeladen",
+    "evidence_backfill_cycles": "Im importierten Leistungsverlauf gefunden"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -756,9 +785,15 @@
     "store_share": "Im Community-Store teilen",
     "store_share_device": "Dieses Gerät teilen",
     "export_select": "Export - Daten wählen",
-    "import_wizard": "Import - Daten wählen"
+    "import_wizard": "Import - Daten wählen",
+    "history_import": "Leistungsverlauf importieren"
   },
   "msg": {
+    "tail_trim_hint": "So viele Sekunden vom Ende entfernen",
+    "store_sibling_hint": "Für Ihr genaues Modell ist nichts geteilt? Ein nah verwandtes Modell derselben Marke ist meist ein guter Ausgangspunkt.",
+    "store_declare_appliance": "Teilen Sie WashData mit, welches Gerät Sie besitzen, dann zeigt dieser Tab die Setups, die andere dafür geteilt haben. Sie können oben auch eine Marke eingeben, um sich umzusehen.",
+    "refresh_catalog_hint": "Die Marken- und Gerätelisten der Community werden zwischengespeichert, damit der Community-Store sein Tageslimit einhält. Aktualisieren Sie, um Einträge zu übernehmen, die andere hinzugefügt oder freigegeben haben.",
+    "head_trim_hint": "So viele Sekunden vom Anfang entfernen",
     "appliance_monitor": "Gerätemonitor",
     "artifact_dip_detail": "Sank unter das übliche Leistungsband für ~{n}s.",
     "artifact_footer": "In der Grafik oben hervorgehoben. Hierbei handelt es sich um vorübergehende Artefakte (z. B. das Öffnen der Tür mitten im Zyklus), nicht unbedingt um Probleme.",
@@ -769,7 +804,7 @@
     "automations_intro": "WashData löst {start} / {end}-Ereignisse aus und stellt Entitäten bereit, sodass Benachrichtigungen und Aktionen am besten als normale Home Assistant-Automatisierungen eingerichtet werden. Automatisierungen, die dieses Gerät verwenden, werden unten angezeigt.",
     "cleanup_intro": "Jeder beschriftete Zyklus überlagert. Markieren Sie Ausreißer und löschen Sie sie, um das Profil zu bereinigen.",
     "clear_debug_hint": "Entfernen Sie gespeicherte Debug-Daten, um Speicherplatz freizugeben.",
-    "collecting_data": "Daten werden gesammelt: noch {need} Zyklus{plural} bis zum Start der Feinabstimmung ({current}/{min}).",
+    "collecting_data": "Daten werden gesammelt. Noch benötigte Zyklen bis zum Start der Feinabstimmung: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlay-Profile (schwach)",
     "compare_profiles_tip": "Überlagern Sie andere Profilumschläge in der Tabelle oben, um zu sehen, welcher am besten zu diesem Zyklus passt.",
     "compare_selected_cycles": "Ausgewählte Zyklen (durchgehend) – ein-/ausblenden",
@@ -856,7 +891,6 @@
     "pg_stress_synthetic": "Leerlaufsimulation beginnt hier",
     "pg_sweep_intro": "Was wäre, wenn {param} anders wäre? Testen Sie {steps} Werte über Ihre letzten {cycles} Zyklen, um die Einstellung zu finden, bei der die meisten Zyklen korrekt zugeordnet werden.",
     "pg_sweep_step": "Schritt {done} / {total}",
-    "pg_undetected": "{n} Zyklus{s} nicht erkannt",
     "pg_verdict_bad": "Erfordert Aufmerksamkeit: viele Zyklen bleiben unerkannt.",
     "pg_verdict_good": "Gut abgestimmt: die meisten Zyklen werden korrekt erkannt und zugeordnet.",
     "pg_verdict_ok": "Akzeptabel: einige Zyklen wurden verpasst. Versuchen Sie, den Startschwellenwert zu senken.",
@@ -887,6 +921,7 @@
     "review_recorded_tip": "Markieren Sie dies als handverlesenen Referenzzyklus für sein Programm – die gleiche Rolle wie ein manuell aufgezeichneter Zyklus. Referenzzyklen bleiben immer erhalten, setzen die passende Vorlage als Seed und werden bei der Bereinigung niemals gelöscht. (Dies ist die „goldene“/aufgezeichnete Flagge; beide sind dasselbe.)",
     "review_tags_tip": "Optionale Flags, die beschreiben, was bei diesem Zyklus schief gelaufen ist, damit Training und Bereinigung dafür verantwortlich sein können.",
     "review_to_cycles": "Öffnen Sie die Cycles-Bewertungswarteschlange",
+    "samples_decimated": "Es werden {shown} von {total} Messwerten angezeigt (für die Anzeige ausgedünnt; Spitzen bleiben erhalten). Eine breite Lücke hier ist Ausdünnung, keine fehlenden Daten.",
     "saving_triggers_reload": "Durch das Speichern wird ein Neuladen der Integration ausgelöst. HA-Entitäten werden möglicherweise kurzzeitig als nicht verfügbar angezeigt.",
     "search_placeholder": "Einstellungen durchsuchen…",
     "see_recorder": "Siehe Rekorder-Widget unten",
@@ -1006,10 +1041,33 @@
     "sug_mute_failed": "Einstellung konnte nicht stummgeschaltet werden",
     "sug_unmuted_all": "Stummgeschaltete Vorschläge zurückgesetzt",
     "n_suggestions_muted": "{count} stummgeschaltet; der Autotuner schlägt diese nicht mehr vor.",
-    "font_size_hint": "Alles in diesem Panel vergrößern oder verkleinern. Gilt für Ihr Konto auf diesem Gerät."
+    "font_size_hint": "Alles in diesem Panel vergrößern oder verkleinern. Gilt für Ihr Konto auf diesem Gerät.",
+    "import_history_description": "Hatten Sie schon vor WashData einen Smart Plug? Laden Sie einen Verlaufsexport seines Leistungssensors hoch oder lassen Sie ihn direkt aus Home Assistant lesen: Die normale Erkennung läuft darüber, sodass vergangene Zyklen in Ihrer Zyklusliste auftauchen und dort benannt werden können.",
+    "hist_input_hint": "Laden Sie eine CSV-Datei aus dem Verlaufs-Panel hoch (Entität, Status, Letzte Änderung), oder lassen Sie WashData den Verlauf des Sensors direkt lesen. Die Erkennung läuft dann genau so darüber wie im Livebetrieb, und Sie wählen aus, welche der gefundenen Zyklen behalten werden.",
+    "hist_recorder_hint": "Liest ab dem gewählten Datum bis jetzt. Home Assistant speichert detaillierte Verlaufsdaten standardmäßig 10 Tage lang und danach nur noch Stundenmittelwerte, die für die Zykluserkennung zu grob sind - wählen Sie nur dann ein weiter zurückliegendes Datum, wenn Ihr Recorder auf eine längere Aufbewahrung eingestellt ist.",
+    "hist_scanning": "Ihr Verlauf wird durch die Erkennung abgespielt. Das läuft im Hintergrund - Sie können diesen Dialog schließen und später zurückkommen.",
+    "hist_imported_count": "{n} Zyklen importiert.",
+    "hist_duplicates": "{n} waren bereits importiert und wurden übersprungen.",
+    "hist_capped": "Das Limit pro Gerät für importierte Zyklen wurde erreicht; der Rest wurde nicht gespeichert.",
+    "hist_next_step": "Sie liegen in Ihrer Zyklusliste, gekennzeichnet als importierter Verlauf. Öffnen Sie einen und benennen Sie über \"Beschriften\" das zugehörige Programm.",
+    "hist_rows_read": "{n} Messwerte gelesen",
+    "hist_entity_substituted": "{used} gelesen (dieses Gerät ist für {wanted} konfiguriert)",
+    "hist_breaks": "{n} Lücken, in denen der Sensor nicht verfügbar war",
+    "hist_other_entity": "{n} Messwerte für andere Entitäten ignoriert",
+    "hist_skipped_spans": "Übersprungene Abschnitte",
+    "hist_settings_used": "Erkannt mit den aktuellen Einstellungen dieses Geräts (Mindestleistung {w} W, Abschaltverzögerung {s} s).",
+    "hist_none_found": "In diesem Verlauf konnten keine Zyklen erkannt werden.",
+    "hist_found": "{n} Zyklen gefunden. Entfernen Sie das Häkchen bei allem, was nicht wie ein echter Lauf aussieht - bis zum Import wird nichts gespeichert.",
+    "hist_scan_capped": "Es werden nur die ersten Kandidaten angezeigt ({n} wurden gefunden).",
+    "hist_recorder_empty": "Home Assistant hat für diesen Sensor in diesem Zeitraum keine detaillierten Verlaufsdaten.",
+    "hist_scan_failed": "Suche fehlgeschlagen.",
+    "hist_scan_expired": "Diese Suche ist nicht mehr verfügbar. Bitte erneut suchen.",
+    "hist_import_failed": "Import fehlgeschlagen.",
+    "imported_history_readonly": "Im importierten Leistungsverlauf erkannt. Er beeinflusst die Programmzuordnung, zählt aber nicht in Ihre Statistik und kann nicht zugeschnitten oder geteilt werden. Beschriften Sie ihn, um das Programm zu benennen."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
+    "smart_termination_duration_ratio": "Anteil der erwarteten Dauer des zugeordneten Programms, den ein Zyklus erreichen muss, bevor die intelligente Beendigung ihn vorzeitig beenden darf; bei last- oder temperaturabhängigen Geräten senken",
     "completion_min_seconds": "Kürzester Lauf, der als echter Zyklus zählt",
     "end_repeat_count": "Aufeinanderfolgende niedrige Messwerte vor dem Ende",
     "interrupted_min_seconds": "Kurze Zyklen werden als unterbrochen markiert",
@@ -1417,6 +1475,10 @@
       "doc": "Speichern Sie für jeden Zyklus die vollständige Leistungsverfolgung und die entsprechenden Debug-Daten. Nützlich zur Fehlerbehebung, erhöht jedoch die Speichergröße.",
       "label": "Debug-Traces speichern"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Wie weit ein Zyklus in die erwartete Dauer des zugeordneten Programms fortgeschritten sein muss, bevor die intelligente Beendigung ihn bei einem Leistungsabfall vorzeitig beenden darf. Die erwartete Dauer ist der Durchschnitt des Programms; bei Geräten mit stark schwankender Laufzeit - Waschmaschinen bei kaltem Winter- gegenüber warmem Sommer-Zulaufwasser, Trockner mit Feuchtesensor, lastabhängige Programme - endet daher etwa die Hälfte aller Läufe kürzer als dieser Durchschnitt und erhält nie die schnelle Beendigung, sondern endet erst Minuten später über den Rückfall-Timeout. Senken Sie diesen Wert (z. B. 0,85) bei solchen Geräten, damit die vorzeitige Beendigung dennoch auslöst; erhöhen Sie ihn Richtung 1,0, um vorsichtiger zu sein. Leer lassen für den Standard (0,98 bzw. 0,99 für Geschirrspüler). Er kann einen Zyklus nur früher beenden, niemals später, und löst nie bei einer mehrdeutigen oder unsicheren Zuordnung aus.",
+      "label": "Verhältnis für intelligente Beendigung"
+    },
     "smoothing_window": {
       "doc": "Wie stark wird das Rohleistungssignal geglättet? Niedrig (2) reagiert, ist aber laut; Hoch (5) glättet Spitzen, fügt aber Verzögerung hinzu.",
       "label": "Glättungsfenster"
@@ -1551,6 +1613,10 @@
     "door_end_dwell_seconds": {
       "label": "Türöffnungs-Endverweildauer",
       "doc": "Wie lange die Tür geöffnet bleiben muss, bevor WashData den Zyklus beendet, wenn \"Tür öffnet sich am Ende automatisch\" aktiv ist. Lang genug, um ein kurzes Öffnen zum Nachlegen eines Geschirrteils zu ignorieren (Standard 60 s), kurz genug, um den Zyklus zügig zu beenden, sobald die Maschine die Tür aufspringt."
+    },
+    "profile_evidence_sources": {
+      "label": "Zyklen, die ein Programm prägen",
+      "doc": "Welche Zyklen zum Aufbau der Leistungskurve jedes Programms und zum Abgleich eines abgeschlossenen Zyklus damit verwendet werden. Wird eine Art abgewählt, prägt sie Ihre Programme nicht mehr, ohne dass etwas gelöscht wird - die Zyklen bleiben in Ihrer Zyklusliste und können weiterhin beschriftet oder entfernt werden. Nützlich, wenn Sie importierten Daten nicht vertrauen. Die Statistik ist davon nicht betroffen: Sie zählt immer nur die Zyklen, die diese Maschine wirklich ausgeführt hat. Alles abzuwählen wird ignoriert, da ein Programm ohne Zyklen dahinter nie zugeordnet werden könnte."
     }
   },
   "setting_group": {
@@ -1634,6 +1700,9 @@
     },
     "basic_configuration": {
       "label": "Grundkonfiguration"
+    },
+    "profile_evidence": {
+      "label": "Profilgrundlage"
     }
   },
   "status": {
@@ -1658,7 +1727,8 @@
     "trimming": "Wird zugeschnitten…",
     "splitting": "Wird geteilt…",
     "deleting": "Wird gelöscht…",
-    "imported": "Importiert"
+    "imported": "Importiert",
+    "preparing": "Wird vorbereitet…"
   },
   "suggestion": {
     "both_agree": "WashData empfiehlt",
@@ -1754,7 +1824,7 @@
       "thr_batch": "Knapp über der p05-niedrigsten aktiven Leistung über {cycles} Zyklen ({p05}W) gehalten, damit ein Start so früh wie möglich erkannt wird und die Stopp-Schwelle unter der niedrigsten Betriebsleistung der Maschine bleibt.",
       "tol_per_profile": "p75 der Dauervarianz pro Profil über {profiles} Profile ({cycles} Zyklen); enge Profile werden nicht benachteiligt.",
       "tol_pooled": "Basierend auf der zusammengefassten Dauervarianz von {cycles} kürzlich gelabelten Zyklen (p95-Abweichung={dev}).",
-      "watchdog": "So niedrig wie sicher gehalten (knapp über der p95-Aktualisierungslücke von {p95}s, min 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
+      "watchdog": "So niedrig wie sicher gehalten (knapp über der p95-Aktualisierungslücke von {p95}s und mindestens 2x dem Abtastintervall von {median}s, min. 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
     },
     "exclusions": {
       "summary": "{total} falsch erkannte Zyklen ausgeschlossen: {parts}.",
@@ -1801,6 +1871,7 @@
     "wrong_profile": "Falsches Profil"
   },
   "toast": {
+    "catalog_refreshed": "Community-Katalog aktualisiert",
     "access_saved": "Zugangskontrolle gespeichert",
     "all_wiped": "Alle Daten gelöscht",
     "analysis_complete_none": "Analyse abgeschlossen: keine neuen Vorschläge",
@@ -1812,7 +1883,7 @@
     "cycle_labelled": "Zyklus beschriftet",
     "cycle_paused": "Zyklus pausiert",
     "cycle_resumed": "Der Zyklus wurde fortgesetzt",
-    "cycle_trimmed": "Zyklus getrimmt",
+    "cycle_trimmed": "Zyklus zugeschnitten",
     "cycles_merged": "Zyklen verschmolzen",
     "envelope_rebuilt": "Umschlag neu aufgebaut",
     "envelopes_rebuilt": "Umschläge neu aufgebaut",
@@ -1906,7 +1977,9 @@
     "store_download_failed": "Download fehlgeschlagen: {error}",
     "store_download_nothing": "Nichts Neues zum Herunterladen -- dieses Setup ist bereits auf Ihrem Gerät.",
     "export_selective_done": "Export heruntergeladen",
-    "import_selective_done": "{profiles} Profil(e) und {cycles} Zyklus/Zyklen importiert"
+    "import_selective_done": "{profiles} Profil(e) und {cycles} Zyklus/Zyklen importiert",
+    "hist_csv_required": "Laden Sie zuerst eine CSV-Datei oder fügen Sie deren Inhalt ein",
+    "file_read_failed": "Diese Datei konnte nicht gelesen werden"
   },
   "trend": {
     "down": "Abwärtstrend",
@@ -1955,6 +2028,10 @@
     "finished": "Der Zyklus hat einen Endzustand erreicht und wurde beendet."
   },
   "store": {
+    "your_model_tip": "Dies ist das Gerät, das Sie in den Einstellungen angegeben haben",
+    "your_model": "Ihr Gerät",
+    "search_brand_ph": "Nach Marke suchen…",
+    "programs_count": "Programme: {n}",
     "browse": "Durchsuchen",
     "device": "Gerät",
     "favorites": "Favoriten",

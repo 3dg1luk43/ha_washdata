@@ -137,6 +137,7 @@ CONF_ANTI_WRINKLE_MAX_DURATION = "anti_wrinkle_max_duration"  # Seconds to treat
 CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true-off exit
 CONF_ANTI_WRINKLE_IDLE_TIMEOUT = "anti_wrinkle_idle_timeout"  # Seconds below exit power before anti-wrinkle ends
 CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE = "dishwasher_end_spike_quiet_release"  # Dishwasher: sustained-quiet seconds after expected duration that release the end-of-cycle drain wait early (#379)
+CONF_SMART_TERMINATION_DURATION_RATIO = "smart_termination_duration_ratio"  # Fraction of the matched profile's expected (mean) duration that Smart Termination requires before it may fire (#393)
 CONF_DELAY_START_DETECT_ENABLED = "delay_start_detect_enabled"  # Enable delayed-start detection
 CONF_DELAY_CONFIRM_SECONDS = "delay_confirm_seconds"  # Seconds power must stay in standby band before DELAY_WAIT engages
 CONF_DELAY_TIMEOUT_HOURS = "delay_timeout_hours"  # Safety timeout (hours) while waiting to start
@@ -297,7 +298,8 @@ DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.5
 DEFAULT_MAX_PAST_CYCLES = 200
 DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
-DEFAULT_WATCHDOG_INTERVAL = 30  # Derived: 2 * sampling_interval + 1
+DEFAULT_WATCHDOG_INTERVAL = 30  # Floor; effective default is resolved per device
+# as max(this, 2*sampling_interval + 1) - see resolve_watchdog_interval_default (#396).
 DEFAULT_MATCH_PERSISTENCE = 3
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 
@@ -487,6 +489,13 @@ DEFAULT_DTW_MODE = "ensemble"
 MATCH_DTW_RESAMPLE_N = 200         # common grid length for "scaled"/"ddtw" DTW
 MATCH_DDTW_DIST_SCALE = 30.0       # half-saturation for derivative-DTW distance
 MATCH_DTW_ENSEMBLE_W = 0.7         # weight on L1 vs DDTW in "ensemble" mode
+# Envelope alignment grid cap: maximum number of time-grid points used by
+# compute_envelope_worker. The DTW cost matrix is (n+1)x(m+1)x8 B float64;
+# both n and m derive from this cap, so memory is bounded to roughly
+# MAX_ALIGN_GRID_POINTS² x 8 B ≈ 32 MB at 2000 — regardless of cycle duration
+# or recording density. Without this cap a 4 h cycle at 1 Hz asks for 1.81 GB
+# in a single np.full, which OOM-kills Home Assistant (issue #388).
+MAX_ALIGN_GRID_POINTS = 2000
 # Ambiguity: top1-top2 score gap below this flags the match as ambiguous.
 MATCH_AMBIGUITY_MARGIN = 0.05
 # Smart Termination landscape guard: when a non-winning candidate is at least this
@@ -498,6 +507,70 @@ MATCH_AMBIGUITY_MARGIN = 0.05
 # but genuine prefix pairs like Quick 46 vs Normal 88 min (ratio 1.91) always do.
 SMART_TERM_LANDSCAPE_RATIO = 1.5       # candidate must be >= 1.5× the matched duration
 SMART_TERM_LANDSCAPE_MIN_SHAPE = 0.40  # minimum shape score (pre-Stage-4) to qualify
+
+# Issue #364: the landscape guard above has three structural false negatives, all
+# reproduced by field reports on a multi-programme Miele washer:
+#   (1) it needs a longer profile to EXIST in the candidate pool, so an untrained
+#       longer programme is uncatchable;
+#   (2) it qualifies the longer candidate on its shape score against its FULL
+#       envelope, but a trace that is only part-way through a longer programme
+#       scores poorly against that programme's whole curve;
+#   (3) the 1.5 ratio is knife-edge - on a real 13-programme washer the observed
+#       neighbour ratios are 1.12-1.48, so the guard never fires at all.
+#
+# Two independent additions, both shorten-only (they can only ever BLOCK an early
+# finish, never end a cycle sooner).
+#
+# (a) Prefix scoring (fixes 2 + 3).  A longer candidate is re-scored against its own
+# curve TRUNCATED to the elapsed duration, which is an apples-to-apples comparison
+# and lands on the same 0-1 scale as `shape_score` (same find_best_alignment, same
+# DTW blend).  Because it compares equal-length series over the whole overlap it
+# reads systematically higher than the full-envelope score, so it gets its OWN
+# threshold rather than reusing SMART_TERM_LANDSCAPE_MIN_SHAPE.  The load-bearing
+# term is the MARGIN over the winner ("the longer programme explains this trace at
+# least this much better than the short one does"), which is scale-free; the floor
+# only rejects candidates that fit nothing.  Measured on 20 real cycles + 7
+# envelopes (37 prefix-cut positives vs 17 genuine-cycle negatives): margin 0.15
+# catches 26/37 splits for 1/17 false blocks, while simply lowering the ratio to
+# 1.35/1.15 costs 2/17 and 4/17 false blocks for no measured gain.
+SMART_TERM_PREFIX_MARGIN = 0.15        # prefix score must beat the winner by this
+SMART_TERM_PREFIX_MIN_SHAPE = 0.40     # absolute floor on the prefix score
+SMART_TERM_PREFIX_MIN_RATIO = 1.10     # noise guard: ignore near-equal durations
+SMART_TERM_PREFIX_MAX_CANDIDATES = 3   # cap prefix scorings per match (cost control)
+SMART_TERM_PREFIX_MIN_POINTS = 12      # mirrors the matcher's >=12-sample floor
+SMART_TERM_PREFIX_MIN_COVERAGE = 0.90  # template span must cover >=90% of its duration
+
+# (b) Power plausibility (fixes 1, the untrained case, which no candidate-pool guard
+# can reach).  Both Smart-Termination paths key on `elapsed >= 0.98 * expected` and
+# neither checks whether the appliance is still WORKING, so a mis-matched shorter
+# profile finalises a cycle mid-wash.  Compare the trailing mean power against what
+# the matched profile itself draws at its own end: if we are drawing several times
+# that, this is not the end of anything.
+#
+# The two windows must cover the same FRACTION of the run, or the comparison is not
+# like-for-like.  A fixed 300 s trailing window is 4% of a cotton wash but a third
+# of a 15-minute "Spin & Drain", whose trailing mean is then the spin itself while
+# its profile tail is the quiet moment after the pump stops - ratios of 45-310x on
+# perfectly normal cycle ends.  So the trailing window is
+# `expected_duration * SMART_TERM_TAIL_WINDOW_FRAC`, clamped; that alone is strictly
+# better at every threshold (e.g. at 4.0x: false blocks 5% -> 3%).
+#
+# Swept with devtools/prefix_guard_eval.py over the whole cycle_data corpus (19
+# devices, 225 labelled cycles, leave-one-out): 114 folds where a shorter profile
+# is winning mid-cycle (the #364 split condition) vs 165 genuine cycle ends.
+#   ratio  caught      false-blocked
+#   3.0    27%         8%
+#   3.5    25%         4%   <- shipped, the knee
+#   4.0    20%         3%
+# 3.0 -> 3.5 halves the false blocks for 2pp of catch, and the reported cases sit
+# at 4-8x so they stay caught.  A false block only costs a later finish (the
+# power-based fallback timeout still ends the cycle); a miss costs a split cycle.
+# ~1 in 5 of the remaining false blocks had a wrong top-1 anyway, where blocking is right.
+SMART_TERM_TAIL_MAX_RATIO = 3.5        # block while trailing mean > this x profile tail
+SMART_TERM_TAIL_WINDOW_S = 300.0       # upper clamp on the trailing window
+SMART_TERM_TAIL_WINDOW_MIN_S = 60.0    # lower clamp (short programmes)
+SMART_TERM_TAIL_MIN_POINTS = 3         # too few samples -> no opinion, do not block
+SMART_TERM_TAIL_WINDOW_FRAC = 0.05     # both windows = last 5% of the run
 
 # Number of points in the compact reference-profile curve exposed on the
 # `_program` sensor (`profile_store.reference_curve`). Chosen so the resulting
@@ -773,6 +846,20 @@ STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS = 300.0
 # a washer's longest legitimate mid-cycle soak trough while capping the pathology.
 WASHER_SMART_TERMINATION_DEBOUNCE_MAX_SECONDS = 600.0
 
+# Fraction of the matched profile's expected (mean) duration that Smart Termination
+# requires before it may fire (#393).  self._expected_duration is the profile's
+# outlier-filtered ARITHMETIC MEAN, so a fixed 0.98 gate against a mean is
+# structurally unreachable for appliances whose runtime depends on load, fill level
+# or inlet temperature - about half of those cycles are shorter than their own mean
+# by construction and can never take the fast path.  Exposed as the per-device
+# CONF_SMART_TERMINATION_DURATION_RATIO option (range 0.50-1.00; empty = default).
+# The default is device-type-resolved: dishwashers keep the conservative 0.99
+# (their programs are fixed, so the spread is small) while everything else keeps
+# 0.98.  The dishwasher pump-out relief (0.90 once the terminal pump-out spike is
+# confirmed) is combined with the configured value via min(), so the option can
+# only ever LOOSEN the gate, never tighten it.
+DEFAULT_SMART_TERMINATION_DURATION_RATIO = 0.98
+
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
     DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
@@ -842,10 +929,70 @@ DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
     DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
 }
 
+
+def resolve_sampling_interval_default(device_type: str) -> float:
+    """Device-resolved default sampling interval (#396).
+
+    Single source of truth for the sampling default, so the manager, the panel
+    (via ws_get_options) and the config migration all agree. Wet appliances
+    sample fast (2 s) to capture the rapid 0<->150 W oscillation; everything else
+    keeps the coarse 30 s scalar.
+    """
+    return DEFAULT_SAMPLING_INTERVAL_BY_DEVICE.get(device_type, DEFAULT_SAMPLING_INTERVAL)
+
+
+def resolve_watchdog_interval_default(device_type: str) -> int:
+    """Device-resolved watchdog tick default (#396).
+
+    The panel enforces watchdog_interval >= 2*sampling_interval (a publish-on-change
+    sensor can skip a sample, so the staleness tick must be coarser than the
+    sampling gap). Derived as max(DEFAULT_WATCHDOG_INTERVAL, 2*sampling+1): 30 for
+    the fast/pump types (30 already clears 2*2 / 2*10), 61 for the 30 s-sampling
+    types. Never smaller than the 30 s floor so a fast-sampling device does not get
+    an over-aggressive watchdog.
+    """
+    sampling = resolve_sampling_interval_default(device_type)
+    return int(max(DEFAULT_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0))
+
+
+def resolve_start_duration_default(device_type: str) -> float:
+    """Device-resolved start-debounce default (#396).
+
+    The panel enforces start_duration_threshold >= sampling_interval (a debounce
+    shorter than one sample lets a single spike open a cycle). Derived as
+    max(DEFAULT_START_DURATION_THRESHOLD, sampling): 5 s for the fast types, the
+    sampling interval for the coarser ones.
+    """
+    sampling = resolve_sampling_interval_default(device_type)
+    return max(DEFAULT_START_DURATION_THRESHOLD, sampling)
+
+
 # Default profile match min duration ratio by device type
 DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 0.10,
 }
+
+# Default Smart-Termination duration ratio by device type (#393).  Dishwashers run
+# fixed programs (measured spread +4%/+17% around the mean), so the conservative
+# 0.99 gate is defensible there; every other type keeps the scalar
+# DEFAULT_SMART_TERMINATION_DURATION_RATIO (0.98).  Resolved in the config builder,
+# never in the gate, so playground.effective_settings() always sees a real float.
+DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE = {
+    DEVICE_TYPE_DISHWASHER: 0.99,
+}
+
+
+def resolve_smart_termination_duration_ratio_default(device_type: str) -> float:
+    """Device-resolved Smart-Termination duration ratio default (#393).
+
+    Single source of truth shared by the manager (config build/reload), the
+    Playground fallback config and the panel (via ws_get_options), so the value
+    the panel pre-populates always matches the one the detector actually uses:
+    0.99 for dishwashers (fixed programs), 0.98 for everything else.
+    """
+    return DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE.get(
+        device_type, DEFAULT_SMART_TERMINATION_DURATION_RATIO
+    )
 
 # Profile groups (Stage 5): the matcher only collapses a group into one
 # aggregate candidate when its members' minimum pairwise shape similarity is at
@@ -872,8 +1019,23 @@ GROUP_MIN_COHESION = 0.80
 # v11 is a marker-only bump: per-phase profiles (envelope["phase_profile"]) are
 # derived cache populated by async_rebuild_envelope, so no data migration is
 # needed - they self-populate on the next envelope rebuild.
-STORAGE_VERSION = 11
+# v12: initialize `backfill_cycles`, the third cycle list (issue #344). Cycles
+# recovered from raw power history predating the integration are auto-detected and
+# unverified, so they belong in neither `past_cycles` (which feeds lifetime stats, ML
+# training labels and the feedback queue, and is retention-evicted oldest-first) nor
+# `reference_cycles` (curated community-store templates, golden by construction).
+# Additive `setdefault`, so it is idempotent and loses nothing.
+STORAGE_VERSION = 12
 STORAGE_KEY = "ha_washdata"
+
+# ─── Config-entry schema version (NOT the storage version above) ───────────────
+# Single source for the config-entry schema: `ConfigFlow.VERSION`/`MINOR_VERSION`, every
+# stepwise block in `async_migrate_entry`, and the `minor_version=` the one-pass legacy
+# migration writes all read from here. They must move together - a bump that misses one
+# leaves an entry a version short, which then re-migrates on every start - and repeating
+# the literals in three places is what made that easy to do.
+CONFIG_ENTRY_VERSION = 3
+CONFIG_ENTRY_MINOR_VERSION = 10
 
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"
@@ -1066,3 +1228,80 @@ PLAYGROUND_STRESS_MAX_IDLE_W: float = 100000.0       # upper bound for a manual 
 # value to entry.options is always an explicit, per-setting user action.
 PLAYGROUND_PRESET_MAX: int = 30                      # per-device cap (keeps the store small)
 PLAYGROUND_PRESET_NAME_MAX: int = 60                 # preset name length cap
+
+# ─── Which cycle categories count as evidence for a profile ────────────────────
+# A profile's envelope (its average curve + duration/energy spread) and the matching
+# template are built from stored cycles. By default all three categories count. Untick a
+# category and it stops shaping profiles - useful when you do not trust imported data -
+# without deleting anything: the cycles remain stored, listed and deletable.
+#
+# This gates *evidence* only (`ProfileStore.iter_evidence_cycles`), never
+# `iter_stored_cycles`/`find_stored_cycle`. Profile garbage collection and sample repair
+# delete or re-point a profile whose sample cycle resolves to nothing, so they must keep
+# seeing every stored cycle: a cycle excluded from evidence is still a stored cycle, and
+# gating those lookups would destroy a backfill-only profile the moment someone unticked
+# imported history.
+CONF_PROFILE_EVIDENCE_SOURCES = "profile_evidence_sources"
+EVIDENCE_REAL_CYCLES = "real_cycles"
+EVIDENCE_REFERENCE_CYCLES = "reference_cycles"
+EVIDENCE_BACKFILL_CYCLES = "backfill_cycles"
+# `real_cycles`/`reference_cycles` match the export taxonomy (`_EXPORT_CATEGORIES`); the
+# evidence view adds `backfill_cycles`, which the selective-export wizard does not yet
+# enumerate (whole-store export still round-trips it).
+PROFILE_EVIDENCE_SOURCES = (
+    EVIDENCE_REAL_CYCLES,
+    EVIDENCE_REFERENCE_CYCLES,
+    EVIDENCE_BACKFILL_CYCLES,
+)
+# All three: the pre-setting behaviour, so an upgrade changes nothing.
+DEFAULT_PROFILE_EVIDENCE_SOURCES = list(PROFILE_EVIDENCE_SOURCES)
+
+# ─── Historical power-data import (issue #344) ─────────────────────────────────
+# An HA history export (or a recorder read) is a *change-based* stream: a steady
+# 0 W emits no rows at all, so it cannot be fed to the detector as-is (doing so
+# produces multi-day `force_stopped` blobs). `history_import.py` pre-segments the
+# stream into activity blocks first; these constants govern that pre-pass.
+HISTORY_IMPORT_MAX_BYTES: int = 32 * 1024 * 1024     # staged upload cap (~32 MiB of CSV text)
+HISTORY_IMPORT_MAX_ROWS: int = 500_000               # parsed-row cap (≈ a month at 5 s)
+HISTORY_IMPORT_CHUNK_BYTES: int = 512 * 1024         # per-WS-message upload chunk (frame cap is 4 MiB)
+HISTORY_IMPORT_CHUNK_SAMPLES: int = 4000             # samples replayed per executor job
+HISTORY_IMPORT_MIN_BLOCK_SAMPLES: int = 20           # floor for the per-block sample gate
+HISTORY_IMPORT_MAX_MEDIAN_INTERVAL_S: float = 120.0  # floor for the per-block cadence gate; the
+                                                     # effective gate is
+                                                     # max(this, 4 x sampling_interval) so a plug
+                                                     # that legitimately reports every 60 s is not
+                                                     # rejected
+HISTORY_IMPORT_EDGE_GAP_S: float = 60.0              # leading samples this far from the block body
+                                                     # are hourly-average debris and are trimmed
+                                                     # (leading edge ONLY - trimming the trailing
+                                                     # edge eats a real cycle's low-power tail)
+HISTORY_IMPORT_MAX_BLOCK_SPAN_S: float = 12 * 3600.0 # a block longer than this can only produce the
+                                                     # detector's 8 h `force_stopped` blob, so it is
+                                                     # reported rather than replayed
+HISTORY_IMPORT_DENSIFY_STEP_S: float = 30.0          # cadence of the synthetic samples inserted into
+                                                     # a carried-forward *quiet* gap, so the
+                                                     # detector's gap-free quiet tally can accrue
+                                                     # exactly as it does live
+HISTORY_IMPORT_TAIL_STEP_S: float = 30.0             # synthetic quiet-tail cadence used to close the
+                                                     # last cycle of a block
+HISTORY_IMPORT_MAX_SEGMENTS: int = 60                # candidates surfaced by one scan
+HISTORY_IMPORT_MAX_TOTAL_CYCLES: int = 200           # total backfilled cycles kept per device
+                                                     # (`backfill_cycles` has no retention pass and
+                                                     # the whole store blob is rewritten on every
+                                                     # throttled active-cycle save)
+HISTORY_IMPORT_RECORDER_MAX_DAYS: int = 3700         # ~10 years. HA's default `purge_keep_days`
+                                                     # is 10, but a recorder configured to keep
+                                                     # full-resolution states for years is a real
+                                                     # setup and must not be capped out of reach.
+                                                     # Reaching past what the recorder holds simply
+                                                     # returns fewer rows; the real guard is
+                                                     # HISTORY_IMPORT_MAX_ROWS, which stops the
+                                                     # day-by-day read as soon as enough accrues.
+HISTORY_IMPORT_RECORDER_EMPTY_DAY_STOP: int = 30     # consecutive empty days that end the walk.
+                                                     # Within the retention window a day always
+                                                     # yields at least the carried start-time state,
+                                                     # so a run of truly empty days means the
+                                                     # recorder has been purged past this point -
+                                                     # without this, a 10-year request would issue
+                                                     # thousands of pointless queries.
+HISTORY_IMPORT_SOURCE: str = "history_import"        # `meta.source` marker on imported cycles

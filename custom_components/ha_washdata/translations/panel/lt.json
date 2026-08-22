@@ -78,9 +78,12 @@
     "awaiting": "Laukiama patvirtinimo",
     "imported_tip": "Importuota iš bendruomenės parduotuvės. Naudojama tik atitikčiai, neįskaičiuojama į statistiką.",
     "not_importable": "čia nepasiekiama",
-    "exists": "jau yra"
+    "exists": "jau yra",
+    "backfilled_tip": "Aptikta importuotoje galios istorijoje. Turi įtakos tik programų atpažinimui, neįskaičiuojama į statistiką."
   },
   "btn": {
+    "set_brand_model": "Nustatyti prekės ženklą ir modelį",
+    "refresh_catalog": "Atnaujinti katalogą",
     "add_device": "+ Pridėti įrenginį",
     "add_device_tip": "Pridėkite kitą WashData įrenginį",
     "add_maintenance": "Pridėti priežiūros įvykį",
@@ -241,7 +244,12 @@
     "import_selected": "Importuoti pasirinktus",
     "back": "Atgal",
     "mute_suggestion": "Nebesiūlyti šio nustatymo",
-    "reset_muted": "Atstatyti nutildytus"
+    "reset_muted": "Atstatyti nutildytus",
+    "import_power_history": "Importuoti galios istoriją",
+    "hist_read_recorder": "Nuskaityti iš Home Assistant",
+    "hist_scan": "Ieškoti ciklų",
+    "hist_import_n": "Importuoti ciklus ({n})",
+    "hist_goto_cycles": "Parodyti ciklus"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,14 +261,14 @@
       "start": "Turi būti žemiau maksimalios apsaugos nuo raukšlių galios ({max} W)"
     },
     "attn_sub": "Prieš išsaugant ištaisykite konfliktus",
-    "attn_title": "{n} nustatymų konfliktas{s}",
-    "settings_banner": "{n} nustatymų konfliktas{s} – patikrinkite pažymėtas sekcijas ir ištaisykite prieš išsaugant.",
+    "attn_title": "Nustatymų konfliktai: {n}",
+    "settings_banner": "Nustatymų konfliktai: {n}. Patikrinkite pažymėtas sekcijas ir ištaisykite jas prieš išsaugant.",
     "settings_banner_btn": "Eiti į pirmą",
     "confidence": {
       "auto": "Turi būti lygus arba aukščiau atitikimo slenksčio ({match})",
-      "learning": "Turi būti lygus arba žemiau atitikimo slenksčio ({match})",
+      "learning": "Turi būti lygus arba aukščiau atitikimo slenksčio ({match})",
       "match_for_auto": "Turi būti lygus arba žemiau automatinio žymėjimo pasitikėjimo ({alc})",
-      "match_for_learning": "Turi būti lygus arba aukščiau mokymosi pasitikėjimo ({lc})"
+      "match_for_learning": "Turi būti lygus arba žemiau mokymosi pasitikėjimo ({lc})"
     },
     "duration_ratio": {
       "max": "Turi būti daugiau nei minimalaus trukmės santykio ({min})",
@@ -298,7 +306,7 @@
       "match": "Turi būti aukščiau neatitikimo slenksčio ({un})",
       "unmatch": "Turi būti žemiau atitikimo slenksčio ({match}); priešingu atveju patvirtintas atitikimas iškart panaikinamas"
     },
-    "cascade_toast": "Taip pat automatiškai pakoreguoti {n} nustatymai dėl nuoseklumo.",
+    "cascade_toast": "Dėl nuoseklumo pakoreguoti ir kiti nustatymai: {n}",
     "suggestion_resolves": "Pritaikykite žemiau esantį laukiantį pasiūlymą ({val}), kad tai ištaisytumėte",
     "use_fix": "Naudoti {val}",
     "watchdog": {
@@ -356,7 +364,8 @@
     "pg_outcome": "Simuliacijos rezultatas",
     "pg_across_cycles": "Per visus jūsų ciklus",
     "community_store": "Bendruomenės parduotuvė",
-    "online_account": "Bendruomenės parduotuvė ir interneto funkcijos"
+    "online_account": "Bendruomenės parduotuvė ir interneto funkcijos",
+    "import_power_history": "Galios istorijos importavimas"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -364,6 +373,7 @@
     "poor": "⚠ Prasta profilio kokybė"
   },
   "lbl": {
+    "drag_to_resize": "Vilkite, kad pakeistumėte dydį",
     "pg_anti_wrinkle": "Apsauga nuo raukšlių",
     "actions": "Veiksmai",
     "activity": "Veikla",
@@ -435,7 +445,7 @@
     "from": "Nuo",
     "gap_s": "Tarpas (-iai)",
     "group_name": "Grupės pavadinimas",
-    "head_trim": "Galvos apdaila (-ai)",
+    "head_trim": "Apkarpymas nuo pradžios (s)",
     "health": "Sveikata",
     "hide_tabs": "Slėpti skirtukus ne administratoriams",
     "in_use": "Naudojamas",
@@ -451,7 +461,7 @@
     "metric": "Metrika",
     "mode_existing_profile": "Pridėti prie esamo profilio",
     "mode_new_profile": "Sukurti naują profilį",
-    "models_fine_tuned": "({count} modeliai tiksliai sureguliuoti)",
+    "models_fine_tuned": "(tiksliai suderinti modeliai: {count})",
     "n_classic_suggestions": "{n} klasikinis",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "Pasirinkta: {n}",
@@ -532,7 +542,7 @@
     "stage3": "3 etapas – DTW",
     "stage4": "4 etapas – atitikimas",
     "status": "Būsena",
-    "tail_trim": "Uodegos apdaila (-ai)",
+    "tail_trim": "Apkarpymas nuo galo (s)",
     "timer_auto_pause": "Automatinis pristabdymas",
     "timer_min": "min",
     "timer_msg_placeholder": "Pranešimas (pasirenkama, {device}/{program}/{minutes})",
@@ -677,7 +687,26 @@
     "conflict_import_copy": "Importuoti kaip kopiją",
     "conflict_keep_mine": "Išlaikyti manuosius",
     "conflict_overwrite": "Perrašyti",
-    "font_size": "Skydelio šrifto dydis"
+    "font_size": "Skydelio šrifto dydis",
+    "hist_csv_data": "CSV duomenys",
+    "hist_from_recorder": "Arba nuskaitykite iš Home Assistant",
+    "hist_since": "Nuo",
+    "days": "d.",
+    "hist_keep": "Palikti šį ciklą",
+    "hist_looks_complete": "užbaigtas",
+    "peak_power_short": "Pikas",
+    "shape": "Forma",
+    "hist_skip_idle": "niekas neveikė",
+    "hist_skip_sparse": "per reti rodmenys",
+    "hist_skip_short": "per mažai rodmenų",
+    "hist_skip_long": "nėra pakankamai ilgos pauzės padalijimui",
+    "hist_reason_short": "trumpesnis nei trumpiausias tikras šio prietaiso ciklas",
+    "hist_reason_no_end": "niekada tvarkingai nepasibaigė",
+    "task_history_import": "Skenuojama galios istorija",
+    "task_history_import_apply": "Importuojami ciklai",
+    "evidence_real_cycles": "Šio prietaiso atlikti ciklai",
+    "evidence_reference_cycles": "Atsisiųsti iš bendruomenės parduotuvės",
+    "evidence_backfill_cycles": "Rasti importuotoje galios istorijoje"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -756,9 +785,15 @@
     "store_share": "Bendrinti bendruomenės parduotuvėje",
     "store_share_device": "Bendrinti šį įrenginį",
     "export_select": "Eksportas - pasirinkti duomenis",
-    "import_wizard": "Importas - pasirinkti duomenis"
+    "import_wizard": "Importas - pasirinkti duomenis",
+    "history_import": "Galios istorijos importavimas"
   },
   "msg": {
+    "tail_trim_hint": "Kiek sekundžių pašalinti nuo galo",
+    "store_sibling_hint": "Jūsų tiksliam modeliui nieko nebendrinta? Artimas to paties prekės ženklo modelis paprastai yra gera pradžia.",
+    "store_declare_appliance": "Nurodykite WashData, kurį prietaisą turite, ir šiame skirtuke bus rodomos kitų jam bendrintos programos bei įrašai. Taip pat galite viršuje įrašyti prekės ženklą ir tiesiog pasižiūrėti.",
+    "refresh_catalog_hint": "Bendruomenės prekės ženklų ir prietaisų sąrašai laikomi podėlyje, kad bendrinama parduotuvė neviršytų savo dienos užklausų limito. Atnaujinkite, kad pamatytumėte kitų pridėtus ar patvirtintus įrašus.",
+    "head_trim_hint": "Kiek sekundžių pašalinti nuo pradžios",
     "appliance_monitor": "Prietaisų monitorius",
     "artifact_dip_detail": "Nukrito žemiau įprastos galios juostos maždaug {n}s.",
     "artifact_footer": "Paryškinta aukščiau esančiame grafike. Tai yra trumpalaikiai artefaktai (pvz., durys atidarytos ciklo viduryje), nebūtinai problemos.",
@@ -769,7 +804,7 @@
     "automations_intro": "WashData paleidžia {start} / {end} įvykius ir atskleidžia esybes, todėl pranešimai ir veiksmai geriausiai kuriami kaip įprasti Home Assistant automatizavimai. Žemiau rodomi automatizavimai, naudojantys šį prietaisą.",
     "cleanup_intro": "Kiekvienas pažymėtas ciklas padengtas. Pažymėkite nuokrypius ir ištrinkite, kad išvalytumėte profilį.",
     "clear_debug_hint": "Pašalinkite saugomus derinimo duomenis, kad atlaisvintumėte vietos.",
-    "collecting_data": "Renkami duomenys - reikia dar {need} ciklų, kad galėtų prasidėti tikslus derinimas ({current}/{min}).",
+    "collecting_data": "Renkami duomenys. Dar reikia ciklų, kad galėtų prasidėti tikslus derinimas: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Perdangos profiliai (blankūs)",
     "compare_profiles_tip": "Aukščiau pateiktoje diagramoje uždėkite kitus profilio vokus, kad sužinotumėte, kuris iš jų geriausiai tinka šiam ciklui.",
     "compare_selected_cycles": "Pasirinkti ciklai (vientisas) – rodyti / slėpti",
@@ -779,7 +814,7 @@
     "cycles_deleted": "Ištrinta ciklų: {count}",
     "enough_data": "Pakankamai duomenų mokymui ({current}/{min} ciklų).",
     "export_description": "Pasirinkite tiksliai, kuriuos profilius, ciklus, nustatymus ir kita eksportuoti į JSON, arba išanalizuokite failą ir importuokite tik norimas dalis.",
-    "feedback_cycles_pending": "{n} cikl{s} peržiūrai",
+    "feedback_cycles_pending": "Peržiūrai: {n}",
     "feedback_prompt": "Patvirtinkite, kad tai buvo teisinga, pataisykite programą arba ignoruokite.",
     "feedback_relabel_hint": "Šio ciklo pažymėjimas iš naujo taip pat išsprendžia peržiūrą.",
     "filter_by_profile": "Filtruoti pagal profilį…",
@@ -856,7 +891,6 @@
     "pg_stress_synthetic": "budėjimo imitacija prasideda čia",
     "pg_sweep_intro": "O kas, jei {param} būtų kitokia? Išbandykite {steps} reikšmes paskutiniuose {cycles} cikluose ir raskite nustatymą, su kuriuo teisingai atitinka daugiausiai ciklų.",
     "pg_sweep_step": "Žingsnis {done} / {total}",
-    "pg_undetected": "Neaptikta ciklų: {n}",
     "pg_verdict_bad": "Reikia dėmesio: daugelis ciklų lieka neaptikti.",
     "pg_verdict_good": "Gerai suderinta: dauguma ciklų teisingai atpažįstami ir atitinkami.",
     "pg_verdict_ok": "Priimtina: kai kurie ciklai praleisti. Pabandykite sumažinti paleidimo slenkstį.",
@@ -887,6 +921,7 @@
     "review_recorded_tip": "Pažymėkite tai kaip savo programos etaloninį ciklą – tą patį vaidmenį kaip ir rankiniu būdu įrašytą ciklą. Etaloniniai ciklai visada išsaugomi, imamasi atitinkamo šablono ir niekada nenuleidžiami valant. (Tai yra „auksinė“ / įrašyta vėliava; abi yra tas pats.)",
     "review_tags_tip": "Pasirenkamos vėliavėlės, nurodančios, kas nutiko šiame cikle, todėl mokymai ir valymas gali tai paaiškinti.",
     "review_to_cycles": "Atidarykite ciklų peržiūros eilę",
+    "samples_decimated": "Rodoma {shown} iš {total} pavyzdžių (praretinta rodymui; smailės išsaugotos). Platus tarpas čia yra praretinimas, o ne trūkstami duomenys.",
     "saving_triggers_reload": "Išsaugojus suaktyvinamas integracijos įkėlimas iš naujo. HA objektai trumpam gali būti rodomi kaip nepasiekiami.",
     "search_placeholder": "Paieškos nustatymai…",
     "see_recorder": "Žiūrėkite įrašymo valdiklį žemiau",
@@ -1006,7 +1041,29 @@
     "sug_mute_failed": "Nepavyko nutildyti pasiūlymo",
     "sug_unmuted_all": "Nutildyti pasiūlymai atstatyti",
     "n_suggestions_muted": "{count} nutildyti; automatinis derintuvas jų nebesiūlys.",
-    "font_size_hint": "Padidinkite arba sumažinkite visą tekstą šiame skydelyje. Galioja jūsų paskyrai šiame įrenginyje."
+    "font_size_hint": "Padidinkite arba sumažinkite visą tekstą šiame skydelyje. Galioja jūsų paskyrai šiame įrenginyje.",
+    "import_history_description": "Išmanųjį kištuką turėjote dar prieš WashData? Įkelkite jo galios sensoriaus istorijos eksportą arba nuskaitykite ją tiesiai iš Home Assistant, ir įprastas aptikimas peržiūrės tuos duomenis, todėl ankstesni ciklai atsiras jūsų „Ciklai“ sąraše ir juos bus galima pavadinti.",
+    "hist_input_hint": "Įkelkite CSV, atsisiųstą iš „Istorijos“ skydelio (objektas, būsena, paskutinis pakeitimas), arba leiskite WashData nuskaityti sensoriaus istoriją tiesiogiai. Tada aptikimas vykdomas lygiai taip pat kaip realiu laiku, o jūs pasirenkate, kuriuos rastus ciklus palikti.",
+    "hist_recorder_hint": "Nuskaito nuo jūsų pasirinktos datos iki dabar. Home Assistant pagal numatytuosius nustatymus išsamią istoriją saugo 10 dienų, o vėliau tik valandinius vidurkius, kurie yra per stambūs, kad iš jų būtų galima aptikti ciklus - senesnę datą rinkitės tik tuo atveju, jei jūsų recorder nustatytas saugoti ilgiau.",
+    "hist_scanning": "Jūsų istorija leidžiama per detektorių. Tai vykdoma fone - galite užverti šį dialogą ir sugrįžti vėliau.",
+    "hist_imported_count": "Importuota ciklų: {n}.",
+    "hist_duplicates": "Jau anksčiau importuota ir praleista: {n}.",
+    "hist_capped": "Pasiektas šio įrenginio importuotų ciklų limitas; likusieji neišsaugoti.",
+    "hist_next_step": "Jie yra jūsų „Ciklai“ sąraše, pažymėti kaip importuota istorija. Atverkite vieną ir paspauskite „Pažymėti“, kad nurodytumėte jo programą.",
+    "hist_rows_read": "Nuskaityta rodmenų: {n}",
+    "hist_entity_substituted": "nuskaityta {used} (šiam įrenginiui sukonfigūruotas {wanted})",
+    "hist_breaks": "Tarpai, kai sensorius buvo nepasiekiamas: {n}",
+    "hist_other_entity": "Praleisti kitų objektų rodmenys: {n}",
+    "hist_skipped_spans": "Praleistos atkarpos",
+    "hist_settings_used": "Aptikta naudojant esamus šio įrenginio nustatymus (minimali galia {w} W, išjungimo delsimas {s} s).",
+    "hist_none_found": "Toje istorijoje nepavyko aptikti nė vieno ciklo.",
+    "hist_found": "Rasta ciklų: {n}. Atžymėkite tai, kas neatrodo kaip tikras paleidimas - kol neimportuojate, nieko neišsaugoma.",
+    "hist_scan_capped": "Rodomi tik pirmieji kandidatai (rasta: {n}).",
+    "hist_recorder_empty": "Home Assistant neturi išsamios šio sensoriaus istorijos tuo laikotarpiu.",
+    "hist_scan_failed": "Skenavimas nepavyko.",
+    "hist_scan_expired": "To skenavimo rezultatų jau nėra. Nuskenuokite dar kartą.",
+    "hist_import_failed": "Importavimas nepavyko.",
+    "imported_history_readonly": "Aptikta importuotoje galios istorijoje. Tai daro įtaką programų atpažinimui, bet neįskaičiuojama į jūsų statistiką, o ciklo negalima apkarpyti ar padalyti. Paspauskite „Pažymėti“, kad nurodytumėte programą."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1392,6 +1449,10 @@
       "doc": "Išsaugokite visą galios pėdsaką ir atitinkamus kiekvieno ciklo derinimo duomenis. Naudinga trikčių šalinimui, bet padidina saugyklos dydį.",
       "label": "Įrašyti derinimo pėdsakus"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Kaip toli į atitiktos programos numatytą trukmę ciklas turi būti pažengęs, kad išmanusis užbaigimas galėtų jį užbaigti anksčiau, kai sumažėja galia. Numatyta trukmė yra programos vidurkis, todėl prietaisuose, kurių veikimo laikas labai svyruoja - skalbyklės su šaltu žiemos ir šiltu vasaros tiekiamu vandeniu, jutiklinio džiovinimo džiovyklės, nuo apkrovos priklausančios programos - maždaug pusė visų paleidimų baigiasi trumpiau nei šis vidurkis ir niekada nesulaukia greito užbaigimo, o baigiasi tik per atsarginį skirtąjį laiką, kelias minutes vėliau. Sumažinkite tai (pvz., 0,85) tose mašinose, kad ankstyvas užbaigimas vis tiek suveiktų; padidinkite jį link 1,0, kad veiktų atsargiau. Palikite tuščią numatytajai vertei (0,98 arba 0,99 indaplovėms). Jis gali užbaigti ciklą tik anksčiau, niekada ne vėliau, ir niekada nesuveikia esant neaiškiai ar mažo patikimumo atitikčiai.",
+      "label": "Išmaniojo užbaigimo santykis"
+    },
     "smoothing_window": {
       "doc": "Kiek išlyginamas neapdorotos galios signalas. Žemas (2) yra jautrus, bet triukšmingas; aukštas (5) išlygina smailes, bet padidina atsilikimą.",
       "label": "Išlyginimo langas"
@@ -1522,6 +1583,10 @@
     "door_end_dwell_seconds": {
       "label": "Durų atidarymo pabaigos laukimas",
       "doc": "Kiek laiko durys turi likti atviros, kad WashData užbaigtų ciklą, kai įjungta parinktis \"Durys automatiškai atsidaromos pabaigoje\". Pakankamai ilgai, kad ignoruotų greitai dedamą indą (numatytasis 60 s), pakankamai trumpai, kad greitai užbaigtų, kai prietaisas atidaro duris."
+    },
+    "profile_evidence_sources": {
+      "label": "Ciklai, formuojantys programą",
+      "doc": "Kurie ciklai naudojami kiekvienos programos galios kreivei sudaryti ir baigtam ciklui su ja palyginti. Atžymėjus tam tikrą rūšį, ji nebeturi įtakos jūsų programoms, tačiau nieko neištrinama - ciklai lieka sąraše Ciklai ir juos vis tiek galima pažymėti arba ištrinti. Naudinga, jei nepasitikite importuotais duomenimis. Statistikai tai neturi įtakos: joje visada įskaičiuojami tik tie ciklai, kuriuos šis prietaisas tikrai atliko. Visų žymių pašalinimas ignoruojamas, nes programa be jokių ciklų niekada negalėtų būti atpažinta."
     }
   },
   "setting_group": {
@@ -1605,6 +1670,9 @@
     },
     "basic_configuration": {
       "label": "Pagrindinė konfigūracija"
+    },
+    "profile_evidence": {
+      "label": "Profilio duomenys"
     }
   },
   "status": {
@@ -1629,7 +1697,8 @@
     "trimming": "Apkarpoma…",
     "splitting": "Padalijama…",
     "deleting": "Trinama…",
-    "imported": "Importuota"
+    "imported": "Importuota",
+    "preparing": "Ruošiama…"
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1659,6 +1728,7 @@
     "wrong_profile": "Neteisingas profilis"
   },
   "toast": {
+    "catalog_refreshed": "Bendruomenės katalogas atnaujintas",
     "access_saved": "Prieigos valdymas išsaugotas",
     "all_wiped": "Visi duomenys ištrinti",
     "analysis_complete_none": "Analizė baigta: jokių naujų pasiūlymų",
@@ -1764,7 +1834,9 @@
     "store_download_failed": "Atsisiuntimas nepavyko: {error}",
     "store_download_nothing": "Nieko naujo atsisiųsti -- ši konfigūracija jau yra jūsų įrenginyje.",
     "export_selective_done": "Eksportas atsisiųstas",
-    "import_selective_done": "Importuota {profiles} profilių ir {cycles} ciklų"
+    "import_selective_done": "Importuota {profiles} profilių ir {cycles} ciklų",
+    "hist_csv_required": "Pirmiausia įkelkite CSV failą arba įklijuokite jo turinį",
+    "file_read_failed": "Nepavyko nuskaityti to failo"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",
@@ -1860,7 +1932,7 @@
       "thr_batch": "Paliktas šiek tiek virš p05 mažiausios aktyvios galios per {cycles} ciklus ({p05}W), kad pradžia būtų aptikta kuo anksčiau, o sustabdymo slenkstis liktų žemiau mažiausios veikiančios mašinos galios.",
       "tol_per_profile": "p75 kiekvieno profilio trukmės dispersijos per {profiles} profilius ({cycles} ciklai); stabilūs profiliai nebaudžiami.",
       "tol_pooled": "Pagrįsta sujungta {cycles} naujausių pažymėtų ciklų trukmės dispersija (p95 nuokrypis={dev}).",
-      "watchdog": "Paliktas kuo mažesnis, kiek saugu (vos didesnis nei p95 atnaujinimo tarpas {p95}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
+      "watchdog": "Paliktas kuo mažesnis, kiek saugu (vos didesnis nei p95 atnaujinimo tarpas {p95}s ir bent 2x mėginių ėmimo intervalas {median}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
     },
     "exclusions": {
       "summary": "Neįtraukta {total} klaidingai aptiktų ciklų: {parts}.",
@@ -1892,6 +1964,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Indaplovė: tylos sekundės po numatytos trukmės, kol atleidžiamas ciklo pabaigos vandens išleidimo laukimas",
+    "smart_termination_duration_ratio": "Atitiktos programos numatytos trukmės dalis, kurią ciklas turi pasiekti, kad išmanusis užbaigimas galėtų jį užbaigti anksčiau; sumažinkite ją nuo apkrovos ar temperatūros priklausančioms mašinoms",
     "anti_wrinkle_enabled": "Sugerkite būgninius impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
     "anti_wrinkle_exit_power": "Kad apsauga nuo raukšlių išliktų aktyvi, galia tarp impulsų turi nukristi žemiau šios ribos",
     "anti_wrinkle_idle_timeout": "Tylos laikas, leidžiamas tarp dviejų būgninių impulsų prieš pasibaigiant apsaugai nuo raukšlių",
@@ -1955,6 +2028,10 @@
     "finished": "Ciklas pasiekė galutinę būseną ir baigėsi."
   },
   "store": {
+    "your_model_tip": "Tai prietaisas, kurį nurodėte nustatymuose",
+    "your_model": "Jūsų modelis",
+    "search_brand_ph": "Ieškoti pagal prekės ženklą…",
+    "programs_count": "Programos: {n}",
     "browse": "Naršyti",
     "device": "Prietaisas",
     "favorites": "Mėgstamiausi",

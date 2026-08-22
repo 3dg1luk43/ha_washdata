@@ -80,11 +80,16 @@ class DeviceInfo(TypedDict):
     current_power_w: float | None
     cycle_progress_pct: float | None
     suggestions_count: int
+    suggestion_keys: list[str]
     feedback_count: int
     recording: bool
     is_user_paused: bool
     manual_program: bool
     options: dict[str, Any]
+    # Device-resolved defaults for the cadence/ratio fields whose default varies by
+    # device type (#396/#393), so the device-list conflict/suggestion badges can score
+    # an unset field against the value the integration would use (matches the Settings tab).
+    option_defaults: dict[str, Any]
 
 
 class GetDevicesResponse(TypedDict):
@@ -95,6 +100,7 @@ class GetDeviceCyclesResponse(TypedDict):
     entry_id: str
     cycles: list[dict[str, Any]]
     reference_cycles: list[dict[str, Any]]
+    backfill_cycles: list[dict[str, Any]]
     total: int
     has_more: bool
 
@@ -103,6 +109,10 @@ class GetDeviceCyclesResponse(TypedDict):
 
 class GetOptionsResponse(TypedDict):
     options: dict[str, Any]
+    # Device-resolved defaults for the cadence settings whose default varies by
+    # device type (sampling_interval / watchdog_interval / start_duration_threshold),
+    # used by the panel as the render + conflict-check fallback for an unset field (#396).
+    defaults: dict[str, Any]
 
 
 class GetSettingsChangelogResponse(TypedDict):
@@ -258,11 +268,15 @@ class RunSuggestionAnalysisResponse(TypedDict, total=False):
 # ─── Cycle curve / interactive editing ─────────────────────────────────────────
 
 class GetCyclePowerDataResponse(TypedDict, total=False):
-    """``cycle_id`` / ``samples`` / ``full_duration_s`` are always present; the
-    metadata keys are present only when the cycle is found."""
+    """``cycle_id`` / ``samples`` / ``sample_count`` / ``decimated`` /
+    ``full_duration_s`` are always present; the metadata keys are present only
+    when the cycle is found. ``sample_count`` is the stored point count and
+    ``decimated`` is True when ``samples`` was thinned below it (#395)."""
 
     cycle_id: str
     samples: list[list[float]]
+    sample_count: int
+    decimated: bool
     full_duration_s: float
     start_time: str | None
     end_time: str | None
@@ -272,13 +286,22 @@ class GetCyclePowerDataResponse(TypedDict, total=False):
     energy_kwh: float | None
     artifacts: list[dict[str, Any]]
     restart_gaps: list[Any]
+    # Capability keys spread from _cycle_capabilities(cycle, origin). ``is_reference``
+    # is present for every cycle; the other three ride along for a non-``past`` cycle
+    # (reference/backfill), so declare them or the WS contract check flags them and the
+    # generated ws-types.d.ts omits the fields the panel needs to type.
     is_reference: bool
+    labelable: bool
+    editable: bool
+    cycle_origin: str
 
 
 class AnalyzeSplitResponse(TypedDict):
     segments: list[list[float]]
     split_offsets: list[float]
     samples: list[list[float]]
+    sample_count: int
+    decimated: bool
     full_duration_s: float
 
 
@@ -513,6 +536,31 @@ class StartTaskResponse(TypedDict):
     task_id: str
 
 
+class HistoryImportBeginResponse(TypedDict):
+    """Staging slot opened for a CSV upload (issue #344)."""
+
+    token: str
+    max_bytes: int
+    chunk_bytes: int
+
+
+class HistoryImportChunkResponse(TypedDict):
+    received_bytes: int
+    next_seq: int
+
+
+class HistoryImportRecorderResponse(TypedDict):
+    """Staging slot filled from the recorder instead of an upload."""
+
+    token: str
+    rows: int
+    entity_id: str
+    days: int
+    # Oldest day actually queried (ISO date), for "read since <date>".
+    start_date: str
+    truncated: bool
+
+
 class SubscribeTasksResponse(TypedDict, total=False):
     """Empty ack for the ``subscribe_tasks`` subscription; the live data arrives
     as ``{"type": "task", "task": TaskSnapshot}`` event messages, not in this
@@ -603,6 +651,25 @@ class StoreDeviceProfilesResponse(TypedDict, total=False):
     """Resolved store deviceId + its profiles (for the Share dialog picker)."""
     device_id: str
     items: list
+    disabled: bool
+
+
+class StoreCatalogEntryResponse(TypedDict, total=False):
+    """One appliance's catalog identity: its brand + device documents, resolved by id.
+
+    ``brand`` / ``device`` are None when that entry is not in the catalog yet (not an
+    error -- it just means nobody has contributed it). Backs the settings form's status
+    badges without downloading the brand/device lists.
+    """
+    device_id: str
+    brand: dict | None
+    device: dict | None
+    disabled: bool
+
+
+class StoreRefreshCatalogResponse(TypedDict, total=False):
+    """Acknowledgement that the cached catalog was dropped."""
+    ok: bool
     disabled: bool
 
 
@@ -737,6 +804,11 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "start_playground_history": StartTaskResponse,
     "start_playground_sweep": StartTaskResponse,
     "start_playground_cycle_detail": StartTaskResponse,
+    "history_import_begin": HistoryImportBeginResponse,
+    "history_import_chunk": HistoryImportChunkResponse,
+    "history_import_recorder": HistoryImportRecorderResponse,
+    "start_history_import_scan": StartTaskResponse,
+    "apply_history_import": StartTaskResponse,
     "store_status": StoreStatusResponse,
     "store_connect": StoreSimpleResponse,
     "store_disconnect": StoreSimpleResponse,
@@ -752,6 +824,8 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_set_online": StoreOnlineResponse,
     "store_set_prefs": StorePrefsResponse,
     "store_get_device_profiles": StoreDeviceProfilesResponse,
+    "store_get_catalog_entry": StoreCatalogEntryResponse,
+    "store_refresh_catalog": StoreRefreshCatalogResponse,
     "store_upload_device": StoreUploadDeviceResponse,
     "store_download_device": StoreDownloadDeviceResponse,
     "get_shareable_cycles": GetShareableCyclesResponse,
@@ -1006,7 +1080,10 @@ WS_COMMANDS: dict[str, dict] = {
         _p("cycle_id", "str"),
         _p("profile_name", "str|null", False),
     ]},
-    "get_playground_settings": {"params": [_entry()]},
+    "get_playground_settings": {"params": [
+        _entry(),
+        _p("include_suggestions", "bool", False),
+    ]},
     "save_playground_preset": {"params": [
         _entry(),
         _p("name", "str"),
@@ -1037,6 +1114,26 @@ WS_COMMANDS: dict[str, dict] = {
         _p("stress_tail", "bool", False),
         _p("stress_idle_w", "float|null", False),
     ]},
+    "history_import_begin": {"params": [_entry()]},
+    "history_import_chunk": {"params": [
+        _entry(),
+        _p("token", "str"),
+        _p("seq", "int"),
+        _p("text", "str"),
+    ]},
+    "history_import_recorder": {"params": [
+        _entry(),
+        # Either bound: `start_date` (an ISO local calendar day, what the panel's date
+        # picker sends) wins over the legacy `days` count when both are present.
+        _p("start_date", "str|null", False),
+        _p("days", "int", False),
+    ]},
+    "start_history_import_scan": {"params": [_entry(), _p("token", "str")]},
+    "apply_history_import": {"params": [
+        _entry(),
+        _p("scan_task_id", "str"),
+        _p("accept", "list"),
+    ]},
     # Community store (online features)
     "store_status": {"params": [_entry()]},
     "store_connect": {"params": [
@@ -1054,6 +1151,8 @@ WS_COMMANDS: dict[str, dict] = {
     "store_get_cycles": {"params": [_entry(), _p("profile_id", "str")]},
     "store_get_device_quality": {"params": [_entry(), _p("device_id", "str")]},
     "store_get_device_profiles": {"params": [_entry(), _p("brand", "str"), _p("model", "str"), _p("appliance_type", "str")]},
+    "store_get_catalog_entry": {"params": [_entry(), _p("brand", "str"), _p("model", "str"), _p("appliance_type", "str")]},
+    "store_refresh_catalog": {"params": [_entry()]},
     "store_confirm_device": {"params": [_entry(), _p("device_id", "str")]},
     "store_rate_device": {"params": [_entry(), _p("device_id", "str"), _p("rating", "int")]},
     "store_set_online": {"params": [_entry(), _p("enabled", "bool")]},

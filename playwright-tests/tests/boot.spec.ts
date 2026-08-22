@@ -80,3 +80,35 @@ test('ML Training is a subtab under Advanced (not a top-level tab)', async ({ pa
   const mlSub = page.locator('button.wd-subtab[data-ptab="ml"]');
   await expect(mlSub).toBeVisible();
 });
+
+// A failing WS command rejects with a plain {code, message} object, which the console
+// renders as a collapsed "Object" -- unreportable by a user pasting their console. These
+// pin that the identity is rendered inline, and that a repeat is collapsed (a poll
+// failure recurs every 5 s and six identical lines bury everything else).
+test('a failed poll logs the WS error identity, not just "Object"', async ({ page }) => {
+  const lines: string[] = [];
+  page.on('console', (m) => { if (m.type() === 'warning') lines.push(m.text()); });
+  await page.goto('/');
+  await bootPanel(page);
+  await page.evaluate(() => window.__set_error('ha_washdata/get_devices', {
+    code: 'unknown_command', message: 'No handler for ha_washdata/get_devices',
+  }));
+  await page.evaluate(() => (document.getElementById('wd-panel') as any)._fetchAll());
+  await expect.poll(() => lines.filter((l) => l.includes('fetch error')).length).toBeGreaterThanOrEqual(1);
+  const line = lines.find((l) => l.includes('fetch error'))!;
+  expect(line).toContain('unknown_command');
+  // unknown_command right after a restart is the self-healing startup race; say so.
+  expect(line).toContain('still starting up');
+});
+
+test('an identical repeated poll failure is logged once', async ({ page }) => {
+  const lines: string[] = [];
+  page.on('console', (m) => { if (m.type() === 'warning') lines.push(m.text()); });
+  await page.goto('/');
+  await bootPanel(page);
+  await page.evaluate(() => window.__set_error('ha_washdata/get_devices', { code: 'boom', message: 'nope' }));
+  for (let i = 0; i < 3; i++) {
+    await page.evaluate(() => (document.getElementById('wd-panel') as any)._fetchAll());
+  }
+  await expect.poll(() => lines.filter((l) => l.includes('fetch error')).length).toBe(1);
+});

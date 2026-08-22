@@ -48,10 +48,16 @@ from .const import (
     DEVICE_TYPE_WASHER_DRYER,
     DEFAULT_MAX_DEFERRAL_SECONDS,
     DEFAULT_DEFER_FINISH_CONFIDENCE,
+    DEFAULT_SMART_TERMINATION_DURATION_RATIO,
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
     DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS,
+    SMART_TERM_TAIL_MAX_RATIO,
+    SMART_TERM_TAIL_MIN_POINTS,
+    SMART_TERM_TAIL_WINDOW_FRAC,
+    SMART_TERM_TAIL_WINDOW_MIN_S,
+    SMART_TERM_TAIL_WINDOW_S,
     WASHER_SMART_TERMINATION_DEBOUNCE_MAX_SECONDS,
     STARTING_PAUSED_TRUE_OFF_TIMEOUT_SECONDS,
     DISHWASHER_MATCH_FREEZE_QUIET_SECONDS,
@@ -129,6 +135,13 @@ class CycleDetectorConfig:
     start_threshold_w: float = 2.0
     stop_threshold_w: float = 2.0
     min_duration_ratio: float = 0.8  # Default deferred finish ratio
+    # Minimum live-match confidence for a match to be trusted by Smart Termination
+    # and the anti-crease gate. Fed from the `profile_match_threshold` option, which
+    # up to 0.5.5 was stored and never read - so raising it (the workaround the #288
+    # reporter documented) silently did nothing. Default matches the value that was
+    # hard-coded at those two sites, so behaviour is unchanged unless the user has
+    # deliberately tuned the option.
+    match_confidence_threshold: float = 0.4
     # Power-based Off detection (issue #284). Carried on the config so the manager
     # (the single owner of the terminal -> Off transition) can read them live; the
     # detector itself does not act on them. 0 = disabled.
@@ -146,6 +159,13 @@ class CycleDetectorConfig:
     # the shipped constant; per-device configurable so a machine with a long silent
     # passive-drying phase before its final drain can absorb profile drift.
     dishwasher_end_spike_quiet_release: float = DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+    # Fraction of the matched profile's expected (mean) duration Smart Termination
+    # requires before it may fire (#393). Device-type-resolved in the manager's
+    # config builder (0.99 dishwasher / 0.98 other), so this field always carries a
+    # real float - never None - which is what playground.effective_settings() relies
+    # on. The dishwasher pump-out relief is combined via min(), so a configured value
+    # can only loosen the gate.
+    smart_termination_duration_ratio: float = DEFAULT_SMART_TERMINATION_DURATION_RATIO
     delay_detect_enabled: bool = False
     # Sustained seconds power must stay in the standby band (between
     # stop_threshold_w and start_threshold_w) before DELAY_WAIT engages.
@@ -311,6 +331,14 @@ class CycleDetector:
         self._end_spike_duration: float = 0.0  # cycle duration (s) when _end_spike_seen was last set
         self._match_ambiguous: bool = False  # last live match was ambiguous (gates predictive end)
         self._match_prefix_ambiguous: bool = False  # longer candidate with good shape exists (prefix guard)
+        # The narrower #288-only half of the flag above. #364 widened
+        # _match_prefix_ambiguous with prefix scoring, which is safe for the ENDING
+        # Smart-Termination gate but must NOT reach the anti-crease finalize (see
+        # _anticrease_gate_open) where blocking can re-hang a cycle (#296).
+        self._match_prefix_ambiguous_full_shape: bool = False
+        # Mean power the matched profile draws over the last few % of its own run
+        # (profile_store.profile_tail_power). None = no opinion, guard stays inert.
+        self._matched_tail_power: float | None = None
         self._last_smart_term_block_reason: str | None = None  # #346 diagnostic throttle
 
         # Anti-wrinkle tracking (dryers only)
@@ -494,6 +522,110 @@ class CycleDetector:
             return self._SANITIZE_INVALID_SENTINEL
         return value
 
+    @staticmethod
+    def _sanitize_tail_power(raw: Any) -> float | None:
+        """Coerce ``raw`` into a finite, positive float, else None (#364).
+
+        None means "no opinion": ``_smart_term_power_plausible`` then leaves both
+        Smart-Termination paths exactly as they behaved before the guard existed.
+        """
+        if raw is None:
+            return None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            return None
+        if not math.isfinite(value) or value <= 0:
+            return None
+        return value
+
+    def _trailing_mean_power(self, timestamp: datetime, window_s: float) -> float | None:
+        """Time-weighted mean power over the trailing ``window_s``, or None when
+        there are too few samples to judge.
+
+        Time-weighted (not a plain sample mean) so an irregular reporting cadence -
+        a plug that only pushes on change, so quiet stretches are sparse - cannot
+        bias the result toward whichever regime happened to sample more often.
+        """
+        window: list[tuple[datetime, float]] = []
+        for ts, power in reversed(self._power_readings):
+            if (timestamp - ts).total_seconds() > window_s:
+                break
+            window.append((ts, float(power)))
+        window.reverse()
+        # Explicit gap handling (energy-integration rule): a reading held across an
+        # unobserved outage would dominate the trapezoid - e.g. a stale 2000 W sample
+        # 290 s before a 284 s dropout, then 5 W, integrates to ~1000 W though every
+        # observed recent reading is 5 W, wrongly blocking termination. So drop
+        # everything up to and including the most recent outage-sized gap and judge
+        # only the clean contiguous tail, the same ceiling the standby / anti-crease
+        # window scans reject a holed window with.
+        if len(window) >= 2:
+            # O(1) ceiling from the maintained p95 cadence (mirrors energy_gap_threshold_s
+            # = clip(10x cadence, 60, 3600)), NOT _outage_threshold_s() which rebuilds a
+            # NumPy array from every reading - this runs on the per-reading ENDING /
+            # anti-crease path, same reasoning as the gap-free tally at L1006.
+            max_gap = min(3600.0, max(60.0, 10.0 * self._p95_dt))
+            cut = 0
+            for i in range(1, len(window)):
+                if (window[i][0] - window[i - 1][0]).total_seconds() > max_gap:
+                    cut = i
+            window = window[cut:]
+        if len(window) < SMART_TERM_TAIL_MIN_POINTS:
+            return None
+        span = (window[-1][0] - window[0][0]).total_seconds()
+        if span <= 0:
+            return None
+        energy = 0.0
+        for (t0, p0), (t1, p1) in zip(window, window[1:]):
+            energy += (p0 + p1) / 2.0 * (t1 - t0).total_seconds()
+        return energy / span
+
+    def _smart_term_power_plausible(self, timestamp: datetime) -> bool:
+        """Whether the appliance looks like it is actually FINISHING (#364).
+
+        Both Smart-Termination paths fire at ``elapsed >= 0.98 * expected`` and
+        neither asks whether the machine is still working.  When the matcher has
+        locked onto a shorter look-alike profile that anchor lands mid-wash, the
+        cycle is cut in half and the remainder is recorded as a second cycle.
+
+        The test: compare the trailing mean power against what the matched profile
+        itself draws at its own end.  Drawing several times that level is proof we
+        are not at the end of anything - whatever the clock says.  Unlike the
+        prefix-landscape guard this needs no longer profile to exist in the pool,
+        so it also covers the reported case where the programme actually running
+        was never trained.
+
+        Shorten-only and fail-open: any missing input returns True, leaving
+        behaviour identical to before the guard.  A False can only ever *block* an
+        early finish - the power-based fallback timeout still ends the cycle.
+        """
+        tail_power = self._matched_tail_power
+        if tail_power is None or tail_power <= 0:
+            return True
+        mean_power = self._trailing_mean_power(timestamp, self._tail_window_s())
+        if mean_power is None:
+            return True
+        return mean_power <= tail_power * SMART_TERM_TAIL_MAX_RATIO
+
+    def _tail_window_s(self) -> float:
+        """Trailing window that covers the same FRACTION of the run as the profile
+        tail it is compared against.
+
+        A fixed window is not comparable across programme lengths: 300 s is 4% of a
+        cotton wash but a third of a 15-minute spin-and-drain, whose trailing mean
+        would then be the spin itself while its profile tail is the quiet moment
+        after the pump stops. Measured on the full corpus, making this proportional
+        is strictly better at every threshold.
+        """
+        expected = self._expected_duration
+        if expected <= 0:
+            return SMART_TERM_TAIL_WINDOW_S
+        return min(
+            SMART_TERM_TAIL_WINDOW_S,
+            max(SMART_TERM_TAIL_WINDOW_MIN_S, expected * SMART_TERM_TAIL_WINDOW_FRAC),
+        )
+
     def update_match(self, result: tuple[Any, ...] | list[Any] | Any) -> None:  # type: ignore[misc]
         """Process a match result (synchronously).
 
@@ -586,6 +718,20 @@ class CycleDetector:
             self._last_match_confidence = confidence or 0.0
             self._match_ambiguous = ambiguous
             self._match_prefix_ambiguous = bool(result_seq[6]) if len(result_seq) >= 7 else False
+            # Element 8 (#364): the narrower legacy verdict. A shorter tuple
+            # (Playground, older callers, most tests) falls back to the widened
+            # value, which reproduces pre-#364 behaviour exactly.
+            self._match_prefix_ambiguous_full_shape = (
+                bool(result_seq[7]) if len(result_seq) >= 8 else self._match_prefix_ambiguous
+            )
+            # Element 9 (#364): the matched profile's own tail power level. Absent
+            # or non-finite leaves the power-plausibility guard inert - so a shorter
+            # tuple (Playground, older callers, most tests) must CLEAR it, not keep
+            # the previous match's value: retaining it would let the guard compare
+            # the live tail against the wrong profile and block a valid termination.
+            self._matched_tail_power = (
+                self._sanitize_tail_power(result_seq[8]) if len(result_seq) >= 9 else None
+            )
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -596,6 +742,8 @@ class CycleDetector:
             self._matched_profile = None
             self._match_ambiguous = False
             self._match_prefix_ambiguous = False
+            self._match_prefix_ambiguous_full_shape = False
+            self._matched_tail_power = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -647,6 +795,8 @@ class CycleDetector:
         self._last_match_confidence = 0.0
         self._match_ambiguous = False
         self._match_prefix_ambiguous = False
+        self._match_prefix_ambiguous_full_shape = False
+        self._matched_tail_power = None
         # Per-cycle diagnostic throttle (#346): the "Smart Termination not applied"
         # line only logs when the reason CHANGES. Carrying the previous cycle's
         # reason across a reset swallows the new cycle's very first diagnostic
@@ -713,14 +863,15 @@ class CycleDetector:
         is_confident: bool,
         ambiguous: bool,
         prefix_ambiguous: bool,
+        power_plausible: bool = True,
     ) -> str | None:
         """Why the Smart-Termination fast end-path did NOT fire, for diagnostics.
 
         Returns None when the gate would pass, or when no expected duration is known
-        yet (nothing meaningful to report). Mirrors the gate's four conditions in
-        order so the first blocking reason is surfaced. Pure and side-effect-free;
-        the detector logs the result (throttled to reason changes) - no behaviour
-        change (#346).
+        yet (nothing meaningful to report). Mirrors the gate's conditions in order so
+        the first blocking reason is surfaced. Pure and side-effect-free; the
+        detector logs the result (throttled to reason changes) - no behaviour
+        change (#346, extended with "still_active" for #364).
         """
         if expected <= 0:
             return None
@@ -732,7 +883,47 @@ class CycleDetector:
             return "match_ambiguous"
         if prefix_ambiguous:
             return "prefix_ambiguous"
+        if not power_plausible:
+            return "still_active"
         return None
+
+    @staticmethod
+    def _resolve_smart_ratio(
+        device_type: str,
+        configured_ratio: float,
+        end_spike_seen: bool,
+        end_spike_duration: float,
+        expected_duration: float,
+    ) -> float:
+        """Resolve the Smart-Termination duration-ratio gate (#393).
+
+        ``configured_ratio`` is the per-device option, already resolved in the
+        config builder to the device-type default (0.99 dishwasher / 0.98 other)
+        unless the user tuned it - so it is always a real float here.
+
+        For a dishwasher whose most-recent in-ENDING spike landed at >=90% of the
+        expected duration, that spike is the terminal pump-out (not a mid-cycle
+        rinse drain): once it is confirmed the gate is loosened to the 0.90
+        pump-out relief, because individual cycles can be a few % shorter than the
+        rolling average and still terminate cleanly. Keeping the configured gate
+        for spikes at <90% prevents premature closes during the passive Dry phase
+        that follows the pre-final-rinse drain. The relief is combined with the
+        configured value via ``min()`` so a configured ratio can only ever LOOSEN
+        the gate, never tighten it. Pure and side-effect-free (unit-testable).
+        """
+        # Clamp to the documented [0.50, 1.00] range (the WS write path clamps, but a
+        # value persisted by an import or an older schema is read here unclamped): a
+        # 0.0 would drop the duration floor entirely and let Smart Termination fire the
+        # moment its other conditions pass.
+        configured_ratio = min(1.0, max(0.5, configured_ratio))
+        if (
+            device_type == "dishwasher"
+            and end_spike_seen
+            and expected_duration > 0
+            and end_spike_duration >= expected_duration * 0.90
+        ):
+            return min(configured_ratio, 0.90)
+        return configured_ratio
 
     def process_reading(self, power: float, timestamp: datetime) -> None:
         """Process a new power reading using robust dt-aware logic."""
@@ -1373,30 +1564,27 @@ class CycleDetector:
                     # 1. Require higher duration ratio for Smart path
                     # 2. Require debounce to be measured FROM entry into ENDING state
 
-                    if self._config.device_type == "dishwasher":
-                        # If the most-recent in-ENDING spike occurred at ≥90% of
-                        # expected, it is the terminal pump-out, not a mid-cycle
-                        # rinse drain.  Once that pump-out is confirmed, we don't
-                        # need to wait for 99% of the rolling avg — individual
-                        # cycles can be up to ~7% shorter than avg_duration and
-                        # still terminate cleanly.  Keeping the 0.99 gate for
-                        # spikes at <90% prevents premature closes during the
-                        # passive Dry phase that follows the pre-final-rinse drain.
-                        _esp_dur = getattr(self, "_end_spike_duration", 0.0)
-                        if (
-                            getattr(self, "_end_spike_seen", False)
-                            and self._expected_duration > 0
-                            and _esp_dur >= self._expected_duration * 0.90
-                        ):
-                            smart_ratio = 0.90  # pump-out confirmed near end
-                        else:
-                            smart_ratio = 0.99  # conservative: wait for expected duration
-                    else:
-                        smart_ratio = 0.98
+                    # Per-appliance configurable gate (#393): the ratio is resolved
+                    # in the config builder to the device-type default (0.99
+                    # dishwasher / 0.98 other) unless the user tuned it, and the
+                    # dishwasher pump-out relief is folded in via a pure helper so
+                    # the gate logic stays unit-testable (see _resolve_smart_ratio).
+                    smart_ratio = self._resolve_smart_ratio(
+                        self._config.device_type,
+                        self._config.smart_termination_duration_ratio,
+                        getattr(self, "_end_spike_seen", False),
+                        getattr(self, "_end_spike_duration", 0.0),
+                        self._expected_duration,
+                    )
 
                     is_confident_match = (
-                        getattr(self, "_last_match_confidence", 0.0) >= 0.4
+                        getattr(self, "_last_match_confidence", 0.0)
+                        >= self._config.match_confidence_threshold
                     )
+                    # Compute the #364 power-plausibility once per reading and reuse it
+                    # for the diagnostic reason and the gate below - the helper walks the
+                    # trailing window, so calling it two/three times per reading is waste.
+                    _power_plausible = self._smart_term_power_plausible(timestamp)
 
                     # Gate the predictive end on match certainty.
                     # _match_ambiguous: top-1 vs top-2 score gap is too small to
@@ -1421,19 +1609,22 @@ class CycleDetector:
                         is_confident_match,
                         self._match_ambiguous,
                         self._match_prefix_ambiguous,
+                        _power_plausible,
                     )
                     if _block_reason != self._last_smart_term_block_reason:
                         self._last_smart_term_block_reason = _block_reason
                         if _block_reason is not None:
                             self._logger.debug(
                                 "Smart Termination not applied (%s): dur=%.0fs/%.0fs conf=%.2f "
-                                "ambiguous=%s prefix_ambiguous=%s",
+                                "ambiguous=%s prefix_ambiguous=%s trailing_power=%s profile_tail=%s",
                                 _block_reason,
                                 current_duration,
                                 self._expected_duration * smart_ratio,
                                 getattr(self, "_last_match_confidence", 0.0),
                                 self._match_ambiguous,
                                 self._match_prefix_ambiguous,
+                                self._trailing_mean_power(timestamp, self._tail_window_s()),
+                                self._matched_tail_power,
                             )
 
                     if (
@@ -1441,6 +1632,11 @@ class CycleDetector:
                         and is_confident_match
                         and not self._match_ambiguous
                         and not self._match_prefix_ambiguous
+                        # #364: the clock says "done", but if we are still drawing
+                        # several times what this profile draws at its own end, the
+                        # match is a shorter look-alike and we are mid-wash. Block;
+                        # the power-based fallback timeout decides instead.
+                        and _power_plausible
                     ):
                         # Dynamic confirmation window
                         if self._config.device_type == "dishwasher":
@@ -1950,17 +2146,30 @@ class CycleDetector:
             return False
         if not (self._matched_profile and self._expected_duration > 0):
             return False
-        if self._last_match_confidence < 0.4:
+        if self._last_match_confidence < self._config.match_confidence_threshold:
             return False
-        if self._match_ambiguous or self._match_prefix_ambiguous:
+        # Deliberately the NARROW #288-only verdict, not the #364-widened flag: a
+        # false block here disables the finalise AND the match freeze, and because
+        # the tumble bursts recur faster than off_delay neither the fallback timeout
+        # nor ENDING_HARD_FINALIZE can close the cycle - that is the #296 hang.
+        if self._match_ambiguous or self._match_prefix_ambiguous_full_shape:
             return False
         if self._cycle_max_power <= float(self._config.anti_wrinkle_max_power):
             return False  # never a hot/energetic cycle - leave low-power programs alone
+        # Cheap clock test first, so the trailing-power scan below is skipped for the
+        # whole mid-wash phase (it only matters once we are past-expected).
         start = self._current_cycle_start
         if start is None:
             return False
         current_duration = (timestamp - start).total_seconds()
         if current_duration < self._expected_duration * ANTI_CREASE_FINALIZE_RATIO:
+            return False
+        # #364: "past expected" only means "past the wash" when expected belongs to
+        # the RIGHT profile. A whole washer wash phase sits below
+        # anti_wrinkle_max_power, so with a mis-matched shorter profile this gate
+        # would open mid-wash. Requiring the trailing power to look like this
+        # profile's own tail restores the guarantee the ratio alone used to give.
+        if not self._smart_term_power_plausible(timestamp):
             return False
         return True
 
@@ -2441,6 +2650,8 @@ class CycleDetector:
             "end_spike_duration": self._end_spike_duration,
             "match_ambiguous": self._match_ambiguous,
             "match_prefix_ambiguous": self._match_prefix_ambiguous,
+            "match_prefix_ambiguous_full_shape": self._match_prefix_ambiguous_full_shape,
+            "matched_tail_power": self._matched_tail_power,
             "ml_defer_start_duration": self._ml_defer_start_duration,
         }
 
@@ -2503,6 +2714,14 @@ class CycleDetector:
             self._end_spike_duration = float(snapshot.get("end_spike_duration", 0.0))
             self._match_ambiguous = snapshot.get("match_ambiguous", False)
             self._match_prefix_ambiguous = snapshot.get("match_prefix_ambiguous", False)
+            # A pre-#364 snapshot has no narrow flag: fall back to the widened
+            # value so a restart cannot loosen the anti-crease gate.
+            self._match_prefix_ambiguous_full_shape = snapshot.get(
+                "match_prefix_ambiguous_full_shape", self._match_prefix_ambiguous
+            )
+            self._matched_tail_power = self._sanitize_tail_power(
+                snapshot.get("matched_tail_power")
+            )
             self._ml_defer_start_duration = snapshot.get("ml_defer_start_duration")
 
             # Restore state enter time and recompute time_in_state from it

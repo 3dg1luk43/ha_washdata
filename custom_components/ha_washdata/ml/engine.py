@@ -39,7 +39,7 @@ import importlib
 import json
 import logging
 from pathlib import Path
-from typing import Mapping
+from typing import Any, Mapping
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,6 +51,73 @@ _MODEL_MODULES = {
     "live_match": "live_match_commit_model",
     "end": "cycle_end_detector_model",
 }
+
+# Modules the live ML paths import lazily besides the baselines themselves.
+_SIBLING_MODULES = ("trainer", "feature_extraction")
+
+# Imported baseline model modules, keyed by module name. Importing a module is a
+# blocking call Home Assistant forbids inside the event loop, and every
+# resolve_scorer() consumer (live matching, end detection, quality gating) runs
+# there - so the modules are imported once from an import executor at setup
+# (:func:`preload_models`) and every later resolution is a dict lookup. A failed
+# import is cached as ``None`` so a broken install warns once instead of retrying
+# the import on every inference.
+_MODULE_CACHE: dict[str, object | None] = {}
+
+
+def _load_model_module(module_name: str) -> Any | None:
+    """Return the embedded model module, importing it at most once.
+
+    Safe to call from the event loop *after* :func:`preload_models` has run (the
+    import is then already satisfied from ``sys.modules``); the first call should
+    happen in an executor thread.
+    """
+    if module_name in _MODULE_CACHE:
+        return _MODULE_CACHE[module_name]
+    try:
+        module = importlib.import_module(f"{__package__}.{module_name}")
+    except Exception as exc:  # noqa: BLE001 - a missing model must not break setup
+        _LOGGER.warning(
+            "Failed to load embedded model module %r: %s", module_name, exc
+        )
+        module = None
+    _MODULE_CACHE[module_name] = module
+    return module
+
+
+def _sibling_attr(module_name: str, attr: str) -> Any | None:
+    """Fetch ``attr`` from an embedded sibling module via the cache, or None.
+
+    Resolution paths run in the event loop, so they must never re-import: this hits
+    the ``_MODULE_CACHE`` warmed by :func:`preload_models` (which stores ``None`` on a
+    failed import). A missing module or attribute returns None, and the caller falls
+    back to the baseline / inert path rather than triggering a blocking loop import.
+    """
+    module = _load_model_module(module_name)
+    return getattr(module, attr, None) if module is not None else None
+
+
+def preload_models() -> None:
+    """Import everything the live ML paths touch. Call from an executor thread.
+
+    ``resolve_scorer`` / ``resolve_regressor`` are called from the event loop, so
+    the imports they need (the embedded baselines plus ``trainer`` /
+    ``feature_extraction``) must already be in ``sys.modules`` by then - Home
+    Assistant flags a blocking ``importlib.import_module`` in the loop (issue
+    #328). Also warms the manifest cache, which reads a file. Never raises;
+    idempotent, so calling it once per config entry is cheap.
+    """
+    for module_name in _MODEL_MODULES.values():
+        _load_model_module(module_name)
+    # Cache the siblings too (module-or-None), so a failed import is recorded once
+    # here and the event-loop resolvers read it from the cache instead of retrying
+    # a blocking import (issue #328).
+    for sibling in _SIBLING_MODULES:
+        _load_model_module(sibling)
+    # No guard needed: available_models() carries its own outer try/except and caches
+    # [] on every failure path, so it cannot raise here (and a try/except/pass around it
+    # would be unreachable code that Ruff flags as S110/SIM105).
+    available_models()
 
 
 def ml_models_enabled(options: Mapping[str, object] | None) -> bool:
@@ -73,20 +140,16 @@ def resolve_scorer(capability: str, store: object | None):
     def _baseline():
         """Resolve the shipped embedded baseline scorer for this capability.
 
-        Kept as a lazily-invoked helper so the baseline module is only imported
-        when the on-device spec is absent *or* fails at call time - preserving the
-        original "baseline only loaded when needed" semantics.
+        Kept as a lazily-invoked helper so the baseline module is only looked up
+        when the on-device spec is absent *or* fails at call time. The lookup hits
+        the module cache warmed by :func:`preload_models`, so no import happens in
+        the event loop.
         """
         module_name = _MODEL_MODULES.get(capability)
         if module_name is None:
             return (None, None)
-        try:
-            module = importlib.import_module(f"{__package__}.{module_name}")
-        except Exception as exc:  # noqa: BLE001
-            _LOGGER.warning(
-                "Failed to load embedded baseline for capability %r: %s",
-                capability, exc,
-            )
+        module = _load_model_module(module_name)
+        if module is None:
             return (None, None)
 
         def _baseline_score(feats, _m=module):
@@ -125,7 +188,7 @@ def resolve_scorer(capability: str, store: object | None):
                 module_name = _MODEL_MODULES.get(capability)
                 if module_name is not None:
                     try:
-                        _bm = importlib.import_module(f"{__package__}.{module_name}")
+                        _bm = _load_model_module(module_name)
                         _expected = list(getattr(_bm, "FEATURE_COLUMNS", []))
                         _stored = list(spec.get("feature_columns") or [])
                         if _expected and _stored and _stored != _expected:
@@ -138,7 +201,9 @@ def resolve_scorer(capability: str, store: object | None):
                     except Exception:  # noqa: BLE001 - schema check must not break inference
                         pass
 
-                from .trainer import score_spec
+                score_spec = _sibling_attr("trainer", "score_spec")
+                if score_spec is None:
+                    return _baseline()
 
                 def _on_device_score(feats, _s=spec):
                     # A malformed / dimensionally-incompatible promoted spec must
@@ -189,8 +254,8 @@ def resolve_regressor(capability: str, store: object | None):
         if isinstance(spec, dict) and spec.get("kind") == "standardized_linear":
             # Feature-column schema guard for regression specs.
             try:
-                from .feature_extraction import PROGRESS_FEATURE_COLUMNS
-                _expected_r = list(PROGRESS_FEATURE_COLUMNS)
+                _prog_cols = _sibling_attr("feature_extraction", "PROGRESS_FEATURE_COLUMNS")
+                _expected_r = list(_prog_cols or [])
                 _stored_r = list(spec.get("feature_columns") or [])
                 if _expected_r and _stored_r and _stored_r != _expected_r:
                     _LOGGER.warning(
@@ -202,7 +267,9 @@ def resolve_regressor(capability: str, store: object | None):
             except Exception:  # noqa: BLE001 - schema check must not break inference
                 pass
 
-            from .trainer import predict_value_spec
+            predict_value_spec = _sibling_attr("trainer", "predict_value_spec")
+            if predict_value_spec is None:
+                return (None, None)
 
             def _on_device_predict(feats, _s=spec):
                 # A malformed / incompatible promoted regression spec must never
@@ -240,14 +307,26 @@ def available_models() -> list[dict[str, object]]:
     global _MANIFEST_MODELS_CACHE
     if _MANIFEST_MODELS_CACHE is not None:
         return _MANIFEST_MODELS_CACHE
-    manifest = Path(__file__).resolve().parent / "promoted_manifest.json"
-    if not manifest.exists():
-        return []
+    # Outer guard so EVERY failure caches a result: an unhandled exception here (from
+    # warm-up in preload_models, whose caller swallows it) would leave the cache cold,
+    # and the next event-loop caller would retry Path.exists()/read_text() - re-creating
+    # the blocking-call warning preload exists to prevent (#328).
     try:
-        payload = json.loads(manifest.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return []
-    models = payload.get("models")
-    result = models if isinstance(models, list) else []
+        manifest = Path(__file__).resolve().parent / "promoted_manifest.json"
+        # A missing manifest is cached as [] too: this is a shipped file that cannot
+        # appear at runtime, and the read is a blocking open() some callers make on
+        # the event loop.
+        if not manifest.exists():
+            result: list[dict[str, object]] = []
+        else:
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+            # A manifest decoding to a list/scalar would make .get() raise; keep only
+            # dict model entries so the return honours its list[dict] contract even for
+            # a malformed manifest like {"models": [null]}.
+            models = payload.get("models") if isinstance(payload, dict) else None
+            result = [m for m in models if isinstance(m, dict)] if isinstance(models, list) else []
+    except Exception as exc:  # noqa: BLE001 - never raise / never leave the cache cold
+        _LOGGER.debug("Could not read the promoted model manifest (%s); caching empty", exc)
+        result = []
     _MANIFEST_MODELS_CACHE = result
     return result

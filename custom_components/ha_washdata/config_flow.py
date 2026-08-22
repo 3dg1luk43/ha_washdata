@@ -29,6 +29,8 @@ from homeassistant.helpers import selector
 
 from .const import (
     DOMAIN,
+    CONFIG_ENTRY_MINOR_VERSION,
+    CONFIG_ENTRY_VERSION,
     CONF_POWER_SENSOR,
     CONF_MIN_POWER,
     CONF_DEVICE_TYPE,
@@ -146,8 +148,9 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=abstract-method
     """Handle a config flow for WashData."""
 
-    VERSION = 3
-    MINOR_VERSION = 8
+    # Single source in const.py; the migration blocks in __init__.py read the same two.
+    VERSION = CONFIG_ENTRY_VERSION
+    MINOR_VERSION = CONFIG_ENTRY_MINOR_VERSION
 
     def __init__(self) -> None:
         """Initialize the config flow."""

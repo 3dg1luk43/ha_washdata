@@ -312,3 +312,239 @@ async def test_get_shareable_cycles_only_golden(store):
     assert all(i.get("id") for i in items)
     # Most-recent-first ordering.
     assert items[0]["profile_name"] == "Eco 60"
+
+
+# --- Naming a program from an imported cycle (issue #344) --------------------
+#
+# A historical import (issue #344) writes UNLABELLED cycles straight into
+# `reference_cycles` via `_add_cycle_data(target=...)`, then asks the user to name the
+# programs it found. That makes `create_profile` from a reference cycle the primary
+# path for that feature, where before it raised "Cycle not found".
+
+async def _add_imported(store, watts, *, start=BASE, dur=3600):
+    """An unlabelled imported-history cycle, written the way the importer writes them."""
+    cycle = {
+        "start_time": start.isoformat(),
+        "end_time": (start + timedelta(seconds=dur)).isoformat(),
+        "duration": dur,
+        "status": "completed",
+        "power_data": _offset_trace(watts, dur=dur),
+        "meta": {"source": "history_import"},
+    }
+    store._add_cycle_data(cycle, target=store._data.setdefault("reference_cycles", []))
+    return cycle["id"]
+
+
+@pytest.mark.asyncio
+async def test_create_profile_from_imported_cycle(store):
+    cid = await _add_imported(store, 1500)
+    assert next(c for c in store.get_reference_cycles() if c["id"] == cid)["profile_name"] is None
+
+    await store.create_profile("Cotton 40", cid)
+
+    profile = store._data["profiles"]["Cotton 40"]
+    assert profile["sample_cycle_id"] == cid
+    assert profile["avg_duration"] == 3600
+    # Labelled in place: still a reference cycle, never promoted into usage stats.
+    refs = store.get_reference_cycles()
+    assert len(refs) == 1
+    assert refs[0]["profile_name"] == "Cotton 40"
+    assert store.get_past_cycles() == []
+    assert store.get_lifetime_cycle_count() == 0
+    assert store.get_lifetime_energy_wh() == 0
+    # Usable immediately: the envelope is built here, not left to the next match pass.
+    assert store.get_envelope("Cotton 40")
+
+
+@pytest.mark.asyncio
+async def test_create_profile_from_real_cycle_also_builds_the_envelope(store):
+    await store.async_add_cycle({
+        "start_time": BASE.isoformat(), "duration": 3600, "status": "completed",
+        "power_data": _iso_trace(2000),
+    })
+    cid = store.get_past_cycles()[0]["id"]
+
+    await store.create_profile("Eco 60", cid)
+
+    assert store.get_past_cycles()[0]["profile_name"] == "Eco 60"
+    assert store.get_envelope("Eco 60")
+
+
+@pytest.mark.asyncio
+async def test_create_profile_unknown_cycle_still_raises(store):
+    with pytest.raises(ValueError):
+        await store.create_profile("Nope", "does-not-exist")
+
+
+# --- Panel capability flags -------------------------------------------------
+#
+# `is_reference` used to be computed two different ways: by list membership in the cycle
+# list, and from `meta.source.startswith("store")` in the inspector. With a
+# `history_import` source those disagreed, and the inspector offered trim/split tools
+# whose store functions only know about `past_cycles` and would silently no-op.
+
+def test_cycle_capabilities_are_derived_from_list_membership():
+    from custom_components.ha_washdata.ws_api import _cycle_capabilities
+
+    real = _cycle_capabilities({"meta": {"source": "recorder"}}, "past")
+    assert real == {"is_reference": False, "labelable": True, "editable": True}
+
+    downloaded = _cycle_capabilities({"meta": {"source": "store:abc"}}, "reference")
+    assert downloaded["is_reference"] is True
+    assert downloaded["cycle_origin"] == "reference"
+    # Non-real cycles are labelable (that is how a program gets named) but not editable.
+    assert downloaded["labelable"] is True
+    assert downloaded["editable"] is False
+
+    backfilled = _cycle_capabilities({"meta": {"source": "history_import"}}, "backfill")
+    assert backfilled["cycle_origin"] == "backfill"
+    assert backfilled["labelable"] is True
+    assert backfilled["editable"] is False
+
+    # An unknown origin is treated as non-real rather than as an editable real cycle.
+    assert _cycle_capabilities({}, "")["cycle_origin"] == "reference"
+
+
+# --- The third category: backfilled history cycles (issue #344) --------------
+#
+# `backfill_cycles` holds cycles recovered by replaying raw power history. They are
+# auto-detected and unverified, so they are deliberately neither `past_cycles` (lifetime
+# stats, ML training labels, feedback queue, retention eviction) nor `reference_cycles`
+# (curated store templates, golden by construction). They DO shape envelopes and matching
+# once labelled - that is the point of importing them.
+
+async def _add_backfill(store, watts, *, profile=None, start=BASE, dur=3600):
+    cycle = {
+        "start_time": start.isoformat(),
+        "end_time": (start + timedelta(seconds=dur)).isoformat(),
+        "duration": dur,
+        "status": "completed",
+        "power_data": _offset_trace(watts, dur=dur),
+        "meta": {"source": "history_import"},
+    }
+    if profile:
+        cycle["profile_name"] = profile
+    store._add_cycle_data(cycle, target=store._data.setdefault("backfill_cycles", []))
+    return cycle["id"]
+
+
+@pytest.mark.asyncio
+async def test_backfill_cycles_are_isolated_from_usage_stats(store):
+    await _add_backfill(store, 1800, profile="Cotton 40")
+    store._data["profiles"]["Cotton 40"] = {"avg_duration": 3600}
+
+    assert len(store.get_backfill_cycles()) == 1
+    assert store.get_past_cycles() == []
+    assert store.get_reference_cycles() == []
+    assert store.get_lifetime_cycle_count() == 0
+    assert store.get_lifetime_energy_wh() == 0
+    # Never offered to the community store, whatever its flags say.
+    assert store.get_shareable_cycles() == []
+
+
+@pytest.mark.asyncio
+async def test_labelled_backfill_cycle_shapes_the_envelope(store):
+    store._data["profiles"]["Cotton 40"] = {"avg_duration": 3600}
+    await _add_backfill(store, 1800, profile="Cotton 40")
+
+    assert await store.async_rebuild_envelope("Cotton 40") is True
+    envelope = store.get_envelope("Cotton 40")
+    assert envelope
+    # The curve is built from it, but usage stats stay at zero: cycle_count counts
+    # only real observed cycles.
+    assert envelope.get("cycle_count") == 0
+
+
+@pytest.mark.asyncio
+async def test_profile_gc_does_not_delete_a_backfill_only_profile(store):
+    """The failure mode a forgotten read path causes.
+
+    `cleanup_orphaned_profiles` deletes any profile whose `sample_cycle_id` resolves to
+    no cycle. If it does not know about `backfill_cycles`, an import-only profile is
+    destroyed on the next maintenance run.
+    """
+    cid = await _add_backfill(store, 1800)
+    await store.create_profile("Cotton 40", cid)
+
+    assert store.cleanup_orphaned_profiles() == 0
+    assert "Cotton 40" in store._data["profiles"]
+
+
+@pytest.mark.asyncio
+async def test_sample_repair_does_not_steal_a_real_cycle_into_a_backfill_profile(store):
+    cid = await _add_backfill(store, 1800)
+    await store.create_profile("Cotton 40", cid)
+    # An unlabelled real cycle exists and must stay unlabelled.
+    await store.async_add_cycle({
+        "start_time": (BASE + timedelta(days=1)).isoformat(), "duration": 3600,
+        "status": "completed", "power_data": _iso_trace(2000),
+    })
+
+    await store.async_repair_profile_samples()
+
+    assert store._data["profiles"]["Cotton 40"]["sample_cycle_id"] == cid
+    assert store.get_past_cycles()[0]["profile_name"] is None
+
+
+@pytest.mark.asyncio
+async def test_backfill_cycle_is_matchable_and_labelable(store):
+    cid = await _add_backfill(store, 1800)
+    assert store.has_real_profiles is False           # nothing labelled yet
+
+    await store.create_profile("Cotton 40", cid)
+    assert store.has_real_profiles is True            # an import-only install can match
+
+    # Relabelling moves it between profiles and keeps it out of past_cycles.
+    store._data["profiles"]["Eco 60"] = {"avg_duration": 3600}
+    await store.assign_profile_to_cycle(cid, "Eco 60")
+    assert store.get_backfill_cycles()[0]["profile_name"] == "Eco 60"
+    assert store.get_past_cycles() == []
+
+
+@pytest.mark.asyncio
+async def test_deleting_a_backfill_cycle_drops_its_now_empty_profile(store):
+    cid = await _add_backfill(store, 1800)
+    await store.create_profile("Cotton 40", cid)
+
+    assert await store.delete_cycle(cid) is True
+    assert store.get_backfill_cycles() == []
+    # Mirrors the reference-cycle path: an empty profile would otherwise be re-populated
+    # by sample repair stealing an unrelated real cycle.
+    assert "Cotton 40" not in store._data["profiles"]
+
+
+@pytest.mark.asyncio
+async def test_renaming_and_deleting_a_profile_cascades_to_backfill_cycles(store):
+    cid = await _add_backfill(store, 1800)
+    await store.create_profile("Cotton 40", cid)
+
+    await store.update_profile("Cotton 40", new_name="Cotton 60")
+    assert store.get_backfill_cycles()[0]["profile_name"] == "Cotton 60"
+
+    await store.delete_profile("Cotton 60", unlabel_cycles=True)
+    assert store.get_backfill_cycles()[0]["profile_name"] is None
+
+
+@pytest.mark.asyncio
+async def test_backfill_count_is_reported_separately_from_cycle_count(store):
+    cid = await _add_backfill(store, 1800)
+    await store.create_profile("Cotton 40", cid)
+
+    profile = next(p for p in store.list_profiles() if p["name"] == "Cotton 40")
+    assert profile["cycle_count"] == 0        # no real observed cycles
+    assert profile["backfill_count"] == 1
+    assert profile["is_imported"] is False   # not a community-store template
+
+
+@pytest.mark.asyncio
+async def test_full_export_carries_backfill_cycles(store):
+    await _add_backfill(store, 1800, profile="Cotton 40")
+    payload = store.export_data()
+    assert len(payload["data"]["backfill_cycles"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_clear_all_data_wipes_backfill_cycles(store):
+    await _add_backfill(store, 1800)
+    await store.clear_all_data()
+    assert store.get_backfill_cycles() == []

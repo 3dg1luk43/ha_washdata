@@ -33,6 +33,8 @@ from homeassistant.helpers import device_registry as dr
 
 from .const import (
     DOMAIN,
+    CONFIG_ENTRY_MINOR_VERSION,
+    CONFIG_ENTRY_VERSION,
     SERVICE_SUBMIT_FEEDBACK,
     CONF_LINKED_DEVICE,
     CONF_MIN_POWER,
@@ -103,9 +105,12 @@ from .const import (
     DEVICE_TYPE_OTHER,
     DEFAULT_START_DURATION_THRESHOLD,
     CONF_START_DURATION_THRESHOLD,
+    resolve_watchdog_interval_default,
+    resolve_start_duration_default,
     CONF_RUNNING_DEAD_ZONE,
 )
 from .log_utils import DeviceLoggerAdapter
+from .options_utils import strip_null_options
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -132,13 +137,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     version = entry.version or 1
     minor_version = entry.minor_version or 1
 
-    if version > 3:
+    if version > CONFIG_ENTRY_VERSION:
         _log.error(
             "Refusing to migrate unsupported future schema %s.%s", version, minor_version
         )
         return False
 
-    if version == 3 and minor_version >= 8:
+    if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
         return True
 
     # 3.6 → 3.7: remove initial_profile stub key from entry.data.
@@ -160,7 +165,81 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         minor_version = 8
         _log.debug("Migrated WashData entry from 3.7 to 3.8 (removed running_dead_zone)")
 
-    if version == 3 and minor_version >= 8:
+    # 3.8 → 3.9: drop options persisted as null. A never-saved setting has no
+    # entry in options, so the per-setting Revert used to send the changelog's
+    # `old` (null) and ws_set_options stored it verbatim - and a stored None
+    # survives options.get(key, DEFAULT), so the numeric casts that build
+    # CycleDetectorConfig raised TypeError and the entry could never be set up
+    # again without hand-editing .storage (#389). ws_set_options and the import
+    # path now strip on write; this heals entries already carrying one. Healing
+    # here rather than on a setup failure keeps it deterministic, covers the
+    # crash classes a null produces outside a numeric cast (a null power_sensor
+    # raises AttributeError inside hass.states.get(None)), and never rewrites the
+    # entry mid-setup.
+    if version == 3 and minor_version == 8:
+        new_opts = strip_null_options(entry.options)
+        dropped = sorted(set(entry.options) - set(new_opts))
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=9
+        )
+        minor_version = 9
+        if dropped:
+            _log.warning(
+                "Migrated WashData entry from 3.8 to 3.9: dropped option(s) %s "
+                "stored as null so the compiled defaults apply again",
+                dropped,
+            )
+        else:
+            _log.debug("Migrated WashData entry from 3.8 to 3.9 (no null options)")
+
+    # 3.9 → 3.10: heal cadence defaults that violate the panel's own conflict rules
+    # (#396). The pre-3.9 legacy migration seeded watchdog_interval=30 and
+    # start_duration_threshold=5 into options. With sampling_interval now resolved
+    # per device type, those seeded values fall below the watchdog>=2*sampling and
+    # start_duration>=sampling gates on the coarse (30 s) sampling device types.
+    # Replace them with the device-resolved default ONLY where they still equal the
+    # old scalar default (30 / 5) - i.e. a value the migration seeded, never a
+    # deliberate user choice (both violated the rule). A never-seeded (absent) key
+    # is left absent so the runtime device-resolved default applies.
+    if version == 3 and minor_version == 9:
+        new_opts = dict(entry.options)
+        # `or` (not `.get(..., default)`) so a present-but-null device type also falls
+        # through to the data value / DEFAULT_DEVICE_TYPE: a null would otherwise resolve
+        # to the coarse scalar defaults and wrongly heal a washing-machine-equivalent
+        # entry's 30/5 up to 61/30.
+        _dt = (
+            new_opts.get(CONF_DEVICE_TYPE)
+            or entry.data.get(CONF_DEVICE_TYPE)
+            or DEFAULT_DEVICE_TYPE
+        )
+        _healed = []
+        if new_opts.get(CONF_WATCHDOG_INTERVAL) == 30:
+            _resolved = resolve_watchdog_interval_default(_dt)
+            if _resolved != 30:
+                new_opts[CONF_WATCHDOG_INTERVAL] = _resolved
+                _healed.append(CONF_WATCHDOG_INTERVAL)
+        if new_opts.get(CONF_START_DURATION_THRESHOLD) == 5:
+            _resolved = resolve_start_duration_default(_dt)
+            if _resolved != 5:
+                new_opts[CONF_START_DURATION_THRESHOLD] = _resolved
+                _healed.append(CONF_START_DURATION_THRESHOLD)
+        # LITERAL 10, not CONFIG_ENTRY_MINOR_VERSION, like every other step. These
+        # blocks form a chain - each advances minor_version to exactly N+1 so the next
+        # block picks it up - so a step that wrote "whatever is current" would, after a
+        # future bump to 11, jump a 3.9 entry straight to 11 and skip the new 3.10->3.11
+        # step entirely. Only the one-pass legacy write at the end means "land on
+        # current" and uses the constant.
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=10
+        )
+        minor_version = 10
+        _log.debug(
+            "Migrated WashData entry from 3.9 to 3.10 (healed seeded cadence "
+            "defaults: %s)",
+            _healed or "none",
+        )
+
+    if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -207,7 +286,17 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(
         CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
     )
-    options.setdefault(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD)
+    # setdefault does not replace a present-but-null value; a null device type would
+    # then miss the per-type maps and fall through to the coarse scalar defaults (30/61)
+    # instead of the washing-machine defaults DEFAULT_DEVICE_TYPE stands for (5/30).
+    # Coerce it here (an explicit type is truthy and preserved) so both resolvers below
+    # see a real device type.
+    if not options.get(CONF_DEVICE_TYPE):
+        options[CONF_DEVICE_TYPE] = DEFAULT_DEVICE_TYPE
+    options.setdefault(
+        CONF_START_DURATION_THRESHOLD,
+        resolve_start_duration_default(options[CONF_DEVICE_TYPE]),
+    )
 
     options.setdefault(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL)
     options.setdefault(
@@ -223,7 +312,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(
         CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED
     )
-    options.setdefault(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
+    options.setdefault(
+        CONF_WATCHDOG_INTERVAL,
+        resolve_watchdog_interval_default(options[CONF_DEVICE_TYPE]),
+    )
     options.setdefault(
         CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD
     )
@@ -294,15 +386,20 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # (covers entries that migrate straight from v1/v2/early-v3 in one pass).
     options.pop(CONF_RUNNING_DEAD_ZONE, None)
 
+    # Same for an option persisted as null (3.8 -> 3.9), so a one-pass legacy
+    # migration lands on the current schema rather than needing a second call.
+    options = strip_null_options(options)
+
     hass.config_entries.async_update_entry(
         entry,
         data=data,
         options=options,
-        version=3,
-        minor_version=8,
+        version=CONFIG_ENTRY_VERSION,
+        minor_version=CONFIG_ENTRY_MINOR_VERSION,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.8", version, minor_version
+        "Migrated WashData entry from version %s.%s to %s.%s",
+        version, minor_version, CONFIG_ENTRY_VERSION, CONFIG_ENTRY_MINOR_VERSION,
     )
     return True
 
@@ -355,6 +452,29 @@ async def _migrate_online_to_global(hass: HomeAssistant, entry: ConfigEntry, man
                 pass
 
 
+async def _async_preload_ml_modules(hass: HomeAssistant) -> None:
+    """Import the ML modules off the event loop (issue #328).
+
+    ``ml.engine.resolve_scorer`` / ``resolve_regressor`` are called from the event
+    loop (live matching, end detection, quality gating), and Home Assistant flags
+    the lazy ``importlib.import_module`` they used to do there as a blocking call.
+    Warming the module cache once per setup in the import executor makes every
+    later resolution a ``sys.modules`` lookup. Best effort: a failure here only
+    means ML stays inert, so it must never block setup.
+    """
+
+    def _preload() -> None:
+        # pylint: disable=import-outside-toplevel
+        from .ml.engine import preload_models
+
+        preload_models()
+
+    try:
+        await hass.async_add_import_executor_job(_preload)
+    except Exception:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("ML module preload failed", exc_info=True)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WashData from a config entry."""
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
@@ -366,6 +486,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
 
     hass.data.setdefault(DOMAIN, {})
+
+    # Warm the ML module cache before anything can score in the event loop.
+    await _async_preload_ml_modules(hass)
 
     # Migration: Remove old auto_maintenance switch entity (now in settings)
     # pylint: disable=import-outside-toplevel
@@ -894,8 +1017,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     if key in entry_data:
                         new_data[key] = entry_data[key]
 
-                # Update all options from import
+                # Update all options from import, then strip any option persisted as
+                # null: an export taken from an already-broken entry (or a hand-edited
+                # file) can carry a `null`, which `.get()` hands back verbatim and the
+                # numeric casts that build CycleDetectorConfig then raise on - the #389
+                # bricked-setup failure. The WS import paths already do this; the legacy
+                # import_config service is the last writer that did not.
                 new_options.update(entry_options)
+                new_options = strip_null_options(new_options)
 
                 hass.config_entries.async_update_entry(
                     entry,
@@ -1094,8 +1223,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await asyncio.gather(*_cancelled_tasks, return_exceptions=True)
 
         # Release the per-entry write lock so it doesn't block the next setup.
-        from .ws_api import _WS_WRITE_LOCKS_KEY
+        from .ws_api import _WS_WRITE_LOCKS_KEY, async_clear_history_import
         hass.data.get(_WS_WRITE_LOCKS_KEY, {}).pop(entry.entry_id, None)
+
+        # Drop any staged history import (uploaded CSV text or a finished scan's
+        # traces). Nothing else owns that memory, so without this an abandoned upload
+        # would live for the lifetime of the process.
+        async_clear_history_import(hass, entry.entry_id)
 
         # When the last WashData entry is removed, tear down the shared panel/sidebar
         # so no stale registration flags or sidebar entry linger.

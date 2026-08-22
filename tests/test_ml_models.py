@@ -84,6 +84,55 @@ def test_unknown_capability_returns_none() -> None:
     assert score_fn is None and source is None
 
 
+def test_available_models_tolerates_a_non_dict_manifest(monkeypatch) -> None:
+    """A manifest that decodes to a list/scalar must not make available_models raise.
+
+    payload.get("models") would AttributeError (not caught by the OSError/ValueError
+    handler), failing every call. It must cache and return []."""
+    from custom_components.ha_washdata.ml import engine
+
+    monkeypatch.setattr(engine, "_MANIFEST_MODELS_CACHE", None)
+    monkeypatch.setattr(engine.json, "loads", lambda *_a, **_k: ["not", "a", "dict"])
+    try:
+        assert engine.available_models() == []
+    finally:
+        engine._MANIFEST_MODELS_CACHE = None  # don't poison other tests
+
+
+def test_available_models_caches_empty_on_an_unexpected_failure(monkeypatch) -> None:
+    """Any warm-up failure must assign the cache, else an event-loop caller retries the
+    blocking manifest read (#328). A non-OSError/ValueError from read_text is caught."""
+    from custom_components.ha_washdata.ml import engine
+
+    monkeypatch.setattr(engine, "_MANIFEST_MODELS_CACHE", None)
+
+    def _boom(*_a, **_k):
+        raise RuntimeError("unexpected")
+
+    monkeypatch.setattr(engine.json, "loads", _boom)
+    try:
+        assert engine.available_models() == []
+        assert engine._MANIFEST_MODELS_CACHE == []  # cache assigned, not left cold
+    finally:
+        engine._MANIFEST_MODELS_CACHE = None
+
+
+def test_available_models_drops_non_dict_entries(monkeypatch) -> None:
+    """A manifest like {"models": [null, {...}]} must not return the null entry -
+    the declared return is list[dict]."""
+    from custom_components.ha_washdata.ml import engine
+
+    monkeypatch.setattr(engine, "_MANIFEST_MODELS_CACHE", None)
+    monkeypatch.setattr(
+        engine.json, "loads",
+        lambda *_a, **_k: {"models": [None, {"name": "x"}, 7, {"name": "y"}]},
+    )
+    try:
+        assert engine.available_models() == [{"name": "x"}, {"name": "y"}]
+    finally:
+        engine._MANIFEST_MODELS_CACHE = None
+
+
 @pytest.mark.parametrize("module_name", MODEL_MODULES)
 def test_embedded_model_matches_lab_parity_fixtures(module_name: str) -> None:
     """The embedded model must reproduce the lab's scores bit-for-bit.

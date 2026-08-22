@@ -78,9 +78,12 @@
     "awaiting": "Oczekuje na zatwierdzenie",
     "imported_tip": "Zaimportowano ze sklepu społecznościowego. Używane tylko do dopasowywania, nie liczy się do statystyk.",
     "not_importable": "niedostępne",
-    "exists": "istnieje"
+    "exists": "istnieje",
+    "backfilled_tip": "Wykryty w zaimportowanej historii mocy. Wpływa tylko na dopasowywanie programów, nie liczy się do statystyk."
   },
   "btn": {
+    "set_brand_model": "Ustaw markę i model",
+    "refresh_catalog": "Odśwież katalog",
     "add_device": "+ Dodaj urządzenie",
     "add_device_tip": "Dodaj kolejne urządzenie WashData",
     "add_maintenance": "Dodaj zdarzenie konserwacji",
@@ -234,14 +237,19 @@
     "download_device": "Pobierz konfigurację urządzenia",
     "share_device": "Udostępnij konfigurację urządzenia",
     "share_device_tip": "Udostępnij programy i ustawienia tego urządzenia społeczności",
-    "share_n": "Udostępnij {n} program{s}",
+    "share_n": "Udostępnij cykle: {n}",
     "export_selected": "Eksport (wybierz dane)",
     "export_all": "Szybki eksport wszystkiego",
     "import_raw": "Zaawansowane: zastąp wszystko z pliku JSON",
     "download_export": "Pobierz eksport",
     "analyze_import": "Analizuj plik",
     "import_selected": "Importuj wybrane",
-    "back": "Wstecz"
+    "back": "Wstecz",
+    "import_power_history": "Importuj historię mocy",
+    "hist_read_recorder": "Wczytaj z Home Assistant",
+    "hist_scan": "Szukaj cykli",
+    "hist_import_n": "Importuj cykle: {n}",
+    "hist_goto_cycles": "Pokaż cykle"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,12 +261,12 @@
       "start": "Musi być poniżej Maks. Mocy Antygniotowej ({max} W)"
     },
     "attn_sub": "Przed zapisaniem napraw konflikty",
-    "attn_title": "{n} konflikt{s} ustawień",
+    "attn_title": "Konflikty ustawień: {n}",
     "confidence": {
       "auto": "Musi być równy lub wyższy niż Próg Dopasowania ({match})",
-      "learning": "Musi być równy lub niższy niż Próg Dopasowania ({match})",
+      "learning": "Musi być równy lub wyższy niż Próg Dopasowania ({match})",
       "match_for_auto": "Musi być równy lub niższy niż Pewność Automatycznego Etykietowania ({alc})",
-      "match_for_learning": "Musi być równy lub wyższy niż Pewność Uczenia ({lc})"
+      "match_for_learning": "Musi być równy lub niższy niż Pewność Uczenia ({lc})"
     },
     "duration_ratio": {
       "max": "Musi być większy niż Minimalna Proporcja Czasu Trwania ({min})",
@@ -296,14 +304,14 @@
       "match": "Musi być powyżej Progu Niedopasowania ({un})",
       "unmatch": "Musi być poniżej Progu Dopasowania ({match}); w przeciwnym razie potwierdzone dopasowanie natychmiast się cofa"
     },
-    "cascade_toast": "Dodatkowo dostosowano {n} ustawień w celu zachowania spójności.",
+    "cascade_toast": "Inne ustawienia dostosowane w celu zachowania spójności: {n}",
     "suggestion_resolves": "Zastosuj oczekującą sugestię ({val}) poniżej, aby rozwiązać ten konflikt",
     "use_fix": "Użyj {val}",
     "watchdog": {
       "interval": "Powinien wynosić co najmniej 2× Interwał Próbkowania ({si} s)",
       "sampling": "Interwał Próbkowania powinien wynosić co najwyżej połowę Interwału Watchdog ({wi} s)"
     },
-    "settings_banner": "{n} konflikt{s} ustawień – sprawdź podświetlone sekcje i popraw przed zapisaniem.",
+    "settings_banner": "Konflikty ustawień: {n}. Sprawdź podświetlone sekcje i popraw je przed zapisaniem.",
     "settings_banner_btn": "Przejdź do pierwszego"
   },
   "hdr": {
@@ -356,7 +364,8 @@
     "pg_outcome": "Wynik symulacji",
     "pg_across_cycles": "We wszystkich Twoich cyklach",
     "community_store": "Sklep społecznościowy",
-    "online_account": "Sklep społecznościowy i funkcje online"
+    "online_account": "Sklep społecznościowy i funkcje online",
+    "import_power_history": "Import historii mocy"
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -364,6 +373,7 @@
     "poor": "⚠ Słaba jakość profilu"
   },
   "lbl": {
+    "drag_to_resize": "Przeciągnij, aby zmienić rozmiar",
     "actions": "Działania",
     "activity": "Działalność",
     "administrators": "Administratorzy",
@@ -435,7 +445,7 @@
     "from": "Od",
     "gap_s": "Luka (y)",
     "group_name": "Nazwa grupy",
-    "head_trim": "Głowica (e)",
+    "head_trim": "Przycięcie początku (s)",
     "health": "Zdrowie",
     "hide_tabs": "Ukryj karty dla osób niebędących administratorami",
     "in_use": "W użyciu",
@@ -451,7 +461,7 @@
     "metric": "Metryka",
     "mode_existing_profile": "Dodaj do istniejącego profilu",
     "mode_new_profile": "Utwórz nowy profil",
-    "models_fine_tuned": "({count} modeli dostrojonych)",
+    "models_fine_tuned": "(dostrojone modele: {count})",
     "n_classic_suggestions": "{n} klasyczne",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "Wybrano {n}",
@@ -533,7 +543,7 @@
     "stage3": "Etap 3 – DTW",
     "stage4": "Etap 4 – zgodność",
     "status": "Status",
-    "tail_trim": "Trymowanie ogona",
+    "tail_trim": "Przycięcie końca (s)",
     "timer_auto_pause": "Automatyczna pauza",
     "timer_min": "min",
     "timer_msg_placeholder": "Wiadomość (opcjonalnie, {device}/{program}/{minutes})",
@@ -677,7 +687,26 @@
     "conflict_resolution": "Konflikty nazw",
     "conflict_import_copy": "Importuj jako kopię",
     "conflict_keep_mine": "Zachowaj moje",
-    "conflict_overwrite": "Nadpisz"
+    "conflict_overwrite": "Nadpisz",
+    "hist_csv_data": "Dane CSV",
+    "hist_from_recorder": "Albo wczytaj ją z Home Assistant",
+    "days": "dni",
+    "hist_keep": "Zachowaj ten cykl",
+    "hist_looks_complete": "zakończony",
+    "peak_power_short": "Szczyt",
+    "shape": "Kształt",
+    "hist_skip_idle": "nic nie działało",
+    "hist_skip_sparse": "odczyty zbyt oddalone od siebie",
+    "hist_skip_short": "za mało odczytów",
+    "hist_skip_long": "brak przerwy dość długiej, by podzielić",
+    "hist_reason_short": "krótszy niż najkrótszy rzeczywisty cykl tego urządzenia",
+    "hist_reason_no_end": "nigdy nie zakończył się poprawnie",
+    "hist_since": "Od",
+    "task_history_import": "Skanowanie historii mocy",
+    "task_history_import_apply": "Importowanie cykli",
+    "evidence_real_cycles": "Cykle wykonane przez to urządzenie",
+    "evidence_reference_cycles": "Pobrane ze sklepu społecznościowego",
+    "evidence_backfill_cycles": "Znalezione w zaimportowanej historii mocy"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -756,9 +785,15 @@
     "store_share": "Udostępnij w sklepie społecznościowym",
     "store_share_device": "Udostępnij konfigurację urządzenia",
     "export_select": "Eksport - wybierz dane",
-    "import_wizard": "Import - wybierz dane"
+    "import_wizard": "Import - wybierz dane",
+    "history_import": "Import historii mocy"
   },
   "msg": {
+    "tail_trim_hint": "Ile sekund usunąć z końca",
+    "store_sibling_hint": "Nic nie udostępniono dla Twojego dokładnego modelu? Bardzo podobny model tej samej marki to zwykle dobry punkt wyjścia.",
+    "store_declare_appliance": "Wskaż WashData, jakie urządzenie posiadasz, a ta karta pokaże konfiguracje udostępnione dla niego przez innych użytkowników. Możesz też wpisać markę powyżej, aby się rozejrzeć.",
+    "refresh_catalog_hint": "Listy marek i urządzeń społeczności są przechowywane w pamięci podręcznej, aby wspólny sklep nie przekroczył swojego dziennego limitu zapytań. Odśwież, aby pobrać pozycje dodane lub zatwierdzone przez innych.",
+    "head_trim_hint": "Ile sekund usunąć z początku",
     "appliance_monitor": "Monitor urządzenia",
     "artifact_dip_detail": "Moc spadła poniżej normalnego zakresu przez ~{n}s.",
     "artifact_footer": "Zaznaczono na powyższym wykresie. Są to artefakty przejściowe (np. otwarcie drzwi w połowie cyklu), niekoniecznie problemy.",
@@ -769,7 +804,7 @@
     "automations_intro": "WashData uruchamia zdarzenia {start} / {end} i udostępnia encje, więc powiadomienia i akcje najlepiej budować jako normalne automatyzacje Home Assistant. Automatyzacje korzystające z tego urządzenia są widoczne poniżej.",
     "cleanup_intro": "Każdy oznaczony cykl został nałożony. Zaznacz wartości odstające i usuń, aby oczyścić profil.",
     "clear_debug_hint": "Usuń zapisane dane debugowania, aby zwolnić miejsce.",
-    "collecting_data": "Zbieranie danych: jeszcze {need} cykli do rozpoczęcia dostrajania ({current}/{min}).",
+    "collecting_data": "Zbieranie danych. Brakujące cykle do rozpoczęcia dostrajania: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Profile nakładkowe (słabe)",
     "compare_profiles_tip": "Nałóż inne koperty profili na powyższy wykres, aby zobaczyć, która z nich najlepiej pasuje do tego cyklu.",
     "compare_selected_cycles": "Wybrane cykle (pełne) – pokaż / ukryj",
@@ -779,7 +814,7 @@
     "cycles_deleted": "Usunięto cykle: {count}",
     "enough_data": "Wystarczająco danych do nauki ({current}/{min} cykli).",
     "export_description": "Wybierz dokładnie, które profile, cykle, ustawienia i inne dane wyeksportować do pliku JSON, albo przeanalizuj plik i zaimportuj tylko wybrane części.",
-    "feedback_cycles_pending": "{n} cykl{s} do sprawdzenia",
+    "feedback_cycles_pending": "Do sprawdzenia: {n}",
     "feedback_prompt": "Potwierdź, że wszystko było w porządku, popraw program lub zignoruj.",
     "feedback_relabel_hint": "Ponowne oznaczenie tego cyklu również go rozwiązuje.",
     "filter_by_profile": "Filtruj według profilu…",
@@ -856,7 +891,6 @@
     "pg_stress_synthetic": "symulacja bezczynności zaczyna się tutaj",
     "pg_sweep_intro": "Co by było, gdyby {param} był inny? Przetestuj {steps} wartości na swoich ostatnich {cycles} cyklach, aby znaleźć ustawienie, przy którym najwięcej cykli jest poprawnie dopasowanych.",
     "pg_sweep_step": "Krok {done} / {total}",
-    "pg_undetected": "{n} niewykrytych cykli",
     "pg_verdict_bad": "Wymaga uwagi: wiele cykli pozostaje niewykrytych.",
     "pg_verdict_good": "Dobrze dostrojone: większość cykli jest poprawnie rozpoznawana i dopasowywana.",
     "pg_verdict_ok": "Akceptowalnie: część cykli pominięto. Spróbuj obniżyć próg startu.",
@@ -888,6 +922,7 @@
     "review_recorded_tip": "Oznacz to jako ręcznie wybrany cykl referencyjny dla swojego programu – pełni tę samą rolę, co cykl nagrany ręcznie. Cykle referencyjne są zawsze zachowywane, zaszczepiają pasujący szablon i nigdy nie są usuwane podczas czyszczenia. (To jest „złota”/nagrana flaga; obie są tym samym.)",
     "review_tags_tip": "Opcjonalne flagi opisujące, co poszło nie tak w tym cyklu, więc szkolenie i czyszczenie mogą to wyjaśnić.",
     "review_to_cycles": "Otwórz kolejkę przeglądu Cykli",
+    "samples_decimated": "Wyświetlanie {shown} z {total} próbek (przerzedzone do wyświetlania; szczyty zachowane). Szeroka przerwa oznacza tu przerzedzenie, a nie brakujące dane.",
     "saving_triggers_reload": "Zapisanie powoduje przeładowanie integracji. Jednostki HA mogą przez chwilę być wyświetlane jako niedostępne.",
     "search_placeholder": "Ustawienia wyszukiwania…",
     "see_recorder": "Zobacz widżet rejestratora poniżej",
@@ -929,7 +964,7 @@
     "trend_energy_down": "Energia wykazuje tendencję spadkową ({pct}%/cykl)",
     "trend_energy_up": "Trend wzrostowy w zakresie energii ({pct}%/cykl) – ostatnia średnia {avg}",
     "trim_destructive_confirm": "To zachowa tylko {pct}% cyklu i tej operacji nie można cofnąć. Kontynuować?",
-    "trim_intro": "Przeciągnij czerwone uchwyty lub wprowadź wartości. Wszystko za oknem jest usuwane.",
+    "trim_intro": "Przeciągnij czerwone uchwyty lub wprowadź wartości. Wszystko poza oknem jest usuwane.",
     "tuning_suggestions_available": "Sugestia dostrojenia {count} dostępna z obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
     "unsure_detected_prefix": "WashData nie jest pewien, czy został wykryty",
     "updated": "Zaktualizowano",
@@ -991,12 +1026,12 @@
     "share_consent": "Udostępniasz rzeczywiste dane ze swojego urządzenia. Nie udostępniaj, jeśli Twoje wzorce użytkowania są prywatne.",
     "share_device_none": "Nie skonfigurowano jeszcze żadnych urządzeń. Najpierw dodaj urządzenie.",
     "share_guideline_naming": "Używaj czytelnych nazw programów (np. 'Cotton 40', 'Eco 60'), żeby inni mogli je zidentyfikować",
-    "share_guideline_quality": "Udostępniaj tylko profile z ⭐ cyklami referencyjnymi lub co najmniej {n} potwierdzonymi uruchomieniami",
+    "share_guideline_quality": "Udostępniaj tylko cykle, które zakończyły się normalnie: bez przerw w połowie cyklu, otwierania drzwi ani chwilowych zaników zasilania.",
     "share_guideline_review": "Przejrzyj swoje profile przed udostępnieniem -- usuń te, które wyglądają błędnie",
     "share_guidelines_title": "Przed udostępnieniem",
     "store_download_device_intro": "Pobierz konfigurację urządzenia ze społeczności i zastosuj ją do nowego lub istniejącego urządzenia",
-    "store_share_device_intro": "Udostępnij programy swojego urządzenia (profile + cykle referencyjne) społeczności. Ustawienia są opcjonalne.",
-    "share_profile_no_cycles": "Profil '{p}' nie ma ⭐ cykli referencyjnych -- zostanie pominięty, chyba że masz {n}+ potwierdzonych uruchomień",
+    "store_share_device_intro": "Prześlij {brand} {model} wraz z wybranymi cyklami referencyjnymi. Inne osoby z tym samym urządzeniem mogą przyjąć Twoje programy. Wpisy są sprawdzane przed publikacją.",
+    "share_profile_no_cycles": "Brak cykli referencyjnych. Aby dołączyć ten profil, oznacz cykl jako ⭐ na karcie Cykle",
     "advisory_phase_inconsistent": "Wygląda na to, że '{name}' miesza różne programy lub temperatury - jego cykle nagrzewają się przez bardzo różne czasy. Podzielenie go na osobne profile (np. dla każdej temperatury) poprawi dopasowanie i szacowanie czasu.",
     "advisory_phase_inconsistent_title": "⚠ Prawdopodobnie pomieszane programy",
     "export_select_intro": "Zaznacz dokładnie to, co ma zostać uwzględnione. Wybranie profili bez ich cykli i tak eksportuje rozpoznawalny program (jego wyuczony kształt jest przenoszony razem z nim).",
@@ -1006,7 +1041,29 @@
     "merge_hint": "Zaimportowane elementy są dodawane; nic lokalnego nie zostaje utracone. Konflikty nazw rozwiązuje się poniżej.",
     "replace_warn": "Każda zaznaczona kategoria zostaje wyczyszczona i zastąpiona danymi z pliku. Niezaznaczone kategorie pozostają nietknięte.",
     "dest_reference_hint": "Zaimportowane cykle jedynie poprawiają rozpoznawanie programów i nigdy nie wpływają na statystyki zużycia/energii.",
-    "dest_real_history_hint": "Zaimportowane cykle liczą się jako własna historia tego urządzenia i zasilają statystyki energii/zużycia. Użyj przy przenoszeniu jednego urządzenia do nowej instalacji."
+    "dest_real_history_hint": "Zaimportowane cykle liczą się jako własna historia tego urządzenia i zasilają statystyki energii/zużycia. Użyj przy przenoszeniu jednego urządzenia do nowej instalacji.",
+    "import_history_description": "Twoja inteligentna wtyczka działała już przed WashData? Wgraj eksport historii jej czujnika mocy albo wczytaj ją wprost z Home Assistant - normalne wykrywanie przebiegnie po tych danych, więc dawne cykle pojawią się na liście Cykle, gotowe do nazwania.",
+    "hist_input_hint": "Wgraj plik CSV pobrany z panelu Historia (encja, stan, ostatnia zmiana) albo pozwól WashData wczytać historię czujnika bezpośrednio. Wykrywanie przebiegnie dokładnie tak samo jak na żywo, a Ty wybierasz, które z odnalezionych cykli zachować.",
+    "hist_recorder_hint": "Odczytuje dane od wybranej daty do teraz. Home Assistant domyślnie przechowuje szczegółową historię przez 10 dni, a potem już tylko średnie godzinowe, zbyt zgrubne do wykrywania cykli - wcześniejszą datę wybieraj tylko wtedy, gdy Twój recorder jest ustawiony na dłuższe przechowywanie.",
+    "hist_scanning": "Odtwarzamy Twoją historię przez detektor. Działa to w tle - możesz zamknąć to okno i wrócić później.",
+    "hist_imported_count": "Zaimportowane cykle: {n}.",
+    "hist_duplicates": "Już wcześniej zaimportowane i pominięte: {n}.",
+    "hist_capped": "Osiągnięto limit zaimportowanych cykli na urządzenie; reszta nie została zapisana.",
+    "hist_next_step": "Są na liście Cykle, oznaczone jako zaimportowana historia. Otwórz jeden z nich i przyciskiem Oznacz nadaj mu nazwę programu, do którego należy.",
+    "hist_rows_read": "Wczytane odczyty: {n}",
+    "hist_breaks": "Przerwy, w których czujnik był niedostępny: {n}",
+    "hist_other_entity": "Pominięte odczyty innych encji: {n}",
+    "hist_entity_substituted": "Odczytano {used} (to urządzenie jest skonfigurowane dla {wanted})",
+    "hist_skipped_spans": "Pominięte odcinki",
+    "hist_settings_used": "Wykryto przy aktualnych ustawieniach tego urządzenia (minimalna moc {w} W, opóźnienie wyłączenia {s} s).",
+    "hist_none_found": "W tej historii nie udało się wykryć żadnych cykli.",
+    "hist_found": "Znalezione cykle: {n}. Odznacz wszystko, co nie wygląda na prawdziwy przebieg - nic nie zostanie zapisane, dopóki nie zaimportujesz.",
+    "hist_scan_capped": "Pokazywane są tylko pierwsze kandydatury (znaleziono: {n}).",
+    "hist_recorder_empty": "Home Assistant nie ma szczegółowej historii tego czujnika w tym okresie.",
+    "hist_scan_failed": "Skanowanie nie powiodło się.",
+    "hist_scan_expired": "To skanowanie nie jest już dostępne. Uruchom je ponownie.",
+    "hist_import_failed": "Import nie powiódł się.",
+    "imported_history_readonly": "Wykryty w zaimportowanej historii mocy. Wpływa na dopasowywanie programów, ale nie liczy się do Twoich statystyk i nie można go przyciąć ani podzielić. Oznacz go, aby nadać mu nazwę programu."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1349,7 +1406,7 @@
       "label": "Czujnik Mocy"
     },
     "profile_duration_tolerance": {
-      "doc": "Pasmo +/- wokół średniego czasu trwania profilu używanego podczas dopasowywania. Wartość 0,25 oznacza, że ​​profil 60-minutowy odpowiada cyklom 45-75-minutowym.",
+      "doc": "Pasmo +/- wokół średniego czasu trwania profilu używanego podczas dopasowywania. Wartość 0,25 oznacza, że profil 60-minutowy odpowiada cyklom 45-75-minutowym.",
       "label": "Tolerancja Czasu Profilu"
     },
     "profile_match_interval": {
@@ -1357,11 +1414,11 @@
       "label": "Interwał Dopasowania"
     },
     "profile_match_max_duration_ratio": {
-      "doc": "Maksymalna długość cyklu w stosunku do profilu. 1.3 oznacza, że ​​cykl musi trwać krócej niż 130% czasu trwania profilu, aby uzyskać zgodność.",
+      "doc": "Maksymalna długość cyklu w stosunku do profilu. 1.3 oznacza, że cykl musi trwać krócej niż 130% czasu trwania profilu, aby uzyskać zgodność.",
       "label": "Maksymalna Proporcja Czasu Trwania"
     },
     "profile_match_min_duration_ratio": {
-      "doc": "Minimalna długość cyklu w stosunku do profilu. Wartość 0,9 oznacza, że ​​aby cykl był zgodny, musi wynosić co najmniej 90% czasu trwania profilu.",
+      "doc": "Minimalna długość cyklu w stosunku do profilu. Wartość 0,9 oznacza, że aby cykl był zgodny, musi wynosić co najmniej 90% czasu trwania profilu.",
       "label": "Minimalna Proporcja Czasu Trwania"
     },
     "profile_match_threshold": {
@@ -1391,6 +1448,10 @@
     "save_debug_traces": {
       "doc": "Przechowuj ślad pełnej mocy i pasujące dane debugowania dla każdego cyklu. Przydatne do rozwiązywania problemów, ale zwiększa rozmiar pamięci.",
       "label": "Zapisuj Ślady Debugowania"
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "Jak daleko w oczekiwanym czasie trwania dopasowanego programu musi znajdować się cykl, zanim Inteligentne zakończenie może go zakończyć wcześniej po spadku mocy. Oczekiwany czas trwania to średnia programu, więc w urządzeniach, których czas pracy bardzo się waha - pralki z zimną wodą dopływową zimą wobec ciepłej latem, suszarki z suszeniem czujnikowym, programy zależne od wsadu - około połowa wszystkich uruchomień kończy się krócej niż ta średnia i nigdy nie doczeka się szybkiego zakończenia, kończąc dopiero przez awaryjny limit czasu, kilka minut później. W takich maszynach obniż tę wartość (np. 0,85), aby wcześniejsze zakończenie nadal się uruchamiało; zwiększ ją w stronę 1,0, aby zachować większą ostrożność. Pozostaw puste dla wartości domyślnej (0,98, a dla zmywarek 0,99). Może jedynie zakończyć cykl wcześniej, nigdy później, i nigdy nie uruchamia się przy niejednoznacznym dopasowaniu lub dopasowaniu o niskiej pewności.",
+      "label": "Współczynnik inteligentnego zakończenia"
     },
     "smoothing_window": {
       "doc": "W jakim stopniu surowy sygnał mocy jest wygładzany. Niski (2) reaguje, ale jest głośny; wysoki (5) wygładza skoki, ale dodaje opóźnienia.",
@@ -1522,6 +1583,10 @@
     "door_end_dwell_seconds": {
       "label": "Czas otwarcia drzwi do zakończenia cyklu",
       "doc": "Jak długo drzwi muszą pozostać otwarte, zanim WashData zakończy cykl, gdy włączone jest \"Drzwi otwierają się automatycznie na końcu\". Wystarczająco długo, aby zignorować szybkie dodawanie naczyń (domyślnie 60 s), wystarczająco krótko, aby szybko zakończyć, gdy maszyna otworzy drzwi."
+    },
+    "profile_evidence_sources": {
+      "label": "Cykle kształtujące program",
+      "doc": "Które cykle są używane do zbudowania krzywej mocy każdego programu i do dopasowania do niej zakończonego cyklu. Odznaczenie danego rodzaju sprawia, że przestaje on wpływać na Twoje programy, ale nic nie zostaje usunięte - cykle pozostają na liście Cykle i nadal można je oznaczyć lub usunąć. Przydatne, jeśli nie masz zaufania do zaimportowanych danych. Nie ma to wpływu na statystyki: zawsze liczą tylko cykle, które to urządzenie faktycznie wykonało. Odznaczenie wszystkiego jest ignorowane, ponieważ program bez żadnych cykli nigdy nie mógłby zostać dopasowany."
     }
   },
   "setting_group": {
@@ -1605,6 +1670,9 @@
     },
     "basic_configuration": {
       "label": "Podstawowa konfiguracja"
+    },
+    "profile_evidence": {
+      "label": "Podstawa profilu"
     }
   },
   "status": {
@@ -1629,7 +1697,8 @@
     "trimming": "Przycinanie…",
     "splitting": "Dzielenie…",
     "deleting": "Usuwanie…",
-    "imported": "Zaimportowano"
+    "imported": "Zaimportowano",
+    "preparing": "Przygotowywanie…"
   },
   "suggestion": {
     "both_agree": "WashData zaleca",
@@ -1725,7 +1794,7 @@
       "thr_batch": "Utrzymane tuż powyżej najniższej mocy czynnej p05 w {cycles} cyklach ({p05}W), aby start był wykrywany jak najwcześniej, a próg zatrzymania pozostawał poniżej najniższej mocy pracy urządzenia.",
       "tol_per_profile": "p75 wariancji czasu trwania na profil w {profiles} profilach ({cycles} cykli); spójne profile nie są karane.",
       "tol_pooled": "Na podstawie łącznej wariancji czasu trwania {cycles} ostatnich oznaczonych cykli (odchylenie p95={dev}).",
-      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (tuż powyżej przerwy aktualizacji p95 wynoszącej {p95}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań."
+      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (tuż powyżej przerwy aktualizacji p95 wynoszącej {p95}s i co najmniej 2x powyżej interwału próbkowania {median}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań."
     },
     "exclusions": {
       "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",
@@ -1772,6 +1841,7 @@
     "wrong_profile": "Zły profil"
   },
   "toast": {
+    "catalog_refreshed": "Katalog społeczności odświeżony",
     "access_saved": "Kontrola dostępu zapisana",
     "all_wiped": "Wszystkie dane zostały usunięte",
     "analysis_complete_none": "Analiza ukończona: brak nowych sugestii",
@@ -1811,7 +1881,7 @@
     "pg_sugg_ml_loaded": "Załadowano {n} wartości skalibrowanych przez ML - uruchom piaskownicę, aby porównać",
     "phase_name_required": "Nazwa fazy jest wymagana",
     "phase_updated": "Faza zaktualizowana",
-    "phases_saved": "Fazy ​​zapisane",
+    "phases_saved": "Fazy zapisane",
     "preferences_saved": "Preferencje zostały zapisane",
     "profile_name_required": "Nazwa profilu jest wymagana",
     "profile_renamed": "Zmieniono nazwę profilu",
@@ -1865,19 +1935,21 @@
     "rating_saved": "Ocena jakości zapisana",
     "brand_added": "Marka dodana, oczekuje na zatwierdzenie",
     "profile_added": "Profil dodany, oczekuje na zatwierdzenie",
-    "saved_except_conflicts": "Ustawienia zapisane -- {n} ustawienie{s} pominięte z powodu konfliktów",
+    "saved_except_conflicts": "Zapisano. Popraw podświetlone konflikty, aby zapisać pozostałe.",
     "share_device_none_sel": "Wybierz co najmniej jeden program do udostępnienia",
-    "store_device_downloaded": "Konfiguracja urządzenia pobrana: {created} profil{c} utworzony, {dup} już istniało",
-    "store_device_downloaded_phases": "Konfiguracja urządzenia pobrana: {created} profil{c} utworzony, {dup} już istniało, mapa faz zastosowana",
-    "store_device_downloaded_settings": "Konfiguracja urządzenia pobrana: {created} profil{c} utworzony, {dup} już istniało, ustawienia zastosowane",
-    "store_device_shared": "Konfiguracja urządzenia udostępniona: {n} program{s} przesłany",
-    "store_device_shared_all_dup": "Nic nowego do udostępnienia -- wszystkie programy już istnieją w sklepie",
-    "store_device_shared_partial": "Częściowe udostępnienie: {n} program{s} przesłany, {failed} pominięte",
-    "store_device_shared_some_dup": "Konfiguracja urządzenia udostępniona: {n} program{s} przesłany ({dup} już istniało)",
+    "store_device_downloaded": "Dodano programów: {p}, nagrań: {c}",
+    "store_device_downloaded_phases": "Dodano programów: {p}, nagrań: {c}, map faz: {ph}",
+    "store_device_downloaded_settings": "Dodano programów: {p}, nagrań: {c}, map faz: {ph}, ustawień: {s}",
+    "store_device_shared": "Udostępniono w sklepie społecznościowym (cykli: {n}), oczekuje na weryfikację.",
+    "store_device_shared_all_dup": "Wszystkie wybrane cykle ({n}) były już w sklepie społecznościowym.",
+    "store_device_shared_partial": "Udostępniono cykli: {n}; nie udało się przesłać: {failed}.",
+    "store_device_shared_some_dup": "Udostępniono cykli: {created}; już w sklepie: {dup}.",
     "store_download_failed": "Pobieranie nie powiodło się: {error}",
     "store_download_nothing": "Nic do pobrania -- wszystkie profile już istnieją na tym urządzeniu",
     "export_selective_done": "Eksport pobrany",
-    "import_selective_done": "Zaimportowano {profiles} profil(e) i {cycles} cykl(e)"
+    "import_selective_done": "Zaimportowano {profiles} profil(e) i {cycles} cykl(e)",
+    "hist_csv_required": "Najpierw wczytaj plik CSV lub wklej jego zawartość",
+    "file_read_failed": "Nie udało się odczytać tego pliku"
   },
   "trend": {
     "down": "Trend w dół",
@@ -1892,6 +1964,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy ciszy po oczekiwanym czasie trwania, zanim zwolnione zostanie oczekiwanie na końcowe odpompowanie wody",
+    "smart_termination_duration_ratio": "Ułamek oczekiwanego czasu trwania dopasowanego programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej; obniż go w przypadku maszyn zależnych od wsadu lub temperatury",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",
     "anti_wrinkle_exit_power": "Moc musi spaść poniżej tej wartości pomiędzy impulsami, aby tryb antygniotowy pozostał aktywny",
     "anti_wrinkle_idle_timeout": "Dozwolony czas ciszy między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy",
@@ -1955,6 +2028,10 @@
     "finished": "Cykl osiągnął stan końcowy i zakończył się."
   },
   "store": {
+    "your_model_tip": "To urządzenie wskazane przez Ciebie w Ustawieniach",
+    "your_model": "Twoje",
+    "search_brand_ph": "Szukaj według marki…",
+    "programs_count": "Programy: {n}",
     "browse": "Przeglądaj",
     "device": "Urządzenie",
     "favorites": "Ulubione",

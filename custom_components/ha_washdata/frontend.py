@@ -31,6 +31,18 @@ CARD_NAME = "ha-washdata-card.js"
 INTEGRATION_URL = f"/{LOCAL_SUBDIR}/{CARD_NAME}"
 CARD_REGISTERED = "registered"
 
+# Minified build artifacts produced by devtools/build_panel.mjs, and the manifest
+# recording which source each was built from.  These are an optimisation only:
+# every asset is ALWAYS served at its readable-source URL, and _resolve_asset()
+# falls back to the readable source whenever the artifact is missing, stale, or
+# hand-edited.  So a forgotten rebuild degrades to a bigger download, never to
+# wrong code -- which is why the URL must not encode which variant was chosen.
+BUILD_MANIFEST_NAME = "build-manifest.json"
+
+# source name -> {"serving", "minified", "bytes"} for whatever was last registered.
+# Module level (not per-entry): the frontend assets are registered once per HA start.
+_SERVED_ASSETS: dict[str, dict] = {}
+
 # Full-screen panel constants
 PANEL_JS_NAME = "ha-washdata-panel.js"
 PANEL_JS_URL = f"/{LOCAL_SUBDIR}/{PANEL_JS_NAME}"
@@ -63,70 +75,235 @@ class LovelaceResourceItem(TypedDict, total=False):
     res_type: str
 
 
-def get_cache_buster(filename: str = CARD_NAME) -> str:
-    """Generate a stable cache buster based on a www asset's mtime.
+def _sha256_file(path: Path) -> str:
+    """SHA-256 of a file, streamed so a large asset never lands in memory twice."""
+    import hashlib
 
-    Also considers the translations/panel/ directory mtime so that
-    translation-only releases (e.g. GitLocalize merges) still bust the
-    browser cache for both the panel JS and the per-language JSON files.
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 256), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _resolve_asset(source_name: str, www: Path | None = None) -> Path:
+    """Return the file to serve for ``source_name``: minified build, or source.
+
+    The minified artifact is used only when the manifest proves it was built from
+    exactly the bytes currently on disk AND has not been modified since. Any doubt
+    -- no manifest, no artifact, changed source, tampered artifact, unreadable
+    anything -- resolves to the readable source. Blocking I/O; call in an executor.
+
+    ``www`` overrides the asset directory (tests only); production always uses the
+    integration's own www/.
     """
+    import json
+
+    if www is None:
+        www = Path(__file__).parent / "www"
+    source = www / source_name
+
     try:
-        base = Path(__file__).parent
-        src_mtime = os.path.getmtime(base / "www" / filename)
+        manifest = json.loads((www / BUILD_MANIFEST_NAME).read_text())
+        entry = manifest["assets"][source_name]
+        artifact = www / entry["artifact"]
+        if not artifact.is_file():
+            return source
+        if _sha256_file(source) != entry["source_sha256"]:
+            _LOGGER.debug(
+                "%s changed since the last panel build; serving readable source "
+                "(run devtools/build_panel.mjs to refresh the minified build)",
+                source_name,
+            )
+            return source
+        if _sha256_file(artifact) != entry["artifact_sha256"]:
+            _LOGGER.warning(
+                "Minified asset %s does not match its build manifest; serving "
+                "readable source instead",
+                entry["artifact"],
+            )
+            return source
+        return artifact
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug(
+            "No usable minified build for %s (%s); serving readable source",
+            source_name,
+            exc,
+        )
+        return source
+
+
+def _ensure_gzip(path: Path) -> None:
+    """Keep a fresh ``<path>.gz`` beside ``path`` so aiohttp can serve it.
+
+    aiohttp's FileResponse transparently serves a pre-compressed sibling when the
+    client sends a matching Accept-Encoding, which cuts these assets by ~75% -- but
+    it only checks that the sibling EXISTS, never that it is current. A stale .gz
+    would therefore be served as if it were the real file (and cached for a month),
+    so the sibling is unconditionally rebuilt from the exact file being served.
+
+    Rebuilding unconditionally rather than comparing mtimes is deliberate: the .gz
+    is not shipped, so it is written at install time, while an update can restore
+    an *older* source mtime from the release archive (the same mtime-preservation
+    ``get_cache_buster`` works around). "Newer .gz" therefore does not imply "current
+    .gz", and the cost of being sure is ~25 ms for the panel and ~1 ms for the card,
+    once per HA start, in an executor. Best-effort: a read-only install just serves
+    uncompressed.
+
+    If the rebuild fails, any existing sibling is removed rather than left behind:
+    aiohttp would keep serving it, which is the stale-content case this function
+    exists to prevent. Losing compression is the safe half of that trade.
+    """
+    import gzip
+    import shutil
+    import tempfile
+
+    gz = path.with_suffix(path.suffix + ".gz")
+    try:
+        # Compress to a temp file in the same directory, then atomically replace, so
+        # a concurrent request can never observe a half-written .gz.
+        fd, tmp_name = tempfile.mkstemp(dir=str(path.parent), suffix=".gz.tmp")
+        os.close(fd)
+        tmp = Path(tmp_name)
+        try:
+            with open(path, "rb") as src, gzip.open(str(tmp), "wb", compresslevel=9) as dst:
+                shutil.copyfileobj(src, dst)
+            os.replace(tmp, gz)
+        except BaseException:
+            tmp.unlink(missing_ok=True)
+            raise
+        _LOGGER.debug("Wrote compressed asset %s", gz.name)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Could not pre-compress %s (%s); serving uncompressed", path, exc)
+        try:
+            gz.unlink(missing_ok=True)
+        except OSError:  # read-only dir: nothing was ever written there either
+            pass
+
+
+def _prepare_asset(source_name: str, www: Path | None = None) -> Path:
+    """Resolve the best variant of an asset and make sure its .gz is current.
+
+    Also records the outcome so it can be reported without a browser: because both
+    variants are served at the SAME url, the only ways to tell from outside are the
+    response size and its hash, which is awkward to ask of a bug reporter. See
+    ``served_asset_report``.
+    """
+    served = _resolve_asset(source_name, www)
+    _ensure_gzip(served)
+    # Stat once and reuse: a second, unguarded stat()/is_file() below could raise if
+    # the file vanished between the two calls and fail the whole registration, even
+    # though the asset was resolved and compressed fine.
+    try:
+        size = served.stat().st_size
+    except OSError:
+        size = None
+    if size is not None:
+        _SERVED_ASSETS[source_name] = {
+            "serving": served.name,
+            "minified": served.name != source_name,
+            "bytes": size,
+        }
+    _LOGGER.info(
+        "Serving %s as %s (%s, %.1f KB)",
+        source_name,
+        served.name,
+        "minified build" if served.name != source_name else "readable source",
+        (size / 1024) if size is not None else 0.0,
+    )
+    return served
+
+
+def served_asset_report() -> dict[str, dict]:
+    """Which variant of each frontend asset is actually being served.
+
+    Populated by :func:`_prepare_asset` at registration time. Surfaced in
+    diagnostics so "is the minified panel live?" is answerable from a diagnostics
+    download instead of from browser devtools and a hash comparison.
+    """
+    return {k: dict(v) for k, v in _SERVED_ASSETS.items()}
+
+
+def get_cache_buster(filename: str = CARD_NAME) -> str:
+    """Generate a stable cache buster for a www asset.
+
+    Folds in the manifest.json version string so that every release produces a
+    different URL even when the package manager (e.g. HACS) preserves original
+    file mtimes from the release archive.  The mtime path is kept as a secondary
+    signal so translation-only GitLocalize merges still bust the cache.
+
+    Timestamps are read in nanoseconds (``st_mtime_ns``): ``getmtime()`` returns
+    float seconds, and truncating that to whole seconds made two rebuilds inside
+    the same second - which is a normal development cycle - produce the same
+    token, leaving the browser on the immutably-cached previous artifact.
+    """
+    import hashlib
+    import json
+
+    base = Path(__file__).parent
+    try:
+        manifest_version = json.loads((base / "manifest.json").read_text())["version"]
+    except Exception:  # pylint: disable=broad-exception-caught
+        manifest_version = ""
+
+    try:
+        src_mtime = os.stat(base / "www" / filename).st_mtime_ns
         try:
             panel_dir = base / "translations" / "panel"
             trans_mtime = max(
-                (os.path.getmtime(f) for f in panel_dir.iterdir() if f.is_file()),
-                default=0.0,
+                (os.stat(f).st_mtime_ns for f in panel_dir.iterdir() if f.is_file()),
+                default=0,
             )
         except OSError:
-            trans_mtime = 0.0
-        return str(int(max(src_mtime, trans_mtime)))
+            trans_mtime = 0
+        # A rebuild changes the minified artifact and the manifest but not the
+        # source, so fold both in: otherwise switching between the readable and
+        # minified variant would reuse a URL the browser has already cached.
+        try:
+            build_mtime = max(
+                os.stat(base / "www" / BUILD_MANIFEST_NAME).st_mtime_ns,
+                os.stat(_resolve_asset(filename)).st_mtime_ns,
+            )
+        except OSError:
+            build_mtime = 0
+        mtime_part = str(max(src_mtime, trans_mtime, build_mtime))
     except OSError:
-        # Deterministic fallback when file is unavailable.
-        return "1"
+        mtime_part = "1"
+
+    raw = f"{manifest_version}:{mtime_part}"
+    # Not a security primitive - just a short, stable URL token - so tell Ruff (S324).
+    return hashlib.sha1(raw.encode(), usedforsecurity=False).hexdigest()[:10]
 
 
-def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> None:
-    """Register a static path with the HA HTTP component, compatible with multiple HA versions."""
-    try:
-        # pylint: disable=import-outside-toplevel
-        from homeassistant.components.http import StaticPathConfig
+def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> bool:
+    """Register a static path through the legacy sync HA HTTP helper.
 
-        if hasattr(hass.http, "async_register_static_paths"):
+    Only reached from :func:`_async_register_path` when the modern
+    ``async_register_static_paths`` API is unavailable, which no supported Home
+    Assistant hits (hacs.json floors the requirement at 2026.5.0, and the sync
+    helper was removed upstream well before that).
 
-            async def _safe_register():
-                try:
-                    await hass.http.async_register_static_paths(
-                        [StaticPathConfig(url_path, path, True)]
-                    )
-                except Exception as exc:  # pylint: disable=broad-exception-caught
-                    _LOGGER.debug(
-                        "Failed to async register static path %s -> %s: %s",
-                        url_path,
-                        path,
-                        exc,
-                    )
-
-            hass.async_create_task(_safe_register())
-            return
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug(
-            "Async static path registration not available; falling back to "
-            "sync registration for %s -> %s (%s)",
-            url_path,
-            path,
-            exc,
-        )
-
-    # Fallback for older HA
+    Returns True only when a registration actually happened. Reporting the
+    outcome is the point: a route that was never registered but is treated as
+    success leaves the Lovelace resource pointing at a permanently 404ing URL,
+    which is issue #384 in its silent form.
+    """
     try:
         http_obj = cast(Any, hass.http)
         register_static_path = getattr(http_obj, "register_static_path", None)
-        if callable(register_static_path):
-            register_static_path(url_path, path, cache_headers=True)
-    except Exception:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Failed to register static path %s -> %s", url_path, path)
+        if not callable(register_static_path):
+            _LOGGER.debug(
+                "No usable static-path API for %s -> %s (neither "
+                "async_register_static_paths nor register_static_path)",
+                url_path,
+                path,
+            )
+            return False
+        register_static_path(url_path, path, cache_headers=True)
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Failed to register static path %s -> %s (%s)", url_path, path, exc)
+        return False
 
 
 async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
@@ -207,7 +384,28 @@ class WashDataCardRegistration:
             _LOGGER.warning("Card file not found: %s", src)
             return CARD_FAILED
 
-        _register_static_path(self.hass, INTEGRATION_URL, str(src))
+        # Serve the minified build when it is provably current. The URL stays
+        # INTEGRATION_URL either way, so the Lovelace resource never has to be
+        # migrated and dashboards cannot end up pointing at a variant that moved.
+        src = await self.hass.async_add_executor_job(_prepare_asset, CARD_NAME)
+
+        # The static route MUST exist before the Lovelace resource is published:
+        # the resource is what makes every browser fetch this URL, and a fetch
+        # that lands before the route is registered 404s, so the module never
+        # runs its customElements.define() and the dashboard reports
+        # "Custom element not found: ha-washdata-card".  Awaiting here (rather
+        # than the old fire-and-forget task) both orders the two steps and
+        # surfaces a genuine registration failure instead of swallowing it.
+        try:
+            await _async_register_path(self.hass, INTEGRATION_URL, str(src))
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.warning(
+                "Failed to register card static path %s -> %s: %s",
+                INTEGRATION_URL,
+                src,
+                exc,
+            )
+            return CARD_FAILED
 
         version = await self.hass.async_add_executor_job(get_cache_buster)
 
@@ -281,16 +479,20 @@ async def _async_register_path(hass: HomeAssistant, url_path: str, path: str) ->
     back to the legacy sync helper only when that API is absent — not on a
     genuine registration failure.  An already-registered path is treated as
     success (benign on integration reload); any other exception propagates so
-    the caller can decide whether to report failure.
+    the caller can decide whether to report failure.  A legacy fallback that
+    could not register either propagates as well: silently returning would
+    publish a Lovelace resource for a URL that 404s (issue #384).
     """
     try:
         from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
     except ImportError:
-        _register_static_path(hass, url_path, path)
+        if not _register_static_path(hass, url_path, path):
+            raise
         return
 
     if not hasattr(hass.http, "async_register_static_paths"):
-        _register_static_path(hass, url_path, path)
+        if not _register_static_path(hass, url_path, path):
+            raise RuntimeError(f"no usable static-path API to serve {url_path}")
         return
 
     try:
@@ -313,7 +515,10 @@ async def _do_register_panel(hass: HomeAssistant, src: Path) -> bool:
     # ── Phase 1: static paths ────────────────────────────────────────────────
     try:
         # Panel JS (primary asset — must be available before the sidebar fires).
-        await _async_register_path(hass, PANEL_JS_URL, str(src))
+        # Served at PANEL_JS_URL regardless of which variant won, so the sidebar's
+        # module_url never has to change and a stale build cannot strand the panel.
+        served = await hass.async_add_executor_job(_prepare_asset, PANEL_JS_NAME)
+        await _async_register_path(hass, PANEL_JS_URL, str(served))
 
         # Per-language translation files.
         trans_src = Path(__file__).parent / "translations" / PANEL_TRANSLATIONS_DIRNAME
