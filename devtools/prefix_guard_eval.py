@@ -87,7 +87,13 @@ def _match_config() -> dict:
         DEFAULT_DTW_MODE,
     )
 
-    return {**_BASE_CFG, "dtw_bandwidth": DEFAULT_DTW_BANDWIDTH, "dtw_mode": DEFAULT_DTW_MODE}
+    cfg = {**_BASE_CFG, "dtw_bandwidth": DEFAULT_DTW_BANDWIDTH, "dtw_mode": DEFAULT_DTW_MODE}
+    # --in-progress: score the mid-cycle populations the way the LIVE matcher now
+    # does (#400), so the guard operating point can be read under the ranking it
+    # will actually see in production rather than under the pre-#400 one.
+    if "--in-progress" in sys.argv:
+        cfg["in_progress"] = True
+    return cfg
 
 
 def _tail_level(sample: list[float], frac: float = SMART_TERM_TAIL_WINDOW_FRAC) -> float | None:

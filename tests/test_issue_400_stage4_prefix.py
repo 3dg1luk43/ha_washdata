@@ -101,16 +101,19 @@ def test_outlasted_candidate_keeps_whole_template_energy():
     assert off[0]["score"] == on[0]["score"]
 
 
-def test_duration_term_is_asymmetric_while_running():
-    """Elapsed time says nothing about a candidate we have not outlasted yet, so
-    both longer candidates get full duration credit and cannot be separated by it."""
-    cfg = _cfg(duration_weight=0.85, energy_weight=0.0, in_progress=True)
-    on = _by_name(analysis.compute_matches_worker(_live_trace(), ELAPSED, _snaps(), cfg))
-    assert on["short"]["score"] == on["long"]["score"]
-
-    off_cfg = _cfg(duration_weight=0.85, energy_weight=0.0)
-    off = _by_name(analysis.compute_matches_worker(_live_trace(), ELAPSED, _snaps(), off_cfg))
-    assert off["short"]["score"] > off["long"]["score"]
+def test_duration_term_below_a_candidate_is_unchanged():
+    """Suppressing the duration penalty for candidates we have not outlasted yet was
+    measured and rejected: +0.7pp mid-cycle for a 3.7pp loss at the 90% checkpoint,
+    and it made a dishwasher's 50/65 deg pair ambiguous at the end of the 50 deg,
+    blocking Smart Termination. Only the overrun side changes."""
+    on = _by_name(analysis.compute_matches_worker(
+        _live_trace(), ELAPSED, _snaps(), _cfg(duration_weight=0.85, energy_weight=0.0,
+                                               in_progress=True)))
+    off = _by_name(analysis.compute_matches_worker(
+        _live_trace(), ELAPSED, _snaps(), _cfg(duration_weight=0.85, energy_weight=0.0)))
+    # Neither candidate has been outlasted at 40% elapsed, so both are untouched.
+    assert on["short"]["score"] == off["short"]["score"]
+    assert on["long"]["score"] == off["long"]["score"]
 
 
 def test_duration_term_penalises_overrun_harder_than_the_symmetric_scale():

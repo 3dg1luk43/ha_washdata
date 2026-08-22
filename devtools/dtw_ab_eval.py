@@ -46,6 +46,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from custom_components.ha_washdata import analysis  # noqa: E402
+from custom_components.ha_washdata.signal_processing import resample_adaptive  # noqa: E402
 
 RESAMPLE_L = 150  # length used to build each profile's average sample curve
 
@@ -550,6 +551,7 @@ def _grouped_once(by_source: dict, base: dict, dur_tol: float, corr_min: float) 
     n_multi_groups, grouped_profiles)."""
     flat_ok = exact_ok = group_ok = total = 0
     n_multi_groups = grouped_profiles = 0
+    bestmem_ok = bestmem_group_ok = 0
     for by_profile in by_source.values():
         if len(by_profile) < 2:
             continue
@@ -587,7 +589,156 @@ def _grouped_once(by_source: dict, base: dict, dur_tol: float, corr_min: float) 
                     exact_ok += 1
                 if chosen_group == gid.get(name, name):
                     group_ok += 1
-    return flat_ok, exact_ok, group_ok, total, n_multi_groups, grouped_profiles
+                # #400: same grouping, but the family is scored as its BEST MEMBER
+                # (members keep their own curves) instead of as their mean curve.
+                bm_group = None
+                for cand in fc:
+                    root = gid.get(cand["name"])
+                    if root is not None:
+                        bm_group = root
+                        break
+                if bm_group is not None:
+                    bm_chosen = (
+                        _pick_member(pw, dur, groups[bm_group], by_profile, (name, idx))
+                        if len(groups[bm_group]) > 1
+                        else groups[bm_group][0]
+                    )
+                    if bm_chosen == name:
+                        bestmem_ok += 1
+                    if bm_group == gid.get(name, name):
+                        bestmem_group_ok += 1
+    return (flat_ok, exact_ok, group_ok, total, n_multi_groups, grouped_profiles,
+            bestmem_ok, bestmem_group_ok)
+
+
+def _prefix_at(cycle: dict, frac: float) -> tuple[list[float], float] | None:
+    """The cycle's trace truncated to ``frac`` of its own duration, as the live
+    matcher would see it mid-run: (powers, elapsed_seconds).
+
+    Truncates on the stored OFFSETS, not on sample count, because a change-based
+    plug samples irregularly - cutting by index would hand the matcher a prefix
+    whose elapsed time it cannot know. The prefix is then resampled onto a uniform
+    time grid exactly as ``async_match_profile`` does, so its mean power is
+    time-weighted like every candidate curve; without that a quiet stretch (which
+    emits almost no rows) is under-weighted and the comparison is measuring the
+    reporting cadence as much as the appliance.
+    """
+    pd = cycle.get("power_data") or []
+    dur = cycle.get("_dur") or 0.0
+    if dur <= 0 or len(pd) < 8:
+        return None
+    cutoff = dur * frac
+    offsets: list[float] = []
+    powers: list[float] = []
+    for point in pd:
+        try:
+            off = float(point[0])
+            val = float(point[1])
+        except (TypeError, ValueError, IndexError):
+            continue
+        if off > cutoff:
+            break
+        offsets.append(off)
+        powers.append(val)
+    if len(powers) < 4:
+        return None
+    try:
+        segments, _dt = resample_adaptive(
+            np.array(offsets), np.array(powers), min_dt=5.0, gap_s=21600.0
+        )
+        if segments:
+            powers = max(segments, key=lambda s: len(s.power)).power.tolist()
+    except Exception:  # pragma: no cover - fall back to the raw prefix
+        pass
+    return powers, cutoff
+
+
+def _device_type(source: str) -> str:
+    """Device type from the corpus path (cycle_data/ is organised by appliance).
+
+    The stored cycles carry no device_type, but the Stage-4 energy mode is gated on
+    it (item 100), so the mid-cycle table has to group by it or it averages two
+    different production configurations together.
+    """
+    s = source.lower()
+    if "dishwash" in s:
+        return "dishwasher"
+    if "waher-dryer" in s or "washer-dryer" in s or "washer_dryer" in s or "combo" in s:
+        return "washer_dryer"
+    if "dryer" in s:
+        return "dryer"
+    if "wash" in s:
+        return "washing_machine"
+    return "other"
+
+
+def _run_checkpoints(by_source: dict) -> None:
+    """#400: top-1 accuracy at 10..90% of each labelled cycle, with and without the
+    live-match Stage-4 fix, grouped by device type.
+
+    dtw_ab_eval's other tables only ever score COMPLETE cycles, so they are blind to
+    the failure #400 reports: mid-run, a cycle was graded against every candidate's
+    whole-cycle energy, which makes a long programme 40% through indistinguishable
+    from a finished short one. `in_progress` integrates each candidate only up to
+    the elapsed time instead, and penalises a candidate the cycle has already
+    outlasted on a sharper scale.
+    """
+    _prep_cycles(by_source)
+    fracs = [i / 10 for i in range(1, 10)]
+    res: dict[tuple[str, float], list[int]] = {}
+    for source, by_profile in by_source.items():
+        dev = _device_type(source)
+        base = {
+            **_BEST,
+            "max_duration_ratio": 1.5,
+            # Mirror the production gate (item 100) rather than one global mode.
+            "energy_mode": analysis.stage4_energy_mode(dev),
+        }
+        if len(by_profile) < 2:
+            continue
+        for name, cycles in by_profile.items():
+            if len(cycles) < 2:
+                continue
+            for idx, target in enumerate(cycles):
+                snaps = _build_snapshots(by_profile, exclude_key=(name, idx))
+                if len(snaps) < 2:
+                    continue
+                for f in fracs:
+                    cut = _prefix_at(target, f)
+                    if cut is None:
+                        continue
+                    pw, elapsed = cut
+                    row = res.setdefault((dev, f), [0, 0, 0])
+                    row[2] += 1
+                    for i, cfg in enumerate((base, {**base, "in_progress": True})):
+                        cands = analysis.compute_matches_worker(pw, elapsed, snaps, cfg)
+                        if cands and cands[0]["name"] == name:
+                            row[i] += 1
+    devices = sorted({k[0] for k in res})
+    print("\n=== MID-CYCLE top-1 (#400) ===")
+    print(f"{'device':<16}{'elapsed':>8}{'n':>6}{'whole-cycle':>13}{'like-for-like':>15}{'delta':>8}")
+    grand = [0, 0, 0]
+    for dev in devices:
+        sub = [0, 0, 0]
+        for f in fracs:
+            row = res.get((dev, f))
+            if not row:
+                continue
+            for i in range(3):
+                sub[i] += row[i]
+            a = row[0] / row[2] * 100
+            b = row[1] / row[2] * 100
+            print(f"{dev:<16}{int(f*100):>7}%{row[2]:>6}{a:>12.1f}%{b:>14.1f}%{b - a:>+7.1f}")
+        if sub[2]:
+            a = sub[0] / sub[2] * 100
+            b = sub[1] / sub[2] * 100
+            print(f"{dev:<16}{'ALL':>8}{sub[2]:>6}{a:>12.1f}%{b:>14.1f}%{b - a:>+7.1f}\n")
+            for i in range(3):
+                grand[i] += sub[i]
+    if grand[2]:
+        a = grand[0] / grand[2] * 100
+        b = grand[1] / grand[2] * 100
+        print(f"{'ALL DEVICES':<16}{'ALL':>8}{grand[2]:>6}{a:>12.1f}%{b:>14.1f}%{b - a:>+7.1f}")
 
 
 def _run_grouped(by_source: dict) -> None:
@@ -595,13 +746,15 @@ def _run_grouped(by_source: dict) -> None:
     _prep_cycles(by_source)
     base = {**_BEST, "max_duration_ratio": 1.5}
     print("\n=== HIERARCHICAL grouped matching prototype ===")
-    print(f"{'grouping (durtol,corr)':<24}{'groups':>8}{'profs':>7}{'flat':>8}{'grouped':>9}{'GROUP':>8}")
+    print(f"{'grouping (durtol,corr)':<24}{'groups':>8}{'profs':>7}{'flat':>8}{'grouped':>9}{'GROUP':>8}{'bestmem':>9}{'bmGROUP':>9}")
     for dt, cm in ((0.12, 0.90), (0.20, 0.85), (0.30, 0.80), (0.40, 0.75)):
-        fo, eo, go, tot, ng, gp = _grouped_once(by_source, base, dt, cm)
+        fo, eo, go, tot, ng, gp, bo, bgo = _grouped_once(by_source, base, dt, cm)
         if not tot:
             continue
-        print(f"±{int(dt*100)}% corr>{cm:<14}{ng:>8}{gp:>7}{fo/tot*100:>7.1f}%{eo/tot*100:>8.1f}%{go/tot*100:>7.1f}%")
-    print("flat = no grouping (baseline); grouped = group+member pick; GROUP = right cluster only")
+        print(f"±{int(dt*100)}% corr>{cm:<14}{ng:>8}{gp:>7}{fo/tot*100:>7.1f}%{eo/tot*100:>8.1f}%"
+              f"{go/tot*100:>7.1f}%{bo/tot*100:>8.1f}%{bgo/tot*100:>8.1f}%")
+    print("flat = no grouping (baseline); grouped = mean-curve aggregate + member pick;")
+    print("GROUP = right cluster only; bestmem/bmGROUP = #400 best-member scoring")
 
 
 def _run_stage5(by_source: dict) -> None:
@@ -635,6 +788,7 @@ def _run_stage5(by_source: dict) -> None:
 
 def main() -> None:
     print("DTW A/B accuracy evaluation (leave-one-out, within-device matching)")
+    checkpoints = "--checkpoints" in sys.argv
 
     # Real cycle_data/ is the discriminating benchmark.
     try:
@@ -642,10 +796,13 @@ def main() -> None:
         loader = DataLoader([str(Path(__file__).resolve().parent.parent / "cycle_data")])
         loader.load_data()
         real = [c for c in loader.cycles if c.get("profile_name") and c.get("power_data")]
-        if real:
-            _run_grouped(_group_by_source(real))
-        else:
+        if not real:
             print("\n(no labelled real cycles found)")
+            return
+        if checkpoints:
+            _run_checkpoints(_group_by_source(real))
+        else:
+            _run_grouped(_group_by_source(real))
     except Exception as exc:  # pragma: no cover
         print(f"\n(real data unavailable: {exc})")
 

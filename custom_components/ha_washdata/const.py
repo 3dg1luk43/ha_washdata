@@ -594,13 +594,20 @@ MATCH_DURATION_WEIGHT = 0.22
 MATCH_ENERGY_WEIGHT = 0.22
 MATCH_DURATION_SCALE = 0.175       # ~ln ratio at which duration agreement halves
 MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
-# Issue #400: while a cycle is still RUNNING the duration term is asymmetric.
-# Below a candidate's duration elapsed time carries no information about it (we
-# simply have not got there yet), so the agreement is 1.0; above it the cycle has
-# genuinely outlasted that candidate, which is hard evidence against, and the
-# penalty uses this sharper scale instead of MATCH_DURATION_SCALE. Only reached
-# when the caller opts in via config["in_progress"] - the final match at cycle end
-# still uses the symmetric term, where elapsed IS the cycle's true duration.
+# Issue #400: once a RUNNING cycle has outlasted a candidate, that is hard
+# evidence against it, and the penalty uses this sharper scale instead of
+# MATCH_DURATION_SCALE. Only reached when the caller opts in via
+# config["in_progress"]; the final match at cycle end keeps the symmetric term,
+# where elapsed IS the cycle's true duration.
+#
+# Below a candidate's duration the term is deliberately UNCHANGED. Suppressing the
+# penalty there ("we simply have not got there yet") was measured and rejected: it
+# adds only +0.7pp mid-cycle top-1 over prefix energy alone, costs 3.7pp at the 90%
+# checkpoint, and - because it hands a longer sibling full duration agreement near
+# the short one's end - it puts a dishwasher's 50 deg and 65 deg programmes inside
+# MATCH_AMBIGUITY_MARGIN of each other at the end of the 50 deg, which reads as
+# ambiguous and blocks Smart Termination (measured on four real exports; #393 is
+# about finishing on time, so that is not a trade worth 0.7pp).
 MATCH_DURATION_SCALE_OVERRUN = 0.05
 
 

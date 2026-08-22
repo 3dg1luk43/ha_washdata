@@ -49,6 +49,7 @@ from . import analysis
 from . import notification_rules as notif_rules
 from . import progress as progress_mod
 from .phase_segmenter import phase_matching_enabled
+from .signal_processing import resample_adaptive
 from .const import (
     CONF_ANTI_WRINKLE_ENABLED,
     CONF_ANTI_WRINKLE_EXIT_POWER,
@@ -887,8 +888,28 @@ class _DetailSim:
     def _matcher(self, det_readings: list[tuple[datetime, float]]):
         if len(det_readings) < 5 or not self.snapshots:
             return (None, 0.0, 0.0, None, False, False)
-        powers = [p for _, p in det_readings]
         duration = (det_readings[-1][0] - det_readings[0][0]).total_seconds()
+        # Resample onto a uniform TIME grid exactly as async_match_profile does
+        # before calling the worker. Without this the sim fed the matcher a
+        # sample-weighted series: on a change-based plug a quiet stretch emits
+        # almost no rows, so its mean power was biased toward the busy part of the
+        # cycle while every candidate curve is uniform in time. That divergence
+        # only showed up once Stage 4 started comparing like with like (#400) - it
+        # flipped a dishwasher onto its hotter sibling in the sim while production,
+        # which resamples, kept the right one.
+        powers = [p for _, p in det_readings]
+        try:
+            t0 = det_readings[0][0].timestamp()
+            segments, _used_dt = resample_adaptive(
+                np.array([r[0].timestamp() - t0 for r in det_readings]),
+                np.array([float(r[1]) for r in det_readings]),
+                min_dt=5.0,
+                gap_s=21600.0,
+            )
+            if segments:
+                powers = max(segments, key=lambda s: len(s.power)).power.tolist()
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass  # fall back to the raw series rather than dropping the match
         try:
             candidates = analysis.compute_matches_worker(
                 powers, duration, self.snapshots, self.match_config
