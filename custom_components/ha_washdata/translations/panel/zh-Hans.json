@@ -78,9 +78,12 @@
         "awaiting": "等待批准",
         "imported_tip": "从社区商店导入。仅用于匹配，不计入统计。",
         "not_importable": "此处不适用",
-        "exists": "已存在"
+        "exists": "已存在",
+        "backfilled_tip": "在导入的功率历史中检测到。仅影响程序匹配，不计入统计。"
     },
     "btn": {
+        "set_brand_model": "设置品牌和型号",
+        "refresh_catalog": "刷新目录",
         "add_device": "+ 添加设备",
         "add_device_tip": "添加另一个 WashData 设备",
         "add_maintenance": "添加维护事件",
@@ -241,7 +244,12 @@
         "import_selected": "导入所选",
         "back": "返回",
         "mute_suggestion": "停止建议此设置",
-        "reset_muted": "重置已屏蔽"
+        "reset_muted": "重置已屏蔽",
+        "import_power_history": "导入功率历史",
+        "hist_read_recorder": "从 Home Assistant 读取",
+        "hist_scan": "扫描周期",
+        "hist_import_n": "导入 {n} 个周期",
+        "hist_goto_cycles": "查看这些周期"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -253,12 +261,12 @@
             "start": "必须低于防皱最大功率 ({max} W)"
         },
         "attn_sub": "保存前请解决冲突",
-        "attn_title": "{n} 个设置冲突{s}",
+        "attn_title": "设置冲突：{n}",
         "confidence": {
             "auto": "必须不低于匹配阈值 ({match})",
-            "learning": "必须不超过匹配阈值 ({match})",
+            "learning": "必须不低于匹配阈值 ({match})",
             "match_for_auto": "必须不超过自动标记置信度 ({alc})",
-            "match_for_learning": "必须不低于学习置信度 ({lc})"
+            "match_for_learning": "必须不超过学习置信度 ({lc})"
         },
         "duration_ratio": {
             "max": "必须大于最小时长比例 ({min})",
@@ -296,14 +304,14 @@
             "match": "必须高于不匹配阈值 ({un})",
             "unmatch": "必须低于匹配阈值 ({match})；否则已确认的匹配会立即取消"
         },
-        "cascade_toast": "为保持一致性，还自动调整了 {n} 项设置{s}。",
+        "cascade_toast": "为保持一致性而调整的其他设置：{n}",
         "suggestion_resolves": "应用下方的待处理建议（{val}）以修复此问题",
         "use_fix": "使用 {val}",
         "watchdog": {
             "interval": "应至少为采样间隔 ({si} 秒) 的 2 倍",
             "sampling": "采样间隔应最多为看门狗间隔 ({wi} 秒) 的一半"
         },
-        "settings_banner": "{n} 个设置冲突{s} – 请检查高亮显示的部分，并在保存前修复。",
+        "settings_banner": "设置冲突：{n}。请检查高亮显示的部分，并在保存前修复。",
         "settings_banner_btn": "前往第一处"
     },
     "hdr": {
@@ -356,7 +364,8 @@
         "pg_outcome": "模拟结果",
         "pg_across_cycles": "所有周期综合",
         "community_store": "社区商店",
-        "online_account": "社区商店与在线功能"
+        "online_account": "社区商店与在线功能",
+        "import_power_history": "导入功率历史"
     },
     "health": {
         "fair": "配置文件质量尚可",
@@ -364,6 +373,7 @@
         "poor": "⚠ 配置文件质量差"
     },
     "lbl": {
+        "drag_to_resize": "拖动以调整大小",
         "actions": "操作",
         "activity": "活动",
         "administrators": "管理员",
@@ -434,7 +444,7 @@
         "from": "起始",
         "gap_s": "间隔（秒）",
         "group_name": "组名称",
-        "head_trim": "头部裁剪（秒）",
+        "head_trim": "开头裁剪（秒）",
         "health": "健康",
         "hide_tabs": "对非管理员隐藏标签",
         "in_use": "使用中",
@@ -450,7 +460,7 @@
         "metric": "指标",
         "mode_existing_profile": "添加到现有配置文件",
         "mode_new_profile": "创建新配置文件",
-        "models_fine_tuned": "（{count}个模型{plural}已微调）",
+        "models_fine_tuned": "（已微调的模型：{count}）",
         "n_classic_suggestions": "{n} 经典",
         "n_ml_suggestions": "{n} ML",
         "n_selected": "已选 {n} 个",
@@ -532,7 +542,7 @@
         "stage3": "阶段 3 – DTW",
         "stage4": "阶段 4 – 一致度",
         "status": "状态",
-        "tail_trim": "尾部裁剪（秒）",
+        "tail_trim": "末尾裁剪（秒）",
         "timer_auto_pause": "自动暂停",
         "timer_min": "分钟",
         "timer_msg_placeholder": "消息（可选，{device}/{program}/{minutes}）",
@@ -677,7 +687,26 @@
         "conflict_import_copy": "作为副本导入",
         "conflict_keep_mine": "保留我的",
         "conflict_overwrite": "覆盖",
-        "font_size": "面板字体大小"
+        "font_size": "面板字体大小",
+        "hist_csv_data": "CSV 数据",
+        "hist_from_recorder": "或从 Home Assistant 读取",
+        "hist_since": "起始日期",
+        "days": "天",
+        "hist_keep": "保留此周期",
+        "hist_looks_complete": "完整",
+        "peak_power_short": "峰值",
+        "shape": "形状",
+        "hist_skip_idle": "没有运行",
+        "hist_skip_sparse": "读数间隔过大",
+        "hist_skip_short": "读数太少",
+        "hist_skip_long": "没有足够长的间断可用于切分",
+        "hist_reason_short": "比该设备最短的真实周期还短",
+        "hist_reason_no_end": "从未正常结束",
+        "task_history_import": "扫描功率历史",
+        "task_history_import_apply": "导入周期",
+        "evidence_real_cycles": "本机实际运行的周期",
+        "evidence_reference_cycles": "从社区商店下载",
+        "evidence_backfill_cycles": "在导入的功率历史中发现"
     },
     "log": {
         "all_levels": "所有级别",
@@ -756,9 +785,15 @@
         "store_share": "分享到社区商店",
         "store_share_device": "分享此设备",
         "export_select": "导出 - 选择数据",
-        "import_wizard": "导入 - 选择数据"
+        "import_wizard": "导入 - 选择数据",
+        "history_import": "导入功率历史"
     },
     "msg": {
+        "tail_trim_hint": "从末尾移除的秒数",
+        "store_sibling_hint": "没有与您型号完全一致的分享内容？同品牌中相近的型号通常是不错的起点。",
+        "store_declare_appliance": "告知 WashData 您拥有哪台家电，此标签页便会显示其他用户为它分享的程序和录制。您也可以在上方输入品牌名称随意浏览。",
+        "refresh_catalog_hint": "社区品牌和家电列表已缓存，以便共享商店保持在每日读取额度内。刷新可获取他人新增或已批准的条目。",
+        "head_trim_hint": "从开头移除的秒数",
         "appliance_monitor": "设备监控",
         "artifact_dip_detail": "跌破通常功率范围约 {n} 秒。",
         "artifact_footer": "在上图中高亮显示。这些是瞬态异常（例如门在周期中打开），不一定是问题。",
@@ -769,7 +804,7 @@
         "automations_intro": "WashData 触发 {start} / {end} 事件并公开实体，因此通知和操作最好构建为常规 Home Assistant 自动化。使用此设备的自动化显示在下方。",
         "cleanup_intro": "显示所有已标记周期的叠加。勾选离群值并删除以清理配置文件。",
         "clear_debug_hint": "删除存储的调试数据以释放空间。",
-        "collecting_data": "正在收集数据，还需要 {need} 个周期{plural}才能开始微调（{current}/{min}）。",
+        "collecting_data": "正在收集数据。开始微调前还需要的周期数：{need}（{current}/{min}）。",
         "compare_overlay_profiles": "叠加配置文件（浅色）",
         "compare_profiles_tip": "将其他配置文件包络叠加在上方图表上，看哪个最适合此周期。",
         "compare_selected_cycles": "选中的周期（实线）– 显示/隐藏",
@@ -779,7 +814,7 @@
         "cycles_deleted": "已删除 {count} 个周期",
         "enough_data": "有足够数据可供学习（{current}/{min} 个循环）。",
         "export_description": "精确选择要导出到 JSON 的配置文件、周期、设置等，或分析文件并仅导入所需的部分。",
-        "feedback_cycles_pending": "{n} 个周期{s}待审查",
+        "feedback_cycles_pending": "待审查：{n}",
         "feedback_prompt": "确认正确、修正程序或忽略。",
         "feedback_relabel_hint": "重新标记此周期也会解决它。",
         "filter_by_profile": "按配置文件筛选…",
@@ -856,7 +891,6 @@
         "pg_stress_synthetic": "待机模拟从此处开始",
         "pg_sweep_intro": "如果 {param} 不同会怎样？在最近 {cycles} 个周期上测试 {steps} 个值，找到能正确匹配最多周期的设置。",
         "pg_sweep_step": "步骤 {done} / {total}",
-        "pg_undetected": "{n} 个周期{s}未检测到",
         "pg_verdict_bad": "需要注意: 许多周期未被检测到。",
         "pg_verdict_good": "调校良好: 大多数周期都被正确识别和匹配。",
         "pg_verdict_ok": "尚可: 漏掉了一些周期。可尝试降低启动阈值。",
@@ -887,6 +921,7 @@
         "review_recorded_tip": "将此标记为其程序的精选参考周期 – 与手动录制周期的作用相同。参考周期始终保留，为匹配模板提供种子，且不会被清理删除。（这是“黄金”/录制标志；两者是同一件事。）",
         "review_tags_tip": "描述此周期出现问题的可选标志，以便训练和清理可以考虑这些问题。",
         "review_to_cycles": "打开周期审查队列",
+        "samples_decimated": "正在显示 {total} 个样本中的 {shown} 个（为显示而抽稀；保留峰值）。此处的较大间隔是抽稀，而非缺失数据。",
         "saving_triggers_reload": "保存会触发集成重载。HA 实体可能短暂显示为不可用。",
         "search_placeholder": "搜索设置…",
         "see_recorder": "查看下方的录制小部件",
@@ -1006,7 +1041,29 @@
         "sug_mute_failed": "无法屏蔽建议",
         "sug_unmuted_all": "已重置屏蔽的建议",
         "n_suggestions_muted": "已屏蔽 {count} 项，自动调整器将不再提议这些设置。",
-        "font_size_hint": "调整此面板所有内容的字体大小，仅对您在此设备上的账户生效。"
+        "font_size_hint": "调整此面板所有内容的字体大小，仅对您在此设备上的账户生效。",
+        "import_history_description": "在使用 WashData 之前就已经有智能插座了？上传其功率传感器的历史导出文件，或直接从 Home Assistant 读取，常规检测会在这些数据上运行，过去的周期便会出现在您的周期列表中，等待命名。",
+        "hist_input_hint": "上传从历史面板下载的 CSV（entity、state、last changed），或让 WashData 直接读取该传感器的历史。随后检测会像实时运行时一样在这些数据上运行，并由您选择保留其中哪些周期。",
+        "hist_recorder_hint": "从您选择的日期读取到现在。Home Assistant 默认保留 10 天的详细历史，之后仅保留每小时平均值，过于粗略，无法用于检测周期；只有当 recorder 配置为保留更长时间时，才选择更早的日期。",
+        "hist_scanning": "正在通过检测器重放您的历史数据。该任务在后台运行 - 您可以关闭此对话框，稍后再回来查看。",
+        "hist_imported_count": "已导入 {n} 个周期。",
+        "hist_duplicates": "其中 {n} 个此前已导入，已跳过。",
+        "hist_capped": "已达到每台设备可导入周期的上限，其余未保存。",
+        "hist_next_step": "它们已在您的周期列表中，标记为导入的历史。打开其中一个，用“标记”指定它所属的程序。",
+        "hist_rows_read": "已读取 {n} 条读数",
+        "hist_entity_substituted": "已读取 {used}（此设备配置的是 {wanted}）",
+        "hist_breaks": "{n} 处传感器不可用的空缺",
+        "hist_other_entity": "已忽略其他实体的 {n} 条读数",
+        "hist_skipped_spans": "跳过的时段",
+        "hist_settings_used": "使用该设备的当前设置检测（最小功率 {w} W，关闭延迟 {s} 秒）。",
+        "hist_none_found": "在该历史数据中未能检测到任何周期。",
+        "hist_found": "找到 {n} 个周期。取消勾选看起来不像真实运行的项 - 在导入之前不会保存任何内容。",
+        "hist_scan_capped": "仅显示前若干个候选项（共找到 {n} 个）。",
+        "hist_recorder_empty": "Home Assistant 中没有该传感器在该时间段的详细历史。",
+        "hist_scan_failed": "扫描失败。",
+        "hist_scan_expired": "该次扫描结果已不可用，请重新扫描。",
+        "hist_import_failed": "导入失败。",
+        "imported_history_readonly": "在导入的功率历史中检测到。它会影响程序匹配，但不计入您的统计，且无法裁剪或拆分。请标记以指定其程序。"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1035,7 +1092,8 @@
         "dtw_refine_top_n": "Stage 3: DTW 重新评分的候选数量; 若正确档案排在第 4-5 位则调高至 7-9（默认 5）",
         "duration_scale": "Stage 4: 时长一致性得分减半时的对数比率; 越小惩罚越严格（默认 0.175）",
         "energy_scale": "Stage 4: 能耗一致性得分减半时的对数比率; 越小惩罚越严格（默认 0.25）",
-        "dishwasher_end_spike_quiet_release": "洗碗机：预期时长过后、解除周期结束排水等待之前保持静止的秒数"
+        "dishwasher_end_spike_quiet_release": "洗碗机：预期时长过后、解除周期结束排水等待之前保持静止的秒数",
+        "smart_termination_duration_ratio": "匹配程序预期时长中，周期在智能终止可以提前结束之前必须达到的比例；对于取决于负载或温度的机器请调低"
     },
     "phase_desc": {
         "anti_crease": "完成后偶尔进行短暂的翻滚以减少皱纹。",
@@ -1290,7 +1348,7 @@
             "label": "结束服务"
         },
         "notify_fire_events": {
-            "doc": "还在循环开始/结束时触发 ha_​​washdata_* 事件，以便您可以构建自己的自动化。",
+            "doc": "还在循环开始/结束时触发 ha_washdata_* 事件，以便您可以构建自己的自动化。",
             "label": "为通知触发 HA 事件"
         },
         "notify_icon": {
@@ -1416,6 +1474,10 @@
         "save_debug_traces": {
             "doc": "存储每个周期的完整功率跟踪和匹配调试数据。对于故障排除很有用，但会增加存储大小。",
             "label": "保存调试追踪"
+        },
+        "smart_termination_duration_ratio": {
+            "doc": "指定在功率下降后、智能终止可以提前结束一个周期之前，该周期必须进行到匹配程序预期时长的多大比例。预期时长是该程序的平均值，因此对于运行时间波动很大的家电（冬季冷进水与夏季暖进水的洗衣机、传感器烘干的烘干机、取决于负载的程序），大约一半的运行会比该平均值更早结束，从而无法获得快速结束，只能通过后备超时晚几分钟才结束。对于这些机器，请调低此值（例如 0.85），使提前结束仍然生效；若要更保守，则将其调高至接近 1.0。留空则使用默认值（0.98，洗碗机为 0.99）。它只能让周期更早结束，绝不会更晚，并且在匹配结果不明确或置信度较低时绝不会触发。",
+            "label": "智能终止比率"
         },
         "smoothing_window": {
             "doc": "原始功率信号被平滑了多少。低 (2) 响应灵敏，但噪音较大；高 (5) 可平滑尖峰，但会增加滞后。",
@@ -1551,6 +1613,10 @@
         "dishwasher_end_spike_quiet_release": {
             "label": "自然干燥静止释放",
             "doc": "当周期超过其预期时长后，洗碗机必须保持静止（低于停止阈值）多长时间，WashData 才会停止等待最终排水并结束该周期。如果您的机器在较晚的最终排水之前有一个较长的近乎无声的干燥阶段，导致该次排水被漏检，请调高此值 - 更宽的窗口可让学习到的时长跟随季节性漂移（进水更冷 = 周期更长），而不是锁定在旧的平均值上。它只能相对于内部 30 分钟的结束尖峰上限缩短等待时间，绝不会延长。"
+        },
+        "profile_evidence_sources": {
+            "label": "用于构建程序的周期",
+            "doc": "用于构建每个程序的功率曲线，并将已完成的周期与其匹配的周期种类。取消勾选某一种类会使其不再影响您的程序，但不会删除任何内容 - 这些周期仍留在周期列表中，仍可标记或删除。如果您不信任导入的数据，此选项很有用。统计不受影响：统计始终只计入本机实际运行过的周期。取消勾选全部会被忽略，因为没有任何周期作为依据的程序永远无法匹配。"
         }
     },
     "setting_group": {
@@ -1634,6 +1700,9 @@
         },
         "basic_configuration": {
             "label": "基本配置"
+        },
+        "profile_evidence": {
+            "label": "配置文件依据"
         }
     },
     "status": {
@@ -1658,7 +1727,8 @@
         "trimming": "裁剪中…",
         "splitting": "拆分中…",
         "deleting": "删除中…",
-        "imported": "已导入"
+        "imported": "已导入",
+        "preparing": "正在准备…"
     },
     "tab": {
         "advanced": "高级",
@@ -1688,6 +1758,7 @@
         "wrong_profile": "错误配置文件"
     },
     "toast": {
+        "catalog_refreshed": "社区目录已刷新",
         "access_saved": "已保存访问控制",
         "all_wiped": "所有数据已清除",
         "analysis_complete_none": "分析完成：没有新建议",
@@ -1793,7 +1864,9 @@
         "store_download_failed": "下载失败：{error}",
         "store_download_nothing": "没有新内容可下载 - 此配置已在您的设备上。",
         "export_selective_done": "导出已下载",
-        "import_selective_done": "已导入 {profiles} 个配置文件和 {cycles} 个周期"
+        "import_selective_done": "已导入 {profiles} 个配置文件和 {cycles} 个周期",
+        "hist_csv_required": "请先加载 CSV 文件或粘贴其内容",
+        "file_read_failed": "无法读取该文件"
     },
     "suggestion": {
         "both_agree": "WashData建议",
@@ -1889,7 +1962,7 @@
             "thr_batch": "保持在 {cycles} 个周期中 p05 最低工作功率（{p05}W）略上方，以便尽早捕捉到启动，同时使停止阈值保持在设备最低运行功率之下。",
             "tol_per_profile": "{profiles} 个配置文件（{cycles} 个周期）中每个配置文件时长方差的 p75；波动小的配置文件不受惩罚。",
             "tol_pooled": "基于 {cycles} 个近期已标注周期的合并时长方差（p95 偏差={dev}）。",
-            "watchdog": "在安全范围内保持尽可能低（略高于 p95 更新间隔 {p95}s，最小 30s），以便快速捕捉到停滞而不产生误停止。"
+            "watchdog": "在安全范围内保持尽可能低（略高于 p95 更新间隔 {p95}s，且至少为采样间隔 {median}s 的 2 倍，最小 30s），以便快速捕捉到停滞而不产生误停止。"
         },
         "exclusions": {
             "summary": "已排除 {total} 个误检测周期：{parts}。",
@@ -1955,6 +2028,10 @@
         "finished": "循环到达终止状态并已结束。"
     },
     "store": {
+        "your_model_tip": "这是您在设置中指定的家电",
+        "your_model": "您的型号",
+        "search_brand_ph": "按品牌搜索…",
+        "programs_count": "程序：{n}",
         "browse": "浏览",
         "device": "设备",
         "favorites": "收藏",

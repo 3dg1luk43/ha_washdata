@@ -1,0 +1,14 @@
+{
+  "name": "ha-washdata-devtools",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Build tooling for the WashData panel/card assets (not shipped).",
+  "type": "module",
+  "scripts": {
+    "build": "node build_panel.mjs",
+    "check": "node build_panel.mjs --check"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

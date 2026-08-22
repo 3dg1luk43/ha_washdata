@@ -78,9 +78,12 @@
         "awaiting": "Jóváhagyásra vár",
         "imported_tip": "A közösségi boltból importálva. Csak egyeztetéshez használatos, a statisztikába nem számít bele.",
         "not_importable": "itt nem elérhető",
-        "exists": "létezik"
+        "exists": "létezik",
+        "backfilled_tip": "Importált teljesítményelőzményekben észlelve. Csak a programegyeztetést befolyásolja, a statisztikába nem számít bele."
     },
     "btn": {
+        "set_brand_model": "Márka és modell megadása",
+        "refresh_catalog": "Katalógus frissítése",
         "add_device": "+ Eszköz hozzáadása",
         "add_device_tip": "Adjon hozzá egy másik WashData eszközt",
         "add_maintenance": "Karbantartási esemény hozzáadása",
@@ -241,7 +244,12 @@
         "import_selected": "Kiválasztottak importálása",
         "back": "Vissza",
         "mute_suggestion": "Ne javasolja többé ezt a beállítást",
-        "reset_muted": "Elhallgatottak visszaállítása"
+        "reset_muted": "Elhallgatottak visszaállítása",
+        "import_power_history": "Teljesítményelőzmények importálása",
+        "hist_read_recorder": "Beolvasás a Home Assistantból",
+        "hist_scan": "Ciklusok keresése",
+        "hist_import_n": "{n} ciklus importálása",
+        "hist_goto_cycles": "Ciklusok megjelenítése"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -253,14 +261,14 @@
             "start": "A Ránctalanítás maximális teljesítménye alatt kell lennie ({max} W)"
         },
         "attn_sub": "Mentés előtt javítsa az ütközéseket",
-        "attn_title": "{n} beállítási ütközés{s}",
-        "settings_banner": "{n} beállítási ütközés{s} – ellenőrizze a kijelölt szakaszokat és javítsa ki mentés előtt.",
+        "attn_title": "Beállítási ütközések: {n}",
+        "settings_banner": "Beállítási ütközések: {n}. Ellenőrizze a kijelölt szakaszokat, és javítsa ki őket mentés előtt.",
         "settings_banner_btn": "Ugrás az elsőhöz",
         "confidence": {
             "auto": "Legalább az Egyezési küszöb értékén kell lennie ({match})",
-            "learning": "Legfeljebb az Egyezési küszöb értékén lehet ({match})",
+            "learning": "Legalább az Egyezési küszöb értékén kell lennie ({match})",
             "match_for_auto": "Legfeljebb az Automatikus jelölési megbízhatóság értékén lehet ({alc})",
-            "match_for_learning": "Legalább a Tanulási megbízhatóság értékén kell lennie ({lc})"
+            "match_for_learning": "Legfeljebb a Tanulási megbízhatóság értékén lehet ({lc})"
         },
         "duration_ratio": {
             "max": "Nagyobb kell lennie a Min. időtartam aránynál ({min})",
@@ -298,7 +306,7 @@
             "match": "A Nem egyező küszöb felett kell lennie ({un})",
             "unmatch": "Az Egyezési küszöb alatt kell lennie ({match}); különben egy megerősített egyezés azonnal visszavonódik"
         },
-        "cascade_toast": "Konzisztencia megőrzése érdekében {n} beállítás is automatikusan módosult.",
+        "cascade_toast": "A konzisztencia érdekében módosított további beállítások: {n}",
         "suggestion_resolves": "A javításhoz alkalmazza az alábbi függőben lévő javaslatot ({val})",
         "use_fix": "Használja a következőt: {val}",
         "watchdog": {
@@ -356,7 +364,8 @@
         "pg_outcome": "Szimuláció eredménye",
         "pg_across_cycles": "Az összes ciklusban",
         "community_store": "Közösségi bolt",
-        "online_account": "Közösségi bolt és online funkciók"
+        "online_account": "Közösségi bolt és online funkciók",
+        "import_power_history": "Teljesítményelőzmények importálása"
     },
     "health": {
         "fair": "Elfogadható profilminőség",
@@ -364,6 +373,7 @@
         "poor": "⚠ Gyenge profilminőség"
     },
     "lbl": {
+        "drag_to_resize": "Húzza az átméretezéshez",
         "pg_anti_wrinkle": "Ránctalanítás",
         "actions": "Akciók",
         "activity": "Tevékenység",
@@ -435,7 +445,7 @@
         "from": "Ettől",
         "gap_s": "rés(ek)",
         "group_name": "Csoport neve",
-        "head_trim": "Fejszegély(ek)",
+        "head_trim": "Vágás az elejéről (s)",
         "health": "Egészség",
         "hide_tabs": "Lapok elrejtése nem rendszergazdák számára",
         "in_use": "Használatban",
@@ -451,7 +461,7 @@
         "metric": "Mérőszám",
         "mode_existing_profile": "Hozzáadás a meglévő profilhoz",
         "mode_new_profile": "Új profil létrehozása",
-        "models_fine_tuned": "({count} modell finomhangolva)",
+        "models_fine_tuned": "(finomhangolt modellek: {count})",
         "n_classic_suggestions": "{n} klasszikus",
         "n_ml_suggestions": "{n} ML",
         "n_selected": "{n} kijelölve",
@@ -532,7 +542,7 @@
         "stage3": "3. szakasz – DTW",
         "stage4": "4. szakasz – egyezés",
         "status": "Állapot",
-        "tail_trim": "Farokszegély(ek)",
+        "tail_trim": "Vágás a végéről (s)",
         "timer_auto_pause": "Automatikus szünet",
         "timer_min": "min",
         "timer_msg_placeholder": "Üzenet (nem kötelező, {device}/{program}/{minutes})",
@@ -677,7 +687,26 @@
         "conflict_import_copy": "Importálás másolatként",
         "conflict_keep_mine": "A sajátom megtartása",
         "conflict_overwrite": "Felülírás",
-        "font_size": "Panel betűmérete"
+        "font_size": "Panel betűmérete",
+        "hist_csv_data": "CSV-adatok",
+        "hist_from_recorder": "Vagy olvassa be a Home Assistantból",
+        "hist_since": "Kezdő dátum",
+        "days": "nap",
+        "hist_keep": "Ciklus megtartása",
+        "hist_looks_complete": "teljes",
+        "peak_power_short": "Csúcs",
+        "shape": "Alak",
+        "hist_skip_idle": "nem futott semmi",
+        "hist_skip_sparse": "túl ritka mérések",
+        "hist_skip_short": "túl kevés mérés",
+        "hist_skip_long": "nincs elég hosszú szünet a felosztáshoz",
+        "hist_reason_short": "rövidebb, mint a készülék legrövidebb valódi ciklusa",
+        "hist_reason_no_end": "soha nem fejeződött be tisztán",
+        "task_history_import": "Teljesítményelőzmények vizsgálata",
+        "task_history_import_apply": "Ciklusok importálása",
+        "evidence_real_cycles": "A gép által lefuttatott ciklusok",
+        "evidence_reference_cycles": "Letöltve a közösségi boltból",
+        "evidence_backfill_cycles": "Importált teljesítményelőzményekben találva"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -756,9 +785,15 @@
         "store_share": "Megosztás a közösségi boltban",
         "store_share_device": "Eszköz megosztása",
         "export_select": "Exportálás - adatok kiválasztása",
-        "import_wizard": "Importálás - adatok kiválasztása"
+        "import_wizard": "Importálás - adatok kiválasztása",
+        "history_import": "Teljesítményelőzmények importálása"
     },
     "msg": {
+        "tail_trim_hint": "Ennyi másodperc eltávolítása a végéről",
+        "store_sibling_hint": "Pontosan az Ön modelljéhez nincs semmi megosztva? Ugyanannak a márkának egy közeli modellje általában jó kiindulópont.",
+        "store_declare_appliance": "Adja meg a WashDatának, hogy melyik készülék az Öné, és ez a lap megjeleníti a mások által hozzá megosztott programokat és felvételeket. Fent egy márkát is beírhat, ha csak körül szeretne nézni.",
+        "refresh_catalog_hint": "A közösségi márka- és készüléklisták gyorsítótárba kerülnek, hogy a megosztott bolt a napi lekérdezési keretén belül maradjon. Frissítsen a mások által hozzáadott vagy jóváhagyott bejegyzések betöltéséhez.",
+        "head_trim_hint": "Ennyi másodperc eltávolítása az elejéről",
         "appliance_monitor": "Készülék monitor",
         "artifact_dip_detail": "~{n}s-re a szokásos energiasáv alá esett.",
         "artifact_footer": "A fenti grafikonon kiemelve. Ezek átmeneti műtermékek (pl. a ciklus közepén kinyílt ajtó), nem feltétlenül problémák.",
@@ -769,7 +804,7 @@
         "automations_intro": "A WashData {start} / {end} eseményeket küld és entitásokat tesz elérhetővé, ezért az értesítések és műveletek legjobban normál Home Assistant automatizálásként építhetők fel. Az ezt az eszközt használó automatizálások alább jelennek meg.",
         "cleanup_intro": "Minden címkézett ciklus átfedi. Jelölje be a kiugró értékeket, és törölje a profilt a profil megtisztításához.",
         "clear_debug_hint": "Távolítsa el a tárolt hibakeresési adatokat, hogy helyet szabadítson fel.",
-        "collecting_data": "Adatgyűjtés folyamatban - még {need} ciklus szükséges a finomhangolás megkezdéséhez ({current}/{min}).",
+        "collecting_data": "Adatgyűjtés folyamatban. A finomhangolás megkezdéséhez még szükséges ciklusok: {need} ({current}/{min}).",
         "compare_overlay_profiles": "Fedőprofilok (halvány)",
         "compare_profiles_tip": "Fedjen rá más profilborítékokat a fenti diagramra, hogy megtudja, melyik illik legjobban ehhez a ciklushoz.",
         "compare_selected_cycles": "Kiválasztott ciklusok (folytonos) – megjelenítés/elrejtés",
@@ -779,7 +814,7 @@
         "cycles_deleted": "{count} ciklus törölve",
         "enough_data": "Elegendő adat a tanuláshoz ({current}/{min} ciklus).",
         "export_description": "Válaszd ki pontosan, mely profilokat, ciklusokat, beállításokat és egyebeket exportálsz JSON-ba, vagy elemezz egy fájlt, és csak a kívánt részeket importáld.",
-        "feedback_cycles_pending": "{n} ciklus{s} áttekintésre vár",
+        "feedback_cycles_pending": "Áttekintésre vár: {n}",
         "feedback_prompt": "Erősítse meg, hogy helyes volt, javítsa ki a programot, vagy hagyja figyelmen kívül.",
         "feedback_relabel_hint": "Ennek a ciklusnak az újracímkézése ezt is megoldja.",
         "filter_by_profile": "Szűrés profil szerint…",
@@ -856,7 +891,6 @@
         "pg_stress_synthetic": "az üresjárati szimuláció itt kezdődik",
         "pg_sweep_intro": "Mi lenne, ha a {param} más lenne? Teszteljen {steps} értéket az utolsó {cycles} cikluson, hogy megtalálja azt a beállítást, ahol a legtöbb ciklus helyesen egyezik.",
         "pg_sweep_step": "{done} / {total}. lépés",
-        "pg_undetected": "{n} nem észlelt ciklus",
         "pg_verdict_bad": "Figyelmet igényel: sok ciklus észrevétlen marad.",
         "pg_verdict_good": "Jól hangolva: a legtöbb ciklust helyesen azonosítja és párosítja.",
         "pg_verdict_ok": "Elfogadható: néhány ciklus kimaradt. Próbálja meg csökkenteni az indítási küszöböt.",
@@ -887,6 +921,7 @@
         "review_recorded_tip": "Jelölje meg ezt a programhoz tartozó, kézzel kiválasztott referenciaciklusként – ugyanaz a szerep, mint egy kézzel rögzített ciklus. A referenciaciklusokat mindig megőrizzük, a megfelelő sablont vetjük be, és soha nem vetik el őket a tisztítás során. (Ez az \"arany\"/rekord zászló; mindkettő ugyanaz.)",
         "review_tags_tip": "Opcionális jelzők, amelyek leírják, hogy mi hibázott ebben a ciklusban, így a képzés és a tisztítás megmagyarázhatja.",
         "review_to_cycles": "Nyissa meg a Ciklusok áttekintési sort",
+        "samples_decimated": "{shown}/{total} minta megjelenítése (megjelenítéshez ritkítva; a csúcsok megtartva). Az itt látható széles hézag ritkítás, nem hiányzó adat.",
         "saving_triggers_reload": "A mentés az integráció újratöltését indítja el. A HA entitások rövid időre elérhetetlenként jelenhetnek meg.",
         "search_placeholder": "Keresési beállítások…",
         "see_recorder": "Lásd alább a felvevő widgetet",
@@ -1006,7 +1041,29 @@
         "sug_mute_failed": "Nem sikerült elhallgattatni a javaslatot",
         "sug_unmuted_all": "Az elhallgattatott javaslatok visszaállítva",
         "n_suggestions_muted": "{count} elhallgattatva; az automatikus finomhangolás nem fogja javasolni ezeket.",
-        "font_size_hint": "Tegye nagyobbá vagy kisebbé mindent a panelen. Az ezen az eszközön lévő fiókjára vonatkozik."
+        "font_size_hint": "Tegye nagyobbá vagy kisebbé mindent a panelen. Az ezen az eszközön lévő fiókjára vonatkozik.",
+        "import_history_description": "Volt már okoskonnektora a WashData előtt? Töltse fel a teljesítményérzékelő előzmény-exportját, vagy olvassa be közvetlenül a Home Assistantból: a szokásos észlelés lefut rajta, így a régi ciklusok megjelennek a Ciklusok listában, készen az elnevezésre.",
+        "hist_input_hint": "Töltsön fel az Előzmények panelről letöltött CSV-t (entity, state, last changed), vagy hagyja, hogy a WashData közvetlenül beolvassa az érzékelő előzményeit. Ezután pontosan ugyanaz az észlelés fut le rajta, mint élőben, és Ön választja ki, mely megtalált ciklusokat tartja meg.",
+        "hist_recorder_hint": "A kiválasztott dátumtól a mostani időpontig olvas be. A Home Assistant alapértelmezés szerint 10 napig tart meg részletes előzményeket, utána már csak óránkénti átlagokat, amelyek túl durvák a ciklusok észleléséhez - csak akkor válasszon korábbi dátumot, ha a recorder többet tart meg.",
+        "hist_scanning": "Az előzményeket újra lejátsszuk az észlelőn keresztül. Ez a háttérben fut - bezárhatja ezt a párbeszédpanelt, és később visszatérhet hozzá.",
+        "hist_imported_count": "{n} ciklus importálva.",
+        "hist_duplicates": "{n} korábban már importálva volt, ezért kimaradt.",
+        "hist_capped": "Elérte az eszközre vonatkozó importált ciklus korlátot; a többi nem lett eltárolva.",
+        "hist_next_step": "A Ciklusok listában találhatók, importált előzményként megjelölve. Nyisson meg egyet, és a Címkézés funkcióval adja meg a hozzá tartozó programot.",
+        "hist_rows_read": "{n} mérés beolvasva",
+        "hist_entity_substituted": "{used} beolvasva (ehhez az eszközhöz {wanted} van beállítva)",
+        "hist_breaks": "{n} szakasz, ahol az érzékelő nem volt elérhető",
+        "hist_other_entity": "{n} más entitáshoz tartozó mérés kihagyva",
+        "hist_skipped_spans": "Kihagyott szakaszok",
+        "hist_settings_used": "Az eszköz jelenlegi beállításaival észlelve (minimális teljesítmény {w} W, kikapcsolási késleltetés {s} s).",
+        "hist_none_found": "Az adott előzményekben nem sikerült ciklust észlelni.",
+        "hist_found": "{n} ciklus található. Vegye ki a jelölést mindenről, ami nem tűnik valódi futásnak - importálásig semmi nem kerül eltárolásra.",
+        "hist_scan_capped": "Csak az első találatok láthatók (összesen {n} volt).",
+        "hist_recorder_empty": "A Home Assistantnak nincs részletes előzménye erről az érzékelőről abban az időszakban.",
+        "hist_scan_failed": "A vizsgálat nem sikerült.",
+        "hist_scan_expired": "Ez a vizsgálat már nem elérhető. Kérjük, futtassa újra.",
+        "hist_import_failed": "Az importálás nem sikerült.",
+        "imported_history_readonly": "Importált teljesítményelőzményekben észlelve. Befolyásolja a programegyeztetést, de nem számít bele a statisztikákba, és nem vágható vagy osztható. Címkézze fel a hozzá tartozó program megadásához."
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1392,6 +1449,10 @@
             "doc": "Tárolja a teljes teljesítmény nyomkövetést és a megfelelő hibakeresési adatokat minden ciklushoz. Hasznos hibaelhárításhoz, de növeli a tárhely méretét.",
             "label": "Hibakeresési nyomok mentése"
         },
+        "smart_termination_duration_ratio": {
+            "doc": "Mennyire kell előrehaladnia a ciklusnak az egyeztetett program várható időtartamán belül, mielőtt az intelligens leállítás a teljesítmény csökkenésekor korábban befejezheti azt. A várható időtartam a program átlaga, így azokon a készülékeken, amelyek futásideje sokat ingadozik - mosógépek hideg téli és meleg nyári befolyó vízzel, szárazságérzékelős szárítógépek, terheléstől függő programok - az összes futás nagyjából fele ennél az átlagnál rövidebben fejeződik be, és soha nem kapja meg a gyors befejezést, csak a tartalék időtúllépésen keresztül ér véget, percekkel később. Csökkentse ezt (pl. 0.85) ezeken a gépeken, hogy a korai befejezés így is elinduljon; emelje 1.0 felé az óvatosabb működéshez. Hagyja üresen az alapértelmezett értékhez (0.98, mosogatógépeknél 0.99). Csak korábban fejezhet be egy ciklust, soha nem később, és soha nem indul el bizonytalan vagy alacsony megbízhatóságú egyezésnél.",
+            "label": "Intelligens leállítási arány"
+        },
         "smoothing_window": {
             "doc": "Mennyire van simítva a nyers teljesítményjel. Alacsony (2) érzékeny, de zajos; magas (5) kisimítja a tüskéket, de növeli a késést.",
             "label": "Simítási ablak"
@@ -1522,6 +1583,10 @@
         "door_end_dwell_seconds": {
             "label": "Ajtó-nyitásvégi várakozási idő",
             "doc": "Mennyi ideig kell nyitva maradnia az ajtónak, mielőtt a WashData befejezi a ciklust, amikor az \"Ajtó automatikusan kinyílik a végén\" be van kapcsolva. Elég hosszú ahhoz, hogy figyelmen kívül hagyja a gyors edény betöltését (alapértelmezés: 60 s), elég rövid ahhoz, hogy gyorsan befejezzen, miután a gép kinyitja az ajtót."
+        },
+        "profile_evidence_sources": {
+            "label": "A programot alakító ciklusok",
+            "doc": "Mely ciklusok szolgálnak az egyes programok teljesítménygörbéjének felépítéséhez, és egy befejezett ciklus ahhoz való egyeztetéséhez. Ha egy fajta jelölését kikapcsolja, az többé nem alakítja a programjait, de semmi nem törlődik - a ciklusok a Ciklusok listában maradnak, és továbbra is címkézhetők vagy eltávolíthatók. Akkor hasznos, ha nem bízik az importált adatokban. A statisztikákra nincs hatással: azok mindig csak azokat a ciklusokat számolják, amelyeket ez a gép valóban lefuttatott. Ha mindent kikapcsol, azt figyelmen kívül hagyjuk, mert egy ciklusok nélküli program soha nem tudna egyezni."
         }
     },
     "setting_group": {
@@ -1605,6 +1670,9 @@
         },
         "basic_configuration": {
             "label": "Alapkonfiguráció"
+        },
+        "profile_evidence": {
+            "label": "Profil alapja"
         }
     },
     "status": {
@@ -1629,7 +1697,8 @@
         "trimming": "Vágás…",
         "splitting": "Felosztás…",
         "deleting": "Törlés…",
-        "imported": "Importált"
+        "imported": "Importált",
+        "preparing": "Előkészítés…"
     },
     "tab": {
         "advanced": "Fejlett",
@@ -1659,6 +1728,7 @@
         "wrong_profile": "Rossz profil"
     },
     "toast": {
+        "catalog_refreshed": "A közösségi katalógus frissítve",
         "access_saved": "A hozzáférés-szabályozás mentve",
         "all_wiped": "Minden adat törölve",
         "analysis_complete_none": "Az elemzés kész: nincs új javaslat",
@@ -1764,7 +1834,9 @@
         "store_download_failed": "Letöltés sikertelen: {error}",
         "store_download_nothing": "Nincs új letöltendő - ez a beállítás már megvan az eszközön.",
         "export_selective_done": "Export letöltve",
-        "import_selective_done": "{profiles} profil és {cycles} ciklus importálva"
+        "import_selective_done": "{profiles} profil és {cycles} ciklus importálva",
+        "hist_csv_required": "Először töltsön be egy CSV-fájlt, vagy illessze be a tartalmát",
+        "file_read_failed": "A fájl nem olvasható"
     },
     "suggestion": {
         "both_agree": "A WashData javasolja",
@@ -1860,7 +1932,7 @@
             "thr_batch": "Éppen a p05 legkisebb aktív teljesítmény fölött tartva {cycles} cikluson át ({p05}W), hogy az indítás a lehető legkorábban észlelhető legyen, a leállítási küszöb pedig a gép legkisebb üzemi teljesítménye alatt maradjon.",
             "tol_per_profile": "A profilonkénti időtartam-szórás p75 értéke {profiles} profilon át ({cycles} ciklus); a stabil profilok nem kapnak büntetést.",
             "tol_pooled": "{cycles} legutóbbi címkézett ciklus összevont időtartam-szórása alapján (p95 szórás={dev}).",
-            "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (épp a p95 frissítési szünet, azaz {p95}s felett, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül."
+            "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (épp a p95 frissítési szünet, azaz {p95}s felett, és legalább a mintavételezési intervallum ({median}s) kétszerese, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül."
         },
         "exclusions": {
             "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",
@@ -1892,6 +1964,7 @@
     },
     "pg_desc": {
         "dishwasher_end_spike_quiet_release": "Mosogatógép: csendes másodpercek a várható időtartam után, mielőtt a ciklus végi leeresztésre való várakozás feloldódik",
+        "smart_termination_duration_ratio": "Az egyeztetett program várható időtartamának hányada, amelyet a ciklusnak el kell érnie, mielőtt az intelligens leállítás korábban befejezheti; csökkentse a terheléstől vagy hőmérséklettől függő gépeknél",
         "anti_wrinkle_enabled": "Nyelje el a fő fázis utáni szárítópulzusokat, ahelyett hogy új ciklusként olvasná őket",
         "anti_wrinkle_exit_power": "A ránctalanítás aktívan tartásához a teljesítménynek az impulzusok között ez alá kell csökkennie",
         "anti_wrinkle_idle_timeout": "Két szárítópulzus között engedélyezett csendes idő, mielőtt a ránctalanítás véget ér",
@@ -1955,6 +2028,10 @@
         "finished": "A ciklus elérte a végállapotot és befejeződött."
     },
     "store": {
+        "your_model_tip": "Ez az a készülék, amelyet a Beállításokban megadott",
+        "your_model": "Az Öné",
+        "search_brand_ph": "Keresés márka szerint…",
+        "programs_count": "Programok: {n}",
         "browse": "Böngészés",
         "device": "Készülék",
         "favorites": "Kedvencek",

@@ -5,7 +5,71 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.5.4 - 2026-08-15
+## 0.5.5 - 2026-08-19
+
+### Features
+
+- **Import the power history you already had** ([#344](https://github.com/3dg1luk43/ha_washdata/issues/344)): Advanced - Diagnostics - Import power history replays your sensor's existing history (an uploaded CSV, or read directly, up to 14 days) through normal detection, so past cycles appear in Cycles ready to name. It runs as a cancellable background scan and shows one reviewable row per candidate (date, duration, energy, peak, shape preview); nothing is written until you confirm, it reports what it skipped and why, and re-importing an overlap skips duplicates rather than doubling them. A raw HA history is change-based (a steady 0 W emits no rows), so a naive replay produced only force-stopped junk; the stream is instead cut into activity blocks and each is replayed through its own detector. Imported cycles are a distinct third category: they shape program matching once you label them, but never touch lifetime stats, the review queue, learning or store sharing. (Also fixed three defects this exposed, which also hit community-store downloads: "Cycle not found" when creating a program from an imported cycle, the missing envelope until a later maintenance pass, and the hidden Label button.)
+
+- **Import history reads from a date you pick, and no longer refuses a valid export**: The recorder read is bounded by a start date rather than a number of days, and reaches back up to 10 years instead of 14 - a recorder configured to keep full-resolution states that long is a real setup. It walks backwards from today and stops once the history runs out, so a wide range costs nothing extra. A CSV holding a single sensor is also no longer rejected when its entity id differs from the one this device is configured with (a renamed entity, or a template sensor in front of the plug): it is read, and the review step says which sensor it used. A file holding several sensors with no match is still refused, since guessing between appliances would corrupt detection.
+
+- **Auto-labelling now names imported cycles too**: "Auto-label cycles" (button, service and confidence setting) now sweeps imported history under the same safeguards - a program is assigned only on a confident, unambiguous match - and marks such labels as matcher-guessed so a wrong guess stays visible and reversible. With no programs yet, name one or two by hand first, then let auto-label do the rest.
+
+- **New setting: which cycles shape a program** (Settings - Matching - Profile Evidence): Choose which kinds build each program's curve and matching template - this machine's cycles, community-store downloads, and imported history - so imported data can be kept for reference without shaping your programs. Unticking a kind deletes nothing and never affects statistics; changing it rebuilds every program immediately; the default is all three.
+
+- **New setting: Smart Termination Ratio** ([#393](https://github.com/3dg1luk43/ha_washdata/issues/393)) (Settings - Detection - Cycle End): The fraction of a program's average duration a run must reach before Smart Termination may fire is now per-appliance. Lower it (e.g. 0.85) on a machine whose runtime varies a lot (variable inlet temperature, sensor-dry, load-dependent) so the early finish still fires; leave it empty for the unchanged default (0.98, or 0.99 for dishwashers). It can only ever end a cycle earlier, never later, and never on an ambiguous or low-confidence match.
+
+### Performance
+
+- **The Playground tab opens without waiting on work it does not need**: Its four setup fetches now go out together instead of in sequence, and the expensive suggestion computation moved to the background, dropping the blocking tab-open from ~34 ms to nothing (more on a Raspberry Pi).
+
+- **The Settings tab no longer spends the community store's shared read budget**: Two queries were 90.7% of all free-tier reads because the "Approved / Awaiting approval" badges downloaded the whole catalog on every Settings open. The badges now resolve as two point reads; the brand and device lists load only when a picker is opened (server-side prefix search, debounced, cached); one store client is shared install-wide; and a new Refresh catalog button (gear) drops the cache. List payloads now project only the fields the UI shows.
+
+- **The Store tab now shows the appliances it should**: Browse listed only the ~6 approved devices per type. It now includes pending entries, scoped to your brand plus this device's type, with your own model first (tagged Yours), then models with shared programs, then the rest; when no appliance is declared it asks for one. (Also relabels the brand-only search box and corrects the wiki/README flow.)
+
+- **A release can no longer ship a stale panel bundle**: A new `devtools/release_check.sh` verifies artifacts, WS types, version agreement, translations and the fast suite in one command; a Checks CI workflow verifies the generated artifacts on every push and Release Preflight enforces version agreement on a tag; and the local deploy script rebuilds first. (Adds the documented-but-missing `requirements-dev.txt`.)
+
+- **Confirming an appliance counts again**: The post-confirm read-back was served from the same one-hour cache the confirm had just written, so the count never reached the promotion threshold; the cache is now dropped between the write and the read-back.
+
+- **Smaller store and panel fixes**: a failed brand search backs off instead of retrying ~4x/second; a failed panel refresh shows the real error instead of a collapsed `Object`; diagnostics report which frontend bundle is being served; `./run_tests.sh` runs again (the render-smoke harness is now ESM); and store document ids are percent-encoded.
+
+- **Panel and card are minified and served pre-compressed**: esbuild produces `*.min.js` (served only while its recorded hash matches the source, else the readable file is served instead) plus an atomically-rebuilt `.gz` sibling. Panel 766 to 522 KB (-32%) to 131 KB gzipped (-83%); card 49 to 29 to ~8 KB.
+
+- **The learning / auto-tune pass no longer runs while idle** ([#394](https://github.com/3dg1luk43/ha_washdata/issues/394)): It ran on a 5-minute timer around the clock although appliances are idle ~98% of the time, and it trained its cadence model on the idle reporting rate - oversizing the watchdog / timeout / match-interval suggestions. It now runs only during an active cycle (the detector still receives every reading), so those suggestions reflect real in-cycle timing.
+
+### Bug Fixes
+
+- **Shipped defaults no longer trip the panel's own conflict checks** ([#396](https://github.com/3dg1luk43/ha_washdata/issues/396)): Three default pairs broke rules the panel enforces. Fixed: the learning-vs-match rule was inverted (the ladder is unmatch < match < learning < auto-label); the per-appliance 2 s sampling for wet appliances was never wired up, so washers and dishwashers ran at the coarse 30 s default, and the watchdog / start-debounce defaults now derive from sampling; and a stale watchdog-default comment. The panel now validates against the device-resolved default, and a 3.9 to 3.10 migration heals older entries seeded with the old values.
+
+- **Cycle graphs no longer drop the load peak when thinning the curve** ([#395](https://github.com/3dg1luk43/ha_washdata/issues/395)): Decimation kept every n-th point, so a single-sample peak or a one-sample 0 W dip could vanish (measured in 14 of 49 curves). It now keeps each interval's minimum and maximum at the same payload size, and reports how much it thinned so a thinning gap is not mistaken for a sensor dropout.
+
+- **A running wash is no longer cut in half at a shorter program's length** ([#364](https://github.com/3dg1luk43/ha_washdata/issues/364)): The matcher can lock onto a shorter look-alike early in a longer wash, close the cycle at that length, and record the rest as a second cycle. WashData now checks whether the appliance is actually finishing (trailing power vs what the matched program draws at its own end) and scores a look-alike against its curve truncated to how far the wash has got. Both only ever delay an early finish, and program matching is provably byte-identical; across the reference library they catch 47% of splits for 6% of normal ends taking the slower path.
+
+- **The "profile match threshold" setting does something again**: Stored but never read for the whole 0.5 series, so raising it (a documented workaround) silently did nothing. It is now wired to the confidence gate it was always described as controlling; the default is unchanged.
+
+- **The Playground could report an imported cycle as unmatched**: It built its candidate programs from a narrower cycle set than the live matcher, so a program seeded only from imported history was left out. It now uses the same evidence set as the live matcher.
+
+- **Time remaining no longer collapses to a minute during a dishwasher's passive dry** ([#386](https://github.com/3dg1luk43/ha_washdata/issues/386)): A quiet drying window matched the envelope's trailing all-zero pad, pulling the scan to the end and the countdown to the 99% clamp. An uninformative window now declines to guess (the clock estimate takes over) and the zero pad is no longer a candidate alignment. Thanks to @andrei-marinache for the diagnosis and initial fix in PR #390.
+
+- **Time remaining keeps counting down through a silent drying tail**: The estimate was recomputed only when a reading arrived, so it froze when a publish-on-change plug went silent for the ~30 min dry. The active-cycle watchdog now refreshes the (wall-clock) estimate each tick, without injecting a reading or ending a cycle.
+
+- **Envelope rebuild no longer OOM-kills Home Assistant** ([#388](https://github.com/3dg1luk43/ha_washdata/issues/388)): A densely-sampled (1 s) cycle sized an uncapped DTW cost matrix at 1.81 GB, killing HA Core on a 4 GB Pi. A `MAX_ALIGN_GRID_POINTS = 2000` cap (~32 MB) now bounds every alignment grid, with a pre-flight guard on the matrix allocation.
+
+- **The dashboard card no longer intermittently fails to load with "Custom element not found"** ([#384](https://github.com/3dg1luk43/ha_washdata/issues/384)): The card's static route was registered as a fire-and-forget task after the Lovelace resource, so a browser could fetch the URL before the route existed and 404; a genuine registration failure was also swallowed. The route is now awaited before the resource is published and fails loud.
+
+- **The card / panel cache buster always changes between releases**: It came only from file mtimes, which some package managers preserve, so a URL could repeat across releases. It now folds in the `manifest.json` version (and reads mtimes in nanoseconds so same-second rebuilds differ).
+
+- **Help bubbles in the cycle Review tab are no longer cut off** ([#385](https://github.com/3dg1luk43/ha_washdata/issues/385)): Fixed-width "i" popovers were clipped when their icon sat near a container edge; they now nudge back inside whichever box would clip them. Thanks to @jbvs01 for the report.
+
+- **Reverting a setting that had never been saved no longer breaks the integration** ([#389](https://github.com/3dg1luk43/ha_washdata/issues/389)): The Revert button sent back `null`, which stored as `None` and crashed setup (`TypeError`) on every restart. A null option is now dropped on save and on import (and healed by migration for entries already broken). Thanks to @DennisGoss99 for the diagnosis and fix in PR #391.
+
+- **The device pill now shows calibrated tuning suggestions too**: The pill counted only the classic suggestions while the Settings tab counted classic plus the Calibrated (ML) ones, so an all-calibrated device showed no badge. The pill now uses the same arithmetic (cached per device) and stops counting muted or no-op suggestions.
+
+- **No more blocking-call warning when a cycle is matched** ([#328](https://github.com/3dg1luk43/ha_washdata/issues/328)): The ML bridge imported its baseline model lazily on the event loop on the first match after a restart. The models are now preloaded once at setup on Home Assistant's import executor. (A latent inline-read fallback in the voice intents was fixed in the same sweep.)
+
+- **Renaming a profile no longer appears to drop it from its group**: The Profiles tab re-fetched only the profile list after a rename, not the groups, so the renamed member vanished from its group card. The tab now re-fetches both.
+
+## 0.5.4 - 2026-08-17
 
 ### Features
 

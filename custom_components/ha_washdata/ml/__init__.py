@@ -24,6 +24,7 @@ from .engine import (
     CONF_ENABLE_ML_MODELS,
     available_models,
     ml_models_enabled,
+    preload_models,
     resolve_regressor,
     resolve_scorer,
 )
@@ -32,6 +33,7 @@ __all__ = [
     "CONF_ENABLE_ML_MODELS",
     "available_models",
     "ml_models_enabled",
+    "preload_models",
     "resolve_regressor",
     "resolve_scorer",
 ]

@@ -1,0 +1,17 @@
+# Development / CI dependencies.
+#
+# The integration itself declares only `numpy` (see manifest.json) and must stay
+# that way -- no SciPy, scikit-learn or torch at runtime, including inside the
+# `ml/` subsystem. Everything below is test-time only.
+#
+#   python3 -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements-dev.txt
+#
+# pytest-homeassistant-custom-component pins a matching Home Assistant core plus
+# pytest and the plugins the suite relies on (asyncio, syrupy, xdist, socket,
+# aiohttp, freezer), so it is deliberately the single pinned entry: bumping it is
+# how this project moves to a newer Home Assistant.
+pytest-homeassistant-custom-component==0.13.316
+
+# The one runtime dependency, needed so the numeric pipeline imports under test.
+numpy>=1.24

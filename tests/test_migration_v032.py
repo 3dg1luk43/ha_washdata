@@ -514,6 +514,44 @@ async def test_full_chain_v1_to_current_profile_has_phases_and_device_type():
 
 
 @pytest.mark.asyncio
+async def test_v11_to_v12_adds_backfill_cycles():
+    """v11 -> v12: the third cycle list is initialized, additively.
+
+    Cycles recovered from raw power history (issue #344) are auto-detected and
+    unverified, so they live in neither `past_cycles` nor `reference_cycles`. The
+    migration only creates the key; nothing else moves.
+    """
+    store = _make_store()
+    data: dict[str, Any] = {
+        "past_cycles": [{"id": "a"}],
+        "reference_cycles": [{"id": "r"}],
+        "profiles": {"Cotton 40": {"avg_duration": 8000.0}},
+    }
+    result = await store._async_migrate_func(11, 1, data)
+    assert result["backfill_cycles"] == []
+    assert result["past_cycles"] == [{"id": "a"}]
+    assert result["reference_cycles"] == [{"id": "r"}]
+
+
+@pytest.mark.asyncio
+async def test_v12_migration_is_idempotent():
+    """Re-running the step never discards already-backfilled cycles."""
+    store = _make_store()
+    data: dict[str, Any] = {"backfill_cycles": [{"id": "b1"}, {"id": "b2"}]}
+    result = await store._async_migrate_func(11, 1, data)
+    assert [c["id"] for c in result["backfill_cycles"]] == ["b1", "b2"]
+
+
+@pytest.mark.asyncio
+async def test_full_chain_v1_to_current_initializes_all_cycle_lists():
+    """A v1 store ends up with all three cycle lists present."""
+    store = _make_store()
+    result = await store._async_migrate_func(1, 1, {"past_cycles": [], "profiles": {}})
+    assert result["reference_cycles"] == []
+    assert result["backfill_cycles"] == []
+
+
+@pytest.mark.asyncio
 async def test_full_chain_v1_to_current_custom_phases_initialized():
     """v1 → current: custom_phases is always present after full migration."""
     store = _make_store()

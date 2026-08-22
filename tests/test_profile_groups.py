@@ -227,20 +227,20 @@ def _cand(name, dur, shape, final=None):
     }
 
 
-# --- pure logic helpers (inline mirror of the production formula) ---
+# --- production predicate, imported (NOT mirrored) ---
+#
+# These used to re-implement the formula inline, which meant they kept passing while
+# production diverged - the #364 leaks were invisible to them. They now call the
+# real predicate, so they are genuine #288 regression tests. `_match_prefix_ambiguity`
+# returns (full_shape_hit, prefix_fit_hit); these cases exercise the full-envelope
+# term (#288), so they assert element 0. The prefix term (#364) needs a
+# `prefix_score` key and is covered in tests/test_issue_364_prefix_scoring.py.
 
-from custom_components.ha_washdata.const import (
-    SMART_TERM_LANDSCAPE_RATIO,
-    SMART_TERM_LANDSCAPE_MIN_SHAPE,
-)
+from custom_components.ha_washdata.profile_store import _match_prefix_ambiguity
 
 
 def _is_prefix_ambiguous(candidates, best_dur):
-    return best_dur > 0 and any(
-        float(c.get("profile_duration") or 0) > best_dur * SMART_TERM_LANDSCAPE_RATIO
-        and float(c.get("shape_score", c.get("score", 0))) >= SMART_TERM_LANDSCAPE_MIN_SHAPE
-        for c in candidates[1:]
-    )
+    return _match_prefix_ambiguity(candidates, best_dur)[0]
 
 
 def test_prefix_ambiguous_true_when_longer_look_alike_exists():
@@ -253,12 +253,20 @@ def test_prefix_ambiguous_true_when_longer_look_alike_exists():
 
 
 def test_prefix_ambiguous_false_when_runner_up_shape_too_low():
-    """A longer profile with poor shape (genuinely different program) is not a prefix risk."""
+    """A longer profile with a poor FULL-envelope shape score does not trip the #288
+    term.
+
+    Note this is a statement about that term only, not about prefix risk in general:
+    a trace part-way through a longer programme scores badly against that
+    programme's whole curve precisely when it IS a prefix of it. That blind spot is
+    #364, and it is covered by the prefix-score term (element 1), which needs a
+    `prefix_score` on the candidate.
+    """
     candidates = [
         _cand("Quick", 2760, 0.70, 0.61),
         _cand("Wool", 5400, 0.15, 0.12),   # different shape -> shape_score below threshold
     ]
-    assert _is_prefix_ambiguous(candidates, 2760.0) is False
+    assert _match_prefix_ambiguity(candidates, 2760.0) == (False, False)
 
 
 def test_prefix_ambiguous_false_when_runner_up_not_much_longer():

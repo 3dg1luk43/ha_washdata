@@ -54,6 +54,7 @@ from .const import (
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+    CONF_SMART_TERMINATION_DURATION_RATIO,
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_COMPLETION_MIN_SECONDS,
@@ -115,7 +116,11 @@ from .const import (
     TerminationReason,
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
-from .profile_store import _ambiguity_from_candidates, decompress_power_data
+from .profile_store import (
+    _ambiguity_from_candidates,
+    _match_prefix_ambiguity,
+    decompress_power_data,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -168,6 +173,7 @@ _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
     CONF_ANTI_WRINKLE_EXIT_POWER: ("anti_wrinkle_exit_power", float),
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT: ("anti_wrinkle_idle_timeout", float),
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE: ("dishwasher_end_spike_quiet_release", float),
+    CONF_SMART_TERMINATION_DURATION_RATIO: ("smart_termination_duration_ratio", float),
     CONF_OFF_DELAY: ("off_delay", int),
     CONF_MIN_OFF_GAP: ("min_off_gap", int),
     CONF_COMPLETION_MIN_SECONDS: ("completion_min_seconds", int),
@@ -411,13 +417,34 @@ def _build_match_snapshots(
     snapshots: list[dict[str, Any]] = []
     try:
         data = getattr(store, "_data", {}) or {}
-        profiles = data.get("profiles", {}) or {}
-        # Include imported reference cycles: an import-only profile samples from
-        # reference_cycles, so without them it would be dropped as a candidate and
-        # the Playground auto-detect would never match a downloaded profile.
-        past = data.get("past_cycles", []) or []
-        refs = data.get("reference_cycles", []) or []
-        by_id = {c.get("id"): c for c in (list(past) + list(refs)) if isinstance(c, dict)}
+        # Snapshot the profiles dict before iterating: this runs in an executor thread
+        # (ws_api dispatches _build_match_snapshots via async_add_executor_job) while the
+        # event loop may add/remove a profile (cycle-end creation, GC, auto-label), and a
+        # live `.items()` walk would raise "dictionary changed size during iteration" -
+        # the same race get_export_inventory was moved on-loop to avoid. dict() is a cheap
+        # shallow copy of the top-level mapping (values are read-only here). iter_evidence_
+        # cycles() below returns a fresh list, so its .extend() is already snapshot-safe.
+        profiles = dict(data.get("profiles", {}) or {})
+        # Include every cycle the live matcher would consider, via the store's own
+        # evidence view: an import-only profile samples from reference_cycles or
+        # backfill_cycles, so a snapshot pool built from past_cycles alone would drop it
+        # as a candidate and the Playground's auto-detect would never match a downloaded
+        # or backfilled profile - silently reporting it as unmatched. Reading the same
+        # gated view the matcher reads also keeps the sandbox honest when the user has
+        # excluded a category from shaping profiles.
+        try:
+            pool = store.iter_evidence_cycles()
+        except Exception:  # pylint: disable=broad-exception-caught
+            # Older store without the evidence view: fall back to the raw lists. Include
+            # backfill_cycles too (the evidence view does), else a profile whose sample
+            # lives only in imported history has no snapshot and the sim reports it
+            # unmatched though live matching can use it.
+            pool = (
+                list(data.get("past_cycles", []) or [])
+                + list(data.get("reference_cycles", []) or [])
+                + list(data.get("backfill_cycles", []) or [])
+            )
+        by_id = {c.get("id"): c for c in pool if isinstance(c, dict)}
         for name, profile in profiles.items():
             if not isinstance(profile, dict):
                 continue
@@ -437,6 +464,11 @@ def _build_match_snapshots(
                     "name": name,
                     "avg_duration": float(avg_dur),
                     "sample_power": [p for _, p in sample_p],
+                    # The trace's own time span, which is NOT avg_duration (a trimmed
+                    # mean across cycles). `analysis._prefix_point_count` converts
+                    # elapsed time to an index with it, so omitting it made the sim
+                    # truncate the prefix at a different point than production.
+                    "sample_span_s": float(sample_p[-1][0] - sample_p[0][0]),
                 }
             )
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -872,10 +904,17 @@ class _DetailSim:
             members = self.group_members.get(gkey, [])
             if members and self.store is not None:
                 try:
-                    member_name, _, _ = self.store._stage5_pick_member(  # noqa: SLF001
+                    member_name, _, member_dur = self.store._stage5_pick_member(  # noqa: SLF001
                         list(powers), duration, members, self.member_snaps or {}
                     )
-                    candidates[0] = dict(candidates[0], name=member_name)
+                    # Carry the member's duration as well, exactly as
+                    # `async_match_profile` relabels the winner: leaving the group's
+                    # aggregate duration here fed the wrong expected value to the
+                    # detector AND to the #364 prefix guard below.
+                    resolved = dict(candidates[0], name=member_name)
+                    if member_dur:
+                        resolved["profile_duration"] = float(member_dur)
+                    candidates[0] = resolved
                 except Exception:  # pylint: disable=broad-exception-caught
                     pass
         best = candidates[0]
@@ -915,7 +954,31 @@ class _DetailSim:
 
         # The DETECTOR still receives the RAW top-1, so detection / smart-termination
         # behaviour is byte-identical to before this reporting change.
-        return (raw_name, raw_conf, raw_expected, None, False, bool(is_ambiguous))
+        # Elements 7-9 (#364): without them the prefix-landscape and power-plausibility
+        # guards were never exercised in a simulation, so the exact failure the
+        # Playground exists to reproduce was invisible here.
+        full_shape_hit, prefix_fit_hit = _match_prefix_ambiguity(candidates, raw_expected)
+        # Guard the store call like iter_evidence_cycles above: on an older store or a
+        # partial test double without profile_tail_power the AttributeError would
+        # bubble through _try_profile_match, which drops the match at debug - so EVERY
+        # match in the sim would be silently reported as unmatched.
+        tail_power = None
+        if self.store is not None and raw_name:
+            try:
+                tail_power = self.store.profile_tail_power(raw_name)
+            except Exception:  # pylint: disable=broad-exception-caught
+                tail_power = None
+        return (
+            raw_name,
+            raw_conf,
+            raw_expected,
+            None,
+            False,
+            bool(is_ambiguous),
+            bool(full_shape_hit or prefix_fit_hit),
+            bool(full_shape_hit),
+            tail_power,
+        )
 
     def _sample(self, ts: datetime) -> None:
         if not self.compute_series:
@@ -947,7 +1010,10 @@ class _DetailSim:
             phase_result = None
             if len(trace) >= 10 and program != "detecting...":
                 phase_result = progress_mod.estimate_phase_progress(
-                    self.store, trace, offset, program
+                    self.store, trace, offset, program,
+                    quiet_threshold_w=float(
+                        getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0
+                    ),
                 )
             ml_pct = progress_mod.ml_progress_percent(
                 self.store, self.options, matched_dur, trace, program, self._end_exp_fn
@@ -1356,6 +1422,7 @@ def _sim_config_summary(config: CycleDetectorConfig) -> dict[str, Any]:
         "anti_wrinkle_exit_power": getattr(config, "anti_wrinkle_exit_power", None),
         "anti_wrinkle_idle_timeout": getattr(config, "anti_wrinkle_idle_timeout", None),
         "dishwasher_end_spike_quiet_release": getattr(config, "dishwasher_end_spike_quiet_release", None),
+        "smart_termination_duration_ratio": getattr(config, "smart_termination_duration_ratio", None),
     }
 
 

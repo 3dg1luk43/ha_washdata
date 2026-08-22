@@ -21,6 +21,7 @@ from __future__ import annotations
 import copy
 import logging
 import math
+from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 from datetime import datetime
 from typing import Any, TYPE_CHECKING, cast
 
@@ -484,9 +485,23 @@ def reconcile_suggestions(
         """True if at least one key is already in the suggestion map (original or cascade)."""
         return any(isinstance(out.get(k), dict) for k in keys)
 
-    def adjust(key: str, new_value: float, why: str) -> None:
-        """Set a suggestion value; cascade-creates an entry when the key is absent."""
-        rounded = round(new_value, 2)
+    def adjust(key: str, new_value: float, why: str, round_dir: str = "nearest") -> None:
+        """Set a suggestion value; cascade-creates an entry when the key is absent.
+
+        ``round_dir`` controls the 2-dp rounding so a strict inequality survives it:
+        ``"up"`` (ceil) when *raising* a value to clear a lower bound, ``"down"``
+        (floor) when *lowering* one to a ceiling. Nearest-rounding could otherwise land
+        back on the value that violated the constraint (e.g. raising auto to 0.901 would
+        round to 0.90 and stay below a match of 0.901). Default ``"nearest"`` keeps every
+        non-ladder rule byte-identical.
+        """
+        if round_dir == "up":
+            # Decimal(str(x)) so binary FP can't nudge e.g. 0.07 to 0.0700001 and ceil to 0.08.
+            rounded = float(Decimal(str(new_value)).quantize(Decimal("0.01"), rounding=ROUND_CEILING))
+        elif round_dir == "down":
+            rounded = float(Decimal(str(new_value)).quantize(Decimal("0.01"), rounding=ROUND_FLOOR))
+        else:
+            rounded = round(new_value, 2)
         entry = out.get(key)
         if isinstance(entry, dict):
             if _num(entry.get("value")) == rounded:
@@ -564,17 +579,43 @@ def reconcile_suggestions(
         if sampling is not None and start_dur is not None and start_dur < sampling and in_out(CONF_SAMPLING_INTERVAL, CONF_START_DURATION_THRESHOLD):
             adjust(CONF_START_DURATION_THRESHOLD, sampling, "the sampling interval")
 
-        # ── Rule 5: learning_confidence <= match_threshold <= auto_label ───────
-        # Reconcile top-down (match<=auto first) so a lower fix cannot re-break
-        # the ordering already set above.
+        # ── Rule 5: match_threshold <= learning_confidence, match <= auto_label ─
+        # The confidence ladder is unmatch < match < learning < auto_label (#396):
+        # the verify-band floor (learning) sits AT OR ABOVE the live match-trust
+        # gate (match), which itself sits at or below the auto-label ceiling.
+        # Reconcile match<=auto first so a later fix cannot re-break the ordering.
         match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
         auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
         if match_thr is not None and auto is not None and match_thr > auto and in_out(CONF_PROFILE_MATCH_THRESHOLD, CONF_AUTO_LABEL_CONFIDENCE):
-            adjust(CONF_PROFILE_MATCH_THRESHOLD, auto, "the auto-label confidence")
-            match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
+            # Anchor on whichever the engine actually proposed, like every other
+            # two-sided rule. match_threshold now drives detection (it is
+            # CycleDetectorConfig.match_confidence_threshold), so when the engine
+            # deliberately RAISED it, lift the auto-label ceiling to keep it rather
+            # than silently undoing the raise; only cascade it downward when it was
+            # not the proposed key.
+            if is_original(CONF_PROFILE_MATCH_THRESHOLD):
+                # raise the ceiling to (>=) match: ceil so 2-dp rounding can't drop it back under
+                adjust(CONF_AUTO_LABEL_CONFIDENCE, match_thr, "the profile match threshold", "up")
+                auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
+            else:
+                # lower match to (<=) auto: floor so it stays at/below the ceiling
+                adjust(CONF_PROFILE_MATCH_THRESHOLD, auto, "the auto-label confidence", "down")
+                match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
         learn = eff(CONF_LEARNING_CONFIDENCE)
-        if learn is not None and match_thr is not None and learn > match_thr and in_out(CONF_LEARNING_CONFIDENCE, CONF_PROFILE_MATCH_THRESHOLD):
-            adjust(CONF_LEARNING_CONFIDENCE, match_thr, "the profile match threshold")
+        if learn is not None and match_thr is not None and learn < match_thr and in_out(CONF_LEARNING_CONFIDENCE, CONF_PROFILE_MATCH_THRESHOLD):
+            # raise learning to (>=) match: ceil
+            adjust(CONF_LEARNING_CONFIDENCE, match_thr, "the profile match threshold", "up")
+        # Top of the ladder: learning <= auto. `_add_confidence_suggestions` derives the
+        # two independently (learning from p05 of manual labels, auto from p15 of
+        # uncorrected auto-labels), so a device with few high-confidence manual labels can
+        # yield learning > auto. Cascade-RAISE the auto ceiling to the verify floor (the
+        # conservative direction — never lower the verify band); keeps the full declared
+        # ordering intact instead of enforcing only its middle two rungs.
+        learn = eff(CONF_LEARNING_CONFIDENCE)
+        auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
+        if learn is not None and auto is not None and learn > auto and in_out(CONF_LEARNING_CONFIDENCE, CONF_AUTO_LABEL_CONFIDENCE):
+            # raise the auto ceiling to (>=) learning: ceil
+            adjust(CONF_AUTO_LABEL_CONFIDENCE, learn, "the learning confidence", "up")
 
         # ── Rule 6: profile_unmatch_threshold < profile_match_threshold ────────
         unmatch = eff(CONF_PROFILE_UNMATCH_THRESHOLD)

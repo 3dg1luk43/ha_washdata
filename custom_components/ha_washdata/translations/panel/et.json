@@ -78,9 +78,12 @@
     "awaiting": "Ootab heakskiitu",
     "imported_tip": "Imporditud kogukonna poest. Kasutatakse ainult sobitamiseks, ei arvestata statistikas.",
     "not_importable": "pole saadaval",
-    "exists": "on olemas"
+    "exists": "on olemas",
+    "backfilled_tip": "Tuvastatud imporditud võimsuse ajaloos. Mõjutab ainult programmide sobitamist, statistikas ei arvestata."
   },
   "btn": {
+    "set_brand_model": "Määra bränd ja mudel",
+    "refresh_catalog": "Värskenda kataloogi",
     "add_device": "+ Lisa seade",
     "add_device_tip": "Lisage veel üks WashData seade",
     "add_maintenance": "Lisa hooldussündmus",
@@ -241,7 +244,12 @@
     "import_selected": "Impordi valitud",
     "back": "Tagasi",
     "mute_suggestion": "Lõpeta selle seade soovitamine",
-    "reset_muted": "Lähtesta vaigistatud"
+    "reset_muted": "Lähtesta vaigistatud",
+    "import_power_history": "Impordi võimsuse ajalugu",
+    "hist_read_recorder": "Loe Home Assistantist",
+    "hist_scan": "Otsi tsükleid",
+    "hist_import_n": "Impordi tsüklid ({n})",
+    "hist_goto_cycles": "Näita tsükleid"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,14 +261,14 @@
       "start": "Peab olema alla kortsudevastase maksimaalse võimsuse ({max} W)"
     },
     "attn_sub": "Lahendage konfliktid enne salvestamist",
-    "attn_title": "{n} seadete konflikt{s}",
-    "settings_banner": "{n} seadete konflikt{s} – kontrollige esile tõstetud sektsioone ja parandage enne salvestamist.",
+    "attn_title": "Seadete konfliktid: {n}",
+    "settings_banner": "Seadete konfliktid: {n}. Kontrollige esile tõstetud sektsioone ja parandage need enne salvestamist.",
     "settings_banner_btn": "Mine esimesele",
     "confidence": {
       "auto": "Peab olema vähemalt vaste läve tasemel ({match})",
-      "learning": "Peab olema kuni vaste läve ({match})",
+      "learning": "Peab olema vähemalt vaste läve tasemel ({match})",
       "match_for_auto": "Peab olema kuni automaatse sildi usalduse ({alc})",
-      "match_for_learning": "Peab olema vähemalt õppimise usalduse tasemel ({lc})"
+      "match_for_learning": "Peab olema kuni õppimise usalduse tasemel ({lc})"
     },
     "duration_ratio": {
       "max": "Peab olema suurem kui minimaalse kestuse suhe ({min})",
@@ -298,7 +306,7 @@
       "match": "Peab olema üle mitte-vaste läve ({un})",
       "unmatch": "Peab olema alla vaste läve ({match}); muidu tühistatakse kinnitatud vaste kohe"
     },
-    "cascade_toast": "Järjepidevuse tagamiseks kohandati automaatselt ka {n} seadistust.",
+    "cascade_toast": "Järjepidevuse tagamiseks kohandati muid seadeid: {n}",
     "suggestion_resolves": "Rakendage allpool kuvatav ootel soovitus ({val}), et see parandada",
     "use_fix": "Kasuta {val}",
     "watchdog": {
@@ -356,7 +364,8 @@
     "pg_outcome": "Simulatsiooni tulemus",
     "pg_across_cycles": "Sinu tsüklite lõikes",
     "community_store": "Kogukonna pood",
-    "online_account": "Kogukonna pood ja veebifunktsioonid"
+    "online_account": "Kogukonna pood ja veebifunktsioonid",
+    "import_power_history": "Võimsuse ajaloo import"
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -364,6 +373,7 @@
     "poor": "⚠ Kehv profiili kvaliteet"
   },
   "lbl": {
+    "drag_to_resize": "Lohistage suuruse muutmiseks",
     "pg_anti_wrinkle": "Kortsudevastane",
     "actions": "Tegevused",
     "activity": "Tegevus",
@@ -435,7 +445,7 @@
     "from": "Alates",
     "gap_s": "Vahe(d)",
     "group_name": "Rühma nimi",
-    "head_trim": "Pea trimm (id)",
+    "head_trim": "Kärbe algusest (s)",
     "health": "Tervis",
     "hide_tabs": "Peida vahekaardid mitteadministraatorite jaoks",
     "in_use": "Kasutuses",
@@ -451,7 +461,7 @@
     "metric": "Mõõdik",
     "mode_existing_profile": "Lisa olemasolevale profiilile",
     "mode_new_profile": "Loo uus profiil",
-    "models_fine_tuned": "({count} mudelit peenhäälestatud)",
+    "models_fine_tuned": "(peenhäälestatud mudelid: {count})",
     "n_classic_suggestions": "{n} klassikaline",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} valitud",
@@ -532,7 +542,7 @@
     "stage3": "Etapp 3 – DTW",
     "stage4": "Etapp 4 – kokkulangevus",
     "status": "Olek",
-    "tail_trim": "Saba trimm (id)",
+    "tail_trim": "Kärbe lõpust (s)",
     "timer_auto_pause": "Automaatne paus",
     "timer_min": "min",
     "timer_msg_placeholder": "Sõnum (valikuline, {device}/{program}/{minutes})",
@@ -677,7 +687,26 @@
     "conflict_import_copy": "Impordi koopiana",
     "conflict_keep_mine": "Säilita minu omad",
     "conflict_overwrite": "Kirjuta üle",
-    "font_size": "Paneeli fondi suurus"
+    "font_size": "Paneeli fondi suurus",
+    "hist_csv_data": "CSV-andmed",
+    "hist_from_recorder": "Või loe see Home Assistantist",
+    "hist_since": "Alates",
+    "days": "päeva",
+    "hist_keep": "Säilita see tsükkel",
+    "hist_looks_complete": "lõpetatud",
+    "peak_power_short": "Tipp",
+    "shape": "Kuju",
+    "hist_skip_idle": "miski ei töötanud",
+    "hist_skip_sparse": "näidud liiga hõredad",
+    "hist_skip_short": "liiga vähe näite",
+    "hist_skip_long": "pole piisavalt pikka pausi, kust jagada",
+    "hist_reason_short": "lühem kui selle seadme lühim tegelik tsükkel",
+    "hist_reason_no_end": "ei lõppenud korralikult",
+    "task_history_import": "Võimsuse ajaloo skannimine",
+    "task_history_import_apply": "Tsüklite importimine",
+    "evidence_real_cycles": "Selle seadme tehtud tsüklid",
+    "evidence_reference_cycles": "Kogukonna poest alla laaditud",
+    "evidence_backfill_cycles": "Leitud imporditud võimsuse ajaloos"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -756,9 +785,15 @@
     "store_share": "Jaga kogukonna poodi",
     "store_share_device": "Jaga seda seadet",
     "export_select": "Eksport - vali andmed",
-    "import_wizard": "Import - vali andmed"
+    "import_wizard": "Import - vali andmed",
+    "history_import": "Võimsuse ajaloo import"
   },
   "msg": {
+    "tail_trim_hint": "Mitu sekundit lõpust eemaldada",
+    "store_sibling_hint": "Sinu täpse mudeli jaoks pole midagi jagatud? Sama brändi lähedane mudel on tavaliselt hea lähtepunkt.",
+    "store_declare_appliance": "Ütle WashDatale, milline seade sul on, ja see vahekaart näitab teiste jagatud programme ja salvestisi selle seadme jaoks. Võid ka ülal brändi kirjutada ja lihtsalt ringi vaadata.",
+    "refresh_catalog_hint": "Kogukonna brändide ja seadmete loendid on vahemälus, et jagatud pood püsiks oma päevase päringulimiidi piires. Värskenda, et näha teiste lisatud või heaks kiidetud kirjeid.",
+    "head_trim_hint": "Mitu sekundit algusest eemaldada",
     "appliance_monitor": "Seadmete monitor",
     "artifact_dip_detail": "Langes alla tavapärase võimsusriba umbes {n}s jooksul.",
     "artifact_footer": "Ülaltoodud graafikul esile tõstetud. Need on mööduvad artefaktid (nt uks avati tsükli keskel), mitte tingimata probleemid.",
@@ -769,7 +804,7 @@
     "automations_intro": "WashData käivitab {start} / {end} sündmusi ja avaldab olemeid, seega on teated ja toimingud kõige paremini ehitada tavaliste Home Assistanti automaatikana. Seda seadet kasutavad automaatikad kuvatakse allpool.",
     "cleanup_intro": "Iga märgistatud tsükkel on kaetud. Profiili puhastamiseks märkige kõrvalekalded ja kustutage.",
     "clear_debug_hint": "Ruumi vabastamiseks eemaldage salvestatud silumisandmed.",
-    "collecting_data": "Andmete kogumine - {need} tsüklit veel enne peenhäälestuse alustamist ({current}/{min}).",
+    "collecting_data": "Andmete kogumine. Tsükleid on enne peenhäälestuse algust veel vaja: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Ülekatteprofiilid (nõrkjad)",
     "compare_profiles_tip": "Katke ülaltoodud diagrammil teised profiiliümbrikud, et näha, milline neist selle tsükliga kõige paremini sobib.",
     "compare_selected_cycles": "Valitud tsüklid (tahked) – näita/peida",
@@ -779,7 +814,7 @@
     "cycles_deleted": "{count} tsüklit kustutatud",
     "enough_data": "Piisavalt andmeid õppimiseks ({current}/{min} tsüklit).",
     "export_description": "Vali täpselt, millised profiilid, tsüklid, seaded ja muu JSON-i eksportida, või analüüsi fail ja impordi ainult soovitud osad.",
-    "feedback_cycles_pending": "{n} tsükkel{s} ülevaatamiseks",
+    "feedback_cycles_pending": "Ülevaatamiseks: {n}",
     "feedback_prompt": "Kinnitage, et see oli õige, parandage programmi või ignoreerige.",
     "feedback_relabel_hint": "Selle tsükli uuesti sildistamine lahendab ka selle.",
     "filter_by_profile": "Filtreeri profiili järgi…",
@@ -804,7 +839,7 @@
     "ml_intro": "WashData tarnitakse nutikate mudelitega, mis töötavad karbist välja.",
     "ml_learned_intro": "Selle masina jaoks peenhäälestatud mudelid.",
     "ml_loading": "ML laadimine…",
-    "ml_settings_intro": "Kaks sõltumatut lülitit: üks rakendab mudeleid tsükli töötamise ajal, teine ​​võimaldab WashDatal neid aja jooksul teie masinale täpselt häälestada.",
+    "ml_settings_intro": "Kaks sõltumatut lülitit: üks rakendab mudeleid tsükli töötamise ajal, teine võimaldab WashDatal neid aja jooksul teie masinale täpselt häälestada.",
     "name_first_program": "Sul on piisavalt tsükleid – pane oma esimesele programmile nimi, et alustada sobitamist.",
     "near_duplicate_cluster": "Tuvastati peaaegu duplikaatprofiili klaster. Rühmitamine võimaldab sobitamisel usaldusväärselt valida sarnasuste vahel (nt sama programm erineval temperatuuril/tsentrifuugimisel).",
     "no_cycles_match": "Ükski tsükkel ei vasta praegusele filtrile.",
@@ -856,7 +891,6 @@
     "pg_stress_synthetic": "tühikäigu simulatsioon algab siit",
     "pg_sweep_intro": "Mis siis, kui {param} oleks teistsugune? Testi {steps} väärtust oma viimase {cycles} tsükli ulatuses, et leida seade, mille juures kõige rohkem tsükleid sobitatakse õigesti.",
     "pg_sweep_step": "Samm {done} / {total}",
-    "pg_undetected": "{n} tsüklit tuvastamata",
     "pg_verdict_bad": "Vajab tähelepanu: paljud tsüklid jäävad tuvastamata.",
     "pg_verdict_good": "Hästi häälestatud: enamik tsükleid tuvastatakse ja sobitatakse õigesti.",
     "pg_verdict_ok": "Vastuvõetav: mõned tsüklid jäid vahele. Proovi käivitusläve alandada.",
@@ -887,6 +921,7 @@
     "review_recorded_tip": "Märkige see oma programmi jaoks käsitsi valitud võrdlustsükliks – sama roll kui käsitsi salvestatud tsüklil. Võrdlustsüklid jäetakse alati alles, külvatakse sobiv mall ja neid ei jäeta kunagi puhastamise käigus maha. (See on \"kuldne\" / salvestatud lipp; mõlemad on samad.)",
     "review_tags_tip": "Valikulised lipud, mis kirjeldavad, mis selle tsükliga valesti läks, nii et koolitus ja puhastamine võivad seda arvesse võtta.",
     "review_to_cycles": "Avage tsüklite ülevaatuse järjekord",
+    "samples_decimated": "Kuvatakse {shown}/{total} näidet (kuvamiseks hõrendatud; tipud säilitatud). Lai vahe siin on hõrendamine, mitte puuduvad andmed.",
     "saving_triggers_reload": "Salvestamine käivitab integratsiooni uuesti laadimise. HA olemid võivad hetkeks kuvada kui kättesaamatud.",
     "search_placeholder": "Otsinguseaded…",
     "see_recorder": "Vaadake salvesti vidinat allpool",
@@ -1006,10 +1041,33 @@
     "sug_mute_failed": "Soovituse vaigistamine ebaõnnestus",
     "sug_unmuted_all": "Vaigistatud soovitused lähtestatud",
     "n_suggestions_muted": "{count} vaigistatud; automaatne häälestaja ei paku neid enam.",
-    "font_size_hint": "Muuda kõik selles paneelil suuremaks või väiksemaks. Kehtib sinu kontole sellel seadmel."
+    "font_size_hint": "Muuda kõik selles paneelil suuremaks või väiksemaks. Kehtib sinu kontole sellel seadmel.",
+    "import_history_description": "Kas nutipistik oli sul olemas juba enne WashDatat? Laadi üles selle võimsusanduri ajaloo eksport või loe see otse Home Assistantist, ja tavaline tuvastus töötab need andmed läbi, nii et möödunud tsüklid ilmuvad sinu Tsüklite loendisse ja neile saab nime anda.",
+    "hist_input_hint": "Laadi üles Ajaloo paneelilt alla laaditud CSV (olem, olek, viimane muutus) või lase WashDatal anduri ajalugu otse lugeda. Seejärel töötab tuvastus need andmed läbi täpselt nii nagu reaalajas ja sina valid, millised leitud tsüklid alles jäävad.",
+    "hist_recorder_hint": "Loeb valitud kuupäevast kuni praeguse hetkeni. Home Assistant hoiab üksikasjalikku ajalugu vaikimisi 10 päeva ja pärast seda ainult tunniseid keskmisi, mis on tsüklite tuvastamiseks liiga jämedad - vali varasem kuupäev ainult siis, kui sinu recorder on seatud rohkem säilitama.",
+    "hist_scanning": "Sinu ajalugu jooksutatakse detektorist läbi. See toimub taustal - võid selle akna sulgeda ja hiljem tagasi tulla.",
+    "hist_imported_count": "Imporditud tsükleid: {n}.",
+    "hist_duplicates": "Juba varem imporditud ja vahele jäetud: {n}.",
+    "hist_capped": "Seadme imporditud tsüklite piirmäär sai täis; ülejäänuid ei salvestatud.",
+    "hist_next_step": "Need on sinu Tsüklite loendis, märgitud imporditud ajaloona. Ava üks ja kasuta nuppu Sildista, et määrata selle programm.",
+    "hist_rows_read": "Loetud näite: {n}",
+    "hist_entity_substituted": "loeti {used} (see seade on seadistatud kasutama {wanted})",
+    "hist_breaks": "Katkestusi, kus andur ei olnud saadaval: {n}",
+    "hist_other_entity": "Eiratud muude olemite näite: {n}",
+    "hist_skipped_spans": "Vahele jäetud lõigud",
+    "hist_settings_used": "Tuvastatud selle seadme praeguste seadetega (Minimaalne Võimsus {w} W, Väljalülitumise Viivitus {s} s).",
+    "hist_none_found": "Sellest ajaloost ei õnnestunud ühtegi tsüklit tuvastada.",
+    "hist_found": "Leitud tsükleid: {n}. Eemalda linnuke kõigelt, mis ei tundu tegelik käitus - enne importimist ei salvestata midagi.",
+    "hist_scan_capped": "Kuvatakse ainult esimesed kandidaadid (leiti: {n}).",
+    "hist_recorder_empty": "Home Assistantil pole selle anduri kohta sellest ajavahemikust üksikasjalikku ajalugu.",
+    "hist_scan_failed": "Skannimine ebaõnnestus.",
+    "hist_scan_expired": "See skannimistulemus pole enam saadaval. Palun skanni uuesti.",
+    "hist_import_failed": "Import ebaõnnestus.",
+    "imported_history_readonly": "Tuvastatud imporditud võimsuse ajaloos. See mõjutab programmide sobitamist, kuid ei arvestata sinu statistikas ning seda ei saa kärpida ega poolitada. Kasuta nuppu Sildista, et määrata programm."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
+    "smart_termination_duration_ratio": "Osa vastendatud programmi eeldatavast kestusest, milleni tsükkel peab jõudma, enne kui nutikas lõpetamine tohib selle ennetähtaegselt lõpetada; vähendage seda koormusest või temperatuurist sõltuvatel masinatel",
     "anti_wrinkle_enabled": "Neelab pärast põhifaasi trummelimpulsid, selle asemel et lugeda neid uute tsüklitena",
     "anti_wrinkle_exit_power": "Kortsudevastase režiimi aktiivsena püsimiseks peab võimsus impulsside vahel sellest allapoole langema",
     "anti_wrinkle_idle_timeout": "Kahe trummelimpulsi vahel lubatud vaikuseaeg enne kortsudevastase režiimi lõppu",
@@ -1134,7 +1192,7 @@
       "doc": "Kui tsükkel ületab oma eeldatava kestuse, siis kui kaua peab nõudepesumasin püsima vaikne (allpool Peatumise Lävi), enne kui WashData lõpetab lõpliku tühjenduse ootamise ja lõpetab tsükli. Suurendage seda, kui teie masinal on pikk vaikne kuivatusfaas enne hilist lõplikku tühjendust, mis jääb märkamata - laiem aken laseb õpitud kestusel järgida hooajalist triivi (külmem sissevoolav vesi = pikemad tsüklid), selle asemel et lukustuda vana keskmise külge. See saab ooteaega üksnes lühendada võrreldes sisemise 30-minutilise lõpupiigi ülempiiriga, mitte kunagi seda pikendada."
     },
     "anti_wrinkle_enabled": {
-      "doc": "Tuvastage lühikesed väikese võimsusega trummelimpulsid, mida kuivati ​​pärast peamist kuumutusfaasi kiirgab, ja hoidke need valmis tsükliga ühendatud, selle asemel, et lugeda neid uute tsüklitena.",
+      "doc": "Tuvastage lühikesed väikese võimsusega trummelimpulsid, mida kuivati pärast peamist kuumutusfaasi kiirgab, ja hoidke need valmis tsükliga ühendatud, selle asemel, et lugeda neid uute tsüklitena.",
       "label": "Luba Kortsudevastane Tuvastamine"
     },
     "anti_wrinkle_exit_power": {
@@ -1421,6 +1479,10 @@
       "doc": "Salvestage iga tsükli täielik võimsusjälg ja vastavad silumisandmed. Kasulik tõrkeotsinguks, kuid suurendab salvestusruumi mahtu.",
       "label": "Salvesta Silumise Jäljed"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Kui kaugele vastendatud programmi eeldatavast kestusest peab tsükkel jõudma, enne kui nutikas lõpetamine tohib selle võimsuse langedes ennetähtaegselt lõpetada. Eeldatav kestus on programmi keskmine, seega seadmetel, mille tööaeg kõigub palju - pesumasinad külma talvise vs sooja suvise sissevoolava veega, andurkuivatusega kuivatid, koormusest sõltuvad programmid - lõpeb umbes pool kõigist tsüklitest sellest keskmisest lühemalt ega saa kunagi kiiret lõpetamist, lõppedes alles tagavara-aegumise kaudu minuteid hiljem. Vähendage seda (nt 0,85) neil masinatel, et varajane lõpetamine ikkagi käivituks; tõstke seda 1,0 poole, et olla ettevaatlikum. Jätke tühjaks vaikeväärtuse jaoks (0,98 või nõudepesumasinatel 0,99). See saab tsükli üksnes varem lõpetada, mitte kunagi hiljem, ega käivitu kunagi ebaselge või madala kindlusega vaste korral.",
+      "label": "Nutika lõpetamise suhe"
+    },
     "smoothing_window": {
       "doc": "Kui palju toorvõimsussignaali tasandatakse. Madal (2) on tundlik, kuid lärmakas; kõrge (5) silub naelu, kuid lisab mahajäämust.",
       "label": "Silumisaken"
@@ -1551,6 +1613,10 @@
     "door_end_dwell_seconds": {
       "label": "Ukse avamise lõppviibimisaeg",
       "doc": "Kui kaua uks peab jääma avatuks, enne kui WashData tsükli lõpetab, kui \"Uks avaneb automaatselt lõpus\" on sisse lülitatud. Piisavalt pikk, et kiire taldrikute lisamine ignoreeritaks (vaikimisi 60 s), piisavalt lühike, et lõpetada kiiresti, kui masin ukse avab."
+    },
+    "profile_evidence_sources": {
+      "label": "Programmi kujundavad tsüklid",
+      "doc": "Milliseid tsükleid kasutatakse iga programmi võimsuskõvera koostamiseks ja lõpetatud tsükli sellega sobitamiseks. Kui mõne liigi märke eemaldad, ei kujunda see enam sinu programme, kuid midagi ei kustutata - tsüklid jäävad Tsüklite loendisse ning neid saab endiselt sildistada või eemaldada. Kasulik, kui sa imporditud andmeid ei usalda. Statistikat see ei mõjuta: seal arvestatakse alati ainult neid tsükleid, mida see seade tegelikult käivitas. Kõigi märkide eemaldamist eiratakse, sest ilma ühegi tsüklita programm ei saaks kunagi sobituda."
     }
   },
   "setting_group": {
@@ -1634,6 +1700,9 @@
     },
     "basic_configuration": {
       "label": "Põhiseaded"
+    },
+    "profile_evidence": {
+      "label": "Profiili alusandmed"
     }
   },
   "status": {
@@ -1658,7 +1727,8 @@
     "trimming": "Kärpimine…",
     "splitting": "Lõhestamine…",
     "deleting": "Kustutamine…",
-    "imported": "Imporditud"
+    "imported": "Imporditud",
+    "preparing": "Ettevalmistamine…"
   },
   "tab": {
     "advanced": "Täpsemalt",
@@ -1688,6 +1758,7 @@
     "wrong_profile": "Vale profiil"
   },
   "toast": {
+    "catalog_refreshed": "Kogukonna kataloog on värskendatud",
     "access_saved": "Juurdepääsukontroll on salvestatud",
     "all_wiped": "Kõik andmed on kustutatud",
     "analysis_complete_none": "Analüüs on lõpetatud: uusi ettepanekuid pole",
@@ -1793,7 +1864,9 @@
     "store_download_failed": "Allalaadimine ebaõnnestus: {error}",
     "store_download_nothing": "Midagi uut alla laadida pole - see seadistus on juba teie seadmel.",
     "export_selective_done": "Eksport alla laaditud",
-    "import_selective_done": "Imporditud {profiles} profiili ja {cycles} tsüklit"
+    "import_selective_done": "Imporditud {profiles} profiili ja {cycles} tsüklit",
+    "hist_csv_required": "Laadi esmalt CSV-fail või kleebi selle sisu",
+    "file_read_failed": "Seda faili ei õnnestunud lugeda"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",
@@ -1889,7 +1962,7 @@
       "thr_batch": "Hoitakse veidi üle madalaima aktiivvõimsuse p05 juures {cycles} tsükli lõikes ({p05}W), et käivitus tuvastataks võimalikult vara ja seiskamislävi jääks alla masina madalaima töövõimsuse.",
       "tol_per_profile": "p75 profiilipõhisest kestuse dispersioonist {profiles} profiili lõikes ({cycles} tsüklit); kitsaid profiile ei karistata.",
       "tol_pooled": "Põhineb {cycles} viimase märgistatud tsükli koondkestuse dispersioonil (p95 hälve={dev}).",
-      "watchdog": "Hoitakse nii madal kui ohutu (veidi üle p95 uuendusintervalli {p95}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta."
+      "watchdog": "Hoitakse nii madal kui ohutu (veidi üle p95 uuendusintervalli {p95}s ja vähemalt 2x proovivõtu intervall {median}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta."
     },
     "exclusions": {
       "summary": "Välja jäetud {total} valesti tuvastatud tsüklit: {parts}.",
@@ -1955,6 +2028,10 @@
     "finished": "Tsükkel jõudis lõppolekusse ja lõppes."
   },
   "store": {
+    "your_model_tip": "See on seade, mille sa seadetes määrasid",
+    "your_model": "Sinu oma",
+    "search_brand_ph": "Otsi brändi järgi…",
+    "programs_count": "Programmid: {n}",
     "browse": "Sirvi",
     "device": "Seade",
     "favorites": "Lemmikud",

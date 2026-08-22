@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**106 commands.**
+**113 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -86,7 +86,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `run_playground_history` | entry_id, cycle_ids?, settings_override?, concurrency? | `RunPlaygroundHistoryResponse` |
 | `run_playground_sweep` | entry_id, param, values, objective, cycle_ids?, concurrency?, param_y?, values_y? | `RunPlaygroundSweepResponse` |
 | `get_dtw_debug` | entry_id, cycle_id, profile_name? | `GetDtwDebugResponse` |
-| `get_playground_settings` | entry_id | `GetPlaygroundSettingsResponse` |
+| `get_playground_settings` | entry_id, include_suggestions? | `GetPlaygroundSettingsResponse` |
 | `save_playground_preset` | entry_id, name, values | `PlaygroundPresetsResponse` |
 | `delete_playground_preset` | entry_id, name | `PlaygroundPresetsResponse` |
 | `list_tasks` | entry_id? | `ListTasksResponse` |
@@ -96,6 +96,11 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `start_playground_history` | entry_id, cycle_ids?, settings_override? | `StartTaskResponse` |
 | `start_playground_sweep` | entry_id, param, values, objective, param_y?, values_y? | `StartTaskResponse` |
 | `start_playground_cycle_detail` | entry_id, cycle_id, settings_override?, stress_tail?, stress_idle_w? | `StartTaskResponse` |
+| `history_import_begin` | entry_id | `HistoryImportBeginResponse` |
+| `history_import_chunk` | entry_id, token, seq, text | `HistoryImportChunkResponse` |
+| `history_import_recorder` | entry_id, start_date?, days? | `HistoryImportRecorderResponse` |
+| `start_history_import_scan` | entry_id, token | `StartTaskResponse` |
+| `apply_history_import` | entry_id, scan_task_id, accept | `StartTaskResponse` |
 | `store_status` | entry_id | `StoreStatusResponse` |
 | `store_connect` | entry_id, refresh_token, uid, name? | `StoreSimpleResponse` |
 | `store_disconnect` | entry_id | `StoreSimpleResponse` |
@@ -105,6 +110,8 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `store_get_cycles` | entry_id, profile_id | `StoreItemsResponse` |
 | `store_get_device_quality` | entry_id, device_id | `StoreQualityResponse` |
 | `store_get_device_profiles` | entry_id, brand, model, appliance_type | `StoreDeviceProfilesResponse` |
+| `store_get_catalog_entry` | entry_id, brand, model, appliance_type | `StoreCatalogEntryResponse` |
+| `store_refresh_catalog` | entry_id | `StoreRefreshCatalogResponse` |
 | `store_confirm_device` | entry_id, device_id | `StoreConfirmResponse` |
 | `store_rate_device` | entry_id, device_id, rating | `StoreOnlineResponse` |
 | `store_set_online` | entry_id, enabled | `StoreOnlineResponse` |
@@ -144,6 +151,7 @@ _None._
 | `entry_id` | yes | str |
 | `cycles` | yes | list[dict[str, any]] |
 | `reference_cycles` | yes | list[dict[str, any]] |
+| `backfill_cycles` | yes | list[dict[str, any]] |
 | `total` | yes | number |
 | `has_more` | yes | bool |
 
@@ -160,6 +168,7 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `options` | yes | dict[str, any] |
+| `defaults` | yes | dict[str, any] |
 
 ## `ha_washdata/set_options`
 
@@ -946,6 +955,8 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | --- | --- | --- |
 | `cycle_id` | no | str |
 | `samples` | no | list[list[number]] |
+| `sample_count` | no | number |
+| `decimated` | no | bool |
 | `full_duration_s` | no | number |
 | `start_time` | no | str \| null |
 | `end_time` | no | str \| null |
@@ -956,6 +967,9 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `artifacts` | no | list[dict[str, any]] |
 | `restart_gaps` | no | list[any] |
 | `is_reference` | no | bool |
+| `labelable` | no | bool |
+| `editable` | no | bool |
+| `cycle_origin` | no | str |
 
 ## `ha_washdata/trim_cycle`
 
@@ -991,6 +1005,8 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `segments` | yes | list[list[number]] |
 | `split_offsets` | yes | list[number] |
 | `samples` | yes | list[list[number]] |
+| `sample_count` | yes | number |
+| `decimated` | yes | bool |
 | `full_duration_s` | yes | number |
 
 ## `ha_washdata/apply_split`
@@ -1436,6 +1452,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | Param | Required | Type |
 | --- | --- | --- |
 | `entry_id` | yes | str |
+| `include_suggestions` | no | bool |
 
 **Response** (`GetPlaygroundSettingsResponse`)
 
@@ -1598,6 +1615,92 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `settings_override` | no | dict |
 | `stress_tail` | no | bool |
 | `stress_idle_w` | no | float\|null |
+
+**Response** (`StartTaskResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `task_id` | yes | str |
+
+## `ha_washdata/history_import_begin`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`HistoryImportBeginResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `token` | yes | str |
+| `max_bytes` | yes | number |
+| `chunk_bytes` | yes | number |
+
+## `ha_washdata/history_import_chunk`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `token` | yes | str |
+| `seq` | yes | int |
+| `text` | yes | str |
+
+**Response** (`HistoryImportChunkResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `received_bytes` | yes | number |
+| `next_seq` | yes | number |
+
+## `ha_washdata/history_import_recorder`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `start_date` | no | str\|null |
+| `days` | no | int |
+
+**Response** (`HistoryImportRecorderResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `token` | yes | str |
+| `rows` | yes | number |
+| `entity_id` | yes | str |
+| `days` | yes | number |
+| `start_date` | yes | str |
+| `truncated` | yes | bool |
+
+## `ha_washdata/start_history_import_scan`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `token` | yes | str |
+
+**Response** (`StartTaskResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `task_id` | yes | str |
+
+## `ha_washdata/apply_history_import`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `scan_task_id` | yes | str |
+| `accept` | yes | list |
 
 **Response** (`StartTaskResponse`)
 
@@ -1770,6 +1873,41 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | --- | --- | --- |
 | `device_id` | no | str |
 | `items` | no | list |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_get_catalog_entry`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `brand` | yes | str |
+| `model` | yes | str |
+| `appliance_type` | yes | str |
+
+**Response** (`StoreCatalogEntryResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `device_id` | no | str |
+| `brand` | no | dict \| null |
+| `device` | no | dict \| null |
+| `disabled` | no | bool |
+
+## `ha_washdata/store_refresh_catalog`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`StoreRefreshCatalogResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `ok` | no | bool |
 | `disabled` | no | bool |
 
 ## `ha_washdata/store_confirm_device`

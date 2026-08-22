@@ -10,13 +10,19 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
+// Set PANEL_BUILD=min to run the suite against the minified build artifacts
+// instead of the readable sources. This is what makes a broken minified bundle
+// impossible to ship: the same 340 tests have to pass against the exact bytes
+// users will download.
+const WWW = path.join(__dirname, '../custom_components/ha_washdata/www');
+const USE_MIN = process.env.PANEL_BUILD === 'min';
 const PANEL_SRC = path.join(
-  __dirname,
-  '../custom_components/ha_washdata/www/ha-washdata-panel.js',
+  WWW,
+  USE_MIN ? 'ha-washdata-panel.min.js' : 'ha-washdata-panel.js',
 );
 const CARD_SRC = path.join(
-  __dirname,
-  '../custom_components/ha_washdata/www/ha-washdata-card.js',
+  WWW,
+  USE_MIN ? 'ha-washdata-card.min.js' : 'ha-washdata-card.js',
 );
 // Per-language panel translations are served straight from the integration's
 // translations/panel/ directory (one {lang}.json per language), matching how
@@ -25,7 +31,9 @@ const TRANSLATIONS_DIR = path.join(
   __dirname,
   '../custom_components/ha_washdata/translations/panel',
 );
-const PORT = 4567;
+// playwright.config.ts passes PORT via the webServer.env option so the two
+// build modes (readable=4567, minified=4568) never share a server instance.
+const PORT = parseInt(process.env.PORT ?? '4567', 10);
 
 const MIME = {
   '.html': 'text/html',
@@ -68,5 +76,8 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`WashData E2E fixture server listening on http://localhost:${PORT}`);
+  console.log(
+    `WashData E2E fixture server listening on http://localhost:${PORT} ` +
+      `(serving ${USE_MIN ? 'MINIFIED build artifacts' : 'readable sources'})`,
+  );
 });

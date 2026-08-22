@@ -17,6 +17,7 @@
       "cycle_count": 13,
       "feedback_count": 1,
       "suggestions_count": 2,
+      "suggestion_keys": ["off_delay", "stop_threshold_w"],
       "energy_kwh": 0.42,
       "lifetime_energy_kwh": 25.0
     }

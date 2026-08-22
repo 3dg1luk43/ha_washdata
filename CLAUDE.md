@@ -26,10 +26,14 @@ pip install -r requirements-dev.txt
 # Run benchmark tests only
 ./run_tests.sh --bench
 
-# Run Playwright E2E browser tests only (332 tests across chromium + mobile-chrome, ~30s)
+# Run Playwright E2E browser tests only (336 tests across chromium + mobile-chrome, ~30s)
 ./run_tests.sh --e2e
 
-# Run everything (fast + slow + benchmark + E2E, ~12 min)
+# Same E2E suite against the minified build artifacts (the bytes users download).
+# Fails fast if the build is stale rather than silently testing old code.
+./run_tests.sh --e2e-min
+
+# Run everything (fast + slow + benchmark + E2E readable + E2E min, ~13 min)
 ./run_tests.sh --all
 
 # Run a single test file
@@ -44,11 +48,51 @@ cd playwright-tests && npx playwright test tests/settings.spec.ts   # single spe
 cd playwright-tests && npx playwright test --ui                      # interactive UI mode
 
 # Syntax check
-python3 -m compileall custom_components/ha_washdata tests/ --quiet
+python3 -m compileall custom_components/ha_washdata tests/ -q
+
+# Rebuild the shipped minified panel/card bundles (REQUIRED after editing www/*.js)
+node devtools/build_panel.mjs
+node devtools/build_panel.mjs --check     # verify only; non-zero if stale
+
+# Install the tracked git hooks (recommended, once per clone). pre-commit refuses a
+# commit whose *.min.js were not rebuilt from the sources being committed.
+./devtools/install_hooks.sh
+
+# Release preflight: artifacts, version agreement, translations, tests
+devtools/release_check.sh                 # verify only (what CI runs)
+devtools/release_check.sh --fix           # regenerate artifacts instead of failing
+devtools/release_check.sh --full --tag v0.5.5   # + slow, E2E, and tag agreement
 
 # Run mock MQTT socket (simulates appliance power cycles for manual testing)
 python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 ```
+
+### Generated files - never hand-edit, always regenerate
+
+| File | Generator | Gate |
+|------|-----------|------|
+| `www/ha-washdata-panel.min.js`, `www/ha-washdata-card.min.js`, `www/build-manifest.json` | `node devtools/build_panel.mjs` | `devtools/hooks/pre-commit`, `tests/test_panel_build.py`, CI, `release_check.sh` |
+| `www/ws-types.d.ts`, `docs/WS_API.md` | `python3 devtools/generate_ws_types.py` | `tests/test_ws_contract.py` |
+
+The `.min.js` files and `build-manifest.json` **are committed** - they are what users
+download. `frontend.py` serves a `.min.js` only while its recorded source hash still
+matches the source on disk, so a forgotten rebuild degrades to the readable file rather
+than serving stale code; the tests and CI fail so it does not go unnoticed. After editing
+`www/*.js`, rebuild and commit the artifacts in the same commit.
+
+Three gates enforce that, earliest first: **`devtools/hooks/pre-commit`** (install once
+with `./devtools/install_hooks.sh`) -> the **Checks** CI workflow -> `release_check.sh`.
+The hook verifies the **staged** tree, not the working tree: it materialises the staged
+blobs into a temp directory and runs `build_panel.mjs --check --www <dir>` there, because
+the usual miss is rebuilding and then committing only the source. It is a no-op for a
+commit that touches no `www/` asset, and `git commit --no-verify` bypasses it for a
+deliberate WIP commit.
+
+`devtools/` declares `"type": "module"`, so any new CommonJS script there must be named
+`.cjs` (this is what once broke `run_tests.sh` via `panel_smoke.js`).
+
+See the [Developer Tools wiki page](https://github.com/3dg1luk43/ha_washdata/wiki/Developer-Tools#releasing-release_checksh)
+for the full release procedure.
 
 ## Architecture
 
@@ -83,7 +127,7 @@ Also manages **match ranking history** (`record_match_ranking_snapshot` / `confi
 - **`signal_processing.py`** - Resampling + the shared energy-integration primitives (`integrate_wh`, `energy_gap_threshold_s`). No filtering, and **no DTW** (the DTW-lite implementation lives in `analysis.py`).
 - **`progress.py`** - **Single source of truth** for cycle progress / remaining-time / phase / projected-energy math (`estimate_phase_progress`, `ml_progress_percent`, `ml_energy_total`, `compute_progress` — the blend+EMA+back-calc, `current_phase`, `projected_energy`, `cycle_anomaly`). Pure (no HA); `manager.py`'s `_estimate_phase_progress`/`_update_remaining_only`/`_update_projected_energy`/`_current_phase_from_progress`/`_update_cycle_anomaly` are thin wrappers, and the Playground `SimRunner` calls the same functions — so the panel's what-if replay is byte-identical to the live estimator. Behavior is locked by a golden before/after snapshot + the progress/phase/ML/energy test suite; never fork this math.
 - **`notification_rules.py`** - Pure notification **decision** predicates (`quiet_hours_bounds`, `in_quiet_hours(bounds, when)`, `seconds_until_quiet_end`, `milestone_crossed`, `should_notify_pre_completion`) shared by `manager.py` (which keeps all delivery: hass services, quiet-hours queueing, presence) and the Playground sim. Delivery stays in the manager; only the thresholds/gating live here.
-- **`learning.py`** - Self-learning feedback system with confidence tracking
+- **`learning.py`** - Self-learning feedback system with confidence tracking. Label provenance lives in `profile_store._AUTO_LABEL_SOURCES` (`auto_match` / `auto_label_post` / `auto_label_service` / `auto_label_backfill`): anything in that tuple means "the matcher guessed this", which is what the `original_auto_label` preservation checks consult before overwriting a label. `auto_label_cycles` covers `past_cycles` **and** `backfill_cycles`, stamping the latter `auto_label_backfill` — a named backfill cycle immediately shapes its profile's envelope, so a wrong guess must stay distinguishable from a confirmed label. Bulk labelling writes non-real cycles through `_relabel_non_real_cycle` (the sync extraction from `_assign_reference_cycle_profile`) and rebuilds + saves **once**, not per cycle.
 - **`phase_catalog.py`** - Phase labels (pre-wash, heating, spin, etc.) mapped to time ranges within cycles. Users draw per-profile phase ranges in the panel (visual configurator → `ws_set_profile_phases` → `profile["phases"]`); the live current phase is derived by `manager._current_phase_from_progress`, which indexes those ranges by the **ML-blended progress fraction** (not raw elapsed) via `profile_store.check_phase_match`, so the readout stays correct under overrun/underrun. One phase definition, driven by the progress estimator. This is separate from the phase-*segmented matching* system below.
 - **`phase_segmenter.py`** - (0.5.1) Unsupervised regime segmenter: a hysteresis classifier splits a cycle trace into idle/active/high runs (+ terminal spin) and derives per-role priors (heating/wash/spin/idle) held in a `PhaseModel`. Models are built for `washing_machine`, `washer_dryer`, `dishwasher`. Feeds the phase-profile cache (`envelope["phase_profile"]`, a derived cache built during envelope rebuild; storage v11 is a marker-only bump).
 - **`phase_match.py`** - (0.5.1) Per-role duration/energy log-ratio agreement + `phase_eta` (Σ max(0, expected − consumed) per role, heating weighted 0.50; the in-progress role is scored one-sided). Consumed **only** by the opt-in phase-resolved ETA blend in `progress.py`; it does NOT change program (Stage 1-5) matching. Gated by the per-device `enable_phase_matching` flag AND `LIVE_PHASE_DEVICE_TYPES = (washing_machine, washer_dryer)`. See IMPLEMENTATION.md "Phase-segmented matching & ETA (0.5.1)".
@@ -91,6 +135,7 @@ Also manages **match ranking history** (`record_match_ranking_snapshot` / `confi
 - **`recorder.py`** - Manual recording mode for training new profiles
 - **`features.py`** - Computes profile feature vectors/signatures
 - **`playground.py`** - Headless, executor-safe backend behind the panel's **Playground** tab (nothing here touches HA; never raises, returns an `{"error": ...}` marker instead). Replays stored cycles through a *fresh* real `CycleDetector` + the real Stage 1-4 matcher — no client-side detection copy. Three entry points, all reusing `progress.py`/`notification_rules.py`: `simulate_cycle_detail` (single-cycle faithful timeline: per-5s `series` of state/model-progress/remaining/confidence/phase/energy + typed `events` incl. notification-would-fire markers + `alerts` + `outcome`), `run_playground_history` (per-cycle rows + before/after `diff` when a settings override is set), and `run_playground_sweep` (objective 1D curve or 2D grid over one/two params; objectives in `objective_metric`). `_build_match_snapshots` is built ONCE per batch and passed via `prebuilt=`; batch/sweep pass `compute_series=False` to skip the per-step progress work. Overrides are split by target: `build_sim_config` applies the detection keys in `_OVERRIDE_FIELD_MAP` to the `CycleDetectorConfig`, and `apply_match_overrides` maps the user-settable matching options in `_MATCH_OVERRIDE_KEYS` (only `profile_match_min/max_duration_ratio` — the ML-tuned scoring weights are intentionally not exposed since users can't set them) onto the matcher's `min/max_duration_ratio` so the sim can A/B the Stage-1 gate. End-detection alerts (`timeout_end`, `would_run_indefinitely`) flag whether an (often auto-detected) cycle actually ends on its own vs. only via the static off-delay. History/optimize run as **detached, registry-tracked background tasks** (see `task_registry.py`): `ws_api._pg_history_task`/`_pg_sweep_task` chunk the replay across many small executor jobs (event loop breathes, no GIL freeze), report progress to the registry, honour cancel, and store the result — so a backgrounded tab / dropped socket never orphans or loses a run. Kicked off by `start_playground_history` / `start_playground_sweep` (return a `task_id`); the one-shot `run_playground_cycle_detail` / `run_playground_history` / `run_playground_sweep` remain (the task runner calls the latter two per chunk). All executor-offloaded; WS commands re-register on every `async_setup_entry` (idempotent), so newly-added commands work after a plain integration reload (no full HA restart needed).
+- **`history_import.py`** - (#344) Turns a raw power history into candidate cycles. Same contract as `playground.py`: pure, executor-safe, hass-free, never raises. **A raw HA history cannot be fed to one detector** - it is *change-based*, so a steady 0 W emits no rows, the detector never sees the readings that expire a cycle, and its outage logic force-stops instead (measured: 18 junk `force_stopped` cycles, one 61 980 min long, two real washes merged). So the stream is pre-segmented: `parse_history_csv` (tolerant CSV; `unavailable` becomes an explicit stream break, never a dropped row, or the previous value carries across the hole) → `find_activity_blocks` (cut on accumulated quiet **or** time since the last active sample - the second rule is what saves an appliance whose standby floor sits above `stop_threshold_w`) → `classify_blocks` (leading-edge trim + relative cadence/sample/span gates, each rejection carrying a reason the UI shows) → `densify_quiet_gaps` (re-insert the quiet a live sensor would have reported, or the detector's outage ceiling resets its quiet tally and two cycles 10 min apart merge) → `ScanRunner`/`StreamSegmenter` (resumable replay through a *fresh* real `CycleDetector` per block, driven chunk-by-chunk from `ws_api._history_import_scan_task`). Three measured constraints are locked by tests and must not be "simplified": never pre-filter isolated sparse samples (it deletes the terminal 0 W row that marks each cycle end), trim the leading block edge only (a trailing trim eats a real cycle's tail), and keep `status == "completed"` as the accept default. Replay runs **unmatched** (`profile_matcher=None`), so Smart Termination / dishwasher end-spike / dryer anti-crease are inert - a documented divergence from live detection, not a bug to chase.
 - **`task_registry.py`** - In-memory per-`hass` registry of long-running background tasks (Playground history/optimize, Process history/reprocess, and on-device ML training all run through it). Each `Task` carries kind + `entry_id` + label + done/total + `progress()`/`eta_s()` + state + result + a cancel flag; `TaskRegistry` create/update/finish/cancel + change listeners, retaining the last `_MAX_FINISHED` completed tasks (with results) for reload. Surfaced by WS `list_tasks` / `subscribe_tasks` (live push, re-hydrates on reconnect) / `cancel_task` / `get_task_result`. The panel subscribes once (survives socket drop), renders one header **activity pill** per running task (device · action · % · ✕), and reads reconnect-safe results via `get_task_result`. This is the single source of truth for "what long thing is running" — never run a multi-second op tied only to a WS request.
 - **`ml/`** - Opt-in, NumPy-only ML subsystem (see "ML Subsystem" below)
 - **`log_utils.py`** - `DeviceLoggerAdapter` for contextual per-device logging
@@ -123,6 +168,24 @@ Entity updates → Home Assistant UI
 ### Data Persistence
 
 Uses `homeassistant.helpers.storage.Store` (JSON). Stores profiles, cycle history, phase catalog, detected cycles, `profile_groups` (Stage 5), `suggestions`, per-cycle `ml_review` labels, on-device trained `ml_model_versions`, and the on-device tuned matcher-weight override `matching_config`. Survives HA restarts. Config migrations are handled in `__init__.py`.
+
+**Three cycle lists, three different claims about a cycle** — mixing them up loses user data or fakes provenance:
+
+| | `past_cycles` | `reference_cycles` | `backfill_cycles` |
+|---|---|---|---|
+| origin | observed live | community-store download | replayed from raw history (#344) |
+| trust | real | curated, **golden by construction** (`_add_reference_cycle_nosave` force-sets `ml_review.golden`) | auto-detected, unverified |
+| shapes envelopes + matching once labelled | yes | yes | yes |
+| lifetime energy / cycle count, ML training, feedback queue | yes | no | no |
+| shareable to the store | golden only | no | never |
+| retention eviction (`_enforce_retention_data`, cap 200, oldest first) | yes | no | no (capped per import instead) |
+
+**Two views over those lists, and they are not interchangeable:**
+
+- `iter_stored_cycles()` / `find_stored_cycle(id) -> (cycle, origin)` — **everything**. Every "find a cycle by id" / "is this id still real?" lookup goes through these. Do **not** open-code a `past + reference` union: profile GC (`cleanup_orphaned_profiles`) and sample repair (`async_repair_profile_samples`) delete or re-point a profile whose `sample_cycle_id` resolves to nothing, so one forgotten list silently destroys an import-only profile.
+- `iter_evidence_cycles()` — **only what the user allows to shape a profile** (`CONF_PROFILE_EVIDENCE_SOURCES`, default all three). Used by exactly four sites, which must agree or a profile's curve and its matching template would describe different things: envelope build, matcher snapshot pool, `_select_reference_cycle_id`, `has_real_profiles`.
+
+**Never gate GC or a lookup on the evidence view.** An excluded cycle is still a stored cycle; routing GC through it would destroy every backfill-built profile the moment someone unticked imported history. Usage statistics are likewise *not* evidence and keep counting real cycles regardless. An empty/unknown selection falls back to all three — a setting must not be able to make every profile unmatchable.
 
 ## ML Subsystem (experimental, gated)
 
@@ -208,14 +271,15 @@ Panel `{lang}.json` files are served as-is (no rebuild). Step 1 is fast and netw
 
 **Two separate migration layers — test them separately:**
 
-1. **Config entry migration** (`async_migrate_entry` in `__init__.py`, config schema v1→3.8): tested in `tests/test_migration_harness.py`. Covers key moves (data→options), notify_service→per-event lists, device type remapping (incl. coffee/EV/heat-pump/oven → Threshold Device), drain-spike key removal, the v3.6→v3.7 `initial_profile` stub removal, and the v3.7→v3.8 `running_dead_zone` option removal (the key was never wired to detection), idempotency.
+1. **Config entry migration** (`async_migrate_entry` in `__init__.py`, config schema v1→3.10; `VERSION` / `MINOR_VERSION` live on the flow class in `config_flow.py` and must be bumped with it): tested in `tests/test_migration_harness.py`. Covers key moves (data→options), notify_service→per-event lists, device type remapping (incl. coffee/EV/heat-pump/oven → Threshold Device), drain-spike key removal, the v3.6→v3.7 `initial_profile` stub removal, the v3.7→v3.8 `running_dead_zone` option removal (the key was never wired to detection), the v3.8→v3.9 strip of options persisted as `null` (issue #389 - a stored `None` survives `options.get(key, DEFAULT)` and breaks setup; `options_utils.strip_null_options` is the shared rule, applied on every write path too), the v3.9→v3.10 heal of seeded cadence defaults that violate the panel's own conflict rules (#396; the pre-3.9 legacy migration seeded `watchdog_interval=30` etc.), idempotency. The one-pass legacy path writes the current version directly, so a bump means updating the `minor_version=` at the end of the bulk migration as well.
 
-2. **Storage migration** (`WashDataStore._async_migrate_func` in `profile_store.py`, storage v1→11, `STORAGE_VERSION = 11` in `const.py`): tested in `tests/test_migration_v032.py`. Call `_async_migrate_func(old_version, 1, data)` **directly** — do not go through `ProfileStore.async_load()` (which requires file I/O). Pattern for adding a new storage version (e.g. v12):
+2. **Storage migration** (`WashDataStore._async_migrate_func` in `profile_store.py`, storage v1→12, `STORAGE_VERSION = 12` in `const.py`): tested in `tests/test_migration_v032.py`. Call `_async_migrate_func(old_version, 1, data)` **directly** — do not go through `ProfileStore.async_load()` (which requires file I/O). Pattern for adding a new storage version (e.g. v13):
+
    ```python
-   async def test_v11_my_new_step():
+   async def test_v12_my_new_step():
        store = WashDataStore(_make_hass(), STORAGE_VERSION, f"{STORAGE_KEY}.test")
        data = {"past_cycles": [...], "profiles": {...}}
-       result = await store._async_migrate_func(11, 1, data)
+       result = await store._async_migrate_func(12, 1, data)
        assert result[...]  # verify the new invariant
    ```
    Storage versions and what each step does:
@@ -229,6 +293,7 @@ Panel `{lang}.json` files are served as-is (no rebuild). Step 1 is fast and netw
    - v8→v9: pre-initialize additive top-level keys (`lifetime_energy_wh`, `lifetime_cycle_count` seeded from history, `settings_changelog`, `maintenance_log`); idempotent `setdefault`
    - v9→v10: add `reference_cycles: []` (imported/community cycles live here, never in `past_cycles`, so they feed envelopes/matcher but never usage/energy stats)
    - v10→v11: **marker-only** bump for the per-phase profile cache (`envelope["phase_profile"]`); nothing is migrated — the derived cache self-populates on the next envelope rebuild
+   - v11→v12: add `backfill_cycles` (issue #344) — cycles recovered by replaying raw power history. Auto-detected and unverified, so they belong in neither `past_cycles` (lifetime stats, ML labels, feedback queue, retention eviction) nor `reference_cycles` (curated store templates, golden by construction). Additive `setdefault`
 
 ## Matching Pipeline Details
 
@@ -283,4 +348,4 @@ Deep-dive files under `docs/internal/reference/` are supplementary detail — th
 - Translation strings live in `custom_components/ha_washdata/translations/` (25+ languages); `strings.json` is the source of truth
 - Tests in `tests/` reproduce specific GitHub issues (e.g., `test_issue_*.py`) - maintain this pattern for bug fixes
 - Test suite is split into **fast / slow / benchmark / e2e** categories (see `TESTING.md`). The default `./run_tests.sh` runs only the fast pytest subset (~30s). Mark new pytest tests `slow` if they replay `cycle_data/` traces, fan out over many cycles, boot full HA, or take >1.5s — use `pytestmark = pytest.mark.slow` at module level, or `@pytest.mark.slow` per test.
-- **Playwright E2E tests** live in `playwright-tests/` and cover the full panel UI across chromium and mobile-chrome (332 tests, ~30s). Run with `./run_tests.sh --e2e` or `cd playwright-tests && npx playwright test`. The test server (`serve.mjs`) and WS mock infrastructure (`helpers/`) start automatically. E2E tests are included in `--all`. When adding panel features, add or update the matching spec in `playwright-tests/tests/`.
+- **Playwright E2E tests** live in `playwright-tests/` and cover the full panel UI across chromium and mobile-chrome (336 tests, ~30s). Run with `./run_tests.sh --e2e` or `cd playwright-tests && npx playwright test`. The test server (`serve.mjs`) and WS mock infrastructure (`helpers/`) start automatically. E2E tests are included in `--all`. When adding panel features, add or update the matching spec in `playwright-tests/tests/`. The same suite can be run against the **minified build** via `./run_tests.sh --e2e-min` (or `PANEL_BUILD=min npx playwright test`), which `--all` and `devtools/release_check.sh` both do — minification is a real transform, so the readable-source run alone does not prove the shipped bundle works. `playwright.config.ts` uses port 4568 in that mode so `reuseExistingServer` cannot hand the run a server still serving readable sources.

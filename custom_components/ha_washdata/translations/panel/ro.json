@@ -30,9 +30,12 @@
     "awaiting": "În așteptarea aprobării",
     "imported_tip": "Importat din magazinul comunității. Folosit doar pentru potrivire, necontabilizat în statistici.",
     "not_importable": "n/a aici",
-    "exists": "există deja"
+    "exists": "există deja",
+    "backfilled_tip": "Detectat într-un istoric de putere importat. Influențează doar potrivirea programelor, nu este contabilizat în statistici."
   },
   "btn": {
+    "set_brand_model": "Stabiliți marca și modelul",
+    "refresh_catalog": "Actualizați catalogul",
     "add_device": "+ Adăugați dispozitiv",
     "add_device_tip": "Adăugați un alt dispozitiv WashData",
     "add_maintenance": "Adăugați eveniment de întreținere",
@@ -193,7 +196,12 @@
     "import_selected": "Importă selecția",
     "back": "Înapoi",
     "mute_suggestion": "Nu mai sugerați această setare",
-    "reset_muted": "Resetați cele ignorate"
+    "reset_muted": "Resetați cele ignorate",
+    "import_power_history": "Importați istoricul de putere",
+    "hist_read_recorder": "Citiți din Home Assistant",
+    "hist_scan": "Căutați cicluri",
+    "hist_import_n": "Importați {n} cicluri",
+    "hist_goto_cycles": "Vedeți ciclurile"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -205,14 +213,14 @@
       "start": "Trebuie să fie sub Puterea maximă anti-șifonare ({max} W)"
     },
     "attn_sub": "Rezolvați conflictele înainte de salvare",
-    "attn_title": "{n} conflict{s} de setări",
-    "settings_banner": "{n} conflict{s} de setări – verificați secțiunile evidențiate și remediați înainte de salvare.",
+    "attn_title": "Conflicte de setări: {n}",
+    "settings_banner": "Conflicte de setări: {n}. Verificați secțiunile evidențiate și remediați-le înainte de salvare.",
     "settings_banner_btn": "Salt la primul",
     "confidence": {
       "auto": "Trebuie să fie cel puțin egal cu Pragul de potrivire ({match})",
-      "learning": "Trebuie să fie cel mult egal cu Pragul de potrivire ({match})",
+      "learning": "Trebuie să fie cel puțin egal cu Pragul de potrivire ({match})",
       "match_for_auto": "Trebuie să fie cel mult egal cu Încrederea de etichetare automată ({alc})",
-      "match_for_learning": "Trebuie să fie cel puțin egal cu Încrederea de învățare ({lc})"
+      "match_for_learning": "Trebuie să fie cel mult egal cu Încrederea de învățare ({lc})"
     },
     "duration_ratio": {
       "max": "Trebuie să fie mai mare decât Raportul de durată minim ({min})",
@@ -250,7 +258,7 @@
       "match": "Trebuie să fie peste Pragul de non-potrivire ({un})",
       "unmatch": "Trebuie să fie sub Pragul de potrivire ({match}); altfel o potrivire confirmată este anulată instantaneu"
     },
-    "cascade_toast": "De asemenea, s-au ajustat {n} setare{s} pentru consecvență.",
+    "cascade_toast": "Alte setări ajustate pentru consecvență: {n}",
     "suggestion_resolves": "Aplicați sugestia în așteptare ({val}) de mai jos pentru a remedia aceasta",
     "use_fix": "Folosiți {val}",
     "watchdog": {
@@ -308,7 +316,8 @@
     "pg_outcome": "Rezultatul simulării",
     "pg_across_cycles": "În toate ciclurile tale",
     "community_store": "Magazinul comunității",
-    "online_account": "Magazinul comunității și funcții online"
+    "online_account": "Magazinul comunității și funcții online",
+    "import_power_history": "Importați istoricul de putere"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -316,6 +325,7 @@
     "poor": "⚠ Calitate slabă a profilului"
   },
   "lbl": {
+    "drag_to_resize": "Trageți pentru redimensionare",
     "actions": "Acțiuni",
     "activity": "Activitate",
     "administrators": "Administratori",
@@ -402,7 +412,7 @@
     "metric": "Metrică",
     "mode_existing_profile": "Adăugați la profilul existent",
     "mode_new_profile": "Creați un profil nou",
-    "models_fine_tuned": "({count} model{plural} reglat fin)",
+    "models_fine_tuned": "(modele ajustate: {count})",
     "n_classic_suggestions": "{n} clasice",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} selectate",
@@ -602,7 +612,7 @@
     "show_contributor": "Afișați numele contribuitorilor",
     "task_pg_detail": "Simulare ciclu",
     "task_split": "Se divide ciclul",
-    "task_trim": "Se decupează ciclul",
+    "task_trim": "Se taie ciclul",
     "task_merge": "Se îmbină ciclurile",
     "task_rebuild": "Se reconstruiesc anvelopele",
     "cat_profiles": "Profiluri (programe)",
@@ -629,7 +639,26 @@
     "conflict_import_copy": "Importă drept copie",
     "conflict_keep_mine": "Păstrează-l pe al meu",
     "conflict_overwrite": "Suprascrie",
-    "font_size": "Dimensiunea fontului panoului"
+    "font_size": "Dimensiunea fontului panoului",
+    "hist_csv_data": "Date CSV",
+    "hist_from_recorder": "Sau citiți-l din Home Assistant",
+    "hist_since": "De la data",
+    "days": "zile",
+    "hist_keep": "Păstrați acest ciclu",
+    "hist_looks_complete": "complet",
+    "peak_power_short": "Vârf",
+    "shape": "Formă",
+    "hist_skip_idle": "nimic în funcțiune",
+    "hist_skip_sparse": "citiri prea îndepărtate între ele",
+    "hist_skip_short": "prea puține citiri",
+    "hist_skip_long": "nicio pauză suficient de lungă pentru divizare",
+    "hist_reason_short": "mai scurt decât cel mai scurt ciclu real al acestui aparat",
+    "hist_reason_no_end": "nu s-a încheiat niciodată curat",
+    "task_history_import": "Se analizează istoricul de putere",
+    "task_history_import_apply": "Se importă ciclurile",
+    "evidence_real_cycles": "Cicluri rulate de această mașină",
+    "evidence_reference_cycles": "Descărcate din magazinul comunității",
+    "evidence_backfill_cycles": "Găsite într-un istoric de putere importat"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -708,9 +737,15 @@
     "store_share": "Partajați în magazinul comunității",
     "store_share_device": "Partajați acest dispozitiv",
     "export_select": "Exportă - alege datele",
-    "import_wizard": "Importă - alege datele"
+    "import_wizard": "Importă - alege datele",
+    "history_import": "Importați istoricul de putere"
   },
   "msg": {
+    "tail_trim_hint": "Numărul de secunde de eliminat de la sfârșit",
+    "store_sibling_hint": "Nu există nimic partajat pentru modelul dvs. exact? Un model foarte apropiat de la aceeași marcă este de obicei un bun punct de plecare.",
+    "store_declare_appliance": "Indicați în WashData ce aparat dețineți, iar această filă va afișa configurațiile pe care alte persoane le-au partajat pentru el. Puteți și să scrieți o marcă mai sus pentru a explora.",
+    "refresh_catalog_hint": "Listele de mărci și aparate ale comunității sunt păstrate în cache pentru a menține magazinul partajat în limita zilnică. Actualizați pentru a prelua intrările adăugate sau aprobate de alții.",
+    "head_trim_hint": "Numărul de secunde de eliminat de la început",
     "appliance_monitor": "Monitor de aparate",
     "artifact_dip_detail": "A scăzut sub banda de putere obișnuită timp de ~{n}s.",
     "artifact_footer": "Evidențiate în graficul de mai sus. Acestea sunt artefacte tranzitorii (de exemplu, ușa deschisă la jumătatea ciclului), nu neapărat probleme.",
@@ -721,7 +756,7 @@
     "automations_intro": "WashData declanșează evenimente {start} / {end} și expune entități, astfel că notificările și acțiunile sunt cel mai bine construite ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
     "cleanup_intro": "Toate ciclurile etichetate suprapuse. Bifați valorile aberante și ștergeți pentru a curăța profilul.",
     "clear_debug_hint": "Eliminați datele de depanare stocate pentru a elibera spațiu.",
-    "collecting_data": "Se colectează date - mai sunt necesare {need} ciclu{plural} înainte ca reglajul fin să poată începe ({current}/{min}).",
+    "collecting_data": "Se colectează date. Cicluri încă necesare înainte ca reglajul fin să poată începe: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Suprapuneți profiluri (estompat)",
     "compare_profiles_tip": "Suprapuneți alte plicuri de profil pe graficul de mai sus pentru a vedea care dintre ele se potrivește cel mai bine acestui ciclu.",
     "compare_selected_cycles": "Cicluri selectate (solid) – afișați / ascundeți",
@@ -731,7 +766,7 @@
     "cycles_deleted": "{count} ciclu(ri) șterse",
     "enough_data": "Date suficiente pentru a învăța ({current}/{min} cicluri).",
     "export_description": "Alege exact ce profiluri, cicluri, setări și altele să exporți în JSON, sau analizează un fișier și importă doar părțile dorite.",
-    "feedback_cycles_pending": "{n} ciclu{s} de revizuit",
+    "feedback_cycles_pending": "De revizuit: {n}",
     "feedback_prompt": "Confirmați că a fost corect, corectați programul sau ignorați.",
     "feedback_relabel_hint": "Și reetichetarea acestui ciclu îl rezolvă.",
     "filter_by_profile": "Filtrează după profil…",
@@ -808,7 +843,6 @@
     "pg_stress_synthetic": "simularea în repaus începe aici",
     "pg_sweep_intro": "Ce-ar fi dacă {param} ar fi diferit? Testați {steps} valori pe ultimele {cycles} cicluri pentru a găsi setarea la care se potrivesc corect cele mai multe cicluri.",
     "pg_sweep_step": "Pasul {done} / {total}",
-    "pg_undetected": "{n} ciclu{s} nedetectat",
     "pg_verdict_bad": "Necesită atenție: multe cicluri rămân nedetectate.",
     "pg_verdict_good": "Bine reglat: majoritatea ciclurilor sunt identificate și potrivite corect.",
     "pg_verdict_ok": "Acceptabil: unele cicluri au fost ratate. Încercați să reduceți pragul de pornire.",
@@ -839,6 +873,7 @@
     "review_recorded_tip": "Marcați acest lucru ca un ciclu de referință ales manual pentru programul său – același rol ca un ciclu înregistrat manual. Ciclurile de referință sunt întotdeauna păstrate, generează șablonul de potrivire și nu sunt niciodată eliminate de curățare. (Acesta este steagul \"de aur\"/înregistrat; ambele sunt același lucru.)",
     "review_tags_tip": "Semnale opționale care descriu ce a mers prost cu acest ciclu, astfel încât antrenamentul și curățarea pot ține cont de acest lucru.",
     "review_to_cycles": "Deschideți coada de revizuire a Ciclurilor",
+    "samples_decimated": "Se afișează {shown} din {total} eșantioane (reduse pentru afișare; vârfurile păstrate). Un spațiu mare aici se datorează reducerii, nu unor date lipsă.",
     "saving_triggers_reload": "Salvarea declanșează o reîncărcare a integrării. Entitățile HA pot apărea pe scurt ca indisponibile.",
     "search_placeholder": "Căutați setări…",
     "see_recorder": "Consultați widgetul de înregistrare de mai jos",
@@ -958,7 +993,29 @@
     "sug_mute_failed": "Nu s-a putut dezactiva sugestia",
     "sug_unmuted_all": "Sugestiile dezactivate au fost resetate",
     "n_suggestions_muted": "{count} dezactivate; reglajul automat nu le va propune.",
-    "font_size_hint": "Faceți tot din acest panou mai mare sau mai mic. Se aplică contului dvs. pe acest dispozitiv."
+    "font_size_hint": "Faceți tot din acest panou mai mare sau mai mic. Se aplică contului dvs. pe acest dispozitiv.",
+    "import_history_description": "Aveați deja o priză inteligentă înainte de WashData? Încărcați un export al istoricului senzorului său de putere sau citiți-l direct din Home Assistant: detectarea obișnuită rulează pe aceste date, astfel încât ciclurile anterioare apar în lista dvs. Cicluri, pregătite pentru a fi denumite.",
+    "hist_input_hint": "Încărcați un CSV descărcat din panoul Istoric (entitate, stare, ultima modificare) sau lăsați WashData să citească direct istoricul senzorului. Detectarea rulează apoi exact ca în timp real, iar dvs. alegeți care dintre ciclurile găsite să fie păstrate.",
+    "hist_recorder_hint": "Citește de la data pe care o alegeți până în prezent. Home Assistant păstrează implicit istoricul detaliat timp de 10 zile, iar după aceea doar medii orare, prea grosiere pentru a detecta cicluri - alegeți o dată mai veche doar dacă recorder-ul din Home Assistant este configurat să păstreze mai mult.",
+    "hist_scanning": "Istoricul dvs. este reluat prin detector. Această operațiune rulează în fundal: puteți închide această fereastră și reveni mai târziu.",
+    "hist_imported_count": "{n} cicluri importate.",
+    "hist_duplicates": "{n} fuseseră deja importate și au fost omise.",
+    "hist_capped": "Limita de cicluri importate pentru acest dispozitiv a fost atinsă; restul nu au fost salvate.",
+    "hist_next_step": "Se află în lista dvs. Cicluri, marcate ca istoric importat. Deschideți unul și folosiți Etichetează pentru a indica programul căruia îi aparține.",
+    "hist_rows_read": "{n} citiri preluate",
+    "hist_breaks": "{n} întreruperi în care senzorul nu a fost disponibil",
+    "hist_other_entity": "{n} citiri pentru alte entități ignorate",
+    "hist_entity_substituted": "{used} citit (acest dispozitiv este configurat pentru {wanted})",
+    "hist_skipped_spans": "Porțiuni omise",
+    "hist_settings_used": "Detectat cu setările actuale ale acestui dispozitiv (putere minimă {w} W, întârziere la oprire {s} s).",
+    "hist_none_found": "Nu a putut fi detectat niciun ciclu în acel istoric.",
+    "hist_found": "S-au găsit {n} cicluri. Debifați tot ce nu pare un ciclu real: nimic nu este salvat până la import.",
+    "hist_scan_capped": "Sunt afișați doar primii candidați (au fost găsiți {n}).",
+    "hist_recorder_empty": "Home Assistant nu are istoric detaliat pentru acest senzor în acea perioadă.",
+    "hist_scan_failed": "Analiza a eșuat.",
+    "hist_scan_expired": "Acea analiză nu mai este disponibilă. Reluați analiza.",
+    "hist_import_failed": "Importul a eșuat.",
+    "imported_history_readonly": "Detectat într-un istoric de putere importat. Influențează potrivirea programelor, dar nu este contabilizat în statisticile dvs. și nu poate fi tăiat sau divizat. Etichetați-l pentru a indica programul."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1344,6 +1401,10 @@
       "doc": "Stocați urmărirea completă a puterii și datele de depanare corespunzătoare pentru fiecare ciclu. Util pentru depanare, dar mărește dimensiunea de stocare.",
       "label": "Salvați Urmele de Depanare"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Cât de mult trebuie să fi avansat un ciclu în durata așteptată a programului corespunzător înainte ca Terminarea inteligentă să îl poată încheia mai devreme odată ce puterea scade. Durata așteptată este media programului, așa că pe aparatele al căror timp de funcționare variază mult - mașini de spălat în funcție de apa de alimentare rece iarna sau caldă vara, uscătoare cu senzor de umiditate, programe care depind de încărcătură - aproximativ jumătate dintre rulări se termină mai devreme decât acea medie și nu beneficiază niciodată de încheierea rapidă, terminându-se doar prin expirarea de rezervă cu minute întârziere. Reduceți această valoare (de ex. 0,85) pe acele mașini pentru ca încheierea anticipată să se declanșeze totuși; măriți-o spre 1,0 pentru a fi mai conservator. Lăsați gol pentru valoarea implicită (0,98 sau 0,99 pentru mașinile de spălat vase). Poate doar să încheie un ciclu mai devreme, niciodată mai târziu, și nu se declanșează niciodată la o potrivire ambiguă sau cu încredere scăzută.",
+      "label": "Raport de terminare inteligentă"
+    },
     "smoothing_window": {
       "doc": "Cât de mult este netezit semnalul de putere brută. Scăzut (2) este receptiv, dar zgomotos; ridicat (5) netezește vârfurile, dar adaugă lag.",
       "label": "Fereastră de Netezire"
@@ -1474,6 +1535,10 @@
     "door_end_dwell_seconds": {
       "label": "Durată de așteptare la deschiderea ușii",
       "doc": "Cât timp trebuie să rămână ușa deschisă înainte ca WashData să termine ciclul, când opțiunea \"Ușa se deschide automat la final\" este activată. Destul de lungă pentru a ignora adăugarea rapidă a unui vas (implicit 60 s), destul de scurtă pentru a termina prompt odată ce mașina deschide ușa."
+    },
+    "profile_evidence_sources": {
+      "label": "Ciclurile care formează un program",
+      "doc": "Ce cicluri sunt folosite pentru a construi curba de putere a fiecărui program și pentru a compara un ciclu încheiat cu ea. Debifarea unui tip face ca acesta să nu mai modeleze programele dvs., fără a șterge nimic - ciclurile rămân în lista dvs. Cicluri și pot fi în continuare etichetate sau eliminate. Util dacă nu aveți încredere în datele importate. Statisticile nu sunt afectate: ele numără întotdeauna doar ciclurile pe care această mașină le-a rulat efectiv. Debifarea tuturor este ignorată, deoarece un program fără cicluri în spate nu s-ar putea potrivi niciodată."
     }
   },
   "setting_group": {
@@ -1557,6 +1622,9 @@
     },
     "basic_configuration": {
       "label": "Configurație de bază"
+    },
+    "profile_evidence": {
+      "label": "Baza Profilurilor"
     }
   },
   "status": {
@@ -1581,7 +1649,8 @@
     "trimming": "Se taie…",
     "splitting": "Se divide…",
     "deleting": "Se șterge…",
-    "imported": "Importat"
+    "imported": "Importat",
+    "preparing": "Se pregătește…"
   },
   "tab": {
     "advanced": "Avansat",
@@ -1611,6 +1680,7 @@
     "wrong_profile": "Profil greșit"
   },
   "toast": {
+    "catalog_refreshed": "Catalogul comunității a fost actualizat",
     "access_saved": "Controlul accesului a fost salvat",
     "all_wiped": "Toate datele au fost șterse",
     "analysis_complete_none": "Analiză finalizată: nicio sugestie nouă",
@@ -1716,7 +1786,9 @@
     "store_download_failed": "Descărcare eșuată: {error}",
     "store_download_nothing": "Nimic nou de descărcat - această configurație este deja pe dispozitivul dvs.",
     "export_selective_done": "Export descărcat",
-    "import_selective_done": "Importate {profiles} profil(uri) și {cycles} ciclu(ri)"
+    "import_selective_done": "Importate {profiles} profil(uri) și {cycles} ciclu(ri)",
+    "hist_csv_required": "Încărcați mai întâi un fișier CSV sau lipiți conținutul acestuia",
+    "file_read_failed": "Fișierul nu a putut fi citit"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",
@@ -1812,7 +1884,7 @@
       "thr_batch": "Păstrat chiar deasupra celei mai mici puteri active p05 pe {cycles} cicluri ({p05}W), astfel încât o pornire să fie surprinsă cât mai devreme posibil, iar pragul de oprire să rămână sub cea mai mică putere de funcționare a mașinii.",
       "tol_per_profile": "p75 al varianței duratei per profil pe {profiles} profiluri ({cycles} cicluri); profilurile stabile nu sunt penalizate.",
       "tol_pooled": "Pe baza varianței combinate a duratei a {cycles} cicluri recente etichetate (deviație p95={dev}).",
-      "watchdog": "Păstrat cât mai mic în siguranță (puțin peste intervalul de actualizare p95 de {p95}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
+      "watchdog": "Păstrat cât mai mic în siguranță (puțin peste intervalul de actualizare p95 de {p95}s și cel puțin 2x intervalul de eșantionare de {median}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
     },
     "exclusions": {
       "summary": "Excluse {total} cicluri detectate greșit: {parts}.",
@@ -1844,6 +1916,7 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Mașină de spălat vase: secunde de liniște după durata așteptată înainte de a elibera așteptarea evacuării de la sfârșitul ciclului",
+    "smart_termination_duration_ratio": "Fracțiunea din durata așteptată a programului corespunzător pe care un ciclu trebuie să o atingă înainte ca Terminarea inteligentă să îl poată încheia mai devreme; reduceți-o pentru mașinile care depind de încărcătură sau de temperatură",
     "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",
     "anti_wrinkle_exit_power": "Puterea trebuie să scadă sub această valoare între impulsuri pentru ca modul anti-șifonare să rămână activ",
     "anti_wrinkle_idle_timeout": "Timp de liniște permis între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie",
@@ -1907,6 +1980,10 @@
     "finished": "Ciclul a ajuns într-o stare finală și s-a încheiat."
   },
   "store": {
+    "your_model_tip": "Acesta este aparatul pe care l-ați declarat în Setări",
+    "your_model": "Al dvs.",
+    "search_brand_ph": "Căutați după marcă…",
+    "programs_count": "Programe: {n}",
     "browse": "Răsfoiți",
     "device": "Dispozitiv",
     "favorites": "Favorite",
@@ -1962,7 +2039,7 @@
       "apply": "Se divide ciclul"
     },
     "trim": {
-      "apply": "Se decupează ciclul"
+      "apply": "Se taie ciclul"
     },
     "merge": {
       "apply": "Se îmbină ciclurile"

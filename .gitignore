@@ -45,6 +45,7 @@ ROADMAP.md
 playwright-tests/test-results
 playwright-tests/playwright-report
 playwright-tests/node_modules
+devtools/node_modules
 IMPROVEMENT_PLAN.md
 docs/superpowers
 re/SETUP.md
@@ -59,3 +60,7 @@ UI_TEST_GUIDE_*.md
 docs/internal/DESIGN_353_program_entity.md
 docs/internal/ISSUE_REPLIES_0.5.4.md
 docs/internal/ISSUE_TRIAGE.md
+# Pre-compressed static assets are generated at integration setup from whatever
+# file is actually being served (see frontend._ensure_gzip), never committed: a
+# checked-in .gz could out-live its source and be served as if it were current.
+custom_components/ha_washdata/www/*.gz

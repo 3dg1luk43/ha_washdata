@@ -28,7 +28,8 @@ from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_NOTIFY_BEFORE_END_MINUTES,
     CONF_POWER_SENSOR, STATE_RUNNING, STATE_OFF, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_START,
     STATE_STARTING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING, STATE_ANTI_WRINKLE,
-    CONF_NOTIFY_ACTIONS, CONF_NOTIFY_PEOPLE, CONF_NOTIFY_ONLY_WHEN_HOME, CONF_NOTIFY_FIRE_EVENTS
+    CONF_NOTIFY_ACTIONS, CONF_NOTIFY_PEOPLE, CONF_NOTIFY_ONLY_WHEN_HOME, CONF_NOTIFY_FIRE_EVENTS,
+    CONF_WATCHDOG_INTERVAL,
 )
 
 @pytest.fixture
@@ -412,6 +413,50 @@ async def test_async_reload_config_allows_sensor_change_when_idle(
         assert mgr.power_sensor_entity_id != original_sensor
         # Verify new listener was attached
         mock_track.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_reload_updates_watchdog_interval_and_rearms(
+    mock_hass: Any, mock_entry: Any
+) -> None:
+    """A changed CONF_WATCHDOG_INTERVAL must take effect on reload, re-arming an
+    active watchdog rather than keeping the construction-time cadence."""
+    with patch("custom_components.ha_washdata.manager.ProfileStore"), \
+         patch("custom_components.ha_washdata.manager.CycleDetector"), \
+         patch("custom_components.ha_washdata.manager.async_track_state_change_event"):
+        mgr = WashDataManager(mock_hass, mock_entry)
+        mgr.profile_store.get_suggestions = MagicMock(return_value={})
+        mgr.profile_store.get_duration_ratio_limits = MagicMock(return_value=(0.7, 1.3))
+        mgr.profile_store.set_duration_ratio_limits = MagicMock()
+        mgr.profile_store.get_active_cycle = MagicMock(return_value={"manual_program": False})
+        mgr.profile_store.get_past_cycles = MagicMock(return_value=[])
+        mgr.profile_store.get_last_active_save = MagicMock(return_value=None)
+        mgr.profile_store.async_clear_active_cycle = AsyncMock()
+        mgr._setup_maintenance_scheduler = AsyncMock()
+        mgr.detector.state = STATE_OFF
+
+        mgr._watchdog_interval = 30
+        # Pretend a cycle is running so the watchdog is active and must be re-armed.
+        mgr._remove_watchdog = MagicMock()
+        mgr._stop_watchdog = MagicMock(side_effect=lambda: setattr(mgr, "_remove_watchdog", None))
+        mgr._start_watchdog = MagicMock()
+
+        new_entry = MagicMock()
+        new_entry.entry_id = "test_entry"
+        new_entry.options = {
+            CONF_POWER_SENSOR: mgr.power_sensor_entity_id,
+            CONF_MIN_POWER: 2.0,
+            CONF_COMPLETION_MIN_SECONDS: 600,
+            CONF_NOTIFY_BEFORE_END_MINUTES: 5,
+            CONF_WATCHDOG_INTERVAL: 90,
+        }
+        new_entry.data = {}
+
+        await mgr.async_reload_config(new_entry)
+
+        assert mgr._watchdog_interval == 90
+        mgr._stop_watchdog.assert_called_once()
+        mgr._start_watchdog.assert_called_once()
 
 
 def test_cycle_start_time_exposed(manager: WashDataManager) -> None:

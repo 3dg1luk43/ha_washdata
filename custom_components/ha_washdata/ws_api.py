@@ -27,6 +27,7 @@ import os
 import re
 import time
 import uuid
+from datetime import timedelta
 from typing import Any
 
 import voluptuous as vol
@@ -41,6 +42,7 @@ from .const import (
     CONF_COMPLETION_MIN_SECONDS,
     CONF_DEVICE_TYPE,
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
+    CONF_SMART_TERMINATION_DURATION_RATIO,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
@@ -74,23 +76,40 @@ from .const import (
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_DEVICE_TYPE,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+    DEFAULT_SMART_TERMINATION_DURATION_RATIO,
+    DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
+    resolve_sampling_interval_default,
+    resolve_watchdog_interval_default,
+    resolve_start_duration_default,
+    resolve_smart_termination_duration_ratio_default,
     DEFAULT_MAINTENANCE_REMINDER_CYCLES,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_OFF_DELAY_BY_DEVICE,
+    DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
     DEVICE_TYPES,
     DOMAIN,
     ENABLE_ML_SUGGESTIONS,
     ENABLE_ML_TRAINING,
+    HISTORY_IMPORT_CHUNK_BYTES,
+    HISTORY_IMPORT_CHUNK_SAMPLES,
+    HISTORY_IMPORT_MAX_BYTES,
+    HISTORY_IMPORT_MAX_ROWS,
+    HISTORY_IMPORT_MAX_SEGMENTS,
+    HISTORY_IMPORT_MAX_TOTAL_CYCLES,
+    HISTORY_IMPORT_RECORDER_EMPTY_DAY_STOP,
+    HISTORY_IMPORT_RECORDER_MAX_DAYS,
     PLAYGROUND_PRESET_MAX,
     SHOW_ML_LAB,
     STATE_COLORS,
 )
+from . import history_import
 from . import playground
 from . import task_registry
 from .cycle_detector import CycleDetectorConfig
+from .options_utils import strip_null_options
 from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
@@ -212,6 +231,22 @@ _SUGGESTION_INT_KEYS: frozenset[str] = frozenset({
 })
 
 
+def _coerce_suggested(key: str, val: Any) -> Any:
+    """Round a raw suggestion value the way the UI would apply it.
+
+    Int keys are floored to int, everything else rounded to 4 dp - the same
+    coercion ``ws_get_suggestions`` does before the equivalence test. The device
+    pill's badge filter must use it too, or a value like 30.4 for an int key with
+    a current 30 is hidden in the Settings list (30 == 30) but still counted on
+    the pill, leaving a badge the user cannot clear. Returns the raw value
+    unchanged if it is not numeric.
+    """
+    try:
+        return int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
+    except (TypeError, ValueError):
+        return val
+
+
 def _suggestion_equivalent(suggested: Any, current: Any) -> bool:
     """True when a suggested value is effectively the same as the current one.
 
@@ -242,11 +277,17 @@ _ML_COMPARE_SETTINGS: tuple[tuple[str, str, str], ...] = (
 
 
 def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
-    """Reduce a [(offset_s, watts), ...] series to <= max_points via striding.
+    """Reduce a [(offset_s, watts), ...] series to ~max_points, preserving extrema.
 
-    Keeps the first and last samples so the time axis is preserved. Power curves
-    can hold thousands of points; the panel only needs enough to draw a faithful
-    line, and WebSocket payloads should stay lean.
+    Splits the series into contiguous buckets and keeps each bucket's MIN and MAX
+    power sample (in time order), plus the global first and last. Two points per
+    bucket, so ~max_points/2 buckets keeps the payload at the same budget striding
+    used. Unlike striding this never drops a single-sample load peak (it is its
+    bucket's max) or a lone 0 W self-shutdown sample between two non-zero readings
+    (a zero is always its bucket's min) - the signals that carry the meaning.
+
+    Power curves can hold thousands of points; the panel only needs enough to draw
+    a faithful line, and WebSocket payloads should stay lean.
     """
     try:
         pairs = list(samples or [])
@@ -262,24 +303,39 @@ def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
     if n <= max_points:
         return [_pt(it) for it in pairs]
 
-    step = n / float(max_points)
-    out: list[list[float]] = []
-    last_i = -1
-    idx = 0.0
-    while int(idx) < n:
-        i = int(idx)
-        if i != last_i:
-            out.append(_pt(pairs[i]))
-            last_i = i
-        idx += step
-    last_pt = _pt(pairs[-1])
-    if not out or out[-1][0] != last_pt[0]:
-        out.append(last_pt)
-    return out
+    nbuckets = max(1, max_points // 2)
+    keep: set[int] = {0, n - 1}
+    for b in range(nbuckets):
+        lo = (b * n) // nbuckets
+        hi = ((b + 1) * n) // nbuckets
+        if hi <= lo:
+            continue
+        min_i = max_i = lo
+        min_v = max_v = float(pairs[lo][1])
+        for i in range(lo + 1, hi):
+            v = float(pairs[i][1])
+            if v < min_v:
+                min_v, min_i = v, i
+            elif v > max_v:
+                max_v, max_i = v, i
+        keep.add(min_i)
+        keep.add(max_i)
+    return [_pt(pairs[i]) for i in sorted(keep)]
 
 
-async def _recorder_power(hass: HomeAssistant, entity_id: str, start_dt: Any) -> list[tuple[float, float]]:
-    """Raw (unix_ts, watts) readings for entity_id from start_dt to now, via the recorder."""
+async def _recorder_power(
+    hass: HomeAssistant,
+    entity_id: str,
+    start_dt: Any,
+    *,
+    end_dt: Any = None,
+) -> list[tuple[float, float]]:
+    """Raw (unix_ts, watts) readings for entity_id over a window, via the recorder.
+
+    ``end_dt`` defaults to now (the live chart overlay's use). Passing it lets a caller
+    read the history in bounded windows instead of one unbounded query - a month of
+    5-second data is millions of rows in a single recorder-executor job.
+    """
     try:
         from homeassistant.components.recorder import (  # pylint: disable=import-outside-toplevel
             get_instance,
@@ -287,16 +343,25 @@ async def _recorder_power(hass: HomeAssistant, entity_id: str, start_dt: Any) ->
         )
     except Exception:  # pylint: disable=broad-exception-caught
         return []
-    end_dt = dt_util.now()  # tz-aware; use dt_util.now() per the datetime convention
+    # tz-aware; use dt_util.now() per the datetime convention
+    window_end = end_dt if end_dt is not None else dt_util.now()
 
     def _query() -> list[tuple[float, float]]:
         res = history.state_changes_during_period(
-            hass, start_dt, end_dt, entity_id, include_start_time_state=True
+            hass, start_dt, window_end, entity_id, include_start_time_state=True
         )
         rows: list[tuple[float, float]] = []
+        start_ts = start_dt.timestamp() if hasattr(start_dt, "timestamp") else None
         for s in res.get(entity_id, []) or []:
             try:
-                rows.append((s.last_changed.timestamp(), round(float(s.state), 1)))
+                ts = s.last_changed.timestamp()
+                # include_start_time_state yields the state in force at the window
+                # start, whose last_changed can predate it by days. Clamp it to the
+                # window so a caller reading day-by-day windows does not see a huge
+                # synthetic leading gap (or the same reading twice).
+                if start_ts is not None and ts < start_ts:
+                    ts = start_ts
+                rows.append((ts, round(float(s.state), 1)))
             except (ValueError, TypeError):
                 continue
         return rows
@@ -364,6 +429,36 @@ def _err_not_found(connection: websocket_api.ActiveConnection, msg_id: int, entr
 
 def _strip_cycle(c: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in c.items() if k not in _CYCLE_STRIP_KEYS}
+
+
+def _cycle_capabilities(cycle: dict[str, Any], origin: str) -> dict[str, Any]:
+    """What the panel may offer for one cycle, given which list it lives in.
+
+    Three separate answers, because "not a real cycle" is not one capability:
+
+    * ``is_reference`` - it lives outside ``past_cycles``, so it feeds envelopes and the
+      matcher but never usage statistics. Always derived from list membership, never from
+      a ``meta.source`` string: the cycle list and the inspector both answer through here,
+      and they must not be able to disagree.
+    * ``labelable`` - a profile can be assigned to it. True everywhere: naming the
+      programs found in imported history (#344) is the entire point of that feature, and
+      the store labels a non-real cycle in place.
+    * ``editable`` - trim / split / review apply. Real cycles only; those store functions
+      operate on ``past_cycles`` and would silently no-op elsewhere.
+
+    ``origin`` is the list name from :meth:`ProfileStore.find_stored_cycle`
+    (``past`` / ``reference`` / ``backfill``) and is passed through so the UI can say
+    where a cycle came from - a curated community-store template and a segment the
+    importer detected in the user's own history warrant different wording.
+    """
+    if origin == "past":
+        return {"is_reference": False, "labelable": True, "editable": True}
+    return {
+        "is_reference": True,
+        "labelable": True,
+        "editable": False,
+        "cycle_origin": origin or "reference",
+    }
 
 
 # Option keys that are identity/transient churn and are never recorded in the
@@ -445,6 +540,9 @@ _FULL_COMMANDS = frozenset({
     "get_export_inventory", "analyze_import", "export_config_selective", "import_config_selective",
     # Reverting on-device models / matcher tuning discards learned state -> full access.
     "revert_matching_config", "revert_ml_models",
+    # Historical power-data import: ingests a whole power history and writes cycles.
+    "history_import_begin", "history_import_chunk", "history_import_recorder",
+    "start_history_import_scan", "apply_history_import",
 })
 # Commands allowed for any authenticated user regardless of device permissions.
 _OPEN_COMMANDS = frozenset({
@@ -474,6 +572,14 @@ _ADMIN_COMMANDS = frozenset({
     "store_disconnect",
     "store_set_online",
     "store_set_prefs",
+    # Historical power-data import: reads a whole recorder history (or an uploaded
+    # export of one) and writes cycles into the store, so it is admin-only even with
+    # RBAC disabled, exactly like the selective import wizard.
+    "history_import_begin",
+    "history_import_chunk",
+    "history_import_recorder",
+    "start_history_import_scan",
+    "apply_history_import",
 })
 # Mutating commands intentionally allowed at the 'read' level. Picking the live
 # program is a benign runtime action (it changes detection, not stored data), so
@@ -502,6 +608,11 @@ _READ_WRITE_COMMANDS = frozenset({
     "store_get_cycles",
     "store_get_device_quality",
     "store_get_device_profiles",
+    "store_get_catalog_entry",
+    # NB: store_refresh_catalog is deliberately NOT here. It drops the install-wide
+    # catalog cache in the shared StoreClient, so a read-level user could bust the
+    # 1-hour TTL that protects the free-tier read budget on repeat. It defaults to
+    # 'edit', like the other install-wide store actions above read level.
 })
 
 _LOG_BUFFER_KEY = "ha_washdata_log_buffer"
@@ -804,6 +915,46 @@ async def ws_store_get_device_quality(hass, connection, msg):
         return
     manager, _ = ctx
     _send_result(connection, msg["id"], "store_get_device_quality", await manager.store_bridge.get_device_quality(msg["device_id"]))
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_get_catalog_entry", vol.Required("entry_id"): str,
+    vol.Required("brand"): str, vol.Required("model"): str, vol.Required("appliance_type"): str,
+})
+@websocket_api.async_response
+async def ws_store_get_catalog_entry(hass, connection, msg):
+    """Resolve just this appliance's catalog brand + device documents, by id.
+
+    Two point reads, replacing the brand list + device list the settings form used to
+    download purely to locate these two rows (measured: 128 documents, 119 KB). The
+    pickers still fetch the full lists, but only when the user opens one.
+    """
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_get_catalog_entry", {"disabled": True})
+        return
+    manager, _ = ctx
+    res = await manager.store_bridge.catalog_entry(msg["brand"], msg["model"], msg["appliance_type"])
+    _send_result(connection, msg["id"], "store_get_catalog_entry", res)
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/store_refresh_catalog", vol.Required("entry_id"): str,
+})
+@websocket_api.async_response
+async def ws_store_refresh_catalog(hass, connection, msg):
+    """Drop the cached catalog so the next browse re-reads the store.
+
+    The cache is deliberately long-lived (the catalog is near-static and every read is
+    charged against a shared free-tier budget), so this is the escape hatch for "someone
+    told me my brand was just approved".
+    """
+    ctx = _store_ctx(hass, msg["entry_id"])
+    if ctx is None:
+        _send_result(connection, msg["id"], "store_refresh_catalog", {"disabled": True})
+        return
+    manager, _ = ctx
+    _send_result(connection, msg["id"], "store_refresh_catalog", manager.store_bridge.refresh_catalog())
 
 
 @websocket_api.websocket_command({
@@ -1138,6 +1289,11 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_store_list_brands, ws_store_get_device_quality, ws_store_get_device_profiles,
         ws_store_confirm_device, ws_store_rate_device, ws_store_set_online,
         ws_store_set_prefs,
+        # Catalog identity badges (point reads) + manual cache refresh
+        ws_store_get_catalog_entry, ws_store_refresh_catalog,
+        # Historical power-data import: staged ingest, background scan, apply
+        ws_history_import_begin, ws_history_import_chunk, ws_history_import_recorder,
+        ws_start_history_import_scan, ws_apply_history_import,
     ]
     for handler in handlers:
         websocket_api.async_register_command(hass, _guard(handler))
@@ -1176,11 +1332,21 @@ def ws_get_devices(
             "current_power_w": None,
             "cycle_progress_pct": None,
             "suggestions_count": 0,
+            # Which keys those are, so the panel can merge them with the
+            # Calibrated (ML) recommendations it computes client-side without
+            # double-counting a key both engines suggest.
+            "suggestion_keys": [],
             "feedback_count": 0,
             "recording": False,
             "is_user_paused": False,
             "manual_program": False,
             "options": dict(entry.options),
+            # Device-resolved defaults for the cadence/ratio fields (#396/#393) so the
+            # device-list conflict/suggestion badges score an unset field against the
+            # value the integration would actually use, matching the Settings tab.
+            "option_defaults": _resolved_option_defaults(
+                {**entry.data, **entry.options}.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+            ),
         }
 
         if manager is not None:
@@ -1209,11 +1375,28 @@ def ws_get_devices(
                 store = getattr(manager, "profile_store", None)
                 if store is not None:
                     try:
+                        # Same filters as ws_get_suggestions (muted keys and
+                        # no-op values dropped) so the device-pill badge can
+                        # never disagree with the Settings tab banner.
                         raw = store.get_suggestions() or {}
-                        info["suggestions_count"] = sum(
-                            1 for k in _SUGGESTION_KEYS
-                            if isinstance(raw.get(k), dict) and raw[k].get("value") is not None
-                        )
+                        merged = {**entry.data, **entry.options}
+                        try:
+                            muted = set(store.get_locked_suggestions() or [])
+                        except Exception:  # pylint: disable=broad-exception-caught
+                            muted = set()
+                        keys = [
+                            k for k in _SUGGESTION_KEYS
+                            if k not in muted
+                            and isinstance(raw.get(k), dict)
+                            and raw[k].get("value") is not None
+                            # Coerce first, exactly like ws_get_suggestions, so the pill
+                            # and the Settings list agree on int-key rounding.
+                            and not _suggestion_equivalent(
+                                _coerce_suggested(k, raw[k]["value"]), merged.get(k)
+                            )
+                        ]
+                        info["suggestion_keys"] = keys
+                        info["suggestions_count"] = len(keys)
                     except Exception:  # pylint: disable=broad-exception-caught
                         pass
                     try:
@@ -1269,6 +1452,7 @@ def ws_get_device_cycles(
 
     cycles: list[dict[str, Any]] = []
     reference_cycles: list[dict[str, Any]] = []
+    backfill_cycles: list[dict[str, Any]] = []
     total = 0
     try:
         store = getattr(manager, "profile_store", None)
@@ -1282,15 +1466,22 @@ def ws_get_device_cycles(
             window = ordered[offset:offset + limit]
             for c in window:
                 cycles.append(_strip_cycle(c))
-            # Imported store recordings are a small, bounded set kept out of the
-            # paginated `cycles`/`total` (they never enter usage stats). Return
-            # them once, on the first page, tagged so the panel can badge them
-            # and route edits/deletes correctly.
+            # Imported store recordings and cycles recovered from raw history are
+            # bounded sets kept out of the paginated `cycles`/`total` (they never enter
+            # usage stats). Return them once, on the first page, tagged so the panel can
+            # badge them and route edits/deletes correctly. They travel in separate
+            # arrays because they are separate categories: a curated community template
+            # and an auto-detected segment from the user's own past are not the same
+            # claim about a cycle.
             if offset == 0:
                 for c in reversed(store.get_reference_cycles()):
                     ref = _strip_cycle(c)
-                    ref["is_reference"] = True
+                    ref.update(_cycle_capabilities(c, "reference"))
                     reference_cycles.append(ref)
+                for c in reversed(store.get_backfill_cycles()):
+                    item = _strip_cycle(c)
+                    item.update(_cycle_capabilities(c, "backfill"))
+                    backfill_cycles.append(item)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error fetching cycles for entry %s: %s", entry_id, exc)
 
@@ -1299,6 +1490,7 @@ def ws_get_device_cycles(
             "entry_id": entry_id,
             "cycles": cycles,
             "reference_cycles": reference_cycles,
+            "backfill_cycles": backfill_cycles,
             "total": total,
             "has_more": has_more,
         },
@@ -1306,6 +1498,28 @@ def ws_get_device_cycles(
 
 
 # ─── Settings ─────────────────────────────────────────────────────────────────
+
+
+def _resolved_option_defaults(device_type: str) -> dict[str, Any]:
+    """Device-resolved defaults for the cadence/ratio settings whose default varies
+    by device type (#396/#393).
+
+    The panel uses these as the render/conflict-check/suggestion-comparison fallback
+    for an unset field, so it shows - and validates against - the value the
+    integration would actually use, not a static schema literal that would spuriously
+    trip (or silently miss) the watchdog>=2*sampling / start_duration>=sampling rules
+    on a coarse-sampling device type. Shared by ws_get_options (current device) and
+    ws_get_devices (per device) so the two never diverge.
+    """
+    return {
+        CONF_SAMPLING_INTERVAL: resolve_sampling_interval_default(device_type),
+        CONF_WATCHDOG_INTERVAL: resolve_watchdog_interval_default(device_type),
+        CONF_START_DURATION_THRESHOLD: resolve_start_duration_default(device_type),
+        CONF_SMART_TERMINATION_DURATION_RATIO: (
+            resolve_smart_termination_duration_ratio_default(device_type)
+        ),
+    }
+
 
 @websocket_api.websocket_command(
     {vol.Required("type"): "ha_washdata/get_options", vol.Required("entry_id"): str}
@@ -1322,7 +1536,19 @@ def ws_get_options(
         connection.send_error(msg["id"], "not_found", f"Entry {msg['entry_id']!r} not found")
         return
     options = {**entry.data, **entry.options}
-    _send_result(connection, msg["id"], "get_options", {"options": options})
+    # Device-resolved defaults for the cadence settings whose defaults vary by
+    # device type (#396). The panel uses these as the render/conflict-check
+    # fallback for an unset field so it shows (and validates against) the value the
+    # integration would actually use - not a static schema literal that would
+    # spuriously trip the panel's own watchdog>=2*sampling / start_duration>=sampling
+    # rules on a coarse-sampling device type.
+    device_type = options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+    _send_result(
+        connection,
+        msg["id"],
+        "get_options",
+        {"options": options, "defaults": _resolved_option_defaults(device_type)},
+    )
 
 
 @websocket_api.websocket_command(
@@ -1393,6 +1619,35 @@ async def ws_set_options(
                 DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
             )
 
+    # Smart-Termination duration ratio (#393): fraction of expected duration, so it
+    # is meaningless outside [0.50, 1.00] - clamp valid submissions to the range.
+    # An empty or non-numeric value drops the key so the device-type default
+    # (resolved in the config builder, 0.99 dishwasher / 0.98 other) applies again;
+    # coercing to a single scalar default here would be wrong for dishwashers.
+    if CONF_SMART_TERMINATION_DURATION_RATIO in new_options:
+        _raw_str = new_options[CONF_SMART_TERMINATION_DURATION_RATIO]
+        if _raw_str in (None, ""):
+            new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+        else:
+            try:
+                _str = float(_raw_str)
+                if not math.isfinite(_str):
+                    raise ValueError("non-finite")
+                new_options[CONF_SMART_TERMINATION_DURATION_RATIO] = min(
+                    1.0, max(0.5, _str)
+                )
+            except (TypeError, ValueError):
+                new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+
+    # A None outside the clearable selectors means "not set", not a value: the
+    # per-setting Revert sends the changelog's `old`, which is null for a setting
+    # never saved before. Stored, it would survive options.get(key, DEFAULT) and
+    # break the float()/int() casts at setup, so drop the key and let the default
+    # apply again; this also cleans nulls persisted by earlier builds.
+    _pre_strip_keys = set(new_options)
+    new_options = strip_null_options(new_options)
+    dropped_null_keys = _pre_strip_keys - set(new_options)
+
     # Partition identity out of options: the display name is carried by the
     # entry title, never persisted in options (matches the config-flow invariant
     # that CONF_NAME is absent from options).
@@ -1409,8 +1664,13 @@ async def ws_set_options(
     # that rebuilds the store). A changelog failure must never block the save.
     try:
         old_effective = {**entry.data, **entry.options}
+        # Keys dropped by the null-strip above are recorded as a change to None
+        # ("reverted to unset") so the history still shows what happened; a
+        # None -> None no-op is skipped by _diff_option_changes.
         submitted_post = {
-            k: new_options[k] for k in msg["options"] if k in new_options
+            k: new_options.get(k)
+            for k in msg["options"]
+            if k in new_options or k in dropped_null_keys
         }
         changes = _diff_option_changes(old_effective, submitted_post)
         if changes:
@@ -2993,8 +3253,14 @@ async def ws_import_config(
                     entry_options_updates.pop(key, None)
                 if entry_options_updates:
                     # Apply the imported tunables on top of the current options;
-                    # never spread entry.data into options.
-                    new_options = {**entry.options, **entry_options_updates}
+                    # never spread entry.data into options. An import payload can
+                    # carry a null (an export taken from an entry that still held
+                    # one), and a persisted null survives options.get(key, DEFAULT)
+                    # and breaks setup (#389), so the same write-boundary strip as
+                    # ws_set_options applies here.
+                    new_options = strip_null_options(
+                        {**entry.options, **entry_options_updates}
+                    )
                     hass.config_entries.async_update_entry(entry, options=new_options)
                 # NB: config_updates["entry_data"] is intentionally NOT written to
                 # entry.data. export_data ships the raw, un-redacted entry.data of
@@ -3319,9 +3585,7 @@ def ws_get_suggestions(
             if not isinstance(item, dict) or item.get("value") is None:
                 continue
             val = item["value"]
-            suggested = (
-                int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
-            )
+            suggested = _coerce_suggested(key, val)
             current = merged.get(key)
             # Hide suggestions that would not change the current value.
             if _suggestion_equivalent(suggested, current):
@@ -3527,15 +3791,7 @@ async def ws_get_cycle_power_data(
     try:
         store = manager.profile_store
         samples = store.get_cycle_power_data(cycle_id)
-        cycle = next(
-            (c for c in store.get_past_cycles() if c.get("id") == cycle_id), None
-        )
-        if cycle is None:
-            # Imported store recordings live in a separate list.
-            cycle = next(
-                (c for c in store.get_reference_cycles() if c.get("id") == cycle_id),
-                None,
-            )
+        cycle, origin = store.find_stored_cycle(cycle_id)
         if cycle:
             meta = {
                 "start_time": cycle.get("start_time"),
@@ -3544,9 +3800,7 @@ async def ws_get_cycle_power_data(
                 "profile_name": cycle.get("profile_name"),
                 "status": cycle.get("status"),
                 "energy_kwh": _cycle_kwh(cycle),
-                # Imported store recordings are read-only in the inspector (no
-                # trim/relabel/review -- they never enter usage stats).
-                "is_reference": str(cycle.get("meta", {}).get("source", "")).startswith("store"),
+                **_cycle_capabilities(cycle, origin),
             }
             # Transient artifacts (door-open pauses, out-of-band dips/spikes) for
             # graph markers. Prefer the value frozen at cycle end; compute on the
@@ -3563,9 +3817,15 @@ async def ws_get_cycle_power_data(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error getting cycle power data %s: %s", cycle_id, exc)
 
+    _ds = _downsample(samples)
     _send_result(connection, msg["id"], "get_cycle_power_data", {
             "cycle_id": cycle_id,
-            "samples": _downsample(samples),
+            "samples": _ds,
+            # Declare thinning (#395) so a gap from decimation is not mistaken for
+            # a gap from a sensor that stopped reporting: the panel can show
+            # "N of M samples" and disambiguate the two.
+            "sample_count": len(samples),
+            "decimated": len(_ds) < len(samples),
             "full_duration_s": round(float(samples[-1][0]), 1) if samples else 0.0,
             **meta,
         },
@@ -3690,12 +3950,16 @@ async def ws_analyze_split(
         split_offsets = (
             [round(float(s[1]), 1) for s in segs[:-1]] if segs and len(segs) > 1 else []
         )
+        _ds = _downsample(samples)
         _send_result(connection, msg["id"], "analyze_split", {
                 "segments": [
                     [round(float(a), 1), round(float(b), 1)] for a, b in (segs or [])
                 ],
                 "split_offsets": split_offsets,
-                "samples": _downsample(samples),
+                "samples": _ds,
+                # Declare thinning (#395); see ws_get_cycle_power_data.
+                "sample_count": len(samples),
+                "decimated": len(_ds) < len(samples),
                 "full_duration_s": round(float(samples[-1][0]), 1) if samples else 0.0,
             },
         )
@@ -5269,6 +5533,17 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
             opts.get(CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE),
             DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
         ),
+        smart_termination_duration_ratio=_safe_float_finite(
+            opts.get(CONF_SMART_TERMINATION_DURATION_RATIO),
+            resolve_smart_termination_duration_ratio_default(
+                str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
+            ),
+        ),
+        # Match the live detector's tuned gate, not the dataclass 0.4, so the sim's
+        # Smart-Termination / anti-crease confidence checks reproduce production.
+        match_confidence_threshold=_safe_float_finite(
+            opts.get(CONF_PROFILE_MATCH_THRESHOLD), DEFAULT_PROFILE_MATCH_THRESHOLD
+        ),
     )
 
 
@@ -5505,6 +5780,7 @@ def _playground_preset_list(store: Any) -> list[dict[str, Any]]:
     {
         vol.Required("type"): "ha_washdata/get_playground_settings",
         vol.Required("entry_id"): str,
+        vol.Optional("include_suggestions", default=True): bool,
     }
 )
 @websocket_api.async_response
@@ -5519,6 +5795,13 @@ async def ws_get_playground_settings(
     simulation uses, so the control panel always opens on what the integration is
     really running - never on a stale schema default. ``publishable`` lists the
     keys the panel may write back to the config entry.
+
+    ``include_suggestions=False`` skips the auto-tuner/ML suggestion blocks. They exist
+    only to label the two "Load suggested" buttons, and the ML one runs statistics across
+    every clean cycle - real work, on the critical path of opening the tab. The panel
+    therefore opens without them and fetches them in the background; the buttons already
+    render only once their count is non-zero, so they simply appear when the data lands.
+    Defaults to True so every other caller is unaffected.
     """
     entry_id: str = msg["entry_id"]
     ctx = _playground_context(hass, entry_id)
@@ -5531,11 +5814,14 @@ async def ws_get_playground_settings(
     except Exception:  # pylint: disable=broad-exception-caught
         match_config = {}
 
+    include_suggestions = bool(msg.get("include_suggestions", True))
+
     # Classic suggestions from the store (periodic analysis results), filtered to
     # keys the Playground actually exposes — cheap dict read, no executor needed.
     raw_sugg: dict[str, Any] = {}
     try:
-        raw_sugg = store.get_suggestions() or {}
+        raw_sugg = store.get_suggestions() if include_suggestions else {}
+        raw_sugg = raw_sugg or {}
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug(
             "Could not read Playground classic suggestions for %s: %s", entry_id, exc
@@ -5553,7 +5839,7 @@ async def ws_get_playground_settings(
     # ML suggestions — computed on-demand; executor-offloaded because it runs
     # statistics across all clean cycles. None when the feature is disabled.
     ml_sugg: dict[str, Any] | None = None
-    if ENABLE_ML_SUGGESTIONS:
+    if ENABLE_ML_SUGGESTIONS and include_suggestions:
         ml_sugg = {}
         try:
             learning = getattr(_manager, "learning_manager", None)
@@ -6064,3 +6350,532 @@ def ws_start_playground_cycle_detail(
     if _raw is not None:
         reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "start_playground_cycle_detail", {"task_id": task.id})
+
+
+# ─── Historical power-data import (issue #344) ─────────────────────────────────
+#
+# Four steps, because the data is large and the answer is the user's to approve:
+#
+#   1. ingest   - `history_import_begin` + `history_import_chunk` stage CSV text, or
+#                 `history_import_recorder` fills the same buffer from the recorder.
+#                 Chunked because Home Assistant builds its WebSocket with aiohttp's
+#                 default 4 MiB frame cap, and ten days of 5-second data is 5-8 MB of
+#                 text; an over-cap frame is not rejected, it closes the connection.
+#   2. scan     - `start_history_import_scan` replays the stream through fresh detectors
+#                 as a detached registry task, chunk by chunk (see history_import.py for
+#                 why a raw stream cannot be fed to one detector).
+#   3. review   - the panel shows one row per candidate; the whole traces never cross
+#                 the wire (they would blow the same frame cap).
+#   4. apply    - `apply_history_import` persists the accepted rows into
+#                 `backfill_cycles`.
+#
+# Parsing lives in Python, not in the panel, so one implementation is under test.
+
+_HISTORY_IMPORT_KEY = f"{DOMAIN}_history_import"
+
+
+def _history_staging(hass: HomeAssistant) -> dict[str, dict[str, Any]]:
+    """Per-entry staging area for an in-flight import, keyed by entry_id.
+
+    One slot per entry: a new upload replaces the previous one, so an abandoned 8 MB
+    paste cannot accumulate. Cleared by :func:`async_clear_history_import` on unload.
+    """
+    return hass.data.setdefault(_HISTORY_IMPORT_KEY, {})
+
+
+def async_clear_history_import(hass: HomeAssistant, entry_id: str) -> None:
+    """Drop any staged upload and scan result for an entry (called on unload)."""
+    _history_staging(hass).pop(entry_id, None)
+
+
+def _history_slot(hass: HomeAssistant, entry_id: str, token: str) -> dict[str, Any] | None:
+    slot = _history_staging(hass).get(entry_id)
+    if not isinstance(slot, dict) or slot.get("token") != token:
+        return None
+    return slot
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/history_import_begin",
+        vol.Required("entry_id"): str,
+    }
+)
+@callback
+def ws_history_import_begin(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Open a staging slot for a CSV upload and return the token chunks must carry."""
+    entry_id: str = msg["entry_id"]
+    if _get_manager(hass, entry_id) is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    token = uuid.uuid4().hex
+    _history_staging(hass)[entry_id] = {
+        "token": token,
+        "chunks": [],
+        "bytes": 0,
+        "next_seq": 0,
+        "source": "csv",
+    }
+    _send_result(connection, msg["id"], "history_import_begin", {
+        "token": token,
+        "max_bytes": HISTORY_IMPORT_MAX_BYTES,
+        "chunk_bytes": HISTORY_IMPORT_CHUNK_BYTES,
+    })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/history_import_chunk",
+        vol.Required("entry_id"): str,
+        vol.Required("token"): str,
+        vol.Required("seq"): int,
+        vol.Required("text"): str,
+    }
+)
+@callback
+def ws_history_import_chunk(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Append one chunk of CSV text to the staging slot.
+
+    Sequence-checked: a dropped or re-ordered chunk would splice the file silently, so a
+    mismatch is an error the panel can restart from rather than a corrupt import.
+    """
+    entry_id: str = msg["entry_id"]
+    slot = _history_slot(hass, entry_id, msg["token"])
+    if slot is None:
+        connection.send_error(msg["id"], "not_found", "No upload in progress; start again")
+        return
+    if int(msg["seq"]) != slot["next_seq"]:
+        connection.send_error(
+            msg["id"], "invalid_format",
+            f"Out-of-order chunk {msg['seq']}, expected {slot['next_seq']}",
+        )
+        return
+    text: str = msg["text"]
+    size = len(text.encode("utf-8", "ignore"))
+    if slot["bytes"] + size > HISTORY_IMPORT_MAX_BYTES:
+        _history_staging(hass).pop(entry_id, None)
+        connection.send_error(msg["id"], "invalid_format", "Upload is too large")
+        return
+    slot["chunks"].append(text)
+    slot["bytes"] += size
+    slot["next_seq"] += 1
+    _send_result(connection, msg["id"], "history_import_chunk", {
+        "received_bytes": slot["bytes"],
+        "next_seq": slot["next_seq"],
+    })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/history_import_recorder",
+        vol.Required("entry_id"): str,
+        # Either a start date (what the panel sends: "import since <date>") or a plain
+        # day count. `start_date` wins when both are present.
+        vol.Optional("start_date"): vol.Any(None, str),
+        vol.Optional("days", default=10): vol.All(
+            vol.Coerce(int), vol.Range(min=1, max=HISTORY_IMPORT_RECORDER_MAX_DAYS)
+        ),
+    }
+)
+@websocket_api.async_response
+async def ws_history_import_recorder(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Fill the staging slot from Home Assistant's own recorder.
+
+    The entity is always the device's configured power sensor, never client-supplied:
+    this command reads arbitrary history, and letting the caller name the entity would
+    make it an information-disclosure hole.
+
+    Read one day at a time. `state_changes_during_period` has no row cap, and a single
+    query over a long window materialises the whole result in one recorder-executor job.
+    Home Assistant purges states after `purge_keep_days` (10 by default), so a request
+    reaching further back simply returns fewer rows - that is reported, not an error.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    entity_id = getattr(manager, "power_sensor_entity_id", None)
+    if not entity_id:
+        connection.send_error(msg["id"], "not_found", "This device has no power sensor configured")
+        return
+
+    now = dt_util.now()
+    days = int(msg.get("days") or 10)
+    start_date = msg.get("start_date")
+    if start_date:
+        # "Import since <date>" - resolve to a day count so the windowed read below is
+        # unchanged. The date is read as a LOCAL calendar day (it comes from a date
+        # picker, where the user means their own midnight), and clamped to the supported
+        # range: a future date reads today, an older one is capped at the maximum.
+        try:
+            parsed_date = dt_util.parse_date(str(start_date))
+        except Exception:  # pylint: disable=broad-exception-caught
+            parsed_date = None
+        if parsed_date is None:
+            connection.send_error(msg["id"], "invalid_format", "Not a valid start date")
+            return
+        span = (now.date() - parsed_date).days + 1
+        days = max(1, min(HISTORY_IMPORT_RECORDER_MAX_DAYS, span))
+    rows: list[tuple[float, float]] = []
+    # Walk BACKWARDS from today, not forwards from the oldest requested day: the window can
+    # now be years (a recorder configured to keep full-resolution states that long), and
+    # starting at the far end would issue thousands of empty queries before reaching any
+    # data - and, on truncation, would keep the OLDEST rows rather than the most recent.
+    # `samples_from_readings` sorts, so the accumulation order does not matter downstream.
+    empty_run = 0
+    # The loop can stop early (empty-day run, or the row cap), so the requested `days` is
+    # not what was read. Track the oldest window actually queried and report THAT, or the
+    # panel would name a range it never looked at.
+    oldest_queried = now
+    queried_days = 0
+    for day in range(1, days + 1):
+        window_start = now - timedelta(days=day)
+        window_end = now - timedelta(days=day - 1)
+        day_rows = await _recorder_power(hass, entity_id, window_start, end_dt=window_end)
+        oldest_queried = window_start
+        queried_days += 1
+        if day_rows:
+            empty_run = 0
+            rows.extend(day_rows)
+        else:
+            # Inside the retention window a day always yields at least the carried
+            # start-time state, so a run of empty days means the recorder is purged past
+            # here and every further query would be wasted.
+            empty_run += 1
+            if empty_run >= HISTORY_IMPORT_RECORDER_EMPTY_DAY_STOP:
+                break
+        if len(rows) > HISTORY_IMPORT_MAX_ROWS:
+            break
+
+    token = uuid.uuid4().hex
+    _history_staging(hass)[entry_id] = {
+        "token": token,
+        "chunks": [],
+        "bytes": 0,
+        "next_seq": 0,
+        "source": "recorder",
+        "rows": rows[:HISTORY_IMPORT_MAX_ROWS],
+        "entity_id": entity_id,
+    }
+    _send_result(connection, msg["id"], "history_import_recorder", {
+        "token": token,
+        "rows": len(rows[:HISTORY_IMPORT_MAX_ROWS]),
+        "entity_id": entity_id,
+        # Both describe the window actually read, not the one asked for: counted from
+        # the loop itself, so an early stop cannot report days that were never queried.
+        "days": queried_days,
+        "start_date": oldest_queried.date().isoformat(),
+        "truncated": len(rows) > HISTORY_IMPORT_MAX_ROWS,
+    })
+
+
+def _history_samples(slot: dict[str, Any], entity_id: str | None) -> Any:
+    """Turn a staging slot into samples, whichever way it was filled.
+
+    Executor-side: CSV parsing is pure Python over megabytes of text. Returns either a
+    ``(samples, report)`` pair or an ``{"error": ...}`` marker.
+    """
+    if slot.get("source") == "recorder":
+        samples = history_import.samples_from_readings(slot.get("rows") or [])
+        if len(samples) < 2:
+            return {"error": "no_readings"}
+        return samples, {
+            "rows_total": len(samples),
+            "rows_parsed": len(samples),
+            "entity_id": slot.get("entity_id"),
+            "source": "recorder",
+        }
+    parsed = history_import.parse_history_csv(
+        "".join(slot.get("chunks") or []), entity_id=entity_id
+    )
+    if isinstance(parsed, dict):
+        return parsed
+    report = parsed.report()
+    report["source"] = "csv"
+    return parsed.samples, report
+
+
+async def _history_import_scan_task(
+    hass: HomeAssistant, task: Any, entry_id: str, token: str
+) -> None:
+    """Replay a staged history stream, chunk by chunk, into candidate cycles.
+
+    The full traces are held in the staging slot rather than in the task result: the
+    result is served verbatim by `get_task_result`, and a few hundred traces would exceed
+    the WebSocket frame cap and take the connection down. The result carries only preview
+    rows, which is also all the review UI needs.
+    """
+    reg = task_registry.get_registry(hass)
+    ctx = _playground_context(hass, entry_id)
+    if ctx is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    manager, _store, base_config, options, _price = ctx
+    slot = _history_slot(hass, entry_id, token)
+    if slot is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="upload expired")
+        return
+    # Segmentation is only as good as the thresholds it runs with, and
+    # `_playground_base_config`'s fallback uses the *scalar* defaults (min_off_gap 60,
+    # off_delay 180) rather than the per-device ones - which on a dishwasher would cut
+    # the stream at every drying pause and produce nothing but fragments. Refuse rather
+    # than scan against the wrong thresholds.
+    if not isinstance(getattr(getattr(manager, "detector", None), "config", None), CycleDetectorConfig):
+        reg.finish(task, state=task_registry.STATE_ERROR, error="detector_unavailable")
+        return
+    try:
+        entity_id = getattr(manager, "power_sensor_entity_id", None)
+        parsed = await hass.async_add_executor_job(_history_samples, slot, entity_id)
+        if isinstance(parsed, dict):
+            reg.finish(task, state=task_registry.STATE_ERROR, error=str(parsed.get("error")))
+            return
+        samples, report = parsed
+        sampling_interval = options.get(CONF_SAMPLING_INTERVAL)
+        runner = await hass.async_add_executor_job(
+            functools.partial(
+                history_import.build_scan,
+                samples,
+                base_config,
+                sampling_interval_s=sampling_interval,
+                parse_report=report,
+            )
+        )
+        if isinstance(runner, dict):
+            # A stream with nothing usable in it is a *result*, not a failure: the panel
+            # explains which spans were skipped and why (six months of hourly averages
+            # is the common case), so the user is not left staring at "0 cycles".
+            reg.finish(task, state=task_registry.STATE_DONE, result={
+                "segments": [],
+                "skipped": runner.get("skipped") or [],
+                "parse": runner.get("parse") or report,
+                "found": 0,
+                "error": runner.get("error"),
+            })
+            return
+        reg.update(task, total=runner.total)
+        while not runner.finished:
+            if task.cancel_requested:
+                break
+            await hass.async_add_executor_job(runner.step, HISTORY_IMPORT_CHUNK_SAMPLES)
+            reg.update(task, done=min(runner.total, runner.done))
+        payload = await hass.async_add_executor_job(
+            functools.partial(runner.finalize, partial=task.cancel_requested)
+        )
+        # Split the payload: traces stay server-side, keyed by this task so a reconnect
+        # can still apply them; only the preview rows travel.
+        cycles = payload.pop("cycles", [])
+        current = _history_slot(hass, entry_id, token)
+        if current is not None:
+            current["scan_task_id"] = task.id
+            current["cycles"] = cycles
+            current.pop("chunks", None)  # the raw text is no longer needed
+            current.pop("rows", None)
+        payload["token"] = token
+        payload["settings"] = {
+            "min_power": base_config.min_power,
+            "off_delay": base_config.off_delay,
+            "min_off_gap": base_config.min_off_gap,
+            "device_type": base_config.device_type,
+        }
+        reg.finish(
+            task,
+            state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
+            result=payload,
+        )
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        # Task-level failure at WARNING like the other task runners, so it lands in the
+        # default HA log and the panel Logs view (sub-step failures stay at debug).
+        _LOGGER.warning("History-import scan failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/start_history_import_scan",
+        vol.Required("entry_id"): str,
+        vol.Required("token"): str,
+    }
+)
+@callback
+def ws_start_history_import_scan(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Kick off the replay as a detached, registry-tracked task."""
+    entry_id: str = msg["entry_id"]
+    if _get_manager(hass, entry_id) is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    if _history_slot(hass, entry_id, msg["token"]) is None:
+        connection.send_error(msg["id"], "not_found", "No upload in progress; start again")
+        return
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "history_import", "Scanning power history",
+        label_key="task.history_import.scanning",
+    )
+    _raw = hass.async_create_task(
+        _history_import_scan_task(hass, task, entry_id, msg["token"])
+    )
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
+    _send_result(connection, msg["id"], "start_history_import_scan", {"task_id": task.id})
+
+
+async def _history_import_apply_task(
+    hass: HomeAssistant, task: Any, entry_id: str, scan_task_id: str, accept: list[int]
+) -> None:
+    """Persist the accepted candidates into ``backfill_cycles``."""
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
+    scan = reg.get(scan_task_id)
+    # Ownership check: get_task_result is not entry-scoped, so without this a stale or
+    # foreign task id could write another device's cycles into this store.
+    if scan is None or scan.entry_id != entry_id or scan.kind != "history_import":
+        reg.finish(task, state=task_registry.STATE_ERROR, error="scan_expired")
+        return
+    try:
+        async with _entry_write_lock(hass, entry_id):
+            if _get_manager(hass, entry_id) is not manager:
+                reg.finish(task, state=task_registry.STATE_ERROR, error="device reloaded")
+                return
+            # Validate AND read the staging slot under the lock, not before it: two
+            # concurrent applies must not both pass a pre-lock check and each persist the
+            # same candidate (one whose dedup_key is None bypasses existing_dedup_keys),
+            # and the slot must not be swapped between the check and the read.
+            slot = _history_staging(hass).get(entry_id)
+            if not isinstance(slot, dict) or slot.get("scan_task_id") != scan_task_id:
+                # The registry keeps only the last 30 finished tasks per entry, and an
+                # entry reload clears the staging area, so a scan can legitimately be
+                # gone by now.
+                reg.finish(task, state=task_registry.STATE_ERROR, error="scan_expired")
+                return
+            cycles: list[dict[str, Any]] = list(slot.get("cycles") or [])
+            # Dedupe the client-supplied indices (order-preserving): a repeated index
+            # would visit the same candidate twice, and one whose dedup_key is None is
+            # not caught by the in-loop dedup set, so it would store a second copy.
+            wanted = list(dict.fromkeys(i for i in accept if 0 <= i < len(cycles)))
+            if not wanted:
+                reg.finish(
+                    task, state=task_registry.STATE_DONE,
+                    result={"imported": 0, "duplicates": 0},
+                )
+                return
+            store = manager.profile_store
+            target = store.get_backfill_cycles()
+            room = max(0, HISTORY_IMPORT_MAX_TOTAL_CYCLES - len(target))
+            existing = history_import.existing_dedup_keys(store.iter_stored_cycles())
+            id_pool = {c.get("id") for c in target if isinstance(c, dict)}
+            imported = 0
+            duplicates = 0
+            reg.update(task, total=len(wanted))
+            for done, index in enumerate(wanted, start=1):
+                if task.cancel_requested:
+                    break
+                raw = cycles[index]
+                key = history_import.dedup_key(raw.get("start_time"), raw.get("duration"))
+                if key is not None and key in existing:
+                    duplicates += 1
+                    reg.update(task, done=done)
+                    continue
+                if imported >= room:
+                    break
+                store._add_cycle_data(  # noqa: SLF001 - the bulk insert primitive
+                    history_import.build_backfill_cycle(raw),
+                    target=target,
+                    id_pool=id_pool,
+                )
+                if key is not None:
+                    existing.add(key)
+                imported += 1
+                reg.update(task, done=done)
+            if imported:
+                await store.async_save()
+            # "capped" means the cap decided where we stopped - not the user cancelling,
+            # and not the duplicates that were legitimately skipped.
+            capped = not task.cancel_requested and imported < (len(wanted) - duplicates)
+            # Read the total inside the lock: another task could append to the same
+            # backfill list after the lock releases, inflating a count read outside it.
+            total_backfill = len(target)
+            # Consume the slot we applied - but only if it is still that same object.
+            # A fresh upload (which does not take this lock) can replace the slot during
+            # the async_save() await above; clearing unconditionally would discard it.
+            if _history_staging(hass).get(entry_id) is slot:
+                async_clear_history_import(hass, entry_id)
+        manager.notify_update()
+        reg.finish(
+            task,
+            state=task_registry.STATE_CANCELLED if task.cancel_requested else task_registry.STATE_DONE,
+            result={
+                "imported": imported,
+                "duplicates": duplicates,
+                "capped": capped,
+                "total_backfill": total_backfill,
+            },
+        )
+    except asyncio.CancelledError:
+        reg.finish(task, state=task_registry.STATE_CANCELLED)
+        raise
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        # A failed apply is a failed data write; log at WARNING like the other task
+        # runners so it is visible in the default HA log and the panel Logs view.
+        _LOGGER.warning("History-import apply failed for %s: %s", entry_id, exc)
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/apply_history_import",
+        vol.Required("entry_id"): str,
+        vol.Required("scan_task_id"): str,
+        vol.Required("accept"): list,
+    }
+)
+@callback
+def ws_apply_history_import(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Persist the candidates the user kept, as a detached, registry-tracked task."""
+    entry_id: str = msg["entry_id"]
+    if _get_manager(hass, entry_id) is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    accept: list[int] = []
+    for item in msg["accept"][:HISTORY_IMPORT_MAX_SEGMENTS]:
+        try:
+            accept.append(int(item))
+        except (TypeError, ValueError):
+            continue
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "history_import_apply", "Importing cycles",
+        label_key="task.history_import.importing",
+    )
+    _raw = hass.async_create_task(
+        _history_import_apply_task(hass, task, entry_id, msg["scan_task_id"], accept)
+    )
+    if _raw is not None:
+        reg.link_asyncio_task(task.id, _raw)
+    _send_result(connection, msg["id"], "apply_history_import", {"task_id": task.id})

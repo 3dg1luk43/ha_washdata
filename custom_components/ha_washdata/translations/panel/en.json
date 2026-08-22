@@ -54,6 +54,7 @@
     "awaiting": "Awaiting approval",
     "awaiting_n": "Awaiting approval · {n} confirmed",
     "awaiting_tip": "Awaiting community approval",
+    "backfilled_tip": "Detected in imported power history. Shapes program matching only, not counted in stats.",
     "built_in_tag": "built-in",
     "declining": "↘ declining",
     "energy_low": "Lower energy than usual",
@@ -120,21 +121,6 @@
     "discard_tip": "Discard the recorded trace without saving",
     "disconnect": "Disconnect",
     "dismiss": "Dismiss",
-    "mute_suggestion": "Stop suggesting this setting",
-    "pg_load_calibrated": "Load Calibrated (ML) ({n})",
-    "pg_load_calibrated_tip": "Stage ML-calibrated settings as Playground overrides",
-    "pg_load_live": "Load live settings",
-    "pg_load_live_tip": "Re-read the integration's current settings and drop every Playground edit",
-    "pg_load_suggested": "Load suggested ({n})",
-    "pg_load_suggested_tip": "Stage the auto-tuner's current suggestions as Playground overrides",
-    "pg_preset_delete": "Delete preset",
-    "pg_preset_load": "Load preset",
-    "pg_preset_load_tip": "Replace the Playground values with this preset (live settings are untouched)",
-    "pg_preset_save": "Save as preset",
-    "pg_preset_save_tip": "Save every value below as a named preset for this device",
-    "pg_publish_all": "Publish {n} to integration",
-    "pg_publish_one": "Publish {label} to the integration",
-    "reset_muted": "Reset muted",
     "done": "Done",
     "download_device": "Download this setup",
     "download_export": "Download export",
@@ -147,10 +133,15 @@
     "force_stop_tip": "Immediately end the current cycle and mark it as force-stopped",
     "from_template": "From template ▾",
     "group_suggest": "Group {n}: {members}",
+    "hist_goto_cycles": "Show me the cycles",
+    "hist_import_n": "Import {n} cycles",
+    "hist_read_recorder": "Read from Home Assistant",
+    "hist_scan": "Scan for cycles",
     "ignore": "Ignore",
     "import": "Import",
     "import_json": "Import from JSON",
     "import_overwrite": "Import (overwrites data)",
+    "import_power_history": "Import power history",
     "import_raw": "Advanced: replace all from JSON",
     "import_selected": "Import selected",
     "inspect": "Inspect",
@@ -159,6 +150,7 @@
     "load_more": "Load more",
     "manage": "Manage",
     "merge": "Merge",
+    "mute_suggestion": "Stop suggesting this setting",
     "new_automation": "＋ New Automation",
     "new_group": "+ New Group",
     "new_group_tip": "Group near-identical profiles (same shape/duration, different temperature or spin) so the matcher reliably picks between them",
@@ -173,6 +165,19 @@
     "pg_apply_to_settings": "Save to settings",
     "pg_apply_to_settings_tip": "Copy the values you edited here into this device's live settings",
     "pg_autofill": "Auto-fill",
+    "pg_load_calibrated": "Load Calibrated (ML) ({n})",
+    "pg_load_calibrated_tip": "Stage ML-calibrated settings as Playground overrides",
+    "pg_load_live": "Load live settings",
+    "pg_load_live_tip": "Re-read the integration's current settings and drop every Playground edit",
+    "pg_load_suggested": "Load suggested ({n})",
+    "pg_load_suggested_tip": "Stage the auto-tuner's current suggestions as Playground overrides",
+    "pg_preset_delete": "Delete preset",
+    "pg_preset_load": "Load preset",
+    "pg_preset_load_tip": "Replace the Playground values with this preset (live settings are untouched)",
+    "pg_preset_save": "Save as preset",
+    "pg_preset_save_tip": "Save every value below as a named preset for this device",
+    "pg_publish_all": "Publish {n} to integration",
+    "pg_publish_one": "Publish {label} to the integration",
     "play": "Play",
     "process": "Process",
     "process_history": "Process Now",
@@ -186,6 +191,7 @@
     "rec_stop_tip": "Stop recording and hold the captured trace for review",
     "record": "Start Recording",
     "refresh": "Refresh",
+    "refresh_catalog": "Refresh catalog",
     "refresh_diag_tip": "Reload storage statistics",
     "refresh_logs_tip": "Reload the latest log records",
     "refresh_settings_tip": "Reload settings from the server",
@@ -194,6 +200,7 @@
     "remove_timer": "Delete",
     "reset": "Reset",
     "reset_ml_models_tip": "Discard the fine-tuned models and go back to the built-in ones. WashData can re-learn them later.",
+    "reset_muted": "Reset muted",
     "reset_to_builtin": "Reset to built-in models",
     "reset_to_defaults": "Reset to defaults",
     "resume_cycle": "Resume cycle",
@@ -225,6 +232,7 @@
     "select_all": "Select all",
     "select_last20": "Last 20",
     "select_none": "Clear",
+    "set_brand_model": "Set brand & model",
     "share": "Share",
     "share_device": "⬆ Share this device",
     "share_device_tip": "Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them",
@@ -252,14 +260,14 @@
       "start": "Must be below Anti-Wrinkle Max Power ({max} W)"
     },
     "attn_sub": "Fix conflicts before saving",
-    "attn_title": "{n} setting conflict{s}",
-    "settings_banner": "{n} setting conflict{s} – check the highlighted sections and fix before saving.",
+    "attn_title": "Setting conflicts: {n}",
+    "settings_banner": "Setting conflicts: {n}. Check the highlighted sections and fix them before saving.",
     "settings_banner_btn": "Go to first",
     "confidence": {
       "auto": "Must be at or above Match Threshold ({match})",
-      "learning": "Must be at or below Match Threshold ({match})",
+      "learning": "Must be at or above Match Threshold ({match})",
       "match_for_auto": "Must be at or below Auto-Label Confidence ({alc})",
-      "match_for_learning": "Must be at or above Learning Confidence ({lc})"
+      "match_for_learning": "Must be at or below Learning Confidence ({lc})"
     },
     "duration_ratio": {
       "max": "Must be greater than Min Duration Ratio ({min})",
@@ -297,7 +305,7 @@
       "match": "Must be above Unmatch Threshold ({un})",
       "unmatch": "Must be below Match Threshold ({match}); otherwise a committed match un-matches instantly"
     },
-    "cascade_toast": "Also adjusted {n} setting{s} for consistency.",
+    "cascade_toast": "Other settings adjusted for consistency: {n}",
     "suggestion_resolves": "Stage the pending suggestion ({val}) below to fix this",
     "use_fix": "Use {val}",
     "watchdog": {
@@ -315,12 +323,14 @@
     "automation_review_this_cycle": "Review this cycle",
     "automations": "Automations",
     "clear_debug": "Clear Debug Traces",
+    "community_store": "Community Store",
     "cycle_simulator": "Cycle Simulator",
     "diagnostics_pref": "Diagnostics",
     "display": "Display",
     "dtw_inspector": "DTW Inspector",
     "export_import": "Export / Import",
     "getting_started": "Getting started",
+    "import_power_history": "Import power history",
     "live_power": "Live Power",
     "logs": "Logs",
     "logs_diagnostics": "Diagnostics",
@@ -335,12 +345,15 @@
     "ml_smart_learning": "Smart Learning",
     "my_preferences": "My Preferences",
     "no_automations": "No automations reference this device yet.",
+    "online_account": "Community Store & online features",
     "panel_settings": "Panel Settings",
     "param_sweep": "Parameter sweep",
+    "pg_across_cycles": "Across your cycles",
     "pg_settings_source": "Settings source",
     "phase_catalog": "Phase Catalog",
     "playground": "Playground",
     "process_history": "Process History",
+    "recommendations": "Recommendations ({n})",
     "settings_history": "Settings history",
     "status": "Status",
     "status_graph": "Status Graph",
@@ -348,11 +361,7 @@
     "test_history": "Test on history",
     "toggle_sidebar": "Toggle Home Assistant sidebar",
     "tools_and_data": "Tools & Data",
-    "wipe_history": "Wipe History",
-    "recommendations": "Recommendations ({n})",
-    "pg_across_cycles": "Across your cycles",
-    "community_store": "Community Store",
-    "online_account": "Community Store & online features"
+    "wipe_history": "Wipe History"
   },
   "health": {
     "fair": "Acceptable profile quality",
@@ -429,12 +438,12 @@
     "cycles_title": "Cycles ({n})",
     "dashed": "dashed",
     "date": "Date",
+    "days": "days",
     "debug_traces": "Debug Traces",
     "default": "Default",
     "default_access_level": "Default level for users not listed below",
     "default_other": "Default (other devices)",
     "default_tab": "Default tab when opening the panel",
-    "font_size": "Panel font size",
     "delta": "Δ",
     "description": "Description",
     "dest_real_history": "Real history (counts in stats)",
@@ -459,11 +468,15 @@
     "eta_secs": "~{n}s left",
     "event_timeline": "Event timeline",
     "event_type": "Event type",
+    "evidence_backfill_cycles": "Found in imported power history",
+    "evidence_real_cycles": "Cycles this machine ran",
+    "evidence_reference_cycles": "Downloaded from the community store",
     "expected": "Expected",
     "expected_duration": "Expected Duration (min)",
     "file_kb": "File (kB)",
     "final_score": "Final score",
     "flags": "Flags",
+    "font_size": "Panel font size",
     "from": "From",
     "from_start": "From start",
     "gap_s": "Gap (s)",
@@ -472,6 +485,17 @@
     "head_trim": "Head Trim (s)",
     "health": "Health",
     "hide_tabs": "Hide tabs for non-admins",
+    "hist_csv_data": "CSV data",
+    "hist_from_recorder": "Or read it from Home Assistant",
+    "hist_keep": "Keep this cycle",
+    "hist_looks_complete": "complete",
+    "hist_reason_no_end": "never ended cleanly",
+    "hist_reason_short": "shorter than this appliance's shortest real cycle",
+    "hist_since": "Since",
+    "hist_skip_idle": "nothing running",
+    "hist_skip_long": "no break long enough to split on",
+    "hist_skip_short": "too few readings",
+    "hist_skip_sparse": "readings too far apart",
     "import_mode": "How to combine",
     "in_use": "In use",
     "include_phase_map": "Include phase map",
@@ -492,7 +516,7 @@
     "mode_merge": "Merge (keep mine)",
     "mode_new_profile": "Create New Profile",
     "mode_replace": "Replace selected",
-    "models_fine_tuned": "({count} model{plural} fine-tuned)",
+    "models_fine_tuned": "(fine-tuned models: {count})",
     "n_classic_suggestions": "{n} classic",
     "n_imported_note": ", {n} imported",
     "n_ml_suggestions": "{n} ML",
@@ -509,12 +533,14 @@
     "panel_default_tab": "Default tab",
     "panel_language": "Panel language",
     "pct_match_confidence": "{pct}% match confidence",
+    "peak_power_short": "Peak",
     "per_cycle_short": "cycle",
     "pg_alert_indefinite": "Would run indefinitely",
     "pg_alert_stress_cap": "Hit safety cap",
     "pg_alert_stress_ok": "Idle termination: cycle stopped",
     "pg_alert_stress_warn": "Idle draw above stop threshold",
     "pg_alert_timeout_end": "Ended by timeout, not prediction",
+    "pg_anti_wrinkle": "Anti-wrinkle",
     "pg_autofill_tip": "Auto-fill range from current value ({lo}–{hi})",
     "pg_best_marker": "Best: {v}",
     "pg_best_value": "Best value found",
@@ -531,15 +557,6 @@
     "pg_group_matching": "Program matching",
     "pg_group_timing": "Timing rules",
     "pg_idle": "Idle",
-    "pg_preset": "Playground preset",
-    "pg_preset_name": "New preset name",
-    "pg_preset_none": "Select a preset…",
-    "pg_stress_group": "Idle termination test",
-    "pg_stress_idle_auto": "Auto",
-    "pg_stress_idle_w": "Idle level (W)",
-    "pg_stress_idle_w_desc": "Override the auto-detected standby floor (leave blank for auto).",
-    "pg_stress_toggle": "Test idle termination",
-    "pg_stress_toggle_desc": "Simulates the appliance staying at its standby draw after recording ends -- shows if and when WashData stops the cycle.",
     "pg_last_run": "Last run: {date}",
     "pg_load_run": "Reload this run",
     "pg_match_confidence": "Match confidence",
@@ -547,7 +564,16 @@
     "pg_mode_optimize": "Optimize",
     "pg_pct_of": "{p}% of {total}",
     "pg_poor_match": "Poor match",
+    "pg_preset": "Playground preset",
+    "pg_preset_name": "New preset name",
+    "pg_preset_none": "Select a preset…",
     "pg_recent_runs": "Recent runs",
+    "pg_stress_group": "Idle termination test",
+    "pg_stress_idle_auto": "Auto",
+    "pg_stress_idle_w": "Idle level (W)",
+    "pg_stress_idle_w_desc": "Override the auto-detected standby floor (leave blank for auto).",
+    "pg_stress_toggle": "Test idle termination",
+    "pg_stress_toggle_desc": "Simulates the appliance staying at its standby draw after recording ends -- shows if and when WashData stops the cycle.",
     "pg_strong_match": "Strong match",
     "pg_tile_ambiguous": "Ambiguous",
     "pg_tile_ambiguous_tip": "Cycles with a near-tie between two programs",
@@ -595,6 +621,7 @@
     "settings_basic": "Basic",
     "settings_detail_level": "Settings detail level",
     "settings_overrides": "Settings overrides",
+    "shape": "Shape",
     "show_contributor": "Show contributor names",
     "show_debug": "Show live match debug card on the Status page (confidence, ambiguity, top candidates)",
     "show_expected": "Show expected curve overlay (matched profile, orange)",
@@ -609,6 +636,8 @@
     "store_model": "Appliance model",
     "tags": "Tags",
     "tail_trim": "Tail Trim (s)",
+    "task_history_import": "Scanning power history",
+    "task_history_import_apply": "Importing cycles",
     "task_merge": "Merging cycles",
     "task_ml_training": "Learning",
     "task_pg_detail": "Simulate cycle",
@@ -630,8 +659,7 @@
     "unlabelled": "Unlabelled",
     "unlabelled_paren": "(unlabelled)",
     "warp_path": "Warp path",
-    "zoom_hint": "scroll to zoom · dblclick to reset",
-    "pg_anti_wrinkle": "Anti-wrinkle"
+    "zoom_hint": "scroll to zoom · dblclick to reset"
   },
   "log": {
     "all_levels": "All levels",
@@ -699,6 +727,7 @@
     "export_select": "Export - choose data",
     "force_stop_msg": "Force-stop the active cycle now? The cycle will be saved as interrupted.",
     "force_stop_title": "Force Stop Cycle",
+    "history_import": "Import power history",
     "import_config": "Import Configuration",
     "import_wizard": "Import - choose data",
     "label_cycle": "Label Cycle",
@@ -739,7 +768,7 @@
     "automations_intro": "WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.",
     "cleanup_intro": "Every labelled cycle overlaid. Tick outliers and delete to clean up the profile.",
     "clear_debug_hint": "Remove stored debug data to free space.",
-    "collecting_data": "Collecting data – {need} more cycle{plural} before fine-tuning can start ({current}/{min}).",
+    "collecting_data": "Collecting data. Cycles still needed before fine-tuning can start: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlay profiles (faint)",
     "compare_overlay_tip": "Overlay learned profile envelopes to see which program each cycle resembles.",
     "compare_profiles_tip": "Overlay other profile envelopes on the chart above to see which one best fits this cycle.",
@@ -760,16 +789,39 @@
     "enough_data": "Enough data to learn from ({current}/{min} cycles).",
     "export_description": "Choose exactly which profiles, cycles, settings and more to export to JSON, or analyze a file and import only the parts you want.",
     "export_select_intro": "Tick exactly what to include. Selecting profiles without their cycles still exports a matchable program (its learned shape travels along).",
-    "feedback_cycles_pending": "{n} cycle{s} to review",
+    "feedback_cycles_pending": "To review: {n}",
     "feedback_prompt": "Confirm it was right, correct the program, or ignore.",
     "feedback_relabel_hint": "Re-labelling this cycle resolves it too.",
     "filter_by_profile": "Filter by profile…",
+    "font_size_hint": "Make everything in this panel larger or smaller. Applies to your account on this device.",
     "group_modal_help": "Group programs with the same shape that differ in temperature/spin (durations may vary). Matching scores the group as one candidate, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.",
     "group_not_cohesive": "These profiles aren't similar enough to group reliably, so matching treats them individually until you remove the outlier or split the group.",
     "group_preview_hint": "Tick 2+ members to preview and compare their power curves.",
     "head_trim_hint": "Remove this many seconds from the start",
+    "hist_breaks": "{n} gaps where the sensor was unavailable",
+    "hist_capped": "The per-device limit for imported cycles was reached; the rest were not stored.",
+    "hist_duplicates": "{n} were already imported and were skipped.",
+    "hist_entity_substituted": "read {used} (this device is configured for {wanted})",
+    "hist_found": "Found {n} cycles. Untick anything that does not look like a real run - nothing is stored until you import.",
+    "hist_import_failed": "Import failed.",
+    "hist_imported_count": "{n} cycles imported.",
+    "hist_input_hint": "Upload a CSV downloaded from the History panel (entity, state, last changed), or let WashData read the sensor's history directly. Detection then runs over it exactly as it does live, and you choose which of the cycles it finds to keep.",
+    "hist_next_step": "They are in your Cycles list, tagged as imported history. Open one and use Label to name the program it belongs to.",
+    "hist_none_found": "No cycles could be detected in that history.",
+    "hist_other_entity": "{n} readings for other entities ignored",
+    "hist_recorder_empty": "Home Assistant has no detailed history for this sensor in that window.",
+    "hist_recorder_hint": "Reads from the date you pick up to now. Home Assistant keeps detailed history for 10 days by default and only hourly averages after that, which are too coarse to detect cycles from - pick a date further back only if your recorder is set to keep more.",
+    "hist_rows_read": "{n} readings read",
+    "hist_scan_capped": "Only the first candidates are shown ({n} were found).",
+    "hist_scan_expired": "That scan is no longer available. Please scan again.",
+    "hist_scan_failed": "Scanning failed.",
+    "hist_scanning": "Replaying your history through the detector. This runs in the background - you can close this dialog and come back to it.",
+    "hist_settings_used": "Detected using this device's current settings (minimum power {w} W, off delay {s} s).",
+    "hist_skipped_spans": "Skipped stretches",
     "import_analyze_hint": "Load an exported file (or paste its JSON). WashData analyzes it and shows exactly what can be imported before anything changes.",
+    "import_history_description": "Already had a smart plug before WashData? Upload a history export of its power sensor, or read it straight from Home Assistant, and the normal detection runs over it so past cycles turn up in your Cycles list ready to name.",
     "import_intro": "Load an exported file or paste a JSON payload below.",
+    "imported_history_readonly": "Detected in imported power history. It shapes program matching but is not counted in your statistics, and cannot be trimmed or split. Label it to name the program.",
     "imported_readonly": "Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.",
     "include_settings_hint": "Share this device's recognition and matching thresholds (not your notifications, entities or energy price). Adopters choose whether to apply them.",
     "legacy_actions_title": "{count} legacy custom action still running",
@@ -794,6 +846,7 @@
     "ml_loading": "loading ML…",
     "ml_settings_intro": "Two independent switches: one applies the models while a cycle runs, the other lets WashData fine-tune them to your machine over time.",
     "model_not_found": "Not in the catalog yet.",
+    "n_suggestions_muted": "{count} muted; the auto-tuner will not propose these.",
     "name_first_program": "You have enough cycles – name your first program to start matching.",
     "near_duplicate_cluster": "near-duplicate profile cluster detected. Grouping lets matching reliably pick between look-alikes (e.g. same program at different temperature/spin).",
     "no_cycles_match": "No cycles match the current filter.",
@@ -836,37 +889,36 @@
     "pg_analysis_hint2": "Pick a cycle and press Run to load match analysis.",
     "pg_apply_confirm": "Apply best value: {label} = {value}?",
     "pg_apply_settings_confirm": "Save these {n} setting(s) to this device? {list}",
+    "pg_canvas_empty": "Select a cycle above, then press Load to see its power trace.",
+    "pg_canvas_empty2": "Pick a cycle above and press Run to simulate it. Then hover to read values, scroll to zoom, and drag to pan.",
+    "pg_chart_caption": "Detection/match rate across values of {param}",
     "pg_ctrl_intro": "Values start from this device's live integration settings. Edits stay in the Playground until you publish them.",
+    "pg_history_intro2": "Replay your recent cycles through the real detector and matcher with the settings above. Click any row to load that cycle in the graph; edit a setting to see a before/after comparison.",
     "pg_live_unavailable": "Live settings unavailable, showing defaults.",
     "pg_load_live_confirm": "Discard {n} Playground edit(s) and reload the integration's current settings?",
+    "pg_match_rate": "{pct}% match rate on {total} cycles",
     "pg_matches_live": "Matches live settings",
     "pg_n_changed": "{n} changed vs live settings",
-    "pg_sugg_none": "All suggestions already match the current settings",
     "pg_preset_delete_confirm": "Delete the preset \"{name}\"?",
     "pg_preset_limit": "Preset limit reached ({n})",
     "pg_preset_overwrite": "Overwrite the preset \"{name}\"?",
     "pg_publish_one_confirm": "Save {label} = {value} to this device's settings?",
-    "pg_stress_terminated_detail": "Settled to ~{idle}W idle -- cycle ended {h}h {m}m later via {reason}.",
-    "pg_stress_above_threshold_detail": "Idle draw ~{idle}W is at or above the effective stop threshold ({stop}W) -- the cycle never registered as quiet. Raise stop_threshold_w to fix.",
-    "pg_stress_hit_cap_detail": "Cycle ran {h}h {m}m without stopping -- force-stopped by the safety cap. Idle draw {idle}W vs stop threshold {stop}W.",
-    "pg_canvas_empty": "Select a cycle above, then press Load to see its power trace.",
-    "pg_canvas_empty2": "Pick a cycle above and press Run to simulate it. Then hover to read values, scroll to zoom, and drag to pan.",
-    "pg_chart_caption": "Detection/match rate across values of {param}",
-    "pg_history_intro2": "Replay your recent cycles through the real detector and matcher with the settings above. Click any row to load that cycle in the graph; edit a setting to see a before/after comparison.",
-    "pg_match_rate": "{pct}% match rate on {total} cycles",
     "pg_restart_note": "Restart Home Assistant to enable simulation tools.",
     "pg_row_load_hint": "Load this cycle in the graph above",
-    "pg_stress_synthetic": "idle simulation starts here",
     "pg_running_history": "Replaying your cycles…",
     "pg_running_sweep": "Testing values across your cycles…",
     "pg_select_cycle_hint": "Select a cycle and click ↺ to load",
     "pg_sim_progress": "{done} / {total} cycles",
     "pg_simulating": "Simulating cycle…",
     "pg_starting": "Starting…",
+    "pg_stress_above_threshold_detail": "Idle draw ~{idle}W is at or above the effective stop threshold ({stop}W) -- the cycle never registered as quiet. Raise stop_threshold_w to fix.",
+    "pg_stress_hit_cap_detail": "Cycle ran {h}h {m}m without stopping -- force-stopped by the safety cap. Idle draw {idle}W vs stop threshold {stop}W.",
+    "pg_stress_synthetic": "idle simulation starts here",
+    "pg_stress_terminated_detail": "Settled to ~{idle}W idle -- cycle ended {h}h {m}m later via {reason}.",
+    "pg_sugg_none": "All suggestions already match the current settings",
     "pg_sweep_intro": "What if {param} were different? Test {steps} values across your last {cycles} cycles to find the setting where the most cycles are correctly matched.",
     "pg_sweep_progress": "Step {done} / {total}",
     "pg_sweep_step": "Step {done} / {total}",
-    "pg_undetected": "{n} cycle{s} undetected",
     "pg_verdict_bad": "Needs attention: many cycles are going undetected.",
     "pg_verdict_good": "Well tuned: most cycles are correctly identified and matched.",
     "pg_verdict_ok": "Acceptable: some cycles missed. Try lowering the start threshold.",
@@ -878,7 +930,6 @@
     "preferences_admin": "Preferences, panel & access control",
     "preferences_adv": "Preferences",
     "prefs_personal": "These apply to your Home Assistant account only.",
-    "font_size_hint": "Make everything in this panel larger or smaller. Applies to your account on this device.",
     "process_history_hint": "Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), and recompute cycle health. Run this after a batch of reviews.",
     "profile_deleted": "Profile deleted",
     "profile_poor_health_detail": "Cycles assigned to this profile have inconsistent shapes or low confidence. Consider rebuilding the envelope or reviewing labelled cycles.",
@@ -886,6 +937,7 @@
     "rbac_hint": "When off, every Home Assistant user has full access (the default). Administrators always have full access and can manage everyone.",
     "recent_logs": "Recent ha_washdata records",
     "recording_in_progress": "Recording in progress",
+    "refresh_catalog_hint": "The community brand and appliance lists are cached to keep the shared store within its daily budget. Refresh to pick up entries added or approved by others.",
     "reminders_intro": "Show a reminder in the panel this many cycles after the last service. Leave blank or 0 to turn a reminder off.",
     "replace_warn": "Each ticked category is wiped and replaced from the file. Unticked categories are left untouched.",
     "restart_gap_footer": "Highlighted on the graph. Power data is missing for these intervals; matching used only real readings.",
@@ -900,6 +952,7 @@
     "review_recorded_tip": "Mark this as a hand-picked reference cycle for its program - the same role as a manually recorded cycle. Reference cycles are always kept, seed the matching template, and are never dropped by cleanup. (This is the \"golden\"/recorded flag; both are the same thing.)",
     "review_tags_tip": "Optional flags describing what went wrong with this cycle, so training and cleanup can account for it.",
     "review_to_cycles": "Open the Cycles review queue",
+    "samples_decimated": "Showing {shown} of {total} samples (thinned for display; peaks kept). A wide gap here is thinning, not missing data.",
     "saving_triggers_reload": "Saving triggers an integration reload. HA entities may briefly show as unavailable.",
     "search_placeholder": "Search settings…",
     "see_recorder": "See recorder widget below",
@@ -918,16 +971,17 @@
     "showing_suggestions": "Showing {count} setting with suggestions.",
     "split_intro": "Click the graph to add or remove a split point, or auto-detect by idle gaps. Each resulting segment can get its own profile.",
     "storage_diagnostics": "Storage stats, maintenance, export/import",
+    "store_declare_appliance": "Tell WashData which appliance you own and this tab shows the setups other people have shared for it. You can also type a brand above to look around.",
     "store_download_device_intro": "Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.",
     "store_enable_hint": "Enable online features in Settings to browse and import community reference cycles.",
     "store_picker_offline": "Enable online features in the settings gear to pick from the community catalog.",
     "store_share_device_intro": "Upload {brand} {model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.",
     "store_share_intro": "Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly.",
-    "sug_staged": "Set {key} = {val}. Save to apply.",
-    "sug_muted": "Won't suggest this setting again",
+    "store_sibling_hint": "Nothing shared for your exact model? A closely-related model from the same brand is usually a good starting point.",
     "sug_mute_failed": "Could not mute suggestion",
+    "sug_muted": "Won't suggest this setting again",
+    "sug_staged": "Set {key} = {val}. Save to apply.",
     "sug_unmuted_all": "Muted suggestions reset",
-    "n_suggestions_muted": "{count} muted; the auto-tuner will not propose these.",
     "tail_trim_hint": "Remove this many seconds from the end",
     "toast_auto_detect_enabled": "Auto-detect enabled",
     "toast_auto_label_complete": "Auto-label complete",
@@ -988,6 +1042,7 @@
     "energy_scale": "Stage 4: log-ratio where energy agreement halves; smaller = stricter penalty (default 0.25)",
     "anti_wrinkle_idle_timeout": "Quiet time allowed between two tumble pulses before anti-wrinkle ends",
     "dishwasher_end_spike_quiet_release": "Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released",
+    "smart_termination_duration_ratio": "Fraction of the matched program's expected duration a cycle must reach before Smart Termination may end it early; lower it for load- or temperature-dependent machines",
     "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
     "anti_wrinkle_enabled": "Absorb the tumble pulses after the main phase instead of reading them as new cycles",
     "anti_wrinkle_max_duration": "A pulse longer than this ends anti-wrinkle and opens a new cycle",
@@ -1093,6 +1148,10 @@
       "doc": "Power must fall below this between pulses for anti-wrinkle mode to stay active.",
       "label": "Exit Power Threshold"
     },
+    "anti_wrinkle_idle_timeout": {
+      "label": "Max Pulse Gap",
+      "doc": "How long the machine may stay quiet between two tumble pulses before anti-wrinkle mode ends. Set it above the longest gap your dryer leaves between pulses, otherwise every later pulse is read as a false start."
+    },
     "anti_wrinkle_max_duration": {
       "doc": "Pulses longer than this are treated as a real cycle rather than an anti-wrinkle tumble.",
       "label": "Max Duration"
@@ -1112,6 +1171,10 @@
     "completion_min_seconds": {
       "doc": "Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).",
       "label": "Min Cycle Duration"
+    },
+    "corr_weight": {
+      "label": "Shape vs Level Weight",
+      "doc": "Balance between curve shape and absolute power level when scoring a match. Higher favours shape; lower favours matching the power level."
     },
     "delay_confirm_seconds": {
       "doc": "Power must stay in the standby band for this long before the appliance is treated as waiting-to-start rather than running.",
@@ -1133,17 +1196,57 @@
       "doc": "Once the cycle passes its expected duration, how long the dishwasher must stay quiet (below the Stop Threshold) before WashData stops waiting for a final drain and ends the cycle. Raise it if your machine has a long silent drying phase before a late final drain that is being missed - a wider window lets the learned duration follow seasonal drift (colder inlet water = longer cycles) instead of locking to the old average. It only ever shortens the wait relative to the internal 30-minute end-spike cap, never extends it.",
       "label": "Passive-Dry Quiet Release"
     },
+    "door_end_dwell_seconds": {
+      "label": "Door-Open End Dwell",
+      "doc": "How long the door must stay open before WashData ends the cycle, when \"Door Opens Automatically At End\" is on. Long enough to ignore quickly adding a dish (default 60 s), short enough to end promptly once the machine pops the door."
+    },
+    "door_opens_at_end": {
+      "label": "Door Opens Automatically At End",
+      "doc": "For dishwashers that pop the door open at the end of the cycle to dry (AirDry and similar). With this on, a door-open on a running cycle no longer pauses it forever; instead, if the door stays open for the dwell below, WashData treats the cycle as finished. A brief open (adding an item) is ignored. Requires a Door Sensor Entity."
+    },
     "door_sensor_entity": {
       "doc": "Optional door binary sensor. Used to detect when the appliance has been opened/unloaded after a cycle.",
       "label": "Door Sensor Entity"
+    },
+    "dtw_bandwidth": {
+      "label": "Shape Match Tolerance",
+      "doc": "How much the matcher may time-warp a cycle to fit a saved program's shape. Higher tolerates more speed variation; too high risks matching the wrong program."
+    },
+    "dtw_blend": {
+      "label": "Warp Blend",
+      "doc": "How much the time-warp (DTW) alignment score replaces the Stage 2 core score. 0 = use only the Stage 2 score, 1 = use only the DTW score, 0.5 (default) = equal blend. Raise it to rely more on warp alignment when programs have similar power levels but different timing patterns."
+    },
+    "dtw_ddtw_scale": {
+      "label": "Derivative Warp Scale",
+      "doc": "Half-saturation distance for derivative DTW scoring. The score halves when the DDTW distance equals this value. Smaller = more sensitive to shape differences. Default 30 is calibrated to typical appliance power traces. Only affects ensemble and ddtw DTW modes."
+    },
+    "dtw_ensemble_w": {
+      "label": "Warp Ensemble Mix",
+      "doc": "In ensemble DTW mode (the default), the weight on scaled L1 versus derivative DTW (DDTW). 1.0 = all scaled-L1, 0 = all DDTW, 0.7 = default. The scaled-L1 variant compares power levels; the derivative variant reacts to how power changes over time. Ensemble blends both."
+    },
+    "dtw_refine_top_n": {
+      "label": "Warp Refine Count",
+      "doc": "How many top Stage 2 candidates are re-scored by DTW. DTW is more expensive so it is only applied to the best N candidates. Default 5. Raise it (to 7-9) if the correct profile sometimes only reaches 4th or 5th place after Stage 2 - DTW can rescue it. Lowering speeds up matching slightly."
+    },
+    "duration_scale": {
+      "label": "Duration Sharpness",
+      "doc": "Sharpness of the Stage 4 duration agreement penalty. This is the log-ratio at which the agreement score halves. Smaller = stricter: a duration mismatch hurts more. Default 0.175 corresponds to roughly 18% duration tolerance at half-weight. Pair with Duration Weight."
     },
     "duration_tolerance": {
       "doc": "Tolerance for time-remaining estimates (learning feedback, not matching). If the actual duration is within +/-X% of the estimate it counts as a good match.",
       "label": "Estimate Tolerance"
     },
+    "duration_weight": {
+      "label": "Duration Weight",
+      "doc": "How strongly a program whose typical run-length matches this cycle is preferred."
+    },
     "enable_ml_models": {
       "doc": "While a cycle runs, let the models refine the live results: a steadier time-remaining and energy/cost estimate, and an anti-premature-stop guard on end detection (it can only ever delay a finish, never end one early, and is bounded). Uses your fine-tuned models when available, otherwise the built-in ones. Off = the classic power-based logic only (still reliable).",
       "label": "Apply smart models during a cycle"
+    },
+    "enable_phase_matching": {
+      "doc": "Break each running cycle into phases (heating, wash, spin) and budget the time remaining per phase, blended with the classic estimate - leaning on the phase budget early in the cycle and the classic estimate near the end. This personalises the countdown to how long your machine actually heats and runs, which is most noticeable in the first half of a cycle. Off = the classic estimate only. Only the time-remaining display is affected; program matching and cycle detection are unchanged.",
+      "label": "Phase-aware time remaining"
     },
     "end_energy_threshold": {
       "doc": "During the off-delay countdown, accumulated energy (watts x time) is compared to this threshold. If exceeded, the countdown resets - keeping anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Raise it if cycles end too early during cool-down; lower it if detection is sluggish.",
@@ -1161,9 +1264,17 @@
       "doc": "Fixed price per kWh used for cost figures when no live price entity is set above.",
       "label": "Static Energy Price (per kWh)"
     },
+    "energy_scale": {
+      "label": "Energy Sharpness",
+      "doc": "Sharpness of the Stage 4 energy agreement penalty. Smaller = stricter: an energy mismatch hurts more. Default 0.25 is intentionally more forgiving than Duration Sharpness because energy varies with load. Pair with Energy Weight."
+    },
     "energy_sensor": {
       "doc": "Optional cumulative energy counter (total_increasing kWh/Wh, e.g. the plug's own lifetime meter). When set, each cycle's reported energy is taken from this counter's start-to-end delta, which avoids the under-counting you get from integrating a slow-reporting power sensor. Falls back to the integrated value if the reading is missing, its unit is unknown, or the delta is not positive. Leave blank to keep integrating the power sensor.",
       "label": "Energy Meter Entity"
+    },
+    "energy_weight": {
+      "label": "Energy Weight",
+      "doc": "How strongly a program whose typical energy use matches this cycle is preferred."
     },
     "expose_debug_entities": {
       "doc": "Publish extra diagnostic HA entities (match confidence, ambiguity, state internals). Off keeps the entity list clean for normal use.",
@@ -1180,6 +1291,10 @@
     "external_end_trigger_inverted": {
       "doc": "Treat the trigger sensor turning OFF (rather than ON) as the end-of-cycle signal.",
       "label": "Invert External Trigger (trigger on OFF)"
+    },
+    "keep_min_score": {
+      "label": "Min Match Score",
+      "doc": "Minimum similarity score a candidate needs to stay in the match race. The default 0.1 is deliberately permissive - it admits even weak candidates and relies on later stages to find the best match. Raise it to prune unlikely profiles earlier; lower it to widen the initial candidate pool."
     },
     "learning_confidence": {
       "doc": "If the match score falls between this and Auto-Label Confidence, a feedback notification asks you to verify the identified program. Below this score the match is too uncertain to surface. Must be kept below Auto-Label Confidence.",
@@ -1257,6 +1372,10 @@
       "doc": "Show a live-updating countdown timer in the notification (on platforms that support it) instead of a static estimate.",
       "label": "Use Live Chronometer"
     },
+    "notify_live_click_action": {
+      "label": "Live Notification Tap Target",
+      "doc": "Android only. Where a tap on the live-progress notification opens (e.g. /lovelace/laundry, or a full URL) instead of the app landing page. Leave blank for the default."
+    },
     "notify_live_interval_seconds": {
       "doc": "How often live-progress notifications are refreshed while a cycle runs.",
       "label": "Live Update Interval"
@@ -1268,6 +1387,10 @@
     "notify_live_services": {
       "doc": "notify.* services called for live progress updates while a cycle runs. Leave empty to disable live-progress notifications.",
       "label": "Live Progress Services"
+    },
+    "notify_live_sticky": {
+      "label": "Keep Live Notification On Tap",
+      "doc": "Android only. Make the live-progress notification persistent (sticky) so tapping it does not dismiss the ongoing thread. Off keeps the default behaviour where a tap dismisses it."
     },
     "notify_milestone_message": {
       "doc": "Message for the milestone notification. Template variables: {device}, {cycle_count}.",
@@ -1349,6 +1472,10 @@
       "doc": "Optional power-based Off detection. When above 0, once a cycle has finished and power stays below this level for the Power Off Delay, the machine is treated as switched off and the state returns to Off. Leave at 0 to disable (the default). Set it above the true switched-off floor and below the Stop Threshold and your machine's finished-but-on standby draw; if it is not below the Stop Threshold it is ignored. When enabled it replaces the Progress Reset Delay for returning to Off, so a finished machine stays in Finished/Clean until it is actually powered off.",
       "label": "Power Off Threshold"
     },
+    "power_profile_interval_min": {
+      "label": "Power Profile Interval",
+      "doc": "Bucket size for the per-profile power_profile sensor attribute (the flat per-slot average-watts array consumed by external planners such as EMHASS and tibber_prices). Smaller buckets keep short power spikes sharp; larger buckets smooth the shape. Default 15 min. Read-time only; does not affect detection."
+    },
     "power_sensor": {
       "doc": "The sensor entity reporting live power in watts for this appliance (e.g. sensor.washer_power). All cycle detection is based on this signal.",
       "label": "Power Sensor"
@@ -1356,6 +1483,10 @@
     "profile_duration_tolerance": {
       "doc": "The +/- band around a profile average duration used during matching. 0.25 means a 60 min profile matches 45-75 min cycles.",
       "label": "Profile Duration Tolerance"
+    },
+    "profile_evidence_sources": {
+      "label": "Cycles that shape a program",
+      "doc": "Which cycles are used to build each program's power curve, and to match a finished cycle against it. Unticking a kind stops it shaping your programs without deleting anything - the cycles stay in your Cycles list and can still be labelled or removed. Useful if you do not trust imported data. Statistics are unaffected: they always count only the cycles this machine actually ran. Unticking everything is ignored, since a program with no cycles behind it could never match."
     },
     "profile_match_interval": {
       "doc": "How often to attempt profile matching during a running cycle. Default 300 s (5 minutes) balances detection speed and CPU.",
@@ -1393,6 +1524,13 @@
       "doc": "Store the full power trace and matching debug data for each cycle. Useful for troubleshooting but increases storage size.",
       "label": "Save Debug Traces"
     },
+    "show_contributor": {
+      "doc": "Show the \"by <contributor>\" attribution on community appliances and reference cycles."
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "How far into the matched program's expected duration a cycle must be before Smart Termination may end it early once power drops. The expected duration is the program's average, so on appliances whose runtime varies a lot - washers on cold winter vs warm summer inlet water, sensor-dry dryers, load-dependent programs - about half of all runs finish shorter than that average and never get the fast finish, ending only via the fallback timeout minutes late. Lower this (e.g. 0.85) on those machines so the early finish still fires; raise it toward 1.0 to be more conservative. Leave empty for the default (0.98, or 0.99 for dishwashers). It can only ever end a cycle earlier, never later, and never fires on an ambiguous or low-confidence match.",
+      "label": "Smart Termination Ratio"
+    },
     "smoothing_window": {
       "doc": "How much the raw power signal is smoothed. Low (2) is responsive but noisy; high (5) smooths spikes but adds lag.",
       "label": "Smoothing Window"
@@ -1413,30 +1551,6 @@
       "doc": "Power must fall below this level before the off-delay countdown begins. Set it below the Start Threshold - the gap between them is the hysteresis band that prevents flicker. If set too high, low-power phases (rinse holds, anti-crease) falsely trigger the end sequence.",
       "label": "Stop Threshold"
     },
-    "switch_entity": {
-      "doc": "Optional switch toggled off on pause and back on when resuming, used together with \"Pause also cuts power\".",
-      "label": "Switch Entity"
-    },
-    "watchdog_interval": {
-      "doc": "How often the background watchdog checks for stalled sensors and elapsed timeouts. Default 30 s.",
-      "label": "Watchdog Interval"
-    },
-    "dtw_bandwidth": {
-      "label": "Shape Match Tolerance",
-      "doc": "How much the matcher may time-warp a cycle to fit a saved program's shape. Higher tolerates more speed variation; too high risks matching the wrong program."
-    },
-    "corr_weight": {
-      "label": "Shape vs Level Weight",
-      "doc": "Balance between curve shape and absolute power level when scoring a match. Higher favours shape; lower favours matching the power level."
-    },
-    "duration_weight": {
-      "label": "Duration Weight",
-      "doc": "How strongly a program whose typical run-length matches this cycle is preferred."
-    },
-    "energy_weight": {
-      "label": "Energy Weight",
-      "doc": "How strongly a program whose typical energy use matches this cycle is preferred."
-    },
     "store_brand": {
       "label": "Appliance Brand",
       "doc": "Optional. The appliance brand, picked from the community catalog. Used to find and share matching reference recordings. Leave blank if you are not using online features."
@@ -1445,69 +1559,21 @@
       "label": "Appliance Model",
       "doc": "Optional. The appliance model, picked from the community catalog once a brand is set. If your model is not listed you can add it to the catalog."
     },
-    "show_contributor": {
-      "doc": "Show the \"by <contributor>\" attribution on community appliances and reference cycles."
+    "switch_entity": {
+      "doc": "Optional switch toggled off on pause and back on when resuming, used together with \"Pause also cuts power\".",
+      "label": "Switch Entity"
     },
-    "enable_phase_matching": {
-      "doc": "Break each running cycle into phases (heating, wash, spin) and budget the time remaining per phase, blended with the classic estimate - leaning on the phase budget early in the cycle and the classic estimate near the end. This personalises the countdown to how long your machine actually heats and runs, which is most noticeable in the first half of a cycle. Off = the classic estimate only. Only the time-remaining display is affected; program matching and cycle detection are unchanged.",
-      "label": "Phase-aware time remaining"
-    },
-    "keep_min_score": {
-      "label": "Min Match Score",
-      "doc": "Minimum similarity score a candidate needs to stay in the match race. The default 0.1 is deliberately permissive - it admits even weak candidates and relies on later stages to find the best match. Raise it to prune unlikely profiles earlier; lower it to widen the initial candidate pool."
-    },
-    "dtw_blend": {
-      "label": "Warp Blend",
-      "doc": "How much the time-warp (DTW) alignment score replaces the Stage 2 core score. 0 = use only the Stage 2 score, 1 = use only the DTW score, 0.5 (default) = equal blend. Raise it to rely more on warp alignment when programs have similar power levels but different timing patterns."
-    },
-    "dtw_ensemble_w": {
-      "label": "Warp Ensemble Mix",
-      "doc": "In ensemble DTW mode (the default), the weight on scaled L1 versus derivative DTW (DDTW). 1.0 = all scaled-L1, 0 = all DDTW, 0.7 = default. The scaled-L1 variant compares power levels; the derivative variant reacts to how power changes over time. Ensemble blends both."
-    },
-    "dtw_ddtw_scale": {
-      "label": "Derivative Warp Scale",
-      "doc": "Half-saturation distance for derivative DTW scoring. The score halves when the DDTW distance equals this value. Smaller = more sensitive to shape differences. Default 30 is calibrated to typical appliance power traces. Only affects ensemble and ddtw DTW modes."
-    },
-    "dtw_refine_top_n": {
-      "label": "Warp Refine Count",
-      "doc": "How many top Stage 2 candidates are re-scored by DTW. DTW is more expensive so it is only applied to the best N candidates. Default 5. Raise it (to 7-9) if the correct profile sometimes only reaches 4th or 5th place after Stage 2 - DTW can rescue it. Lowering speeds up matching slightly."
-    },
-    "duration_scale": {
-      "label": "Duration Sharpness",
-      "doc": "Sharpness of the Stage 4 duration agreement penalty. This is the log-ratio at which the agreement score halves. Smaller = stricter: a duration mismatch hurts more. Default 0.175 corresponds to roughly 18% duration tolerance at half-weight. Pair with Duration Weight."
-    },
-    "energy_scale": {
-      "label": "Energy Sharpness",
-      "doc": "Sharpness of the Stage 4 energy agreement penalty. Smaller = stricter: an energy mismatch hurts more. Default 0.25 is intentionally more forgiving than Duration Sharpness because energy varies with load. Pair with Energy Weight."
-    },
-    "anti_wrinkle_idle_timeout": {
-      "label": "Max Pulse Gap",
-      "doc": "How long the machine may stay quiet between two tumble pulses before anti-wrinkle mode ends. Set it above the longest gap your dryer leaves between pulses, otherwise every later pulse is read as a false start."
-    },
-    "power_profile_interval_min": {
-      "label": "Power Profile Interval",
-      "doc": "Bucket size for the per-profile power_profile sensor attribute (the flat per-slot average-watts array consumed by external planners such as EMHASS and tibber_prices). Smaller buckets keep short power spikes sharp; larger buckets smooth the shape. Default 15 min. Read-time only; does not affect detection."
-    },
-    "notify_live_sticky": {
-      "label": "Keep Live Notification On Tap",
-      "doc": "Android only. Make the live-progress notification persistent (sticky) so tapping it does not dismiss the ongoing thread. Off keeps the default behaviour where a tap dismisses it."
-    },
-    "notify_live_click_action": {
-      "label": "Live Notification Tap Target",
-      "doc": "Android only. Where a tap on the live-progress notification opens (e.g. /lovelace/laundry, or a full URL) instead of the app landing page. Leave blank for the default."
-    },
-    "door_opens_at_end": {
-      "label": "Door Opens Automatically At End",
-      "doc": "For dishwashers that pop the door open at the end of the cycle to dry (AirDry and similar). With this on, a door-open on a running cycle no longer pauses it forever; instead, if the door stays open for the dwell below, WashData treats the cycle as finished. A brief open (adding an item) is ignored. Requires a Door Sensor Entity."
-    },
-    "door_end_dwell_seconds": {
-      "label": "Door-Open End Dwell",
-      "doc": "How long the door must stay open before WashData ends the cycle, when \"Door Opens Automatically At End\" is on. Long enough to ignore quickly adding a dish (default 60 s), short enough to end promptly once the machine pops the door."
+    "watchdog_interval": {
+      "doc": "How often the background watchdog checks for stalled sensors and elapsed timeouts. Default 30 s.",
+      "label": "Watchdog Interval"
     }
   },
   "setting_group": {
     "auto_labeling": {
       "label": "Auto-Labeling"
+    },
+    "basic_configuration": {
+      "label": "Basic configuration"
     },
     "cycle_end": {
       "label": "Cycle End"
@@ -1523,6 +1589,9 @@
     },
     "debug": {
       "label": "Debug"
+    },
+    "device_info": {
+      "label": "Device info"
     },
     "dishwasher_end": {
       "label": "Dishwasher End"
@@ -1557,6 +1626,9 @@
     "predictive_end": {
       "label": "Predictive End"
     },
+    "profile_evidence": {
+      "label": "Profile Evidence"
+    },
     "quiet_hours_milestones": {
       "label": "Quiet Hours & Milestones"
     },
@@ -1580,37 +1652,32 @@
     },
     "watchdog": {
       "label": "Watchdog"
-    },
-    "device_info": {
-      "label": "Device info"
-    },
-    "basic_configuration": {
-      "label": "Basic configuration"
     }
   },
   "status": {
     "active": "Active",
     "all_statuses": "All statuses",
     "ambiguous": "Ambiguous",
+    "analyzing": "Analyzing…",
     "auto_detect": "Auto-detect",
     "clear": "Clear",
     "completed": "Completed",
+    "deleting": "Deleting…",
     "fine_tuning": "fine-tuning now…",
     "force_stopped": "Force stopped",
     "idle": "Idle",
+    "imported": "Imported",
     "interrupted": "Interrupted",
+    "preparing": "Preparing…",
     "ready": "Ready to process",
-    "recording": "Recording",
-    "training": "Training…",
-    "saving": "Saving…",
     "rebuilding": "Rebuilding…",
-    "analyzing": "Analyzing…",
+    "recording": "Recording",
     "resetting": "Resetting…",
     "reverting": "Reverting…",
-    "trimming": "Trimming…",
+    "saving": "Saving…",
     "splitting": "Splitting…",
-    "deleting": "Deleting…",
-    "imported": "Imported"
+    "training": "Training…",
+    "trimming": "Trimming…"
   },
   "suggestion": {
     "both_agree": "WashData recommends",
@@ -1757,6 +1824,7 @@
     "auto_label_complete": "Auto-label complete",
     "automation_deleted": "Automation deleted",
     "brand_added": "Brand added - awaiting approval",
+    "catalog_refreshed": "Community catalog refreshed",
     "correction_submitted": "Correction submitted",
     "cycle_deleted": "Cycle deleted",
     "cycle_force_stopped": "Cycle force-stopped",
@@ -1775,9 +1843,11 @@
     "feedback_all_dismissed": "All feedbacks dismissed",
     "feedback_confirmed": "Feedback confirmed",
     "feedback_dismissed": "Feedback dismissed",
+    "file_read_failed": "Could not read that file",
     "group_deleted": "Group deleted",
     "group_name_required": "Group name is required",
     "group_saved": "Group saved",
+    "hist_csv_required": "Load a CSV file or paste its contents first",
     "import_selective_done": "Imported {profiles} profile(s) and {cycles} cycle(s)",
     "import_successful": "Import successful; integration reloading",
     "json_required": "JSON data is required",
@@ -1798,9 +1868,9 @@
     "pause_no_cycle": "No active cycle to pause",
     "pg_preset_loaded": "Preset \"{name}\" loaded",
     "pg_preset_saved": "Preset \"{name}\" saved",
+    "pg_run_gone": "That run is no longer available.",
     "pg_sugg_loaded": "Staged {n} suggested value(s) - run the Playground to compare",
     "pg_sugg_ml_loaded": "Staged {n} ML-calibrated value(s) - run the Playground to compare",
-    "pg_run_gone": "That run is no longer available.",
     "phase_name_required": "Phase name is required",
     "phase_updated": "Phase updated",
     "phases_saved": "Phases saved",
@@ -1899,7 +1969,11 @@
     "browse": "Browse",
     "device": "Device",
     "favorites": "Favourites",
+    "programs_count": "Programs: {n}",
+    "search_brand_ph": "Search by brand…",
     "search_ph": "Search by brand or model…",
+    "your_model": "Yours",
+    "your_model_tip": "This is the appliance you declared in Settings",
     "no_results": "No matching appliances found. Try a different search.",
     "n_programs": "{n} programs",
     "n_cycles": "{n} cycles",

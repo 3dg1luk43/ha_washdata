@@ -50,6 +50,9 @@ def test_cycle_upload_stats_omits_unknown_energy():
 
 class FakeClient:
     def __init__(self):
+        # The real client is shared install-wide, so the bridge wraps each upload and its
+        # last_error() read in one critical section; the fake needs the same lock object.
+        self.write_lock = asyncio.Lock()
         self.token = "TOK"
         self.uploaded = None
         self.cycle = None

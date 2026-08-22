@@ -90,6 +90,30 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   'ha_washdata/set_user_prefs': { success: true },
   'ha_washdata/set_panel_config': { success: true },
   'ha_washdata/trigger_ml_training': { ok: true, message: 'Training started' },
+  // Historical power-data import (#344). The two `__history_import_*_result` keys are
+  // not real commands: they are the payloads TASK_START hands back as each detached
+  // task's result, mirroring how the playground task keys work.
+  'ha_washdata/history_import_begin': { token: 'tok-1', max_bytes: 33554432, chunk_bytes: 524288 },
+  'ha_washdata/history_import_chunk': { received_bytes: 128, next_seq: 1 },
+  'ha_washdata/history_import_recorder': { token: 'tok-rec', rows: 2400, entity_id: 'sensor.washer_power', days: 10, truncated: false },
+  'ha_washdata/__history_import_scan_result': {
+    segments: [
+      { index: 0, start_time: '2026-07-21T09:14:00+00:00', end_time: '2026-07-21T10:28:00+00:00',
+        duration_s: 4464, status: 'completed', termination_reason: 'timeout', samples: 661,
+        peak_w: 2165, energy_wh: 1096.3, accept: true, reason: null, below_minimum: false,
+        curve: [10, 900, 1800, 1200, 400, 60, 5] },
+      { index: 1, start_time: '2026-07-21T11:34:00+00:00', end_time: '2026-07-21T11:41:00+00:00',
+        duration_s: 420, status: 'interrupted', termination_reason: 'timeout', samples: 84,
+        peak_w: 410, energy_wh: 22.5, accept: false, reason: 'shorter_than_minimum', below_minimum: true,
+        curve: [5, 300, 410, 120, 4] },
+    ],
+    skipped: [{ reason: 'idle', span_s: 3600, samples: 1 }, { reason: 'sparse', span_s: 604800, samples: 114 }],
+    parse: { rows_total: 2358, rows_parsed: 2358, breaks: 8, rows_other_entity: 0,
+             first: '2026-07-21T09:14:00+00:00', last: '2026-07-28T08:22:00+00:00', peak_w: 2165 },
+    settings: { min_power: 2, off_delay: 300, min_off_gap: 480, device_type: 'washing_machine' },
+    found: 2, capped: false, truncated_blocks: 0, partial: false, token: 'tok-1',
+  },
+  'ha_washdata/__history_import_apply_result': { imported: 1, duplicates: 0, capped: false, total_backfill: 1 },
   'ha_washdata/revert_ml_models': { ok: true },
   'ha_washdata/revert_matching_config': { ok: true },
   'ha_washdata/label_cycle': { success: true },

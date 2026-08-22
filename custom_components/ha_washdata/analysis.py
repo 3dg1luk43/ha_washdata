@@ -41,6 +41,11 @@ from .const import (
     MATCH_MAE_PEAK_FLOOR,
     MATCH_MAE_REF_PEAK,
     MATCH_MAE_SCALE,
+    MAX_ALIGN_GRID_POINTS,
+    SMART_TERM_PREFIX_MAX_CANDIDATES,
+    SMART_TERM_PREFIX_MIN_COVERAGE,
+    SMART_TERM_PREFIX_MIN_POINTS,
+    SMART_TERM_PREFIX_MIN_RATIO,
     STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES,
 )
 
@@ -322,6 +327,51 @@ def _dtw_component_score(
     return scale / (scale + scaled)
 
 
+def _stage3_dtw_score(
+    curr_arr: np.ndarray,
+    sample_arr: np.ndarray,
+    current_peak: float,
+    *,
+    dtw_mode: str,
+    dtw_bandwidth: float,
+    l1_scale: float,
+    ddtw_scale: float,
+    ensemble_w: float,
+    curr_resampled: np.ndarray | None = None,
+) -> tuple[float, float]:
+    """``(dtw_score, norm_dist)`` for one candidate: the four-way ``dtw_mode``
+    branch of the Stage-3 refinement.
+
+    Lifted verbatim out of ``compute_matches_worker`` so the Stage-3 loop and the
+    Stage-6 prefix pass (#364) share one implementation and cannot drift apart.
+    Behaviour-identical to the inlined version, including ``legacy`` mode's
+    ``dtw_dist / len(curr_arr)`` normalisation and its ``norm_dist`` bookkeeping.
+    """
+    if dtw_mode == "legacy":
+        # Original behaviour: raw sequences, distance / len(current),
+        # fixed absolute-watt scale (not peak-relative).
+        dtw_dist = compute_dtw_lite(curr_arr, sample_arr, band_width_ratio=dtw_bandwidth)
+        n_points = len(curr_arr)
+        norm_dist = (dtw_dist / n_points) if n_points > 0 else 999.0
+        return 1.0 / (1.0 + norm_dist / MATCH_DTW_DIST_SCALE), norm_dist
+    if dtw_mode == "ensemble":
+        # Blend the level-based (L1) and shape-based (derivative) DTW
+        # scores; they are complementary signals.
+        s_l1 = _dtw_component_score(curr_arr, sample_arr, current_peak, dtw_bandwidth, False, l1_scale, curr_resampled=curr_resampled)
+        s_dd = _dtw_component_score(curr_arr, sample_arr, current_peak, dtw_bandwidth, True, ddtw_scale, curr_resampled=curr_resampled)
+        # composite; per-component distance not meaningful
+        return ensemble_w * s_l1 + (1.0 - ensemble_w) * s_dd, 0.0
+    # "scaled" (default) or "ddtw": resample both onto one grid so the
+    # band and normalisation are consistent, then express the distance
+    # relative to the current peak (behaviour-neutral at
+    # MATCH_MAE_REF_PEAK), mirroring the Stage-2 MAE treatment.
+    use_deriv = dtw_mode == "ddtw"
+    scale = ddtw_scale if use_deriv else l1_scale
+    return _dtw_component_score(
+        curr_arr, sample_arr, current_peak, dtw_bandwidth, use_deriv, scale, curr_resampled=curr_resampled
+    ), 0.0
+
+
 def compute_matches_worker(
     current_power: list[float],
     current_duration: float,
@@ -368,6 +418,10 @@ def compute_matches_worker(
                 "profile_duration": profile_duration,
                 "current": current_power,
                 "sample": sample_power,
+                # True wall-clock span of `sample`, for prefix truncation (#364).
+                # Falls back to profile_duration so the other snapshot builders
+                # (devtools, matching_tuner, playground) keep working unchanged.
+                "sample_span_s": float(item.get("sample_span_s") or profile_duration or 0.0),
                 "offset": offset
             })
 
@@ -391,31 +445,17 @@ def compute_matches_worker(
         for cand in to_refine:
             sample_arr = np.array(cand["sample"])
 
-            if dtw_mode == "legacy":
-                # Original behaviour: raw sequences, distance / len(current),
-                # fixed absolute-watt scale (not peak-relative).
-                dtw_dist = compute_dtw_lite(curr_arr, sample_arr, band_width_ratio=dtw_bandwidth)
-                n_points = len(curr_arr)
-                norm_dist = (dtw_dist / n_points) if n_points > 0 else 999.0
-                dtw_score = 1.0 / (1.0 + norm_dist / MATCH_DTW_DIST_SCALE)
-            elif dtw_mode == "ensemble":
-                # Blend the level-based (L1) and shape-based (derivative) DTW
-                # scores; they are complementary signals.
-                s_l1 = _dtw_component_score(curr_arr, sample_arr, current_peak, dtw_bandwidth, False, l1_scale, curr_resampled=curr_resampled)
-                s_dd = _dtw_component_score(curr_arr, sample_arr, current_peak, dtw_bandwidth, True, ddtw_scale, curr_resampled=curr_resampled)
-                dtw_score = ensemble_w * s_l1 + (1.0 - ensemble_w) * s_dd
-                norm_dist = 0.0  # composite; per-component distance not meaningful
-            else:
-                # "scaled" (default) or "ddtw": resample both onto one grid so the
-                # band and normalisation are consistent, then express the distance
-                # relative to the current peak (behaviour-neutral at
-                # MATCH_MAE_REF_PEAK), mirroring the Stage-2 MAE treatment.
-                use_deriv = dtw_mode == "ddtw"
-                scale = ddtw_scale if use_deriv else l1_scale
-                dtw_score = _dtw_component_score(
-                    curr_arr, sample_arr, current_peak, dtw_bandwidth, use_deriv, scale, curr_resampled=curr_resampled
-                )
-                norm_dist = 0.0
+            dtw_score, norm_dist = _stage3_dtw_score(
+                curr_arr,
+                sample_arr,
+                current_peak,
+                dtw_mode=dtw_mode,
+                dtw_bandwidth=dtw_bandwidth,
+                l1_scale=l1_scale,
+                ddtw_scale=ddtw_scale,
+                ensemble_w=ensemble_w,
+                curr_resampled=curr_resampled,
+            )
 
             cand["original_score"] = float(cand["score"])
             cand["score"] = float(blend * cand["score"] + (1.0 - blend) * dtw_score)
@@ -461,7 +501,133 @@ def compute_matches_worker(
             )
         candidates.sort(key=lambda x: x["score"], reverse=True)
 
+    # Stage 6 (#364): prefix scores for the few candidates materially LONGER than
+    # the winner. Purely additive - it writes `prefix_score` and never touches
+    # `score`, so ranking is provably unchanged. Must run after the Stage-4
+    # re-sort because the anchor is the winner's duration.
+    annotate_prefix_scores(candidates, curr_arr, current_duration, config)
+
     return candidates
+
+def _prefix_point_count(
+    n_points: int, current_duration: float, sample_span_s: float
+) -> int:
+    """Leading template samples that cover ``current_duration`` seconds.
+
+    0 when the span is unknown/non-positive, when the elapsed time already covers
+    the whole template (then it is not a prefix), or when too few points remain to
+    judge. Fraction-of-array is the right operator because every snapshot flavour
+    is uniform in time over its own span (envelope: np.linspace; sample cycle:
+    resample_uniform at a fixed dt; group aggregate: np.interp onto 200 points).
+    """
+    if n_points < SMART_TERM_PREFIX_MIN_POINTS or sample_span_s <= 0 or current_duration <= 0:
+        return 0
+    k = int(round(n_points * (current_duration / sample_span_s)))
+    if k < SMART_TERM_PREFIX_MIN_POINTS or k >= n_points:
+        return 0
+    return k
+
+
+def prefix_shape_score(
+    curr_arr: np.ndarray,
+    sample: list[float] | np.ndarray,
+    current_duration: float,
+    sample_span_s: float,
+    current_peak: float,
+    config: dict[str, Any],
+) -> float | None:
+    """Score the live trace against ``sample`` TRUNCATED to ``current_duration``.
+
+    The #288 landscape guard asks whether a longer candidate has a decent shape
+    score against its **whole** curve - which a part-way-through trace cannot
+    have. This asks the question that actually matters: does the trace look like
+    the *beginning* of that longer programme? (#364)
+
+    Same scale as ``shape_score`` by construction: identical Stage-2 formula
+    (``find_best_alignment``) and identical Stage-3 DTW blend, only the reference
+    array differs. Returns None when the template cannot be truncated meaningfully.
+
+    NB prefix scoring normalizes on the shared resample ``grid`` (both series are
+    resampled to it), so it does not support the non-default ``dtw_mode="legacy"``
+    absolute-watt/length normalization - under which cross-candidate prefix scores of
+    differing native length would not be comparable. This is inert in production: the
+    default is ``"ensemble"`` and the live ProfileStore path never sets ``dtw_mode``;
+    ``"legacy"`` exists only for the devtools re-sweep harness.
+    """
+    arr = np.asarray(sample, dtype=float)
+    k = _prefix_point_count(arr.size, current_duration, sample_span_s)
+    if k == 0:
+        return None
+    prefix = arr[:k]
+    # Put both series on one grid so index offset equals time offset regardless of
+    # the template's native cadence, and honour the #388 OOM cap.
+    grid = int(min(curr_arr.size, k, MAX_ALIGN_GRID_POINTS))
+    if grid < SMART_TERM_PREFIX_MIN_POINTS:
+        return None
+    a = _resample_to(curr_arr, grid)
+    b = _resample_to(prefix, grid)
+
+    corr_weight = float(config.get("corr_weight", MATCH_CORR_WEIGHT))
+    score, _metrics, _offset = find_best_alignment(a, b, 1.0, corr_weight=corr_weight)
+
+    dtw_bandwidth = float(config.get("dtw_bandwidth", 0.1))
+    if dtw_bandwidth > 0.0:
+        dtw_score, _ = _stage3_dtw_score(
+            a,
+            b,
+            current_peak,
+            dtw_mode=str(config.get("dtw_mode", DEFAULT_DTW_MODE)),
+            dtw_bandwidth=dtw_bandwidth,
+            l1_scale=float(config.get("dtw_l1_scale", MATCH_DTW_DIST_SCALE)),
+            ddtw_scale=float(config.get("dtw_ddtw_scale", MATCH_DDTW_DIST_SCALE)),
+            ensemble_w=float(config.get("dtw_ensemble_w", MATCH_DTW_ENSEMBLE_W)),
+        )
+        blend = float(config.get("dtw_blend", MATCH_DTW_BLEND))
+        return float(blend * score + (1.0 - blend) * dtw_score)
+    return float(score)
+
+
+def annotate_prefix_scores(
+    candidates: list[dict[str, Any]],
+    curr_arr: np.ndarray,
+    current_duration: float,
+    config: dict[str, Any],
+) -> None:
+    """Stage 6 (#364): write ``prefix_score`` on the few non-winning candidates
+    that are materially longer than the winner.
+
+    Mutates in place and never touches ``score``/``shape_score``, so candidate
+    ranking is unaffected - this only feeds the Smart-Termination prefix guard.
+    Every test before the first array touch is a scalar compare, so the common
+    case (no candidate is materially longer) costs nothing.
+    """
+    if current_duration <= 0 or len(candidates) < 2 or curr_arr.size == 0:
+        return
+    best_dur = float(candidates[0].get("profile_duration") or 0.0)
+    if best_dur <= 0:
+        return
+    min_dur = best_dur * SMART_TERM_PREFIX_MIN_RATIO
+    current_peak = float(np.max(curr_arr))
+    scored = 0
+    for cand in candidates[1:]:
+        prof_dur = float(cand.get("profile_duration") or 0.0)
+        if prof_dur <= min_dur:
+            continue  # not a longer look-alike
+        if prof_dur <= current_duration:
+            continue  # we already outlasted it, so we are not inside its prefix
+        span = float(cand.get("sample_span_s") or prof_dur)
+        if span < prof_dur * SMART_TERM_PREFIX_MIN_COVERAGE:
+            continue  # gap-truncated template: may not start at the programme's start
+        score = prefix_shape_score(
+            curr_arr, cand.get("sample") or [], current_duration, span, current_peak, config
+        )
+        if score is None:
+            continue
+        cand["prefix_score"] = float(score)
+        scored += 1
+        if scored >= SMART_TERM_PREFIX_MAX_CANDIDATES:
+            break
+
 
 def _dtw_cost_matrix_scalar(
     x: np.ndarray, y: np.ndarray, n: int, m: int, w: int
@@ -535,6 +701,20 @@ def compute_dtw_path(
     """
     n, m = len(x), len(y)
     if n == 0 or m == 0:
+        return []
+
+    # Pre-flight memory guard: the cost matrix is (n+1)x(m+1) float64.  An
+    # uncapped call from a 1 Hz long cycle can request >1 GB here.  If the
+    # allocation would exceed ~80 MB, skip DTW and return an empty path so
+    # the caller falls back to linear interpolation (graceful degrade rather
+    # than OOM-killing Home Assistant — issue #388).
+    _DTW_CELL_BUDGET = 10_000_000  # 10 M cells x 8 B ≈ 80 MB
+    if (n + 1) * (m + 1) > _DTW_CELL_BUDGET:
+        _LOGGER.warning(
+            "DTW cost matrix %dx%d would need %.0f MB — skipping DTW refinement "
+            "(cap compute_envelope_worker inputs via MAX_ALIGN_GRID_POINTS to prevent this)",
+            n, m, (n + 1) * (m + 1) * 8 / 1e6,
+        )
         return []
 
     w = max(1, int(min(n, m) * band_width_ratio))
@@ -701,6 +881,9 @@ def compute_envelope_worker(
 
     align_dt = avg_sample_rate
     num_points = max(50, int(target_duration / align_dt))
+    if num_points > MAX_ALIGN_GRID_POINTS:
+        num_points = MAX_ALIGN_GRID_POINTS
+        align_dt = target_duration / num_points  # re-derive so per-cycle grids inherit the cap
     time_grid = np.linspace(0.0, target_duration, num_points)
 
     # Robust reference curve: the pointwise MEDIAN across all cycles resampled
@@ -733,7 +916,11 @@ def compute_envelope_worker(
 
     for offsets, values, dur in normalized_curves:
         this_dur = dur
-        this_num_points = max(10, int(this_dur / align_dt))
+        # Cap this grid too, not just the reference one: a cycle far longer than the
+        # median would otherwise size its own grid past the cap and push the cost
+        # matrix over compute_dtw_path's budget, which silently drops the outlier
+        # back to plain interpolation. Capping keeps DTW alignment available for it.
+        this_num_points = min(MAX_ALIGN_GRID_POINTS, max(10, int(this_dur / align_dt)))
         this_grid = np.linspace(0.0, this_dur, this_num_points)
         this_array = np.interp(this_grid, offsets, values)
 

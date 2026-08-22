@@ -115,6 +115,8 @@ const _SETTINGS_SECTIONS = [
         doc: 'During the off-delay countdown, accumulated energy (watts x time) is compared to this threshold. If exceeded, the countdown resets - keeping anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Raise it if cycles end too early during cool-down; lower it if detection is sluggish.' },
       { key: 'end_repeat_count', label: 'End Repeat Count', type: 'number', min: 1, def: 1,
         doc: 'Number of consecutive below-stop-threshold readings required before the cycle ends. 1 is fine for most plugs. Raise to 2-3 if your smart plug occasionally reports a false-zero sample mid-cycle and your cycles are ending prematurely.' },
+      { key: 'smart_termination_duration_ratio', label: 'Smart Termination Ratio', type: 'number', step: 0.01, min: 0.5, max: 1.0,
+        doc: 'How far into the matched program\'s expected duration a cycle must be before Smart Termination may end it early once power drops. The expected duration is the program\'s average, so on appliances whose runtime varies a lot - washers on cold winter vs warm summer inlet water, sensor-dry dryers, load-dependent programs - about half of all runs finish shorter than that average and never get the fast finish, ending only via the fallback timeout minutes late. Lower this (e.g. 0.85) on those machines so the early finish still fires; raise it toward 1.0 to be more conservative. Leave empty for the default (0.98, or 0.99 for dishwashers). It can only ever end a cycle earlier, never later, and never fires on an ambiguous or low-confidence match.' },
     ] },
     { sub: 'Power Off', fields: [
       { key: 'power_off_threshold_w', label: 'Power Off Threshold', unit: 'W', type: 'number', step: 0.1, min: 0, def: 0,
@@ -147,6 +149,11 @@ const _SETTINGS_SECTIONS = [
         doc: 'The +/- band around a profile average duration used during matching. 0.25 means a 60 min profile matches 45-75 min cycles.' },
       { key: 'duration_tolerance', label: 'Estimate Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
         doc: 'Tolerance for time-remaining estimates (learning feedback, not matching). If the actual duration is within +/-X% of the estimate it counts as a good match.' },
+    ] },
+    { sub: 'Profile Evidence', fields: [
+      { key: 'profile_evidence_sources', label: 'Cycles that shape a program', type: 'checkboxlist', def: ['real_cycles', 'reference_cycles', 'backfill_cycles'],
+        choices: [['real_cycles', 'Cycles this machine ran'], ['reference_cycles', 'Downloaded from the community store'], ['backfill_cycles', 'Found in imported power history']],
+        doc: 'Which cycles are used to build each program\'s power curve, and to match a finished cycle against it. Unticking a kind stops it shaping your programs without deleting anything - the cycles stay in your Cycles list and can still be labelled or removed. Useful if you do not trust imported data. Statistics are unaffected: they always count only the cycles this machine actually ran. Unticking everything is ignored, since a program with no cycles behind it could never match.' },
     ] },
     { sub: 'Auto-Labeling', fields: [
       { key: 'auto_label_confidence', label: 'Auto-Label Confidence', type: 'number', step: 0.01, min: 0, max: 1, def: 0.9,
@@ -422,12 +429,15 @@ const _SETTING_CONFLICTS = [
     }),
   },
   {
-    // learning_confidence <= profile_match_threshold
+    // learning_confidence >= profile_match_threshold (#396): the verify-band floor
+    // must sit at or above the live match-trust gate. The correct confidence ladder
+    // is unmatch < match < learning < auto_label; flagging learning BELOW match
+    // (the old rule) was backwards and tripped the shipped defaults (0.6 vs 0.4).
     keys: ['learning_confidence', 'profile_match_threshold'],
-    check: v => v.learning_confidence != null && v.profile_match_threshold != null && v.learning_confidence > v.profile_match_threshold,
+    check: v => v.learning_confidence != null && v.profile_match_threshold != null && v.learning_confidence < v.profile_match_threshold,
     fieldErrors: v => ({
-      learning_confidence:    { msgKey: 'conflict.confidence.learning',  msgVars: {match: v.profile_match_threshold}, msgFb: `Must be at or below Match Threshold (${v.profile_match_threshold})`, fixVal: +(v.profile_match_threshold).toFixed(2) },
-      profile_match_threshold: { msgKey: 'conflict.confidence.match_for_learning', msgVars: {lc: v.learning_confidence}, msgFb: `Must be at or above Learning Confidence (${v.learning_confidence})`, fixVal: +(v.learning_confidence).toFixed(2) },
+      learning_confidence:    { msgKey: 'conflict.confidence.learning',  msgVars: {match: v.profile_match_threshold}, msgFb: `Must be at or above Match Threshold (${v.profile_match_threshold})`, fixVal: +(v.profile_match_threshold).toFixed(2) },
+      profile_match_threshold: { msgKey: 'conflict.confidence.match_for_learning', msgVars: {lc: v.learning_confidence}, msgFb: `Must be at or below Learning Confidence (${v.learning_confidence})`, fixVal: +(v.learning_confidence).toFixed(2) },
     }),
   },
   {
@@ -1222,6 +1232,25 @@ function _fmtEnergy(kwh) {
 // user's persisted "Cycle date display" preference by _render() on each paint.
 let _datePref = 'relative';
 
+// ─── History-import date picker helpers ──────────────────────────────────────
+// The recorder read is bounded by a start DATE ("import since ..."), which is what a
+// user actually knows, rather than a day count they have to work out. These produce
+// LOCAL calendar days in the `yyyy-mm-dd` form <input type="date"> requires (toISOString
+// would shift across the UTC boundary and offer "tomorrow" or skip today).
+const _HIST_MAX_DAYS = 3700;  // mirrors HISTORY_IMPORT_RECORDER_MAX_DAYS (~10 years)
+function _histDayStr(d) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+function _histShiftDays(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return _histDayStr(d);
+}
+function _histToday() { return _histDayStr(new Date()); }
+function _histDefaultSince() { return _histShiftDays(10); }  // HA's default purge_keep_days
+function _histMinSince() { return _histShiftDays(_HIST_MAX_DAYS - 1); }
+
 // Locale-aware "3 hours ago" / "in 2 days" formatting. Intl handles localization,
 // so this needs no translation strings; falls back to absolute if unsupported.
 function _relTime(ms) {
@@ -1259,6 +1288,27 @@ function _fmtDate(ts, mode) {
   if (isNaN(ms)) return '-';
   return (mode || _datePref) === 'relative' ? _relTime(ms) : _fmtAbsDate(ms);
 }
+// Home Assistant rejects a WebSocket command with a plain {code, message} object,
+// which every browser console renders as a collapsed "Object". That made a panel
+// fetch failure unreportable: the user sees `fetch error: Object` and has to expand
+// it by hand to learn anything. Render the identity inline instead.
+//
+// The common case worth recognising is `unknown_command` right after a Home Assistant
+// restart: the sidebar panel loads and starts polling before the integration has
+// finished setting up and registering its commands, so the first few polls fail and
+// then it self-heals. Saying so beats leaving the user to guess.
+function _wsErrText(err) {
+  if (err == null) return 'unknown error';
+  if (err instanceof Error) return `${err.name}: ${err.message}`;
+  const code = err.code != null ? String(err.code) : '';
+  const msg = err.message != null ? String(err.message) : '';
+  if (!code && !msg) { try { return JSON.stringify(err); } catch (_) { return String(err); } }
+  const hint = code === 'unknown_command'
+    ? ' (the integration is probably still starting up; this should stop on its own)'
+    : '';
+  return `${code || 'error'}${msg ? ': ' + msg : ''}${hint}`;
+}
+
 function _esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
@@ -1414,6 +1464,22 @@ function _field(f, value, extra) {
     // Structured value (list/object) edited as JSON text; round-trips on save.
     const jt = (v === '' || v == null) ? '' : (typeof v === 'string' ? v : JSON.stringify(v, null, 2));
     input = `<textarea data-opt="${key}" data-ftype="json" rows="3" placeholder='${_esc(extra.t('placeholder.json_buttons', {}, '[{"action":"ID","title":"Label"}]'))}'>${_esc(jt)}</textarea>`;
+  } else if (f.type === 'checkboxlist') {
+    // Several checkboxes writing ONE option as a list of the ticked values. The inner
+    // boxes carry data-choice, never data-opt, so the collectors below see one field.
+    // An empty stored value is not a valid "none" state - the backend treats an empty
+    // evidence selection as all-three (a profile with no cycles could never match), so
+    // render the field's default set rather than all-unchecked, which would tell the
+    // user matching is starved while it is actually using every source.
+    const chosen = (Array.isArray(value) && value.length)
+      ? value.map(String)
+      : (Array.isArray(f.def) ? f.def.map(String) : []);
+    input = `<div data-opt="${key}" data-ftype="checkboxlist" class="wd-checkboxlist">` +
+      (f.choices || []).map(([val, lbl]) =>
+        `<label class="wd-switch-lbl" style="display:flex;align-items:center;gap:8px;margin:2px 0">` +
+        `<span class="wd-switch"><input type="checkbox" data-choice="${_esc(val)}" ${chosen.includes(String(val)) ? 'checked' : ''}><span class="wd-switch-slider"></span></span>` +
+        `<span class="wd-switch-text">${_esc(extra.t ? extra.t('lbl.evidence_' + val, {}, lbl) : lbl)}</span></label>`
+      ).join('') + `</div>`;
   } else if (f.type === 'entitylist') {
     // Chip/pill multi-picker: existing values as removable pills + a combobox
     // add-input. Managed by DOM (no re-render) and collected on save.
@@ -1567,6 +1633,22 @@ const _DIAGRAM_BY_KEY = {
   anti_wrinkle_idle_timeout: 'anti_wrinkle',
   sampling_interval: 'sampling',
 };
+
+// Rect that really clips an absolutely-positioned popover: the viewport
+// intersected with every ancestor that scrolls or hides its overflow. `.wd-modal`
+// only declares `overflow-y: auto`, but CSS promotes the unset axis to `auto` as
+// well, so it clips horizontally too, which is what cut the help bubbles in half
+// (#385).
+function _clipRectFor(el) {
+  let left = 0, right = window.innerWidth;
+  for (let a = el.parentElement; a; a = a.parentElement) {
+    if (getComputedStyle(a).overflowX === 'visible') continue;
+    const r = a.getBoundingClientRect();
+    if (r.left > left) left = r.left;
+    if (r.right < right) right = r.right;
+  }
+  return { left, right };
+}
 
 // Tooltip popover with an optional JS-drawn SVG diagram above the text.
 function _tip(text, diagram) {
@@ -1771,11 +1853,18 @@ class HaWashdataPanel extends HTMLElement {
     this._phases = [];
     this._recState = null;
     this._opts = {};
+    this._optDefaults = {};  // device-resolved cadence defaults from get_options (#396)
     this._mlComparison = null;
     this._mlById = {};
     this._mlLoading = false;
     this._mlSettings = {};        // conf key -> {classic_value, ml_value, ml_reason, ...}
     this._mlSettingsLoading = false;
+    // Last-seen Calibrated (ML) comparison + muted keys per entry_id. The ML
+    // comparison is expensive and only fetched for the device being viewed, so
+    // these keep the device-pill badges of already-visited devices from blanking
+    // out when the selection moves on. Keyed by entry_id, never cleared on switch.
+    this._mlSettingsByEntry = {};
+    this._lockedByEntry = {};
     this._mlTrainingStatus = null; // {enabled, running, last_trained, cycle_count, min_cycles, ...}
     this._setupStatus = null;      // result of ws_get_setup_status
     // UI state
@@ -1810,7 +1899,13 @@ class HaWashdataPanel extends HTMLElement {
     this._panelSubtab = 'maintenance';
     this._gearTab = 'prefs';
     // Store-backed brand/model picker cache (Basic > Device info).
-    this._catalog = { brands: undefined, devices: undefined, forBrand: null, approvedOnly: false };
+    // brandsFull: the whole brand collection is local, so every search is in-memory.
+    // brandPrefixes: prefixes already resolved server-side (a completed "bo" covers "bos").
+    this._catalog = { brands: undefined, devices: undefined, forBrand: null, approvedOnly: false,
+                      brandsFull: false, brandPrefixes: [] };
+    // Resolved catalog identity for the saved brand/model (two point reads), which is
+    // all the status badges need. Keyed on brand|model|type so it self-invalidates.
+    this._catalogEntry = null;
     this._maintenance = null;          // cached maintenance log/reminders (Advanced → Maintenance)
     this._logs = [];
     this._logLevel = '';
@@ -1845,6 +1940,8 @@ class HaWashdataPanel extends HTMLElement {
     this._undoSeq = 0;
     // Bound modal keydown handler (Escape / Tab-trap); attached once in _boot.
     this._kbdHandler = null;
+    // Bound help-bubble edge nudge (#385); attached once in _boot.
+    this._tipHandler = null;
     // D7: settings changelog cache
     this._settingsChangelog = null;
     this._settingsChangeByKey = {};
@@ -1945,6 +2042,14 @@ class HaWashdataPanel extends HTMLElement {
         this._kbdHandler = (e) => this._onKeydown(e);
         this.shadowRoot.addEventListener('keydown', this._kbdHandler);
       }
+      if (this.shadowRoot && !this._tipHandler) {
+        this._tipHandler = (e) => {
+          const t = e.target;
+          const anchor = t && t.closest ? t.closest('.wd-tip') : null;
+          if (anchor) this._positionTip(anchor);
+        };
+        this.shadowRoot.addEventListener('pointerover', this._tipHandler);
+      }
     }
     this._onResize = () => this._resizeLogsPage();
     window.addEventListener('resize', this._onResize);
@@ -1960,6 +2065,7 @@ class HaWashdataPanel extends HTMLElement {
     this._flushPendingDeletes();
     // Remove the modal keydown listener.
     if (this._kbdHandler && this.shadowRoot) { this.shadowRoot.removeEventListener('keydown', this._kbdHandler); this._kbdHandler = null; }
+    if (this._tipHandler && this.shadowRoot) { this.shadowRoot.removeEventListener('pointerover', this._tipHandler); this._tipHandler = null; }
     // Remove the community-store OAuth message listener.
     if (this._storeConnectListener) { window.removeEventListener('message', this._storeConnectListener); this._storeConnectListener = null; }
   }
@@ -1980,6 +2086,14 @@ class HaWashdataPanel extends HTMLElement {
     // survives every _render() innerHTML swap. Removed on disconnect.
     this._kbdHandler = (e) => this._onKeydown(e);
     shadow.addEventListener('keydown', this._kbdHandler);
+    // Same deal for the help-bubble edge nudge (#385): delegated on the shadow
+    // root so it survives every innerHTML swap.
+    this._tipHandler = (e) => {
+      const t = e.target;
+      const anchor = t && t.closest ? t.closest('.wd-tip') : null;
+      if (anchor) this._positionTip(anchor);
+    };
+    shadow.addEventListener('pointerover', this._tipHandler);
     // Load per-user-language panel translations before first render.
     // Falls back to JS-embedded strings if the fetch fails.
     this._loadPanelTranslations().catch(() => {}).finally(() => {
@@ -2040,6 +2154,12 @@ class HaWashdataPanel extends HTMLElement {
     this._updateTaskPills();
     this._pgAdoptTask(t);
     this._onTrackedTaskProgress(t);
+    // The history-import wizard reads its own progress and results off this stream, so
+    // a closed dialog or a dropped socket cannot lose a run.
+    if (t.kind === 'history_import' || t.kind === 'history_import_apply') {
+      if (t.state === 'running') { if (this._modal && this._modal.type === 'history-import') this._render(); }
+      else this._histTaskFinished(t);
+    }
     this._settleTaskCallback(t);
   }
 
@@ -2238,6 +2358,8 @@ class HaWashdataPanel extends HTMLElement {
       rebuild: this._t('lbl.task_rebuild', {}, 'Rebuilding envelopes'),
       reprocess: this._t('lbl.task_reprocess', {}, 'Reprocessing'),
       ml_training: this._t('lbl.task_ml_training', {}, 'Learning'),
+      history_import: this._t('lbl.task_history_import', {}, 'Scanning power history'),
+      history_import_apply: this._t('lbl.task_history_import_apply', {}, 'Importing cycles'),
     };
     return m[kind] || kind;
   }
@@ -2436,6 +2558,7 @@ class HaWashdataPanel extends HTMLElement {
       }
 
       const res = await this._ws({ type: `${_DOMAIN}/get_devices` });
+      this._lastFetchErr = null;   // recovered: report the next failure even if identical
       this._devices = res.devices || [];
       this._lastRefresh = new Date();
       // Restore the last-used device on the first paint (selIdx is still 0).
@@ -2509,7 +2632,13 @@ class HaWashdataPanel extends HTMLElement {
         this._fetchLogs().then(() => this._refreshLogDrawer()).catch(() => {});
       }
     } catch (err) {
-      console.warn('[WashData panel] fetch error:', err);
+      // Collapse repeats: a poll failure is usually transient and identical every
+      // 5 s, and six copies of the same line buries whatever else is in the console.
+      const text = _wsErrText(err);
+      if (text !== this._lastFetchErr) {
+        this._lastFetchErr = text;
+        console.warn('[WashData panel] fetch error -', text, err);
+      }
     } finally {
       this._loading = false;
       // The 5s poll must never clobber editing on another tab or inside a modal.
@@ -2539,9 +2668,11 @@ class HaWashdataPanel extends HTMLElement {
     try {
       const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: _CYCLE_PAGE_SIZE, offset: 0 });
       this._cycles = res.cycles || [];
-      // Imported store recordings are returned once (first page) and kept out of
-      // the paginated `cycles`/offset math so "Load more" stays correct.
-      this._refCycles = res.reference_cycles || [];
+      // Imported store recordings and cycles recovered from raw power history are
+      // returned once (first page) and kept out of the paginated `cycles`/offset math
+      // so "Load more" stays correct. They share one panel array because they share the
+      // table; each row carries `cycle_origin` so badges and wording can differ.
+      this._refCycles = [...(res.reference_cycles || []), ...(res.backfill_cycles || [])];
       this._cycleOffset = this._cycles.length;
       this._cyclesTotal = (res.total != null) ? res.total : this._cycles.length;
       this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : false;
@@ -2795,6 +2926,7 @@ class HaWashdataPanel extends HTMLElement {
       for (const c of (d && d.cycles) || []) idx[c.id] = c;
       this._mlById = idx;
       this._mlSettings = (d && d.settings_comparison) || this._mlSettings;
+      this._mlSettingsByEntry[entryId] = this._mlSettings;
     } catch (_) { /* leave prior index */ }
   }
 
@@ -2808,6 +2940,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._isActiveEntry(entryId)) return;  // device switched mid-flight — drop stale response
       this._mlComparison = d;
       this._mlSettings = (d && d.settings_comparison) || {};
+      this._mlSettingsByEntry[entryId] = this._mlSettings;
     } catch (_) { /* leave prior */ }
   }
 
@@ -2849,6 +2982,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._isActiveEntry(entryId)) return;  // device switched mid-flight
       this._suggestions = res.suggestions || [];
       this._lockedSuggestions = res.locked_suggestions || [];
+      this._lockedByEntry[entryId] = this._lockedSuggestions;
     } catch (_) {
       if (this._isActiveEntry(entryId)) { this._suggestionsError = true; this._suggestions = []; }
     }
@@ -2913,7 +3047,7 @@ class HaWashdataPanel extends HTMLElement {
     this._settingsChangelog = null; this._settingsChangeByKey = {};
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
-    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._suggestions = []; this._lockedSuggestions = [];
+    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._optDefaults = {}; this._suggestions = []; this._lockedSuggestions = [];
     this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._setupStatus = null;       // per-device; re-fetched by _fetchTabData
@@ -2947,7 +3081,13 @@ class HaWashdataPanel extends HTMLElement {
     // previous device's appliance type, so reusing them could save an invalid
     // brand/model combo. Brands are type-agnostic, so keep them loaded (reloading
     // them without a re-render is what left the brand dropdown empty).
-    this._catalog = { brands: this._catalog.brands, devices: undefined, forBrand: null, approvedOnly: this._catalog.approvedOnly };
+    clearTimeout(this._brandSearchTimer); this._brandSearchTimer = null;
+    this._catalog = {
+      brands: this._catalog.brands, devices: undefined, forBrand: null,
+      approvedOnly: this._catalog.approvedOnly,
+      // Which brand prefixes have already been resolved travels with the rows.
+      brandsFull: this._catalog.brandsFull, brandPrefixes: this._catalog.brandPrefixes,
+    };
     if (this._entityListCache) delete this._entityListCache.store_model;
     const dev = this._devices[this._selIdx];
     if (dev) await this._fetchSuggestions(dev.entry_id);
@@ -3072,6 +3212,7 @@ class HaWashdataPanel extends HTMLElement {
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
         if (!this._isActiveEntry(eid)) return;  // device switched mid-flight — drop stale response
         this._opts = r.options || {};
+        this._optDefaults = r.defaults || {};  // device-resolved cadence defaults (#396)
         await this._fetchSuggestions(eid);
         // D7: "What changed" — load the settings changelog (best-effort; older
         // backends without this command simply show no change markers).
@@ -3105,22 +3246,38 @@ class HaWashdataPanel extends HTMLElement {
         await this._loadStoreStatus(eid);
         if (!this._isActiveEntry(eid)) return;
         this._ensureStoreConnectListener();
-        // Kick off the initial browse in the background (renders its own spinner).
-        if (this._onlineEnabled()) this._storeSearch(this._storeQuery);
+        // Kick off the initial browse in the background (renders its own spinner). It
+        // opens on the declared brand -- the useful, and cheapest, default: the query
+        // then shares a cache key with the Settings model picker.
+        if (this._onlineEnabled()) this._storeSearch(this._storeBrandScope());
       } else if (this._tab === 'advanced' && this._panelSubtab === 'ml') {
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
         if (!this._isActiveEntry(eid)) return;  // device switched mid-flight — drop stale response
         this._opts = r.options || {};
         this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'advanced' && this._panelSubtab === 'ml') this._renderPreservingFormEdits(); });
       } else if (this._tab === 'playground') {
-        try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (!this._isActiveEntry(eid)) return; this._opts = r.options || {}; } catch (_) {}
-        // Always open on the integration's CURRENT settings: the backend reads them
-        // back off the live detector/matcher config, so no stale schema default can
-        // leak into the sandbox.
-        await this._pgFetchSettings(eid);
+        // These four are independent of each other, so they go out together rather
+        // than in series: on a slow host the tab used to wait out four sequential
+        // round-trips before rendering anything.
+        //
+        // Settings are fetched WITHOUT suggestions (see _pgFetchSuggestions): they only
+        // label two buttons, and computing them runs statistics over every clean cycle.
+        await Promise.all([
+          (async () => {
+            try {
+              const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
+              if (this._isActiveEntry(eid)) this._opts = r.options || {};
+            } catch (_) {}
+          })(),
+          // Always open on the integration's CURRENT settings: the backend reads them
+          // back off the live detector/matcher config, so no stale schema default can
+          // leak into the sandbox.
+          this._pgFetchSettings(eid, false),
+          this._fetchCycles(eid),
+          this._profiles.length ? Promise.resolve() : this._fetchProfiles(eid),
+        ]);
         if (!this._isActiveEntry(eid)) return;
-        await this._fetchCycles(eid);
-        if (!this._profiles.length) await this._fetchProfiles(eid);
+        this._pgFetchSuggestions(eid);
         // Auto-select most recent cycle on first load. Profile defaults to
         // auto-detect ('') so the sim shows what the matcher WOULD pick, not the
         // cycle's stored label.
@@ -3145,7 +3302,7 @@ class HaWashdataPanel extends HTMLElement {
         }
       }
     } catch (err) {
-      console.warn('[WashData panel] tab data fetch error:', err);
+      console.warn('[WashData panel] tab data fetch error -', _wsErrText(err), err);
     } finally {
       this._tabLoading = false;
       this._render();
@@ -3158,7 +3315,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._isActiveEntry(eid)) return;  // device switched mid-flight — drop stale result
       this._diag = r.stats || {};
     } catch (err) {
-      console.warn('[WashData panel] tools fetch error:', err);
+      console.warn('[WashData panel] tools fetch error -', _wsErrText(err), err);
       this._diag = { _error: String(err && err.message || err) };
     }
   }
@@ -3168,7 +3325,7 @@ class HaWashdataPanel extends HTMLElement {
       const r = await this._ws({ type: `${_DOMAIN}/get_maintenance_log`, entry_id: eid });
       this._maintenance = r || {};
     } catch (err) {
-      console.warn('[WashData panel] maintenance fetch error:', err);
+      console.warn('[WashData panel] maintenance fetch error -', _wsErrText(err), err);
       this._maintenance = { _error: String(err && err.message || err) };
     }
   }
@@ -3180,7 +3337,7 @@ class HaWashdataPanel extends HTMLElement {
       const r = await this._ws({ type: `${_DOMAIN}/get_logs`, level: null, limit: 500 });
       this._logs = r.logs || [];
     } catch (err) {
-      console.warn('[WashData panel] logs fetch error:', err);
+      console.warn('[WashData panel] logs fetch error -', _wsErrText(err), err);
     }
   }
 
@@ -3451,6 +3608,7 @@ class HaWashdataPanel extends HTMLElement {
     this._drawStatusCurve();
     this._drawModalCanvas();
     this._drawProfileSparklines();  // D2
+    this._drawHistorySparklines();  // #344 import review
     this._drawPlaygroundCanvases(); // F3
     ['wd-status-canvas', 'wd-cyc-canvas', 'wd-compare-canvas', 'wd-env-canvas', 'wd-phase-canvas', 'wd-spag-canvas', 'wd-pgroup-canvas']
       .forEach(id => this._attachHover(id));
@@ -3641,9 +3799,10 @@ class HaWashdataPanel extends HTMLElement {
       const dotColor = rec ? 'var(--error-color, #f44336)' : this._stateColor(st);
       const label = rec ? this._t('status.recording', {}, 'Recording') : this._stateLabel(st);
       const badges = [];
-      const confN = this._conflictCountForOpts(d.options || {});
+      const confN = this._conflictCountForOpts(d.options || {}, d.option_defaults || {});
       if (confN) badges.push(`<span class="wd-dbadge conf">⚠ ${confN}</span>`);
-      if (d.suggestions_count) badges.push(`<span class="wd-dbadge sug">💡 ${d.suggestions_count}</span>`);
+      const sugN = this._sugCountsForDevice(d).total;
+      if (sugN) badges.push(`<span class="wd-dbadge sug">💡 ${sugN}</span>`);
       if (d.feedback_count) badges.push(`<span class="wd-dbadge fb">💬 ${d.feedback_count}</span>`);
       return `<button class="wd-devcard ${i === this._selIdx ? 'active' : ''}" data-idx="${i}">
         <span class="wd-devdot ${rec || running ? 'run' : ''}" style="background:${dotColor}"></span>
@@ -3684,18 +3843,18 @@ class HaWashdataPanel extends HTMLElement {
 
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
-    if (dev.feedback_count && this._canEdit()) attn.push(`<button class="wd-attn-card" type="button" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count, s: dev.feedback_count > 1 ? 's' : ''}, `${dev.feedback_count} cycle${dev.feedback_count > 1 ? 's' : ''} to review`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></button>`);
+    if (dev.feedback_count && this._canEdit()) attn.push(`<button class="wd-attn-card" type="button" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count}, `To review: ${dev.feedback_count}`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></button>`);
     const _confKeys = this._conflictKeysFromOpts();
     if (_confKeys.size && this._canEdit()) {
       const n = _confKeys.size, s = n > 1 ? 's' : '';
-      attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n, s}, `${n} setting conflict${s}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></button>`);
+      attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--error-color,#b71c1c)" data-action="goto-conflicts"><span class="wd-attn-icon">⚠</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--error-color,#b71c1c)">${this._t('conflict.attn_title', {n}, `Setting conflicts: ${n}`)}</div><div class="wd-attn-sub">${this._t('conflict.attn_sub', {}, 'Fix conflicts before saving')}</div></div></button>`);
     }
-    const _mlSugCount = this._mlSugKeys().size;
-    if ((dev.suggestions_count || _mlSugCount) && this._canEdit()) {
-      const total = (dev.suggestions_count || 0) + _mlSugCount;
+    const _sugC = this._sugCountsForDevice(dev);
+    if (_sugC.total && this._canEdit()) {
+      const total = _sugC.total;
       const parts = [];
-      if (dev.suggestions_count) parts.push(this._t('lbl.n_classic_suggestions', {n: dev.suggestions_count}, `${dev.suggestions_count} classic`));
-      if (_mlSugCount) parts.push(this._t('lbl.n_ml_suggestions', {n: _mlSugCount}, `${_mlSugCount} ML`));
+      if (_sugC.classic) parts.push(this._t('lbl.n_classic_suggestions', {n: _sugC.classic}, `${_sugC.classic} classic`));
+      if (_sugC.ml) parts.push(this._t('lbl.n_ml_suggestions', {n: _sugC.ml}, `${_sugC.ml} ML`));
       attn.push(`<button class="wd-attn-card" type="button" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('lbl.n_tuning_suggestions', {n: total}, `${total} tuning suggestion${total > 1 ? 's' : ''}`)}</div><div class="wd-attn-sub">${parts.join(' · ')} · ${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></button>`);
     }
     const attnHtml = attn.length ? `<div class="wd-attn">${attn.join('')}</div>` : '';
@@ -4053,9 +4212,14 @@ class HaWashdataPanel extends HTMLElement {
       : s === 'interrupted' ? 'var(--error-color, #f44336)'
       : s === 'force_stopped' ? 'var(--warning-color, #ff9800)' : 'var(--secondary-text-color)';
 
-    const importedBadge = c => c.is_reference
-      ? ` <span title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="color:var(--info-color,#2196f3)">📥</span>`
-      : '';
+    const importedBadge = c => {
+      if (!c.is_reference) return '';
+      const fromHistory = c.cycle_origin === 'backfill';
+      const tip = fromHistory
+        ? this._t('badge.backfilled_tip', {}, 'Detected in imported power history. Shapes program matching only, not counted in stats.')
+        : this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.');
+      return ` <span title="${_esc(tip)}" style="color:var(--info-color,#2196f3)">${fromHistory ? '🕗' : '📥'}</span>`;
+    };
     const reviewBadge = c => {
       if (isGolden(c)) return ' <span title="' + _esc(this._t('badge.golden_cycle', {}, 'Recorded reference cycle')) + '" style="color:var(--warning-color,#ff9800)">⭐</span>';
       // Pending feedback wins over the reviewed check, matching needsReview (#355):
@@ -4270,32 +4434,37 @@ class HaWashdataPanel extends HTMLElement {
   }
 
 
+  // Paint one power curve into a small canvas. Shared by the profile-card
+  // signature sparklines (D2) and the import-review candidate rows (#344), so the two
+  // cannot drift apart.
+  _paintSparkline(cv, curve) {
+    if (!cv || !Array.isArray(curve) || curve.length < 3) return;
+    const primary = (getComputedStyle(this).getPropertyValue('--primary-color') || '#03a9f4').trim() || '#03a9f4';
+    const dpr = window.devicePixelRatio || 1;
+    const rect = cv.getBoundingClientRect();
+    const w = cv.width = Math.max(1, Math.round((rect.width || 64) * dpr));
+    const h = cv.height = Math.max(1, Math.round((rect.height || 20) * dpr));
+    const ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+    const max = Math.max(...curve, 1), pad = 2 * dpr;
+    const X = i => pad + (curve.length === 1 ? 0 : (i / (curve.length - 1)) * (w - 2 * pad));
+    const Y = v => h - pad - (Math.max(0, v) / max) * (h - 2 * pad);
+    ctx.beginPath();
+    curve.forEach((v, i) => { const x = X(i), y = Y(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    ctx.strokeStyle = primary; ctx.lineWidth = 1.5 * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+  }
+
   // D2: paint every profile-card sparkline after a render.
   _drawProfileSparklines() {
     const sr = this.shadowRoot;
     if (!sr) return;
     const canvases = sr.querySelectorAll('canvas[data-spark-prof]');
     if (!canvases.length) return;
-    const primary = (getComputedStyle(this).getPropertyValue('--primary-color') || '#03a9f4').trim() || '#03a9f4';
     const byName = {};
     for (const p of (this._profiles || [])) byName[p.name] = p;
     canvases.forEach(cv => {
-      const name = cv.dataset.sparkProf;
-      const curve = (byName[name] && byName[name].signature_curve) || [];
-      if (!Array.isArray(curve) || curve.length < 3) return;
-      const dpr = window.devicePixelRatio || 1;
-      const rect = cv.getBoundingClientRect();
-      const w = cv.width = Math.max(1, Math.round((rect.width || 64) * dpr));
-      const h = cv.height = Math.max(1, Math.round((rect.height || 20) * dpr));
-      const ctx = cv.getContext('2d');
-      ctx.clearRect(0, 0, w, h);
-      const max = Math.max(...curve, 1), pad = 2 * dpr;
-      const X = i => pad + (curve.length === 1 ? 0 : (i / (curve.length - 1)) * (w - 2 * pad));
-      const Y = v => h - pad - (Math.max(0, v) / max) * (h - 2 * pad);
-      // Filled area + line, matching the appliance's power signature.
-      ctx.beginPath();
-      curve.forEach((v, i) => { const x = X(i), y = Y(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
-      ctx.strokeStyle = primary; ctx.lineWidth = 1.5 * dpr; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+      const prof = byName[cv.dataset.sparkProf];
+      this._paintSparkline(cv, (prof && prof.signature_curve) || []);
     });
   }
 
@@ -4509,7 +4678,7 @@ class HaWashdataPanel extends HTMLElement {
     const s = confCount !== 1 ? 's' : '';
     const confBanner = confCount ? `
       <div class="wd-sug-banner" style="background:rgba(183,28,28,.10);border-color:rgba(183,28,28,.4);color:var(--error-color,#b71c1c)">
-        <span>⚠ ${this._t('conflict.settings_banner', {n: confCount, s}, `${confCount} setting conflict${s} — check the highlighted sections and fix before saving.`)}</span>
+        <span>⚠ ${this._t('conflict.settings_banner', {n: confCount}, `Setting conflicts: ${confCount}. Check the highlighted sections and fix them before saving.`)}</span>
         <button class="wd-btn wd-btn-sm wd-btn-secondary" data-action="conf-goto-section">${this._t('conflict.settings_banner_btn', {}, 'Go to first')}</button>
       </div>` : '';
     // Combined tuning-suggestion count: classic (observed) + Calibrated (ML) keys
@@ -4614,7 +4783,14 @@ class HaWashdataPanel extends HTMLElement {
     if (f.onlyDeviceType && (o.device_type || 'washing_machine') !== f.onlyDeviceType) return '';
     if (f.type === 'storebrand' || f.type === 'storemodel') return this._renderStorePicker(f, o);
     let value = o[f.key];
-    if (value === undefined) value = f.def;
+    // Prefer a device-resolved default from the backend (#396: cadence settings
+    // whose default varies by device type) over the static schema literal, so an
+    // unset field shows - and the conflict validator checks - the value the
+    // integration would actually use.
+    if (value === undefined) {
+      const od = this._optDefaults;
+      value = (od && od[f.key] != null) ? od[f.key] : f.def;
+    }
     const extra = {};
 
     if (f.type === 'devicetype') extra.opts = this._deviceTypeOpts(value || o.device_type);
@@ -4709,14 +4885,16 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _renderBrandPicker(key, val, label, doc, ph) {
-    if (this._catalog.brands === undefined) { this._catalog.brands = null; this._loadCatalogBrands(); }
+    // The badge comes from the resolved catalog ENTRY (one point read), not from the
+    // brand list: fetching all ~84 brands to find one row was the store's single
+    // largest read source. The list is loaded only when the user opens the combo.
+    this._ensureCatalogEntry();
     const brands = Array.isArray(this._catalog.brands) ? this._catalog.brands : [];
     // Feed the shared custom combobox (works in the shadow DOM, unlike a native
     // <datalist>). The combo reads this cache live, so async loads appear.
     this._entityListCache = this._entityListCache || {};
     this._entityListCache[key] = brands.map(b => b.brand).filter(Boolean);
-    const match = brands.find(b => String(b.brand || '').toLowerCase() === val.toLowerCase());
-    const tag = this._statusTag(match);
+    const tag = this._statusTag(this._catalogEntryFor(val, 'brand'));
     const loading = this._catalog.brands === null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
     return `<div class="wd-field"><label>${_esc(label)} ${doc ? _tip(doc) : ''}${tag}${loading}</label>
       <div class="wd-combo-row">
@@ -4735,11 +4913,15 @@ class HaWashdataPanel extends HTMLElement {
         <input type="text" id="wd-store-model" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" disabled>
         <div class="wd-field-hint">${_esc(this._t('msg.pick_brand_first', {}, 'Pick an appliance brand first.'))}</div></div>`;
     }
-    if (this._catalog.forBrand !== brand) { this._catalog.forBrand = brand; this._catalog.devices = null; this._loadCatalogDevices(brand); }
+    // As in the brand picker: the badge + community actions come from the resolved
+    // catalog entry (one point read), so simply opening Settings no longer downloads
+    // this brand's whole device list. That list is fetched on combo focus.
+    this._ensureCatalogEntry();
+    if (this._catalog.forBrand !== brand) { this._catalog.forBrand = brand; this._catalog.devices = undefined; }
     const devices = Array.isArray(this._catalog.devices) ? this._catalog.devices : [];
     this._entityListCache = this._entityListCache || {};
     this._entityListCache[key] = devices.map(d => d.model).filter(Boolean);
-    const match = devices.find(d => String(d.model || '').toLowerCase() === val.toLowerCase());
+    const match = this._catalogEntryFor(val, 'device');
     const tag = this._statusTag(match);
     const loading = this._catalog.devices === null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
     // Details + community actions for the resolved device.
@@ -4817,21 +4999,176 @@ class HaWashdataPanel extends HTMLElement {
     return groups;
   }
 
+  // ── Catalog identity (badges) vs catalog lists (pickers) ────────────────────
+  // These are two different reads and it matters which one runs. Resolving the
+  // appliance the user already saved needs exactly two documents, both of which have
+  // deterministic ids, so it is a point read. Offering every alternative to pick from
+  // needs whole collections. Rendering the Settings tab only ever needed the former,
+  // but used to trigger the latter -- measured at 128 documents / 119 KB per open,
+  // against a daily read budget the whole community shares.
+
+  // Which appliance the currently-rendered entry describes. Included in the key so a
+  // device switch (or an edit to brand/model/type) re-resolves instead of showing the
+  // previous appliance's badge.
+  _catalogEntryKey() {
+    const o = this._opts || {};
+    return [
+      (o.store_brand || '').trim().toLowerCase(),
+      (o.store_model || '').trim().toLowerCase(),
+      o.device_type || '',
+    ].join('|');
+  }
+
+  // Kick off the two point reads if this appliance's identity is not already resolved.
+  // Safe to call from render (it self-dedupes on the key and never re-enters).
+  _ensureCatalogEntry() {
+    const want = this._catalogEntryKey();
+    const cur = this._catalogEntry;
+    if (cur && cur.key === want) return;
+    this._catalogEntry = { key: want, brand: null, device: null, deviceId: null, loading: true };
+    this._loadCatalogEntry(want);
+  }
+
+  // The resolved brand/device doc, but only when it actually describes the value being
+  // rendered -- a half-typed model must not keep showing the saved model's badge.
+  _catalogEntryFor(val, which) {
+    const e = this._catalogEntry;
+    if (!e || e.key !== this._catalogEntryKey()) return null;
+    const rec = which === 'brand' ? e.brand : e.device;
+    if (!rec) return null;
+    const field = which === 'brand' ? rec.brand : rec.model;
+    return String(field || '').toLowerCase() === String(val || '').trim().toLowerCase() ? rec : null;
+  }
+
+  async _loadCatalogEntry(wantKey) {
+    const dev = this._devices[this._selIdx];
+    const o = this._opts || {};
+    const brand = (o.store_brand || '').trim();
+    const model = (o.store_model || '').trim();
+    if (!dev || !this._onlineEnabled() || !brand || !model) {
+      if (this._catalogEntry && this._catalogEntry.key === wantKey) this._catalogEntry.loading = false;
+      return;
+    }
+    let res = null;
+    try {
+      res = await this._ws({
+        type: `${_DOMAIN}/store_get_catalog_entry`, entry_id: dev.entry_id,
+        brand, model, appliance_type: o.device_type || '',
+      });
+    } catch (_) { /* leave unresolved: the badge is decoration, not state */ }
+    // Drop a response that a device switch or a further edit has already superseded.
+    if (!this._catalogEntry || this._catalogEntry.key !== wantKey) return;
+    this._catalogEntry = {
+      key: wantKey, loading: false,
+      brand: (res && res.brand) || null,
+      device: (res && res.device) || null,
+      deviceId: (res && res.device_id) || null,
+    };
+    if (this._isActiveEntry(dev.entry_id)) this._renderPreservingFormEdits();
+  }
+
+  // Surface a just-loaded candidate list without a re-render when the user is typing in
+  // that picker. Dispatching `input` runs the combobox's own showDrop handler (which reads
+  // _entityListCache live), so the options appear while focus and caret stay put; a
+  // re-render here would rebuild the input mid-keystroke. Falls back to a normal render
+  // when the field is not focused, which is what clears the "Loading..." hint.
+  _refreshComboAfterLoad(inputId, entryId, mayReopen = true) {
+    const inp = this.shadowRoot && this.shadowRoot.getElementById(inputId);
+    if (inp && this.shadowRoot.activeElement === inp) {
+      // mayReopen=false after a failed load: re-dispatching would re-arm the search
+      // debounce and turn a persistent failure into a request loop.
+      if (mayReopen) inp.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+    if (this._isActiveEntry(entryId)) this._render();
+  }
+
+  // Load the picker's candidate list on first interaction with that picker. Called from
+  // the combobox's focus/input path rather than from render, so a user who opens Settings
+  // to change an unrelated setting never pays for the catalog at all.
+  _ensureCatalogList(optKey, q) {
+    if (!this._onlineEnabled()) return;
+    if (optKey === 'store_brand') { this._ensureBrandCandidates(q); return; }
+    if (optKey === 'store_model') {
+      const brand = String((this._opts || {}).store_brand || '').trim();
+      if (!brand) return;
+      if (this._catalog.forBrand !== brand || this._catalog.devices === undefined) {
+        this._catalog.forBrand = brand;
+        this._catalog.devices = null;
+        this._loadCatalogDevices(brand);
+      }
+    }
+  }
+
+  // Resolve brand candidates for what is currently typed, as cheaply as possible.
+  //
+  // The field opens pre-filled with the saved brand, so the very first focus already has
+  // a search term -- which the backend answers with a `brand_lc` range query reading only
+  // the matching documents (3 for "bo" against 84 for the whole collection). Clearing the
+  // field is the explicit "show me everything" gesture and is the only path that fetches
+  // the full list. Typing is debounced, and a prefix whose matches are already covered by
+  // a completed broader query never queries at all.
+  _ensureBrandCandidates(q) {
+    const prefix = String(q || '').trim().toLowerCase();
+    if (this._catalog.brandsFull) return;   // whole collection is already local
+    if (!prefix) {
+      // Clearing the field supersedes any prefix search still sitting in the debounce:
+      // the full list answers it, so letting it fire would spend a read for nothing.
+      clearTimeout(this._brandSearchTimer); this._brandSearchTimer = null;
+      if (this._catalog.brands === undefined) { this._catalog.brands = null; this._loadCatalogBrands(''); }
+      return;
+    }
+    const done = this._catalog.brandPrefixes || (this._catalog.brandPrefixes = []);
+    // A completed query for "bo" already returned every brand starting with "bos".
+    if (done.some(p => prefix.startsWith(p))) return;
+    clearTimeout(this._brandSearchTimer);
+    this._brandSearchTimer = setTimeout(() => this._loadCatalogBrands(prefix), 250);
+  }
+
+  // Prefix results are PARTIAL, so they are unioned into the candidate list rather than
+  // replacing it: typing "bo" and then backspacing to "b" must not drop the rows the
+  // broader query already produced.
+  _mergeBrandCandidates(rows) {
+    const have = new Map(
+      (Array.isArray(this._catalog.brands) ? this._catalog.brands : [])
+        .map(b => [String(b.id != null ? b.id : b.brand), b]));
+    for (const r of rows || []) have.set(String(r.id != null ? r.id : r.brand), r);
+    this._catalog.brands = Array.from(have.values())
+      .sort((a, b) => String(a.brand || '').localeCompare(String(b.brand || '')));
+  }
+
   // Feed the combobox candidate cache directly (no re-render): the combo reads it
   // live, so options appear without rebuilding the input the user is typing in.
-  async _loadCatalogBrands() {
+  async _loadCatalogBrands(query = '') {
     this._entityListCache = this._entityListCache || {};
+    let failed = false;
     const dev = this._devices[this._selIdx];
     if (!dev || !this._onlineEnabled()) { this._catalog.brands = []; this._entityListCache.store_brand = []; return; }
+    if (query && this._catalog.brandsFull) return;   // the full list already covers it
+    if (this._catalog.brands === undefined) this._catalog.brands = null;  // show the loading hint
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/store_list_brands`, entry_id: dev.entry_id, include_pending: !this._catalog.approvedOnly });
-      this._catalog.brands = (r && r.items) || [];
-    } catch (_) { this._catalog.brands = []; }
+      const r = await this._ws({
+        type: `${_DOMAIN}/store_list_brands`, entry_id: dev.entry_id,
+        query: query || null, include_pending: !this._catalog.approvedOnly,
+      });
+      const rows = (r && r.items) || [];
+      if (query) {
+        this._mergeBrandCandidates(rows);
+        (this._catalog.brandPrefixes || (this._catalog.brandPrefixes = [])).push(query);
+      } else {
+        this._catalog.brands = rows;
+        this._catalog.brandsFull = true;   // every later search is answered in memory
+      }
+    } catch (_) {
+      if (!Array.isArray(this._catalog.brands)) this._catalog.brands = [];
+      failed = true;
+    }
     this._entityListCache.store_brand = (this._catalog.brands || []).map(b => b.brand).filter(Boolean);
-    // Re-render so the picker shows the loaded brands + clears the "Loading…" hint
-    // (the combo also reads the cache live on focus, but a stale device switch left
-    // it looking empty until the next paint).
-    if (this._isActiveEntry(dev.entry_id)) this._render();
+    // On failure do NOT re-dispatch `input`: that is what re-arms the debounce, and a
+    // query that keeps failing would then retry ~4x/second for as long as the field has
+    // focus. Backing off means the dropdown simply does not update until the user types
+    // again (which is itself the retry) or the field loses focus.
+    this._refreshComboAfterLoad('wd-store-brand', dev.entry_id, !failed);
   }
 
   async _loadCatalogDevices(brand) {
@@ -4843,7 +5180,7 @@ class HaWashdataPanel extends HTMLElement {
       if (this._catalog.forBrand === brand) this._catalog.devices = (r && r.items) || [];
     } catch (_) { if (this._catalog.forBrand === brand) this._catalog.devices = []; }
     this._entityListCache.store_model = (this._catalog.devices || []).map(d => d.model).filter(Boolean);
-    if (this._isActiveEntry(dev.entry_id)) this._render();
+    this._refreshComboAfterLoad('wd-store-model', dev.entry_id);
   }
 
   // Load the appliance's profiles into the open Share dialog (dropdown + resolved
@@ -5118,17 +5455,57 @@ class HaWashdataPanel extends HTMLElement {
   // by the settings banner, section dots, tab bulb, and the "Show only" filter so
   // Calibrated suggestions surface everywhere classic (observed) suggestions do.
   _mlSugKeys(eff) {
-    const cur = eff || Object.assign({}, this._opts, this._pendingSettings || {});
+    // Fall back to the device-resolved defaults for an unset field (#396) so an ML
+    // value equal to that default is not counted as differing from "current" - which
+    // would badge a phantom suggestion whose "Use" value already equals what runs.
+    const cur = eff || Object.assign({}, this._optDefaults, this._opts, this._pendingSettings || {});
     // Muted keys (#343) are excluded so the banner count, section dots, tab bulb
     // and the "Show only" filter all follow the mute state the same way the
     // classic suggestions do (which are dropped from this._suggestions on mute).
-    const locked = new Set(this._lockedSuggestions || []);
+    return this._mlSugKeysFrom(this._mlSettings, cur, this._lockedSuggestions);
+  }
+
+  // Same rule for an arbitrary (comparison, current values, muted keys) triple,
+  // so the device-pill badges can score a device that is not the selected one
+  // from the per-entry caches.
+  _mlSugKeysFrom(mlSettings, cur, locked) {
+    const muted = new Set(locked || []);
+    const vals = cur || {};
     const keys = new Set();
-    for (const [key, mlc] of Object.entries(this._mlSettings || {})) {
-      if (locked.has(key)) continue;
-      if (mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, cur[key])) keys.add(key);
+    for (const [key, mlc] of Object.entries(mlSettings || {})) {
+      if (muted.has(key)) continue;
+      if (mlc && mlc.ml_value != null && !_sugSame(mlc.ml_value, vals[key])) keys.add(key);
     }
     return keys;
+  }
+
+  // Tuning-suggestion counts for one entry of the device list: classic (observed,
+  // counted by the backend) plus the Calibrated (ML) recommendations that no
+  // classic suggestion already covers. Same arithmetic as the Settings tab
+  // banner, so the pill badge, the Overview attention card and the banner agree.
+  _sugCountsForDevice(dev) {
+    if (!dev) return { classic: 0, ml: 0, total: 0 };
+    const sel = this._devices[this._selIdx];
+    const isSel = !!(sel && sel.entry_id === dev.entry_id);
+    // Keys let us drop an ML recommendation for a key that already has a classic
+    // suggestion; a payload carrying only the count (older backend, test mocks)
+    // falls back to adding the two.
+    const cKeys = Array.isArray(dev.suggestion_keys) ? dev.suggestion_keys : null;
+    const classic = cKeys ? cKeys.length : (dev.suggestions_count || 0);
+    // Staged (unsaved) edits count for the selected device only; every other
+    // device is scored against its saved options, which the poll keeps fresh.
+    // Device-resolved defaults (#396) sit under the saved options so an unset field
+    // scores against the value the integration would actually use, not `undefined`.
+    const cur = isSel
+      ? Object.assign({}, dev.option_defaults || {}, dev.options || {}, this._opts, this._pendingSettings || {})
+      : Object.assign({}, dev.option_defaults || {}, dev.options || {});
+    const mlKeys = this._mlSugKeysFrom(
+      isSel ? this._mlSettings : this._mlSettingsByEntry[dev.entry_id],
+      cur,
+      isSel ? this._lockedSuggestions : this._lockedByEntry[dev.entry_id],
+    );
+    const ml = cKeys ? [...mlKeys].filter(k => !cKeys.includes(k)).length : mlKeys.size;
+    return { classic, ml, total: classic + ml };
   }
 
   _htmlSettingsSugOnly(o) {
@@ -5202,7 +5579,7 @@ class HaWashdataPanel extends HTMLElement {
     }
     const nModels = Object.keys(st.on_device_models || {}).length;
     const source = nModels
-      ? `<span style="color:var(--success-color,#4caf50);font-weight:600">${this._t('ml.personalized', {}, '● Personalized to this machine')}</span> <span style="color:var(--secondary-text-color)">${this._t('lbl.models_fine_tuned', {count: nModels, plural: nModels > 1 ? 's' : ''}, '(' + nModels + ' model' + (nModels > 1 ? 's' : '') + ' fine-tuned)')}</span>`
+      ? `<span style="color:var(--success-color,#4caf50);font-weight:600">${this._t('ml.personalized', {}, '● Personalized to this machine')}</span> <span style="color:var(--secondary-text-color)">${this._t('lbl.models_fine_tuned', {count: nModels}, '(fine-tuned models: ' + nModels + ')')}</span>`
       : `<span style="color:var(--secondary-text-color)">${this._t('ml.builtin_models', {}, '● Using built-in models')}</span>`;
     const cyc = st.cycle_count || 0, min = st.min_cycles || 0;
     const enough = cyc >= min;
@@ -5211,7 +5588,7 @@ class HaWashdataPanel extends HTMLElement {
     const need = Math.max(0, min - cyc);
     const dataLine = enough
       ? this._t('msg.enough_data', {current: cyc, min: min}, `Enough data to learn from (${cyc}/${min} cycles).`)
-      : this._t('msg.collecting_data', {need: need, current: cyc, min: min, plural: need === 1 ? '' : 's'}, `Collecting data — ${need} more cycle${need === 1 ? '' : 's'} before fine-tuning can start (${cyc}/${min}).`);
+      : this._t('msg.collecting_data', {need: need, current: cyc, min: min}, `Collecting data. Cycles still needed before fine-tuning can start: ${need} (${cyc}/${min}).`);
     const bar = `<div style="height:8px;border-radius:6px;background:var(--secondary-background-color);overflow:hidden;margin:8px 0"><div style="width:${pct}%;height:100%;background:${barCol}"></div></div>`;
     const last = st.last_trained ? _fmtDate(st.last_trained) : 'never';
     const state = running
@@ -5373,6 +5750,7 @@ class HaWashdataPanel extends HTMLElement {
       ['anti_wrinkle_exit_power', 'Anti-Wrinkle Exit Power','W', 'Power must fall below this between pulses for anti-wrinkle to stay active', 'advanced'],
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
       ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released', 'advanced'],
+      ['smart_termination_duration_ratio', 'Smart Termination Ratio', '', 'Fraction of the matched program\'s expected duration a cycle must reach before Smart Termination may end it early; lower it for load- or temperature-dependent machines', 'advanced'],
       ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
       ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
       ['corr_weight',      'Correlation Weight', '', 'Stage 2: balance between curve shape (correlation) and power level (MAE); default 0.45', 'matching'],
@@ -5423,21 +5801,45 @@ class HaWashdataPanel extends HTMLElement {
   // Fetch the device's live effective settings + its saved presets. Tolerant of an
   // older backend (command unknown): the field pre-fill silently falls back to the
   // stored-option chain in _pgFieldVal.
-  async _pgFetchSettings(entryId) {
+  async _pgFetchSettings(entryId, includeSuggestions = true) {
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/get_playground_settings`, entry_id: entryId });
+      const r = await this._ws({
+        type: `${_DOMAIN}/get_playground_settings`, entry_id: entryId,
+        include_suggestions: includeSuggestions,
+      });
       if (!this._isActiveEntry(entryId)) return;
       this._pgEffective = r.effective || {};
       this._pgPublishable = Array.isArray(r.publishable) ? r.publishable : null;
       this._pgPresets = Array.isArray(r.presets) ? r.presets : [];
       this._pgPresetLimit = r.preset_limit || 0;
       if (this._pgPresetSel && !this._pgPresets.some(p => p.name === this._pgPresetSel)) this._pgPresetSel = '';
-      this._pgSuggClassic = (r.classic_suggestions && typeof r.classic_suggestions === 'object') ? r.classic_suggestions : {};
-      this._pgSuggMl = (r.ml_suggestions && typeof r.ml_suggestions === 'object') ? r.ml_suggestions : null;
-      this._pgMlSuggEnabled = !!r.ml_suggestions_enabled;
+      if (includeSuggestions) this._pgApplySuggestions(r);
     } catch (e) {
       if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
     }
+  }
+
+  _pgApplySuggestions(r) {
+    this._pgSuggClassic = (r.classic_suggestions && typeof r.classic_suggestions === 'object') ? r.classic_suggestions : {};
+    this._pgSuggMl = (r.ml_suggestions && typeof r.ml_suggestions === 'object') ? r.ml_suggestions : null;
+    this._pgMlSuggEnabled = !!r.ml_suggestions_enabled;
+  }
+
+  // Suggestions label the two "Load suggested" buttons and nothing else, and the ML set
+  // runs statistics over every clean cycle - real work that used to sit on the critical
+  // path of opening the tab, ahead of two more round-trips. Fetched in the background
+  // instead; the buttons render only once their count is non-zero, so they appear when
+  // the data lands rather than holding up the whole tab.
+  async _pgFetchSuggestions(entryId) {
+    try {
+      const r = await this._ws({
+        type: `${_DOMAIN}/get_playground_settings`, entry_id: entryId,
+        include_suggestions: true,
+      });
+      if (!this._isActiveEntry(entryId)) return;
+      this._pgApplySuggestions(r);
+      if (this._tab === 'playground') this._render();
+    } catch (_) { /* the buttons simply stay hidden */ }
   }
 
   // Every value the control panel currently shows (live baseline + staged edits).
@@ -7062,6 +7464,13 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-secondary" data-action="export-config">${this._t('btn.export_all', {}, 'Quick export everything')}</button>
           <button class="wd-btn wd-btn-secondary" data-action="import-config-raw">${this._t('btn.import_raw', {}, 'Advanced: replace all from JSON')}</button>
         </div>
+      </div>
+      <div class="wd-card">
+        <div class="wd-card-title">${this._t('hdr.import_power_history', {}, 'Import power history')}</div>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.import_history_description', {}, 'Already had a smart plug before WashData? Upload a history export of its power sensor, or read it straight from Home Assistant, and the normal detection runs over it so past cycles turn up in your Cycles list ready to name.')}</p>
+        <div class="wd-card-actions">
+          <button class="wd-btn wd-btn-primary" data-action="hist-import-open">${this._t('btn.import_power_history', {}, 'Import power history')}</button>
+        </div>
       </div>` : `<div class="wd-card"><p class="wd-info">${this._t('msg.maintenance_requires_access', {}, 'Maintenance and export/import require full access.')}</p></div>`}`;
   }
 
@@ -7324,24 +7733,54 @@ class HaWashdataPanel extends HTMLElement {
 
   _htmlStoreBrands() {
     const items = this._storeDevices || [];
+    const mine = String((this._opts || {}).store_model || '').trim().toLowerCase();
     const rows = items.map(d => {
       const title = `${_esc(d.brand || '')} ${_esc(d.model || '')}`.trim() || this._t('store.device', {}, 'Device');
       const type = d.applianceType ? `<span class="wd-store-chip">${_esc(this._deviceTypeLabel(d.applianceType))}</span>` : '';
+      const isMine = mine && String(d.model || '').toLowerCase() === mine;
+      const yours = isMine ? `<span class="wd-tag wd-tag-approved" title="${_esc(this._t('store.your_model_tip', {}, 'This is the appliance you declared in Settings'))}">${this._t('store.your_model', {}, 'Yours')}</span>` : '';
+      // Only ever claim content, never absence: these counters under-report (see
+      // _storeItemHasContent), so a missing chip means "unknown", not "empty".
+      const nProg = Number(d.profileCount) || 0;
+      const progChip = nProg > 0
+        ? `<span class="wd-store-chip">${this._t('store.programs_count', {n: nProg}, `Programs: ${nProg}`)}</span>`
+        : '';
       return `<button class="wd-store-row" data-action="store-open-device" data-device-id="${_esc(d.id)}">
         <span class="wd-store-row-main">
-          <span class="wd-store-row-title">${title}${this._statusTag(d)}</span>
-          <span class="wd-store-row-sub">${type}<span class="wd-store-fav" title="${_esc(this._t('store.favorites', {}, 'Favourites'))}">★ ${d.favoriteCount || 0}</span></span>
+          <span class="wd-store-row-title">${title}${yours}${this._statusTag(d)}</span>
+          <span class="wd-store-row-sub">${type}${progChip}<span class="wd-store-fav" title="${_esc(this._t('store.favorites', {}, 'Favourites'))}">★ ${d.favoriteCount || 0}</span></span>
         </span>
         <span class="wd-store-row-arrow" aria-hidden="true">›</span>
       </button>`;
     }).join('');
+
+    // Nothing to scope the catalog to yet. Declaring the appliance is what makes this tab
+    // useful AND is itself the catalog search (the Settings pickers query the same data),
+    // so point there rather than showing an unscoped list the user cannot act on.
+    if (!this._storeBrandScope()) {
+      return `
+        <div class="wd-store-search">
+          <input type="text" id="wd-store-q" placeholder="${_esc(this._t('store.search_brand_ph', {}, 'Search by brand…'))}" value="" autocomplete="off" spellcheck="false">
+          <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-search">${this._t('btn.search', {}, 'Search')}</button>
+        </div>
+        <p class="wd-info" style="margin-bottom:10px">${this._t('msg.store_declare_appliance', {}, 'Tell WashData which appliance you own and this tab shows the setups other people have shared for it. You can also type a brand above to look around.')}</p>
+        <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-goto-identity">${this._t('btn.set_brand_model', {}, 'Set brand & model')}</button>`;
+    }
+
+    const empty = `<p class="wd-info">${this._t('store.no_results', {}, 'No matching appliances found. Try a different search.')}</p>`;
     const list = this._storeLoading ? this._htmlStoreLoading()
-      : (items.length ? `<div class="wd-store-rows">${rows}</div>` : `<p class="wd-info">${this._t('store.no_results', {}, 'No matching appliances found. Try a different search.')}</p>`);
+      : (items.length ? `<div class="wd-store-rows">${rows}</div>` : empty);
+    // The exact model is empty far more often than not, so say plainly that the other
+    // rows are worth a look rather than letting the user conclude the store is empty.
+    const siblingHint = (!this._storeLoading && items.length > 1)
+      ? `<p class="wd-info" style="margin-bottom:8px">${this._t('msg.store_sibling_hint', {}, 'Nothing shared for your exact model? A closely-related model from the same brand is usually a good starting point.')}</p>`
+      : '';
     return `
       <div class="wd-store-search">
-        <input type="text" id="wd-store-q" placeholder="${_esc(this._t('store.search_ph', {}, 'Search by brand or model…'))}" value="${_esc(this._storeQuery)}" autocomplete="off" spellcheck="false">
+        <input type="text" id="wd-store-q" placeholder="${_esc(this._t('store.search_brand_ph', {}, 'Search by brand…'))}" value="${_esc(this._storeQuery)}" autocomplete="off" spellcheck="false">
         <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-search">${this._t('btn.search', {}, 'Search')}</button>
       </div>
+      ${siblingHint}
       ${list}`;
   }
 
@@ -7465,10 +7904,19 @@ class HaWashdataPanel extends HTMLElement {
   // one-line list entry + a store_account default; no bespoke handler needed.
   _htmlStorePrefs(busy) {
     const prefs = (this._constants && this._constants.storePrefs) || {};
-    return _STORE_PREFS.map(p => {
+    const rows = _STORE_PREFS.map(p => {
       const checked = prefs[p.key] !== false;  // defaults on; get_constants sends the full set
       return _switchRow(`data-action="store-toggle-pref" data-pref="${_esc(p.key)}" ${checked ? 'checked' : ''} ${busy ? 'disabled' : ''}`, this._t(p.labelKey, {}, p.labelFb), _tip(this._t(p.docKey, {}, p.docFb)));
     }).join('');
+    // The catalog is cached for an hour because every read is charged against a quota the
+    // whole community shares. Your own contributions clear it immediately; this is the
+    // escape hatch for someone else's (e.g. a brand you were told was just approved).
+    const refreshing = this._busy.has('store-refresh-catalog');
+    return rows + `
+      <div class="wd-field" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px">
+        <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="store-refresh-catalog" ${refreshing || busy ? 'disabled' : ''}>${refreshing ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.refresh_catalog', {}, 'Refresh catalog')}</button>
+        <span class="wd-info" style="margin:0;flex:1;min-width:180px">${this._t('msg.refresh_catalog_hint', {}, 'The community brand and appliance lists are cached to keep the shared store within its daily budget. Refresh to pick up entries added or approved by others.')}</span>
+      </div>`;
   }
 
   // ── Community Store data ─────────────────────────────────────────────────────
@@ -7483,6 +7931,15 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { /* leave prior status */ }
   }
 
+  // The brand the browse list is scoped to: whatever the user typed, else the appliance
+  // they declared. Browsing is deliberately brand-scoped -- an unscoped list of one
+  // appliance type is ~140 catalog entries, and a washing machine has no use for
+  // dishwashers. Scoping also lands on the SAME cache key the Settings model picker
+  // uses, so opening one after the other costs nothing.
+  _storeBrandScope() {
+    return String(this._storeQuery || (this._opts || {}).store_brand || '').trim();
+  }
+
   async _storeSearch(query) {
     const dev = this._devices[this._selIdx];
     if (!dev) return;
@@ -7490,17 +7947,51 @@ class HaWashdataPanel extends HTMLElement {
     this._storeQuery = query || '';
     this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null;
     this._storeProfiles = []; this._storeCycles = [];
+    const brand = this._storeBrandScope();
+    // Nothing to scope to yet: show the "tell us what you own" state rather than spend a
+    // read on a list the user cannot act on (see _htmlStoreBrands).
+    if (!brand) { this._storeDevices = []; this._storeLoading = false; this._render(); return; }
     this._storeLoading = true; this._render();
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/store_search_devices`, entry_id: eid, query: this._storeQuery, appliance_type: this._storeApplianceType() });
+      const r = await this._ws({
+        type: `${_DOMAIN}/store_search_devices`, entry_id: eid,
+        query: brand, appliance_type: this._storeApplianceType(),
+        // Pending entries are 93% of the catalog and are publicly readable (shown with
+        // an "awaiting approval" tag), so approved-only made this tab show 15 of 564
+        // devices -- about 6 per appliance type.
+        include_pending: true,
+      });
       if (!this._isActiveEntry(eid)) return;
       if (r && r.disabled) { this._storeStatus = { enabled: false }; this._storeDevices = []; }
-      else this._storeDevices = (r && r.items) || [];
+      else this._storeDevices = this._sortStoreDevices((r && r.items) || []);
     } catch (e) {
       if (this._isActiveEntry(eid)) { this._storeDevices = []; this._showToast(this._t('toast.store_search_failed', {error: e.message || e}, 'Search failed: ' + (e.message || e)), 'error'); }
     } finally {
       if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); }
     }
+  }
+
+  // Own model first, then entries that carry shared programs, then the rest (each group
+  // keeping the server's favourite-count order). The user's exact model has nothing
+  // shared about 70% of the time, so the sibling models have to be visible -- but their
+  // own machine still has to be easy to find in a 44-row list.
+  _sortStoreDevices(items) {
+    const mine = String((this._opts || {}).store_model || '').trim().toLowerCase();
+    const rank = (d) => {
+      if (mine && String(d.model || '').toLowerCase() === mine) return 0;
+      return this._storeItemHasContent(d) ? 1 : 2;
+    };
+    return items
+      .map((d, i) => ({ d, i }))
+      .sort((a, b) => (rank(a.d) - rank(b.d)) || (a.i - b.i))
+      .map((x) => x.d);
+  }
+
+  // True only when a positive count says so. These counters are contributor-maintained
+  // and under-report where an increment was denied, so absent/zero means "unknown", not
+  // "empty" -- the UI must never tell a user an entry is empty on a stale zero.
+  _storeItemHasContent(d) {
+    return (Number(d && d.profileCount) || 0) > 0 || (Number(d && d.cycleCount) || 0) > 0;
   }
 
   // Attach the GitHub-connect popup message listener exactly once. The popup
@@ -7526,6 +8017,8 @@ class HaWashdataPanel extends HTMLElement {
         if (d.model) patch.store_model = d.model;
         this._opts = { ...this._opts, ...patch };
         this._catalog.brands = undefined; this._catalog.devices = undefined; this._catalog.forBrand = null;
+        this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
+        this._catalogEntry = null;
         this._showToast(this._t('toast.appliance_added', {}, 'Appliance added - awaiting approval'));
         this._render();
         return;
@@ -7533,6 +8026,8 @@ class HaWashdataPanel extends HTMLElement {
       if (d.type === 'washdata-brand-created') {
         if (d.brand) this._opts = { ...this._opts, store_brand: d.brand };
         this._catalog.brands = undefined;  // reload the brand catalog so it is pickable
+        this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
+        this._catalogEntry = null;         // and re-resolve the badge for the new brand
         this._showToast(this._t('toast.brand_added', {}, 'Brand added - awaiting approval'));
         this._render();
         return;
@@ -7901,6 +8396,33 @@ class HaWashdataPanel extends HTMLElement {
 
   _hideGraphTip() { if (this._hoverRafId) { cancelAnimationFrame(this._hoverRafId); this._hoverRafId = null; this._hoverPending = null; } if (this._gtip) this._gtip.style.display = 'none'; this._syncSpagRowHighlight(null); }
 
+  // #385: keep an "i" help popover inside whatever clips it. The CSS centres the
+  // bubble on its 15px anchor (`left:50%` + `translateX(-50%)`), so an anchor near
+  // a container edge (every label in the cycle modal's Review tab) pushed half
+  // of it outside the modal, where the overflow cut the text off mid-word. Nudge
+  // it back along the x axis on hover, keeping the centred position preferred.
+  _positionTip(anchor) {
+    const pop = anchor.querySelector('.wd-tip-pop');
+    if (!pop) return;
+    // Always measure from the unshifted position so repeat hovers can't stack up.
+    pop.style.transform = '';
+    // On the first hover the :hover rule may not have been applied yet, so lay
+    // the bubble out invisibly just to measure it.
+    const hidden = !pop.offsetWidth;
+    const prev = hidden ? pop.style.cssText : '';
+    if (hidden) { pop.style.visibility = 'hidden'; pop.style.display = 'block'; }
+    const r = pop.getBoundingClientRect();
+    if (hidden) pop.style.cssText = prev;
+    if (!r.width) return;
+    const clip = _clipRectFor(anchor);
+    const gap = 6;                                   // breathing room at the edge
+    const min = clip.left + gap;
+    const max = clip.right - gap - r.width;
+    const left = max < min ? min : Math.min(Math.max(r.left, min), max);
+    const shift = Math.round(left - r.left);
+    if (shift) pop.style.transform = `translateX(calc(-50% + ${shift}px))`;
+  }
+
   _syncSpagRowHighlight(cid) {
     if (cid === this._spagHoverCid) return;
     this._spagHoverCid = cid;
@@ -7938,6 +8460,7 @@ class HaWashdataPanel extends HTMLElement {
     if (m.type === 'gear-settings') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlGearModal(m)}</div></div>`;
     if (m.type === 'export-select') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlExportSelectModal(m)}</div></div>`;
     if (m.type === 'import-wizard') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlImportWizardModal(m)}</div></div>`;
+    if (m.type === 'history-import') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlHistoryImportModal(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
@@ -8392,6 +8915,187 @@ class HaWashdataPanel extends HTMLElement {
       </div>`;
   }
 
+  // ── Import power history (#344) ───────────────────────────────────────────────
+  //
+  // Four steps: stage the data, scan it in the background, review what was found,
+  // then write only the rows the user kept. Nothing is stored before the review step.
+  // Parsing lives in Python so one implementation is under test; the panel only ships
+  // the text up in frame-sized chunks.
+
+  _histSkipReason(reason) {
+    const map = {
+      idle: this._t('lbl.hist_skip_idle', {}, 'nothing running'),
+      sparse: this._t('lbl.hist_skip_sparse', {}, 'readings too far apart'),
+      too_few_samples: this._t('lbl.hist_skip_short', {}, 'too few readings'),
+      too_long: this._t('lbl.hist_skip_long', {}, 'no break long enough to split on'),
+    };
+    return map[reason] || reason || '';
+  }
+
+  _histSegReason(reason) {
+    const map = {
+      shorter_than_minimum: this._t('lbl.hist_reason_short', {}, 'shorter than this appliance\'s shortest real cycle'),
+      no_clean_end: this._t('lbl.hist_reason_no_end', {}, 'never ended cleanly'),
+    };
+    return map[reason] || '';
+  }
+
+  _htmlHistoryImportModal(m) {
+    const title = `<h2 id="wd-modal-title">${this._t('modal.history_import', {}, 'Import power history')}</h2>`;
+    const err = m.error ? `<p class="wd-info" style="color:var(--error-color)">${_esc(m.error)}</p>` : '';
+
+    if (m.step === 'input') {
+      const busy = this._busy.has('hist-import');
+      const dis = busy ? 'disabled' : '';
+      return `${title}
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.hist_input_hint', {}, 'Upload a CSV downloaded from the History panel (entity, state, last changed), or let WashData read the sensor\'s history directly. Detection then runs over it exactly as it does live, and you choose which of the cycles it finds to keep.')}</p>
+        <div class="wd-field"><label>${this._t('lbl.load_from_file', {}, 'Load from file')}</label><input type="file" id="wd-hist-file" accept=".csv,text/csv,text/plain" ${dis}></div>
+        <div class="wd-field"><label>${this._t('lbl.hist_csv_data', {}, 'CSV data')}</label><textarea id="wd-hist-csv" style="min-height:96px;font-family:monospace;font-size:.78em" placeholder="entity_id,state,last_changed" ${dis}>${_esc(m.csvText || '')}</textarea></div>
+        <div class="wd-field">
+          <label>${this._t('lbl.hist_from_recorder', {}, 'Or read it from Home Assistant')}</label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="wd-info">${this._t('lbl.hist_since', {}, 'Since')}</span>
+            <input type="date" id="wd-hist-since" value="${_esc(m.since || _histDefaultSince())}" min="${_esc(_histMinSince())}" max="${_esc(_histToday())}" ${dis}>
+            <button class="wd-btn wd-btn-secondary" data-maction="hist-recorder" ${dis}>${this._t('btn.hist_read_recorder', {}, 'Read from Home Assistant')}</button>
+          </div>
+          <div class="wd-field-hint">${this._t('msg.hist_recorder_hint', {}, 'Reads from the date you pick up to now. Home Assistant keeps detailed history for 10 days by default and only hourly averages after that, which are too coarse to detect cycles from - pick a date further back only if your recorder is set to keep more.')}</div>
+        </div>
+        ${err}
+        <div class="wd-modal-actions">
+          <button class="wd-btn wd-btn-secondary" data-maction="cancel" ${dis}>${this._t('btn.cancel', {}, 'Cancel')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="hist-scan" ${dis}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.hist_scan', {}, 'Scan for cycles')}</button>
+        </div>`;
+    }
+
+    if (m.step === 'scan') {
+      const t = m.scanTaskId ? (this._tasks || {})[m.scanTaskId] : null;
+      const pct = (t && t.total > 0) ? Math.round((t.done / t.total) * 100) : null;
+      return `${title}
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.hist_scanning', {}, 'Replaying your history through the detector. This runs in the background - you can close this dialog and come back to it.')}</p>
+        <div class="wd-prog-bg" style="margin-bottom:8px"><div class="wd-prog-fill" style="width:${pct == null ? 0 : pct}%"></div></div>
+        <p class="wd-info">${pct == null ? this._t('status.preparing', {}, 'Preparing…') : `${pct}%`}</p>
+        ${err}
+        <div class="wd-modal-actions">
+          <button class="wd-btn wd-btn-secondary" data-maction="hist-cancel-scan">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        </div>`;
+    }
+
+    if (m.step === 'done') {
+      const d = m.done || {};
+      const lines = [
+        this._t('msg.hist_imported_count', { n: d.imported || 0 }, `${d.imported || 0} cycles imported.`),
+        d.duplicates ? this._t('msg.hist_duplicates', { n: d.duplicates }, `${d.duplicates} were already imported and were skipped.`) : '',
+        d.capped ? this._t('msg.hist_capped', {}, 'The per-device limit for imported cycles was reached; the rest were not stored.') : '',
+      ].filter(Boolean);
+      return `${title}
+        ${lines.map(l => `<p class="wd-info">${_esc(l)}</p>`).join('')}
+        <p class="wd-info">${this._t('msg.hist_next_step', {}, 'They are in your Cycles list, tagged as imported history. Open one and use Label to name the program it belongs to.')}</p>
+        <div class="wd-modal-actions">
+          <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="hist-goto-cycles">${this._t('btn.hist_goto_cycles', {}, 'Show me the cycles')}</button>
+        </div>`;
+    }
+
+    // step === 'review'
+    const res = m.result || {};
+    const segs = res.segments || [];
+    const parse = res.parse || {};
+    const busy = this._busy.has('hist-apply');
+    const accept = m.accept || new Set();
+
+    // Account for every row the file contained, so "nothing found" is explained
+    // rather than just reported.
+    const facts = [];
+    if (parse.rows_total) facts.push(this._t('msg.hist_rows_read', { n: parse.rows_total }, `${parse.rows_total} readings read`));
+    if (parse.first && parse.last) facts.push(`${_fmtDate(parse.first)} – ${_fmtDate(parse.last)}`);
+    if (parse.breaks) facts.push(this._t('msg.hist_breaks', { n: parse.breaks }, `${parse.breaks} gaps where the sensor was unavailable`));
+    if (parse.rows_other_entity) facts.push(this._t('msg.hist_other_entity', { n: parse.rows_other_entity }, `${parse.rows_other_entity} readings for other entities ignored`));
+    // The file held one sensor and it was not this device's: it was read anyway, but say
+    // so plainly - it is the difference between "my export" and "the wrong export".
+    if (parse.entity_substituted_from) {
+      facts.push(this._t(
+        'msg.hist_entity_substituted',
+        { used: parse.entity_id || '?', wanted: parse.entity_substituted_from },
+        `read ${parse.entity_id || '?'} (this device is configured for ${parse.entity_substituted_from})`,
+      ));
+    }
+    const skipped = res.skipped || [];
+    const skippedByReason = {};
+    skipped.forEach(sk => { skippedByReason[sk.reason] = (skippedByReason[sk.reason] || 0) + 1; });
+    const skipLine = Object.entries(skippedByReason)
+      .map(([reason, n]) => `${n} × ${this._histSkipReason(reason)}`).join(', ');
+
+    const settings = res.settings || {};
+    const settingsLine = settings.min_power != null
+      ? this._t('msg.hist_settings_used', { w: settings.min_power, s: settings.off_delay },
+          `Detected using this device's current settings (minimum power ${settings.min_power} W, off delay ${settings.off_delay} s).`)
+      : '';
+
+    if (!segs.length) {
+      return `${title}
+        <p class="wd-info">${this._t('msg.hist_none_found', {}, 'No cycles could be detected in that history.')}</p>
+        ${facts.length ? `<p class="wd-info">${_esc(facts.join(' · '))}</p>` : ''}
+        ${skipLine ? `<p class="wd-info">${this._t('msg.hist_skipped_spans', {}, 'Skipped stretches')}: ${_esc(skipLine)}</p>` : ''}
+        ${settingsLine ? `<p class="wd-info">${_esc(settingsLine)}</p>` : ''}
+        <div class="wd-modal-actions">
+          <button class="wd-btn wd-btn-secondary" data-maction="hist-back">${this._t('btn.back', {}, 'Back')}</button>
+          <button class="wd-btn wd-btn-primary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+        </div>`;
+    }
+
+    const rows = segs.map(seg => {
+      const on = accept.has(seg.index);
+      const reason = this._histSegReason(seg.reason);
+      return `<tr data-hist-row="${seg.index}" style="${on ? '' : 'opacity:.55'}">
+        <td><input type="checkbox" data-hist-pick="${seg.index}" ${on ? 'checked' : ''} aria-label="${_esc(this._t('lbl.hist_keep', {}, 'Keep this cycle'))}"></td>
+        <td>${_esc(_fmtDate(seg.start_time))}</td>
+        <td>${_esc(_fmtDuration(seg.duration_s))}</td>
+        <td>${seg.energy_wh != null ? _esc((seg.energy_wh / 1000).toFixed(2)) + ' kWh' : '–'}</td>
+        <td>${_esc(String(Math.round(seg.peak_w)))} W</td>
+        <td><canvas class="wd-prof-spark" data-hist-spark="${seg.index}" width="64" height="20" aria-hidden="true"></canvas></td>
+        <td>${reason ? `<span title="${_esc(reason)}" style="color:var(--warning-color,#ff9800)">⚠</span> <span class="wd-info">${_esc(reason)}</span>` : `<span class="wd-info">${_esc(this._t('lbl.hist_looks_complete', {}, 'complete'))}</span>`}</td>
+      </tr>`;
+    }).join('');
+
+    const allOn = segs.every(seg => accept.has(seg.index));
+    return `${title}
+      <p class="wd-info" style="margin-bottom:8px">${this._t('msg.hist_found', { n: segs.length }, `Found ${segs.length} cycles. Untick anything that does not look like a real run - nothing is stored until you import.`)}</p>
+      ${facts.length ? `<p class="wd-info" style="margin-bottom:4px">${_esc(facts.join(' · '))}</p>` : ''}
+      ${skipLine ? `<p class="wd-info" style="margin-bottom:4px">${this._t('msg.hist_skipped_spans', {}, 'Skipped stretches')}: ${_esc(skipLine)}</p>` : ''}
+      ${settingsLine ? `<p class="wd-info" style="margin-bottom:12px">${_esc(settingsLine)}</p>` : ''}
+      <div style="margin-bottom:8px"><button class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="hist-toggle-all">${allOn ? this._t('btn.select_none', {}, 'Select none') : this._t('btn.select_all', {}, 'Select all')}</button></div>
+      <div class="wd-table-wrap">
+        <table class="wd-table"><thead><tr>
+          <th></th>
+          <th>${this._t('lbl.date', {}, 'Date')}</th>
+          <th>${this._t('lbl.duration', {}, 'Duration')}</th>
+          <th>${this._t('lbl.energy', {}, 'Energy')}</th>
+          <th>${this._t('lbl.peak_power_short', {}, 'Peak')}</th>
+          <th>${this._t('lbl.shape', {}, 'Shape')}</th>
+          <th>${this._t('lbl.notes', {}, 'Notes')}</th>
+        </tr></thead><tbody>${rows}</tbody></table>
+      </div>
+      ${res.capped ? `<p class="wd-info">${this._t('msg.hist_scan_capped', { n: res.found }, `Only the first candidates are shown (${res.found} were found).`)}</p>` : ''}
+      ${err}
+      <div class="wd-modal-actions">
+        <button class="wd-btn wd-btn-secondary" data-maction="hist-back" ${busy ? 'disabled' : ''}>${this._t('btn.back', {}, 'Back')}</button>
+        <button class="wd-btn wd-btn-primary" data-maction="hist-apply" ${busy || !accept.size ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.hist_import_n', { n: accept.size }, `Import ${accept.size} cycles`)}</button>
+      </div>`;
+  }
+
+  // Paint the candidate sparklines after a render (same painter as profile cards).
+  _drawHistorySparklines() {
+    const sr = this.shadowRoot;
+    if (!sr) return;
+    const m = this._modal;
+    const segs = (m && m.result && m.result.segments) || [];
+    const byIndex = {};
+    segs.forEach(seg => { byIndex[String(seg.index)] = seg.curve || []; });
+    sr.querySelectorAll('canvas[data-hist-spark]').forEach(cv => {
+      this._paintSparkline(cv, byIndex[cv.dataset.histSpark] || []);
+    });
+  }
+
   // Interactive cycle inspector: view / trim / split.
   _htmlCycleModal(m) {
     if (!m.loaded) {
@@ -8399,7 +9103,14 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button></div>`;
     }
     const cur = m.curve || {};
-    const isRef = !!cur.is_reference;  // imported store recording: read-only except delete
+    const isRef = !!cur.is_reference;  // lives in reference_cycles: outside usage stats
+    // Capabilities come from the backend (`_reference_capabilities`), which derives them
+    // from which list the cycle lives in. An imported cycle can be labelled - that is how
+    // a program gets named from imported history (#344) - but not trimmed, split or
+    // reviewed, because those store functions only operate on past_cycles.
+    const canLabel = cur.labelable !== false;
+    const canEditCycle = cur.editable !== false;
+    const fromHistory = cur.cycle_origin === 'backfill';
     const full = cur.full_duration_s || cur.duration || 0;
     const kwh = cur.energy_kwh != null ? cur.energy_kwh : null;
     // ML health chip (higher = better) shown when an ML assessment is attached.
@@ -8433,12 +9144,14 @@ class HaWashdataPanel extends HTMLElement {
       : '';
     // Imported recordings are read-only (they seed matching templates only), so
     // the edit mode-bar is hidden and a short note explains why.
-    const modeBar = (this._canEdit() && !isRef) ? `<div class="wd-mode-bar">
+    const modeBar = (this._canEdit() && canEditCycle) ? `<div class="wd-mode-bar">
       <button class="wd-btn wd-btn-sm ${m.mode === 'view' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-view">${this._t('btn.inspect', {}, 'Inspect')}</button>
       <button class="wd-btn wd-btn-sm ${m.mode === 'trim' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-trim">${this._t('btn.trim', {}, 'Trim')}</button>
       <button class="wd-btn wd-btn-sm ${m.mode === 'split' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-split">${this._t('btn.split', {}, 'Split')}</button>
       <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>
-    </div>` : (isRef ? `<div class="wd-info" style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${this._t('msg.imported_readonly', {}, 'Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.')}</div>` : '');
+    </div>` : (isRef ? `<div class="wd-info" style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${fromHistory
+      ? this._t('msg.imported_history_readonly', {}, 'Detected in imported power history. It shapes program matching but is not counted in your statistics, and cannot be trimmed or split. Label it to name the program.')
+      : this._t('msg.imported_readonly', {}, 'Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.')}</div>` : '');
 
     // Pending-detection-feedback banner (Confirm / Correct… / Ignore). Built once
     // and shown in BOTH Inspect and Review modes, so a cycle in the "needs review"
@@ -8466,12 +9179,14 @@ class HaWashdataPanel extends HTMLElement {
       const shareBtn = canShare
         ? `<button class="wd-btn wd-btn-secondary" data-action="store-share-cycle" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(cur.profile_name || '')}">${this._t('btn.share_to_store', {}, 'Share to store')}</button>`
         : '';
-      // Imported recordings support Delete (remove a bad import) but not Label
-      // (relabelling only applies to real cycles that feed usage stats).
+      // Delete removes a bad import; Label is offered whenever the backend says the
+      // cycle can carry one, which includes imported cycles - naming the programs found
+      // in imported history is the point of that import (#344), and the store handles
+      // labelling a reference cycle in place.
       const editBtns = !this._canEdit() ? ''
-        : isRef ? `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>`
-        : `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>
-        <button class="wd-btn wd-btn-primary" data-maction="cyc-label">${this._t('btn.label', {}, 'Label')}</button>`;
+        : `<button class="wd-btn wd-btn-danger" data-maction="cyc-delete">${this._t('btn.delete', {}, 'Delete')}</button>${canLabel
+          ? `\n        <button class="wd-btn wd-btn-primary" data-maction="cyc-label">${this._t('btn.label', {}, 'Label')}</button>`
+          : ''}`;
       controls = `${fbBanner}<div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
         ${shareBtn}
@@ -8605,9 +9320,19 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-info" style="margin:6px 0 0;font-size:.75em">${this._t('msg.restart_gap_footer', {}, 'Highlighted on the graph. Power data is missing for these intervals — matching used only real readings.')}</div>
       </div>`;
     }
+    // Thinning caption (#395): the graph draws a decimated copy of the stored
+    // trace, so a wide gap between drawn points can look like missing sensor data.
+    // Declare it when the server thinned the curve so the two are not confused.
+    let decNote = '';
+    if (cur.decimated) {
+      const shownN = (cur.samples || []).length;
+      const totalN = cur.sample_count || shownN;
+      decNote = `<div class="wd-info" style="margin:4px 0 0;font-size:.72em;color:var(--secondary-text-color)">${this._t('msg.samples_decimated', {shown: shownN, total: totalN}, `Showing ${shownN} of ${totalN} samples (thinned for display; peaks kept). A wide gap here is thinning, not missing data.`)}</div>`;
+    }
     return `<h2>${this._t('lbl.cycle', {}, 'Cycle')} · ${_esc(_fmtDate(cur.start_time))}</h2>
       ${meta}${modeBar}
       <div class="wd-canvas-wrap"><canvas id="wd-cyc-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_cycle_chart', {}, 'Cycle power trace'))}"></canvas></div>
+      ${decNote}
       ${artifactBox}
       ${restartGapBox}
       ${controls}`;
@@ -9014,9 +9739,8 @@ class HaWashdataPanel extends HTMLElement {
       // _snapshotFormToPending call; it would override _opts in the render since
       // Object.assign merges pending last. Clear it so _opts wins.
       delete this._pendingSettings.store_brand;
-      this._catalog.forBrand = v; this._catalog.devices = null;
+      this._catalog.forBrand = v; this._catalog.devices = undefined;
       this._render();                 // enable + reset the model field (input has blurred)
-      this._loadCatalogDevices(v);    // patches #wd-model-dl in place, no re-render
     });
     const modelInput = sr.getElementById('wd-store-model');
     if (modelInput) modelInput.addEventListener('change', () => {
@@ -9345,6 +10069,11 @@ class HaWashdataPanel extends HTMLElement {
       const optKey = inp.dataset.opt || combo.closest('[data-opt]')?.dataset.opt;
 
       const showDrop = (q) => {
+        // Opening the store brand/model combo is the moment the user actually needs the
+        // catalog, so that is when it is fetched -- rendering the form no longer does it.
+        // This costs nothing here: the fetch fills _entityListCache, which is read live
+        // below, so the options appear on the next keystroke or focus without a re-render.
+        this._ensureCatalogList(optKey, q);
         // Read the candidate list live so async-loaded options (e.g. the store
         // brand/model catalog) appear without re-wiring the combobox.
         const entities = (this._entityListCache || {})[optKey] || [];
@@ -9610,6 +10339,30 @@ class HaWashdataPanel extends HTMLElement {
         }, { once: true });
       });
     }
+    const histFile = sr.getElementById('wd-hist-file');
+    if (histFile) histFile.addEventListener('change', () => {
+      const f = histFile.files && histFile.files[0];
+      if (!f) return;
+      const m = this._modal;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const ta = sr.getElementById('wd-hist-csv');
+        const text = String(reader.result || '');
+        if (ta) ta.value = text;
+        if (m && m.type === 'history-import') m.csvText = text;
+      };
+      reader.onerror = () => this._showToast(
+        this._t('toast.file_read_failed', {}, 'Could not read that file'), 'error');
+      reader.readAsText(f);
+    });
+    sr.querySelectorAll('[data-hist-pick]').forEach(box => box.addEventListener('change', () => {
+      const m = this._modal;
+      if (!m || m.type !== 'history-import') return;
+      const index = parseInt(box.dataset.histPick, 10);
+      if (box.checked) m.accept.add(index); else m.accept.delete(index);
+      this._render();
+      requestAnimationFrame(() => this._drawHistorySparklines());
+    }));
     const impFile = sr.getElementById('wd-import-file');
     if (impFile) impFile.addEventListener('change', () => {
       const f = impFile.files && impFile.files[0];
@@ -9687,6 +10440,7 @@ class HaWashdataPanel extends HTMLElement {
         this._pendingSettings = {};
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: dev.entry_id });
         this._opts = r.options || {};
+        this._optDefaults = r.defaults || {};  // #396
         await this._fetchSuggestions(dev.entry_id);
         this._render();
       }
@@ -10058,6 +10812,19 @@ class HaWashdataPanel extends HTMLElement {
     if (!dev) return;
     const eid = dev.entry_id;
 
+    // Prefix-grouped dispatch: these action families live in dedicated sub-methods.
+    // dev / eid / sr stay derived here and are passed in, never re-derived.
+    if (a.startsWith('sug-')) return this._onActSuggestions(a, btn, dev, eid, sr);
+    if (a.startsWith('ml-')) return this._onActMl(a, btn, dev, eid);
+    if (a.startsWith('store-')) return this._onActStore(a, btn, dev, eid, sr);
+    if (a.startsWith('auto-')) return this._onActAuto(a, btn, dev, eid, sr);
+    if (a.startsWith('maint-')) return this._onActMaintenance(a, btn, dev, eid, sr);
+    // 'pg-new' / 'pg-edit' / 'pg-suggest' are profile-GROUP actions handled in the
+    // chain below, not Playground ones, so they are excluded from the pg- prefix.
+    if (a.startsWith('pg-') && a !== 'pg-new' && a !== 'pg-edit' && a !== 'pg-suggest') {
+      return this._onActPlayground(a, btn, dev, eid);
+    }
+
     if (a === 'open-cycle') {
       const cid = btn.dataset.cid;
       // Cycles opened from the "needs review" queue jump straight to Review mode.
@@ -10098,7 +10865,397 @@ class HaWashdataPanel extends HTMLElement {
         this._render();
       });
 
-    } else if (a === 'sug-apply-all') {
+    } else if (a === 'create-profile') {
+      this._modal = { type: 'create-profile' }; this._render();
+
+    } else if (a === 'setup-cta') {
+      // Setup card primary / secondary CTA — navigate to the relevant panel section.
+      const ctaAction = btn.dataset.ctaAction || '';
+      let params = {};
+      try { params = JSON.parse(btn.dataset.ctaParams || '{}'); } catch (_) {}
+      this._dispatchSetupCta(ctaAction, params);
+
+    } else if (a === 'setup-skip') {
+      // Setup card step skip (snooze 14 days or never).
+      const stepKey = btn.dataset.step;
+      const snooze = btn.dataset.snooze; // "never" or "14d"
+      if (stepKey) {
+        let val;
+        if (snooze === 'never') {
+          val = 'never';
+        } else {
+          const until = new Date();
+          until.setDate(until.getDate() + 14);
+          val = until.toISOString();
+        }
+        this._setPref(stepKey, val);
+        this._reloadSetupStatus(); // async fire-and-forget; calls _render() when done
+      }
+
+    } else if (a === 'hide-setup-card') {
+      // Setup card permanent hide (only offered when dismissible, i.e. phase 3/4).
+      // Keep _setupStatus so _htmlSetupCard can collapse to the phase-3 chip
+      // immediately (nulling it here would hide the card entirely instead — the
+      // sibling setup-skip / expand-setup handlers also leave the status intact).
+      this._setPref('setup_card_dismissed', true);
+      this._render();
+
+    } else if (a === 'expand-setup') {
+      // Phase 3/4 chip tapped — restore full guidance card by clearing the pref.
+      this._setPref('setup_card_dismissed', false);
+      this._render();
+
+    } else if (a === 'set-settings-level') {
+      // F2: switch the Settings tab between Basic and Advanced disclosure.
+      const lvl = (btn.type === 'checkbox' ? btn.checked : btn.dataset.slevel === 'advanced') ? 'advanced' : 'basic';
+      if (lvl !== this._pref('settings_level', 'basic')) {
+        this._snapshotFormToPending(sr);  // keep in-progress edits across re-render
+        this._setPref('settings_level', lvl);
+        this._render();
+      }
+
+    } else if (a === 'pg-new' || a === 'pg-edit' || a === 'pg-suggest') {
+      if (a === 'pg-new') {
+        this._modal = { type: 'profile-group', orig: null, name: '', members: [] };
+      } else if (a === 'pg-edit') {
+        const gname = btn.dataset.gname;
+        const g = ((this._profileGroups || {}).groups || []).find(x => x.name === gname);
+        this._modal = { type: 'profile-group', orig: gname, name: gname, members: g ? [...(g.members || [])] : [] };
+      } else {
+        const s = ((this._profileGroups || {}).suggestions || [])[parseInt(btn.dataset.idx, 10)] || null;
+        if (!s) return;
+        this._modal = { type: 'profile-group', orig: s.existing_group || null, name: s.existing_group || '', members: [...(s.members || [])] };
+      }
+      this._render();
+      // Fetch every profile's envelope so ticked members render on the overlay.
+      this._ensureProfileEnvs(eid, (this._profiles || []).map(p => p.name)).then(() => {
+        if (this._modal && this._modal.type === 'profile-group') this._render();
+      });
+
+    } else if (a === 'rebuild-envelopes') {
+      // Backgrounded task (issue #311): rebuilding every profile serially can
+      // stall a low-power host, so run it via the registry with a header pill.
+      this._kickAndTrack(
+        { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
+        'rebuild-envelopes',
+        async () => { this._showToast(this._t('toast.envelopes_rebuilt', {}, 'Envelopes rebuilt')); await this._fetchProfiles(eid); },
+      );
+
+    } else if (a === 'rec-start') {
+      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
+    } else if (a === 'rec-stop') {
+      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
+    } else if (a === 'rec-process-open') {
+      this._fetchProfiles(eid).then(() => { this._modal = { type: 'process-recording' }; this._render(); });
+    } else if (a === 'rec-discard') {
+      this._modal = { type: 'confirm', title: this._t('modal.discard_recording_title', {}, 'Discard Recording'), message: this._t('modal.discard_recording_msg', {}, 'Discard the saved recording? This cannot be undone.'), okLabel: this._t('btn.discard', {}, 'Discard'),
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._t('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
+      this._render();
+
+    } else if (a === 'fb-confirm') {
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
+    } else if (a === 'fb-ignore') {
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
+    } else if (a === 'fb-correct') {
+      this._fetchProfiles(eid).then(() => { this._modal = { type: 'correct-feedback', cycleId: btn.dataset.cid, detectedProfile: btn.dataset.prof }; this._render(); });
+    } else if (a === 'fb-dismiss-all') {
+      this._modal = { type: 'confirm', title: this._t('modal.dismiss_all_title', {}, 'Dismiss All Feedbacks'), message: this._t('modal.dismiss_all_msg', {count: this._feedbacks.length}, `Dismiss all ${this._feedbacks.length} pending feedback requests?`), okLabel: this._t('modal.dismiss_all_ok', {}, 'Dismiss All'),
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast(this._t('toast.feedback_all_dismissed', {}, 'All feedbacks dismissed')); await this._fetchFeedbacks(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } } };
+      this._render();
+
+    } else if (a === 'create-phase') {
+      this._modal = { type: 'create-phase', deviceType: btn.dataset.dtype }; this._render();
+    } else if (a === 'edit-phase') {
+      this._modal = { type: 'edit-phase', phaseId: btn.dataset.pid, phaseName: btn.dataset.pname, phaseDesc: btn.dataset.pdesc, isDefault: btn.dataset.pisdefault === 'true' }; this._render();
+    } else if (a === 'del-phase') {
+      const pname = btn.dataset.pname, pid = btn.dataset.pid;
+      this._modal = { type: 'confirm', title: this._t('modal.delete_phase_title', {}, 'Delete Phase'), message: this._t('modal.delete_phase_msg', {name: pname}, `Delete phase "${pname}"?`), okLabel: this._t('btn.delete', {}, 'Delete'),
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(this._t('toast.phase_deleted', {name: pname}, `Phase "${pname}" deleted`)); await this._fetchPhases(eid); } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); } } };
+      this._render();
+
+    } else if (a === 'diag-refresh') {
+      this._fetchToolsData(eid).then(() => this._render());
+
+    } else if (a === 'reprocess-history') {
+      this._modal = { type: 'confirm', title: this._t('modal.process_history_title', {}, 'Process History'), message: this._t('modal.process_history_msg', {}, 'Re-run matching, refresh suggestions, retrain ML (if enabled) and recompute cycle health across all stored cycles. This may take a while.'), okLabel: this._t('modal.process_history_ok', {}, 'Process'),
+        onOk: () => this._kickAndTrack({ type: `${_DOMAIN}/reprocess_history`, entry_id: eid }, 'reprocess', async (r) => {
+          const nc = r.count || 0;
+          const bits = [this._t('toast.processed_cycles', {n: nc}, nc + ' cycles')];
+          if (r.suggestions != null) bits.push(this._t('toast.processed_suggestions', {n: r.suggestions}, r.suggestions + ' suggestion(s)'));
+          const np = (r.ml_training && r.ml_training.ok && (r.ml_training.promoted || []).length) || 0;
+          if (np) bits.push(this._t('toast.processed_models', {n: np}, np + ' model(s) promoted'));
+          this._showToast(this._t('toast.processed', {bits: bits.join(', ')}, 'Processed ' + bits.join(', ')));
+          await this._fetchToolsData(eid);
+        }) };
+      this._render();
+    } else if (a === 'clear-debug') {
+      this._modal = { type: 'confirm', title: this._t('modal.clear_debug_title', {}, 'Clear Debug Data'), message: this._t('modal.clear_debug_msg', {}, 'Delete all stored debug traces?'), okLabel: this._t('status.clear', {}, 'Clear'),
+        onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._t('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
+      this._render();
+    } else if (a === 'wipe-history') {
+      this._modal = { type: 'confirm', title: this._t('modal.wipe_all_title', {}, 'Wipe All Data'), message: this._t('modal.wipe_all_msg', {}, '⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.'), okLabel: this._t('modal.wipe_all_ok', {}, 'Wipe Everything'),
+        onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
+      this._render();
+
+    } else if (a === 'export-config') {
+      this._ws({ type: `${_DOMAIN}/export_config`, entry_id: eid }).then(r => {
+        const blob = new Blob([r.json_data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a2 = document.createElement('a');
+        a2.href = url; a2.download = `washdata_export_${eid.slice(0, 8)}.json`;
+        document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
+        this._showToast(this._t('toast.export_downloaded', {}, 'Export downloaded'));
+      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
+    } else if (a === 'export-select-open') {
+      // Open the export wizard: fetch this device's inventory, default everything on.
+      this._modal = { type: 'export-select', inventory: null, loading: true, sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }, expanded: new Set() };
+      this._render();
+      (async () => {
+        let inv = null;
+        try { const r = await this._ws({ type: `${_DOMAIN}/get_export_inventory`, entry_id: eid }); inv = (r && r.manifest) || null; }
+        catch (e) { this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'); }
+        if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'export-select') return;
+        if (!inv) { this._modal = null; this._render(); return; }
+        this._modal.inventory = inv;
+        this._modal.sel = this._wizInitSel({ categories: inv }, false);
+        this._modal.loading = false;
+        this._render();
+      })();
+    } else if (a === 'cyc-select-toggle') {
+      this._selectMode = !this._selectMode;
+      if (!this._selectMode) this._cycleSel.clear();
+      this._render();
+    } else if (a === 'cyc-auto-open') {
+      this._modal = { type: 'auto-label' }; this._render();
+    } else if (a === 'cyc-merge') {
+      const ids = Array.from(this._cycleSel);
+      if (ids.length < 2) return;
+      this._fetchProfiles(eid).then(() => { this._modal = { type: 'merge-cycles', ids }; this._render(); });
+    } else if (a === 'cyc-relabel') {
+      // D6: bulk relabel — reuse the existing profile picker.
+      const ids = Array.from(this._cycleSel);
+      if (!ids.length) return;
+      this._fetchProfiles(eid).then(() => { this._modal = { type: 'bulk-relabel', ids }; this._render(); });
+    } else if (a === 'cyc-load-more') {
+      // D3: append the next page, preserving current sort/filter.
+      this._busyRun('cyc-load-more', async () => {
+        try { await this._loadMoreCycles(eid); }
+        catch (e) { this._showToast(this._t('toast.load_more_failed', { error: e.message || e }, 'Could not load more: ' + (e.message || e)), 'error'); }
+      });
+    } else if (a === 'task-cancel') {
+      const tid = btn.dataset.taskId;
+      if (tid) {
+        this._cancellingTasks.add(tid);
+        this._updateTaskPills();
+        this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {
+          // Cancel request itself failed (dropped socket, etc.) — re-enable the
+          // ✕ so the user can retry instead of leaving the pill stuck "Cancelling…".
+          this._cancellingTasks.delete(tid);
+          this._updateTaskPills();
+        });
+      }
+    } else if (a === 'cyc-compare') {
+      const ids = Array.from(this._cycleSel);
+      if (ids.length < 2) return;
+      // Open the overlay modal immediately (loading state), then fetch each
+      // selected cycle's trace in parallel and fill it in as they arrive.
+      this._modal = { type: 'compare-cycles', ids, cycles: {}, hidden: new Set(), overlays: [], loaded: false };
+      if (!this._profiles.length) this._fetchProfiles(eid);
+      this._render();
+      Promise.all(ids.map(cid =>
+        this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
+          .then(r => ({ cid, r })).catch(() => ({ cid, r: null }))
+      )).then(results => {
+        if (!this._modal || this._modal.type !== 'compare-cycles') return;
+        results.forEach(({ cid, r }) => { if (r) this._modal.cycles[cid] = r; });
+        this._modal.loaded = true;
+        this._render();
+      });
+    } else if (a === 'cyc-bulk-del') {
+      // D4: optimistic delete with a 10s Undo window (no confirm dialog).
+      const ids = Array.from(this._cycleSel);
+      if (!ids.length) return;
+      this._deleteCyclesWithUndo(eid, ids);
+    } else if (a === 'retry-cycles') {
+      this._fetchCycles(eid).then(() => this._render());
+    } else if (a === 'retry-profiles') {
+      Promise.all([this._fetchProfiles(eid), this._fetchProfileGroups(eid)]).then(() => this._render());
+    } else if (a === 'retry-suggestions') {
+      this._fetchSuggestions(eid).then(() => this._render());
+    } else if (a === 'goto-suggestions') {
+      this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
+    } else if (a === 'goto-conflicts') {
+      this._tab = 'settings'; this._fetchTabData();
+    } else if (a === 'conf-goto-section') {
+      const confKeys = this._conflictKeysFromOpts();
+      for (const sec of _SETTINGS_SECTIONS) {
+        const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
+        if (fields.some(f => confKeys.has(f.key))) { this._settingsSec = sec.id; this._render(); break; }
+      }
+    } else if (a === 'toggle-settings-history') {
+      this._settingsHistoryOpen = !this._settingsHistoryOpen;
+      this._render();
+
+    } else if (a === 'settings-revert-key') {
+      const key = btn.dataset.key;
+      const val = JSON.parse(btn.dataset.val);
+      if (!key) return;
+      const eid = dev.entry_id;
+      this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { [key]: val } })
+        .then(() => this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }))
+        .then(r => { this._opts = r.options || {}; this._optDefaults = r.defaults || {}; return this._fetchSettingsChangelog(eid); })
+        .then(() => {
+          this._showToast(this._t('msg.toast_reverted', { key: this._t('setting.' + key + '.label', {}, key) }, '{key} reverted'), 'success');
+          this._render();
+        })
+        .catch(e => this._showToast(this._t('msg.toast_error', { error: e.message || e }, 'Error: ' + (e.message || e)), 'error'));
+
+    } else if (a === 'toggle-log-drawer') {
+      this._logOpen = !this._logOpen;
+      try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
+      this._render();
+      if (this._logOpen) this._fetchLogs().then(() => { if (this._logOpen) this._render(); });
+    } else if (a === 'open-advanced') {
+      // Overview action cards navigate to the Advanced tab at a given subtab.
+      const sub = btn.dataset.sub;
+      if (sub) this._panelSubtab = sub;
+      this._tab = 'advanced';
+      this._render();
+      if (this._panelSubtab === 'diagnostics' && !this._diag) this._fetchToolsData(eid).then(() => { if (this._tab === 'advanced') this._render(); });
+      else if (this._panelSubtab === 'logs') this._fetchLogs().then(() => { if (this._tab === 'advanced') this._render(); });
+      else if (this._panelSubtab === 'maintenance') this._fetchMaintenance(eid).then(() => { if (this._tab === 'advanced') this._render(); });
+      else if (this._panelSubtab === 'ml') this._fetchTabData();
+    } else if (a === 'add-device') {
+      this._navigate(`/config/integrations/integration/${_DOMAIN}`);
+    } else if (a === 'goto-feedbacks') {
+      this._tab = 'history'; this._cycleFilter = { ...this._cycleFilter, status: 'needs_review' }; this._fetchTabData();
+    } else if (a === 'goto-recording') {
+      this._tab = 'status'; this._fetchTabData();
+    } else if (a === 'logs-refresh') {
+      this._fetchLogs().then(() => this._render());
+    } else if (a === 'logs-export') {
+      this._ws({ type: `${_DOMAIN}/get_logs`, limit: 500 }).then(r => {
+        const lines = (r.logs || []).map(x => `${new Date(x.ts * 1000).toISOString()} ${x.level} ${x.msg}`).join('\n');
+        const blob = new Blob([lines], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a2 = document.createElement('a');
+        a2.href = url; a2.download = `washdata_logs_${Date.now()}.txt`;
+        document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
+        this._showToast(this._t('toast.logs_exported', {}, 'Logs exported'));
+      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
+    } else if (a === 'import-config-open') {
+      // Open the import wizard at the paste/upload step.
+      this._modal = { type: 'import-wizard', step: 'input', jsonText: '', manifest: null, error: null,
+        sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() },
+        expanded: new Set(), mode: 'merge', cycleDest: 'reference', conflicts: {} };
+      this._render();
+    } else if (a === 'hist-import-open') {
+      // Open the power-history import wizard at the upload step. Every field is
+      // initialised here so the render-smoke harness (which calls every modal
+      // renderer) never meets a half-built state.
+      this._modal = {
+        type: 'history-import', step: 'input', csvText: '', since: _histDefaultSince(), token: null,
+        scanTaskId: null, applyTaskId: null, result: null, accept: new Set(),
+        done: null, error: null,
+      };
+      this._render();
+    } else if (a === 'import-config-raw') {
+      // Advanced fallback: the legacy raw-JSON whole-store replace.
+      this._modal = { type: 'import-config' }; this._render();
+
+    } else if (a === 'save-prefs') {
+      const dt = sr.getElementById('wd-pref-tab')?.value || '';
+      const dbg = !!sr.getElementById('wd-pref-debug')?.checked;
+      const showExpected = sr.getElementById('wd-pref-expected') ? !!sr.getElementById('wd-pref-expected').checked : true;
+      const showRaw = !!sr.getElementById('wd-pref-raw')?.checked;
+      const dateFmt = sr.getElementById('wd-pref-datefmt')?.value || 'relative';
+      const langOverrideSave = sr.getElementById('wd-pref-lang')?.value || '';
+      const fontScale = parseFloat(sr.getElementById('wd-pref-fontscale')?.value) || 1;
+      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt, lang_override: langOverrideSave, font_scale: fontScale };
+      this._busyRun('save-prefs', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs });
+          if (this._panelCfg) this._panelCfg.prefs = { ...(this._panelCfg.prefs || {}), ...prefs };
+          // Language may have changed: ensure the (now effective) language file is
+          // loaded, then re-render so the new strings take effect immediately.
+          const effLang = langOverrideSave || (this._hass && this._hass.locale && this._hass.locale.language);
+          await this._loadPanelLang(effLang);
+          this._render();
+          this._showToast(this._t('toast.preferences_saved', {}, 'Preferences saved'));
+        } catch (e) { this._showToast(this._t('toast.save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+      });
+
+    } else if (a === 'save-panel') {
+      const panel = {
+        default_tab: sr.getElementById('wd-ps-deftab')?.value || 'status',
+        hidden_tabs: Array.from(sr.querySelectorAll('[data-hidetab]')).filter(c => c.checked).map(c => c.dataset.hidetab),
+      };
+      this._busyRun('save-panel', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/set_panel_config`, panel });
+          this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
+          this._tabInitialized = true;  // keep the user on the current tab
+          this._applyPanelConfig();
+          this._showToast(this._t('toast.panel_settings_saved', {}, 'Panel settings saved'));
+        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+      });
+
+    } else if (a === 'pause-cycle') {
+      this._ws({ type: `${_DOMAIN}/pause_cycle`, entry_id: eid })
+        .then(r => {
+          if (r && r.ok === false) { this._showToast(this._t('toast.pause_no_cycle', {}, 'No active cycle to pause'), 'error'); return; }
+          this._showToast(this._t('toast.cycle_paused', {}, 'Cycle paused'));
+          return this._fetchAll();
+        })
+        .catch(e => this._showToast(this._t('toast.pause_failed', {error: e.message || e}, 'Pause failed: ' + (e.message || e)), 'error'));
+
+    } else if (a === 'resume-cycle') {
+      this._ws({ type: `${_DOMAIN}/resume_cycle`, entry_id: eid })
+        .then(r => {
+          if (r && r.ok === false) { this._showToast(this._t('toast.resume_no_cycle', {}, 'No paused cycle to resume'), 'error'); return; }
+          this._showToast(this._t('toast.cycle_resumed', {}, 'Cycle resumed'));
+          return this._fetchAll();
+        })
+        .catch(e => this._showToast(this._t('msg.toast_resume_failed', {error: e.message || e}, 'Resume failed: ' + (e.message || e)), 'error'));
+
+    } else if (a === 'terminate-cycle') {
+      this._modal = {
+        type: 'confirm',
+        title: this._t('modal.force_stop_title', {}, 'Force Stop Cycle'),
+        message: this._t('modal.force_stop_msg', {}, 'Force-stop the active cycle now? The cycle will be saved as interrupted.'),
+        okLabel: this._t('btn.force_stop', {}, 'Force Stop'),
+        onOk: async () => {
+          try {
+            await this._ws({ type: `${_DOMAIN}/terminate_cycle`, entry_id: eid });
+            this._showToast(this._t('toast.cycle_force_stopped', {}, 'Cycle force-stopped'));
+            await this._fetchAll();
+          } catch (e) { this._showToast(this._t('msg.toast_force_stop_failed', {error: e.message || e}, 'Force stop failed: ' + (e.message || e)), 'error'); }
+        },
+      };
+      this._render();
+
+    } else if (a === 'save-rbac') {
+      const enabled = !!sr.getElementById('wd-rbac-enabled')?.checked;
+      const default_level = sr.getElementById('wd-rbac-default')?.value || 'none';
+      const usersMap = {};
+      sr.querySelectorAll('[data-rbacuser]').forEach(el => {
+        const uid = el.dataset.rbacuser, dev = el.dataset.rbacdev, val = el.value;
+        if (!usersMap[uid]) usersMap[uid] = { default: 'none', devices: {} };
+        if (dev === '__default__') usersMap[uid].default = val;
+        else if (val && val !== 'inherit') usersMap[uid].devices[dev] = val;
+      });
+      this._busyRun('save-rbac', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/set_panel_config`, rbac: { enabled, default_level, users: usersMap } });
+          this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
+          this._showToast(this._t('toast.access_saved', {}, 'Access control saved'));
+        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+      });
+    }
+  }
+
+  _onActSuggestions(a, btn, dev, eid, sr) {
+    if (a === 'sug-apply-all') {
       const keys = this._suggestions.map(s => s.key);
       this._busyRun('save-settings', async () => {
         try {
@@ -10107,6 +11264,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchSuggestions(eid);
           const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
           this._opts = r.options || {};
+          this._optDefaults = r.defaults || {};  // #396
           this._prevOpts = null;
           this._cascadePending = {};
           this._preCascadeOpts = null;
@@ -10153,8 +11311,11 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchSuggestions(eid);
         } catch (e) { this._showToast(this._t('toast.analysis_failed', {error: e.message || e}, 'Analysis failed: ' + (e.message || e)), 'error'); }
       });
+    }
+  }
 
-    } else if (a === 'ml-train-now') {
+  _onActMl(a, btn, dev, eid) {
+    if (a === 'ml-train-now') {
       // Detached, registry-tracked task: a header pill shows progress and it
       // survives a dropped socket; the result loads when it settles.
       this._kickAndTrack({ type: `${_DOMAIN}/trigger_ml_training`, entry_id: eid }, 'ml-train-now:' + eid, async (r) => {
@@ -10184,9 +11345,12 @@ class HaWashdataPanel extends HTMLElement {
           await this._loadMlTrainingStatus(eid);
         } catch (e) { this._showToast(this._t('msg.toast_revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
       });
+    }
+  }
 
+  _onActStore(a, btn, dev, eid, sr) {
     // ── Community Store ──────────────────────────────────────────────────────
-    } else if (a === 'store-toggle-online') {
+    if (a === 'store-toggle-online') {
       // Online features are integration-wide: persist via the global store_set_online.
       const on = !!btn.checked;
       this._busyRun('store-account', async () => {
@@ -10209,6 +11373,38 @@ class HaWashdataPanel extends HTMLElement {
         try {
           const r = await this._ws({ type: `${_DOMAIN}/store_set_prefs`, entry_id: eid, prefs: { [key]: val } });
           if (r && r.prefs) this._constants = { ...this._constants, storePrefs: r.prefs };
+        } catch (e) {
+          this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+        }
+      });
+
+    } else if (a === 'store-goto-identity') {
+      this._tab = 'settings';
+      this._settingsSec = 'basic';   // the Device info group lives in Basic
+      this._fetchTabData();
+      // Focus the brand picker once the Settings form has rendered. Focusing it also
+      // opens its dropdown, which is what loads the brand catalog (_ensureCatalogList).
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const el = this.shadowRoot && this.shadowRoot.getElementById('wd-store-brand');
+        if (el) { el.focus(); el.scrollIntoView({ block: 'center' }); }
+      }));
+
+    } else if (a === 'store-refresh-catalog') {
+      // Drop the backend's cached catalog AND every local copy of it, so the next time a
+      // picker is opened it genuinely re-reads the store.
+      this._busyRun('store-refresh-catalog', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/store_refresh_catalog`, entry_id: eid });
+          clearTimeout(this._brandSearchTimer); this._brandSearchTimer = null;
+          this._catalog.brands = undefined; this._catalog.devices = undefined;
+          this._catalog.forBrand = null;
+          this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
+          this._catalogEntry = null;
+          if (this._entityListCache) {
+            delete this._entityListCache.store_brand;
+            delete this._entityListCache.store_model;
+          }
+          this._showToast(this._t('toast.catalog_refreshed', {}, 'Community catalog refreshed'));
         } catch (e) {
           this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
         }
@@ -10258,8 +11454,16 @@ class HaWashdataPanel extends HTMLElement {
         try {
           const r = await this._ws({ type: `${_DOMAIN}/store_confirm_device`, entry_id: eid, device_id: did });
           if (r && r.error) { this._showToast(this._t('toast.store_error', {error: r.error}, 'Error: ' + r.error), 'error'); return; }
-          const d = (this._catalog.devices || []).find(x => String(x.id) === String(did));
-          if (d && r) { d.confirmCount = r.confirmCount; d.status = r.status; }
+          // Patch every copy of the row the UI may be showing: the picker's badge now
+          // reads the resolved catalog entry, while the Store tab reads the browse list.
+          const rows = [
+            ...(this._catalog.devices || []),
+            ...(this._storeDevices || []),
+            (this._catalogEntry && this._catalogEntry.device) || null,
+          ];
+          for (const d of rows) {
+            if (r && d && String(d.id) === String(did)) { d.confirmCount = r.confirmCount; d.status = r.status; }
+          }
           this._showToast(r && r.status === 'approved' ? this._t('toast.device_approved', {}, 'Approved by the community') : this._t('toast.thanks_confirming', {}, 'Thanks for confirming'));
           this._render();
         } catch (e2) { this._showToast(this._t('toast.store_error', {error: e2.message || e2}, 'Error: ' + (e2.message || e2)), 'error'); }
@@ -10412,8 +11616,11 @@ class HaWashdataPanel extends HTMLElement {
         brand: this._opts.store_brand || '', model: this._opts.store_model || '', origin: location.origin,
       }).toString();
       window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');
+    }
+  }
 
-    } else if (a === 'auto-new') {
+  _onActAuto(a, btn, dev, eid, sr) {
+    if (a === 'auto-new') {
       this._navigate('/config/automation/edit/new');
 
     } else if (a === 'auto-new-started') {
@@ -10454,119 +11661,11 @@ class HaWashdataPanel extends HTMLElement {
         try { await this._ws({ type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid, confidence_threshold: thr }); this._showToast(this._t('toast.auto_label_complete', {}, 'Auto-label complete')); await this._fetchCycles(eid); }
         catch (e) { this._showToast(this._t('toast.auto_label_failed', {error: e.message || e}, 'Auto-label failed: ' + (e.message || e)), 'error'); }
       });
+    }
+  }
 
-    } else if (a === 'create-profile') {
-      this._modal = { type: 'create-profile' }; this._render();
-
-    } else if (a === 'setup-cta') {
-      // Setup card primary / secondary CTA — navigate to the relevant panel section.
-      const ctaAction = btn.dataset.ctaAction || '';
-      let params = {};
-      try { params = JSON.parse(btn.dataset.ctaParams || '{}'); } catch (_) {}
-      this._dispatchSetupCta(ctaAction, params);
-
-    } else if (a === 'setup-skip') {
-      // Setup card step skip (snooze 14 days or never).
-      const stepKey = btn.dataset.step;
-      const snooze = btn.dataset.snooze; // "never" or "14d"
-      if (stepKey) {
-        let val;
-        if (snooze === 'never') {
-          val = 'never';
-        } else {
-          const until = new Date();
-          until.setDate(until.getDate() + 14);
-          val = until.toISOString();
-        }
-        this._setPref(stepKey, val);
-        this._reloadSetupStatus(); // async fire-and-forget; calls _render() when done
-      }
-
-    } else if (a === 'hide-setup-card') {
-      // Setup card permanent hide (only offered when dismissible, i.e. phase 3/4).
-      // Keep _setupStatus so _htmlSetupCard can collapse to the phase-3 chip
-      // immediately (nulling it here would hide the card entirely instead — the
-      // sibling setup-skip / expand-setup handlers also leave the status intact).
-      this._setPref('setup_card_dismissed', true);
-      this._render();
-
-    } else if (a === 'expand-setup') {
-      // Phase 3/4 chip tapped — restore full guidance card by clearing the pref.
-      this._setPref('setup_card_dismissed', false);
-      this._render();
-
-    } else if (a === 'set-settings-level') {
-      // F2: switch the Settings tab between Basic and Advanced disclosure.
-      const lvl = (btn.type === 'checkbox' ? btn.checked : btn.dataset.slevel === 'advanced') ? 'advanced' : 'basic';
-      if (lvl !== this._pref('settings_level', 'basic')) {
-        this._snapshotFormToPending(sr);  // keep in-progress edits across re-render
-        this._setPref('settings_level', lvl);
-        this._render();
-      }
-
-    } else if (a === 'pg-new' || a === 'pg-edit' || a === 'pg-suggest') {
-      if (a === 'pg-new') {
-        this._modal = { type: 'profile-group', orig: null, name: '', members: [] };
-      } else if (a === 'pg-edit') {
-        const gname = btn.dataset.gname;
-        const g = ((this._profileGroups || {}).groups || []).find(x => x.name === gname);
-        this._modal = { type: 'profile-group', orig: gname, name: gname, members: g ? [...(g.members || [])] : [] };
-      } else {
-        const s = ((this._profileGroups || {}).suggestions || [])[parseInt(btn.dataset.idx, 10)] || null;
-        if (!s) return;
-        this._modal = { type: 'profile-group', orig: s.existing_group || null, name: s.existing_group || '', members: [...(s.members || [])] };
-      }
-      this._render();
-      // Fetch every profile's envelope so ticked members render on the overlay.
-      this._ensureProfileEnvs(eid, (this._profiles || []).map(p => p.name)).then(() => {
-        if (this._modal && this._modal.type === 'profile-group') this._render();
-      });
-
-    } else if (a === 'rebuild-envelopes') {
-      // Backgrounded task (issue #311): rebuilding every profile serially can
-      // stall a low-power host, so run it via the registry with a header pill.
-      this._kickAndTrack(
-        { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
-        'rebuild-envelopes',
-        async () => { this._showToast(this._t('toast.envelopes_rebuilt', {}, 'Envelopes rebuilt')); await this._fetchProfiles(eid); },
-      );
-
-    } else if (a === 'rec-start') {
-      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
-    } else if (a === 'rec-stop') {
-      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
-    } else if (a === 'rec-process-open') {
-      this._fetchProfiles(eid).then(() => { this._modal = { type: 'process-recording' }; this._render(); });
-    } else if (a === 'rec-discard') {
-      this._modal = { type: 'confirm', title: this._t('modal.discard_recording_title', {}, 'Discard Recording'), message: this._t('modal.discard_recording_msg', {}, 'Discard the saved recording? This cannot be undone.'), okLabel: this._t('btn.discard', {}, 'Discard'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._t('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
-      this._render();
-
-    } else if (a === 'fb-confirm') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
-    } else if (a === 'fb-ignore') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
-    } else if (a === 'fb-correct') {
-      this._fetchProfiles(eid).then(() => { this._modal = { type: 'correct-feedback', cycleId: btn.dataset.cid, detectedProfile: btn.dataset.prof }; this._render(); });
-    } else if (a === 'fb-dismiss-all') {
-      this._modal = { type: 'confirm', title: this._t('modal.dismiss_all_title', {}, 'Dismiss All Feedbacks'), message: this._t('modal.dismiss_all_msg', {count: this._feedbacks.length}, `Dismiss all ${this._feedbacks.length} pending feedback requests?`), okLabel: this._t('modal.dismiss_all_ok', {}, 'Dismiss All'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast(this._t('toast.feedback_all_dismissed', {}, 'All feedbacks dismissed')); await this._fetchFeedbacks(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } } };
-      this._render();
-
-    } else if (a === 'create-phase') {
-      this._modal = { type: 'create-phase', deviceType: btn.dataset.dtype }; this._render();
-    } else if (a === 'edit-phase') {
-      this._modal = { type: 'edit-phase', phaseId: btn.dataset.pid, phaseName: btn.dataset.pname, phaseDesc: btn.dataset.pdesc, isDefault: btn.dataset.pisdefault === 'true' }; this._render();
-    } else if (a === 'del-phase') {
-      const pname = btn.dataset.pname, pid = btn.dataset.pid;
-      this._modal = { type: 'confirm', title: this._t('modal.delete_phase_title', {}, 'Delete Phase'), message: this._t('modal.delete_phase_msg', {name: pname}, `Delete phase "${pname}"?`), okLabel: this._t('btn.delete', {}, 'Delete'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(this._t('toast.phase_deleted', {name: pname}, `Phase "${pname}" deleted`)); await this._fetchPhases(eid); } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); } } };
-      this._render();
-
-    } else if (a === 'diag-refresh') {
-      this._fetchToolsData(eid).then(() => this._render());
-
-    } else if (a === 'maint-add') {
+  _onActMaintenance(a, btn, dev, eid, sr) {
+    if (a === 'maint-add') {
       const eventType = sr.getElementById('wd-maint-type')?.value || '';
       const date = sr.getElementById('wd-maint-date')?.value || '';
       const notes = (sr.getElementById('wd-maint-notes')?.value || '').trim();
@@ -10608,74 +11707,11 @@ class HaWashdataPanel extends HTMLElement {
           this._render();
         } catch (e) { this._showToast(this._t('toast.reminders_save_failed', { error: e.message || e }, 'Could not save reminders: ' + (e.message || e)), 'error'); }
       });
+    }
+  }
 
-    } else if (a === 'reprocess-history') {
-      this._modal = { type: 'confirm', title: this._t('modal.process_history_title', {}, 'Process History'), message: this._t('modal.process_history_msg', {}, 'Re-run matching, refresh suggestions, retrain ML (if enabled) and recompute cycle health across all stored cycles. This may take a while.'), okLabel: this._t('modal.process_history_ok', {}, 'Process'),
-        onOk: () => this._kickAndTrack({ type: `${_DOMAIN}/reprocess_history`, entry_id: eid }, 'reprocess', async (r) => {
-          const nc = r.count || 0;
-          const bits = [this._t('toast.processed_cycles', {n: nc}, nc + ' cycles')];
-          if (r.suggestions != null) bits.push(this._t('toast.processed_suggestions', {n: r.suggestions}, r.suggestions + ' suggestion(s)'));
-          const np = (r.ml_training && r.ml_training.ok && (r.ml_training.promoted || []).length) || 0;
-          if (np) bits.push(this._t('toast.processed_models', {n: np}, np + ' model(s) promoted'));
-          this._showToast(this._t('toast.processed', {bits: bits.join(', ')}, 'Processed ' + bits.join(', ')));
-          await this._fetchToolsData(eid);
-        }) };
-      this._render();
-    } else if (a === 'clear-debug') {
-      this._modal = { type: 'confirm', title: this._t('modal.clear_debug_title', {}, 'Clear Debug Data'), message: this._t('modal.clear_debug_msg', {}, 'Delete all stored debug traces?'), okLabel: this._t('status.clear', {}, 'Clear'),
-        onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._t('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
-      this._render();
-    } else if (a === 'wipe-history') {
-      this._modal = { type: 'confirm', title: this._t('modal.wipe_all_title', {}, 'Wipe All Data'), message: this._t('modal.wipe_all_msg', {}, '⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.'), okLabel: this._t('modal.wipe_all_ok', {}, 'Wipe Everything'),
-        onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
-      this._render();
-
-    } else if (a === 'export-config') {
-      this._ws({ type: `${_DOMAIN}/export_config`, entry_id: eid }).then(r => {
-        const blob = new Blob([r.json_data], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a2 = document.createElement('a');
-        a2.href = url; a2.download = `washdata_export_${eid.slice(0, 8)}.json`;
-        document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
-        this._showToast(this._t('toast.export_downloaded', {}, 'Export downloaded'));
-      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
-    } else if (a === 'export-select-open') {
-      // Open the export wizard: fetch this device's inventory, default everything on.
-      this._modal = { type: 'export-select', inventory: null, loading: true, sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }, expanded: new Set() };
-      this._render();
-      (async () => {
-        let inv = null;
-        try { const r = await this._ws({ type: `${_DOMAIN}/get_export_inventory`, entry_id: eid }); inv = (r && r.manifest) || null; }
-        catch (e) { this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'); }
-        if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'export-select') return;
-        if (!inv) { this._modal = null; this._render(); return; }
-        this._modal.inventory = inv;
-        this._modal.sel = this._wizInitSel({ categories: inv }, false);
-        this._modal.loading = false;
-        this._render();
-      })();
-    } else if (a === 'cyc-select-toggle') {
-      this._selectMode = !this._selectMode;
-      if (!this._selectMode) this._cycleSel.clear();
-      this._render();
-    } else if (a === 'cyc-auto-open') {
-      this._modal = { type: 'auto-label' }; this._render();
-    } else if (a === 'cyc-merge') {
-      const ids = Array.from(this._cycleSel);
-      if (ids.length < 2) return;
-      this._fetchProfiles(eid).then(() => { this._modal = { type: 'merge-cycles', ids }; this._render(); });
-    } else if (a === 'cyc-relabel') {
-      // D6: bulk relabel — reuse the existing profile picker.
-      const ids = Array.from(this._cycleSel);
-      if (!ids.length) return;
-      this._fetchProfiles(eid).then(() => { this._modal = { type: 'bulk-relabel', ids }; this._render(); });
-    } else if (a === 'cyc-load-more') {
-      // D3: append the next page, preserving current sort/filter.
-      this._busyRun('cyc-load-more', async () => {
-        try { await this._loadMoreCycles(eid); }
-        catch (e) { this._showToast(this._t('toast.load_more_failed', { error: e.message || e }, 'Could not load more: ' + (e.message || e)), 'error'); }
-      });
-    } else if (a === 'pg-analysis-tab') {
+  _onActPlayground(a, btn, dev, eid) {
+    if (a === 'pg-analysis-tab') {
       const tab = btn.dataset.subtab || 'history';
       if (tab !== this._pgAnalysisTab) { this._pgAnalysisTab = tab; this._render(); requestAnimationFrame(() => this._drawPlaygroundCanvases()); }
     } else if (a === 'pg-run-history') {
@@ -10684,18 +11720,6 @@ class HaWashdataPanel extends HTMLElement {
       this._pgBatchCancel = true;
       const tid = this._pgHistoryTaskId || this._pgSweepTaskId;
       if (tid) this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
-    } else if (a === 'task-cancel') {
-      const tid = btn.dataset.taskId;
-      if (tid) {
-        this._cancellingTasks.add(tid);
-        this._updateTaskPills();
-        this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {
-          // Cancel request itself failed (dropped socket, etc.) — re-enable the
-          // ✕ so the user can retry instead of leaving the pill stuck "Cancelling…".
-          this._cancellingTasks.delete(tid);
-          this._updateTaskPills();
-        });
-      }
     } else if (a === 'pg-load-run') {
       const tid = btn.dataset.taskId;
       if (!tid) return;
@@ -10751,193 +11775,6 @@ class HaWashdataPanel extends HTMLElement {
       this._pgDeletePreset();
     } else if (a === 'pg-publish-one') {
       this._pgPublishOne(btn.dataset.pgkey);
-    } else if (a === 'cyc-compare') {
-      const ids = Array.from(this._cycleSel);
-      if (ids.length < 2) return;
-      // Open the overlay modal immediately (loading state), then fetch each
-      // selected cycle's trace in parallel and fill it in as they arrive.
-      this._modal = { type: 'compare-cycles', ids, cycles: {}, hidden: new Set(), overlays: [], loaded: false };
-      if (!this._profiles.length) this._fetchProfiles(eid);
-      this._render();
-      Promise.all(ids.map(cid =>
-        this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
-          .then(r => ({ cid, r })).catch(() => ({ cid, r: null }))
-      )).then(results => {
-        if (!this._modal || this._modal.type !== 'compare-cycles') return;
-        results.forEach(({ cid, r }) => { if (r) this._modal.cycles[cid] = r; });
-        this._modal.loaded = true;
-        this._render();
-      });
-    } else if (a === 'cyc-bulk-del') {
-      // D4: optimistic delete with a 10s Undo window (no confirm dialog).
-      const ids = Array.from(this._cycleSel);
-      if (!ids.length) return;
-      this._deleteCyclesWithUndo(eid, ids);
-    } else if (a === 'retry-cycles') {
-      this._fetchCycles(eid).then(() => this._render());
-    } else if (a === 'retry-profiles') {
-      Promise.all([this._fetchProfiles(eid), this._fetchProfileGroups(eid)]).then(() => this._render());
-    } else if (a === 'retry-suggestions') {
-      this._fetchSuggestions(eid).then(() => this._render());
-    } else if (a === 'goto-suggestions') {
-      this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
-    } else if (a === 'goto-conflicts') {
-      this._tab = 'settings'; this._fetchTabData();
-    } else if (a === 'conf-goto-section') {
-      const confKeys = this._conflictKeysFromOpts();
-      for (const sec of _SETTINGS_SECTIONS) {
-        const fields = sec.fields || (sec.groups || []).flatMap(g => g.fields || []);
-        if (fields.some(f => confKeys.has(f.key))) { this._settingsSec = sec.id; this._render(); break; }
-      }
-    } else if (a === 'toggle-settings-history') {
-      this._settingsHistoryOpen = !this._settingsHistoryOpen;
-      this._render();
-
-    } else if (a === 'settings-revert-key') {
-      const key = btn.dataset.key;
-      const val = JSON.parse(btn.dataset.val);
-      if (!key) return;
-      const eid = dev.entry_id;
-      this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { [key]: val } })
-        .then(() => this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }))
-        .then(r => { this._opts = r.options || {}; return this._fetchSettingsChangelog(eid); })
-        .then(() => {
-          this._showToast(this._t('msg.toast_reverted', { key: this._t('setting.' + key + '.label', {}, key) }, '{key} reverted'), 'success');
-          this._render();
-        })
-        .catch(e => this._showToast(this._t('msg.toast_error', { error: e.message || e }, 'Error: ' + (e.message || e)), 'error'));
-
-    } else if (a === 'toggle-log-drawer') {
-      this._logOpen = !this._logOpen;
-      try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
-      this._render();
-      if (this._logOpen) this._fetchLogs().then(() => { if (this._logOpen) this._render(); });
-    } else if (a === 'open-advanced') {
-      // Overview action cards navigate to the Advanced tab at a given subtab.
-      const sub = btn.dataset.sub;
-      if (sub) this._panelSubtab = sub;
-      this._tab = 'advanced';
-      this._render();
-      if (this._panelSubtab === 'diagnostics' && !this._diag) this._fetchToolsData(eid).then(() => { if (this._tab === 'advanced') this._render(); });
-      else if (this._panelSubtab === 'logs') this._fetchLogs().then(() => { if (this._tab === 'advanced') this._render(); });
-      else if (this._panelSubtab === 'maintenance') this._fetchMaintenance(eid).then(() => { if (this._tab === 'advanced') this._render(); });
-      else if (this._panelSubtab === 'ml') this._fetchTabData();
-    } else if (a === 'add-device') {
-      this._navigate(`/config/integrations/integration/${_DOMAIN}`);
-    } else if (a === 'goto-feedbacks') {
-      this._tab = 'history'; this._cycleFilter = { ...this._cycleFilter, status: 'needs_review' }; this._fetchTabData();
-    } else if (a === 'goto-recording') {
-      this._tab = 'status'; this._fetchTabData();
-    } else if (a === 'logs-refresh') {
-      this._fetchLogs().then(() => this._render());
-    } else if (a === 'logs-export') {
-      this._ws({ type: `${_DOMAIN}/get_logs`, limit: 500 }).then(r => {
-        const lines = (r.logs || []).map(x => `${new Date(x.ts * 1000).toISOString()} ${x.level} ${x.msg}`).join('\n');
-        const blob = new Blob([lines], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a2 = document.createElement('a');
-        a2.href = url; a2.download = `washdata_logs_${Date.now()}.txt`;
-        document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
-        this._showToast(this._t('toast.logs_exported', {}, 'Logs exported'));
-      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
-    } else if (a === 'import-config-open') {
-      // Open the import wizard at the paste/upload step.
-      this._modal = { type: 'import-wizard', step: 'input', jsonText: '', manifest: null, error: null,
-        sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() },
-        expanded: new Set(), mode: 'merge', cycleDest: 'reference', conflicts: {} };
-      this._render();
-    } else if (a === 'import-config-raw') {
-      // Advanced fallback: the legacy raw-JSON whole-store replace.
-      this._modal = { type: 'import-config' }; this._render();
-
-    } else if (a === 'save-prefs') {
-      const dt = sr.getElementById('wd-pref-tab')?.value || '';
-      const dbg = !!sr.getElementById('wd-pref-debug')?.checked;
-      const showExpected = sr.getElementById('wd-pref-expected') ? !!sr.getElementById('wd-pref-expected').checked : true;
-      const showRaw = !!sr.getElementById('wd-pref-raw')?.checked;
-      const dateFmt = sr.getElementById('wd-pref-datefmt')?.value || 'relative';
-      const langOverrideSave = sr.getElementById('wd-pref-lang')?.value || '';
-      const fontScale = parseFloat(sr.getElementById('wd-pref-fontscale')?.value) || 1;
-      const prefs = { default_tab: dt, show_debug: dbg, show_expected: showExpected, show_raw: showRaw, date_format: dateFmt, lang_override: langOverrideSave, font_scale: fontScale };
-      this._busyRun('save-prefs', async () => {
-        try {
-          await this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs });
-          if (this._panelCfg) this._panelCfg.prefs = { ...(this._panelCfg.prefs || {}), ...prefs };
-          // Language may have changed: ensure the (now effective) language file is
-          // loaded, then re-render so the new strings take effect immediately.
-          const effLang = langOverrideSave || (this._hass && this._hass.locale && this._hass.locale.language);
-          await this._loadPanelLang(effLang);
-          this._render();
-          this._showToast(this._t('toast.preferences_saved', {}, 'Preferences saved'));
-        } catch (e) { this._showToast(this._t('toast.save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
-      });
-
-    } else if (a === 'save-panel') {
-      const panel = {
-        default_tab: sr.getElementById('wd-ps-deftab')?.value || 'status',
-        hidden_tabs: Array.from(sr.querySelectorAll('[data-hidetab]')).filter(c => c.checked).map(c => c.dataset.hidetab),
-      };
-      this._busyRun('save-panel', async () => {
-        try {
-          await this._ws({ type: `${_DOMAIN}/set_panel_config`, panel });
-          this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
-          this._tabInitialized = true;  // keep the user on the current tab
-          this._applyPanelConfig();
-          this._showToast(this._t('toast.panel_settings_saved', {}, 'Panel settings saved'));
-        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
-      });
-
-    } else if (a === 'pause-cycle') {
-      this._ws({ type: `${_DOMAIN}/pause_cycle`, entry_id: eid })
-        .then(r => {
-          if (r && r.ok === false) { this._showToast(this._t('toast.pause_no_cycle', {}, 'No active cycle to pause'), 'error'); return; }
-          this._showToast(this._t('toast.cycle_paused', {}, 'Cycle paused'));
-          return this._fetchAll();
-        })
-        .catch(e => this._showToast(this._t('toast.pause_failed', {error: e.message || e}, 'Pause failed: ' + (e.message || e)), 'error'));
-
-    } else if (a === 'resume-cycle') {
-      this._ws({ type: `${_DOMAIN}/resume_cycle`, entry_id: eid })
-        .then(r => {
-          if (r && r.ok === false) { this._showToast(this._t('toast.resume_no_cycle', {}, 'No paused cycle to resume'), 'error'); return; }
-          this._showToast(this._t('toast.cycle_resumed', {}, 'Cycle resumed'));
-          return this._fetchAll();
-        })
-        .catch(e => this._showToast(this._t('msg.toast_resume_failed', {error: e.message || e}, 'Resume failed: ' + (e.message || e)), 'error'));
-
-    } else if (a === 'terminate-cycle') {
-      this._modal = {
-        type: 'confirm',
-        title: this._t('modal.force_stop_title', {}, 'Force Stop Cycle'),
-        message: this._t('modal.force_stop_msg', {}, 'Force-stop the active cycle now? The cycle will be saved as interrupted.'),
-        okLabel: this._t('btn.force_stop', {}, 'Force Stop'),
-        onOk: async () => {
-          try {
-            await this._ws({ type: `${_DOMAIN}/terminate_cycle`, entry_id: eid });
-            this._showToast(this._t('toast.cycle_force_stopped', {}, 'Cycle force-stopped'));
-            await this._fetchAll();
-          } catch (e) { this._showToast(this._t('msg.toast_force_stop_failed', {error: e.message || e}, 'Force stop failed: ' + (e.message || e)), 'error'); }
-        },
-      };
-      this._render();
-
-    } else if (a === 'save-rbac') {
-      const enabled = !!sr.getElementById('wd-rbac-enabled')?.checked;
-      const default_level = sr.getElementById('wd-rbac-default')?.value || 'none';
-      const usersMap = {};
-      sr.querySelectorAll('[data-rbacuser]').forEach(el => {
-        const uid = el.dataset.rbacuser, dev = el.dataset.rbacdev, val = el.value;
-        if (!usersMap[uid]) usersMap[uid] = { default: 'none', devices: {} };
-        if (dev === '__default__') usersMap[uid].default = val;
-        else if (val && val !== 'inherit') usersMap[uid].devices[dev] = val;
-      });
-      this._busyRun('save-rbac', async () => {
-        try {
-          await this._ws({ type: `${_DOMAIN}/set_panel_config`, rbac: { enabled, default_level, users: usersMap } });
-          this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
-          this._showToast(this._t('toast.access_saved', {}, 'Access control saved'));
-        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
-      });
     }
   }
 
@@ -10989,190 +11826,17 @@ class HaWashdataPanel extends HTMLElement {
       }
     }
 
-    // ---- Community Store: import a reference cycle ----
-    if (m && m.type === 'store-import') {
-      if (action === 'store-import-mode-new') { m.mode = 'new'; this._render(); return; }
-      if (action === 'store-import-mode-merge') { m.mode = 'merge'; this._render(); return; }
-      if (action === 'store-import-ok') {
-        const msg = { type: `${_DOMAIN}/store_import_cycle`, entry_id: eid, cycle_id: m.cycleId };
-        if (m.mode === 'merge') {
-          const target = sr.getElementById('wd-store-import-target')?.value || '';
-          if (!target) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to merge into'), 'error'); return; }
-          msg.target_profile = target;
-        } else {
-          const name = (sr.getElementById('wd-store-import-name')?.value || '').trim() || m.program;
-          if (!name) { this._showToast(this._t('toast.store_name_required', {}, 'Enter a profile name'), 'error'); return; }
-          msg.new_profile_name = name;
-        }
-        await this._busyRun('store-import', async () => {
-          try {
-            const r = await this._ws(msg);
-            if (r && r.error) { this._showToast(this._t('toast.store_import_failed', {error: r.error}, 'Import failed: ' + r.error), 'error'); return; }
-            this._modal = null;
-            this._showToast(this._t('toast.store_imported', {profile: (r && r.profile) || ''}, `Imported into ${(r && r.profile) || 'profile'}`));
-            await this._fetchProfiles(eid);
-          } catch (e) { this._showToast(this._t('toast.store_import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
+    // NB: 'import-ok' (the legacy raw-JSON import modal) is deliberately NOT in this
+    // list, so the 'import-' names are matched one by one rather than by prefix.
+    if (action.startsWith('store-import-') || action === 'store-share-ok'
+        || action.startsWith('wiz-') || action.startsWith('imp-')
+        || action === 'import-back' || action === 'import-analyze' || action === 'import-apply-ok') {
+      return this._onMActImport(action, btn, m, eid, sr);
     }
 
-    // ---- Community Store: share a golden cycle ----
-    if (m && m.type === 'store-share') {
-      if (action === 'store-share-ok') {
-        const program = (sr.getElementById('wd-store-share-prog')?.value || '').trim();
-        const description = (sr.getElementById('wd-store-share-desc')?.value || '').trim();
-        if (!program) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to share into'), 'error'); return; }
-        await this._busyRun('store-share', async () => {
-          try {
-            const r = await this._ws({ type: `${_DOMAIN}/store_upload_cycle`, entry_id: eid, local_cycle_id: m.cycleId, program, description });
-            if (r && r.error) {
-              if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
-              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
-              return;
-            }
-            this._modal = null;
-            this._showToast(this._t('toast.store_shared', {}, 'Shared to the community store - pending review.'));
-          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-    }
+    if (action.startsWith('hist-')) return this._onMActHistoryImport(action, btn, m, eid, sr);
 
-    // ---- Community Store: share a whole device bundle ----
-    if (m && m.type === 'store-share-device') {
-      if (action === 'sd-toggle-cyc') {
-        const cid = btn.dataset.cid;
-        if (m.selected.has(cid)) m.selected.delete(cid); else m.selected.add(cid);
-        this._render();
-        return;
-      }
-      if (action === 'sd-toggle-prof') {
-        const prog = btn.dataset.prog;
-        const grp = this._shareableByProgram().find(g => g.program === prog);
-        if (grp) {
-          const all = grp.cycles.every(c => m.selected.has(c.id));
-          grp.cycles.forEach(c => { if (all) m.selected.delete(c.id); else m.selected.add(c.id); });
-        }
-        this._render();
-        return;
-      }
-      if (action === 'sd-toggle-phases') {
-        const prog = btn.dataset.prog;
-        if (!m.includePhases) m.includePhases = new Set();
-        if (m.includePhases.has(prog)) m.includePhases.delete(prog); else m.includePhases.add(prog);
-        this._render();
-        return;
-      }
-      if (action === 'sd-toggle-settings') { m.includeSettings = !m.includeSettings; this._render(); return; }
-      if (action === 'sd-toggle-consent') { m.consented = !m.consented; this._render(); return; }
-      if (action === 'sd-toggle-guide') { m.guideOpen = !m.guideOpen; this._render(); return; }
-      if (action === 'store-share-device-ok') {
-        // Build the {local_cycle_id, program} items from the model selection,
-        // resolving each cycle's program from the fetched shareable list.
-        const progById = new Map();
-        (this._shareableCycles || []).forEach(c => progById.set(c.id, (c.profile_name || '').trim()));
-        const items = Array.from(m.selected)
-          .map(cid => ({ local_cycle_id: cid, program: progById.get(cid) || '' }))
-          .filter(it => it.program);
-        if (!items.length) { this._showToast(this._t('toast.share_device_none_sel', {}, 'Select at least one cycle to share'), 'error'); return; }
-        // Only send phases for programs that both opted in AND have a selected cycle.
-        const selectedProgs = new Set(items.map(it => it.program));
-        const includePhases = Array.from(m.includePhases || []).filter(p => selectedProgs.has(p));
-        await this._busyRun('store-share-device', async () => {
-          try {
-            const r = await this._ws({ type: `${_DOMAIN}/store_upload_device`, entry_id: eid, items, include_phases: includePhases, include_settings: !!m.includeSettings });
-            // Pre-flight gate error (not connected / no appliance): keep the modal open.
-            if (r && r.error) {
-              if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
-              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
-              return;
-            }
-            const n = (r && r.cycle_ids && r.cycle_ids.length) || 0;
-            const failed = (r && r.errors && r.errors.length) || 0;
-            const dup = (r && r.duplicates) || 0;
-            const created = (r && r.created != null) ? r.created : n;
-            if (!n) {
-              // Nothing uploaded: surface the first error and keep the modal for retry.
-              const why = (r && r.errors && r.errors[0]) || (r && r.detail) || 'upload_failed';
-              this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error');
-              return;
-            }
-            this._modal = null;
-            if (failed) this._showToast(this._t('toast.store_device_shared_partial', {n, failed}, `Shared ${n} cycle(s); ${failed} could not be uploaded.`), 'info');
-            else if (dup && !created) this._showToast(this._t('toast.store_device_shared_all_dup', {n: dup}, `All ${dup} cycle(s) were already in the community store.`), 'info');
-            else if (dup) this._showToast(this._t('toast.store_device_shared_some_dup', {created, dup}, `Shared ${created} cycle(s); ${dup} were already in the store.`));
-            else this._showToast(this._t('toast.store_device_shared', {n: created}, `Shared ${created} cycle(s) to the community store - pending review.`));
-          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-    }
-
-    // ---- Selective export / import wizard ----
-    if (m && (m.type === 'export-select' || m.type === 'import-wizard')) {
-      // The manifest that backs the tree: inventory for export, analyze result for import.
-      const man = m.type === 'export-select' ? { categories: m.inventory || {} } : (m.manifest || { categories: {} });
-      if (action === 'wiz-toggle-all') {
-        const cats = man.categories || {};
-        const importableOnly = m.type === 'import-wizard';
-        // If everything is already selected, clear; otherwise select all selectable.
-        let allSel = true;
-        this._wizCatOrder().filter(cid => cats[cid] && cats[cid].present).forEach(cid => {
-          if (importableOnly && cats[cid].importable === false) return;
-          if (this._wizCatState(m, cid, man).state !== 'all') allSel = false;
-        });
-        m.sel = allSel
-          ? { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }
-          : this._wizInitSel(man, importableOnly);
-        this._render();
-        return;
-      }
-      if (action === 'wiz-toggle-cat') {
-        const cid = btn.dataset.cat;
-        const st = this._wizCatState(m, cid, man);
-        const turnOn = st.state !== 'all';
-        if (cid === 'profiles') {
-          const items = (man.categories.profiles && man.categories.profiles.items) || [];
-          m.sel.profiles = new Set(turnOn ? items.map(i => i.name) : []);
-        } else if (cid === 'real_cycles' || cid === 'reference_cycles') {
-          const set = new Set();
-          if (turnOn) ((man.categories[cid] && man.categories[cid].groups) || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) set.add(String(cy.id)); }));
-          if (cid === 'real_cycles') m.sel.realIds = set; else m.sel.refIds = set;
-        } else if (turnOn) { m.sel.cats.add(cid); } else { m.sel.cats.delete(cid); }
-        this._render();
-        return;
-      }
-      if (action === 'wiz-toggle-profile') {
-        const name = btn.dataset.name;
-        if (m.sel.profiles.has(name)) m.sel.profiles.delete(name); else m.sel.profiles.add(name);
-        this._render();
-        return;
-      }
-      if (action === 'wiz-toggle-cycgroup') {
-        const cid = btn.dataset.cat; const prof = btn.dataset.prof;
-        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
-        const ids = this._wizGroupIds(man, cid, prof);
-        const all = ids.length > 0 && ids.every(id => set.has(id));
-        ids.forEach(id => { if (all) set.delete(id); else set.add(id); });
-        this._render();
-        return;
-      }
-      if (action === 'wiz-toggle-cyc') {
-        const cid = btn.dataset.cat; const id = btn.dataset.cid;
-        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
-        if (set.has(id)) set.delete(id); else set.add(id);
-        this._render();
-        return;
-      }
-      if (action === 'wiz-expand') {
-        const key = btn.dataset.key;
-        if (!m.expanded) m.expanded = new Set();
-        if (m.expanded.has(key)) m.expanded.delete(key); else m.expanded.add(key);
-        this._render();
-        return;
-      }
-    }
+    if (action.startsWith('sd-') || action === 'store-share-device-ok') return this._onMActStoreShare(action, btn, m, eid);
 
     // Export wizard: generate + download the filtered JSON.
     if (m && m.type === 'export-select' && action === 'export-generate' && eid) {
@@ -11192,153 +11856,7 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
 
-    // Import wizard: step machine + toggles + apply.
-    if (m && m.type === 'import-wizard') {
-      if (action === 'import-back') {
-        m.step = 'input'; m.error = null; this._render();
-        return;
-      }
-      if (action === 'imp-mode-merge') { m.mode = 'merge'; this._render(); return; }
-      if (action === 'imp-mode-replace') { m.mode = 'replace'; this._render(); return; }
-      if (action === 'imp-dest-reference') { m.cycleDest = 'reference'; this._render(); return; }
-      if (action === 'imp-dest-real') { if ((m.manifest || {}).real_history_allowed !== false) { m.cycleDest = 'real_history'; this._render(); } return; }
-      if (action === 'imp-conflict') { m.conflicts[btn.dataset.prof] = btn.value; return; }
-      if (action === 'import-analyze' && eid) {
-        const ta = sr.getElementById('wd-import-json');
-        const jsonText = ta ? ta.value : (m.jsonText || '');
-        m.jsonText = jsonText;
-        if (!jsonText.trim()) { this._showToast(this._t('toast.json_required', {}, 'JSON data is required'), 'error'); return; }
-        m.step = 'analyze'; m.error = null; this._render();
-        try {
-          const r = await this._ws({ type: `${_DOMAIN}/analyze_import`, entry_id: eid, json_data: jsonText });
-          if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'import-wizard') return;
-          const manifest = (r && r.manifest) || {};
-          if (manifest.error) { m.step = 'input'; m.error = manifest.error; this._render(); return; }
-          m.manifest = manifest;
-          m.sel = this._wizInitSel(manifest, true);
-          // Default every conflicting profile to the safest resolution.
-          m.conflicts = {};
-          ((manifest.categories && manifest.categories.profiles && manifest.categories.profiles.items) || [])
-            .forEach(i => { if (i.conflict) m.conflicts[i.name] = 'import_as_copy'; });
-          m.step = 'select';
-          this._render();
-        } catch (e) {
-          if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'import-wizard') return;
-          m.step = 'input'; m.error = (e && e.message) || String(e); this._render();
-        }
-        return;
-      }
-      if (action === 'import-apply-ok' && eid) {
-        const selection = this._wizSelectionPayload(m);
-        await this._busyRun('import-wizard', async () => {
-          try {
-            const r = await this._ws({ type: `${_DOMAIN}/import_config_selective`, entry_id: eid,
-              json_data: m.jsonText, selection, mode: m.mode,
-              conflict_resolutions: m.conflicts, cycle_destination: m.cycleDest, apply_settings: true });
-            const s = (r && r.summary) || {};
-            this._modal = null;
-            this._showToast(this._t('toast.import_selective_done', {
-              profiles: s.profiles_imported || 0,
-              cycles: (s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0),
-            }, `Imported ${s.profiles_imported || 0} profile(s) and ${(s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0)} cycle(s)`));
-            await this._fetchCycles(eid);
-            await this._fetchProfiles(eid);
-          } catch (e) { this._showToast(this._t('toast.import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-    }
-
-
-    // ---- Cycle inspector ----
-    if (m && m.type === 'cycle-detail') {
-      if (action === 'cyc-view') { m.mode = 'view'; this._render(); return; }
-      if (action === 'cyc-trim') { m.mode = 'trim'; if (!m.trim || m.trim.end <= 0) m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
-      if (action === 'cyc-split') { m.mode = 'split'; this._render(); return; }
-      if (action === 'cyc-review') { m.mode = 'review'; this._render(); return; }
-      if (action === 'cyc-review-save') {
-        const cid = m.cycleId;
-        const quality = sr.getElementById('wd-cyc-rev-quality')?.value || '';
-        const golden = !!sr.getElementById('wd-cyc-rev-golden')?.checked;
-        const notes = sr.getElementById('wd-cyc-rev-notes')?.value || '';
-        const tags = Array.from(sr.querySelectorAll('.wd-cyc-rev-tag')).filter(cb => cb.checked).map(cb => cb.value);
-        const newLabel = sr.getElementById('wd-cyc-rev-label')?.value ?? '';
-        const curLabel = (m.curve && m.curve.profile_name) || '';
-        await this._busyRun('cyc-review-save', async () => {
-          try {
-            await this._ws({ type: `${_DOMAIN}/set_ml_review`, entry_id: eid, cycle_id: cid, quality, golden, tags, notes });
-            if (newLabel !== curLabel) {
-              await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: newLabel || null });
-            }
-            this._showToast(this._t('toast.review_saved', {}, 'Review saved'));
-            await this._fetchCycles(eid);
-            // A label change in review now resolves the pending feedback backend-side
-            // (#331), so refresh the queue rather than leaving a stale entry.
-            if (newLabel !== curLabel) await this._fetchFeedbacks(eid);
-            await this._loadMlIndex(eid);
-            if (this._modal && this._modal.cycleId === cid) this._modal.ml = (this._mlById || {})[cid] || this._modal.ml;
-          } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-      if (action === 'trim-mode-s') { m.timeMode = 's'; this._render(); return; }
-      if (action === 'trim-mode-clock') { m.timeMode = 'clock'; this._render(); return; }
-      if (action === 'cyc-reset-trim') { m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
-      if (action === 'cyc-clear-split') { m.split = { offsets: [], profiles: [] }; this._render(); return; }
-      if (action === 'cyc-label') { if (!this._profiles.length) await this._fetchProfiles(eid); this._modal = { type: 'label-cycle', cycleId: m.cycleId }; this._render(); return; }
-      if (action === 'cyc-delete') {
-        // D4: optimistic delete with Undo (close the inspector first).
-        const cid = m.cycleId;
-        this._modal = null; this._render();
-        this._deleteCyclesWithUndo(eid, [cid]);
-        return;
-      }
-      if (action === 'cyc-auto-split') {
-        const gap = parseInt(sr.getElementById('wd-split-gap')?.value || '900', 10);
-        await this._busyRun('cyc-auto', async () => {
-          try { const r = await this._ws({ type: `${_DOMAIN}/analyze_split`, entry_id: eid, cycle_id: m.cycleId, gap_seconds: gap }); m.split.offsets = (r.split_offsets || []).slice(); m.split.profiles = []; if (!m.split.offsets.length) this._showToast(this._t('toast.no_split_found', {}, 'No idle gaps found to split on'), 'info'); }
-          catch (e) { this._showToast(this._t('toast.auto_detect_failed', {error: e.message || e}, 'Auto-detect failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-      if (action === 'cyc-apply-trim') {
-        // Backgrounded task (issue #311): recompute + envelope rebuild can stall a
-        // low-power host, so run it via the registry with a header pill.
-        const cid = m.cycleId, s = m.trim.start, e2 = m.trim.end;
-        // The trim is irreversible (no undo). Confirm before discarding the
-        // majority of the trace so an accidental collapse can't slip through on
-        // a single click (#373).
-        const full = (m.curve && m.curve.full_duration_s) || 0;
-        const keptPct = full > 0 ? Math.max(0, Math.round(((e2 - s) / full) * 100)) : 100;
-        if (keptPct < 50 && !confirm(this._t('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
-        this._kickAndTrack(
-          { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
-          'cyc-trim-apply',
-          async () => {
-            this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed'));
-            await this._closeCycleDetail(eid);
-            await this._fetchCycles(eid);
-          },
-        );
-        return;
-      }
-      if (action === 'cyc-apply-split') {
-        // Backgrounded task (issue #311): per-segment extraction + affected
-        // envelope rebuilds can stall a low-power host, so run it via the registry.
-        const cid = m.cycleId, offs = m.split.offsets.slice(), profs = m.split.profiles.slice();
-        this._kickAndTrack(
-          { type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs },
-          'cyc-split-apply',
-          async (result) => {
-            this._showToast(this._t('toast.split_complete', {count: (result.new_ids || []).length}, `Split into ${(result.new_ids || []).length} cycles`));
-            await this._closeCycleDetail(eid);
-            await this._fetchCycles(eid);
-            await this._fetchProfiles(eid);
-          },
-        );
-        return;
-      }
-    }
+    if (action.startsWith('cyc-') || action.startsWith('trim-mode-')) return this._onMActCycleDetail(action, m, eid, sr);
 
     // ---- Profile control panel ----
     if (m && m.type === 'profile-panel') {
@@ -11351,68 +11869,7 @@ class HaWashdataPanel extends HTMLElement {
         }
         return;
       }
-      if (action === 'pp-phase-add') {
-        const full = (m.env && m.env.target_duration) || (m.env && m.env.avg && m.env.avg.length ? m.env.avg[m.env.avg.length - 1][0] : 600);
-        const last = m.phases.length ? m.phases[m.phases.length - 1].end : 0;
-        const st = Math.min(last, full);
-        m.phases.push({ name: m.catalog[0] || '', start: st, end: Math.min(st + Math.max(60, full * 0.1), full) });
-        this._render(); return;
-      }
-      if (action === 'pp-phase-rm') { const i = +((btn && btn.dataset.idx) || -1); if (i >= 0) { m.phases.splice(i, 1); this._render(); } return; }
-      if (action === 'pp-phase-save') {
-        const phases = m.phases.filter(p => p.name).map(p => ({ name: p.name, start: p.start, end: p.end }));
-        await this._busyRun('pp-phase-save', async () => {
-          try { await this._ws({ type: `${_DOMAIN}/set_profile_phases`, entry_id: eid, profile_name: m.name, phases }); this._showToast(this._t('toast.phases_saved', {}, 'Phases saved')); }
-          catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-      if (action === 'pp-cleanup-del') {
-        const sel = m.cleanup ? Array.from(m.cleanup.selected) : [];
-        if (!sel.length) return;
-        await this._busyRun('pp-cleanup-del', async () => {
-          try {
-            for (const cid of sel) await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid });
-            this._showToast(this._t('toast.cycles_deleted', {count: sel.length}, `Deleted ${sel.length} cycle(s)`));
-            const r = await this._ws({ type: `${_DOMAIN}/get_profile_cycles`, entry_id: eid, profile_name: m.name });
-            if (this._modal) this._modal.cleanup = { cycles: r.cycles || [], selected: new Set() };
-            await this._fetchProfiles(eid);
-          } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
-        });
-        return;
-      }
-      if (action === 'pp-rename') {
-        const nn = sr.getElementById('wd-pp-rename')?.value?.trim();
-        const dur = parseFloat(sr.getElementById('wd-pp-dur')?.value || '0');
-        if (!nn) { this._showToast(this._t('msg.toast_name_required', {}, 'Name required'), 'error'); return; }
-        try {
-          await this._ws({ type: `${_DOMAIN}/rename_profile`, entry_id: eid, profile_name: m.name, new_name: nn, manual_duration_min: dur > 0 ? dur : null });
-          this._showToast(this._t('toast.profile_renamed', {}, 'Profile renamed')); m.name = nn; await this._fetchProfiles(eid);
-          m.stats = (this._profiles || []).find(p => p.name === nn) || m.stats; this._render();
-        } catch (e) { this._showToast(this._t('toast.rename_failed', {error: e.message || e}, 'Rename failed: ' + (e.message || e)), 'error'); }
-        return;
-      }
-      if (action === 'pp-rebuild') {
-        // Backgrounded task (issue #311): rebuild runs via the registry; the
-        // profile's fresh envelope is fetched only once the task has settled.
-        this._kickAndTrack(
-          { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
-          'pp-rebuild',
-          async () => {
-            try {
-              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name });
-              if (this._modal) this._modal.env = r.envelope;
-            } catch (_) { /* modal may have closed */ }
-            this._showToast(this._t('toast.envelope_rebuilt', {}, 'Envelope rebuilt'));
-          },
-        );
-        return;
-      }
-      if (action === 'pp-delete') {
-        // D4: optimistic delete with Undo (close the profile panel first).
-        this._deleteProfileWithUndo(eid, m.name);
-        return;
-      }
+      return this._onMActProfilePanel(action, btn, m, eid, sr);
     }
 
     // ---- Simple form modals ----
@@ -11526,6 +11983,630 @@ class HaWashdataPanel extends HTMLElement {
     }
   }
 
+  // ── Import power history (#344): upload, scan, review, apply ─────────────────
+
+  // Ship the staged text in frame-sized chunks. Home Assistant builds its WebSocket
+  // with aiohttp's default 4 MiB frame cap, and ten days of 5-second data is 5-8 MB of
+  // text - an over-cap frame is not rejected, it closes the connection and takes every
+  // subscription with it. Chunks are split on line boundaries so the server never has to
+  // reassemble a partial row.
+  async _histUpload(eid, text) {
+    const begun = await this._ws({ type: `${_DOMAIN}/history_import_begin`, entry_id: eid });
+    const limit = Math.max(4096, begun.chunk_bytes || 512 * 1024);
+    let seq = 0;
+    let from = 0;
+    while (from < text.length) {
+      let to = Math.min(text.length, from + limit);
+      if (to < text.length) {
+        const nl = text.lastIndexOf('\n', to);
+        if (nl > from) to = nl + 1;
+      }
+      await this._ws({
+        type: `${_DOMAIN}/history_import_chunk`, entry_id: eid,
+        token: begun.token, seq, text: text.slice(from, to),
+      });
+      seq += 1;
+      from = to;
+    }
+    return begun.token;
+  }
+
+  async _histStartScan(eid, m, token) {
+    m.token = token;
+    m.step = 'scan';
+    m.error = null;
+    this._render();
+    const started = await this._ws({
+      type: `${_DOMAIN}/start_history_import_scan`, entry_id: eid, token,
+    });
+    m.scanTaskId = started.task_id;
+    this._addProvisionalTask(started.task_id, 'history_import', eid, 0);
+    if (!this._tasksSubscribed) this._pollTaskGeneric(started.task_id);
+    // A short history can finish before this reply arrives, in which case the task
+    // event fired while we still had no id to match it against. Adopt the current
+    // snapshot so a fast scan is never lost.
+    this._histAdopt(started.task_id);
+  }
+
+  // Pick up a task that may already have settled. Safe to call for a running task.
+  async _histAdopt(taskId) {
+    if (!taskId) return;
+    let snap = (this._tasks || {})[taskId];
+    if (!snap || snap.state === 'running') {
+      try {
+        snap = await this._ws({ type: `${_DOMAIN}/get_task_result`, task_id: taskId });
+      } catch (_) { return; }
+    }
+    if (snap && snap.state && snap.state !== 'running') this._histTaskFinished(snap);
+  }
+
+  // Called from the task-registry snapshot handler when one of our tasks finishes, so a
+  // dropped socket or a closed dialog cannot lose the run.
+  async _histTaskFinished(task) {
+    const m = this._modal;
+    if (!m || m.type !== 'history-import') return;
+    // Both the task-event stream and the post-start adoption can deliver the same
+    // terminal snapshot; settle each task once. The id is only marked once it is known
+    // to be one of ours - an event that arrives before the start reply recorded the id
+    // must not burn it, or the adoption that follows would be a no-op and the wizard
+    // would sit on the progress step forever.
+    if (task.id !== m.scanTaskId && task.id !== m.applyTaskId) return;
+    this._histSettled = this._histSettled || new Set();
+    if (this._histSettled.has(task.id)) return;
+    this._histSettled.add(task.id);
+    if (task.id === m.scanTaskId) {
+      if (task.state === 'error') {
+        m.step = 'input';
+        m.error = task.error || this._t('msg.hist_scan_failed', {}, 'Scanning failed.');
+        this._render();
+        return;
+      }
+      try {
+        const res = task.result ? task : await this._ws({ type: `${_DOMAIN}/get_task_result`, task_id: task.id });
+        m.result = res.result || {};
+        m.accept = new Set((m.result.segments || []).filter(seg => seg.accept).map(seg => seg.index));
+        m.step = 'review';
+        this._render();
+        requestAnimationFrame(() => this._drawHistorySparklines());
+      } catch (e) {
+        m.step = 'input';
+        m.error = String((e && e.message) || e);
+        this._render();
+      }
+      return;
+    }
+    if (task.id === m.applyTaskId) {
+      if (task.state === 'error') {
+        m.error = task.error === 'scan_expired'
+          ? this._t('msg.hist_scan_expired', {}, 'That scan is no longer available. Please scan again.')
+          : (task.error || this._t('msg.hist_import_failed', {}, 'Import failed.'));
+        m.step = 'review';
+        this._render();
+        return;
+      }
+      try {
+        const res = task.result ? task : await this._ws({ type: `${_DOMAIN}/get_task_result`, task_id: task.id });
+        m.done = res.result || {};
+      } catch (_) { m.done = {}; }
+      m.step = 'done';
+      this._render();
+      const dev = this._devices[this._selIdx];
+      if (dev) { this._fetchCycles(dev.entry_id); this._fetchProfiles(dev.entry_id); }
+    }
+  }
+
+  async _onMActHistoryImport(action, btn, m, eid, sr) {
+    if (!m || m.type !== 'history-import' || !eid) return;
+
+    if (action === 'hist-scan') {
+      const ta = sr.getElementById('wd-hist-csv');
+      const text = ta ? ta.value : (m.csvText || '');
+      if (!text.trim()) {
+        this._showToast(this._t('toast.hist_csv_required', {}, 'Load a CSV file or paste its contents first'), 'error');
+        return;
+      }
+      m.csvText = text;
+      await this._busyRun('hist-import', async () => {
+        try {
+          const token = await this._histUpload(eid, text);
+          await this._histStartScan(eid, m, token);
+        } catch (e) {
+          m.error = String((e && e.message) || e);
+          this._render();
+        }
+      });
+      return;
+    }
+
+    if (action === 'hist-recorder') {
+      const sinceInput = sr.getElementById('wd-hist-since');
+      const since = (sinceInput && sinceInput.value) || _histDefaultSince();
+      m.since = since;
+      await this._busyRun('hist-import', async () => {
+        try {
+          const res = await this._ws({
+            type: `${_DOMAIN}/history_import_recorder`, entry_id: eid, start_date: since,
+          });
+          if (!res.rows) {
+            m.error = this._t('msg.hist_recorder_empty', {}, 'Home Assistant has no detailed history for this sensor in that window.');
+            this._render();
+            return;
+          }
+          await this._histStartScan(eid, m, res.token);
+        } catch (e) {
+          m.error = String((e && e.message) || e);
+          this._render();
+        }
+      });
+      return;
+    }
+
+    if (action === 'hist-cancel-scan') {
+      if (m.scanTaskId) {
+        try { await this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: m.scanTaskId }); } catch (_) {}
+      }
+      m.step = 'input';
+      m.scanTaskId = null;
+      this._render();
+      return;
+    }
+
+    if (action === 'hist-back') {
+      m.step = 'input';
+      m.result = null;
+      m.error = null;
+      this._render();
+      return;
+    }
+
+    if (action === 'hist-toggle-all') {
+      const segs = (m.result && m.result.segments) || [];
+      const allOn = segs.every(seg => m.accept.has(seg.index));
+      m.accept = allOn ? new Set() : new Set(segs.map(seg => seg.index));
+      this._render();
+      requestAnimationFrame(() => this._drawHistorySparklines());
+      return;
+    }
+
+    if (action === 'hist-apply') {
+      if (!m.accept || !m.accept.size) return;
+      await this._busyRun('hist-apply', async () => {
+        try {
+          const res = await this._ws({
+            type: `${_DOMAIN}/apply_history_import`, entry_id: eid,
+            scan_task_id: m.scanTaskId, accept: [...m.accept].sort((a, b) => a - b),
+          });
+          m.applyTaskId = res.task_id;
+          this._addProvisionalTask(res.task_id, 'history_import_apply', eid, m.accept.size);
+          if (!this._tasksSubscribed) this._pollTaskGeneric(res.task_id);
+          this._histAdopt(res.task_id);
+        } catch (e) {
+          m.error = String((e && e.message) || e);
+          this._render();
+        }
+      });
+      return;
+    }
+
+    if (action === 'hist-goto-cycles') {
+      this._modal = null;
+      this._tab = 'history';
+      this._cycleFilter = { ...(this._cycleFilter || {}), status: 'imported' };
+      this._fetchTabData();
+      return;
+    }
+  }
+
+  async _onMActImport(action, btn, m, eid, sr) {
+    // ---- Community Store: import a reference cycle ----
+    if (m && m.type === 'store-import') {
+      if (action === 'store-import-mode-new') { m.mode = 'new'; this._render(); return; }
+      if (action === 'store-import-mode-merge') { m.mode = 'merge'; this._render(); return; }
+      if (action === 'store-import-ok') {
+        const msg = { type: `${_DOMAIN}/store_import_cycle`, entry_id: eid, cycle_id: m.cycleId };
+        if (m.mode === 'merge') {
+          const target = sr.getElementById('wd-store-import-target')?.value || '';
+          if (!target) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to merge into'), 'error'); return; }
+          msg.target_profile = target;
+        } else {
+          const name = (sr.getElementById('wd-store-import-name')?.value || '').trim() || m.program;
+          if (!name) { this._showToast(this._t('toast.store_name_required', {}, 'Enter a profile name'), 'error'); return; }
+          msg.new_profile_name = name;
+        }
+        await this._busyRun('store-import', async () => {
+          try {
+            const r = await this._ws(msg);
+            if (r && r.error) { this._showToast(this._t('toast.store_import_failed', {error: r.error}, 'Import failed: ' + r.error), 'error'); return; }
+            this._modal = null;
+            this._showToast(this._t('toast.store_imported', {profile: (r && r.profile) || ''}, `Imported into ${(r && r.profile) || 'profile'}`));
+            await this._fetchProfiles(eid);
+          } catch (e) { this._showToast(this._t('toast.store_import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+
+    // ---- Community Store: share a golden cycle ----
+    if (m && m.type === 'store-share') {
+      if (action === 'store-share-ok') {
+        const program = (sr.getElementById('wd-store-share-prog')?.value || '').trim();
+        const description = (sr.getElementById('wd-store-share-desc')?.value || '').trim();
+        if (!program) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to share into'), 'error'); return; }
+        await this._busyRun('store-share', async () => {
+          try {
+            const r = await this._ws({ type: `${_DOMAIN}/store_upload_cycle`, entry_id: eid, local_cycle_id: m.cycleId, program, description });
+            if (r && r.error) {
+              if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
+              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
+              return;
+            }
+            this._modal = null;
+            this._showToast(this._t('toast.store_shared', {}, 'Shared to the community store - pending review.'));
+          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+
+    // ---- Selective export / import wizard ----
+    if (m && (m.type === 'export-select' || m.type === 'import-wizard')) {
+      // The manifest that backs the tree: inventory for export, analyze result for import.
+      const man = m.type === 'export-select' ? { categories: m.inventory || {} } : (m.manifest || { categories: {} });
+      if (action === 'wiz-toggle-all') {
+        const cats = man.categories || {};
+        const importableOnly = m.type === 'import-wizard';
+        // If everything is already selected, clear; otherwise select all selectable.
+        let allSel = true;
+        this._wizCatOrder().filter(cid => cats[cid] && cats[cid].present).forEach(cid => {
+          if (importableOnly && cats[cid].importable === false) return;
+          if (this._wizCatState(m, cid, man).state !== 'all') allSel = false;
+        });
+        m.sel = allSel
+          ? { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }
+          : this._wizInitSel(man, importableOnly);
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-cat') {
+        const cid = btn.dataset.cat;
+        const st = this._wizCatState(m, cid, man);
+        const turnOn = st.state !== 'all';
+        if (cid === 'profiles') {
+          const items = (man.categories.profiles && man.categories.profiles.items) || [];
+          m.sel.profiles = new Set(turnOn ? items.map(i => i.name) : []);
+        } else if (cid === 'real_cycles' || cid === 'reference_cycles') {
+          const set = new Set();
+          if (turnOn) ((man.categories[cid] && man.categories[cid].groups) || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) set.add(String(cy.id)); }));
+          if (cid === 'real_cycles') m.sel.realIds = set; else m.sel.refIds = set;
+        } else if (turnOn) { m.sel.cats.add(cid); } else { m.sel.cats.delete(cid); }
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-profile') {
+        const name = btn.dataset.name;
+        if (m.sel.profiles.has(name)) m.sel.profiles.delete(name); else m.sel.profiles.add(name);
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-cycgroup') {
+        const cid = btn.dataset.cat; const prof = btn.dataset.prof;
+        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
+        const ids = this._wizGroupIds(man, cid, prof);
+        const all = ids.length > 0 && ids.every(id => set.has(id));
+        ids.forEach(id => { if (all) set.delete(id); else set.add(id); });
+        this._render();
+        return;
+      }
+      if (action === 'wiz-toggle-cyc') {
+        const cid = btn.dataset.cat; const id = btn.dataset.cid;
+        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
+        if (set.has(id)) set.delete(id); else set.add(id);
+        this._render();
+        return;
+      }
+      if (action === 'wiz-expand') {
+        const key = btn.dataset.key;
+        if (!m.expanded) m.expanded = new Set();
+        if (m.expanded.has(key)) m.expanded.delete(key); else m.expanded.add(key);
+        this._render();
+        return;
+      }
+    }
+
+    // Import wizard: step machine + toggles + apply.
+    if (m && m.type === 'import-wizard') {
+      if (action === 'import-back') {
+        m.step = 'input'; m.error = null; this._render();
+        return;
+      }
+      if (action === 'imp-mode-merge') { m.mode = 'merge'; this._render(); return; }
+      if (action === 'imp-mode-replace') { m.mode = 'replace'; this._render(); return; }
+      if (action === 'imp-dest-reference') { m.cycleDest = 'reference'; this._render(); return; }
+      if (action === 'imp-dest-real') { if ((m.manifest || {}).real_history_allowed !== false) { m.cycleDest = 'real_history'; this._render(); } return; }
+      if (action === 'imp-conflict') { m.conflicts[btn.dataset.prof] = btn.value; return; }
+      if (action === 'import-analyze' && eid) {
+        const ta = sr.getElementById('wd-import-json');
+        const jsonText = ta ? ta.value : (m.jsonText || '');
+        m.jsonText = jsonText;
+        if (!jsonText.trim()) { this._showToast(this._t('toast.json_required', {}, 'JSON data is required'), 'error'); return; }
+        m.step = 'analyze'; m.error = null; this._render();
+        try {
+          const r = await this._ws({ type: `${_DOMAIN}/analyze_import`, entry_id: eid, json_data: jsonText });
+          if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'import-wizard') return;
+          const manifest = (r && r.manifest) || {};
+          if (manifest.error) { m.step = 'input'; m.error = manifest.error; this._render(); return; }
+          m.manifest = manifest;
+          m.sel = this._wizInitSel(manifest, true);
+          // Default every conflicting profile to the safest resolution.
+          m.conflicts = {};
+          ((manifest.categories && manifest.categories.profiles && manifest.categories.profiles.items) || [])
+            .forEach(i => { if (i.conflict) m.conflicts[i.name] = 'import_as_copy'; });
+          m.step = 'select';
+          this._render();
+        } catch (e) {
+          if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'import-wizard') return;
+          m.step = 'input'; m.error = (e && e.message) || String(e); this._render();
+        }
+        return;
+      }
+      if (action === 'import-apply-ok' && eid) {
+        const selection = this._wizSelectionPayload(m);
+        await this._busyRun('import-wizard', async () => {
+          try {
+            const r = await this._ws({ type: `${_DOMAIN}/import_config_selective`, entry_id: eid,
+              json_data: m.jsonText, selection, mode: m.mode,
+              conflict_resolutions: m.conflicts, cycle_destination: m.cycleDest, apply_settings: true });
+            const s = (r && r.summary) || {};
+            this._modal = null;
+            this._showToast(this._t('toast.import_selective_done', {
+              profiles: s.profiles_imported || 0,
+              cycles: (s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0),
+            }, `Imported ${s.profiles_imported || 0} profile(s) and ${(s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0)} cycle(s)`));
+            await this._fetchCycles(eid);
+            await this._fetchProfiles(eid);
+          } catch (e) { this._showToast(this._t('toast.import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+  }
+
+  async _onMActStoreShare(action, btn, m, eid) {
+    // ---- Community Store: share a whole device bundle ----
+    if (m && m.type === 'store-share-device') {
+      if (action === 'sd-toggle-cyc') {
+        const cid = btn.dataset.cid;
+        if (m.selected.has(cid)) m.selected.delete(cid); else m.selected.add(cid);
+        this._render();
+        return;
+      }
+      if (action === 'sd-toggle-prof') {
+        const prog = btn.dataset.prog;
+        const grp = this._shareableByProgram().find(g => g.program === prog);
+        if (grp) {
+          const all = grp.cycles.every(c => m.selected.has(c.id));
+          grp.cycles.forEach(c => { if (all) m.selected.delete(c.id); else m.selected.add(c.id); });
+        }
+        this._render();
+        return;
+      }
+      if (action === 'sd-toggle-phases') {
+        const prog = btn.dataset.prog;
+        if (!m.includePhases) m.includePhases = new Set();
+        if (m.includePhases.has(prog)) m.includePhases.delete(prog); else m.includePhases.add(prog);
+        this._render();
+        return;
+      }
+      if (action === 'sd-toggle-settings') { m.includeSettings = !m.includeSettings; this._render(); return; }
+      if (action === 'sd-toggle-consent') { m.consented = !m.consented; this._render(); return; }
+      if (action === 'sd-toggle-guide') { m.guideOpen = !m.guideOpen; this._render(); return; }
+      if (action === 'store-share-device-ok') {
+        // Build the {local_cycle_id, program} items from the model selection,
+        // resolving each cycle's program from the fetched shareable list.
+        const progById = new Map();
+        (this._shareableCycles || []).forEach(c => progById.set(c.id, (c.profile_name || '').trim()));
+        const items = Array.from(m.selected)
+          .map(cid => ({ local_cycle_id: cid, program: progById.get(cid) || '' }))
+          .filter(it => it.program);
+        if (!items.length) { this._showToast(this._t('toast.share_device_none_sel', {}, 'Select at least one cycle to share'), 'error'); return; }
+        // Only send phases for programs that both opted in AND have a selected cycle.
+        const selectedProgs = new Set(items.map(it => it.program));
+        const includePhases = Array.from(m.includePhases || []).filter(p => selectedProgs.has(p));
+        await this._busyRun('store-share-device', async () => {
+          try {
+            const r = await this._ws({ type: `${_DOMAIN}/store_upload_device`, entry_id: eid, items, include_phases: includePhases, include_settings: !!m.includeSettings });
+            // Pre-flight gate error (not connected / no appliance): keep the modal open.
+            if (r && r.error) {
+              if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
+              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
+              return;
+            }
+            const n = (r && r.cycle_ids && r.cycle_ids.length) || 0;
+            const failed = (r && r.errors && r.errors.length) || 0;
+            const dup = (r && r.duplicates) || 0;
+            const created = (r && r.created != null) ? r.created : n;
+            if (!n) {
+              // Nothing uploaded: surface the first error and keep the modal for retry.
+              const why = (r && r.errors && r.errors[0]) || (r && r.detail) || 'upload_failed';
+              this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error');
+              return;
+            }
+            this._modal = null;
+            if (failed) this._showToast(this._t('toast.store_device_shared_partial', {n, failed}, `Shared ${n} cycle(s); ${failed} could not be uploaded.`), 'info');
+            else if (dup && !created) this._showToast(this._t('toast.store_device_shared_all_dup', {n: dup}, `All ${dup} cycle(s) were already in the community store.`), 'info');
+            else if (dup) this._showToast(this._t('toast.store_device_shared_some_dup', {created, dup}, `Shared ${created} cycle(s); ${dup} were already in the store.`));
+            else this._showToast(this._t('toast.store_device_shared', {n: created}, `Shared ${created} cycle(s) to the community store - pending review.`));
+          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+    }
+  }
+
+  async _onMActCycleDetail(action, m, eid, sr) {
+    // ---- Cycle inspector ----
+    if (m && m.type === 'cycle-detail') {
+      if (action === 'cyc-view') { m.mode = 'view'; this._render(); return; }
+      if (action === 'cyc-trim') { m.mode = 'trim'; if (!m.trim || m.trim.end <= 0) m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
+      if (action === 'cyc-split') { m.mode = 'split'; this._render(); return; }
+      if (action === 'cyc-review') { m.mode = 'review'; this._render(); return; }
+      if (action === 'cyc-review-save') {
+        const cid = m.cycleId;
+        const quality = sr.getElementById('wd-cyc-rev-quality')?.value || '';
+        const golden = !!sr.getElementById('wd-cyc-rev-golden')?.checked;
+        const notes = sr.getElementById('wd-cyc-rev-notes')?.value || '';
+        const tags = Array.from(sr.querySelectorAll('.wd-cyc-rev-tag')).filter(cb => cb.checked).map(cb => cb.value);
+        const newLabel = sr.getElementById('wd-cyc-rev-label')?.value ?? '';
+        const curLabel = (m.curve && m.curve.profile_name) || '';
+        await this._busyRun('cyc-review-save', async () => {
+          try {
+            await this._ws({ type: `${_DOMAIN}/set_ml_review`, entry_id: eid, cycle_id: cid, quality, golden, tags, notes });
+            if (newLabel !== curLabel) {
+              await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: newLabel || null });
+            }
+            this._showToast(this._t('toast.review_saved', {}, 'Review saved'));
+            await this._fetchCycles(eid);
+            // A label change in review now resolves the pending feedback backend-side
+            // (#331), so refresh the queue rather than leaving a stale entry.
+            if (newLabel !== curLabel) await this._fetchFeedbacks(eid);
+            await this._loadMlIndex(eid);
+            if (this._modal && this._modal.cycleId === cid) this._modal.ml = (this._mlById || {})[cid] || this._modal.ml;
+          } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+      if (action === 'trim-mode-s') { m.timeMode = 's'; this._render(); return; }
+      if (action === 'trim-mode-clock') { m.timeMode = 'clock'; this._render(); return; }
+      if (action === 'cyc-reset-trim') { m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
+      if (action === 'cyc-clear-split') { m.split = { offsets: [], profiles: [] }; this._render(); return; }
+      if (action === 'cyc-label') { if (!this._profiles.length) await this._fetchProfiles(eid); this._modal = { type: 'label-cycle', cycleId: m.cycleId }; this._render(); return; }
+      if (action === 'cyc-delete') {
+        // D4: optimistic delete with Undo (close the inspector first).
+        const cid = m.cycleId;
+        this._modal = null; this._render();
+        this._deleteCyclesWithUndo(eid, [cid]);
+        return;
+      }
+      if (action === 'cyc-auto-split') {
+        const gap = parseInt(sr.getElementById('wd-split-gap')?.value || '900', 10);
+        await this._busyRun('cyc-auto', async () => {
+          try { const r = await this._ws({ type: `${_DOMAIN}/analyze_split`, entry_id: eid, cycle_id: m.cycleId, gap_seconds: gap }); m.split.offsets = (r.split_offsets || []).slice(); m.split.profiles = []; if (!m.split.offsets.length) this._showToast(this._t('toast.no_split_found', {}, 'No idle gaps found to split on'), 'info'); }
+          catch (e) { this._showToast(this._t('toast.auto_detect_failed', {error: e.message || e}, 'Auto-detect failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+      if (action === 'cyc-apply-trim') {
+        // Backgrounded task (issue #311): recompute + envelope rebuild can stall a
+        // low-power host, so run it via the registry with a header pill.
+        const cid = m.cycleId, s = m.trim.start, e2 = m.trim.end;
+        // The trim is irreversible (no undo). Confirm before discarding the
+        // majority of the trace so an accidental collapse can't slip through on
+        // a single click (#373).
+        const full = (m.curve && m.curve.full_duration_s) || 0;
+        const keptPct = full > 0 ? Math.max(0, Math.round(((e2 - s) / full) * 100)) : 100;
+        if (keptPct < 50 && !confirm(this._t('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
+          'cyc-trim-apply',
+          async () => {
+            this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed'));
+            await this._closeCycleDetail(eid);
+            await this._fetchCycles(eid);
+          },
+        );
+        return;
+      }
+      if (action === 'cyc-apply-split') {
+        // Backgrounded task (issue #311): per-segment extraction + affected
+        // envelope rebuilds can stall a low-power host, so run it via the registry.
+        const cid = m.cycleId, offs = m.split.offsets.slice(), profs = m.split.profiles.slice();
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs },
+          'cyc-split-apply',
+          async (result) => {
+            this._showToast(this._t('toast.split_complete', {count: (result.new_ids || []).length}, `Split into ${(result.new_ids || []).length} cycles`));
+            await this._closeCycleDetail(eid);
+            await this._fetchCycles(eid);
+            await this._fetchProfiles(eid);
+          },
+        );
+        return;
+      }
+    }
+  }
+
+  async _onMActProfilePanel(action, btn, m, eid, sr) {
+    if (m && m.type === 'profile-panel') {
+      if (action === 'pp-phase-add') {
+        const full = (m.env && m.env.target_duration) || (m.env && m.env.avg && m.env.avg.length ? m.env.avg[m.env.avg.length - 1][0] : 600);
+        const last = m.phases.length ? m.phases[m.phases.length - 1].end : 0;
+        const st = Math.min(last, full);
+        m.phases.push({ name: m.catalog[0] || '', start: st, end: Math.min(st + Math.max(60, full * 0.1), full) });
+        this._render(); return;
+      }
+      if (action === 'pp-phase-rm') { const i = +((btn && btn.dataset.idx) || -1); if (i >= 0) { m.phases.splice(i, 1); this._render(); } return; }
+      if (action === 'pp-phase-save') {
+        const phases = m.phases.filter(p => p.name).map(p => ({ name: p.name, start: p.start, end: p.end }));
+        await this._busyRun('pp-phase-save', async () => {
+          try { await this._ws({ type: `${_DOMAIN}/set_profile_phases`, entry_id: eid, profile_name: m.name, phases }); this._showToast(this._t('toast.phases_saved', {}, 'Phases saved')); }
+          catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+      if (action === 'pp-cleanup-del') {
+        const sel = m.cleanup ? Array.from(m.cleanup.selected) : [];
+        if (!sel.length) return;
+        await this._busyRun('pp-cleanup-del', async () => {
+          try {
+            for (const cid of sel) await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid });
+            this._showToast(this._t('toast.cycles_deleted', {count: sel.length}, `Deleted ${sel.length} cycle(s)`));
+            const r = await this._ws({ type: `${_DOMAIN}/get_profile_cycles`, entry_id: eid, profile_name: m.name });
+            if (this._modal) this._modal.cleanup = { cycles: r.cycles || [], selected: new Set() };
+            await this._fetchProfiles(eid);
+          } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
+        });
+        return;
+      }
+      if (action === 'pp-rename') {
+        const nn = sr.getElementById('wd-pp-rename')?.value?.trim();
+        const dur = parseFloat(sr.getElementById('wd-pp-dur')?.value || '0');
+        if (!nn) { this._showToast(this._t('msg.toast_name_required', {}, 'Name required'), 'error'); return; }
+        try {
+          await this._ws({ type: `${_DOMAIN}/rename_profile`, entry_id: eid, profile_name: m.name, new_name: nn, manual_duration_min: dur > 0 ? dur : null });
+          this._showToast(this._t('toast.profile_renamed', {}, 'Profile renamed')); m.name = nn;
+          // rename_profile also rewrites the member name inside any profile group
+          // (profile_store.update_profile step 4); re-fetch groups too or the stale
+          // old name leaves the renamed profile looking removed from its group, and
+          // resaving that stale modal would drop it for real.
+          await Promise.all([this._fetchProfiles(eid), this._fetchProfileGroups(eid)]);
+          m.stats = (this._profiles || []).find(p => p.name === nn) || m.stats; this._render();
+        } catch (e) { this._showToast(this._t('toast.rename_failed', {error: e.message || e}, 'Rename failed: ' + (e.message || e)), 'error'); }
+        return;
+      }
+      if (action === 'pp-rebuild') {
+        // Backgrounded task (issue #311): rebuild runs via the registry; the
+        // profile's fresh envelope is fetched only once the task has settled.
+        this._kickAndTrack(
+          { type: `${_DOMAIN}/rebuild_envelopes`, entry_id: eid },
+          'pp-rebuild',
+          async () => {
+            try {
+              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: m.name });
+              if (this._modal) this._modal.env = r.envelope;
+            } catch (_) { /* modal may have closed */ }
+            this._showToast(this._t('toast.envelope_rebuilt', {}, 'Envelope rebuilt'));
+          },
+        );
+        return;
+      }
+      if (action === 'pp-delete') {
+        // D4: optimistic delete with Undo (close the profile panel first).
+        this._deleteProfileWithUndo(eid, m.name);
+        return;
+      }
+    }
+  }
+
   // ── Settings save ─────────────────────────────────────────────────────────
 
   // Runs all conflict rules against this._opts (no DOM required).
@@ -11543,6 +12624,7 @@ class HaWashdataPanel extends HTMLElement {
       const f = _FIELD_BY_KEY[key];
       const ftype = (f && f.type) || el.dataset.ftype || 'text';
       if (el.type === 'checkbox') { this._pendingSettings[key] = el.checked; return; }
+      if (ftype === 'checkboxlist') { this._pendingSettings[key] = this._collectCheckboxlist(el, key); return; }
       if (ftype === 'entitylist') {
         this._pendingSettings[key] = Array.from(el.querySelectorAll('.wd-pill')).map(p => p.dataset.val).filter(Boolean);
         return;
@@ -11576,31 +12658,59 @@ class HaWashdataPanel extends HTMLElement {
     });
   }
 
+  // Collect a checkboxlist field's ticked choices. An empty result on a field whose
+  // default is a non-empty set (profile_evidence_sources) is normalised to that default:
+  // an empty evidence selection is not a valid "none" - the backend silently uses all
+  // three - so persisting/staging [] would leave the UI showing all-unchecked while
+  // matching used every source (#2). The default set is the honest, stored value.
+  _collectCheckboxlist(el, key) {
+    const chosen = Array.from(el.querySelectorAll('[data-choice]'))
+      .filter(c => c.checked).map(c => c.dataset.choice);
+    if (chosen.length) return chosen;
+    const f = _FIELD_BY_KEY[key];
+    return (f && Array.isArray(f.def) && f.def.length) ? f.def.slice() : chosen;
+  }
+
   // Compute conflicting field keys from any options dict (used by device cards and section dots).
-  _conflictKeysForOpts(opts) {
+  // `defaults` supplies the device-resolved value for a field the user never set
+  // (#396: sampling/watchdog/start_duration/smart-term ratio resolve per device type
+  // and are sent by the backend as `defaults`/`option_defaults`, never stored in
+  // options). Merging them UNDER `opts` means a cross-section rule (watchdog>=2*sampling)
+  // sees the value the integration would actually use even when the partner field's
+  // section was never opened this session - otherwise the unset partner reads as
+  // `undefined`, the rule's `!= null` guard short-circuits, and the conflict is missed.
+  _conflictKeysForOpts(opts, defaults) {
+    const v = Object.assign({}, defaults || {}, opts);
     const keys = new Set();
     for (const rule of _SETTING_CONFLICTS) {
-      if (!rule.check(opts)) continue;
-      for (const key of Object.keys(rule.fieldErrors(opts))) keys.add(key);
+      if (!rule.check(v)) continue;
+      for (const key of Object.keys(rule.fieldErrors(v))) keys.add(key);
     }
     return keys;
   }
 
-  _conflictCountForOpts(opts) { return this._conflictKeysForOpts(opts).size; }
+  _conflictCountForOpts(opts, defaults) { return this._conflictKeysForOpts(opts, defaults).size; }
 
   // section-pill dots to surface saved-settings conflicts without needing the form.
   _conflictKeysFromOpts() {
-    return this._conflictKeysForOpts(Object.assign({}, this._opts, this._pendingSettings));
+    return this._conflictKeysForOpts(
+      Object.assign({}, this._opts, this._pendingSettings), this._optDefaults
+    );
   }
 
-  // Collect current numeric form values from DOM, falling back to saved opts for
-  // fields not rendered in the current section (cross-section conflicts).
+  // Collect current numeric form values from DOM, falling back to saved opts (and
+  // the device-resolved defaults for unset fields, #396) for fields not rendered in
+  // the current section (cross-section conflicts).
   _readSettingsFormValues(sr) {
-    const vals = Object.assign({}, this._opts, this._pendingSettings);
+    const vals = Object.assign({}, this._optDefaults, this._opts, this._pendingSettings);
     if (!sr) return vals;
     sr.querySelectorAll('#wd-settings-form [data-opt]').forEach(el => {
       const key = el.dataset.opt;
       if (el.type === 'checkbox') { vals[key] = el.checked; return; }
+      if (el.dataset.ftype === 'checkboxlist') {
+        vals[key] = this._collectCheckboxlist(el, key);
+        return;
+      }
       const n = parseFloat(el.value);
       if (!isNaN(n)) vals[key] = n;
       else if (el.value !== '') vals[key] = el.value;
@@ -11710,7 +12820,7 @@ class HaWashdataPanel extends HTMLElement {
     this._snapshotFormToPending(sr);
     if (autoChanged.size > 0) {
       const n = autoChanged.size, s = n > 1 ? 's' : '';
-      this._showToast(this._t('conflict.cascade_toast', {n, s}, `Also adjusted ${n} setting${s} for consistency.`), 'success');
+      this._showToast(this._t('conflict.cascade_toast', {n}, `Other settings adjusted for consistency: ${n}`), 'success');
     }
   }
 
@@ -11728,6 +12838,7 @@ class HaWashdataPanel extends HTMLElement {
       const f = _FIELD_BY_KEY[key];
       const ftype = (f && f.type) || el.dataset.ftype || 'text';
       if (el.type === 'checkbox') { updates[key] = el.checked; return; }
+      if (ftype === 'checkboxlist') { updates[key] = this._collectCheckboxlist(el, key); return; }
       if (ftype === 'entitylist') { updates[key] = Array.from(el.querySelectorAll('.wd-pill')).map(p => p.dataset.val).filter(Boolean); return; }
       if (ftype === 'timerlist') {
         updates[key] = Array.from(el.querySelectorAll('.wd-timer-row')).map(row => ({
@@ -11761,6 +12872,21 @@ class HaWashdataPanel extends HTMLElement {
       if (ftype === 'entity' || ftype === 'device') { const t = String(val).trim(); updates[key] = t ? t : null; return; }
       updates[key] = val;  // text, textarea, select, devicetype
     });
+
+    // #396/#393: the cadence/ratio fields render their runtime-resolved default when
+    // unset (from _optDefaults). Persisting that default back as an explicit option
+    // pins the value against future default changes and defeats "unset -> resolve per
+    // device type", so drop a field that is (a) not already an explicit option and
+    // (b) still equal to the resolved default - the backend resolves the identical
+    // value, so runtime behaviour is unchanged. A value the user actually changed away
+    // from the default (or a field they had already set) is untouched and still saves.
+    const _od = this._optDefaults || {};
+    for (const k of Object.keys(_od)) {
+      if (!(k in this._opts) && (k in updates)
+          && JSON.stringify(updates[k]) === JSON.stringify(_od[k])) {
+        delete updates[k];
+      }
+    }
 
     if (this._invalidJson) {
       this._showToast(this._t('toast.invalid_json', {key: this._invalidJson}, `"${this._invalidJson}" is not valid JSON - fix it or clear the field before saving.`), 'error');

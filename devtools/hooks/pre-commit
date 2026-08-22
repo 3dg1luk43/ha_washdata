@@ -1,0 +1,79 @@
+#!/bin/sh
+# WashData pre-commit hook: refuse a commit whose minified panel/card bundles were not
+# rebuilt from the sources being committed.
+#
+# Why this exists. `www/*.min.js` + `build-manifest.json` are GENERATED but COMMITTED -
+# they are the bytes users download. `frontend.py` serves an artifact only while its
+# recorded source hash still matches disk, so a forgotten rebuild fails *safe* (users
+# get the larger readable file) but silently: the release quietly loses minification
+# for everyone. CI and `release_check.sh` catch it, but only after the push.
+#
+# Why it checks the STAGED tree, not the working tree. The common miss is not "never
+# rebuilt" - it is rebuilding, then committing only the source (`git commit panel.js`,
+# or `git add` on one path). The working tree would look perfectly current while the
+# commit itself is inconsistent. So the staged blobs are materialised into a temp
+# directory and verified there, which is exactly what the commit will contain.
+#
+# Install:  ./devtools/install_hooks.sh      (sets core.hooksPath)
+# Bypass:   git commit --no-verify           (for a deliberate WIP commit)
+set -eu
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+WWW_REL="custom_components/ha_washdata/www"
+SOURCES="ha-washdata-panel.js ha-washdata-card.js"
+ARTIFACTS="ha-washdata-panel.min.js ha-washdata-card.min.js build-manifest.json"
+
+# Fast path: nothing about the panel bundle is staged, so there is nothing to verify.
+# Keeps the hook free on the overwhelming majority of commits (python, tests, docs).
+staged=$(git diff --cached --name-only --diff-filter=ACM -- "$WWW_REL" || true)
+touched=0
+for f in $SOURCES $ARTIFACTS; do
+  case "$staged" in
+    *"$WWW_REL/$f"*) touched=1 ;;
+  esac
+done
+[ "$touched" -eq 1 ] || exit 0
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: node not found, skipping the panel build check." >&2
+  exit 0
+fi
+if [ ! -d "$REPO_ROOT/devtools/node_modules" ]; then
+  echo "pre-commit: devtools dependencies are not installed, skipping the panel" >&2
+  echo "            build check (run: npm ci --prefix devtools)." >&2
+  exit 0
+fi
+
+# Materialise the staged versions of every file the check reads. A file that is not
+# staged is taken from HEAD, so the snapshot is the commit's own tree - not a mix of
+# staged and working-tree content.
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+mkdir -p "$tmp/www"
+for f in $SOURCES $ARTIFACTS; do
+  if git show ":$WWW_REL/$f" > "$tmp/www/$f" 2>/dev/null; then
+    :
+  elif git show "HEAD:$WWW_REL/$f" > "$tmp/www/$f" 2>/dev/null; then
+    :
+  else
+    rm -f "$tmp/www/$f"   # absent in both: let the verifier report it as missing
+  fi
+done
+
+if node "$REPO_ROOT/devtools/build_panel.mjs" --check --www "$tmp/www" >/dev/null 2>&1; then
+  exit 0
+fi
+
+echo >&2
+echo "pre-commit: the minified panel/card bundles are not current for this commit." >&2
+# Only the problem lines; the verifier's own "Run:" hint is superseded by the Fix
+# block below, which also covers the staging step this hook exists to enforce.
+node "$REPO_ROOT/devtools/build_panel.mjs" --check --www "$tmp/www" 2>&1 \
+  | sed -n 's/^  *- /           - /p' >&2
+echo >&2
+echo "  Fix:  node devtools/build_panel.mjs" >&2
+echo "        git add $WWW_REL/*.min.js $WWW_REL/build-manifest.json" >&2
+echo >&2
+echo "  These artifacts are what users download, so they are committed alongside" >&2
+echo "  their sources. Bypass with --no-verify only for a deliberate WIP commit." >&2
+exit 1

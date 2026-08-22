@@ -20,6 +20,8 @@ export interface AnalyzeSplitResponse {
   segments: number[][];
   split_offsets: number[];
   samples: number[][];
+  sample_count: number;
+  decimated: boolean;
   full_duration_s: number;
 }
 
@@ -54,11 +56,13 @@ export interface DeviceInfo {
   current_power_w: number | null;
   cycle_progress_pct: number | null;
   suggestions_count: number;
+  suggestion_keys: string[];
   feedback_count: number;
   recording: boolean;
   is_user_paused: boolean;
   manual_program: boolean;
   options: Record<string, unknown>;
+  option_defaults: Record<string, unknown>;
 }
 
 export interface DismissAllFeedbacksResponse {
@@ -109,6 +113,8 @@ export interface GetConstantsResponse {
 export interface GetCyclePowerDataResponse {
   cycle_id?: string;
   samples?: number[][];
+  sample_count?: number;
+  decimated?: boolean;
   full_duration_s?: number;
   start_time?: string | null;
   end_time?: string | null;
@@ -119,12 +125,16 @@ export interface GetCyclePowerDataResponse {
   artifacts?: Record<string, unknown>[];
   restart_gaps?: unknown[];
   is_reference?: boolean;
+  labelable?: boolean;
+  editable?: boolean;
+  cycle_origin?: string;
 }
 
 export interface GetDeviceCyclesResponse {
   entry_id: string;
   cycles: Record<string, unknown>[];
   reference_cycles: Record<string, unknown>[];
+  backfill_cycles: Record<string, unknown>[];
   total: number;
   has_more: boolean;
 }
@@ -203,6 +213,7 @@ export interface GetMlTrainingStatusResponse {
 
 export interface GetOptionsResponse {
   options: Record<string, unknown>;
+  defaults: Record<string, unknown>;
 }
 
 export interface GetPanelConfigResponse {
@@ -300,6 +311,26 @@ export interface GetSuggestionsResponse {
   locked_suggestions: string[];
 }
 
+export interface HistoryImportBeginResponse {
+  token: string;
+  max_bytes: number;
+  chunk_bytes: number;
+}
+
+export interface HistoryImportChunkResponse {
+  received_bytes: number;
+  next_seq: number;
+}
+
+export interface HistoryImportRecorderResponse {
+  token: string;
+  rows: number;
+  entity_id: string;
+  days: number;
+  start_date: string;
+  truncated: boolean;
+}
+
 export interface ImportConfigSelectiveResponse {
   success: boolean;
   summary: Record<string, unknown>;
@@ -393,6 +424,13 @@ export interface StartTaskResponse {
   task_id: string;
 }
 
+export interface StoreCatalogEntryResponse {
+  device_id?: string;
+  brand?: Record<string, unknown> | null;
+  device?: Record<string, unknown> | null;
+  disabled?: boolean;
+}
+
 export interface StoreConfirmResponse {
   confirmed?: boolean;
   confirmCount?: number;
@@ -444,6 +482,11 @@ export interface StorePrefsResponse {
 export interface StoreQualityResponse {
   avg?: number | null;
   count?: number;
+  disabled?: boolean;
+}
+
+export interface StoreRefreshCatalogResponse {
+  ok?: boolean;
   disabled?: boolean;
 }
 
@@ -915,6 +958,7 @@ export interface GetDtwDebugRequest {
 
 export interface GetPlaygroundSettingsRequest {
   entry_id: string;
+  include_suggestions?: boolean;
 }
 
 export interface SavePlaygroundPresetRequest {
@@ -967,6 +1011,34 @@ export interface StartPlaygroundCycleDetailRequest {
   stress_idle_w?: number | null;
 }
 
+export interface HistoryImportBeginRequest {
+  entry_id: string;
+}
+
+export interface HistoryImportChunkRequest {
+  entry_id: string;
+  token: string;
+  seq: number;
+  text: string;
+}
+
+export interface HistoryImportRecorderRequest {
+  entry_id: string;
+  start_date?: string | null;
+  days?: number;
+}
+
+export interface StartHistoryImportScanRequest {
+  entry_id: string;
+  token: string;
+}
+
+export interface ApplyHistoryImportRequest {
+  entry_id: string;
+  scan_task_id: string;
+  accept: unknown[];
+}
+
 export interface StoreStatusRequest {
   entry_id: string;
 }
@@ -1016,6 +1088,17 @@ export interface StoreGetDeviceProfilesRequest {
   brand: string;
   model: string;
   appliance_type: string;
+}
+
+export interface StoreGetCatalogEntryRequest {
+  entry_id: string;
+  brand: string;
+  model: string;
+  appliance_type: string;
+}
+
+export interface StoreRefreshCatalogRequest {
+  entry_id: string;
 }
 
 export interface StoreConfirmDeviceRequest {
@@ -1161,6 +1244,11 @@ export interface WashDataWsRequests {
   "ha_washdata/start_playground_history": StartPlaygroundHistoryRequest;
   "ha_washdata/start_playground_sweep": StartPlaygroundSweepRequest;
   "ha_washdata/start_playground_cycle_detail": StartPlaygroundCycleDetailRequest;
+  "ha_washdata/history_import_begin": HistoryImportBeginRequest;
+  "ha_washdata/history_import_chunk": HistoryImportChunkRequest;
+  "ha_washdata/history_import_recorder": HistoryImportRecorderRequest;
+  "ha_washdata/start_history_import_scan": StartHistoryImportScanRequest;
+  "ha_washdata/apply_history_import": ApplyHistoryImportRequest;
   "ha_washdata/store_status": StoreStatusRequest;
   "ha_washdata/store_connect": StoreConnectRequest;
   "ha_washdata/store_disconnect": StoreDisconnectRequest;
@@ -1170,6 +1258,8 @@ export interface WashDataWsRequests {
   "ha_washdata/store_get_cycles": StoreGetCyclesRequest;
   "ha_washdata/store_get_device_quality": StoreGetDeviceQualityRequest;
   "ha_washdata/store_get_device_profiles": StoreGetDeviceProfilesRequest;
+  "ha_washdata/store_get_catalog_entry": StoreGetCatalogEntryRequest;
+  "ha_washdata/store_refresh_catalog": StoreRefreshCatalogRequest;
   "ha_washdata/store_confirm_device": StoreConfirmDeviceRequest;
   "ha_washdata/store_rate_device": StoreRateDeviceRequest;
   "ha_washdata/store_set_online": StoreSetOnlineRequest;
@@ -1270,6 +1360,11 @@ export interface WashDataWsResponses {
   "ha_washdata/start_playground_history": StartTaskResponse;
   "ha_washdata/start_playground_sweep": StartTaskResponse;
   "ha_washdata/start_playground_cycle_detail": StartTaskResponse;
+  "ha_washdata/history_import_begin": HistoryImportBeginResponse;
+  "ha_washdata/history_import_chunk": HistoryImportChunkResponse;
+  "ha_washdata/history_import_recorder": HistoryImportRecorderResponse;
+  "ha_washdata/start_history_import_scan": StartTaskResponse;
+  "ha_washdata/apply_history_import": StartTaskResponse;
   "ha_washdata/store_status": StoreStatusResponse;
   "ha_washdata/store_connect": StoreSimpleResponse;
   "ha_washdata/store_disconnect": StoreSimpleResponse;
@@ -1285,6 +1380,8 @@ export interface WashDataWsResponses {
   "ha_washdata/store_set_online": StoreOnlineResponse;
   "ha_washdata/store_set_prefs": StorePrefsResponse;
   "ha_washdata/store_get_device_profiles": StoreDeviceProfilesResponse;
+  "ha_washdata/store_get_catalog_entry": StoreCatalogEntryResponse;
+  "ha_washdata/store_refresh_catalog": StoreRefreshCatalogResponse;
   "ha_washdata/store_upload_device": StoreUploadDeviceResponse;
   "ha_washdata/store_download_device": StoreDownloadDeviceResponse;
   "ha_washdata/get_shareable_cycles": GetShareableCyclesResponse;

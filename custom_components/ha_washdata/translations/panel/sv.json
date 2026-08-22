@@ -78,9 +78,12 @@
     "awaiting": "Väntar på godkännande",
     "imported_tip": "Importerad från gemenskapsbutiken. Används endast för matchning, räknas inte in i statistiken.",
     "not_importable": "ej här",
-    "exists": "finns"
+    "exists": "finns",
+    "backfilled_tip": "Detekterad i importerad effekthistorik. Påverkar bara programmatchningen, räknas inte in i statistiken."
   },
   "btn": {
+    "set_brand_model": "Ange märke och modell",
+    "refresh_catalog": "Uppdatera katalog",
     "add_device": "+ Lägg till enhet",
     "add_device_tip": "Lägg till ytterligare en WashData-enhet",
     "add_maintenance": "Lägg till underhållshändelse",
@@ -90,7 +93,7 @@
     "apply_label": "Tillämpa etikett",
     "apply_set_b": "Använd uppsättning B",
     "apply_split": "Tillämpa delning",
-    "apply_trim": "Tillämpa trimning",
+    "apply_trim": "Tillämpa beskärning",
     "auto_detect_split": "Autoidentifiera",
     "auto_label_cycles": "Automatisk märkning av cykler",
     "auto_label_cycles_tip": "Tilldela automatiskt profilnamn till omärkta cykler vars matchningskonfidens klarar tröskeln",
@@ -209,8 +212,8 @@
     "stop": "Stoppa",
     "submit_correction": "Skicka korrigering",
     "train_now": "Träna nu",
-    "trim": "Trimma",
-    "trim_split": "Trimma / Dela",
+    "trim": "Beskär",
+    "trim_split": "Beskär / Dela",
     "undo": "Ångra",
     "use": "Använd",
     "wipe_all": "Rensa all data",
@@ -241,7 +244,12 @@
     "import_selected": "Importera valda",
     "back": "Tillbaka",
     "mute_suggestion": "Sluta föreslå den här inställningen",
-    "reset_muted": "Återställ tysta förslag"
+    "reset_muted": "Återställ tysta förslag",
+    "import_power_history": "Importera effekthistorik",
+    "hist_read_recorder": "Läs från Home Assistant",
+    "hist_scan": "Sök efter cykler",
+    "hist_import_n": "Importera {n} cykler",
+    "hist_goto_cycles": "Visa mig cyklerna"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -253,12 +261,12 @@
       "start": "Måste vara under skrynkelskyddets maxeffekt ({max} W)"
     },
     "attn_sub": "Åtgärda konflikter innan du sparar",
-    "attn_title": "{n} inställningskonflikt{s}",
+    "attn_title": "Inställningskonflikter: {n}",
     "confidence": {
       "auto": "Måste vara vid eller över matchningströskel ({match})",
-      "learning": "Måste vara vid eller under matchningströskel ({match})",
+      "learning": "Måste vara vid eller över matchningströskel ({match})",
       "match_for_auto": "Måste vara vid eller under automatisk-märknings-konfidensen ({alc})",
-      "match_for_learning": "Måste vara vid eller över inlärningskonfidensen ({lc})"
+      "match_for_learning": "Måste vara vid eller under inlärningskonfidensen ({lc})"
     },
     "duration_ratio": {
       "max": "Måste vara större än minimal varaktighetskvot ({min})",
@@ -296,14 +304,14 @@
       "match": "Måste vara över avmatchningströskel ({un})",
       "unmatch": "Måste vara under matchningströskel ({match}); annars avmatchas en bekräftad matchning omedelbart"
     },
-    "cascade_toast": "Även {n} inställning{s} justerades för konsekvens.",
+    "cascade_toast": "Andra inställningar justerades för konsekvens: {n}",
     "suggestion_resolves": "Tillämpa förslaget nedan ({val}) för att lösa detta",
     "use_fix": "Använd {val}",
     "watchdog": {
       "interval": "Bör vara minst 2x samplingsintervallet ({si} s)",
       "sampling": "Samplingsintervall bör vara högst hälften av vakthundsintervallet ({wi} s)"
     },
-    "settings_banner": "{n} inställningskonflikt{s} – kontrollera de markerade avsnitten och åtgärda dem innan du sparar.",
+    "settings_banner": "Inställningskonflikter: {n}. Kontrollera de markerade avsnitten och åtgärda dem innan du sparar.",
     "settings_banner_btn": "Gå till första"
   },
   "hdr": {
@@ -356,7 +364,8 @@
     "pg_outcome": "Simuleringsresultat",
     "pg_across_cycles": "Över dina cykler",
     "community_store": "Gemenskapsbutik",
-    "online_account": "Gemenskapsbutik och onlinefunktioner"
+    "online_account": "Gemenskapsbutik och onlinefunktioner",
+    "import_power_history": "Importera effekthistorik"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -364,6 +373,7 @@
     "poor": "⚠ Dålig profilkvalitet"
   },
   "lbl": {
+    "drag_to_resize": "Dra för att ändra storlek",
     "actions": "Åtgärder",
     "activity": "Aktivitet",
     "administrators": "Administratörer",
@@ -434,7 +444,7 @@
     "from": "Från",
     "gap_s": "Lucka (s)",
     "group_name": "Gruppnamn",
-    "head_trim": "Starttrimning (s)",
+    "head_trim": "Beskär start (s)",
     "health": "Hälsa",
     "hide_tabs": "Dölj flikar för icke-administratörer",
     "in_use": "Används",
@@ -450,7 +460,7 @@
     "metric": "Mått",
     "mode_existing_profile": "Lägg till i befintlig profil",
     "mode_new_profile": "Skapa ny profil",
-    "models_fine_tuned": "({count} modell{plural} finjusterad)",
+    "models_fine_tuned": "(finjusterade modeller: {count})",
     "n_classic_suggestions": "{n} klassisk",
     "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} valda",
@@ -537,7 +547,7 @@
     "stage3": "Steg 3 – DTW",
     "stage4": "Steg 4 – överensstämmelse",
     "status": "Status",
-    "tail_trim": "Sluttrimning (s)",
+    "tail_trim": "Beskär slut (s)",
     "timer_auto_pause": "Automatisk paus",
     "timer_min": "min",
     "timer_msg_placeholder": "Meddelande (valfritt, {device}/{program}/{minutes})",
@@ -677,7 +687,26 @@
     "conflict_keep_mine": "Behåll mina",
     "conflict_overwrite": "Skriv över",
     "pg_anti_wrinkle": "Skrynkelskydd",
-    "font_size": "Panelens teckenstorlek"
+    "font_size": "Panelens teckenstorlek",
+    "hist_csv_data": "CSV-data",
+    "hist_from_recorder": "Eller läs den från Home Assistant",
+    "hist_since": "Sedan",
+    "days": "dagar",
+    "hist_keep": "Behåll den här cykeln",
+    "hist_looks_complete": "komplett",
+    "peak_power_short": "Topp",
+    "shape": "Form",
+    "hist_skip_idle": "inget kördes",
+    "hist_skip_sparse": "avläsningar för långt ifrån varandra",
+    "hist_skip_short": "för få avläsningar",
+    "hist_skip_long": "ingen paus lång nog att dela på",
+    "hist_reason_short": "kortare än den här apparatens kortaste verkliga cykel",
+    "hist_reason_no_end": "avslutades aldrig rent",
+    "task_history_import": "Söker igenom effekthistorik",
+    "task_history_import_apply": "Importerar cykler",
+    "evidence_real_cycles": "Cykler den här maskinen har kört",
+    "evidence_reference_cycles": "Nedladdade från gemenskapsbutiken",
+    "evidence_backfill_cycles": "Hittade i importerad effekthistorik"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -756,9 +785,15 @@
     "store_share": "Dela till gemenskapsbutiken",
     "store_share_device": "Dela den här apparaten",
     "export_select": "Export - välj data",
-    "import_wizard": "Import - välj data"
+    "import_wizard": "Import - välj data",
+    "history_import": "Importera effekthistorik"
   },
   "msg": {
+    "tail_trim_hint": "Ta bort så här många sekunder från slutet",
+    "store_sibling_hint": "Finns inget delat för exakt din modell? En närbesläktad modell från samma märke är oftast en bra utgångspunkt.",
+    "store_declare_appliance": "Berätta för WashData vilken apparat du har, så visar den här fliken de färdiga inställningar andra har delat för den. Du kan också skriva ett märke ovanför för att se dig omkring.",
+    "refresh_catalog_hint": "Gemenskapens listor över märken och apparater cachelagras för att gemenskapsbutiken ska hålla sig inom sin dagliga gräns. Uppdatera för att hämta poster som andra har lagt till eller godkänt.",
+    "head_trim_hint": "Ta bort så här många sekunder från början",
     "appliance_monitor": "Apparatövervakning",
     "artifact_dip_detail": "Föll under det normala effektbandet i ~{n} s.",
     "artifact_footer": "Markerad i grafen ovan. Dessa är övergående artefakter (t.ex. dörren öppnas mitt i cykeln), inte nödvändigtvis problem.",
@@ -769,7 +804,7 @@
     "automations_intro": "WashData utlöser {start} / {end}-händelser och tillhandahåller entiteter – aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
     "cleanup_intro": "Alla märkta cykler är överlagda. Kryssa i avvikare och ta bort dem för att rensa profilen.",
     "clear_debug_hint": "Ta bort lagrad felsökningsdata för att frigöra utrymme.",
-    "collecting_data": "Samlar in data: {need} cykel{plural} kvar innan finjustering kan starta ({current}/{min}).",
+    "collecting_data": "Samlar in data. Cykler som återstår innan finjustering kan starta: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Lägg över profiler (svag)",
     "compare_profiles_tip": "Lägg över andra profilkuvert på diagrammet ovan för att se vilket som passar bäst för denna cykel.",
     "compare_selected_cycles": "Valda cykler (solid) – visa / dölj",
@@ -779,7 +814,7 @@
     "cycles_deleted": "{count} cykler borttagna",
     "enough_data": "Tillräckligt med data för att lära sig av ({current}/{min} cykler).",
     "export_description": "Välj exakt vilka profiler, cykler, inställningar och mer som ska exporteras till JSON, eller analysera en fil och importera bara de delar du vill ha.",
-    "feedback_cycles_pending": "{n} cykel{s} att granska",
+    "feedback_cycles_pending": "Att granska: {n}",
     "feedback_prompt": "Bekräfta att det var rätt, korrigera programmet eller ignorera.",
     "feedback_relabel_hint": "Att märka om den här cykeln löser också granskningen.",
     "filter_by_profile": "Filtrera efter profil…",
@@ -856,7 +891,6 @@
     "pg_stress_synthetic": "inaktiv simulering börjar här",
     "pg_sweep_intro": "Tänk om {param} vore annorlunda? Testa {steps} värden över dina senaste {cycles} cykler för att hitta inställningen där flest cykler matchas korrekt.",
     "pg_sweep_step": "Steg {done} / {total}",
-    "pg_undetected": "{n} cykel{s} oupptäckt",
     "pg_verdict_bad": "Behöver åtgärdas: många cykler förblir oupptäckta.",
     "pg_verdict_good": "Väl inställt: de flesta cykler identifieras och matchas korrekt.",
     "pg_verdict_ok": "Godtagbart: några cykler missades. Prova att sänka startröskeln.",
@@ -887,6 +921,7 @@
     "review_recorded_tip": "Markera detta som en handplockad referenscykel för sitt program - samma roll som en manuellt inspelad cykel. Referenscykler hålls alltid, såddar den matchande mallen och släpps aldrig vid rengöring. (Detta är den \"gyllene\"/inspelade flaggan; båda är samma sak.)",
     "review_tags_tip": "Valfria flaggor som beskriver vad som gick fel med den här cykeln, så träning och städning kan förklara det.",
     "review_to_cycles": "Öppna granskningskön för Cykler",
+    "samples_decimated": "Visar {shown} av {total} sampel (gallrat för visning; toppar behålls). En bred lucka här är gallring, inte saknade data.",
     "saving_triggers_reload": "Sparande utlöser en integration-omladdning. HA-enheter kan kortvarigt visas som otillgängliga.",
     "search_placeholder": "Sök inställningar…",
     "see_recorder": "Se inspelningswidgeten nedan",
@@ -1006,10 +1041,33 @@
     "sug_mute_failed": "Kunde inte tysta förslaget",
     "sug_unmuted_all": "Tysta förslag återställda",
     "n_suggestions_muted": "{count} tystade; auto-tunern föreslår inte dessa.",
-    "font_size_hint": "Gör allt i den här panelen större eller mindre. Gäller för ditt konto på den här enheten."
+    "font_size_hint": "Gör allt i den här panelen större eller mindre. Gäller för ditt konto på den här enheten.",
+    "import_history_description": "Hade du redan en smart kontakt innan du började med WashData? Ladda upp en historikexport från dess effektsensor, eller låt den läsas direkt från Home Assistant, och den vanliga detekteringen körs över den så att tidigare cykler dyker upp i din Cykler-lista, klara att namnges.",
+    "hist_input_hint": "Ladda upp en CSV-fil som hämtats från Historik-panelen (entitet, tillstånd, senast ändrad), eller låt WashData läsa sensorns historik direkt. Detekteringen körs sedan över den precis som live, och du väljer vilka av cyklerna den hittar du vill behålla.",
+    "hist_recorder_hint": "Läser från det datum du väljer fram till nu. Home Assistant sparar detaljerad historik i 10 dagar som standard och därefter bara timmedelvärden, som är för grova för att detektera cykler ur - välj ett datum längre tillbaka bara om din recorder är inställd på att spara mer.",
+    "hist_scanning": "Din historik spelas upp genom detekteringen. Detta körs i bakgrunden - du kan stänga den här dialogen och komma tillbaka till den senare.",
+    "hist_imported_count": "{n} cykler importerade.",
+    "hist_duplicates": "{n} var redan importerade och hoppades över.",
+    "hist_capped": "Gränsen per enhet för importerade cykler nåddes; resten sparades inte.",
+    "hist_next_step": "De finns i din Cykler-lista, märkta som importerad historik. Öppna en och använd Märk för att namnge programmet den hör till.",
+    "hist_rows_read": "{n} avläsningar lästa",
+    "hist_entity_substituted": "läste {used} (den här enheten är konfigurerad för {wanted})",
+    "hist_breaks": "{n} luckor där sensorn var otillgänglig",
+    "hist_other_entity": "{n} avläsningar för andra entiteter ignorerade",
+    "hist_skipped_spans": "Överhoppade sträckor",
+    "hist_settings_used": "Detekterad med den här enhetens nuvarande inställningar (minimieffekt {w} W, avfördröjning {s} s).",
+    "hist_none_found": "Inga cykler kunde detekteras i den historiken.",
+    "hist_found": "Hittade {n} cykler. Avmarkera allt som inte ser ut som en verklig körning - inget sparas förrän du importerar.",
+    "hist_scan_capped": "Endast de första kandidaterna visas ({n} hittades).",
+    "hist_recorder_empty": "Home Assistant har ingen detaljerad historik för den här sensorn i det tidsfönstret.",
+    "hist_scan_failed": "Sökningen misslyckades.",
+    "hist_scan_expired": "Den sökningen är inte längre tillgänglig. Sök igen.",
+    "hist_import_failed": "Importen misslyckades.",
+    "imported_history_readonly": "Detekterad i importerad effekthistorik. Den påverkar programmatchningen men räknas inte in i din statistik och kan inte beskäras eller delas. Märk den för att namnge programmet."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
+    "smart_termination_duration_ratio": "Andel av det matchade programmets förväntade varaktighet som en cykel måste nå innan smart avslutning får avsluta den i förtid; sänk den för last- eller temperaturberoende maskiner",
     "completion_min_seconds": "Kortaste körning som räknas som en riktig cykel",
     "end_repeat_count": "Antal låga avläsningar i rad innan avslut",
     "interrupted_min_seconds": "Korta cykler markeras som avbrutna",
@@ -1421,6 +1479,10 @@
       "doc": "Lagra spårningen av full effekt och matchande felsökningsdata för varje cykel. Användbar för felsökning men ökar lagringsstorleken.",
       "label": "Spara felsökningsspår"
     },
+    "smart_termination_duration_ratio": {
+      "doc": "Hur långt in i det matchade programmets förväntade varaktighet en cykel måste vara innan smart avslutning får avsluta den i förtid när effekten sjunker. Den förväntade varaktigheten är programmets genomsnitt, så på apparater vars körtid varierar mycket - tvättmaskiner med kallt vinter- kontra varmt sommarinloppsvatten, torktumlare med fuktsensor, lastberoende program - avslutas ungefär hälften av alla körningar kortare än det genomsnittet och får aldrig den snabba avslutningen, utan avslutas först minuter senare via reserv-timeouten. Sänk detta värde (t.ex. 0,85) på sådana maskiner så att den tidiga avslutningen ändå utlöses; höj det mot 1,0 för att vara mer försiktig. Lämna tomt för standardvärdet (0,98, eller 0,99 för diskmaskiner). Den kan bara avsluta en cykel tidigare, aldrig senare, och utlöses aldrig vid en tvetydig eller osäker matchning.",
+      "label": "Kvot för smart avslutning"
+    },
     "smoothing_window": {
       "doc": "Hur mycket råeffektsignalen utjämnas. Låg (2) är lyhörd men bullrig; hög (5) jämnar ut spikar men lägger till eftersläpning.",
       "label": "Utjämningsfönster"
@@ -1551,6 +1613,10 @@
     "door_end_dwell_seconds": {
       "label": "Dörröppningens uppehållstid vid avslut",
       "doc": "Hur länge dörren måste förbli öppen innan WashData avslutar cykeln, när \"Dörren öppnas automatiskt vid avslut\" är aktiverat. Tillräckligt länge för att ignorera snabb tilläggning av ett fat (standard 60 s), tillräckligt kort för att avsluta snabbt när maskinen poppar upp dörren."
+    },
+    "profile_evidence_sources": {
+      "label": "Cykler som formar ett program",
+      "doc": "Vilka cykler som används för att bygga upp effektkurvan för varje program och för att matcha en avslutad cykel mot den. Avmarkerar du en typ formar den inte längre dina program, utan att något tas bort - cyklerna ligger kvar i din Cykler-lista och kan fortfarande märkas eller tas bort. Praktiskt om du inte litar på importerade data. Statistiken påverkas inte: den räknar alltid bara de cykler som den här maskinen verkligen har kört. Att avmarkera allt ignoreras, eftersom ett program utan cykler bakom sig aldrig skulle kunna matcha."
     }
   },
   "setting_group": {
@@ -1634,6 +1700,9 @@
     },
     "basic_configuration": {
       "label": "Grundkonfiguration"
+    },
+    "profile_evidence": {
+      "label": "Profilunderlag"
     }
   },
   "status": {
@@ -1658,7 +1727,8 @@
     "trimming": "Beskär…",
     "splitting": "Delar upp…",
     "deleting": "Raderar…",
-    "imported": "Importerad"
+    "imported": "Importerad",
+    "preparing": "Förbereder…"
   },
   "suggestion": {
     "both_agree": "WashData rekommenderar",
@@ -1754,7 +1824,7 @@
       "thr_batch": "Hålls precis över den lägsta aktiva effekten vid p05 över {cycles} cykler ({p05}W) så att en start fångas så tidigt som möjligt och stopptröskeln stannar under maskinens lägsta driftseffekt.",
       "tol_per_profile": "p75 för varaktighetsvariansen per profil över {profiles} profiler ({cycles} cykler); snäva profiler bestraffas inte.",
       "tol_pooled": "Baserat på sammanslagen varaktighetsvarians för {cycles} senaste märkta cykler (p95 avvikelse={dev}).",
-      "watchdog": "Hålls så lågt som är säkert (strax över p95-uppdateringsmellanrummet på {p95}s, min 30s) så att stillestånd upptäcks snabbt utan falska stopp."
+      "watchdog": "Hålls så lågt som är säkert (strax över p95-uppdateringsmellanrummet på {p95}s och minst 2x samplingsintervallet på {median}s, min. 30s) så att stillestånd upptäcks snabbt utan falska stopp."
     },
     "exclusions": {
       "summary": "Uteslöt {total} feldetekterade cykler: {parts}.",
@@ -1801,6 +1871,7 @@
     "wrong_profile": "Fel profil"
   },
   "toast": {
+    "catalog_refreshed": "Gemenskapskatalogen har uppdaterats",
     "access_saved": "Åtkomstkontroll sparad",
     "all_wiped": "All data rensad",
     "analysis_complete_none": "Analys klar: inga nya förslag",
@@ -1812,7 +1883,7 @@
     "cycle_labelled": "Cykel märkt",
     "cycle_paused": "Cykel pausad",
     "cycle_resumed": "Cykel återupptagen",
-    "cycle_trimmed": "Cykel trimmad",
+    "cycle_trimmed": "Cykel beskuren",
     "cycles_merged": "Cykler sammanslagna",
     "envelope_rebuilt": "Kuvert ombyggt",
     "envelopes_rebuilt": "Kuvert ombyggda",
@@ -1906,7 +1977,9 @@
     "store_download_failed": "Nedladdning misslyckades: {error}",
     "store_download_nothing": "Inget nytt att ladda ner -- den här inställningen finns redan på din apparat.",
     "export_selective_done": "Export nedladdad",
-    "import_selective_done": "Importerade {profiles} profil(er) och {cycles} cykel/cykler"
+    "import_selective_done": "Importerade {profiles} profil(er) och {cycles} cykel/cykler",
+    "hist_csv_required": "Ladda in en CSV-fil eller klistra in dess innehåll först",
+    "file_read_failed": "Kunde inte läsa den filen"
   },
   "trend": {
     "down": "Nedåtgående trend",
@@ -1955,6 +2028,10 @@
     "finished": "Cykeln nådde ett sluttillstånd och avslutades."
   },
   "store": {
+    "your_model_tip": "Det här är apparaten du har angett i Inställningar",
+    "your_model": "Din apparat",
+    "search_brand_ph": "Sök efter märke…",
+    "programs_count": "Program: {n}",
     "browse": "Bläddra",
     "device": "Enhet",
     "favorites": "Favoriter",

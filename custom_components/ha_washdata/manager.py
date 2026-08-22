@@ -54,6 +54,7 @@ from homeassistant.helpers import translation
 from .const import (
     DOMAIN,
     CONF_POWER_SENSOR,
+    CONF_PROFILE_EVIDENCE_SOURCES,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_NOTIFY_SERVICE,
@@ -113,6 +114,9 @@ from .const import (
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+    CONF_SMART_TERMINATION_DURATION_RATIO,
+    DEFAULT_SMART_TERMINATION_DURATION_RATIO,
+    DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
     CONF_DELAY_START_DETECT_ENABLED,
     CONF_DELAY_CONFIRM_SECONDS,
     CONF_DELAY_TIMEOUT_HOURS,
@@ -142,6 +146,7 @@ from .const import (
     DEFAULT_SAMPLING_INTERVAL,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_POWER_OFF_THRESHOLD_W,
+    DEFAULT_PROFILE_EVIDENCE_SOURCES,
     DEFAULT_POWER_OFF_DELAY,
     DEFAULT_LEARNING_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
@@ -223,6 +228,10 @@ from .const import (
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
     DEFAULT_WATCHDOG_INTERVAL,
+    resolve_sampling_interval_default,
+    resolve_watchdog_interval_default,
+    resolve_start_duration_default,
+    resolve_smart_termination_duration_ratio_default,
     CONF_MATCH_PERSISTENCE,
     DEFAULT_MATCH_PERSISTENCE,
     DEFAULT_MATCH_REVERT_RATIO,
@@ -593,6 +602,11 @@ class WashDataManager:
         # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
+        # Which cycle categories may shape a profile. The store cannot read entry
+        # options, so the manager pushes this in (same as energy_mode above).
+        self.profile_store.evidence_sources = config_entry.options.get(
+            CONF_PROFILE_EVIDENCE_SOURCES, DEFAULT_PROFILE_EVIDENCE_SOURCES
+        )
         self.learning_manager = LearningManager(
             hass, self.entry_id, self.profile_store, self.device_type,
             device_name=config_entry.title,
@@ -707,7 +721,8 @@ class WashDataManager:
 
         start_duration_threshold = float(
             config_entry.options.get(
-                CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD
+                CONF_START_DURATION_THRESHOLD,
+                resolve_start_duration_default(self.device_type),
             )
         )
         end_repeat_count = int(
@@ -779,6 +794,16 @@ class WashDataManager:
                     CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
                 )
             ),
+            # `profile_match_threshold` was stored on the ProfileStore and never read
+            # anywhere, so the #288 workaround (raise it so near-duplicate profiles
+            # stop being trusted mid-cycle) silently did nothing. Wire it to the gate
+            # it was always documented to control; the default is the value that used
+            # to be hard-coded there, so nothing changes unless it was tuned.
+            match_confidence_threshold=float(
+                config_entry.options.get(
+                    CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
+                )
+            ),
             anti_wrinkle_enabled=bool(
                 config_entry.options.get(
                     CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED
@@ -808,6 +833,15 @@ class WashDataManager:
                 config_entry.options.get(
                     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
                     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+                )
+            ),
+            # #393: resolve the device-type default HERE (not in the gate) so the
+            # field always carries a real float - playground.effective_settings()
+            # skips a None-valued field, which would desync the sim from the detector.
+            smart_termination_duration_ratio=float(
+                config_entry.options.get(
+                    CONF_SMART_TERMINATION_DURATION_RATIO,
+                    resolve_smart_termination_duration_ratio_default(self.device_type),
                 )
             ),
             delay_detect_enabled=bool(
@@ -903,13 +937,19 @@ class WashDataManager:
         self._remove_external_trigger_listener = None  # External cycle end trigger
         self._remove_watchdog = None
         self._watchdog_interval = int(
-            config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
+            config_entry.options.get(
+                CONF_WATCHDOG_INTERVAL,
+                resolve_watchdog_interval_default(self.device_type),
+            )
         )
         self._match_persistence = int(
             config_entry.options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE)
         )
         self._sampling_interval = float(
-            config_entry.options.get(CONF_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL)
+            config_entry.options.get(
+                CONF_SAMPLING_INTERVAL,
+                resolve_sampling_interval_default(self.device_type),
+            )
         )
         self._noise_events_threshold = int(
             config_entry.options.get(
@@ -1427,10 +1467,15 @@ class WashDataManager:
 
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
+            # Element 8 is the narrow #288-only prefix verdict and element 9 the
+            # matched profile's own tail power level, both for the #364 guards. The
+            # detector tolerates shorter tuples, so other callers stay valid.
             self.detector.update_match(
                 (profile_name, confidence, matched_duration, phase_name,
                  result.is_confident_mismatch, result.is_ambiguous,
-                 result.is_prefix_ambiguous)
+                 result.is_prefix_ambiguous,
+                 result.is_prefix_ambiguous_full_shape,
+                 self.profile_store.profile_tail_power(profile_name) if profile_name else None)
             )
 
             # --- LOGGING (Unified) ---
@@ -2093,12 +2138,36 @@ class WashDataManager:
                 CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
             )
         )
+        # Keep the detector's copy in sync so a panel edit takes effect without a
+        # restart, exactly like min_duration_ratio below.
+        self.detector.config.match_confidence_threshold = float(
+            config_entry.options.get(
+                CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
+            )
+        )
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
         )
         # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
+        # Which cycle categories may shape a profile. Changing it changes every
+        # profile's curve, so rebuild them all now: envelopes are otherwise only rebuilt
+        # on a cycle end or a label change, so the user would tick the box and see
+        # nothing happen for days.
+        _prev_evidence = self.profile_store.evidence_sources
+        self.profile_store.evidence_sources = config_entry.options.get(
+            CONF_PROFILE_EVIDENCE_SOURCES, DEFAULT_PROFILE_EVIDENCE_SOURCES
+        )
+        if self.profile_store.evidence_sources != _prev_evidence:
+            self._logger.info(
+                "Profile evidence sources changed %s -> %s; rebuilding all envelopes",
+                list(_prev_evidence), list(self.profile_store.evidence_sources),
+            )
+            # Tracked, not fire-and-forget: this writes to the ProfileStore, so a
+            # reload/unload mid-rebuild must be able to cancel it before the store is
+            # swapped out (see _spawn_tracked).
+            self._spawn_tracked(self.profile_store.async_rebuild_all_envelopes())
 
         # Device default
         dev_def = DEVICE_COMPLETION_THRESHOLDS.get(
@@ -2110,7 +2179,8 @@ class WashDataManager:
 
         new_start_threshold = float(
             config_entry.options.get(
-                CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD
+                CONF_START_DURATION_THRESHOLD,
+                resolve_start_duration_default(self.device_type),
             )
         )
         new_end_repeat_count = int(
@@ -2180,6 +2250,12 @@ class WashDataManager:
                 DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
             )
         )
+        new_smart_termination_duration_ratio = float(
+            config_entry.options.get(
+                CONF_SMART_TERMINATION_DURATION_RATIO,
+                resolve_smart_termination_duration_ratio_default(self.device_type),
+            )
+        )
         new_delay_detect_enabled = bool(
             config_entry.options.get(
                 CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
@@ -2219,6 +2295,7 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
         self.detector.config.anti_wrinkle_idle_timeout = new_anti_wrinkle_idle_timeout
         self.detector.config.dishwasher_end_spike_quiet_release = new_dishwasher_end_spike_quiet_release
+        self.detector.config.smart_termination_duration_ratio = new_smart_termination_duration_ratio
         self.detector.config.delay_detect_enabled = new_delay_detect_enabled
         self.detector.config.delay_confirm_seconds = new_delay_confirm_seconds
         self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds
@@ -2414,13 +2491,36 @@ class WashDataManager:
         # Update sampling interval
         old_sampling = self._sampling_interval
         new_sampling = float(
-            config_entry.options.get(CONF_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL)
+            config_entry.options.get(
+                CONF_SAMPLING_INTERVAL,
+                resolve_sampling_interval_default(self.device_type),
+            )
         )
         if old_sampling != new_sampling:
             self._sampling_interval = new_sampling
             self._logger.info(
                 "Updated sampling interval: %.1fs -> %.1fs", old_sampling, new_sampling
             )
+
+        # Watchdog cadence: like sampling above, this was only read at construction, so a
+        # changed CONF_WATCHDOG_INTERVAL (or a device-type change selecting a new default)
+        # otherwise kept the old cadence until the manager was recreated. Re-arm an active
+        # watchdog so the new interval takes effect mid-cycle.
+        old_watchdog = self._watchdog_interval
+        new_watchdog = int(
+            config_entry.options.get(
+                CONF_WATCHDOG_INTERVAL,
+                resolve_watchdog_interval_default(self.device_type),
+            )
+        )
+        if old_watchdog != new_watchdog:
+            self._watchdog_interval = new_watchdog
+            self._logger.info(
+                "Updated watchdog interval: %ds -> %ds", old_watchdog, new_watchdog
+            )
+            if self._remove_watchdog:  # active cycle: cancel and re-register at the new cadence
+                self._stop_watchdog()
+                self._start_watchdog()
 
         # RESTORE STATE (only if recent enough, otherwise treat as stale)
         await self._attempt_state_restoration()
@@ -3218,8 +3318,24 @@ class WashDataManager:
         ):
             return
 
-        # Track observed power readings for learning
-        self.learning_manager.process_power_reading(power, now, self._last_reading_time)
+        # Track observed power readings for learning - only while a cycle is
+        # active (#394). An appliance is idle ~98% of the time; running the 5-min
+        # auto-tune pass and training the sample-interval cadence model on the
+        # standby heartbeat is constant background work (a store rewrite every few
+        # minutes) that buys nothing AND skews every operational suggestion, since
+        # the idle publish-on-change heartbeat is not the in-cycle sampling
+        # cadence those suggestions are sized from. The detector below still
+        # receives EVERY reading, so the next cycle's start is never missed - only
+        # the learning call is gated.
+        if self.detector.state in (
+            STATE_STARTING,
+            STATE_RUNNING,
+            STATE_PAUSED,
+            STATE_ENDING,
+        ):
+            self.learning_manager.process_power_reading(
+                power, now, self._last_reading_time
+            )
         self._last_reading_time = now
         self._last_real_reading_time = now # Track real update
         self._current_power = power
@@ -3634,6 +3750,20 @@ class WashDataManager:
 
         if not self._last_reading_time:
             return
+
+        # Refresh the remaining-time / progress estimate on the watchdog cadence
+        # (sampling-derived: max(30, 2*sampling+1)s), independently of incoming power
+        # events. A publish-on-change plug emits nothing during a flat low-power tail
+        # (e.g. a dishwasher's ~30 min drying phase at 0 W), so the event-driven
+        # _update_remaining_only never runs and the displayed countdown freezes at
+        # whatever value it last showed. The estimate is wall-clock based
+        # (net_elapsed_seconds), so this tick advances it correctly with zero new
+        # readings; it no-ops until a profile is matched. Kept ahead of the
+        # keepalive/force-end branches below so even a verified-pause drying tail
+        # (which skips those branches) still ticks down.
+        if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            self._update_remaining_only()
+            self._notify_update()
 
         time_since_any_update = (now - self._last_reading_time).total_seconds()
 
@@ -6742,6 +6872,9 @@ class WashDataManager:
             current_duration,
             profile_name,
             self._logger,
+            quiet_threshold_w=float(
+                getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0
+            ),
         )
 
     def _notify_update(self) -> None:

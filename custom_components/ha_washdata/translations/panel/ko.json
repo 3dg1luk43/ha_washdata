@@ -78,9 +78,12 @@
         "awaiting": "승인 대기 중",
         "imported_tip": "커뮤니티 스토어에서 가져왔습니다. 매칭에만 사용되며 통계에는 포함되지 않습니다.",
         "not_importable": "해당 없음",
-        "exists": "존재함"
+        "exists": "존재함",
+        "backfilled_tip": "가져온 전력 이력에서 감지되었습니다. 프로그램 매칭에만 영향을 주며 통계에는 포함되지 않습니다."
     },
     "btn": {
+        "set_brand_model": "브랜드 및 모델 설정",
+        "refresh_catalog": "카탈로그 새로 고침",
         "add_device": "+ 장치 추가",
         "add_device_tip": "다른 WashData 장치 추가",
         "add_maintenance": "유지보수 이벤트 추가",
@@ -90,7 +93,7 @@
         "apply_label": "라벨 적용",
         "apply_set_b": "세트 B 적용",
         "apply_split": "분할 적용",
-        "apply_trim": "트림 적용",
+        "apply_trim": "자르기 적용",
         "auto_detect_split": "자동 감지",
         "auto_label_cycles": "사이클 자동 라벨 지정",
         "auto_label_cycles_tip": "일치 신뢰도가 임계값을 초과하는 미라벨 주기에 프로필 이름을 자동으로 할당합니다",
@@ -209,8 +212,8 @@
         "stop": "정지",
         "submit_correction": "정정사항 제출",
         "train_now": "지금 훈련",
-        "trim": "다듬기",
-        "trim_split": "다듬기/분할",
+        "trim": "자르기",
+        "trim_split": "자르기/분할",
         "undo": "실행 취소",
         "use": "사용",
         "wipe_all": "모든 데이터 지우기",
@@ -241,7 +244,12 @@
         "import_selected": "선택 항목 가져오기",
         "back": "뒤로",
         "mute_suggestion": "이 설정 제안 중지",
-        "reset_muted": "뮤트 초기화"
+        "reset_muted": "뮤트 초기화",
+        "import_power_history": "전력 이력 가져오기",
+        "hist_read_recorder": "Home Assistant에서 읽기",
+        "hist_scan": "사이클 검색",
+        "hist_import_n": "{n}개 사이클 가져오기",
+        "hist_goto_cycles": "사이클 보기"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -253,12 +261,12 @@
             "start": "구김 방지 최대 전력 ({max} W) 미만이어야 합니다"
         },
         "attn_sub": "저장하기 전에 충돌을 해결하세요",
-        "attn_title": "설정 충돌 {n}건{s}",
+        "attn_title": "설정 충돌: {n}",
         "confidence": {
             "auto": "매칭 임계값 ({match}) 이상이어야 합니다",
-            "learning": "매칭 임계값 ({match}) 이하이어야 합니다",
+            "learning": "매칭 임계값 ({match}) 이상이어야 합니다",
             "match_for_auto": "자동 라벨 신뢰도 ({alc}) 이하이어야 합니다",
-            "match_for_learning": "학습 신뢰도 ({lc}) 이상이어야 합니다"
+            "match_for_learning": "학습 신뢰도 ({lc}) 이하이어야 합니다"
         },
         "duration_ratio": {
             "max": "최소 기간 비율 ({min}) 보다 커야 합니다",
@@ -296,14 +304,14 @@
             "match": "언매칭 임계값 ({un}) 이상이어야 합니다",
             "unmatch": "매칭 임계값 ({match}) 미만이어야 합니다. 그렇지 않으면 확정된 일치가 즉시 해제됩니다"
         },
-        "cascade_toast": "일관성을 위해 {n}개 설정{s}을 추가로 자동 조정했습니다.",
+        "cascade_toast": "일관성을 위해 조정된 다른 설정: {n}",
         "suggestion_resolves": "이 문제를 해결하려면 아래의 보류 중인 제안({val})을 적용하세요",
         "use_fix": "{val} 사용",
         "watchdog": {
             "interval": "샘플링 간격 ({si} 초)의 최소 2배이어야 합니다",
             "sampling": "샘플링 간격은 워치독 간격 ({wi} 초)의 절반 이하이어야 합니다"
         },
-        "settings_banner": "{n}건의 설정 충돌{s} – 강조 표시된 섹션을 확인하고 저장 전에 수정하세요.",
+        "settings_banner": "설정 충돌: {n}. 강조 표시된 섹션을 확인하고 저장 전에 수정하세요.",
         "settings_banner_btn": "첫 번째로"
     },
     "hdr": {
@@ -356,7 +364,8 @@
         "pg_outcome": "시뮬레이션 결과",
         "pg_across_cycles": "전체 사이클에 걸쳐",
         "community_store": "커뮤니티 스토어",
-        "online_account": "커뮤니티 스토어 및 온라인 기능"
+        "online_account": "커뮤니티 스토어 및 온라인 기능",
+        "import_power_history": "전력 이력 가져오기"
     },
     "health": {
         "fair": "프로파일 품질: 보통",
@@ -364,6 +373,7 @@
         "poor": "⚠ 프로파일 품질: 불량"
     },
     "lbl": {
+        "drag_to_resize": "드래그하여 크기 조정",
         "actions": "작업",
         "activity": "활동",
         "administrators": "관리자",
@@ -434,7 +444,7 @@
         "from": "시작",
         "gap_s": "간격(초)",
         "group_name": "그룹 이름",
-        "head_trim": "헤드 트림(초)",
+        "head_trim": "시작 부분 자르기(초)",
         "health": "건강",
         "hide_tabs": "관리자가 아닌 사용자를 위한 탭 숨기기",
         "in_use": "사용 중",
@@ -450,7 +460,7 @@
         "metric": "지표",
         "mode_existing_profile": "기존 프로필에 추가",
         "mode_new_profile": "새 프로필 만들기",
-        "models_fine_tuned": "({count}개 모델{plural} 미세 조정됨)",
+        "models_fine_tuned": "(미세 조정된 모델: {count})",
         "n_classic_suggestions": "{n} 클래식",
         "n_ml_suggestions": "{n} ML",
         "n_selected": "{n}개 선택됨",
@@ -532,7 +542,7 @@
         "stage3": "3단계 – DTW",
         "stage4": "4단계 – 일치도",
         "status": "상태",
-        "tail_trim": "테일 트림(초)",
+        "tail_trim": "끝부분 자르기(초)",
         "timer_auto_pause": "자동 일시중지",
         "timer_min": "분",
         "timer_msg_placeholder": "메시지(선택사항, {device}/{program}/{minutes})",
@@ -650,7 +660,7 @@
         "show_contributor": "기여자 이름 표시",
         "task_pg_detail": "사이클 시뮬레이션",
         "task_split": "사이클 분할 중",
-        "task_trim": "사이클 트리밍 중",
+        "task_trim": "사이클 자르는 중",
         "task_merge": "사이클 병합 중",
         "task_rebuild": "엔벨로프 재구성 중",
         "cat_profiles": "프로필(프로그램)",
@@ -677,7 +687,26 @@
         "conflict_import_copy": "사본으로 가져오기",
         "conflict_keep_mine": "내 것 유지",
         "conflict_overwrite": "덮어쓰기",
-        "font_size": "패널 글꼴 크기"
+        "font_size": "패널 글꼴 크기",
+        "hist_csv_data": "CSV 데이터",
+        "hist_from_recorder": "또는 Home Assistant에서 읽기",
+        "hist_since": "시작 날짜",
+        "days": "일",
+        "hist_keep": "이 사이클 유지",
+        "hist_looks_complete": "완전",
+        "peak_power_short": "피크",
+        "shape": "형태",
+        "hist_skip_idle": "작동 없음",
+        "hist_skip_sparse": "측정값 간격이 너무 넓음",
+        "hist_skip_short": "측정값이 너무 적음",
+        "hist_skip_long": "나눌 만큼 긴 공백이 없음",
+        "hist_reason_short": "이 가전의 실제 최단 사이클보다 짧음",
+        "hist_reason_no_end": "정상적으로 종료되지 않음",
+        "task_history_import": "전력 이력 검색",
+        "task_history_import_apply": "사이클 가져오기",
+        "evidence_real_cycles": "이 기기가 실행한 사이클",
+        "evidence_reference_cycles": "커뮤니티 스토어에서 다운로드",
+        "evidence_backfill_cycles": "가져온 전력 이력에서 발견"
     },
     "log": {
         "all_levels": "모든 레벨",
@@ -756,9 +785,15 @@
         "store_share": "커뮤니티 스토어에 공유",
         "store_share_device": "이 기기 공유",
         "export_select": "내보내기 - 데이터 선택",
-        "import_wizard": "가져오기 - 데이터 선택"
+        "import_wizard": "가져오기 - 데이터 선택",
+        "history_import": "전력 이력 가져오기"
     },
     "msg": {
+        "tail_trim_hint": "끝부분에서 제거할 초 수",
+        "store_sibling_hint": "정확히 같은 모델로 공유된 항목이 없나요? 같은 브랜드의 비슷한 모델이 보통 좋은 출발점이 됩니다.",
+        "store_declare_appliance": "보유한 가전제품을 WashData에 지정하면 이 탭에 다른 사용자가 공유한 프로그램과 녹음이 표시됩니다. 위에 브랜드를 입력해 둘러볼 수도 있습니다.",
+        "refresh_catalog_hint": "커뮤니티 브랜드 및 가전제품 목록은 공유 스토어가 일일 조회 한도를 넘지 않도록 캐시됩니다. 새로 고치면 다른 사용자가 추가하거나 승인한 항목을 가져옵니다.",
+        "head_trim_hint": "시작 부분에서 제거할 초 수",
         "appliance_monitor": "가전제품 모니터",
         "artifact_dip_detail": "일반 전력 범위 아래로 약 {n}초 동안 내려갔습니다.",
         "artifact_footer": "위 그래프에 강조표시되어 있습니다. 이는 일시적인 아티팩트(예: 사이클 중간에 문이 열림)이며 반드시 문제가 되는 것은 아닙니다.",
@@ -769,7 +804,7 @@
         "automations_intro": "WashData는 {start} / {end} 이벤트를 발생시키고 엔티티를 노출하므로, 알림과 동작은 일반 Home Assistant 자동화로 구축하는 것이 가장 좋습니다. 이 기기를 사용하는 자동화가 아래에 표시됩니다.",
         "cleanup_intro": "라벨이 붙은 모든 사이클이 중첩됩니다. 이상값을 선택하고 삭제하여 프로필을 정리하세요.",
         "clear_debug_hint": "저장된 디버그 데이터를 제거하여 여유 공간을 확보하세요.",
-        "collecting_data": "데이터 수집 중입니다. 미세 조정을 시작하려면 {need}번의 사이클{plural}이 더 필요합니다（{current}/{min}）。",
+        "collecting_data": "데이터 수집 중입니다. 미세 조정을 시작하기까지 더 필요한 사이클: {need} ({current}/{min}).",
         "compare_overlay_profiles": "오버레이 프로필(희미함)",
         "compare_profiles_tip": "위 차트에 다른 프로필 봉투를 겹쳐서 어느 것이 이 주기에 가장 적합한지 확인하세요.",
         "compare_selected_cycles": "선택한 주기(단색) – 표시/숨기기",
@@ -779,7 +814,7 @@
         "cycles_deleted": "{count}개 사이클이 삭제되었습니다",
         "enough_data": "학습할 충분한 데이터가 있습니다（{current}/{min}사이클）。",
         "export_description": "JSON으로 내보낼 프로필, 사이클, 설정 등을 정확히 선택하거나, 파일을 분석하여 원하는 부분만 가져올 수 있습니다.",
-        "feedback_cycles_pending": "검토가 필요한 사이클 {n}개{s}",
+        "feedback_cycles_pending": "검토 대기: {n}",
         "feedback_prompt": "그것이 옳았는지 확인하고, 프로그램을 수정하거나, 무시하십시오.",
         "feedback_relabel_hint": "이 사이클을 다시 라벨 지정하면 이것도 해결됩니다.",
         "filter_by_profile": "프로필로 필터링…",
@@ -856,7 +891,6 @@
         "pg_stress_synthetic": "대기 시뮬레이션이 여기서 시작됩니다",
         "pg_sweep_intro": "{param}이(가) 달랐다면 어땠을까요? 가장 많은 사이클이 올바르게 매칭되는 설정을 찾기 위해 최근 {cycles}개 사이클에서 {steps}개 값을 테스트합니다.",
         "pg_sweep_step": "단계 {done} / {total}",
-        "pg_undetected": "{n}개 사이클{s} 미감지",
         "pg_verdict_bad": "주의 필요: 많은 사이클이 감지되지 않고 있습니다.",
         "pg_verdict_good": "잘 조정됨: 대부분의 사이클이 올바르게 식별되고 매칭됩니다.",
         "pg_verdict_ok": "양호: 일부 사이클을 놓쳤습니다. 시작 임계값을 낮춰 보세요.",
@@ -887,6 +921,7 @@
         "review_recorded_tip": "이를 프로그램에 대해 직접 선택한 참조 주기로 표시합니다. 이는 수동으로 기록된 주기와 동일한 역할입니다. 참조 순환은 항상 유지되고 일치하는 템플릿을 시드하며 정리로 인해 삭제되지 않습니다. (이것은 \"황금\"/기록된 플래그입니다. 둘 다 동일합니다.)",
         "review_tags_tip": "이 주기에 무엇이 잘못되었는지 설명하는 선택적 플래그이므로 훈련과 정리가 이를 설명할 수 있습니다.",
         "review_to_cycles": "사이클 검토 대기열 열기",
+        "samples_decimated": "{total}개 샘플 중 {shown}개 표시 중 (표시용으로 솎아냄; 피크는 유지). 여기서 넓은 간격은 솎아낸 것이며 누락된 데이터가 아닙니다.",
         "saving_triggers_reload": "저장하면 통합 다시 로드가 트리거됩니다. HA 엔터티는 일시적으로 사용할 수 없는 것으로 표시될 수 있습니다.",
         "search_placeholder": "검색 설정…",
         "see_recorder": "아래의 녹음기 위젯을 참조하세요",
@@ -1006,7 +1041,29 @@
         "sug_mute_failed": "제안을 음소거할 수 없습니다",
         "sug_unmuted_all": "뮤트된 제안을 초기화했습니다",
         "n_suggestions_muted": "{count}개 뮤트됨. 자동 튜너가 이 설정들을 제안하지 않습니다.",
-        "font_size_hint": "이 패널의 모든 내용을 크거나 작게 표시합니다. 이 기기의 내 계정에 적용됩니다."
+        "font_size_hint": "이 패널의 모든 내용을 크거나 작게 표시합니다. 이 기기의 내 계정에 적용됩니다.",
+        "import_history_description": "WashData를 사용하기 전에도 스마트 플러그를 쓰고 있었나요? 해당 전력 센서의 이력 내보내기 파일을 업로드하거나 Home Assistant에서 바로 읽어오면 평소와 같은 감지가 그 데이터에 실행되어, 과거 사이클이 사이클 목록에 나타나 이름을 지정할 수 있습니다.",
+        "hist_input_hint": "이력 패널에서 다운로드한 CSV(entity, state, last changed)를 업로드하거나, WashData가 센서 이력을 직접 읽도록 하세요. 그러면 실시간과 똑같은 감지가 실행되고, 찾은 사이클 중 어떤 것을 보관할지 직접 선택합니다.",
+        "hist_recorder_hint": "선택한 날짜부터 현재까지 읽습니다. Home Assistant는 기본적으로 상세 이력을 10일간 보관하고 그 이후에는 시간별 평균만 남기는데, 이는 사이클을 감지하기에 너무 거칩니다. recorder가 더 오래 보관하도록 설정되어 있을 때만 더 이전 날짜를 선택하세요.",
+        "hist_scanning": "이력을 감지기로 다시 재생하고 있습니다. 이 작업은 백그라운드에서 실행되므로 이 창을 닫고 나중에 다시 열어도 됩니다.",
+        "hist_imported_count": "{n}개 사이클을 가져왔습니다.",
+        "hist_duplicates": "{n}개는 이미 가져온 항목이라 건너뛰었습니다.",
+        "hist_capped": "기기당 가져온 사이클 한도에 도달하여 나머지는 저장되지 않았습니다.",
+        "hist_next_step": "가져온 이력으로 표시되어 사이클 목록에 있습니다. 하나를 열고 라벨 지정으로 해당 프로그램 이름을 지정하세요.",
+        "hist_rows_read": "측정값 {n}개 읽음",
+        "hist_entity_substituted": "{used}을(를) 읽었습니다 (이 기기에는 {wanted}이(가) 설정되어 있습니다)",
+        "hist_breaks": "센서를 사용할 수 없었던 공백 {n}곳",
+        "hist_other_entity": "다른 엔티티의 측정값 {n}개 무시됨",
+        "hist_skipped_spans": "건너뛴 구간",
+        "hist_settings_used": "이 기기의 현재 설정(최소 전력 {w} W, 오프 지연 {s}초)으로 감지했습니다.",
+        "hist_none_found": "해당 이력에서 사이클을 감지할 수 없었습니다.",
+        "hist_found": "{n}개 사이클을 찾았습니다. 실제 작동으로 보이지 않는 항목은 선택을 해제하세요. 가져오기 전에는 아무것도 저장되지 않습니다.",
+        "hist_scan_capped": "처음 후보만 표시합니다(총 {n}개 발견).",
+        "hist_recorder_empty": "Home Assistant에 해당 기간의 이 센서 상세 이력이 없습니다.",
+        "hist_scan_failed": "검색에 실패했습니다.",
+        "hist_scan_expired": "해당 검색 결과는 더 이상 사용할 수 없습니다. 다시 검색해 주세요.",
+        "hist_import_failed": "가져오기에 실패했습니다.",
+        "imported_history_readonly": "가져온 전력 이력에서 감지되었습니다. 프로그램 매칭에 반영되지만 통계에는 포함되지 않으며, 자르거나 분할할 수 없습니다. 라벨을 지정해 프로그램 이름을 정하세요."
     },
     "pg_desc": {
         "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -1035,7 +1092,8 @@
         "dtw_refine_top_n": "Stage 3: DTW가 재점수화하는 후보 수; 올바른 프로파일이 4-5위면 7-9로 높임(기본값 5)",
         "duration_scale": "Stage 4: 지속 시간 일치 점수가 반으로 줄어드는 로그 비율; 작을수록 엄격한 패널티(기본값 0.175)",
         "energy_scale": "Stage 4: 에너지 일치 점수가 반으로 줄어드는 로그 비율; 작을수록 엄격한 패널티(기본값 0.25)",
-        "dishwasher_end_spike_quiet_release": "식기세척기: 예상 소요 시간 이후 사이클 종료 배수 대기가 해제되기 전 조용히 유지되는 초"
+        "dishwasher_end_spike_quiet_release": "식기세척기: 예상 소요 시간 이후 사이클 종료 배수 대기가 해제되기 전 조용히 유지되는 초",
+        "smart_termination_duration_ratio": "일치된 프로그램의 예상 소요 시간 중 스마트 종료가 조기에 끝낼 수 있으려면 주기가 도달해야 하는 비율; 부하나 온도에 따라 달라지는 기기에서는 낮추십시오"
     },
     "phase_desc": {
         "anti_crease": "메인 사이클 후 드럼이 간헐적으로 회전하여 의류 구김을 방지합니다.",
@@ -1417,6 +1475,10 @@
             "doc": "각 사이클에 대해 전체 전력 추적 및 일치하는 디버그 데이터를 저장합니다. 문제 해결에 유용하지만 저장소 크기가 늘어납니다.",
             "label": "디버그 추적 저장"
         },
+        "smart_termination_duration_ratio": {
+            "doc": "전력이 떨어졌을 때 스마트 종료가 주기를 조기에 끝낼 수 있으려면, 일치된 프로그램의 예상 소요 시간 중 어느 정도까지 주기가 진행되어야 하는지를 지정합니다. 예상 소요 시간은 해당 프로그램의 평균값이므로, 실행 시간이 크게 달라지는 가전제품(겨울철 차가운 급수 대 여름철 따뜻한 급수의 세탁기, 센서 건조식 건조기, 부하에 따라 달라지는 프로그램)에서는 전체 실행의 약 절반이 그 평균보다 짧게 끝나 빠른 종료가 적용되지 않고, 폴백 시간 초과를 통해서만 몇 분 늦게 종료됩니다. 이러한 기기에서는 이 값을 낮춰(예: 0.85) 조기 종료가 계속 작동하도록 하고, 더 보수적으로 하려면 1.0에 가깝게 높이십시오. 기본값(0.98, 식기세척기는 0.99)을 사용하려면 비워 두십시오. 주기를 더 일찍 끝낼 수만 있고 더 늦출 수는 없으며, 모호하거나 신뢰도가 낮은 일치에서는 작동하지 않습니다.",
+            "label": "스마트 종료 비율"
+        },
         "smoothing_window": {
             "doc": "원시 전력 신호가 얼마나 평탄화되는지입니다. 낮음(2)은 반응이 좋지만 소음이 있습니다. 높음(5)은 스파이크를 부드럽게 하지만 지연을 추가합니다.",
             "label": "스무딩 윈도우"
@@ -1551,6 +1613,10 @@
         "dishwasher_end_spike_quiet_release": {
             "label": "자연 건조 조용 시 해제",
             "doc": "사이클이 예상 소요 시간을 지난 후, WashData가 최종 배수를 더 이상 기다리지 않고 사이클을 종료하기까지 식기세척기가 조용한 상태(중지 임계값 미만)를 유지해야 하는 시간입니다. 늦게 발생하는 최종 배수 전에 긴 무음 건조 단계가 있고 그 배수가 감지되지 않고 있다면 값을 높이세요. 창을 넓히면 학습된 소요 시간이 예전 평균값에 고정되지 않고 계절적 변동(급수 온도가 낮을수록 사이클이 길어짐)을 따라갈 수 있습니다. 이 설정은 내부의 30분 종료 스파이크 상한에 비해 대기 시간을 단축할 수만 있고 연장하지는 않습니다."
+        },
+        "profile_evidence_sources": {
+            "label": "프로그램을 형성하는 사이클",
+            "doc": "각 프로그램의 전력 곡선을 만들고 완료된 사이클을 그것과 매칭할 때 사용할 사이클 종류입니다. 종류의 선택을 해제하면 해당 종류는 더 이상 프로그램에 반영되지 않지만 아무것도 삭제되지 않습니다. 사이클은 사이클 목록에 그대로 남아 있으며 계속 라벨을 지정하거나 삭제할 수 있습니다. 가져온 데이터를 신뢰할 수 없을 때 유용합니다. 통계에는 영향이 없습니다. 통계는 항상 이 기기가 실제로 실행한 사이클만 계산합니다. 모두 선택 해제하면 무시됩니다. 근거가 되는 사이클이 없는 프로그램은 결코 매칭될 수 없기 때문입니다."
         }
     },
     "setting_group": {
@@ -1634,6 +1700,9 @@
         },
         "basic_configuration": {
             "label": "기본 구성"
+        },
+        "profile_evidence": {
+            "label": "프로필 근거"
         }
     },
     "status": {
@@ -1655,10 +1724,11 @@
         "analyzing": "분석 중…",
         "resetting": "재설정 중…",
         "reverting": "되돌리는 중…",
-        "trimming": "다듬는 중…",
+        "trimming": "자르는 중…",
         "splitting": "분할 중…",
         "deleting": "삭제 중…",
-        "imported": "가져옴"
+        "imported": "가져옴",
+        "preparing": "준비 중…"
     },
     "tab": {
         "advanced": "고급",
@@ -1688,6 +1758,7 @@
         "wrong_profile": "잘못된 프로필"
     },
     "toast": {
+        "catalog_refreshed": "커뮤니티 카탈로그를 새로 고쳤습니다",
         "access_saved": "액세스 제어가 저장되었습니다.",
         "all_wiped": "모든 데이터가 지워졌습니다.",
         "analysis_complete_none": "분석 완료: 새로운 제안 없음",
@@ -1699,7 +1770,7 @@
         "cycle_labelled": "라벨이 붙은 사이클",
         "cycle_paused": "주기가 일시중지됨",
         "cycle_resumed": "사이클 재개",
-        "cycle_trimmed": "주기가 잘림",
+        "cycle_trimmed": "사이클을 잘랐습니다",
         "cycles_merged": "사이클이 병합되었습니다.",
         "envelope_rebuilt": "봉투 재구축",
         "envelopes_rebuilt": "봉투 재구축",
@@ -1793,7 +1864,9 @@
         "store_download_failed": "다운로드 실패: {error}",
         "store_download_nothing": "다운로드할 새 항목 없음 - 이 설정은 이미 기기에 있습니다.",
         "export_selective_done": "내보내기 다운로드 완료",
-        "import_selective_done": "{profiles}개 프로필과 {cycles}개 사이클을 가져왔습니다"
+        "import_selective_done": "{profiles}개 프로필과 {cycles}개 사이클을 가져왔습니다",
+        "hist_csv_required": "먼저 CSV 파일을 불러오거나 내용을 붙여넣으세요",
+        "file_read_failed": "해당 파일을 읽을 수 없습니다"
     },
     "suggestion": {
         "both_agree": "WashData 권장",
@@ -1889,7 +1962,7 @@
             "thr_batch": "{cycles} 사이클의 p05 최저 활성 전력({p05}W) 바로 위로 유지합니다. 그래서 시작을 최대한 빨리 포착하고, 정지 임계값은 기기의 최저 작동 전력보다 낮게 유지됩니다.",
             "tol_per_profile": "{profiles}개 프로필({cycles} 사이클)의 프로필별 시간 분산 p75. 편차가 작은 프로필은 불이익을 받지 않습니다.",
             "tol_pooled": "{cycles}개 최근 라벨 사이클의 통합 시간 분산 기반(p95 편차={dev}).",
-            "watchdog": "안전한 범위에서 최대한 낮게 유지(p95 업데이트 간격 {p95}s보다 약간 큰 값, 최소 30s). 잘못된 정지 없이 멈춤을 빠르게 감지합니다."
+            "watchdog": "안전한 범위에서 최대한 낮게 유지(p95 업데이트 간격 {p95}s보다 약간 크고, 샘플링 간격 {median}s의 2배 이상, 최소 30s). 잘못된 정지 없이 멈춤을 빠르게 감지합니다."
         },
         "exclusions": {
             "summary": "잘못 감지된 사이클 {total}개를 제외했습니다: {parts}.",
@@ -1955,6 +2028,10 @@
         "finished": "사이클이 종료 상태에 도달하여 끝났습니다."
     },
     "store": {
+        "your_model_tip": "설정에서 지정한 가전제품입니다",
+        "your_model": "내 기기",
+        "search_brand_ph": "브랜드로 검색…",
+        "programs_count": "프로그램: {n}",
         "browse": "탐색",
         "device": "기기",
         "favorites": "즐겨찾기",
@@ -2010,7 +2087,7 @@
             "apply": "사이클 분할 중"
         },
         "trim": {
-            "apply": "사이클 트리밍 중"
+            "apply": "사이클 자르는 중"
         },
         "merge": {
             "apply": "사이클 병합 중"

@@ -407,6 +407,7 @@ def test_read_cache_get_put_and_expiry():
     assert "k2" not in c._read_cache
 
 
+
 @pytest.mark.asyncio
 async def test_upload_encodes_points_as_maps_not_nested_arrays():
     # Firestore forbids directly-nested arrays; trace.points must be an array of maps.
@@ -692,3 +693,311 @@ async def test_get_device_bundle_includes_settings():
     bundle = await c.get_device_bundle(d)
     assert bundle["settings"] == {"start_threshold_w": 12.0}
     assert bundle["profiles"][0]["program"] == "Cotton 40"
+
+
+# ── read-budget reductions (see the StoreClient class docstring) ────────────────
+# The store runs on Firebase's free tier (50k document reads/day, shared by every
+# install). These tests pin the behaviours that keep the catalog off that budget:
+# resolving a known id with a point read, answering a prefix search server-side, and
+# never re-querying for a subset of rows already held in memory.
+
+def _q(session):
+    """The structuredQuery of the most recent :runQuery POST."""
+    return session.posts[-1][1]["json"]["structuredQuery"]
+
+
+@pytest.mark.asyncio
+async def test_list_brands_prefix_uses_range_query_not_full_list():
+    # A prefix search must NOT download the whole collection to filter it in memory:
+    # a brand_lc range query reads only the matching docs (measured on the live
+    # catalog: 3 docs for "bo" against 84 for the full list).
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../brands/bosch", "fields": {"brand_lc": {"stringValue": "bosch"}}}},
+    ]))
+    c = _client(s)
+    rows = await c.list_brands(q="bo")
+    assert [r["id"] for r in rows] == ["bosch"]
+    ops = {
+        f["fieldFilter"]["op"]
+        for f in _q(s)["where"]["compositeFilter"]["filters"]
+        if f["fieldFilter"]["field"]["fieldPath"] == "brand_lc"
+    }
+    assert ops == {"GREATER_THAN_OR_EQUAL", "LESS_THAN_OR_EQUAL"}
+
+
+@pytest.mark.asyncio
+async def test_list_brands_narrowing_prefix_served_from_cached_prefix():
+    # Typing extends the prefix one character at a time. A result set for "bo" already
+    # contains every brand starting with "bos", so only the first keystroke may query.
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../brands/bosch", "fields": {"brand_lc": {"stringValue": "bosch"}}}},
+        {"document": {"name": ".../brands/bomann", "fields": {"brand_lc": {"stringValue": "bomann"}}}},
+    ]))
+    c = _client(s)
+    await c.list_brands(q="bo")
+    assert len(s.posts) == 1
+    assert [r["id"] for r in await c.list_brands(q="bos")] == ["bosch"]
+    assert [r["id"] for r in await c.list_brands(q="bosch")] == ["bosch"]
+    assert len(s.posts) == 1  # both narrower prefixes answered from memory
+
+
+@pytest.mark.asyncio
+async def test_full_brand_list_answers_later_prefix_searches():
+    # Opening the dropdown (no q) fetches everything; every subsequent search is free.
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../brands/bosch", "fields": {"brand_lc": {"stringValue": "bosch"}}}},
+        {"document": {"name": ".../brands/miele", "fields": {"brand_lc": {"stringValue": "miele"}}}},
+    ]))
+    c = _client(s)
+    await c.list_brands()
+    assert [r["id"] for r in await c.list_brands(q="mi")] == ["miele"]
+    assert len(s.posts) == 1
+
+
+@pytest.mark.asyncio
+async def test_approved_only_served_from_cached_pending_superset():
+    # A pending-inclusive result already contains every approved row, so an
+    # approved-only caller must be filtered out of it rather than issuing a second,
+    # narrower query for a strict subset.
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../devices/d1", "fields": {
+            "model_lc": {"stringValue": "wat28"}, "status": {"stringValue": "approved"}}}},
+        {"document": {"name": ".../devices/d2", "fields": {
+            "model_lc": {"stringValue": "wat29"}, "status": {"stringValue": "pending"}}}},
+    ]))
+    c = _client(s)
+    await c.search_devices(brand="Bosch", appliance_type="washer", include_pending=True)
+    assert len(s.posts) == 1
+    approved = await c.search_devices(brand="Bosch", appliance_type="washer", include_pending=False)
+    assert [d["id"] for d in approved] == ["d1"]
+    assert len(s.posts) == 1
+
+
+@pytest.mark.asyncio
+async def test_approved_only_is_not_upgraded_to_the_superset_query():
+    # The reverse must NOT happen: widening an approved-only request to the
+    # pending-inclusive query would raise its read count (on the live catalog, ~6
+    # approved devices of one type against ~140 pending-inclusive).
+    s = _Session()
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    await c.search_devices(brand="Bosch", appliance_type="washer", include_pending=False)
+    status = next(
+        f for f in _q(s)["where"]["compositeFilter"]["filters"]
+        if f["fieldFilter"]["field"]["fieldPath"] == "status"
+    )
+    assert status["fieldFilter"]["op"] == "EQUAL"
+    assert status["fieldFilter"]["value"]["stringValue"] == "approved"
+
+
+@pytest.mark.asyncio
+async def test_catalog_entry_uses_two_point_reads_and_no_query():
+    # The settings-form status badges: two GETs by deterministic id, replacing the
+    # brand list + device list this used to be a by-product of.
+    s = _Session()
+    s.queue_get(_Resp(200, {"name": ".../brands/bosch", "fields": {
+        "brand": {"stringValue": "Bosch"}, "status": {"stringValue": "approved"}}}))
+    s.queue_get(_Resp(200, {"name": ".../devices/washer__bosch__wat28660", "fields": {
+        "model": {"stringValue": "WAT28660"}, "status": {"stringValue": "pending"},
+        "confirmCount": {"integerValue": "2"}}}))
+    c = _client(s)
+    res = await c.catalog_entry("Bosch", "WAT28660", "washer")
+    assert res["device_id"] == "washer__bosch__wat28660"
+    assert res["brand"]["status"] == "approved"
+    assert res["device"]["confirmCount"] == 2
+    assert len(s.gets) == 2
+    assert not s.posts  # no list query at all
+    # Both documents are cached, so re-rendering the form costs nothing.
+    await c.catalog_entry("Bosch", "WAT28660", "washer")
+    assert len(s.gets) == 2
+
+
+@pytest.mark.asyncio
+async def test_catalog_entry_reports_missing_entries_as_none():
+    s = _Session()
+    s.queue_get(_Resp(404, {}))
+    s.queue_get(_Resp(404, {}))
+    c = _client(s)
+    res = await c.catalog_entry("Nope", "X1", "washer")
+    assert res["brand"] is None and res["device"] is None
+    # A miss is NOT cached -- it flips as soon as the user contributes the entry.
+    s.queue_get(_Resp(200, {"name": ".../brands/nope", "fields": {"status": {"stringValue": "pending"}}}))
+    s.queue_get(_Resp(404, {}))
+    assert (await c.catalog_entry("Nope", "X1", "washer"))["brand"]["status"] == "pending"
+
+
+@pytest.mark.asyncio
+async def test_catalog_entry_skips_lookups_for_blank_identity():
+    s = _Session()
+    c = _client(s)
+    res = await c.catalog_entry("", "", "washer")
+    assert res == {"device_id": "", "brand": None, "device": None}
+    assert not s.gets and not s.posts
+
+
+@pytest.mark.asyncio
+async def test_point_reads_percent_encode_the_document_id():
+    # brand_id() is just brand.lower() with no normalisation, so the live catalog holds
+    # ids like "aeg lavamat" and "fisher & paykel". Splicing those into a URL raw
+    # produces a malformed request, not a 404.
+    s = _Session()
+    s.queue_get(_Resp(200, {"name": ".../brands/aeg lavamat", "fields": {}}))
+    c = _client(s)
+    await c.get_brand("AEG Lavamat")
+    assert s.gets[-1][0].endswith("/brands/aeg%20lavamat")
+
+
+@pytest.mark.asyncio
+async def test_catalog_invalidation_drops_point_read_cache_too():
+    # Contributing a brand writes the very document the badge resolves, so a stale hit
+    # would keep showing "not in the catalog" for an entry the user just added.
+    s = _Session()
+    s.queue_get(_Resp(200, {"name": ".../brands/bosch", "fields": {"status": {"stringValue": "approved"}}}))
+    c = _client(s)
+    await c.get_brand("Bosch")
+    assert len(s.gets) == 1
+    c._invalidate_catalog_cache()
+    s.queue_get(_Resp(200, {"name": ".../brands/bosch", "fields": {"status": {"stringValue": "approved"}}}))
+    await c.get_brand("Bosch")
+    assert len(s.gets) == 2
+
+
+@pytest.mark.asyncio
+async def test_refresh_catalog_forces_a_requery():
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../brands/bosch", "fields": {"brand_lc": {"stringValue": "bosch"}}}},
+    ]))
+    c = _client(s)
+    await c.list_brands()
+    await c.list_brands()
+    assert len(s.posts) == 1
+    c.refresh_catalog()
+    s.queue_post(_Resp(200, []))
+    await c.list_brands()
+    assert len(s.posts) == 2
+
+
+@pytest.mark.asyncio
+async def test_list_queries_project_only_the_fields_the_ui_reads():
+    # A projection does not change the billed read count, but these lists are relayed
+    # verbatim to the panel, and device docs carry a ~25-key settings map no list view
+    # reads (measured: one brand's device list 54.4 KB -> 17 KB).
+    s = _Session()
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    await c.list_brands()
+    assert [f["fieldPath"] for f in _q(s)["select"]["fields"]] == list(sc._BRAND_LIST_FIELDS)
+    s.queue_post(_Resp(200, []))
+    await c.search_devices(brand="Bosch", appliance_type="washer")
+    assert [f["fieldPath"] for f in _q(s)["select"]["fields"]] == list(sc._DEVICE_LIST_FIELDS)
+    assert "settings" not in sc._DEVICE_LIST_FIELDS
+
+
+@pytest.mark.asyncio
+async def test_bundle_skips_the_per_cycle_rating_fanout():
+    # Ratings are browse-only decoration the adopt path never reads, but they cost one
+    # aggregation request per cycle.
+    s = _Session()
+    s.queue_get(_Resp(200, {"name": ".../devices/d1", "fields": {}}))          # get_device
+    s.queue_post(_Resp(200, [                                                  # get_profiles
+        {"document": {"name": ".../profiles/p1", "fields": {"program": {"stringValue": "Cotton"}}}},
+    ]))
+    s.queue_post(_Resp(200, [                                                  # get_cycles
+        {"document": {"name": ".../cycles/c1", "fields": {}}},
+        {"document": {"name": ".../cycles/c2", "fields": {}}},
+    ]))
+    c = _client(s)
+    bundle = await c.get_device_bundle("d1")
+    assert [cyc["id"] for cyc in bundle["profiles"][0]["cycles"]] == ["c1", "c2"]
+    assert not [u for u, _ in s.posts if "runAggregationQuery" in u]
+    # ...while the browse path still attaches them.
+    s.queue_post(_Resp(200, [{"document": {"name": ".../cycles/c1", "fields": {}}}]))
+    s.queue_post(_Resp(200, [{"result": {"aggregateFields": {
+        "cnt": {"integerValue": "2"}, "avg": {"doubleValue": 4.5}}}}]))
+    cycles = await c.get_cycles("p1")
+    assert cycles[0]["rating"] == {"avg": 4.5, "count": 2}
+
+
+def test_shared_client_is_one_per_install():
+    # A StoreBridge exists per appliance, but the catalog it reads is public and
+    # device-agnostic: a per-bridge client made an N-appliance install issue N
+    # cold-cache copies of the same queries.
+    hass = MagicMock()
+    hass.data = {}
+    first = sc.get_client(hass)
+    assert sc.get_client(hass) is first
+
+
+# ── review regressions (2026-08-20) ─────────────────────────────────────────────
+# Caching the point read that confirm_device uses to read its own write back is the
+# kind of bug that only shows up as "community approval never happens".
+
+@pytest.mark.asyncio
+async def test_confirm_device_does_not_read_its_own_write_from_cache():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))     # token
+    # The settings badge warms devices/<id> BEFORE the confirm (this is the normal order).
+    s.queue_get(_Resp(200, {"name": ".../devices/d1", "fields": {
+        "status": {"stringValue": "pending"}, "confirmCount": {"integerValue": "4"}}}))
+    c = _client(s)
+    assert (await c.get_device("d1"))["confirmCount"] == 4
+
+    s.queue_post(_Resp(200, {}))                                          # the confirm commit
+    # Post-write state: threshold reached. If the cached pre-write doc were reused, count
+    # would still read 4, `count >= threshold` would be False, and the device would never
+    # be promoted.
+    s.queue_get(_Resp(200, {"name": ".../devices/d1", "fields": {
+        "status": {"stringValue": "pending"}, "confirmCount": {"integerValue": "5"}}}))
+    s.queue_get(_Resp(200, {"name": ".../config/site", "fields": {
+        "confirmThreshold": {"integerValue": "5"}}}))
+    s.queue_post(_Resp(200, {}))                                          # the promote commit
+    res = await c.confirm_device("refresh", "u1", "d1")
+    assert res["confirmCount"] == 5
+    assert res["status"] == "approved"
+
+
+@pytest.mark.asyncio
+async def test_point_read_spanning_an_invalidation_is_not_cached():
+    """A read in flight when a write lands must not re-pin the pre-write document."""
+    s = _Session()
+    s.queue_get(_Resp(200, {"name": ".../brands/bosch", "fields": {
+        "status": {"stringValue": "pending"}}}))
+    c = _client(s)
+
+    real_get = c._sess().get
+    def _get_and_invalidate(url, **kw):
+        c._invalidate_catalog_cache()   # a write lands mid-flight
+        return real_get(url, **kw)
+    c._session.get = _get_and_invalidate
+
+    assert (await c.get_brand("Bosch"))["status"] == "pending"
+    c._session.get = real_get
+    # Not cached, so the next read goes back to the store and sees the new state.
+    s.queue_get(_Resp(200, {"name": ".../brands/bosch", "fields": {
+        "status": {"stringValue": "approved"}}}))
+    assert (await c.get_brand("Bosch"))["status"] == "approved"
+    assert len(s.gets) == 2
+
+
+@pytest.mark.asyncio
+async def test_truncated_superset_does_not_answer_an_approved_only_request():
+    """A list capped at page_size may be missing approved rows past the cap, so it
+    cannot be filtered down to answer a narrower question."""
+    s = _Session()
+    # page_size=2 and exactly 2 rows back => possibly truncated.
+    def row(lc, status):
+        return {"document": {"name": f".../brands/{lc}", "fields": {
+            "brand_lc": {"stringValue": lc}, "status": {"stringValue": status}}}}
+    s.queue_post(_Resp(200, [row("aaa", "pending"), row("bbb", "pending")]))
+    c = _client(s)
+    assert len(await c.list_brands(include_pending=True, page_size=2)) == 2
+    assert len(s.posts) == 1
+    # Must re-query rather than concluding "no approved brands" from a truncated page.
+    s.queue_post(_Resp(200, [row("zzz", "approved")]))
+    assert [b["id"] for b in await c.list_brands(include_pending=False, page_size=2)] == ["zzz"]
+    assert len(s.posts) == 2

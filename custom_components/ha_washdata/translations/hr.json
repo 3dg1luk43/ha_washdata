@@ -231,7 +231,7 @@
     },
     "trim_cycle": {
       "name": "Ciklus podrezivanja",
-      "description": "Skratite podatke o snazi ​​prošlog ciklusa na određeni vremenski prozor.",
+      "description": "Skratite podatke o snazi prošlog ciklusa na određeni vremenski prozor.",
       "fields": {
         "device_id": {
           "name": "Uređaj",
@@ -414,7 +414,7 @@
       "message": "Ciklus nije pronađen ili nema podataka o snazi."
     },
     "trim_failed_empty_window": {
-      "message": "Podrezivanje nije uspjelo - ciklus nije pronađen, nema podataka o snazi ​​ili je rezultirajući prozor prazan."
+      "message": "Podrezivanje nije uspjelo - ciklus nije pronađen, nema podataka o snazi ili je rezultirajući prozor prazan."
     },
     "trim_invalid_range": {
       "message": "trim_end_s mora biti veći od trim_start_s."
