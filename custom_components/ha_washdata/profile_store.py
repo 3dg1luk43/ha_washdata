@@ -870,6 +870,49 @@ class WashDataStore(Store[JSONDict]):
 
         return old_data
 
+def collapse_group_candidates(
+    candidates: list[dict], group_members: dict[str, list[str]]
+) -> list[dict]:
+    """Replace each cohesive group's scored members with ONE candidate carrying
+    the best member's score (#400).
+
+    Members reach the matcher as their own snapshots, so each is scored on its own
+    curve; the group is formed afterwards, here. That is the difference from the
+    original design, which averaged the member curves into an aggregate snapshot
+    *before* scoring - on a temperature family (same silhouette, different heating
+    length) the mean curve carries an energy figure no member has and roughly
+    doubles the MAE, so the family could lose the program-level match outright and
+    Stage-5 member selection never ran.
+
+    What grouping is actually for survives: the members no longer sit next to each
+    other in the ranking, so they cannot make each other look ambiguous. The winner
+    keeps the group's ``__group__`` name, so the existing Stage-5 hand-off (and
+    with it `_stage5_pick_member`, register item 99) is unchanged.
+
+    Pure; ``candidates`` must already be score-sorted, and the returned list keeps
+    that order because entries are only dropped, never reordered.
+    """
+    if not group_members or not candidates:
+        return candidates
+    member_to_group: dict[str, str] = {
+        m: key for key, members in group_members.items() for m in members
+    }
+    if not member_to_group:
+        return candidates
+    out: list[dict] = []
+    seen_groups: set[str] = set()
+    for cand in candidates:
+        key = member_to_group.get(str(cand.get("name")))
+        if key is None:
+            out.append(cand)
+            continue
+        if key in seen_groups:
+            continue  # a lower-scoring sibling; the family is already represented
+        seen_groups.add(key)
+        out.append({**cand, "name": key, "group_best_member": cand.get("name")})
+    return out
+
+
 def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     """Top1-vs-top2 score margin and whether the match is ambiguous.
 
@@ -2185,62 +2228,34 @@ class ProfileStore:
     def _grouped_snapshots(
         self, snapshots: list[dict[str, Any]]
     ) -> tuple[list[dict[str, Any]], dict[str, list[str]], dict[str, dict[str, Any]]]:
-        """Collapse each *cohesive* group into one aggregate candidate snapshot.
+        """Map each *cohesive* group to its member snapshots for the Stage-5 pass.
 
-        Returns (snapshots, group_members, member_snaps). Groups with <2 present
-        members, or cohesion below GROUP_MIN_COHESION (too generic an aggregate),
-        are left as individual member snapshots. Aggregate name is prefixed
-        ``__group__`` and mapped to its member profile names in group_members.
+        Returns (snapshots, group_members, member_snaps). Snapshots are returned
+        **unchanged**: every member is scored on its own curve, and the family is
+        formed afterwards by ``collapse_group_candidates`` (#400). Groups with <2
+        present members, or cohesion below GROUP_MIN_COHESION, are not mapped at
+        all, so their members simply stay individual candidates.
+
+        Until #400 this method averaged the member curves into one ``__group__``
+        aggregate snapshot. That is what the collapse replaces: on a temperature
+        family the averaged curve belongs to no member (it has a half-height
+        heating block and an energy figure neither member reaches), which cost the
+        family the program-level match before Stage 5 could pick between them.
         """
         groups = self.get_profile_groups()
         if not groups:
             return snapshots, {}, {}
         by_name = {s["name"]: s for s in snapshots}
-        member_to_group: dict[str, str] = {}
+        group_members: dict[str, list[str]] = {}
+        member_snaps: dict[str, dict[str, Any]] = {}
         for gname, g in groups.items():
             present = [m for m in (g.get("members") or []) if m in by_name]
             if len(present) < 2 or self.group_cohesion(present) < GROUP_MIN_COHESION:
                 continue  # keep members individual
+            group_members[f"__group__{gname}"] = present
             for m in present:
-                member_to_group[m] = gname
-        if not member_to_group:
-            return snapshots, {}, {}
-        n = 200
-        agg_curves: dict[str, list[np.ndarray]] = {}
-        agg_durs: dict[str, list[float]] = {}
-        agg_spans: dict[str, list[float]] = {}
-        member_snaps: dict[str, dict[str, Any]] = {}
-        out: list[dict[str, Any]] = []
-        for s in snapshots:
-            g = member_to_group.get(s["name"])
-            if g is None:
-                out.append(s)
-                continue
-            member_snaps[s["name"]] = s
-            sp = s.get("sample_power") or []
-            if len(sp) >= 2:
-                arr = np.asarray(sp, dtype=float)
-                agg_curves.setdefault(g, []).append(
-                    np.interp(np.linspace(0, 1, n), np.linspace(0, 1, arr.size), arr)
-                )
-                _dur = float(s.get("avg_duration") or 0.0)
-                agg_durs.setdefault(g, []).append(_dur)
-                # Members are resampled onto a normalized 0..1 axis above, so the
-                # aggregate's own time span is the mean of its members' (#364).
-                agg_spans.setdefault(g, []).append(float(s.get("sample_span_s") or _dur))
-        group_members: dict[str, list[str]] = {}
-        for g, curves in agg_curves.items():
-            key = f"__group__{g}"
-            durs = [d for d in agg_durs[g] if d > 0]
-            spans = [v for v in agg_spans.get(g, []) if v > 0]
-            out.append({
-                "name": key,
-                "avg_duration": float(np.mean(durs)) if durs else 0.0,
-                "sample_power": np.mean(np.array(curves), axis=0).tolist(),
-                "sample_span_s": float(np.mean(spans)) if spans else 0.0,
-            })
-            group_members[key] = [m for m in member_to_group if member_to_group[m] == g and m in member_snaps]
-        return out, group_members, member_snaps
+                member_snaps[m] = by_name[m]
+        return snapshots, group_members, member_snaps
 
     def _stage5_pick_member(
         self, current_power: list[float], current_duration: float,
@@ -5596,8 +5611,9 @@ class ProfileStore:
                     "; ".join(skipped_profiles)
                 )
 
-            # Stage 5: collapse cohesive near-duplicate groups into one aggregate
-            # candidate each (loose groups stay individual). No-op without groups.
+            # Stage 5: map cohesive near-duplicate groups to their members (loose
+            # groups stay individual). The members are scored individually and the
+            # family is collapsed after the worker. No-op without groups.
             snapshots, group_members, member_snaps = self._grouped_snapshots(snapshots)
 
             config = {
@@ -5636,6 +5652,13 @@ class ProfileStore:
                 current_duration
             )
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0, [], {}, is_confident_mismatch=True, mismatch_reason="all_rejected")
+
+        # Stage 5, part 1 (#400): the members of a cohesive group were scored on
+        # their own curves; collapse each family to its best-scoring member now.
+        # Must happen BEFORE the ambiguity check - two members of the same family
+        # sitting next to each other in the ranking is precisely what grouping
+        # exists to stop reading as an ambiguous top-2.
+        candidates = collapse_group_candidates(candidates, group_members)
 
         best = candidates[0]
 
