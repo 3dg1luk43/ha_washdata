@@ -181,12 +181,88 @@ jobs:
 
             console.log(`#${issueNumber}: reporter responded via comment, swapped to "${reviewLabel}".`);
 
+  restore-template-label:
+    runs-on: ubuntu-latest
+    # GitHub applies an issue form's `labels:` ONLY when the issue is opened through the
+    # web form. An issue created over the REST API / `gh issue create` with a body pasted
+    # from the template arrives with NO labels - and every downstream gate here keys off
+    # that label, so the whole validator silently skipped those reports (#399, #400).
+    # Restore the label from the body's own headings so the rest of the pipeline works.
+    # opened/reopened only: this repairs a label the form never applied, which is an
+    # open-time property. Running it on `edited` would re-add a label a maintainer had
+    # deliberately removed every time the reporter touched the body.
+    if: >
+      github.event_name == 'issues' &&
+      (github.event.action == 'opened' || github.event.action == 'reopened') &&
+      github.event.issue.pull_request == null
+    steps:
+      - name: Restore the label the issue form would have applied
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.0.1
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const body = issue.body || '';
+
+            const TEMPLATE_LABELS = ['bug', 'feature request', 'documentation'];
+            const labels = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name));
+            if (labels.some(l => TEMPLATE_LABELS.includes(l))) {
+              console.log(`#${issue.number}: already carries a template label - nothing to restore.`);
+              return;
+            }
+
+            // Headings unique to ONE template. Shared fields (Before You Submit,
+            // Additional Context, Device Brand & Model) are deliberately excluded -
+            // they cannot discriminate between templates.
+            const DISTINCTIVE = {
+              'bug': [
+                'Describe the Bug', 'Device Type', 'WashData Integration Version',
+                'Home Assistant Version', 'Reproduction Steps', 'Expected Behavior',
+                'Logs / Error Evidence', 'Contributing a Fix',
+              ],
+              'feature request': [
+                'Problem or Motivation', 'Proposed Solution', 'Related Device Type',
+                'Alternatives Considered', 'Contributing an Implementation',
+              ],
+              'documentation': [
+                'Page / Section', 'What is Wrong or Missing?', 'Suggested Change',
+              ],
+            };
+            // Any heading level: a hand-written body uses `##` where the web form
+            // renders `###`, and both are the same field.
+            const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const headingRe = h => new RegExp('^#{1,6}[ \\t]+' + escapeRe(h) + '(?=[ \\t]|$)', 'im');
+
+            const scored = Object.entries(DISTINCTIVE)
+              .map(([label, hs]) => [label, hs.filter(h => headingRe(h).test(body)).length])
+              .sort((a, b) => b[1] - a[1]);
+            const [best, bestHits] = scored[0];
+            const runnerUpHits = scored[1] ? scored[1][1] : 0;
+
+            // Need at least two distinctive headings, and a clear winner, before
+            // labelling. A single stray heading must never mislabel a report.
+            if (bestHits < 2 || bestHits === runnerUpHits) {
+              console.log(`#${issue.number}: no clear template (${JSON.stringify(scored)}) - leaving unlabelled.`);
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number: issue.number, labels: [best],
+            });
+            console.log(`#${issue.number}: restored "${best}" label (${bestHits} distinctive headings).`);
+
   validate-bug-report:
     runs-on: ubuntu-latest
+    needs: restore-template-label
+    # `always()` because restore-template-label is skipped on workflow_dispatch, and a
+    # skipped `needs` would otherwise skip this job too. The `bug` gate itself moved
+    # INTO the script: the payload's label list is a snapshot taken before
+    # restore-template-label ran, so it must be re-read from the API.
     if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issues' &&
-       contains(github.event.issue.labels.*.name, 'bug'))
+      always() &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'issues' && github.event.issue.pull_request == null))
 
     steps:
       - name: Validate bug report completeness
@@ -194,29 +270,66 @@ jobs:
         with:
           script: |
             const isDryRun = context.eventName === 'workflow_dispatch';
-            const issue = isDryRun ? {
+            let issue = isDryRun ? {
               body: context.payload.inputs.issue_body,
               number: parseInt(context.payload.inputs.issue_number) || null,
               user: { login: 'dry-run-user', type: 'User' },
               labels: [],
             } : context.payload.issue;
+
+            // The `bug` gate lives here rather than in the job's `if:` because the event
+            // payload is a snapshot taken BEFORE restore-template-label ran. Re-read the
+            // issue so a label restored moments ago counts (#399, #400 were skipped
+            // outright because the payload had no labels at all).
+            if (!isDryRun) {
+              const fresh = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+              });
+              issue = fresh.data;
+              const names = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name));
+              if (!names.includes('bug')) {
+                console.log(`#${issue.number}: not labelled "bug" (${names.join(', ') || 'no labels'}) - skipping bug validation.`);
+                return;
+              }
+            }
+
             const body = issue.body || '';
             const incompleteLabel = 'more info required';
 
             // ── Checks ────────────────────────────────────────────────────────────
             const problems = [];
 
+            // Field headings are matched at ANY heading level. GitHub's issue form
+            // renders each field as `### Label`, but a body written by hand or posted
+            // over the API commonly uses `##` - the same field, and previously invisible
+            // to every check below, which then reported all four as missing (#399/#400).
+            const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // First non-empty line under the heading (single-line fields).
+            const fieldLine = label => {
+              const m = body.match(new RegExp(
+                '^#{1,6}[ \\t]+' + escapeRe(label) + '[ \\t]*\\r?\\n+([^\\n#]+)', 'im'));
+              return m ? m[1].trim() : '';
+            };
+            // Everything up to the next heading of any level (multi-line fields).
+            // End-of-input is `(?![\s\S])`, not `$`: the `m` flag needed for `^` would
+            // otherwise make `$` match every line end and truncate to one line.
+            const fieldBlock = label => {
+              const m = body.match(new RegExp(
+                '^#{1,6}[ \\t]+' + escapeRe(label) + '[ \\t]*\\r?\\n([\\s\\S]*?)(?=\\n#{1,6}[ \\t]|(?![\\s\\S]))', 'im'));
+              return m ? m[1].trim() : '';
+            };
+
             // 1. Device Brand & Model - must not be blank or the placeholder
-            const brandMatch = body.match(/###\s*Device Brand & Model\s*\n+([^\n#]+)/);
-            const brand = brandMatch ? brandMatch[1].trim() : '';
+            const brand = fieldLine('Device Brand & Model');
             const brandIsNA = /^n\/?a$/i.test(brand);
             if (!brand || brand === 'Brand Model Number' || brand === 'Brand Model Number or N/A' || brand === '_No response_') {
               problems.push('**Device Brand & Model** is missing or still set to the placeholder value. Provide the actual brand and model (e.g. `Miele W1 WCG370`), or enter `N/A` if this bug is not related to a specific device.');
             }
 
             // 2. WashData version - must not be blank or placeholder; warn if outdated
-            const versionMatch = body.match(/###\s*WashData Integration Version\s*\n+([^\n#]+)/);
-            const version = versionMatch ? versionMatch[1].trim() : '';
+            const version = fieldLine('WashData Integration Version');
             if (!version || version === 'vX.Y.Z' || version === '_No response_') {
               problems.push('**WashData Integration Version** is missing. You can find it in HACS or Settings → Integrations.');
             } else {
@@ -276,15 +389,13 @@ jobs:
             }
 
             // 3. HA version - must not be blank or the placeholder
-            const haVersionMatch = body.match(/###\s*Home Assistant Version\s*\n+([^\n#]+)/);
-            const haVersion = haVersionMatch ? haVersionMatch[1].trim() : '';
+            const haVersion = fieldLine('Home Assistant Version');
             if (!haVersion || haVersion === '2024.12.0' || haVersion === '_No response_') {
               problems.push('**Home Assistant Version** is missing. You can find it in Settings → About.');
             }
 
             // 4. Logs / Error Evidence - must contain actual log/error output, an attached file, or a clear N/A with stated reason
-            const logMatch = body.match(/###\s*Logs \/ Error Evidence\s*\n+([\s\S]*?)(?=\n###|$)/);
-            const logContent = logMatch ? logMatch[1].trim() : '';
+            const logContent = fieldBlock('Logs / Error Evidence');
             // Accept "N/A" / "NA" only when a reason follows on the same line
             // (e.g. "N/A - crashes before logs"), not a bare "N/A".
             const logIsExplainedNA =
