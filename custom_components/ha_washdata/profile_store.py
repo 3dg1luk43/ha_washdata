@@ -5399,8 +5399,16 @@ class ProfileStore:
         self,
         current_power_data: list[tuple[str, float]] | list[tuple[datetime, float]] | list[tuple[float, float]] | list[list[float]],
         current_duration: float,
+        in_progress: bool = False,
     ) -> MatchResult:
-        """Run profile matching asynchronously in executor."""
+        """Run profile matching asynchronously in executor.
+
+        ``in_progress`` marks a live, still-running cycle, which makes Stage 4
+        compare the elapsed stretch against the same stretch of each candidate
+        instead of against its complete duration/energy (#400). Defaults to False
+        so the final match at cycle end - where the cycle IS complete - and every
+        other caller keep their existing behaviour.
+        """
         # 1. Prepare data in main thread (Access ProfileStore state safely)
         group_members: dict[str, list[str]] = {}
         member_snaps: dict[str, dict[str, Any]] = {}
@@ -5597,6 +5605,7 @@ class ProfileStore:
                 "max_duration_ratio": self._max_duration_ratio,
                 "dtw_bandwidth": self.dtw_bandwidth,
                 "energy_mode": self.energy_mode,
+                "in_progress": bool(in_progress),
                 # On-device tuned scoring weights (opt-in); empty = shipped defaults.
                 **self._matching_overrides(),
             }

@@ -485,11 +485,13 @@ def _build_match_snapshots(
         _LOGGER.debug("Playground: _grouped_snapshots failed: %s", exc)
         grouped_snaps = snapshots
 
-    config = _matching_config(store)
+    # in_progress: the sim replays a cycle step by step, so every match it runs is
+    # a live one - the same footing as manager._async_do_perform_matching (#400).
+    config = _matching_config(store, in_progress=True)
     return grouped_snaps, config, group_members, member_snaps
 
 
-def _matching_config(store: Any) -> dict[str, Any]:
+def _matching_config(store: Any, in_progress: bool = False) -> dict[str, Any]:
     """Live matcher config from the store (defaults + tuned overrides)."""
     config: dict[str, Any] = {
         "min_duration_ratio": float(getattr(store, "_min_duration_ratio", 0.07)),
@@ -497,6 +499,7 @@ def _matching_config(store: Any) -> dict[str, Any]:
         "dtw_bandwidth": float(getattr(store, "dtw_bandwidth", 0.2)),
         # Mirror the live Stage-4 energy discriminator so the sim is byte-identical.
         "energy_mode": str(getattr(store, "energy_mode", "mean")),
+        "in_progress": bool(in_progress),
     }
     try:
         overrides = store._matching_overrides()  # pylint: disable=protected-access
