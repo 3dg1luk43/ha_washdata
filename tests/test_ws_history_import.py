@@ -252,9 +252,12 @@ async def test_recorder_ingest_accepts_a_start_date():
             hass, conn, {"id": 1, "entry_id": "e", "start_date": since.isoformat()}
         )
     payload = conn.send_result.call_args.args[1]
-    assert payload["days"] == 5                  # the picked day is included
-    assert payload["start_date"] == since.isoformat()
+    # 5 windows queried, so the picked calendar day is fully covered (the oldest window
+    # starts one day before it, since "now" is mid-day). Both fields describe the window
+    # actually read, not the one requested.
+    assert payload["days"] == 5
     assert len(calls) == 5
+    assert payload["start_date"] == (since - _td(days=1)).isoformat()
 
 
 @pytest.mark.asyncio
@@ -292,6 +295,8 @@ async def test_recorder_ingest_stops_after_a_run_of_empty_days():
     # 2 with data + the empty-day run, nowhere near the 3700 requested.
     assert len(calls) == 2 + ws_api.HISTORY_IMPORT_RECORDER_EMPTY_DAY_STOP
     assert len(calls) < 100
+    # The reported window is what was queried, not the 3700 that were asked for.
+    assert payload["days"] == len(calls)
 
 
 # ─── Scan ─────────────────────────────────────────────────────────────────────
