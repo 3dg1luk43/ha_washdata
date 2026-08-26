@@ -3,17 +3,17 @@
   "assets": {
     "ha-washdata-panel.js": {
       "artifact": "ha-washdata-panel.min.js",
-      "source_sha256": "43b0efee6d3f550d172f407258848c646d579687b54f22d864556fbfc37fadad",
-      "artifact_sha256": "aca76e03cced1c2dbcc5a19ad8d4979ca383606b574932a5f529129ba1a54ea3",
-      "source_bytes": 846301,
-      "artifact_bytes": 566021
+      "source_sha256": "1069a0db5a1d493167659618eb261c09753d3a87a059ffd655f226a209b88ac2",
+      "artifact_sha256": "7652e3d3f0d517ac672bda65b7f382b5bfc353faa80a1c36b41b8285a0da0252",
+      "source_bytes": 846502,
+      "artifact_bytes": 565902
     },
     "ha-washdata-card.js": {
       "artifact": "ha-washdata-card.min.js",
-      "source_sha256": "71a6d762af2ab78525a3bc169d6bfa682ce5f79ab3bd23a808059102a1d223e3",
-      "artifact_sha256": "f7e8ab6492010f5ad6875e0c2969a5fe43ff3040ac96ada665cd61016963ea16",
-      "source_bytes": 50627,
-      "artifact_bytes": 29435
+      "source_sha256": "f277b7e748089d461f91b6d4792e0406c0e6e8f4ca00980fc1c9c095180117f8",
+      "artifact_sha256": "b84006aa376196752e337fdea3a0991935f7d70326c7b251ad05bdb7e4c647d5",
+      "source_bytes": 50942,
+      "artifact_bytes": 29464
     }
   }
 }
