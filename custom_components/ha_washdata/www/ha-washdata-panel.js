@@ -44,6 +44,12 @@ const _HASS_REFRESH_MS = 6000;
 // for typical histories instead of loading everything in one page.
 const _CYCLE_PAGE_SIZE = 25;
 
+// Detector states that mean "a cycle is in flight". Single source for the device
+// bar dot, the status header and the pause/resume/force-stop controls -- these
+// used to be three hand-copied lists and the controls one had drifted (it was
+// missing 'paused', so an auto-paused cycle showed no buttons at all).
+const _ACTIVE_STATES = ['running', 'starting', 'paused', 'user_paused', 'ending', 'anti_wrinkle', 'rinse'];
+
 // Declarative community-store preference toggles, rendered in the gear's Online &
 // Community pane. To ship a new online setting: add one row here AND one default in
 // store_account._DEFAULT_PREFS -- the generic get_prefs / store_set_prefs plumbing
@@ -3794,7 +3800,7 @@ class HaWashdataPanel extends HTMLElement {
     if (this._devices.length <= 1) return addBtn ? `<div class="wd-devbar">${addBtn}</div>` : '';
     return `<div class="wd-devbar">${this._devices.map((d, i) => {
       const st = d.is_user_paused ? 'user_paused' : (d.detector_state || 'unknown');
-      const running = ['running', 'starting', 'paused', 'user_paused', 'ending', 'anti_wrinkle', 'rinse'].includes(st);
+      const running = _ACTIVE_STATES.includes(st);
       const rec = !!d.recording;
       const dotColor = rec ? 'var(--error-color, #f44336)' : this._stateColor(st);
       const label = rec ? this._t('status.recording', {}, 'Recording') : this._stateLabel(st);
@@ -3820,7 +3826,7 @@ class HaWashdataPanel extends HTMLElement {
     const rec = !!dev.recording;
     const color = rec ? 'var(--error-color, #f44336)' : this._stateColor(state);
     const label = rec ? this._t('status.recording', {}, 'Recording') : this._stateLabel(state);
-    const isRunning = rec || ['running', 'starting', 'paused', 'user_paused', 'ending', 'anti_wrinkle', 'rinse'].includes(state);
+    const isRunning = rec || _ACTIVE_STATES.includes(state);
     const prog = dev.cycle_progress_pct;
     const rem = dev.time_remaining_s;
 
@@ -3914,8 +3920,7 @@ class HaWashdataPanel extends HTMLElement {
 
     const cycleCtrlHtml = (() => {
       if (!this._canEdit()) return '';
-      const cycleStates = ['running', 'starting', 'ending', 'anti_wrinkle', 'rinse'];
-      const cycleActive = cycleStates.includes(state);
+      const cycleActive = _ACTIVE_STATES.includes(state);
       const showPause = cycleActive && !isUserPaused;
       const showResume = isUserPaused;
       const showStop = cycleActive || isUserPaused;

@@ -54,6 +54,11 @@ const BUTTON_ICONS = {
 const BUTTON_ORDER = ["pause", "resume", "terminate", "record_start", "record_stop", "program", "open_panel"];
 
 const ACTIVE_STATES = ["running", "paused", "user_paused", "ending", "starting", "anti_wrinkle", "rinse"];
+// States where button.py's PauseCycleButton is available, so the card must not
+// grey out Pause where the backend would accept it. An auto-detected "paused"
+// is pausable: async_pause_cycle turns it into a user pause that survives the
+// power drop.
+const PAUSABLE_STATES = ["running", "starting", "paused", "ending"];
 const INACTIVE_STATES = ["off", "unknown", "unavailable", "idle"];
 const SPARK_MAX_POINTS = 60;
 
@@ -878,8 +883,8 @@ class WashDataCard extends HTMLElement {
     if (!acts) return;
     const sk = vm.sk;
     const enabled = {
-      pause: sk === "running",
-      resume: sk === "paused" || sk === "user_paused",
+      pause: PAUSABLE_STATES.includes(sk),
+      resume: sk === "user_paused",
       terminate: vm.isActive,
       record_start: !vm.isActive,
       record_stop: true,
