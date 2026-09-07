@@ -253,7 +253,8 @@
     "hist_read_recorder": "Lue Home Assistantista",
     "hist_scan": "Etsi syklejä",
     "hist_import_n": "Tuo {n} sykliä",
-    "hist_goto_cycles": "Näytä syklit"
+    "hist_goto_cycles": "Näytä syklit",
+    "save_total_cycles": "Tallenna kokonaismäärä"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Kaikissa jaksoissasi",
     "community_store": "Yhteisökauppa",
     "online_account": "Yhteisökauppa ja verkkotoiminnot",
-    "import_power_history": "Tuo tehohistoria"
+    "import_power_history": "Tuo tehohistoria",
+    "service_status": "Huollon tila"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Ladattu yhteisökaupasta",
     "evidence_backfill_cycles": "Löydetty tuodusta tehohistoriasta",
     "zoom_hint_touch": "nipistä zoomataksesi",
-    "zoom_hint_touch_zoomed": "nipistä zoomataksesi · kaksoisnapauta nollataksesi"
+    "zoom_hint_touch_zoomed": "nipistä zoomataksesi · kaksoisnapauta nollataksesi",
+    "cycles_since_service": "{since} / {total} sykliä",
+    "total_cycles_run": "sykliä yhteensä",
+    "correct_total_cycles": "Korjaa kokonaismäärä"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Läpikäynti epäonnistui.",
     "hist_scan_expired": "Kyseinen läpikäynti ei ole enää saatavilla. Tee läpikäynti uudelleen.",
     "hist_import_failed": "Tuonti epäonnistui.",
-    "imported_history_readonly": "Tunnistettu tuodusta tehohistoriasta. Se vaikuttaa ohjelmien täsmäytykseen, mutta ei näy tilastoissasi, eikä sitä voi rajata tai jakaa. Nimeä ohjelma Merkitse-toiminnolla."
+    "imported_history_readonly": "Tunnistettu tuodusta tehohistoriasta. Se vaikuttaa ohjelmien täsmäytykseen, mutta ei näy tilastoissasi, eikä sitä voi rajata tai jakaa. Nimeä ohjelma Merkitse-toiminnolla.",
+    "odometer_intro": "Tämä kokonaismäärä voi vain kasvaa. Syklitietueen poistaminen ei muuta sitä, ja laskenta jatkuu myös tallennetun historian rajan yli, jotta huoltomuistutukset pysyvät oikeina.",
+    "odometer_correct_hint": "Aseta tämä, jos WashData kirjasi ajon, jota ei koskaan tapahtunut, tai jos laitteella oli jo ajettu syklejä ennen WashDatan asennusta.",
+    "no_reminders_set": "Huoltomuistutuksia ei ole vielä asetettu."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
@@ -1979,7 +1987,9 @@
     "hist_csv_required": "Lataa ensin CSV-tiedosto tai liitä sen sisältö",
     "file_read_failed": "Tiedostoa ei voitu lukea",
     "unlabel_done": "{count} syklin merkintä poistettu",
-    "unlabel_failed": "Merkinnän poisto epäonnistui: {error}"
+    "unlabel_failed": "Merkinnän poisto epäonnistui: {error}",
+    "odometer_saved": "Syklien kokonaismäärä tallennettu",
+    "odometer_save_failed": "Kokonaismäärän tallennus epäonnistui: {error}"
   },
   "trend": {
     "down": "Trendikäs alaspäin",

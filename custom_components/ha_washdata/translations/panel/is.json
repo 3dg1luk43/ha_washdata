@@ -253,7 +253,8 @@
     "hist_read_recorder": "Lesa úr Home Assistant",
     "hist_scan": "Leita að lotum",
     "hist_import_n": "Flytja inn {n} lotur",
-    "hist_goto_cycles": "Sýndu mér loturnar"
+    "hist_goto_cycles": "Sýndu mér loturnar",
+    "save_total_cycles": "Vista samtölu"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Yfir lotur þínar",
     "community_store": "Samfélagsverslun",
     "online_account": "Samfélagsverslun og nettengdir eiginleikar",
-    "import_power_history": "Flytja inn aflsögu"
+    "import_power_history": "Flytja inn aflsögu",
+    "service_status": "Staða þjónustu"
   },
   "health": {
     "fair": "Viðunanlegt prófíl",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Hlaðnar niður úr samfélagsversluninni",
     "evidence_backfill_cycles": "Fundnar í innfluttri aflsögu",
     "zoom_hint_touch": "þysjaðu með tveimur fingrum",
-    "zoom_hint_touch_zoomed": "þysjaðu með tveimur fingrum · pikkaðu tvisvar til að endurstilla"
+    "zoom_hint_touch_zoomed": "þysjaðu með tveimur fingrum · pikkaðu tvisvar til að endurstilla",
+    "cycles_since_service": "{since} / {total} lotur",
+    "total_cycles_run": "lotur samtals",
+    "correct_total_cycles": "Leiðréttu samtöluna"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Skönnun mistókst.",
     "hist_scan_expired": "Sú skönnun er ekki lengur tiltæk. Skannaðu aftur.",
     "hist_import_failed": "Innflutningur mistókst.",
-    "imported_history_readonly": "Greint í innfluttri aflsögu. Hún hefur áhrif á kerfissamsvörun en telst ekki með í tölfræðinni þinni og ekki er hægt að klippa hana til eða skipta henni. Merktu hana til að gefa kerfinu heiti."
+    "imported_history_readonly": "Greint í innfluttri aflsögu. Hún hefur áhrif á kerfissamsvörun en telst ekki með í tölfræðinni þinni og ekki er hægt að klippa hana til eða skipta henni. Merktu hana til að gefa kerfinu heiti.",
+    "odometer_intro": "Þessi samtala getur aðeins hækkað. Það að eyða lotuskrá breytir henni ekki, og hún heldur áfram að telja fram yfir hámark vistaðrar sögu, svo að þjónustuáminningar haldist réttar.",
+    "odometer_correct_hint": "Stilltu þetta ef WashData skráði lotu sem aldrei fór fram, eða ef tækið hafði þegar keyrt lotur áður en WashData var sett upp.",
+    "no_reminders_set": "Engar þjónustuáminningar hafa enn verið stilltar."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
@@ -1979,7 +1987,9 @@
     "hist_csv_required": "Hlaðdu fyrst inn CSV-skrá eða límdu innihald hennar",
     "file_read_failed": "Gat ekki lesið þá skrá",
     "unlabel_done": "Fjarlægði merkingu af {count} lotu(m)",
-    "unlabel_failed": "Fjarlæging merkingar mistókst: {error}"
+    "unlabel_failed": "Fjarlæging merkingar mistókst: {error}",
+    "odometer_saved": "Samtala lotna vistuð",
+    "odometer_save_failed": "Ekki tókst að vista samtöluna: {error}"
   },
   "trend": {
     "down": "Stefnir niður",

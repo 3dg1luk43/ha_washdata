@@ -253,7 +253,8 @@
     "hist_read_recorder": "Loe Home Assistantist",
     "hist_scan": "Otsi tsükleid",
     "hist_import_n": "Impordi tsüklid ({n})",
-    "hist_goto_cycles": "Näita tsükleid"
+    "hist_goto_cycles": "Näita tsükleid",
+    "save_total_cycles": "Salvesta koguarv"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Sinu tsüklite lõikes",
     "community_store": "Kogukonna pood",
     "online_account": "Kogukonna pood ja veebifunktsioonid",
-    "import_power_history": "Võimsuse ajaloo import"
+    "import_power_history": "Võimsuse ajaloo import",
+    "service_status": "Hoolduse olek"
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Kogukonna poest alla laaditud",
     "evidence_backfill_cycles": "Leitud imporditud võimsuse ajaloos",
     "zoom_hint_touch": "näpista suumimiseks",
-    "zoom_hint_touch_zoomed": "näpista suumimiseks · topeltpuudutus lähtestamiseks"
+    "zoom_hint_touch_zoomed": "näpista suumimiseks · topeltpuudutus lähtestamiseks",
+    "cycles_since_service": "{since} / {total} tsüklit",
+    "total_cycles_run": "tsüklit kokku",
+    "correct_total_cycles": "Paranda koguarv"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Skannimine ebaõnnestus.",
     "hist_scan_expired": "See skannimistulemus pole enam saadaval. Palun skanni uuesti.",
     "hist_import_failed": "Import ebaõnnestus.",
-    "imported_history_readonly": "Tuvastatud imporditud võimsuse ajaloos. See mõjutab programmide sobitamist, kuid ei arvestata sinu statistikas ning seda ei saa kärpida ega poolitada. Kasuta nuppu Sildista, et määrata programm."
+    "imported_history_readonly": "Tuvastatud imporditud võimsuse ajaloos. See mõjutab programmide sobitamist, kuid ei arvestata sinu statistikas ning seda ei saa kärpida ega poolitada. Kasuta nuppu Sildista, et määrata programm.",
+    "odometer_intro": "See koguarv saab ainult kasvada. Tsüklikirje kustutamine seda ei muuda ja loendamine jätkub ka üle salvestatud ajaloo piiri, nii et hoolduse meeldetuletused jäävad õigeks.",
+    "odometer_correct_hint": "Määra see, kui WashData salvestas käituse, mida kunagi ei toimunud, või kui seade oli tsükleid läbinud juba enne WashData paigaldamist.",
+    "no_reminders_set": "Hoolduse meeldetuletusi pole veel määratud."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
@@ -1870,7 +1878,9 @@
     "hist_csv_required": "Laadi esmalt CSV-fail või kleebi selle sisu",
     "file_read_failed": "Seda faili ei õnnestunud lugeda",
     "unlabel_done": "{count} tsükli märgistus eemaldatud",
-    "unlabel_failed": "Märgistuse eemaldamine ebaõnnestus: {error}"
+    "unlabel_failed": "Märgistuse eemaldamine ebaõnnestus: {error}",
+    "odometer_saved": "Tsüklite koguarv salvestatud",
+    "odometer_save_failed": "Koguarvu ei õnnestunud salvestada: {error}"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",

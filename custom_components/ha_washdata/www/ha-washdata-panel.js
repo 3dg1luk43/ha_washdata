@@ -7603,6 +7603,9 @@ class HaWashdataPanel extends HTMLElement {
     const due = mt.due || [];
     const log = mt.log || [];
     const reminders = mt.reminders || {};
+    const cyclesSince = mt.cycles_since || {};
+    const odometer = Math.max(0, parseInt(mt.lifetime_cycle_count, 10) || 0);
+    const canFull = this._canFull();
 
     // Reminder-due banner (advisory style; never a notification).
     const dueBanner = due.length ? (() => {
@@ -7651,7 +7654,49 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="maint-save-reminders">${this._t('btn.save_reminders', {}, 'Save reminders')}</button></div>
     </div>` : '';
 
+    // Service status: the odometer every reminder is measured against, plus how
+    // close each task is. The backend computed "cycles since" all along and only
+    // ever sent the yes/no "due" list, so the panel could not show progress.
+    const progressRows = eventTypes.map(t => {
+      const thr = parseInt(reminders[t], 10) || 0;
+      if (thr <= 0) return '';
+      const since = Math.max(0, parseInt(cyclesSince[t], 10) || 0);
+      const pct = Math.max(0, Math.min(100, Math.round((since / thr) * 100)));
+      const isDue = since >= thr;
+      const barColor = isDue ? 'var(--warning-color,#ff9800)' : 'var(--primary-color)';
+      return `<div style="margin-top:10px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+          <span style="font-weight:600">${_esc(this._maintLabel(t))}</span>
+          <span class="wd-info">${this._t('lbl.cycles_since_service', { since: since, total: thr }, since + ' / ' + thr + ' cycles')}</span>
+        </div>
+        <div style="height:6px;margin-top:4px;border-radius:3px;background:var(--divider-color);overflow:hidden">
+          <div style="height:100%;border-radius:3px;width:${pct}%;background:${barColor}"></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    const odometerEditor = canFull ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--divider-color)">
+      <div class="wd-field">
+        <label>${this._t('lbl.correct_total_cycles', {}, 'Correct the total')}</label>
+        <input type="number" min="0" step="1" id="wd-maint-odometer" value="${odometer}">
+      </div>
+      <p class="wd-info" style="margin-top:6px">${this._t('msg.odometer_correct_hint', {}, 'Set this if WashData recorded a run that never happened, or if the appliance had already run cycles before WashData was installed.')}</p>
+      <div class="wd-card-actions"><button class="wd-btn" data-action="maint-save-odometer">${this._t('btn.save_total_cycles', {}, 'Save total')}</button></div>
+    </div>` : '';
+
+    const statusCard = `<div class="wd-card">
+      <div class="wd-card-title">${this._t('hdr.service_status', {}, 'Service Status')}</div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-size:26px;font-weight:700">${odometer}</span>
+        <span class="wd-info">${this._t('lbl.total_cycles_run', {}, 'cycles run in total')}</span>
+      </div>
+      <p class="wd-info" style="margin-top:6px">${this._t('msg.odometer_intro', {}, 'This total only ever rises. Deleting a cycle record does not change it, and it keeps counting past the stored-history limit, so service reminders stay correct.')}</p>
+      ${progressRows || `<p class="wd-info" style="margin-top:10px">${this._t('msg.no_reminders_set', {}, 'No service reminders are set yet.')}</p>`}
+      ${odometerEditor}
+    </div>`;
+
     return `${dueBanner}
+      ${statusCard}
       ${addForm}
       <div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.maintenance_log', {}, 'Maintenance Log')}</div>
@@ -12248,6 +12293,18 @@ class HaWashdataPanel extends HTMLElement {
           } catch (e) { this._showToast(this._t('toast.maint_delete_failed', { error: e.message || e }, 'Could not delete event: ' + (e.message || e)), 'error'); }
         }) };
       this._render();
+    } else if (a === 'maint-save-odometer') {
+      const raw = sr.getElementById('wd-maint-odometer')?.value;
+      const count = parseInt(raw, 10);
+      if (isNaN(count) || count < 0) { this._showToast(this._t('toast.odometer_save_failed', { error: this._t('lbl.total_cycles_run', {}, 'cycles run in total') }, 'Could not save total: cycles run in total'), 'error'); return; }
+      this._busyRun('maint-save-odometer', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/set_lifetime_cycle_count`, entry_id: eid, count: count });
+          await this._fetchMaintenance(eid);
+          this._showToast(this._t('toast.odometer_saved', {}, 'Total cycles saved'));
+          this._render();
+        } catch (e) { this._showToast(this._t('toast.odometer_save_failed', { error: e.message || e }, 'Could not save total: ' + (e.message || e)), 'error'); }
+      });
     } else if (a === 'maint-save-reminders') {
       const dict = {};
       sr.querySelectorAll('[data-maint-rem]').forEach(el => {

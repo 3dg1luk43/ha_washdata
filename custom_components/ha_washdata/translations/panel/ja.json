@@ -253,7 +253,8 @@
         "hist_read_recorder": "Home Assistant から読み込む",
         "hist_scan": "サイクルを検索",
         "hist_import_n": "{n} サイクルをインポート",
-        "hist_goto_cycles": "サイクルを表示"
+        "hist_goto_cycles": "サイクルを表示",
+        "save_total_cycles": "累計を保存"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
         "pg_across_cycles": "全サイクルにわたって",
         "community_store": "コミュニティストア",
         "online_account": "コミュニティストアとオンライン機能",
-        "import_power_history": "電力履歴のインポート"
+        "import_power_history": "電力履歴のインポート",
+        "service_status": "メンテナンス状況"
     },
     "health": {
         "fair": "プロファイル品質: 普通",
@@ -709,7 +711,10 @@
         "evidence_reference_cycles": "コミュニティストアからダウンロード",
         "evidence_backfill_cycles": "インポートした電力履歴から検出",
         "zoom_hint_touch": "ピンチでズーム",
-        "zoom_hint_touch_zoomed": "ピンチでズーム · ダブルタップでリセット"
+        "zoom_hint_touch_zoomed": "ピンチでズーム · ダブルタップでリセット",
+        "cycles_since_service": "{since} / {total} サイクル",
+        "total_cycles_run": "累計サイクル数",
+        "correct_total_cycles": "累計を修正"
     },
     "log": {
         "all_levels": "すべてのレベル",
@@ -1067,7 +1072,10 @@
         "hist_scan_failed": "スキャンに失敗しました。",
         "hist_scan_expired": "そのスキャン結果はすでに利用できません。もう一度スキャンしてください。",
         "hist_import_failed": "インポートに失敗しました。",
-        "imported_history_readonly": "インポートした電力履歴から検出されました。プログラムのマッチングには反映されますが、統計には含まれず、トリミングや分割はできません。ラベル付けしてプログラム名を設定してください。"
+        "imported_history_readonly": "インポートした電力履歴から検出されました。プログラムのマッチングには反映されますが、統計には含まれず、トリミングや分割はできません。ラベル付けしてプログラム名を設定してください。",
+        "odometer_intro": "この累計は増える一方です。サイクルの記録を削除しても変わらず、保存される履歴の上限を超えてもカウントを続けるため、サービスリマインダーは正確なままです。",
+        "odometer_correct_hint": "WashData が実際には行われていない稼働を記録した場合や、WashData を導入する前に家電がすでにサイクルを実行していた場合は、この値を設定してください。",
+        "no_reminders_set": "サービスリマインダーはまだ設定されていません。"
     },
     "pg_desc": {
         "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
@@ -1870,7 +1878,9 @@
         "hist_csv_required": "先に CSV ファイルを読み込むか、内容を貼り付けてください",
         "file_read_failed": "そのファイルを読み込めませんでした",
         "unlabel_done": "{count} 件のサイクルのラベルを解除しました",
-        "unlabel_failed": "ラベルの解除に失敗しました: {error}"
+        "unlabel_failed": "ラベルの解除に失敗しました: {error}",
+        "odometer_saved": "累計サイクル数を保存しました",
+        "odometer_save_failed": "累計を保存できませんでした: {error}"
     },
     "suggestion": {
         "both_agree": "WashDataの推奨",

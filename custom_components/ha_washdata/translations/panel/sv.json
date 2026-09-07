@@ -253,7 +253,8 @@
     "hist_read_recorder": "Läs från Home Assistant",
     "hist_scan": "Sök efter cykler",
     "hist_import_n": "Importera {n} cykler",
-    "hist_goto_cycles": "Visa mig cyklerna"
+    "hist_goto_cycles": "Visa mig cyklerna",
+    "save_total_cycles": "Spara total"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Över dina cykler",
     "community_store": "Gemenskapsbutik",
     "online_account": "Gemenskapsbutik och onlinefunktioner",
-    "import_power_history": "Importera effekthistorik"
+    "import_power_history": "Importera effekthistorik",
+    "service_status": "Servicestatus"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Nedladdade från gemenskapsbutiken",
     "evidence_backfill_cycles": "Hittade i importerad effekthistorik",
     "zoom_hint_touch": "nyp för att zooma",
-    "zoom_hint_touch_zoomed": "nyp för att zooma · dubbeltryck för att återställa"
+    "zoom_hint_touch_zoomed": "nyp för att zooma · dubbeltryck för att återställa",
+    "cycles_since_service": "{since} / {total} cykler",
+    "total_cycles_run": "cykler totalt",
+    "correct_total_cycles": "Korrigera totalen"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Sökningen misslyckades.",
     "hist_scan_expired": "Den sökningen är inte längre tillgänglig. Sök igen.",
     "hist_import_failed": "Importen misslyckades.",
-    "imported_history_readonly": "Detekterad i importerad effekthistorik. Den påverkar programmatchningen men räknas inte in i din statistik och kan inte beskäras eller delas. Märk den för att namnge programmet."
+    "imported_history_readonly": "Detekterad i importerad effekthistorik. Den påverkar programmatchningen men räknas inte in i din statistik och kan inte beskäras eller delas. Märk den för att namnge programmet.",
+    "odometer_intro": "Den här totalsumman kan bara öka. Att ta bort en cykelpost ändrar den inte, och den fortsätter räkna även utöver gränsen för sparad historik, så att servicepåminnelserna fortsätter stämma.",
+    "odometer_correct_hint": "Ange detta om WashData har registrerat en körning som aldrig ägde rum, eller om apparaten redan hade kört cykler innan WashData installerades.",
+    "no_reminders_set": "Inga servicepåminnelser är inställda än."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
@@ -1979,7 +1987,9 @@
     "hist_csv_required": "Ladda in en CSV-fil eller klistra in dess innehåll först",
     "file_read_failed": "Kunde inte läsa den filen",
     "unlabel_done": "Märkningen togs bort från {count} cykler",
-    "unlabel_failed": "Borttagning av märkning misslyckades: {error}"
+    "unlabel_failed": "Borttagning av märkning misslyckades: {error}",
+    "odometer_saved": "Totalt antal cykler sparat",
+    "odometer_save_failed": "Kunde inte spara totalen: {error}"
   },
   "trend": {
     "down": "Nedåtgående trend",

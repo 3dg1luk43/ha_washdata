@@ -253,7 +253,8 @@
     "hist_read_recorder": "Načíst z Home Assistant",
     "hist_scan": "Vyhledat cykly",
     "hist_import_n": "Importovat cykly: {n}",
-    "hist_goto_cycles": "Zobrazit cykly"
+    "hist_goto_cycles": "Zobrazit cykly",
+    "save_total_cycles": "Uložit celkový počet"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Napříč vašimi cykly",
     "community_store": "Komunitní obchod",
     "online_account": "Komunitní obchod a online funkce",
-    "import_power_history": "Import historie výkonu"
+    "import_power_history": "Import historie výkonu",
+    "service_status": "Stav servisu"
   },
   "health": {
     "fair": "Přijatelná shoda",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Stažené z komunitního obchodu",
     "evidence_backfill_cycles": "Nalezené v importované historii výkonu",
     "zoom_hint_touch": "dvěma prsty přiblížíte",
-    "zoom_hint_touch_zoomed": "dvěma prsty přiblížíte · dvojitým klepnutím obnovíte"
+    "zoom_hint_touch_zoomed": "dvěma prsty přiblížíte · dvojitým klepnutím obnovíte",
+    "cycles_since_service": "{since} / {total} cyklů",
+    "total_cycles_run": "cyklů celkem",
+    "correct_total_cycles": "Opravit celkový počet"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Vyhledávání se nezdařilo.",
     "hist_scan_expired": "Toto vyhledávání už není dostupné. Spusťte je prosím znovu.",
     "hist_import_failed": "Import se nezdařil.",
-    "imported_history_readonly": "Detekováno v importované historii výkonu. Ovlivňuje přiřazování programů, ale nezapočítává se do vašich statistik a nelze jej oříznout ani rozdělit. Označením mu přiřaďte program."
+    "imported_history_readonly": "Detekováno v importované historii výkonu. Ovlivňuje přiřazování programů, ale nezapočítává se do vašich statistik a nelze jej oříznout ani rozdělit. Označením mu přiřaďte program.",
+    "odometer_intro": "Tento celkový počet pouze roste. Smazání záznamu o cyklu jej nezmění a počítá dál i za limitem uložené historie, takže připomínky servisu zůstávají správné.",
+    "odometer_correct_hint": "Nastavte, pokud WashData zaznamenala cyklus, který nikdy neproběhl, nebo pokud spotřebič už absolvoval cykly před instalací WashData.",
+    "no_reminders_set": "Zatím nejsou nastaveny žádné připomínky servisu."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1949,7 +1957,9 @@
     "hist_csv_required": "Nejprve načtěte soubor CSV nebo vložte jeho obsah",
     "file_read_failed": "Tento soubor se nepodařilo přečíst",
     "unlabel_done": "Odznačeno cyklů: {count}",
-    "unlabel_failed": "Odznačení selhalo: {error}"
+    "unlabel_failed": "Odznačení selhalo: {error}",
+    "odometer_saved": "Celkový počet cyklů uložen",
+    "odometer_save_failed": "Celkový počet nelze uložit: {error}"
   },
   "trend": {
     "down": "Klesající trend",

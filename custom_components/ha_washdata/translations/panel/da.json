@@ -253,7 +253,8 @@
     "hist_read_recorder": "Læs fra Home Assistant",
     "hist_scan": "Scan efter cyklusser",
     "hist_import_n": "Importér {n} cyklusser",
-    "hist_goto_cycles": "Vis mig cyklusserne"
+    "hist_goto_cycles": "Vis mig cyklusserne",
+    "save_total_cycles": "Gem total"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "På tværs af dine cyklusser",
     "community_store": "Fællesskabsbutik",
     "online_account": "Fællesskabsbutik og onlinefunktioner",
-    "import_power_history": "Importér effekthistorik"
+    "import_power_history": "Importér effekthistorik",
+    "service_status": "Servicestatus"
   },
   "health": {
     "fair": "Acceptabel matchkvalitet",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Hentet fra fællesskabsbutikken",
     "evidence_backfill_cycles": "Fundet i importeret effekthistorik",
     "zoom_hint_touch": "knib for at zoome",
-    "zoom_hint_touch_zoomed": "knib for at zoome · dobbelttryk for at nulstille"
+    "zoom_hint_touch_zoomed": "knib for at zoome · dobbelttryk for at nulstille",
+    "cycles_since_service": "{since} / {total} cyklusser",
+    "total_cycles_run": "cyklusser i alt",
+    "correct_total_cycles": "Ret totalen"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Scanningen mislykkedes.",
     "hist_scan_expired": "Den scanning er ikke længere tilgængelig. Scan igen.",
     "hist_import_failed": "Importen mislykkedes.",
-    "imported_history_readonly": "Registreret i importeret effekthistorik. Den påvirker programmatchning, men tælles ikke med i din statistik og kan ikke beskæres eller opdeles. Mærk den for at give programmet navn."
+    "imported_history_readonly": "Registreret i importeret effekthistorik. Den påvirker programmatchning, men tælles ikke med i din statistik og kan ikke beskæres eller opdeles. Mærk den for at give programmet navn.",
+    "odometer_intro": "Denne total kan kun stige. Sletning af en cyklusregistrering ændrer den ikke, og den tæller videre ud over grænsen for den gemte historik, så servicepåmindelser bliver ved med at være korrekte.",
+    "odometer_correct_hint": "Angiv dette, hvis WashData har registreret en kørsel, der aldrig har fundet sted, eller hvis apparatet allerede havde kørt cyklusser, før WashData blev installeret.",
+    "no_reminders_set": "Der er endnu ikke angivet nogen servicepåmindelser."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",
@@ -1979,7 +1987,9 @@
     "hist_csv_required": "Indlæs først en CSV-fil eller indsæt dens indhold",
     "file_read_failed": "Kunne ikke læse den fil",
     "unlabel_done": "Fjernede mærkning fra {count} cyklus(ser)",
-    "unlabel_failed": "Fjernelse af mærkning mislykkedes: {error}"
+    "unlabel_failed": "Fjernelse af mærkning mislykkedes: {error}",
+    "odometer_saved": "Samlet antal cyklusser gemt",
+    "odometer_save_failed": "Kunne ikke gemme totalen: {error}"
   },
   "trend": {
     "down": "Trend nedad",

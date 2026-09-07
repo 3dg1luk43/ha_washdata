@@ -253,7 +253,8 @@
         "hist_read_recorder": "Beolvasás a Home Assistantból",
         "hist_scan": "Ciklusok keresése",
         "hist_import_n": "{n} ciklus importálása",
-        "hist_goto_cycles": "Ciklusok megjelenítése"
+        "hist_goto_cycles": "Ciklusok megjelenítése",
+        "save_total_cycles": "Összesítés mentése"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
         "pg_across_cycles": "Az összes ciklusban",
         "community_store": "Közösségi bolt",
         "online_account": "Közösségi bolt és online funkciók",
-        "import_power_history": "Teljesítményelőzmények importálása"
+        "import_power_history": "Teljesítményelőzmények importálása",
+        "service_status": "Szerviz állapota"
     },
     "health": {
         "fair": "Elfogadható profilminőség",
@@ -709,7 +711,10 @@
         "evidence_reference_cycles": "Letöltve a közösségi boltból",
         "evidence_backfill_cycles": "Importált teljesítményelőzményekben találva",
         "zoom_hint_touch": "csippentés a nagyításhoz",
-        "zoom_hint_touch_zoomed": "csippentés a nagyításhoz · dupla koppintás a visszaállításhoz"
+        "zoom_hint_touch_zoomed": "csippentés a nagyításhoz · dupla koppintás a visszaállításhoz",
+        "cycles_since_service": "{since} / {total} ciklus",
+        "total_cycles_run": "lefutott ciklus összesen",
+        "correct_total_cycles": "Összesített ciklusszám javítása"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -1067,7 +1072,10 @@
         "hist_scan_failed": "A vizsgálat nem sikerült.",
         "hist_scan_expired": "Ez a vizsgálat már nem elérhető. Kérjük, futtassa újra.",
         "hist_import_failed": "Az importálás nem sikerült.",
-        "imported_history_readonly": "Importált teljesítményelőzményekben észlelve. Befolyásolja a programegyeztetést, de nem számít bele a statisztikákba, és nem vágható vagy osztható. Címkézze fel a hozzá tartozó program megadásához."
+        "imported_history_readonly": "Importált teljesítményelőzményekben észlelve. Befolyásolja a programegyeztetést, de nem számít bele a statisztikákba, és nem vágható vagy osztható. Címkézze fel a hozzá tartozó program megadásához.",
+        "odometer_intro": "Ez az összesítés csak növekedhet. Egy ciklusbejegyzés törlése nem változtatja meg, és a tárolt előzmények korlátján túl is számol tovább, így a szerviz emlékeztetők pontosak maradnak.",
+        "odometer_correct_hint": "Akkor állítsa be, ha a WashData olyan futást rögzített, amely soha nem történt meg, vagy ha a készülék már a WashData telepítése előtt is futtatott ciklusokat.",
+        "no_reminders_set": "Még nincs beállítva szerviz emlékeztető."
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1840,7 +1848,9 @@
         "hist_csv_required": "Először töltsön be egy CSV-fájlt, vagy illessze be a tartalmát",
         "file_read_failed": "A fájl nem olvasható",
         "unlabel_done": "{count} ciklus címkéje eltávolítva",
-        "unlabel_failed": "A címke eltávolítása sikertelen: {error}"
+        "unlabel_failed": "A címke eltávolítása sikertelen: {error}",
+        "odometer_saved": "Összesített ciklusszám mentve",
+        "odometer_save_failed": "Nem sikerült menteni az összesítést: {error}"
     },
     "suggestion": {
         "both_agree": "A WashData javasolja",

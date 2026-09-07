@@ -205,7 +205,8 @@
     "hist_read_recorder": "Leggi da Home Assistant",
     "hist_scan": "Cerca cicli",
     "hist_import_n": "Importa {n} cicli",
-    "hist_goto_cycles": "Mostrami i cicli"
+    "hist_goto_cycles": "Mostrami i cicli",
+    "save_total_cycles": "Salva totale"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -320,7 +321,8 @@
     "pg_across_cycles": "Su tutti i tuoi cicli",
     "community_store": "Store della community",
     "online_account": "Store della community e funzionalità online",
-    "import_power_history": "Importa lo storico di potenza"
+    "import_power_history": "Importa lo storico di potenza",
+    "service_status": "Stato della manutenzione"
   },
   "health": {
     "fair": "Qualità profilo accettabile",
@@ -661,7 +663,10 @@
     "evidence_reference_cycles": "Scaricati dallo store della community",
     "evidence_backfill_cycles": "Trovati in uno storico di potenza importato",
     "zoom_hint_touch": "pizzica per ingrandire",
-    "zoom_hint_touch_zoomed": "pizzica per ingrandire · doppio tocco per reimpostare"
+    "zoom_hint_touch_zoomed": "pizzica per ingrandire · doppio tocco per reimpostare",
+    "cycles_since_service": "{since} / {total} cicli",
+    "total_cycles_run": "cicli eseguiti in totale",
+    "correct_total_cycles": "Correggi il totale"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -1019,7 +1024,10 @@
     "hist_scan_failed": "Scansione non riuscita.",
     "hist_scan_expired": "Quella scansione non è più disponibile. Esegui di nuovo la scansione.",
     "hist_import_failed": "Importazione non riuscita.",
-    "imported_history_readonly": "Rilevato in uno storico di potenza importato. Influenza la corrispondenza dei programmi ma non viene conteggiato nelle tue statistiche e non può essere ritagliato né diviso. Assegna un'etichetta per indicare il programma."
+    "imported_history_readonly": "Rilevato in uno storico di potenza importato. Influenza la corrispondenza dei programmi ma non viene conteggiato nelle tue statistiche e non può essere ritagliato né diviso. Assegna un'etichetta per indicare il programma.",
+    "odometer_intro": "Questo totale può solo aumentare. L'eliminazione del record di un ciclo non lo modifica e continua a contare oltre il limite dello storico conservato, così i promemoria di servizio restano corretti.",
+    "odometer_correct_hint": "Imposta questo valore se WashData ha registrato un ciclo che non è mai avvenuto, oppure se l'elettrodomestico aveva già eseguito dei cicli prima dell'installazione di WashData.",
+    "no_reminders_set": "Non è ancora impostato alcun promemoria di servizio."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
@@ -1822,7 +1830,9 @@
     "hist_csv_required": "Carica prima un file CSV o incolla il suo contenuto",
     "file_read_failed": "Impossibile leggere quel file",
     "unlabel_done": "Etichetta rimossa da {count} cicli",
-    "unlabel_failed": "Rimozione dell'etichetta non riuscita: {error}"
+    "unlabel_failed": "Rimozione dell'etichetta non riuscita: {error}",
+    "odometer_saved": "Totale dei cicli salvato",
+    "odometer_save_failed": "Impossibile salvare il totale: {error}"
   },
   "suggestion": {
     "both_agree": "WashData consiglia",

@@ -205,7 +205,8 @@
     "hist_read_recorder": "Leer desde Home Assistant",
     "hist_scan": "Buscar ciclos",
     "hist_import_n": "Importar {n} ciclos",
-    "hist_goto_cycles": "Ver los ciclos"
+    "hist_goto_cycles": "Ver los ciclos",
+    "save_total_cycles": "Guardar total"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -320,7 +321,8 @@
     "pg_across_cycles": "En todos tus ciclos",
     "community_store": "Tienda de la comunidad",
     "online_account": "Tienda de la comunidad y funciones en línea",
-    "import_power_history": "Importar historial de potencia"
+    "import_power_history": "Importar historial de potencia",
+    "service_status": "Estado del mantenimiento"
   },
   "health": {
     "fair": "Calidad de perfil aceptable",
@@ -661,7 +663,10 @@
     "evidence_reference_cycles": "Descargados de la tienda de la comunidad",
     "evidence_backfill_cycles": "Encontrados en un historial de potencia importado",
     "zoom_hint_touch": "pellizcar para hacer zoom",
-    "zoom_hint_touch_zoomed": "pellizcar para hacer zoom · doble toque para restablecer"
+    "zoom_hint_touch_zoomed": "pellizcar para hacer zoom · doble toque para restablecer",
+    "cycles_since_service": "{since} / {total} ciclos",
+    "total_cycles_run": "ciclos realizados en total",
+    "correct_total_cycles": "Corregir el total"
   },
   "log": {
     "all_levels": "Todos los niveles",
@@ -1019,7 +1024,10 @@
     "hist_scan_failed": "El análisis falló.",
     "hist_scan_expired": "Ese análisis ya no está disponible. Vuelva a analizar el historial.",
     "hist_import_failed": "La importación falló.",
-    "imported_history_readonly": "Detectado en un historial de potencia importado. Influye en la coincidencia de programas, pero no cuenta en sus estadísticas y no se puede recortar ni dividir. Etiquételo para indicar el programa."
+    "imported_history_readonly": "Detectado en un historial de potencia importado. Influye en la coincidencia de programas, pero no cuenta en sus estadísticas y no se puede recortar ni dividir. Etiquételo para indicar el programa.",
+    "odometer_intro": "Este total solo aumenta. Eliminar el registro de un ciclo no lo modifica y sigue contando más allá del límite del historial almacenado, de modo que los recordatorios de servicio siguen siendo correctos.",
+    "odometer_correct_hint": "Ajuste este valor si WashData registró un ciclo que nunca ocurrió, o si el electrodoméstico ya había realizado ciclos antes de instalar WashData.",
+    "no_reminders_set": "Aún no hay recordatorios de servicio configurados."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
@@ -1822,7 +1830,9 @@
     "hist_csv_required": "Cargue primero un archivo CSV o pegue su contenido",
     "file_read_failed": "No se pudo leer ese archivo",
     "unlabel_done": "Etiqueta quitada de {count} ciclo(s)",
-    "unlabel_failed": "Error al quitar la etiqueta: {error}"
+    "unlabel_failed": "Error al quitar la etiqueta: {error}",
+    "odometer_saved": "Total de ciclos guardado",
+    "odometer_save_failed": "No se pudo guardar el total: {error}"
   },
   "suggestion": {
     "both_agree": "WashData recomienda",

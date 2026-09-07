@@ -28,7 +28,10 @@ const EMPTY_MAINTENANCE = {
   log: [],
   due: [],
   event_types: ['descale', 'filter_clean', 'drum_clean', 'bearing_service', 'other'],
-  reminders: {},
+  reminders: { descale: 30 },
+  // #414: cycles run since each task, and the odometer they are measured against.
+  cycles_since: { descale: 12, filter_clean: 12, drum_clean: 12, bearing_service: 12, other: 12 },
+  lifetime_cycle_count: 212,
 };
 
 const EMPTY_CHANGELOG = { changelog: [] };
@@ -87,6 +90,7 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   'ha_washdata/get_suggestions': NO_SUGGESTIONS,
   // Write commands — return success so form submissions don't throw.
   'ha_washdata/set_options': { success: true },
+  'ha_washdata/set_lifetime_cycle_count': { success: true, lifetime_cycle_count: 250 },
   'ha_washdata/set_user_prefs': { success: true },
   'ha_washdata/set_panel_config': { success: true },
   'ha_washdata/trigger_ml_training': { ok: true, message: 'Training started' },

@@ -2498,28 +2498,75 @@ class ProfileStore:
         await self.async_save()
 
     def get_lifetime_cycle_count(self) -> int:
-        """Persisted monotonic lifetime completed-cycle count.
+        """Cycles this appliance has run, ever - the odometer.
 
-        Only ever increments (never regresses when history is trimmed/merged), so it
-        is the correct basis for milestone crossings. Pure getter - never persists.
-        Never raises; returns 0 when unset.
+        Only ever increments (never regresses when history is trimmed, merged or
+        deleted from), so it is the correct basis for milestone crossings, the
+        maintenance reminders and the cycle-count sensor (#414).
+
+        Floored at ``len(past_cycles)``: a stored record is evidence of a run, so
+        the odometer can never read below the number of records on hand. That makes
+        the getter correct even before :meth:`_heal_lifetime_cycle_count` has
+        persisted the floor (a v8->v9 seed predating a replace-mode import), and it
+        stops a hand-correction from being quietly undone at the next restart. Pure
+        getter - never persists. Never raises; returns 0 when unset.
         """
         try:
-            return int(self._data.get("lifetime_cycle_count", 0) or 0)
+            stored = int(self._data.get("lifetime_cycle_count", 0) or 0)
         except Exception:  # noqa: BLE001
-            return 0
+            stored = 0
+        try:
+            return max(stored, len(self.get_past_cycles()))
+        except Exception:  # noqa: BLE001
+            return stored
 
-    def set_lifetime_cycle_count(self, count: int) -> None:
+    def set_lifetime_cycle_count(self, count: int, *, force: bool = False) -> None:
         """Set the lifetime cycle count in memory WITHOUT persisting.
 
         The cycle-end path batches this with the immediately-following lifetime
         energy save (:meth:`async_add_lifetime_energy_wh`) so the store is written
         once per cycle. Encapsulates the storage key so callers need not touch
         ``_data`` directly. Ignores non-integer input.
+
+        This is an odometer: it changes when a cycle persists, or when the user
+        explicitly corrects it. A decrease is therefore refused unless ``force``
+        is set (the user-correction path, WS ``set_lifetime_cycle_count``), so no
+        ordinary code path can walk the appliance's life total backwards - the bug
+        behind discussion #414, where deleting a record lowered the count and an
+        external "every 30 cycles" maintenance task stopped firing.
         """
         try:
-            self._data["lifetime_cycle_count"] = int(count)
+            value = int(count)
         except (TypeError, ValueError):
+            return
+        if value < 0:
+            return
+        if not force and value < self.get_lifetime_cycle_count():
+            return
+        self._data["lifetime_cycle_count"] = value
+
+    def _heal_lifetime_cycle_count(self) -> None:
+        """Persist the ``len(past_cycles)`` floor that the getter already applies.
+
+        The v8->v9 migration seeded the counter from the history that existed at
+        that moment, and a replace-mode selective import can overwrite history
+        without its ``lifetime_stats``. Either way the appliance has demonstrably
+        run at least as many cycles as are stored. Writing the floor down at load
+        keeps the stored key in step with
+        :meth:`get_lifetime_cycle_count`, so an export carries the real reading.
+        Only ever increases. Never raises.
+        """
+        try:
+            stored = int(self._data.get("lifetime_cycle_count", 0) or 0)
+            real = len(self.get_past_cycles())
+            if real > stored:
+                self._data["lifetime_cycle_count"] = real
+                _LOGGER.debug(
+                    "Healed lifetime cycle count %d -> %d (stored history is larger)",
+                    stored,
+                    real,
+                )
+        except Exception:  # noqa: BLE001
             pass
 
     # ------------------------------------------------------------------
@@ -2529,7 +2576,8 @@ class ProfileStore:
     def get_maintenance_log(self) -> list[dict[str, Any]]:
         """Return logged maintenance events, most-recent-first. Never raises.
 
-        Each entry is ``{"id", "date", "event_type", "notes"}``. Entries with an
+        Each entry is ``{"id", "date", "event_type", "notes", "cycle_count_at_log"}``
+        (the last is absent on entries logged before #414). Entries with an
         unparseable date sort last.
         """
         try:
@@ -2557,11 +2605,20 @@ class ProfileStore:
         """
         if event_type not in MAINTENANCE_EVENT_TYPES:
             raise ValueError(f"Unknown maintenance event_type: {event_type!r}")
+        when = date if isinstance(date, str) and date else dt_util.now().isoformat()
         entry: dict[str, Any] = {
             "id": uuid.uuid4().hex[:12],
-            "date": date if isinstance(date, str) and date else dt_util.now().isoformat(),
+            "date": when,
             "event_type": event_type,
             "notes": str(notes or ""),
+            # Odometer reading at the moment of servicing (#414). "Cycles since" is
+            # then a subtraction against the monotonic lifetime counter instead of a
+            # scan of `past_cycles`, which is capped at max_past_cycles and shrinks
+            # when the user deletes a record - both of which silently froze the
+            # reminder. Derived from the event's own date rather than from "now", so
+            # a back-dated entry ("descaled it three months ago") still reports the
+            # cycles run since that date instead of collapsing to zero.
+            "cycle_count_at_log": self._odometer_at(_parse_maintenance_dt(when)),
         }
         log = self._data.setdefault("maintenance_log", [])
         if not isinstance(log, list):
@@ -2660,18 +2717,63 @@ class ProfileStore:
         self._logger.info("Deleted playground preset %r", name)
         return True
 
-    def cycles_since_maintenance(self, event_type: str) -> int:
-        """Count completed cycles since the most recent maintenance event of a type.
+    def _cycles_after(self, since: datetime | None) -> int:
+        """Stored completed cycles that started after *since* (all of them if None).
 
-        Counts completed cycles (``status == "completed"``) whose ``start_time`` is
-        after the most recent maintenance event of ``event_type``. If no such event
-        was ever logged, returns the total completed-cycle count. Never raises.
+        A scan of the retained history, so it is bounded by ``max_past_cycles`` and
+        shrinks when a record is deleted. Used only to place a maintenance event on
+        the odometer at log time, and as the legacy fallback for events logged
+        before that stamp existed. Never raises.
         """
         try:
             completed = [
                 c for c in self.get_past_cycles()
                 if isinstance(c, dict) and c.get("status") == "completed"
             ]
+            if since is None:
+                return len(completed)
+            count = 0
+            for c in completed:
+                start = _parse_start_dt(c.get("start_time"))
+                if start is not None and start > since:
+                    count += 1
+            return count
+        except Exception:  # noqa: BLE001
+            return 0
+
+    def _odometer_at(self, when: datetime | None) -> int:
+        """The lifetime cycle count as it stood at *when*.
+
+        ``odometer_now - cycles_after(when)``, clamped to >= 0. For "now" this is
+        simply the current reading; for a back-dated maintenance entry it rewinds
+        the odometer by the cycles run since that date. Never raises.
+        """
+        try:
+            return max(0, self.get_lifetime_cycle_count() - self._cycles_after(when))
+        except Exception:  # noqa: BLE001
+            return 0
+
+    def cycles_since_maintenance(self, event_type: str) -> int:
+        """Cycles this appliance has run since it was last serviced for *event_type*.
+
+        Measured against the monotonic lifetime odometer
+        (:meth:`get_lifetime_cycle_count`): the reading now minus the reading stamped
+        on the most recent matching event. That is retention-proof and
+        deletion-proof, which the previous ``past_cycles`` scan was not - past
+        ``max_past_cycles`` it stopped rising and every deleted record set the
+        reminder back (#414).
+
+        Events logged before the stamp existed have no reading to subtract, so they
+        fall back to the old date-based scan. When the task was never logged at all
+        (the common case), the answer is the whole odometer.
+
+        Note the odometer counts every persisted cycle, including ones recorded as
+        interrupted or force-stopped, where the old scan counted only completed
+        ones: a filter still gets dirty on a run the watchdog had to close.
+        Never raises.
+        """
+        try:
+            latest: dict[str, Any] | None = None
             latest_dt: datetime | None = None
             for e in self._data.get("maintenance_log", []) or []:
                 if not isinstance(e, dict) or e.get("event_type") != event_type:
@@ -2679,14 +2781,13 @@ class ProfileStore:
                 dt = _parse_maintenance_dt(e.get("date"))
                 if dt is not None and (latest_dt is None or dt > latest_dt):
                     latest_dt = dt
-            if latest_dt is None:
-                return len(completed)
-            count = 0
-            for c in completed:
-                start = _parse_start_dt(c.get("start_time"))
-                if start is not None and start > latest_dt:
-                    count += 1
-            return count
+                    latest = e
+            if latest is None:
+                return self.get_lifetime_cycle_count()
+            stamp = latest.get("cycle_count_at_log")
+            if isinstance(stamp, (int, float)) and not isinstance(stamp, bool):
+                return max(0, self.get_lifetime_cycle_count() - int(stamp))
+            return self._cycles_after(latest_dt)
         except Exception:  # noqa: BLE001
             return 0
 
@@ -3770,6 +3871,8 @@ class ProfileStore:
         data = await self._store.async_load()
         if data:
             self._data = data
+        # The odometer can only be behind, never ahead, of the stored history (#414).
+        self._heal_lifetime_cycle_count()
         # Ensure legacy custom phase formats are normalized in-memory.
         self._get_shared_custom_phases()
         # Assign ids to any custom phase missing one.
@@ -6377,7 +6480,8 @@ class ProfileStore:
         self._data["active_cycle"] = None
         self._data["last_active_save"] = None
         # Newer persisted state must also be wiped, else a "wipe all" leaves trained
-        # models, groups, matcher tuning, histories, and counters behind.
+        # models, groups, matcher tuning and histories behind. The two lifetime
+        # odometers are the documented exception - see the note below.
         self._data["custom_phases"] = []
         self._data["ml_model_versions"] = {}
         self._data["profile_groups"] = {}
@@ -6387,8 +6491,12 @@ class ProfileStore:
         self._data["match_ranking_history"] = []
         self._data["ml_last_training_run"] = None
         self._data["ml_training_history"] = {}
-        self._data["lifetime_energy_wh"] = 0.0
-        self._data["lifetime_cycle_count"] = 0
+        # The two lifetime odometers deliberately SURVIVE a wipe (#414). They record
+        # what the appliance has done, not what WashData has stored: the cycle count
+        # now drives the maintenance reminders (and any external "every N cycles"
+        # task), and the energy total backs a TOTAL_INCREASING Energy-dashboard
+        # sensor where a silent reset reads as a meter replacement. Both remain
+        # correctable by hand - the panel's Maintenance tab edits the cycle count.
         self._data["settings_changelog"] = []
         self._data["suggestion_apply_cycle_count"] = 0
         self._cached_sample_segments = {}
