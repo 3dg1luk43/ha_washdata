@@ -997,7 +997,15 @@ class CycleDetector:
                 self._lockout_high_seconds += dt
                 if self._lockout_high_seconds < STOP_LOCKOUT_RELEASE_SECONDS:
                     # Still within the spin-down window - ignore reading.
+                    # The reading is withheld from the state machine, but it is
+                    # still a real observation of the power level, so record it
+                    # (#403): the accumulator below judges each interval against
+                    # the previous observation, and a release reading compared to
+                    # a pre-stop sample up to the full lockout window old would
+                    # lose the credit for its own interval (#267 back-to-back
+                    # start whose stop happened in a low-power trough).
                     self._last_process_time = timestamp
+                    self._last_power = power
                     return
                 self._ignore_power_until_idle = False
                 self._lockout_high_seconds = 0.0
@@ -1032,8 +1040,38 @@ class CycleDetector:
 
         is_high = power >= threshold
 
+        # Last observation carried forward (#403): `dt` is the interval that
+        # ENDED at this reading, so the appliance sat at the PREVIOUS sample's
+        # level for it, not at this one. With a change-only (send-on-delta)
+        # power sensor a low -> high crossing carries the whole idle gap, and
+        # crediting it at the new high power let a single blip after minutes of
+        # silence satisfy both start gates on the next reading. So the interval
+        # only counts as high-power evidence when the previous observation was
+        # also at or above the threshold those gates measure against. A densely
+        # sampled device is unaffected: there the previous sample is already
+        # high and the interval keeps its full credit.
+        #
+        # This is the same principle the surrounding code already applies - the
+        # low branch restarts its gap-free tally rather than credit an outage,
+        # DELAY_WAIT and the paused-STARTING anchor (#306) anchor on the first
+        # high reading, and `integrate_wh`/`energy_gap_threshold_s` drop
+        # outage-sized segments - applied to the one branch that still credited
+        # unobserved time. An outage heuristic cannot substitute for it: a
+        # 511 s gap on a 70 s idle cadence is legitimate change-only silence,
+        # well inside the outage ceiling, and only the credit direction
+        # separates it from real high-power time.
+        #
+        # A reading inside the hysteresis band (>= stop_threshold_w but
+        # < start_threshold_w) therefore earns no evidence toward the start
+        # gates, which is correct: the band is by definition below the
+        # threshold the gates measure against, and it is exactly where a
+        # waiting machine idles. The cost is one extra report before
+        # confirmation on a band-crossing ramp; no start is lost.
+        prev_high = self._last_power is not None and self._last_power >= threshold
+        high_dt = dt if prev_high else 0.0
+
         if is_high:
-            self._time_above_threshold += dt
+            self._time_above_threshold += high_dt
             self._time_below_threshold = 0.0
             self._time_below_threshold_gapfree = 0.0
             # Energy integration (trapezoidal approx for this single step)
@@ -1042,7 +1080,7 @@ class CycleDetector:
             # Simplified: just P * dt for short steps is fine,
             # or call integrate_wh on buffer if needed.
             # Let's use simple rect/trapz here for running sum
-            step_wh = power * (dt / 3600.0)
+            step_wh = power * (high_dt / 3600.0)
             self._energy_since_idle_wh += step_wh
             self._last_active_time = timestamp
         else:
@@ -1123,7 +1161,11 @@ class CycleDetector:
                         self._energy_since_idle_wh = max(0.0, avg_power * (interval_s / 3600.0))
                     else:
                         self._power_readings = [(timestamp, power)]
-                        self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
+                        # Guarded interval (#403): the gap between anti-wrinkle
+                        # tumbles was spent at the previous (idle) level.
+                        self._energy_since_idle_wh = (
+                            power * (high_dt / 3600.0) if high_dt > 0 else 0.0
+                        )
 
                     self._cycle_max_power = max(candidate_peak, power)
             elif self._state != STATE_ANTI_WRINKLE:
@@ -1234,7 +1276,14 @@ class CycleDetector:
                 self._transition_to(STATE_STARTING, timestamp)
                 self._current_cycle_start = timestamp
                 self._power_readings = [(timestamp, power)]
-                self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
+                # Seed from the guarded interval (#403), not raw dt: this seed
+                # OVERWRITES the accumulator (it has to - entering STARTING from
+                # a terminal state carries the previous cycle's total), so an
+                # unguarded seed would reinstate the idle gap the accumulator
+                # just declined to credit.
+                self._energy_since_idle_wh = (
+                    power * (high_dt / 3600.0) if high_dt > 0 else 0.0
+                )
                 self._cycle_max_power = power
             # NOTE: terminal-state expiry (Finished/Interrupted/Force-Stopped -> Off)
             # is owned solely by the manager (WashDataManager._handle_state_expiry),
