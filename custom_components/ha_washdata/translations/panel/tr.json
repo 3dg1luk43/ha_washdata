@@ -80,7 +80,8 @@
         "unmatchable": "eşleştirilemez",
         "not_importable": "burada geçersiz",
         "exists": "mevcut",
-        "backfilled_tip": "İçe aktarılan güç geçmişinde algılandı. Yalnızca program eşleştirmesini etkiler, istatistiklere sayılmaz."
+        "backfilled_tip": "İçe aktarılan güç geçmişinde algılandı. Yalnızca program eşleştirmesini etkiler, istatistiklere sayılmaz.",
+        "armed": "(sonraki döngüye uygulanır)"
     },
     "btn": {
         "reset_zoom": "Yakınlaştırmayı sıfırla",
@@ -515,7 +516,7 @@
         "profile_index": "profil dizini →",
         "profile_name": "Profil Adı",
         "program": "Program",
-        "program_tip": "Geçerli döngüyle eşleştirilen profili geçersiz kılın. Otomatik algılama, entegrasyonun en iyi eşleşmeyi otomatik olarak seçmesine olanak tanır. Otomatik algılama yanlış olduğunda veya neyin çalıştığını bildiğinizde belirli bir programı zorla eşleştirmek için sabitleyin.",
+        "program_tip": "Geçerli döngüyle eşleştirilen profili geçersiz kılın. Otomatik algılama, entegrasyonun en iyi eşleşmeyi otomatik olarak seçmesine olanak tanır. Otomatik algılama yanlış olduğunda veya neyin çalıştığını bildiğinizde belirli bir programı zorla eşleştirmek için sabitleyin. Cihazı çalıştırmadan önce bir program seçin; sonraki döngü başladığı anda uygulanır.",
         "progress": "İlerleme",
         "raw_socket": "Ham soket",
         "read_only": "Salt okunur",
@@ -1075,7 +1076,8 @@
         "imported_history_readonly": "İçe aktarılan güç geçmişinde algılandı. Program eşleştirmesini etkiler ancak istatistiklerinize sayılmaz, kırpılamaz veya bölünemez. Programını adlandırmak için etiketleyin.",
         "odometer_intro": "Bu toplam yalnızca artar. Bir döngü kaydını silmek onu değiştirmez ve saklanan geçmiş sınırının ötesinde saymaya devam eder, böylece servis hatırlatıcıları doğru kalır.",
         "odometer_correct_hint": "WashData gerçekleşmemiş bir çalışma kaydettiyse veya cihaz WashData kurulmadan önce zaten döngü çalıştırmışsa bu değeri ayarlayın.",
-        "no_reminders_set": "Henüz servis hatırlatıcısı ayarlanmadı."
+        "no_reminders_set": "Henüz servis hatırlatıcısı ayarlanmadı.",
+        "toast_program_armed": "Program sonraki döngü için ayarlandı: {program}"
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",

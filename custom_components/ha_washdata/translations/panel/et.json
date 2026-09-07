@@ -80,7 +80,8 @@
     "unmatchable": "ei saa sobitada",
     "not_importable": "pole saadaval",
     "exists": "on olemas",
-    "backfilled_tip": "Tuvastatud imporditud võimsuse ajaloos. Mõjutab ainult programmide sobitamist, statistikas ei arvestata."
+    "backfilled_tip": "Tuvastatud imporditud võimsuse ajaloos. Mõjutab ainult programmide sobitamist, statistikas ei arvestata.",
+    "armed": "(kehtib järgmise tsükli kohta)"
   },
   "btn": {
     "reset_zoom": "Lähtesta suum",
@@ -515,7 +516,7 @@
     "profile_index": "profiili indeks →",
     "profile_name": "Profiili nimi",
     "program": "Programm",
-    "program_tip": "Asendage profiil, mis sobitatakse praeguse tsükliga. Automaatne tuvastamine laseb integratsioonil automaatselt valida parima vaste. Kinnitage konkreetne programm sundvastendamiseks, kui automaatne tuvastamine on vale või teate, mis töötab.",
+    "program_tip": "Asendage profiil, mis sobitatakse praeguse tsükliga. Automaatne tuvastamine laseb integratsioonil automaatselt valida parima vaste. Kinnitage konkreetne programm sundvastendamiseks, kui automaatne tuvastamine on vale või teate, mis töötab. Valige programm enne seadme käivitamist ja see rakendatakse kohe, kui algab järgmine tsükkel.",
     "progress": "Edusammud",
     "raw_socket": "Toores signaal",
     "read_only": "Kirjutuskaitstud",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Tuvastatud imporditud võimsuse ajaloos. See mõjutab programmide sobitamist, kuid ei arvestata sinu statistikas ning seda ei saa kärpida ega poolitada. Kasuta nuppu Sildista, et määrata programm.",
     "odometer_intro": "See koguarv saab ainult kasvada. Tsüklikirje kustutamine seda ei muuda ja loendamine jätkub ka üle salvestatud ajaloo piiri, nii et hoolduse meeldetuletused jäävad õigeks.",
     "odometer_correct_hint": "Määra see, kui WashData salvestas käituse, mida kunagi ei toimunud, või kui seade oli tsükleid läbinud juba enne WashData paigaldamist.",
-    "no_reminders_set": "Hoolduse meeldetuletusi pole veel määratud."
+    "no_reminders_set": "Hoolduse meeldetuletusi pole veel määratud.",
+    "toast_program_armed": "Programm seatud järgmise tsükli jaoks: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",

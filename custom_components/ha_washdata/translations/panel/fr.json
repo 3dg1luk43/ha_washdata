@@ -32,7 +32,8 @@
     "unmatchable": "correspondance impossible",
     "not_importable": "n/a ici",
     "exists": "existe déjà",
-    "backfilled_tip": "Détecté dans un historique de puissance importé. Influence uniquement la correspondance des programmes, non compté dans les statistiques."
+    "backfilled_tip": "Détecté dans un historique de puissance importé. Influence uniquement la correspondance des programmes, non compté dans les statistiques.",
+    "armed": "(s'applique au prochain cycle)"
   },
   "btn": {
     "reset_zoom": "Réinitialiser le zoom",
@@ -467,7 +468,7 @@
     "profile_index": "index du profil →",
     "profile_name": "Nom du profil",
     "program": "Programme",
-    "program_tip": "Remplacez le profil associé au cycle en cours. La détection automatique permet à l'intégration de choisir automatiquement la meilleure correspondance. Épinglez un programme spécifique pour forcer la correspondance quand la détection automatique est incorrecte ou que vous savez ce qui tourne.",
+    "program_tip": "Remplacez le profil associé au cycle en cours. La détection automatique permet à l'intégration de choisir automatiquement la meilleure correspondance. Épinglez un programme spécifique pour forcer la correspondance quand la détection automatique est incorrecte ou que vous savez ce qui tourne. Sélectionnez-en un avant de démarrer l'appareil et il sera appliqué dès le début du prochain cycle.",
     "progress": "Progrès",
     "raw_socket": "Signal brut",
     "read_only": "Lecture seule",
@@ -1027,7 +1028,8 @@
     "imported_history_readonly": "Détecté dans un historique de puissance importé. Il influence la correspondance des programmes mais n'est pas compté dans vos statistiques, et ne peut être ni rogné ni divisé. Étiquetez-le pour nommer le programme.",
     "odometer_intro": "Ce total ne fait qu'augmenter. Supprimer l'enregistrement d'un cycle ne le modifie pas, et il continue de compter au-delà de la limite d'historique conservé, afin que les rappels d'entretien restent exacts.",
     "odometer_correct_hint": "Renseignez cette valeur si WashData a enregistré un cycle qui n'a jamais eu lieu, ou si l'appareil avait déjà effectué des cycles avant l'installation de WashData.",
-    "no_reminders_set": "Aucun rappel d'entretien n'est encore configuré."
+    "no_reminders_set": "Aucun rappel d'entretien n'est encore configuré.",
+    "toast_program_armed": "Programme prévu pour le prochain cycle : {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",

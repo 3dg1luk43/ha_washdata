@@ -315,6 +315,19 @@ _SENSOR_SWAP_BLOCKED_STATES = frozenset(
     }
 )
 
+# States in which a cycle is under way, so a manually picked program applies to it
+# right now rather than being armed for the next one (#411). ANTI_WRINKLE is
+# excluded on purpose: its tumble pulses belong to the cycle that already ended,
+# so a program chosen there is meant for the next run.
+_CYCLE_IN_PROGRESS_STATES = frozenset(
+    {
+        STATE_STARTING,
+        STATE_RUNNING,
+        STATE_PAUSED,
+        STATE_ENDING,
+    }
+)
+
 
 def _sanitize_ranking(raw_list: list[dict[str, Any]], limit: int = 5) -> list[dict[str, Any]]:
     """Top-N ranking candidates stripped of the heavy `current`/`sample` power
@@ -1019,6 +1032,9 @@ class WashDataManager:
         self._pump_stuck: bool = False  # True once the stuck threshold has fired for this cycle
 
         self._manual_program_active: bool = False
+        # The user's standing program choice for the current or next cycle (#411).
+        # Rehydrated from the store during setup so arming survives a restart.
+        self._armed_program: str | None = None
         self._notified_start: bool = False
         self._notified_pre_completion: bool = False
         self._last_match_result: Any = None  # Stores full MatchResult object
@@ -2054,6 +2070,18 @@ class WashDataManager:
 
         # Load recorder state
         await self.recorder.async_load()
+
+        # Rehydrate a program armed before a restart (#411). Arming is an
+        # idle-time action, so the wait between picking a program and starting the
+        # machine can easily span a Home Assistant restart.
+        try:
+            self._armed_program = self.profile_store.get_armed_program()
+            if self._armed_program:
+                self._logger.info(
+                    "Program %r is armed for the next cycle", self._armed_program
+                )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._armed_program = None
 
         # Force initial update from current state (in case it's already stable)
         state = self.hass.states.get(self.power_sensor_entity_id)
@@ -4320,6 +4348,13 @@ class WashDataManager:
                 self._cycle_start_time = self.detector.current_cycle_start or dt_util.now()
                 self._ranking_snapshot_cycle_id = str(uuid.uuid4())
                 self._reset_live_notification_state()
+                # A program the user armed while idle - or pinned during STARTING,
+                # which the reset above would otherwise have wiped - takes effect
+                # here (#411). Deliberately after the reset, so the duration it
+                # sets is not nulled a line later, and before the start event, so
+                # the event carries the real program name rather than
+                # "detecting...".
+                self._consume_armed_program()
                 # Snapshot the external energy meter (issue #316) so cycle end can
                 # take an accurate start->end delta. No-op when none is configured.
                 self._snapshot_energy_meter_start()
@@ -5448,6 +5483,10 @@ class WashDataManager:
         # Clear all state and timers - zero everything out
         self._current_program = "off"
         self._manual_program_active = False
+        # A pin is for the cycle it was made for, so it does not carry over (#411).
+        if self._armed_program is not None:
+            self._armed_program = None
+            self._persist_armed_program(None)
         self._notified_pre_completion = False
         self._time_remaining = None
         self._matched_profile_duration = None
@@ -7399,10 +7438,17 @@ class WashDataManager:
         """Return True if a manual program override is active."""
         return getattr(self, "_manual_program_active", False)
 
-    def set_manual_program(self, profile_name: str) -> None:
-        """Manually set the current program."""
-        if self.detector.state != "running":
-            return
+    @property
+    def armed_program(self) -> str | None:
+        """The program pinned for the next cycle, when one is not under way (#411)."""
+        return getattr(self, "_armed_program", None)
+
+    def _resolve_profiles(self) -> dict[str, Any]:
+        """Return the stored profiles mapping, falling back to the raw store dict.
+
+        Shared by the manual-program set and re-arm paths so both agree on what
+        counts as an existing program. Never raises.
+        """
         profiles_raw: Any = None
         try:
             profiles_raw = self.profile_store.get_profiles()
@@ -7410,26 +7456,58 @@ class WashDataManager:
             profiles_raw = None
 
         if isinstance(profiles_raw, dict):
-            profiles: dict[str, Any] = cast(dict[str, Any], profiles_raw)
-        else:
-            profiles_fallback = getattr(self.profile_store, "_data", {}).get(
-                "profiles", {}
-            )
-            profiles = (
-                cast(dict[str, Any], profiles_fallback)
-                if isinstance(profiles_fallback, dict)
-                else {}
-            )
+            return cast(dict[str, Any], profiles_raw)
+        profiles_fallback = getattr(self.profile_store, "_data", {}).get("profiles", {})
+        return (
+            cast(dict[str, Any], profiles_fallback)
+            if isinstance(profiles_fallback, dict)
+            else {}
+        )
+
+    def set_manual_program(self, profile_name: str) -> bool:
+        """Pin a program to the current cycle, or arm it for the next one (#411).
+
+        Returns True when the choice was accepted. It used to return silently
+        unless the detector was exactly in ``running``, which meant selecting a
+        program on an idle appliance (the overwhelmingly common case: the panel
+        offers the dropdown at all times) did nothing at all, reported success to
+        the caller because there was no return value to test, and logged nothing.
+        The selection then snapped back to auto-detect on the next refresh.
+
+        Now every state is accepted. While a cycle is under way the program is
+        applied to it immediately; otherwise it is armed and applied the moment
+        the next cycle starts, which is what someone picking a program on an idle
+        machine means by it. The only rejection left is a program that does not
+        exist, and that one is reported rather than swallowed.
+        """
+        profiles = self._resolve_profiles()
 
         if profile_name not in profiles:
             self._logger.warning("Cannot set manual program: '%s' not found", profile_name)
-            return
+            return False
 
+        # Remember the choice either way. Held across the STARTING -> RUNNING
+        # transition too, which clears the live pin as it resets the new cycle.
+        self._armed_program = profile_name
+        self._persist_armed_program(profile_name)
+
+        if self.detector.state in _CYCLE_IN_PROGRESS_STATES:
+            self._apply_manual_program(profile_name, profiles.get(profile_name))
+        else:
+            self._logger.info(
+                "Program %r armed; it will be applied when the next cycle starts",
+                profile_name,
+            )
+        return True
+
+    def _apply_manual_program(
+        self, profile_name: str, profile: dict[str, Any] | None
+    ) -> None:
+        """Pin *profile_name* to the cycle in progress. Shared by set and re-arm."""
         self._current_program = profile_name
         self._manual_program_active = True
 
         # Update expected duration immediately
-        profile = profiles.get(profile_name)
         if profile:
             avg = float(profile.get("avg_duration", 0.0))
             if avg > 0:
@@ -7439,8 +7517,43 @@ class WashDataManager:
                 )
 
                 # Update estimates if running
-                if self.detector.state == "running":
+                if self.detector.state == STATE_RUNNING:
                     self._update_estimates()
+
+    def _persist_armed_program(self, profile_name: str | None) -> None:
+        """Persist the armed program without blocking the caller. Never raises."""
+        try:
+            self.hass.async_create_task(
+                self.profile_store.async_set_armed_program(profile_name)
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not persist the armed program", exc_info=True)
+
+    def _consume_armed_program(self) -> bool:
+        """Apply an armed program to the cycle that just started, if there is one.
+
+        Called from the new-cycle reset, which is also what would otherwise wipe a
+        program pinned during STARTING. Returns True when one was applied, so the
+        caller knows not to fall back to "detecting...".
+        """
+        name = self._armed_program
+        if not name:
+            return False
+        profiles = self._resolve_profiles()
+        if name not in profiles:
+            # Deleted between arming and starting: drop it rather than pinning a
+            # program that no longer exists.
+            self._logger.info(
+                "Armed program %r no longer exists; reverting to auto-detect", name
+            )
+            self._armed_program = None
+            self._persist_armed_program(None)
+            return False
+        self._apply_manual_program(name, profiles.get(name))
+        self._armed_program = None
+        self._persist_armed_program(None)
+        self._logger.info("Applied armed program %r to the cycle just started", name)
+        return True
 
     async def async_pause_cycle(self) -> bool:
         """Pause the current cycle (user-triggered).
@@ -7605,8 +7718,21 @@ class WashDataManager:
         self._notify_update()
 
     def clear_manual_program(self) -> None:
-        """Clear manual program override."""
+        """Clear the manual program override, live or merely armed (#411).
+
+        Previously bailed out unless a pin was active on a running cycle, which
+        left an armed program stuck: picking "Auto-detect" on an idle appliance
+        could not undo a choice made a moment earlier.
+        """
+        had_arm = self._armed_program is not None
+        if had_arm:
+            self._armed_program = None
+            self._persist_armed_program(None)
+
         if not self._manual_program_active:
+            if had_arm:
+                self._notify_update()
+                self._logger.info("Armed program cleared, reverting to auto-detection")
             return
 
         self._manual_program_active = False

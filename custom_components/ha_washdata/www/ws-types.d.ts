@@ -61,6 +61,7 @@ export interface DeviceInfo {
   recording: boolean;
   is_user_paused: boolean;
   manual_program: boolean;
+  armed_program: string | null;
   options: Record<string, unknown>;
   option_defaults: Record<string, unknown>;
 }

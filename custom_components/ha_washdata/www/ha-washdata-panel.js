@@ -3922,16 +3922,23 @@ class HaWashdataPanel extends HTMLElement {
 
     const matched = dev.current_program;
     const manual = !!dev.manual_program;
-    const selVal = matched || 'auto_detect';
+    // A program pinned for the NEXT cycle, on an appliance that is not running one
+    // (#411). Shown selected, or the dropdown would appear to forget the choice.
+    const armed = matched ? null : (dev.armed_program || null);
+    const selVal = matched || armed || 'auto_detect';
     const profNames = (this._profiles || []).map(p => p.name);
     if (matched && !profNames.includes(matched)) profNames.unshift(matched);
+    if (armed && !profNames.includes(armed)) profNames.unshift(armed);
     const profOpts = profNames.map(n =>
       `<option value="${_esc(n)}" ${selVal === n ? 'selected' : ''}>${_esc(n)}</option>`).join('');
-    const suffix = matched ? (manual ? this._t('badge.manual', {}, '(manually selected)') : this._t('badge.auto', {}, '(auto-detected)')) : '';
-    const tag = suffix ? `<span class="wd-prog-tag ${manual ? 'manual' : 'auto'}">${suffix}</span>` : '';
+    const suffix = matched
+      ? (manual ? this._t('badge.manual', {}, '(manually selected)') : this._t('badge.auto', {}, '(auto-detected)'))
+      : (armed ? this._t('badge.armed', {}, '(applies to the next cycle)') : '');
+    const tagKind = matched ? (manual ? 'manual' : 'auto') : 'manual';
+    const tag = suffix ? `<span class="wd-prog-tag ${tagKind}">${suffix}</span>` : '';
     // Program selection is allowed for any user who can see the device (read+),
     // since it only changes live detection, not stored data.
-    const programCtl = `<div class="wd-prog-ctl"><label>${this._t('lbl.program', {}, 'Program')}</label>${_tip(this._t('lbl.program_tip', {}, 'Override which profile is matched to the current cycle. Auto-detect lets the integration pick the best match automatically. Pin a specific program to force-match it when auto-detect is wrong or you know what is running.'))}
+    const programCtl = `<div class="wd-prog-ctl"><label>${this._t('lbl.program', {}, 'Program')}</label>${_tip(this._t('lbl.program_tip', {}, 'Override which profile is matched to the current cycle. Auto-detect lets the integration pick the best match automatically. Pin a specific program to force-match it when auto-detect is wrong or you know what is running. Pick one before starting the appliance and it is applied as soon as the next cycle begins.'))}
           <select id="wd-status-prog">
             <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>${this._t('status.auto_detect', {}, 'Auto-detect')}</option>
             ${profOpts}
@@ -10746,8 +10753,19 @@ class HaWashdataPanel extends HTMLElement {
     if (progSel) progSel.addEventListener('change', () => {
       const dev = this._devices[this._selIdx]; if (!dev) return;
       const val = progSel.value;
+      // No cycle under way means the choice is armed for the next one (#411), so
+      // say that rather than implying it applies to something running now.
+      const willArm = !_ACTIVE_STATES.includes(dev.detector_state || '');
       this._ws({ type: `${_DOMAIN}/set_program`, entry_id: dev.entry_id, program: val })
-        .then(() => { this._showToast(val === 'auto_detect' ? this._t('msg.toast_auto_detect_enabled', {}, 'Auto-detect enabled') : this._t('msg.toast_program_set', {program: val}, `Program set: ${val}`)); return this._fetchAll(); })
+        .then(() => {
+          this._showToast(
+            val === 'auto_detect'
+              ? this._t('msg.toast_auto_detect_enabled', {}, 'Auto-detect enabled')
+              : willArm
+                ? this._t('msg.toast_program_armed', {program: val}, `Program armed for the next cycle: ${val}`)
+                : this._t('msg.toast_program_set', {program: val}, `Program set: ${val}`));
+          return this._fetchAll();
+        })
         .catch(e => this._showToast(this._t('msg.toast_failed', {error: e.message || e}, 'Failed: ' + (e.message || e)), 'error'));
     });
 

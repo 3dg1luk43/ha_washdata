@@ -2570,6 +2570,35 @@ class ProfileStore:
             pass
 
     # ------------------------------------------------------------------
+    # Armed program (pre-arm a manual program for the next cycle, #411)
+    # ------------------------------------------------------------------
+
+    def get_armed_program(self) -> str | None:
+        """Return the program the user pinned for the current or next cycle.
+
+        Persisted because arming is an idle-time action: the user picks the
+        programme now and starts the machine later, so it has to survive a Home
+        Assistant restart in between. (The mid-cycle pin rides the active-cycle
+        snapshot instead, see ``manual_program_name``.) Never raises.
+        """
+        try:
+            value = self._data.get("armed_program")
+            return value if isinstance(value, str) and value else None
+        except Exception:  # noqa: BLE001
+            return None
+
+    async def async_set_armed_program(self, program: str | None) -> None:
+        """Persist (or clear, with ``None``) the armed program. Never raises."""
+        try:
+            if isinstance(program, str) and program:
+                self._data["armed_program"] = program
+            else:
+                self._data.pop("armed_program", None)
+            await self.async_save()
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Failed to persist the armed program", exc_info=True)
+
+    # ------------------------------------------------------------------
     # E1: Maintenance log & predictive-maintenance reminders (Group E)
     # ------------------------------------------------------------------
 
@@ -6486,6 +6515,7 @@ class ProfileStore:
         self._data["ml_model_versions"] = {}
         self._data["profile_groups"] = {}
         self._data["maintenance_log"] = []
+        self._data.pop("armed_program", None)
         self._data["playground_presets"] = {}
         self._data["matching_config"] = {}
         self._data["match_ranking_history"] = []

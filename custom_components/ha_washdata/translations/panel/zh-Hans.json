@@ -80,7 +80,8 @@
         "unmatchable": "无法匹配",
         "not_importable": "此处不适用",
         "exists": "已存在",
-        "backfilled_tip": "在导入的功率历史中检测到。仅影响程序匹配，不计入统计。"
+        "backfilled_tip": "在导入的功率历史中检测到。仅影响程序匹配，不计入统计。",
+        "armed": "（应用于下一个周期）"
     },
     "btn": {
         "reset_zoom": "重置缩放",
@@ -515,7 +516,7 @@
         "profile_index": "配置文件序号 →",
         "profile_name": "配置文件名称",
         "program": "程序",
-        "program_tip": "覆盖与当前周期匹配的配置文件。自动检测让集成自动选择最佳匹配。当自动检测出错或您知道正在运行什么时，固定特定程序以强制匹配。",
+        "program_tip": "覆盖与当前周期匹配的配置文件。自动检测让集成自动选择最佳匹配。当自动检测出错或您知道正在运行什么时，固定特定程序以强制匹配。在启动家电之前选择一个程序，下一个周期开始时即会应用。",
         "progress": "进度",
         "raw_socket": "原始套接字",
         "read_only": "只读",
@@ -1075,7 +1076,8 @@
         "imported_history_readonly": "在导入的功率历史中检测到。它会影响程序匹配，但不计入您的统计，且无法裁剪或拆分。请标记以指定其程序。",
         "odometer_intro": "此累计值只会增加。删除某条周期记录不会改变它，并且它会在保存的历史记录上限之外继续累加，因此保养提醒始终准确。",
         "odometer_correct_hint": "如果 WashData 记录了从未发生的运行，或者设备在安装 WashData 之前已经运行过周期，请设置此值。",
-        "no_reminders_set": "尚未设置保养提醒。"
+        "no_reminders_set": "尚未设置保养提醒。",
+        "toast_program_armed": "已为下一个周期设置程序：{program}"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",

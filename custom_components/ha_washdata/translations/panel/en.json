@@ -80,7 +80,8 @@
     "underrun": "Finished faster than usual",
     "underrun_ratio": "({pct}% of expected)",
     "using_defaults": "Using shipped defaults",
-    "using_tuned": "Using tuned weights"
+    "using_tuned": "Using tuned weights",
+    "armed": "(applies to the next cycle)"
   },
   "btn": {
     "add_device": "+ Add device",
@@ -640,7 +641,7 @@
     "profile_index": "profile index →",
     "profile_name": "Profile Name",
     "program": "Program",
-    "program_tip": "Override which profile is matched to the current cycle. Auto-detect lets the integration pick the best match automatically. Pin a specific program to force-match it when auto-detect is wrong or you know what is running.",
+    "program_tip": "Override which profile is matched to the current cycle. Auto-detect lets the integration pick the best match automatically. Pin a specific program to force-match it when auto-detect is wrong or you know what is running. Pick one before starting the appliance and it is applied as soon as the next cycle begins.",
     "progress": "Progress",
     "quality": "Quality",
     "rate_n": "{n} stars",
@@ -1065,6 +1066,7 @@
     "toast_name_required": "Name required",
     "toast_no_automation": "Cannot create automation here",
     "toast_profile_name_required": "Profile name is required",
+    "toast_program_armed": "Program armed for the next cycle: {program}",
     "toast_program_set": "Program set: {program}",
     "toast_rebuild_failed": "Rebuild failed: {error}",
     "toast_resume_failed": "Resume failed: {error}",

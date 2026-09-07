@@ -80,7 +80,8 @@
     "unmatchable": "nevar atpazīt",
     "not_importable": "šeit nav pieejams",
     "exists": "jau eksistē",
-    "backfilled_tip": "Noteikts importētā jaudas vēsturē. Ietekmē tikai programmu saskaņošanu, netiek ieskaitīts statistikā."
+    "backfilled_tip": "Noteikts importētā jaudas vēsturē. Ietekmē tikai programmu saskaņošanu, netiek ieskaitīts statistikā.",
+    "armed": "(attiecas uz nākamo ciklu)"
   },
   "btn": {
     "reset_zoom": "Atiestatīt tuvinājumu",
@@ -515,7 +516,7 @@
     "profile_index": "profila numurs →",
     "profile_name": "Profila nosaukums",
     "program": "Programma",
-    "program_tip": "Ignorējiet, kurš profils tiek pielīdzināts pašreizējam ciklam. Automātiskā noteikšana ļauj integrācijai automātiski izvēlēties vislabāko atbilstību. Piespraudiet konkrētu programmu, lai piespiestu atbilstību, kad automātiskā noteikšana ir nepareiza vai zināt, kas darbojas.",
+    "program_tip": "Ignorējiet, kurš profils tiek pielīdzināts pašreizējam ciklam. Automātiskā noteikšana ļauj integrācijai automātiski izvēlēties vislabāko atbilstību. Piespraudiet konkrētu programmu, lai piespiestu atbilstību, kad automātiskā noteikšana ir nepareiza vai zināt, kas darbojas. Izvēlieties programmu pirms ierīces palaišanas, un tā tiks lietota, tiklīdz sāksies nākamais cikls.",
     "progress": "Progress",
     "raw_socket": "Neapstrādāts kontakts",
     "read_only": "Tikai lasāms",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Noteikts importētā jaudas vēsturē. Tas ietekmē programmu saskaņošanu, bet netiek ieskaitīts jūsu statistikā, un to nevar apgriezt vai sadalīt. Izmantojiet pogu Iezīmēt, lai norādītu programmu.",
     "odometer_intro": "Šis kopējais skaits tikai palielinās. Cikla ieraksta dzēšana to nemaina, un skaitīšana turpinās arī pēc saglabātās vēstures ierobežojuma, tāpēc apkopes atgādinājumi paliek precīzi.",
     "odometer_correct_hint": "Iestatiet to, ja WashData ir reģistrējis ciklu, kas nekad nav noticis, vai ja ierīce jau bija veikusi ciklus pirms WashData uzstādīšanas.",
-    "no_reminders_set": "Vēl nav iestatīts neviens apkopes atgādinājums."
+    "no_reminders_set": "Vēl nav iestatīts neviens apkopes atgādinājums.",
+    "toast_program_armed": "Programma iestatīta nākamajam ciklam: {program}"
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",

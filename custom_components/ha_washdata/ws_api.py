@@ -1343,6 +1343,7 @@ def ws_get_devices(
             "recording": False,
             "is_user_paused": False,
             "manual_program": False,
+            "armed_program": None,
             "options": dict(entry.options),
             # Device-resolved defaults for the cadence/ratio fields (#396/#393) so the
             # device-list conflict/suggestion badges score an unset field against the
@@ -1364,6 +1365,9 @@ def ws_get_devices(
                     program = None
                 info["current_program"] = program
                 info["manual_program"] = bool(getattr(manager, "manual_program_active", False))
+                # A program pinned for the NEXT cycle (#411). Kept separate from
+                # current_program so an idle device does not claim to be running one.
+                info["armed_program"] = getattr(manager, "armed_program", None)
 
                 info["time_remaining_s"] = getattr(manager, "_time_remaining", None)
                 info["total_duration_s"] = getattr(manager, "_total_duration", None)
@@ -4541,8 +4545,16 @@ def ws_set_program(
         prog = msg.get("program")
         if not prog or prog in ("auto_detect", "__auto__", "none"):
             manager.clear_manual_program()
-        else:
-            manager.set_manual_program(prog)
+        elif not manager.set_manual_program(prog):
+            # Only a program that does not exist can fail now (#411). It used to
+            # fail for the far more common reason of no cycle being under way, and
+            # this line reported success anyway because the manager returned None
+            # either way, so the panel showed a confirmation and then quietly
+            # reverted the dropdown.
+            connection.send_error(
+                msg["id"], "not_found", f"No such program: {prog}"
+            )
+            return
         manager.notify_update()
         _send_result(connection, msg["id"], "set_program", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught

@@ -32,7 +32,8 @@
     "unmatchable": "potrivire imposibilă",
     "not_importable": "n/a aici",
     "exists": "există deja",
-    "backfilled_tip": "Detectat într-un istoric de putere importat. Influențează doar potrivirea programelor, nu este contabilizat în statistici."
+    "backfilled_tip": "Detectat într-un istoric de putere importat. Influențează doar potrivirea programelor, nu este contabilizat în statistici.",
+    "armed": "(se aplică ciclului următor)"
   },
   "btn": {
     "reset_zoom": "Resetați zoomul",
@@ -467,7 +468,7 @@
     "profile_index": "index profil →",
     "profile_name": "Numele profilului",
     "program": "Program",
-    "program_tip": "Înlocuiți profilul potrivit ciclului curent. Detectarea automată permite integrării să aleagă automat cea mai bună potrivire. Fixați un program specific pentru a forța potrivirea când detectarea automată este incorectă sau știți ce rulează.",
+    "program_tip": "Înlocuiți profilul potrivit ciclului curent. Detectarea automată permite integrării să aleagă automat cea mai bună potrivire. Fixați un program specific pentru a forța potrivirea când detectarea automată este incorectă sau știți ce rulează. Alegeți unul înainte de a porni aparatul și va fi aplicat imediat ce începe ciclul următor.",
     "progress": "Progres",
     "raw_socket": "Socket brut",
     "read_only": "Doar citire",
@@ -1027,7 +1028,8 @@
     "imported_history_readonly": "Detectat într-un istoric de putere importat. Influențează potrivirea programelor, dar nu este contabilizat în statisticile dvs. și nu poate fi tăiat sau divizat. Etichetați-l pentru a indica programul.",
     "odometer_intro": "Acest total doar crește. Ștergerea înregistrării unui ciclu nu îl modifică și continuă să numere dincolo de limita istoricului păstrat, astfel încât mementourile de service rămân corecte.",
     "odometer_correct_hint": "Setați această valoare dacă WashData a înregistrat un ciclu care nu a avut loc niciodată sau dacă aparatul efectuase deja cicluri înainte de instalarea WashData.",
-    "no_reminders_set": "Încă nu este setat niciun memento de service."
+    "no_reminders_set": "Încă nu este setat niciun memento de service.",
+    "toast_program_armed": "Program pregătit pentru ciclul următor: {program}"
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",

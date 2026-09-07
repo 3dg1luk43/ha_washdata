@@ -80,7 +80,8 @@
     "unmatchable": "kan inte matchas",
     "not_importable": "ej här",
     "exists": "finns",
-    "backfilled_tip": "Detekterad i importerad effekthistorik. Påverkar bara programmatchningen, räknas inte in i statistiken."
+    "backfilled_tip": "Detekterad i importerad effekthistorik. Påverkar bara programmatchningen, räknas inte in i statistiken.",
+    "armed": "(gäller nästa cykel)"
   },
   "btn": {
     "reset_zoom": "Återställ zoom",
@@ -520,7 +521,7 @@
     "profile_index": "profilindex →",
     "profile_name": "Profilnamn",
     "program": "Program",
-    "program_tip": "Åsidosätt vilken profil som matchas mot det aktuella cykeln. Autodetektering låter integrationen välja den bästa matchningen automatiskt. Fäst ett specifikt program för att tvinga matchning när autodetekteringen är fel eller du vet vad som körs.",
+    "program_tip": "Åsidosätt vilken profil som matchas mot det aktuella cykeln. Autodetektering låter integrationen välja den bästa matchningen automatiskt. Fäst ett specifikt program för att tvinga matchning när autodetekteringen är fel eller du vet vad som körs. Välj ett innan du startar apparaten, så tillämpas det så snart nästa cykel börjar.",
     "progress": "Förlopp",
     "raw_socket": "Råsocket",
     "read_only": "Skrivskyddad",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Detekterad i importerad effekthistorik. Den påverkar programmatchningen men räknas inte in i din statistik och kan inte beskäras eller delas. Märk den för att namnge programmet.",
     "odometer_intro": "Den här totalsumman kan bara öka. Att ta bort en cykelpost ändrar den inte, och den fortsätter räkna även utöver gränsen för sparad historik, så att servicepåminnelserna fortsätter stämma.",
     "odometer_correct_hint": "Ange detta om WashData har registrerat en körning som aldrig ägde rum, eller om apparaten redan hade kört cykler innan WashData installerades.",
-    "no_reminders_set": "Inga servicepåminnelser är inställda än."
+    "no_reminders_set": "Inga servicepåminnelser är inställda än.",
+    "toast_program_armed": "Program valt för nästa cykel: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",

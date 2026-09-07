@@ -32,7 +32,8 @@
     "unmatchable": "corrispondenza impossibile",
     "not_importable": "n/d qui",
     "exists": "esiste già",
-    "backfilled_tip": "Rilevato in uno storico di potenza importato. Influenza solo la corrispondenza dei programmi, non conteggiato nelle statistiche."
+    "backfilled_tip": "Rilevato in uno storico di potenza importato. Influenza solo la corrispondenza dei programmi, non conteggiato nelle statistiche.",
+    "armed": "(si applica al prossimo ciclo)"
   },
   "btn": {
     "reset_zoom": "Reimposta zoom",
@@ -467,7 +468,7 @@
     "profile_index": "indice profilo →",
     "profile_name": "Nome del profilo",
     "program": "Programma",
-    "program_tip": "Sovrascrive quale profilo viene abbinato al ciclo corrente. Il rilevamento automatico consente all'integrazione di scegliere automaticamente la corrispondenza migliore. Aggancia un programma specifico per forzare la corrispondenza quando il rilevamento automatico non è corretto o sai cosa è in esecuzione.",
+    "program_tip": "Sovrascrive quale profilo viene abbinato al ciclo corrente. Il rilevamento automatico consente all'integrazione di scegliere automaticamente la corrispondenza migliore. Aggancia un programma specifico per forzare la corrispondenza quando il rilevamento automatico non è corretto o sai cosa è in esecuzione. Scegline uno prima di avviare l'elettrodomestico e verrà applicato non appena inizia il prossimo ciclo.",
     "progress": "Progressi",
     "raw_socket": "Segnale grezzo",
     "read_only": "Sola lettura",
@@ -1027,7 +1028,8 @@
     "imported_history_readonly": "Rilevato in uno storico di potenza importato. Influenza la corrispondenza dei programmi ma non viene conteggiato nelle tue statistiche e non può essere ritagliato né diviso. Assegna un'etichetta per indicare il programma.",
     "odometer_intro": "Questo totale può solo aumentare. L'eliminazione del record di un ciclo non lo modifica e continua a contare oltre il limite dello storico conservato, così i promemoria di servizio restano corretti.",
     "odometer_correct_hint": "Imposta questo valore se WashData ha registrato un ciclo che non è mai avvenuto, oppure se l'elettrodomestico aveva già eseguito dei cicli prima dell'installazione di WashData.",
-    "no_reminders_set": "Non è ancora impostato alcun promemoria di servizio."
+    "no_reminders_set": "Non è ancora impostato alcun promemoria di servizio.",
+    "toast_program_armed": "Programma preimpostato per il prossimo ciclo: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",

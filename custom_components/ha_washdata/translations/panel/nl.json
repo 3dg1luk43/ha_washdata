@@ -80,7 +80,8 @@
     "unmatchable": "niet te matchen",
     "not_importable": "hier n.v.t.",
     "exists": "bestaat",
-    "backfilled_tip": "Gedetecteerd in geïmporteerde vermogensgeschiedenis. Beïnvloedt alleen het matchen van programma's, telt niet mee in statistieken."
+    "backfilled_tip": "Gedetecteerd in geïmporteerde vermogensgeschiedenis. Beïnvloedt alleen het matchen van programma's, telt niet mee in statistieken.",
+    "armed": "(geldt voor de volgende cyclus)"
   },
   "btn": {
     "reset_zoom": "Zoom resetten",
@@ -520,7 +521,7 @@
     "profile_index": "profielindex →",
     "profile_name": "Profielnaam",
     "program": "Programma",
-    "program_tip": "Overschrijft welk profiel wordt gekoppeld aan de huidige cyclus. Automatische detectie laat de integratie automatisch de beste overeenkomst kiezen. Zet een specifiek programma vast om het te forceren wanneer automatische detectie onjuist is of u weet wat er draait.",
+    "program_tip": "Overschrijft welk profiel wordt gekoppeld aan de huidige cyclus. Automatische detectie laat de integratie automatisch de beste overeenkomst kiezen. Zet een specifiek programma vast om het te forceren wanneer automatische detectie onjuist is of u weet wat er draait. Kies er een voordat u het apparaat start, dan wordt het toegepast zodra de volgende cyclus begint.",
     "progress": "Voortgang",
     "raw_socket": "Ruwe stroom",
     "read_only": "Alleen-lezen",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Gedetecteerd in geïmporteerde vermogensgeschiedenis. Het beïnvloedt het matchen van programma's, maar telt niet mee in je statistieken en kan niet worden bijgesneden of gesplitst. Label het om het programma te benoemen.",
     "odometer_intro": "Dit totaal loopt alleen omhoog. Een cyclusregistratie verwijderen verandert het niet, en het blijft doortellen voorbij de limiet van de opgeslagen geschiedenis, zodat serviceherinneringen juist blijven.",
     "odometer_correct_hint": "Stel dit in als WashData een draaibeurt heeft geregistreerd die nooit heeft plaatsgevonden, of als het apparaat al cycli had uitgevoerd voordat WashData werd geïnstalleerd.",
-    "no_reminders_set": "Er zijn nog geen serviceherinneringen ingesteld."
+    "no_reminders_set": "Er zijn nog geen serviceherinneringen ingesteld.",
+    "toast_program_armed": "Programma klaargezet voor de volgende cyclus: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Vaatwasser: stille seconden na de verwachte duur voordat de wachttijd op het wegpompen aan het einde van de cyclus wordt vrijgegeven",

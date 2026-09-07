@@ -80,7 +80,8 @@
     "unmatchable": "ei täsmäytettävissä",
     "not_importable": "ei käytettävissä",
     "exists": "on jo",
-    "backfilled_tip": "Tunnistettu tuodusta tehohistoriasta. Vaikuttaa vain ohjelmien täsmäytykseen, ei lasketa tilastoihin."
+    "backfilled_tip": "Tunnistettu tuodusta tehohistoriasta. Vaikuttaa vain ohjelmien täsmäytykseen, ei lasketa tilastoihin.",
+    "armed": "(koskee seuraavaa sykliä)"
   },
   "btn": {
     "reset_zoom": "Nollaa zoomaus",
@@ -515,7 +516,7 @@
     "profile_index": "profiilin indeksi →",
     "profile_name": "Profiilin nimi",
     "program": "Ohjelma",
-    "program_tip": "Ohita, mikä profiili sovitetaan nykyiseen sykliin. Automaattinen tunnistus antaa integraation valita parhaan vastaavuuden automaattisesti. Kiinnitä tietty ohjelma pakottaaksesi vastaavuuden, kun automaattinen tunnistus on väärässä tai tiedät, mitä on käynnissä.",
+    "program_tip": "Ohita, mikä profiili sovitetaan nykyiseen sykliin. Automaattinen tunnistus antaa integraation valita parhaan vastaavuuden automaattisesti. Kiinnitä tietty ohjelma pakottaaksesi vastaavuuden, kun automaattinen tunnistus on väärässä tai tiedät, mitä on käynnissä. Valitse ohjelma ennen laitteen käynnistämistä, niin se otetaan käyttöön heti kun seuraava sykli alkaa.",
     "progress": "Edistyminen",
     "raw_socket": "Raaka signaali",
     "read_only": "Vain luku",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Tunnistettu tuodusta tehohistoriasta. Se vaikuttaa ohjelmien täsmäytykseen, mutta ei näy tilastoissasi, eikä sitä voi rajata tai jakaa. Nimeä ohjelma Merkitse-toiminnolla.",
     "odometer_intro": "Tämä kokonaismäärä voi vain kasvaa. Syklitietueen poistaminen ei muuta sitä, ja laskenta jatkuu myös tallennetun historian rajan yli, jotta huoltomuistutukset pysyvät oikeina.",
     "odometer_correct_hint": "Aseta tämä, jos WashData kirjasi ajon, jota ei koskaan tapahtunut, tai jos laitteella oli jo ajettu syklejä ennen WashDatan asennusta.",
-    "no_reminders_set": "Huoltomuistutuksia ei ole vielä asetettu."
+    "no_reminders_set": "Huoltomuistutuksia ei ole vielä asetettu.",
+    "toast_program_armed": "Ohjelma asetettu seuraavaa sykliä varten: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",

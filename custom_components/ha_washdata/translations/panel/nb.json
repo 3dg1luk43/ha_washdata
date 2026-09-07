@@ -80,7 +80,8 @@
     "unmatchable": "kan ikke matches",
     "not_importable": "ikke her",
     "exists": "finnes",
-    "backfilled_tip": "Oppdaget i importert effekthistorikk. Påvirker bare programmatching, telles ikke med i statistikken."
+    "backfilled_tip": "Oppdaget i importert effekthistorikk. Påvirker bare programmatching, telles ikke med i statistikken.",
+    "armed": "(gjelder neste syklus)"
   },
   "btn": {
     "reset_zoom": "Tilbakestill zoom",
@@ -520,7 +521,7 @@
     "profile_index": "profilindeks →",
     "profile_name": "Profilnavn",
     "program": "Program",
-    "program_tip": "Overstyr hvilken profil som matches til gjeldende syklus. Automatisk deteksjon lar integrasjonen velge den beste matchen automatisk. Fest et bestemt program for å tvinge-matche det når automatisk deteksjon er feil eller du vet hva som kjøres.",
+    "program_tip": "Overstyr hvilken profil som matches til gjeldende syklus. Automatisk deteksjon lar integrasjonen velge den beste matchen automatisk. Fest et bestemt program for å tvinge-matche det når automatisk deteksjon er feil eller du vet hva som kjøres. Velg ett før du starter apparatet, så brukes det så snart neste syklus begynner.",
     "progress": "Framgang",
     "raw_socket": "Rå strøm",
     "read_only": "Skrivebeskyttet",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Oppdaget i importert effekthistorikk. Den påvirker programmatching, men telles ikke med i statistikken din og kan ikke beskjæres eller deles. Merk den for å navngi programmet.",
     "odometer_intro": "Denne totalen kan bare gå oppover. Å slette en syklusoppføring endrer den ikke, og den fortsetter å telle utover grensen for lagret historikk, slik at servicepåminnelsene fortsatt stemmer.",
     "odometer_correct_hint": "Angi dette hvis WashData har registrert en kjøring som aldri fant sted, eller hvis apparatet allerede hadde kjørt sykluser før WashData ble installert.",
-    "no_reminders_set": "Ingen servicepåminnelser er satt opp ennå."
+    "no_reminders_set": "Ingen servicepåminnelser er satt opp ennå.",
+    "toast_program_armed": "Program valgt for neste syklus: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: stille sekunder etter forventet varighet før ventingen på tømming ved slutten av syklusen frigjøres",

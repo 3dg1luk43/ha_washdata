@@ -80,7 +80,8 @@
     "unmatchable": "nicht zuordenbar",
     "not_importable": "hier n. v.",
     "exists": "vorhanden",
-    "backfilled_tip": "Im importierten Leistungsverlauf erkannt. Beeinflusst nur die Programmzuordnung, zählt nicht in die Statistik."
+    "backfilled_tip": "Im importierten Leistungsverlauf erkannt. Beeinflusst nur die Programmzuordnung, zählt nicht in die Statistik.",
+    "armed": "(gilt für den nächsten Zyklus)"
   },
   "btn": {
     "reset_zoom": "Zoom zurücksetzen",
@@ -520,7 +521,7 @@
     "profile_index": "Profilindex →",
     "profile_name": "Profilname",
     "program": "Programm",
-    "program_tip": "Überschreibt, welches Profil dem aktuellen Zyklus zugeordnet wird. Die automatische Erkennung lässt die Integration automatisch die beste Übereinstimmung auswählen. Heften Sie ein bestimmtes Programm an, um es zu erzwingen, wenn die automatische Erkennung falsch liegt oder Sie wissen, was läuft.",
+    "program_tip": "Überschreibt, welches Profil dem aktuellen Zyklus zugeordnet wird. Die automatische Erkennung lässt die Integration automatisch die beste Übereinstimmung auswählen. Heften Sie ein bestimmtes Programm an, um es zu erzwingen, wenn die automatische Erkennung falsch liegt oder Sie wissen, was läuft. Wählen Sie eines aus, bevor Sie das Gerät starten, dann wird es angewendet, sobald der nächste Zyklus beginnt.",
     "progress": "Fortschritt",
     "raw_socket": "Rohsignal",
     "read_only": "Schreibgeschützt",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Im importierten Leistungsverlauf erkannt. Er beeinflusst die Programmzuordnung, zählt aber nicht in Ihre Statistik und kann nicht zugeschnitten oder geteilt werden. Beschriften Sie ihn, um das Programm zu benennen.",
     "odometer_intro": "Diese Gesamtzahl steigt immer nur an. Das Löschen eines Zyklus-Eintrags ändert sie nicht, und sie zählt auch über die Grenze des gespeicherten Verlaufs hinaus weiter, damit Wartungserinnerungen korrekt bleiben.",
     "odometer_correct_hint": "Setzen Sie diesen Wert, wenn WashData einen Lauf erfasst hat, der nie stattgefunden hat, oder wenn das Gerät schon vor der Installation von WashData Zyklen absolviert hat.",
-    "no_reminders_set": "Es sind noch keine Service-Erinnerungen eingerichtet."
+    "no_reminders_set": "Es sind noch keine Service-Erinnerungen eingerichtet.",
+    "toast_program_armed": "Programm für den nächsten Zyklus vorgemerkt: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
