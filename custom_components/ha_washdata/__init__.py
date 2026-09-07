@@ -112,6 +112,21 @@ from .const import (
 from .log_utils import DeviceLoggerAdapter
 from .options_utils import strip_null_options
 
+try:  # pragma: no cover - present in every supported HA, guarded on principle
+    from homeassistant.setup import SetupPhases, async_pause_setup
+except ImportError:  # pragma: no cover
+    from contextlib import nullcontext
+
+    class SetupPhases:  # type: ignore[no-redef]
+        """Fallback so a missing helper degrades to plain (uncredited) waiting."""
+
+        WAIT_IMPORT_PACKAGES = "wait_import_packages"
+
+    def async_pause_setup(hass, phase):  # type: ignore[misc]
+        """No-op stand-in for HA's setup-time credit context manager."""
+        return nullcontext()
+
+
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [
@@ -120,6 +135,9 @@ PLATFORMS: list[Platform] = [
     Platform.SELECT,
     Platform.BUTTON,
 ]
+
+# Shared future for the once-per-HA-instance ML module warm-up (issue #408).
+ML_PRELOAD_FUTURE_KEY = "ha_washdata_ml_preload"
 
 
 def _require_str(value: Any, name: str) -> str:
@@ -461,6 +479,20 @@ async def _async_preload_ml_modules(hass: HomeAssistant) -> None:
     Warming the module cache once per setup in the import executor makes every
     later resolution a ``sys.modules`` lookup. Best effort: a failure here only
     means ML stays inert, so it must never block setup.
+
+    Two things matter for startup time here (issue #408), because
+    ``hass.import_executor`` is ``max_workers=1`` and is shared with every other
+    integration importing during startup, so an awaited job on it costs however
+    deep that queue happens to be - measured at 35-95 s in real user
+    diagnostics, against ~1 ms of actual work:
+
+    1. The job is coalesced onto ONE shared future for the whole HA instance.
+       ``preload_models()`` is idempotent, so a second job per config entry
+       would buy nothing but another full trip through that queue.
+    2. The wait is wrapped in ``async_pause_setup(WAIT_IMPORT_PACKAGES)``, which
+       is how HA core reports its own heavy imports (``workday``, ``holiday``,
+       ``stream``, ``mqtt``, ...): the queue wait is credited back instead of
+       being billed to us as "Integration startup time".
     """
 
     def _preload() -> None:
@@ -469,10 +501,25 @@ async def _async_preload_ml_modules(hass: HomeAssistant) -> None:
 
         preload_models()
 
+    future = hass.data.get(ML_PRELOAD_FUTURE_KEY)
+    if future is None:
+        future = hass.data[ML_PRELOAD_FUTURE_KEY] = hass.async_add_import_executor_job(
+            _preload
+        )
+
     try:
-        await hass.async_add_import_executor_job(_preload)
+        with async_pause_setup(hass, SetupPhases.WAIT_IMPORT_PACKAGES):
+            # shield: a cancelled entry setup must not cancel the warm-up that
+            # the other entries are waiting on.
+            await asyncio.shield(future)
     except Exception:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("ML module preload failed", exc_info=True)
+        # Broken install: drop the memo so a later setup/reload retries instead
+        # of every entry re-raising the one cached failure forever. A cancelled
+        # setup is not caught here (CancelledError is not an Exception), so the
+        # memo correctly survives for the entries still awaiting the warm-up.
+        if hass.data.get(ML_PRELOAD_FUTURE_KEY) is future:
+            hass.data.pop(ML_PRELOAD_FUTURE_KEY, None)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

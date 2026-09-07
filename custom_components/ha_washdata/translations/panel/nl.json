@@ -77,11 +77,13 @@
     "approved": "Goedgekeurd",
     "awaiting": "Wacht op goedkeuring",
     "imported_tip": "Geïmporteerd uit de communitystore. Alleen gebruikt voor matchen, telt niet mee in statistieken.",
+    "unmatchable": "niet te matchen",
     "not_importable": "hier n.v.t.",
     "exists": "bestaat",
     "backfilled_tip": "Gedetecteerd in geïmporteerde vermogensgeschiedenis. Beïnvloedt alleen het matchen van programma's, telt niet mee in statistieken."
   },
   "btn": {
+    "reset_zoom": "Zoom resetten",
     "set_brand_model": "Merk en model instellen",
     "refresh_catalog": "Catalogus vernieuwen",
     "add_device": "+ Apparaat toevoegen",
@@ -362,7 +364,6 @@
     "wipe_history": "Geschiedenis wissen",
     "recommendations": "Aanbevelingen ({n})",
     "pg_detection_params": "Detectie-instellingen",
-    "pg_timeline": "Gebeurtenistijdlijn",
     "pg_outcome": "Simulatieresultaat",
     "pg_across_cycles": "Over al je cycli",
     "community_store": "Communitystore",
@@ -375,6 +376,8 @@
     "poor": "⚠ Slechte profielkwaliteit"
   },
   "lbl": {
+    "aria_playground_chart3": "Interactieve vermogensgrafiek van de cyclus: beweeg de muis eroverheen om tijd/vermogen af te lezen, scroll of knijp om te zoomen, sleep om te verschuiven",
+    "device_unresolved": "Niet-beschikbaar apparaat ({id})",
     "drag_to_resize": "Sleep om het formaat te wijzigen",
     "actions": "Acties",
     "activity": "Activiteit",
@@ -550,6 +553,7 @@
     "stage4": "Stap 4 – overeenkomst",
     "status": "Status",
     "tail_trim": "Einde bijsnijden (s)",
+    "tap_to_dismiss": "tik op de grafiek om te sluiten",
     "timer_auto_pause": "Automatische pauze",
     "timer_min": "min",
     "timer_msg_placeholder": "Bericht (optioneel, {device}/{program}/{minutes})",
@@ -586,9 +590,7 @@
     "pg_time_left_model": "Resterende tijd (model)",
     "pg_time_left_model_tip": "Door het model geschatte resterende tijd (fase-schatter + ML-mix), geen statische aftelling",
     "phase": "Fase",
-    "pg_mode_simulate": "Simuleren",
     "pg_mode_history": "Op geschiedenis testen",
-    "pg_mode_sweep": "Scan",
     "pg_ev_detected": "Gedetecteerd",
     "pg_ev_match": "Match vastgelegd",
     "pg_ev_match_changed": "Match gewijzigd",
@@ -618,14 +620,11 @@
     "pg_sweep_param": "Parameter",
     "pg_objective": "Doel",
     "pg_steps": "Stappen",
-    "pg_sweep_2d": "2D-heatmap",
-    "pg_sweep_param_y": "2e parameter",
     "pg_obj_match": "Matchnauwkeurigheid",
     "pg_obj_endtiming": "Nauwkeurigheid eindtiming",
     "pg_obj_falseend": "Vals-einde-percentage",
     "pg_obj_overrun": "Duurafwijking",
     "pg_obj_ambiguity": "Dubbelzinnigheidspercentage",
-    "pg_best_combo": "beste combinatie",
     "pg_mode_optimize": "Optimaliseren",
     "pg_group_matching": "Programmaherkenning",
     "pg_zoom_hint": "dubbelklik om de zoom te resetten",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Cycli importeren",
     "evidence_real_cycles": "Cycli die deze machine heeft uitgevoerd",
     "evidence_reference_cycles": "Gedownload uit de communitystore",
-    "evidence_backfill_cycles": "Gevonden in geïmporteerde vermogensgeschiedenis"
+    "evidence_backfill_cycles": "Gevonden in geïmporteerde vermogensgeschiedenis",
+    "zoom_hint_touch": "knijp om te zoomen",
+    "zoom_hint_touch_zoomed": "knijp om te zoomen · dubbeltik om te resetten"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -791,6 +792,7 @@
     "history_import": "Vermogensgeschiedenis importeren"
   },
   "msg": {
+    "pg_canvas_empty3": "Kies hierboven een cyclus en druk op Uitvoeren om deze te simuleren. Beweeg vervolgens de muis erover om waarden af te lezen, scroll of knijp om te zoomen en sleep om te verschuiven.",
     "tail_trim_hint": "Dit aantal seconden aan het einde verwijderen",
     "store_sibling_hint": "Niets gedeeld voor precies uw model? Een nauw verwant model van hetzelfde merk is meestal een goed startpunt.",
     "store_declare_appliance": "Laat WashData weten welk apparaat u bezit, dan toont dit tabblad de setups die anderen ervoor hebben gedeeld. U kunt hierboven ook een merk invoeren om rond te kijken.",
@@ -986,9 +988,9 @@
     "advisory_poor_health": "'{name}' heeft een lage overeenkomstscore - de recente cycli variëren sterk of komen zwak overeen. Bekijk de cycli of neem het profiel opnieuw op zodat de herkenning en tijdschattingen nauwkeurig blijven.",
     "advisory_shape_drift": "'{name}' is aanzienlijk afgeweken van de oorspronkelijke vermogenscurve. Het apparaat heeft zijn gedrag mogelijk in de loop van de tijd veranderd (bijv. kalkaanslag, slijtage). Overweeg dit profiel opnieuw op te nemen met recente cycli.",
     "advisory_shape_drift_corr": "'{name}' is aanzienlijk afgeweken van de oorspronkelijke vermogenscurve (correlatie {corr}). Het apparaat heeft zijn gedrag mogelijk in de loop van de tijd veranderd (bijv. kalkaanslag, slijtage). Overweeg dit profiel opnieuw op te nemen met recente cycli.",
+    "advisory_unmatchable": "'{name}' kan nooit worden gematcht: er zit geen cyclus met vermogensdata achter, dus WashData heeft niets om een lopende cyclus mee te vergelijken. Label een cyclus van dit programma (of neem er een op) om het weer mee te laten doen aan het matchen.",
     "pg_no_alerts": "Geen problemen gedetecteerd in deze run.",
     "pg_override_active": "Gebruikt je bewerkte instellingen t.o.v. de huidige",
-    "pg_history_intro": "Speel je recente cycli opnieuw af via de echte detectie en matching. Bewerk eerst een detectie-instelling in Simuleren om hier een voor/na-vergelijking te zien.",
     "pg_history_empty": "Druk op Uitvoeren om je cycli opnieuw af te spelen.",
     "pg_history_summary": "{detected}/{total} gedetecteerd · {correct} correct gematcht",
     "pg_sweep_no_metric": "Niet genoeg gegevens om dit doel te scoren.",
@@ -1469,10 +1471,6 @@
       "doc": "Seconden dat een pomp continu kan draaien voordat deze wordt gemarkeerd als mogelijk vastgelopen (de gebeurtenis Vastgelopen pomp wordt geactiveerd).",
       "label": "Duur pomp vastzitten"
     },
-    "running_dead_zone": {
-      "doc": "Nadat een cyclus is gestart, worden stroomonderbrekingen binnen dit venster genegeerd. Wasmachines worden gevuld met koud water (zakt tot bijna 0 W voordat ze worden verwarmd) - zonder deze bescherming lijkt de vulfase op het einde van de cyclus. Hierbij worden GEEN gegevens overgeslagen: het volledige vermogensspoor wordt geregistreerd vanaf T=0. De suggestie-engine meet het daadwerkelijke opstartpatroon van uw machine en berekent dit automatisch.",
-      "label": "Loopzone"
-    },
     "sampling_interval": {
       "doc": "Verwachte tijd tussen sensormetingen - gebruikt om het afvlakkingsvenster te vergroten en de debounce correct te starten. Elke sensorupdate wordt ongeacht deze waarde vastgelegd; het kalibreert alleen de stroomafwaartse berekeningen. De suggestie-engine meet de werkelijke cadans van uw sensor uit eerdere cycli en stelt deze automatisch in.",
       "label": "Samplinginterval"
@@ -1778,10 +1776,6 @@
         "higher": "Alleen zeer zekere overeenkomsten worden bevestigd – meer cycli blijven ongelabeld",
         "lower": "Meer cycli worden gekoppeld – sommige kunnen licht onjuist zijn"
       },
-      "running_dead_zone": {
-        "higher": "Korte vermogenspieken tijdens stilstand worden genegeerd – minder ruisgevoelig",
-        "lower": "Reageert op kortere vermogensimpulsen – detecteert snelle transiënten"
-      },
       "start_threshold_w": {
         "higher": "Voorkomt valse starts door korte vermogenspieken",
         "lower": "Herkent programma's met laag vermogen – kan op ruis reageren"
@@ -1924,6 +1918,7 @@
     "recording_stopped": "De opname is gestopt",
     "review_saved": "Beoordeling opgeslagen",
     "settings_conflicts": "Los de gemarkeerde instellingsconflicten op voor het opslaan.",
+    "settings_no_changes": "Geen wijzigingen om op te slaan",
     "settings_reverted": "Instellingen hersteld; integratie herladen",
     "settings_saved": "Instellingen opgeslagen; integratie herladen",
     "suggestions_applied": "Suggesties toegepast; integratie herladen",

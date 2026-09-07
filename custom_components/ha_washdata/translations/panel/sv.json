@@ -77,11 +77,13 @@
     "approved": "Godkänd",
     "awaiting": "Väntar på godkännande",
     "imported_tip": "Importerad från gemenskapsbutiken. Används endast för matchning, räknas inte in i statistiken.",
+    "unmatchable": "kan inte matchas",
     "not_importable": "ej här",
     "exists": "finns",
     "backfilled_tip": "Detekterad i importerad effekthistorik. Påverkar bara programmatchningen, räknas inte in i statistiken."
   },
   "btn": {
+    "reset_zoom": "Återställ zoom",
     "set_brand_model": "Ange märke och modell",
     "refresh_catalog": "Uppdatera katalog",
     "add_device": "+ Lägg till enhet",
@@ -362,7 +364,6 @@
     "wipe_history": "Rensa historik",
     "recommendations": "Rekommendationer ({n})",
     "pg_detection_params": "Detekteringsinställningar",
-    "pg_timeline": "Händelsetidslinje",
     "pg_outcome": "Simuleringsresultat",
     "pg_across_cycles": "Över dina cykler",
     "community_store": "Gemenskapsbutik",
@@ -375,6 +376,8 @@
     "poor": "⚠ Dålig profilkvalitet"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktiv effektgraf för cykeln: hovra för att avläsa tid/effekt, skrolla eller nyp för att zooma, dra för att panorera",
+    "device_unresolved": "Otillgänglig enhet ({id})",
     "drag_to_resize": "Dra för att ändra storlek",
     "actions": "Åtgärder",
     "activity": "Aktivitet",
@@ -550,6 +553,7 @@
     "stage4": "Steg 4 – överensstämmelse",
     "status": "Status",
     "tail_trim": "Beskär slut (s)",
+    "tap_to_dismiss": "tryck på diagrammet för att stänga",
     "timer_auto_pause": "Automatisk paus",
     "timer_min": "min",
     "timer_msg_placeholder": "Meddelande (valfritt, {device}/{program}/{minutes})",
@@ -586,9 +590,7 @@
     "pg_time_left_model": "Tid kvar (modell)",
     "pg_time_left_model_tip": "Modellberäknad återstående tid (fasberäknare + ML-blandning), inte en statisk nedräkning",
     "phase": "Fas",
-    "pg_mode_simulate": "Simulera",
     "pg_mode_history": "Testa på historik",
-    "pg_mode_sweep": "Svep",
     "pg_ev_detected": "Upptäckt",
     "pg_ev_match": "Matchning bekräftad",
     "pg_ev_match_changed": "Matchning ändrad",
@@ -618,14 +620,11 @@
     "pg_sweep_param": "Parameter",
     "pg_objective": "Mål",
     "pg_steps": "Steg",
-    "pg_sweep_2d": "2D-värmekarta",
-    "pg_sweep_param_y": "2:a parametern",
     "pg_obj_match": "Matchningsnoggrannhet",
     "pg_obj_endtiming": "Sluttidsnoggrannhet",
     "pg_obj_falseend": "Falskt-slut-andel",
     "pg_obj_overrun": "Varaktighetsavvikelse",
     "pg_obj_ambiguity": "Tvetydighetsandel",
-    "pg_best_combo": "bästa kombinationen",
     "pg_mode_optimize": "Optimera",
     "pg_group_matching": "Programmatchning",
     "pg_zoom_hint": "dubbelklicka för att återställa zoomen",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Importerar cykler",
     "evidence_real_cycles": "Cykler den här maskinen har kört",
     "evidence_reference_cycles": "Nedladdade från gemenskapsbutiken",
-    "evidence_backfill_cycles": "Hittade i importerad effekthistorik"
+    "evidence_backfill_cycles": "Hittade i importerad effekthistorik",
+    "zoom_hint_touch": "nyp för att zooma",
+    "zoom_hint_touch_zoomed": "nyp för att zooma · dubbeltryck för att återställa"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -791,6 +792,7 @@
     "history_import": "Importera effekthistorik"
   },
   "msg": {
+    "pg_canvas_empty3": "Välj en cykel ovan och tryck på Kör för att simulera den. Hovra sedan för att avläsa värden, skrolla eller nyp för att zooma och dra för att panorera.",
     "tail_trim_hint": "Ta bort så här många sekunder från slutet",
     "store_sibling_hint": "Finns inget delat för exakt din modell? En närbesläktad modell från samma märke är oftast en bra utgångspunkt.",
     "store_declare_appliance": "Berätta för WashData vilken apparat du har, så visar den här fliken de färdiga inställningar andra har delat för den. Du kan också skriva ett märke ovanför för att se dig omkring.",
@@ -986,9 +988,9 @@
     "advisory_poor_health": "'{name}' har ett lågt passningsvärde - dess senaste cykler varierar mycket eller matchar svagt. Granska dess cykler eller spela in profilen på nytt så att matchning och tidsuppskattningar förblir korrekta.",
     "advisory_shape_drift": "'{name}' har drivit iväg avsevärt från sin ursprungliga effektkurva. Apparaten kan ha förändrat sitt beteende över tid (t.ex. kalkavlagringar, slitage). Överväg att spela in profilen på nytt med aktuella cykler.",
     "advisory_shape_drift_corr": "'{name}' har drivit iväg avsevärt från sin ursprungliga effektkurva (korrelation {corr}). Apparaten kan ha förändrat sitt beteende över tid (t.ex. kalkavlagringar, slitage). Överväg att spela in profilen på nytt med aktuella cykler.",
+    "advisory_unmatchable": "'{name}' kan aldrig matchas: det finns ingen cykel med effektdata bakom den, så WashData har inget att jämföra en pågående cykel med. Märk en cykel av det här programmet (eller spela in en) för att få med det i matchningen igen.",
     "pg_no_alerts": "Inga problem upptäcktes i den här körningen.",
     "pg_override_active": "Använder dina redigerade inställningar mot de nuvarande",
-    "pg_history_intro": "Spela upp dina senaste cykler genom den riktiga detekteringen och matchningen. Redigera en detekteringsinställning i Simulera först för att se en före/efter-jämförelse här.",
     "pg_history_empty": "Tryck på Kör för att spela upp dina cykler igen.",
     "pg_history_summary": "{detected}/{total} upptäckta · {correct} matchade korrekt",
     "pg_sweep_no_metric": "Inte tillräckligt med data för att poängsätta det här målet.",
@@ -1469,10 +1471,6 @@
       "doc": "Sekunder kan en pump köras kontinuerligt innan den flaggas som eventuellt fast (utlöser händelsen med fast pump).",
       "label": "Pumpens fastnadsvaraktighet"
     },
-    "running_dead_zone": {
-      "doc": "Efter att en cykel har startat ignoreras effektfall inom detta fönster. Tvättmaskiner fylls med kallt vatten (sjunker nära 0 W före uppvärmning) - utan detta skydd ser fyllningsfasen ut som ett cykelslut. Detta hoppar INTE över data: spåret för full effekt registreras från T=0. Förslagsmotorn mäter din maskins faktiska startmönster och dimensionerar detta automatiskt.",
-      "label": "Löpande dödzon"
-    },
     "sampling_interval": {
       "doc": "Förväntad tid mellan sensoravläsningarna - används för att dimensionera utjämningsfönstret och starta avstudsningen korrekt. Varje sensoruppdatering registreras oavsett detta värde; den kalibrerar bara nedströmsberäkningarna. Förslagsmotorn mäter din sensors faktiska kadens från tidigare cykler och ställer in denna automatiskt.",
       "label": "Samplingsintervall"
@@ -1778,10 +1776,6 @@
         "higher": "Bara mycket säkra matchningar bekräftas – fler cykler förblir omärkta",
         "lower": "Fler cykler matchas – vissa kan vara något felaktiga"
       },
-      "running_dead_zone": {
-        "higher": "Korta effekttoppar under tomgång ignoreras – mindre brusig",
-        "lower": "Reagerar på kortare effektimpulser – fångar snabba transienter"
-      },
       "start_threshold_w": {
         "higher": "Undviker falska starter från korta effekttoppar",
         "lower": "Fångar lågeffektsprogram – kan triggas av brus"
@@ -1924,6 +1918,7 @@
     "recording_stopped": "Inspelning stoppad",
     "review_saved": "Granskning sparad",
     "settings_conflicts": "Åtgärda de markerade inställningskonflikterna innan du sparar.",
+    "settings_no_changes": "Inga ändringar att spara",
     "settings_reverted": "Inställningar återställda; integration laddas om",
     "settings_saved": "Inställningar sparade; integration laddas om",
     "suggestions_applied": "Förslag tillämpade; integration laddas om",

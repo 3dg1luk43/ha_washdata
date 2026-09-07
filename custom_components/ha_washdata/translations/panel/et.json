@@ -77,11 +77,13 @@
     "approved": "Heaks kiidetud",
     "awaiting": "Ootab heakskiitu",
     "imported_tip": "Imporditud kogukonna poest. Kasutatakse ainult sobitamiseks, ei arvestata statistikas.",
+    "unmatchable": "ei saa sobitada",
     "not_importable": "pole saadaval",
     "exists": "on olemas",
     "backfilled_tip": "Tuvastatud imporditud võimsuse ajaloos. Mõjutab ainult programmide sobitamist, statistikas ei arvestata."
   },
   "btn": {
+    "reset_zoom": "Lähtesta suum",
     "set_brand_model": "Määra bränd ja mudel",
     "refresh_catalog": "Värskenda kataloogi",
     "add_device": "+ Lisa seade",
@@ -362,7 +364,6 @@
     "wipe_history": "Pühkige ajalugu",
     "recommendations": "Soovitused ({n})",
     "pg_detection_params": "Tuvastuse seaded",
-    "pg_timeline": "Sündmuste ajajoon",
     "pg_outcome": "Simulatsiooni tulemus",
     "pg_across_cycles": "Sinu tsüklite lõikes",
     "community_store": "Kogukonna pood",
@@ -375,6 +376,8 @@
     "poor": "⚠ Kehv profiili kvaliteet"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktiivne tsükli võimsusgraafik: hõljuta aja/võimsuse lugemiseks, keri või näpista suumimiseks, lohista liigutamiseks",
+    "device_unresolved": "Seade pole saadaval ({id})",
     "drag_to_resize": "Lohistage suuruse muutmiseks",
     "pg_anti_wrinkle": "Kortsudevastane",
     "actions": "Tegevused",
@@ -545,6 +548,7 @@
     "stage4": "Etapp 4 – kokkulangevus",
     "status": "Olek",
     "tail_trim": "Kärbe lõpust (s)",
+    "tap_to_dismiss": "puuduta graafikut sulgemiseks",
     "timer_auto_pause": "Automaatne paus",
     "timer_min": "min",
     "timer_msg_placeholder": "Sõnum (valikuline, {device}/{program}/{minutes})",
@@ -581,9 +585,7 @@
     "pg_time_left_model": "Aega jäänud (mudel)",
     "pg_time_left_model_tip": "Mudeli hinnatud järelejäänud aeg (faasi hindaja + ML-segu), mitte staatiline loendur",
     "phase": "Faas",
-    "pg_mode_simulate": "Simuleeri",
     "pg_mode_history": "Testi ajalooga",
-    "pg_mode_sweep": "Pühkimine",
     "pg_ev_detected": "Tuvastatud",
     "pg_ev_match": "Vaste kinnitatud",
     "pg_ev_match_changed": "Vaste muutus",
@@ -619,14 +621,11 @@
     "pg_stress_idle_w_desc": "Defineeri automaatselt tuvastatud ooterežiimi põhi käsitsi (jäta tühjaks automaatse jaoks).",
     "pg_stress_toggle": "Testi tühikäigu lõpetamist",
     "pg_stress_toggle_desc": "Simuleerib seadet, mis jääb salvestuse lõpus ooterežiimi tarbimise tasemele - näitab, kas ja millal WashData tsükli peatab.",
-    "pg_sweep_2d": "2D soojuskaart",
-    "pg_sweep_param_y": "2. parameeter",
     "pg_obj_match": "Vaste täpsus",
     "pg_obj_endtiming": "Lõpuaja täpsus",
     "pg_obj_falseend": "Valelõppude määr",
     "pg_obj_overrun": "Kestuse kõrvalekalle",
     "pg_obj_ambiguity": "Ebaselguse määr",
-    "pg_best_combo": "parim kombinatsioon",
     "pg_mode_optimize": "Optimeeri",
     "pg_group_matching": "Programmi sobitamine",
     "pg_zoom_hint": "topeltklõps suumi lähtestamiseks",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Tsüklite importimine",
     "evidence_real_cycles": "Selle seadme tehtud tsüklid",
     "evidence_reference_cycles": "Kogukonna poest alla laaditud",
-    "evidence_backfill_cycles": "Leitud imporditud võimsuse ajaloos"
+    "evidence_backfill_cycles": "Leitud imporditud võimsuse ajaloos",
+    "zoom_hint_touch": "näpista suumimiseks",
+    "zoom_hint_touch_zoomed": "näpista suumimiseks · topeltpuudutus lähtestamiseks"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -791,6 +792,7 @@
     "history_import": "Võimsuse ajaloo import"
   },
   "msg": {
+    "pg_canvas_empty3": "Vali ülalt tsükkel ja vajuta Käivita, et seda simuleerida. Seejärel hõljuta väärtuste lugemiseks, keri või näpista suumimiseks ja lohista liigutamiseks.",
     "tail_trim_hint": "Mitu sekundit lõpust eemaldada",
     "store_sibling_hint": "Sinu täpse mudeli jaoks pole midagi jagatud? Sama brändi lähedane mudel on tavaliselt hea lähtepunkt.",
     "store_declare_appliance": "Ütle WashDatale, milline seade sul on, ja see vahekaart näitab teiste jagatud programme ja salvestisi selle seadme jaoks. Võid ka ülal brändi kirjutada ja lihtsalt ringi vaadata.",
@@ -986,9 +988,9 @@
     "advisory_poor_health": "'{name}' profiilil on madal sobivusskoor - selle hiljutised tsüklid varieeruvad palju või sobituvad nõrgalt. Vaata selle tsüklid üle või salvesta profiil uuesti, et tuvastus ja ajahinnangud püsiksid täpsed.",
     "advisory_shape_drift": "'{name}' on oma algsest võimsuskõverast märgatavalt kõrvale kaldunud. Seadme käitumine võib olla aja jooksul muutunud (nt katlakivi, kulumine). Kaalu selle profiili uuesti salvestamist hiljutiste tsüklitega.",
     "advisory_shape_drift_corr": "'{name}' on oma algsest võimsuskõverast märgatavalt kõrvale kaldunud (korrelatsioon {corr}). Seadme käitumine võib olla aja jooksul muutunud (nt katlakivi, kulumine). Kaalu selle profiili uuesti salvestamist hiljutiste tsüklitega.",
+    "advisory_unmatchable": "'{name}' ei saa kunagi sobituda: selle taga pole ühtegi võimsusandmetega tsüklit, seega pole WashDatal käimasolevat tsüklit millegagi võrrelda. Märgista mõni tsükkel selle programmiga (või salvesta üks), et profiil sobitamisse tagasi tuua.",
     "pg_no_alerts": "Selles käivituses ei tuvastatud probleeme.",
     "pg_override_active": "Kasutatakse su muudetud seadeid vs praegused",
-    "pg_history_intro": "Esita oma hiljutised tsüklid uuesti läbi päris tuvastaja ja sobitaja. Muuda esmalt tuvastuse seadet režiimis Simuleeri, et näha siin enne/pärast võrdlust.",
     "pg_history_empty": "Vajuta Käivita, et oma tsüklid uuesti esitada.",
     "pg_history_summary": "{detected}/{total} tuvastatud · {correct} õigesti sobitatud",
     "pg_sweep_no_metric": "Selle eesmärgi hindamiseks pole piisavalt andmeid.",
@@ -1469,10 +1471,6 @@
       "doc": "Mõni sekund võib pump pidevalt töötada, enne kui see märgitakse võimalikuks ummikuks (käivitab pumba kinnijäämise sündmuse).",
       "label": "Pumba Kinnijäämise Kestus"
     },
-    "running_dead_zone": {
-      "doc": "Pärast tsükli algust eiratakse selle akna võimsuse langusi. Pesumasinad täituvad külma veega (enne kuumutamist langeb 0 W lähedale) – ilma selle kaitseta näeb täitmisfaas välja nagu tsükli lõpp. See EI jäta andmeid vahele: täisvõimsuse jälg salvestatakse alates T=0. Soovitusmootor mõõdab teie masina tegelikku käivitusmustrit ja määrab selle suuruse automaatselt.",
-      "label": "Töötava Surnud Tsoon"
-    },
     "sampling_interval": {
       "doc": "Eeldatav aeg andurite näitude vahel – kasutatakse silumisakna suuruse määramiseks ja tagasilöögi õigeks alustamiseks. Iga anduri värskendus salvestatakse olenemata sellest väärtusest; see kalibreerib ainult allavoolu arvutusi. Soovitusmootor mõõdab teie anduri tegelikku sagedust eelmiste tsüklite põhjal ja määrab selle automaatselt.",
       "label": "Proovivõtu Intervall"
@@ -1811,6 +1809,7 @@
     "recording_stopped": "Salvestamine peatus",
     "review_saved": "Arvustus salvestatud",
     "settings_conflicts": "Parandage esiletõstetud sätete konfliktid enne salvestamist.",
+    "settings_no_changes": "Pole muudatusi, mida salvestada",
     "settings_reverted": "Seaded taastatud; integratsiooni uuesti laadimine",
     "settings_saved": "Seaded salvestatud; integratsiooni uuesti laadimine",
     "suggestions_applied": "Soovitused rakendatud; integratsiooni uuesti laadimine",
@@ -1917,10 +1916,6 @@
       "profile_match_threshold": {
         "higher": "Kinnitab ainult suure kindlusega vasteid; rohkem tsükleid jääb märgistamata",
         "lower": "Sobib rohkema tsükliga; mõnda võib olla veidi vale"
-      },
-      "running_dead_zone": {
-        "higher": "Ignoreerib lühikesi voolutõuse jõudeolekus – vähem müra suhtes tundlik",
-        "lower": "Reageerib lühematele energiapursetele – tabab kiiret mööduvat aktiivsust"
       },
       "start_threshold_w": {
         "higher": "Väldib lühikestest energiatõusudest tulenevaid valesid käivitusi",

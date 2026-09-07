@@ -10,6 +10,7 @@
     "test:report": "playwright show-report"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.0"
+    "@playwright/test": "^1.49.0",
+    "@webcomponents/scoped-custom-element-registry": "^0.0.10"
   }
 }

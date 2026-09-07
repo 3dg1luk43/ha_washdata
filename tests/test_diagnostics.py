@@ -230,15 +230,16 @@ async def test_diagnostics_manager_state_contains_expected_fields():
     mock_manager.profile_store.get_suggestions.return_value = {}
     mock_manager.profile_store.export_data.return_value = {}
     mock_manager.diag_buffer.redacted_snapshot.return_value = {}
-    # Suppress attribute errors on getattr checks
-    mock_manager._auto_maintenance = True
-    mock_manager._save_debug_traces = False
+    # Each flag must be set on the object that owns it (issue #407): the store owns
+    # save_debug_traces, and auto_maintenance is read straight off the entry option.
+    mock_manager.profile_store.save_debug_traces = False
     mock_manager._notify_fire_events = True
+    mock_manager._remove_maintenance_scheduler = None
 
     entry = MagicMock()
     entry.entry_id = "diag_test2"
     entry.data = {}
-    entry.options = {}
+    entry.options = {"auto_maintenance": True}
     entry.as_dict.return_value = {}
 
     hass = MagicMock()
@@ -251,4 +252,11 @@ async def test_diagnostics_manager_state_contains_expected_fields():
     assert state["current_program"] == "Cotton 40"
     assert state["time_remaining"] == 1800
     assert state["cycle_progress"] == pytest.approx(0.45)
-    assert "feature_flags" in state
+    # Assert values, not membership: a MagicMock satisfies any getattr, so an
+    # existence check passed happily while two of the three flags were always False.
+    assert state["feature_flags"] == {
+        "auto_maintenance": True,
+        "auto_maintenance_scheduled": False,
+        "save_debug_traces": False,
+        "notify_fire_events": True,
+    }

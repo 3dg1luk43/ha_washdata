@@ -77,11 +77,13 @@
         "approved": "Miratuar",
         "awaiting": "Në pritje të miratimit",
         "imported_tip": "Importuar nga dyqani i komunitetit. Përdoret vetëm për përputhje, nuk llogaritet në statistika.",
+        "unmatchable": "s'mund të përputhet",
         "not_importable": "s'aplikohet këtu",
         "exists": "ekziston",
         "backfilled_tip": "Zbuluar në historikun e importuar të fuqisë. Ndikon vetëm në përputhjen e programeve, nuk llogaritet në statistika."
     },
     "btn": {
+        "reset_zoom": "Rivendos zmadhimin",
         "set_brand_model": "Cakto markën dhe modelin",
         "refresh_catalog": "Rifresko katalogun",
         "add_device": "+ Shto pajisje",
@@ -362,7 +364,6 @@
         "wipe_history": "Fshi historikun",
         "recommendations": "Rekomandime ({n})",
         "pg_detection_params": "Cilësimet e zbulimit",
-        "pg_timeline": "Kronologjia e ngjarjeve",
         "pg_outcome": "Rezultati i simulimit",
         "pg_across_cycles": "Në të gjithë ciklet tuaja",
         "community_store": "Dyqani i Komunitetit",
@@ -375,6 +376,8 @@
         "poor": "⚠ Cilësi e keqe e profilit"
     },
     "lbl": {
+        "aria_playground_chart3": "Grafik interaktiv i fuqisë së ciklit: kaloni kursorin për të lexuar kohën/fuqinë, rrëshqitni ose zmadhoni me dy gishta, tërhiqni për të lëvizur",
+        "device_unresolved": "Pajisje e padisponueshme ({id})",
         "drag_to_resize": "Tërhiqni për të ndryshuar madhësinë",
         "actions": "Veprime",
         "activity": "Aktivitet",
@@ -545,6 +548,7 @@
         "stage4": "Etapa 4 – përputhja",
         "status": "Statusi",
         "tail_trim": "Prerje në fund (s)",
+        "tap_to_dismiss": "trokit grafikun për ta mbyllur",
         "timer_auto_pause": "Auto-pauzë",
         "timer_min": "min",
         "timer_msg_placeholder": "Mesazh (opsionale, {device}/{program}/{minutes})",
@@ -581,9 +585,7 @@
         "pg_time_left_model": "Koha e mbetur (modeli)",
         "pg_time_left_model_tip": "Koha e mbetur e vlerësuar nga modeli (vlerësuesi i fazës + përzierje ML), jo një numërim mbrapsht statik",
         "phase": "Faza",
-        "pg_mode_simulate": "Simulo",
         "pg_mode_history": "Testo në histori",
-        "pg_mode_sweep": "Skanim",
         "pg_ev_detected": "U zbulua",
         "pg_ev_match": "Përputhja u përcaktua",
         "pg_ev_match_changed": "Përputhja ndryshoi",
@@ -619,14 +621,11 @@
         "pg_stress_idle_w_desc": "Anuloni vlerën minimale të gjendjes statike të zbuluar automatikisht (lini bosh për automatik).",
         "pg_stress_toggle": "Testo ndërprerjen me gjendje statike",
         "pg_stress_toggle_desc": "Simulon pajisjen që qëndron në nivelin e konsumit të gjendjes statike pas përfundimit të regjistrimit - tregon nëse dhe kur WashData ndalon ciklin.",
-        "pg_sweep_2d": "Hartë nxehtësie 2D",
-        "pg_sweep_param_y": "Parametri 2",
         "pg_obj_match": "Saktësia e përputhjes",
         "pg_obj_endtiming": "Saktësia e kohës së përfundimit",
         "pg_obj_falseend": "Shkalla e përfundimeve të rreme",
         "pg_obj_overrun": "Devijimi i kohëzgjatjes",
         "pg_obj_ambiguity": "Shkalla e paqartësisë",
-        "pg_best_combo": "kombinimi më i mirë",
         "pg_mode_optimize": "Optimizo",
         "pg_group_matching": "Përputhja e programeve",
         "pg_zoom_hint": "klikoni dy herë për të rivendosur zmadhimin",
@@ -708,7 +707,9 @@
         "task_history_import_apply": "Importim i cikleve",
         "evidence_real_cycles": "Ciklet që kreu kjo makinë",
         "evidence_reference_cycles": "Shkarkuar nga dyqani i komunitetit",
-        "evidence_backfill_cycles": "Gjetur në historikun e importuar të fuqisë"
+        "evidence_backfill_cycles": "Gjetur në historikun e importuar të fuqisë",
+        "zoom_hint_touch": "zmadho me dy gishta",
+        "zoom_hint_touch_zoomed": "zmadho me dy gishta · trokit dy herë për rivendosje"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -791,6 +792,7 @@
         "history_import": "Importo historikun e fuqisë"
     },
     "msg": {
+        "pg_canvas_empty3": "Zgjidhni një cikël më sipër dhe shtypni Ekzekuto për ta simuluar. Pastaj kaloni kursorin për të lexuar vlerat, rrëshqitni ose zmadhoni me dy gishta dhe tërhiqni për të lëvizur.",
         "tail_trim_hint": "Hiqni kaq sekonda nga fundi",
         "store_sibling_hint": "Nuk ka asgjë të ndarë për modelin tuaj të saktë? Një model i afërt i të njëjtës markë është zakonisht një pikënisje e mirë.",
         "store_declare_appliance": "Përcaktoni në WashData pajisjen që zotëroni dhe kjo skedë shfaq konfigurimet që të tjerët kanë ndarë për të. Mund edhe të shkruani një markë më lart për t'i hedhur një sy katalogut.",
@@ -986,9 +988,9 @@
         "advisory_poor_health": "'{name}' ka një rezultat të ulët përputhjeje - ciklet e tij të fundit ndryshojnë shumë ose përputhen dobët. Rishikoni ciklet e tij ose regjistrojeni sërish profilin që njohja dhe vlerësimet e kohës të mbeten të sakta.",
         "advisory_shape_drift": "'{name}' ka devijuar ndjeshëm nga forma e tij fillestare e fuqisë. Sjellja e pajisjes mund të ketë ndryshuar me kalimin e kohës (p.sh. gëlqerëzim, konsumim). Merrni në konsideratë regjistrimin sërish të këtij profili me ciklet e fundit.",
         "advisory_shape_drift_corr": "'{name}' ka devijuar ndjeshëm nga forma e tij fillestare e fuqisë (korrelacioni {corr}). Sjellja e pajisjes mund të ketë ndryshuar me kalimin e kohës (p.sh. gëlqerëzim, konsumim). Merrni në konsideratë regjistrimin sërish të këtij profili me ciklet e fundit.",
+        "advisory_unmatchable": "'{name}' nuk mund të përputhet kurrë: pas tij nuk ka asnjë cikël me të dhëna të energjisë, kështu që WashData nuk ka me çfarë të krahasojë ciklin që ekzekutohet. Etiketoni një cikël të këtij programi (ose regjistroni një cikël të ri) për ta rikthyer në përputhje.",
         "pg_no_alerts": "Nuk u zbuluan probleme në këtë ekzekutim.",
         "pg_override_active": "Po përdoren cilësimet tuaja të redaktuara kundrejt atyre aktuale",
-        "pg_history_intro": "Riluani ciklet tuaja të fundit përmes zbuluesit dhe përputhësit të vërtetë. Redaktoni fillimisht një cilësim zbulimi te Simulo për të parë këtu një krahasim para/pas.",
         "pg_history_empty": "Shtypni Ekzekuto për të riluajtur ciklet tuaja.",
         "pg_history_summary": "{detected}/{total} u zbuluan · {correct} u përputhën saktë",
         "pg_sweep_no_metric": "Nuk ka mjaftueshëm të dhëna për të vlerësuar këtë objektiv.",
@@ -1435,10 +1437,6 @@
             "doc": "Sekonda një pompë mund të funksionojë vazhdimisht përpara se të shënohet si e mundshme e mbërthyer (ndiz ngjarjen e pompës së mbërthyer).",
             "label": "Kohëzgjatja e pompës së bllokuar"
         },
-        "running_dead_zone": {
-            "doc": "Pas fillimit të një cikli, uljet e energjisë brenda kësaj dritareje nuk merren parasysh. Makinat larëse mbushen me ujë të ftohtë (duke rënë afër 0 W para ngrohjes) - pa këtë mbrojtje, faza e mbushjes duket si një fund cikli. Kjo NUK kapërcen të dhënat: gjurma e plotë e fuqisë regjistrohet nga T=0. Motori i sugjerimeve mat modelin aktual të nisjes së makinës suaj dhe e përmason atë automatikisht.",
-            "label": "Zona e vdekur e ekzekutimit"
-        },
         "sampling_interval": {
             "doc": "Koha e pritshme midis leximeve të sensorit - përdoret për madhësinë e dritares së zbutjes dhe fillimin e debouncimit në mënyrë korrekte. Çdo përditësim i sensorit kapet pavarësisht nga kjo vlerë; ai kalibron vetëm llogaritjet e rrjedhës së poshtme. Motori i sugjerimeve mat kadencën aktuale të sensorit tuaj nga ciklet e kaluara dhe e vendos këtë automatikisht.",
             "label": "Intervali i kampionimit"
@@ -1781,6 +1779,7 @@
         "recording_stopped": "Regjistrimi u ndalua",
         "review_saved": "Rishikimi u ruajt",
         "settings_conflicts": "Korrigjoni konfliktet e theksuara të cilësimeve para ruajtjes.",
+        "settings_no_changes": "Nuk ka ndryshime për të ruajtur",
         "settings_reverted": "Cilësimet u rivendosën; integrimi po ringarkohet",
         "settings_saved": "Cilësimet u ruajtën; integrimi po ringarkohet",
         "suggestions_applied": "Sugjerimet u zbatuan; integrimi po ringarkohet",
@@ -1887,10 +1886,6 @@
             "profile_match_threshold": {
                 "higher": "Konfirmon vetëm përputhjet me besueshmëri të lartë; më shumë cikle mbeten pa etiketë",
                 "lower": "Përputhet me më shumë cikle; disa mund të jenë paksa të gabuara"
-            },
-            "running_dead_zone": {
-                "higher": "Injoron kumbëzat e shkurtra të fuqisë gjatë pushimit – më pak e ndjeshme ndaj zhurmës",
-                "lower": "Reagron ndaj shpërthimeve më të shkurtra të fuqisë – kap aktivitetin kalimtar të shpejtë"
             },
             "start_threshold_w": {
                 "higher": "Shmang startet false nga kumbëzat e shkurtra të fuqisë",

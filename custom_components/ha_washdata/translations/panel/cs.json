@@ -77,11 +77,13 @@
     "approved": "Schváleno",
     "awaiting": "Čeká na schválení",
     "imported_tip": "Importováno z komunitního obchodu. Používá se pouze pro porovnávání, nezapočítává se do statistik.",
+    "unmatchable": "nelze rozpoznat",
     "not_importable": "nedostupné",
     "exists": "existuje",
     "backfilled_tip": "Detekováno v importované historii výkonu. Ovlivňuje pouze přiřazování programů, nezapočítává se do statistik."
   },
   "btn": {
+    "reset_zoom": "Obnovit přiblížení",
     "set_brand_model": "Nastavit značku a model",
     "refresh_catalog": "Obnovit katalog",
     "add_device": "+ Přidat zařízení",
@@ -362,7 +364,6 @@
     "wipe_history": "Vymazat historii",
     "recommendations": "Doporučení ({n})",
     "pg_detection_params": "Nastavení detekce",
-    "pg_timeline": "Časová osa událostí",
     "pg_outcome": "Výsledek simulace",
     "pg_across_cycles": "Napříč vašimi cykly",
     "community_store": "Komunitní obchod",
@@ -375,6 +376,8 @@
     "poor": "⚠ Špatná shoda"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktivní graf výkonu cyklu: najetím zobrazíte čas/výkon, kolečkem nebo dvěma prsty přiblížíte, tažením posunete",
+    "device_unresolved": "Nedostupné zařízení ({id})",
     "drag_to_resize": "Přetažením změníte velikost",
     "actions": "Akce",
     "activity": "Aktivita",
@@ -546,6 +549,7 @@
     "stage4": "Fáze 4 – shoda",
     "status": "Stav",
     "tail_trim": "Oříznutí konce (s)",
+    "tap_to_dismiss": "klepnutím na graf zavřete",
     "timer_auto_pause": "Automatická pauza",
     "timer_min": "min",
     "timer_msg_placeholder": "Zpráva (volitelné, {device}/{program}/{minutes})",
@@ -582,9 +586,7 @@
     "pg_time_left_model": "Zbývající čas (model)",
     "pg_time_left_model_tip": "Modelem odhadovaný zbývající čas (odhad fáze + kombinace s ML), nikoli statické odpočítávání",
     "phase": "Fáze",
-    "pg_mode_simulate": "Simulovat",
     "pg_mode_history": "Otestovat na historii",
-    "pg_mode_sweep": "Prohledávání",
     "pg_ev_detected": "Detekováno",
     "pg_ev_match": "Shoda potvrzena",
     "pg_ev_match_changed": "Shoda změněna",
@@ -614,14 +616,11 @@
     "pg_sweep_param": "Parametr",
     "pg_objective": "Cíl",
     "pg_steps": "Kroky",
-    "pg_sweep_2d": "Teplotní mapa 2D",
-    "pg_sweep_param_y": "2. parametr",
     "pg_obj_match": "Přesnost shody",
     "pg_obj_endtiming": "Přesnost konce",
     "pg_obj_falseend": "Míra falešných konců",
     "pg_obj_overrun": "Odchylka trvání",
     "pg_obj_ambiguity": "Míra nejednoznačnosti",
-    "pg_best_combo": "nejlepší kombinace",
     "pg_mode_optimize": "Optimalizovat",
     "pg_group_matching": "Přiřazování programů",
     "pg_zoom_hint": "dvojklikem obnovíte přiblížení",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Import cyklů",
     "evidence_real_cycles": "Cykly, které tento spotřebič provedl",
     "evidence_reference_cycles": "Stažené z komunitního obchodu",
-    "evidence_backfill_cycles": "Nalezené v importované historii výkonu"
+    "evidence_backfill_cycles": "Nalezené v importované historii výkonu",
+    "zoom_hint_touch": "dvěma prsty přiblížíte",
+    "zoom_hint_touch_zoomed": "dvěma prsty přiblížíte · dvojitým klepnutím obnovíte"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -791,6 +792,7 @@
     "history_import": "Import historie výkonu"
   },
   "msg": {
+    "pg_canvas_empty3": "Vyberte cyklus výše a stisknutím Spustit jej nasimulujte. Poté najetím zobrazíte hodnoty, kolečkem nebo dvěma prsty přiblížíte a tažením posunete.",
     "tail_trim_hint": "Kolik sekund odstranit z konce",
     "store_sibling_hint": "Pro váš konkrétní model není nic nasdíleno? Velmi podobný model od stejné značky je obvykle dobrý výchozí bod.",
     "store_declare_appliance": "Řekněte WashData, jaký spotřebič máte, a tato karta zobrazí nastavení, která pro něj nasdíleli ostatní uživatelé. Můžete také zadat značku výše a jen se rozhlédnout.",
@@ -991,9 +993,9 @@
     "advisory_poor_health": "'{name}' má nízké skóre shody - jeho poslední cykly se hodně liší nebo se špatně rozpoznávají. Projděte jeho cykly nebo profil nahrajte znovu, aby rozpoznávání a odhady času zůstaly přesné.",
     "advisory_shape_drift": "'{name}' se výrazně odchýlil od původního tvaru křivky výkonu. Chování spotřebiče se mohlo časem změnit (např. vodní kámen, opotřebení). Zvažte opětovné nahrání tohoto profilu z posledních cyklů.",
     "advisory_shape_drift_corr": "'{name}' se výrazně odchýlil od původního tvaru křivky výkonu (korelace {corr}). Chování spotřebiče se mohlo časem změnit (např. vodní kámen, opotřebení). Zvažte opětovné nahrání tohoto profilu z posledních cyklů.",
+    "advisory_unmatchable": "'{name}' nelze nikdy rozpoznat: nestojí za ním žádný cyklus s daty o výkonu, takže WashData nemá s čím probíhající cyklus porovnat. Označte tímto programem některý cyklus (nebo jeden zaznamenejte), aby se profil vrátil do rozpoznávání.",
     "pg_no_alerts": "V tomto běhu nebyly zjištěny žádné problémy.",
     "pg_override_active": "Používají se vaše upravená nastavení oproti aktuálním",
-    "pg_history_intro": "Přehrajte své nedávné cykly přes skutečný detektor a párování. Nejprve upravte nastavení detekce v režimu Simulovat, abyste zde viděli porovnání před/po.",
     "pg_history_empty": "Stiskněte Spustit pro přehrání vašich cyklů.",
     "pg_history_summary": "{detected}/{total} detekováno · {correct} správně spárováno",
     "pg_sweep_no_metric": "Nedostatek dat pro vyhodnocení tohoto cíle.",
@@ -1439,10 +1441,6 @@
       "doc": "Sekundy, po které může čerpadlo běžet nepřetržitě, než je označeno jako možná zaseklé (spustí událost zaseknutoého čerpadla).",
       "label": "Délka zaseknutého čerpadla"
     },
-    "running_dead_zone": {
-      "doc": "Po zahájení cyklu jsou poklesy příkonu v tomto okně ignorovány. Pračky se plní studenou vodou (pokles blízký 0 W před ohřevem) – bez této ochrany by tato fáze plnění vypadala jako konec cyklu. Toto NEVYNECHÁVÁ data: celý záznam příkonu je zaznamenán od T=0. Engine návrhů měří skutečný vzor startu vašeho stroje a nastavuje tuto hodnotu automaticky.",
-      "label": "Mrtvá zóna běhu"
-    },
     "sampling_interval": {
       "doc": "Očekávaný čas mezi čteními senzoru – používá se ke správnému nastavení okna vyhlazení a debounce startu. Každá aktualizace senzoru je zachycena bez ohledu na tuto hodnotu; jen kalibruje následné výpočty. Engine návrhů měří skutečnou kadenci vašeho senzoru z minulých cyklů a nastavuje tuto hodnotu automaticky.",
       "label": "Interval vzorkování"
@@ -1748,10 +1746,6 @@
         "higher": "Potvrzuje pouze vysoce jisté shody; více cyklů zůstane neoznačených",
         "lower": "Páruje více cyklů; některé mohou být mírně nesprávné"
       },
-      "running_dead_zone": {
-        "higher": "Ignoruje krátké výkonové špičky během klidu – méně citlivý na šum",
-        "lower": "Reaguje na kratší výkonové impulzy – zachytí rychlou přechodnou aktivitu"
-      },
       "start_threshold_w": {
         "higher": "Zabraňuje falešným startům z krátkých výkonových špiček",
         "lower": "Zachytí programy s nízkým příkonem; může reagovat na rušení"
@@ -1894,6 +1888,7 @@
     "recording_stopped": "Nahrávání zastaveno",
     "review_saved": "Hodnocení uloženo",
     "settings_conflicts": "Před uložením opravte zvýrazněné konflikty nastavení.",
+    "settings_no_changes": "Žádné změny k uložení",
     "settings_reverted": "Nastavení bylo obnoveno; integrace se znovu načítá",
     "settings_saved": "Nastavení uloženo; znovunačtení integrace",
     "suggestions_applied": "Byly použity návrhy; znovunačtení integrace",

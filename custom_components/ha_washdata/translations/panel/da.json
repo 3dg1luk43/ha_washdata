@@ -77,11 +77,13 @@
     "approved": "Godkendt",
     "awaiting": "Afventer godkendelse",
     "imported_tip": "Importeret fra fællesskabsbutikken. Bruges kun til matchning, tælles ikke med i statistikken.",
+    "unmatchable": "kan ikke matches",
     "not_importable": "ikke her",
     "exists": "findes",
     "backfilled_tip": "Registreret i importeret effekthistorik. Påvirker kun programmatchning, tælles ikke med i statistikken."
   },
   "btn": {
+    "reset_zoom": "Nulstil zoom",
     "set_brand_model": "Angiv mærke og model",
     "refresh_catalog": "Opdater katalog",
     "add_device": "+ Tilføj enhed",
@@ -362,7 +364,6 @@
     "wipe_history": "Tør historie",
     "recommendations": "Anbefalinger ({n})",
     "pg_detection_params": "Registreringsindstillinger",
-    "pg_timeline": "Hændelsestidslinje",
     "pg_outcome": "Simuleringsresultat",
     "pg_across_cycles": "På tværs af dine cyklusser",
     "community_store": "Fællesskabsbutik",
@@ -375,6 +376,8 @@
     "poor": "⚠ Dårlig matchkvalitet"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktiv effektgraf for cyklussen: hold markøren over for at aflæse tid/effekt, rul eller knib for at zoome, træk for at panorere",
+    "device_unresolved": "Utilgængelig enhed ({id})",
     "drag_to_resize": "Træk for at ændre størrelse",
     "actions": "Handlinger",
     "activity": "Aktivitet",
@@ -550,6 +553,7 @@
     "stage4": "Trin 4 – overensstemmelse",
     "status": "Status",
     "tail_trim": "Beskær slut (s)",
+    "tap_to_dismiss": "tryk på grafen for at lukke",
     "timer_auto_pause": "Auto-pause",
     "timer_min": "min",
     "timer_msg_placeholder": "Besked (valgfrit, {device}/{program}/{minutes})",
@@ -586,9 +590,7 @@
     "pg_time_left_model": "Tid tilbage (model)",
     "pg_time_left_model_tip": "Modelberegnet resterende tid (faseberegner + ML-blanding), ikke en statisk nedtælling",
     "phase": "Fase",
-    "pg_mode_simulate": "Simuler",
     "pg_mode_history": "Test på historik",
-    "pg_mode_sweep": "Sweep",
     "pg_ev_detected": "Registreret",
     "pg_ev_match": "Match bekræftet",
     "pg_ev_match_changed": "Match ændret",
@@ -618,14 +620,11 @@
     "pg_sweep_param": "Parameter",
     "pg_objective": "Mål",
     "pg_steps": "Trin",
-    "pg_sweep_2d": "2D-varmekort",
-    "pg_sweep_param_y": "2. parameter",
     "pg_obj_match": "Matchnøjagtighed",
     "pg_obj_endtiming": "Sluttidsnøjagtighed",
     "pg_obj_falseend": "Falsk-slut-rate",
     "pg_obj_overrun": "Varighedsafvigelse",
     "pg_obj_ambiguity": "Tvetydighedsrate",
-    "pg_best_combo": "bedste kombination",
     "pg_mode_optimize": "Optimér",
     "pg_group_matching": "Programgenkendelse",
     "pg_zoom_hint": "dobbeltklik for at nulstille zoom",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Importerer cyklusser",
     "evidence_real_cycles": "Cyklusser, denne maskine har kørt",
     "evidence_reference_cycles": "Hentet fra fællesskabsbutikken",
-    "evidence_backfill_cycles": "Fundet i importeret effekthistorik"
+    "evidence_backfill_cycles": "Fundet i importeret effekthistorik",
+    "zoom_hint_touch": "knib for at zoome",
+    "zoom_hint_touch_zoomed": "knib for at zoome · dobbelttryk for at nulstille"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -791,6 +792,7 @@
     "history_import": "Importér effekthistorik"
   },
   "msg": {
+    "pg_canvas_empty3": "Vælg en cyklus ovenfor, og tryk på Kør for at simulere den. Hold derefter markøren over for at aflæse værdier, rul eller knib for at zoome, og træk for at panorere.",
     "tail_trim_hint": "Fjern så mange sekunder fra slutningen",
     "store_sibling_hint": "Er der intet delt til netop din model? En nært beslægtet model fra samme mærke er normalt et godt udgangspunkt.",
     "store_declare_appliance": "Fortæl WashData, hvilket apparat du har, så viser denne fane de opsætninger, andre har delt til det. Du kan også skrive et mærke ovenfor for at se dig omkring.",
@@ -986,9 +988,9 @@
     "advisory_poor_health": "'{name}' har en lav pasningsscore - dens seneste cyklusser varierer meget eller matcher svagt. Gennemgå dens cyklusser, eller optag profilen igen, så matchning og tidsestimater forbliver præcise.",
     "advisory_shape_drift": "'{name}' har afveget markant fra sin oprindelige effektkurve. Apparatet kan have ændret adfærd med tiden (f.eks. kalk, slid). Overvej at optage denne profil igen med nye cyklusser.",
     "advisory_shape_drift_corr": "'{name}' har afveget markant fra sin oprindelige effektkurve (korrelation {corr}). Apparatet kan have ændret adfærd med tiden (f.eks. kalk, slid). Overvej at optage denne profil igen med nye cyklusser.",
+    "advisory_unmatchable": "'{name}' kan aldrig matches: der ligger ingen cyklus med effektdata bag den, så WashData har intet at sammenligne en kørende cyklus med. Mærk en cyklus af dette program (eller optag en) for at få den med i matchningen igen.",
     "pg_no_alerts": "Ingen problemer registreret i denne kørsel.",
     "pg_override_active": "Bruger dine redigerede indstillinger mod de nuværende",
-    "pg_history_intro": "Afspil dine seneste cyklusser gennem den rigtige registrering og matching. Rediger en registreringsindstilling i Simuler først for at se en før/efter-sammenligning her.",
     "pg_history_empty": "Tryk på Kør for at afspille dine cyklusser igen.",
     "pg_history_summary": "{detected}/{total} registreret · {correct} matchet korrekt",
     "pg_sweep_no_metric": "Ikke nok data til at score dette mål.",
@@ -1469,10 +1471,6 @@
       "doc": "Sekunder kan en pumpe køre uafbrudt, før den er markeret som muligvis sidder fast (udløser hændelsen stuck-pumpe).",
       "label": "Varighed for fastklemt pumpe"
     },
-    "running_dead_zone": {
-      "doc": "Efter en cyklus starter, ignoreres strømfald i dette vindue. Vaskemaskiner fyldes med koldt vand (falder i nærheden af 0 W før opvarmning) - uden denne beskyttelse ligner påfyldningsfasen en cyklusafslutning. Dette springer IKKE data over: sporet med fuld effekt registreres fra T=0. Forslagsmotoren måler din maskines faktiske opstartsmønster og størrelser dette automatisk.",
-      "label": "Kørende dødzone"
-    },
     "sampling_interval": {
       "doc": "Forventet tid mellem sensoraflæsninger - bruges til at dimensionere udjævningsvinduet og starte debounce korrekt. Hver sensoropdatering registreres uanset denne værdi; den kalibrerer kun nedstrømsberegningerne. Forslagsmotoren måler din sensors faktiske kadence fra tidligere cyklusser og indstiller denne automatisk.",
       "label": "Samplingsinterval"
@@ -1778,10 +1776,6 @@
         "higher": "Kun meget sikre matches bekræftes – flere cyklusser forbliver umærkede",
         "lower": "Flere cyklusser matches – nogle kan være lidt forkerte"
       },
-      "running_dead_zone": {
-        "higher": "Korte effekttoppe i tomgang ignoreres – mindre støjfølsom",
-        "lower": "Reagerer på kortere effektimpulser – opfanger hurtige transienter"
-      },
       "start_threshold_w": {
         "higher": "Undgår falske starter fra korte effekttoppe",
         "lower": "Opfanger laveffektsprogrammer – kan aktiveres af støj"
@@ -1924,6 +1918,7 @@
     "recording_stopped": "Optagelsen stoppede",
     "review_saved": "Anmeldelsen er gemt",
     "settings_conflicts": "Ret de fremhævede indstillingskonflikter inden lagring.",
+    "settings_no_changes": "Ingen ændringer at gemme",
     "settings_reverted": "Indstillinger gendannet; integration genindlæsning",
     "settings_saved": "Indstillinger gemt; integration genindlæsning",
     "suggestions_applied": "Forslag anvendt; integration genindlæsning",
