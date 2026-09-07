@@ -113,3 +113,34 @@ async def test_stale_target_treated_as_no_link(hass):
     _apply_device_link(hass, entry)
 
     assert registry.async_get(washdata.id).via_device_id is None
+
+
+async def test_uses_by_identifier_lookup_when_available(hass, monkeypatch):
+    """On HA 2026.9+ the lookup goes through async_get_device_by_identifier (#405).
+
+    The deprecated async_get_device must not be called when the newer, unambiguous
+    per-entry method is present. The dev HA lacks it, so we stub it in.
+    """
+    registry = dr.async_get(hass)
+    target = _register_target_device(hass, registry)
+    entry = _make_entry(hass, {CONF_LINKED_DEVICE: target.id})
+    washdata = _register_washdata_device(registry, entry)
+
+    calls: dict[str, object] = {}
+
+    def _by_identifier(identifier, config_entry_id):
+        calls["args"] = (identifier, config_entry_id)
+        return washdata
+
+    def _fail_deprecated(*args, **kwargs):  # pragma: no cover - must not run
+        raise AssertionError("deprecated async_get_device was called")
+
+    monkeypatch.setattr(
+        registry, "async_get_device_by_identifier", _by_identifier, raising=False
+    )
+    monkeypatch.setattr(registry, "async_get_device", _fail_deprecated)
+
+    _apply_device_link(hass, entry)
+
+    assert calls["args"] == ((DOMAIN, entry.entry_id), entry.entry_id)
+    assert registry.async_get(washdata.id).via_device_id == target.id

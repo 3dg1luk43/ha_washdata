@@ -913,6 +913,22 @@ DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_PUMP: 20,  # 20 s (Pumps cut off sharply; no warm-down phase)
 }
 
+# Ceiling for the manager's *unmatched* zombie guard (seconds), i.e. the failsafe
+# that force-ends a cycle with no learned expected duration (expected == 0). This is
+# only a last-resort kill for a stuck FALSE START; the detector already hard-caps any
+# cycle at 8h (28800s), and the guard additionally only fires when the appliance is
+# effectively idle and no external end trigger is available (issue #404). All values
+# MUST stay below the detector's 28800s cap so the guard remains an *earlier* kill.
+# Wet/long appliances get a longer fuse because a genuine wash+dry or long cottons
+# programme with no matched profile can legitimately run well past 4h.
+DEFAULT_UNMATCHED_WATCHDOG_CEILING = 14400  # 4h scalar fallback
+DEFAULT_UNMATCHED_WATCHDOG_CEILING_BY_DEVICE = {
+    DEVICE_TYPE_WASHING_MACHINE: 21600,  # 6h (long cottons + pre-wash)
+    DEVICE_TYPE_WASHER_DRYER: 25200,  # 7h (combined wash+dry runs 6+h)
+    DEVICE_TYPE_DRYER: 21600,  # 6h (anti-crease can extend a long dry)
+    DEVICE_TYPE_DISHWASHER: 18000,  # 5h (long eco + silent drying pauses)
+}
+
 # Device-specific progress smoothing thresholds (percentage points)
 # These control how much backward progress is allowed before heavy damping kicks in
 DEVICE_SMOOTHING_THRESHOLDS = {

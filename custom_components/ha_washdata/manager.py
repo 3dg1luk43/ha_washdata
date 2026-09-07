@@ -241,6 +241,8 @@ from .const import (
     DEFAULT_END_REPEAT_COUNT,
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
+    DEFAULT_UNMATCHED_WATCHDOG_CEILING,
+    DEFAULT_UNMATCHED_WATCHDOG_CEILING_BY_DEVICE,
     DEFAULT_MAX_DEFERRAL_SECONDS,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
@@ -634,6 +636,14 @@ class WashDataManager:
             config_entry.options.get(CONF_LOW_POWER_NO_UPDATE_TIMEOUT, 3600.0)
         )
         self._off_delay = float(config_entry.options.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY))
+        # Device-scaled ceiling for the unmatched (expected == 0) zombie guard (#404).
+        # Not a user option; purely a function of device_type, so it is recomputed
+        # alongside device_type on reconfigure.
+        self._unmatched_watchdog_ceiling = float(
+            DEFAULT_UNMATCHED_WATCHDOG_CEILING_BY_DEVICE.get(
+                self.device_type, DEFAULT_UNMATCHED_WATCHDOG_CEILING
+            )
+        )
         self._learning_confidence = config_entry.options.get(
             CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE
         )
@@ -1841,7 +1851,46 @@ class WashDataManager:
                         )
                     else:
                         self._current_program = "detecting..."
-                    
+
+                    # Re-pin a manual program override across the restart (#404
+                    # secondary bug). _manual_program_active was restored above, but
+                    # _matched_profile_duration was not; without this the manual
+                    # matcher tuple would feed expected_duration=0 on the next tick,
+                    # wipe the detector's matched_profile, and drop the cycle to
+                    # "detecting..." + the unmatched watchdog guard. The duration is
+                    # re-read from the (possibly since-learned) profile, so an empty
+                    # profile stays active with a None duration rather than being lost.
+                    if self._manual_program_active:
+                        manual_name = (
+                            active_snapshot_to_restore.get("manual_program_name")
+                            or self.detector.matched_profile
+                        )
+                        profile = (
+                            self.profile_store.get_profile(manual_name)
+                            if manual_name
+                            else None
+                        )
+                        if profile is not None:
+                            self._current_program = manual_name
+                            try:
+                                avg = float(profile.get("avg_duration", 0.0))
+                            except (TypeError, ValueError):
+                                avg = 0.0
+                            self._matched_profile_duration = avg if avg > 0 else None
+                            self._logger.info(
+                                "Restored manual program override: %s (duration=%.0fs)",
+                                manual_name,
+                                self._matched_profile_duration or 0.0,
+                            )
+                        else:
+                            # The chosen profile was deleted while HA was down.
+                            self._manual_program_active = False
+                            self._logger.info(
+                                "Manual program %r no longer exists after restart; "
+                                "reverting to auto-detect",
+                                manual_name,
+                            )
+
                     # Restore persisted start-notification/event flags from snapshot.
                     self._notified_start = bool(
                         active_snapshot_to_restore.get("notified_start", False)
@@ -2127,6 +2176,13 @@ class WashDataManager:
         # Propagate to learning pipeline (captured at construction time)
         self.learning_manager.device_type = self.device_type
         self.learning_manager.suggestion_engine.device_type = self.device_type
+        # Recompute the device-scaled unmatched-guard ceiling (#404): it tracks
+        # device_type, which the reconfigure flow can change.
+        self._unmatched_watchdog_ceiling = float(
+            DEFAULT_UNMATCHED_WATCHDOG_CEILING_BY_DEVICE.get(
+                self.device_type, DEFAULT_UNMATCHED_WATCHDOG_CEILING
+            )
+        )
 
         # Update detector config in-place
         old_min_power = self.detector.config.min_power
@@ -2938,6 +2994,23 @@ class WashDataManager:
             elif self.detector.state != STATE_OFF:
                 self.detector.user_stop()
                 self._logger.info("Cycle completed via external trigger")
+
+    def _external_end_trigger_available(self) -> bool:
+        """True when an authoritative external end trigger is wired and reporting.
+
+        Used by the unmatched zombie guard (#404): if the user has configured an
+        external end-of-cycle binary sensor and it currently has a usable state, an
+        authoritative end signal already exists, so the time-based failsafe would only
+        do harm (it would truncate a long programme that the trigger will end cleanly).
+        Returns False if disabled, unconfigured, or the entity is missing/unavailable.
+        """
+        if not self.config_entry.options.get(CONF_EXTERNAL_END_TRIGGER_ENABLED, False):
+            return False
+        entity_id = self.config_entry.options.get(CONF_EXTERNAL_END_TRIGGER, "")
+        if not entity_id:
+            return False
+        state = self.hass.states.get(entity_id)
+        return state is not None and state.state not in ("unavailable", "unknown")
 
     async def _setup_maintenance_scheduler(self) -> None:
         """Set up daily maintenance task at midnight."""
@@ -3837,24 +3910,43 @@ class WashDataManager:
                 return
 
         # Secondary zombie guard for unmatched cycles (expected == 0 when no profile
-        # has been matched). The detector hard-caps RUNNING at 8h but a chatty sensor
-        # that never goes silent can keep the watchdog from reaching the end state.
-        # Kill here after 4h so a stuck false-start doesn't run indefinitely.
+        # has been matched, or a hand-created profile has no learned avg_duration yet).
+        # This is a failsafe against a stuck FALSE START, not a cap on real programmes.
+        # The detector already hard-caps any cycle at 8h (cycle_detector 28800s), so
+        # this only ever fires *earlier*, and only when the cycle looks like it is not
+        # really running any more. Its old form force-ended on elapsed time alone, which
+        # truncated genuine long runs (issue #404: a >4h washer-dryer wash+dry drawing
+        # hundreds of watts was cut off at exactly 4h; the empty profile it was learning
+        # against was then stored force_stopped/truncated and could never learn its true
+        # duration, so every subsequent run repeated the deadlock). Three gates keep it
+        # honest without losing the false-start failsafe:
+        #   - a device-scaled ceiling (wet/long appliances get a longer fuse), never
+        #     above the detector's 8h absolute cap;
+        #   - only when the appliance is effectively idle (current draw below the
+        #     running threshold) - a cycle still pulling real power is not a stuck false
+        #     start (reporter's evidence: the plug never dropped below 64 W);
+        #   - skipped when an authoritative external end trigger is wired and reporting,
+        #     since that signal will end the cycle cleanly.
+        # Gate on the active detector state, not _current_program: the latter is only set
+        # to "detecting..." on the RUNNING transition, so a cycle stuck in STARTING keeps
+        # a stale program and would never hit this guard.
         elif (
             expected == 0
             and not self._is_user_paused
             and not _verified_pause_zombie
-            and elapsed > 14400
-            # Gate on the active detector state, not _current_program: the latter is
-            # only set to "detecting..." on the RUNNING transition, so a cycle stuck
-            # in STARTING keeps a stale program and would never hit this 4h guard.
+            and elapsed > self._unmatched_watchdog_ceiling
+            and self._current_power < self.detector.config.start_threshold_w
+            and not self._external_end_trigger_available()
             and self.detector.state in (
                 STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING
             )
         ):
             self._logger.warning(
-                "Watchdog: Unmatched cycle exceeded 4h (%.0fs). Force-ending.",
+                "Watchdog: Unmatched idle cycle exceeded %.0fs (elapsed %.0fs, "
+                "power %.1fW). Force-ending.",
+                self._unmatched_watchdog_ceiling,
                 elapsed,
+                self._current_power,
             )
             self.detector.force_end(now)
             self._current_power = 0.0
@@ -4690,6 +4782,13 @@ class WashDataManager:
         so every save site (shutdown, periodic, pause, resume) stays consistent.
         """
         snapshot["manual_program"] = self._manual_program_active
+        # Persist the chosen program name too (#404 secondary bug): the detector
+        # snapshot's matched_profile is wiped on the first post-restart match tick
+        # because _matched_profile_duration is not restored, so the name must be
+        # carried explicitly to re-pin the override.
+        snapshot["manual_program_name"] = (
+            self._current_program if self._manual_program_active else None
+        )
         snapshot["notified_start"] = self._notified_start
         snapshot["start_event_fired"] = self._start_event_fired
         snapshot["is_user_paused"] = self._is_user_paused
