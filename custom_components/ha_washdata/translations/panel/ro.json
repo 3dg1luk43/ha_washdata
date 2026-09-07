@@ -29,11 +29,13 @@
     "approved": "Aprobat",
     "awaiting": "În așteptarea aprobării",
     "imported_tip": "Importat din magazinul comunității. Folosit doar pentru potrivire, necontabilizat în statistici.",
+    "unmatchable": "potrivire imposibilă",
     "not_importable": "n/a aici",
     "exists": "există deja",
     "backfilled_tip": "Detectat într-un istoric de putere importat. Influențează doar potrivirea programelor, nu este contabilizat în statistici."
   },
   "btn": {
+    "reset_zoom": "Resetați zoomul",
     "set_brand_model": "Stabiliți marca și modelul",
     "refresh_catalog": "Actualizați catalogul",
     "add_device": "+ Adăugați dispozitiv",
@@ -314,7 +316,6 @@
     "wipe_history": "Ștergeți istoricul",
     "recommendations": "Recomandări ({n})",
     "pg_detection_params": "Setări de detectare",
-    "pg_timeline": "Cronologia evenimentelor",
     "pg_outcome": "Rezultatul simulării",
     "pg_across_cycles": "În toate ciclurile tale",
     "community_store": "Magazinul comunității",
@@ -327,6 +328,8 @@
     "poor": "⚠ Calitate slabă a profilului"
   },
   "lbl": {
+    "aria_playground_chart3": "Grafic interactiv al puterii ciclului: treci cu cursorul pentru a citi timpul/puterea, derulează sau folosește două degete pentru a mări, trage pentru a te deplasa",
+    "device_unresolved": "Dispozitiv indisponibil ({id})",
     "drag_to_resize": "Trageți pentru redimensionare",
     "actions": "Acțiuni",
     "activity": "Activitate",
@@ -497,6 +500,7 @@
     "stage4": "Etapa 4 – concordanță",
     "status": "Stare",
     "tail_trim": "Tăiere finală (s)",
+    "tap_to_dismiss": "atingeți graficul pentru a închide",
     "timer_auto_pause": "Pauză automată",
     "timer_min": "min",
     "timer_msg_placeholder": "Mesaj (opțional, {device}/{program}/{minutes})",
@@ -533,9 +537,7 @@
     "pg_time_left_model": "Timp rămas (model)",
     "pg_time_left_model_tip": "Timp rămas estimat de model (estimator de fază + combinație ML), nu o numărătoare inversă fixă",
     "phase": "Fază",
-    "pg_mode_simulate": "Simulează",
     "pg_mode_history": "Testează pe istoric",
-    "pg_mode_sweep": "Scanare",
     "pg_ev_detected": "Detectat",
     "pg_ev_match": "Potrivire confirmată",
     "pg_ev_match_changed": "Potrivire schimbată",
@@ -574,14 +576,11 @@
     "pg_stress_idle_w_desc": "Înlocuiește nivelul de repaus detectat automat (lăsați gol pentru automat).",
     "pg_stress_toggle": "Testați terminarea în repaus",
     "pg_stress_toggle_desc": "Simulează aparatul menținut la consumul său în standby după terminarea înregistrării – arată dacă și când WashData oprește ciclul.",
-    "pg_sweep_2d": "Hartă termică 2D",
-    "pg_sweep_param_y": "Al 2-lea parametru",
     "pg_obj_match": "Acuratețea potrivirii",
     "pg_obj_endtiming": "Acuratețea momentului de încheiere",
     "pg_obj_falseend": "Rata de sfârșituri false",
     "pg_obj_overrun": "Abatere de durată",
     "pg_obj_ambiguity": "Rata de ambiguitate",
-    "pg_best_combo": "cea mai bună combinație",
     "pg_mode_optimize": "Optimizează",
     "pg_group_matching": "Potrivirea programului",
     "pg_zoom_hint": "dublu clic pentru a reseta zoomul",
@@ -660,7 +659,9 @@
     "task_history_import_apply": "Se importă ciclurile",
     "evidence_real_cycles": "Cicluri rulate de această mașină",
     "evidence_reference_cycles": "Descărcate din magazinul comunității",
-    "evidence_backfill_cycles": "Găsite într-un istoric de putere importat"
+    "evidence_backfill_cycles": "Găsite într-un istoric de putere importat",
+    "zoom_hint_touch": "folosiți două degete pentru zoom",
+    "zoom_hint_touch_zoomed": "folosiți două degete pentru zoom · dublă atingere pentru resetare"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -743,6 +744,7 @@
     "history_import": "Importați istoricul de putere"
   },
   "msg": {
+    "pg_canvas_empty3": "Alege un ciclu de mai sus și apasă Rulează pentru a-l simula. Apoi treci cu cursorul pentru a citi valorile, derulează sau folosește două degete pentru a mări și trage pentru a te deplasa.",
     "tail_trim_hint": "Numărul de secunde de eliminat de la sfârșit",
     "store_sibling_hint": "Nu există nimic partajat pentru modelul dvs. exact? Un model foarte apropiat de la aceeași marcă este de obicei un bun punct de plecare.",
     "store_declare_appliance": "Indicați în WashData ce aparat dețineți, iar această filă va afișa configurațiile pe care alte persoane le-au partajat pentru el. Puteți și să scrieți o marcă mai sus pentru a explora.",
@@ -938,9 +940,9 @@
     "advisory_poor_health": "'{name}' are un scor de potrivire scăzut - ciclurile sale recente variază mult sau se potrivesc slab. Examinați ciclurile sau reînregistrați profilul pentru ca recunoașterea și estimările de timp să rămână exacte.",
     "advisory_shape_drift": "'{name}' a deviat semnificativ față de forma inițială a puterii. Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente.",
     "advisory_shape_drift_corr": "'{name}' a deviat semnificativ față de forma inițială a puterii (corelație {corr}). Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente.",
+    "advisory_unmatchable": "'{name}' nu va putea fi niciodată potrivit: nu are în spate niciun ciclu cu date de putere, așa că WashData nu are cu ce să compare un ciclu în desfășurare. Etichetați un ciclu al acestui program (sau înregistrați unul) pentru a-l readuce în procesul de potrivire.",
     "pg_no_alerts": "Nicio problemă detectată în această rulare.",
     "pg_override_active": "Se folosesc setările editate față de cele actuale",
-    "pg_history_intro": "Reluați ciclurile recente prin detectorul și sistemul de potrivire reale. Modificați mai întâi o setare de detectare în Simulează pentru a vedea aici o comparație înainte/după.",
     "pg_history_empty": "Apăsați Rulați pentru a relua ciclurile.",
     "pg_history_summary": "{detected}/{total} detectate · {correct} potrivite corect",
     "pg_sweep_no_metric": "Date insuficiente pentru a evalua acest obiectiv.",
@@ -1391,10 +1393,6 @@
       "doc": "În câteva secunde, o pompă poate funcționa continuu înainte de a fi semnalată ca posibil blocată (declanșează evenimentul de pompă blocată).",
       "label": "Durata Pompei Blocate"
     },
-    "running_dead_zone": {
-      "doc": "După începerea unui ciclu, scăderile de putere din această fereastră sunt ignorate. Mașinile de spălat se umplu cu apă rece (scăzând aproape de 0 W înainte de încălzire) - fără această protecție, faza de umplere arată ca un sfârșit de ciclu. Acest lucru NU omite datele: traseul complet de putere este înregistrat de la T=0. Motorul de sugestii măsoară modelul real de pornire al mașinii și îl dimensionează automat.",
-      "label": "Zonă Moartă în Funcționare"
-    },
     "sampling_interval": {
       "doc": "Timp așteptat între citirile senzorului - utilizat pentru a dimensiona fereastra de netezire și pentru a începe corect să renunțe. Fiecare actualizare a senzorului este capturată indiferent de această valoare; calibrează doar calculele din aval. Motorul de sugestii măsoară cadența reală a senzorului dvs. din ciclurile trecute și o setează automat.",
       "label": "Interval de Eșantionare"
@@ -1737,6 +1735,7 @@
     "recording_stopped": "Înregistrare oprită",
     "review_saved": "Revizuire salvată",
     "settings_conflicts": "Corectați conflictele de setări evidențiate înainte de salvare.",
+    "settings_no_changes": "Nicio modificare de salvat",
     "settings_reverted": "Setări restaurate; integrarea se reîncarcă",
     "settings_saved": "Setări salvate; integrarea se reîncarcă",
     "suggestions_applied": "Sugestii aplicate; integrarea se reîncarcă",
@@ -1839,10 +1838,6 @@
       "profile_match_threshold": {
         "higher": "Confirmă doar potriviri de înaltă încredere; mai multe cicluri rămân neetichetate",
         "lower": "Potrivește mai multe cicluri; unele pot fi ușor greșite"
-      },
-      "running_dead_zone": {
-        "higher": "Ignoră scurte vârfuri de putere în repaus – mai puțin sensibil la zgomot",
-        "lower": "Răspunde la impulsuri mai scurte – detectează activitate tranzitorie rapidă"
       },
       "start_threshold_w": {
         "higher": "Evită pornirile false cauzate de scurte vârfuri de putere",

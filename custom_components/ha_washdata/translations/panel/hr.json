@@ -77,11 +77,13 @@
     "approved": "Odobreno",
     "awaiting": "Čeka odobrenje",
     "imported_tip": "Uvezeno iz zajedničke trgovine. Koristi se samo za podudaranje, ne broji se u statistiku.",
+    "unmatchable": "ne može se podudariti",
     "not_importable": "nije dostupno",
     "exists": "postoji",
     "backfilled_tip": "Otkriveno u uvezenoj povijesti snage. Utječe samo na podudaranje programa, ne broji se u statistiku."
   },
   "btn": {
+    "reset_zoom": "Poništi zumiranje",
     "set_brand_model": "Postavi marku i model",
     "refresh_catalog": "Osvježi katalog",
     "add_device": "+ Dodaj uređaj",
@@ -362,7 +364,6 @@
     "wipe_history": "Obriši povijest",
     "recommendations": "Preporuke ({n})",
     "pg_detection_params": "Postavke otkrivanja",
-    "pg_timeline": "Vremenska crta događaja",
     "pg_outcome": "Ishod simulacije",
     "pg_across_cycles": "Kroz sve vaše cikluse",
     "community_store": "Zajednička trgovina",
@@ -375,6 +376,8 @@
     "poor": "⚠ Loša kvaliteta profila"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktivni grafikon snage ciklusa: prijeđite mišem za prikaz vremena/snage, pomičite kotačić ili koristite dva prsta za zumiranje, povucite za pomicanje",
+    "device_unresolved": "Nedostupan uređaj ({id})",
     "drag_to_resize": "Povucite za promjenu veličine",
     "actions": "Radnje",
     "activity": "Aktivnost",
@@ -546,6 +549,7 @@
     "stage4": "Faza 4 – podudaranje",
     "status": "Status",
     "tail_trim": "Obrezivanje kraja (s)",
+    "tap_to_dismiss": "dotaknite grafikon za zatvaranje",
     "timer_auto_pause": "Automatska pauza",
     "timer_min": "min",
     "timer_msg_placeholder": "Poruka (nije obavezno, {device}/{program}/{minutes})",
@@ -582,9 +586,7 @@
     "pg_time_left_model": "Preostalo vrijeme (model)",
     "pg_time_left_model_tip": "Modelom procijenjeno preostalo vrijeme (procjenitelj faza + mješavina s ML), a ne statičko odbrojavanje",
     "phase": "Faza",
-    "pg_mode_simulate": "Simuliraj",
     "pg_mode_history": "Testiraj na povijesti",
-    "pg_mode_sweep": "Pretraživanje",
     "pg_ev_detected": "Otkriveno",
     "pg_ev_match": "Podudaranje potvrđeno",
     "pg_ev_match_changed": "Podudaranje promijenjeno",
@@ -614,14 +616,11 @@
     "pg_sweep_param": "Parametar",
     "pg_objective": "Cilj",
     "pg_steps": "Koraci",
-    "pg_sweep_2d": "Toplinska karta 2D",
-    "pg_sweep_param_y": "2. parametar",
     "pg_obj_match": "Točnost podudaranja",
     "pg_obj_endtiming": "Točnost kraja",
     "pg_obj_falseend": "Stopa lažnih završetaka",
     "pg_obj_overrun": "Odstupanje trajanja",
     "pg_obj_ambiguity": "Stopa nejasnoća",
-    "pg_best_combo": "najbolja kombinacija",
     "pg_mode_optimize": "Optimiziraj",
     "pg_group_matching": "Podudaranje programa",
     "pg_zoom_hint": "dvostruki klik poništava zumiranje",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Uvoz ciklusa",
     "evidence_real_cycles": "Ciklusi koje je izvršio ovaj uređaj",
     "evidence_reference_cycles": "Preuzeti iz zajedničke trgovine",
-    "evidence_backfill_cycles": "Nađeni u uvezenoj povijesti snage"
+    "evidence_backfill_cycles": "Nađeni u uvezenoj povijesti snage",
+    "zoom_hint_touch": "zumirajte s dva prsta",
+    "zoom_hint_touch_zoomed": "zumirajte s dva prsta · dvostruki dodir za resetiranje"
   },
   "log": {
     "all_levels": "Sve razine",
@@ -791,6 +792,7 @@
     "history_import": "Uvoz povijesti snage"
   },
   "msg": {
+    "pg_canvas_empty3": "Odaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim prijeđite mišem za prikaz vrijednosti, pomičite kotačić ili koristite dva prsta za zumiranje i povucite za pomicanje.",
     "tail_trim_hint": "Uklonite ovoliko sekundi s kraja",
     "store_sibling_hint": "Nema ničega podijeljenog za vaš točan model? Blisko srodan model iste marke obično je dobra početna točka.",
     "store_declare_appliance": "Recite integraciji WashData koji uređaj posjedujete i ova kartica prikazat će konfiguracije koje su drugi podijelili za njega. Možete i upisati marku iznad kako biste pregledali katalog.",
@@ -991,9 +993,9 @@
     "advisory_poor_health": "Profil '{name}' ima nisku ocjenu podudaranja - njegovi noviji ciklusi znatno variraju ili se slabo podudaraju. Pregledajte njegove cikluse ili ponovno snimite profil kako bi prepoznavanje i procjene vremena ostali točni.",
     "advisory_shape_drift": "Profil '{name}' znatno je odstupio od svog izvornog oblika potrošnje snage. Uređaj je možda s vremenom promijenio ponašanje (npr. kamenac, trošenje). Razmislite o ponovnom snimanju ovog profila s novijim ciklusima.",
     "advisory_shape_drift_corr": "Profil '{name}' znatno je odstupio od svog izvornog oblika potrošnje snage (korelacija {corr}). Uređaj je možda s vremenom promijenio ponašanje (npr. kamenac, trošenje). Razmislite o ponovnom snimanju ovog profila s novijim ciklusima.",
+    "advisory_unmatchable": "Profil '{name}' nikada se ne može podudariti: iza njega ne stoji nijedan ciklus s podacima o snazi, pa WashData nema s čime usporediti ciklus koji je u tijeku. Označite ciklus ovog programa (ili snimite novi) kako bi se ponovno uključio u podudaranje.",
     "pg_no_alerts": "U ovom pokretanju nisu otkriveni problemi.",
     "pg_override_active": "Koriste se vaše uređene postavke umjesto trenutnih",
-    "pg_history_intro": "Ponovno reproducirajte svoje nedavne cikluse kroz stvarni detektor i mehanizam podudaranja. Najprije uredite postavku otkrivanja u načinu Simuliraj da biste ovdje vidjeli usporedbu prije/poslije.",
     "pg_history_empty": "Pritisnite Pokreni za reprodukciju svojih ciklusa.",
     "pg_history_summary": "{detected}/{total} otkriveno · {correct} ispravno podudareno",
     "pg_sweep_no_metric": "Nedovoljno podataka za ocjenu ovog cilja.",
@@ -1439,10 +1441,6 @@
       "doc": "Nekoliko sekundi pumpa može raditi neprekidno prije nego što se označi kao moguće zaglavljena (pokreće događaj zaglavljene pumpe).",
       "label": "Trajanje zaglavljene pumpe"
     },
-    "running_dead_zone": {
-      "doc": "Nakon što ciklus započne, padovi snage unutar ovog prozora se zanemaruju. Perilice se pune hladnom vodom (pada blizu 0 W prije zagrijavanja) - bez ove zaštite ta faza punjenja izgleda kao kraj ciklusa. Time se NE preskaču podaci: trag pune snage bilježi se od T=0. Sugestivni mehanizam mjeri stvarni uzorak pokretanja vašeg stroja i automatski ga određuje.",
-      "label": "Mrtva zona u tijeku"
-    },
     "sampling_interval": {
       "doc": "Očekivano vrijeme između očitanja senzora - koristi se za određivanje veličine prozora za izglađivanje i ispravno pokretanje odbijanja. Svako ažuriranje senzora bilježi se bez obzira na ovu vrijednost; samo kalibrira nizvodne izračune. Mehanizam za sugestije mjeri stvarni ritam vašeg senzora iz prošlih ciklusa i automatski ga postavlja.",
       "label": "Interval uzorkovanja"
@@ -1748,10 +1746,6 @@
         "higher": "Potvrđuje samo visoko pouzdana podudaranja; više ciklusa ostaje neoznačeno",
         "lower": "Podudara više ciklusa; neki mogu biti blago pogrešni"
       },
-      "running_dead_zone": {
-        "higher": "Zanemaruje kratke skokove snage u mirovanju – manje osjetljiv na šum",
-        "lower": "Reagira na kraće impulse snage – otkriva brzu prolaznu aktivnost"
-      },
       "start_threshold_w": {
         "higher": "Sprječava lažne startove od kratkih skokova snage",
         "lower": "Otkriva programe s niskom snagom; može reagirati na šum"
@@ -1894,6 +1888,7 @@
     "recording_stopped": "Snimanje zaustavljeno",
     "review_saved": "Pregled spremljen",
     "settings_conflicts": "Ispravite istaknute sukobe postavki prije spremanja.",
+    "settings_no_changes": "Nema promjena za spremanje",
     "settings_reverted": "Postavke vraćene; ponovno učitavanje integracije",
     "settings_saved": "Postavke spremljene; ponovno učitavanje integracije",
     "suggestions_applied": "Prijedlozi primijenjeni; ponovno učitavanje integracije",

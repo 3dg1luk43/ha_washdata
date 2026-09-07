@@ -185,3 +185,42 @@ test('unlabel selected never deletes cycles and refreshes the profile', async ({
   await assertWsNotCalled(page, 'ha_washdata/delete_cycle');
   await assertWsCalled(page, 'ha_washdata/get_profiles');
 });
+
+// ── Unmatchable programs (#400 follow-up) ────────────────────────────────────
+//
+// A program with no cycle behind it is silently absent from every match: it can
+// never win, and it cannot veto a shorter look-alike either, because the #364
+// prefix guard only inspects candidates that reached the ranking. The backend
+// reports it as an `unmatchable` advisory; the card is where the user sees it.
+
+test('a program reported as unmatchable gets a warning badge', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', {
+    ...profilesData,
+    profile_advisories: [{
+      profile: 'Quick 30°C',
+      severity: 'warning',
+      code: 'unmatchable',
+      message: "'Quick 30°C' can never be matched: it has no cycle with power data behind it.",
+      message_key: 'msg.advisory_unmatchable',
+      message_params: { name: 'Quick 30°C' },
+    }],
+  });
+  await clickTab(page, 'profiles');
+
+  const flagged = page.locator('.wd-profile-card').filter({ hasText: 'Quick 30°C' });
+  await expect(flagged).toBeVisible({ timeout: 5_000 });
+  const badge = flagged.locator('.wd-badge', { hasText: "can't be matched" });
+  await expect(badge).toBeVisible();
+  // The advisory text is the tooltip, so the fix is actionable from the card.
+  await expect(badge).toHaveAttribute('title', /no cycle with power data/);
+
+  // And it is scoped to the program actually reported - not every card.
+  const healthy = page.locator('.wd-profile-card').filter({ hasText: 'Cotton 40°C' });
+  await expect(healthy.locator('.wd-badge', { hasText: "can't be matched" })).toHaveCount(0);
+});
+
+test('no unmatchable badge when the backend reports none', async ({ page }) => {
+  await clickTab(page, 'profiles');
+  await expect(page.locator('.wd-profile-card').first()).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('.wd-badge', { hasText: "can't be matched" })).toHaveCount(0);
+});

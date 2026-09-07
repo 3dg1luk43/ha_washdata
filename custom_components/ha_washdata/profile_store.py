@@ -1930,6 +1930,19 @@ class ProfileStore:
             wanted = tuple(PROFILE_EVIDENCE_SOURCES)
         self._evidence_sources = wanted
 
+    @property
+    def save_debug_traces(self) -> bool:
+        """Whether rich per-cycle debug traces are persisted with each cycle.
+
+        Pushed in by the manager from entry options, the way energy_mode and
+        evidence_sources are; the store has no access to them itself.
+        """
+        return self._save_debug_traces
+
+    @save_debug_traces.setter
+    def save_debug_traces(self, value: Any) -> None:
+        self._save_debug_traces = bool(value)
+
     def iter_evidence_cycles(self) -> list[CycleDict]:
         """Stored cycles the user allows to shape a profile.
 
@@ -3078,6 +3091,99 @@ class ProfileStore:
         except Exception:  # noqa: BLE001
             return {}
 
+    def unmatchable_profiles(self) -> dict[str, str]:
+        """Profiles the matcher cannot even consider, mapped to the reason.
+
+        ``_build_match_snapshots`` admits a profile to the candidate pool from one of
+        two sources: its multi-cycle envelope, or a single sample cycle (its pinned
+        ``sample_cycle_id``, else any labelled evidence cycle). A profile with neither
+        is skipped with a ``debug`` log and nothing else - it can never win a match,
+        and it cannot veto a shorter look-alike through the #364 prefix guard either,
+        since that guard only inspects candidates that made it into the ranking. #400
+        was reported against exactly that state: five wrong programs won in turn while
+        the right one sat outside the contest, and the cycle was then cut at 0.98x the
+        wrong program's length.
+
+        This is a *sufficient* condition, deliberately weaker than the builder's own
+        skip list: it reports a profile only when BOTH sources are unusable, so it
+        never claims a profile is unmatchable when the builder would have admitted it.
+        (What it does not predict is a resample failure on a cycle that does have data.)
+        ``test_issue_400_label_provenance`` pins it against a real match so the two
+        cannot drift apart.
+
+        Reads the *evidence* view, so a profile whose only cycles the user excluded via
+        the evidence-source setting is reported too - that is genuinely the state they
+        have put it in. Never raises; returns ``{}`` on error.
+        """
+        try:
+            profiles = self._data.get("profiles") or {}
+            if not isinstance(profiles, dict) or not profiles:
+                return {}
+
+            # Same two lookups the snapshot builder precomputes, same selections.
+            by_id: dict[str, CycleDict] = {}
+            labeled_by_profile: dict[str, CycleDict] = {}
+            for c in self.iter_evidence_cycles():
+                cid = c.get("id")
+                if cid is not None and cid not in by_id:
+                    by_id[cid] = c
+                pname = c.get("profile_name")
+                if not pname or not c.get("power_data"):
+                    continue
+                if (
+                    pname not in labeled_by_profile
+                    and c.get("status") in ("completed", "force_stopped")
+                ):
+                    labeled_by_profile[pname] = c
+
+            envelopes = self._data.get("envelopes") or {}
+            out: dict[str, str] = {}
+
+            for name, profile in profiles.items():
+                if not isinstance(profile, dict):
+                    continue
+
+                # Source 1: the envelope average curve (needs >= 2 cycles and a duration).
+                env = envelopes.get(name) if isinstance(envelopes, dict) else None
+                env_avg = env.get("avg") if isinstance(env, dict) else None
+                env_usable = False
+                if (
+                    isinstance(env, dict)
+                    and int(env.get("cycle_count") or 0) >= 2
+                    and isinstance(env_avg, list)
+                    and len(env_avg) > 1
+                    and isinstance(env_avg[0], (list, tuple))
+                    and len(env_avg[0]) >= 2
+                ):
+                    try:
+                        span = float(env_avg[-1][0]) - float(env_avg[0][0])
+                    except (TypeError, ValueError, IndexError):
+                        span = 0.0
+                    env_usable = bool(
+                        env.get("target_duration") or profile.get("avg_duration") or span
+                    )
+
+                # Source 2: a single sample cycle.
+                sample_id = profile.get("sample_cycle_id")
+                sample = by_id.get(sample_id) if sample_id else None
+                if sample is None or not sample.get("power_data"):
+                    sample = labeled_by_profile.get(name)
+                sample_present = bool(sample is not None and sample.get("power_data"))
+                sample_usable = sample_present and bool(
+                    profile.get("avg_duration") or (sample or {}).get("duration")
+                )
+
+                if env_usable or sample_usable:
+                    continue
+                out[name] = (
+                    "no usable duration"
+                    if (sample_present or isinstance(env_avg, list))
+                    else "no evidence cycle with power data"
+                )
+            return out
+        except Exception:  # noqa: BLE001
+            return {}
+
     def compute_profile_advisories(self) -> list[dict[str, Any]]:
         """Actionable per-profile maintenance advisories from existing signals.
 
@@ -3092,6 +3198,23 @@ class ProfileStore:
             advisories: list[dict[str, Any]] = []
             health = self.compute_profile_health() or {}
             trends = self.compute_profile_trends() or {}
+
+            # A program that cannot be matched at all comes first: no other advice about
+            # it means anything, and until now this state was invisible (a debug log in
+            # the snapshot builder). See :meth:`unmatchable_profiles`.
+            unmatchable = self.unmatchable_profiles() or {}
+            for name in unmatchable:
+                advisories.append({
+                    "profile": name, "severity": "warning", "code": "unmatchable",
+                    "message": (
+                        f"'{name}' can never be matched: it has no cycle with power "
+                        "data behind it, so WashData has nothing to compare a running "
+                        "cycle against. Label a cycle of this program (or record one) "
+                        "to bring it back into matching."
+                    ),
+                    "message_key": "msg.advisory_unmatchable",
+                    "message_params": {"name": name},
+                })
 
             for name, h in health.items():
                 if h.get("health_status") == "poor":
@@ -3668,11 +3791,22 @@ class ProfileStore:
         """Repair profile sample references after retention or migrations.
 
         Ensures each profile's sample_cycle_id points to an existing cycle that still
-        has full-resolution power_data. If missing, picks the newest available cycle
-        with power_data and assigns it as the sample (and labels that cycle to the
-        profile if it was unlabeled).
+        has full-resolution power_data. If it does not, the profile is re-pointed at the
+        newest cycle **already labelled to it** - real, imported or backfilled, so an
+        import-only profile is repaired from its own cycles rather than left broken.
 
-        Returns stats dict.
+        What this deliberately does NOT do (#400 follow-up): adopt an *unlabelled*
+        cycle. It used to hand each sampleless profile the newest unlabelled cycle -
+        any cycle, no similarity check - as its template, its avg_duration and its
+        label. Since this runs on every setup, a program left without evidence (its
+        cycles deleted, unlabelled via the Cleanup tab, or excluded by the evidence-
+        source setting) silently adopted an unrelated wash at the next restart, and then
+        matched and mis-estimated against it. A profile with no cycles of its own is a
+        legitimate pending state (``cleanup_orphaned_profiles`` keeps it on purpose);
+        it is reported by :meth:`unmatchable_profiles` instead of being papered over.
+
+        Returns stats dict. ``cycles_labeled_as_sample`` is retained for diagnostics
+        continuity and is now always 0.
         """
         stats = {
             "profiles_checked": 0,
@@ -3693,10 +3827,7 @@ class ProfileStore:
             c["id"]: c for c in self.iter_stored_cycles() if c.get("id")
         }
 
-        def newest_unlabeled_with_power_data() -> dict[str, Any] | None:
-            candidates: list[dict[str, Any]] = [
-                c for c in cycles if c.get("power_data") and not c.get("profile_name")
-            ]
+        def newest(candidates: list[dict[str, Any]]) -> dict[str, Any] | None:
             if not candidates:
                 return None
             try:
@@ -3713,34 +3844,29 @@ class ProfileStore:
             if sample and sample.get("power_data"):
                 continue
 
-            # Prefer newest already-labeled cycle for this profile that still has power_data
-            labeled_candidates = [
+            # Newest cycle already labelled to this profile that still has power_data.
+            # Real cycles first (they are this appliance's own evidence); an imported or
+            # backfilled cycle is a valid template too, and for an import-only profile
+            # it is the ONLY one - searching past_cycles alone left such a profile
+            # unrepairable, which is what made the unlabelled-steal look necessary.
+            chosen = newest([
                 c
                 for c in cycles
                 if c.get("profile_name") == profile_name and c.get("power_data")
-            ]
-            if labeled_candidates:
-                try:
-                    chosen = max(
-                        labeled_candidates, key=lambda c: c.get("start_time", "")
-                    )
-                except Exception:  # pylint: disable=broad-exception-caught
-                    chosen = labeled_candidates[-1]
-            else:
-                # Fallback: pick newest UNLABELED cycle with power_data
-                chosen = newest_unlabeled_with_power_data()
+            ]) or newest([
+                c
+                for c in self.iter_stored_cycles()
+                if c.get("profile_name") == profile_name and c.get("power_data")
+            ])
 
             if not chosen:
+                # No evidence of its own: leave the profile alone (pending state) so it
+                # cannot adopt an unrelated cycle's shape and duration.
                 continue
 
             profile["sample_cycle_id"] = chosen.get("id")
             if chosen.get("duration"):
                 profile["avg_duration"] = chosen["duration"]
-
-            # If chosen cycle is unlabeled, label it to this profile to bootstrap matching
-            if not chosen.get("profile_name"):
-                chosen["profile_name"] = profile_name
-                stats["cycles_labeled_as_sample"] += 1
 
             stats["profiles_repaired"] += 1
             try:

@@ -77,11 +77,13 @@
         "approved": "Jóváhagyva",
         "awaiting": "Jóváhagyásra vár",
         "imported_tip": "A közösségi boltból importálva. Csak egyeztetéshez használatos, a statisztikába nem számít bele.",
+        "unmatchable": "nem egyeztethető",
         "not_importable": "itt nem elérhető",
         "exists": "létezik",
         "backfilled_tip": "Importált teljesítményelőzményekben észlelve. Csak a programegyeztetést befolyásolja, a statisztikába nem számít bele."
     },
     "btn": {
+        "reset_zoom": "Nagyítás visszaállítása",
         "set_brand_model": "Márka és modell megadása",
         "refresh_catalog": "Katalógus frissítése",
         "add_device": "+ Eszköz hozzáadása",
@@ -362,7 +364,6 @@
         "wipe_history": "Törölje az előzményeket",
         "recommendations": "Javaslatok ({n})",
         "pg_detection_params": "Érzékelési beállítások",
-        "pg_timeline": "Események idővonala",
         "pg_outcome": "Szimuláció eredménye",
         "pg_across_cycles": "Az összes ciklusban",
         "community_store": "Közösségi bolt",
@@ -375,6 +376,8 @@
         "poor": "⚠ Gyenge profilminőség"
     },
     "lbl": {
+        "aria_playground_chart3": "Interaktív ciklusteljesítmény-grafikon: vigye rá a mutatót az idő/teljesítmény leolvasásához, görgessen vagy csippentsen a nagyításhoz, húzza az eltoláshoz",
+        "device_unresolved": "Nem elérhető eszköz ({id})",
         "drag_to_resize": "Húzza az átméretezéshez",
         "pg_anti_wrinkle": "Ránctalanítás",
         "actions": "Akciók",
@@ -545,6 +548,7 @@
         "stage4": "4. szakasz – egyezés",
         "status": "Állapot",
         "tail_trim": "Vágás a végéről (s)",
+        "tap_to_dismiss": "koppintás a grafikonra a bezáráshoz",
         "timer_auto_pause": "Automatikus szünet",
         "timer_min": "min",
         "timer_msg_placeholder": "Üzenet (nem kötelező, {device}/{program}/{minutes})",
@@ -581,9 +585,7 @@
         "pg_time_left_model": "Hátralévő idő (modell)",
         "pg_time_left_model_tip": "A modell által becsült hátralévő idő (fázisbecslő + ML keverék), nem statikus visszaszámláló",
         "phase": "Fázis",
-        "pg_mode_simulate": "Szimuláció",
         "pg_mode_history": "Tesztelés előzményeken",
-        "pg_mode_sweep": "Pásztázás",
         "pg_ev_detected": "Észlelve",
         "pg_ev_match": "Egyezés véglegesítve",
         "pg_ev_match_changed": "Egyezés megváltozott",
@@ -619,14 +621,11 @@
         "pg_stress_idle_w_desc": "Felülbírálja az automatikusan észlelt készenléti teljesítmény alsó értékét (hagyja üresen az automatikus beállításhoz).",
         "pg_stress_toggle": "Üresjárati leállás tesztelése",
         "pg_stress_toggle_desc": "Szimulálja, hogy a készülék a felvétel befejezése után a készenléti fogyasztási szintjén marad - megmutatja, hogy és mikor állítja le a WashData a ciklust.",
-        "pg_sweep_2d": "2D hőtérkép",
-        "pg_sweep_param_y": "2. paraméter",
         "pg_obj_match": "Egyezés pontossága",
         "pg_obj_endtiming": "Befejezési idő pontossága",
         "pg_obj_falseend": "Téves befejezések aránya",
         "pg_obj_overrun": "Időtartam eltérése",
         "pg_obj_ambiguity": "Bizonytalanság aránya",
-        "pg_best_combo": "legjobb kombináció",
         "pg_mode_optimize": "Optimalizálás",
         "pg_group_matching": "Programillesztés",
         "pg_zoom_hint": "dupla kattintás a nagyítás visszaállításához",
@@ -708,7 +707,9 @@
         "task_history_import_apply": "Ciklusok importálása",
         "evidence_real_cycles": "A gép által lefuttatott ciklusok",
         "evidence_reference_cycles": "Letöltve a közösségi boltból",
-        "evidence_backfill_cycles": "Importált teljesítményelőzményekben találva"
+        "evidence_backfill_cycles": "Importált teljesítményelőzményekben találva",
+        "zoom_hint_touch": "csippentés a nagyításhoz",
+        "zoom_hint_touch_zoomed": "csippentés a nagyításhoz · dupla koppintás a visszaállításhoz"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -791,6 +792,7 @@
         "history_import": "Teljesítményelőzmények importálása"
     },
     "msg": {
+        "pg_canvas_empty3": "Válassz ki egy ciklust fent, és nyomd meg a Futtatás gombot a szimulációhoz. Ezután vidd rá a mutatót az értékek leolvasásához, görgess vagy csippents a nagyításhoz, és húzd az eltoláshoz.",
         "tail_trim_hint": "Ennyi másodperc eltávolítása a végéről",
         "store_sibling_hint": "Pontosan az Ön modelljéhez nincs semmi megosztva? Ugyanannak a márkának egy közeli modellje általában jó kiindulópont.",
         "store_declare_appliance": "Adja meg a WashDatának, hogy melyik készülék az Öné, és ez a lap megjeleníti a mások által hozzá megosztott programokat és felvételeket. Fent egy márkát is beírhat, ha csak körül szeretne nézni.",
@@ -986,9 +988,9 @@
         "advisory_poor_health": "A(z) '{name}' illeszkedési pontszáma alacsony - a közelmúltbeli ciklusai erősen ingadoznak vagy gyengén illeszkednek. Nézze át a ciklusait, vagy rögzítse újra a profilt, hogy a felismerés és az időbecslés pontos maradjon.",
         "advisory_shape_drift": "A(z) '{name}' jelentősen eltért az eredeti teljesítménygörbéjétől. A készülék működése idővel megváltozhatott (pl. vízkő, kopás). Fontolja meg a profil újrarögzítését a közelmúltbeli ciklusokkal.",
         "advisory_shape_drift_corr": "A(z) '{name}' jelentősen eltért az eredeti teljesítménygörbéjétől (korreláció: {corr}). A készülék működése idővel megváltozhatott (pl. vízkő, kopás). Fontolja meg a profil újrarögzítését a közelmúltbeli ciklusokkal.",
+        "advisory_unmatchable": "A(z) '{name}' soha nem egyeztethető: nincs mögötte teljesítményadatokkal rendelkező ciklus, így a WashData nem tud mihez hasonlítani egy futó ciklust. Címkézze fel ennek a programnak egy ciklusát (vagy rögzítsen egyet), hogy a profil visszakerüljön az egyeztetésbe.",
         "pg_no_alerts": "Ebben a futásban nem észlelt problémát.",
         "pg_override_active": "A szerkesztett beállításait használja a jelenlegiekhez képest",
-        "pg_history_intro": "Játssza le legutóbbi ciklusait a valódi érzékelőn és illesztőn keresztül. Először szerkesszen egy érzékelési beállítást a Szimuláció módban, hogy itt egy előtte/utána összehasonlítást lásson.",
         "pg_history_empty": "Nyomja meg a Futtatás gombot a ciklusai lejátszásához.",
         "pg_history_summary": "{detected}/{total} észlelve · {correct} helyesen illesztve",
         "pg_sweep_no_metric": "Nincs elég adat ennek a célnak az értékeléséhez.",
@@ -1439,10 +1441,6 @@
             "doc": "Másodpercekkel a szivattyú folyamatosan működhet, mielőtt esetleg elakadtként jelölik meg (kiváltja a beragadt szivattyú eseményt).",
             "label": "Elakadt szivattyú időtartama"
         },
-        "running_dead_zone": {
-            "doc": "A ciklus elindítása után az ablakon belüli teljesítménycsökkenéseket figyelmen kívül hagyja. A mosógépek hideg vízzel töltik fel (a melegítés előtt közel 0 W csökken) – e védelem nélkül a töltési fázis úgy néz ki, mint a ciklus végén. Ez NEM hagyja ki az adatokat: a teljes teljesítmény nyomvonal T=0-tól kerül rögzítésre. A javaslatmotor méri a gép tényleges indítási mintáját, és automatikusan méretezi azt.",
-            "label": "Futó holttér"
-        },
         "sampling_interval": {
             "doc": "Várható idő az érzékelő leolvasásai között – a simítóablak méretére és a visszapattanás helyes elindítására szolgál. Ettől az értéktől függetlenül minden érzékelőfrissítés rögzítésre kerül; csak a downstream számításokat kalibrálja. A javaslatmotor méri az érzékelő tényleges ütemét az elmúlt ciklusokból, és automatikusan beállítja ezt.",
             "label": "Mintavételezési intervallum"
@@ -1781,6 +1779,7 @@
         "recording_stopped": "A felvétel leállt",
         "review_saved": "Vélemény mentve",
         "settings_conflicts": "Mentés előtt javítsa ki a kijelölt beállítási ütközéseket.",
+        "settings_no_changes": "Nincs mentendő módosítás",
         "settings_reverted": "A beállítások visszaállítva; integráció újratöltése",
         "settings_saved": "A beállítások elmentve; integráció újratöltése",
         "suggestions_applied": "Javaslatok alkalmazva; integráció újratöltése",
@@ -1887,10 +1886,6 @@
             "profile_match_threshold": {
                 "higher": "Csak nagy magabiztosságú egyezéseket erősít meg; több ciklus marad jelöletlen",
                 "lower": "Több ciklust egyeztet; néhány kissé helytelen lehet"
-            },
-            "running_dead_zone": {
-                "higher": "Figyelmen kívül hagyja a rövid teljesítménycsúcsokat tétlenség közben – zajra kevésbé érzékeny",
-                "lower": "Rövidebb teljesítménylökésekre reagál – gyors átmeneti aktivitást észlel"
             },
             "start_threshold_w": {
                 "higher": "Elkerüli a rövid teljesítménycsúcsokból eredő hamis indításokat",

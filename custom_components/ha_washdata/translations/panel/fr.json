@@ -29,11 +29,13 @@
     "approved": "Approuvé",
     "awaiting": "En attente d'approbation",
     "imported_tip": "Importé depuis la boutique communautaire. Utilisé uniquement pour la correspondance, non compté dans les statistiques.",
+    "unmatchable": "correspondance impossible",
     "not_importable": "n/a ici",
     "exists": "existe déjà",
     "backfilled_tip": "Détecté dans un historique de puissance importé. Influence uniquement la correspondance des programmes, non compté dans les statistiques."
   },
   "btn": {
+    "reset_zoom": "Réinitialiser le zoom",
     "set_brand_model": "Définir la marque et le modèle",
     "refresh_catalog": "Rafraîchir le catalogue",
     "add_device": "+ Ajouter un appareil",
@@ -314,7 +316,6 @@
     "wipe_history": "Effacer l'historique",
     "recommendations": "Recommandations ({n})",
     "pg_detection_params": "Paramètres de détection",
-    "pg_timeline": "Chronologie des événements",
     "pg_outcome": "Résultat de la simulation",
     "pg_across_cycles": "Sur l'ensemble de vos cycles",
     "community_store": "Boutique communautaire",
@@ -327,6 +328,8 @@
     "poor": "⚠ Qualité de profil médiocre"
   },
   "lbl": {
+    "aria_playground_chart3": "Graphique interactif de puissance du cycle : survolez pour lire le temps/la puissance, faites défiler ou pincez pour zoomer, faites glisser pour vous déplacer",
+    "device_unresolved": "Appareil indisponible ({id})",
     "drag_to_resize": "Faites glisser pour redimensionner",
     "actions": "Actions",
     "activity": "Activité",
@@ -497,6 +500,7 @@
     "stage4": "Étape 4 – concordance",
     "status": "Statut",
     "tail_trim": "Rognage de fin (s)",
+    "tap_to_dismiss": "appuyez sur le graphique pour fermer",
     "timer_auto_pause": "Pause automatique",
     "timer_min": "min",
     "timer_msg_placeholder": "Message (facultatif, {device}/{program}/{minutes})",
@@ -533,9 +537,7 @@
     "pg_time_left_model": "Temps restant (modèle)",
     "pg_time_left_model_tip": "Temps restant estimé par le modèle (estimateur de phase + mélange ML), pas un compte à rebours fixe",
     "phase": "Phase",
-    "pg_mode_simulate": "Simuler",
     "pg_mode_history": "Tester sur l'historique",
-    "pg_mode_sweep": "Balayage",
     "pg_ev_detected": "Détecté",
     "pg_ev_match": "Correspondance confirmée",
     "pg_ev_match_changed": "Correspondance modifiée",
@@ -574,14 +576,11 @@
     "pg_stress_idle_w_desc": "Remplace le plancher de veille détecté automatiquement (laisser vide pour auto).",
     "pg_stress_toggle": "Tester la terminaison au repos",
     "pg_stress_toggle_desc": "Simule l'appareil maintenu à sa consommation en veille après la fin de l'enregistrement – indique si et quand WashData arrête le cycle.",
-    "pg_sweep_2d": "Carte thermique 2D",
-    "pg_sweep_param_y": "2e paramètre",
     "pg_obj_match": "Précision de correspondance",
     "pg_obj_endtiming": "Précision du moment de fin",
     "pg_obj_falseend": "Taux de fausses fins",
     "pg_obj_overrun": "Écart de durée",
     "pg_obj_ambiguity": "Taux d'ambiguïté",
-    "pg_best_combo": "meilleure combinaison",
     "pg_mode_optimize": "Optimiser",
     "pg_group_matching": "Correspondance de programme",
     "pg_zoom_hint": "double-cliquez pour réinitialiser le zoom",
@@ -660,7 +659,9 @@
     "task_history_import_apply": "Importation des cycles",
     "evidence_real_cycles": "Cycles effectués par cette machine",
     "evidence_reference_cycles": "Téléchargés depuis la boutique communautaire",
-    "evidence_backfill_cycles": "Trouvés dans un historique de puissance importé"
+    "evidence_backfill_cycles": "Trouvés dans un historique de puissance importé",
+    "zoom_hint_touch": "pincer pour zoomer",
+    "zoom_hint_touch_zoomed": "pincer pour zoomer · appuyer deux fois pour réinitialiser"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -743,6 +744,7 @@
     "history_import": "Importer l'historique de puissance"
   },
   "msg": {
+    "pg_canvas_empty3": "Choisissez un cycle ci-dessus et appuyez sur Exécuter pour le simuler. Survolez ensuite pour lire les valeurs, faites défiler ou pincez pour zoomer et faites glisser pour vous déplacer.",
     "tail_trim_hint": "Nombre de secondes à supprimer à la fin",
     "store_sibling_hint": "Rien de partagé pour votre modèle exact ? Un modèle proche de la même marque constitue généralement un bon point de départ.",
     "store_declare_appliance": "Indiquez à WashData l'appareil que vous possédez et cet onglet affichera les configurations que d'autres personnes ont partagées pour celui-ci. Vous pouvez aussi saisir une marque ci-dessus pour explorer.",
@@ -938,9 +940,9 @@
     "advisory_poor_health": "'{name}' a un faible score de correspondance - ses cycles récents varient beaucoup ou correspondent mal. Vérifiez ses cycles ou réenregistrez le profil pour que la reconnaissance et les estimations de temps restent précises.",
     "advisory_shape_drift": "'{name}' s'est nettement éloigné de sa courbe de puissance d'origine. L'appareil a peut-être changé de comportement avec le temps (p. ex. calcaire, usure). Envisagez de réenregistrer ce profil avec des cycles récents.",
     "advisory_shape_drift_corr": "'{name}' s'est nettement éloigné de sa courbe de puissance d'origine (corrélation {corr}). L'appareil a peut-être changé de comportement avec le temps (p. ex. calcaire, usure). Envisagez de réenregistrer ce profil avec des cycles récents.",
+    "advisory_unmatchable": "'{name}' ne pourra jamais correspondre à un cycle : aucun cycle avec des données de puissance ne lui est associé, donc WashData n'a rien à quoi comparer un cycle en cours. Étiquetez un cycle de ce programme (ou enregistrez-en un) pour le réintégrer dans la correspondance.",
     "pg_no_alerts": "Aucun problème détecté lors de cette exécution.",
     "pg_override_active": "Utilisation de vos paramètres modifiés vs actuels",
-    "pg_history_intro": "Rejouez vos cycles récents avec le détecteur et le moteur de correspondance réels. Modifiez d'abord un paramètre de détection dans Simuler pour voir ici une comparaison avant/après.",
     "pg_history_empty": "Appuyez sur Exécuter pour rejouer vos cycles.",
     "pg_history_summary": "{detected}/{total} détectés · {correct} correctement reconnus",
     "pg_sweep_no_metric": "Données insuffisantes pour évaluer cet objectif.",
@@ -1421,10 +1423,6 @@
       "doc": "Secondes pendant lesquelles une pompe peut fonctionner en continu avant d'être signalée comme étant éventuellement bloquée (déclenche l'événement de pompe bloquée).",
       "label": "Durée de blocage de la pompe"
     },
-    "running_dead_zone": {
-      "doc": "Après le démarrage d'un cycle, les baisses de puissance dans cette fenêtre sont ignorées. Les machines à laver se remplissent d'eau froide (tombant près de 0 W avant de chauffer) - sans cette protection, cette phase de remplissage ressemble à une fin de cycle. Cela ne saute PAS de données : la trace de pleine puissance est enregistrée à partir de T=0. Le moteur de suggestion mesure le modèle de démarrage réel de votre machine et le dimensionne automatiquement.",
-      "label": "Zone morte en cours d'exécution"
-    },
     "sampling_interval": {
       "doc": "Temps prévu entre les lectures du capteur - utilisé pour dimensionner la fenêtre de lissage et démarrer correctement l'anti-rebond. Chaque mise à jour du capteur est capturée quelle que soit cette valeur ; il calibre uniquement les calculs en aval. Le moteur de suggestion mesure la cadence réelle de votre capteur à partir des cycles passés et la définit automatiquement.",
       "label": "Intervalle d'échantillonnage"
@@ -1514,7 +1512,6 @@
       "doc": "Facultatif. Le modèle de l'appareil, choisi dans le catalogue de la communauté une fois la marque définie. Si votre modèle n'y figure pas, vous pouvez l'ajouter au catalogue."
     },
     "show_contributor": {
-      "label": "Afficher les noms des contributeurs",
       "doc": "Afficher l'attribution « par <contributeur> » sur les appareils de la communauté et les cycles de référence."
     },
     "enable_phase_matching": {
@@ -1768,6 +1765,7 @@
     "recording_stopped": "L'enregistrement s'est arrêté",
     "review_saved": "Avis enregistré",
     "settings_conflicts": "Corrigez les conflits de réglages mis en évidence avant d'enregistrer.",
+    "settings_no_changes": "Aucune modification à enregistrer",
     "settings_reverted": "Paramètres rétablis ; rechargement de l'intégration",
     "settings_saved": "Paramètres enregistrés ; rechargement de l'intégration",
     "suggestions_applied": "Suggestions appliquées ; rechargement de l'intégration",
@@ -1870,10 +1868,6 @@
       "profile_match_threshold": {
         "higher": "Ne valide que les correspondances très confiantes ; plus de cycles restent non étiquetés",
         "lower": "Fait correspondre plus de cycles ; certains peuvent être légèrement erronés"
-      },
-      "running_dead_zone": {
-        "higher": "Ignore les brèves pointes de puissance au repos – moins sensible au bruit",
-        "lower": "Réagit à des impulsions plus courtes – capte les activités transitoires rapides"
       },
       "start_threshold_w": {
         "higher": "Évite les faux démarrages dus à de brèves pointes de puissance",

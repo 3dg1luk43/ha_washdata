@@ -77,11 +77,13 @@
     "approved": "Patvirtinta",
     "awaiting": "Laukiama patvirtinimo",
     "imported_tip": "Importuota iš bendruomenės parduotuvės. Naudojama tik atitikčiai, neįskaičiuojama į statistiką.",
+    "unmatchable": "negalima atpažinti",
     "not_importable": "čia nepasiekiama",
     "exists": "jau yra",
     "backfilled_tip": "Aptikta importuotoje galios istorijoje. Turi įtakos tik programų atpažinimui, neįskaičiuojama į statistiką."
   },
   "btn": {
+    "reset_zoom": "Atstatyti mastelį",
     "set_brand_model": "Nustatyti prekės ženklą ir modelį",
     "refresh_catalog": "Atnaujinti katalogą",
     "add_device": "+ Pridėti įrenginį",
@@ -362,7 +364,6 @@
     "wipe_history": "Išvalyti istoriją",
     "recommendations": "Rekomendacijos ({n})",
     "pg_detection_params": "Aptikimo nustatymai",
-    "pg_timeline": "Įvykių chronologija",
     "pg_outcome": "Simuliacijos rezultatas",
     "pg_across_cycles": "Per visus jūsų ciklus",
     "community_store": "Bendruomenės parduotuvė",
@@ -375,6 +376,8 @@
     "poor": "⚠ Prasta profilio kokybė"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktyvus ciklo galios grafikas: užveskite žymeklį, kad nuskaitytumėte laiką/galią, slinkite arba priartinkite dviem pirštais, vilkite, kad pastumtumėte",
+    "device_unresolved": "Nepasiekiamas įrenginys ({id})",
     "drag_to_resize": "Vilkite, kad pakeistumėte dydį",
     "pg_anti_wrinkle": "Apsauga nuo raukšlių",
     "actions": "Veiksmai",
@@ -545,6 +548,7 @@
     "stage4": "4 etapas – atitikimas",
     "status": "Būsena",
     "tail_trim": "Apkarpymas nuo galo (s)",
+    "tap_to_dismiss": "palieskite grafiką, kad uždarytumėte",
     "timer_auto_pause": "Automatinis pristabdymas",
     "timer_min": "min",
     "timer_msg_placeholder": "Pranešimas (pasirenkama, {device}/{program}/{minutes})",
@@ -581,9 +585,7 @@
     "pg_time_left_model": "Liko laiko (modelis)",
     "pg_time_left_model_tip": "Modelio įvertintas likęs laikas (fazės vertintuvas + ML derinys), ne statinis atgalinis skaičiavimas",
     "phase": "Fazė",
-    "pg_mode_simulate": "Simuliuoti",
     "pg_mode_history": "Bandyti su istorija",
-    "pg_mode_sweep": "Skenavimas",
     "pg_ev_detected": "Aptikta",
     "pg_ev_match": "Atitiktis patvirtinta",
     "pg_ev_match_changed": "Atitiktis pasikeitė",
@@ -619,14 +621,11 @@
     "pg_stress_idle_w_desc": "Perrašyti automatiškai aptiktą budėjimo lygio apatinę ribą (palikite tuščią automatiniam).",
     "pg_stress_toggle": "Testuoti budėjimo nutraukimą",
     "pg_stress_toggle_desc": "Imituoja prietaisą, kuris po įrašymo pasibaigimo lieka budėjimo suvartojimo lygyje - parodo, ar ir kada WashData sustabdys ciklą.",
-    "pg_sweep_2d": "2D šilumos žemėlapis",
-    "pg_sweep_param_y": "Antras parametras",
     "pg_obj_match": "Atitikties tikslumas",
     "pg_obj_endtiming": "Pabaigos laiko tikslumas",
     "pg_obj_falseend": "Klaidingų pabaigų dažnis",
     "pg_obj_overrun": "Trukmės nuokrypis",
     "pg_obj_ambiguity": "Neaiškumų dažnis",
-    "pg_best_combo": "geriausias derinys",
     "pg_mode_optimize": "Optimizuoti",
     "pg_group_matching": "Programų atitiktis",
     "pg_zoom_hint": "dukart spustelėkite, kad atstatytumėte mastelį",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Importuojami ciklai",
     "evidence_real_cycles": "Šio prietaiso atlikti ciklai",
     "evidence_reference_cycles": "Atsisiųsti iš bendruomenės parduotuvės",
-    "evidence_backfill_cycles": "Rasti importuotoje galios istorijoje"
+    "evidence_backfill_cycles": "Rasti importuotoje galios istorijoje",
+    "zoom_hint_touch": "priartinkite dviem pirštais",
+    "zoom_hint_touch_zoomed": "priartinkite dviem pirštais · dukart palieskite atstatymui"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -791,6 +792,7 @@
     "history_import": "Galios istorijos importavimas"
   },
   "msg": {
+    "pg_canvas_empty3": "Pasirinkite ciklą aukščiau ir paspauskite Vykdyti, kad jį simuliuotumėte. Tada užveskite žymeklį, kad nuskaitytumėte reikšmes, slinkite arba priartinkite dviem pirštais ir vilkite, kad pastumtumėte.",
     "tail_trim_hint": "Kiek sekundžių pašalinti nuo galo",
     "store_sibling_hint": "Jūsų tiksliam modeliui nieko nebendrinta? Artimas to paties prekės ženklo modelis paprastai yra gera pradžia.",
     "store_declare_appliance": "Nurodykite WashData, kurį prietaisą turite, ir šiame skirtuke bus rodomos kitų jam bendrintos programos bei įrašai. Taip pat galite viršuje įrašyti prekės ženklą ir tiesiog pasižiūrėti.",
@@ -986,9 +988,9 @@
     "advisory_poor_health": "'{name}' turi žemą atitikties įvertį - naujausi jo ciklai labai skiriasi arba silpnai atpažįstami. Peržiūrėkite jo ciklus arba įrašykite profilį iš naujo, kad atpažinimas ir laiko įverčiai išliktų tikslūs.",
     "advisory_shape_drift": "'{name}' smarkiai nukrypo nuo pradinės galios kreivės. Prietaiso veikimas laikui bėgant galėjo pasikeisti (pvz., kalkės, nusidėvėjimas). Apsvarstykite galimybę įrašyti šį profilį iš naujo pagal naujausius ciklus.",
     "advisory_shape_drift_corr": "'{name}' smarkiai nukrypo nuo pradinės galios kreivės (koreliacija {corr}). Prietaiso veikimas laikui bėgant galėjo pasikeisti (pvz., kalkės, nusidėvėjimas). Apsvarstykite galimybę įrašyti šį profilį iš naujo pagal naujausius ciklus.",
+    "advisory_unmatchable": "'{name}' niekada nebus atpažintas: už jo nėra nė vieno ciklo su galios duomenimis, todėl WashData neturi su kuo palyginti vykstančio ciklo. Pažymėkite kurį nors ciklą šia programa (arba įrašykite vieną), kad profilis vėl būtų atpažįstamas.",
     "pg_no_alerts": "Šiame paleidime problemų neaptikta.",
     "pg_override_active": "Naudojami jūsų redaguoti nustatymai, palyginti su dabartiniais",
-    "pg_history_intro": "Iš naujo paleiskite savo naujausius ciklus per tikrą detektorių ir atitikimo variklį. Pirmiausia redaguokite aptikimo nustatymą režime Simuliuoti, kad čia pamatytumėte prieš/po palyginimą.",
     "pg_history_empty": "Paspauskite Vykdyti, kad iš naujo paleistumėte savo ciklus.",
     "pg_history_summary": "{detected}/{total} aptikta · {correct} teisingai suderinta",
     "pg_sweep_no_metric": "Nepakanka duomenų šiam tikslui įvertinti.",
@@ -1439,10 +1441,6 @@
       "doc": "Po kelių sekundžių siurblys gali veikti nepertraukiamai, kol jis bus pažymėtas kaip galimai užstrigęs (įjungiamas įstrigusio siurblio įvykis).",
       "label": "Siurblio įstrigimo trukmė"
     },
-    "running_dead_zone": {
-      "doc": "Prasidėjus ciklui, maitinimo kritimai šiame lange nepaisomi. Skalbimo mašinos prisipildo šalto vandens (prieš kaitinant nukrenta beveik 0 W) – be šios apsaugos ta užpildymo fazė atrodo kaip ciklo pabaiga. Tai NEpraleidžia duomenų: visos galios sekimas įrašomas nuo T=0. Pasiūlymo variklis matuoja tikrąjį jūsų mašinos paleidimo modelį ir automatiškai nustato jo dydį.",
-      "label": "Veikimo mirusi zona"
-    },
     "sampling_interval": {
       "doc": "Numatomas laikas tarp jutiklio rodmenų – naudojamas išlyginimo lango dydžiui nustatyti ir tinkamai pradėti atšokti. Kiekvienas jutiklio atnaujinimas fiksuojamas neatsižvelgiant į šią reikšmę; tai tik kalibruoja tolesnius skaičiavimus. Pasiūlymų variklis matuoja tikrąją jutiklio kadenciją iš praėjusių ciklų ir nustato ją automatiškai.",
       "label": "Mėginių ėmimo intervalas"
@@ -1781,6 +1779,7 @@
     "recording_stopped": "Įrašymas sustabdytas",
     "review_saved": "Apžvalga išsaugota",
     "settings_conflicts": "Prieš išsaugojant ištaisykite paryškintas nustatymų nesuderinamumus.",
+    "settings_no_changes": "Nėra pakeitimų, kuriuos reikia išsaugoti",
     "settings_reverted": "Nustatymai atkurti; integracijos perkrovimas",
     "settings_saved": "Nustatymai išsaugoti; integracijos perkrovimas",
     "suggestions_applied": "Pasiūlymai pritaikyti; integracijos perkrovimas",
@@ -1887,10 +1886,6 @@
       "profile_match_threshold": {
         "higher": "Patvirtina tik aukšto pasitikėjimo atitikimus; daugiau ciklų lieka nepažymėtų",
         "lower": "Atitinka daugiau ciklų; kai kurie gali būti šiek tiek neteisingi"
-      },
-      "running_dead_zone": {
-        "higher": "Ignoruoja trumpus galios šuolius neveiklumo metu – mažiau jautrus triukšmui",
-        "lower": "Reaguoja į trumpesnius galios pliūpsnius – aptinka greitą trumpalaikę veiklą"
       },
       "start_threshold_w": {
         "higher": "Išvengia netikrų paleidimų dėl trumpų galios šuolių",

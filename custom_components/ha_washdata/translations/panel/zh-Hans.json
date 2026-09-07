@@ -77,11 +77,13 @@
         "approved": "已批准",
         "awaiting": "等待批准",
         "imported_tip": "从社区商店导入。仅用于匹配，不计入统计。",
+        "unmatchable": "无法匹配",
         "not_importable": "此处不适用",
         "exists": "已存在",
         "backfilled_tip": "在导入的功率历史中检测到。仅影响程序匹配，不计入统计。"
     },
     "btn": {
+        "reset_zoom": "重置缩放",
         "set_brand_model": "设置品牌和型号",
         "refresh_catalog": "刷新目录",
         "add_device": "+ 添加设备",
@@ -362,7 +364,6 @@
         "wipe_history": "清除历史",
         "recommendations": "建议（{n}）",
         "pg_detection_params": "检测设置",
-        "pg_timeline": "事件时间线",
         "pg_outcome": "模拟结果",
         "pg_across_cycles": "所有周期综合",
         "community_store": "社区商店",
@@ -375,6 +376,8 @@
         "poor": "⚠ 配置文件质量差"
     },
     "lbl": {
+        "aria_playground_chart3": "交互式周期功率图：悬停查看时间/功率，滚动或双指缩放，拖动平移",
+        "device_unresolved": "不可用的设备 ({id})",
         "drag_to_resize": "拖动以调整大小",
         "actions": "操作",
         "activity": "活动",
@@ -545,6 +548,7 @@
         "stage4": "阶段 4 – 一致度",
         "status": "状态",
         "tail_trim": "末尾裁剪（秒）",
+        "tap_to_dismiss": "点按图表关闭",
         "timer_auto_pause": "自动暂停",
         "timer_min": "分钟",
         "timer_msg_placeholder": "消息（可选，{device}/{program}/{minutes}）",
@@ -581,9 +585,7 @@
         "pg_time_left_model": "剩余时间（模型）",
         "pg_time_left_model_tip": "由模型估算的剩余时间（阶段估算 + ML 混合），并非固定倒计时。",
         "phase": "阶段",
-        "pg_mode_simulate": "模拟",
         "pg_mode_history": "历史测试",
-        "pg_mode_sweep": "参数扫描",
         "pg_ev_detected": "已检测",
         "pg_ev_match": "匹配确定",
         "pg_ev_match_changed": "匹配已更改",
@@ -619,14 +621,11 @@
         "pg_stress_idle_w_desc": "覆盖自动检测的待机功率下限（留空则使用自动值）。",
         "pg_stress_toggle": "测试闲置终止",
         "pg_stress_toggle_desc": "模拟设备在录制结束后维持待机功耗水平，查看 WashData 是否以及何时停止运行周期。",
-        "pg_sweep_2d": "2D 热图",
-        "pg_sweep_param_y": "第二个参数",
         "pg_obj_match": "匹配准确度",
         "pg_obj_endtiming": "结束时机准确度",
         "pg_obj_falseend": "误结束率",
         "pg_obj_overrun": "时长偏离目标",
         "pg_obj_ambiguity": "不明确率",
-        "pg_best_combo": "最佳组合",
         "pg_mode_optimize": "优化",
         "pg_group_matching": "程序匹配",
         "pg_zoom_hint": "双击可重置缩放",
@@ -708,7 +707,9 @@
         "task_history_import_apply": "导入周期",
         "evidence_real_cycles": "本机实际运行的周期",
         "evidence_reference_cycles": "从社区商店下载",
-        "evidence_backfill_cycles": "在导入的功率历史中发现"
+        "evidence_backfill_cycles": "在导入的功率历史中发现",
+        "zoom_hint_touch": "双指缩放",
+        "zoom_hint_touch_zoomed": "双指缩放 · 双击重置"
     },
     "log": {
         "all_levels": "所有级别",
@@ -791,6 +792,7 @@
         "history_import": "导入功率历史"
     },
     "msg": {
+        "pg_canvas_empty3": "在上方选择一个周期并按“运行”进行模拟。然后悬停查看数值，滚动或双指缩放，拖动平移。",
         "tail_trim_hint": "从末尾移除的秒数",
         "store_sibling_hint": "没有与您型号完全一致的分享内容？同品牌中相近的型号通常是不错的起点。",
         "store_declare_appliance": "告知 WashData 您拥有哪台家电，此标签页便会显示其他用户为它分享的程序和录制。您也可以在上方输入品牌名称随意浏览。",
@@ -986,9 +988,9 @@
         "advisory_poor_health": "'{name}' 的拟合度评分较低 - 其近期周期波动较大或匹配较弱。请检查其周期或重新录制该配置文件，以保持匹配和时间估算的准确性。",
         "advisory_shape_drift": "'{name}' 已明显偏离其原始功率曲线。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。",
         "advisory_shape_drift_corr": "'{name}' 已明显偏离其原始功率曲线（相关系数 {corr}）。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。",
+        "advisory_unmatchable": "'{name}' 永远无法被匹配：其背后没有任何带功率数据的周期，因此 WashData 没有可与运行中的周期进行比较的对象。请为此程序标记一个周期（或录制一个周期），使其重新参与匹配。",
         "pg_no_alerts": "本次运行未检测到问题。",
         "pg_override_active": "正在使用您编辑的设置对比当前设置",
-        "pg_history_intro": "用真实的检测器和匹配器重放您最近的周期。若要在此查看前后对比，请先在模拟中编辑一项检测设置。",
         "pg_history_empty": "按运行以重放您的周期。",
         "pg_history_summary": "{detected}/{total} 已检测 · {correct} 正确匹配",
         "pg_sweep_no_metric": "数据不足，无法为此目标评分。",
@@ -1465,10 +1467,6 @@
             "doc": "泵在被标记为可能卡住之前可以连续运行的秒数（触发泵卡住事件）。",
             "label": "泵卡住时长"
         },
-        "running_dead_zone": {
-            "doc": "一个周期开始后，该窗口内的功率骤降将被忽略。洗衣机注满冷水（加热前下降到接近 0 W） - 如果没有这种保护，注水阶段看起来就像循环结束。这不会跳过数据：从 T=0 开始记录全功率轨迹。建议引擎会测量机器的实际启动模式并自动调整其大小。",
-            "label": "运行死区"
-        },
         "sampling_interval": {
             "doc": "传感器读数之间的预期时间 - 用于调整平滑窗口的大小并正确启动去抖。无论该值如何，都会捕获每个传感器更新；它仅校准下游计算。建议引擎会测量传感器过去周期的实际踏频并自动设置。",
             "label": "采样间隔"
@@ -1811,6 +1809,7 @@
         "recording_stopped": "录制已停止",
         "review_saved": "审查已保存",
         "settings_conflicts": "请先解决标红的设置冲突，再保存。",
+        "settings_no_changes": "没有需要保存的更改",
         "settings_reverted": "设置已恢复；集成正在重新加载",
         "settings_saved": "设置已保存；集成重载中",
         "suggestions_applied": "建议已应用；集成重载中",
@@ -1917,10 +1916,6 @@
             "profile_match_threshold": {
                 "higher": "仅提交高置信度匹配，更多循环保持未标记",
                 "lower": "匹配更多循环，部分可能略有偏差"
-            },
-            "running_dead_zone": {
-                "higher": "忽略待机时的短暂功率尖峰––对噪声不那么敏感",
-                "lower": "响应更短的功率突发––捕捉快速瞬态活动"
             },
             "start_threshold_w": {
                 "higher": "避免因短暂功率尖峰引起的误启动",

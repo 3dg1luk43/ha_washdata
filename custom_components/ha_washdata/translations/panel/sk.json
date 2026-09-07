@@ -77,11 +77,13 @@
     "approved": "Schválené",
     "awaiting": "Čaká na schválenie",
     "imported_tip": "Importované z komunitného obchodu. Používa sa iba na porovnávanie, nezapočítava sa do štatistík.",
+    "unmatchable": "nedá sa rozpoznať",
     "not_importable": "nedostupné",
     "exists": "existuje",
     "backfilled_tip": "Detekované v importovanej histórii výkonu. Ovplyvňuje iba priraďovanie programov, nezapočítava sa do štatistík."
   },
   "btn": {
+    "reset_zoom": "Obnoviť priblíženie",
     "set_brand_model": "Nastaviť značku a model",
     "refresh_catalog": "Obnoviť katalóg",
     "add_device": "+ Pridať zariadenie",
@@ -362,7 +364,6 @@
     "wipe_history": "Vymazať históriu",
     "recommendations": "Odporúčania ({n})",
     "pg_detection_params": "Nastavenia detekcie",
-    "pg_timeline": "Časová os udalostí",
     "pg_outcome": "Výsledok simulácie",
     "pg_across_cycles": "Naprieč vašimi cyklami",
     "community_store": "Komunitný obchod",
@@ -375,6 +376,8 @@
     "poor": "⚠ Zlá kvalita profilu"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktívny graf výkonu cyklu: prejdením myšou zobrazíte čas/výkon, kolieskom alebo dvoma prstami priblížite, ťahaním posuniete",
+    "device_unresolved": "Nedostupné zariadenie ({id})",
     "drag_to_resize": "Potiahnutím zmeníte veľkosť",
     "actions": "Akcie",
     "activity": "Aktivita",
@@ -546,6 +549,7 @@
     "stage4": "Etapa 4 – zhoda",
     "status": "Stav",
     "tail_trim": "Orezanie konca (s)",
+    "tap_to_dismiss": "ťuknutím na graf zatvoríte",
     "timer_auto_pause": "Automatické pozastavenie",
     "timer_min": "min",
     "timer_msg_placeholder": "Správa (voliteľné, {device}/{program}/{minutes})",
@@ -582,9 +586,7 @@
     "pg_time_left_model": "Zostávajúci čas (model)",
     "pg_time_left_model_tip": "Modelom odhadovaný zostávajúci čas (odhad fázy + kombinácia s ML), nie statické odpočítavanie",
     "phase": "Fáza",
-    "pg_mode_simulate": "Simulovať",
     "pg_mode_history": "Otestovať na histórii",
-    "pg_mode_sweep": "Prehľadávanie",
     "pg_ev_detected": "Zistené",
     "pg_ev_match": "Zhoda potvrdená",
     "pg_ev_match_changed": "Zhoda zmenená",
@@ -614,14 +616,11 @@
     "pg_sweep_param": "Parameter",
     "pg_objective": "Cieľ",
     "pg_steps": "Kroky",
-    "pg_sweep_2d": "Teplotná mapa 2D",
-    "pg_sweep_param_y": "2. parameter",
     "pg_obj_match": "Presnosť zhody",
     "pg_obj_endtiming": "Presnosť konca",
     "pg_obj_falseend": "Miera falošných koncov",
     "pg_obj_overrun": "Odchýlka trvania",
     "pg_obj_ambiguity": "Miera nejednoznačnosti",
-    "pg_best_combo": "najlepšia kombinácia",
     "pg_mode_optimize": "Optimalizovať",
     "pg_group_matching": "Priraďovanie programov",
     "pg_zoom_hint": "dvojitým kliknutím obnovíte priblíženie",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Import cyklov",
     "evidence_real_cycles": "Cykly, ktoré tento spotrebič vykonal",
     "evidence_reference_cycles": "Stiahnuté z komunitného obchodu",
-    "evidence_backfill_cycles": "Nájdené v importovanej histórii výkonu"
+    "evidence_backfill_cycles": "Nájdené v importovanej histórii výkonu",
+    "zoom_hint_touch": "dvoma prstami priblížite",
+    "zoom_hint_touch_zoomed": "dvoma prstami priblížite · dvojitým ťuknutím obnovíte"
   },
   "log": {
     "all_levels": "Všetky úrovne",
@@ -791,6 +792,7 @@
     "history_import": "Import histórie výkonu"
   },
   "msg": {
+    "pg_canvas_empty3": "Vyberte cyklus vyššie a stlačením Spustiť ho nasimulujte. Potom prejdením myšou zobrazíte hodnoty, kolieskom alebo dvoma prstami priblížite a ťahaním posuniete.",
     "tail_trim_hint": "Koľko sekúnd odstrániť z konca",
     "store_sibling_hint": "Pre váš konkrétny model nie je nič zdieľané? Veľmi podobný model od tej istej značky je zvyčajne dobrý východiskový bod.",
     "store_declare_appliance": "Povedzte WashData, aký spotrebič máte, a táto karta zobrazí nastavenia, ktoré pre neho zdieľali ostatní používatelia. Môžete tiež zadať značku vyššie a poobzerať sa.",
@@ -991,9 +993,9 @@
     "advisory_poor_health": "'{name}' má nízke skóre zhody - jeho posledné cykly sa veľmi líšia alebo sa slabo rozpoznávajú. Prezrite jeho cykly alebo profil nahrajte znova, aby rozpoznávanie a odhady času zostali presné.",
     "advisory_shape_drift": "'{name}' sa výrazne odchýlil od pôvodného tvaru krivky výkonu. Správanie spotrebiča sa mohlo časom zmeniť (napr. vodný kameň, opotrebenie). Zvážte opätovné nahranie tohto profilu z posledných cyklov.",
     "advisory_shape_drift_corr": "'{name}' sa výrazne odchýlil od pôvodného tvaru krivky výkonu (korelácia {corr}). Správanie spotrebiča sa mohlo časom zmeniť (napr. vodný kameň, opotrebenie). Zvážte opätovné nahranie tohto profilu z posledných cyklov.",
+    "advisory_unmatchable": "'{name}' nie je možné nikdy rozpoznať: nestojí za ním žiadny cyklus s údajmi o výkone, takže WashData nemá s čím porovnať prebiehajúci cyklus. Označte týmto programom niektorý cyklus (alebo jeden zaznamenajte), aby sa profil vrátil do rozpoznávania.",
     "pg_no_alerts": "V tomto behu neboli zistené žiadne problémy.",
     "pg_override_active": "Používajú sa vaše upravené nastavenia oproti aktuálnym",
-    "pg_history_intro": "Prehrajte svoje nedávne cykly cez skutočný detektor a priraďovač. Najprv upravte nastavenie detekcie v režime Simulovať, aby ste tu videli porovnanie pred/po.",
     "pg_history_empty": "Stlačte Spustiť na prehratie vašich cyklov.",
     "pg_history_summary": "{detected}/{total} zistených · {correct} správne priradených",
     "pg_sweep_no_metric": "Nedostatok dát na vyhodnotenie tohto cieľa.",
@@ -1439,10 +1441,6 @@
       "doc": "Sekundy môže čerpadlo bežať nepretržite predtým, ako je označené ako možné zablokovanie (spustí udalosť zaseknutého čerpadla).",
       "label": "Trvanie zaseknutia čerpadla"
     },
-    "running_dead_zone": {
-      "doc": "Po spustení cyklu sa poklesy výkonu v rámci tohto okna ignorujú. Práčky sa plnia studenou vodou (pred ohrevom poklesne takmer 0 W) - bez tejto ochrany vyzerá fáza plnenia ako koniec cyklu. Týmto sa nepreskakujú údaje: celý priebeh výkonu sa zaznamenáva od T=0. Nástroj návrhov meria skutočný vzor spustenia vášho počítača a automaticky ho upravuje.",
-      "label": "Mŕtva zóna behu"
-    },
     "sampling_interval": {
       "doc": "Očakávaný čas medzi snímaniami snímača – používa sa na nastavenie veľkosti vyhladzovacieho okna a správne spustenie odrazu. Každá aktualizácia snímača sa zaznamená bez ohľadu na túto hodnotu; kalibruje iba následné výpočty. Nástroj návrhov meria skutočnú kadenciu vášho senzora z minulých cyklov a automaticky ju nastavuje.",
       "label": "Interval vzorkovania"
@@ -1748,10 +1746,6 @@
         "higher": "Potvrdzuje iba vysoko isté zhody; viac cyklov zostane neoznačených",
         "lower": "Páruje viac cyklov; niektoré môžu byť mierne nesprávne"
       },
-      "running_dead_zone": {
-        "higher": "Ignoruje krátke výkonové špičky počas nečinnosti – menej citlivý na rušenie",
-        "lower": "Reaguje na kratšie výkonové impulzy – zachytí rýchlu prechodnú aktivitu"
-      },
       "start_threshold_w": {
         "higher": "Zabraňuje falošným štartom z krátkych výkonových špiček",
         "lower": "Zachytí programy s nízkym príkonom; môže reagovať na šum"
@@ -1894,6 +1888,7 @@
     "recording_stopped": "Nahrávanie zastavené",
     "review_saved": "Kontrola uložená",
     "settings_conflicts": "Pred uložením opravte zvýraznené konflikty nastavení.",
+    "settings_no_changes": "Žiadne zmeny na uloženie",
     "settings_reverted": "Nastavenia boli obnovené; integrácia sa znovu načítava",
     "settings_saved": "Nastavenia uložené; integrácia sa znovu načítava",
     "suggestions_applied": "Návrhy použité; integrácia sa znovu načítava",

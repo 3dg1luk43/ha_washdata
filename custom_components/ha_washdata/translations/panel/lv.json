@@ -77,11 +77,13 @@
     "approved": "Apstiprināts",
     "awaiting": "Gaida apstiprinājumu",
     "imported_tip": "Importēts no kopienas veikala. Izmanto tikai saskaņošanai, netiek ieskaitīts statistikā.",
+    "unmatchable": "nevar atpazīt",
     "not_importable": "šeit nav pieejams",
     "exists": "jau eksistē",
     "backfilled_tip": "Noteikts importētā jaudas vēsturē. Ietekmē tikai programmu saskaņošanu, netiek ieskaitīts statistikā."
   },
   "btn": {
+    "reset_zoom": "Atiestatīt tuvinājumu",
     "set_brand_model": "Iestatīt zīmolu un modeli",
     "refresh_catalog": "Atsvaidzināt katalogu",
     "add_device": "+ Pievienot ierīci",
@@ -362,7 +364,6 @@
     "wipe_history": "Noslaukiet vēsturi",
     "recommendations": "Ieteikumi ({n})",
     "pg_detection_params": "Noteikšanas iestatījumi",
-    "pg_timeline": "Notikumu laika josla",
     "pg_outcome": "Simulācijas rezultāts",
     "pg_across_cycles": "Pa visiem jūsu cikliem",
     "community_store": "Kopienas veikals",
@@ -375,6 +376,8 @@
     "poor": "⚠ Slikta profila kvalitāte"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktīva cikla jaudas diagramma: turiet kursoru virs, lai nolasītu laiku/jaudu, ritiniet vai tuviniet ar diviem pirkstiem, velciet, lai pārvietotu",
+    "device_unresolved": "Nepieejama ierīce ({id})",
     "drag_to_resize": "Velciet, lai mainītu izmēru",
     "pg_anti_wrinkle": "Pretgrumbu režīms",
     "actions": "Darbības",
@@ -545,6 +548,7 @@
     "stage4": "4. posms – atbilstība",
     "status": "Statuss",
     "tail_trim": "Apgriešana no beigām (s)",
+    "tap_to_dismiss": "pieskarieties diagrammai, lai aizvērtu",
     "timer_auto_pause": "Automātiska pauze",
     "timer_min": "min",
     "timer_msg_placeholder": "Ziņojums (neobligāti, {device}/{program}/{minutes})",
@@ -581,9 +585,7 @@
     "pg_time_left_model": "Atlikušais laiks (modelis)",
     "pg_time_left_model_tip": "Modeļa novērtētais atlikušais laiks (fāzes novērtētājs + ML sajaukums), nevis statisks atpakaļskaitītājs",
     "phase": "Fāze",
-    "pg_mode_simulate": "Simulēt",
     "pg_mode_history": "Testēt uz vēstures",
-    "pg_mode_sweep": "Skenēšana",
     "pg_ev_detected": "Noteikts",
     "pg_ev_match": "Atbilstība apstiprināta",
     "pg_ev_match_changed": "Atbilstība mainījās",
@@ -619,14 +621,11 @@
     "pg_stress_idle_w_desc": "Pārrakstīt automātiski noteikto gaidstāves jaudas apakšrobežu (atstājiet tukšu automātiskai).",
     "pg_stress_toggle": "Pārbaudīt dīkstāves apturēšanu",
     "pg_stress_toggle_desc": "Simulē ierīci, kas paliek gaidstāves patēriņa līmenī pēc ierakstīšanas beigām - rāda, vai un kad WashData aptur ciklu.",
-    "pg_sweep_2d": "2D siltuma karte",
-    "pg_sweep_param_y": "2. parametrs",
     "pg_obj_match": "Atbilstības precizitāte",
     "pg_obj_endtiming": "Beigu laika precizitāte",
     "pg_obj_falseend": "Kļūdaino beigu īpatsvars",
     "pg_obj_overrun": "Ilguma novirze",
     "pg_obj_ambiguity": "Neskaidrību īpatsvars",
-    "pg_best_combo": "labākā kombinācija",
     "pg_mode_optimize": "Optimizēt",
     "pg_group_matching": "Programmu saskaņošana",
     "pg_zoom_hint": "veiciet dubultklikšķi, lai atiestatītu tuvinājumu",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Ciklu importēšana",
     "evidence_real_cycles": "Šīs ierīces izpildītie cikli",
     "evidence_reference_cycles": "Lejupielādēti no kopienas veikala",
-    "evidence_backfill_cycles": "Atrasti importētā jaudas vēsturē"
+    "evidence_backfill_cycles": "Atrasti importētā jaudas vēsturē",
+    "zoom_hint_touch": "tuviniet ar diviem pirkstiem",
+    "zoom_hint_touch_zoomed": "tuviniet ar diviem pirkstiem · divreiz pieskarieties, lai atiestatītu"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -791,6 +792,7 @@
     "history_import": "Jaudas vēstures importēšana"
   },
   "msg": {
+    "pg_canvas_empty3": "Izvēlieties ciklu augšā un nospiediet Palaist, lai to simulētu. Pēc tam turiet kursoru virs, lai nolasītu vērtības, ritiniet vai tuviniet ar diviem pirkstiem un velciet, lai pārvietotu.",
     "tail_trim_hint": "Cik sekundes noņemt no beigām",
     "store_sibling_hint": "Jūsu precīzajam modelim nekas nav kopīgots? Tuvs tā paša zīmola modelis parasti ir labs sākumpunkts.",
     "store_declare_appliance": "Norādiet WashData, kura ierīce jums pieder, un šajā cilnē tiks parādītas citu tai kopīgotās programmas un ieraksti. Varat arī augšā ievadīt zīmolu un vienkārši paskatīties apkārt.",
@@ -986,9 +988,9 @@
     "advisory_poor_health": "'{name}' ir zems atbilstības rādītājs - tā nesenie cikli stipri atšķiras vai atpazīti vāji. Pārskatiet tā ciklus vai ierakstiet profilu no jauna, lai atpazīšana un laika aplēses paliktu precīzas.",
     "advisory_shape_drift": "'{name}' ir ievērojami novirzījies no sākotnējās jaudas līknes. Ierīces darbība laika gaitā, iespējams, ir mainījusies (piemēram, katlakmens, nolietojums). Apsveriet šī profila ierakstīšanu no jauna, izmantojot nesenos ciklus.",
     "advisory_shape_drift_corr": "'{name}' ir ievērojami novirzījies no sākotnējās jaudas līknes (korelācija {corr}). Ierīces darbība laika gaitā, iespējams, ir mainījusies (piemēram, katlakmens, nolietojums). Apsveriet šī profila ierakstīšanu no jauna, izmantojot nesenos ciklus.",
+    "advisory_unmatchable": "'{name}' nekad netiks atpazīts: tam nav neviena cikla ar jaudas datiem, tāpēc WashData nav ar ko salīdzināt notiekošo ciklu. Iezīmējiet kādu ciklu ar šo programmu (vai ierakstiet vienu), lai profils atgrieztos saskaņošanā.",
     "pg_no_alerts": "Šajā palaišanā problēmas netika konstatētas.",
     "pg_override_active": "Tiek izmantoti jūsu rediģētie iestatījumi pret pašreizējiem",
-    "pg_history_intro": "Atkārtoti palaidiet savus nesenos ciklus caur īsto detektoru un saskaņotāju. Vispirms rediģējiet noteikšanas iestatījumu režīmā Simulēt, lai šeit redzētu pirms/pēc salīdzinājumu.",
     "pg_history_empty": "Nospiediet Palaist, lai atkārtoti palaistu savus ciklus.",
     "pg_history_summary": "{detected}/{total} noteikti · {correct} pareizi saskaņoti",
     "pg_sweep_no_metric": "Nav pietiekami daudz datu šī mērķa novērtēšanai.",
@@ -1439,10 +1441,6 @@
       "doc": "Sekundes sūknis var darboties nepārtraukti, pirms tas tiek atzīmēts kā iespējams iestrēdzis (aktivizē sūkņa iestrēgšanas notikumu).",
       "label": "Iestrēgušā sūkņa ilgums"
     },
-    "running_dead_zone": {
-      "doc": "Pēc cikla sākuma strāvas kritumi šajā logā tiek ignorēti. Veļas mazgājamās mašīnas piepilda ar aukstu ūdeni (pirms karsēšanas samazinās gandrīz 0 W) – bez šīs aizsardzības uzpildes fāze izskatās kā cikla beigas. Dati netiek izlaisti: pilna jaudas izsekošana tiek reģistrēta no T=0. Ieteikumu programma mēra jūsu mašīnas faktisko palaišanas modeli un automātiski nosaka to izmērus.",
-      "label": "Darbības mirušā zona"
-    },
     "sampling_interval": {
       "doc": "Paredzamais laiks starp sensora rādījumiem – tiek izmantots, lai izlīdzinātu logu un sāktu pareizu atlēcienu. Katrs sensora atjauninājums tiek fiksēts neatkarīgi no šīs vērtības; tas tikai kalibrē pakārtotos aprēķinus. Ieteikumu programma mēra jūsu sensora faktisko ritmu no iepriekšējiem cikliem un iestata to automātiski.",
       "label": "Paraugu ņemšanas intervāls"
@@ -1781,6 +1779,7 @@
     "recording_stopped": "Ierakstīšana pārtraukta",
     "review_saved": "Atsauksme saglabāta",
     "settings_conflicts": "Novērsiet izceltās iestatījumu pretrunas pirms saglabāšanas.",
+    "settings_no_changes": "Nav izmaiņu, ko saglabāt",
     "settings_reverted": "Iestatījumi atjaunoti; integrācijas pārlādēšana",
     "settings_saved": "Iestatījumi saglabāti; integrācijas pārlādēšana",
     "suggestions_applied": "Ieteikumi piemēroti; integrācijas pārlādēšana",
@@ -1887,10 +1886,6 @@
       "profile_match_threshold": {
         "higher": "Apstiprina tikai augstas pārliecības atbilstības; vairāk ciklu paliek bez iezīmes",
         "lower": "Atbilst vairākiem cikliem; daži var būt nedaudz nepareizi"
-      },
-      "running_dead_zone": {
-        "higher": "Ignorē īsus jaudas pieauguma momentus dīkstāvē – mazāk jutīgs pret troksni",
-        "lower": "Reaģē uz īsākiem jaudas uzliesmojumiem – uztver ātru pārejošu aktivitāti"
       },
       "start_threshold_w": {
         "higher": "Novērš viltus palaišanas no īslaicīgiem jaudas pieaugumiem",

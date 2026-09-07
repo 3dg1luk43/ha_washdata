@@ -77,11 +77,13 @@
     "approved": "Freigegeben",
     "awaiting": "Warten auf Freigabe",
     "imported_tip": "Aus dem Community-Store importiert. Wird nur für den Abgleich verwendet, zählt nicht in die Statistik.",
+    "unmatchable": "nicht zuordenbar",
     "not_importable": "hier n. v.",
     "exists": "vorhanden",
     "backfilled_tip": "Im importierten Leistungsverlauf erkannt. Beeinflusst nur die Programmzuordnung, zählt nicht in die Statistik."
   },
   "btn": {
+    "reset_zoom": "Zoom zurücksetzen",
     "set_brand_model": "Marke und Modell festlegen",
     "refresh_catalog": "Katalog aktualisieren",
     "add_device": "+ Gerät hinzufügen",
@@ -362,7 +364,6 @@
     "wipe_history": "Verlauf löschen",
     "recommendations": "Empfehlungen ({n})",
     "pg_detection_params": "Erkennungseinstellungen",
-    "pg_timeline": "Ereignis-Zeitachse",
     "pg_outcome": "Simulationsergebnis",
     "pg_across_cycles": "Über deine Zyklen hinweg",
     "community_store": "Community-Store",
@@ -375,6 +376,8 @@
     "poor": "⚠ Schlechte Übereinstimmungsqualität"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktives Leistungsdiagramm des Zyklus: zum Ablesen von Zeit/Leistung mit dem Zeiger darüberfahren, scrollen oder mit zwei Fingern zoomen, zum Verschieben ziehen",
+    "device_unresolved": "Nicht verfügbares Gerät ({id})",
     "drag_to_resize": "Zum Ändern der Größe ziehen",
     "actions": "Aktionen",
     "activity": "Aktivität",
@@ -550,6 +553,7 @@
     "stage4": "Stufe 4 – Übereinstimmung",
     "status": "Status",
     "tail_trim": "Ende kürzen (s)",
+    "tap_to_dismiss": "zum Ausblenden auf das Diagramm tippen",
     "timer_auto_pause": "Automatische Pause",
     "timer_min": "min",
     "timer_msg_placeholder": "Nachricht (optional, {device}/{program}/{minutes})",
@@ -586,9 +590,7 @@
     "pg_time_left_model": "Restzeit (Modell)",
     "pg_time_left_model_tip": "Modellgeschätzte verbleibende Zeit (Phasenschätzer + ML-Mix), kein statischer Countdown",
     "phase": "Phase",
-    "pg_mode_simulate": "Simulieren",
     "pg_mode_history": "An Verlauf testen",
-    "pg_mode_sweep": "Durchlauf",
     "pg_ev_detected": "Erkannt",
     "pg_ev_match": "Übereinstimmung bestätigt",
     "pg_ev_match_changed": "Übereinstimmung geändert",
@@ -618,14 +620,11 @@
     "pg_sweep_param": "Parameter",
     "pg_objective": "Ziel",
     "pg_steps": "Schritte",
-    "pg_sweep_2d": "2D-Heatmap",
-    "pg_sweep_param_y": "2. Parameter",
     "pg_obj_match": "Zuordnungsgenauigkeit",
     "pg_obj_endtiming": "Endzeit-Genauigkeit",
     "pg_obj_falseend": "Falsch-Ende-Rate",
     "pg_obj_overrun": "Dauerabweichung",
     "pg_obj_ambiguity": "Mehrdeutigkeitsrate",
-    "pg_best_combo": "beste Kombination",
     "pg_mode_optimize": "Optimieren",
     "pg_group_matching": "Programmzuordnung",
     "pg_zoom_hint": "Doppelklick zum Zurücksetzen des Zooms",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Zyklen werden importiert",
     "evidence_real_cycles": "Zyklen, die diese Maschine ausgeführt hat",
     "evidence_reference_cycles": "Aus dem Community-Store heruntergeladen",
-    "evidence_backfill_cycles": "Im importierten Leistungsverlauf gefunden"
+    "evidence_backfill_cycles": "Im importierten Leistungsverlauf gefunden",
+    "zoom_hint_touch": "mit zwei Fingern zoomen",
+    "zoom_hint_touch_zoomed": "mit zwei Fingern zoomen · Doppeltippen zum Zurücksetzen"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -791,6 +792,7 @@
     "history_import": "Leistungsverlauf importieren"
   },
   "msg": {
+    "pg_canvas_empty3": "Wähle oben einen Zyklus und drücke auf Ausführen, um ihn zu simulieren. Fahre dann mit dem Zeiger darüber, um Werte abzulesen, scrolle oder zoome mit zwei Fingern und ziehe zum Verschieben.",
     "tail_trim_hint": "So viele Sekunden vom Ende entfernen",
     "store_sibling_hint": "Für Ihr genaues Modell ist nichts geteilt? Ein nah verwandtes Modell derselben Marke ist meist ein guter Ausgangspunkt.",
     "store_declare_appliance": "Teilen Sie WashData mit, welches Gerät Sie besitzen, dann zeigt dieser Tab die Setups, die andere dafür geteilt haben. Sie können oben auch eine Marke eingeben, um sich umzusehen.",
@@ -986,9 +988,9 @@
     "advisory_poor_health": "'{name}' hat einen niedrigen Übereinstimmungswert - die letzten Zyklen schwanken stark oder passen nur schwach. Überprüfen Sie die Zyklen oder zeichnen Sie das Profil neu auf, damit Erkennung und Zeitschätzungen genau bleiben.",
     "advisory_shape_drift": "'{name}' hat sich deutlich vom ursprünglichen Leistungsverlauf entfernt. Das Gerät hat sein Verhalten möglicherweise mit der Zeit verändert (z. B. Verkalkung, Verschleiß). Erwägen Sie, dieses Profil mit aktuellen Zyklen neu aufzuzeichnen.",
     "advisory_shape_drift_corr": "'{name}' hat sich deutlich vom ursprünglichen Leistungsverlauf entfernt (Korrelation {corr}). Das Gerät hat sein Verhalten möglicherweise mit der Zeit verändert (z. B. Verkalkung, Verschleiß). Erwägen Sie, dieses Profil mit aktuellen Zyklen neu aufzuzeichnen.",
+    "advisory_unmatchable": "'{name}' kann nie zugeordnet werden: Dahinter steht kein Zyklus mit Leistungsdaten, daher hat WashData nichts, womit es einen laufenden Zyklus vergleichen kann. Beschriften Sie einen Zyklus dieses Programms (oder nehmen Sie einen auf), um es wieder in die Zuordnung aufzunehmen.",
     "pg_no_alerts": "In diesem Lauf wurden keine Probleme erkannt.",
     "pg_override_active": "Verwendet Ihre bearbeiteten Einstellungen ggü. den aktuellen",
-    "pg_history_intro": "Spielen Sie Ihre letzten Zyklen durch die echte Erkennung und Zuordnung ab. Bearbeiten Sie zuerst eine Erkennungseinstellung unter Simulieren, um hier einen Vorher-Nachher-Vergleich zu sehen.",
     "pg_history_empty": "Drücken Sie Ausführen, um Ihre Zyklen erneut abzuspielen.",
     "pg_history_summary": "{detected}/{total} erkannt · {correct} korrekt zugeordnet",
     "pg_sweep_no_metric": "Nicht genügend Daten, um dieses Ziel zu bewerten.",
@@ -1465,10 +1467,6 @@
       "doc": "Sekunden lang kann eine Pumpe ununterbrochen laufen, bevor sie als möglicherweise steckengeblieben gekennzeichnet wird (löst das Ereignis „Pumpe steckengeblieben“ aus).",
       "label": "Dauer der feststeckenden Pumpe"
     },
-    "running_dead_zone": {
-      "doc": "Nach Beginn eines Zyklus werden Leistungseinbrüche innerhalb dieses Fensters ignoriert. Waschmaschinen füllen sich mit kaltem Wasser (der Wert sinkt vor dem Aufheizen auf nahezu 0 W) – ohne diesen Schutz sieht die Füllphase wie ein Zyklusende aus. Dabei werden KEINE Daten übersprungen: Die vollständige Leistungskurve wird ab T=0 aufgezeichnet. Die Vorschlags-Engine misst das tatsächliche Startmuster Ihrer Maschine und passt dieses automatisch an.",
-      "label": "Laufende Totzone"
-    },
     "sampling_interval": {
       "doc": "Erwartete Zeit zwischen Sensorablesungen – wird verwendet, um das Glättungsfenster zu dimensionieren und die Entprellung korrekt zu starten. Unabhängig von diesem Wert wird jede Sensoraktualisierung erfasst; es kalibriert nur die nachgelagerten Berechnungen. Die Vorschlags-Engine misst die tatsächliche Trittfrequenz Ihres Sensors aus vergangenen Zyklen und stellt diese automatisch ein.",
       "label": "Abtastintervall"
@@ -1778,10 +1776,6 @@
         "higher": "Nur sehr sichere Übereinstimmungen werden bestätigt – mehr Zyklen bleiben unbeschriftet",
         "lower": "Mehr Zyklen werden zugeordnet – einzelne könnten leicht falsch sein"
       },
-      "running_dead_zone": {
-        "higher": "Kurze Leistungsspitzen im Leerlauf werden ignoriert – weniger rauschempfindlich",
-        "lower": "Reagiert auf kürzere Leistungsimpulse – erfasst schnelle Transienten"
-      },
       "start_threshold_w": {
         "higher": "Vermeidet Fehlstarts durch kurze Leistungsspitzen",
         "lower": "Erkennt leistungsschwache Programme – kann auf Rauschen reagieren"
@@ -1924,6 +1918,7 @@
     "recording_stopped": "Die Aufnahme wurde gestoppt",
     "review_saved": "Bewertung gespeichert",
     "settings_conflicts": "Beheben Sie die markierten Einstellungskonflikte, bevor Sie speichern.",
+    "settings_no_changes": "Keine Änderungen zum Speichern",
     "settings_reverted": "Einstellungen wiederhergestellt; Neuladen der Integration",
     "settings_saved": "Einstellungen gespeichert; Neuladen der Integration",
     "suggestions_applied": "Angewendete Vorschläge; Neuladen der Integration",

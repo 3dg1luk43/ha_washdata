@@ -77,11 +77,13 @@
     "approved": "Hyväksytty",
     "awaiting": "Odottaa hyväksyntää",
     "imported_tip": "Tuotu yhteisökaupasta. Käytetään vain täsmäytykseen, ei lasketa tilastoihin.",
+    "unmatchable": "ei täsmäytettävissä",
     "not_importable": "ei käytettävissä",
     "exists": "on jo",
     "backfilled_tip": "Tunnistettu tuodusta tehohistoriasta. Vaikuttaa vain ohjelmien täsmäytykseen, ei lasketa tilastoihin."
   },
   "btn": {
+    "reset_zoom": "Nollaa zoomaus",
     "set_brand_model": "Aseta merkki ja malli",
     "refresh_catalog": "Päivitä luettelo",
     "add_device": "+ Lisää laite",
@@ -362,7 +364,6 @@
     "wipe_history": "Pyyhi historia",
     "recommendations": "Suositukset ({n})",
     "pg_detection_params": "Tunnistusasetukset",
-    "pg_timeline": "Tapahtuma-aikajana",
     "pg_outcome": "Simulaation tulos",
     "pg_across_cycles": "Kaikissa jaksoissasi",
     "community_store": "Yhteisökauppa",
@@ -375,6 +376,8 @@
     "poor": "⚠ Heikko profiililaatu"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktiivinen jakson tehokaavio: vie osoitin päälle lukeaksesi ajan/tehon, vieritä tai nipistä zoomataksesi, vedä panoroidaksesi",
+    "device_unresolved": "Laite ei saatavilla ({id})",
     "drag_to_resize": "Vedä muuttaaksesi kokoa",
     "pg_anti_wrinkle": "Ryppyjenesto",
     "actions": "Toiminnot",
@@ -545,6 +548,7 @@
     "stage4": "Vaihe 4 – vastaavuus",
     "status": "Tila",
     "tail_trim": "Leikkaus lopusta (s)",
+    "tap_to_dismiss": "napauta kaaviota sulkeaksesi",
     "timer_auto_pause": "Automaattinen tauko",
     "timer_min": "min",
     "timer_msg_placeholder": "Viesti (valinnainen, {device}/{program}/{minutes})",
@@ -581,9 +585,7 @@
     "pg_time_left_model": "Aikaa jäljellä (malli)",
     "pg_time_left_model_tip": "Mallin arvioima jäljellä oleva aika (vaihe-estimaattori + ML-yhdistelmä), ei kiinteä laskuri",
     "phase": "Vaihe",
-    "pg_mode_simulate": "Simuloi",
     "pg_mode_history": "Testaa historialla",
-    "pg_mode_sweep": "Pyyhkäisy",
     "pg_ev_detected": "Havaittu",
     "pg_ev_match": "Osuma vahvistettu",
     "pg_ev_match_changed": "Osuma vaihtui",
@@ -619,14 +621,11 @@
     "pg_stress_idle_w_desc": "Ohita automaattisesti havaittu valmiustilasyöte (jätä tyhjäksi automaattista varten).",
     "pg_stress_toggle": "Testaa valmiustilan päätöstä",
     "pg_stress_toggle_desc": "Simuloi laitetta, joka pysyy valmiustilan kulutustasollaan tallennuksen jälkeen - näyttää, pysäyttääkö WashData syklin ja milloin.",
-    "pg_sweep_2d": "2D-lämpökartta",
-    "pg_sweep_param_y": "2. parametri",
     "pg_obj_match": "Osumatarkkuus",
     "pg_obj_endtiming": "Lopetusajan tarkkuus",
     "pg_obj_falseend": "Väärien lopetusten osuus",
     "pg_obj_overrun": "Keston poikkeama",
     "pg_obj_ambiguity": "Epäselvyyksien osuus",
-    "pg_best_combo": "paras yhdistelmä",
     "pg_mode_optimize": "Optimoi",
     "pg_group_matching": "Ohjelman täsmäytys",
     "pg_zoom_hint": "kaksoisnapsauta nollataksesi zoomauksen",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Syklien tuonti",
     "evidence_real_cycles": "Tämän koneen ajamat syklit",
     "evidence_reference_cycles": "Ladattu yhteisökaupasta",
-    "evidence_backfill_cycles": "Löydetty tuodusta tehohistoriasta"
+    "evidence_backfill_cycles": "Löydetty tuodusta tehohistoriasta",
+    "zoom_hint_touch": "nipistä zoomataksesi",
+    "zoom_hint_touch_zoomed": "nipistä zoomataksesi · kaksoisnapauta nollataksesi"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -791,6 +792,7 @@
     "history_import": "Tuo tehohistoria"
   },
   "msg": {
+    "pg_canvas_empty3": "Valitse jakso yltä ja paina Suorita simuloidaksesi sen. Vie sitten osoitin päälle lukeaksesi arvoja, vieritä tai nipistä zoomataksesi ja vedä panoroidaksesi.",
     "tail_trim_hint": "Kuinka monta sekuntia poistetaan lopusta",
     "store_sibling_hint": "Eikö juuri sinun mallillesi ole jaettu mitään? Saman merkin läheinen malli on yleensä hyvä lähtökohta.",
     "store_declare_appliance": "Kerro WashDatalle, mikä laite sinulla on, niin tämä välilehti näyttää muiden sille jakamat ohjelmat ja tallennukset. Voit myös kirjoittaa merkin nimen yläkenttään ja katsella ympärillesi.",
@@ -986,9 +988,9 @@
     "advisory_poor_health": "'{name}'-profiilin sopivuusarvo on matala - sen viimeaikaiset jaksot vaihtelevat paljon tai tunnistuvat heikosti. Käy läpi sen jaksot tai tallenna profiili uudelleen, jotta tunnistus ja aika-arviot pysyvät tarkkoina.",
     "advisory_shape_drift": "'{name}' on muuttunut merkittävästi alkuperäisestä tehokäyrästään. Laitteen toiminta on voinut muuttua ajan myötä (esim. kalkki, kuluminen). Harkitse profiilin tallentamista uudelleen tuoreilla jaksoilla.",
     "advisory_shape_drift_corr": "'{name}' on muuttunut merkittävästi alkuperäisestä tehokäyrästään (korrelaatio {corr}). Laitteen toiminta on voinut muuttua ajan myötä (esim. kalkki, kuluminen). Harkitse profiilin tallentamista uudelleen tuoreilla jaksoilla.",
+    "advisory_unmatchable": "'{name}'-profiilia ei voi koskaan täsmäyttää: sen taustalla ei ole yhtään jaksoa, jossa olisi tehotietoja, joten WashDatalla ei ole mitään, mihin verrata käynnissä olevaa jaksoa. Merkitse jokin tämän ohjelman jakso (tai tallenna uusi), jotta profiili palaa täsmäytykseen.",
     "pg_no_alerts": "Tässä ajossa ei havaittu ongelmia.",
     "pg_override_active": "Käytetään muokattuja asetuksiasi vs. nykyiset",
-    "pg_history_intro": "Toista viimeisimmät syklisi todellisen tunnistimen ja täsmääjän läpi. Muokkaa ensin tunnistusasetusta Simuloi-tilassa nähdäksesi tässä ennen/jälkeen-vertailun.",
     "pg_history_empty": "Paina Aja toistaaksesi syklisi.",
     "pg_history_summary": "{detected}/{total} havaittu · {correct} täsmätty oikein",
     "pg_sweep_no_metric": "Ei tarpeeksi dataa tämän tavoitteen pisteyttämiseen.",
@@ -1469,10 +1471,6 @@
       "doc": "Sekunteja pumppu voi käydä jatkuvasti ennen kuin se merkitään mahdollisesti jumiutuneeksi (käynnistää juuttunut pumppu -tapahtuman).",
       "label": "Pumpun jumiutumiskesto"
     },
-    "running_dead_zone": {
-      "doc": "Jakson alkamisen jälkeen tämän ikkunan sisällä olevat virrankatkaisut ohitetaan. Pyykinpesukoneet täyttyvät kylmällä vedellä (lämpenee lähes 0 W ennen lämmitystä) - ilman tätä suojaa täyttövaihe näyttää syklin päättymiseltä. Tämä EI ohita tietoja: täysi tehojälki tallennetaan T=0:sta. Ehdotusmoottori mittaa koneesi todellisen käynnistyskuvion ja määrittää sen automaattisesti.",
-      "label": "Käynnissäolon kuolualue"
-    },
     "sampling_interval": {
       "doc": "Odotettu aika anturin lukemien välillä - käytetään tasoitusikkunan mitoittamiseen ja oikeaan palautumiseen. Jokainen anturin päivitys tallennetaan tästä arvosta riippumatta; se vain kalibroi alavirran laskelmia. Ehdotusmoottori mittaa anturin todellisen poljinnopeuden aiemmista sykleistä ja asettaa sen automaattisesti.",
       "label": "Näytteenottoväli"
@@ -1778,10 +1776,6 @@
         "higher": "Vain erittäin varmat osumat vahvistetaan – useammat syklit jäävät merkitsemättä",
         "lower": "Useammat syklit täsmäytetään – osa voi olla hieman väärin"
       },
-      "running_dead_zone": {
-        "higher": "Lyhyet tehohuiput tyhjäkäynnin aikana ohitetaan – vähemmän häiriöherkkä",
-        "lower": "Reagoi lyhyempiin tehoimpulsseihin – havaitsee nopeat transientit"
-      },
       "start_threshold_w": {
         "higher": "Välttää väärät käynnistykset lyhyistä tehohuipuista",
         "lower": "Tunnistaa vähätehoiset ohjelmat – voi aktivoitua häiriöistä"
@@ -1924,6 +1918,7 @@
     "recording_stopped": "Tallennus lopetettiin",
     "review_saved": "Arvostelu tallennettu",
     "settings_conflicts": "Korjaa korostetut asetusten ristiriidat ennen tallentamista.",
+    "settings_no_changes": "Ei muutoksia tallennettavaksi",
     "settings_reverted": "Asetukset palautettu; integroinnin uudelleenlataus",
     "settings_saved": "Asetukset tallennettu; integroinnin uudelleenlataus",
     "suggestions_applied": "Ehdotuksia otettu käyttöön; integroinnin uudelleenlataus",

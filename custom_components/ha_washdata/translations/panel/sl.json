@@ -77,11 +77,13 @@
     "approved": "Odobreno",
     "awaiting": "Čaka na odobritev",
     "imported_tip": "Uvoženo iz skupnostne trgovine. Uporablja se samo za ujemanje, ne šteje se v statistiko.",
+    "unmatchable": "ni mogoče ujemati",
     "not_importable": "ni na voljo",
     "exists": "obstaja",
     "backfilled_tip": "Zaznano v uvoženi zgodovini moči. Vpliva samo na ujemanje programov, ne šteje se v statistiko."
   },
   "btn": {
+    "reset_zoom": "Ponastavi povečavo",
     "set_brand_model": "Nastavi znamko in model",
     "refresh_catalog": "Osveži katalog",
     "add_device": "+ Dodaj napravo",
@@ -362,7 +364,6 @@
     "wipe_history": "Izbriši zgodovino",
     "recommendations": "Priporočila ({n})",
     "pg_detection_params": "Nastavitve zaznavanja",
-    "pg_timeline": "Časovnica dogodkov",
     "pg_outcome": "Izid simulacije",
     "pg_across_cycles": "Po vseh vaših ciklih",
     "community_store": "Skupnostna trgovina",
@@ -375,6 +376,8 @@
     "poor": "⚠ Slaba kakovost profila"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktivni graf moči cikla: pomaknite kazalec za prikaz časa/moči, drsajte ali uporabite dva prsta za povečavo, povlecite za premikanje",
+    "device_unresolved": "Nedostopna naprava ({id})",
     "drag_to_resize": "Povlecite za spremembo velikosti",
     "actions": "Dejanja",
     "activity": "Aktivnost",
@@ -546,6 +549,7 @@
     "stage4": "Stopnja 4 – ujemanje",
     "status": "Stanje",
     "tail_trim": "Obrezovanje konca (s)",
+    "tap_to_dismiss": "tapnite graf, da zaprete",
     "timer_auto_pause": "Samodejna pavza",
     "timer_min": "min",
     "timer_msg_placeholder": "Sporočilo (izbirno, {device}/{program}/{minutes})",
@@ -582,9 +586,7 @@
     "pg_time_left_model": "Preostali čas (model)",
     "pg_time_left_model_tip": "Modelska ocena preostalega časa (ocenjevalnik faz + mešanje z ML), ne statično odštevanje",
     "phase": "Faza",
-    "pg_mode_simulate": "Simuliraj",
     "pg_mode_history": "Preizkusi na zgodovini",
-    "pg_mode_sweep": "Preizkušanje",
     "pg_ev_detected": "Zaznano",
     "pg_ev_match": "Ujemanje potrjeno",
     "pg_ev_match_changed": "Ujemanje spremenjeno",
@@ -614,14 +616,11 @@
     "pg_sweep_param": "Parameter",
     "pg_objective": "Cilj",
     "pg_steps": "Koraki",
-    "pg_sweep_2d": "Toplotna karta 2D",
-    "pg_sweep_param_y": "2. parameter",
     "pg_obj_match": "Natančnost ujemanja",
     "pg_obj_endtiming": "Natančnost konca",
     "pg_obj_falseend": "Stopnja lažnih koncev",
     "pg_obj_overrun": "Odstopanje trajanja",
     "pg_obj_ambiguity": "Stopnja dvoumnosti",
-    "pg_best_combo": "najboljša kombinacija",
     "pg_mode_optimize": "Optimiziraj",
     "pg_group_matching": "Ujemanje programov",
     "pg_zoom_hint": "dvojni klik ponastavi povečavo",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Uvažanje ciklov",
     "evidence_real_cycles": "Cikli, ki jih je izvedla ta naprava",
     "evidence_reference_cycles": "Preneseni iz skupnostne trgovine",
-    "evidence_backfill_cycles": "Najdeni v uvoženi zgodovini moči"
+    "evidence_backfill_cycles": "Najdeni v uvoženi zgodovini moči",
+    "zoom_hint_touch": "povečajte z dvema prstoma",
+    "zoom_hint_touch_zoomed": "povečajte z dvema prstoma · dvakrat tapnite za ponastavitev"
   },
   "log": {
     "all_levels": "Vse ravni",
@@ -791,6 +792,7 @@
     "history_import": "Uvoz zgodovine moči"
   },
   "msg": {
+    "pg_canvas_empty3": "Izberite cikel zgoraj in pritisnite Zaženi za simulacijo. Nato pomaknite kazalec za prikaz vrednosti, drsajte ali uporabite dva prsta za povečavo in povlecite za premikanje.",
     "tail_trim_hint": "Odstranite toliko sekund s konca",
     "store_sibling_hint": "Za vaš točni model ni nič deljenega? Tesno soroden model iste znamke je običajno dobro izhodišče.",
     "store_declare_appliance": "Povejte integraciji WashData, katero napravo imate, in ta zavihek bo prikazal konfiguracije, ki so jih zanjo delili drugi. Zgoraj lahko tudi vpišete znamko in pregledate katalog.",
@@ -991,9 +993,9 @@
     "advisory_poor_health": "Profil '{name}' ima nizko oceno ujemanja - njegovi nedavni cikli se močno razlikujejo ali se slabo ujemajo. Preglejte njegove cikle ali ponovno posnemite profil, da prepoznavanje in ocene časa ostanejo natančni.",
     "advisory_shape_drift": "Profil '{name}' je znatno odstopil od prvotne oblike porabe moči. Naprava je morda sčasoma spremenila vedenje (npr. vodni kamen, obraba). Razmislite o ponovnem snemanju tega profila z nedavnimi cikli.",
     "advisory_shape_drift_corr": "Profil '{name}' je znatno odstopil od prvotne oblike porabe moči (korelacija {corr}). Naprava je morda sčasoma spremenila vedenje (npr. vodni kamen, obraba). Razmislite o ponovnem snemanju tega profila z nedavnimi cikli.",
+    "advisory_unmatchable": "Profil '{name}' se ne more nikoli ujemati: za njim ni nobenega cikla s podatki o moči, zato WashData nima s čim primerjati cikla, ki poteka. Označite kateri cikel s tem programom (ali enega posnemite), da se profil vrne v ujemanje.",
     "pg_no_alerts": "V tem zagonu ni bilo zaznanih težav.",
     "pg_override_active": "Uporabljajo se vaše urejene nastavitve namesto trenutnih",
-    "pg_history_intro": "Ponovno predvajajte svoje nedavne cikle skozi pravi detektor in ujemalnik. Najprej uredite nastavitev zaznavanja v načinu Simuliraj, da tu vidite primerjavo pred/po.",
     "pg_history_empty": "Pritisnite Zaženi za ponovno predvajanje ciklov.",
     "pg_history_summary": "{detected}/{total} zaznanih · {correct} pravilno ujemanih",
     "pg_sweep_no_metric": "Premalo podatkov za oceno tega cilja.",
@@ -1439,10 +1441,6 @@
       "doc": "Nekaj sekund lahko črpalka deluje neprekinjeno, preden je označena kot morebitna zastoj (sproži dogodek zastoja črpalke).",
       "label": "Trajanje zataknjenosti črpalke"
     },
-    "running_dead_zone": {
-      "doc": "Ko se cikel začne, se padci moči v tem oknu ne upoštevajo. Pralni stroj se polni s hladno vodo (pred segrevanjem pade blizu 0 W) – brez te zaščite je faza polnjenja videti kot konec cikla. To NE preskoči podatkov: sled polne moči se zabeleži od T=0. Mehanizem predlogov meri dejanski vzorec zagona vašega računalnika in ga samodejno prilagodi.",
-      "label": "Mrtva cona delovanja"
-    },
     "sampling_interval": {
       "doc": "Pričakovan čas med odčitki senzorja – uporablja se za velikost okna za glajenje in pravilen začetek odboja. Vsaka posodobitev senzorja je zajeta ne glede na to vrednost; kalibrira le spodnje izračune. Mehanizem predlogov meri dejansko kadenco vašega senzorja iz preteklih ciklov in jo samodejno nastavi.",
       "label": "Interval vzorčenja"
@@ -1748,10 +1746,6 @@
         "higher": "Potrdi le visoko zanesljiva ujemanja; več ciklov ostane neoznačenih",
         "lower": "Ujema več ciklov; nekateri so lahko rahlo napačni"
       },
-      "running_dead_zone": {
-        "higher": "Prezre kratke skoke moči med mirovanjem – manj občutljiv na šum",
-        "lower": "Odziva se na krajše impulze moči – zazna hitro prehodno aktivnost"
-      },
       "start_threshold_w": {
         "higher": "Preprečuje lažne zagone iz kratkih skokov moči",
         "lower": "Zazna programe z nizko močjo; lahko se odzove na šum"
@@ -1894,6 +1888,7 @@
     "recording_stopped": "Snemanje ustavljeno",
     "review_saved": "Pregled shranjen",
     "settings_conflicts": "Pred shranjevanjem popravite označene konflikte nastavitev.",
+    "settings_no_changes": "Ni sprememb za shranjevanje",
     "settings_reverted": "Nastavitve obnovljene; integracija se znova nalaga",
     "settings_saved": "Nastavitve shranjene; integracija se znova nalaga",
     "suggestions_applied": "Predlogi uporabljeni; integracija se znova nalaga",

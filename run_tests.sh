@@ -33,7 +33,7 @@ js_check() {
     fi
 }
 
-# Playwright E2E runner: 336 tests across chromium + mobile-chrome.
+# Playwright E2E runner: 452 tests across chromium + mobile-chrome.
 # Skipped if npx is unavailable; fatal on failure when available.
 e2e_check() {
     local e2e_dir="playwright-tests"
@@ -45,7 +45,7 @@ e2e_check() {
         echo "Installing Playwright dependencies..."
         (cd "$e2e_dir" && npm ci --silent) || exit 1
     fi
-    echo "Running E2E tests (Playwright, 336 tests across chromium + mobile-chrome)..."
+    echo "Running E2E tests (Playwright, 452 tests across chromium + mobile-chrome)..."
     (cd "$e2e_dir" && npx playwright test "$@") || exit 1
 }
 
@@ -86,7 +86,7 @@ e2e_min_check() {
         echo "Installing Playwright dependencies..."
         (cd "$e2e_dir" && npm ci --silent) || exit 1
     fi
-    echo "Running E2E tests against MINIFIED build (336 tests)..."
+    echo "Running E2E tests against MINIFIED build (452 tests)..."
     (cd "$e2e_dir" && PANEL_BUILD=min npx playwright test "$@") || exit 1
 }
 

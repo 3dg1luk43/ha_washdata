@@ -1316,14 +1316,67 @@ class WashDataCardEditor extends HTMLElement {
   }
 }
 
-customElements.define(CARD_TAG, WashDataCard);
-customElements.define(EDITOR_TAG, WashDataCardEditor);
+// Element registration, made resilient against the scoped-registry race (#384).
+//
+// Home Assistant starts this module in one of two ways. A dashboard whose
+// resources live in the UI registry imports it from inside app.js, so it always
+// runs AFTER the frontend installed @webcomponents/scoped-custom-element-registry.
+// With `lovelace: resource_mode: yaml` that collection is read-only, so the
+// integration falls back to add_extra_js_url() (see frontend.py::_init_resource)
+// and the browser starts this module as its own <script type="module"> import,
+// in parallel with the multi-megabyte app bundle - no ordering guarantee.
+//
+// When this module wins that race, the polyfill afterwards REPLACES
+// window.customElements with a shim that answers get()/whenDefined() from its
+// own map, so a definition made into the native registry beforehand becomes
+// invisible: the dashboard waits out create-element-base.ts's 2 s timeout and
+// reports "Custom element not found: ha-washdata-card". Nothing throws, and
+// window.customCards still lists the card, so the card picker shows a spinning
+// placeholder and neither the console nor the HA log says anything. Upstream:
+// home-assistant/frontend#53890.
+//
+// The fix is to define defensively and to repeat the definition for as long as
+// it could still be lost. Re-defining costs nothing and cannot conflict: the
+// shim reuses an already-native definition as its own stand-in class instead of
+// registering the tag twice.
+const wdDefineElements = () => {
+  for (const [tag, cls] of [[CARD_TAG, WashDataCard], [EDITOR_TAG, WashDataCardEditor]]) {
+    try {
+      // `customElements` is looked up on every call, so this always sees the
+      // registry that is current - the shim, once the polyfill swapped it in.
+      if (!customElements.get(tag)) customElements.define(tag, cls);
+    } catch (err) {
+      console.error(`WashData: could not define <${tag}>`, err);
+    }
+  }
+};
+
+wdDefineElements();
+
+(async () => {
+  // Watch until the app has booted and our tags are visible to it. `home-assistant`
+  // can only be defined once the app bundle evaluated, i.e. after the polyfill
+  // installed, so that pair of conditions is the terminal healthy state. The
+  // deadline keeps a page that never boots an app (the card editor preview in
+  // isolation, tests) from polling forever.
+  const deadline = Date.now() + 30000;
+  while (Date.now() < deadline) {
+    if (!customElements.get(CARD_TAG)) wdDefineElements();
+    if (customElements.get("home-assistant") && customElements.get(CARD_TAG)) return;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+})();
 
 window.customCards = window.customCards || [];
-window.customCards.push({
-  type: CARD_TAG,
-  name: "WashData Card",
-  preview: true,
-  description: "Adaptive card for WashData appliances: compact tile, rich detail, or multi-device glance.",
-  documentationURL: "https://github.com/3dg1luk43/ha_washdata",
-});
+// Guarded so a document that ends up loading this module twice (two Lovelace
+// resources pointing at different ?v= cache busters, for instance) lists the
+// card once instead of twice in the picker.
+if (!window.customCards.some((entry) => entry && entry.type === CARD_TAG)) {
+  window.customCards.push({
+    type: CARD_TAG,
+    name: "WashData Card",
+    preview: true,
+    description: "Adaptive card for WashData appliances: compact tile, rich detail, or multi-device glance.",
+    documentationURL: "https://github.com/3dg1luk43/ha_washdata",
+  });
+}

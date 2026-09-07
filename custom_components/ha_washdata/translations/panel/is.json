@@ -77,11 +77,13 @@
     "approved": "Samþykkt",
     "awaiting": "Bíður samþykkis",
     "imported_tip": "Flutt inn úr samfélagsversluninni. Aðeins notað til samsvörunar, ekki talið með í tölfræði.",
+    "unmatchable": "fær enga samsvörun",
     "not_importable": "ekki hér",
     "exists": "til staðar",
     "backfilled_tip": "Greint í innfluttri aflsögu. Hefur aðeins áhrif á kerfissamsvörun, telst ekki með í tölfræði."
   },
   "btn": {
+    "reset_zoom": "Endurstilla aðdrátt",
     "set_brand_model": "Stilla vörumerki og gerð",
     "refresh_catalog": "Endurnýja skrána",
     "add_device": "+ Bæta við tæki",
@@ -362,7 +364,6 @@
     "wipe_history": "Þurrkaðu sögu",
     "recommendations": "Ráðleggingar ({n})",
     "pg_detection_params": "Greiningarstillingar",
-    "pg_timeline": "Tímalína atburða",
     "pg_outcome": "Niðurstaða hermunar",
     "pg_across_cycles": "Yfir lotur þínar",
     "community_store": "Samfélagsverslun",
@@ -375,6 +376,8 @@
     "poor": "⚠ Léleg samsvörun"
   },
   "lbl": {
+    "aria_playground_chart3": "Gagnvirkt aflrit fyrir lotuna: haltu bendlinum yfir til að lesa tíma/afl, skrunaðu eða þysjaðu með tveimur fingrum, dragðu til að hliðra",
+    "device_unresolved": "Ótiltækt tæki ({id})",
     "drag_to_resize": "Dragðu til að breyta stærð",
     "actions": "Aðgerðir",
     "activity": "Virkni",
@@ -550,6 +553,7 @@
     "stage4": "Þrep 4 – samræmi",
     "status": "Staða",
     "tail_trim": "Klippt aftan af (s)",
+    "tap_to_dismiss": "pikkaðu á ritið til að loka",
     "timer_auto_pause": "Sjálfvirk hlé",
     "timer_min": "mín",
     "timer_msg_placeholder": "Skilaboð (valfrjálst, {device}/{program}/{minutes})",
@@ -586,9 +590,7 @@
     "pg_time_left_model": "Tími eftir (líkan)",
     "pg_time_left_model_tip": "Áætlaður tími sem eftir er samkvæmt líkani (fasamatstæki + ML-blanda), ekki föst niðurtalning",
     "phase": "Fasi",
-    "pg_mode_simulate": "Herma",
     "pg_mode_history": "Prófa á sögu",
-    "pg_mode_sweep": "Yfirferð",
     "pg_ev_detected": "Greint",
     "pg_ev_match": "Samsvörun staðfest",
     "pg_ev_match_changed": "Samsvörun breytt",
@@ -618,14 +620,11 @@
     "pg_sweep_param": "Færibreyta",
     "pg_objective": "Markmið",
     "pg_steps": "Skref",
-    "pg_sweep_2d": "2D-hitakort",
-    "pg_sweep_param_y": "2. færibreyta",
     "pg_obj_match": "Nákvæmni samsvörunar",
     "pg_obj_endtiming": "Nákvæmni lokatíma",
     "pg_obj_falseend": "Hlutfall falskra loka",
     "pg_obj_overrun": "Frávik í lengd",
     "pg_obj_ambiguity": "Hlutfall óljósra",
-    "pg_best_combo": "besta samsetning",
     "pg_mode_optimize": "Fínstilla",
     "pg_group_matching": "Kerfissamsvörun",
     "pg_zoom_hint": "tvísmelltu til að núllstilla aðdrátt",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Flyt inn lotur",
     "evidence_real_cycles": "Lotur sem þessi vél hefur keyrt",
     "evidence_reference_cycles": "Hlaðnar niður úr samfélagsversluninni",
-    "evidence_backfill_cycles": "Fundnar í innfluttri aflsögu"
+    "evidence_backfill_cycles": "Fundnar í innfluttri aflsögu",
+    "zoom_hint_touch": "þysjaðu með tveimur fingrum",
+    "zoom_hint_touch_zoomed": "þysjaðu með tveimur fingrum · pikkaðu tvisvar til að endurstilla"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -791,6 +792,7 @@
     "history_import": "Flytja inn aflsögu"
   },
   "msg": {
+    "pg_canvas_empty3": "Veldu lotu að ofan og ýttu á Keyra til að herma hana. Haltu svo bendlinum yfir til að lesa gildi, skrunaðu eða þysjaðu með tveimur fingrum og dragðu til að hliðra.",
     "tail_trim_hint": "Fjarlægðu þennan fjölda sekúndna frá lokum",
     "store_sibling_hint": "Er engu deilt fyrir nákvæmlega þína gerð? Náskyld gerð frá sama vörumerki er oftast góður upphafspunktur.",
     "store_declare_appliance": "Segðu WashData hvaða tæki þú átt, þá sýnir þessi flipi þær uppsetningar sem aðrir hafa deilt fyrir það. Þú getur líka slegið inn vörumerki hér fyrir ofan til að skoða þig um.",
@@ -986,9 +988,9 @@
     "advisory_poor_health": "'{name}' er með lágt samsvörunargildi - nýlegar lotur þess eru mjög breytilegar eða samsvara illa. Farðu yfir lotur þess eða taktu sniðið upp aftur svo að greining og tímamat haldist nákvæm.",
     "advisory_shape_drift": "'{name}' hefur breyst verulega frá upprunalegri aflkúrfu sinni. Tækið kann að hafa breytt hegðun sinni með tímanum (t.d. kalk, slit). Íhugaðu að taka þetta snið upp aftur með nýlegum lotum.",
     "advisory_shape_drift_corr": "'{name}' hefur breyst verulega frá upprunalegri aflkúrfu sinni (fylgni {corr}). Tækið kann að hafa breytt hegðun sinni með tímanum (t.d. kalk, slit). Íhugaðu að taka þetta snið upp aftur með nýlegum lotum.",
+    "advisory_unmatchable": "'{name}' getur aldrei fengið samsvörun: engin lota með aflgögnum liggur að baki, svo WashData hefur ekkert til að bera yfirstandandi lotu saman við. Merktu lotu af þessu kerfi (eða taktu eina upp) til að koma því aftur inn í samsvörunina.",
     "pg_no_alerts": "Engin vandamál greindust í þessari keyrslu.",
     "pg_override_active": "Notar breyttu stillingarnar þínar á móti núverandi",
-    "pg_history_intro": "Spilaðu nýlegar lotur þínar aftur í gegnum raunverulega greiningu og samsvörun. Breyttu greiningarstillingu í Herma fyrst til að sjá fyrir/eftir samanburð hér.",
     "pg_history_empty": "Ýttu á Keyra til að spila lotur þínar aftur.",
     "pg_history_summary": "{detected}/{total} greindar · {correct} rétt samsvaraðar",
     "pg_sweep_no_metric": "Ekki nóg af gögnum til að meta þetta markmið.",
@@ -1469,10 +1471,6 @@
       "doc": "Sekúndur sem dæla gæti keyrt samfellt áður en hún er merkt sem hugsanlega föst (kveikir dælutilvikinu sem festist).",
       "label": "Fastri dælu-lengd"
     },
-    "running_dead_zone": {
-      "doc": "Eftir að hringrás er hafin, er hunsað að draga úr krafti innan þessa glugga. Þvottavélar fyllast af köldu vatni (lækkar nálægt 0 W fyrir upphitun) - án þessarar verndar lítur áfyllingarfasinn út eins og lok hringrásar. Þetta sleppir EKKI gögnum: fullur kraftur er skráður frá T=0. Tillöguvélin mælir raunverulegt gangmynstur vélarinnar þinnar og stærðir þetta sjálfkrafa.",
-      "label": "Dauðbelt í gangi"
-    },
     "sampling_interval": {
       "doc": "Væntanlegur tími á milli skynjaralestra - notaður til að stærð sléttunargluggans og hefja frákast á réttan hátt. Sérhver skynjarauppfærsla er tekin óháð þessu gildi; það kvarðar aðeins niðurstreymisútreikningana. Tillöguvélin mælir raunverulegt hraðafall skynjarans frá fyrri lotum og stillir þetta sjálfkrafa.",
       "label": "Sýnitakabil"
@@ -1778,10 +1776,6 @@
         "higher": "Aðeins mjög öruggar samsvörunir staðfestar – fleiri lotur vera ómerktar",
         "lower": "Fleiri lotur samsvara – sumar kunna að vera lítið eitt rangar"
       },
-      "running_dead_zone": {
-        "higher": "Stuttar aflhækkingar í aðgerðaleysi hunsar – minna næmt fyrir hávaða",
-        "lower": "Bregst við styttri aflboðum – skráir skjótar sveiflur"
-      },
       "start_threshold_w": {
         "higher": "Forðast rangar ræsingar vegna stuttra aflhækkinga",
         "lower": "Þekkir kerfi með lágt afl; getur kviknað af hávaða"
@@ -1924,6 +1918,7 @@
     "recording_stopped": "Upptaka hætt",
     "review_saved": "Umsögn vistuð",
     "settings_conflicts": "Lagðu merktu stillingarárekstrana áður en þú vistar.",
+    "settings_no_changes": "Engar breytingar til að vista",
     "settings_reverted": "Stillingar endurheimtar; endurhleðsla samþættingar",
     "settings_saved": "Stillingar vistaðar; endurhleðsla samþættingar",
     "suggestions_applied": "Tillögur beitt; endurhleðsla samþættingar",

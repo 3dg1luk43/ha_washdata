@@ -77,11 +77,13 @@
     "approved": "Godkjent",
     "awaiting": "Venter på godkjenning",
     "imported_tip": "Importert fra fellesskapsbutikken. Brukes kun til matching, telles ikke med i statistikken.",
+    "unmatchable": "kan ikke matches",
     "not_importable": "ikke her",
     "exists": "finnes",
     "backfilled_tip": "Oppdaget i importert effekthistorikk. Påvirker bare programmatching, telles ikke med i statistikken."
   },
   "btn": {
+    "reset_zoom": "Tilbakestill zoom",
     "set_brand_model": "Angi merke og modell",
     "refresh_catalog": "Oppdater katalog",
     "add_device": "+ Legg til enhet",
@@ -362,7 +364,6 @@
     "wipe_history": "Tørk historikk",
     "recommendations": "Anbefalinger ({n})",
     "pg_detection_params": "Deteksjonsinnstillinger",
-    "pg_timeline": "Hendelsestidslinje",
     "pg_outcome": "Simuleringsresultat",
     "pg_across_cycles": "På tvers av syklusene dine",
     "community_store": "Fellesskapsbutikk",
@@ -375,6 +376,8 @@
     "poor": "⚠ Dårlig profilkvalitet"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktiv effektgraf for syklusen: hold pekeren over for å lese av tid/effekt, rull eller knip for å zoome, dra for å panorere",
+    "device_unresolved": "Utilgjengelig enhet ({id})",
     "drag_to_resize": "Dra for å endre størrelse",
     "actions": "Handlinger",
     "activity": "Aktivitet",
@@ -550,6 +553,7 @@
     "stage4": "Trinn 4 – samsvar",
     "status": "Status",
     "tail_trim": "Beskjær slutt (s)",
+    "tap_to_dismiss": "trykk på grafen for å lukke",
     "timer_auto_pause": "Auto-pause",
     "timer_min": "min",
     "timer_msg_placeholder": "Melding (valgfritt, {device}/{program}/{minutes})",
@@ -586,9 +590,7 @@
     "pg_time_left_model": "Tid igjen (modell)",
     "pg_time_left_model_tip": "Modellberegnet gjenværende tid (faseberegner + ML-blanding), ikke en statisk nedtelling",
     "phase": "Fase",
-    "pg_mode_simulate": "Simuler",
     "pg_mode_history": "Test på historikk",
-    "pg_mode_sweep": "Sveip",
     "pg_ev_detected": "Oppdaget",
     "pg_ev_match": "Treff bekreftet",
     "pg_ev_match_changed": "Treff endret",
@@ -618,14 +620,11 @@
     "pg_sweep_param": "Parameter",
     "pg_objective": "Mål",
     "pg_steps": "Trinn",
-    "pg_sweep_2d": "2D-varmekart",
-    "pg_sweep_param_y": "2. parameter",
     "pg_obj_match": "Treffnøyaktighet",
     "pg_obj_endtiming": "Sluttidsnøyaktighet",
     "pg_obj_falseend": "Falsk-slutt-rate",
     "pg_obj_overrun": "Varighetsavvik",
     "pg_obj_ambiguity": "Tvetydighetsrate",
-    "pg_best_combo": "beste kombinasjon",
     "pg_mode_optimize": "Optimaliser",
     "pg_group_matching": "Programgjenkjenning",
     "pg_zoom_hint": "dobbeltklikk for å tilbakestille zoom",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Importerer sykluser",
     "evidence_real_cycles": "Sykluser denne maskinen har kjørt",
     "evidence_reference_cycles": "Lastet ned fra fellesskapsbutikken",
-    "evidence_backfill_cycles": "Funnet i importert effekthistorikk"
+    "evidence_backfill_cycles": "Funnet i importert effekthistorikk",
+    "zoom_hint_touch": "knip for å zoome",
+    "zoom_hint_touch_zoomed": "knip for å zoome · dobbelttrykk for å tilbakestille"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -791,6 +792,7 @@
     "history_import": "Importer effekthistorikk"
   },
   "msg": {
+    "pg_canvas_empty3": "Velg en syklus ovenfor og trykk på Kjør for å simulere den. Hold deretter pekeren over for å lese av verdier, rull eller knip for å zoome, og dra for å panorere.",
     "tail_trim_hint": "Fjern så mange sekunder fra slutten",
     "store_sibling_hint": "Er ingenting delt for nøyaktig din modell? En nært beslektet modell fra samme merke er vanligvis et godt utgangspunkt.",
     "store_declare_appliance": "Fortell WashData hvilket apparat du har, så viser denne fanen oppsettene andre har delt for det. Du kan også skrive et merke ovenfor for å se deg rundt.",
@@ -986,9 +988,9 @@
     "advisory_poor_health": "'{name}' har en lav samsvarsscore - de siste syklusene varierer mye eller samsvarer svakt. Gå gjennom syklusene, eller ta opp profilen på nytt slik at gjenkjenning og tidsestimater forblir nøyaktige.",
     "advisory_shape_drift": "'{name}' har endret seg betydelig fra sin opprinnelige effektkurve. Apparatet kan ha endret oppførsel over tid (f.eks. kalk, slitasje). Vurder å ta opp denne profilen på nytt med nye sykluser.",
     "advisory_shape_drift_corr": "'{name}' har endret seg betydelig fra sin opprinnelige effektkurve (korrelasjon {corr}). Apparatet kan ha endret oppførsel over tid (f.eks. kalk, slitasje). Vurder å ta opp denne profilen på nytt med nye sykluser.",
+    "advisory_unmatchable": "'{name}' kan aldri matches: det finnes ingen syklus med effektdata bak den, så WashData har ingenting å sammenligne en pågående syklus med. Merk en syklus av dette programmet (eller ta opp en) for å få det med i matchingen igjen.",
     "pg_no_alerts": "Ingen problemer oppdaget i denne kjøringen.",
     "pg_override_active": "Bruker dine redigerte innstillinger mot gjeldende",
-    "pg_history_intro": "Spill av de siste syklusene dine gjennom den ekte deteksjonen og matchingen. Rediger en deteksjonsinnstilling i Simuler først for å se en før/etter-sammenligning her.",
     "pg_history_empty": "Trykk Kjør for å spille av syklusene dine på nytt.",
     "pg_history_summary": "{detected}/{total} oppdaget · {correct} matchet riktig",
     "pg_sweep_no_metric": "Ikke nok data til å score dette målet.",
@@ -1469,10 +1471,6 @@
       "doc": "Sekunder kan en pumpe kjøre kontinuerlig før den blir flagget som mulig fastlåst (utløser hendelsen med fast pumpe).",
       "label": "Pumpe fastsittingsvarighet"
     },
-    "running_dead_zone": {
-      "doc": "Etter at en syklus starter, ignoreres strømfall i dette vinduet. Vaskemaskiner fylles med kaldt vann (faller nær 0 W før oppvarming) - uten denne beskyttelsen ser fyllingsfasen ut som en syklusslutt. Dette hopper IKKE over data: trasen med full effekt registreres fra T=0. Forslagsmotoren måler maskinens faktiske oppstartsmønster og dimensjonerer dette automatisk.",
-      "label": "Kjøredødsone"
-    },
     "sampling_interval": {
       "doc": "Forventet tid mellom sensoravlesninger - brukes til å dimensjonere utjevningsvinduet og starte avsprettingen riktig. Hver sensoroppdatering registreres uavhengig av denne verdien; den kalibrerer bare nedstrømsberegningene. Forslagsmotoren måler sensorens faktiske tråkkfrekvens fra tidligere sykluser og setter denne automatisk.",
       "label": "Sampling-intervall"
@@ -1778,10 +1776,6 @@
         "higher": "Bare svært sikre treff bekreftes – flere sykluser forblir umerket",
         "lower": "Flere sykluser matches – noen kan være litt feil"
       },
-      "running_dead_zone": {
-        "higher": "Korte effekttopper under tomgang ignoreres – mindre støyfølsom",
-        "lower": "Reagerer på kortere effektimpulser – fanger raske transienter"
-      },
       "start_threshold_w": {
         "higher": "Unngår falske starter fra korte effekttopper",
         "lower": "Fanger lavomsatte programmer – kan trigges av støy"
@@ -1924,6 +1918,7 @@
     "recording_stopped": "Opptaket stoppet",
     "review_saved": "Anmeldelsen er lagret",
     "settings_conflicts": "Rett de fremhevede innstillingskonflikter før lagring.",
+    "settings_no_changes": "Ingen endringer å lagre",
     "settings_reverted": "Innstillinger gjenopprettet; integrering omlasting",
     "settings_saved": "Innstillinger lagret; integrering omlasting",
     "suggestions_applied": "Forslag brukt; integrering omlasting",

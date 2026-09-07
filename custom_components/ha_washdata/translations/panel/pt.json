@@ -29,11 +29,13 @@
     "approved": "Aprovado",
     "awaiting": "A aguardar aprovação",
     "imported_tip": "Importado da loja da comunidade. Usado apenas para correspondência, não contabilizado nas estatísticas.",
+    "unmatchable": "correspondência impossível",
     "not_importable": "n/d aqui",
     "exists": "já existe",
     "backfilled_tip": "Detetado num histórico de potência importado. Influencia apenas a correspondência de programas, não é contabilizado nas estatísticas."
   },
   "btn": {
+    "reset_zoom": "Repor zoom",
     "set_brand_model": "Definir marca e modelo",
     "refresh_catalog": "Actualizar catálogo",
     "add_device": "+ Adicionar dispositivo",
@@ -314,7 +316,6 @@
     "wipe_history": "Apagar histórico",
     "recommendations": "Recomendações ({n})",
     "pg_detection_params": "Definições de deteção",
-    "pg_timeline": "Cronologia de eventos",
     "pg_outcome": "Resultado da simulação",
     "pg_across_cycles": "Em todos os seus ciclos",
     "community_store": "Loja da comunidade",
@@ -327,6 +328,8 @@
     "poor": "⚠ Qualidade de perfil fraca"
   },
   "lbl": {
+    "aria_playground_chart3": "Gráfico interativo da potência do ciclo: passe o cursor para ler tempo/potência, percorra ou use o gesto de pinça para ampliar, arraste para deslocar",
+    "device_unresolved": "Dispositivo indisponível ({id})",
     "drag_to_resize": "Arraste para redimensionar",
     "actions": "Acções",
     "activity": "Actividade",
@@ -497,6 +500,7 @@
     "stage4": "Etapa 4 – concordância",
     "status": "Estado",
     "tail_trim": "Corte final (s)",
+    "tap_to_dismiss": "toque no gráfico para fechar",
     "timer_auto_pause": "Pausa automática",
     "timer_min": "min",
     "timer_msg_placeholder": "Mensagem (opcional, {device}/{program}/{minutes})",
@@ -533,9 +537,7 @@
     "pg_time_left_model": "Tempo restante (modelo)",
     "pg_time_left_model_tip": "Tempo restante estimado pelo modelo (estimador de fase + combinação de ML), não uma contagem decrescente fixa",
     "phase": "Fase",
-    "pg_mode_simulate": "Simular",
     "pg_mode_history": "Testar no histórico",
-    "pg_mode_sweep": "Varrimento",
     "pg_ev_detected": "Detetado",
     "pg_ev_match": "Correspondência confirmada",
     "pg_ev_match_changed": "Correspondência alterada",
@@ -574,14 +576,11 @@
     "pg_stress_idle_w_desc": "Substitui o piso de repouso detectado automaticamente (deixe em branco para automático).",
     "pg_stress_toggle": "Testar terminação em repouso",
     "pg_stress_toggle_desc": "Simula o electrodoméstico mantido no seu consumo em repouso após o fim da gravação – mostra se e quando o WashData para o ciclo.",
-    "pg_sweep_2d": "Mapa de calor 2D",
-    "pg_sweep_param_y": "2.º parâmetro",
     "pg_obj_match": "Precisão de correspondência",
     "pg_obj_endtiming": "Precisão do momento de fim",
     "pg_obj_falseend": "Taxa de fins falsos",
     "pg_obj_overrun": "Desvio de duração",
     "pg_obj_ambiguity": "Taxa de ambiguidade",
-    "pg_best_combo": "melhor combinação",
     "pg_mode_optimize": "Otimizar",
     "pg_group_matching": "Correspondência de programa",
     "pg_zoom_hint": "faça duplo clique para repor o zoom",
@@ -660,7 +659,9 @@
     "task_history_import_apply": "A importar ciclos",
     "evidence_real_cycles": "Ciclos que esta máquina executou",
     "evidence_reference_cycles": "Transferidos da loja da comunidade",
-    "evidence_backfill_cycles": "Encontrados num histórico de potência importado"
+    "evidence_backfill_cycles": "Encontrados num histórico de potência importado",
+    "zoom_hint_touch": "gesto de pinça para ampliar",
+    "zoom_hint_touch_zoomed": "gesto de pinça para ampliar · duplo toque para repor"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -743,6 +744,7 @@
     "history_import": "Importar histórico de potência"
   },
   "msg": {
+    "pg_canvas_empty3": "Escolha um ciclo acima e prima Executar para o simular. Depois passe o cursor para ler os valores, percorra ou use o gesto de pinça para ampliar e arraste para deslocar.",
     "tail_trim_hint": "Número de segundos a remover do fim",
     "store_sibling_hint": "Não há nada partilhado para o seu modelo exato? Um modelo muito semelhante da mesma marca é normalmente um bom ponto de partida.",
     "store_declare_appliance": "Indique ao WashData qual o electrodoméstico que possui e este separador mostrará as configurações que outras pessoas partilharam para ele. Também pode escrever uma marca acima para explorar.",
@@ -938,9 +940,9 @@
     "advisory_poor_health": "'{name}' tem uma pontuação de correspondência baixa - os ciclos recentes variam muito ou correspondem fracamente. Reveja os ciclos ou volte a gravar o perfil para que o reconhecimento e as estimativas de tempo se mantenham precisos.",
     "advisory_shape_drift": "'{name}' afastou-se significativamente da sua curva de potência original. O aparelho pode ter alterado o comportamento ao longo do tempo (por ex. calcário, desgaste). Considere voltar a gravar este perfil com ciclos recentes.",
     "advisory_shape_drift_corr": "'{name}' afastou-se significativamente da sua curva de potência original (correlação {corr}). O aparelho pode ter alterado o comportamento ao longo do tempo (por ex. calcário, desgaste). Considere voltar a gravar este perfil com ciclos recentes.",
+    "advisory_unmatchable": "'{name}' nunca poderá ser correspondido: não tem nenhum ciclo com dados de potência associado, pelo que o WashData não tem nada com que comparar um ciclo em curso. Rotule um ciclo deste programa (ou grave um) para o voltar a incluir na correspondência.",
     "pg_no_alerts": "Nenhum problema detetado nesta execução.",
     "pg_override_active": "A usar as suas definições editadas vs. as atuais",
-    "pg_history_intro": "Reproduza os seus ciclos recentes com o detetor e o comparador reais. Edite primeiro uma definição de deteção em Simular para ver aqui uma comparação antes/depois.",
     "pg_history_empty": "Prima Executar para reproduzir os seus ciclos.",
     "pg_history_summary": "{detected}/{total} detetados · {correct} reconhecidos corretamente",
     "pg_sweep_no_metric": "Dados insuficientes para pontuar este objetivo.",
@@ -1421,10 +1423,6 @@
       "doc": "Segundos, uma bomba pode funcionar continuamente antes de ser sinalizada como possivelmente travada (dispara o evento de bomba travada).",
       "label": "Duração de Bomba Presa"
     },
-    "running_dead_zone": {
-      "doc": "Após o início de um ciclo, as quedas de energia nesta janela são ignoradas. As máquinas de lavar enchem com água fria (caindo perto de 0 W antes do aquecimento) - sem esta proteção, a fase de enchimento parece um fim de ciclo. Isto NÃO ignora dados: o traço de potência total é registrado a partir de T=0. O mecanismo de sugestão mede o padrão de inicialização real da sua máquina e o dimensiona automaticamente.",
-      "label": "Zona Morta em Execução"
-    },
     "sampling_interval": {
       "doc": "Tempo esperado entre as leituras do sensor - usado para dimensionar a janela de suavização e iniciar o debounce corretamente. Cada atualização do sensor é capturada independentemente deste valor; ele apenas calibra os cálculos posteriores. O mecanismo de sugestão mede a cadência real do seu sensor em ciclos anteriores e define isso automaticamente.",
       "label": "Intervalo de Amostragem"
@@ -1767,6 +1765,7 @@
     "recording_stopped": "Gravação parada",
     "review_saved": "Revisão guardada",
     "settings_conflicts": "Corrija os conflitos de definições destacados antes de guardar.",
+    "settings_no_changes": "Nenhuma alteração para guardar",
     "settings_reverted": "Definições revertidas; a integração está a recarregar",
     "settings_saved": "Definições guardadas; a integração está a recarregar",
     "suggestions_applied": "Sugestões aplicadas; a integração está a recarregar",
@@ -1869,10 +1868,6 @@
       "profile_match_threshold": {
         "higher": "Confirma apenas correspondências de alta confiança; mais ciclos ficam sem etiqueta",
         "lower": "Corresponde a mais ciclos; alguns podem estar ligeiramente errados"
-      },
-      "running_dead_zone": {
-        "higher": "Ignora breves picos de potência em repouso – menos sensível ao ruído",
-        "lower": "Responde a impulsos mais curtos – deteta atividade transitória rápida"
       },
       "start_threshold_w": {
         "higher": "Evita arranques falsos por breves picos de potência",

@@ -77,11 +77,13 @@
     "approved": "Zatwierdzone",
     "awaiting": "Oczekuje na zatwierdzenie",
     "imported_tip": "Zaimportowano ze sklepu społecznościowego. Używane tylko do dopasowywania, nie liczy się do statystyk.",
+    "unmatchable": "nie można dopasować",
     "not_importable": "niedostępne",
     "exists": "istnieje",
     "backfilled_tip": "Wykryty w zaimportowanej historii mocy. Wpływa tylko na dopasowywanie programów, nie liczy się do statystyk."
   },
   "btn": {
+    "reset_zoom": "Resetuj powiększenie",
     "set_brand_model": "Ustaw markę i model",
     "refresh_catalog": "Odśwież katalog",
     "add_device": "+ Dodaj urządzenie",
@@ -362,7 +364,6 @@
     "wipe_history": "Wyczyść historię",
     "recommendations": "Zalecenia ({n})",
     "pg_detection_params": "Ustawienia wykrywania",
-    "pg_timeline": "Oś czasu zdarzeń",
     "pg_outcome": "Wynik symulacji",
     "pg_across_cycles": "We wszystkich Twoich cyklach",
     "community_store": "Sklep społecznościowy",
@@ -375,6 +376,8 @@
     "poor": "⚠ Słaba jakość profilu"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktywny wykres mocy cyklu: najedź, aby odczytać czas/moc, przewiń lub użyj dwóch palców, aby powiększyć, przeciągnij, aby przesunąć",
+    "device_unresolved": "Niedostępne urządzenie ({id})",
     "drag_to_resize": "Przeciągnij, aby zmienić rozmiar",
     "actions": "Działania",
     "activity": "Działalność",
@@ -546,6 +549,7 @@
     "stage4": "Etap 4 – zgodność",
     "status": "Status",
     "tail_trim": "Przycięcie końca (s)",
+    "tap_to_dismiss": "dotknij wykresu, aby zamknąć",
     "timer_auto_pause": "Automatyczna pauza",
     "timer_min": "min",
     "timer_msg_placeholder": "Wiadomość (opcjonalnie, {device}/{program}/{minutes})",
@@ -582,9 +586,7 @@
     "pg_time_left_model": "Pozostały czas (model)",
     "pg_time_left_model_tip": "Szacowany przez model pozostały czas (estymator faz + mieszanie z ML), a nie statyczne odliczanie",
     "phase": "Faza",
-    "pg_mode_simulate": "Symuluj",
     "pg_mode_history": "Testuj na historii",
-    "pg_mode_sweep": "Przemiatanie",
     "pg_ev_detected": "Wykryto",
     "pg_ev_match": "Dopasowanie zatwierdzone",
     "pg_ev_match_changed": "Dopasowanie zmienione",
@@ -614,14 +616,11 @@
     "pg_sweep_param": "Parametr",
     "pg_objective": "Cel",
     "pg_steps": "Kroki",
-    "pg_sweep_2d": "Mapa cieplna 2D",
-    "pg_sweep_param_y": "2. parametr",
     "pg_obj_match": "Trafność dopasowania",
     "pg_obj_endtiming": "Trafność końca",
     "pg_obj_falseend": "Wskaźnik fałszywych końców",
     "pg_obj_overrun": "Odchylenie czasu trwania",
     "pg_obj_ambiguity": "Wskaźnik niejednoznaczności",
-    "pg_best_combo": "najlepsza kombinacja",
     "pg_mode_optimize": "Optymalizuj",
     "pg_group_matching": "Dopasowywanie programów",
     "pg_zoom_hint": "kliknij dwukrotnie, aby zresetować powiększenie",
@@ -708,7 +707,9 @@
     "task_history_import_apply": "Importowanie cykli",
     "evidence_real_cycles": "Cykle wykonane przez to urządzenie",
     "evidence_reference_cycles": "Pobrane ze sklepu społecznościowego",
-    "evidence_backfill_cycles": "Znalezione w zaimportowanej historii mocy"
+    "evidence_backfill_cycles": "Znalezione w zaimportowanej historii mocy",
+    "zoom_hint_touch": "przybliż dwoma palcami",
+    "zoom_hint_touch_zoomed": "przybliż dwoma palcami · dotknij dwukrotnie, aby zresetować"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -791,6 +792,7 @@
     "history_import": "Import historii mocy"
   },
   "msg": {
+    "pg_canvas_empty3": "Wybierz cykl powyżej i naciśnij Uruchom, aby go zasymulować. Następnie najedź, aby odczytać wartości, przewiń lub użyj dwóch palców, aby powiększyć, i przeciągnij, aby przesunąć.",
     "tail_trim_hint": "Ile sekund usunąć z końca",
     "store_sibling_hint": "Nic nie udostępniono dla Twojego dokładnego modelu? Bardzo podobny model tej samej marki to zwykle dobry punkt wyjścia.",
     "store_declare_appliance": "Wskaż WashData, jakie urządzenie posiadasz, a ta karta pokaże konfiguracje udostępnione dla niego przez innych użytkowników. Możesz też wpisać markę powyżej, aby się rozejrzeć.",
@@ -991,9 +993,9 @@
     "advisory_poor_health": "'{name}' ma niski wskaźnik dopasowania - jego ostatnie cykle mocno się różnią lub słabo pasują. Przejrzyj jego cykle lub nagraj profil ponownie, aby rozpoznawanie i szacunki czasu pozostały dokładne.",
     "advisory_shape_drift": "'{name}' znacząco odbiegł od pierwotnego kształtu krzywej mocy. Zachowanie urządzenia mogło zmienić się z czasem (np. kamień, zużycie). Rozważ ponowne nagranie tego profilu na podstawie ostatnich cykli.",
     "advisory_shape_drift_corr": "'{name}' znacząco odbiegł od pierwotnego kształtu krzywej mocy (korelacja {corr}). Zachowanie urządzenia mogło zmienić się z czasem (np. kamień, zużycie). Rozważ ponowne nagranie tego profilu na podstawie ostatnich cykli.",
+    "advisory_unmatchable": "'{name}' nigdy nie zostanie dopasowany: nie stoi za nim żaden cykl z danymi o mocy, więc WashData nie ma z czym porównać trwającego cyklu. Oznacz jakiś cykl tym programem (lub nagraj jeden), aby profil wrócił do dopasowywania.",
     "pg_no_alerts": "W tym uruchomieniu nie wykryto żadnych problemów.",
     "pg_override_active": "Używane są Twoje edytowane ustawienia zamiast bieżących",
-    "pg_history_intro": "Odtwórz swoje ostatnie cykle przez rzeczywisty detektor i mechanizm dopasowania. Najpierw edytuj ustawienie wykrywania w trybie Symuluj, aby zobaczyć tu porównanie przed/po.",
     "pg_history_empty": "Naciśnij Uruchom, aby odtworzyć swoje cykle.",
     "pg_history_summary": "{detected}/{total} wykryto · {correct} poprawnie dopasowano",
     "pg_sweep_no_metric": "Za mało danych, aby ocenić ten cel.",
@@ -1439,10 +1441,6 @@
       "doc": "Przez kilka sekund pompa może pracować nieprzerwanie, zanim zostanie oznaczona jako prawdopodobnie zablokowana (wywołane zostanie zdarzenie zablokowania pompy).",
       "label": "Czas Zacięcia Pompy"
     },
-    "running_dead_zone": {
-      "doc": "Po rozpoczęciu cyklu spadki mocy w tym oknie są ignorowane. Pralki napełniają się zimną wodą (spadającą w okolicach 0 W przed nagrzaniem) - bez tego zabezpieczenia faza napełniania wygląda jak koniec cyklu. NIE powoduje to pominięcia danych: zapis pełnej mocy jest rejestrowany od T=0. Silnik sugestii mierzy rzeczywisty wzorzec uruchamiania Twojej maszyny i automatycznie go dopasowuje.",
-      "label": "Strefa Martwa"
-    },
     "sampling_interval": {
       "doc": "Oczekiwany czas pomiędzy odczytami czujnika – używany do określenia rozmiaru okna wygładzającego i prawidłowego rozpoczęcia odbijania. Każda aktualizacja czujnika jest rejestrowana niezależnie od tej wartości; kalibruje jedynie dalsze obliczenia. Silnik sugestii mierzy rzeczywistą kadencję czujnika z poprzednich cykli i ustawia ją automatycznie.",
       "label": "Interwał Próbkowania"
@@ -1748,10 +1746,6 @@
         "higher": "Zatwierdza tylko dopasowania o wysokiej pewności; więcej cykli pozostaje nieoznakowanych",
         "lower": "Dopasowuje więcej cykli; niektóre mogą być lekko błędne"
       },
-      "running_dead_zone": {
-        "higher": "Ignoruje krótkie skoki mocy podczas bezczynności – mniej wrażliwy na zakłócenia",
-        "lower": "Reaguje na krótsze impulsy mocy – wykrywa szybką aktywność przejściową"
-      },
       "start_threshold_w": {
         "higher": "Zapobiega fałszywym startom z krótkich skoków mocy",
         "lower": "Wykrywa programy o niskiej mocy; może reagować na zakłócenia"
@@ -1894,6 +1888,7 @@
     "recording_stopped": "Nagrywanie zatrzymane",
     "review_saved": "Recenzja zapisana",
     "settings_conflicts": "Napraw zaznaczone konflikty ustawień przed zapisem.",
+    "settings_no_changes": "Brak zmian do zapisania",
     "settings_reverted": "Ustawienia przywrócono; integracja jest przeładowywana",
     "settings_saved": "Ustawienia zapisane; przeładowanie integracji",
     "suggestions_applied": "Zastosowano sugestie; przeładowanie integracji",

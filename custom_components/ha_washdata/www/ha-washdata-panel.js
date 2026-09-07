@@ -63,6 +63,22 @@ const _STORE_PREFS = [
 // layout() closure so threshold-drag math stays aligned with the drawn plot.
 const _PG_PIN_BAND_H = 34;
 
+// Chart gesture tuning (see _attachGraphGestures).
+// A double tap / double click halves the visible window, i.e. zooms 2x. HA uses
+// a fixed +/-15% slice of the axis; a relative step composes better because our
+// charts start from wildly different cycle lengths (a 3 min air-fryer run and a
+// 4 h wash both live in these canvases).
+const _CANVAS_DBLTAP_ZOOM = 0.5;
+// Deepest zoom, as a multiple of the full trace. Without a floor a runaway
+// pinch collapses the axis onto a single sample and both edge labels read the
+// same minute.
+const _CANVAS_MAX_ZOOM = 200;
+// ...and never below this many seconds, which keeps very short cycles usable.
+const _CANVAS_MIN_VIEW_S = 5;
+// Grab radius (CSS px) of the axis-pointer handle. 22 is a touch target, not a
+// pixel-hunt: HA draws its handle at size 20.
+const _AXIS_HANDLE_GRAB = 22;
+
 // Distinct colors for overlaying many cycle curves (history cleanup).
 const _PALETTE = [
   '#e6194B', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#42d4f4',
@@ -944,8 +960,27 @@ button.wd-profile-card { display: block; }
 .wd-modal-lg { max-width: 880px; }
 .wd-modal h2 { margin: 0 0 16px; font-size: 1.1em; display: flex; align-items: center; gap: 10px; }
 .wd-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
-.wd-canvas-wrap { margin: 10px 0; background: var(--secondary-background-color); border-radius: var(--wd-radius-md); padding: 6px; }
-.wd-canvas-wrap canvas { width: 100%; height: 240px; display: block; touch-action: none; cursor: crosshair; }
+.wd-canvas-wrap { position: relative; margin: 10px 0; background: var(--secondary-background-color); border-radius: var(--wd-radius-md); padding: 6px; }
+/* touch-action: pan-y is load-bearing, not cosmetic. With "none" (the pre-0.5.6
+   value) a one-finger swipe that started on a graph was swallowed, so every chart
+   was a 160-240px band the user could not scroll past on a phone (issue #413).
+   With pan-y the browser keeps the vertical swipe (page scrolls) while still
+   handing us the horizontal drag AND both pointers of a two-finger pinch, which
+   is what makes touch zoom possible at all. Mirrors what Home Assistant's own
+   ha-chart-base does via moveOnMouseMove/preventDefaultMouseMove. */
+.wd-canvas-wrap canvas { width: 100%; height: 240px; display: block; touch-action: pan-y; cursor: crosshair; }
+/* Zoom reset affordance, mirroring HA's mdiRestart chart button: only rendered
+   while the canvas actually has a zoom viewport. */
+.wd-zoom-reset {
+  position: absolute; top: 10px; right: 12px; z-index: 2; display: none;
+  align-items: center; justify-content: center; width: 30px; height: 30px; padding: 0;
+  border-radius: 50%; border: 1px solid var(--divider-color);
+  background: var(--card-background-color); color: var(--primary-text-color);
+  cursor: pointer; font-size: 15px; line-height: 1; opacity: .92;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.wd-zoom-reset.wd-zoom-reset--on { display: inline-flex; }
+.wd-zoom-reset:hover { opacity: 1; border-color: var(--primary-color); }
 .wd-mode-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
 .wd-mini-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--divider-color); margin-bottom: 16px; flex-wrap: wrap; }
 .wd-mini-tab { padding: 7px 16px; border: none; background: transparent; color: var(--secondary-text-color); font-size: .82em; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; }
@@ -984,6 +1019,8 @@ button.wd-profile-card { display: block; }
 /* Graph hover tooltip (follows the cursor) */
 .wd-gtip { position: fixed; z-index: 300; display: none; pointer-events: none; background: var(--card-background-color); color: var(--primary-text-color); border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); padding: 7px 10px; font-size: 12px; line-height: 1.5; box-shadow: 0 4px 16px rgba(0,0,0,.4); white-space: nowrap; }
 .wd-gtip b { font-weight: 700; }
+.wd-gtip--pinned { border-color: var(--primary-color); }
+.wd-gtip-dismiss { display: block; margin-top: 4px; opacity: .55; font-size: 11px; }
 /* Status chart legend + toggles */
 .wd-leg { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: .8em; color: var(--secondary-text-color); }
 .wd-leg-i { display: inline-flex; align-items: center; gap: 6px; }
@@ -1087,6 +1124,8 @@ button.wd-profile-card { display: block; }
   .wd-modal { padding: 16px; width: calc(100% - 18px); }
   .wd-modal-lg { max-width: 100%; }
   .wd-canvas-wrap canvas { height: 200px; }
+  .wd-zoom-reset { width: 36px; height: 36px; top: 8px; right: 8px; font-size: 17px; }
+  .wd-gtip { white-space: normal; max-width: calc(100vw - 24px); }
   .wd-header { padding: 12px 14px; }
   .wd-btn { padding: 9px 15px; }  /* larger touch targets */
   .wd-tip-pop { width: 210px; }
@@ -1131,7 +1170,11 @@ button.wd-profile-card { display: block; }
 .wd-pg-delta-flat { color: var(--secondary-text-color); }
 /* F3: Unified Playground */
 .wd-pg-canvas-wrap { position: relative; width: 100%; }
-#wd-pg-canvas { display: block; width: 100%; height: 330px; cursor: crosshair; border-radius: 6px; background: var(--secondary-background-color); margin: 10px 0 0; }
+/* Same pan-y contract as .wd-canvas-wrap canvas above: page keeps the vertical
+   swipe, we keep horizontal drags and pinch. This canvas previously had no
+   touch-action at all (default auto), so on touch the browser cancelled every
+   gesture and none of the pan / threshold-drag / hover features worked. */
+#wd-pg-canvas { display: block; width: 100%; height: 330px; cursor: crosshair; touch-action: pan-y; border-radius: 6px; background: var(--secondary-background-color); margin: 10px 0 0; }
 .wd-pg-strip { display: flex; align-items: center; gap: 10px; padding: 8px 2px; font-size: .88em; font-variant-numeric: tabular-nums; flex-wrap: wrap; border-bottom: 1px solid var(--divider-color, rgba(127,127,127,.2)); margin-bottom: 12px; }
 .wd-pg-strip-state { padding: 2px 10px; border-radius: 20px; font-weight: 700; font-size: .83em; white-space: nowrap; }
 .wd-pg-strip-pbar { display: inline-flex; align-items: center; gap: 5px; }
@@ -1881,6 +1924,11 @@ class HaWashdataPanel extends HTMLElement {
     this._settingsSugOnly = false;
     this._settingsHistoryOpen = false;
     this._canvasZoom = {};     // canvasId -> {xMin, xMax}; absent = full view
+    this._gAxisHandle = {};    // canvasId -> CSS x of the touch axis-pointer handle
+    this._gtipPinned = false;  // readout kept up after a touch lifted (#413)
+    this._gtipLines = null;    // last readout body, so _pinGraphTip can re-render it
+    this._gPinchRaf = null;    // rAF gate for pinch frames
+    this._gPinchPending = null; // latest pinch target viewport awaiting that frame
     this._toolsSubtab = 'recording';
     this._loading = true;
     this._tabLoading = false;
@@ -1892,6 +1940,13 @@ class HaWashdataPanel extends HTMLElement {
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._stagedSuggestions = false;   // a suggestion was applied to a field this session
     this._pendingSettings = {};        // unsaved edits accumulated across section switches
+    this._dirtyOptKeys = new Set();    // #406: setting keys the USER actually edited.
+                                      // _snapshotFormToPending captures only these, so a
+                                      // value the renderer itself produced (an unresolved
+                                      // select collapsing to its first option, a form
+                                      // painted from stale _opts) can never be latched into
+                                      // _pendingSettings, where it would shadow _opts for
+                                      // the rest of the visit and then be saved.
     this._busy = new Set();            // in-flight long operations (drives spinners)
     this._tasks = {};                  // id -> background-task snapshot (registry, reconnect-safe)
     this._cancellingTasks = new Set(); // task ids for which cancel was requested but not yet confirmed
@@ -2056,6 +2111,10 @@ class HaWashdataPanel extends HTMLElement {
         };
         this.shadowRoot.addEventListener('pointerover', this._tipHandler);
       }
+      if (this.shadowRoot && !this._gtipDismissHandler) {
+        this._gtipDismissHandler = (e) => this._maybeDismissGraphTip(e);
+        this.shadowRoot.addEventListener('pointerdown', this._gtipDismissHandler);
+      }
     }
     this._onResize = () => this._resizeLogsPage();
     window.addEventListener('resize', this._onResize);
@@ -2072,6 +2131,7 @@ class HaWashdataPanel extends HTMLElement {
     // Remove the modal keydown listener.
     if (this._kbdHandler && this.shadowRoot) { this.shadowRoot.removeEventListener('keydown', this._kbdHandler); this._kbdHandler = null; }
     if (this._tipHandler && this.shadowRoot) { this.shadowRoot.removeEventListener('pointerover', this._tipHandler); this._tipHandler = null; }
+    if (this._gtipDismissHandler && this.shadowRoot) { this.shadowRoot.removeEventListener('pointerdown', this._gtipDismissHandler); this._gtipDismissHandler = null; }
     // Remove the community-store OAuth message listener.
     if (this._storeConnectListener) { window.removeEventListener('message', this._storeConnectListener); this._storeConnectListener = null; }
   }
@@ -2100,6 +2160,12 @@ class HaWashdataPanel extends HTMLElement {
       if (anchor) this._positionTip(anchor);
     };
     shadow.addEventListener('pointerover', this._tipHandler);
+    // A pinned touch readout (#413) has to be dismissible from anywhere, not
+    // only by tapping the same chart, or it would hang over the rest of the UI
+    // until the next hover. Delegated on the shadow root so it survives every
+    // innerHTML swap, same as _tipHandler.
+    this._gtipDismissHandler = (e) => this._maybeDismissGraphTip(e);
+    shadow.addEventListener('pointerdown', this._gtipDismissHandler);
     // Load per-user-language panel translations before first render.
     // Falls back to JS-embedded strings if the fetch fails.
     this._loadPanelTranslations().catch(() => {}).finally(() => {
@@ -3041,6 +3107,7 @@ class HaWashdataPanel extends HTMLElement {
     const savedDev = this._devices[idx];
     if (savedDev) localStorage.setItem('wd-last-device', savedDev.entry_id);
     this._pendingSettings = {};
+    this._dirtyOptKeys = new Set();
     // Clear settings-form staged/cascade/undo state so the previous device's edits
     // never leak into the new one.
     this._prevOpts = null; this._cascadePending = {}; this._preCascadeOpts = null; this._stagedSuggestions = false;
@@ -3486,20 +3553,39 @@ class HaWashdataPanel extends HTMLElement {
     return this._localize(`component.${_DOMAIN}.selector.device_type.options.${id}`, fb);
   }
 
-  // Device-type <select> options.
-  _deviceTypeOpts(current) {  // eslint-disable-line no-unused-vars
-    return (this._constants.deviceTypes || [])
+  // Device-type <select> options. `current` is the stored value: get_constants is
+  // fetched once and its failure is swallowed (_constantsLoaded is set either way),
+  // so deviceTypes can stay empty for the whole session. An empty option list would
+  // make the select read back as "" and overwrite device_type on the next save, so
+  // always carry the stored type (#406).
+  _deviceTypeOpts(current) {
+    const out = (this._constants.deviceTypes || [])
       .map(d => [d.id, this._deviceTypeLabel(d.id)]);
+    if (current && !out.some(([id]) => String(id) === String(current))) {
+      out.push([current, this._deviceTypeLabel(current)]);
+    }
+    return out;
   }
 
   // HA device-registry options for the "group under" picker.
-  _deviceOpts() {
+  //
+  // #406: the device registry reaches the frontend asynchronously, so an early
+  // paint can see an empty map - and a linked device can also have been deleted.
+  // Either way the stored id has no matching <option>, the browser silently
+  // displays the first one ("- None -"), and both the pending-edit snapshot and
+  // the save collector read that back as "the user cleared the link" - wiping
+  // linked_device (and the device's via_device_id) on an unrelated save. Always
+  // carry an option for the stored value so the field round-trips.
+  _deviceOpts(current) {
     const out = [['', '- None -']];
     const devs = this._hass && this._hass.devices ? this._hass.devices : {};
     Object.values(devs).forEach(d => {
       const name = d.name_by_user || d.name || d.id;
       out.push([d.id, name]);
     });
+    if (current && !out.some(([id]) => String(id) === String(current))) {
+      out.push([current, this._t('lbl.device_unresolved', {id: current}, `Unavailable device (${current})`)]);
+    }
     return out;
   }
 
@@ -3609,6 +3695,10 @@ class HaWashdataPanel extends HTMLElement {
     const focusedBefore = sr0
       ? (sr0.activeElement || (this.getRootNode() && this.getRootNode().activeElement) || null)
       : null;
+    // A pinned touch readout (#413) is anchored to a crosshair this swap is
+    // about to erase, so it would be left floating with stale numbers over the
+    // new DOM. Drop it with the crosshair it describes.
+    this._hideGraphTip();
     this._container.innerHTML = this._buildHtml();
     this._wire();
     this._drawStatusCurve();
@@ -3617,7 +3707,7 @@ class HaWashdataPanel extends HTMLElement {
     this._drawHistorySparklines();  // #344 import review
     this._drawPlaygroundCanvases(); // F3
     ['wd-status-canvas', 'wd-cyc-canvas', 'wd-compare-canvas', 'wd-env-canvas', 'wd-phase-canvas', 'wd-spag-canvas', 'wd-pgroup-canvas']
-      .forEach(id => this._attachHover(id));
+      .forEach(id => this._attachGraphGestures(id));
     this._syncModalFocus(focusedBefore);
     requestAnimationFrame(() => this._resizeLogsPage());
   }
@@ -4418,7 +4508,14 @@ class HaWashdataPanel extends HTMLElement {
     const importedBadge = p.is_imported
       ? `<span class="wd-badge" title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="background:var(--info-color,#2196f3);color:#fff">📥 ${this._t('status.imported', {}, 'Imported')}</span>`
       : '';
-    const badges = [healthBadge, trendBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
+    // A program with no cycle behind it is silently absent from every match: it can
+    // never win, and it cannot veto a shorter look-alike either (#400). That state used
+    // to be a debug log only, so it is called out here, on the program itself.
+    const unmatchableAdv = (this._profileAdvisories || []).find(a => a && a.profile === p.name && a.code === 'unmatchable');
+    const unmatchableBadge = unmatchableAdv
+      ? `<span class="wd-badge" style="color:var(--error-color,#f44336);background:rgba(244,67,54,.12)" title="${_esc(this._t(unmatchableAdv.message_key, unmatchableAdv.message_params, unmatchableAdv.message))}">⚠ ${this._t('badge.unmatchable', {}, "can't be matched")}</span>`
+      : '';
+    const badges = [unmatchableBadge, healthBadge, trendBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
     // Mini power-signature curve: the profile's real average power shape (from its
     // envelope), so the card thumbnail matches the actual cycle. Painted after
     // render by _drawProfileSparklines. Needs ≥3 envelope points.
@@ -4799,7 +4896,7 @@ class HaWashdataPanel extends HTMLElement {
     const extra = {};
 
     if (f.type === 'devicetype') extra.opts = this._deviceTypeOpts(value || o.device_type);
-    else if (f.type === 'device') extra.opts = this._deviceOpts();
+    else if (f.type === 'device') extra.opts = this._deviceOpts(value);
     else if (f.type === 'select') extra.opts = f.opts || [];
     else if (f.type === 'entity') {
       const states = this._hass && this._hass.states ? this._hass.states : {};
@@ -6134,10 +6231,10 @@ class HaWashdataPanel extends HTMLElement {
     const canvasEmptyOverlay = (!this._pgPowerPts && !busy)
       ? `<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:6px">
           <div style="font-size:1.6em;opacity:.25">&#12316;</div>
-          <div style="font-size:.82em;color:var(--secondary-text-color);text-align:center">${this._t('msg.pg_canvas_empty2', {}, 'Pick a cycle above and press Run to simulate it. Then hover to read values, scroll to zoom, and drag to pan.')}</div>
+          <div style="font-size:.82em;color:var(--secondary-text-color);text-align:center">${this._t('msg.pg_canvas_empty3', {}, 'Pick a cycle above and press Run to simulate it. Then hover to read values, scroll or pinch to zoom, and drag to pan.')}</div>
         </div>`
       : '';
-    const canvas = `${progressBar}<div class="wd-pg-canvas-wrap" style="position:relative"><canvas id="wd-pg-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_playground_chart2', {}, 'Interactive cycle power graph: hover to read time/power, scroll to zoom, drag to pan'))}"></canvas>${canvasEmptyOverlay}</div>`;
+    const canvas = `${progressBar}<div class="wd-pg-canvas-wrap" style="position:relative"><canvas id="wd-pg-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_playground_chart3', {}, 'Interactive cycle power graph: hover to read time/power, scroll or pinch to zoom, drag to pan'))}"></canvas>${canvasEmptyOverlay}</div>`;
     const strip = this._htmlPgStrip();
 
     const restartNote = this._pgNeedsRestart
@@ -8124,13 +8221,32 @@ class HaWashdataPanel extends HTMLElement {
     let xMax = opts.xMax || 0;
     if (!xMax) { series.forEach(s => (s.points || []).forEach(p => { if (p[0] > xMax) xMax = p[0]; })); if (opts.band) (opts.band.max || []).forEach(p => { if (p[0] > xMax) xMax = p[0]; }); }
     xMax = xMax || 1;
-    let yMax = opts.yMax || 0;
-    if (!yMax) { const scan = a => (a || []).forEach(p => { if (p[1] > yMax) yMax = p[1]; }); series.forEach(s => { if (!s.noScale) scan(s.points); }); if (opts.band) scan(opts.band.max); yMax = (yMax || 10) * 1.08; }
-
     // Zoom viewport (absent key = full view).
     const zoom = this._canvasZoom && this._canvasZoom[canvasId];
     const xMin = zoom ? zoom.xMin : 0;
     const xViewMax = zoom ? zoom.xMax : xMax;
+
+    // Scale y to the VISIBLE window, not the whole trace - this is HA's
+    // "boundaryFilter" behaviour. Without it, zooming into a low-power tail
+    // leaves the curve pinned flat along the bottom of the plot at a y scale
+    // set by a peak that is no longer on screen, which is exactly the case a
+    // phone user zooms in to inspect. One sample either side of the window is
+    // included so a line entering/leaving the view does not clip to nothing.
+    let yMax = opts.yMax || 0;
+    if (!yMax) {
+      const scan = a => {
+        const pts = a || [];
+        for (let i = 0; i < pts.length; i++) {
+          const t = pts[i][0];
+          if (t < xMin && !(i + 1 < pts.length && pts[i + 1][0] >= xMin)) continue;
+          if (t > xViewMax && !(i > 0 && pts[i - 1][0] <= xViewMax)) continue;
+          if (pts[i][1] > yMax) yMax = pts[i][1];
+        }
+      };
+      series.forEach(s => { if (!s.noScale) scan(s.points); });
+      if (opts.band) scan(opts.band.max);
+      yMax = (yMax || 10) * 1.08;
+    }
 
     const plotW = cw - padL - padR;
     const X = x => padL + ((x - xMin) / (xViewMax - xMin)) * plotW;
@@ -8189,7 +8305,10 @@ class HaWashdataPanel extends HTMLElement {
     ctx.fillText((xViewMax / 60).toFixed(0) + ' min', cw - padR, ch - 2 * dpr);
 
     canvas._wd = {
-      xMax, xMin, xViewMax, yMax, dpr, padT, padB, ch, primary,
+      xMax, xMin, xViewMax, yMax, dpr, padT, padB, padL, ch, primary,
+      // CSS-px width of the plot area; the pinch/pan math needs it to turn a
+      // finger travel distance into seconds at the current scale.
+      plotWcss: plotW / dpr,
       Xpx: X, Ypx: Y,
       xToCss: x => X(x) / dpr,
       cssToX: px => Math.max(xMin, Math.min(xViewMax, xMin + ((px * dpr - padL) / plotW) * (xViewMax - xMin))),
@@ -8283,56 +8402,268 @@ class HaWashdataPanel extends HTMLElement {
     this._drawCurves('wd-status-canvas', { series, xMax, bands });
   }
 
-  // ── Graph hover (crosshair + cursor-following readout) ──────────────────────
-
-  _attachHover(id) {
+  // ── Graph gestures (crosshair readout, zoom, pan) ───────────────────────────
+  //
+  // One gesture layer for every .wd-canvas-wrap chart. The split below is not
+  // arbitrary: it is the only assignment that lets the browser keep enough of a
+  // touch gesture to scroll the page (issue #413) while every chart feature we
+  // already ship keeps the exact input it already owned.
+  //
+  //   1 finger, vertical    -> page scrolls (the browser claims it, see pan-y)
+  //   1 finger, horizontal  -> scrub the readout, or drag a trim / phase handle
+  //   2 fingers, pinch      -> zoom the x axis about the pinch centre
+  //   2 fingers, drag       -> pan the x axis
+  //   double tap / dblclick -> zoom in at the point, or reset if already zoomed
+  //   tap (touch)           -> pin the readout so it survives lifting the finger
+  //   wheel / ctrl+wheel    -> zoom about the cursor
+  //
+  // Two fingers pan where Home Assistant's own charts pan with one: HA can
+  // afford that because its charts have no draggable handles, whereas ours do
+  // (trim bounds in _wireCycleCanvas, phase edges in _wirePhaseCanvas) and
+  // those own the one-finger horizontal drag.
+  _attachGraphGestures(id) {
     const sr = this.shadowRoot;
     const canvas = sr && sr.getElementById(id);
     if (!canvas) return;
-    canvas.addEventListener('pointermove', e => this._onGraphHover(e, id));
-    canvas.addEventListener('pointerleave', () => this._hideGraphTip());
+    // innerHTML replaced the element, so the reset button and its zoomed-state
+    // class have to be re-created / re-synced on every render.
+    this._syncZoomReset(id);
+    this._attachTouchOwnershipGuard(canvas);
+
+    const pts = new Map();     // pointerId -> {x, y} for every finger on this canvas
+    let pinch = null;          // {dist, centerCss} baseline, refreshed each frame
+
+    const relX = clientX => clientX - canvas.getBoundingClientRect().left;
+
+    canvas.addEventListener('pointerdown', e => {
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 1) {
+        // A fresh touch dismisses a pinned readout; the scrub below re-shows it.
+        if (e.pointerType === 'touch') this._unpinGraphTip();
+        // HA draws a draggable axis-pointer handle so a finger does not have to
+        // sit on the curve to read it. Claiming it here (a) keeps the drag ours
+        // through the touch guard even if the finger drifts vertically, and
+        // (b) is what makes the handle worth drawing at all.
+        if (e.pointerType === 'touch' && this._onAxisHandle(canvas, id, e)) {
+          canvas._wdOwnGesture = true;
+          try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+        return;
+      }
+      if (pts.size !== 2) return;
+      // Second finger: this is a pinch/pan. Let whichever edit handler claimed
+      // the first finger back out, or it would drag its handle to wherever the
+      // pinch centre happens to travel.
+      canvas._wdPinching = true;
+      canvas._wdOwnGesture = false;
+      if (canvas._wdAbortEdit) canvas._wdAbortEdit();
+      this._hideGraphTip();
+      const [a, b] = [...pts.values()];
+      pinch = { dist: Math.max(1, Math.abs(a.x - b.x)), centerCss: relX((a.x + b.x) / 2) };
+    });
+
+    canvas.addEventListener('pointermove', e => {
+      if (pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (canvas._wdPinching) {
+        if (pinch && pts.size >= 2) this._onGraphPinch(canvas, id, pts, pinch, relX);
+        return;
+      }
+      this._onGraphHover(e, id);
+    });
+
+    const release = e => {
+      pts.delete(e.pointerId);
+      if (pts.size < 2) { pinch = null; canvas._wdPinching = false; }
+      if (pts.size === 0) canvas._wdOwnGesture = false;
+    };
+    canvas.addEventListener('pointerup', e => {
+      const wasPinching = canvas._wdPinching;
+      release(e);
+      // On touch the pointer is destroyed at lift, which fires pointerleave
+      // immediately - the readout used to vanish before it could be read. Pin
+      // it instead; the next tap (here or elsewhere) dismisses it.
+      if (e.pointerType === 'touch' && !wasPinching) this._pinGraphTip();
+    });
+    canvas.addEventListener('pointercancel', e => {
+      // The browser took the gesture to scroll the page. The user is navigating,
+      // not inspecting, so drop the readout rather than leaving it stranded.
+      release(e);
+      this._hideGraphTip();
+    });
+    canvas.addEventListener('pointerleave', e => {
+      if (e.pointerType === 'touch') return;   // handled by pointerup / -cancel
+      this._hideGraphTip();
+    });
+
     canvas.addEventListener('wheel', e => {
       const wd = canvas._wd;
       if (!wd) return;
       e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      const cursorXt = wd.cssToX(e.clientX - rect.left);
-      const curZoom = this._canvasZoom[id];
-      const fullXMax = wd.xMax;
-      const curXMin = curZoom ? curZoom.xMin : 0;
-      const curXMax = curZoom ? curZoom.xMax : fullXMax;
-      const range = curXMax - curXMin;
-      const newRange = range * (e.deltaY > 0 ? 1.3 : 0.75);
-      if (newRange >= fullXMax * 0.99) {
-        delete this._canvasZoom[id];
-      } else {
-        const ratio = (cursorXt - curXMin) / range;
-        const newXMax = Math.min(fullXMax, cursorXt - ratio * newRange + newRange);
-        const newXMin = Math.max(0, newXMax - newRange);
-        this._canvasZoom[id] = { xMin: newXMin, xMax: Math.min(fullXMax, newXMin + newRange) };
-      }
-      this._redrawCanvas(id);
+      // ctrlKey is how a trackpad pinch arrives. Scale proportionally there so
+      // the gesture feels continuous; a discrete wheel notch keeps its step.
+      const factor = e.ctrlKey
+        ? Math.min(4, Math.max(0.25, Math.exp(e.deltaY * 0.01)))
+        : (e.deltaY > 0 ? 1.3 : 0.75);
+      this._zoomCanvasAbout(id, wd.cssToX(relX(e.clientX)), factor);
     }, { passive: false });
-    canvas.addEventListener('dblclick', () => {
-      delete this._canvasZoom[id];
-      this._redrawCanvas(id);
+
+    canvas.addEventListener('dblclick', e => {
+      const wd = canvas._wd;
+      if (!wd) return;
+      if (this._canvasZoom[id]) { this._resetCanvasZoom(id); this._hideGraphTip(); return; }
+      this._zoomCanvasAbout(id, wd.cssToX(relX(e.clientX)), _CANVAS_DBLTAP_ZOOM);
     });
+  }
+
+  // pan-y hands the browser any vertical swipe, which is exactly what restores
+  // page scrolling. Two gestures have to survive that anyway: a pinch, and a
+  // drag the chart explicitly claimed (axis handle, trim/phase handle,
+  // playground threshold line). Cancelling the FIRST touchmove of such a
+  // gesture is what stops the scroll from ever starting - once the browser has
+  // committed to it we only get pointercancel, and preventDefault is too late.
+  _attachTouchOwnershipGuard(canvas) {
+    if (canvas._wdTouchGuard) return;
+    canvas._wdTouchGuard = true;
+    canvas.addEventListener('touchmove', e => {
+      if (e.touches.length >= 2 || canvas._wdOwnGesture) e.preventDefault();
+    }, { passive: false });
+  }
+
+  // Is this touch on the axis-pointer handle drawn by _onGraphHoverInner?
+  _onAxisHandle(canvas, id, e) {
+    const hx = this._gAxisHandle ? this._gAxisHandle[id] : null;
+    const wd = canvas._wd;
+    if (hx == null || !wd) return false;
+    const rect = canvas.getBoundingClientRect();
+    const axisY = (wd.ch - wd.padB) / wd.dpr;
+    return Math.abs((e.clientX - rect.left) - hx) <= _AXIS_HANDLE_GRAB
+      && Math.abs((e.clientY - rect.top) - axisY) <= _AXIS_HANDLE_GRAB;
+  }
+
+  // One pinch frame: pan by however far the two-finger centre travelled, then
+  // scale about it. Both fold into a single viewport write so the canvas is
+  // repainted once per frame instead of twice.
+  _onGraphPinch(canvas, id, pts, pinch, relX) {
+    const wd = canvas._wd;
+    if (!wd) return;
+    const [a, b] = [...pts.values()];
+    const dist = Math.max(1, Math.abs(a.x - b.x));
+    const centerCss = relX((a.x + b.x) / 2);
+    // Two fingers fire pointermove twice per frame, so the repaint is
+    // rAF-coalesced. The math must then run against the PENDING viewport, not
+    // the painted one: reading this._canvasZoom here would re-apply every
+    // in-flight delta to a stale window and the gesture would visibly lag and
+    // undershoot (measured: a 90px two-finger drag moved the view ~8x too far
+    // in the wrong direction).
+    const pend = this._gPinchPending && this._gPinchPending.id === id ? this._gPinchPending : null;
+    const cur = pend ? { xMin: pend.lo, xMax: pend.hi } : this._canvasZoom[id];
+    const lo = cur ? cur.xMin : 0;
+    const range = (cur ? cur.xMax : (wd.xMax || 1)) - lo;
+    const plotW = Math.max(1, wd.plotWcss);
+    const frac = Math.max(0, Math.min(1, centerCss / plotW));
+    const tCenter = lo + frac * range;
+    const newRange = range * (pinch.dist / dist);
+    const newLo = tCenter - frac * newRange - ((centerCss - pinch.centerCss) / plotW) * newRange;
+    pinch.dist = dist;
+    pinch.centerCss = centerCss;
+    this._gPinchPending = { id, lo: newLo, hi: newLo + newRange };
+    if (this._gPinchRaf) return;
+    this._gPinchRaf = requestAnimationFrame(() => {
+      this._gPinchRaf = null;
+      const p = this._gPinchPending;
+      this._gPinchPending = null;
+      if (p) this._setCanvasViewport(p.id, p.lo, p.hi);
+    });
+  }
+
+  // ── Canvas zoom viewport ────────────────────────────────────────────────────
+
+  // Single writer for this._canvasZoom: clamps the window, drops the key when
+  // the view is effectively whole (so "unzoomed" stays one representable state),
+  // repaints once and syncs the reset button.
+  _setCanvasViewport(id, xMin, xMax) {
+    const canvas = this.shadowRoot && this.shadowRoot.getElementById(id);
+    const wd = canvas && canvas._wd;
+    if (!wd) return;
+    const full = wd.xMax || 1;
+    const minRange = Math.min(full, Math.max(full / _CANVAS_MAX_ZOOM, _CANVAS_MIN_VIEW_S));
+    const range = Math.min(full, Math.max(minRange, xMax - xMin));
+    if (range >= full * 0.99) { this._resetCanvasZoom(id); return; }
+    const lo = Math.max(0, Math.min(full - range, xMin));
+    const prev = this._canvasZoom[id];
+    if (prev && Math.abs(prev.xMin - lo) < 1e-6 && Math.abs(prev.xMax - lo - range) < 1e-6) return;
+    this._canvasZoom[id] = { xMin: lo, xMax: lo + range };
+    this._redrawCanvas(id);
+    this._syncZoomReset(id);
+  }
+
+  // factor < 1 zooms in. focusXt (seconds) stays put under the cursor / pinch centre.
+  _zoomCanvasAbout(id, focusXt, factor) {
+    const canvas = this.shadowRoot && this.shadowRoot.getElementById(id);
+    const wd = canvas && canvas._wd;
+    if (!wd) return;
+    const full = wd.xMax || 1;
+    const cur = this._canvasZoom[id];
+    const lo = cur ? cur.xMin : 0;
+    const range = Math.max(1e-6, (cur ? cur.xMax : full) - lo);
+    const frac = Math.max(0, Math.min(1, (focusXt - lo) / range));
+    const newRange = range * factor;
+    this._setCanvasViewport(id, focusXt - frac * newRange, focusXt + (1 - frac) * newRange);
+  }
+
+  _resetCanvasZoom(id) {
+    if (!this._canvasZoom[id]) { this._syncZoomReset(id); return; }
+    delete this._canvasZoom[id];
+    this._redrawCanvas(id);
+    this._syncZoomReset(id);
+  }
+
+  // Mirrors HA's mdiRestart chart button: created lazily beside the canvas and
+  // shown only while that canvas actually has a zoom viewport. Double-tap-to-
+  // reset alone was undiscoverable, since the only hint lived inside the
+  // tooltip, which you could not see until you were already zoomed.
+  _ensureZoomReset(id, canvas) {
+    const wrap = canvas.parentElement;
+    if (!wrap) return null;
+    let btn = wrap.querySelector('.wd-zoom-reset');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'wd-zoom-reset';
+      btn.textContent = '↻';
+      btn.addEventListener('click', ev => { ev.stopPropagation(); this._resetCanvasZoom(id); });
+      wrap.appendChild(btn);
+    }
+    // Re-label on every sync, not just at creation: the panel can render before
+    // _loadPanelTranslations resolves, and a label captured then would stay
+    // English for the life of that element.
+    const lbl = this._t('btn.reset_zoom', {}, 'Reset zoom');
+    if (btn.title !== lbl) { btn.title = lbl; btn.setAttribute('aria-label', lbl); }
+    return btn;
+  }
+
+  _syncZoomReset(id) {
+    const canvas = this.shadowRoot && this.shadowRoot.getElementById(id);
+    if (!canvas) return;
+    const btn = this._ensureZoomReset(id, canvas);
+    if (btn) btn.classList.toggle('wd-zoom-reset--on', !!this._canvasZoom[id]);
   }
 
   _onGraphHover(e, id) {
     // rAF-coalesce: many pointermove events fire per frame; only do one redraw+overlay
     // per animation frame. Capture coordinates immediately (they may be stale by rAF).
     const px = e.clientX, py = e.clientY;
-    if (this._hoverRafId) { this._hoverPending = { px, py, id }; return; }
-    this._hoverPending = { px, py, id };
+    const touch = e.pointerType === 'touch';
+    if (this._hoverRafId) { this._hoverPending = { px, py, id, touch }; return; }
+    this._hoverPending = { px, py, id, touch };
     this._hoverRafId = requestAnimationFrame(() => {
       this._hoverRafId = null;
-      const { px: cx, py: cy, id: cid } = this._hoverPending || {};
+      const { px: cx, py: cy, id: cid, touch: ct } = this._hoverPending || {};
       if (!cid) return;
-      this._onGraphHoverInner(cx, cy, cid);
+      this._onGraphHoverInner(cx, cy, cid, { touch: ct });
     });
   }
-  _onGraphHoverInner(px, py, id) {
+  _onGraphHoverInner(px, py, id, opts = {}) {
     const canvas = this.shadowRoot && this.shadowRoot.getElementById(id);
     const wd = canvas && canvas._wd;
     if (!wd) return;
@@ -8380,26 +8711,109 @@ class HaWashdataPanel extends HTMLElement {
         lines.push(`<span style="color:var(--warning-color,#ff9800)">⚠ ${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</span>: ${_esc(detail)}`);
       }
     });
-    if (this._canvasZoom[id]) lines.push(`<span style="opacity:.45">${this._t('lbl.zoom_hint', {}, 'scroll to zoom · dblclick to reset')}</span>`);
+    // Gesture hint. On touch it shows unconditionally, because pinch-to-zoom is
+    // undiscoverable otherwise; with a mouse it only appears once zoomed, which
+    // is the pre-existing behaviour.
+    const zoomed = !!this._canvasZoom[id];
+    let hint = null;
+    if (opts.touch) {
+      hint = zoomed
+        ? this._t('lbl.zoom_hint_touch_zoomed', {}, 'pinch to zoom · double-tap to reset')
+        : this._t('lbl.zoom_hint_touch', {}, 'pinch to zoom');
+    } else if (zoomed) {
+      hint = this._t('lbl.zoom_hint', {}, 'scroll to zoom · dblclick to reset');
+    }
+    if (hint) lines.push(`<span style="opacity:.45">${_esc(hint)}</span>`);
+    // Axis-pointer handle (HA draws the same thing on touch): a grab target
+    // sitting ON the time axis, so scrubbing does not require keeping a finger
+    // over the very samples being read. _onAxisHandle hit-tests against this.
+    if (opts.touch) {
+      const hy = wd.ch - wd.padB;
+      ctx.beginPath(); ctx.arc(xp, hy, _AXIS_HANDLE_GRAB * 0.41 * wd.dpr, 0, 6.2832);
+      ctx.fillStyle = wd.primary; ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.92)'; ctx.lineWidth = 1.6 * wd.dpr; ctx.stroke();
+      if (!this._gAxisHandle) this._gAxisHandle = {};
+      this._gAxisHandle[id] = wd.xToCss(x);
+    } else if (this._gAxisHandle) {
+      delete this._gAxisHandle[id];
+    }
     ctx.restore();
-    this._showGraphTip(px, py, lines);
+    this._showGraphTip(px, py, lines, { touch: opts.touch, rect });
     this._syncSpagRowHighlight(this._hoverNearest ? this._hoverNearest.cid : null);
   }
 
-  _showGraphTip(cx, cy, lines) {
+  _showGraphTip(cx, cy, lines, opts = {}) {
     const tip = this._gtip;
     if (!tip) return;
+    this._gtipLines = lines;
     tip.innerHTML = lines.join('<br>');
+    tip.classList.remove('wd-gtip--pinned');
+    this._gtipPinned = false;
     tip.style.display = 'block';
     const w = tip.offsetWidth, h = tip.offsetHeight, off = 16;
-    let left = cx + off, top = cy + off;
-    if (left + w > window.innerWidth - 6) left = cx - w - off;
-    if (top + h > window.innerHeight - 6) top = cy - h - off;
-    tip.style.left = Math.max(6, left) + 'px';
-    tip.style.top = Math.max(6, top) + 'px';
+    let left, top;
+    if (opts.touch && opts.rect) {
+      // A fingertip is ~45px wide, so the mouse rule (cursor + 16px) put the
+      // readout squarely underneath it - measured at exactly 16px down-right of
+      // the touch point, i.e. permanently hidden. Park it OUTSIDE the plot
+      // instead: on a phone the chart is only ~200px tall, so a five-line
+      // readout docked inside it would cover both the finger and the curve.
+      // Above the chart is preferred, below is the fallback, and only if
+      // neither fits does it dock inside at the end furthest from the finger.
+      const r = opts.rect;
+      const gap = 8;
+      if (r.top - h - gap >= 6) top = r.top - h - gap;
+      else if (r.bottom + gap + h <= window.innerHeight - 6) top = r.bottom + gap;
+      else top = cy > r.top + r.height * 0.5 ? r.top + 6 : r.bottom - h - 6;
+      left = cx - w / 2;
+    } else {
+      left = cx + off;
+      top = cy + off;
+      if (top + h > window.innerHeight - 6) top = cy - h - off;
+      if (left + w > window.innerWidth - 6) left = cx - w - off;
+    }
+    tip.style.left = Math.max(6, Math.min(left, window.innerWidth - w - 6)) + 'px';
+    tip.style.top = Math.max(6, Math.min(top, window.innerHeight - h - 6)) + 'px';
   }
 
-  _hideGraphTip() { if (this._hoverRafId) { cancelAnimationFrame(this._hoverRafId); this._hoverRafId = null; this._hoverPending = null; } if (this._gtip) this._gtip.style.display = 'none'; this._syncSpagRowHighlight(null); }
+  // Touch destroys the pointer at lift, which fires pointerleave straight away;
+  // the readout used to disappear in the same instant it became readable. Keep
+  // it up and say so, rather than requiring the user to hold a finger down and
+  // read around it.
+  _pinGraphTip() {
+    const tip = this._gtip;
+    if (!tip || tip.style.display === 'none' || this._gtipPinned) return;
+    this._gtipPinned = true;
+    tip.classList.add('wd-gtip--pinned');
+    const hint = this._t('lbl.tap_to_dismiss', {}, 'tap the chart to dismiss');
+    tip.innerHTML = (this._gtipLines || []).join('<br>')
+      + `<span class="wd-gtip-dismiss">${_esc(hint)}</span>`;
+  }
+
+  // A tap on a chart is handled by that chart's own pointerdown (it dismisses
+  // and then re-scrubs). A tap anywhere else just dismisses.
+  _maybeDismissGraphTip(e) {
+    if (!this._gtipPinned) return;
+    const t = e.target;
+    if (t && t.closest && t.closest('.wd-canvas-wrap')) return;
+    this._unpinGraphTip();
+  }
+
+  _unpinGraphTip() {
+    if (!this._gtipPinned) return;
+    this._gtipPinned = false;
+    if (this._gtip) {
+      this._gtip.classList.remove('wd-gtip--pinned');
+      this._gtip.style.display = 'none';
+    }
+  }
+
+  _hideGraphTip() {
+    if (this._hoverRafId) { cancelAnimationFrame(this._hoverRafId); this._hoverRafId = null; this._hoverPending = null; }
+    this._gtipPinned = false;
+    if (this._gtip) { this._gtip.classList.remove('wd-gtip--pinned'); this._gtip.style.display = 'none'; }
+    this._syncSpagRowHighlight(null);
+  }
 
   // #385: keep an "i" help popover inside whatever clips it. The CSS centres the
   // bubble on its 15px anchor (`left:50%` + `translateX(-50%)`), so an anchor near
@@ -9713,7 +10127,7 @@ class HaWashdataPanel extends HTMLElement {
 
     sr.querySelectorAll('.wd-devcard[data-idx]').forEach(btn => btn.addEventListener('click', () => this._selectDevice(parseInt(btn.dataset.idx, 10))));
 
-    sr.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => { if (btn.dataset.tab !== 'settings') this._pendingSettings = {}; this._tab = btn.dataset.tab; this._fetchTabData(); }));
+    sr.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => { if (btn.dataset.tab !== 'settings') { this._pendingSettings = {}; this._dirtyOptKeys = new Set(); } this._tab = btn.dataset.tab; this._fetchTabData(); }));
     sr.querySelectorAll('[data-sec]').forEach(btn => btn.addEventListener('click', () => { this._snapshotFormToPending(sr); this._settingsSec = btn.dataset.sec; this._settingsSearch = ''; this._settingsSugOnly = false; this._render(); }));
     sr.querySelectorAll('[data-ptab]').forEach(btn => btn.addEventListener('click', () => {
       const sub = this._panelSubtab = btn.dataset.ptab;
@@ -9804,6 +10218,8 @@ class HaWashdataPanel extends HTMLElement {
         return m.vMin + Math.max(0, Math.min(1, frac)) * (m.vMax - m.vMin);
       };
       pgCanvas.addEventListener('pointermove', (e) => {
+        if (pgPts.has(e.pointerId)) pgPts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pgCanvas._wdPinching) { pgPinchFrame(); return; }
         if (this._pgDragging === 'start_thr') {
           this._pgThreshStart = Math.max(0, yToWatts(e.clientY));
           this._pgUpdateParamInput('start_threshold_w', this._pgThreshStart);
@@ -9841,47 +10257,112 @@ class HaWashdataPanel extends HTMLElement {
         const t = xToTime(e.clientX);
         if (t != null) { this._pgHoverT = t; this._pgUpdateStripAt(t); this._pgDrawCanvas(); }
       });
+      // Same viewport write for wheel, pinch and double tap.
+      const pgZoomAbout = (tFocus, factor) => {
+        const m = this._pgMap;
+        if (!m || tFocus == null) return;
+        const span = m.vMax - m.vMin;
+        const nSpan = Math.max(30, Math.min(m.totalDur, span * factor));
+        const frac = span > 0 ? Math.max(0, Math.min(1, (tFocus - m.vMin) / span)) : 0.5;
+        let nMin = tFocus - frac * nSpan;
+        nMin = Math.max(0, Math.min(m.totalDur - nSpan, nMin));
+        this._pgView = (nSpan >= m.totalDur - 1) ? null : { min: nMin, max: nMin + nSpan };
+        this._pgDrawCanvas();
+      };
+      // Two-finger pinch/pan, matching the .wd-canvas-wrap charts. pan-y keeps
+      // the vertical swipe with the page, so this is the only way to zoom the
+      // Playground trace on a phone.
+      const pgPts = new Map();
+      let pgPinch = null;
       pgCanvas.addEventListener('pointerdown', (e) => {
         if (!this._pgPowerPts?.length) return;
+        pgPts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pgPts.size === 2 && this._pgMap) {
+          // Abandon whatever the first finger claimed; this is a pinch now.
+          pgCanvas._wdPinching = true;
+          pgCanvas._wdOwnGesture = false;
+          this._pgDragging = null; this._pgPanStart = null;
+          pgCanvas.classList.remove('wd-pg-panning');
+          const [a, b] = [...pgPts.values()];
+          pgPinch = { dist: Math.max(1, Math.abs(a.x - b.x)), centerX: (a.x + b.x) / 2 };
+          return;
+        }
+        if (pgPts.size !== 1) return;
         if (eventHitAt(e.clientX, e.clientY)) return;  // clicking a pin head is not a pan
         pgCanvas.setPointerCapture(e.pointerId);
         const startThr = this._pgThreshStart ?? this._pgFieldVal('start_threshold_w', {}) ?? 50;
         const stopThr = this._pgThreshStop ?? this._pgFieldVal('stop_threshold_w', {}) ?? 5;
-        if (Math.abs(e.clientY - thresholdY(startThr)) < 10) { this._pgDragging = 'start_thr'; }
-        else if (Math.abs(e.clientY - thresholdY(stopThr)) < 10) { this._pgDragging = 'stop_thr'; }
+        // A fingertip cannot hit a 10px band; give touch a real touch target.
+        const tol = e.pointerType === 'touch' ? 18 : 10;
+        if (Math.abs(e.clientY - thresholdY(startThr)) < tol) { this._pgDragging = 'start_thr'; }
+        else if (Math.abs(e.clientY - thresholdY(stopThr)) < tol) { this._pgDragging = 'stop_thr'; }
         else if (this._pgMap) {
           this._pgDragging = 'pan';
           this._pgPanStart = { clientX: e.clientX, vMin: this._pgMap.vMin, vMax: this._pgMap.vMax, totalDur: this._pgMap.totalDur };
           pgCanvas.classList.add('wd-pg-panning');
         }
+        // Threshold drags are VERTICAL, the one axis pan-y hands to the page,
+        // so they have to be claimed through the touch guard. Panning is
+        // horizontal and deliberately is NOT claimed: leaving it unclaimed is
+        // what lets a vertical swipe still scroll the page (#413).
+        pgCanvas._wdOwnGesture = this._pgDragging === 'start_thr' || this._pgDragging === 'stop_thr';
       });
-      pgCanvas.addEventListener('pointerup', (e) => {
+      const pgRelease = (e) => {
         try { pgCanvas.releasePointerCapture(e.pointerId); } catch (_) {}
+        pgPts.delete(e.pointerId);
+        if (pgPts.size < 2) { pgPinch = null; pgCanvas._wdPinching = false; }
+        if (pgPts.size === 0) pgCanvas._wdOwnGesture = false;
         const wasThr = this._pgDragging === 'start_thr' || this._pgDragging === 'stop_thr';
         this._pgDragging = null; this._pgPanStart = null;
         pgCanvas.classList.remove('wd-pg-panning');
-        if (wasThr) this._pgDrawCanvas();
+        return wasThr;
+      };
+      pgCanvas.addEventListener('pointerup', (e) => {
+        if (pgRelease(e)) this._pgDrawCanvas();
       });
-      pgCanvas.addEventListener('pointerleave', () => {
-        if (this._pgDragging) return;
+      // Without this, a touch gesture the browser reclaims for scrolling never
+      // clears _pgDragging (only pointerup did), so the NEXT hover kept dragging
+      // a threshold line with no finger down.
+      pgCanvas.addEventListener('pointercancel', (e) => {
+        if (pgRelease(e)) this._pgDrawCanvas();
+        this._pgHoverT = null; this._pgHoverEvent = null; this._pgUpdateStripAt(null); this._pgDrawCanvas();
+      });
+      pgCanvas.addEventListener('pointerleave', (e) => {
+        if (this._pgDragging || e.pointerType === 'touch') return;
         this._pgHoverT = null; this._pgHoverEvent = null; this._pgUpdateStripAt(null); this._pgDrawCanvas();
       });
       pgCanvas.addEventListener('wheel', (e) => {
         if (!this._pgPowerPts?.length || !this._pgMap) return;
         e.preventDefault();
+        const factor = e.ctrlKey
+          ? Math.min(4, Math.max(0.25, Math.exp(e.deltaY * 0.01)))
+          : (e.deltaY > 0 ? 1.25 : 0.8);            // wheel down = zoom out
+        pgZoomAbout(xToTime(e.clientX), factor);
+      }, { passive: false });
+      pgCanvas.addEventListener('dblclick', (e) => {
+        if (this._pgView) { this._pgView = null; this._pgDrawCanvas(); return; }
+        pgZoomAbout(xToTime(e.clientX), _CANVAS_DBLTAP_ZOOM);
+      });
+      const pgPinchFrame = () => {
         const m = this._pgMap;
-        const tCursor = xToTime(e.clientX);
-        if (tCursor == null) return;
+        if (!m || !pgPinch || pgPts.size < 2) return;
+        const [a, b] = [...pgPts.values()];
+        const dist = Math.max(1, Math.abs(a.x - b.x));
+        const centerX = (a.x + b.x) / 2;
         const span = m.vMax - m.vMin;
-        const factor = e.deltaY > 0 ? 1.25 : 0.8;   // wheel down = zoom out
-        const nSpan = Math.max(30, Math.min(m.totalDur, span * factor));
-        const cursorFrac = span > 0 ? (tCursor - m.vMin) / span : 0.5;
-        let nMin = tCursor - cursorFrac * nSpan;
+        const nSpan = Math.max(30, Math.min(m.totalDur, span * (pgPinch.dist / dist)));
+        const tCenter = xToTime(centerX);
+        const dragT = ((centerX - pgPinch.centerX) / Math.max(1, m.plotWpx)) * nSpan;
+        pgPinch.dist = dist;
+        pgPinch.centerX = centerX;
+        if (tCenter == null) return;
+        const frac = span > 0 ? Math.max(0, Math.min(1, (tCenter - m.vMin) / span)) : 0.5;
+        let nMin = tCenter - frac * nSpan - dragT;
         nMin = Math.max(0, Math.min(m.totalDur - nSpan, nMin));
         this._pgView = (nSpan >= m.totalDur - 1) ? null : { min: nMin, max: nMin + nSpan };
         this._pgDrawCanvas();
-      }, { passive: false });
-      pgCanvas.addEventListener('dblclick', () => { this._pgView = null; this._pgDrawCanvas(); });
+      };
+      this._attachTouchOwnershipGuard(pgCanvas);
     }
 
     // F3: Param input fields → sync to threshold state + redraw. Scoped to inputs:
@@ -10408,21 +10889,36 @@ class HaWashdataPanel extends HTMLElement {
     // Guard: a stray in-form button (or Enter) must never submit the settings
     // form and reload the panel to "/?". Saving is explicit via the buttons above.
     const settingsForm = sr.getElementById('wd-settings-form');
+    // #406: a real user edit is the only thing that may enter the pending-edit
+    // buffer. Delegated so it covers every field type in both forms, and driven by
+    // trusted input/change events, so a value written by the renderer is not
+    // mistaken for one the user chose.
+    const markDirty = (e) => {
+      const el = e.target && e.target.closest ? e.target.closest('[data-opt]') : null;
+      if (el && el.dataset.opt) this._dirtyOptKeys.add(el.dataset.opt);
+    };
     if (settingsForm) {
       settingsForm.addEventListener('submit', e => e.preventDefault());
       // Live conflict validation: re-check on any field change.
-      settingsForm.addEventListener('input', () => this._liveValidateSettings(sr));
-      settingsForm.addEventListener('change', () => this._liveValidateSettings(sr));
+      settingsForm.addEventListener('input', (e) => { markDirty(e); this._liveValidateSettings(sr); });
+      settingsForm.addEventListener('change', (e) => { markDirty(e); this._liveValidateSettings(sr); });
       // Conflict fix-button delegation: apply the fix then cascade any downstream conflicts.
       settingsForm.addEventListener('click', e => {
         const btn = e.target.closest('.wd-conflict-fix');
         if (!btn) return;
         const key = btn.dataset.ckey, val = parseFloat(btn.dataset.cval);
         const inp = settingsForm.querySelector(`[data-opt="${key}"]`);
-        if (inp && !isNaN(val)) { inp.value = val; this._cascadeConflictFix(sr, settingsForm, key); }
+        // Setting .value fires no event, so mark it dirty explicitly - the user
+        // clicking "Use X" is an edit and must survive the next re-render.
+        if (inp && !isNaN(val)) { inp.value = val; this._dirtyOptKeys.add(key); this._cascadeConflictFix(sr, settingsForm, key); }
       });
       // Run initial validation in case the current saved opts already conflict.
       this._liveValidateSettings(sr);
+    }
+    const mlForm = sr.getElementById('wd-ml-form');
+    if (mlForm) {
+      mlForm.addEventListener('input', markDirty);
+      mlForm.addEventListener('change', markDirty);
     }
     const revertBtn = sr.getElementById('wd-settings-revert');
     if (revertBtn) revertBtn.addEventListener('click', async () => {
@@ -10438,6 +10934,7 @@ class HaWashdataPanel extends HTMLElement {
           this._cascadePending = {};
           this._preCascadeOpts = null;
           this._pendingSettings = {};
+          this._dirtyOptKeys = new Set();
           this._showToast(this._t('toast.settings_reverted', {}, 'Settings reverted; integration reloading'));
           this._render();
         } catch (e) { this._showToast(this._t('msg.toast_revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
@@ -10451,6 +10948,7 @@ class HaWashdataPanel extends HTMLElement {
         this._cascadePending = {};
         this._preCascadeOpts = null;
         this._pendingSettings = {};
+        this._dirtyOptKeys = new Set();
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: dev.entry_id });
         this._opts = r.options || {};
         this._optDefaults = r.defaults || {};  // #396
@@ -10521,6 +11019,7 @@ class HaWashdataPanel extends HTMLElement {
       // baseline) — the render overlays pending over opts, and _saveSettings picks
       // it up, so Revert can still restore the untouched saved values.
       this._pendingSettings[k] = isNaN(numV) ? v : numV;
+      this._dirtyOptKeys.add(k);   // #406: staging a suggestion is a user edit
       this._stagedSuggestions = true;
       // Live-only: drop the accepted suggestion so the category dot and the
       // "N tuning suggestions" count update immediately. Not persisted - a
@@ -10679,24 +11178,49 @@ class HaWashdataPanel extends HTMLElement {
       const commit = () => { this._snapTrimBounds(); this._syncTrimInputs(); this._drawCycleEditor(); };
       if (start) start.addEventListener('change', commit);
       if (end) end.addEventListener('change', commit);
+      const stop = () => {
+        if (m.drag) { this._snapTrimBounds(); this._syncTrimInputs(); this._drawCycleEditor(); }
+        m.drag = null;
+        cyc._wdOwnGesture = false;
+      };
+      // A second finger turns an in-progress handle drag into a pinch. Drop the
+      // drag WITHOUT committing, or the handle lands wherever the pinch centre
+      // happened to be. _attachGraphGestures calls this hook.
+      cyc._wdAbortEdit = () => { m.drag = null; cyc._wdOwnGesture = false; };
       cyc.addEventListener('pointerdown', e => {
         const wd = cyc._wd; if (!wd) return;
         const r = cyc.getBoundingClientRect(); const px = e.clientX - r.left;
-        m.drag = Math.abs(px - wd.xToCss(m.trim.start)) <= Math.abs(px - wd.xToCss(m.trim.end)) ? 'start' : 'end';
+        const dStart = Math.abs(px - wd.xToCss(m.trim.start));
+        const dEnd = Math.abs(px - wd.xToCss(m.trim.end));
+        // With a mouse, clicking anywhere grabs the nearer handle - there is no
+        // cost to that. With a finger there is: claiming the gesture is what
+        // stops the page scrolling (see _attachTouchOwnershipGuard), so an
+        // unconditional claim would make the chart a scroll trap again in trim
+        // mode, i.e. re-break the very thing #413 fixed. On touch, only claim
+        // when the finger actually landed on a handle.
+        if (e.pointerType === 'touch' && Math.min(dStart, dEnd) > _AXIS_HANDLE_GRAB) {
+          m.drag = null;
+          return;
+        }
+        m.drag = dStart <= dEnd ? 'start' : 'end';
+        // Claim it, so the touch guard keeps the drag out of the page scroller
+        // even if the finger drifts vertically off the handle.
+        cyc._wdOwnGesture = true;
         cyc.setPointerCapture(e.pointerId);
       });
       cyc.addEventListener('pointermove', e => {
-        if (!m.drag) return; const wd = cyc._wd; if (!wd) return;
+        if (!m.drag || cyc._wdPinching) return; const wd = cyc._wd; if (!wd) return;
         const r = cyc.getBoundingClientRect(); const x = wd.cssToX(e.clientX - r.left);
         if (m.drag === 'start') m.trim.start = Math.min(x, m.trim.end - 1);
         else m.trim.end = Math.max(x, m.trim.start + 1);
         this._syncTrimInputs(); this._drawCycleEditor();
       });
-      const stop = () => { if (m.drag) { this._snapTrimBounds(); this._syncTrimInputs(); this._drawCycleEditor(); } m.drag = null; };
       cyc.addEventListener('pointerup', stop); cyc.addEventListener('pointercancel', stop);
     } else if (m.mode === 'split') {
       cyc.addEventListener('pointerdown', e => {
         const wd = cyc._wd; if (!wd) return;
+        // A pinch must not drop a split marker at the pinch centre.
+        if (cyc._wdPinching) return;
         const r = cyc.getBoundingClientRect();
         this._toggleSplit(wd.cssToX(e.clientX - r.left));
       });
@@ -10733,9 +11257,11 @@ class HaWashdataPanel extends HTMLElement {
     if (!canvas) return;
     const full = m.env.target_duration || m.env.avg[m.env.avg.length - 1][0];
     const minGap = Math.max(5, full * 0.01);
-    const nearestEdge = px => {
+    const nearestEdge = (px, pointerType) => {
       const wd = canvas._wd; if (!wd) return null;
-      let best = null, bestD = 12;   // px tolerance
+      // 12 px is a mouse target; a fingertip needs roughly a touch target or
+      // the phase edges are not grabbable at all on a phone.
+      let best = null, bestD = pointerType === 'touch' ? _AXIS_HANDLE_GRAB : 12;
       (m.phases || []).forEach((ph, i) => {
         [['start', ph.start], ['end', ph.end]].forEach(([edge, val]) => {
           const d = Math.abs(px - wd.xToCss(val));
@@ -10744,13 +11270,22 @@ class HaWashdataPanel extends HTMLElement {
       });
       return best;
     };
+    const stop = () => { m.phaseDrag = null; canvas._wdOwnGesture = false; };
+    // Second finger: abandon the edge drag so the gesture becomes a pinch
+    // instead of flinging the edge to the pinch centre.
+    canvas._wdAbortEdit = stop;
     canvas.addEventListener('pointerdown', e => {
       const r = canvas.getBoundingClientRect();
-      m.phaseDrag = nearestEdge(e.clientX - r.left);
-      if (m.phaseDrag) canvas.setPointerCapture(e.pointerId);
+      m.phaseDrag = nearestEdge(e.clientX - r.left, e.pointerType);
+      if (m.phaseDrag) {
+        // Claim it, so the touch guard keeps a slightly-diagonal drag ours
+        // rather than handing it to the page scroller.
+        canvas._wdOwnGesture = true;
+        canvas.setPointerCapture(e.pointerId);
+      }
     });
     canvas.addEventListener('pointermove', e => {
-      if (!m.phaseDrag) return;
+      if (!m.phaseDrag || canvas._wdPinching) return;
       const wd = canvas._wd; if (!wd) return;
       const r = canvas.getBoundingClientRect();
       const x = wd.cssToX(e.clientX - r.left);
@@ -10760,7 +11295,6 @@ class HaWashdataPanel extends HTMLElement {
       this._syncPhaseInputs(m.phaseDrag.idx);
       this._drawPhaseEditor();
     });
-    const stop = () => { m.phaseDrag = null; };
     canvas.addEventListener('pointerup', stop);
     canvas.addEventListener('pointercancel', stop);
   }
@@ -10804,9 +11338,11 @@ class HaWashdataPanel extends HTMLElement {
     // Click the highlighted curve on the graph to toggle that cycle's selection.
     const spag = sr.getElementById('wd-spag-canvas');
     if (spag) spag.addEventListener('pointerdown', e => {
+      // A pinch must not toggle whichever cycle happens to sit under a finger.
+      if (spag._wdPinching) return;
       // Hit-test synchronously: _onGraphHover defers via rAF, so _hoverNearest
       // would still be stale/null on this same tick and the click would no-op.
-      this._onGraphHoverInner(e.clientX, e.clientY, 'wd-spag-canvas');
+      this._onGraphHoverInner(e.clientX, e.clientY, 'wd-spag-canvas', { touch: e.pointerType === 'touch' });
       const hn = this._hoverNearest;
       if (hn && hn.cid) {
         const sel = m.cleanup.selected;
@@ -12663,6 +13199,11 @@ class HaWashdataPanel extends HTMLElement {
     // never discard the user's unsaved edits in either place.
     sr.querySelectorAll('#wd-settings-form [data-opt], #wd-ml-form [data-opt]').forEach(el => {
       const key = el.dataset.opt;
+      // #406: only fields the user actually touched. Snapshotting everything meant a
+      // background re-render (ML comparison / automations / store status all call
+      // _renderPreservingFormEdits) froze the whole rendered form into
+      // _pendingSettings - including any field the renderer could not represent.
+      if (!this._dirtyOptKeys.has(key)) return;
       const f = _FIELD_BY_KEY[key];
       const ftype = (f && f.type) || el.dataset.ftype || 'text';
       if (el.type === 'checkbox') { this._pendingSettings[key] = el.checked; return; }
@@ -12841,6 +13382,7 @@ class HaWashdataPanel extends HTMLElement {
         const inp = form.querySelector(`[data-opt="${key}"]`);
         if (inp) {
           inp.value = fixErr.fixVal;
+          this._dirtyOptKeys.add(key);  // programmatic write: no event to mark it
         } else {
           // Off-screen: mutate this._opts so validation fallback sees the new value.
           // But snapshot the untouched last-saved baseline FIRST (once), so Revert
@@ -12864,6 +13406,33 @@ class HaWashdataPanel extends HTMLElement {
       const n = autoChanged.size, s = n > 1 ? 's' : '';
       this._showToast(this._t('conflict.cascade_toast', {n}, `Other settings adjusted for consistency: ${n}`), 'success');
     }
+  }
+
+  // #406: reduce a collected form payload to the keys that actually differ from the
+  // saved baseline. The save collector reads every [data-opt] in the DOM, so without
+  // this a save rewrote every field in the current section whether or not the user
+  // touched it - and any field the form could not render faithfully (a <select> whose
+  // stored value had no <option>, a form painted from stale options) was silently
+  // persisted at its rendered value. That is how an untouched "Group under device"
+  // was cleared by a save of an unrelated setting.
+  //
+  // The baseline is _preCascadeOpts when set, NOT the live _opts: an off-screen
+  // cascade fix writes its value into _opts as it goes (so cross-section conflict
+  // validation sees it) and records it in _cascadePending. Diffing against the
+  // mutated _opts would call those keys unchanged and silently drop them from the
+  // payload. _preCascadeOpts is the untouched last-saved baseline - the same
+  // expression _saveSettings uses for its undo snapshot.
+  _changedOptions(updates) {
+    const baseline = this._preCascadeOpts || this._opts || {};
+    const changed = {};
+    for (const [k, val] of Object.entries(updates)) {
+      if (JSON.stringify(val) === JSON.stringify(baseline[k])) continue;
+      // A blank/cleared value for a key that was never stored is a no-op: there is
+      // nothing to clear, and writing it would pin an empty string into options.
+      if (!(k in baseline) && (val === '' || val === null)) continue;
+      changed[k] = val;
+    }
+    return changed;
   }
 
   async _saveSettings() {
@@ -12942,11 +13511,11 @@ class HaWashdataPanel extends HTMLElement {
       // brand/model, group, ...) saves normally, since those aren't conflict-checked.
       // Conflicting in-progress edits are kept in the pending buffer so the fields +
       // banner survive the reload for the user to fix.
-      const safe = {}; const heldBack = {};
+      const rest = {}; const heldBack = {};
       for (const [k, val] of Object.entries(updates)) {
-        if (conflictKeys.has(k)) { heldBack[k] = val; continue; }
-        if (JSON.stringify(val) !== JSON.stringify((this._opts || {})[k])) safe[k] = val;
+        if (conflictKeys.has(k)) heldBack[k] = val; else rest[k] = val;
       }
+      const safe = this._changedOptions(rest);
       this._pendingSettings = { ...this._pendingSettings, ...heldBack };
       if (Object.keys(safe).length) {
         await this._busyRun('save-settings', async () => {
@@ -12961,6 +13530,15 @@ class HaWashdataPanel extends HTMLElement {
       }
       return;
     }
+    const changed = this._changedOptions(updates);
+    if (!Object.keys(changed).length) {
+      // Nothing to write. set_options always reloads the entry, so an empty save
+      // would take the entities unavailable for no reason.
+      this._pendingSettings = {};
+      this._dirtyOptKeys = new Set();
+      this._showToast(this._t('toast.settings_no_changes', {}, 'No changes to save'), 'info');
+      return;
+    }
     await this._busyRun('save-settings', async () => {
       try {
         // Snapshot current state before overwriting — one-level undo for the Revert
@@ -12969,15 +13547,16 @@ class HaWashdataPanel extends HTMLElement {
         // pre-cascade baseline: off-screen cascade fixes mutate this._opts before the
         // save, so cloning it here would bake those adjustments into the undo target.
         const prevSnap = JSON.parse(JSON.stringify(this._preCascadeOpts || this._opts || {}));
-        await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: updates });
+        await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: changed });
         // Reflect the saved values locally so the re-render keeps them (the
         // backend reload is async; without this the form snaps back to the
         // pre-edit values because this._opts was never updated).
-        this._opts = { ...this._opts, ...updates };
+        this._opts = { ...this._opts, ...changed };
         this._prevOpts = prevSnap;
         this._cascadePending = {};
         this._preCascadeOpts = null;
         this._pendingSettings = {};
+        this._dirtyOptKeys = new Set();
         if (this._stagedSuggestions) {
           try { await this._ws({ type: `${_DOMAIN}/clear_suggestions`, entry_id: dev.entry_id }); } catch (_) { /* non-fatal */ }
           this._stagedSuggestions = false; this._suggestions = [];

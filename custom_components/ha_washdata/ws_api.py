@@ -1365,7 +1365,10 @@ def ws_get_devices(
                 info["time_remaining_s"] = getattr(manager, "_time_remaining", None)
                 info["total_duration_s"] = getattr(manager, "_total_duration", None)
 
-                power = getattr(manager, "_current_power", None)
+                # Read through the property, not the raw cache (#409): it falls back
+                # to the sensor's live state so the panel can never show a power the
+                # sensor never reported.
+                power = getattr(manager, "current_power", None)
                 info["current_power_w"] = round(float(power), 2) if power is not None else None
 
                 progress = getattr(manager, "_cycle_progress", None)

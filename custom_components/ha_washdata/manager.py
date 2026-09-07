@@ -2062,6 +2062,19 @@ class WashDataManager:
                 power = float(state.state)
                 now = dt_util.now()
                 self.detector.process_reading(power, now)
+                # Seed the reading cache from the sensor itself (#409). The reading
+                # was already fed to the detector; leaving the manager's own cache
+                # unset meant every reload started with _current_power = 0 and
+                # _last_reading_time = None, so (a) the power tile/entity reported a
+                # value the sensor never had until the next event and (b) the
+                # watchdog - which returns early while _last_reading_time is None -
+                # could neither keepalive nor close a restored cycle whose plug went
+                # silent across the reload.
+                self._current_power = power
+                self._last_reading_time = now
+                self._last_real_reading_time = (
+                    getattr(state, "last_reported", None) or state.last_updated
+                )
             except (ValueError, TypeError):
                 pass
 
@@ -2217,6 +2230,12 @@ class WashDataManager:
         )
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
+        )
+        # Re-plumbed on every reload, not just at construction (issue #407): this is
+        # a panel checkbox, and an options change reloads in place without rebuilding
+        # the store, so without this line the toggle only took effect on an HA restart.
+        self.profile_store.save_debug_traces = config_entry.options.get(
+            CONF_SAVE_DEBUG_TRACES, False
         )
         # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
         # mean power elsewhere (see analysis.stage4_energy_mode).
@@ -3588,6 +3607,14 @@ class WashDataManager:
             # Cycle is running or not completed, don't reset
             return
 
+        # Keep the cached power honest in the terminal states too (#409). The
+        # watchdog is stopped here, so nothing else refreshes it: the panel/entity
+        # would keep reporting the last value seen before the cycle ended, and
+        # power-based Off detection (#284) - which compares that same cache against
+        # power_off_threshold_w - could never see the appliance being switched off.
+        # Display/decision cache only; the detector is not fed in a terminal state.
+        self._resync_power_from_state(now, feed_detector=False)
+
         time_since_complete = (now - self._cycle_completed_time).total_seconds()
 
         # Clean laundry nag notification. In repeat mode (#374) the reminder re-fires
@@ -3830,12 +3857,91 @@ class WashDataManager:
         )
         self._reset_terminal_to_off()
 
+    def _live_power_state(self) -> tuple[float, datetime] | None:
+        """Return ``(power, report_ts)`` from the power sensor's CURRENT state.
+
+        ``hass.states`` is the authoritative record of what the plug last said, and
+        unlike the manager's own cache it cannot go stale: it is written on every
+        report, including the ones this manager deliberately drops (the
+        sampling-interval throttle) or never receives (an event lost across a
+        reload). ``last_reported`` advances on every write - unchanged re-reports
+        included - so it is the honest "when did the sensor last speak" clock.
+
+        Returns None when the sensor is missing, unavailable or non-numeric.
+        """
+        state = self.hass.states.get(self.power_sensor_entity_id)
+        if state is None or state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE):
+            return None
+        try:
+            power = float(state.state)
+        except (TypeError, ValueError):
+            return None
+        report_ts = getattr(state, "last_reported", None) or state.last_updated
+        if not isinstance(report_ts, datetime):
+            return None
+        return power, report_ts
+
+    def _resync_power_from_state(self, now: datetime, feed_detector: bool) -> None:
+        """Re-anchor the cached power on the sensor's live state (#409).
+
+        ``_current_power`` is otherwise a pure event cache: one dropped or missed
+        state event and it stays wrong indefinitely, because nothing ever compares
+        it against the sensor again. That single stale number then drives the
+        watchdog's high-power branch, the low-power keepalive gate and the #284
+        power-off detection, so the divergence does not merely show a wrong value
+        in the panel - it decides whether a cycle ends at all.
+
+        Called from the two periodic timers (the in-cycle watchdog and the terminal
+        state-expiry poll), so the cache can never be more than one tick out of
+        step with the sensor. When ``feed_detector`` is set and the sensor has
+        reported since our last real reading, that report is also handed to the
+        detector: it is a genuine observation we simply never processed. Timestamped
+        with ``now`` rather than the report time so the detector's dt can never run
+        backwards (a negative dt is discarded, taking the reading with it).
+        """
+        live = self._live_power_state()
+        if live is None:
+            return
+        power, report_ts = live
+        missed = (
+            self._last_real_reading_time is None
+            or report_ts > self._last_real_reading_time
+        )
+        if feed_detector and missed:
+            self._logger.debug(
+                "Resync: sensor reported %.2fW at %s but the last processed reading "
+                "was %s (cached %.2fW); processing it now",
+                power,
+                report_ts,
+                self._last_real_reading_time,
+                self._current_power,
+            )
+            self.detector.process_reading(power, now)
+            self._last_reading_time = now
+            self._last_real_reading_time = report_ts
+        self._current_power = power
+
     async def _watchdog_check_stuck_cycle(self, now: datetime) -> None:
         """Watchdog: check if cycle is stuck (no updates for too long)."""
         if self.detector.state not in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
             return
 
         if not self._last_reading_time:
+            return
+
+        # Re-anchor the cached power on the sensor before any branch below reads it
+        # (#409): every decision from here on (keepalive vs force-end, low- vs
+        # high-power handling) is made against _current_power, and an event cache
+        # that has drifted from the sensor turns those decisions into fiction.
+        self._resync_power_from_state(now, feed_detector=True)
+        if self.detector.state not in (
+            STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING
+        ):
+            # A missed reading can legitimately end the cycle (that is the point of
+            # picking it up). Every other injection path in this method returns
+            # immediately for the same reason: none of the branches below are
+            # meaningful once the cycle is over.
+            self._notify_update()
             return
 
         # Refresh the remaining-time / progress estimate on the watchdog cadence
@@ -4123,11 +4229,35 @@ class WashDataManager:
                 limit = (expected + 14400) if expected > 0 else 14400 # 4h default
 
                 if elapsed < limit:
+                    # Silence at high power buys the cycle more time, but it must NOT
+                    # be turned into data (#409). This branch used to re-feed the
+                    # cached power to the detector on every tick, which
+                    #   - wrote a reading the sensor never reported into the cycle
+                    #     trace, producing a dead-flat non-zero tail that inflates
+                    #     the stored duration and energy and skews matching;
+                    #   - reset _time_below_threshold and _last_active_time, so the
+                    #     detector's own end-of-cycle timers could never accumulate
+                    #     and the fabricated tail was self-sustaining until this
+                    #     limit expired hours later (force_stopped);
+                    #   - fed that inflated duration back into the profile once the
+                    #     cycle was labelled, growing avg_duration and therefore
+                    #     `limit`, so each subsequent stuck cycle ran longer still.
+                    # The keepalive was never what kept the cycle alive - the
+                    # detector only ends a cycle on quiet time it has actually
+                    # observed - so deferring the force-end is enough. The trace
+                    # keeps an honest hole (integrate_wh drops outage-sized
+                    # segments), _update_remaining_only above keeps the ETA ticking
+                    # on wall-clock, and the resync at the top of this method picks
+                    # the real value up the moment the plug speaks again.
                     self._logger.info(
-                        "Watchdog: High power (%.1fW) stale (%.0fs). Injecting refresh.",
-                        self._current_power, time_since_any_update
+                        "Watchdog: High power (%.1fW) stale (%.0fs, sensor silent "
+                        "%.0fs). Deferring end (elapsed %.0fs < limit %.0fs).",
+                        self._current_power,
+                        time_since_any_update,
+                        time_since_real_update,
+                        elapsed,
+                        limit,
                     )
-                    self.detector.process_reading(self._current_power, now)
                     self._last_reading_time = now
                     self._notify_update()
                     return
@@ -4886,19 +5016,56 @@ class WashDataManager:
         match_result = self._last_match_result
         match_confidence = self._last_match_confidence
         matched_profile_duration = self._matched_profile_duration
+        manual_program = self._manual_program_active
         cycle_anomaly = self._cycle_anomaly
         overrun_ratio = self._overrun_ratio
 
-        # If we had a runtime match, attach the profile name for persistence
+        # Record which program this cycle ran - but only when we actually know it.
+        #
+        # A label is not a display value. It makes the cycle *evidence* for that
+        # profile (the async_rebuild_envelope right after the persist below), which
+        # moves the profile's avg_duration / target_duration - and those are what arm
+        # Smart Termination and the anti-crease finalize. So a weak guess recorded as
+        # fact seeds the next mis-detection: #400 measured a program's target_duration
+        # snapping to the duration of a fragment mis-assigned to it.
+        #
+        # The bar is the learning threshold, i.e. the ladder the panel already enforces
+        # (unmatch < match < learning < auto-label): a match that is not confident
+        # enough for WashData to ASK about is not confident enough to record as fact.
+        # Below it the cycle stays unlabelled and the auto-label pass below gets its
+        # turn on the COMPLETE trace at its own (higher) threshold, which is the better
+        # judge - previously any live commit, or a final match scraping its 0.15 floor,
+        # pre-empted that path entirely.
+        #
+        # A hand-picked program bypasses the gate: it is the user's own statement, not a
+        # guess. It is stamped "manual" rather than "auto_match" for the same reason -
+        # "auto_match" means "the matcher guessed this", which is what lets bulk
+        # auto-labelling overwrite a label later.
         if (
             program
             and program not in ("off", "detecting...", "restored...")
             and program in self.profile_store.get_profiles()
         ):
-            cycle_data["profile_name"] = program
-            cycle_data["label_source"] = "auto_match"
-            if match_confidence:
-                cycle_data["match_confidence"] = float(match_confidence)
+            _label_conf = float(match_confidence or 0.0)
+            if _label_conf > 0:
+                # Recorded whether or not we label, so the panel can show what
+                # WashData suspected without the cycle claiming it as its program.
+                cycle_data["match_confidence"] = _label_conf
+            if manual_program:
+                cycle_data["profile_name"] = program
+                cycle_data["label_source"] = "manual"
+            elif _label_conf >= float(self._learning_confidence or 0.0):
+                cycle_data["profile_name"] = program
+                cycle_data["label_source"] = "auto_match"
+            else:
+                self._logger.info(
+                    "Not labeling cycle as '%s': match confidence %.2f is below the "
+                    "learning threshold %.2f, so it stays unlabelled rather than "
+                    "reshaping that program's statistics.",
+                    program,
+                    _label_conf,
+                    float(self._learning_confidence or 0.0),
+                )
 
         # Attach extensive debug data if available (and configured)
         if match_result:
@@ -7131,8 +7298,15 @@ class WashDataManager:
 
     @property
     def current_power(self):
-        """Return current power reading in watts."""
-        return self._current_power
+        """Return current power reading in watts.
+
+        Prefers the sensor's live state over the event cache (#409): the cache is
+        only refreshed while a cycle is active or expiring, so an idle appliance
+        whose plug reports rarely would otherwise show whatever value was last seen
+        - which is what users compared against their HA sensor and found wrong.
+        """
+        live = self._live_power_state()
+        return live[0] if live is not None else self._current_power
 
     @property
     def cycle_start_time(self) -> datetime | None:
