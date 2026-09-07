@@ -253,7 +253,8 @@
         "hist_read_recorder": "从 Home Assistant 读取",
         "hist_scan": "扫描周期",
         "hist_import_n": "导入 {n} 个周期",
-        "hist_goto_cycles": "查看这些周期"
+        "hist_goto_cycles": "查看这些周期",
+        "save_total_cycles": "保存累计值"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
         "pg_across_cycles": "所有周期综合",
         "community_store": "社区商店",
         "online_account": "社区商店与在线功能",
-        "import_power_history": "导入功率历史"
+        "import_power_history": "导入功率历史",
+        "service_status": "保养状态"
     },
     "health": {
         "fair": "配置文件质量尚可",
@@ -709,7 +711,10 @@
         "evidence_reference_cycles": "从社区商店下载",
         "evidence_backfill_cycles": "在导入的功率历史中发现",
         "zoom_hint_touch": "双指缩放",
-        "zoom_hint_touch_zoomed": "双指缩放 · 双击重置"
+        "zoom_hint_touch_zoomed": "双指缩放 · 双击重置",
+        "cycles_since_service": "{since} / {total} 个周期",
+        "total_cycles_run": "累计运行周期",
+        "correct_total_cycles": "更正累计值"
     },
     "log": {
         "all_levels": "所有级别",
@@ -1067,7 +1072,10 @@
         "hist_scan_failed": "扫描失败。",
         "hist_scan_expired": "该次扫描结果已不可用，请重新扫描。",
         "hist_import_failed": "导入失败。",
-        "imported_history_readonly": "在导入的功率历史中检测到。它会影响程序匹配，但不计入您的统计，且无法裁剪或拆分。请标记以指定其程序。"
+        "imported_history_readonly": "在导入的功率历史中检测到。它会影响程序匹配，但不计入您的统计，且无法裁剪或拆分。请标记以指定其程序。",
+        "odometer_intro": "此累计值只会增加。删除某条周期记录不会改变它，并且它会在保存的历史记录上限之外继续累加，因此保养提醒始终准确。",
+        "odometer_correct_hint": "如果 WashData 记录了从未发生的运行，或者设备在安装 WashData 之前已经运行过周期，请设置此值。",
+        "no_reminders_set": "尚未设置保养提醒。"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1870,7 +1878,9 @@
         "hist_csv_required": "请先加载 CSV 文件或粘贴其内容",
         "file_read_failed": "无法读取该文件",
         "unlabel_done": "已取消标记 {count} 个周期",
-        "unlabel_failed": "取消标记失败：{error}"
+        "unlabel_failed": "取消标记失败：{error}",
+        "odometer_saved": "已保存累计周期数",
+        "odometer_save_failed": "无法保存累计值：{error}"
     },
     "suggestion": {
         "both_agree": "WashData建议",

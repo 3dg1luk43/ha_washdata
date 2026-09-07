@@ -253,7 +253,8 @@
     "unlabel_selected": "Unlabel selected ({n})",
     "unlabel_selected_tip": "Remove the profile label from the selected cycles. They stay in your history and can be labelled again later - they just stop shaping this profile.",
     "use": "Use",
-    "wipe_all": "Wipe All Data"
+    "wipe_all": "Wipe All Data",
+    "save_total_cycles": "Save total"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -361,6 +362,7 @@
     "playground": "Playground",
     "process_history": "Process History",
     "recommendations": "Recommendations ({n})",
+    "service_status": "Service Status",
     "settings_history": "Settings history",
     "status": "Status",
     "status_graph": "Status Graph",
@@ -709,7 +711,10 @@
     "tap_to_dismiss": "tap the chart to dismiss",
     "zoom_hint": "scroll to zoom · dblclick to reset",
     "zoom_hint_touch": "pinch to zoom",
-    "zoom_hint_touch_zoomed": "pinch to zoom · double-tap to reset"
+    "zoom_hint_touch_zoomed": "pinch to zoom · double-tap to reset",
+    "cycles_since_service": "{since} / {total} cycles",
+    "total_cycles_run": "cycles run in total",
+    "correct_total_cycles": "Correct the total"
   },
   "log": {
     "all_levels": "All levels",
@@ -920,10 +925,13 @@
     "no_profiles_overlay": "No profiles to overlay.",
     "no_profiles_yet": "No profiles yet. Create one from a labelled cycle.",
     "no_profiles_yet_short": "No profiles yet.",
+    "no_reminders_set": "No service reminders are set yet.",
     "no_settings_match": "No settings match \"{q}\"",
     "no_split_points": "No split points yet.",
     "no_suggestions": "No active suggestions.",
     "notify_services_hint": "Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.",
+    "odometer_correct_hint": "Set this if WashData recorded a run that never happened, or if the appliance had already run cycles before WashData was installed.",
+    "odometer_intro": "This total only ever rises. Deleting a cycle record does not change it, and it keeps counting past the stored-history limit, so service reminders stay correct.",
     "old_actions_warning": "Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.",
     "onboard_download": "New device? Adopt a ready-made setup (programs, reference cycles and phases) from another WashData user with the same appliance.",
     "onboarding_progress": "{n} / 3 cycles observed",
@@ -1923,6 +1931,8 @@
     "models_reverted": "On-device models reverted to baseline",
     "name_required": "Name required",
     "no_split_found": "No idle gaps found to split on",
+    "odometer_save_failed": "Could not save total: {error}",
+    "odometer_saved": "Total cycles saved",
     "panel_settings_saved": "Panel settings saved",
     "pause_no_cycle": "No active cycle to pause",
     "pg_preset_loaded": "Preset \"{name}\" loaded",

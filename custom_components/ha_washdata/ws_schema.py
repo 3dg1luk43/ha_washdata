@@ -158,6 +158,13 @@ class GetMaintenanceLogResponse(TypedDict):
     due: Any
     event_types: list[str]
     reminders: dict[str, Any]
+    cycles_since: dict[str, int]
+    lifetime_cycle_count: int
+
+
+class SetLifetimeCycleCountResponse(TypedDict):
+    success: bool
+    lifetime_cycle_count: int
 
 
 class AddMaintenanceEventResponse(TypedDict):
@@ -736,6 +743,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_maintenance_log": GetMaintenanceLogResponse,
     "add_maintenance_event": AddMaintenanceEventResponse,
     "delete_maintenance_event": SuccessResponse,
+    "set_lifetime_cycle_count": SetLifetimeCycleCountResponse,
     "label_cycle": SuccessResponse,
     "delete_cycle": SuccessResponse,
     "auto_label_cycles": SuccessResponse,
@@ -926,6 +934,7 @@ WS_COMMANDS: dict[str, dict] = {
         _p("notes", "str", False),
     ]},
     "delete_maintenance_event": {"params": [_entry(), _p("event_id", "str")]},
+    "set_lifetime_cycle_count": {"params": [_entry(), _p("count", "int")]},
     "label_cycle": {"params": [
         _entry(),
         _p("cycle_id", "str"),

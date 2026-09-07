@@ -253,7 +253,8 @@
     "hist_read_recorder": "Pročitaj iz Home Assistant",
     "hist_scan": "Potraži cikluse",
     "hist_import_n": "Uvezi cikluse: {n}",
-    "hist_goto_cycles": "Prikaži cikluse"
+    "hist_goto_cycles": "Prikaži cikluse",
+    "save_total_cycles": "Sačuvaj ukupan broj"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Kroz sve vaše cikluse",
     "community_store": "Prodavnica zajednice",
     "online_account": "Prodavnica zajednice i online funkcije",
-    "import_power_history": "Uvoz istorije snage"
+    "import_power_history": "Uvoz istorije snage",
+    "service_status": "Status servisa"
   },
   "health": {
     "fair": "Prihvatljiva kvaliteta profila",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Preuzeti iz prodavnice zajednice",
     "evidence_backfill_cycles": "Pronađeni u uvezenoj istoriji snage",
     "zoom_hint_touch": "zumirajte sa dva prsta",
-    "zoom_hint_touch_zoomed": "zumirajte sa dva prsta · dvostruki dodir za resetovanje"
+    "zoom_hint_touch_zoomed": "zumirajte sa dva prsta · dvostruki dodir za resetovanje",
+    "cycles_since_service": "{since} / {total} ciklusa",
+    "total_cycles_run": "ciklusa ukupno",
+    "correct_total_cycles": "Ispravi ukupan broj"
   },
   "log": {
     "all_levels": "Svi nivoi",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Pretraživanje nije uspelo.",
     "hist_scan_expired": "To pretraživanje više nije dostupno. Pokrenite ga ponovo.",
     "hist_import_failed": "Uvoz nije uspeo.",
-    "imported_history_readonly": "Detektovano u uvezenoj istoriji snage. Utiče na podudaranje programa, ali se ne računa u vašu statistiku i ne može se isecati ni deliti. Označite ga da mu dodelite program."
+    "imported_history_readonly": "Detektovano u uvezenoj istoriji snage. Utiče na podudaranje programa, ali se ne računa u vašu statistiku i ne može se isecati ni deliti. Označite ga da mu dodelite program.",
+    "odometer_intro": "Ovaj ukupan broj samo raste. Brisanje zapisa o ciklusu ga ne menja i nastavlja da broji i preko ograničenja sačuvane istorije, tako da podsetnici za servis ostaju tačni.",
+    "odometer_correct_hint": "Postavite ovo ako je WashData zabeležio ciklus koji se nikada nije dogodio ili ako je uređaj već obavio cikluse pre instaliranja WashData.",
+    "no_reminders_set": "Još nema postavljenih podsetnika za servis."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka okretanja nakon završetka radi smanjenja gužvanja.",
@@ -1949,7 +1957,9 @@
     "hist_csv_required": "Prvo učitajte CSV datoteku ili nalepite njen sadržaj",
     "file_read_failed": "Nije bilo moguće pročitati tu datoteku",
     "unlabel_done": "Uklonjena oznaka sa {count} ciklus(a)",
-    "unlabel_failed": "Uklanjanje oznake nije uspelo: {error}"
+    "unlabel_failed": "Uklanjanje oznake nije uspelo: {error}",
+    "odometer_saved": "Ukupan broj ciklusa sačuvan",
+    "odometer_save_failed": "Nije moguće sačuvati ukupan broj: {error}"
   },
   "trend": {
     "down": "Opadajući trend",

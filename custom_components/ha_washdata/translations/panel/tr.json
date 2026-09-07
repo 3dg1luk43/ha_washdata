@@ -253,7 +253,8 @@
         "hist_read_recorder": "Home Assistant'tan oku",
         "hist_scan": "Döngüleri tara",
         "hist_import_n": "{n} döngüyü içe aktar",
-        "hist_goto_cycles": "Döngüleri göster"
+        "hist_goto_cycles": "Döngüleri göster",
+        "save_total_cycles": "Toplamı Kaydet"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
         "pg_across_cycles": "Tüm döngülerinizde",
         "community_store": "Topluluk Mağazası",
         "online_account": "Topluluk Mağazası ve çevrimiçi özellikler",
-        "import_power_history": "Güç geçmişini içe aktar"
+        "import_power_history": "Güç geçmişini içe aktar",
+        "service_status": "Bakım Durumu"
     },
     "health": {
         "fair": "Kabul edilebilir profil kalitesi",
@@ -709,7 +711,10 @@
         "evidence_reference_cycles": "Topluluk mağazasından indirilenler",
         "evidence_backfill_cycles": "İçe aktarılan güç geçmişinde bulunanlar",
         "zoom_hint_touch": "iki parmakla yakınlaştırın",
-        "zoom_hint_touch_zoomed": "iki parmakla yakınlaştırın · sıfırlamak için çift dokunun"
+        "zoom_hint_touch_zoomed": "iki parmakla yakınlaştırın · sıfırlamak için çift dokunun",
+        "cycles_since_service": "{since} / {total} döngü",
+        "total_cycles_run": "toplamda çalıştırılan döngü",
+        "correct_total_cycles": "Toplamı düzelt"
     },
     "log": {
         "all_levels": "Tüm seviyeler",
@@ -1067,7 +1072,10 @@
         "hist_scan_failed": "Tarama başarısız oldu.",
         "hist_scan_expired": "Bu tarama artık kullanılamıyor. Lütfen yeniden tarayın.",
         "hist_import_failed": "İçe aktarma başarısız oldu.",
-        "imported_history_readonly": "İçe aktarılan güç geçmişinde algılandı. Program eşleştirmesini etkiler ancak istatistiklerinize sayılmaz, kırpılamaz veya bölünemez. Programını adlandırmak için etiketleyin."
+        "imported_history_readonly": "İçe aktarılan güç geçmişinde algılandı. Program eşleştirmesini etkiler ancak istatistiklerinize sayılmaz, kırpılamaz veya bölünemez. Programını adlandırmak için etiketleyin.",
+        "odometer_intro": "Bu toplam yalnızca artar. Bir döngü kaydını silmek onu değiştirmez ve saklanan geçmiş sınırının ötesinde saymaya devam eder, böylece servis hatırlatıcıları doğru kalır.",
+        "odometer_correct_hint": "WashData gerçekleşmemiş bir çalışma kaydettiyse veya cihaz WashData kurulmadan önce zaten döngü çalıştırmışsa bu değeri ayarlayın.",
+        "no_reminders_set": "Henüz servis hatırlatıcısı ayarlanmadı."
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1870,7 +1878,9 @@
         "hist_csv_required": "Önce bir CSV dosyası yükleyin veya içeriğini yapıştırın",
         "file_read_failed": "Bu dosya okunamadı",
         "unlabel_done": "{count} döngünün etiketi kaldırıldı",
-        "unlabel_failed": "Etiket kaldırma başarısız: {error}"
+        "unlabel_failed": "Etiket kaldırma başarısız: {error}",
+        "odometer_saved": "Toplam döngü sayısı kaydedildi",
+        "odometer_save_failed": "Toplam kaydedilemedi: {error}"
     },
     "suggestion": {
         "both_agree": "WashData öneriyor",

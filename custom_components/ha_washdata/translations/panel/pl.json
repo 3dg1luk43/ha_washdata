@@ -253,7 +253,8 @@
     "hist_read_recorder": "Wczytaj z Home Assistant",
     "hist_scan": "Szukaj cykli",
     "hist_import_n": "Importuj cykle: {n}",
-    "hist_goto_cycles": "Pokaż cykle"
+    "hist_goto_cycles": "Pokaż cykle",
+    "save_total_cycles": "Zapisz łączną liczbę"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "We wszystkich Twoich cyklach",
     "community_store": "Sklep społecznościowy",
     "online_account": "Sklep społecznościowy i funkcje online",
-    "import_power_history": "Import historii mocy"
+    "import_power_history": "Import historii mocy",
+    "service_status": "Status serwisu"
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Pobrane ze sklepu społecznościowego",
     "evidence_backfill_cycles": "Znalezione w zaimportowanej historii mocy",
     "zoom_hint_touch": "przybliż dwoma palcami",
-    "zoom_hint_touch_zoomed": "przybliż dwoma palcami · dotknij dwukrotnie, aby zresetować"
+    "zoom_hint_touch_zoomed": "przybliż dwoma palcami · dotknij dwukrotnie, aby zresetować",
+    "cycles_since_service": "{since} / {total} cykli",
+    "total_cycles_run": "cykli łącznie",
+    "correct_total_cycles": "Popraw łączną liczbę"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Skanowanie nie powiodło się.",
     "hist_scan_expired": "To skanowanie nie jest już dostępne. Uruchom je ponownie.",
     "hist_import_failed": "Import nie powiódł się.",
-    "imported_history_readonly": "Wykryty w zaimportowanej historii mocy. Wpływa na dopasowywanie programów, ale nie liczy się do Twoich statystyk i nie można go przyciąć ani podzielić. Oznacz go, aby nadać mu nazwę programu."
+    "imported_history_readonly": "Wykryty w zaimportowanej historii mocy. Wpływa na dopasowywanie programów, ale nie liczy się do Twoich statystyk i nie można go przyciąć ani podzielić. Oznacz go, aby nadać mu nazwę programu.",
+    "odometer_intro": "Ta łączna liczba tylko rośnie. Usunięcie zapisu cyklu jej nie zmienia, a licznik działa dalej także po przekroczeniu limitu przechowywanej historii, więc przypomnienia serwisowe pozostają prawidłowe.",
+    "odometer_correct_hint": "Ustaw tę wartość, jeśli WashData zapisał cykl, który nigdy się nie odbył, albo jeśli urządzenie wykonało już cykle przed instalacją WashData.",
+    "no_reminders_set": "Nie ustawiono jeszcze żadnych przypomnień serwisowych."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1949,7 +1957,9 @@
     "hist_csv_required": "Najpierw wczytaj plik CSV lub wklej jego zawartość",
     "file_read_failed": "Nie udało się odczytać tego pliku",
     "unlabel_done": "Usunięto etykietę z {count} cykli",
-    "unlabel_failed": "Usunięcie etykiety nie powiodło się: {error}"
+    "unlabel_failed": "Usunięcie etykiety nie powiodło się: {error}",
+    "odometer_saved": "Łączna liczba cykli zapisana",
+    "odometer_save_failed": "Nie udało się zapisać łącznej liczby: {error}"
   },
   "trend": {
     "down": "Trend w dół",

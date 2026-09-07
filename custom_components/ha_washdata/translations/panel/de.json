@@ -253,7 +253,8 @@
     "hist_read_recorder": "Aus Home Assistant lesen",
     "hist_scan": "Nach Zyklen suchen",
     "hist_import_n": "{n} Zyklen importieren",
-    "hist_goto_cycles": "Zeig mir die Zyklen"
+    "hist_goto_cycles": "Zeig mir die Zyklen",
+    "save_total_cycles": "Gesamtzahl speichern"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Über deine Zyklen hinweg",
     "community_store": "Community-Store",
     "online_account": "Community-Store und Onlinefunktionen",
-    "import_power_history": "Leistungsverlauf importieren"
+    "import_power_history": "Leistungsverlauf importieren",
+    "service_status": "Wartungsstatus"
   },
   "health": {
     "fair": "Akzeptable Übereinstimmungsqualität",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Aus dem Community-Store heruntergeladen",
     "evidence_backfill_cycles": "Im importierten Leistungsverlauf gefunden",
     "zoom_hint_touch": "mit zwei Fingern zoomen",
-    "zoom_hint_touch_zoomed": "mit zwei Fingern zoomen · Doppeltippen zum Zurücksetzen"
+    "zoom_hint_touch_zoomed": "mit zwei Fingern zoomen · Doppeltippen zum Zurücksetzen",
+    "cycles_since_service": "{since} / {total} Zyklen",
+    "total_cycles_run": "Zyklen insgesamt",
+    "correct_total_cycles": "Gesamtzahl korrigieren"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Suche fehlgeschlagen.",
     "hist_scan_expired": "Diese Suche ist nicht mehr verfügbar. Bitte erneut suchen.",
     "hist_import_failed": "Import fehlgeschlagen.",
-    "imported_history_readonly": "Im importierten Leistungsverlauf erkannt. Er beeinflusst die Programmzuordnung, zählt aber nicht in Ihre Statistik und kann nicht zugeschnitten oder geteilt werden. Beschriften Sie ihn, um das Programm zu benennen."
+    "imported_history_readonly": "Im importierten Leistungsverlauf erkannt. Er beeinflusst die Programmzuordnung, zählt aber nicht in Ihre Statistik und kann nicht zugeschnitten oder geteilt werden. Beschriften Sie ihn, um das Programm zu benennen.",
+    "odometer_intro": "Diese Gesamtzahl steigt immer nur an. Das Löschen eines Zyklus-Eintrags ändert sie nicht, und sie zählt auch über die Grenze des gespeicherten Verlaufs hinaus weiter, damit Wartungserinnerungen korrekt bleiben.",
+    "odometer_correct_hint": "Setzen Sie diesen Wert, wenn WashData einen Lauf erfasst hat, der nie stattgefunden hat, oder wenn das Gerät schon vor der Installation von WashData Zyklen absolviert hat.",
+    "no_reminders_set": "Es sind noch keine Service-Erinnerungen eingerichtet."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
@@ -1979,7 +1987,9 @@
     "hist_csv_required": "Laden Sie zuerst eine CSV-Datei oder fügen Sie deren Inhalt ein",
     "file_read_failed": "Diese Datei konnte nicht gelesen werden",
     "unlabel_done": "Beschriftung von {count} Zyklen entfernt",
-    "unlabel_failed": "Entfernen der Beschriftung fehlgeschlagen: {error}"
+    "unlabel_failed": "Entfernen der Beschriftung fehlgeschlagen: {error}",
+    "odometer_saved": "Gesamtzahl der Zyklen gespeichert",
+    "odometer_save_failed": "Gesamtzahl konnte nicht gespeichert werden: {error}"
   },
   "trend": {
     "down": "Abwärtstrend",

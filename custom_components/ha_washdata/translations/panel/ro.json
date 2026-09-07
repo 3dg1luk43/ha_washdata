@@ -205,7 +205,8 @@
     "hist_read_recorder": "Citiți din Home Assistant",
     "hist_scan": "Căutați cicluri",
     "hist_import_n": "Importați {n} cicluri",
-    "hist_goto_cycles": "Vedeți ciclurile"
+    "hist_goto_cycles": "Vedeți ciclurile",
+    "save_total_cycles": "Salvați totalul"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -320,7 +321,8 @@
     "pg_across_cycles": "În toate ciclurile tale",
     "community_store": "Magazinul comunității",
     "online_account": "Magazinul comunității și funcții online",
-    "import_power_history": "Importați istoricul de putere"
+    "import_power_history": "Importați istoricul de putere",
+    "service_status": "Starea întreținerii"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -661,7 +663,10 @@
     "evidence_reference_cycles": "Descărcate din magazinul comunității",
     "evidence_backfill_cycles": "Găsite într-un istoric de putere importat",
     "zoom_hint_touch": "folosiți două degete pentru zoom",
-    "zoom_hint_touch_zoomed": "folosiți două degete pentru zoom · dublă atingere pentru resetare"
+    "zoom_hint_touch_zoomed": "folosiți două degete pentru zoom · dublă atingere pentru resetare",
+    "cycles_since_service": "{since} / {total} cicluri",
+    "total_cycles_run": "cicluri efectuate în total",
+    "correct_total_cycles": "Corectați totalul"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -1019,7 +1024,10 @@
     "hist_scan_failed": "Analiza a eșuat.",
     "hist_scan_expired": "Acea analiză nu mai este disponibilă. Reluați analiza.",
     "hist_import_failed": "Importul a eșuat.",
-    "imported_history_readonly": "Detectat într-un istoric de putere importat. Influențează potrivirea programelor, dar nu este contabilizat în statisticile dvs. și nu poate fi tăiat sau divizat. Etichetați-l pentru a indica programul."
+    "imported_history_readonly": "Detectat într-un istoric de putere importat. Influențează potrivirea programelor, dar nu este contabilizat în statisticile dvs. și nu poate fi tăiat sau divizat. Etichetați-l pentru a indica programul.",
+    "odometer_intro": "Acest total doar crește. Ștergerea înregistrării unui ciclu nu îl modifică și continuă să numere dincolo de limita istoricului păstrat, astfel încât mementourile de service rămân corecte.",
+    "odometer_correct_hint": "Setați această valoare dacă WashData a înregistrat un ciclu care nu a avut loc niciodată sau dacă aparatul efectuase deja cicluri înainte de instalarea WashData.",
+    "no_reminders_set": "Încă nu este setat niciun memento de service."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1792,7 +1800,9 @@
     "hist_csv_required": "Încărcați mai întâi un fișier CSV sau lipiți conținutul acestuia",
     "file_read_failed": "Fișierul nu a putut fi citit",
     "unlabel_done": "Etichetă eliminată de la {count} ciclu(ri)",
-    "unlabel_failed": "Eliminarea etichetei a eșuat: {error}"
+    "unlabel_failed": "Eliminarea etichetei a eșuat: {error}",
+    "odometer_saved": "Totalul ciclurilor a fost salvat",
+    "odometer_save_failed": "Nu s-a putut salva totalul: {error}"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",

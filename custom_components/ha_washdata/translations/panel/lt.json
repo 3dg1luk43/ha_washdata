@@ -253,7 +253,8 @@
     "hist_read_recorder": "Nuskaityti iš Home Assistant",
     "hist_scan": "Ieškoti ciklų",
     "hist_import_n": "Importuoti ciklus ({n})",
-    "hist_goto_cycles": "Parodyti ciklus"
+    "hist_goto_cycles": "Parodyti ciklus",
+    "save_total_cycles": "Išsaugoti bendrą skaičių"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Per visus jūsų ciklus",
     "community_store": "Bendruomenės parduotuvė",
     "online_account": "Bendruomenės parduotuvė ir interneto funkcijos",
-    "import_power_history": "Galios istorijos importavimas"
+    "import_power_history": "Galios istorijos importavimas",
+    "service_status": "Aptarnavimo būsena"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Atsisiųsti iš bendruomenės parduotuvės",
     "evidence_backfill_cycles": "Rasti importuotoje galios istorijoje",
     "zoom_hint_touch": "priartinkite dviem pirštais",
-    "zoom_hint_touch_zoomed": "priartinkite dviem pirštais · dukart palieskite atstatymui"
+    "zoom_hint_touch_zoomed": "priartinkite dviem pirštais · dukart palieskite atstatymui",
+    "cycles_since_service": "{since} / {total} ciklų",
+    "total_cycles_run": "ciklų iš viso",
+    "correct_total_cycles": "Pataisyti bendrą skaičių"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Skenavimas nepavyko.",
     "hist_scan_expired": "To skenavimo rezultatų jau nėra. Nuskenuokite dar kartą.",
     "hist_import_failed": "Importavimas nepavyko.",
-    "imported_history_readonly": "Aptikta importuotoje galios istorijoje. Tai daro įtaką programų atpažinimui, bet neįskaičiuojama į jūsų statistiką, o ciklo negalima apkarpyti ar padalyti. Paspauskite „Pažymėti“, kad nurodytumėte programą."
+    "imported_history_readonly": "Aptikta importuotoje galios istorijoje. Tai daro įtaką programų atpažinimui, bet neįskaičiuojama į jūsų statistiką, o ciklo negalima apkarpyti ar padalyti. Paspauskite „Pažymėti“, kad nurodytumėte programą.",
+    "odometer_intro": "Šis bendras skaičius tik didėja. Ciklo įrašo ištrynimas jo nepakeičia, o skaičiavimas tęsiamas ir pasiekus išsaugotos istorijos ribą, todėl aptarnavimo priminimai lieka tikslūs.",
+    "odometer_correct_hint": "Nustatykite tai, jei WashData užregistravo ciklą, kurio iš tikrųjų nebuvo, arba jei prietaisas jau buvo atlikęs ciklus prieš WashData įdiegimą.",
+    "no_reminders_set": "Kol kas nenustatyta jokių aptarnavimo priminimų."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1840,7 +1848,9 @@
     "hist_csv_required": "Pirmiausia įkelkite CSV failą arba įklijuokite jo turinį",
     "file_read_failed": "Nepavyko nuskaityti to failo",
     "unlabel_done": "Panaikintas žymėjimas ciklams: {count}",
-    "unlabel_failed": "Nepavyko panaikinti žymėjimo: {error}"
+    "unlabel_failed": "Nepavyko panaikinti žymėjimo: {error}",
+    "odometer_saved": "Bendras ciklų skaičius išsaugotas",
+    "odometer_save_failed": "Nepavyko išsaugoti bendro skaičiaus: {error}"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",

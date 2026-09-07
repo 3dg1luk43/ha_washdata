@@ -253,7 +253,8 @@
     "hist_read_recorder": "Nolasīt no Home Assistant",
     "hist_scan": "Meklēt ciklus",
     "hist_import_n": "Importēt ciklus ({n})",
-    "hist_goto_cycles": "Parādīt ciklus"
+    "hist_goto_cycles": "Parādīt ciklus",
+    "save_total_cycles": "Saglabāt kopējo skaitu"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Pa visiem jūsu cikliem",
     "community_store": "Kopienas veikals",
     "online_account": "Kopienas veikals un tiešsaistes funkcijas",
-    "import_power_history": "Jaudas vēstures importēšana"
+    "import_power_history": "Jaudas vēstures importēšana",
+    "service_status": "Apkopes statuss"
   },
   "health": {
     "fair": "Pieņemama profila kvalitāte",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Lejupielādēti no kopienas veikala",
     "evidence_backfill_cycles": "Atrasti importētā jaudas vēsturē",
     "zoom_hint_touch": "tuviniet ar diviem pirkstiem",
-    "zoom_hint_touch_zoomed": "tuviniet ar diviem pirkstiem · divreiz pieskarieties, lai atiestatītu"
+    "zoom_hint_touch_zoomed": "tuviniet ar diviem pirkstiem · divreiz pieskarieties, lai atiestatītu",
+    "cycles_since_service": "{since} / {total} cikli",
+    "total_cycles_run": "cikli kopā",
+    "correct_total_cycles": "Labot kopējo skaitu"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Skenēšana neizdevās.",
     "hist_scan_expired": "Šī skenēšana vairs nav pieejama. Lūdzu, skenējiet vēlreiz.",
     "hist_import_failed": "Importēšana neizdevās.",
-    "imported_history_readonly": "Noteikts importētā jaudas vēsturē. Tas ietekmē programmu saskaņošanu, bet netiek ieskaitīts jūsu statistikā, un to nevar apgriezt vai sadalīt. Izmantojiet pogu Iezīmēt, lai norādītu programmu."
+    "imported_history_readonly": "Noteikts importētā jaudas vēsturē. Tas ietekmē programmu saskaņošanu, bet netiek ieskaitīts jūsu statistikā, un to nevar apgriezt vai sadalīt. Izmantojiet pogu Iezīmēt, lai norādītu programmu.",
+    "odometer_intro": "Šis kopējais skaits tikai palielinās. Cikla ieraksta dzēšana to nemaina, un skaitīšana turpinās arī pēc saglabātās vēstures ierobežojuma, tāpēc apkopes atgādinājumi paliek precīzi.",
+    "odometer_correct_hint": "Iestatiet to, ja WashData ir reģistrējis ciklu, kas nekad nav noticis, vai ja ierīce jau bija veikusi ciklus pirms WashData uzstādīšanas.",
+    "no_reminders_set": "Vēl nav iestatīts neviens apkopes atgādinājums."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1840,7 +1848,9 @@
     "hist_csv_required": "Vispirms ielādējiet CSV failu vai ielīmējiet tā saturu",
     "file_read_failed": "Šo failu nevarēja nolasīt",
     "unlabel_done": "Marķējums noņemts cikliem: {count}",
-    "unlabel_failed": "Marķējuma noņemšana neizdevās: {error}"
+    "unlabel_failed": "Marķējuma noņemšana neizdevās: {error}",
+    "odometer_saved": "Kopējais ciklu skaits saglabāts",
+    "odometer_save_failed": "Neizdevās saglabāt kopējo skaitu: {error}"
   },
   "suggestion": {
     "both_agree": "WashData iesaka",

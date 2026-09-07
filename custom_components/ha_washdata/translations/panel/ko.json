@@ -253,7 +253,8 @@
         "hist_read_recorder": "Home Assistant에서 읽기",
         "hist_scan": "사이클 검색",
         "hist_import_n": "{n}개 사이클 가져오기",
-        "hist_goto_cycles": "사이클 보기"
+        "hist_goto_cycles": "사이클 보기",
+        "save_total_cycles": "누적 값 저장"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
         "pg_across_cycles": "전체 사이클에 걸쳐",
         "community_store": "커뮤니티 스토어",
         "online_account": "커뮤니티 스토어 및 온라인 기능",
-        "import_power_history": "전력 이력 가져오기"
+        "import_power_history": "전력 이력 가져오기",
+        "service_status": "유지보수 상태"
     },
     "health": {
         "fair": "프로파일 품질: 보통",
@@ -709,7 +711,10 @@
         "evidence_reference_cycles": "커뮤니티 스토어에서 다운로드",
         "evidence_backfill_cycles": "가져온 전력 이력에서 발견",
         "zoom_hint_touch": "두 손가락으로 확대/축소",
-        "zoom_hint_touch_zoomed": "두 손가락으로 확대/축소 · 두 번 탭하여 초기화"
+        "zoom_hint_touch_zoomed": "두 손가락으로 확대/축소 · 두 번 탭하여 초기화",
+        "cycles_since_service": "{since} / {total} 사이클",
+        "total_cycles_run": "누적 실행 사이클",
+        "correct_total_cycles": "누적 값 수정"
     },
     "log": {
         "all_levels": "모든 레벨",
@@ -1067,7 +1072,10 @@
         "hist_scan_failed": "검색에 실패했습니다.",
         "hist_scan_expired": "해당 검색 결과는 더 이상 사용할 수 없습니다. 다시 검색해 주세요.",
         "hist_import_failed": "가져오기에 실패했습니다.",
-        "imported_history_readonly": "가져온 전력 이력에서 감지되었습니다. 프로그램 매칭에 반영되지만 통계에는 포함되지 않으며, 자르거나 분할할 수 없습니다. 라벨을 지정해 프로그램 이름을 정하세요."
+        "imported_history_readonly": "가져온 전력 이력에서 감지되었습니다. 프로그램 매칭에 반영되지만 통계에는 포함되지 않으며, 자르거나 분할할 수 없습니다. 라벨을 지정해 프로그램 이름을 정하세요.",
+        "odometer_intro": "이 누적 값은 줄어들지 않습니다. 사이클 기록을 삭제해도 값이 바뀌지 않으며, 저장되는 기록 한도를 넘어서도 계속 집계되므로 서비스 알림이 정확하게 유지됩니다.",
+        "odometer_correct_hint": "WashData가 실제로 일어나지 않은 작동을 기록했거나, WashData를 설치하기 전에 기기가 이미 사이클을 실행한 적이 있다면 이 값을 설정하세요.",
+        "no_reminders_set": "설정된 서비스 알림이 아직 없습니다."
     },
     "pg_desc": {
         "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -1870,7 +1878,9 @@
         "hist_csv_required": "먼저 CSV 파일을 불러오거나 내용을 붙여넣으세요",
         "file_read_failed": "해당 파일을 읽을 수 없습니다",
         "unlabel_done": "{count}개 사이클의 라벨을 해제했습니다",
-        "unlabel_failed": "라벨 해제 실패: {error}"
+        "unlabel_failed": "라벨 해제 실패: {error}",
+        "odometer_saved": "누적 사이클 수가 저장되었습니다",
+        "odometer_save_failed": "누적 값을 저장할 수 없습니다: {error}"
     },
     "suggestion": {
         "both_agree": "WashData 권장",

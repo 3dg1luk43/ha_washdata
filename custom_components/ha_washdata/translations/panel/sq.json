@@ -253,7 +253,8 @@
         "hist_read_recorder": "Lexo nga Home Assistant",
         "hist_scan": "Kërko cikle",
         "hist_import_n": "Importo {n} cikle",
-        "hist_goto_cycles": "Shfaq ciklet"
+        "hist_goto_cycles": "Shfaq ciklet",
+        "save_total_cycles": "Ruaj totalin"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
         "pg_across_cycles": "Në të gjithë ciklet tuaja",
         "community_store": "Dyqani i Komunitetit",
         "online_account": "Dyqani i Komunitetit dhe veçoritë online",
-        "import_power_history": "Importo historikun e fuqisë"
+        "import_power_history": "Importo historikun e fuqisë",
+        "service_status": "Statusi i mirëmbajtjes"
     },
     "health": {
         "fair": "Cilësi e pranueshme e profilit",
@@ -709,7 +711,10 @@
         "evidence_reference_cycles": "Shkarkuar nga dyqani i komunitetit",
         "evidence_backfill_cycles": "Gjetur në historikun e importuar të fuqisë",
         "zoom_hint_touch": "zmadho me dy gishta",
-        "zoom_hint_touch_zoomed": "zmadho me dy gishta · trokit dy herë për rivendosje"
+        "zoom_hint_touch_zoomed": "zmadho me dy gishta · trokit dy herë për rivendosje",
+        "cycles_since_service": "{since} / {total} cikle",
+        "total_cycles_run": "cikle të kryera gjithsej",
+        "correct_total_cycles": "Korrigjo totalin"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -1067,7 +1072,10 @@
         "hist_scan_failed": "Skanimi dështoi.",
         "hist_scan_expired": "Ai skanim nuk është më i disponueshëm. Skanoni përsëri.",
         "hist_import_failed": "Importimi dështoi.",
-        "imported_history_readonly": "Zbuluar në historikun e importuar të fuqisë. Ndikon në përputhjen e programeve, por nuk llogaritet në statistikat tuaja dhe nuk mund të shkurtohet ose të ndahet. Etiketojeni për të emërtuar programin."
+        "imported_history_readonly": "Zbuluar në historikun e importuar të fuqisë. Ndikon në përputhjen e programeve, por nuk llogaritet në statistikat tuaja dhe nuk mund të shkurtohet ose të ndahet. Etiketojeni për të emërtuar programin.",
+        "odometer_intro": "Ky total vetëm rritet. Fshirja e regjistrimit të një cikli nuk e ndryshon dhe vazhdon të numërojë përtej kufirit të historikut të ruajtur, kështu që kujtesat e servisit mbeten të sakta.",
+        "odometer_correct_hint": "Vendosni këtë vlerë nëse WashData regjistroi një cikël që nuk ndodhi kurrë, ose nëse pajisja kishte kryer cikle përpara se WashData të instalohej.",
+        "no_reminders_set": "Nuk është caktuar ende asnjë kujtesë servisi."
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1840,7 +1848,9 @@
         "hist_csv_required": "Ngarkoni së pari një skedar CSV ose ngjitni përmbajtjen e tij",
         "file_read_failed": "Skedari nuk mund të lexohej",
         "unlabel_done": "U hoq etiketa nga {count} cikël(e)",
-        "unlabel_failed": "Heqja e etiketës dështoi: {error}"
+        "unlabel_failed": "Heqja e etiketës dështoi: {error}",
+        "odometer_saved": "Totali i cikleve u ruajt",
+        "odometer_save_failed": "Nuk u ruajt dot totali: {error}"
     },
     "suggestion": {
         "both_agree": "WashData rekomandon",

@@ -540,6 +540,8 @@ _FULL_COMMANDS = frozenset({
     "get_export_inventory", "analyze_import", "export_config_selective", "import_config_selective",
     # Reverting on-device models / matcher tuning discards learned state -> full access.
     "revert_matching_config", "revert_ml_models",
+    # Rewrites the appliance's lifetime odometer, which drives maintenance schedules.
+    "set_lifetime_cycle_count",
     # Historical power-data import: ingests a whole power history and writes cycles.
     "history_import_begin", "history_import_chunk", "history_import_recorder",
     "start_history_import_scan", "apply_history_import",
@@ -1222,6 +1224,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_profile_groups, ws_save_profile_group, ws_rename_profile_group, ws_delete_profile_group,
         # Maintenance log (Group E)
         ws_get_maintenance_log, ws_add_maintenance_event, ws_delete_maintenance_event,
+        ws_set_lifetime_cycle_count,
         # Cycles
         ws_label_cycle, ws_delete_cycle, ws_auto_label_cycles,
         # Phase catalog
@@ -2269,12 +2272,66 @@ async def ws_get_maintenance_log(
     cfg = manager.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
     if isinstance(cfg, dict):
         reminders.update(cfg)
+    store = manager.profile_store
     _send_result(connection, msg["id"], "get_maintenance_log", {
-        "log": manager.profile_store.get_maintenance_log(),
+        "log": store.get_maintenance_log(),
         "due": manager.maintenance_due,
         "event_types": list(MAINTENANCE_EVENT_TYPES),
         "reminders": reminders,
+        # Cycles run since each task was last done, and the odometer they are
+        # measured against (#414). Computed backend-side before this and never
+        # sent, so the panel could show "due" but never "how close".
+        "cycles_since": {
+            evt: store.cycles_since_maintenance(evt) for evt in MAINTENANCE_EVENT_TYPES
+        },
+        "lifetime_cycle_count": manager.lifetime_cycle_count,
     })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/set_lifetime_cycle_count",
+        vol.Required("entry_id"): str,
+        vol.Required("count"): vol.All(vol.Coerce(int), vol.Range(min=0, max=1000000)),
+    }
+)
+@websocket_api.async_response
+async def ws_set_lifetime_cycle_count(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Correct the appliance's lifetime cycle odometer (requires full access).
+
+    The one sanctioned way the count moves other than a cycle completing (#414).
+    It exists because WashData cannot always tell a real short run from an
+    artefact, and because an appliance may have run for years before WashData was
+    installed - rather than asking "was that a real cycle?" on every deletion, the
+    user corrects the total once. Recorded in the settings changelog.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        store = manager.profile_store
+        previous = store.get_lifetime_cycle_count()
+        count = int(msg["count"])
+        store.set_lifetime_cycle_count(count, force=True)
+        await store.async_save()
+        await store.async_record_settings_changes(
+            [{"key": "lifetime_cycle_count", "old": previous, "new": count}]
+        )
+        manager.notify_update()
+        _send_result(
+            connection,
+            msg["id"],
+            "set_lifetime_cycle_count",
+            {"success": True, "lifetime_cycle_count": store.get_lifetime_cycle_count()},
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
 @websocket_api.websocket_command(

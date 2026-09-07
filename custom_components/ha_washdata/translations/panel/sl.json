@@ -253,7 +253,8 @@
     "hist_read_recorder": "Preberi iz Home Assistant",
     "hist_scan": "Poišči cikle",
     "hist_import_n": "Uvozi cikle: {n}",
-    "hist_goto_cycles": "Pokaži cikle"
+    "hist_goto_cycles": "Pokaži cikle",
+    "save_total_cycles": "Shrani skupno število"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Po vseh vaših ciklih",
     "community_store": "Skupnostna trgovina",
     "online_account": "Skupnostna trgovina in spletne funkcije",
-    "import_power_history": "Uvoz zgodovine moči"
+    "import_power_history": "Uvoz zgodovine moči",
+    "service_status": "Stanje servisa"
   },
   "health": {
     "fair": "Sprejemljiva kakovost profila",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Preneseni iz skupnostne trgovine",
     "evidence_backfill_cycles": "Najdeni v uvoženi zgodovini moči",
     "zoom_hint_touch": "povečajte z dvema prstoma",
-    "zoom_hint_touch_zoomed": "povečajte z dvema prstoma · dvakrat tapnite za ponastavitev"
+    "zoom_hint_touch_zoomed": "povečajte z dvema prstoma · dvakrat tapnite za ponastavitev",
+    "cycles_since_service": "{since} / {total} ciklov",
+    "total_cycles_run": "ciklov skupaj",
+    "correct_total_cycles": "Popravi skupno število"
   },
   "log": {
     "all_levels": "Vse ravni",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Pregledovanje ni uspelo.",
     "hist_scan_expired": "Ta pregled ni več na voljo. Zaženite ga znova.",
     "hist_import_failed": "Uvoz ni uspel.",
-    "imported_history_readonly": "Zaznano v uvoženi zgodovini moči. Vpliva na ujemanje programov, ne šteje pa se v vašo statistiko in ga ni mogoče obrezati ali razdeliti. Označite ga, da mu določite program."
+    "imported_history_readonly": "Zaznano v uvoženi zgodovini moči. Vpliva na ujemanje programov, ne šteje pa se v vašo statistiko in ga ni mogoče obrezati ali razdeliti. Označite ga, da mu določite program.",
+    "odometer_intro": "To skupno število samo narašča. Brisanje zapisa o ciklu ga ne spremeni in šteje naprej tudi prek omejitve shranjene zgodovine, zato opomniki za servis ostanejo pravilni.",
+    "odometer_correct_hint": "Nastavite to, če je WashData zabeležil cikel, ki se nikoli ni zgodil, ali če je naprava opravila cikle že pred namestitvijo WashData.",
+    "no_reminders_set": "Opomniki za servis še niso nastavljeni."
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -1949,7 +1957,9 @@
     "hist_csv_required": "Najprej naložite datoteko CSV ali prilepite njeno vsebino",
     "file_read_failed": "Te datoteke ni bilo mogoče prebrati",
     "unlabel_done": "Odstranjena oznaka za {count} ciklov",
-    "unlabel_failed": "Odstranjevanje oznake ni uspelo: {error}"
+    "unlabel_failed": "Odstranjevanje oznake ni uspelo: {error}",
+    "odometer_saved": "Skupno število ciklov shranjeno",
+    "odometer_save_failed": "Skupnega števila ni bilo mogoče shraniti: {error}"
   },
   "trend": {
     "down": "Padajoči trend",

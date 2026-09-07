@@ -253,7 +253,8 @@
     "hist_read_recorder": "Uit Home Assistant lezen",
     "hist_scan": "Zoeken naar cycli",
     "hist_import_n": "{n} cycli importeren",
-    "hist_goto_cycles": "Toon me de cycli"
+    "hist_goto_cycles": "Toon me de cycli",
+    "save_total_cycles": "Totaal opslaan"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -368,7 +369,8 @@
     "pg_across_cycles": "Over al je cycli",
     "community_store": "Communitystore",
     "online_account": "Communitystore en onlinefuncties",
-    "import_power_history": "Vermogensgeschiedenis importeren"
+    "import_power_history": "Vermogensgeschiedenis importeren",
+    "service_status": "Onderhoudsstatus"
   },
   "health": {
     "fair": "Acceptabele profielkwaliteit",
@@ -709,7 +711,10 @@
     "evidence_reference_cycles": "Gedownload uit de communitystore",
     "evidence_backfill_cycles": "Gevonden in geïmporteerde vermogensgeschiedenis",
     "zoom_hint_touch": "knijp om te zoomen",
-    "zoom_hint_touch_zoomed": "knijp om te zoomen · dubbeltik om te resetten"
+    "zoom_hint_touch_zoomed": "knijp om te zoomen · dubbeltik om te resetten",
+    "cycles_since_service": "{since} / {total} cycli",
+    "total_cycles_run": "cycli in totaal",
+    "correct_total_cycles": "Totaal corrigeren"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -1067,7 +1072,10 @@
     "hist_scan_failed": "Zoeken mislukt.",
     "hist_scan_expired": "Die zoekopdracht is niet meer beschikbaar. Zoek opnieuw.",
     "hist_import_failed": "Importeren mislukt.",
-    "imported_history_readonly": "Gedetecteerd in geïmporteerde vermogensgeschiedenis. Het beïnvloedt het matchen van programma's, maar telt niet mee in je statistieken en kan niet worden bijgesneden of gesplitst. Label het om het programma te benoemen."
+    "imported_history_readonly": "Gedetecteerd in geïmporteerde vermogensgeschiedenis. Het beïnvloedt het matchen van programma's, maar telt niet mee in je statistieken en kan niet worden bijgesneden of gesplitst. Label het om het programma te benoemen.",
+    "odometer_intro": "Dit totaal loopt alleen omhoog. Een cyclusregistratie verwijderen verandert het niet, en het blijft doortellen voorbij de limiet van de opgeslagen geschiedenis, zodat serviceherinneringen juist blijven.",
+    "odometer_correct_hint": "Stel dit in als WashData een draaibeurt heeft geregistreerd die nooit heeft plaatsgevonden, of als het apparaat al cycli had uitgevoerd voordat WashData werd geïnstalleerd.",
+    "no_reminders_set": "Er zijn nog geen serviceherinneringen ingesteld."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Vaatwasser: stille seconden na de verwachte duur voordat de wachttijd op het wegpompen aan het einde van de cyclus wordt vrijgegeven",
@@ -1979,7 +1987,9 @@
     "hist_csv_required": "Laad eerst een CSV-bestand of plak de inhoud ervan",
     "file_read_failed": "Kon dat bestand niet lezen",
     "unlabel_done": "Label verwijderd van {count} cyclus(sen)",
-    "unlabel_failed": "Label verwijderen mislukt: {error}"
+    "unlabel_failed": "Label verwijderen mislukt: {error}",
+    "odometer_saved": "Totaal aantal cycli opgeslagen",
+    "odometer_save_failed": "Kan totaal niet opslaan: {error}"
   },
   "trend": {
     "down": "Trend naar beneden",

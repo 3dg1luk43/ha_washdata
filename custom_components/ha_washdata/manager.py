@@ -7383,6 +7383,18 @@ class WashDataManager:
         return round(self.profile_store.get_lifetime_energy_wh() / 1000.0, 3)
 
     @property
+    def lifetime_cycle_count(self) -> int:
+        """Cycles this appliance has run, ever - the odometer behind the count sensor.
+
+        Distinct from :attr:`cycle_count`, which is ``len(retained history)`` and is
+        the right basis for "do I have enough data yet" gates. This one only ever
+        rises: it survives retention trimming, record deletion and a data wipe, so an
+        "every N cycles" maintenance schedule (ours or an external integration's) can
+        be built on it (#414).
+        """
+        return self._lifetime_cycle_count()
+
+    @property
     def manual_program_active(self) -> bool:
         """Return True if a manual program override is active."""
         return getattr(self, "_manual_program_active", False)
