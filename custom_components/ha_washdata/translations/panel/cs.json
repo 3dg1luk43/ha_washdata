@@ -80,7 +80,8 @@
     "unmatchable": "nelze rozpoznat",
     "not_importable": "nedostupné",
     "exists": "existuje",
-    "backfilled_tip": "Detekováno v importované historii výkonu. Ovlivňuje pouze přiřazování programů, nezapočítává se do statistik."
+    "backfilled_tip": "Detekováno v importované historii výkonu. Ovlivňuje pouze přiřazování programů, nezapočítává se do statistik.",
+    "armed": "(použije se na další cyklus)"
   },
   "btn": {
     "reset_zoom": "Obnovit přiblížení",
@@ -516,7 +517,7 @@
     "profile_index": "index profilu →",
     "profile_name": "Název profilu",
     "program": "Program",
-    "program_tip": "Přepište, který profil se páruje s aktuálním cyklem. Automatická detekce umožňuje integraci automaticky vybrat nejlepší shodu. Připněte konkrétní program, aby se vynuceně pároval, pokud automatická detekce chybuje nebo víte, co běží.",
+    "program_tip": "Přepište, který profil se páruje s aktuálním cyklem. Automatická detekce umožňuje integraci automaticky vybrat nejlepší shodu. Připněte konkrétní program, aby se vynuceně pároval, pokud automatická detekce chybuje nebo víte, co běží. Vyberte program před spuštěním spotřebiče a použije se, jakmile začne další cyklus.",
     "progress": "Pokrok",
     "raw_socket": "Surový signál",
     "read_only": "Pouze pro čtení",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Detekováno v importované historii výkonu. Ovlivňuje přiřazování programů, ale nezapočítává se do vašich statistik a nelze jej oříznout ani rozdělit. Označením mu přiřaďte program.",
     "odometer_intro": "Tento celkový počet pouze roste. Smazání záznamu o cyklu jej nezmění a počítá dál i za limitem uložené historie, takže připomínky servisu zůstávají správné.",
     "odometer_correct_hint": "Nastavte, pokud WashData zaznamenala cyklus, který nikdy neproběhl, nebo pokud spotřebič už absolvoval cykly před instalací WashData.",
-    "no_reminders_set": "Zatím nejsou nastaveny žádné připomínky servisu."
+    "no_reminders_set": "Zatím nejsou nastaveny žádné připomínky servisu.",
+    "toast_program_armed": "Program nastaven pro další cyklus: {program}"
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",

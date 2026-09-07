@@ -80,7 +80,8 @@
     "unmatchable": "kan ikke matches",
     "not_importable": "ikke her",
     "exists": "findes",
-    "backfilled_tip": "Registreret i importeret effekthistorik. Påvirker kun programmatchning, tælles ikke med i statistikken."
+    "backfilled_tip": "Registreret i importeret effekthistorik. Påvirker kun programmatchning, tælles ikke med i statistikken.",
+    "armed": "(gælder for næste cyklus)"
   },
   "btn": {
     "reset_zoom": "Nulstil zoom",
@@ -520,7 +521,7 @@
     "profile_index": "profilindeks →",
     "profile_name": "Profilnavn",
     "program": "Program",
-    "program_tip": "Tilsidesæt, hvilket profil der matches med den aktuelle cyklus. Automatisk registrering lader integrationen automatisk vælge den bedste match. Fastgør et bestemt program for at tvinge det til at matche, når automatisk registrering er forkert, eller du ved, hvad der kører.",
+    "program_tip": "Tilsidesæt, hvilket profil der matches med den aktuelle cyklus. Automatisk registrering lader integrationen automatisk vælge den bedste match. Fastgør et bestemt program for at tvinge det til at matche, når automatisk registrering er forkert, eller du ved, hvad der kører. Vælg et, før du starter apparatet, så anvendes det, så snart den næste cyklus begynder.",
     "progress": "Fremskridt",
     "raw_socket": "Rå stikkontakt",
     "read_only": "Skrivebeskyttet",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Registreret i importeret effekthistorik. Den påvirker programmatchning, men tælles ikke med i din statistik og kan ikke beskæres eller opdeles. Mærk den for at give programmet navn.",
     "odometer_intro": "Denne total kan kun stige. Sletning af en cyklusregistrering ændrer den ikke, og den tæller videre ud over grænsen for den gemte historik, så servicepåmindelser bliver ved med at være korrekte.",
     "odometer_correct_hint": "Angiv dette, hvis WashData har registreret en kørsel, der aldrig har fundet sted, eller hvis apparatet allerede havde kørt cyklusser, før WashData blev installeret.",
-    "no_reminders_set": "Der er endnu ikke angivet nogen servicepåmindelser."
+    "no_reminders_set": "Der er endnu ikke angivet nogen servicepåmindelser.",
+    "toast_program_armed": "Program valgt til næste cyklus: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",

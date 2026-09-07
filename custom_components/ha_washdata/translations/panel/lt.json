@@ -80,7 +80,8 @@
     "unmatchable": "negalima atpažinti",
     "not_importable": "čia nepasiekiama",
     "exists": "jau yra",
-    "backfilled_tip": "Aptikta importuotoje galios istorijoje. Turi įtakos tik programų atpažinimui, neįskaičiuojama į statistiką."
+    "backfilled_tip": "Aptikta importuotoje galios istorijoje. Turi įtakos tik programų atpažinimui, neįskaičiuojama į statistiką.",
+    "armed": "(taikoma kitam ciklui)"
   },
   "btn": {
     "reset_zoom": "Atstatyti mastelį",
@@ -515,7 +516,7 @@
     "profile_index": "profilio numeris →",
     "profile_name": "Profilio pavadinimas",
     "program": "Programa",
-    "program_tip": "Pakeiskite, kuris profilis atitinka dabartinį ciklą. Automatinis aptikimas leidžia integracijai automatiškai pasirinkti geriausią atitikmenį. Prisegkite konkretų programą, kad jis būtų priverstinai parinktas, kai automatinis aptikimas klysta arba žinote, kas veikia.",
+    "program_tip": "Pakeiskite, kuris profilis atitinka dabartinį ciklą. Automatinis aptikimas leidžia integracijai automatiškai pasirinkti geriausią atitikmenį. Prisegkite konkretų programą, kad jis būtų priverstinai parinktas, kai automatinis aptikimas klysta arba žinote, kas veikia. Pasirinkite programą prieš paleisdami prietaisą ir ji bus pritaikyta vos prasidėjus kitam ciklui.",
     "progress": "Pažanga",
     "raw_socket": "Neapdorotas lizdas",
     "read_only": "Tik skaityti",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Aptikta importuotoje galios istorijoje. Tai daro įtaką programų atpažinimui, bet neįskaičiuojama į jūsų statistiką, o ciklo negalima apkarpyti ar padalyti. Paspauskite „Pažymėti“, kad nurodytumėte programą.",
     "odometer_intro": "Šis bendras skaičius tik didėja. Ciklo įrašo ištrynimas jo nepakeičia, o skaičiavimas tęsiamas ir pasiekus išsaugotos istorijos ribą, todėl aptarnavimo priminimai lieka tikslūs.",
     "odometer_correct_hint": "Nustatykite tai, jei WashData užregistravo ciklą, kurio iš tikrųjų nebuvo, arba jei prietaisas jau buvo atlikęs ciklus prieš WashData įdiegimą.",
-    "no_reminders_set": "Kol kas nenustatyta jokių aptarnavimo priminimų."
+    "no_reminders_set": "Kol kas nenustatyta jokių aptarnavimo priminimų.",
+    "toast_program_armed": "Programa nustatyta kitam ciklui: {program}"
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",

@@ -80,7 +80,8 @@
     "unmatchable": "ni mogoče ujemati",
     "not_importable": "ni na voljo",
     "exists": "obstaja",
-    "backfilled_tip": "Zaznano v uvoženi zgodovini moči. Vpliva samo na ujemanje programov, ne šteje se v statistiko."
+    "backfilled_tip": "Zaznano v uvoženi zgodovini moči. Vpliva samo na ujemanje programov, ne šteje se v statistiko.",
+    "armed": "(velja za naslednji cikel)"
   },
   "btn": {
     "reset_zoom": "Ponastavi povečavo",
@@ -516,7 +517,7 @@
     "profile_index": "indeks profila →",
     "profile_name": "Ime profila",
     "program": "Program",
-    "program_tip": "Preglasujte profil, ki je primerjan s trenutnim ciklom. Samozaznavanje omogoča integraciji, da samodejno izbere najboljše ujemanje. Pripnite določen program, da prisilite ujemanje, ko je samodejno zaznavanje napačno ali veste, kaj se izvaja.",
+    "program_tip": "Preglasujte profil, ki je primerjan s trenutnim ciklom. Samozaznavanje omogoča integraciji, da samodejno izbere najboljše ujemanje. Pripnite določen program, da prisilite ujemanje, ko je samodejno zaznavanje napačno ali veste, kaj se izvaja. Izberite program pred zagonom naprave in uporabljen bo takoj, ko se začne naslednji cikel.",
     "progress": "Napredek",
     "raw_socket": "Surova vtičnica",
     "read_only": "Samo za branje",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Zaznano v uvoženi zgodovini moči. Vpliva na ujemanje programov, ne šteje pa se v vašo statistiko in ga ni mogoče obrezati ali razdeliti. Označite ga, da mu določite program.",
     "odometer_intro": "To skupno število samo narašča. Brisanje zapisa o ciklu ga ne spremeni in šteje naprej tudi prek omejitve shranjene zgodovine, zato opomniki za servis ostanejo pravilni.",
     "odometer_correct_hint": "Nastavite to, če je WashData zabeležil cikel, ki se nikoli ni zgodil, ali če je naprava opravila cikle že pred namestitvijo WashData.",
-    "no_reminders_set": "Opomniki za servis še niso nastavljeni."
+    "no_reminders_set": "Opomniki za servis še niso nastavljeni.",
+    "toast_program_armed": "Program nastavljen za naslednji cikel: {program}"
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",

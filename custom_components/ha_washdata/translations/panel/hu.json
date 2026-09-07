@@ -80,7 +80,8 @@
         "unmatchable": "nem egyeztethető",
         "not_importable": "itt nem elérhető",
         "exists": "létezik",
-        "backfilled_tip": "Importált teljesítményelőzményekben észlelve. Csak a programegyeztetést befolyásolja, a statisztikába nem számít bele."
+        "backfilled_tip": "Importált teljesítményelőzményekben észlelve. Csak a programegyeztetést befolyásolja, a statisztikába nem számít bele.",
+        "armed": "(a következő ciklusra érvényes)"
     },
     "btn": {
         "reset_zoom": "Nagyítás visszaállítása",
@@ -515,7 +516,7 @@
         "profile_index": "profilindex →",
         "profile_name": "Profil neve",
         "program": "Program",
-        "program_tip": "Felülbírálja, hogy melyik profil illeszkedik az aktuális ciklushoz. Az automatikus észlelés lehetővé teszi, hogy az integráció automatikusan válassza ki a legjobb egyezést. Rögzítsen egy adott programot a kényszer-egyezéshez, ha az automatikus észlelés téves, vagy tudja, mi fut.",
+        "program_tip": "Felülbírálja, hogy melyik profil illeszkedik az aktuális ciklushoz. Az automatikus észlelés lehetővé teszi, hogy az integráció automatikusan válassza ki a legjobb egyezést. Rögzítsen egy adott programot a kényszer-egyezéshez, ha az automatikus észlelés téves, vagy tudja, mi fut. Válasszon egyet a készülék indítása előtt, és a program a következő ciklus indulásakor érvénybe lép.",
         "progress": "Előrehaladás",
         "raw_socket": "Nyers csatlakozó",
         "read_only": "Csak olvasható",
@@ -1075,7 +1076,8 @@
         "imported_history_readonly": "Importált teljesítményelőzményekben észlelve. Befolyásolja a programegyeztetést, de nem számít bele a statisztikákba, és nem vágható vagy osztható. Címkézze fel a hozzá tartozó program megadásához.",
         "odometer_intro": "Ez az összesítés csak növekedhet. Egy ciklusbejegyzés törlése nem változtatja meg, és a tárolt előzmények korlátján túl is számol tovább, így a szerviz emlékeztetők pontosak maradnak.",
         "odometer_correct_hint": "Akkor állítsa be, ha a WashData olyan futást rögzített, amely soha nem történt meg, vagy ha a készülék már a WashData telepítése előtt is futtatott ciklusokat.",
-        "no_reminders_set": "Még nincs beállítva szerviz emlékeztető."
+        "no_reminders_set": "Még nincs beállítva szerviz emlékeztető.",
+        "toast_program_armed": "Program beállítva a következő ciklushoz: {program}"
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",

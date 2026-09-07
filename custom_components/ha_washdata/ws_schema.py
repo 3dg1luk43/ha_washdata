@@ -85,6 +85,7 @@ class DeviceInfo(TypedDict):
     recording: bool
     is_user_paused: bool
     manual_program: bool
+    armed_program: str | None
     options: dict[str, Any]
     # Device-resolved defaults for the cadence/ratio fields whose default varies by
     # device type (#396/#393), so the device-list conflict/suggestion badges can score

@@ -80,7 +80,8 @@
     "unmatchable": "nedá sa rozpoznať",
     "not_importable": "nedostupné",
     "exists": "existuje",
-    "backfilled_tip": "Detekované v importovanej histórii výkonu. Ovplyvňuje iba priraďovanie programov, nezapočítava sa do štatistík."
+    "backfilled_tip": "Detekované v importovanej histórii výkonu. Ovplyvňuje iba priraďovanie programov, nezapočítava sa do štatistík.",
+    "armed": "(použije sa na ďalší cyklus)"
   },
   "btn": {
     "reset_zoom": "Obnoviť priblíženie",
@@ -516,7 +517,7 @@
     "profile_index": "index profilu →",
     "profile_name": "Názov profilu",
     "program": "Program",
-    "program_tip": "Prepíšte profil priradený k aktuálnemu cyklu. Automatická detekcia umožňuje integrácii automaticky vybrať najlepšiu zhodu. Pripnite konkrétny program na vynútenie zhody, keď automatická detekcia nie je správna alebo viete, čo beží.",
+    "program_tip": "Prepíšte profil priradený k aktuálnemu cyklu. Automatická detekcia umožňuje integrácii automaticky vybrať najlepšiu zhodu. Pripnite konkrétny program na vynútenie zhody, keď automatická detekcia nie je správna alebo viete, čo beží. Vyberte program pred spustením spotrebiča a použije sa hneď, ako začne ďalší cyklus.",
     "progress": "Priebeh",
     "raw_socket": "Surový socket",
     "read_only": "Len na čítanie",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Detekované v importovanej histórii výkonu. Ovplyvňuje priraďovanie programov, ale nezapočítava sa do vašich štatistík a nedá sa orezať ani rozdeliť. Označením mu priraďte program.",
     "odometer_intro": "Tento celkový počet iba rastie. Odstránenie záznamu o cykle ho nezmení a počíta ďalej aj za limitom uloženej histórie, takže pripomienky servisu zostávajú správne.",
     "odometer_correct_hint": "Nastavte, ak WashData zaznamenalo cyklus, ktorý nikdy neprebehol, alebo ak spotrebič už absolvoval cykly pred inštaláciou WashData.",
-    "no_reminders_set": "Zatiaľ nie sú nastavené žiadne pripomienky servisu."
+    "no_reminders_set": "Zatiaľ nie sú nastavené žiadne pripomienky servisu.",
+    "toast_program_armed": "Program nastavený pre ďalší cyklus: {program}"
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",

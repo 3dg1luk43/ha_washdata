@@ -5,6 +5,7 @@
 import { test, expect } from '@playwright/test';
 import { bootPanel, clickTab, assertWsCalled } from '../helpers/panel';
 import deviceRunning from '../fixtures/mock-data/device-running.json';
+import deviceIdle from '../fixtures/mock-data/device-idle.json';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -29,6 +30,27 @@ test('status tab shows running state and program when cycle is active', async ({
   // Cotton 40°C should be the selected value in the program selector
   const progSelect = page.locator('#wd-status-prog');
   await expect(progSelect).toHaveValue('Cotton 40°C', { timeout: 5_000 });
+});
+
+// ─── Program pre-arming on an idle appliance (#411) ──────────────────────────
+
+test('picking a program while idle really sends the choice', async ({ page }) => {
+  // The dropdown is offered on an idle appliance, and the backend used to drop
+  // the write silently. Assert the command carries the picked program.
+  await bootPanel(page, { 'ha_washdata/set_program': { success: true } });
+  const progSelect = page.locator('#wd-status-prog');
+  await expect(progSelect).toHaveValue('auto_detect', { timeout: 8_000 });
+  await progSelect.selectOption('Cotton 40\u00B0C');
+  const calls = await assertWsCalled(page, 'ha_washdata/set_program');
+  expect(calls[0].program).toBe('Cotton 40\u00B0C');
+});
+
+test('an armed program is shown as such, not as a live match', async ({ page }) => {
+  const armed = JSON.parse(JSON.stringify(deviceIdle));
+  armed.devices[0].armed_program = 'Eco 60\u00B0C';
+  await bootPanel(page, { 'ha_washdata/get_devices': armed });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Eco 60\u00B0C', { timeout: 8_000 });
+  await expect(page.locator('.wd-prog-tag').first()).toContainText('next cycle');
 });
 
 test('progress bar is visible during a running cycle', async ({ page }) => {

@@ -80,7 +80,8 @@
         "unmatchable": "ne može se podudariti",
         "not_importable": "nije dostupno",
         "exists": "postoji",
-        "backfilled_tip": "Otkriveno u uvezenoj historiji snage. Utiče samo na podudaranje programa, ne broji se u statistiku."
+        "backfilled_tip": "Otkriveno u uvezenoj historiji snage. Utiče samo na podudaranje programa, ne broji se u statistiku.",
+        "armed": "(primjenjuje se na sljedeći ciklus)"
     },
     "btn": {
         "reset_zoom": "Poništi zumiranje",
@@ -516,7 +517,7 @@
         "profile_index": "indeks profila →",
         "profile_name": "Ime profila",
         "program": "Program",
-        "program_tip": "Zamijeni koji profil se poklapa s trenutnim ciklusom. Automatsko otkrivanje omogućava integraciji da automatski odabere najboljeg kandidata. Prikvačite određeni program za prisilno podudaranje kada automatsko otkrivanje nije ispravno ili znate što radi.",
+        "program_tip": "Zamijeni koji profil se poklapa s trenutnim ciklusom. Automatsko otkrivanje omogućava integraciji da automatski odabere najboljeg kandidata. Prikvačite određeni program za prisilno podudaranje kada automatsko otkrivanje nije ispravno ili znate što radi. Odaberite program prije pokretanja uređaja i primijenit će se čim počne sljedeći ciklus.",
         "progress": "Napredak",
         "raw_socket": "Sirova utičnica",
         "read_only": "Samo za čitanje",
@@ -1075,7 +1076,8 @@
         "imported_history_readonly": "Otkriveno u uvezenoj historiji snage. Utiče na podudaranje programa, ali se ne broji u vašu statistiku i ne može se skratiti ni podijeliti. Označite ga da mu dodijelite program.",
         "odometer_intro": "Ovaj ukupan broj samo raste. Brisanje zapisa o ciklusu ga ne mijenja i nastavlja se povećavati i nakon ograničenja sačuvane historije, tako da podsjetnici za servis ostaju tačni.",
         "odometer_correct_hint": "Postavite ovo ako je WashData zabilježio ciklus koji se nikada nije dogodio ili ako je uređaj već obavio cikluse prije instaliranja WashData.",
-        "no_reminders_set": "Još nema postavljenih podsjetnika za servis."
+        "no_reminders_set": "Još nema postavljenih podsjetnika za servis.",
+        "toast_program_armed": "Program postavljen za sljedeći ciklus: {program}"
     },
     "phase_desc": {
         "anti_crease": "Povremena kratka spuštanja nakon završetka za smanjenje bora.",

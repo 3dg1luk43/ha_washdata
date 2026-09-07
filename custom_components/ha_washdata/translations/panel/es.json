@@ -32,7 +32,8 @@
     "unmatchable": "coincidencia imposible",
     "not_importable": "n/d aquí",
     "exists": "ya existe",
-    "backfilled_tip": "Detectado en un historial de potencia importado. Solo influye en la coincidencia de programas, no cuenta en las estadísticas."
+    "backfilled_tip": "Detectado en un historial de potencia importado. Solo influye en la coincidencia de programas, no cuenta en las estadísticas.",
+    "armed": "(se aplica al siguiente ciclo)"
   },
   "btn": {
     "reset_zoom": "Restablecer zoom",
@@ -467,7 +468,7 @@
     "profile_index": "índice de perfil →",
     "profile_name": "Nombre del perfil",
     "program": "Programa",
-    "program_tip": "Anula qué perfil se asocia al ciclo actual. La detección automática permite que la integración elija la mejor coincidencia automáticamente. Fija un programa concreto para forzar la coincidencia cuando la detección automática falla o sabes qué está en marcha.",
+    "program_tip": "Anula qué perfil se asocia al ciclo actual. La detección automática permite que la integración elija la mejor coincidencia automáticamente. Fija un programa concreto para forzar la coincidencia cuando la detección automática falla o sabes qué está en marcha. Elige uno antes de poner en marcha el electrodoméstico y se aplicará en cuanto empiece el siguiente ciclo.",
     "progress": "Progreso",
     "raw_socket": "Señal bruta",
     "read_only": "Sólo lectura",
@@ -1027,7 +1028,8 @@
     "imported_history_readonly": "Detectado en un historial de potencia importado. Influye en la coincidencia de programas, pero no cuenta en sus estadísticas y no se puede recortar ni dividir. Etiquételo para indicar el programa.",
     "odometer_intro": "Este total solo aumenta. Eliminar el registro de un ciclo no lo modifica y sigue contando más allá del límite del historial almacenado, de modo que los recordatorios de servicio siguen siendo correctos.",
     "odometer_correct_hint": "Ajuste este valor si WashData registró un ciclo que nunca ocurrió, o si el electrodoméstico ya había realizado ciclos antes de instalar WashData.",
-    "no_reminders_set": "Aún no hay recordatorios de servicio configurados."
+    "no_reminders_set": "Aún no hay recordatorios de servicio configurados.",
+    "toast_program_armed": "Programa preparado para el siguiente ciclo: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",

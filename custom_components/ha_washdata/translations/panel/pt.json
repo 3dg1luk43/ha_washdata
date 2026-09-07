@@ -32,7 +32,8 @@
     "unmatchable": "correspondência impossível",
     "not_importable": "n/d aqui",
     "exists": "já existe",
-    "backfilled_tip": "Detetado num histórico de potência importado. Influencia apenas a correspondência de programas, não é contabilizado nas estatísticas."
+    "backfilled_tip": "Detetado num histórico de potência importado. Influencia apenas a correspondência de programas, não é contabilizado nas estatísticas.",
+    "armed": "(aplica-se ao próximo ciclo)"
   },
   "btn": {
     "reset_zoom": "Repor zoom",
@@ -467,7 +468,7 @@
     "profile_index": "índice do perfil →",
     "profile_name": "Nome do perfil",
     "program": "Programa",
-    "program_tip": "Substitua o perfil correspondido ao ciclo atual. A deteção automática permite que a integração escolha a melhor correspondência automaticamente. Fixe um programa específico para forçar a correspondência quando a deteção automática está errada ou quando sabe o que está em execução.",
+    "program_tip": "Substitua o perfil correspondido ao ciclo atual. A deteção automática permite que a integração escolha a melhor correspondência automaticamente. Fixe um programa específico para forçar a correspondência quando a deteção automática está errada ou quando sabe o que está em execução. Escolha um antes de ligar o aparelho e será aplicado assim que o próximo ciclo começar.",
     "progress": "Progresso",
     "raw_socket": "Socket bruto",
     "read_only": "Só de leitura",
@@ -1027,7 +1028,8 @@
     "imported_history_readonly": "Detetado num histórico de potência importado. Influencia a correspondência de programas, mas não é contabilizado nas suas estatísticas e não pode ser cortado nem dividido. Rotule-o para indicar o programa.",
     "odometer_intro": "Este total só aumenta. Eliminar o registo de um ciclo não o altera e continua a contar além do limite do histórico guardado, para que os lembretes de manutenção se mantenham corretos.",
     "odometer_correct_hint": "Defina este valor se o WashData registou um ciclo que nunca aconteceu, ou se o eletrodoméstico já tinha realizado ciclos antes de o WashData ser instalado.",
-    "no_reminders_set": "Ainda não há lembretes de manutenção definidos."
+    "no_reminders_set": "Ainda não há lembretes de manutenção definidos.",
+    "toast_program_armed": "Programa preparado para o próximo ciclo: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Máquina de lavar louça: segundos de silêncio após a duração esperada antes de libertar a espera da descarga de fim de ciclo",

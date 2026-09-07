@@ -32,7 +32,8 @@
     "unmatchable": "correspondência impossível",
     "not_importable": "n/d aqui",
     "exists": "já existe",
-    "backfilled_tip": "Detectado em um histórico de potência importado. Influencia apenas a correspondência de programas, não é contabilizado nas estatísticas."
+    "backfilled_tip": "Detectado em um histórico de potência importado. Influencia apenas a correspondência de programas, não é contabilizado nas estatísticas.",
+    "armed": "(aplica-se ao próximo ciclo)"
   },
   "btn": {
     "reset_zoom": "Redefinir zoom",
@@ -467,7 +468,7 @@
     "profile_index": "índice do perfil →",
     "profile_name": "Nome do perfil",
     "program": "Programa",
-    "program_tip": "Substitua o perfil correspondido ao ciclo atual. A detecção automática permite que a integração escolha a melhor correspondência automaticamente. Fixe um programa específico para forçar a correspondência quando a detecção automática estiver errada ou você souber o que está em execução.",
+    "program_tip": "Substitua o perfil correspondido ao ciclo atual. A detecção automática permite que a integração escolha a melhor correspondência automaticamente. Fixe um programa específico para forçar a correspondência quando a detecção automática estiver errada ou você souber o que está em execução. Escolha um antes de ligar o eletrodoméstico e ele será aplicado assim que o próximo ciclo começar.",
     "progress": "Progresso",
     "raw_socket": "Socket bruto",
     "read_only": "Somente leitura",
@@ -1027,7 +1028,8 @@
     "imported_history_readonly": "Detectado em um histórico de potência importado. Influencia a correspondência de programas, mas não é contabilizado nas suas estatísticas e não pode ser recortado nem dividido. Rotule-o para indicar o programa.",
     "odometer_intro": "Este total só aumenta. Excluir o registro de um ciclo não o altera e ele continua contando além do limite do histórico armazenado, para que os lembretes de manutenção permaneçam corretos.",
     "odometer_correct_hint": "Defina este valor se o WashData registrou um ciclo que nunca aconteceu, ou se o eletrodoméstico já havia realizado ciclos antes de o WashData ser instalado.",
-    "no_reminders_set": "Ainda não há lembretes de manutenção definidos."
+    "no_reminders_set": "Ainda não há lembretes de manutenção definidos.",
+    "toast_program_armed": "Programa preparado para o próximo ciclo: {program}"
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",

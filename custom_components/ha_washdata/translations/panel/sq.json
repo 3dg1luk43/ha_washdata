@@ -80,7 +80,8 @@
         "unmatchable": "s'mund të përputhet",
         "not_importable": "s'aplikohet këtu",
         "exists": "ekziston",
-        "backfilled_tip": "Zbuluar në historikun e importuar të fuqisë. Ndikon vetëm në përputhjen e programeve, nuk llogaritet në statistika."
+        "backfilled_tip": "Zbuluar në historikun e importuar të fuqisë. Ndikon vetëm në përputhjen e programeve, nuk llogaritet në statistika.",
+        "armed": "(zbatohet për ciklin tjetër)"
     },
     "btn": {
         "reset_zoom": "Rivendos zmadhimin",
@@ -515,7 +516,7 @@
         "profile_index": "indeksi i profilit →",
         "profile_name": "Emri i profilit",
         "program": "Program",
-        "program_tip": "Anuloni profilin që përputhet me ciklin aktual. Zbulimi automatik lejon integrimin të zgjedhë automatikisht përputhjen më të mirë. Fiksoni një program specifik për të detyruar përputhjen kur zbulimi automatik është i gabuar ose e dini çfarë po funksionon.",
+        "program_tip": "Anuloni profilin që përputhet me ciklin aktual. Zbulimi automatik lejon integrimin të zgjedhë automatikisht përputhjen më të mirë. Fiksoni një program specifik për të detyruar përputhjen kur zbulimi automatik është i gabuar ose e dini çfarë po funksionon. Zgjidhni një program para se të nisni pajisjen dhe do të zbatohet sapo të fillojë cikli tjetër.",
         "progress": "Progresi",
         "raw_socket": "Fole e papërpunuar",
         "read_only": "Vetëm lexim",
@@ -1075,7 +1076,8 @@
         "imported_history_readonly": "Zbuluar në historikun e importuar të fuqisë. Ndikon në përputhjen e programeve, por nuk llogaritet në statistikat tuaja dhe nuk mund të shkurtohet ose të ndahet. Etiketojeni për të emërtuar programin.",
         "odometer_intro": "Ky total vetëm rritet. Fshirja e regjistrimit të një cikli nuk e ndryshon dhe vazhdon të numërojë përtej kufirit të historikut të ruajtur, kështu që kujtesat e servisit mbeten të sakta.",
         "odometer_correct_hint": "Vendosni këtë vlerë nëse WashData regjistroi një cikël që nuk ndodhi kurrë, ose nëse pajisja kishte kryer cikle përpara se WashData të instalohej.",
-        "no_reminders_set": "Nuk është caktuar ende asnjë kujtesë servisi."
+        "no_reminders_set": "Nuk është caktuar ende asnjë kujtesë servisi.",
+        "toast_program_armed": "Programi u caktua për ciklin tjetër: {program}"
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",

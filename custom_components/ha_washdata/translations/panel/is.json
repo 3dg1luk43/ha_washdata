@@ -80,7 +80,8 @@
     "unmatchable": "fær enga samsvörun",
     "not_importable": "ekki hér",
     "exists": "til staðar",
-    "backfilled_tip": "Greint í innfluttri aflsögu. Hefur aðeins áhrif á kerfissamsvörun, telst ekki með í tölfræði."
+    "backfilled_tip": "Greint í innfluttri aflsögu. Hefur aðeins áhrif á kerfissamsvörun, telst ekki með í tölfræði.",
+    "armed": "(gildir fyrir næstu lotu)"
   },
   "btn": {
     "reset_zoom": "Endurstilla aðdrátt",
@@ -520,7 +521,7 @@
     "profile_index": "sniðnúmer →",
     "profile_name": "Nafn prófíls",
     "program": "Kerfi",
-    "program_tip": "Hnekktu því sniði sem samsvarar núverandi lotu. Sjálfvirk greining lætur samþættinguna velja bestu samsvörun sjálfkrafa. Festu ákveðið kerfi til að þvinga samsvörun þegar sjálfvirk greining er röng eða þú veist hvað er í gangi.",
+    "program_tip": "Hnekktu því sniði sem samsvarar núverandi lotu. Sjálfvirk greining lætur samþættinguna velja bestu samsvörun sjálfkrafa. Festu ákveðið kerfi til að þvinga samsvörun þegar sjálfvirk greining er röng eða þú veist hvað er í gangi. Veldu kerfi áður en þú setur tækið í gang og það verður notað um leið og næsta lota byrjar.",
     "progress": "Framfarir",
     "raw_socket": "Hrár tengi",
     "read_only": "Eingöngu lesin",
@@ -1075,7 +1076,8 @@
     "imported_history_readonly": "Greint í innfluttri aflsögu. Hún hefur áhrif á kerfissamsvörun en telst ekki með í tölfræðinni þinni og ekki er hægt að klippa hana til eða skipta henni. Merktu hana til að gefa kerfinu heiti.",
     "odometer_intro": "Þessi samtala getur aðeins hækkað. Það að eyða lotuskrá breytir henni ekki, og hún heldur áfram að telja fram yfir hámark vistaðrar sögu, svo að þjónustuáminningar haldist réttar.",
     "odometer_correct_hint": "Stilltu þetta ef WashData skráði lotu sem aldrei fór fram, eða ef tækið hafði þegar keyrt lotur áður en WashData var sett upp.",
-    "no_reminders_set": "Engar þjónustuáminningar hafa enn verið stilltar."
+    "no_reminders_set": "Engar þjónustuáminningar hafa enn verið stilltar.",
+    "toast_program_armed": "Kerfi stillt fyrir næstu lotu: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
