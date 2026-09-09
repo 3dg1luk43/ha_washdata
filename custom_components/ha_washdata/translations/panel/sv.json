@@ -227,7 +227,6 @@
     "pg_apply_best": "Använd bästa",
     "pg_apply_to_settings": "Spara till inställningar",
     "pg_apply_to_settings_tip": "Kopiera värdena du redigerade här till den här enhetens aktiva inställningar",
-    "search": "Sök",
     "import": "Importera",
     "disconnect": "Koppla från",
     "connect_github": "Anslut GitHub",
@@ -2040,9 +2039,9 @@
     "finished": "Cykeln nådde ett sluttillstånd och avslutades."
   },
   "store": {
+    "search_ph2": "Sök efter märke eller modell…",
     "your_model_tip": "Det här är apparaten du har angett i Inställningar",
     "your_model": "Din apparat",
-    "search_brand_ph": "Sök efter märke…",
     "programs_count": "Program: {n}",
     "browse": "Bläddra",
     "device": "Enhet",

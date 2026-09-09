@@ -179,7 +179,6 @@
     "pg_apply_best": "Applica migliore",
     "pg_apply_to_settings": "Salva nelle impostazioni",
     "pg_apply_to_settings_tip": "Copia i valori che hai modificato qui nelle impostazioni attive di questo dispositivo",
-    "search": "Cerca",
     "import": "Importa",
     "disconnect": "Disconnetti",
     "connect_github": "Connetti GitHub",
@@ -1992,9 +1991,9 @@
     "finished": "Il ciclo ha raggiunto lo stato finale e si è concluso."
   },
   "store": {
+    "search_ph2": "Cerca per marca o modello…",
     "your_model_tip": "Questo è l'elettrodomestico che hai dichiarato nelle Impostazioni",
     "your_model": "Il tuo",
-    "search_brand_ph": "Cerca per marca…",
     "programs_count": "Programmi: {n}",
     "browse": "Sfoglia",
     "device": "Dispositivo",

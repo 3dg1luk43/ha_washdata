@@ -70,7 +70,8 @@ class FakeClient:
     async def list_brands(self, q, include_pending=True):
         self.last_brands = {"q": q, "include_pending": include_pending}
         return [{"id": "bosch", "brand": "Bosch", "status": "approved"}]
-    async def get_profiles(self, did):
+    async def get_profiles(self, did, include_pending=True):
+        self.last_get_profiles = {"did": did, "include_pending": include_pending}
         return [{"id": "p1", "program": "Cotton 40"}]
     async def device_profiles(self, brand, model, appliance_type):
         self.last_device_profiles = {"brand": brand, "model": model, "appliance_type": appliance_type}
@@ -417,3 +418,16 @@ async def test_download_device_returns_settings(bridge):
     res = await br.download_device("d1", "washer")
     assert res["settings"] == {"off_delay": 180}
     assert res["profiles_adopted"] == 1
+
+
+@pytest.mark.asyncio
+async def test_get_profiles_browses_pending_inclusively(bridge):
+    """The device list the browse is opened from is pending-inclusive, so the program
+    list under it must be too. Approved-only showed "No shared programs for this
+    appliance yet" on a device whose own chip advertised several."""
+    br, _ps, _hass = bridge
+    items = await br.get_profiles("dishwasher__ikea__tallboda")
+    assert [i["id"] for i in items] == ["p1"]
+    assert br._client.last_get_profiles == {
+        "did": "dishwasher__ikea__tallboda", "include_pending": True,
+    }

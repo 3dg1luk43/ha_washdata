@@ -75,7 +75,11 @@ async function doubleTap(cdp: CDPSession, x: number, y: number, page: Page) {
   }
 }
 
-const scrollTop = (page: Page) => page.evaluate(() => document.scrollingElement!.scrollTop);
+// The panel is a fixed-height column that scrolls internally, so the scroller a
+// swipe must move is .wd-main, not the document (which no longer overflows at all
+// - that is what used to clip every dropdown against the window edge).
+const scrollTop = (page: Page) =>
+  panelState<number>(page, `(root, sr) => sr.querySelector('.wd-main').scrollTop`);
 const zoomOf = (page: Page, id: string) =>
   panelState<{ xMin: number; xMax: number } | null>(page, `(root) => root._canvasZoom['${id}'] || null`);
 
@@ -129,8 +133,8 @@ test('playground canvas declares touch-action pan-y as well', async ({ page }) =
 test.describe('touch', () => {
   test.skip(({ hasTouch }) => !hasTouch, 'touch-only gestures');
 
-  test('a vertical swipe starting on a chart scrolls the page (#413)', async ({ page }) => {
-    // Overview, not a modal: this is the case users hit, and the page here is
+  test('a vertical swipe starting on a chart scrolls the content (#413)', async ({ page }) => {
+    // Overview, not a modal: this is the case users hit, and the content here is
     // genuinely taller than the viewport. Before the fix this swipe moved
     // nothing at all, because touch-action: none handed every touch that began
     // on a chart to the canvas and the scroller never saw it.

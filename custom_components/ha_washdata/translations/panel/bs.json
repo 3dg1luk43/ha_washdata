@@ -229,7 +229,6 @@
         "pg_apply_best": "Primijeni najbolje",
         "pg_apply_to_settings": "Sačuvaj u postavke",
         "pg_apply_to_settings_tip": "Kopiraj ovdje uređene vrijednosti u aktivne postavke ovog uređaja",
-        "search": "Pretraži",
         "import": "Uvezi",
         "disconnect": "Prekini vezu",
         "connect_github": "Poveži GitHub",
@@ -2040,9 +2039,9 @@
         "finished": "Ciklus je dostigao završno stanje i završio."
     },
     "store": {
+        "search_ph2": "Pretraži po marki ili modelu…",
         "your_model_tip": "Ovo je uređaj koji ste naveli u Postavkama",
         "your_model": "Vaš",
-        "search_brand_ph": "Pretraži po marki…",
         "programs_count": "Programi: {n}",
         "browse": "Pregledaj",
         "device": "Uređaj",

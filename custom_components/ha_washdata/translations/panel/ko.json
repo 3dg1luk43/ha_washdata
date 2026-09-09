@@ -227,7 +227,6 @@
         "pg_apply_best": "최적 값 적용",
         "pg_apply_to_settings": "설정에 저장",
         "pg_apply_to_settings_tip": "여기서 편집한 값을 이 기기에 현재 적용 중인 설정으로 복사합니다",
-        "search": "검색",
         "import": "가져오기",
         "disconnect": "연결 해제",
         "connect_github": "GitHub 연결",
@@ -2040,9 +2039,9 @@
         "finished": "사이클이 종료 상태에 도달하여 끝났습니다."
     },
     "store": {
+        "search_ph2": "제조사 또는 모델명 검색…",
         "your_model_tip": "설정에서 지정한 가전제품입니다",
         "your_model": "내 기기",
-        "search_brand_ph": "브랜드로 검색…",
         "programs_count": "프로그램: {n}",
         "browse": "탐색",
         "device": "기기",

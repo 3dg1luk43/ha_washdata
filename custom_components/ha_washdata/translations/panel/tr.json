@@ -227,7 +227,6 @@
         "pg_apply_best": "En iyisini uygula",
         "pg_apply_to_settings": "Ayarlara kaydet",
         "pg_apply_to_settings_tip": "Burada düzenlediğiniz değerleri bu cihazın etkin ayarlarına kopyalayın",
-        "search": "Ara",
         "import": "İçe aktar",
         "disconnect": "Bağlantıyı kes",
         "connect_github": "GitHub'a bağlan",
@@ -2040,9 +2039,9 @@
         "finished": "Döngü, son duruma ulaştı ve sona erdi."
     },
     "store": {
+        "search_ph2": "Marka veya modele göre ara…",
         "your_model_tip": "Bu, Ayarlar'da belirttiğiniz cihazdır",
         "your_model": "Sizinki",
-        "search_brand_ph": "Markaya göre ara…",
         "programs_count": "Programlar: {n}",
         "browse": "Göz at",
         "device": "Cihaz",

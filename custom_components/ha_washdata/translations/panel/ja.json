@@ -227,7 +227,6 @@
         "pg_apply_best": "最適値を適用",
         "pg_apply_to_settings": "設定に保存",
         "pg_apply_to_settings_tip": "ここで編集した値をこのデバイスの現在有効な設定にコピーします",
-        "search": "検索",
         "import": "インポート",
         "disconnect": "切断",
         "connect_github": "GitHub に接続",
@@ -2040,9 +2039,9 @@
         "finished": "サイクルが終了状態に達して終了しました。"
     },
     "store": {
+        "search_ph2": "メーカーまたは型番で検索…",
         "your_model_tip": "設定で指定した家電です",
         "your_model": "自分の機種",
-        "search_brand_ph": "ブランドで検索…",
         "programs_count": "プログラム: {n}",
         "browse": "閲覧",
         "device": "デバイス",

@@ -227,7 +227,6 @@
     "pg_apply_best": "Lietot labāko",
     "pg_apply_to_settings": "Saglabāt iestatījumos",
     "pg_apply_to_settings_tip": "Kopēt šeit rediģētās vērtības šīs ierīces aktīvajos iestatījumos",
-    "search": "Meklēt",
     "import": "Importēt",
     "disconnect": "Atvienot",
     "connect_github": "Savienot GitHub",
@@ -2040,9 +2039,9 @@
     "finished": "Cikls sasniedza gala stāvokli un beidzās."
   },
   "store": {
+    "search_ph2": "Meklēt pēc zīmola vai modeļa…",
     "your_model_tip": "Šī ir ierīce, ko norādījāt iestatījumos",
     "your_model": "Jūsu modelis",
-    "search_brand_ph": "Meklēt pēc zīmola…",
     "programs_count": "Programmas: {n}",
     "browse": "Pārlūkot",
     "device": "Ierīce",

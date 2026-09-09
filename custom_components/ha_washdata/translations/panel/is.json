@@ -227,7 +227,6 @@
     "pg_apply_best": "Nota besta",
     "pg_apply_to_settings": "Vista í stillingar",
     "pg_apply_to_settings_tip": "Afrita gildin sem þú breyttir hér yfir í virkar stillingar þessa tækis",
-    "search": "Leita",
     "import": "Flytja inn",
     "disconnect": "Aftengja",
     "connect_github": "Tengja GitHub",
@@ -2040,9 +2039,9 @@
     "finished": "Lotan náði lokastöðu og endaði."
   },
   "store": {
+    "search_ph2": "Leita eftir vörumerki eða gerð…",
     "your_model_tip": "Þetta er tækið sem þú tilgreindir í Stillingum",
     "your_model": "Þitt tæki",
-    "search_brand_ph": "Leita eftir vörumerki…",
     "programs_count": "Kerfi: {n}",
     "browse": "Skoða",
     "device": "Tæki",

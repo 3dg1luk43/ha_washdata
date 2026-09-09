@@ -227,7 +227,6 @@
     "pg_apply_best": "Käytä parasta",
     "pg_apply_to_settings": "Tallenna asetuksiin",
     "pg_apply_to_settings_tip": "Kopioi tässä muokkaamasi arvot tämän laitteen aktiivisiin asetuksiin",
-    "search": "Hae",
     "import": "Tuo",
     "disconnect": "Katkaise yhteys",
     "connect_github": "Yhdistä GitHub",
@@ -2040,9 +2039,9 @@
     "finished": "Jakso saavutti lopputilan ja päättyi."
   },
   "store": {
+    "search_ph2": "Hae merkin tai mallin mukaan…",
     "your_model_tip": "Tämä on laite, jonka määritit asetuksissa",
     "your_model": "Omasi",
-    "search_brand_ph": "Hae merkin mukaan…",
     "programs_count": "Ohjelmat: {n}",
     "browse": "Selaa",
     "device": "Laite",

@@ -179,7 +179,6 @@
     "pg_apply_best": "Appliquer le meilleur",
     "pg_apply_to_settings": "Enregistrer dans les réglages",
     "pg_apply_to_settings_tip": "Copier les valeurs que vous avez modifiées ici dans les réglages actifs de cet appareil",
-    "search": "Rechercher",
     "import": "Importer",
     "disconnect": "Déconnecter",
     "connect_github": "Connecter GitHub",
@@ -1992,9 +1991,9 @@
     "finished": "Le cycle a atteint son état final et s'est terminé."
   },
   "store": {
+    "search_ph2": "Rechercher par marque ou modèle…",
     "your_model_tip": "C'est l'appareil que vous avez déclaré dans les Paramètres",
     "your_model": "Le vôtre",
-    "search_brand_ph": "Rechercher par marque…",
     "programs_count": "Programmes : {n}",
     "browse": "Parcourir",
     "device": "Appareil",

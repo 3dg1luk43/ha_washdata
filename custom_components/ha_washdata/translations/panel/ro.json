@@ -179,7 +179,6 @@
     "pg_apply_best": "Aplică cel mai bun",
     "pg_apply_to_settings": "Salvează în setări",
     "pg_apply_to_settings_tip": "Copiază valorile pe care le-ai modificat aici în setările active ale acestui dispozitiv",
-    "search": "Căutați",
     "import": "Importați",
     "disconnect": "Deconectați",
     "connect_github": "Conectați GitHub",
@@ -1992,9 +1991,9 @@
     "finished": "Ciclul a ajuns într-o stare finală și s-a încheiat."
   },
   "store": {
+    "search_ph2": "Căutați după marcă sau model…",
     "your_model_tip": "Acesta este aparatul pe care l-ați declarat în Setări",
     "your_model": "Al dvs.",
-    "search_brand_ph": "Căutați după marcă…",
     "programs_count": "Programe: {n}",
     "browse": "Răsfoiți",
     "device": "Dispozitiv",
