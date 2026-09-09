@@ -1,7 +1,7 @@
 ![Installs](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=Installations&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.ha_washdata.total)
 ![Latest](https://img.shields.io/github/v/release/3dg1luk43/ha_washdata)
 [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://ko-fi.com/3dg1luk43)
-![Matrix](https://img.shields.io/matrix/washdata%3Amatrix.org?link=https%3A%2F%2Fmatrix.to%2F%23%2F%23washdata%3Amatrix.org)
+[![Matrix](https://img.shields.io/matrix/washdata%3Amatrix.org?logo=matrix&label=Matrix%20chat&color=0dbd8b)](https://matrix.to/#/#washdata:matrix.org)
 
 # WashData Integration
 
@@ -151,6 +151,8 @@ If "Auto-Detect" isn't working perfectly, use the panel's **Settings** tab to tu
 
 > **Pro Tip**: Once WashData has analysed enough of your history, tuning suggestions appear **inline in Settings** next to each affected field - click **Use** to accept one, or **Apply all** in the banner to take them together. Nothing is ever applied automatically.
 
+> 💬 **Stuck?** Join the [WashData Matrix / Element community](https://matrix.to/#/#washdata:matrix.org) to ask questions and discuss with other users in real time.
+
 ### Suggested Settings Sensor: What To Do
 
 WashData exposes a diagnostic sensor: `sensor.<name>_suggested_settings`.
@@ -187,6 +189,7 @@ Full documentation lives in the **[WashData Wiki](https://github.com/3dg1luk43/h
 - 🛠️ **[Developer Tools](https://github.com/3dg1luk43/ha_washdata/wiki/Developer-Tools)** - Offline diagnostic analyser and other dev utilities.
 - 📋 **[Changelog](CHANGELOG.md)** - Full version history and release notes.
 - 🗺️ **[Roadmap](https://github.com/3dg1luk43/ha_washdata/wiki/Roadmap)** - Feature roadmap organized by group, with implementation status.
+- 💬 **[Matrix / Element Community](https://matrix.to/#/#washdata:matrix.org)** - Real-time chat for questions, tips, and discussion. Join via any Matrix client (Element, FluffyChat, etc.) or in a browser.
 
 ### The WashData panel
 
@@ -340,7 +343,7 @@ Per-HA-account display options: default landing tab, cycle date format (relative
 
 **Diagnostics**
 
-Storage stats (cycle count, profile count, file size), and three maintenance actions: **Process History** re-runs matching and ML retraining on all stored cycles after a batch of reviews; **Clear Debug Traces** frees space; **Wipe All Data** is the nuclear option. **Export / Import** lets you back up the full profile and cycle database to JSON or restore from a previous export (also accepts HA diagnostics downloads).
+Storage stats (cycle count, profile count, file size), and three maintenance actions: **Process History** re-runs matching and ML retraining on all stored cycles after a batch of reviews; **Clear Debug Traces** frees space; **Wipe All Data** is the nuclear option. The **Export / Import** card backs up or transfers this device's data, either wholesale or a single program at a time - see [Export & Import](#-export--import). A separate **Import power history** card recovers past cycles by replaying a raw power-sensor history from before WashData was installed.
 
 ![Advanced - Diagnostics subtab with storage stats, maintenance actions, and export/import](docs/images/panel/advanced_diagnostics.png)
 
@@ -379,8 +382,8 @@ Per-user RBAC. Enable per-user control, set the fallback level for unlisted user
 ### Services
 Most management is done from the **WashData panel**, but these services are available for automations:
 
-- **`ha_washdata.export_config`**: Full JSON backup of all settings, profiles, and cycle history.
-- **`ha_washdata.import_config`**: Restore from a JSON backup. Accepts regular WashData exports **and** HA diagnostics download files.
+- **`ha_washdata.export_config`**: Full JSON backup of one device (`device_id`, plus an optional `path`) - all settings, profiles, and cycle history.
+- **`ha_washdata.import_config`**: Restore one device from a JSON backup. This is a wholesale **replace**, not a merge: the device's existing data is discarded. Accepts regular WashData exports **and** HA diagnostics download files. For anything finer-grained, use the panel's selective import instead - see [Export & Import](#-export--import).
 - **`ha_washdata.pause_cycle`**: Pause the active cycle programmatically (e.g. from an energy-tariff automation).
 - **`ha_washdata.resume_cycle`**: Resume a user-paused cycle.
 
@@ -426,28 +429,35 @@ Every notification option, how to build automations with these variables, the cy
 notification lifecycle, message placeholders, companion-app payload keys, and the full
 event payload reference are documented in **[Notifications & Events](https://github.com/3dg1luk43/ha_washdata/wiki/Notifications-and-Events)**.
 
-### 🤝 Contribute Training Data
+### 💾 Export & Import
 
-The more real-world cycle data WashData has, the smarter its detection becomes - across different appliance brands, ages, and programs.
+Everything lives under **Advanced → Diagnostics → Export / Import** (admin only). Exports are always **per device** - one appliance per file - and come at two levels of control.
 
-If you'd like to help, you can submit a diagnostics export directly from Home Assistant. It takes less than 2 minutes and requires no technical knowledge.
+**Quick export everything** writes that device's complete store to JSON: every program, all three cycle lists, phase maps, groups, matcher tuning, ML models, lifetime totals and the raw settings. This is the backup to take before an experiment. **Advanced: replace all from JSON** is its mirror, and is destructive by design: it discards the target device's data and swaps in the file's. It is also the only path that carries lifetime totals and cycles recovered from imported power history.
 
-**How to export:**
+**Export (choose data)** and **Import from JSON** are the granular pair. Both open a tri-state tree of 13 categories:
 
-1. Open Home Assistant and go to **Settings → Devices & Services**
-2. Find your **WashData** integration and click on it
-3. Open device you want to submit data for
-4. Navigate left, to **"Device info"** section
-5. Select **"Download diagnostics"**
-6. A .json file will be downloaded to your device
+| Category | How finely you can pick |
+| :--- | :--- |
+| **Profiles (programs)** | per program |
+| **Cycles (run history)** | per cycle, grouped by program |
+| **Reference cycles (imported)** | per cycle |
+| **Custom phases**, **Profile groups** | on / off |
+| **Detection & matching settings**, **Matcher tuning**, **ML models** | on / off, appliance-type-specific |
+| **Feedback & review labels**, **Suggestions** | on / off |
+| **Maintenance log**, **History & change logs**, **Lifetime totals** | on / off |
 
-> 🔒 **Privacy:** The export contains your appliance's power data and integration settings. It does **not** include your name, home details, location, or any other personal information.
+So moving one program and two of its cycles to another install, touching nothing else, is a supported operation. Importing adds three more choices:
 
-> 💡 **Tip:** The same diagnostics file you download here can be pasted directly into the panel's **Advanced → Diagnostics → Import** (config import accepts an HA diagnostics download) to restore profiles and settings on a different HA instance - no manual format conversion needed.
+- **How to combine** - **Merge (keep mine)** adds imported items without losing anything local, or **Replace selected** wipes and refills only the ticked categories.
+- **Where imported cycles go** - **Reference (shape only)** (the default) improves program matching but never affects your energy and usage statistics, or **Real history (counts in stats)** for genuinely moving an appliance to a new install.
+- **Name clashes**, decided per program - **Import as copy** (the default, so "Cotton 40" arrives as "Cotton 40 (imported)"), **Keep mine**, or **Overwrite**.
 
-➡️ **[Submit your data here](https://forms.gle/m6iGfP8QTasXWg5z7)**
+Importing an export taken from a *different appliance type* is allowed, but the appliance-specific categories and the real-history option are disabled: programs and cycles come in as reference data only.
 
-All contributions are used solely to improve the WashData integration.
+> 💡 **Tip:** Import also accepts an **HA diagnostics download** (Settings → Devices & Services → WashData → your device → **Download diagnostics**), so the file you would attach to a bug report doubles as a transfer file. Diagnostics redact entity ids and notification targets, so the power sensor, door/switch entities and notify settings are **not** restored from one - re-point those by hand afterwards.
+
+Two limits worth knowing: **phase maps travel inside their program** rather than as a category of their own, and a *selective* export omits cycles recovered by **Import power history** (a full export keeps them).
 
 ### 🏪 WashData Community Store
 
