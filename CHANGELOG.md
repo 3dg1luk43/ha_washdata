@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mid-cycle program matching is far more accurate (56% → 71% top-1).
 - Long programs are no longer force-ended at 4 hours.
 - Charts support pinch-zoom and no longer trap page scrolling on phones.
+- Community Store search suggests brands and models as you type; no Search button.
 - Fixes for phantom cycles, stale power readings, and a 65 s reported startup time.
 - New Matrix/Element community channel; export/import finally documented.
 
@@ -26,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Service reminders no longer stop working after 200 cycles** ([#414](https://github.com/3dg1luk43/ha_washdata/discussions/414)): Descale, filter and drum reminders counted the same stored records, so they broke in the same two ways. "Cycles since last service" is now measured against the running total, noted at the moment you log the service, the way a service booklet records mileage. Reminders logged before this release keep the old date-based count until next logged. One deliberate change: interrupted and force-stopped runs now count toward a reminder.
 
 - **Maintenance shows how close each task is**: Advanced → Maintenance now shows a progress bar per task ("12 / 30 cycles") instead of only due or not due.
+
+- **Community Store appliances now show the programs they advertise**: A device listed with "Programs: 7" opened to "No shared programs for this appliance yet." The appliance list included entries still awaiting community approval, as it is meant to, but the program list under it asked for approved programs only. Approval is a community vote that almost nothing has passed yet, so that list was empty for practically every appliance in the catalogue. Programs awaiting approval are now listed and tagged, matching how appliances and reference cycles were already handled.
 
 - **Graphs no longer block scrolling on a phone, and the reading you tap for stays on screen** ([#413](https://github.com/3dg1luk43/ha_washdata/issues/413)): Every chart claimed all touch input, leaving each a 160-240 px band the page could not scroll past. Charts now keep the sideways drags they need and hand vertical swipes back to the page. The tap readout previously appeared under your fingertip and vanished the instant you lifted off; it is now placed clear of the chart, stays up, and is dismissed by tapping anywhere. Playground panning and threshold dragging never worked on touch and now do.
 
@@ -64,6 +67,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Pinch to zoom on graphs, on phones and tablets** ([#413](https://github.com/3dg1luk43/ha_washdata/issues/413)): Zooming a chart needed a mouse wheel, so on a phone the feature was out of reach. Every graph now follows the gestures Home Assistant's own charts use: pinch to zoom, two-finger drag to move along the cycle, double-tap to zoom in, double-tap again to reset. A reset button appears whenever a chart is zoomed, so there is always a visible way out. Drag one finger to read values, or grab the time-axis marker to scrub without covering the curve. Zooming now rescales the power axis to what is on screen, so the quiet end of a cycle shows its detail instead of a flat line squashed by an off-screen peak. Desktop is unchanged, and a trackpad pinch now zooms smoothly rather than in fixed steps.
 
 - **Unlabel cycles from a program without deleting them**: The per-program Cleanup tab (Profiles → click a program → Cleanup) now has **Unlabel selected** beside **Delete selected**. Tick the outliers dragging a program's learned curve off and remove them from that program while keeping them in your history. Both buttons act on the same tick boxes, and whichever is running locks the other out.
+
+- **The Community Store search finds brands and models as you type** ([#416](https://github.com/3dg1luk43/ha_washdata/issues/416)): The Store tab's search needed a button press to do anything, and it could only search by brand, which is no help if you know your appliance's model number and not who else sells the same machine. It is now a picker like the brand field in Settings: matching brands **and models** appear in a dropdown while you type, and the Search button is gone. Pick a brand to browse it, pick a model to go straight to that appliance, or press Enter. Keyboard navigation works throughout. Typing costs one catalogue lookup for your appliance type and then filters in memory, and browsing a brand afterwards is answered from that same list, so this reads the shared store no more than the old button did.
+
+- **The panel fills the window, and only the page content scrolls**: The panel grew with its content instead of fitting the window, so long tabs put a scrollbar on the whole page and a dropdown opened near the bottom was cut off at the window edge with no way to reach the rest of it (scrolling the page moved the field the list was attached to). The panel now measures the space it actually has and fills it on every tab, and the content area is the only thing that scrolls. The **device list and the tabs stay put** while you scroll, instead of disappearing off the top. Dropdowns open on whichever side has room and are never taller than that space.
 
 ### Community & Docs
 

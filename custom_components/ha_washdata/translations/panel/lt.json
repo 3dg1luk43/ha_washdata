@@ -227,7 +227,6 @@
     "pg_apply_best": "Taikyti geriausią",
     "pg_apply_to_settings": "Įrašyti į nustatymus",
     "pg_apply_to_settings_tip": "Kopijuoti čia redaguotas reikšmes į aktyvius šio įrenginio nustatymus",
-    "search": "Ieškoti",
     "import": "Importuoti",
     "disconnect": "Atjungti",
     "connect_github": "Prijungti GitHub",
@@ -2040,9 +2039,9 @@
     "finished": "Ciklas pasiekė galutinę būseną ir baigėsi."
   },
   "store": {
+    "search_ph2": "Ieškoti pagal prekės ženklą ar modelį…",
     "your_model_tip": "Tai prietaisas, kurį nurodėte nustatymuose",
     "your_model": "Jūsų modelis",
-    "search_brand_ph": "Ieškoti pagal prekės ženklą…",
     "programs_count": "Programos: {n}",
     "browse": "Naršyti",
     "device": "Prietaisas",

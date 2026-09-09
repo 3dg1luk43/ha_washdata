@@ -227,7 +227,6 @@
     "pg_apply_best": "Beste toepassen",
     "pg_apply_to_settings": "Opslaan in instellingen",
     "pg_apply_to_settings_tip": "De hier bewerkte waarden kopiëren naar de actieve instellingen van dit apparaat",
-    "search": "Zoeken",
     "import": "Importeren",
     "disconnect": "Verbinding verbreken",
     "connect_github": "Verbinden met GitHub",
@@ -2040,9 +2039,9 @@
     "finished": "De cyclus bereikte een eindtoestand en stopte."
   },
   "store": {
+    "search_ph2": "Zoeken op merk of model…",
     "your_model_tip": "Dit is het apparaat dat u bij Instellingen hebt opgegeven",
     "your_model": "Uw apparaat",
-    "search_brand_ph": "Zoeken op merk…",
     "programs_count": "Programma's: {n}",
     "browse": "Bladeren",
     "device": "Apparaat",

@@ -227,7 +227,6 @@
         "pg_apply_best": "Legjobb alkalmazása",
         "pg_apply_to_settings": "Mentés a beállításokba",
         "pg_apply_to_settings_tip": "Az itt szerkesztett értékek másolása az eszköz aktív beállításaiba",
-        "search": "Keresés",
         "import": "Importálás",
         "disconnect": "Leválasztás",
         "connect_github": "GitHub összekapcsolása",
@@ -2040,9 +2039,9 @@
         "finished": "A ciklus elérte a végállapotot és befejeződött."
     },
     "store": {
+        "search_ph2": "Keresés márka vagy típus szerint…",
         "your_model_tip": "Ez az a készülék, amelyet a Beállításokban megadott",
         "your_model": "Az Öné",
-        "search_brand_ph": "Keresés márka szerint…",
         "programs_count": "Programok: {n}",
         "browse": "Böngészés",
         "device": "Készülék",

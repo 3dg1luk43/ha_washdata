@@ -227,7 +227,6 @@
         "pg_apply_best": "Zbato më të mirën",
         "pg_apply_to_settings": "Ruaj te cilësimet",
         "pg_apply_to_settings_tip": "Kopjo vlerat që redaktove këtu te cilësimet aktive të kësaj pajisjeje",
-        "search": "Kërko",
         "import": "Importo",
         "disconnect": "Shkëput",
         "connect_github": "Lidh GitHub",
@@ -2040,9 +2039,9 @@
         "finished": "Cikli arriti gjendjen përfundimtare dhe përfundoi."
     },
     "store": {
+        "search_ph2": "Kërko sipas markës ose modelit…",
         "your_model_tip": "Kjo është pajisja që deklaruat te Cilësimet",
         "your_model": "E juaja",
-        "search_brand_ph": "Kërko sipas markës…",
         "programs_count": "Programe: {n}",
         "browse": "Shfleto",
         "device": "Pajisja",

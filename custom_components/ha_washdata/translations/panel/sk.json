@@ -229,7 +229,6 @@
     "pg_apply_best": "Použiť najlepšie",
     "pg_apply_to_settings": "Uložiť do nastavení",
     "pg_apply_to_settings_tip": "Skopírovať hodnoty, ktoré ste tu upravili, do aktívnych nastavení tohto zariadenia",
-    "search": "Hľadať",
     "import": "Importovať",
     "disconnect": "Odpojiť",
     "connect_github": "Pripojiť GitHub",
@@ -2040,9 +2039,9 @@
     "finished": "Cyklus dosiahol koncový stav a skončil."
   },
   "store": {
+    "search_ph2": "Hľadať podľa značky alebo modelu…",
     "your_model_tip": "Toto je spotrebič, ktorý ste zadali v Nastaveniach",
     "your_model": "Vaše",
-    "search_brand_ph": "Hľadať podľa značky…",
     "programs_count": "Programy: {n}",
     "browse": "Prehliadať",
     "device": "Zariadenie",

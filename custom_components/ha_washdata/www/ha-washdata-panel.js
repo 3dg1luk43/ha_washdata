@@ -79,6 +79,10 @@ const _CANVAS_MIN_VIEW_S = 5;
 // pixel-hunt: HA draws its handle at size 20.
 const _AXIS_HANDLE_GRAB = 22;
 
+// Floor for the measured panel height (_syncPanelHeight), so a bad measurement in a
+// hidden/zero-height container cannot collapse the UI to nothing.
+const _MIN_PANEL_HEIGHT = 320;
+
 // Distinct colors for overlaying many cycle curves (history cleanup).
 const _PALETTE = [
   '#e6194B', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#42d4f4',
@@ -539,10 +543,26 @@ const _SETTING_CONFLICTS = [
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const _CSS = `
 :host {
+  /* The panel owns the full height it is given and scrolls INTERNALLY (.wd-main).
+     HA renders a non-iframe custom panel into a plain container that sets only
+     display/background and the safe-area padding, and no height at all
+     (frontend src/panels/custom/ha-panel-custom.ts), so the old min-height: 100%
+     resolved against an auto-height parent and the panel simply grew with its
+     content: the DOCUMENT scrolled, .wd-main's overflow never engaged, and a
+     dropdown opened near the bottom was cut off by the window edge with no way
+     to reach the rest of it (scrolling the page moves the anchor and closes it).
+     The insets are subtracted because that same container adds them as padding
+     around us, so 100dvh alone would overflow by exactly that much. */
+  /* NOT display:flex, and the layout must not depend on it: a rule in the embedding
+     document targeting our tag beats any :host rule regardless of specificity, and
+     both HA and the E2E fixture set display:block on the panel element. The height
+     survives that because _syncPanelHeight writes it inline. .wd-root below takes
+     height:100% of it and is the flex column everything else resolves against. */
   display: block;
+  height: calc(100dvh - var(--safe-area-inset-top, 0px) - var(--safe-area-inset-bottom, 0px));
+  overflow: hidden;
   background: var(--primary-background-color);
   color: var(--primary-text-color);
-  min-height: 100%;
   font-family: var(--paper-font-body1_-_font-family, Roboto, sans-serif);
   --wd-radius-sm: 4px;
   --wd-radius-md: 8px;
@@ -592,6 +612,18 @@ const _CSS = `
   border-bottom: 1px solid var(--divider-color, rgba(0,0,0,.1));
   margin-bottom: 20px; overflow-x: auto;
 }
+/* The device list and the tab bar are the app's navigation: they stay put while only
+   the pane below them scrolls. Sticky rather than hoisted out of .wd-main, so the DOM
+   order and the tablist/tabpanel relationship are untouched. The negative margins
+   bleed the opaque background over .wd-body's own padding, so a card scrolling past
+   cannot show through above or beside the nav; the padding puts that space back
+   inside the sticky box. */
+.wd-nav {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--primary-background-color);
+  margin: -20px -16px 20px; padding: 20px 16px 0;
+}
+.wd-nav .wd-tabs { margin-bottom: 0; }
 .wd-tab {
   padding: 10px 22px; border: none; background: transparent;
   color: var(--secondary-text-color); font-size: .8em; font-weight: 600;
@@ -901,6 +933,8 @@ button.wd-profile-card { display: block; }
 .wd-crumb-sep { color: var(--secondary-text-color); }
 .wd-store-search { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
 .wd-store-search input { flex: 1; min-width: 180px; padding: 8px 11px; border-radius: 6px; border: 1px solid var(--divider-color); background: var(--secondary-background-color); color: var(--primary-text-color); font-size: .9em; }
+/* The box is a combobox (#416), so the flex child is the wrapper, not the input. */
+.wd-store-search .wd-combo { flex: 1 1 auto; min-width: 180px; }
 .wd-store-list { display: flex; flex-direction: column; gap: 8px; }
 /* Browse rows (appliances / programs): tappable list rows with a hover affordance
    and a chevron, instead of flat cards. */
@@ -1089,6 +1123,8 @@ button.wd-profile-card { display: block; }
   background: var(--card-background-color,#fff); border: 1px solid var(--divider-color);
   border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.18);
   max-height: 220px; overflow-y: auto; margin-top: 3px; }
+/* Flipped above the input when there is more room there (_positionComboDrop). */
+.wd-combo-drop.wd-drop-up { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 3px; }
 .wd-combo-item { padding: 7px 12px; cursor: pointer; font-size: .86em; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; }
 .wd-combo-item:hover, .wd-combo-item.kbd { background: var(--secondary-background-color); }
@@ -1116,6 +1152,7 @@ button.wd-profile-card { display: block; }
 /* Responsive / touch (portrait, phones, side panel) */
 @media (max-width: 680px) {
   .wd-body { padding: 12px 10px 64px; }
+  .wd-nav { margin: -12px -10px 12px; padding: 12px 10px 0; }
   .wd-card { padding: 14px; margin-bottom: 12px; }
   .wd-form-grid { grid-template-columns: 1fr; }
   .wd-stats { grid-template-columns: repeat(2, 1fr); }
@@ -1133,7 +1170,16 @@ button.wd-profile-card { display: block; }
   #wd-settings-form .wd-form-grid { grid-template-columns: 1fr; gap: 12px 0; }
 }
 /* Log drawer */
-.wd-shell { display: flex; flex-direction: column; min-height: 100%; }
+/* The render target between :host and .wd-shell (created in _boot). It must be a
+   full-height flex column of its own: an unstyled wrapper is a block box sized by its
+   content, so .wd-shell's flex:1 had no flex container to resolve against and the whole
+   chain down to .wd-main fell back to content height. .wd-main then never overflowed
+   (scrollHeight == clientHeight, so no scrollbar) and instead spilled out of the
+   clipped host, stranding the bottom of every long tab where no scrolling reaches it. */
+.wd-root { height: 100%; display: flex; flex-direction: column; }
+/* min-height:0 so the row below can actually shrink and hand its overflow to
+   .wd-main, instead of the shell growing to fit and pushing past the host. */
+.wd-shell { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .wd-content-row { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 .wd-main { flex: 1; overflow-y: auto; min-width: 0; }
 .wd-log-drawer {
@@ -1690,13 +1736,26 @@ const _DIAGRAM_BY_KEY = {
 // (#385).
 function _clipRectFor(el) {
   let left = 0, right = window.innerWidth;
+  let top = 0, bottom = window.innerHeight;
   for (let a = el.parentElement; a; a = a.parentElement) {
-    if (getComputedStyle(a).overflowX === 'visible') continue;
+    const cs = getComputedStyle(a);
+    const clipsX = cs.overflowX !== 'visible';
+    const clipsY = cs.overflowY !== 'visible';
+    if (!clipsX && !clipsY) continue;
     const r = a.getBoundingClientRect();
-    if (r.left > left) left = r.left;
-    if (r.right < right) right = r.right;
+    if (clipsX) {
+      if (r.left > left) left = r.left;
+      if (r.right < right) right = r.right;
+    }
+    // Vertical half is used by the combobox dropdown (a tall popover anchored to
+    // an input that can sit anywhere in the .wd-main scroller); the tooltip only
+    // reads left/right.
+    if (clipsY) {
+      if (r.top > top) top = r.top;
+      if (r.bottom < bottom) bottom = r.bottom;
+    }
   }
-  return { left, right };
+  return { left, right, top, bottom };
 }
 
 // Tooltip popover with an optional JS-drawn SVG diagram above the text.
@@ -1962,8 +2021,12 @@ class HaWashdataPanel extends HTMLElement {
     // Store-backed brand/model picker cache (Basic > Device info).
     // brandsFull: the whole brand collection is local, so every search is in-memory.
     // brandPrefixes: prefixes already resolved server-side (a completed "bo" covers "bos").
+    // typeDevices/typeDevicesFor: the whole device list for one appliance type, fetched
+    // once so the search box can match MODELS in memory (#416 follow-up). modelIndex maps
+    // each "MODEL · Brand" label back to its row.
     this._catalog = { brands: undefined, devices: undefined, forBrand: null, approvedOnly: false,
-                      brandsFull: false, brandPrefixes: [] };
+                      brandsFull: false, brandPrefixes: [],
+                      typeDevices: undefined, typeDevicesFor: null, modelIndex: new Map() };
     // Resolved catalog identity for the saved brand/model (two point reads), which is
     // all the status badges need. Keyed on brand|model|type so it self-invalidates.
     this._catalogEntry = null;
@@ -2116,11 +2179,44 @@ class HaWashdataPanel extends HTMLElement {
         this.shadowRoot.addEventListener('pointerdown', this._gtipDismissHandler);
       }
     }
-    this._onResize = () => this._resizeLogsPage();
+    this._onResize = () => { this._syncPanelHeight(); this._resizeLogsPage(); };
     window.addEventListener('resize', this._onResize);
+    // Rotating a phone or opening the on-screen keyboard changes the usable height
+    // without always firing a window resize.
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', this._onResize);
+    // After the first layout, when the host has a rect to measure.
+    requestAnimationFrame(() => this._syncPanelHeight());
+  }
+
+  // Size the panel to the space it actually has, rather than trusting 100dvh.
+  //
+  // HA gives a non-iframe custom panel a container with no height of its own, and how
+  // far down the viewport that container starts is not something CSS can express: it
+  // carries safe-area padding, and anything HA chooses to put above it adds to the
+  // offset. Assuming the full viewport height there makes the panel overhang the
+  // bottom of the window by exactly that offset, and because the host clips its
+  // overflow, the last stretch of .wd-main's scroll viewport sits off-screen: content
+  // you can see is there but can never scroll to, however far you scroll.
+  //
+  // The CSS calc() stays as the pre-JS/no-JS fallback.
+  _syncPanelHeight() {
+    if (!this.isConnected) return;
+    const r = this.getBoundingClientRect();
+    // Viewport-relative top plus any page scroll = the offset when unscrolled, which
+    // is what the height has to subtract. (The page should not scroll once this has
+    // run; adding it back keeps a transient scroll from shrinking the panel.)
+    const top = r.top + (window.scrollY || document.documentElement.scrollTop || 0);
+    const avail = Math.round((window.innerHeight || 0) - top);
+    if (!(avail > 0)) return;                       // detached / display:none
+    const px = `${Math.max(_MIN_PANEL_HEIGHT, avail)}px`;
+    if (this.style.height !== px) this.style.height = px;
   }
   disconnectedCallback() {
-    if (this._onResize) { window.removeEventListener('resize', this._onResize); this._onResize = null; }
+    if (this._onResize) {
+      window.removeEventListener('resize', this._onResize);
+      if (window.visualViewport) window.visualViewport.removeEventListener('resize', this._onResize);
+      this._onResize = null;
+    }
     this._stopPoll();
     if (this._hassUpdateThrottle) { clearTimeout(this._hassUpdateThrottle); this._hassUpdateThrottle = null; }
     if (this._pgRestartRetryTimer) { clearTimeout(this._pgRestartRetryTimer); this._pgRestartRetryTimer = null; }
@@ -2144,6 +2240,9 @@ class HaWashdataPanel extends HTMLElement {
     style.textContent = _CSS;
     shadow.appendChild(style);
     this._container = document.createElement('div');
+    // .wd-root, not a bare div: it is the flex link between :host and .wd-shell and
+    // has to pass the height down (see the CSS).
+    this._container.className = 'wd-root';
     shadow.appendChild(this._container);
     this._gtip = document.createElement('div');
     this._gtip.className = 'wd-gtip';
@@ -3867,8 +3966,10 @@ class HaWashdataPanel extends HTMLElement {
     const pane = (id, html) => visible.includes(id)
       ? `<div class="wd-pane ${this._tab === id && !this._tabLoading ? 'active' : ''}" role="tabpanel" aria-labelledby="wd-tab-${id}">${html}</div>` : '';
     return `
-      ${this._htmlDeviceBar()}
-      <div class="wd-tabs" role="tablist">${tabBtns}</div>
+      <div class="wd-nav">
+        ${this._htmlDeviceBar()}
+        <div class="wd-tabs" role="tablist">${tabBtns}</div>
+      </div>
       ${this._tabLoading ? `<div class="wd-empty" style="padding:24px"><div class="wd-icon">⏳</div>${this._t('msg.loading', {}, 'Loading…')}</div>` : ''}
       ${pane('status', this._htmlStatus())}
       ${pane('history', this._htmlHistory())}
@@ -5182,12 +5283,27 @@ class HaWashdataPanel extends HTMLElement {
   // re-render here would rebuild the input mid-keystroke. Falls back to a normal render
   // when the field is not focused, which is what clears the "Loading..." hint.
   _refreshComboAfterLoad(inputId, entryId, mayReopen = true) {
-    const inp = this.shadowRoot && this.shadowRoot.getElementById(inputId);
-    if (inp && this.shadowRoot.activeElement === inp) {
-      // mayReopen=false after a failed load: re-dispatching would re-arm the search
-      // debounce and turn a persistent failure into a request loop.
-      if (mayReopen) inp.dispatchEvent(new Event('input', { bubbles: true }));
-      return;
+    const sr = this.shadowRoot;
+    // One candidate list can feed more than one picker (the brand catalog feeds both
+    // the Settings picker and the Store tab's search box, #416). They live on
+    // different tabs so at most one exists, and the focused one is the picker that
+    // asked for this load - the others must not trigger a re-render that would
+    // replace the input the user is typing in.
+    for (const id of (Array.isArray(inputId) ? inputId : [inputId])) {
+      const inp = sr && sr.getElementById(id);
+      if (inp && sr.activeElement === inp) {
+        // mayReopen=false after a failed load: re-dispatching would re-arm the search
+        // debounce and turn a persistent failure into a request loop.
+        if (mayReopen) {
+          // Flagged so the listener can tell this apart from a real keystroke: only a
+          // keystroke may escalate to a more expensive catalog fetch, or one load's
+          // synthetic refresh would trigger the next load in a chain.
+          inp._wdSyntheticInput = true;
+          try { inp.dispatchEvent(new Event('input', { bubbles: true })); }
+          finally { inp._wdSyntheticInput = false; }
+        }
+        return;
+      }
     }
     if (this._isActiveEntry(entryId)) this._render();
   }
@@ -5195,9 +5311,22 @@ class HaWashdataPanel extends HTMLElement {
   // Load the picker's candidate list on first interaction with that picker. Called from
   // the combobox's focus/input path rather than from render, so a user who opens Settings
   // to change an unrelated setting never pays for the catalog at all.
-  _ensureCatalogList(optKey, q) {
+  // `typed` is true only for a real keystroke. Opening the box is not a request for
+  // the expensive per-type device list: the field arrives pre-filled with the saved
+  // brand, so focus alone would spend that query on every visit to the Store tab.
+  _ensureCatalogList(optKey, q, typed = false) {
     if (!this._onlineEnabled()) return;
     if (optKey === 'store_brand') { this._ensureBrandCandidates(q); return; }
+    // The Store tab's search box offers brands AND models, because "search by brand"
+    // is useless to someone who knows their model number and not who else shares the
+    // badge. Brands come from the cheap prefix range query; models need the appliance
+    // type's device list, which is fetched ONCE per type and then filtered in memory,
+    // so typing costs nothing after the first two characters.
+    if (optKey === 'store_search') {
+      this._ensureBrandCandidates(q);
+      if (typed && String(q || '').trim().length >= 2) this._ensureStoreTypeDevices();
+      return;
+    }
     if (optKey === 'store_model') {
       const brand = String((this._opts || {}).store_brand || '').trim();
       if (!brand) return;
@@ -5273,11 +5402,69 @@ class HaWashdataPanel extends HTMLElement {
       failed = true;
     }
     this._entityListCache.store_brand = (this._catalog.brands || []).map(b => b.brand).filter(Boolean);
+    this._syncStoreSearchCandidates();
     // On failure do NOT re-dispatch `input`: that is what re-arms the debounce, and a
     // query that keeps failing would then retry ~4x/second for as long as the field has
     // focus. Backing off means the dropdown simply does not update until the user types
     // again (which is itself the retry) or the field loses focus.
-    this._refreshComboAfterLoad('wd-store-brand', dev.entry_id, !failed);
+    this._refreshComboAfterLoad(['wd-store-brand', 'wd-store-q'], dev.entry_id, !failed);
+  }
+
+  // Compose the Store search box's candidate list: brands first (what most people
+  // start from), then "MODEL · Brand" labels. The combobox reads plain strings, so
+  // the label is also the key back to the row - kept in _catalog.modelIndex.
+  _syncStoreSearchCandidates() {
+    this._entityListCache = this._entityListCache || {};
+    const index = new Map();
+    const models = [];
+    for (const d of (this._catalog.typeDevices || [])) {
+      const model = String((d && d.model) || '').trim();
+      if (!model) continue;
+      const label = d.brand ? `${model} · ${d.brand}` : model;
+      if (index.has(label)) continue;               // same model shared twice
+      index.set(label, d);
+      models.push(label);
+    }
+    this._catalog.modelIndex = index;
+    const brands = (this._catalog.brands || []).map(b => b.brand).filter(Boolean);
+    this._entityListCache.store_search = brands.concat(models);
+  }
+
+  // Forget the per-type device list so the next model search re-reads it. Called
+  // wherever the catalog itself changed (a new appliance was contributed, or the user
+  // asked for a refresh) - NOT on a device switch, where a same-type list is still valid
+  // and _ensureStoreTypeDevices' type guard handles a different one.
+  _dropModelCandidates() {
+    this._catalog.typeDevices = undefined;
+    this._catalog.typeDevicesFor = null;
+    this._catalog.modelIndex = new Map();
+    if (this._entityListCache) delete this._entityListCache.store_search;
+  }
+
+  // Fetch the appliance type's whole device list once, so model matching is local.
+  // The backend caches it too, and a brand browse of the same type is then served
+  // from it (store_client._serve_from_type_superset) rather than costing a query.
+  _ensureStoreTypeDevices() {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._onlineEnabled()) return;
+    const type = this._storeApplianceType();
+    if (this._catalog.typeDevicesFor === type && this._catalog.typeDevices !== undefined) return;
+    this._catalog.typeDevicesFor = type;
+    this._catalog.typeDevices = null;               // in flight; also the "asked" marker
+    this._ws({
+      type: `${_DOMAIN}/store_search_devices`, entry_id: dev.entry_id,
+      query: null, appliance_type: type, include_pending: true,
+    }).then(r => {
+      if (this._catalog.typeDevicesFor !== type) return;   // device switched mid-flight
+      this._catalog.typeDevices = (r && r.items) || [];
+    }).catch(() => {
+      if (this._catalog.typeDevicesFor === type) this._catalog.typeDevices = [];
+    }).finally(() => {
+      this._syncStoreSearchCandidates();
+      // mayReopen=false on failure, matching _loadCatalogBrands: a query that keeps
+      // failing must not be re-armed by a synthetic input event.
+      this._refreshComboAfterLoad(['wd-store-q'], dev.entry_id, !!(this._catalog.typeDevices || []).length);
+    });
   }
 
   async _loadCatalogDevices(brand) {
@@ -7913,10 +8100,7 @@ class HaWashdataPanel extends HTMLElement {
     // so point there rather than showing an unscoped list the user cannot act on.
     if (!this._storeBrandScope()) {
       return `
-        <div class="wd-store-search">
-          <input type="text" id="wd-store-q" placeholder="${_esc(this._t('store.search_brand_ph', {}, 'Search by brand…'))}" value="" autocomplete="off" spellcheck="false">
-          <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-search">${this._t('btn.search', {}, 'Search')}</button>
-        </div>
+        ${this._storeSearchHtml()}
         <p class="wd-info" style="margin-bottom:10px">${this._t('msg.store_declare_appliance', {}, 'Tell WashData which appliance you own and this tab shows the setups other people have shared for it. You can also type a brand above to look around.')}</p>
         <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-goto-identity">${this._t('btn.set_brand_model', {}, 'Set brand & model')}</button>`;
     }
@@ -7930,12 +8114,30 @@ class HaWashdataPanel extends HTMLElement {
       ? `<p class="wd-info" style="margin-bottom:8px">${this._t('msg.store_sibling_hint', {}, 'Nothing shared for your exact model? A closely-related model from the same brand is usually a good starting point.')}</p>`
       : '';
     return `
-      <div class="wd-store-search">
-        <input type="text" id="wd-store-q" placeholder="${_esc(this._t('store.search_brand_ph', {}, 'Search by brand…'))}" value="${_esc(this._storeQuery)}" autocomplete="off" spellcheck="false">
-        <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-search">${this._t('btn.search', {}, 'Search')}</button>
-      </div>
+      ${this._storeSearchHtml()}
       ${siblingHint}
       ${list}`;
+  }
+
+  // Store-tab search box. Built on the SAME combobox as the Settings brand picker, so
+  // suggestions arrive while typing (250 ms debounce, prefix-superset cache, no
+  // re-render) and there is no "Search" button left to click (#416). It offers brands
+  // AND models, because a model number is what a user actually knows about their own
+  // appliance.
+  //
+  // `data-catalog` and NOT `data-opt`: _saveSettings sweeps `[data-opt]` across the
+  // whole shadow root, so a settings key here would be written back to the config
+  // entry as though the user had edited that field.
+  _storeSearchHtml() {
+    return `
+      <div class="wd-store-search">
+        <div class="wd-combo">
+          <input type="text" id="wd-store-q" class="wd-combo-inp" data-catalog="store_search"
+                 placeholder="${_esc(this._t('store.search_ph2', {}, 'Search by brand or model…'))}"
+                 value="${_esc(this._storeQuery)}" autocomplete="off" spellcheck="false">
+          <div class="wd-combo-drop" hidden></div>
+        </div>
+      </div>`;
   }
 
   _htmlStoreDevice() {
@@ -8094,6 +8296,51 @@ class HaWashdataPanel extends HTMLElement {
     return String(this._storeQuery || (this._opts || {}).store_brand || '').trim();
   }
 
+  // Re-render without ejecting the user from the Store search box. Now that the box
+  // searches as you type (#416) rather than on a button press, every render below
+  // happens while the field can still be focused, and an innerHTML swap replaces the
+  // input. Same save/restore as the Cycles and Settings filter fields.
+  _renderKeepingStoreQFocus() {
+    const sr = this.shadowRoot;
+    const cur = sr && sr.getElementById('wd-store-q');
+    const focused = !!cur && sr.activeElement === cur;
+    const pos = focused ? cur.selectionStart : 0;
+    this._render();
+    if (!focused) return;
+    const el = sr.getElementById('wd-store-q');
+    if (!el) return;
+    el.focus();
+    try { el.setSelectionRange(pos, pos); } catch (_) { /* not a text input */ }
+    // Refocusing runs the combobox's own focus handler, which reopens the suggestion
+    // list. Right after a search that is noise covering the results the user just
+    // asked for, so close it again; the next keystroke reopens it.
+    const drop = el.parentElement && el.parentElement.querySelector('.wd-combo-drop');
+    if (drop) drop.hidden = true;
+  }
+
+  // Open one catalog appliance (its shared programs). Shared by the browse rows and
+  // by picking a model straight out of the search box, so both land in the same state.
+  _storeOpenDevice(d) {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !d) return;
+    const eid = dev.entry_id;
+    this._storeDevice = d; this._storeProfile = null; this._storeView = 'device';
+    this._storeProfiles = []; this._storeCycles = []; this._storeLoading = true; this._render();
+    this._ws({ type: `${_DOMAIN}/store_get_profiles`, entry_id: eid, device_id: d.id })
+      .then(r => { if (!this._isActiveEntry(eid) || this._storeView !== 'device') return; this._storeProfiles = (r && r.items) || []; })
+      .catch(() => { if (this._isActiveEntry(eid)) this._storeProfiles = []; })
+      .finally(() => { if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); } });
+  }
+
+  // A model picked out of the search box. Scope the browse to that appliance's brand
+  // first so the list behind it (and Back) is consistent, then open it.
+  async _storeOpenModel(d) {
+    if (!d) return;
+    await this._storeSearch(String(d.brand || ''));
+    const row = (this._storeDevices || []).find(x => String(x.id) === String(d.id)) || d;
+    this._storeOpenDevice(row);
+  }
+
   async _storeSearch(query) {
     const dev = this._devices[this._selIdx];
     if (!dev) return;
@@ -8104,8 +8351,8 @@ class HaWashdataPanel extends HTMLElement {
     const brand = this._storeBrandScope();
     // Nothing to scope to yet: show the "tell us what you own" state rather than spend a
     // read on a list the user cannot act on (see _htmlStoreBrands).
-    if (!brand) { this._storeDevices = []; this._storeLoading = false; this._render(); return; }
-    this._storeLoading = true; this._render();
+    if (!brand) { this._storeDevices = []; this._storeLoading = false; this._renderKeepingStoreQFocus(); return; }
+    this._storeLoading = true; this._renderKeepingStoreQFocus();
     try {
       const r = await this._ws({
         type: `${_DOMAIN}/store_search_devices`, entry_id: eid,
@@ -8121,7 +8368,7 @@ class HaWashdataPanel extends HTMLElement {
     } catch (e) {
       if (this._isActiveEntry(eid)) { this._storeDevices = []; this._showToast(this._t('toast.store_search_failed', {error: e.message || e}, 'Search failed: ' + (e.message || e)), 'error'); }
     } finally {
-      if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); }
+      if (this._isActiveEntry(eid)) { this._storeLoading = false; this._renderKeepingStoreQFocus(); }
     }
   }
 
@@ -8172,6 +8419,7 @@ class HaWashdataPanel extends HTMLElement {
         this._opts = { ...this._opts, ...patch };
         this._catalog.brands = undefined; this._catalog.devices = undefined; this._catalog.forBrand = null;
         this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
+        this._dropModelCandidates();
         this._catalogEntry = null;
         this._showToast(this._t('toast.appliance_added', {}, 'Appliance added - awaiting approval'));
         this._render();
@@ -8181,6 +8429,7 @@ class HaWashdataPanel extends HTMLElement {
         if (d.brand) this._opts = { ...this._opts, store_brand: d.brand };
         this._catalog.brands = undefined;  // reload the brand catalog so it is pickable
         this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
+        this._dropModelCandidates();
         this._catalogEntry = null;         // and re-resolve the badge for the new brand
         this._showToast(this._t('toast.brand_added', {}, 'Brand added - awaiting approval'));
         this._render();
@@ -8892,6 +9141,25 @@ class HaWashdataPanel extends HTMLElement {
     const left = max < min ? min : Math.min(Math.max(r.left, min), max);
     const shift = Math.round(left - r.left);
     if (shift) pop.style.transform = `translateX(calc(-50% + ${shift}px))`;
+  }
+
+  // Keep a combobox dropdown inside whatever actually clips it. The list is
+  // anchored to an input that can sit anywhere in the .wd-main scroller, so a
+  // fixed 220px panel opening downwards gets cut in half near the bottom - and
+  // the cut-off part is unreachable, because scrolling to it moves the anchor and
+  // closes the list. Opens on whichever side has more room and never asks for
+  // more height than that side has; the list scrolls internally beyond that.
+  _positionComboDrop(inp, drop) {
+    const r = inp.getBoundingClientRect();
+    if (!r.height) return;
+    const clip = _clipRectFor(inp);
+    const gap = 8;                                   // breathing room at the edge
+    const below = clip.bottom - r.bottom - gap;
+    const above = r.top - clip.top - gap;
+    const up = below < 120 && above > below;         // only flip when it actually helps
+    const room = Math.max(64, Math.floor(up ? above : below));
+    drop.classList.toggle('wd-drop-up', up);
+    drop.style.maxHeight = `${Math.min(220, room)}px`;
   }
 
   _syncSpagRowHighlight(cid) {
@@ -10612,14 +10880,18 @@ class HaWashdataPanel extends HTMLElement {
       const drop = combo.querySelector('.wd-combo-drop');
       if (!inp || !drop) return;
       const isPill = combo.classList.contains('wd-combo-pill');
-      const optKey = inp.dataset.opt || combo.closest('[data-opt]')?.dataset.opt;
+      // `data-catalog` names the candidate list for a combobox that is NOT a settings
+      // field (the Store tab's search box, #416). It must not carry `data-opt`:
+      // _saveSettings sweeps `[data-opt]` across the whole shadow root, so the key
+      // would be written back to the config entry as if it were a form value.
+      const optKey = inp.dataset.catalog || inp.dataset.opt || combo.closest('[data-opt]')?.dataset.opt;
 
-      const showDrop = (q) => {
+      const showDrop = (q, typed = false) => {
         // Opening the store brand/model combo is the moment the user actually needs the
         // catalog, so that is when it is fetched -- rendering the form no longer does it.
         // This costs nothing here: the fetch fills _entityListCache, which is read live
         // below, so the options appear on the next keystroke or focus without a re-render.
-        this._ensureCatalogList(optKey, q);
+        this._ensureCatalogList(optKey, q, typed);
         // Read the candidate list live so async-loaded options (e.g. the store
         // brand/model catalog) appear without re-wiring the combobox.
         const entities = (this._entityListCache || {})[optKey] || [];
@@ -10630,6 +10902,9 @@ class HaWashdataPanel extends HTMLElement {
         drop.innerHTML = hits.map(e => `<div class="wd-combo-item" data-val="${_esc(e)}">${_esc(e)}</div>`).join('');
         drop._kbd = -1;
         drop.hidden = false;
+        // After unhiding, so the input's rect is final and the list can be sized
+        // against the space that is really available.
+        this._positionComboDrop(inp, drop);
       };
 
       const pick = (val) => {
@@ -10658,7 +10933,7 @@ class HaWashdataPanel extends HTMLElement {
       };
 
       inp.addEventListener('focus', () => showDrop(inp.value));
-      inp.addEventListener('input', () => showDrop(inp.value));
+      inp.addEventListener('input', () => showDrop(inp.value, !inp._wdSyntheticInput));
       inp.addEventListener('blur', () => setTimeout(() => { drop.hidden = true; }, 150));
       inp.addEventListener('keydown', e => {
         if (drop.hidden && e.key !== 'ArrowDown') return;
@@ -10678,6 +10953,55 @@ class HaWashdataPanel extends HTMLElement {
         if (item) { e.preventDefault(); pick(item.dataset.val); }
       });
     });
+
+    // Store tab search: incremental, no button (#416). Typing is handled by the
+    // combobox above, which shows brand suggestions from the debounced, prefix-cached
+    // catalog without re-rendering. What is wired here is the *commit*, i.e. the point
+    // at which a device query is worth spending: picking a suggestion, pressing Enter,
+    // leaving the field, or typing a brand out in full.
+    //
+    // Device search is an exact `brand_lc` match server-side, so every partial prefix
+    // would return nothing. That is why keystrokes drive the suggestion list and only a
+    // resolved brand queries devices - a naive search-per-keystroke would show "no
+    // results" for all but the last character AND spend a Firestore read on each one.
+    const storeQ = sr.getElementById('wd-store-q');
+    if (storeQ) {
+      const commit = () => {
+        const v = String(storeQ.value || '').trim();
+        // A picked "MODEL · Brand" suggestion goes straight to that appliance; anything
+        // else is a brand to scope the browse to.
+        const model = (this._catalog.modelIndex || new Map()).get(v);
+        if (model) { this._storeOpenModel(model); return; }
+        if (v.toLowerCase() === String(this._storeQuery || '').trim().toLowerCase()) return;
+        this._storeSearch(v);
+      };
+      storeQ.addEventListener('change', commit);
+      storeQ.addEventListener('keydown', e => {
+        if (e.key !== 'Enter') return;
+        // The combobox handler (attached above, so it runs first) owns Enter only when a
+        // suggestion is keyboard-highlighted: it picks it, which fires `change` and
+        // commits through the listener above. With the list open but nothing
+        // highlighted it swallows Enter and does nothing, so this must still commit or
+        // the key would be dead exactly when the user has typed the brand out in full.
+        const drop = storeQ.parentElement && storeQ.parentElement.querySelector('.wd-combo-drop');
+        if (drop && !drop.hidden && drop._kbd >= 0) return;
+        e.preventDefault();
+        commit();
+      });
+      storeQ.addEventListener('input', () => {
+        // A catalog load finishing refreshes the list through a synthetic input event;
+        // letting that re-arm the timer would push the commit out for as long as loads
+        // keep landing, so only a real keystroke restarts it.
+        if (storeQ._wdSyntheticInput) return;
+        clearTimeout(this._storeQTimer);
+        this._storeQTimer = setTimeout(() => {
+          const v = String(storeQ.value || '').trim();
+          if (!v) return;
+          const known = (this._entityListCache || {}).store_brand || [];
+          if (known.some(b => String(b).toLowerCase() === v.toLowerCase())) commit();
+        }, 450);
+      });
+    }
 
     // Cycle timer list: all mutations write-through to this._pendingSettings (the
     // unsaved-edits buffer) — never to this._opts, which is the saved baseline the
@@ -12018,6 +12342,7 @@ class HaWashdataPanel extends HTMLElement {
           this._catalog.brands = undefined; this._catalog.devices = undefined;
           this._catalog.forBrand = null;
           this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
+          this._dropModelCandidates();
           this._catalogEntry = null;
           if (this._entityListCache) {
             delete this._entityListCache.store_brand;
@@ -12100,10 +12425,6 @@ class HaWashdataPanel extends HTMLElement {
         } catch (e2) { this._showToast(this._t('toast.store_error', {error: e2.message || e2}, 'Error: ' + (e2.message || e2)), 'error'); }
       });
 
-    } else if (a === 'store-search') {
-      const inp = sr.getElementById('wd-store-q');
-      this._storeSearch(inp ? inp.value : '');
-
     } else if (a === 'store-nav') {
       const view = btn.dataset.view;
       if (view === 'brands') { this._storeView = 'brands'; this._storeDevice = null; this._storeProfile = null; this._render(); }
@@ -12112,13 +12433,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'store-open-device') {
       const id = btn.dataset.deviceId;
       const d = (this._storeDevices || []).find(x => String(x.id) === String(id));
-      if (!d) return;
-      this._storeDevice = d; this._storeProfile = null; this._storeView = 'device';
-      this._storeProfiles = []; this._storeCycles = []; this._storeLoading = true; this._render();
-      this._ws({ type: `${_DOMAIN}/store_get_profiles`, entry_id: eid, device_id: d.id })
-        .then(r => { if (!this._isActiveEntry(eid) || this._storeView !== 'device') return; this._storeProfiles = (r && r.items) || []; })
-        .catch(() => { if (this._isActiveEntry(eid)) this._storeProfiles = []; })
-        .finally(() => { if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); } });
+      if (d) this._storeOpenDevice(d);
 
     } else if (a === 'store-open-profile') {
       const id = btn.dataset.profileId;

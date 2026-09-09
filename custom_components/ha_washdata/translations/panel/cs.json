@@ -229,7 +229,6 @@
     "pg_apply_best": "Použít nejlepší",
     "pg_apply_to_settings": "Uložit do nastavení",
     "pg_apply_to_settings_tip": "Zkopírovat hodnoty, které jste zde upravili, do aktivního nastavení tohoto zařízení",
-    "search": "Hledat",
     "import": "Importovat",
     "disconnect": "Odpojit",
     "connect_github": "Připojit GitHub",
@@ -2040,9 +2039,9 @@
     "finished": "Cyklus dosáhl koncového stavu a skončil."
   },
   "store": {
+    "search_ph2": "Hledat podle značky nebo modelu…",
     "your_model_tip": "Toto je spotřebič, který jste zadali v Nastavení",
     "your_model": "Vaše",
-    "search_brand_ph": "Hledat podle značky…",
     "programs_count": "Programy: {n}",
     "browse": "Procházet",
     "device": "Zařízení",

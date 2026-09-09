@@ -227,7 +227,6 @@
     "pg_apply_best": "Beste anwenden",
     "pg_apply_to_settings": "In Einstellungen speichern",
     "pg_apply_to_settings_tip": "Die hier bearbeiteten Werte in die aktiven Einstellungen dieses Geräts übernehmen",
-    "search": "Suchen",
     "import": "Importieren",
     "disconnect": "Trennen",
     "connect_github": "Mit GitHub verbinden",
@@ -2040,9 +2039,9 @@
     "finished": "Der Zyklus hat einen Endzustand erreicht und wurde beendet."
   },
   "store": {
+    "search_ph2": "Nach Marke oder Modell suchen…",
     "your_model_tip": "Dies ist das Gerät, das Sie in den Einstellungen angegeben haben",
     "your_model": "Ihr Gerät",
-    "search_brand_ph": "Nach Marke suchen…",
     "programs_count": "Programme: {n}",
     "browse": "Durchsuchen",
     "device": "Gerät",

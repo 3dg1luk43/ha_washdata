@@ -227,7 +227,6 @@
     "pg_apply_best": "Bruk beste",
     "pg_apply_to_settings": "Lagre i innstillinger",
     "pg_apply_to_settings_tip": "Kopier verdiene du redigerte her, til de aktive innstillingene for denne enheten",
-    "search": "Søk",
     "import": "Importer",
     "disconnect": "Koble fra",
     "connect_github": "Koble til GitHub",
@@ -2040,9 +2039,9 @@
     "finished": "Syklusen nådde en sluttilstand og stoppet."
   },
   "store": {
+    "search_ph2": "Søk etter merke eller modell…",
     "your_model_tip": "Dette er apparatet du har angitt i Innstillinger",
     "your_model": "Ditt apparat",
-    "search_brand_ph": "Søk etter merke…",
     "programs_count": "Programmer: {n}",
     "browse": "Bla gjennom",
     "device": "Enhet",

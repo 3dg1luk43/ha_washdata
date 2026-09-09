@@ -227,7 +227,6 @@
         "pg_apply_best": "应用最佳值",
         "pg_apply_to_settings": "保存到设置",
         "pg_apply_to_settings_tip": "将您在此处编辑的值复制到该设备当前生效的设置中",
-        "search": "搜索",
         "import": "导入",
         "disconnect": "断开连接",
         "connect_github": "连接 GitHub",
@@ -2040,9 +2039,9 @@
         "finished": "循环到达终止状态并已结束。"
     },
     "store": {
+        "search_ph2": "按品牌或型号搜索…",
         "your_model_tip": "这是您在设置中指定的家电",
         "your_model": "您的型号",
-        "search_brand_ph": "按品牌搜索…",
         "programs_count": "程序：{n}",
         "browse": "浏览",
         "device": "设备",

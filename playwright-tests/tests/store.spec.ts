@@ -44,10 +44,12 @@ const BRAND_DEVICES = {
   ],
 };
 
+// Shaped like the live catalog: approval is a community vote almost nothing has passed,
+// so a pending program is the normal case, not the exception.
 const STORE_PROFILES = {
   items: [
-    { id: 'sp-1', program: 'Cotton 40°C', cycleCount: 4 },
-    { id: 'sp-2', program: 'Eco 60°C', cycleCount: 2 },
+    { id: 'sp-1', program: 'Cotton 40°C', cycleCount: 4, status: 'pending' },
+    { id: 'sp-2', program: 'Eco 60°C', cycleCount: 2, status: 'approved' },
   ],
 };
 
@@ -150,10 +152,151 @@ test('searching re-queries the store', async ({ page }) => {
   await expect(page.locator('[data-action="store-open-device"]').first()).toBeVisible({ timeout: 8_000 });
   const before = (await page.evaluate((t: string) => window.__get_calls(t), 'ha_washdata/store_search_devices')).length;
   await page.locator('#wd-store-q').fill('miele');
-  await page.locator('[data-action="store-search"]').click();
+  await page.locator('#wd-store-q').press('Enter');
   await expect
     .poll(async () => (await page.evaluate((t: string) => window.__get_calls(t), 'ha_washdata/store_search_devices')).length)
     .toBeGreaterThan(before);
+});
+
+// #416: the box is a combobox, so there is nothing to click. These three tests pin the
+// three ways a brand is committed (Enter, picking a suggestion, typing it out in full)
+// and that the old button is really gone.
+test('the store search has no Search button', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers());
+  await clickTab(page, 'store');
+  await expect(page.locator('#wd-store-q')).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('[data-action="store-search"]')).toHaveCount(0);
+});
+
+test('typing shows brand suggestions and picking one queries the store', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers());
+  await usePrefixBrandHandler(page);
+  await clickTab(page, 'store');
+  await expect(page.locator('[data-action="store-open-device"]').first()).toBeVisible({ timeout: 8_000 });
+  const before = (await page.evaluate((t: string) => window.__get_calls(t), 'ha_washdata/store_search_devices')).length;
+
+  const box = page.locator('#wd-store-q');
+  await box.click();
+  await box.fill('');
+  await box.pressSequentially('mi', { delay: 60 });
+  const item = page.locator('.wd-store-search .wd-combo-item[data-val="Miele"]');
+  await expect(item).toBeVisible({ timeout: 8_000 });
+
+  await item.click();
+  await expect
+    .poll(async () => (await page.evaluate((t: string) => window.__get_calls(t), 'ha_washdata/store_search_devices')).length)
+    .toBeGreaterThan(before);
+  const calls = await page.evaluate(() => window.__get_calls('ha_washdata/store_search_devices')) as any[];
+  expect(calls.some((c) => c.query === 'Miele')).toBe(true);
+});
+
+test('typing a brand out in full searches without pressing anything', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers());
+  await usePrefixBrandHandler(page);
+  await clickTab(page, 'store');
+  await expect(page.locator('[data-action="store-open-device"]').first()).toBeVisible({ timeout: 8_000 });
+  const before = (await page.evaluate((t: string) => window.__get_calls(t), 'ha_washdata/store_search_devices')).length;
+
+  const box = page.locator('#wd-store-q');
+  await box.click();
+  await box.fill('');
+  await box.pressSequentially('Miele', { delay: 60 });
+  // No Enter, no click: the 450 ms exact-match debounce commits it. Poll for the brand
+  // query itself, not for the call count - the model-suggestion fetch also lands here
+  // and would satisfy a count check before the commit had run.
+  await expect
+    .poll(async () => {
+      const calls = (await page.evaluate(() => window.__get_calls('ha_washdata/store_search_devices'))) as any[];
+      return calls.some((c) => c.query === 'Miele');
+    }, { timeout: 8_000 })
+    .toBe(true);
+  expect(before).toBeGreaterThanOrEqual(1);   // the tab's own browse, before we typed
+});
+
+// Searching by brand alone is useless to someone who knows their model number and not
+// who else sells the same machine, so the box offers models too.
+test('typing a model number suggests the appliance and opens it', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers({
+    // Brand-scoped browse returns Bosch rows; the unscoped type query (no `query`)
+    // is what the model search uses, and it returns every brand.
+    'ha_washdata/store_search_devices': SEARCH_RESULTS,
+  }));
+  await usePrefixBrandHandler(page);
+  await clickTab(page, 'store');
+  await expect(page.locator('[data-action="store-open-device"]').first()).toBeVisible({ timeout: 8_000 });
+
+  const box = page.locator('#wd-store-q');
+  await box.click();
+  await box.fill('');
+  await box.pressSequentially('wcg', { delay: 60 });
+
+  // "MODEL · Brand" so a bare model number is recognisable, and it is a model row,
+  // not the brand the user did not type.
+  const item = page.locator('.wd-store-search .wd-combo-item', { hasText: 'WCG370 · Miele' });
+  await expect(item).toBeVisible({ timeout: 8_000 });
+  await item.click();
+
+  // Picking a model lands on that appliance's programs, not on a brand list.
+  await assertWsCalled(page, 'ha_washdata/store_get_profiles');
+  await expect(page.locator('[data-action="store-open-profile"]').first()).toBeVisible({ timeout: 8_000 });
+});
+
+test('the model search asks for the whole appliance type exactly once', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers({ 'ha_washdata/store_search_devices': SEARCH_RESULTS }));
+  await usePrefixBrandHandler(page);
+  await clickTab(page, 'store');
+  await expect(page.locator('[data-action="store-open-device"]').first()).toBeVisible({ timeout: 8_000 });
+
+  const unscoped = async () =>
+    (await page.evaluate(() => window.__get_calls('ha_washdata/store_search_devices')) as any[])
+      .filter((c) => !c.query).length;
+  // Opening the tab browses the declared brand; it must not pull the type list.
+  expect(await unscoped()).toBe(0);
+
+  const box = page.locator('#wd-store-q');
+  await box.click();
+  await box.fill('');
+  await box.pressSequentially('wc', { delay: 60 });
+  await expect(page.locator('.wd-store-search .wd-combo-item', { hasText: 'WCG370' })).toBeVisible({ timeout: 8_000 });
+  expect(await unscoped()).toBe(1);
+
+  // Every later keystroke filters that list in memory.
+  await box.pressSequentially('g370', { delay: 60 });
+  await page.waitForTimeout(500);
+  expect(await unscoped()).toBe(1);
+});
+
+test('a single character does not pull the appliance-type list', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers({ 'ha_washdata/store_search_devices': SEARCH_RESULTS }));
+  await usePrefixBrandHandler(page);
+  await clickTab(page, 'store');
+  await expect(page.locator('[data-action="store-open-device"]').first()).toBeVisible({ timeout: 8_000 });
+  const box = page.locator('#wd-store-q');
+  await box.click();
+  await box.fill('');
+  await box.pressSequentially('b', { delay: 60 });
+  await page.waitForTimeout(500);
+  const unscoped = (await page.evaluate(() => window.__get_calls('ha_washdata/store_search_devices')) as any[])
+    .filter((c) => !c.query).length;
+  expect(unscoped).toBe(0);
+});
+
+test('the store search box is not collected as a settings field', async ({ page }) => {
+  // Regression guard: _saveSettings sweeps [data-opt] across the whole shadow root, so
+  // the box must identify its candidate list with data-catalog instead.
+  await page.goto('/');
+  await bootPanel(page, storeHandlers());
+  await clickTab(page, 'store');
+  const box = page.locator('#wd-store-q');
+  await expect(box).toBeVisible({ timeout: 8_000 });
+  await expect(box).toHaveAttribute('data-catalog', 'store_search');
+  expect(await box.getAttribute('data-opt')).toBeNull();
 });
 
 test('clicking a device loads its programs', async ({ page }) => {
@@ -165,6 +308,21 @@ test('clicking a device loads its programs', async ({ page }) => {
   const programs = page.locator('[data-action="store-open-profile"]');
   await expect(programs.first()).toBeVisible({ timeout: 8_000 });
   await expect(page.locator('.wd-store-row-title').filter({ hasText: 'Cotton 40°C' })).toBeVisible();
+});
+
+// A device whose chip advertises programs must actually list them. The store's own
+// approval vote leaves practically every shared program "pending", so listing only
+// approved ones reported "No shared programs for this appliance yet" on every device.
+test('programs awaiting approval are listed, and marked', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers());
+  await clickTab(page, 'store');
+  await page.locator('[data-action="store-open-device"]').first().click();
+  const programs = page.locator('[data-action="store-open-profile"]');
+  await expect(programs).toHaveCount(2);
+  await expect(page.locator('.wd-store-row-title').filter({ hasText: 'Cotton 40°C' })
+    .locator('.wd-tag-pending')).toBeVisible();
+  await expect(page.getByText('No shared programs for this appliance yet.')).toHaveCount(0);
 });
 
 test('clicking a program loads its reference cycles with a sparkline', async ({ page }) => {
@@ -662,7 +820,7 @@ test('typing a brand in the Store tab still scopes the browse', async ({ page })
   });
   await clickTab(page, 'store');
   await page.locator('#wd-store-q').fill('Miele');
-  await page.locator('[data-action="store-search"]').click();
+  await page.locator('#wd-store-q').press('Enter');
   const calls = await assertWsCalled(page, 'ha_washdata/store_search_devices');
   expect(calls[calls.length - 1]).toMatchObject({ query: 'Miele', include_pending: true });
 });

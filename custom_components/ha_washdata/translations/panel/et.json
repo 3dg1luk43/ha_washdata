@@ -227,7 +227,6 @@
     "pg_apply_best": "Rakenda parim",
     "pg_apply_to_settings": "Salvesta sätetesse",
     "pg_apply_to_settings_tip": "Kopeeri siin muudetud väärtused selle seadme aktiivsetesse sätetesse",
-    "search": "Otsi",
     "import": "Impordi",
     "disconnect": "Katkesta ühendus",
     "connect_github": "Ühenda GitHub",
@@ -2040,9 +2039,9 @@
     "finished": "Tsükkel jõudis lõppolekusse ja lõppes."
   },
   "store": {
+    "search_ph2": "Otsi brändi või mudeli järgi…",
     "your_model_tip": "See on seade, mille sa seadetes määrasid",
     "your_model": "Sinu oma",
-    "search_brand_ph": "Otsi brändi järgi…",
     "programs_count": "Programmid: {n}",
     "browse": "Sirvi",
     "device": "Seade",
