@@ -258,6 +258,11 @@ python3 devtools/sync_translations.py
 
 Panel `{lang}.json` files are served as-is (no rebuild). Step 1 is fast and network-free. **Step 2 is subagents only — for HA-layer keys too.** The machine translator (`translate.py`) is banned; it has corrupted the files and produces domain-wrong output. If new HA-layer keys are English-only in other languages temporarily, that is hassfest-safe (English fallback) — fix it with subagents, not the machine translator.
 
+### CHANGELOG Style
+- **Every release opens with a `### TL;DR`** - a handful of bullets, a few words each, covering what the release actually did. It is **rewritten as a whole** every time an entry is added, not appended to: the point is to stay short while still carrying information, so merge and re-cut the bullets rather than growing the list.
+- **Entries are direct and concise, not stories.** State the symptom, the cause, and the fix. Keep the measured numbers, the issue link, and the `Thanks to @user` credit; cut the narration, the re-litigation of how it was found, and the "which is exactly what a reporter did not expect" asides. A few sentences, not a paragraph-length case history.
+- No em dash characters anywhere (repo-wide rule); `→` is fine and already used throughout.
+
 ### Home Assistant Patterns
 - Use `async_update_entry` for config entry modifications
 - Store tunables in `entry.options`, identity keys in `entry.data`
