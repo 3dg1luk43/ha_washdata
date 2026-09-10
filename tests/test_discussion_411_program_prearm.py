@@ -133,6 +133,64 @@ def test_the_armed_program_is_applied_when_the_cycle_starts(
     assert manager._matched_profile_duration == 3600.0
 
 
+def test_pinning_a_program_with_no_learned_duration_clears_the_old_one(
+    manager: WashDataManager,
+) -> None:
+    """Switching mid-cycle must not leave the previous program's ETA behind.
+
+    A hand-created or freshly imported program has no ``avg_duration`` yet. The pin
+    is applied to the cycle already running, so leaving the auto-matched program's
+    duration in place meant the remaining time and progress went on describing the
+    program the user had just replaced. ``None`` is this field's "unknown" value and
+    every reader guards for it; the restart path that re-pins a manual program
+    already cleared it this way.
+    """
+    manager.profile_store.get_profiles = MagicMock(
+        return_value={PROGRAM: {"avg_duration": 3600.0}, "Fresh": {}}
+    )
+    manager.detector.state = STATE_RUNNING
+
+    # An auto-match has already set a duration for this cycle.
+    manager.set_manual_program(PROGRAM)
+    assert manager._matched_profile_duration == 3600.0
+
+    manager.set_manual_program("Fresh")
+    assert manager.current_program == "Fresh"
+    assert manager._matched_profile_duration is None
+
+
+def test_pinning_a_program_with_a_garbage_duration_clears_it_too(
+    manager: WashDataManager,
+) -> None:
+    """A hand-edited import can store a non-numeric avg_duration."""
+    manager.profile_store.get_profiles = MagicMock(
+        return_value={PROGRAM: {"avg_duration": 3600.0}, "Bad": {"avg_duration": "soon"}}
+    )
+    manager.detector.state = STATE_RUNNING
+
+    manager.set_manual_program(PROGRAM)
+    assert manager._matched_profile_duration == 3600.0
+
+    # Used to raise ValueError out of a @callback WS handler.
+    assert manager.set_manual_program("Bad") is True
+    assert manager._matched_profile_duration is None
+
+
+def test_clearing_the_duration_refreshes_the_estimate(
+    manager: WashDataManager,
+) -> None:
+    """Otherwise a stale remaining time stays on display until the next tick."""
+    manager.profile_store.get_profiles = MagicMock(
+        return_value={PROGRAM: {"avg_duration": 3600.0}, "Fresh": {}}
+    )
+    manager.detector.state = STATE_RUNNING
+    manager.set_manual_program(PROGRAM)
+    manager._update_estimates.reset_mock()
+
+    manager.set_manual_program("Fresh")
+    manager._update_estimates.assert_called()
+
+
 def test_the_arm_is_consumed_not_sticky(manager: WashDataManager) -> None:
     """It pins the next cycle, not every future one."""
     manager.set_manual_program(PROGRAM)

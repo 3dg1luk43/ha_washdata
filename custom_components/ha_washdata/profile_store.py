@@ -5401,9 +5401,21 @@ class ProfileStore:
                 first -= 1
             start_frac = (float(times[first]) - float(times[0])) / span
             # The block covers the interval up to the sample AFTER its last one, so
-            # a single-sample spike still has a length (its own step).
-            end_i = min(last + 1, len(times) - 1)
-            seconds = float(times[end_i]) - float(times[first])
+            # a single-sample spike still has a length (its own step). When the run
+            # reaches the trimmed trace's final sample there IS no following one, so
+            # the step is carried over from the preceding interval instead of
+            # clamping back onto times[last]: clamping made the block one step short,
+            # and for a single-sample spike it made it zero-length, which fell
+            # through the guard below and returned None. That silently disarmed the
+            # anti-crease spin wait for a profile whose spin runs to the end of its
+            # own trace - the shape this method exists to detect.
+            if last + 1 < len(times):
+                end_t = float(times[last + 1])
+            elif last > 0:
+                end_t = float(times[last]) + (float(times[last]) - float(times[last - 1]))
+            else:
+                end_t = float(times[last])
+            seconds = end_t - float(times[first])
             if seconds <= 0:
                 return None
             return (min(max(start_frac, 0.0), 1.0), seconds)

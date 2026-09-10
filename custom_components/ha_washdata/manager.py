@@ -7543,18 +7543,36 @@ class WashDataManager:
         self._current_program = profile_name
         self._manual_program_active = True
 
-        # Update expected duration immediately
+        # Update expected duration immediately. A profile with nothing learned yet
+        # (hand-created, or imported before its first cycle) must CLEAR the duration
+        # rather than leave the previously matched program's behind: the pin is
+        # applied mid-cycle, so the ETA and progress would go on describing the
+        # program the user just replaced. None is this field's established "unknown"
+        # value and every reader guards for it. Same shape as the restart path that
+        # re-pins a manual program (see the #404 secondary-bug block above), which
+        # already got this right.
+        avg = 0.0
         if profile:
-            avg = float(profile.get("avg_duration", 0.0))
-            if avg > 0:
-                self._matched_profile_duration = avg
-                self._logger.info(
-                    "Manual program set to %s, duration=%.0fs", profile_name, avg
-                )
+            try:
+                avg = float(profile.get("avg_duration", 0.0))
+            except (TypeError, ValueError):
+                avg = 0.0
+        self._matched_profile_duration = avg if avg > 0 else None
+        if avg > 0:
+            self._logger.info(
+                "Manual program set to %s, duration=%.0fs", profile_name, avg
+            )
+        else:
+            self._logger.info(
+                "Manual program set to %s; it has no learned duration yet, so the "
+                "time estimate stays unknown until it does",
+                profile_name,
+            )
 
-                # Update estimates if running
-                if self.detector.state == STATE_RUNNING:
-                    self._update_estimates()
+        # Update estimates if running. Runs for the cleared case too, so a stale
+        # remaining time is not left on display until the next tick.
+        if self.detector.state == STATE_RUNNING:
+            self._update_estimates()
 
     def _persist_armed_program(self, profile_name: str | None) -> None:
         """Persist the armed program without blocking the caller. Never raises."""
