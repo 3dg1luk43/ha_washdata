@@ -278,6 +278,20 @@ def test_option_float_does_not_swallow_a_stored_bool():
     assert option_float(True, 0.9) == 1.0
 
 
+def test_option_float_rejects_an_oversized_integer():
+    """`json` parses an integer literal of any length into an unbounded `int`.
+
+    `float()` on one of those raises OverflowError rather than returning `inf`, so
+    it needs catching alongside the type errors or a hand-edited import aborts
+    setup - the bricked-entry outcome this module exists to prevent.
+    """
+    huge = 10 ** 400
+    with pytest.raises(OverflowError):
+        float(huge)
+    assert option_float(huge, 0.9) == 0.9
+    assert option_float(-huge, 0.9) == 0.9
+
+
 @pytest.mark.asyncio
 async def test_a_garbage_confidence_option_does_not_break_cycle_end(hass):
     """The failure this guards: a raised cast inside the spawned cycle-end task.

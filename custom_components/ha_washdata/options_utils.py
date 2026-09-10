@@ -94,10 +94,16 @@ def option_float(value: Any, default: float) -> float:
     threshold: every comparison against ``nan`` is False and every one against
     ``inf`` is False for real confidences, so the feature the threshold gates goes
     quietly dead instead of failing loudly.
+
+    ``OverflowError`` is caught alongside the type errors because ``json`` parses an
+    integer literal of any length into a Python ``int`` of unbounded size, and
+    ``float()`` on one of those raises rather than returning ``inf``. An import file
+    is hand-editable, so that lands in ``entry.options`` and would otherwise abort
+    setup - the same bricked-entry outcome this module exists to prevent.
     """
     try:
         result = float(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return float(default)
     return result if math.isfinite(result) else float(default)
 
