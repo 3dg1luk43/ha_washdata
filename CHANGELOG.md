@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Setup no longer fails when an appliance is grouped under itself.
 - iOS live progress updates are silent instead of buzzing every few minutes.
 - Charts support pinch-zoom and no longer trap page scrolling on phones.
-- Fixes for phantom cycles, stale power readings, and a 65 s reported startup time.
+- Fixes for phantom cycles, stale power readings, a 65 s reported startup time, and two ways a cycle or a program could be quietly lost.
 - Community Store search suggests brands and models as you type; new Matrix/Element channel; export/import documented.
 
 ### Fixes
@@ -64,6 +64,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **The power shown matches your sensor, and a quiet plug no longer stretches a cycle over hours** ([#409](https://github.com/3dg1luk43/ha_washdata/issues/409)): Power was tracked purely from sensor events and never re-checked against the sensor, so any report not processed (a skipped sample, an event lost across a reload, a report-on-change plug falling silent) left WashData showing a value the sensor never had. Worse, while that stale value sat above minimum power the safety timer re-fed it to detection as a fresh reading: a dead-flat tail lasting hours that inflated duration and energy and held off the end-of-cycle timers until the cycle was force-stopped. Label such a cycle and the program learned the inflated length, which widened the same limit, so each following cycle ran longer still (one reporter's program had learned 8.2 hours). The reading is now re-anchored on the sensor's live state on every safety tick and terminal check, and silence at high power still holds a cycle open without inventing anything to fill the gap. Thanks to @crassay and @LeagueOfPoro for the screenshots.
 
 - **WashData no longer reports a minute-long startup time** ([#408](https://github.com/3dg1luk43/ha_washdata/issues/408)): Home Assistant's startup list showed WashData taking 65 seconds where setting an appliance up in fact takes well under a second. Almost all of it was queueing: Home Assistant imports every integration's modules through a single worker thread, and WashData warmed its ML modules on that thread once per configured appliance, so it was billed for every other integration's imports. The warm-up now runs once for Home Assistant as a whole (worth 46 seconds on its own in one report), and the remaining wait is declared as an import wait exactly as Home Assistant's own integrations declare theirs. The warm-up itself is unchanged, so the models are still ready before the first power reading.
+
+- **A program built only from imported history can be re-pointed again**: When a profile's stored sample cycle goes missing (retention, a deleted record, a migration), WashData re-points it at the newest cycle carrying its label. On an appliance whose history is entirely imported or recovered from raw power history, that repair never ran: it gave up early on finding no live-recorded cycles, which is exactly the case it was extended to handle. Such a profile could keep a broken sample reference indefinitely.
+
+- **A malformed setting no longer costs you the cycle**: The two confidence thresholds were read from storage without checking they were numbers. A hand-edited import file (or one carried over from a broken entry) could put text where a number belonged, and the comparison raised at the end of the cycle, inside the step that saves it. The cycle was lost outright rather than merely mislabelled. Both are now coerced when read, falling back to their defaults.
 
 ### Features
 

@@ -477,6 +477,12 @@ MATCH_MAE_SCALE = 100.0            # half-saturation point of the MAE score curv
 MATCH_MAE_REF_PEAK = 1000.0        # peak (W) at which scoring matches the legacy formula
 MATCH_MAE_PEAK_FLOOR = 50.0        # floor so tiny/idle traces don't explode the ratio
 MATCH_KEEP_MIN_SCORE = 0.1         # candidates scoring below this are discarded
+# Shortest resampled current-cycle trace the matcher will score. Below this a
+# correlation is noise, so both match paths decline rather than return a number
+# nobody should act on. Named because the value was duplicated as a bare literal
+# in async_match_profile and in the Playground's matcher, and the two drifted:
+# the sim scored 5-point stretches that production had already rejected.
+MATCH_MIN_RESAMPLED_POINTS = 12
 # DTW refinement (Stage 3): blended = DTW_BLEND*core + (1-DTW_BLEND)*dtw_score,
 # dtw_score = DIST_SCALE / (DIST_SCALE + scaled_dtw_distance).
 MATCH_DTW_BLEND = 0.5

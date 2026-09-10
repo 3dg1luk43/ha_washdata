@@ -44,6 +44,7 @@ from custom_components.ha_washdata.const import (
 )
 from custom_components.ha_washdata.options_utils import (
     has_null_options,
+    option_float,
     strip_null_options,
 )
 
@@ -222,3 +223,78 @@ async def test_import_does_not_persist_a_null_option():
     saved = hass.config_entries.async_update_entry.call_args.kwargs["options"]
     assert CONF_POWER_OFF_DELAY not in saved
     assert saved[CONF_POWER_OFF_THRESHOLD_W] == 1.5
+
+
+# ---------------------------------------------------------------------------
+# option_float
+#
+# strip_null_options fixes the wrong *value*; this fixes the wrong *type*. An
+# import file is hand-editable and ws_set_options validates the payload as a
+# plain dict, so a string can be persisted where a number is expected and
+# survive options.get(key, DEFAULT) exactly as a null did.
+# ---------------------------------------------------------------------------
+
+def test_option_float_passes_numbers_through():
+    assert option_float(0.6, 0.9) == 0.6
+    assert option_float(1, 0.9) == 1.0
+
+
+def test_option_float_accepts_a_numeric_string():
+    """The common shape of a hand-edited or form-encoded value."""
+    assert option_float("0.6", 0.9) == 0.6
+
+
+def test_option_float_falls_back_on_garbage():
+    for bad in ("high", "", None, [], {}, object()):
+        assert option_float(bad, 0.9) == 0.9
+
+
+def test_option_float_falls_back_to_the_default_not_zero():
+    """Zero is a real setting ("accept anything"), so it must not be the fallback."""
+    assert option_float("nonsense", 0.9) == 0.9
+    assert option_float("nonsense", 0.0) == 0.0
+
+
+def test_option_float_does_not_swallow_a_stored_bool():
+    """Not a valid threshold, but float() accepts it, so record the behaviour."""
+    assert option_float(True, 0.9) == 1.0
+
+
+@pytest.mark.asyncio
+async def test_a_garbage_confidence_option_does_not_break_cycle_end(hass):
+    """The failure this guards: a raised cast inside the spawned cycle-end task.
+
+    Both thresholds are compared against the match confidence in
+    ``_async_process_cycle_end``, which runs as a task. A non-numeric option raised
+    there - ``float()`` for the learning threshold, ``> 0`` for the auto-label one -
+    and killed the task before ``async_add_cycle``, so the cycle was lost outright
+    rather than merely mislabelled.
+    """
+    from custom_components.ha_washdata.const import (
+        CONF_AUTO_LABEL_CONFIDENCE,
+        CONF_LEARNING_CONFIDENCE,
+        DEFAULT_AUTO_LABEL_CONFIDENCE,
+        DEFAULT_LEARNING_CONFIDENCE,
+    )
+    from custom_components.ha_washdata.manager import WashDataManager
+
+    entry = MagicMock()
+    entry.entry_id = "e1"
+    entry.title = "Washer"
+    entry.data = {}
+    entry.options = {
+        CONF_POWER_SENSOR: "sensor.p",
+        CONF_LEARNING_CONFIDENCE: "high",
+        CONF_AUTO_LABEL_CONFIDENCE: "very high",
+    }
+    hass.config_entries.async_get_entry = MagicMock(return_value=entry)
+
+    with patch("custom_components.ha_washdata.manager.ProfileStore"), \
+         patch("custom_components.ha_washdata.manager.CycleDetector"):
+        mgr = WashDataManager(hass, entry)
+
+    assert mgr._learning_confidence == DEFAULT_LEARNING_CONFIDENCE
+    assert mgr._auto_label_confidence == DEFAULT_AUTO_LABEL_CONFIDENCE
+    # The two comparisons that used to raise.
+    assert (0.5 >= float(mgr._learning_confidence or 0.0)) in (True, False)
+    assert (mgr._auto_label_confidence > 0) in (True, False)

@@ -98,6 +98,7 @@ from .const import (
     MATCH_MAE_PEAK_FLOOR,
     MATCH_MAE_REF_PEAK,
     MATCH_MAE_SCALE,
+    MATCH_MIN_RESAMPLED_POINTS,
     PLAYGROUND_STRESS_DENSE_DURATION_S,
     PLAYGROUND_STRESS_DENSE_STEP_S,
     PLAYGROUND_STRESS_FLOOR_PERCENTILE,
@@ -897,7 +898,14 @@ class _DetailSim:
         # only showed up once Stage 4 started comparing like with like (#400) - it
         # flipped a dishwasher onto its hotter sibling in the sim while production,
         # which resamples, kept the right one.
-        powers = [p for _, p in det_readings]
+        # The three ways production declines to match are reproduced exactly, because
+        # a sim that matches where production returns nothing is worse than useless
+        # for the question the Playground exists to answer. async_match_profile
+        # returns an empty MatchResult when resampling yields no segment, when the
+        # longest segment is under MATCH_MIN_RESAMPLED_POINTS, and when preprocessing
+        # raises; falling back to the raw series here instead let the sim match a
+        # 5-point stretch that production rejects (the detector calls this from 5
+        # readings up).
         try:
             t0 = det_readings[0][0].timestamp()
             segments, _used_dt = resample_adaptive(
@@ -906,10 +914,15 @@ class _DetailSim:
                 min_dt=5.0,
                 gap_s=21600.0,
             )
-            if segments:
-                powers = max(segments, key=lambda s: len(s.power)).power.tolist()
+            if not segments:
+                return (None, 0.0, 0.0, None, False, False)
+            current_seg = max(segments, key=lambda s: len(s.power))
+            if len(current_seg.power) < MATCH_MIN_RESAMPLED_POINTS:
+                return (None, 0.0, 0.0, None, False, False)
+            powers = current_seg.power.tolist()
         except Exception:  # pylint: disable=broad-exception-caught
-            pass  # fall back to the raw series rather than dropping the match
+            _LOGGER.debug("Playground detail resample failed", exc_info=True)
+            return (None, 0.0, 0.0, None, False, False)
         try:
             candidates = analysis.compute_matches_worker(
                 powers, duration, self.snapshots, self.match_config

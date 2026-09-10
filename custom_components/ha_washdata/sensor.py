@@ -993,7 +993,14 @@ class WasherCycleCountSensor(WasherBaseSensor):
             translation_key="cycle_count",
             icon="mdi:counter",
             native_unit_of_measurement="cycles",
-            state_class=SensorStateClass.TOTAL_INCREASING,
+            # TOTAL, not TOTAL_INCREASING, even though the odometer only rises on its
+            # own. The user can correct it downward (WS set_lifetime_cycle_count ->
+            # set_lifetime_cycle_count(force=True)), and TOTAL_INCREASING reads any
+            # decrease as a meter reset: correcting 500 down to 300 makes the
+            # long-term sum absorb the new reading whole, recording 300 cycles that
+            # were never run. TOTAL applies the -200 the correction actually means.
+            # No last_reset: the sum accumulates continuously.
+            state_class=SensorStateClass.TOTAL,
         )
         super().__init__(manager, entry)
 
