@@ -7569,10 +7569,28 @@ class WashDataManager:
                 profile_name,
             )
 
-        # Update estimates if running. Runs for the cleared case too, so a stale
-        # remaining time is not left on display until the next tick.
-        if self.detector.state == STATE_RUNNING:
-            self._update_estimates()
+        # Refresh whatever estimate the current state exposes, then publish. Runs for
+        # the cleared case too, so a stale remaining time is not left on display until
+        # the next tick.
+        #
+        # Every live state, not just RUNNING: set_manual_program applies the pin in
+        # PAUSED and ENDING as well (_CYCLE_IN_PROGRESS_STATES), and neither
+        # select.py nor _update_remaining_only publishes on its own, so on the
+        # select-entity path nothing reached the sensors at all. The phase
+        # estimator's 5 s throttle is bypassed because this is a user action, not a
+        # tick, and the value it invalidates is on screen right now.
+        #
+        # STARTING is deliberately excluded from the refresh: it exposes no estimate,
+        # and _update_estimates() treats it as a dead state - it would reset
+        # _current_program to "off" and undo the pin we just applied.
+        state = self.detector.state
+        if state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            self._last_phase_estimate_time = None
+            if state == STATE_RUNNING:
+                self._update_estimates()
+            else:
+                self._update_remaining_only()
+        self._notify_update()
 
     def _persist_armed_program(self, profile_name: str | None) -> None:
         """Persist the armed program without blocking the caller. Never raises."""

@@ -20,6 +20,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+import pytest
+
 from custom_components.ha_washdata.cycle_detector import (
     CycleDetector,
     CycleDetectorConfig,
@@ -210,6 +212,65 @@ def _trace(spin_start: float, spin_end: float, span: float = EXPECTED, n: int = 
         [i * step, 774.0 if spin_start <= i * step < spin_end else 60.0]
         for i in range(n)
     ]
+
+
+# ---------------------------------------------------------------------------
+# _high_power_seconds_since: what the guard measures the live cycle against
+# ---------------------------------------------------------------------------
+
+
+def _seeded_detector(readings: list[tuple[float, float]]) -> CycleDetector:
+    """A detector whose cycle started at BASE, with `readings` as (offset, power).
+
+    The readings are installed directly: the point of these tests is the accounting
+    in _high_power_seconds_since, not the state machine that fills the buffer.
+    """
+    det = _bare_detector()
+    det._current_cycle_start = BASE
+    det._power_readings = [(BASE + timedelta(seconds=o), p) for o, p in readings]
+    det._p95_dt = 10.0  # ceiling = max(60, 10 x 10) = 100 s
+    return det
+
+
+def test_high_power_seconds_counts_observed_intervals() -> None:
+    det = _seeded_detector([(0.0, 774.0), (10.0, 774.0), (20.0, 774.0), (30.0, 15.0)])
+    # Three high readings, each covering its own 10 s interval; the last covers none.
+    assert det._high_power_seconds_since(0.0) == pytest.approx(30.0)
+
+
+def test_high_power_seconds_ignores_a_telemetry_outage() -> None:
+    """A silent plug must not bank spin it never reported.
+
+    Counting the outage in full inflated `seen`, satisfied `seen >= needed` and
+    released the anti-crease finalise before the real terminal spin - the #399
+    failure reached by a different route.
+    """
+    # High at t=0, then nothing for 600 s (>> the 100 s ceiling), then a quiet sample.
+    det = _seeded_detector([(0.0, 774.0), (600.0, 15.0), (610.0, 15.0)])
+    assert det._high_power_seconds_since(0.0) == pytest.approx(0.0)
+
+
+def test_high_power_seconds_still_counts_a_gap_inside_the_ceiling() -> None:
+    """Only outage-sized gaps are dropped; ordinary cadence jitter is not."""
+    det = _seeded_detector([(0.0, 774.0), (90.0, 774.0), (100.0, 15.0)])
+    # 90 s < the 100 s ceiling, so it counts; then 10 s more.
+    assert det._high_power_seconds_since(0.0) == pytest.approx(100.0)
+
+
+def test_high_power_seconds_credits_only_the_part_after_the_offset() -> None:
+    """The offset is start_frac x expected, so it lands mid-interval as a rule.
+
+    Breaking out of the scan dropped the remainder of the straddling interval
+    entirely, which under-counted the live spin the guard is waiting for.
+    """
+    det = _seeded_detector([(0.0, 774.0), (60.0, 774.0), (90.0, 15.0)])
+    # Offset at 30 s: the 0-60 s interval contributes its last 30 s, then 60-90 s.
+    assert det._high_power_seconds_since(30.0) == pytest.approx(60.0)
+
+
+def test_high_power_seconds_excludes_intervals_wholly_before_the_offset() -> None:
+    det = _seeded_detector([(0.0, 774.0), (10.0, 774.0), (20.0, 774.0), (30.0, 15.0)])
+    assert det._high_power_seconds_since(20.0) == pytest.approx(10.0)
 
 
 def test_terminal_high_block_from_the_envelope_max_band() -> None:

@@ -191,6 +191,67 @@ def test_clearing_the_duration_refreshes_the_estimate(
     manager._update_estimates.assert_called()
 
 
+def test_the_estimate_is_refreshed_in_paused_and_ending_too(
+    manager: WashDataManager,
+) -> None:
+    """The pin applies in all four live states, so the refresh has to as well.
+
+    `_CYCLE_IN_PROGRESS_STATES` is {STARTING, RUNNING, PAUSED, ENDING}. Refreshing
+    only in RUNNING left the previous program's remaining time in the sensors, and
+    neither `select.py` nor `_update_remaining_only` publishes on its own, so on the
+    select-entity path nothing reached them at all.
+    """
+    manager._update_remaining_only = MagicMock()
+    for state in (STATE_PAUSED, STATE_ENDING):
+        manager.detector.state = state
+        manager._update_remaining_only.reset_mock()
+        manager._notify_update.reset_mock()
+
+        manager.set_manual_program(PROGRAM)
+
+        manager._update_remaining_only.assert_called()
+        manager._notify_update.assert_called()
+
+
+def test_the_five_second_estimate_throttle_is_bypassed(
+    manager: WashDataManager,
+) -> None:
+    """A pin is a user action, not a tick; the value it invalidates is on screen.
+
+    Asserted at the moment of the call, because `_update_remaining_only` re-stamps
+    the timestamp itself once it decides to run.
+    """
+    seen: list[Any] = []
+    manager._update_remaining_only = MagicMock(
+        side_effect=lambda: seen.append(manager._last_phase_estimate_time)
+    )
+    manager.detector.state = STATE_PAUSED
+    manager._last_phase_estimate_time = dt_util.now()
+
+    manager.set_manual_program(PROGRAM)
+
+    assert seen == [None], "the throttle stamp must be cleared before the refresh"
+
+
+def test_starting_is_not_routed_through_update_estimates(
+    manager: WashDataManager,
+) -> None:
+    """`_update_estimates` lists STARTING as a dead state and resets the program.
+
+    Routing the pin through it there would set `_current_program` back to "off",
+    undoing the very thing just applied.
+    """
+    manager._update_remaining_only = MagicMock()
+    manager.detector.state = STATE_STARTING
+
+    manager.set_manual_program(PROGRAM)
+
+    manager._update_estimates.assert_not_called()
+    manager._update_remaining_only.assert_not_called()
+    assert manager.current_program == PROGRAM
+    manager._notify_update.assert_called()
+
+
 def test_the_arm_is_consumed_not_sticky(manager: WashDataManager) -> None:
     """It pins the next cycle, not every future one."""
     manager.set_manual_program(PROGRAM)

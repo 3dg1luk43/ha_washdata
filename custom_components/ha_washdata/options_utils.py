@@ -34,6 +34,7 @@ and why none does today.
 """
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from typing import Any
 
@@ -87,11 +88,18 @@ def option_float(value: Any, default: float) -> float:
     Falls back to the compiled default rather than to ``0.0``: these values are
     thresholds, and zero is a meaningful setting ("accept anything"), so silently
     substituting it would change behaviour instead of restoring it.
+
+    Non-finite results are rejected too. ``float()`` happily accepts ``"nan"``,
+    ``"inf"`` and ``"infinity"``, and either one is worse than a raise for a
+    threshold: every comparison against ``nan`` is False and every one against
+    ``inf`` is False for real confidences, so the feature the threshold gates goes
+    quietly dead instead of failing loudly.
     """
     try:
-        return float(value)
+        result = float(value)
     except (TypeError, ValueError):
         return float(default)
+    return result if math.isfinite(result) else float(default)
 
 
 def has_null_options(options: Mapping[str, Any]) -> bool:

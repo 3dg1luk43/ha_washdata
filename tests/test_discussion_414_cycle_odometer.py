@@ -32,6 +32,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from homeassistant.util import dt as dt_util
 
+from custom_components.ha_washdata import ws_api
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.profile_store import ProfileStore
 from custom_components.ha_washdata.sensor import WasherCycleCountSensor
@@ -326,6 +327,28 @@ async def test_legacy_date_scan_keeps_its_completed_only_basis(store):
     assert store.cycles_since_maintenance("drum_clean") == 0
 
 
+async def test_an_unparseable_maintenance_date_is_refused(store):
+    """It would poison the entry twice: near-zero stamp, and skipped when read back.
+
+    `_odometer_at(None)` rewinds by the whole retained history, and
+    `cycles_since_maintenance` skips an entry whose date will not parse when picking
+    the latest event - so the task reported as never serviced and its reminder came
+    due immediately. Refused at the door, like an unknown event_type.
+    """
+    _seed(store, 10)
+    with pytest.raises(ValueError):
+        await store.async_add_maintenance_event("descale", date="not-a-date")
+    assert store._data.get("maintenance_log", []) == []
+
+
+async def test_a_valid_date_is_still_accepted(store):
+    _seed(store, 10)
+    entry = await store.async_add_maintenance_event(
+        "descale", date=dt_util.now().isoformat()
+    )
+    assert entry["cycle_count_at_log"] == 10
+
+
 async def test_never_serviced_reports_the_whole_odometer(store):
     _seed(store, 30)
     store._data["lifetime_cycle_count"] = 250  # ran well past the retention cap
@@ -341,3 +364,86 @@ async def test_due_fires_off_the_odometer(store):
     assert store.get_maintenance_due({"descale": 30}) == []
     store._data["lifetime_cycle_count"] = 230
     assert store.get_maintenance_due({"descale": 30}) == ["descale"]
+
+
+# ---------------------------------------------------------------------------
+# ws_set_lifetime_cycle_count: the one sanctioned way the odometer moves by hand
+# ---------------------------------------------------------------------------
+
+
+def _ws_ctx(store):
+    """(hass, connection, manager) triple for driving the handler directly."""
+    manager = MagicMock()
+    manager.profile_store = store
+    manager.notify_update = MagicMock()
+    connection = MagicMock()
+    return MagicMock(), connection, manager
+
+
+async def _set_count(store, count: int):
+    hass, connection, manager = _ws_ctx(store)
+    with patch.object(ws_api, "_get_manager", return_value=manager):
+        await ws_api.ws_set_lifetime_cycle_count.__wrapped__(
+            hass, connection, {"id": 1, "entry_id": "e1", "count": count}
+        )
+    return connection
+
+
+async def test_correction_below_the_stored_records_is_refused(store):
+    """Otherwise it looks like a no-op now and applies retroactively later.
+
+    `get_lifetime_cycle_count` floors at `len(past_cycles)`, so a lower value was
+    masked while the history was long, then surfaced once records were deleted -
+    the odometer regression #414 exists to prevent.
+    """
+    _seed(store, 200)
+    connection = await _set_count(store, 50)
+
+    connection.send_error.assert_called_once()
+    assert connection.send_error.call_args.args[1] == "invalid_format"
+    assert store._data["lifetime_cycle_count"] == 200
+    assert store.get_lifetime_cycle_count() == 200
+
+
+async def test_correction_at_or_above_the_floor_is_accepted(store):
+    _seed(store, 200)
+    store._data["lifetime_cycle_count"] = 500
+
+    connection = await _set_count(store, 300)
+
+    connection.send_error.assert_not_called()
+    assert store.get_lifetime_cycle_count() == 300
+
+
+async def test_correction_upward_is_accepted(store):
+    _seed(store, 10)
+    connection = await _set_count(store, 4000)
+    connection.send_error.assert_not_called()
+    assert store.get_lifetime_cycle_count() == 4000
+
+
+async def test_the_count_and_its_changelog_entry_are_persisted_together(store):
+    """One save covers both, so a changelog failure cannot leave the count written."""
+    _seed(store, 10)
+    store.async_save = AsyncMock()
+
+    await _set_count(store, 4000)
+
+    # Exactly one save, issued by async_record_settings_changes.
+    assert store.async_save.await_count == 1
+    log = store._data["settings_changelog"]
+    assert log[0]["key"] == "lifetime_cycle_count"
+    assert log[0]["old"] == 10
+    assert log[0]["new"] == 4000
+
+
+async def test_a_failed_save_does_not_leave_the_new_count_in_memory(store):
+    """Otherwise a retry reads the new value as `previous` and records old == new."""
+    _seed(store, 10)
+    store.async_save = AsyncMock(side_effect=OSError("disk full"))
+
+    connection = await _set_count(store, 4000)
+
+    connection.send_error.assert_called_once()
+    assert connection.send_error.call_args.args[1] == "unknown_error"
+    assert store.get_lifetime_cycle_count() == 10

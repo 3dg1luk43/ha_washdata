@@ -2322,11 +2322,36 @@ async def ws_set_lifetime_cycle_count(
         store = manager.profile_store
         previous = store.get_lifetime_cycle_count()
         count = int(msg["count"])
+        # A stored record is evidence of a run, so the odometer can never read below
+        # the number of records on hand - that floor is what get_lifetime_cycle_count
+        # applies. Without this check the setter accepted a lower value, the getter
+        # masked it while the history was long, and it then surfaced later once
+        # records were deleted: a correction that appeared to do nothing and took
+        # effect retroactively, i.e. the odometer regression #414 exists to prevent.
+        # Refused with the floor named rather than silently clamped, so the user is
+        # told why their number was not taken.
+        floor = len(store.get_past_cycles())
+        if count < floor:
+            connection.send_error(
+                msg["id"],
+                "invalid_format",
+                f"Cannot set the lifetime count below the {floor} cycle records "
+                f"currently stored; delete records first or choose {floor} or more",
+            )
+            return
         store.set_lifetime_cycle_count(count, force=True)
-        await store.async_save()
-        await store.async_record_settings_changes(
-            [{"key": "lifetime_cycle_count", "old": previous, "new": count}]
-        )
+        try:
+            # ONE save for both mutations: async_record_settings_changes persists the
+            # store, and the new count is already staged in memory. Saving separately
+            # beforehand meant a changelog failure reported unknown_error on a
+            # correction that had in fact been written, and left `previous` reading
+            # the new value on a retry - recording old == new.
+            await store.async_record_settings_changes(
+                [{"key": "lifetime_cycle_count", "old": previous, "new": count}]
+            )
+        except Exception:
+            store.set_lifetime_cycle_count(previous, force=True)
+            raise
         manager.notify_update()
         _send_result(
             connection,

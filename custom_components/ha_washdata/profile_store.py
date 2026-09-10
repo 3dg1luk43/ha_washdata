@@ -2645,6 +2645,17 @@ class ProfileStore:
         if event_type not in MAINTENANCE_EVENT_TYPES:
             raise ValueError(f"Unknown maintenance event_type: {event_type!r}")
         when = date if isinstance(date, str) and date else dt_util.now().isoformat()
+        # Reject a date the log cannot read back, for the same reason event_type is
+        # validated above: an unparseable date poisons the entry twice over. It makes
+        # the stamp below rewind the odometer by the WHOLE retained history (the
+        # parser returns None and `_odometer_at(None)` reads that as "since the
+        # beginning of time"), and `cycles_since_maintenance` then skips the entry
+        # when picking the latest event for its type - so the task reports as never
+        # serviced and its reminder comes due immediately. The WS handler already
+        # maps ValueError to `invalid_format`.
+        parsed_when = _parse_maintenance_dt(when)
+        if parsed_when is None:
+            raise ValueError(f"Unparseable maintenance date: {when!r}")
         entry: dict[str, Any] = {
             "id": uuid.uuid4().hex[:12],
             "date": when,
@@ -2657,7 +2668,7 @@ class ProfileStore:
             # reminder. Derived from the event's own date rather than from "now", so
             # a back-dated entry ("descaled it three months ago") still reports the
             # cycles run since that date instead of collapsing to zero.
-            "cycle_count_at_log": self._odometer_at(_parse_maintenance_dt(when)),
+            "cycle_count_at_log": self._odometer_at(parsed_when),
         }
         log = self._data.setdefault("maintenance_log", [])
         if not isinstance(log, list):
