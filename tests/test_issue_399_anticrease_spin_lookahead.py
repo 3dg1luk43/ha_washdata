@@ -244,6 +244,52 @@ def test_terminal_high_block_falls_back_to_the_sample_cycle() -> None:
     assert block[0] > 0.9
 
 
+def test_terminal_high_block_survives_a_spin_that_runs_to_the_last_sample() -> None:
+    """A trace that stops mid-spin still has a terminal block.
+
+    The block covers the interval up to the sample after its last one, but when the
+    run reaches the trace's final sample there is none. Clamping back onto that same
+    sample made the block one step short, and for a single-sample spike it made it
+    zero-length - which returned None and disarmed the guard for exactly the shape
+    this method looks for.
+    """
+    ps = _store()
+    step = EXPECTED / 199
+    # Spin starts near the end and is never followed by a quiet sample.
+    trace = [
+        [i * step, 774.0 if i >= 190 else 60.0]
+        for i in range(200)
+    ]
+    ps._data["profiles"] = {"P": {"avg_duration": EXPECTED}}
+    ps._data["envelopes"] = {"P": {"max": trace}}
+
+    block = ps.profile_terminal_high_block("P", 400.0)
+    assert block is not None
+    start_frac, seconds = block
+    assert start_frac >= 0.90
+    # 10 samples wide (190..199), each covering one step.
+    assert abs(seconds - 10 * step) < step * 0.6
+
+
+def test_terminal_high_block_keeps_a_single_sample_spike_at_the_very_end() -> None:
+    """The zero-length case: one high sample, and it is the last one in the trace."""
+    ps = _store()
+    step = EXPECTED / 199
+    trace = [
+        [i * step, 774.0 if i == 199 else 60.0]
+        for i in range(200)
+    ]
+    ps._data["profiles"] = {"P": {"avg_duration": EXPECTED}}
+    ps._data["envelopes"] = {"P": {"max": trace}}
+
+    block = ps.profile_terminal_high_block("P", 400.0)
+    assert block is not None
+    start_frac, seconds = block
+    assert start_frac > 0.99
+    # Its own step, carried over from the preceding interval.
+    assert abs(seconds - step) < step * 0.1
+
+
 def test_terminal_high_block_never_raises() -> None:
     ps = _store()
     ps._data["profiles"] = {"P": {"avg_duration": EXPECTED}}
