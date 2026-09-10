@@ -252,6 +252,56 @@ def test_starting_is_not_routed_through_update_estimates(
     manager._notify_update.assert_called()
 
 
+def test_pinning_during_a_live_cycle_does_not_leave_the_arm_set(
+    manager: WashDataManager,
+) -> None:
+    """A mid-cycle pin belongs to that cycle, not to the next one.
+
+    The cycle-end tail already clears the arm, but it sits behind the new-cycle
+    token guard and returns early when a back-to-back load has already started a
+    fresh cycle - the one case where a leftover arm does damage, because
+    `_consume_armed_program` would stamp the unrelated cycle `label_source =
+    "manual"` and let it reshape that program's envelope.
+    """
+    for state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+        manager._armed_program = None
+        manager.detector.state = state
+
+        assert manager.set_manual_program(PROGRAM) is True
+
+        assert manager.manual_program_active is True
+        assert manager.current_program == PROGRAM
+        assert manager.armed_program is None, f"arm leaked in {state}"
+        assert _armed_writes(manager)[-1] is None
+
+
+def test_a_back_to_back_cycle_does_not_inherit_a_live_pin(
+    manager: WashDataManager,
+) -> None:
+    """The consequence, end to end: the next cycle must not claim the program."""
+    manager.detector.state = STATE_RUNNING
+    manager.set_manual_program(PROGRAM)
+
+    # A fresh cycle starts before the previous cycle's tail ran.
+    assert manager._consume_armed_program() is False
+
+
+def test_pinning_during_starting_keeps_the_arm(manager: WashDataManager) -> None:
+    """STARTING is the exception, and it is load-bearing.
+
+    The STARTING -> RUNNING transition resets the live pin as it starts the cycle;
+    `_consume_armed_program` is what puts it back, so the arm has to survive.
+    """
+    manager.detector.state = STATE_STARTING
+
+    assert manager.set_manual_program(PROGRAM) is True
+
+    assert manager.armed_program == PROGRAM
+    manager.detector.state = STATE_RUNNING
+    assert manager._consume_armed_program() is True
+    assert manager.current_program == PROGRAM
+
+
 def test_the_arm_is_consumed_not_sticky(manager: WashDataManager) -> None:
     """It pins the next cycle, not every future one."""
     manager.set_manual_program(PROGRAM)

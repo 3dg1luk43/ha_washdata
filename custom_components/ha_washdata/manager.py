@@ -7529,6 +7529,22 @@ class WashDataManager:
 
         if self.detector.state in _CYCLE_IN_PROGRESS_STATES:
             self._apply_manual_program(profile_name, profiles.get(profile_name))
+            # The pin now belongs to the cycle in progress, so it must not stay armed
+            # for the next one. The cycle-end tail already tries to enforce that ("a
+            # pin is for the cycle it was made for"), but it sits behind the
+            # new-cycle token guard and returns early when a back-to-back load has
+            # already started a fresh cycle - the exact case where a leftover arm
+            # does damage, because _consume_armed_program would then stamp an
+            # unrelated cycle `label_source = "manual"` and let it reshape that
+            # program's envelope. Clearing at the set site does not depend on the
+            # tail running at all.
+            #
+            # STARTING is the one state that must KEEP the arm: the STARTING ->
+            # RUNNING transition resets the live pin as it starts the new cycle, and
+            # _consume_armed_program is what puts it back.
+            if self.detector.state != STATE_STARTING:
+                self._armed_program = None
+                self._persist_armed_program(None)
         else:
             self._logger.info(
                 "Program %r armed; it will be applied when the next cycle starts",
