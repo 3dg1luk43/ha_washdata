@@ -161,6 +161,8 @@ async def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: 
     mock_res = MagicMock()
     mock_res.best_profile = "Heavy Duty"
     mock_res.confidence = 0.80
+    # == confidence for a non-group match (item 206).
+    mock_res.label_confidence = 0.80
     mock_res.ranking = []
     mock_res.debug_details = {}
     mock_res.is_ambiguous = False
@@ -228,7 +230,9 @@ async def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, m
     mock_res = MagicMock()
     mock_res.best_profile = "Heavy Duty"
     mock_res.confidence = 0.98
-    
+    # == confidence for a non-group match (item 206).
+    mock_res.label_confidence = 0.98
+
     manager.profile_store.async_match_profile = AsyncMock(return_value=mock_res)
     manager.profile_store.async_add_cycle = AsyncMock()
     manager.profile_store.async_rebuild_envelope = AsyncMock()

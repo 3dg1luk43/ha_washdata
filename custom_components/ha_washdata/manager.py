@@ -1053,6 +1053,12 @@ class WashDataManager:
         self._last_match_ambiguous: bool = False
         self._matched_profile_duration: float | None = None
         self._last_match_confidence: float = 0.0
+        # Stage-5 companion to the above (item 206): what the SELECTED group member
+        # earned on its own curve, vs the group's score in _last_match_confidence.
+        # None for every non-group match, and the label gate then behaves exactly as
+        # before. Kept as a separate field rather than replacing the confidence,
+        # because the confidence is what the detector's end-detection gates read.
+        self._last_member_confidence: float | None = None
         # Sample interval tracking (seconds) for adaptive timing
         # Profile matching duration tolerance (0.25 = ±25%)
         self._profile_duration_tolerance: float = float(
@@ -1357,6 +1363,7 @@ class WashDataManager:
                 else:
                     self._current_program = profile_name
                 self._last_match_confidence = confidence
+                self._last_member_confidence = result.member_confidence
                 self._unmatch_persistence_counter = 0 # Reset on switch
                 if profile_name in self._match_persistence_counter:
                     self._match_persistence_counter[profile_name] = self._match_persistence # Lock it in
@@ -1370,6 +1377,7 @@ class WashDataManager:
             elif profile_name == self._current_program:
                 # Same program, but update confidence for sensors
                 self._last_match_confidence = confidence
+                self._last_member_confidence = result.member_confidence
             elif not self._matched_profile_duration:
                 self._current_program = "detecting..."
 
@@ -1520,6 +1528,7 @@ class WashDataManager:
                 if profile_name:
                     self._current_program = profile_name
                     self._last_match_confidence = confidence
+                    self._last_member_confidence = result.member_confidence
                     # Try to fetch duration if we switched back to matched
                     try:
                         prof = self.profile_store.get_profile(profile_name)
@@ -3592,6 +3601,7 @@ class WashDataManager:
             )
             self._current_program = profile_name
             self._last_match_confidence = confidence
+            self._last_member_confidence = result.member_confidence
         else:
             self._logger.info(
                 "No confident match from cycle data (best: %s, conf=%.3f)",
@@ -4391,6 +4401,7 @@ class WashDataManager:
                 # i.e. fabricated match provenance on a cycle that has none - the
                 # #400 class of bug. Zero means "no opinion" and is not stored.
                 self._last_match_confidence = 0.0
+                self._last_member_confidence = None
                 self._notified_pre_completion = False
                 self._time_remaining = None
                 self._total_duration = None
@@ -5117,6 +5128,7 @@ class WashDataManager:
         program = self._current_program
         match_result = self._last_match_result
         match_confidence = self._last_match_confidence
+        member_confidence = self._last_member_confidence
         matched_profile_duration = self._matched_profile_duration
         manual_program = self._manual_program_active
         cycle_anomaly = self._cycle_anomaly
@@ -5148,7 +5160,18 @@ class WashDataManager:
             and program not in ("off", "detecting...", "restored...")
             and program in self.profile_store.get_profiles()
         ):
+            # A Stage-5 group win reports the group's score, i.e. the best-scoring
+            # SIBLING's, while the member the cycle would be labelled as is chosen
+            # separately by integrated energy - so the two can be different profiles
+            # (item 206; measured 16.7% of whole-cycle group wins, gap up to 0.157).
+            # A label makes the cycle evidence for that ONE member, so it has to
+            # clear the bar on its own blended score, not on its sibling's. Both are
+            # blended pipeline scores over the same trace, so they compare directly.
+            # None (every non-group match, or a member the matcher never scored)
+            # leaves this exactly as it was.
             _label_conf = float(match_confidence or 0.0)
+            if member_confidence is not None:
+                _label_conf = min(_label_conf, float(member_confidence))
             if _label_conf > 0:
                 # Recorded whether or not we label, so the panel can show what
                 # WashData suspected without the cycle claiming it as its program.
@@ -5163,10 +5186,17 @@ class WashDataManager:
                 self._logger.info(
                     "Not labeling cycle as '%s': match confidence %.2f is below the "
                     "learning threshold %.2f, so it stays unlabelled rather than "
-                    "reshaping that program's statistics.",
+                    "reshaping that program's statistics.%s",
                     program,
                     _label_conf,
                     float(self._learning_confidence or 0.0),
+                    ""
+                    if member_confidence is None
+                    or float(member_confidence) >= float(match_confidence or 0.0)
+                    else (
+                        f" (its profile group scored {float(match_confidence or 0.0):.2f}, "
+                        f"but that was a different member of the group)"
+                    ),
                 )
 
         # Attach extensive debug data if available (and configured)
@@ -5188,10 +5218,14 @@ class WashDataManager:
             res = await self.profile_store.async_match_profile(
                 cycle_data["power_data"], cycle_data["duration"]
             )
-            if res.best_profile and res.confidence >= self._auto_label_confidence:
+            # label_confidence == confidence for everything except a Stage-5 group
+            # win whose selected member scored below the sibling that set the group's
+            # score (item 206). This is the highest-stakes gate of the three: it
+            # labels without ever asking the user.
+            if res.best_profile and res.label_confidence >= self._auto_label_confidence:
                 cycle_data["profile_name"] = res.best_profile
                 cycle_data["label_source"] = "auto_label_post"
-                cycle_data["match_confidence"] = float(res.confidence)
+                cycle_data["match_confidence"] = float(res.label_confidence)
                 # Top-5 from post-cycle match (may differ from live match ranking).
                 # Sanitize: strip heavy current/sample arrays (these fields are NOT
                 # in the fired-event exclusion set, so they must stay small to keep
@@ -5202,7 +5236,7 @@ class WashDataManager:
                 self._logger.info(
                     "Post-cycle auto-labeled as '%s' (confidence: %.2f)",
                     res.best_profile,
-                    res.confidence,
+                    res.label_confidence,
                 )
 
         # Back-fill confirmed label on any ranking snapshots captured during this cycle
