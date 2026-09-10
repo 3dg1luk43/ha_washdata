@@ -1455,6 +1455,10 @@
       "doc": "notify.* services called for live progress updates while a cycle runs. Leave empty to disable live-progress notifications.",
       "label": "Live Progress Services"
     },
+    "notify_live_silent": {
+      "label": "Silent Live Updates",
+      "doc": "iOS only. Refresh the live progress quietly: each update arrives without a sound or vibration, at a lower, battery-saving priority that iOS may briefly batch. The first update of a cycle (the one that starts the Live Activity) and the start/finish notifications still alert as usual. Turn this off to be alerted on every update."
+    },
     "notify_live_sticky": {
       "label": "Keep Live Notification On Tap",
       "doc": "Android only. Make the live-progress notification persistent (sticky) so tapping it does not dismiss the ongoing thread. Off keeps the default behaviour where a tap dismisses it."

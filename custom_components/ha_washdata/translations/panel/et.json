@@ -1607,6 +1607,10 @@
       "label": "Võimsusprofiilivahemik",
       "doc": "Ämbri suurus profiili power_profile sensori atribuudile (tasane pesa kohta keskmiste vattide massiiv, mida kasutavad välised planeerijad nagu EMHASS ja tibber_prices). Väiksemad ämbrid hoiavad lühikesi võimsushüppeid teravana; suuremad ämbrid siluvad kuju. Vaikimisi 15 min. Ainult lugemisaeg; ei mõjuta tuvastust."
     },
+    "notify_live_silent": {
+      "label": "Vaiksed reaalajas uuendused",
+      "doc": "Ainult iOS. Värskenda reaalajas edenemist vaikselt: iga uuendus saabub helita ja vibratsioonita, madalama, akut säästva prioriteediga, mida iOS võib korraks kokku koguda. Tsükli esimene uuendus (see, mis käivitab Live Activity) ning algus- ja lõputeavitused annavad endiselt tavapäraselt märku. Lülita see välja, kui soovid märguannet iga uuenduse kohta."
+    },
     "notify_live_sticky": {
       "label": "Hoia reaalajas teavitus puudutuse järel",
       "doc": "Ainult Android. Tee reaalajas edenemise teavitus püsivaks (kleepuvaks), nii et selle puudutamine ei sulge käimasolevat lõime. Väljas hoiab vaikekäitumist, kus puudutamine teavituse sulgeb."

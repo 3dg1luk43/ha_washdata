@@ -28,7 +28,7 @@ from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import device_registry as dr
 
 from .const import (
@@ -1221,9 +1221,11 @@ def _apply_device_link(hass: HomeAssistant, entry: ConfigEntry) -> None:
     When CONF_LINKED_DEVICE points at an existing device (e.g. the smart plug or
     appliance), the WashData device is shown as "Connected via <device>" in the
     HA device registry. Clearing the option removes the link. Stale targets that
-    no longer exist are treated as "no link" so the registry never references a
-    deleted device.
+    no longer exist - and a target that is this entry's own WashData device, which
+    HA rejects as a self-reference (#418) - are treated as "no link" so the
+    registry never references a deleted device or itself.
     """
+    _log = DeviceLoggerAdapter(_LOGGER, entry.title)
     registry = dr.async_get(hass)
     identifier = (DOMAIN, entry.entry_id)
     if hasattr(registry, "async_get_device_by_identifier"):
@@ -1243,11 +1245,38 @@ def _apply_device_link(hass: HomeAssistant, entry: ConfigEntry) -> None:
     linked_device_id = entry.options.get(CONF_LINKED_DEVICE) or None
     if linked_device_id and registry.async_get(linked_device_id) is None:
         linked_device_id = None
+    if linked_device_id and linked_device_id == washdata_device.id:
+        # A device may not be its own via_device: HA 2026.9 raises
+        # HomeAssistantError instead of silently accepting it, and this runs inside
+        # async_setup_entry - so a self-link aborted setup for the whole entry
+        # (#418). The picker used to list this entry's own WashData device, whose
+        # name mirrors the entry title (and often the plug's), so it was easy to
+        # select by mistake. Treat it as "no link" and fall through to the update
+        # below: on an older HA the self-reference may already be stored in the
+        # registry, and clearing it is exactly the repair needed.
+        _log.warning(
+            "Ignoring 'Group Under Device': %s is this appliance's own WashData "
+            "device and a device cannot be linked to itself. Pick the smart plug "
+            "(or another device) instead, or clear the setting.",
+            linked_device_id,
+        )
+        linked_device_id = None
 
     if washdata_device.via_device_id != linked_device_id:
-        registry.async_update_device(
-            washdata_device.id, via_device_id=linked_device_id
-        )
+        try:
+            registry.async_update_device(
+                washdata_device.id, via_device_id=linked_device_id
+            )
+        except (HomeAssistantError, ValueError) as err:
+            # The via_device link is cosmetic (it only nests the device in the HA
+            # registry UI). A registry rule we do not know about yet must never be
+            # able to take the whole entry down with it, as the self-link did in
+            # #418 - log it and leave the device standalone.
+            _log.warning(
+                "Could not link WashData device to %s: %s",
+                linked_device_id or "(none)",
+                err,
+            )
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:

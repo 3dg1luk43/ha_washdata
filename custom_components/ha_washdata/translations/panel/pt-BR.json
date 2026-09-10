@@ -1529,6 +1529,10 @@
       "label": "Intervalo do Perfil de Potência",
       "doc": "Tamanho do intervalo para o atributo de sensor power_profile por perfil (a matriz plana de watts médios por slot consumida por planejadores externos como EMHASS e tibber_prices). Intervalos menores preservam picos curtos de potência com mais nitidez; intervalos maiores suavizam o perfil. Padrão: 15 min. Apenas em tempo de leitura; não afeta a detecção."
     },
+    "notify_live_silent": {
+      "label": "Atualizações Silenciosas ao Vivo",
+      "doc": "Apenas iOS. Atualiza o progresso ao vivo em silêncio: cada atualização chega sem som nem vibração, com uma prioridade mais baixa que economiza bateria e que o iOS pode agrupar por alguns instantes. A primeira atualização de um ciclo (a que inicia a Atividade ao Vivo) e as notificações de início e de término continuam avisando normalmente. Desative esta opção para ser avisado a cada atualização."
+    },
     "notify_live_sticky": {
       "label": "Manter Notificação ao Vivo ao Toque",
       "doc": "Apenas Android. Torna a notificação de progresso ao vivo persistente (fixada) para que tocá-la não dispense o encadeamento em andamento. Desativado mantém o comportamento padrão, em que um toque a dispensa."

@@ -223,3 +223,53 @@ test('the #406 strings render from the German panel translation', async ({ page 
   await expect(page.locator('.wd-toast, [class*="toast"]').first())
     .toContainText('Keine Änderungen zum Speichern', { timeout: 5_000 });
 });
+
+/**
+ * Issue #418: the picker listed this entry's own WashData device. HA refuses a
+ * device as its own via_device (2026.9 raises HomeAssistantError), and the link is
+ * applied inside async_setup_entry - so picking it made the whole entry fail to set
+ * up on every restart. The registry names that device after the entry title, which
+ * is usually what the user called the plug too, so it was easy to select.
+ */
+const SELF_DEV = 'dev-washdata-self';
+const ENTRY = 'test-entry-001';  // matches the device-idle fixture
+const REGISTRY_WITH_SELF = {
+  [SELF_DEV]: {
+    id: SELF_DEV,
+    name: 'Test Washer',
+    identifiers: [['ha_washdata', ENTRY]],
+    config_entries: [ENTRY],
+  },
+  [LINKED]: { id: LINKED, name: 'ShellyPlugS04' },
+};
+
+test("the entry's own WashData device is not offered (#418)", async ({ page }) => {
+  await bootSettings(page, {}, REGISTRY_WITH_SELF);
+  const sel = page.locator('select[data-opt="linked_device"]');
+  await expect(sel.locator(`option[value="${SELF_DEV}"]`)).toHaveCount(0);
+  // ...while every other device still is.
+  await expect(sel.locator(`option[value="${LINKED}"]`)).toHaveCount(1);
+});
+
+test('a stored self-link reads back as None and the next save clears it (#418)', async ({ page }) => {
+  await bootSettings(page, { linked_device: SELF_DEV }, REGISTRY_WITH_SELF);
+  const sel = page.locator('select[data-opt="linked_device"]');
+  // Not carried as an "unavailable device" placeholder: the value is invalid, so
+  // the field must fall back to None rather than round-trip it (#406 does that only
+  // for links that could still be valid).
+  await expect(sel.locator(`option[value="${SELF_DEV}"]`)).toHaveCount(0);
+  await expect(sel).toHaveValue('');
+
+  await page.locator('input[data-opt="min_power"]').fill('2.5');
+  await page.locator('#wd-settings-save').click();
+  await expect.poll(async () =>
+    (await page.evaluate(() => (window as any).__get_calls('ha_washdata/set_options'))).length,
+  ).toBe(1);
+  const [call] = await page.evaluate(() => (window as any).__get_calls('ha_washdata/set_options'));
+  expect(call.options).toEqual({ min_power: 2.5, linked_device: null });
+});
+
+test('a valid link survives when the registry also holds our own device (#418)', async ({ page }) => {
+  await bootSettings(page, { linked_device: LINKED }, REGISTRY_WITH_SELF);
+  await expect(page.locator('select[data-opt="linked_device"]')).toHaveValue(LINKED);
+});

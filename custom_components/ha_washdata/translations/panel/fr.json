@@ -1559,6 +1559,10 @@
       "label": "Intervalle du profil de puissance",
       "doc": "Taille des créneaux pour l'attribut de capteur power_profile par profil (le tableau plat de watts moyens par créneau consommé par des planificateurs externes tels que EMHASS et tibber_prices). Des créneaux plus petits conservent les pics de puissance courts et nets ; des créneaux plus grands lissent la forme. Par défaut 15 min. Lecture seule ; n'affecte pas la détection."
     },
+    "notify_live_silent": {
+      "label": "Mises à jour en direct silencieuses",
+      "doc": "iOS uniquement. Actualise la progression en direct en toute discrétion : chaque mise à jour arrive sans son ni vibration, avec une priorité réduite qui économise la batterie et qu'iOS peut regrouper pendant un court instant. La première mise à jour d'un cycle (celle qui lance l'activité en direct) ainsi que les notifications de début et de fin continuent d'alerter normalement. Désactivez cette option pour être alerté à chaque mise à jour."
+    },
     "notify_live_sticky": {
       "label": "Conserver la notification en direct au toucher",
       "doc": "Android uniquement. Rend la notification de progression en direct persistante (épinglée) afin que la toucher ne la ferme pas. Désactivé conserve le comportement par défaut où un toucher la ferme."

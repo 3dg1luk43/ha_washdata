@@ -292,6 +292,8 @@ const _SETTINGS_SECTIONS = [
         doc: 'If a cycle runs past its estimate by more than this percentage, send an overrun alert.' },
       { key: 'notify_live_chronometer', label: 'Use Live Chronometer', type: 'checkbox',
         doc: 'Show a live-updating countdown timer in the notification (on platforms that support it) instead of a static estimate.' },
+      { key: 'notify_live_silent', label: 'Silent Live Updates', type: 'checkbox', def: true,
+        doc: 'iOS only. Refresh the live progress quietly: each update arrives without a sound or vibration, at a lower, battery-saving priority that iOS may briefly batch. The first update of a cycle (the one that starts the Live Activity) and the start/finish notifications still alert as usual. Turn this off to be alerted on every update.' },
       { key: 'notify_live_sticky', label: 'Keep Live Notification On Tap', type: 'checkbox',
         doc: 'Android only. Make the live-progress notification persistent (sticky) so tapping it does not dismiss the ongoing thread. Off keeps the default behaviour where a tap dismisses it.' },
       { key: 'notify_live_click_action', label: 'Live Notification Tap Target', type: 'text', optional: true,
@@ -3678,14 +3680,41 @@ class HaWashdataPanel extends HTMLElement {
   _deviceOpts(current) {
     const out = [['', '- None -']];
     const devs = this._hass && this._hass.devices ? this._hass.devices : {};
+    // #418: never offer this entry's OWN WashData device. HA refuses a device as
+    // its own via_device (2026.9 raises, which aborted setup for the whole entry),
+    // and the registry names that device after the entry title - typically the same
+    // name the user gave the plug - so it was easy to pick by mistake. A stored
+    // self-id is dropped rather than carried below, so the field reads back as
+    // "- None -" and the next save clears the broken option.
+    const selfId = this._ownDeviceId();
     Object.values(devs).forEach(d => {
+      if (selfId && String(d.id) === selfId) return;
       const name = d.name_by_user || d.name || d.id;
       out.push([d.id, name]);
     });
-    if (current && !out.some(([id]) => String(id) === String(current))) {
+    if (current && String(current) !== selfId
+        && !out.some(([id]) => String(id) === String(current))) {
       out.push([current, this._t('lbl.device_unresolved', {id: current}, `Unavailable device (${current})`)]);
     }
     return out;
+  }
+
+  // HA device-registry id of the WashData device belonging to the SELECTED entry,
+  // or '' when it cannot be resolved. The registry reaches the frontend
+  // asynchronously (#406), so an empty/partial map must yield '' - never a guess -
+  // or _deviceOpts would drop a perfectly valid stored link.
+  _ownDeviceId() {
+    const dev = this._devices && this._devices[this._selIdx];
+    const eid = dev && dev.entry_id;
+    if (!eid) return '';
+    const devs = this._hass && this._hass.devices ? this._hass.devices : {};
+    for (const d of Object.values(devs)) {
+      if (!d || !d.id) continue;
+      const ids = Array.isArray(d.identifiers) ? d.identifiers : [];
+      if (ids.some(p => Array.isArray(p) && p[0] === _DOMAIN && String(p[1]) === String(eid))) return String(d.id);
+      if (Array.isArray(d.config_entries) && d.config_entries.map(String).includes(String(eid))) return String(d.id);
+    }
+    return '';
   }
 
   // ── Access / panel-config helpers ───────────────────────────────────────────

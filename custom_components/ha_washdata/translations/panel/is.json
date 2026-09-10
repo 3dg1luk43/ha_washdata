@@ -1607,6 +1607,10 @@
       "label": "Aflaprófíl-bil",
       "doc": "Fötustærð fyrir eigindið power_profile á prófílskynjaraskynjara (flatt fylki meðalwattsgilda á hólf sem notast af ytri skipuleggjendum eins og EMHASS og tibber_prices). Minni fötur halda stuttum aflgöllum skörpum; stærri fötur jafna út ferilinn. Sjálfgefið 15 mín. Eingöngu til birtingar; hefur engin áhrif á greiningu."
     },
+    "notify_live_silent": {
+      "label": "Hljóðlausar lifandi uppfærslur",
+      "doc": "Eingöngu iOS. Uppfærir lifandi framvindu hljóðlaust: hver uppfærsla berst án hljóðs eða titrings, með lægri forgangi sem sparar rafhlöðu og iOS getur safnað saman í stutta stund. Fyrsta uppfærsla hringrásar (sú sem ræsir Live Activity) og upphafs- og lokatilkynningarnar láta áfram vita eins og venjulega. Slökktu á þessu til að fá tilkynningu við hverja uppfærslu."
+    },
     "notify_live_sticky": {
       "label": "Halda lifandi tilkynningu við snertingu",
       "doc": "Eingöngu Android. Gerir lifandi framvindutilkynningu viðvarandi (sticky) þannig að snertingar lokar henni ekki. Slökkt: sjálfgefin hegðun þar sem snertingar lokar tilkynningu."

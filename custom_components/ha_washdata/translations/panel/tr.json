@@ -1603,6 +1603,10 @@
             "label": "Güç Profili Aralığı",
             "doc": "EMHASS ve tibber_prices gibi harici planlayıcılar tarafından kullanılan düz slot başına ortalama watt dizisi olan power_profile sensör özelliği için kova boyutu. Küçük kovalar kısa güç ani artışlarını keskin tutar; büyük kovalar şekli düzler. Varsayılan 15 dakika. Yalnızca okuma zamanında kullanılır; algılamayı etkilemez."
         },
+        "notify_live_silent": {
+            "label": "Sessiz Canlı Güncellemeler",
+            "doc": "Yalnızca iOS. Canlı ilerlemeyi sessizce yeniler: her güncelleme ses veya titreşim olmadan, pil tasarrufu sağlayan daha düşük bir öncelikle gelir ve iOS bunları kısa süreliğine gruplayabilir. Bir döngünün ilk güncellemesi (Live Activity'yi başlatan güncelleme) ile başlangıç/bitiş bildirimleri her zamanki gibi uyarı vermeye devam eder. Her güncellemede uyarı almak için bunu kapatın."
+        },
         "notify_live_sticky": {
             "label": "Dokunuşta Canlı Bildirimi Koru",
             "doc": "Yalnızca Android. Canlı ilerleme bildirimini kalıcı (yapışkan) hale getirerek üzerine dokunulduğunda devam eden bildirimin kapatılmasını önleyin. Kapalı olduğunda dokunmanın bildirimi kapattığı varsayılan davranış korunur."

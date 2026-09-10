@@ -1577,6 +1577,10 @@
       "label": "Jaudas profila intervāls",
       "doc": "Spaiņa lielums profilam power_profile sensora atribūtam (vienots vidējo vatu masīvs pa laika nišām, ko izmanto ārējie plānotāji, piemēram, EMHASS un tibber_prices). Mazāki spaini saglabā īsas jaudas pikas asas; lielāki spaini izlīdzina formu. Noklusējums 15 min. Tikai lasīšanas laikā; neietekmē noteikšanu."
     },
+    "notify_live_silent": {
+      "label": "Klusi tiešraides atjauninājumi",
+      "doc": "Tikai iOS. Tiešraides progress tiek atsvaidzināts klusi: katrs atjauninājums pienāk bez skaņas un vibrācijas, ar zemāku, akumulatoru taupošu prioritāti, ko iOS var uz brīdi apvienot. Pirmais cikla atjauninājums (tas, kas sāk Live Activity) un sākuma un beigu paziņojumi joprojām paziņo kā parasti. Izslēdziet to, ja vēlaties saņemt paziņojumu par katru atjauninājumu."
+    },
     "notify_live_sticky": {
       "label": "Saglabāt tiešraides paziņojumu pēc pieskāriena",
       "doc": "Tikai Android. Padarīt tiešraides progresa paziņojumu pastāvīgu (lipīgu), lai pieskāriens tam neatceltu notiekošo pavedienu. Izslēgts saglabā noklusēto uzvedību, kad pieskāriens paziņojumu noraida."

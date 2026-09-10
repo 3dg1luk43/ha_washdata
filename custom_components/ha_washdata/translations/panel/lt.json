@@ -1577,6 +1577,10 @@
       "label": "Galios profilio intervalas",
       "doc": "Kibirio dydis profilio power_profile jutiklio atributui (plokščias per laiko atkarpas vidutinių vatų masyvas, naudojamas išorinių planavimo sistemų, pvz., EMHASS ir tibber_prices). Mažesni kibirai išlaiko trumpus galios šuolius aštresniais; didesni kibirai lygina formą. Numatytasis 15 min. Tik skaitymo metu; neturi įtakos aptikimui."
     },
+    "notify_live_silent": {
+      "label": "Tylūs tiesioginiai atnaujinimai",
+      "doc": "Tik iOS. Tiesioginė eiga atnaujinama tyliai: kiekvienas atnaujinimas gaunamas be garso ir vibracijos, žemesniu, bateriją tausojančiu prioritetu, kurį iOS gali trumpam sugrupuoti. Pirmasis ciklo atnaujinimas (tas, kuris paleidžia Live Activity) bei pradžios ir pabaigos pranešimai ir toliau praneša įprastai. Išjunkite, jei norite gauti pranešimą apie kiekvieną atnaujinimą."
+    },
     "notify_live_sticky": {
       "label": "Išlaikyti tiesioginį pranešimą po paspaudimo",
       "doc": "Tik Android. Padaryti tiesioginį pažangos pranešimą patvariu (klijuojamu), kad paspaudus nebus atsisakyta vykstančios gijos. Išjungus paliekama numatytoji elgsena, kai paspaudus pranešimas atsisakomas."
