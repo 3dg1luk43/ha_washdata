@@ -617,3 +617,52 @@ async def test_the_import_heal_never_lowers_the_odometer(store):
     await store.async_import_data(payload)
 
     assert store.get_lifetime_cycle_count() == 900
+
+
+async def test_a_naive_start_time_does_not_zero_the_rewind(store):
+    """One un-offset stamp must not stamp a back-dated event at today's odometer.
+
+    An ISO string without an offset parses naive, and comparing it with the aware
+    `since` raises TypeError. The handler around the loop returned 0 for the whole
+    tally, and 0 means "no cycles since that date" - so `_odometer_at` stamped the
+    CURRENT odometer onto a back-dated event and `cycles_since_maintenance` came
+    due late by every cycle run since the service.
+    """
+    now = dt_util.now()
+    cycles = []
+    for i in range(10):
+        c = _cycle(10 - i)
+        c["start_time"] = (now - timedelta(days=10 - i)).isoformat()
+        cycles.append(c)
+    # One legacy/imported record with no UTC offset, inside the counted window.
+    cycles[7]["start_time"] = (now - timedelta(days=3)).replace(tzinfo=None).isoformat()
+    store._data["past_cycles"] = cycles
+    store._data["lifetime_cycle_count"] = 10
+
+    entry = await store.async_add_maintenance_event(
+        "drum_clean", date=(now - timedelta(days=4, hours=1)).isoformat()
+    )
+
+    # 4 cycles started after that date, the naive one included.
+    assert entry["cycle_count_at_log"] == 6
+    assert store.cycles_since_maintenance("drum_clean") == 4
+
+
+async def test_an_unparseable_start_time_only_drops_its_own_record(store):
+    """Junk in one record must not discard the whole count either."""
+    now = dt_util.now()
+    cycles = []
+    for i in range(10):
+        c = _cycle(10 - i)
+        c["start_time"] = (now - timedelta(days=10 - i)).isoformat()
+        cycles.append(c)
+    cycles[7]["start_time"] = "not-a-date"
+    store._data["past_cycles"] = cycles
+    store._data["lifetime_cycle_count"] = 10
+
+    entry = await store.async_add_maintenance_event(
+        "drum_clean", date=(now - timedelta(days=4, hours=1)).isoformat()
+    )
+
+    # The junk record is skipped; the other 3 in the window still count.
+    assert entry["cycle_count_at_log"] == 7

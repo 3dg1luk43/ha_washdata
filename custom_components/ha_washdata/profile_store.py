@@ -2809,8 +2809,27 @@ class ProfileStore:
             count = 0
             for c in cycles:
                 start = _parse_start_dt(c.get("start_time"))
-                if start is not None and start > since:
-                    count += 1
+                if start is None:
+                    continue
+                # A naive stamp cannot be compared with the aware `since` at all
+                # ("can't compare offset-naive and offset-aware datetimes"), and an
+                # ISO string without an offset parses naive - reachable through an
+                # import or a hand-edited file even though every record this device
+                # writes is aware. Read as UTC, the same way `newest` does in
+                # async_repair_profile_samples.
+                if start.tzinfo is None:
+                    start = start.replace(tzinfo=dt_util.UTC)
+                # Guarded per cycle, not once around the loop: the outer handler
+                # below returns 0 for the WHOLE tally, and 0 means "no cycles since
+                # that date", so a single odd record used to make _odometer_at stamp
+                # the CURRENT odometer onto a back-dated event. cycles_since_maintenance
+                # then subtracts that stamp and the reminder is late by every cycle
+                # run since the service.
+                try:
+                    if start > since:
+                        count += 1
+                except TypeError:  # pragma: no cover - defensive
+                    continue
             return count
         except Exception:  # noqa: BLE001
             return 0
