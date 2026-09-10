@@ -1069,19 +1069,25 @@ class CycleDetector:
         # confirmation on a band-crossing ramp; no start is lost.
         prev_high = self._last_power is not None and self._last_power >= threshold
         high_dt = dt if prev_high else 0.0
+        # ...and the ENERGY for that interval at the level the appliance actually sat
+        # at, which is the same argument applied to the second start gate. Crediting
+        # it at the NEW reading's power let a sample barely above the threshold,
+        # followed by a spike, bank the spike's power for the whole preceding
+        # interval and satisfy start_energy_threshold on its own. Computed here, not
+        # at the three use sites, because `self._last_power` is overwritten a few
+        # lines below - before the two STARTING seeds further down would read it.
+        # The sibling paths already do this: the DELAY_WAIT seed credits at
+        # `start_power` and the anti-wrinkle window uses the trapezoid average.
+        high_step_wh = (
+            (self._last_power or 0.0) * (high_dt / 3600.0) if high_dt > 0 else 0.0
+        )
 
         if is_high:
             self._time_above_threshold += high_dt
             self._time_below_threshold = 0.0
             self._time_below_threshold_gapfree = 0.0
-            # Energy integration (trapezoidal approx for this single step)
-            # prev_p = self._last_power if self._last_power is not None else power
-            # step_wh = ((power + prev_p) / 2.0) * (dt / 3600.0)
-            # Simplified: just P * dt for short steps is fine,
-            # or call integrate_wh on buffer if needed.
-            # Let's use simple rect/trapz here for running sum
-            step_wh = power * (high_dt / 3600.0)
-            self._energy_since_idle_wh += step_wh
+            # Energy for the guarded interval, computed with high_dt above.
+            self._energy_since_idle_wh += high_step_wh
             self._last_active_time = timestamp
         else:
             self._time_below_threshold += dt
@@ -1163,9 +1169,7 @@ class CycleDetector:
                         self._power_readings = [(timestamp, power)]
                         # Guarded interval (#403): the gap between anti-wrinkle
                         # tumbles was spent at the previous (idle) level.
-                        self._energy_since_idle_wh = (
-                            power * (high_dt / 3600.0) if high_dt > 0 else 0.0
-                        )
+                        self._energy_since_idle_wh = high_step_wh
 
                     self._cycle_max_power = max(candidate_peak, power)
             elif self._state != STATE_ANTI_WRINKLE:
@@ -1281,9 +1285,7 @@ class CycleDetector:
                 # a terminal state carries the previous cycle's total), so an
                 # unguarded seed would reinstate the idle gap the accumulator
                 # just declined to credit.
-                self._energy_since_idle_wh = (
-                    power * (high_dt / 3600.0) if high_dt > 0 else 0.0
-                )
+                self._energy_since_idle_wh = high_step_wh
                 self._cycle_max_power = power
             # NOTE: terminal-state expiry (Finished/Interrupted/Force-Stopped -> Off)
             # is owned solely by the manager (WashDataManager._handle_state_expiry),
@@ -2419,20 +2421,46 @@ class CycleDetector:
         by the tail of the trace rather than its whole length. Each reading covers
         the interval up to the following one, which matches how the profile's own
         block length is measured.
+
+        Two corrections to that per-interval credit, both of which decide whether the
+        guard releases:
+
+        * An outage-sized interval is unobserved time, not high-power time. Counting
+          it in full let a silent plug bank minutes of "spin" it never reported,
+          satisfy ``seen >= needed`` and release the finalise before the real
+          terminal spin - the #399 failure, reached by a different route. Same
+          treatment (and the same p95-derived ceiling) the tail scan at
+          ``_smart_term_tail_stats`` and the gap-free quiet tally already apply.
+          Deliberately NOT ``_outage_threshold_s()``, which rebuilds a NumPy array
+          from every reading; this runs on the per-reading anti-crease path.
+        * When ``offset_s`` falls inside an interval, only the part after the offset
+          counts. Breaking out of the loop dropped that remainder entirely, and the
+          offset is ``start_frac * expected``, so a boundary reading is the norm
+          rather than an edge case.
         """
         start = self._current_cycle_start
         if start is None or not self._power_readings:
             return 0.0
         ceiling = float(self._config.anti_wrinkle_max_power)
+        max_gap = min(3600.0, max(60.0, 10.0 * self._p95_dt))
         total = 0.0
         readings = self._power_readings
         for i in range(len(readings) - 1, -1, -1):
             ts, power = readings[i]
             elapsed = (ts - start).total_seconds()
-            if elapsed < offset_s:
-                break
-            if float(power) > ceiling and i + 1 < len(readings):
-                total += (readings[i + 1][0] - ts).total_seconds()
+            if i + 1 >= len(readings):
+                continue  # last reading covers no interval yet
+            next_elapsed = (readings[i + 1][0] - start).total_seconds()
+            if next_elapsed <= offset_s:
+                break  # this interval ends at or before the offset, as do all earlier ones
+            interval = next_elapsed - elapsed
+            if interval > max_gap:
+                if elapsed < offset_s:
+                    break
+                continue  # unobserved time, not evidence of anything
+            if float(power) > ceiling:
+                # Credit only the portion at or after the offset.
+                total += next_elapsed - max(elapsed, offset_s)
         return total
 
     def _maybe_finalize_anticrease_tail(self, timestamp: datetime) -> bool:

@@ -255,6 +255,24 @@ def test_option_float_falls_back_to_the_default_not_zero():
     assert option_float("nonsense", 0.0) == 0.0
 
 
+def test_option_float_rejects_non_finite_values():
+    """float() accepts these, and a non-finite threshold is worse than a raise.
+
+    Every comparison against nan is False, and every comparison of a real
+    confidence against inf is False, so the gated feature goes quietly dead.
+    """
+    for bad in ("nan", "NaN", "inf", "-inf", "infinity", float("nan"), float("inf")):
+        assert option_float(bad, 0.9) == 0.9
+
+
+def test_option_float_non_finite_would_otherwise_disable_labelling():
+    """The concrete consequence, stated as the comparison the manager makes."""
+    conf = 0.95
+    assert (conf >= float("nan")) is False      # never labels
+    assert (conf >= float("inf")) is False      # never labels
+    assert (conf >= option_float("nan", 0.9)) is True
+
+
 def test_option_float_does_not_swallow_a_stored_bool():
     """Not a valid threshold, but float() accepts it, so record the behaviour."""
     assert option_float(True, 0.9) == 1.0

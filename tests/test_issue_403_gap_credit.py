@@ -109,6 +109,57 @@ def test_idle_gap_is_not_start_evidence():
     assert det.state == STATE_OFF, "false start must be aborted"
 
 
+def test_energy_gate_is_credited_at_the_level_actually_observed():
+    """The second start gate, held to the same rule as the first.
+
+    ``high_dt`` is the interval that ENDED at this reading, so the appliance sat at
+    the PREVIOUS sample's level for it. Crediting the energy at the NEW reading's
+    power let a sample barely above the threshold, followed by a spike, bank the
+    spike's power for the whole preceding interval and satisfy
+    ``start_energy_threshold`` on its own.
+    """
+    det = _make(start_duration_threshold=1.0, start_energy_threshold=0.2)
+    _seed_idle_cadence(det, interval=30.0, power=0.4)
+
+    # A sample just above the 22 W start threshold, so the NEXT interval is credited.
+    det.process_reading(25.0, at(0))
+    assert det.state == STATE_STARTING
+    # 300 s later, a big spike. The appliance was observed at 25 W for that stretch,
+    # so it earns 25 W * 300 s = 2.08 Wh, not 3000 W * 300 s = 250 Wh.
+    det.process_reading(3000.0, at(300))
+    assert det._energy_since_idle_wh == pytest.approx(25.0 * 300.0 / 3600.0, rel=1e-6)
+
+
+def test_energy_credit_still_accrues_for_a_genuine_high_power_run():
+    """The guard must not starve the gate on a real cycle."""
+    det = _make(start_duration_threshold=1.0, start_energy_threshold=0.2)
+    _seed_idle_cadence(det, interval=30.0, power=0.4)
+
+    det.process_reading(2000.0, at(0))
+    det.process_reading(2000.0, at(30))
+    # Previous sample was high, so the interval keeps its full credit.
+    assert det._energy_since_idle_wh == pytest.approx(2000.0 * 30.0 / 3600.0, rel=1e-6)
+    assert det.state == STATE_RUNNING
+
+
+def test_starting_seed_uses_the_observed_level_not_the_new_reading():
+    """The two STARTING seeds OVERWRITE the accumulator, so they need the same rule.
+
+    Regression guard on the mechanism as much as the value: ``self._last_power`` is
+    reassigned before these seeds run, so reading it there would silently return the
+    current power and change nothing.
+    """
+    det = _make(start_duration_threshold=1.0, start_energy_threshold=0.2)
+    _seed_idle_cadence(det, interval=30.0, power=0.4)
+
+    # 25 W observed, then a spike 300 s later drives OFF -> STARTING and seeds the
+    # accumulator from the guarded interval.
+    det.process_reading(25.0, at(0))
+    det.process_reading(3000.0, at(300))
+    assert det._energy_since_idle_wh == pytest.approx(25.0 * 300.0 / 3600.0, rel=1e-6)
+    assert det._energy_since_idle_wh < 3.0  # nowhere near 3000 W * 300 s = 250 Wh
+
+
 def test_dense_sampler_start_costs_one_extra_sample():
     """A real start on a 2 s-cadence sensor still commits, one report later.
 
