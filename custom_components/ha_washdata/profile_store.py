@@ -5386,16 +5386,33 @@ class ProfileStore:
         self,
         profile_name: str,
         threshold_w: float,
-    ) -> tuple[float, float] | None:
+    ) -> tuple[float, float, float] | None:
         """Position and length of the LAST contiguous run above ``threshold_w`` in a
-        profile's own trace: ``(start_frac, seconds)``, or None (#399).
+        profile's own trace: ``(start_frac, seconds, start_offset_s)``, or None (#399).
 
-        ``start_frac`` is where that run begins as a fraction of the profile's span,
-        so the caller can map it onto a live cycle whose expected duration differs
-        from the trace it was built from. This is what tells the anti-crease
-        finalise that a programme ends with a spin, and roughly how long that spin
-        runs, so it can wait for the live counterpart instead of closing the wash
-        seconds before it.
+        ``start_frac`` is where that run begins as a fraction of the profile's
+        quiet-trimmed span, and answers only one question: is this block *terminal*
+        (``ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC``)? ``start_offset_s`` is the same
+        position in ABSOLUTE seconds from the start of the trace, and is what the
+        detector scans from. This is what tells the anti-crease finalise that a
+        programme ends with a spin, and roughly how long that spin runs, so it can
+        wait for the live counterpart instead of closing the wash seconds before it.
+
+        The two are deliberately on different bases, because they answer different
+        questions and the caller has no denominator that fits both (register item
+        196). The fraction MUST divide by the trimmed span, or a capture's idle tail
+        pushes a genuine terminal spin under the gate and disarms the guard (see the
+        trim comment below). The scan offset must NOT be reconstructed from it as
+        ``start_frac x expected``, because ``expected`` is the profile's
+        ``avg_duration``, which tracks the UNTRIMMED span - measured over 152 real
+        washer/dryer cycles a recorded ``duration`` sits at relative error 0.0000
+        (median) from the full span versus 0.0274 from the trimmed one. Multiplying
+        a trimmed-basis fraction by an untrimmed-basis duration produced a
+        systematically LATE offset (median +180 s, max +1731 s over 13 real armed
+        profiles), so the run's own spin fell before the scan window and was never
+        counted: over 36 real armed profile/cycle pairs the product recognised the
+        spin 3 times, the absolute offset 14. Returning the offset removes the
+        denominator from the question entirely.
 
         Reads the envelope's ``max`` band first - a spin recorded by ANY member is
         a spin this programme can have - and falls back to the sample cycle's raw
@@ -5464,7 +5481,13 @@ class ProfileStore:
             first = last
             while first > 0 and powers[first - 1] > level:
                 first -= 1
-            start_frac = (float(times[first]) - float(times[0])) / span
+            # Absolute seconds from the start of the trace. `times` is already
+            # quiet-trimmed, but the trim is TRAILING only, so this offset is
+            # identical on the trimmed and untrimmed traces - which is exactly the
+            # capture-tail invariance the fraction needs the trim to get, obtained
+            # here for free (see the item-196 note in the docstring).
+            start_offset = float(times[first]) - float(times[0])
+            start_frac = start_offset / span
             # The block covers the interval up to the sample AFTER its last one, so
             # a single-sample spike still has a length (its own step). When the run
             # reaches the trimmed trace's final sample there IS no following one, so
@@ -5496,7 +5519,7 @@ class ProfileStore:
             seconds = end_t - float(times[first])
             if seconds <= 0:
                 return None
-            return (min(max(start_frac, 0.0), 1.0), seconds)
+            return (min(max(start_frac, 0.0), 1.0), seconds, start_offset)
         except Exception:  # noqa: BLE001
             return None
 
