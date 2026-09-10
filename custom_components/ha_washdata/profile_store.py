@@ -1529,6 +1529,9 @@ class ProfileStore:
         if not isinstance(log, list):
             log = []
             self._data["settings_changelog"] = log
+        # Snapshot for the rollback below. Shallow copy is enough: entries are only
+        # ever inserted or dropped wholesale, never edited in place.
+        before = list(log)
 
         now_iso = dt_util.now().isoformat()
         added = False
@@ -1553,7 +1556,16 @@ class ProfileStore:
         if len(log) > self.SETTINGS_CHANGELOG_MAX:
             del log[self.SETTINGS_CHANGELOG_MAX:]
         self._data["settings_changelog"] = log
-        await self.async_save()
+        try:
+            await self.async_save()
+        except Exception:
+            # Roll the insert back rather than leave an entry that was never
+            # persisted: get_settings_changelog() reads straight off _data, so the
+            # failed audit line would be shown as history and then written for real
+            # by whatever saves next. Restored here rather than at the call sites so
+            # every caller gets it, and the snapshot is taken before any mutation.
+            self._data["settings_changelog"] = before
+            raise
 
     # ─── On-device ML model versions (Stage 4) ────────────────────────────────
 
