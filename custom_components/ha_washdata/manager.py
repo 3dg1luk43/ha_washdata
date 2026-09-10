@@ -4357,6 +4357,17 @@ class WashDataManager:
 
                 self._current_program = "detecting..."
                 self._manual_program_active = False
+                # Confidence belongs to the match that produced it, so it cannot
+                # carry into the next cycle. It was only ever assigned by a real
+                # match update, never cleared, and the cycle-end tail stamps it onto
+                # cycle_data["match_confidence"] - so a cycle that never matched
+                # (most obviously one running a hand-pinned program, where
+                # _update_estimates returns early and the matcher never runs)
+                # persisted the PREVIOUS cycle's confidence as its own. That number
+                # then feeds _compute_cycle_quality_score and the learning feedback,
+                # i.e. fabricated match provenance on a cycle that has none - the
+                # #400 class of bug. Zero means "no opinion" and is not stored.
+                self._last_match_confidence = 0.0
                 self._notified_pre_completion = False
                 self._time_remaining = None
                 self._total_duration = None
@@ -7522,29 +7533,28 @@ class WashDataManager:
             self._logger.warning("Cannot set manual program: '%s' not found", profile_name)
             return False
 
-        # Remember the choice either way. Held across the STARTING -> RUNNING
-        # transition too, which clears the live pin as it resets the new cycle.
-        self._armed_program = profile_name
-        self._persist_armed_program(profile_name)
+        in_progress = self.detector.state in _CYCLE_IN_PROGRESS_STATES
+        # The arm survives only where the next cycle still needs it. Applied to a
+        # cycle already under way the pin belongs to THAT cycle, and leaving it armed
+        # let a back-to-back load inherit it: the cycle-end tail does try to clear it
+        # ("a pin is for the cycle it was made for") but sits behind the new-cycle
+        # token guard and returns early in exactly that case, so _consume_armed_program
+        # would stamp an unrelated cycle `label_source = "manual"` and let it reshape
+        # that program's envelope.
+        #
+        # STARTING is the one in-progress state that must KEEP the arm: the
+        # STARTING -> RUNNING transition resets the live pin as it starts the new
+        # cycle, and _consume_armed_program is what puts it back.
+        keep_arm = (not in_progress) or self.detector.state == STATE_STARTING
+        armed = profile_name if keep_arm else None
+        # Resolved before persisting, so this is ONE store write. Setting and then
+        # clearing scheduled two async_set_armed_program tasks and two saves for
+        # every mid-cycle pin.
+        self._armed_program = armed
+        self._persist_armed_program(armed)
 
-        if self.detector.state in _CYCLE_IN_PROGRESS_STATES:
+        if in_progress:
             self._apply_manual_program(profile_name, profiles.get(profile_name))
-            # The pin now belongs to the cycle in progress, so it must not stay armed
-            # for the next one. The cycle-end tail already tries to enforce that ("a
-            # pin is for the cycle it was made for"), but it sits behind the
-            # new-cycle token guard and returns early when a back-to-back load has
-            # already started a fresh cycle - the exact case where a leftover arm
-            # does damage, because _consume_armed_program would then stamp an
-            # unrelated cycle `label_source = "manual"` and let it reshape that
-            # program's envelope. Clearing at the set site does not depend on the
-            # tail running at all.
-            #
-            # STARTING is the one state that must KEEP the arm: the STARTING ->
-            # RUNNING transition resets the live pin as it starts the new cycle, and
-            # _consume_armed_program is what puts it back.
-            if self.detector.state != STATE_STARTING:
-                self._armed_program = None
-                self._persist_armed_program(None)
         else:
             self._logger.info(
                 "Program %r armed; it will be applied when the next cycle starts",

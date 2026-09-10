@@ -50,6 +50,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from homeassistant.core import HomeAssistant
 
+from custom_components.ha_washdata.const import STATE_OFF, STATE_RUNNING
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.profile_store import ProfileStore
 
@@ -126,6 +127,50 @@ async def test_a_weak_live_match_is_not_recorded_as_the_cycles_programme(
     assert cycle_data["match_confidence"] == pytest.approx(0.52)
     # And nothing was allowed to reshape a profile from it.
     manager.profile_store.async_rebuild_envelope.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_a_new_cycle_does_not_inherit_the_previous_confidence(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """Confidence belongs to the match that produced it.
+
+    `_last_match_confidence` was only ever assigned by a real match update and
+    never cleared, so a cycle that never matched persisted the PREVIOUS cycle's
+    number as its own `match_confidence` - which then feeds the quality score and
+    the learning feedback. Most visible on a hand-pinned program, where
+    `_update_estimates` returns early and the matcher never runs at all.
+    """
+    manager._last_match_confidence = 0.91  # left over from an earlier cycle
+
+    # The detector reports a brand-new cycle.
+    manager.detector.state = STATE_RUNNING
+    manager._on_state_change(STATE_OFF, STATE_RUNNING)
+
+    assert manager._last_match_confidence == 0.0
+
+
+@pytest.mark.asyncio
+async def test_a_manual_cycle_does_not_claim_a_borrowed_confidence(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """The consequence at cycle end: no fabricated match provenance."""
+    manager._current_program = "Sportswear 30C"
+    manager._manual_program_active = True
+    manager._last_match_confidence = 0.0  # a fresh cycle, matcher never ran
+    manager._matched_profile_duration = 4080
+    manager.profile_store.async_match_profile = AsyncMock(
+        return_value=MagicMock(best_profile=None, confidence=0.0, ranking=[])
+    )
+
+    cycle_data = _cycle_data()
+    await manager._async_process_cycle_end(cycle_data)
+    await hass.async_block_till_done()
+
+    # The user's choice is recorded, with no match score attached to it.
+    assert cycle_data["profile_name"] == "Sportswear 30C"
+    assert cycle_data["label_source"] == "manual"
+    assert "match_confidence" not in cycle_data
 
 
 @pytest.mark.asyncio

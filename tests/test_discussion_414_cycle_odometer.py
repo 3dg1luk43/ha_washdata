@@ -531,3 +531,46 @@ def _make_replacement_store(count: int):
     st = MagicMock()
     st.get_lifetime_cycle_count = MagicMock(return_value=count)
     return st
+
+
+async def test_a_failed_rollback_does_not_discard_a_concurrent_cycle_increment(store):
+    """The rollback must undo only its own write.
+
+    A cycle completing during the awaited save bumps the same counter, and that
+    path deliberately does not take the WS write lock. Restoring `previous`
+    unconditionally would throw the increment away.
+    """
+    _seed(store, 10)
+
+    async def record(_changes):
+        # A cycle completes while the save is in flight.
+        store._data["past_cycles"].append(_cycle(99))
+        store.set_lifetime_cycle_count(store.get_lifetime_cycle_count() + 1)
+        raise OSError("disk full")
+
+    store.async_record_settings_changes = AsyncMock(side_effect=record)
+
+    hass, connection, manager = _ws_ctx(store)
+    with patch.object(ws_api, "_get_manager", return_value=manager):
+        await ws_api.ws_set_lifetime_cycle_count.__wrapped__(
+            hass, connection, {"id": 1, "entry_id": "e1", "count": 4000}
+        )
+
+    connection.send_error.assert_called_once()
+    # The correction was rolled back, but the cycle's increment survived it.
+    assert store.get_lifetime_cycle_count() == 4001
+
+
+async def test_the_rollback_still_undoes_its_own_write(store):
+    """The plain case must keep working: nothing else touched it, so restore."""
+    _seed(store, 10)
+    store.async_record_settings_changes = AsyncMock(side_effect=OSError("disk full"))
+
+    hass, connection, manager = _ws_ctx(store)
+    with patch.object(ws_api, "_get_manager", return_value=manager):
+        await ws_api.ws_set_lifetime_cycle_count.__wrapped__(
+            hass, connection, {"id": 1, "entry_id": "e1", "count": 4000}
+        )
+
+    connection.send_error.assert_called_once()
+    assert store.get_lifetime_cycle_count() == 10
