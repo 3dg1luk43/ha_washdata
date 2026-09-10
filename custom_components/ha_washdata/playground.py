@@ -407,15 +407,19 @@ def _build_match_snapshots(
     its sample cycle's decompressed trace, plus the store's live matching config
     (with any on-device tuned weight overrides merged in).
 
-    Also applies Stage-5 group collapsing via
-    :meth:`ProfileStore._grouped_snapshots`: returns the collapsed snapshot list
-    (where each cohesive group is represented by a single ``__group__*``
-    aggregate candidate), plus ``group_members`` and ``member_snaps`` for the
-    Stage-5 member-resolution step in the faithful history runner.
+    Also resolves Stage-5 groups via :meth:`ProfileStore._grouped_snapshots`, the
+    same call the live matcher makes. Note what that returns since #400: the
+    **individual member** snapshots, unchanged, plus ``group_members`` and
+    ``member_snaps``. It no longer averages a family into one ``__group__*``
+    aggregate - that averaged curve belonged to no member and cost the family its
+    program-level match, so members are scored individually and each cohesive
+    family is collapsed to its best member afterwards by
+    :func:`collapse_group_candidates`. This docstring described the old aggregate
+    behaviour long after the code stopped doing it.
 
-    Returns ``(grouped_snapshots, match_config, group_members, member_snaps)``.
-    When no cohesive groups exist ``group_members`` and ``member_snaps`` are both
-    empty dicts and behaviour is identical to before.
+    Returns ``(snapshots, match_config, group_members, member_snaps)``. When no
+    cohesive groups exist ``group_members`` and ``member_snaps`` are both empty
+    dicts and behaviour is identical to before.
     """
     snapshots: list[dict[str, Any]] = []
     try:

@@ -361,6 +361,53 @@ async def test_repair_is_still_a_no_op_when_nothing_is_stored(
     assert stats["profiles_repaired"] == 0
 
 
+@pytest.mark.asyncio
+async def test_repair_picks_the_newest_cycle_across_mixed_utc_offsets(
+    store: ProfileStore,
+) -> None:
+    """ISO stamps only sort chronologically when they share an offset.
+
+    One store legitimately holds several: the reference library carries +02:00,
+    +01:00 and +00:00 side by side (DST either side of a transition, plus
+    downloaded community cycles recorded in someone else's zone). Sorting the raw
+    strings made repair adopt an older cycle's trace and duration.
+    """
+    older = _cycle("older", 2000, profile="Cotton 40C")
+    newer = _cycle("newer", 2000, profile="Cotton 40C")
+    # 11:00+02:00 is 09:00 UTC; 10:00+00:00 is 10:00 UTC and therefore LATER,
+    # but sorts lower as a raw string.
+    older["start_time"] = "2026-06-01T11:00:00+02:00"
+    newer["start_time"] = "2026-06-01T10:00:00+00:00"
+
+    store._data["profiles"] = {"Cotton 40C": {"avg_duration": 3600, "sample_cycle_id": "gone"}}
+    store._data["past_cycles"] = [older, newer]
+    # The envelope rebuild re-points sample_cycle_id by its own rule
+    # (_select_reference_cycle_id picks on duration proximity, not recency), so it
+    # is stubbed to leave the repair's own choice observable.
+    store.async_rebuild_envelope = AsyncMock()
+
+    await store.async_repair_profile_samples()
+
+    assert store._data["profiles"]["Cotton 40C"]["sample_cycle_id"] == "newer"
+
+
+@pytest.mark.asyncio
+async def test_repair_tolerates_an_unparseable_start_time(store: ProfileStore) -> None:
+    """It must not raise, and must not prefer the junk stamp."""
+    good = _cycle("good", 2000, profile="Cotton 40C")
+    bad = _cycle("bad", 2000, profile="Cotton 40C")
+    good["start_time"] = "2026-06-01T10:00:00+00:00"
+    bad["start_time"] = "not-a-date"
+
+    store._data["profiles"] = {"Cotton 40C": {"avg_duration": 3600, "sample_cycle_id": "gone"}}
+    store._data["past_cycles"] = [bad, good]
+    store.async_rebuild_envelope = AsyncMock()
+
+    await store.async_repair_profile_samples()
+
+    assert store._data["profiles"]["Cotton 40C"]["sample_cycle_id"] == "good"
+
+
 def test_a_profile_with_no_evidence_is_reported_as_unmatchable(store: ProfileStore) -> None:
     """The reporter's Cotton 40C: present in the list, could never win, said nothing."""
     store._data["profiles"] = {
