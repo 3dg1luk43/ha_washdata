@@ -318,7 +318,7 @@ def test_terminal_high_block_from_the_envelope_max_band() -> None:
 
     block = ps.profile_terminal_high_block("P", 400.0)
     assert block is not None
-    start_frac, seconds = block
+    start_frac, seconds, _start_offset = block
     assert abs(start_frac - PROFILE_SPIN_START / EXPECTED) < 0.02
     assert abs(seconds - (PROFILE_SPIN_END - PROFILE_SPIN_START)) < 80
 
@@ -364,7 +364,7 @@ def test_terminal_high_block_survives_a_spin_that_runs_to_the_last_sample() -> N
 
     block = ps.profile_terminal_high_block("P", 400.0)
     assert block is not None
-    start_frac, seconds = block
+    start_frac, seconds, _start_offset = block
     assert start_frac >= 0.90
     # 10 samples wide (190..199), each covering one step.
     assert abs(seconds - 10 * step) < step * 0.6
@@ -383,7 +383,7 @@ def test_terminal_high_block_keeps_a_single_sample_spike_at_the_very_end() -> No
 
     block = ps.profile_terminal_high_block("P", 400.0)
     assert block is not None
-    start_frac, seconds = block
+    start_frac, seconds, _start_offset = block
     assert start_frac > 0.99
     # Its own step, carried over from the preceding interval.
     assert abs(seconds - step) < step * 0.1
@@ -407,7 +407,7 @@ def test_terminal_block_does_not_inherit_an_outage_sized_final_step() -> None:
 
     block = ps.profile_terminal_high_block("P", 400.0)
     assert block is not None
-    _start_frac, seconds = block
+    _start_frac, seconds, _start_offset = block
     # One sample wide, so it earns one representative step - not the 7200 s gap.
     assert seconds == pytest.approx(step, abs=1.0)
 
@@ -456,3 +456,206 @@ def test_terminal_high_block_ignores_a_recorded_idle_tail() -> None:
     assert abs(padded[0] - without_tail[0]) < 0.01     # same position
     assert padded[0] >= 0.90                            # still reads as terminal
     assert abs(padded[1] - without_tail[1]) < 40        # same block length
+
+
+# ---------------------------------------------------------------------------
+# Register item 196: the scan offset must not be reconstructed from the
+# trimmed-basis fraction and the untrimmed-basis avg_duration
+# ---------------------------------------------------------------------------
+
+# A profile whose capture carries a long idle tail. Trimmed span 7000 s (which is
+# what makes the block read as terminal), full span 10000 s, and avg_duration
+# tracks the FULL span - measured over 152 real washer/dryer cycles a recorded
+# duration sits at relative error 0.0000 (median) from the full span versus
+# 0.0274 from the trimmed one.
+ITEM196_ACTIVE_S = 7000.0
+ITEM196_FULL_S = 10000.0
+ITEM196_SPIN_START = 6500.0
+ITEM196_SPIN_END = 6700.0
+
+
+def _item196_envelope() -> list[list[float]]:
+    """The profile's own max band: a wash, its terminal spin, then 3000 s of the
+    trailing quiet a capture happens to record."""
+    step = 20.0
+    pts: list[list[float]] = []
+    t = 0.0
+    while t <= ITEM196_ACTIVE_S:
+        high = ITEM196_SPIN_START <= t < ITEM196_SPIN_END
+        pts.append([t, 774.0 if high else 60.0])
+        t += step
+    while t <= ITEM196_FULL_S:
+        pts.append([t, 0.0])
+        t += step
+    return pts
+
+
+def _item196_store():
+    ps = _store()
+    ps._data["profiles"] = {"P": {"avg_duration": ITEM196_FULL_S}}
+    ps._data["envelopes"] = {"P": {"max": _item196_envelope()}}
+    return ps
+
+
+def test_terminal_high_block_reports_the_blocks_absolute_offset() -> None:
+    """The third element is the block's position in absolute seconds on the
+    profile's own grid, so the consumer needs no denominator at all."""
+    block = _item196_store().profile_terminal_high_block("P", 400.0)
+    assert block is not None
+    start_frac, _seconds, start_offset = block
+    # The fraction is on the quiet-TRIMMED span, which is what makes this block
+    # read as terminal in the first place.
+    assert start_frac == pytest.approx(ITEM196_SPIN_START / ITEM196_ACTIVE_S, abs=0.01)
+    assert start_frac >= 0.90
+    # The offset is the real position, not start_frac x anything.
+    assert start_offset == pytest.approx(ITEM196_SPIN_START, abs=25.0)
+    assert start_offset == pytest.approx(start_frac * ITEM196_ACTIVE_S, abs=25.0)
+
+
+def test_absolute_offset_ignores_a_recorded_idle_tail() -> None:
+    """Same capture-tail invariance the fraction has, for the new element: the
+    trailing trim cannot move a position measured from the START of the trace."""
+    ps = _item196_store()
+    with_tail = ps.profile_terminal_high_block("P", 400.0)
+    # The same programme captured without its idle tail.
+    tight = [p for p in _item196_envelope() if p[0] <= ITEM196_ACTIVE_S]
+    ps._data["profiles"]["P2"] = {"avg_duration": ITEM196_ACTIVE_S}
+    ps._data["envelopes"]["P2"] = {"max": tight}
+    without_tail = ps.profile_terminal_high_block("P2", 400.0)
+    assert with_tail is not None and without_tail is not None
+    assert with_tail[2] == pytest.approx(without_tail[2], abs=1.0)
+
+
+def test_spin_guard_scans_from_the_absolute_offset_not_frac_times_expected() -> None:
+    """Item 196: `start_frac` is measured against the quiet-TRIMMED span while
+    `expected` (the profile's avg_duration) tracks the UNTRIMMED one, so their
+    product is a systematically LATE scan offset - here 0.929 x 10000 = 9286 s for
+    a spin that really sits at 6500 s. A late offset means the run's own spin falls
+    BEFORE the scan window and is never counted, so the delay-only hold ran out the
+    ANTI_CREASE_SPIN_WAIT_MAX_RATIO cap instead of releasing on the event.
+
+    Measured over 36 real armed profile/cycle pairs from cycle_data/: the product
+    recognised the spin 3 times, the absolute offset 14, and in neither case did
+    the credited seconds exceed the run's own terminal block.
+    """
+    block = _item196_store().profile_terminal_high_block("P", 400.0)
+    assert block is not None
+
+    def _pending(payload) -> bool:
+        det = _bare_detector()
+        det._current_cycle_start = BASE
+        det._expected_duration = ITEM196_FULL_S
+        det._p95_dt = 20.0
+        # This run: its spin lands exactly where the profile says it does.
+        det._power_readings = [
+            (
+                BASE + timedelta(seconds=t),
+                774.0 if ITEM196_SPIN_START <= t < ITEM196_SPIN_END else 15.0,
+            )
+            for t in [i * 20.0 for i in range(int(ITEM196_FULL_S / 20.0) + 1)]
+        ]
+        det._matched_terminal_high = det._sanitize_terminal_high(payload)
+        return det._anticrease_spin_pending(
+            BASE + timedelta(seconds=ITEM196_FULL_S * 0.99)
+        )
+
+    # The spin has run, so the guard must release.
+    assert _pending(block) is False
+    # And the reason it did not before: the pre-item-196 payload has no offset, so
+    # the consumer falls back to start_frac x expected and scans from 9286 s, past
+    # the whole spin. Kept as the contrast, and as the compatibility contract below.
+    assert _pending((block[0], block[1])) is True
+
+
+def test_a_two_element_payload_still_falls_back_to_frac_times_expected() -> None:
+    """Compatibility: an old state snapshot, the Playground and every pre-item-196
+    caller supply two elements. That must keep meaning "no absolute offset, use
+    start_frac x expected" rather than being handed a fabricated 0.0 offset, which
+    would make the guard scan the whole cycle and release on any heating burst."""
+    det = _bare_detector()
+    det._current_cycle_start = BASE
+    det._expected_duration = EXPECTED
+    det._p95_dt = 5.0
+    # A 300 s heating burst early on, and nothing above the ceiling after it.
+    det._power_readings = [
+        (BASE + timedelta(seconds=t), 1957.0 if 300 <= t < 600 else 15.0)
+        for t in [i * 5.0 for i in range(int(EXPECTED / 5.0) + 1)]
+    ]
+    det._matched_terminal_high = det._sanitize_terminal_high((0.95, 200.0))
+    assert det._matched_terminal_high == (0.95, 200.0)
+    # Scanning from 0.95 x expected finds nothing, so the guard holds.
+    assert det._anticrease_spin_pending(BASE + timedelta(seconds=EXPECTED * 0.99)) is True
+
+
+def test_sanitize_terminal_high_takes_the_triple_and_degrades_a_bad_offset() -> None:
+    """Arity is preserved, and a malformed third element must never be able to
+    disarm a guard that would otherwise arm."""
+    det = _bare_detector()
+    assert det._sanitize_terminal_high((0.95, 200.0, 5700.0)) == (0.95, 200.0, 5700.0)
+    assert det._sanitize_terminal_high((0.95, 200.0)) == (0.95, 200.0)
+    # The state snapshot round-trips through JSON, so the triple comes back as a
+    # LIST. That is the real restore path and it must keep the offset.
+    assert det._sanitize_terminal_high([0.95, 200.0, 5700.0]) == (0.95, 200.0, 5700.0)
+    snap_det = _bare_detector()
+    snap_det._matched_terminal_high = (0.95, 200.0, 5700.0)
+    restored = _bare_detector()
+    restored.restore_state_snapshot(
+        {**snap_det.get_state_snapshot(), "matched_terminal_high": [0.95, 200.0, 5700.0]}
+    )
+    assert restored._matched_terminal_high == (0.95, 200.0, 5700.0)
+    # Garbage / impossible offsets fall back to the pair, not to None.
+    for bad in ("x", float("nan"), float("inf"), -1.0, None):
+        assert det._sanitize_terminal_high((0.95, 200.0, bad)) == (0.95, 200.0)
+    # The pair's own validation is unchanged.
+    assert det._sanitize_terminal_high((1.5, 200.0, 5700.0)) is None
+    assert det._sanitize_terminal_high((0.95, 0.0, 5700.0)) is None
+    assert det._sanitize_terminal_high((0.95,)) is None
+    assert det._sanitize_terminal_high((0.95, 200.0, 1.0, 2.0)) is None
+    assert det._sanitize_terminal_high(None) is None
+    assert det._sanitize_terminal_high(42) is None
+
+
+def test_the_late_scan_offset_no_longer_holds_a_wash_to_the_cap() -> None:
+    """End to end, through the real detector: the #296 shape (tumble bursts recur
+    faster than off_delay, so the anti-crease finalise is the only closer) on a
+    profile whose capture carries an idle tail. Replayed over 36 real armed
+    profile/cycle pairs the late offset held 21 of 23 finalises to the
+    ANTI_CREASE_SPIN_WAIT_MAX_RATIO cap (median +1610 s, max +5340 s past the
+    no-guard baseline); the absolute offset holds 13, median +960 s, max +1860 s.
+    """
+    block = _item196_store().profile_terminal_high_block("P", 400.0)
+    assert block is not None
+
+    def _power(t: float) -> float:
+        if t < 120:
+            return 1957.0                                    # heating, so the cycle is hot
+        if ITEM196_SPIN_START <= t < ITEM196_SPIN_END:
+            return 774.0                                     # the terminal spin
+        if t >= ITEM196_ACTIVE_S:
+            return 140.0 if int(t) % 120 < 30 else 12.0      # anti-crease tumble bursts
+        return 60.0
+
+    def _finalize_at(payload) -> float | None:
+        ended: list[dict] = []
+        det = CycleDetector(
+            config=_config(),
+            on_state_change=lambda _o, _n: None,
+            on_cycle_end=lambda d: ended.append(d),
+        )
+        match = ("P", 0.9, ITEM196_FULL_S, None, False, False, False, False, 60.0, payload)
+        t = 0.0
+        limit = ITEM196_FULL_S * 1.25 + 1800.0
+        while t <= limit and not ended:
+            det.process_reading(_power(t), BASE + timedelta(seconds=t))
+            det.update_match(match)
+            t += 20.0
+        return float(ended[0]["duration"]) if ended else None
+
+    with_offset = _finalize_at(block)
+    late = _finalize_at((block[0], block[1]))
+    assert with_offset is not None and late is not None
+    # The late offset runs the hold out to the 1.25 x cap; the absolute offset
+    # releases as soon as the confirm window accrues on the tumble tail.
+    assert late >= ITEM196_FULL_S * 1.25
+    assert with_offset < ITEM196_FULL_S * 1.25
+    assert with_offset < late - 600.0

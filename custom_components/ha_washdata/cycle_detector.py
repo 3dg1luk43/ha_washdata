@@ -342,10 +342,14 @@ class CycleDetector:
         # Mean power the matched profile draws over the last few % of its own run
         # (profile_store.profile_tail_power). None = no opinion, guard stays inert.
         self._matched_tail_power: float | None = None
-        # (start_frac, seconds) of the matched profile's own terminal high-power
-        # block, from profile_store.profile_terminal_high_block. None = the profile
-        # has no such block (or we have no opinion) and the guard stays inert (#399).
-        self._matched_terminal_high: tuple[float, float] | None = None
+        # (start_frac, seconds, start_offset_s) of the matched profile's own terminal
+        # high-power block, from profile_store.profile_terminal_high_block. None = the
+        # profile has no such block (or we have no opinion) and the guard stays inert
+        # (#399). A two-element payload (pre-item-196 snapshot, Playground, older
+        # callers) is still accepted and falls back to start_frac x expected.
+        self._matched_terminal_high: (
+            tuple[float, float] | tuple[float, float, float] | None
+        ) = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
         self._anticrease_spin_wait_logged: bool = False
@@ -550,25 +554,49 @@ class CycleDetector:
         return value
 
     @staticmethod
-    def _sanitize_terminal_high(raw: Any) -> tuple[float, float] | None:
-        """Coerce ``raw`` into a ``(start_frac, seconds)`` pair, else None (#399).
+    def _sanitize_terminal_high(
+        raw: Any,
+    ) -> tuple[float, float] | tuple[float, float, float] | None:
+        """Coerce ``raw`` into a ``(start_frac, seconds)`` pair or a
+        ``(start_frac, seconds, start_offset_s)`` triple, else None (#399).
 
         None means "no opinion", which leaves ``_anticrease_spin_pending`` inert and
         the anti-crease finalise exactly as it behaved before the guard existed.
+
+        The arity is PRESERVED rather than normalised (register item 196). A
+        two-element payload is what a pre-196 state snapshot, an older caller and
+        most tests supply, and it has to keep meaning "no absolute offset, fall back
+        to ``start_frac x expected``" - handing it a fabricated 0.0 offset would make
+        the guard scan the whole cycle. A malformed third element degrades to the
+        pair for the same reason the whole method returns None on garbage: it must
+        never be able to disarm a guard that would otherwise arm.
         """
         if raw is None:
             return None
         try:
-            start_frac, seconds = raw  # type: ignore[misc]
-            start_frac = float(start_frac)
-            seconds = float(seconds)
+            values = list(raw)
+        except TypeError:
+            return None
+        if len(values) not in (2, 3):
+            return None
+        try:
+            start_frac = float(values[0])
+            seconds = float(values[1])
         except (TypeError, ValueError):
             return None
         if not math.isfinite(start_frac) or not math.isfinite(seconds):
             return None
         if not 0.0 <= start_frac <= 1.0 or seconds <= 0:
             return None
-        return (start_frac, seconds)
+        if len(values) == 2:
+            return (start_frac, seconds)
+        try:
+            start_offset = float(values[2])
+        except (TypeError, ValueError):
+            return (start_frac, seconds)
+        if not math.isfinite(start_offset) or start_offset < 0:
+            return (start_frac, seconds)
+        return (start_frac, seconds, start_offset)
 
     def _trailing_mean_power(self, timestamp: datetime, window_s: float) -> float | None:
         """Time-weighted mean power over the trailing ``window_s``, or None when
@@ -2381,7 +2409,7 @@ class CycleDetector:
         block = self._matched_terminal_high
         if block is None:
             return False
-        start_frac, block_seconds = block
+        start_frac, block_seconds = block[0], block[1]
         if start_frac < ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC:
             return False  # the profile's tail is genuinely low-power (#296 shape)
         expected = self._expected_duration
@@ -2394,19 +2422,34 @@ class CycleDetector:
         needed = block_seconds * ANTI_CREASE_TERMINAL_MATCH_FRAC
         if needed <= 0:
             return False
-        seen = self._high_power_seconds_since(start_frac * expected)
+        # Register item 196: scan from the block's ABSOLUTE offset on the profile's
+        # own grid when the store supplied one (element 3). `start_frac` is measured
+        # against the quiet-TRIMMED span - it has to be, or a capture's idle tail
+        # disarms the terminal gate above - while `expected` is the profile's
+        # avg_duration, which tracks the UNTRIMMED span. Their product is therefore a
+        # systematically LATE offset, and a late offset means the run's own spin sits
+        # BEFORE the scan window and is never counted, so the hold ran out the
+        # ANTI_CREASE_SPIN_WAIT_MAX_RATIO cap instead of releasing on the event. Over
+        # 36 real armed profile/cycle pairs the product recognised the spin 3 times
+        # and the absolute offset 14, with zero cases in either where the credited
+        # seconds exceeded the run's own terminal block (so no new premature-release
+        # exposure). The fallback keeps a pre-196 payload - an old state snapshot, the
+        # Playground, older callers - behaving exactly as before.
+        offset_s = float(block[2]) if len(block) >= 3 else start_frac * expected
+        seen = self._high_power_seconds_since(offset_s)
         if seen >= needed:
             return False
         if not self._anticrease_spin_wait_logged:
             self._anticrease_spin_wait_logged = True
             self._logger.debug(
                 "Anti-crease finalize held: '%s' ends with a %.0fs block above %.0fW "
-                "at %.0f%% of its run; this cycle has %.0fs of it so far (elapsed "
-                "%.0fs of %.0fs expected).",
+                "at %.0f%% of its run (scanning from %.0fs); this cycle has %.0fs of "
+                "it so far (elapsed %.0fs of %.0fs expected).",
                 self._matched_profile,
                 block_seconds,
                 float(self._config.anti_wrinkle_max_power),
                 start_frac * 100.0,
+                offset_s,
                 seen,
                 current_duration,
                 expected,
