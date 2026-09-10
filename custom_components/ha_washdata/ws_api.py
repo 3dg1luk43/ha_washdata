@@ -2357,7 +2357,16 @@ async def ws_set_lifetime_cycle_count(
                     [{"key": "lifetime_cycle_count", "old": previous, "new": count}]
                 )
             except Exception:
-                store.set_lifetime_cycle_count(previous, force=True)
+                # Undo only OUR write. A cycle completing during the await bumps the
+                # same counter (manager._async_process_cycle_end -> lifetime energy
+                # save), and that path deliberately does not take this lock: it lives
+                # in the manager, on the hot cycle-end path, and reaching into the WS
+                # layer's lock from there would invert the layering for a window this
+                # narrow. Compare-and-swap keeps the rollback honest without it - if
+                # the value is no longer what we wrote, someone else owns it now and
+                # restoring `previous` would discard their increment.
+                if store.get_lifetime_cycle_count() == count:
+                    store.set_lifetime_cycle_count(previous, force=True)
                 raise
         # Re-validate the manager is still live after the awaited save: a reload
         # during it detaches this manager (and its per-entry lock, which

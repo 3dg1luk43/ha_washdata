@@ -302,6 +302,30 @@ def test_pinning_during_starting_keeps_the_arm(manager: WashDataManager) -> None
     assert manager.current_program == PROGRAM
 
 
+def test_a_mid_cycle_pin_costs_one_store_write_not_two(
+    manager: WashDataManager,
+) -> None:
+    """The final arm state is resolved before persisting, so it is a single save."""
+    manager.detector.state = STATE_RUNNING
+
+    manager.set_manual_program(PROGRAM)
+
+    writes = _armed_writes(manager)
+    assert writes == [None], f"expected one write of None, got {writes}"
+
+
+def test_an_idle_pin_still_persists_the_arm(manager: WashDataManager) -> None:
+    manager.detector.state = STATE_OFF
+    manager.set_manual_program(PROGRAM)
+    assert _armed_writes(manager) == [PROGRAM]
+
+
+def test_a_starting_pin_persists_the_arm_once(manager: WashDataManager) -> None:
+    manager.detector.state = STATE_STARTING
+    manager.set_manual_program(PROGRAM)
+    assert _armed_writes(manager) == [PROGRAM]
+
+
 def test_the_arm_is_consumed_not_sticky(manager: WashDataManager) -> None:
     """It pins the next cycle, not every future one."""
     manager.set_manual_program(PROGRAM)
