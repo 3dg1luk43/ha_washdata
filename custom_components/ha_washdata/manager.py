@@ -4407,13 +4407,6 @@ class WashDataManager:
                 self._cycle_start_time = self.detector.current_cycle_start or dt_util.now()
                 self._ranking_snapshot_cycle_id = str(uuid.uuid4())
                 self._reset_live_notification_state()
-                # A program the user armed while idle - or pinned during STARTING,
-                # which the reset above would otherwise have wiped - takes effect
-                # here (#411). Deliberately after the reset, so the duration it
-                # sets is not nulled a line later, and before the start event, so
-                # the event carries the real program name rather than
-                # "detecting...".
-                self._consume_armed_program()
                 # Snapshot the external energy meter (issue #316) so cycle end can
                 # take an accurate start->end delta. No-op when none is configured.
                 self._snapshot_energy_meter_start()
@@ -4428,6 +4421,21 @@ class WashDataManager:
                 self._clean_state_start = None
                 self._notified_clean_laundry = False
                 self._reset_unload_nag_tracking()
+
+                # A program the user armed while idle - or pinned during STARTING,
+                # which the reset above would otherwise have wiped - takes effect
+                # here (#411). Placed after the reset for two reasons: the duration
+                # it sets must not be nulled a line later, and it applies the pin,
+                # which refreshes the estimate - so it has to run once the pause
+                # totals belong to THIS cycle. Reading them a few lines earlier
+                # computed the new cycle's first ETA from the previous cycle's
+                # paused seconds, which the back-to-back case makes reachable: when
+                # the cycle-end tail returns early on the new-cycle token guard, it
+                # never clears them either, and the live progress notification is
+                # interval-throttled, so that wrong ETA sits on the phone until the
+                # next allowed tick. Still before the start event, so the event
+                # carries the real program name rather than "detecting...".
+                self._consume_armed_program()
 
                 self._start_watchdog()  # Start watchdog when cycle starts
 
