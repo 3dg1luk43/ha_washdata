@@ -4021,10 +4021,32 @@ class ProfileStore:
             return stats
 
         def newest(candidates: list[dict[str, Any]]) -> dict[str, Any] | None:
+            """The most recent candidate, ordered by parsed instant.
+
+            Not by raw ``start_time`` string: ISO stamps only sort chronologically
+            when they share a UTC offset, and one store legitimately holds several.
+            The reference library carries +02:00, +01:00 and +00:00 side by side
+            (DST either side of a transition, plus downloaded community cycles
+            recorded in someone else's zone), and e.g. ``11:00+02:00`` sorts above
+            ``10:00+00:00`` while being an hour earlier. Repair would then adopt an
+            older cycle's trace and duration as the profile's sample.
+
+            Unparseable stamps sort last rather than raising, and a naive stamp is
+            read as UTC so it can be compared with the aware ones at all.
+            """
             if not candidates:
                 return None
+
+            def _key(c: dict[str, Any]) -> datetime:
+                parsed = _parse_start_dt(c.get("start_time"))
+                if parsed is None:
+                    return datetime.min.replace(tzinfo=dt_util.UTC)
+                if parsed.tzinfo is None:
+                    return parsed.replace(tzinfo=dt_util.UTC)
+                return parsed
+
             try:
-                return max(candidates, key=lambda c: c.get("start_time", ""))
+                return max(candidates, key=_key)
             except Exception:  # pylint: disable=broad-exception-caught
                 return candidates[-1]
 
@@ -7124,6 +7146,12 @@ class ProfileStore:
             )
         self._data = data_dict
         self._cached_sample_segments = {}
+        # Re-apply the odometer floor: an import can add or replace past_cycles
+        # after async_load already healed it, and export_data copies the STORED
+        # value rather than the getter's floored one - so an export taken before
+        # the next restart could report a lifetime count below its own retained
+        # history. Only ever increases, and idempotent.
+        self._heal_lifetime_cycle_count()
         await self.async_save()
 
         return {
@@ -7479,6 +7507,12 @@ class ProfileStore:
             await self.async_rebuild_envelope(p)
 
         self._cached_sample_segments = {}
+        # Re-apply the odometer floor: an import can add or replace past_cycles
+        # after async_load already healed it, and export_data copies the STORED
+        # value rather than the getter's floored one - so an export taken before
+        # the next restart could report a lifetime count below its own retained
+        # history. Only ever increases, and idempotent.
+        self._heal_lifetime_cycle_count()
         await self.async_save()
 
         settings_out: dict[str, Any] = {}

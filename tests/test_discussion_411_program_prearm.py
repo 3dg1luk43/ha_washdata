@@ -29,6 +29,7 @@ remembered and applied the moment the next cycle starts.
 """
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -324,6 +325,72 @@ def test_a_starting_pin_persists_the_arm_once(manager: WashDataManager) -> None:
     manager.detector.state = STATE_STARTING
     manager.set_manual_program(PROGRAM)
     assert _armed_writes(manager) == [PROGRAM]
+
+
+def _captured_matcher(hass: HomeAssistant, entry: Any) -> tuple[Any, WashDataManager]:
+    """Build a manager and hand back the real matcher callback it gives the detector.
+
+    The callback is a closure inside __init__, so the only way to exercise it is to
+    capture the kwarg the (patched) CycleDetector was constructed with.
+    """
+    hass.config_entries.async_get_entry = MagicMock(return_value=entry)
+    with (
+        patch("custom_components.ha_washdata.manager.ProfileStore"),
+        patch("custom_components.ha_washdata.manager.CycleDetector") as det_cls,
+    ):
+        mgr = WashDataManager(hass, entry)
+        matcher = det_cls.call_args.kwargs["profile_matcher"]
+    mgr.profile_store.get_profiles = MagicMock(
+        return_value={PROGRAM: {"avg_duration": 3600.0}}
+    )
+    mgr.profile_store.check_phase_match = MagicMock(return_value="Spin")
+    mgr.profile_store.profile_tail_power = MagicMock(return_value=60.0)
+    mgr.profile_store.profile_terminal_high_block = MagicMock(return_value=(0.95, 160.0))
+    mgr._notify_update = MagicMock()
+    return matcher, mgr
+
+
+def test_a_manual_match_reports_the_profiles_own_tail_and_spin(
+    hass: HomeAssistant, mock_entry: Any
+) -> None:
+    """The detector clears those fields for any shorter tuple.
+
+    That is correct for a newly matched profile, which must not inherit the
+    previous one's tail, but a manual pin names its profile - so the manual result
+    has to carry that profile's own values or the #364 tail guard and the #399
+    anti-crease spin wait both sit inert for every hand-picked program.
+    """
+    matcher, mgr = _captured_matcher(hass, mock_entry)
+    mgr._manual_program_active = True
+    mgr._current_program = PROGRAM
+    mgr._matched_profile_duration = 3600.0
+    mgr.detector.config.anti_wrinkle_enabled = True
+    mgr.detector.config.anti_wrinkle_max_power = 400.0
+
+    now = dt_util.now()
+    result = matcher([(now, 2000.0), (now + timedelta(seconds=60), 2000.0)])
+
+    assert len(result) == 10, f"manual tuple must carry elements 9 and 10, got {len(result)}"
+    assert result[0] == PROGRAM
+    assert result[8] == 60.0            # profile_tail_power
+    assert result[9] == (0.95, 160.0)   # profile_terminal_high_block
+
+
+def test_a_manual_match_omits_the_spin_block_when_anti_crease_is_off(
+    hass: HomeAssistant, mock_entry: Any
+) -> None:
+    """Mirrors the async path, which only looks it up when the guard can use it."""
+    matcher, mgr = _captured_matcher(hass, mock_entry)
+    mgr._manual_program_active = True
+    mgr._current_program = PROGRAM
+    mgr._matched_profile_duration = 3600.0
+    mgr.detector.config.anti_wrinkle_enabled = False
+
+    now = dt_util.now()
+    result = matcher([(now, 2000.0), (now + timedelta(seconds=60), 2000.0)])
+
+    assert result[9] is None
+    mgr.profile_store.profile_terminal_high_block.assert_not_called()
 
 
 def test_the_arm_is_consumed_not_sticky(manager: WashDataManager) -> None:

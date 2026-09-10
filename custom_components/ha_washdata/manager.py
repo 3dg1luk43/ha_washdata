@@ -939,11 +939,34 @@ class WashDataManager:
                     self._current_program,
                     elapsed_seconds,
                 )
+                # Elements 9 and 10 matter even here. update_match CLEARS
+                # _matched_tail_power and _matched_terminal_high for any tuple
+                # shorter than this, on the sound reasoning that a newly matched
+                # profile must not inherit the previous one's tail - but a manual
+                # pin names its profile, so the answer is to supply that profile's
+                # own values rather than nothing. Left empty, the #364 tail guard
+                # and the #399 anti-crease spin wait both sat inert for every
+                # hand-picked program, so a washer could finalize in the quiet
+                # before its terminal spin and record the spin as a second cycle.
+                # Elements 5-8 stay False: a manual pin is certain by definition,
+                # so there is no mismatch or ambiguity to report.
+                terminal_high = None
+                if self.detector.config.anti_wrinkle_enabled:
+                    terminal_high = self.profile_store.profile_terminal_high_block(
+                        self._current_program,
+                        self.detector.config.anti_wrinkle_max_power,
+                    )
                 return (
                     self._current_program,
                     1.0,
                     expected_duration,
                     manual_phase or "Manual",
+                    False,
+                    False,
+                    False,
+                    False,
+                    self.profile_store.profile_tail_power(self._current_program),
+                    terminal_high,
                 )
 
             if not readings:

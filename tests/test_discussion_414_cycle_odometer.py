@@ -34,6 +34,7 @@ import pytest
 from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata import ws_api
+from custom_components.ha_washdata.const import STORAGE_VERSION
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.profile_store import ProfileStore
 from custom_components.ha_washdata.sensor import WasherCycleCountSensor
@@ -574,3 +575,45 @@ async def test_the_rollback_still_undoes_its_own_write(store):
 
     connection.send_error.assert_called_once()
     assert store.get_lifetime_cycle_count() == 10
+
+
+async def test_an_import_reheals_the_odometer_floor(store):
+    """_heal_lifetime_cycle_count only ran at load, but imports replace history.
+
+    The getter applies the floor, so the live reading was right - but export_data
+    copies the STORED value, so an export taken before the next restart could
+    report a lifetime count below its own retained history.
+    """
+    store._data["past_cycles"] = []
+    store._data["lifetime_cycle_count"] = 0
+    payload = {
+        "version": STORAGE_VERSION,
+        "data": {
+            "profiles": {"Eco 50C": {"avg_duration": 3600}},
+            "past_cycles": [_cycle(i) for i in range(1, 26)],
+        },
+    }
+
+    await store.async_import_data(payload)
+
+    # The stored key, not just the getter, now reflects the imported history.
+    assert store._data["lifetime_cycle_count"] == 25
+    assert store.get_lifetime_cycle_count() == 25
+
+
+async def test_the_import_heal_never_lowers_the_odometer(store):
+    """It is a floor, so a larger existing reading must survive an import."""
+    store._data["past_cycles"] = []
+    store._data["lifetime_cycle_count"] = 900
+    payload = {
+        "version": STORAGE_VERSION,
+        "data": {
+            "profiles": {"Eco 50C": {"avg_duration": 3600}},
+            "past_cycles": [_cycle(i) for i in range(1, 6)],
+            "lifetime_cycle_count": 900,
+        },
+    }
+
+    await store.async_import_data(payload)
+
+    assert store.get_lifetime_cycle_count() == 900

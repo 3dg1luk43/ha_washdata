@@ -215,6 +215,44 @@ def _trace(spin_start: float, spin_end: float, span: float = EXPECTED, n: int = 
 
 
 # ---------------------------------------------------------------------------
+# A manually pinned program must still arm the guard
+# ---------------------------------------------------------------------------
+
+
+def test_a_manual_match_still_carries_the_terminal_block() -> None:
+    """`update_match` clears elements 9 and 10 for any shorter tuple.
+
+    That is right for a newly matched profile, which must not inherit the
+    previous one's tail - but a manual pin names its profile, so the answer is to
+    supply that profile's own values. Left empty, the #364 tail guard and the #399
+    spin wait both sat inert for every hand-picked program, so a washer could
+    finalize in the quiet before its terminal spin and record the spin as a second
+    cycle.
+    """
+    det = _bare_detector()
+    # The 10-element tuple the manual path now returns.
+    det.update_match(
+        ("Delicate 30C", 1.0, EXPECTED, "Manual", False, False, False, False,
+         60.0, TERMINAL_HIGH)
+    )
+    assert det._matched_profile == "Delicate 30C"
+    assert det._matched_tail_power == 60.0
+    assert det._matched_terminal_high == TERMINAL_HIGH
+
+
+def test_a_four_element_match_still_clears_the_terminal_block() -> None:
+    """The clearing behaviour itself is deliberate and must not regress."""
+    det = _bare_detector()
+    det.update_match(
+        ("Delicate 30C", 1.0, EXPECTED, "Manual", False, False, False, False,
+         60.0, TERMINAL_HIGH)
+    )
+    det.update_match(("Other", 0.8, EXPECTED, None))
+    assert det._matched_tail_power is None
+    assert det._matched_terminal_high is None
+
+
+# ---------------------------------------------------------------------------
 # _high_power_seconds_since: what the guard measures the live cycle against
 # ---------------------------------------------------------------------------
 
