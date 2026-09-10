@@ -2359,12 +2359,29 @@ async def ws_set_lifetime_cycle_count(
             except Exception:
                 store.set_lifetime_cycle_count(previous, force=True)
                 raise
-        manager.notify_update()
+        # Re-validate the manager is still live after the awaited save: a reload
+        # during it detaches this manager (and its per-entry lock, which
+        # async_unload_entry pops), so notifying it would target stale state and
+        # reporting its store's count would show the panel a number from a store
+        # nothing reads any more. Mirrors the guard the recording-persist and import
+        # handlers use. Reported as success because the save itself did happen; the
+        # count comes from whatever store is live now.
+        current_manager = _get_manager(hass, entry_id)
+        if current_manager is not manager:
+            _LOGGER.warning(
+                "Manager replaced during lifetime-count correction for %s; "
+                "skipping notify", entry_id,
+            )
+        else:
+            manager.notify_update()
+        live_store = (
+            current_manager.profile_store if current_manager is not None else store
+        )
         _send_result(
             connection,
             msg["id"],
             "set_lifetime_cycle_count",
-            {"success": True, "lifetime_cycle_count": store.get_lifetime_cycle_count()},
+            {"success": True, "lifetime_cycle_count": live_store.get_lifetime_cycle_count()},
         )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
