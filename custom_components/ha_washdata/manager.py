@@ -7595,7 +7595,12 @@ class WashDataManager:
     def _persist_armed_program(self, profile_name: str | None) -> None:
         """Persist the armed program without blocking the caller. Never raises."""
         try:
-            self.hass.async_create_task(
+            # Tracked, not bare async_create_task: this writes to the ProfileStore
+            # and saves, so a reload/unload that swaps the store out mid-flight must
+            # be able to cancel it rather than let it write to the stale one. That is
+            # the documented rule for every store-touching fire-and-forget in this
+            # class; this call site was the one that did not follow it.
+            self._spawn_tracked(
                 self.profile_store.async_set_armed_program(profile_name)
             )
         except Exception:  # pylint: disable=broad-exception-caught
