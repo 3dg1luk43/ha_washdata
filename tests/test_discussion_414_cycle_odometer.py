@@ -26,6 +26,7 @@ or when the user explicitly corrects it. Nothing else moves it.**
 """
 from __future__ import annotations
 
+import asyncio
 from datetime import timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -372,12 +373,19 @@ async def test_due_fires_off_the_odometer(store):
 
 
 def _ws_ctx(store):
-    """(hass, connection, manager) triple for driving the handler directly."""
+    """(hass, connection, manager) triple for driving the handler directly.
+
+    ``hass.data`` is a real dict so ``_entry_write_lock`` hands back a real
+    ``asyncio.Lock``. With a MagicMock there, ``async with`` is a silent no-op and
+    the serialization these handlers rely on would not be under test at all.
+    """
     manager = MagicMock()
     manager.profile_store = store
     manager.notify_update = MagicMock()
     connection = MagicMock()
-    return MagicMock(), connection, manager
+    hass = MagicMock()
+    hass.data = {}
+    return hass, connection, manager
 
 
 async def _set_count(store, count: int):
@@ -447,3 +455,40 @@ async def test_a_failed_save_does_not_leave_the_new_count_in_memory(store):
     connection.send_error.assert_called_once()
     assert connection.send_error.call_args.args[1] == "unknown_error"
     assert store.get_lifetime_cycle_count() == 10
+
+
+async def test_concurrent_corrections_are_serialized(store):
+    """A failed correction must not roll back over a later successful one.
+
+    The rollback restores the value read at the start of the handler, so without
+    the per-entry write lock two corrections interleaving across the save let the
+    loser undo the winner: A reads 10, B reads and writes 4000 successfully, A's
+    save fails, and A restores 10 over it.
+    """
+    _seed(store, 10)
+
+    async def record(changes):
+        new = changes[0]["new"]
+        await asyncio.sleep(0)  # yield, so an unlocked handler really interleaves
+        if new == 4000:
+            raise OSError("disk full")
+        store._data["settings_changelog"] = list(changes)
+
+    store.async_record_settings_changes = AsyncMock(side_effect=record)
+
+    hass, conn_a, manager = _ws_ctx(store)
+    conn_b = MagicMock()
+    with patch.object(ws_api, "_get_manager", return_value=manager):
+        await asyncio.gather(
+            ws_api.ws_set_lifetime_cycle_count.__wrapped__(
+                hass, conn_a, {"id": 1, "entry_id": "e1", "count": 4000}
+            ),
+            ws_api.ws_set_lifetime_cycle_count.__wrapped__(
+                hass, conn_b, {"id": 2, "entry_id": "e1", "count": 5000}
+            ),
+        )
+
+    # The failing correction reported its error, and the successful one survives.
+    conn_a.send_error.assert_called_once()
+    conn_b.send_error.assert_not_called()
+    assert store.get_lifetime_cycle_count() == 5000
