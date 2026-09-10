@@ -389,6 +389,43 @@ def test_terminal_high_block_keeps_a_single_sample_spike_at_the_very_end() -> No
     assert abs(seconds - step) < step * 0.1
 
 
+def test_terminal_block_does_not_inherit_an_outage_sized_final_step() -> None:
+    """The estimated final step must be representative, not the neighbouring gap.
+
+    With no trailing sample the last step has to be estimated. Copying the
+    immediately preceding interval reported a block hours longer than the one
+    actually observed whenever that neighbour was an outage-sized gap, which
+    inflates `needed` until the anti-crease wait runs to its ceiling.
+    """
+    ps = _store()
+    step = 30.0
+    # A dense trace, then a 2-hour hole, then ONE final high sample.
+    trace = [[i * step, 60.0] for i in range(100)]
+    trace.append([trace[-1][0] + 7200.0, 774.0])
+    ps._data["profiles"] = {"P": {"avg_duration": EXPECTED}}
+    ps._data["envelopes"] = {"P": {"max": trace}}
+
+    block = ps.profile_terminal_high_block("P", 400.0)
+    assert block is not None
+    _start_frac, seconds = block
+    # One sample wide, so it earns one representative step - not the 7200 s gap.
+    assert seconds == pytest.approx(step, abs=1.0)
+
+
+def test_terminal_block_step_is_the_median_not_the_last_interval() -> None:
+    """A single odd neighbour must not set the estimate for the whole block."""
+    ps = _store()
+    trace = [[i * 30.0, 60.0] for i in range(50)]
+    # One 600 s stretch immediately before the terminal sample.
+    trace.append([trace[-1][0] + 600.0, 774.0])
+    ps._data["profiles"] = {"P2": {"avg_duration": EXPECTED}}
+    ps._data["envelopes"] = {"P2": {"max": trace}}
+
+    block = ps.profile_terminal_high_block("P2", 400.0)
+    assert block is not None
+    assert block[1] == pytest.approx(30.0, abs=1.0)
+
+
 def test_terminal_high_block_never_raises() -> None:
     ps = _store()
     ps._data["profiles"] = {"P": {"avg_duration": EXPECTED}}

@@ -26,6 +26,7 @@ import logging
 import math
 import os
 import re
+import statistics
 import threading
 import uuid
 from datetime import datetime, timedelta
@@ -5457,7 +5458,20 @@ class ProfileStore:
             if last + 1 < len(times):
                 end_t = float(times[last + 1])
             elif last > 0:
-                end_t = float(times[last]) + (float(times[last]) - float(times[last - 1]))
+                # No trailing sample, so the final step has to be estimated. Use the
+                # trace's own MEDIAN positive interval rather than the immediately
+                # preceding one: on an irregular trace that neighbour can be an
+                # outage-sized gap, and copying it verbatim reported a block hours
+                # longer than the one actually observed, inflating `needed` until the
+                # anti-crease wait ran to its ceiling. The median is representative
+                # by construction and cannot be dragged by a single gap.
+                diffs = [
+                    float(times[i + 1]) - float(times[i])
+                    for i in range(len(times) - 1)
+                    if float(times[i + 1]) - float(times[i]) > 0
+                ]
+                step = statistics.median(diffs) if diffs else 0.0
+                end_t = float(times[last]) + step
             else:
                 end_t = float(times[last])
             seconds = end_t - float(times[first])
@@ -6158,8 +6172,24 @@ class ProfileStore:
             # to ambiguous so Smart Termination falls back to the power timeout.
             if best_duration and current_duration > best_duration * 1.05:
                 is_ambiguous = True
-            # Relabel the winning candidate for the ranking / diagnostics.
-            candidates = [{**best, "name": best_name, "profile_duration": best_duration}, *candidates[1:]]
+            # Relabel the winning candidate for the ranking / diagnostics, and carry
+            # the Stage-5 provenance with it. `score` deliberately stays the group's
+            # (i.e. the best-scoring sibling's) blended score - members are collapsed
+            # only when pairwise envelope correlation clears GROUP_MIN_COHESION, so
+            # their shape scores are close by construction, and a member whose own
+            # fit falls far below it is downgraded to ambiguous just above. Recording
+            # both numbers means the ranking and the training snapshots can no longer
+            # imply the chosen member earned the sibling's score on its own.
+            candidates = [
+                {
+                    **best,
+                    "name": best_name,
+                    "profile_duration": best_duration,
+                    "stage5_member_fit": member_fit,
+                    "stage5_group": best["name"],
+                },
+                *candidates[1:],
+            ]
 
         matched_phase = None
         if best_name:

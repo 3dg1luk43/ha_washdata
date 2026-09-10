@@ -393,6 +393,40 @@ def test_a_manual_match_omits_the_spin_block_when_anti_crease_is_off(
     mgr.profile_store.profile_terminal_high_block.assert_not_called()
 
 
+def test_the_arm_is_consumed_after_the_pause_totals_are_reset(
+    manager: WashDataManager,
+) -> None:
+    """Applying the pin refreshes the estimate, so the pause totals must be clean.
+
+    `_consume_armed_program` -> `_apply_manual_program` -> `_update_estimates`
+    computes `net_elapsed_seconds`, which subtracts `_total_user_paused_seconds`
+    and any open `_user_pause_start`. Run before the new-cycle reset, that read
+    the PREVIOUS cycle's values - reachable back-to-back, because the cycle-end
+    tail returns early on the new-cycle token guard and never clears them either.
+    The live progress notification is interval-throttled, so the wrong ETA would
+    then sit on the phone until the next allowed tick.
+    """
+    seen: list[tuple[float, Any]] = []
+
+    def _record(_name: str, _profile: Any) -> None:
+        seen.append((manager._total_user_paused_seconds, manager._user_pause_start))
+
+    manager._apply_manual_program = MagicMock(side_effect=_record)
+    manager._armed_program = PROGRAM
+    # Left over from the previous cycle, as a back-to-back load leaves them.
+    manager._total_user_paused_seconds = 900.0
+    manager._user_pause_start = dt_util.now()
+    manager.detector.state = STATE_RUNNING
+    manager.detector.current_cycle_start = dt_util.now()
+
+    manager._on_state_change(STATE_OFF, STATE_RUNNING)
+
+    assert seen, "the armed program was never applied"
+    paused_total, pause_start = seen[0]
+    assert paused_total == 0.0, "pin applied before the paused total was reset"
+    assert pause_start is None, "pin applied while a stale pause was still open"
+
+
 def test_the_arm_is_consumed_not_sticky(manager: WashDataManager) -> None:
     """It pins the next cycle, not every future one."""
     manager.set_manual_program(PROGRAM)
