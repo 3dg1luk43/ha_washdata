@@ -182,6 +182,7 @@ Full documentation lives in the **[WashData Wiki](https://github.com/3dg1luk43/h
 - 🔔 **[Notifications & Events](https://github.com/3dg1luk43/ha_washdata/wiki/Notifications-and-Events)** - Every notification option explained, the two ways to send notifications (per-event targets and native automations), how to build automations on WashData's cycle events (with the `{{ trigger.event.data.* }}` variables), the cycle notification lifecycle, message placeholders, companion-app payload keys, the full Events reference, and entity attributes.
 - 📊 **[Settings Visual Guide](https://github.com/3dg1luk43/ha_washdata/wiki/Settings-Visual-Guide)** - Graphs explaining what each detection/matching setting actually does.
 - 🏪 **[Community Store](https://github.com/3dg1luk43/ha_washdata/wiki/Community-Store)** - Full guide to browsing, adopting, and sharing appliance setups.
+- 🤝 **[Community Projects](https://github.com/3dg1luk43/ha_washdata/wiki/Community-Projects)** - Community-built blueprints and integrations that work alongside WashData, or offer a different take on what it does.
 - 📗 **[Implementation Details](https://github.com/3dg1luk43/ha_washdata/wiki/Implementation-Details)** - Deep dive into NumPy matching, State Machine logic, and Learning algorithms.
 - 🔌 **[WebSocket API](docs/WS_API.md)** - Full WebSocket API reference for all panel commands.
 - 🤖 **[ML Subsystem](https://github.com/3dg1luk43/ha_washdata/wiki/ML-Subsystem)** - The experimental on-device ML subsystem.
