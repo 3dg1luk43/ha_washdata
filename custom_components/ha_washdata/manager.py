@@ -281,6 +281,7 @@ from .signal_processing import integrate_wh, energy_gap_threshold_s
 from .recorder import CycleRecorder
 from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
+from .options_utils import option_float
 from .time_utils import power_data_to_offsets
 from . import analysis
 from . import progress as progress_mod
@@ -662,14 +663,23 @@ class WashDataManager:
                 self.device_type, DEFAULT_UNMATCHED_WATCHDOG_CEILING
             )
         )
-        self._learning_confidence = config_entry.options.get(
-            CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE
+        # Coerced here rather than at the point of use. Both thresholds are compared
+        # against a match confidence inside the cycle-end tail, and that tail runs as
+        # a spawned task: a non-numeric option (an import file is hand-editable, and
+        # strip_null_options only removes nulls) raised there instead, killing the task
+        # before async_add_cycle and losing the whole cycle. Same #389 failure shape,
+        # one step later. Falls back to the default rather than to 0, which would
+        # silently auto-label everything.
+        self._learning_confidence = option_float(
+            config_entry.options.get(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
+            DEFAULT_LEARNING_CONFIDENCE,
         )
         self._duration_tolerance = config_entry.options.get(
             CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE
         )
-        self._auto_label_confidence = config_entry.options.get(
-            CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE
+        self._auto_label_confidence = option_float(
+            config_entry.options.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE),
+            DEFAULT_AUTO_LABEL_CONFIDENCE,
         )
 
         self._profile_match_interval = int(

@@ -190,8 +190,15 @@ def test_sensor_keeps_the_old_number_as_an_attribute():
     assert attrs == {"stored_cycles": 200}
 
 
-def test_sensor_is_a_total_increasing_meter():
-    """Required for HA statistics, and what an external counter-delta task expects."""
+def test_sensor_is_a_total_meter_not_total_increasing():
+    """TOTAL, so a downward hand-correction is not read as a meter reset.
+
+    The odometer only rises on its own, which is what TOTAL_INCREASING describes,
+    but ``set_lifetime_cycle_count(force=True)`` exists so the user can correct it
+    in either direction. HA absorbs the new reading whole when a TOTAL_INCREASING
+    sensor drops, so correcting 500 down to 300 books 300 cycles that were never
+    run; TOTAL books the -200 the correction means.
+    """
     mgr = MagicMock()
     entry = MagicMock()
     entry.entry_id = "entry"
@@ -205,7 +212,9 @@ def test_sensor_is_a_total_increasing_meter():
     assert desc.key == "cycle_count"
     assert desc.translation_key == "cycle_count"
     assert desc.native_unit_of_measurement == "cycles"
-    assert desc.state_class == "total_increasing"
+    assert desc.state_class == "total"
+    # No last_reset: the sum accumulates continuously.
+    assert getattr(desc, "last_reset_key", None) is None
 
 
 def test_manager_property_delegates_to_the_store():
@@ -260,6 +269,61 @@ async def test_back_dated_event_keeps_its_history(store):
     )
     assert entry["cycle_count_at_log"] == 6
     assert store.cycles_since_maintenance("drum_clean") == 4
+
+
+async def test_back_dated_event_rewinds_over_non_completed_cycles_too(store):
+    """The rewind must count what the odometer counts, or the reminder comes late.
+
+    The odometer bumps on every persisted cycle, interrupted and force-stopped
+    included. Rewinding it on completed-only records left the stamp too high by the
+    number of unclean runs in between, and ``cycles_since_maintenance`` subtracts
+    that stamp, so the service fell due that many cycles late.
+    """
+    now = dt_util.now()
+    # 10 cycles over the last 10 days; the 4 most recent are NOT "completed".
+    store._data["past_cycles"] = [
+        {
+            "id": f"b{i}",
+            "start_time": (now - timedelta(days=10 - i)).isoformat(),
+            "status": "completed" if i < 6 else "force_stopped",
+            "duration": 3600.0,
+        }
+        for i in range(10)
+    ]
+    store._data["lifetime_cycle_count"] = 10
+
+    entry = await store.async_add_maintenance_event(
+        "drum_clean", date=(now - timedelta(days=4, hours=1)).isoformat()
+    )
+    # 4 cycles have started since that date, whatever their status.
+    assert entry["cycle_count_at_log"] == 6
+    assert store.cycles_since_maintenance("drum_clean") == 4
+
+
+async def test_legacy_date_scan_keeps_its_completed_only_basis(store):
+    """An entry logged before the stamp existed answers the way it always did."""
+    now = dt_util.now()
+    store._data["past_cycles"] = [
+        {
+            "id": f"c{i}",
+            "start_time": (now - timedelta(days=10 - i)).isoformat(),
+            "status": "completed" if i < 6 else "interrupted",
+            "duration": 3600.0,
+        }
+        for i in range(10)
+    ]
+    store._data["lifetime_cycle_count"] = 10
+    # No cycle_count_at_log, so cycles_since_maintenance falls back to the scan.
+    store._data["maintenance_log"] = [
+        {
+            "id": "old",
+            "date": (now - timedelta(days=4, hours=1)).isoformat(),
+            "event_type": "drum_clean",
+            "notes": "",
+        }
+    ]
+    # Of the 4 cycles since that date, none is "completed".
+    assert store.cycles_since_maintenance("drum_clean") == 0
 
 
 async def test_never_serviced_reports_the_whole_odometer(store):

@@ -73,6 +73,27 @@ def strip_null_options(options: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def option_float(value: Any, default: float) -> float:
+    """Coerce a stored option to ``float``, falling back to ``default``.
+
+    ``strip_null_options`` removes the ``None`` that broke setup in #389, but a
+    stored value can still be the wrong *type*: ``import_config`` and the legacy
+    import service write hand-editable option maps straight into ``entry.options``,
+    and ``ws_set_options`` validates the payload as a plain ``dict`` with no
+    per-key coercion. A non-numeric string then survives ``.get(key, DEFAULT)`` and
+    raises at whatever line first casts or compares it, which for an option read at
+    cycle end is inside a spawned task - the cycle is lost, not just the setting.
+
+    Falls back to the compiled default rather than to ``0.0``: these values are
+    thresholds, and zero is a meaningful setting ("accept anything"), so silently
+    substituting it would change behaviour instead of restoring it.
+    """
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return float(default)
+
+
 def has_null_options(options: Mapping[str, Any]) -> bool:
     """True when ``options`` holds at least one unset-meaning ``None``.
 

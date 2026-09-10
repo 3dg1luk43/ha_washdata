@@ -44,6 +44,7 @@ from .const import (
     MAINTENANCE_EVENT_TYPES,
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
+    MATCH_MIN_RESAMPLED_POINTS,
     PHASE_CONSISTENCY_MIN_CYCLES,
     PHASE_PROFILE_MIN_CYCLES,
     PHASE_HEAT_CV_WARN,
@@ -2596,7 +2597,16 @@ class ProfileStore:
                 self._data.pop("armed_program", None)
             await self.async_save()
         except Exception:  # noqa: BLE001
-            self._logger.debug("Failed to persist the armed program", exc_info=True)
+            # In-memory arming (manager._armed_program) has already taken effect and
+            # is what applies the program to the next cycle, so this is not a failed
+            # arm - it is an arm that will not survive a restart. Worth a warning
+            # rather than a debug line, because the user sees no error and would have
+            # no way to explain the choice being gone after a restart.
+            self._logger.warning(
+                "Failed to persist the armed program; it stays armed for this session "
+                "but will not survive a Home Assistant restart",
+                exc_info=True,
+            )
 
     # ------------------------------------------------------------------
     # E1: Maintenance log & predictive-maintenance reminders (Group E)
@@ -2746,23 +2756,34 @@ class ProfileStore:
         self._logger.info("Deleted playground preset %r", name)
         return True
 
-    def _cycles_after(self, since: datetime | None) -> int:
-        """Stored completed cycles that started after *since* (all of them if None).
+    def _cycles_after(
+        self, since: datetime | None, *, include_all_statuses: bool = False
+    ) -> int:
+        """Stored cycles that started after *since* (all of them if None).
 
         A scan of the retained history, so it is bounded by ``max_past_cycles`` and
         shrinks when a record is deleted. Used only to place a maintenance event on
         the odometer at log time, and as the legacy fallback for events logged
         before that stamp existed. Never raises.
+
+        ``include_all_statuses`` selects the basis, and the two callers need
+        different ones. :meth:`_odometer_at` rewinds the lifetime odometer, which
+        counts every persisted cycle regardless of status, so it must subtract on
+        that same basis or the rewind is short and the stamp it writes is too high.
+        The legacy date-scan fallback keeps the completed-only basis it was
+        written with, so entries logged before the stamp existed keep answering
+        the way they always did.
         """
         try:
-            completed = [
+            cycles = [
                 c for c in self.get_past_cycles()
-                if isinstance(c, dict) and c.get("status") == "completed"
+                if isinstance(c, dict)
+                and (include_all_statuses or c.get("status") == "completed")
             ]
             if since is None:
-                return len(completed)
+                return len(cycles)
             count = 0
-            for c in completed:
+            for c in cycles:
                 start = _parse_start_dt(c.get("start_time"))
                 if start is not None and start > since:
                     count += 1
@@ -2775,10 +2796,20 @@ class ProfileStore:
 
         ``odometer_now - cycles_after(when)``, clamped to >= 0. For "now" this is
         simply the current reading; for a back-dated maintenance entry it rewinds
-        the odometer by the cycles run since that date. Never raises.
+        the odometer by the cycles run since that date.
+
+        The rewind counts every persisted status, matching what the odometer itself
+        counts. Rewinding on completed-only left the stamp too high by the number of
+        interrupted or force-stopped runs in between, and since
+        :meth:`cycles_since_maintenance` subtracts that stamp, the reminder came due
+        late by the same amount. Never raises.
         """
         try:
-            return max(0, self.get_lifetime_cycle_count() - self._cycles_after(when))
+            return max(
+                0,
+                self.get_lifetime_cycle_count()
+                - self._cycles_after(when, include_all_statuses=True),
+            )
         except Exception:  # noqa: BLE001
             return 0
 
@@ -3948,7 +3979,7 @@ class ProfileStore:
 
         profiles: dict[str, dict[str, Any]] = self._data.get("profiles", {}) or {}
         cycles: list[dict[str, Any]] = self._data.get("past_cycles", []) or []
-        if not profiles or not cycles:
+        if not profiles:
             return stats
 
         # Sample validity must recognise imported and backfilled cycles: an import-only
@@ -3958,6 +3989,13 @@ class ProfileStore:
         by_id: dict[str, dict[str, Any]] = {
             c["id"]: c for c in self.iter_stored_cycles() if c.get("id")
         }
+
+        # The "no evidence at all" bail-out is taken on every stored list, not on
+        # past_cycles. A device whose history is entirely imported or backfilled has an
+        # empty past_cycles, so guarding on that list returned before the loop and left
+        # exactly the import-only profile this method exists to repair broken.
+        if not by_id:
+            return stats
 
         def newest(candidates: list[dict[str, Any]]) -> dict[str, Any] | None:
             if not candidates:
@@ -5832,7 +5870,7 @@ class ProfileStore:
             if not segments:
                 return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
             current_seg = max(segments, key=lambda s: len(s.power))
-            if len(current_seg.power) < 12:
+            if len(current_seg.power) < MATCH_MIN_RESAMPLED_POINTS:
                 return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
             current_power_list = current_seg.power.tolist()

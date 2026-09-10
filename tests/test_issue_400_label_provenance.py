@@ -266,6 +266,56 @@ async def test_repair_still_repoints_a_profile_at_its_own_cycle(
     assert stats["profiles_repaired"] == 1
 
 
+@pytest.mark.asyncio
+async def test_repair_reaches_an_import_only_profile_with_no_real_cycles(
+    store: ProfileStore,
+) -> None:
+    """The early-out has to be taken on every stored list, not just past_cycles.
+
+    A device set up purely from a downloaded package or a history import has an
+    empty ``past_cycles``, so guarding on that list returned before the repair loop
+    and left the imported profile pointing at a sample it could not resolve - the
+    one case the loop's own fallback was added for.
+    """
+    store._data["profiles"] = {"Eco 50C": {"avg_duration": 3600, "sample_cycle_id": "gone"}}
+    store._data["past_cycles"] = []
+    store._data["reference_cycles"] = [_cycle("imported1", 2000, profile="Eco 50C")]
+
+    stats = await store.async_repair_profile_samples()
+
+    assert store._data["profiles"]["Eco 50C"]["sample_cycle_id"] == "imported1"
+    assert stats["profiles_repaired"] == 1
+
+
+@pytest.mark.asyncio
+async def test_repair_reaches_a_backfill_only_profile_too(store: ProfileStore) -> None:
+    """Same for a profile built from replayed raw history (#344)."""
+    store._data["profiles"] = {"Quick 30": {"avg_duration": 1800, "sample_cycle_id": None}}
+    store._data["past_cycles"] = []
+    store._data["backfill_cycles"] = [_cycle("bf1", 1500, dur=1800, profile="Quick 30")]
+
+    stats = await store.async_repair_profile_samples()
+
+    assert store._data["profiles"]["Quick 30"]["sample_cycle_id"] == "bf1"
+    assert stats["profiles_repaired"] == 1
+
+
+@pytest.mark.asyncio
+async def test_repair_is_still_a_no_op_when_nothing_is_stored(
+    store: ProfileStore,
+) -> None:
+    """Widening the guard must not make it start inventing samples."""
+    store._data["profiles"] = {"Eco 50C": {"avg_duration": 3600, "sample_cycle_id": "gone"}}
+    store._data["past_cycles"] = []
+    store._data["reference_cycles"] = []
+    store._data["backfill_cycles"] = []
+
+    stats = await store.async_repair_profile_samples()
+
+    assert store._data["profiles"]["Eco 50C"]["sample_cycle_id"] == "gone"
+    assert stats["profiles_repaired"] == 0
+
+
 def test_a_profile_with_no_evidence_is_reported_as_unmatchable(store: ProfileStore) -> None:
     """The reporter's Cotton 40C: present in the list, could never win, said nothing."""
     store._data["profiles"] = {
