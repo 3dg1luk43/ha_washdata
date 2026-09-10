@@ -371,6 +371,39 @@ class MatchResult:
     # NOT for the anti-crease finalize, where blocking can re-hang a cycle the way
     # #296 described. That consumer reads this narrower flag instead.
     is_prefix_ambiguous_full_shape: bool = False
+    # Stage 5 only (None for every non-group match): the blended pipeline score
+    # the SELECTED member earned on its own curve. `confidence` deliberately stays
+    # the group's score - the best-scoring sibling's - because that is what the
+    # matcher actually decided on and what every live consumer (Smart Termination,
+    # the ML end-guard, ETA, the panel) is calibrated against. But the two can be
+    # different members: `collapse_group_candidates` keeps the top sibling's record
+    # and `_stage5_pick_member` then chooses by integrated energy. Measured on the
+    # real corpus, the pick differs from the top sibling in 16.7% of whole-cycle
+    # group wins, by up to 0.157 of score. So a *label* decision - which turns the
+    # cycle into evidence for that one member - gets its own number.
+    member_confidence: float | None = None
+
+    @property
+    def label_confidence(self) -> float:
+        """The confidence a LABEL / persistence decision may rely on.
+
+        Identical to ``confidence`` for every match except a Stage-5 group win
+        whose selected member scored lower than the sibling whose score became the
+        group's. There, labelling the cycle makes it evidence for the *selected*
+        member, so the bar has to be what that member earned itself, not what its
+        sibling did. Both numbers are blended pipeline scores over the same trace,
+        so they are directly comparable (unlike ``stage5_member_fit``, which is
+        Stage-2 only). ``min`` is defensive: the group score is by construction the
+        max over the members, so it is already the larger of the two.
+
+        Falls back to ``confidence`` when the member has no score of its own (the
+        matcher rejected it at Stage 1, yet Stage 5 still selected it) - there is no
+        comparable number to gate on, and the existing ambiguity / overrun guards
+        still apply.
+        """
+        if self.member_confidence is None:
+            return self.confidence
+        return min(self.confidence, self.member_confidence)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary with JSON-serializable types, excluding heavy arrays."""
@@ -6181,6 +6214,11 @@ class ProfileStore:
         # Must happen BEFORE the ambiguity check - two members of the same family
         # sitting next to each other in the ranking is precisely what grouping
         # exists to stop reading as an ambiguous top-2.
+        # Captured BEFORE the collapse: every member was scored on its own curve,
+        # and the collapse drops all but the best sibling. This is the only place
+        # the selected member's own blended score still exists (see
+        # MatchResult.label_confidence).
+        scored_by_name = {str(c.get("name")): c for c in candidates}
         candidates = collapse_group_candidates(candidates, group_members)
 
         best = candidates[0]
@@ -6192,6 +6230,7 @@ class ProfileStore:
 
         best_name = best["name"]
         best_duration = best["profile_duration"]
+        member_confidence: float | None = None
         # Stage 5: if a group won, pick the best-fitting member.
         if best_name in group_members:
             chosen, member_fit, member_dur = self._stage5_pick_member(
@@ -6201,12 +6240,37 @@ class ProfileStore:
             best_name = chosen
             if member_dur:
                 best_duration = member_dur
+            # The selected member's OWN blended pipeline score, for the label gate.
+            # None when the member has no candidate record at all: `member_snaps`
+            # holds every present member, including ones `compute_matches_worker`
+            # rejected at the Stage-1 duration gate, so Stage 5 can select a member
+            # the matcher itself refused to consider (measured: 2 of 267 group wins).
+            _chosen_cand = scored_by_name.get(chosen)
+            if _chosen_cand is not None:
+                try:
+                    member_confidence = float(_chosen_cand["score"])
+                except (TypeError, ValueError, KeyError):
+                    member_confidence = None
             # Safeguard #2: the group aggregate matched but if the chosen member
             # does not individually fit reasonably (vs the group score), the real
             # program may be a different single profile -> treat as uncertain.
             # member_fit is a Stage-2-only score; best["score"] includes DTW-blend +
-            # duration/energy agreement (typically 25-30% higher). Use 0.55× to avoid
-            # the threshold being effectively too strict for DTW-boosted groups.
+            # duration/energy agreement. Use 0.55× to avoid the threshold being
+            # effectively too strict for DTW-boosted groups.
+            #
+            # This is a coarse "is the member nowhere near" backstop, NOT a
+            # mislabel detector, and it must not be recalibrated into one. Measured
+            # on the real corpus (267 group wins), member_fit/best["score"] has
+            # median 0.877 whole-cycle and 1.018 mid-cycle - so the ratio is not a
+            # stable ~0.75 as the "25-30% higher" note used to claim, it straddles
+            # 1.0 and reaches 2.07 mid-cycle (member_fit warps the FULL trace
+            # against the FULL template, while mid-cycle Stage 2 scored a prefix
+            # pair). Worse, on the folds where Stage 5 picked the WRONG member the
+            # ratio is *higher* than where it picked the right one (median 0.992 vs
+            # 0.947), so no constant K separates them: sweeping K from 0.55 to 1.00
+            # cost up to 53 correct labels to prevent 12 wrong ones. The label gate
+            # uses MatchResult.label_confidence instead, which compares two
+            # like-for-like blended scores.
             if member_fit is not None and best["score"] > 0 and member_fit < 0.55 * best["score"]:
                 is_ambiguous = True
             # Overrun guard: if the cycle has already outlasted the chosen member's
@@ -6216,18 +6280,28 @@ class ProfileStore:
                 is_ambiguous = True
             # Relabel the winning candidate for the ranking / diagnostics, and carry
             # the Stage-5 provenance with it. `score` deliberately stays the group's
-            # (i.e. the best-scoring sibling's) blended score - members are collapsed
-            # only when pairwise envelope correlation clears GROUP_MIN_COHESION, so
-            # their shape scores are close by construction, and a member whose own
-            # fit falls far below it is downgraded to ambiguous just above. Recording
-            # both numbers means the ranking and the training snapshots can no longer
-            # imply the chosen member earned the sibling's score on its own.
+            # (i.e. the best-scoring sibling's) blended score: that is the number the
+            # matcher decided on, and every live consumer - Smart Termination's
+            # match_confidence_threshold, the ML end-guard's defer_finish_confidence,
+            # the unmatch/divergence tracking, the ETA blend - is calibrated against
+            # it. Lowering it here would silently re-tune end detection.
+            #
+            # What the cohesion gate does NOT make close is this blended score. It
+            # bounds the *shape* spread (measured sibling Stage-2 spread: median
+            # 0.068 whole-cycle), but Stage 4's duration/energy agreement exists
+            # precisely to pull temperature/spin siblings apart, so the blended
+            # spread is 2.3x wider (median 0.154, max 0.431). Hence
+            # `stage5_member_score`: the selected member's own blended score, which
+            # MatchResult.label_confidence gates labelling on. The ranking and the
+            # live_match training snapshots therefore record all three numbers and
+            # never imply the chosen member earned its sibling's score.
             candidates = [
                 {
                     **best,
                     "name": best_name,
                     "profile_duration": best_duration,
                     "stage5_member_fit": member_fit,
+                    "stage5_member_score": member_confidence,
                     "stage5_group": best["name"],
                 },
                 *candidates[1:],
@@ -6261,6 +6335,7 @@ class ProfileStore:
             ranking=candidates[:5],  # populate ranking (consumed for training snapshots)
             is_prefix_ambiguous=is_prefix_ambiguous,
             is_prefix_ambiguous_full_shape=full_shape_hit,
+            member_confidence=member_confidence,
         )
 
     async def async_verify_alignment(

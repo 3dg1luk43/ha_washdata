@@ -224,7 +224,11 @@ async def test_a_weak_match_falls_through_to_the_post_cycle_auto_label(
     manager._matched_profile_duration = 4080
     manager.profile_store.async_match_profile = AsyncMock(
         return_value=MagicMock(
-            best_profile="Delicate 30C", confidence=0.95, ranking=[]
+            best_profile="Delicate 30C",
+            confidence=0.95,
+            # == confidence for a non-group match (item 206).
+            label_confidence=0.95,
+            ranking=[],
         )
     )
 
