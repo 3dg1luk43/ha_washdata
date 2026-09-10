@@ -1607,6 +1607,10 @@
       "label": "Vermogensprofiel-interval",
       "doc": "Bucketgrootte voor het attribuut power_profile van de profielsensor (het platte array van gemiddelde wattwaarden per slot dat door externe planners zoals EMHASS en tibber_prices wordt gebruikt). Kleinere buckets houden korte vermogenspieken scherp; grotere buckets gladden de vorm. Standaard 15 min. Alleen voor weergave; heeft geen invloed op de detectie."
     },
+    "notify_live_silent": {
+      "label": "Stille live-updates",
+      "doc": "Alleen iOS. Vernieuw de live-voortgang geruisloos: elke update komt binnen zonder geluid of trilling, met een lagere, batterijbesparende prioriteit die iOS even kan groeperen. De eerste update van een cyclus (die de Live activiteit start) en de start- en eindmeldingen laten nog steeds gewoon van zich horen. Zet dit uit om bij elke update een melding te krijgen."
+    },
     "notify_live_sticky": {
       "label": "Live-melding bij aanraken behouden",
       "doc": "Alleen Android. Maak de live-voortgangsmelding aanhoudend (sticky), zodat deze bij aanraken niet wordt gesloten. Uitgeschakeld: standaardgedrag waarbij een aanraking de melding sluit."

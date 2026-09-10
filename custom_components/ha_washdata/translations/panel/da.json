@@ -1607,6 +1607,10 @@
       "label": "Effektprofil-interval",
       "doc": "Bucket-størrelse for effektprofilsensorens attribut power_profile (det flade array af gennemsnitlige watt-værdier pr. slot, der bruges af eksterne planlæggere som EMHASS og tibber_prices). Mindre buckets holder korte effektspidser skarpe; større buckets glatter kurven. Standard 15 min. Kun til visning; påvirker ikke detektering."
     },
+    "notify_live_silent": {
+      "label": "Lydløse live-opdateringer",
+      "doc": "Kun iOS. Opdater live-forløbet lydløst: hver opdatering kommer uden lyd eller vibration og med en lavere, batterivenlig prioritet, som iOS kortvarigt kan samle i grupper. Den første opdatering i en cyklus (den, der starter Live-aktiviteten) samt start- og slutnotifikationerne giver stadig besked som normalt. Slå dette fra for at få besked ved hver opdatering."
+    },
     "notify_live_sticky": {
       "label": "Behold live-notifikation ved tryk",
       "doc": "Kun Android. Gør live-forløbsnotifikationen vedvarende (sticky), så et tryk ikke afviser den. Slukket: standardadfærd, hvor et tryk afviser notifikationen."

@@ -1577,6 +1577,10 @@
             "label": "Teljesítményprofil-intervallum",
             "doc": "A profilonkénti power_profile szenzorattribútum vödörmérete (az EMHASS és tibber_prices, illetve egyéb külső tervezők által felhasznált időköz-alapú átlagos vatt-tömb). A kisebb vödrök megőrzik a rövid teljesítménycsúcsokat; a nagyobbak simítják az alakot. Alapértelmezés: 15 perc. Csak olvasáskor; a felismerést nem befolyásolja."
         },
+        "notify_live_silent": {
+            "label": "Néma élő frissítések",
+            "doc": "Csak iOS esetén. Az élő folyamat frissítése csendben történik: minden frissítés hang és rezgés nélkül érkezik, alacsonyabb, akkumulátorkímélő prioritással, amelyet az iOS rövid időre összevonhat. A ciklus első frissítése (amely elindítja az Élő tevékenységet), valamint az indítási és befejezési értesítések továbbra is a megszokott módon jeleznek. Kapcsolja ki, ha minden frissítésről jelzést szeretne kapni."
+        },
         "notify_live_sticky": {
             "label": "Élő értesítés megtartása koppintás után",
             "doc": "Csak Android esetén. Az élő folyamatértesítést tartóssá teszi (ragadóssá), hogy rákoppintva ne zárja be a folyamatban lévő szálat. Kikapcsolt állapotban az alapértelmezett viselkedés érvényes, ahol a koppintás elveti az értesítést."

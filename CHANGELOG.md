@@ -13,12 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cycle count is a real odometer: survives deletions and the 200-cycle cap, and so do service reminders.
 - Mid-cycle program matching is far more accurate (56% → 71% top-1).
 - Long programs are no longer force-ended at 4 hours.
+- Setup no longer fails when an appliance is grouped under itself.
+- iOS live progress updates are silent instead of buzzing every few minutes.
 - Charts support pinch-zoom and no longer trap page scrolling on phones.
-- Community Store search suggests brands and models as you type; no Search button.
 - Fixes for phantom cycles, stale power readings, and a 65 s reported startup time.
-- New Matrix/Element community channel; export/import finally documented.
+- Community Store search suggests brands and models as you type; new Matrix/Element channel; export/import documented.
 
 ### Fixes
+
+- **Setup no longer fails when an appliance is grouped under itself** ([#418](https://github.com/3dg1luk43/ha_washdata/issues/418)): "Group under device" listed the appliance's own WashData device, which Home Assistant names after the appliance and so reads like the plug you were looking for. Home Assistant 2026.9 refuses a device linked to itself, and that link is applied while the entry is being set up, so every affected appliance failed to load with "A device can not be its own via device". The picker no longer offers the device itself, a self-link already stored is ignored and cleared from the registry, and a link Home Assistant rejects can no longer stop an appliance from loading. Thanks to @Moohan for the traceback.
 
 - **Picking a program on an idle appliance now works, and applies to the next cycle** ([#411](https://github.com/3dg1luk43/ha_washdata/discussions/411)): The Program dropdown did nothing unless a cycle was already running, and failed silently: it wrote no value but still reported success, so the panel refreshed and reset to Auto-detect. A program picked while idle is now remembered and applied when the next cycle begins, shown as "(applies to the next cycle)", and survives a Home Assistant restart; Auto-detect cancels it. Picking is also no longer refused in the just-started, paused and finishing states, and the `select` entity is covered too. Thanks to @ctweber01 for the WebSocket capture and @Aaroneisele55 for confirming.
 
@@ -63,6 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **WashData no longer reports a minute-long startup time** ([#408](https://github.com/3dg1luk43/ha_washdata/issues/408)): Home Assistant's startup list showed WashData taking 65 seconds where setting an appliance up in fact takes well under a second. Almost all of it was queueing: Home Assistant imports every integration's modules through a single worker thread, and WashData warmed its ML modules on that thread once per configured appliance, so it was billed for every other integration's imports. The warm-up now runs once for Home Assistant as a whole (worth 46 seconds on its own in one report), and the remaining wait is declared as an import wait exactly as Home Assistant's own integrations declare theirs. The warm-up itself is unchanged, so the models are still ready before the first power reading.
 
 ### Features
+
+- **Live progress updates no longer make your phone chime** ([#417](https://github.com/3dg1luk43/ha_washdata/issues/417)): On iOS every Live Activity refresh played a sound and vibrated, so an appliance with a 10 minute live interval buzzed all the way through a cycle. Refreshes are now sent as silent, lower-priority pushes, the way delivery and navigation apps send theirs: the Lock Screen and Dynamic Island still update, quietly. The first update of a cycle, the one that puts the activity on your Lock Screen, is left audible, as are the start and finish notifications. Notifications → Timing → **Silent Live Updates** turns it off if you would rather be alerted on every update. Android is unaffected, where repeat alerts were already suppressed. Thanks to @jenskraska for the Companion documentation reference.
 
 - **Pinch to zoom on graphs, on phones and tablets** ([#413](https://github.com/3dg1luk43/ha_washdata/issues/413)): Zooming a chart needed a mouse wheel, so on a phone the feature was out of reach. Every graph now follows the gestures Home Assistant's own charts use: pinch to zoom, two-finger drag to move along the cycle, double-tap to zoom in, double-tap again to reset. A reset button appears whenever a chart is zoomed, so there is always a visible way out. Drag one finger to read values, or grab the time-axis marker to scrub without covering the curve. Zooming now rescales the power axis to what is on screen, so the quiet end of a cycle shows its detail instead of a flat line squashed by an off-screen peak. Desktop is unchanged, and a trackpad pinch now zooms smoothly rather than in fixed steps.
 

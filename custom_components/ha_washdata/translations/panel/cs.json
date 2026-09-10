@@ -1577,6 +1577,10 @@
       "label": "Interval výkonového profilu",
       "doc": "Velikost segmentu pro atribut senzoru power_profile pro daný profil (plochá sada průměrných wattů za slot spotřebovaná externími plánovači jako EMHASS a tibber_prices). Menší segmenty zachovávají krátké výkonové špičky ostré; větší segmenty vyhlazují tvar. Výchozí 15 min. Pouze při načítání; neovlivňuje detekci."
     },
+    "notify_live_silent": {
+      "label": "Tiché živé aktualizace",
+      "doc": "Pouze iOS. Aktualizovat živý průběh potichu: každá aktualizace dorazí bez zvuku a vibrací, s nižší prioritou šetřící baterii, takže je iOS může na chvíli seskupit. První aktualizace cyklu (ta, která spustí Live Activity) a oznámení o startu a dokončení upozorní jako obvykle. Vypnutím budete upozorněni na každou aktualizaci."
+    },
     "notify_live_sticky": {
       "label": "Zachovat živé oznámení po klepnutí",
       "doc": "Pouze Android. Živé oznámení průběhu nastavte jako trvalé (přilepené), aby jeho klepnutím nedošlo k zavření průběžného vlákna. Vypnuto zachovává výchozí chování, kdy klepnutí oznámení zavře."

@@ -1577,6 +1577,10 @@
       "label": "Interval profila porabe",
       "doc": "Velikost segmenta za atribut senzorja power_profile za posamezni profil (ploska matrika povprečnih vatov na režo, ki jo porabijo zunanji planerji, kot sta EMHASS in tibber_prices). Manjši segmenti ohranijo kratke skoke moči ostre; večji segmenti zgladijo obliko. Privzeto 15 min. Samo za branje; ne vpliva na zaznavanje."
     },
+    "notify_live_silent": {
+      "label": "Tihe posodobitve v živo",
+      "doc": "Samo iOS. Napredek v živo osvežujte tiho: vsaka posodobitev prispe brez zvoka in vibriranja, z nižjo prednostjo, ki varčuje z baterijo in jo lahko iOS za kratek čas združi. Prva posodobitev v ciklu (tista, ki zažene Live Activity) in obvestila o začetku ter koncu se še naprej oglašajo kot običajno. To izklopite, če želite opozorilo ob vsaki posodobitvi."
+    },
     "notify_live_sticky": {
       "label": "Ohrani živo obvestilo ob dotiku",
       "doc": "Samo Android. Živo obvestilo o napredku nastavite kot trajno (pritrjeno), da ga dotik ne zavrže. Izklopljeno ohranja privzeto vedenje, ko dotik zavrže obvestilo."

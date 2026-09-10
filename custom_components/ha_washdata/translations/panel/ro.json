@@ -1529,6 +1529,10 @@
       "label": "Interval Profil Putere",
       "doc": "Dimensiunea intervalului pentru atributul senzorului power_profile per profil (tabloul plat de wați medii per slot consumat de planificatoare externe precum EMHASS și tibber_prices). Intervalele mai mici păstrează vârfurile scurte de putere clare; intervalele mai mari netezesc forma. Implicit 15 min. Doar la citire; nu afectează detectarea."
     },
+    "notify_live_silent": {
+      "label": "Actualizări silențioase în timp real",
+      "doc": "Numai iOS. Reîmprospătează discret progresul în timp real: fiecare actualizare sosește fără sunet sau vibrații, cu o prioritate mai redusă, care economisește bateria și pe care iOS o poate grupa pentru scurt timp. Prima actualizare dintr-un ciclu (cea care pornește Activitatea live) și notificările de început și de final alertează în continuare ca de obicei. Dezactivați această opțiune pentru a fi alertat la fiecare actualizare."
+    },
     "notify_live_sticky": {
       "label": "Păstrați notificarea în timp real la atingere",
       "doc": "Numai Android. Faceți notificarea de progres în timp real persistentă (fixată) astfel încât atingerea ei să nu o respingă. Dezactivat păstrează comportamentul implicit în care o atingere o respinge."

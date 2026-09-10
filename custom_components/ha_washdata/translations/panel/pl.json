@@ -1577,6 +1577,10 @@
       "label": "Interwał profilu mocy",
       "doc": "Rozmiar segmentu dla atrybutu senzora power_profile na profil (płaska tablica średnich watów na slot zużywana przez zewnętrzne planerzy jak EMHASS i tibber_prices). Mniejsze segmenty zachowują krótkie skoki mocy ostre; większe segmenty wygładzają kształt. Domyślnie 15 min. Tylko do odczytu; nie wpływa na wykrywanie."
     },
+    "notify_live_silent": {
+      "label": "Ciche aktualizacje na żywo",
+      "doc": "Tylko iOS. Odświeżaj postęp na żywo po cichu: każda aktualizacja przychodzi bez dźwięku i wibracji, z niższym priorytetem oszczędzającym baterię, więc iOS może je na krótko grupować. Pierwsza aktualizacja cyklu (ta, która uruchamia Live Activity) oraz powiadomienia o rozpoczęciu i zakończeniu nadal powiadamiają jak zwykle. Wyłącz, aby otrzymywać sygnał przy każdej aktualizacji."
+    },
     "notify_live_sticky": {
       "label": "Zachowaj powiadomienie na żywo po dotknięciu",
       "doc": "Tylko Android. Ustaw powiadomienie o postępie na żywo jako trwałe (przypięte), aby dotknięcie nie odrzucało aktywnego wątku. Wyłączone zachowuje domyślne zachowanie, gdzie dotknięcie odrzuca powiadomienie."

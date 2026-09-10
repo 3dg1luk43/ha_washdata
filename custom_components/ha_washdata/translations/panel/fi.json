@@ -1607,6 +1607,10 @@
       "label": "Tehoprofiilin aikaväli",
       "doc": "Säilön koko profiilin power_profile-sensorin attribuutille (tasainen kohtakohtainen keskivattimäärän matriisi, jota käyttävät ulkoiset suunnittelijat kuten EMHASS ja tibber_prices). Pienemmät säiliöt pitävät lyhyet tehopiikit terävinä; suuremmat säiliöt tasoittavat muodon. Oletus 15 min. Vain lukuaika; ei vaikuta tunnistukseen."
     },
+    "notify_live_silent": {
+      "label": "Äänettömät live-päivitykset",
+      "doc": "Vain iOS. Päivitä reaaliaikaista edistymistä huomaamattomasti: jokainen päivitys saapuu ilman ääntä tai värinää, matalammalla, akkua säästävällä prioriteetilla, jonka iOS voi hetkeksi niputtaa. Syklin ensimmäinen päivitys (se, joka käynnistää Live Activity -näkymän) sekä aloitus- ja lopetusilmoitukset hälyttävät edelleen normaalisti. Poista tämä käytöstä, jos haluat hälytyksen jokaisesta päivityksestä."
+    },
     "notify_live_sticky": {
       "label": "Pidä reaaliaikailmoitus napauttamisen jälkeen",
       "doc": "Vain Android. Tee reaaliaikaisesta edistymisilmoituksesta pysyvä (sticky), jotta sen napauttaminen ei sulje käynnissä olevaa viestiketjua. Pois päältä säilyttää oletustoiminnan, jossa napautus sulkee ilmoituksen."

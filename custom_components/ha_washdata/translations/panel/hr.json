@@ -1577,6 +1577,10 @@
       "label": "Interval profila snage",
       "doc": "Veličina segmenta za atribut senzora power_profile po profilu (polje prosječnih vata po slotu koje koriste vanjski planeri poput EMHASS i tibber_prices). Manji segmenti zadržavaju kratke skokove snage oštrima; veći segmenti zaglađuju oblik. Zadano 15 min. Samo za čitanje; ne utječe na otkrivanje."
     },
+    "notify_live_silent": {
+      "label": "Tiha ažuriranja uživo",
+      "doc": "Samo iOS. Napredak uživo osvježavajte tiho: svako ažuriranje stiže bez zvuka i vibracije, s nižim prioritetom koji štedi bateriju i koji iOS može nakratko grupirati. Prvo ažuriranje u ciklusu (ono koje pokreće Live Activity), kao i obavijesti o početku i završetku, i dalje se javljaju kao i obično. Isključite ovo da biste bili obaviješteni pri svakom ažuriranju."
+    },
     "notify_live_sticky": {
       "label": "Zadrži živu obavijest pri dodiru",
       "doc": "Samo Android. Živu obavijest o napretku postavite kao trajnu (prikvačenu) kako dodir ne bi odbacio aktivnu nit. Isključeno zadržava zadano ponašanje gdje dodir odbacuje obavijest."

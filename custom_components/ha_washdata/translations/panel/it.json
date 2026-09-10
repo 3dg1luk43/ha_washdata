@@ -1559,6 +1559,10 @@
       "label": "Intervallo profilo di potenza",
       "doc": "Dimensione del bucket per l'attributo sensore power_profile per profilo (l'array piatto di watt medi per slot consumato dai pianificatori esterni come EMHASS e tibber_prices). Bucket più piccoli mantengono nitidi i picchi di potenza brevi; bucket più grandi smussano la forma. Predefinito 15 min. Solo in lettura; non influisce sul rilevamento."
     },
+    "notify_live_silent": {
+      "label": "Aggiornamenti silenziosi in tempo reale",
+      "doc": "Solo iOS. Aggiorna l'avanzamento in tempo reale in modo discreto: ogni aggiornamento arriva senza suono né vibrazione, con una priorità più bassa che risparmia batteria e che iOS può raggruppare per qualche istante. Il primo aggiornamento di un ciclo (quello che avvia l'Attività in tempo reale) e le notifiche di avvio e di fine avvisano comunque come sempre. Disattiva questa opzione per ricevere un avviso a ogni aggiornamento."
+    },
     "notify_live_sticky": {
       "label": "Mantieni notifica live al tocco",
       "doc": "Solo Android. Rende persistente (sticky) la notifica di avanzamento in tempo reale, in modo che toccandola non venga chiusa. Disattivato mantiene il comportamento predefinito in cui il tocco la chiude."

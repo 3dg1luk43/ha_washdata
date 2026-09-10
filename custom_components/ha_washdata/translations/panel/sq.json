@@ -1573,6 +1573,10 @@
             "label": "Intervali i Profilit të Energjisë",
             "doc": "Madhësia e kovës për atributin e sensorit power_profile (vargu i sheshtë me vat mesatare për slot) të konsumuar nga planifikues të jashtëm si EMHASS dhe tibber_prices. Kova më të vogla mbajnë pikat e shkurtra të energjisë të mprehta; kova më të mëdha zbuten forma. Parazgjedhja 15 min. Vetëm për lexim; nuk ndikon zbulimin."
         },
+        "notify_live_silent": {
+            "label": "Përditësime live pa zë",
+            "doc": "Vetëm iOS. Rifreskoni progresin live në heshtje: çdo përditësim vjen pa zë dhe pa dridhje, me një përparësi më të ulët që kursen baterinë dhe që iOS mund ta grupojë për pak kohë. Përditësimi i parë i një cikli (ai që nis Live Activity), si dhe njoftimet e nisjes dhe të përfundimit, sinjalizojnë si zakonisht. Çaktivizojeni këtë për t'u njoftuar në çdo përditësim."
+        },
         "notify_live_sticky": {
             "label": "Mbaj njoftimin live pas trokitjes",
             "doc": "Vetëm Android. Bëni njoftimin e progresit live të vazhdueshëm (sticky) kështu që trokitja mbi të nuk e humb fijen e vazhdueshme. Off ruan sjelljen e parazgjedhur ku trokitja e humb atë."

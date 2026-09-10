@@ -176,8 +176,10 @@ from .const import (
     CONF_NOTIFY_LIVE_CHRONOMETER,
     CONF_NOTIFY_LIVE_STICKY,
     CONF_NOTIFY_LIVE_CLICK_ACTION,
+    CONF_NOTIFY_LIVE_SILENT,
     DEFAULT_NOTIFY_LIVE_STICKY,
     DEFAULT_NOTIFY_LIVE_CLICK_ACTION,
+    DEFAULT_NOTIFY_LIVE_SILENT,
     CONF_NOTIFY_REMINDER_MESSAGE,
     CONF_NOTIFY_TIMEOUT_SECONDS,
     CONF_NOTIFY_CHANNEL,
@@ -358,6 +360,8 @@ _MOBILE_ONLY_EXTRA_KEYS = (
     "subtitle",
     "content_state",
     "activity",
+    "silent",
+    "push",
 )
 
 
@@ -459,6 +463,7 @@ class WashDataManager:
         self._notify_live_chronometer = DEFAULT_NOTIFY_LIVE_CHRONOMETER
         self._notify_live_sticky = DEFAULT_NOTIFY_LIVE_STICKY
         self._notify_live_click_action = DEFAULT_NOTIFY_LIVE_CLICK_ACTION
+        self._notify_live_silent = DEFAULT_NOTIFY_LIVE_SILENT
         self._notify_timeout_seconds = DEFAULT_NOTIFY_TIMEOUT_SECONDS
         self._pending_notifications: list[dict[str, Any]] = []
         # Quiet-hours (do-not-disturb) hold queue + release timer. Finish-type
@@ -721,6 +726,11 @@ class WashDataManager:
             )
             or ""
         ).strip()
+        self._notify_live_silent = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_SILENT, DEFAULT_NOTIFY_LIVE_SILENT
+            )
+        )
         self._notify_timeout_seconds = int(
             config_entry.options.get(
                 CONF_NOTIFY_TIMEOUT_SECONDS, DEFAULT_NOTIFY_TIMEOUT_SECONDS
@@ -2545,6 +2555,11 @@ class WashDataManager:
             )
             or ""
         ).strip()
+        self._notify_live_silent = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_SILENT, DEFAULT_NOTIFY_LIVE_SILENT
+            )
+        )
         self._notify_timeout_seconds = int(
             config_entry.options.get(
                 CONF_NOTIFY_TIMEOUT_SECONDS, DEFAULT_NOTIFY_TIMEOUT_SECONDS
@@ -6477,18 +6492,29 @@ class WashDataManager:
         return max(1, int(np.ceil(estimated_updates * (1.0 + overrun_ratio))))
 
     def _apply_live_notification_prefs(self, extra_vars: dict[str, Any]) -> None:
-        """Inject the user's opt-in live-notification data keys (#347).
+        """Inject the user's live-notification data keys (#347, #417).
 
         ``sticky`` keeps the live notification on screen when tapped; ``clickAction``
         gives the notification a tap target (e.g. a dashboard path). Both are
         mobile-only keys forwarded only to ``mobile_app_*`` live targets. Defaults
         (sticky off, empty clickAction) add nothing, so the payload is byte-identical
         to before unless the user opts in.
+
+        ``silent`` (#417) marks a *refresh* of the running Live Activity as a
+        non-alerting, lower-priority push, which is what stops iOS playing a sound and
+        vibrating on every interval tick; ``push.interruption-level: passive`` is the
+        companion's generic quiet key and covers the case where the update is rendered
+        as an ordinary banner instead. Neither is applied to the update that STARTS the
+        activity: that one is the "cycle is now on your Lock Screen" cue and stays
+        audible (per the companion docs ``silent`` has no effect there in any case).
         """
         if self._notify_live_sticky:
             extra_vars["sticky"] = "true"
         if self._notify_live_click_action:
             extra_vars["clickAction"] = self._notify_live_click_action
+        if self._notify_live_silent and self._live_activity_started:
+            extra_vars["silent"] = True
+            extra_vars["push"] = {"interruption-level": "passive"}
 
     def _check_live_progress_notification(self) -> None:
         """Send throttled live progress notifications for compatible mobile targets."""

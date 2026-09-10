@@ -1607,6 +1607,10 @@
       "label": "Leistungsprofil-Intervall",
       "doc": "Bucket-Größe für das Attribut power_profile des profilbezogenen Sensors (ein flaches Array der durchschnittlichen Wattzahl pro Slot, das von externen Planern wie EMHASS und tibber_prices verwendet wird). Kleinere Buckets halten kurze Leistungsspitzen scharf; größere Buckets glätten die Kurve. Standard 15 Min. Nur zur Darstellung; hat keinen Einfluss auf die Erkennung."
     },
+    "notify_live_silent": {
+      "label": "Stille Live-Aktualisierungen",
+      "doc": "Nur iOS. Aktualisiert den Live-Fortschritt lautlos: Jede Aktualisierung kommt ohne Ton und ohne Vibration an, mit einer niedrigeren, akkuschonenden Priorität, die iOS kurz bündeln kann. Die erste Aktualisierung eines Zyklus (die die Live-Aktivität startet) sowie die Start- und Endbenachrichtigungen melden sich weiterhin wie gewohnt. Schalten Sie dies aus, um bei jeder Aktualisierung benachrichtigt zu werden."
+    },
     "notify_live_sticky": {
       "label": "Live-Benachrichtigung beim Antippen behalten",
       "doc": "Nur Android. Die Live-Fortschrittsbenachrichtigung dauerhaft (sticky) anzeigen, sodass sie beim Antippen nicht ausgeblendet wird. Ausgeschaltet: Standardverhalten, bei dem ein Antippen die Benachrichtigung schließt."

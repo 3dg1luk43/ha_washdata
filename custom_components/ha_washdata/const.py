@@ -163,6 +163,11 @@ CONF_NOTIFY_LIVE_CHRONOMETER = "notify_live_chronometer"
 # (sticky) and a tap target (clickAction). Not new notification types. Mobile-only.
 CONF_NOTIFY_LIVE_STICKY = "notify_live_sticky"
 CONF_NOTIFY_LIVE_CLICK_ACTION = "notify_live_click_action"
+# Silent recurring live updates (#417). iOS alerts on every Live Activity refresh
+# unless the update is marked silent, so a 10-minute live interval buzzes the phone
+# all cycle long. Mobile-only, and never applied to the update that STARTS the
+# activity - that one stays audible (and `silent` has no effect there anyway).
+CONF_NOTIFY_LIVE_SILENT = "notify_live_silent"
 CONF_NOTIFY_REMINDER_MESSAGE = "notify_reminder_message"  # Distinct one-time pre-end alert
 CONF_NOTIFY_TIMEOUT_SECONDS = "notify_timeout_seconds"  # Auto-dismiss after N seconds (0 = never)
 CONF_NOTIFY_CHANNEL = "notify_channel"  # Android channel for status/live/reminder
@@ -230,6 +235,10 @@ DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
 DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
 DEFAULT_NOTIFY_LIVE_STICKY = False  # #347: off = today's behaviour (tap dismisses)
 DEFAULT_NOTIFY_LIVE_CLICK_ACTION = ""  # #347: empty = no tap target (today's behaviour)
+# #417: on by default. A progress refresh is not an alert, and every other app with
+# live progress updates silently; the audible per-update buzz was the complaint, not
+# the feature. Turn it off to get a sound/vibration on every update again.
+DEFAULT_NOTIFY_LIVE_SILENT = True
 DEFAULT_NOTIFY_TIMEOUT_SECONDS = 0  # 0 = notifications never auto-dismiss
 DEFAULT_NOTIFY_CHANNEL = ""  # Empty = omit channel (companion app default)
 DEFAULT_NOTIFY_FINISH_CHANNEL = ""  # Empty = reuse status channel
