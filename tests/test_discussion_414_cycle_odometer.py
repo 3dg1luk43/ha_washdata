@@ -492,3 +492,42 @@ async def test_concurrent_corrections_are_serialized(store):
     conn_a.send_error.assert_called_once()
     conn_b.send_error.assert_not_called()
     assert store.get_lifetime_cycle_count() == 5000
+
+
+async def test_a_reload_during_the_save_does_not_notify_a_detached_manager(store):
+    """A reload mid-save detaches this manager; notifying it targets stale state.
+
+    Mirrors the guard the recording-persist and import handlers use. The save
+    itself did happen, so this still reports success, but the count comes from
+    whatever store is live now rather than from the detached one.
+    """
+    _seed(store, 10)
+    hass, connection, manager = _ws_ctx(store)
+
+    replacement = MagicMock()
+    replacement.profile_store = _make_replacement_store(4242)
+
+    calls = {"n": 0}
+
+    def _get(_hass, _entry_id):
+        calls["n"] += 1
+        # First call resolves the handler's manager; later calls (the post-await
+        # re-validation) see the reloaded one.
+        return manager if calls["n"] == 1 else replacement
+
+    with patch.object(ws_api, "_get_manager", side_effect=_get):
+        await ws_api.ws_set_lifetime_cycle_count.__wrapped__(
+            hass, connection, {"id": 1, "entry_id": "e1", "count": 4000}
+        )
+
+    manager.notify_update.assert_not_called()
+    connection.send_error.assert_not_called()
+    result = connection.send_result.call_args[0][1]
+    assert result["lifetime_cycle_count"] == 4242
+
+
+def _make_replacement_store(count: int):
+    """A stand-in for the store a reloaded manager would carry."""
+    st = MagicMock()
+    st.get_lifetime_cycle_count = MagicMock(return_value=count)
+    return st
