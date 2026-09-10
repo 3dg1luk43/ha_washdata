@@ -374,8 +374,8 @@ Per-user RBAC. Enable per-user control, set the fallback level for unlisted user
 - **`sensor.<name>_current_phase`**: Active cycle phase label (e.g. "Rinsing", "Spin").
 - **`sensor.<name>_pump_runs_today`**: *(Pump device type only)* Completed pump cycles in a rolling 24-hour window.
 - **`binary_sensor.<name>_running`**: Simple on/off running state.
-- **`button.<name>_pause_cycle`**: Pause the active cycle (available while Running/Starting/Ending and not already paused).
-- **`button.<name>_resume_cycle`**: Resume a user-paused cycle.
+- **`button.<name>_pause_cycle`**: Pause the active cycle. Available at every stage of a live cycle (Running, Starting, Paused, Ending) unless you have already held it yourself. Available during an *automatic* pause too, where pressing it turns that pause into a held one.
+- **`button.<name>_resume_cycle`**: Resume a cycle you paused. Available only while the cycle is held by you, not during an automatic pause.
 - **`button.<name>_force_end_cycle`**: Force-terminate a stuck cycle.
 - **`switch.<name>_auto_maintenance`**: Toggle nightly database cleanup.
 
