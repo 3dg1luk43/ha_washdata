@@ -240,6 +240,7 @@ def manager(hass: Any, mock_entry: Any) -> Any:
         mgr.profile_store.async_add_cycle = AsyncMock()
         mgr.profile_store.async_clear_active_cycle = AsyncMock()
         mgr.profile_store.async_rebuild_envelope = AsyncMock()
+        mgr.profile_store.async_save = AsyncMock()
         mgr.profile_store.confirm_match_ranking_snapshots = MagicMock()
         mgr._run_post_cycle_processing = AsyncMock()
         mgr._learning_confidence = 0.6
@@ -357,3 +358,106 @@ async def test_post_cycle_auto_label_gates_on_the_members_own_score(
 
     assert not cycle_data.get("profile_name")
     assert cycle_data.get("label_source") != "auto_label_post"
+
+
+# ── the learning handoff reads the same number ──────────────────────────────
+#
+# The cycle-end gate and the post-cycle auto-label gate both moved onto the
+# member's own score, but `LearningManager.process_cycle_end` was still handed
+# the group's. `_maybe_request_feedback` routes on that value, so a member whose
+# own score sat below `auto_label_confidence` could still be auto-labelled on its
+# sibling's - labelled as fact without the user ever being asked. The measured
+# sibling gap reaches 0.157 of blended score, which straddles the default 0.90
+# auto-label bar from either side.
+
+
+@pytest.mark.asyncio
+async def test_learning_handoff_carries_the_members_own_score(
+    hass: Any, manager: Any
+) -> None:
+    """The confidence handed to the learning manager is a LABEL decision's input,
+    so it gets the member-aware number like the other two gates."""
+    manager._current_program = "Wolle 30"
+    manager._last_match_confidence = 0.93
+    manager._last_member_confidence = 0.88
+    manager._matched_profile_duration = 4080
+    manager.profile_store.async_match_profile = AsyncMock(
+        return_value=MagicMock(best_profile=None, confidence=0.0,
+                               label_confidence=0.0, ranking=[])
+    )
+    manager.learning_manager.process_cycle_end = MagicMock()
+
+    await manager._async_process_cycle_end(_cycle_data())
+    await hass.async_block_till_done()
+
+    manager.learning_manager.process_cycle_end.assert_called_once()
+    assert manager.learning_manager.process_cycle_end.call_args.kwargs[
+        "confidence"
+    ] == pytest.approx(0.88)
+
+
+@pytest.mark.asyncio
+async def test_learning_does_not_auto_label_a_member_on_its_siblings_score(
+    hass: Any, manager: Any, mock_entry: Any
+) -> None:
+    """End to end through the real routing: the group cleared the 0.90 auto-label
+    bar, the selected member did not. The member must be queued for confirmation,
+    not recorded as fact."""
+    mock_entry.options = {
+        "power_sensor": "sensor.test_power",
+        "auto_label_confidence": 0.90,
+        "learning_confidence": 0.60,
+    }
+    manager._current_program = "Wolle 30"
+    manager._last_match_confidence = 0.93   # the group's, i.e. the sibling's
+    manager._last_member_confidence = 0.88  # what Wolle itself earned
+    manager._matched_profile_duration = 4080
+    manager.profile_store.async_match_profile = AsyncMock(
+        return_value=MagicMock(best_profile=None, confidence=0.0,
+                               label_confidence=0.0, ranking=[])
+    )
+    manager.profile_store.get_past_cycles = MagicMock(return_value=[])
+    manager.learning_manager._async_run_simulation = AsyncMock()
+    manager.learning_manager.auto_label_high_confidence = MagicMock(return_value=True)
+    manager.learning_manager.request_cycle_verification = MagicMock()
+
+    await manager._async_process_cycle_end(_cycle_data())
+    await hass.async_block_till_done()
+
+    manager.learning_manager.auto_label_high_confidence.assert_not_called()
+    manager.learning_manager.request_cycle_verification.assert_called_once()
+    assert manager.learning_manager.request_cycle_verification.call_args.kwargs[
+        "confidence"
+    ] == pytest.approx(0.88)
+
+
+@pytest.mark.asyncio
+async def test_learning_handoff_is_unchanged_for_a_non_group_match(
+    hass: Any, manager: Any, mock_entry: Any
+) -> None:
+    """The control. member_confidence is None for every match that did not come
+    from a group, and the handoff then passes exactly what it always did."""
+    mock_entry.options = {
+        "power_sensor": "sensor.test_power",
+        "auto_label_confidence": 0.90,
+        "learning_confidence": 0.60,
+    }
+    manager._current_program = "Wolle 30"
+    manager._last_match_confidence = 0.93
+    manager._last_member_confidence = None
+    manager._matched_profile_duration = 4080
+    manager.profile_store.async_match_profile = AsyncMock(
+        return_value=MagicMock(best_profile=None, confidence=0.0,
+                               label_confidence=0.0, ranking=[])
+    )
+    manager.profile_store.get_past_cycles = MagicMock(return_value=[])
+    manager.learning_manager._async_run_simulation = AsyncMock()
+    manager.learning_manager.auto_label_high_confidence = MagicMock(return_value=True)
+
+    await manager._async_process_cycle_end(_cycle_data())
+    await hass.async_block_till_done()
+
+    manager.learning_manager.auto_label_high_confidence.assert_called_once()
+    assert manager.learning_manager.auto_label_high_confidence.call_args.kwargs[
+        "confidence"
+    ] == pytest.approx(0.93)

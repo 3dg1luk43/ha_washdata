@@ -5130,6 +5130,28 @@ class WashDataManager:
         match_confidence = self._last_match_confidence
         member_confidence = self._last_member_confidence
         matched_profile_duration = self._matched_profile_duration
+        # The number EVERY label / persistence decision for this cycle gates on.
+        #
+        # A Stage-5 group win reports the group's score, i.e. the best-scoring
+        # SIBLING's, while the member the cycle would be labelled as is chosen
+        # separately by integrated energy - so the two can be different profiles
+        # (item 206; measured 16.7% of whole-cycle group wins, gap up to 0.157).
+        # A label makes the cycle evidence for that ONE member, so it has to clear
+        # the bar on its own blended score, not on its sibling's. Both are blended
+        # pipeline scores over the same trace, so they compare directly.
+        #
+        # Computed once here because three gates read it and they must agree: the
+        # cycle-end gate below, the post-cycle auto-label pass (via
+        # MatchResult.label_confidence on its own fresh match), and the learning
+        # handoff - whose `_maybe_request_feedback` can auto-label without ever
+        # asking the user, so a member that fell short of `auto_label_confidence`
+        # on its own score has to be queued for confirmation instead.
+        #
+        # `member_confidence` is None for every non-group match, which leaves this
+        # exactly equal to the `match_confidence or 0.0` passed down before.
+        label_confidence = float(match_confidence or 0.0)
+        if member_confidence is not None:
+            label_confidence = min(label_confidence, float(member_confidence))
         manual_program = self._manual_program_active
         cycle_anomaly = self._cycle_anomaly
         overrun_ratio = self._overrun_ratio
@@ -5160,26 +5182,17 @@ class WashDataManager:
             and program not in ("off", "detecting...", "restored...")
             and program in self.profile_store.get_profiles()
         ):
-            # A Stage-5 group win reports the group's score, i.e. the best-scoring
-            # SIBLING's, while the member the cycle would be labelled as is chosen
-            # separately by integrated energy - so the two can be different profiles
-            # (item 206; measured 16.7% of whole-cycle group wins, gap up to 0.157).
-            # A label makes the cycle evidence for that ONE member, so it has to
-            # clear the bar on its own blended score, not on its sibling's. Both are
-            # blended pipeline scores over the same trace, so they compare directly.
-            # None (every non-group match, or a member the matcher never scored)
-            # leaves this exactly as it was.
-            _label_conf = float(match_confidence or 0.0)
-            if member_confidence is not None:
-                _label_conf = min(_label_conf, float(member_confidence))
-            if _label_conf > 0:
+            # `label_confidence` (computed above) is the member-aware number, not
+            # the group's. See its definition for why a label may not rely on a
+            # sibling's score.
+            if label_confidence > 0:
                 # Recorded whether or not we label, so the panel can show what
                 # WashData suspected without the cycle claiming it as its program.
-                cycle_data["match_confidence"] = _label_conf
+                cycle_data["match_confidence"] = label_confidence
             if manual_program:
                 cycle_data["profile_name"] = program
                 cycle_data["label_source"] = "manual"
-            elif _label_conf >= float(self._learning_confidence or 0.0):
+            elif label_confidence >= float(self._learning_confidence or 0.0):
                 cycle_data["profile_name"] = program
                 cycle_data["label_source"] = "auto_match"
             else:
@@ -5188,7 +5201,7 @@ class WashDataManager:
                     "learning threshold %.2f, so it stays unlabelled rather than "
                     "reshaping that program's statistics.%s",
                     program,
-                    _label_conf,
+                    label_confidence,
                     float(self._learning_confidence or 0.0),
                     ""
                     if member_confidence is None
@@ -5558,7 +5571,7 @@ class WashDataManager:
             self.learning_manager.process_cycle_end(
                 cycle_data,
                 detected_profile=program,
-                confidence=match_confidence or 0.0,
+                confidence=label_confidence,
                 predicted_duration=matched_profile_duration,
                 match_result=match_result,
             )
