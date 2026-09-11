@@ -20,6 +20,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata.manager import _finite_power
 
@@ -137,3 +138,107 @@ def test_the_event_path_still_accepts_a_real_reading(manager: Any) -> None:
 
     manager.diag_buffer.record_power.assert_called_once()
     assert manager.diag_buffer.record_power.call_args.args[0] == 1500.0
+
+
+# ── every power-reading site, not just the two from round 20 ────────────────
+#
+# Round 21 found the gap this way: the setup seed (`_async_setup_complete`)
+# parsed with a bare `float()` and wrote the result straight into
+# `_current_power`. Seeding a nan there is PERMANENT, because
+# `_resync_power_from_state` returns early exactly when `_live_power_state()`
+# yields None, which is what a non-finite sensor now produces - so the healing
+# path added for #409 could never overwrite it. Guarding only the two round-20
+# sites left the cache poisonable at setup and reload.
+
+
+def test_every_power_reading_site_routes_through_the_helper() -> None:
+    """Structural guard, and the ONLY coverage for two of the six sites.
+
+    The setup seed and the config-reload re-seed both live inside
+    `WashDataManager.async_setup` / the options-update handler, so reaching them
+    means booting all of setup; this test pins them instead. If that is ever
+    considered too indirect, the fix is to extract those blocks, not to drop the
+    assertion.
+
+    The energy-price and energy-sensor readers at the end of the module are
+    deliberately excluded: different consumer, different fallback contract, and
+    they are recorded as follow-up rather than reshaped inside a review loop.
+    """
+    import re
+    from pathlib import Path
+
+    src = Path(
+        "custom_components/ha_washdata/manager.py"
+    ).read_text() if Path("custom_components/ha_washdata/manager.py").exists() else (
+        Path(__file__).resolve().parents[1]
+        / "custom_components" / "ha_washdata" / "manager.py"
+    ).read_text()
+
+    bare = [
+        m.start() for m in re.finditer(r"float\((?:new_|old_)?state\.state\)", src)
+    ]
+    # Two known-and-documented exceptions remain (price + energy sensor).
+    assert len(bare) == 2, (
+        f"expected only the 2 energy/price readers to parse a state directly, "
+        f"found {len(bare)}; a power reading must go through _finite_power"
+    )
+
+
+@pytest.mark.asyncio
+async def test_resync_cannot_heal_a_poisoned_cache(manager: Any) -> None:
+    """Why seeding a nan would be permanent rather than merely wrong once: the
+    resync path bails on a non-finite sensor, so nothing overwrites the cache.
+    This is the mechanism that makes the seed guard load-bearing."""
+    import math
+
+    manager._current_power = math.nan
+    manager.hass.states.async_set("sensor.test_power", "nan")
+
+    manager._resync_power_from_state(datetime(2026, 5, 1, 8, 0, 0), True)
+
+    # Still nan: the resync declined, which is exactly why the seed must refuse.
+    assert math.isnan(manager._current_power)
+
+
+@pytest.mark.asyncio
+async def test_resync_heals_the_cache_once_the_sensor_recovers(manager: Any) -> None:
+    """The control: a real reading after a bad one is picked up normally."""
+    import math
+
+    manager._current_power = math.nan
+    manager.hass.states.async_set("sensor.test_power", "900")
+
+    manager._resync_power_from_state(datetime(2026, 5, 1, 8, 0, 0), False)
+
+    assert manager._current_power == 900.0
+
+
+def test_prev_raw_power_keeps_the_cached_value_for_a_nan_old_state(
+    manager: Any
+) -> None:
+    """`prev_raw_power >= min_p` is the "genuine drop from active power" arm of
+    `is_low_power`, and a nan there evaluates False and silently disables it.
+
+    That arm is what exempts a real drop to ~0 W from the sampling-interval
+    throttle, so the observable consequence is whether the reading reaches the
+    detector at all: `_last_reading_time` is set just now, so with the arm
+    disabled the throttle returns early and the drop is swallowed.
+    """
+    manager._current_power = 1200.0
+    manager._sampling_interval = 300
+    manager._last_reading_time = dt_util.now()
+    # min_power must be set explicitly: on the patched detector it would come from
+    # MagicMock.__float__, i.e. 1.0, and `power < min_p` would be False so the
+    # branch under test never runs. "off" keeps the cycle-active arm out of it, so
+    # is_low_power can only become True via prev_raw_power.
+    manager.detector.config.min_power = 2.0
+    manager.detector.state = "off"
+    manager.detector.process_reading = MagicMock()
+
+    event = MagicMock()
+    event.data = {"new_state": _state("1.0"), "old_state": _state("nan")}
+    manager._async_power_changed(event)
+
+    # The nan old_state was ignored, so prev_raw_power kept the cached 1200 W and
+    # the drop was still recognised as genuine, bypassing the throttle.
+    manager.detector.process_reading.assert_called_once()
