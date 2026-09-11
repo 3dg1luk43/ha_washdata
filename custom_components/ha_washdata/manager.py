@@ -1739,17 +1739,20 @@ class WashDataManager:
         power_is_valid = False
 
         if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
-            try:
-                current_power = float(state.state)
-                power_is_valid = True
-            except (ValueError, TypeError):
-                # Power sensor state is not numeric during restoration; treat as 0W
+            _restore_power = _finite_power(state.state)
+            if _restore_power is None:
+                # Not numeric, or nan/inf: treat as 0W and do not restore by power.
+                # Leaving power_is_valid False is what keeps a non-finite reading out
+                # of the restore decision, whose comparisons would silently be False.
                 self._logger.debug(
-                    "Power sensor %s state %r is not numeric during restoration; "
-                    "treating as 0W and not restoring by power",
+                    "Power sensor %s state %r is not a finite number during "
+                    "restoration; treating as 0W and not restoring by power",
                     self.power_sensor_entity_id,
                     getattr(state, "state", None),
                 )
+            else:
+                current_power = _restore_power
+                power_is_valid = True
 
         should_restore = False
         active_snapshot_to_restore: dict[str, Any] | None = (
@@ -2163,25 +2166,31 @@ class WashDataManager:
         # Force initial update from current state (in case it's already stable)
         state = self.hass.states.get(self.power_sensor_entity_id)
         if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
-            try:
-                power = float(state.state)
-                now = dt_util.now()
-                self.detector.process_reading(power, now)
-                # Seed the reading cache from the sensor itself (#409). The reading
-                # was already fed to the detector; leaving the manager's own cache
-                # unset meant every reload started with _current_power = 0 and
-                # _last_reading_time = None, so (a) the power tile/entity reported a
-                # value the sensor never had until the next event and (b) the
-                # watchdog - which returns early while _last_reading_time is None -
-                # could neither keepalive nor close a restored cycle whose plug went
-                # silent across the reload.
-                self._current_power = power
-                self._last_reading_time = now
-                self._last_real_reading_time = (
-                    getattr(state, "last_reported", None) or state.last_updated
-                )
-            except (ValueError, TypeError):
-                pass
+            # A non-finite reading is skipped entirely, which leaves the cache
+            # unset, i.e. the pre-#409 behaviour. Seeding it with a nan instead
+            # would be PERMANENT: _resync_power_from_state returns early precisely
+            # when the sensor is non-finite, so the healing path could never
+            # overwrite it, and every later watchdog comparison would be False.
+            power = _finite_power(state.state)
+            if power is not None:
+                try:
+                    now = dt_util.now()
+                    self.detector.process_reading(power, now)
+                    # Seed the reading cache from the sensor itself (#409). The
+                    # reading was already fed to the detector; leaving the manager's
+                    # own cache unset meant every reload started with
+                    # _current_power = 0 and _last_reading_time = None, so (a) the
+                    # power tile/entity reported a value the sensor never had until
+                    # the next event and (b) the watchdog - which returns early while
+                    # _last_reading_time is None - could neither keepalive nor close a
+                    # restored cycle whose plug went silent across the reload.
+                    self._current_power = power
+                    self._last_reading_time = now
+                    self._last_real_reading_time = (
+                        getattr(state, "last_reported", None) or state.last_updated
+                    )
+                except (ValueError, TypeError):
+                    pass
 
         # Trigger migration/compression of old cycle format
         # This is safe to run repeatedly (it skips already compressed cycles)
@@ -2276,12 +2285,13 @@ class WashDataManager:
                 # Force update from new sensor
                 state = self.hass.states.get(self.power_sensor_entity_id)
                 if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
-                    try:
-                        power = float(state.state)
-                        self.detector.process_reading(power, dt_util.now())
-                    except ValueError:
+                    _reload_power = _finite_power(state.state)
+                    if _reload_power is not None:
+                        self.detector.process_reading(_reload_power, dt_util.now())
+                    else:
                         self._logger.debug(
-                            "Initial power value for %s after config reload is not numeric: %r",
+                            "Initial power value for %s after config reload is not a "
+                            "finite number: %r",
                             self.power_sensor_entity_id,
                             state.state,
                         )
@@ -3517,10 +3527,9 @@ class WashDataManager:
         if old_state is not None and old_state.state not in (
             STATE_UNKNOWN, STATE_UNAVAILABLE
         ):
-            try:
-                prev_raw_power = float(old_state.state)
-            except ValueError:
-                pass
+            _prev = _finite_power(old_state.state)
+            if _prev is not None:
+                prev_raw_power = _prev
         is_low_power = power < min_p and (
             self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
             or prev_raw_power >= min_p  # genuine drop from active power
