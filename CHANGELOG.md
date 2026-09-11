@@ -16,10 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Setup no longer fails when an appliance is grouped under itself.
 - iOS live progress updates are silent instead of buzzing every few minutes.
 - Charts support pinch-zoom and no longer trap page scrolling on phones.
-- Fixes for phantom cycles, stale power readings, a 65 s reported startup time, and two ways a cycle or a program could be quietly lost.
+- Fixes for phantom cycles, stale and non-numeric power readings, a 65 s reported startup time, and two ways a cycle or a program could be quietly lost.
 - Community Store search suggests brands and models as you type; new Matrix/Element channel; export/import documented.
 
 ### Fixes
+
+- **A power sensor reporting a non-numeric spike can no longer switch off the end-of-cycle guards**: `nan`, `inf` and `infinity` are accepted by Python's number parser, so a plug reporting one of those was taken as a real reading rather than rejected. It then became the current power, and because every comparison against `nan` is false, two safety checks silently stopped applying: the timer that ends a cycle once the appliance looks idle, and the one that allows extended silence while power is high. Neither raised an error, so a cycle could hang instead of finishing. Such readings are now treated as "sensor not reporting a number", the same rule already applied to stored settings.
 
 - **Setup no longer fails when an appliance is grouped under itself** ([#418](https://github.com/3dg1luk43/ha_washdata/issues/418)): "Group under device" listed the appliance's own WashData device, which Home Assistant names after the appliance and so reads like the plug you were looking for. Home Assistant 2026.9 refuses a device linked to itself, and that link is applied while the entry is being set up, so every affected appliance failed to load with "A device can not be its own via device". The picker no longer offers the device itself, a self-link already stored is ignored and cleared from the registry, and a link Home Assistant rejects can no longer stop an appliance from loading. Thanks to @Moohan for the traceback.
 

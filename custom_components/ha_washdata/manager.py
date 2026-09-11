@@ -332,6 +332,31 @@ _CYCLE_IN_PROGRESS_STATES = frozenset(
 )
 
 
+def _finite_power(raw: Any) -> float | None:
+    """Parse a power sensor's state string, rejecting non-finite values.
+
+    ``float()`` accepts ``"nan"``, ``"inf"`` and ``"infinity"``, and a power
+    reading is compared against thresholds exactly like the options
+    ``options_utils.option_float`` already guards: every comparison against
+    ``nan`` is False, so a single such reading does not raise, it silently
+    switches gates OFF. With ``_current_power`` set to ``nan`` both the
+    unmatched-cycle watchdog (`< start_threshold_w`) and the high-power silence
+    deferral (`> min_power`) evaluate False, so a running cycle loses the guards
+    that decide whether it ends at all.
+
+    Returns None for anything unusable, which is the "sensor is non-numeric"
+    outcome every caller already handles. A real meter never reports either
+    value, so no valid reading changes behaviour.
+    """
+    try:
+        power = float(raw)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not math.isfinite(power):
+        return None
+    return power
+
+
 def _sanitize_ranking(raw_list: list[dict[str, Any]], limit: int = 5) -> list[dict[str, Any]]:
     """Top-N ranking candidates stripped of the heavy `current`/`sample` power
     arrays, safe to persist on cycle_data and to include in the 32KB-limited
@@ -3451,9 +3476,8 @@ class WashDataManager:
         if new_state is None or new_state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE):
             return
 
-        try:
-            power = float(new_state.state)
-        except ValueError:
+        power = _finite_power(new_state.state)
+        if power is None:
             return
 
         # Capture every raw sensor reading before any throttling or processing.
@@ -3958,9 +3982,8 @@ class WashDataManager:
         state = self.hass.states.get(self.power_sensor_entity_id)
         if state is None or state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE):
             return None
-        try:
-            power = float(state.state)
-        except (TypeError, ValueError):
+        power = _finite_power(state.state)
+        if power is None:
             return None
         report_ts = getattr(state, "last_reported", None) or state.last_updated
         if not isinstance(report_ts, datetime):
