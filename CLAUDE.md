@@ -342,6 +342,8 @@ Tuning provenance, A/B tables and measured accuracies are in reference 02 and
   temperature). Two safeguards: the top-level ambiguity gate, and a post-commit member sanity check.
   **The additive tie-break `_stage5_rerank` was tried and rejected (hurt net, redundant with Stage-4).
   It survives only in `devtools/dtw_ab_eval.py` as a documented negative result - do not re-add it.**
+  Design rationale: register item 99 and
+  `docs/superpowers/specs/2026-08-14-cycle-variant-discrimination-design.md` (Phase 0.5).
 
 **Match confidence** = the top candidate's final blended pipeline score (`best["score"]`), 0-1. It is
 a similarity score, **not a calibrated probability**. **Ambiguity:**

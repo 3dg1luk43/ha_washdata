@@ -1,131 +1,41 @@
-# Pull Request
-
 > [!CAUTION]
-> **STOP - do not open this PR unless you already have an `accepted` issue.**
+> **Do not open this PR unless your linked issue already carries the `accepted` label.**
 >
-> WashData does **not** accept unsolicited code. Work must be agreed with the maintainer *before* you write it, so you never spend time on something that is already in progress, already rejected, or headed in a direction that will not be merged.
+> WashData does not accept unsolicited code. Open an
+> [issue](https://github.com/3dg1luk43/ha_washdata/issues/new/choose) first, tick "I plan to submit a
+> PR", and wait for the `accepted` label so scope is agreed before you write anything.
 >
-> **Required flow for every non-translation PR:**
-> 1. Open a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml), [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml), or [Documentation](https://github.com/3dg1luk43/ha_washdata/issues/new?template=documentation.yml) issue and tick the "I plan to submit a PR" box.
-> 2. **Wait** for the maintainer to add the `accepted` label. This is where you agree on scope and approach.
-> 3. *Only then* open this PR, referencing that already-accepted issue.
->
-> **These PRs are not considered and will be closed automatically:**
-> - PRs that link **no** issue.
-> - PRs opened **in parallel** with a brand-new, not-yet-accepted issue (opening the PR alongside the issue skips the review-and-agree step and will not be reviewed).
-> - PRs where this template is deleted or left unfilled.
->
-> **Exemption:** Translation PRs (including those opened automatically by [GitLocalize](https://gitlocalize.com/repo/10819)) skip all of the above.
+> Closed automatically: PRs linking no issue, PRs opened in parallel with a brand-new issue, and PRs
+> with this template deleted or unfilled. **Translation PRs (incl. GitLocalize) are exempt from all of
+> the above.**
 
-## Linked Accepted Issue (required for non-translation PRs)
+Closes #<!-- must already have the `accepted` label -->
 
-<!-- The issue below must ALREADY carry the `accepted` label BEFORE you open this PR.
-     Linking a fresh, unaccepted issue does not qualify - see the flow above. -->
+## What and why
 
-Closes #<!-- issue number - must have the `accepted` label -->
+<!-- What problem does this solve, and how? -->
 
-## Description
+## Type
 
-<!-- Brief summary of the changes. What problem does this solve? -->
-
-## Type of Change
-
-<!-- Mark the relevant option with an "x" -->
-
-- [ ] 🐛 Bug fix (non-breaking change that fixes an issue)
-- [ ] ✨ New feature (non-breaking change that adds functionality)
-- [ ] 🔄 Refactor (code reorganization with no behavior change)
-- [ ] 📚 Documentation update
-- [ ] 🧪 Test additions/improvements
-- [ ] ⚡ Performance improvement
-- [ ] 🎨 UI/UX improvement
-- [ ] 🌍 Translation/Localization
-
-## Changes Made
-
-<!-- Describe what you changed and why. Be specific. -->
-
-- [ ] Change 1
-- [ ] Change 2
-- [ ] Change 3
+<!-- Delete what does not apply -->
+Bug fix / Feature / Refactor / Docs / Tests / Performance / UI / Translation
 
 ## Testing
 
-<!-- How have you tested these changes? -->
+<!-- How did you verify this? Include HA version, WashData version and device type for a bug fix. -->
 
-- [ ] Unit tests added/updated
-- [ ] Manual testing completed
-- [ ] Tested with mock socket: `python3 devtools/mqtt_mock_socket.py`
-- [ ] Ran: `./run_tests.sh`
-
-<!-- For bugs, include reproduction steps: -->
-**Tested on:**
-- Home Assistant version: X.Y.Z
-- WashData version: X.Y.Z
-- Device type(s): [Washing Machine / Dryer / Dishwasher / Other]
-
-## Breaking Changes?
-
-- [ ] This PR includes **breaking changes**
-
-<!-- If breaking changes, describe them and migration path: -->
-**If breaking:**
-Describe the breaking change and how to migrate...
+- [ ] `./run_tests.sh` passes
+- [ ] Tests added or updated
+- [ ] Manually verified
 
 ## Checklist
 
-<!-- Ensure these before submitting -->
+- [ ] The linked issue already had the `accepted` label (or this is a translation PR)
+- [ ] No hardcoded UI strings - user-facing text is in `strings.json` / `translations/`
+- [ ] Rebuilt panel artifacts if I touched `www/*.js` (`node devtools/build_panel.mjs`)
+- [ ] Docs and CHANGELOG updated if the change is user-visible
+- [ ] Breaking change? Describe it and the migration path here:
 
-- [ ] **The issue I link above already had the `accepted` label before I opened this PR** (or this is a translation PR)
-- [ ] My code follows the project's code standards (PEP 8, type hints)
-- [ ] I've added/updated docstrings for new functions/classes
-- [ ] I've added corresponding tests (if applicable)
-- [ ] I've updated documentation (README, CHANGELOG, etc. if applicable)
-- [ ] I've checked that `python3 -m compileall custom_components tests` passes
-- [ ] I've run `./run_tests.sh` and all tests pass
-- [ ] **No hardcoded UI strings** - all user-facing text is in `strings.json` and `translations/`
-- [ ] I've reviewed my own code for quality
-- [ ] I've synced with upstream: `git fetch upstream && git rebase upstream/main`
+## Notes for reviewers
 
-## For Translations
-
-<!-- Translation contributions are preferred via GitLocalize: https://gitlocalize.com/repo/10819
-     GitLocalize opens PRs automatically. If this is a manual translation PR, fill in below. -->
-
-- [ ] Language: [e.g., Russian, Spanish, French]
-- [ ] I've verified JSON syntax: `python3 -m json.tool custom_components/ha_washdata/translations/[lang].json`
-- [ ] All keys match the English translation file
-
-## Screenshots / Demo
-
-<!-- Add screenshots, GIFs, or describe the visual impact if applicable -->
-
-<!-- Example for UI changes:
-Before:
-[screenshot]
-
-After:
-[screenshot]
--->
-
-## Related Issues
-
-<!-- Any additional related issues or discussions beyond the accepted issue above -->
-
-- Related to: #(issue number)
-
-## Notes for Reviewers
-
-<!-- Any additional context, concerns, or guidance for the reviewer? -->
-
----
-
-**Thank you for contributing to WashData!** 🙏
-
-Before hitting submit, please make sure:
-1. ✅ Your linked issue **already carries the `accepted` label** (translation PRs exempt)
-2. ✅ PR title clearly describes the change
-3. ✅ Description is detailed enough for reviewers to understand
-4. ✅ Tests pass locally
-5. ✅ You've reviewed the [CONTRIBUTING.md](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md) guide
-6. ✅ You've read our [Code of Conduct](https://github.com/3dg1luk43/ha_washdata/blob/main/CODE_OF_CONDUCT.md)
+<!-- Anything else worth knowing. Screenshots welcome for UI changes. -->
