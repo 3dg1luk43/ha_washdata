@@ -2608,7 +2608,7 @@ class ProfileStore:
             real = len(self.get_past_cycles())
             if real > stored:
                 self._data["lifetime_cycle_count"] = real
-                _LOGGER.debug(
+                self._logger.debug(
                     "Healed lifetime cycle count %d -> %d (stored history is larger)",
                     stored,
                     real,
