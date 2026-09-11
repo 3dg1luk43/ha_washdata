@@ -3288,6 +3288,10 @@ async def ws_wipe_history(
 
     try:
         await manager.profile_store.clear_all_data()
+        # clear_all_data pops the persisted arm, but the manager's in-memory field is
+        # the authoritative one, so the pin has to be retired there too or the next
+        # cycle re-applies a program from before the wipe.
+        manager.clear_armed_program()
         manager.notify_update()
         _send_result(connection, msg["id"], "wipe_history", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught

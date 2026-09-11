@@ -5598,9 +5598,7 @@ class WashDataManager:
         self._current_program = "off"
         self._manual_program_active = False
         # A pin is for the cycle it was made for, so it does not carry over (#411).
-        if self._armed_program is not None:
-            self._armed_program = None
-            self._persist_armed_program(None)
+        self.clear_armed_program()
         self._notified_pre_completion = False
         self._time_remaining = None
         self._matched_profile_duration = None
@@ -7710,6 +7708,22 @@ class WashDataManager:
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.debug("Could not persist the armed program", exc_info=True)
 
+    def clear_armed_program(self) -> bool:
+        """Drop any program armed for the next cycle. True if one was armed.
+
+        `_armed_program` is the authoritative copy; the store key is only there so
+        an arm survives a restart. So every site that retires an arm has to clear
+        BOTH, and there were three inline copies of this pair plus one place that
+        cleared only the store - the wipe (`clear_all_data` pops `armed_program`,
+        `ws_wipe_history` never touched the field), which left a pre-wipe pin ready
+        to be re-applied as soon as a profile of the same name existed again.
+        """
+        if self._armed_program is None:
+            return False
+        self._armed_program = None
+        self._persist_armed_program(None)
+        return True
+
     def _consume_armed_program(self) -> bool:
         """Apply an armed program to the cycle that just started, if there is one.
 
@@ -7727,12 +7741,10 @@ class WashDataManager:
             self._logger.info(
                 "Armed program %r no longer exists; reverting to auto-detect", name
             )
-            self._armed_program = None
-            self._persist_armed_program(None)
+            self.clear_armed_program()
             return False
         self._apply_manual_program(name, profiles.get(name))
-        self._armed_program = None
-        self._persist_armed_program(None)
+        self.clear_armed_program()
         self._logger.info("Applied armed program %r to the cycle just started", name)
         return True
 

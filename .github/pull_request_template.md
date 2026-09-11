@@ -11,14 +11,20 @@
 
 Closes #<!-- must already have the `accepted` label -->
 
-## What and why
+## Description
 
 <!-- What problem does this solve, and how? -->
 
-## Type
+## Type of Change
 
-<!-- Delete what does not apply -->
-Bug fix / Feature / Refactor / Docs / Tests / Performance / UI / Translation
+- [ ] Bug fix
+- [ ] Feature
+- [ ] Refactor
+- [ ] Docs
+- [ ] Tests
+- [ ] Performance
+- [ ] UI
+- [ ] Translation
 
 ## Testing
 
