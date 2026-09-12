@@ -77,11 +77,14 @@
     "approved": "Godkänd",
     "awaiting": "Väntar på godkännande",
     "imported_tip": "Importerad från gemenskapsbutiken. Används endast för matchning, räknas inte in i statistiken.",
+    "unmatchable": "kan inte matchas",
     "not_importable": "ej här",
     "exists": "finns",
-    "backfilled_tip": "Detekterad i importerad effekthistorik. Påverkar bara programmatchningen, räknas inte in i statistiken."
+    "backfilled_tip": "Detekterad i importerad effekthistorik. Påverkar bara programmatchningen, räknas inte in i statistiken.",
+    "armed": "(gäller nästa cykel)"
   },
   "btn": {
+    "reset_zoom": "Återställ zoom",
     "set_brand_model": "Ange märke och modell",
     "refresh_catalog": "Uppdatera katalog",
     "add_device": "+ Lägg till enhet",
@@ -215,6 +218,8 @@
     "trim": "Beskär",
     "trim_split": "Beskär / Dela",
     "undo": "Ångra",
+    "unlabel_selected": "Ta bort märkning ({n})",
+    "unlabel_selected_tip": "Tar bort profilmärkningen från de valda cyklerna. De ligger kvar i din historik och kan märkas igen senare - de påverkar bara inte längre den här profilen.",
     "use": "Använd",
     "wipe_all": "Rensa all data",
     "delete_selected": "Radera valda ({n})",
@@ -222,7 +227,6 @@
     "pg_apply_best": "Använd bästa",
     "pg_apply_to_settings": "Spara till inställningar",
     "pg_apply_to_settings_tip": "Kopiera värdena du redigerade här till den här enhetens aktiva inställningar",
-    "search": "Sök",
     "import": "Importera",
     "disconnect": "Koppla från",
     "connect_github": "Anslut GitHub",
@@ -249,7 +253,8 @@
     "hist_read_recorder": "Läs från Home Assistant",
     "hist_scan": "Sök efter cykler",
     "hist_import_n": "Importera {n} cykler",
-    "hist_goto_cycles": "Visa mig cyklerna"
+    "hist_goto_cycles": "Visa mig cyklerna",
+    "save_total_cycles": "Spara total"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -360,12 +365,12 @@
     "wipe_history": "Rensa historik",
     "recommendations": "Rekommendationer ({n})",
     "pg_detection_params": "Detekteringsinställningar",
-    "pg_timeline": "Händelsetidslinje",
     "pg_outcome": "Simuleringsresultat",
     "pg_across_cycles": "Över dina cykler",
     "community_store": "Gemenskapsbutik",
     "online_account": "Gemenskapsbutik och onlinefunktioner",
-    "import_power_history": "Importera effekthistorik"
+    "import_power_history": "Importera effekthistorik",
+    "service_status": "Servicestatus"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -373,6 +378,8 @@
     "poor": "⚠ Dålig profilkvalitet"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktiv effektgraf för cykeln: hovra för att avläsa tid/effekt, skrolla eller nyp för att zooma, dra för att panorera",
+    "device_unresolved": "Otillgänglig enhet ({id})",
     "drag_to_resize": "Dra för att ändra storlek",
     "actions": "Åtgärder",
     "activity": "Aktivitet",
@@ -513,7 +520,7 @@
     "profile_index": "profilindex →",
     "profile_name": "Profilnamn",
     "program": "Program",
-    "program_tip": "Åsidosätt vilken profil som matchas mot det aktuella cykeln. Autodetektering låter integrationen välja den bästa matchningen automatiskt. Fäst ett specifikt program för att tvinga matchning när autodetekteringen är fel eller du vet vad som körs.",
+    "program_tip": "Åsidosätt vilken profil som matchas mot det aktuella cykeln. Autodetektering låter integrationen välja den bästa matchningen automatiskt. Fäst ett specifikt program för att tvinga matchning när autodetekteringen är fel eller du vet vad som körs. Välj ett innan du startar apparaten, så tillämpas det så snart nästa cykel börjar.",
     "progress": "Förlopp",
     "raw_socket": "Råsocket",
     "read_only": "Skrivskyddad",
@@ -548,6 +555,7 @@
     "stage4": "Steg 4 – överensstämmelse",
     "status": "Status",
     "tail_trim": "Beskär slut (s)",
+    "tap_to_dismiss": "tryck på diagrammet för att stänga",
     "timer_auto_pause": "Automatisk paus",
     "timer_min": "min",
     "timer_msg_placeholder": "Meddelande (valfritt, {device}/{program}/{minutes})",
@@ -584,9 +592,7 @@
     "pg_time_left_model": "Tid kvar (modell)",
     "pg_time_left_model_tip": "Modellberäknad återstående tid (fasberäknare + ML-blandning), inte en statisk nedräkning",
     "phase": "Fas",
-    "pg_mode_simulate": "Simulera",
     "pg_mode_history": "Testa på historik",
-    "pg_mode_sweep": "Svep",
     "pg_ev_detected": "Upptäckt",
     "pg_ev_match": "Matchning bekräftad",
     "pg_ev_match_changed": "Matchning ändrad",
@@ -616,14 +622,11 @@
     "pg_sweep_param": "Parameter",
     "pg_objective": "Mål",
     "pg_steps": "Steg",
-    "pg_sweep_2d": "2D-värmekarta",
-    "pg_sweep_param_y": "2:a parametern",
     "pg_obj_match": "Matchningsnoggrannhet",
     "pg_obj_endtiming": "Sluttidsnoggrannhet",
     "pg_obj_falseend": "Falskt-slut-andel",
     "pg_obj_overrun": "Varaktighetsavvikelse",
     "pg_obj_ambiguity": "Tvetydighetsandel",
-    "pg_best_combo": "bästa kombinationen",
     "pg_mode_optimize": "Optimera",
     "pg_group_matching": "Programmatchning",
     "pg_zoom_hint": "dubbelklicka för att återställa zoomen",
@@ -706,7 +709,12 @@
     "task_history_import_apply": "Importerar cykler",
     "evidence_real_cycles": "Cykler den här maskinen har kört",
     "evidence_reference_cycles": "Nedladdade från gemenskapsbutiken",
-    "evidence_backfill_cycles": "Hittade i importerad effekthistorik"
+    "evidence_backfill_cycles": "Hittade i importerad effekthistorik",
+    "zoom_hint_touch": "nyp för att zooma",
+    "zoom_hint_touch_zoomed": "nyp för att zooma · dubbeltryck för att återställa",
+    "cycles_since_service": "{since} / {total} cykler",
+    "total_cycles_run": "cykler totalt",
+    "correct_total_cycles": "Korrigera totalen"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -789,6 +797,7 @@
     "history_import": "Importera effekthistorik"
   },
   "msg": {
+    "pg_canvas_empty3": "Välj en cykel ovan och tryck på Kör för att simulera den. Hovra sedan för att avläsa värden, skrolla eller nyp för att zooma och dra för att panorera.",
     "tail_trim_hint": "Ta bort så här många sekunder från slutet",
     "store_sibling_hint": "Finns inget delat för exakt din modell? En närbesläktad modell från samma märke är oftast en bra utgångspunkt.",
     "store_declare_appliance": "Berätta för WashData vilken apparat du har, så visar den här fliken de färdiga inställningar andra har delat för den. Du kan också skriva ett märke ovanför för att se dig omkring.",
@@ -802,7 +811,7 @@
     "artifact_spike_detail": "Drog över det normala effektbandet i ~{n} s.",
     "auto_label_intro": "Tilldela profiler till omärkta cykler vars matchningskonfidens överstiger tröskeln.",
     "automations_intro": "WashData utlöser {start} / {end}-händelser och tillhandahåller entiteter – aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
-    "cleanup_intro": "Alla märkta cykler är överlagda. Kryssa i avvikare och ta bort dem för att rensa profilen.",
+    "cleanup_intro": "Alla märkta cykler är överlagrade. Kryssa i avvikare och ta sedan bort deras märkning (de ligger kvar i historiken men påverkar inte längre den här profilen) eller radera dem helt.",
     "clear_debug_hint": "Ta bort lagrad felsökningsdata för att frigöra utrymme.",
     "collecting_data": "Samlar in data. Cykler som återstår innan finjustering kan starta: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Lägg över profiler (svag)",
@@ -984,9 +993,9 @@
     "advisory_poor_health": "'{name}' har ett lågt passningsvärde - dess senaste cykler varierar mycket eller matchar svagt. Granska dess cykler eller spela in profilen på nytt så att matchning och tidsuppskattningar förblir korrekta.",
     "advisory_shape_drift": "'{name}' har drivit iväg avsevärt från sin ursprungliga effektkurva. Apparaten kan ha förändrat sitt beteende över tid (t.ex. kalkavlagringar, slitage). Överväg att spela in profilen på nytt med aktuella cykler.",
     "advisory_shape_drift_corr": "'{name}' har drivit iväg avsevärt från sin ursprungliga effektkurva (korrelation {corr}). Apparaten kan ha förändrat sitt beteende över tid (t.ex. kalkavlagringar, slitage). Överväg att spela in profilen på nytt med aktuella cykler.",
+    "advisory_unmatchable": "'{name}' kan aldrig matchas: det finns ingen cykel med effektdata bakom den, så WashData har inget att jämföra en pågående cykel med. Märk en cykel av det här programmet (eller spela in en) för att få med det i matchningen igen.",
     "pg_no_alerts": "Inga problem upptäcktes i den här körningen.",
     "pg_override_active": "Använder dina redigerade inställningar mot de nuvarande",
-    "pg_history_intro": "Spela upp dina senaste cykler genom den riktiga detekteringen och matchningen. Redigera en detekteringsinställning i Simulera först för att se en före/efter-jämförelse här.",
     "pg_history_empty": "Tryck på Kör för att spela upp dina cykler igen.",
     "pg_history_summary": "{detected}/{total} upptäckta · {correct} matchade korrekt",
     "pg_sweep_no_metric": "Inte tillräckligt med data för att poängsätta det här målet.",
@@ -1063,7 +1072,11 @@
     "hist_scan_failed": "Sökningen misslyckades.",
     "hist_scan_expired": "Den sökningen är inte längre tillgänglig. Sök igen.",
     "hist_import_failed": "Importen misslyckades.",
-    "imported_history_readonly": "Detekterad i importerad effekthistorik. Den påverkar programmatchningen men räknas inte in i din statistik och kan inte beskäras eller delas. Märk den för att namnge programmet."
+    "imported_history_readonly": "Detekterad i importerad effekthistorik. Den påverkar programmatchningen men räknas inte in i din statistik och kan inte beskäras eller delas. Märk den för att namnge programmet.",
+    "odometer_intro": "Den här totalsumman kan bara öka. Att ta bort en cykelpost ändrar den inte, och den fortsätter räkna även utöver gränsen för sparad historik, så att servicepåminnelserna fortsätter stämma.",
+    "odometer_correct_hint": "Ange detta om WashData har registrerat en körning som aldrig ägde rum, eller om apparaten redan hade kört cykler innan WashData installerades.",
+    "no_reminders_set": "Inga servicepåminnelser är inställda än.",
+    "toast_program_armed": "Program valt för nästa cykel: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
@@ -1467,10 +1480,6 @@
       "doc": "Sekunder kan en pump köras kontinuerligt innan den flaggas som eventuellt fast (utlöser händelsen med fast pump).",
       "label": "Pumpens fastnadsvaraktighet"
     },
-    "running_dead_zone": {
-      "doc": "Efter att en cykel har startat ignoreras effektfall inom detta fönster. Tvättmaskiner fylls med kallt vatten (sjunker nära 0 W före uppvärmning) - utan detta skydd ser fyllningsfasen ut som ett cykelslut. Detta hoppar INTE över data: spåret för full effekt registreras från T=0. Förslagsmotorn mäter din maskins faktiska startmönster och dimensionerar detta automatiskt.",
-      "label": "Löpande dödzon"
-    },
     "sampling_interval": {
       "doc": "Förväntad tid mellan sensoravläsningarna - används för att dimensionera utjämningsfönstret och starta avstudsningen korrekt. Varje sensoruppdatering registreras oavsett detta värde; den kalibrerar bara nedströmsberäkningarna. Förslagsmotorn mäter din sensors faktiska kadens från tidigare cykler och ställer in denna automatiskt.",
       "label": "Samplingsintervall"
@@ -1597,6 +1606,10 @@
     "power_profile_interval_min": {
       "label": "Effektprofil-intervall",
       "doc": "Storlek på bucket för effektprofilsensorns attribut power_profile (det platta arrayen med genomsnittliga wattvärden per slot som används av externa planerare som EMHASS och tibber_prices). Mindre buckets håller korta effekttoppar skarpa; större buckets jämnar ut kurvan. Standard 15 min. Endast för visning; påverkar inte detektering."
+    },
+    "notify_live_silent": {
+      "label": "Tysta liveuppdateringar",
+      "doc": "Endast iOS. Uppdatera liveförloppet ljudlöst: varje uppdatering kommer utan ljud eller vibration, med en lägre, batterisnål prioritet som iOS kan gruppera en kort stund. Den första uppdateringen i en cykel (den som startar liveaktiviteten) samt start- och slutaviseringarna hörs fortfarande som vanligt. Stäng av detta om du vill bli aviserad vid varje uppdatering."
     },
     "notify_live_sticky": {
       "label": "Behåll live-avisering vid tryck",
@@ -1728,7 +1741,8 @@
     "splitting": "Delar upp…",
     "deleting": "Raderar…",
     "imported": "Importerad",
-    "preparing": "Förbereder…"
+    "preparing": "Förbereder…",
+    "unlabelling": "Tar bort märkning…"
   },
   "suggestion": {
     "both_agree": "WashData rekommenderar",
@@ -1774,10 +1788,6 @@
       "profile_match_threshold": {
         "higher": "Bara mycket säkra matchningar bekräftas – fler cykler förblir omärkta",
         "lower": "Fler cykler matchas – vissa kan vara något felaktiga"
-      },
-      "running_dead_zone": {
-        "higher": "Korta effekttoppar under tomgång ignoreras – mindre brusig",
-        "lower": "Reagerar på kortare effektimpulser – fångar snabba transienter"
       },
       "start_threshold_w": {
         "higher": "Undviker falska starter från korta effekttoppar",
@@ -1921,6 +1931,7 @@
     "recording_stopped": "Inspelning stoppad",
     "review_saved": "Granskning sparad",
     "settings_conflicts": "Åtgärda de markerade inställningskonflikterna innan du sparar.",
+    "settings_no_changes": "Inga ändringar att spara",
     "settings_reverted": "Inställningar återställda; integration laddas om",
     "settings_saved": "Inställningar sparade; integration laddas om",
     "suggestions_applied": "Förslag tillämpade; integration laddas om",
@@ -1979,7 +1990,11 @@
     "export_selective_done": "Export nedladdad",
     "import_selective_done": "Importerade {profiles} profil(er) och {cycles} cykel/cykler",
     "hist_csv_required": "Ladda in en CSV-fil eller klistra in dess innehåll först",
-    "file_read_failed": "Kunde inte läsa den filen"
+    "file_read_failed": "Kunde inte läsa den filen",
+    "unlabel_done": "Märkningen togs bort från {count} cykler",
+    "unlabel_failed": "Borttagning av märkning misslyckades: {error}",
+    "odometer_saved": "Totalt antal cykler sparat",
+    "odometer_save_failed": "Kunde inte spara totalen: {error}"
   },
   "trend": {
     "down": "Nedåtgående trend",
@@ -2028,9 +2043,9 @@
     "finished": "Cykeln nådde ett sluttillstånd och avslutades."
   },
   "store": {
+    "search_ph2": "Sök efter märke eller modell…",
     "your_model_tip": "Det här är apparaten du har angett i Inställningar",
     "your_model": "Din apparat",
-    "search_brand_ph": "Sök efter märke…",
     "programs_count": "Program: {n}",
     "browse": "Bläddra",
     "device": "Enhet",

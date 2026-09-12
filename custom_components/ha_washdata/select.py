@@ -104,9 +104,14 @@ class WashDataProgramSelect(SelectEntity):
 
         current = self._manager.current_program
         manual_active = getattr(self._manager, "manual_program_active", False)
+        armed = getattr(self._manager, "armed_program", None)
 
         if manual_active and current:
             self._attr_current_option = current
+        elif armed and armed in self._attr_options:
+            # Pinned for the next cycle while the appliance is idle (#411): show the
+            # choice back, or the select would snap to Auto the moment it was set.
+            self._attr_current_option = armed
         elif current in ("detecting...", "off", "restored..."):
             self._attr_current_option = OPTION_AUTO
         elif current:

@@ -29,11 +29,14 @@
     "approved": "Aprobado",
     "awaiting": "A la espera de aprobación",
     "imported_tip": "Importado de la tienda de la comunidad. Se usa solo para la coincidencia, no cuenta en las estadísticas.",
+    "unmatchable": "coincidencia imposible",
     "not_importable": "n/d aquí",
     "exists": "ya existe",
-    "backfilled_tip": "Detectado en un historial de potencia importado. Solo influye en la coincidencia de programas, no cuenta en las estadísticas."
+    "backfilled_tip": "Detectado en un historial de potencia importado. Solo influye en la coincidencia de programas, no cuenta en las estadísticas.",
+    "armed": "(se aplica al siguiente ciclo)"
   },
   "btn": {
+    "reset_zoom": "Restablecer zoom",
     "set_brand_model": "Definir marca y modelo",
     "refresh_catalog": "Actualizar catálogo",
     "add_device": "+ Agregar dispositivo",
@@ -167,6 +170,8 @@
     "trim": "Recortar",
     "trim_split": "Recortar / Dividir",
     "undo": "Deshacer",
+    "unlabel_selected": "Quitar etiqueta a los seleccionados ({n})",
+    "unlabel_selected_tip": "Quita la etiqueta de perfil de los ciclos seleccionados. Permanecen en su historial y se podrán volver a etiquetar más tarde; solo dejan de influir en este perfil.",
     "use": "Usar",
     "wipe_all": "Borrar todos los datos",
     "delete_selected": "Eliminar seleccionados ({n})",
@@ -174,7 +179,6 @@
     "pg_apply_best": "Aplicar mejor",
     "pg_apply_to_settings": "Guardar en los ajustes",
     "pg_apply_to_settings_tip": "Copiar los valores que has editado aquí en los ajustes activos de este dispositivo",
-    "search": "Buscar",
     "import": "Importar",
     "disconnect": "Desconectar",
     "connect_github": "Conectar GitHub",
@@ -201,7 +205,8 @@
     "hist_read_recorder": "Leer desde Home Assistant",
     "hist_scan": "Buscar ciclos",
     "hist_import_n": "Importar {n} ciclos",
-    "hist_goto_cycles": "Ver los ciclos"
+    "hist_goto_cycles": "Ver los ciclos",
+    "save_total_cycles": "Guardar total"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -312,12 +317,12 @@
     "wipe_history": "Limpiar historial",
     "recommendations": "Recomendaciones ({n})",
     "pg_detection_params": "Ajustes de detección",
-    "pg_timeline": "Cronología de eventos",
     "pg_outcome": "Resultado de la simulación",
     "pg_across_cycles": "En todos tus ciclos",
     "community_store": "Tienda de la comunidad",
     "online_account": "Tienda de la comunidad y funciones en línea",
-    "import_power_history": "Importar historial de potencia"
+    "import_power_history": "Importar historial de potencia",
+    "service_status": "Estado del mantenimiento"
   },
   "health": {
     "fair": "Calidad de perfil aceptable",
@@ -325,6 +330,8 @@
     "poor": "⚠ Calidad de perfil deficiente"
   },
   "lbl": {
+    "aria_playground_chart3": "Gráfico interactivo de potencia del ciclo: pasa el cursor para leer el tiempo/la potencia, desplázate o pellizca para hacer zoom, arrastra para desplazarte",
+    "device_unresolved": "Dispositivo no disponible ({id})",
     "drag_to_resize": "Arrastre para cambiar el tamaño",
     "actions": "Comportamiento",
     "activity": "Actividad",
@@ -460,7 +467,7 @@
     "profile_index": "índice de perfil →",
     "profile_name": "Nombre del perfil",
     "program": "Programa",
-    "program_tip": "Anula qué perfil se asocia al ciclo actual. La detección automática permite que la integración elija la mejor coincidencia automáticamente. Fija un programa concreto para forzar la coincidencia cuando la detección automática falla o sabes qué está en marcha.",
+    "program_tip": "Anula qué perfil se asocia al ciclo actual. La detección automática permite que la integración elija la mejor coincidencia automáticamente. Fija un programa concreto para forzar la coincidencia cuando la detección automática falla o sabes qué está en marcha. Elige uno antes de poner en marcha el electrodoméstico y se aplicará en cuanto empiece el siguiente ciclo.",
     "progress": "Progreso",
     "raw_socket": "Señal bruta",
     "read_only": "Sólo lectura",
@@ -495,6 +502,7 @@
     "stage4": "Etapa 4 – concordancia",
     "status": "Estado",
     "tail_trim": "Recorte de fin (s)",
+    "tap_to_dismiss": "toca el gráfico para cerrar",
     "timer_auto_pause": "Pausa automática",
     "timer_min": "mín.",
     "timer_msg_placeholder": "Mensaje (opcional, {device}/{program}/{minutes})",
@@ -531,9 +539,7 @@
     "pg_time_left_model": "Tiempo restante (modelo)",
     "pg_time_left_model_tip": "Tiempo restante estimado por el modelo (estimador de fase + mezcla de ML), no una cuenta atrás fija",
     "phase": "Fase",
-    "pg_mode_simulate": "Simular",
     "pg_mode_history": "Probar en el historial",
-    "pg_mode_sweep": "Barrido",
     "pg_ev_detected": "Detectado",
     "pg_ev_match": "Coincidencia confirmada",
     "pg_ev_match_changed": "Coincidencia cambiada",
@@ -572,14 +578,11 @@
     "pg_stress_idle_w_desc": "Anula el nivel mínimo de reposo detectado automáticamente (dejar en blanco para automático).",
     "pg_stress_toggle": "Probar terminación en reposo",
     "pg_stress_toggle_desc": "Simula el electrodoméstico manteniéndose en su consumo en reposo tras el final de la grabación – muestra si WashData detiene el ciclo y cuándo.",
-    "pg_sweep_2d": "Mapa de calor 2D",
-    "pg_sweep_param_y": "2.º parámetro",
     "pg_obj_match": "Precisión de coincidencia",
     "pg_obj_endtiming": "Precisión del momento de fin",
     "pg_obj_falseend": "Tasa de falsos finales",
     "pg_obj_overrun": "Desviación de duración",
     "pg_obj_ambiguity": "Tasa de ambigüedad",
-    "pg_best_combo": "mejor combinación",
     "pg_mode_optimize": "Optimizar",
     "pg_group_matching": "Coincidencia de programa",
     "pg_zoom_hint": "haz doble clic para restablecer el zoom",
@@ -658,7 +661,12 @@
     "task_history_import_apply": "Importando ciclos",
     "evidence_real_cycles": "Ciclos que ejecutó esta máquina",
     "evidence_reference_cycles": "Descargados de la tienda de la comunidad",
-    "evidence_backfill_cycles": "Encontrados en un historial de potencia importado"
+    "evidence_backfill_cycles": "Encontrados en un historial de potencia importado",
+    "zoom_hint_touch": "pellizcar para hacer zoom",
+    "zoom_hint_touch_zoomed": "pellizcar para hacer zoom · doble toque para restablecer",
+    "cycles_since_service": "{since} / {total} ciclos",
+    "total_cycles_run": "ciclos realizados en total",
+    "correct_total_cycles": "Corregir el total"
   },
   "log": {
     "all_levels": "Todos los niveles",
@@ -741,6 +749,7 @@
     "history_import": "Importar historial de potencia"
   },
   "msg": {
+    "pg_canvas_empty3": "Elige un ciclo de arriba y pulsa Ejecutar para simularlo. Después, pasa el cursor para leer los valores, desplázate o pellizca para hacer zoom y arrastra para desplazarte.",
     "tail_trim_hint": "Número de segundos que se eliminarán del final",
     "store_sibling_hint": "¿No hay nada compartido para su modelo exacto? Un modelo muy parecido de la misma marca suele ser un buen punto de partida.",
     "store_declare_appliance": "Indique a WashData qué electrodoméstico tiene y esta pestaña mostrará las configuraciones que otras personas han compartido para él. También puede escribir una marca arriba para echar un vistazo.",
@@ -754,7 +763,7 @@
     "artifact_spike_detail": "Superó la banda de potencia habitual durante ~{n}s.",
     "auto_label_intro": "Asigne perfiles a ciclos sin etiquetar cuya confianza de coincidencia supere el umbral.",
     "automations_intro": "WashData dispara los eventos {start} / {end} y expone entidades, por lo que las notificaciones y acciones se construyen mejor como automatizaciones normales de Home Assistant. Las automatizaciones que usan este dispositivo aparecen a continuación.",
-    "cleanup_intro": "Cada ciclo etiquetado se superpone. Marque los valores atípicos y elimínelos para limpiar el perfil.",
+    "cleanup_intro": "Cada ciclo etiquetado se superpone. Marque los valores atípicos y luego quíteles la etiqueta (se conservan en el historial, pero dejan de influir en este perfil) o elimínelos definitivamente.",
     "clear_debug_hint": "Elimine los datos de depuración almacenados para liberar espacio.",
     "collecting_data": "Recopilando datos. Ciclos que faltan para que pueda comenzar el ajuste fino: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Perfiles superpuestos (débil)",
@@ -936,9 +945,9 @@
     "advisory_poor_health": "'{name}' tiene una baja puntuación de coincidencia - sus ciclos recientes varían mucho o coinciden poco. Revisa sus ciclos o vuelve a grabar el perfil para que el reconocimiento y las estimaciones de tiempo sigan siendo precisos.",
     "advisory_shape_drift": "'{name}' se ha alejado notablemente de su curva de potencia original. Puede que el electrodoméstico haya cambiado de comportamiento con el tiempo (p. ej. cal, desgaste). Considera volver a grabar este perfil con ciclos recientes.",
     "advisory_shape_drift_corr": "'{name}' se ha alejado notablemente de su curva de potencia original (correlación {corr}). Puede que el electrodoméstico haya cambiado de comportamiento con el tiempo (p. ej. cal, desgaste). Considera volver a grabar este perfil con ciclos recientes.",
+    "advisory_unmatchable": "'{name}' nunca podrá coincidir: no tiene detrás ningún ciclo con datos de potencia, por lo que WashData no tiene nada con lo que comparar un ciclo en curso. Etiquete un ciclo de este programa (o registre uno) para volver a incluirlo en la coincidencia.",
     "pg_no_alerts": "No se detectaron problemas en esta ejecución.",
     "pg_override_active": "Usando sus ajustes editados vs. los actuales",
-    "pg_history_intro": "Reproduzca sus ciclos recientes con el detector y el comparador reales. Edite primero un ajuste de detección en Simular para ver aquí una comparación antes/después.",
     "pg_history_empty": "Pulse Ejecutar para reproducir sus ciclos.",
     "pg_history_summary": "{detected}/{total} detectados · {correct} reconocidos correctamente",
     "pg_sweep_no_metric": "No hay datos suficientes para puntuar este objetivo.",
@@ -1015,7 +1024,11 @@
     "hist_scan_failed": "El análisis falló.",
     "hist_scan_expired": "Ese análisis ya no está disponible. Vuelva a analizar el historial.",
     "hist_import_failed": "La importación falló.",
-    "imported_history_readonly": "Detectado en un historial de potencia importado. Influye en la coincidencia de programas, pero no cuenta en sus estadísticas y no se puede recortar ni dividir. Etiquételo para indicar el programa."
+    "imported_history_readonly": "Detectado en un historial de potencia importado. Influye en la coincidencia de programas, pero no cuenta en sus estadísticas y no se puede recortar ni dividir. Etiquételo para indicar el programa.",
+    "odometer_intro": "Este total solo aumenta. Eliminar el registro de un ciclo no lo modifica y sigue contando más allá del límite del historial almacenado, de modo que los recordatorios de servicio siguen siendo correctos.",
+    "odometer_correct_hint": "Ajuste este valor si WashData registró un ciclo que nunca ocurrió, o si el electrodoméstico ya había realizado ciclos antes de instalar WashData.",
+    "no_reminders_set": "Aún no hay recordatorios de servicio configurados.",
+    "toast_program_armed": "Programa preparado para el siguiente ciclo: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
@@ -1419,10 +1432,6 @@
       "doc": "Segundos que una bomba puede funcionar continuamente antes de que se marque como posiblemente atascada (activa el evento de bomba atascada).",
       "label": "Duración de bomba atascada"
     },
-    "running_dead_zone": {
-      "doc": "Después de que comienza un ciclo, se ignoran las caídas de energía dentro de esta ventana. Las lavadoras se llenan con agua fría (que cae cerca de 0 W antes de calentarse); sin esta protección, la fase de llenado parece un final de ciclo. Esto NO omite datos: el trazo de potencia total se registra desde T=0. El motor de sugerencias mide el patrón de inicio real de su máquina y lo dimensiona automáticamente.",
-      "label": "Zona muerta en funcionamiento"
-    },
     "sampling_interval": {
       "doc": "Tiempo esperado entre lecturas del sensor: se utiliza para dimensionar la ventana de suavizado e iniciar el rebote correctamente. Cada actualización del sensor se captura independientemente de este valor; solo calibra los cálculos posteriores. El motor de sugerencias mide la cadencia real de su sensor de ciclos anteriores y la configura automáticamente.",
       "label": "Intervalo de muestreo"
@@ -1549,6 +1558,10 @@
     "power_profile_interval_min": {
       "label": "Intervalo del perfil de potencia",
       "doc": "Tamaño del intervalo para el atributo del sensor power_profile por perfil (la matriz plana de vatios medios por franja, consumida por planificadores externos como EMHASS y tibber_prices). Intervalos más pequeños mantienen nítidos los picos de potencia breves; intervalos más grandes suavizan la forma. Predeterminado 15 min. Solo de lectura; no afecta a la detección."
+    },
+    "notify_live_silent": {
+      "label": "Actualizaciones en vivo silenciosas",
+      "doc": "Solo iOS. Actualiza el progreso en vivo de forma discreta: cada actualización llega sin sonido ni vibración, con una prioridad más baja que ahorra batería y que iOS puede agrupar durante unos instantes. La primera actualización de un ciclo (la que inicia la Actividad en vivo) y las notificaciones de inicio y de fin siguen avisando como siempre. Desactívelo para recibir un aviso en cada actualización."
     },
     "notify_live_sticky": {
       "label": "Mantener la notificación activa al pulsar",
@@ -1680,7 +1693,8 @@
     "splitting": "Dividiendo…",
     "deleting": "Eliminando…",
     "imported": "Importado",
-    "preparing": "Preparando…"
+    "preparing": "Preparando…",
+    "unlabelling": "Quitando etiqueta…"
   },
   "tab": {
     "advanced": "Avanzado",
@@ -1764,6 +1778,7 @@
     "recording_stopped": "Grabación detenida",
     "review_saved": "Revisión guardada",
     "settings_conflicts": "Corrija los conflictos de ajustes resaltados antes de guardar.",
+    "settings_no_changes": "No hay cambios para guardar",
     "settings_reverted": "Configuración revertida; recarga de integración",
     "settings_saved": "Configuración guardada; recarga de integración",
     "suggestions_applied": "Sugerencias aplicadas; recarga de integración",
@@ -1818,7 +1833,11 @@
     "export_selective_done": "Exportación descargada",
     "import_selective_done": "Se importaron {profiles} perfil(es) y {cycles} ciclo(s)",
     "hist_csv_required": "Cargue primero un archivo CSV o pegue su contenido",
-    "file_read_failed": "No se pudo leer ese archivo"
+    "file_read_failed": "No se pudo leer ese archivo",
+    "unlabel_done": "Etiqueta quitada de {count} ciclo(s)",
+    "unlabel_failed": "Error al quitar la etiqueta: {error}",
+    "odometer_saved": "Total de ciclos guardado",
+    "odometer_save_failed": "No se pudo guardar el total: {error}"
   },
   "suggestion": {
     "both_agree": "WashData recomienda",
@@ -1864,10 +1883,6 @@
       "profile_match_threshold": {
         "higher": "Solo confirma coincidencias de alta confianza; más ciclos quedan sin etiquetar",
         "lower": "Coincide con más ciclos; algunos pueden ser ligeramente incorrectos"
-      },
-      "running_dead_zone": {
-        "higher": "Ignora breves picos de potencia en reposo – menos sensible al ruido",
-        "lower": "Reacciona a impulsos más cortos – detecta actividad transitoria rápida"
       },
       "start_threshold_w": {
         "higher": "Evita arranques falsos por breves picos de potencia",
@@ -1980,9 +1995,9 @@
     "finished": "El ciclo alcanzó un estado final y terminó."
   },
   "store": {
+    "search_ph2": "Buscar por marca o modelo…",
     "your_model_tip": "Este es el electrodoméstico que declaró en Ajustes",
     "your_model": "El suyo",
-    "search_brand_ph": "Buscar por marca…",
     "programs_count": "Programas: {n}",
     "browse": "Explorar",
     "device": "Dispositivo",

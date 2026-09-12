@@ -31,6 +31,15 @@ const TRANSLATIONS_DIR = path.join(
   __dirname,
   '../custom_components/ha_washdata/translations/panel',
 );
+// The real @webcomponents/scoped-custom-element-registry build that the Home
+// Assistant frontend loads as the first import of its app entry. Served so the
+// card fixture can reproduce either load order against the genuine polyfill
+// instead of a hand-written stand-in (issue #384).
+const SCOPED_REGISTRY_SRC = path.join(
+  __dirname,
+  'node_modules/@webcomponents/scoped-custom-element-registry',
+  'scoped-custom-element-registry.min.js',
+);
 // playwright.config.ts passes PORT via the webServer.env option so the two
 // build modes (readable=4567, minified=4568) never share a server instance.
 const PORT = parseInt(process.env.PORT ?? '4567', 10);
@@ -50,6 +59,8 @@ const server = http.createServer((req, res) => {
     filePath = PANEL_SRC;
   } else if (url.pathname === '/card.js') {
     filePath = CARD_SRC;
+  } else if (url.pathname === '/scoped-custom-element-registry.js') {
+    filePath = SCOPED_REGISTRY_SRC;
   } else if (url.pathname.startsWith('/ha_washdata/panel-translations/')) {
     // /ha_washdata/panel-translations/{lang}.json -> translations/panel/{lang}.json
     const name = path.basename(url.pathname);

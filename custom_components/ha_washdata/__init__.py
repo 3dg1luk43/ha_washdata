@@ -28,7 +28,7 @@ from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import device_registry as dr
 
 from .const import (
@@ -112,6 +112,21 @@ from .const import (
 from .log_utils import DeviceLoggerAdapter
 from .options_utils import strip_null_options
 
+try:  # pragma: no cover - present in every supported HA, guarded on principle
+    from homeassistant.setup import SetupPhases, async_pause_setup
+except ImportError:  # pragma: no cover
+    from contextlib import nullcontext
+
+    class SetupPhases:  # type: ignore[no-redef]
+        """Fallback so a missing helper degrades to plain (uncredited) waiting."""
+
+        WAIT_IMPORT_PACKAGES = "wait_import_packages"
+
+    def async_pause_setup(hass, phase):  # type: ignore[misc]
+        """No-op stand-in for HA's setup-time credit context manager."""
+        return nullcontext()
+
+
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [
@@ -120,6 +135,9 @@ PLATFORMS: list[Platform] = [
     Platform.SELECT,
     Platform.BUTTON,
 ]
+
+# Shared future for the once-per-HA-instance ML module warm-up (issue #408).
+ML_PRELOAD_FUTURE_KEY = "ha_washdata_ml_preload"
 
 
 def _require_str(value: Any, name: str) -> str:
@@ -461,6 +479,20 @@ async def _async_preload_ml_modules(hass: HomeAssistant) -> None:
     Warming the module cache once per setup in the import executor makes every
     later resolution a ``sys.modules`` lookup. Best effort: a failure here only
     means ML stays inert, so it must never block setup.
+
+    Two things matter for startup time here (issue #408), because
+    ``hass.import_executor`` is ``max_workers=1`` and is shared with every other
+    integration importing during startup, so an awaited job on it costs however
+    deep that queue happens to be - measured at 35-95 s in real user
+    diagnostics, against ~1 ms of actual work:
+
+    1. The job is coalesced onto ONE shared future for the whole HA instance.
+       ``preload_models()`` is idempotent, so a second job per config entry
+       would buy nothing but another full trip through that queue.
+    2. The wait is wrapped in ``async_pause_setup(WAIT_IMPORT_PACKAGES)``, which
+       is how HA core reports its own heavy imports (``workday``, ``holiday``,
+       ``stream``, ``mqtt``, ...): the queue wait is credited back instead of
+       being billed to us as "Integration startup time".
     """
 
     def _preload() -> None:
@@ -469,10 +501,25 @@ async def _async_preload_ml_modules(hass: HomeAssistant) -> None:
 
         preload_models()
 
+    future = hass.data.get(ML_PRELOAD_FUTURE_KEY)
+    if future is None:
+        future = hass.data[ML_PRELOAD_FUTURE_KEY] = hass.async_add_import_executor_job(
+            _preload
+        )
+
     try:
-        await hass.async_add_import_executor_job(_preload)
+        with async_pause_setup(hass, SetupPhases.WAIT_IMPORT_PACKAGES):
+            # shield: a cancelled entry setup must not cancel the warm-up that
+            # the other entries are waiting on.
+            await asyncio.shield(future)
     except Exception:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("ML module preload failed", exc_info=True)
+        # Broken install: drop the memo so a later setup/reload retries instead
+        # of every entry re-raising the one cached failure forever. A cancelled
+        # setup is not caught here (CancelledError is not an Exception), so the
+        # memo correctly survives for the entries still awaiting the warm-up.
+        if hass.data.get(ML_PRELOAD_FUTURE_KEY) is future:
+            hass.data.pop(ML_PRELOAD_FUTURE_KEY, None)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -1174,22 +1221,62 @@ def _apply_device_link(hass: HomeAssistant, entry: ConfigEntry) -> None:
     When CONF_LINKED_DEVICE points at an existing device (e.g. the smart plug or
     appliance), the WashData device is shown as "Connected via <device>" in the
     HA device registry. Clearing the option removes the link. Stale targets that
-    no longer exist are treated as "no link" so the registry never references a
-    deleted device.
+    no longer exist - and a target that is this entry's own WashData device, which
+    HA rejects as a self-reference (#418) - are treated as "no link" so the
+    registry never references a deleted device or itself.
     """
+    _log = DeviceLoggerAdapter(_LOGGER, entry.title)
     registry = dr.async_get(hass)
-    washdata_device = registry.async_get_device(identifiers={(DOMAIN, entry.entry_id)})
+    identifier = (DOMAIN, entry.entry_id)
+    if hasattr(registry, "async_get_device_by_identifier"):
+        # HA 2026.9+ deprecated async_get_device because identifiers are no longer
+        # unique across config entries (issue #405). Our device's identifier is
+        # owned by this entry, so the by-identifier lookup is unambiguous. The
+        # attribute guard keeps us working on the older HA the manifest still
+        # supports, where the new method does not exist yet.
+        washdata_device = registry.async_get_device_by_identifier(
+            identifier, entry.entry_id
+        )
+    else:
+        washdata_device = registry.async_get_device(identifiers={identifier})
     if washdata_device is None:
         return
 
     linked_device_id = entry.options.get(CONF_LINKED_DEVICE) or None
     if linked_device_id and registry.async_get(linked_device_id) is None:
         linked_device_id = None
+    if linked_device_id and linked_device_id == washdata_device.id:
+        # A device may not be its own via_device: HA 2026.9 raises
+        # HomeAssistantError instead of silently accepting it, and this runs inside
+        # async_setup_entry - so a self-link aborted setup for the whole entry
+        # (#418). The picker used to list this entry's own WashData device, whose
+        # name mirrors the entry title (and often the plug's), so it was easy to
+        # select by mistake. Treat it as "no link" and fall through to the update
+        # below: on an older HA the self-reference may already be stored in the
+        # registry, and clearing it is exactly the repair needed.
+        _log.warning(
+            "Ignoring 'Group Under Device': %s is this appliance's own WashData "
+            "device and a device cannot be linked to itself. Pick the smart plug "
+            "(or another device) instead, or clear the setting.",
+            linked_device_id,
+        )
+        linked_device_id = None
 
     if washdata_device.via_device_id != linked_device_id:
-        registry.async_update_device(
-            washdata_device.id, via_device_id=linked_device_id
-        )
+        try:
+            registry.async_update_device(
+                washdata_device.id, via_device_id=linked_device_id
+            )
+        except (HomeAssistantError, ValueError) as err:
+            # The via_device link is cosmetic (it only nests the device in the HA
+            # registry UI). A registry rule we do not know about yet must never be
+            # able to take the whole entry down with it, as the self-link did in
+            # #418 - log it and leave the device standalone.
+            _log.warning(
+                "Could not link WashData device to %s: %s",
+                linked_device_id or "(none)",
+                err,
+            )
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:

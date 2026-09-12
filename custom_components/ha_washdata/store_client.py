@@ -503,6 +503,22 @@ class StoreClient:
             return None
         return self._approved_only(cached)
 
+    def _serve_from_type_superset(
+        self, appliance_type: str | None, include_pending: bool, page_size: int
+    ) -> list[dict[str, Any]] | None:
+        """A warm brand-unscoped device list for ``appliance_type``, if one can answer a
+        brand-scoped request for that type. Prefers the pending-inclusive entry (which
+        contains the approved rows too) and narrows it in memory when the caller wants
+        approved only. Returns None when nothing usable is cached.
+        """
+        base = f"devices::{appliance_type or ''}"
+        for pend in ((1,) if include_pending else (1, 0)):
+            cached = self._cache_get(f"{base}:{pend}:{page_size}")
+            if cached is None or len(cached) >= page_size:
+                continue
+            return cached if include_pending else self._approved_only(cached)
+        return None
+
     async def search_devices(
         self, brand: str | None = None, appliance_type: str | None = None,
         model_query: str | None = None, *, include_pending: bool = False, page_size: int = 500,
@@ -525,6 +541,18 @@ class StoreClient:
         shared = self._serve_from_superset(f"{base}:1:{page_size}", include_pending, page_size)
         if shared is not None:
             return _finish(shared)
+
+        # A brand-unscoped list for the same appliance type is a strict superset of every
+        # brand-scoped list of that type, so once the panel's model search has warmed it
+        # (it queries by model prefix across all brands) every subsequent brand browse of
+        # that type is answered in memory instead of costing its own query. Only shares
+        # downwards, and only from an untruncated entry -- same two rules as
+        # _serve_from_superset, whose include_pending downgrade this reuses.
+        if brand:
+            wide = self._serve_from_type_superset(appliance_type, include_pending, page_size)
+            if wide is not None:
+                bl = brand.lower()
+                return _finish([r for r in wide if str(r.get("brand_lc", "")) == bl])
 
         def _build() -> dict[str, Any]:
             filters = [self._status_filter(include_pending)]
@@ -739,7 +767,18 @@ class StoreClient:
         """count + average of a reference cycle's 5-star ratings (info only)."""
         return await self._rating_agg(f"cycles/{_seg(cycle_id)}")
 
-    async def get_profiles(self, dev_id: str, include_pending: bool = False, page_size: int = 100) -> list[dict[str, Any]]:
+    async def get_profiles(self, dev_id: str, include_pending: bool = True, page_size: int = 100) -> list[dict[str, Any]]:
+        """Shared programs for one catalog appliance, most-recent-first.
+
+        ``include_pending`` defaults to **True**, matching ``get_cycles`` and the
+        device browse. It used to default to False, which made the Store tab list a
+        device with a "Programs: N" chip and then report "No shared programs for this
+        appliance yet": approval is a community vote that almost nothing has passed
+        (measured on the live catalog: the IKEA TALLBODA dishwasher has 9 profiles,
+        **0** of them approved), so an approved-only query on a pending-inclusive
+        device list is empty for practically every appliance. Pending rows are
+        publicly readable and the panel tags them "awaiting approval".
+        """
         sq = {
             "from": [{"collectionId": "profiles"}],
             "where": self._where([

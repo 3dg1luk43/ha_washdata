@@ -33,7 +33,36 @@
   <div id="root"></div>
   <!-- Loaded as a module so import.meta / top-level define run as in production. -->
   <script type="module">
-    import '/card.js';
+    // ?registry= reproduces the two orders in which HA can start the card module
+    // relative to the scoped-custom-element-registry polyfill that its app entry
+    // installs (issue #384; upstream home-assistant/frontend#53890):
+    //   before-card  a UI-registry resource: imported from inside app.js, so the
+    //                polyfill has already replaced window.customElements
+    //   after-card   an extra module (lovelace: resource_mode: yaml -> the
+    //                integration's add_extra_js_url fallback): started in
+    //                parallel with the app bundle, and here it wins that race,
+    //                which is the order that used to lose the registration
+    // Without the parameter nothing changes for the other card tests: no polyfill,
+    // exactly the plain module import they have always run against.
+    const registryOrder = new URLSearchParams(location.search).get('registry');
+    // The app's own root element. Its definition is what tells the card module
+    // that the app bundle - and therefore the polyfill - has finished loading.
+    const defineHomeAssistant = () => {
+      if (!customElements.get('home-assistant')) {
+        customElements.define('home-assistant', class extends HTMLElement {});
+      }
+    };
+
+    if (registryOrder === 'before-card') {
+      await import('/scoped-custom-element-registry.js');
+      defineHomeAssistant();
+    }
+    await import('/card.js');
+    window.__afterCardImport = !!customElements.get('ha-washdata-card');
+    if (registryOrder === 'after-card') {
+      await import('/scoped-custom-element-registry.js');
+      defineHomeAssistant();
+    }
 
     // Build a HomeAssistant-shaped object from plain data (functions cannot cross
     // the Playwright evaluate boundary, so they are constructed here in page scope).

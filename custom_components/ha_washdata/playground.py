@@ -49,6 +49,7 @@ from . import analysis
 from . import notification_rules as notif_rules
 from . import progress as progress_mod
 from .phase_segmenter import phase_matching_enabled
+from .signal_processing import resample_adaptive
 from .const import (
     CONF_ANTI_WRINKLE_ENABLED,
     CONF_ANTI_WRINKLE_EXIT_POWER,
@@ -97,6 +98,7 @@ from .const import (
     MATCH_MAE_PEAK_FLOOR,
     MATCH_MAE_REF_PEAK,
     MATCH_MAE_SCALE,
+    MATCH_MIN_RESAMPLED_POINTS,
     PLAYGROUND_STRESS_DENSE_DURATION_S,
     PLAYGROUND_STRESS_DENSE_STEP_S,
     PLAYGROUND_STRESS_FLOOR_PERCENTILE,
@@ -119,6 +121,7 @@ from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .profile_store import (
     _ambiguity_from_candidates,
     _match_prefix_ambiguity,
+    collapse_group_candidates,
     decompress_power_data,
 )
 
@@ -404,15 +407,19 @@ def _build_match_snapshots(
     its sample cycle's decompressed trace, plus the store's live matching config
     (with any on-device tuned weight overrides merged in).
 
-    Also applies Stage-5 group collapsing via
-    :meth:`ProfileStore._grouped_snapshots`: returns the collapsed snapshot list
-    (where each cohesive group is represented by a single ``__group__*``
-    aggregate candidate), plus ``group_members`` and ``member_snaps`` for the
-    Stage-5 member-resolution step in the faithful history runner.
+    Also resolves Stage-5 groups via :meth:`ProfileStore._grouped_snapshots`, the
+    same call the live matcher makes. Note what that returns since #400: the
+    **individual member** snapshots, unchanged, plus ``group_members`` and
+    ``member_snaps``. It no longer averages a family into one ``__group__*``
+    aggregate - that averaged curve belonged to no member and cost the family its
+    program-level match, so members are scored individually and each cohesive
+    family is collapsed to its best member afterwards by
+    :func:`collapse_group_candidates`. This docstring described the old aggregate
+    behaviour long after the code stopped doing it.
 
-    Returns ``(grouped_snapshots, match_config, group_members, member_snaps)``.
-    When no cohesive groups exist ``group_members`` and ``member_snaps`` are both
-    empty dicts and behaviour is identical to before.
+    Returns ``(snapshots, match_config, group_members, member_snaps)``. When no
+    cohesive groups exist ``group_members`` and ``member_snaps`` are both empty
+    dicts and behaviour is identical to before.
     """
     snapshots: list[dict[str, Any]] = []
     try:
@@ -485,11 +492,13 @@ def _build_match_snapshots(
         _LOGGER.debug("Playground: _grouped_snapshots failed: %s", exc)
         grouped_snaps = snapshots
 
-    config = _matching_config(store)
+    # in_progress: the sim replays a cycle step by step, so every match it runs is
+    # a live one - the same footing as manager._async_do_perform_matching (#400).
+    config = _matching_config(store, in_progress=True)
     return grouped_snaps, config, group_members, member_snaps
 
 
-def _matching_config(store: Any) -> dict[str, Any]:
+def _matching_config(store: Any, in_progress: bool = False) -> dict[str, Any]:
     """Live matcher config from the store (defaults + tuned overrides)."""
     config: dict[str, Any] = {
         "min_duration_ratio": float(getattr(store, "_min_duration_ratio", 0.07)),
@@ -497,6 +506,7 @@ def _matching_config(store: Any) -> dict[str, Any]:
         "dtw_bandwidth": float(getattr(store, "dtw_bandwidth", 0.2)),
         # Mirror the live Stage-4 energy discriminator so the sim is byte-identical.
         "energy_mode": str(getattr(store, "energy_mode", "mean")),
+        "in_progress": bool(in_progress),
     }
     try:
         overrides = store._matching_overrides()  # pylint: disable=protected-access
@@ -883,8 +893,40 @@ class _DetailSim:
     def _matcher(self, det_readings: list[tuple[datetime, float]]):
         if len(det_readings) < 5 or not self.snapshots:
             return (None, 0.0, 0.0, None, False, False)
-        powers = [p for _, p in det_readings]
         duration = (det_readings[-1][0] - det_readings[0][0]).total_seconds()
+        # Resample onto a uniform TIME grid exactly as async_match_profile does
+        # before calling the worker. Without this the sim fed the matcher a
+        # sample-weighted series: on a change-based plug a quiet stretch emits
+        # almost no rows, so its mean power was biased toward the busy part of the
+        # cycle while every candidate curve is uniform in time. That divergence
+        # only showed up once Stage 4 started comparing like with like (#400) - it
+        # flipped a dishwasher onto its hotter sibling in the sim while production,
+        # which resamples, kept the right one.
+        # The three ways production declines to match are reproduced exactly, because
+        # a sim that matches where production returns nothing is worse than useless
+        # for the question the Playground exists to answer. async_match_profile
+        # returns an empty MatchResult when resampling yields no segment, when the
+        # longest segment is under MATCH_MIN_RESAMPLED_POINTS, and when preprocessing
+        # raises; falling back to the raw series here instead let the sim match a
+        # 5-point stretch that production rejects (the detector calls this from 5
+        # readings up).
+        try:
+            t0 = det_readings[0][0].timestamp()
+            segments, _used_dt = resample_adaptive(
+                np.array([r[0].timestamp() - t0 for r in det_readings]),
+                np.array([float(r[1]) for r in det_readings]),
+                min_dt=5.0,
+                gap_s=21600.0,
+            )
+            if not segments:
+                return (None, 0.0, 0.0, None, False, False)
+            current_seg = max(segments, key=lambda s: len(s.power))
+            if len(current_seg.power) < MATCH_MIN_RESAMPLED_POINTS:
+                return (None, 0.0, 0.0, None, False, False)
+            powers = current_seg.power.tolist()
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Playground detail resample failed", exc_info=True)
+            return (None, 0.0, 0.0, None, False, False)
         try:
             candidates = analysis.compute_matches_worker(
                 powers, duration, self.snapshots, self.match_config
@@ -899,14 +941,25 @@ class _DetailSim:
             # Hold any committed match on a transient miss (as the manager does).
             self.last_match.update(ambiguous=False)
             return (None, 0.0, 0.0, None, False, False)
+        # Mirror of async_match_profile: members are scored individually, then each
+        # cohesive family is collapsed to its best member before anything reads the
+        # ranking (#400).
+        candidates = collapse_group_candidates(candidates, self.group_members or {})
+        # Stage-5 safeguards #2 and #3, captured here and applied after the
+        # top-level ambiguity call below so the ORDER matches async_match_profile.
+        stage5_member_fit: float | None = None
+        stage5_group_win = False
         if self.group_members and candidates[0].get("name", "").startswith("__group__"):
             gkey = candidates[0]["name"]
             members = self.group_members.get(gkey, [])
             if members and self.store is not None:
                 try:
-                    member_name, _, member_dur = self.store._stage5_pick_member(  # noqa: SLF001
-                        list(powers), duration, members, self.member_snaps or {}
+                    member_name, member_fit, member_dur = self.store._stage5_pick_member(  # noqa: SLF001
+                        list(powers), duration, members, self.member_snaps or {},
+                        in_progress=bool(self.match_config.get("in_progress")),
                     )
+                    stage5_member_fit = member_fit
+                    stage5_group_win = True
                     # Carry the member's duration as well, exactly as
                     # `async_match_profile` relabels the winner: leaving the group's
                     # aggregate duration here fed the wrong expected value to the
@@ -919,6 +972,22 @@ class _DetailSim:
                     pass
         best = candidates[0]
         margin, is_ambiguous = _ambiguity_from_candidates(candidates)
+        if stage5_group_win:
+            # Safeguard #2: the family matched, but the chosen member does not
+            # individually fit near the group score, so the real program may be a
+            # different single profile. Same 0.55x coarse backstop as production.
+            _bscore = float(best.get("score") or 0.0)
+            if stage5_member_fit is not None and _bscore > 0 and stage5_member_fit < 0.55 * _bscore:
+                is_ambiguous = True
+            # Safeguard #3 (overrun): already past the chosen member's expected
+            # duration, so this may be the LONGER member of the family.
+            _bdur = float(best.get("profile_duration") or 0.0)
+            if _bdur and duration > _bdur * 1.05:
+                is_ambiguous = True
+            # Without these two the sim reports a confident match exactly where
+            # production downgrades to uncertain, and `is_ambiguous` is what blocks
+            # Smart Termination - so the replay would finalise where the real
+            # detector falls through to the power timeout.
         raw_name = best.get("name")
         raw_conf = float(best.get("score") or 0.0)
         raw_expected = float(best.get("profile_duration") or 0.0)
@@ -963,11 +1032,22 @@ class _DetailSim:
         # bubble through _try_profile_match, which drops the match at debug - so EVERY
         # match in the sim would be silently reported as unmatched.
         tail_power = None
+        terminal_high = None
         if self.store is not None and raw_name:
             try:
                 tail_power = self.store.profile_tail_power(raw_name)
             except Exception:  # pylint: disable=broad-exception-caught
                 tail_power = None
+            # Element 10 (#399), guarded the same way: the anti-crease spin guard is
+            # only meaningful for a device that runs anti-wrinkle at all.
+            det = getattr(self, "detector", None)
+            if det is not None and det.config.anti_wrinkle_enabled:
+                try:
+                    terminal_high = self.store.profile_terminal_high_block(
+                        raw_name, det.config.anti_wrinkle_max_power
+                    )
+                except Exception:  # pylint: disable=broad-exception-caught
+                    terminal_high = None
         return (
             raw_name,
             raw_conf,
@@ -978,6 +1058,7 @@ class _DetailSim:
             bool(full_shape_hit or prefix_fit_hit),
             bool(full_shape_hit),
             tail_power,
+            terminal_high,
         )
 
     def _sample(self, ts: datetime) -> None:

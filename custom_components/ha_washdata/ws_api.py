@@ -540,6 +540,8 @@ _FULL_COMMANDS = frozenset({
     "get_export_inventory", "analyze_import", "export_config_selective", "import_config_selective",
     # Reverting on-device models / matcher tuning discards learned state -> full access.
     "revert_matching_config", "revert_ml_models",
+    # Rewrites the appliance's lifetime odometer, which drives maintenance schedules.
+    "set_lifetime_cycle_count",
     # Historical power-data import: ingests a whole power history and writes cycles.
     "history_import_begin", "history_import_chunk", "history_import_recorder",
     "start_history_import_scan", "apply_history_import",
@@ -1222,6 +1224,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_profile_groups, ws_save_profile_group, ws_rename_profile_group, ws_delete_profile_group,
         # Maintenance log (Group E)
         ws_get_maintenance_log, ws_add_maintenance_event, ws_delete_maintenance_event,
+        ws_set_lifetime_cycle_count,
         # Cycles
         ws_label_cycle, ws_delete_cycle, ws_auto_label_cycles,
         # Phase catalog
@@ -1340,6 +1343,7 @@ def ws_get_devices(
             "recording": False,
             "is_user_paused": False,
             "manual_program": False,
+            "armed_program": None,
             "options": dict(entry.options),
             # Device-resolved defaults for the cadence/ratio fields (#396/#393) so the
             # device-list conflict/suggestion badges score an unset field against the
@@ -1361,11 +1365,17 @@ def ws_get_devices(
                     program = None
                 info["current_program"] = program
                 info["manual_program"] = bool(getattr(manager, "manual_program_active", False))
+                # A program pinned for the NEXT cycle (#411). Kept separate from
+                # current_program so an idle device does not claim to be running one.
+                info["armed_program"] = getattr(manager, "armed_program", None)
 
                 info["time_remaining_s"] = getattr(manager, "_time_remaining", None)
                 info["total_duration_s"] = getattr(manager, "_total_duration", None)
 
-                power = getattr(manager, "_current_power", None)
+                # Read through the property, not the raw cache (#409): it falls back
+                # to the sensor's live state so the panel can never show a power the
+                # sensor never reported.
+                power = getattr(manager, "current_power", None)
                 info["current_power_w"] = round(float(power), 2) if power is not None else None
 
                 progress = getattr(manager, "_cycle_progress", None)
@@ -2266,12 +2276,124 @@ async def ws_get_maintenance_log(
     cfg = manager.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
     if isinstance(cfg, dict):
         reminders.update(cfg)
+    store = manager.profile_store
     _send_result(connection, msg["id"], "get_maintenance_log", {
-        "log": manager.profile_store.get_maintenance_log(),
+        "log": store.get_maintenance_log(),
         "due": manager.maintenance_due,
         "event_types": list(MAINTENANCE_EVENT_TYPES),
         "reminders": reminders,
+        # Cycles run since each task was last done, and the odometer they are
+        # measured against (#414). Computed backend-side before this and never
+        # sent, so the panel could show "due" but never "how close".
+        "cycles_since": {
+            evt: store.cycles_since_maintenance(evt) for evt in MAINTENANCE_EVENT_TYPES
+        },
+        "lifetime_cycle_count": manager.lifetime_cycle_count,
     })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/set_lifetime_cycle_count",
+        vol.Required("entry_id"): str,
+        vol.Required("count"): vol.All(vol.Coerce(int), vol.Range(min=0, max=1000000)),
+    }
+)
+@websocket_api.async_response
+async def ws_set_lifetime_cycle_count(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Correct the appliance's lifetime cycle odometer (requires full access).
+
+    The one sanctioned way the count moves other than a cycle completing (#414).
+    It exists because WashData cannot always tell a real short run from an
+    artefact, and because an appliance may have run for years before WashData was
+    installed - rather than asking "was that a real cycle?" on every deletion, the
+    user corrects the total once. Recorded in the settings changelog.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        store = manager.profile_store
+        count = int(msg["count"])
+        # Serialize the whole read-check-mutate-save-rollback under the per-entry
+        # write lock. The rollback below restores the value read at the start, so two
+        # corrections that interleave across the save could see the earlier one's
+        # failure undo the later one's success (A reads 10, B reads and writes 4000
+        # successfully, A's save fails and A restores 10). Holding the lock across the
+        # await is the point; taking it only around the mutation would not help.
+        async with _entry_write_lock(hass, msg["entry_id"]):
+            previous = store.get_lifetime_cycle_count()
+            # A stored record is evidence of a run, so the odometer can never read below
+            # the number of records on hand - that floor is what get_lifetime_cycle_count
+            # applies. Without this check the setter accepted a lower value, the getter
+            # masked it while the history was long, and it then surfaced later once
+            # records were deleted: a correction that appeared to do nothing and took
+            # effect retroactively, i.e. the odometer regression #414 exists to prevent.
+            # Refused with the floor named rather than silently clamped, so the user is
+            # told why their number was not taken.
+            floor = len(store.get_past_cycles())
+            if count < floor:
+                connection.send_error(
+                    msg["id"],
+                    "invalid_format",
+                    f"Cannot set the lifetime count below the {floor} cycle records "
+                    f"currently stored; delete records first or choose {floor} or more",
+                )
+                return
+            store.set_lifetime_cycle_count(count, force=True)
+            try:
+                # ONE save for both mutations: async_record_settings_changes persists the
+                # store, and the new count is already staged in memory. Saving separately
+                # beforehand meant a changelog failure reported unknown_error on a
+                # correction that had in fact been written, and left `previous` reading
+                # the new value on a retry - recording old == new.
+                await store.async_record_settings_changes(
+                    [{"key": "lifetime_cycle_count", "old": previous, "new": count}]
+                )
+            except Exception:
+                # Undo only OUR write. A cycle completing during the await bumps the
+                # same counter (manager._async_process_cycle_end -> lifetime energy
+                # save), and that path deliberately does not take this lock: it lives
+                # in the manager, on the hot cycle-end path, and reaching into the WS
+                # layer's lock from there would invert the layering for a window this
+                # narrow. Compare-and-swap keeps the rollback honest without it - if
+                # the value is no longer what we wrote, someone else owns it now and
+                # restoring `previous` would discard their increment.
+                if store.get_lifetime_cycle_count() == count:
+                    store.set_lifetime_cycle_count(previous, force=True)
+                raise
+        # Re-validate the manager is still live after the awaited save: a reload
+        # during it detaches this manager (and its per-entry lock, which
+        # async_unload_entry pops), so notifying it would target stale state and
+        # reporting its store's count would show the panel a number from a store
+        # nothing reads any more. Mirrors the guard the recording-persist and import
+        # handlers use. Reported as success because the save itself did happen; the
+        # count comes from whatever store is live now.
+        current_manager = _get_manager(hass, entry_id)
+        if current_manager is not manager:
+            _LOGGER.warning(
+                "Manager replaced during lifetime-count correction for %s; "
+                "skipping notify", entry_id,
+            )
+        else:
+            manager.notify_update()
+        live_store = (
+            current_manager.profile_store if current_manager is not None else store
+        )
+        _send_result(
+            connection,
+            msg["id"],
+            "set_lifetime_cycle_count",
+            {"success": True, "lifetime_cycle_count": live_store.get_lifetime_cycle_count()},
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
 @websocket_api.websocket_command(
@@ -3166,6 +3288,10 @@ async def ws_wipe_history(
 
     try:
         await manager.profile_store.clear_all_data()
+        # clear_all_data pops the persisted arm, but the manager's in-memory field is
+        # the authoritative one, so the pin has to be retired there too or the next
+        # cycle re-applies a program from before the wipe.
+        manager.clear_armed_program()
         manager.notify_update()
         _send_result(connection, msg["id"], "wipe_history", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -4481,8 +4607,16 @@ def ws_set_program(
         prog = msg.get("program")
         if not prog or prog in ("auto_detect", "__auto__", "none"):
             manager.clear_manual_program()
-        else:
-            manager.set_manual_program(prog)
+        elif not manager.set_manual_program(prog):
+            # Only a program that does not exist can fail now (#411). It used to
+            # fail for the far more common reason of no cycle being under way, and
+            # this line reported success anyway because the manager returned None
+            # either way, so the panel showed a confirmation and then quietly
+            # reverted the dropdown.
+            connection.send_error(
+                msg["id"], "not_found", f"No such program: {prog}"
+            )
+            return
         manager.notify_update()
         _send_result(connection, msg["id"], "set_program", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught

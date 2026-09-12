@@ -977,7 +977,15 @@ class PumpRunsTodaySensor(WasherBaseSensor):
 
 
 class WasherCycleCountSensor(WasherBaseSensor):
-    """Sensor reporting the total number of completed cycles stored for this device."""
+    """Odometer: how many cycles this appliance has run, ever.
+
+    Reports the monotonic lifetime counter, not ``len(stored history)`` (#414). The
+    stored-history number is capped at ``max_past_cycles`` and shrinks when the user
+    deletes a record, so as a state it was unusable for the thing people build on it:
+    an "every N cycles" maintenance schedule, whether WashData's own reminders or an
+    external integration's. The old number is still available as the
+    ``stored_cycles`` attribute.
+    """
 
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         self.entity_description = SensorEntityDescription(
@@ -985,12 +993,25 @@ class WasherCycleCountSensor(WasherBaseSensor):
             translation_key="cycle_count",
             icon="mdi:counter",
             native_unit_of_measurement="cycles",
+            # TOTAL, not TOTAL_INCREASING, even though the odometer only rises on its
+            # own. The user can correct it downward (WS set_lifetime_cycle_count ->
+            # set_lifetime_cycle_count(force=True)), and TOTAL_INCREASING reads any
+            # decrease as a meter reset: correcting 500 down to 300 makes the
+            # long-term sum absorb the new reading whole, recording 300 cycles that
+            # were never run. TOTAL applies the -200 the correction actually means.
+            # No last_reset: the sum accumulates continuously.
+            state_class=SensorStateClass.TOTAL,
         )
         super().__init__(manager, entry)
 
     @property
     def native_value(self) -> int:  # type: ignore[override]
-        return self._manager.cycle_count
+        return self._manager.lifetime_cycle_count
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:  # type: ignore[override]
+        """Expose the retained-history count the state used to report."""
+        return {"stored_cycles": self._manager.cycle_count}
 
 
 class WasherEnergyTotalSensor(WasherBaseSensor):

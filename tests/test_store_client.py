@@ -1001,3 +1001,85 @@ async def test_truncated_superset_does_not_answer_an_approved_only_request():
     s.queue_post(_Resp(200, [row("zzz", "approved")]))
     assert [b["id"] for b in await c.list_brands(include_pending=False, page_size=2)] == ["zzz"]
     assert len(s.posts) == 2
+
+
+@pytest.mark.asyncio
+async def test_brand_browse_served_from_warm_model_search_list():
+    """A model search fetches every device of one appliance type; the brand browse that
+    follows must be answered from that list rather than costing its own query."""
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": ".../devices/d1", "fields": {
+            "model_lc": {"stringValue": "wat28401"}, "brand_lc": {"stringValue": "bosch"},
+            "status": {"stringValue": "approved"}}}},
+        {"document": {"name": ".../devices/d2", "fields": {
+            "model_lc": {"stringValue": "wcg370"}, "brand_lc": {"stringValue": "miele"},
+            "status": {"stringValue": "pending"}}}},
+    ]))
+    c = _client(s)
+
+    # The model search: no brand, prefix filtered in memory.
+    hit = await c.search_devices(
+        brand=None, appliance_type="washer", model_query="wat", include_pending=True
+    )
+    assert [d["id"] for d in hit] == ["d1"]
+    assert len(s.posts) == 1
+
+    # Browsing either brand of the same type is now free, and correctly narrowed.
+    bosch = await c.search_devices(brand="Bosch", appliance_type="washer", include_pending=True)
+    assert [d["id"] for d in bosch] == ["d1"]
+    miele = await c.search_devices(brand="Miele", appliance_type="washer", include_pending=True)
+    assert [d["id"] for d in miele] == ["d2"]
+    assert len(s.posts) == 1
+
+    # Approved-only narrows the same superset in memory (shares downwards only).
+    approved = await c.search_devices(brand="Miele", appliance_type="washer", include_pending=False)
+    assert approved == []
+    assert len(s.posts) == 1
+
+    # A different appliance type is a different superset -> a real query.
+    s.queue_post(_Resp(200, []))
+    await c.search_devices(brand="Bosch", appliance_type="dishwasher", include_pending=True)
+    assert len(s.posts) == 2
+
+
+@pytest.mark.asyncio
+async def test_type_superset_refused_when_truncated():
+    """A list capped at page_size may be missing rows a narrower query would return, so it
+    must not answer the narrower question (mirrors the _serve_from_superset guard)."""
+    s = _Session()
+    s.queue_post(_Resp(200, [
+        {"document": {"name": f".../devices/d{i}", "fields": {
+            "model_lc": {"stringValue": f"m{i}"}, "brand_lc": {"stringValue": "bosch"},
+            "status": {"stringValue": "approved"}}}}
+        for i in range(2)
+    ]))
+    c = _client(s)
+    await c.search_devices(brand=None, appliance_type="washer", include_pending=True, page_size=2)
+    assert len(s.posts) == 1
+    s.queue_post(_Resp(200, []))
+    await c.search_devices(brand="Bosch", appliance_type="washer", include_pending=True, page_size=2)
+    assert len(s.posts) == 2
+
+
+@pytest.mark.asyncio
+async def test_get_profiles_is_pending_inclusive_by_default():
+    """Approval is a community vote almost nothing has passed, so an approved-only
+    profile query under a pending-inclusive device list is empty for practically every
+    appliance: the browse listed "Programs: N" and then said there were none."""
+    s = _Session()
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    await c.get_profiles("dishwasher__ikea__tallboda")
+    clauses = s.posts[-1][1]["json"]["structuredQuery"]["where"]["compositeFilter"]["filters"]
+    status = next(f for f in clauses if f["fieldFilter"]["field"]["fieldPath"] == "status")
+    assert status["fieldFilter"]["op"] == "IN"
+    vals = status["fieldFilter"]["value"]["arrayValue"]["values"]
+    assert {v["stringValue"] for v in vals} == {"approved", "pending"}
+    # Still narrowable when a caller really wants approved rows only.
+    s.queue_post(_Resp(200, []))
+    await c.get_profiles("dishwasher__ikea__tallboda", include_pending=False)
+    clauses = s.posts[-1][1]["json"]["structuredQuery"]["where"]["compositeFilter"]["filters"]
+    status = next(f for f in clauses if f["fieldFilter"]["field"]["fieldPath"] == "status")
+    assert status["fieldFilter"]["op"] == "EQUAL"
+    assert status["fieldFilter"]["value"]["stringValue"] == "approved"

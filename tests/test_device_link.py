@@ -23,6 +23,7 @@ valid device is selected, leave it standalone when unset, and treat a stale
 """
 from __future__ import annotations
 
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -111,5 +112,118 @@ async def test_stale_target_treated_as_no_link(hass):
     washdata = _register_washdata_device(registry, entry)
 
     _apply_device_link(hass, entry)
+
+    assert registry.async_get(washdata.id).via_device_id is None
+
+
+async def test_uses_by_identifier_lookup_when_available(hass, monkeypatch):
+    """On HA 2026.9+ the lookup goes through async_get_device_by_identifier (#405).
+
+    The deprecated async_get_device must not be called when the newer, unambiguous
+    per-entry method is present. The dev HA lacks it, so we stub it in.
+    """
+    registry = dr.async_get(hass)
+    target = _register_target_device(hass, registry)
+    entry = _make_entry(hass, {CONF_LINKED_DEVICE: target.id})
+    washdata = _register_washdata_device(registry, entry)
+
+    calls: dict[str, object] = {}
+
+    def _by_identifier(identifier, config_entry_id):
+        calls["args"] = (identifier, config_entry_id)
+        return washdata
+
+    def _fail_deprecated(*args, **kwargs):  # pragma: no cover - must not run
+        raise AssertionError("deprecated async_get_device was called")
+
+    monkeypatch.setattr(
+        registry, "async_get_device_by_identifier", _by_identifier, raising=False
+    )
+    monkeypatch.setattr(registry, "async_get_device", _fail_deprecated)
+
+    _apply_device_link(hass, entry)
+
+    assert calls["args"] == ((DOMAIN, entry.entry_id), entry.entry_id)
+    assert registry.async_get(washdata.id).via_device_id == target.id
+
+
+async def test_self_link_is_ignored(hass):
+    """Selecting this entry's own WashData device must not link it to itself (#418).
+
+    HA 2026.9 rejects a self-reference with HomeAssistantError, and this runs inside
+    async_setup_entry - so before the guard the whole entry failed to set up.
+    """
+    registry = dr.async_get(hass)
+    entry = _make_entry(hass)
+    washdata = _register_washdata_device(registry, entry)
+    hass.config_entries.async_update_entry(
+        entry, options={CONF_LINKED_DEVICE: washdata.id}
+    )
+
+    _apply_device_link(hass, entry)
+
+    assert registry.async_get(washdata.id).via_device_id is None
+
+
+async def test_existing_self_link_is_repaired(hass):
+    """A self-reference already stored by an older HA is cleared, not left in place."""
+    registry = dr.async_get(hass)
+    entry = _make_entry(hass)
+    washdata = _register_washdata_device(registry, entry)
+    # Older HA accepted this write, so an upgraded install can already hold it.
+    registry.async_update_device(washdata.id, via_device_id=washdata.id)
+    assert registry.async_get(washdata.id).via_device_id == washdata.id
+    hass.config_entries.async_update_entry(
+        entry, options={CONF_LINKED_DEVICE: washdata.id}
+    )
+
+    _apply_device_link(hass, entry)
+
+    assert registry.async_get(washdata.id).via_device_id is None
+
+
+async def test_registry_rejection_does_not_abort_setup(hass, monkeypatch):
+    """A registry validation error is logged, never raised (#418).
+
+    The link is cosmetic; a rule we do not know about yet must not be able to take
+    the config entry down with it.
+    """
+    registry = dr.async_get(hass)
+    target = _register_target_device(hass, registry)
+    entry = _make_entry(hass, {CONF_LINKED_DEVICE: target.id})
+    _register_washdata_device(registry, entry)
+
+    def _raise(*args, **kwargs):
+        raise HomeAssistantError("A device can not be its own via device")
+
+    monkeypatch.setattr(registry, "async_update_device", _raise)
+
+    _apply_device_link(hass, entry)  # must not raise
+
+
+async def test_self_link_under_ha_2026_9_validation(hass, monkeypatch):
+    """The reported traceback (#418) cannot happen: the self-link never reaches HA.
+
+    The dev HA (2026.2.3) still accepts a self-reference, so the 2026.9 rule is
+    stubbed in here - this is the exact check whose HomeAssistantError aborted
+    ``async_setup_entry`` for the reporter's Washing Machine and Dishwasher entries.
+    """
+    registry = dr.async_get(hass)
+    entry = _make_entry(hass)
+    washdata = _register_washdata_device(registry, entry)
+    hass.config_entries.async_update_entry(
+        entry, options={CONF_LINKED_DEVICE: washdata.id}
+    )
+
+    real_update = registry.async_update_device
+
+    def _validating_update(device_id, **kwargs):
+        if kwargs.get("via_device_id") == device_id:
+            raise HomeAssistantError("A device can not be its own via device")
+        return real_update(device_id, **kwargs)
+
+    monkeypatch.setattr(registry, "async_update_device", _validating_update)
+
+    _apply_device_link(hass, entry)  # must not raise
 
     assert registry.async_get(washdata.id).via_device_id is None

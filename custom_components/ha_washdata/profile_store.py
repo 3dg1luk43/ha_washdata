@@ -26,6 +26,7 @@ import logging
 import math
 import os
 import re
+import statistics
 import threading
 import uuid
 from datetime import datetime, timedelta
@@ -44,6 +45,7 @@ from .const import (
     MAINTENANCE_EVENT_TYPES,
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
+    MATCH_MIN_RESAMPLED_POINTS,
     PHASE_CONSISTENCY_MIN_CYCLES,
     PHASE_PROFILE_MIN_CYCLES,
     PHASE_HEAT_CV_WARN,
@@ -369,6 +371,39 @@ class MatchResult:
     # NOT for the anti-crease finalize, where blocking can re-hang a cycle the way
     # #296 described. That consumer reads this narrower flag instead.
     is_prefix_ambiguous_full_shape: bool = False
+    # Stage 5 only (None for every non-group match): the blended pipeline score
+    # the SELECTED member earned on its own curve. `confidence` deliberately stays
+    # the group's score - the best-scoring sibling's - because that is what the
+    # matcher actually decided on and what every live consumer (Smart Termination,
+    # the ML end-guard, ETA, the panel) is calibrated against. But the two can be
+    # different members: `collapse_group_candidates` keeps the top sibling's record
+    # and `_stage5_pick_member` then chooses by integrated energy. Measured on the
+    # real corpus, the pick differs from the top sibling in 16.7% of whole-cycle
+    # group wins, by up to 0.157 of score. So a *label* decision - which turns the
+    # cycle into evidence for that one member - gets its own number.
+    member_confidence: float | None = None
+
+    @property
+    def label_confidence(self) -> float:
+        """The confidence a LABEL / persistence decision may rely on.
+
+        Identical to ``confidence`` for every match except a Stage-5 group win
+        whose selected member scored lower than the sibling whose score became the
+        group's. There, labelling the cycle makes it evidence for the *selected*
+        member, so the bar has to be what that member earned itself, not what its
+        sibling did. Both numbers are blended pipeline scores over the same trace,
+        so they are directly comparable (unlike ``stage5_member_fit``, which is
+        Stage-2 only). ``min`` is defensive: the group score is by construction the
+        max over the members, so it is already the larger of the two.
+
+        Falls back to ``confidence`` when the member has no score of its own (the
+        matcher rejected it at Stage 1, yet Stage 5 still selected it) - there is no
+        comparable number to gate on, and the existing ambiguity / overrun guards
+        still apply.
+        """
+        if self.member_confidence is None:
+            return self.confidence
+        return min(self.confidence, self.member_confidence)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary with JSON-serializable types, excluding heavy arrays."""
@@ -869,6 +904,49 @@ class WashDataStore(Store[JSONDict]):
             old_data.setdefault("backfill_cycles", [])
 
         return old_data
+
+def collapse_group_candidates(
+    candidates: list[dict], group_members: dict[str, list[str]]
+) -> list[dict]:
+    """Replace each cohesive group's scored members with ONE candidate carrying
+    the best member's score (#400).
+
+    Members reach the matcher as their own snapshots, so each is scored on its own
+    curve; the group is formed afterwards, here. That is the difference from the
+    original design, which averaged the member curves into an aggregate snapshot
+    *before* scoring - on a temperature family (same silhouette, different heating
+    length) the mean curve carries an energy figure no member has and roughly
+    doubles the MAE, so the family could lose the program-level match outright and
+    Stage-5 member selection never ran.
+
+    What grouping is actually for survives: the members no longer sit next to each
+    other in the ranking, so they cannot make each other look ambiguous. The winner
+    keeps the group's ``__group__`` name, so the existing Stage-5 hand-off (and
+    with it `_stage5_pick_member`, register item 99) is unchanged.
+
+    Pure; ``candidates`` must already be score-sorted, and the returned list keeps
+    that order because entries are only dropped, never reordered.
+    """
+    if not group_members or not candidates:
+        return candidates
+    member_to_group: dict[str, str] = {
+        m: key for key, members in group_members.items() for m in members
+    }
+    if not member_to_group:
+        return candidates
+    out: list[dict] = []
+    seen_groups: set[str] = set()
+    for cand in candidates:
+        key = member_to_group.get(str(cand.get("name")))
+        if key is None:
+            out.append(cand)
+            continue
+        if key in seen_groups:
+            continue  # a lower-scoring sibling; the family is already represented
+        seen_groups.add(key)
+        out.append({**cand, "name": key, "group_best_member": cand.get("name")})
+    return out
+
 
 def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     """Top1-vs-top2 score margin and whether the match is ambiguous.
@@ -1485,6 +1563,9 @@ class ProfileStore:
         if not isinstance(log, list):
             log = []
             self._data["settings_changelog"] = log
+        # Snapshot for the rollback below. Shallow copy is enough: entries are only
+        # ever inserted or dropped wholesale, never edited in place.
+        before = list(log)
 
         now_iso = dt_util.now().isoformat()
         added = False
@@ -1509,7 +1590,16 @@ class ProfileStore:
         if len(log) > self.SETTINGS_CHANGELOG_MAX:
             del log[self.SETTINGS_CHANGELOG_MAX:]
         self._data["settings_changelog"] = log
-        await self.async_save()
+        try:
+            await self.async_save()
+        except Exception:
+            # Roll the insert back rather than leave an entry that was never
+            # persisted: get_settings_changelog() reads straight off _data, so the
+            # failed audit line would be shown as history and then written for real
+            # by whatever saves next. Restored here rather than at the call sites so
+            # every caller gets it, and the snapshot is taken before any mutation.
+            self._data["settings_changelog"] = before
+            raise
 
     # ─── On-device ML model versions (Stage 4) ────────────────────────────────
 
@@ -1887,6 +1977,19 @@ class ProfileStore:
             wanted = tuple(PROFILE_EVIDENCE_SOURCES)
         self._evidence_sources = wanted
 
+    @property
+    def save_debug_traces(self) -> bool:
+        """Whether rich per-cycle debug traces are persisted with each cycle.
+
+        Pushed in by the manager from entry options, the way energy_mode and
+        evidence_sources are; the store has no access to them itself.
+        """
+        return self._save_debug_traces
+
+    @save_debug_traces.setter
+    def save_debug_traces(self, value: Any) -> None:
+        self._save_debug_traces = bool(value)
+
     def iter_evidence_cycles(self) -> list[CycleDict]:
         """Stored cycles the user allows to shape a profile.
 
@@ -2185,66 +2288,39 @@ class ProfileStore:
     def _grouped_snapshots(
         self, snapshots: list[dict[str, Any]]
     ) -> tuple[list[dict[str, Any]], dict[str, list[str]], dict[str, dict[str, Any]]]:
-        """Collapse each *cohesive* group into one aggregate candidate snapshot.
+        """Map each *cohesive* group to its member snapshots for the Stage-5 pass.
 
-        Returns (snapshots, group_members, member_snaps). Groups with <2 present
-        members, or cohesion below GROUP_MIN_COHESION (too generic an aggregate),
-        are left as individual member snapshots. Aggregate name is prefixed
-        ``__group__`` and mapped to its member profile names in group_members.
+        Returns (snapshots, group_members, member_snaps). Snapshots are returned
+        **unchanged**: every member is scored on its own curve, and the family is
+        formed afterwards by ``collapse_group_candidates`` (#400). Groups with <2
+        present members, or cohesion below GROUP_MIN_COHESION, are not mapped at
+        all, so their members simply stay individual candidates.
+
+        Until #400 this method averaged the member curves into one ``__group__``
+        aggregate snapshot. That is what the collapse replaces: on a temperature
+        family the averaged curve belongs to no member (it has a half-height
+        heating block and an energy figure neither member reaches), which cost the
+        family the program-level match before Stage 5 could pick between them.
         """
         groups = self.get_profile_groups()
         if not groups:
             return snapshots, {}, {}
         by_name = {s["name"]: s for s in snapshots}
-        member_to_group: dict[str, str] = {}
+        group_members: dict[str, list[str]] = {}
+        member_snaps: dict[str, dict[str, Any]] = {}
         for gname, g in groups.items():
             present = [m for m in (g.get("members") or []) if m in by_name]
             if len(present) < 2 or self.group_cohesion(present) < GROUP_MIN_COHESION:
                 continue  # keep members individual
+            group_members[f"__group__{gname}"] = present
             for m in present:
-                member_to_group[m] = gname
-        if not member_to_group:
-            return snapshots, {}, {}
-        n = 200
-        agg_curves: dict[str, list[np.ndarray]] = {}
-        agg_durs: dict[str, list[float]] = {}
-        agg_spans: dict[str, list[float]] = {}
-        member_snaps: dict[str, dict[str, Any]] = {}
-        out: list[dict[str, Any]] = []
-        for s in snapshots:
-            g = member_to_group.get(s["name"])
-            if g is None:
-                out.append(s)
-                continue
-            member_snaps[s["name"]] = s
-            sp = s.get("sample_power") or []
-            if len(sp) >= 2:
-                arr = np.asarray(sp, dtype=float)
-                agg_curves.setdefault(g, []).append(
-                    np.interp(np.linspace(0, 1, n), np.linspace(0, 1, arr.size), arr)
-                )
-                _dur = float(s.get("avg_duration") or 0.0)
-                agg_durs.setdefault(g, []).append(_dur)
-                # Members are resampled onto a normalized 0..1 axis above, so the
-                # aggregate's own time span is the mean of its members' (#364).
-                agg_spans.setdefault(g, []).append(float(s.get("sample_span_s") or _dur))
-        group_members: dict[str, list[str]] = {}
-        for g, curves in agg_curves.items():
-            key = f"__group__{g}"
-            durs = [d for d in agg_durs[g] if d > 0]
-            spans = [v for v in agg_spans.get(g, []) if v > 0]
-            out.append({
-                "name": key,
-                "avg_duration": float(np.mean(durs)) if durs else 0.0,
-                "sample_power": np.mean(np.array(curves), axis=0).tolist(),
-                "sample_span_s": float(np.mean(spans)) if spans else 0.0,
-            })
-            group_members[key] = [m for m in member_to_group if member_to_group[m] == g and m in member_snaps]
-        return out, group_members, member_snaps
+                member_snaps[m] = by_name[m]
+        return snapshots, group_members, member_snaps
 
     def _stage5_pick_member(
         self, current_power: list[float], current_duration: float,
         members: list[str], member_snaps: dict[str, dict[str, Any]],
+        in_progress: bool = False,
     ) -> tuple[str, float | None, float | None]:
         """Within a winning group, pick the member whose integrated ENERGY best
         matches the cycle.
@@ -2259,6 +2335,15 @@ class ProfileStore:
         63.3%; adding any duration term back regressed it (grouped members are
         duration-cohesive, so duration only adds noise). Duration is still returned
         (for ETA and the overrun guard) but is intentionally not part of selection.
+
+        ``in_progress`` marks a live, still-running cycle and makes the comparison
+        like-for-like, exactly as Stage 4 does (#400): each member is integrated
+        only up to the elapsed time via the shared ``analysis.prefix_mean``. Without
+        it the partial cycle's energy is graded against every member's COMPLETE
+        energy, and since a partial figure is always the smaller one the group
+        resolves to its coolest member for most of every run - the same defect this
+        stage exists to fix, one stage later. Off at cycle end, where the whole-cycle
+        comparison is the correct one and item 99's validation applies unchanged.
 
         Returns (member_name, individual_fit_score, member_avg_duration). The fit
         score is the chosen member's own alignment score, used as a sanity check."""
@@ -2286,7 +2371,13 @@ class ProfileStore:
             if sp.size == 0:
                 continue
             md = float(snap.get("avg_duration") or 0.0)
-            mem_energy = float(sp.mean()) * md
+            if in_progress:
+                mem_mean, mem_span = analysis.prefix_mean(
+                    sp, current_duration, float(snap.get("sample_span_s") or md or 0.0), md
+                )
+                mem_energy = mem_mean * mem_span
+            else:
+                mem_energy = float(sp.mean()) * md
             # Scale 0.30 is validated as insensitive over 0.25-0.40 on real data.
             sc = agree(cur_energy, mem_energy, 0.30)
             if sc > best_sc:
@@ -2454,29 +2545,114 @@ class ProfileStore:
         await self.async_save()
 
     def get_lifetime_cycle_count(self) -> int:
-        """Persisted monotonic lifetime completed-cycle count.
+        """Cycles this appliance has run, ever - the odometer.
 
-        Only ever increments (never regresses when history is trimmed/merged), so it
-        is the correct basis for milestone crossings. Pure getter - never persists.
-        Never raises; returns 0 when unset.
+        Only ever increments (never regresses when history is trimmed, merged or
+        deleted from), so it is the correct basis for milestone crossings, the
+        maintenance reminders and the cycle-count sensor (#414).
+
+        Floored at ``len(past_cycles)``: a stored record is evidence of a run, so
+        the odometer can never read below the number of records on hand. That makes
+        the getter correct even before :meth:`_heal_lifetime_cycle_count` has
+        persisted the floor (a v8->v9 seed predating a replace-mode import), and it
+        stops a hand-correction from being quietly undone at the next restart. Pure
+        getter - never persists. Never raises; returns 0 when unset.
         """
         try:
-            return int(self._data.get("lifetime_cycle_count", 0) or 0)
+            stored = int(self._data.get("lifetime_cycle_count", 0) or 0)
         except Exception:  # noqa: BLE001
-            return 0
+            stored = 0
+        try:
+            return max(stored, len(self.get_past_cycles()))
+        except Exception:  # noqa: BLE001
+            return stored
 
-    def set_lifetime_cycle_count(self, count: int) -> None:
+    def set_lifetime_cycle_count(self, count: int, *, force: bool = False) -> None:
         """Set the lifetime cycle count in memory WITHOUT persisting.
 
         The cycle-end path batches this with the immediately-following lifetime
         energy save (:meth:`async_add_lifetime_energy_wh`) so the store is written
         once per cycle. Encapsulates the storage key so callers need not touch
         ``_data`` directly. Ignores non-integer input.
+
+        This is an odometer: it changes when a cycle persists, or when the user
+        explicitly corrects it. A decrease is therefore refused unless ``force``
+        is set (the user-correction path, WS ``set_lifetime_cycle_count``), so no
+        ordinary code path can walk the appliance's life total backwards - the bug
+        behind discussion #414, where deleting a record lowered the count and an
+        external "every 30 cycles" maintenance task stopped firing.
         """
         try:
-            self._data["lifetime_cycle_count"] = int(count)
+            value = int(count)
         except (TypeError, ValueError):
+            return
+        if value < 0:
+            return
+        if not force and value < self.get_lifetime_cycle_count():
+            return
+        self._data["lifetime_cycle_count"] = value
+
+    def _heal_lifetime_cycle_count(self) -> None:
+        """Persist the ``len(past_cycles)`` floor that the getter already applies.
+
+        The v8->v9 migration seeded the counter from the history that existed at
+        that moment, and a replace-mode selective import can overwrite history
+        without its ``lifetime_stats``. Either way the appliance has demonstrably
+        run at least as many cycles as are stored. Writing the floor down at load
+        keeps the stored key in step with
+        :meth:`get_lifetime_cycle_count`, so an export carries the real reading.
+        Only ever increases. Never raises.
+        """
+        try:
+            stored = int(self._data.get("lifetime_cycle_count", 0) or 0)
+            real = len(self.get_past_cycles())
+            if real > stored:
+                self._data["lifetime_cycle_count"] = real
+                self._logger.debug(
+                    "Healed lifetime cycle count %d -> %d (stored history is larger)",
+                    stored,
+                    real,
+                )
+        except Exception:  # noqa: BLE001
             pass
+
+    # ------------------------------------------------------------------
+    # Armed program (pre-arm a manual program for the next cycle, #411)
+    # ------------------------------------------------------------------
+
+    def get_armed_program(self) -> str | None:
+        """Return the program the user pinned for the current or next cycle.
+
+        Persisted because arming is an idle-time action: the user picks the
+        programme now and starts the machine later, so it has to survive a Home
+        Assistant restart in between. (The mid-cycle pin rides the active-cycle
+        snapshot instead, see ``manual_program_name``.) Never raises.
+        """
+        try:
+            value = self._data.get("armed_program")
+            return value if isinstance(value, str) and value else None
+        except Exception:  # noqa: BLE001
+            return None
+
+    async def async_set_armed_program(self, program: str | None) -> None:
+        """Persist (or clear, with ``None``) the armed program. Never raises."""
+        try:
+            if isinstance(program, str) and program:
+                self._data["armed_program"] = program
+            else:
+                self._data.pop("armed_program", None)
+            await self.async_save()
+        except Exception:  # noqa: BLE001
+            # In-memory arming (manager._armed_program) has already taken effect and
+            # is what applies the program to the next cycle, so this is not a failed
+            # arm - it is an arm that will not survive a restart. Worth a warning
+            # rather than a debug line, because the user sees no error and would have
+            # no way to explain the choice being gone after a restart.
+            self._logger.warning(
+                "Failed to persist the armed program; it stays armed for this session "
+                "but will not survive a Home Assistant restart",
+                exc_info=True,
+            )
 
     # ------------------------------------------------------------------
     # E1: Maintenance log & predictive-maintenance reminders (Group E)
@@ -2485,7 +2661,8 @@ class ProfileStore:
     def get_maintenance_log(self) -> list[dict[str, Any]]:
         """Return logged maintenance events, most-recent-first. Never raises.
 
-        Each entry is ``{"id", "date", "event_type", "notes"}``. Entries with an
+        Each entry is ``{"id", "date", "event_type", "notes", "cycle_count_at_log"}``
+        (the last is absent on entries logged before #414). Entries with an
         unparseable date sort last.
         """
         try:
@@ -2513,11 +2690,31 @@ class ProfileStore:
         """
         if event_type not in MAINTENANCE_EVENT_TYPES:
             raise ValueError(f"Unknown maintenance event_type: {event_type!r}")
+        when = date if isinstance(date, str) and date else dt_util.now().isoformat()
+        # Reject a date the log cannot read back, for the same reason event_type is
+        # validated above: an unparseable date poisons the entry twice over. It makes
+        # the stamp below rewind the odometer by the WHOLE retained history (the
+        # parser returns None and `_odometer_at(None)` reads that as "since the
+        # beginning of time"), and `cycles_since_maintenance` then skips the entry
+        # when picking the latest event for its type - so the task reports as never
+        # serviced and its reminder comes due immediately. The WS handler already
+        # maps ValueError to `invalid_format`.
+        parsed_when = _parse_maintenance_dt(when)
+        if parsed_when is None:
+            raise ValueError(f"Unparseable maintenance date: {when!r}")
         entry: dict[str, Any] = {
             "id": uuid.uuid4().hex[:12],
-            "date": date if isinstance(date, str) and date else dt_util.now().isoformat(),
+            "date": when,
             "event_type": event_type,
             "notes": str(notes or ""),
+            # Odometer reading at the moment of servicing (#414). "Cycles since" is
+            # then a subtraction against the monotonic lifetime counter instead of a
+            # scan of `past_cycles`, which is capped at max_past_cycles and shrinks
+            # when the user deletes a record - both of which silently froze the
+            # reminder. Derived from the event's own date rather than from "now", so
+            # a back-dated entry ("descaled it three months ago") still reports the
+            # cycles run since that date instead of collapsing to zero.
+            "cycle_count_at_log": self._odometer_at(parsed_when),
         }
         log = self._data.setdefault("maintenance_log", [])
         if not isinstance(log, list):
@@ -2616,18 +2813,103 @@ class ProfileStore:
         self._logger.info("Deleted playground preset %r", name)
         return True
 
-    def cycles_since_maintenance(self, event_type: str) -> int:
-        """Count completed cycles since the most recent maintenance event of a type.
+    def _cycles_after(
+        self, since: datetime | None, *, include_all_statuses: bool = False
+    ) -> int:
+        """Stored cycles that started after *since* (all of them if None).
 
-        Counts completed cycles (``status == "completed"``) whose ``start_time`` is
-        after the most recent maintenance event of ``event_type``. If no such event
-        was ever logged, returns the total completed-cycle count. Never raises.
+        A scan of the retained history, so it is bounded by ``max_past_cycles`` and
+        shrinks when a record is deleted. Used only to place a maintenance event on
+        the odometer at log time, and as the legacy fallback for events logged
+        before that stamp existed. Never raises.
+
+        ``include_all_statuses`` selects the basis, and the two callers need
+        different ones. :meth:`_odometer_at` rewinds the lifetime odometer, which
+        counts every persisted cycle regardless of status, so it must subtract on
+        that same basis or the rewind is short and the stamp it writes is too high.
+        The legacy date-scan fallback keeps the completed-only basis it was
+        written with, so entries logged before the stamp existed keep answering
+        the way they always did.
         """
         try:
-            completed = [
+            cycles = [
                 c for c in self.get_past_cycles()
-                if isinstance(c, dict) and c.get("status") == "completed"
+                if isinstance(c, dict)
+                and (include_all_statuses or c.get("status") == "completed")
             ]
+            if since is None:
+                return len(cycles)
+            count = 0
+            for c in cycles:
+                start = _parse_start_dt(c.get("start_time"))
+                if start is None:
+                    continue
+                # A naive stamp cannot be compared with the aware `since` at all
+                # ("can't compare offset-naive and offset-aware datetimes"), and an
+                # ISO string without an offset parses naive - reachable through an
+                # import or a hand-edited file even though every record this device
+                # writes is aware. Read as UTC, the same way `newest` does in
+                # async_repair_profile_samples.
+                if start.tzinfo is None:
+                    start = start.replace(tzinfo=dt_util.UTC)
+                # Guarded per cycle, not once around the loop: the outer handler
+                # below returns 0 for the WHOLE tally, and 0 means "no cycles since
+                # that date", so a single odd record used to make _odometer_at stamp
+                # the CURRENT odometer onto a back-dated event. cycles_since_maintenance
+                # then subtracts that stamp and the reminder is late by every cycle
+                # run since the service.
+                try:
+                    if start > since:
+                        count += 1
+                except TypeError:  # pragma: no cover - defensive
+                    continue
+            return count
+        except Exception:  # noqa: BLE001
+            return 0
+
+    def _odometer_at(self, when: datetime | None) -> int:
+        """The lifetime cycle count as it stood at *when*.
+
+        ``odometer_now - cycles_after(when)``, clamped to >= 0. For "now" this is
+        simply the current reading; for a back-dated maintenance entry it rewinds
+        the odometer by the cycles run since that date.
+
+        The rewind counts every persisted status, matching what the odometer itself
+        counts. Rewinding on completed-only left the stamp too high by the number of
+        interrupted or force-stopped runs in between, and since
+        :meth:`cycles_since_maintenance` subtracts that stamp, the reminder came due
+        late by the same amount. Never raises.
+        """
+        try:
+            return max(
+                0,
+                self.get_lifetime_cycle_count()
+                - self._cycles_after(when, include_all_statuses=True),
+            )
+        except Exception:  # noqa: BLE001
+            return 0
+
+    def cycles_since_maintenance(self, event_type: str) -> int:
+        """Cycles this appliance has run since it was last serviced for *event_type*.
+
+        Measured against the monotonic lifetime odometer
+        (:meth:`get_lifetime_cycle_count`): the reading now minus the reading stamped
+        on the most recent matching event. That is retention-proof and
+        deletion-proof, which the previous ``past_cycles`` scan was not - past
+        ``max_past_cycles`` it stopped rising and every deleted record set the
+        reminder back (#414).
+
+        Events logged before the stamp existed have no reading to subtract, so they
+        fall back to the old date-based scan. When the task was never logged at all
+        (the common case), the answer is the whole odometer.
+
+        Note the odometer counts every persisted cycle, including ones recorded as
+        interrupted or force-stopped, where the old scan counted only completed
+        ones: a filter still gets dirty on a run the watchdog had to close.
+        Never raises.
+        """
+        try:
+            latest: dict[str, Any] | None = None
             latest_dt: datetime | None = None
             for e in self._data.get("maintenance_log", []) or []:
                 if not isinstance(e, dict) or e.get("event_type") != event_type:
@@ -2635,14 +2917,13 @@ class ProfileStore:
                 dt = _parse_maintenance_dt(e.get("date"))
                 if dt is not None and (latest_dt is None or dt > latest_dt):
                     latest_dt = dt
-            if latest_dt is None:
-                return len(completed)
-            count = 0
-            for c in completed:
-                start = _parse_start_dt(c.get("start_time"))
-                if start is not None and start > latest_dt:
-                    count += 1
-            return count
+                    latest = e
+            if latest is None:
+                return self.get_lifetime_cycle_count()
+            stamp = latest.get("cycle_count_at_log")
+            if isinstance(stamp, (int, float)) and not isinstance(stamp, bool):
+                return max(0, self.get_lifetime_cycle_count() - int(stamp))
+            return self._cycles_after(latest_dt)
         except Exception:  # noqa: BLE001
             return 0
 
@@ -3047,6 +3328,99 @@ class ProfileStore:
         except Exception:  # noqa: BLE001
             return {}
 
+    def unmatchable_profiles(self) -> dict[str, str]:
+        """Profiles the matcher cannot even consider, mapped to the reason.
+
+        ``_build_match_snapshots`` admits a profile to the candidate pool from one of
+        two sources: its multi-cycle envelope, or a single sample cycle (its pinned
+        ``sample_cycle_id``, else any labelled evidence cycle). A profile with neither
+        is skipped with a ``debug`` log and nothing else - it can never win a match,
+        and it cannot veto a shorter look-alike through the #364 prefix guard either,
+        since that guard only inspects candidates that made it into the ranking. #400
+        was reported against exactly that state: five wrong programs won in turn while
+        the right one sat outside the contest, and the cycle was then cut at 0.98x the
+        wrong program's length.
+
+        This is a *sufficient* condition, deliberately weaker than the builder's own
+        skip list: it reports a profile only when BOTH sources are unusable, so it
+        never claims a profile is unmatchable when the builder would have admitted it.
+        (What it does not predict is a resample failure on a cycle that does have data.)
+        ``test_issue_400_label_provenance`` pins it against a real match so the two
+        cannot drift apart.
+
+        Reads the *evidence* view, so a profile whose only cycles the user excluded via
+        the evidence-source setting is reported too - that is genuinely the state they
+        have put it in. Never raises; returns ``{}`` on error.
+        """
+        try:
+            profiles = self._data.get("profiles") or {}
+            if not isinstance(profiles, dict) or not profiles:
+                return {}
+
+            # Same two lookups the snapshot builder precomputes, same selections.
+            by_id: dict[str, CycleDict] = {}
+            labeled_by_profile: dict[str, CycleDict] = {}
+            for c in self.iter_evidence_cycles():
+                cid = c.get("id")
+                if cid is not None and cid not in by_id:
+                    by_id[cid] = c
+                pname = c.get("profile_name")
+                if not pname or not c.get("power_data"):
+                    continue
+                if (
+                    pname not in labeled_by_profile
+                    and c.get("status") in ("completed", "force_stopped")
+                ):
+                    labeled_by_profile[pname] = c
+
+            envelopes = self._data.get("envelopes") or {}
+            out: dict[str, str] = {}
+
+            for name, profile in profiles.items():
+                if not isinstance(profile, dict):
+                    continue
+
+                # Source 1: the envelope average curve (needs >= 2 cycles and a duration).
+                env = envelopes.get(name) if isinstance(envelopes, dict) else None
+                env_avg = env.get("avg") if isinstance(env, dict) else None
+                env_usable = False
+                if (
+                    isinstance(env, dict)
+                    and int(env.get("cycle_count") or 0) >= 2
+                    and isinstance(env_avg, list)
+                    and len(env_avg) > 1
+                    and isinstance(env_avg[0], (list, tuple))
+                    and len(env_avg[0]) >= 2
+                ):
+                    try:
+                        span = float(env_avg[-1][0]) - float(env_avg[0][0])
+                    except (TypeError, ValueError, IndexError):
+                        span = 0.0
+                    env_usable = bool(
+                        env.get("target_duration") or profile.get("avg_duration") or span
+                    )
+
+                # Source 2: a single sample cycle.
+                sample_id = profile.get("sample_cycle_id")
+                sample = by_id.get(sample_id) if sample_id else None
+                if sample is None or not sample.get("power_data"):
+                    sample = labeled_by_profile.get(name)
+                sample_present = bool(sample is not None and sample.get("power_data"))
+                sample_usable = sample_present and bool(
+                    profile.get("avg_duration") or (sample or {}).get("duration")
+                )
+
+                if env_usable or sample_usable:
+                    continue
+                out[name] = (
+                    "no usable duration"
+                    if (sample_present or isinstance(env_avg, list))
+                    else "no evidence cycle with power data"
+                )
+            return out
+        except Exception:  # noqa: BLE001
+            return {}
+
     def compute_profile_advisories(self) -> list[dict[str, Any]]:
         """Actionable per-profile maintenance advisories from existing signals.
 
@@ -3061,6 +3435,23 @@ class ProfileStore:
             advisories: list[dict[str, Any]] = []
             health = self.compute_profile_health() or {}
             trends = self.compute_profile_trends() or {}
+
+            # A program that cannot be matched at all comes first: no other advice about
+            # it means anything, and until now this state was invisible (a debug log in
+            # the snapshot builder). See :meth:`unmatchable_profiles`.
+            unmatchable = self.unmatchable_profiles() or {}
+            for name in unmatchable:
+                advisories.append({
+                    "profile": name, "severity": "warning", "code": "unmatchable",
+                    "message": (
+                        f"'{name}' can never be matched: it has no cycle with power "
+                        "data behind it, so WashData has nothing to compare a running "
+                        "cycle against. Label a cycle of this program (or record one) "
+                        "to bring it back into matching."
+                    ),
+                    "message_key": "msg.advisory_unmatchable",
+                    "message_params": {"name": name},
+                })
 
             for name, h in health.items():
                 if h.get("health_status") == "poor":
@@ -3616,6 +4007,8 @@ class ProfileStore:
         data = await self._store.async_load()
         if data:
             self._data = data
+        # The odometer can only be behind, never ahead, of the stored history (#414).
+        self._heal_lifetime_cycle_count()
         # Ensure legacy custom phase formats are normalized in-memory.
         self._get_shared_custom_phases()
         # Assign ids to any custom phase missing one.
@@ -3637,11 +4030,22 @@ class ProfileStore:
         """Repair profile sample references after retention or migrations.
 
         Ensures each profile's sample_cycle_id points to an existing cycle that still
-        has full-resolution power_data. If missing, picks the newest available cycle
-        with power_data and assigns it as the sample (and labels that cycle to the
-        profile if it was unlabeled).
+        has full-resolution power_data. If it does not, the profile is re-pointed at the
+        newest cycle **already labelled to it** - real, imported or backfilled, so an
+        import-only profile is repaired from its own cycles rather than left broken.
 
-        Returns stats dict.
+        What this deliberately does NOT do (#400 follow-up): adopt an *unlabelled*
+        cycle. It used to hand each sampleless profile the newest unlabelled cycle -
+        any cycle, no similarity check - as its template, its avg_duration and its
+        label. Since this runs on every setup, a program left without evidence (its
+        cycles deleted, unlabelled via the Cleanup tab, or excluded by the evidence-
+        source setting) silently adopted an unrelated wash at the next restart, and then
+        matched and mis-estimated against it. A profile with no cycles of its own is a
+        legitimate pending state (``cleanup_orphaned_profiles`` keeps it on purpose);
+        it is reported by :meth:`unmatchable_profiles` instead of being papered over.
+
+        Returns stats dict. ``cycles_labeled_as_sample`` is retained for diagnostics
+        continuity and is now always 0.
         """
         stats = {
             "profiles_checked": 0,
@@ -3651,7 +4055,7 @@ class ProfileStore:
 
         profiles: dict[str, dict[str, Any]] = self._data.get("profiles", {}) or {}
         cycles: list[dict[str, Any]] = self._data.get("past_cycles", []) or []
-        if not profiles or not cycles:
+        if not profiles:
             return stats
 
         # Sample validity must recognise imported and backfilled cycles: an import-only
@@ -3662,14 +4066,40 @@ class ProfileStore:
             c["id"]: c for c in self.iter_stored_cycles() if c.get("id")
         }
 
-        def newest_unlabeled_with_power_data() -> dict[str, Any] | None:
-            candidates: list[dict[str, Any]] = [
-                c for c in cycles if c.get("power_data") and not c.get("profile_name")
-            ]
+        # The "no evidence at all" bail-out is taken on every stored list, not on
+        # past_cycles. A device whose history is entirely imported or backfilled has an
+        # empty past_cycles, so guarding on that list returned before the loop and left
+        # exactly the import-only profile this method exists to repair broken.
+        if not by_id:
+            return stats
+
+        def newest(candidates: list[dict[str, Any]]) -> dict[str, Any] | None:
+            """The most recent candidate, ordered by parsed instant.
+
+            Not by raw ``start_time`` string: ISO stamps only sort chronologically
+            when they share a UTC offset, and one store legitimately holds several.
+            The reference library carries +02:00, +01:00 and +00:00 side by side
+            (DST either side of a transition, plus downloaded community cycles
+            recorded in someone else's zone), and e.g. ``11:00+02:00`` sorts above
+            ``10:00+00:00`` while being an hour earlier. Repair would then adopt an
+            older cycle's trace and duration as the profile's sample.
+
+            Unparseable stamps sort last rather than raising, and a naive stamp is
+            read as UTC so it can be compared with the aware ones at all.
+            """
             if not candidates:
                 return None
+
+            def _key(c: dict[str, Any]) -> datetime:
+                parsed = _parse_start_dt(c.get("start_time"))
+                if parsed is None:
+                    return datetime.min.replace(tzinfo=dt_util.UTC)
+                if parsed.tzinfo is None:
+                    return parsed.replace(tzinfo=dt_util.UTC)
+                return parsed
+
             try:
-                return max(candidates, key=lambda c: c.get("start_time", ""))
+                return max(candidates, key=_key)
             except Exception:  # pylint: disable=broad-exception-caught
                 return candidates[-1]
 
@@ -3682,34 +4112,29 @@ class ProfileStore:
             if sample and sample.get("power_data"):
                 continue
 
-            # Prefer newest already-labeled cycle for this profile that still has power_data
-            labeled_candidates = [
+            # Newest cycle already labelled to this profile that still has power_data.
+            # Real cycles first (they are this appliance's own evidence); an imported or
+            # backfilled cycle is a valid template too, and for an import-only profile
+            # it is the ONLY one - searching past_cycles alone left such a profile
+            # unrepairable, which is what made the unlabelled-steal look necessary.
+            chosen = newest([
                 c
                 for c in cycles
                 if c.get("profile_name") == profile_name and c.get("power_data")
-            ]
-            if labeled_candidates:
-                try:
-                    chosen = max(
-                        labeled_candidates, key=lambda c: c.get("start_time", "")
-                    )
-                except Exception:  # pylint: disable=broad-exception-caught
-                    chosen = labeled_candidates[-1]
-            else:
-                # Fallback: pick newest UNLABELED cycle with power_data
-                chosen = newest_unlabeled_with_power_data()
+            ]) or newest([
+                c
+                for c in self.iter_stored_cycles()
+                if c.get("profile_name") == profile_name and c.get("power_data")
+            ])
 
             if not chosen:
+                # No evidence of its own: leave the profile alone (pending state) so it
+                # cannot adopt an unrelated cycle's shape and duration.
                 continue
 
             profile["sample_cycle_id"] = chosen.get("id")
             if chosen.get("duration"):
                 profile["avg_duration"] = chosen["duration"]
-
-            # If chosen cycle is unlabeled, label it to this profile to bootstrap matching
-            if not chosen.get("profile_name"):
-                chosen["profile_name"] = profile_name
-                stats["cycles_labeled_as_sample"] += 1
 
             stats["profiles_repaired"] += 1
             try:
@@ -4844,18 +5269,23 @@ class ProfileStore:
     @staticmethod
     def _envelope_time_power(
         envelope: JSONDict | None,
+        curve_key: str = "avg",
     ) -> tuple[list[float], list[float]] | None:
-        """Extract (time_grid, power) from an envelope's ``avg`` curve, or None.
+        """Extract (time_grid, power) from an envelope curve, or None.
 
         Handles both the new ``[[t, p], ...]`` and legacy ``[p, ...]`` formats
         (reconstructing the grid from ``time_grid`` / ``target_duration`` / a 60 s
         fallback). Single source of the envelope time axis for both the alignment
         worker and the Smart-Termination release span (#348), so the mapped position
         and the span it is compared against always live on the same grid.
+
+        ``curve_key`` selects the band: ``"avg"`` (the default, every existing
+        caller) or ``"max"``, which #399 uses to ask whether ANY member of the
+        profile ends with a high-power block.
         """
         if not envelope:
             return None
-        env_avg_raw = envelope.get("avg", [])
+        env_avg_raw = envelope.get(curve_key, [])
         if not env_avg_raw:
             return None
         try:
@@ -4982,6 +5412,147 @@ class ProfileStore:
             if not tail:
                 return None
             return float(np.mean(tail))
+        except Exception:  # noqa: BLE001
+            return None
+
+    def profile_terminal_high_block(
+        self,
+        profile_name: str,
+        threshold_w: float,
+    ) -> tuple[float, float, float] | None:
+        """Position and length of the LAST contiguous run above ``threshold_w`` in a
+        profile's own trace: ``(start_frac, seconds, start_offset_s)``, or None (#399).
+
+        ``start_frac`` is where that run begins as a fraction of the profile's
+        quiet-trimmed span, and answers only one question: is this block *terminal*
+        (``ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC``)? ``start_offset_s`` is the same
+        position in ABSOLUTE seconds from the start of the trace, and is what the
+        detector scans from. This is what tells the anti-crease finalise that a
+        programme ends with a spin, and roughly how long that spin runs, so it can
+        wait for the live counterpart instead of closing the wash seconds before it.
+
+        The two are deliberately on different bases, because they answer different
+        questions and the caller has no denominator that fits both (register item
+        196). The fraction MUST divide by the trimmed span, or a capture's idle tail
+        pushes a genuine terminal spin under the gate and disarms the guard (see the
+        trim comment below). The scan offset must NOT be reconstructed from it as
+        ``start_frac x expected``, because ``expected`` is the profile's
+        ``avg_duration``, which tracks the UNTRIMMED span - measured over 152 real
+        washer/dryer cycles a recorded ``duration`` sits at relative error 0.0000
+        (median) from the full span versus 0.0274 from the trimmed one. Multiplying
+        a trimmed-basis fraction by an untrimmed-basis duration produced a
+        systematically LATE offset (median +180 s, max +1731 s over 13 real armed
+        profiles), so the run's own spin fell before the scan window and was never
+        counted: over 36 real armed profile/cycle pairs the product recognised the
+        spin 3 times, the absolute offset 14. Returning the offset removes the
+        denominator from the question entirely.
+
+        Reads the envelope's ``max`` band first - a spin recorded by ANY member is
+        a spin this programme can have - and falls back to the sample cycle's raw
+        trace, because a thinly-trained profile (one labelled cycle, so no envelope)
+        is still a match candidate and would otherwise get no guard at all. Pure
+        statistics, never raises; same contract as ``profile_tail_power``.
+        """
+        try:
+            level = float(threshold_w)
+            if not (level > 0):
+                return None
+
+            curves = self._envelope_time_power(self.get_envelope(profile_name), "max")
+            if not curves or len(curves[0]) < 2:
+                profile = self.get_profiles().get(profile_name)
+                if not isinstance(profile, dict):
+                    return None
+                sample_id = profile.get("sample_cycle_id")
+                if not sample_id:
+                    return None
+                cycle, _ = self.find_stored_cycle(str(sample_id))
+                if not cycle:
+                    return None
+                # Through decompress_power_data, not raw power_data: a legacy cycle
+                # stores (iso_string, power) pairs (see profile_tail_power).
+                points = decompress_power_data(cycle)
+                if len(points) < 2:
+                    return None
+                times = [float(pt[0]) for pt in points]
+                powers = [float(pt[1]) for pt in points]
+            else:
+                times, powers = curves
+
+            # Trim trailing near-silence before measuring positions. How much idle
+            # tail a stored trace carries is a property of the capture, not the
+            # appliance - the same programme on the same machine ranges from 0 s to
+            # 613 s of trailing quiet in the #399 reporter's own store - and it is
+            # what makes profile_tail_power's last-5% mean swing by two orders of
+            # magnitude. Left in, it would push a genuine terminal spin below
+            # ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC and silently disarm the guard.
+            # Floor is relative to the trace's own peak, so it needs no config and
+            # keeps a real low-power tumble tail (which legitimately means the block
+            # is not terminal).
+            peak = max(powers) if powers else 0.0
+            quiet_floor = max(1.0, peak * 0.02)
+            end = len(powers) - 1
+            while end > 0 and powers[end] <= quiet_floor:
+                end -= 1
+            if end < 1:
+                return None
+            times = times[: end + 1]
+            powers = powers[: end + 1]
+
+            span = float(times[-1]) - float(times[0])
+            if span <= 0:
+                return None
+            # Walk back to the last sample above the level, then back to the start
+            # of the contiguous run it belongs to.
+            last = None
+            for i in range(len(powers) - 1, -1, -1):
+                if powers[i] > level:
+                    last = i
+                    break
+            if last is None:
+                return None  # this programme never draws above the level
+            first = last
+            while first > 0 and powers[first - 1] > level:
+                first -= 1
+            # Absolute seconds from the start of the trace. `times` is already
+            # quiet-trimmed, but the trim is TRAILING only, so this offset is
+            # identical on the trimmed and untrimmed traces - which is exactly the
+            # capture-tail invariance the fraction needs the trim to get, obtained
+            # here for free (see the item-196 note in the docstring).
+            start_offset = float(times[first]) - float(times[0])
+            start_frac = start_offset / span
+            # The block covers the interval up to the sample AFTER its last one, so
+            # a single-sample spike still has a length (its own step). When the run
+            # reaches the trimmed trace's final sample there IS no following one, so
+            # the step is carried over from the preceding interval instead of
+            # clamping back onto times[last]: clamping made the block one step short,
+            # and for a single-sample spike it made it zero-length, which fell
+            # through the guard below and returned None. That silently disarmed the
+            # anti-crease spin wait for a profile whose spin runs to the end of its
+            # own trace - the shape this method exists to detect.
+            if last + 1 < len(times):
+                end_t = float(times[last + 1])
+            elif last > 0:
+                # No trailing sample, so the final step has to be estimated. Use the
+                # trace's own MEDIAN positive interval rather than the immediately
+                # preceding one: on an irregular trace that neighbour can be an
+                # outage-sized gap, and copying it verbatim reported a block hours
+                # longer than the one actually observed, inflating `needed` until the
+                # anti-crease wait ran to its ceiling. The median is representative
+                # by construction and cannot be dragged by a single gap.
+                diffs = [
+                    float(times[i + 1]) - float(times[i])
+                    for i in range(len(times) - 1)
+                    if float(times[i + 1]) - float(times[i]) > 0
+                ]
+                step = statistics.median(diffs) if diffs else 0.0
+                end_t = float(times[last]) + step
+            else:
+                end_t = float(times[last])
+            seconds = end_t - float(times[first])
+            if seconds <= 0:
+                return None
+            return (min(max(start_frac, 0.0), 1.0), seconds, start_offset)
         except Exception:  # noqa: BLE001
             return None
 
@@ -5399,8 +5970,16 @@ class ProfileStore:
         self,
         current_power_data: list[tuple[str, float]] | list[tuple[datetime, float]] | list[tuple[float, float]] | list[list[float]],
         current_duration: float,
+        in_progress: bool = False,
     ) -> MatchResult:
-        """Run profile matching asynchronously in executor."""
+        """Run profile matching asynchronously in executor.
+
+        ``in_progress`` marks a live, still-running cycle, which makes Stage 4
+        compare the elapsed stretch against the same stretch of each candidate
+        instead of against its complete duration/energy (#400). Defaults to False
+        so the final match at cycle end - where the cycle IS complete - and every
+        other caller keep their existing behaviour.
+        """
         # 1. Prepare data in main thread (Access ProfileStore state safely)
         group_members: dict[str, list[str]] = {}
         member_snaps: dict[str, dict[str, Any]] = {}
@@ -5437,7 +6016,7 @@ class ProfileStore:
             if not segments:
                 return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
             current_seg = max(segments, key=lambda s: len(s.power))
-            if len(current_seg.power) < 12:
+            if len(current_seg.power) < MATCH_MIN_RESAMPLED_POINTS:
                 return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
             current_power_list = current_seg.power.tolist()
@@ -5588,8 +6167,9 @@ class ProfileStore:
                     "; ".join(skipped_profiles)
                 )
 
-            # Stage 5: collapse cohesive near-duplicate groups into one aggregate
-            # candidate each (loose groups stay individual). No-op without groups.
+            # Stage 5: map cohesive near-duplicate groups to their members (loose
+            # groups stay individual). The members are scored individually and the
+            # family is collapsed after the worker. No-op without groups.
             snapshots, group_members, member_snaps = self._grouped_snapshots(snapshots)
 
             config = {
@@ -5597,6 +6177,7 @@ class ProfileStore:
                 "max_duration_ratio": self._max_duration_ratio,
                 "dtw_bandwidth": self.dtw_bandwidth,
                 "energy_mode": self.energy_mode,
+                "in_progress": bool(in_progress),
                 # On-device tuned scoring weights (opt-in); empty = shipped defaults.
                 **self._matching_overrides(),
             }
@@ -5628,6 +6209,18 @@ class ProfileStore:
             )
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0, [], {}, is_confident_mismatch=True, mismatch_reason="all_rejected")
 
+        # Stage 5, part 1 (#400): the members of a cohesive group were scored on
+        # their own curves; collapse each family to its best-scoring member now.
+        # Must happen BEFORE the ambiguity check - two members of the same family
+        # sitting next to each other in the ranking is precisely what grouping
+        # exists to stop reading as an ambiguous top-2.
+        # Captured BEFORE the collapse: every member was scored on its own curve,
+        # and the collapse drops all but the best sibling. This is the only place
+        # the selected member's own blended score still exists (see
+        # MatchResult.label_confidence).
+        scored_by_name = {str(c.get("name")): c for c in candidates}
+        candidates = collapse_group_candidates(candidates, group_members)
+
         best = candidates[0]
 
         # Reconstruct MatchResult. Top-level ambiguity (safeguard #1): a close
@@ -5637,20 +6230,47 @@ class ProfileStore:
 
         best_name = best["name"]
         best_duration = best["profile_duration"]
+        member_confidence: float | None = None
         # Stage 5: if a group won, pick the best-fitting member.
         if best_name in group_members:
             chosen, member_fit, member_dur = self._stage5_pick_member(
-                current_power_list, current_duration, group_members[best_name], member_snaps
+                current_power_list, current_duration, group_members[best_name], member_snaps,
+                in_progress=in_progress,
             )
             best_name = chosen
             if member_dur:
                 best_duration = member_dur
+            # The selected member's OWN blended pipeline score, for the label gate.
+            # None when the member has no candidate record at all: `member_snaps`
+            # holds every present member, including ones `compute_matches_worker`
+            # rejected at the Stage-1 duration gate, so Stage 5 can select a member
+            # the matcher itself refused to consider (measured: 2 of 267 group wins).
+            _chosen_cand = scored_by_name.get(chosen)
+            if _chosen_cand is not None:
+                try:
+                    member_confidence = float(_chosen_cand["score"])
+                except (TypeError, ValueError, KeyError):
+                    member_confidence = None
             # Safeguard #2: the group aggregate matched but if the chosen member
             # does not individually fit reasonably (vs the group score), the real
             # program may be a different single profile -> treat as uncertain.
             # member_fit is a Stage-2-only score; best["score"] includes DTW-blend +
-            # duration/energy agreement (typically 25-30% higher). Use 0.55× to avoid
-            # the threshold being effectively too strict for DTW-boosted groups.
+            # duration/energy agreement. Use 0.55× to avoid the threshold being
+            # effectively too strict for DTW-boosted groups.
+            #
+            # This is a coarse "is the member nowhere near" backstop, NOT a
+            # mislabel detector, and it must not be recalibrated into one. Measured
+            # on the real corpus (267 group wins), member_fit/best["score"] has
+            # median 0.877 whole-cycle and 1.018 mid-cycle - so the ratio is not a
+            # stable ~0.75 as the "25-30% higher" note used to claim, it straddles
+            # 1.0 and reaches 2.07 mid-cycle (member_fit warps the FULL trace
+            # against the FULL template, while mid-cycle Stage 2 scored a prefix
+            # pair). Worse, on the folds where Stage 5 picked the WRONG member the
+            # ratio is *higher* than where it picked the right one (median 0.992 vs
+            # 0.947), so no constant K separates them: sweeping K from 0.55 to 1.00
+            # cost up to 53 correct labels to prevent 12 wrong ones. The label gate
+            # uses MatchResult.label_confidence instead, which compares two
+            # like-for-like blended scores.
             if member_fit is not None and best["score"] > 0 and member_fit < 0.55 * best["score"]:
                 is_ambiguous = True
             # Overrun guard: if the cycle has already outlasted the chosen member's
@@ -5658,8 +6278,34 @@ class ProfileStore:
             # to ambiguous so Smart Termination falls back to the power timeout.
             if best_duration and current_duration > best_duration * 1.05:
                 is_ambiguous = True
-            # Relabel the winning candidate for the ranking / diagnostics.
-            candidates = [{**best, "name": best_name, "profile_duration": best_duration}, *candidates[1:]]
+            # Relabel the winning candidate for the ranking / diagnostics, and carry
+            # the Stage-5 provenance with it. `score` deliberately stays the group's
+            # (i.e. the best-scoring sibling's) blended score: that is the number the
+            # matcher decided on, and every live consumer - Smart Termination's
+            # match_confidence_threshold, the ML end-guard's defer_finish_confidence,
+            # the unmatch/divergence tracking, the ETA blend - is calibrated against
+            # it. Lowering it here would silently re-tune end detection.
+            #
+            # What the cohesion gate does NOT make close is this blended score. It
+            # bounds the *shape* spread (measured sibling Stage-2 spread: median
+            # 0.068 whole-cycle), but Stage 4's duration/energy agreement exists
+            # precisely to pull temperature/spin siblings apart, so the blended
+            # spread is 2.3x wider (median 0.154, max 0.431). Hence
+            # `stage5_member_score`: the selected member's own blended score, which
+            # MatchResult.label_confidence gates labelling on. The ranking and the
+            # live_match training snapshots therefore record all three numbers and
+            # never imply the chosen member earned its sibling's score.
+            candidates = [
+                {
+                    **best,
+                    "name": best_name,
+                    "profile_duration": best_duration,
+                    "stage5_member_fit": member_fit,
+                    "stage5_member_score": member_confidence,
+                    "stage5_group": best["name"],
+                },
+                *candidates[1:],
+            ]
 
         matched_phase = None
         if best_name:
@@ -5689,6 +6335,7 @@ class ProfileStore:
             ranking=candidates[:5],  # populate ranking (consumed for training snapshots)
             is_prefix_ambiguous=is_prefix_ambiguous,
             is_prefix_ambiguous_full_shape=full_shape_hit,
+            member_confidence=member_confidence,
         )
 
     async def async_verify_alignment(
@@ -6104,18 +6751,24 @@ class ProfileStore:
         self._data["active_cycle"] = None
         self._data["last_active_save"] = None
         # Newer persisted state must also be wiped, else a "wipe all" leaves trained
-        # models, groups, matcher tuning, histories, and counters behind.
+        # models, groups, matcher tuning and histories behind. The two lifetime
+        # odometers are the documented exception - see the note below.
         self._data["custom_phases"] = []
         self._data["ml_model_versions"] = {}
         self._data["profile_groups"] = {}
         self._data["maintenance_log"] = []
+        self._data.pop("armed_program", None)
         self._data["playground_presets"] = {}
         self._data["matching_config"] = {}
         self._data["match_ranking_history"] = []
         self._data["ml_last_training_run"] = None
         self._data["ml_training_history"] = {}
-        self._data["lifetime_energy_wh"] = 0.0
-        self._data["lifetime_cycle_count"] = 0
+        # The two lifetime odometers deliberately SURVIVE a wipe (#414). They record
+        # what the appliance has done, not what WashData has stored: the cycle count
+        # now drives the maintenance reminders (and any external "every N cycles"
+        # task), and the energy total backs a TOTAL_INCREASING Energy-dashboard
+        # sensor where a silent reset reads as a meter replacement. Both remain
+        # correctable by hand - the panel's Maintenance tab edits the cycle count.
         self._data["settings_changelog"] = []
         self._data["suggestion_apply_cycle_count"] = 0
         self._cached_sample_segments = {}
@@ -6640,6 +7293,12 @@ class ProfileStore:
             )
         self._data = data_dict
         self._cached_sample_segments = {}
+        # Re-apply the odometer floor: an import can add or replace past_cycles
+        # after async_load already healed it, and export_data copies the STORED
+        # value rather than the getter's floored one - so an export taken before
+        # the next restart could report a lifetime count below its own retained
+        # history. Only ever increases, and idempotent.
+        self._heal_lifetime_cycle_count()
         await self.async_save()
 
         return {
@@ -6995,6 +7654,12 @@ class ProfileStore:
             await self.async_rebuild_envelope(p)
 
         self._cached_sample_segments = {}
+        # Re-apply the odometer floor: an import can add or replace past_cycles
+        # after async_load already healed it, and export_data copies the STORED
+        # value rather than the getter's floored one - so an export taken before
+        # the next restart could report a lifetime count below its own retained
+        # history. Only ever increases, and idempotent.
+        self._heal_lifetime_cycle_count()
         await self.async_save()
 
         settings_out: dict[str, Any] = {}

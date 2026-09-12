@@ -89,6 +89,37 @@ test('maintenance subtab is visible in advanced tab', async ({ page }) => {
   await expect(maintContent).toBeVisible({ timeout: 5_000 });
 });
 
+// ─── Service status / lifetime odometer (#414) ───────────────────────────────
+
+test('maintenance shows the lifetime odometer, not the stored-history count', async ({ page }) => {
+  await clickTab(page, 'advanced');
+  await page.locator('[data-ptab="maintenance"]').first().click();
+  const card = page.locator('.wd-card', { hasText: 'Service Status' }).first();
+  await expect(card).toBeVisible({ timeout: 8_000 });
+  // 212 comes from lifetime_cycle_count, past the 200-record retention cap.
+  await expect(card).toContainText('212');
+  await expect(card).toContainText('cycles run in total');
+});
+
+test('maintenance shows how close each service task is', async ({ page }) => {
+  await clickTab(page, 'advanced');
+  await page.locator('[data-ptab="maintenance"]').first().click();
+  const card = page.locator('.wd-card', { hasText: 'Service Status' }).first();
+  await expect(card).toBeVisible({ timeout: 8_000 });
+  await expect(card).toContainText('12 / 30 cycles');
+});
+
+test('the odometer can be corrected by hand', async ({ page }) => {
+  await clickTab(page, 'advanced');
+  await page.locator('[data-ptab="maintenance"]').first().click();
+  const input = page.locator('#wd-maint-odometer').first();
+  await expect(input).toBeVisible({ timeout: 8_000 });
+  await expect(input).toHaveValue('212');
+  await input.fill('250');
+  await page.locator('button[data-action="maint-save-odometer"]').first().click();
+  await assertWsCalled(page, 'ha_washdata/set_lifetime_cycle_count');
+});
+
 // ─── Mobile ─────────────────────────────────────────────────────────────────
 
 test('advanced tab renders without overflow on mobile', async ({ page }) => {

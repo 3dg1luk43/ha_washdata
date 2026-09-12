@@ -116,7 +116,11 @@ async def test_setup_preloads_through_the_import_executor() -> None:
 
     calls: list[object] = []
 
+    # hass.data holds the shared warm-up future (one job per HA instance, #408).
     class _Hass:
+        def __init__(self) -> None:
+            self.data: dict = {}
+
         async def async_add_import_executor_job(self, target, *args):
             calls.append(target)
             return target(*args)
@@ -126,6 +130,9 @@ async def test_setup_preloads_through_the_import_executor() -> None:
     assert engine._MANIFEST_MODELS_CACHE is not None
 
     class _BrokenHass:
+        def __init__(self) -> None:
+            self.data: dict = {}
+
         async def async_add_import_executor_job(self, target, *args):
             raise RuntimeError("executor gone")
 

@@ -175,14 +175,42 @@ async def test_cycles_since_maintenance_after_event(store):
     assert store.cycles_since_maintenance("descale") == 3
 
 
-async def test_cycles_since_maintenance_only_counts_completed(store):
+async def test_cycles_since_maintenance_counts_every_run(store):
+    """Every recorded run counts, not just the ones that ended cleanly (#414).
+
+    The reading now comes off the lifetime odometer, which increments once per
+    persisted cycle. A run the watchdog had to close (``force_stopped``) or one cut
+    short (``interrupted``) still soiled the filter, and ``force_stopped`` in
+    particular is routinely a perfectly real wash behind a plug that went quiet.
+    The legacy date-scan fallback still counts completed cycles only - see
+    :func:`test_cycles_since_maintenance_legacy_event_without_stamp`.
+    """
     now = dt_util.now()
     store._data["past_cycles"] = [
         _completed_cycle(now - timedelta(days=2)),
         _completed_cycle(now - timedelta(days=1), status="interrupted"),
         _completed_cycle(now - timedelta(hours=1), status="force_stopped"),
     ]
-    # no event → total completed only (1)
+    assert store.cycles_since_maintenance("descale") == 3
+
+
+async def test_cycles_since_maintenance_legacy_event_without_stamp(store):
+    """An event logged before #414 has no odometer reading, so it falls back."""
+    now = dt_util.now()
+    store._data["past_cycles"] = [
+        _completed_cycle(now - timedelta(days=4)),
+        _completed_cycle(now - timedelta(days=1)),
+        _completed_cycle(now - timedelta(hours=2), status="interrupted"),
+    ]
+    store._data["maintenance_log"] = [
+        {
+            "id": "legacy000001",
+            "date": (now - timedelta(days=2)).isoformat(),
+            "event_type": "descale",
+            "notes": "",
+        }
+    ]
+    # Date scan over completed cycles only: the interrupted one is not counted.
     assert store.cycles_since_maintenance("descale") == 1
 
 

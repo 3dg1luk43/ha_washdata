@@ -163,6 +163,11 @@ CONF_NOTIFY_LIVE_CHRONOMETER = "notify_live_chronometer"
 # (sticky) and a tap target (clickAction). Not new notification types. Mobile-only.
 CONF_NOTIFY_LIVE_STICKY = "notify_live_sticky"
 CONF_NOTIFY_LIVE_CLICK_ACTION = "notify_live_click_action"
+# Silent recurring live updates (#417). iOS alerts on every Live Activity refresh
+# unless the update is marked silent, so a 10-minute live interval buzzes the phone
+# all cycle long. Mobile-only, and never applied to the update that STARTS the
+# activity - that one stays audible (and `silent` has no effect there anyway).
+CONF_NOTIFY_LIVE_SILENT = "notify_live_silent"
 CONF_NOTIFY_REMINDER_MESSAGE = "notify_reminder_message"  # Distinct one-time pre-end alert
 CONF_NOTIFY_TIMEOUT_SECONDS = "notify_timeout_seconds"  # Auto-dismiss after N seconds (0 = never)
 CONF_NOTIFY_CHANNEL = "notify_channel"  # Android channel for status/live/reminder
@@ -230,6 +235,10 @@ DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
 DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
 DEFAULT_NOTIFY_LIVE_STICKY = False  # #347: off = today's behaviour (tap dismisses)
 DEFAULT_NOTIFY_LIVE_CLICK_ACTION = ""  # #347: empty = no tap target (today's behaviour)
+# #417: on by default. A progress refresh is not an alert, and every other app with
+# live progress updates silently; the audible per-update buzz was the complaint, not
+# the feature. Turn it off to get a sound/vibration on every update again.
+DEFAULT_NOTIFY_LIVE_SILENT = True
 DEFAULT_NOTIFY_TIMEOUT_SECONDS = 0  # 0 = notifications never auto-dismiss
 DEFAULT_NOTIFY_CHANNEL = ""  # Empty = omit channel (companion app default)
 DEFAULT_NOTIFY_FINISH_CHANNEL = ""  # Empty = reuse status channel
@@ -468,6 +477,12 @@ MATCH_MAE_SCALE = 100.0            # half-saturation point of the MAE score curv
 MATCH_MAE_REF_PEAK = 1000.0        # peak (W) at which scoring matches the legacy formula
 MATCH_MAE_PEAK_FLOOR = 50.0        # floor so tiny/idle traces don't explode the ratio
 MATCH_KEEP_MIN_SCORE = 0.1         # candidates scoring below this are discarded
+# Shortest resampled current-cycle trace the matcher will score. Below this a
+# correlation is noise, so both match paths decline rather than return a number
+# nobody should act on. Named because the value was duplicated as a bare literal
+# in async_match_profile and in the Playground's matcher, and the two drifted:
+# the sim scored 5-point stretches that production had already rejected.
+MATCH_MIN_RESAMPLED_POINTS = 12
 # DTW refinement (Stage 3): blended = DTW_BLEND*core + (1-DTW_BLEND)*dtw_score,
 # dtw_score = DIST_SCALE / (DIST_SCALE + scaled_dtw_distance).
 MATCH_DTW_BLEND = 0.5
@@ -594,6 +609,30 @@ MATCH_DURATION_WEIGHT = 0.22
 MATCH_ENERGY_WEIGHT = 0.22
 MATCH_DURATION_SCALE = 0.175       # ~ln ratio at which duration agreement halves
 MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
+# Issue #400: once a RUNNING cycle has outlasted a candidate, that is hard
+# evidence against it, and the penalty uses this sharper scale instead of
+# MATCH_DURATION_SCALE. Only reached when the caller opts in via
+# config["in_progress"]; the final match at cycle end keeps the symmetric term,
+# where elapsed IS the cycle's true duration.
+#
+# Below a candidate's duration the term is deliberately UNCHANGED. Suppressing the
+# penalty there ("we simply have not got there yet") was measured and rejected: it
+# adds only +0.7pp mid-cycle top-1 over prefix energy alone, costs 3.7pp at the 90%
+# checkpoint, and - because it hands a longer sibling full duration agreement near
+# the short one's end - it puts a dishwasher's 50 deg and 65 deg programmes inside
+# MATCH_AMBIGUITY_MARGIN of each other at the end of the 50 deg, which reads as
+# ambiguous and blocks Smart Termination (measured on four real exports; #393 is
+# about finishing on time, so that is not a trade worth 0.7pp).
+MATCH_DURATION_SCALE_OVERRUN = 0.05
+# Issue #400, shape half: while a cycle is running, Stages 2 and 3 score it against
+# each candidate TRUNCATED to the elapsed time (reusing the #364 prefix machinery),
+# but only while it is still clearly mid-run. Past this fraction of a candidate's
+# own span the truncation starts discarding the very thing that separates a short
+# programme from its longer sibling at the end - "I have already run longer than
+# everything you have shown me". Measured on cycle_data: mid-cycle top-1 62.6% ->
+# 71.0% at 0.7; at 0.8 the 90% checkpoint drops and a real dishwasher export loses
+# Smart Termination, the same cliff the rejected duration credit fell off.
+MATCH_PREFIX_SHAPE_MAX_RATIO = 0.7
 
 
 # States
@@ -744,6 +783,29 @@ STANDBY_BAND_FLATNESS_FLOOR_W = 2.0   # absolute flatness floor for low-peak dev
 ANTI_CREASE_FINALIZE_RATIO = 0.98      # elapsed must reach 98% of expected duration
 ANTI_CREASE_CONFIRM_WINDOW_S = 180.0   # recent window that must hold no reading > max_power
 
+# Issue #399: both conditions above look BACKWARDS, so a wash whose final spin
+# lands just past 0.98 x expected - preceded by more than the confirm window below
+# `anti_wrinkle_max_power` (a delicate/rinse stretch) - was finalised seconds
+# before its own spin, and the spin then opened a second cycle record. The guard
+# asks the matched profile whether it ends with a high-power block and, if so,
+# refuses to finalise until THIS run has produced its counterpart.
+#
+# Deliberately event-based, not clock-based: blocking merely until elapsed passes
+# the profile's own last high sample delays the reported finalise by 16 s and then
+# splits the wash anyway, because a run's spin can sit hundreds of seconds later
+# than the profile's (load-dependent duration). Asymmetric like the other
+# anti-crease guards - it can only ever DELAY a finalise - and bounded by the cap
+# below so a program that legitimately skips its spin can never hang.
+ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC = 0.90   # profile's last high block must START this
+                                            # late in its run to count as terminal;
+                                            # a genuinely low-power tail (the #296
+                                            # Miele tumble) never arms the guard
+ANTI_CREASE_TERMINAL_MATCH_FRAC = 0.5       # live high-power seconds after that
+                                            # position, as a fraction of the
+                                            # profile's own block, that count as
+                                            # "this run has had its spin"
+ANTI_CREASE_SPIN_WAIT_MAX_RATIO = 1.25      # never block past this x expected
+
 # Device Type Defaults
 # Device Type Defaults (Maps)
 
@@ -864,6 +926,22 @@ DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
     DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
     DEVICE_TYPE_PUMP: 20,  # 20 s (Pumps cut off sharply; no warm-down phase)
+}
+
+# Ceiling for the manager's *unmatched* zombie guard (seconds), i.e. the failsafe
+# that force-ends a cycle with no learned expected duration (expected == 0). This is
+# only a last-resort kill for a stuck FALSE START; the detector already hard-caps any
+# cycle at 8h (28800s), and the guard additionally only fires when the appliance is
+# effectively idle and no external end trigger is available (issue #404). All values
+# MUST stay below the detector's 28800s cap so the guard remains an *earlier* kill.
+# Wet/long appliances get a longer fuse because a genuine wash+dry or long cottons
+# programme with no matched profile can legitimately run well past 4h.
+DEFAULT_UNMATCHED_WATCHDOG_CEILING = 14400  # 4h scalar fallback
+DEFAULT_UNMATCHED_WATCHDOG_CEILING_BY_DEVICE = {
+    DEVICE_TYPE_WASHING_MACHINE: 21600,  # 6h (long cottons + pre-wash)
+    DEVICE_TYPE_WASHER_DRYER: 25200,  # 7h (combined wash+dry runs 6+h)
+    DEVICE_TYPE_DRYER: 21600,  # 6h (anti-crease can extend a long dry)
+    DEVICE_TYPE_DISHWASHER: 18000,  # 5h (long eco + silent drying pauses)
 }
 
 # Device-specific progress smoothing thresholds (percentage points)

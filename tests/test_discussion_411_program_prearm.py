@@ -1,0 +1,596 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Discussion #411: picking a program on an idle appliance did nothing, silently.
+
+``set_manual_program`` returned early unless the detector was in exactly
+``running``. The panel offers the dropdown at all times, so the common case
+(pick a program on an idle machine) set nothing, logged nothing, and still
+reported success to the caller because the method returned ``None`` either way.
+The panel then refreshed, read ``manual_program: false`` / ``current_program:
+null`` and snapped the dropdown back to auto-detect. Two reporters saw exactly
+that; one captured the WebSocket exchange showing the success reply.
+
+The chosen behaviour is pre-arming: a program picked while nothing is running is
+remembered and applied the moment the next cycle starts.
+"""
+from __future__ import annotations
+
+from datetime import timedelta
+from typing import Any
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
+
+from custom_components.ha_washdata.const import (
+    STATE_ENDING,
+    STATE_OFF,
+    STATE_PAUSED,
+    STATE_RUNNING,
+    STATE_STARTING,
+)
+from custom_components.ha_washdata.manager import WashDataManager
+
+PROGRAM = "Normal - Warm - Medium"
+
+
+@pytest.fixture
+def mock_entry() -> Any:
+    entry = MagicMock()
+    entry.entry_id = "test_discussion_411"
+    entry.title = "Test Washer"
+    entry.options = {"power_sensor": "sensor.test_power", "device_type": "washing_machine"}
+    entry.data = {}
+    return entry
+
+
+@pytest.fixture
+def manager(hass: HomeAssistant, mock_entry: Any) -> WashDataManager:
+    hass.config_entries.async_get_entry = MagicMock(return_value=mock_entry)
+    with (
+        patch("custom_components.ha_washdata.manager.ProfileStore"),
+        patch("custom_components.ha_washdata.manager.CycleDetector"),
+    ):
+        mgr = WashDataManager(hass, mock_entry)
+        mgr.profile_store.get_suggestions = MagicMock(return_value={})
+        mgr.profile_store.get_past_cycles = MagicMock(return_value=[])
+        mgr.profile_store.get_profiles = MagicMock(
+            return_value={PROGRAM: {"avg_duration": 3600.0}}
+        )
+        mgr.profile_store.async_set_armed_program = AsyncMock()
+        mgr.profile_store.get_armed_program = MagicMock(return_value=None)
+        mgr._notify_update = MagicMock()
+        mgr._update_estimates = MagicMock()
+        mgr.detector.state = STATE_OFF
+        return mgr
+
+
+def _armed_writes(manager: WashDataManager) -> list[Any]:
+    """The values handed to the store's armed-program setter, in order."""
+    return [c.args[0] for c in manager.profile_store.async_set_armed_program.call_args_list]
+
+
+# ---------------------------------------------------------------------------
+# The reported bug
+# ---------------------------------------------------------------------------
+
+
+def test_picking_a_program_while_off_is_accepted(manager: WashDataManager) -> None:
+    """The reporter's case: appliance Off, dropdown used, nothing happened."""
+    assert manager.set_manual_program(PROGRAM) is True
+    assert manager.armed_program == PROGRAM
+
+
+def test_picking_a_program_while_off_does_not_claim_a_live_pin(
+    manager: WashDataManager,
+) -> None:
+    """Armed is not the same as running: the status card must not claim a match."""
+    manager.set_manual_program(PROGRAM)
+    assert manager.manual_program_active is False
+    assert manager.current_program == "off"
+
+
+def test_a_missing_program_is_the_only_rejection_left(manager: WashDataManager) -> None:
+    """And it is now reported, rather than returning the same silent None."""
+    manager.profile_store.get_profiles = MagicMock(return_value={})
+    assert manager.set_manual_program("Ghost") is False
+    assert manager.armed_program is None
+
+
+def test_the_arm_is_persisted_so_it_survives_a_restart(manager: WashDataManager) -> None:
+    """Arming happens while idle, so the wait can easily span a restart."""
+    manager.set_manual_program(PROGRAM)
+    assert _armed_writes(manager) == [PROGRAM]
+
+
+# ---------------------------------------------------------------------------
+# Applying the arm
+# ---------------------------------------------------------------------------
+
+
+def test_the_armed_program_is_applied_when_the_cycle_starts(
+    manager: WashDataManager,
+) -> None:
+    manager.set_manual_program(PROGRAM)
+    manager.detector.state = STATE_RUNNING
+    assert manager._consume_armed_program() is True
+    assert manager.manual_program_active is True
+    assert manager.current_program == PROGRAM
+    assert manager._matched_profile_duration == 3600.0
+
+
+def test_pinning_a_program_with_no_learned_duration_clears_the_old_one(
+    manager: WashDataManager,
+) -> None:
+    """Switching mid-cycle must not leave the previous program's ETA behind.
+
+    A hand-created or freshly imported program has no ``avg_duration`` yet. The pin
+    is applied to the cycle already running, so leaving the auto-matched program's
+    duration in place meant the remaining time and progress went on describing the
+    program the user had just replaced. ``None`` is this field's "unknown" value and
+    every reader guards for it; the restart path that re-pins a manual program
+    already cleared it this way.
+    """
+    manager.profile_store.get_profiles = MagicMock(
+        return_value={PROGRAM: {"avg_duration": 3600.0}, "Fresh": {}}
+    )
+    manager.detector.state = STATE_RUNNING
+
+    # An auto-match has already set a duration for this cycle.
+    manager.set_manual_program(PROGRAM)
+    assert manager._matched_profile_duration == 3600.0
+
+    manager.set_manual_program("Fresh")
+    assert manager.current_program == "Fresh"
+    assert manager._matched_profile_duration is None
+
+
+def test_pinning_a_program_with_a_garbage_duration_clears_it_too(
+    manager: WashDataManager,
+) -> None:
+    """A hand-edited import can store a non-numeric avg_duration."""
+    manager.profile_store.get_profiles = MagicMock(
+        return_value={PROGRAM: {"avg_duration": 3600.0}, "Bad": {"avg_duration": "soon"}}
+    )
+    manager.detector.state = STATE_RUNNING
+
+    manager.set_manual_program(PROGRAM)
+    assert manager._matched_profile_duration == 3600.0
+
+    # Used to raise ValueError out of a @callback WS handler.
+    assert manager.set_manual_program("Bad") is True
+    assert manager._matched_profile_duration is None
+
+
+def test_clearing_the_duration_refreshes_the_estimate(
+    manager: WashDataManager,
+) -> None:
+    """Otherwise a stale remaining time stays on display until the next tick."""
+    manager.profile_store.get_profiles = MagicMock(
+        return_value={PROGRAM: {"avg_duration": 3600.0}, "Fresh": {}}
+    )
+    manager.detector.state = STATE_RUNNING
+    manager.set_manual_program(PROGRAM)
+    manager._update_estimates.reset_mock()
+
+    manager.set_manual_program("Fresh")
+    manager._update_estimates.assert_called()
+
+
+def test_the_estimate_is_refreshed_in_paused_and_ending_too(
+    manager: WashDataManager,
+) -> None:
+    """The pin applies in all four live states, so the refresh has to as well.
+
+    `_CYCLE_IN_PROGRESS_STATES` is {STARTING, RUNNING, PAUSED, ENDING}. Refreshing
+    only in RUNNING left the previous program's remaining time in the sensors, and
+    neither `select.py` nor `_update_remaining_only` publishes on its own, so on the
+    select-entity path nothing reached them at all.
+    """
+    manager._update_remaining_only = MagicMock()
+    for state in (STATE_PAUSED, STATE_ENDING):
+        manager.detector.state = state
+        manager._update_remaining_only.reset_mock()
+        manager._notify_update.reset_mock()
+
+        manager.set_manual_program(PROGRAM)
+
+        manager._update_remaining_only.assert_called()
+        manager._notify_update.assert_called()
+
+
+def test_the_five_second_estimate_throttle_is_bypassed(
+    manager: WashDataManager,
+) -> None:
+    """A pin is a user action, not a tick; the value it invalidates is on screen.
+
+    Asserted at the moment of the call, because `_update_remaining_only` re-stamps
+    the timestamp itself once it decides to run.
+    """
+    seen: list[Any] = []
+    manager._update_remaining_only = MagicMock(
+        side_effect=lambda: seen.append(manager._last_phase_estimate_time)
+    )
+    manager.detector.state = STATE_PAUSED
+    manager._last_phase_estimate_time = dt_util.now()
+
+    manager.set_manual_program(PROGRAM)
+
+    assert seen == [None], "the throttle stamp must be cleared before the refresh"
+
+
+def test_starting_is_not_routed_through_update_estimates(
+    manager: WashDataManager,
+) -> None:
+    """`_update_estimates` lists STARTING as a dead state and resets the program.
+
+    Routing the pin through it there would set `_current_program` back to "off",
+    undoing the very thing just applied.
+    """
+    manager._update_remaining_only = MagicMock()
+    manager.detector.state = STATE_STARTING
+
+    manager.set_manual_program(PROGRAM)
+
+    manager._update_estimates.assert_not_called()
+    manager._update_remaining_only.assert_not_called()
+    assert manager.current_program == PROGRAM
+    manager._notify_update.assert_called()
+
+
+def test_pinning_during_a_live_cycle_does_not_leave_the_arm_set(
+    manager: WashDataManager,
+) -> None:
+    """A mid-cycle pin belongs to that cycle, not to the next one.
+
+    The cycle-end tail already clears the arm, but it sits behind the new-cycle
+    token guard and returns early when a back-to-back load has already started a
+    fresh cycle - the one case where a leftover arm does damage, because
+    `_consume_armed_program` would stamp the unrelated cycle `label_source =
+    "manual"` and let it reshape that program's envelope.
+    """
+    for state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+        manager._armed_program = None
+        manager.detector.state = state
+
+        assert manager.set_manual_program(PROGRAM) is True
+
+        assert manager.manual_program_active is True
+        assert manager.current_program == PROGRAM
+        assert manager.armed_program is None, f"arm leaked in {state}"
+        assert _armed_writes(manager)[-1] is None
+
+
+def test_a_back_to_back_cycle_does_not_inherit_a_live_pin(
+    manager: WashDataManager,
+) -> None:
+    """The consequence, end to end: the next cycle must not claim the program."""
+    manager.detector.state = STATE_RUNNING
+    manager.set_manual_program(PROGRAM)
+
+    # A fresh cycle starts before the previous cycle's tail ran.
+    assert manager._consume_armed_program() is False
+
+
+def test_pinning_during_starting_keeps_the_arm(manager: WashDataManager) -> None:
+    """STARTING is the exception, and it is load-bearing.
+
+    The STARTING -> RUNNING transition resets the live pin as it starts the cycle;
+    `_consume_armed_program` is what puts it back, so the arm has to survive.
+    """
+    manager.detector.state = STATE_STARTING
+
+    assert manager.set_manual_program(PROGRAM) is True
+
+    assert manager.armed_program == PROGRAM
+    manager.detector.state = STATE_RUNNING
+    assert manager._consume_armed_program() is True
+    assert manager.current_program == PROGRAM
+
+
+def test_a_mid_cycle_pin_costs_one_store_write_not_two(
+    manager: WashDataManager,
+) -> None:
+    """The final arm state is resolved before persisting, so it is a single save."""
+    manager.detector.state = STATE_RUNNING
+
+    manager.set_manual_program(PROGRAM)
+
+    writes = _armed_writes(manager)
+    assert writes == [None], f"expected one write of None, got {writes}"
+
+
+def test_an_idle_pin_still_persists_the_arm(manager: WashDataManager) -> None:
+    manager.detector.state = STATE_OFF
+    manager.set_manual_program(PROGRAM)
+    assert _armed_writes(manager) == [PROGRAM]
+
+
+def test_a_starting_pin_persists_the_arm_once(manager: WashDataManager) -> None:
+    manager.detector.state = STATE_STARTING
+    manager.set_manual_program(PROGRAM)
+    assert _armed_writes(manager) == [PROGRAM]
+
+
+def _captured_matcher(hass: HomeAssistant, entry: Any) -> tuple[Any, WashDataManager]:
+    """Build a manager and hand back the real matcher callback it gives the detector.
+
+    The callback is a closure inside __init__, so the only way to exercise it is to
+    capture the kwarg the (patched) CycleDetector was constructed with.
+    """
+    hass.config_entries.async_get_entry = MagicMock(return_value=entry)
+    with (
+        patch("custom_components.ha_washdata.manager.ProfileStore"),
+        patch("custom_components.ha_washdata.manager.CycleDetector") as det_cls,
+    ):
+        mgr = WashDataManager(hass, entry)
+        matcher = det_cls.call_args.kwargs["profile_matcher"]
+    mgr.profile_store.get_profiles = MagicMock(
+        return_value={PROGRAM: {"avg_duration": 3600.0}}
+    )
+    mgr.profile_store.check_phase_match = MagicMock(return_value="Spin")
+    mgr.profile_store.profile_tail_power = MagicMock(return_value=60.0)
+    mgr.profile_store.profile_terminal_high_block = MagicMock(return_value=(0.95, 160.0))
+    mgr._notify_update = MagicMock()
+    return matcher, mgr
+
+
+def test_a_manual_match_reports_the_profiles_own_tail_and_spin(
+    hass: HomeAssistant, mock_entry: Any
+) -> None:
+    """The detector clears those fields for any shorter tuple.
+
+    That is correct for a newly matched profile, which must not inherit the
+    previous one's tail, but a manual pin names its profile - so the manual result
+    has to carry that profile's own values or the #364 tail guard and the #399
+    anti-crease spin wait both sit inert for every hand-picked program.
+    """
+    matcher, mgr = _captured_matcher(hass, mock_entry)
+    mgr._manual_program_active = True
+    mgr._current_program = PROGRAM
+    mgr._matched_profile_duration = 3600.0
+    mgr.detector.config.anti_wrinkle_enabled = True
+    mgr.detector.config.anti_wrinkle_max_power = 400.0
+
+    now = dt_util.now()
+    result = matcher([(now, 2000.0), (now + timedelta(seconds=60), 2000.0)])
+
+    assert len(result) == 10, f"manual tuple must carry elements 9 and 10, got {len(result)}"
+    assert result[0] == PROGRAM
+    assert result[8] == 60.0            # profile_tail_power
+    assert result[9] == (0.95, 160.0)   # profile_terminal_high_block
+
+
+def test_a_manual_match_omits_the_spin_block_when_anti_crease_is_off(
+    hass: HomeAssistant, mock_entry: Any
+) -> None:
+    """Mirrors the async path, which only looks it up when the guard can use it."""
+    matcher, mgr = _captured_matcher(hass, mock_entry)
+    mgr._manual_program_active = True
+    mgr._current_program = PROGRAM
+    mgr._matched_profile_duration = 3600.0
+    mgr.detector.config.anti_wrinkle_enabled = False
+
+    now = dt_util.now()
+    result = matcher([(now, 2000.0), (now + timedelta(seconds=60), 2000.0)])
+
+    assert result[9] is None
+    mgr.profile_store.profile_terminal_high_block.assert_not_called()
+
+
+def test_the_arm_is_consumed_after_the_pause_totals_are_reset(
+    manager: WashDataManager,
+) -> None:
+    """Applying the pin refreshes the estimate, so the pause totals must be clean.
+
+    `_consume_armed_program` -> `_apply_manual_program` -> `_update_estimates`
+    computes `net_elapsed_seconds`, which subtracts `_total_user_paused_seconds`
+    and any open `_user_pause_start`. Run before the new-cycle reset, that read
+    the PREVIOUS cycle's values - reachable back-to-back, because the cycle-end
+    tail returns early on the new-cycle token guard and never clears them either.
+    The live progress notification is interval-throttled, so the wrong ETA would
+    then sit on the phone until the next allowed tick.
+    """
+    seen: list[tuple[float, Any]] = []
+
+    def _record(_name: str, _profile: Any) -> None:
+        seen.append((manager._total_user_paused_seconds, manager._user_pause_start))
+
+    manager._apply_manual_program = MagicMock(side_effect=_record)
+    manager._armed_program = PROGRAM
+    # Left over from the previous cycle, as a back-to-back load leaves them.
+    manager._total_user_paused_seconds = 900.0
+    manager._user_pause_start = dt_util.now()
+    manager.detector.state = STATE_RUNNING
+    manager.detector.current_cycle_start = dt_util.now()
+
+    manager._on_state_change(STATE_OFF, STATE_RUNNING)
+
+    assert seen, "the armed program was never applied"
+    paused_total, pause_start = seen[0]
+    assert paused_total == 0.0, "pin applied before the paused total was reset"
+    assert pause_start is None, "pin applied while a stale pause was still open"
+
+
+def test_the_arm_is_consumed_not_sticky(manager: WashDataManager) -> None:
+    """It pins the next cycle, not every future one."""
+    manager.set_manual_program(PROGRAM)
+    manager.detector.state = STATE_RUNNING
+    manager._consume_armed_program()
+    assert manager.armed_program is None
+    assert _armed_writes(manager) == [PROGRAM, None]
+
+
+def test_consuming_nothing_is_a_no_op(manager: WashDataManager) -> None:
+    assert manager._consume_armed_program() is False
+    assert manager.manual_program_active is False
+
+
+def test_a_program_deleted_before_the_cycle_started_is_dropped(
+    manager: WashDataManager,
+) -> None:
+    manager.set_manual_program(PROGRAM)
+    manager.profile_store.get_profiles = MagicMock(return_value={})
+    manager.detector.state = STATE_RUNNING
+    assert manager._consume_armed_program() is False
+    assert manager.manual_program_active is False
+    assert manager.armed_program is None
+
+
+# ---------------------------------------------------------------------------
+# States other than "running"
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("state", [STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING])
+def test_a_cycle_in_progress_is_pinned_immediately(
+    manager: WashDataManager, state: str
+) -> None:
+    """All four in-progress states, not just `running` as before."""
+    manager.detector.state = state
+    assert manager.set_manual_program(PROGRAM) is True
+    assert manager.manual_program_active is True
+    assert manager.current_program == PROGRAM
+
+
+def test_a_pin_made_during_starting_survives_the_run_transition(
+    manager: WashDataManager,
+) -> None:
+    """The new-cycle reset clears the live pin, so the arm has to restore it.
+
+    Picking a program right after switching the appliance on is the natural
+    moment to do it, and STARTING -> RUNNING would otherwise discard the choice.
+    """
+    manager.detector.state = STATE_STARTING
+    manager.set_manual_program(PROGRAM)
+    # what the reset at the top of a new cycle does
+    manager._current_program = "detecting..."
+    manager._manual_program_active = False
+    manager._matched_profile_duration = None
+    manager.detector.state = STATE_RUNNING
+
+    assert manager._consume_armed_program() is True
+    assert manager.current_program == PROGRAM
+    assert manager._matched_profile_duration == 3600.0
+
+
+# ---------------------------------------------------------------------------
+# Clearing
+# ---------------------------------------------------------------------------
+
+
+def test_auto_detect_clears_an_arm_made_while_idle(manager: WashDataManager) -> None:
+    """Previously impossible: clear bailed out unless a pin was live."""
+    manager.set_manual_program(PROGRAM)
+    manager.clear_manual_program()
+    assert manager.armed_program is None
+    assert _armed_writes(manager) == [PROGRAM, None]
+
+
+def test_auto_detect_still_clears_a_live_pin(manager: WashDataManager) -> None:
+    manager.detector.state = STATE_RUNNING
+    manager.set_manual_program(PROGRAM)
+    manager.clear_manual_program()
+    assert manager.manual_program_active is False
+    assert manager.current_program == "detecting..."
+
+
+def test_clearing_nothing_stays_a_no_op(manager: WashDataManager) -> None:
+    manager.clear_manual_program()
+    assert manager.armed_program is None
+    assert _armed_writes(manager) == []
+
+
+# ---------------------------------------------------------------------------
+# The store side: an arm has to outlive a restart
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def store():
+    from custom_components.ha_washdata.profile_store import ProfileStore
+
+    with patch("custom_components.ha_washdata.profile_store.WashDataStore"):
+        ps = ProfileStore(MagicMock(), "entry")
+        ps.async_save = AsyncMock()
+        yield ps
+
+
+async def test_store_round_trips_the_armed_program(store) -> None:
+    assert store.get_armed_program() is None
+    await store.async_set_armed_program(PROGRAM)
+    assert store.get_armed_program() == PROGRAM
+    await store.async_set_armed_program(None)
+    assert store.get_armed_program() is None
+
+
+def test_store_getter_ignores_junk(store) -> None:
+    store._data["armed_program"] = 42
+    assert store.get_armed_program() is None
+    store._data["armed_program"] = ""
+    assert store.get_armed_program() is None
+
+
+async def test_wiping_all_data_clears_the_arm(store) -> None:
+    await store.async_set_armed_program(PROGRAM)
+    await store.clear_all_data()
+    assert store.get_armed_program() is None
+
+
+# ---------------------------------------------------------------------------
+# The WebSocket command must stop reporting success it did not achieve
+# ---------------------------------------------------------------------------
+
+
+def _conn():
+    c = MagicMock()
+    c.send_result = MagicMock()
+    c.send_error = MagicMock()
+    return c
+
+
+def test_ws_set_program_reports_a_rejection() -> None:
+    """The reporter captured {"success": true} for a write that never happened."""
+    from custom_components.ha_washdata import ws_api
+
+    hass = MagicMock()
+    manager = MagicMock()
+    manager.set_manual_program = MagicMock(return_value=False)
+    conn = _conn()
+    with patch.object(ws_api, "_get_manager", return_value=manager):
+        ws_api.ws_set_program(
+            hass, conn, {"id": 1, "entry_id": "e", "program": "Ghost"}
+        )
+    conn.send_result.assert_not_called()
+    conn.send_error.assert_called_once()
+    assert conn.send_error.call_args.args[1] == "not_found"
+
+
+def test_ws_set_program_still_reports_success_when_accepted() -> None:
+    from custom_components.ha_washdata import ws_api
+
+    hass = MagicMock()
+    manager = MagicMock()
+    manager.set_manual_program = MagicMock(return_value=True)
+    conn = _conn()
+    with patch.object(ws_api, "_get_manager", return_value=manager):
+        ws_api.ws_set_program(
+            hass, conn, {"id": 1, "entry_id": "e", "program": PROGRAM}
+        )
+    conn.send_error.assert_not_called()
+    manager.notify_update.assert_called_once()

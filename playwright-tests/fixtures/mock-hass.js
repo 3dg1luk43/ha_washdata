@@ -45,7 +45,7 @@ window.__emit_task = function (task) {
 
 window.__create_mock_hass = function (extra) {
   extra = extra || {};
-  return {
+  return Object.assign({
     connection: {
       sendMessagePromise: function (msg) {
         window.__ws_calls.push(msg);
@@ -153,7 +153,7 @@ window.__create_mock_hass = function (extra) {
     devices: {},
     states: {},
     entities: {},
-  };
+  }, extra);
 };
 
 window.__boot_panel = function (handlers, hassExtra) {

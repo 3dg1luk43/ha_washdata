@@ -77,11 +77,14 @@
     "approved": "Hyväksytty",
     "awaiting": "Odottaa hyväksyntää",
     "imported_tip": "Tuotu yhteisökaupasta. Käytetään vain täsmäytykseen, ei lasketa tilastoihin.",
+    "unmatchable": "ei täsmäytettävissä",
     "not_importable": "ei käytettävissä",
     "exists": "on jo",
-    "backfilled_tip": "Tunnistettu tuodusta tehohistoriasta. Vaikuttaa vain ohjelmien täsmäytykseen, ei lasketa tilastoihin."
+    "backfilled_tip": "Tunnistettu tuodusta tehohistoriasta. Vaikuttaa vain ohjelmien täsmäytykseen, ei lasketa tilastoihin.",
+    "armed": "(koskee seuraavaa sykliä)"
   },
   "btn": {
+    "reset_zoom": "Nollaa zoomaus",
     "set_brand_model": "Aseta merkki ja malli",
     "refresh_catalog": "Päivitä luettelo",
     "add_device": "+ Lisää laite",
@@ -215,6 +218,8 @@
     "trim": "Leikkaa",
     "trim_split": "Leikkaa / jaa",
     "undo": "Kumoa",
+    "unlabel_selected": "Poista valittujen merkintä ({n})",
+    "unlabel_selected_tip": "Poistaa profiilimerkinnän valituista sykleistä. Ne säilyvät historiassasi ja ne voidaan merkitä myöhemmin uudelleen - ne eivät vain enää muovaa tätä profiilia.",
     "use": "Käytä",
     "wipe_all": "Pyyhi kaikki tiedot",
     "delete_selected": "Poista valitut ({n})",
@@ -222,7 +227,6 @@
     "pg_apply_best": "Käytä parasta",
     "pg_apply_to_settings": "Tallenna asetuksiin",
     "pg_apply_to_settings_tip": "Kopioi tässä muokkaamasi arvot tämän laitteen aktiivisiin asetuksiin",
-    "search": "Hae",
     "import": "Tuo",
     "disconnect": "Katkaise yhteys",
     "connect_github": "Yhdistä GitHub",
@@ -249,7 +253,8 @@
     "hist_read_recorder": "Lue Home Assistantista",
     "hist_scan": "Etsi syklejä",
     "hist_import_n": "Tuo {n} sykliä",
-    "hist_goto_cycles": "Näytä syklit"
+    "hist_goto_cycles": "Näytä syklit",
+    "save_total_cycles": "Tallenna kokonaismäärä"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -360,12 +365,12 @@
     "wipe_history": "Pyyhi historia",
     "recommendations": "Suositukset ({n})",
     "pg_detection_params": "Tunnistusasetukset",
-    "pg_timeline": "Tapahtuma-aikajana",
     "pg_outcome": "Simulaation tulos",
     "pg_across_cycles": "Kaikissa jaksoissasi",
     "community_store": "Yhteisökauppa",
     "online_account": "Yhteisökauppa ja verkkotoiminnot",
-    "import_power_history": "Tuo tehohistoria"
+    "import_power_history": "Tuo tehohistoria",
+    "service_status": "Huollon tila"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -373,6 +378,8 @@
     "poor": "⚠ Heikko profiililaatu"
   },
   "lbl": {
+    "aria_playground_chart3": "Interaktiivinen jakson tehokaavio: vie osoitin päälle lukeaksesi ajan/tehon, vieritä tai nipistä zoomataksesi, vedä panoroidaksesi",
+    "device_unresolved": "Laite ei saatavilla ({id})",
     "drag_to_resize": "Vedä muuttaaksesi kokoa",
     "pg_anti_wrinkle": "Ryppyjenesto",
     "actions": "Toiminnot",
@@ -508,7 +515,7 @@
     "profile_index": "profiilin indeksi →",
     "profile_name": "Profiilin nimi",
     "program": "Ohjelma",
-    "program_tip": "Ohita, mikä profiili sovitetaan nykyiseen sykliin. Automaattinen tunnistus antaa integraation valita parhaan vastaavuuden automaattisesti. Kiinnitä tietty ohjelma pakottaaksesi vastaavuuden, kun automaattinen tunnistus on väärässä tai tiedät, mitä on käynnissä.",
+    "program_tip": "Ohita, mikä profiili sovitetaan nykyiseen sykliin. Automaattinen tunnistus antaa integraation valita parhaan vastaavuuden automaattisesti. Kiinnitä tietty ohjelma pakottaaksesi vastaavuuden, kun automaattinen tunnistus on väärässä tai tiedät, mitä on käynnissä. Valitse ohjelma ennen laitteen käynnistämistä, niin se otetaan käyttöön heti kun seuraava sykli alkaa.",
     "progress": "Edistyminen",
     "raw_socket": "Raaka signaali",
     "read_only": "Vain luku",
@@ -543,6 +550,7 @@
     "stage4": "Vaihe 4 – vastaavuus",
     "status": "Tila",
     "tail_trim": "Leikkaus lopusta (s)",
+    "tap_to_dismiss": "napauta kaaviota sulkeaksesi",
     "timer_auto_pause": "Automaattinen tauko",
     "timer_min": "min",
     "timer_msg_placeholder": "Viesti (valinnainen, {device}/{program}/{minutes})",
@@ -579,9 +587,7 @@
     "pg_time_left_model": "Aikaa jäljellä (malli)",
     "pg_time_left_model_tip": "Mallin arvioima jäljellä oleva aika (vaihe-estimaattori + ML-yhdistelmä), ei kiinteä laskuri",
     "phase": "Vaihe",
-    "pg_mode_simulate": "Simuloi",
     "pg_mode_history": "Testaa historialla",
-    "pg_mode_sweep": "Pyyhkäisy",
     "pg_ev_detected": "Havaittu",
     "pg_ev_match": "Osuma vahvistettu",
     "pg_ev_match_changed": "Osuma vaihtui",
@@ -617,14 +623,11 @@
     "pg_stress_idle_w_desc": "Ohita automaattisesti havaittu valmiustilasyöte (jätä tyhjäksi automaattista varten).",
     "pg_stress_toggle": "Testaa valmiustilan päätöstä",
     "pg_stress_toggle_desc": "Simuloi laitetta, joka pysyy valmiustilan kulutustasollaan tallennuksen jälkeen - näyttää, pysäyttääkö WashData syklin ja milloin.",
-    "pg_sweep_2d": "2D-lämpökartta",
-    "pg_sweep_param_y": "2. parametri",
     "pg_obj_match": "Osumatarkkuus",
     "pg_obj_endtiming": "Lopetusajan tarkkuus",
     "pg_obj_falseend": "Väärien lopetusten osuus",
     "pg_obj_overrun": "Keston poikkeama",
     "pg_obj_ambiguity": "Epäselvyyksien osuus",
-    "pg_best_combo": "paras yhdistelmä",
     "pg_mode_optimize": "Optimoi",
     "pg_group_matching": "Ohjelman täsmäytys",
     "pg_zoom_hint": "kaksoisnapsauta nollataksesi zoomauksen",
@@ -706,7 +709,12 @@
     "task_history_import_apply": "Syklien tuonti",
     "evidence_real_cycles": "Tämän koneen ajamat syklit",
     "evidence_reference_cycles": "Ladattu yhteisökaupasta",
-    "evidence_backfill_cycles": "Löydetty tuodusta tehohistoriasta"
+    "evidence_backfill_cycles": "Löydetty tuodusta tehohistoriasta",
+    "zoom_hint_touch": "nipistä zoomataksesi",
+    "zoom_hint_touch_zoomed": "nipistä zoomataksesi · kaksoisnapauta nollataksesi",
+    "cycles_since_service": "{since} / {total} sykliä",
+    "total_cycles_run": "sykliä yhteensä",
+    "correct_total_cycles": "Korjaa kokonaismäärä"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -789,6 +797,7 @@
     "history_import": "Tuo tehohistoria"
   },
   "msg": {
+    "pg_canvas_empty3": "Valitse jakso yltä ja paina Suorita simuloidaksesi sen. Vie sitten osoitin päälle lukeaksesi arvoja, vieritä tai nipistä zoomataksesi ja vedä panoroidaksesi.",
     "tail_trim_hint": "Kuinka monta sekuntia poistetaan lopusta",
     "store_sibling_hint": "Eikö juuri sinun mallillesi ole jaettu mitään? Saman merkin läheinen malli on yleensä hyvä lähtökohta.",
     "store_declare_appliance": "Kerro WashDatalle, mikä laite sinulla on, niin tämä välilehti näyttää muiden sille jakamat ohjelmat ja tallennukset. Voit myös kirjoittaa merkin nimen yläkenttään ja katsella ympärillesi.",
@@ -802,7 +811,7 @@
     "artifact_spike_detail": "Ylitti tavallisen tehon ylärajan noin {n} sekunnin ajan.",
     "auto_label_intro": "Määritä profiilit nimeämättömille sykleille, joiden osuvuusvarmuus tyhjentää kynnyksen.",
     "automations_intro": "WashData laukaisee {start} / {end}-tapahtumat ja tarjoaa entiteetit, joten ilmoitukset ja toiminnot kannattaa rakentaa tavallisina Home Assistant -automaatioina. Tätä laitetta käyttävät automaatiot näkyvät alla.",
-    "cleanup_intro": "Jokainen merkitty sykli peitetään. Tyhjennä profiili valitsemalla poikkeamat ja poistamalla ne.",
+    "cleanup_intro": "Kaikki merkityt syklit näkyvät päällekkäin. Valitse poikkeamat ja poista niiden merkintä (ne säilyvät historiassa, mutta eivät enää muovaa tätä profiilia) tai poista ne kokonaan.",
     "clear_debug_hint": "Poista tallennetut virheenkorjaustiedot vapauttaaksesi tilaa.",
     "collecting_data": "Kerätään tietoja. Syklejä tarvitaan vielä ennen hienosäädön aloittamista: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Päällekkäiset profiilit (himmeä)",
@@ -984,9 +993,9 @@
     "advisory_poor_health": "'{name}'-profiilin sopivuusarvo on matala - sen viimeaikaiset jaksot vaihtelevat paljon tai tunnistuvat heikosti. Käy läpi sen jaksot tai tallenna profiili uudelleen, jotta tunnistus ja aika-arviot pysyvät tarkkoina.",
     "advisory_shape_drift": "'{name}' on muuttunut merkittävästi alkuperäisestä tehokäyrästään. Laitteen toiminta on voinut muuttua ajan myötä (esim. kalkki, kuluminen). Harkitse profiilin tallentamista uudelleen tuoreilla jaksoilla.",
     "advisory_shape_drift_corr": "'{name}' on muuttunut merkittävästi alkuperäisestä tehokäyrästään (korrelaatio {corr}). Laitteen toiminta on voinut muuttua ajan myötä (esim. kalkki, kuluminen). Harkitse profiilin tallentamista uudelleen tuoreilla jaksoilla.",
+    "advisory_unmatchable": "'{name}'-profiilia ei voi koskaan täsmäyttää: sen taustalla ei ole yhtään jaksoa, jossa olisi tehotietoja, joten WashDatalla ei ole mitään, mihin verrata käynnissä olevaa jaksoa. Merkitse jokin tämän ohjelman jakso (tai tallenna uusi), jotta profiili palaa täsmäytykseen.",
     "pg_no_alerts": "Tässä ajossa ei havaittu ongelmia.",
     "pg_override_active": "Käytetään muokattuja asetuksiasi vs. nykyiset",
-    "pg_history_intro": "Toista viimeisimmät syklisi todellisen tunnistimen ja täsmääjän läpi. Muokkaa ensin tunnistusasetusta Simuloi-tilassa nähdäksesi tässä ennen/jälkeen-vertailun.",
     "pg_history_empty": "Paina Aja toistaaksesi syklisi.",
     "pg_history_summary": "{detected}/{total} havaittu · {correct} täsmätty oikein",
     "pg_sweep_no_metric": "Ei tarpeeksi dataa tämän tavoitteen pisteyttämiseen.",
@@ -1063,7 +1072,11 @@
     "hist_scan_failed": "Läpikäynti epäonnistui.",
     "hist_scan_expired": "Kyseinen läpikäynti ei ole enää saatavilla. Tee läpikäynti uudelleen.",
     "hist_import_failed": "Tuonti epäonnistui.",
-    "imported_history_readonly": "Tunnistettu tuodusta tehohistoriasta. Se vaikuttaa ohjelmien täsmäytykseen, mutta ei näy tilastoissasi, eikä sitä voi rajata tai jakaa. Nimeä ohjelma Merkitse-toiminnolla."
+    "imported_history_readonly": "Tunnistettu tuodusta tehohistoriasta. Se vaikuttaa ohjelmien täsmäytykseen, mutta ei näy tilastoissasi, eikä sitä voi rajata tai jakaa. Nimeä ohjelma Merkitse-toiminnolla.",
+    "odometer_intro": "Tämä kokonaismäärä voi vain kasvaa. Syklitietueen poistaminen ei muuta sitä, ja laskenta jatkuu myös tallennetun historian rajan yli, jotta huoltomuistutukset pysyvät oikeina.",
+    "odometer_correct_hint": "Aseta tämä, jos WashData kirjasi ajon, jota ei koskaan tapahtunut, tai jos laitteella oli jo ajettu syklejä ennen WashDatan asennusta.",
+    "no_reminders_set": "Huoltomuistutuksia ei ole vielä asetettu.",
+    "toast_program_armed": "Ohjelma asetettu seuraavaa sykliä varten: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
@@ -1467,10 +1480,6 @@
       "doc": "Sekunteja pumppu voi käydä jatkuvasti ennen kuin se merkitään mahdollisesti jumiutuneeksi (käynnistää juuttunut pumppu -tapahtuman).",
       "label": "Pumpun jumiutumiskesto"
     },
-    "running_dead_zone": {
-      "doc": "Jakson alkamisen jälkeen tämän ikkunan sisällä olevat virrankatkaisut ohitetaan. Pyykinpesukoneet täyttyvät kylmällä vedellä (lämpenee lähes 0 W ennen lämmitystä) - ilman tätä suojaa täyttövaihe näyttää syklin päättymiseltä. Tämä EI ohita tietoja: täysi tehojälki tallennetaan T=0:sta. Ehdotusmoottori mittaa koneesi todellisen käynnistyskuvion ja määrittää sen automaattisesti.",
-      "label": "Käynnissäolon kuolualue"
-    },
     "sampling_interval": {
       "doc": "Odotettu aika anturin lukemien välillä - käytetään tasoitusikkunan mitoittamiseen ja oikeaan palautumiseen. Jokainen anturin päivitys tallennetaan tästä arvosta riippumatta; se vain kalibroi alavirran laskelmia. Ehdotusmoottori mittaa anturin todellisen poljinnopeuden aiemmista sykleistä ja asettaa sen automaattisesti.",
       "label": "Näytteenottoväli"
@@ -1597,6 +1606,10 @@
     "power_profile_interval_min": {
       "label": "Tehoprofiilin aikaväli",
       "doc": "Säilön koko profiilin power_profile-sensorin attribuutille (tasainen kohtakohtainen keskivattimäärän matriisi, jota käyttävät ulkoiset suunnittelijat kuten EMHASS ja tibber_prices). Pienemmät säiliöt pitävät lyhyet tehopiikit terävinä; suuremmat säiliöt tasoittavat muodon. Oletus 15 min. Vain lukuaika; ei vaikuta tunnistukseen."
+    },
+    "notify_live_silent": {
+      "label": "Äänettömät live-päivitykset",
+      "doc": "Vain iOS. Päivitä reaaliaikaista edistymistä huomaamattomasti: jokainen päivitys saapuu ilman ääntä tai värinää, matalammalla, akkua säästävällä prioriteetilla, jonka iOS voi hetkeksi niputtaa. Syklin ensimmäinen päivitys (se, joka käynnistää Live Activity -näkymän) sekä aloitus- ja lopetusilmoitukset hälyttävät edelleen normaalisti. Poista tämä käytöstä, jos haluat hälytyksen jokaisesta päivityksestä."
     },
     "notify_live_sticky": {
       "label": "Pidä reaaliaikailmoitus napauttamisen jälkeen",
@@ -1728,7 +1741,8 @@
     "splitting": "Jaetaan…",
     "deleting": "Poistetaan…",
     "imported": "Tuotu",
-    "preparing": "Valmistellaan…"
+    "preparing": "Valmistellaan…",
+    "unlabelling": "Poistetaan merkintää…"
   },
   "suggestion": {
     "both_agree": "WashData suosittelee",
@@ -1774,10 +1788,6 @@
       "profile_match_threshold": {
         "higher": "Vain erittäin varmat osumat vahvistetaan – useammat syklit jäävät merkitsemättä",
         "lower": "Useammat syklit täsmäytetään – osa voi olla hieman väärin"
-      },
-      "running_dead_zone": {
-        "higher": "Lyhyet tehohuiput tyhjäkäynnin aikana ohitetaan – vähemmän häiriöherkkä",
-        "lower": "Reagoi lyhyempiin tehoimpulsseihin – havaitsee nopeat transientit"
       },
       "start_threshold_w": {
         "higher": "Välttää väärät käynnistykset lyhyistä tehohuipuista",
@@ -1921,6 +1931,7 @@
     "recording_stopped": "Tallennus lopetettiin",
     "review_saved": "Arvostelu tallennettu",
     "settings_conflicts": "Korjaa korostetut asetusten ristiriidat ennen tallentamista.",
+    "settings_no_changes": "Ei muutoksia tallennettavaksi",
     "settings_reverted": "Asetukset palautettu; integroinnin uudelleenlataus",
     "settings_saved": "Asetukset tallennettu; integroinnin uudelleenlataus",
     "suggestions_applied": "Ehdotuksia otettu käyttöön; integroinnin uudelleenlataus",
@@ -1979,7 +1990,11 @@
     "export_selective_done": "Vienti ladattu",
     "import_selective_done": "Tuotu {profiles} profiilia ja {cycles} jaksoa",
     "hist_csv_required": "Lataa ensin CSV-tiedosto tai liitä sen sisältö",
-    "file_read_failed": "Tiedostoa ei voitu lukea"
+    "file_read_failed": "Tiedostoa ei voitu lukea",
+    "unlabel_done": "{count} syklin merkintä poistettu",
+    "unlabel_failed": "Merkinnän poisto epäonnistui: {error}",
+    "odometer_saved": "Syklien kokonaismäärä tallennettu",
+    "odometer_save_failed": "Kokonaismäärän tallennus epäonnistui: {error}"
   },
   "trend": {
     "down": "Trendikäs alaspäin",
@@ -2028,9 +2043,9 @@
     "finished": "Jakso saavutti lopputilan ja päättyi."
   },
   "store": {
+    "search_ph2": "Hae merkin tai mallin mukaan…",
     "your_model_tip": "Tämä on laite, jonka määritit asetuksissa",
     "your_model": "Omasi",
-    "search_brand_ph": "Hae merkin mukaan…",
     "programs_count": "Ohjelmat: {n}",
     "browse": "Selaa",
     "device": "Laite",

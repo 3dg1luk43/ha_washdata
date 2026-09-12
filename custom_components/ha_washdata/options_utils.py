@@ -34,6 +34,7 @@ and why none does today.
 """
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from typing import Any
 
@@ -71,6 +72,40 @@ def strip_null_options(options: Mapping[str, Any]) -> dict[str, Any]:
         for k, v in options.items()
         if v is not None or k in NULL_MEANINGFUL_OPTION_KEYS
     }
+
+
+def option_float(value: Any, default: float) -> float:
+    """Coerce a stored option to ``float``, falling back to ``default``.
+
+    ``strip_null_options`` removes the ``None`` that broke setup in #389, but a
+    stored value can still be the wrong *type*: ``import_config`` and the legacy
+    import service write hand-editable option maps straight into ``entry.options``,
+    and ``ws_set_options`` validates the payload as a plain ``dict`` with no
+    per-key coercion. A non-numeric string then survives ``.get(key, DEFAULT)`` and
+    raises at whatever line first casts or compares it, which for an option read at
+    cycle end is inside a spawned task - the cycle is lost, not just the setting.
+
+    Falls back to the compiled default rather than to ``0.0``: these values are
+    thresholds, and zero is a meaningful setting ("accept anything"), so silently
+    substituting it would change behaviour instead of restoring it.
+
+    Non-finite results are rejected too. ``float()`` happily accepts ``"nan"``,
+    ``"inf"`` and ``"infinity"``, and either one is worse than a raise for a
+    threshold: every comparison against ``nan`` is False and every one against
+    ``inf`` is False for real confidences, so the feature the threshold gates goes
+    quietly dead instead of failing loudly.
+
+    ``OverflowError`` is caught alongside the type errors because ``json`` parses an
+    integer literal of any length into a Python ``int`` of unbounded size, and
+    ``float()`` on one of those raises rather than returning ``inf``. An import file
+    is hand-editable, so that lands in ``entry.options`` and would otherwise abort
+    setup - the same bricked-entry outcome this module exists to prevent.
+    """
+    try:
+        result = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return float(default)
+    return result if math.isfinite(result) else float(default)
 
 
 def has_null_options(options: Mapping[str, Any]) -> bool:
