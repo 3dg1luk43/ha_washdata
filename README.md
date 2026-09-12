@@ -169,7 +169,7 @@ screenshot tour.
 | `sensor.<name>_current_phase` | Active phase label ("Rinsing", "Spin") |
 | `sensor.<name>_pump_runs_today` | *(Pump type only)* completed pump cycles in a rolling 24 h |
 | `binary_sensor.<name>_running` | Simple on/off |
-| `button.<name>_pause_cycle` | Pause the active cycle, at any live stage. During an *automatic* pause it converts that into a held one. |
+| `button.<name>_pause_cycle` | Pause a cycle that is starting, running, finishing, or already auto-paused (converting that into a held pause). Not available during the anti-crease or rinse-hold stages. |
 | `button.<name>_resume_cycle` | Resume a cycle you paused (not an automatic pause) |
 | `button.<name>_force_end_cycle` | Force-terminate a stuck cycle |
 | `switch.<name>_auto_maintenance` | Nightly database cleanup |
