@@ -640,10 +640,24 @@ def prefix_shape_arrays(
     One definition of "the same stretch of both curves", shared by the two callers
     that need it: the live Stage-2/3 shape scoring (#400) and the Stage-6 prefix
     guard (#364). Both series go onto a shared grid so an index offset equals a time
-    offset regardless of the template's native cadence, and so cross-candidate
-    scores stay comparable when templates differ in length; the grid also honours
-    the #388 OOM cap. The 12-sample floor is real here (unlike in ``prefix_mean``):
+    offset regardless of the template's native cadence; the grid also honours the
+    #388 OOM cap. The 12-sample floor is real here (unlike in ``prefix_mean``):
     these arrays get correlated and warped, not averaged.
+
+    The grid is shared **between the two series**, not across candidates: ``k``
+    is the candidate's own truncated point count, so a longer template can be
+    scored on a finer grid than a shorter one. That asymmetry is deliberate and
+    measured. Capping the grid at ``k`` is what stops ``arr[:k]`` being upsampled
+    past the points it actually has, which would invent template detail the
+    recording never contained. Dropping the ``k`` term to make the grid purely
+    candidate-independent (``min(curr_arr.size, MAX_ALIGN_GRID_POINTS)``) was
+    tried and measured on ``devtools/prefix_guard_eval.py``: at the shipped
+    constants it takes the #364 split guard from **59/114 caught (52%) to 52/114
+    (46%)** while removing only 2 of 13 false blocks. A miss there is a SPLIT
+    CYCLE and a false block is merely a later finish, so that trade is
+    net-negative. ``devtools/dtw_ab_eval.py`` is byte-identical either way
+    (it scores only complete cycles, which never take the prefix path), so it
+    cannot be used to judge this function - use ``prefix_guard_eval.py``.
     """
     arr = np.asarray(sample, dtype=float)
     k = _prefix_point_count(arr.size, current_duration, sample_span_s)
