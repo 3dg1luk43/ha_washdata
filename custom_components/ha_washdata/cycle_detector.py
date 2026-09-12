@@ -325,6 +325,12 @@ class CycleDetector:
         # Adaptive Sampling Tracker
         self._recent_dts: list[float] = []  # Track last 20 dt values
         self._p95_dt: float = 1.0  # Default assumption
+        # The cadence as it stood BEFORE the reading currently being processed was
+        # folded in. Every gap-vs-outage classification reads this, never _p95_dt:
+        # an outage-sized interval that has already widened p95 would raise the very
+        # ceiling meant to catch it (a 120 s gap after a 10 s cadence lifts p95 to
+        # ~15.5 s -> ceiling 155 s -> the gap passes as observed time).
+        self._prior_p95_dt: float = 1.0
 
         # Profile Matching Tracker
         self._last_match_time: datetime | None = None
@@ -624,7 +630,7 @@ class CycleDetector:
             # = clip(10x cadence, 60, 3600)), NOT _outage_threshold_s() which rebuilds a
             # NumPy array from every reading - this runs on the per-reading ENDING /
             # anti-crease path, same reasoning as the gap-free tally at L1006.
-            max_gap = min(3600.0, max(60.0, 10.0 * self._p95_dt))
+            max_gap = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
             cut = 0
             for i in range(1, len(window)):
                 if (window[i][0] - window[i - 1][0]).total_seconds() > max_gap:
@@ -1050,7 +1056,7 @@ class CycleDetector:
         # outage that has already widened p95 would raise the very threshold that
         # is supposed to catch it (a 120 s gap after a 10 s cadence lifts p95 to
         # ~15.5 s -> ceiling 155 s -> the gap counts as observed quiet).
-        prior_p95_dt = self._p95_dt
+        self._prior_p95_dt = self._p95_dt
         self._update_cadence(dt)
         self._last_process_time = timestamp
 
@@ -1125,7 +1131,7 @@ class CycleDetector:
             # 3600)) but reuses the maintained p95 cadence to stay O(1) in this
             # per-reading hot path. Uses the cadence as it stood BEFORE this
             # reading, so a gap cannot widen its own acceptance threshold.
-            outage_ceiling = min(3600.0, max(60.0, 10.0 * prior_p95_dt))
+            outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
             if dt > outage_ceiling:
                 self._time_below_threshold_gapfree = 0.0
             else:
@@ -2485,7 +2491,7 @@ class CycleDetector:
         if start is None or not self._power_readings:
             return 0.0
         ceiling = float(self._config.anti_wrinkle_max_power)
-        max_gap = min(3600.0, max(60.0, 10.0 * self._p95_dt))
+        max_gap = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
         total = 0.0
         readings = self._power_readings
         for i in range(len(readings) - 1, -1, -1):

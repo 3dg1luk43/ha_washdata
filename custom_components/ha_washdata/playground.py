@@ -945,15 +945,21 @@ class _DetailSim:
         # cohesive family is collapsed to its best member before anything reads the
         # ranking (#400).
         candidates = collapse_group_candidates(candidates, self.group_members or {})
+        # Stage-5 safeguards #2 and #3, captured here and applied after the
+        # top-level ambiguity call below so the ORDER matches async_match_profile.
+        stage5_member_fit: float | None = None
+        stage5_group_win = False
         if self.group_members and candidates[0].get("name", "").startswith("__group__"):
             gkey = candidates[0]["name"]
             members = self.group_members.get(gkey, [])
             if members and self.store is not None:
                 try:
-                    member_name, _, member_dur = self.store._stage5_pick_member(  # noqa: SLF001
+                    member_name, member_fit, member_dur = self.store._stage5_pick_member(  # noqa: SLF001
                         list(powers), duration, members, self.member_snaps or {},
                         in_progress=bool(self.match_config.get("in_progress")),
                     )
+                    stage5_member_fit = member_fit
+                    stage5_group_win = True
                     # Carry the member's duration as well, exactly as
                     # `async_match_profile` relabels the winner: leaving the group's
                     # aggregate duration here fed the wrong expected value to the
@@ -966,6 +972,22 @@ class _DetailSim:
                     pass
         best = candidates[0]
         margin, is_ambiguous = _ambiguity_from_candidates(candidates)
+        if stage5_group_win:
+            # Safeguard #2: the family matched, but the chosen member does not
+            # individually fit near the group score, so the real program may be a
+            # different single profile. Same 0.55x coarse backstop as production.
+            _bscore = float(best.get("score") or 0.0)
+            if stage5_member_fit is not None and _bscore > 0 and stage5_member_fit < 0.55 * _bscore:
+                is_ambiguous = True
+            # Safeguard #3 (overrun): already past the chosen member's expected
+            # duration, so this may be the LONGER member of the family.
+            _bdur = float(best.get("profile_duration") or 0.0)
+            if _bdur and duration > _bdur * 1.05:
+                is_ambiguous = True
+            # Without these two the sim reports a confident match exactly where
+            # production downgrades to uncertain, and `is_ambiguous` is what blocks
+            # Smart Termination - so the replay would finalise where the real
+            # detector falls through to the power timeout.
         raw_name = best.get("name")
         raw_conf = float(best.get("score") or 0.0)
         raw_expected = float(best.get("profile_duration") or 0.0)
