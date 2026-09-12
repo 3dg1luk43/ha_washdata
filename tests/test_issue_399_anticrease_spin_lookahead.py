@@ -266,7 +266,10 @@ def _seeded_detector(readings: list[tuple[float, float]]) -> CycleDetector:
     det = _bare_detector()
     det._current_cycle_start = BASE
     det._power_readings = [(BASE + timedelta(seconds=o), p) for o, p in readings]
-    det._p95_dt = 10.0  # ceiling = max(60, 10 x 10) = 100 s
+    # Both: the gap classifications read _prior_p95_dt (the cadence BEFORE the
+    # reading being judged), and these tests install readings directly rather
+    # than going through process_reading, which is what maintains it.
+    det._p95_dt = det._prior_p95_dt = 10.0  # ceiling = max(60, 10 x 10) = 100 s
     return det
 
 
@@ -293,6 +296,31 @@ def test_high_power_seconds_still_counts_a_gap_inside_the_ceiling() -> None:
     det = _seeded_detector([(0.0, 774.0), (90.0, 774.0), (100.0, 15.0)])
     # 90 s < the 100 s ceiling, so it counts; then 10 s more.
     assert det._high_power_seconds_since(0.0) == pytest.approx(100.0)
+
+
+def test_a_gap_cannot_widen_the_ceiling_that_judges_it() -> None:
+    """The classification reads the cadence as it stood BEFORE the interval.
+
+    Fed through the real `process_reading`, so the cadence is earned rather than
+    seeded. Nineteen 10 s intervals then a 120 s outage: folding that outage into
+    p95 first lifts it to ~15.5 s, so the ceiling becomes 155 s and the outage
+    passes as 120 s of observed terminal spin. Judged against the pre-gap 10 s
+    cadence the ceiling is 100 s and the outage is correctly dropped.
+
+    Mis-counting it is not cosmetic: `_anticrease_spin_pending` releases on
+    `seen >= needed`, so banked phantom spin releases the finalise before the real
+    terminal spin and splits that spin off as a second cycle.
+    """
+    det = _bare_detector()
+    det._current_cycle_start = BASE
+    for i in range(20):
+        det.process_reading(774.0, BASE + timedelta(seconds=i * 10.0))
+    # The outage: high again, 120 s after the last report.
+    det.process_reading(774.0, BASE + timedelta(seconds=190.0 + 120.0))
+
+    assert det._prior_p95_dt == pytest.approx(10.0)
+    # 19 observed 10 s intervals = 190 s. The 120 s outage contributes nothing.
+    assert det._high_power_seconds_since(0.0) == pytest.approx(190.0)
 
 
 def test_high_power_seconds_credits_only_the_part_after_the_offset() -> None:
@@ -545,7 +573,7 @@ def test_spin_guard_scans_from_the_absolute_offset_not_frac_times_expected() -> 
         det = _bare_detector()
         det._current_cycle_start = BASE
         det._expected_duration = ITEM196_FULL_S
-        det._p95_dt = 20.0
+        det._p95_dt = det._prior_p95_dt = 20.0
         # This run: its spin lands exactly where the profile says it does.
         det._power_readings = [
             (
@@ -575,7 +603,7 @@ def test_a_two_element_payload_still_falls_back_to_frac_times_expected() -> None
     det = _bare_detector()
     det._current_cycle_start = BASE
     det._expected_duration = EXPECTED
-    det._p95_dt = 5.0
+    det._p95_dt = det._prior_p95_dt = 5.0
     # A 300 s heating burst early on, and nothing above the ceiling after it.
     det._power_readings = [
         (BASE + timedelta(seconds=t), 1957.0 if 300 <= t < 600 else 15.0)

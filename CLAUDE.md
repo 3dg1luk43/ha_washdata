@@ -335,8 +335,14 @@ Tuning provenance, A/B tables and measured accuracies are in reference 02 and
   net-negative). `energy_agreement` uses mean power by default, **integrated energy** for
   `washing_machine`/`washer_dryer` via `energy_mode`.
 - **Stage 5 - profile groups (shipped, hierarchical):** the user groups near-duplicate profiles.
-  `_grouped_snapshots` collapses each **cohesive** group (pairwise envelope correlation >=
-  `GROUP_MIN_COHESION`) into one aggregate candidate; loose groups stay individual. If a group wins,
+  `_grouped_snapshots` returns the snapshots **unchanged** and only maps each **cohesive** group
+  (pairwise envelope correlation >= `GROUP_MIN_COHESION`) to its members; loose groups are not mapped
+  at all. Every member is scored **on its own curve**, and `collapse_group_candidates` forms the
+  family afterwards, keeping the best sibling's record under the `__group__` name. Until #400 this
+  method averaged the member curves into one aggregate snapshot; that curve belonged to no member
+  (half-height heating block, an energy figure neither reaches) and cost the family the
+  program-level match before Stage 5 could choose. **Do not reintroduce the aggregate snapshot.** If
+  a group wins,
   `_stage5_pick_member` picks by **integrated-energy agreement** (peak is the flat heating-element
   draw and mean power is diluted by longer hot cycles; integrated energy is what separates
   temperature). Two safeguards: the top-level ambiguity gate, and a post-commit member sanity check.
