@@ -638,6 +638,23 @@ def test_sanitize_terminal_high_takes_the_triple_and_degrades_a_bad_offset() -> 
     assert det._sanitize_terminal_high((1.5, 200.0, 5700.0)) is None
     assert det._sanitize_terminal_high((0.95, 0.0, 5700.0)) is None
     assert det._sanitize_terminal_high((0.95,)) is None
+
+
+def test_sanitize_terminal_high_rejects_a_scalar_string() -> None:
+    """A str is iterable, so `list("11")` is `["1", "1"]` and would sanitize to
+    (1.0, 1.0) - a malformed snapshot silently ARMING the guard and delaying the
+    finalise, which is the one direction this method promises never to go.
+
+    Three-character digit strings are the same trap via the triple path, and the
+    bytes forms round-trip out of some stores, so all of them take the documented
+    garbage path instead.
+    """
+    det = _bare_detector()
+    for bad in ("11", "123", "0.5", "", "ab", b"11", bytearray(b"11")):
+        assert det._sanitize_terminal_high(bad) is None, bad
+    # A real pair/triple in the same shapes still works, so this only narrows.
+    assert det._sanitize_terminal_high((0.95, 200.0)) == (0.95, 200.0)
+    assert det._sanitize_terminal_high([0.95, 200.0, 5700.0]) == (0.95, 200.0, 5700.0)
     assert det._sanitize_terminal_high((0.95, 200.0, 1.0, 2.0)) is None
     assert det._sanitize_terminal_high(None) is None
     assert det._sanitize_terminal_high(42) is None

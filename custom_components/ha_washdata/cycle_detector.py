@@ -579,6 +579,12 @@ class CycleDetector:
         """
         if raw is None:
             return None
+        # A str/bytes is iterable, so `list("11")` is `["1", "1"]` and sanitizes to
+        # (1.0, 1.0) - a scalar string silently ARMING the guard off a malformed
+        # snapshot, which is the one direction this method promises never to go.
+        # Rejected before the iteration so it takes the documented garbage path.
+        if isinstance(raw, (str, bytes, bytearray)):
+            return None
         try:
             values = list(raw)
         except TypeError:
