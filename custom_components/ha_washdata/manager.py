@@ -3609,6 +3609,15 @@ class WashDataManager:
                 continue
             start_dt = dt_util.parse_datetime(str(cycle.get("start_time") or ""))
             end_dt = dt_util.parse_datetime(str(cycle.get("end_time") or ""))
+            # An ISO string without an offset parses naive, which every record this
+            # device writes is not, but an import or a hand-edited file can be. Read
+            # as UTC, the same way the odometer scan does: one such cycle otherwise
+            # raises on the aware `horizon` comparison below, and the WS caller only
+            # debug-logs that, so the whole pass silently recosts nothing.
+            if start_dt is not None and start_dt.tzinfo is None:
+                start_dt = start_dt.replace(tzinfo=dt_util.UTC)
+            if end_dt is not None and end_dt.tzinfo is None:
+                end_dt = end_dt.replace(tzinfo=dt_util.UTC)
             if start_dt is None or end_dt is None or end_dt <= start_dt:
                 continue
             candidates.append((cycle, start_dt, end_dt))
