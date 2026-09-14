@@ -133,7 +133,9 @@ def compact_price_timeline(
             price = round(float(entry[1]), decimals)
         except (TypeError, ValueError, IndexError):
             continue
-        if offset != offset or price != price:  # NaN
+        if not np.isfinite(offset) or not np.isfinite(price):
+            # nan AND +-inf: "inf" parses out of a sensor state like any other
+            # float, and an infinite price makes every downstream cost infinite.
             continue
         cleaned.append((offset, price))
     if not cleaned:
