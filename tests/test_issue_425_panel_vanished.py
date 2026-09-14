@@ -216,6 +216,38 @@ async def test_a_refused_platform_unload_keeps_the_forward_record(
     )
 
 
+async def test_a_partly_forwarded_entry_is_still_recorded(
+    hass, enable_custom_integrations, http_up, monkeypatch
+):
+    """A forward that sets up some platforms and then raises must still be recorded.
+
+    ``async_forward_entry_setups`` gathers the platform setups, so one raising
+    leaves the others registered. A marker written after the await is never
+    reached, and the next attempt would skip the unload and forward an
+    already-registered platform (#425).
+    """
+    hass.states.async_set(POWER_SENSOR, "0", {"unit_of_measurement": "W"})
+    entry = _make_entry(hass)
+    real_forward = hass.config_entries.async_forward_entry_setups
+
+    async def _partial_forward(config_entry, platforms):
+        await real_forward(config_entry, list(platforms)[:1])
+        raise HomeAssistantError("the second platform failed to set up")
+
+    monkeypatch.setattr(
+        hass.config_entries, "async_forward_entry_setups", _partial_forward
+    )
+
+    with pytest.raises(HomeAssistantError):
+        await washdata.async_setup_entry(hass, entry)
+    await hass.async_block_till_done()
+
+    assert entry.entry_id in hass.data[washdata.FORWARDED_ENTRIES_KEY], (
+        "a platform is set up but nothing recorded it, so the next attempt will "
+        "forward it a second time and fail permanently."
+    )
+
+
 async def test_panel_registers_when_http_comes_up_late(hass, enable_custom_integrations):
     """Hoisting the registration must not lose the panel on a late frontend stack.
 

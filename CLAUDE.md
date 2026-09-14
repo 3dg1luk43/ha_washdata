@@ -356,6 +356,13 @@ Tuning provenance, A/B tables and measured accuracies are in reference 02 and
 a similarity score, **not a calibrated probability**. **Ambiguity:**
 `is_ambiguous = (top1 - top2) < MATCH_AMBIGUITY_MARGIN`.
 
+**On a Stage-5 group win there are two confidences, and they are not interchangeable.**
+`MatchResult.confidence` stays the winning *group's* score, because the end-detection consumers are
+calibrated against it. The chosen member's own score is `member_confidence`, and everything that
+**labels or persists** must go through `MatchResult.label_confidence` = `min(confidence,
+member_confidence)`. Using `confidence` to gate a label is register item 206: the cycle got labelled
+with a member the matcher was far less sure of than the number suggested.
+
 ## Known Technical Debt
 
 The `[FIXED]` register in `docs/internal/INTEGRATION_REFERENCE.md` §7 is the live tracker - read it

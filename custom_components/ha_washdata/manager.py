@@ -4924,9 +4924,18 @@ class WashDataManager:
         # detector into a fresh RUNNING before post-processing completes). See B1 in
         # _async_process_cycle_end.
         end_token = self._ranking_snapshot_cycle_id
+        # Freeze the price timeline alongside the token, for the same reason: the
+        # back-to-back start that changes the token also calls _start_price_timeline,
+        # which replaces this cycle's timeline with the NEW cycle's opening sample
+        # before the task reaches the costing step (#426).
+        end_price_timeline = list(self._price_timeline)
         if not self._is_shutdown:
             self._cycle_end_task = self._spawn_tracked(
-                self._async_process_cycle_end(cycle_data, cycle_token=end_token)
+                self._async_process_cycle_end(
+                    cycle_data,
+                    cycle_token=end_token,
+                    price_timeline=end_price_timeline,
+                )
             )
 
     def _ml_end_confidence(
@@ -5296,7 +5305,11 @@ class WashDataManager:
             self._logger.debug("Price history lookup failed for %s: %s", entity_id, exc)
             return []
 
-    async def _async_apply_cycle_cost(self, cycle_data: dict[str, Any]) -> None:
+    async def _async_apply_cycle_cost(
+        self,
+        cycle_data: dict[str, Any],
+        price_timeline: list[tuple[float, float]] | None = None,
+    ) -> None:
         """Freeze ``cost`` / ``energy_price`` onto a finished cycle (#426).
 
         Dynamic mode integrates the stored power trace against the price timeline
@@ -5313,7 +5326,9 @@ class WashDataManager:
         price = self._resolve_energy_price()
         if self._dynamic_pricing_enabled():
             try:
-                if await self._async_apply_dynamic_cost(cycle_data):
+                if await self._async_apply_dynamic_cost(
+                    cycle_data, price_timeline=price_timeline
+                ):
                     return
             except Exception as exc:  # noqa: BLE001 - never break cycle storage
                 self._logger.debug("Dynamic cost calculation failed: %s", exc)
@@ -5324,14 +5339,25 @@ class WashDataManager:
                 self._cycle_report_energy_wh(cycle_data) / 1000.0 * price, 4
             )
 
-    async def _async_apply_dynamic_cost(self, cycle_data: dict[str, Any]) -> bool:
-        """Cost the cycle against its price timeline. True when it succeeded."""
+    async def _async_apply_dynamic_cost(
+        self,
+        cycle_data: dict[str, Any],
+        price_timeline: list[tuple[float, float]] | None = None,
+    ) -> bool:
+        """Cost the cycle against its price timeline. True when it succeeded.
+
+        ``price_timeline`` is the finished cycle's own history, frozen at cycle end.
+        Falling back to the live ``_price_timeline`` is only correct while no new
+        cycle has started since.
+        """
         start_dt = dt_util.parse_datetime(str(cycle_data.get("start_time") or ""))
         end_dt = dt_util.parse_datetime(str(cycle_data.get("end_time") or ""))
         if start_dt is None or end_dt is None or end_dt <= start_dt:
             return False
 
-        timeline = list(self._price_timeline)
+        timeline = list(
+            self._price_timeline if price_timeline is None else price_timeline
+        )
         # The live listener is complete whenever HA stayed up for the whole cycle.
         # Consult the recorder only when it cannot have been: nothing recorded at
         # all (the feature was switched on mid-cycle), or a restart gap where price
@@ -5569,13 +5595,18 @@ class WashDataManager:
             return ""
 
     async def _async_process_cycle_end(
-        self, cycle_data: dict[str, Any], cycle_token: str | None = None
+        self,
+        cycle_data: dict[str, Any],
+        cycle_token: str | None = None,
+        price_timeline: list[tuple[float, float]] | None = None,
     ) -> None:
         """Process cycle completion asynchronously (heavy tasks).
 
         ``cycle_token`` is the ``_ranking_snapshot_cycle_id`` captured when this cycle
         ended. The terminal-state reset at the tail is skipped if a new cycle has
         started since (token changed), so back-to-back cycles are not clobbered (B1).
+        ``price_timeline`` is that same cycle's tariff history, frozen at the same
+        moment and for the same reason; None means "read the live one".
         """
 
         # FINAL PROFILE MATCH: If still detecting, try one last match with complete cycle data
@@ -5826,7 +5857,7 @@ class WashDataManager:
         # power trace integrated against the price in force at each moment (#426);
         # otherwise the single price in effect NOW. Either way it is frozen here, so
         # later price changes never rewrite historical costs.
-        await self._async_apply_cycle_cost(cycle_data)
+        await self._async_apply_cycle_cost(cycle_data, price_timeline=price_timeline)
 
         # Score cycle quality with the ML model before persisting so the score is
         # stored on the cycle record and available to the learning manager immediately.

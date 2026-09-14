@@ -593,3 +593,51 @@ async def test_recosting_survives_a_naive_timestamp():
 
     # 1 kWh, half at each price.
     assert cycle["cost"] == pytest.approx(0.15)
+
+
+async def test_a_back_to_back_start_cannot_cost_the_finished_cycle():
+    """The finished cycle is costed from ITS timeline, not the next cycle's.
+
+    ``_on_cycle_end`` schedules the cycle-end task and returns; a load started
+    right after drives the detector into RUNNING, which calls
+    ``_start_price_timeline()`` and replaces the list the awaiting task was going
+    to read. The finished cycle then has one sample dated after its own end, which
+    the offset filter drops, so it silently fell back to the flat price.
+    """
+    mgr = _mgr(
+        timeline=[(_START.timestamp(), 0.10), (_START.timestamp() + 1800, 0.20)],
+        price=0.30,
+    )
+    frozen = list(mgr._price_timeline)
+    # The next cycle opens its own timeline while the task is awaiting.
+    mgr._price_timeline = [(_START.timestamp() + 7200, 0.50)]
+
+    costed = _cycle()
+    await mgr._async_apply_cycle_cost(costed, price_timeline=frozen)
+    assert costed["energy_price_mode"] == "dynamic"
+    assert costed["cost"] == pytest.approx(0.15)  # 1 kWh, half at each price
+
+    # Reading the live list instead is exactly the fallback this prevents.
+    clobbered = _cycle()
+    await mgr._async_apply_cycle_cost(clobbered)
+    assert clobbered["energy_price_mode"] == "fixed"
+
+
+async def test_cycle_end_freezes_the_timeline_with_the_token(hass, price_manager):
+    """The freeze has to happen in the sync handler, beside the B1 cycle token."""
+    captured = {}
+
+    async def _capture(cycle_data, cycle_token=None, price_timeline=None):
+        captured["token"] = cycle_token
+        captured["timeline"] = price_timeline
+
+    price_manager._async_process_cycle_end = _capture
+    price_manager._spawn_tracked = lambda coro: hass.async_create_task(coro)
+    price_manager._price_timeline = [(_START.timestamp(), 0.10)]
+
+    price_manager._on_cycle_end(_cycle(duration_s=3600.0, watts=2000.0, max_power=2000.0))
+    # The next cycle starts before the task runs.
+    price_manager._start_price_timeline()
+    await hass.async_block_till_done()
+
+    assert captured["timeline"] == [(_START.timestamp(), 0.10)]
