@@ -1545,7 +1545,14 @@ def ws_get_options(
     if not entry:
         connection.send_error(msg["id"], "not_found", f"Entry {msg['entry_id']!r} not found")
         return
-    options = {**entry.data, **entry.options}
+    # #422: the display name is carried by ``entry.title``, never by options -
+    # ``_merge_structural_options`` and ``_OPTIONS_IDENTITY_KEYS`` strip CONF_NAME
+    # back out on every save. ``entry.data[CONF_NAME]`` is therefore a fossil from
+    # ``async_create_entry`` that no rename path updates, and being data-only it is
+    # the one key nothing in options can shadow. Pin it to the title so Settings ->
+    # Basic shows the same name as the device list (which serves entry.title) and a
+    # save can never echo the creation-time name back over the current one.
+    options = {**entry.data, **entry.options, CONF_NAME: entry.title}
     # Device-resolved defaults for the cadence settings whose defaults vary by
     # device type (#396). The panel uses these as the render/conflict-check
     # fallback for an unset field so it shows (and validates against) the value the
