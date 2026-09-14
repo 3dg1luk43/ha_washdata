@@ -54,6 +54,7 @@ from .signal_processing import (
     compact_price_timeline,
     cycle_cost,
     energy_gap_threshold_s,
+    integrate_wh,
 )
 from .const import (
     CONF_ANTI_WRINKLE_ENABLED,
@@ -1077,8 +1078,10 @@ class _DetailSim:
             terminal_high,
         )
 
-    def _cost_so_far(self, trace: list[tuple[datetime, float]]) -> float | None:
-        """Dynamic-tariff cost incurred up to this point of the replay, or None.
+    def _cost_so_far(
+        self, trace: list[tuple[datetime, float]]
+    ) -> tuple[float, float] | None:
+        """``(cost, charged_wh)`` incurred up to this point of the replay, or None.
 
         Mirrors ``manager._live_cost_so_far``: the integrated trace charged at the
         prices the cycle actually ran through. None (no stored timeline) puts the
@@ -1091,11 +1094,11 @@ class _DetailSim:
             base_ts = self.base.timestamp()
             timestamps = np.asarray([t.timestamp() - base_ts for t, _ in trace], dtype=float)
             power = np.asarray([p for _, p in trace], dtype=float)
-            result = cycle_cost(
-                timestamps, power, self.price_points,
-                max_gap_s=energy_gap_threshold_s(timestamps),
-            )
-            return result[0] if result is not None else None
+            max_gap_s = energy_gap_threshold_s(timestamps)
+            result = cycle_cost(timestamps, power, self.price_points, max_gap_s=max_gap_s)
+            if result is None:
+                return None
+            return result[0], float(integrate_wh(timestamps, power, max_gap_s=max_gap_s))
         except Exception:  # noqa: BLE001 - the sim never raises
             return None
 
@@ -1160,10 +1163,12 @@ class _DetailSim:
                 pt["phase"] = progress_mod.current_phase(
                     self.store, state, program, result.progress
                 )
+                sim_cost = self._cost_so_far(trace)
                 wh, cost = progress_mod.projected_energy(
                     self.store, self.options, matched_dur, trace, program, result.progress,
                     energy_wh, self.price, self._end_exp_fn,
-                    cost_so_far=self._cost_so_far(trace),
+                    cost_so_far=sim_cost[0] if sim_cost else None,
+                    cost_so_far_wh=sim_cost[1] if sim_cost else None,
                 )
                 pt["projected_energy_wh"] = round(wh, 1) if wh is not None else None
                 pt["projected_cost"] = round(cost, 4) if cost is not None else None

@@ -278,6 +278,38 @@ class TestKeepTailCap:
             "the trace must not run past the stored end_time"
         )
 
+    def test_a_late_fallback_finish_is_capped_at_the_expected_end(self) -> None:
+        """Behaviour pin, raised by the PR #420 round-31 review (register item 238).
+
+        A dishwasher that finishes through the FALLBACK path (timeout / energy
+        gate, not Smart Termination) after its expected end, with no
+        above-threshold reading after it, stores exactly ``_expected_duration``.
+        That is the cap working as designed, and it is also the one shape where a
+        genuine passive-drying tail LONGER than the learned programme cannot grow
+        the profile: ``avg_duration`` is rebuilt from stored durations, so the
+        upper tail is clipped at the current average every time.
+
+        Pinned rather than changed: both call sites (the timeout and the
+        energy-gate finish) share the cap with Smart Termination, and removing it
+        from either reintroduces the #424 standby inflation this test file exists
+        for. Whether a different bound is right for the fallback path is a
+        termination-design decision for the maintainer.
+        """
+        det, completed = self._armed(expected=14338.0, last_active_s=7200.0)
+        det._power_readings = [
+            (BASE + timedelta(seconds=t), p)
+            for t, p in [(0.0, 5.0), (7200.0, 1.5), (14400.0, 0.0), (15594.0, 0.0)]
+        ]
+        det._cycle_max_power = 1974.2
+        det._finish_cycle(
+            BASE + timedelta(seconds=15594.0),
+            status="completed",
+            keep_tail=True,
+            tail_cap=det._keep_tail_cap(BASE),
+        )
+
+        assert completed[0]["duration"] == pytest.approx(14338.0)
+
     def test_uncapped_keep_tail_is_unchanged(self) -> None:
         """Callers that pass no cap (user stop, anti-crease) keep the old shape."""
         det, completed = self._armed()

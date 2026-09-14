@@ -248,6 +248,35 @@ async def test_a_partly_forwarded_entry_is_still_recorded(
     )
 
 
+async def test_a_cancelled_card_registration_clears_the_in_progress_flag(
+    hass, enable_custom_integrations, http_up, monkeypatch
+):
+    """HA cancels entry setup on timeout, and CancelledError is not an Exception.
+
+    The guard flag is what stops two entries registering the card at once. Left
+    True it is never cleared again, so every later setup skips card registration
+    and the Lovelace resource stays unpublished until HA restarts.
+    """
+    import asyncio
+
+    from custom_components.ha_washdata import frontend as wd_frontend
+
+    async def _cancelled(self):
+        raise asyncio.CancelledError
+
+    monkeypatch.setattr(
+        wd_frontend.WashDataCardRegistration, "async_register", _cancelled
+    )
+
+    with pytest.raises(asyncio.CancelledError):
+        await washdata._async_setup_shared(hass, washdata._LOGGER)
+
+    assert hass.data.get("ha_washdata_card_registering") is False, (
+        "the in-progress flag survived a cancelled setup, so card registration is "
+        "skipped for the rest of this HA run."
+    )
+
+
 async def test_panel_registers_when_http_comes_up_late(hass, enable_custom_integrations):
     """Hoisting the registration must not lose the panel on a late frontend stack.
 
