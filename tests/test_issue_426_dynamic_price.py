@@ -328,7 +328,11 @@ def test_live_cost_tracks_the_prices_already_run_through():
     mgr._cycle_start_time = _START
     trace = [(_START + timedelta(seconds=i * 60.0), 1000.0) for i in range(61)]
     # A full hour at 1 kW, half at each price -> 0.20.
-    assert mgr._live_cost_so_far(trace) == pytest.approx(0.20, abs=1e-3)
+    cost, charged_wh = mgr._live_cost_so_far(trace)
+    assert cost == pytest.approx(0.20, abs=1e-3)
+    # The energy that cost was charged for. The projection must subtract THIS, not
+    # the detector's accumulator, or the overlap is charged twice.
+    assert charged_wh == pytest.approx(1000.0, abs=1e-6)
 
 
 # ─── The listener, on a real manager ──────────────────────────────────────────
@@ -641,3 +645,33 @@ async def test_cycle_end_freezes_the_timeline_with_the_token(hass, price_manager
     await hass.async_block_till_done()
 
     assert captured["timeline"] == [(_START.timestamp(), 0.10)]
+
+
+def test_the_projection_subtracts_the_energy_the_cost_was_charged_for():
+    """``cost_so_far`` and ``energy_so_far`` are two different measurements.
+
+    The cost integrates the power trace; ``energy_so_far`` is the detector's
+    per-reading accumulator, which declines sub-threshold and outage intervals.
+    Subtracting the accumulator from the projection leaves the difference between
+    them charged twice (or not at all) on top of the cost already incurred.
+    """
+    # 400 Wh charged at the prices it ran through; the accumulator says 380.
+    wh, cost = projected_energy(
+        None, {}, 0.0, [], None,
+        50.0,          # progress %
+        380.0,         # energy_so_far (detector accumulator)
+        0.40,          # current price
+        lambda *a, **k: None,
+        cost_so_far=0.05,
+        cost_so_far_wh=400.0,
+    )
+    assert wh == pytest.approx(760.0)  # 380 / 0.5
+    # Remaining = 760 - 400, NOT 760 - 380.
+    assert cost == pytest.approx(0.05 + (360.0 / 1000.0) * 0.40)
+
+    # Without the basis the caller keeps the old behaviour.
+    _, legacy = projected_energy(
+        None, {}, 0.0, [], None, 50.0, 380.0, 0.40, lambda *a, **k: None,
+        cost_so_far=0.05,
+    )
+    assert legacy == pytest.approx(0.05 + (380.0 / 1000.0) * 0.40)

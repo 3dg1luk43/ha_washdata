@@ -564,10 +564,8 @@ async def _async_setup_shared(
         try:
             register_result = await card_reg.async_register()
         except Exception as err:  # pylint: disable=broad-exception-caught
-            hass.data["ha_washdata_card_registering"] = False
             log.warning("Card registration failed, will retry on next setup: %s", err)
         else:
-            hass.data["ha_washdata_card_registering"] = False
             if register_result == CARD_REGISTERED:
                 hass.data["ha_washdata_card_deferred"] = False
                 hass.data["ha_washdata_card_registered"] = True
@@ -578,6 +576,12 @@ async def _async_setup_shared(
                 hass.data["ha_washdata_card_deferred"] = False
                 hass.data["ha_washdata_card_registered"] = False
                 log.warning("Card registration failed and was not deferred")
+        finally:
+            # finally, not one reset per branch: `except Exception` does not catch
+            # CancelledError, and HA cancels entry setup on timeout or on a reload
+            # racing it. A flag left True is never cleared again, so every later
+            # setup skips card registration until HA restarts.
+            hass.data["ha_washdata_card_registering"] = False
 
     # Register full-screen sidebar panel - once per HA instance only.
     # pylint: disable=import-outside-toplevel

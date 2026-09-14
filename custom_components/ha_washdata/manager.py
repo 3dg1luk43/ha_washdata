@@ -7541,6 +7541,7 @@ class WashDataManager:
             self._projected_energy_wh = None
             self._projected_cost = None
             return
+        live_cost = self._live_cost_so_far(trace)
         wh, cost = progress_mod.projected_energy(
             self.profile_store,
             self.config_entry.options,
@@ -7552,18 +7553,24 @@ class WashDataManager:
             price,
             self._profile_end_expectation,
             self._logger,
-            cost_so_far=self._live_cost_so_far(trace),
+            cost_so_far=live_cost[0] if live_cost else None,
+            cost_so_far_wh=live_cost[1] if live_cost else None,
         )
         self._projected_energy_wh = wh
         self._projected_cost = cost
 
-    def _live_cost_so_far(self, trace: list[tuple[datetime, float]]) -> float | None:
-        """Cost already incurred by the running cycle at the prices it ran through.
+    def _live_cost_so_far(
+        self, trace: list[tuple[datetime, float]]
+    ) -> tuple[float, float] | None:
+        """``(cost, charged_wh)`` incurred so far at the prices the cycle ran through.
 
         Returns ``None`` when dynamic pricing is off or nothing has been recorded
         yet, which puts :func:`progress.projected_energy` back on the flat-price
-        formula. Uses the integrated trace (not the external meter) so it lines up
-        with the ``energy_so_far`` the same projection is built from. Never raises.
+        formula. The second element is the energy that cost was charged for, which
+        the projection must subtract instead of ``energy_so_far``: this integrates
+        the trace, while ``energy_so_far`` is the detector's per-reading
+        accumulator, and the two treat outages and sub-threshold intervals
+        differently. Never raises.
         """
         if not self._dynamic_pricing_enabled() or not self._price_timeline:
             return None
@@ -7578,13 +7585,13 @@ class WashDataManager:
                 max_points=PRICE_TIMELINE_MAX_POINTS,
                 decimals=PRICE_TIMELINE_PRICE_DECIMALS,
             )
-            result = cycle_cost(
-                timestamps,
-                power,
-                points,
-                max_gap_s=energy_gap_threshold_s(timestamps),
-            )
-            return result[0] if result is not None else None
+            max_gap_s = energy_gap_threshold_s(timestamps)
+            result = cycle_cost(timestamps, power, points, max_gap_s=max_gap_s)
+            if result is None:
+                return None
+            # integrate_wh is the same total the price segments sum to, by the
+            # documented contract of integrate_wh_by_price.
+            return result[0], float(integrate_wh(timestamps, power, max_gap_s=max_gap_s))
         except Exception:  # noqa: BLE001 - projection must never break estimates
             return None
 

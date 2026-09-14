@@ -795,6 +795,7 @@ def projected_energy(
     end_expectation_fn: EndExpFn,
     logger: logging.Logger | None = None,
     cost_so_far: float | None = None,
+    cost_so_far_wh: float | None = None,
 ) -> tuple[float | None, float | None]:
     """Project total energy (Wh) and cost for the running cycle.
 
@@ -808,6 +809,13 @@ def projected_energy(
     cycle that ran through a cheap window is not retroactively repriced at the
     expensive one it happens to be in now. The future half is still the current
     price - forecasting the tariff is deliberately out of scope.
+
+    ``cost_so_far_wh`` is the energy ``cost_so_far`` was charged for, which is NOT
+    ``energy_so_far``: the cost integrates the power trace while ``energy_so_far``
+    is the detector's per-reading accumulator, and the two count outages and
+    sub-threshold intervals differently. Subtracting the wrong one leaves the
+    overlap double-charged or uncharged. Defaults to ``energy_so_far`` so a caller
+    that has only the cost keeps the previous behaviour.
     """
     logger = logger or _LOGGER
     try:
@@ -833,7 +841,13 @@ def projected_energy(
         elif cost_so_far is None:
             cost = (projected_wh / 1000.0) * price_val
         else:
-            remaining_wh = max(0.0, projected_wh - energy_so_far)
+            charged_wh = energy_so_far
+            if cost_so_far_wh is not None:
+                try:
+                    charged_wh = float(cost_so_far_wh)
+                except (TypeError, ValueError):
+                    charged_wh = energy_so_far
+            remaining_wh = max(0.0, projected_wh - charged_wh)
             cost = float(cost_so_far) + (remaining_wh / 1000.0) * price_val
         return projected_wh, cost
     except Exception:  # noqa: BLE001 - projection must never break estimates
