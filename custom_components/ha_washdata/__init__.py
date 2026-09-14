@@ -139,6 +139,12 @@ PLATFORMS: list[Platform] = [
 # Shared future for the once-per-HA-instance ML module warm-up (issue #408).
 ML_PRELOAD_FUTURE_KEY = "ha_washdata_ml_preload"
 
+# Entry ids whose entity platforms are currently forwarded.  HA leaves forwarded
+# platforms in place when async_setup_entry raises, and it refuses to set the same
+# platform up twice, so a retry after a part-way failure has to take them down
+# first (issue #425).
+FORWARDED_ENTRIES_KEY = "ha_washdata_forwarded_entries"
+
 
 def _require_str(value: Any, name: str) -> str:
     if not isinstance(value, str) or not value:
@@ -522,17 +528,156 @@ async def _async_preload_ml_modules(hass: HomeAssistant) -> None:
             hass.data.pop(ML_PRELOAD_FUTURE_KEY, None)
 
 
+async def _async_setup_shared(
+    hass: HomeAssistant, log: DeviceLoggerAdapter
+) -> None:
+    """Register everything that belongs to the HA instance, not to one appliance.
+
+    The custom card, the sidebar panel, the WebSocket API, the conversation
+    intents and the cached integration version are global: the first config
+    entry brings them up and every later entry is a guarded no-op.
+
+    Issue #425: this used to sit near the END of ``async_setup_entry``, so any
+    earlier per-appliance failure took the whole install's UI down with it - and
+    because the panel is where almost every setting is edited (including the
+    ``via_device`` link that aborted setup in #418), losing it left the user with
+    no way to undo the setting that broke setup. Registering it first makes the
+    panel independent of whether any individual appliance sets up.
+
+    Failures inside are already handled per block (the card defers and retries,
+    the panel logs and retries on the next setup), so a missing UI never fails
+    the entry.
+    """
+    # Register custom card via frontend.py - once per HA instance only.
+    if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(
+        "ha_washdata_card_deferred"
+    ) and not hass.data.get("ha_washdata_card_registering"):
+        # pylint: disable=import-outside-toplevel
+        from .frontend import (
+            CARD_REGISTERED,
+            CARD_DEFERRED,
+            WashDataCardRegistration,
+        )
+
+        card_reg = WashDataCardRegistration(hass)
+        hass.data["ha_washdata_card_registering"] = True
+        try:
+            register_result = await card_reg.async_register()
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            hass.data["ha_washdata_card_registering"] = False
+            log.warning("Card registration failed, will retry on next setup: %s", err)
+        else:
+            hass.data["ha_washdata_card_registering"] = False
+            if register_result == CARD_REGISTERED:
+                hass.data["ha_washdata_card_deferred"] = False
+                hass.data["ha_washdata_card_registered"] = True
+            elif register_result == CARD_DEFERRED:
+                hass.data["ha_washdata_card_deferred"] = True
+                hass.data["ha_washdata_card_registered"] = False
+            else:
+                hass.data["ha_washdata_card_deferred"] = False
+                hass.data["ha_washdata_card_registered"] = False
+                log.warning("Card registration failed and was not deferred")
+
+    # Register full-screen sidebar panel - once per HA instance only.
+    # pylint: disable=import-outside-toplevel
+    from .frontend import async_register_panel, PANEL_REGISTERED_KEY
+
+    if not hass.data.get(PANEL_REGISTERED_KEY):
+        await async_register_panel(hass)
+
+    # Register WebSocket API commands for the panel. Re-run on every setup/reload:
+    # HA's async_register_command overwrites the handler per command type, so this
+    # is idempotent AND means NEW commands become available after an integration
+    # reload, not only after a full Home Assistant restart (previously the
+    # once-per-instance guard forced a full restart for any newly-added command).
+    from .ws_api import (  # pylint: disable=import-outside-toplevel
+        async_load_panel_config,
+        async_register_commands,
+    )
+
+    await async_load_panel_config(hass)  # self-guards; safe to call repeatedly
+    from . import store_account  # pylint: disable=import-outside-toplevel
+    await store_account.async_load(hass)  # integration-wide online flag + account
+
+    # Cache the integration version from HA's already-loaded manifest (no file IO).
+    # ws_get_constants reads it from hass.data; we can't do a module-level read_text
+    # in ws_api.py because the module is imported lazily inside this coroutine and the
+    # IO runs on the event loop (#328/#335).
+    if "ha_washdata_version" not in hass.data:
+        try:
+            from homeassistant.loader import async_get_integration as _aget_integration  # pylint: disable=import-outside-toplevel
+            _integ = await _aget_integration(hass, DOMAIN)
+            hass.data["ha_washdata_version"] = _integ.manifest.get("version", "") or ""
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Could not load ha_washdata version from manifest: %s", err)
+            # Fall back to reading manifest.json off the event loop.  Only
+            # write the key when the read succeeds so that a double failure
+            # (loader + file) leaves the key absent rather than storing ""
+            # (which would shadow _INTEGRATION_VERSION in ws_get_constants).
+            def _read_manifest_version() -> str:
+                try:
+                    return json.loads(
+                        (Path(__file__).parent / "manifest.json").read_text(encoding="utf-8")
+                    ).get("version") or ""
+                except Exception:  # pylint: disable=broad-exception-caught
+                    return ""
+            _fallback_version = await hass.async_add_executor_job(_read_manifest_version)
+            if _fallback_version:
+                hass.data["ha_washdata_version"] = _fallback_version
+
+    async_register_commands(hass)
+    hass.data["ha_washdata_ws_registered"] = True
+
+    # Register conversation intents (e.g. "is my washer done?") - once per HA
+    # instance. Intents are domain-global, so guard against re-registration when
+    # more than one device is configured.
+    if not hass.data.get("ha_washdata_intents_registered"):
+        from .intents import async_setup_intents  # pylint: disable=import-outside-toplevel
+
+        async_setup_intents(hass)
+        hass.data["ha_washdata_intents_registered"] = True
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WashData from a config entry."""
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
-    # Guard against duplicate setup during hot-reload
-    if entry.entry_id in hass.data.get(DOMAIN, {}):
-        _log.warning(
-            "Entry %s already set up, skipping duplicate setup", entry.entry_id
-        )
-        return True
-
     hass.data.setdefault(DOMAIN, {})
+
+    # Panel / card / WebSocket API first: they belong to the HA instance, not to
+    # this appliance, so they must not depend on this entry getting through
+    # (#425).  See _async_setup_shared.
+    await _async_setup_shared(hass, _log)
+
+    # Debris from an earlier setup that failed part-way.  HA does NOT call
+    # async_unload_entry for an entry that never reached LOADED, so the manager
+    # this function stores before the failure point is still here - and before
+    # #425 we answered that by logging "already set up" and returning True,
+    # which told HA the entry was loaded while everything after the failure
+    # point (device link, half the services, the update listener) had never
+    # run.  Every later reload repeated the lie, so the only way out was to
+    # delete and re-add the appliance.  Throw the leftover away and set up for
+    # real instead.
+    stale = hass.data[DOMAIN].pop(entry.entry_id, None)
+    if stale is not None:
+        _log.warning(
+            "Entry %s still holds a manager from an earlier incomplete setup; "
+            "discarding it and setting up again",
+            entry.entry_id,
+        )
+        try:
+            await stale.async_shutdown()
+        except Exception:  # pylint: disable=broad-exception-caught
+            _log.debug("Shutdown of the stale manager failed", exc_info=True)
+        # Its entity platforms are still registered (HA leaves forwarded
+        # platforms in place when setup fails); forwarding them again raises
+        # "has already been setup", so take them down first.
+        if entry.entry_id in hass.data.get(FORWARDED_ENTRIES_KEY, set()):
+            try:
+                await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+            except Exception:  # pylint: disable=broad-exception-caught
+                _log.debug("Unloading the stale platforms failed", exc_info=True)
+            hass.data[FORWARDED_ENTRIES_KEY].discard(entry.entry_id)
 
     # Warm the ML module cache before anything can score in the event loop.
     await _async_preload_ml_modules(hass)
@@ -560,6 +705,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await _migrate_online_to_global(hass, entry, manager)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    hass.data.setdefault(FORWARDED_ENTRIES_KEY, set()).add(entry.entry_id)
 
     _apply_device_link(hass, entry)
 
@@ -765,95 +911,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.services.async_register(DOMAIN, "trim_cycle", handle_trim_cycle)
 
-    # Register custom card via frontend.py - once per HA instance only.
-    if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(
-        "ha_washdata_card_deferred"
-    ) and not hass.data.get("ha_washdata_card_registering"):
-        # pylint: disable=import-outside-toplevel
-        from .frontend import (
-            CARD_REGISTERED,
-            CARD_DEFERRED,
-            WashDataCardRegistration,
-        )
-
-        card_reg = WashDataCardRegistration(hass)
-        hass.data["ha_washdata_card_registering"] = True
-        try:
-            register_result = await card_reg.async_register()
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            hass.data["ha_washdata_card_registering"] = False
-            _log.warning("Card registration failed, will retry on next setup: %s", err)
-        else:
-            hass.data["ha_washdata_card_registering"] = False
-            if register_result == CARD_REGISTERED:
-                hass.data["ha_washdata_card_deferred"] = False
-                hass.data["ha_washdata_card_registered"] = True
-            elif register_result == CARD_DEFERRED:
-                hass.data["ha_washdata_card_deferred"] = True
-                hass.data["ha_washdata_card_registered"] = False
-            else:
-                hass.data["ha_washdata_card_deferred"] = False
-                hass.data["ha_washdata_card_registered"] = False
-                _log.warning("Card registration failed and was not deferred")
-
-    # Register full-screen sidebar panel - once per HA instance only.
-    # pylint: disable=import-outside-toplevel
-    from .frontend import async_register_panel, PANEL_REGISTERED_KEY
-
-    if not hass.data.get(PANEL_REGISTERED_KEY):
-        await async_register_panel(hass)
-
-    # Register WebSocket API commands for the panel. Re-run on every setup/reload:
-    # HA's async_register_command overwrites the handler per command type, so this
-    # is idempotent AND means NEW commands become available after an integration
-    # reload, not only after a full Home Assistant restart (previously the
-    # once-per-instance guard forced a full restart for any newly-added command).
-    from .ws_api import (  # pylint: disable=import-outside-toplevel
-        async_load_panel_config,
-        async_register_commands,
-    )
-
-    await async_load_panel_config(hass)  # self-guards; safe to call repeatedly
-    from . import store_account  # pylint: disable=import-outside-toplevel
-    await store_account.async_load(hass)  # integration-wide online flag + account
-
-    # Cache the integration version from HA's already-loaded manifest (no file IO).
-    # ws_get_constants reads it from hass.data; we can't do a module-level read_text
-    # in ws_api.py because the module is imported lazily inside this coroutine and the
-    # IO runs on the event loop (#328/#335).
-    if "ha_washdata_version" not in hass.data:
-        try:
-            from homeassistant.loader import async_get_integration as _aget_integration  # pylint: disable=import-outside-toplevel
-            _integ = await _aget_integration(hass, DOMAIN)
-            hass.data["ha_washdata_version"] = _integ.manifest.get("version", "") or ""
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Could not load ha_washdata version from manifest: %s", err)
-            # Fall back to reading manifest.json off the event loop.  Only
-            # write the key when the read succeeds so that a double failure
-            # (loader + file) leaves the key absent rather than storing ""
-            # (which would shadow _INTEGRATION_VERSION in ws_get_constants).
-            def _read_manifest_version() -> str:
-                try:
-                    return json.loads(
-                        (Path(__file__).parent / "manifest.json").read_text(encoding="utf-8")
-                    ).get("version") or ""
-                except Exception:  # pylint: disable=broad-exception-caught
-                    return ""
-            _fallback_version = await hass.async_add_executor_job(_read_manifest_version)
-            if _fallback_version:
-                hass.data["ha_washdata_version"] = _fallback_version
-
-    async_register_commands(hass)
-    hass.data["ha_washdata_ws_registered"] = True
-
-    # Register conversation intents (e.g. "is my washer done?") - once per HA
-    # instance. Intents are domain-global, so guard against re-registration when
-    # more than one device is configured.
-    if not hass.data.get("ha_washdata_intents_registered"):
-        from .intents import async_setup_intents  # pylint: disable=import-outside-toplevel
-
-        async_setup_intents(hass)
-        hass.data["ha_washdata_intents_registered"] = True
+    # Belt and braces for the hoist above: the panel's static routes need
+    # hass.http, which is an after_dependencies entry rather than a hard one, so
+    # it is guaranteed up before setup in a real HA but not in every harness.
+    # By here the entity platforms have pulled the whole frontend stack in, which
+    # is where this block used to live.  Every step guards on its own "already
+    # done" flag, so this is a no-op whenever the early call did its job.
+    await _async_setup_shared(hass, _log)
 
     # Register feedback service
     if not hass.services.has_service(
@@ -1297,6 +1361,7 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+        hass.data.get(FORWARDED_ENTRIES_KEY, set()).discard(entry.entry_id)
         manager = hass.data[DOMAIN].pop(entry.entry_id)
         await manager.async_shutdown()
 

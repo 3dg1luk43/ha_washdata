@@ -1501,6 +1501,17 @@ function _slugSub(s) {
   return s.toLowerCase().replace(/[\s&/\-]+/g, '_').replace(/^_+|_+$/g, '').replace(/_+/g, '_');
 }
 
+// Normalise a device name for a ?device= deep link (#428): fold case and
+// diacritics, then reduce every run of spaces/punctuation to one dash, so
+// "Waschmaschine (Keller)" is also reachable as waschmaschine-keller. The class
+// is \p{L}\p{N} rather than a-z0-9 so a Cyrillic or CJK name keeps its letters
+// instead of slugging away to an empty string that would match anything.
+function _deviceSlug(s) {
+  let t = String(s == null ? '' : s).trim().toLowerCase();
+  try { t = t.normalize('NFKD').replace(/[\u0300-\u036f]/g, ''); } catch (_) { /* keep as-is */ }
+  return t.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '');
+}
+
 // Parse a comma-separated string into a sorted list of unique positive ints.
 // Backs the `intlist` setting type (e.g. notify_milestones), which the backend
 // stores as a list of ints but the panel edits as a comma-separated string.
@@ -1979,6 +1990,7 @@ class HaWashdataPanel extends HTMLElement {
     this._setupStatus = null;      // result of ws_get_setup_status
     // UI state
     this._selIdx = 0;
+    this._deepLinkApplied = null;  // last ?device= token honoured (#428)
     this._tab = 'status';
     this._settingsSec = 'basic';
     this._settingsSearch = '';
@@ -2183,6 +2195,12 @@ class HaWashdataPanel extends HTMLElement {
     }
     this._onResize = () => { this._syncPanelHeight(); this._resizeLogsPage(); };
     window.addEventListener('resize', this._onResize);
+    // Deep links (#428): HA fires `location-changed` on every in-app navigation
+    // (popstate covers back/forward), which is the only signal that the ?device=
+    // query changed while this element stayed mounted.
+    this._onLocChanged = () => this._onLocationChanged();
+    window.addEventListener('location-changed', this._onLocChanged);
+    window.addEventListener('popstate', this._onLocChanged);
     // Rotating a phone or opening the on-screen keyboard changes the usable height
     // without always firing a window resize.
     if (window.visualViewport) window.visualViewport.addEventListener('resize', this._onResize);
@@ -2218,6 +2236,11 @@ class HaWashdataPanel extends HTMLElement {
       window.removeEventListener('resize', this._onResize);
       if (window.visualViewport) window.visualViewport.removeEventListener('resize', this._onResize);
       this._onResize = null;
+    }
+    if (this._onLocChanged) {
+      window.removeEventListener('location-changed', this._onLocChanged);
+      window.removeEventListener('popstate', this._onLocChanged);
+      this._onLocChanged = null;
     }
     this._stopPoll();
     if (this._hassUpdateThrottle) { clearTimeout(this._hassUpdateThrottle); this._hassUpdateThrottle = null; }
@@ -2734,8 +2757,20 @@ class HaWashdataPanel extends HTMLElement {
       this._lastFetchErr = null;   // recovered: report the next failure even if identical
       this._devices = res.devices || [];
       this._lastRefresh = new Date();
+      // A ?device= deep link (#428) outranks the remembered device - but only once
+      // per token: re-applying it on every poll would silently undo a manual
+      // switch a few seconds later. A later notification tap re-navigates to the
+      // panel, which comes back through _onLocationChanged instead.
+      let linked = false;
+      const linkTok = this._deepLinkToken();
+      if (linkTok && linkTok !== this._deepLinkApplied && this._devices.length) {
+        this._deepLinkApplied = linkTok;
+        const linkIdx = this._deepLinkIdx(linkTok);
+        if (linkIdx >= 0) { this._selIdx = linkIdx; linked = true; this._rememberDevice(linkIdx); }
+        else console.warn(`[WashData panel] ?device=${linkTok} matches no WashData device`);
+      }
       // Restore the last-used device on the first paint (selIdx is still 0).
-      if (this._selIdx === 0 && this._devices.length > 1) {
+      if (!linked && this._selIdx === 0 && this._devices.length > 1) {
         const lastId = localStorage.getItem('wd-last-device');
         if (lastId) {
           const saved = this._devices.findIndex(d => d.entry_id === lastId);
@@ -3197,6 +3232,73 @@ class HaWashdataPanel extends HTMLElement {
     return this._profileGroups;
   }
 
+  // ── Device deep linking (#428) ────────────────────────────────────────────
+  // `/ha-washdata?device=<entry_id|name>` opens the panel with that appliance
+  // selected, so an automation's notification can link to the device it is about
+  // instead of whichever one happened to be viewed last.
+
+  // The ?device= token from the current URL, '' when absent. The query string is
+  // read straight off window.location: HA's `route` carries only prefix/path, not
+  // the search part, so there is nothing to read it from on the element.
+  _deepLinkToken() {
+    try {
+      const raw = new URLSearchParams(window.location.search || '').get('device');
+      return raw ? raw.trim() : '';
+    } catch (_) { return ''; }
+  }
+
+  // Resolve a token to an index into this._devices, or -1 if nothing matches.
+  // entry_id first (the only identifier that survives a rename), then the visible
+  // title, then a slug comparison so the human-readable name works from a
+  // notification template without worrying about case, spaces or accents.
+  _deepLinkIdx(token) {
+    const list = this._devices || [];
+    const t = String(token || '').trim();
+    if (!t || !list.length) return -1;
+    const low = t.toLowerCase();
+    let i = list.findIndex(d => String(d.entry_id || '').toLowerCase() === low);
+    if (i < 0) i = list.findIndex(d => String(d.title || '').trim().toLowerCase() === low);
+    if (i < 0) {
+      const slug = _deviceSlug(t);
+      if (slug) i = list.findIndex(d => _deviceSlug(d.title) === slug);
+    }
+    return i;
+  }
+
+  // Persist the selection as "last used". Guarded because localStorage throws
+  // outright when site data is blocked, and an unguarded write in the middle of
+  // _selectDevice would abort the switch after _selIdx had already moved but
+  // before the outgoing device's caches were cleared.
+  _rememberDevice(idx) {
+    const dev = (this._devices || [])[idx];
+    if (!dev) return;
+    try { localStorage.setItem('wd-last-device', dev.entry_id); } catch (_) { /* ignore */ }
+  }
+
+  // True while the browser is still on this panel's own path. `location-changed`
+  // is a global event that also fires on the way OUT of the panel, and that
+  // navigation's URL must not be mistaken for a deep link of ours.
+  _onOwnPath() {
+    const p = this._panel && this._panel.url_path;
+    if (!p) return true;   // test shell / no panel info: assume ours
+    return (window.location.pathname || '').split('/').filter(Boolean)[0] === p;
+  }
+
+  // The panel element survives an in-app navigation to its own URL, so a second
+  // notification tap changes only the query string: no boot, no new element.
+  // Re-resolve on every location change and honour the token even when it is
+  // unchanged, so tapping the dryer's notification after manually switching to
+  // the washer still lands back on the dryer.
+  _onLocationChanged() {
+    if (!this._initialized || !this._devices.length || !this._onOwnPath()) return;
+    const token = this._deepLinkToken();
+    if (!token) return;
+    this._deepLinkApplied = token;
+    const idx = this._deepLinkIdx(token);
+    if (idx < 0) { console.warn(`[WashData panel] ?device=${token} matches no WashData device`); return; }
+    if (idx !== this._selIdx) this._selectDevice(idx);   // persists the choice itself
+  }
+
   async _selectDevice(idx) {
     if (idx === this._selIdx) return;
     // Commit any pending optimistic deletes for the outgoing device first, and
@@ -3205,8 +3307,7 @@ class HaWashdataPanel extends HTMLElement {
     // response can mutate the device we're about to switch to.
     await this._flushPendingDeletes();
     this._selIdx = idx;
-    const savedDev = this._devices[idx];
-    if (savedDev) localStorage.setItem('wd-last-device', savedDev.entry_id);
+    this._rememberDevice(idx);
     this._pendingSettings = {};
     this._dirtyOptKeys = new Set();
     // Clear settings-form staged/cascade/undo state so the previous device's edits
