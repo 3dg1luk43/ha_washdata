@@ -675,3 +675,27 @@ def test_the_projection_subtracts_the_energy_the_cost_was_charged_for():
         cost_so_far=0.05,
     )
     assert legacy == pytest.approx(0.05 + (380.0 / 1000.0) * 0.40)
+
+
+def test_the_replay_projects_at_the_tariff_of_the_moment():
+    """The sim's future half must move with the timeline, like live does.
+
+    Live charges the remaining energy at whatever the price entity reads *now*,
+    so a replay that pins one price for the whole cycle reports a projected cost
+    the live estimator never produced - the exact divergence the stored timeline
+    was added to prevent.
+    """
+    from custom_components.ha_washdata import playground
+
+    sim = object.__new__(playground._DetailSim)
+    sim.price = 0.30           # the flat price the replay was launched with
+    sim.price_points = [(0.0, 0.10), (1800.0, 0.25), (3600.0, 0.40)]
+
+    assert sim._price_at(0.0) == 0.10
+    assert sim._price_at(1799.9) == 0.10
+    assert sim._price_at(1800.0) == 0.25
+    assert sim._price_at(5400.0) == 0.40
+
+    # No stored timeline: the flat price still answers.
+    sim.price_points = []
+    assert sim._price_at(1234.0) == 0.30
