@@ -713,8 +713,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await manager.async_setup()
     await _migrate_online_to_global(hass, entry, manager)
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    # Recorded BEFORE the await on purpose: async_forward_entry_setups gathers the
+    # platform setups, so one raising leaves the others set up, and a marker written
+    # afterwards would never be reached. The next attempt would then skip the unload
+    # and forward an already-registered platform (#425). Marking a forward that in
+    # fact set nothing up is harmless: the unload of a never-loaded platform raises,
+    # that is caught, and the retry forwards normally.
     hass.data.setdefault(FORWARDED_ENTRIES_KEY, set()).add(entry.entry_id)
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     _apply_device_link(hass, entry)
 
