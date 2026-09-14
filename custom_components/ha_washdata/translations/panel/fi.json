@@ -63,7 +63,7 @@
     "needs_review": "Vaatii tarkistuksen",
     "overrun": "Juoksi tavallista pidempään",
     "poor_fit": "heikko laatu",
-    "poor_fit_tip": "Epäjohdonmukainen otteluhistoria – harkitse tämän profiilin rakentamista uudelleen",
+    "poor_fit_tip": "Epäjohdonmukainen täsmäytyshistoria – harkitse tämän profiilin rakentamista uudelleen",
     "restart_gap_tip": "{n} HA-uudelleenkäynnistyskatkos: tehoviivan datassa on aukko",
     "reviewed": "Tarkistettu",
     "steady": "→ tasainen",
@@ -354,7 +354,7 @@
     "pg_settings_source": "Asetusten lähde",
     "phase_catalog": "Vaiheen katalogi",
     "playground": "Testialue",
-    "process_history": "Prosessihistoria",
+    "process_history": "Käsittele historia",
     "settings_history": "Asetusten historia",
     "status": "Tila",
     "status_graph": "Tilakaavio",
@@ -541,7 +541,7 @@
     "settings_basic": "Perus",
     "settings_detail_level": "Asetusten yksityiskohtien taso",
     "settings_overrides": "Asetusten ohitukset",
-    "show_debug": "Näytä live-ottelun virheenkorjauskortti Tila-sivulla (luottamus, epäselvyys, parhaat ehdokkaat)",
+    "show_debug": "Näytä reaaliaikaisen täsmäytyksen virheenkorjauskortti Tila-sivulla (luottamus, epäselvyys, parhaat ehdokkaat)",
     "show_expected": "Näytä odotettu käyrän peittokuva (vastaava profiili, oranssi)",
     "show_raw": "Näytä raakadatan pistorasiakytkin reaaliaikaisessa tehograafissa",
     "sparkline": "Viimeaikainen syklin keston suuntaus",
@@ -764,7 +764,7 @@
     "merge_cycles": "Yhdistä {n} sykliä",
     "new_group": "Uusi profiiliryhmä",
     "new_phase": "Uusi vaihe",
-    "process_history_msg": "Suorita täsmäytys uudelleen, päivitä ehdotukset, kouluta ML uudelleen (jos käytössä) ja laske syklipistemäärät uudelleen kaikkien tallennettujen syklien osalta. Tämä voi kestää hetken.",
+    "process_history_msg": "Suorita täsmäytys uudelleen, päivitä ehdotukset, kouluta ML uudelleen (jos käytössä), laske kustannukset uudelleen tallennettujen energiahintojen mukaan ja laske syklien kunto uudelleen kaikille tallennetuille sykleille. Tämä voi kestää hetken.",
     "process_history_ok": "Käsittele",
     "process_history_title": "Käsittele historia",
     "process_recording": "Prosessin tallennus",
@@ -910,7 +910,7 @@
     "preferences_admin": "Asetukset, paneeli ja kulunvalvonta",
     "preferences_adv": "Asetukset",
     "prefs_personal": "Nämä koskevat vain Home Assistant -tiliäsi.",
-    "process_history_hint": "Suorita täsmäytys uudelleen kaikille tallennetuille sykleille, päivitä virityssuositukset, kouluta ML-mallit uudelleen (jos käytössä) ja laske syklipistemäärät uudelleen. Suorita tämä arviointierän jälkeen.",
+    "process_history_hint": "Suorita täsmäytys uudelleen kaikille tallennetuille sykleille, päivitä virityssuositukset, kouluta ML-mallit uudelleen (jos käytössä), laske syklien kustannukset uudelleen tallennettujen energiahintojen mukaan ja laske syklien kunto uudelleen. Suorita tämä arviointierän jälkeen.",
     "profile_deleted": "Profiili poistettu",
     "profile_poor_health_detail": "Tälle profiilille määritetyillä sykleillä on epäjohdonmukainen muoto tai alhainen luotettavuus. Harkitse kirjekuoren rakentamista uudelleen tai merkittyjen syklien tarkistamista.",
     "profiles_intro": "Napsauta profiilia nähdäksesi tilastot, vaiheet ja puhdistus. Ryhmittele lähes identtiset ohjelmat (sama muoto/kesto, eri lämpötila tai linkous), jotta yhteensopivuus valitsee niiden välillä luotettavasti.",
@@ -924,7 +924,7 @@
     "review_confirm_help": "Varmista, tunnistettiinko tämä jakso oikein. Arvostelusi opettavat mallia koneessasi – mitä enemmän jaksoja vahvistat, sitä paremmat yhteensopivuus- ja kuntopisteet ovat. Nopea Hyvä/Paha riittää.",
     "review_in_settings": "Tarkista asetuksista",
     "review_notes_placeholder": "Huomautuksia (valinnainen)",
-    "review_notes_tip": "Vapaatekstiiset muistiinpanot omaksi viitteeksi. Ei käytössä otteluissa tai harjoituksissa.",
+    "review_notes_tip": "Vapaamuotoiset muistiinpanot omaan käyttöösi. Ei käytetä täsmäytyksessä eikä koulutuksessa.",
     "review_profile_tip": "Tämän syklin ohjelma on nimetty. Jos automaattisesti havaittu ohjelma oli väärä, korjaa se tässä - merkintä opettaa vastaavuuden tulevia jaksoja varten.",
     "review_quality_tip": "Kuinka puhdas tämä kierto on. Hyvä = tämän ohjelman oppikirjaesimerkki; Huono = havaittu, mutta meluisa tai epätyypillinen; Käyttökelvoton = väärin havaittu (yhdistetty, katkaistu tai harhaanjohtava). Ajaa terveyspisteitä ja mitkä syklit ovat sallittuja mallin kouluttamiseen.",
     "review_recorded_tip": "Merkitse tämä käsin valituksi referenssijaksoksi ohjelmaansa varten - sama rooli kuin manuaalisesti tallennetulla jaksolla. Vertailusyklit säilytetään aina, siemennä vastaava malli, eikä niitä koskaan pudoteta puhdistuksen yhteydessä. (Tämä on \"kultainen\" / tallennettu lippu; molemmat ovat sama asia.)",
@@ -1225,7 +1225,7 @@
       "label": "Ryppyjeneston enimmäisteho"
     },
     "auto_label_confidence": {
-      "doc": "Jos ottelun tulos syklin lopussa on tätä suurempi tai suurempi, ohjelma merkitään automaattisesti ilman vahvistuskehotetta. Nosta se vaatimaan suurempaa varmuutta ennen automaattista merkitsemistä; alenna sitä automatisoidaksesi enemmän. Toimii yhdessä sen alla olevan Learning Confidencen kanssa.",
+      "doc": "Jos täsmäytyspisteet syklin lopussa ovat tässä tai sen yli, ohjelma merkitään automaattisesti ilman vahvistuskehotetta. Nosta sitä, jos haluat vaatia suurempaa varmuutta ennen automaattista merkintää; laske sitä automatisoidaksesi enemmän. Toimii yhdessä alla olevan Oppimisen varmuus -asetuksen kanssa.",
       "label": "Automaattimerkinnän varmuus"
     },
     "auto_maintenance": {
@@ -1273,7 +1273,7 @@
       "label": "Lopetuksen toistomäärä"
     },
     "energy_price_entity": {
-      "doc": "Anturi nykyisellä sähkön hinnalla kWh (esim. dynaaminen tariffi). Ensisijainen alla olevaan staattiseen hintaan. Jokainen sykli jäädyttää hinnan, joka on voimassa sen päättyessä.",
+      "doc": "Anturi nykyisellä sähkön hinnalla kWh (esim. dynaaminen tariffi). Ensisijainen alla olevaan staattiseen hintaan nähden. Kun Aikapainotettu kustannus on käytössä, kukin sykli veloitetaan sillä hinnalla, joka oli voimassa jokaisella sen käyntihetkellä; muuten siihen lukitaan hinta, joka oli voimassa sen päättyessä.",
       "label": "Energiahinnan entiteetti"
     },
     "energy_price_static": {
@@ -1301,7 +1301,7 @@
       "label": "Käännä ulkoinen signaali (laukaise POIS)"
     },
     "learning_confidence": {
-      "doc": "Jos osumapisteet jäävät tämän ja Auto-Label Confidence -toiminnon väliin, palauteilmoitus pyytää sinua vahvistamaan tunnistetun ohjelman. Tämän pistemäärän alapuolella ottelu on liian epävarma tullakseen pintaan. On säilytettävä Auto-Label Confidence -arvon alapuolella.",
+      "doc": "Jos täsmäytyspisteet jäävät tämän ja Automaattimerkinnän varmuuden väliin, palauteilmoitus pyytää sinua vahvistamaan tunnistetun ohjelman. Tämän pistemäärän alle jäävä täsmäytys on liian epävarma näytettäväksi. Arvo on pidettävä Automaattimerkinnän varmuutta pienempänä.",
       "label": "Oppimisen varmuus"
     },
     "linked_device": {
@@ -1469,7 +1469,7 @@
       "label": "Täsmäytyskynnys"
     },
     "profile_unmatch_threshold": {
-      "doc": "Jos live-ottelu puolivälissä putoaa tämän pistemäärän alapuolelle, alustava tunnistaminen tyhjennetään. Pidä se hieman vastaavuuskynnyksen alapuolella, jotta lyhyt samankaltaisuus ei käännä näyttöä takaisin vertaansa vailla.",
+      "doc": "Jos reaaliaikainen, kesken syklin tehty täsmäytys putoaa tämän pistemäärän alle, alustava tunnistus tyhjennetään. Pidä se hieman Täsmäytyskynnystä pienempänä, jotta lyhyt notkahdus samankaltaisuudessa ei palauta näyttöä tilaan Ei osumaa.",
       "label": "Eritäsmäytyskynnys"
     },
     "progress_reset_delay": {
@@ -1630,6 +1630,10 @@
     "profile_evidence_sources": {
       "label": "Ohjelmaa muovaavat syklit",
       "doc": "Mitä syklejä käytetään kunkin ohjelman tehokäyrän muodostamiseen ja valmistuneen syklin täsmäyttämiseen siihen. Valinnan poistaminen estää kyseisen tyypin vaikutuksen ohjelmiisi poistamatta mitään - syklit pysyvät Syklit-luettelossa, ja ne voi silti merkitä tai poistaa. Hyödyllinen, jos et luota tuotuun dataan. Tilastot eivät muutu: ne laskevat aina vain ne syklit, jotka tämä kone on todella ajanut. Kaikkien valintojen poistaminen ohitetaan, koska ohjelma ilman taustalla olevia syklejä ei voisi koskaan täsmätä."
+    },
+    "energy_price_dynamic": {
+      "label": "Aikapainotettu kustannus",
+      "doc": "Veloittaa kunkin syklin sillä hinnalla, joka oli voimassa jokaisella sen käyntihetkellä, yhden päättymishetken hinnan sijaan. Koskee vain hintaentiteettiä (kiinteä hinta ei voi muuttua). Ei vaadi lisäasetuksia: hintaa seurataan reaaliaikaisesti syklin käydessä, ja Diagnostiikan alla oleva toiminto Käsittele historia laskee vanhempien syklien kustannukset uudelleen recorderin tiedoista. Pois = perinteinen toiminta, yksi lopussa lukittu hinta."
     }
   },
   "setting_group": {
@@ -2013,10 +2017,11 @@
     "date_tip": "Syklin alkamispäivä ja -aika.",
     "duration_tip": "Syklin kokonaiskesto alusta loppuun.",
     "energy_tip": "Kulutettu kokonaisenergia (kWh). Laskettu integroimalla teho ajan yli.",
-    "cost_tip": "Tämän syklin energiakustannus, lukittu valmistuessa käyttäen silloin voimassa ollutta hintaa (energia x hinta per kWh). Aseta hinta Asetuksista täyttääksesi sen.",
+    "cost_tip": "Tämän syklin energiakustannus, lukittu valmistuessa. Kun Aikapainotettu kustannus on käytössä, tehokäyrä veloitetaan kullakin hetkellä voimassa olleella hinnalla; muuten energia x yksi lopussa voimassa ollut hinta. Aseta hinta Asetuksista täyttääksesi sen.",
     "confidence_tip": "Profiilin osumaluottamus (0-100%). Kuinka tarkasti syklin tehokäyrä osui tunnistettuun ohjelmaan.",
     "health_tip": "ML-syklin kunto (korkeampi = parempi). Napsauta sykliä tarkastellaksesi ja arvioidaksesi sitä.",
-    "flags_tip": "Syklin tarkistus-, poikkeama- ja lähdeliput. Siirrä hiiri kuvakkeen päälle saadaksesi lisätiedot."
+    "flags_tip": "Syklin tarkistus-, poikkeama- ja lähdeliput. Siirrä hiiri kuvakkeen päälle saadaksesi lisätiedot.",
+    "cost_dynamic_tip": "Aikapainotettu: veloitettu syklin aikana voimassa olleella hinnalla (toteutunut {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "ka.",
@@ -2090,7 +2095,8 @@
       "golden": "Uudelleenkäsittely: vertailujaksojen täydennys",
       "suggestions": "Uudelleenkäsittely: ehdotukset",
       "ml_training": "Uudelleenkäsittely: ML-koulutus",
-      "health": "Uudelleenkäsittely: syklien kunto"
+      "health": "Uudelleenkäsittely: syklien kunto",
+      "costs": "Uudelleenkäsittely: energiakustannukset"
     },
     "pg_sweep": {
       "optimize": "Optimointi: {param}"

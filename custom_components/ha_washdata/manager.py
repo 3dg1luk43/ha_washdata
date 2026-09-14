@@ -27,7 +27,7 @@ import math
 import uuid
 import asyncio
 from asyncio import Task
-from collections.abc import Coroutine
+from collections.abc import Callable, Coroutine
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, cast
 import numpy as np
@@ -186,6 +186,10 @@ from .const import (
     CONF_NOTIFY_FINISH_CHANNEL,
     CONF_ENERGY_PRICE_STATIC,
     CONF_ENERGY_PRICE_ENTITY,
+    CONF_ENERGY_PRICE_DYNAMIC,
+    DEFAULT_ENERGY_PRICE_DYNAMIC,
+    PRICE_TIMELINE_MAX_POINTS,
+    PRICE_TIMELINE_PRICE_DECIMALS,
     CONF_ENERGY_SENSOR,
     CONF_PEAK_RATE_THRESHOLD,
     CONF_PEAK_RATE_MESSAGE,
@@ -277,7 +281,12 @@ from .profile_store import (
     is_terminal_drop,
     terminal_drop_baseline,
 )
-from .signal_processing import integrate_wh, energy_gap_threshold_s
+from .signal_processing import (
+    integrate_wh,
+    energy_gap_threshold_s,
+    compact_price_timeline,
+    cycle_cost,
+)
 from .recorder import CycleRecorder
 from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
@@ -355,6 +364,27 @@ def _finite_power(raw: Any) -> float | None:
     if not math.isfinite(power):
         return None
     return power
+
+
+def _coerce_price_timeline(raw: Any) -> list[tuple[float, float]]:
+    """Coerce a persisted price timeline back into ``(ts, price)`` tuples (#426).
+
+    JSON round-trips the pairs as lists, and a hand-edited or truncated store must
+    not be able to break cycle restoration, so anything unparseable is dropped
+    rather than raised on.
+    """
+    result: list[tuple[float, float]] = []
+    if not isinstance(raw, (list, tuple)):
+        return result
+    for entry in raw:
+        if not isinstance(entry, (list, tuple)) or len(entry) < 2:
+            continue
+        try:
+            result.append((float(entry[0]), float(entry[1])))
+        except (TypeError, ValueError):
+            continue
+    result.sort(key=lambda item: item[0])
+    return result
 
 
 def _sanitize_ranking(raw_list: list[dict[str, Any]], limit: int = 5) -> list[dict[str, Any]]:
@@ -516,6 +546,17 @@ class WashDataManager:
         # Both survive a restart via the active-cycle snapshot.
         self._energy_meter_start: float | None = None
         self._energy_meter_source: str | None = None
+
+        # Dynamic energy price timeline for the current cycle (#426): the price in
+        # force at each point of the cycle, as ``(unix_ts, price_per_kwh)`` pairs,
+        # appended by the price-entity listener below. Absolute timestamps, not
+        # offsets: the stored cycle's start time can end up later than the detector's
+        # (leading-zero trim, a split), and converting once at cycle end against the
+        # figure actually persisted is the only way the two axes cannot drift apart.
+        # Survives a restart via the active-cycle snapshot; any price change that
+        # happened while HA was down is recovered from the recorder at cycle end.
+        self._price_timeline: list[tuple[float, float]] = []
+        self._remove_price_listener: Callable[[], None] | None = None
 
         # Pause tracking (user-triggered)
         self._user_pause_start: datetime | None = None
@@ -1927,6 +1968,14 @@ class WashDataManager:
                         "energy_meter_source"
                     )
 
+                    # Restore the dynamic price timeline (#426). Prices recorded
+                    # before the restart stay valid; a change that happened while HA
+                    # was down is recovered from the recorder at cycle end, guided by
+                    # the restart gap recorded a few lines below.
+                    self._price_timeline = _coerce_price_timeline(
+                        active_snapshot_to_restore.get("price_timeline")
+                    )
+
                     # If we restored into a low-power state, ensure we don't
                     # immediately quit. For now we just log this; the cycle
                     # detector's off_delay will handle actual shutdown.
@@ -2206,6 +2255,9 @@ class WashDataManager:
 
         # Subscribe to door sensor (if configured)
         await self._setup_door_sensor_listener()
+
+        # Subscribe to the dynamic energy price entity (if configured, #426)
+        await self._setup_price_listener()
 
         # Subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
@@ -2674,6 +2726,11 @@ class WashDataManager:
         await self._setup_door_sensor_listener()
         self._maybe_arm_door_end_dwell_if_open()
 
+        # Re-subscribe to the dynamic energy price entity (#426). A changed entity
+        # (or the toggle being turned off) takes effect from here on; the samples
+        # already recorded for a running cycle stay - they were true when taken.
+        await self._setup_price_listener()
+
         # Re-subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
 
@@ -2783,6 +2840,9 @@ class WashDataManager:
         if self._remove_door_sensor_listener:
             self._remove_door_sensor_listener()
             self._remove_door_sensor_listener = None
+        if self._remove_price_listener:
+            self._remove_price_listener()
+            self._remove_price_listener = None
         self._cancel_door_end_dwell()
         # Drop the repeat-unload-reminder dismiss action listener (#374).
         self._remove_unload_dismiss_listener()
@@ -2877,6 +2937,94 @@ class WashDataManager:
         self._remove_door_sensor_listener = async_track_state_change_event(
             self.hass, [entity_id], self._handle_door_sensor_change
         )
+
+    async def _setup_price_listener(self) -> None:
+        """Subscribe to the dynamic energy price entity (#426).
+
+        Only when a price *entity* is configured and dynamic pricing is on: a
+        static price cannot move, so there is nothing to track. Registered for the
+        entity's whole lifetime rather than per cycle - the appended samples are
+        gated on the detector being active, and a subscription that only exists
+        while a cycle runs would miss the price in force at the moment it starts.
+        """
+        if self._remove_price_listener:
+            self._remove_price_listener()
+            self._remove_price_listener = None
+
+        if not self._dynamic_pricing_enabled():
+            return
+
+        entity_id = self.config_entry.options.get(CONF_ENERGY_PRICE_ENTITY)
+        self._logger.debug("Setting up dynamic price listener: %s", entity_id)
+        self._remove_price_listener = async_track_state_change_event(
+            self.hass, [entity_id], self._handle_price_change
+        )
+
+    def _dynamic_pricing_enabled(self) -> bool:
+        """Whether cost should be integrated against a moving price (#426)."""
+        options = self.config_entry.options
+        if not options.get(CONF_ENERGY_PRICE_ENTITY):
+            return False
+        return bool(
+            options.get(CONF_ENERGY_PRICE_DYNAMIC, DEFAULT_ENERGY_PRICE_DYNAMIC)
+        )
+
+    @callback
+    def _handle_price_change(self, event: Event[evt.EventStateChangedData]) -> None:
+        """Record a price change onto the running cycle's timeline (#426)."""
+        new_state = event.data.get("new_state")
+        if new_state is None:
+            return
+        try:
+            price = float(new_state.state)
+        except (ValueError, TypeError):
+            # unknown/unavailable/non-numeric: carry the last known price forward
+            # rather than charging the cycle at zero for the outage.
+            return
+        self._append_price_sample(price)
+
+    def _append_price_sample(self, price: float | None) -> None:
+        """Append ``price`` to the current cycle's timeline, deduplicated.
+
+        No-op when no cycle is running - the timeline describes one cycle - and
+        when the price is unchanged, so a template sensor that re-emits the same
+        number every few seconds costs one comparison and nothing else.
+        """
+        if price is None:
+            return
+        if self.detector.state not in (
+            STATE_STARTING,
+            STATE_RUNNING,
+            STATE_PAUSED,
+            STATE_ENDING,
+        ):
+            return
+        try:
+            value = round(float(price), PRICE_TIMELINE_PRICE_DECIMALS)
+        except (ValueError, TypeError):
+            return
+        if self._price_timeline and self._price_timeline[-1][1] == value:
+            return
+        self._price_timeline.append((dt_util.now().timestamp(), value))
+        # Hard bound so a pathologically chatty price entity cannot grow the
+        # in-memory list without limit during a long cycle; the stored timeline is
+        # compacted again (by price step) at cycle end.
+        if len(self._price_timeline) > PRICE_TIMELINE_MAX_POINTS * 4:
+            self._price_timeline = [
+                (offset, price_val)
+                for offset, price_val in compact_price_timeline(
+                    self._price_timeline,
+                    max_points=PRICE_TIMELINE_MAX_POINTS * 2,
+                    decimals=PRICE_TIMELINE_PRICE_DECIMALS,
+                )
+            ]
+
+    def _start_price_timeline(self) -> None:
+        """Open a fresh price timeline for a cycle that just started (#426)."""
+        self._price_timeline = []
+        if not self._dynamic_pricing_enabled():
+            return
+        self._append_price_sample(self._resolve_energy_price())
 
     @callback
     def _handle_door_sensor_change(self, event: Event[evt.EventStateChangedData]) -> None:
@@ -3424,6 +3572,95 @@ class WashDataManager:
         if result.get("_health_dirty") or health_updates:
             await self.profile_store.async_save()
         return int(result.get("evaluated_count", 0))
+
+    async def async_recompute_cycle_costs(self) -> int:
+        """Recost stored cycles from the recorder's price history (#426).
+
+        Existing cycles were costed at the single price in force when they ended -
+        including everything imported from raw history (#344), which was costed at
+        whatever the tariff happened to be at import time. Where the recorder still
+        holds the price entity's history, those cycles can be recosted properly
+        after the fact. Returns the number of cycles rewritten.
+
+        Deliberately conservative, because it overwrites a figure the user has
+        already seen:
+
+        * only ``past_cycles`` and ``backfill_cycles`` - reference cycles are other
+          people's recordings and were never the user's energy to pay for;
+        * only cycles the recorder can actually answer for (a price row at or before
+          the cycle's start); anything older than the recorder's retention keeps the
+          cost it has;
+        * cycles already costed dynamically are left alone, so the pass is
+          idempotent and never re-derives a live-tracked timeline from a coarser
+          recorder view.
+        """
+        if not self._dynamic_pricing_enabled():
+            return 0
+        candidates: list[tuple[dict[str, Any], datetime, datetime]] = []
+        for cycle in list(self.profile_store.get_past_cycles()) + list(
+            self.profile_store.get_backfill_cycles()
+        ):
+            if cycle.get("energy_price_mode") == "dynamic" and cycle.get("price_timeline"):
+                continue
+            start_dt = dt_util.parse_datetime(str(cycle.get("start_time") or ""))
+            end_dt = dt_util.parse_datetime(str(cycle.get("end_time") or ""))
+            if start_dt is None or end_dt is None or end_dt <= start_dt:
+                continue
+            candidates.append((cycle, start_dt, end_dt))
+        if not candidates:
+            return 0
+
+        # Bound the query to what the recorder can still answer. Reading further
+        # back returns nothing but makes the executor walk the whole retained
+        # window of a frequently-updating price entity for it.
+        keep_days = 10.0
+        try:
+            from homeassistant.components.recorder import get_instance  # noqa: PLC0415
+
+            keep_days = float(getattr(get_instance(self.hass), "keep_days", 10) or 10)
+        except Exception:  # noqa: BLE001 - recorder optional; the default stands
+            pass
+        horizon = dt_util.now() - timedelta(days=min(max(keep_days, 1.0), 365.0))
+        candidates = [c for c in candidates if c[2] >= horizon]
+        if not candidates:
+            return 0
+
+        window_start = min(start for _, start, _ in candidates)
+        window_end = max(end for _, _, end in candidates)
+        rows = await self._async_price_history(max(window_start, horizon), window_end)
+        if not rows:
+            return 0
+
+        updated = 0
+        for cycle, start_dt, end_dt in candidates:
+            start_ts = start_dt.timestamp()
+            end_ts = end_dt.timestamp()
+            # Require an anchor at or before the cycle: without one the first known
+            # price would be back-applied to energy bought before it existed.
+            if not any(ts <= start_ts for ts, _ in rows):
+                continue
+            window = [(ts, price) for ts, price in rows if ts <= end_ts]
+            points = compact_price_timeline(
+                [(max(0.0, ts - start_ts), price) for ts, price in window],
+                max_points=PRICE_TIMELINE_MAX_POINTS,
+                decimals=PRICE_TIMELINE_PRICE_DECIMALS,
+            )
+            if not points:
+                continue
+            result = self._cost_from_timeline(cycle, points)
+            if result is None:
+                continue
+            cost, effective_price = result
+            cycle["cost"] = round(cost, 4)
+            cycle["energy_price"] = round(effective_price, 6)
+            cycle["energy_price_mode"] = "dynamic"
+            cycle["price_timeline"] = [[round(offset, 1), price] for offset, price in points]
+            updated += 1
+
+        if updated:
+            await self.profile_store.async_save()
+            self._logger.info("Recosted %d cycle(s) from recorder price history", updated)
+        return updated
 
     def _last_ml_training_at(self) -> datetime | None:
         """When on-device training last *ran* (not just last promoted a model).
@@ -4453,6 +4690,9 @@ class WashDataManager:
                 # Snapshot the external energy meter (issue #316) so cycle end can
                 # take an accurate start->end delta. No-op when none is configured.
                 self._snapshot_energy_meter_start()
+                # Open the dynamic price timeline (#426) with the price in force
+                # right now. No-op when no price entity is configured.
+                self._start_price_timeline()
 
                 # Reset pause tracking and clean state for new cycle
                 self._is_user_paused = False
@@ -4972,6 +5212,160 @@ class WashDataManager:
                 pass
         return None
 
+    async def _async_price_history(
+        self, start: datetime, end: datetime
+    ) -> list[tuple[float, float]]:
+        """``(unix_ts, price)`` rows for the price entity over a window, via the
+        recorder (#426).
+
+        Used to recover price changes the live listener could not see - the period
+        HA was down mid-cycle, a cycle that predates the feature, a device whose
+        history was imported from raw recorder data. Returns ``[]`` on any failure
+        (recorder disabled, entity excluded from recording, data purged) so the
+        caller falls back to whatever it already had.
+        """
+        entity_id = self.config_entry.options.get(CONF_ENERGY_PRICE_ENTITY)
+        if not entity_id:
+            return []
+        try:
+            from homeassistant.components.recorder import (  # noqa: PLC0415
+                get_instance,
+                history,
+            )
+        except Exception:  # noqa: BLE001 - recorder is an optional component
+            return []
+
+        def _query() -> list[tuple[float, float]]:
+            res = history.state_changes_during_period(
+                self.hass, start, end, entity_id, include_start_time_state=True
+            )
+            start_ts = start.timestamp()
+            rows: list[tuple[float, float]] = []
+            for state in res.get(entity_id, []) or []:
+                try:
+                    price = float(state.state)
+                except (ValueError, TypeError):
+                    # unknown/unavailable: the previous price stays in force.
+                    continue
+                ts = state.last_changed.timestamp()
+                # include_start_time_state hands back the state in force at the
+                # window start, whose last_changed can predate it by hours. Clamp
+                # so it anchors the timeline instead of sorting before the cycle.
+                rows.append((max(ts, start_ts), price))
+            rows.sort(key=lambda item: item[0])
+            return rows
+
+        try:
+            return await get_instance(self.hass).async_add_executor_job(_query)
+        except Exception as exc:  # noqa: BLE001 - cost must never break cycle end
+            self._logger.debug("Price history lookup failed for %s: %s", entity_id, exc)
+            return []
+
+    async def _async_apply_cycle_cost(self, cycle_data: dict[str, Any]) -> None:
+        """Freeze ``cost`` / ``energy_price`` onto a finished cycle (#426).
+
+        Dynamic mode integrates the stored power trace against the price timeline
+        recorded while the cycle ran; ``energy_price`` then carries the *effective*
+        price per kWh the cycle paid (cost / kWh), which is the only figure that
+        stays meaningful once the tariff moved. ``energy_price_mode`` says which of
+        the two produced the number so the panel can label it honestly.
+
+        Falls back to the single current price whenever dynamic costing cannot
+        produce an answer - no price entity, the toggle off, no timeline, or a
+        trace with no energy in it. Never raises: a cost figure is display-only and
+        must not be able to lose a finished cycle.
+        """
+        price = self._resolve_energy_price()
+        if self._dynamic_pricing_enabled():
+            try:
+                if await self._async_apply_dynamic_cost(cycle_data):
+                    return
+            except Exception as exc:  # noqa: BLE001 - never break cycle storage
+                self._logger.debug("Dynamic cost calculation failed: %s", exc)
+        if price is not None:
+            cycle_data["energy_price"] = price
+            cycle_data["energy_price_mode"] = "fixed"
+            cycle_data["cost"] = round(
+                self._cycle_report_energy_wh(cycle_data) / 1000.0 * price, 4
+            )
+
+    async def _async_apply_dynamic_cost(self, cycle_data: dict[str, Any]) -> bool:
+        """Cost the cycle against its price timeline. True when it succeeded."""
+        start_dt = dt_util.parse_datetime(str(cycle_data.get("start_time") or ""))
+        end_dt = dt_util.parse_datetime(str(cycle_data.get("end_time") or ""))
+        if start_dt is None or end_dt is None or end_dt <= start_dt:
+            return False
+
+        timeline = list(self._price_timeline)
+        # The live listener is complete whenever HA stayed up for the whole cycle.
+        # Consult the recorder only when it cannot have been: nothing recorded at
+        # all (the feature was switched on mid-cycle), or a restart gap where price
+        # changes would have gone unseen.
+        if not timeline or cycle_data.get("restart_gaps"):
+            recorded = await self._async_price_history(start_dt, end_dt)
+            if recorded:
+                # The recorder saw the downtime too, so it supersedes rather than
+                # merges - interleaving the two would double-count a change that
+                # both captured at slightly different timestamps.
+                timeline = recorded
+
+        if not timeline:
+            return False
+
+        start_ts = start_dt.timestamp()
+        duration = (end_dt - start_dt).total_seconds()
+        points = compact_price_timeline(
+            [(ts - start_ts, price) for ts, price in timeline],
+            max_points=PRICE_TIMELINE_MAX_POINTS,
+            decimals=PRICE_TIMELINE_PRICE_DECIMALS,
+        )
+        # A price recorded before the trace's first sample still sets the opening
+        # price; clamp rather than drop it, and discard anything past the end.
+        points = [(max(0.0, offset), price) for offset, price in points if offset <= duration]
+        points = compact_price_timeline(
+            points, max_points=PRICE_TIMELINE_MAX_POINTS,
+            decimals=PRICE_TIMELINE_PRICE_DECIMALS,
+        )
+        if not points:
+            return False
+
+        result = self._cost_from_timeline(cycle_data, points)
+        if result is None:
+            return False
+        cost, effective_price = result
+        cycle_data["cost"] = round(cost, 4)
+        cycle_data["energy_price"] = round(effective_price, 6)
+        cycle_data["energy_price_mode"] = "dynamic"
+        cycle_data["price_timeline"] = [
+            [round(offset, 1), price] for offset, price in points
+        ]
+        return True
+
+    def _cost_from_timeline(
+        self, cycle_data: dict[str, Any], points: list[tuple[float, float]]
+    ) -> tuple[float, float] | None:
+        """``(cost, effective_price)`` for a cycle and its price timeline, or None.
+
+        Pure apart from reading the cycle; the meter-vs-integrated decision is the
+        same ``_cycle_report_energy_wh`` every other user-facing energy figure uses,
+        so the cost and the kWh shown beside it are computed from one number.
+        """
+        # decompress_power_data, not the raw list: a cycle stored before the
+        # offset migration still carries ISO timestamps, and recosting must work
+        # on exactly the cycles that are old enough to need it.
+        points_xy = decompress_power_data(cast(Any, cycle_data))
+        if len(points_xy) < 2:
+            return None
+        timestamps = np.asarray([t for t, _ in points_xy], dtype=float)
+        power = np.asarray([p for _, p in points_xy], dtype=float)
+        return cycle_cost(
+            timestamps,
+            power,
+            points,
+            max_gap_s=energy_gap_threshold_s(timestamps),
+            report_wh=self._cycle_report_energy_wh(cycle_data),
+        )
+
     def _read_energy_meter(self) -> tuple[float, str] | None:
         """Read the configured external energy meter, normalized to Wh.
 
@@ -5073,6 +5467,11 @@ class WashDataManager:
         snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
         snapshot["energy_meter_start"] = self._energy_meter_start
         snapshot["energy_meter_source"] = self._energy_meter_source
+        # Dynamic price timeline (#426): absolute (unix_ts, price) pairs, as lists
+        # so the JSON round-trip is lossless.
+        snapshot["price_timeline"] = [
+            [ts, price] for ts, price in self._price_timeline
+        ]
         return snapshot
 
     @staticmethod
@@ -5388,15 +5787,11 @@ class WashDataManager:
             restart_gaps_snapshot = list(self._restart_gaps)
             cycle_data["restart_gaps"] = restart_gaps_snapshot
 
-        # Freeze the energy cost onto the cycle using the price in effect NOW, so
-        # later price changes never rewrite historical costs. Stored as a number
-        # (currency per the configured price's unit); absent when no price is set.
-        price = self._resolve_energy_price()
-        if price is not None:
-            cycle_data["energy_price"] = price
-            cycle_data["cost"] = round(
-                self._cycle_report_energy_wh(cycle_data) / 1000.0 * price, 4
-            )
+        # Freeze the energy cost onto the cycle. With a dynamic tariff this is the
+        # power trace integrated against the price in force at each moment (#426);
+        # otherwise the single price in effect NOW. Either way it is frozen here, so
+        # later price changes never rewrite historical costs.
+        await self._async_apply_cycle_cost(cycle_data)
 
         # Score cycle quality with the ML model before persisting so the score is
         # stored on the cycle record and available to the learning manager immediately.
@@ -5488,7 +5883,12 @@ class WashDataManager:
 
         # Prepare cycle data for event (enrich if needed)
         # IMPORTANT: Exclude large fields to prevent exceeding HA's 32KB event data limit
-        excluded_fields = {"power_data", "debug_data", "power_trace"}
+        excluded_fields = {
+            "power_data", "debug_data", "power_trace",
+            # A chatty dynamic tariff can add hundreds of entries (#426); the
+            # cost and effective price it produced ride along instead.
+            "price_timeline",
+        }
         event_cycle_data = {
             k: v for k, v in cycle_data.items() if k not in excluded_fields
         }
@@ -7086,9 +7486,41 @@ class WashDataManager:
             price,
             self._profile_end_expectation,
             self._logger,
+            cost_so_far=self._live_cost_so_far(trace),
         )
         self._projected_energy_wh = wh
         self._projected_cost = cost
+
+    def _live_cost_so_far(self, trace: list[tuple[datetime, float]]) -> float | None:
+        """Cost already incurred by the running cycle at the prices it ran through.
+
+        Returns ``None`` when dynamic pricing is off or nothing has been recorded
+        yet, which puts :func:`progress.projected_energy` back on the flat-price
+        formula. Uses the integrated trace (not the external meter) so it lines up
+        with the ``energy_so_far`` the same projection is built from. Never raises.
+        """
+        if not self._dynamic_pricing_enabled() or not self._price_timeline:
+            return None
+        try:
+            if len(trace) < 2 or self._cycle_start_time is None:
+                return None
+            start_ts = self._cycle_start_time.timestamp()
+            timestamps = np.asarray([t.timestamp() - start_ts for t, _ in trace], dtype=float)
+            power = np.asarray([p for _, p in trace], dtype=float)
+            points = compact_price_timeline(
+                [(ts - start_ts, price) for ts, price in self._price_timeline],
+                max_points=PRICE_TIMELINE_MAX_POINTS,
+                decimals=PRICE_TIMELINE_PRICE_DECIMALS,
+            )
+            result = cycle_cost(
+                timestamps,
+                power,
+                points,
+                max_gap_s=energy_gap_threshold_s(timestamps),
+            )
+            return result[0] if result is not None else None
+        except Exception:  # noqa: BLE001 - projection must never break estimates
+            return None
 
     def _update_cycle_anomaly(self, duration_so_far: float) -> None:
         """Flag a *soft* runtime overrun anomaly for the running cycle.

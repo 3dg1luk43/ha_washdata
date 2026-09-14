@@ -3154,7 +3154,7 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
             reg.finish(task, state=task_registry.STATE_CANCELLED)
             return
 
-        reg.update(task, total=5, done=0, label="Reprocessing: matching cycles",
+        reg.update(task, total=6, done=0, label="Reprocessing: matching cycles",
                    label_key="task.reprocess.matching")
         summary["count"] = await store.async_reprocess_all_data()
 
@@ -3200,7 +3200,21 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
             reg.finish(task, state=task_registry.STATE_CANCELLED, result=summary)
             return
 
-        reg.update(task, done=4, label="Reprocessing: cycle health",
+        reg.update(task, done=4, label="Reprocessing: energy costs",
+                   label_key="task.reprocess.costs")
+        # Recost stored cycles against the recorder's price history (#426). Cheap
+        # and a no-op unless a dynamic price entity is configured, so it runs
+        # unconditionally rather than behind yet another switch.
+        try:
+            summary["costs_recomputed"] = await manager.async_recompute_cycle_costs()
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("cost recompute failed for %s: %s", entry_id, exc)
+
+        if task.cancel_requested:
+            reg.finish(task, state=task_registry.STATE_CANCELLED, result=summary)
+            return
+
+        reg.update(task, done=5, label="Reprocessing: cycle health",
                    label_key="task.reprocess.health")
         # Recompute per-cycle health against the (possibly retrained) model.
         # Skip when training already recomputed it (a promotion refreshes health).
@@ -3210,7 +3224,7 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 _LOGGER.debug("health recompute failed for %s: %s", entry_id, exc)
 
-        reg.update(task, done=5)
+        reg.update(task, done=6)
         # Re-validate the manager is still live after a long chain of awaits; if the
         # entry was reloaded, the original manager is detached and must not notify.
         if _get_manager(hass, entry_id) is manager:
@@ -3241,7 +3255,8 @@ def ws_reprocess_history(
     """Kick off the full "Process history" pass as a detached, registry-tracked
     task; returns its id immediately. Runs, in order: reprocess (rematch + rebuild
     envelopes) -> backfill golden -> refresh suggestions -> on-device ML training
-    (when enabled) -> recompute cycle health. Progress + result via the registry."""
+    (when enabled) -> recost cycles from recorder price history -> recompute cycle
+    health. Progress + result via the registry."""
     entry_id: str = msg["entry_id"]
     if _get_manager(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)

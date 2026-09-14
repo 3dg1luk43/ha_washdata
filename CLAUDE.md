@@ -77,7 +77,7 @@ because the usual miss is rebuilding and then committing only the source. `--no-
 
 ### Core components
 
-- **`manager.py`** (~7180 lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
+- **`manager.py`** (~8420 lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
   async profile matching every 5 min, entity updates. Runs its own long jobs (ML training, health
   recompute) as plain executor/`async_create_task` jobs; the `task_registry` wiring lives in `ws_api.py`.
 - **`cycle_detector.py`** (~2570 lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
@@ -104,7 +104,8 @@ measures absolute *level/spread*.
 
 - **`analysis.py`** - NumPy coarse-to-fine alignment, correlation scoring, `compute_dtw_lite`.
 - **`signal_processing.py`** - resampling + shared energy integration (`integrate_wh`,
-  `energy_gap_threshold_s`). No filtering, **no DTW** (that is in `analysis.py`).
+  `energy_gap_threshold_s`) and the time-weighted cost math (`integrate_wh_by_price`, `cycle_cost`,
+  `compact_price_timeline`; #426). No filtering, **no DTW** (that is in `analysis.py`).
 - **`progress.py`** - **single source of truth** for progress / remaining-time / phase /
   projected-energy math. Pure, no HA. `manager.py`'s equivalents are thin wrappers and the Playground
   `SimRunner` calls the same functions, so the what-if replay is byte-identical to the live estimator.

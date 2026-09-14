@@ -306,7 +306,7 @@
     "pg_settings_source": "Origem das definições",
     "phase_catalog": "Catálogo de fases",
     "playground": "Área de testes",
-    "process_history": "Histórico de processamento",
+    "process_history": "Processar histórico",
     "settings_history": "Histórico de definições",
     "status": "Estado",
     "status_graph": "Gráfico de estado",
@@ -716,7 +716,7 @@
     "merge_cycles": "Combinar {n} ciclos",
     "new_group": "Novo grupo de perfis",
     "new_phase": "Nova fase",
-    "process_history_msg": "Reexecute a correspondência, atualize as sugestões, retreine os modelos ML (se ativados) e recalcule o estado de todos os ciclos armazenados. Isto pode demorar algum tempo.",
+    "process_history_msg": "Reexecute a correspondência, atualize as sugestões, retreine os modelos ML (se ativados), recalcule o custo dos ciclos com base nos preços de energia registados e recalcule o estado de todos os ciclos armazenados. Isto pode demorar algum tempo.",
     "process_history_ok": "Processar",
     "process_history_title": "Processar histórico",
     "process_recording": "Processar gravação",
@@ -862,7 +862,7 @@
     "preferences_admin": "Preferências, painel e controlo de acesso",
     "preferences_adv": "Preferências",
     "prefs_personal": "Aplicam-se apenas à sua conta do Home Assistant.",
-    "process_history_hint": "Reexecute a correspondência em todos os ciclos armazenados, atualize as sugestões de ajuste, retreine os modelos ML (se ativados) e recalcule o estado dos ciclos. Execute após um lote de revisões.",
+    "process_history_hint": "Reexecute a correspondência em todos os ciclos armazenados, atualize as sugestões de ajuste, retreine os modelos ML (se ativados), recalcule o custo dos ciclos com base nos preços de energia registados e recalcule o estado dos ciclos. Execute após um lote de revisões.",
     "profile_deleted": "Perfil eliminado",
     "profile_poor_health_detail": "Os ciclos atribuídos a este perfil têm formas inconsistentes ou baixa confiança. Considere reconstruir o envelope ou rever os ciclos rotulados.",
     "profiles_intro": "Clique num perfil para ver estatísticas, fases e limpeza. Agrupe programas quase idênticos (mesma forma/duração, temperatura ou centrifugação diferentes) para que a correspondência escolha de forma fiável entre eles.",
@@ -1052,7 +1052,7 @@
     "energy_weight": "Fase 4: o quanto a concordância de energia afeta a pontuação final (predefinição 0,22)",
     "profile_match_min_duration_ratio": "Fase 1: duração mínima do ciclo como fração da duração do perfil; predefinição 0,1 (10%)",
     "profile_match_max_duration_ratio": "Fase 1: duração máxima do ciclo como fração da duração do perfil; predefinição 1,5 (150%)",
-    "keep_min_score": "Fase 2: pontuação mínima para permanecer em jogo; a predefinição 0,1 admite candidatos fracos, as fases seguintes escolhem o melhor",
+    "keep_min_score": "Fase 2: pontuação mínima para permanecer na disputa; a predefinição 0,1 admite correspondências fracas, as fases seguintes escolhem a melhor",
     "dtw_blend": "Fase 3: 0 = apenas pontuação central, 1 = apenas pontuação DTW, 0,5 = mistura equilibrada (predefinição)",
     "dtw_ensemble_w": "Fase 3 (modo ensemble): peso em L1 escalado vs DTW derivativo; a predefinição 0,7 favorece a sensibilidade ao nível",
     "dtw_ddtw_scale": "Fase 3: distância de semissaturação DDTW; menor = maior sensibilidade à forma (predefinição 30)",
@@ -1177,7 +1177,7 @@
       "label": "Potência Máxima Anti-Vincos"
     },
     "auto_label_confidence": {
-      "doc": "Se a pontuação da partida no final do ciclo for igual ou superior a isso, o programa será rotulado automaticamente sem qualquer solicitação de confirmação. Aumente-o para exigir maior certeza antes da rotulagem automática; abaixe-o para automatizar mais. Funciona em conjunto com Learning Confidence abaixo dele.",
+      "doc": "Se a pontuação de correspondência no final do ciclo for igual ou superior a este valor, o programa é rotulado automaticamente sem qualquer pedido de confirmação. Aumente-o para exigir maior certeza antes da rotulagem automática; baixe-o para automatizar mais. Funciona em conjunto com a Confiança de Aprendizagem apresentada abaixo.",
       "label": "Confiança de Rotulagem Automática"
     },
     "auto_maintenance": {
@@ -1225,7 +1225,7 @@
       "label": "Contagem de Repetições de Fim"
     },
     "energy_price_entity": {
-      "doc": "Sensor com o preço atual da eletricidade por kWh (por exemplo, uma tarifa dinâmica). Tem precedência sobre o preço estático abaixo. Cada ciclo congela o preço em vigor quando termina.",
+      "doc": "Sensor com o preço atual da eletricidade por kWh (por exemplo, uma tarifa dinâmica). Tem precedência sobre o preço estático abaixo. Com o Custo Ponderado no Tempo ativado, cada ciclo é cobrado ao preço em vigor em cada momento em que decorreu; caso contrário, fica-lhe fixado o preço em vigor quando terminou.",
       "label": "Entidade de Preço de Energia"
     },
     "energy_price_static": {
@@ -1253,7 +1253,7 @@
       "label": "Inverter Gatilho Externo (activar em DESLIGADO)"
     },
     "learning_confidence": {
-      "doc": "Se a pontuação de correspondência estiver entre este valor e a Confiança do rótulo automático, uma notificação de feedback solicitará que você verifique o programa identificado. Abaixo desta pontuação, a partida é muito incerta para surgir. Deve ser mantido abaixo da Confiança da Etiqueta Automática.",
+      "doc": "Se a pontuação de correspondência estiver entre este valor e a Confiança de Rotulagem Automática, uma notificação de feedback pede-lhe para verificar o programa identificado. Abaixo desta pontuação, a correspondência é demasiado incerta para ser apresentada. Deve ser mantido abaixo da Confiança de Rotulagem Automática.",
       "label": "Confiança de Aprendizagem"
     },
     "linked_device": {
@@ -1321,7 +1321,7 @@
       "label": "Disparar Eventos HA para Notificações"
     },
     "notify_icon": {
-      "doc": "Ícone mdi opcional para a notificação (por exemplo, mdi:máquina de lavar). Deixe em branco para o padrão da plataforma.",
+      "doc": "Ícone mdi opcional para a notificação (por exemplo, mdi:washing-machine). Deixe em branco para o padrão da plataforma.",
       "label": "Ícone da Notificação"
     },
     "notify_live_chronometer": {
@@ -1421,7 +1421,7 @@
       "label": "Limiar de Correspondência"
     },
     "profile_unmatch_threshold": {
-      "doc": "Se uma partida ao vivo no meio do ciclo cair abaixo dessa pontuação, a identificação provisória será apagada. Mantenha-o um pouco abaixo do Limite de Correspondência para que uma breve queda na similaridade não reverta a exibição para incomparável.",
+      "doc": "Se uma correspondência em direto a meio do ciclo descer abaixo desta pontuação, a identificação provisória é apagada. Mantenha-o um pouco abaixo do Limiar de Correspondência para que uma breve queda na semelhança não faça a apresentação voltar a sem correspondência.",
       "label": "Limiar de Não Correspondência"
     },
     "progress_reset_delay": {
@@ -1449,7 +1449,7 @@
       "label": "Janela de Suavização"
     },
     "start_duration_threshold": {
-      "doc": "A energia deve permanecer acima do limite de partida por tanto tempo para confirmar uma partida real, evitando que interruptores liga/desliga em frações de segundo iniciem um ciclo.",
+      "doc": "A potência deve permanecer acima do Limiar de Início durante este tempo para confirmar uma partida real, evitando que comutações liga/desliga em frações de segundo iniciem um ciclo.",
       "label": "Duração de Início"
     },
     "start_energy_threshold": {
@@ -1457,7 +1457,7 @@
       "label": "Energia de Início"
     },
     "start_threshold_w": {
-      "doc": "A potência deve subir acima deste nível para confirmar que um ciclo foi iniciado. Definir um valor muito baixo causa falsas partidas na energia de espera; programas muito altos e de início lento (enchimento a frio) são perdidos. O mecanismo de sugestão define isso logo acima da potência ativa mais baixa observada pela máquina.",
+      "doc": "A potência deve subir acima deste nível para confirmar que um ciclo foi iniciado. Defini-lo demasiado baixo causa falsas partidas a partir da energia em espera; defini-lo demasiado alto faz perder os programas de início lento (enchimento a frio). O mecanismo de sugestão define isto logo acima da potência ativa mais baixa observada na máquina.",
       "label": "Limiar de Início"
     },
     "stop_threshold_w": {
@@ -1529,7 +1529,7 @@
     },
     "keep_min_score": {
       "label": "Score mín de correspondência",
-      "doc": "Pontuação de similaridade mínima que um candidato precisa para permanecer em jogo. A predefinição 0,1 é deliberadamente permissiva - admite mesmo candidatos fracos e depende das fases seguintes para encontrar a melhor correspondência. Aumente para eliminar perfis improváveis mais cedo; reduza para ampliar o pool inicial de candidatos."
+      "doc": "Pontuação de similaridade mínima que um candidato precisa para permanecer na disputa pela correspondência. A predefinição 0,1 é deliberadamente permissiva - admite mesmo candidatos fracos e depende das fases seguintes para encontrar a melhor correspondência. Aumente para eliminar perfis improváveis mais cedo; reduza para ampliar o pool inicial de candidatos."
     },
     "dtw_blend": {
       "label": "Fusão Warp",
@@ -1582,6 +1582,10 @@
     "profile_evidence_sources": {
       "label": "Ciclos que moldam um programa",
       "doc": "Que ciclos são usados para construir a curva de potência de cada programa e para comparar um ciclo terminado com ela. Ao desmarcar um tipo, este deixa de moldar os seus programas sem que nada seja apagado - os ciclos permanecem na sua lista de Ciclos e podem continuar a ser rotulados ou removidos. Útil se não confiar nos dados importados. As estatísticas não são afetadas: contabilizam sempre apenas os ciclos que esta máquina realmente executou. Desmarcar tudo é ignorado, pois um programa sem ciclos por trás nunca poderia corresponder."
+    },
+    "energy_price_dynamic": {
+      "label": "Custo Ponderado no Tempo",
+      "doc": "Cobra cada ciclo ao preço em vigor em cada momento em que decorreu, em vez do preço único do instante em que terminou. Só se aplica a uma entidade de preço (um preço estático não pode variar). Não precisa de configuração adicional: o preço é acompanhado em direto enquanto o ciclo decorre e Processar histórico, em Diagnósticos, recalcula o custo dos ciclos antigos a partir do recorder. Desativado = o comportamento clássico, um preço fixado no fim."
     }
   },
   "setting_group": {
@@ -1965,10 +1969,11 @@
     "date_tip": "Data e hora de início do ciclo.",
     "duration_tip": "Tempo total de execução do ciclo, do início ao fim.",
     "energy_tip": "Energia total consumida (kWh). Calculada integrando a potência ao longo do tempo.",
-    "cost_tip": "Custo de energia deste ciclo, fixado na conclusão usando o preço então em vigor (energia x preço por kWh). Defina um preço nas Definições para o preencher.",
+    "cost_tip": "Custo de energia deste ciclo, fixado na conclusão. Com o Custo Ponderado no Tempo ativado, a curva de potência é cobrada ao preço em vigor em cada momento; caso contrário, energia x o preço único em vigor no fim. Defina um preço nas Definições para o preencher.",
     "confidence_tip": "Confiança de correspondência do perfil (0-100%). Quão próxima a curva de potência do ciclo correspondeu ao programa identificado.",
     "health_tip": "Saúde do ciclo por ML (mais alto = melhor). Clique num ciclo para o inspecionar e rever.",
-    "flags_tip": "Indicadores de revisão, anomalia e origem do ciclo. Passe o cursor sobre um ícone para ver o detalhe."
+    "flags_tip": "Indicadores de revisão, anomalia e origem do ciclo. Passe o cursor sobre um ícone para ver o detalhe.",
+    "cost_dynamic_tip": "Ponderado no tempo: cobrado ao preço em vigor durante o ciclo (preço efetivo {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "méd.",
@@ -2042,7 +2047,8 @@
       "golden": "Reprocessamento: marcação de ciclos de referência",
       "suggestions": "Reprocessamento: sugestões",
       "ml_training": "Reprocessamento: treino de ML",
-      "health": "Reprocessamento: saúde dos ciclos"
+      "health": "Reprocessamento: saúde dos ciclos",
+      "costs": "Reprocessamento: custos de energia"
     },
     "pg_sweep": {
       "optimize": "Otimizar: {param}"

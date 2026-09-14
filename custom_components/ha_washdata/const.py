@@ -174,6 +174,26 @@ CONF_NOTIFY_CHANNEL = "notify_channel"  # Android channel for status/live/remind
 CONF_NOTIFY_FINISH_CHANNEL = "notify_finish_channel"  # Distinct Android channel for finished/clean
 CONF_ENERGY_PRICE_STATIC = "energy_price_static"
 CONF_ENERGY_PRICE_ENTITY = "energy_price_entity"
+# Dynamic (time-weighted) pricing (#426). With a price *entity* configured, the
+# cost of a cycle is integrated against the price in force at each moment instead
+# of freezing the single price that happened to be current when the cycle ended.
+# Only meaningful for a price entity - a static price has no time dimension, so
+# this is a no-op there and the flag is never consulted. Default on: the frozen
+# end-of-cycle price is simply wrong for a tariff that moves during the cycle,
+# and cost is display-only (no detection, matching or ML input depends on it).
+CONF_ENERGY_PRICE_DYNAMIC = "energy_price_dynamic"
+DEFAULT_ENERGY_PRICE_DYNAMIC = True
+# Cap on the stored per-cycle price timeline. Entries are deduplicated (a price
+# that did not change adds nothing), so an hourly tariff needs a handful and this
+# only bites on a template sensor that recomputes every few seconds. Past the cap
+# the timeline is coarsened by dropping the smallest price steps, which keeps the
+# cost figure within a rounding error of the uncapped one while bounding what a
+# cycle adds to the JSON store.
+PRICE_TIMELINE_MAX_POINTS = 240
+# Prices are rounded to this many decimals before dedup. Currency-per-kWh figures
+# are quoted to 4-5 decimals at most; the extra digit keeps sub-cent tariffs exact
+# while collapsing the float noise a template sensor emits on every recompute.
+PRICE_TIMELINE_PRICE_DECIMALS = 6
 # Optional external cumulative energy meter (issue #316). When set, each cycle's
 # reported energy is taken from this counter's start->end delta instead of the
 # integrated power trace, which systematically under-counts on report-on-change

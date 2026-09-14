@@ -354,7 +354,7 @@
         "pg_settings_source": "Ayarların kaynağı",
         "phase_catalog": "Aşama Kataloğu",
         "playground": "Deneme Alanı",
-        "process_history": "İşlem Geçmişi",
+        "process_history": "Geçmişi İşle",
         "settings_history": "Ayar geçmişi",
         "status": "Durum",
         "status_graph": "Durum Grafiği",
@@ -764,7 +764,7 @@
         "merge_cycles": "{n} Döngüyü Birleştir",
         "new_group": "Yeni profil grubu",
         "new_phase": "Yeni Aşama",
-        "process_history_msg": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, önerileri yenileyin, ML'yi yeniden eğitin (etkinleştirilmişse) ve döngü sağlığını yeniden hesaplayın. Bu biraz zaman alabilir.",
+        "process_history_msg": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, önerileri yenileyin, ML'yi yeniden eğitin (etkinleştirilmişse), döngü maliyetlerini kayıtlı enerji fiyatlarına göre yeniden hesaplayın ve döngü sağlığını yeniden hesaplayın. Bu biraz zaman alabilir.",
         "process_history_ok": "İşle",
         "process_history_title": "Geçmişi İşle",
         "process_recording": "Kaydı İşle",
@@ -910,7 +910,7 @@
         "preferences_admin": "Tercihler, panel ve erişim denetimi",
         "preferences_adv": "Tercihler",
         "prefs_personal": "Bunlar yalnızca Home Assistant hesabınıza uygulanır.",
-        "process_history_hint": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, ayar önerilerini yenileyin, ML modellerini yeniden eğitin (etkinleştirilmişse) ve döngü sağlığını yeniden hesaplayın. Bir toplu incelemenin ardından çalıştırın.",
+        "process_history_hint": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, ayar önerilerini yenileyin, ML modellerini yeniden eğitin (etkinleştirilmişse), döngü maliyetlerini kayıtlı enerji fiyatlarına göre yeniden hesaplayın ve döngü sağlığını yeniden hesaplayın. Bunu bir grup incelemenin ardından çalıştırın.",
         "profile_deleted": "Profil silindi",
         "profile_poor_health_detail": "Bu profile atanan döngüler tutarsız şekillere sahip veya güvenirliği düşük. Zarfı yeniden oluşturmayı veya etiketli döngüleri gözden geçirmeyi düşünün.",
         "profiles_intro": "İstatistikler, aşamalar ve temizleme için bir profile tıklayın. Güvenilir seçim için neredeyse aynı programları (aynı şekil/süre, farklı sıcaklık veya dönüş) gruplayın.",
@@ -1221,7 +1221,7 @@
             "label": "Maks. Kırışıklık Önleme Gücü"
         },
         "auto_label_confidence": {
-            "doc": "Döngü sonundaki maç skoru bu seviyede veya üzerindeyse program herhangi bir onay istemi olmadan otomatik olarak etiketlenir. Otomatik etiketlemeden önce daha yüksek kesinlik gerektirecek şekilde yükseltin; daha fazlasını otomatikleştirmek için düşürün. Altındaki Learning Confidence ile birlikte çalışır.",
+            "doc": "Döngü sonundaki eşleşme puanı bu seviyede veya üzerindeyse program herhangi bir onay istemi olmadan otomatik olarak etiketlenir. Otomatik etiketlemeden önce daha yüksek kesinlik gerektirmek için yükseltin; daha fazlasını otomatikleştirmek için düşürün. Hemen altındaki Öğrenme Güveni ile birlikte çalışır.",
             "label": "Otomatik Etiket Güveni"
         },
         "auto_maintenance": {
@@ -1269,7 +1269,7 @@
             "label": "Bitiş Tekrar Sayısı"
         },
         "energy_price_entity": {
-            "doc": "kWh başına güncel elektrik fiyatını gösteren sensör (örn. dinamik tarife). Aşağıdaki statik fiyata göre önceliklidir. Her döngü bittiğinde geçerli olan fiyat dondurulur.",
+            "doc": "kWh başına güncel elektrik fiyatını gösteren sensör (örn. dinamik tarife). Aşağıdaki statik fiyata göre önceliklidir. Zaman Ağırlıklı Maliyet açıkken her döngü, çalıştığı her an geçerli olan fiyattan ücretlendirilir; aksi halde bittiğinde geçerli olan fiyat üzerine dondurulur.",
             "label": "Enerji Fiyatı Varlığı"
         },
         "energy_price_static": {
@@ -1297,7 +1297,7 @@
             "label": "Harici Tetikleyiciyi Tersine Çevir (KAPALI'da tetikle)"
         },
         "learning_confidence": {
-            "doc": "Eşleşme puanı bu ile Otomatik Etiket Güveni arasında kalırsa, bir geri bildirim bildirimi tanımlanan programı doğrulamanızı ister. Bu skorun altında maç yüzeye çıkamayacak kadar belirsiz. Otomatik Etiket Güveninin altında tutulmalıdır.",
+            "doc": "Eşleşme puanı bu değer ile Otomatik Etiket Güveni arasında kalırsa, bir geri bildirim bildirimi tanımlanan programı doğrulamanızı ister. Bu puanın altında eşleşme gösterilemeyecek kadar belirsizdir. Otomatik Etiket Güveninin altında tutulmalıdır.",
             "label": "Öğrenme Güveni"
         },
         "linked_device": {
@@ -1365,7 +1365,7 @@
             "label": "Bildirimler için HA Olayları Tetikle"
         },
         "notify_icon": {
-            "doc": "Bildirim için isteğe bağlı mdi simgesi (ör. mdi:çamaşır makinesi). Platform varsayılanı için boş bırakın.",
+            "doc": "Bildirim için isteğe bağlı mdi simgesi (ör. mdi:washing-machine). Platform varsayılanı için boş bırakın.",
             "label": "Bildirim Simgesi"
         },
         "notify_live_chronometer": {
@@ -1441,7 +1441,7 @@
             "label": "Güç Kapatma Eşiği"
         },
         "power_sensor": {
-            "doc": "Bu cihaz için canlı gücü watt cinsinden bildiren sensör varlığı (ör. sensör.washer_power). Tüm döngü tespiti bu sinyale dayanır.",
+            "doc": "Bu cihaz için canlı gücü watt cinsinden bildiren sensör varlığı (ör. sensor.washer_power). Tüm döngü tespiti bu sinyale dayanır.",
             "label": "Güç Sensörü"
         },
         "profile_duration_tolerance": {
@@ -1465,7 +1465,7 @@
             "label": "Eşleşme Eşiği"
         },
         "profile_unmatch_threshold": {
-            "doc": "Canlı bir döngü ortası maçı bu puanın altına düşerse, geçici tanımlama silinir. Eşleşme Eşiğinin biraz altında tutun, böylece benzerlikteki kısa bir düşüş, ekranı tekrar benzersiz hale getirmez.",
+            "doc": "Canlı bir döngü ortası eşleşme puanı bu puanın altına düşerse, geçici tanımlama silinir. Eşleşme Eşiğinin biraz altında tutun, böylece benzerlikteki kısa bir düşüş ekranı yeniden eşleşmedi durumuna döndürmez.",
             "label": "Eşleşmeme Eşiği"
         },
         "progress_reset_delay": {
@@ -1630,6 +1630,10 @@
         "profile_evidence_sources": {
             "label": "Bir programı şekillendiren döngüler",
             "doc": "Her programın güç eğrisini oluşturmak ve tamamlanmış bir döngüyü onunla eşleştirmek için hangi döngülerin kullanılacağı. Bir türün işaretini kaldırmak, hiçbir şey silmeden onun programlarınızı şekillendirmesini durdurur - döngüler Döngüler listenizde kalır ve yine etiketlenebilir veya kaldırılabilir. İçe aktarılan verilere güvenmiyorsanız kullanışlıdır. İstatistikler etkilenmez: her zaman yalnızca bu makinenin gerçekten çalıştırdığı döngüleri sayarlar. Her şeyin işaretini kaldırmak yok sayılır, çünkü arkasında hiç döngü olmayan bir program asla eşleşemez."
+        },
+        "energy_price_dynamic": {
+            "label": "Zaman Ağırlıklı Maliyet",
+            "doc": "Her döngüyü, bittiğinde geçerli olan tek fiyat yerine, çalıştığı her an geçerli olan fiyattan ücretlendirir. Yalnızca fiyat varlığı için geçerlidir (sabit fiyat değişemez). Ek kurulum gerektirmez: döngü çalışırken fiyat canlı olarak izlenir, Tanılamalar altındaki Geçmişi İşle eylemi ise eski döngülerin maliyetini recorder verilerinden yeniden hesaplar. Kapalı = klasik davranış, sonda dondurulan tek fiyat."
         }
     },
     "setting_group": {
@@ -2013,10 +2017,11 @@
         "date_tip": "Döngünün başladığı tarih ve saat.",
         "duration_tip": "Baştan sona toplam döngü çalışma süresi.",
         "energy_tip": "Tüketilen toplam enerji (kWh). Gücün zamana göre integrali alınarak hesaplanır.",
-        "cost_tip": "Bu döngünün enerji maliyeti; tamamlandığında o an geçerli olan fiyat kullanılarak sabitlenir (enerji x kWh başına fiyat). Doldurmak için Ayarlar altında bir fiyat belirleyin.",
+        "cost_tip": "Bu döngünün enerji maliyeti, tamamlandığında sabitlenir. Zaman Ağırlıklı Maliyet açıkken güç eğrisi her an geçerli olan fiyattan ücretlendirilir; aksi halde enerji x sonda geçerli olan tek fiyat. Doldurmak için Ayarlar altında bir fiyat belirleyin.",
         "confidence_tip": "Profil eşleşme güveni (0-100%). Döngünün güç eğrisinin, tanımlanan programla ne kadar yakından eşleştiği.",
         "health_tip": "ML döngü sağlığı (yüksek = daha iyi). İncelemek ve gözden geçirmek için bir döngüye tıklayın.",
-        "flags_tip": "Döngü için inceleme, anomali ve kaynak işaretleri. Ayrıntı için bir simgenin üzerine gelin."
+        "flags_tip": "Döngü için inceleme, anomali ve kaynak işaretleri. Ayrıntı için bir simgenin üzerine gelin.",
+        "cost_dynamic_tip": "Zaman ağırlıklı: döngü boyunca geçerli olan fiyattan ücretlendirildi (efektif {price} {cur}/kWh)."
     },
     "stat": {
         "avg": "ort.",
@@ -2090,7 +2095,8 @@
             "golden": "Yeniden işleme: referans döngülerini işaretleme",
             "suggestions": "Yeniden işleme: öneriler",
             "ml_training": "Yeniden işleme: ML eğitimi",
-            "health": "Yeniden işleme: döngü sağlığı"
+            "health": "Yeniden işleme: döngü sağlığı",
+            "costs": "Yeniden işleme: enerji maliyetleri"
         },
         "pg_sweep": {
             "optimize": "Optimizasyon: {param}"

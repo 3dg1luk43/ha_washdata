@@ -15,7 +15,7 @@
     "needs_review": "Necessita di revisione",
     "overrun": "Ha funzionato più a lungo del solito",
     "poor_fit": "scarsa vestibilità",
-    "poor_fit_tip": "Cronologia delle partite incoerente: valuta la possibilità di ricostruire questo profilo",
+    "poor_fit_tip": "Cronologia delle corrispondenze incoerente: valuta la possibilità di ricostruire questo profilo",
     "restart_gap_tip": "{n} interruzione riavvio HA: il tracciato di potenza ha un buco",
     "reviewed": "Revisionato",
     "steady": "→ stabile",
@@ -306,7 +306,7 @@
     "pg_settings_source": "Origine delle impostazioni",
     "phase_catalog": "Catalogo delle fasi",
     "playground": "Playground",
-    "process_history": "Storia del processo",
+    "process_history": "Elabora storico",
     "settings_history": "Cronologia impostazioni",
     "status": "Stato",
     "status_graph": "Grafico dello stato",
@@ -493,7 +493,7 @@
     "settings_basic": "Base",
     "settings_detail_level": "Livello di dettaglio impostazioni",
     "settings_overrides": "Override impostazioni",
-    "show_debug": "Mostra la scheda di debug della partita in tempo reale nella pagina Stato (fiducia, ambiguità, migliori candidati)",
+    "show_debug": "Mostra la scheda di debug della corrispondenza in tempo reale nella pagina Stato (confidenza, ambiguità, migliori candidati)",
     "show_expected": "Mostra sovrapposizione curva prevista (profilo corrispondente, arancione)",
     "show_raw": "Mostra l'interruttore del segnale grezzo della presa nel grafico di potenza in tempo reale",
     "sparkline": "Andamento recente durata cicli",
@@ -716,7 +716,7 @@
     "merge_cycles": "Unisci {n} cicli",
     "new_group": "Nuovo gruppo di profili",
     "new_phase": "Nuova Fase",
-    "process_history_msg": "Riesegui il confronto, aggiorna i suggerimenti, riaddestra i modelli ML (se abilitati) e ricalcola lo stato di tutti i cicli memorizzati. Potrebbe richiedere del tempo.",
+    "process_history_msg": "Riesegui la corrispondenza, aggiorna i suggerimenti, riaddestra ML (se abilitato), ricalcola il costo dei cicli in base ai prezzi dell'energia registrati e ricalcola lo stato di tutti i cicli memorizzati. Potrebbe richiedere del tempo.",
     "process_history_ok": "Elabora",
     "process_history_title": "Elabora storico",
     "process_recording": "Registrazione del processo",
@@ -862,7 +862,7 @@
     "preferences_admin": "Preferenze, pannello e controllo degli accessi",
     "preferences_adv": "Preferenze",
     "prefs_personal": "Questi si applicano solo al tuo account Home Assistant.",
-    "process_history_hint": "Riesegui il confronto su tutti i cicli memorizzati, aggiorna i suggerimenti di ottimizzazione, riaddestra i modelli ML (se abilitati) e ricalcola lo stato dei cicli. Da eseguire dopo una serie di revisioni.",
+    "process_history_hint": "Riesegui la corrispondenza su tutti i cicli memorizzati, aggiorna i suggerimenti di ottimizzazione, riaddestra i modelli ML (se abilitati), ricalcola il costo dei cicli in base ai prezzi dell'energia registrati e ricalcola lo stato dei cicli. Da eseguire dopo una serie di revisioni.",
     "profile_deleted": "Profilo eliminato",
     "profile_poor_health_detail": "I cicli assegnati a questo profilo hanno forme incoerenti o bassa confidenza. Considerare la ricostruzione della busta o la revisione dei cicli etichettati.",
     "profiles_intro": "Fai clic su un profilo per statistiche, fasi e pulizia. Raggruppa programmi quasi identici (stessa forma/durata, temperatura o centrifuga diversa) in modo che l'abbinamento sia affidabile tra loro.",
@@ -1177,7 +1177,7 @@
       "label": "Potenza massima antirughe"
     },
     "auto_label_confidence": {
-      "doc": "Se il punteggio della partita alla fine del ciclo è pari o superiore a questo, il programma viene etichettato automaticamente senza alcuna richiesta di conferma. Aumentarlo per richiedere una maggiore certezza prima dell'etichettatura automatica; abbassarlo per automatizzare di più. Funziona insieme al Learning Confidence sottostante.",
+      "doc": "Se il punteggio di corrispondenza alla fine del ciclo è pari o superiore a questo, il programma viene etichettato automaticamente senza alcuna richiesta di conferma. Aumentarlo per richiedere una maggiore certezza prima dell'etichettatura automatica; abbassarlo per automatizzare di più. Funziona insieme alla Confidenza apprendimento sottostante.",
       "label": "Confidenza etichettatura automatica"
     },
     "auto_maintenance": {
@@ -1225,7 +1225,7 @@
       "label": "Conteggio ripetizioni fine"
     },
     "energy_price_entity": {
-      "doc": "Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Ha la precedenza sul prezzo statico riportato di seguito. Ogni ciclo blocca il prezzo in vigore al termine.",
+      "doc": "Sensore con il prezzo attuale dell'elettricità per kWh (ad esempio una tariffa dinamica). Ha la precedenza sul prezzo statico riportato di seguito. Con Costo ponderato nel tempo attivo, ogni ciclo viene addebitato al prezzo in vigore in ogni momento in cui è stato eseguito; altrimenti gli viene fissato il prezzo in vigore al termine.",
       "label": "Entità prezzo energia"
     },
     "energy_price_static": {
@@ -1253,7 +1253,7 @@
       "label": "Inverti trigger esterno (attiva su SPENTO)"
     },
     "learning_confidence": {
-      "doc": "Se il punteggio di corrispondenza è compreso tra questo e la sicurezza dell'etichetta automatica, una notifica di feedback ti chiede di verificare il programma identificato. Al di sotto di questo punteggio la partita è troppo incerta per emergere. Deve essere mantenuto al di sotto del livello di confidenza dell'etichetta automatica.",
+      "doc": "Se il punteggio di corrispondenza è compreso tra questo e la Confidenza etichettatura automatica, una notifica di feedback ti chiede di verificare il programma identificato. Al di sotto di questo punteggio la corrispondenza è troppo incerta per essere mostrata. Deve essere mantenuto al di sotto della Confidenza etichettatura automatica.",
       "label": "Confidenza apprendimento"
     },
     "linked_device": {
@@ -1321,7 +1321,7 @@
       "label": "Genera eventi HA per le notifiche"
     },
     "notify_icon": {
-      "doc": "Icona mdi opzionale per la notifica (es. mdi:lavatrice). Lascia vuoto per l'impostazione predefinita della piattaforma.",
+      "doc": "Icona mdi opzionale per la notifica (es. mdi:washing-machine). Lascia vuoto per l'impostazione predefinita della piattaforma.",
       "label": "Icona notifica"
     },
     "notify_live_chronometer": {
@@ -1421,7 +1421,7 @@
       "label": "Soglia di corrispondenza"
     },
     "profile_unmatch_threshold": {
-      "doc": "Se una partita in diretta a metà ciclo scende al di sotto di questo punteggio, l'identificazione provvisoria viene cancellata. Mantienilo leggermente al di sotto della Soglia di corrispondenza in modo che un breve calo nella somiglianza non riporti la visualizzazione su senza corrispondenza.",
+      "doc": "Se una corrispondenza in tempo reale a metà ciclo scende al di sotto di questo punteggio, l'identificazione provvisoria viene cancellata. Mantienilo leggermente al di sotto della Soglia di corrispondenza in modo che un breve calo nella somiglianza non riporti la visualizzazione su senza corrispondenza.",
       "label": "Soglia di non corrispondenza"
     },
     "progress_reset_delay": {
@@ -1457,7 +1457,7 @@
       "label": "Energia avvio"
     },
     "start_threshold_w": {
-      "doc": "La potenza deve superare questo livello per confermare l'inizio di un ciclo. Un valore troppo basso provoca false partenze dall'alimentazione in standby; vengono persi programmi troppo elevati e con avvio lento (riempimento a freddo). Il motore dei suggerimenti imposta questo valore appena al di sopra della potenza attiva più bassa osservata della macchina.",
+      "doc": "La potenza deve superare questo livello per confermare l'inizio di un ciclo. Un valore troppo basso provoca false partenze dovute alla potenza in standby; un valore troppo alto fa perdere i programmi ad avvio lento (riempimento a freddo). Il motore dei suggerimenti imposta questo valore appena al di sopra della potenza attiva più bassa osservata sulla macchina.",
       "label": "Soglia di avvio"
     },
     "stop_threshold_w": {
@@ -1582,6 +1582,10 @@
     "profile_evidence_sources": {
       "label": "Cicli che formano un programma",
       "doc": "Quali cicli vengono usati per costruire la curva di potenza di ogni programma e per confrontare con essa un ciclo terminato. Deselezionare un tipo fa sì che non modelli più i tuoi programmi senza eliminare nulla - i cicli restano nel tuo elenco Cicli e possono ancora essere etichettati o rimossi. Utile se non ti fidi dei dati importati. Le statistiche non sono influenzate: conteggiano sempre solo i cicli che questa macchina ha effettivamente eseguito. Deselezionare tutto viene ignorato, perché un programma senza cicli alle spalle non potrebbe mai corrispondere."
+    },
+    "energy_price_dynamic": {
+      "label": "Costo ponderato nel tempo",
+      "doc": "Addebita ogni ciclo al prezzo in vigore in ogni momento in cui è stato eseguito, invece dell'unico prezzo valido al termine. Vale solo per un'entità di prezzo (un prezzo statico non può variare). Non serve alcuna configurazione aggiuntiva: il prezzo viene seguito in tempo reale mentre il ciclo è in corso, e Elabora storico, in Diagnostica, ricalcola il costo dei cicli più vecchi a partire dal recorder. Disattivato = il comportamento classico, un unico prezzo fissato alla fine."
     }
   },
   "setting_group": {
@@ -1965,10 +1969,11 @@
     "date_tip": "Data e ora di inizio del ciclo.",
     "duration_tip": "Tempo totale di esecuzione del ciclo, dall'inizio alla fine.",
     "energy_tip": "Energia totale consumata (kWh). Calcolata integrando la potenza nel tempo.",
-    "cost_tip": "Costo energetico di questo ciclo, fissato al completamento usando il prezzo allora in vigore (energia x prezzo per kWh). Imposta un prezzo nelle Impostazioni per popolarlo.",
+    "cost_tip": "Costo energetico di questo ciclo, fissato al completamento. Con Costo ponderato nel tempo attivo, la curva di potenza viene addebitata al prezzo in vigore in ogni momento; altrimenti energia x l'unico prezzo in vigore alla fine. Imposta un prezzo nelle Impostazioni per popolarlo.",
     "confidence_tip": "Confidenza di corrispondenza del profilo (0-100%). Quanto la curva di potenza del ciclo corrispondeva al programma identificato.",
     "health_tip": "Salute del ciclo tramite ML (più alto = migliore). Clicca su un ciclo per ispezionarlo e revisionarlo.",
-    "flags_tip": "Indicatori di revisione, anomalia e fonte per il ciclo. Passa il cursore su un'icona per i dettagli."
+    "flags_tip": "Indicatori di revisione, anomalia e fonte per il ciclo. Passa il cursore su un'icona per i dettagli.",
+    "cost_dynamic_tip": "Ponderato nel tempo: addebitato al prezzo in vigore durante il ciclo (prezzo effettivo {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "media",
@@ -2042,7 +2047,8 @@
       "golden": "Rielaborazione: marcatura dei cicli di riferimento",
       "suggestions": "Rielaborazione: suggerimenti",
       "ml_training": "Rielaborazione: addestramento ML",
-      "health": "Rielaborazione: salute dei cicli"
+      "health": "Rielaborazione: salute dei cicli",
+      "costs": "Rielaborazione: costi energetici"
     },
     "pg_sweep": {
       "optimize": "Ottimizza: {param}"

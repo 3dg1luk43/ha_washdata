@@ -354,7 +354,7 @@
     "pg_settings_source": "Zdroj nastavení",
     "phase_catalog": "Katalóg fáz",
     "playground": "Testovacie prostredie",
-    "process_history": "História procesov",
+    "process_history": "Spracovanie histórie",
     "settings_history": "História nastavení",
     "status": "Stav",
     "status_graph": "Graf stavu",
@@ -764,7 +764,7 @@
     "merge_cycles": "Zlúčiť {n} cyklov",
     "new_group": "Nová skupina profilov",
     "new_phase": "Nová fáza",
-    "process_history_msg": "Znova spustite párovanie, obnovte návrhy, preškolte ML (ak je povolené) a prepočítajte zdravie cyklov pre všetky uložené cykly. Môže to chvíľu trvať.",
+    "process_history_msg": "Znova spustite vyhodnotenie zhody, obnovte návrhy, preškolte ML (ak je povolené), prepočítajte náklady podľa zaznamenaných cien energie a prepočítajte zdravie cyklov pre všetky uložené cykly. Môže to chvíľu trvať.",
     "process_history_ok": "Spracovať",
     "process_history_title": "Spracovanie histórie",
     "process_recording": "Spracovať nahrávku",
@@ -911,7 +911,7 @@
     "preferences_adv": "Predvoľby",
     "prefs_personal": "Platí iba pre váš účet Home Assistant.",
     "font_size_hint": "Zväčšite alebo zmenšite všetko v tomto paneli. Platí pre váš účet na tomto zariadení.",
-    "process_history_hint": "Znova spustite párovanie pre všetky uložené cykly, obnovte návrhy ladenia, preškolte modely ML (ak sú povolené) a prepočítajte zdravie cyklov. Spustite po sérii recenzií.",
+    "process_history_hint": "Znova spustite vyhodnotenie zhody pre všetky uložené cykly, obnovte návrhy ladenia, preškolte modely ML (ak sú povolené), prepočítajte náklady cyklov podľa zaznamenaných cien energie a prepočítajte zdravie cyklov. Spustite to po sérii kontrol.",
     "profile_deleted": "Profil odstránený",
     "profile_poor_health_detail": "Cykly priradené k tomuto profilu majú nekonzistentný tvar alebo nízku spoľahlivosť. Zvážte prestavbu obálky alebo kontrolu cyklov s označením.",
     "profiles_intro": "Kliknite na profil pre štatistiky, fázy a vyčistenie. Zoskupte takmer identické programy (rovnaký tvar/trvanie, rôzna teplota alebo odstreďovanie), aby zhoda spoľahlivo vyberala medzi nimi.",
@@ -1195,7 +1195,7 @@
       "label": "Max. výkon ochrany pred krčením"
     },
     "auto_label_confidence": {
-      "doc": "Ak je skóre zápasu na konci cyklu rovnaké alebo vyššie, program sa označí automaticky bez výzvy na potvrdenie. Zvýšte ho tak, aby vyžadoval vyššiu istotu pred automatickým označovaním; znížte ho, aby ste automatizovali viac. Funguje v spojení s Learning Confidence pod ním.",
+      "doc": "Ak je skóre zhody na konci cyklu rovnaké alebo vyššie ako toto, program sa označí automaticky bez výzvy na potvrdenie. Zvýšte ho, ak chcete pred automatickým označovaním vyžadovať vyššiu istotu; znížte ho, ak chcete automatizovať viac. Funguje v spojení so Spoľahlivosťou učenia pod ním.",
       "label": "Spoľahlivosť autooznačovania"
     },
     "auto_maintenance": {
@@ -1243,7 +1243,7 @@
       "label": "Počet opakovaní ukončenia"
     },
     "energy_price_entity": {
-      "doc": "Senzor s aktuálnou cenou elektriny za kWh (napr. dynamická tarifa). Má prednosť pred statickou cenou nižšie. Každý cyklus zmrazí cenu platnú po jeho skončení.",
+      "doc": "Senzor s aktuálnou cenou elektriny za kWh (napr. dynamická tarifa). Má prednosť pred statickou cenou nižšie. Keď sú Časovo vážené náklady zapnuté, každý cyklus sa účtuje cenou platnou v každom okamihu jeho behu; inak sa naň zafixuje cena platná pri jeho dokončení.",
       "label": "Entita ceny energie"
     },
     "energy_price_static": {
@@ -1271,7 +1271,7 @@
       "label": "Invertovať externý spúšť (spustiť pri VYPNUTÍ)"
     },
     "learning_confidence": {
-      "doc": "Ak je skóre zhody medzi týmto a Auto-Label Confidence, upozornenie na spätnú väzbu vás požiada o overenie identifikovaného programu. Pod týmto skóre je zápas príliš neistý. Musí sa udržiavať pod úrovňou spoľahlivosti automatického označenia.",
+      "doc": "Ak skóre zhody padne medzi toto a Spoľahlivosť autooznačovania, upozornenie na spätnú väzbu vás požiada o overenie identifikovaného programu. Pod týmto skóre je zhoda príliš neistá na to, aby sa zobrazila. Musí sa udržiavať pod Spoľahlivosťou autooznačovania.",
       "label": "Spoľahlivosť učenia"
     },
     "linked_device": {
@@ -1339,7 +1339,7 @@
       "label": "Spúšťať HA udalosti pre upozornenia"
     },
     "notify_icon": {
-      "doc": "Voliteľná ikona mdi pre upozornenie (napr. mdi:pračka). Pre predvolenú platformu nechajte prázdne.",
+      "doc": "Voliteľná ikona mdi pre upozornenie (napr. mdi:washing-machine). Pre predvolenú platformu nechajte prázdne.",
       "label": "Ikona upozornenia"
     },
     "notify_live_chronometer": {
@@ -1439,7 +1439,7 @@
       "label": "Prah zhody"
     },
     "profile_unmatch_threshold": {
-      "doc": "Ak živý zápas v strede cyklu klesne pod toto skóre, predbežná identifikácia sa vymaže. Udržujte ho trochu pod prahom zhody, aby krátky pokles podobnosti neprevrátil displej späť na neporovnateľný.",
+      "doc": "Ak živá zhoda v strede cyklu klesne pod toto skóre, predbežná identifikácia sa vymaže. Udržujte ho trochu pod Prahom zhody, aby krátky pokles podobnosti neprepol zobrazenie späť na stav bez zhody.",
       "label": "Prah nezhody"
     },
     "progress_reset_delay": {
@@ -1600,6 +1600,10 @@
     "profile_evidence_sources": {
       "label": "Cykly tvoriace program",
       "doc": "Ktoré cykly sa používajú na zostavenie krivky výkonu každého programu a na priradenie dokončeného cyklu k nej. Keď niektorý druh odškrtnete, prestane ovplyvňovať vaše programy, ale nič sa nezmaže - cykly zostanú v zozname Cykly a stále ich možno označiť alebo odstrániť. Užitočné, ak nedôverujete importovaným údajom. Štatistiky to neovplyvní: vždy počítajú len cykly, ktoré tento spotrebič skutočne vykonal. Odškrtnutie všetkých možností sa ignoruje, pretože program bez cyklov by nikdy nemohol byť priradený."
+    },
+    "energy_price_dynamic": {
+      "label": "Časovo vážené náklady",
+      "doc": "Účtuje každý cyklus cenou platnou v každom okamihu jeho behu namiesto jedinej ceny platnej pri jeho dokončení. Týka sa len entity ceny (statická cena sa meniť nemôže). Nevyžaduje žiadne ďalšie nastavenie: cena sa počas cyklu sleduje naživo a Spracovanie histórie v Diagnostike prepočíta náklady starších cyklov z recordera. Vypnuté = klasické správanie, jedna cena zafixovaná na konci."
     }
   },
   "setting_group": {
@@ -2013,10 +2017,11 @@
     "date_tip": "Dátum a čas začatia cyklu.",
     "duration_tip": "Celkový čas behu cyklu od začiatku do konca.",
     "energy_tip": "Celková spotrebovaná energia (kWh). Vypočítané integráciou výkonu v čase.",
-    "cost_tip": "Náklady na energiu pre tento cyklus, zafixované pri dokončení podľa ceny platnej v tom čase (energia x cena za kWh). Nastavte cenu v Nastaveniach, aby ste ho vyplnili.",
+    "cost_tip": "Náklady na energiu za tento cyklus, zafixované pri dokončení. Keď sú Časovo vážené náklady zapnuté, krivka výkonu sa účtuje cenou platnou v každom okamihu; inak energia x jediná cena platná na konci. Nastavte cenu v Nastaveniach, aby sa hodnota vyplnila.",
     "confidence_tip": "Spoľahlivosť zhody profilu (0-100%). Ako presne krivka výkonu cyklu zodpovedala identifikovanému programu.",
     "health_tip": "Zdravie cyklu ML (vyššie = lepšie). Kliknutím na cyklus ho skontrolujete a zhodnotíte.",
-    "flags_tip": "Komunitné príznaky a indikátory kvality dát"
+    "flags_tip": "Komunitné príznaky a indikátory kvality dát",
+    "cost_dynamic_tip": "Časovo vážené: účtované cenou platnou počas cyklu (efektívne {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "priem.",
@@ -2090,7 +2095,8 @@
       "golden": "Opätovné spracovanie: dopĺňanie referenčných",
       "suggestions": "Opätovné spracovanie: návrhy",
       "ml_training": "Opätovné spracovanie: tréning ML",
-      "health": "Opätovné spracovanie: kvalita cyklov"
+      "health": "Opätovné spracovanie: kvalita cyklov",
+      "costs": "Opätovné spracovanie: náklady na energiu"
     },
     "pg_sweep": {
       "optimize": "Optimalizácia: {param}"

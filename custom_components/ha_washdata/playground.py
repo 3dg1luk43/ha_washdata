@@ -49,7 +49,12 @@ from . import analysis
 from . import notification_rules as notif_rules
 from . import progress as progress_mod
 from .phase_segmenter import phase_matching_enabled
-from .signal_processing import resample_adaptive
+from .signal_processing import (
+    resample_adaptive,
+    compact_price_timeline,
+    cycle_cost,
+    energy_gap_threshold_s,
+)
 from .const import (
     CONF_ANTI_WRINKLE_ENABLED,
     CONF_ANTI_WRINKLE_EXIT_POWER,
@@ -738,6 +743,17 @@ class _DetailSim:
         self.store = store
         self.options = options or {}
         self.price = price
+        # Dynamic tariff timeline frozen onto the stored cycle (#426). Replaying it
+        # is what keeps the sim's projected cost identical to the one the live
+        # estimator produced for that cycle; without it a dynamically-priced cycle
+        # would replay at a single flat price and silently diverge.
+        self.price_points = compact_price_timeline(
+            [
+                (entry[0], entry[1])
+                for entry in (cycle.get("price_timeline") or [])
+                if isinstance(entry, (list, tuple)) and len(entry) >= 2
+            ]
+        )
         self.compute_series = compute_series
         self.config = build_sim_config(base_config, settings_override)
         self.device_type = _device_type_of(self.config)
@@ -1061,6 +1077,28 @@ class _DetailSim:
             terminal_high,
         )
 
+    def _cost_so_far(self, trace: list[tuple[datetime, float]]) -> float | None:
+        """Dynamic-tariff cost incurred up to this point of the replay, or None.
+
+        Mirrors ``manager._live_cost_so_far``: the integrated trace charged at the
+        prices the cycle actually ran through. None (no stored timeline) puts the
+        projection back on the flat-price formula, which is the right answer for a
+        cycle recorded before dynamic pricing existed.
+        """
+        if not self.price_points or len(trace) < 2:
+            return None
+        try:
+            base_ts = self.base.timestamp()
+            timestamps = np.asarray([t.timestamp() - base_ts for t, _ in trace], dtype=float)
+            power = np.asarray([p for _, p in trace], dtype=float)
+            result = cycle_cost(
+                timestamps, power, self.price_points,
+                max_gap_s=energy_gap_threshold_s(timestamps),
+            )
+            return result[0] if result is not None else None
+        except Exception:  # noqa: BLE001 - the sim never raises
+            return None
+
     def _sample(self, ts: datetime) -> None:
         if not self.compute_series:
             return  # batch/sweep rows only need the outcome, not the per-step series
@@ -1125,6 +1163,7 @@ class _DetailSim:
                 wh, cost = progress_mod.projected_energy(
                     self.store, self.options, matched_dur, trace, program, result.progress,
                     energy_wh, self.price, self._end_exp_fn,
+                    cost_so_far=self._cost_so_far(trace),
                 )
                 pt["projected_energy_wh"] = round(wh, 1) if wh is not None else None
                 pt["projected_cost"] = round(cost, 4) if cost is not None else None

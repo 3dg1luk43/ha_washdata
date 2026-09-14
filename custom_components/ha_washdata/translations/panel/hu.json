@@ -63,7 +63,7 @@
         "needs_review": "Felülvizsgálatra szorul",
         "overrun": "A szokásosnál tovább futott",
         "poor_fit": "rossz illeszkedés",
-        "poor_fit_tip": "Inkonzisztens meccselőzmények – fontolja meg a profil újjáépítését",
+        "poor_fit_tip": "Inkonzisztens egyezési előzmények – fontolja meg a profil újjáépítését",
         "restart_gap_tip": "{n} HA-újraindítás-rés: a teljesítménygörbén van egy lyuk",
         "reviewed": "Áttekintve",
         "steady": "→ állandó",
@@ -354,7 +354,7 @@
         "pg_settings_source": "Beállítások forrása",
         "phase_catalog": "Fázis katalógus",
         "playground": "Homokozó",
-        "process_history": "Folyamattörténet",
+        "process_history": "Előzmények feldolgozása",
         "settings_history": "Beállítások előzményei",
         "status": "Állapot",
         "status_graph": "Állapotgrafikon",
@@ -764,7 +764,7 @@
         "merge_cycles": "Egyesítsen {n} ciklust",
         "new_group": "Új profilcsoport",
         "new_phase": "Új fázis",
-        "process_history_msg": "Futtassa újra az egyeztetést, frissítse a javaslatokat, tanítsa újra az ML-t (ha engedélyezve van) és számolja újra a ciklusok egészségét az összes tárolt cikluson. Ez eltarthat egy ideig.",
+        "process_history_msg": "Futtassa újra az egyeztetést, frissítse a javaslatokat, tanítsa újra az ML-t (ha engedélyezve van), számolja újra a ciklusok költségét a rögzített energiaárak alapján, és számolja újra a ciklusok egészségét az összes tárolt cikluson. Ez eltarthat egy ideig.",
         "process_history_ok": "Feldolgozás",
         "process_history_title": "Előzmények feldolgozása",
         "process_recording": "Folyamat rögzítése",
@@ -910,7 +910,7 @@
         "preferences_admin": "Beállítások, panel és hozzáférés-vezérlés",
         "preferences_adv": "Preferenciák",
         "prefs_personal": "Ezek csak a Home Assistant-fiókra vonatkoznak.",
-        "process_history_hint": "Futtassa újra az egyeztetést az összes tárolt cikluson, frissítse a hangolási javaslatokat, tanítsa újra az ML modelleket (ha engedélyezve van) és számolja újra a ciklusok egészségét. Futtassa ezt egy áttekintési köteg után.",
+        "process_history_hint": "Futtassa újra az egyeztetést az összes tárolt cikluson, frissítse a hangolási javaslatokat, tanítsa újra az ML-modelleket (ha engedélyezve van), számolja újra a ciklusok költségét a rögzített energiaárak alapján, és számolja újra a ciklusok egészségét. Futtassa ezt egy köteg felülvizsgálat után.",
         "profile_deleted": "Profil törölve",
         "profile_poor_health_detail": "Az ehhez a profilhoz rendelt ciklusok alakja inkonzisztens vagy alacsony a megbízhatóságuk. Fontolja meg a boríték újjáépítését vagy a címkézett ciklusok áttekintését.",
         "profiles_intro": "Kattintson egy profilra a statisztikák, fázisok és tisztítás megtekintéséhez. Csoportosítsa a közel azonos programokat (azonos forma/időtartam, eltérő hőmérséklet vagy centrifugálás), így az illesztés megbízhatóan kiválasztja őket.",
@@ -1243,7 +1243,7 @@
             "label": "Záró ismétlések száma"
         },
         "energy_price_entity": {
-            "doc": "Érzékelő az aktuális elektromos áram kWh-nkénti árával (pl. dinamikus tarifa). Elsőbbséget élvez az alábbi statikus árral szemben. Minden ciklus lefagyasztja az árat, amikor befejeződött.",
+            "doc": "Érzékelő az aktuális elektromos áram kWh-nkénti árával (pl. dinamikus tarifa). Elsőbbséget élvez az alábbi statikus árral szemben. Ha az Időben súlyozott költség be van kapcsolva, minden ciklus azon az áron kerül elszámolásra, amely a futása minden pillanatában érvényes volt; egyébként a befejezéskor érvényes ár rögzül rá.",
             "label": "Energiaár entitás"
         },
         "energy_price_static": {
@@ -1339,7 +1339,7 @@
             "label": "HA események aktiválása értesítésekhez"
         },
         "notify_icon": {
-            "doc": "Opcionális mdi ikon az értesítéshez (pl. mdi:mosógép). Hagyja üresen a platform alapértelmezett beállításához.",
+            "doc": "Opcionális mdi ikon az értesítéshez (pl. mdi:washing-machine). Hagyja üresen a platform alapértelmezett beállításához.",
             "label": "Értesítés ikonja"
         },
         "notify_live_chronometer": {
@@ -1439,7 +1439,7 @@
             "label": "Egyezési küszöb"
         },
         "profile_unmatch_threshold": {
-            "doc": "Ha egy élő ciklus közbeni meccs ez alá csökken, a próbaazonosító törlődik. Tartsa egy kicsit az egyezési küszöb alatt, hogy a hasonlóság rövid csökkenése ne fordítsa vissza páratlanná a kijelzőt.",
+            "doc": "Ha egy élő, ciklus közbeni egyezés pontszáma ez alá csökken, az ideiglenes azonosítás törlődik. Tartsa kicsivel az Egyezési küszöb alatt, hogy a hasonlóság rövid visszaesése ne állítsa vissza a kijelzőt a nincs egyezés állapotba.",
             "label": "Nem egyező küszöb"
         },
         "progress_reset_delay": {
@@ -1600,6 +1600,10 @@
         "profile_evidence_sources": {
             "label": "A programot alakító ciklusok",
             "doc": "Mely ciklusok szolgálnak az egyes programok teljesítménygörbéjének felépítéséhez, és egy befejezett ciklus ahhoz való egyeztetéséhez. Ha egy fajta jelölését kikapcsolja, az többé nem alakítja a programjait, de semmi nem törlődik - a ciklusok a Ciklusok listában maradnak, és továbbra is címkézhetők vagy eltávolíthatók. Akkor hasznos, ha nem bízik az importált adatokban. A statisztikákra nincs hatással: azok mindig csak azokat a ciklusokat számolják, amelyeket ez a gép valóban lefuttatott. Ha mindent kikapcsol, azt figyelmen kívül hagyjuk, mert egy ciklusok nélküli program soha nem tudna egyezni."
+        },
+        "energy_price_dynamic": {
+            "label": "Időben súlyozott költség",
+            "doc": "Minden ciklust azon az áron számol el, amely a futása minden pillanatában érvényes volt, a befejezéskori egyetlen ár helyett. Csak ár entitással működik (a statikus ár nem változik). Nem igényel külön beállítást: az árat a ciklus futása közben élőben követi, a Diagnosztika alatti Előzmények feldolgozása művelet pedig a recorder adataiból számolja újra a régebbi ciklusok költségét. Kikapcsolva = a megszokott működés, egyetlen, a végén rögzített ár."
         }
     },
     "setting_group": {
@@ -2013,10 +2017,11 @@
         "date_tip": "A ciklus indulásának dátuma és időpontja.",
         "duration_tip": "A ciklus teljes futásideje kezdéstől végéig.",
         "energy_tip": "Az összes elfogyasztott energia (kWh). A teljesítmény idő szerinti integrálásával számítva.",
-        "cost_tip": "A ciklus energiaköltsége, befejezéskor rögzítve az akkor érvényes árral (energia x kWh-ár). Állíts be egy árat a Beállításokban a kitöltéséhez.",
+        "cost_tip": "A ciklus energiaköltsége, befejezéskor rögzítve. Ha az Időben súlyozott költség be van kapcsolva, a teljesítménygörbe minden pillanatban az akkor érvényes áron kerül elszámolásra; egyébként energia x a végén érvényes egyetlen ár. Állíts be egy árat a Beállításokban a kitöltéséhez.",
         "confidence_tip": "A profilegyezés bizalma (0-100%). Mennyire pontosan illeszkedett a ciklus teljesítménygörbéje az azonosított programhoz.",
         "health_tip": "ML ciklusállapot (magasabb = jobb). Kattints egy ciklusra a vizsgálatához és áttekintéséhez.",
-        "flags_tip": "Felülvizsgálati, anomália- és forrásjelzők a ciklushoz. Vigye rá a mutatót az ikonra a részletekért."
+        "flags_tip": "Felülvizsgálati, anomália- és forrásjelzők a ciklushoz. Vigye rá a mutatót az ikonra a részletekért.",
+        "cost_dynamic_tip": "Időben súlyozott: a ciklus alatt érvényes áron elszámolva (tényleges {price} {cur}/kWh)."
     },
     "stat": {
         "avg": "átlag",
@@ -2090,7 +2095,8 @@
             "golden": "Újrafeldolgozás: referenciaciklusok pótlása",
             "suggestions": "Újrafeldolgozás: javaslatok",
             "ml_training": "Újrafeldolgozás: ML-tanítás",
-            "health": "Újrafeldolgozás: ciklusok egészsége"
+            "health": "Újrafeldolgozás: ciklusok egészsége",
+            "costs": "Újrafeldolgozás: energiaköltségek"
         },
         "pg_sweep": {
             "optimize": "Optimalizálás: {param}"

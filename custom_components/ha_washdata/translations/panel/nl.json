@@ -354,7 +354,7 @@
     "pg_settings_source": "Herkomst van de instellingen",
     "phase_catalog": "Fasecatalogus",
     "playground": "Speeltuin",
-    "process_history": "Procesgeschiedenis",
+    "process_history": "Geschiedenis verwerken",
     "settings_history": "Instellingengeschiedenis",
     "status": "Status",
     "status_graph": "Statusgrafiek",
@@ -764,7 +764,7 @@
     "merge_cycles": "Voeg {n} cycli samen",
     "new_group": "Nieuwe profielgroep",
     "new_phase": "Nieuwe Fase",
-    "process_history_msg": "Voer opnieuw matching uit, vernieuw suggesties, train ML opnieuw (indien ingeschakeld) en herbereken de cyclusgezondheid over alle opgeslagen cycli. Dit kan even duren.",
+    "process_history_msg": "Voer de matching opnieuw uit, vernieuw de suggesties, train ML opnieuw (indien ingeschakeld), herbereken de kosten van de cycli op basis van geregistreerde energieprijzen en herbereken de cyclusgezondheid voor alle opgeslagen cycli. Dit kan even duren.",
     "process_history_ok": "Verwerken",
     "process_history_title": "Geschiedenis verwerken",
     "process_recording": "Opname verwerken",
@@ -910,7 +910,7 @@
     "preferences_admin": "Voorkeuren, paneel- en toegangscontrole",
     "preferences_adv": "Voorkeuren",
     "prefs_personal": "Deze zijn alleen van toepassing op uw Home Assistant-account.",
-    "process_history_hint": "Voer opnieuw matching uit op alle opgeslagen cycli, vernieuw afstemsugesties, train de ML-modellen opnieuw (indien ingeschakeld) en herbereken de cyclusgezondheid. Uitvoeren na een batch van beoordelingen.",
+    "process_history_hint": "Voer de matching opnieuw uit op alle opgeslagen cycli, vernieuw de afstemmingssuggesties, train de ML-modellen opnieuw (indien ingeschakeld), herbereken de kosten van de cycli op basis van uw geregistreerde energieprijzen en herbereken de cyclusgezondheid. Uitvoeren na een reeks beoordelingen.",
     "profile_deleted": "Profiel verwijderd",
     "profile_poor_health_detail": "Cycli die aan dit profiel zijn toegewezen, hebben inconsistente vormen of een lage betrouwbaarheid. Overweeg om de envelop opnieuw te maken of de gelabelde cycli te bekijken.",
     "profiles_intro": "Klik op een profiel voor statistieken, fasen en opruimacties. Groepeer vrijwel identieke programma's (dezelfde vorm/duur, andere temperatuur of draairichting), zodat er betrouwbaar een keuze tussen de programma's kan worden gemaakt.",
@@ -1225,7 +1225,7 @@
       "label": "Max. anti-kreuk vermogen"
     },
     "auto_label_confidence": {
-      "doc": "Als de wedstrijdscore aan het einde van de cyclus op of boven dit niveau ligt, wordt het programma automatisch gelabeld zonder enige bevestigingsvraag. Verhoog het niveau om meer zekerheid te vereisen vóór automatische etikettering; verlaag het om meer te automatiseren. Werkt samen met Learning Confidence eronder.",
+      "doc": "Als de matchscore aan het einde van de cyclus op of boven deze waarde ligt, wordt het programma automatisch gelabeld zonder bevestigingsvraag. Verhoog de waarde om meer zekerheid te eisen vóór automatisch labelen; verlaag hem om meer te automatiseren. Werkt samen met Leerbetrouwbaarheid eronder.",
       "label": "Auto-label betrouwbaarheid"
     },
     "auto_maintenance": {
@@ -1273,7 +1273,7 @@
       "label": "Eindherhalingsaantal"
     },
     "energy_price_entity": {
-      "doc": "Sensor met de actuele elektriciteitsprijs per kWh (bijvoorbeeld een dynamisch tarief). Heeft voorrang op de onderstaande statische prijs. Elke cyclus bevriest de geldende prijs wanneer deze is voltooid.",
+      "doc": "Sensor met de actuele elektriciteitsprijs per kWh (bijvoorbeeld een dynamisch tarief). Heeft voorrang op de onderstaande statische prijs. Met Tijdgewogen kosten aan wordt elke cyclus afgerekend tegen de prijs die op elk moment van de cyclus gold; anders wordt de prijs die gold toen hij klaar was erop bevroren.",
       "label": "Energieprijsentiteit"
     },
     "energy_price_static": {
@@ -1301,7 +1301,7 @@
       "label": "Externe trigger omkeren (activeer bij UIT)"
     },
     "learning_confidence": {
-      "doc": "Als de matchscore tussen dit en Auto-Label Confidence ligt, wordt u in een feedbackmelding gevraagd het geïdentificeerde programma te verifiëren. Beneden deze score is de wedstrijd te onzeker om naar boven te komen. Moet onder Auto-Label Confidence blijven.",
+      "doc": "Als de matchscore tussen deze waarde en Auto-label betrouwbaarheid ligt, vraagt een feedbackmelding u om het geïdentificeerde programma te verifiëren. Onder deze score is de match te onzeker om te tonen. Moet onder Auto-label betrouwbaarheid blijven.",
       "label": "Leerbetrouwbaarheid"
     },
     "linked_device": {
@@ -1369,7 +1369,7 @@
       "label": "HA-gebeurtenissen afvuren voor meldingen"
     },
     "notify_icon": {
-      "doc": "Optioneel mdi-pictogram voor de melding (bijvoorbeeld mdi:wasmachine). Laat dit leeg voor de platformstandaard.",
+      "doc": "Optioneel mdi-pictogram voor de melding (bijvoorbeeld mdi:washing-machine). Laat dit leeg voor de platformstandaard.",
       "label": "Meldingspictogram"
     },
     "notify_live_chronometer": {
@@ -1469,7 +1469,7 @@
       "label": "Afstemmingsdrempel"
     },
     "profile_unmatch_threshold": {
-      "doc": "Als een live mid-cycle-wedstrijd onder deze score daalt, wordt de voorlopige identificatie gewist. Houd het iets onder de Match Threshold, zodat een korte dip in gelijkenis het scherm niet terugzet naar ongeëvenaard.",
+      "doc": "Als een live match tijdens de cyclus onder deze score zakt, wordt de voorlopige identificatie gewist. Houd hem iets onder de Afstemmingsdrempel, zodat een korte dip in gelijkenis het scherm niet terugzet naar geen match.",
       "label": "Niet-afstemmingsdrempel"
     },
     "progress_reset_delay": {
@@ -1630,6 +1630,10 @@
     "profile_evidence_sources": {
       "label": "Cycli die een programma vormen",
       "doc": "Welke cycli worden gebruikt om de vermogenscurve van elk programma op te bouwen en om een voltooide cyclus daarmee te matchen. Een soort uitvinken laat die uw programma's niet langer vormen zonder dat er iets wordt verwijderd - de cycli blijven in uw Cycli-lijst staan en kunnen nog steeds gelabeld of verwijderd worden. Handig als u geïmporteerde gegevens niet vertrouwt. Statistieken blijven ongewijzigd: die tellen altijd alleen de cycli die deze machine echt heeft uitgevoerd. Alles uitvinken wordt genegeerd, want een programma zonder cycli erachter zou nooit kunnen matchen."
+    },
+    "energy_price_dynamic": {
+      "label": "Tijdgewogen kosten",
+      "doc": "Reken elke cyclus af tegen de prijs die op elk moment van de cyclus gold, in plaats van tegen de ene prijs die gold toen hij klaar was. Geldt alleen voor een prijsentiteit (een statische prijs kan niet bewegen). Vraagt geen extra instellingen: tijdens de cyclus wordt de prijs live bijgehouden, en \"Geschiedenis verwerken\" onder Diagnostiek berekent de kosten van oudere cycli opnieuw uit de recorder. Uit = het klassieke gedrag, één prijs bevroren aan het eind."
     }
   },
   "setting_group": {
@@ -2013,10 +2017,11 @@
     "date_tip": "Datum en tijd waarop de cyclus is gestart.",
     "duration_tip": "Totale looptijd van de cyclus van begin tot einde.",
     "energy_tip": "Totaal verbruikte energie (kWh). Berekend door het vermogen over de tijd te integreren.",
-    "cost_tip": "Energiekosten voor deze cyclus, vastgezet bij voltooiing met de op dat moment geldende prijs (energie x prijs per kWh). Stel een prijs in onder Instellingen om deze te vullen.",
+    "cost_tip": "Energiekosten voor deze cyclus, bevroren bij voltooiing. Met Tijdgewogen kosten aan wordt de vermogenscurve afgerekend tegen de prijs die op elk moment gold, anders energie x de ene prijs die aan het eind gold. Stel een prijs in bij Instellingen om dit te vullen.",
     "confidence_tip": "Betrouwbaarheid van de profielovereenkomst (0-100%). Hoe nauwkeurig de vermogenscurve van de cyclus overeenkwam met het geïdentificeerde programma.",
     "health_tip": "ML-cyclusgezondheid (hoger = beter). Klik op een cyclus om deze te inspecteren en te beoordelen.",
-    "flags_tip": "Beoordelings-, anomalie- en bronvlaggen voor de cyclus. Beweeg de muis over een pictogram voor details."
+    "flags_tip": "Beoordelings-, anomalie- en bronvlaggen voor de cyclus. Beweeg de muis over een pictogram voor details.",
+    "cost_dynamic_tip": "Tijdgewogen: afgerekend tegen de prijs die tijdens de cyclus gold (effectief {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "gem.",
@@ -2090,7 +2095,8 @@
       "golden": "Opnieuw verwerken: referentiecycli aanvullen",
       "suggestions": "Opnieuw verwerken: suggesties",
       "ml_training": "Opnieuw verwerken: ML-training",
-      "health": "Opnieuw verwerken: cyclusgezondheid"
+      "health": "Opnieuw verwerken: cyclusgezondheid",
+      "costs": "Opnieuw verwerken: energiekosten"
     },
     "pg_sweep": {
       "optimize": "Optimaliseren: {param}"

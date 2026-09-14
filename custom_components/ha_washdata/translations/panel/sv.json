@@ -63,7 +63,7 @@
     "needs_review": "Behöver granskning",
     "overrun": "Pågick längre än vanligt",
     "poor_fit": "dålig kvalitet",
-    "poor_fit_tip": "Inkonsekvent matchhistorik – överväg att bygga om den här profilen",
+    "poor_fit_tip": "Inkonsekvent matchningshistorik: överväg att bygga om den här profilen",
     "restart_gap_tip": "{n} HA-omstartslucka: effektspåret har ett hål",
     "reviewed": "Granskad",
     "steady": "→ stabil",
@@ -354,7 +354,7 @@
     "pg_settings_source": "Inställningarnas källa",
     "phase_catalog": "Faskatalog",
     "playground": "Testyta",
-    "process_history": "Processhistorik",
+    "process_history": "Bearbeta historik",
     "settings_history": "Inställningshistorik",
     "status": "Status",
     "status_graph": "Statusdiagram",
@@ -764,7 +764,7 @@
     "merge_cycles": "Slå samman {n} cykler",
     "new_group": "Ny profilgrupp",
     "new_phase": "Ny fas",
-    "process_history_msg": "Kör matchning igen, uppdatera förslag, träna om ML (om aktiverat) och beräkna om cyklernas hälsa för alla lagrade cykler. Detta kan ta ett tag.",
+    "process_history_msg": "Kör matchningen igen, uppdatera förslagen, träna om ML (om aktiverat), räkna om cyklernas kostnad mot registrerade energipriser och beräkna om cyklernas hälsa för alla lagrade cykler. Detta kan ta ett tag.",
     "process_history_ok": "Bearbeta",
     "process_history_title": "Bearbeta historik",
     "process_recording": "Bearbeta inspelning",
@@ -910,7 +910,7 @@
     "preferences_admin": "Inställningar, panel och åtkomstkontroll",
     "preferences_adv": "Inställningar",
     "prefs_personal": "Dessa gäller endast ditt Home Assistant-konto.",
-    "process_history_hint": "Kör matchning igen på alla lagrade cykler, uppdatera justeringsförslag, träna om ML-modellerna (om aktiverat) och beräkna om cyklernas hälsa. Kör detta efter en omgång granskningar.",
+    "process_history_hint": "Kör matchningen igen på alla lagrade cykler, uppdatera justeringsförslagen, träna om ML-modellerna (om aktiverat), räkna om cyklernas kostnad mot dina registrerade energipriser och beräkna om cyklernas hälsa. Kör detta efter en omgång granskningar.",
     "profile_deleted": "Profil borttagen",
     "profile_poor_health_detail": "Cykler som tilldelats den här profilen har inkonsekventa former eller låg konfidens. Överväg att bygga om kuvertet eller granska märkta cykler.",
     "profiles_intro": "Klicka på en profil för statistik, faser och rensning. Gruppera nästan identiska program (samma form/varaktighet, olika temperatur eller centrifugering) så att matchning tillförlitligt väljer mellan dem.",
@@ -1095,7 +1095,7 @@
     "energy_weight": "Steg 4: hur starkt energiöverensstämmelse påverkar slutpoängen (standard 0,22)",
     "profile_match_min_duration_ratio": "Steg 1: lägsta cykellängd som andel av profilduration; standard 0,1 (10%)",
     "profile_match_max_duration_ratio": "Steg 1: högsta cykellängd som andel av profilduration; standard 1,5 (150%)",
-    "keep_min_score": "Steg 2: lägsta poäng för att vara kvar i matchen; standard 0,1 tillåter svaga kandidater, senare steg väljer bäst",
+    "keep_min_score": "Steg 2: lägsta poäng för att gå vidare; standard 0,1 släpper igenom svaga matchningar, senare steg väljer den bästa",
     "dtw_blend": "Steg 3: 0 = bara kärnpoäng, 1 = bara DTW-poäng, 0,5 = lika blandning (standard)",
     "dtw_ensemble_w": "Steg 3 (ensemble-läge): vikt på skalad L1 kontra derivativ DTW; standard 0,7 gynnar nivåmedvetenhet",
     "dtw_ddtw_scale": "Steg 3: DDTW-halvmättnadsavstånd; lägre = mer formkänslig (standard 30)",
@@ -1273,7 +1273,7 @@
       "label": "Antal slutrepetitioner"
     },
     "energy_price_entity": {
-      "doc": "Sensor med aktuellt elpris per kWh (t.ex. en dynamisk tariff). Har företräde framför det statiska priset nedan. Varje cykel fryser det pris som gäller när den är klar.",
+      "doc": "Sensor med aktuellt elpris per kWh (t.ex. en dynamisk tariff). Har företräde framför det statiska priset nedan. Med Tidsviktad kostnad på debiteras varje cykel till det pris som gällde i varje ögonblick den kördes; annars fryses det pris som gällde när den var klar fast på den.",
       "label": "Energiprisentitet"
     },
     "energy_price_static": {
@@ -1301,7 +1301,7 @@
       "label": "Invertera extern utlösare (utlös vid AV)"
     },
     "learning_confidence": {
-      "doc": "Om matchresultatet faller mellan detta och Auto-Label Confidence, uppmanas du i ett feedbackmeddelande att verifiera det identifierade programmet. Under denna poäng är matchen för osäker för att ytan. Måste hållas under Auto-Label Confidence.",
+      "doc": "Om matchningspoängen hamnar mellan detta värde och Automärkningskonfidens uppmanas du i ett feedbackmeddelande att verifiera det identifierade programmet. Under denna poäng är matchningen för osäker för att visas. Måste hållas under Automärkningskonfidens.",
       "label": "Inlärningskonfidens"
     },
     "linked_device": {
@@ -1369,7 +1369,7 @@
       "label": "Avfyra HA-händelser för meddelanden"
     },
     "notify_icon": {
-      "doc": "Valfri mdi-ikon för meddelandet (t.ex. mdi:tvättmaskin). Lämna tomt för plattformens standard.",
+      "doc": "Valfri mdi-ikon för meddelandet (t.ex. mdi:washing-machine). Lämna tomt för plattformens standard.",
       "label": "Meddelandeikon"
     },
     "notify_live_chronometer": {
@@ -1469,7 +1469,7 @@
       "label": "Matchningströskel"
     },
     "profile_unmatch_threshold": {
-      "doc": "Om en livematch i mitten av cykeln sjunker under denna poäng, rensas den preliminära identifieringen. Håll den lite under matchtröskeln så att en kort dopp i likhet inte vänder tillbaka skärmen till oöverträffad.",
+      "doc": "Om en pågående matchning mitt i cykeln sjunker under denna poäng rensas den preliminära identifieringen. Håll den lite under Matchningströskeln så att ett kort fall i likhet inte får visningen att gå tillbaka till Ingen matchning.",
       "label": "Omatchningströskel"
     },
     "progress_reset_delay": {
@@ -1630,6 +1630,10 @@
     "profile_evidence_sources": {
       "label": "Cykler som formar ett program",
       "doc": "Vilka cykler som används för att bygga upp effektkurvan för varje program och för att matcha en avslutad cykel mot den. Avmarkerar du en typ formar den inte längre dina program, utan att något tas bort - cyklerna ligger kvar i din Cykler-lista och kan fortfarande märkas eller tas bort. Praktiskt om du inte litar på importerade data. Statistiken påverkas inte: den räknar alltid bara de cykler som den här maskinen verkligen har kört. Att avmarkera allt ignoreras, eftersom ett program utan cykler bakom sig aldrig skulle kunna matcha."
+    },
+    "energy_price_dynamic": {
+      "label": "Tidsviktad kostnad",
+      "doc": "Debitera varje cykel till det pris som gällde i varje ögonblick den kördes, i stället för det enda pris som gällde när den var klar. Gäller bara en prisentitet (ett statiskt pris kan inte röra sig). Kräver ingen extra inställning: priset följs live medan cykeln kör, och \"Bearbeta historik\" under Diagnostik räknar om kostnaden för äldre cykler från recordern. Av = det klassiska beteendet, ett pris fryst vid slutet."
     }
   },
   "setting_group": {
@@ -2013,10 +2017,11 @@
     "date_tip": "Datum och tid då cykeln startade.",
     "duration_tip": "Total körtid för cykeln från start till slut.",
     "energy_tip": "Total förbrukad energi (kWh). Beräknad genom att integrera effekten över tid.",
-    "cost_tip": "Energikostnad för denna cykel, låst vid slutförandet utifrån priset som gällde då (energi x pris per kWh). Ange ett pris under Inställningar för att fylla i den.",
+    "cost_tip": "Energikostnad för denna cykel, fryst vid slutförandet. Med Tidsviktad kostnad på debiteras effektkurvan till det pris som gällde i varje ögonblick, annars energi x det enda pris som gällde vid slutet. Ange ett pris under Inställningar för att fylla i den.",
     "confidence_tip": "Profilmatchkonfidens (0-100 %). Hur nära cykelns effektkurva matchade det identifierade programmet.",
     "health_tip": "ML-cykelhälsa (högre = bättre). Klicka på en cykel för att inspektera och granska den.",
-    "flags_tip": "Gransknings-, anomali- och källflaggor för cykeln. Håll muspekaren över en ikon för detaljer."
+    "flags_tip": "Gransknings-, anomali- och källflaggor för cykeln. Håll muspekaren över en ikon för detaljer.",
+    "cost_dynamic_tip": "Tidsviktad: debiterad till det pris som gällde under cykeln (effektivt {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "snitt",
@@ -2090,7 +2095,8 @@
       "golden": "Bearbetar igen: fyller i referenscykler",
       "suggestions": "Bearbetar igen: förslag",
       "ml_training": "Bearbetar igen: ML-träning",
-      "health": "Bearbetar igen: cykelhälsa"
+      "health": "Bearbetar igen: cykelhälsa",
+      "costs": "Bearbetar igen: energikostnader"
     },
     "pg_sweep": {
       "optimize": "Optimera: {param}"

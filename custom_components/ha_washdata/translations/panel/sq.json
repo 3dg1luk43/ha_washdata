@@ -55,7 +55,7 @@
         "energy_low": "Energji më e ulët se zakonisht",
         "energy_spike": "Energji më e lartë se zakonisht",
         "fair_fit": "cilësi e pranueshme",
-        "fair_fit_tip": "Konsistencë e moderuar e ndeshjes – disa cikle të caktuara për këtë profil kanë rezultate më të ulëta besimi. Etiketoni më shumë cikle ose riregjistroni profilin për të përmirësuar saktësinë.",
+        "fair_fit_tip": "Konsistencë e moderuar e përputhjes – disa cikle të caktuara për këtë profil kanë rezultate më të ulëta besueshmërie. Etiketoni më shumë cikle ose riregjistroni profilin për të përmirësuar saktësinë.",
         "feedback_requested": "Kërkohet koment",
         "golden_cycle": "Cikli referues i regjistruar",
         "improving": "↗ në rritje",
@@ -63,7 +63,7 @@
         "needs_review": "Ka nevojë për rishikim",
         "overrun": "Zgjati më shumë se zakonisht",
         "poor_fit": "cilësi e keqe",
-        "poor_fit_tip": "Histori jokonsistente e ndeshjeve – merrni parasysh rindërtimin e këtij profili",
+        "poor_fit_tip": "Histori jokonsistente e përputhjeve – merrni parasysh rindërtimin e këtij profili",
         "restart_gap_tip": "{n} boshllëk rinisje të HA: gjurma e energjisë ka një vrimë",
         "reviewed": "Shqyrtuar",
         "steady": "→ i qëndrueshëm",
@@ -354,7 +354,7 @@
         "pg_settings_source": "Burimi i cilësimeve",
         "phase_catalog": "Katalog fazash",
         "playground": "Zona e provave",
-        "process_history": "Historiku i procesit",
+        "process_history": "Proceso historinë",
         "settings_history": "Historiku i cilësimeve",
         "status": "Statusi",
         "status_graph": "Grafiku i statusit",
@@ -764,7 +764,7 @@
         "merge_cycles": "Bashko {n} cikle",
         "new_group": "Grup i ri profilesh",
         "new_phase": "Fazë e re",
-        "process_history_msg": "Riekzekutoni përputhjen, rifreskoni sugjerimet, stërvitni ML (nëse aktivizuara) dhe rillogaritni shëndetin e cikleve në të gjitha ciklet e ruajtura. Kjo mund të marrë pak kohë.",
+        "process_history_msg": "Riekzekutoni përputhjen, rifreskoni sugjerimet, ristërvitni ML (nëse është aktivizuar), rillogaritni koston e cikleve sipas çmimeve të regjistruara të energjisë dhe rillogaritni shëndetin e cikleve në të gjitha ciklet e ruajtura. Kjo mund të marrë pak kohë.",
         "process_history_ok": "Proceso",
         "process_history_title": "Proceso historinë",
         "process_recording": "Proceso regjistrimin",
@@ -910,7 +910,7 @@
         "preferences_admin": "Preferencat, paneli dhe kontrolli i aksesit",
         "preferences_adv": "Preferencat",
         "prefs_personal": "Këto vlejnë vetëm për llogarinë tuaj të Asistentit në Shtëpi.",
-        "process_history_hint": "Riekzekutoni përputhjen në të gjitha ciklet e ruajtura, rifreskoni sugjerimet e sintonizimit, stërvitni modelet ML (nëse janë aktivizuara) dhe rillogaritni shëndetin e cikleve. Ekzekutoni këtë pas një grupi rishikimesh.",
+        "process_history_hint": "Riekzekutoni përputhjen në të gjitha ciklet e ruajtura, rifreskoni sugjerimet e sintonizimit, ristërvitni modelet ML (nëse janë aktivizuara), rillogaritni koston e cikleve sipas çmimeve të regjistruara të energjisë dhe rillogaritni shëndetin e cikleve. Ekzekutoni këtë pas një grupi rishikimesh.",
         "profile_deleted": "Profili u fshi",
         "profile_poor_health_detail": "Ciklet e caktuara për këtë profil kanë forma jokonsistente ose besim të ulët. Merrni parasysh rindërtimin e zarfit ose rishikimin e cikleve të etiketuara.",
         "profiles_intro": "Kliko një profil për statistika, faza dhe pastrim. Grupo programe pothuajse identike (të njëjtën formë/kohëzgjatje, temperaturë ose centrifugim të ndryshëm) kështu që përputhja zgjedh me besueshmëri ndërmjet tyre.",
@@ -1191,7 +1191,7 @@
             "label": "Fuqia maks. kundër rrudhave"
         },
         "auto_label_confidence": {
-            "doc": "Nëse rezultati i ndeshjes në fund të ciklit është në ose mbi këtë, programi etiketohet automatikisht pa ndonjë kërkesë konfirmimi. Rriteni atë për të kërkuar siguri më të lartë përpara etiketimit automatik; uleni atë për të automatizuar më shumë. Funksionon në lidhje me besimin e të mësuarit nën të.",
+            "doc": "Nëse rezultati i përputhjes në fund të ciklit është në këtë nivel ose mbi të, programi etiketohet automatikisht pa asnjë kërkesë konfirmimi. Rriteni për të kërkuar siguri më të lartë përpara etiketimit automatik; uleni për të automatizuar më shumë. Funksionon së bashku me Besueshmërinë e të mësuarit menjëherë poshtë tij.",
             "label": "Besueshmëria e etiketimit automatik"
         },
         "auto_maintenance": {
@@ -1239,7 +1239,7 @@
             "label": "Numri i përsëritjeve të fundit"
         },
         "energy_price_entity": {
-            "doc": "Sensori me çmimin aktual të energjisë elektrike për kWh (p.sh. një tarifë dinamike). Ka përparësi ndaj çmimit statik më poshtë. Çdo cikël ngrin çmimin në fuqi kur të përfundojë.",
+            "doc": "Sensori me çmimin aktual të energjisë elektrike për kWh (p.sh. një tarifë dinamike). Ka përparësi ndaj çmimit statik më poshtë. Kur është aktive Kosto e ponderuar sipas kohës, çdo cikël faturohet me çmimin në fuqi në çdo çast që ai punoi; përndryshe mbi të ngrihet çmimi në fuqi kur ai përfundoi.",
             "label": "Entiteta e çmimit të energjisë"
         },
         "energy_price_static": {
@@ -1251,7 +1251,7 @@
             "label": "Entiteti i matësit të energjisë"
         },
         "expose_debug_entities": {
-            "doc": "Publikoni entitete shtesë diagnostikuese HA (besimi i ndeshjes, paqartësia, të brendshmet e gjendjes). Off e mban listën e entiteteve të pastër për përdorim normal.",
+            "doc": "Publikoni entitete shtesë diagnostikuese HA (besueshmëria e përputhjes, paqartësia, të brendshmet e gjendjes). Joaktiv e mban listën e entiteteve të pastër për përdorim normal.",
             "label": "Ekspono entitetet e korrigjimit"
         },
         "external_end_trigger": {
@@ -1267,7 +1267,7 @@
             "label": "Invertoj aktivizuesin e jashtëm (aktivizoj kur FIKUR)"
         },
         "learning_confidence": {
-            "doc": "Nëse rezultati i ndeshjes bie midis kësaj dhe \"Konfidencës me etiketë automatike\", një njoftim reagimi ju kërkon të verifikoni programin e identifikuar. Poshtë këtij rezultati ndeshja është shumë e pasigurt për t'u shfaqur. Duhet të mbahet nën Besueshmërinë e Etiketës Automatike.",
+            "doc": "Nëse rezultati i përputhjes bie midis kësaj dhe Besueshmërisë së etiketimit automatik, një njoftim reagimi ju kërkon të verifikoni programin e identifikuar. Poshtë këtij rezultati përputhja është shumë e pasigurt për t'u shfaqur. Duhet të mbahet nën Besueshmërinë e etiketimit automatik.",
             "label": "Besueshmëria e të mësuarit"
         },
         "linked_device": {
@@ -1335,7 +1335,7 @@
             "label": "Aktivizo ngjarje HA për njoftime"
         },
         "notify_icon": {
-            "doc": "Ikona opsionale mdi për njoftimin (p.sh. mdi: makinë larëse). Lëreni bosh për parazgjedhjen e platformës.",
+            "doc": "Ikona opsionale mdi për njoftimin (p.sh. mdi:washing-machine). Lëreni bosh për parazgjedhjen e platformës.",
             "label": "Ikona e njoftimit"
         },
         "notify_live_chronometer": {
@@ -1435,7 +1435,7 @@
             "label": "Pragu i përputhjes"
         },
         "profile_unmatch_threshold": {
-            "doc": "Nëse një ndeshje e drejtpërdrejtë në mes të ciklit bie nën këtë rezultat, identifikimi paraprak pastrohet. Mbajeni atë pak më poshtë Pragut të Përputhjes në mënyrë që një rënie e shkurtër në ngjashmëri të mos e kthejë ekranin përsëri në të pashoq.",
+            "doc": "Nëse një përputhje e drejtpërdrejtë në mes të ciklit bie nën këtë rezultat, identifikimi paraprak pastrohet. Mbajeni pak më poshtë Pragut të përputhjes, në mënyrë që një rënie e shkurtër e ngjashmërisë të mos e kthejë ekranin përsëri në gjendjen pa përputhje.",
             "label": "Pragu i mosperputhjeve"
         },
         "progress_reset_delay": {
@@ -1600,6 +1600,10 @@
         "profile_evidence_sources": {
             "label": "Ciklet që formojnë një program",
             "doc": "Cilat cikle përdoren për të ndërtuar kurbën e fuqisë së secilit program dhe për të përputhur me të një cikël të përfunduar. Heqja e shenjës nga një lloj e ndalon atë të formojë programet tuaja pa fshirë asgjë - ciklet mbeten në listën Cikle dhe mund të etiketohen ose të hiqen si më parë. E dobishme nëse nuk i besoni të dhënave të importuara. Statistikat nuk preken: ato numërojnë gjithmonë vetëm ciklet që kjo makinë kreu vërtet. Heqja e shenjës nga të gjitha llojet shpërfillet, sepse një program pa cikle pas tij nuk mund të përputhej kurrë."
+        },
+        "energy_price_dynamic": {
+            "label": "Kosto e ponderuar sipas kohës",
+            "doc": "Çdo cikël faturohet me çmimin në fuqi në çdo çast që ai punoi, në vend të një çmimi të vetëm në fuqi kur ai përfundoi. Vlen vetëm për një entitet çmimi (një çmim statik nuk ndryshon). Nuk kërkon konfigurim shtesë: çmimi ndiqet drejtpërdrejt ndërsa cikli po punon, kurse veprimi Proceso historinë te Diagnostikimi rillogarit koston e cikleve më të vjetra nga recorder. Joaktiv = sjellja klasike, një çmim i vetëm i ngrirë në fund."
         }
     },
     "setting_group": {
@@ -2013,10 +2017,11 @@
         "date_tip": "Data dhe ora kur filloi cikli.",
         "duration_tip": "Koha e plotë e ekzekutimit të ciklit nga fillimi deri në fund.",
         "energy_tip": "Energjia e plotë e konsumuar (kWh). Llogaritur duke integruar fuqinë me kalimin e kohës.",
-        "cost_tip": "Kostoja e energjisë për këtë cikël, e ngrirë në përfundim duke përdorur çmimin në fuqi atëherë (energjia x çmimi për kWh). Vendos një çmim te Cilësimet për ta plotësuar.",
+        "cost_tip": "Kostoja e energjisë për këtë cikël, e ngrirë në përfundim. Kur është aktive Kosto e ponderuar sipas kohës, kurba e fuqisë faturohet me çmimin në fuqi në çdo çast; përndryshe energjia x çmimi i vetëm në fuqi në fund. Vendos një çmim te Cilësimet për ta plotësuar.",
         "confidence_tip": "Besueshmëria e përputhjes së profilit (0-100%). Sa afër përputhej kurba e fuqisë së ciklit me programin e identifikuar.",
         "health_tip": "Shëndeti ML i ciklit (më lart = më mirë). Kliko një cikël për ta inspektuar dhe shqyrtuar.",
-        "flags_tip": "Flamujt e rishikimit, anomalive dhe burimit për ciklin. Vendosni miun mbi ikonë për detaje."
+        "flags_tip": "Flamujt e rishikimit, anomalive dhe burimit për ciklin. Vendosni miun mbi ikonë për detaje.",
+        "cost_dynamic_tip": "E ponderuar sipas kohës: e faturuar me çmimin në fuqi gjatë ciklit (efektivisht {price} {cur}/kWh)."
     },
     "stat": {
         "avg": "mesatare",
@@ -2091,7 +2096,8 @@
             "golden": "Ripërpunim: shënimi i cikleve referues",
             "suggestions": "Ripërpunim: sugjerime",
             "ml_training": "Ripërpunim: trajnimi i ML-së",
-            "health": "Ripërpunim: shëndeti i cikleve"
+            "health": "Ripërpunim: shëndeti i cikleve",
+            "costs": "Ripërpunim: kostot e energjisë"
         },
         "pg_sweep": {
             "optimize": "Optimizim: {param}"

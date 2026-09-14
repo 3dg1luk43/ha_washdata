@@ -325,9 +325,11 @@ const _SETTINGS_SECTIONS = [
       { key: 'energy_sensor', label: 'Energy Meter Entity', type: 'entity', domain: 'sensor', optional: true,
         doc: 'Optional cumulative energy counter (total_increasing kWh/Wh, e.g. the plug\'s own lifetime meter). When set, each cycle\'s reported energy is taken from this counter\'s start-to-end delta, which avoids the under-counting you get from integrating a slow-reporting power sensor. Falls back to the integrated value if the reading is missing, its unit is unknown, or the delta is not positive. Leave blank to keep integrating the power sensor.' },
       { key: 'energy_price_entity', label: 'Energy Price Entity', type: 'entity', domain: 'sensor', basic: true,
-        doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. Each cycle freezes the price in effect when it finished.' },
+        doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. With Time-Weighted Cost on, each cycle is charged at the price in force at every moment it ran; otherwise the price in effect when it finished is frozen onto it.' },
       { key: 'energy_price_static', label: 'Static Energy Price (per kWh)', type: 'number', step: 0.001, min: 0, basic: true,
         doc: 'Fixed price per kWh used for cost figures when no live price entity is set above.' },
+      { key: 'energy_price_dynamic', label: 'Time-Weighted Cost', type: 'checkbox', def: true, basic: true,
+        doc: 'Charge each cycle at the price in force at every moment it ran, instead of the single price current when it finished. Only applies to a price entity (a static price cannot move). Needs no extra setup: the price is tracked live while the cycle runs, and Process History under Diagnostics recosts older cycles from the recorder. Off = the classic behaviour, one price frozen at the end.' },
       { key: 'peak_rate_threshold', label: 'Peak-Rate Threshold (per kWh)', type: 'number', step: 0.001, min: 0, def: 0, clearable: true,
         doc: 'When a cycle starts and the current price per kWh is at or above this value, append a peak-rate tip to the start notification. 0 or blank disables the tip.' },
       { key: 'peak_rate_message', label: 'Peak-Rate Message', type: 'text', def: '', placeholder: 'Running at peak rate ({price}/kWh).',
@@ -4594,7 +4596,18 @@ class HaWashdataPanel extends HTMLElement {
     };
 
     const cur = (this._hass && this._hass.config && this._hass.config.currency) || '';
-    const costCell = c => c.cost != null ? `${c.cost.toFixed(2)}${cur ? ' ' + cur : ''}` : '-';
+    const costCell = c => {
+      if (c.cost == null) return '-';
+      const txt = `${c.cost.toFixed(2)}${cur ? ' ' + cur : ''}`;
+      // A time-weighted cost (#426) is a different claim than a flat one, so say
+      // which price produced it rather than leaving the two indistinguishable.
+      if (c.energy_price_mode === 'dynamic' && c.energy_price != null) {
+        const tip = this._t('col.cost_dynamic_tip', { price: c.energy_price.toFixed(4), cur },
+          `Time-weighted: charged at the price in force during the cycle (effective ${c.energy_price.toFixed(4)} ${cur}/kWh).`);
+        return `<span title="${_esc(tip)}" style="border-bottom:1px dotted var(--secondary-text-color)">${txt}</span>`;
+      }
+      return txt;
+    };
     const rows = cycles.map(c => {
       const prog = c.profile_name || c.matched_profile;
       const conf = c.match_confidence != null ? c.match_confidence * 100 : null;
@@ -4627,7 +4640,7 @@ class HaWashdataPanel extends HTMLElement {
       ${_th(this._t('lbl.date', {}, 'Date'), 'date', col === 'date', dir, 'cycsort', '', this._t('col.date_tip', {}, 'Date and time the cycle started.'))}
       ${_th(this._t('lbl.duration', {}, 'Duration'), 'duration', col === 'duration', dir, 'cycsort', 'right', this._t('col.duration_tip', {}, 'Total cycle run time from start to end.'))}
       ${_th(this._t('lbl.energy', {}, 'Energy'), 'energy', col === 'energy', dir, 'cycsort', 'right', this._t('col.energy_tip', {}, 'Total energy consumed (kWh). Computed by integrating power over time.'))}
-      ${_th(this._t('lbl.cost', {}, 'Cost'), 'cost', col === 'cost', dir, 'cycsort', 'right', this._t('col.cost_tip', {}, 'Energy cost for this cycle, frozen at completion using the price in effect then (energy x price per kWh). Set a price under Settings to populate it.'))}
+      ${_th(this._t('lbl.cost', {}, 'Cost'), 'cost', col === 'cost', dir, 'cycsort', 'right', this._t('col.cost_tip', {}, 'Energy cost for this cycle, frozen at completion. With Time-Weighted Cost on, the power trace is charged at the price in force at each moment; otherwise energy x the single price in effect at the end. Set a price under Settings to populate it.'))}
       ${_th(this._t('lbl.confidence', {}, 'Confidence'), 'confidence', col === 'confidence', dir, 'cycsort', 'right', this._t('col.confidence_tip', {}, 'Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.'))}
     </tr></thead>`;
 
@@ -7873,7 +7886,7 @@ class HaWashdataPanel extends HTMLElement {
       ${this._canFull() ? `<div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.maintenance', {}, 'Maintenance Actions')}</div>
         <div style="display:flex;flex-direction:column;gap:12px">
-          <div><strong>${this._t('hdr.process_history', {}, 'Process History')}</strong><p class="wd-info" style="margin:4px 0">${this._t('msg.process_history_hint', {}, 'Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), and recompute cycle health. Run this after a batch of reviews.')}</p>
+          <div><strong>${this._t('hdr.process_history', {}, 'Process History')}</strong><p class="wd-info" style="margin:4px 0">${this._t('msg.process_history_hint', {}, 'Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), recost cycles against your recorded energy prices, and recompute cycle health. Run this after a batch of reviews.')}</p>
             <button class="wd-btn wd-btn-secondary" data-action="reprocess-history">${this._t('btn.process_history', {}, 'Process Now')}</button></div>
           <div><strong>${this._t('hdr.clear_debug', {}, 'Clear Debug Traces')}</strong><p class="wd-info" style="margin:4px 0">${this._t('msg.clear_debug_hint', {}, 'Remove stored debug data to free space.')}</p>
             <button class="wd-btn wd-btn-secondary" data-action="clear-debug">${this._t('btn.clear_debug', {}, 'Clear Debug Data')}</button></div>
@@ -12050,7 +12063,7 @@ class HaWashdataPanel extends HTMLElement {
       this._fetchToolsData(eid).then(() => this._render());
 
     } else if (a === 'reprocess-history') {
-      this._modal = { type: 'confirm', title: this._t('modal.process_history_title', {}, 'Process History'), message: this._t('modal.process_history_msg', {}, 'Re-run matching, refresh suggestions, retrain ML (if enabled) and recompute cycle health across all stored cycles. This may take a while.'), okLabel: this._t('modal.process_history_ok', {}, 'Process'),
+      this._modal = { type: 'confirm', title: this._t('modal.process_history_title', {}, 'Process History'), message: this._t('modal.process_history_msg', {}, 'Re-run matching, refresh suggestions, retrain ML (if enabled), recost cycles against recorded energy prices and recompute cycle health across all stored cycles. This may take a while.'), okLabel: this._t('modal.process_history_ok', {}, 'Process'),
         onOk: () => this._kickAndTrack({ type: `${_DOMAIN}/reprocess_history`, entry_id: eid }, 'reprocess', async (r) => {
           const nc = r.count || 0;
           const bits = [this._t('toast.processed_cycles', {n: nc}, nc + ' cycles')];

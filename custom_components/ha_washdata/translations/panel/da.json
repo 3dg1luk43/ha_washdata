@@ -64,7 +64,7 @@
     "overrun": "Løb længere end normalt",
     "underrun": "Færdig hurtigere end normalt",
     "poor_fit": "dårlig kvalitet",
-    "poor_fit_tip": "Inkonsekvent kamphistorik – overvej at genopbygge denne profil",
+    "poor_fit_tip": "Inkonsekvent matchhistorik: overvej at genopbygge denne profil",
     "restart_gap_tip": "{n} HA-genstartsgab: strømsporet har et hul",
     "reviewed": "Gennemgået",
     "steady": "→ stabil",
@@ -354,7 +354,7 @@
     "pg_settings_source": "Indstillingernes kilde",
     "phase_catalog": "Fasekatalog",
     "playground": "Legeplads",
-    "process_history": "Proceshistorie",
+    "process_history": "Behandl historik",
     "settings_history": "Indstillingshistorik",
     "status": "Status",
     "status_graph": "Statusgraf",
@@ -764,7 +764,7 @@
     "merge_cycles": "Flet {n} cyklusser",
     "new_group": "Ny profilgruppe",
     "new_phase": "Ny fase",
-    "process_history_msg": "Kør matching igen, opdater forslag, gentræn ML (hvis aktiveret) og genberegn cyklernes tilstand på tværs af alle gemte cyklusser. Dette kan tage et øjeblik.",
+    "process_history_msg": "Kør matching igen, opdater forslag, gentræn ML (hvis aktiveret), genberegn cyklussernes omkostninger ud fra registrerede energipriser, og genberegn cyklernes tilstand på tværs af alle gemte cyklusser. Dette kan tage et stykke tid.",
     "process_history_ok": "Behandl",
     "process_history_title": "Behandl historik",
     "process_recording": "Behandl optagelse",
@@ -910,7 +910,7 @@
     "preferences_admin": "Præferencer, panel og adgangskontrol",
     "preferences_adv": "Præferencer",
     "prefs_personal": "Disse gælder kun for din Home Assistant-konto.",
-    "process_history_hint": "Kør matching igen på alle gemte cyklusser, opdater justeringsforslag, gentræn ML-modellerne (hvis aktiveret) og genberegn cyklernes tilstand. Kør dette efter en batch af gennemgange.",
+    "process_history_hint": "Kør matching igen på alle gemte cyklusser, opdater justeringsforslag, gentræn ML-modellerne (hvis aktiveret), genberegn cyklussernes omkostninger ud fra dine registrerede energipriser, og genberegn cyklernes tilstand. Kør dette efter en batch af gennemgange.",
     "profile_deleted": "Profil slettet",
     "profile_poor_health_detail": "Cykler, der er tildelt denne profil, har inkonsekvente former eller lav tillid. Overvej at genopbygge konvolutten eller gennemgå mærkede cyklusser.",
     "profiles_intro": "Klik på en profil for statistik, faser og oprydning. Gruppér næsten identiske programmer (samme form/varighed, forskellig temperatur eller centrifugering), så du kan matche pålideligt valg mellem dem.",
@@ -1095,7 +1095,7 @@
     "energy_weight": "Trin 4: hvor stærkt energioverensstemmelse påvirker slutscoren (standard 0,22)",
     "profile_match_min_duration_ratio": "Trin 1: korteste cykellængde som brøkdel af profilvarighed; standard 0,1 (10%)",
     "profile_match_max_duration_ratio": "Trin 1: længste cykellængde som brøkdel af profilvarighed; standard 1,5 (150%)",
-    "keep_min_score": "Trin 2: laveste score for at forblive i kampen; standard 0,1 tillader svage kandidater, senere trin vælger bedst",
+    "keep_min_score": "Trin 2: minimumsscore for at komme videre; standard 0,1 tillader svage match, senere trin vælger det bedste",
     "dtw_blend": "Trin 3: 0 = kun kernescore, 1 = kun DTW-score, 0,5 = ligelig blanding (standard)",
     "dtw_ensemble_w": "Trin 3 (ensemble-tilstand): vægt på skaleret L1 kontra derivativ DTW; standard 0,7 foretrækker niveaubevidst",
     "dtw_ddtw_scale": "Trin 3: DDTW-halvmætningsafstand; mindre = mere formfølsom (standard 30)",
@@ -1225,7 +1225,7 @@
       "label": "Maks. anti-rynkeeffekt"
     },
     "auto_label_confidence": {
-      "doc": "Hvis kampresultatet ved cyklusslut er på eller over dette, mærkes programmet automatisk uden nogen bekræftelsesprompt. Hæv den for at kræve større sikkerhed før auto-mærkning; sænk den for at automatisere mere. Fungerer sammen med Learning Confidence under den.",
+      "doc": "Hvis matchscoren ved cyklusslut er på eller over denne, mærkes programmet automatisk uden nogen bekræftelsesprompt. Hæv den for at kræve større sikkerhed før automatisk mærkning; sænk den for at automatisere mere. Fungerer sammen med Læringskonfidens nedenunder.",
       "label": "Auto-mærkning konfidens"
     },
     "auto_maintenance": {
@@ -1273,7 +1273,7 @@
       "label": "Slutgentagelsesantal"
     },
     "energy_price_entity": {
-      "doc": "Sensor med den aktuelle elpris pr. kWh (f.eks. en dynamisk tarif). Har forrang over den statiske pris nedenfor. Hver cyklus fryser den gældende pris, når den er færdig.",
+      "doc": "Sensor med den aktuelle elpris pr. kWh (f.eks. en dynamisk tarif). Har forrang over den statiske pris nedenfor. Med Tidsvægtede omkostninger slået til beregnes hver cyklus til den pris, der gjaldt i hvert øjeblik, den kørte; ellers fryses den pris, der gjaldt, da den sluttede, fast på den.",
       "label": "Energiprisenhed"
     },
     "energy_price_static": {
@@ -1301,7 +1301,7 @@
       "label": "Inverter ekstern udløser (udløs ved SLUK)"
     },
     "learning_confidence": {
-      "doc": "Hvis kampresultatet falder mellem dette og Auto-Label Confidence, beder en feedbackmeddelelse dig om at verificere det identificerede program. Under denne score er kampen for usikker til at dukke op. Skal holdes under Auto-label konfidens.",
+      "doc": "Hvis matchscoren ligger mellem denne og Auto-mærkning konfidens, beder en feedbackmeddelelse dig om at bekræfte det identificerede program. Under denne score er matchet for usikkert til at blive vist. Skal holdes under Auto-mærkning konfidens.",
       "label": "Læringskonfidens"
     },
     "linked_device": {
@@ -1369,7 +1369,7 @@
       "label": "Send HA-hændelser til notifikationer"
     },
     "notify_icon": {
-      "doc": "Valgfrit mdi-ikon for meddelelsen (f.eks. mdi:vaskemaskine). Lad stå tomt for platformens standard.",
+      "doc": "Valgfrit mdi-ikon for meddelelsen (f.eks. mdi:washing-machine). Lad stå tomt for platformens standard.",
       "label": "Notifikationsikon"
     },
     "notify_live_chronometer": {
@@ -1469,7 +1469,7 @@
       "label": "Matchtærskel"
     },
     "profile_unmatch_threshold": {
-      "doc": "Hvis en direkte midt-cyklus-kamp falder under denne score, slettes den foreløbige identifikation. Hold det lidt under Match Threshold, så et kort dyk i ligheden ikke vender skærmen tilbage til uovertruffen.",
+      "doc": "Hvis et live-match midt i cyklussen falder under denne score, slettes den foreløbige identifikation. Hold den lidt under Matchtærskel, så et kort dyk i lighed ikke sætter visningen tilbage til uden match.",
       "label": "Fejlmatchtærskel"
     },
     "progress_reset_delay": {
@@ -1630,6 +1630,10 @@
     "profile_evidence_sources": {
       "label": "Cyklusser, der former et program",
       "doc": "Hvilke cyklusser der bruges til at opbygge hvert programs effektkurve og til at matche en afsluttet cyklus mod den. Fravælger du en type, former den ikke længere dine programmer, uden at noget slettes - cyklusserne bliver i din Cykler-liste og kan stadig mærkes eller fjernes. Nyttigt, hvis du ikke stoler på importerede data. Statistikken påvirkes ikke: den tæller altid kun de cyklusser, som denne maskine faktisk har kørt. At fravælge alt ignoreres, da et program uden cyklusser bag sig aldrig kunne matche."
+    },
+    "energy_price_dynamic": {
+      "label": "Tidsvægtede omkostninger",
+      "doc": "Beregn hver cyklus til den pris, der gjaldt i hvert øjeblik, den kørte, i stedet for den ene pris, der gjaldt, da den sluttede. Gælder kun for en prisenhed (en statisk pris kan ikke ændre sig). Kræver ingen ekstra opsætning: prisen følges live, mens cyklussen kører, og \"Behandl historik\" under Diagnostik genberegner omkostningerne for ældre cyklusser ud fra recorderen. Fra = den klassiske adfærd, én pris frosset ved slutningen."
     }
   },
   "setting_group": {
@@ -2013,10 +2017,11 @@
     "date_tip": "Dato og klokkeslæt, hvor cyklussen startede.",
     "duration_tip": "Samlet kørselstid for cyklussen fra start til slut.",
     "energy_tip": "Samlet forbrugt energi (kWh). Beregnet ved at integrere effekten over tid.",
-    "cost_tip": "Energiomkostning for denne cyklus, låst ved afslutningen ud fra den pris, der var gældende da (energi x pris pr. kWh). Angiv en pris under Indstillinger for at udfylde den.",
+    "cost_tip": "Energiomkostninger for denne cyklus, frosset ved afslutningen. Med Tidsvægtede omkostninger slået til beregnes effektkurven til den pris, der gjaldt i hvert øjeblik, ellers energi x den ene pris, der gjaldt til sidst. Angiv en pris under Indstillinger for at udfylde den.",
     "confidence_tip": "Profilmatchkonfidens (0-100 %). Hvor tæt cyklussens effektkurve matchede det identificerede program.",
     "health_tip": "ML-cyklussundhed (højere = bedre). Klik på en cyklus for at inspicere og gennemgå den.",
-    "flags_tip": "Gennemgangs-, anomali- og kildeflags for cyklussen. Hold musen over et ikon for detaljer."
+    "flags_tip": "Gennemgangs-, anomali- og kildeflags for cyklussen. Hold musen over et ikon for detaljer.",
+    "cost_dynamic_tip": "Tidsvægtet: beregnet til den pris, der gjaldt under cyklussen (effektivt {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "gns.",
@@ -2090,7 +2095,8 @@
       "golden": "Genbehandling: udfylder referencecyklusser",
       "suggestions": "Genbehandling: forslag",
       "ml_training": "Genbehandling: ML-træning",
-      "health": "Genbehandling: cyklussundhed"
+      "health": "Genbehandling: cyklussundhed",
+      "costs": "Genbehandling: energiomkostninger"
     },
     "pg_sweep": {
       "optimize": "Optimér: {param}"
