@@ -177,6 +177,44 @@ def test_pinning_a_program_with_a_garbage_duration_clears_it_too(
     assert manager._matched_profile_duration is None
 
 
+def test_pinning_a_program_with_an_infinite_duration_clears_it_too(
+    manager: WashDataManager,
+) -> None:
+    """``inf`` survives a plain ``> 0`` test, unlike the garbage above.
+
+    ``sensor.py`` publishes the countdown as ``int(time_remaining / 60)``, and
+    ``int(inf)`` raises OverflowError, so an imported profile carrying ``"inf"``
+    (or ``1e400``, which parses to it) breaks the sensor on every update rather
+    than once. Same rule as ``_finite_power`` for readings.
+    """
+    manager.profile_store.get_profiles = MagicMock(
+        return_value={
+            PROGRAM: {"avg_duration": 3600.0},
+            "Endless": {"avg_duration": "inf"},
+            "Huge": {"avg_duration": 1e400},
+            "Backwards": {"avg_duration": -60.0},
+        }
+    )
+    manager.detector.state = STATE_RUNNING
+
+    for name in ("Endless", "Huge", "Backwards"):
+        manager.set_manual_program(PROGRAM)
+        assert manager._matched_profile_duration == 3600.0
+        assert manager.set_manual_program(name) is True
+        assert manager._matched_profile_duration is None, name
+
+
+def test_the_profile_duration_guard_keeps_every_usable_value(
+    manager: WashDataManager,
+) -> None:
+    """The guard is a filter, not a reinterpretation: real durations pass through."""
+    assert manager._profile_duration(3600.0) == 3600.0
+    assert manager._profile_duration("900") == 900.0
+    assert manager._profile_duration(0.5) == 0.5
+    for bad in (None, "", "soon", 0, 0.0, -1.0, float("nan"), float("inf"), float("-inf")):
+        assert manager._profile_duration(bad) is None, bad
+
+
 def test_clearing_the_duration_refreshes_the_estimate(
     manager: WashDataManager,
 ) -> None:

@@ -164,7 +164,7 @@ screenshot tour.
 | `sensor.<name>_time_remaining` | Smart countdown (locks during high-variance phases) |
 | `sensor.<name>_total_duration` | Elapsed + remaining. Ideal for `timer-bar-card`. |
 | `sensor.<name>_cycle_progress` | 0-100% |
-| `sensor.<name>_cycle_count` | Lifetime completed cycles - use to schedule maintenance by count |
+| `sensor.<name>_cycle_count` | Lifetime appliance runs, interrupted and force-stopped ones included - use to schedule maintenance by count |
 | `sensor.<name>_energy_total` | Lifetime kWh (`total_increasing`) - add to the HA **Energy dashboard** |
 | `sensor.<name>_current_phase` | Active phase label ("Rinsing", "Spin") |
 | `sensor.<name>_pump_runs_today` | *(Pump type only)* completed pump cycles in a rolling 24 h |
