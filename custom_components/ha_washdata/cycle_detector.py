@@ -22,7 +22,7 @@ import itertools
 import logging
 import math
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Callable, cast
 import numpy as np
 
@@ -65,6 +65,7 @@ from .const import (
     TERMINAL_DROP_OFF_DELAY_SECONDS,
     ENDING_HARD_FINALIZE_RATIO,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
+    GATE_CADENCE_MEDIAN_FACTOR,
     STANDBY_BAND_FINALIZE_DEVICE_TYPES,
     STANDBY_BAND_MIN_RATIO,
     STANDBY_BAND_WINDOW_S,
@@ -403,17 +404,47 @@ class CycleDetector:
         self._preserve_delay_band_on_off: bool = False
 
     @property
+    def _gate_cadence(self) -> float:
+        """Cadence the pause/end gates are sized from (#424/#427).
+
+        ``_p95_dt`` is the 2nd-largest of the last 20 intervals by construction,
+        so it tracks the worst *gap* rather than the reporting rate. That is the
+        right input for the outage ceilings (a gap must be judged against the
+        worst gap we consider normal) but the wrong one for the gates below,
+        which multiply it by three: once a publish-on-change plug falls silent at
+        standby, the only intervals left are the long quiet ones, p95 collapses
+        onto them, and each gate becomes ~3x the silence it is supposed to be
+        measuring. The accumulator advances one interval per reading, so the
+        cycle then needs ~3 more readings - a gate that is set by, and grows
+        with, its own input. Measured on the #427 trace: a 297 s sensor silence
+        followed by a 481 s keepalive lifted the end gate from 45 s to 1455 s and
+        held the cycle in PAUSED for 25.5 min.
+
+        Capping p95 at a multiple of the *median* keeps the estimate robust: a
+        genuinely slow sensor reports slowly every time, so its median equals its
+        p95 and the cap never binds (a 300 s-cadence meter keeps its 900 s gate);
+        a fast sensor that went quiet has a small median, so the isolated holes
+        cannot triple the gate. Only these two gates read it - ``_p95_dt`` itself
+        is left alone so every outage ceiling keeps the cadence snapshot it was
+        tuned against (register items 213, 215).
+        """
+        if len(self._recent_dts) < 5:
+            return self._p95_dt
+        median_dt = float(np.median(self._recent_dts))
+        return min(self._p95_dt, GATE_CADENCE_MEDIAN_FACTOR * median_dt)
+
+    @property
     def _dynamic_pause_threshold(self) -> float:
         """Calculate dynamic pause threshold based on sampling cadence."""
         # User requirement: T_pause >= 3 * p95_update_interval
         # Default 15s or 3 * p95
-        return max(15.0, 3.0 * self._p95_dt)
+        return max(15.0, 3.0 * self._gate_cadence)
 
     @property
     def _dynamic_end_threshold(self) -> float:
         """Calculate dynamic end candidate threshold."""
         # Keep this generic for pause->ending transitions across all device types.
-        base = 3.0 * self._p95_dt
+        base = 3.0 * self._gate_cadence
         # Ensure end threshold is at least 15s greater than pause threshold
         return max(base, self._dynamic_pause_threshold + 15.0)
 
@@ -1863,12 +1894,15 @@ class CycleDetector:
                                 getattr(self, "_last_match_confidence", 0.0),
                                 end_spike_seen,
                             )
-                            # Keep tail when smart terminating (matches profile duration)
+                            # Keep tail when smart terminating (matches profile
+                            # duration), but only as far as the program can
+                            # actually reach - see _keep_tail_cap (#424).
                             self._finish_cycle(
                                 timestamp,
                                 status="completed",
                                 termination_reason=TerminationReason.SMART,
                                 keep_tail=True,
+                                tail_cap=self._keep_tail_cap(start_time),
                             )
                             return
 
@@ -2011,7 +2045,12 @@ class CycleDetector:
                         # to _last_active_time which may be set by a terminal drain
                         # spike mid-ENDING, producing a falsely short cycle duration.
                         keep_tail = self._config.device_type == "dishwasher"
-                        self._finish_cycle(timestamp, status="completed", keep_tail=keep_tail)
+                        self._finish_cycle(
+                            timestamp,
+                            status="completed",
+                            keep_tail=keep_tail,
+                            tail_cap=self._keep_tail_cap(start_time),
+                        )
                         return
 
                     # Compute energy in recent window
@@ -2028,7 +2067,12 @@ class CycleDetector:
                             return
 
                         keep_tail = self._config.device_type == "dishwasher"
-                        self._finish_cycle(timestamp, status="completed", keep_tail=keep_tail)
+                        self._finish_cycle(
+                            timestamp,
+                            status="completed",
+                            keep_tail=keep_tail,
+                            tail_cap=self._keep_tail_cap(start_time),
+                        )
                     else:
 
                         self._logger.debug(
@@ -2760,12 +2804,47 @@ class CycleDetector:
         # Tertiary check: If duration exceeded max tolerance, allow finish (failsafe).
         return False
 
+    def _keep_tail_cap(self, start_time: datetime) -> datetime | None:
+        """Latest end time a *kept* tail may claim (#424).
+
+        The paths that keep their tail do so because the tail can be real cycle
+        time: a dishwasher's near-0 W passive drying phase sits between the last
+        drain spike and the actual end of the programme (issue #43), so snapping
+        back to ``_last_active_time`` would store a falsely short cycle. But they
+        fire on accumulated quiet time, and on a publish-on-change plug that wait
+        is minutes of *post-appliance* standby - which stamping ``timestamp`` as
+        the end time banked as cycle time.
+
+        Measured on the #424 reporter's dishwasher: every cycle that ended via
+        `timeout` stored a 0-29 s tail (237-239 min, matching the appliance), and
+        every cycle that ended via `smart` stored a 96-1239 s tail (240-260 min),
+        with ``_last_active_time`` unchanged across the whole history - only the
+        termination path differed. It also self-amplifies, because the inflated
+        duration feeds ``avg_duration``, which raises ``expected_duration``,
+        which delays the next Smart Termination further (the second reporter's
+        profile had already drifted 63 -> 70.5 min).
+
+        So cap the kept tail at whichever is later: the last above-threshold
+        reading, or the matched profile's expected end. Time after *both* is time
+        the appliance drew nothing AND that lies beyond the known length of the
+        programme it matched, so nothing real can live there. Asymmetric -
+        shorten-only, and never earlier than the expected end, so a genuine
+        passive drying phase still lands inside the stored cycle. Returns None
+        for an unmatched cycle, which has no expected end to anchor against and
+        is left exactly as before.
+        """
+        if self._expected_duration <= 0:
+            return None
+        expected_end = start_time + timedelta(seconds=self._expected_duration)
+        return max(expected_end, self._last_active_time or expected_end)
+
     def _finish_cycle(
         self,
         timestamp: datetime,
         status: str = "completed",
         termination_reason: str = TerminationReason.TIMEOUT,
         keep_tail: bool = False,
+        tail_cap: datetime | None = None,
     ) -> None:
         """Finalize cycle.
 
@@ -2777,11 +2856,19 @@ class CycleDetector:
                        trailing zero readings (e.g. Smart Termination).
                        If False (default), snap back to last active time and trim
                        trailing zeros (e.g. Timeout).
+            tail_cap: Latest end time a kept tail may claim. Ignored when
+                      ``keep_tail`` is False or when it is not earlier than
+                      ``timestamp``; readings past it are dropped so the stored
+                      trace and the stored duration stay consistent.
         """
 
         # Capture data before reset
+        readings = self._power_readings
         if keep_tail:
             end_time = timestamp
+            if tail_cap is not None and tail_cap < end_time:
+                end_time = tail_cap
+                readings = [r for r in readings if r[0] <= end_time]
         else:
             end_time = self._last_active_time or timestamp
 
@@ -2800,7 +2887,7 @@ class CycleDetector:
         # Trim leading/trailing zero readings for cleaner data
         # If we keep tail, we explicitly do NOT trim end zeros
         trimmed_readings = trim_zero_readings(
-            self._power_readings,
+            readings,
             threshold=self._config.stop_threshold_w,
             trim_end=not keep_tail,
         )

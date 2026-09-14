@@ -357,6 +357,17 @@ CYCLE_OVERRUN_ANOMALY_RATIO = 1.5
 ENDING_HARD_FINALIZE_RATIO = 2.0
 ENDING_HARD_FINALIZE_MIN_QUIET_S = 600.0  # continuous sub-threshold span floor
 
+# Cap on how far the RUNNING->PAUSED / PAUSED->ENDING gates may be stretched by
+# the p95 sampling cadence (#424/#427).  The gates are 3x a cadence estimate; p95
+# is the 2nd-largest of the last 20 intervals, so a publish-on-change plug that
+# falls silent at standby drives the estimate onto its own silence and the gates
+# grow with it.  ``CycleDetector._gate_cadence`` therefore clamps p95 to this
+# multiple of the median interval.  5x is deliberately loose: it is above any
+# plausible jitter ratio for a regularly-reporting sensor (whose median equals
+# its p95, so the cap never binds and slow meters keep their wide gates) while
+# still rejecting the isolated multi-minute holes that caused both reports.
+GATE_CADENCE_MEDIAN_FACTOR = 5.0
+
 # NOTE: STANDBY_BAND_* constants live further down, after the DEVICE_TYPE_*
 # definitions they reference (search "Standby-band stuck-in-RUNNING finalize").
 # Underrun anomaly: a cycle that finishes in less than this fraction of its
