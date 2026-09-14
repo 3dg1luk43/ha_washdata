@@ -517,3 +517,58 @@ async def test_a_zero_meter_reading_costs_zero_instead_of_the_trace():
 
     assert cycle["energy_price_mode"] == "fixed"
     assert cycle["cost"] == 0.0
+
+
+# ─── Non-finite prices (the _finite_power invariant, register item 211) ───────
+
+
+def test_compaction_drops_infinite_offsets_and_prices():
+    """``inf`` parses out of a sensor state like any other float, and one infinite
+    price makes every cost derived from the timeline infinite."""
+    points = [
+        (0.0, 0.10),
+        (float("inf"), 0.20),
+        (100.0, float("inf")),
+        (200.0, float("-inf")),
+        (300.0, float("nan")),
+        (400.0, 0.30),
+    ]
+    assert compact_price_timeline(points) == [(0.0, 0.10), (400.0, 0.30)]
+
+
+def test_a_non_finite_price_is_not_appended_to_the_timeline():
+    """nan also defeats the dedup (it compares unequal to itself), so every report
+    would append a point."""
+    mgr = _mgr()
+    mgr.detector.state = "running"
+    mgr._price_timeline = []
+    mgr._append_price_sample = WashDataManager._append_price_sample.__get__(
+        mgr, WashDataManager
+    )
+
+    for bad in (float("nan"), float("inf"), float("-inf"), "nan", "inf"):
+        mgr._append_price_sample(bad)
+    assert mgr._price_timeline == []
+
+    mgr._append_price_sample(0.25)
+    assert [p for _, p in mgr._price_timeline] == [0.25]
+
+
+def test_a_non_finite_price_entity_reads_as_no_price(hass, price_entry):
+    """An infinite reading must fall back, not freeze an infinite cost on the cycle."""
+    from unittest.mock import patch
+
+    from custom_components.ha_washdata.manager import WashDataManager as _M
+
+    hass.config_entries.async_get_entry = MagicMock(return_value=price_entry)
+    with patch("custom_components.ha_washdata.manager.ProfileStore"), patch(
+        "custom_components.ha_washdata.manager.CycleDetector"
+    ):
+        mgr = _M(hass, price_entry)
+
+    hass.states.async_set("sensor.test_price", "inf")
+    assert mgr._resolve_energy_price() is None
+    hass.states.async_set("sensor.test_price", "nan")
+    assert mgr._resolve_energy_price() is None
+    hass.states.async_set("sensor.test_price", "0.42")
+    assert mgr._resolve_energy_price() == pytest.approx(0.42)

@@ -3003,6 +3003,11 @@ class WashDataManager:
             value = round(float(price), PRICE_TIMELINE_PRICE_DECIMALS)
         except (ValueError, TypeError):
             return
+        if not math.isfinite(value):
+            # Same rule as _finite_power: "nan"/"inf" parse cleanly and would ride
+            # into the stored timeline. nan also defeats the dedup below, since it
+            # compares unequal to itself, so every report would append a point.
+            return
         if self._price_timeline and self._price_timeline[-1][1] == value:
             return
         self._price_timeline.append((dt_util.now().timestamp(), value))
@@ -5213,15 +5218,24 @@ class WashDataManager:
             state = self.hass.states.get(price_entity)
             if state is not None:
                 try:
-                    return float(state.state)
+                    value = float(state.state)
                 except (ValueError, TypeError):
                     pass
+                else:
+                    # A non-finite reading is treated as no reading, exactly like an
+                    # unparseable one: returning it would freeze an infinite cost
+                    # onto the cycle (register item 211).
+                    if math.isfinite(value):
+                        return value
         static = options.get(CONF_ENERGY_PRICE_STATIC)
         if static is not None:
             try:
-                return float(static)
+                value = float(static)
             except (ValueError, TypeError):
                 pass
+            else:
+                if math.isfinite(value):
+                    return value
         return None
 
     async def _async_price_history(
