@@ -794,12 +794,20 @@ def projected_energy(
     price: float | None,
     end_expectation_fn: EndExpFn,
     logger: logging.Logger | None = None,
+    cost_so_far: float | None = None,
 ) -> tuple[float | None, float | None]:
     """Project total energy (Wh) and cost for the running cycle.
 
     Prefers the on-device ``total_energy`` regressor; otherwise falls back to
     ``energy_so_far / progress_fraction``. Returns ``(wh, cost)``; both values are
     ``None`` when progress is too low or there is no energy yet. Never raises.
+
+    ``cost_so_far`` is the dynamic-tariff cost already incurred (#426): the energy
+    consumed so far, charged at the price in force when it was consumed. When it
+    is given, only the *remaining* energy is charged at the current price, so a
+    cycle that ran through a cheap window is not retroactively repriced at the
+    expensive one it happens to be in now. The future half is still the current
+    price - forecasting the tariff is deliberately out of scope.
     """
     logger = logger or _LOGGER
     try:
@@ -820,7 +828,13 @@ def projected_energy(
             price_val = float(price)
         except (TypeError, ValueError):
             price_val = None
-        cost = (projected_wh / 1000.0) * price_val if price_val is not None else None
+        if price_val is None:
+            cost = None
+        elif cost_so_far is None:
+            cost = (projected_wh / 1000.0) * price_val
+        else:
+            remaining_wh = max(0.0, projected_wh - energy_so_far)
+            cost = float(cost_so_far) + (remaining_wh / 1000.0) * price_val
         return projected_wh, cost
     except Exception:  # noqa: BLE001 - projection must never break estimates
         return None, None

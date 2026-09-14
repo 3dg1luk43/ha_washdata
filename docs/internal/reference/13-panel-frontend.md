@@ -154,6 +154,7 @@ Start/stop/discard recording via `ha_washdata/start_recording`, `stop_recording`
 ### Table
 Sortable, filterable table of cycles. Columns:
 - Checkbox / status dot, Profile name, Flags, Status, Date, Duration, Energy, Cost, Confidence.
+  - **Cost** is rendered by `costCell`: a cycle costed against a moving tariff (`energy_price_mode === 'dynamic'`, #426) gets a dotted underline and a title carrying the effective price per kWh, so a time-weighted figure is distinguishable from one frozen at a single price.
 
 Column sorting via `_cycleSort { col, dir }`. Filter bar: free-text (profile name) + status filter dropdown.
 

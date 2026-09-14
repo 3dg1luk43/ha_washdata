@@ -354,7 +354,7 @@
     "pg_settings_source": "Iestatījumu avots",
     "phase_catalog": "Fāzes katalogs",
     "playground": "Izmēģinājumu laukums",
-    "process_history": "Procesa vēsture",
+    "process_history": "Apstrādāt vēsturi",
     "settings_history": "Iestatījumu vēsture",
     "status": "Statuss",
     "status_graph": "Statusa grafiks",
@@ -764,7 +764,7 @@
     "merge_cycles": "Apvienot {n} ciklus",
     "new_group": "Jauna profilu grupa",
     "new_phase": "Jauns posms",
-    "process_history_msg": "Atkārtoti palaist atbilstību, atjaunināt ieteikumus, pārtrenēt ML (ja iespējots) un pārrēķināt ciklu veselību visos saglabātajos ciklos. Tas var aizņemt kādu laiku.",
+    "process_history_msg": "Atkārtoti palaist atbilstību, atjaunināt ieteikumus, pārtrenēt ML (ja iespējots), pārrēķināt ciklu izmaksas pēc reģistrētajām enerģijas cenām un pārrēķināt ciklu veselību visos saglabātajos ciklos. Tas var aizņemt kādu laiku.",
     "process_history_ok": "Apstrādāt",
     "process_history_title": "Apstrādāt vēsturi",
     "process_recording": "Procesa ierakstīšana",
@@ -910,7 +910,7 @@
     "preferences_admin": "Preferences, panelis un piekļuves kontrole",
     "preferences_adv": "Preferences",
     "prefs_personal": "Tie attiecas tikai uz jūsu Home Assistant kontu.",
-    "process_history_hint": "Atkārtoti palaist atbilstību visiem saglabātajiem cikliem, atjaunināt precizēšanas ieteikumus, pārtrenēt ML modeļus (ja iespējots) un pārrēķināt ciklu veselību. Palaidiet to pēc pārskatu partijas.",
+    "process_history_hint": "Atkārtoti palaist atbilstību visiem saglabātajiem cikliem, atjaunināt precizēšanas ieteikumus, pārtrenēt ML modeļus (ja iespējots), pārrēķināt ciklu izmaksas pēc reģistrētajām enerģijas cenām un pārrēķināt ciklu veselību. Palaidiet to pēc vairāku ciklu pārskatīšanas.",
     "profile_deleted": "Profils dzēsts",
     "profile_poor_health_detail": "Šim profilam piešķirtajiem cikliem ir nekonsekventas formas vai zema ticamība. Apsveriet iespēju atjaunot aploksni vai pārskatīt marķētos ciklus.",
     "profiles_intro": "Noklikšķiniet uz profila, lai skatītu statistiku, fāzes un tīrīšanu. Grupējiet gandrīz identiskas programmas (tāda pati forma/ilgums, atšķirīga temperatūra vai centrifūga), lai tās varētu droši izvēlēties.",
@@ -1243,7 +1243,7 @@
       "label": "Beigu atkārtojumu skaits"
     },
     "energy_price_entity": {
-      "doc": "Sensors ar pašreizējo elektroenerģijas cenu par kWh (piemēram, dinamisks tarifs). Ir prioritāte pār zemāk norādīto statisko cenu. Katrs cikls iesaldē cenu spēkā, kad tas ir beidzies.",
+      "doc": "Sensors ar pašreizējo elektroenerģijas cenu par kWh (piemēram, dinamisks tarifs). Tam ir prioritāte pār zemāk norādīto statisko cenu. Ja ieslēgtas Laikā svērtās izmaksas, katrs cikls tiek rēķināts pēc cenas, kas bija spēkā katrā tā darbības brīdī; pretējā gadījumā tam tiek fiksēta cena, kas bija spēkā tā beigās.",
       "label": "Enerģijas cenas entītija"
     },
     "energy_price_static": {
@@ -1271,7 +1271,7 @@
       "label": "Invertēt ārējo aktivatoru (aktivēt pie IZSLĒGTS)"
     },
     "learning_confidence": {
-      "doc": "Ja atbilstības rezultāts ir starp šo un Auto-Label Confidence, atsauksmes paziņojumā tiek lūgts pārbaudīt identificēto programmu. Zem šī rezultāta spēle ir pārāk nenoteikta, lai to varētu atklāt. Jāsaglabā zem Auto-Label Confidence.",
+      "doc": "Ja atbilstības rezultāts ir starp šo un Automātiskās marķēšanas pārliecību, atsauksmes paziņojumā tiek lūgts pārbaudīt identificēto programmu. Zem šī rezultāta atbilstība ir pārāk nenoteikta, lai to rādītu. Tai jāpaliek zem Automātiskās marķēšanas pārliecības.",
       "label": "Mācīšanās pārliecība"
     },
     "linked_device": {
@@ -1439,7 +1439,7 @@
       "label": "Atbilstības slieksnis"
     },
     "profile_unmatch_threshold": {
-      "doc": "Ja tiešraides cikla vidus spēles rezultāts ir zemāks par šo rezultātu, provizoriskā identifikācija tiek dzēsta. Turiet to nedaudz zem atbilstības sliekšņa, lai īss līdzības kritums nemainītu displeju atpakaļ uz nepārspējamu.",
+      "doc": "Ja tiešraides atbilstības rezultāts cikla vidū noslīd zem šī rezultāta, provizoriskā identifikācija tiek dzēsta. Turiet to nedaudz zem Atbilstības sliekšņa, lai īss līdzības kritums nepārslēgtu attēlojumu atpakaļ uz stāvokli bez atbilstības.",
       "label": "Neatbilstības slieksnis"
     },
     "progress_reset_delay": {
@@ -1600,6 +1600,10 @@
     "profile_evidence_sources": {
       "label": "Cikli, kas veido programmu",
       "doc": "Kuri cikli tiek izmantoti katras programmas jaudas līknes izveidei un pabeigta cikla saskaņošanai ar to. Ja kādam veidam noņemat atzīmi, tas vairs neietekmē jūsu programmas, taču nekas netiek dzēsts - cikli paliek sarakstā Cikli, un tos joprojām var iezīmēt vai izņemt. Noderīgi, ja neuzticaties importētajiem datiem. Statistiku tas neietekmē: tajā vienmēr tiek ieskaitīti tikai tie cikli, ko šī ierīce patiešām ir izpildījusi. Visu atzīmju noņemšana tiek ignorēta, jo programma bez neviena cikla nekad nevarētu tikt saskaņota."
+    },
+    "energy_price_dynamic": {
+      "label": "Laikā svērtās izmaksas",
+      "doc": "Katra cikla izmaksas tiek rēķinātas pēc cenas, kas bija spēkā katrā tā darbības brīdī, nevis pēc vienas cenas, kas bija spēkā tā beigās. Darbojas tikai ar cenas entītiju (statiska cena nemainās). Papildu iestatīšana nav vajadzīga: cikla laikā cena tiek izsekota reāllaikā, bet sadaļā Diagnostika pieejamā funkcija Apstrādāt vēsturi pārrēķina vecāku ciklu izmaksas no recorder datiem. Izslēgts = klasiskā darbība, viena cena, kas fiksēta beigās."
     }
   },
   "setting_group": {
@@ -2013,10 +2017,11 @@
     "date_tip": "Datums un laiks, kad cikls sākās.",
     "duration_tip": "Kopējais cikla darbības laiks no sākuma līdz beigām.",
     "energy_tip": "Kopējā patērētā enerģija (kWh). Aprēķināta, integrējot jaudu laikā.",
-    "cost_tip": "Šā cikla enerģijas izmaksas, fiksētas pabeigšanas brīdī, izmantojot tobrīd spēkā esošo cenu (enerģija x cena par kWh). Iestatiet cenu sadaļā Iestatījumi, lai tās aizpildītu.",
+    "cost_tip": "Šā cikla enerģijas izmaksas, fiksētas pabeigšanas brīdī. Ja ieslēgtas Laikā svērtās izmaksas, jaudas līkne tiek rēķināta pēc katrā brīdī spēkā esošās cenas; pretējā gadījumā enerģija x viena cena, kas bija spēkā beigās. Iestatiet cenu sadaļā Iestatījumi, lai tās aizpildītu.",
     "confidence_tip": "Profila atbilstības pārliecība (0-100%). Cik cieši cikla jaudas līkne atbilda identificētajai programmai.",
     "health_tip": "ML cikla veselība (augstāks = labāk). Noklikšķiniet uz cikla, lai to apskatītu un pārskatītu.",
-    "flags_tip": "Cikla pārskatīšanas, anomāliju un avota karodziņi. Pārvietojiet peli virs ikonas, lai skatītu detaļas."
+    "flags_tip": "Cikla pārskatīšanas, anomāliju un avota karodziņi. Pārvietojiet peli virs ikonas, lai skatītu detaļas.",
+    "cost_dynamic_tip": "Laikā svērts: rēķināts pēc cikla laikā spēkā esošās cenas (faktiskā {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "vidēji",
@@ -2090,7 +2095,8 @@
       "golden": "Atkārtota apstrāde: atskaites ciklu atzīmēšana",
       "suggestions": "Atkārtota apstrāde: ieteikumi",
       "ml_training": "Atkārtota apstrāde: ML apmācība",
-      "health": "Atkārtota apstrāde: ciklu veselība"
+      "health": "Atkārtota apstrāde: ciklu veselība",
+      "costs": "Atkārtota apstrāde: enerģijas izmaksas"
     },
     "pg_sweep": {
       "optimize": "Optimizēšana: {param}"

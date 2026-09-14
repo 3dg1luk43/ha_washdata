@@ -15,7 +15,7 @@
     "needs_review": "Besoin d'un examen",
     "overrun": "A couru plus longtemps que d'habitude",
     "poor_fit": "qualité médiocre",
-    "poor_fit_tip": "Historique des matchs incohérent : envisagez de reconstruire ce profil",
+    "poor_fit_tip": "Historique de correspondance incohérent : envisagez de reconstruire ce profil",
     "restart_gap_tip": "{n} coupure redémarrage HA : la courbe de puissance a un trou",
     "reviewed": "Révisé",
     "steady": "→ stable",
@@ -306,7 +306,7 @@
     "pg_settings_source": "Origine des réglages",
     "phase_catalog": "Catalogue de phases",
     "playground": "Bac à sable",
-    "process_history": "Historique du processus",
+    "process_history": "Traiter l'historique",
     "settings_history": "Historique des paramètres",
     "status": "Statut",
     "status_graph": "Graphique d'état",
@@ -493,7 +493,7 @@
     "settings_basic": "De base",
     "settings_detail_level": "Niveau de détail des paramètres",
     "settings_overrides": "Remplacements de paramètres",
-    "show_debug": "Afficher la carte de débogage du match en direct sur la page Statut (confiance, ambiguïté, meilleurs candidats)",
+    "show_debug": "Afficher la carte de débogage de la correspondance en direct sur la page Statut (confiance, ambiguïté, meilleurs candidats)",
     "show_expected": "Afficher la superposition de courbe attendue (profil correspondant, orange)",
     "show_raw": "Afficher le commutateur de signal brut de la prise dans le graphique de puissance en direct",
     "sparkline": "Tendance récente de la durée des cycles",
@@ -716,7 +716,7 @@
     "merge_cycles": "Fusionner {n} cycles",
     "new_group": "Nouveau groupe de profils",
     "new_phase": "Nouvelle phase",
-    "process_history_msg": "Relancez la correspondance, actualisez les suggestions, réentraînez les modèles ML (si activés) et recalculez la santé des cycles sur tous les cycles enregistrés. Cela peut prendre un moment.",
+    "process_history_msg": "Relancez la correspondance, actualisez les suggestions, réentraînez les modèles ML (si activés), recalculez le coût des cycles d'après les prix de l'énergie enregistrés et recalculez la santé des cycles sur tous les cycles enregistrés. Cela peut prendre un moment.",
     "process_history_ok": "Traiter",
     "process_history_title": "Traiter l'historique",
     "process_recording": "Enregistrement du processus",
@@ -862,7 +862,7 @@
     "preferences_admin": "Préférences, panneau et contrôle d'accès",
     "preferences_adv": "Préférences",
     "prefs_personal": "Celles-ci s'appliquent uniquement à votre compte Home Assistant.",
-    "process_history_hint": "Relancez la correspondance sur tous les cycles enregistrés, actualisez les suggestions de réglage, réentraînez les modèles ML (si activés) et recalculez la santé des cycles. À exécuter après un lot de révisions.",
+    "process_history_hint": "Relancez la correspondance sur tous les cycles enregistrés, actualisez les suggestions de réglage, réentraînez les modèles ML (si activés), recalculez le coût des cycles d'après les prix de l'énergie enregistrés et recalculez la santé des cycles. À exécuter après un lot de révisions.",
     "profile_deleted": "Profil supprimé",
     "profile_poor_health_detail": "Les cycles attribués à ce profil ont des formes incohérentes ou un faible niveau de confiance. Pensez à reconstruire l’enveloppe ou à revoir les cycles étiquetés.",
     "profiles_intro": "Cliquez sur un profil pour les statistiques, les phases et le nettoyage. Regroupez des programmes presque identiques (même forme/durée, température ou essorage différents) afin de faire correspondre de manière fiable les choix entre eux.",
@@ -1225,7 +1225,7 @@
       "label": "Nombre de répétitions de fin"
     },
     "energy_price_entity": {
-      "doc": "Capteur avec le prix actuel de l'électricité par kWh (par exemple un tarif dynamique). Prévaut sur le prix statique ci-dessous. Chaque cycle gèle le prix en vigueur à sa fin.",
+      "doc": "Capteur avec le prix actuel de l'électricité par kWh (par exemple un tarif dynamique). Prévaut sur le prix statique ci-dessous. Avec Coût pondéré dans le temps activé, chaque cycle est facturé au prix en vigueur à chaque instant où il a tourné ; sinon, le prix en vigueur à sa fin lui est figé.",
       "label": "Entité de prix de l'énergie"
     },
     "energy_price_static": {
@@ -1253,7 +1253,7 @@
       "label": "Inverser le déclencheur externe (déclencher sur ARRÊT)"
     },
     "learning_confidence": {
-      "doc": "Si le score de correspondance se situe entre ceci et Auto-Label Confidence, une notification de retour vous demande de vérifier le programme identifié. En dessous de ce score, le match est trop incertain pour faire surface. Doit être conservé en dessous du niveau de confiance Auto-Label.",
+      "doc": "Si le score de correspondance se situe entre celui-ci et la Confiance d'étiquetage automatique, une notification de retour vous demande de vérifier le programme identifié. En dessous de ce score, la correspondance est trop incertaine pour être affichée. Doit rester en dessous de la Confiance d'étiquetage automatique.",
       "label": "Confiance d'apprentissage"
     },
     "linked_device": {
@@ -1421,7 +1421,7 @@
       "label": "Seuil de correspondance"
     },
     "profile_unmatch_threshold": {
-      "doc": "Si un match en direct à mi-cycle tombe en dessous de ce score, l'identification provisoire est effacée. Gardez-le un peu en dessous du seuil de correspondance afin qu'une brève baisse de similarité ne ramène pas l'affichage à un niveau inégalé.",
+      "doc": "Si une correspondance en direct en milieu de cycle tombe en dessous de ce score, l'identification provisoire est effacée. Gardez-le un peu en dessous du Seuil de correspondance afin qu'une brève baisse de similarité ne fasse pas repasser l'affichage à l'état sans correspondance.",
       "label": "Seuil de non-correspondance"
     },
     "progress_reset_delay": {
@@ -1457,7 +1457,7 @@
       "label": "Énergie de démarrage"
     },
     "start_threshold_w": {
-      "doc": "La puissance doit augmenter au-dessus de ce niveau pour confirmer qu’un cycle a commencé. Un réglage trop bas provoque des faux démarrages à partir de l'alimentation de veille ; des programmes trop élevés et qui démarrent lentement (remplissage à froid) sont manqués. Le moteur de suggestion règle cette valeur juste au-dessus de la puissance active la plus basse observée par la machine.",
+      "doc": "La puissance doit dépasser ce niveau pour confirmer qu'un cycle a commencé. Un réglage trop bas provoque de faux démarrages dus à la puissance de veille ; un réglage trop élevé fait manquer les programmes à démarrage lent (remplissage à froid). Le moteur de suggestion règle cette valeur juste au-dessus de la puissance active la plus basse observée sur la machine.",
       "label": "Seuil de démarrage"
     },
     "stop_threshold_w": {
@@ -1582,6 +1582,10 @@
     "profile_evidence_sources": {
       "label": "Cycles qui façonnent un programme",
       "doc": "Quels cycles servent à construire la courbe de puissance de chaque programme et à y comparer un cycle terminé. Décocher un type l'empêche de façonner vos programmes sans rien supprimer - les cycles restent dans votre liste Cycles et peuvent toujours être étiquetés ou supprimés. Utile si vous ne faites pas confiance aux données importées. Les statistiques ne sont pas concernées : elles ne comptent toujours que les cycles que cette machine a réellement effectués. Décocher tout est ignoré, car un programme sans aucun cycle derrière lui ne pourrait jamais correspondre."
+    },
+    "energy_price_dynamic": {
+      "label": "Coût pondéré dans le temps",
+      "doc": "Facture chaque cycle au prix en vigueur à chaque instant où il a tourné, au lieu du seul prix du moment où il s'est terminé. Ne s'applique qu'à une entité de prix (un prix statique ne peut pas varier). Aucune configuration supplémentaire n'est nécessaire : le prix est suivi en direct pendant le cycle, et Traiter l'historique, dans Diagnostic, recalcule le coût des anciens cycles à partir du recorder. Désactivé = le comportement classique, un seul prix figé à la fin."
     }
   },
   "setting_group": {
@@ -1965,10 +1969,11 @@
     "date_tip": "Date et heure de début du cycle.",
     "duration_tip": "Durée totale d'exécution du cycle, du début à la fin.",
     "energy_tip": "Énergie totale consommée (kWh). Calculée en intégrant la puissance dans le temps.",
-    "cost_tip": "Coût énergétique de ce cycle, figé à la fin en utilisant le prix alors en vigueur (énergie x prix par kWh). Définissez un prix dans les Paramètres pour le renseigner.",
+    "cost_tip": "Coût énergétique de ce cycle, figé à la fin. Avec Coût pondéré dans le temps activé, la courbe de puissance est facturée au prix en vigueur à chaque instant ; sinon, énergie x le seul prix en vigueur à la fin. Définissez un prix dans les Paramètres pour le renseigner.",
     "confidence_tip": "Confiance de correspondance du profil (0-100 %). À quel point la courbe de puissance du cycle correspondait au programme identifié.",
     "health_tip": "Santé du cycle par ML (plus élevé = mieux). Cliquez sur un cycle pour l'inspecter et l'examiner.",
-    "flags_tip": "Indicateurs de révision, d'anomalie et de source pour le cycle. Survolez une icône pour plus de détails."
+    "flags_tip": "Indicateurs de révision, d'anomalie et de source pour le cycle. Survolez une icône pour plus de détails.",
+    "cost_dynamic_tip": "Pondéré dans le temps : facturé au prix en vigueur pendant le cycle (prix effectif {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "moy.",
@@ -2042,7 +2047,8 @@
       "golden": "Retraitement : marquage des cycles de référence",
       "suggestions": "Retraitement : suggestions",
       "ml_training": "Retraitement : entraînement ML",
-      "health": "Retraitement : santé des cycles"
+      "health": "Retraitement : santé des cycles",
+      "costs": "Retraitement : coûts énergétiques"
     },
     "pg_sweep": {
       "optimize": "Optimiser : {param}"

@@ -354,7 +354,7 @@
     "pg_settings_source": "Vir nastavitev",
     "phase_catalog": "Katalog faz",
     "playground": "Peskovnik",
-    "process_history": "Zgodovina procesov",
+    "process_history": "Obdelava zgodovine",
     "settings_history": "Zgodovina nastavitev",
     "status": "Stanje",
     "status_graph": "Graf stanja",
@@ -764,7 +764,7 @@
     "merge_cycles": "Spoji {n} ciklov",
     "new_group": "Nova skupina profilov",
     "new_phase": "Nova faza",
-    "process_history_msg": "Znova zaženite ujemanje, osvežite predloge, naučite ML (če je omogočen) in znova izračunajte zdravje ciklov za vse shranjene cikle. To lahko traja nekaj časa.",
+    "process_history_msg": "Znova zaženite ujemanje, osvežite predloge, znova naučite ML (če je omogočen), znova izračunajte stroške glede na zabeležene cene energije in znova izračunajte zdravje ciklov za vse shranjene cikle. To lahko traja nekaj časa.",
     "process_history_ok": "Obdelaj",
     "process_history_title": "Obdelaj zgodovino",
     "process_recording": "Obdelaj posnetek",
@@ -911,7 +911,7 @@
     "preferences_adv": "Nastavitve",
     "prefs_personal": "Veljajo samo za vaš račun Home Assistant.",
     "font_size_hint": "Povečajte ali pomanjšajte vse v tej plošči. Velja za vaš račun na tej napravi.",
-    "process_history_hint": "Znova zaženite ujemanje za vse shranjene cikle, osvežite predloge nastavljanja, znova naučite modele ML (če so omogočeni) in znova izračunajte zdravje ciklov. Zaženite po seriji pregledov.",
+    "process_history_hint": "Znova zaženite ujemanje za vse shranjene cikle, osvežite predloge nastavljanja, znova naučite modele ML (če so omogočeni), znova izračunajte stroške ciklov glede na zabeležene cene energije in znova izračunajte zdravje ciklov. Zaženite to po seriji pregledov.",
     "profile_deleted": "Profil izbrisan",
     "profile_poor_health_detail": "Cikli, dodeljeni temu profilu, imajo nedosledne oblike ali nizko stopnjo zaupanja. Razmislite o ponovni izdelavi ovojnice ali pregledu označenih ciklov.",
     "profiles_intro": "Kliknite na profil za statistike, faze in čiščenje. Združite skoraj enake programe (enaka oblika/trajanje, različna temperatura ali ožemanje), da ujemanje zanesljivo izbira med njimi.",
@@ -1243,7 +1243,7 @@
       "label": "Število ponovitev konca"
     },
     "energy_price_entity": {
-      "doc": "Senzor s trenutno ceno električne energije na kWh (npr. dinamična tarifa). Ima prednost pred spodnjo statično ceno. Vsak cikel zamrzne veljavno ceno, ko se konča.",
+      "doc": "Senzor s trenutno ceno elektrike na kWh (npr. dinamična tarifa). Ima prednost pred statično ceno spodaj. Ko so Časovno tehtani stroški vklopljeni, se vsak cikel obračuna po ceni, ki je veljala v vsakem trenutku njegovega teka; sicer se nanj zamrzne cena, ki je veljala ob zaključku.",
       "label": "Entiteta cene energije"
     },
     "energy_price_static": {
@@ -1271,7 +1271,7 @@
       "label": "Obrni zunanji sprožilec (sproži ob IZKLOP)"
     },
     "learning_confidence": {
-      "doc": "Če je rezultat ujemanja med tem in zaupanjem samodejnega označevanja, vas obvestilo s povratnimi informacijami prosi, da preverite prepoznani program. Pod tem rezultatom je tekma preveč negotova, da bi prišla na površje. Mora biti pod zaupanjem samodejnega označevanja.",
+      "doc": "Če je rezultat ujemanja med to vrednostjo in Zaupanjem samodejnega označevanja, vas obvestilo s povratnimi informacijami prosi, da preverite prepoznani program. Pod tem rezultatom je ujemanje preveč negotovo, da bi ga prikazali. Ostati mora pod Zaupanjem samodejnega označevanja.",
       "label": "Zaupanje učenja"
     },
     "linked_device": {
@@ -1439,7 +1439,7 @@
       "label": "Prag ujemanja"
     },
     "profile_unmatch_threshold": {
-      "doc": "Če tekma v živo sredi cikla pade pod ta rezultat, se začasna identifikacija počisti. Naj bo malo pod pragom ujemanja, tako da kratek padec podobnosti ne obrne zaslona nazaj na neizravnanega.",
+      "doc": "Če ujemanje v živo sredi cikla pade pod ta rezultat, se začasna identifikacija počisti. Naj bo malo pod Pragom ujemanja, tako da kratek padec podobnosti prikaza ne vrne nazaj na stanje brez ujemanja.",
       "label": "Prag neujemanja"
     },
     "progress_reset_delay": {
@@ -1547,7 +1547,7 @@
     },
     "keep_min_score": {
       "label": "Min. ocena ujemanja",
-      "doc": "Minimalna ocena podobnosti, ki jo mora imeti kandidat, da ostane v tekmi za ujemanje. Privzeta vrednost 0,1 je namerno dovoljna - sprejme celo šibke kandidate in se zanaša na kasnejše stopnje za iskanje najboljšega ujemanja. Zvišajte za zgodnejše izločanje malo verjetnih profilov; znižajte za razširitev začetnega nabora kandidatov."
+      "doc": "Minimalna ocena podobnosti, ki jo mora imeti kandidat, da ostane v izboru za ujemanje. Privzeta vrednost 0,1 je namerno dopustna - sprejme tudi šibke kandidate in se zanaša na kasnejše stopnje, da najdejo najboljše ujemanje. Zvišajte jo za zgodnejše izločanje malo verjetnih profilov; znižajte jo za razširitev začetnega nabora kandidatov."
     },
     "dtw_blend": {
       "label": "Mešanje deformacije",
@@ -1600,6 +1600,10 @@
     "profile_evidence_sources": {
       "label": "Cikli, ki oblikujejo program",
       "doc": "Kateri cikli se uporabijo za izgradnjo krivulje moči vsakega programa in za ujemanje zaključenega cikla z njo. Če neko vrsto odkljukate, ta ne vpliva več na vaše programe, vendar se nič ne izbriše - cikli ostanejo na seznamu Cikli in jih je še vedno mogoče označiti ali odstraniti. Uporabno, če uvoženim podatkom ne zaupate. Na statistiko to ne vpliva: vedno šteje samo cikle, ki jih je ta naprava res izvedla. Če odkljukate vse, se to prezre, saj se program brez ciklov nikoli ne bi mogel ujemati."
+    },
+    "energy_price_dynamic": {
+      "label": "Časovno tehtani stroški",
+      "doc": "Vsak cikel obračuna po ceni, ki je veljala v vsakem trenutku njegovega teka, namesto po eni sami ceni ob zaključku. Velja samo za entiteto cene (statična cena se ne more spreminjati). Ne potrebuje dodatnih nastavitev: cena se med ciklom spremlja v živo, Obdelava zgodovine v Diagnostiki pa starejšim ciklom znova izračuna stroške iz recorderja. Izklopljeno = klasično vedenje, ena cena, zamrznjena ob koncu."
     }
   },
   "setting_group": {
@@ -1999,7 +2003,7 @@
     "energy_weight": "Stopnja 4: kako močno ujemanje energije vpliva na končno oceno (privzeto 0,22)",
     "profile_match_min_duration_ratio": "Stopnja 1: minimalna dolžina cikla kot del trajanja profila; privzeto 0,1 (10%)",
     "profile_match_max_duration_ratio": "Stopnja 1: maksimalna dolžina cikla kot del trajanja profila; privzeto 1,5 (150%)",
-    "keep_min_score": "Stopnja 2: minimalna ocena za ostanok v tekmi; privzeto 0,1 sprejme šibka ujemanja, kasnejše stopnje izberejo najboljše",
+    "keep_min_score": "Stopnja 2: najnižja ocena za ostanek v izboru; privzeto 0,1 sprejme šibka ujemanja, kasnejše stopnje izberejo najboljše",
     "dtw_blend": "Stopnja 3: 0 = samo osnovna ocena, 1 = samo DTW ocena, 0,5 = enakomerno mešanje (privzeto)",
     "dtw_ensemble_w": "Stopnja 3 (kombinirani način): utež skaliranega L1 v primerjavi z izvedenim DTW; privzeto 0,7 daje prednost ravni",
     "dtw_ddtw_scale": "Stopnja 3: razdalja pol-nasičenja DDTW; manjša = bolj občutljiva na obliko (privzeto 30)",
@@ -2013,10 +2017,11 @@
     "date_tip": "Datum in čas začetka cikla.",
     "duration_tip": "Skupni čas trajanja cikla od začetka do konca.",
     "energy_tip": "Skupna porabljena energija (kWh). Izračunano z integracijo moči skozi čas.",
-    "cost_tip": "Strošek energije za ta cikel, zamrznjen ob zaključku po takrat veljavni ceni (energija x cena na kWh). Nastavite ceno v Nastavitvah, da ga izpolnite.",
+    "cost_tip": "Strošek energije za ta cikel, zamrznjen ob zaključku. Ko so Časovno tehtani stroški vklopljeni, se krivulja moči obračuna po ceni, ki velja v vsakem trenutku; sicer energija x ena sama cena, ki velja ob koncu. Nastavite ceno v Nastavitvah, da se vrednost izpolni.",
     "confidence_tip": "Zaupanje ujemanja profila (0-100%). Kako natančno se je krivulja moči cikla ujemala z določenim programom.",
     "health_tip": "Zdravje cikla ML (višje = boljše). Kliknite cikel, da ga pregledate in ocenite.",
-    "flags_tip": "Oznake skupnosti in kazalniki kakovosti podatkov"
+    "flags_tip": "Oznake skupnosti in kazalniki kakovosti podatkov",
+    "cost_dynamic_tip": "Časovno tehtano: obračunano po ceni, ki je veljala med ciklom (efektivno {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "povpr.",
@@ -2090,7 +2095,8 @@
       "golden": "Ponovna obdelava: dopolnjevanje referenčnih",
       "suggestions": "Ponovna obdelava: predlogi",
       "ml_training": "Ponovna obdelava: usposabljanje ML",
-      "health": "Ponovna obdelava: kakovost ciklov"
+      "health": "Ponovna obdelava: kakovost ciklov",
+      "costs": "Ponovna obdelava: stroški energije"
     },
     "pg_sweep": {
       "optimize": "Optimizacija: {param}"

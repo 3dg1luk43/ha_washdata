@@ -354,7 +354,7 @@
     "pg_settings_source": "Kilde for innstillingene",
     "phase_catalog": "Fasekatalog",
     "playground": "Sandkasse",
-    "process_history": "Prosesshistorie",
+    "process_history": "Behandle historikk",
     "settings_history": "Innstillingshistorikk",
     "status": "Status",
     "status_graph": "Statusgraf",
@@ -764,7 +764,7 @@
     "merge_cycles": "Slå sammen {n} sykluser",
     "new_group": "Ny profilgruppe",
     "new_phase": "Ny fase",
-    "process_history_msg": "Kjør matching på nytt, oppdater forslag, tren ML på nytt (hvis aktivert) og beregn syklusenes tilstand på nytt for alle lagrede sykluser. Dette kan ta litt tid.",
+    "process_history_msg": "Kjør matching på nytt, oppdater forslag, tren ML på nytt (hvis aktivert), beregn kostnaden for syklusene på nytt ut fra registrerte energipriser, og beregn syklusenes tilstand på nytt for alle lagrede sykluser. Dette kan ta litt tid.",
     "process_history_ok": "Behandl",
     "process_history_title": "Behandle historikk",
     "process_recording": "Behandle opptak",
@@ -910,7 +910,7 @@
     "preferences_admin": "Preferanser, panel og tilgangskontroll",
     "preferences_adv": "Preferanser",
     "prefs_personal": "Disse gjelder kun for Home Assistant-kontoen din.",
-    "process_history_hint": "Kjør matching på nytt for alle lagrede sykluser, oppdater justeringsforslag, tren ML-modellene på nytt (hvis aktivert) og beregn syklusenes tilstand på nytt. Kjør dette etter en batch med gjennomganger.",
+    "process_history_hint": "Kjør matching på nytt for alle lagrede sykluser, oppdater justeringsforslag, tren ML-modellene på nytt (hvis aktivert), beregn kostnaden for syklusene på nytt ut fra de registrerte energiprisene dine, og beregn syklusenes tilstand på nytt. Kjør dette etter en batch med gjennomganger.",
     "profile_deleted": "Profil slettet",
     "profile_poor_health_detail": "Sykluser som er tilordnet denne profilen har inkonsekvente former eller lav konfidens. Vurder å gjenoppbygge konvolutten eller gjennomgå merkede sykluser.",
     "profiles_intro": "Klikk på en profil for statistikk, faser og opprydding. Grupper nesten identiske programmer (samme form/varighet, forskjellig temperatur eller spinn) slik at du kan matche pålitelige valg mellom dem.",
@@ -1095,7 +1095,7 @@
     "energy_weight": "Trinn 4: hvor sterkt energioverensstemmelse påvirker sluttscoren (standard 0,22)",
     "profile_match_min_duration_ratio": "Trinn 1: korteste sykel som andel av profilvarighet; standard 0,1 (10%)",
     "profile_match_max_duration_ratio": "Trinn 1: lengste sykel som andel av profilvarighet; standard 1,5 (150%)",
-    "keep_min_score": "Trinn 2: laveste poeng for å bli i matchen; standard 0,1 tillater svake kandidater, senere trinn velger best",
+    "keep_min_score": "Trinn 2: laveste poengsum for å gå videre; standard 0,1 slipper gjennom svake samsvar, senere trinn velger det beste",
     "dtw_blend": "Trinn 3: 0 = bare kjernepoengscore, 1 = bare DTW-score, 0,5 = lik blanding (standard)",
     "dtw_ensemble_w": "Trinn 3 (ensemble-modus): vekt på skalert L1 kontra derivativ DTW; standard 0,7 foretrekker nivåbevisst",
     "dtw_ddtw_scale": "Trinn 3: DDTW-halvmetningsavstand; mindre = mer formfølsom (standard 30)",
@@ -1225,7 +1225,7 @@
       "label": "Maks. anti-rynke effekt"
     },
     "auto_label_confidence": {
-      "doc": "Hvis kampresultatet ved syklusslutt er på eller over dette, merkes programmet automatisk uten noen bekreftelsesmelding. Hev den for å kreve høyere sikkerhet før automerking; senk den for å automatisere mer. Fungerer sammen med Learning Confidence under den.",
+      "doc": "Hvis samsvarsscoren ved syklusslutt er på eller over denne, merkes programmet automatisk uten noen bekreftelsesmelding. Hev den for å kreve høyere sikkerhet før automerking; senk den for å automatisere mer. Fungerer sammen med Lærings-konfidensgrad under den.",
       "label": "Auto-merking konfidensgrad"
     },
     "auto_maintenance": {
@@ -1273,7 +1273,7 @@
       "label": "Slutt gjentaksantall"
     },
     "energy_price_entity": {
-      "doc": "Sensor med gjeldende strømpris per kWh (f.eks. en dynamisk tariff). Går foran den statiske prisen nedenfor. Hver syklus fryser den gjeldende prisen når den er ferdig.",
+      "doc": "Sensor med gjeldende strømpris per kWh (f.eks. en dynamisk tariff). Går foran den statiske prisen nedenfor. Med Tidsvektet kostnad på beregnes hver syklus til prisen som gjaldt i hvert øyeblikk den kjørte; ellers fryses prisen som gjaldt da den var ferdig, fast på den.",
       "label": "Energiprisenhet"
     },
     "energy_price_static": {
@@ -1301,7 +1301,7 @@
       "label": "Inverter ekstern utløser (utløs ved AV)"
     },
     "learning_confidence": {
-      "doc": "Hvis kampresultatet faller mellom dette og Auto-Label Confidence, ber en tilbakemeldingsmelding deg om å bekrefte det identifiserte programmet. Under denne poengsummen er kampen for usikker til å dukke opp. Må holdes under Auto-Label Confidence.",
+      "doc": "Hvis samsvarsscoren faller mellom denne og Auto-merking konfidensgrad, ber en tilbakemeldingsmelding deg om å bekrefte det identifiserte programmet. Under denne poengsummen er samsvaret for usikkert til å vises. Må holdes under Auto-merking konfidensgrad.",
       "label": "Lærings-konfidensgrad"
     },
     "linked_device": {
@@ -1369,7 +1369,7 @@
       "label": "Aktiver HA-hendelser for varsler"
     },
     "notify_icon": {
-      "doc": "Valgfritt mdi-ikon for varselet (f.eks. mdi:vaskemaskin). La stå tomt for standard plattform.",
+      "doc": "Valgfritt mdi-ikon for varselet (f.eks. mdi:washing-machine). La stå tomt for standard plattform.",
       "label": "Varselikon"
     },
     "notify_live_chronometer": {
@@ -1469,7 +1469,7 @@
       "label": "Samsvarsterskel"
     },
     "profile_unmatch_threshold": {
-      "doc": "Hvis en direkte kamp midt i syklusen faller under denne poengsummen, slettes den tentative identifikasjonen. Hold den litt under Match-terskelen, slik at et kort fall i likhet ikke snur skjermen tilbake til uovertruffen.",
+      "doc": "Hvis et direkte samsvar midt i syklusen faller under denne poengsummen, slettes den tentative identifikasjonen. Hold den litt under Samsvarsterskel, slik at et kort fall i likhet ikke setter visningen tilbake til uten treff.",
       "label": "Ikke-samsvarsterskel"
     },
     "progress_reset_delay": {
@@ -1630,6 +1630,10 @@
     "profile_evidence_sources": {
       "label": "Sykluser som former et program",
       "doc": "Hvilke sykluser som brukes til å bygge opp effektkurven for hvert program, og til å matche en ferdig syklus mot den. Fjerner du haken for en type, former den ikke lenger programmene dine, uten at noe slettes - syklusene blir liggende i Sykluser-listen din og kan fortsatt merkes eller fjernes. Nyttig hvis du ikke stoler på importerte data. Statistikken påvirkes ikke: den teller alltid bare syklusene denne maskinen faktisk har kjørt. Å fjerne alle hakene blir ignorert, siden et program uten sykluser bak seg aldri kunne matche."
+    },
+    "energy_price_dynamic": {
+      "label": "Tidsvektet kostnad",
+      "doc": "Beregn hver syklus til prisen som gjaldt i hvert øyeblikk den kjørte, i stedet for den ene prisen som gjaldt da den var ferdig. Gjelder bare for en prisenhet (en statisk pris kan ikke endre seg). Krever ikke noe ekstra oppsett: prisen følges live mens syklusen kjører, og \"Behandle historikk\" under Diagnostikk beregner kostnaden for eldre sykluser på nytt fra recorderen. Av = den klassiske oppførselen, én pris frosset ved slutten."
     }
   },
   "setting_group": {
@@ -2013,10 +2017,11 @@
     "date_tip": "Dato og klokkeslett da syklusen startet.",
     "duration_tip": "Total kjøretid for syklusen fra start til slutt.",
     "energy_tip": "Totalt forbrukt energi (kWh). Beregnet ved å integrere effekten over tid.",
-    "cost_tip": "Energikostnad for denne syklusen, låst ved fullføring med prisen som gjaldt da (energi x pris per kWh). Angi en pris under Innstillinger for å fylle den ut.",
+    "cost_tip": "Energikostnad for denne syklusen, frosset ved fullføring. Med Tidsvektet kostnad på beregnes effektkurven til prisen som gjaldt i hvert øyeblikk, ellers energi x den ene prisen som gjaldt til slutt. Angi en pris under Innstillinger for å fylle den ut.",
     "confidence_tip": "Profilmatchkonfidens (0-100 %). Hvor tett syklusens effektkurve matchet det identifiserte programmet.",
     "health_tip": "ML-syklushelse (høyere = bedre). Klikk på en syklus for å inspisere og gjennomgå den.",
-    "flags_tip": "Gjennomgangs-, anomali- og kildeflagg for syklusen. Hold musepekeren over et ikon for detaljer."
+    "flags_tip": "Gjennomgangs-, anomali- og kildeflagg for syklusen. Hold musepekeren over et ikon for detaljer.",
+    "cost_dynamic_tip": "Tidsvektet: beregnet til prisen som gjaldt under syklusen (effektivt {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "gj.sn.",
@@ -2090,7 +2095,8 @@
       "golden": "Behandler på nytt: fyller ut referansesykluser",
       "suggestions": "Behandler på nytt: forslag",
       "ml_training": "Behandler på nytt: ML-opplæring",
-      "health": "Behandler på nytt: syklushelse"
+      "health": "Behandler på nytt: syklushelse",
+      "costs": "Behandler på nytt: energikostnader"
     },
     "pg_sweep": {
       "optimize": "Optimaliser: {param}"

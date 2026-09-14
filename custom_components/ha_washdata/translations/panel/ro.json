@@ -306,7 +306,7 @@
     "pg_settings_source": "Sursa setărilor",
     "phase_catalog": "Catalog de faze",
     "playground": "Zonă de test",
-    "process_history": "Istoricul procesării",
+    "process_history": "Procesare istoric",
     "settings_history": "Istoric setări",
     "status": "Stare",
     "status_graph": "Grafic de stare",
@@ -716,7 +716,7 @@
     "merge_cycles": "Îmbinați {n} cicluri",
     "new_group": "Grup de profiluri nou",
     "new_phase": "Fază nouă",
-    "process_history_msg": "Reexecutați potrivirea, actualizați sugestiile, reantrenați ML (dacă este activat) și recalculați starea ciclurilor pentru toate ciclurile stocate. Acest lucru poate dura ceva timp.",
+    "process_history_msg": "Reexecutați potrivirea, actualizați sugestiile, reantrenați ML (dacă este activat), recalculați costul ciclurilor pe baza prețurilor energiei înregistrate și recalculați starea ciclurilor pentru toate ciclurile stocate. Acest lucru poate dura ceva timp.",
     "process_history_ok": "Procesare",
     "process_history_title": "Procesare Istoric",
     "process_recording": "Procesați înregistrarea",
@@ -862,7 +862,7 @@
     "preferences_admin": "Preferințe, panou și control acces",
     "preferences_adv": "Preferințe",
     "prefs_personal": "Se aplică numai contului dvs. Home Assistant.",
-    "process_history_hint": "Reexecutați potrivirea pe toate ciclurile stocate, actualizați sugestiile de reglaj, reantrenați modelele ML (dacă sunt activate) și recalculați starea ciclurilor. Rulați după un lot de recenzii.",
+    "process_history_hint": "Reexecutați potrivirea pe toate ciclurile stocate, actualizați sugestiile de reglaj, reantrenați modelele ML (dacă sunt activate), recalculați costul ciclurilor pe baza prețurilor energiei înregistrate și recalculați starea ciclurilor. Rulați după un lot de revizuiri.",
     "profile_deleted": "Profil șters",
     "profile_poor_health_detail": "Ciclurile atribuite acestui profil au forme inconsistente sau încredere scăzută. Luați în considerare reconstruirea plicului sau revizuirea ciclurilor etichetate.",
     "profiles_intro": "Faceți clic pe un profil pentru statistici, faze și curățare. Grupați programe aproape identice (aceeași formă/durată, temperatură sau centrifugare diferite) pentru ca potrivirea să aleagă în mod fiabil între ele.",
@@ -1147,7 +1147,7 @@
       "label": "Putere Maximă Anti-Șifonare"
     },
     "auto_label_confidence": {
-      "doc": "Dacă scorul meciului la sfârșitul ciclului este egal sau peste acesta, programul este etichetat automat fără nicio solicitare de confirmare. Ridicați-l pentru a necesita o mai mare certitudine înainte de auto-etichetare; coborâți-l pentru a automatiza mai mult. Funcționează împreună cu Learning Confidence de mai jos.",
+      "doc": "Dacă scorul de potrivire la sfârșitul ciclului este egal sau peste acesta, programul este etichetat automat fără nicio solicitare de confirmare. Ridicați-l pentru a necesita o mai mare certitudine înainte de auto-etichetare; coborâți-l pentru a automatiza mai mult. Funcționează împreună cu Încredere Învățare de mai jos.",
       "label": "Încredere Etichetare Automată"
     },
     "auto_maintenance": {
@@ -1195,7 +1195,7 @@
       "label": "Număr de Repetări la Sfârșit"
     },
     "energy_price_entity": {
-      "doc": "Senzor cu prețul curent al energiei electrice pe kWh (de exemplu, un tarif dinamic). Are prioritate față de prețul static de mai jos. Fiecare ciclu îngheață prețul în vigoare când s-a terminat.",
+      "doc": "Senzor cu prețul curent al energiei electrice pe kWh (de exemplu, un tarif dinamic). Are prioritate față de prețul static de mai jos. Cu Cost Ponderat în Timp activat, fiecare ciclu este taxat la prețul în vigoare în fiecare moment în care a rulat; altfel, i se fixează prețul în vigoare când s-a terminat.",
       "label": "Entitate Preț Energie"
     },
     "energy_price_static": {
@@ -1223,7 +1223,7 @@
       "label": "Inversați Declanșatorul Extern (declanșare la OPRIT)"
     },
     "learning_confidence": {
-      "doc": "Dacă scorul meciului se situează între acesta și Auto-Label Confidence, o notificare de feedback vă solicită să verificați programul identificat. Sub acest scor meciul este prea incert pentru a ieși la suprafață. Trebuie menținut sub nivelul de încredere pentru etichete automate.",
+      "doc": "Dacă scorul de potrivire se situează între acesta și Încredere Etichetare Automată, o notificare de feedback vă solicită să verificați programul identificat. Sub acest scor, potrivirea este prea incertă pentru a fi afișată. Trebuie menținut sub Încredere Etichetare Automată.",
       "label": "Încredere Învățare"
     },
     "linked_device": {
@@ -1391,7 +1391,7 @@
       "label": "Prag de Potrivire"
     },
     "profile_unmatch_threshold": {
-      "doc": "Dacă un meci în direct la mijlocul ciclului scade sub acest scor, identificarea provizorie este șters. Păstrați-l puțin sub Pragul de potrivire, astfel încât o scurtă scădere în similitudine să nu întoarcă afișajul la neegalat.",
+      "doc": "Dacă o potrivire live de la mijlocul ciclului scade sub acest scor, identificarea provizorie este ștearsă. Păstrați-l puțin sub Pragul de potrivire, astfel încât o scădere scurtă a similitudinii să nu readucă afișajul la starea fără potrivire.",
       "label": "Prag de Nepotrivire"
     },
     "progress_reset_delay": {
@@ -1427,7 +1427,7 @@
       "label": "Energia de Pornire"
     },
     "start_threshold_w": {
-      "doc": "Puterea trebuie să crească peste acest nivel pentru a confirma că a început un ciclu. Setarea prea scăzută cauzează porniri false de la puterea de așteptare; Programele prea mari și cu pornire lentă (umplere la rece) sunt ratate. Motorul de sugestie setează acest lucru chiar peste cea mai mică putere activă observată a mașinii.",
+      "doc": "Puterea trebuie să crească peste acest nivel pentru a confirma că a început un ciclu. O valoare prea mică provoacă porniri false din cauza puterii în așteptare; o valoare prea mare face ca programele cu pornire lentă (umplere la rece) să fie ratate. Motorul de sugestii setează această valoare chiar peste cea mai mică putere activă observată a mașinii.",
       "label": "Prag de Pornire"
     },
     "stop_threshold_w": {
@@ -1552,6 +1552,10 @@
     "profile_evidence_sources": {
       "label": "Ciclurile care formează un program",
       "doc": "Ce cicluri sunt folosite pentru a construi curba de putere a fiecărui program și pentru a compara un ciclu încheiat cu ea. Debifarea unui tip face ca acesta să nu mai modeleze programele dvs., fără a șterge nimic - ciclurile rămân în lista dvs. Cicluri și pot fi în continuare etichetate sau eliminate. Util dacă nu aveți încredere în datele importate. Statisticile nu sunt afectate: ele numără întotdeauna doar ciclurile pe care această mașină le-a rulat efectiv. Debifarea tuturor este ignorată, deoarece un program fără cicluri în spate nu s-ar putea potrivi niciodată."
+    },
+    "energy_price_dynamic": {
+      "label": "Cost Ponderat în Timp",
+      "doc": "Taxează fiecare ciclu la prețul în vigoare în fiecare moment în care a rulat, în loc de prețul unic din momentul în care s-a terminat. Se aplică doar unei entități de preț (un preț static nu poate varia). Nu necesită configurare suplimentară: prețul este urmărit în timp real cât timp ciclul rulează, iar Procesare istoric, din Diagnostice, recalculează costul ciclurilor mai vechi pornind de la recorder. Dezactivat = comportamentul clasic, un singur preț fixat la final."
     }
   },
   "setting_group": {
@@ -1965,10 +1969,11 @@
     "date_tip": "Data și ora la care a început ciclul.",
     "duration_tip": "Durata totală de rulare a ciclului, de la început până la sfârșit.",
     "energy_tip": "Energia totală consumată (kWh). Calculată prin integrarea puterii în timp.",
-    "cost_tip": "Costul energetic al acestui ciclu, fixat la finalizare folosind prețul în vigoare atunci (energie x preț pe kWh). Setați un preț în Setări pentru a-l completa.",
+    "cost_tip": "Costul energetic al acestui ciclu, fixat la finalizare. Cu Cost Ponderat în Timp activat, curba de putere este taxată la prețul în vigoare în fiecare moment; altfel, energie x prețul unic în vigoare la final. Setați un preț în Setări pentru a-l completa.",
     "confidence_tip": "Încrederea de potrivire a profilului (0-100%). Cât de bine s-a potrivit curba de putere a ciclului cu programul identificat.",
     "health_tip": "Starea ciclului prin ML (mai mare = mai bine). Faceți clic pe un ciclu pentru a-l inspecta și revizui.",
-    "flags_tip": "Semnale de revizuire, anomalie și sursă pentru ciclu. Treceți cu cursorul peste o pictogramă pentru detalii."
+    "flags_tip": "Semnale de revizuire, anomalie și sursă pentru ciclu. Treceți cu cursorul peste o pictogramă pentru detalii.",
+    "cost_dynamic_tip": "Ponderat în timp: taxat la prețul în vigoare în timpul ciclului (preț efectiv {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "medie",
@@ -2042,7 +2047,8 @@
       "golden": "Reprocesare: marcarea ciclurilor de referință",
       "suggestions": "Reprocesare: sugestii",
       "ml_training": "Reprocesare: antrenare ML",
-      "health": "Reprocesare: sănătatea ciclurilor"
+      "health": "Reprocesare: sănătatea ciclurilor",
+      "costs": "Reprocesare: costuri de energie"
     },
     "pg_sweep": {
       "optimize": "Optimizează: {param}"

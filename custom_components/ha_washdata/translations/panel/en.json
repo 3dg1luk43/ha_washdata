@@ -789,7 +789,7 @@
     "merge_cycles": "Merge {n} Cycles",
     "new_group": "New profile group",
     "new_phase": "New Phase",
-    "process_history_msg": "Re-run matching, refresh suggestions, retrain ML (if enabled) and recompute cycle health across all stored cycles. This may take a while.",
+    "process_history_msg": "Re-run matching, refresh suggestions, retrain ML (if enabled), recost cycles against recorded energy prices and recompute cycle health across all stored cycles. This may take a while.",
     "process_history_ok": "Process",
     "process_history_title": "Process History",
     "process_recording": "Process Recording",
@@ -996,7 +996,7 @@
     "preferences_admin": "Preferences, panel & access control",
     "preferences_adv": "Preferences",
     "prefs_personal": "These apply to your Home Assistant account only.",
-    "process_history_hint": "Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), and recompute cycle health. Run this after a batch of reviews.",
+    "process_history_hint": "Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), recost cycles against your recorded energy prices, and recompute cycle health. Run this after a batch of reviews.",
     "profile_deleted": "Profile deleted",
     "profile_poor_health_detail": "Cycles assigned to this profile have inconsistent shapes or low confidence. Consider rebuilding the envelope or reviewing labelled cycles.",
     "profiles_intro": "Click a profile for stats, phases and cleanup. Group near-identical programs (same shape/duration, different temperature or spin) so matching reliably picks between them.",
@@ -1323,8 +1323,12 @@
       "doc": "Number of consecutive below-stop-threshold readings required before the cycle ends. 1 is fine for most plugs. Raise to 2-3 if your smart plug occasionally reports a false-zero sample mid-cycle and your cycles are ending prematurely.",
       "label": "End Repeat Count"
     },
+    "energy_price_dynamic": {
+      "doc": "Charge each cycle at the price in force at every moment it ran, instead of the single price current when it finished. Only applies to a price entity (a static price cannot move). Needs no extra setup: the price is tracked live while the cycle runs, and Process History under Diagnostics recosts older cycles from the recorder. Off = the classic behaviour, one price frozen at the end.",
+      "label": "Time-Weighted Cost"
+    },
     "energy_price_entity": {
-      "doc": "Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. Each cycle freezes the price in effect when it finished.",
+      "doc": "Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. With Time-Weighted Cost on, each cycle is charged at the price in force at every moment it ran; otherwise the price in effect when it finished is frozen onto it.",
       "label": "Energy Price Entity"
     },
     "energy_price_static": {
@@ -2013,7 +2017,8 @@
     "date_tip": "Date and time the cycle started.",
     "duration_tip": "Total cycle run time from start to end.",
     "energy_tip": "Total energy consumed (kWh). Computed by integrating power over time.",
-    "cost_tip": "Energy cost for this cycle, frozen at completion using the price in effect then (energy x price per kWh). Set a price under Settings to populate it.",
+    "cost_dynamic_tip": "Time-weighted: charged at the price in force during the cycle (effective {price} {cur}/kWh).",
+    "cost_tip": "Energy cost for this cycle, frozen at completion. With Time-Weighted Cost on, the power trace is charged at the price in force at each moment; otherwise energy x the single price in effect at the end. Set a price under Settings to populate it.",
     "confidence_tip": "Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.",
     "health_tip": "ML cycle health (higher = better). Click a cycle to inspect and review it.",
     "flags_tip": "Review, anomaly and source flags for the cycle. Hover an icon for detail."
@@ -2090,6 +2095,7 @@
       "golden": "Reprocessing: backfilling golden",
       "suggestions": "Reprocessing: suggestions",
       "ml_training": "Reprocessing: ML training",
+      "costs": "Reprocessing: energy costs",
       "health": "Reprocessing: cycle health"
     },
     "pg_sweep": {

@@ -160,9 +160,11 @@ def test_every_power_reading_site_routes_through_the_helper() -> None:
     considered too indirect, the fix is to extract those blocks, not to drop the
     assertion.
 
-    The energy-price and energy-sensor readers at the end of the module are
-    deliberately excluded: different consumer, different fallback contract, and
-    they are recorded as follow-up rather than reshaped inside a review loop.
+    The energy-price and energy-sensor readers are deliberately excluded:
+    different consumer, different fallback contract, and they are recorded as
+    follow-up rather than reshaped inside a review loop. Four of them now, after
+    the dynamic-tariff listener and its recorder backfill (#426) - a price of nan
+    is dropped by the same non-numeric guard, and nothing feeds it to the detector.
     """
     import re
     from pathlib import Path
@@ -177,9 +179,10 @@ def test_every_power_reading_site_routes_through_the_helper() -> None:
     bare = [
         m.start() for m in re.finditer(r"float\((?:new_|old_)?state\.state\)", src)
     ]
-    # Two known-and-documented exceptions remain (price + energy sensor).
-    assert len(bare) == 2, (
-        f"expected only the 2 energy/price readers to parse a state directly, "
+    # Four known-and-documented exceptions remain: the energy meter, the spot
+    # price, the dynamic-price listener and the recorder price backfill (#426).
+    assert len(bare) == 4, (
+        f"expected only the 4 energy/price readers to parse a state directly, "
         f"found {len(bare)}; a power reading must go through _finite_power"
     )
 

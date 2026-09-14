@@ -63,7 +63,7 @@
     "needs_review": "Reikia peržiūros",
     "overrun": "Bėgo ilgiau nei įprastai",
     "poor_fit": "prastai tinka",
-    "poor_fit_tip": "Nenuosekli rungtynių istorija – apsvarstykite galimybę atkurti šį profilį",
+    "poor_fit_tip": "Nenuosekli atitikčių istorija – apsvarstykite galimybę atkurti šį profilį",
     "restart_gap_tip": "{n} HA paleidimo iš naujo spraga: galios kreivė turi skylę",
     "reviewed": "Peržiūrėta",
     "steady": "→ pastovus",
@@ -161,7 +161,7 @@
     "pg_publish_one": "Įrašyti „{label}“ į integracijos nustatymus",
     "play": "Leisti",
     "process": "Apdoroti",
-    "process_history": "Apdorokite dabar",
+    "process_history": "Apdoroti dabar",
     "process_recording": "Išsaugoti įrašą",
     "process_tip": "Išsaugoti įrašytą seką kaip naują arba esamą profilį",
     "rebuild": "Atstatyti vokus",
@@ -354,7 +354,7 @@
     "pg_settings_source": "Nustatymų šaltinis",
     "phase_catalog": "Fazių katalogas",
     "playground": "Bandymų aikštelė",
-    "process_history": "Proceso istorija",
+    "process_history": "Apdoroti istoriją",
     "settings_history": "Nustatymų istorija",
     "status": "Būsena",
     "status_graph": "Būsenos grafikas",
@@ -541,7 +541,7 @@
     "settings_basic": "Pagrindiniai",
     "settings_detail_level": "Nustatymų detalumo lygis",
     "settings_overrides": "Nustatymų nepaisymai",
-    "show_debug": "Rodyti tiesioginio rungtynių derinimo kortelę būsenos puslapyje (pasitikėjimas, dviprasmiškumas, geriausi kandidatai)",
+    "show_debug": "Rodyti tiesioginės atitikties derinimo kortelę būsenos puslapyje (pasitikėjimas, dviprasmiškumas, geriausi kandidatai)",
     "show_expected": "Rodyti numatomą kreivės perdangą (atitinkantį profilį, oranžinė)",
     "show_raw": "Rodyti neapdoroto lizdo perjungiklį tiesioginiame galios grafike",
     "sparkline": "Naujausia ciklų trukmės tendencija",
@@ -764,7 +764,7 @@
     "merge_cycles": "Sujungti {n} ciklus",
     "new_group": "Nauja profilių grupė",
     "new_phase": "Naujas etapas",
-    "process_history_msg": "Pakartotinai paleisti atitikimą, atnaujinti pasiūlymus, iš naujo apmokyti ML (jei įjungta) ir perskaičiuoti ciklų sveikatą visuose saugomuose cikluose. Tai gali užtrukti.",
+    "process_history_msg": "Pakartotinai paleisti atitikimą, atnaujinti pasiūlymus, iš naujo apmokyti ML (jei įjungta), perskaičiuoti ciklų kainą pagal įrašytas energijos kainas ir perskaičiuoti ciklų sveikatą visuose saugomuose cikluose. Tai gali užtrukti.",
     "process_history_ok": "Apdoroti",
     "process_history_title": "Apdoroti istoriją",
     "process_recording": "Proceso įrašymas",
@@ -910,7 +910,7 @@
     "preferences_admin": "Parinktys, skydelis ir prieigos valdymas",
     "preferences_adv": "Parinktys",
     "prefs_personal": "Tai galioja tik jūsų namų asistento paskyrai.",
-    "process_history_hint": "Pakartotinai paleisti atitikimą visiems saugomiems ciklams, atnaujinti derinimo pasiūlymus, iš naujo apmokyti ML modelius (jei įjungta) ir perskaičiuoti ciklų sveikatą. Paleiskite tai po peržiūrų partijos.",
+    "process_history_hint": "Pakartotinai paleisti atitikimą visiems saugomiems ciklams, atnaujinti derinimo pasiūlymus, iš naujo apmokyti ML modelius (jei įjungta), perskaičiuoti ciklų kainą pagal įrašytas energijos kainas ir perskaičiuoti ciklų sveikatą. Paleiskite tai atlikę keletą peržiūrų.",
     "profile_deleted": "Profilis ištrintas",
     "profile_poor_health_detail": "Šiam profiliui priskirtų ciklų formos yra nenuoseklios arba jų patikimumas yra mažas. Apsvarstykite galimybę atkurti voką arba peržiūrėti pažymėtus ciklus.",
     "profiles_intro": "Spustelėkite profilį, kad pamatytumėte statistiką, etapus ir valymą. Grupuokite beveik identiškas programas (ta pati forma / trukmė, skirtinga temperatūra arba sukimas), kad suderinus būtų patikimai parenkamos tarp jų.",
@@ -1243,7 +1243,7 @@
       "label": "Pabaigos pakartojimų sk."
     },
     "energy_price_entity": {
-      "doc": "Jutiklis su esama elektros kaina už kWh (pvz., dinaminis tarifas). Pirmenybė teikiama žemiau nurodytai statinei kainai. Kiekvienas ciklas užšaldo kainą, galiojančią jam pasibaigus.",
+      "doc": "Jutiklis su esama elektros kaina už kWh (pvz., dinaminis tarifas). Ši reikšmė turi pirmenybę prieš toliau nurodytą statinę kainą. Kai įjungta „Pagal laiką svertinė kaina“, kiekvienas ciklas įkainojamas pagal kainą, galiojusią kiekvieną jo veikimo akimirką; priešingu atveju jam užfiksuojama kaina, galiojusi jam pasibaigus.",
       "label": "Energijos kainos objektas"
     },
     "energy_price_static": {
@@ -1271,7 +1271,7 @@
       "label": "Invertuoti išorinį trigerį (OFF)"
     },
     "learning_confidence": {
-      "doc": "Jei atitikties rezultatas patenka tarp šio ir automatinio etiketės pasitikėjimo, atsiliepimo pranešime prašoma patikrinti identifikuotą programą. Žemiau šio rezultato rungtynės yra per daug neaiškios, kad būtų galima pamatyti. Turi būti žemiau automatinio etiketės patikimumo.",
+      "doc": "Jei atitikties balas patenka tarp šio ir Automatinio žymėjimo pasitikėjimo, atsiliepimo pranešime prašoma patikrinti identifikuotą programą. Žemiau šio balo atitiktis yra per daug neaiški, kad būtų rodoma. Turi būti mažesnis už Automatinio žymėjimo pasitikėjimą.",
       "label": "Mokymosi pasitikėjimas"
     },
     "linked_device": {
@@ -1339,7 +1339,7 @@
       "label": "Paleisti HA įvykius pranešimams"
     },
     "notify_icon": {
-      "doc": "Pasirenkama pranešimo mdi piktograma (pvz., mdi:skalbimo mašina). Numatytajai platformai palikite tuščią.",
+      "doc": "Pasirenkama pranešimo mdi piktograma (pvz., mdi:washing-machine). Numatytajai platformai palikite tuščią.",
       "label": "Pranešimo piktograma"
     },
     "notify_live_chronometer": {
@@ -1439,7 +1439,7 @@
       "label": "Atitikimo slenkstis"
     },
     "profile_unmatch_threshold": {
-      "doc": "Jei tiesioginės ciklo vidurio rungtynės nukrenta žemiau šio balo, preliminarus identifikavimas išvalomas. Laikykite jį šiek tiek žemiau atitikties slenksčio, kad trumpas panašumas nesukeltų ekrano į neprilygstamą.",
+      "doc": "Jei tiesioginės atitikties balas ciklo viduryje nukrenta žemiau šio balo, preliminarus identifikavimas išvalomas. Laikykite jį šiek tiek žemiau Atitikimo slenksčio, kad trumpas panašumo sumažėjimas negrąžintų ekrano į būseną be atitikties.",
       "label": "Neatitikimo slenkstis"
     },
     "progress_reset_delay": {
@@ -1600,6 +1600,10 @@
     "profile_evidence_sources": {
       "label": "Ciklai, formuojantys programą",
       "doc": "Kurie ciklai naudojami kiekvienos programos galios kreivei sudaryti ir baigtam ciklui su ja palyginti. Atžymėjus tam tikrą rūšį, ji nebeturi įtakos jūsų programoms, tačiau nieko neištrinama - ciklai lieka sąraše Ciklai ir juos vis tiek galima pažymėti arba ištrinti. Naudinga, jei nepasitikite importuotais duomenimis. Statistikai tai neturi įtakos: joje visada įskaičiuojami tik tie ciklai, kuriuos šis prietaisas tikrai atliko. Visų žymių pašalinimas ignoruojamas, nes programa be jokių ciklų niekada negalėtų būti atpažinta."
+    },
+    "energy_price_dynamic": {
+      "label": "Pagal laiką svertinė kaina",
+      "doc": "Kiekvienas ciklas įkainojamas pagal kainą, galiojusią kiekvieną jo veikimo akimirką, o ne pagal vieną kainą, galiojusią jam pasibaigus. Taikoma tik kainos objektui (statinė kaina nekinta). Papildomai nieko nustatyti nereikia: ciklui veikiant kaina sekama tiesiogiai, o skiltyje Diagnostika esantis veiksmas Apdoroti istoriją perskaičiuoja senesnių ciklų kainą pagal recorder duomenis. Išjungta = įprastas veikimas, viena kaina, užfiksuota pabaigoje."
     }
   },
   "setting_group": {
@@ -2013,10 +2017,11 @@
     "date_tip": "Data ir laikas, kada ciklas prasidėjo.",
     "duration_tip": "Bendra ciklo veikimo trukmė nuo pradžios iki pabaigos.",
     "energy_tip": "Bendras suvartotos energijos kiekis (kWh). Apskaičiuojamas integruojant galią laike.",
-    "cost_tip": "Šio ciklo energijos kaina, užfiksuota jam pasibaigus pagal tuo metu galiojusią kainą (energija x kaina už kWh). Nustatykite kainą Nustatymuose, kad ji būtų užpildyta.",
+    "cost_tip": "Šio ciklo energijos kaina, užfiksuota jam pasibaigus. Kai įjungta „Pagal laiką svertinė kaina“, galios kreivė įkainojama pagal kiekvieną akimirką galiojusią kainą; priešingu atveju energija x viena kaina, galiojusi pabaigoje. Nustatykite kainą Nustatymuose, kad ji būtų užpildyta.",
     "confidence_tip": "Profilio atitikties pasitikėjimas (0–100 %). Kaip glaudžiai ciklo galios kreivė atitiko atpažintą programą.",
     "health_tip": "ML ciklo būklė (daugiau = geriau). Spustelėkite ciklą, kad jį patikrintumėte ir peržiūrėtumėte.",
-    "flags_tip": "Ciklo peržiūros, anomalijų ir šaltinio žymės. Užveskite pelę ant piktogramos, kad matytumėte detales."
+    "flags_tip": "Ciklo peržiūros, anomalijų ir šaltinio žymės. Užveskite pelę ant piktogramos, kad matytumėte detales.",
+    "cost_dynamic_tip": "Pagal laiką sverta: įkainota pagal ciklo metu galiojusią kainą (faktinė {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "vid.",
@@ -2090,7 +2095,8 @@
       "golden": "Pakartotinis apdorojimas: atskaitos ciklų žymėjimas",
       "suggestions": "Pakartotinis apdorojimas: pasiūlymai",
       "ml_training": "Pakartotinis apdorojimas: ML mokymas",
-      "health": "Pakartotinis apdorojimas: ciklų sveikata"
+      "health": "Pakartotinis apdorojimas: ciklų sveikata",
+      "costs": "Pakartotinis apdorojimas: energijos išlaidos"
     },
     "pg_sweep": {
       "optimize": "Optimizavimas: {param}"

@@ -177,7 +177,7 @@ Four levels in ascending order: `none` / `read` / `edit` / `full`.
 | Command | Line | Params | Handler type | Response | Notes |
 |---|---|---|---|---|---|
 | `get_diagnostics` | 2649 | `entry_id` R | `@async_response` | `{stats}` | Storage statistics |
-| `reprocess_history` | 2748 | `entry_id` R | `@callback` | `{task_id}` | **Background task** (`kind="reprocess"`); 5-phase sequence: rematch -> backfill golden -> refresh suggestions -> ML training (if `ENABLE_ML_TRAINING`) -> recompute health; serialized under write lock; admin-only |
+| `reprocess_history` | 2748 | `entry_id` R | `@callback` | `{task_id}` | **Background task** (`kind="reprocess"`); 6-phase sequence: rematch -> backfill golden -> refresh suggestions -> ML training (if `ENABLE_ML_TRAINING`) -> recost cycles from recorder price history (#426) -> recompute health; serialized under write lock; admin-only |
 | `clear_debug_data` | 2771 | `entry_id` R | `@async_response` | `{success, count}` | Clears stored debug traces; admin-only |
 | `wipe_history` | 2794 | `entry_id` R | `@async_response` | `{success}` | Destructive: clears all cycles + profiles; admin-only |
 | `export_config` | 2818 | `entry_id` R | `@async_response` | `{json_data}` | Executor-offloads JSON serialization; admin-only |
@@ -327,7 +327,7 @@ Nine task kinds run through the registry:
 
 | Kind | Spawned by | Phases / chunks |
 |---|---|---|
-| `reprocess` | `ws_reprocess_history` | 5 phases (match, golden, suggestions, ML training, health) |
+| `reprocess` | `ws_reprocess_history` | 6 phases (match, golden, suggestions, ML training, costs, health) |
 | `rebuild` | `ws_rebuild_envelopes` | 1 step per profile, executor per step |
 | `trim` | `ws_trim_cycle` | 1 step (trim + envelope rebuild), write-lock held |
 | `split` | `ws_apply_split` | N segment steps, write-lock held |

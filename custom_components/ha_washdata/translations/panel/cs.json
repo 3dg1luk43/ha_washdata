@@ -354,7 +354,7 @@
     "pg_settings_source": "Zdroj nastavení",
     "phase_catalog": "Katalog fází",
     "playground": "Testovací prostředí",
-    "process_history": "Historie procesu",
+    "process_history": "Zpracování historie",
     "settings_history": "Historie nastavení",
     "status": "Stav",
     "status_graph": "Stavový graf",
@@ -764,7 +764,7 @@
     "merge_cycles": "Sloučit {n} cyklů",
     "new_group": "Nová skupina profilů",
     "new_phase": "Nová fáze",
-    "process_history_msg": "Znovu spustí párování, obnoví návrhy, přetrénuje ML (je-li povoleno) a přepočítá zdraví cyklů pro všechny uložené cykly. Může to chvíli trvat.",
+    "process_history_msg": "Znovu spustí vyhodnocení shody, obnoví návrhy, přetrénuje ML (je-li povoleno), přepočítá náklady podle zaznamenaných cen energie a přepočítá zdraví cyklů u všech uložených cyklů. Může to chvíli trvat.",
     "process_history_ok": "Zpracovat",
     "process_history_title": "Zpracovat historii",
     "process_recording": "Procesní záznam",
@@ -911,7 +911,7 @@
     "preferences_adv": "Předvolby",
     "prefs_personal": "Platí pouze pro váš účet Home Assistant.",
     "font_size_hint": "Zvětšete nebo zmenšete vše v tomto panelu. Platí pro váš účet na tomto zařízení.",
-    "process_history_hint": "Znovu spustí párování na všech uložených cyklech, obnoví návrhy ladění, přetrénuje modely ML (je-li povoleno) a přepočítá zdraví cyklů. Spusťte po skupině revizí.",
+    "process_history_hint": "Znovu spustí vyhodnocení shody u všech uložených cyklů, obnoví návrhy ladění, přetrénuje modely ML (je-li povoleno), přepočítá náklady cyklů podle zaznamenaných cen energie a přepočítá zdraví cyklů. Spusťte po sérii kontrol.",
     "profile_deleted": "Profil smazán",
     "profile_poor_health_detail": "Cykly přiřazené k tomuto profilu mají nekonzistentní tvary nebo nízkou spolehlivost. Zvažte přestavbu obálky nebo revizi označených cyklů.",
     "profiles_intro": "Kliknutím na profil zobrazíte statistiky, fáze a vyčištění. Seskupte téměř identické programy (stejný tvar/doba trvání, různá teplota nebo odstřeďování), takže se mezi nimi dá spolehlivě vybrat.",
@@ -1103,7 +1103,7 @@
     "group_name": "např. Bavlna 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Popisek\"}]",
     "notify": "přidat službu pro oznámení…",
-    "notify_services_list": "notify.mobile_app_telefon, ...",
+    "notify_services_list": "notify.mobile_app_phone, ...",
     "person": "přidat osobu…",
     "phase_name": "např. Předpírka",
     "profile_name": "např. Bavlna 40 °C",
@@ -1243,7 +1243,7 @@
       "label": "Počet opakování konce"
     },
     "energy_price_entity": {
-      "doc": "Senzor s aktuální cenou elektřiny za kWh (např. dynamický tarif). Má přednost před statickou cenou níže. Každý cyklus zaznamenává cenu platnou v okamžiku dokončení.",
+      "doc": "Senzor s aktuální cenou elektřiny za kWh (např. dynamický tarif). Má přednost před statickou cenou níže. Když jsou Časově vážené náklady zapnuté, každý cyklus se účtuje cenou platnou v každém okamžiku jeho běhu; jinak se na něj zafixuje cena platná v okamžiku jeho dokončení.",
       "label": "Entita ceny energie"
     },
     "energy_price_static": {
@@ -1415,7 +1415,7 @@
       "label": "Práh vypnutí napájení"
     },
     "power_sensor": {
-      "doc": "Entita senzoru hlásící okamžitý příkon ve wattech pro tento spotřebič (např. sensor.pracka_prikon). Veškerá detekce cyklu je založena na tomto signálu.",
+      "doc": "Entita senzoru hlásící okamžitý příkon ve wattech pro tento spotřebič (např. sensor.washer_power). Veškerá detekce cyklu je založena na tomto signálu.",
       "label": "Snímač výkonu"
     },
     "profile_duration_tolerance": {
@@ -1600,6 +1600,10 @@
     "profile_evidence_sources": {
       "label": "Cykly tvořící program",
       "doc": "Které cykly se používají k sestavení křivky výkonu každého programu a k přiřazení dokončeného cyklu k ní. Když některý druh odškrtnete, přestane ovlivňovat vaše programy, ale nic se nesmaže - cykly zůstanou v seznamu Cykly a stále je lze označit nebo odstranit. Užitečné, pokud nedůvěřujete importovaným datům. Statistiky to neovlivní: vždy počítají jen cykly, které tento spotřebič skutečně provedl. Odškrtnutí všech možností se ignoruje, protože program bez cyklů by nikdy nemohl být přiřazen."
+    },
+    "energy_price_dynamic": {
+      "label": "Časově vážené náklady",
+      "doc": "Účtuje každý cyklus cenou platnou v každém okamžiku jeho běhu místo jediné ceny platné v okamžiku jeho dokončení. Týká se pouze entity ceny (statická cena se měnit nemůže). Nevyžaduje žádné další nastavení: cena se sleduje živě po celou dobu cyklu a Zpracování historie v Diagnostice přepočítá náklady starších cyklů z recorderu. Vypnuto = klasické chování, jedna cena zafixovaná na konci."
     }
   },
   "setting_group": {
@@ -2013,10 +2017,11 @@
     "date_tip": "Datum a čas zahájení cyklu.",
     "duration_tip": "Celková doba běhu cyklu od začátku do konce.",
     "energy_tip": "Celková spotřebovaná energie (kWh). Vypočteno integrací výkonu v čase.",
-    "cost_tip": "Náklady na energii pro tento cyklus, zafixované při dokončení podle ceny platné v té době (energie x cena za kWh). Nastavte cenu v Nastavení, abyste ho vyplnili.",
+    "cost_tip": "Náklady na energii za tento cyklus, zafixované při dokončení. Když jsou Časově vážené náklady zapnuté, křivka výkonu se účtuje cenou platnou v každém okamžiku; jinak energie x jediná cena platná na konci. Nastavte cenu v Nastavení, aby se hodnota vyplnila.",
     "confidence_tip": "Spolehlivost shody profilu (0-100%). Jak přesně křivka výkonu cyklu odpovídala identifikovanému programu.",
     "health_tip": "Zdraví cyklu ML (vyšší = lepší). Kliknutím na cyklus jej prohlédnete a zhodnotíte.",
-    "flags_tip": "Komunitní příznaky a indikátory kvality dat"
+    "flags_tip": "Komunitní příznaky a indikátory kvality dat",
+    "cost_dynamic_tip": "Časově vážené: účtováno cenou platnou v průběhu cyklu (efektivně {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "prům.",
@@ -2090,7 +2095,8 @@
       "golden": "Opětovné zpracování: doplňování referenčních",
       "suggestions": "Opětovné zpracování: návrhy",
       "ml_training": "Opětovné zpracování: trénování ML",
-      "health": "Opětovné zpracování: zdraví cyklů"
+      "health": "Opětovné zpracování: zdraví cyklů",
+      "costs": "Opětovné zpracování: náklady na energii"
     },
     "pg_sweep": {
       "optimize": "Optimalizace: {param}"
