@@ -1434,8 +1434,8 @@ class WashDataManager:
                 if profile_name in self._match_persistence_counter:
                     self._match_persistence_counter[profile_name] = self._match_persistence # Lock it in
 
-                avg_duration = float(matched_duration)
-                self._matched_profile_duration = avg_duration if avg_duration > 0 else None
+                self._matched_profile_duration = self._profile_duration(matched_duration)
+                avg_duration = self._matched_profile_duration or 0.0
                 self._logger.info(
                      "Switching to profile '%s' (reason: %s). Expected duration: %.0fs (%smin)",
                      profile_name, switch_reason, avg_duration, int(avg_duration / 60),
@@ -1599,7 +1599,9 @@ class WashDataManager:
                     try:
                         prof = self.profile_store.get_profile(profile_name)
                         if prof:
-                            self._matched_profile_duration = float(prof.get("avg_duration", 0))
+                            self._matched_profile_duration = self._profile_duration(
+                                prof.get("avg_duration")
+                            )
                     except Exception as e:
                         self._logger.debug("Failed to fetch profile duration on switch: %s", e)
                 else:
@@ -2017,11 +2019,9 @@ class WashDataManager:
                         )
                         if profile is not None:
                             self._current_program = manual_name
-                            try:
-                                avg = float(profile.get("avg_duration", 0.0))
-                            except (TypeError, ValueError):
-                                avg = 0.0
-                            self._matched_profile_duration = avg if avg > 0 else None
+                            self._matched_profile_duration = self._profile_duration(
+                                profile.get("avg_duration")
+                            )
                             self._logger.info(
                                 "Restored manual program override: %s (duration=%.0fs)",
                                 manual_name,
@@ -8168,6 +8168,25 @@ class WashDataManager:
             )
         return True
 
+    @staticmethod
+    def _profile_duration(value: Any) -> float | None:
+        """A profile's expected duration in seconds, or None when unusable.
+
+        None is the field's declared "unknown" and every reader of
+        ``_matched_profile_duration`` already guards for it. Non-finite is rejected
+        for the same reason ``_finite_power`` rejects it: ``inf`` survives a plain
+        ``> 0`` test, and ``sensor.py``'s ``int(time_remaining / 60)`` then raises
+        OverflowError on every update. A profile written by this device is always
+        finite; an imported or hand-edited one need not be (register items 211/229).
+        """
+        try:
+            avg = float(value)
+        except (TypeError, ValueError):
+            return None
+        if not math.isfinite(avg) or avg <= 0:
+            return None
+        return avg
+
     def _apply_manual_program(
         self, profile_name: str, profile: dict[str, Any] | None
     ) -> None:
@@ -8183,14 +8202,9 @@ class WashDataManager:
         # value and every reader guards for it. Same shape as the restart path that
         # re-pins a manual program (see the #404 secondary-bug block above), which
         # already got this right.
-        avg = 0.0
-        if profile:
-            try:
-                avg = float(profile.get("avg_duration", 0.0))
-            except (TypeError, ValueError):
-                avg = 0.0
-        self._matched_profile_duration = avg if avg > 0 else None
-        if avg > 0:
+        avg = self._profile_duration(profile.get("avg_duration")) if profile else None
+        self._matched_profile_duration = avg
+        if avg:
             self._logger.info(
                 "Manual program set to %s, duration=%.0fs", profile_name, avg
             )
