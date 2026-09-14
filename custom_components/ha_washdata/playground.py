@@ -1078,6 +1078,22 @@ class _DetailSim:
             terminal_high,
         )
 
+    def _price_at(self, offset_s: float) -> float | None:
+        """The tariff in force at a replay offset, or the flat price with no timeline.
+
+        Live charges the *remaining* energy at whatever ``_resolve_energy_price()``
+        returns at that instant, so a replay has to move through its own stored
+        timeline instead of pinning the whole cycle to one price. Otherwise a
+        dynamically-priced cycle diverges from the projection the live estimator
+        actually produced, which is the one thing this sim exists to reproduce.
+        """
+        price = self.price
+        for point_offset, point_price in self.price_points:
+            if point_offset > offset_s:
+                break
+            price = point_price
+        return price
+
     def _cost_so_far(
         self, trace: list[tuple[datetime, float]]
     ) -> tuple[float, float] | None:
@@ -1166,7 +1182,7 @@ class _DetailSim:
                 sim_cost = self._cost_so_far(trace)
                 wh, cost = progress_mod.projected_energy(
                     self.store, self.options, matched_dur, trace, program, result.progress,
-                    energy_wh, self.price, self._end_exp_fn,
+                    energy_wh, self._price_at(offset), self._end_exp_fn,
                     cost_so_far=sim_cost[0] if sim_cost else None,
                     cost_so_far_wh=sim_cost[1] if sim_cost else None,
                 )
