@@ -38,6 +38,9 @@ from unittest.mock import AsyncMock, MagicMock
 import numpy as np
 import pytest
 
+from homeassistant.util import dt as dt_util
+
+from custom_components.ha_washdata.const import PRICE_TIMELINE_MAX_POINTS
 from custom_components.ha_washdata.manager import (
     WashDataManager,
     _coerce_price_timeline,
@@ -443,3 +446,74 @@ def test_the_timeline_survives_the_active_cycle_snapshot(price_manager):
     # JSON round-trip: the store writes lists, not tuples.
     restored = _coerce_price_timeline(json.loads(json.dumps(snapshot["price_timeline"])))
     assert restored == [(1000.0, 0.10), (2000.0, 0.30)]
+
+
+# ─── Recosting historic cycles from recorder price history ────────────────────
+
+
+def _recost_mgr(cycles, rows):
+    mgr = MagicMock()
+    mgr._logger = logging.getLogger("test_issue_426")
+    mgr._dynamic_pricing_enabled.return_value = True
+    mgr.profile_store.get_past_cycles.return_value = list(cycles)
+    mgr.profile_store.get_backfill_cycles.return_value = []
+    mgr.profile_store.async_save = AsyncMock()
+    mgr._async_price_history = AsyncMock(return_value=list(rows))
+    mgr._cycle_report_energy_wh = WashDataManager._cycle_report_energy_wh
+    for name in ("async_recompute_cycle_costs", "_cost_from_timeline"):
+        setattr(mgr, name, getattr(WashDataManager, name).__get__(mgr, WashDataManager))
+    return mgr
+
+
+async def test_recosting_scopes_the_price_rows_to_the_cycle():
+    """Rows from before the cycle must not evict the cycle's own transitions.
+
+    The recorder window spans every candidate, so one cycle's query carries days
+    of rows that all collapse onto offset 0. Past ``PRICE_TIMELINE_MAX_POINTS`` of
+    them, compaction spends its whole budget on prices this cycle never ran at and
+    drops the in-cycle change, which is the only one that alters the bill.
+    """
+    start = dt_util.now() - timedelta(hours=3)
+    start_ts = start.timestamp()
+    cycle = _cycle()
+    cycle["start_time"] = start.isoformat()
+    cycle["end_time"] = (start + timedelta(hours=1)).isoformat()
+    rows = [
+        (start_ts - 86400.0 + i * 60.0, 2.0 if i % 2 == 0 else 1.0)
+        for i in range(PRICE_TIMELINE_MAX_POINTS + 60)
+    ]
+    rows.append((start_ts - 60.0, 0.10))    # the price actually in force at start
+    rows.append((start_ts + 1800.0, 0.11))  # the cycle's own step, the smallest one
+
+    mgr = _recost_mgr([cycle], rows)
+    assert await mgr.async_recompute_cycle_costs() == 1
+
+    assert cycle["price_timeline"] == [[0.0, 0.10], [1800.0, 0.11]]
+    # 1 kWh, half at each price.
+    assert cycle["cost"] == pytest.approx(0.105)
+
+
+# ─── A reported energy that cannot be costed ──────────────────────────────────
+
+
+def test_an_unusable_reported_energy_yields_no_cost():
+    """``report_wh`` is the figure the cost must describe, or there is no answer."""
+    ts, pw = _flat_trace()
+    points = [(0.0, 0.30)]
+    assert cycle_cost(ts, pw, points, report_wh=0.0) is None
+    assert cycle_cost(ts, pw, points, report_wh=-5.0) is None
+    assert cycle_cost(ts, pw, points, report_wh=float("nan")) is None
+    assert cycle_cost(ts, pw, points, report_wh="junk") is None
+    # A usable figure still scales the segments.
+    assert cycle_cost(ts, pw, points, report_wh=500.0)[0] == pytest.approx(0.15)
+
+
+async def test_a_zero_meter_reading_costs_zero_instead_of_the_trace():
+    """A meter that did not move must not be priced as if the trace had been billed."""
+    mgr = _mgr(timeline=[(_START.timestamp(), 0.10)], price=0.30)
+    cycle = _cycle(energy_meter_wh=0.0)
+
+    await mgr._async_apply_cycle_cost(cycle)
+
+    assert cycle["energy_price_mode"] == "fixed"
+    assert cycle["cost"] == 0.0

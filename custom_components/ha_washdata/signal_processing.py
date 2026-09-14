@@ -227,8 +227,10 @@ def cycle_cost(
     effective_price``. Without that, the cost shown next to a kWh figure would be
     computed from a different amount of energy than the kWh figure itself.
 
-    Returns ``None`` when the trace carries no energy to charge for, so the caller
-    can fall back to the single-price behaviour instead of reporting a false zero.
+    Returns ``None`` when the trace carries no energy to charge for, or when
+    ``report_wh`` is given but is not a usable positive figure, so the caller can
+    fall back to the single-price behaviour instead of reporting a false zero or a
+    cost that describes a different amount of energy than the kWh beside it.
     """
     segments = integrate_wh_by_price(timestamps, power, price_points, max_gap_s=max_gap_s)
     if not segments:
@@ -241,9 +243,13 @@ def cycle_cost(
         try:
             report = float(report_wh)
         except (TypeError, ValueError):
-            report = 0.0
-        if report > 0:
-            scale = report / integrated
+            return None
+        if not np.isfinite(report) or report <= 0:
+            # The caller asked for the cost of *this* figure. Costing the trace
+            # integral instead would print a price beside a 0 kWh readout, so hand
+            # the decision back rather than answer a question that was not asked.
+            return None
+        scale = report / integrated
     cost = sum(wh * scale / 1000.0 * price for price, wh in segments)
     effective_price = cost / (integrated * scale / 1000.0)
     return cost, effective_price

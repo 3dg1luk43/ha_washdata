@@ -174,6 +174,48 @@ async def test_reload_after_a_failed_setup_really_sets_up(
     assert hass.data.get(PANEL_REGISTERED_KEY) is True
 
 
+async def test_a_refused_platform_unload_keeps_the_forward_record(
+    hass, enable_custom_integrations, http_up, broken_link, monkeypatch
+):
+    """A platform that refuses to unload must not erase the forwarded record.
+
+    The record is what tells the next attempt to take the stale platforms down
+    first. Dropping it while they are still forwarded makes every later setup skip
+    the unload and hit "has already been setup" instead - the loop this set exists
+    to break (#425).
+    """
+    hass.states.async_set(POWER_SENSOR, "0", {"unit_of_measurement": "W"})
+    entry = _make_entry(hass)
+
+    with pytest.raises(HomeAssistantError):
+        await washdata.async_setup_entry(hass, entry)
+    await hass.async_block_till_done()
+    assert entry.entry_id in hass.data[washdata.FORWARDED_ENTRIES_KEY]
+
+    unload_calls = []
+
+    async def _refuse_unload(config_entry, platforms):
+        unload_calls.append(config_entry.entry_id)
+        return False
+
+    async def _fail_after_the_unload(_hass):
+        raise RuntimeError("setup aborted after the stale-platform cleanup")
+
+    broken_link["on"] = False
+    monkeypatch.setattr(hass.config_entries, "async_unload_platforms", _refuse_unload)
+    monkeypatch.setattr(washdata, "_async_preload_ml_modules", _fail_after_the_unload)
+
+    with pytest.raises(RuntimeError):
+        await washdata.async_setup_entry(hass, entry)
+    await hass.async_block_till_done()
+
+    assert unload_calls == [entry.entry_id]
+    assert entry.entry_id in hass.data[washdata.FORWARDED_ENTRIES_KEY], (
+        "the entry was forgotten although its platforms are still forwarded, so "
+        "the next setup will forward them a second time and fail permanently."
+    )
+
+
 async def test_panel_registers_when_http_comes_up_late(hass, enable_custom_integrations):
     """Hoisting the registration must not lose the panel on a late frontend stack.
 
