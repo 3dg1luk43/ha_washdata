@@ -673,11 +673,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # platforms in place when setup fails); forwarding them again raises
         # "has already been setup", so take them down first.
         if entry.entry_id in hass.data.get(FORWARDED_ENTRIES_KEY, set()):
+            unloaded = False
             try:
-                await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+                unloaded = await hass.config_entries.async_unload_platforms(
+                    entry, PLATFORMS
+                )
             except Exception:  # pylint: disable=broad-exception-caught
                 _log.debug("Unloading the stale platforms failed", exc_info=True)
-            hass.data[FORWARDED_ENTRIES_KEY].discard(entry.entry_id)
+            # Only forget the platforms once they are actually gone. A platform
+            # that refuses to unload leaves them forwarded, and dropping the
+            # record here would make the next attempt skip the unload and hit
+            # "has already been setup" forever - the #425 loop this set exists
+            # to break.
+            if unloaded:
+                hass.data[FORWARDED_ENTRIES_KEY].discard(entry.entry_id)
 
     # Warm the ML module cache before anything can score in the event loop.
     await _async_preload_ml_modules(hass)

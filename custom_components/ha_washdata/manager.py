@@ -3637,9 +3637,21 @@ class WashDataManager:
             end_ts = end_dt.timestamp()
             # Require an anchor at or before the cycle: without one the first known
             # price would be back-applied to energy bought before it existed.
-            if not any(ts <= start_ts for ts, _ in rows):
+            anchor: tuple[float, float] | None = None
+            window: list[tuple[float, float]] = []
+            for ts, price in rows:
+                if ts <= start_ts:
+                    # Keep only the newest pre-start row. Older ones all collapse
+                    # onto offset 0 and, once there are more of them than
+                    # PRICE_TIMELINE_MAX_POINTS, compaction can spend the whole
+                    # budget on prices this cycle never ran at and evict the real
+                    # anchor or an in-cycle transition.
+                    anchor = (ts, price)
+                elif ts <= end_ts:
+                    window.append((ts, price))
+            if anchor is None:
                 continue
-            window = [(ts, price) for ts, price in rows if ts <= end_ts]
+            window.insert(0, anchor)
             points = compact_price_timeline(
                 [(max(0.0, ts - start_ts), price) for ts, price in window],
                 max_points=PRICE_TIMELINE_MAX_POINTS,
