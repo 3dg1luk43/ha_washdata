@@ -572,3 +572,24 @@ def test_a_non_finite_price_entity_reads_as_no_price(hass, price_entry):
     assert mgr._resolve_energy_price() is None
     hass.states.async_set("sensor.test_price", "0.42")
     assert mgr._resolve_energy_price() == pytest.approx(0.42)
+
+
+async def test_recosting_survives_a_naive_timestamp():
+    """One offset-free stored stamp must not abort the whole pass.
+
+    The horizon filter compares against an aware ``dt_util.now()``, and the WS
+    caller only debug-logs the resulting TypeError, so a single imported or
+    hand-edited record used to make the recost silently do nothing at all.
+    """
+    naive_start = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=2)
+    start_ts = naive_start.replace(tzinfo=timezone.utc).timestamp()
+    cycle = _cycle()
+    cycle["start_time"] = naive_start.isoformat()
+    cycle["end_time"] = (naive_start + timedelta(hours=1)).isoformat()
+    rows = [(start_ts - 60.0, 0.10), (start_ts + 1800.0, 0.20)]
+
+    mgr = _recost_mgr([cycle], rows)
+    assert await mgr.async_recompute_cycle_costs() == 1
+
+    # 1 kWh, half at each price.
+    assert cycle["cost"] == pytest.approx(0.15)
