@@ -994,6 +994,7 @@
         "advisory_shape_drift": "'{name}' 已明显偏离其原始功率曲线。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。",
         "advisory_shape_drift_corr": "'{name}' 已明显偏离其原始功率曲线（相关系数 {corr}）。设备行为可能随时间发生了变化（例如水垢、磨损）。建议用近期周期重新录制此配置文件。",
         "advisory_unmatchable": "'{name}' 永远无法被匹配：其背后没有任何带功率数据的周期，因此 WashData 没有可与运行中的周期进行比较的对象。请为此程序标记一个周期（或录制一个周期），使其重新参与匹配。",
+        "advisory_unmatchable_no_duration": "'{name}' 永远无法被匹配：它有带功率数据的周期，但没有可用的时长，因此 WashData 没有可用来衡量匹配的长度。请重新录制此程序，或设置其预期时长，使其重新参与匹配。",
         "pg_no_alerts": "本次运行未检测到问题。",
         "pg_override_active": "正在使用您编辑的设置对比当前设置",
         "pg_history_empty": "按运行以重放您的周期。",
@@ -1992,7 +1993,8 @@
             "tol_per_profile": "{profiles} 个配置文件（{cycles} 个周期）中每个配置文件时长方差的 p75；波动小的配置文件不受惩罚。",
             "tol_pooled": "基于 {cycles} 个近期已标注周期的合并时长方差（p95 偏差={dev}）。",
             "watchdog": "在安全范围内保持尽可能低（略高于 p95 更新间隔 {p95}s，且至少为采样间隔 {median}s 的 2 倍，最小 30s），以便快速捕捉到停滞而不产生误停止。",
-            "match_interval_capped": "已设上限，使 {persistence} 次连续匹配能落在最短程序（{shortest}s）的 {pct}% 之内；仅按更新频率（中位数={median}s）计算本会建议更长的间隔。"
+            "match_interval_capped": "已设上限，使 {persistence} 次连续匹配能落在最短程序（{shortest}s）的 {pct}% 之内；仅按更新频率（中位数={median}s）计算本会建议更长的间隔。",
+            "match_interval_floored": "仅按最短程序（{shortest} 秒）计算，上限会是 {cap} 秒，低于 {minimum} 秒的最小值，因此保持在最小值：{persistence} 次连续匹配需要 {budget} 秒，超过该程序的 {pct}%。匹配只在有读数到达时才运行（中位数={median} 秒），因此使用最小值不会带来额外开销。"
         },
         "exclusions": {
             "summary": "已排除 {total} 个误检测周期：{parts}。",
