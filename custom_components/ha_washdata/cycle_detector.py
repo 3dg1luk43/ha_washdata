@@ -361,6 +361,10 @@ class CycleDetector:
         self._preroll_buffer: list[tuple[datetime, float]] = []
         self._current_cycle_start: datetime | None = None
         self._last_active_time: datetime | None = None
+        # Last reading the POWER SENSOR actually sent, as opposed to one the
+        # manager injected to advance the quiet timers. Deliberately not reset per
+        # cycle: it describes the sensor, not the run.
+        self._last_real_reading_time: datetime | None = None
         self._cycle_max_power: float = 0.0
 
         # Accumulators (dt-aware)
@@ -1103,8 +1107,21 @@ class CycleDetector:
             return min(configured_ratio, 0.90)
         return configured_ratio
 
-    def process_reading(self, power: float, timestamp: datetime) -> None:
-        """Process a new power reading using robust dt-aware logic."""
+    def process_reading(
+        self, power: float, timestamp: datetime, synthetic: bool = False
+    ) -> None:
+        """Process a new power reading using robust dt-aware logic.
+
+        ``synthetic=True`` marks a reading the *manager* injected rather than one
+        the power sensor sent: the watchdog and anti-wrinkle keepalives, which
+        exist to advance the quiet timers while a change-only plug says nothing.
+        They must keep doing exactly that, so this flag changes no timing here.
+        It is recorded only so that anything reasoning about what was OBSERVED can
+        tell the two apart - today that is `_keep_tail_cap` (#424 / register item
+        238), which must never bank a span the plug never reported on.
+        """
+        if not synthetic:
+            self._last_real_reading_time = timestamp
 
         # Calculate dt (needed by the stop lockout below and the state machine).
         dt = 0.0

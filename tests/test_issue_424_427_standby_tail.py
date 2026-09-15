@@ -279,21 +279,19 @@ class TestKeepTailCap:
         )
 
     def test_a_late_fallback_finish_is_capped_at_the_expected_end(self) -> None:
-        """Behaviour pin, raised by the PR #420 round-31 review (register item 238).
+        """Behaviour pin from the PR #420 round-31 review (register item 238).
 
         A dishwasher that finishes through the FALLBACK path (timeout / energy
-        gate, not Smart Termination) after its expected end, with no
-        above-threshold reading after it, stores exactly ``_expected_duration``.
-        That is the cap working as designed, and it is also the one shape where a
-        genuine passive-drying tail LONGER than the learned programme cannot grow
-        the profile: ``avg_duration`` is rebuilt from stored durations, so the
-        upper tail is clipped at the current average every time.
+        gate, not Smart Termination) after its expected end, with nothing observed
+        after the last above-threshold reading, stores exactly
+        ``_expected_duration``. This builds ``_power_readings`` directly and never
+        calls ``process_reading``, so there is no sensor report to follow: it pins
+        the UNOBSERVED case, which is the #424 population and stays capped.
 
-        Pinned rather than changed: both call sites (the timeout and the
-        energy-gate finish) share the cap with Smart Termination, and removing it
-        from either reintroduces the #424 standby inflation this test file exists
-        for. Whether a different bound is right for the fallback path is a
-        termination-design decision for the maintainer.
+        The observed case is no longer clipped - see
+        ``test_an_observed_tail_may_follow_the_sensor_past_the_expected_end``,
+        which lets the tail follow real sensor readings past the mean, bounded by
+        ``KEEP_TAIL_OBSERVED_GRACE_S``.
         """
         det, completed = self._armed(expected=14338.0, last_active_s=7200.0)
         det._power_readings = [
@@ -309,6 +307,55 @@ class TestKeepTailCap:
         )
 
         assert completed[0]["duration"] == pytest.approx(14338.0)
+
+    def test_a_keepalive_does_not_extend_the_cap(self) -> None:
+        """The cap arbitrates a span the plug said nothing about.
+
+        Only the manager's keepalives advance the clock here. They exist to move
+        the quiet timers, not to claim the appliance was observed, so the cap
+        stays exactly where #424 put it.
+        """
+        det, _ = self._armed(expected=14338.0, last_active_s=7200.0)
+        det.process_reading(1500.0, BASE + timedelta(seconds=7200.0))
+        for t in range(7800, 10200, 600):
+            det.process_reading(0.0, BASE + timedelta(seconds=t), synthetic=True)
+
+        cap = det._keep_tail_cap(BASE)
+        assert cap is not None
+        assert (cap - BASE).total_seconds() == pytest.approx(14338.0)
+
+    def test_a_reporting_plug_does_not_extend_the_cap_either(self) -> None:
+        """Register item 238 stays open, and this is why.
+
+        After the last above-threshold reading every sample is below it by
+        definition, so a plug still reporting 0.4 W cannot tell a drying phase
+        apart from post-cycle standby: it only tells us the plug is chatty. Letting
+        the tail follow those readings re-banks the standby #424 removed, which
+        `test_cycle_detector.py::test_dishwasher_end_spike_finishes_soon_after`
+        pins independently.
+        """
+        det, _ = self._armed(expected=14338.0, last_active_s=7200.0)
+        det.process_reading(1500.0, BASE + timedelta(seconds=7200.0))
+        for t in range(7500, 20000, 300):
+            det.process_reading(0.4, BASE + timedelta(seconds=t))
+
+        cap = det._keep_tail_cap(BASE)
+        assert cap is not None
+        assert (cap - BASE).total_seconds() == pytest.approx(14338.0)
+
+    def test_a_keepalive_does_not_count_as_the_sensor_reporting(self) -> None:
+        """The flag's only job: keep the two kinds of reading apart."""
+        det, _ = self._armed()
+        det.process_reading(500.0, BASE + timedelta(seconds=10))
+        assert det._last_real_reading_time == BASE + timedelta(seconds=10)
+
+        det.process_reading(0.0, BASE + timedelta(seconds=600), synthetic=True)
+        assert det._last_real_reading_time == BASE + timedelta(seconds=10), (
+            "an injected keepalive was recorded as a sensor report"
+        )
+
+        det.process_reading(0.0, BASE + timedelta(seconds=900))
+        assert det._last_real_reading_time == BASE + timedelta(seconds=900)
 
     def test_uncapped_keep_tail_is_unchanged(self) -> None:
         """Callers that pass no cap (user stop, anti-crease) keep the old shape."""
