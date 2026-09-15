@@ -3405,9 +3405,21 @@ class ProfileStore:
                 sample = by_id.get(sample_id) if sample_id else None
                 if sample is None or not sample.get("power_data"):
                     sample = labeled_by_profile.get(name)
-                sample_present = bool(sample is not None and sample.get("power_data"))
+                sample_power_data = (sample or {}).get("power_data") or []
+                sample_present = bool(sample is not None and sample_power_data)
                 sample_usable = sample_present and bool(
-                    profile.get("avg_duration") or (sample or {}).get("duration")
+                    profile.get("avg_duration")
+                    or (sample or {}).get("duration")
+                    # Third fallback in _build_match_snapshots: when both stored
+                    # durations are falsy it derives one from the RESAMPLED
+                    # segment's timestamp span, so a profile with neither can still
+                    # be admitted. Deliberately not reproduced exactly - that needs
+                    # _get_cached_sample_segment, whose longest-gap-free-run pick
+                    # this method cannot afford on the event loop - so any sample
+                    # with two readings counts as usable. That is the weaker
+                    # direction this method documents: never claim a profile is
+                    # unmatchable where the builder might admit it.
+                    or len(sample_power_data) >= 2
                 )
 
                 if env_usable or sample_usable:

@@ -133,6 +133,10 @@ def test_malformed_profiles_do_not_raise() -> None:
         "bad": None,
         "worse": {"avg_duration": "not a number"},
         "nan": {"avg_duration": float("nan")},
+        # json keeps an oversized literal as an unbounded int and float() on one
+        # raises OverflowError, which is neither a TypeError nor a ValueError: it
+        # used to abort the whole operational-suggestion pass.
+        "imported": {"avg_duration": 10**400},
         "good": {"avg_duration": 2579.0},
     }
     sug = _match_suggestion(60.0, profiles)
