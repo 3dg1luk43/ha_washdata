@@ -891,6 +891,14 @@ STANDBY_BAND_FLATNESS_FLOOR_W = 2.0   # absolute flatness floor for low-peak dev
 # ``_anticrease_spin_pending`` (#399) covers the terminal-spin case but fails
 # open when the profile carries no terminal high block.
 DEFAULT_ANTI_CREASE_FINALIZE_RATIO = 0.98  # elapsed must reach 98% of expected duration
+# The range the panel's number input enforces (min 0.5 / max 1.0), restated here so
+# the detector can hold a stored value to it. Nothing else validates the range:
+# `import_config` strips only nulls, a selective import writes numbers through, and
+# the Playground sanitizer casts to float. A stored 0.0 would make the past-expected
+# test `current_duration < expected * 0.0` pass for every non-negative duration, i.e.
+# remove the discriminator this gate rests on for washing machines (see above).
+ANTI_CREASE_FINALIZE_RATIO_MIN = 0.5
+ANTI_CREASE_FINALIZE_RATIO_MAX = 1.0
 # Backwards-compatible alias: the pre-#429 module-level constant. Kept so older
 # imports (and anything pinned in the lab) still resolve; the detector reads the
 # per-device config field, never this.
