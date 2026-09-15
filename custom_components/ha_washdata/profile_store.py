@@ -3412,9 +3412,18 @@ class ProfileStore:
 
                 if env_usable or sample_usable:
                     continue
+                # "no usable duration" means evidence EXISTS and only the length is
+                # missing, so the advisory can tell the user to set one. An envelope
+                # curve alone does not qualify: below 2 cycles the builder never
+                # admits it, so there is nothing to size a match against either way.
+                env_has_evidence = (
+                    isinstance(env, dict)
+                    and int(env.get("cycle_count") or 0) >= 2
+                    and isinstance(env_avg, list)
+                )
                 out[name] = (
                     "no usable duration"
-                    if (sample_present or isinstance(env_avg, list))
+                    if (sample_present or env_has_evidence)
                     else "no evidence cycle with power data"
                 )
             return out

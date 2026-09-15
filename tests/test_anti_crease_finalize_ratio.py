@@ -45,6 +45,7 @@ from custom_components.ha_washdata import playground, ws_api
 from custom_components.ha_washdata.const import (
     ANTI_CREASE_FINALIZE_RATIO,
     CONF_ANTI_CREASE_FINALIZE_RATIO,
+    CONF_CURVE_PREROLL_SECONDS,
     CONF_DEVICE_TYPE,
     CONF_POWER_SENSOR,
     DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
@@ -307,6 +308,23 @@ async def test_empty_or_non_numeric_drops_the_key(junk) -> None:
         {CONF_ANTI_CREASE_FINALIZE_RATIO: junk},
     )
     assert CONF_ANTI_CREASE_FINALIZE_RATIO not in saved
+
+
+async def test_an_oversized_integer_drops_the_key_instead_of_failing_the_save() -> None:
+    """json parses an integer literal of any length; float() on one raises.
+
+    OverflowError is not a ValueError, so it escaped the guard, and the
+    ``async_response`` wrapper turns it into ERR_UNKNOWN_ERROR - the whole
+    settings save fails instead of this one key falling back to its default
+    (register item 194, same shape).
+    """
+    saved = await _set_options(
+        _entry({CONF_ANTI_CREASE_FINALIZE_RATIO: 0.75}),
+        _hass()[0],
+        {CONF_ANTI_CREASE_FINALIZE_RATIO: 10**400, CONF_CURVE_PREROLL_SECONDS: 10**400},
+    )
+    assert CONF_ANTI_CREASE_FINALIZE_RATIO not in saved
+    assert CONF_CURVE_PREROLL_SECONDS not in saved
 
 
 async def test_the_two_ratios_do_not_clobber_each_other() -> None:
