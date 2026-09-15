@@ -284,14 +284,13 @@ class TestKeepTailCap:
         A dishwasher that finishes through the FALLBACK path (timeout / energy
         gate, not Smart Termination) after its expected end, with nothing observed
         after the last above-threshold reading, stores exactly
-        ``_expected_duration``. This builds ``_power_readings`` directly and never
-        calls ``process_reading``, so there is no sensor report to follow: it pins
-        the UNOBSERVED case, which is the #424 population and stays capped.
+        ``_expected_duration``.
 
-        The observed case is no longer clipped - see
-        ``test_an_observed_tail_may_follow_the_sensor_past_the_expected_end``,
-        which lets the tail follow real sensor readings past the mean, bounded by
-        ``KEEP_TAIL_OBSERVED_GRACE_S``.
+        The observed case is capped identically - see
+        ``test_a_reporting_plug_does_not_extend_the_cap_either``. Following the
+        sensor past the expected end was implemented and reverted (register items
+        238 and 260): after ``_last_active_time`` every reading is sub-threshold,
+        so a plug still reporting cannot separate drying from standby.
         """
         det, completed = self._armed(expected=14338.0, last_active_s=7200.0)
         det._power_readings = [
