@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Proti koncu ta program za približno {mins} min utihne, nato pa pred zaključkom {secs} s porablja okoli {watts} W. Zaznano pri {seen} od {measured} izmerjenih ciklov: naprava tega ne stori ob vsakem zagonu.",
+    "quiet_tail": "tih konec ~{mins} min",
     "artifact_tip": "{n} zaznanih nepravilnosti (npr. odprta vrata sredi cikla) – odprite, da jih vidite na grafu",
     "auto": "(samodejno zaznano)",
     "built_in_tag": "vgrajeno",
@@ -378,6 +380,8 @@
     "poor": "⚠ Slaba kakovost profila"
   },
   "lbl": {
+    "envelope_position_tip": "Položaj na lastni posneti krivulji ujemajočega programa, {pct}%. Določen je s primerjavo oblike tega cikla s profilom in ne s štetjem časa, zato ostane pravilen, kadar je zagon daljši ali krajši od običajnega. Osveži se, ko naprava miruje, zato lahko med aktivno fazo zaostaja.",
+    "envelope_position": "krivulja {pct}%",
     "aria_playground_chart3": "Interaktivni graf moči cikla: pomaknite kazalec za prikaz časa/moči, drsajte ali uporabite dva prsta za povečavo, povlecite za premikanje",
     "device_unresolved": "Nedostopna naprava ({id})",
     "drag_to_resize": "Povlecite za spremembo velikosti",

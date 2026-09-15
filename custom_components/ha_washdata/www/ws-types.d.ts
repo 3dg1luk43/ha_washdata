@@ -55,6 +55,7 @@ export interface DeviceInfo {
   total_duration_s: number | null;
   current_power_w: number | null;
   cycle_progress_pct: number | null;
+  envelope_position: number | null;
   suggestions_count: number;
   suggestion_keys: string[];
   feedback_count: number;

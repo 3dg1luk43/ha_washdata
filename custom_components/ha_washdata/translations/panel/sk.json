@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Ku koncu tento program asi na {mins} min stíchne a pred dokončením odoberá približne {watts} W počas {secs} s. Zaznamenané pri {seen} z {measured} zmeraných cyklov: spotrebič to nerobí pri každom behu.",
+    "quiet_tail": "tichý koniec ~{mins} min",
     "artifact_tip": "Zistilo sa {n} anomálií (napr. dvere otvorené uprostred cyklu) – otvorte ich, aby ste ich videli na grafe",
     "auto": "(automaticky zistené)",
     "built_in_tag": "vstavaný",
@@ -378,6 +380,8 @@
     "poor": "⚠ Zlá kvalita profilu"
   },
   "lbl": {
+    "envelope_position_tip": "Poloha na vlastnej zaznamenanej krivke zhodného programu, {pct}%. Určuje sa porovnaním tvaru tohto cyklu s profilom, nie odpočítavaním času, takže zostáva správna aj pri dlhšom alebo kratšom behu. Obnovuje sa, keď je spotrebič v pokoji, takže počas aktívnej fázy môže zaostávať.",
+    "envelope_position": "krivka {pct}%",
     "aria_playground_chart3": "Interaktívny graf výkonu cyklu: prejdením myšou zobrazíte čas/výkon, kolieskom alebo dvoma prstami priblížite, ťahaním posuniete",
     "device_unresolved": "Nedostupné zariadenie ({id})",
     "drag_to_resize": "Potiahnutím zmeníte veľkosť",

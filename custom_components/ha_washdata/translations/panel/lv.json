@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Beigu daļā šī programma uz aptuveni {mins} min apklust, pēc tam pirms pabeigšanas {secs} s patērē aptuveni {watts} W. Novērots {seen} no {measured} izmērītajiem cikliem: ierīce to nedara katrā reizē.",
+    "quiet_tail": "klusās beigas ~{mins} min",
     "artifact_tip": "Konstatētas {n} anomālijas (piemēram, durvis atvērtas cikla vidū) – atveriet, lai tās skatītu diagrammā",
     "auto": "(noteikts automātiski)",
     "built_in_tag": "iebūvēts",
@@ -378,6 +380,8 @@
     "poor": "⚠ Slikta profila kvalitāte"
   },
   "lbl": {
+    "envelope_position_tip": "Pozīcija atbilstošās programmas pašas ierakstītajā līknē, {pct}%. To nosaka, salīdzinot šī cikla formu ar profilu, nevis skaitot laiku, tāpēc tā paliek pareiza, ja cikls ir garāks vai īsāks nekā parasti. Tā atjaunojas, kamēr ierīce ir klusa, tāpēc aktīvas fāzes laikā var atpalikt.",
+    "envelope_position": "līkne {pct}%",
     "aria_playground_chart3": "Interaktīva cikla jaudas diagramma: turiet kursoru virs, lai nolasītu laiku/jaudu, ritiniet vai tuviniet ar diviem pirkstiem, velciet, lai pārvietotu",
     "device_unresolved": "Nepieejama ierīce ({id})",
     "drag_to_resize": "Velciet, lai mainītu izmēru",

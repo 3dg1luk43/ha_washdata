@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Pabaigos link ši programa maždaug {mins} min nutyla, tada prieš baigdama {secs} s naudoja apie {watts} W. Pastebėta {seen} iš {measured} išmatuotų ciklų: prietaisas tai daro ne kiekvieną kartą.",
+    "quiet_tail": "tyli pabaiga ~{mins} min",
     "artifact_tip": "Aptikta {n} anomalijų (pvz., durys atidarytos ciklo viduryje) – atidarykite, kad pamatytumėte juos diagramoje",
     "auto": "(aptikta automatiškai)",
     "built_in_tag": "įmontuotas",
@@ -378,6 +380,8 @@
     "poor": "⚠ Prasta profilio kokybė"
   },
   "lbl": {
+    "envelope_position_tip": "Padėtis atitinkančios programos įrašytoje kreivėje, {pct}%. Nustatoma lyginant šio ciklo formą su profiliu, o ne skaičiuojant laiką, todėl lieka teisinga, kai ciklas trunka ilgiau ar trumpiau nei įprastai. Atnaujinama, kai prietaisas tyli, todėl aktyvios fazės metu gali vėluoti.",
+    "envelope_position": "kreivė {pct}%",
     "aria_playground_chart3": "Interaktyvus ciklo galios grafikas: užveskite žymeklį, kad nuskaitytumėte laiką/galią, slinkite arba priartinkite dviem pirštais, vilkite, kad pastumtumėte",
     "device_unresolved": "Nepasiekiamas įrenginys ({id})",
     "drag_to_resize": "Vilkite, kad pakeistumėte dydį",

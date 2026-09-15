@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Lõpu poole jääb see programm umbes {mins} minutiks vaikseks ja tarbib siis enne lõpetamist {secs} s jooksul umbes {watts} W. Täheldatud {seen} korral {measured} mõõdetud tsüklist: seade ei tee seda igal käivitusel.",
+    "quiet_tail": "vaikne lõpp ~{mins} min",
     "artifact_tip": "Tuvastati {n} anomaaliat (nt uks avati tsükli keskel) – avage, et näha neid graafikul",
     "auto": "(tuvastatud automaatselt)",
     "built_in_tag": "sisseehitatud",
@@ -378,6 +380,8 @@
     "poor": "⚠ Kehv profiili kvaliteet"
   },
   "lbl": {
+    "envelope_position_tip": "Asukoht sobiva programmi enda salvestatud kõveral, {pct}%. Määratakse selle tsükli kuju võrdlemisel profiiliga, mitte aja lugemisel, seega püsib õige ka siis, kui tsükkel on tavalisest pikem või lühem. See värskendub, kui seade on vaikne, seega aktiivse faasi ajal võib maha jääda.",
+    "envelope_position": "kõver {pct}%",
     "aria_playground_chart3": "Interaktiivne tsükli võimsusgraafik: hõljuta aja/võimsuse lugemiseks, keri või näpista suumimiseks, lohista liigutamiseks",
     "device_unresolved": "Seade pole saadaval ({id})",
     "drag_to_resize": "Lohistage suuruse muutmiseks",

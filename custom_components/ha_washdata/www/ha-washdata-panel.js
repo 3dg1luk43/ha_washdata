@@ -3211,6 +3211,7 @@ class HaWashdataPanel extends HTMLElement {
       this._profileTrends = r.profile_trends || {};
       this._coverageGaps = r.coverage_gaps || {};
       this._profileAdvisories = r.profile_advisories || [];
+      this._profileTerminal = r.profile_terminal || {};
     } catch (_) { this._profilesError = true; /* keep previous data */ }
     return this._profiles;
   }
@@ -3328,7 +3329,7 @@ class HaWashdataPanel extends HTMLElement {
     this._settingsChangelog = null; this._settingsChangeByKey = {};
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
-    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._opts = {}; this._optDefaults = {}; this._suggestions = []; this._lockedSuggestions = [];
+    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._profileTerminal = {}; this._opts = {}; this._optDefaults = {}; this._suggestions = []; this._lockedSuggestions = [];
     this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._setupStatus = null;       // per-device; re-fetched by _fetchTabData
@@ -4199,9 +4200,24 @@ class HaWashdataPanel extends HTMLElement {
     }
     const attnHtml = attn.length ? `<div class="wd-attn">${attn.join('')}</div>` : '';
 
+    // The one "how far through" figure that is not made of elapsed time: it comes
+    // from aligning the live trace against the matched profile's own curve, so it
+    // survives a run that over- or under-shoots its mean. It is only recomputed
+    // while the appliance is below the stop threshold, which the tooltip says,
+    // because otherwise a figure that visibly stalls during a wash looks broken.
+    const envPos = dev.envelope_position;
+    const envPct = envPos != null ? Math.round(envPos * 100) : null;
+    const envPosHtml = envPct != null
+      ? ` <span style="opacity:.75" title="${_esc(this._t('lbl.envelope_position_tip', {pct: envPct},
+          `Position on the matched program's own recorded curve, ${envPct}%. Measured by aligning `
+          + `this cycle against the profile instead of counting time, so it stays right when a run `
+          + `is longer or shorter than usual. It refreshes while the appliance is quiet, so it can `
+          + `lag behind during an active phase.`))}">${this._t('lbl.envelope_position', {pct: envPct},
+          `curve ${envPct}%`)}</span>`
+      : '';
     const progressHtml = (isRunning && prog != null) ? `
       <div class="wd-prog-bg"><div class="wd-prog-fill" style="width:${Math.min(100, prog)}%"></div></div>
-      <div class="wd-prog-row"><span>${prog.toFixed(1)}%</span>${rem != null ? `<span>${this._t('lbl.time_remaining', {v: _fmtDuration(rem)}, `~${_fmtDuration(rem)} remaining`)}</span>` : ''}</div>
+      <div class="wd-prog-row"><span>${prog.toFixed(1)}%${envPosHtml}</span>${rem != null ? `<span>${this._t('lbl.time_remaining', {v: _fmtDuration(rem)}, `~${_fmtDuration(rem)} remaining`)}</span>` : ''}</div>
     ` : '';
     const pd = this._powerData || {};
     const hasCurve = (pd.live || []).length > 1;
@@ -4770,7 +4786,26 @@ class HaWashdataPanel extends HTMLElement {
     const unmatchableBadge = unmatchableAdv
       ? `<span class="wd-badge" style="color:var(--error-color,#f44336);background:rgba(244,67,54,.12)" title="${_esc(this._t(unmatchableAdv.message_key, unmatchableAdv.message_params, unmatchableAdv.message))}">⚠ ${this._t('badge.unmatchable', {}, "can't be matched")}</span>`
       : '';
-    const badges = [unmatchableBadge, healthBadge, trendBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
+    // How this program ends, measured from its own cycles. A dishwasher that has
+    // gone quiet for its drying phase is the commonest "is it finished?" question,
+    // so the measured length belongs on the program itself. The appliance does not
+    // always emit the terminal event, so the badge hedges with ~ and the tooltip
+    // gives the frequency outright rather than implying a guarantee.
+    const term = (this._profileTerminal || {})[p.name];
+    let terminalBadge = '';
+    if (term && term.quiet_before_s > 0 && term.seen_in >= 2) {
+      const mins = Math.max(1, Math.round(term.quiet_before_s / 60));
+      const watts = Number(term.event_watts || 0).toFixed(0);
+      const secs = Math.round(term.event_seconds || 0);
+      const tTip = this._t('badge.quiet_tail_tip',
+        {mins, secs, watts, seen: term.seen_in, measured: term.measured},
+        `Near the end this program goes quiet for about ${mins} min, then draws about `
+        + `${watts} W for ${secs} s before finishing. Seen in ${term.seen_in} of `
+        + `${term.measured} measured cycles: the appliance does not do it every run.`);
+      terminalBadge = `<span class="wd-badge" style="color:var(--secondary-text-color,#888)"`
+        + ` title="${_esc(tTip)}">${this._t('badge.quiet_tail', {mins}, `~${mins}m quiet tail`)}</span>`;
+    }
+    const badges = [unmatchableBadge, healthBadge, trendBadge, terminalBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
     // Mini power-signature curve: the profile's real average power shape (from its
     // envelope), so the card thumbnail matches the actual cycle. Painted after
     // render by _drawProfileSparklines. Needs ≥3 envelope points.

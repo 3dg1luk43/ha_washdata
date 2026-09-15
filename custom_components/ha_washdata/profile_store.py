@@ -5810,7 +5810,11 @@ class ProfileStore:
             event_watts        median peak power of the event
             event_watts_frac   that peak as a fraction of the cycle's own peak
             position_frac      where the event sits in the cycle (0-1)
-            seen_in / measured how many of the measured cycles showed one
+            seen_in / measured how many of the measured cycles showed one.
+                               ``measured`` counts the cycles the statistic could
+                               be computed on at all, so a degenerate trace (too
+                               few points, all-zero, zero span) is excluded
+                               rather than counted as a cycle that did not do it
             consistency       seen_in / measured, 0-1
 
         **Read `consistency` before trusting the rest.** The same appliance emits
@@ -5856,7 +5860,6 @@ class ProfileStore:
                 points = decompress_power_data(cast(Any, cycle))
                 if len(points) < 5:
                     continue
-                measured += 1
                 peak = max(p for _t, p in points)
                 if peak <= 0:
                     continue
@@ -5864,6 +5867,14 @@ class ProfileStore:
                 span = points[-1][0] - points[0][0]
                 if span <= 0:
                     continue
+                # Counted only once the trace is measurable AT ALL. An all-zero
+                # cycle (a stored cycle that is nothing but 0.0 W keepalives,
+                # item 260) or a zero-span one can never produce an event, so
+                # putting it in the denominator would report the appliance as
+                # less consistent for a reason that is not about the appliance.
+                # Every `continue` BELOW this line is a real measured-but-absent
+                # cycle and must stay counted: that is what `consistency` means.
+                measured += 1
 
                 # Walk back to the last run above the threshold, then to the start
                 # of that run, then to the end of the quiet stretch before it.

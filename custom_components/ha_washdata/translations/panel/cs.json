@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Ke konci tento program zhruba na {mins} min ztichne a před dokončením odebírá asi {watts} W po dobu {secs} s. Zaznamenáno u {seen} z {measured} změřených cyklů: spotřebič to nedělá při každém běhu.",
+    "quiet_tail": "tichý konec ~{mins} min",
     "artifact_tip": "Zjištěno {n} anomálií (např. dveře otevřené uprostřed cyklu) – otevřete, abyste je viděli na grafu",
     "auto": "(automaticky zjištěno)",
     "built_in_tag": "vestavěný",
@@ -378,6 +380,8 @@
     "poor": "⚠ Špatná shoda"
   },
   "lbl": {
+    "envelope_position_tip": "Pozice na vlastní zaznamenané křivce shodného programu, {pct}%. Určuje se porovnáním tvaru tohoto cyklu s profilem, ne odpočtem času, takže zůstává správná i při delším nebo kratším běhu. Obnovuje se, když je spotřebič v klidu, takže během aktivní fáze může zaostávat.",
+    "envelope_position": "křivka {pct}%",
     "aria_playground_chart3": "Interaktivní graf výkonu cyklu: najetím zobrazíte čas/výkon, kolečkem nebo dvěma prsty přiblížíte, tažením posunete",
     "device_unresolved": "Nedostupné zařízení ({id})",
     "drag_to_resize": "Přetažením změníte velikost",

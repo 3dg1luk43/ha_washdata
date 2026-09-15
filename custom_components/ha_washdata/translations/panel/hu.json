@@ -48,6 +48,8 @@
         }
     },
     "badge": {
+        "quiet_tail_tip": "A vége felé ez a program körülbelül {mins} percre elcsendesedik, majd a befejezés előtt {secs} másodpercig körülbelül {watts} W-ot vesz fel. {measured} mért ciklusból {seen} esetben fordult elő: a készülék nem minden futásnál csinálja.",
+        "quiet_tail": "záró csend ~{mins} perc",
         "artifact_tip": "{n} rendellenesség észlelve (pl. ajtónyitás a ciklus közepén) – nyissa meg, hogy megtekinthesse őket a grafikonon",
         "auto": "(automatikusan észlelve)",
         "built_in_tag": "beépített",
@@ -378,6 +380,8 @@
         "poor": "⚠ Gyenge profilminőség"
     },
     "lbl": {
+        "envelope_position_tip": "Pozíció az egyező program saját rögzített görbéjén, {pct}%. A ciklus alakjának a profillal való összevetéséből adódik, nem az eltelt idő számolásából, ezért akkor is helyes marad, ha a futás a szokásosnál hosszabb vagy rövidebb. Akkor frissül, amikor a készülék csendes, ezért aktív fázis közben lemaradhat.",
+        "envelope_position": "görbe {pct}%",
         "aria_playground_chart3": "Interaktív ciklusteljesítmény-grafikon: vigye rá a mutatót az idő/teljesítmény leolvasásához, görgessen vagy csippentsen a nagyításhoz, húzza az eltoláshoz",
         "device_unresolved": "Nem elérhető eszköz ({id})",
         "drag_to_resize": "Húzza az átméretezéshez",

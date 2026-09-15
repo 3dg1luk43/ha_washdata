@@ -48,6 +48,8 @@
         }
     },
     "badge": {
+        "quiet_tail_tip": "Pri kraju ovaj program utihne na otprilike {mins} min, zatim povuče oko {watts} W tokom {secs} s i završava. Uočeno u {seen}/{measured} izmjerenih ciklusa: uređaj to ne radi pri svakom pokretanju.",
+        "quiet_tail": "~{mins} min tišine na kraju",
         "artifact_tip": "Otkrivene su {n} anomalije (npr. vrata otvorena sredinom ciklusa) – otvorite da ih vidite na grafikonu",
         "auto": "(automatski otkriveno)",
         "built_in_tag": "ugrađen",
@@ -378,6 +380,8 @@
         "poor": "⚠ Loša kvaliteta podudaranja"
     },
     "lbl": {
+        "envelope_position_tip": "Položaj na vlastitoj snimljenoj krivulji podudarenog programa, {pct}%. Mjeri se poravnavanjem ovog ciklusa s profilom umjesto brojanjem vremena, pa ostaje tačan kada je pokretanje duže ili kraće nego obično. Osvježava se dok je uređaj tih, pa tokom aktivne faze može kasniti.",
+        "envelope_position": "krivulja {pct}%",
         "aria_playground_chart3": "Interaktivni grafikon snage ciklusa: pređite mišem za prikaz vremena/snage, pomjerajte točkić ili koristite dva prsta za zumiranje, povucite za pomjeranje",
         "device_unresolved": "Nedostupan uređaj ({id})",
         "drag_to_resize": "Prevucite za promjenu veličine",

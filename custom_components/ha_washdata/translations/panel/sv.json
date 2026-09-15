@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Mot slutet blir det här programmet tyst i cirka {mins} min och drar sedan omkring {watts} W i {secs} s innan det är klart. Sett i {seen} av {measured} uppmätta cykler: apparaten gör det inte vid varje körning.",
+    "quiet_tail": "~{mins} min tyst slutfas",
     "artifact_tip": "{n} anomalier upptäckta (t.ex. dörren öppnades mitt i cykeln) – öppna för att se dem i diagrammet",
     "auto": "(automatiskt identifierat)",
     "built_in_tag": "inbyggd",
@@ -378,6 +380,8 @@
     "poor": "⚠ Dålig profilkvalitet"
   },
   "lbl": {
+    "envelope_position_tip": "Position på det matchade programmets egen registrerade kurva, {pct} %. Mäts genom att den här cykeln passas in mot profilen i stället för att tiden räknas, så den stämmer även när en körning är längre eller kortare än vanligt. Den uppdateras medan apparaten är tyst och kan därför släpa efter under en aktiv fas.",
+    "envelope_position": "kurva {pct} %",
     "aria_playground_chart3": "Interaktiv effektgraf för cykeln: hovra för att avläsa tid/effekt, skrolla eller nyp för att zooma, dra för att panorera",
     "device_unresolved": "Otillgänglig enhet ({id})",
     "drag_to_resize": "Dra för att ändra storlek",
