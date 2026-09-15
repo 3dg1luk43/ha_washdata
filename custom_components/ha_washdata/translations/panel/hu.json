@@ -994,6 +994,7 @@
         "advisory_shape_drift": "A(z) '{name}' jelentősen eltért az eredeti teljesítménygörbéjétől. A készülék működése idővel megváltozhatott (pl. vízkő, kopás). Fontolja meg a profil újrarögzítését a közelmúltbeli ciklusokkal.",
         "advisory_shape_drift_corr": "A(z) '{name}' jelentősen eltért az eredeti teljesítménygörbéjétől (korreláció: {corr}). A készülék működése idővel megváltozhatott (pl. vízkő, kopás). Fontolja meg a profil újrarögzítését a közelmúltbeli ciklusokkal.",
         "advisory_unmatchable": "A(z) '{name}' soha nem egyeztethető: nincs mögötte teljesítményadatokkal rendelkező ciklus, így a WashData nem tud mihez hasonlítani egy futó ciklust. Címkézze fel ennek a programnak egy ciklusát (vagy rögzítsen egyet), hogy a profil visszakerüljön az egyeztetésbe.",
+        "advisory_unmatchable_no_duration": "A(z) '{name}' soha nem egyeztethető: van mögötte teljesítményadatokkal rendelkező ciklus, de nincs használható időtartama, így a WashDatának nincs mihez méretezni az egyeztetést. Rögzítse újra ezt a programot, vagy adja meg a várható időtartamát, hogy a profil visszakerüljön az egyeztetésbe.",
         "pg_no_alerts": "Ebben a futásban nem észlelt problémát.",
         "pg_override_active": "A szerkesztett beállításait használja a jelenlegiekhez képest",
         "pg_history_empty": "Nyomja meg a Futtatás gombot a ciklusai lejátszásához.",
@@ -1960,7 +1961,8 @@
             "tol_per_profile": "A profilonkénti időtartam-szórás p75 értéke {profiles} profilon át ({cycles} ciklus); a stabil profilok nem kapnak büntetést.",
             "tol_pooled": "{cycles} legutóbbi címkézett ciklus összevont időtartam-szórása alapján (p95 szórás={dev}).",
             "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (épp a p95 frissítési szünet, azaz {p95}s felett, és legalább a mintavételezési intervallum ({median}s) kétszerese, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül.",
-            "match_interval_capped": "Korlátozva, hogy {persistence} egymást követő egyezés beleférjen a legrövidebb program ({shortest}s) {pct}%-ába; önmagában a frissítési ütem (médián={median}s) hosszabb intervallumot javasolt volna."
+            "match_interval_capped": "Korlátozva, hogy {persistence} egymást követő egyezés beleférjen a legrövidebb program ({shortest}s) {pct}%-ába; önmagában a frissítési ütem (médián={median}s) hosszabb intervallumot javasolt volna.",
+            "match_interval_floored": "Önmagában a legrövidebb program ({shortest}s) {cap}s értékre korlátozná ezt, ami a(z) {minimum}s minimum alatt van, ezért a minimumon marad: {persistence} egymást követő egyezés {budget}s időt vesz igénybe, ami a program {pct}%-ánál több. Az egyeztetés csak akkor fut, amikor új mérés érkezik (médián={median}s), így a minimum semmibe sem kerül."
         },
         "exclusions": {
             "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",

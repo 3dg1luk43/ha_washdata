@@ -994,6 +994,7 @@
         "advisory_shape_drift": "'{name}' orijinal güç eğrisinden önemli ölçüde uzaklaştı. Cihazın davranışı zamanla değişmiş olabilir (ör. kireçlenme, aşınma). Bu profili son çevrimlerle yeniden kaydetmeyi düşünün.",
         "advisory_shape_drift_corr": "'{name}' orijinal güç eğrisinden önemli ölçüde uzaklaştı (korelasyon {corr}). Cihazın davranışı zamanla değişmiş olabilir (ör. kireçlenme, aşınma). Bu profili son çevrimlerle yeniden kaydetmeyi düşünün.",
         "advisory_unmatchable": "'{name}' asla eşleştirilemez: arkasında güç verisi bulunan bir çevrim yok, bu nedenle WashData çalışan bir çevrimi karşılaştıracak bir referansa sahip değil. Profili yeniden eşleştirmeye dahil etmek için bu programın bir çevrimini etiketleyin (veya bir çevrim kaydedin).",
+        "advisory_unmatchable_no_duration": "'{name}' asla eşleştirilemez: güç verisi bulunan bir çevrimi var ancak kullanılabilir bir süresi yok, bu nedenle WashData eşleştirmeyi ölçeklendirecek bir süreye sahip değil. Bu programı yeniden kaydedin veya beklenen süresini girin; böylece profil yeniden eşleştirmeye dahil olur.",
         "pg_no_alerts": "Bu çalıştırmada sorun tespit edilmedi.",
         "pg_override_active": "Düzenlediğiniz ayarlar mevcut ayarlara karşı kullanılıyor",
         "pg_history_empty": "Döngülerinizi yeniden oynatmak için Çalıştır'a basın.",
@@ -1992,7 +1993,8 @@
             "tol_per_profile": "{profiles} profil boyunca ({cycles} çevrim) profil başına süre varyansının p75'i; tutarlı profiller cezalandırılmaz.",
             "tol_pooled": "{cycles} son etiketli çevrimin birleştirilmiş süre varyansına dayalı (p95 sapma={dev}).",
             "watchdog": "Güvenli olduğu kadar düşük tutuldu (p95 güncelleme boşluğu {p95}s değerinin hemen üzerinde ve örnekleme aralığı {median}s değerinin en az 2 katı, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır.",
-            "match_interval_capped": "{persistence} ardışık eşleşme en kısa programın ({shortest}s) %{pct} kadarlık bölümüne sığsın diye sınırlandırıldı; yalnızca güncelleme sıklığı (medyan={median}s) daha uzun bir aralık önerirdi."
+            "match_interval_capped": "{persistence} ardışık eşleşme en kısa programın ({shortest}s) %{pct} kadarlık bölümüne sığsın diye sınırlandırıldı; yalnızca güncelleme sıklığı (medyan={median}s) daha uzun bir aralık önerirdi.",
+            "match_interval_floored": "Yalnızca en kısa program ({shortest}s) bunu {cap}s ile sınırlardı; bu da {minimum}s alt sınırının altında kaldığından değer alt sınırda tutuluyor: {persistence} ardışık eşleşme {budget}s sürüyor, bu da o programın %{pct} kadarlık bölümünden fazla. Eşleştirme yalnızca yeni bir ölçüm geldiğinde çalışır (medyan={median}s), bu yüzden alt sınırın bir maliyeti yok."
         },
         "exclusions": {
             "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",

@@ -95,3 +95,40 @@ for (const registry of ['after-card', 'before-card'] as const) {
     expect(pageErrors).toEqual([]);
   });
 }
+
+
+// The editor is defined in the same loop as the card, but wdDefineElements
+// catches per tag, so a define that throws for the editor alone is swallowed.
+// The self-heal poll used to re-run only while the CARD was missing, so that
+// failure was permanent and Lovelace fell back to the YAML editor for the rest
+// of the session.
+//
+// No ?registry= here on purpose: with the polyfill loaded, its swap re-defines
+// BOTH tags as a side effect and recovers the editor whether or not the poll
+// checks for it, which hides the defect. Plain native registry, no swap.
+test('a failed editor define is retried, not left undefined', async ({ page }) => {
+  await page.addInitScript(() => {
+    let failuresLeft = 1;
+    const original = customElements.define.bind(customElements);
+    customElements.define = (name: string, ctor: any, options?: any) => {
+      if (name === 'ha-washdata-card-editor' && failuresLeft > 0) {
+        failuresLeft -= 1;
+        throw new Error('simulated one-off editor define failure');
+      }
+      return original(name, ctor, options);
+    };
+  });
+
+  await page.goto('/card.html');
+  await page.waitForFunction(() => (window as any).__ready === true, { timeout: 10_000 });
+
+  // The card is unaffected: only the editor's define threw.
+  expect(await page.evaluate(() => !!customElements.get('ha-washdata-card'))).toBe(true);
+
+  // The poll has to come back for the editor. It runs every 200 ms; before the
+  // fix this stayed undefined until the 30 s deadline.
+  await page.waitForFunction(
+    () => !!customElements.get('ha-washdata-card-editor'),
+    { timeout: 5_000 },
+  );
+});
