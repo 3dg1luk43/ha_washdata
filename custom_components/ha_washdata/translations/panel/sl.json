@@ -1174,6 +1174,10 @@
       "label": "Sprostitev po tihi fazi sušenja",
       "doc": "Ko cikel preseže svoje pričakovano trajanje, kako dolgo mora pomivalni stroj ostati tih (pod Pragom zaustavitve), preden WashData preneha čakati na končno izčrpavanje vode in zaključi cikel. Povečajte, če ima vaša naprava dolgo tiho fazo sušenja pred poznim končnim izčrpavanjem, ki ga zaznavanje spregleda - širše okno omogoča, da naučeno trajanje sledi sezonskemu premiku (hladnejša dovodna voda = daljši cikli), namesto da ostane zaklenjeno na starem povprečju. Čakanje lahko le skrajša glede na notranjo 30-minutno omejitev čakanja na končno izčrpavanje, nikoli ga ne podaljša."
     },
+    "anti_crease_finalize_ratio": {
+      "doc": "Kako daleč v pričakovanem trajanju ujemajočega programa mora biti cikel, preden sme WashData sklepati, da je tiho vrtenje bobna, ki ga vidi, že zaključni rep zaščite pred gubami, in cikel tam končati. Pričakovano trajanje je povprečje programa, zato pri sušilnem stroju, katerega čas senzorskega sušenja se ravna po količini perila, večina zagonov nikoli ne doseže 98% tega povprečja in rep obstane vse do nadomestnega časovnega zamika - pogosto 15 do 40 minut po tem, ko se je stroj dejansko ustavil. Pri takem sušilnem stroju to vrednost znižajte (npr. 0,75). Pralne stroje pustite na privzeti vrednosti: pralni stroj preživi večji del cikla pod nastavitvijo Maks. moč zaščite pred gubami, zato je ta delež edino, kar loči tiho fazo sredi pranja od repa, njegovo znižanje pa lahko pranje prepolovi. Pustite prazno za privzeto vrednost (0,98). To je druga nastavitev kot Razmerje pametnega zaključka, ki ureja ločeno preverjanje predčasnega zaključka.",
+      "label": "Razmerje zaključka zaščite pred gubami"
+    },
     "anti_wrinkle_enabled": {
       "doc": "Prepoznajte kratke vrtilne impulze nizke moči, ki jih oddaja sušilni stroj po glavni fazi segrevanja, in jih ohranite povezane s končanim ciklom, namesto da jih berete kot nove cikle.",
       "label": "Omogoči zaznavanje zaščite pred gubami"
@@ -1205,6 +1209,10 @@
     "completion_min_seconds": {
       "doc": "Cikli, krajši od tega, se zavržejo kot cikli duhov (testne vožnje, odpiranje vrat za dodajanje nogavice).",
       "label": "Min. trajanje cikla"
+    },
+    "curve_preroll_seconds": {
+      "doc": "Koliko sekund odčitkov iz prekinjenih poskusov zagona sme WashData prenesti na začetek krivulje cikla. Krivulja cikla se običajno začne pri poskusu zagona, ki končno uspe, zato pri stroju, ki pred umiritvijo večkrat poskusi - izbira programa, zaklep vrat, prvo polnjenje z vodo - v vsaki krivulji manjkajo prve minute resnične dejavnosti. To vrednost nastavite nekoliko nad najdaljši tak zalet, ki ga ima vaš stroj (300 s je za večino več kot dovolj). 0 funkcijo izklopi. Upoštevajte, da vklop premakne zabeleženi začetek nazaj, zato cikli, zabeleženi pred spremembo in po njej, za isti program nosijo različna trajanja; naučena povprečja bodo odstopala, dokler starejši cikli ne izpadejo.",
+      "label": "Uvodne sekunde krivulje"
     },
     "delay_confirm_seconds": {
       "doc": "Napajanje mora ostati v pasu pripravljenosti toliko časa, preden se naprava obravnava kot naprava, ki čaka na zagon, namesto da deluje.",
@@ -1787,6 +1795,7 @@
       "end_repeat_count": "{false}/{total} čistih ciklov ({pct}%) je imelo notranji premor, daljši od 60s, ki se je nadaljeval; zahtevaj {val} potrditev konca.",
       "learning_confidence": "Zaupanje p05 za {cycles} uporabniško označenih ciklov ({p05}); pod to vrednostjo zahtevaj preverjanje.",
       "match_interval": "Na podlagi opažene frekvence posodobitev (mediana={median}s) * 10.",
+      "match_interval_capped": "Omejeno tako, da {persistence} zaporednih ujemanj sodi v {pct}% najkrajšega programa ({shortest}s); sama frekvenca posodobitev (mediana={median}s) bi predlagala daljši interval.",
       "max_duration_ratio": "Na podlagi trajanj označenih ciklov (p95={p95}).",
       "min_active": "Na podlagi najmanjše delovne moči ({min}W), opažene v zadnjem ciklu.",
       "min_duration_ratio": "Ohranjeno čim nižje, da se program prepozna zgodaj v ciklu; pragova zaupanja in dvoumnosti preprečujeta prezgodnje potrditve.",
@@ -1984,6 +1993,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Pomivalni stroj: sekunde tišine po pričakovanem trajanju, preden se sprosti čakanje na končno izčrpavanje vode",
     "smart_termination_duration_ratio": "Delež pričakovanega trajanja ujemajočega programa, ki ga mora cikel doseči, preden ga Pametni zaključek lahko predčasno konča; znižajte ga pri strojih, odvisnih od količine perila ali temperature",
+    "anti_crease_finalize_ratio": "Delež pričakovanega trajanja ujemajočega programa, ki ga mora cikel doseči, preden se sme zaključni rep vrtenja zaščite pred gubami zaključiti; znižajte ga pri sušilnih strojih z dolgim repom vrtenja, pralne stroje pustite na privzeti vrednosti",
     "anti_wrinkle_enabled": "Vsrkaj vrtilne impulze po glavni fazi, namesto da jih obravnavaš kot nove cikle",
     "anti_wrinkle_exit_power": "Moč mora med impulzi pasti pod to vrednost, da zaščita pred gubami ostane aktivna",
     "anti_wrinkle_idle_timeout": "Dovoljeni mir med dvema vrtilnima impulzoma, preden se zaščita pred gubami konča",
@@ -2009,7 +2019,8 @@
     "dtw_ddtw_scale": "Stopnja 3: razdalja pol-nasičenja DDTW; manjša = bolj občutljiva na obliko (privzeto 30)",
     "dtw_refine_top_n": "Stopnja 3: kandidati, ki jih DTW znova oceni; zvišajte na 7-9, če pravi profil zasede 4.-5. mesto (privzeto 5)",
     "duration_scale": "Stopnja 4: logaritmično razmerje, pri katerem se ujemanje trajanja prepolovi; manjše = strožja kazen (privzeto 0,175)",
-    "energy_scale": "Stopnja 4: logaritmično razmerje, pri katerem se ujemanje energije prepolovi; manjše = strožja kazen (privzeto 0,25)"
+    "energy_scale": "Stopnja 4: logaritmično razmerje, pri katerem se ujemanje energije prepolovi; manjše = strožja kazen (privzeto 0,25)",
+    "curve_preroll_seconds": "Sekunde odčitkov iz prekinjenih poskusov zagona, prenesene na začetek krivulje cikla; 0 = izklopljeno"
   },
   "col": {
     "profile_tip": "Ime ujemajočega programa. Brez oznake pomeni, da se ob koncu cikla ni ujemal noben profil.",

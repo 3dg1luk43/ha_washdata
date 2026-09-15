@@ -1174,6 +1174,10 @@
       "label": "Otpuštanje nakon tihe faze sušenja",
       "doc": "Kada ciklus pređe svoje očekivano trajanje, koliko dugo mašina mora ostati tiha (ispod Praga zaustavljanja) pre nego što WashData prestane da čeka na završno ispumpavanje vode i završi ciklus. Povećajte ako vaš uređaj ima dugu tihu fazu sušenja pre kasnog završnog ispumpavanja koje se propušta - šire okno omogućava da naučeno trajanje prati sezonske promene (hladnija dovodna voda = duži ciklusi) umesto da ostane zaključano na staroj prosečnoj vrednosti. Čekanje samo skraćuje u odnosu na interno ograničenje završnog ispumpavanja od 30 minuta, nikada ga ne produžava."
     },
+    "anti_crease_finalize_ratio": {
+      "doc": "Koliko duboko u očekivano trajanje podudarenog programa ciklus mora da odmakne pre nego što WashData sme da zaključi da je tiho prevrtanje bubnja koje vidi završni rep zaštite od gužvanja i da tu okonča ciklus. Očekivano trajanje je prosek programa, pa kod mašine za sušenje čije vreme rada sa senzorom vlage prati količinu veša većina ciklusa nikada ne dostigne 98% tog proseka, pa rep stoji sve do rezervnog tajmauta - često 15 do 40 minuta nakon što je mašina zaista stala. Kod takve mašine za sušenje smanjite ovu vrednost (npr. 0.75). Mašine za pranje veša ostavite na podrazumevanoj vrednosti: mašina za pranje veći deo ciklusa provede ispod podešavanja Maks. snaga zaštite od gužvanja, pa je ovaj udeo jedino što razdvaja tihu fazu usred pranja od repa, a njegovo smanjenje može da prepolovi pranje. Ostavite prazno za podrazumevanu vrednost (0.98). Ovo je drugo podešavanje od Koeficijenta pametnog završavanja, koji upravlja zasebnom proverom ranog završetka.",
+      "label": "Koeficijent završavanja zaštite od gužvanja"
+    },
     "anti_wrinkle_enabled": {
       "doc": "Prepoznajte kratke impulse male snage koje mašina za sušenje emituje nakon glavne faze grejanja i držite ih povezanim sa završenim ciklusom umesto da ih čitate kao nove cikluse.",
       "label": "Omogući detekciju zaštite od gužvanja"
@@ -1205,6 +1209,10 @@
     "completion_min_seconds": {
       "doc": "Ciklusi kraći od ovog se odbacuju kao ciklusi duhova (probni radovi, otvaranje vrata da se doda čarapa).",
       "label": "Min. trajanje ciklusa"
+    },
+    "curve_preroll_seconds": {
+      "doc": "Koliko sekundi očitavanja iz prekinutih pokušaja pokretanja WashData sme da prenese na početak krive ciklusa. Kriva ciklusa obično počinje od pokušaja pokretanja koji konačno uspe, pa kod mašine koja nekoliko puta proba da krene pre nego što se ustali - izbor programa, zaključavanje vrata, prvo punjenje vodom - prvi minuti stvarne aktivnosti nedostaju na svakoj krivoj. Podesite ovu vrednost malo iznad najdužeg takvog zaleta koji vaša mašina ima (300 s je za većinu više nego dovoljno). 0 isključuje ovu funkciju. Imajte u vidu da uključivanje pomera zabeleženi početak ranije, pa ciklusi zabeleženi pre i posle promene nose različita trajanja za isti program; naučeni proseci će odstupati dok stariji ciklusi ne isteknu.",
+      "label": "Uvodne sekunde krive"
     },
     "delay_confirm_seconds": {
       "doc": "Napajanje mora ostati u opsegu pripravnosti ovoliko dugo pre nego što se uređaj tretira kao da čeka da se pokrene, a ne da radi.",
@@ -1547,7 +1555,7 @@
     },
     "keep_min_score": {
       "label": "Min. rezultat podudaranja",
-      "doc": "Minimalni rezultat sličnosti koji kandidat mora imati da bi ostao u utrci podudaranja. Podrazumevana vrednost 0,1 je namerno benigna - prihvata čak i slabe kandidate i oslanja se na kasnijе faze za pronalazak najboljeg podudaranja. Povećajte za ranije odbacivanje neprobabilnih profila; smanjite za proširenje početnog skupa kandidata."
+      "doc": "Minimalni rezultat sličnosti koji kandidat mora imati da bi ostao u utrci podudaranja. Podrazumevana vrednost 0,1 je namerno benigna - prihvata čak i slabe kandidate i oslanja se na kasnije faze za pronalazak najboljeg podudaranja. Povećajte za ranije odbacivanje neprobabilnih profila; smanjite za proširenje početnog skupa kandidata."
     },
     "dtw_blend": {
       "label": "Mešanje deformacije",
@@ -1787,6 +1795,7 @@
       "end_repeat_count": "{false}/{total} čistih ciklusa ({pct}%) imalo je unutrašnju pauzu dužu od 60s koja se nastavila; zahtevaj {val} potvrdu(e) kraja.",
       "learning_confidence": "Pouzdanost p05 za {cycles} korisnički označenih ciklusa ({p05}); ispod ove vrednosti zahtevaj proveru.",
       "match_interval": "Na osnovu uočene učestalosti ažuriranja (medijana={median}s) * 10.",
+      "match_interval_capped": "Ograničeno tako da {persistence} uzastopnih podudaranja stane u {pct}% najkraćeg programa ({shortest}s); sama učestalost ažuriranja (medijana={median}s) predložila bi duži interval.",
       "max_duration_ratio": "Na osnovu trajanja označenih ciklusa (p95={p95}).",
       "min_active": "Na osnovu najmanje radne snage ({min}W) uočene u poslednjem ciklusu.",
       "min_duration_ratio": "Zadržano što nižim kako bi se program prepoznao rano u ciklusu; pragovi pouzdanosti i dvosmislenosti sprečavaju prevremene potvrde.",
@@ -1984,6 +1993,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Mašina za pranje sudova: sekunde tišine nakon očekivanog trajanja pre nego što se otpusti čekanje na završno ispumpavanje vode",
     "smart_termination_duration_ratio": "Deo očekivanog trajanja podudarenog programa koji ciklus mora da dostigne pre nego što Pametno završavanje sme da ga okonča ranije; smanjite ga za mašine zavisne od količine veša ili temperature",
+    "anti_crease_finalize_ratio": "Deo očekivanog trajanja podudarenog programa koji ciklus mora da dostigne pre nego što završni rep prevrtanja zaštite od gužvanja sme da se okonča; smanjite ga kod mašina za sušenje sa dugim repom prevrtanja, mašine za pranje veša ostavite na podrazumevanoj vrednosti",
     "completion_min_seconds": "Najkraće pokretanje koje se računa kao pravi ciklus",
     "end_repeat_count": "Niska očitavanja zaredom pre završetka",
     "interrupted_min_seconds": "Kratki ciklusi označeni kao prekinuti",
@@ -2009,7 +2019,8 @@
     "dtw_ddtw_scale": "Faza 3: rastojanje polu-zasićenja DDTW; manje = osetljivije na oblik (podrazumevano 30)",
     "dtw_refine_top_n": "Faza 3: kandidati koje DTW ponovo ocenjuje; povećajte na 7-9 ako ispravni profil zauzme 4.-5. mesto (podrazumevano 5)",
     "duration_scale": "Faza 4: odnos logaritma gde se slaganje trajanja prepolovi; manje = stroža kazna (podrazumevano 0,175)",
-    "energy_scale": "Faza 4: odnos logaritma gde se slaganje energije prepolovi; manje = stroža kazna (podrazumevano 0,25)"
+    "energy_scale": "Faza 4: odnos logaritma gde se slaganje energije prepolovi; manje = stroža kazna (podrazumevano 0,25)",
+    "curve_preroll_seconds": "Sekunde očitavanja iz prekinutih pokušaja pokretanja prenete na početak krive ciklusa; 0 = isključeno"
   },
   "col": {
     "profile_tip": "Naziv podudarnog programa. Bez oznake znači da se na kraju ciklusa nijedan profil nije podudarao.",

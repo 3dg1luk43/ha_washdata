@@ -1174,6 +1174,10 @@
       "label": "Pasyvaus džiovinimo tylusis atleidimas",
       "doc": "Kai ciklas viršija numatytą trukmę, kiek laiko indaplovė turi išlikti tyli (žemiau Sustabdymo slenkstis) prieš tai, kai WashData nustoja laukti galutinio vandens išleidimo ir užbaigia ciklą. Padidinkite, jei jūsų aparatas turi ilgą tylią džiovinimo fazę prieš vėlyvą galutinį vandens išleidimą, kuris praleidžiamas - platesnis langas leidžia išmoktai trukmei sekti sezoninį poslinkį (šaltesnis įleidžiamas vanduo = ilgesni ciklai), užuot užsifiksavus ties senuoju vidurkiu. Jis gali tik sutrumpinti laukimą, palyginti su vidiniu 30 minučių pabaigos smailės ribojimu, bet niekada jo nepailgina."
     },
+    "anti_crease_finalize_ratio": {
+      "doc": "Kaip toli į atitiktos programos numatytą trukmę ciklas turi būti pažengęs, kad WashData galėtų nuspręsti, jog matomas tylus būgno sukimas yra apsaugos nuo raukšlių uodega, ir ties ta vieta užbaigti ciklą. Numatyta trukmė yra programos vidurkis, todėl džiovyklėje, kurios jutiklinio džiovinimo trukmė priklauso nuo apkrovos, dauguma paleidimų niekada nepasiekia 98% šio vidurkio, o uodega užsilaiko iki atsarginio skirtojo laiko - dažnai nuo 15 iki 40 minučių po to, kai mašina iš tikrųjų sustojo. Tokioje džiovyklėje sumažinkite šią vertę (pvz., 0,75). Skalbyklėms palikite numatytąją vertę: skalbyklė didžiąją ciklo dalį praleidžia žemiau nustatymo Maks. apsaugos nuo raukšlių galia, todėl ši dalis yra vienintelis dalykas, skiriantis tylią skalbimo vidurio fazę nuo uodegos, o jos sumažinimas gali perpus sutrumpinti skalbimą. Palikite tuščią numatytajai vertei (0,98). Tai kitas nustatymas nei Išmaniojo užbaigimo santykis, kuris valdo atskirą ankstyvo užbaigimo patikrą.",
+      "label": "Apsaugos nuo raukšlių užbaigimo santykis"
+    },
     "anti_wrinkle_enabled": {
       "doc": "Atpažinkite trumpus mažos galios būgninius impulsus, kuriuos džiovyklė skleidžia po pagrindinės šildymo fazės, ir laikykite juos prijungtus prie baigto ciklo, o ne skaitykite juos kaip naujus ciklus.",
       "label": "Įjungti apsaugą nuo raukšlių"
@@ -1205,6 +1209,10 @@
     "completion_min_seconds": {
       "doc": "Trumpesni nei šis ciklai atmetami kaip vaiduokliniai ciklai (bandomieji važiavimai, atidarant dureles, norint įdėti kojines).",
       "label": "Min. ciklo trukmė"
+    },
+    "curve_preroll_seconds": {
+      "doc": "Kiek sekundžių rodmenų iš nutrauktų paleidimo bandymų WashData gali perkelti į ciklo kreivės pradžią. Ciklo kreivė paprastai prasideda nuo to paleidimo bandymo, kuris galiausiai pavyksta, todėl mašinoje, kuri prieš įsibėgėdama kelis kartus pabando - programos pasirinkimas, durelių užraktas, pirmasis vandens pripildymas - kiekvienoje kreivėje trūksta pirmųjų tikros veiklos minučių. Nustatykite šią vertę šiek tiek didesnę už ilgiausią tokią jūsų mašinos įsibėgėjimo trukmę (300 s daugumai yra su kaupu). 0 išjungia šią funkciją. Atminkite, kad ją įjungus įrašyta pradžia paankstinama, todėl ciklai, įrašyti prieš pakeitimą ir po jo, tai pačiai programai turi skirtingas trukmes; išmokti vidurkiai svyruos, kol senesni ciklai bus išstumti.",
+      "label": "Kreivės įžanginės sekundės"
     },
     "delay_confirm_seconds": {
       "doc": "Maitinimas turi likti budėjimo režimo juostoje tiek laiko, kol prietaisas bus traktuojamas kaip laukiantis įsijungimo, o ne kaip veikiantis.",
@@ -1930,6 +1938,7 @@
       "end_repeat_count": "{false}/{total} švarių ciklų ({pct}%) turėjo >60s vidinę pauzę, kuri vėl tęsėsi; reikalauti {val} pabaigos patvirtinimo(-ų).",
       "learning_confidence": "p05 patikimumas {cycles} naudotojo pažymėtų ciklų ({p05}); žemiau šios ribos prašyti patikrinimo.",
       "match_interval": "Pagrįsta stebimu atnaujinimo dažniu (mediana={median}s) * 10.",
+      "match_interval_capped": "Apribota taip, kad {persistence} iš eilės einančios atitiktys tilptų į {pct}% trumpiausios programos ({shortest}s); vien atnaujinimo dažnis (mediana={median}s) būtų pasiūlęs ilgesnį intervalą.",
       "max_duration_ratio": "Pagrįsta pažymėtų ciklų trukmėmis (p95={p95}).",
       "min_active": "Pagrįsta mažiausia aktyvia galia ({min}W), stebėta paskutiniame cikle.",
       "min_duration_ratio": "Paliktas kuo mažesnis, kad programa būtų atpažinta ciklo pradžioje; patikimumo ir dviprasmiškumo slenksčiai neleidžia patvirtinti per anksti.",
@@ -1984,6 +1993,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Indaplovė: tylos sekundės po numatytos trukmės, kol atleidžiamas ciklo pabaigos vandens išleidimo laukimas",
     "smart_termination_duration_ratio": "Atitiktos programos numatytos trukmės dalis, kurią ciklas turi pasiekti, kad išmanusis užbaigimas galėtų jį užbaigti anksčiau; sumažinkite ją nuo apkrovos ar temperatūros priklausančioms mašinoms",
+    "anti_crease_finalize_ratio": "Atitiktos programos numatytos trukmės dalis, kurią ciklas turi pasiekti, kad apsaugos nuo raukšlių sukimo uodegą būtų galima užbaigti; sumažinkite ją džiovyklėse su ilga sukimo uodega, skalbyklėms palikite numatytąją vertę",
     "anti_wrinkle_enabled": "Sugerkite būgninius impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
     "anti_wrinkle_exit_power": "Kad apsauga nuo raukšlių išliktų aktyvi, galia tarp impulsų turi nukristi žemiau šios ribos",
     "anti_wrinkle_idle_timeout": "Tylos laikas, leidžiamas tarp dviejų būgninių impulsų prieš pasibaigiant apsaugai nuo raukšlių",
@@ -2009,7 +2019,8 @@
     "dtw_ddtw_scale": "3 etapas: DDTW pusiau prisotinimo atstumas; mažesnis = jautresnis formos skirtumams (numatytoji 30)",
     "dtw_refine_top_n": "3 etapas: kandidatai, kuriems DTW perskaičiuoja balus; padidinkite iki 7-9 jei teisingas profilis patenka į 4-5 vietą (numatytoji 5)",
     "duration_scale": "4 etapas: logaritmas, ties kuriuo trukmės atitikimas perpus sumažėja; mažesnis = griežtesnė bausmė (numatytoji 0,175)",
-    "energy_scale": "4 etapas: logaritmas, ties kuriuo energijos atitikimas perpus sumažėja; mažesnis = griežtesnė bausmė (numatytoji 0,25)"
+    "energy_scale": "4 etapas: logaritmas, ties kuriuo energijos atitikimas perpus sumažėja; mažesnis = griežtesnė bausmė (numatytoji 0,25)",
+    "curve_preroll_seconds": "Sekundės rodmenų iš nutrauktų paleidimo bandymų, perkeltų į ciklo kreivės pradžią; 0 = išjungta"
   },
   "col": {
     "profile_tip": "Atitikusios programos pavadinimas. Nepažymėta reiškia, kad ciklo pabaigoje neatitiko joks profilis.",

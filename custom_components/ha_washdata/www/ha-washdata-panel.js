@@ -135,6 +135,8 @@ const _SETTINGS_SECTIONS = [
         doc: 'Energy (power x time) the appliance must consume before RUNNING. A brief high-power spike has very low energy and is ignored, preventing false starts.' },
       { key: 'completion_min_seconds', label: 'Min Cycle Duration', unit: 's', type: 'number', min: 0, def: 600, basic: true,
         doc: 'Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).' },
+      { key: 'curve_preroll_seconds', label: 'Curve Pre-roll', unit: 's', type: 'number', step: 10, min: 0, max: 600, def: 0,
+        doc: 'Seconds of readings from aborted start attempts that may be carried into the front of a cycle\'s curve. Machines that probe before settling (programme selection, door lock, first fill) can drop the first minutes of real activity from every curve. 0 turns this off. Note that enabling it moves the recorded start earlier, so cycles recorded before and after the change carry different durations for the same program until the older ones age out - expect the learned averages to drift for a while.' },
     ] },
     { sub: 'Cycle End', fields: [
       { key: 'end_energy_threshold', label: 'End Energy', unit: 'Wh', type: 'number', step: 0.001, min: 0, def: 0.05,
@@ -225,6 +227,8 @@ const _SETTINGS_SECTIONS = [
       doc: 'Power must fall below this between pulses for anti-wrinkle mode to stay active.' },
     { key: 'anti_wrinkle_idle_timeout', label: 'Max Pulse Gap', unit: 's', type: 'number', step: 30, min: 0, def: 120,
       doc: 'How long the machine may stay quiet between two tumble pulses before anti-wrinkle mode ends. Set it above the longest gap your dryer leaves between pulses, otherwise every later pulse is read as a false start.' },
+    { key: 'anti_crease_finalize_ratio', label: 'Anti-Crease Finalize Ratio', type: 'number', step: 0.01, min: 0.5, max: 1.0, def: 0.98,
+      doc: 'Fraction of the matched program\'s expected duration a cycle must reach before the anti-crease tumble tail may be finalised. Lower it on a dryer whose sensor-dry runtime follows the load, so its tail is recognised instead of sitting until the fallback timeout. Leave washing machines at the default: there this fraction is what keeps a quiet mid-wash phase from being mistaken for the tail. Separate from the Smart Termination Ratio, which gates a different check.' },
   ] },
   { id: 'dishwasher', label: 'Dishwasher', intro: 'End-of-cycle handling for dishwashers, which typically finish with a long near-silent drying phase before a short final drain.', onlyDeviceTypes: ['dishwasher'], fields: [
     { key: 'dishwasher_end_spike_quiet_release', label: 'Passive-Dry Quiet Release', unit: 's', type: 'number', step: 60, min: 0, def: 600,
@@ -1740,7 +1744,7 @@ const _DIAGRAM_BY_KEY = {
   no_update_active_timeout: 'watchdog_timeout',
   anti_wrinkle_enabled: 'anti_wrinkle', anti_wrinkle_max_power: 'anti_wrinkle',
   anti_wrinkle_max_duration: 'anti_wrinkle', anti_wrinkle_exit_power: 'anti_wrinkle',
-  anti_wrinkle_idle_timeout: 'anti_wrinkle',
+  anti_wrinkle_idle_timeout: 'anti_wrinkle', anti_crease_finalize_ratio: 'anti_wrinkle',
   sampling_interval: 'sampling',
 };
 
@@ -6190,6 +6194,8 @@ class HaWashdataPanel extends HTMLElement {
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
       ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released', 'advanced'],
       ['smart_termination_duration_ratio', 'Smart Termination Ratio', '', 'Fraction of the matched program\'s expected duration a cycle must reach before Smart Termination may end it early; lower it for load- or temperature-dependent machines', 'advanced'],
+      ['anti_crease_finalize_ratio', 'Anti-Crease Finalize Ratio', '', 'Fraction of the matched program\'s expected duration a cycle must reach before the anti-crease tumble tail may be finalised. Lower it on a dryer whose sensor-dry runtime follows the load, so its tail is recognised instead of sitting until the fallback timeout. Leave washing machines at the default: there this fraction is what keeps a quiet mid-wash phase from being mistaken for the tail. Separate from the Smart Termination Ratio, which gates a different check.', 'advanced'],
+      ['curve_preroll_seconds', 'Curve Pre-roll', 's', 'Seconds of readings from aborted start attempts that may be carried into the front of a cycle\'s curve. Machines that probe before settling (programme selection, door lock, first fill) can drop the first minutes of real activity from every curve. 0 turns this off. Note that enabling it moves the recorded start earlier, so cycles recorded before and after the change carry different durations for the same program until the older ones age out - expect the learned averages to drift for a while.', 'timing'],
       ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
       ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
       ['corr_weight',      'Correlation Weight', '', 'Stage 2: balance between curve shape (correlation) and power level (MAE); default 0.45', 'matching'],

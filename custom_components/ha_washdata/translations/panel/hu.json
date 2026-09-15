@@ -1604,6 +1604,14 @@
         "energy_price_dynamic": {
             "label": "Időben súlyozott költség",
             "doc": "Minden ciklust azon az áron számol el, amely a futása minden pillanatában érvényes volt, a befejezéskori egyetlen ár helyett. Csak ár entitással működik (a statikus ár nem változik). Nem igényel külön beállítást: az árat a ciklus futása közben élőben követi, a Diagnosztika alatti Előzmények feldolgozása művelet pedig a recorder adataiból számolja újra a régebbi ciklusok költségét. Kikapcsolva = a megszokott működés, egyetlen, a végén rögzített ár."
+        },
+        "anti_crease_finalize_ratio": {
+            "label": "Ránctalanítás lezárási aránya",
+            "doc": "Meddig kell eljutnia a ciklusnak az egyeztetett program várható időtartamán belül, mielőtt a WashData eldöntheti, hogy az általa látott alacsony teljesítményű dobforgás a ránctalanítási utószakasz, és ott befejezheti a ciklust. A várható időtartam a program átlaga, ezért egy olyan szárítógépnél, amelynek szenzoros szárítási ideje a töltet méretéhez igazodik, a legtöbb futás soha nem éri el ennek a 98%-át, és az utószakasz a tartalék időtúllépésig kitart, gyakran 15-40 perccel azután, hogy a gép valójában leállt. Ilyen szárítógépen csökkentse ezt az értéket (például 0,75). A mosógépeket hagyja az alapértelmezett értéken: a mosógép a ciklusa nagy részét a Max. ránctalanítási teljesítmény alatt tölti, így egyedül ez a hányad választja el a csendes mosás közbeni szakaszt az utószakasztól, a csökkentése pedig félbevághat egy mosást. Hagyja üresen az alapértelmezéshez (0,98). Ez a beállítás nem azonos az Intelligens leállítási aránnyal, amely egy külön korai befejezési ellenőrzést szabályoz."
+        },
+        "curve_preroll_seconds": {
+            "label": "Görbe előfutama",
+            "doc": "Hány másodpercnyi leolvasás kerülhet a megszakadt indítási kísérletekből a ciklus görbéjének elejére. A ciklus görbéje általában azzal az indítási kísérlettel kezdődik, amelyik végül sikerül, ezért egy olyan gépnél, amely néhányszor próbálkozik, mielőtt beállna (programválasztás, ajtózár, első vízbeeresztés), minden görbéből hiányzik a tényleges működés első néhány perce. Állítsa ezt az értéket kicsivel a gépénél előforduló leghosszabb ilyen nekifutás fölé (300 mp a legtöbb géphez bőven elég). A 0 kikapcsolja. Vegye figyelembe, hogy bekapcsolva a rögzített kezdés korábbra kerül, így a változtatás előtt és után rögzített ciklusok ugyanahhoz a programhoz eltérő időtartamot hordoznak; a megtanult átlagok addig csúsznak el, amíg a régebbi ciklusok ki nem esnek."
         }
     },
     "setting_group": {
@@ -1951,7 +1959,8 @@
             "thr_batch": "Éppen a p05 legkisebb aktív teljesítmény fölött tartva {cycles} cikluson át ({p05}W), hogy az indítás a lehető legkorábban észlelhető legyen, a leállítási küszöb pedig a gép legkisebb üzemi teljesítménye alatt maradjon.",
             "tol_per_profile": "A profilonkénti időtartam-szórás p75 értéke {profiles} profilon át ({cycles} ciklus); a stabil profilok nem kapnak büntetést.",
             "tol_pooled": "{cycles} legutóbbi címkézett ciklus összevont időtartam-szórása alapján (p95 szórás={dev}).",
-            "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (épp a p95 frissítési szünet, azaz {p95}s felett, és legalább a mintavételezési intervallum ({median}s) kétszerese, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül."
+            "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (épp a p95 frissítési szünet, azaz {p95}s felett, és legalább a mintavételezési intervallum ({median}s) kétszerese, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül.",
+            "match_interval_capped": "Korlátozva, hogy {persistence} egymást követő egyezés beleférjen a legrövidebb program ({shortest}s) {pct}%-ába; önmagában a frissítési ütem (médián={median}s) hosszabb intervallumot javasolt volna."
         },
         "exclusions": {
             "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",
@@ -2009,7 +2018,9 @@
         "dtw_ddtw_scale": "3. szakasz: DDTW féltelítési távolság; kisebb = érzékenyebb az alakra (alapértelmezett 30)",
         "dtw_refine_top_n": "3. szakasz: DTW által újrapontozandó jelöltek; növelje 7-9-re, ha a helyes profil a 4-5. helyen végez (alapértelmezett 5)",
         "duration_scale": "4. szakasz: logaritmikus arány, ahol az időtartam-egyezés megfeleződik; kisebb = szigorúbb büntetés (alapértelmezett 0.175)",
-        "energy_scale": "4. szakasz: logaritmikus arány, ahol az energia-egyezés megfeleződik; kisebb = szigorúbb büntetés (alapértelmezett 0.25)"
+        "energy_scale": "4. szakasz: logaritmikus arány, ahol az energia-egyezés megfeleződik; kisebb = szigorúbb büntetés (alapértelmezett 0.25)",
+        "anti_crease_finalize_ratio": "Az egyeztetett program várható időtartamának hányada, amelyet a ciklusnak el kell érnie, mielőtt a ránctalanítási dobforgás utószakasza lezárható; hosszú utószakaszú szárítógépeknél csökkentse, a mosógépeket hagyja alapértelmezetten",
+        "curve_preroll_seconds": "A megszakadt indítási kísérletekből a ciklus görbéjének elejére átvett leolvasások másodpercben; 0 = ki"
     },
     "col": {
         "profile_tip": "Az egyezést mutató program neve. A címkézetlen azt jelenti, hogy a ciklus végén egyetlen profil sem egyezett.",

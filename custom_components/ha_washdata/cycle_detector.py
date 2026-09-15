@@ -72,7 +72,10 @@ from .const import (
     STANDBY_BAND_MAX_FRACTION,
     STANDBY_BAND_FLATNESS_FRACTION,
     STANDBY_BAND_FLATNESS_FLOOR_W,
-    ANTI_CREASE_FINALIZE_RATIO,
+    DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+    DEFAULT_CURVE_PREROLL_SECONDS,
+    CURVE_PREROLL_MAX_SECONDS,
+    PREROLL_CHAIN_BREAK_SECONDS,
     ANTI_CREASE_CONFIRM_WINDOW_S,
     ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC,
     ANTI_CREASE_TERMINAL_MATCH_FRAC,
@@ -170,6 +173,16 @@ class CycleDetectorConfig:
     # on. The dishwasher pump-out relief is combined via min(), so a configured value
     # can only loosen the gate.
     smart_termination_duration_ratio: float = DEFAULT_SMART_TERMINATION_DURATION_RATIO
+    # Fraction of the matched profile's expected duration the anti-crease finalise
+    # requires before it may fire (#429). A DIFFERENT gate from the ratio above:
+    # that one gates Smart Termination, this one the finalise into
+    # STATE_ANTI_WRINKLE. Scalar default (no device-type resolution) and always a
+    # real float, so playground.effective_settings() never sees None.
+    anti_crease_finalize_ratio: float = DEFAULT_ANTI_CREASE_FINALIZE_RATIO
+    # How far back readings from aborted start probes may be carried into a
+    # committed cycle's curve (#430). 0 disables the whole path, which is the
+    # default and keeps the stored-duration convention unchanged.
+    curve_preroll_seconds: float = DEFAULT_CURVE_PREROLL_SECONDS
     delay_detect_enabled: bool = False
     # Sustained seconds power must stay in the standby band (between
     # stop_threshold_w and start_threshold_w) before DELAY_WAIT engages.
@@ -297,6 +310,12 @@ class CycleDetector:
 
         # Data
         self._power_readings: list[tuple[datetime, float]] = []  # (time, raw_power)
+        # Rolling pre-cycle readings, so a start that took several probes to
+        # commit can recover the readings the aborted probes took with them
+        # (#430). Only appended to while no cycle is open, trimmed to
+        # curve_preroll_seconds, and cleared at every cycle end - a previous
+        # cycle's tail must never be carried into the next cycle's curve.
+        self._preroll_buffer: list[tuple[datetime, float]] = []
         self._current_cycle_start: datetime | None = None
         self._last_active_time: datetime | None = None
         self._cycle_max_power: float = 0.0
@@ -885,6 +904,10 @@ class CycleDetector:
         """Force reset the detector state to target state."""
         self._transition_to(target_state, dt_util.now())
         self._power_readings = []
+        # #430: the pre-roll buffer is pre-CYCLE context, never cross-cycle. A
+        # reset that left it populated would let the previous cycle's tail be
+        # spliced into the front of the next cycle's curve.
+        self._preroll_buffer = []
         self._current_cycle_start = None
         self._last_active_time = None
         self._cycle_max_power = 0.0
@@ -1096,6 +1119,11 @@ class CycleDetector:
         self._prior_p95_dt = self._p95_dt
         self._update_cadence(dt)
         self._last_process_time = timestamp
+
+        # 1b. Pre-roll buffer (#430): record every reading seen while no cycle is
+        # open, so a start that needed several probes can recover what the aborted
+        # ones took with them. Cheap and bounded; inert while the option is off.
+        self._record_preroll(power, timestamp)
 
         # 1. Smoothing (Legacy buffer for debug/display, logic uses raw + time accumulators)
         self._ma_buffer.append(power)
@@ -1358,6 +1386,7 @@ class CycleDetector:
                 # just declined to credit.
                 self._energy_since_idle_wh = high_step_wh
                 self._cycle_max_power = power
+                self._apply_curve_preroll(timestamp, power)
             # NOTE: terminal-state expiry (Finished/Interrupted/Force-Stopped -> Off)
             # is owned solely by the manager (WashDataManager._handle_state_expiry),
             # which has a wall-clock timer that also fires when a change-only power
@@ -2081,6 +2110,131 @@ class CycleDetector:
                             self._config.end_energy_threshold,
                         )
 
+    def _record_preroll(self, power: float, timestamp: datetime) -> None:
+        """Buffer a reading seen before a cycle commits (#430).
+
+        Only while no cycle is open - once RUNNING, ``_power_readings`` is the
+        curve and this buffer would just duplicate it. STARTING counts as "not
+        open": a probe in STARTING may still abort, and those are precisely the
+        readings worth keeping.
+
+        Bounded by ``curve_preroll_seconds`` (itself capped at
+        ``CURVE_PREROLL_MAX_SECONDS``), so the buffer holds seconds of data, not
+        an unbounded history.
+        """
+        window = float(self._config.curve_preroll_seconds or 0.0)
+        if window <= 0:
+            # Option off: keep the buffer empty rather than paying to fill one
+            # nothing will read, and so that enabling it mid-run cannot splice in
+            # readings from before the option was turned on.
+            if self._preroll_buffer:
+                self._preroll_buffer = []
+            return
+        if self._state not in (
+            STATE_OFF,
+            STATE_STARTING,
+            STATE_DELAY_WAIT,
+            STATE_UNKNOWN,
+        ):
+            return
+        window = min(window, CURVE_PREROLL_MAX_SECONDS)
+        self._preroll_buffer.append((timestamp, float(power)))
+        cutoff = timestamp - timedelta(seconds=window)
+        # Readings arrive in order, so the stale prefix is contiguous.
+        drop = 0
+        for ts, _p in self._preroll_buffer:
+            if ts < cutoff:
+                drop += 1
+            else:
+                break
+        if drop:
+            del self._preroll_buffer[:drop]
+
+    def _preroll_for_commit(
+        self, timestamp: datetime, power: float
+    ) -> list[tuple[datetime, float]]:
+        """Readings to prepend to a cycle committing at ``timestamp`` (#430).
+
+        Walks the buffer backwards from the commit and stops at the first quiet
+        gap longer than ``PREROLL_CHAIN_BREAK_SECONDS`` - "the same start, probed
+        twice" rather than "an unrelated blip earlier". Then anchors on the
+        EARLIEST reading in that chain that is at or above ``start_threshold_w``:
+        anchoring on the window edge instead would drag standby into the curve
+        and move the cycle start to a moment the appliance was not yet doing
+        anything.
+
+        Returns [] whenever there is nothing to add, so the caller's fast path is
+        a single emptiness test.
+        """
+        window = float(self._config.curve_preroll_seconds or 0.0)
+        if window <= 0 or not self._preroll_buffer:
+            return []
+
+        # Everything strictly before this commit, most recent first.
+        prior = [(ts, p) for ts, p in self._preroll_buffer if ts < timestamp]
+        if not prior:
+            return []
+
+        chain: list[tuple[datetime, float]] = []
+        next_ts = timestamp
+        for ts, p in reversed(prior):
+            if (next_ts - ts).total_seconds() > PREROLL_CHAIN_BREAK_SECONDS:
+                break
+            chain.append((ts, p))
+            next_ts = ts
+        if not chain:
+            return []
+        chain.reverse()  # chronological
+
+        threshold = float(self._config.start_threshold_w)
+        anchor = next(
+            (i for i, (_ts, p) in enumerate(chain) if p >= threshold), None
+        )
+        if anchor is None:
+            return []  # the chain is all standby - nothing of this cycle in it
+        return chain[anchor:]
+
+    def _apply_curve_preroll(self, timestamp: datetime, power: float) -> None:
+        """Prepend buffered pre-commit readings to the freshly-started cycle (#430).
+
+        Moves ``_current_cycle_start`` back with them, and that is not optional:
+        the stored duration is ``end_time - _current_cycle_start`` while matching
+        resamples ``_power_readings``, so a curve that started earlier than the
+        pointer would describe a different run from the one whose duration is
+        recorded. The two existing back-anchors (the anti-wrinkle candidate
+        window and the DELAY_WAIT high-start anchor) move the pointer for exactly
+        the same reason.
+
+        **Record-only: this must never make a cycle easier to START.**
+        ``_energy_since_idle_wh`` is deliberately left alone. Despite the name it
+        is not the cycle's energy - the stored figure is integrated from
+        ``power_data`` at persistence, so it picks the pre-roll up for free - it
+        is the accumulator the STARTING -> RUNNING gate reads
+        (``>= start_energy_threshold``). Feeding it the pre-roll would let an
+        aborted probe's energy be re-spent on the next probe's start gate, so two
+        blips that each failed the gate could together pass it: exactly the
+        phantom cycle #403 was fixed to prevent. The same argument covers
+        ``_time_above_threshold``, which is likewise untouched.
+
+        ``_cycle_max_power`` IS updated, because that is a property of the run
+        being recorded (it gates the anti-crease path), not of admitting it.
+        """
+        preroll = self._preroll_for_commit(timestamp, power)
+        if not preroll:
+            return
+
+        start_ts = preroll[0][0]
+        self._power_readings = [*preroll, (timestamp, power)]
+        self._current_cycle_start = start_ts
+        self._cycle_max_power = max(p for _ts, p in self._power_readings)
+        self._logger.debug(
+            "Curve pre-roll: carried %d reading(s) covering %.0fs from aborted "
+            "start probe(s) into this cycle (start moved back to %s).",
+            len(preroll),
+            (timestamp - start_ts).total_seconds(),
+            start_ts.isoformat(),
+        )
+
     def _transition_to(self, new_state: str, timestamp: datetime) -> None:
         """Handle state transitions."""
         if self._state == new_state:
@@ -2309,6 +2463,18 @@ class CycleDetector:
         separates the post-wash anti-crease tail from a mid-wash low-power trough
         (a washer spends most of its cycle below ``anti_wrinkle_max_power``, but a
         mid-wash trough is always BEFORE the expected duration, the tail after it).
+
+        That "past expected" fraction is per-appliance since #429
+        (``anti_crease_finalize_ratio``, default 0.98). **Lowering it trades away
+        exactly the guarantee in the paragraph above**, so it is meant for dryers
+        whose sensor-dry runtime follows the load and whose tumble tail would
+        otherwise sit until the fallback timeout. Nothing downstream can stand in
+        for it on a washer: the low-power window check cannot separate a trough
+        from a tail (both are below ``anti_wrinkle_max_power`` by definition),
+        ``_smart_term_power_plausible`` compares the trailing mean against the
+        matched profile's OWN tail level, which is equally low, and
+        ``_anticrease_spin_pending`` fails open when the profile carries no
+        terminal high block.
         """
         if not self._config.anti_wrinkle_enabled:
             return False
@@ -2338,7 +2504,7 @@ class CycleDetector:
         if start is None:
             return False
         current_duration = (timestamp - start).total_seconds()
-        if current_duration < self._expected_duration * ANTI_CREASE_FINALIZE_RATIO:
+        if current_duration < self._expected_duration * self._config.anti_crease_finalize_ratio:
             return False
         # #364: "past expected" only means "past the wash" when expected belongs to
         # the RIGHT profile. A whole washer wash phase sits below

@@ -1174,6 +1174,10 @@
       "label": "Pasīvās žāvēšanas klusā atbrīvošana",
       "doc": "Kad cikls pārsniedz paredzēto ilgumu, cik ilgi trauku mazgājamai mašīnai jāpaliek klusai (zem Apstāšanās slieksnis), pirms WashData pārtrauc gaidīt galīgo ūdens izvadīšanu un pabeidz ciklu. Palieliniet to, ja jūsu mašīnai ir ilga klusa žāvēšanas fāze pirms vēlas galīgās ūdens izvadīšanas, kas tiek palaista garām - plašāks logs ļauj apgūtajam ilgumam sekot sezonālajai novirzei (aukstāks ieplūstošais ūdens = garāki cikli), nevis fiksēties pie vecā vidējā. Tas var tikai saīsināt gaidīšanu attiecībā pret iekšējo 30 minūšu beigu smailes ierobežojumu, nekad to nepagarina."
     },
+    "anti_crease_finalize_ratio": {
+      "doc": "Cik tālu atbilstošās programmas paredzētajā ilgumā ciklam jābūt nonākušam, pirms WashData drīkst secināt, ka klusā griešanās, ko tā redz, ir pretgrumbu aste, un tur pabeigt ciklu. Paredzētais ilgums ir programmas vidējais rādītājs, tāpēc žāvētājā, kura sensora žāvēšanas laiks ir atkarīgs no slodzes, lielākā daļa ciklu nekad nesasniedz 98% no tā, un aste paliek līdz rezerves noildzei - bieži 15 līdz 40 minūtes pēc tam, kad mašīna patiesībā jau apstājusies. Šādā žāvētājā samaziniet šo vērtību (piem., 0,75). Veļas mašīnām atstājiet noklusējumu: veļas mašīna lielāko cikla daļu pavada zem iestatījuma Maks. pretgrumbu jauda, tāpēc šī daļa ir vienīgais, kas atšķir kluso mazgāšanas vidusfāzi no astes, un tās samazināšana var uz pusi saīsināt mazgāšanu. Atstājiet tukšu noklusējuma vērtībai (0,98). Šis ir cits iestatījums nekā Viedas pabeigšanas attiecība, kas vada atsevišķu agrīnas pabeigšanas pārbaudi.",
+      "label": "Pretgrumbu pabeigšanas attiecība"
+    },
     "anti_wrinkle_enabled": {
       "doc": "Atpazīstiet īsos mazjaudas veļas impulsus, ko žāvētājs izstaro pēc galvenās karsēšanas fāzes, un turiet tos pievienotus gatavajam ciklam, nevis nolasiet tos kā jaunus ciklus.",
       "label": "Iespējot pretgrumbu noteikšanu"
@@ -1205,6 +1209,10 @@
     "completion_min_seconds": {
       "doc": "Cikli, kas ir īsāki par šo, tiek izmesti kā spoku cikli (pārbaudes darbi, atverot durvis, lai pievienotu zeķi).",
       "label": "Min. cikla ilgums"
+    },
+    "curve_preroll_seconds": {
+      "doc": "Cik sekundes nolasījumu no pārtrauktiem palaišanas mēģinājumiem WashData drīkst pārnest uz cikla līknes sākumu. Cikla līkne parasti sākas ar to palaišanas mēģinājumu, kurš beidzot izdodas, tāpēc mašīnā, kas pirms iestāšanās ritmā pamēģina vairākas reizes - programmas izvēle, durvju bloķēšana, pirmā ūdens uzpilde - katrā līknē trūkst pirmo īstās darbības minūšu. Iestatiet šo vērtību nedaudz virs garākā šāda jūsu mašīnas iesildīšanās posma (300 s vairumam ir ar uzviju). 0 to izslēdz. Ņemiet vērā, ka ieslēgšana pārceļ reģistrēto sākumu agrāk, tāpēc cikli, kas reģistrēti pirms un pēc izmaiņas, vienai un tai pašai programmai uzrāda atšķirīgu ilgumu; apgūtie vidējie rādītāji mainīsies, līdz vecākie cikli izkritīs no uzskaites.",
+      "label": "Līknes ievadsekundes"
     },
     "delay_confirm_seconds": {
       "doc": "Strāvai jāpaliek gaidstāves joslā tik ilgi, pirms ierīce tiek uzskatīta par gaidīšanas brīdi, nevis darbošanos.",
@@ -1930,6 +1938,7 @@
       "end_repeat_count": "{false}/{total} tīro ciklu ({pct}%) bija >60s iekšēja pauze, kas atsākās; pieprasīt {val} beigu apstiprinājumu(s).",
       "learning_confidence": "p05 ticamība {cycles} lietotāja marķētajiem cikliem ({p05}); zem šīs vērtības pieprasīt pārbaudi.",
       "match_interval": "Pamatots ar novēroto atjaunināšanas biežumu (mediāna={median}s) * 10.",
+      "match_interval_capped": "Ierobežots tā, lai {persistence} secīgas atbilstības ietilptu {pct}% no īsākās programmas ({shortest}s); tikai atjaunināšanas biežums (mediāna={median}s) būtu ieteicis garāku intervālu.",
       "max_duration_ratio": "Pamatots ar marķēto ciklu ilgumiem (p95={p95}).",
       "min_active": "Pamatots ar minimālo aktīvo jaudu ({min}W), kas novērota pēdējā ciklā.",
       "min_duration_ratio": "Saglabāts pēc iespējas zemāks, lai programma tiktu atpazīta cikla sākumā; ticamības un neskaidrības sliekšņi novērš pāragru apstiprināšanu.",
@@ -1984,6 +1993,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Trauku mazgājamā mašīna: klusās sekundes pēc paredzētā ilguma, pirms tiek atbrīvota cikla beigu ūdens izvadīšanas gaidīšana",
     "smart_termination_duration_ratio": "Atbilstošās programmas paredzētā ilguma daļa, kas ciklam jāsasniedz, pirms vieda pabeigšana drīkst to pabeigt agrāk; samaziniet to no slodzes vai temperatūras atkarīgām mašīnām",
+    "anti_crease_finalize_ratio": "Atbilstošās programmas paredzētā ilguma daļa, kas ciklam jāsasniedz, pirms pretgrumbu griešanās asti drīkst pabeigt; samaziniet to žāvētājiem ar garu griešanās asti, veļas mašīnām atstājiet noklusējumu",
     "anti_wrinkle_enabled": "Absorbējiet griešanās impulsus pēc galvenās fāzes, nevis nolasiet tos kā jaunus ciklus",
     "anti_wrinkle_exit_power": "Lai pretgrumbu režīms paliktu aktīvs, jaudai starp impulsiem jānokrītas zem šīs vērtības",
     "anti_wrinkle_idle_timeout": "Atļautais klusuma laiks starp diviem griešanās impulsiem, pirms pretgrumbu režīms beidzas",
@@ -2009,7 +2019,8 @@
     "dtw_ddtw_scale": "3. posms: DDTW pusiesātinājuma attālums; mazāks = jutīgāks pret formas atšķirībām (noklusējums 30)",
     "dtw_refine_top_n": "3. posms: kandidāti, kurus DTW pārvērtē; palieliniet līdz 7-9, ja pareizais profils ierindojas 4.-5. vietā (noklusējums 5)",
     "duration_scale": "4. posms: logaritmiskais koeficients, kur ilguma atbilstība uz pusēm; mazāks = bargāks sods (noklusējums 0,175)",
-    "energy_scale": "4. posms: logaritmiskais koeficients, kur enerģijas atbilstība uz pusēm; mazāks = bargāks sods (noklusējums 0,25)"
+    "energy_scale": "4. posms: logaritmiskais koeficients, kur enerģijas atbilstība uz pusēm; mazāks = bargāks sods (noklusējums 0,25)",
+    "curve_preroll_seconds": "Sekundes nolasījumu no pārtrauktiem palaišanas mēģinājumiem, kas pārnestas uz cikla līknes sākumu; 0 = izslēgts"
   },
   "col": {
     "profile_tip": "Atbilstošās programmas nosaukums. Bez birkas nozīmē, ka cikla beigās neatbilda neviens profils.",

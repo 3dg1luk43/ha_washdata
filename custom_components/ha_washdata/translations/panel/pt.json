@@ -1033,6 +1033,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Máquina de lavar louça: segundos de silêncio após a duração esperada antes de libertar a espera da descarga de fim de ciclo",
     "smart_termination_duration_ratio": "Fração da duração esperada do programa correspondente que um ciclo deve atingir antes de a Terminação inteligente o poder terminar mais cedo; reduza-a para máquinas que dependem da carga ou da temperatura",
+    "anti_crease_finalize_ratio": "Fração da duração esperada do programa correspondente que um ciclo deve atingir antes de a cauda de rotação anti-vincos poder ser finalizada; reduza-a em máquinas de secar com uma cauda de rotação longa, deixe as máquinas de lavar no valor predefinido",
     "anti_wrinkle_enabled": "Absorver os pulsos de rotação após a fase principal em vez de os ler como novos ciclos",
     "anti_wrinkle_exit_power": "A potência deve descer abaixo deste valor entre pulsos para que o modo anti-vincos permaneça ativo",
     "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de rotação antes de o modo anti-vincos terminar",
@@ -1058,7 +1059,8 @@
     "dtw_ddtw_scale": "Fase 3: distância de semissaturação DDTW; menor = maior sensibilidade à forma (predefinição 30)",
     "dtw_refine_top_n": "Fase 3: candidatos reavaliados pelo DTW; aumente para 7-9 se o perfil correto se classificar em 4.º-5.º (predefinição 5)",
     "duration_scale": "Fase 4: log-razão em que a concordância de duração é reduzida a metade; menor = penalidade mais severa (predefinição 0,175)",
-    "energy_scale": "Fase 4: log-razão em que a concordância de energia é reduzida a metade; menor = penalidade mais severa (predefinição 0,25)"
+    "energy_scale": "Fase 4: log-razão em que a concordância de energia é reduzida a metade; menor = penalidade mais severa (predefinição 0,25)",
+    "curve_preroll_seconds": "Segundos de leituras de tentativas de arranque abortadas incorporados no início da curva de um ciclo; 0 = desativado"
   },
   "phase_desc": {
     "anti_crease": "Rotações curtas ocasionais após a conclusão para reduzir vincos.",
@@ -1156,6 +1158,10 @@
       "label": "Libertação em silêncio da secagem passiva",
       "doc": "Assim que o ciclo ultrapassa a sua duração esperada, durante quanto tempo a máquina de lavar louça deve permanecer silenciosa (abaixo do Limiar de Paragem) antes de o WashData deixar de aguardar uma descarga final e terminar o ciclo. Aumente este valor se a sua máquina tiver uma longa fase de secagem silenciosa antes de uma descarga final tardia que está a ser ignorada - uma janela mais ampla permite que a duração aprendida acompanhe a variação sazonal (água de entrada mais fria = ciclos mais longos) em vez de se fixar na média antiga. Apenas encurta a espera face ao limite interno de 30 minutos para o pico de fim, nunca a prolonga."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Rácio de finalização anti-vincos",
+      "doc": "Até que ponto da duração esperada do programa correspondente um ciclo tem de ter chegado antes de o WashData poder concluir que a rotação lenta de baixa potência que está a observar é a cauda anti-vincos e terminar aí o ciclo. A duração esperada é a média do programa, pelo que numa máquina de secar cujo tempo de secagem por sonda acompanha a carga a maioria dos ciclos nunca atinge 98% dessa média e a cauda fica à espera até ao tempo limite de segurança, muitas vezes 15 a 40 minutos depois de a máquina ter realmente parado. Reduza este valor (por exemplo, 0,75) numa máquina de secar assim. Deixe as máquinas de lavar roupa no valor predefinido: uma máquina de lavar passa a maior parte do ciclo abaixo da Potência Máxima Anti-Vincos, pelo que esta fração é a única coisa que separa uma fase silenciosa a meio da lavagem da cauda, e baixá-la pode cortar uma lavagem a meio. Deixe vazio para o valor predefinido (0,98). Esta definição é distinta do Rácio de terminação inteligente, que condiciona uma verificação de fim antecipado separada."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Reconheça os pulsos curtos de baixa potência que uma secadora emite após a fase de aquecimento principal e mantenha-os anexados ao ciclo finalizado, em vez de lê-los como novos ciclos.",
       "label": "Activar Detecção Anti-Vincos"
@@ -1187,6 +1193,10 @@
     "completion_min_seconds": {
       "doc": "Ciclos mais curtos que isso são descartados como ciclos fantasmas (testes, abertura da porta para adicionar uma meia).",
       "label": "Duração Mínima do Ciclo"
+    },
+    "curve_preroll_seconds": {
+      "label": "Pré-arranque da curva",
+      "doc": "Quantos segundos de leituras provenientes de tentativas de arranque abortadas o WashData pode incorporar no início da curva de um ciclo. A curva de um ciclo começa normalmente na tentativa de arranque que acaba por ser bem-sucedida, pelo que numa máquina que tenta algumas vezes antes de arrancar mesmo (seleção do programa, bloqueio da porta, primeiro enchimento) faltam os primeiros minutos de atividade real em todas as curvas. Defina este valor um pouco acima do arranque prévio mais longo da sua máquina (300 s chegam e sobram na maioria dos casos). 0 desativa a função. Tenha em atenção que ativá-la antecipa o início registado, pelo que os ciclos registados antes e depois da alteração ficam com durações diferentes para o mesmo programa; as médias aprendidas vão derivar até os ciclos mais antigos saírem do histórico."
     },
     "delay_confirm_seconds": {
       "doc": "A energia deve permanecer na faixa de espera por esse tempo antes que o aparelho seja tratado como aguardando para iniciar, em vez de funcionar.",
@@ -1912,6 +1922,7 @@
       "end_repeat_count": "{false}/{total} ciclos limpos ({pct}%) tiveram uma pausa interna >60s que foi retomada; exigir {val} confirmação(ões) de fim.",
       "learning_confidence": "Confiança p05 de {cycles} ciclos rotulados pelo utilizador ({p05}); abaixo disto, é pedida uma verificação.",
       "match_interval": "Com base na cadência de atualização observada (mediana={median}s) * 10.",
+      "match_interval_capped": "Limitado para que {persistence} correspondências consecutivas caibam em {pct}% do programa mais curto ({shortest}s); só a cadência de atualização (mediana={median}s) teria sugerido um intervalo mais longo.",
       "max_duration_ratio": "Com base nas durações dos ciclos rotulados (p95={p95}).",
       "min_active": "Com base na potência ativa mínima ({min}W) observada no último ciclo.",
       "min_duration_ratio": "Mantido o mais baixo possível para que um programa seja reconhecido cedo no ciclo; os limiares de confiança e ambiguidade evitam decisões prematuras.",

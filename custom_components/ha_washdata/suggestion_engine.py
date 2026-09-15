@@ -59,6 +59,7 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
     CONF_DEVICE_TYPE,
     CONF_PUMP_STUCK_DURATION,
+    CONF_MATCH_PERSISTENCE,
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_PUMP,
     DEVICE_TYPE_WASHING_MACHINE,
@@ -68,6 +69,8 @@ from .const import (
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_SAMPLING_INTERVAL,
+    DEFAULT_MATCH_PERSISTENCE,
+    MATCH_INTERVAL_SUGGESTION_DECISION_FRAC,
 )
 from .time_utils import power_data_to_offsets
 
@@ -852,15 +855,91 @@ class SuggestionEngine:
             }
 
         # 4. Profile Match Interval
+        #
+        # Cadence alone is the wrong yardstick (#431): the interval is spent
+        # waiting to IDENTIFY a program, so what bounds it is how long the
+        # shortest program runs, not how chatty the plug is. A 60 s reporting
+        # plug produced 599 s, and with match_persistence 3 no profile could then
+        # settle before ~30 min - on a 43-minute program that is most of the run,
+        # and the value is worse than the 300 s default the user started from.
+        #
+        # So cap the DECISION budget (interval x persistence), not the interval
+        # alone, at MATCH_INTERVAL_SUGGESTION_DECISION_FRAC of the shortest known
+        # profile. Capping the interval alone would let a higher persistence
+        # reintroduce the same wait.
         suggested_match = int(max(10, median_dt * 10))
+        reason_match = f"Based on observed update cadence (median={median_dt:.1f}s) * 10."
+        reason_match_key = "suggestion.reason.match_interval"
+        reason_match_params: dict[str, Any] = {"median": f"{median_dt:.1f}"}
+
+        shortest_profile_s = self._shortest_profile_duration()
+        if shortest_profile_s is not None:
+            try:
+                persistence = int(
+                    _op_opts.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE)
+                )
+            except (TypeError, ValueError):
+                persistence = DEFAULT_MATCH_PERSISTENCE
+            persistence = max(1, persistence)
+            cap = (
+                shortest_profile_s * MATCH_INTERVAL_SUGGESTION_DECISION_FRAC
+            ) / persistence
+            if cap < suggested_match:
+                # Floor at 10 s to match the uncapped branch: a very short profile
+                # must not drive the matcher into a per-second poll.
+                suggested_match = int(max(10, cap))
+                pct = MATCH_INTERVAL_SUGGESTION_DECISION_FRAC * 100.0
+                reason_match = (
+                    f"Capped so {persistence} consecutive matches fit in "
+                    f"{pct:.0f}% of the shortest program ({shortest_profile_s:.0f}s); "
+                    f"the update cadence (median={median_dt:.1f}s) alone would "
+                    f"have suggested a longer interval."
+                )
+                reason_match_key = "suggestion.reason.match_interval_capped"
+                reason_match_params = {
+                    "median": f"{median_dt:.1f}",
+                    "shortest": f"{shortest_profile_s:.0f}",
+                    "persistence": str(persistence),
+                    "pct": f"{pct:.0f}",
+                }
+
         suggestions[CONF_PROFILE_MATCH_INTERVAL] = {
             "value": suggested_match,
-            "reason": f"Based on observed update cadence (median={median_dt:.1f}s) * 10.",
-            "reason_key": "suggestion.reason.match_interval",
-            "reason_params": {"median": f"{median_dt:.1f}"},
+            "reason": reason_match,
+            "reason_key": reason_match_key,
+            "reason_params": reason_match_params,
         }
 
         return suggestions
+
+    def _shortest_profile_duration(self) -> float | None:
+        """Shortest learned ``avg_duration`` across all profiles, or None.
+
+        Mirrors the ``avg > 60`` guard the model-suggestion generator already
+        applies, so a hand-created profile with a placeholder duration cannot
+        collapse a suggestion to its floor. Returns None when nothing usable is
+        known yet - the caller then leaves its cadence-only value untouched, so a
+        fresh install behaves exactly as before.
+        """
+        try:
+            profiles = self.profile_store.get_profiles()
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+        if not isinstance(profiles, dict):
+            return None
+        shortest: float | None = None
+        for prof in profiles.values():
+            if not isinstance(prof, dict):
+                continue
+            try:
+                avg = float(prof.get("avg_duration") or 0.0)
+            except (TypeError, ValueError):
+                continue
+            if not math.isfinite(avg) or avg <= 60.0:
+                continue
+            if shortest is None or avg < shortest:
+                shortest = avg
+        return shortest
 
     def generate_model_suggestions(self) -> dict[str, Any]:
         """Generate suggestions for model parameters based on past cycles."""

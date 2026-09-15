@@ -1106,7 +1106,9 @@
     "anti_wrinkle_max_power": "Ein Impuls darüber beendet den Knitterschutz und öffnet einen neuen Zyklus",
     "anti_wrinkle_enabled": "Die Trommelimpulse nach der Hauptphase schlucken, statt sie als neue Zyklen zu lesen",
     "anti_wrinkle_max_duration": "Ein längerer Impuls beendet den Knitterschutz und öffnet einen neuen Zyklus",
-    "anti_wrinkle_exit_power": "Die Leistung muss zwischen den Impulsen darunter fallen, damit der Knitterschutz aktiv bleibt"
+    "anti_wrinkle_exit_power": "Die Leistung muss zwischen den Impulsen darunter fallen, damit der Knitterschutz aktiv bleibt",
+    "anti_crease_finalize_ratio": "Anteil der erwarteten Dauer des zugeordneten Programms, den ein Zyklus erreichen muss, bevor der Knitterschutz-Nachlauf abgeschlossen werden darf; bei Trocknern mit langem Nachlauf senken, Waschmaschinen beim Standard belassen",
+    "curve_preroll_seconds": "Sekunden an Messwerten aus abgebrochenen Startversuchen, die an den Anfang der Kurve eines Zyklus übernommen werden; 0 = aus"
   },
   "phase_desc": {
     "anti_crease": "Gelegentliche kurze Trommelumwälzungen nach Abschluss, um Knitterung zu vermeiden.",
@@ -1204,6 +1206,10 @@
       "label": "Ruhefreigabe nach Passivtrocknung",
       "doc": "Sobald der Zyklus seine erwartete Dauer überschreitet: wie lange der Geschirrspüler ruhig bleiben muss (unter dem Stoppschwellenwert), bevor WashData nicht mehr auf ein letztes Abpumpen wartet und den Zyklus beendet. Erhöhen Sie den Wert, wenn Ihre Maschine eine lange, stille Trocknungsphase vor einem späten letzten Abpumpen hat, das übersehen wird - ein größeres Fenster lässt die erlernte Dauer der saisonalen Drift folgen (kälteres Zulaufwasser = längere Zyklen), statt sich auf den alten Mittelwert festzulegen. Er verkürzt die Wartezeit gegenüber der internen 30-minütigen Obergrenze für die Endspitze nur, verlängert sie aber nie."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Verhältnis für Knitterschutz-Abschluss",
+      "doc": "Wie weit ein Zyklus in die erwartete Dauer des zugeordneten Programms fortgeschritten sein muss, bevor WashData entscheiden darf, dass das beobachtete Trommeln mit geringer Leistung der Knitterschutz-Nachlauf ist, und den Zyklus dort beenden darf. Die erwartete Dauer ist der Durchschnitt des Programms; bei einem Trockner, dessen Laufzeit mit Feuchtesensor von der Beladung abhängt, erreichen die meisten Läufe daher nie 98 % davon, und der Nachlauf bleibt stattdessen bis zum Rückfall-Timeout stehen - oft 15 bis 40 Minuten, nachdem das Gerät tatsächlich gestoppt hat. Senken Sie den Wert (z. B. 0,75) bei einem solchen Trockner. Belassen Sie Waschmaschinen beim Standard: Eine Waschmaschine liegt während des größten Teils ihres Zyklus unterhalb der Max. Knitterschutzleistung, sodass dieser Anteil das Einzige ist, was eine ruhige Phase mitten im Waschgang vom Nachlauf trennt, und ein Senken kann einen Waschgang halbieren. Leer lassen für den Standard (0,98). Dies ist eine andere Einstellung als das Verhältnis für intelligente Beendigung, das eine separate Prüfung auf vorzeitige Beendigung steuert."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Erkennen Sie die kurzen, stromsparenden Wäscheimpulse, die ein Trockner nach der Hauptheizphase abgibt, und behalten Sie im Zusammenhang mit dem abgeschlossenen Zyklus bei, anstatt sie als neue Zyklen zu lesen.",
       "label": "Knitterschutzerkennung aktivieren"
@@ -1231,6 +1237,10 @@
     "completion_min_seconds": {
       "doc": "Zyklen, die kürzer sind, werden als Geisterzyklen (Testläufe, Öffnen der Tür zum Hinzufügen einer Socke) verworfen.",
       "label": "Mindestzyklusdauer"
+    },
+    "curve_preroll_seconds": {
+      "label": "Kurven-Vorlauf",
+      "doc": "Wie viele Sekunden an Messwerten aus abgebrochenen Startversuchen WashData an den Anfang der Kurve eines Zyklus übernehmen darf. Die Kurve eines Zyklus beginnt normalerweise bei dem Startversuch, der schließlich erfolgreich ist; bei einem Gerät, das mehrmals antastet, bevor es richtig losläuft - Programmwahl, Türverriegelung, erstes Befüllen -, fehlen daher die ersten Minuten echter Aktivität in jeder Kurve. Stellen Sie diesen Wert etwas höher ein als den längsten solchen Anlauf Ihres Geräts (300 s reichen für die meisten aus). 0 schaltet die Funktion ab. Beachten Sie: Wird sie eingeschaltet, verschiebt sich der aufgezeichnete Start nach vorn, sodass Zyklen von vor und nach der Änderung für dasselbe Programm unterschiedliche Dauern tragen; die gelernten Durchschnittswerte driften, bis die älteren Zyklen herausgefallen sind."
     },
     "delay_confirm_seconds": {
       "doc": "Der Strom muss so lange im Standby-Bereich bleiben, bevor das Gerät als „auf den Start wartend“ und nicht als „in Betrieb“ behandelt wird.",
@@ -1817,6 +1827,7 @@
       "end_repeat_count": "{false}/{total} sauberen Zyklen ({pct}%) hatten eine interne Pause >60s, die wieder fortgesetzt wurde; {val} Endbestätigung(en) erforderlich.",
       "learning_confidence": "p05-Konfidenz von {cycles} vom Benutzer gelabelten Zyklen ({p05}); darunter wird eine Bestätigung angefordert.",
       "match_interval": "Basierend auf dem beobachteten Aktualisierungsrhythmus (Median={median}s) * 10.",
+      "match_interval_capped": "Begrenzt, damit {persistence} aufeinanderfolgende Zuordnungen in {pct}% des kürzesten Programms ({shortest}s) passen; der Aktualisierungsrhythmus allein (Median={median}s) hätte ein längeres Intervall vorgeschlagen.",
       "max_duration_ratio": "Basierend auf den Dauern gelabelter Zyklen (p95={p95}).",
       "min_active": "Basierend auf der minimalen aktiven Leistung ({min}W), die im letzten Zyklus beobachtet wurde.",
       "min_duration_ratio": "So niedrig wie möglich gehalten, damit ein Programm früh im Zyklus erkannt wird; die Konfidenz- und Mehrdeutigkeitsschranken verhindern vorzeitige Festlegungen.",

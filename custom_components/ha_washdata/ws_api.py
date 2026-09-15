@@ -43,6 +43,8 @@ from .const import (
     CONF_DEVICE_TYPE,
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
     CONF_SMART_TERMINATION_DURATION_RATIO,
+    CONF_ANTI_CREASE_FINALIZE_RATIO,
+    CONF_CURVE_PREROLL_SECONDS,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
@@ -78,6 +80,9 @@ from .const import (
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
+    DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+    DEFAULT_CURVE_PREROLL_SECONDS,
+    CURVE_PREROLL_MAX_SECONDS,
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
     resolve_start_duration_default,
@@ -1528,6 +1533,10 @@ def _resolved_option_defaults(device_type: str) -> dict[str, Any]:
         CONF_SMART_TERMINATION_DURATION_RATIO: (
             resolve_smart_termination_duration_ratio_default(device_type)
         ),
+        # #429: deliberately NOT device-resolved (the safe value is a property of
+        # the individual machine), but the panel pre-populates it from the same
+        # payload, so it is published here rather than left to the JS default.
+        CONF_ANTI_CREASE_FINALIZE_RATIO: DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
     }
 
 
@@ -1655,6 +1664,41 @@ async def ws_set_options(
                 )
             except (TypeError, ValueError):
                 new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+
+    # #429: the anti-crease finalise ratio is the same kind of value against the
+    # same kind of mean, and equally meaningless outside [0.50, 1.00]. An empty or
+    # non-numeric submission drops the key so DEFAULT_ANTI_CREASE_FINALIZE_RATIO
+    # applies again.
+    if CONF_ANTI_CREASE_FINALIZE_RATIO in new_options:
+        _raw_ac = new_options[CONF_ANTI_CREASE_FINALIZE_RATIO]
+        if _raw_ac in (None, ""):
+            new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
+        else:
+            try:
+                _ac = float(_raw_ac)
+                if not math.isfinite(_ac):
+                    raise ValueError("non-finite")
+                new_options[CONF_ANTI_CREASE_FINALIZE_RATIO] = min(1.0, max(0.5, _ac))
+            except (TypeError, ValueError):
+                new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
+
+    # #430: seconds, 0 = off. Clamped to [0, CURVE_PREROLL_MAX_SECONDS] so a
+    # mistyped value cannot drag minutes of unrelated standby into a curve; empty
+    # or non-numeric drops the key and restores the default (off).
+    if CONF_CURVE_PREROLL_SECONDS in new_options:
+        _raw_pr = new_options[CONF_CURVE_PREROLL_SECONDS]
+        if _raw_pr in (None, ""):
+            new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
+        else:
+            try:
+                _pr = float(_raw_pr)
+                if not math.isfinite(_pr):
+                    raise ValueError("non-finite")
+                new_options[CONF_CURVE_PREROLL_SECONDS] = min(
+                    CURVE_PREROLL_MAX_SECONDS, max(0.0, _pr)
+                )
+            except (TypeError, ValueError):
+                new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
 
     # A None outside the clearable selectors means "not set", not a value: the
     # per-setting Revert sends the changelog's `old`, which is null for a setting
@@ -5694,6 +5738,14 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
             resolve_smart_termination_duration_ratio_default(
                 str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
             ),
+        ),
+        anti_crease_finalize_ratio=_safe_float_finite(
+            opts.get(CONF_ANTI_CREASE_FINALIZE_RATIO),
+            DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+        ),
+        curve_preroll_seconds=_safe_float_finite(
+            opts.get(CONF_CURVE_PREROLL_SECONDS),
+            DEFAULT_CURVE_PREROLL_SECONDS,
         ),
         # Match the live detector's tuned gate, not the dataclass 0.4, so the sim's
         # Smart-Termination / anti-crease confidence checks reproduce production.

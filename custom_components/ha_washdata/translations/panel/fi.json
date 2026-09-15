@@ -1086,6 +1086,8 @@
     "anti_wrinkle_idle_timeout": "Kahden rumpupulssin välillä sallittu hiljainen aika ennen kuin ryppyjenesto päättyy",
     "anti_wrinkle_max_duration": "Tätä pidempi pulssi päättää ryppyjeneston ja aloittaa uuden syklin",
     "anti_wrinkle_max_power": "Tätä suurempi pulssi päättää ryppyjeneston ja aloittaa uuden syklin",
+    "anti_crease_finalize_ratio": "Osuus täsmätyn ohjelman odotetusta kestosta, joka syklin on saavutettava ennen kuin ryppyjeneston rummutushäntä voidaan päättää; laske sitä kuivausrummuissa, joissa on pitkä häntä, ja jätä pesukoneet oletusarvoon",
+    "curve_preroll_seconds": "Keskeytyneiden käynnistysyritysten lukemien sekunnit, jotka liitetään syklin käyrän alkuun; 0 = pois",
     "completion_min_seconds": "Lyhin ajo, joka lasketaan oikeaksi sykliksi",
     "end_repeat_count": "Peräkkäisten matalien lukemien määrä ennen päättymistä",
     "interrupted_min_seconds": "Lyhyet syklit merkitään keskeytyneiksi",
@@ -1204,6 +1206,10 @@
       "label": "Passiivikuivauksen hiljainen vapautus",
       "doc": "Kun sykli ylittää odotetun kestonsa, kuinka kauan astianpesukoneen on pysyttävä hiljaisena (Pysäytyskynnys-arvon alapuolella) ennen kuin WashData lopettaa lopullisen vedenpoiston odottamisen ja päättää syklin. Nosta arvoa, jos koneessasi on pitkä hiljainen kuivausvaihe ennen myöhäistä lopullista vedenpoistoa, joka jää huomaamatta - laajempi ikkuna antaa opitun keston seurata kausivaihtelua (kylmempi tulovesi = pidemmät syklit) sen sijaan, että se lukittuisi vanhaan keskiarvoon. Se voi vain lyhentää odotusta suhteessa sisäiseen 30 minuutin loppupiikkirajaan, ei koskaan pidentää sitä."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Ryppyjeneston lopetussuhde",
+      "doc": "Kuinka pitkälle täsmätyn ohjelman odotettuun kestoon syklin on edettävä, ennen kuin WashData saa päätellä, että havaittu vähätehoinen rummutus on ryppyjeneston loppuhäntä, ja lopettaa syklin siihen. Odotettu kesto on ohjelman keskiarvo, joten kuivausrummussa, jonka anturikuivauksen ajoaika seuraa pyykkimäärää, useimmat ajot eivät koskaan yllä 98 %:iin siitä, ja häntä jää odottamaan vara-aikakatkaisua - usein 15-40 minuuttia sen jälkeen, kun kone tosiasiassa pysähtyi. Laske tätä (esim. 0,75) tällaisessa kuivausrummussa. Jätä pesukoneet oletusarvoon: pesukone on suurimman osan syklistään Ryppyjeneston enimmäistehon alapuolella, joten tämä osuus on ainoa asia, joka erottaa pesun keskellä olevan hiljaisen vaiheen hännästä, ja sen laskeminen voi puolittaa pesun. Jätä tyhjäksi käyttääksesi oletusta (0,98). Tämä on eri asetus kuin Älykkään lopetuksen suhde, joka ohjaa erillistä ennenaikaisen lopetuksen tarkistusta."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Tunnista lyhyet vähätehoiset rumpupulssit, joita kuivausrumpu lähettää päälämpövaiheen jälkeen, ja pidä ne kiinni valmiissa jaksossa sen sijaan, että luet ne uusina jaksoina.",
       "label": "Ota ryppyjenesto käyttöön"
@@ -1235,6 +1241,10 @@
     "completion_min_seconds": {
       "doc": "Tätä lyhyemmät syklit hylätään haamujaksoina (koeajot, oven avaaminen sukan lisäämiseksi).",
       "label": "Syklin vähimmäiskesto"
+    },
+    "curve_preroll_seconds": {
+      "label": "Käyrän esijakso",
+      "doc": "Kuinka monta sekuntia keskeytyneiden käynnistysyritysten lukemia WashData saa liittää syklin käyrän alkuun. Syklin käyrä alkaa normaalisti siitä käynnistysyrityksestä, joka lopulta onnistuu, joten koneessa, joka kokeilee muutaman kerran ennen kuin se todella lähtee käyntiin - ohjelman valinta, luukun lukitus, ensimmäinen vedenotto - jokaisesta käyrästä puuttuvat todellisen toiminnan ensimmäiset minuutit. Aseta tämä hieman suuremmaksi kuin koneesi pisin tällainen alkuvaihe (300 s riittää useimmille). 0 poistaa toiminnon käytöstä. Huomaa, että käyttöönotto siirtää tallennettua alkuhetkeä aikaisemmaksi, joten ennen muutosta ja sen jälkeen tallennetuilla sykleillä on saman ohjelman kohdalla eri kestot; opitut keskiarvot ajautuvat, kunnes vanhemmat syklit poistuvat."
     },
     "delay_confirm_seconds": {
       "doc": "Virran on pysyttävä valmiustilassa niin kauan, ennen kuin laitetta käsitellään käynnistystä odottavana eikä käynnissä.",
@@ -1817,6 +1827,7 @@
       "end_repeat_count": "{false}/{total} puhtaasta jaksosta ({pct}%) sisälsi yli 60s kestäneen sisäisen tauon, joka jatkui; vaatii {val} loppuvahvistusta.",
       "learning_confidence": "p05-luottamus {cycles} käyttäjän merkitsemälle jaksolle ({p05}); tämän alle pyydetään vahvistusta.",
       "match_interval": "Perustuu havaittuun päivitystahtiin (mediaani={median}s) * 10.",
+      "match_interval_capped": "Rajoitettu niin, että {persistence} peräkkäistä täsmäystä mahtuu {pct} prosenttiin lyhimmästä ohjelmasta ({shortest}s); pelkkä päivitystahti (mediaani={median}s) olisi ehdottanut pidempää väliä.",
       "max_duration_ratio": "Perustuu merkittyjen jaksojen kestoihin (p95={p95}).",
       "min_active": "Perustuu pienimpään aktiiviseen tehoon ({min}W), joka havaittiin viime jaksossa.",
       "min_duration_ratio": "Pidetään mahdollisimman matalana, jotta ohjelma tunnistetaan jakson alkuvaiheessa; luottamus- ja epäselvyysrajat estävät ennenaikaiset päätökset.",

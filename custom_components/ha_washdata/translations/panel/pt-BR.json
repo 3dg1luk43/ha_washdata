@@ -1126,6 +1126,10 @@
       "label": "Liberação em silêncio da secagem passiva",
       "doc": "Assim que o ciclo ultrapassa a duração esperada, por quanto tempo a lava-louças deve permanecer silenciosa (abaixo do Limite de Parada) antes de o WashData parar de aguardar uma descarga final e encerrar o ciclo. Aumente este valor se a sua máquina tiver uma longa fase de secagem silenciosa antes de uma descarga final tardia que está passando despercebida - uma janela mais ampla permite que a duração aprendida acompanhe a variação sazonal (água de entrada mais fria = ciclos mais longos) em vez de se fixar na média antiga. Ele apenas encurta a espera em relação ao limite interno de 30 minutos para o pico de fim, nunca a prolonga."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Proporção de finalização antiamasso",
+      "doc": "Até que ponto da duração esperada do programa correspondente um ciclo precisa ter chegado antes de o WashData poder concluir que o giro lento de baixa potência que está vendo é a cauda antiamasso e encerrar o ciclo ali. A duração esperada é a média do programa, portanto, em uma secadora cujo tempo de secagem por sensor acompanha a carga, a maioria dos ciclos nunca atinge 98% dessa média e a cauda fica esperando até o tempo limite de segurança, muitas vezes de 15 a 40 minutos depois de a máquina ter realmente parado. Reduza este valor (por exemplo, 0,75) em uma secadora assim. Deixe as máquinas de lavar no valor padrão: uma lavadora passa a maior parte do ciclo abaixo da Potência Máxima Antiamasso, de modo que essa fração é a única coisa que separa uma fase silenciosa no meio da lavagem da cauda, e reduzi-la pode cortar uma lavagem pela metade. Deixe vazio para o valor padrão (0,98). Esta configuração é diferente da Proporção de encerramento inteligente, que controla uma verificação de encerramento antecipado separada."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Reconheça os pulsos curtos de baixa potência que uma secadora emite após a fase de aquecimento principal e mantenha-os anexados ao ciclo finalizado, em vez de lê-los como novos ciclos.",
       "label": "Ativar Detecção Antiamasso"
@@ -1157,6 +1161,10 @@
     "completion_min_seconds": {
       "doc": "Ciclos mais curtos que isso são descartados como ciclos fantasmas (testes, abertura da porta para adicionar uma meia).",
       "label": "Duração Mínima do Ciclo"
+    },
+    "curve_preroll_seconds": {
+      "label": "Pré-início da curva",
+      "doc": "Quantos segundos de leituras provenientes de tentativas de início interrompidas o WashData pode incorporar no começo da curva de um ciclo. A curva de um ciclo normalmente começa na tentativa de início que enfim dá certo, portanto, em uma máquina que faz algumas tentativas antes de engatar de fato (seleção do programa, travamento da porta, primeiro enchimento), os primeiros minutos de atividade real ficam de fora de todas as curvas. Defina este valor um pouco acima da partida prévia mais longa da sua máquina (300 s são mais do que suficientes na maioria dos casos). 0 desativa o recurso. Fique atento: ativá-lo antecipa o início registrado, de modo que os ciclos registrados antes e depois da mudança ficam com durações diferentes para o mesmo programa; as médias aprendidas vão se desviar até os ciclos mais antigos saírem do histórico."
     },
     "delay_confirm_seconds": {
       "doc": "A energia deve permanecer na faixa de espera por esse tempo antes que o aparelho seja tratado como aguardando para iniciar, em vez de funcionar.",
@@ -1882,6 +1890,7 @@
       "end_repeat_count": "{false}/{total} ciclos limpos ({pct}%) tiveram uma pausa interna de >60s que foi retomada; exigir {val} confirmação(ões) de fim.",
       "learning_confidence": "Confiança p05 de {cycles} ciclos rotulados pelo usuário ({p05}); abaixo disso, solicitar verificação.",
       "match_interval": "Com base na cadência de atualização observada (mediana={median}s) * 10.",
+      "match_interval_capped": "Limitado para que {persistence} correspondências consecutivas caibam em {pct}% do programa mais curto ({shortest}s); apenas a cadência de atualização (mediana={median}s) teria sugerido um intervalo maior.",
       "max_duration_ratio": "Com base nas durações de ciclos rotulados (p95={p95}).",
       "min_active": "Com base na potência ativa mínima ({min}W) observada no último ciclo.",
       "min_duration_ratio": "Mantido o mais baixo possível para que um programa seja reconhecido logo no início do ciclo; os limiares de confiança e de ambiguidade evitam confirmações prematuras.",
@@ -1936,6 +1945,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lava-louças: segundos de silêncio após a duração esperada antes de liberar a espera da descarga de fim de ciclo",
     "smart_termination_duration_ratio": "Fração da duração esperada do programa correspondente que um ciclo deve atingir antes de o Encerramento inteligente poder encerrá-lo mais cedo; reduza-a para máquinas que dependem da carga ou da temperatura",
+    "anti_crease_finalize_ratio": "Fração da duração esperada do programa correspondente que um ciclo deve atingir antes de a cauda de giro antiamasso poder ser finalizada; reduza-a em secadoras com uma cauda de giro longa, deixe as máquinas de lavar no valor padrão",
     "anti_wrinkle_enabled": "Absorver os pulsos de giro após a fase principal em vez de lê-los como novos ciclos",
     "anti_wrinkle_exit_power": "A potência deve cair abaixo deste valor entre os pulsos para que o modo antiamasso permaneça ativo",
     "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de giro antes de o modo antiamasso terminar",
@@ -1961,7 +1971,8 @@
     "dtw_ddtw_scale": "Etapa 3: distância de meia saturação DDTW; menor = mais sensível à forma (padrão 30)",
     "dtw_refine_top_n": "Etapa 3: candidatos reavaliados pelo DTW; aumente para 7-9 se o perfil correto se classificar em 4.º-5.º (padrão 5)",
     "duration_scale": "Etapa 4: log-razão em que a concordância de duração é reduzida à metade; menor = penalidade mais severa (padrão 0,175)",
-    "energy_scale": "Etapa 4: log-razão em que a concordância de energia é reduzida à metade; menor = penalidade mais severa (padrão 0,25)"
+    "energy_scale": "Etapa 4: log-razão em que a concordância de energia é reduzida à metade; menor = penalidade mais severa (padrão 0,25)",
+    "curve_preroll_seconds": "Segundos de leituras de tentativas de início interrompidas incorporados no começo da curva de um ciclo; 0 = desativado"
   },
   "col": {
     "profile_tip": "Nome do programa correspondente. Sem rótulo significa que nenhum perfil correspondeu no fim do ciclo.",

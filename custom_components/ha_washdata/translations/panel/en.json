@@ -1110,10 +1110,12 @@
     "anti_wrinkle_idle_timeout": "Quiet time allowed between two tumble pulses before anti-wrinkle ends",
     "dishwasher_end_spike_quiet_release": "Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released",
     "smart_termination_duration_ratio": "Fraction of the matched program's expected duration a cycle must reach before Smart Termination may end it early; lower it for load- or temperature-dependent machines",
+    "anti_crease_finalize_ratio": "Fraction of the matched program's expected duration a cycle must reach before the anti-crease tumble tail may be finalised; lower it on dryers with a long tumble tail, leave washing machines at the default",
     "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
     "anti_wrinkle_enabled": "Absorb the tumble pulses after the main phase instead of reading them as new cycles",
     "anti_wrinkle_max_duration": "A pulse longer than this ends anti-wrinkle and opens a new cycle",
-    "anti_wrinkle_exit_power": "Power must fall below this between pulses for anti-wrinkle to stay active"
+    "anti_wrinkle_exit_power": "Power must fall below this between pulses for anti-wrinkle to stay active",
+    "curve_preroll_seconds": "Seconds of readings from aborted start attempts carried into the front of a cycle's curve; 0 = off"
   },
   "phase_desc": {
     "anti_crease": "Occasional short tumbles after completion to reduce wrinkles.",
@@ -1207,6 +1209,10 @@
     }
   },
   "setting": {
+    "anti_crease_finalize_ratio": {
+      "doc": "How far into the matched program's expected duration a cycle must be before WashData may decide the low-power tumbling it is seeing is the anti-crease tail and finish the cycle there. The expected duration is the program's average, so on a dryer whose sensor-dry runtime follows the load, most runs never reach 98% of it and the tail sits until the fallback timeout instead - often 15 to 40 minutes after the machine actually stopped. Lower this (e.g. 0.75) on such a dryer. Leave washing machines at the default: a washer spends most of its cycle below the Max Anti-Wrinkle Power, so this fraction is the only thing separating a quiet mid-wash phase from the tail, and lowering it can cut a wash in half. Leave empty for the default (0.98). This is a different setting from the Smart Termination Ratio, which gates a separate early-finish check.",
+      "label": "Anti-Crease Finalize Ratio"
+    },
     "anti_wrinkle_enabled": {
       "doc": "Recognise the short low-power tumble pulses a dryer emits after the main heat phase and keep them attached to the finished cycle instead of reading them as new cycles.",
       "label": "Enable Anti-Wrinkle Detection"
@@ -1242,6 +1248,10 @@
     "corr_weight": {
       "label": "Shape vs Level Weight",
       "doc": "Balance between curve shape and absolute power level when scoring a match. Higher favours shape; lower favours matching the power level."
+    },
+    "curve_preroll_seconds": {
+      "doc": "How many seconds of readings from aborted start attempts WashData may carry into the front of a cycle's curve. A cycle's curve normally begins at the start attempt that finally succeeds, so on a machine that probes a few times before settling - programme selection, door lock, first fill - the first minutes of real activity are missing from every curve. Set this a little above the longest such run-up your machine has (300 s is plenty for most). 0 turns it off. Be aware that turning it on moves the recorded start earlier, so cycles recorded before and after the change carry different durations for the same program; the learned averages will drift until the older cycles age out.",
+      "label": "Curve Pre-roll"
     },
     "delay_confirm_seconds": {
       "doc": "Power must stay in the standby band for this long before the appliance is treated as waiting-to-start rather than running.",
@@ -1821,6 +1831,7 @@
       "off_delay_generic_floor": "Used generic safe minimum ({floor}s).",
       "off_delay_pauses": "Sized to outlast real pauses: p95 intra-cycle pause {p95}s + 60s buffer, from {pauses} pauses across {cycles} clean cycles (floor {floor}s).",
       "match_interval": "Based on observed update cadence (median={median}s) * 10.",
+      "match_interval_capped": "Capped so {persistence} consecutive matches fit in {pct}% of the shortest program ({shortest}s); the update cadence (median={median}s) alone would have suggested a longer interval.",
       "tol_per_profile": "p75 of per-profile duration variance across {profiles} profiles ({cycles} cycles); tight profiles not penalised.",
       "tol_pooled": "Based on pooled duration variance of {cycles} recent labeled cycles (p95 dev={dev}).",
       "min_duration_ratio": "Kept as low as possible so a program is recognised early in the cycle; the confidence and ambiguity gates prevent premature commits.",

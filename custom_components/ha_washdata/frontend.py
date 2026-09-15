@@ -20,7 +20,7 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Any, Literal, TypedDict, cast
+from typing import Any, Literal, NamedTuple, TypedDict, cast
 from homeassistant.core import HomeAssistant, Event
 from homeassistant.const import EVENT_COMPONENT_LOADED
 
@@ -65,6 +65,45 @@ PANEL_TASK_KEY = "ha_washdata_panel_task"
 CARD_DEFERRED = "deferred"
 CARD_FAILED = "failed"
 CardRegisterResult = Literal["registered", "deferred", "failed"]
+
+# How the card ended up loaded (or why it did not), carried out of
+# _init_resource so the caller can log the truth instead of a guess (#432).
+# ``extra_module`` is a SUCCESS that creates no Lovelace resource at all: with
+# YAML-managed resources the card is injected via frontend.add_extra_js_url, so
+# the old blanket "Auto-registered lovelace resource" line named the wrong
+# mechanism - and only at debug, which is why #384 needed debug logging enabled
+# before anyone could see which path had run.
+RESOURCE_CREATED = "resource_created"
+RESOURCE_UPDATED = "resource_updated"
+RESOURCE_CURRENT = "resource_current"
+RESOURCE_EXTRA_MODULE = "extra_module"
+RESOURCE_HELPERS_UNAVAILABLE = "lovelace_helpers_unavailable"
+RESOURCE_LOVELACE_UNAVAILABLE = "lovelace_storage_unavailable"
+
+# Human-readable reason per failure mode, used in the warnings so a user can act
+# on the log line without turning on debug.
+_RESOURCE_FAILURE_REASONS = {
+    RESOURCE_HELPERS_UNAVAILABLE: (
+        "Lovelace resource helpers are unavailable in this Home Assistant build"
+    ),
+    RESOURCE_LOVELACE_UNAVAILABLE: "Lovelace storage is not available",
+}
+
+
+class ResourceInitResult(NamedTuple):
+    """Outcome of one Lovelace resource initialisation attempt.
+
+    ``ok`` keeps the old boolean contract for the callers' control flow; ``mode``
+    is one of the ``RESOURCE_*`` constants above and exists purely so the log
+    line can name the path that actually ran.
+    """
+
+    ok: bool
+    mode: str
+
+    def describe(self) -> str:
+        """Reason text for a warning, falling back to the raw mode."""
+        return _RESOURCE_FAILURE_REASONS.get(self.mode, self.mode)
 
 
 class LovelaceResourceItem(TypedDict, total=False):
@@ -306,8 +345,15 @@ def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> bool
         return False
 
 
-async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
-    """Safely add or update a Lovelace resource for the given URL."""
+async def _init_resource(
+    hass: HomeAssistant, url: str, ver: str
+) -> ResourceInitResult:
+    """Safely add or update a Lovelace resource for the given URL.
+
+    Returns ``ResourceInitResult(ok, mode)``; ``mode`` names which of the two
+    load mechanisms ran (a real Lovelace resource, or the ``add_extra_js_url``
+    fallback used when resources are YAML-managed) or why neither could (#432).
+    """
     try:
         # pylint: disable=import-outside-toplevel
         from homeassistant.components.frontend import add_extra_js_url
@@ -318,12 +364,12 @@ async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
         _LOGGER.debug(
             "Lovelace resource helpers unavailable; skipping auto resource init"
         )
-        return False
+        return ResourceInitResult(False, RESOURCE_HELPERS_UNAVAILABLE)
 
     lovelace = hass.data.get("lovelace")
     if not lovelace:
         _LOGGER.debug("Lovelace storage not available; skipping auto resource init")
-        return False
+        return ResourceInitResult(False, RESOURCE_LOVELACE_UNAVAILABLE)
 
     resources = (
         lovelace.resources if hasattr(lovelace, "resources") else lovelace["resources"]
@@ -334,7 +380,7 @@ async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
     if not isinstance(resources, ResourceStorageCollection):
         _LOGGER.debug("Add extra JS module (non-storage): %s", url2)
         add_extra_js_url(hass, url2)
-        return True
+        return ResourceInitResult(True, RESOURCE_EXTRA_MODULE)
 
     resources_obj = resources
     await resources_obj.async_get_info()
@@ -349,7 +395,7 @@ async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
             continue
 
         if item_url == url2 and item.get("res_type") == "module":
-            return True
+            return ResourceInitResult(True, RESOURCE_CURRENT)
 
         item_id = item.get("id")
         if not isinstance(item_id, str):
@@ -360,12 +406,12 @@ async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
             item_id, {"res_type": "module", "url": url2}
         )
 
-        return True
+        return ResourceInitResult(True, RESOURCE_UPDATED)
 
     _LOGGER.debug("Add new lovelace resource: %s", url2)
     await resources_obj.async_create_item({"res_type": "module", "url": url2})
 
-    return True
+    return ResourceInitResult(True, RESOURCE_CREATED)
 
 
 class WashDataCardRegistration:
@@ -373,6 +419,9 @@ class WashDataCardRegistration:
 
     def __init__(self, hass: HomeAssistant) -> None:
         self.hass = hass
+        # Why the last attempt failed, so the caller's warning can say so without
+        # the user having to enable debug logging first (#432).
+        self.last_failure_reason: str = "unknown"
 
     def _src_path(self) -> Path:
         return Path(__file__).parent / "www" / CARD_NAME
@@ -382,6 +431,7 @@ class WashDataCardRegistration:
         src = self._src_path()
         if not await self.hass.async_add_executor_job(src.exists):
             _LOGGER.warning("Card file not found: %s", src)
+            self.last_failure_reason = f"card file not found: {src}"
             return CARD_FAILED
 
         # Serve the minified build when it is provably current. The URL stays
@@ -405,6 +455,7 @@ class WashDataCardRegistration:
                 src,
                 exc,
             )
+            self.last_failure_reason = f"static path registration failed: {exc}"
             return CARD_FAILED
 
         version = await self.hass.async_add_executor_job(get_cache_buster)
@@ -424,16 +475,36 @@ class WashDataCardRegistration:
                     if unsubscribe_on_lovelace_loaded:
                         unsubscribe_on_lovelace_loaded()
                     try:
-                        if await _init_resource(self.hass, INTEGRATION_URL, version):
+                        outcome = await _init_resource(
+                            self.hass, INTEGRATION_URL, version
+                        )
+                        if outcome.ok:
+                            self._log_success(outcome, version)
                             self.hass.data["ha_washdata_card_registered"] = True
                             self.hass.data["ha_washdata_card_deferred"] = False
                         else:
                             self.hass.data["ha_washdata_card_deferred"] = False
-                    except Exception:  # pylint: disable=broad-exception-caught
+                            self.last_failure_reason = outcome.describe()
+                            # Warn, not debug: this is the LAST chance to load the
+                            # card, and nothing downstream is watching any more -
+                            # async_register returned CARD_DEFERRED long ago, so a
+                            # silent failure here left no evidence at all (#432).
+                            _LOGGER.warning(
+                                "Deferred card registration failed for %s: %s. The "
+                                "WashData card will not be available until Home "
+                                "Assistant is restarted.",
+                                INTEGRATION_URL,
+                                self.last_failure_reason,
+                            )
+                    except Exception as exc:  # pylint: disable=broad-exception-caught
                         self.hass.data["ha_washdata_card_deferred"] = False
-                        _LOGGER.debug(
-                            "Delayed auto-registration of lovelace resource failed for %s",
+                        self.last_failure_reason = str(exc) or type(exc).__name__
+                        _LOGGER.warning(
+                            "Deferred card registration failed for %s: %s. The "
+                            "WashData card will not be available until Home "
+                            "Assistant is restarted.",
                             INTEGRATION_URL,
+                            self.last_failure_reason,
                         )
 
             unsubscribe_on_lovelace_loaded = self.hass.bus.async_listen(EVENT_COMPONENT_LOADED, _on_lovelace_loaded)
@@ -443,22 +514,27 @@ class WashDataCardRegistration:
                 unsubscribe_on_lovelace_loaded()
                 _LOGGER.debug("Lovelace already loaded after deferred listener; registering now")
                 try:
-                    if await _init_resource(self.hass, INTEGRATION_URL, version):
+                    outcome = await _init_resource(self.hass, INTEGRATION_URL, version)
+                    if outcome.ok:
+                        self._log_success(outcome, version)
                         self.hass.data["ha_washdata_card_registered"] = True
                         self.hass.data["ha_washdata_card_deferred"] = False
                         return CARD_REGISTERED
                     self.hass.data["ha_washdata_card_deferred"] = False
+                    self.last_failure_reason = outcome.describe()
                     return CARD_FAILED
-                except Exception:  # pylint: disable=broad-exception-caught
+                except Exception as exc:  # pylint: disable=broad-exception-caught
                     self.hass.data["ha_washdata_card_deferred"] = False
+                    self.last_failure_reason = str(exc) or type(exc).__name__
                     return CARD_FAILED
 
             return CARD_DEFERRED
 
         # Lovelace is already loaded
         try:
-            registered = await _init_resource(self.hass, INTEGRATION_URL, version)
+            outcome = await _init_resource(self.hass, INTEGRATION_URL, version)
         except Exception as err:  # pylint: disable=broad-exception-caught
+            self.last_failure_reason = str(err) or type(err).__name__
             _LOGGER.debug(
                 "Auto-registration of lovelace resource failed for %s: %s",
                 INTEGRATION_URL,
@@ -466,10 +542,36 @@ class WashDataCardRegistration:
             )
             return CARD_FAILED
 
-        if registered:
-            _LOGGER.debug("Auto-registered lovelace resource for %s", INTEGRATION_URL)
+        if outcome.ok:
+            self._log_success(outcome, version)
             return CARD_REGISTERED
+        self.last_failure_reason = outcome.describe()
         return CARD_FAILED
+
+    def _log_success(self, outcome: ResourceInitResult, version: str) -> None:
+        """Name the mechanism that actually loaded the card (#432).
+
+        The ``add_extra_js_url`` path creates no Lovelace resource, so reporting
+        it as "Auto-registered lovelace resource" sent anyone debugging a missing
+        card looking for a resource that was never going to exist - that is the
+        load path behind #384. It is logged at INFO because it is the one
+        outcome a user may need to know about (their resources are YAML-managed,
+        so the card will not appear in the Resources UI); the storage-backed
+        paths stay at debug, where they have always been.
+        """
+        if outcome.mode == RESOURCE_EXTRA_MODULE:
+            _LOGGER.info(
+                "Card loaded as a frontend extra module (Lovelace resources are "
+                "YAML-managed, so no Lovelace resource was created): %s?v=%s",
+                INTEGRATION_URL,
+                version,
+            )
+        else:
+            _LOGGER.debug(
+                "Auto-registered lovelace resource for %s (%s)",
+                INTEGRATION_URL,
+                outcome.mode,
+            )
 
 
 async def _async_register_path(hass: HomeAssistant, url_path: str, path: str) -> None:

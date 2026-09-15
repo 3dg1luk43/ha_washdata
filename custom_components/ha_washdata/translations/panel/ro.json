@@ -1126,6 +1126,10 @@
       "label": "Eliberare la liniște în uscarea pasivă",
       "doc": "După ce ciclul depășește durata așteptată, cât timp trebuie să rămână silențioasă mașina de spălat vase (sub Prag de Oprire) înainte ca WashData să nu mai aștepte o evacuare finală și să încheie ciclul. Măriți-l dacă mașina are o fază lungă de uscare silențioasă înainte de o evacuare finală întârziată care nu este detectată - o fereastră mai largă permite duratei învățate să urmeze variația sezonieră (apă de alimentare mai rece = cicluri mai lungi) în loc să se fixeze pe media veche. Doar scurtează așteptarea față de plafonul intern de 30 de minute pentru vârful de final, fără a o prelungi vreodată."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Raport de finalizare anti-șifonare",
+      "doc": "Cât de departe în durata așteptată a programului corespunzător trebuie să ajungă un ciclu înainte ca WashData să poată stabili că rotirea lentă de putere redusă pe care o observă este coada anti-șifonare și să încheie ciclul acolo. Durata așteptată este media programului, așa că la un uscător al cărui timp de uscare cu senzor urmează încărcătura majoritatea ciclurilor nu ating niciodată 98% din acea medie, iar coada rămâne în așteptare până la timpul de expirare de rezervă, deseori cu 15 până la 40 de minute după ce mașina s-a oprit efectiv. Reduceți această valoare (de exemplu, 0,75) la un astfel de uscător. Lăsați mașinile de spălat rufe la valoarea implicită: o mașină de spălat petrece cea mai mare parte a ciclului sub Puterea Maximă Anti-Șifonare, deci această fracțiune este singurul lucru care separă o fază liniștită de la mijlocul spălării de coadă, iar reducerea ei poate înjumătăți o spălare. Lăsați gol pentru valoarea implicită (0,98). Această setare este diferită de Raportul de terminare inteligentă, care condiționează o verificare separată de finalizare timpurie."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Recunoașteți impulsurile scurte de rufe de putere redusă pe care le emite un uscător după faza principală de căldură și mențineți-le atașate la ciclul terminat în loc să le citiți ca cicluri noi.",
       "label": "Activați Detectarea Anti-Șifonare"
@@ -1157,6 +1161,10 @@
     "completion_min_seconds": {
       "doc": "Ciclurile mai scurte decât aceasta sunt eliminate ca cicluri fantomă (testare, deschiderea ușii pentru a adăuga un șosetă).",
       "label": "Durata Minimă a Ciclului"
+    },
+    "curve_preroll_seconds": {
+      "label": "Preambulul curbei",
+      "doc": "Câte secunde de citiri provenite din încercări de pornire întrerupte poate include WashData la începutul curbei unui ciclu. Curba unui ciclu începe în mod normal la încercarea de pornire care reușește în cele din urmă, așa că la o mașină care încearcă de câteva ori înainte de a porni efectiv (selectarea programului, blocarea ușii, prima umplere) primele minute de activitate reală lipsesc din fiecare curbă. Setați această valoare puțin peste cea mai lungă astfel de pornire pregătitoare a mașinii dumneavoastră (300 s sunt mai mult decât suficiente în majoritatea cazurilor). 0 dezactivează funcția. Rețineți că activarea ei mută mai devreme startul înregistrat, astfel încât ciclurile înregistrate înainte și după modificare vor avea durate diferite pentru același program; mediile învățate vor devia până când ciclurile mai vechi ies din istoric."
     },
     "delay_confirm_seconds": {
       "doc": "Puterea trebuie să rămână în banda de așteptare mult timp înainte ca aparatul să fie tratat ca așteptând să pornească și nu ca fiind în funcțiune.",
@@ -1882,6 +1890,7 @@
       "end_repeat_count": "{false}/{total} cicluri curate ({pct}%) au avut o pauză internă de >60s care a fost reluată; necesită {val} confirmare(i) de sfârșit.",
       "learning_confidence": "Încrederea p05 a {cycles} cicluri etichetate de utilizator ({p05}); sub această valoare, se solicită verificare.",
       "match_interval": "Pe baza cadenței de actualizare observate (mediană={median}s) * 10.",
+      "match_interval_capped": "Limitat astfel încât {persistence} potriviri consecutive să încapă în {pct}% din cel mai scurt program ({shortest}s); singură, cadența de actualizare (mediană={median}s) ar fi sugerat un interval mai lung.",
       "max_duration_ratio": "Pe baza duratelor ciclurilor etichetate (p95={p95}).",
       "min_active": "Pe baza puterii active minime ({min}W) observate în ultimul ciclu.",
       "min_duration_ratio": "Păstrat cât mai mic posibil, astfel încât un program să fie recunoscut devreme în ciclu; pragurile de încredere și de ambiguitate previn confirmările premature.",
@@ -1936,6 +1945,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Mașină de spălat vase: secunde de liniște după durata așteptată înainte de a elibera așteptarea evacuării de la sfârșitul ciclului",
     "smart_termination_duration_ratio": "Fracțiunea din durata așteptată a programului corespunzător pe care un ciclu trebuie să o atingă înainte ca Terminarea inteligentă să îl poată încheia mai devreme; reduceți-o pentru mașinile care depind de încărcătură sau de temperatură",
+    "anti_crease_finalize_ratio": "Fracțiunea din durata așteptată a programului corespunzător pe care un ciclu trebuie să o atingă înainte ca coada de rotire anti-șifonare să poată fi finalizată; reduceți-o la uscătoarele cu o coadă de rotire lungă, lăsați mașinile de spălat la valoarea implicită",
     "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",
     "anti_wrinkle_exit_power": "Puterea trebuie să scadă sub această valoare între impulsuri pentru ca modul anti-șifonare să rămână activ",
     "anti_wrinkle_idle_timeout": "Timp de liniște permis între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie",
@@ -1961,7 +1971,8 @@
     "dtw_ddtw_scale": "Etapa 3: distanța de semi-saturație DDTW; mai mic = mai sensibil la formă (implicit 30)",
     "dtw_refine_top_n": "Etapa 3: candidați rescorați de DTW; măriți la 7-9 dacă profilul corect se clasează pe locul 4-5 (implicit 5)",
     "duration_scale": "Etapa 4: raportul logaritmic la care acordul de durată se înjumătățește; mai mic = penalizare mai strictă (implicit 0.175)",
-    "energy_scale": "Etapa 4: raportul logaritmic la care acordul de energie se înjumătățește; mai mic = penalizare mai strictă (implicit 0.25)"
+    "energy_scale": "Etapa 4: raportul logaritmic la care acordul de energie se înjumătățește; mai mic = penalizare mai strictă (implicit 0.25)",
+    "curve_preroll_seconds": "Secunde de citiri din încercări de pornire întrerupte incluse la începutul curbei unui ciclu; 0 = dezactivat"
   },
   "col": {
     "profile_tip": "Numele programului corespunzător. Neetichetat înseamnă că niciun profil nu a corespuns la sfârșitul ciclului.",
