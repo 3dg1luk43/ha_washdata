@@ -2604,7 +2604,20 @@ class ProfileStore:
         Only ever increases. Never raises.
         """
         try:
-            stored = int(self._data.get("lifetime_cycle_count", 0) or 0)
+            try:
+                stored = int(self._data.get("lifetime_cycle_count", 0) or 0)
+            except (TypeError, ValueError, OverflowError):
+                # Same fallback :meth:`get_lifetime_cycle_count` uses: an unusable
+                # stored value is no reading at all, so the floor below replaces it
+                # outright. Skipping the heal instead left the malformed value in
+                # ``_data``, which ``export_data`` copies verbatim, so it travelled
+                # into the export and back in on the next import.
+                self._logger.debug(
+                    "Lifetime cycle count %r is not a number; replacing it with the "
+                    "stored-history floor",
+                    self._data.get("lifetime_cycle_count"),
+                )
+                stored = 0
             real = len(self.get_past_cycles())
             if real > stored:
                 self._data["lifetime_cycle_count"] = real
@@ -2614,7 +2627,7 @@ class ProfileStore:
                     real,
                 )
         except Exception:  # noqa: BLE001
-            pass
+            self._logger.debug("Lifetime cycle count heal failed", exc_info=True)
 
     # ------------------------------------------------------------------
     # Armed program (pre-arm a manual program for the next cycle, #411)
