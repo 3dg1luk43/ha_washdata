@@ -1930,12 +1930,26 @@ async def ws_get_profiles(
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
+        # How each programme ENDS, measured from its own cycles. Read-only: no
+        # detection path consults it, and `consistency` is there to be read first,
+        # because the event it describes is present in only some runs of the same
+        # programme (register item 238).
+        terminal: dict[str, Any] = {}
+        try:
+            for _name in profiles:
+                _sig = manager.profile_store.compute_profile_terminal_signature(_name)
+                if _sig is not None:
+                    terminal[_name] = _sig
+        except Exception:  # pylint: disable=broad-exception-caught
+            terminal = {}
+
         return {
             "profiles": profiles,
             "profile_health": health,
             "profile_trends": trends,
             "coverage_gaps": coverage_gaps,
             "profile_advisories": advisories,
+            "profile_terminal": terminal,
         }
 
     stats = await hass.async_add_executor_job(_compute_stats)

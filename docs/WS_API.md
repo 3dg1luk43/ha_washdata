@@ -240,6 +240,7 @@ _None._
 | `profile_trends` | yes | dict[str, any] |
 | `coverage_gaps` | yes | dict[str, any] |
 | `profile_advisories` | yes | list[dict[str, any]] |
+| `profile_terminal` | yes | dict[str, any] |
 
 ## `ha_washdata/create_profile`
 

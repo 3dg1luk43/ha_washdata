@@ -1205,6 +1205,20 @@ def resolve_smart_termination_duration_ratio_default(device_type: str) -> float:
 # distinct programs <~0.6; 0.80 leaves margin below the 0.85 suggestion bar.
 GROUP_MIN_COHESION = 0.80
 
+# Per-profile terminal signature (`profile_store.compute_profile_terminal_signature`).
+# Measured over every export in `cycle_data/` (146 unique dishwasher cycles, 10
+# households): a dishwasher's terminal pump-out peaks at a median 1.3% of its own
+# cycle peak (p10 0.8%, p90 3.8%) and follows a median 906 s of quiet. Both bounds
+# are therefore RELATIVE - a fixed wattage does not survive the range, which is
+# exactly why the #399 spin extractor (fixed at `anti_wrinkle_max_power`, 400 W)
+# finds no terminal block at all on a dishwasher whose pump-out is 33 W.
+# The quiet minimum separates "the event after the drying phase" from an ordinary
+# gap inside the wash; 120 s is well under the measured p10 of 624 s.
+TERMINAL_EVENT_PEAK_FRAC = 0.004
+TERMINAL_QUIET_MIN_S = 120.0
+# Below this many evidence cycles the medians describe noise, not the programme.
+TERMINAL_SIGNATURE_MIN_CYCLES = 3
+
 # Storage
 # v6: backfill ml_review.golden=True for manually-recorded cycles (recorded ==
 # golden reference; a single flag, no duplicate "recorded" field).

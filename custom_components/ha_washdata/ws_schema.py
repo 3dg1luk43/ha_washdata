@@ -128,6 +128,7 @@ class GetProfilesResponse(TypedDict):
     profile_trends: dict[str, Any]
     coverage_gaps: dict[str, Any]
     profile_advisories: list[dict[str, Any]]
+    profile_terminal: dict[str, Any]
 
 
 class CreateProfileResponse(TypedDict):
