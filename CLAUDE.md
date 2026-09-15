@@ -77,23 +77,24 @@ because the usual miss is rebuilding and then committing only the source. `--no-
 
 ### Core components
 
-- **`manager.py`** (~8420 lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
+- **`manager.py`** (~8580 lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
   async profile matching every 5 min, entity updates. Runs its own long jobs (ML training, health
   recompute) as plain executor/`async_create_task` jobs; the `task_registry` wiring lives in `ws_api.py`.
-- **`cycle_detector.py`** (~2570 lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
+- **`cycle_detector.py`** (~3400 lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
   power thresholds + energy gates, dryer anti-wrinkle, external triggers.
-- **`profile_store.py`** (~7310 lines) - learned profiles + matching pipeline orchestration (numeric
+- **`profile_store.py`** (~8610 lines) - learned profiles + matching pipeline orchestration (numeric
   Stages 1-4 run in `analysis.py::compute_matches_worker`; profile_store adds Stage-5 grouping and
   rebuilds the `MatchResult`). Also match ranking history (`record_match_ranking_snapshot` /
   `confirm_match_ranking_snapshots`), the training dataset for `live_match` retraining.
 - **`config_flow.py`** (~260 lines) - minimal HA flow (setup, reconfigure, small options flow). The
   180+ tunables are edited in the **panel** and persisted via `ws_set_options`, not HA flows.
-- **`__init__.py`** (~1100 lines) - entry point, services, config migration. Every registered service
+- **`__init__.py`** (~1420 lines) - entry point, services, config migration. Every registered service
   needs matching entries in `services.yaml` and `strings.json`.
 
 **Pure-statistics per-profile heuristics** (no ML, never raise, surfaced via `ws_get_profiles`):
 `compute_profile_health`, `compute_profile_trends`, `suggest_coverage_gaps`,
-`compute_profile_advisories`, `compute_envelope_conformance`, `detect_cycle_artifacts`. Detail in
+`compute_profile_advisories`, `compute_envelope_conformance`, `detect_cycle_artifacts`,
+`compute_profile_terminal_signature`. Detail in
 reference 02. Two traps: **there is no generic "Recommendations" banner** - advisories render per
 code, and `poor_health`/`shape_drift`/`duration_trend_up`/`energy_trend_up` ship over the WS but
 render nowhere, so a new code needs its render path too (register item 161). Conformance is

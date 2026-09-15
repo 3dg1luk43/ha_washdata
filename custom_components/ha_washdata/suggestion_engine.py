@@ -963,18 +963,16 @@ class SuggestionEngine:
         if not isinstance(profiles, dict):
             return None
         shortest: float | None = None
-        for prof in profiles.values():
+        for name, prof in profiles.items():
             if not isinstance(prof, dict):
                 continue
-            try:
-                avg = float(prof.get("avg_duration") or 0.0)
-            # OverflowError: an imported profile keeps an oversized integer literal
-            # as an unbounded int, and float() on one raises rather than returning
-            # inf. Escaping here aborts the whole operational-suggestion pass over
-            # one bad profile (register item 194's shape).
-            except (TypeError, ValueError, OverflowError):
-                continue
-            if not math.isfinite(avg) or avg <= 60.0:
+            # The matcher's own contract, not just `avg_duration`: a profile whose
+            # length comes from its sample cycle is still matchable, and if it is
+            # the shortest one, capping against a longer program would overrun the
+            # decision budget for it. The helper absorbs the malformed cases
+            # (including the unbounded-int OverflowError of register item 194).
+            avg = self.profile_store.resolve_profile_duration(name)
+            if avg is None or avg <= 60.0:
                 continue
             if shortest is None or avg < shortest:
                 shortest = avg

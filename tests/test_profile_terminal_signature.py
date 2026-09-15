@@ -192,3 +192,49 @@ def test_it_never_raises(store: ProfileStore) -> None:
     ]
     result = store.compute_profile_terminal_signature("Eco")
     assert result is None or isinstance(result, dict)
+
+
+# ─── The matcher's duration contract, shared so callers cannot drift ──────────
+
+
+def test_duration_resolution_follows_the_matcher_contract(store: ProfileStore) -> None:
+    """`_build_match_snapshots` takes the first usable of three sources.
+
+    A caller that checks fewer of them disagrees with the candidate pool about how
+    long a profile is - and `_shortest_profile_duration` checking only the first
+    could cap the match interval against a longer program than the shortest one
+    actually matchable.
+    """
+    store._data["profiles"] = {
+        "FromAvg": {"avg_duration": 3600.0},
+        "FromCycle": {"avg_duration": 0, "sample_cycle_id": "s1"},
+        "FromSpan": {"avg_duration": 0, "sample_cycle_id": "s2"},
+        "Nothing": {"avg_duration": 0},
+    }
+    from_cycle = _cycle("s1")
+    from_cycle["profile_name"] = "FromCycle"
+    from_cycle["duration"] = 1234.0
+    from_span = _cycle("s2")
+    from_span["profile_name"] = "FromSpan"
+    from_span["duration"] = 0
+    store._data["past_cycles"] = [from_cycle, from_span]
+
+    assert store.resolve_profile_duration("FromAvg") == pytest.approx(3600.0)
+    assert store.resolve_profile_duration("FromCycle") == pytest.approx(1234.0)
+    # Neither stored duration is usable, so the trace's own wall-clock span answers.
+    span = store.resolve_profile_duration("FromSpan")
+    assert span is not None and span > 0
+    assert store.resolve_profile_duration("Nothing") is None
+    assert store.resolve_profile_duration("NoSuchProfile") is None
+
+
+def test_duration_resolution_never_raises(store: ProfileStore) -> None:
+    """Same contract as its neighbours; an import can hold anything."""
+    store._data["profiles"] = {
+        "Huge": {"avg_duration": 10**400},
+        "Junk": {"avg_duration": "soon"},
+        "Inf": {"avg_duration": float("inf")},
+    }
+    store._data["past_cycles"] = []
+    for name in ("Huge", "Junk", "Inf"):
+        assert store.resolve_profile_duration(name) is None

@@ -55,11 +55,37 @@ def _engine(
     ``get_past_cycles`` returns nothing so the off-delay branch falls through to
     its cadence fallback and only the match-interval block under test varies.
     """
-    store = MagicMock()
-    store.get_profiles.return_value = profiles if profiles is not None else {}
-    store.get_past_cycles.return_value = []
+    store = _fake_store(profiles if profiles is not None else {})
     eng = SuggestionEngine(MagicMock(), "entry", store, device_type="washing_machine")
     return eng.for_job(options or {})
+
+
+def _fake_store(profiles: dict[str, Any]) -> MagicMock:
+    """A store whose duration resolution behaves like the real one.
+
+    `_shortest_profile_duration` asks `ProfileStore.resolve_profile_duration`,
+    which follows the matcher's three-source contract. These tests only vary
+    `avg_duration`, so the fake resolves that and rejects everything unusable,
+    exactly as the real helper does for a profile with no sample cycle.
+    """
+    store = MagicMock()
+    store.get_profiles.return_value = profiles
+    store.get_past_cycles.return_value = []
+
+    def _resolve(name: str) -> float | None:
+        prof = profiles.get(name)
+        if not isinstance(prof, dict):
+            return None
+        try:
+            value = float(prof.get("avg_duration") or 0.0)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        import math as _math
+
+        return value if _math.isfinite(value) and value > 0 else None
+
+    store.resolve_profile_duration.side_effect = _resolve
+    return store
 
 
 def _match_suggestion(
@@ -184,9 +210,8 @@ def test_a_profile_added_mid_pass_does_not_abort_the_suggestions() -> None:
 
             return _gen()
 
-    store = MagicMock()
+    store = _fake_store(live)
     store.get_profiles.return_value = _MutatingView(live)
-    store.get_past_cycles.return_value = []
     eng = SuggestionEngine(MagicMock(), "entry", store, device_type="washing_machine")
     sug = eng.for_job({}).generate_operational_suggestions(p95_dt=60.0, median_dt=60.0)
 
