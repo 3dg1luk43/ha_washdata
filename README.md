@@ -172,7 +172,6 @@ screenshot tour.
 | `button.<name>_pause_cycle` | Pause a cycle that is starting, running, finishing, or already auto-paused (converting that into a held pause). Not available during the anti-crease or rinse-hold stages. |
 | `button.<name>_resume_cycle` | Resume a cycle you paused (not an automatic pause) |
 | `button.<name>_force_end_cycle` | Force-terminate a stuck cycle |
-| `switch.<name>_auto_maintenance` | Nightly database cleanup |
 
 ### Services
 

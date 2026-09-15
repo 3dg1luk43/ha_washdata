@@ -952,7 +952,12 @@ class SuggestionEngine:
         fresh install behaves exactly as before.
         """
         try:
-            profiles = self.profile_store.get_profiles()
+            # Snapshot, not the live map: get_profiles() hands back
+            # self._data["profiles"] itself, and this runs in an executor thread
+            # while the event loop can label, rename or delete a profile - which
+            # would raise "dictionary changed size during iteration" and abort the
+            # whole suggestion pass.
+            profiles = dict(self.profile_store.get_profiles() or {})
         except Exception:  # pylint: disable=broad-exception-caught
             return None
         if not isinstance(profiles, dict):

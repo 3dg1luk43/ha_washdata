@@ -158,6 +158,28 @@ def test_compaction_survives_garbage():
     assert compact_price_timeline(None) == []
 
 
+def test_a_subnormal_reported_energy_yields_no_cost():
+    """5e-324 passes "finite and positive" and then underflows the denominator.
+
+    `scale` becomes report/integrated, which rounds to 0.0, so the charged kWh is
+    exactly zero and the effective-price division raised ZeroDivisionError out of
+    a function documented never to.
+    """
+    ts, pw = _flat_trace()
+    assert cycle_cost(ts, pw, [(0.0, 0.30)], report_wh=5e-324) is None
+
+
+def test_an_overflowing_cost_yields_no_cost():
+    """Finite inputs can still leave the finite range.
+
+    A price near the float ceiling against a multi-kWh trace overflows to inf,
+    and inf must not reach `cycle["cost"]`. 100 kW for an hour is 100 kWh, so
+    100 x 1e308 leaves the finite range while every input is still finite.
+    """
+    ts, pw = _flat_trace(watts=100_000.0)
+    assert cycle_cost(ts, pw, [(0.0, 1e308)]) is None
+
+
 def test_compaction_survives_an_oversized_integer():
     """json keeps a huge integer literal as an unbounded int, and float() raises.
 

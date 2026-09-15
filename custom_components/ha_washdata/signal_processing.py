@@ -261,7 +261,18 @@ def cycle_cost(
             return None
         scale = report / integrated
     cost = sum(wh * scale / 1000.0 * price for price, wh in segments)
-    effective_price = cost / (integrated * scale / 1000.0)
+    # Finite inputs can still leave the finite range: a price near the float
+    # ceiling against a multi-kWh trace overflows to inf, and a subnormal
+    # `report_wh` (5e-324 passes every check above) makes `scale` underflow, so
+    # the charged energy rounds to exactly 0.0 and the division raises. Both end
+    # in a non-finite or undefined cost, which is what the caller's fallback is
+    # for, so hand the decision back rather than publish one.
+    charged_kwh = integrated * scale / 1000.0
+    if not np.isfinite(cost) or charged_kwh <= 0.0:
+        return None
+    effective_price = cost / charged_kwh
+    if not np.isfinite(effective_price):
+        return None
     return cost, effective_price
 
 

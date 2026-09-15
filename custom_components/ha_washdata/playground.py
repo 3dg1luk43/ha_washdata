@@ -320,7 +320,11 @@ def sanitize_setting_values(values: Any) -> dict[str, Any]:
         _target, coerce = mapping
         try:
             coerced = coerce(value)
-        except (TypeError, ValueError):
+        # OverflowError: the preset payload is JSON-decoded, so an oversized
+        # integer literal arrives as an unbounded int and float() on one raises
+        # rather than returning inf. Dropping the value is this function's
+        # documented behaviour; escaping would fail the whole save.
+        except (TypeError, ValueError, OverflowError):
             continue
         if isinstance(coerced, float) and not math.isfinite(coerced):
             continue
