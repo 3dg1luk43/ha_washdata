@@ -1126,6 +1126,10 @@ class WashDataManager:
         # and frozen onto the cycle at end for panel badging.
         self._cycle_anomaly: str = "none"
         self._overrun_ratio: float = 0.0
+        # Where this run maps onto its matched profile's envelope, 0-1, from the
+        # DTW alignment that already runs for the verified-pause decision. Visible
+        # only: nothing reads it back. None until an alignment has produced one.
+        self._envelope_position: float | None = None
         # Post-cycle anomaly cache: holds energy/underrun anomaly from the last
         # completed cycle so sensor attributes can surface them after idle.
         self._last_cycle_post_anomaly: dict = {}
@@ -1522,6 +1526,15 @@ class WashDataManager:
                     # unreachable and the cycle would hang to the deferral cap (#348).
                     try:
                         span = self.profile_store.envelope_time_span(current_matched)
+                        if span > 0:
+                            # The same ratio the release below tests, kept for the
+                            # state attribute. It is the only continuous "how far
+                            # through this programme are we" figure the integration
+                            # has that is independent of elapsed time, so it stays
+                            # meaningful when a run over- or under-shoots its mean.
+                            self._envelope_position = round(
+                                min(1.0, max(0.0, mapped_time / span)), 3
+                            )
                         if span > 0 and (mapped_time / span) > 0.95:
                             verified_pause = False
                             self._logger.info(
@@ -7024,6 +7037,7 @@ class WashDataManager:
             self._projected_cost = None
             self._cycle_anomaly = "none"
             self._overrun_ratio = 0.0
+            self._envelope_position = None
             self._last_match_result = None
             self._notify_update()
             return
@@ -7656,6 +7670,7 @@ class WashDataManager:
             self._projected_cost = None
             self._cycle_anomaly = "none"
             self._overrun_ratio = 0.0
+            self._envelope_position = None
             return
 
         now = dt_util.now()
@@ -7681,6 +7696,7 @@ class WashDataManager:
             self._projected_cost = None
             self._cycle_anomaly = "none"
             self._overrun_ratio = 0.0
+            self._envelope_position = None
             self._logger.debug(
                 "No profile matched yet, elapsed=%smin", int(duration_so_far / 60)
             )
@@ -8000,6 +8016,18 @@ class WashDataManager:
     def overrun_ratio(self) -> float:
         """Elapsed / expected duration for the running cycle (0.0 when unknown)."""
         return self._overrun_ratio
+
+    @property
+    def envelope_position(self) -> float | None:
+        """How far this run has mapped onto its profile's envelope, 0-1, or None.
+
+        Produced by the DTW alignment that runs for the verified-pause decision,
+        so it is only refreshed while power is below the stop threshold and a
+        profile is matched - which is exactly the phase where elapsed time says
+        least (a dishwasher sitting in its drying phase). Visible only; no
+        detection path reads it.
+        """
+        return self._envelope_position
 
     @property
     def last_cycle_post_anomaly(self) -> dict:
