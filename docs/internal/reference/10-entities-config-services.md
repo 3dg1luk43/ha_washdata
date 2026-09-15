@@ -193,7 +193,7 @@ Present only when projection is available (omitted when idle/early in cycle).
 | Attribute | Description |
 |-----------|-------------|
 | `projected_energy_kwh` | Projected total energy kWh (3dp); accumulated energy / ML-blended progress |
-| `projected_cost` | Projected cycle cost (2dp); present only when cost calculation available |
+| `projected_cost` | Projected cycle cost (2dp); present only when cost calculation available. With dynamic pricing (#426) this is `cost already incurred at the prices the cycle ran through` + `remaining energy x the current price`, not `projected total x current price`. |
 
 #### Debug Sensor Attributes (`WasherDebugSensor.extra_state_attributes`)
 

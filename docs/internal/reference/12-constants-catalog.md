@@ -180,7 +180,7 @@ Note: deprecated 0.4.5 drain-spike keys (`delay_drain_*`) are stripped during co
 | CONF key | String value | Default | Panel-settable | Controls |
 |---|---|---|---|---|
 | `CONF_NOTIFY_TITLE` | `notify_title` | `DEFAULT_NOTIFY_TITLE` = `"WashData: {device}"` | Yes | Notification title template. |
-| `CONF_NOTIFY_ICON` | `notify_icon` | — | Yes | Notification icon. |
+| `CONF_NOTIFY_ICON` | `notify_icon` | — | Yes | Notification icon. Sent as `notification_icon` to `mobile_app_*` targets (#435); Android status bar, iOS from companion app 2026.8.0. |
 | `CONF_NOTIFY_START_MESSAGE` | `notify_start_message` | `DEFAULT_NOTIFY_START_MESSAGE` = `"{device} started."` | Yes | Start message template. |
 | `CONF_NOTIFY_FINISH_MESSAGE` | `notify_finish_message` | `DEFAULT_NOTIFY_FINISH_MESSAGE` = `"{device} finished. Duration: {duration}m."` | Yes | Finish message template. |
 | `CONF_NOTIFY_PRE_COMPLETE_MESSAGE` | `notify_pre_complete_message` | `DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE` = `"{device}: Less than {minutes} minutes remaining."` | Yes | Pre-completion message. |
@@ -193,6 +193,9 @@ Note: deprecated 0.4.5 drain-spike keys (`delay_drain_*`) are stripped during co
 | `CONF_NOTIFY_FINISH_CHANNEL` | `notify_finish_channel` | `DEFAULT_NOTIFY_FINISH_CHANNEL` = `""` | Yes | Distinct Android channel for finished/clean. |
 | `CONF_ENERGY_PRICE_STATIC` | `energy_price_static` | — | Yes | Static kWh price for cost estimates. |
 | `CONF_ENERGY_PRICE_ENTITY` | `energy_price_entity` | — | Yes | Dynamic-price entity id. |
+| `CONF_ENERGY_PRICE_DYNAMIC` | `energy_price_dynamic` | `True` | Yes | Integrate cost against the price in force at each moment instead of freezing the end-of-cycle price (#426). Only consulted when a price *entity* is set. |
+| `PRICE_TIMELINE_MAX_POINTS` | — | `240` | No | Cap on a cycle's stored price timeline; coarsened by dropping the smallest price steps. |
+| `PRICE_TIMELINE_PRICE_DECIMALS` | — | `6` | No | Rounding applied before timeline deduplication. |
 | `CONF_PEAK_RATE_THRESHOLD` | `peak_rate_threshold` | — | Yes | Price at/above which start notification appends a peak-rate tip. |
 | `CONF_PEAK_RATE_MESSAGE` | `peak_rate_message` | `DEFAULT_PEAK_RATE_MESSAGE` = `"Running at peak rate ({price}/kWh)."` | Yes | Peak-rate advisory text. |
 | `CONF_DOOR_SENSOR_ENTITY` | `door_sensor_entity` | — | Yes | Optional binary_sensor for machine door. |

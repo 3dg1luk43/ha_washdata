@@ -34,6 +34,8 @@ from .const import (
     MATCH_DTW_REFINE_TOP_N,
     MATCH_DTW_RESAMPLE_N,
     MATCH_DURATION_SCALE,
+    MATCH_DURATION_SCALE_OVERRUN,
+    MATCH_PREFIX_SHAPE_MAX_RATIO,
     MATCH_DURATION_WEIGHT,
     MATCH_ENERGY_SCALE,
     MATCH_ENERGY_WEIGHT,
@@ -390,7 +392,24 @@ def compute_matches_worker(
     dur_weight = float(config.get("duration_weight", MATCH_DURATION_WEIGHT))
     en_weight = float(config.get("energy_weight", MATCH_ENERGY_WEIGHT))
     dur_scale = float(config.get("duration_scale", MATCH_DURATION_SCALE))
+    dur_overrun_scale = float(
+        config.get("duration_overrun_scale", MATCH_DURATION_SCALE_OVERRUN)
+    )
     en_scale = float(config.get("energy_scale", MATCH_ENERGY_SCALE))
+    # #400: while the cycle is still running, Stage 4 compares like with like. Both
+    # of its terms describe the cycle SO FAR; without this they are graded against
+    # each candidate's COMPLETE duration and energy, which makes a long program 40%
+    # through numerically indistinguishable from a finished short one. Opt-in (live
+    # match path only) so the final match at cycle end - where the whole-cycle
+    # figures are the right comparison - is byte-identical.
+    in_progress = bool(config.get("in_progress"))
+    # ...and Stages 2/3 score the SHAPE against the same truncated stretch, while the
+    # cycle is still clearly mid-run (MATCH_PREFIX_SHAPE_MAX_RATIO). On by default
+    # for a live match; `prefix_shape: False` turns it off for the A/B harnesses.
+    prefix_shape_on = in_progress and bool(config.get("prefix_shape", True))
+    prefix_shape_max_ratio = float(
+        config.get("prefix_shape_max_ratio", MATCH_PREFIX_SHAPE_MAX_RATIO)
+    )
 
     curr_arr = np.array(current_power)
 
@@ -405,10 +424,29 @@ def compute_matches_worker(
             if ratio < min_duration_ratio or ratio > max_duration_ratio:
                 continue
 
-        # Core Similarity
-        score, metrics, offset = find_best_alignment(
-            current_power, sample_power, 1.0, corr_weight=corr_weight
-        )
+        # Core Similarity. While the cycle is mid-run this compares it against the
+        # candidate truncated to the elapsed time, on a shared grid (#400) - the
+        # same pair Stage 3 then warps, so both shape stages ask one question.
+        # `sample` below stays the FULL template: Stage 4 takes its own prefix of it
+        # (analysis.prefix_mean), and truncating it here would truncate twice.
+        span_s = float(item.get("sample_span_s") or profile_duration or 0.0)
+        shape_pair = None
+        if (
+            prefix_shape_on
+            and span_s > 0
+            and current_duration <= span_s * prefix_shape_max_ratio
+        ):
+            shape_pair = prefix_shape_arrays(
+                curr_arr, sample_power, current_duration, span_s
+            )
+        if shape_pair is not None:
+            score, metrics, offset = find_best_alignment(
+                shape_pair[0], shape_pair[1], 1.0, corr_weight=corr_weight
+            )
+        else:
+            score, metrics, offset = find_best_alignment(
+                current_power, sample_power, 1.0, corr_weight=corr_weight
+            )
 
         if score > keep_min:
             candidates.append({
@@ -418,6 +456,9 @@ def compute_matches_worker(
                 "profile_duration": profile_duration,
                 "current": current_power,
                 "sample": sample_power,
+                # Transient, popped after Stage 3: the truncated (current, template)
+                # pair Stage 2 scored, so Stage 3 warps the same thing.
+                "_shape_pair": shape_pair,
                 # True wall-clock span of `sample`, for prefix truncation (#364).
                 # Falls back to profile_duration so the other snapshot builders
                 # (devtools, matching_tuner, playground) keep working unchanged.
@@ -443,10 +484,16 @@ def compute_matches_worker(
         curr_resampled = _resample_to(curr_arr, MATCH_DTW_RESAMPLE_N)
 
         for cand in to_refine:
-            sample_arr = np.array(cand["sample"])
+            pair = cand.get("_shape_pair")
+            if pair is not None:
+                warp_curr, sample_arr, cand_resampled = pair[0], pair[1], None
+            else:
+                warp_curr, sample_arr, cand_resampled = (
+                    curr_arr, np.array(cand["sample"]), curr_resampled
+                )
 
             dtw_score, norm_dist = _stage3_dtw_score(
-                curr_arr,
+                warp_curr,
                 sample_arr,
                 current_peak,
                 dtw_mode=dtw_mode,
@@ -454,7 +501,7 @@ def compute_matches_worker(
                 l1_scale=l1_scale,
                 ddtw_scale=ddtw_scale,
                 ensemble_w=ensemble_w,
-                curr_resampled=curr_resampled,
+                curr_resampled=cand_resampled,
             )
 
             cand["original_score"] = float(cand["score"])
@@ -462,6 +509,11 @@ def compute_matches_worker(
             cand["dtw_dist"] = float(norm_dist)
 
         candidates.sort(key=lambda x: x["score"], reverse=True)
+
+    # The truncated pair is scratch for the two shape stages; it must not reach the
+    # MatchResult ranking (numpy arrays, and the store/WS serialise that dict).
+    for cand in candidates:
+        cand.pop("_shape_pair", None)
 
     # Final pass: blend in duration + energy agreement. Shape correlation alone
     # cannot separate profiles that differ mainly in duration/energy (the main
@@ -488,10 +540,29 @@ def compute_matches_worker(
         cur_energy = cur_mean * current_duration if integrated else cur_mean
         for cand in candidates:
             prof_dur = float(cand.get("profile_duration") or 0.0)
-            dur_ag = _agreement(current_duration, prof_dur, dur_scale)
+            if in_progress and prof_dur > 0 and current_duration > prof_dur:
+                # The cycle has outlasted this candidate: real evidence against it,
+                # penalised on the sharper scale. Below a candidate's duration the
+                # term is unchanged - suppressing the penalty there was measured and
+                # rejected (see MATCH_DURATION_SCALE_OVERRUN in const.py).
+                dur_ag = _agreement(current_duration, prof_dur, dur_overrun_scale)
+            else:
+                dur_ag = _agreement(current_duration, prof_dur, dur_scale)
             sample = cand.get("sample") or []
-            cand_mean = float(np.mean(sample)) if sample else 0.0
-            cand_energy = cand_mean * prof_dur if integrated else cand_mean
+            if in_progress:
+                cand_mean, cand_span = prefix_mean(
+                    sample,
+                    current_duration,
+                    float(cand.get("sample_span_s") or prof_dur or 0.0),
+                    prof_dur,
+                )
+            else:
+                cand_mean = float(np.mean(sample)) if sample else 0.0
+                cand_span = prof_dur
+            # In integrated mode the candidate figure must cover the same stretch of
+            # time as cur_energy does, so a prefix mean is scaled by the elapsed
+            # duration and a whole-template mean by the candidate's own duration.
+            cand_energy = cand_mean * cand_span if integrated else cand_mean
             en_ag = _agreement(cur_energy, cand_energy, en_scale)
             cand["shape_score"] = float(cand["score"])
             cand["score"] = float(
@@ -508,6 +579,35 @@ def compute_matches_worker(
     annotate_prefix_scores(candidates, curr_arr, current_duration, config)
 
     return candidates
+
+def prefix_mean(
+    sample: list[float] | np.ndarray,
+    current_duration: float,
+    sample_span_s: float,
+    profile_duration: float,
+) -> tuple[float, float]:
+    """Mean power of ``sample`` over its leading ``current_duration`` seconds, and
+    the span that mean covers - the Stage-4 like-for-like pair for a cycle that is
+    still running (#400).
+
+    The Stage-4 like-for-like pair, and the same pair Stage 5 uses to choose between
+    a group's members while a cycle is running - one definition, two callers.
+
+    Falls back to the whole template (and the candidate's own duration) when the
+    cycle has already outlasted it: that candidate has finished, so its total is
+    the honest comparison. Deliberately NOT ``_prefix_point_count``: that helper's
+    12-sample floor exists because Stage 6 *correlates* the prefix, while a mean
+    over a handful of leading samples is perfectly well defined - applying the
+    floor here would silently restore whole-template energy for the first few
+    percent of every cycle, which is exactly the window #400 is about.
+    """
+    if len(sample) == 0:
+        return 0.0, profile_duration
+    if sample_span_s > 0 and current_duration < sample_span_s:
+        k = max(1, int(round(len(sample) * (current_duration / sample_span_s))))
+        return float(np.mean(sample[:k])), current_duration
+    return float(np.mean(sample)), profile_duration
+
 
 def _prefix_point_count(
     n_points: int, current_duration: float, sample_span_s: float
@@ -526,6 +626,47 @@ def _prefix_point_count(
     if k < SMART_TERM_PREFIX_MIN_POINTS or k >= n_points:
         return 0
     return k
+
+
+def prefix_shape_arrays(
+    curr_arr: np.ndarray,
+    sample: list[float] | np.ndarray,
+    current_duration: float,
+    sample_span_s: float,
+) -> tuple[np.ndarray, np.ndarray] | None:
+    """``(current, template)`` on one grid, with the template TRUNCATED to the
+    elapsed time - or None when it cannot be truncated meaningfully.
+
+    One definition of "the same stretch of both curves", shared by the two callers
+    that need it: the live Stage-2/3 shape scoring (#400) and the Stage-6 prefix
+    guard (#364). Both series go onto a shared grid so an index offset equals a time
+    offset regardless of the template's native cadence; the grid also honours the
+    #388 OOM cap. The 12-sample floor is real here (unlike in ``prefix_mean``):
+    these arrays get correlated and warped, not averaged.
+
+    The grid is shared **between the two series**, not across candidates: ``k``
+    is the candidate's own truncated point count, so a longer template can be
+    scored on a finer grid than a shorter one. That asymmetry is deliberate and
+    measured. Capping the grid at ``k`` is what stops ``arr[:k]`` being upsampled
+    past the points it actually has, which would invent template detail the
+    recording never contained. Dropping the ``k`` term to make the grid purely
+    candidate-independent (``min(curr_arr.size, MAX_ALIGN_GRID_POINTS)``) was
+    tried and measured on ``devtools/prefix_guard_eval.py``: at the shipped
+    constants it takes the #364 split guard from **59/114 caught (52%) to 52/114
+    (46%)** while removing only 2 of 13 false blocks. A miss there is a SPLIT
+    CYCLE and a false block is merely a later finish, so that trade is
+    net-negative. ``devtools/dtw_ab_eval.py`` is byte-identical either way
+    (it scores only complete cycles, which never take the prefix path), so it
+    cannot be used to judge this function - use ``prefix_guard_eval.py``.
+    """
+    arr = np.asarray(sample, dtype=float)
+    k = _prefix_point_count(arr.size, current_duration, sample_span_s)
+    if k == 0:
+        return None
+    grid = int(min(curr_arr.size, k, MAX_ALIGN_GRID_POINTS))
+    if grid < SMART_TERM_PREFIX_MIN_POINTS:
+        return None
+    return _resample_to(curr_arr, grid), _resample_to(arr[:k], grid)
 
 
 def prefix_shape_score(
@@ -554,18 +695,10 @@ def prefix_shape_score(
     default is ``"ensemble"`` and the live ProfileStore path never sets ``dtw_mode``;
     ``"legacy"`` exists only for the devtools re-sweep harness.
     """
-    arr = np.asarray(sample, dtype=float)
-    k = _prefix_point_count(arr.size, current_duration, sample_span_s)
-    if k == 0:
+    pair = prefix_shape_arrays(curr_arr, sample, current_duration, sample_span_s)
+    if pair is None:
         return None
-    prefix = arr[:k]
-    # Put both series on one grid so index offset equals time offset regardless of
-    # the template's native cadence, and honour the #388 OOM cap.
-    grid = int(min(curr_arr.size, k, MAX_ALIGN_GRID_POINTS))
-    if grid < SMART_TERM_PREFIX_MIN_POINTS:
-        return None
-    a = _resample_to(curr_arr, grid)
-    b = _resample_to(prefix, grid)
+    a, b = pair
 
     corr_weight = float(config.get("corr_weight", MATCH_CORR_WEIGHT))
     score, _metrics, _offset = find_best_alignment(a, b, 1.0, corr_weight=corr_weight)

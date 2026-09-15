@@ -28,7 +28,11 @@ from __future__ import annotations
 
 import pytest
 
+from datetime import datetime, timedelta
+from unittest.mock import patch
+
 from custom_components.ha_washdata import playground
+from custom_components.ha_washdata.const import MATCH_MIN_RESAMPLED_POINTS
 from custom_components.ha_washdata.cycle_detector import CycleDetectorConfig
 
 
@@ -314,3 +318,86 @@ def test_sanitize_setting_values_drops_unknown_and_malformed_entries():
     assert out == {"off_delay": 300, "corr_weight": 0.6, "anti_wrinkle_enabled": True}
     assert playground.sanitize_setting_values(None) == {}
     assert playground.sanitize_setting_values("nope") == {}
+
+
+# ---------------------------------------------------------------------------
+# The sim must decline to match wherever production declines
+#
+# async_match_profile returns an empty MatchResult when resampling yields no
+# segment and when the longest segment is shorter than MATCH_MIN_RESAMPLED_POINTS.
+# The sim's matcher used to fall back to the raw series instead, so it scored
+# short stretches that production had already rejected - the sim then reported a
+# match for a cycle the live matcher would have left unmatched.
+# ---------------------------------------------------------------------------
+
+_BASE = datetime(2026, 1, 1, 12, 0, 0)
+
+
+def _sim(readings_n: int = 60) -> playground._DetailSim:
+    """A _DetailSim with dummy snapshots, so _matcher's own guards are what decide."""
+    cycle = {
+        "id": "c1",
+        "duration": 3600.0,
+        "status": "completed",
+        "start_time": _BASE.isoformat(),
+        "power_data": [[i * 60.0, 500.0] for i in range(readings_n)],
+    }
+    # A non-empty snapshot pool: _matcher returns early on an empty one for its own
+    # reasons, and that is not the guard under test.
+    prebuilt = ([{"name": "Eco", "power": [500.0] * 200, "duration": 3600.0}], {}, {}, {})
+    return playground._DetailSim(
+        cycle=cycle,
+        base_config=CycleDetectorConfig(min_power=10.0, off_delay=180),
+        settings_override=None,
+        store=None,
+        options={},
+        price=None,
+        prebuilt=prebuilt,
+    )
+
+
+def _readings(n: int, step_s: float) -> list[tuple[datetime, float]]:
+    return [(_BASE + timedelta(seconds=i * step_s), 500.0) for i in range(n)]
+
+
+def test_matcher_declines_a_series_too_short_to_resample():
+    """5 readings 1s apart resample to well under the 12-point floor."""
+    sim = _sim()
+    with patch.object(
+        playground.analysis, "compute_matches_worker"
+    ) as worker:
+        result = sim._matcher(_readings(6, 1.0))
+    assert result == (None, 0.0, 0.0, None, False, False)
+    # Declined BEFORE scoring, exactly as async_match_profile does.
+    worker.assert_not_called()
+
+
+def test_matcher_declines_when_preprocessing_raises():
+    sim = _sim()
+    with patch.object(
+        playground, "resample_adaptive", side_effect=ValueError("boom")
+    ), patch.object(playground.analysis, "compute_matches_worker") as worker:
+        result = sim._matcher(_readings(60, 60.0))
+    assert result == (None, 0.0, 0.0, None, False, False)
+    worker.assert_not_called()
+
+
+def test_matcher_declines_when_resampling_yields_no_segment():
+    sim = _sim()
+    with patch.object(playground, "resample_adaptive", return_value=([], 5.0)), \
+         patch.object(playground.analysis, "compute_matches_worker") as worker:
+        result = sim._matcher(_readings(60, 60.0))
+    assert result == (None, 0.0, 0.0, None, False, False)
+    worker.assert_not_called()
+
+
+def test_matcher_still_scores_a_long_enough_series():
+    """The guards must not swallow the normal path."""
+    sim = _sim()
+    with patch.object(
+        playground.analysis, "compute_matches_worker", return_value=[]
+    ) as worker:
+        sim._matcher(_readings(60, 60.0))
+    worker.assert_called_once()
+    powers = worker.call_args[0][0]
+    assert len(powers) >= MATCH_MIN_RESAMPLED_POINTS

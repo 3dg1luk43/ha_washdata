@@ -296,7 +296,7 @@ Called at 5s throttle (`_SIM_SERIES_THROTTLE_S`). When `compute_series=False`, r
    - Calls `store.phase_remaining(trace, offset, device_type)` when phase-matching is enabled
    - Calls `progress_mod.compute_progress(device_type, matched_dur, offset, smoothed, phase_result, ml_pct, phase_remaining_s=...)` → `ProgressResult`
    - Calls `progress_mod.current_phase(store, state, program, result.progress)`
-   - Calls `progress_mod.projected_energy(store, options, matched_dur, trace, program, result.progress, energy_wh, price, end_exp_fn)`
+   - Calls `progress_mod.projected_energy(store, options, matched_dur, trace, program, result.progress, energy_wh, price, end_exp_fn, cost_so_far=self._cost_so_far(trace))`. `_cost_so_far` integrates the replayed trace against the cycle's stored `price_timeline` (#426), mirroring `manager._live_cost_so_far`; without it a dynamically-priced cycle would replay at one flat price and diverge from the estimate the live run produced. A cycle with no stored timeline returns `None` and keeps the flat-price formula.
    - Checks `notif_rules.should_notify_pre_completion(...)` once; emits `"notify_pre_complete"` or `"notify_held"` event
 
 3. Appends the point to `self.series`.
