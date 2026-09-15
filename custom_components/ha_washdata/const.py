@@ -347,6 +347,15 @@ DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 # interval is still whatever the user typed.
 MATCH_INTERVAL_SUGGESTION_DECISION_FRAC = 0.15
 
+# Absolute floor for the same suggestion, and the one case where the budget rule
+# above does NOT hold: a very short program (below ~200 s at the default
+# persistence) would cap the interval into a per-second poll, so the floor wins
+# and the decision budget then exceeds the fraction.  The suggestion says so
+# rather than claiming a bound it did not apply.  Matching is driven by incoming
+# readings, so a 10 s interval on a 60 s-reporting plug still only matches per
+# reading; the floor costs nothing there.
+MATCH_INTERVAL_SUGGESTION_MIN_S = 10
+
 # Issue #430: a cycle's curve begins at the start probe that finally COMMITS.
 # Earlier probes that aborted as false starts take their readings with them, so
 # on an appliance that probes repeatedly before settling (programme selection,

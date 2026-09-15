@@ -456,3 +456,25 @@ def test_an_unmatchable_profile_raises_an_advisory(store: ProfileStore) -> None:
     assert unmatchable[0]["severity"] == "warning"
     assert unmatchable[0]["message_key"] == "msg.advisory_unmatchable"
     assert unmatchable[0]["message_params"] == {"name": "Cotton 40C"}
+
+
+def test_the_advisory_tells_the_two_unmatchable_reasons_apart(store: ProfileStore) -> None:
+    """A profile that HAS a cycle but no duration needs different remediation.
+
+    ``unmatchable_profiles`` already distinguishes them; the advisory used to
+    discard the reason and tell every such user to go and label a cycle, which
+    for this one is a problem they do not have.
+    """
+    cycle = _cycle("c1", 2000, profile="Quick 30")
+    cycle["duration"] = 0
+    store._data["profiles"] = {"Quick 30": {"avg_duration": 0, "sample_cycle_id": "c1"}}
+    store._data["past_cycles"] = [cycle]
+
+    assert store.unmatchable_profiles() == {"Quick 30": "no usable duration"}
+
+    advisories = store.compute_profile_advisories()
+    unmatchable = [a for a in advisories if a.get("code") == "unmatchable"]
+    assert len(unmatchable) == 1
+    assert unmatchable[0]["message_key"] == "msg.advisory_unmatchable_no_duration"
+    assert "no usable duration" in unmatchable[0]["message"]
+    assert "no cycle with power data" not in unmatchable[0]["message"]

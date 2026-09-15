@@ -71,6 +71,7 @@ from .const import (
     DEFAULT_SAMPLING_INTERVAL,
     DEFAULT_MATCH_PERSISTENCE,
     MATCH_INTERVAL_SUGGESTION_DECISION_FRAC,
+    MATCH_INTERVAL_SUGGESTION_MIN_S,
 )
 from .time_utils import power_data_to_offsets
 
@@ -867,7 +868,7 @@ class SuggestionEngine:
         # alone, at MATCH_INTERVAL_SUGGESTION_DECISION_FRAC of the shortest known
         # profile. Capping the interval alone would let a higher persistence
         # reintroduce the same wait.
-        suggested_match = int(max(10, median_dt * 10))
+        suggested_match = int(max(MATCH_INTERVAL_SUGGESTION_MIN_S, median_dt * 10))
         reason_match = f"Based on observed update cadence (median={median_dt:.1f}s) * 10."
         reason_match_key = "suggestion.reason.match_interval"
         reason_match_params: dict[str, Any] = {"median": f"{median_dt:.1f}"}
@@ -885,23 +886,48 @@ class SuggestionEngine:
                 shortest_profile_s * MATCH_INTERVAL_SUGGESTION_DECISION_FRAC
             ) / persistence
             if cap < suggested_match:
-                # Floor at 10 s to match the uncapped branch: a very short profile
-                # must not drive the matcher into a per-second poll.
-                suggested_match = int(max(10, cap))
+                # Floor at MATCH_INTERVAL_SUGGESTION_MIN_S to match the uncapped
+                # branch: a very short profile must not drive the matcher into a
+                # per-second poll.
+                suggested_match = int(max(MATCH_INTERVAL_SUGGESTION_MIN_S, cap))
                 pct = MATCH_INTERVAL_SUGGESTION_DECISION_FRAC * 100.0
-                reason_match = (
-                    f"Capped so {persistence} consecutive matches fit in "
-                    f"{pct:.0f}% of the shortest program ({shortest_profile_s:.0f}s); "
-                    f"the update cadence (median={median_dt:.1f}s) alone would "
-                    f"have suggested a longer interval."
-                )
-                reason_match_key = "suggestion.reason.match_interval_capped"
-                reason_match_params = {
-                    "median": f"{median_dt:.1f}",
-                    "shortest": f"{shortest_profile_s:.0f}",
-                    "persistence": str(persistence),
-                    "pct": f"{pct:.0f}",
-                }
+                if cap < MATCH_INTERVAL_SUGGESTION_MIN_S:
+                    # The floor won, so the budget rule does NOT hold here. Say that
+                    # instead of claiming a bound that was not applied: the reason is
+                    # shown to the user beside the value they are asked to accept.
+                    budget = MATCH_INTERVAL_SUGGESTION_MIN_S * persistence
+                    reason_match = (
+                        f"The shortest program ({shortest_profile_s:.0f}s) alone would cap "
+                        f"this at {cap:.0f}s, below the {MATCH_INTERVAL_SUGGESTION_MIN_S}s "
+                        f"minimum, so it is held there: {persistence} consecutive matches "
+                        f"take {budget}s, which is more than {pct:.0f}% of that program. "
+                        f"Matching only runs when a reading arrives (median="
+                        f"{median_dt:.1f}s), so the minimum costs nothing."
+                    )
+                    reason_match_key = "suggestion.reason.match_interval_floored"
+                    reason_match_params = {
+                        "median": f"{median_dt:.1f}",
+                        "shortest": f"{shortest_profile_s:.0f}",
+                        "persistence": str(persistence),
+                        "pct": f"{pct:.0f}",
+                        "cap": f"{cap:.0f}",
+                        "minimum": str(MATCH_INTERVAL_SUGGESTION_MIN_S),
+                        "budget": str(budget),
+                    }
+                else:
+                    reason_match = (
+                        f"Capped so {persistence} consecutive matches fit in "
+                        f"{pct:.0f}% of the shortest program ({shortest_profile_s:.0f}s); "
+                        f"the update cadence (median={median_dt:.1f}s) alone would "
+                        f"have suggested a longer interval."
+                    )
+                    reason_match_key = "suggestion.reason.match_interval_capped"
+                    reason_match_params = {
+                        "median": f"{median_dt:.1f}",
+                        "shortest": f"{shortest_profile_s:.0f}",
+                        "persistence": str(persistence),
+                        "pct": f"{pct:.0f}",
+                    }
 
         suggestions[CONF_PROFILE_MATCH_INTERVAL] = {
             "value": suggested_match,
