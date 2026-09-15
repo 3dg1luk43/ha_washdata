@@ -1117,8 +1117,13 @@ class CycleDetector:
         exist to advance the quiet timers while a change-only plug says nothing.
         They must keep doing exactly that, so this flag changes no timing here.
         It is recorded only so that anything reasoning about what was OBSERVED can
-        tell the two apart - today that is `_keep_tail_cap` (#424 / register item
-        238), which must never bank a span the plug never reported on.
+        tell the two apart. **Nothing consumes it yet**: it was added for
+        `_keep_tail_cap` (register item 238) and that use was implemented,
+        measured and reverted, because after `_last_active_time` every reading is
+        below the stop threshold anyway, so a plug still reporting cannot separate
+        a drying phase from standby - it only shows the plug is chatty. Kept
+        because the distinction is correct and cheap to carry; see item 260 for
+        the two other consumers that were measured and rejected.
         """
         if not synthetic:
             self._last_real_reading_time = timestamp

@@ -115,7 +115,11 @@ from .const import (
 from . import history_import
 from . import playground
 from . import task_registry
-from .cycle_detector import CycleDetectorConfig
+from .cycle_detector import (
+    CycleDetectorConfig,
+    effective_anticrease_finalize_ratio,
+    effective_curve_preroll_seconds,
+)
 from .options_utils import strip_null_options
 from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
@@ -5748,13 +5752,15 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
                 str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
             ),
         ),
-        anti_crease_finalize_ratio=_safe_float_finite(
-            opts.get(CONF_ANTI_CREASE_FINALIZE_RATIO),
-            DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+        # The same helpers the detector reads these through, not a bare float:
+        # this branch builds the sim config when the live detector is unavailable,
+        # and an imported or stale option would otherwise give the Playground a
+        # value production would have clamped (register items 244, 249).
+        anti_crease_finalize_ratio=effective_anticrease_finalize_ratio(
+            opts.get(CONF_ANTI_CREASE_FINALIZE_RATIO, DEFAULT_ANTI_CREASE_FINALIZE_RATIO)
         ),
-        curve_preroll_seconds=_safe_float_finite(
-            opts.get(CONF_CURVE_PREROLL_SECONDS),
-            DEFAULT_CURVE_PREROLL_SECONDS,
+        curve_preroll_seconds=effective_curve_preroll_seconds(
+            opts.get(CONF_CURVE_PREROLL_SECONDS, DEFAULT_CURVE_PREROLL_SECONDS)
         ),
         # Match the live detector's tuned gate, not the dataclass 0.4, so the sim's
         # Smart-Termination / anti-crease confidence checks reproduce production.

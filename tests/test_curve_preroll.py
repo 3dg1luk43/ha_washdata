@@ -424,6 +424,23 @@ def test_playground_override_is_wired() -> None:
     )
 
 
+def test_the_preset_sanitizer_drops_an_oversized_integer() -> None:
+    """Preset payloads are JSON-decoded, so an unbounded int can arrive.
+
+    `float()` on one raises OverflowError, which is neither TypeError nor
+    ValueError, so the whole preset save failed instead of the value being
+    dropped the way every other malformed value is.
+    """
+    out = playground.sanitize_setting_values({
+        CONF_CURVE_PREROLL_SECONDS: 10**400,
+        CONF_POWER_SENSOR: "ignored, not a setting key",
+    })
+    assert CONF_CURVE_PREROLL_SECONDS not in out
+
+    kept = playground.sanitize_setting_values({CONF_CURVE_PREROLL_SECONDS: 120.0})
+    assert kept[CONF_CURVE_PREROLL_SECONDS] == 120.0
+
+
 def test_the_sim_summary_reports_the_window_the_sim_applied() -> None:
     """An override the detector clamps must not be echoed back unclamped.
 

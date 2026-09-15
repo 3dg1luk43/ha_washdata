@@ -157,6 +157,42 @@ def test_higher_persistence_shrinks_the_interval() -> None:
     assert at6 < at3
 
 
+def test_a_profile_added_mid_pass_does_not_abort_the_suggestions() -> None:
+    """`get_profiles()` hands back the live map and this runs in an executor.
+
+    The event loop can label, rename or delete a profile while the pass is
+    iterating, which raised "dictionary changed size during iteration" and took
+    the whole suggestion pass with it.
+    """
+    live = {"Eco": {"avg_duration": 2579.0}, "Cotton": {"avg_duration": 7200.0}}
+
+    class _MutatingView(dict):
+        """Grows WHILE it is being iterated, which is what the event loop does.
+
+        Mutating before iteration starts would not reproduce anything: the error
+        comes from the dict's own iterator noticing the size changed under it.
+        """
+
+        def values(self):  # noqa: D102
+            view = super().values()
+
+            def _gen():
+                for index, value in enumerate(view):
+                    if index == 0:
+                        self["Added mid-pass"] = {"avg_duration": 1800.0}
+                    yield value
+
+            return _gen()
+
+    store = MagicMock()
+    store.get_profiles.return_value = _MutatingView(live)
+    store.get_past_cycles.return_value = []
+    eng = SuggestionEngine(MagicMock(), "entry", store, device_type="washing_machine")
+    sug = eng.for_job({}).generate_operational_suggestions(p95_dt=60.0, median_dt=60.0)
+
+    assert CONF_PROFILE_MATCH_INTERVAL in sug
+
+
 @pytest.mark.parametrize(
     "bad",
     # float("inf") is the one that raises OverflowError rather than ValueError:
