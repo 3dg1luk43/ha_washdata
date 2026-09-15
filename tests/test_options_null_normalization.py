@@ -45,6 +45,7 @@ from custom_components.ha_washdata.const import (
 from custom_components.ha_washdata.options_utils import (
     has_null_options,
     option_float,
+    option_int,
     strip_null_options,
 )
 
@@ -292,6 +293,71 @@ def test_option_float_rejects_an_oversized_integer():
     assert option_float(-huge, 0.9) == 0.9
 
 
+# ---------------------------------------------------------------------------
+# option_int
+#
+# The integer companion. It exists because int() alone is NOT the whole guard:
+# Python ints are unbounded, so an oversized literal survives int() and only
+# raises at the next line that asks float() for it (register item 278).
+# ---------------------------------------------------------------------------
+
+def test_option_int_passes_integers_through():
+    assert option_int(3, 5) == 3
+    assert option_int("7", 5) == 7
+
+
+def test_option_int_truncates_a_fractional_value_like_int_did():
+    """The pre-existing behaviour of `int(30.7)`, preserved."""
+    assert option_int(30.7, 5) == 30
+    assert option_int(-30.7, 5) == -30
+
+
+def test_option_int_accepts_a_fractional_string_that_bare_int_rejected():
+    """`int("30.5")` raises; routing through float() makes it usable."""
+    with pytest.raises(ValueError):
+        int("30.5")
+    assert option_int("30.5", 5) == 30
+
+
+def test_option_int_falls_back_on_garbage():
+    for bad in ("high", "", None, [], {}, object()):
+        assert option_int(bad, 5) == 5
+
+
+def test_option_int_rejects_non_finite_values():
+    for bad in ("nan", "inf", "-inf", "infinity", float("nan"), float("inf")):
+        assert option_int(bad, 5) == 5
+
+
+def test_option_int_rejects_an_oversized_integer_that_int_would_pass():
+    """The register-278 escape route, in one assertion pair.
+
+    `int()` is total on an unbounded int, so the old guard returned the literal
+    and the OverflowError surfaced at the next float() - a division, a timedelta,
+    a log format - outside whatever try block was protecting the cast.
+    """
+    huge = 10 ** 400
+    assert int(huge) == huge                      # int() does NOT reject it
+    with pytest.raises(OverflowError):
+        float(huge)                               # the next line does
+    assert option_int(huge, 5) == 5
+    assert option_int(-huge, 5) == 5
+
+
+def test_option_int_minimum_clamps_but_does_not_become_the_fallback():
+    """A floor lifts an out-of-range value; it does not replace the default."""
+    assert option_int(0, 3, minimum=1) == 1
+    assert option_int(-9, 3, minimum=1) == 1
+    assert option_int(6, 3, minimum=1) == 6
+    assert option_int("garbage", 3, minimum=1) == 3
+
+
+def test_option_int_return_value_is_always_usable_as_a_divisor():
+    """What every caller of the ``minimum=1`` form actually needs."""
+    for value in ("", None, "abc", 0, -2, float("inf"), float("nan"), 10 ** 400, -(10 ** 400)):
+        assert (1.0 / option_int(value, 3, minimum=1)) > 0
+
+
 @pytest.mark.asyncio
 async def test_a_garbage_confidence_option_does_not_break_cycle_end(hass):
     """The failure this guards: a raised cast inside the spawned cycle-end task.
@@ -330,3 +396,68 @@ async def test_a_garbage_confidence_option_does_not_break_cycle_end(hass):
     # The two comparisons that used to raise.
     assert (0.5 >= float(mgr._learning_confidence or 0.0)) in (True, False)
     assert (mgr._auto_label_confidence > 0) in (True, False)
+
+
+@pytest.mark.parametrize("bad", ["", "three", "abc", float("inf"), float("nan"), 10 ** 400])
+@pytest.mark.asyncio
+async def test_a_garbage_match_persistence_option_still_builds_the_manager(hass, bad):
+    """The worst blast radius of this whole class: construction itself.
+
+    ``_match_persistence`` was read with a bare ``int()`` in ``__init__``, and
+    ``WashDataManager`` is built in ``async_setup_entry`` before anything else runs.
+    A hand-edited import putting a non-numeric or non-finite value there raised
+    before the manager existed, so the entry could never finish setup - not one
+    lost cycle, the whole device gone.
+
+    ``10 ** 400`` is in the list because it is the one shape ``int()`` accepts: it
+    would have been adopted intact and then raised at the first ``float()`` of it.
+    """
+    from custom_components.ha_washdata.const import (
+        CONF_MATCH_PERSISTENCE,
+        DEFAULT_MATCH_PERSISTENCE,
+    )
+    from custom_components.ha_washdata.manager import WashDataManager
+
+    entry = MagicMock()
+    entry.entry_id = "e1"
+    entry.title = "Washer"
+    entry.data = {}
+    entry.options = {CONF_POWER_SENSOR: "sensor.p", CONF_MATCH_PERSISTENCE: bad}
+    hass.config_entries.async_get_entry = MagicMock(return_value=entry)
+
+    with patch("custom_components.ha_washdata.manager.ProfileStore"), \
+         patch("custom_components.ha_washdata.manager.CycleDetector"):
+        mgr = WashDataManager(hass, entry)
+
+    assert mgr._match_persistence == DEFAULT_MATCH_PERSISTENCE
+    # The comparison the matcher makes against it, on every match pass.
+    assert (2 >= mgr._match_persistence) in (True, False)
+
+
+@pytest.mark.asyncio
+async def test_a_zero_match_persistence_is_floored_not_honoured(hass):
+    """Zero DISABLES the persistence gate rather than tightening it.
+
+    ``is_persistent`` is ``counter >= self._match_persistence``, so a stored 0
+    makes the very first match persistent and commits it with no confirmation -
+    the opposite of what a user lowering the setting to 0 would expect, and
+    unreachable from the panel (the key has no schema entry). The floor of 1 is
+    the same one ``SuggestionEngine`` applies, which matters because its interval
+    cap is computed FROM this number.
+    """
+    from custom_components.ha_washdata.const import CONF_MATCH_PERSISTENCE
+    from custom_components.ha_washdata.manager import WashDataManager
+
+    entry = MagicMock()
+    entry.entry_id = "e1"
+    entry.title = "Washer"
+    entry.data = {}
+    entry.options = {CONF_POWER_SENSOR: "sensor.p", CONF_MATCH_PERSISTENCE: 0}
+    hass.config_entries.async_get_entry = MagicMock(return_value=entry)
+
+    with patch("custom_components.ha_washdata.manager.ProfileStore"), \
+         patch("custom_components.ha_washdata.manager.CycleDetector"):
+        mgr = WashDataManager(hass, entry)
+
+    assert mgr._match_persistence == 1
+    assert (0 >= mgr._match_persistence) is False, "a fresh counter must not read as persistent"

@@ -108,6 +108,29 @@ def option_float(value: Any, default: float) -> float:
     return result if math.isfinite(result) else float(default)
 
 
+def option_int(value: Any, default: int, minimum: int | None = None) -> int:
+    """Coerce a stored option to ``int``, falling back to ``default``.
+
+    The integer companion to :func:`option_float`, and it routes THROUGH it rather
+    than calling ``int(value)`` directly, because ``int()`` is not the whole test.
+    Python integers are arbitrary precision, so a JSON literal such as ``10**400``
+    survives ``int()`` intact and only raises ``OverflowError`` further downstream,
+    at whatever line first asks ``float()`` for it - a division, a ``timedelta``, a
+    log format. That is register item 278: the guard was in place and the value
+    still escaped it, one line later. Proving the value is representable as a float
+    here means the caller holds an int it can actually use.
+
+    ``minimum`` clamps the result for the settings where a zero or negative silently
+    DISABLES the gate it configures rather than tightening it. Pass it only where a
+    floor is already established elsewhere (a panel schema ``min``, or a sibling
+    reader's own clamp), so the two readers of one key cannot disagree.
+    """
+    result = int(option_float(value, default))
+    if minimum is not None and result < minimum:
+        return minimum
+    return result
+
+
 def has_null_options(options: Mapping[str, Any]) -> bool:
     """True when ``options`` holds at least one unset-meaning ``None``.
 
