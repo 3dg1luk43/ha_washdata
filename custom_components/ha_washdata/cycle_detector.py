@@ -126,6 +126,47 @@ _LOGGER = logging.getLogger(__name__)
 STOP_LOCKOUT_RELEASE_SECONDS = 180.0
 
 
+def effective_anticrease_finalize_ratio(value: Any) -> float:
+    """The ratio the anti-crease gate will actually use for a stored value.
+
+    Only ``ws_set_options`` range-checks this option: ``import_config`` strips
+    nulls only, a selective import writes numbers through, and the Playground
+    sanitizer just casts to float. So the value is held to its documented range
+    here, at every point of use, and anything unusable falls back to the default
+    rather than disarming the gate (a stored ``0.0`` would satisfy the
+    past-expected test for every duration).
+
+    Shared with the Playground's config summary so the figure the panel shows and
+    the figure the gate applies cannot drift apart.
+    """
+    try:
+        ratio = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return DEFAULT_ANTI_CREASE_FINALIZE_RATIO
+    if not math.isfinite(ratio):
+        return DEFAULT_ANTI_CREASE_FINALIZE_RATIO
+    return min(
+        ANTI_CREASE_FINALIZE_RATIO_MAX, max(ANTI_CREASE_FINALIZE_RATIO_MIN, ratio)
+    )
+
+
+def effective_curve_preroll_seconds(value: Any) -> float:
+    """The pre-roll window actually applied for a stored value (0 = off).
+
+    Same reasoning as :func:`effective_anticrease_finalize_ratio`: the detector
+    caps the window at ``CURVE_PREROLL_MAX_SECONDS`` wherever it reads it, so the
+    summary has to report the capped figure or it describes a sim that did not
+    run.
+    """
+    try:
+        window = float(value or 0.0)
+    except (TypeError, ValueError, OverflowError):
+        return 0.0
+    if not math.isfinite(window) or window <= 0:
+        return 0.0
+    return min(window, CURVE_PREROLL_MAX_SECONDS)
+
+
 @dataclass
 class CycleDetectorConfig:
     """Configuration for cycle detection."""
@@ -2131,7 +2172,7 @@ class CycleDetector:
         ``CURVE_PREROLL_MAX_SECONDS``), so the buffer holds seconds of data, not
         an unbounded history.
         """
-        window = float(self._config.curve_preroll_seconds or 0.0)
+        window = effective_curve_preroll_seconds(self._config.curve_preroll_seconds)
         if window <= 0:
             # Option off: keep the buffer empty rather than paying to fill one
             # nothing will read, and so that enabling it mid-run cannot splice in
@@ -2146,7 +2187,6 @@ class CycleDetector:
             STATE_UNKNOWN,
         ):
             return
-        window = min(window, CURVE_PREROLL_MAX_SECONDS)
         self._preroll_buffer.append((timestamp, float(power)))
         cutoff = timestamp - timedelta(seconds=window)
         # Readings arrive in order, so the stale prefix is contiguous.
@@ -2175,7 +2215,7 @@ class CycleDetector:
         Returns [] whenever there is nothing to add, so the caller's fast path is
         a single emptiness test.
         """
-        window = float(self._config.curve_preroll_seconds or 0.0)
+        window = effective_curve_preroll_seconds(self._config.curve_preroll_seconds)
         if window <= 0 or not self._preroll_buffer:
             return []
 
@@ -2527,9 +2567,8 @@ class CycleDetector:
         # arrive from an import or the Playground, neither of which range-checks it.
         # A stored 0.0 would satisfy the test below for every duration and hand the
         # gate a mid-wash trough.
-        finalize_ratio = min(
-            ANTI_CREASE_FINALIZE_RATIO_MAX,
-            max(ANTI_CREASE_FINALIZE_RATIO_MIN, float(self._config.anti_crease_finalize_ratio)),
+        finalize_ratio = effective_anticrease_finalize_ratio(
+            self._config.anti_crease_finalize_ratio
         )
         if current_duration < self._expected_duration * finalize_ratio:
             return False

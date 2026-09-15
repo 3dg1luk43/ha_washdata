@@ -125,7 +125,12 @@ from .const import (
     STATE_UNKNOWN,
     TerminationReason,
 )
-from .cycle_detector import CycleDetector, CycleDetectorConfig
+from .cycle_detector import (
+    CycleDetector,
+    CycleDetectorConfig,
+    effective_anticrease_finalize_ratio,
+    effective_curve_preroll_seconds,
+)
 from .profile_store import (
     _ambiguity_from_candidates,
     _match_prefix_ambiguity,
@@ -1568,8 +1573,15 @@ def _sim_config_summary(config: CycleDetectorConfig) -> dict[str, Any]:
         "anti_wrinkle_idle_timeout": getattr(config, "anti_wrinkle_idle_timeout", None),
         "dishwasher_end_spike_quiet_release": getattr(config, "dishwasher_end_spike_quiet_release", None),
         "smart_termination_duration_ratio": getattr(config, "smart_termination_duration_ratio", None),
-        "anti_crease_finalize_ratio": getattr(config, "anti_crease_finalize_ratio", None),
-        "curve_preroll_seconds": getattr(config, "curve_preroll_seconds", None),
+        # Both are clamped by the detector wherever it reads them, so report the
+        # effective figure: a summary carrying an out-of-range override would
+        # describe a sim that did not run.
+        "anti_crease_finalize_ratio": effective_anticrease_finalize_ratio(
+            getattr(config, "anti_crease_finalize_ratio", None)
+        ),
+        "curve_preroll_seconds": effective_curve_preroll_seconds(
+            getattr(config, "curve_preroll_seconds", None)
+        ),
     }
 
 

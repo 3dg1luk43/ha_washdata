@@ -158,6 +158,18 @@ def test_compaction_survives_garbage():
     assert compact_price_timeline(None) == []
 
 
+def test_compaction_survives_an_oversized_integer():
+    """json keeps a huge integer literal as an unbounded int, and float() raises.
+
+    An imported cycle's ``price_timeline`` reaches this function unvalidated, and
+    OverflowError is not a ValueError, so the entry has to be dropped like any
+    other malformed one rather than taking the caller down.
+    """
+    huge = 10**400
+    assert compact_price_timeline([(huge, 0.2), (0.0, 0.1)]) == [(0.0, 0.1)]
+    assert compact_price_timeline([(0.0, huge), (1.0, 0.1)]) == [(1.0, 0.1)]
+
+
 def test_persisted_timeline_round_trips_through_json_lists():
     assert _coerce_price_timeline([[1.0, 0.2], [0.0, 0.1]]) == [(0.0, 0.1), (1.0, 0.2)]
     assert _coerce_price_timeline("nonsense") == []
