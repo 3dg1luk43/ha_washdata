@@ -73,6 +73,7 @@ from .const import (
     MATCH_INTERVAL_SUGGESTION_DECISION_FRAC,
     MATCH_INTERVAL_SUGGESTION_MIN_S,
 )
+from .options_utils import option_int
 from .time_utils import power_data_to_offsets
 
 # ─── Clean-cycle selection ────────────────────────────────────────────────────
@@ -875,28 +876,15 @@ class SuggestionEngine:
 
         shortest_profile_s = self._shortest_profile_duration()
         if shortest_profile_s is not None:
-            persistence = DEFAULT_MATCH_PERSISTENCE
-            try:
-                candidate = max(
-                    1,
-                    int(
-                        _op_opts.get(
-                            CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE
-                        )
-                    ),
-                )
-                # int() is not the whole test. Python ints are arbitrary precision,
-                # so an oversized literal such as 10**400 survives int() intact and
-                # only raises when the division below asks float() for it - which is
-                # OUTSIDE this block unless the divisor is proved usable here first.
-                float(candidate)
-                persistence = candidate
-            # OverflowError: int(float("inf")) raises, and json parses a bare
-            # `Infinity` literal into that, so a hand-edited import can put one in
-            # entry.options. Escaping here would abort every operational suggestion
-            # over one unusable setting.
-            except (TypeError, ValueError, OverflowError):
-                pass
+            # option_int holds the whole guard (register items 278, 279): it proves
+            # the value is float-representable before returning it, so the divisor
+            # below cannot raise, and the floor of 1 is shared with the manager's
+            # read of the same key instead of being re-derived here.
+            persistence = option_int(
+                _op_opts.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE),
+                DEFAULT_MATCH_PERSISTENCE,
+                minimum=1,
+            )
             cap = (
                 shortest_profile_s * MATCH_INTERVAL_SUGGESTION_DECISION_FRAC
             ) / persistence

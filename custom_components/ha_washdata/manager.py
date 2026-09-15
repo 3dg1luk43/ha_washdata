@@ -294,7 +294,7 @@ from .signal_processing import (
 from .recorder import CycleRecorder
 from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
-from .options_utils import option_float
+from .options_utils import option_float, option_int
 from .time_utils import power_data_to_offsets
 from . import analysis
 from . import progress as progress_mod
@@ -1096,8 +1096,18 @@ class WashDataManager:
                 resolve_watchdog_interval_default(self.device_type),
             )
         )
-        self._match_persistence = int(
-            config_entry.options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE)
+        # option_int, not a bare int(): this runs in __init__, so a hand-edited
+        # import putting a non-numeric or oversized value here raised before the
+        # manager existed and the entry could never finish setup. The floor of 1 is
+        # what `SuggestionEngine` already applies to the same key - and it has to,
+        # because its interval cap is computed FROM this number, so an unclamped 0
+        # here would have the suggestion describe a persistence the matcher is not
+        # using. Zero also disables the gate rather than tightening it: every
+        # `counter >= 0` is true, so the first match commits.
+        self._match_persistence = option_int(
+            config_entry.options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE),
+            DEFAULT_MATCH_PERSISTENCE,
+            minimum=1,
         )
         self._sampling_interval = float(
             config_entry.options.get(
