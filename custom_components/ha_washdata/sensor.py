@@ -305,6 +305,13 @@ class WasherStateSensor(WasherBaseSensor):
         if anomaly and anomaly != "none":
             attrs["cycle_anomaly"] = anomaly
             attrs["overrun_ratio"] = round(self._manager.overrun_ratio, 2)
+        # Envelope position (visible only): where the run maps onto the matched
+        # profile's own curve, which is independent of elapsed time and therefore
+        # still meaningful when a cycle over- or under-runs its usual duration.
+        # Refreshed only during the low-power phases the alignment runs in.
+        envelope_position = self._manager.envelope_position
+        if envelope_position is not None:
+            attrs["envelope_position"] = envelope_position
         # Post-cycle anomaly data (underrun, energy spike/low) from last completed cycle.
         last_post = self._manager.last_cycle_post_anomaly
         if isinstance(last_post, dict):
