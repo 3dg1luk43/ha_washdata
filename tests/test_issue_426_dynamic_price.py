@@ -520,6 +520,9 @@ def test_an_unusable_reported_energy_yields_no_cost():
     assert cycle_cost(ts, pw, points, report_wh=-5.0) is None
     assert cycle_cost(ts, pw, points, report_wh=float("nan")) is None
     assert cycle_cost(ts, pw, points, report_wh="junk") is None
+    # float() on an unbounded int raises OverflowError, not ValueError, and an
+    # imported or backfilled record can carry one.
+    assert cycle_cost(ts, pw, points, report_wh=10**400) is None
     # A usable figure still scales the segments.
     assert cycle_cost(ts, pw, points, report_wh=500.0)[0] == pytest.approx(0.15)
 

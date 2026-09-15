@@ -248,7 +248,11 @@ def cycle_cost(
     if report_wh is not None:
         try:
             report = float(report_wh)
-        except (TypeError, ValueError):
+        # OverflowError alongside the rest, as in compact_price_timeline above: an
+        # imported or hand-edited record keeps an oversized integer literal as an
+        # unbounded int, and float() on one raises instead of returning inf. This
+        # function's contract is to hand the decision back, not to raise.
+        except (TypeError, ValueError, OverflowError):
             return None
         if not np.isfinite(report) or report <= 0:
             # The caller asked for the cost of *this* figure. Costing the trace
