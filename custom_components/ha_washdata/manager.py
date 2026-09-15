@@ -4011,7 +4011,7 @@ class WashDataManager:
                     (now - last_real).total_seconds(),
                     self._off_delay,
                 )
-                self.detector.process_reading(0.0, now)
+                self.detector.process_reading(0.0, now, synthetic=True)
                 self._notify_update()
             return
         if (
@@ -4591,7 +4591,7 @@ class WashDataManager:
                     time_since_real_update,
                     self._no_update_active_timeout,
                 )
-                self.detector.process_reading(0.0, now)
+                self.detector.process_reading(0.0, now, synthetic=True)
                 self._last_reading_time = now
                 self._current_power = 0.0
                 self._notify_update()
@@ -4606,8 +4606,11 @@ class WashDataManager:
                     time_since_any_update
                 )
                 # Ensure we handle the injection cleanly
-                # Do NOT update _last_real_reading_time here
-                self.detector.process_reading(0.0, now)
+                # Do NOT update _last_real_reading_time here, and tell the
+                # detector this reading is ours: it must still advance the
+                # quiet timers (that is the whole point of injecting it) but
+                # must not count as the sensor having reported (item 238).
+                self.detector.process_reading(0.0, now, synthetic=True)
                 self._last_reading_time = now # Resets 'any' timer so we don't spam
                 self._current_power = 0.0
                 self._notify_update()
@@ -4624,7 +4627,7 @@ class WashDataManager:
         ):
             # Treating as start of low power wait
             self._logger.debug("Watchdog: Silence at low power (%.0fs). Injecting 0W.", time_since_any_update)
-            self.detector.process_reading(0.0, now)
+            self.detector.process_reading(0.0, now, synthetic=True)
             self._last_reading_time = now
             self._current_power = 0.0
             self._notify_update()
