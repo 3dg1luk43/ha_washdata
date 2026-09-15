@@ -276,6 +276,7 @@ export interface GetProfilesResponse {
   profile_trends: Record<string, unknown>;
   coverage_gaps: Record<string, unknown>;
   profile_advisories: Record<string, unknown>[];
+  profile_terminal: Record<string, unknown>;
 }
 
 export interface GetRecordingStateResponse {

@@ -42,6 +42,9 @@ from .const import (
     CLUSTER_RESAMPLE_N,
     CLUSTER_SHAPE_SIMILARITY_THRESHOLD,
     GROUP_MIN_COHESION,
+    TERMINAL_EVENT_PEAK_FRAC,
+    TERMINAL_QUIET_MIN_S,
+    TERMINAL_SIGNATURE_MIN_CYCLES,
     MAINTENANCE_EVENT_TYPES,
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
@@ -5725,6 +5728,142 @@ class ProfileStore:
             return out
         except Exception:  # pragma: no cover - defensive; never break the sensor
             return []
+
+    def compute_profile_terminal_signature(
+        self, profile_name: str
+    ) -> dict[str, Any] | None:
+        """How this program ends, measured from its OWN cycles. Pure statistics.
+
+        A dishwasher's cycle does not end at its last wash activity: it goes quiet
+        for a passive drying phase and then, usually, emits a short low-power
+        terminal event (the final pump-out) before standby. Measured across the
+        real corpus, that quiet-plus-event span is a median 11% of the cycle and
+        reaches 43%, so the phase is substantial cycle content rather than a tail.
+
+        Returns ``None`` when the profile has fewer than
+        ``TERMINAL_SIGNATURE_MIN_CYCLES`` evidence cycles to measure, else::
+
+            quiet_before_s     median seconds of quiet before the terminal event
+            event_seconds      median duration of the event itself
+            event_watts        median peak power of the event
+            event_watts_frac   that peak as a fraction of the cycle's own peak
+            position_frac      where the event sits in the cycle (0-1)
+            seen_in / measured how many of the measured cycles showed one
+            consistency       seen_in / measured, 0-1
+
+        **Read `consistency` before trusting the rest.** The same appliance emits
+        the event only sometimes: on the best-sampled device in the corpus (5-10 s
+        sampling, 1100+ samples through the quiet phase) it appeared in roughly 6
+        of 15 runs of one program, the others reaching the same duration with
+        nothing above 0.6 W. So the event's PRESENCE is informative and its
+        ABSENCE is not, which is why this is reported rather than acted on - see
+        register item 238 for the two end-detection rules this evidence rejected.
+
+        The detection threshold scales with each cycle's own peak
+        (``TERMINAL_EVENT_PEAK_FRAC``) instead of a fixed wattage, because a
+        fixed one does not survive the range involved: measured terminal events
+        are a median 1.3% of their cycle's peak, and the #399 spin extractor's
+        400 W ceiling finds nothing at all on a dishwasher whose pump-out is 33 W.
+
+        The bound of scaling that way: an appliance whose standby is a large
+        FRACTION of its own peak has no quiet phase to find. A 2000 W dishwasher
+        idling at 2 W is 0.1% and reads as quiet; a 60 W pump idling at 0.5 W is
+        0.8% and does not. That is the honest answer for such a device (its
+        standby is not distinguishable from its running load at this resolution),
+        so it reports ``seen_in: 0`` rather than a fabricated event.
+
+        Never raises; returns ``None`` on any error.
+        """
+        try:
+            cycles = [
+                c
+                for c in self.iter_evidence_cycles()
+                if c.get("profile_name") == profile_name and c.get("power_data")
+            ]
+            if len(cycles) < TERMINAL_SIGNATURE_MIN_CYCLES:
+                return None
+
+            quiet: list[float] = []
+            seconds: list[float] = []
+            watts: list[float] = []
+            watt_fracs: list[float] = []
+            positions: list[float] = []
+            measured = 0
+
+            for cycle in cycles:
+                points = decompress_power_data(cast(Any, cycle))
+                if len(points) < 5:
+                    continue
+                measured += 1
+                peak = max(p for _t, p in points)
+                if peak <= 0:
+                    continue
+                threshold = peak * TERMINAL_EVENT_PEAK_FRAC
+                span = points[-1][0] - points[0][0]
+                if span <= 0:
+                    continue
+
+                # Walk back to the last run above the threshold, then to the start
+                # of that run, then to the end of the quiet stretch before it.
+                end_i = None
+                for i in range(len(points) - 1, -1, -1):
+                    if points[i][1] > threshold:
+                        end_i = i
+                        break
+                if end_i is None:
+                    continue
+                start_i = end_i
+                while start_i > 0 and points[start_i - 1][1] > threshold:
+                    start_i -= 1
+                if start_i == 0:
+                    continue  # the run reaches the start: no quiet phase before it
+                # The quiet PHASE, not the sample interval: walk back to the
+                # previous activity. Measuring the gap to the preceding sample
+                # would just report the plug's reporting rate, since a plug that
+                # keeps sampling through the drying phase has no large interval.
+                prev_i = None
+                for i in range(start_i - 1, -1, -1):
+                    if points[i][1] > threshold:
+                        prev_i = i
+                        break
+                if prev_i is None:
+                    continue  # nothing before it: this is the main activity
+                gap = points[start_i][0] - points[prev_i][0]
+                if gap < TERMINAL_QUIET_MIN_S:
+                    continue  # the event is part of the main activity, not after it
+
+                quiet.append(gap)
+                seconds.append(points[end_i][0] - points[start_i][0])
+                event_peak = max(p for _t, p in points[start_i : end_i + 1])
+                watts.append(event_peak)
+                watt_fracs.append(event_peak / peak)
+                positions.append((points[start_i][0] - points[0][0]) / span)
+
+            if not measured:
+                return None
+            if not quiet:
+                return {
+                    "quiet_before_s": None,
+                    "event_seconds": None,
+                    "event_watts": None,
+                    "event_watts_frac": None,
+                    "position_frac": None,
+                    "seen_in": 0,
+                    "measured": measured,
+                    "consistency": 0.0,
+                }
+            return {
+                "quiet_before_s": round(float(np.median(quiet)), 1),
+                "event_seconds": round(float(np.median(seconds)), 1),
+                "event_watts": round(float(np.median(watts)), 2),
+                "event_watts_frac": round(float(np.median(watt_fracs)), 4),
+                "position_frac": round(float(np.median(positions)), 4),
+                "seen_in": len(quiet),
+                "measured": measured,
+                "consistency": round(len(quiet) / measured, 3),
+            }
+        except Exception:  # noqa: BLE001 - a statistic must never break the panel
+            return None
 
     def compute_envelope_conformance(
         self,
