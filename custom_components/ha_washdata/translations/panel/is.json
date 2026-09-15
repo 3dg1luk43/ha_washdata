@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Undir lokin verður þetta kerfi kyrrt í um það bil {mins} mín. og dregur svo um {watts} W í {secs} s áður en því lýkur. Sést í {seen} af {measured} mældum lotum: tækið gerir þetta ekki í hverri keyrslu.",
+    "quiet_tail": "~{mins} mín. kyrr lokaáfangi",
     "artifact_tip": "{n} frávik fundust (t.d. hurð opnuð í miðjum lotu) – opnaðu til að sjá þau á línuritinu",
     "auto": "(sjálfvirkt greint)",
     "built_in_tag": "innbyggður",
@@ -378,6 +380,8 @@
     "poor": "⚠ Léleg samsvörun"
   },
   "lbl": {
+    "envelope_position_tip": "Staðsetning á skráðum ferli kerfisins sem samsvarar, {pct}%. Mælt með því að stilla þessa lotu saman við prófílinn í stað þess að telja tíma, þannig að hún helst rétt þegar keyrsla er lengri eða styttri en venjulega. Hún uppfærist á meðan tækið er kyrrt og getur því dregist aftur úr í virkum áfanga.",
+    "envelope_position": "ferill {pct}%",
     "aria_playground_chart3": "Gagnvirkt aflrit fyrir lotuna: haltu bendlinum yfir til að lesa tíma/afl, skrunaðu eða þysjaðu með tveimur fingrum, dragðu til að hliðra",
     "device_unresolved": "Ótiltækt tæki ({id})",
     "drag_to_resize": "Dragðu til að breyta stærð",

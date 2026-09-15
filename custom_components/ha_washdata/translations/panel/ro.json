@@ -1,5 +1,7 @@
 {
   "badge": {
+    "quiet_tail_tip": "Spre final, acest program rămâne în liniște aproximativ {mins} min, apoi consumă aproximativ {watts} W timp de {secs} s înainte de a se încheia. Observat în {seen} din {measured} cicluri măsurate: aparatul nu face asta la fiecare utilizare.",
+    "quiet_tail": "liniște finală ~{mins} min",
     "artifact_tip": "{n} anomalii detectate (de exemplu, ușa deschisă la jumătatea ciclului) – deschideți pentru a le vedea pe grafic",
     "auto": "(detectat automat)",
     "built_in_tag": "integrat",
@@ -330,6 +332,8 @@
     "poor": "⚠ Calitate slabă a profilului"
   },
   "lbl": {
+    "envelope_position_tip": "Poziția pe curba înregistrată a programului potrivit, {pct}%. Este măsurată prin alinierea acestui ciclu la profil în loc de numărarea timpului, așa că rămâne corectă atunci când un ciclu durează mai mult sau mai puțin decât de obicei. Se actualizează cât timp aparatul este în liniște, deci poate rămâne în urmă în timpul unei faze active.",
+    "envelope_position": "curbă {pct}%",
     "aria_playground_chart3": "Grafic interactiv al puterii ciclului: treci cu cursorul pentru a citi timpul/puterea, derulează sau folosește două degete pentru a mări, trage pentru a te deplasa",
     "device_unresolved": "Dispozitiv indisponibil ({id})",
     "drag_to_resize": "Trageți pentru redimensionare",

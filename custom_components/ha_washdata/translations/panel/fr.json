@@ -1,5 +1,7 @@
 {
   "badge": {
+    "quiet_tail_tip": "Vers la fin, ce programme reste silencieux pendant environ {mins} min, puis consomme environ {watts} W pendant {secs} s avant de se terminer. Observé sur {seen} des {measured} cycles mesurés : l'appareil ne le fait pas à chaque utilisation.",
+    "quiet_tail": "silence final ~{mins} min",
     "artifact_tip": "{n} anomalies détectées (par exemple, porte ouverte en cours de cycle) : ouvrez-les pour les voir sur le graphique",
     "auto": "(détecté automatiquement)",
     "built_in_tag": "intégré",
@@ -330,6 +332,8 @@
     "poor": "⚠ Qualité de profil médiocre"
   },
   "lbl": {
+    "envelope_position_tip": "Position sur la courbe enregistrée du programme correspondant, {pct} %. Elle est mesurée en alignant ce cycle sur le profil plutôt qu'en comptant le temps, elle reste donc juste lorsqu'un cycle est plus long ou plus court que d'habitude. Elle est actualisée lorsque l'appareil est silencieux et peut donc être en retard pendant une phase active.",
+    "envelope_position": "courbe {pct} %",
     "aria_playground_chart3": "Graphique interactif de puissance du cycle : survolez pour lire le temps/la puissance, faites défiler ou pincez pour zoomer, faites glisser pour vous déplacer",
     "device_unresolved": "Appareil indisponible ({id})",
     "drag_to_resize": "Faites glisser pour redimensionner",

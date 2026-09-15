@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Loppua kohti tämä ohjelma on hiljaa noin {mins} min, minkä jälkeen se ottaa noin {watts} W {secs} s ajan ennen valmistumista. Havaittu {seen}/{measured} mitatussa syklissä: laite ei tee näin joka ajolla.",
+    "quiet_tail": "~{mins} min hiljainen loppu",
     "artifact_tip": "{n} poikkeavaa havaittu (esim. oven avautuminen kesken syklin) – avaa nähdäksesi ne kaaviossa",
     "auto": "(tunnistettu automaattisesti)",
     "built_in_tag": "sisäänrakennettu",
@@ -378,6 +380,8 @@
     "poor": "⚠ Heikko profiililaatu"
   },
   "lbl": {
+    "envelope_position_tip": "Sijainti täsmätyn ohjelman omalla tallennetulla käyrällä, {pct} %. Mitataan kohdistamalla tämä sykli profiiliin ajan laskemisen sijaan, joten se pysyy oikeana, vaikka ajo olisi tavallista pidempi tai lyhyempi. Se päivittyy laitteen ollessa hiljaa, joten se voi jäädä jälkeen aktiivisen vaiheen aikana.",
+    "envelope_position": "käyrä {pct} %",
     "aria_playground_chart3": "Interaktiivinen jakson tehokaavio: vie osoitin päälle lukeaksesi ajan/tehon, vieritä tai nipistä zoomataksesi, vedä panoroidaksesi",
     "device_unresolved": "Laite ei saatavilla ({id})",
     "drag_to_resize": "Vedä muuttaaksesi kokoa",

@@ -48,6 +48,8 @@
         }
     },
     "badge": {
+        "quiet_tail_tip": "接近结束时，该程序会静默约 {mins} 分钟，然后在结束前以约 {watts} W 运行约 {secs} 秒。在已测量的 {measured} 个周期中有 {seen} 个出现过：设备并非每次运行都会如此。",
+        "quiet_tail": "结尾静默约 {mins} 分钟",
         "artifact_tip": "检测到 {n} 个异常（例如，门在周期中打开）– 打开以在图表上查看",
         "auto": "（自动检测）",
         "built_in_tag": "内置",
@@ -378,6 +380,8 @@
         "poor": "⚠ 配置文件质量差"
     },
     "lbl": {
+        "envelope_position_tip": "在匹配程序自身记录曲线上的位置，{pct}%。它通过将本次周期与配置文件对齐来测量，而不是计算时间，因此运行比平时更长或更短时仍然准确。它在设备静默时刷新，因此在活跃阶段可能会滞后。",
+        "envelope_position": "曲线 {pct}%",
         "aria_playground_chart3": "交互式周期功率图：悬停查看时间/功率，滚动或双指缩放，拖动平移",
         "device_unresolved": "不可用的设备 ({id})",
         "drag_to_resize": "拖动以调整大小",

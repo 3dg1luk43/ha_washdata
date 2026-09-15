@@ -79,6 +79,7 @@ class DeviceInfo(TypedDict):
     total_duration_s: float | None
     current_power_w: float | None
     cycle_progress_pct: float | None
+    envelope_position: float | None
     suggestions_count: int
     suggestion_keys: list[str]
     feedback_count: int

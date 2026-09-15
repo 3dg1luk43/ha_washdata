@@ -1,5 +1,7 @@
 {
   "badge": {
+    "quiet_tail_tip": "Perto do fim, este programa fica em silêncio por cerca de {mins} min e depois consome cerca de {watts} W durante {secs} s antes de terminar. Observado em {seen} de {measured} ciclos medidos: o eletrodoméstico não faz isso em todas as execuções.",
+    "quiet_tail": "silêncio final ~{mins} min",
     "artifact_tip": "{n} anomalias detectadas (por exemplo, porta aberta no meio do ciclo) – abra para vê-las no gráfico",
     "auto": "(detectado automaticamente)",
     "built_in_tag": "integrado",
@@ -330,6 +332,8 @@
     "poor": "⚠ Qualidade de perfil fraca"
   },
   "lbl": {
+    "envelope_position_tip": "Posição na curva gravada do próprio programa correspondente, {pct}%. É medida alinhando este ciclo com o perfil em vez de contar o tempo, por isso continua certa quando um ciclo é mais longo ou mais curto que o normal. É atualizada enquanto o eletrodoméstico está em silêncio, então pode ficar atrasada durante uma fase ativa.",
+    "envelope_position": "curva {pct}%",
     "aria_playground_chart3": "Gráfico interativo de potência do ciclo: passe o cursor para ler tempo/potência, role ou use o gesto de pinça para ampliar, arraste para deslocar",
     "device_unresolved": "Dispositivo indisponível ({id})",
     "drag_to_resize": "Arraste para redimensionar",

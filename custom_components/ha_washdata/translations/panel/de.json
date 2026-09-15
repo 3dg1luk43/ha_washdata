@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Gegen Ende wird dieses Programm für etwa {mins} Min. still und zieht dann noch rund {watts} W für {secs} s, bevor es fertig ist. In {seen} von {measured} gemessenen Zyklen beobachtet: das Gerät macht das nicht bei jedem Durchlauf.",
+    "quiet_tail": "~{mins} Min. Ruhephase",
     "artifact_tip": "{n} Anomalien erkannt (z. B. Tür mitten im Zyklus geöffnet) – öffnen Sie sie, um sie in der Grafik anzuzeigen",
     "auto": "(automatisch erkannt)",
     "built_in_tag": "eingebaut",
@@ -378,6 +380,8 @@
     "poor": "⚠ Schlechte Übereinstimmungsqualität"
   },
   "lbl": {
+    "envelope_position_tip": "Position auf der aufgezeichneten Kurve des zugeordneten Programms, {pct} %. Ermittelt durch den Abgleich dieses Zyklus mit dem Profil statt durch Zählen der Zeit, daher stimmt sie auch, wenn ein Durchlauf länger oder kürzer als üblich ist. Sie wird aktualisiert, während das Gerät still ist, und kann deshalb in einer aktiven Phase hinterherhinken.",
+    "envelope_position": "Kurve {pct} %",
     "aria_playground_chart3": "Interaktives Leistungsdiagramm des Zyklus: zum Ablesen von Zeit/Leistung mit dem Zeiger darüberfahren, scrollen oder mit zwei Fingern zoomen, zum Verschieben ziehen",
     "device_unresolved": "Nicht verfügbares Gerät ({id})",
     "drag_to_resize": "Zum Ändern der Größe ziehen",

@@ -238,3 +238,61 @@ def test_duration_resolution_never_raises(store: ProfileStore) -> None:
     store._data["past_cycles"] = []
     for name in ("Huge", "Junk", "Inf"):
         assert store.resolve_profile_duration(name) is None
+
+
+def test_an_unmeasurable_trace_is_not_counted_as_a_cycle_that_did_not_do_it(
+    store: ProfileStore,
+) -> None:
+    """`consistency` must describe the appliance, not the quality of the trace.
+
+    A stored cycle can be nothing but 0.0 W keepalives (register item 260: 39.8%
+    of stored cycles contain injected keepalives and every one is exactly 0.0 W),
+    and such a trace can never yield an event no matter what the appliance did.
+    Counting it in the denominator would report a program as less consistent for
+    a reason that is not a property of the program. Found by the PR #420 review.
+    """
+    dead = {
+        "id": "dead",
+        "profile_name": "Eco",
+        "status": "completed",
+        "duration": 600.0,
+        "power_data": [[float(i * 30), 0.0] for i in range(20)],
+    }
+    flat = {
+        "id": "flat",
+        "profile_name": "Eco",
+        "status": "completed",
+        "duration": 0.0,
+        # Every sample at the same offset: zero span, so no position is definable.
+        "power_data": [[0.0, 100.0] for _ in range(20)],
+    }
+    store._data["past_cycles"] = [_cycle(f"c{i}") for i in range(3)] + [dead, flat]
+
+    sig = store.compute_profile_terminal_signature("Eco")
+
+    assert sig is not None
+    assert sig["measured"] == 3, "the two degenerate traces are not measurements"
+    assert sig["seen_in"] == 3
+    assert sig["consistency"] == 1.0
+
+
+def test_a_cycle_that_could_be_measured_and_showed_nothing_stays_counted(
+    store: ProfileStore,
+) -> None:
+    """The other half of the same rule, so the fix cannot be over-applied.
+
+    A full trace whose appliance simply did not emit the terminal event is the
+    case `consistency` exists to report, and it must stay in the denominator.
+    """
+    store._data["past_cycles"] = [
+        _cycle("c1"),
+        _cycle("c2"),
+        _cycle("c3"),
+        _cycle("c4", event_w=None),
+    ]
+
+    sig = store.compute_profile_terminal_signature("Eco")
+
+    assert sig is not None
+    assert sig["measured"] == 4 and sig["seen_in"] == 3
+    assert sig["consistency"] == pytest.approx(0.75)

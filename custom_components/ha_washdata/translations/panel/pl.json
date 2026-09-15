@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Pod koniec ten program cichnie na około {mins} min, a następnie tuż przed zakończeniem pobiera około {watts} W przez {secs} s. Zaobserwowano w {seen} z {measured} zmierzonych cykli: urządzenie nie robi tego przy każdym uruchomieniu.",
+    "quiet_tail": "cicha końcówka ~{mins} min",
     "artifact_tip": "Wykryto {n} anomalii (np. drzwi otwarte w połowie cyklu) – otwórz, aby zobaczyć je na wykresie",
     "auto": "(automatycznie wykryty)",
     "built_in_tag": "wbudowany",
@@ -378,6 +380,8 @@
     "poor": "⚠ Słaba jakość profilu"
   },
   "lbl": {
+    "envelope_position_tip": "Pozycja na własnej zarejestrowanej krzywej dopasowanego programu, {pct}%. Wyznaczana przez dopasowanie kształtu tego cyklu do profilu, a nie przez odliczanie czasu, więc pozostaje poprawna, gdy przebieg jest dłuższy lub krótszy niż zwykle. Odświeża się, gdy urządzenie jest ciche, więc podczas aktywnej fazy może być opóźniona.",
+    "envelope_position": "krzywa {pct}%",
     "aria_playground_chart3": "Interaktywny wykres mocy cyklu: najedź, aby odczytać czas/moc, przewiń lub użyj dwóch palców, aby powiększyć, przeciągnij, aby przesunąć",
     "device_unresolved": "Niedostępne urządzenie ({id})",
     "drag_to_resize": "Przeciągnij, aby zmienić rozmiar",

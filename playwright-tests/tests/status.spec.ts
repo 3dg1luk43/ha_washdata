@@ -181,3 +181,42 @@ test('status tab renders without horizontal overflow on mobile viewport', async 
   });
   expect(overflow).toBeLessThanOrEqual(1); // Allow 1px rounding
 });
+
+// ─── Envelope position (item 269) ────────────────────────────────────────────
+//
+// The one "how far through" figure that is not derived from elapsed time. The
+// manager computed it, used it for the Smart Termination release and threw it
+// away; it now reaches the progress row beside the time-based percentage, which
+// is exactly where the two disagreeing is informative rather than confusing.
+
+test('the matched-curve position renders beside the time-based progress', async ({ page }) => {
+  const dev = JSON.parse(JSON.stringify(deviceRunning));
+  dev.devices[0].envelope_position = 0.87;
+  await bootPanel(page, { 'ha_washdata/get_devices': dev });
+
+  const row = page.locator('.wd-prog-row').first();
+  await expect(row).toBeVisible({ timeout: 8_000 });
+  await expect(row).toContainText('45.2%');
+  // Deliberately not the same number: 45% of the expected time, 87% of the way
+  // along the matched curve, is the overrun the profile alignment can see.
+  await expect(row).toContainText('curve 87%');
+  await expect(row.locator('span[title]', { hasText: 'curve 87%' }))
+    .toHaveAttribute('title', /refreshes while the appliance is quiet/);
+});
+
+test('no curve position is shown before an alignment has run', async ({ page }) => {
+  // Every cycle starts this way: the verification only runs below the stop
+  // threshold, so a fresh run has nothing measured yet and must show nothing
+  // rather than a placeholder 0%.
+  await bootPanel(page, { 'ha_washdata/get_devices': deviceRunning });
+  const row = page.locator('.wd-prog-row').first();
+  await expect(row).toBeVisible({ timeout: 8_000 });
+  await expect(row).not.toContainText('curve');
+});
+
+test('a zero curve position is rendered, not swallowed as falsy', async ({ page }) => {
+  const dev = JSON.parse(JSON.stringify(deviceRunning));
+  dev.devices[0].envelope_position = 0.0;
+  await bootPanel(page, { 'ha_washdata/get_devices': dev });
+  await expect(page.locator('.wd-prog-row').first()).toContainText('curve 0%', { timeout: 8_000 });
+});

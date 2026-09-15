@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Mod slutningen bliver dette program stille i omkring {mins} min og trækker derefter cirka {watts} W i {secs} s, før det er færdigt. Set i {seen} af {measured} målte cyklusser: apparatet gør det ikke ved hver kørsel.",
+    "quiet_tail": "~{mins} min stille slutfase",
     "artifact_tip": "{n} registrerede anomalier (f.eks. dør åbnet midt i cyklus) – åben for at se dem på grafen",
     "auto": "(auto-detekteret)",
     "built_in_tag": "indbygget",
@@ -378,6 +380,8 @@
     "poor": "⚠ Dårlig matchkvalitet"
   },
   "lbl": {
+    "envelope_position_tip": "Position på det matchede programs egen registrerede kurve, {pct} %. Måles ved at justere denne cyklus ind efter profilen i stedet for at tælle tid, så den holder stik, når en kørsel er længere eller kortere end normalt. Den opdateres, mens apparatet er stille, så den kan halte bagefter under en aktiv fase.",
+    "envelope_position": "kurve {pct} %",
     "aria_playground_chart3": "Interaktiv effektgraf for cyklussen: hold markøren over for at aflæse tid/effekt, rul eller knib for at zoome, træk for at panorere",
     "device_unresolved": "Utilgængelig enhed ({id})",
     "drag_to_resize": "Træk for at ændre størrelse",

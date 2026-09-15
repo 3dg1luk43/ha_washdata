@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Mot slutten blir dette programmet stille i omtrent {mins} min og trekker deretter rundt {watts} W i {secs} s før det er ferdig. Sett i {seen} av {measured} målte sykluser: apparatet gjør det ikke ved hver kjøring.",
+    "quiet_tail": "~{mins} min stille sluttfase",
     "artifact_tip": "{n} avvik oppdaget (f.eks. dør åpnet midt i syklusen) – åpne for å se dem på grafen",
     "auto": "(automatisk oppdaget)",
     "built_in_tag": "innebygd",
@@ -378,6 +380,8 @@
     "poor": "⚠ Dårlig profilkvalitet"
   },
   "lbl": {
+    "envelope_position_tip": "Posisjon på det matchede programmets egen registrerte kurve, {pct} %. Måles ved å justere denne syklusen mot profilen i stedet for å telle tid, så den stemmer også når en kjøring er lengre eller kortere enn vanlig. Den oppdateres mens apparatet er stille, og kan derfor henge etter i en aktiv fase.",
+    "envelope_position": "kurve {pct} %",
     "aria_playground_chart3": "Interaktiv effektgraf for syklusen: hold pekeren over for å lese av tid/effekt, rull eller knip for å zoome, dra for å panorere",
     "device_unresolved": "Utilgjengelig enhet ({id})",
     "drag_to_resize": "Dra for å endre størrelse",

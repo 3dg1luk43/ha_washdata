@@ -48,6 +48,8 @@
         }
     },
     "badge": {
+        "quiet_tail_tip": "Afër fundit ky program bie në qetësi për rreth {mins} min, pastaj tërheq rreth {watts} W për {secs} s përpara se të përfundojë. Vërejtur në {seen}/{measured} cikle të matura: pajisja nuk e bën këtë në çdo nisje.",
+        "quiet_tail": "~{mins} min qetësi në fund",
         "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) – hapeni për t'i parë ato në grafik",
         "auto": "(zbuluar automatikisht)",
         "built_in_tag": "i integruar",
@@ -378,6 +380,8 @@
         "poor": "⚠ Cilësi e keqe e profilit"
     },
     "lbl": {
+        "envelope_position_tip": "Pozicioni në kurbën e regjistruar të vetë programit të përputhur, {pct}%. Matet duke përputhur këtë cikël me profilin në vend që të numërohet koha, prandaj mbetet i saktë kur një nisje është më e gjatë ose më e shkurtër se zakonisht. Freskohet ndërsa pajisja është e qetë, prandaj gjatë një faze aktive mund të mbetet prapa.",
+        "envelope_position": "kurba {pct}%",
         "aria_playground_chart3": "Grafik interaktiv i fuqisë së ciklit: kaloni kursorin për të lexuar kohën/fuqinë, rrëshqitni ose zmadhoni me dy gishta, tërhiqni për të lëvizur",
         "device_unresolved": "Pajisje e padisponueshme ({id})",
         "drag_to_resize": "Tërhiqni për të ndryshuar madhësinë",

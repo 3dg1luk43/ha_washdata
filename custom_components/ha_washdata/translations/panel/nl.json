@@ -48,6 +48,8 @@
     }
   },
   "badge": {
+    "quiet_tail_tip": "Tegen het einde wordt dit programma ongeveer {mins} min stil en trekt daarna nog ongeveer {watts} W gedurende {secs} s voordat het klaar is. Gezien in {seen} van {measured} gemeten cycli: het apparaat doet dit niet bij elke draaibeurt.",
+    "quiet_tail": "~{mins} min stille fase",
     "artifact_tip": "{n} afwijkingen gedetecteerd (bijvoorbeeld de deur werd halverwege de cyclus geopend) – open om ze in de grafiek te zien",
     "auto": "(automatisch gedetecteerd)",
     "built_in_tag": "ingebouwd",
@@ -378,6 +380,8 @@
     "poor": "⚠ Slechte profielkwaliteit"
   },
   "lbl": {
+    "envelope_position_tip": "Positie op de eigen opgenomen curve van het overeenkomende programma, {pct}%. Bepaald door deze cyclus uit te lijnen op het profiel in plaats van tijd te tellen, dus hij blijft kloppen als een draaibeurt langer of korter duurt dan gebruikelijk. Hij wordt ververst terwijl het apparaat stil is en kan daardoor achterlopen tijdens een actieve fase.",
+    "envelope_position": "curve {pct}%",
     "aria_playground_chart3": "Interactieve vermogensgrafiek van de cyclus: beweeg de muis eroverheen om tijd/vermogen af te lezen, scroll of knijp om te zoomen, sleep om te verschuiven",
     "device_unresolved": "Niet-beschikbaar apparaat ({id})",
     "drag_to_resize": "Sleep om het formaat te wijzigen",

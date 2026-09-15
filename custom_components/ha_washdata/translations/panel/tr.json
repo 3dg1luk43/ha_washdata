@@ -48,6 +48,8 @@
         }
     },
     "badge": {
+        "quiet_tail_tip": "Sona yaklaşırken bu program yaklaşık {mins} dk sessizleşir, ardından bitmeden önce {secs} sn boyunca yaklaşık {watts} W çeker. Ölçülen {measured} döngüden {seen} tanesinde görüldü: cihaz bunu her çalışmada yapmaz.",
+        "quiet_tail": "~{mins} dk sessiz bitiş",
         "artifact_tip": "{n} anormallik algılandı (ör. döngünün ortasında kapının açılması) – bunları grafikte görmek için açın",
         "auto": "(otomatik algılandı)",
         "built_in_tag": "yerleşik",
@@ -378,6 +380,8 @@
         "poor": "⚠ Düşük profil kalitesi"
     },
     "lbl": {
+        "envelope_position_tip": "Eşleşen programın kendi kayıtlı eğrisi üzerindeki konum, %{pct}. Zaman saymak yerine bu döngü profile hizalanarak ölçülür, böylece çalışma her zamankinden uzun ya da kısa olduğunda da doğru kalır. Cihaz sessizken yenilenir, bu yüzden etkin bir aşama sırasında geride kalabilir.",
+        "envelope_position": "eğri %{pct}",
         "aria_playground_chart3": "Etkileşimli döngü güç grafiği: zamanı/gücü okumak için üzerine gelin, yakınlaştırmak için kaydırın veya iki parmak kullanın, kaydırmak için sürükleyin",
         "device_unresolved": "Kullanılamayan cihaz ({id})",
         "drag_to_resize": "Yeniden boyutlandırmak için sürükleyin",

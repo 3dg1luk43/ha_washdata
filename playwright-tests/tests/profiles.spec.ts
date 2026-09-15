@@ -224,3 +224,60 @@ test('no unmatchable badge when the backend reports none', async ({ page }) => {
   await expect(page.locator('.wd-profile-card').first()).toBeVisible({ timeout: 5_000 });
   await expect(page.locator('.wd-badge', { hasText: "can't be matched" })).toHaveCount(0);
 });
+
+// ── Terminal signature: how a program ends (item 269) ────────────────────────
+//
+// `profile_terminal` measures the quiet drying phase and the pump-out that
+// usually follows it, per program, from that program's own cycles. It shipped
+// over the WS for a commit before anything rendered it, and the earlier bug was
+// the reverse - the backend computed {} for every device and no test noticed -
+// so these assert the wiring, not the statistic.
+
+test('a measured quiet tail shows on the program that has one', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', {
+    ...profilesData,
+    profile_terminal: {
+      'Cotton 40°C': {
+        quiet_before_s: 934, event_seconds: 60, event_watts: 33.2,
+        event_watts_frac: 0.013, position_frac: 0.93, seen_in: 6, measured: 15,
+        consistency: 0.4,
+      },
+    },
+  });
+  await clickTab(page, 'profiles');
+
+  const withTail = page.locator('.wd-profile-card').filter({ hasText: 'Cotton 40°C' });
+  const badge = withTail.locator('.wd-badge', { hasText: 'quiet tail' });
+  await expect(badge).toBeVisible({ timeout: 5_000 });
+  await expect(badge).toHaveText(/~16m quiet tail/);
+  // 6 of 15 is the real measured frequency: the badge must not imply every run
+  // does this, so the count is stated rather than rounded away.
+  await expect(badge).toHaveAttribute('title', /Seen in 6 of 15 measured cycles/);
+  await expect(badge).toHaveAttribute('title', /33 W for 60 s/);
+
+  // Scoped to the program it was measured on.
+  const other = page.locator('.wd-profile-card').filter({ hasText: 'Eco 60°C' });
+  await expect(other.locator('.wd-badge', { hasText: 'quiet tail' })).toHaveCount(0);
+});
+
+test('a one-off terminal event is not reported as a program trait', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', {
+    ...profilesData,
+    profile_terminal: {
+      'Cotton 40°C': {
+        quiet_before_s: 934, event_seconds: 60, event_watts: 33.2,
+        event_watts_frac: 0.013, position_frac: 0.93, seen_in: 1, measured: 12,
+        consistency: 0.083,
+      },
+    },
+  });
+  await clickTab(page, 'profiles');
+  await expect(page.locator('.wd-profile-card').first()).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('.wd-badge', { hasText: 'quiet tail' })).toHaveCount(0);
+});
+
+test('no quiet-tail badge when the backend measured none', async ({ page }) => {
+  await clickTab(page, 'profiles');
+  await expect(page.locator('.wd-profile-card').first()).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('.wd-badge', { hasText: 'quiet tail' })).toHaveCount(0);
+});

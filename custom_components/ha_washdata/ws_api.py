@@ -1393,6 +1393,12 @@ def ws_get_devices(
                 if progress is not None:
                     info["cycle_progress_pct"] = round(float(progress), 1)
 
+                # Where the run maps onto the matched profile's own curve (item 269).
+                # Independent of elapsed time, so it stays meaningful when a cycle
+                # over- or under-runs; refreshed only during low-power phases, which
+                # the panel's tooltip says.
+                info["envelope_position"] = getattr(manager, "envelope_position", None)
+
                 store = getattr(manager, "profile_store", None)
                 if store is not None:
                     try:
