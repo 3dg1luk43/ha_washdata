@@ -3440,16 +3440,30 @@ class ProfileStore:
             # it means anything, and until now this state was invisible (a debug log in
             # the snapshot builder). See :meth:`unmatchable_profiles`.
             unmatchable = self.unmatchable_profiles() or {}
-            for name in unmatchable:
-                advisories.append({
-                    "profile": name, "severity": "warning", "code": "unmatchable",
-                    "message": (
+            for name, reason in unmatchable.items():
+                # Two reasons, two different things to do about it. Telling a user
+                # whose profile HAS a cycle to go and record one sends them after a
+                # problem they do not have.
+                if reason == "no usable duration":
+                    message = (
+                        f"'{name}' can never be matched: it has a cycle with power "
+                        "data but no usable duration, so WashData has no length to "
+                        "size a match against. Re-record this program, or set its "
+                        "expected duration, to bring it back into matching."
+                    )
+                    message_key = "msg.advisory_unmatchable_no_duration"
+                else:
+                    message = (
                         f"'{name}' can never be matched: it has no cycle with power "
                         "data behind it, so WashData has nothing to compare a running "
                         "cycle against. Label a cycle of this program (or record one) "
                         "to bring it back into matching."
-                    ),
-                    "message_key": "msg.advisory_unmatchable",
+                    )
+                    message_key = "msg.advisory_unmatchable"
+                advisories.append({
+                    "profile": name, "severity": "warning", "code": "unmatchable",
+                    "message": message,
+                    "message_key": message_key,
                     "message_params": {"name": name},
                 })
 

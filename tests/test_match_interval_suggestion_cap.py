@@ -41,6 +41,7 @@ from custom_components.ha_washdata.const import (
     DEFAULT_MATCH_PERSISTENCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
     MATCH_INTERVAL_SUGGESTION_DECISION_FRAC,
+    MATCH_INTERVAL_SUGGESTION_MIN_S,
 )
 from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
 
@@ -169,7 +170,27 @@ def test_invalid_persistence_falls_back_to_the_default(bad: Any) -> None:
 def test_very_short_profile_still_respects_the_10s_floor() -> None:
     """A 61 s program must not drive the matcher into a per-second poll."""
     sug = _match_suggestion(60.0, {"Rinse": {"avg_duration": 61.0}})
-    assert sug["value"] == 10
+    assert sug["value"] == MATCH_INTERVAL_SUGGESTION_MIN_S
+
+
+def test_the_floor_says_it_broke_the_budget_rule() -> None:
+    """When the floor wins, the budget rule does not hold and must not be claimed.
+
+    61 s at persistence 3 caps to 3 s, the floor lifts it back to 10 s, and three
+    consecutive matches then take 30 s - about half the program, far past the 15%
+    the capped wording promises. The reason is shown beside the value the user is
+    asked to accept, so it says the minimum applied instead.
+    """
+    sug = _match_suggestion(60.0, {"Rinse": {"avg_duration": 61.0}})
+    budget = 61.0 * MATCH_INTERVAL_SUGGESTION_DECISION_FRAC
+
+    assert sug["value"] * DEFAULT_MATCH_PERSISTENCE > budget  # the rule is broken
+    assert sug["reason_key"] == "suggestion.reason.match_interval_floored"
+    assert set(sug["reason_params"]) == {
+        "median", "shortest", "persistence", "pct", "cap", "minimum", "budget",
+    }
+    assert all(isinstance(v, str) for v in sug["reason_params"].values())
+    assert "minimum" in sug["reason"]
 
 
 def test_capped_reason_params_cover_every_placeholder() -> None:

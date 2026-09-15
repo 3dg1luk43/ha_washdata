@@ -1,6 +1,6 @@
 # WashData - AI development instructions
 
-**All project guidance lives in [`CLAUDE.md`](../CLAUDE.md) at the repository root.** Read that file
+**Start with [`CLAUDE.md`](../CLAUDE.md) at the repository root.** Read that file
 first: it covers the architecture, the build and test commands, the generated files that must be
 regenerated rather than hand-edited, and the hard rules (NumPy-only runtime, no machine translation,
 timezone-aware datetimes, the three cycle lists).
