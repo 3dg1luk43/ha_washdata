@@ -1352,7 +1352,7 @@
       "label": "Aktivēt HA notikumus paziņojumiem"
     },
     "notify_icon": {
-      "doc": "Izvēles mdi ikona paziņojumam (piem., mdi:washing-machine). Platformas noklusējuma iestatījumam atstājiet tukšu.",
+      "doc": "Maza ikona, kas tiek rādīta paziņojumā (piem., mdi:washing-machine). Android to zīmē statusa joslā; iOS to rāda lietotnes ikonas vietā, un tam ir nepieciešama pavadošā lietotne 2026.8 vai jaunāka. Atstājiet tukšu, lai izmantotu platformas noklusējuma ikonu.",
       "label": "Paziņojuma ikona"
     },
     "notify_live_chronometer": {
@@ -1599,8 +1599,8 @@
       "doc": "Tikai Android. Padarīt tiešraides progresa paziņojumu pastāvīgu (lipīgu), lai pieskāriens tam neatceltu notiekošo pavedienu. Izslēgts saglabā noklusēto uzvedību, kad pieskāriens paziņojumu noraida."
     },
     "notify_live_click_action": {
-      "label": "Tiešraides paziņojuma pieskāriena mērķis",
-      "doc": "Tikai Android. Kur atveras tiešraides progresa paziņojuma pieskāriens (piemēram, /lovelace/laundry vai pilns URL), nevis lietotnes sākumlapa. Atstājiet tukšu noklusējumam."
+      "label": "Paziņojuma pieskāriena mērķis",
+      "doc": "Kur atveras pieskāriens šīs ierīces paziņojumam, gan Android, gan iOS. Tukšs atver WashData paneli ar šo ierīci. Ievadiet informācijas paneļa ceļu (piem., /lovelace/laundry) vai pilnu URL, lai novirzītu citur, vai “none”, lai pieskārienam nebūtu nekāda mērķa."
     },
     "door_opens_at_end": {
       "label": "Durvis automātiski atveras beigās",

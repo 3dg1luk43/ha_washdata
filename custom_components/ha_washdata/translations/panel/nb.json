@@ -1384,7 +1384,7 @@
       "label": "Aktiver HA-hendelser for varsler"
     },
     "notify_icon": {
-      "doc": "Valgfritt mdi-ikon for varselet (f.eks. mdi:washing-machine). La stå tomt for standard plattform.",
+      "doc": "Det lille ikonet som vises på varselet (f.eks. mdi:washing-machine). Android tegner det i statuslinjen; iOS viser det i stedet for appikonet og krever companion-appen 2026.8 eller nyere. La stå tomt for plattformens standard.",
       "label": "Varselikon"
     },
     "notify_live_chronometer": {
@@ -1631,8 +1631,8 @@
       "doc": "Kun Android. Gjør live-fremdriftsvarselet vedvarende (sticky) slik at et trykk ikke avviser det. Av: standardadferd der et trykk avviser varselet."
     },
     "notify_live_click_action": {
-      "label": "Trykkdestinasjon for live-varsel",
-      "doc": "Kun Android. Hvor et trykk på live-fremdriftsvarselet åpner (f.eks. /lovelace/laundry eller en full URL) i stedet for appens startside. La stå tomt for standard."
+      "label": "Trykkdestinasjon for varsel",
+      "doc": "Hvor et trykk på et varsel fra dette apparatet åpner, på Android og iOS. Tomt åpner WashData-panelet på dette apparatet. Angi en dashbord-sti (f.eks. /lovelace/laundry) eller en full URL for å sende det et annet sted, eller «none» for ingen trykkdestinasjon i det hele tatt."
     },
     "door_opens_at_end": {
       "label": "Dør åpnes automatisk ved avslutning",

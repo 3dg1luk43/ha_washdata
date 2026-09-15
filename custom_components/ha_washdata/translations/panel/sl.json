@@ -1352,7 +1352,7 @@
       "label": "Sproži HA dogodke za obvestila"
     },
     "notify_icon": {
-      "doc": "Izbirna ikona mdi za obvestilo (npr. mdi:washing-machine). Pustite prazno za privzeto platformo.",
+      "doc": "Majhna ikona, prikazana v obvestilu (npr. mdi:washing-machine). Android jo izriše v vrstici stanja; iOS jo prikaže namesto ikone aplikacije in zahteva mobilno aplikacijo Home Assistant (companion app) 2026.8 ali novejšo. Pustite prazno za privzeto ikono platforme.",
       "label": "Ikona obvestila"
     },
     "notify_live_chronometer": {
@@ -1599,8 +1599,8 @@
       "doc": "Samo Android. Živo obvestilo o napredku nastavite kot trajno (pritrjeno), da ga dotik ne zavrže. Izklopljeno ohranja privzeto vedenje, ko dotik zavrže obvestilo."
     },
     "notify_live_click_action": {
-      "label": "Cilj dotika na živo obvestilo",
-      "doc": "Samo Android. Kam dotik na živo obvestilo o napredku odpre (npr. /lovelace/laundry ali celoten URL) namesto vstopne strani aplikacije. Pustite prazno za privzeto."
+      "label": "Cilj dotika na obvestilo",
+      "doc": "Kam vodi dotik obvestila te naprave, v sistemih Android in iOS. Prazno polje odpre ploščo WashData na tej napravi. Vnesite pot nadzorne plošče (npr. /lovelace/laundry) ali celoten URL, če naj vodi drugam, ali „none“, če dotik ne sme odpreti ničesar."
     },
     "door_opens_at_end": {
       "label": "Vrata se ob koncu samodejno odprejo",

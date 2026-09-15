@@ -1372,7 +1372,7 @@
             "label": "为通知触发 HA 事件"
         },
         "notify_icon": {
-            "doc": "通知的可选 mdi 图标（例如 mdi:washing-machine）。将平台默认值留空。",
+            "doc": "通知上显示的小图标（例如 mdi:washing-machine）。Android 会将其绘制在状态栏中；iOS 则用它代替应用图标，需要配套应用 2026.8 或更高版本。留空则使用平台默认值。",
             "label": "通知图标"
         },
         "notify_live_chronometer": {
@@ -1619,8 +1619,8 @@
             "doc": "仅限 Android。将实时进度通知设置为固定（常驻），点击时不会关闭正在进行的通知线程。关闭则恢复默认行为，点击后通知消失。"
         },
         "notify_live_click_action": {
-            "label": "实时通知点击目标",
-            "doc": "仅限 Android。点击实时进度通知时打开的位置（例如 /lovelace/laundry 或完整 URL），而非应用默认首页。留空使用默认值。"
+            "label": "通知点击目标",
+            "doc": "点击此家电的通知时打开的位置，在 Android 和 iOS 上均适用。留空则打开显示此家电的 WashData 面板。若要跳转到其他位置，请输入仪表板路径（例如 /lovelace/laundry）或完整 URL；若不需要任何点击目标，请输入“none”。"
         },
         "door_opens_at_end": {
             "label": "结束时自动开门",

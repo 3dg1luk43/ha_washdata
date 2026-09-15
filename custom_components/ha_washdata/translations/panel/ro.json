@@ -1304,7 +1304,7 @@
       "label": "Declanșați Evenimente HA pentru Notificări"
     },
     "notify_icon": {
-      "doc": "Pictogramă mdi opțională pentru notificare (de exemplu, mdi:washing-machine). Lăsați necompletat pentru valoarea prestabilită a platformei.",
+      "doc": "Pictograma mică afișată pe notificare (de exemplu, mdi:washing-machine). Android o desenează în bara de stare; iOS o afișează în locul pictogramei aplicației și necesită aplicația însoțitoare 2026.8 sau mai nouă. Lăsați necompletat pentru valoarea prestabilită a platformei.",
       "label": "Pictogramă Notificare"
     },
     "notify_live_chronometer": {
@@ -1551,8 +1551,8 @@
       "doc": "Numai Android. Faceți notificarea de progres în timp real persistentă (fixată) astfel încât atingerea ei să nu o respingă. Dezactivat păstrează comportamentul implicit în care o atingere o respinge."
     },
     "notify_live_click_action": {
-      "label": "Destinație la atingerea notificării în timp real",
-      "doc": "Numai Android. Unde deschide o atingere pe notificarea de progres în timp real (de ex. /lovelace/laundry, sau un URL complet) în loc de pagina principală a aplicației. Lăsați necompletat pentru valoarea implicită."
+      "label": "Destinație la atingerea notificării",
+      "doc": "Unde se deschide o atingere pe o notificare de la acest aparat, pe Android și pe iOS. Necompletat deschide panoul WashData pentru acest aparat. Introduceți calea unui tablou de bord (de ex. /lovelace/laundry) sau un URL complet pentru a deschide altceva, sau „none” pentru nicio destinație la atingere."
     },
     "door_opens_at_end": {
       "label": "Ușa se deschide automat la final",

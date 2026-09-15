@@ -180,7 +180,7 @@ Note: deprecated 0.4.5 drain-spike keys (`delay_drain_*`) are stripped during co
 | CONF key | String value | Default | Panel-settable | Controls |
 |---|---|---|---|---|
 | `CONF_NOTIFY_TITLE` | `notify_title` | `DEFAULT_NOTIFY_TITLE` = `"WashData: {device}"` | Yes | Notification title template. |
-| `CONF_NOTIFY_ICON` | `notify_icon` | — | Yes | Notification icon. |
+| `CONF_NOTIFY_ICON` | `notify_icon` | — | Yes | Notification icon. Sent as `notification_icon` to `mobile_app_*` targets (#435); Android status bar, iOS from companion app 2026.8.0. |
 | `CONF_NOTIFY_START_MESSAGE` | `notify_start_message` | `DEFAULT_NOTIFY_START_MESSAGE` = `"{device} started."` | Yes | Start message template. |
 | `CONF_NOTIFY_FINISH_MESSAGE` | `notify_finish_message` | `DEFAULT_NOTIFY_FINISH_MESSAGE` = `"{device} finished. Duration: {duration}m."` | Yes | Finish message template. |
 | `CONF_NOTIFY_PRE_COMPLETE_MESSAGE` | `notify_pre_complete_message` | `DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE` = `"{device}: Less than {minutes} minutes remaining."` | Yes | Pre-completion message. |

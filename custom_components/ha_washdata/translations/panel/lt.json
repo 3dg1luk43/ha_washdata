@@ -1352,7 +1352,7 @@
       "label": "Paleisti HA įvykius pranešimams"
     },
     "notify_icon": {
-      "doc": "Pasirenkama pranešimo mdi piktograma (pvz., mdi:washing-machine). Numatytajai platformai palikite tuščią.",
+      "doc": "Maža piktograma, rodoma pranešime (pvz., mdi:washing-machine). Android ją piešia būsenos juostoje; iOS ją rodo vietoj programos piktogramos ir tam reikia papildomos programos 2026.8 arba naujesnės versijos. Palikite tuščią, kad būtų naudojama numatytoji platformos piktograma.",
       "label": "Pranešimo piktograma"
     },
     "notify_live_chronometer": {
@@ -1599,8 +1599,8 @@
       "doc": "Tik Android. Padaryti tiesioginį pažangos pranešimą patvariu (klijuojamu), kad paspaudus nebus atsisakyta vykstančios gijos. Išjungus paliekama numatytoji elgsena, kai paspaudus pranešimas atsisakomas."
     },
     "notify_live_click_action": {
-      "label": "Tiesioginio pranešimo paspaudimo tikslas",
-      "doc": "Tik Android. Kur atidaroma paspaudus tiesioginės pažangos pranešimą (pvz., /lovelace/laundry arba visas URL), o ne programos pradžios puslapis. Palikite tuščią, kad naudotumėte numatytąjį."
+      "label": "Pranešimo paspaudimo tikslas",
+      "doc": "Kur atidaroma paspaudus šio prietaiso pranešimą, tiek Android, tiek iOS. Palikus tuščią, atidaromas WashData skydelis su šiuo prietaisu. Įveskite prietaisų skydelio kelią (pvz., /lovelace/laundry) arba visą URL, kad nukreiptumėte kitur, arba „none“, kad paspaudimas nieko neatidarytų."
     },
     "door_opens_at_end": {
       "label": "Durys automatiškai atsidaromos pabaigoje",

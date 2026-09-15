@@ -300,6 +300,7 @@ from . import analysis
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
 from .phase_segmenter import phase_matching_enabled
+from .frontend import PANEL_URL_PATH
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -417,6 +418,7 @@ _MOBILE_ONLY_EXTRA_KEYS = (
     "actions",
     "sticky",
     "clickAction",
+    "url",
     "subtitle",
     "content_state",
     "activity",
@@ -6625,6 +6627,16 @@ class WashDataManager:
         if self._notify_timeout_seconds > 0:
             variables["timeout"] = self._notify_timeout_seconds
             extra_vars = {**(extra_vars or {}), "timeout": self._notify_timeout_seconds}
+        tap_target = self._notification_tap_target()
+        if tap_target and message != _CLEAR_NOTIFICATION_MARKER:
+            # A dismiss marker is a command, not a card - it has nothing to tap.
+            variables["clickAction"] = tap_target
+            variables["url"] = tap_target
+            extra_vars = {
+                **(extra_vars or {}),
+                "clickAction": tap_target,
+                "url": tap_target,
+            }
 
         # Quiet hours (do-not-disturb): hold finish-type notifications that would
         # wake someone and deliver them at the end of the window. Live-progress ticks
@@ -6764,6 +6776,18 @@ class WashDataManager:
             # the base payload only.
             svc_data = dict(data)
             svc_data.update(self._mobile_service_extras(ev, notify_service))
+
+            # #435: the companion app reads the notification icon from
+            # `notification_icon`, NOT from `icon` - so the configured mdi icon was
+            # being sent under a key no companion platform looks at. `icon` stays in
+            # the base payload for the platforms that do use it (notify.html5 and
+            # friends); the mobile-only alias is added here. The same key now covers
+            # both platforms: Android draws it in the status bar, and iOS renders it
+            # as a communication-notification avatar in place of the app icon from
+            # companion app 2026.8.0 (home-assistant/iOS#4672). Older iOS builds
+            # ignore the key rather than failing, so there is nothing to gate on.
+            if icon and self._is_mobile_notify_service(notify_service):
+                svc_data["notification_icon"] = icon
 
             state = (
                 self.hass.states.get(notify_service)
@@ -7119,6 +7143,25 @@ class WashDataManager:
         )
         return service.startswith("mobile_app")
 
+    def _notification_tap_target(self) -> str:
+        """Where a tap on this device's notifications should land (#438).
+
+        Blank (the shipped default) resolves to this appliance's own panel deep link
+        ``/ha-washdata?device=<entry_id>``, so a notification about the dryer opens
+        the dryer instead of whichever appliance the panel happened to show last.
+        The entry id is used rather than the title because it survives a rename, and
+        it needs no URL escaping. A user-supplied value wins, and the literal
+        ``none`` turns the tap target off entirely.
+
+        Emitted as both ``clickAction`` (Android) and ``url`` (iOS), which are the
+        two companion-app keys for the same thing; both are mobile-only and are
+        filtered to ``mobile_app_*`` targets by ``_mobile_service_extras``.
+        """
+        configured = (self._notify_live_click_action or "").strip()
+        if configured:
+            return "" if configured.lower() == "none" else configured
+        return f"/{PANEL_URL_PATH}?device={self.entry_id}"
+
     @property
     def _timer_pause_action_id(self) -> str:
         """Stable mobile action ID for timer-pause Resume button, unique per device."""
@@ -7139,11 +7182,12 @@ class WashDataManager:
     def _apply_live_notification_prefs(self, extra_vars: dict[str, Any]) -> None:
         """Inject the user's live-notification data keys (#347, #417).
 
-        ``sticky`` keeps the live notification on screen when tapped; ``clickAction``
-        gives the notification a tap target (e.g. a dashboard path). Both are
-        mobile-only keys forwarded only to ``mobile_app_*`` live targets. Defaults
-        (sticky off, empty clickAction) add nothing, so the payload is byte-identical
-        to before unless the user opts in.
+        ``sticky`` keeps the live notification on screen when tapped. It is a
+        mobile-only key forwarded only to ``mobile_app_*`` live targets, and its
+        default (off) adds nothing, so the payload is byte-identical to before
+        unless the user opts in. The tap target itself is no longer applied here:
+        it belongs to every event type, so ``_dispatch_notification`` injects
+        ``_notification_tap_target()`` centrally instead (#438).
 
         ``silent`` (#417) marks a *refresh* of the running Live Activity as a
         non-alerting, lower-priority push, which is what stops iOS playing a sound and
@@ -7155,8 +7199,6 @@ class WashDataManager:
         """
         if self._notify_live_sticky:
             extra_vars["sticky"] = "true"
-        if self._notify_live_click_action:
-            extra_vars["clickAction"] = self._notify_live_click_action
         if self._notify_live_silent and self._live_activity_started:
             extra_vars["silent"] = True
             extra_vars["push"] = {"interruption-level": "passive"}
@@ -7168,8 +7210,18 @@ class WashDataManager:
         if self.detector.state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
             return
 
+        # #437: a match landing is not the same as an ETA existing.
+        # _update_remaining_only() is throttled to one estimate per 5 s, so the tick
+        # that accepts a match can find _matched_profile_duration set while
+        # _time_remaining is still None - and the progress branch below renders that
+        # `float(self._time_remaining or 0.0)` as remaining 0, i.e. elapsed == total
+        # (a full 100 % bar) and minutes_left == 1 ("less than 1 minute") at the very
+        # start of the cycle. Require a real estimate; the waiting latch keeps that
+        # tick silent rather than re-sending the waiting message.
         has_profile_match = bool(
-            self._matched_profile_duration and self._matched_profile_duration > 0
+            self._matched_profile_duration
+            and self._matched_profile_duration > 0
+            and self._time_remaining is not None
         )
         if has_profile_match:
             # A profile has been matched - reset the waiting latch so future
@@ -7674,9 +7726,21 @@ class WashDataManager:
             return
 
         now = dt_util.now()
+        # The 5 s throttle guards the heavy phase estimate, but the FIRST estimate
+        # after a match must not wait it out (#437): the match callback calls this
+        # and then _check_live_progress_notification(), which now stays in the
+        # waiting branch while _time_remaining is None. Bypassing once per match
+        # means the live notification switches to a real countdown immediately
+        # instead of holding the waiting message for another interval.
+        first_estimate_after_match = (
+            self._time_remaining is None
+            and bool(self._matched_profile_duration)
+            and self._matched_profile_duration > 0
+        )
         if (
             self._last_phase_estimate_time
             and (now - self._last_phase_estimate_time).total_seconds() < 5.0
+            and not first_estimate_after_match
         ):
             return
         self._last_phase_estimate_time = now

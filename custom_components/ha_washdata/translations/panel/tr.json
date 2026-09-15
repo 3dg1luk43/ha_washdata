@@ -1372,7 +1372,7 @@
             "label": "Bildirimler için HA Olayları Tetikle"
         },
         "notify_icon": {
-            "doc": "Bildirim için isteğe bağlı mdi simgesi (ör. mdi:washing-machine). Platform varsayılanı için boş bırakın.",
+            "doc": "Bildirimde gösterilen küçük simge (ör. mdi:washing-machine). Android bunu durum çubuğuna çizer; iOS ise uygulama simgesinin yerine gösterir ve 2026.8 veya daha yeni bir tamamlayıcı uygulama gerektirir. Platform varsayılanı için boş bırakın.",
             "label": "Bildirim Simgesi"
         },
         "notify_live_chronometer": {
@@ -1619,8 +1619,8 @@
             "doc": "Yalnızca Android. Canlı ilerleme bildirimini kalıcı (yapışkan) hale getirerek üzerine dokunulduğunda devam eden bildirimin kapatılmasını önleyin. Kapalı olduğunda dokunmanın bildirimi kapattığı varsayılan davranış korunur."
         },
         "notify_live_click_action": {
-            "label": "Canlı Bildirim Dokunma Hedefi",
-            "doc": "Yalnızca Android. Canlı ilerleme bildirimine dokunulduğunda açılan yer (örn. /lovelace/laundry veya tam URL), uygulama açılış sayfası yerine. Varsayılan için boş bırakın."
+            "label": "Bildirim Dokunma Hedefi",
+            "doc": "Bu cihazdan gelen bir bildirime dokunulduğunda nereye gidileceği, hem Android hem de iOS'ta. Boş bırakılırsa WashData paneli bu cihazda açılır. Başka bir yere yönlendirmek için bir pano yolu (ör. /lovelace/laundry) veya tam bir URL girin; hiç dokunma hedefi olmaması için \"none\" yazın."
         },
         "door_opens_at_end": {
             "label": "Döngü Sonunda Kapı Otomatik Açılır",

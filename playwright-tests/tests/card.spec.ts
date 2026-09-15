@@ -198,3 +198,46 @@ test('editor: exposes a layout-aware flat schema', async ({ page }) => {
   // Flat schema: no nested/expandable groups that would break the config shape.
   expect(ed.names).not.toContain('appearance');
 });
+
+// ── #438: "Open WashData" opens THIS appliance ────────────────────────────────
+// The button used to navigate to a bare /ha-washdata, so the panel landed on
+// whichever appliance was viewed last. It now carries the ?device= deep link
+// added in #428.
+
+async function clickOpenPanel(page: any) {
+  return page.evaluate(() => {
+    const sr = (window as any).__card.shadowRoot;
+    const seen: string[] = [];
+    const push = history.pushState.bind(history);
+    history.pushState = (a: any, b: any, url: any) => { seen.push(String(url)); return push(a, b, url); };
+    (sr.querySelector('.wd-act[data-btn="open_panel"]') as any).click();
+    history.pushState = push;
+    return seen;
+  });
+}
+
+test('detail: Open WashData deep-links to this card\'s config entry', async ({ page }) => {
+  const data = JSON.parse(JSON.stringify(RUN));
+  data.devices.d1 = { name: 'Washing Machine', config_entries: ['abc123'], primary_config_entry: 'abc123' };
+  await mount(page, { entity: 'sensor.wm_state', layout: 'detail', buttons: ['open_panel'] }, data);
+  expect(await clickOpenPanel(page)).toEqual(['/ha-washdata?device=abc123']);
+});
+
+test('detail: Open WashData falls back to the device name when no entry id is known', async ({ page }) => {
+  // Older/registry-incomplete hass payloads carry no config_entries at all; the
+  // panel resolves a name case- and accent-insensitively, so it still lands right.
+  const data = JSON.parse(JSON.stringify(RUN));
+  data.devices.d1 = { name: 'Waschmaschine Küche' };
+  await mount(page, { entity: 'sensor.wm_state', layout: 'detail', buttons: ['open_panel'] }, data);
+  expect(await clickOpenPanel(page)).toEqual(['/ha-washdata?device=Waschmaschine%20K%C3%BCche']);
+});
+
+test('detail: a foreign integration\'s entry id is never used as the token', async ({ page }) => {
+  // A card pointed at a template/third-party entity must not hand the panel an
+  // entry id belonging to another integration - that resolves to nothing.
+  const data = JSON.parse(JSON.stringify(RUN));
+  data.entities['sensor.wm_state'].platform = 'template';
+  data.devices.d1 = { name: 'Washing Machine', config_entries: ['other_entry'], primary_config_entry: 'other_entry' };
+  await mount(page, { entity: 'sensor.wm_state', layout: 'detail', buttons: ['open_panel'] }, data);
+  expect(await clickOpenPanel(page)).toEqual(['/ha-washdata?device=Washing%20Machine']);
+});

@@ -1384,7 +1384,7 @@
       "label": "Kveikja HA viðburði fyrir tilkynningar"
     },
     "notify_icon": {
-      "doc": "Valfrjálst mdi tákn fyrir tilkynninguna (t.d. mdi:washing-machine). Skildu eftir autt fyrir sjálfgefna pallinn.",
+      "doc": "Litla táknið sem birtist á tilkynningunni (t.d. mdi:washing-machine). Android birtir það í stöðustikunni; iOS sýnir það í stað táknmyndar forritsins og krefst fylgiforritsins 2026.8 eða nýrra. Skildu eftir autt fyrir sjálfgefið tákn kerfisins.",
       "label": "Tilkynningatákn"
     },
     "notify_live_chronometer": {
@@ -1631,8 +1631,8 @@
       "doc": "Eingöngu Android. Gerir lifandi framvindutilkynningu viðvarandi (sticky) þannig að snertingar lokar henni ekki. Slökkt: sjálfgefin hegðun þar sem snertingar lokar tilkynningu."
     },
     "notify_live_click_action": {
-      "label": "Snertimarkmið lifandi tilkynningar",
-      "doc": "Eingöngu Android. Hvert snertingar á lifandi framvindutilkynningu opnar (t.d. /lovelace/laundry eða fulla vefslóð) í stað sjálfgefinna ræsiglugga forritsins. Skildu eftir autt fyrir sjálfgefið."
+      "label": "Snertimarkmið tilkynningar",
+      "doc": "Hvert snerting á tilkynningu frá þessu tæki opnar, á Android og iOS. Autt opnar WashData pallborðið á þessu tæki. Sláðu inn slóð á mælaborð (t.d. /lovelace/laundry) eða fulla URL-slóð til að senda það annað, eða „none“ fyrir ekkert snertimarkmið."
     },
     "door_opens_at_end": {
       "label": "Hurð opnast sjálfkrafa í lok",

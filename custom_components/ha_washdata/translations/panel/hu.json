@@ -1344,7 +1344,7 @@
             "label": "HA események aktiválása értesítésekhez"
         },
         "notify_icon": {
-            "doc": "Opcionális mdi ikon az értesítéshez (pl. mdi:washing-machine). Hagyja üresen a platform alapértelmezett beállításához.",
+            "doc": "Az értesítésen megjelenő kis ikon (pl. mdi:washing-machine). Az Android az állapotsorban rajzolja ki; az iOS az alkalmazás ikonja helyett jeleníti meg, és ehhez a 2026.8 vagy újabb kísérőalkalmazás szükséges. Hagyja üresen a platform alapértelmezett beállításához.",
             "label": "Értesítés ikonja"
         },
         "notify_live_chronometer": {
@@ -1591,8 +1591,8 @@
             "doc": "Csak Android esetén. Az élő folyamatértesítést tartóssá teszi (ragadóssá), hogy rákoppintva ne zárja be a folyamatban lévő szálat. Kikapcsolt állapotban az alapértelmezett viselkedés érvényes, ahol a koppintás elveti az értesítést."
         },
         "notify_live_click_action": {
-            "label": "Élő értesítés koppintási célhelye",
-            "doc": "Csak Android esetén. Az alkalmazás kezdőlapja helyett hová nyílik meg az élő folyamatértesítésre való koppintás (pl. /lovelace/laundry, vagy egy teljes URL). Az alapértelmezetthez hagyja üresen."
+            "label": "Értesítés koppintási célhelye",
+            "doc": "Hová nyílik meg az ettől a készüléktől érkező értesítésre való koppintás, Androidon és iOS-en egyaránt. Üresen hagyva a WashData panel nyílik meg ezen a készüléken. Adjon meg egy irányítópult-útvonalat (pl. /lovelace/laundry) vagy egy teljes URL-t, ha máshová szeretné irányítani, illetve a \"none\" értéket, ha egyáltalán ne legyen koppintási célhely."
         },
         "door_opens_at_end": {
             "label": "Az ajtó automatikusan kinyílik a végén",

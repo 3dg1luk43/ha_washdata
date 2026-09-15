@@ -1384,7 +1384,7 @@
       "label": "Send HA-hændelser til notifikationer"
     },
     "notify_icon": {
-      "doc": "Valgfrit mdi-ikon for meddelelsen (f.eks. mdi:washing-machine). Lad stå tomt for platformens standard.",
+      "doc": "Det lille ikon, der vises på notifikationen (f.eks. mdi:washing-machine). Android tegner det i statuslinjen; iOS viser det i stedet for appens ikon og kræver companion-appen 2026.8 eller nyere. Lad stå tomt for platformens standard.",
       "label": "Notifikationsikon"
     },
     "notify_live_chronometer": {
@@ -1631,8 +1631,8 @@
       "doc": "Kun Android. Gør live-forløbsnotifikationen vedvarende (sticky), så et tryk ikke afviser den. Slukket: standardadfærd, hvor et tryk afviser notifikationen."
     },
     "notify_live_click_action": {
-      "label": "Trykdestination for live-notifikation",
-      "doc": "Kun Android. Hvor et tryk på live-forløbsnotifikationen åbner (f.eks. /lovelace/laundry eller en fuld URL) i stedet for app-startsiden. Lad stå blank for standard."
+      "label": "Trykdestination for notifikation",
+      "doc": "Hvor et tryk på en notifikation fra dette apparat åbner, på Android og iOS. Tomt åbner WashData-panelet på dette apparat. Angiv en dashboard-sti (f.eks. /lovelace/laundry) eller en fuld URL for at sende det et andet sted hen, eller \"none\" for slet ingen trykdestination."
     },
     "door_opens_at_end": {
       "label": "Dør åbner automatisk ved afslutning",

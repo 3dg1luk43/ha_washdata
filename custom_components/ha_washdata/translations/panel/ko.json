@@ -1372,7 +1372,7 @@
             "label": "알림용 HA 이벤트 실행"
         },
         "notify_icon": {
-            "doc": "알림을 위한 선택적 mdi 아이콘(예: mdi:washing-machine) 플랫폼 기본값은 비워 두세요.",
+            "doc": "알림에 표시되는 작은 아이콘(예: mdi:washing-machine). Android는 상태 표시줄에 표시하고, iOS는 앱 아이콘 대신 표시하며 컴패니언 앱 2026.8 이상이 필요합니다. 플랫폼 기본값을 사용하려면 비워 두세요.",
             "label": "알림 아이콘"
         },
         "notify_live_chronometer": {
@@ -1619,8 +1619,8 @@
             "doc": "Android 전용. 실시간 진행 알림을 고정(스티키)으로 만들어 탭해도 진행 중인 알림 스레드가 사라지지 않도록 합니다. 꺼져 있으면 탭 시 알림이 사라지는 기본 동작이 유지됩니다."
         },
         "notify_live_click_action": {
-            "label": "실시간 알림 탭 대상",
-            "doc": "Android 전용. 실시간 진행 알림을 탭했을 때 열리는 위치(예: /lovelace/laundry 또는 전체 URL)를 앱 기본 시작 페이지 대신 지정합니다. 기본값으로 두려면 비워 두세요."
+            "label": "알림 탭 대상",
+            "doc": "이 가전제품의 알림을 탭했을 때 열리는 위치로, Android와 iOS에 모두 적용됩니다. 비워 두면 이 가전제품이 열린 WashData 패널로 이동합니다. 다른 곳으로 보내려면 대시보드 경로(예: /lovelace/laundry)나 전체 URL을 입력하고, 탭 대상을 아예 두지 않으려면 'none'을 입력하세요."
         },
         "door_opens_at_end": {
             "label": "종료 시 자동으로 문 열림",
