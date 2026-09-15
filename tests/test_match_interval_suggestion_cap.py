@@ -220,10 +220,25 @@ def test_a_profile_added_mid_pass_does_not_abort_the_suggestions() -> None:
 
 @pytest.mark.parametrize(
     "bad",
-    # float("inf") is the one that raises OverflowError rather than ValueError:
-    # json parses a bare `Infinity` literal into it, so a hand-edited import can
-    # store one, and escaping here aborted every operational suggestion.
-    ["", None, "abc", 0, -2, float("inf"), float("-inf"), float("nan")],
+    # Two different escape routes, and the second was missed the first time.
+    # float("inf") raises OverflowError inside int(): json parses a bare `Infinity`
+    # literal into it, so a hand-edited import can store one.
+    # 10**400 does NOT - Python ints are arbitrary precision, so it survives int()
+    # intact and only raises when the cap division asks float() for the divisor,
+    # one line further on and outside the guard. Same literal, same file, same
+    # defect as the `avg_duration` case above; the guard just did not reach it.
+    [
+        "",
+        None,
+        "abc",
+        0,
+        -2,
+        float("inf"),
+        float("-inf"),
+        float("nan"),
+        10**400,
+        -(10**400),
+    ],
 )
 def test_invalid_persistence_falls_back_to_the_default(bad: Any) -> None:
     """A junk stored value must not divide by zero or invert the cap."""
