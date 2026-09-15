@@ -1384,7 +1384,7 @@
       "label": "Käynnistä HA-tapahtumat ilmoituksille"
     },
     "notify_icon": {
-      "doc": "Valinnainen mdi-kuvake ilmoitukselle (esim. mdi:washing-machine). Jätä tyhjäksi alustan oletuksena.",
+      "doc": "Ilmoituksessa näytettävä pieni kuvake (esim. mdi:washing-machine). Android piirtää sen tilapalkkiin; iOS näyttää sen sovelluksen kuvakkeen tilalla ja vaatii kumppanisovelluksen version 2026.8 tai uudemman. Jätä tyhjäksi alustan oletusta varten.",
       "label": "Ilmoituksen kuvake"
     },
     "notify_live_chronometer": {
@@ -1631,8 +1631,8 @@
       "doc": "Vain Android. Tee reaaliaikaisesta edistymisilmoituksesta pysyvä (sticky), jotta sen napauttaminen ei sulje käynnissä olevaa viestiketjua. Pois päältä säilyttää oletustoiminnan, jossa napautus sulkee ilmoituksen."
     },
     "notify_live_click_action": {
-      "label": "Reaaliaikailmoituksen napauttamiskohde",
-      "doc": "Vain Android. Mihin reaaliaikaisen edistymisilmoituksen napauttaminen avaa (esim. /lovelace/laundry tai koko URL) sovellusaloitussivun sijaan. Jätä tyhjäksi oletusmääränpäätä varten."
+      "label": "Ilmoituksen napauttamiskohde",
+      "doc": "Mihin tämän laitteen ilmoituksen napauttaminen vie, sekä Androidissa että iOS:ssä. Tyhjä avaa WashData-paneelin tälle laitteelle. Syötä koontinäytön polku (esim. /lovelace/laundry) tai koko URL ohjataksesi sen muualle, tai \"none\", jos napautuskohdetta ei haluta lainkaan."
     },
     "door_opens_at_end": {
       "label": "Ovi avautuu automaattisesti lopussa",

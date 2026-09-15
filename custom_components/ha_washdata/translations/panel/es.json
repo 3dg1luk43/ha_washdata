@@ -1336,7 +1336,7 @@
       "label": "Disparar eventos de HA para notificaciones"
     },
     "notify_icon": {
-      "doc": "Icono mdi opcional para la notificación (por ejemplo, mdi:washing-machine). Déjelo en blanco para la plataforma predeterminada.",
+      "doc": "El pequeño icono que se muestra en la notificación (por ejemplo, mdi:washing-machine). Android lo dibuja en la barra de estado; iOS lo muestra en lugar del icono de la aplicación y necesita la aplicación complementaria 2026.8 o posterior. Déjelo en blanco para el valor predeterminado de la plataforma.",
       "label": "Icono de notificación"
     },
     "notify_live_chronometer": {
@@ -1583,8 +1583,8 @@
       "doc": "Solo Android. Hace que la notificación de progreso en vivo sea persistente (fija), de modo que pulsarla no la cierre. Desactivado mantiene el comportamiento predeterminado en el que un toque la cierra."
     },
     "notify_live_click_action": {
-      "label": "Destino al pulsar la notificación en vivo",
-      "doc": "Solo Android. Destino que se abre al pulsar la notificación de progreso en vivo (por ejemplo, /lovelace/lavandería, o una URL completa), en lugar de la página de inicio de la aplicación. Dejar en blanco para el valor predeterminado."
+      "label": "Destino al pulsar la notificación",
+      "doc": "Destino que se abre al pulsar una notificación de este electrodoméstico, tanto en Android como en iOS. En blanco abre el panel de WashData en este electrodoméstico. Introduzca la ruta de un tablero (por ejemplo, /lovelace/laundry) o una URL completa para abrir otro destino, o «none» para que no se abra nada al pulsar."
     },
     "door_opens_at_end": {
       "label": "La puerta se abre automáticamente al final",

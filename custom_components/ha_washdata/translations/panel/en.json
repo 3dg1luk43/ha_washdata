@@ -1451,7 +1451,7 @@
       "label": "Fire HA Events for Notifications"
     },
     "notify_icon": {
-      "doc": "Optional mdi icon for the notification (e.g. mdi:washing-machine). Leave blank for the platform default.",
+      "doc": "The small icon shown on the notification (e.g. mdi:washing-machine). Android draws it in the status bar; iOS shows it in place of the app icon, and needs the companion app 2026.8 or newer. Leave blank for the platform default.",
       "label": "Notification Icon"
     },
     "notify_live_chronometer": {
@@ -1459,8 +1459,8 @@
       "label": "Use Live Chronometer"
     },
     "notify_live_click_action": {
-      "label": "Live Notification Tap Target",
-      "doc": "Android only. Where a tap on the live-progress notification opens (e.g. /lovelace/laundry, or a full URL) instead of the app landing page. Leave blank for the default."
+      "label": "Notification Tap Target",
+      "doc": "Where a tap on a notification from this appliance opens, on Android and iOS. Blank opens the WashData panel on this appliance. Enter a dashboard path (e.g. /lovelace/laundry) or a full URL to send it somewhere else, or \"none\" for no tap target at all."
     },
     "notify_live_interval_seconds": {
       "doc": "How often live-progress notifications are refreshed while a cycle runs.",

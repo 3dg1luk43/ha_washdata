@@ -1384,7 +1384,7 @@
       "label": "Käivita HA Sündmused Teavituste Jaoks"
     },
     "notify_icon": {
-      "doc": "Märguande valikuline mdi-ikoon (nt mdi:washing-machine). Platvormi vaikeseadeks jätke tühjaks.",
+      "doc": "Teavitusel kuvatav väike ikoon (nt mdi:washing-machine). Android joonistab selle olekuribale; iOS kuvab selle rakenduse ikooni asemel ja vajab kaasrakendust 2026.8 või uuemat. Platvormi vaikeseade jaoks jätke tühjaks.",
       "label": "Teavituse Ikoon"
     },
     "notify_live_chronometer": {
@@ -1631,8 +1631,8 @@
       "doc": "Ainult Android. Tee reaalajas edenemise teavitus püsivaks (kleepuvaks), nii et selle puudutamine ei sulge käimasolevat lõime. Väljas hoiab vaikekäitumist, kus puudutamine teavituse sulgeb."
     },
     "notify_live_click_action": {
-      "label": "Reaalajas teavituse puudutamise sihtkoht",
-      "doc": "Ainult Android. Kuhu reaalajas edenemise teavituse puudutamine avab (nt /lovelace/laundry või täielik URL) rakenduse avalehe asemel. Vaikimisi jaoks jätke tühjaks."
+      "label": "Teavituse puudutamise sihtkoht",
+      "doc": "Kuhu viib selle seadme teavituse puudutamine, nii Androidis kui ka iOS-is. Tühjaks jätmine avab selle seadme WashData paneeli. Mujale suunamiseks sisestage töölaua tee (nt /lovelace/laundry) või täielik URL, või \"none\", kui puudutamisel ei tohi midagi avaneda."
     },
     "door_opens_at_end": {
       "label": "Uks avaneb automaatselt lõpus",

@@ -1380,7 +1380,7 @@
       "label": "HA-Ereignisse für Benachrichtigungen auslösen"
     },
     "notify_icon": {
-      "doc": "Optionales MDI-Symbol für die Benachrichtigung (z. B. mdi:washing-machine). Für den Plattformstandard lassen Sie das Feld leer.",
+      "doc": "Das kleine Symbol, das auf der Benachrichtigung angezeigt wird (z. B. mdi:washing-machine). Android zeichnet es in der Statusleiste; iOS zeigt es anstelle des App-Symbols und benötigt dafür die Companion-App 2026.8 oder neuer. Für den Plattformstandard lassen Sie das Feld leer.",
       "label": "Benachrichtigungssymbol"
     },
     "notify_live_chronometer": {
@@ -1631,8 +1631,8 @@
       "doc": "Nur Android. Die Live-Fortschrittsbenachrichtigung dauerhaft (sticky) anzeigen, sodass sie beim Antippen nicht ausgeblendet wird. Ausgeschaltet: Standardverhalten, bei dem ein Antippen die Benachrichtigung schließt."
     },
     "notify_live_click_action": {
-      "label": "Ziel beim Antippen der Live-Benachrichtigung",
-      "doc": "Nur Android. Wohin das Antippen der Live-Fortschrittsbenachrichtigung führt (z. B. /lovelace/laundry oder eine vollständige URL), statt zur Standard-App-Startseite. Leer lassen für Standard."
+      "label": "Ziel beim Antippen der Benachrichtigung",
+      "doc": "Wohin das Antippen einer Benachrichtigung dieses Geräts führt, unter Android und iOS. Leer öffnet das WashData-Panel bei diesem Gerät. Geben Sie einen Dashboard-Pfad (z. B. /lovelace/laundry) oder eine vollständige URL ein, um woandershin zu führen, oder „none“ für gar kein Ziel beim Antippen."
     },
     "door_opens_at_end": {
       "label": "Tür öffnet sich am Ende automatisch",

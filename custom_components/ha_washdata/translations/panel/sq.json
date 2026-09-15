@@ -1348,7 +1348,7 @@
             "label": "Aktivizo ngjarje HA për njoftime"
         },
         "notify_icon": {
-            "doc": "Ikona opsionale mdi për njoftimin (p.sh. mdi:washing-machine). Lëreni bosh për parazgjedhjen e platformës.",
+            "doc": "Ikona e vogël që shfaqet në njoftim (p.sh. mdi:washing-machine). Android e vizaton në shiritin e statusit; iOS e shfaq në vend të ikonës së aplikacionit dhe kërkon aplikacionin shoqërues 2026.8 ose më të ri. Lëreni bosh për parazgjedhjen e platformës.",
             "label": "Ikona e njoftimit"
         },
         "notify_live_chronometer": {
@@ -1595,8 +1595,8 @@
             "doc": "Vetëm Android. Bëni njoftimin e progresit live të vazhdueshëm (sticky) kështu që trokitja mbi të nuk e humb fijen e vazhdueshme. Off ruan sjelljen e parazgjedhur ku trokitja e humb atë."
         },
         "notify_live_click_action": {
-            "label": "Destinacioni i trokitjes së njoftimit live",
-            "doc": "Vetëm Android. Ku hap trokitja mbi njoftimin e progresit live (p.sh. /lovelace/laundry ose një URL e plotë) në vend të faqes kryesore të aplikacionit. Lëreni bosh për parazgjedhjen."
+            "label": "Destinacioni i trokitjes së njoftimit",
+            "doc": "Ku të çojë trokitja mbi një njoftim nga kjo pajisje, në Android dhe iOS. E lënë bosh, hap panelin WashData te kjo pajisje. Shkruani shtegun e një paneli kontrolli (p.sh. /lovelace/laundry) ose një URL të plotë për ta dërguar diku tjetër, ose \"none\" që të mos ketë fare destinacion trokitjeje."
         },
         "door_opens_at_end": {
             "label": "Dera hapet automatikisht në fund",

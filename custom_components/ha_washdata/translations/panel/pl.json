@@ -1348,7 +1348,7 @@
       "label": "Wysyłaj Zdarzenia HA dla Powiadomień"
     },
     "notify_icon": {
-      "doc": "Opcjonalna ikona mdi dla powiadomienia (np. mdi:washing-machine). Pozostaw puste dla domyślnej platformy.",
+      "doc": "Mała ikona wyświetlana w powiadomieniu (np. mdi:washing-machine). Android rysuje ją na pasku stanu; iOS pokazuje ją zamiast ikony aplikacji i wymaga aplikacji mobilnej Home Assistant (companion app) w wersji 2026.8 lub nowszej. Pozostaw puste, aby użyć domyślnej ikony platformy.",
       "label": "Ikona Powiadomienia"
     },
     "notify_live_chronometer": {
@@ -1595,8 +1595,8 @@
       "doc": "Tylko Android. Ustaw powiadomienie o postępie na żywo jako trwałe (przypięte), aby dotknięcie nie odrzucało aktywnego wątku. Wyłączone zachowuje domyślne zachowanie, gdzie dotknięcie odrzuca powiadomienie."
     },
     "notify_live_click_action": {
-      "label": "Cel dotknięcia powiadomienia na żywo",
-      "doc": "Tylko Android. Gdzie dotknięcie powiadomienia o postępie na żywo otwiera (np. /lovelace/laundry lub pełny URL) zamiast strony startowej aplikacji. Pozostaw puste dla wartości domyślnej."
+      "label": "Cel dotknięcia powiadomienia",
+      "doc": "Gdzie prowadzi dotknięcie powiadomienia z tego urządzenia, w systemach Android i iOS. Puste pole otwiera panel WashData na tym urządzeniu. Wpisz ścieżkę pulpitu nawigacyjnego (np. /lovelace/laundry) lub pełny URL, aby otworzyć coś innego, albo „none”, aby dotknięcie nie otwierało niczego."
     },
     "door_opens_at_end": {
       "label": "Drzwi otwierają się automatycznie na końcu",

@@ -1336,7 +1336,7 @@
       "label": "Déclencher des événements HA pour les notifications"
     },
     "notify_icon": {
-      "doc": "Icône mdi facultative pour la notification (par exemple mdi:washing-machine). Laissez vide pour la valeur par défaut de la plateforme.",
+      "doc": "La petite icône affichée sur la notification (par exemple mdi:washing-machine). Android la dessine dans la barre d'état ; iOS l'affiche à la place de l'icône de l'application et nécessite l'application compagnon 2026.8 ou plus récente. Laissez vide pour la valeur par défaut de la plateforme.",
       "label": "Icône de notification"
     },
     "notify_live_chronometer": {
@@ -1583,8 +1583,8 @@
       "doc": "Android uniquement. Rend la notification de progression en direct persistante (épinglée) afin que la toucher ne la ferme pas. Désactivé conserve le comportement par défaut où un toucher la ferme."
     },
     "notify_live_click_action": {
-      "label": "Destination au toucher de la notification en direct",
-      "doc": "Android uniquement. Où s'ouvre un toucher sur la notification de progression en direct (par exemple /lovelace/laundry, ou une URL complète) au lieu de la page d'accueil de l'application. Laissez vide pour la valeur par défaut."
+      "label": "Destination au toucher de la notification",
+      "doc": "Où s'ouvre un toucher sur une notification de cet appareil, sur Android comme sur iOS. Vide ouvre le panneau WashData sur cet appareil. Saisissez un chemin de tableau de bord (par exemple /lovelace/laundry) ou une URL complète pour l'ouvrir ailleurs, ou « none » pour aucune destination au toucher."
     },
     "door_opens_at_end": {
       "label": "La porte s'ouvre automatiquement en fin de cycle",

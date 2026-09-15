@@ -1336,7 +1336,7 @@
       "label": "Disparar Eventos HA para Notificações"
     },
     "notify_icon": {
-      "doc": "Ícone mdi opcional para a notificação (por exemplo, mdi:washing-machine). Deixe em branco para o padrão da plataforma.",
+      "doc": "O pequeno ícone apresentado na notificação (por exemplo, mdi:washing-machine). O Android desenha-o na barra de estado; o iOS mostra-o em vez do ícone da aplicação e requer a aplicação complementar 2026.8 ou mais recente. Deixe em branco para a predefinição da plataforma.",
       "label": "Ícone da Notificação"
     },
     "notify_live_chronometer": {
@@ -1583,8 +1583,8 @@
       "doc": "Apenas Android. Torna a notificação de progresso em tempo real persistente (fixada) para que ao tocar nela não a dispense. Desativado mantém o comportamento padrão em que o toque a dispensa."
     },
     "notify_live_click_action": {
-      "label": "Destino ao Tocar na Notificação em Tempo Real",
-      "doc": "Apenas Android. Para onde abre o toque na notificação de progresso em tempo real (por exemplo, /lovelace/lavandaria, ou um URL completo) em vez da página inicial da aplicação. Deixe em branco para a predefinição."
+      "label": "Destino ao Tocar na Notificação",
+      "doc": "Para onde abre um toque numa notificação deste eletrodoméstico, no Android e no iOS. Em branco abre o painel WashData neste eletrodoméstico. Introduza o caminho de um painel (por exemplo, /lovelace/laundry) ou um URL completo para abrir outro destino, ou \"none\" para não abrir nada ao tocar."
     },
     "door_opens_at_end": {
       "label": "Porta Abre Automaticamente no Fim",

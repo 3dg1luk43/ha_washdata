@@ -1021,7 +1021,7 @@ class WashDataCard extends HTMLElement {
     const hass = this._hass;
     if (!hass) return;
     if (b === "open_panel") {
-      this._navigate("/" + "ha-washdata");
+      this._navigate("/" + "ha-washdata" + this._deepLinkQuery());
       return;
     }
     const roles = this._resolveRoles();
@@ -1043,6 +1043,34 @@ class WashDataCard extends HTMLElement {
   _moreInfo(entityId) {
     if (!entityId) return;
     this.dispatchEvent(new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true }));
+  }
+
+  // ── Panel deep link (#438) ─────────────────────────────────────────────────
+  // "Open WashData" used to land on whichever appliance the panel showed last, so
+  // the dryer's card opened the washer. Carry this card's own appliance as
+  // ?device=. The config entry id is preferred because it is the only token that
+  // survives a rename; the device name is the documented fallback and the panel
+  // resolves it case- and accent-insensitively. Returns "" when neither is
+  // knowable, which simply restores the old behaviour for that card.
+  _deepLinkQuery() {
+    const hass = this._hass;
+    const cfg = this._cfg || {};
+    const reg = (hass && hass.entities) || {};
+    const primary = cfg.entity;
+    const primaryReg = reg[primary];
+    const deviceId = cfg.device_id || (primaryReg && primaryReg.device_id) || null;
+    const dev = (deviceId && hass && hass.devices) ? hass.devices[deviceId] : null;
+    let token = "";
+    // Only read an entry id off a device we actually own: a card pointed at a
+    // template or third-party entity would otherwise hand the panel the wrong
+    // integration's entry id, which resolves to nothing.
+    if (dev && primaryReg && primaryReg.platform === DOMAIN) {
+      const entries = Array.isArray(dev.config_entries) ? dev.config_entries : [];
+      token = dev.primary_config_entry || (entries.length === 1 ? entries[0] : "");
+    }
+    if (!token && dev) token = dev.name_by_user || dev.name || "";
+    if (!token && primary) token = this._deviceNameFor(primary);
+    return token ? "?device=" + encodeURIComponent(token) : "";
   }
 
   _navigate(path) {

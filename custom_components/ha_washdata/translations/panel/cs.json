@@ -1348,7 +1348,7 @@
       "label": "Spustit HA události pro oznámení"
     },
     "notify_icon": {
-      "doc": "Volitelná ikona mdi pro oznámení (např. mdi:washing-machine). Nechte prázdné pro výchozí platformy.",
+      "doc": "Malá ikona zobrazená v oznámení (např. mdi:washing-machine). Android ji vykreslí ve stavovém řádku; iOS ji zobrazí místo ikony aplikace a vyžaduje mobilní aplikaci Home Assistant (companion app) 2026.8 nebo novější. Nechte prázdné pro výchozí ikonu platformy.",
       "label": "Ikona oznámení"
     },
     "notify_live_chronometer": {
@@ -1595,8 +1595,8 @@
       "doc": "Pouze Android. Živé oznámení průběhu nastavte jako trvalé (přilepené), aby jeho klepnutím nedošlo k zavření průběžného vlákna. Vypnuto zachovává výchozí chování, kdy klepnutí oznámení zavře."
     },
     "notify_live_click_action": {
-      "label": "Cíl klepnutí na živé oznámení",
-      "doc": "Pouze Android. Kam klepnutí na živé oznámení průběhu otevře (např. /lovelace/laundry nebo celá URL) namísto vstupní stránky aplikace. Ponechte prázdné pro výchozí nastavení."
+      "label": "Cíl klepnutí na oznámení",
+      "doc": "Kam vede klepnutí na oznámení z tohoto spotřebiče, v systémech Android i iOS. Prázdné pole otevře panel WashData na tomto spotřebiči. Zadejte cestu k nástěnce (např. /lovelace/laundry) nebo celou URL, pokud má vést jinam, případně „none“, pokud nemá klepnutí otevírat nic."
     },
     "door_opens_at_end": {
       "label": "Dveře se na konci automaticky otevřou",

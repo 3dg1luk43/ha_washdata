@@ -1336,7 +1336,7 @@
       "label": "Genera eventi HA per le notifiche"
     },
     "notify_icon": {
-      "doc": "Icona mdi opzionale per la notifica (es. mdi:washing-machine). Lascia vuoto per l'impostazione predefinita della piattaforma.",
+      "doc": "La piccola icona mostrata sulla notifica (es. mdi:washing-machine). Android la disegna nella barra di stato; iOS la mostra al posto dell'icona dell'app e richiede l'app complementare 2026.8 o successiva. Lascia vuoto per l'impostazione predefinita della piattaforma.",
       "label": "Icona notifica"
     },
     "notify_live_chronometer": {
@@ -1583,8 +1583,8 @@
       "doc": "Solo Android. Rende persistente (sticky) la notifica di avanzamento in tempo reale, in modo che toccandola non venga chiusa. Disattivato mantiene il comportamento predefinito in cui il tocco la chiude."
     },
     "notify_live_click_action": {
-      "label": "Destinazione tocco notifica live",
-      "doc": "Solo Android. Dove si apre un tocco sulla notifica di avanzamento in tempo reale (ad es. /lovelace/laundry o un URL completo) invece della pagina iniziale dell'app. Lascia vuoto per il valore predefinito."
+      "label": "Destinazione tocco notifica",
+      "doc": "Dove si apre un tocco su una notifica di questo elettrodomestico, su Android e iOS. Se lasciato vuoto, apre il pannello WashData su questo elettrodomestico. Inserisci il percorso di una dashboard (ad es. /lovelace/laundry) o un URL completo per aprire altro, oppure \"none\" per nessuna destinazione al tocco."
     },
     "door_opens_at_end": {
       "label": "Porta si apre automaticamente al termine",

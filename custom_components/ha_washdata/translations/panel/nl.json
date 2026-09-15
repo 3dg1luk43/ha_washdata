@@ -1384,7 +1384,7 @@
       "label": "HA-gebeurtenissen afvuren voor meldingen"
     },
     "notify_icon": {
-      "doc": "Optioneel mdi-pictogram voor de melding (bijvoorbeeld mdi:washing-machine). Laat dit leeg voor de platformstandaard.",
+      "doc": "Het kleine pictogram dat op de melding wordt getoond (bijvoorbeeld mdi:washing-machine). Android tekent het in de statusbalk; iOS toont het in plaats van het app-pictogram en heeft daarvoor de companion-app 2026.8 of nieuwer nodig. Laat dit leeg voor de platformstandaard.",
       "label": "Meldingspictogram"
     },
     "notify_live_chronometer": {
@@ -1631,8 +1631,8 @@
       "doc": "Alleen Android. Maak de live-voortgangsmelding aanhoudend (sticky), zodat deze bij aanraken niet wordt gesloten. Uitgeschakeld: standaardgedrag waarbij een aanraking de melding sluit."
     },
     "notify_live_click_action": {
-      "label": "Aanraakdoel live-melding",
-      "doc": "Alleen Android. Waarheen een aanraking van de live-voortgangsmelding navigeert (bijv. /lovelace/laundry of een volledige URL) in plaats van de standaard startpagina van de app. Leeg laten voor standaard."
+      "label": "Aanraakdoel melding",
+      "doc": "Waarheen een aanraking van een melding van dit apparaat navigeert, op Android en iOS. Leeg opent het WashData-paneel bij dit apparaat. Voer een dashboardpad in (bijv. /lovelace/laundry) of een volledige URL om ergens anders naartoe te gaan, of \"none\" voor helemaal geen aanraakdoel."
     },
     "door_opens_at_end": {
       "label": "Deur opent automatisch aan het einde",
