@@ -478,3 +478,25 @@ def test_the_advisory_tells_the_two_unmatchable_reasons_apart(store: ProfileStor
     assert unmatchable[0]["message_key"] == "msg.advisory_unmatchable_no_duration"
     assert "no usable duration" in unmatchable[0]["message"]
     assert "no cycle with power data" not in unmatchable[0]["message"]
+
+
+def test_a_one_cycle_envelope_is_not_evidence_of_a_usable_cycle(store: ProfileStore) -> None:
+    """An envelope below 2 cycles is not admitted by the builder either.
+
+    The reason picker used to accept any ``avg`` list as proof that a cycle exists,
+    so a profile with a single-cycle envelope and no sample was told it had power
+    data and only needed a duration. There is nothing to size a match against here,
+    which is the other message.
+    """
+    store._data["profiles"] = {"Eco": {"avg_duration": 0, "sample_cycle_id": None}}
+    store._data["past_cycles"] = []
+    store._data["envelopes"] = {
+        "Eco": {"cycle_count": 1, "avg": [[0.0, 100.0], [60.0, 120.0]]}
+    }
+
+    assert store.unmatchable_profiles() == {"Eco": "no evidence cycle with power data"}
+
+    advisories = store.compute_profile_advisories()
+    unmatchable = [a for a in advisories if a.get("code") == "unmatchable"]
+    assert len(unmatchable) == 1
+    assert unmatchable[0]["message_key"] == "msg.advisory_unmatchable"

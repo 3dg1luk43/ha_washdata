@@ -377,8 +377,9 @@ MATCH_INTERVAL_SUGGESTION_MIN_S = 10
 # moving expected_duration (which arms Smart Termination x0.98 and the #429
 # anti-crease ratio) until the old cycles age out of the retention cap.
 DEFAULT_CURVE_PREROLL_SECONDS = 0.0  # 0 = off
-# Upper bound on the option, so a mistyped value cannot drag minutes of unrelated
-# standby into a curve. 300 s covered every appliance the reporter measured.
+# Upper bound on the option (the panel's number input offers the same maximum), so
+# a mistyped value cannot drag minutes of unrelated standby into a curve. It is
+# headroom, not a measurement: the probe runs above were 40-217 s.
 CURVE_PREROLL_MAX_SECONDS = 600.0
 # A quiet stretch longer than this ends the carry: it separates "the same start,
 # probed twice" from "an unrelated blip earlier in the day". Deliberately a

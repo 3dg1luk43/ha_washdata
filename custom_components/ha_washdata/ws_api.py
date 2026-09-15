@@ -44,6 +44,8 @@ from .const import (
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
     CONF_SMART_TERMINATION_DURATION_RATIO,
     CONF_ANTI_CREASE_FINALIZE_RATIO,
+    ANTI_CREASE_FINALIZE_RATIO_MIN,
+    ANTI_CREASE_FINALIZE_RATIO_MAX,
     CONF_CURVE_PREROLL_SECONDS,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_ANTI_WRINKLE_EXIT_POWER,
@@ -1678,8 +1680,15 @@ async def ws_set_options(
                 _ac = float(_raw_ac)
                 if not math.isfinite(_ac):
                     raise ValueError("non-finite")
-                new_options[CONF_ANTI_CREASE_FINALIZE_RATIO] = min(1.0, max(0.5, _ac))
-            except (TypeError, ValueError):
+                new_options[CONF_ANTI_CREASE_FINALIZE_RATIO] = min(
+                    ANTI_CREASE_FINALIZE_RATIO_MAX,
+                    max(ANTI_CREASE_FINALIZE_RATIO_MIN, _ac),
+                )
+            # OverflowError too (register item 194): json parses an integer literal
+            # of any length into an unbounded int, and float() on one of those raises
+            # rather than returning inf. Uncaught it becomes ERR_UNKNOWN_ERROR and
+            # the whole save fails, instead of this key falling back to its default.
+            except (TypeError, ValueError, OverflowError):
                 new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
 
     # #430: seconds, 0 = off. Clamped to [0, CURVE_PREROLL_MAX_SECONDS] so a
@@ -1697,7 +1706,7 @@ async def ws_set_options(
                 new_options[CONF_CURVE_PREROLL_SECONDS] = min(
                     CURVE_PREROLL_MAX_SECONDS, max(0.0, _pr)
                 )
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
 
     # A None outside the clearable selectors means "not set", not a value: the
