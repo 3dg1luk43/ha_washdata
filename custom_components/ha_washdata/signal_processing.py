@@ -191,7 +191,21 @@ def integrate_wh_by_price(
     bounded by a single sample interval per price change - seconds against a
     tariff that steps hourly.
     """
-    prices = [float(p) for _, p in price_points or []]
+    try:
+        prices = [float(p) for _, p in price_points or []]
+        offsets = np.asarray([float(o) for o, _ in price_points or []], dtype=float)
+    except (TypeError, ValueError, OverflowError):
+        # Same JSON boundary as compact_price_timeline above, which already drops
+        # an entry for exactly these reasons: an imported or hand-edited
+        # price_timeline keeps an oversized integer literal as an unbounded int,
+        # and float() on one raises rather than returning inf. Every in-repo
+        # caller compacts first, so this only binds a direct caller - and for one
+        # of those "unusable timeline" means no timeline, which is the empty
+        # return cycle_cost below already falls back on. Returning a zero Wh per
+        # price instead would claim the timeline was fine and the trace carried no
+        # energy, a different statement that only lands on the same fallback by
+        # accident.
+        return []
     if not prices:
         return []
     ts = np.asarray(timestamps, dtype=float)
@@ -206,7 +220,6 @@ def integrate_wh_by_price(
         mask = (dt_hours > 0) & (dt_hours <= float(max_gap_s) / 3600.0)
         energy = np.where(mask, energy, 0.0)
 
-    offsets = np.asarray([float(o) for o, _ in price_points], dtype=float)
     midpoints = (ts[:-1] + ts[1:]) * 0.5
     # side="right" - 1 gives the last price point at or before the midpoint.
     # Clipped at 0 so a trace that starts before the first price point is charged
