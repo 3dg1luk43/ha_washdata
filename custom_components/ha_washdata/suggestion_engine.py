@@ -959,7 +959,11 @@ class SuggestionEngine:
                 continue
             try:
                 avg = float(prof.get("avg_duration") or 0.0)
-            except (TypeError, ValueError):
+            # OverflowError: an imported profile keeps an oversized integer literal
+            # as an unbounded int, and float() on one raises rather than returning
+            # inf. Escaping here aborts the whole operational-suggestion pass over
+            # one bad profile (register item 194's shape).
+            except (TypeError, ValueError, OverflowError):
                 continue
             if not math.isfinite(avg) or avg <= 60.0:
                 continue

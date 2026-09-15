@@ -464,9 +464,14 @@ def test_the_advisory_tells_the_two_unmatchable_reasons_apart(store: ProfileStor
     ``unmatchable_profiles`` already distinguishes them; the advisory used to
     discard the reason and tell every such user to go and label a cycle, which
     for this one is a problem they do not have.
+
+    A single-reading sample is the state that reaches this: the builder's own
+    third fallback (the resampled segment's timestamp span) needs two points, so
+    with no stored duration either there is genuinely no length to match against.
     """
     cycle = _cycle("c1", 2000, profile="Quick 30")
     cycle["duration"] = 0
+    cycle["power_data"] = [[0.0, 2000.0]]
     store._data["profiles"] = {"Quick 30": {"avg_duration": 0, "sample_cycle_id": "c1"}}
     store._data["past_cycles"] = [cycle]
 
@@ -478,6 +483,24 @@ def test_the_advisory_tells_the_two_unmatchable_reasons_apart(store: ProfileStor
     assert unmatchable[0]["message_key"] == "msg.advisory_unmatchable_no_duration"
     assert "no usable duration" in unmatchable[0]["message"]
     assert "no cycle with power data" not in unmatchable[0]["message"]
+
+
+def test_a_sample_without_a_stored_duration_is_not_unmatchable(store: ProfileStore) -> None:
+    """The builder derives a duration from the resampled span when both are missing.
+
+    ``_build_match_snapshots`` falls back to the sample segment's own timestamp
+    span, so this profile matches fine. Reporting it would break this method's
+    stated contract (never claim unmatchable where the builder would admit) and,
+    since the reason carries its own advisory now, would tell the user to
+    re-record a program that works.
+    """
+    cycle = _cycle("c1", 2000, profile="Quick 30")
+    cycle["duration"] = 0
+    store._data["profiles"] = {"Quick 30": {"avg_duration": 0, "sample_cycle_id": "c1"}}
+    store._data["past_cycles"] = [cycle]
+
+    assert store.unmatchable_profiles() == {}
+    assert [a for a in store.compute_profile_advisories() if a.get("code") == "unmatchable"] == []
 
 
 def test_a_one_cycle_envelope_is_not_evidence_of_a_usable_cycle(store: ProfileStore) -> None:

@@ -1361,8 +1361,18 @@ wdDefineElements();
   // isolation, tests) from polling forever.
   const deadline = Date.now() + 30000;
   while (Date.now() < deadline) {
-    if (!customElements.get(CARD_TAG)) wdDefineElements();
-    if (customElements.get("home-assistant") && customElements.get(CARD_TAG)) return;
+    // Both tags, not just the card: wdDefineElements catches per tag, so an
+    // editor define that threw while the card succeeded would otherwise never be
+    // retried and never block the exit - leaving Lovelace with no visual editor
+    // for the rest of the session.
+    if (!customElements.get(CARD_TAG) || !customElements.get(EDITOR_TAG)) {
+      wdDefineElements();
+    }
+    if (
+      customElements.get("home-assistant") &&
+      customElements.get(CARD_TAG) &&
+      customElements.get(EDITOR_TAG)
+    ) return;
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
 })();
