@@ -143,6 +143,23 @@ def test_heal_never_lowers_the_stored_value(store):
     assert store._data["lifetime_cycle_count"] == 90
 
 
+def test_heal_replaces_a_malformed_stored_count(store):
+    """The getter already treats junk as no reading; the heal has to agree.
+
+    It used to abort on the `int()` failure, leaving the malformed value in
+    `_data` - and `export_data` copies `_data` verbatim, so the junk travelled
+    into the export and back in on the next import, while every live reading used
+    the floor. The two disagreed about the same odometer.
+    """
+    store._data["past_cycles"] = [_cycle(3), _cycle(2), _cycle(1)]
+    store._data["lifetime_cycle_count"] = "not a number"
+
+    store._heal_lifetime_cycle_count()
+
+    assert store._data["lifetime_cycle_count"] == 3
+    assert store.get_lifetime_cycle_count() == 3
+
+
 def test_getter_never_raises_on_garbage(store):
     store._data["lifetime_cycle_count"] = "not a number"
     store._data["past_cycles"] = "garbage"
