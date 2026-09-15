@@ -215,6 +215,30 @@ def test_gate_respects_the_ratio_boundary() -> None:
     assert det._anticrease_gate_open(_dt(8100)) is True
 
 
+def test_an_out_of_range_stored_ratio_is_held_to_the_documented_minimum() -> None:
+    """Only ``ws_set_options`` clamps; the detector must not trust the stored value.
+
+    ``import_config`` strips nulls only, a selective import writes numbers through,
+    and the Playground sanitizer just casts to float, so 0.0 can reach the config.
+    ``current_duration < expected * 0.0`` is False for every non-negative duration,
+    which removes the past-expected discriminator entirely and lets the gate open on
+    a mid-wash trough.
+    """
+    det, _ = _run_dryer_with_tumble_tail(0.98)
+
+    det.config.anti_crease_finalize_ratio = 0.0
+    # 10% of expected: nowhere near any legal ratio, so the gate must stay shut.
+    assert det._anticrease_gate_open(_dt(1000)) is False
+    # The floor is 0.5, so half-way through is still short.
+    assert det._anticrease_gate_open(_dt(4900)) is False
+    assert det._anticrease_gate_open(_dt(5100)) is True
+
+    # Above the range is held down to 1.0 rather than pushing the gate past the end.
+    det.config.anti_crease_finalize_ratio = 4.0
+    assert det._anticrease_gate_open(_dt(9900)) is False
+    assert det._anticrease_gate_open(_dt(10100)) is True
+
+
 def test_default_keeps_the_pre_429_behaviour_exactly() -> None:
     """An install that never touches the setting must be byte-identical."""
     det_default, end_default = _run_dryer_with_tumble_tail(

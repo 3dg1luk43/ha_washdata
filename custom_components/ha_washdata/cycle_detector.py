@@ -73,6 +73,8 @@ from .const import (
     STANDBY_BAND_FLATNESS_FRACTION,
     STANDBY_BAND_FLATNESS_FLOOR_W,
     DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+    ANTI_CREASE_FINALIZE_RATIO_MIN,
+    ANTI_CREASE_FINALIZE_RATIO_MAX,
     DEFAULT_CURVE_PREROLL_SECONDS,
     CURVE_PREROLL_MAX_SECONDS,
     PREROLL_CHAIN_BREAK_SECONDS,
@@ -2504,7 +2506,16 @@ class CycleDetector:
         if start is None:
             return False
         current_duration = (timestamp - start).total_seconds()
-        if current_duration < self._expected_duration * self._config.anti_crease_finalize_ratio:
+        # Held to the documented 0.50-1.00 range on READ, not at construction: the
+        # manager assigns this field directly on an options reload, and the value can
+        # arrive from an import or the Playground, neither of which range-checks it.
+        # A stored 0.0 would satisfy the test below for every duration and hand the
+        # gate a mid-wash trough.
+        finalize_ratio = min(
+            ANTI_CREASE_FINALIZE_RATIO_MAX,
+            max(ANTI_CREASE_FINALIZE_RATIO_MIN, float(self._config.anti_crease_finalize_ratio)),
+        )
+        if current_duration < self._expected_duration * finalize_ratio:
             return False
         # #364: "past expected" only means "past the wash" when expected belongs to
         # the RIGHT profile. A whole washer wash phase sits below
