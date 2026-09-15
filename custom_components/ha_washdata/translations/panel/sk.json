@@ -1174,6 +1174,10 @@
       "label": "Uvoľnenie po tichej fáze sušenia",
       "doc": "Keď cyklus prekročí svoje očakávané trvanie, ako dlho musí umývačka zostať v pokoji (pod Prahom zastavenia), než WashData prestane čakať na záverečné odčerpanie vody a ukončí cyklus. Zvýšte hodnotu, ak má váš spotrebič dlhú tichú fázu sušenia pred neskorým záverečným odčerpaním, ktoré uniká detekcii - širšie okno umožňuje, aby naučené trvanie sledovalo sezónny posun (studenšia privádzaná voda = dlhšie cykly) namiesto toho, aby zostalo uzamknuté na starom priemere. Čakanie iba skracuje vzhľadom na interný 30-minútový limit čakania na záverečné odčerpanie, nikdy ho nepredlžuje."
     },
+    "anti_crease_finalize_ratio": {
+      "doc": "Ako ďaleko v očakávanej dobe trvania priradeného programu musí byť cyklus, než smie WashData vyhodnotiť pozorované otáčanie bubna s nízkym príkonom ako chvost ochrany pred krčením a cyklus tam ukončiť. Očakávaná doba trvania je priemer programu, takže pri sušičke, ktorej doba senzorového sušenia sa riadi náplňou, väčšina behov nikdy nedosiahne 98 % tejto hodnoty a chvost zostane visieť až do záložného časového limitu - často 15 až 40 minút potom, čo sa stroj skutočne zastavil. Pri takejto sušičke hodnotu znížte (napr. 0,75). Pri práčkach ponechajte predvolenú hodnotu: práčka strávi väčšinu cyklu pod hodnotou Max. výkon ochrany pred krčením, takže tento zlomok je jediné, čo oddeľuje tichú fázu uprostred prania od chvosta, a jeho zníženie môže pranie skrátiť na polovicu. Ponechajte prázdne pre predvolenú hodnotu (0,98). Je to iné nastavenie než Pomer inteligentného ukončenia, ktoré riadi samostatnú kontrolu skoršieho ukončenia.",
+      "label": "Pomer dokončenia ochrany pred krčením"
+    },
     "anti_wrinkle_enabled": {
       "doc": "Rozpoznajte krátke pulzy bubna s nízkym výkonom, ktoré sušička vydáva po hlavnej fáze ohrevu, a nechajte ich pripojené k dokončenému cyklu namiesto toho, aby ste ich čítali ako nové cykly.",
       "label": "Povoliť detekciu ochrany pred krčením"
@@ -1604,6 +1608,10 @@
     "energy_price_dynamic": {
       "label": "Časovo vážené náklady",
       "doc": "Účtuje každý cyklus cenou platnou v každom okamihu jeho behu namiesto jedinej ceny platnej pri jeho dokončení. Týka sa len entity ceny (statická cena sa meniť nemôže). Nevyžaduje žiadne ďalšie nastavenie: cena sa počas cyklu sleduje naživo a Spracovanie histórie v Diagnostike prepočíta náklady starších cyklov z recordera. Vypnuté = klasické správanie, jedna cena zafixovaná na konci."
+    },
+    "curve_preroll_seconds": {
+      "doc": "Koľko sekúnd meraní z neúspešných pokusov o spustenie môže WashData preniesť na začiatok krivky cyklu. Krivka cyklu obvykle začína pri pokuse o spustenie, ktorý nakoniec uspel, takže pri stroji, ktorý to pred rozbehnutím niekoľkokrát skúsi - voľba programu, zámok dverí, prvé napúšťanie - chýbajú v každej krivke prvé minúty skutočnej činnosti. Nastavte túto hodnotu o niečo vyššie, než je najdlhší takýto rozbeh vášho stroja (300 s väčšine bohato stačí). 0 funkciu vypne. Majte na pamäti, že zapnutie posunie zaznamenaný začiatok skôr, takže cykly zaznamenané pred zmenou a po nej nesú pre ten istý program rozdielne doby trvania; naučené priemery sa budú posúvať, kým staršie cykly nevypadnú z histórie.",
+      "label": "Nábeh krivky"
     }
   },
   "setting_group": {
@@ -1787,6 +1795,7 @@
       "end_repeat_count": "{false}/{total} čistých cyklov ({pct}%) malo vnútornú pauzu >60s, ktorá pokračovala; vyžadovať {val} potvrdení konca.",
       "learning_confidence": "Istota p05 z {cycles} cyklov označených používateľom ({p05}); pod touto hodnotou vyžiadať overenie.",
       "match_interval": "Na základe pozorovanej frekvencie aktualizácií (medián={median}s) * 10.",
+      "match_interval_capped": "Obmedzené tak, aby sa {persistence} po sebe idúcich zhôd zmestilo do {pct}% najkratšieho programu ({shortest}s); samotná frekvencia aktualizácií (medián={median}s) by navrhla dlhší interval.",
       "max_duration_ratio": "Na základe dĺžok označených cyklov (p95={p95}).",
       "min_active": "Na základe minimálneho činného výkonu ({min}W) zaznamenaného v poslednom cykle.",
       "min_duration_ratio": "Ponechané čo najnižšie, aby sa program rozpoznal skoro v cykle; prahy istoty a nejednoznačnosti bránia predčasnému potvrdeniu.",
@@ -1984,6 +1993,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Umývačka: tiché sekundy po očakávanom trvaní, než sa uvoľní čakanie na záverečné odčerpanie vody",
     "smart_termination_duration_ratio": "Zlomok očakávanej doby trvania priradeného programu, ktorý musí cyklus dosiahnuť, než ho Inteligentné ukončenie môže ukončiť skôr; znížte ho pri strojoch závislých od náplne alebo teploty",
+    "anti_crease_finalize_ratio": "Zlomok očakávanej doby trvania priradeného programu, ktorý musí cyklus dosiahnuť, než možno ukončiť chvost otáčania ochrany pred krčením; znížte ho pri sušičkách s dlhým chvostom otáčania, pri práčkach ponechajte predvolenú hodnotu",
     "anti_wrinkle_enabled": "Pohltiť impulzy bubna po hlavnej fáze namiesto ich čítania ako nové cykly",
     "anti_wrinkle_exit_power": "Výkon musí medzi impulzmi klesnúť pod túto hodnotu, aby ochrana pred krčením zostala aktívna",
     "anti_wrinkle_idle_timeout": "Povolený pokoj medzi dvoma impulzmi bubna, než sa ochrana pred krčením skončí",
@@ -2009,7 +2019,8 @@
     "dtw_ddtw_scale": "Fáza 3: vzdialenosť polosaturácie DDTW; menšia = citlivejšia na tvar (predvolené 30)",
     "dtw_refine_top_n": "Fáza 3: kandidáti, ktorých DTW prehodnotí; zvýšte na 7-9, ak správny profil skončí na 4.-5. mieste (predvolené 5)",
     "duration_scale": "Fáza 4: logaritmický pomer, pri ktorom sa zhoda dĺžky trvania zníži na polovicu; menší = prísnejšia penalizácia (predvolené 0,175)",
-    "energy_scale": "Fáza 4: logaritmický pomer, pri ktorom sa zhoda energie zníži na polovicu; menší = prísnejšia penalizácia (predvolené 0,25)"
+    "energy_scale": "Fáza 4: logaritmický pomer, pri ktorom sa zhoda energie zníži na polovicu; menší = prísnejšia penalizácia (predvolené 0,25)",
+    "curve_preroll_seconds": "Sekundy meraní z neúspešných pokusov o spustenie prenesené na začiatok krivky cyklu; 0 = vypnuté"
   },
   "col": {
     "profile_tip": "Názov zhodného programu. Bez štítku znamená, že na konci cyklu sa nezhodoval žiadny profil.",

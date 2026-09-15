@@ -115,6 +115,10 @@ from .const import (
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     CONF_SMART_TERMINATION_DURATION_RATIO,
+    CONF_ANTI_CREASE_FINALIZE_RATIO,
+    CONF_CURVE_PREROLL_SECONDS,
+    DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+    DEFAULT_CURVE_PREROLL_SECONDS,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
     CONF_DELAY_START_DETECT_ENABLED,
@@ -951,6 +955,22 @@ class WashDataManager:
                 config_entry.options.get(
                     CONF_SMART_TERMINATION_DURATION_RATIO,
                     resolve_smart_termination_duration_ratio_default(self.device_type),
+                )
+            ),
+            # #429: same reasoning, different gate - this one gates the finalise
+            # into STATE_ANTI_WRINKLE, not Smart Termination. Scalar default: the
+            # safe value is per-machine, not per-device-type.
+            anti_crease_finalize_ratio=float(
+                config_entry.options.get(
+                    CONF_ANTI_CREASE_FINALIZE_RATIO,
+                    DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+                )
+            ),
+            # #430: 0 = off, which is the default and leaves the stored-duration
+            # convention exactly as it was.
+            curve_preroll_seconds=float(
+                config_entry.options.get(
+                    CONF_CURVE_PREROLL_SECONDS, DEFAULT_CURVE_PREROLL_SECONDS
                 )
             ),
             delay_detect_enabled=bool(
@@ -2512,6 +2532,17 @@ class WashDataManager:
                 resolve_smart_termination_duration_ratio_default(self.device_type),
             )
         )
+        new_anti_crease_finalize_ratio = float(
+            config_entry.options.get(
+                CONF_ANTI_CREASE_FINALIZE_RATIO,
+                DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+            )
+        )
+        new_curve_preroll_seconds = float(
+            config_entry.options.get(
+                CONF_CURVE_PREROLL_SECONDS, DEFAULT_CURVE_PREROLL_SECONDS
+            )
+        )
         new_delay_detect_enabled = bool(
             config_entry.options.get(
                 CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
@@ -2552,6 +2583,8 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_idle_timeout = new_anti_wrinkle_idle_timeout
         self.detector.config.dishwasher_end_spike_quiet_release = new_dishwasher_end_spike_quiet_release
         self.detector.config.smart_termination_duration_ratio = new_smart_termination_duration_ratio
+        self.detector.config.anti_crease_finalize_ratio = new_anti_crease_finalize_ratio
+        self.detector.config.curve_preroll_seconds = new_curve_preroll_seconds
         self.detector.config.delay_detect_enabled = new_delay_detect_enabled
         self.detector.config.delay_confirm_seconds = new_delay_confirm_seconds
         self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds

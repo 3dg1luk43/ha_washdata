@@ -575,7 +575,12 @@ async def _async_setup_shared(
             else:
                 hass.data["ha_washdata_card_deferred"] = False
                 hass.data["ha_washdata_card_registered"] = False
-                log.warning("Card registration failed and was not deferred")
+                # The reason used to be debug-only inside frontend.py, so this
+                # warning told the user something was wrong but not what (#432).
+                log.warning(
+                    "Card registration failed and was not deferred: %s",
+                    getattr(card_reg, "last_failure_reason", "unknown"),
+                )
         finally:
             # finally, not one reset per branch: `except Exception` does not catch
             # CancelledError, and HA cancels entry setup on timeout or on a reload

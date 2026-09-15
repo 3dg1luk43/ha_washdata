@@ -1174,6 +1174,10 @@
       "label": "Zwolnienie po cichej fazie suszenia",
       "doc": "Gdy cykl przekroczy oczekiwany czas trwania, jak długo zmywarka musi pozostać cicha (poniżej Progu Zatrzymania), zanim WashData przestanie czekać na końcowe odpompowanie wody i zakończy cykl. Zwiększ tę wartość, jeśli Twoje urządzenie ma długą cichą fazę suszenia przed późnym końcowym odpompowaniem, które jest pomijane - szersze okno pozwala, aby wyuczony czas trwania podążał za sezonowym dryfem (chłodniejsza woda na wlocie = dłuższe cykle), zamiast trzymać się starej średniej. Może jedynie skrócić oczekiwanie względem wewnętrznego 30-minutowego limitu końcowego odpompowania, nigdy go nie wydłuża."
     },
+    "anti_crease_finalize_ratio": {
+      "doc": "Jak daleko w oczekiwanym czasie trwania dopasowanego programu musi znajdować się cykl, zanim WashData może uznać obserwowane obracanie bębna o niskiej mocy za antygniotowy ogon i zakończyć w tym miejscu cykl. Oczekiwany czas trwania to średnia programu, więc w suszarce, której czas suszenia z czujnikiem wilgotności zależy od wsadu, większość uruchomień nigdy nie osiąga 98% tej wartości, a ogon ciągnie się aż do awaryjnego limitu czasu - często 15 do 40 minut po tym, jak maszyna faktycznie się zatrzymała. W takiej suszarce obniż tę wartość (np. 0,75). W pralkach pozostaw wartość domyślną: pralka spędza większość cyklu poniżej ustawienia Maks. Moc Antygniotowa, więc ten ułamek jest jedyną rzeczą oddzielającą cichą fazę w środku prania od ogona, a jego obniżenie może skrócić pranie o połowę. Pozostaw puste dla wartości domyślnej (0,98). To inne ustawienie niż Współczynnik inteligentnego zakończenia, które steruje osobnym sprawdzeniem wcześniejszego zakończenia.",
+      "label": "Współczynnik zakończenia trybu antygniotowego"
+    },
     "anti_wrinkle_enabled": {
       "doc": "Rozpoznawaj krótkie impulsy suszenia o małej mocy, które suszarka emituje po głównej fazie nagrzewania, i pamiętaj o ich dołączeniu do zakończonego cyklu, zamiast odczytywać je jako nowe cykle.",
       "label": "Włącz Wykrywanie Antygniotowe"
@@ -1604,6 +1608,10 @@
     "energy_price_dynamic": {
       "label": "Koszt ważony czasem",
       "doc": "Nalicza każdy cykl według ceny obowiązującej w każdej chwili jego trwania, zamiast według jednej ceny z momentu zakończenia. Działa tylko z encją ceny (cena statyczna nie może się zmieniać). Nie wymaga dodatkowej konfiguracji: cena jest śledzona na bieżąco w trakcie cyklu, a Przetwarzanie historii w Diagnostyce przelicza koszty starszych cykli z recordera. Wyłączone = klasyczne działanie, jedna cena zamrożona na koniec."
+    },
+    "curve_preroll_seconds": {
+      "doc": "Ile sekund odczytów z przerwanych prób startu WashData może dołączyć na początku krzywej cyklu. Krzywa cyklu zwykle zaczyna się od tej próby startu, która ostatecznie się powiodła, więc w maszynie, która próbuje kilka razy, zanim się rozkręci - wybór programu, blokada drzwi, pierwsze napełnianie - w każdej krzywej brakuje pierwszych minut rzeczywistej pracy. Ustaw tę wartość nieco powyżej najdłuższego takiego rozbiegu Twojej maszyny (300 s w zupełności wystarczy w większości przypadków). 0 wyłącza tę funkcję. Pamiętaj, że jej włączenie przesuwa zapisany początek wcześniej, więc cykle zapisane przed zmianą i po niej mają różne czasy trwania dla tego samego programu; wyuczone średnie będą się przesuwać, dopóki starsze cykle nie wypadną z historii.",
+      "label": "Wstępny zapis krzywej"
     }
   },
   "setting_group": {
@@ -1787,6 +1795,7 @@
       "end_repeat_count": "{false}/{total} poprawnych cykli ({pct}%) miało wewnętrzną pauzę >60s, która została wznowiona; wymagaj {val} potwierdzeń zakończenia.",
       "learning_confidence": "Pewność p05 dla {cycles} cykli oznaczonych przez użytkownika ({p05}); poniżej tej wartości żądaj weryfikacji.",
       "match_interval": "Na podstawie obserwowanej częstotliwości aktualizacji (mediana={median}s) * 10.",
+      "match_interval_capped": "Ograniczone tak, aby {persistence} kolejnych dopasowań zmieściło się w {pct}% najkrótszego programu ({shortest}s); sama częstotliwość aktualizacji (mediana={median}s) sugerowałaby dłuższy interwał.",
       "max_duration_ratio": "Na podstawie czasów trwania oznaczonych cykli (p95={p95}).",
       "min_active": "Na podstawie minimalnej mocy czynnej ({min}W) zaobserwowanej w ostatnim cyklu.",
       "min_duration_ratio": "Utrzymane jak najniżej, aby program był rozpoznawany na wczesnym etapie cyklu; progi pewności i niejednoznaczności zapobiegają przedwczesnym decyzjom.",
@@ -1984,6 +1993,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy ciszy po oczekiwanym czasie trwania, zanim zwolnione zostanie oczekiwanie na końcowe odpompowanie wody",
     "smart_termination_duration_ratio": "Ułamek oczekiwanego czasu trwania dopasowanego programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej; obniż go w przypadku maszyn zależnych od wsadu lub temperatury",
+    "anti_crease_finalize_ratio": "Ułamek oczekiwanego czasu trwania dopasowanego programu, który cykl musi osiągnąć, zanim antygniotowy ogon obracania bębna może zostać zakończony; obniż go w suszarkach z długim ogonem obracania, w pralkach pozostaw wartość domyślną",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",
     "anti_wrinkle_exit_power": "Moc musi spaść poniżej tej wartości pomiędzy impulsami, aby tryb antygniotowy pozostał aktywny",
     "anti_wrinkle_idle_timeout": "Dozwolony czas ciszy między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy",
@@ -2009,7 +2019,8 @@
     "dtw_ddtw_scale": "Etap 3: odległość półnasycenia DDTW; mniejsza = bardziej wrażliwa na kształt (domyślnie 30)",
     "dtw_refine_top_n": "Etap 3: kandydaci ponownie oceniani przez DTW; zwiększ do 7-9, jeśli właściwy profil zajmuje 4-5 miejsce (domyślnie 5)",
     "duration_scale": "Etap 4: logarytm stosunku, przy którym zgodność czasu trwania spada do połowy; mniejszy = surowsza kara (domyślnie 0,175)",
-    "energy_scale": "Etap 4: logarytm stosunku, przy którym zgodność energii spada do połowy; mniejszy = surowsza kara (domyślnie 0,25)"
+    "energy_scale": "Etap 4: logarytm stosunku, przy którym zgodność energii spada do połowy; mniejszy = surowsza kara (domyślnie 0,25)",
+    "curve_preroll_seconds": "Sekundy odczytów z przerwanych prób startu dołączane na początku krzywej cyklu; 0 = wyłączone"
   },
   "col": {
     "profile_tip": "Nazwa dopasowanego programu. Brak etykiety oznacza, że na końcu cyklu nie dopasowano żadnego profilu.",

@@ -1106,7 +1106,9 @@
     "anti_wrinkle_max_power": "En puls over dette afslutter anti-rynke og åbner en ny cyklus",
     "anti_wrinkle_enabled": "Opfange tumle-pulserne efter hovedfasen i stedet for at læse dem som nye cyklusser",
     "anti_wrinkle_max_duration": "En puls længere end dette afslutter anti-rynke og åbner en ny cyklus",
-    "anti_wrinkle_exit_power": "Effekten skal falde under dette mellem pulserne, for at anti-rynke forbliver aktiv"
+    "anti_wrinkle_exit_power": "Effekten skal falde under dette mellem pulserne, for at anti-rynke forbliver aktiv",
+    "anti_crease_finalize_ratio": "Andel af det genkendte programs forventede varighed, som en cyklus skal nå, før anti-rynke-efterløbet må afsluttes; sænk den på tørretumblere med langt efterløb, lad vaskemaskiner stå på standardværdien",
+    "curve_preroll_seconds": "Sekunders målinger fra afbrudte startforsøg, der tages med forrest i en cyklus' kurve; 0 = fra"
   },
   "phase_desc": {
     "anti_crease": "Lejlighedsvis korte tumblinger efter færdiggørelse for at reducere rynker.",
@@ -1204,6 +1206,10 @@
       "label": "Frigivelse efter stille tørrefase",
       "doc": "Når cyklussen overskrider sin forventede varighed: hvor længe opvaskemaskinen skal forblive stille (under Stoptærskel), før WashData holder op med at vente på en sidste udpumpning og afslutter cyklussen. Hæv den, hvis din maskine har en lang stille tørrefase før en sen sidste udpumpning, der bliver overset - et bredere vindue lader den indlærte varighed følge sæsonudsving (koldere indløbsvand = længere cyklusser) i stedet for at låse sig til det gamle gennemsnit. Den forkorter kun ventetiden i forhold til den interne grænse på 30 minutter for slutspidsen, aldrig forlænger den."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Forhold for anti-rynke-afslutning",
+      "doc": "Hvor langt en cyklus skal være inde i det genkendte programs forventede varighed, før WashData må afgøre, at den lavenergi-tumling, den ser, er anti-rynke-efterløbet, og afslutte cyklussen dér. Den forventede varighed er programmets gennemsnit, så på en tørretumbler, hvis køretid med fugtsensor følger tøjmængden, når de fleste kørsler aldrig 98% af den, og efterløbet bliver i stedet stående til reserve-timeoutet - ofte 15 til 40 minutter efter at maskinen faktisk stoppede. Sænk denne værdi (f.eks. 0,75) på sådan en tørretumbler. Lad vaskemaskiner stå på standardværdien: en vaskemaskine ligger under Maks. anti-rynkeeffekt det meste af sin cyklus, så denne brøkdel er det eneste, der skiller en stille fase midt i vasken fra efterløbet, og en sænkning kan halvere en vask. Lad feltet stå tomt for standarden (0,98). Dette er en anden indstilling end Forhold for smart afslutning, som styrer en separat kontrol for tidlig afslutning."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Genkend de korte tørretumblerimpulser med lav effekt, som en tørretumbler udsender efter hovedvarmefasen, og hold dem fastgjort til den færdige cyklus i stedet for at læse dem som nye cyklusser.",
       "label": "Aktivér anti-rynke registrering"
@@ -1235,6 +1241,10 @@
     "completion_min_seconds": {
       "doc": "Cykler, der er kortere end dette, kasseres som spøgelsescyklusser (testkørsler, åbning af døren for at tilføje en sok).",
       "label": "Minimum cyklusvarighed"
+    },
+    "curve_preroll_seconds": {
+      "label": "Kurveoptakt",
+      "doc": "Hvor mange sekunders målinger fra afbrudte startforsøg WashData må tage med forrest i en cyklus' kurve. En cyklus' kurve begynder normalt ved det startforsøg, der endelig lykkes, så på en maskine, der prøver sig frem et par gange, før den går rigtigt i gang - programvalg, dørlås, første indløb - mangler de første minutters reelle aktivitet i hver kurve. Sæt værdien lidt højere end den længste sådan optakt, din maskine har (300 s er rigeligt for de fleste). 0 slår det fra. Vær opmærksom på, at når det slås til, rykkes den registrerede start tidligere, så cyklusser fra før og efter ændringen bærer forskellige varigheder for det samme program; de indlærte gennemsnit vil glide, indtil de ældre cyklusser er faldet ud."
     },
     "delay_confirm_seconds": {
       "doc": "Strømmen skal forblive i standby-båndet så længe, før apparatet behandles som ventende på at starte i stedet for at køre.",
@@ -1817,6 +1827,7 @@
       "end_repeat_count": "{false}/{total} rene cyklusser ({pct}%) havde en intern pause på >60s, der blev genoptaget; kræver {val} slutbekræftelse(r).",
       "learning_confidence": "p05-konfidens for {cycles} brugermærkede cyklusser ({p05}); under dette anmodes om verificering.",
       "match_interval": "Baseret på observeret opdateringskadence (median={median}s) * 10.",
+      "match_interval_capped": "Begrænset, så {persistence} på hinanden følgende match kan være inden for {pct}% af det korteste program ({shortest}s); opdateringskadencen alene (median={median}s) ville have foreslået et længere interval.",
       "max_duration_ratio": "Baseret på varigheder for mærkede cyklusser (p95={p95}).",
       "min_active": "Baseret på laveste aktive effekt ({min}W) observeret i sidste cyklus.",
       "min_duration_ratio": "Holdt så lav som muligt, så et program genkendes tidligt i cyklussen; konfidens- og tvetydighedsgrænserne forhindrer forhastede beslutninger.",

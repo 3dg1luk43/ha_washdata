@@ -1033,6 +1033,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
     "smart_termination_duration_ratio": "Frazione della durata prevista del programma corrispondente che un ciclo deve raggiungere prima che la Terminazione intelligente possa concluderlo in anticipo; abbassala per le macchine che dipendono dal carico o dalla temperatura",
+    "anti_crease_finalize_ratio": "Frazione della durata prevista del programma corrispondente che un ciclo deve raggiungere prima che la coda di rotazione antirughe possa essere finalizzata; abbassala sulle asciugatrici con una coda di rotazione lunga, lascia le lavatrici sul valore predefinito",
     "anti_wrinkle_enabled": "Assorbire gli impulsi di rotazione dopo la fase principale invece di leggerli come nuovi cicli",
     "anti_wrinkle_exit_power": "La potenza deve scendere sotto questo valore tra gli impulsi affinché la modalità antirughe resti attiva",
     "anti_wrinkle_idle_timeout": "Tempo di silenzio consentito tra due impulsi di rotazione prima che la modalità antirughe termini",
@@ -1058,7 +1059,8 @@
     "dtw_ddtw_scale": "Fase 3: distanza di semi-saturazione DDTW; minore = maggiore sensibilità alla forma (predefinito 30)",
     "dtw_refine_top_n": "Fase 3: candidati rivalutati da DTW; aumentare a 7-9 se il profilo corretto si classifica 4°-5° (predefinito 5)",
     "duration_scale": "Fase 4: log-rapporto in cui la concordanza di durata si dimezza; minore = penalità più severa (predefinito 0,175)",
-    "energy_scale": "Fase 4: log-rapporto in cui la concordanza di energia si dimezza; minore = penalità più severa (predefinito 0,25)"
+    "energy_scale": "Fase 4: log-rapporto in cui la concordanza di energia si dimezza; minore = penalità più severa (predefinito 0,25)",
+    "curve_preroll_seconds": "Secondi di letture da tentativi di avvio interrotti riportati all'inizio della curva di un ciclo; 0 = disattivato"
   },
   "phase_desc": {
     "anti_crease": "Brevi tumble occasionali dopo il completamento per ridurre le grinze del bucato.",
@@ -1156,6 +1158,10 @@
       "label": "Rilascio al silenzio dell'asciugatura passiva",
       "doc": "Una volta che il ciclo supera la sua durata prevista, per quanto tempo la lavastoviglie deve restare silenziosa (sotto la Soglia di arresto) prima che WashData smetta di attendere uno scarico finale e termini il ciclo. Aumentalo se la tua macchina ha una lunga fase di asciugatura silenziosa prima di uno scarico finale tardivo che non viene rilevato - una finestra più ampia consente alla durata appresa di seguire la deriva stagionale (acqua in ingresso più fredda = cicli più lunghi) invece di bloccarsi sulla vecchia media. Riduce soltanto l'attesa rispetto al limite interno di 30 minuti per il picco di fine, senza mai prolungarla."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Rapporto di finalizzazione antirughe",
+      "doc": "Quanto avanti nella durata prevista del programma corrispondente deve trovarsi un ciclo prima che WashData possa stabilire che la rotazione a bassa potenza che sta osservando è la coda antirughe e concludere lì il ciclo. La durata prevista è la media del programma, quindi su un'asciugatrice il cui tempo di asciugatura a sonda dipende dal carico la maggior parte dei cicli non raggiunge mai il 98% di quella media e la coda resta in attesa fino al timeout di riserva, spesso da 15 a 40 minuti dopo l'effettivo arresto della macchina. Su un'asciugatrice di questo tipo abbassa il valore (ad esempio 0,75). Lascia le lavatrici sul valore predefinito: una lavatrice trascorre gran parte del ciclo al di sotto della Potenza massima antirughe, quindi questa frazione è l'unica cosa che separa una fase silenziosa a metà lavaggio dalla coda, e abbassarla può dimezzare un lavaggio. Lascia vuoto per il valore predefinito (0,98). Questa impostazione è diversa dal Rapporto di terminazione intelligente, che regola un controllo di fine anticipata separato."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Riconosci i brevi impulsi di asciugatrice a bassa potenza emessi da un'asciugatrice dopo la fase di riscaldamento principale e mantienili collegati al ciclo finito invece di leggerli come nuovi cicli.",
       "label": "Abilita rilevamento antirughe"
@@ -1187,6 +1193,10 @@
     "completion_min_seconds": {
       "doc": "I cicli più brevi di questo vengono scartati come cicli fantasma (corse di prova, apertura della porta per aggiungere un calzino).",
       "label": "Durata minima ciclo"
+    },
+    "curve_preroll_seconds": {
+      "label": "Anticipo della curva",
+      "doc": "Quanti secondi di letture provenienti da tentativi di avvio interrotti WashData può riportare all'inizio della curva di un ciclo. La curva di un ciclo parte normalmente dal tentativo di avvio che alla fine riesce, quindi su una macchina che fa qualche tentativo prima di partire davvero (selezione del programma, blocco dell'oblò, primo carico d'acqua) i primi minuti di attività reale mancano da ogni curva. Imposta questo valore poco sopra il più lungo avvio a vuoto della tua macchina (300 s bastano e avanzano nella maggior parte dei casi). 0 disattiva la funzione. Tieni presente che attivarlo anticipa l'inizio registrato, quindi i cicli registrati prima e dopo la modifica avranno durate diverse per lo stesso programma; le medie apprese andranno alla deriva finché i cicli più vecchi non usciranno dallo storico."
     },
     "delay_confirm_seconds": {
       "doc": "L'alimentazione deve rimanere nella banda di standby per tutto questo tempo prima che l'apparecchio venga considerato in attesa di avvio anziché in funzione.",
@@ -1912,6 +1922,7 @@
       "end_repeat_count": "{false}/{total} cicli puliti ({pct}%) hanno avuto una pausa interna >60s poi ripresa; richiedere {val} conferma/e di fine.",
       "learning_confidence": "Confidenza p05 di {cycles} cicli etichettati dall'utente ({p05}); al di sotto, viene richiesta una verifica.",
       "match_interval": "In base alla cadenza di aggiornamento osservata (mediana={median}s) * 10.",
+      "match_interval_capped": "Limitato affinché {persistence} corrispondenze consecutive rientrino nel {pct}% del programma più breve ({shortest}s); la sola cadenza di aggiornamento (mediana={median}s) avrebbe suggerito un intervallo più lungo.",
       "max_duration_ratio": "In base alle durate dei cicli etichettati (p95={p95}).",
       "min_active": "In base alla potenza attiva minima ({min}W) osservata nell'ultimo ciclo.",
       "min_duration_ratio": "Mantenuto il più basso possibile affinché un programma venga riconosciuto presto nel ciclo; i limiti di confidenza e ambiguità impediscono decisioni premature.",

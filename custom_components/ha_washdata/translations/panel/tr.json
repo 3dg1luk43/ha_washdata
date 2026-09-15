@@ -1106,7 +1106,9 @@
         "duration_scale": "Aşama 4: süre uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.175)",
         "energy_scale": "Aşama 4: enerji uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.25)",
         "dishwasher_end_spike_quiet_release": "Bulaşık makinesi: beklenen süreden sonra döngü sonu tahliye beklemesi bırakılmadan önceki sessiz saniyeler",
-        "smart_termination_duration_ratio": "Eşleşen programın beklenen süresinin, Akıllı Sonlandırma'nın döngüyü erken bitirebilmesi için döngünün ulaşması gereken kesri; yüke veya sıcaklığa bağlı makinelerde düşürün"
+        "smart_termination_duration_ratio": "Eşleşen programın beklenen süresinin, Akıllı Sonlandırma'nın döngüyü erken bitirebilmesi için döngünün ulaşması gereken kesri; yüke veya sıcaklığa bağlı makinelerde düşürün",
+        "anti_crease_finalize_ratio": "Kırışıklık önleme tambur kuyruğunun sonlandırılabilmesi için döngünün ulaşması gereken, eşleşen programın beklenen süresine oranı; uzun tambur kuyruğu olan kurutucularda düşürün, çamaşır makinelerini varsayılanda bırakın",
+        "curve_preroll_seconds": "İptal edilen başlatma denemelerinden bir döngünün eğrisinin başına taşınan okuma saniyesi; 0 = kapalı"
     },
     "phase_desc": {
         "anti_crease": "Kırışıklıkları azaltmak için tamamlandıktan sonra ara sıra kısa yuvarlanmalar.",
@@ -1634,6 +1636,14 @@
         "energy_price_dynamic": {
             "label": "Zaman Ağırlıklı Maliyet",
             "doc": "Her döngüyü, bittiğinde geçerli olan tek fiyat yerine, çalıştığı her an geçerli olan fiyattan ücretlendirir. Yalnızca fiyat varlığı için geçerlidir (sabit fiyat değişemez). Ek kurulum gerektirmez: döngü çalışırken fiyat canlı olarak izlenir, Tanılamalar altındaki Geçmişi İşle eylemi ise eski döngülerin maliyetini recorder verilerinden yeniden hesaplar. Kapalı = klasik davranış, sonda dondurulan tek fiyat."
+        },
+        "anti_crease_finalize_ratio": {
+            "label": "Kırışıklık Önleme Sonlandırma Oranı",
+            "doc": "WashData'nın gördüğü düşük güçlü tamburlamanın kırışıklık önleme kuyruğu olduğuna karar verip döngüyü orada bitirebilmesi için, döngünün eşleşen programın beklenen süresinin ne kadarına ulaşmış olması gerektiği. Beklenen süre, programın ortalamasıdır; bu yüzden sensörlü kurutma süresi çamaşır miktarına göre değişen bir kurutucuda çoğu çalışma bu sürenin %98'ine hiç ulaşmaz ve kuyruk, yedek zaman aşımına kadar bekler; bu da çoğu zaman makine gerçekte durduktan 15 ila 40 dakika sonrasını bulur. Böyle bir kurutucuda bu değeri düşürün (örneğin 0,75). Çamaşır makinelerini varsayılanda bırakın: bir çamaşır makinesi döngüsünün büyük bölümünü Maks. Kırışıklık Önleme Gücü'nün altında geçirir, dolayısıyla sessiz bir yıkama ara aşamasını kuyruktan ayıran tek şey bu orandır ve değeri düşürmek bir yıkamayı ortasından kesebilir. Varsayılan (0,98) için boş bırakın. Bu, ayrı bir erken bitirme denetimini yöneten Akıllı Sonlandırma Oranı'ndan farklı bir ayardır."
+        },
+        "curve_preroll_seconds": {
+            "label": "Eğri Ön Kaydı",
+            "doc": "WashData'nın, iptal edilen başlatma denemelerinden gelen kaç saniyelik okumayı bir döngünün eğrisinin başına taşıyabileceği. Bir döngünün eğrisi normalde sonunda başarılı olan başlatma denemesiyle başlar; bu nedenle yerleşmeden önce birkaç kez yoklayan makinelerde (program seçimi, kapak kilidi, ilk su alma) gerçek etkinliğin ilk dakikaları her eğride eksik kalır. Bu değeri, makinenizdeki en uzun hazırlık aşamasının biraz üzerine ayarlayın (çoğu makine için 300 sn fazlasıyla yeter). 0 kapatır. Açmanın kaydedilen başlangıcı öne çektiğini unutmayın: değişiklikten önce ve sonra kaydedilen döngüler aynı program için farklı süreler taşır ve eski döngüler elenene kadar öğrenilen ortalamalar kayar."
         }
     },
     "setting_group": {
@@ -1981,7 +1991,8 @@
             "thr_batch": "{cycles} çevrim boyunca p05 en düşük aktif gücün ({p05}W) hemen üzerinde tutuldu; böylece başlangıç olabildiğince erken yakalanır ve durdurma eşiği makinenin en düşük çalışma gücünün altında kalır.",
             "tol_per_profile": "{profiles} profil boyunca ({cycles} çevrim) profil başına süre varyansının p75'i; tutarlı profiller cezalandırılmaz.",
             "tol_pooled": "{cycles} son etiketli çevrimin birleştirilmiş süre varyansına dayalı (p95 sapma={dev}).",
-            "watchdog": "Güvenli olduğu kadar düşük tutuldu (p95 güncelleme boşluğu {p95}s değerinin hemen üzerinde ve örnekleme aralığı {median}s değerinin en az 2 katı, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır."
+            "watchdog": "Güvenli olduğu kadar düşük tutuldu (p95 güncelleme boşluğu {p95}s değerinin hemen üzerinde ve örnekleme aralığı {median}s değerinin en az 2 katı, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır.",
+            "match_interval_capped": "{persistence} ardışık eşleşme en kısa programın ({shortest}s) %{pct} kadarlık bölümüne sığsın diye sınırlandırıldı; yalnızca güncelleme sıklığı (medyan={median}s) daha uzun bir aralık önerirdi."
         },
         "exclusions": {
             "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",

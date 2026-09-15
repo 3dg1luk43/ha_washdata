@@ -1174,6 +1174,10 @@
       "label": "Otpuštanje nakon tihe faze sušenja",
       "doc": "Kada ciklus prijeđe svoje očekivano trajanje, koliko dugo perilica mora ostati tiha (ispod Praga zaustavljanja) prije nego što WashData prestane čekati na završno ispumpavanje vode i završi ciklus. Povećajte ako vaš uređaj ima dugu tihu fazu sušenja prije kasnog završnog ispumpavanja koje se propušta - šire okno omogućuje da naučeno trajanje prati sezonske promjene (hladnija dovodna voda = dulji ciklusi) umjesto da ostane zaključano na staroj prosječnoj vrijednosti. Čekanje samo skraćuje u odnosu na interno ograničenje završnog ispumpavanja od 30 minuta, nikada ga ne produljuje."
     },
+    "anti_crease_finalize_ratio": {
+      "doc": "Koliko daleko u očekivanom trajanju podudarajućeg programa ciklus mora biti prije nego što WashData smije zaključiti da je tiho prevrtanje bubnja koje vidi završni rep anti-bore i tu završiti ciklus. Očekivano trajanje je prosjek programa, pa kod sušilice čije vrijeme rada sa senzorskim sušenjem ovisi o količini rublja većina pokretanja nikada ne dosegne 98% tog prosjeka, pa rep ostaje stajati do pričuvnog vremenskog ograničenja - često 15 do 40 minuta nakon što je stroj stvarno stao. Kod takve sušilice smanjite ovu vrijednost (npr. 0,75). Perilice ostavite na zadanoj vrijednosti: perilica veći dio ciklusa provede ispod postavke Maks. snaga anti-bora, pa je ovaj udio jedino što razdvaja tihu fazu usred pranja od repa, a njegovo smanjenje može prepoloviti pranje. Ostavite prazno za zadanu vrijednost (0,98). Ovo je druga postavka od Omjera pametnog završetka, koji upravlja zasebnom provjerom ranog završetka.",
+      "label": "Omjer dovršetka anti-bore"
+    },
     "anti_wrinkle_enabled": {
       "doc": "Prepoznajte kratke impulse male snage koje sušilica emitira nakon glavne faze zagrijavanja i držite ih vezanima uz završeni ciklus umjesto da ih čitate kao nove cikluse.",
       "label": "Omogući otkrivanje anti-bora"
@@ -1205,6 +1209,10 @@
     "completion_min_seconds": {
       "doc": "Ciklusi kraći od ovoga odbacuju se kao ciklusi duhova (probne vožnje, otvaranje vrata za dodavanje čarape).",
       "label": "Min. trajanje ciklusa"
+    },
+    "curve_preroll_seconds": {
+      "doc": "Koliko sekundi očitanja iz prekinutih pokušaja pokretanja WashData smije prenijeti na početak krivulje ciklusa. Krivulja ciklusa inače počinje pokušajem pokretanja koji konačno uspije, pa kod stroja koji nekoliko puta pokuša krenuti prije nego što se smiri - odabir programa, zaključavanje vrata, prvo punjenje vodom - prve minute stvarne aktivnosti nedostaju u svakoj krivulji. Postavite ovu vrijednost malo iznad najduljeg takvog zaleta koji vaš stroj ima (300 s je za većinu više nego dovoljno). 0 isključuje ovu značajku. Imajte na umu da uključivanje pomiče zabilježeni početak ranije, pa ciklusi zabilježeni prije i poslije promjene nose različita trajanja za isti program; naučeni prosjeci će odstupati dok stariji ciklusi ne isteknu.",
+      "label": "Uvodne sekunde krivulje"
     },
     "delay_confirm_seconds": {
       "doc": "Napajanje mora ostati u pojasu pripravnosti toliko dugo prije nego što se uređaj tretira kao uređaj koji čeka na pokretanje, a ne kao da radi.",
@@ -1787,6 +1795,7 @@
       "end_repeat_count": "{false}/{total} čistih ciklusa ({pct}%) imalo je unutarnju pauzu dulju od 60s koja se nastavila; zatraži {val} potvrdu/potvrde kraja.",
       "learning_confidence": "Pouzdanost p05 za {cycles} korisnički označenih ciklusa ({p05}); ispod ove vrijednosti zatraži provjeru.",
       "match_interval": "Na temelju uočene učestalosti ažuriranja (medijan={median}s) * 10.",
+      "match_interval_capped": "Ograničeno tako da {persistence} uzastopnih podudaranja stane u {pct}% najkraćeg programa ({shortest}s); sama učestalost ažuriranja (medijan={median}s) predložila bi dulji interval.",
       "max_duration_ratio": "Na temelju trajanja označenih ciklusa (p95={p95}).",
       "min_active": "Na temelju najmanje radne snage ({min}W) uočene u posljednjem ciklusu.",
       "min_duration_ratio": "Zadržano što nižim kako bi se program prepoznao rano u ciklusu; pragovi pouzdanosti i dvosmislenosti sprječavaju prijevremene potvrde.",
@@ -1984,6 +1993,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Perilica posuđa: sekunde tišine nakon očekivanog trajanja prije nego što se otpusti čekanje na završno ispumpavanje vode",
     "smart_termination_duration_ratio": "Udio očekivanog trajanja podudarajućeg programa koji ciklus mora dosegnuti prije nego što ga Pametni završetak može ranije završiti; smanjite ga za strojeve ovisne o količini rublja ili temperaturi",
+    "anti_crease_finalize_ratio": "Udio očekivanog trajanja podudarajućeg programa koji ciklus mora dosegnuti prije nego što se završni rep prevrtanja anti-bore smije dovršiti; smanjite ga kod sušilica s dugim repom prevrtanja, perilice ostavite na zadanoj vrijednosti",
     "anti_wrinkle_enabled": "Upij impulse bubnja nakon glavne faze, a ne čitaj ih kao nove cikluse",
     "anti_wrinkle_exit_power": "Snaga mora pasti ispod ove vrijednosti između impulsa da bi anti-bora ostala aktivna",
     "anti_wrinkle_idle_timeout": "Dopušteno vrijeme mirovanja između dva impulsa bubnja prije nego što anti-bora završi",
@@ -2009,7 +2019,8 @@
     "dtw_ddtw_scale": "Faza 3: udaljenost polu-zasićenja DDTW; manja = osjetljivija na oblik (zadano 30)",
     "dtw_refine_top_n": "Faza 3: kandidati koje DTW ponovo ocjenjuje; povećajte na 7-9 ako ispravni profil zauzme 4.-5. mjesto (zadano 5)",
     "duration_scale": "Faza 4: omjer logaritma gdje se slaganje trajanja prepolovi; manje = stroža kazna (zadano 0,175)",
-    "energy_scale": "Faza 4: omjer logaritma gdje se slaganje energije prepolovi; manje = stroža kazna (zadano 0,25)"
+    "energy_scale": "Faza 4: omjer logaritma gdje se slaganje energije prepolovi; manje = stroža kazna (zadano 0,25)",
+    "curve_preroll_seconds": "Sekunde očitanja iz prekinutih pokušaja pokretanja prenesene na početak krivulje ciklusa; 0 = isključeno"
   },
   "col": {
     "profile_tip": "Naziv podudarnog programa. Bez oznake znači da se na kraju ciklusa nijedan profil nije podudarao.",

@@ -1170,6 +1170,10 @@
         }
     },
     "setting": {
+        "anti_crease_finalize_ratio": {
+            "doc": "Sa larg brenda kohëzgjatjes së pritur të programit të përputhur duhet të ketë ecur një cikël përpara se WashData të mund të vendosë se rrotullimi i qetë që po sheh është bishti kundër rrudhave dhe ta mbyllë ciklin aty. Kohëzgjatja e pritur është mesatarja e programit, prandaj te një tharëse kohëzgjatja e së cilës me sensor lagështie varet nga ngarkesa, shumica e nisjeve nuk e arrijnë kurrë 98% të saj dhe bishti qëndron deri te afati rezervë - shpesh 15 deri në 40 minuta pasi makina ka ndaluar në të vërtetë. Uleni këtë vlerë (p.sh. 0.75) te një tharëse e tillë. Makinat larëse lërini në vlerën e parazgjedhur: një makinë larëse e kalon pjesën më të madhe të ciklit nën cilësimin Fuqia maks. kundër rrudhave, prandaj ky fraksion është e vetmja gjë që ndan një fazë të qetë në mes të larjes nga bishti, dhe ulja e tij mund ta përgjysmojë një larje. Lëreni bosh për vlerën e parazgjedhur (0.98). Ky është një cilësim tjetër nga Raporti i Përfundimit të Zgjuar, i cili kontrollon një verifikim të veçantë të përfundimit të hershëm.",
+            "label": "Raporti i finalizimit kundër rrudhave"
+        },
         "anti_wrinkle_enabled": {
             "doc": "Njihni pulset e shkurtra me fuqi të ulët që lëshon një tharëse pas fazës kryesore të nxehtësisë dhe mbajini të lidhura me ciklin e përfunduar në vend që t'i lexoni si cikle të reja.",
             "label": "Aktivizo zbulimin kundër rrudhave"
@@ -1201,6 +1205,10 @@
         "completion_min_seconds": {
             "doc": "Ciklet më të shkurtra se kjo hidhen si cikle fantazmë (vrapime testimi, hapja e derës për të shtuar një çorape).",
             "label": "Kohëzgjatja min. e ciklit"
+        },
+        "curve_preroll_seconds": {
+            "doc": "Sa sekonda leximesh nga përpjekjet e ndërprera për nisje mund të bartë WashData në fillim të kurbës së një cikli. Kurba e një cikli normalisht fillon nga përpjekja e nisjes që më në fund ia del, prandaj te një makinë që provon disa herë përpara se të vendoset - zgjedhja e programit, bllokimi i derës, mbushja e parë me ujë - minutat e para të aktivitetit të vërtetë mungojnë në çdo kurbë. Vendoseni këtë vlerë pak mbi nisjen më të gjatë të tillë që ka makina juaj (300 s është më se e mjaftueshme për shumicën). 0 e çaktivizon. Kini parasysh se aktivizimi e zhvendos më herët fillimin e regjistruar, prandaj ciklet e regjistruara para dhe pas ndryshimit mbajnë kohëzgjatje të ndryshme për të njëjtin program; mesataret e mësuara do të zhvendosen derisa ciklet më të vjetra të dalin nga përdorimi.",
+            "label": "Sekondat hyrëse të kurbës"
         },
         "delay_confirm_seconds": {
             "doc": "Energjia duhet të qëndrojë në brezin e gatishmërisë për kaq shumë kohë përpara se pajisja të trajtohet si në pritje për të nisur në vend që të funksionojë.",
@@ -1930,6 +1938,7 @@
             "end_repeat_count": "{false}/{total} cikle të pastra ({pct}%) patën një pauzë të brendshme >60s që vazhdoi; kërkohen {val} konfirmim(e) fundi.",
             "learning_confidence": "Besueshmëria p05 e {cycles} cikleve të etiketuara nga përdoruesi ({p05}); nën këtë vlerë, kërkohet verifikim.",
             "match_interval": "Bazuar në ritmin e vëzhguar të përditësimit (mesatarja={median}s) * 10.",
+            "match_interval_capped": "Kufizuar që {persistence} përputhje të njëpasnjëshme të hyjnë në {pct}% të programit më të shkurtër ({shortest}s); vetëm ritmi i përditësimit (mesatarja={median}s) do të kishte sugjeruar një interval më të gjatë.",
             "max_duration_ratio": "Bazuar në kohëzgjatjet e cikleve të etiketuara (p95={p95}).",
             "min_active": "Bazuar në fuqinë minimale aktive ({min}W) të vëzhguar në ciklin e fundit.",
             "min_duration_ratio": "Mbahet sa më i ulët që një program të njihet herët në cikël; pragjet e besueshmërisë dhe të paqartësisë parandalojnë konfirmimet e parakohshme.",
@@ -2009,7 +2018,9 @@
         "duration_scale": "Etapa 4: raporti logaritmik ku marrëveshja e kohëzgjatjes gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.175)",
         "energy_scale": "Etapa 4: raporti logaritmik ku marrëveshja e energjisë gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.25)",
         "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda qetësie pas kohëzgjatjes së pritur para se të lirohet pritja e shkarkimit në fund të ciklit",
-        "smart_termination_duration_ratio": "Pjesa e kohëzgjatjes së pritur të programit të përputhur që një cikël duhet të arrijë përpara se Përfundimi i Zgjuar të mund ta mbyllë atë herët; uleni për makina që varen nga ngarkesa ose temperatura"
+        "smart_termination_duration_ratio": "Pjesa e kohëzgjatjes së pritur të programit të përputhur që një cikël duhet të arrijë përpara se Përfundimi i Zgjuar të mund ta mbyllë atë herët; uleni për makina që varen nga ngarkesa ose temperatura",
+        "anti_crease_finalize_ratio": "Pjesa e kohëzgjatjes së pritur të programit të përputhur që një cikël duhet të arrijë përpara se bishti i rrotullimit kundër rrudhave të mund të finalizohet; uleni te tharëset me bisht të gjatë rrotullimi, makinat larëse lërini në vlerën e parazgjedhur",
+        "curve_preroll_seconds": "Sekonda leximesh nga përpjekjet e ndërprera për nisje të bartura në fillim të kurbës së një cikli; 0 = joaktiv"
     },
     "col": {
         "profile_tip": "Emri i programit të përputhur. I paetiketuar do të thotë se asnjë profil nuk u përputh në fund të ciklit.",

@@ -1106,7 +1106,9 @@
     "anti_wrinkle_max_power": "En puls över detta avslutar skrynkelskyddet och öppnar en ny cykel",
     "anti_wrinkle_enabled": "Fånga upp tumlingspulserna efter huvudfasen i stället för att läsa dem som nya cykler",
     "anti_wrinkle_max_duration": "En puls längre än detta avslutar skrynkelskyddet och öppnar en ny cykel",
-    "anti_wrinkle_exit_power": "Effekten måste sjunka under detta mellan pulserna för att skrynkelskyddet ska förbli aktivt"
+    "anti_wrinkle_exit_power": "Effekten måste sjunka under detta mellan pulserna för att skrynkelskyddet ska förbli aktivt",
+    "anti_crease_finalize_ratio": "Andel av det matchade programmets förväntade varaktighet som en cykel måste nå innan skrynkelskyddssvansen får avslutas; sänk den på torktumlare med lång svans, lämna tvättmaskiner på standardvärdet",
+    "curve_preroll_seconds": "Sekunders mätvärden från avbrutna startförsök som tas med främst i en cykels kurva; 0 = av"
   },
   "phase_desc": {
     "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
@@ -1204,6 +1206,10 @@
       "label": "Frisläpp efter tyst torkfas",
       "doc": "När cykeln passerar sin förväntade varaktighet: hur länge diskmaskinen måste förbli tyst (under Stopptröskel) innan WashData slutar vänta på en sista tömning och avslutar cykeln. Höj värdet om din maskin har en lång tyst torkfas före en sen sista tömning som missas - ett bredare fönster låter den inlärda varaktigheten följa säsongsvariationer (kallare inloppsvatten = längre cykler) istället för att låsa sig vid det gamla medelvärdet. Det förkortar bara väntetiden i förhållande till den interna gränsen på 30 minuter för slutspiken, aldrig förlänger den."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Kvot för skrynkelskyddsavslut",
+      "doc": "Hur långt in i det matchade programmets förväntade varaktighet en cykel måste vara innan WashData får avgöra att den lågeffektstumling den ser är skrynkelskyddssvansen och avsluta cykeln där. Den förväntade varaktigheten är programmets genomsnitt, så på en torktumlare vars körtid med fuktsensor följer tvättmängden når de flesta körningar aldrig 98% av den, och svansen blir kvar till reserv-timeouten i stället - ofta 15 till 40 minuter efter att maskinen faktiskt stannade. Sänk detta värde (t.ex. 0,75) på en sådan torktumlare. Lämna tvättmaskiner på standardvärdet: en tvättmaskin ligger under Maks. skrynkelskyddseffekt under största delen av sin cykel, så den här andelen är det enda som skiljer en tyst fas mitt i tvätten från svansen, och en sänkning kan halvera en tvätt. Lämna tomt för standardvärdet (0,98). Detta är en annan inställning än Kvot för smart avslutning, som styr en separat kontroll för tidigt avslut."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Känn igen de korta torktumlarpulser med låg effekt en torktumlare avger efter huvuduppvärmningsfasen och håll dem kopplade till den färdiga cykeln istället för att läsa dem som nya cykler.",
       "label": "Aktivera skrynkelskyddsdetektering"
@@ -1235,6 +1241,10 @@
     "completion_min_seconds": {
       "doc": "Cykler som är kortare än detta kasseras som spökcykler (testkörningar, öppna dörren för att lägga till en strumpa).",
       "label": "Min. cykelvaraktighet"
+    },
+    "curve_preroll_seconds": {
+      "label": "Kurvupptakt",
+      "doc": "Hur många sekunders mätvärden från avbrutna startförsök WashData får ta med främst i en cykels kurva. En cykels kurva börjar normalt vid det startförsök som till slut lyckas, så på en maskin som trevar ett par gånger innan den kommer i gång på riktigt - programval, dörrlås, första vattenintag - saknas de första minuterna av verklig aktivitet i varje kurva. Ställ in det här lite högre än den längsta sådana upptakt din maskin har (300 s räcker gott för de flesta). 0 stänger av det. Tänk på att när det slås på flyttas den registrerade starten tidigare, så cykler från före och efter ändringen bär olika varaktigheter för samma program; de inlärda medelvärdena kommer att glida tills de äldre cyklerna fallit ur."
     },
     "delay_confirm_seconds": {
       "doc": "Strömmen måste stanna i standby-bandet så länge innan apparaten behandlas som att den väntar på att starta snarare än att den är igång.",
@@ -1817,6 +1827,7 @@
       "end_repeat_count": "{false}/{total} rena cykler ({pct}%) hade en intern paus på >60s som återupptogs; kräver {val} slutbekräftelse(r).",
       "learning_confidence": "p05-konfidens för {cycles} användarmärkta cykler ({p05}); under detta begärs verifiering.",
       "match_interval": "Baserat på observerad uppdateringstakt (median={median}s) * 10.",
+      "match_interval_capped": "Begränsad så att {persistence} matchningar i följd får plats inom {pct}% av det kortaste programmet ({shortest}s); enbart uppdateringstakten (median={median}s) hade föreslagit ett längre intervall.",
       "max_duration_ratio": "Baserat på varaktigheter för märkta cykler (p95={p95}).",
       "min_active": "Baserat på lägsta aktiva effekt ({min}W) som observerades i senaste cykeln.",
       "min_duration_ratio": "Hålls så låg som möjligt så att ett program känns igen tidigt i cykeln; konfidens- och tvetydighetsgränserna förhindrar förhastade beslut.",

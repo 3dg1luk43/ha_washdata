@@ -1106,7 +1106,9 @@
     "anti_wrinkle_max_power": "Púls yfir þessu slekkur á hrukkuleysi og opnar nýja lotu",
     "anti_wrinkle_enabled": "Fangar veltipúlsana eftir aðalfasann í stað þess að lesa þá sem nýjar lotur",
     "anti_wrinkle_max_duration": "Púls sem er lengri en þetta slekkur á hrukkuleysi og opnar nýja lotu",
-    "anti_wrinkle_exit_power": "Aflið verður að falla undir þetta á milli púlsa til að hrukkuleysi haldist virkt"
+    "anti_wrinkle_exit_power": "Aflið verður að falla undir þetta á milli púlsa til að hrukkuleysi haldist virkt",
+    "anti_crease_finalize_ratio": "Hlutfall af væntanlegri lengd samsvaraða kerfisins sem lota þarf að ná áður en hrukkuvarnarhalanum má ljúka; lækkaðu það fyrir þurrkara með langan hala, skildu þvottavélar eftir á sjálfgefna gildinu",
+    "curve_preroll_seconds": "Sekúndur af mælingum úr misheppnuðum ræsitilraunum sem teknar eru með fremst í ferli lotu; 0 = slökkt"
   },
   "phase_desc": {
     "anti_crease": "Stundum hrynur stutt eftir að því er lokið til að draga úr hrukkum.",
@@ -1204,6 +1206,10 @@
       "label": "Losun eftir hljóðláta þurrkun",
       "doc": "Þegar lotan fer fram úr áætlaðri lengd sinni: hversu lengi uppþvottavélin þarf að vera hljóðlát (undir Stöðvunarþröskuldi) áður en WashData hættir að bíða eftir lokaútdælingu og lýkur lotunni. Hækkaðu gildið ef vélin þín er með langan hljóðlátan þurrkfasa á undan seinni lokaútdælingu sem sleppur fram hjá - breiðari gluggi leyfir lærðu lengdinni að fylgja árstíðabundnum breytingum (kaldara innrennslisvatn = lengri lotur) í stað þess að festast við gamla meðaltalið. Það styttir aðeins biðtímann miðað við innra 30 mínútna hámark fyrir lokatoppinn, lengir hann aldrei."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Hlutfall fyrir lok hrukkuvarnar",
+      "doc": "Hversu langt inn í væntanlega lengd samsvaraða kerfisins lota þarf að vera komin áður en WashData má ákveða að lágaflsveltan sem hún sér sé hrukkuvarnarhalinn og ljúka lotunni þar. Væntanlega lengdin er meðaltal kerfisins, þannig að í þurrkara þar sem keyrslutími með rakaskynjara ræðst af magni þvottarins ná flestar keyrslur aldrei 98% af henni og halinn situr þess í stað þar til vara-tímamörkin renna út - oft 15 til 40 mínútum eftir að vélin stöðvaðist í raun. Lækkaðu þetta gildi (t.d. 0,75) í slíkum þurrkara. Skildu þvottavélar eftir á sjálfgefna gildinu: þvottavél er undir Hám. hrukkuleys-afli mestallan sinn tíma, þannig að þetta hlutfall er það eina sem skilur rólegan áfanga í miðjum þvotti frá halanum, og lækkun getur helmingað þvott. Skildu eftir autt fyrir sjálfgefið gildi (0,98). Þetta er önnur stilling en Hlutfall snjallrar lokunar, sem stýrir sjálfstæðri athugun á snemmbúinni lokun."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Viðurkenndu stuttu lág-afls þurrkarapúlsana sem þurrkari gefur frá sér eftir aðalhitafasann og haltu þeim tengdum við lokið lotu í stað þess að lesa þá sem nýjar lotur.",
       "label": "Virkja hrukkuleysi-greiningu"
@@ -1235,6 +1241,10 @@
     "completion_min_seconds": {
       "doc": "Hringrásum sem eru styttri en þetta er fleygt sem draugalotum (prófun, opnun á hurðinni til að bæta við sokk).",
       "label": "Lágm. lotulengd"
+    },
+    "curve_preroll_seconds": {
+      "label": "Aðdragandi ferils",
+      "doc": "Hversu margar sekúndur af mælingum úr misheppnuðum ræsitilraunum WashData má taka með fremst í ferli lotu. Ferill lotu byrjar venjulega á þeirri ræsitilraun sem loks tekst, þannig að í vél sem þreifar sig áfram nokkrum sinnum áður en hún fer almennilega í gang - kerfisval, hurðarlæsing, fyrsta vatnsinntak - vantar fyrstu mínúturnar af raunverulegri virkni í hvern feril. Stilltu þetta aðeins hærra en lengsti slíkur aðdragandi vélarinnar þinnar (300 s duga flestum). 0 slekkur á þessu. Athugaðu að þegar kveikt er á því færist skráð upphaf framar, þannig að lotur fyrir og eftir breytinguna bera ólíka lengd fyrir sama kerfi; lærðu meðaltölin skekkjast þar til eldri loturnar detta út."
     },
     "delay_confirm_seconds": {
       "doc": "Rafmagn verður að vera í biðstöðu í þetta lengi áður en heimilistækið er meðhöndlað sem bið eftir að ræsa sig frekar en í gangi.",
@@ -1817,6 +1827,7 @@
       "end_repeat_count": "{false}/{total} hreinar lotur ({pct}%) höfðu innri hlé lengra en 60s sem hélt svo áfram; krefst {val} staðfestinga á lokum.",
       "learning_confidence": "p05-vissa fyrir {cycles} lotur sem notandi merkti ({p05}); undir þessu er beðið um staðfestingu.",
       "match_interval": "Byggt á mældri uppfærslutíðni (miðgildi={median}s) * 10.",
+      "match_interval_capped": "Takmarkað þannig að {persistence} samfelldar samsvaranir rúmist innan {pct}% af stysta kerfinu ({shortest}s); uppfærslutíðnin ein og sér (miðgildi={median}s) hefði stungið upp á lengra bili.",
       "max_duration_ratio": "Byggt á lengd merktra lota (p95={p95}).",
       "min_active": "Byggt á lægsta virka afli ({min}W) sem mældist í síðustu lotu.",
       "min_duration_ratio": "Haldið eins lágu og hægt er svo að kerfi greinist snemma í lotunni; vissu- og tvíræðnimörkin koma í veg fyrir ótímabærar ákvarðanir.",

@@ -1174,6 +1174,10 @@
       "label": "Uvolnění po tiché fázi sušení",
       "doc": "Jakmile cyklus překročí svou očekávanou dobu trvání, jak dlouho musí myčka zůstat v klidu (pod Prahem zastavení), než WashData přestane čekat na závěrečné odčerpání vody a ukončí cyklus. Zvyšte hodnotu, pokud má váš spotřebič dlouhou tichou fázi sušení před pozdním závěrečným odčerpáním, které uniká detekci - širší okno umožňuje, aby naučená doba trvání sledovala sezonní posun (studenější přiváděná voda = delší cykly) místo toho, aby zůstala uzamčená na starém průměru. Čekání pouze zkracuje vzhledem k internímu 30minutovému limitu čekání na závěrečné odčerpání, nikdy jej neprodlužuje."
     },
+    "anti_crease_finalize_ratio": {
+      "doc": "Jak daleko v očekávané době trvání přiřazeného programu musí cyklus být, než smí WashData vyhodnotit pozorované otáčení bubnu s nízkým příkonem jako ocas ochrany před zmačkáním a cyklus tam ukončit. Očekávaná doba trvání je průměr programu, takže u sušičky, jejíž doba senzorového sušení se řídí náplní, většina běhů nikdy nedosáhne 98 % této hodnoty a ocas zůstane viset až do záložního časového limitu - často 15 až 40 minut poté, co se stroj skutečně zastavil. U takové sušičky hodnotu snižte (např. 0,75). U praček ponechte výchozí hodnotu: pračka stráví většinu cyklu pod hodnotou Max. výkon ochrany před zmačkáním, takže tento zlomek je jediné, co odděluje tichou fázi uprostřed praní od ocasu, a jeho snížení může praní zkrátit na polovinu. Ponechte prázdné pro výchozí hodnotu (0,98). Je to jiné nastavení než Poměr chytrého ukončení, které řídí samostatnou kontrolu dřívějšího ukončení.",
+      "label": "Poměr dokončení ochrany před zmačkáním"
+    },
     "anti_wrinkle_enabled": {
       "doc": "Rozpoznejte krátké impulzy s nízkým příkonem, které sušič emituje po hlavní tepelné fázi, a udržte je připojené k dokončenému cyklu místo čtení jako nové cykly.",
       "label": "Povolit detekci ochrany před zmačkáním"
@@ -1604,6 +1608,10 @@
     "energy_price_dynamic": {
       "label": "Časově vážené náklady",
       "doc": "Účtuje každý cyklus cenou platnou v každém okamžiku jeho běhu místo jediné ceny platné v okamžiku jeho dokončení. Týká se pouze entity ceny (statická cena se měnit nemůže). Nevyžaduje žádné další nastavení: cena se sleduje živě po celou dobu cyklu a Zpracování historie v Diagnostice přepočítá náklady starších cyklů z recorderu. Vypnuto = klasické chování, jedna cena zafixovaná na konci."
+    },
+    "curve_preroll_seconds": {
+      "doc": "Kolik sekund odečtů z neúspěšných pokusů o spuštění může WashData přenést na začátek křivky cyklu. Křivka cyklu obvykle začíná u pokusu o spuštění, který nakonec uspěl, takže u stroje, který to před rozběhnutím několikrát zkusí - volba programu, zámek dveří, první napouštění - chybí v každé křivce první minuty skutečné činnosti. Nastavte tuto hodnotu o něco výše, než je nejdelší takový rozběh vašeho stroje (300 s většině bohatě stačí). 0 funkci vypne. Mějte na paměti, že zapnutí posune zaznamenaný začátek dříve, takže cykly zaznamenané před změnou a po ní nesou pro stejný program různé doby trvání; naučené průměry se budou posouvat, dokud starší cykly nevypadnou z historie.",
+      "label": "Náběh křivky"
     }
   },
   "setting_group": {
@@ -1787,6 +1795,7 @@
       "end_repeat_count": "{false}/{total} čistých cyklů ({pct}%) mělo vnitřní pauzu >60s, která pokračovala; vyžadovat {val} potvrzení konce.",
       "learning_confidence": "Jistota p05 z {cycles} cyklů označených uživatelem ({p05}); pod touto hodnotou vyžádat ověření.",
       "match_interval": "Na základě pozorované frekvence aktualizací (medián={median}s) * 10.",
+      "match_interval_capped": "Omezeno tak, aby se {persistence} po sobě jdoucích shod vešlo do {pct}% nejkratšího programu ({shortest}s); samotná frekvence aktualizací (medián={median}s) by navrhla delší interval.",
       "max_duration_ratio": "Na základě délek označených cyklů (p95={p95}).",
       "min_active": "Na základě minimálního činného výkonu ({min}W) zaznamenaného v posledním cyklu.",
       "min_duration_ratio": "Ponecháno co nejnižší, aby byl program rozpoznán brzy v cyklu; prahy jistoty a nejednoznačnosti brání předčasnému potvrzení.",
@@ -1984,6 +1993,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Myčka: tiché sekundy po očekávané době trvání, než se uvolní čekání na závěrečné odčerpání vody",
     "smart_termination_duration_ratio": "Zlomek očekávané doby trvání přiřazeného programu, kterého musí cyklus dosáhnout, než jej Chytré ukončení může ukončit dříve; snižte jej u strojů závislých na náplni nebo teplotě",
+    "anti_crease_finalize_ratio": "Zlomek očekávané doby trvání přiřazeného programu, kterého musí cyklus dosáhnout, než lze ukončit ocas otáčení ochrany před zmačkáním; snižte jej u sušiček s dlouhým ocasem otáčení, u praček ponechte výchozí hodnotu",
     "anti_wrinkle_enabled": "Pohltit impulzy bubnu po hlavní fázi místo čtení jako nové cykly",
     "anti_wrinkle_exit_power": "Výkon musí mezi impulzy klesnout pod tuto hodnotu, aby ochrana před zmačkáním zůstala aktivní",
     "anti_wrinkle_idle_timeout": "Povolený klid mezi dvěma impulzy bubnu, než ochrana před zmačkáním skončí",
@@ -2009,7 +2019,8 @@
     "dtw_ddtw_scale": "Fáze 3: vzdálenost polosaturace DDTW; menší = citlivější na tvar (výchozí 30)",
     "dtw_refine_top_n": "Fáze 3: kandidáti, které DTW přehodnotí; zvyšte na 7-9, pokud správný profil skončí na 4.-5. místě (výchozí 5)",
     "duration_scale": "Fáze 4: logaritmický poměr, při kterém se shoda délky trvání sníží na polovinu; menší = přísnější penalizace (výchozí 0,175)",
-    "energy_scale": "Fáze 4: logaritmický poměr, při kterém se shoda energie sníží na polovinu; menší = přísnější penalizace (výchozí 0,25)"
+    "energy_scale": "Fáze 4: logaritmický poměr, při kterém se shoda energie sníží na polovinu; menší = přísnější penalizace (výchozí 0,25)",
+    "curve_preroll_seconds": "Sekundy odečtů z neúspěšných pokusů o spuštění přenesené na začátek křivky cyklu; 0 = vypnuto"
   },
   "col": {
     "profile_tip": "Název odpovídajícího programu. Bez štítku znamená, že na konci cyklu nebyl nalezen žádný profil.",

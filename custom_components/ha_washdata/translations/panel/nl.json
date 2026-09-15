@@ -1106,7 +1106,9 @@
     "anti_wrinkle_max_power": "Een puls boven dit niveau beëindigt anti-kreuk en opent een nieuwe cyclus",
     "anti_wrinkle_enabled": "De tuimelpulsen na de hoofdfase opvangen in plaats van ze als nieuwe cycli te lezen",
     "anti_wrinkle_max_duration": "Een puls die langer is dan dit beëindigt anti-kreuk en opent een nieuwe cyclus",
-    "anti_wrinkle_exit_power": "Het vermogen moet tussen de pulsen onder dit niveau vallen om anti-kreuk actief te houden"
+    "anti_wrinkle_exit_power": "Het vermogen moet tussen de pulsen onder dit niveau vallen om anti-kreuk actief te houden",
+    "anti_crease_finalize_ratio": "Deel van de verwachte duur van het herkende programma dat een cyclus moet bereiken voordat de anti-kreuknaloop mag worden afgesloten; verlaag het bij drogers met een lange naloop, laat wasmachines op de standaardwaarde",
+    "curve_preroll_seconds": "Seconden aan metingen uit afgebroken startpogingen die vooraan in de curve van een cyclus worden opgenomen; 0 = uit"
   },
   "phase_desc": {
     "anti_crease": "Af en toe kort tuimelen na voltooiing om rimpels te verminderen.",
@@ -1204,6 +1206,10 @@
       "label": "Vrijgave na stille droogfase",
       "doc": "Zodra de cyclus zijn verwachte duur voorbij is: hoe lang de vaatwasser stil moet blijven (onder de Stopdrempel) voordat WashData niet langer op een laatste wegpompen wacht en de cyclus beëindigt. Verhoog dit als uw machine een lange stille droogfase heeft vóór een laat laatste wegpompen dat wordt gemist - een breder venster laat de geleerde duur de seizoensdrift volgen (kouder toevoerwater = langere cycli) in plaats van vast te houden aan het oude gemiddelde. Het verkort de wachttijd alleen ten opzichte van de interne limiet van 30 minuten voor de eindpiek, en verlengt die nooit."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Verhouding afsluiten anti-kreuknaloop",
+      "doc": "Hoe ver een cyclus in de verwachte duur van het herkende programma moet zijn voordat WashData mag besluiten dat het waargenomen tuimelen met laag vermogen de anti-kreuknaloop is en de cyclus daar mag afsluiten. De verwachte duur is het gemiddelde van het programma, dus bij een droger waarvan de looptijd met vochtsensor meebeweegt met de belading haalt het merendeel van de draaien nooit 98% daarvan, en blijft de naloop staan tot de fallback-time-out - vaak 15 tot 40 minuten nadat de machine daadwerkelijk is gestopt. Verlaag deze waarde (bijv. 0,75) op zo'n droger. Laat wasmachines op de standaardwaarde staan: een wasmachine zit het grootste deel van haar cyclus onder het Max. anti-kreuk vermogen, dus deze fractie is het enige wat een rustige fase midden in de was van de naloop onderscheidt, en verlagen kan een wasbeurt halveren. Laat leeg voor de standaard (0,98). Dit is een andere instelling dan de Verhouding slimme beëindiging, die een aparte controle op vroegtijdig afsluiten regelt."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Herken de korte tuimelpulsen met laag vermogen die een droger afgeeft na de hoofdverwarmingsfase en houd ze vast aan het voltooide programma in plaats van ze als nieuwe cycli te lezen.",
       "label": "Anti-kreuk detectie inschakelen"
@@ -1235,6 +1241,10 @@
     "completion_min_seconds": {
       "doc": "Cycli korter dan dit worden weggegooid als spookcycli (testruns, de deur openen om een sok toe te voegen).",
       "label": "Min. cyclusduur"
+    },
+    "curve_preroll_seconds": {
+      "label": "Curve-aanloop",
+      "doc": "Hoeveel seconden aan metingen uit afgebroken startpogingen WashData vooraan in de curve van een cyclus mag opnemen. De curve van een cyclus begint normaal bij de startpoging die uiteindelijk slaagt, dus bij een machine die een paar keer aftast voordat ze echt begint - programmakeuze, deurvergrendeling, eerste vulling - ontbreken de eerste minuten echte activiteit in elke curve. Stel dit iets hoger in dan de langste aanloop die uw machine heeft (300 s is voor de meeste ruim voldoende). 0 schakelt het uit. Houd er rekening mee dat inschakelen het geregistreerde begin naar voren verschuift, zodat cycli van voor en na de wijziging verschillende duren dragen voor hetzelfde programma; de geleerde gemiddelden verschuiven tot de oudere cycli zijn afgevallen."
     },
     "delay_confirm_seconds": {
       "doc": "De stroom moet zo lang in de standby-band blijven voordat het apparaat wordt behandeld als wachtend om te starten in plaats van als actief.",
@@ -1817,6 +1827,7 @@
       "end_repeat_count": "{false}/{total} schone cycli ({pct}%) hadden een interne pauze >60s die werd hervat; vereis {val} eindbevestiging(en).",
       "learning_confidence": "p05-betrouwbaarheid van {cycles} door de gebruiker gelabelde cycli ({p05}); daaronder wordt om verificatie gevraagd.",
       "match_interval": "Op basis van de waargenomen updatecadans (mediaan={median}s) * 10.",
+      "match_interval_capped": "Begrensd zodat {persistence} opeenvolgende herkenningen binnen {pct}% van het kortste programma ({shortest}s) passen; de updatecadans alleen (mediaan={median}s) had een langer interval voorgesteld.",
       "max_duration_ratio": "Op basis van de duur van gelabelde cycli (p95={p95}).",
       "min_active": "Op basis van het minimale actieve vermogen ({min}W) dat in de laatste cyclus is waargenomen.",
       "min_duration_ratio": "Zo laag mogelijk gehouden zodat een programma vroeg in de cyclus wordt herkend; de betrouwbaarheids- en ambiguïteitsdrempels voorkomen voortijdige beslissingen.",

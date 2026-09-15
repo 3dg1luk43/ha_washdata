@@ -1086,6 +1086,8 @@
     "anti_wrinkle_idle_timeout": "Kahe trummelimpulsi vahel lubatud vaikuseaeg enne kortsudevastase režiimi lõppu",
     "anti_wrinkle_max_duration": "Sellest pikem impulss lõpetab kortsudevastase režiimi ja avab uue tsükli",
     "anti_wrinkle_max_power": "Sellest kõrgem impulss lõpetab kortsudevastase režiimi ja avab uue tsükli",
+    "anti_crease_finalize_ratio": "Osa vastendatud programmi eeldatavast kestusest, milleni tsükkel peab jõudma, enne kui kortsudevastase trummeldamise saba tohib lõpetada; vähendage seda pika sabaga kuivatitel, jätke pesumasinad vaikeväärtusele",
+    "curve_preroll_seconds": "Katkenud käivituskatsete näitude sekundid, mis kantakse tsükli kõvera algusse; 0 = väljas",
     "completion_min_seconds": "Lühim käivitus, mis loetakse päris tsükliks",
     "end_repeat_count": "Madalate näitude arv järjest enne lõpetamist",
     "interrupted_min_seconds": "Lühikesed tsüklid märgitakse katkestatuks",
@@ -1204,6 +1206,10 @@
       "label": "Passiivkuivatuse vaikne vabastamine",
       "doc": "Kui tsükkel ületab oma eeldatava kestuse, siis kui kaua peab nõudepesumasin püsima vaikne (allpool Peatumise Lävi), enne kui WashData lõpetab lõpliku tühjenduse ootamise ja lõpetab tsükli. Suurendage seda, kui teie masinal on pikk vaikne kuivatusfaas enne hilist lõplikku tühjendust, mis jääb märkamata - laiem aken laseb õpitud kestusel järgida hooajalist triivi (külmem sissevoolav vesi = pikemad tsüklid), selle asemel et lukustuda vana keskmise külge. See saab ooteaega üksnes lühendada võrreldes sisemise 30-minutilise lõpupiigi ülempiiriga, mitte kunagi seda pikendada."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Kortsudevastase lõpetamise suhe",
+      "doc": "Kui kaugele vastendatud programmi eeldatavast kestusest peab tsükkel jõudma, enne kui WashData tohib otsustada, et nähtav väikese võimsusega trummeldamine on kortsudevastane saba, ja tsükli seal lõpetada. Eeldatav kestus on programmi keskmine, seega kuivatil, mille andurkuivatuse tööaeg sõltub pesukogusest, ei jõua enamik tsükleid kunagi 98%-ni sellest ning saba jääb selle asemel ootama tagavara-aegumist - sageli 15 kuni 40 minutit pärast seda, kui masin tegelikult seiskus. Vähendage seda (nt 0,75) sellisel kuivatil. Jätke pesumasinad vaikeväärtusele: pesumasin püsib suurema osa oma tsüklist allpool seadet Maks Kortsudevastane Võimsus, nii et see osakaal on ainus, mis eristab pesu keskel olevat vaikset faasi sabast, ja selle vähendamine võib pesu poole lühemaks lõigata. Jätke tühjaks vaikeväärtuse jaoks (0,98). See on eri seade kui Nutika lõpetamise suhe, mis juhib eraldi varajase lõpetamise kontrolli."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Tuvastage lühikesed väikese võimsusega trummelimpulsid, mida kuivati pärast peamist kuumutusfaasi kiirgab, ja hoidke need valmis tsükliga ühendatud, selle asemel, et lugeda neid uute tsüklitena.",
       "label": "Luba Kortsudevastane Tuvastamine"
@@ -1235,6 +1241,10 @@
     "completion_min_seconds": {
       "doc": "Sellest lühemad tsüklid jäetakse kummitustsüklitena kõrvale (testisõidud, soki lisamiseks ukse avamine).",
       "label": "Min Tsükli Kestus"
+    },
+    "curve_preroll_seconds": {
+      "label": "Kõvera eeljooks",
+      "doc": "Mitu sekundit katkenud käivituskatsete näite tohib WashData kanda tsükli kõvera algusse. Tsükli kõver algab tavaliselt sellest käivituskatsest, mis lõpuks õnnestub, seega masinal, mis kobab paar korda enne tegelikku käivitumist - programmi valik, ukselukk, esimene veevõtt - puuduvad igalt kõveralt tegeliku tegevuse esimesed minutid. Seadke see veidi suuremaks kui teie masina pikim selline eeljooks (300 s on enamikule küllaga). 0 lülitab selle välja. Pange tähele, et sisselülitamine nihutab salvestatud alguse varasemaks, nii et enne ja pärast muudatust salvestatud tsüklid kannavad sama programmi kohta erinevat kestust; õpitud keskmised triivivad, kuni vanemad tsüklid välja langevad."
     },
     "delay_confirm_seconds": {
       "doc": "Toide peab jääma ooterežiimi sagedusalasse nii kauaks, enne kui seadet käsitletakse kui käivitust ootavat, mitte töötavat.",
@@ -1960,6 +1970,7 @@
       "end_repeat_count": "{false}/{total} puhtast tsüklist ({pct}%) sisaldas üle 60s kestnud sisemist pausi, mis jätkus; nõuab {val} lõpukinnitust.",
       "learning_confidence": "p05 usaldusväärsus {cycles} kasutaja märgistatud tsükli puhul ({p05}); sellest allpool küsitakse kinnitust.",
       "match_interval": "Põhineb täheldatud uuendustempol (mediaan={median}s) * 10.",
+      "match_interval_capped": "Piiratud nii, et {persistence} järjestikust vastet mahuks lühima programmi ({shortest}s) {pct}% sisse; ainuüksi uuendustempo (mediaan={median}s) oleks soovitanud pikemat intervalli.",
       "max_duration_ratio": "Põhineb märgistatud tsüklite kestustel (p95={p95}).",
       "min_active": "Põhineb viimases tsüklis täheldatud madalaimal aktiivvõimsusel ({min}W).",
       "min_duration_ratio": "Hoitakse võimalikult madal, et programm tuvastataks tsükli alguses varakult; usaldus- ja mitmetimõistetavuse lävid hoiavad ära enneaegsed otsused.",

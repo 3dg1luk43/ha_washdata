@@ -138,6 +138,8 @@ CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true
 CONF_ANTI_WRINKLE_IDLE_TIMEOUT = "anti_wrinkle_idle_timeout"  # Seconds below exit power before anti-wrinkle ends
 CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE = "dishwasher_end_spike_quiet_release"  # Dishwasher: sustained-quiet seconds after expected duration that release the end-of-cycle drain wait early (#379)
 CONF_SMART_TERMINATION_DURATION_RATIO = "smart_termination_duration_ratio"  # Fraction of the matched profile's expected (mean) duration that Smart Termination requires before it may fire (#393)
+CONF_ANTI_CREASE_FINALIZE_RATIO = "anti_crease_finalize_ratio"  # Fraction of the matched profile's expected (mean) duration the anti-crease finalise requires before it may fire (#429)
+CONF_CURVE_PREROLL_SECONDS = "curve_preroll_seconds"  # How far back readings from aborted start probes may be carried into a committed cycle's curve; 0 = off (#430)
 CONF_DELAY_START_DETECT_ENABLED = "delay_start_detect_enabled"  # Enable delayed-start detection
 CONF_DELAY_CONFIRM_SECONDS = "delay_confirm_seconds"  # Seconds power must stay in standby band before DELAY_WAIT engages
 CONF_DELAY_TIMEOUT_HOURS = "delay_timeout_hours"  # Safety timeout (hours) while waiting to start
@@ -331,6 +333,49 @@ DEFAULT_WATCHDOG_INTERVAL = 30  # Floor; effective default is resolved per devic
 # as max(this, 2*sampling_interval + 1) - see resolve_watchdog_interval_default (#396).
 DEFAULT_MATCH_PERSISTENCE = 3
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
+
+# Share of the SHORTEST known profile that the match-interval suggestion is
+# allowed to spend before a program can first be committed (#431).  The
+# suggestion used to be cadence-only (`median_dt * 10`), so a plug reporting
+# every 60 s produced 599 s - longer than DEFAULT_PROFILE_MATCH_INTERVAL itself,
+# which makes applying the suggestion strictly worse than never touching the
+# setting.  The budget is spent on `match_persistence` consecutive matches, so
+# the cap is applied to `interval * persistence` rather than to the interval
+# alone; otherwise raising persistence brings the problem straight back.  At the
+# default persistence of 3 this is exactly the "shortest / 20" rule the reporter
+# proposed (3 / 20 = 0.15).  It bounds only the *suggestion* - a hand-set
+# interval is still whatever the user typed.
+MATCH_INTERVAL_SUGGESTION_DECISION_FRAC = 0.15
+
+# Issue #430: a cycle's curve begins at the start probe that finally COMMITS.
+# Earlier probes that aborted as false starts take their readings with them, so
+# on an appliance that probes repeatedly before settling (programme selection,
+# door lock, first fill) the first 40-217 s of real activity - up to 17 readings
+# on the reporter's dishwashers - is missing from the front of every curve. #403
+# makes this more common, not less: the first high reading now earns no evidence
+# toward either start gate, so a sparse change-only sensor aborts more probes.
+#
+# The detector keeps its own small ring buffer rather than reaching into the
+# manager's diag_buffer: that one is manager-owned and records RAW readings
+# before throttling, while the curve is built from throttled ones, so joining
+# the two would splice two different sample populations into one curve.
+#
+# OFF BY DEFAULT, and it must stay that way. The stored duration is
+# ``end_time - _current_cycle_start`` and matching resamples the stored curve, so
+# the start pointer has to move back with the curve or the two disagree - which
+# means avg_duration shifts. Cycles recorded before and after a change therefore
+# carry different durations for the SAME program, widening the envelope and
+# moving expected_duration (which arms Smart Termination x0.98 and the #429
+# anti-crease ratio) until the old cycles age out of the retention cap.
+DEFAULT_CURVE_PREROLL_SECONDS = 0.0  # 0 = off
+# Upper bound on the option, so a mistyped value cannot drag minutes of unrelated
+# standby into a curve. 300 s covered every appliance the reporter measured.
+CURVE_PREROLL_MAX_SECONDS = 600.0
+# A quiet stretch longer than this ends the carry: it separates "the same start,
+# probed twice" from "an unrelated blip earlier in the day". Deliberately a
+# constant, not an option - it is a property of how appliances probe, and one
+# more knob here is one more way to widen a curve by accident.
+PREROLL_CHAIN_BREAK_SECONDS = 90.0
 
 # Matching & Termination Stability
 DEFAULT_MATCH_REVERT_RATIO = 0.4  # Drop from peak score to revert to detecting
@@ -811,7 +856,36 @@ STANDBY_BAND_FLATNESS_FLOOR_W = 2.0   # absolute flatness floor for low-peak dev
 # that never heats is left alone.  Asymmetric (finalise-only, can only shorten the
 # wait) and self-correcting (a new wash's heating burst leaves the regime and
 # re-arms matching).
-ANTI_CREASE_FINALIZE_RATIO = 0.98      # elapsed must reach 98% of expected duration
+# Issue #429: the ratio is per-appliance (CONF_ANTI_CREASE_FINALIZE_RATIO, range
+# 0.50-1.00, empty = this default), for the same reason as #393 - and note that
+# this is a DIFFERENT gate from CONF_SMART_TERMINATION_DURATION_RATIO, which
+# gates Smart Termination rather than the finalise into STATE_ANTI_WRINKLE.
+# ``_expected_duration`` is the profile's outlier-filtered arithmetic MEAN, so on
+# a sensor-dry program (runtime follows the load, not the clock) a fixed 98% of
+# the mean is unreachable for about half the runs by construction, and the path
+# built for exactly that tail can never engage. Measured by the reporter on a
+# condenser dryer: 15 of 15 matched runs landed at 0.38-0.92 of expected and all
+# 15 ended by fallback timeout, 14-39 min (median 27) after the last real
+# activity; at 0.75 the finalise fired on all 3 subsequent runs, 6-12 min after.
+#
+# Left per-appliance rather than re-defaulted, and NOT device-type-resolved,
+# because the safe value is a property of the individual machine: the reporter's
+# heat-pump dryer has no comparable tumble tail and closes 0.8-1.5 min after its
+# last high reading, so the fixed ratio costs it nothing.
+#
+# LOWER IT ON DRYERS, NOT ON WASHING MACHINES. On a washer this ratio is the
+# whole discriminator between the post-wash tail and a mid-wash trough (see the
+# rationale above): a washer spends most of its cycle below
+# ``anti_wrinkle_max_power``, so the low-power window check cannot tell the two
+# apart, and neither can the #364 trailing-power check (``_smart_term_power_
+# plausible`` compares against the profile's OWN tail level, which is also low).
+# ``_anticrease_spin_pending`` (#399) covers the terminal-spin case but fails
+# open when the profile carries no terminal high block.
+DEFAULT_ANTI_CREASE_FINALIZE_RATIO = 0.98  # elapsed must reach 98% of expected duration
+# Backwards-compatible alias: the pre-#429 module-level constant. Kept so older
+# imports (and anything pinned in the lab) still resolve; the detector reads the
+# per-device config field, never this.
+ANTI_CREASE_FINALIZE_RATIO = DEFAULT_ANTI_CREASE_FINALIZE_RATIO
 ANTI_CREASE_CONFIRM_WINDOW_S = 180.0   # recent window that must hold no reading > max_power
 
 # Issue #399: both conditions above look BACKWARDS, so a wash whose final spin
