@@ -1936,7 +1936,14 @@ async def ws_get_profiles(
         # programme (register item 238).
         terminal: dict[str, Any] = {}
         try:
-            for _name in profiles:
+            for _profile in profiles:
+                # `profiles` is list_profiles(): a list of profile DICTS, not names.
+                # Passing the dict straight in compared it against each cycle's
+                # `profile_name` string, which can never match, so the feature
+                # returned {} for every device while raising nothing.
+                _name = _profile.get("name") if isinstance(_profile, dict) else None
+                if not _name:
+                    continue
                 _sig = manager.profile_store.compute_profile_terminal_signature(_name)
                 if _sig is not None:
                     terminal[_name] = _sig

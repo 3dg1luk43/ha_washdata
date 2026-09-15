@@ -5729,6 +5729,68 @@ class ProfileStore:
         except Exception:  # pragma: no cover - defensive; never break the sensor
             return []
 
+    def resolve_profile_duration(self, profile_name: str) -> float | None:
+        """A profile's expected duration the way the MATCHER resolves it, or None.
+
+        `_build_match_snapshots` takes the first usable of three sources, and a
+        caller that checks fewer of them disagrees with the candidate pool about
+        which profiles exist and how long they are:
+
+          1. ``profile["avg_duration"]`` - the rolling average.
+          2. the sample cycle's own ``duration``.
+          3. the wall-clock span of that cycle's stored trace.
+
+        Source 3 is the weaker cousin of the builder's third fallback, which uses
+        the RESAMPLED segment's span (and therefore the longest gap-free run). The
+        raw span is used here because resampling is too expensive for a caller on
+        the event loop, and it errs the same way item 251 does: toward believing a
+        profile is usable, never toward hiding one.
+
+        Never raises; returns ``None`` when no source yields a positive duration.
+        """
+        try:
+            profiles = self._data.get("profiles") or {}
+            profile = profiles.get(profile_name) if isinstance(profiles, dict) else None
+            if not isinstance(profile, dict):
+                return None
+
+            def _positive(value: Any) -> float | None:
+                try:
+                    number = float(value or 0.0)
+                except (TypeError, ValueError, OverflowError):
+                    return None
+                if not math.isfinite(number) or number <= 0:
+                    return None
+                return number
+
+            direct = _positive(profile.get("avg_duration"))
+            if direct is not None:
+                return direct
+
+            sample_id = profile.get("sample_cycle_id")
+            # find_stored_cycle returns (cycle, origin), not the cycle.
+            sample = self.find_stored_cycle(sample_id)[0] if sample_id else None
+            if sample is None:
+                for candidate in self.iter_evidence_cycles():
+                    if candidate.get("profile_name") == profile_name and candidate.get(
+                        "power_data"
+                    ):
+                        sample = candidate
+                        break
+            if sample is None:
+                return None
+
+            stored = _positive(sample.get("duration"))
+            if stored is not None:
+                return stored
+
+            points = decompress_power_data(cast(Any, sample))
+            if len(points) < 2:
+                return None
+            return _positive(points[-1][0] - points[0][0])
+        except Exception:  # noqa: BLE001 - a duration lookup must never raise
+            return None
+
     def compute_profile_terminal_signature(
         self, profile_name: str
     ) -> dict[str, Any] | None:
