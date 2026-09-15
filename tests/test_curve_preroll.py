@@ -49,7 +49,9 @@ from custom_components.ha_washdata.const import (
     DEFAULT_CURVE_PREROLL_SECONDS,
     DOMAIN,
     PREROLL_CHAIN_BREAK_SECONDS,
+    STATE_DELAY_WAIT,
     STATE_OFF,
+    STATE_STARTING,
     STATE_RUNNING,
 )
 from custom_components.ha_washdata.cycle_detector import (
@@ -277,6 +279,66 @@ def test_previous_cycle_tail_is_never_carried_over() -> None:
     det.reset()
     assert det._preroll_buffer == []
     assert det.state == STATE_OFF
+
+
+def _delayed_start_detector(preroll: float, confirm_s: float = 40.0) -> CycleDetector:
+    """A detector that parks in DELAY_WAIT, then confirms on sustained power."""
+    cfg = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=60,
+        completion_min_seconds=600,
+        start_duration_threshold=confirm_s,
+        start_energy_threshold=0.0,
+        start_threshold_w=100.0,
+        stop_threshold_w=4.0,
+        delay_detect_enabled=True,
+        delay_confirm_seconds=30.0,
+        curve_preroll_seconds=preroll,
+    )
+    det = CycleDetector(
+        config=cfg, on_state_change=Mock(), on_cycle_end=Mock(), profile_matcher=None
+    )
+    det.process_reading(0.0, _dt(0))
+    for t in range(10, 70, 10):  # standby band -> DELAY_WAIT
+        det.process_reading(25.0, _dt(t))
+    assert det.state == STATE_DELAY_WAIT
+    return det
+
+
+def test_delayed_start_keeps_the_samples_between_anchor_and_confirmation() -> None:
+    """The DELAY_WAIT commit built its curve from two points and dropped the rest.
+
+    The anchor is the first sustained-high reading and the confirmation arrives
+    `start_duration_threshold` later, so everything measured in between was
+    thrown away even though the buffer records in DELAY_WAIT.
+    """
+    det = _delayed_start_detector(300.0)
+    for t in range(100, 160, 10):  # high power: anchor at 100, confirms at 140
+        det.process_reading(800.0, _dt(t))
+
+    assert det.state in (STATE_STARTING, STATE_RUNNING)
+    assert det._current_cycle_start == _dt(100), "the delayed-start anchor must hold"
+    carried = [ts for ts, _p in det._power_readings if _dt(100) <= ts <= _dt(140)]
+    assert len(carried) >= 4, (
+        "the readings measured during the confirmation window are missing from "
+        f"the curve: {[t.second for t in carried]}"
+    )
+
+
+def test_a_short_preroll_window_cannot_move_the_delayed_anchor_forward() -> None:
+    """The guard: pre-roll only ever moves the start pointer earlier.
+
+    With a 15 s window and a 40 s confirmation the buffered chain begins well
+    after the anchor, and adopting its first reading as the start would shorten
+    the delayed cycle by the difference.
+    """
+    det = _delayed_start_detector(15.0)
+    for t in range(100, 160, 10):
+        det.process_reading(800.0, _dt(t))
+
+    assert det.state in (STATE_STARTING, STATE_RUNNING)
+    assert det._current_cycle_start == _dt(100)
+    assert det._power_readings[0][0] == _dt(100)
 
 
 def test_buffer_is_not_filled_while_a_cycle_runs() -> None:

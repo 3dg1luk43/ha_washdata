@@ -1438,6 +1438,13 @@ class CycleDetector:
                         if timestamp != start_timestamp:
                             self._power_readings.append((timestamp, power))
                         self._cycle_max_power = max(start_power, power)
+                        # #430: the buffer records in DELAY_WAIT too, so the
+                        # readings between the anchor and this confirmation exist
+                        # and would otherwise be dropped - the curve would span the
+                        # confirmation window with two points. Never moves the
+                        # anchor forward (see _apply_curve_preroll), and is a no-op
+                        # while the option is off, which is the default.
+                        self._apply_curve_preroll(timestamp, power)
             else:
                 # Power dropped back below start threshold - clear the
                 # high-power streak anchor so the next high reading
@@ -2226,8 +2233,17 @@ class CycleDetector:
             return
 
         start_ts = preroll[0][0]
-        self._power_readings = [*preroll, (timestamp, power)]
-        self._current_cycle_start = start_ts
+        # Callers do not all commit with the pointer at ``timestamp``. The
+        # DELAY_WAIT confirmation has already back-anchored it to its first
+        # sustained-high reading, and a pre-roll window shorter than
+        # ``start_duration_threshold`` would otherwise move that pointer FORWARD
+        # and shorten the delayed start. So keep whatever the caller anchored
+        # before the chain, and only ever move the pointer earlier.
+        earlier = [(ts, p) for ts, p in self._power_readings if ts < start_ts]
+        self._power_readings = [*earlier, *preroll, (timestamp, power)]
+        self._current_cycle_start = min(
+            start_ts, self._current_cycle_start or start_ts
+        )
         self._cycle_max_power = max(p for _ts, p in self._power_readings)
         self._logger.debug(
             "Curve pre-roll: carried %d reading(s) covering %.0fs from aborted "
