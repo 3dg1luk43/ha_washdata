@@ -131,7 +131,11 @@ def compact_price_timeline(
         try:
             offset = float(entry[0])
             price = round(float(entry[1]), decimals)
-        except (TypeError, ValueError, IndexError):
+        except (TypeError, ValueError, IndexError, OverflowError):
+            # OverflowError: json keeps an oversized integer literal as an unbounded
+            # int, and float() on one of those raises rather than returning inf. An
+            # imported cycle's price_timeline reaches here unvalidated, and this
+            # function's contract is to drop a malformed entry, not to raise.
             continue
         if not np.isfinite(offset) or not np.isfinite(price):
             # nan AND +-inf: "inf" parses out of a sensor state like any other

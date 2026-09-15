@@ -43,6 +43,7 @@ import pytest
 
 from custom_components.ha_washdata import playground, ws_api
 from custom_components.ha_washdata.const import (
+    ANTI_CREASE_FINALIZE_RATIO_MIN,
     CONF_CURVE_PREROLL_SECONDS,
     CONF_POWER_SENSOR,
     CURVE_PREROLL_MAX_SECONDS,
@@ -421,3 +422,23 @@ def test_playground_override_is_wired() -> None:
         playground._OVERRIDE_FIELD_MAP[CONF_CURVE_PREROLL_SECONDS][0]
         == "curve_preroll_seconds"
     )
+
+
+def test_the_sim_summary_reports_the_window_the_sim_applied() -> None:
+    """An override the detector clamps must not be echoed back unclamped.
+
+    ``build_sim_config`` passes a non-negative override through as given, while
+    every detector read caps it at ``CURVE_PREROLL_MAX_SECONDS``, so the summary
+    would describe a sim that did not run.
+    """
+    cfg = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=60,
+        curve_preroll_seconds=CURVE_PREROLL_MAX_SECONDS * 4,
+        anti_crease_finalize_ratio=0.0,
+    )
+    summary = playground._sim_config_summary(cfg)
+
+    assert summary["curve_preroll_seconds"] == CURVE_PREROLL_MAX_SECONDS
+    # 0.0 is the case that silently disarms the gate; the gate reads 0.5.
+    assert summary["anti_crease_finalize_ratio"] == ANTI_CREASE_FINALIZE_RATIO_MIN
