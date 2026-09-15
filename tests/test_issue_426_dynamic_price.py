@@ -192,6 +192,30 @@ def test_compaction_survives_an_oversized_integer():
     assert compact_price_timeline([(0.0, huge), (1.0, 0.1)]) == [(1.0, 0.1)]
 
 
+def test_integration_drops_an_unusable_timeline_rather_than_raising():
+    """The sibling guard: ``compact_price_timeline`` drops the entry, this one did not.
+
+    ``integrate_wh_by_price`` is public and pure, and ``cycle_cost``'s own
+    ``report_wh`` conversion in the same file already catches OverflowError. Every
+    in-repo caller compacts first, so this binds a direct caller: an unusable
+    timeline has to read as no timeline (the empty return ``cycle_cost`` falls
+    back on) rather than take the caller down.
+    """
+    ts, pw = _flat_trace()
+    huge = 10**400
+    for bad in ([(0.0, huge)], [(huge, 0.2)], [(0.0, "free")], [(0.0,)], [None]):
+        assert integrate_wh_by_price(ts, pw, bad) == []
+        assert cycle_cost(ts, pw, bad) is None
+
+
+def test_a_usable_timeline_is_unaffected_by_the_guard():
+    """The guard is a filter, not a reinterpretation: the segments still sum to the whole."""
+    ts, pw = _flat_trace()
+    segments = integrate_wh_by_price(ts, pw, [(0.0, 0.10), (1800.0, 0.40)])
+    assert [price for price, _ in segments] == [0.10, 0.40]
+    assert sum(wh for _, wh in segments) == pytest.approx(integrate_wh(ts, pw))
+
+
 def test_persisted_timeline_round_trips_through_json_lists():
     assert _coerce_price_timeline([[1.0, 0.2], [0.0, 0.1]]) == [(0.0, 0.1), (1.0, 0.2)]
     assert _coerce_price_timeline("nonsense") == []

@@ -8323,10 +8323,17 @@ class WashDataManager:
         ``> 0`` test, and ``sensor.py``'s ``int(time_remaining / 60)`` then raises
         OverflowError on every update. A profile written by this device is always
         finite; an imported or hand-edited one need not be (register items 211/229).
+
+        OverflowError is caught alongside the rest because ``json`` keeps an
+        oversized integer literal as an unbounded ``int``: ``float(10**400)``
+        raises instead of returning ``inf``, so the non-finite filter below is
+        never reached and the raise escapes a ``@callback`` WS handler. ``1e400``
+        parses to ``inf`` and is the case the filter covers; the two are different
+        inputs (register items 279/280).
         """
         try:
             avg = float(value)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return None
         if not math.isfinite(avg) or avg <= 0:
             return None

@@ -215,6 +215,41 @@ def test_the_profile_duration_guard_keeps_every_usable_value(
         assert manager._profile_duration(bad) is None, bad
 
 
+def test_an_oversized_integer_duration_is_rejected_not_raised(
+    manager: WashDataManager,
+) -> None:
+    """``10**400`` is a different input from ``1e400``, and the test above missed it.
+
+    ``1e400`` is a float literal that parses to ``inf``, so the non-finite filter
+    catches it. ``json`` keeps an oversized integer *literal* as an unbounded
+    ``int``, and ``float()`` on one raises OverflowError before the filter is
+    reached - out of ``set_manual_program``, which the select entity and the
+    ``@callback`` ``ws_set_program`` handler both call.
+    """
+    assert manager._profile_duration(10**400) is None
+    assert manager._profile_duration(-(10**400)) is None
+    assert manager._profile_duration(str(10**400)) is None
+
+
+def test_pinning_a_program_with_an_oversized_integer_duration_clears_it(
+    manager: WashDataManager,
+) -> None:
+    """The reachable half: the pin must land with an unknown duration, not raise."""
+    manager.profile_store.get_profiles = MagicMock(
+        return_value={
+            PROGRAM: {"avg_duration": 3600.0},
+            "Imported": {"avg_duration": 10**400},
+        }
+    )
+    manager.detector.state = STATE_RUNNING
+
+    manager.set_manual_program(PROGRAM)
+    assert manager._matched_profile_duration == 3600.0
+    assert manager.set_manual_program("Imported") is True
+    assert manager._current_program == "Imported"
+    assert manager._matched_profile_duration is None
+
+
 def test_clearing_the_duration_refreshes_the_estimate(
     manager: WashDataManager,
 ) -> None:
