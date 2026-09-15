@@ -879,7 +879,11 @@ class SuggestionEngine:
                 persistence = int(
                     _op_opts.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE)
                 )
-            except (TypeError, ValueError):
+            # OverflowError: int(float("inf")) raises, and json parses a bare
+            # `Infinity` literal into that, so a hand-edited import can put one in
+            # entry.options. Escaping here would abort every operational suggestion
+            # over one unusable setting.
+            except (TypeError, ValueError, OverflowError):
                 persistence = DEFAULT_MATCH_PERSISTENCE
             persistence = max(1, persistence)
             cap = (

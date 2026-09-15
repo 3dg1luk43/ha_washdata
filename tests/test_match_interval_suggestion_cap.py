@@ -157,7 +157,13 @@ def test_higher_persistence_shrinks_the_interval() -> None:
     assert at6 < at3
 
 
-@pytest.mark.parametrize("bad", ["", None, "abc", 0, -2])
+@pytest.mark.parametrize(
+    "bad",
+    # float("inf") is the one that raises OverflowError rather than ValueError:
+    # json parses a bare `Infinity` literal into it, so a hand-edited import can
+    # store one, and escaping here aborted every operational suggestion.
+    ["", None, "abc", 0, -2, float("inf"), float("-inf"), float("nan")],
+)
 def test_invalid_persistence_falls_back_to_the_default(bad: Any) -> None:
     """A junk stored value must not divide by zero or invert the cap."""
     profiles = {"Eco": {"avg_duration": 2579.0}}

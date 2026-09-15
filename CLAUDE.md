@@ -346,7 +346,10 @@ Tuning provenance, A/B tables and measured accuracies are in reference 02 and
   a group wins,
   `_stage5_pick_member` picks by **integrated-energy agreement** (peak is the flat heating-element
   draw and mean power is diluted by longer hot cycles; integrated energy is what separates
-  temperature). Two safeguards: the top-level ambiguity gate, and a post-commit member sanity check.
+  temperature). Three safeguards, all applied on a group win *before* the result is built: the
+  top-level ambiguity gate, the member-fit backstop (`member_fit < 0.55 * best["score"]`), and the
+  overrun guard (`current_duration > best_duration * 1.05`). The last two set `is_ambiguous`, which
+  is what blocks confident labelling and Smart Termination (register item 214).
   **The additive tie-break `_stage5_rerank` was tried and rejected (hurt net, redundant with Stage-4).
   It survives only in `devtools/dtw_ab_eval.py` as a documented negative result - do not re-add it.**
   Design rationale: register item 99 and
