@@ -221,6 +221,12 @@
     },
     "attn_sub": "Corrige los conflictos antes de guardar",
     "attn_title": "Conflictos de ajustes: {n}",
+    "price_entity": {
+      "power_sensor": "Este es el Sensor de potencia del dispositivo, no un precio. Una entidad de precio anula el Precio de energía estático de abajo, por lo que los ciclos se cobrarían a vatios por kWh - borre este campo.",
+      "energy_sensor": "Esta es la Entidad del medidor de energía del dispositivo, no un precio. Una entidad de precio anula el Precio de energía estático de abajo, por lo que los ciclos se cobrarían a la lectura del medidor por kWh - borre este campo.",
+      "device_class": "Este sensor mide {dc}, no un precio por kWh. Una entidad de precio anula el Precio de energía estático de abajo - borre este campo o apúntelo a un sensor de tarifa.",
+      "unit": "Este sensor lee en {unit}, que no es un precio por kWh. Una entidad de precio anula el Precio de energía estático de abajo - borre este campo o apúntelo a un sensor de tarifa."
+    },
     "settings_banner": "Conflictos de ajustes: {n}. Revisa las secciones resaltadas y corrígelos antes de guardar.",
     "settings_banner_btn": "Ir al primero",
     "confidence": {
@@ -1240,7 +1246,7 @@
       "label": "Recuento de repetición de fin"
     },
     "energy_price_entity": {
-      "doc": "Sensor con el precio actual de la electricidad por kWh (por ejemplo, una tarifa dinámica). Tiene prioridad sobre el precio estático a continuación. Con Costo ponderado en el tiempo activado, cada ciclo se cobra al precio vigente en cada momento de su ejecución; si no, se le congela el precio vigente cuando terminó.",
+      "doc": "Sensor con el precio actual de la electricidad por kWh (por ejemplo, una tarifa dinámica). Debe ser un precio, no la propia entidad de potencia o de energía del enchufe: tiene prioridad sobre el precio estático a continuación, por lo que un contador de kWh aquí cobra cada ciclo a la lectura del medidor en lugar de a su tarifa. Con Costo ponderado en el tiempo activado, cada ciclo se cobra al precio vigente en cada momento de su ejecución; si no, se le congela el precio vigente cuando terminó.",
       "label": "Entidad de precio de energía"
     },
     "energy_price_static": {

@@ -299,6 +299,12 @@
       "stop": "Mora biti iznad Praga isključivanja napajanja ({pot} W)",
       "threshold": "Mora biti ispod Praga zaustavljanja ({stop} W) da bi imalo učinak"
     },
+    "price_entity": {
+      "power_sensor": "Ovo je Senzor snage uređaja, a ne cijena. Entitet cijene ima prednost pred statičkom cijenom ispod, pa bi se ciklusi obračunavali po vatima za kWh - očistite ovo polje.",
+      "energy_sensor": "Ovo je Brojilo energije uređaja, a ne cijena. Entitet cijene ima prednost pred statičkom cijenom ispod, pa bi se ciklusi obračunavali po očitanju brojila za kWh - očistite ovo polje.",
+      "device_class": "Klasa ovog senzora je {dc}, a ne cijena po kWh. Entitet cijene ima prednost pred statičkom cijenom ispod - očistite ovo polje ili ga usmjerite na senzor tarife.",
+      "unit": "Ovaj senzor očitava u {unit}, što nije cijena po kWh. Entitet cijene ima prednost pred statičkom cijenom ispod - očistite ovo polje ili ga usmjerite na senzor tarife."
+    },
     "pump_stuck": {
       "duration": "Mora biti manji od Vremenskog ograničenja bez ažuriranja ({to} s) kako bi alarm zaglavljene pumpe okinuo prije nego nadzor prekine ciklus",
       "timeout": "Mora premašiti Trajanje zaglavljene pumpe ({ps} s) kako bi alarm okinuo prije prisilnog zaustavljanja ciklusa"
@@ -1256,7 +1262,7 @@
       "label": "Broj ponavljanja završetka"
     },
     "energy_price_entity": {
-      "doc": "Senzor s trenutnom cijenom struje po kWh (npr. dinamična tarifa). Ima prednost pred statičnom cijenom ispod. Kada je Vremenski ponderiran trošak uključen, svaki ciklus se naplaćuje po cijeni koja je vrijedila u svakom trenutku njegova rada; inače se na njega zamrzava cijena koja je vrijedila kada je završio.",
+      "doc": "Senzor s trenutnom cijenom struje po kWh (npr. dinamična tarifa). Mora biti cijena, a ne vlastiti entitet snage ili energije utičnice: ima prednost pred statičnom cijenom ispod, pa bi brojilo kWh ovdje obračunalo svaki ciklus po očitanju brojila umjesto po vašoj tarifi. Kada je Vremenski ponderiran trošak uključen, svaki ciklus se naplaćuje po cijeni koja je vrijedila u svakom trenutku njegova rada; inače se na njega zamrzava cijena koja je vrijedila kada je završio.",
       "label": "Entitet cijene energije"
     },
     "energy_price_static": {

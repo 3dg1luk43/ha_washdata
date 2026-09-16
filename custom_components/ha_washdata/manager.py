@@ -346,6 +346,21 @@ _CYCLE_IN_PROGRESS_STATES = frozenset(
 )
 
 
+# Device classes and units that prove a configured "energy price entity" is not a
+# price at all (#439). The panel's picker lists every `sensor.`, so the obvious
+# mistake is to point it at the plug's own energy counter - and because a price
+# entity outranks the static price, the cycle is then costed at
+# `kWh_used * current_meter_reading`, which looks like a plausible number and is
+# nonsense. A price is never measured in W or kWh; `monetary` and unitless or
+# "EUR/kWh"-style sensors are left alone.
+_NON_PRICE_DEVICE_CLASSES = frozenset(
+    {"energy", "energy_storage", "power", "gas", "water", "current", "voltage"}
+)
+_NON_PRICE_UNITS = frozenset(
+    {"w", "kw", "mw", "wh", "kwh", "mwh", "va", "kva", "varh", "a", "ma", "v", "mv"}
+)
+
+
 def _finite_power(raw: Any) -> float | None:
     """Parse a power sensor's state string, rejecting non-finite values.
 
@@ -563,6 +578,9 @@ class WashDataManager:
         # happened while HA was down is recovered from the recorder at cycle end.
         self._price_timeline: list[tuple[float, float]] = []
         self._remove_price_listener: Callable[[], None] | None = None
+        # Entity id already reported as "not a price" (#439), so the rejection is
+        # logged once per misconfiguration instead of on every cycle.
+        self._warned_price_entity: str | None = None
 
         # Pause tracking (user-triggered)
         self._user_pause_start: datetime | None = None
@@ -3012,7 +3030,9 @@ class WashDataManager:
         if not self._dynamic_pricing_enabled():
             return
 
-        entity_id = self.config_entry.options.get(CONF_ENERGY_PRICE_ENTITY)
+        entity_id = self._price_entity_id()
+        if not entity_id:
+            return
         self._logger.debug("Setting up dynamic price listener: %s", entity_id)
         self._remove_price_listener = async_track_state_change_event(
             self.hass, [entity_id], self._handle_price_change
@@ -3021,7 +3041,7 @@ class WashDataManager:
     def _dynamic_pricing_enabled(self) -> bool:
         """Whether cost should be integrated against a moving price (#426)."""
         options = self.config_entry.options
-        if not options.get(CONF_ENERGY_PRICE_ENTITY):
+        if not self._price_entity_id():
             return False
         return bool(
             options.get(CONF_ENERGY_PRICE_DYNAMIC, DEFAULT_ENERGY_PRICE_DYNAMIC)
@@ -5285,6 +5305,57 @@ class WashDataManager:
         except Exception:  # noqa: BLE001 - never break cycle storage
             pass
 
+    def _price_entity_reject_reason(self, entity_id: str) -> str | None:
+        """Why ``entity_id`` cannot be a price per kWh, or None (#439).
+
+        Only *positive* evidence rejects: an entity that has not loaded yet carries
+        no attributes, and refusing it would silence a perfectly good tariff sensor
+        that HA sets up after us.
+        """
+        options = self.config_entry.options
+        if entity_id == self.power_sensor_entity_id:
+            return "it is this device's power sensor"
+        if entity_id == options.get(CONF_ENERGY_SENSOR):
+            return "it is this device's energy meter"
+        state = self.hass.states.get(entity_id)
+        if state is None:
+            return None
+        device_class = str(state.attributes.get("device_class") or "").strip().lower()
+        if device_class in _NON_PRICE_DEVICE_CLASSES:
+            return f"its device class is '{device_class}'"
+        unit = str(state.attributes.get("unit_of_measurement") or "").strip().lower()
+        if unit in _NON_PRICE_UNITS:
+            return f"its unit is '{unit}'"
+        return None
+
+    def _price_entity_id(self) -> str | None:
+        """The configured price entity, or None when it is provably not a price.
+
+        Guards the single trap the cost feature has (#439): the panel picker lists
+        every sensor, a price entity outranks the static price, and pointing it at
+        the plug's own kWh counter silently charges every cycle
+        ``energy * meter_reading`` instead of ``energy * tariff``. Rejecting it here
+        - rather than in the panel alone - also repairs entries that are already
+        misconfigured, which fall back to the static price.
+        """
+        entity_id = self.config_entry.options.get(CONF_ENERGY_PRICE_ENTITY)
+        if not entity_id:
+            return None
+        reason = self._price_entity_reject_reason(entity_id)
+        if reason is None:
+            self._warned_price_entity = None
+            return entity_id
+        if self._warned_price_entity != entity_id:
+            self._warned_price_entity = entity_id
+            self._logger.warning(
+                "Energy price entity %s is not a price per kWh (%s); ignoring it and "
+                "using the static energy price instead. Set a tariff sensor there, or "
+                "clear the field to cost cycles at the static price",
+                entity_id,
+                reason,
+            )
+        return None
+
     def _resolve_energy_price(self) -> float | None:
         """Current energy price per kWh, or None when none is configured.
 
@@ -5292,7 +5363,7 @@ class WashDataManager:
         value. Used to freeze each cycle's cost at completion time.
         """
         options = self.config_entry.options
-        price_entity = options.get(CONF_ENERGY_PRICE_ENTITY)
+        price_entity = self._price_entity_id()
         if price_entity:
             state = self.hass.states.get(price_entity)
             if state is not None:
@@ -5329,7 +5400,7 @@ class WashDataManager:
         (recorder disabled, entity excluded from recording, data purged) so the
         caller falls back to whatever it already had.
         """
-        entity_id = self.config_entry.options.get(CONF_ENERGY_PRICE_ENTITY)
+        entity_id = self._price_entity_id()
         if not entity_id:
             return []
         try:

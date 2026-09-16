@@ -26,6 +26,7 @@ from custom_components.ha_washdata.cycle_detector import (
     CycleDetector,
     CycleDetectorConfig,
     STATE_ANTI_WRINKLE,
+    STATE_RUNNING,
 )
 
 BASE = datetime(2026, 8, 21, 19, 10, 39, tzinfo=timezone.utc)
@@ -638,6 +639,70 @@ def test_sanitize_terminal_high_takes_the_triple_and_degrades_a_bad_offset() -> 
     assert det._sanitize_terminal_high((1.5, 200.0, 5700.0)) is None
     assert det._sanitize_terminal_high((0.95, 0.0, 5700.0)) is None
     assert det._sanitize_terminal_high((0.95,)) is None
+
+
+def test_sanitize_terminal_high_rejects_an_oversized_integer() -> None:
+    """An unbounded int raises out of ``float()``, and a raise here is expensive.
+
+    ``json`` keeps an integer literal of any length as a Python ``int``, so
+    ``float(10**400)`` raises ``OverflowError`` before the ``math.isfinite`` filter
+    is reached - and the caller that matters is ``restore_state_snapshot``, whose
+    single broad ``except`` answers a raise with ``self.reset()``. That discards the
+    entire restored cycle (readings, matched profile, accumulators) over one
+    malformed field, which is the opposite of this method's documented contract:
+    garbage degrades to ``None`` or to the pair.
+    """
+    det = _bare_detector()
+    huge = 10 ** 400
+    assert det._sanitize_terminal_high((huge, 200.0)) is None
+    assert det._sanitize_terminal_high((0.95, huge)) is None
+    # The optional third element degrades to the pair rather than to None.
+    assert det._sanitize_terminal_high((0.95, 200.0, huge)) == (0.95, 200.0)
+
+
+def test_sanitize_tail_power_rejects_an_oversized_integer() -> None:
+    """The sibling guard, same shape, same two callers.
+
+    ``_sanitize_tail_power`` is read from the restored snapshot as well as from the
+    matcher result tuple, and "no opinion" means the #364 power-plausibility guard
+    stays inert - it must not mean the cycle is thrown away.
+    """
+    det = _bare_detector()
+    assert det._sanitize_tail_power(10 ** 400) is None
+    assert det._sanitize_tail_power(-(10 ** 400)) is None
+    assert det._sanitize_tail_power(140.0) == 140.0
+
+
+def test_a_restore_survives_an_oversized_snapshot_field() -> None:
+    """The consequence, end to end: one bad field must not cost the whole restore.
+
+    Pre-fix the OverflowError propagated into ``restore_state_snapshot``'s broad
+    ``except`` and reset the detector, so a restart mid-cycle lost the cycle rather
+    than one guard's input.
+    """
+    snap_det = _bare_detector()
+    snap_det._state = STATE_RUNNING
+    snap_det._current_cycle_start = BASE
+    snap_det._matched_profile = "Baumwolle 60"
+    # A real expected_duration, because the restore drops matched_profile whenever
+    # this sanitizes to the invalid sentinel - so a 0.0 here would fail the
+    # assertion below for a reason that has nothing to do with the guard.
+    snap_det._expected_duration = EXPECTED
+    restored = _bare_detector()
+    restored.restore_state_snapshot(
+        {
+            **snap_det.get_state_snapshot(),
+            "matched_terminal_high": [0.95, 10 ** 400, 5700.0],
+            "matched_tail_power": 10 ** 400,
+        }
+    )
+    assert restored._matched_terminal_high is None
+    assert restored._matched_tail_power is None
+    assert restored._matched_profile == "Baumwolle 60", (
+        "the restore reset the whole cycle over one malformed field"
+    )
+    assert restored._expected_duration == EXPECTED
+    assert restored._state == STATE_RUNNING
 
 
 def test_sanitize_terminal_high_rejects_a_scalar_string() -> None:

@@ -299,6 +299,12 @@
       "stop": "Musí byť nad Prahom vypnutia napájania ({pot} W)",
       "threshold": "Musí byť pod Prahom zastavenia ({stop} W), aby mal účinok"
     },
+    "price_entity": {
+      "power_sensor": "Toto je Senzor výkonu zariadenia, nie cena. Entita ceny má prednosť pred statickou cenou nižšie, takže by sa cykly účtovali vo wattoch za kWh - vymažte toto pole.",
+      "energy_sensor": "Toto je Merač energie zariadenia, nie cena. Entita ceny má prednosť pred statickou cenou nižšie, takže by sa cykly účtovali podľa stavu merača za kWh - vymažte toto pole.",
+      "device_class": "Trieda tohto senzora je {dc}, nie cena za kWh. Entita ceny má prednosť pred statickou cenou nižšie - vymažte toto pole alebo ho nasmerujte na senzor tarify.",
+      "unit": "Tento senzor meria v {unit}, čo nie je cena za kWh. Entita ceny má prednosť pred statickou cenou nižšie - vymažte toto pole alebo ho nasmerujte na senzor tarify."
+    },
     "pump_stuck": {
       "duration": "Musí byť menší ako Časový limit bez aktualizácie ({to} s), aby sa alarm zaseknutia spustil pred ukončením cyklu watchdogom",
       "timeout": "Musí presiahnuť Trvanie zaseknutia čerpadla ({ps} s), aby sa alarm spustil pred vynúteným zastavením cyklu"
@@ -1252,7 +1258,7 @@
       "label": "Počet opakovaní ukončenia"
     },
     "energy_price_entity": {
-      "doc": "Senzor s aktuálnou cenou elektriny za kWh (napr. dynamická tarifa). Má prednosť pred statickou cenou nižšie. Keď sú Časovo vážené náklady zapnuté, každý cyklus sa účtuje cenou platnou v každom okamihu jeho behu; inak sa naň zafixuje cena platná pri jeho dokončení.",
+      "doc": "Senzor s aktuálnou cenou elektriny za kWh (napr. dynamická tarifa). Musí to byť cena, nie vlastná entita výkonu alebo energie zásuvky: má prednosť pred statickou cenou nižšie, takže počítadlo kWh zadané tu účtuje každý cyklus podľa stavu merača namiesto vašej tarify. Keď sú Časovo vážené náklady zapnuté, každý cyklus sa účtuje cenou platnou v každom okamihu jeho behu; inak sa naň zafixuje cena platná pri jeho dokončení.",
       "label": "Entita ceny energie"
     },
     "energy_price_static": {

@@ -299,6 +299,12 @@
       "stop": "Måste vara över avstängningströskel ({pot} W)",
       "threshold": "Måste vara under stopptröskel ({stop} W) för att ha effekt"
     },
+    "price_entity": {
+      "power_sensor": "Det här är apparatens Effektsensor, inte ett pris. En prisentitet har företräde framför det statiska priset nedan, så cykler skulle debiteras till watt per kWh - töm det här fältet.",
+      "energy_sensor": "Det här är apparatens Energimätare, inte ett pris. En prisentitet har företräde framför det statiska priset nedan, så cykler skulle debiteras till mätarställningen per kWh - töm det här fältet.",
+      "device_class": "Den här sensorn mäter {dc}, inte ett pris per kWh. En prisentitet har företräde framför det statiska priset nedan - töm fältet eller peka det på en tariffsensor.",
+      "unit": "Den här sensorn visar värden i {unit}, vilket inte är ett pris per kWh. En prisentitet har företräde framför det statiska priset nedan - töm fältet eller peka det på en tariffsensor."
+    },
     "pump_stuck": {
       "duration": "Måste vara kortare än timeout utan uppdatering ({to} s) så att fastnar-larmet utlöses innan vakthunden stoppar cykeln",
       "timeout": "Måste överskrida pumpens fastnar-varaktighet ({ps} s) så att larmet utlöses innan cykeln tvångsstoppas"
@@ -1288,7 +1294,7 @@
       "label": "Antal slutrepetitioner"
     },
     "energy_price_entity": {
-      "doc": "Sensor med aktuellt elpris per kWh (t.ex. en dynamisk tariff). Har företräde framför det statiska priset nedan. Med Tidsviktad kostnad på debiteras varje cykel till det pris som gällde i varje ögonblick den kördes; annars fryses det pris som gällde när den var klar fast på den.",
+      "doc": "Sensor med aktuellt elpris per kWh (t.ex. en dynamisk tariff). Måste vara ett pris, inte uttagets egen effekt- eller energientitet: det har företräde framför det statiska priset nedan, så en kWh-räknare här debiterar varje cykel till mätarställningen i stället för till din tariff. Med Tidsviktad kostnad på debiteras varje cykel till det pris som gällde i varje ögonblick den kördes; annars fryses det pris som gällde när den var klar fast på den.",
       "label": "Energiprisentitet"
     },
     "energy_price_static": {

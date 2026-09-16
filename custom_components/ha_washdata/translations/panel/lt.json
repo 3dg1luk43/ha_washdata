@@ -269,6 +269,12 @@
     },
     "attn_sub": "Prieš išsaugant ištaisykite konfliktus",
     "attn_title": "Nustatymų konfliktai: {n}",
+    "price_entity": {
+      "power_sensor": "Tai yra įrenginio Galios jutiklis, o ne kaina. Kainos objektas turi pirmenybę prieš toliau nurodytą statinę kainą, todėl ciklai būtų įkainojami pagal vatus už kWh - išvalykite šį lauką.",
+      "energy_sensor": "Tai yra įrenginio Energijos skaitiklis, o ne kaina. Kainos objektas turi pirmenybę prieš toliau nurodytą statinę kainą, todėl ciklai būtų įkainojami pagal skaitiklio rodmenį už kWh - išvalykite šį lauką.",
+      "device_class": "Šio jutiklio klasė yra {dc}, o ne kaina už kWh. Kainos objektas turi pirmenybę prieš toliau nurodytą statinę kainą - išvalykite šį lauką arba nurodykite tarifo jutiklį.",
+      "unit": "Šio jutiklio matavimo vienetas yra {unit}, o tai nėra kaina už kWh. Kainos objektas turi pirmenybę prieš toliau nurodytą statinę kainą - išvalykite šį lauką arba nurodykite tarifo jutiklį."
+    },
     "settings_banner": "Nustatymų konfliktai: {n}. Patikrinkite pažymėtas sekcijas ir ištaisykite jas prieš išsaugant.",
     "settings_banner_btn": "Eiti į pirmą",
     "confidence": {
@@ -1256,7 +1262,7 @@
       "label": "Pabaigos pakartojimų sk."
     },
     "energy_price_entity": {
-      "doc": "Jutiklis su esama elektros kaina už kWh (pvz., dinaminis tarifas). Ši reikšmė turi pirmenybę prieš toliau nurodytą statinę kainą. Kai įjungta „Pagal laiką svertinė kaina“, kiekvienas ciklas įkainojamas pagal kainą, galiojusią kiekvieną jo veikimo akimirką; priešingu atveju jam užfiksuojama kaina, galiojusi jam pasibaigus.",
+      "doc": "Jutiklis su esama elektros kaina už kWh (pvz., dinaminis tarifas). Tai turi būti kaina, o ne paties kištuko galios ar energijos objektas: ši reikšmė turi pirmenybę prieš toliau nurodytą statinę kainą, todėl čia nurodytas kWh skaitiklis kiekvieną ciklą įkainoja pagal skaitiklio rodmenį, o ne pagal jūsų tarifą. Kai įjungta „Pagal laiką svertinė kaina“, kiekvienas ciklas įkainojamas pagal kainą, galiojusią kiekvieną jo veikimo akimirką; priešingu atveju jam užfiksuojama kaina, galiojusi jam pasibaigus.",
       "label": "Energijos kainos objektas"
     },
     "energy_price_static": {

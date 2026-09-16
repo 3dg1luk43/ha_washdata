@@ -21,13 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Live progress on iOS is silent instead of buzzing, and no longer flashes 100% the moment a program is recognised.
 - The notification icon setting actually reaches the phone, on Android and on iOS.
 - Charts support pinch-zoom and no longer trap page scrolling on phones.
-- Energy cost follows a dynamic tariff through the cycle, instead of billing it all at the price at the end.
+- Energy cost follows a dynamic tariff through the cycle, and can no longer be computed from the plug's own meter reading instead of your price.
 - Translation fixes in every language: "match" was a sports match in 32 of them, and Process History named the wrong thing in 28.
 - A cycle's curve can optionally include the start attempts that led up to it.
 - Fixes for phantom cycles, stale and non-numeric power readings, a 65 s reported startup time, two ways a cycle or a program could be quietly lost, and a card-registration log that named the wrong mechanism.
 - Community Store search suggests brands and models as you type; new Matrix/Element channel; export/import documented.
 
 ### Fixes
+
+- **A cycle's cost is no longer computed from the plug's energy counter instead of your tariff** ([#439](https://github.com/3dg1luk43/ha_washdata/discussions/439)): A 1.30 kWh wash was shown as 7.22 EUR on a 0.37 EUR/kWh price. The Energy Price Entity field offers every sensor in the system, and whatever it points at overrides the static price, so selecting the plug's own energy meter there costs each cycle at the meter's current reading per kWh: 5.55 kWh on the counter, 1.30 x 5.55 = 7.22. The static price was never consulted. WashData now refuses an entity that cannot be a price (the appliance's own power or energy entity, anything declared as energy, power, gas, water, current or voltage, or anything reading in W or kWh), falls back to the static price and says so in the log, so an installation configured this way is corrected without touching it. The picker no longer offers those entities, and one typed in anyway is flagged in Settings. Sensors that are prices, including plain template sensors with no unit at all, are unaffected. Thanks to @testpaul999 for the report.
 
 - **The live notification no longer shows 100 % and "less than 1 minute" at the start of a cycle** ([#437](https://github.com/3dg1luk43/ha_washdata/issues/437)): For one update right after a programme was identified, the phone showed a full progress bar and the almost-done wording while the dashboard correctly showed four hours left. Recognising a programme and estimating the time left are two separate steps, and the estimate is recomputed at most every 5 seconds, so the update that accepted the match could find the programme known but no estimate yet, and read that absence as zero remaining. The notification now keeps showing the waiting message until a real estimate exists, and the first estimate after a match skips the wait so the countdown appears immediately rather than one interval later. With "notify only when home" on, the wrong card had frozen on the reporter's lock screen for 38 minutes. Thanks to @kdjkdjkdj for the diagnosis and the state timeline.
 

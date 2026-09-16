@@ -299,6 +299,12 @@
       "stop": "Må være over av-effektterskelen ({pot} W)",
       "threshold": "Må være under stoppeterskelen ({stop} W) for å ha effekt"
     },
+    "price_entity": {
+      "power_sensor": "Dette er apparatets Strømsensor, ikke en pris. En prisenhet går foran den statiske prisen nedenfor, så sykluser ville blitt beregnet til watt per kWh - tøm dette feltet.",
+      "energy_sensor": "Dette er apparatets Energimåler, ikke en pris. En prisenhet går foran den statiske prisen nedenfor, så sykluser ville blitt beregnet til måleravlesningen per kWh - tøm dette feltet.",
+      "device_class": "Denne sensoren måler {dc}, ikke en pris per kWh. En prisenhet går foran den statiske prisen nedenfor - tøm dette feltet, eller pek det mot en tariffsensor.",
+      "unit": "Denne sensoren leser av i {unit}, som ikke er en pris per kWh. En prisenhet går foran den statiske prisen nedenfor - tøm dette feltet, eller pek det mot en tariffsensor."
+    },
     "pump_stuck": {
       "duration": "Må være kortere enn ingen-oppdatering-tidsavbruddet ({to} s) slik at fastnat-alarmen utløses før vaktbikkjen stopper syklusen",
       "timeout": "Må overstige pumpe-fastnat-varigheten ({ps} s) slik at alarmen utløses før syklusen tvangstopper"
@@ -1288,7 +1294,7 @@
       "label": "Slutt gjentaksantall"
     },
     "energy_price_entity": {
-      "doc": "Sensor med gjeldende strømpris per kWh (f.eks. en dynamisk tariff). Går foran den statiske prisen nedenfor. Med Tidsvektet kostnad på beregnes hver syklus til prisen som gjaldt i hvert øyeblikk den kjørte; ellers fryses prisen som gjaldt da den var ferdig, fast på den.",
+      "doc": "Sensor med gjeldende strømpris per kWh (f.eks. en dynamisk tariff). Må være en pris, ikke støpselets egen strøm- eller energienhet: den går foran den statiske prisen nedenfor, så en kWh-teller her beregner hver syklus til måleravlesningen i stedet for til tariffen din. Med Tidsvektet kostnad på beregnes hver syklus til prisen som gjaldt i hvert øyeblikk den kjørte; ellers fryses prisen som gjaldt da den var ferdig, fast på den.",
       "label": "Energiprisenhet"
     },
     "energy_price_static": {

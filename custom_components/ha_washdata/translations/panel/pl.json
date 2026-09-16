@@ -299,6 +299,12 @@
       "stop": "Musi być powyżej Progu Wyłączenia Zasilania ({pot} W)",
       "threshold": "Musi być poniżej Progu Zatrzymania ({stop} W), aby zadziałać"
     },
+    "price_entity": {
+      "power_sensor": "To jest Czujnik Mocy urządzenia, a nie cena. Encja ceny ma pierwszeństwo przed statyczną ceną poniżej, więc cykle byłyby wyceniane po watach za kWh - wyczyść to pole.",
+      "energy_sensor": "To jest Licznik Energii urządzenia, a nie cena. Encja ceny ma pierwszeństwo przed statyczną ceną poniżej, więc cykle byłyby wyceniane po wskazaniu licznika za kWh - wyczyść to pole.",
+      "device_class": "Klasa tego czujnika to {dc}, a nie cena za kWh. Encja ceny ma pierwszeństwo przed statyczną ceną poniżej - wyczyść to pole lub wskaż czujnik taryfy.",
+      "unit": "Ten czujnik podaje wartości w {unit}, co nie jest ceną za kWh. Encja ceny ma pierwszeństwo przed statyczną ceną poniżej - wyczyść to pole lub wskaż czujnik taryfy."
+    },
     "pump_stuck": {
       "duration": "Musi być mniejszy niż Limit Czasu Braku Aktualizacji ({to} s), aby alarm zacięcia zadziałał przed wyłączeniem cyklu przez watchdoga",
       "timeout": "Musi przekraczać Czas Zacięcia Pompy ({ps} s), aby alarm zadziałał przed wymuszonym zatrzymaniem cyklu"
@@ -1252,7 +1258,7 @@
       "label": "Liczba Powtórzeń Zakończenia"
     },
     "energy_price_entity": {
-      "doc": "Sensor z aktualną ceną energii elektrycznej za kWh (np. taryfa dynamiczna). Ma pierwszeństwo przed statyczną ceną poniżej. Gdy Koszt ważony czasem jest włączony, każdy cykl jest naliczany według ceny obowiązującej w każdej chwili jego trwania; w przeciwnym razie zostaje na nim zamrożona cena obowiązująca w momencie zakończenia.",
+      "doc": "Sensor z aktualną ceną energii elektrycznej za kWh (np. taryfa dynamiczna). Musi to być cena, a nie własna encja mocy lub energii wtyczki: ma pierwszeństwo przed statyczną ceną poniżej, więc licznik kWh wskazany tutaj wycenia każdy cykl według wskazania licznika zamiast Twojej taryfy. Gdy Koszt ważony czasem jest włączony, każdy cykl jest naliczany według ceny obowiązującej w każdej chwili jego trwania; w przeciwnym razie zostaje na nim zamrożona cena obowiązująca w momencie zakończenia.",
       "label": "Encja Ceny Energii"
     },
     "energy_price_static": {

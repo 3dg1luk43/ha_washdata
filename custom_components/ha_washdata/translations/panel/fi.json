@@ -299,6 +299,12 @@
       "stop": "Täytyy olla yli virran sammutuksen kynnyksen ({pot} W)",
       "threshold": "Täytyy olla alle pysäytyskynnyksen ({stop} W), jotta se astuu voimaan"
     },
+    "price_entity": {
+      "power_sensor": "Tämä on laitteen Tehoanturi, ei hinta. Hintaentiteetti ohittaa alla olevan kiinteän energiahinnan, joten sykleistä veloitettaisiin wattilukema kWh:n hintana - tyhjennä tämä kenttä.",
+      "energy_sensor": "Tämä on laitteen Energiamittari, ei hinta. Hintaentiteetti ohittaa alla olevan kiinteän energiahinnan, joten sykleistä veloitettaisiin mittarin lukema kWh:n hintana - tyhjennä tämä kenttä.",
+      "device_class": "Tämä anturi mittaa suuretta {dc}, ei hintaa per kWh. Hintaentiteetti ohittaa alla olevan kiinteän energiahinnan - tyhjennä tämä kenttä tai valitse tariffianturi.",
+      "unit": "Tämän anturin lukeman yksikkö on {unit}, joka ei ole hinta per kWh. Hintaentiteetti ohittaa alla olevan kiinteän energiahinnan - tyhjennä tämä kenttä tai valitse tariffianturi."
+    },
     "pump_stuck": {
       "duration": "Täytyy olla alle päivityksettömyyden aikakatkaisun ({to} s), jotta jumihälytys aktivoituu ennen kuin tarkkailija lopettaa syklin",
       "timeout": "Täytyy ylittää pumpun jumiutumiskesto ({ps} s), jotta jumihälytys aktivoituu ennen syklin pakotettua pysäytystä"
@@ -1288,7 +1294,7 @@
       "label": "Lopetuksen toistomäärä"
     },
     "energy_price_entity": {
-      "doc": "Anturi nykyisellä sähkön hinnalla kWh (esim. dynaaminen tariffi). Ensisijainen alla olevaan staattiseen hintaan nähden. Kun Aikapainotettu kustannus on käytössä, kukin sykli veloitetaan sillä hinnalla, joka oli voimassa jokaisella sen käyntihetkellä; muuten siihen lukitaan hinta, joka oli voimassa sen päättyessä.",
+      "doc": "Anturi nykyisellä sähkön hinnalla kWh (esim. dynaaminen tariffi). Sen on oltava hinta, ei pistokkeen oma teho- tai energiaentiteetti: se on ensisijainen alla olevaan staattiseen hintaan nähden, joten tähän valittu kWh-laskuri veloittaa jokaisesta syklistä mittarin lukeman oman tariffisi sijaan. Kun Aikapainotettu kustannus on käytössä, kukin sykli veloitetaan sillä hinnalla, joka oli voimassa jokaisella sen käyntihetkellä; muuten siihen lukitaan hinta, joka oli voimassa sen päättyessä.",
       "label": "Energiahinnan entiteetti"
     },
     "energy_price_static": {

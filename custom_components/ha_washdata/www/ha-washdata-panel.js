@@ -328,8 +328,8 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Energy', fields: [
       { key: 'energy_sensor', label: 'Energy Meter Entity', type: 'entity', domain: 'sensor', optional: true,
         doc: 'Optional cumulative energy counter (total_increasing kWh/Wh, e.g. the plug\'s own lifetime meter). When set, each cycle\'s reported energy is taken from this counter\'s start-to-end delta, which avoids the under-counting you get from integrating a slow-reporting power sensor. Falls back to the integrated value if the reading is missing, its unit is unknown, or the delta is not positive. Leave blank to keep integrating the power sensor.' },
-      { key: 'energy_price_entity', label: 'Energy Price Entity', type: 'entity', domain: 'sensor', basic: true,
-        doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. With Time-Weighted Cost on, each cycle is charged at the price in force at every moment it ran; otherwise the price in effect when it finished is frozen onto it.' },
+      { key: 'energy_price_entity', label: 'Energy Price Entity', type: 'entity', domain: 'sensor', basic: true, notPrice: true,
+        doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Must be a price, not the plug\'s own power or energy entity: it takes precedence over the static price below, so a kWh counter here costs every cycle at the meter reading instead of your tariff. With Time-Weighted Cost on, each cycle is charged at the price in force at every moment it ran; otherwise the price in effect when it finished is frozen onto it.' },
       { key: 'energy_price_static', label: 'Static Energy Price (per kWh)', type: 'number', step: 0.001, min: 0, basic: true,
         doc: 'Fixed price per kWh used for cost figures when no live price entity is set above.' },
       { key: 'energy_price_dynamic', label: 'Time-Weighted Cost', type: 'checkbox', def: true, basic: true,
@@ -394,11 +394,57 @@ const _PG_MATCH_DEFAULTS = {
 };
 
 // ─── Setting conflict rules ───────────────────────────────────────────────────
-// Each rule describes a cross-parameter invariant. `check(vals)` returns true
-// when the invariant is violated. `fieldErrors(vals)` maps each affected key to
+// Each rule describes a cross-parameter invariant. `check(vals, ctx)` returns true
+// when the invariant is violated. `fieldErrors(vals, ctx)` maps each affected key to
 // an error descriptor: `{msgKey, msgVars, msgFb, fixVal}` where `fixVal` is the
 // suggested value for THAT field (always actionable in the current section).
+// `ctx.stateOf(entity_id)` reaches the hass state for rules that need an entity's
+// attributes; every numeric rule ignores it.
+
+// Device classes and units that prove a sensor is not a price per kWh (#439).
+// Mirrors manager._NON_PRICE_DEVICE_CLASSES / _NON_PRICE_UNITS - keep in step.
+const _NON_PRICE_DEVICE_CLASSES = new Set(['energy', 'energy_storage', 'power', 'gas', 'water', 'current', 'voltage']);
+const _NON_PRICE_UNITS = new Set(['w', 'kw', 'mw', 'wh', 'kwh', 'mwh', 'va', 'kva', 'varh', 'a', 'ma', 'v', 'mv']);
+
+// Why the chosen Energy Price Entity cannot be a price per kWh, or null (#439).
+// Only positive evidence rejects, exactly as the backend does: an entity HA has
+// not loaded yet has no attributes to judge and is left alone.
+function _nonPriceReason(id, vals, ctx) {
+  if (!id) return null;
+  if (id === vals.power_sensor) {
+    return { msgKey: 'conflict.price_entity.power_sensor', msgVars: {},
+      msgFb: 'This is the device\'s Power Sensor, not a price. A price entity overrides the static price below, so cycles would be costed at watts per kWh - clear this field.' };
+  }
+  if (id === vals.energy_sensor) {
+    return { msgKey: 'conflict.price_entity.energy_sensor', msgVars: {},
+      msgFb: 'This is the device\'s Energy Meter, not a price. A price entity overrides the static price below, so cycles would be costed at the meter reading per kWh - clear this field.' };
+  }
+  const st = (ctx && ctx.stateOf) ? ctx.stateOf(id) : null;
+  if (!st) return null;
+  const attrs = st.attributes || {};
+  const dc = String(attrs.device_class == null ? '' : attrs.device_class).trim().toLowerCase();
+  if (_NON_PRICE_DEVICE_CLASSES.has(dc)) {
+    return { msgKey: 'conflict.price_entity.device_class', msgVars: {dc},
+      msgFb: `This sensor measures ${dc}, not a price per kWh. A price entity overrides the static price below - clear this field or point it at a tariff sensor.` };
+  }
+  const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
+  if (_NON_PRICE_UNITS.has(unit.toLowerCase())) {
+    return { msgKey: 'conflict.price_entity.unit', msgVars: {unit},
+      msgFb: `This sensor reads in ${unit}, which is not a price per kWh. A price entity overrides the static price below - clear this field or point it at a tariff sensor.` };
+  }
+  return null;
+}
+
 const _SETTING_CONFLICTS = [
+  {
+    // energy_price_entity pointing at something that is provably not a price (#439).
+    // The picker lists every sensor, and a price entity outranks the static price, so
+    // choosing the plug's own kWh counter silently costs every cycle at
+    // energy * meter_reading. No fix button: the fix is to clear the field.
+    keys: ['energy_price_entity', 'energy_sensor', 'power_sensor'],
+    check: (v, ctx) => _nonPriceReason(v.energy_price_entity, v, ctx) != null,
+    fieldErrors: (v, ctx) => ({ energy_price_entity: _nonPriceReason(v.energy_price_entity, v, ctx) }),
+  },
   {
     // start_threshold_w > stop_threshold_w (hysteresis band must be positive)
     keys: ['start_threshold_w', 'stop_threshold_w'],
@@ -5191,7 +5237,13 @@ class HaWashdataPanel extends HTMLElement {
     else if (f.type === 'entity') {
       const states = this._hass && this._hass.states ? this._hass.states : {};
       const domains = f.domain === 'binary_sensor' ? ['binary_sensor', 'sensor'] : (f.domain ? [f.domain] : null);
-      const ids = Object.keys(states).filter(e => !domains || domains.some(d => e.startsWith(d + '.'))).sort().slice(0, 500);
+      // `notPrice` drops the plug's own power/energy entities from the Energy Price
+      // picker (#439) - they are the entities users reach for, and picking one costs
+      // every cycle at the meter reading per kWh. Typing one anyway still validates.
+      const ids = Object.keys(states)
+        .filter(e => !domains || domains.some(d => e.startsWith(d + '.')))
+        .filter(e => !f.notPrice || _nonPriceReason(e, o, this._conflictCtx()) == null)
+        .sort().slice(0, 500);
       if (!this._entityListCache) this._entityListCache = {};
       this._entityListCache[f.key] = ids;
     } else if (f.type === 'entitylist') {
@@ -13838,12 +13890,19 @@ class HaWashdataPanel extends HTMLElement {
   // `undefined`, the rule's `!= null` guard short-circuits, and the conflict is missed.
   _conflictKeysForOpts(opts, defaults) {
     const v = Object.assign({}, defaults || {}, opts);
+    const ctx = this._conflictCtx();
     const keys = new Set();
     for (const rule of _SETTING_CONFLICTS) {
-      if (!rule.check(v)) continue;
-      for (const key of Object.keys(rule.fieldErrors(v))) keys.add(key);
+      if (!rule.check(v, ctx)) continue;
+      for (const key of Object.keys(rule.fieldErrors(v, ctx))) keys.add(key);
     }
     return keys;
+  }
+
+  // Entity lookups for rules that judge a chosen entity rather than a number (#439).
+  _conflictCtx() {
+    const states = (this._hass && this._hass.states) ? this._hass.states : {};
+    return { stateOf: (id) => (id ? states[id] || null : null) };
   }
 
   _conflictCountForOpts(opts, defaults) { return this._conflictKeysForOpts(opts, defaults).size; }
@@ -13866,6 +13925,12 @@ class HaWashdataPanel extends HTMLElement {
       if (el.type === 'checkbox') { vals[key] = el.checked; return; }
       if (el.dataset.ftype === 'checkboxlist') {
         vals[key] = this._collectCheckboxlist(el, key);
+        return;
+      }
+      if (el.dataset.ftype === 'entity' || el.dataset.ftype === 'device') {
+        // A cleared picker means "unset", not "keep the saved value": the #439
+        // price-entity rule must stop warning the moment the field is emptied.
+        vals[key] = String(el.value).trim() || null;
         return;
       }
       const n = parseFloat(el.value);
@@ -13893,15 +13958,16 @@ class HaWashdataPanel extends HTMLElement {
 
     // Compute per-key errors across all conflict rules.
     const keyErrors = {};   // key -> [{msgKey, msgVars, msgFb, fixVal, suggFix?}, ...]
+    const ctx = this._conflictCtx();
     for (const rule of _SETTING_CONFLICTS) {
-      if (!rule.check(vals)) continue;
-      const errs = rule.fieldErrors(vals);
+      if (!rule.check(vals, ctx)) continue;
+      const errs = rule.fieldErrors(vals, ctx);
       for (const [key, info] of Object.entries(errs)) {
         // Tag the error with `suggFix` when a pending suggestion for this key
         // would satisfy the constraint — so the panel can explain that instead
         // of offering a generic "Use X" fix button.
         const sugV = suggMap[key];
-        const errInfo = (sugV != null && !rule.check({...vals, [key]: sugV}))
+        const errInfo = (sugV != null && !rule.check({...vals, [key]: sugV}, ctx))
           ? {...info, suggFix: sugV}
           : info;
         (keyErrors[key] = keyErrors[key] || []).push(errInfo);

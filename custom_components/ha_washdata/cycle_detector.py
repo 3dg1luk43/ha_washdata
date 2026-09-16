@@ -650,7 +650,16 @@ class CycleDetector:
             return None
         try:
             value = float(raw)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
+            # OverflowError alongside the type errors: `json` keeps an integer
+            # literal of any length as an unbounded `int`, and `float()` on one
+            # raises rather than returning `inf`, so the non-finite filter below is
+            # never reached. Both callers are the reason it matters - the restored
+            # state snapshot is hand-editable `.storage` JSON, and
+            # `restore_state_snapshot`'s one broad `except` answers a raise with
+            # `self.reset()`, which discards the WHOLE restored cycle rather than
+            # this one field. "No opinion" is the documented contract; a full reset
+            # is not.
             return None
         if not math.isfinite(value) or value <= 0:
             return None
@@ -691,7 +700,9 @@ class CycleDetector:
         try:
             start_frac = float(values[0])
             seconds = float(values[1])
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
+            # Same reason as _sanitize_tail_power above: an unbounded int raises out
+            # of float(), and a raise here costs the whole restored cycle state.
             return None
         if not math.isfinite(start_frac) or not math.isfinite(seconds):
             return None
@@ -701,7 +712,7 @@ class CycleDetector:
             return (start_frac, seconds)
         try:
             start_offset = float(values[2])
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return (start_frac, seconds)
         if not math.isfinite(start_offset) or start_offset < 0:
             return (start_frac, seconds)

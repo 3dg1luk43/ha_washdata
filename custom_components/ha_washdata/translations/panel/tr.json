@@ -269,6 +269,12 @@
         },
         "attn_sub": "Kaydetmeden önce çakışmaları düzeltin",
         "attn_title": "Ayar çakışmaları: {n}",
+        "price_entity": {
+            "power_sensor": "Bu, cihazın Güç Sensörü; bir fiyat değil. Fiyat varlığı aşağıdaki sabit fiyatı geçersiz kılar, bu yüzden döngüler watt değeri kWh başına fiyatmış gibi ücretlendirilir - bu alanı temizleyin.",
+            "energy_sensor": "Bu, cihazın Enerji Sayacı; bir fiyat değil. Fiyat varlığı aşağıdaki sabit fiyatı geçersiz kılar, bu yüzden döngüler sayaç okuması kWh başına fiyatmış gibi ücretlendirilir - bu alanı temizleyin.",
+            "device_class": "Bu sensör {dc} ölçer, kWh başına fiyat değil. Fiyat varlığı aşağıdaki sabit fiyatı geçersiz kılar - bu alanı temizleyin veya bir tarife sensörüne yönlendirin.",
+            "unit": "Bu sensör {unit} biriminde okuma verir; bu da kWh başına fiyat değildir. Fiyat varlığı aşağıdaki sabit fiyatı geçersiz kılar - bu alanı temizleyin veya bir tarife sensörüne yönlendirin."
+        },
         "settings_banner": "Ayar çakışmaları: {n}. Vurgulanan bölümleri kontrol edin ve kaydetmeden önce düzeltin.",
         "settings_banner_btn": "İlkine git",
         "confidence": {
@@ -1276,7 +1282,7 @@
             "label": "Bitiş Tekrar Sayısı"
         },
         "energy_price_entity": {
-            "doc": "kWh başına güncel elektrik fiyatını gösteren sensör (örn. dinamik tarife). Aşağıdaki statik fiyata göre önceliklidir. Zaman Ağırlıklı Maliyet açıkken her döngü, çalıştığı her an geçerli olan fiyattan ücretlendirilir; aksi halde bittiğinde geçerli olan fiyat üzerine dondurulur.",
+            "doc": "kWh başına güncel elektrik fiyatını gösteren sensör (örn. dinamik tarife). Bir fiyat olmalıdır, prizin kendi güç veya enerji varlığı değil: aşağıdaki statik fiyata göre önceliklidir, bu nedenle buraya konan bir kWh sayacı her döngüyü tarifeniz yerine sayaç okumasıyla ücretlendirir. Zaman Ağırlıklı Maliyet açıkken her döngü, çalıştığı her an geçerli olan fiyattan ücretlendirilir; aksi halde bittiğinde geçerli olan fiyat üzerine dondurulur.",
             "label": "Enerji Fiyatı Varlığı"
         },
         "energy_price_static": {

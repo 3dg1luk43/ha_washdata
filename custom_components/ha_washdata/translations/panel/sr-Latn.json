@@ -299,6 +299,12 @@
       "stop": "Mora biti iznad Praga isključivanja napajanja ({pot} W)",
       "threshold": "Mora biti ispod Praga zaustavljanja ({stop} W) da bi imalo efekta"
     },
+    "price_entity": {
+      "power_sensor": "Ovo je Senzor snage uređaja, a ne cena. Entitet cene ima prednost nad statičnom cenom ispod, pa bi ciklusi bili obračunati po vatima za kWh - obrišite ovo polje.",
+      "energy_sensor": "Ovo je Brojilo energije uređaja, a ne cena. Entitet cene ima prednost nad statičnom cenom ispod, pa bi ciklusi bili obračunati po očitavanju brojila za kWh - obrišite ovo polje.",
+      "device_class": "Klasa ovog senzora je {dc}, a ne cena po kWh. Entitet cene ima prednost nad statičnom cenom ispod - obrišite ovo polje ili ga usmerite na senzor tarife.",
+      "unit": "Ovaj senzor očitava u {unit}, što nije cena po kWh. Entitet cene ima prednost nad statičnom cenom ispod - obrišite ovo polje ili ga usmerite na senzor tarife."
+    },
     "pump_stuck": {
       "duration": "Mora biti manji od Vremenskog ograničenja bez ažuriranja ({to} s) kako bi alarm zaglavljene pumpe okidao pre nego nadzornik prekine ciklus",
       "timeout": "Mora premašiti Trajanje zaglavljene pumpe ({ps} s) kako bi alarm okidao pre prisilnog zaustavljanja ciklusa"
@@ -1256,7 +1262,7 @@
       "label": "Broj ponavljanja kraja"
     },
     "energy_price_entity": {
-      "doc": "Senzor sa trenutnom cenom struje po kWh (npr. dinamična tarifa). Ima prednost nad statičnom cenom ispod. Kada je Vremenski ponderisan trošak uključen, svaki ciklus se naplaćuje po ceni koja je važila u svakom trenutku njegovog rada; u suprotnom se na njega zamrzava cena koja je važila kada je završio.",
+      "doc": "Senzor sa trenutnom cenom struje po kWh (npr. dinamična tarifa). Mora biti cena, a ne sopstveni entitet snage ili energije utičnice: ima prednost nad statičnom cenom ispod, pa bi brojilo kWh ovde obračunalo svaki ciklus po očitavanju brojila umesto po vašoj tarifi. Kada je Vremenski ponderisan trošak uključen, svaki ciklus se naplaćuje po ceni koja je važila u svakom trenutku njegovog rada; u suprotnom se na njega zamrzava cena koja je važila kada je završio.",
       "label": "Entiteta cene energije"
     },
     "energy_price_static": {

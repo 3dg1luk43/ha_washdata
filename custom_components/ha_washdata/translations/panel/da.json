@@ -299,6 +299,12 @@
       "stop": "Skal være over afbrydereffekttærsklen ({pot} W)",
       "threshold": "Skal være under stoptærsklen ({stop} W) for at have effekt"
     },
+    "price_entity": {
+      "power_sensor": "Dette er apparatets Effektsensor, ikke en pris. En prisenhed har forrang over den statiske pris nedenfor, så cyklusser ville blive beregnet til watt pr. kWh - ryd dette felt.",
+      "energy_sensor": "Dette er apparatets Energimåler, ikke en pris. En prisenhed har forrang over den statiske pris nedenfor, så cyklusser ville blive beregnet til måleraflæsningen pr. kWh - ryd dette felt.",
+      "device_class": "Denne sensor måler {dc}, ikke en pris pr. kWh. En prisenhed har forrang over den statiske pris nedenfor - ryd dette felt, eller peg det på en tarifsensor.",
+      "unit": "Denne sensor aflæses i {unit}, hvilket ikke er en pris pr. kWh. En prisenhed har forrang over den statiske pris nedenfor - ryd dette felt, eller peg det på en tarifsensor."
+    },
     "pump_stuck": {
       "duration": "Skal være kortere end ingen-opdatering-timeout ({to} s) for at fastsat-alarmen udløses inden watchdog stopper cyklussen",
       "timeout": "Skal overstige pumpe-faststidvarighed ({ps} s) for at alarmen udløses inden cyklussen tvangstopper"
@@ -1288,7 +1294,7 @@
       "label": "Slutgentagelsesantal"
     },
     "energy_price_entity": {
-      "doc": "Sensor med den aktuelle elpris pr. kWh (f.eks. en dynamisk tarif). Har forrang over den statiske pris nedenfor. Med Tidsvægtede omkostninger slået til beregnes hver cyklus til den pris, der gjaldt i hvert øjeblik, den kørte; ellers fryses den pris, der gjaldt, da den sluttede, fast på den.",
+      "doc": "Sensor med den aktuelle elpris pr. kWh (f.eks. en dynamisk tarif). Skal være en pris, ikke stikkets egen effekt- eller energienhed: den har forrang over den statiske pris nedenfor, så en kWh-tæller her beregner hver cyklus til måleraflæsningen i stedet for til din tarif. Med Tidsvægtede omkostninger slået til beregnes hver cyklus til den pris, der gjaldt i hvert øjeblik, den kørte; ellers fryses den pris, der gjaldt, da den sluttede, fast på den.",
       "label": "Energiprisenhed"
     },
     "energy_price_static": {

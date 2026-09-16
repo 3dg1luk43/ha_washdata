@@ -299,6 +299,12 @@
       "stop": "Muss über dem Abschaltschwellenwert ({pot} W) liegen",
       "threshold": "Muss unter dem Stop-Schwellenwert ({stop} W) liegen, um wirksam zu sein"
     },
+    "price_entity": {
+      "power_sensor": "Das ist der Leistungssensor des Geräts, kein Preis. Eine Preis-Entität hat Vorrang vor dem untenstehenden statischen Preis, sodass Zyklen mit Watt pro kWh berechnet würden - dieses Feld leeren.",
+      "energy_sensor": "Das ist der Energiezähler des Geräts, kein Preis. Eine Preis-Entität hat Vorrang vor dem untenstehenden statischen Preis, sodass Zyklen mit dem Zählerstand pro kWh berechnet würden - dieses Feld leeren.",
+      "device_class": "Dieser Sensor misst {dc}, keinen Preis pro kWh. Eine Preis-Entität hat Vorrang vor dem untenstehenden statischen Preis - dieses Feld leeren oder auf einen Tarifsensor verweisen.",
+      "unit": "Dieser Sensor liefert Werte in {unit}, das ist kein Preis pro kWh. Eine Preis-Entität hat Vorrang vor dem untenstehenden statischen Preis - dieses Feld leeren oder auf einen Tarifsensor verweisen."
+    },
     "pump_stuck": {
       "duration": "Muss kleiner als das Timeout ohne Aktualisierung ({to} s) sein, damit der Festsitzen-Alarm vor dem Watchdog auslöst und den Zyklus beendet",
       "timeout": "Muss die Pumpen-Stuck-Dauer ({ps} s) überschreiten, damit der Festsitzen-Alarm auslöst, bevor der Zyklus zwangsweise gestoppt wird"
@@ -1284,7 +1290,7 @@
       "label": "End-Wiederholungsanzahl"
     },
     "energy_price_entity": {
-      "doc": "Sensor mit dem aktuellen Strompreis pro kWh (z. B. ein dynamischer Tarif). Hat Vorrang vor dem untenstehenden statischen Preis. Wenn Zeitgewichtete Kosten aktiviert ist, wird jeder Zyklus zu dem Preis berechnet, der in jedem Moment seines Laufs galt; andernfalls wird der bei Zyklusende gültige Preis auf ihm eingefroren.",
+      "doc": "Sensor mit dem aktuellen Strompreis pro kWh (z. B. ein dynamischer Tarif). Muss ein Preis sein, nicht der Leistungs- oder Energiesensor der Steckdose selbst: Er hat Vorrang vor dem untenstehenden statischen Preis, sodass ein kWh-Zähler an dieser Stelle jeden Zyklus zum Zählerstand statt zu Ihrem Tarif berechnet. Wenn Zeitgewichtete Kosten aktiviert ist, wird jeder Zyklus zu dem Preis berechnet, der in jedem Moment seines Laufs galt; andernfalls wird der bei Zyklusende gültige Preis auf ihm eingefroren.",
       "label": "Energiepreis-Entität"
     },
     "energy_price_static": {

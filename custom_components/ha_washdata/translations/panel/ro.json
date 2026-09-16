@@ -221,6 +221,12 @@
     },
     "attn_sub": "Rezolvați conflictele înainte de salvare",
     "attn_title": "Conflicte de setări: {n}",
+    "price_entity": {
+      "power_sensor": "Acesta este Senzorul de Putere al dispozitivului, nu un preț. O entitate de preț are prioritate față de Prețul Static Energie de mai jos, așa că ciclurile ar fi taxate la wați pe kWh - goliți acest câmp.",
+      "energy_sensor": "Aceasta este Entitatea contor de energie a dispozitivului, nu un preț. O entitate de preț are prioritate față de Prețul Static Energie de mai jos, așa că ciclurile ar fi taxate la valoarea contorului pe kWh - goliți acest câmp.",
+      "device_class": "Acest senzor măsoară {dc}, nu un preț pe kWh. O entitate de preț are prioritate față de Prețul Static Energie de mai jos - goliți acest câmp sau indicați un senzor de tarif.",
+      "unit": "Acest senzor afișează valori în {unit}, ceea ce nu este un preț pe kWh. O entitate de preț are prioritate față de Prețul Static Energie de mai jos - goliți acest câmp sau indicați un senzor de tarif."
+    },
     "settings_banner": "Conflicte de setări: {n}. Verificați secțiunile evidențiate și remediați-le înainte de salvare.",
     "settings_banner_btn": "Salt la primul",
     "confidence": {
@@ -1208,7 +1214,7 @@
       "label": "Număr de Repetări la Sfârșit"
     },
     "energy_price_entity": {
-      "doc": "Senzor cu prețul curent al energiei electrice pe kWh (de exemplu, un tarif dinamic). Are prioritate față de prețul static de mai jos. Cu Cost Ponderat în Timp activat, fiecare ciclu este taxat la prețul în vigoare în fiecare moment în care a rulat; altfel, i se fixează prețul în vigoare când s-a terminat.",
+      "doc": "Senzor cu prețul curent al energiei electrice pe kWh (de exemplu, un tarif dinamic). Trebuie să fie un preț, nu entitatea de putere sau de energie a prizei: are prioritate față de prețul static de mai jos, așa că un contor de kWh pus aici taxează fiecare ciclu la valoarea contorului în loc de tariful dumneavoastră. Cu Cost Ponderat în Timp activat, fiecare ciclu este taxat la prețul în vigoare în fiecare moment în care a rulat; altfel, i se fixează prețul în vigoare când s-a terminat.",
       "label": "Entitate Preț Energie"
     },
     "energy_price_static": {
