@@ -100,7 +100,18 @@ def option_float(value: Any, default: float) -> float:
     ``float()`` on one of those raises rather than returning ``inf``. An import file
     is hand-editable, so that lands in ``entry.options`` and would otherwise abort
     setup - the same bricked-entry outcome this module exists to prevent.
+
+    A stored ``bool`` is rejected before the cast, because ``bool`` is a subclass of
+    ``int`` and ``float(True)`` is a perfectly good ``1.0``. No numeric option is
+    read through here as a boolean, so one can only arrive from a hand-edited import
+    or an untyped ``ws_set_options`` payload - and adopting it is the silent
+    behaviour change the fallback exists to avoid: ``True`` becomes the strictest
+    possible threshold (1.0, gating the feature off) and ``False`` becomes "accept
+    anything" (0.0), or 1 under an ``option_int`` floor. The default is the honest
+    answer to a value of the wrong type.
     """
+    if isinstance(value, bool):
+        return float(default)
     try:
         result = float(value)
     except (TypeError, ValueError, OverflowError):

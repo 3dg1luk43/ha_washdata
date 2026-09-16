@@ -132,3 +132,30 @@ def test_keys_are_reported_even_when_no_manager_is_loaded():
     dev = connection.send_result.call_args[0][1]["devices"][0]
     assert dev["suggestion_keys"] == []
     assert dev["suggestions_count"] == 0
+
+
+def test_a_manager_less_device_carries_every_declared_key():
+    """The whole ``DeviceInfo`` contract, not one field at a time.
+
+    Everything live is filled in inside ``if manager is not None:``, which is
+    skipped for an entry that is mid-setup, stale, or whose setup failed - and
+    short-circuited by its own ``except`` even when a manager exists. ``DeviceInfo``
+    (``ws_schema.py``) and the generated ``ws-types.d.ts`` both declare these keys
+    non-optional, so each one needs a base default. ``envelope_position`` was
+    missing it; asserting the full annotation set is what stops the next field
+    shipping the same way.
+    """
+    from custom_components.ha_washdata.ws_schema import DeviceInfo
+
+    entry = SimpleNamespace(entry_id="e1", title="Washer", data={}, options={})
+    hass = MagicMock()
+    hass.config_entries.async_entries.return_value = [entry]
+    hass.data = {DOMAIN: {}}
+    connection = MagicMock()
+    with patch.object(ws_api, "_effective_level", return_value="admin"):
+        ws_api.ws_get_devices(hass, connection, {"id": 1, "type": "x"})
+    dev = connection.send_result.call_args[0][1]["devices"][0]
+
+    missing = sorted(set(DeviceInfo.__annotations__) - set(dev))
+    assert not missing, f"declared non-optional but absent without a manager: {missing}"
+    assert dev["envelope_position"] is None

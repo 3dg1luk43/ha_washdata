@@ -1355,6 +1355,11 @@ def ws_get_devices(
             "is_user_paused": False,
             "manual_program": False,
             "armed_program": None,
+            # Defaulted here rather than only in the manager branch below: both are
+            # declared non-optional by DeviceInfo (ws_schema.py) and ws-types.d.ts,
+            # and the branch is skipped for a manager-less entry (mid-setup, stale,
+            # or a setup that failed) as well as short-circuited by its own except.
+            "envelope_position": None,
             "options": dict(entry.options),
             # Device-resolved defaults for the cadence/ratio fields (#396/#393) so the
             # device-list conflict/suggestion badges score an unset field against the
