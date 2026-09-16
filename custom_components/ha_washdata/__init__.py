@@ -678,24 +678,44 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await stale.async_shutdown()
         except Exception:  # pylint: disable=broad-exception-caught
             _log.debug("Shutdown of the stale manager failed", exc_info=True)
-        # Its entity platforms are still registered (HA leaves forwarded
-        # platforms in place when setup fails); forwarding them again raises
-        # "has already been setup", so take them down first.
-        if entry.entry_id in hass.data.get(FORWARDED_ENTRIES_KEY, set()):
-            unloaded = False
-            try:
-                unloaded = await hass.config_entries.async_unload_platforms(
-                    entry, PLATFORMS
-                )
-            except Exception:  # pylint: disable=broad-exception-caught
-                _log.debug("Unloading the stale platforms failed", exc_info=True)
-            # Only forget the platforms once they are actually gone. A platform
-            # that refuses to unload leaves them forwarded, and dropping the
-            # record here would make the next attempt skip the unload and hit
-            # "has already been setup" forever - the #425 loop this set exists
-            # to break.
-            if unloaded:
-                hass.data[FORWARDED_ENTRIES_KEY].discard(entry.entry_id)
+
+    # Entity platforms from an earlier attempt are still registered (HA leaves
+    # forwarded platforms in place when setup fails); forwarding them again raises
+    # "has already been setup", so take them down first.
+    #
+    # NOT gated on the stale manager: FORWARDED_ENTRIES_KEY is the independent
+    # record of a forward, and the two can part company. async_reload_entry's
+    # full-reload branch runs precisely when the manager is missing - it calls
+    # async_unload_entry, which leaves the marker in place when the platform unload
+    # is refused, and then calls this function with nothing to find. Gating the
+    # cleanup on `stale` skipped it in exactly the case it exists for.
+    if entry.entry_id in hass.data.get(FORWARDED_ENTRIES_KEY, set()):
+        unloaded = False
+        try:
+            unloaded = await hass.config_entries.async_unload_platforms(
+                entry, PLATFORMS
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            _log.debug("Unloading the stale platforms failed", exc_info=True)
+        # Only forget the platforms once they are actually gone. A platform that
+        # refuses to unload leaves them forwarded, and dropping the record here
+        # would make the next attempt skip the unload and hit "has already been
+        # setup" forever - the #425 loop this set exists to break.
+        #
+        # Setup deliberately CARRIES ON when the unload does not succeed, rather
+        # than returning False. `False` does not mean "a live platform refused":
+        # HA's ConfigEntry.async_unload catches a never-loaded platform's
+        # ValueError("Config entry was never loaded!"), logs "Error unloading entry
+        # X for sensor" and returns False (`config_entries.py:997-1015`). Since the
+        # marker is written BEFORE the forward on purpose, the common instance of
+        # False is "the forward set nothing up", where there is nothing registered
+        # to collide with and the retry succeeds. Aborting on False would abort
+        # every later attempt identically - a permanent brick, the exact #425 loop
+        # this set exists to break, and it is what
+        # `test_reload_after_a_failed_setup_really_sets_up` and
+        # `test_an_unloadable_stale_platform_does_not_abort_the_retry` pin.
+        if unloaded:
+            hass.data[FORWARDED_ENTRIES_KEY].discard(entry.entry_id)
 
     # Warm the ML module cache before anything can score in the event loop.
     await _async_preload_ml_modules(hass)
