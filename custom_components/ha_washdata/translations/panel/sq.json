@@ -299,6 +299,12 @@
             "stop": "Duhet të jetë mbi Pragun e Fikjes së Energjisë ({pot} W)",
             "threshold": "Duhet të jetë nën Pragun e Ndalimit ({stop} W) për të hyrë në fuqi"
         },
+        "price_entity": {
+            "power_sensor": "Ky është Sensori i fuqisë i pajisjes, jo një çmim. Një entitet çmimi ka përparësi ndaj çmimit statik më poshtë, prandaj ciklet do të faturoheshin sikur vlera në vat të ishte çmimi për kWh - pastroni këtë fushë.",
+            "energy_sensor": "Ky është matësi i energjisë i pajisjes, jo një çmim. Një entitet çmimi ka përparësi ndaj çmimit statik më poshtë, prandaj ciklet do të faturoheshin sikur leximi i matësit të ishte çmimi për kWh - pastroni këtë fushë.",
+            "device_class": "Ky sensor mat {dc}, jo një çmim për kWh. Një entitet çmimi ka përparësi ndaj çmimit statik më poshtë - pastroni këtë fushë ose zgjidhni një sensor tarife.",
+            "unit": "Ky sensor lexon në {unit}, e cila nuk është çmim për kWh. Një entitet çmimi ka përparësi ndaj çmimit statik më poshtë - pastroni këtë fushë ose zgjidhni një sensor tarife."
+        },
         "pump_stuck": {
             "duration": "Duhet të jetë më i vogël se Koha e Skadimit pa Përditësim ({to} s) kështu që alarmi i bllokimit të ndizet para se rojtari të vrasë ciklin",
             "timeout": "Duhet të tejkalojë Kohëzgjatjen e Pompës së Bllokuar ({ps} s) kështu që alarmi të ndizet para se cikli të ndalet me forcë"
@@ -1252,7 +1258,7 @@
             "label": "Numri i përsëritjeve të fundit"
         },
         "energy_price_entity": {
-            "doc": "Sensori me çmimin aktual të energjisë elektrike për kWh (p.sh. një tarifë dinamike). Ka përparësi ndaj çmimit statik më poshtë. Kur është aktive Kosto e ponderuar sipas kohës, çdo cikël faturohet me çmimin në fuqi në çdo çast që ai punoi; përndryshe mbi të ngrihet çmimi në fuqi kur ai përfundoi.",
+            "doc": "Sensori me çmimin aktual të energjisë elektrike për kWh (p.sh. një tarifë dinamike). Duhet të jetë një çmim, jo entiteti i fuqisë ose i energjisë së vetë prizës: ka përparësi ndaj çmimit statik më poshtë, prandaj një numërues kWh i vendosur këtu e faturon çdo cikël me leximin e matësit në vend të tarifës suaj. Kur është aktive Kosto e ponderuar sipas kohës, çdo cikël faturohet me çmimin në fuqi në çdo çast që ai punoi; përndryshe mbi të ngrihet çmimi në fuqi kur ai përfundoi.",
             "label": "Entiteta e çmimit të energjisë"
         },
         "energy_price_static": {

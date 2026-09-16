@@ -221,6 +221,12 @@
     },
     "attn_sub": "Corriger les conflits avant d'enregistrer",
     "attn_title": "Conflits de paramètres : {n}",
+    "price_entity": {
+      "power_sensor": "Il s'agit du Capteur de puissance de l'appareil, pas d'un prix. Une entité de prix prévaut sur le Prix de l'énergie statique ci-dessous, donc les cycles seraient facturés à des watts par kWh - videz ce champ.",
+      "energy_sensor": "Il s'agit de l'Entité du compteur d'énergie de l'appareil, pas d'un prix. Une entité de prix prévaut sur le Prix de l'énergie statique ci-dessous, donc les cycles seraient facturés à la valeur du compteur par kWh - videz ce champ.",
+      "device_class": "Ce capteur mesure {dc}, pas un prix par kWh. Une entité de prix prévaut sur le Prix de l'énergie statique ci-dessous - videz ce champ ou pointez-le vers un capteur de tarif.",
+      "unit": "Ce capteur est exprimé en {unit}, ce qui n'est pas un prix par kWh. Une entité de prix prévaut sur le Prix de l'énergie statique ci-dessous - videz ce champ ou pointez-le vers un capteur de tarif."
+    },
     "settings_banner": "Conflits de paramètres : {n}. Vérifiez les sections surlignées et corrigez-les avant d'enregistrer.",
     "settings_banner_btn": "Aller au premier",
     "confidence": {
@@ -1240,7 +1246,7 @@
       "label": "Nombre de répétitions de fin"
     },
     "energy_price_entity": {
-      "doc": "Capteur avec le prix actuel de l'électricité par kWh (par exemple un tarif dynamique). Prévaut sur le prix statique ci-dessous. Avec Coût pondéré dans le temps activé, chaque cycle est facturé au prix en vigueur à chaque instant où il a tourné ; sinon, le prix en vigueur à sa fin lui est figé.",
+      "doc": "Capteur avec le prix actuel de l'électricité par kWh (par exemple un tarif dynamique). Doit être un prix, pas le capteur de puissance ni le compteur d'énergie de la prise elle-même : il prévaut sur le prix statique ci-dessous, donc un compteur kWh placé ici facture chaque cycle à la valeur du compteur au lieu de votre tarif. Avec Coût pondéré dans le temps activé, chaque cycle est facturé au prix en vigueur à chaque instant où il a tourné ; sinon, le prix en vigueur à sa fin lui est figé.",
       "label": "Entité de prix de l'énergie"
     },
     "energy_price_static": {

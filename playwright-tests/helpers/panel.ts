@@ -16,8 +16,13 @@ export type Handlers = Record<string, unknown>;
  *
  * @param page       Playwright page
  * @param overrides  WS handler overrides merged on top of DEFAULT_HANDLERS
+ * @param hassExtra  extra mock-hass fields (states / entities / devices)
  */
-export async function bootPanel(page: Page, overrides: Handlers = {}): Promise<void> {
+export async function bootPanel(
+  page: Page,
+  overrides: Handlers = {},
+  hassExtra: Record<string, unknown> = {},
+): Promise<void> {
   // Intercept the per-language translation fetches so tests don't need network.
   // Returning an empty dict makes _t() fall back to the JS-embedded English.
   await page.route('**/panel-translations/**', (route) =>
@@ -26,10 +31,12 @@ export async function bootPanel(page: Page, overrides: Handlers = {}): Promise<v
 
   const handlers = buildHandlers(overrides);
 
-  await page.evaluate((h: Handlers) => {
+  await page.evaluate((arg: { h: Handlers; hass: Record<string, unknown> }) => {
     // Serialise functions aren't transferable; only plain data reaches page scope.
-    window.__boot_panel(h);
-  }, handlers as any);
+    // `hass` seeds the mock hass (states/entities/devices) for panel code that reads
+    // them directly, e.g. the entity pickers and the #439 price-entity validation.
+    window.__boot_panel(arg.h, arg.hass);
+  }, { h: handlers, hass: hassExtra } as any);
 
   // Wait for the tab bar to appear — confirms initial render completed.
   await expect(page.locator('button.wd-tab').first()).toBeVisible({ timeout: 10_000 });

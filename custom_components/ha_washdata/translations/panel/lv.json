@@ -269,6 +269,12 @@
     },
     "attn_sub": "Pirms saglabāšanas novērsiet konfliktus",
     "attn_title": "Iestatījumu konflikti: {n}",
+    "price_entity": {
+      "power_sensor": "Šis ir ierīces Jaudas sensors, nevis cena. Cenas entītija aizstāj zemāk norādīto fiksēto cenu, tāpēc cikli tiktu aprēķināti pēc vatiem par kWh - notīriet šo lauku.",
+      "energy_sensor": "Šis ir ierīces Enerģijas skaitītājs, nevis cena. Cenas entītija aizstāj zemāk norādīto fiksēto cenu, tāpēc cikli tiktu aprēķināti pēc skaitītāja rādījuma par kWh - notīriet šo lauku.",
+      "device_class": "Šī sensora klase ir {dc}, nevis cena par kWh. Cenas entītija aizstāj zemāk norādīto fiksēto cenu - notīriet šo lauku vai norādiet tarifa sensoru.",
+      "unit": "Šī sensora mērvienība ir {unit}, kas nav cena par kWh. Cenas entītija aizstāj zemāk norādīto fiksēto cenu - notīriet šo lauku vai norādiet tarifa sensoru."
+    },
     "settings_banner": "Iestatījumu konflikti: {n}. Pārbaudiet iezīmētās sadaļas un labojiet tās pirms saglabāšanas.",
     "settings_banner_btn": "Doties uz pirmo",
     "confidence": {
@@ -1256,7 +1262,7 @@
       "label": "Beigu atkārtojumu skaits"
     },
     "energy_price_entity": {
-      "doc": "Sensors ar pašreizējo elektroenerģijas cenu par kWh (piemēram, dinamisks tarifs). Tam ir prioritāte pār zemāk norādīto statisko cenu. Ja ieslēgtas Laikā svērtās izmaksas, katrs cikls tiek rēķināts pēc cenas, kas bija spēkā katrā tā darbības brīdī; pretējā gadījumā tam tiek fiksēta cena, kas bija spēkā tā beigās.",
+      "doc": "Sensors ar pašreizējo elektroenerģijas cenu par kWh (piemēram, dinamisks tarifs). Tai jābūt cenai, nevis pašas kontaktligzdas jaudas vai enerģijas entītijai: tam ir prioritāte pār zemāk norādīto statisko cenu, tāpēc šeit norādīts kWh skaitītājs katru ciklu aprēķina pēc skaitītāja rādījuma, nevis pēc jūsu tarifa. Ja ieslēgtas Laikā svērtās izmaksas, katrs cikls tiek rēķināts pēc cenas, kas bija spēkā katrā tā darbības brīdī; pretējā gadījumā tam tiek fiksēta cena, kas bija spēkā tā beigās.",
       "label": "Enerģijas cenas entītija"
     },
     "energy_price_static": {

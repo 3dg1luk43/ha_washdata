@@ -299,6 +299,12 @@
       "stop": "Mora biti nad Pragom izklopa napajanja ({pot} W)",
       "threshold": "Mora biti pod Pragom zaustavitve ({stop} W), da ima učinek"
     },
+    "price_entity": {
+      "power_sensor": "To je Senzor moči naprave, ne cena. Entiteta cene ima prednost pred statično ceno spodaj, zato bi se cikli obračunali po vatih za kWh - počistite to polje.",
+      "energy_sensor": "To je Merilnik energije naprave, ne cena. Entiteta cene ima prednost pred statično ceno spodaj, zato bi se cikli obračunali po odčitku merilnika za kWh - počistite to polje.",
+      "device_class": "Razred tega senzorja je {dc}, ne cena za kWh. Entiteta cene ima prednost pred statično ceno spodaj - počistite to polje ali ga usmerite na senzor tarife.",
+      "unit": "Ta senzor meri v {unit}, kar ni cena za kWh. Entiteta cene ima prednost pred statično ceno spodaj - počistite to polje ali ga usmerite na senzor tarife."
+    },
     "pump_stuck": {
       "duration": "Mora biti manjši od Časovne omejitve brez posodobitve ({to} s), da alarm zastoja sproži pred tem, ko nadzornik prekine cikel",
       "timeout": "Mora presegati Trajanje zataknjenosti črpalke ({ps} s), da alarm sproži pred prisilno zaustavitvijo cikla"
@@ -1256,7 +1262,7 @@
       "label": "Število ponovitev konca"
     },
     "energy_price_entity": {
-      "doc": "Senzor s trenutno ceno elektrike na kWh (npr. dinamična tarifa). Ima prednost pred statično ceno spodaj. Ko so Časovno tehtani stroški vklopljeni, se vsak cikel obračuna po ceni, ki je veljala v vsakem trenutku njegovega teka; sicer se nanj zamrzne cena, ki je veljala ob zaključku.",
+      "doc": "Senzor s trenutno ceno elektrike na kWh (npr. dinamična tarifa). Biti mora cena, ne lastna entiteta moči ali energije vtičnice: ima prednost pred statično ceno spodaj, zato bi tukaj vpisan števec kWh vsak cikel obračunal po odčitku merilnika namesto po vaši tarifi. Ko so Časovno tehtani stroški vklopljeni, se vsak cikel obračuna po ceni, ki je veljala v vsakem trenutku njegovega teka; sicer se nanj zamrzne cena, ki je veljala ob zaključku.",
       "label": "Entiteta cene energije"
     },
     "energy_price_static": {

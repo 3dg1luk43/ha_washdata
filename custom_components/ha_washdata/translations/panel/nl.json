@@ -299,6 +299,12 @@
       "stop": "Moet boven de uitschakeldrempel ({pot} W) liggen",
       "threshold": "Moet onder de stopdrempel ({stop} W) liggen om van kracht te zijn"
     },
+    "price_entity": {
+      "power_sensor": "Dit is de Vermogenssensor van het apparaat, geen prijs. Een prijsentiteit heeft voorrang op de onderstaande statische prijs, dus cycli zouden worden afgerekend tegen watt per kWh - maak dit veld leeg.",
+      "energy_sensor": "Dit is de Energiemeter van het apparaat, geen prijs. Een prijsentiteit heeft voorrang op de onderstaande statische prijs, dus cycli zouden worden afgerekend tegen de meterstand per kWh - maak dit veld leeg.",
+      "device_class": "Deze sensor meet {dc}, geen prijs per kWh. Een prijsentiteit heeft voorrang op de onderstaande statische prijs - maak dit veld leeg of kies een tariefsensor.",
+      "unit": "Deze sensor geeft waarden in {unit}, en dat is geen prijs per kWh. Een prijsentiteit heeft voorrang op de onderstaande statische prijs - maak dit veld leeg of kies een tariefsensor."
+    },
     "pump_stuck": {
       "duration": "Moet kleiner zijn dan de geen-update-timeout ({to} s) zodat het vastgelopen-alarm afgaat vóór de watchdog de cyclus beëindigt",
       "timeout": "Moet de vastgelopen-duur van de pomp ({ps} s) overschrijden zodat het alarm afgaat vóór de cyclus geforceerd wordt gestopt"
@@ -1288,7 +1294,7 @@
       "label": "Eindherhalingsaantal"
     },
     "energy_price_entity": {
-      "doc": "Sensor met de actuele elektriciteitsprijs per kWh (bijvoorbeeld een dynamisch tarief). Heeft voorrang op de onderstaande statische prijs. Met Tijdgewogen kosten aan wordt elke cyclus afgerekend tegen de prijs die op elk moment van de cyclus gold; anders wordt de prijs die gold toen hij klaar was erop bevroren.",
+      "doc": "Sensor met de actuele elektriciteitsprijs per kWh (bijvoorbeeld een dynamisch tarief). Moet een prijs zijn, niet de vermogens- of energie-entiteit van de stekker zelf: hij heeft voorrang op de onderstaande statische prijs, dus een kWh-teller hier rekent elke cyclus af tegen de meterstand in plaats van tegen je tarief. Met Tijdgewogen kosten aan wordt elke cyclus afgerekend tegen de prijs die op elk moment van de cyclus gold; anders wordt de prijs die gold toen hij klaar was erop bevroren.",
       "label": "Energieprijsentiteit"
     },
     "energy_price_static": {

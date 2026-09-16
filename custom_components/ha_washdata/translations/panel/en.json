@@ -269,6 +269,12 @@
     },
     "attn_sub": "Fix conflicts before saving",
     "attn_title": "Setting conflicts: {n}",
+    "price_entity": {
+      "power_sensor": "This is the device's Power Sensor, not a price. A price entity overrides the static price below, so cycles would be costed at watts per kWh - clear this field.",
+      "energy_sensor": "This is the device's Energy Meter, not a price. A price entity overrides the static price below, so cycles would be costed at the meter reading per kWh - clear this field.",
+      "device_class": "This sensor measures {dc}, not a price per kWh. A price entity overrides the static price below - clear this field or point it at a tariff sensor.",
+      "unit": "This sensor reads in {unit}, which is not a price per kWh. A price entity overrides the static price below - clear this field or point it at a tariff sensor."
+    },
     "settings_banner": "Setting conflicts: {n}. Check the highlighted sections and fix them before saving.",
     "settings_banner_btn": "Go to first",
     "confidence": {
@@ -1343,7 +1349,7 @@
       "label": "Time-Weighted Cost"
     },
     "energy_price_entity": {
-      "doc": "Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Takes precedence over the static price below. With Time-Weighted Cost on, each cycle is charged at the price in force at every moment it ran; otherwise the price in effect when it finished is frozen onto it.",
+      "doc": "Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Must be a price, not the plug's own power or energy entity: it takes precedence over the static price below, so a kWh counter here costs every cycle at the meter reading instead of your tariff. With Time-Weighted Cost on, each cycle is charged at the price in force at every moment it ran; otherwise the price in effect when it finished is frozen onto it.",
       "label": "Energy Price Entity"
     },
     "energy_price_static": {

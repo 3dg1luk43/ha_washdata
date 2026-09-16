@@ -299,6 +299,12 @@
       "stop": "Verður að vera yfir Slökkunarþröskuldi ({pot} W)",
       "threshold": "Verður að vera undir Stöðvunarþröskuldi ({stop} W) til að taka gildi"
     },
+    "price_entity": {
+      "power_sensor": "Þetta er Aflskynjari tækisins, ekki verð. Verðeining tekur fram yfir fasta verðið hér að neðan, þannig að lotur yrðu reiknaðar á vöttum á kWh - hreinsaðu þennan reit.",
+      "energy_sensor": "Þetta er Orkumælir tækisins, ekki verð. Verðeining tekur fram yfir fasta verðið hér að neðan, þannig að lotur yrðu reiknaðar á stöðu mælisins á kWh - hreinsaðu þennan reit.",
+      "device_class": "Þessi skynjari mælir {dc}, ekki verð á kWh. Verðeining tekur fram yfir fasta verðið hér að neðan - hreinsaðu þennan reit eða bentu honum á gjaldskrárskynjara.",
+      "unit": "Þessi skynjari sýnir gildi í {unit}, sem er ekki verð á kWh. Verðeining tekur fram yfir fasta verðið hér að neðan - hreinsaðu þennan reit eða bentu honum á gjaldskrárskynjara."
+    },
     "pump_stuck": {
       "duration": "Verður að vera minna en Engin-uppfærsla-tímamark ({to} s) svo fasadæluvísbending kvikni áður en gæslan drepur lotuna",
       "timeout": "Verður að vera meira en Fastri dælu-lengd ({ps} s) svo fasadæluvísbending kvikni áður en lotunni er þvingað stöðvað"
@@ -1288,7 +1294,7 @@
       "label": "Fjöldi lokakorna"
     },
     "energy_price_entity": {
-      "doc": "Skynjari með núverandi raforkuverði á kWh (t.d. breytileg gjaldskrá). Tekur fram yfir fasta verðið hér að neðan. Þegar Tímaveginn kostnaður er kveiktur er hver lota reiknuð á því verði sem gilti á hverri stundu meðan hún keyrði; annars er verðið sem gilti þegar henni lauk fryst á hana.",
+      "doc": "Skynjari með núverandi raforkuverði á kWh (t.d. breytileg gjaldskrá). Verður að vera verð, ekki aflseining eða orkueining innstungunnar sjálfrar: hann tekur fram yfir fasta verðið hér að neðan, þannig að kWh-teljari hér reiknar hverja lotu á stöðu mælisins í stað gjaldskrárinnar þinnar. Þegar Tímaveginn kostnaður er kveiktur er hver lota reiknuð á því verði sem gilti á hverri stundu meðan hún keyrði; annars er verðið sem gilti þegar henni lauk fryst á hana.",
       "label": "Orkuverðeining"
     },
     "energy_price_static": {

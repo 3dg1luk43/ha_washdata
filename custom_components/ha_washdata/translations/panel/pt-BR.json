@@ -221,6 +221,12 @@
     },
     "attn_sub": "Corrija os conflitos antes de salvar",
     "attn_title": "Conflitos de configurações: {n}",
+    "price_entity": {
+      "power_sensor": "Este é o Sensor de Potência do dispositivo, não um preço. Uma entidade de preço tem precedência sobre o Preço Estático de Energia abaixo, então os ciclos seriam cobrados a watts por kWh - limpe este campo.",
+      "energy_sensor": "Esta é a Entidade do Medidor de Energia do dispositivo, não um preço. Uma entidade de preço tem precedência sobre o Preço Estático de Energia abaixo, então os ciclos seriam cobrados pela leitura do medidor por kWh - limpe este campo.",
+      "device_class": "Este sensor mede {dc}, não um preço por kWh. Uma entidade de preço tem precedência sobre o Preço Estático de Energia abaixo - limpe este campo ou aponte-o para um sensor de tarifa.",
+      "unit": "Este sensor indica valores em {unit}, o que não é um preço por kWh. Uma entidade de preço tem precedência sobre o Preço Estático de Energia abaixo - limpe este campo ou aponte-o para um sensor de tarifa."
+    },
     "settings_banner": "Conflitos de configurações: {n}. Verifique as seções destacadas e corrija-os antes de salvar.",
     "settings_banner_btn": "Ir para o primeiro",
     "confidence": {
@@ -1208,7 +1214,7 @@
       "label": "Contagem de Repetições de Fim"
     },
     "energy_price_entity": {
-      "doc": "Sensor com o preço atual da eletricidade por kWh (por exemplo, uma tarifa dinâmica). Tem precedência sobre o preço estático abaixo. Com o Custo Ponderado no Tempo ativado, cada ciclo é cobrado pelo preço em vigor em cada momento em que ele rodou; caso contrário, fica congelado nele o preço em vigor quando terminou.",
+      "doc": "Sensor com o preço atual da eletricidade por kWh (por exemplo, uma tarifa dinâmica). Precisa ser um preço, não a entidade de potência ou de energia da própria tomada: tem precedência sobre o preço estático abaixo, então um contador de kWh aqui cobra cada ciclo pela leitura do medidor em vez da sua tarifa. Com o Custo Ponderado no Tempo ativado, cada ciclo é cobrado pelo preço em vigor em cada momento em que ele rodou; caso contrário, fica congelado nele o preço em vigor quando terminou.",
       "label": "Entidade de Preço de Energia"
     },
     "energy_price_static": {

@@ -269,6 +269,12 @@
     },
     "attn_sub": "Lahendage konfliktid enne salvestamist",
     "attn_title": "Seadete konfliktid: {n}",
+    "price_entity": {
+      "power_sensor": "See on seadme Võimsusandur, mitte hind. Hinna olem on ülimuslik allpool oleva staatilise hinna suhtes, seega arvestataks tsüklite maksumus nii, nagu oleks vattide näit hind kWh kohta - tühjendage see väli.",
+      "energy_sensor": "See on seadme Energiaarvesti, mitte hind. Hinna olem on ülimuslik allpool oleva staatilise hinna suhtes, seega arvestataks tsüklite maksumus nii, nagu oleks arvesti näit hind kWh kohta - tühjendage see väli.",
+      "device_class": "See andur mõõdab suurust {dc}, mitte hinda kWh kohta. Hinna olem on ülimuslik allpool oleva staatilise hinna suhtes - tühjendage see väli või valige tariifiandur.",
+      "unit": "Selle anduri näidu ühik on {unit}, mis ei ole hind kWh kohta. Hinna olem on ülimuslik allpool oleva staatilise hinna suhtes - tühjendage see väli või valige tariifiandur."
+    },
     "settings_banner": "Seadete konfliktid: {n}. Kontrollige esile tõstetud sektsioone ja parandage need enne salvestamist.",
     "settings_banner_btn": "Mine esimesele",
     "confidence": {
@@ -1288,7 +1294,7 @@
       "label": "Lõpu Kordusloendur"
     },
     "energy_price_entity": {
-      "doc": "Andur praeguse elektrihinnaga kWh kohta (nt dünaamiline tariif). See on ülimuslik alloleva staatilise hinna suhtes. Kui Ajaliselt Kaalutud Maksumus on sees, arvestatakse iga tsükkel hinna järgi, mis kehtis igal selle töötamise hetkel; muidu fikseeritakse sellele hind, mis kehtis lõpetamise hetkel.",
+      "doc": "Andur praeguse elektrihinnaga kWh kohta (nt dünaamiline tariif). See peab olema hind, mitte pistiku enda võimsuse või energia olem: see on ülimuslik alloleva staatilise hinna suhtes, seega siia määratud kWh loendur arvestab iga tsükli maksumuse arvesti näidu, mitte teie tariifi järgi. Kui Ajaliselt Kaalutud Maksumus on sees, arvestatakse iga tsükkel hinna järgi, mis kehtis igal selle töötamise hetkel; muidu fikseeritakse sellele hind, mis kehtis lõpetamise hetkel.",
       "label": "Energia Hinna Olem"
     },
     "energy_price_static": {

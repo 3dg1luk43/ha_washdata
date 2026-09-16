@@ -299,6 +299,12 @@
       "stop": "Musí být nad Prahem vypnutí napájení ({pot} W)",
       "threshold": "Musí být pod Prahem zastavení ({stop} W), aby měl účinek"
     },
+    "price_entity": {
+      "power_sensor": "Toto je Snímač výkonu zařízení, ne cena. Entita ceny má přednost před statickou cenou níže, takže by se cykly účtovaly ve wattech za kWh - vymažte toto pole.",
+      "energy_sensor": "Toto je Měřič energie zařízení, ne cena. Entita ceny má přednost před statickou cenou níže, takže by se cykly účtovaly podle stavu měřiče za kWh - vymažte toto pole.",
+      "device_class": "Třída tohoto senzoru je {dc}, ne cena za kWh. Entita ceny má přednost před statickou cenou níže - vymažte toto pole nebo jej nasměrujte na senzor tarifu.",
+      "unit": "Tento senzor měří v {unit}, což není cena za kWh. Entita ceny má přednost před statickou cenou níže - vymažte toto pole nebo jej nasměrujte na senzor tarifu."
+    },
     "pump_stuck": {
       "duration": "Musí být menší než Timeout bez aktualizace ({to} s), aby alarm zaseknutí vyskočil dříve než hlídač ukončí cyklus",
       "timeout": "Musí překročit Délku zaseknutého čerpadla ({ps} s), aby alarm vyskočil dříve než je cyklus vynuceně zastaven"
@@ -1252,7 +1258,7 @@
       "label": "Počet opakování konce"
     },
     "energy_price_entity": {
-      "doc": "Senzor s aktuální cenou elektřiny za kWh (např. dynamický tarif). Má přednost před statickou cenou níže. Když jsou Časově vážené náklady zapnuté, každý cyklus se účtuje cenou platnou v každém okamžiku jeho běhu; jinak se na něj zafixuje cena platná v okamžiku jeho dokončení.",
+      "doc": "Senzor s aktuální cenou elektřiny za kWh (např. dynamický tarif). Musí to být cena, ne vlastní entita výkonu nebo energie zásuvky: má přednost před statickou cenou níže, takže počítadlo kWh zadané zde účtuje každý cyklus podle stavu měřiče místo podle vašeho tarifu. Když jsou Časově vážené náklady zapnuté, každý cyklus se účtuje cenou platnou v každém okamžiku jeho běhu; jinak se na něj zafixuje cena platná v okamžiku jeho dokončení.",
       "label": "Entita ceny energie"
     },
     "energy_price_static": {

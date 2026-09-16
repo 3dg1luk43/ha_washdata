@@ -269,6 +269,12 @@
         },
         "attn_sub": "Mentés előtt javítsa az ütközéseket",
         "attn_title": "Beállítási ütközések: {n}",
+        "price_entity": {
+            "power_sensor": "Ez a készülék Teljesítmény érzékelője, nem egy ár. Egy ár entitás felülírja az alábbi statikus árat, így a ciklusok költsége úgy számolódna, mintha a wattérték lenne a kWh-nkénti ár - törölje ezt a mezőt.",
+            "energy_sensor": "Ez a készülék Energiamérője, nem egy ár. Egy ár entitás felülírja az alábbi statikus árat, így a ciklusok költsége úgy számolódna, mintha a mérőóra állása lenne a kWh-nkénti ár - törölje ezt a mezőt.",
+            "device_class": "Ez az érzékelő {dc} mennyiséget mér, nem kWh-nkénti árat. Egy ár entitás felülírja az alábbi statikus árat - törölje ezt a mezőt, vagy állítsa be egy tarifaérzékelőre.",
+            "unit": "Ez az érzékelő {unit} egységben ad értéket, ami nem kWh-nkénti ár. Egy ár entitás felülírja az alábbi statikus árat - törölje ezt a mezőt, vagy állítsa be egy tarifaérzékelőre."
+        },
         "settings_banner": "Beállítási ütközések: {n}. Ellenőrizze a kijelölt szakaszokat, és javítsa ki őket mentés előtt.",
         "settings_banner_btn": "Ugrás az elsőhöz",
         "confidence": {
@@ -1248,7 +1254,7 @@
             "label": "Záró ismétlések száma"
         },
         "energy_price_entity": {
-            "doc": "Érzékelő az aktuális elektromos áram kWh-nkénti árával (pl. dinamikus tarifa). Elsőbbséget élvez az alábbi statikus árral szemben. Ha az Időben súlyozott költség be van kapcsolva, minden ciklus azon az áron kerül elszámolásra, amely a futása minden pillanatában érvényes volt; egyébként a befejezéskor érvényes ár rögzül rá.",
+            "doc": "Érzékelő az aktuális elektromos áram kWh-nkénti árával (pl. dinamikus tarifa). Árnak kell lennie, nem a konnektor saját teljesítmény- vagy energiaentitásának: elsőbbséget élvez az alábbi statikus árral szemben, így egy ide megadott kWh-számláló minden ciklust a mérőóra állása szerint számol el a tarifája helyett. Ha az Időben súlyozott költség be van kapcsolva, minden ciklus azon az áron kerül elszámolásra, amely a futása minden pillanatában érvényes volt; egyébként a befejezéskor érvényes ár rögzül rá.",
             "label": "Energiaár entitás"
         },
         "energy_price_static": {

@@ -221,6 +221,12 @@
     },
     "attn_sub": "Correggi i conflitti prima di salvare",
     "attn_title": "Conflitti nelle impostazioni: {n}",
+    "price_entity": {
+      "power_sensor": "Questo è il Sensore di potenza del dispositivo, non un prezzo. Un'entità di prezzo ha la precedenza sul Prezzo energia statico qui sotto, quindi i cicli verrebbero addebitati a watt per kWh - svuota questo campo.",
+      "energy_sensor": "Questa è l'Entità del contatore di energia del dispositivo, non un prezzo. Un'entità di prezzo ha la precedenza sul Prezzo energia statico qui sotto, quindi i cicli verrebbero addebitati alla lettura del contatore per kWh - svuota questo campo.",
+      "device_class": "Questo sensore misura {dc}, non un prezzo per kWh. Un'entità di prezzo ha la precedenza sul Prezzo energia statico qui sotto - svuota questo campo oppure puntalo su un sensore di tariffa.",
+      "unit": "Questo sensore riporta valori in {unit}, che non è un prezzo per kWh. Un'entità di prezzo ha la precedenza sul Prezzo energia statico qui sotto - svuota questo campo oppure puntalo su un sensore di tariffa."
+    },
     "settings_banner": "Conflitti nelle impostazioni: {n}. Controlla le sezioni evidenziate e correggile prima di salvare.",
     "settings_banner_btn": "Vai al primo",
     "confidence": {
@@ -1240,7 +1246,7 @@
       "label": "Conteggio ripetizioni fine"
     },
     "energy_price_entity": {
-      "doc": "Sensore con il prezzo attuale dell'elettricità per kWh (ad esempio una tariffa dinamica). Ha la precedenza sul prezzo statico riportato di seguito. Con Costo ponderato nel tempo attivo, ogni ciclo viene addebitato al prezzo in vigore in ogni momento in cui è stato eseguito; altrimenti gli viene fissato il prezzo in vigore al termine.",
+      "doc": "Sensore con il prezzo attuale dell'elettricità per kWh (ad esempio una tariffa dinamica). Deve essere un prezzo, non l'entità di potenza o di energia della presa stessa: ha la precedenza sul prezzo statico riportato di seguito, quindi un contatore di kWh inserito qui addebita ogni ciclo alla lettura del contatore invece che alla tua tariffa. Con Costo ponderato nel tempo attivo, ogni ciclo viene addebitato al prezzo in vigore in ogni momento in cui è stato eseguito; altrimenti gli viene fissato il prezzo in vigore al termine.",
       "label": "Entità prezzo energia"
     },
     "energy_price_static": {

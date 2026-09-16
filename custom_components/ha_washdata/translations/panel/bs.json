@@ -299,6 +299,12 @@
             "stop": "Mora biti iznad Praga isključivanja napajanja ({pot} W)",
             "threshold": "Mora biti ispod Praga zaustavljanja ({stop} W) da bi stupilo na snagu"
         },
+        "price_entity": {
+            "power_sensor": "Ovo je Senzor snage uređaja, a ne cijena. Entitet cijene ima prednost nad statičnom cijenom ispod, pa bi ciklusi bili obračunati po vatima za kWh - očistite ovo polje.",
+            "energy_sensor": "Ovo je Brojilo energije uređaja, a ne cijena. Entitet cijene ima prednost nad statičnom cijenom ispod, pa bi ciklusi bili obračunati po očitanju brojila za kWh - očistite ovo polje.",
+            "device_class": "Klasa ovog senzora je {dc}, a ne cijena po kWh. Entitet cijene ima prednost nad statičnom cijenom ispod - očistite ovo polje ili ga usmjerite na senzor tarife.",
+            "unit": "Ovaj senzor očitava u {unit}, što nije cijena po kWh. Entitet cijene ima prednost nad statičnom cijenom ispod - očistite ovo polje ili ga usmjerite na senzor tarife."
+        },
         "pump_stuck": {
             "duration": "Mora biti manje od Timeouta bez ažuriranja ({to} s) kako bi alarm zaglavljivanja aktivirao prije nego čuvar zaustavi ciklus",
             "timeout": "Mora premašiti Trajanje zaglavljivanja pumpe ({ps} s) kako bi alarm aktivirao prije prisilnog zaustavljanja ciklusa"
@@ -1256,7 +1262,7 @@
             "label": "Broj ponavljanja kraja"
         },
         "energy_price_entity": {
-            "doc": "Senzor s trenutnom cijenom struje po kWh (npr. dinamična tarifa). Ima prednost nad statičnom cijenom ispod. Kada je Vremenski ponderisan trošak uključen, svaki ciklus se naplaćuje po cijeni koja je važila u svakom trenutku njegovog rada; u suprotnom se na njega zamrzava cijena koja je važila kada je završio.",
+            "doc": "Senzor s trenutnom cijenom struje po kWh (npr. dinamična tarifa). Mora biti cijena, a ne vlastiti entitet snage ili energije utičnice: ima prednost nad statičnom cijenom ispod, pa bi brojilo kWh ovdje obračunalo svaki ciklus po očitanju brojila umjesto po vašoj tarifi. Kada je Vremenski ponderisan trošak uključen, svaki ciklus se naplaćuje po cijeni koja je važila u svakom trenutku njegovog rada; u suprotnom se na njega zamrzava cijena koja je važila kada je završio.",
             "label": "Entitet cijene energije"
         },
         "energy_price_static": {
