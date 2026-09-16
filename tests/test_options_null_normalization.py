@@ -274,9 +274,29 @@ def test_option_float_non_finite_would_otherwise_disable_labelling():
     assert (conf >= option_float("nan", 0.9)) is True
 
 
-def test_option_float_does_not_swallow_a_stored_bool():
-    """Not a valid threshold, but float() accepts it, so record the behaviour."""
-    assert option_float(True, 0.9) == 1.0
+def test_option_float_rejects_a_stored_bool():
+    """``bool`` is a subclass of ``int``, so ``float(True)`` is a valid-looking 1.0.
+
+    It is not a valid threshold, and adopting it is the silent behaviour change the
+    default fallback exists to avoid: ``True`` becomes the strictest possible
+    setting (1.0 gates the feature off entirely) and ``False`` becomes "accept
+    anything". No numeric option is read through here as a boolean, so one can only
+    arrive from a hand-edited import or an untyped ``ws_set_options`` payload.
+    """
+    assert option_float(True, 0.9) == 0.9
+    assert option_float(False, 0.9) == 0.9
+
+
+def test_option_int_rejects_a_stored_bool_before_the_floor_hides_it():
+    """``option_int`` inherits the rejection, and the floor would have masked it.
+
+    Without it ``False`` coerces to 0 and ``minimum=1`` raises that to 1, so a
+    boolean would silently configure a persistence of 1 - the loosest real setting -
+    while looking like a clamp doing its job. The default is 3.
+    """
+    assert option_int(True, 3) == 3
+    assert option_int(False, 3) == 3
+    assert option_int(False, 3, minimum=1) == 3
 
 
 def test_option_float_rejects_an_oversized_integer():

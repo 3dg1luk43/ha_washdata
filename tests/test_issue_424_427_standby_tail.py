@@ -356,8 +356,76 @@ class TestKeepTailCap:
         det.process_reading(0.0, BASE + timedelta(seconds=900))
         assert det._last_real_reading_time == BASE + timedelta(seconds=900)
 
+    def test_the_anticrease_finalize_caps_its_kept_tail(self, monkeypatch) -> None:
+        """The anti-crease finalize is a keep_tail finish and needs the same bound.
+
+        It can fire on a window of *watchdog keepalives*: a change-only plug that
+        has gone silent emits nothing, the injected 0 W readings satisfy the "all at
+        or below anti_wrinkle_max_power" window, and the finalize then stamps the
+        moment the watchdog noticed as ``end_time``. Item 260 measured that shape on
+        real data - 18.7% of stored cycles carry a keepalive in the tail, median
+        204 s and up to 1782 s of never-observed time inside the stored duration.
+
+        The tail predicate is forced here rather than rebuilt sample by sample: what
+        is under test is the ``tail_cap`` argument at the finalize call site, and
+        ``_is_anticrease_tail`` has its own tests.
+        """
+        det, completed = self._armed(expected=14338.0, last_active_s=7200.0)
+        det._matched_profile = "Baumwolle 60"
+        det._power_readings = [
+            (BASE + timedelta(seconds=t), p)
+            for t, p in [(0.0, 5.0), (7200.0, 1.5), (14400.0, 0.0), (15594.0, 0.0)]
+        ]
+        det._cycle_max_power = 1974.2
+        monkeypatch.setattr(det, "_is_anticrease_tail", lambda _ts: True)
+
+        assert det._maybe_finalize_anticrease_tail(BASE + timedelta(seconds=15594.0))
+
+        assert len(completed) == 1
+        # Pre-fix: 15594 s, i.e. 20 min of standby banked onto a 239 min programme.
+        assert completed[0]["duration"] == pytest.approx(14338.0)
+
+    def test_a_real_anticrease_tumble_tail_is_not_clipped(self, monkeypatch) -> None:
+        """The safety half: the cap never cuts into the tail the feature exists for.
+
+        A Miele-style anti-crease tail is a constant baseline plus sub-
+        ``anti_wrinkle_max_power`` tumble bursts, and that baseline sits ABOVE
+        ``stop_threshold`` (``const.py:811-812``: a ~2.5-3.2 W draw against a ~1.2 W
+        threshold). Every one of those readings therefore refreshes
+        ``_last_active_time``, and the cap is ``max(expected_end,
+        _last_active_time)`` - the last tumble, 15500 s here.
+
+        It is not a strict no-op, and this pins the size of the difference: the
+        stored end moves from the finalize moment back to the last reading, so a
+        real tail loses only the trailing quiet gap (94 s here, part of the confirm
+        window it waited out). The tumble itself is kept. A tail of genuinely-0 W
+        readings is the case above, clipped back to the expected end.
+        """
+        det, completed = self._armed(expected=14338.0, last_active_s=None)
+        det._matched_profile = "Baumwolle 60"
+        det._last_active_time = BASE + timedelta(seconds=15500.0)
+        det._power_readings = [
+            (BASE + timedelta(seconds=t), p)
+            for t, p in [(0.0, 5.0), (14400.0, 3.0), (15000.0, 2.8), (15500.0, 3.1)]
+        ]
+        det._cycle_max_power = 1974.2
+        monkeypatch.setattr(det, "_is_anticrease_tail", lambda _ts: True)
+
+        assert det._maybe_finalize_anticrease_tail(BASE + timedelta(seconds=15594.0))
+
+        assert len(completed) == 1
+        assert completed[0]["duration"] == pytest.approx(15500.0), (
+            "a tumble tail that kept reporting above stop_threshold must keep the "
+            "tumble; only the quiet gap after its last reading is clipped."
+        )
+
     def test_uncapped_keep_tail_is_unchanged(self) -> None:
-        """Callers that pass no cap (user stop, anti-crease) keep the old shape."""
+        """Callers that pass no cap (the user stop) keep the old shape.
+
+        The anti-crease finalize used to be in this list; it now passes the cap
+        (register item 282), so the only remaining uncapped keep_tail is the
+        explicit user "Done Now", where the user IS the evidence for the end time.
+        """
         det, completed = self._armed()
         det._power_readings = [
             (BASE + timedelta(seconds=t), p)

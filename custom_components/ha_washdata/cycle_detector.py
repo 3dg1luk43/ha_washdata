@@ -2842,6 +2842,24 @@ class CycleDetector:
             status="completed",
             termination_reason=TerminationReason.SMART,
             keep_tail=True,
+            # Capped like the three sibling keep_tail finishes (#424). This path can
+            # fire on a window of *watchdog* keepalives: a change-only plug that has
+            # gone silent emits nothing, the injected 0 W readings satisfy the "all
+            # at or below anti_wrinkle_max_power" window, and `timestamp` is then
+            # the moment the watchdog noticed rather than the moment the appliance
+            # stopped - post-cycle standby banked as cycle time, which feeds
+            # avg_duration and self-amplifies.
+            #
+            # The tumble tail itself is never cut into, which is why this is safe
+            # here: an anti-crease baseline sits ABOVE stop_threshold
+            # (const.py:811-812, a ~2.5-3.2 W draw against a ~1.2 W threshold), so
+            # every one of those readings refreshes `_last_active_time` and the cap
+            # - max(expected_end, _last_active_time) - lands at the last tumble. A
+            # real tail therefore loses only the trailing quiet gap between its last
+            # reading and this finalize, which is time the appliance drew nothing.
+            # A tail of genuinely-0 W readings is clipped back to the matched
+            # profile's expected end. Shorten-only, never earlier than expected_end.
+            tail_cap=self._keep_tail_cap(start_time),
         )
         return True
 
