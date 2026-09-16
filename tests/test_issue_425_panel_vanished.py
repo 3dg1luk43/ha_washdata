@@ -216,6 +216,107 @@ async def test_a_refused_platform_unload_keeps_the_forward_record(
     )
 
 
+async def test_a_forward_record_without_a_manager_is_still_cleaned_up(
+    hass, enable_custom_integrations, http_up, broken_link, monkeypatch
+):
+    """The marker, not the stale manager, is the record of a forward.
+
+    The cleanup used to sit inside ``if stale is not None``, but the two can part
+    company: ``async_reload_entry``'s full-reload branch runs precisely when the
+    manager is missing, and the ``async_unload_entry`` it calls first leaves the
+    marker in place when the unload is refused. Setup was then entered with the
+    marker set and nothing to find, skipped the cleanup, and forwarded an
+    already-registered platform - the #425 loop, reached through the one path that
+    is meant to recover from it.
+    """
+    hass.states.async_set(POWER_SENSOR, "0", {"unit_of_measurement": "W"})
+    entry = _make_entry(hass)
+
+    with pytest.raises(HomeAssistantError):
+        await washdata.async_setup_entry(hass, entry)
+    await hass.async_block_till_done()
+    assert entry.entry_id in hass.data[washdata.FORWARDED_ENTRIES_KEY]
+
+    # What async_unload_entry leaves behind when the platforms refuse to unload:
+    # the manager gone, the forward record kept.
+    manager = hass.data[DOMAIN].pop(entry.entry_id)
+    await manager.async_shutdown()
+
+    unload_calls = []
+
+    async def _record_unload(config_entry, platforms):
+        unload_calls.append(config_entry.entry_id)
+        return False
+
+    async def _fail_after_the_unload(_hass):
+        raise RuntimeError("setup aborted after the stale-platform cleanup")
+
+    broken_link["on"] = False
+    monkeypatch.setattr(hass.config_entries, "async_unload_platforms", _record_unload)
+    monkeypatch.setattr(washdata, "_async_preload_ml_modules", _fail_after_the_unload)
+
+    with pytest.raises(RuntimeError):
+        await washdata.async_setup_entry(hass, entry)
+    await hass.async_block_till_done()
+
+    assert unload_calls == [entry.entry_id], (
+        "the stale platforms were never taken down because no stale manager was "
+        "there to trigger it, so the forward would have hit "
+        '"has already been setup".'
+    )
+    assert entry.entry_id in hass.data[washdata.FORWARDED_ENTRIES_KEY]
+
+
+async def test_an_unloadable_stale_platform_does_not_abort_the_retry(
+    hass, enable_custom_integrations, http_up, broken_link, monkeypatch
+):
+    """A ``False`` from the unload must not stop setup. It is not "a platform refused".
+
+    Raised in the PR #420 review as: abort setup and keep the marker when the
+    unload does not succeed. It reads well and it is wrong here, because ``False``
+    conflates two states. HA's ``ConfigEntry.async_unload`` catches a never-loaded
+    platform's ``ValueError("Config entry was never loaded!")``, logs "Error
+    unloading entry X for sensor" and returns False
+    (``config_entries.py:997-1015``) - so an entry whose forward set nothing up
+    reports exactly the same False as one whose platform will not let go. The
+    marker is written BEFORE the forward on purpose, so that state is normal, and
+    the retry would succeed: there is nothing registered to collide with.
+
+    Aborting on False would therefore abort every later attempt identically, which
+    is the permanent #425 loop the marker exists to break. Setup carries on and
+    lets the forward decide.
+    """
+    hass.states.async_set(POWER_SENSOR, "0", {"unit_of_measurement": "W"})
+    entry = _make_entry(hass)
+    hass.data.setdefault(washdata.FORWARDED_ENTRIES_KEY, set()).add(entry.entry_id)
+
+    async def _nothing_was_loaded(config_entry, platforms):
+        # What HA actually returns for a platform it never set up.
+        return False
+
+    forwards = []
+
+    async def _record_forward(config_entry, platforms):
+        forwards.append(list(platforms))
+
+    broken_link["on"] = False
+    monkeypatch.setattr(
+        hass.config_entries, "async_unload_platforms", _nothing_was_loaded
+    )
+    monkeypatch.setattr(
+        hass.config_entries, "async_forward_entry_setups", _record_forward
+    )
+
+    assert await washdata.async_setup_entry(hass, entry) is True
+    await hass.async_block_till_done()
+
+    assert forwards, (
+        "setup gave up on an unload that only reported nothing was loaded, so an "
+        "entry whose forward set nothing up can never be retried."
+    )
+    assert hass.data[DOMAIN].get(entry.entry_id) is not None
+
+
 async def test_a_partly_forwarded_entry_is_still_recorded(
     hass, enable_custom_integrations, http_up, monkeypatch
 ):
