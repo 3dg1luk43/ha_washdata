@@ -435,10 +435,13 @@ def projected_energy(
     price: float | None,
     end_expectation_fn: EndExpFn,
     logger: logging.Logger | None = None,
+    cost_so_far: float | None = None,
 ) -> tuple[float | None, float | None]:
 ```
 
 **Purpose:** Returns `(projected_wh, projected_cost)` for the running cycle. Both are `None` if progress is too low or no energy has accumulated. Never raises.
+
+`cost_so_far` (#426) is the dynamic-tariff cost already incurred. When given, only `projected_wh - energy_so_far` is charged at `price`, so a cycle that ran through a cheap window is not retroactively repriced at the rate it happens to be in now; `None` keeps the flat `projected_wh/1000 × price`. The Playground passes the stored `price_timeline` through the same parameter, so the replay cannot diverge from the live estimator.
 
 **Logic:**
 ```

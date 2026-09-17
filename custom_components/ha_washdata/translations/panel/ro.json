@@ -1,5 +1,7 @@
 {
   "badge": {
+    "quiet_tail_tip": "Spre final, acest program rămâne în liniște aproximativ {mins} min, apoi consumă aproximativ {watts} W timp de {secs} s înainte de a se încheia. Observat în {seen} din {measured} cicluri măsurate: aparatul nu face asta la fiecare utilizare.",
+    "quiet_tail": "liniște finală ~{mins} min",
     "artifact_tip": "{n} anomalii detectate (de exemplu, ușa deschisă la jumătatea ciclului) – deschideți pentru a le vedea pe grafic",
     "auto": "(detectat automat)",
     "built_in_tag": "integrat",
@@ -29,11 +31,14 @@
     "approved": "Aprobat",
     "awaiting": "În așteptarea aprobării",
     "imported_tip": "Importat din magazinul comunității. Folosit doar pentru potrivire, necontabilizat în statistici.",
+    "unmatchable": "potrivire imposibilă",
     "not_importable": "n/a aici",
     "exists": "există deja",
-    "backfilled_tip": "Detectat într-un istoric de putere importat. Influențează doar potrivirea programelor, nu este contabilizat în statistici."
+    "backfilled_tip": "Detectat într-un istoric de putere importat. Influențează doar potrivirea programelor, nu este contabilizat în statistici.",
+    "armed": "(se aplică ciclului următor)"
   },
   "btn": {
+    "reset_zoom": "Resetați zoomul",
     "set_brand_model": "Stabiliți marca și modelul",
     "refresh_catalog": "Actualizați catalogul",
     "add_device": "+ Adăugați dispozitiv",
@@ -167,6 +172,8 @@
     "trim": "Tăiați",
     "trim_split": "Tăiați / Divizați",
     "undo": "Anulați",
+    "unlabel_selected": "Eliminați eticheta selecției ({n})",
+    "unlabel_selected_tip": "Elimină eticheta de profil de la ciclurile selectate. Rămân în istoricul dvs. și pot fi etichetate din nou mai târziu; doar nu mai influențează acest profil.",
     "use": "Utilizați",
     "wipe_all": "Ștergeți toate datele",
     "delete_selected": "Ștergeți selecția ({n})",
@@ -174,7 +181,6 @@
     "pg_apply_best": "Aplică cel mai bun",
     "pg_apply_to_settings": "Salvează în setări",
     "pg_apply_to_settings_tip": "Copiază valorile pe care le-ai modificat aici în setările active ale acestui dispozitiv",
-    "search": "Căutați",
     "import": "Importați",
     "disconnect": "Deconectați",
     "connect_github": "Conectați GitHub",
@@ -201,7 +207,8 @@
     "hist_read_recorder": "Citiți din Home Assistant",
     "hist_scan": "Căutați cicluri",
     "hist_import_n": "Importați {n} cicluri",
-    "hist_goto_cycles": "Vedeți ciclurile"
+    "hist_goto_cycles": "Vedeți ciclurile",
+    "save_total_cycles": "Salvați totalul"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -214,6 +221,12 @@
     },
     "attn_sub": "Rezolvați conflictele înainte de salvare",
     "attn_title": "Conflicte de setări: {n}",
+    "price_entity": {
+      "power_sensor": "Acesta este Senzorul de Putere al dispozitivului, nu un preț. O entitate de preț are prioritate față de Prețul Static Energie de mai jos, așa că ciclurile ar fi taxate la wați pe kWh - goliți acest câmp.",
+      "energy_sensor": "Aceasta este Entitatea contor de energie a dispozitivului, nu un preț. O entitate de preț are prioritate față de Prețul Static Energie de mai jos, așa că ciclurile ar fi taxate la valoarea contorului pe kWh - goliți acest câmp.",
+      "device_class": "Acest senzor măsoară {dc}, nu un preț pe kWh. O entitate de preț are prioritate față de Prețul Static Energie de mai jos - goliți acest câmp sau indicați un senzor de tarif.",
+      "unit": "Acest senzor afișează valori în {unit}, ceea ce nu este un preț pe kWh. O entitate de preț are prioritate față de Prețul Static Energie de mai jos - goliți acest câmp sau indicați un senzor de tarif."
+    },
     "settings_banner": "Conflicte de setări: {n}. Verificați secțiunile evidențiate și remediați-le înainte de salvare.",
     "settings_banner_btn": "Salt la primul",
     "confidence": {
@@ -301,7 +314,7 @@
     "pg_settings_source": "Sursa setărilor",
     "phase_catalog": "Catalog de faze",
     "playground": "Zonă de test",
-    "process_history": "Istoricul procesării",
+    "process_history": "Procesare istoric",
     "settings_history": "Istoric setări",
     "status": "Stare",
     "status_graph": "Grafic de stare",
@@ -312,12 +325,12 @@
     "wipe_history": "Ștergeți istoricul",
     "recommendations": "Recomandări ({n})",
     "pg_detection_params": "Setări de detectare",
-    "pg_timeline": "Cronologia evenimentelor",
     "pg_outcome": "Rezultatul simulării",
     "pg_across_cycles": "În toate ciclurile tale",
     "community_store": "Magazinul comunității",
     "online_account": "Magazinul comunității și funcții online",
-    "import_power_history": "Importați istoricul de putere"
+    "import_power_history": "Importați istoricul de putere",
+    "service_status": "Starea întreținerii"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -325,6 +338,10 @@
     "poor": "⚠ Calitate slabă a profilului"
   },
   "lbl": {
+    "envelope_position_tip": "Poziția pe curba înregistrată a programului potrivit, {pct}%. Este măsurată prin alinierea acestui ciclu la profil în loc de numărarea timpului, așa că rămâne corectă atunci când un ciclu durează mai mult sau mai puțin decât de obicei. Se actualizează cât timp aparatul este în liniște, deci poate rămâne în urmă în timpul unei faze active.",
+    "envelope_position": "curbă {pct}%",
+    "aria_playground_chart3": "Grafic interactiv al puterii ciclului: treci cu cursorul pentru a citi timpul/puterea, derulează sau folosește două degete pentru a mări, trage pentru a te deplasa",
+    "device_unresolved": "Dispozitiv indisponibil ({id})",
     "drag_to_resize": "Trageți pentru redimensionare",
     "actions": "Acțiuni",
     "activity": "Activitate",
@@ -460,7 +477,7 @@
     "profile_index": "index profil →",
     "profile_name": "Numele profilului",
     "program": "Program",
-    "program_tip": "Înlocuiți profilul potrivit ciclului curent. Detectarea automată permite integrării să aleagă automat cea mai bună potrivire. Fixați un program specific pentru a forța potrivirea când detectarea automată este incorectă sau știți ce rulează.",
+    "program_tip": "Înlocuiți profilul potrivit ciclului curent. Detectarea automată permite integrării să aleagă automat cea mai bună potrivire. Fixați un program specific pentru a forța potrivirea când detectarea automată este incorectă sau știți ce rulează. Alegeți unul înainte de a porni aparatul și va fi aplicat imediat ce începe ciclul următor.",
     "progress": "Progres",
     "raw_socket": "Socket brut",
     "read_only": "Doar citire",
@@ -495,6 +512,7 @@
     "stage4": "Etapa 4 – concordanță",
     "status": "Stare",
     "tail_trim": "Tăiere finală (s)",
+    "tap_to_dismiss": "atingeți graficul pentru a închide",
     "timer_auto_pause": "Pauză automată",
     "timer_min": "min",
     "timer_msg_placeholder": "Mesaj (opțional, {device}/{program}/{minutes})",
@@ -531,9 +549,7 @@
     "pg_time_left_model": "Timp rămas (model)",
     "pg_time_left_model_tip": "Timp rămas estimat de model (estimator de fază + combinație ML), nu o numărătoare inversă fixă",
     "phase": "Fază",
-    "pg_mode_simulate": "Simulează",
     "pg_mode_history": "Testează pe istoric",
-    "pg_mode_sweep": "Scanare",
     "pg_ev_detected": "Detectat",
     "pg_ev_match": "Potrivire confirmată",
     "pg_ev_match_changed": "Potrivire schimbată",
@@ -572,14 +588,11 @@
     "pg_stress_idle_w_desc": "Înlocuiește nivelul de repaus detectat automat (lăsați gol pentru automat).",
     "pg_stress_toggle": "Testați terminarea în repaus",
     "pg_stress_toggle_desc": "Simulează aparatul menținut la consumul său în standby după terminarea înregistrării – arată dacă și când WashData oprește ciclul.",
-    "pg_sweep_2d": "Hartă termică 2D",
-    "pg_sweep_param_y": "Al 2-lea parametru",
     "pg_obj_match": "Acuratețea potrivirii",
     "pg_obj_endtiming": "Acuratețea momentului de încheiere",
     "pg_obj_falseend": "Rata de sfârșituri false",
     "pg_obj_overrun": "Abatere de durată",
     "pg_obj_ambiguity": "Rata de ambiguitate",
-    "pg_best_combo": "cea mai bună combinație",
     "pg_mode_optimize": "Optimizează",
     "pg_group_matching": "Potrivirea programului",
     "pg_zoom_hint": "dublu clic pentru a reseta zoomul",
@@ -658,7 +671,12 @@
     "task_history_import_apply": "Se importă ciclurile",
     "evidence_real_cycles": "Cicluri rulate de această mașină",
     "evidence_reference_cycles": "Descărcate din magazinul comunității",
-    "evidence_backfill_cycles": "Găsite într-un istoric de putere importat"
+    "evidence_backfill_cycles": "Găsite într-un istoric de putere importat",
+    "zoom_hint_touch": "folosiți două degete pentru zoom",
+    "zoom_hint_touch_zoomed": "folosiți două degete pentru zoom · dublă atingere pentru resetare",
+    "cycles_since_service": "{since} / {total} cicluri",
+    "total_cycles_run": "cicluri efectuate în total",
+    "correct_total_cycles": "Corectați totalul"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -708,7 +726,7 @@
     "merge_cycles": "Îmbinați {n} cicluri",
     "new_group": "Grup de profiluri nou",
     "new_phase": "Fază nouă",
-    "process_history_msg": "Reexecutați potrivirea, actualizați sugestiile, reantrenați ML (dacă este activat) și recalculați starea ciclurilor pentru toate ciclurile stocate. Acest lucru poate dura ceva timp.",
+    "process_history_msg": "Reexecutați potrivirea, actualizați sugestiile, reantrenați ML (dacă este activat), recalculați costul ciclurilor pe baza prețurilor energiei înregistrate și recalculați starea ciclurilor pentru toate ciclurile stocate. Acest lucru poate dura ceva timp.",
     "process_history_ok": "Procesare",
     "process_history_title": "Procesare Istoric",
     "process_recording": "Procesați înregistrarea",
@@ -741,6 +759,7 @@
     "history_import": "Importați istoricul de putere"
   },
   "msg": {
+    "pg_canvas_empty3": "Alege un ciclu de mai sus și apasă Rulează pentru a-l simula. Apoi treci cu cursorul pentru a citi valorile, derulează sau folosește două degete pentru a mări și trage pentru a te deplasa.",
     "tail_trim_hint": "Numărul de secunde de eliminat de la sfârșit",
     "store_sibling_hint": "Nu există nimic partajat pentru modelul dvs. exact? Un model foarte apropiat de la aceeași marcă este de obicei un bun punct de plecare.",
     "store_declare_appliance": "Indicați în WashData ce aparat dețineți, iar această filă va afișa configurațiile pe care alte persoane le-au partajat pentru el. Puteți și să scrieți o marcă mai sus pentru a explora.",
@@ -754,7 +773,7 @@
     "artifact_spike_detail": "A depășit banda de putere obișnuită timp de ~{n}s.",
     "auto_label_intro": "Atribuiți profiluri ciclurilor neetichetate a căror încredere de potrivire depășește pragul.",
     "automations_intro": "WashData declanșează evenimente {start} / {end} și expune entități, astfel că notificările și acțiunile sunt cel mai bine construite ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
-    "cleanup_intro": "Toate ciclurile etichetate suprapuse. Bifați valorile aberante și ștergeți pentru a curăța profilul.",
+    "cleanup_intro": "Toate ciclurile etichetate suprapuse. Bifați valorile aberante, apoi eliminați-le eticheta (rămân în istoric, dar nu mai influențează acest profil) sau ștergeți-le definitiv.",
     "clear_debug_hint": "Eliminați datele de depanare stocate pentru a elibera spațiu.",
     "collecting_data": "Se colectează date. Cicluri încă necesare înainte ca reglajul fin să poată începe: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Suprapuneți profiluri (estompat)",
@@ -853,7 +872,7 @@
     "preferences_admin": "Preferințe, panou și control acces",
     "preferences_adv": "Preferințe",
     "prefs_personal": "Se aplică numai contului dvs. Home Assistant.",
-    "process_history_hint": "Reexecutați potrivirea pe toate ciclurile stocate, actualizați sugestiile de reglaj, reantrenați modelele ML (dacă sunt activate) și recalculați starea ciclurilor. Rulați după un lot de recenzii.",
+    "process_history_hint": "Reexecutați potrivirea pe toate ciclurile stocate, actualizați sugestiile de reglaj, reantrenați modelele ML (dacă sunt activate), recalculați costul ciclurilor pe baza prețurilor energiei înregistrate și recalculați starea ciclurilor. Rulați după un lot de revizuiri.",
     "profile_deleted": "Profil șters",
     "profile_poor_health_detail": "Ciclurile atribuite acestui profil au forme inconsistente sau încredere scăzută. Luați în considerare reconstruirea plicului sau revizuirea ciclurilor etichetate.",
     "profiles_intro": "Faceți clic pe un profil pentru statistici, faze și curățare. Grupați programe aproape identice (aceeași formă/durată, temperatură sau centrifugare diferite) pentru ca potrivirea să aleagă în mod fiabil între ele.",
@@ -936,9 +955,10 @@
     "advisory_poor_health": "'{name}' are un scor de potrivire scăzut - ciclurile sale recente variază mult sau se potrivesc slab. Examinați ciclurile sau reînregistrați profilul pentru ca recunoașterea și estimările de timp să rămână exacte.",
     "advisory_shape_drift": "'{name}' a deviat semnificativ față de forma inițială a puterii. Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente.",
     "advisory_shape_drift_corr": "'{name}' a deviat semnificativ față de forma inițială a puterii (corelație {corr}). Comportamentul aparatului s-ar putea să se fi schimbat în timp (de ex. calcar, uzură). Luați în considerare reînregistrarea acestui profil cu cicluri recente.",
+    "advisory_unmatchable": "'{name}' nu va putea fi niciodată potrivit: nu are în spate niciun ciclu cu date de putere, așa că WashData nu are cu ce să compare un ciclu în desfășurare. Etichetați un ciclu al acestui program (sau înregistrați unul) pentru a-l readuce în procesul de potrivire.",
+    "advisory_unmatchable_no_duration": "'{name}' nu va putea fi niciodată potrivit: are un ciclu cu date de putere, dar fără o durată utilizabilă, așa că WashData nu are nicio durată după care să dimensioneze o potrivire. Înregistrați din nou acest program sau setați-i durata estimată, pentru a-l readuce în procesul de potrivire.",
     "pg_no_alerts": "Nicio problemă detectată în această rulare.",
     "pg_override_active": "Se folosesc setările editate față de cele actuale",
-    "pg_history_intro": "Reluați ciclurile recente prin detectorul și sistemul de potrivire reale. Modificați mai întâi o setare de detectare în Simulează pentru a vedea aici o comparație înainte/după.",
     "pg_history_empty": "Apăsați Rulați pentru a relua ciclurile.",
     "pg_history_summary": "{detected}/{total} detectate · {correct} potrivite corect",
     "pg_sweep_no_metric": "Date insuficiente pentru a evalua acest obiectiv.",
@@ -1015,7 +1035,11 @@
     "hist_scan_failed": "Analiza a eșuat.",
     "hist_scan_expired": "Acea analiză nu mai este disponibilă. Reluați analiza.",
     "hist_import_failed": "Importul a eșuat.",
-    "imported_history_readonly": "Detectat într-un istoric de putere importat. Influențează potrivirea programelor, dar nu este contabilizat în statisticile dvs. și nu poate fi tăiat sau divizat. Etichetați-l pentru a indica programul."
+    "imported_history_readonly": "Detectat într-un istoric de putere importat. Influențează potrivirea programelor, dar nu este contabilizat în statisticile dvs. și nu poate fi tăiat sau divizat. Etichetați-l pentru a indica programul.",
+    "odometer_intro": "Acest total doar crește. Ștergerea înregistrării unui ciclu nu îl modifică și continuă să numere dincolo de limita istoricului păstrat, astfel încât mementourile de service rămân corecte.",
+    "odometer_correct_hint": "Setați această valoare dacă WashData a înregistrat un ciclu care nu a avut loc niciodată sau dacă aparatul efectuase deja cicluri înainte de instalarea WashData.",
+    "no_reminders_set": "Încă nu este setat niciun memento de service.",
+    "toast_program_armed": "Program pregătit pentru ciclul următor: {program}"
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1113,6 +1137,10 @@
       "label": "Eliberare la liniște în uscarea pasivă",
       "doc": "După ce ciclul depășește durata așteptată, cât timp trebuie să rămână silențioasă mașina de spălat vase (sub Prag de Oprire) înainte ca WashData să nu mai aștepte o evacuare finală și să încheie ciclul. Măriți-l dacă mașina are o fază lungă de uscare silențioasă înainte de o evacuare finală întârziată care nu este detectată - o fereastră mai largă permite duratei învățate să urmeze variația sezonieră (apă de alimentare mai rece = cicluri mai lungi) în loc să se fixeze pe media veche. Doar scurtează așteptarea față de plafonul intern de 30 de minute pentru vârful de final, fără a o prelungi vreodată."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Raport de finalizare anti-șifonare",
+      "doc": "Cât de departe în durata așteptată a programului corespunzător trebuie să ajungă un ciclu înainte ca WashData să poată stabili că rotirea lentă de putere redusă pe care o observă este coada anti-șifonare și să încheie ciclul acolo. Durata așteptată este media programului, așa că la un uscător al cărui timp de uscare cu senzor urmează încărcătura majoritatea ciclurilor nu ating niciodată 98% din acea medie, iar coada rămâne în așteptare până la timpul de expirare de rezervă, deseori cu 15 până la 40 de minute după ce mașina s-a oprit efectiv. Reduceți această valoare (de exemplu, 0,75) la un astfel de uscător. Lăsați mașinile de spălat rufe la valoarea implicită: o mașină de spălat petrece cea mai mare parte a ciclului sub Puterea Maximă Anti-Șifonare, deci această fracțiune este singurul lucru care separă o fază liniștită de la mijlocul spălării de coadă, iar reducerea ei poate înjumătăți o spălare. Lăsați gol pentru valoarea implicită (0,98). Această setare este diferită de Raportul de terminare inteligentă, care condiționează o verificare separată de finalizare timpurie."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Recunoașteți impulsurile scurte de rufe de putere redusă pe care le emite un uscător după faza principală de căldură și mențineți-le atașate la ciclul terminat în loc să le citiți ca cicluri noi.",
       "label": "Activați Detectarea Anti-Șifonare"
@@ -1134,7 +1162,7 @@
       "label": "Putere Maximă Anti-Șifonare"
     },
     "auto_label_confidence": {
-      "doc": "Dacă scorul meciului la sfârșitul ciclului este egal sau peste acesta, programul este etichetat automat fără nicio solicitare de confirmare. Ridicați-l pentru a necesita o mai mare certitudine înainte de auto-etichetare; coborâți-l pentru a automatiza mai mult. Funcționează împreună cu Learning Confidence de mai jos.",
+      "doc": "Dacă scorul de potrivire la sfârșitul ciclului este egal sau peste acesta, programul este etichetat automat fără nicio solicitare de confirmare. Ridicați-l pentru a necesita o mai mare certitudine înainte de auto-etichetare; coborâți-l pentru a automatiza mai mult. Funcționează împreună cu Încredere Învățare de mai jos.",
       "label": "Încredere Etichetare Automată"
     },
     "auto_maintenance": {
@@ -1144,6 +1172,10 @@
     "completion_min_seconds": {
       "doc": "Ciclurile mai scurte decât aceasta sunt eliminate ca cicluri fantomă (testare, deschiderea ușii pentru a adăuga un șosetă).",
       "label": "Durata Minimă a Ciclului"
+    },
+    "curve_preroll_seconds": {
+      "label": "Preambulul curbei",
+      "doc": "Câte secunde de citiri provenite din încercări de pornire întrerupte poate include WashData la începutul curbei unui ciclu. Curba unui ciclu începe în mod normal la încercarea de pornire care reușește în cele din urmă, așa că la o mașină care încearcă de câteva ori înainte de a porni efectiv (selectarea programului, blocarea ușii, prima umplere) primele minute de activitate reală lipsesc din fiecare curbă. Setați această valoare puțin peste cea mai lungă astfel de pornire pregătitoare a mașinii dumneavoastră (300 s sunt mai mult decât suficiente în majoritatea cazurilor). 0 dezactivează funcția. Rețineți că activarea ei mută mai devreme startul înregistrat, astfel încât ciclurile înregistrate înainte și după modificare vor avea durate diferite pentru același program; mediile învățate vor devia până când ciclurile mai vechi ies din istoric."
     },
     "delay_confirm_seconds": {
       "doc": "Puterea trebuie să rămână în banda de așteptare mult timp înainte ca aparatul să fie tratat ca așteptând să pornească și nu ca fiind în funcțiune.",
@@ -1182,7 +1214,7 @@
       "label": "Număr de Repetări la Sfârșit"
     },
     "energy_price_entity": {
-      "doc": "Senzor cu prețul curent al energiei electrice pe kWh (de exemplu, un tarif dinamic). Are prioritate față de prețul static de mai jos. Fiecare ciclu îngheață prețul în vigoare când s-a terminat.",
+      "doc": "Senzor cu prețul curent al energiei electrice pe kWh (de exemplu, un tarif dinamic). Trebuie să fie un preț, nu entitatea de putere sau de energie a prizei: are prioritate față de prețul static de mai jos, așa că un contor de kWh pus aici taxează fiecare ciclu la valoarea contorului în loc de tariful dumneavoastră. Cu Cost Ponderat în Timp activat, fiecare ciclu este taxat la prețul în vigoare în fiecare moment în care a rulat; altfel, i se fixează prețul în vigoare când s-a terminat.",
       "label": "Entitate Preț Energie"
     },
     "energy_price_static": {
@@ -1210,7 +1242,7 @@
       "label": "Inversați Declanșatorul Extern (declanșare la OPRIT)"
     },
     "learning_confidence": {
-      "doc": "Dacă scorul meciului se situează între acesta și Auto-Label Confidence, o notificare de feedback vă solicită să verificați programul identificat. Sub acest scor meciul este prea incert pentru a ieși la suprafață. Trebuie menținut sub nivelul de încredere pentru etichete automate.",
+      "doc": "Dacă scorul de potrivire se situează între acesta și Încredere Etichetare Automată, o notificare de feedback vă solicită să verificați programul identificat. Sub acest scor, potrivirea este prea incertă pentru a fi afișată. Trebuie menținut sub Încredere Etichetare Automată.",
       "label": "Încredere Învățare"
     },
     "linked_device": {
@@ -1278,7 +1310,7 @@
       "label": "Declanșați Evenimente HA pentru Notificări"
     },
     "notify_icon": {
-      "doc": "Pictogramă mdi opțională pentru notificare (de exemplu, mdi:washing-machine). Lăsați necompletat pentru valoarea prestabilită a platformei.",
+      "doc": "Pictograma mică afișată pe notificare (de exemplu, mdi:washing-machine). Android o desenează în bara de stare; iOS o afișează în locul pictogramei aplicației și necesită aplicația însoțitoare 2026.8 sau mai nouă. Lăsați necompletat pentru valoarea prestabilită a platformei.",
       "label": "Pictogramă Notificare"
     },
     "notify_live_chronometer": {
@@ -1378,7 +1410,7 @@
       "label": "Prag de Potrivire"
     },
     "profile_unmatch_threshold": {
-      "doc": "Dacă un meci în direct la mijlocul ciclului scade sub acest scor, identificarea provizorie este șters. Păstrați-l puțin sub Pragul de potrivire, astfel încât o scurtă scădere în similitudine să nu întoarcă afișajul la neegalat.",
+      "doc": "Dacă o potrivire live de la mijlocul ciclului scade sub acest scor, identificarea provizorie este ștearsă. Păstrați-l puțin sub Pragul de potrivire, astfel încât o scădere scurtă a similitudinii să nu readucă afișajul la starea fără potrivire.",
       "label": "Prag de Nepotrivire"
     },
     "progress_reset_delay": {
@@ -1388,10 +1420,6 @@
     "pump_stuck_duration": {
       "doc": "În câteva secunde, o pompă poate funcționa continuu înainte de a fi semnalată ca posibil blocată (declanșează evenimentul de pompă blocată).",
       "label": "Durata Pompei Blocate"
-    },
-    "running_dead_zone": {
-      "doc": "După începerea unui ciclu, scăderile de putere din această fereastră sunt ignorate. Mașinile de spălat se umplu cu apă rece (scăzând aproape de 0 W înainte de încălzire) - fără această protecție, faza de umplere arată ca un sfârșit de ciclu. Acest lucru NU omite datele: traseul complet de putere este înregistrat de la T=0. Motorul de sugestii măsoară modelul real de pornire al mașinii și îl dimensionează automat.",
-      "label": "Zonă Moartă în Funcționare"
     },
     "sampling_interval": {
       "doc": "Timp așteptat între citirile senzorului - utilizat pentru a dimensiona fereastra de netezire și pentru a începe corect să renunțe. Fiecare actualizare a senzorului este capturată indiferent de această valoare; calibrează doar calculele din aval. Motorul de sugestii măsoară cadența reală a senzorului dvs. din ciclurile trecute și o setează automat.",
@@ -1418,7 +1446,7 @@
       "label": "Energia de Pornire"
     },
     "start_threshold_w": {
-      "doc": "Puterea trebuie să crească peste acest nivel pentru a confirma că a început un ciclu. Setarea prea scăzută cauzează porniri false de la puterea de așteptare; Programele prea mari și cu pornire lentă (umplere la rece) sunt ratate. Motorul de sugestie setează acest lucru chiar peste cea mai mică putere activă observată a mașinii.",
+      "doc": "Puterea trebuie să crească peste acest nivel pentru a confirma că a început un ciclu. O valoare prea mică provoacă porniri false din cauza puterii în așteptare; o valoare prea mare face ca programele cu pornire lentă (umplere la rece) să fie ratate. Motorul de sugestii setează această valoare chiar peste cea mai mică putere activă observată a mașinii.",
       "label": "Prag de Pornire"
     },
     "stop_threshold_w": {
@@ -1520,13 +1548,17 @@
       "label": "Interval Profil Putere",
       "doc": "Dimensiunea intervalului pentru atributul senzorului power_profile per profil (tabloul plat de wați medii per slot consumat de planificatoare externe precum EMHASS și tibber_prices). Intervalele mai mici păstrează vârfurile scurte de putere clare; intervalele mai mari netezesc forma. Implicit 15 min. Doar la citire; nu afectează detectarea."
     },
+    "notify_live_silent": {
+      "label": "Actualizări silențioase în timp real",
+      "doc": "Numai iOS. Reîmprospătează discret progresul în timp real: fiecare actualizare sosește fără sunet sau vibrații, cu o prioritate mai redusă, care economisește bateria și pe care iOS o poate grupa pentru scurt timp. Prima actualizare dintr-un ciclu (cea care pornește Activitatea live) și notificările de început și de final alertează în continuare ca de obicei. Dezactivați această opțiune pentru a fi alertat la fiecare actualizare."
+    },
     "notify_live_sticky": {
       "label": "Păstrați notificarea în timp real la atingere",
       "doc": "Numai Android. Faceți notificarea de progres în timp real persistentă (fixată) astfel încât atingerea ei să nu o respingă. Dezactivat păstrează comportamentul implicit în care o atingere o respinge."
     },
     "notify_live_click_action": {
-      "label": "Destinație la atingerea notificării în timp real",
-      "doc": "Numai Android. Unde deschide o atingere pe notificarea de progres în timp real (de ex. /lovelace/laundry, sau un URL complet) în loc de pagina principală a aplicației. Lăsați necompletat pentru valoarea implicită."
+      "label": "Destinație la atingerea notificării",
+      "doc": "Unde se deschide o atingere pe o notificare de la acest aparat, pe Android și pe iOS. Necompletat deschide panoul WashData pentru acest aparat. Introduceți calea unui tablou de bord (de ex. /lovelace/laundry) sau un URL complet pentru a deschide altceva, sau „none” pentru nicio destinație la atingere."
     },
     "door_opens_at_end": {
       "label": "Ușa se deschide automat la final",
@@ -1539,6 +1571,10 @@
     "profile_evidence_sources": {
       "label": "Ciclurile care formează un program",
       "doc": "Ce cicluri sunt folosite pentru a construi curba de putere a fiecărui program și pentru a compara un ciclu încheiat cu ea. Debifarea unui tip face ca acesta să nu mai modeleze programele dvs., fără a șterge nimic - ciclurile rămân în lista dvs. Cicluri și pot fi în continuare etichetate sau eliminate. Util dacă nu aveți încredere în datele importate. Statisticile nu sunt afectate: ele numără întotdeauna doar ciclurile pe care această mașină le-a rulat efectiv. Debifarea tuturor este ignorată, deoarece un program fără cicluri în spate nu s-ar putea potrivi niciodată."
+    },
+    "energy_price_dynamic": {
+      "label": "Cost Ponderat în Timp",
+      "doc": "Taxează fiecare ciclu la prețul în vigoare în fiecare moment în care a rulat, în loc de prețul unic din momentul în care s-a terminat. Se aplică doar unei entități de preț (un preț static nu poate varia). Nu necesită configurare suplimentară: prețul este urmărit în timp real cât timp ciclul rulează, iar Procesare istoric, din Diagnostice, recalculează costul ciclurilor mai vechi pornind de la recorder. Dezactivat = comportamentul clasic, un singur preț fixat la final."
     }
   },
   "setting_group": {
@@ -1650,7 +1686,8 @@
     "splitting": "Se divide…",
     "deleting": "Se șterge…",
     "imported": "Importat",
-    "preparing": "Se pregătește…"
+    "preparing": "Se pregătește…",
+    "unlabelling": "Se elimină eticheta…"
   },
   "tab": {
     "advanced": "Avansat",
@@ -1734,6 +1771,7 @@
     "recording_stopped": "Înregistrare oprită",
     "review_saved": "Revizuire salvată",
     "settings_conflicts": "Corectați conflictele de setări evidențiate înainte de salvare.",
+    "settings_no_changes": "Nicio modificare de salvat",
     "settings_reverted": "Setări restaurate; integrarea se reîncarcă",
     "settings_saved": "Setări salvate; integrarea se reîncarcă",
     "suggestions_applied": "Sugestii aplicate; integrarea se reîncarcă",
@@ -1788,7 +1826,11 @@
     "export_selective_done": "Export descărcat",
     "import_selective_done": "Importate {profiles} profil(uri) și {cycles} ciclu(ri)",
     "hist_csv_required": "Încărcați mai întâi un fișier CSV sau lipiți conținutul acestuia",
-    "file_read_failed": "Fișierul nu a putut fi citit"
+    "file_read_failed": "Fișierul nu a putut fi citit",
+    "unlabel_done": "Etichetă eliminată de la {count} ciclu(ri)",
+    "unlabel_failed": "Eliminarea etichetei a eșuat: {error}",
+    "odometer_saved": "Totalul ciclurilor a fost salvat",
+    "odometer_save_failed": "Nu s-a putut salva totalul: {error}"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",
@@ -1835,10 +1877,6 @@
         "higher": "Confirmă doar potriviri de înaltă încredere; mai multe cicluri rămân neetichetate",
         "lower": "Potrivește mai multe cicluri; unele pot fi ușor greșite"
       },
-      "running_dead_zone": {
-        "higher": "Ignoră scurte vârfuri de putere în repaus – mai puțin sensibil la zgomot",
-        "lower": "Răspunde la impulsuri mai scurte – detectează activitate tranzitorie rapidă"
-      },
       "start_threshold_w": {
         "higher": "Evită pornirile false cauzate de scurte vârfuri de putere",
         "lower": "Detectează programe de putere redusă; poate fi declanșat de zgomot"
@@ -1863,6 +1901,8 @@
       "end_repeat_count": "{false}/{total} cicluri curate ({pct}%) au avut o pauză internă de >60s care a fost reluată; necesită {val} confirmare(i) de sfârșit.",
       "learning_confidence": "Încrederea p05 a {cycles} cicluri etichetate de utilizator ({p05}); sub această valoare, se solicită verificare.",
       "match_interval": "Pe baza cadenței de actualizare observate (mediană={median}s) * 10.",
+      "match_interval_capped": "Limitat astfel încât {persistence} potriviri consecutive să încapă în {pct}% din cel mai scurt program ({shortest}s); singură, cadența de actualizare (mediană={median}s) ar fi sugerat un interval mai lung.",
+      "match_interval_floored": "Singur, cel mai scurt program ({shortest}s) ar limita această valoare la {cap}s, sub minimul de {minimum}s, așa că este menținută la acest minim: {persistence} potriviri consecutive durează {budget}s, adică mai mult de {pct}% din acel program. Potrivirea rulează doar când sosește o citire (mediană={median}s), deci minimul nu costă nimic.",
       "max_duration_ratio": "Pe baza duratelor ciclurilor etichetate (p95={p95}).",
       "min_active": "Pe baza puterii active minime ({min}W) observate în ultimul ciclu.",
       "min_duration_ratio": "Păstrat cât mai mic posibil, astfel încât un program să fie recunoscut devreme în ciclu; pragurile de încredere și de ambiguitate previn confirmările premature.",
@@ -1917,6 +1957,7 @@
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Mașină de spălat vase: secunde de liniște după durata așteptată înainte de a elibera așteptarea evacuării de la sfârșitul ciclului",
     "smart_termination_duration_ratio": "Fracțiunea din durata așteptată a programului corespunzător pe care un ciclu trebuie să o atingă înainte ca Terminarea inteligentă să îl poată încheia mai devreme; reduceți-o pentru mașinile care depind de încărcătură sau de temperatură",
+    "anti_crease_finalize_ratio": "Fracțiunea din durata așteptată a programului corespunzător pe care un ciclu trebuie să o atingă înainte ca coada de rotire anti-șifonare să poată fi finalizată; reduceți-o la uscătoarele cu o coadă de rotire lungă, lăsați mașinile de spălat la valoarea implicită",
     "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",
     "anti_wrinkle_exit_power": "Puterea trebuie să scadă sub această valoare între impulsuri pentru ca modul anti-șifonare să rămână activ",
     "anti_wrinkle_idle_timeout": "Timp de liniște permis între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie",
@@ -1942,7 +1983,8 @@
     "dtw_ddtw_scale": "Etapa 3: distanța de semi-saturație DDTW; mai mic = mai sensibil la formă (implicit 30)",
     "dtw_refine_top_n": "Etapa 3: candidați rescorați de DTW; măriți la 7-9 dacă profilul corect se clasează pe locul 4-5 (implicit 5)",
     "duration_scale": "Etapa 4: raportul logaritmic la care acordul de durată se înjumătățește; mai mic = penalizare mai strictă (implicit 0.175)",
-    "energy_scale": "Etapa 4: raportul logaritmic la care acordul de energie se înjumătățește; mai mic = penalizare mai strictă (implicit 0.25)"
+    "energy_scale": "Etapa 4: raportul logaritmic la care acordul de energie se înjumătățește; mai mic = penalizare mai strictă (implicit 0.25)",
+    "curve_preroll_seconds": "Secunde de citiri din încercări de pornire întrerupte incluse la începutul curbei unui ciclu; 0 = dezactivat"
   },
   "col": {
     "profile_tip": "Numele programului corespunzător. Neetichetat înseamnă că niciun profil nu a corespuns la sfârșitul ciclului.",
@@ -1950,10 +1992,11 @@
     "date_tip": "Data și ora la care a început ciclul.",
     "duration_tip": "Durata totală de rulare a ciclului, de la început până la sfârșit.",
     "energy_tip": "Energia totală consumată (kWh). Calculată prin integrarea puterii în timp.",
-    "cost_tip": "Costul energetic al acestui ciclu, fixat la finalizare folosind prețul în vigoare atunci (energie x preț pe kWh). Setați un preț în Setări pentru a-l completa.",
+    "cost_tip": "Costul energetic al acestui ciclu, fixat la finalizare. Cu Cost Ponderat în Timp activat, curba de putere este taxată la prețul în vigoare în fiecare moment; altfel, energie x prețul unic în vigoare la final. Setați un preț în Setări pentru a-l completa.",
     "confidence_tip": "Încrederea de potrivire a profilului (0-100%). Cât de bine s-a potrivit curba de putere a ciclului cu programul identificat.",
     "health_tip": "Starea ciclului prin ML (mai mare = mai bine). Faceți clic pe un ciclu pentru a-l inspecta și revizui.",
-    "flags_tip": "Semnale de revizuire, anomalie și sursă pentru ciclu. Treceți cu cursorul peste o pictogramă pentru detalii."
+    "flags_tip": "Semnale de revizuire, anomalie și sursă pentru ciclu. Treceți cu cursorul peste o pictogramă pentru detalii.",
+    "cost_dynamic_tip": "Ponderat în timp: taxat la prețul în vigoare în timpul ciclului (preț efectiv {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "medie",
@@ -1980,9 +2023,9 @@
     "finished": "Ciclul a ajuns într-o stare finală și s-a încheiat."
   },
   "store": {
+    "search_ph2": "Căutați după marcă sau model…",
     "your_model_tip": "Acesta este aparatul pe care l-ați declarat în Setări",
     "your_model": "Al dvs.",
-    "search_brand_ph": "Căutați după marcă…",
     "programs_count": "Programe: {n}",
     "browse": "Răsfoiți",
     "device": "Dispozitiv",
@@ -2027,7 +2070,8 @@
       "golden": "Reprocesare: marcarea ciclurilor de referință",
       "suggestions": "Reprocesare: sugestii",
       "ml_training": "Reprocesare: antrenare ML",
-      "health": "Reprocesare: sănătatea ciclurilor"
+      "health": "Reprocesare: sănătatea ciclurilor",
+      "costs": "Reprocesare: costuri de energie"
     },
     "pg_sweep": {
       "optimize": "Optimizează: {param}"

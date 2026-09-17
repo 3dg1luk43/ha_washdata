@@ -71,6 +71,11 @@ Cross-module imports of note: `cycle_detector` (CycleDetector/Config), `learning
 | 3795 | `_ml_progress_percent` / 3819 `_ml_energy_total` | wrappers |
 | 3845 | `_compute_cycle_quality_score` | ML quality gate |
 | 3917 | `_resolve_energy_price` | method |
+| 5215 | `_async_price_history` | async (recorder price lookup, #426) |
+| 5264 | `_async_apply_cycle_cost` / 5292 `_async_apply_dynamic_cost` / 5344 `_cost_from_timeline` | cycle-end cost freeze (#426) |
+| 2941 | `_setup_price_listener` / 2963 `_dynamic_pricing_enabled` / 2973 `_handle_price_change` / 2986 `_append_price_sample` / 3022 `_start_price_timeline` | dynamic price timeline (#426) |
+| 3576 | `async_recompute_cycle_costs` | async (recorder recost pass, #426) |
+| 7494 | `_live_cost_so_far` | live projection input (#426) |
 | 3941 | `_format_vs_typical` | @staticmethod |
 | 3975 | `_peak_rate_tip` | method |
 | 3999 | `_async_process_cycle_end` | async (cycle-end heavy tail) |
@@ -269,7 +274,7 @@ For suppressed ghosts: clears the active-cycle snapshot, anchors `_cycle_complet
    - **A2 energy anomaly:** z-score vs profile energy stats; `|z| > ENERGY_ANOMALY_Z_THRESHOLD (2.5)` → `energy_anomaly="energy_spike"|"energy_low"` + `energy_z_score`.
    - Caches these into `_last_cycle_post_anomaly` for idle sensor attrs.
 9. Restart gaps: snapshot onto `cycle_data["restart_gaps"]`; source list cleared **only after** confirmed persist.
-10. **Energy cost frozen** at current price (`_resolve_energy_price`): `cost = energy_wh/1000 × price`.
+10. **Energy cost frozen** (`_async_apply_cycle_cost`, #426). Dynamic mode (a price *entity* + `CONF_ENERGY_PRICE_DYNAMIC`): the stored trace integrated against the cycle's price timeline (`signal_processing.cycle_cost`), writing `cost`, `energy_price` (the **effective** price, cost / kWh), `energy_price_mode="dynamic"` and the compacted `price_timeline`. The timeline comes from the live price-entity listener, or from the recorder (`_async_price_history`) when the listener cannot have been complete (empty, or `restart_gaps` present). Otherwise, and on any failure, the classic single price: `cost = report_wh/1000 × _resolve_energy_price()` with `energy_price_mode="fixed"`.
 11. **ML quality score** (`_compute_cycle_quality_score`) — only when `ml_models_enabled`, and offloaded to the executor. Runs BEFORE `async_add_cycle` so reference stats exclude the current cycle.
 12. `async_add_cycle(cycle_data)` → `cycle_persisted=True`; `async_rebuild_envelope(profile_name)`.
 13. **C2 lifetime counter** (`set_lifetime_cycle_count`, in-memory; persisted by lifetime-energy save) — monotonic, correct across retention trims.
@@ -292,7 +297,7 @@ These confirm the "single source of truth" contract — **none forks the math**:
 - `_estimate_phase_progress` (L5870) → `progress_mod.estimate_phase_progress(...)`.
 - `_ml_progress_percent` (L3795) → `progress_mod.ml_progress_percent(...)` (opt-in `remaining_time` regressor; None until a model is promoted).
 - `_ml_energy_total` (L3819) → `progress_mod.ml_energy_total(...)` (opt-in `total_energy` regressor).
-- `_update_projected_energy` (L5591) → `progress_mod.projected_energy(...)` (prefers ML energy regressor, else `energy_so_far / progress_fraction`; cost via same price resolution). Wrapped in try/except.
+- `_update_projected_energy` → `progress_mod.projected_energy(...)` (prefers ML energy regressor, else `energy_so_far / progress_fraction`; cost via the same price resolution). With dynamic pricing it also passes `cost_so_far=_live_cost_so_far(trace)`, so only the energy still to come is charged at the current price (#426). Wrapped in try/except.
 - `_update_cycle_anomaly(duration_so_far)` (L5629) → `progress_mod.cycle_anomaly(...)` → sets `_overrun_ratio`, `_cycle_anomaly` ("overrun" at `CYCLE_OVERRUN_ANOMALY_RATIO`=1.5).
 - `_current_phase_from_progress` (L1379) → `progress_mod.current_phase(...)` (indexes per-profile ranges by ML-blended progress, not raw elapsed).
 

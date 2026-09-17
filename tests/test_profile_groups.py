@@ -127,7 +127,10 @@ def _snap(name, power, dur):
 # ── group-aware matcher transform ──────────────────────────────────────────
 
 
-def test_grouped_snapshots_collapses_cohesive_group(store):
+def test_grouped_snapshots_maps_cohesive_group(store):
+    # Since #400 the members are scored individually and the family is collapsed
+    # afterwards (collapse_group_candidates), so no averaged aggregate snapshot is
+    # built - the mapping is what _grouped_snapshots contributes.
     store._data["envelopes"] = {"A": {"avg": _ramp()}, "B": {"avg": _ramp(scale=1.2)}}
     store._data["profile_groups"] = {"G": {"members": ["A", "B"]}}
     snaps = [
@@ -137,10 +140,9 @@ def test_grouped_snapshots_collapses_cohesive_group(store):
     ]
     out, gm, ms = store._grouped_snapshots(snaps)
     names = [s["name"] for s in out]
-    assert "C" in names                       # ungrouped stays individual
-    assert "A" not in names and "B" not in names  # cohesive members collapsed
-    key = next(n for n in names if n.startswith("__group__"))
-    assert set(gm[key]) == {"A", "B"}
+    assert names == ["A", "B", "C"]                            # nothing averaged away
+    assert not any(n.startswith("__group__") for n in names)
+    assert set(gm["__group__G"]) == {"A", "B"}
     assert set(ms) == {"A", "B"}
 
 

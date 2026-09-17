@@ -23,7 +23,7 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
+from .const import CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE, DOMAIN
 from .manager import WashDataManager
 
 # Keys that can identify the user or their home network - redacted in all contexts.
@@ -101,10 +101,33 @@ async def async_get_config_entry_diagnostics(
                 else {}
             ),
             "profile_sample_repair_stats": manager.profile_sample_repair_stats,
+            # Programs the matcher cannot even consider (no evidence cycle behind them),
+            # which used to be a debug log only - #400 was reported against a device in
+            # exactly this state, where the right program could neither win a match nor
+            # veto a shorter look-alike.
+            "unmatchable_profiles": manager.profile_store.unmatchable_profiles(),
             "suggestions": manager.profile_store.get_suggestions(),
+            # Read each flag off the object that actually owns it. Two of these used
+            # to be read off the manager, which owns neither, so they reported False
+            # for everyone and sent triage down the wrong path (issue #407).
             "feature_flags": {
-                "auto_maintenance": bool(getattr(manager, "_auto_maintenance", False)),
-                "save_debug_traces": bool(getattr(manager, "_save_debug_traces", False)),
+                # No runtime mirror on the manager: the option is read on demand in
+                # _setup_maintenance_scheduler. Report the effective option *and*
+                # whether the midnight job actually armed, so a divergence points at
+                # the scheduler instead of looking like a stale flag.
+                "auto_maintenance": bool(
+                    entry.options.get(
+                        CONF_AUTO_MAINTENANCE,
+                        entry.data.get(CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE),
+                    )
+                ),
+                "auto_maintenance_scheduled": (
+                    getattr(manager, "_remove_maintenance_scheduler", None) is not None
+                ),
+                # Lives on the store, not the manager.
+                "save_debug_traces": bool(
+                    getattr(manager.profile_store, "save_debug_traces", False)
+                ),
                 "notify_fire_events": bool(getattr(manager, "_notify_fire_events", False)),
             },
         },

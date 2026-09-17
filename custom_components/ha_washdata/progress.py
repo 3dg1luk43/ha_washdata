@@ -794,12 +794,28 @@ def projected_energy(
     price: float | None,
     end_expectation_fn: EndExpFn,
     logger: logging.Logger | None = None,
+    cost_so_far: float | None = None,
+    cost_so_far_wh: float | None = None,
 ) -> tuple[float | None, float | None]:
     """Project total energy (Wh) and cost for the running cycle.
 
     Prefers the on-device ``total_energy`` regressor; otherwise falls back to
     ``energy_so_far / progress_fraction``. Returns ``(wh, cost)``; both values are
     ``None`` when progress is too low or there is no energy yet. Never raises.
+
+    ``cost_so_far`` is the dynamic-tariff cost already incurred (#426): the energy
+    consumed so far, charged at the price in force when it was consumed. When it
+    is given, only the *remaining* energy is charged at the current price, so a
+    cycle that ran through a cheap window is not retroactively repriced at the
+    expensive one it happens to be in now. The future half is still the current
+    price - forecasting the tariff is deliberately out of scope.
+
+    ``cost_so_far_wh`` is the energy ``cost_so_far`` was charged for, which is NOT
+    ``energy_so_far``: the cost integrates the power trace while ``energy_so_far``
+    is the detector's per-reading accumulator, and the two count outages and
+    sub-threshold intervals differently. Subtracting the wrong one leaves the
+    overlap double-charged or uncharged. Defaults to ``energy_so_far`` so a caller
+    that has only the cost keeps the previous behaviour.
     """
     logger = logger or _LOGGER
     try:
@@ -820,7 +836,19 @@ def projected_energy(
             price_val = float(price)
         except (TypeError, ValueError):
             price_val = None
-        cost = (projected_wh / 1000.0) * price_val if price_val is not None else None
+        if price_val is None:
+            cost = None
+        elif cost_so_far is None:
+            cost = (projected_wh / 1000.0) * price_val
+        else:
+            charged_wh = energy_so_far
+            if cost_so_far_wh is not None:
+                try:
+                    charged_wh = float(cost_so_far_wh)
+                except (TypeError, ValueError):
+                    charged_wh = energy_so_far
+            remaining_wh = max(0.0, projected_wh - charged_wh)
+            cost = float(cost_so_far) + (remaining_wh / 1000.0) * price_val
         return projected_wh, cost
     except Exception:  # noqa: BLE001 - projection must never break estimates
         return None, None

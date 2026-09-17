@@ -248,8 +248,11 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
 
     await manager._watchdog_check_stuck_cycle(now)
 
-    # Injection must have fired - process_reading(0.0, now) called.
-    detector.process_reading.assert_called_once_with(0.0, now)
+    # Injection must have fired, and must be marked as ours rather than as the
+    # sensor reporting: `_keep_tail_cap` follows real readings past the expected
+    # end, so a keepalive counted as real would bank silence as cycle time
+    # (register item 238).
+    detector.process_reading.assert_called_once_with(0.0, now, synthetic=True)
     # No force-end: the cycle should close gracefully, not be aborted.
     detector.force_end.assert_not_called()
 

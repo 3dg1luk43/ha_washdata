@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**113 commands.**
+**114 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -28,6 +28,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_maintenance_log` | entry_id | `GetMaintenanceLogResponse` |
 | `add_maintenance_event` | entry_id, event_type, date?, notes? | `AddMaintenanceEventResponse` |
 | `delete_maintenance_event` | entry_id, event_id | `SuccessResponse` |
+| `set_lifetime_cycle_count` | entry_id, count | `SetLifetimeCycleCountResponse` |
 | `label_cycle` | entry_id, cycle_id, profile_name?, new_profile_name? | `SuccessResponse` |
 | `delete_cycle` | entry_id, cycle_id | `SuccessResponse` |
 | `auto_label_cycles` | entry_id, confidence_threshold? | `SuccessResponse` |
@@ -239,6 +240,7 @@ _None._
 | `profile_trends` | yes | dict[str, any] |
 | `coverage_gaps` | yes | dict[str, any] |
 | `profile_advisories` | yes | list[dict[str, any]] |
+| `profile_terminal` | yes | dict[str, any] |
 
 ## `ha_washdata/create_profile`
 
@@ -415,6 +417,8 @@ _None._
 | `due` | yes | any |
 | `event_types` | yes | list[str] |
 | `reminders` | yes | dict[str, any] |
+| `cycles_since` | yes | dict[str, number] |
+| `lifetime_cycle_count` | yes | number |
 
 ## `ha_washdata/add_maintenance_event`
 
@@ -448,6 +452,22 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `success` | yes | bool |
+
+## `ha_washdata/set_lifetime_cycle_count`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `count` | yes | int |
+
+**Response** (`SetLifetimeCycleCountResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `lifetime_cycle_count` | yes | number |
 
 ## `ha_washdata/label_cycle`
 

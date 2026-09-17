@@ -55,12 +55,14 @@ export interface DeviceInfo {
   total_duration_s: number | null;
   current_power_w: number | null;
   cycle_progress_pct: number | null;
+  envelope_position: number | null;
   suggestions_count: number;
   suggestion_keys: string[];
   feedback_count: number;
   recording: boolean;
   is_user_paused: boolean;
   manual_program: boolean;
+  armed_program: string | null;
   options: Record<string, unknown>;
   option_defaults: Record<string, unknown>;
 }
@@ -178,6 +180,8 @@ export interface GetMaintenanceLogResponse {
   due: unknown;
   event_types: string[];
   reminders: Record<string, unknown>;
+  cycles_since: Record<string, number>;
+  lifetime_cycle_count: number;
 }
 
 export interface GetMatchDebugResponse {
@@ -273,6 +277,7 @@ export interface GetProfilesResponse {
   profile_trends: Record<string, unknown>;
   coverage_gaps: Record<string, unknown>;
   profile_advisories: Record<string, unknown>[];
+  profile_terminal: Record<string, unknown>;
 }
 
 export interface GetRecordingStateResponse {
@@ -413,6 +418,11 @@ export interface RunPlaygroundSweepResponse {
 export interface RunSuggestionAnalysisResponse {
   success?: boolean;
   count?: number;
+}
+
+export interface SetLifetimeCycleCountResponse {
+  success: boolean;
+  lifetime_cycle_count: number;
 }
 
 export interface SetSuggestionLockResponse {
@@ -653,6 +663,11 @@ export interface AddMaintenanceEventRequest {
 export interface DeleteMaintenanceEventRequest {
   entry_id: string;
   event_id: string;
+}
+
+export interface SetLifetimeCycleCountRequest {
+  entry_id: string;
+  count: number;
 }
 
 export interface LabelCycleRequest {
@@ -1176,6 +1191,7 @@ export interface WashDataWsRequests {
   "ha_washdata/get_maintenance_log": GetMaintenanceLogRequest;
   "ha_washdata/add_maintenance_event": AddMaintenanceEventRequest;
   "ha_washdata/delete_maintenance_event": DeleteMaintenanceEventRequest;
+  "ha_washdata/set_lifetime_cycle_count": SetLifetimeCycleCountRequest;
   "ha_washdata/label_cycle": LabelCycleRequest;
   "ha_washdata/delete_cycle": DeleteCycleRequest;
   "ha_washdata/auto_label_cycles": AutoLabelCyclesRequest;
@@ -1292,6 +1308,7 @@ export interface WashDataWsResponses {
   "ha_washdata/get_maintenance_log": GetMaintenanceLogResponse;
   "ha_washdata/add_maintenance_event": AddMaintenanceEventResponse;
   "ha_washdata/delete_maintenance_event": SuccessResponse;
+  "ha_washdata/set_lifetime_cycle_count": SetLifetimeCycleCountResponse;
   "ha_washdata/label_cycle": SuccessResponse;
   "ha_washdata/delete_cycle": SuccessResponse;
   "ha_washdata/auto_label_cycles": SuccessResponse;

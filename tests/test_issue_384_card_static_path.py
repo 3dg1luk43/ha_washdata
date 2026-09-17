@@ -64,7 +64,7 @@ async def test_static_path_registered_before_lovelace_resource():
 
     async def _fake_init_resource(_hass, url, _ver):
         calls.append(f"resource:{url}")
-        return True
+        return fe.ResourceInitResult(True, fe.RESOURCE_CREATED)
 
     with (
         patch.object(fe, "_async_register_path", _fake_register_path),
@@ -97,7 +97,7 @@ async def test_static_path_failure_reports_card_failed():
 
     async def _fake_init_resource(_hass, url, _ver):
         resource_calls.append(url)
-        return True
+        return fe.ResourceInitResult(True, fe.RESOURCE_CREATED)
 
     with (
         patch.object(fe, "_async_register_path", _boom),

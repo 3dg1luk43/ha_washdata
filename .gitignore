@@ -54,6 +54,7 @@ docs/plans
 docs/STORE.md
 coderabbit_unfixed_findings.md
 issue_*_reply_draft.md
+DISCUSSION_*_REPLY.md
 UI_TEST_GUIDE_*.md
 # Developer-specific MCP server config (local endpoints); not part of the release.
 .mcp.json

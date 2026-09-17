@@ -182,6 +182,28 @@ async def test_d7_record_appends_most_recent_first():
     assert store.async_save.await_count == 2
 
 
+async def test_d7_a_failed_save_rolls_the_entry_back():
+    """An audit line that was never persisted must not be readable as history.
+
+    get_settings_changelog() reads straight off _data, so a failed save used to
+    leave the entry visible and let whatever saved next write it for real.
+    """
+    store = _make_store()
+    await store.async_record_settings_changes(
+        [{"key": "a", "old": 1, "new": 2, "timestamp": "t0"}]
+    )
+    assert [e["key"] for e in store.get_settings_changelog()] == ["a"]
+
+    store.async_save = AsyncMock(side_effect=OSError("disk full"))
+    with pytest.raises(OSError):
+        await store.async_record_settings_changes(
+            [{"key": "b", "old": 3, "new": 4, "timestamp": "t1"}]
+        )
+
+    # Only the entry that actually persisted remains.
+    assert [e["key"] for e in store.get_settings_changelog()] == ["a"]
+
+
 async def test_d7_record_noop_on_empty():
     store = _make_store()
     await store.async_record_settings_changes([])

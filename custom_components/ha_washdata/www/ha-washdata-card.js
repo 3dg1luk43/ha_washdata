@@ -54,6 +54,11 @@ const BUTTON_ICONS = {
 const BUTTON_ORDER = ["pause", "resume", "terminate", "record_start", "record_stop", "program", "open_panel"];
 
 const ACTIVE_STATES = ["running", "paused", "user_paused", "ending", "starting", "anti_wrinkle", "rinse"];
+// States where button.py's PauseCycleButton is available, so the card must not
+// grey out Pause where the backend would accept it. An auto-detected "paused"
+// is pausable: async_pause_cycle turns it into a user pause that survives the
+// power drop.
+const PAUSABLE_STATES = ["running", "starting", "paused", "ending"];
 const INACTIVE_STATES = ["off", "unknown", "unavailable", "idle"];
 const SPARK_MAX_POINTS = 60;
 
@@ -878,8 +883,8 @@ class WashDataCard extends HTMLElement {
     if (!acts) return;
     const sk = vm.sk;
     const enabled = {
-      pause: sk === "running",
-      resume: sk === "paused" || sk === "user_paused",
+      pause: PAUSABLE_STATES.includes(sk),
+      resume: sk === "user_paused",
       terminate: vm.isActive,
       record_start: !vm.isActive,
       record_stop: true,
@@ -1016,7 +1021,7 @@ class WashDataCard extends HTMLElement {
     const hass = this._hass;
     if (!hass) return;
     if (b === "open_panel") {
-      this._navigate("/" + "ha-washdata");
+      this._navigate("/" + "ha-washdata" + this._deepLinkQuery());
       return;
     }
     const roles = this._resolveRoles();
@@ -1038,6 +1043,34 @@ class WashDataCard extends HTMLElement {
   _moreInfo(entityId) {
     if (!entityId) return;
     this.dispatchEvent(new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true }));
+  }
+
+  // ── Panel deep link (#438) ─────────────────────────────────────────────────
+  // "Open WashData" used to land on whichever appliance the panel showed last, so
+  // the dryer's card opened the washer. Carry this card's own appliance as
+  // ?device=. The config entry id is preferred because it is the only token that
+  // survives a rename; the device name is the documented fallback and the panel
+  // resolves it case- and accent-insensitively. Returns "" when neither is
+  // knowable, which simply restores the old behaviour for that card.
+  _deepLinkQuery() {
+    const hass = this._hass;
+    const cfg = this._cfg || {};
+    const reg = (hass && hass.entities) || {};
+    const primary = cfg.entity;
+    const primaryReg = reg[primary];
+    const deviceId = cfg.device_id || (primaryReg && primaryReg.device_id) || null;
+    const dev = (deviceId && hass && hass.devices) ? hass.devices[deviceId] : null;
+    let token = "";
+    // Only read an entry id off a device we actually own: a card pointed at a
+    // template or third-party entity would otherwise hand the panel the wrong
+    // integration's entry id, which resolves to nothing.
+    if (dev && primaryReg && primaryReg.platform === DOMAIN) {
+      const entries = Array.isArray(dev.config_entries) ? dev.config_entries : [];
+      token = dev.primary_config_entry || (entries.length === 1 ? entries[0] : "");
+    }
+    if (!token && dev) token = dev.name_by_user || dev.name || "";
+    if (!token && primary) token = this._deviceNameFor(primary);
+    return token ? "?device=" + encodeURIComponent(token) : "";
   }
 
   _navigate(path) {
@@ -1311,14 +1344,77 @@ class WashDataCardEditor extends HTMLElement {
   }
 }
 
-customElements.define(CARD_TAG, WashDataCard);
-customElements.define(EDITOR_TAG, WashDataCardEditor);
+// Element registration, made resilient against the scoped-registry race (#384).
+//
+// Home Assistant starts this module in one of two ways. A dashboard whose
+// resources live in the UI registry imports it from inside app.js, so it always
+// runs AFTER the frontend installed @webcomponents/scoped-custom-element-registry.
+// With `lovelace: resource_mode: yaml` that collection is read-only, so the
+// integration falls back to add_extra_js_url() (see frontend.py::_init_resource)
+// and the browser starts this module as its own <script type="module"> import,
+// in parallel with the multi-megabyte app bundle - no ordering guarantee.
+//
+// When this module wins that race, the polyfill afterwards REPLACES
+// window.customElements with a shim that answers get()/whenDefined() from its
+// own map, so a definition made into the native registry beforehand becomes
+// invisible: the dashboard waits out create-element-base.ts's 2 s timeout and
+// reports "Custom element not found: ha-washdata-card". Nothing throws, and
+// window.customCards still lists the card, so the card picker shows a spinning
+// placeholder and neither the console nor the HA log says anything. Upstream:
+// home-assistant/frontend#53890.
+//
+// The fix is to define defensively and to repeat the definition for as long as
+// it could still be lost. Re-defining costs nothing and cannot conflict: the
+// shim reuses an already-native definition as its own stand-in class instead of
+// registering the tag twice.
+const wdDefineElements = () => {
+  for (const [tag, cls] of [[CARD_TAG, WashDataCard], [EDITOR_TAG, WashDataCardEditor]]) {
+    try {
+      // `customElements` is looked up on every call, so this always sees the
+      // registry that is current - the shim, once the polyfill swapped it in.
+      if (!customElements.get(tag)) customElements.define(tag, cls);
+    } catch (err) {
+      console.error(`WashData: could not define <${tag}>`, err);
+    }
+  }
+};
+
+wdDefineElements();
+
+(async () => {
+  // Watch until the app has booted and our tags are visible to it. `home-assistant`
+  // can only be defined once the app bundle evaluated, i.e. after the polyfill
+  // installed, so that pair of conditions is the terminal healthy state. The
+  // deadline keeps a page that never boots an app (the card editor preview in
+  // isolation, tests) from polling forever.
+  const deadline = Date.now() + 30000;
+  while (Date.now() < deadline) {
+    // Both tags, not just the card: wdDefineElements catches per tag, so an
+    // editor define that threw while the card succeeded would otherwise never be
+    // retried and never block the exit - leaving Lovelace with no visual editor
+    // for the rest of the session.
+    if (!customElements.get(CARD_TAG) || !customElements.get(EDITOR_TAG)) {
+      wdDefineElements();
+    }
+    if (
+      customElements.get("home-assistant") &&
+      customElements.get(CARD_TAG) &&
+      customElements.get(EDITOR_TAG)
+    ) return;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+})();
 
 window.customCards = window.customCards || [];
-window.customCards.push({
-  type: CARD_TAG,
-  name: "WashData Card",
-  preview: true,
-  description: "Adaptive card for WashData appliances: compact tile, rich detail, or multi-device glance.",
-  documentationURL: "https://github.com/3dg1luk43/ha_washdata",
-});
+// Guarded so a document that ends up loading this module twice (two Lovelace
+// resources pointing at different ?v= cache busters, for instance) lists the
+// card once instead of twice in the picker.
+if (!window.customCards.some((entry) => entry && entry.type === CARD_TAG)) {
+  window.customCards.push({
+    type: CARD_TAG,
+    name: "WashData Card",
+    preview: true,
+    description: "Adaptive card for WashData appliances: compact tile, rich detail, or multi-device glance.",
+    documentationURL: "https://github.com/3dg1luk43/ha_washdata",
+  });
+}

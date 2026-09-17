@@ -48,6 +48,8 @@
         }
     },
     "badge": {
+        "quiet_tail_tip": "Sona yaklaşırken bu program yaklaşık {mins} dk sessizleşir, ardından bitmeden önce {secs} sn boyunca yaklaşık {watts} W çeker. Ölçülen {measured} döngüden {seen} tanesinde görüldü: cihaz bunu her çalışmada yapmaz.",
+        "quiet_tail": "~{mins} dk sessiz bitiş",
         "artifact_tip": "{n} anormallik algılandı (ör. döngünün ortasında kapının açılması) – bunları grafikte görmek için açın",
         "auto": "(otomatik algılandı)",
         "built_in_tag": "yerleşik",
@@ -77,11 +79,14 @@
         "approved": "Onaylandı",
         "awaiting": "Onay bekleniyor",
         "imported_tip": "Topluluk mağazasından içe aktarıldı. Yalnızca eşleştirme için kullanılır, istatistiklere sayılmaz.",
+        "unmatchable": "eşleştirilemez",
         "not_importable": "burada geçersiz",
         "exists": "mevcut",
-        "backfilled_tip": "İçe aktarılan güç geçmişinde algılandı. Yalnızca program eşleştirmesini etkiler, istatistiklere sayılmaz."
+        "backfilled_tip": "İçe aktarılan güç geçmişinde algılandı. Yalnızca program eşleştirmesini etkiler, istatistiklere sayılmaz.",
+        "armed": "(sonraki döngüye uygulanır)"
     },
     "btn": {
+        "reset_zoom": "Yakınlaştırmayı sıfırla",
         "set_brand_model": "Marka ve modeli ayarla",
         "refresh_catalog": "Kataloğu yenile",
         "add_device": "+ Cihaz ekle",
@@ -215,6 +220,8 @@
         "trim": "Kırp",
         "trim_split": "Kırp / Böl",
         "undo": "Geri al",
+        "unlabel_selected": "Seçilenlerin etiketini kaldır ({n})",
+        "unlabel_selected_tip": "Seçili döngülerden profil etiketini kaldırır. Döngüler geçmişinizde kalır ve daha sonra tekrar etiketlenebilir - yalnızca bu profili şekillendirmeyi bırakırlar.",
         "use": "Kullan",
         "wipe_all": "Tüm Verileri Sil",
         "delete_selected": "Seçilenleri sil ({n})",
@@ -222,7 +229,6 @@
         "pg_apply_best": "En iyisini uygula",
         "pg_apply_to_settings": "Ayarlara kaydet",
         "pg_apply_to_settings_tip": "Burada düzenlediğiniz değerleri bu cihazın etkin ayarlarına kopyalayın",
-        "search": "Ara",
         "import": "İçe aktar",
         "disconnect": "Bağlantıyı kes",
         "connect_github": "GitHub'a bağlan",
@@ -249,7 +255,8 @@
         "hist_read_recorder": "Home Assistant'tan oku",
         "hist_scan": "Döngüleri tara",
         "hist_import_n": "{n} döngüyü içe aktar",
-        "hist_goto_cycles": "Döngüleri göster"
+        "hist_goto_cycles": "Döngüleri göster",
+        "save_total_cycles": "Toplamı Kaydet"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -262,6 +269,12 @@
         },
         "attn_sub": "Kaydetmeden önce çakışmaları düzeltin",
         "attn_title": "Ayar çakışmaları: {n}",
+        "price_entity": {
+            "power_sensor": "Bu, cihazın Güç Sensörü; bir fiyat değil. Fiyat varlığı aşağıdaki sabit fiyatı geçersiz kılar, bu yüzden döngüler watt değeri kWh başına fiyatmış gibi ücretlendirilir - bu alanı temizleyin.",
+            "energy_sensor": "Bu, cihazın Enerji Sayacı; bir fiyat değil. Fiyat varlığı aşağıdaki sabit fiyatı geçersiz kılar, bu yüzden döngüler sayaç okuması kWh başına fiyatmış gibi ücretlendirilir - bu alanı temizleyin.",
+            "device_class": "Bu sensör {dc} ölçer, kWh başına fiyat değil. Fiyat varlığı aşağıdaki sabit fiyatı geçersiz kılar - bu alanı temizleyin veya bir tarife sensörüne yönlendirin.",
+            "unit": "Bu sensör {unit} biriminde okuma verir; bu da kWh başına fiyat değildir. Fiyat varlığı aşağıdaki sabit fiyatı geçersiz kılar - bu alanı temizleyin veya bir tarife sensörüne yönlendirin."
+        },
         "settings_banner": "Ayar çakışmaları: {n}. Vurgulanan bölümleri kontrol edin ve kaydetmeden önce düzeltin.",
         "settings_banner_btn": "İlkine git",
         "confidence": {
@@ -349,7 +362,7 @@
         "pg_settings_source": "Ayarların kaynağı",
         "phase_catalog": "Aşama Kataloğu",
         "playground": "Deneme Alanı",
-        "process_history": "İşlem Geçmişi",
+        "process_history": "Geçmişi İşle",
         "settings_history": "Ayar geçmişi",
         "status": "Durum",
         "status_graph": "Durum Grafiği",
@@ -360,12 +373,12 @@
         "wipe_history": "Geçmişi Sil",
         "recommendations": "Öneriler ({n})",
         "pg_detection_params": "Algılama ayarları",
-        "pg_timeline": "Olay zaman çizelgesi",
         "pg_outcome": "Simülasyon sonucu",
         "pg_across_cycles": "Tüm döngülerinizde",
         "community_store": "Topluluk Mağazası",
         "online_account": "Topluluk Mağazası ve çevrimiçi özellikler",
-        "import_power_history": "Güç geçmişini içe aktar"
+        "import_power_history": "Güç geçmişini içe aktar",
+        "service_status": "Bakım Durumu"
     },
     "health": {
         "fair": "Kabul edilebilir profil kalitesi",
@@ -373,6 +386,10 @@
         "poor": "⚠ Düşük profil kalitesi"
     },
     "lbl": {
+        "envelope_position_tip": "Eşleşen programın kendi kayıtlı eğrisi üzerindeki konum, %{pct}. Zaman saymak yerine bu döngü profile hizalanarak ölçülür, böylece çalışma her zamankinden uzun ya da kısa olduğunda da doğru kalır. Cihaz sessizken yenilenir, bu yüzden etkin bir aşama sırasında geride kalabilir.",
+        "envelope_position": "eğri %{pct}",
+        "aria_playground_chart3": "Etkileşimli döngü güç grafiği: zamanı/gücü okumak için üzerine gelin, yakınlaştırmak için kaydırın veya iki parmak kullanın, kaydırmak için sürükleyin",
+        "device_unresolved": "Kullanılamayan cihaz ({id})",
         "drag_to_resize": "Yeniden boyutlandırmak için sürükleyin",
         "actions": "Eylemler",
         "activity": "Aktivite",
@@ -508,7 +525,7 @@
         "profile_index": "profil dizini →",
         "profile_name": "Profil Adı",
         "program": "Program",
-        "program_tip": "Geçerli döngüyle eşleştirilen profili geçersiz kılın. Otomatik algılama, entegrasyonun en iyi eşleşmeyi otomatik olarak seçmesine olanak tanır. Otomatik algılama yanlış olduğunda veya neyin çalıştığını bildiğinizde belirli bir programı zorla eşleştirmek için sabitleyin.",
+        "program_tip": "Geçerli döngüyle eşleştirilen profili geçersiz kılın. Otomatik algılama, entegrasyonun en iyi eşleşmeyi otomatik olarak seçmesine olanak tanır. Otomatik algılama yanlış olduğunda veya neyin çalıştığını bildiğinizde belirli bir programı zorla eşleştirmek için sabitleyin. Cihazı çalıştırmadan önce bir program seçin; sonraki döngü başladığı anda uygulanır.",
         "progress": "İlerleme",
         "raw_socket": "Ham soket",
         "read_only": "Salt okunur",
@@ -543,6 +560,7 @@
         "stage4": "Aşama 4 – uyum",
         "status": "Durum",
         "tail_trim": "Sondan Kırpma (s)",
+        "tap_to_dismiss": "kapatmak için grafiğe dokunun",
         "timer_auto_pause": "Otomatik duraklatma",
         "timer_min": "dk.",
         "timer_msg_placeholder": "Mesaj (isteğe bağlı, {device}/{program}/{minutes})",
@@ -579,9 +597,7 @@
         "pg_time_left_model": "Kalan süre (model)",
         "pg_time_left_model_tip": "Model tarafından tahmin edilen kalan süre (aşama tahmincisi + ML karışımı), sabit bir geri sayım değil",
         "phase": "Aşama",
-        "pg_mode_simulate": "Simülasyon",
         "pg_mode_history": "Geçmişte test et",
-        "pg_mode_sweep": "Tarama",
         "pg_ev_detected": "Algılandı",
         "pg_ev_match": "Eşleşme kesinleşti",
         "pg_ev_match_changed": "Eşleşme değişti",
@@ -617,14 +633,11 @@
         "pg_stress_idle_w_desc": "Otomatik algılanan bekleme tabanını geçersiz kıl (otomatik için boş bırakın).",
         "pg_stress_toggle": "Bekleme sonlandırmasını test et",
         "pg_stress_toggle_desc": "Kaydın bitmesinin ardından cihazın bekleme modundaki güç tüketimine devam ettiğini simüle eder - WashData'nın döngüyü durdurup durdurmayacağını ve ne zaman durduracağını gösterir.",
-        "pg_sweep_2d": "2D ısı haritası",
-        "pg_sweep_param_y": "2. parametre",
         "pg_obj_match": "Eşleşme doğruluğu",
         "pg_obj_endtiming": "Bitiş zamanı doğruluğu",
         "pg_obj_falseend": "Yanlış bitiş oranı",
         "pg_obj_overrun": "Süre sapması",
         "pg_obj_ambiguity": "Belirsizlik oranı",
-        "pg_best_combo": "en iyi kombinasyon",
         "pg_mode_optimize": "Optimize et",
         "pg_group_matching": "Program eşleştirme",
         "pg_zoom_hint": "yakınlaştırmayı sıfırlamak için çift tıklayın",
@@ -706,7 +719,12 @@
         "task_history_import_apply": "Döngüleri içe aktarma",
         "evidence_real_cycles": "Bu makinenin çalıştırdığı döngüler",
         "evidence_reference_cycles": "Topluluk mağazasından indirilenler",
-        "evidence_backfill_cycles": "İçe aktarılan güç geçmişinde bulunanlar"
+        "evidence_backfill_cycles": "İçe aktarılan güç geçmişinde bulunanlar",
+        "zoom_hint_touch": "iki parmakla yakınlaştırın",
+        "zoom_hint_touch_zoomed": "iki parmakla yakınlaştırın · sıfırlamak için çift dokunun",
+        "cycles_since_service": "{since} / {total} döngü",
+        "total_cycles_run": "toplamda çalıştırılan döngü",
+        "correct_total_cycles": "Toplamı düzelt"
     },
     "log": {
         "all_levels": "Tüm seviyeler",
@@ -756,7 +774,7 @@
         "merge_cycles": "{n} Döngüyü Birleştir",
         "new_group": "Yeni profil grubu",
         "new_phase": "Yeni Aşama",
-        "process_history_msg": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, önerileri yenileyin, ML'yi yeniden eğitin (etkinleştirilmişse) ve döngü sağlığını yeniden hesaplayın. Bu biraz zaman alabilir.",
+        "process_history_msg": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, önerileri yenileyin, ML'yi yeniden eğitin (etkinleştirilmişse), döngü maliyetlerini kayıtlı enerji fiyatlarına göre yeniden hesaplayın ve döngü sağlığını yeniden hesaplayın. Bu biraz zaman alabilir.",
         "process_history_ok": "İşle",
         "process_history_title": "Geçmişi İşle",
         "process_recording": "Kaydı İşle",
@@ -789,6 +807,7 @@
         "history_import": "Güç geçmişini içe aktar"
     },
     "msg": {
+        "pg_canvas_empty3": "Yukarıdan bir döngü seçin ve simüle etmek için Çalıştır'a basın. Ardından değerleri okumak için üzerine gelin, yakınlaştırmak için kaydırın veya iki parmak kullanın ve kaydırmak için sürükleyin.",
         "tail_trim_hint": "Sondan kaldırılacak saniye sayısı",
         "store_sibling_hint": "Tam olarak sizin modeliniz için paylaşılmış bir şey yok mu? Aynı markanın yakın bir modeli genellikle iyi bir başlangıç noktasıdır.",
         "store_declare_appliance": "WashData'ya hangi cihaza sahip olduğunuzu bildirin; bu sekme, başkalarının o cihaz için paylaştığı programları ve kayıtları gösterir. Ayrıca yukarıya bir marka yazıp göz atabilirsiniz.",
@@ -802,7 +821,7 @@
         "artifact_spike_detail": "Normal güç bandının üzerinde yaklaşık ~{n} saniye sürdü.",
         "auto_label_intro": "Eşleşme güveni eşiği geçen etiketsiz döngülere profil atayın.",
         "automations_intro": "WashData, {start} / {end} olaylarını tetikler ve varlıkları gösterir; bu nedenle bildirimler ve eylemler en iyi şekilde normal Home Assistant otomasyonları olarak oluşturulur. Bu cihazı kullanan otomasyonlar aşağıda görünür.",
-        "cleanup_intro": "Tüm etiketli döngüler üst üste bindirilmiş. Aykırı değerleri işaretleyip silerek profili temizleyin.",
+        "cleanup_intro": "Tüm etiketli döngüler üst üste bindirilmiş. Aykırı değerleri işaretleyin, ardından etiketlerini kaldırın (geçmişte kalırlar ama artık bu profili şekillendirmezler) veya tamamen silin.",
         "clear_debug_hint": "Saklanan hata ayıklama verilerini kaldırarak boş alan açın.",
         "collecting_data": "Veri toplanıyor. İnce ayarın başlaması için gereken döngü sayısı: {need} ({current}/{min}).",
         "compare_overlay_profiles": "Profilleri üst üste bindirin (soluk)",
@@ -901,7 +920,7 @@
         "preferences_admin": "Tercihler, panel ve erişim denetimi",
         "preferences_adv": "Tercihler",
         "prefs_personal": "Bunlar yalnızca Home Assistant hesabınıza uygulanır.",
-        "process_history_hint": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, ayar önerilerini yenileyin, ML modellerini yeniden eğitin (etkinleştirilmişse) ve döngü sağlığını yeniden hesaplayın. Bir toplu incelemenin ardından çalıştırın.",
+        "process_history_hint": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, ayar önerilerini yenileyin, ML modellerini yeniden eğitin (etkinleştirilmişse), döngü maliyetlerini kayıtlı enerji fiyatlarına göre yeniden hesaplayın ve döngü sağlığını yeniden hesaplayın. Bunu bir grup incelemenin ardından çalıştırın.",
         "profile_deleted": "Profil silindi",
         "profile_poor_health_detail": "Bu profile atanan döngüler tutarsız şekillere sahip veya güvenirliği düşük. Zarfı yeniden oluşturmayı veya etiketli döngüleri gözden geçirmeyi düşünün.",
         "profiles_intro": "İstatistikler, aşamalar ve temizleme için bir profile tıklayın. Güvenilir seçim için neredeyse aynı programları (aynı şekil/süre, farklı sıcaklık veya dönüş) gruplayın.",
@@ -984,9 +1003,10 @@
         "advisory_poor_health": "'{name}' düşük bir uyum puanına sahip - son çevrimleri çok değişkenlik gösteriyor veya zayıf eşleşiyor. Eşleştirme ve süre tahminlerinin doğru kalması için çevrimlerini gözden geçirin ya da profili yeniden kaydedin.",
         "advisory_shape_drift": "'{name}' orijinal güç eğrisinden önemli ölçüde uzaklaştı. Cihazın davranışı zamanla değişmiş olabilir (ör. kireçlenme, aşınma). Bu profili son çevrimlerle yeniden kaydetmeyi düşünün.",
         "advisory_shape_drift_corr": "'{name}' orijinal güç eğrisinden önemli ölçüde uzaklaştı (korelasyon {corr}). Cihazın davranışı zamanla değişmiş olabilir (ör. kireçlenme, aşınma). Bu profili son çevrimlerle yeniden kaydetmeyi düşünün.",
+        "advisory_unmatchable": "'{name}' asla eşleştirilemez: arkasında güç verisi bulunan bir çevrim yok, bu nedenle WashData çalışan bir çevrimi karşılaştıracak bir referansa sahip değil. Profili yeniden eşleştirmeye dahil etmek için bu programın bir çevrimini etiketleyin (veya bir çevrim kaydedin).",
+        "advisory_unmatchable_no_duration": "'{name}' asla eşleştirilemez: güç verisi bulunan bir çevrimi var ancak kullanılabilir bir süresi yok, bu nedenle WashData eşleştirmeyi ölçeklendirecek bir süreye sahip değil. Bu programı yeniden kaydedin veya beklenen süresini girin; böylece profil yeniden eşleştirmeye dahil olur.",
         "pg_no_alerts": "Bu çalıştırmada sorun tespit edilmedi.",
         "pg_override_active": "Düzenlediğiniz ayarlar mevcut ayarlara karşı kullanılıyor",
-        "pg_history_intro": "Son döngülerinizi gerçek algılayıcı ve eşleştirici üzerinden yeniden oynatın. Burada bir önce/sonra karşılaştırması görmek için önce Simülasyon modunda bir algılama ayarını düzenleyin.",
         "pg_history_empty": "Döngülerinizi yeniden oynatmak için Çalıştır'a basın.",
         "pg_history_summary": "{detected}/{total} algılandı · {correct} doğru eşleşti",
         "pg_sweep_no_metric": "Bu hedefi puanlamak için yeterli veri yok.",
@@ -1063,7 +1083,11 @@
         "hist_scan_failed": "Tarama başarısız oldu.",
         "hist_scan_expired": "Bu tarama artık kullanılamıyor. Lütfen yeniden tarayın.",
         "hist_import_failed": "İçe aktarma başarısız oldu.",
-        "imported_history_readonly": "İçe aktarılan güç geçmişinde algılandı. Program eşleştirmesini etkiler ancak istatistiklerinize sayılmaz, kırpılamaz veya bölünemez. Programını adlandırmak için etiketleyin."
+        "imported_history_readonly": "İçe aktarılan güç geçmişinde algılandı. Program eşleştirmesini etkiler ancak istatistiklerinize sayılmaz, kırpılamaz veya bölünemez. Programını adlandırmak için etiketleyin.",
+        "odometer_intro": "Bu toplam yalnızca artar. Bir döngü kaydını silmek onu değiştirmez ve saklanan geçmiş sınırının ötesinde saymaya devam eder, böylece servis hatırlatıcıları doğru kalır.",
+        "odometer_correct_hint": "WashData gerçekleşmemiş bir çalışma kaydettiyse veya cihaz WashData kurulmadan önce zaten döngü çalıştırmışsa bu değeri ayarlayın.",
+        "no_reminders_set": "Henüz servis hatırlatıcısı ayarlanmadı.",
+        "toast_program_armed": "Program sonraki döngü için ayarlandı: {program}"
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1093,7 +1117,9 @@
         "duration_scale": "Aşama 4: süre uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.175)",
         "energy_scale": "Aşama 4: enerji uyumunun yarılandığı logaritmik oran; küçük = daha sert ceza (varsayılan 0.25)",
         "dishwasher_end_spike_quiet_release": "Bulaşık makinesi: beklenen süreden sonra döngü sonu tahliye beklemesi bırakılmadan önceki sessiz saniyeler",
-        "smart_termination_duration_ratio": "Eşleşen programın beklenen süresinin, Akıllı Sonlandırma'nın döngüyü erken bitirebilmesi için döngünün ulaşması gereken kesri; yüke veya sıcaklığa bağlı makinelerde düşürün"
+        "smart_termination_duration_ratio": "Eşleşen programın beklenen süresinin, Akıllı Sonlandırma'nın döngüyü erken bitirebilmesi için döngünün ulaşması gereken kesri; yüke veya sıcaklığa bağlı makinelerde düşürün",
+        "anti_crease_finalize_ratio": "Kırışıklık önleme tambur kuyruğunun sonlandırılabilmesi için döngünün ulaşması gereken, eşleşen programın beklenen süresine oranı; uzun tambur kuyruğu olan kurutucularda düşürün, çamaşır makinelerini varsayılanda bırakın",
+        "curve_preroll_seconds": "İptal edilen başlatma denemelerinden bir döngünün eğrisinin başına taşınan okuma saniyesi; 0 = kapalı"
     },
     "phase_desc": {
         "anti_crease": "Kırışıklıkları azaltmak için tamamlandıktan sonra ara sıra kısa yuvarlanmalar.",
@@ -1208,7 +1234,7 @@
             "label": "Maks. Kırışıklık Önleme Gücü"
         },
         "auto_label_confidence": {
-            "doc": "Döngü sonundaki maç skoru bu seviyede veya üzerindeyse program herhangi bir onay istemi olmadan otomatik olarak etiketlenir. Otomatik etiketlemeden önce daha yüksek kesinlik gerektirecek şekilde yükseltin; daha fazlasını otomatikleştirmek için düşürün. Altındaki Learning Confidence ile birlikte çalışır.",
+            "doc": "Döngü sonundaki eşleşme puanı bu seviyede veya üzerindeyse program herhangi bir onay istemi olmadan otomatik olarak etiketlenir. Otomatik etiketlemeden önce daha yüksek kesinlik gerektirmek için yükseltin; daha fazlasını otomatikleştirmek için düşürün. Hemen altındaki Öğrenme Güveni ile birlikte çalışır.",
             "label": "Otomatik Etiket Güveni"
         },
         "auto_maintenance": {
@@ -1256,7 +1282,7 @@
             "label": "Bitiş Tekrar Sayısı"
         },
         "energy_price_entity": {
-            "doc": "kWh başına güncel elektrik fiyatını gösteren sensör (örn. dinamik tarife). Aşağıdaki statik fiyata göre önceliklidir. Her döngü bittiğinde geçerli olan fiyat dondurulur.",
+            "doc": "kWh başına güncel elektrik fiyatını gösteren sensör (örn. dinamik tarife). Bir fiyat olmalıdır, prizin kendi güç veya enerji varlığı değil: aşağıdaki statik fiyata göre önceliklidir, bu nedenle buraya konan bir kWh sayacı her döngüyü tarifeniz yerine sayaç okumasıyla ücretlendirir. Zaman Ağırlıklı Maliyet açıkken her döngü, çalıştığı her an geçerli olan fiyattan ücretlendirilir; aksi halde bittiğinde geçerli olan fiyat üzerine dondurulur.",
             "label": "Enerji Fiyatı Varlığı"
         },
         "energy_price_static": {
@@ -1284,7 +1310,7 @@
             "label": "Harici Tetikleyiciyi Tersine Çevir (KAPALI'da tetikle)"
         },
         "learning_confidence": {
-            "doc": "Eşleşme puanı bu ile Otomatik Etiket Güveni arasında kalırsa, bir geri bildirim bildirimi tanımlanan programı doğrulamanızı ister. Bu skorun altında maç yüzeye çıkamayacak kadar belirsiz. Otomatik Etiket Güveninin altında tutulmalıdır.",
+            "doc": "Eşleşme puanı bu değer ile Otomatik Etiket Güveni arasında kalırsa, bir geri bildirim bildirimi tanımlanan programı doğrulamanızı ister. Bu puanın altında eşleşme gösterilemeyecek kadar belirsizdir. Otomatik Etiket Güveninin altında tutulmalıdır.",
             "label": "Öğrenme Güveni"
         },
         "linked_device": {
@@ -1352,7 +1378,7 @@
             "label": "Bildirimler için HA Olayları Tetikle"
         },
         "notify_icon": {
-            "doc": "Bildirim için isteğe bağlı mdi simgesi (ör. mdi:çamaşır makinesi). Platform varsayılanı için boş bırakın.",
+            "doc": "Bildirimde gösterilen küçük simge (ör. mdi:washing-machine). Android bunu durum çubuğuna çizer; iOS ise uygulama simgesinin yerine gösterir ve 2026.8 veya daha yeni bir tamamlayıcı uygulama gerektirir. Platform varsayılanı için boş bırakın.",
             "label": "Bildirim Simgesi"
         },
         "notify_live_chronometer": {
@@ -1428,7 +1454,7 @@
             "label": "Güç Kapatma Eşiği"
         },
         "power_sensor": {
-            "doc": "Bu cihaz için canlı gücü watt cinsinden bildiren sensör varlığı (ör. sensör.washer_power). Tüm döngü tespiti bu sinyale dayanır.",
+            "doc": "Bu cihaz için canlı gücü watt cinsinden bildiren sensör varlığı (ör. sensor.washer_power). Tüm döngü tespiti bu sinyale dayanır.",
             "label": "Güç Sensörü"
         },
         "profile_duration_tolerance": {
@@ -1452,7 +1478,7 @@
             "label": "Eşleşme Eşiği"
         },
         "profile_unmatch_threshold": {
-            "doc": "Canlı bir döngü ortası maçı bu puanın altına düşerse, geçici tanımlama silinir. Eşleşme Eşiğinin biraz altında tutun, böylece benzerlikteki kısa bir düşüş, ekranı tekrar benzersiz hale getirmez.",
+            "doc": "Canlı bir döngü ortası eşleşme puanı bu puanın altına düşerse, geçici tanımlama silinir. Eşleşme Eşiğinin biraz altında tutun, böylece benzerlikteki kısa bir düşüş ekranı yeniden eşleşmedi durumuna döndürmez.",
             "label": "Eşleşmeme Eşiği"
         },
         "progress_reset_delay": {
@@ -1462,10 +1488,6 @@
         "pump_stuck_duration": {
             "doc": "Bir pompa, muhtemelen sıkışmış olarak işaretlenmeden önce sürekli olarak çalışabilir (sıkışmış pompa olayını tetikler).",
             "label": "Pompa Takılma Süresi"
-        },
-        "running_dead_zone": {
-            "doc": "Bir döngü başladıktan sonra bu penceredeki güç düşüşleri dikkate alınmaz. Çamaşır makineleri soğuk suyla doluyor (ısıtmadan önce neredeyse 0 W'a düşüyor) - bu koruma olmadan dolum aşaması bir döngü sonu gibi görünür. Bu, verileri atlamaz: tam güç takibi T=0'dan itibaren kaydedilir. Öneri motoru, makinenizin gerçek başlatma düzenini ölçer ve bunu otomatik olarak boyutlandırır.",
-            "label": "Çalışma Ölü Bölgesi"
         },
         "sampling_interval": {
             "doc": "Sensör okumaları arasında beklenen süre - yumuşatma penceresini boyutlandırmak ve geri dönmeyi doğru şekilde başlatmak için kullanılır. Her sensör güncellemesi bu değere bakılmaksızın yakalanır; yalnızca aşağı yöndeki hesaplamaları kalibre eder. Öneri motoru, sensörünüzün geçmiş döngülerdeki gerçek temposunu ölçer ve bunu otomatik olarak ayarlar.",
@@ -1594,13 +1616,17 @@
             "label": "Güç Profili Aralığı",
             "doc": "EMHASS ve tibber_prices gibi harici planlayıcılar tarafından kullanılan düz slot başına ortalama watt dizisi olan power_profile sensör özelliği için kova boyutu. Küçük kovalar kısa güç ani artışlarını keskin tutar; büyük kovalar şekli düzler. Varsayılan 15 dakika. Yalnızca okuma zamanında kullanılır; algılamayı etkilemez."
         },
+        "notify_live_silent": {
+            "label": "Sessiz Canlı Güncellemeler",
+            "doc": "Yalnızca iOS. Canlı ilerlemeyi sessizce yeniler: her güncelleme ses veya titreşim olmadan, pil tasarrufu sağlayan daha düşük bir öncelikle gelir ve iOS bunları kısa süreliğine gruplayabilir. Bir döngünün ilk güncellemesi (Live Activity'yi başlatan güncelleme) ile başlangıç/bitiş bildirimleri her zamanki gibi uyarı vermeye devam eder. Her güncellemede uyarı almak için bunu kapatın."
+        },
         "notify_live_sticky": {
             "label": "Dokunuşta Canlı Bildirimi Koru",
             "doc": "Yalnızca Android. Canlı ilerleme bildirimini kalıcı (yapışkan) hale getirerek üzerine dokunulduğunda devam eden bildirimin kapatılmasını önleyin. Kapalı olduğunda dokunmanın bildirimi kapattığı varsayılan davranış korunur."
         },
         "notify_live_click_action": {
-            "label": "Canlı Bildirim Dokunma Hedefi",
-            "doc": "Yalnızca Android. Canlı ilerleme bildirimine dokunulduğunda açılan yer (örn. /lovelace/laundry veya tam URL), uygulama açılış sayfası yerine. Varsayılan için boş bırakın."
+            "label": "Bildirim Dokunma Hedefi",
+            "doc": "Bu cihazdan gelen bir bildirime dokunulduğunda nereye gidileceği, hem Android hem de iOS'ta. Boş bırakılırsa WashData paneli bu cihazda açılır. Başka bir yere yönlendirmek için bir pano yolu (ör. /lovelace/laundry) veya tam bir URL girin; hiç dokunma hedefi olmaması için \"none\" yazın."
         },
         "door_opens_at_end": {
             "label": "Döngü Sonunda Kapı Otomatik Açılır",
@@ -1617,6 +1643,18 @@
         "profile_evidence_sources": {
             "label": "Bir programı şekillendiren döngüler",
             "doc": "Her programın güç eğrisini oluşturmak ve tamamlanmış bir döngüyü onunla eşleştirmek için hangi döngülerin kullanılacağı. Bir türün işaretini kaldırmak, hiçbir şey silmeden onun programlarınızı şekillendirmesini durdurur - döngüler Döngüler listenizde kalır ve yine etiketlenebilir veya kaldırılabilir. İçe aktarılan verilere güvenmiyorsanız kullanışlıdır. İstatistikler etkilenmez: her zaman yalnızca bu makinenin gerçekten çalıştırdığı döngüleri sayarlar. Her şeyin işaretini kaldırmak yok sayılır, çünkü arkasında hiç döngü olmayan bir program asla eşleşemez."
+        },
+        "energy_price_dynamic": {
+            "label": "Zaman Ağırlıklı Maliyet",
+            "doc": "Her döngüyü, bittiğinde geçerli olan tek fiyat yerine, çalıştığı her an geçerli olan fiyattan ücretlendirir. Yalnızca fiyat varlığı için geçerlidir (sabit fiyat değişemez). Ek kurulum gerektirmez: döngü çalışırken fiyat canlı olarak izlenir, Tanılamalar altındaki Geçmişi İşle eylemi ise eski döngülerin maliyetini recorder verilerinden yeniden hesaplar. Kapalı = klasik davranış, sonda dondurulan tek fiyat."
+        },
+        "anti_crease_finalize_ratio": {
+            "label": "Kırışıklık Önleme Sonlandırma Oranı",
+            "doc": "WashData'nın gördüğü düşük güçlü tamburlamanın kırışıklık önleme kuyruğu olduğuna karar verip döngüyü orada bitirebilmesi için, döngünün eşleşen programın beklenen süresinin ne kadarına ulaşmış olması gerektiği. Beklenen süre, programın ortalamasıdır; bu yüzden sensörlü kurutma süresi çamaşır miktarına göre değişen bir kurutucuda çoğu çalışma bu sürenin %98'ine hiç ulaşmaz ve kuyruk, yedek zaman aşımına kadar bekler; bu da çoğu zaman makine gerçekte durduktan 15 ila 40 dakika sonrasını bulur. Böyle bir kurutucuda bu değeri düşürün (örneğin 0,75). Çamaşır makinelerini varsayılanda bırakın: bir çamaşır makinesi döngüsünün büyük bölümünü Maks. Kırışıklık Önleme Gücü'nün altında geçirir, dolayısıyla sessiz bir yıkama ara aşamasını kuyruktan ayıran tek şey bu orandır ve değeri düşürmek bir yıkamayı ortasından kesebilir. Varsayılan (0,98) için boş bırakın. Bu, ayrı bir erken bitirme denetimini yöneten Akıllı Sonlandırma Oranı'ndan farklı bir ayardır."
+        },
+        "curve_preroll_seconds": {
+            "label": "Eğri Ön Kaydı",
+            "doc": "WashData'nın, iptal edilen başlatma denemelerinden gelen kaç saniyelik okumayı bir döngünün eğrisinin başına taşıyabileceği. Bir döngünün eğrisi normalde sonunda başarılı olan başlatma denemesiyle başlar; bu nedenle yerleşmeden önce birkaç kez yoklayan makinelerde (program seçimi, kapak kilidi, ilk su alma) gerçek etkinliğin ilk dakikaları her eğride eksik kalır. Bu değeri, makinenizdeki en uzun hazırlık aşamasının biraz üzerine ayarlayın (çoğu makine için 300 sn fazlasıyla yeter). 0 kapatır. Açmanın kaydedilen başlangıcı öne çektiğini unutmayın: değişiklikten önce ve sonra kaydedilen döngüler aynı program için farklı süreler taşır ve eski döngüler elenene kadar öğrenilen ortalamalar kayar."
         }
     },
     "setting_group": {
@@ -1728,7 +1766,8 @@
         "splitting": "Bölünüyor…",
         "deleting": "Siliniyor…",
         "imported": "İçe aktarıldı",
-        "preparing": "Hazırlanıyor…"
+        "preparing": "Hazırlanıyor…",
+        "unlabelling": "Etiket kaldırılıyor…"
     },
     "tab": {
         "advanced": "Gelişmiş",
@@ -1808,6 +1847,7 @@
         "recording_stopped": "Kayıt durduruldu",
         "review_saved": "İnceleme kaydedildi",
         "settings_conflicts": "Kaydetmeden önce vurgulanan ayar çakışmalarını düzeltin.",
+        "settings_no_changes": "Kaydedilecek değişiklik yok",
         "settings_reverted": "Ayarlar geri yüklendi; entegrasyon yeniden yükleniyor",
         "settings_saved": "Ayarlar kaydedildi; entegrasyon yeniden yükleniyor",
         "suggestions_applied": "Öneriler uygulandı; entegrasyon yeniden yükleniyor",
@@ -1866,7 +1906,11 @@
         "export_selective_done": "Dışa aktarma indirildi",
         "import_selective_done": "{profiles} profil ve {cycles} döngü içe aktarıldı",
         "hist_csv_required": "Önce bir CSV dosyası yükleyin veya içeriğini yapıştırın",
-        "file_read_failed": "Bu dosya okunamadı"
+        "file_read_failed": "Bu dosya okunamadı",
+        "unlabel_done": "{count} döngünün etiketi kaldırıldı",
+        "unlabel_failed": "Etiket kaldırma başarısız: {error}",
+        "odometer_saved": "Toplam döngü sayısı kaydedildi",
+        "odometer_save_failed": "Toplam kaydedilemedi: {error}"
     },
     "suggestion": {
         "both_agree": "WashData öneriyor",
@@ -1913,10 +1957,6 @@
                 "higher": "Yalnızca yüksek güvenli eşleşmeleri onaylar; daha fazla döngü etiketsiz kalır",
                 "lower": "Daha fazla döngüyle eşleşir; bazıları hafif hatalı olabilir"
             },
-            "running_dead_zone": {
-                "higher": "Boşta kısa güç artışlarını yoksayar – gürültüye daha az duyarlı",
-                "lower": "Daha kısa güç patlamalarına yanıt verir – hızlı geçici etkinliği yakalar"
-            },
             "start_threshold_w": {
                 "higher": "Kısa güç artışlarından kaynaklanan yanlış başlatmaları önler",
                 "lower": "Düşük güçlü programları yakalar; gürültüde tetiklenebilir"
@@ -1962,7 +2002,9 @@
             "thr_batch": "{cycles} çevrim boyunca p05 en düşük aktif gücün ({p05}W) hemen üzerinde tutuldu; böylece başlangıç olabildiğince erken yakalanır ve durdurma eşiği makinenin en düşük çalışma gücünün altında kalır.",
             "tol_per_profile": "{profiles} profil boyunca ({cycles} çevrim) profil başına süre varyansının p75'i; tutarlı profiller cezalandırılmaz.",
             "tol_pooled": "{cycles} son etiketli çevrimin birleştirilmiş süre varyansına dayalı (p95 sapma={dev}).",
-            "watchdog": "Güvenli olduğu kadar düşük tutuldu (p95 güncelleme boşluğu {p95}s değerinin hemen üzerinde ve örnekleme aralığı {median}s değerinin en az 2 katı, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır."
+            "watchdog": "Güvenli olduğu kadar düşük tutuldu (p95 güncelleme boşluğu {p95}s değerinin hemen üzerinde ve örnekleme aralığı {median}s değerinin en az 2 katı, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır.",
+            "match_interval_capped": "{persistence} ardışık eşleşme en kısa programın ({shortest}s) %{pct} kadarlık bölümüne sığsın diye sınırlandırıldı; yalnızca güncelleme sıklığı (medyan={median}s) daha uzun bir aralık önerirdi.",
+            "match_interval_floored": "Yalnızca en kısa program ({shortest}s) bunu {cap}s ile sınırlardı; bu da {minimum}s alt sınırının altında kaldığından değer alt sınırda tutuluyor: {persistence} ardışık eşleşme {budget}s sürüyor, bu da o programın %{pct} kadarlık bölümünden fazla. Eşleştirme yalnızca yeni bir ölçüm geldiğinde çalışır (medyan={median}s), bu yüzden alt sınırın bir maliyeti yok."
         },
         "exclusions": {
             "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",
@@ -1998,10 +2040,11 @@
         "date_tip": "Döngünün başladığı tarih ve saat.",
         "duration_tip": "Baştan sona toplam döngü çalışma süresi.",
         "energy_tip": "Tüketilen toplam enerji (kWh). Gücün zamana göre integrali alınarak hesaplanır.",
-        "cost_tip": "Bu döngünün enerji maliyeti; tamamlandığında o an geçerli olan fiyat kullanılarak sabitlenir (enerji x kWh başına fiyat). Doldurmak için Ayarlar altında bir fiyat belirleyin.",
+        "cost_tip": "Bu döngünün enerji maliyeti, tamamlandığında sabitlenir. Zaman Ağırlıklı Maliyet açıkken güç eğrisi her an geçerli olan fiyattan ücretlendirilir; aksi halde enerji x sonda geçerli olan tek fiyat. Doldurmak için Ayarlar altında bir fiyat belirleyin.",
         "confidence_tip": "Profil eşleşme güveni (0-100%). Döngünün güç eğrisinin, tanımlanan programla ne kadar yakından eşleştiği.",
         "health_tip": "ML döngü sağlığı (yüksek = daha iyi). İncelemek ve gözden geçirmek için bir döngüye tıklayın.",
-        "flags_tip": "Döngü için inceleme, anomali ve kaynak işaretleri. Ayrıntı için bir simgenin üzerine gelin."
+        "flags_tip": "Döngü için inceleme, anomali ve kaynak işaretleri. Ayrıntı için bir simgenin üzerine gelin.",
+        "cost_dynamic_tip": "Zaman ağırlıklı: döngü boyunca geçerli olan fiyattan ücretlendirildi (efektif {price} {cur}/kWh)."
     },
     "stat": {
         "avg": "ort.",
@@ -2028,9 +2071,9 @@
         "finished": "Döngü, son duruma ulaştı ve sona erdi."
     },
     "store": {
+        "search_ph2": "Marka veya modele göre ara…",
         "your_model_tip": "Bu, Ayarlar'da belirttiğiniz cihazdır",
         "your_model": "Sizinki",
-        "search_brand_ph": "Markaya göre ara…",
         "programs_count": "Programlar: {n}",
         "browse": "Göz at",
         "device": "Cihaz",
@@ -2075,7 +2118,8 @@
             "golden": "Yeniden işleme: referans döngülerini işaretleme",
             "suggestions": "Yeniden işleme: öneriler",
             "ml_training": "Yeniden işleme: ML eğitimi",
-            "health": "Yeniden işleme: döngü sağlığı"
+            "health": "Yeniden işleme: döngü sağlığı",
+            "costs": "Yeniden işleme: enerji maliyetleri"
         },
         "pg_sweep": {
             "optimize": "Optimizasyon: {param}"

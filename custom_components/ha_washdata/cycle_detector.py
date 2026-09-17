@@ -22,7 +22,7 @@ import itertools
 import logging
 import math
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Callable, cast
 import numpy as np
 
@@ -65,14 +65,23 @@ from .const import (
     TERMINAL_DROP_OFF_DELAY_SECONDS,
     ENDING_HARD_FINALIZE_RATIO,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
+    GATE_CADENCE_MEDIAN_FACTOR,
     STANDBY_BAND_FINALIZE_DEVICE_TYPES,
     STANDBY_BAND_MIN_RATIO,
     STANDBY_BAND_WINDOW_S,
     STANDBY_BAND_MAX_FRACTION,
     STANDBY_BAND_FLATNESS_FRACTION,
     STANDBY_BAND_FLATNESS_FLOOR_W,
-    ANTI_CREASE_FINALIZE_RATIO,
+    DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+    ANTI_CREASE_FINALIZE_RATIO_MIN,
+    ANTI_CREASE_FINALIZE_RATIO_MAX,
+    DEFAULT_CURVE_PREROLL_SECONDS,
+    CURVE_PREROLL_MAX_SECONDS,
+    PREROLL_CHAIN_BREAK_SECONDS,
     ANTI_CREASE_CONFIRM_WINDOW_S,
+    ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC,
+    ANTI_CREASE_TERMINAL_MATCH_FRAC,
+    ANTI_CREASE_SPIN_WAIT_MAX_RATIO,
 )
 
 # The dishwasher end-spike wait window is shared between two code paths
@@ -115,6 +124,47 @@ _LOGGER = logging.getLogger(__name__)
 # the new cycle is detected instead of being pinned until the progress-reset
 # window expires (issue #267).
 STOP_LOCKOUT_RELEASE_SECONDS = 180.0
+
+
+def effective_anticrease_finalize_ratio(value: Any) -> float:
+    """The ratio the anti-crease gate will actually use for a stored value.
+
+    Only ``ws_set_options`` range-checks this option: ``import_config`` strips
+    nulls only, a selective import writes numbers through, and the Playground
+    sanitizer just casts to float. So the value is held to its documented range
+    here, at every point of use, and anything unusable falls back to the default
+    rather than disarming the gate (a stored ``0.0`` would satisfy the
+    past-expected test for every duration).
+
+    Shared with the Playground's config summary so the figure the panel shows and
+    the figure the gate applies cannot drift apart.
+    """
+    try:
+        ratio = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return DEFAULT_ANTI_CREASE_FINALIZE_RATIO
+    if not math.isfinite(ratio):
+        return DEFAULT_ANTI_CREASE_FINALIZE_RATIO
+    return min(
+        ANTI_CREASE_FINALIZE_RATIO_MAX, max(ANTI_CREASE_FINALIZE_RATIO_MIN, ratio)
+    )
+
+
+def effective_curve_preroll_seconds(value: Any) -> float:
+    """The pre-roll window actually applied for a stored value (0 = off).
+
+    Same reasoning as :func:`effective_anticrease_finalize_ratio`: the detector
+    caps the window at ``CURVE_PREROLL_MAX_SECONDS`` wherever it reads it, so the
+    summary has to report the capped figure or it describes a sim that did not
+    run.
+    """
+    try:
+        window = float(value or 0.0)
+    except (TypeError, ValueError, OverflowError):
+        return 0.0
+    if not math.isfinite(window) or window <= 0:
+        return 0.0
+    return min(window, CURVE_PREROLL_MAX_SECONDS)
 
 
 @dataclass
@@ -166,6 +216,16 @@ class CycleDetectorConfig:
     # on. The dishwasher pump-out relief is combined via min(), so a configured value
     # can only loosen the gate.
     smart_termination_duration_ratio: float = DEFAULT_SMART_TERMINATION_DURATION_RATIO
+    # Fraction of the matched profile's expected duration the anti-crease finalise
+    # requires before it may fire (#429). A DIFFERENT gate from the ratio above:
+    # that one gates Smart Termination, this one the finalise into
+    # STATE_ANTI_WRINKLE. Scalar default (no device-type resolution) and always a
+    # real float, so playground.effective_settings() never sees None.
+    anti_crease_finalize_ratio: float = DEFAULT_ANTI_CREASE_FINALIZE_RATIO
+    # How far back readings from aborted start probes may be carried into a
+    # committed cycle's curve (#430). 0 disables the whole path, which is the
+    # default and keeps the stored-duration convention unchanged.
+    curve_preroll_seconds: float = DEFAULT_CURVE_PREROLL_SECONDS
     delay_detect_enabled: bool = False
     # Sustained seconds power must stay in the standby band (between
     # stop_threshold_w and start_threshold_w) before DELAY_WAIT engages.
@@ -293,8 +353,18 @@ class CycleDetector:
 
         # Data
         self._power_readings: list[tuple[datetime, float]] = []  # (time, raw_power)
+        # Rolling pre-cycle readings, so a start that took several probes to
+        # commit can recover the readings the aborted probes took with them
+        # (#430). Only appended to while no cycle is open, trimmed to
+        # curve_preroll_seconds, and cleared at every cycle end - a previous
+        # cycle's tail must never be carried into the next cycle's curve.
+        self._preroll_buffer: list[tuple[datetime, float]] = []
         self._current_cycle_start: datetime | None = None
         self._last_active_time: datetime | None = None
+        # Last reading the POWER SENSOR actually sent, as opposed to one the
+        # manager injected to advance the quiet timers. Deliberately not reset per
+        # cycle: it describes the sensor, not the run.
+        self._last_real_reading_time: datetime | None = None
         self._cycle_max_power: float = 0.0
 
         # Accumulators (dt-aware)
@@ -322,6 +392,12 @@ class CycleDetector:
         # Adaptive Sampling Tracker
         self._recent_dts: list[float] = []  # Track last 20 dt values
         self._p95_dt: float = 1.0  # Default assumption
+        # The cadence as it stood BEFORE the reading currently being processed was
+        # folded in. Every gap-vs-outage classification reads this, never _p95_dt:
+        # an outage-sized interval that has already widened p95 would raise the very
+        # ceiling meant to catch it (a 120 s gap after a 10 s cadence lifts p95 to
+        # ~15.5 s -> ceiling 155 s -> the gap passes as observed time).
+        self._prior_p95_dt: float = 1.0
 
         # Profile Matching Tracker
         self._last_match_time: datetime | None = None
@@ -339,6 +415,17 @@ class CycleDetector:
         # Mean power the matched profile draws over the last few % of its own run
         # (profile_store.profile_tail_power). None = no opinion, guard stays inert.
         self._matched_tail_power: float | None = None
+        # (start_frac, seconds, start_offset_s) of the matched profile's own terminal
+        # high-power block, from profile_store.profile_terminal_high_block. None = the
+        # profile has no such block (or we have no opinion) and the guard stays inert
+        # (#399). A two-element payload (pre-item-196 snapshot, Playground, older
+        # callers) is still accepted and falls back to start_frac x expected.
+        self._matched_terminal_high: (
+            tuple[float, float] | tuple[float, float, float] | None
+        ) = None
+        # One-shot per cycle, so the held-finalise reason is visible in the log
+        # without repeating it on every reading.
+        self._anticrease_spin_wait_logged: bool = False
         self._last_smart_term_block_reason: str | None = None  # #346 diagnostic throttle
 
         # Anti-wrinkle tracking (dryers only)
@@ -383,17 +470,47 @@ class CycleDetector:
         self._preserve_delay_band_on_off: bool = False
 
     @property
+    def _gate_cadence(self) -> float:
+        """Cadence the pause/end gates are sized from (#424/#427).
+
+        ``_p95_dt`` is the 2nd-largest of the last 20 intervals by construction,
+        so it tracks the worst *gap* rather than the reporting rate. That is the
+        right input for the outage ceilings (a gap must be judged against the
+        worst gap we consider normal) but the wrong one for the gates below,
+        which multiply it by three: once a publish-on-change plug falls silent at
+        standby, the only intervals left are the long quiet ones, p95 collapses
+        onto them, and each gate becomes ~3x the silence it is supposed to be
+        measuring. The accumulator advances one interval per reading, so the
+        cycle then needs ~3 more readings - a gate that is set by, and grows
+        with, its own input. Measured on the #427 trace: a 297 s sensor silence
+        followed by a 481 s keepalive lifted the end gate from 45 s to 1455 s and
+        held the cycle in PAUSED for 25.5 min.
+
+        Capping p95 at a multiple of the *median* keeps the estimate robust: a
+        genuinely slow sensor reports slowly every time, so its median equals its
+        p95 and the cap never binds (a 300 s-cadence meter keeps its 900 s gate);
+        a fast sensor that went quiet has a small median, so the isolated holes
+        cannot triple the gate. Only these two gates read it - ``_p95_dt`` itself
+        is left alone so every outage ceiling keeps the cadence snapshot it was
+        tuned against (register items 213, 215).
+        """
+        if len(self._recent_dts) < 5:
+            return self._p95_dt
+        median_dt = float(np.median(self._recent_dts))
+        return min(self._p95_dt, GATE_CADENCE_MEDIAN_FACTOR * median_dt)
+
+    @property
     def _dynamic_pause_threshold(self) -> float:
         """Calculate dynamic pause threshold based on sampling cadence."""
         # User requirement: T_pause >= 3 * p95_update_interval
         # Default 15s or 3 * p95
-        return max(15.0, 3.0 * self._p95_dt)
+        return max(15.0, 3.0 * self._gate_cadence)
 
     @property
     def _dynamic_end_threshold(self) -> float:
         """Calculate dynamic end candidate threshold."""
         # Keep this generic for pause->ending transitions across all device types.
-        base = 3.0 * self._p95_dt
+        base = 3.0 * self._gate_cadence
         # Ensure end threshold is at least 15s greater than pause threshold
         return max(base, self._dynamic_pause_threshold + 15.0)
 
@@ -533,11 +650,73 @@ class CycleDetector:
             return None
         try:
             value = float(raw)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
+            # OverflowError alongside the type errors: `json` keeps an integer
+            # literal of any length as an unbounded `int`, and `float()` on one
+            # raises rather than returning `inf`, so the non-finite filter below is
+            # never reached. Both callers are the reason it matters - the restored
+            # state snapshot is hand-editable `.storage` JSON, and
+            # `restore_state_snapshot`'s one broad `except` answers a raise with
+            # `self.reset()`, which discards the WHOLE restored cycle rather than
+            # this one field. "No opinion" is the documented contract; a full reset
+            # is not.
             return None
         if not math.isfinite(value) or value <= 0:
             return None
         return value
+
+    @staticmethod
+    def _sanitize_terminal_high(
+        raw: Any,
+    ) -> tuple[float, float] | tuple[float, float, float] | None:
+        """Coerce ``raw`` into a ``(start_frac, seconds)`` pair or a
+        ``(start_frac, seconds, start_offset_s)`` triple, else None (#399).
+
+        None means "no opinion", which leaves ``_anticrease_spin_pending`` inert and
+        the anti-crease finalise exactly as it behaved before the guard existed.
+
+        The arity is PRESERVED rather than normalised (register item 196). A
+        two-element payload is what a pre-196 state snapshot, an older caller and
+        most tests supply, and it has to keep meaning "no absolute offset, fall back
+        to ``start_frac x expected``" - handing it a fabricated 0.0 offset would make
+        the guard scan the whole cycle. A malformed third element degrades to the
+        pair for the same reason the whole method returns None on garbage: it must
+        never be able to disarm a guard that would otherwise arm.
+        """
+        if raw is None:
+            return None
+        # A str/bytes is iterable, so `list("11")` is `["1", "1"]` and sanitizes to
+        # (1.0, 1.0) - a scalar string silently ARMING the guard off a malformed
+        # snapshot, which is the one direction this method promises never to go.
+        # Rejected before the iteration so it takes the documented garbage path.
+        if isinstance(raw, (str, bytes, bytearray)):
+            return None
+        try:
+            values = list(raw)
+        except TypeError:
+            return None
+        if len(values) not in (2, 3):
+            return None
+        try:
+            start_frac = float(values[0])
+            seconds = float(values[1])
+        except (TypeError, ValueError, OverflowError):
+            # Same reason as _sanitize_tail_power above: an unbounded int raises out
+            # of float(), and a raise here costs the whole restored cycle state.
+            return None
+        if not math.isfinite(start_frac) or not math.isfinite(seconds):
+            return None
+        if not 0.0 <= start_frac <= 1.0 or seconds <= 0:
+            return None
+        if len(values) == 2:
+            return (start_frac, seconds)
+        try:
+            start_offset = float(values[2])
+        except (TypeError, ValueError, OverflowError):
+            return (start_frac, seconds)
+        if not math.isfinite(start_offset) or start_offset < 0:
+            return (start_frac, seconds)
+        return (start_frac, seconds, start_offset)
 
     def _trailing_mean_power(self, timestamp: datetime, window_s: float) -> float | None:
         """Time-weighted mean power over the trailing ``window_s``, or None when
@@ -565,7 +744,7 @@ class CycleDetector:
             # = clip(10x cadence, 60, 3600)), NOT _outage_threshold_s() which rebuilds a
             # NumPy array from every reading - this runs on the per-reading ENDING /
             # anti-crease path, same reasoning as the gap-free tally at L1006.
-            max_gap = min(3600.0, max(60.0, 10.0 * self._p95_dt))
+            max_gap = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
             cut = 0
             for i in range(1, len(window)):
                 if (window[i][0] - window[i - 1][0]).total_seconds() > max_gap:
@@ -732,6 +911,13 @@ class CycleDetector:
             self._matched_tail_power = (
                 self._sanitize_tail_power(result_seq[8]) if len(result_seq) >= 9 else None
             )
+            # Element 10 (#399): the matched profile's own terminal high-power
+            # block. Cleared by a shorter tuple for the same reason as element 9 -
+            # keeping the previous profile's block would make the anti-crease guard
+            # wait for a spin the newly-matched program does not have.
+            self._matched_terminal_high = (
+                self._sanitize_terminal_high(result_seq[9]) if len(result_seq) >= 10 else None
+            )
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -744,6 +930,7 @@ class CycleDetector:
             self._match_prefix_ambiguous = False
             self._match_prefix_ambiguous_full_shape = False
             self._matched_tail_power = None
+            self._matched_terminal_high = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -775,6 +962,10 @@ class CycleDetector:
         """Force reset the detector state to target state."""
         self._transition_to(target_state, dt_util.now())
         self._power_readings = []
+        # #430: the pre-roll buffer is pre-CYCLE context, never cross-cycle. A
+        # reset that left it populated would let the previous cycle's tail be
+        # spliced into the front of the next cycle's curve.
+        self._preroll_buffer = []
         self._current_cycle_start = None
         self._last_active_time = None
         self._cycle_max_power = 0.0
@@ -797,6 +988,8 @@ class CycleDetector:
         self._match_prefix_ambiguous = False
         self._match_prefix_ambiguous_full_shape = False
         self._matched_tail_power = None
+        self._matched_terminal_high = None
+        self._anticrease_spin_wait_logged = False
         # Per-cycle diagnostic throttle (#346): the "Smart Termination not applied"
         # line only logs when the reason CHANGES. Carrying the previous cycle's
         # reason across a reset swallows the new cycle's very first diagnostic
@@ -925,8 +1118,26 @@ class CycleDetector:
             return min(configured_ratio, 0.90)
         return configured_ratio
 
-    def process_reading(self, power: float, timestamp: datetime) -> None:
-        """Process a new power reading using robust dt-aware logic."""
+    def process_reading(
+        self, power: float, timestamp: datetime, synthetic: bool = False
+    ) -> None:
+        """Process a new power reading using robust dt-aware logic.
+
+        ``synthetic=True`` marks a reading the *manager* injected rather than one
+        the power sensor sent: the watchdog and anti-wrinkle keepalives, which
+        exist to advance the quiet timers while a change-only plug says nothing.
+        They must keep doing exactly that, so this flag changes no timing here.
+        It is recorded only so that anything reasoning about what was OBSERVED can
+        tell the two apart. **Nothing consumes it yet**: it was added for
+        `_keep_tail_cap` (register item 238) and that use was implemented,
+        measured and reverted, because after `_last_active_time` every reading is
+        below the stop threshold anyway, so a plug still reporting cannot separate
+        a drying phase from standby - it only shows the plug is chatty. Kept
+        because the distinction is correct and cheap to carry; see item 260 for
+        the two other consumers that were measured and rejected.
+        """
+        if not synthetic:
+            self._last_real_reading_time = timestamp
 
         # Calculate dt (needed by the stop lockout below and the state machine).
         dt = 0.0
@@ -956,7 +1167,15 @@ class CycleDetector:
                 self._lockout_high_seconds += dt
                 if self._lockout_high_seconds < STOP_LOCKOUT_RELEASE_SECONDS:
                     # Still within the spin-down window - ignore reading.
+                    # The reading is withheld from the state machine, but it is
+                    # still a real observation of the power level, so record it
+                    # (#403): the accumulator below judges each interval against
+                    # the previous observation, and a release reading compared to
+                    # a pre-stop sample up to the full lockout window old would
+                    # lose the credit for its own interval (#267 back-to-back
+                    # start whose stop happened in a low-power trough).
                     self._last_process_time = timestamp
+                    self._last_power = power
                     return
                 self._ignore_power_until_idle = False
                 self._lockout_high_seconds = 0.0
@@ -973,9 +1192,14 @@ class CycleDetector:
         # outage that has already widened p95 would raise the very threshold that
         # is supposed to catch it (a 120 s gap after a 10 s cadence lifts p95 to
         # ~15.5 s -> ceiling 155 s -> the gap counts as observed quiet).
-        prior_p95_dt = self._p95_dt
+        self._prior_p95_dt = self._p95_dt
         self._update_cadence(dt)
         self._last_process_time = timestamp
+
+        # 1b. Pre-roll buffer (#430): record every reading seen while no cycle is
+        # open, so a start that needed several probes can recover what the aborted
+        # ones took with them. Cheap and bounded; inert while the option is off.
+        self._record_preroll(power, timestamp)
 
         # 1. Smoothing (Legacy buffer for debug/display, logic uses raw + time accumulators)
         self._ma_buffer.append(power)
@@ -991,18 +1215,54 @@ class CycleDetector:
 
         is_high = power >= threshold
 
+        # Last observation carried forward (#403): `dt` is the interval that
+        # ENDED at this reading, so the appliance sat at the PREVIOUS sample's
+        # level for it, not at this one. With a change-only (send-on-delta)
+        # power sensor a low -> high crossing carries the whole idle gap, and
+        # crediting it at the new high power let a single blip after minutes of
+        # silence satisfy both start gates on the next reading. So the interval
+        # only counts as high-power evidence when the previous observation was
+        # also at or above the threshold those gates measure against. A densely
+        # sampled device is unaffected: there the previous sample is already
+        # high and the interval keeps its full credit.
+        #
+        # This is the same principle the surrounding code already applies - the
+        # low branch restarts its gap-free tally rather than credit an outage,
+        # DELAY_WAIT and the paused-STARTING anchor (#306) anchor on the first
+        # high reading, and `integrate_wh`/`energy_gap_threshold_s` drop
+        # outage-sized segments - applied to the one branch that still credited
+        # unobserved time. An outage heuristic cannot substitute for it: a
+        # 511 s gap on a 70 s idle cadence is legitimate change-only silence,
+        # well inside the outage ceiling, and only the credit direction
+        # separates it from real high-power time.
+        #
+        # A reading inside the hysteresis band (>= stop_threshold_w but
+        # < start_threshold_w) therefore earns no evidence toward the start
+        # gates, which is correct: the band is by definition below the
+        # threshold the gates measure against, and it is exactly where a
+        # waiting machine idles. The cost is one extra report before
+        # confirmation on a band-crossing ramp; no start is lost.
+        prev_high = self._last_power is not None and self._last_power >= threshold
+        high_dt = dt if prev_high else 0.0
+        # ...and the ENERGY for that interval at the level the appliance actually sat
+        # at, which is the same argument applied to the second start gate. Crediting
+        # it at the NEW reading's power let a sample barely above the threshold,
+        # followed by a spike, bank the spike's power for the whole preceding
+        # interval and satisfy start_energy_threshold on its own. Computed here, not
+        # at the three use sites, because `self._last_power` is overwritten a few
+        # lines below - before the two STARTING seeds further down would read it.
+        # The sibling paths already do this: the DELAY_WAIT seed credits at
+        # `start_power` and the anti-wrinkle window uses the trapezoid average.
+        high_step_wh = (
+            (self._last_power or 0.0) * (high_dt / 3600.0) if high_dt > 0 else 0.0
+        )
+
         if is_high:
-            self._time_above_threshold += dt
+            self._time_above_threshold += high_dt
             self._time_below_threshold = 0.0
             self._time_below_threshold_gapfree = 0.0
-            # Energy integration (trapezoidal approx for this single step)
-            # prev_p = self._last_power if self._last_power is not None else power
-            # step_wh = ((power + prev_p) / 2.0) * (dt / 3600.0)
-            # Simplified: just P * dt for short steps is fine,
-            # or call integrate_wh on buffer if needed.
-            # Let's use simple rect/trapz here for running sum
-            step_wh = power * (dt / 3600.0)
-            self._energy_since_idle_wh += step_wh
+            # Energy for the guarded interval, computed with high_dt above.
+            self._energy_since_idle_wh += high_step_wh
             self._last_active_time = timestamp
         else:
             self._time_below_threshold += dt
@@ -1012,7 +1272,7 @@ class CycleDetector:
             # 3600)) but reuses the maintained p95 cadence to stay O(1) in this
             # per-reading hot path. Uses the cadence as it stood BEFORE this
             # reading, so a gap cannot widen its own acceptance threshold.
-            outage_ceiling = min(3600.0, max(60.0, 10.0 * prior_p95_dt))
+            outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
             if dt > outage_ceiling:
                 self._time_below_threshold_gapfree = 0.0
             else:
@@ -1082,7 +1342,9 @@ class CycleDetector:
                         self._energy_since_idle_wh = max(0.0, avg_power * (interval_s / 3600.0))
                     else:
                         self._power_readings = [(timestamp, power)]
-                        self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
+                        # Guarded interval (#403): the gap between anti-wrinkle
+                        # tumbles was spent at the previous (idle) level.
+                        self._energy_since_idle_wh = high_step_wh
 
                     self._cycle_max_power = max(candidate_peak, power)
             elif self._state != STATE_ANTI_WRINKLE:
@@ -1193,8 +1455,14 @@ class CycleDetector:
                 self._transition_to(STATE_STARTING, timestamp)
                 self._current_cycle_start = timestamp
                 self._power_readings = [(timestamp, power)]
-                self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
+                # Seed from the guarded interval (#403), not raw dt: this seed
+                # OVERWRITES the accumulator (it has to - entering STARTING from
+                # a terminal state carries the previous cycle's total), so an
+                # unguarded seed would reinstate the idle gap the accumulator
+                # just declined to credit.
+                self._energy_since_idle_wh = high_step_wh
                 self._cycle_max_power = power
+                self._apply_curve_preroll(timestamp, power)
             # NOTE: terminal-state expiry (Finished/Interrupted/Force-Stopped -> Off)
             # is owned solely by the manager (WashDataManager._handle_state_expiry),
             # which has a wall-clock timer that also fires when a change-only power
@@ -1244,6 +1512,13 @@ class CycleDetector:
                         if timestamp != start_timestamp:
                             self._power_readings.append((timestamp, power))
                         self._cycle_max_power = max(start_power, power)
+                        # #430: the buffer records in DELAY_WAIT too, so the
+                        # readings between the anchor and this confirmation exist
+                        # and would otherwise be dropped - the curve would span the
+                        # confirmation window with two points. Never moves the
+                        # anchor forward (see _apply_curve_preroll), and is a no-op
+                        # while the option is off, which is the default.
+                        self._apply_curve_preroll(timestamp, power)
             else:
                 # Power dropped back below start threshold - clear the
                 # high-power streak anchor so the next high reading
@@ -1731,12 +2006,15 @@ class CycleDetector:
                                 getattr(self, "_last_match_confidence", 0.0),
                                 end_spike_seen,
                             )
-                            # Keep tail when smart terminating (matches profile duration)
+                            # Keep tail when smart terminating (matches profile
+                            # duration), but only as far as the program can
+                            # actually reach - see _keep_tail_cap (#424).
                             self._finish_cycle(
                                 timestamp,
                                 status="completed",
                                 termination_reason=TerminationReason.SMART,
                                 keep_tail=True,
+                                tail_cap=self._keep_tail_cap(start_time),
                             )
                             return
 
@@ -1879,7 +2157,12 @@ class CycleDetector:
                         # to _last_active_time which may be set by a terminal drain
                         # spike mid-ENDING, producing a falsely short cycle duration.
                         keep_tail = self._config.device_type == "dishwasher"
-                        self._finish_cycle(timestamp, status="completed", keep_tail=keep_tail)
+                        self._finish_cycle(
+                            timestamp,
+                            status="completed",
+                            keep_tail=keep_tail,
+                            tail_cap=self._keep_tail_cap(start_time),
+                        )
                         return
 
                     # Compute energy in recent window
@@ -1896,7 +2179,12 @@ class CycleDetector:
                             return
 
                         keep_tail = self._config.device_type == "dishwasher"
-                        self._finish_cycle(timestamp, status="completed", keep_tail=keep_tail)
+                        self._finish_cycle(
+                            timestamp,
+                            status="completed",
+                            keep_tail=keep_tail,
+                            tail_cap=self._keep_tail_cap(start_time),
+                        )
                     else:
 
                         self._logger.debug(
@@ -1904,6 +2192,139 @@ class CycleDetector:
                             recent_e,
                             self._config.end_energy_threshold,
                         )
+
+    def _record_preroll(self, power: float, timestamp: datetime) -> None:
+        """Buffer a reading seen before a cycle commits (#430).
+
+        Only while no cycle is open - once RUNNING, ``_power_readings`` is the
+        curve and this buffer would just duplicate it. STARTING counts as "not
+        open": a probe in STARTING may still abort, and those are precisely the
+        readings worth keeping.
+
+        Bounded by ``curve_preroll_seconds`` (itself capped at
+        ``CURVE_PREROLL_MAX_SECONDS``), so the buffer holds seconds of data, not
+        an unbounded history.
+        """
+        window = effective_curve_preroll_seconds(self._config.curve_preroll_seconds)
+        if window <= 0:
+            # Option off: keep the buffer empty rather than paying to fill one
+            # nothing will read, and so that enabling it mid-run cannot splice in
+            # readings from before the option was turned on.
+            if self._preroll_buffer:
+                self._preroll_buffer = []
+            return
+        if self._state not in (
+            STATE_OFF,
+            STATE_STARTING,
+            STATE_DELAY_WAIT,
+            STATE_UNKNOWN,
+        ):
+            return
+        self._preroll_buffer.append((timestamp, float(power)))
+        cutoff = timestamp - timedelta(seconds=window)
+        # Readings arrive in order, so the stale prefix is contiguous.
+        drop = 0
+        for ts, _p in self._preroll_buffer:
+            if ts < cutoff:
+                drop += 1
+            else:
+                break
+        if drop:
+            del self._preroll_buffer[:drop]
+
+    def _preroll_for_commit(
+        self, timestamp: datetime, power: float
+    ) -> list[tuple[datetime, float]]:
+        """Readings to prepend to a cycle committing at ``timestamp`` (#430).
+
+        Walks the buffer backwards from the commit and stops at the first quiet
+        gap longer than ``PREROLL_CHAIN_BREAK_SECONDS`` - "the same start, probed
+        twice" rather than "an unrelated blip earlier". Then anchors on the
+        EARLIEST reading in that chain that is at or above ``start_threshold_w``:
+        anchoring on the window edge instead would drag standby into the curve
+        and move the cycle start to a moment the appliance was not yet doing
+        anything.
+
+        Returns [] whenever there is nothing to add, so the caller's fast path is
+        a single emptiness test.
+        """
+        window = effective_curve_preroll_seconds(self._config.curve_preroll_seconds)
+        if window <= 0 or not self._preroll_buffer:
+            return []
+
+        # Everything strictly before this commit, most recent first.
+        prior = [(ts, p) for ts, p in self._preroll_buffer if ts < timestamp]
+        if not prior:
+            return []
+
+        chain: list[tuple[datetime, float]] = []
+        next_ts = timestamp
+        for ts, p in reversed(prior):
+            if (next_ts - ts).total_seconds() > PREROLL_CHAIN_BREAK_SECONDS:
+                break
+            chain.append((ts, p))
+            next_ts = ts
+        if not chain:
+            return []
+        chain.reverse()  # chronological
+
+        threshold = float(self._config.start_threshold_w)
+        anchor = next(
+            (i for i, (_ts, p) in enumerate(chain) if p >= threshold), None
+        )
+        if anchor is None:
+            return []  # the chain is all standby - nothing of this cycle in it
+        return chain[anchor:]
+
+    def _apply_curve_preroll(self, timestamp: datetime, power: float) -> None:
+        """Prepend buffered pre-commit readings to the freshly-started cycle (#430).
+
+        Moves ``_current_cycle_start`` back with them, and that is not optional:
+        the stored duration is ``end_time - _current_cycle_start`` while matching
+        resamples ``_power_readings``, so a curve that started earlier than the
+        pointer would describe a different run from the one whose duration is
+        recorded. The two existing back-anchors (the anti-wrinkle candidate
+        window and the DELAY_WAIT high-start anchor) move the pointer for exactly
+        the same reason.
+
+        **Record-only: this must never make a cycle easier to START.**
+        ``_energy_since_idle_wh`` is deliberately left alone. Despite the name it
+        is not the cycle's energy - the stored figure is integrated from
+        ``power_data`` at persistence, so it picks the pre-roll up for free - it
+        is the accumulator the STARTING -> RUNNING gate reads
+        (``>= start_energy_threshold``). Feeding it the pre-roll would let an
+        aborted probe's energy be re-spent on the next probe's start gate, so two
+        blips that each failed the gate could together pass it: exactly the
+        phantom cycle #403 was fixed to prevent. The same argument covers
+        ``_time_above_threshold``, which is likewise untouched.
+
+        ``_cycle_max_power`` IS updated, because that is a property of the run
+        being recorded (it gates the anti-crease path), not of admitting it.
+        """
+        preroll = self._preroll_for_commit(timestamp, power)
+        if not preroll:
+            return
+
+        start_ts = preroll[0][0]
+        # Callers do not all commit with the pointer at ``timestamp``. The
+        # DELAY_WAIT confirmation has already back-anchored it to its first
+        # sustained-high reading, and a pre-roll window shorter than
+        # ``start_duration_threshold`` would otherwise move that pointer FORWARD
+        # and shorten the delayed start. So keep whatever the caller anchored
+        # before the chain, and only ever move the pointer earlier.
+        earlier = [(ts, p) for ts, p in self._power_readings if ts < start_ts]
+        self._power_readings = [*earlier, *preroll, (timestamp, power)]
+        self._current_cycle_start = min(
+            start_ts, self._current_cycle_start or start_ts
+        )
+        self._cycle_max_power = max(p for _ts, p in self._power_readings)
+        self._logger.debug(
+            "Curve pre-roll: carried %d reading(s) covering %.0fs from aborted "
+            "start probe(s) into this cycle (start moved back to %s).",
+            len(preroll),
+            (timestamp - start_ts).total_seconds(),
+            start_ts.isoformat(),
+        )
 
     def _transition_to(self, new_state: str, timestamp: datetime) -> None:
         """Handle state transitions."""
@@ -2133,6 +2554,18 @@ class CycleDetector:
         separates the post-wash anti-crease tail from a mid-wash low-power trough
         (a washer spends most of its cycle below ``anti_wrinkle_max_power``, but a
         mid-wash trough is always BEFORE the expected duration, the tail after it).
+
+        That "past expected" fraction is per-appliance since #429
+        (``anti_crease_finalize_ratio``, default 0.98). **Lowering it trades away
+        exactly the guarantee in the paragraph above**, so it is meant for dryers
+        whose sensor-dry runtime follows the load and whose tumble tail would
+        otherwise sit until the fallback timeout. Nothing downstream can stand in
+        for it on a washer: the low-power window check cannot separate a trough
+        from a tail (both are below ``anti_wrinkle_max_power`` by definition),
+        ``_smart_term_power_plausible`` compares the trailing mean against the
+        matched profile's OWN tail level, which is equally low, and
+        ``_anticrease_spin_pending`` fails open when the profile carries no
+        terminal high block.
         """
         if not self._config.anti_wrinkle_enabled:
             return False
@@ -2162,7 +2595,15 @@ class CycleDetector:
         if start is None:
             return False
         current_duration = (timestamp - start).total_seconds()
-        if current_duration < self._expected_duration * ANTI_CREASE_FINALIZE_RATIO:
+        # Held to the documented 0.50-1.00 range on READ, not at construction: the
+        # manager assigns this field directly on an options reload, and the value can
+        # arrive from an import or the Playground, neither of which range-checks it.
+        # A stored 0.0 would satisfy the test below for every duration and hand the
+        # gate a mid-wash trough.
+        finalize_ratio = effective_anticrease_finalize_ratio(
+            self._config.anti_crease_finalize_ratio
+        )
+        if current_duration < self._expected_duration * finalize_ratio:
             return False
         # #364: "past expected" only means "past the wash" when expected belongs to
         # the RIGHT profile. A whole washer wash phase sits below
@@ -2215,6 +2656,12 @@ class CycleDetector:
         """
         if not self._anticrease_gate_open(timestamp):
             return False
+        # #399: only the finalise, never _anticrease_gate_open. A false block in the
+        # shared gate would also kill the match freeze, and because the tumble bursts
+        # recur faster than off_delay neither the fallback timeout nor
+        # ENDING_HARD_FINALIZE could then close the cycle - that is the #296 hang.
+        if self._anticrease_spin_pending(timestamp):
+            return False
         max_power = float(self._config.anti_wrinkle_max_power)
         # Walk the tail; readings are chronological so we can break once outside the
         # window (O(window), not O(n)).
@@ -2254,6 +2701,132 @@ class CycleDetector:
             return False  # a heating / high-spin reading in the window - still washing
         return True
 
+    def _anticrease_spin_pending(self, timestamp: datetime) -> bool:
+        """Whether the matched profile still owes this run a terminal high-power
+        event - i.e. the anti-crease finalise must wait (#399).
+
+        ``_is_anticrease_tail``'s two conditions both look backwards: past expected,
+        and quiet for the confirm window. A programme whose final spin lands just
+        past 0.98 x expected, after a long sub-``anti_wrinkle_max_power`` rinse
+        stretch, satisfies both while the spin is still ahead - so the wash was
+        finalised into anti-wrinkle and the spin opened a SECOND cycle record.
+
+        The profile carries the missing information: where its own last high-power
+        block sits and how long it runs. If that block is terminal (starts at or
+        after ``ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC`` of the profile) and this run
+        has not yet produced a comparable amount of high-power time at or after the
+        same position, the spin is still ahead.
+
+        Deliberately compares EVENTS, not clock positions: mapping the profile's
+        last high sample onto elapsed time and clearing there delays the reported
+        finalise by 16 s and then splits the wash anyway, because a run's spin can
+        arrive hundreds of seconds later than the profile's (the same
+        load-dependent duration spread behind #393).
+
+        Delay-only and bounded: never blocks past
+        ``ANTI_CREASE_SPIN_WAIT_MAX_RATIO`` x expected, and fails open on any
+        missing input, so it cannot reproduce the #296 hang.
+        """
+        block = self._matched_terminal_high
+        if block is None:
+            return False
+        start_frac, block_seconds = block[0], block[1]
+        if start_frac < ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC:
+            return False  # the profile's tail is genuinely low-power (#296 shape)
+        expected = self._expected_duration
+        start = self._current_cycle_start
+        if expected <= 0 or start is None:
+            return False
+        current_duration = (timestamp - start).total_seconds()
+        if current_duration >= expected * ANTI_CREASE_SPIN_WAIT_MAX_RATIO:
+            return False  # cap: waited long enough, let the finalise through
+        needed = block_seconds * ANTI_CREASE_TERMINAL_MATCH_FRAC
+        if needed <= 0:
+            return False
+        # Register item 196: scan from the block's ABSOLUTE offset on the profile's
+        # own grid when the store supplied one (element 3). `start_frac` is measured
+        # against the quiet-TRIMMED span - it has to be, or a capture's idle tail
+        # disarms the terminal gate above - while `expected` is the profile's
+        # avg_duration, which tracks the UNTRIMMED span. Their product is therefore a
+        # systematically LATE offset, and a late offset means the run's own spin sits
+        # BEFORE the scan window and is never counted, so the hold ran out the
+        # ANTI_CREASE_SPIN_WAIT_MAX_RATIO cap instead of releasing on the event. Over
+        # 36 real armed profile/cycle pairs the product recognised the spin 3 times
+        # and the absolute offset 14, with zero cases in either where the credited
+        # seconds exceeded the run's own terminal block (so no new premature-release
+        # exposure). The fallback keeps a pre-196 payload - an old state snapshot, the
+        # Playground, older callers - behaving exactly as before.
+        offset_s = float(block[2]) if len(block) >= 3 else start_frac * expected
+        seen = self._high_power_seconds_since(offset_s)
+        if seen >= needed:
+            return False
+        if not self._anticrease_spin_wait_logged:
+            self._anticrease_spin_wait_logged = True
+            self._logger.debug(
+                "Anti-crease finalize held: '%s' ends with a %.0fs block above %.0fW "
+                "at %.0f%% of its run (scanning from %.0fs); this cycle has %.0fs of "
+                "it so far (elapsed %.0fs of %.0fs expected).",
+                self._matched_profile,
+                block_seconds,
+                float(self._config.anti_wrinkle_max_power),
+                start_frac * 100.0,
+                offset_s,
+                seen,
+                current_duration,
+                expected,
+            )
+        return True
+
+    def _high_power_seconds_since(self, offset_s: float) -> float:
+        """Seconds this cycle has spent above ``anti_wrinkle_max_power`` at or after
+        ``offset_s`` from its start (#399).
+
+        Walks the readings backwards and stops at the offset, so the scan is bounded
+        by the tail of the trace rather than its whole length. Each reading covers
+        the interval up to the following one, which matches how the profile's own
+        block length is measured.
+
+        Two corrections to that per-interval credit, both of which decide whether the
+        guard releases:
+
+        * An outage-sized interval is unobserved time, not high-power time. Counting
+          it in full let a silent plug bank minutes of "spin" it never reported,
+          satisfy ``seen >= needed`` and release the finalise before the real
+          terminal spin - the #399 failure, reached by a different route. Same
+          treatment (and the same p95-derived ceiling) the tail scan at
+          ``_smart_term_tail_stats`` and the gap-free quiet tally already apply.
+          Deliberately NOT ``_outage_threshold_s()``, which rebuilds a NumPy array
+          from every reading; this runs on the per-reading anti-crease path.
+        * When ``offset_s`` falls inside an interval, only the part after the offset
+          counts. Breaking out of the loop dropped that remainder entirely, and the
+          offset is ``start_frac * expected``, so a boundary reading is the norm
+          rather than an edge case.
+        """
+        start = self._current_cycle_start
+        if start is None or not self._power_readings:
+            return 0.0
+        ceiling = float(self._config.anti_wrinkle_max_power)
+        max_gap = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
+        total = 0.0
+        readings = self._power_readings
+        for i in range(len(readings) - 1, -1, -1):
+            ts, power = readings[i]
+            elapsed = (ts - start).total_seconds()
+            if i + 1 >= len(readings):
+                continue  # last reading covers no interval yet
+            next_elapsed = (readings[i + 1][0] - start).total_seconds()
+            if next_elapsed <= offset_s:
+                break  # this interval ends at or before the offset, as do all earlier ones
+            interval = next_elapsed - elapsed
+            if interval > max_gap:
+                if elapsed < offset_s:
+                    break
+                continue  # unobserved time, not evidence of anything
+            if float(power) > ceiling:
+                # Credit only the portion at or after the offset.
+                total += next_elapsed - max(elapsed, offset_s)
+        return total
+
     def _maybe_finalize_anticrease_tail(self, timestamp: datetime) -> bool:
         """Finalise a cycle that has entered the anti-crease tail into
         STATE_ANTI_WRINKLE (#296).  Returns True if the cycle was finalised.
@@ -2280,6 +2853,24 @@ class CycleDetector:
             status="completed",
             termination_reason=TerminationReason.SMART,
             keep_tail=True,
+            # Capped like the three sibling keep_tail finishes (#424). This path can
+            # fire on a window of *watchdog* keepalives: a change-only plug that has
+            # gone silent emits nothing, the injected 0 W readings satisfy the "all
+            # at or below anti_wrinkle_max_power" window, and `timestamp` is then
+            # the moment the watchdog noticed rather than the moment the appliance
+            # stopped - post-cycle standby banked as cycle time, which feeds
+            # avg_duration and self-amplifies.
+            #
+            # The tumble tail itself is never cut into, which is why this is safe
+            # here: an anti-crease baseline sits ABOVE stop_threshold
+            # (const.py:811-812, a ~2.5-3.2 W draw against a ~1.2 W threshold), so
+            # every one of those readings refreshes `_last_active_time` and the cap
+            # - max(expected_end, _last_active_time) - lands at the last tumble. A
+            # real tail therefore loses only the trailing quiet gap between its last
+            # reading and this finalize, which is time the appliance drew nothing.
+            # A tail of genuinely-0 W readings is clipped back to the matched
+            # profile's expected end. Shorten-only, never earlier than expected_end.
+            tail_cap=self._keep_tail_cap(start_time),
         )
         return True
 
@@ -2496,12 +3087,47 @@ class CycleDetector:
         # Tertiary check: If duration exceeded max tolerance, allow finish (failsafe).
         return False
 
+    def _keep_tail_cap(self, start_time: datetime) -> datetime | None:
+        """Latest end time a *kept* tail may claim (#424).
+
+        The paths that keep their tail do so because the tail can be real cycle
+        time: a dishwasher's near-0 W passive drying phase sits between the last
+        drain spike and the actual end of the programme (issue #43), so snapping
+        back to ``_last_active_time`` would store a falsely short cycle. But they
+        fire on accumulated quiet time, and on a publish-on-change plug that wait
+        is minutes of *post-appliance* standby - which stamping ``timestamp`` as
+        the end time banked as cycle time.
+
+        Measured on the #424 reporter's dishwasher: every cycle that ended via
+        `timeout` stored a 0-29 s tail (237-239 min, matching the appliance), and
+        every cycle that ended via `smart` stored a 96-1239 s tail (240-260 min),
+        with ``_last_active_time`` unchanged across the whole history - only the
+        termination path differed. It also self-amplifies, because the inflated
+        duration feeds ``avg_duration``, which raises ``expected_duration``,
+        which delays the next Smart Termination further (the second reporter's
+        profile had already drifted 63 -> 70.5 min).
+
+        So cap the kept tail at whichever is later: the last above-threshold
+        reading, or the matched profile's expected end. Time after *both* is time
+        the appliance drew nothing AND that lies beyond the known length of the
+        programme it matched, so nothing real can live there. Asymmetric -
+        shorten-only, and never earlier than the expected end, so a genuine
+        passive drying phase still lands inside the stored cycle. Returns None
+        for an unmatched cycle, which has no expected end to anchor against and
+        is left exactly as before.
+        """
+        if self._expected_duration <= 0:
+            return None
+        expected_end = start_time + timedelta(seconds=self._expected_duration)
+        return max(expected_end, self._last_active_time or expected_end)
+
     def _finish_cycle(
         self,
         timestamp: datetime,
         status: str = "completed",
         termination_reason: str = TerminationReason.TIMEOUT,
         keep_tail: bool = False,
+        tail_cap: datetime | None = None,
     ) -> None:
         """Finalize cycle.
 
@@ -2513,11 +3139,19 @@ class CycleDetector:
                        trailing zero readings (e.g. Smart Termination).
                        If False (default), snap back to last active time and trim
                        trailing zeros (e.g. Timeout).
+            tail_cap: Latest end time a kept tail may claim. Ignored when
+                      ``keep_tail`` is False or when it is not earlier than
+                      ``timestamp``; readings past it are dropped so the stored
+                      trace and the stored duration stay consistent.
         """
 
         # Capture data before reset
+        readings = self._power_readings
         if keep_tail:
             end_time = timestamp
+            if tail_cap is not None and tail_cap < end_time:
+                end_time = tail_cap
+                readings = [r for r in readings if r[0] <= end_time]
         else:
             end_time = self._last_active_time or timestamp
 
@@ -2536,7 +3170,7 @@ class CycleDetector:
         # Trim leading/trailing zero readings for cleaner data
         # If we keep tail, we explicitly do NOT trim end zeros
         trimmed_readings = trim_zero_readings(
-            self._power_readings,
+            readings,
             threshold=self._config.stop_threshold_w,
             trim_end=not keep_tail,
         )
@@ -2652,6 +3286,7 @@ class CycleDetector:
             "match_prefix_ambiguous": self._match_prefix_ambiguous,
             "match_prefix_ambiguous_full_shape": self._match_prefix_ambiguous_full_shape,
             "matched_tail_power": self._matched_tail_power,
+            "matched_terminal_high": self._matched_terminal_high,
             "ml_defer_start_duration": self._ml_defer_start_duration,
         }
 
@@ -2721,6 +3356,9 @@ class CycleDetector:
             )
             self._matched_tail_power = self._sanitize_tail_power(
                 snapshot.get("matched_tail_power")
+            )
+            self._matched_terminal_high = self._sanitize_terminal_high(
+                snapshot.get("matched_terminal_high")
             )
             self._ml_defer_start_duration = snapshot.get("ml_defer_start_duration")
 

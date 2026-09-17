@@ -154,6 +154,7 @@ Start/stop/discard recording via `ha_washdata/start_recording`, `stop_recording`
 ### Table
 Sortable, filterable table of cycles. Columns:
 - Checkbox / status dot, Profile name, Flags, Status, Date, Duration, Energy, Cost, Confidence.
+  - **Cost** is rendered by `costCell`: a cycle costed against a moving tariff (`energy_price_mode === 'dynamic'`, #426) gets a dotted underline and a title carrying the effective price per kWh, so a time-weighted figure is distinguishable from one frozen at a single price.
 
 Column sorting via `_cycleSort { col, dir }`. Filter bar: free-text (profile name) + status filter dropdown.
 
@@ -219,7 +220,7 @@ Opens on row click. Not defined as a standalone render method but built inside t
 - Save calls `ha_washdata/save_profile_group`; Delete calls `ha_washdata/delete_profile_group`.
 
 ### Profile panel modal (opened from card click)
-Renders a detailed view of the individual profile with tabs for Stats, Cleanup, Phases, Share (store share). The cleanup tab shows per-cycle rows for the profile's labelled cycles and allows trimming/removing individual cycle contributions.
+Renders a detailed view of the individual profile with tabs for Stats, Cleanup, Phases, Share (store share). The cleanup tab shows per-cycle rows for the profile's labelled cycles and allows trimming/removing individual cycle contributions; ticking rows enables a shared-selection action pair, **Unlabel selected** (`pp-cleanup-unlabel`, `label_cycle` with a null profile - keeps the cycle, drops it from this profile) and **Delete selected** (`pp-cleanup-del`).
 
 ### Phase Catalog sub-tab (`_htmlPhases`, line 6313)
 - Table of phase definitions (name, description, built-in flag).

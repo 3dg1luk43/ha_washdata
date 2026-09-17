@@ -39,27 +39,41 @@ def store(mock_hass):
 
 @pytest.mark.asyncio
 async def test_repair_profile_samples(store):
-    """Test repairing profiles with missing or invalid sample references."""
-    # 1. Setup: Profile with missing sample_cycle_id
+    """Repair re-points a profile at its OWN cycle, and never adopts a stranger.
+
+    This test used to assert the opposite (a sampleless profile adopting the newest
+    *unlabelled* cycle, and labelling it to itself). That behaviour was removed as the
+    #400 follow-up: repair runs on every setup, so a program whose cycles had been
+    deleted, unlabelled or excluded by the evidence-source setting silently took over
+    an unrelated wash as its template, avg_duration and label at the next restart.
+    See ``tests/test_issue_400_label_provenance.py``.
+    """
+    # 1. A profile with no sample of its own, and one of its own cycles to find.
     store._data["profiles"]["NoSample"] = {"sample_cycle_id": None}
-    
-    # 2. Setup: Cycle with power_data
-    cycle_with_power = {
-        "id": "c_power",
-        "profile_name": None,
+    own_cycle = {
+        "id": "c_own",
+        "profile_name": "NoSample",
         "power_data": [[0, 0], [10, 100], [20, 0]],
         "duration": 20,
-        "start_time": "2025-01-01T10:00:00+00:00"
+        "start_time": "2025-01-01T10:00:00+00:00",
     }
-    store._data["past_cycles"].append(cycle_with_power)
-    
-    # 3. Repair
+    # 2. An unrelated unlabelled cycle that must be left completely alone.
+    stranger = {
+        "id": "c_stranger",
+        "profile_name": None,
+        "power_data": [[0, 0], [10, 2000], [20, 0]],
+        "duration": 900,
+        "start_time": "2025-06-01T10:00:00+00:00",  # newer, so the old code chose it
+    }
+    store._data["past_cycles"].extend([own_cycle, stranger])
+
     with patch.object(store, "async_rebuild_envelope", AsyncMock(return_value=True)):
         stats = await store.async_repair_profile_samples()
-        
+
     assert stats["profiles_repaired"] == 1
-    assert store._data["profiles"]["NoSample"]["sample_cycle_id"] == "c_power"
-    assert cycle_with_power["profile_name"] == "NoSample"
+    assert store._data["profiles"]["NoSample"]["sample_cycle_id"] == "c_own"
+    assert stranger["profile_name"] is None
+    assert stats["cycles_labeled_as_sample"] == 0
 
 @pytest.mark.asyncio
 async def test_import_data(store):

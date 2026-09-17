@@ -85,13 +85,9 @@ pip install -r requirements-dev.txt
 ./devtools/install_hooks.sh
 ```
 
-Installs the repo's tracked hooks. The `pre-commit` hook refuses a commit whose
-minified panel/card bundles (`custom_components/ha_washdata/www/*.min.js` and
-`build-manifest.json`) were not rebuilt from the sources being committed - those
-artifacts are generated but **committed**, because they are the bytes users download.
-It checks the staged tree, so rebuilding and then committing only the source is caught
-too. It does nothing on commits that touch no asset in that directory; bypass a single
-deliberate WIP commit with `git commit --no-verify`.
+The `pre-commit` hook refuses a commit whose minified panel bundles were not rebuilt
+from the sources being committed. Those artifacts are generated but **committed**, because they are
+the bytes users download. Bypass a deliberate WIP commit with `git commit --no-verify`.
 
 After editing `custom_components/ha_washdata/www/ha-washdata-panel.js` or
 `custom_components/ha_washdata/www/ha-washdata-card.js`:
@@ -126,7 +122,7 @@ To simulate a washing machine with power readings:
 python3 devtools/mqtt_mock_socket.py --default LONG --variability 0.15
 ```
 
-For full mock testing guide, see [TESTING.md](TESTING.md).
+For the full testing guide, see the [Testing wiki page](https://github.com/3dg1luk43/ha_washdata/wiki/Testing).
 
 ---
 
@@ -266,23 +262,6 @@ Example: `[FIX] Handle timezone-aware datetime in cycle detection`
 - **Docstrings** for all public functions/classes (Google style)
 - **No hardcoded UI strings** - use `strings.json` and `translations/` for all user-facing text
 
-Example:
-
-```python
-async def async_method(self, device_id: str, config: dict[str, Any]) -> None:
-    """
-    Perform an async operation.
-    
-    Args:
-        device_id: The device identifier
-        config: Configuration dictionary
-        
-    Returns:
-        None
-    """
-    # Implementation
-```
-
 ### Project Guardrails
 
 - **ONLY NumPy** for calculations (no SciPy or ML libraries)
@@ -291,7 +270,7 @@ async def async_method(self, device_id: str, config: dict[str, Any]) -> None:
 - **No inline UI strings** - use translation keys instead
 - **Respect 32KB event data limit** - exclude large data from fired events
 
-See [copilot-instructions.md](.github/copilot-instructions.md) for full technical details.
+See [CLAUDE.md](CLAUDE.md) for full technical details.
 
 ### File Organization
 
