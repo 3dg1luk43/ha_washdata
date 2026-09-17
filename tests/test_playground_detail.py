@@ -190,3 +190,29 @@ def test_sweep_2d_returns_grid():
     )
     assert sw["param_x"] == "off_delay" and sw["param_y"] == "min_off_gap"
     assert len(sw["grid"]) == 2 and all(len(row) == 2 for row in sw["grid"])
+
+
+def test_the_projection_follows_the_stored_tariff_not_the_launch_price():
+    """The replay's future half must be priced from the cycle's own timeline.
+
+    Live charges the remaining energy at the price in force at that instant, so a
+    replay that keeps using the flat price it was launched with reports a
+    projected cost the live estimator never produced. Here the whole cycle ran at
+    0.10 while the sim is launched at 6.0, so the two answers differ by 60x.
+    """
+    store, cfg, opts, data = _load()
+    cyc = dict(_cycle(data, "52eb7ba46c"))
+    cyc["price_timeline"] = [[0.0, 0.10]]
+
+    d = playground.simulate_cycle_detail(cyc, cfg, None, store, opts, price=6.0)
+    assert "error" not in d
+
+    priced = [
+        p for p in d["series"]
+        if p.get("projected_cost") is not None and p.get("projected_energy_wh")
+    ]
+    assert priced, "no projection samples to check"
+    last = priced[-1]
+    # Everything, incurred and remaining, at 0.10/kWh.
+    expected = last["projected_energy_wh"] / 1000.0 * 0.10
+    assert last["projected_cost"] == pytest.approx(expected, rel=0.02)

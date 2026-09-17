@@ -18,8 +18,13 @@
 """Issue #347: opt-in sticky + clickAction on the live progress notification.
 
 These are options on the EXISTING live notification (not a new notification type):
-`sticky` so a tap does not dismiss the live thread, and `clickAction` so a tap
-opens a chosen dashboard/panel. Defaults reproduce today's payload exactly.
+`sticky` so a tap does not dismiss the live thread, and a tap target so a tap opens
+a chosen dashboard/panel. Defaults reproduce today's payload exactly.
+
+The tap target moved out of `_apply_live_notification_prefs` in #438: it applies to
+every event type now, so `_dispatch_notification` injects it centrally. The option
+itself is unchanged and still wins over the per-device default; see
+`tests/test_issue_435_438_notification_icon_tap_target.py`.
 """
 
 from datetime import datetime, timezone
@@ -66,6 +71,7 @@ def test_defaults_add_nothing(mock_hass):
     ev: dict[str, Any] = {}
     mgr._apply_live_notification_prefs(ev)
     assert "sticky" not in ev
+    # The tap target is no longer applied here (#438).
     assert "clickAction" not in ev
 
 
@@ -76,8 +82,7 @@ def test_sticky_enabled_sets_sticky_true(mock_hass):
     assert ev["sticky"] == "true"
 
 
-def test_click_action_sets_clickaction(mock_hass):
+def test_click_action_is_still_honoured(mock_hass):
+    """The user's explicit target still wins over the #438 per-device default."""
     mgr = _make_manager(mock_hass, {CONF_NOTIFY_LIVE_CLICK_ACTION: "/lovelace/laundry"})
-    ev: dict[str, Any] = {}
-    mgr._apply_live_notification_prefs(ev)
-    assert ev["clickAction"] == "/lovelace/laundry"
+    assert mgr._notification_tap_target() == "/lovelace/laundry"

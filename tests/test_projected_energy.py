@@ -37,6 +37,10 @@ def _bound(*, progress: float, energy_wh: float, price):
     mgr._resolve_energy_price.return_value = price
     mgr._projected_energy_wh = None
     mgr._projected_cost = None
+    # No dynamic price timeline here (#426), so the projection stays on the flat
+    # price. Explicit because a bare MagicMock would hand back a truthy stand-in
+    # for the accrued cost and silently reprice every case below.
+    mgr._live_cost_so_far.return_value = None
     # ML energy regressor is inert here (MagicMock store has no promoted spec), so
     # these exercise the time-progress fallback; the regressor path is covered by
     # test_ml_energy_projection.

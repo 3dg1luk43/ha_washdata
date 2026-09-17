@@ -59,6 +59,7 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
     CONF_DEVICE_TYPE,
     CONF_PUMP_STUCK_DURATION,
+    CONF_MATCH_PERSISTENCE,
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_PUMP,
     DEVICE_TYPE_WASHING_MACHINE,
@@ -68,7 +69,11 @@ from .const import (
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_SAMPLING_INTERVAL,
+    DEFAULT_MATCH_PERSISTENCE,
+    MATCH_INTERVAL_SUGGESTION_DECISION_FRAC,
+    MATCH_INTERVAL_SUGGESTION_MIN_S,
 )
+from .options_utils import option_int
 from .time_utils import power_data_to_offsets
 
 # ─── Clean-cycle selection ────────────────────────────────────────────────────
@@ -852,15 +857,125 @@ class SuggestionEngine:
             }
 
         # 4. Profile Match Interval
-        suggested_match = int(max(10, median_dt * 10))
+        #
+        # Cadence alone is the wrong yardstick (#431): the interval is spent
+        # waiting to IDENTIFY a program, so what bounds it is how long the
+        # shortest program runs, not how chatty the plug is. A 60 s reporting
+        # plug produced 599 s, and with match_persistence 3 no profile could then
+        # settle before ~30 min - on a 43-minute program that is most of the run,
+        # and the value is worse than the 300 s default the user started from.
+        #
+        # So cap the DECISION budget (interval x persistence), not the interval
+        # alone, at MATCH_INTERVAL_SUGGESTION_DECISION_FRAC of the shortest known
+        # profile. Capping the interval alone would let a higher persistence
+        # reintroduce the same wait.
+        suggested_match = int(max(MATCH_INTERVAL_SUGGESTION_MIN_S, median_dt * 10))
+        reason_match = f"Based on observed update cadence (median={median_dt:.1f}s) * 10."
+        reason_match_key = "suggestion.reason.match_interval"
+        reason_match_params: dict[str, Any] = {"median": f"{median_dt:.1f}"}
+
+        shortest_profile_s = self._shortest_profile_duration()
+        if shortest_profile_s is not None:
+            # option_int holds the whole guard (register items 278, 279): it proves
+            # the value is float-representable before returning it, so the divisor
+            # below cannot raise, and the floor of 1 is shared with the manager's
+            # read of the same key instead of being re-derived here.
+            persistence = option_int(
+                _op_opts.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE),
+                DEFAULT_MATCH_PERSISTENCE,
+                minimum=1,
+            )
+            cap = (
+                shortest_profile_s * MATCH_INTERVAL_SUGGESTION_DECISION_FRAC
+            ) / persistence
+            if cap < suggested_match:
+                # Floor at MATCH_INTERVAL_SUGGESTION_MIN_S to match the uncapped
+                # branch: a very short profile must not drive the matcher into a
+                # per-second poll.
+                suggested_match = int(max(MATCH_INTERVAL_SUGGESTION_MIN_S, cap))
+                pct = MATCH_INTERVAL_SUGGESTION_DECISION_FRAC * 100.0
+                if cap < MATCH_INTERVAL_SUGGESTION_MIN_S:
+                    # The floor won, so the budget rule does NOT hold here. Say that
+                    # instead of claiming a bound that was not applied: the reason is
+                    # shown to the user beside the value they are asked to accept.
+                    budget = MATCH_INTERVAL_SUGGESTION_MIN_S * persistence
+                    reason_match = (
+                        f"The shortest program ({shortest_profile_s:.0f}s) alone would cap "
+                        f"this at {cap:.0f}s, below the {MATCH_INTERVAL_SUGGESTION_MIN_S}s "
+                        f"minimum, so it is held there: {persistence} consecutive matches "
+                        f"take {budget}s, which is more than {pct:.0f}% of that program. "
+                        f"Matching only runs when a reading arrives (median="
+                        f"{median_dt:.1f}s), so the minimum costs nothing."
+                    )
+                    reason_match_key = "suggestion.reason.match_interval_floored"
+                    reason_match_params = {
+                        "median": f"{median_dt:.1f}",
+                        "shortest": f"{shortest_profile_s:.0f}",
+                        "persistence": str(persistence),
+                        "pct": f"{pct:.0f}",
+                        "cap": f"{cap:.0f}",
+                        "minimum": str(MATCH_INTERVAL_SUGGESTION_MIN_S),
+                        "budget": str(budget),
+                    }
+                else:
+                    reason_match = (
+                        f"Capped so {persistence} consecutive matches fit in "
+                        f"{pct:.0f}% of the shortest program ({shortest_profile_s:.0f}s); "
+                        f"the update cadence (median={median_dt:.1f}s) alone would "
+                        f"have suggested a longer interval."
+                    )
+                    reason_match_key = "suggestion.reason.match_interval_capped"
+                    reason_match_params = {
+                        "median": f"{median_dt:.1f}",
+                        "shortest": f"{shortest_profile_s:.0f}",
+                        "persistence": str(persistence),
+                        "pct": f"{pct:.0f}",
+                    }
+
         suggestions[CONF_PROFILE_MATCH_INTERVAL] = {
             "value": suggested_match,
-            "reason": f"Based on observed update cadence (median={median_dt:.1f}s) * 10.",
-            "reason_key": "suggestion.reason.match_interval",
-            "reason_params": {"median": f"{median_dt:.1f}"},
+            "reason": reason_match,
+            "reason_key": reason_match_key,
+            "reason_params": reason_match_params,
         }
 
         return suggestions
+
+    def _shortest_profile_duration(self) -> float | None:
+        """Shortest learned ``avg_duration`` across all profiles, or None.
+
+        Mirrors the ``avg > 60`` guard the model-suggestion generator already
+        applies, so a hand-created profile with a placeholder duration cannot
+        collapse a suggestion to its floor. Returns None when nothing usable is
+        known yet - the caller then leaves its cadence-only value untouched, so a
+        fresh install behaves exactly as before.
+        """
+        try:
+            # Snapshot, not the live map: get_profiles() hands back
+            # self._data["profiles"] itself, and this runs in an executor thread
+            # while the event loop can label, rename or delete a profile - which
+            # would raise "dictionary changed size during iteration" and abort the
+            # whole suggestion pass.
+            profiles = dict(self.profile_store.get_profiles() or {})
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+        if not isinstance(profiles, dict):
+            return None
+        shortest: float | None = None
+        for name, prof in profiles.items():
+            if not isinstance(prof, dict):
+                continue
+            # The matcher's own contract, not just `avg_duration`: a profile whose
+            # length comes from its sample cycle is still matchable, and if it is
+            # the shortest one, capping against a longer program would overrun the
+            # decision budget for it. The helper absorbs the malformed cases
+            # (including the unbounded-int OverflowError of register item 194).
+            avg = self.profile_store.resolve_profile_duration(name)
+            if avg is None or avg <= 60.0:
+                continue
+            if shortest is None or avg < shortest:
+                shortest = avg
+        return shortest
 
     def generate_model_suggestions(self) -> dict[str, Any]:
         """Generate suggestions for model parameters based on past cycles."""

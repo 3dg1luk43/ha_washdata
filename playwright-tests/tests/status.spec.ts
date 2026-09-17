@@ -5,6 +5,7 @@
 import { test, expect } from '@playwright/test';
 import { bootPanel, clickTab, assertWsCalled } from '../helpers/panel';
 import deviceRunning from '../fixtures/mock-data/device-running.json';
+import deviceIdle from '../fixtures/mock-data/device-idle.json';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -29,6 +30,27 @@ test('status tab shows running state and program when cycle is active', async ({
   // Cotton 40°C should be the selected value in the program selector
   const progSelect = page.locator('#wd-status-prog');
   await expect(progSelect).toHaveValue('Cotton 40°C', { timeout: 5_000 });
+});
+
+// ─── Program pre-arming on an idle appliance (#411) ──────────────────────────
+
+test('picking a program while idle really sends the choice', async ({ page }) => {
+  // The dropdown is offered on an idle appliance, and the backend used to drop
+  // the write silently. Assert the command carries the picked program.
+  await bootPanel(page, { 'ha_washdata/set_program': { success: true } });
+  const progSelect = page.locator('#wd-status-prog');
+  await expect(progSelect).toHaveValue('auto_detect', { timeout: 8_000 });
+  await progSelect.selectOption('Cotton 40\u00B0C');
+  const calls = await assertWsCalled(page, 'ha_washdata/set_program');
+  expect(calls[0].program).toBe('Cotton 40\u00B0C');
+});
+
+test('an armed program is shown as such, not as a live match', async ({ page }) => {
+  const armed = JSON.parse(JSON.stringify(deviceIdle));
+  armed.devices[0].armed_program = 'Eco 60\u00B0C';
+  await bootPanel(page, { 'ha_washdata/get_devices': armed });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Eco 60\u00B0C', { timeout: 8_000 });
+  await expect(page.locator('.wd-prog-tag').first()).toContainText('next cycle');
 });
 
 test('progress bar is visible during a running cycle', async ({ page }) => {
@@ -158,4 +180,43 @@ test('status tab renders without horizontal overflow on mobile viewport', async 
     return body ? body.scrollWidth - body.clientWidth : 0;
   });
   expect(overflow).toBeLessThanOrEqual(1); // Allow 1px rounding
+});
+
+// ─── Envelope position (item 269) ────────────────────────────────────────────
+//
+// The one "how far through" figure that is not derived from elapsed time. The
+// manager computed it, used it for the Smart Termination release and threw it
+// away; it now reaches the progress row beside the time-based percentage, which
+// is exactly where the two disagreeing is informative rather than confusing.
+
+test('the matched-curve position renders beside the time-based progress', async ({ page }) => {
+  const dev = JSON.parse(JSON.stringify(deviceRunning));
+  dev.devices[0].envelope_position = 0.87;
+  await bootPanel(page, { 'ha_washdata/get_devices': dev });
+
+  const row = page.locator('.wd-prog-row').first();
+  await expect(row).toBeVisible({ timeout: 8_000 });
+  await expect(row).toContainText('45.2%');
+  // Deliberately not the same number: 45% of the expected time, 87% of the way
+  // along the matched curve, is the overrun the profile alignment can see.
+  await expect(row).toContainText('curve 87%');
+  await expect(row.locator('span[title]', { hasText: 'curve 87%' }))
+    .toHaveAttribute('title', /refreshes while the appliance is quiet/);
+});
+
+test('no curve position is shown before an alignment has run', async ({ page }) => {
+  // Every cycle starts this way: the verification only runs below the stop
+  // threshold, so a fresh run has nothing measured yet and must show nothing
+  // rather than a placeholder 0%.
+  await bootPanel(page, { 'ha_washdata/get_devices': deviceRunning });
+  const row = page.locator('.wd-prog-row').first();
+  await expect(row).toBeVisible({ timeout: 8_000 });
+  await expect(row).not.toContainText('curve');
+});
+
+test('a zero curve position is rendered, not swallowed as falsy', async ({ page }) => {
+  const dev = JSON.parse(JSON.stringify(deviceRunning));
+  dev.devices[0].envelope_position = 0.0;
+  await bootPanel(page, { 'ha_washdata/get_devices': dev });
+  await expect(page.locator('.wd-prog-row').first()).toContainText('curve 0%', { timeout: 8_000 });
 });

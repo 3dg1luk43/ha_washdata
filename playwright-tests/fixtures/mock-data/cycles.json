@@ -12,7 +12,10 @@
       "cycle_anomaly": null,
       "energy_anomaly": null,
       "ml_review": null,
-      "artifacts": []
+      "artifacts": [],
+      "cost": 0.21,
+      "energy_price": 0.2471,
+      "energy_price_mode": "dynamic"
     },
     {
       "id": "cyc-002",
@@ -26,7 +29,10 @@
       "cycle_anomaly": null,
       "energy_anomaly": null,
       "ml_review": null,
-      "artifacts": []
+      "artifacts": [],
+      "cost": 0.34,
+      "energy_price": 0.3,
+      "energy_price_mode": "fixed"
     },
     {
       "id": "cyc-003",

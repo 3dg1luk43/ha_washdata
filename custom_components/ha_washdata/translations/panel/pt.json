@@ -1,5 +1,7 @@
 {
   "badge": {
+    "quiet_tail_tip": "Perto do fim, este programa fica em silêncio durante cerca de {mins} min e depois consome cerca de {watts} W durante {secs} s antes de terminar. Observado em {seen} de {measured} ciclos medidos: o aparelho não o faz em todas as utilizações.",
+    "quiet_tail": "silêncio final ~{mins} min",
     "artifact_tip": "{n} anomalias detectadas (por exemplo, porta aberta a meio do ciclo) – abra para as ver no gráfico",
     "auto": "(detectado automaticamente)",
     "built_in_tag": "incorporado",
@@ -29,11 +31,14 @@
     "approved": "Aprovado",
     "awaiting": "A aguardar aprovação",
     "imported_tip": "Importado da loja da comunidade. Usado apenas para correspondência, não contabilizado nas estatísticas.",
+    "unmatchable": "correspondência impossível",
     "not_importable": "n/d aqui",
     "exists": "já existe",
-    "backfilled_tip": "Detetado num histórico de potência importado. Influencia apenas a correspondência de programas, não é contabilizado nas estatísticas."
+    "backfilled_tip": "Detetado num histórico de potência importado. Influencia apenas a correspondência de programas, não é contabilizado nas estatísticas.",
+    "armed": "(aplica-se ao próximo ciclo)"
   },
   "btn": {
+    "reset_zoom": "Repor zoom",
     "set_brand_model": "Definir marca e modelo",
     "refresh_catalog": "Actualizar catálogo",
     "add_device": "+ Adicionar dispositivo",
@@ -167,6 +172,8 @@
     "trim": "Cortar",
     "trim_split": "Cortar / Dividir",
     "undo": "Anular",
+    "unlabel_selected": "Remover rótulo dos selecionados ({n})",
+    "unlabel_selected_tip": "Remove o rótulo de perfil dos ciclos selecionados. Continuam no seu histórico e poderão ser rotulados novamente mais tarde; deixam apenas de influenciar este perfil.",
     "use": "Usar",
     "wipe_all": "Apagar todos os dados",
     "delete_selected": "Eliminar selecionados ({n})",
@@ -174,7 +181,6 @@
     "pg_apply_best": "Aplicar melhor",
     "pg_apply_to_settings": "Guardar nas definições",
     "pg_apply_to_settings_tip": "Copiar os valores que editou aqui para as definições ativas deste dispositivo",
-    "search": "Pesquisar",
     "import": "Importar",
     "disconnect": "Desconectar",
     "connect_github": "Conectar GitHub",
@@ -201,7 +207,8 @@
     "hist_read_recorder": "Ler do Home Assistant",
     "hist_scan": "Procurar ciclos",
     "hist_import_n": "Importar {n} ciclos",
-    "hist_goto_cycles": "Ver os ciclos"
+    "hist_goto_cycles": "Ver os ciclos",
+    "save_total_cycles": "Guardar total"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -214,6 +221,12 @@
     },
     "attn_sub": "Corrija os conflitos antes de guardar",
     "attn_title": "Conflitos de definições: {n}",
+    "price_entity": {
+      "power_sensor": "Este é o Sensor de Potência do dispositivo, não um preço. Uma entidade de preço tem precedência sobre o Preço Estático de Energia abaixo, pelo que os ciclos seriam cobrados a watts por kWh - limpe este campo.",
+      "energy_sensor": "Esta é a Entidade do Contador de Energia do dispositivo, não um preço. Uma entidade de preço tem precedência sobre o Preço Estático de Energia abaixo, pelo que os ciclos seriam cobrados à leitura do contador por kWh - limpe este campo.",
+      "device_class": "Este sensor mede {dc}, não um preço por kWh. Uma entidade de preço tem precedência sobre o Preço Estático de Energia abaixo - limpe este campo ou aponte-o para um sensor de tarifa.",
+      "unit": "Este sensor indica valores em {unit}, o que não é um preço por kWh. Uma entidade de preço tem precedência sobre o Preço Estático de Energia abaixo - limpe este campo ou aponte-o para um sensor de tarifa."
+    },
     "settings_banner": "Conflitos de definições: {n}. Verifique as secções realçadas e corrija-os antes de guardar.",
     "settings_banner_btn": "Ir para o primeiro",
     "confidence": {
@@ -301,7 +314,7 @@
     "pg_settings_source": "Origem das definições",
     "phase_catalog": "Catálogo de fases",
     "playground": "Área de testes",
-    "process_history": "Histórico de processamento",
+    "process_history": "Processar histórico",
     "settings_history": "Histórico de definições",
     "status": "Estado",
     "status_graph": "Gráfico de estado",
@@ -312,12 +325,12 @@
     "wipe_history": "Apagar histórico",
     "recommendations": "Recomendações ({n})",
     "pg_detection_params": "Definições de deteção",
-    "pg_timeline": "Cronologia de eventos",
     "pg_outcome": "Resultado da simulação",
     "pg_across_cycles": "Em todos os seus ciclos",
     "community_store": "Loja da comunidade",
     "online_account": "Loja da comunidade e funcionalidades online",
-    "import_power_history": "Importar histórico de potência"
+    "import_power_history": "Importar histórico de potência",
+    "service_status": "Estado da manutenção"
   },
   "health": {
     "fair": "Qualidade de perfil aceitável",
@@ -325,6 +338,10 @@
     "poor": "⚠ Qualidade de perfil fraca"
   },
   "lbl": {
+    "envelope_position_tip": "Posição na curva gravada do próprio programa correspondente, {pct}%. É medida alinhando este ciclo com o perfil em vez de contar o tempo, pelo que se mantém correta quando um ciclo é mais longo ou mais curto do que o habitual. É atualizada enquanto o aparelho está em silêncio, pelo que pode ficar atrasada durante uma fase ativa.",
+    "envelope_position": "curva {pct}%",
+    "aria_playground_chart3": "Gráfico interativo da potência do ciclo: passe o cursor para ler tempo/potência, percorra ou use o gesto de pinça para ampliar, arraste para deslocar",
+    "device_unresolved": "Dispositivo indisponível ({id})",
     "drag_to_resize": "Arraste para redimensionar",
     "actions": "Acções",
     "activity": "Actividade",
@@ -460,7 +477,7 @@
     "profile_index": "índice do perfil →",
     "profile_name": "Nome do perfil",
     "program": "Programa",
-    "program_tip": "Substitua o perfil correspondido ao ciclo atual. A deteção automática permite que a integração escolha a melhor correspondência automaticamente. Fixe um programa específico para forçar a correspondência quando a deteção automática está errada ou quando sabe o que está em execução.",
+    "program_tip": "Substitua o perfil correspondido ao ciclo atual. A deteção automática permite que a integração escolha a melhor correspondência automaticamente. Fixe um programa específico para forçar a correspondência quando a deteção automática está errada ou quando sabe o que está em execução. Escolha um antes de ligar o aparelho e será aplicado assim que o próximo ciclo começar.",
     "progress": "Progresso",
     "raw_socket": "Socket bruto",
     "read_only": "Só de leitura",
@@ -495,6 +512,7 @@
     "stage4": "Etapa 4 – concordância",
     "status": "Estado",
     "tail_trim": "Corte final (s)",
+    "tap_to_dismiss": "toque no gráfico para fechar",
     "timer_auto_pause": "Pausa automática",
     "timer_min": "min",
     "timer_msg_placeholder": "Mensagem (opcional, {device}/{program}/{minutes})",
@@ -531,9 +549,7 @@
     "pg_time_left_model": "Tempo restante (modelo)",
     "pg_time_left_model_tip": "Tempo restante estimado pelo modelo (estimador de fase + combinação de ML), não uma contagem decrescente fixa",
     "phase": "Fase",
-    "pg_mode_simulate": "Simular",
     "pg_mode_history": "Testar no histórico",
-    "pg_mode_sweep": "Varrimento",
     "pg_ev_detected": "Detetado",
     "pg_ev_match": "Correspondência confirmada",
     "pg_ev_match_changed": "Correspondência alterada",
@@ -572,14 +588,11 @@
     "pg_stress_idle_w_desc": "Substitui o piso de repouso detectado automaticamente (deixe em branco para automático).",
     "pg_stress_toggle": "Testar terminação em repouso",
     "pg_stress_toggle_desc": "Simula o electrodoméstico mantido no seu consumo em repouso após o fim da gravação – mostra se e quando o WashData para o ciclo.",
-    "pg_sweep_2d": "Mapa de calor 2D",
-    "pg_sweep_param_y": "2.º parâmetro",
     "pg_obj_match": "Precisão de correspondência",
     "pg_obj_endtiming": "Precisão do momento de fim",
     "pg_obj_falseend": "Taxa de fins falsos",
     "pg_obj_overrun": "Desvio de duração",
     "pg_obj_ambiguity": "Taxa de ambiguidade",
-    "pg_best_combo": "melhor combinação",
     "pg_mode_optimize": "Otimizar",
     "pg_group_matching": "Correspondência de programa",
     "pg_zoom_hint": "faça duplo clique para repor o zoom",
@@ -658,7 +671,12 @@
     "task_history_import_apply": "A importar ciclos",
     "evidence_real_cycles": "Ciclos que esta máquina executou",
     "evidence_reference_cycles": "Transferidos da loja da comunidade",
-    "evidence_backfill_cycles": "Encontrados num histórico de potência importado"
+    "evidence_backfill_cycles": "Encontrados num histórico de potência importado",
+    "zoom_hint_touch": "gesto de pinça para ampliar",
+    "zoom_hint_touch_zoomed": "gesto de pinça para ampliar · duplo toque para repor",
+    "cycles_since_service": "{since} / {total} ciclos",
+    "total_cycles_run": "ciclos realizados no total",
+    "correct_total_cycles": "Corrigir o total"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -708,7 +726,7 @@
     "merge_cycles": "Combinar {n} ciclos",
     "new_group": "Novo grupo de perfis",
     "new_phase": "Nova fase",
-    "process_history_msg": "Reexecute a correspondência, atualize as sugestões, retreine os modelos ML (se ativados) e recalcule o estado de todos os ciclos armazenados. Isto pode demorar algum tempo.",
+    "process_history_msg": "Reexecute a correspondência, atualize as sugestões, retreine os modelos ML (se ativados), recalcule o custo dos ciclos com base nos preços de energia registados e recalcule o estado de todos os ciclos armazenados. Isto pode demorar algum tempo.",
     "process_history_ok": "Processar",
     "process_history_title": "Processar histórico",
     "process_recording": "Processar gravação",
@@ -741,6 +759,7 @@
     "history_import": "Importar histórico de potência"
   },
   "msg": {
+    "pg_canvas_empty3": "Escolha um ciclo acima e prima Executar para o simular. Depois passe o cursor para ler os valores, percorra ou use o gesto de pinça para ampliar e arraste para deslocar.",
     "tail_trim_hint": "Número de segundos a remover do fim",
     "store_sibling_hint": "Não há nada partilhado para o seu modelo exato? Um modelo muito semelhante da mesma marca é normalmente um bom ponto de partida.",
     "store_declare_appliance": "Indique ao WashData qual o electrodoméstico que possui e este separador mostrará as configurações que outras pessoas partilharam para ele. Também pode escrever uma marca acima para explorar.",
@@ -754,7 +773,7 @@
     "artifact_spike_detail": "Ultrapassou a banda de potência habitual durante ~{n}s.",
     "auto_label_intro": "Atribua perfis a ciclos sem rótulo cuja confiança de correspondência ultrapasse o limiar.",
     "automations_intro": "O WashData dispara os eventos {start} / {end} e expõe entidades, por isso as notificações e ações são melhor criadas como automatizações normais do Home Assistant. As automatizações que utilizam este dispositivo aparecem abaixo.",
-    "cleanup_intro": "Todos os ciclos rotulados sobrepostos. Assinale os valores aberrantes e elimine para limpar o perfil.",
+    "cleanup_intro": "Todos os ciclos rotulados sobrepostos. Assinale os valores aberrantes e depois remova-lhes o rótulo (mantêm-se no histórico, mas deixam de influenciar este perfil) ou elimine-os por completo.",
     "clear_debug_hint": "Remova os dados de depuração armazenados para libertar espaço.",
     "collecting_data": "A recolher dados. Ciclos ainda necessários para o ajuste fino poder começar: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Sobrepor perfis (ténue)",
@@ -853,7 +872,7 @@
     "preferences_admin": "Preferências, painel e controlo de acesso",
     "preferences_adv": "Preferências",
     "prefs_personal": "Aplicam-se apenas à sua conta do Home Assistant.",
-    "process_history_hint": "Reexecute a correspondência em todos os ciclos armazenados, atualize as sugestões de ajuste, retreine os modelos ML (se ativados) e recalcule o estado dos ciclos. Execute após um lote de revisões.",
+    "process_history_hint": "Reexecute a correspondência em todos os ciclos armazenados, atualize as sugestões de ajuste, retreine os modelos ML (se ativados), recalcule o custo dos ciclos com base nos preços de energia registados e recalcule o estado dos ciclos. Execute após um lote de revisões.",
     "profile_deleted": "Perfil eliminado",
     "profile_poor_health_detail": "Os ciclos atribuídos a este perfil têm formas inconsistentes ou baixa confiança. Considere reconstruir o envelope ou rever os ciclos rotulados.",
     "profiles_intro": "Clique num perfil para ver estatísticas, fases e limpeza. Agrupe programas quase idênticos (mesma forma/duração, temperatura ou centrifugação diferentes) para que a correspondência escolha de forma fiável entre eles.",
@@ -936,9 +955,10 @@
     "advisory_poor_health": "'{name}' tem uma pontuação de correspondência baixa - os ciclos recentes variam muito ou correspondem fracamente. Reveja os ciclos ou volte a gravar o perfil para que o reconhecimento e as estimativas de tempo se mantenham precisos.",
     "advisory_shape_drift": "'{name}' afastou-se significativamente da sua curva de potência original. O aparelho pode ter alterado o comportamento ao longo do tempo (por ex. calcário, desgaste). Considere voltar a gravar este perfil com ciclos recentes.",
     "advisory_shape_drift_corr": "'{name}' afastou-se significativamente da sua curva de potência original (correlação {corr}). O aparelho pode ter alterado o comportamento ao longo do tempo (por ex. calcário, desgaste). Considere voltar a gravar este perfil com ciclos recentes.",
+    "advisory_unmatchable": "'{name}' nunca poderá ser correspondido: não tem nenhum ciclo com dados de potência associado, pelo que o WashData não tem nada com que comparar um ciclo em curso. Rotule um ciclo deste programa (ou grave um) para o voltar a incluir na correspondência.",
+    "advisory_unmatchable_no_duration": "'{name}' nunca poderá ser correspondido: tem um ciclo com dados de potência mas sem uma duração utilizável, pelo que o WashData não tem qualquer duração com que dimensionar uma correspondência. Volte a gravar este programa, ou defina a duração prevista, para o voltar a incluir na correspondência.",
     "pg_no_alerts": "Nenhum problema detetado nesta execução.",
     "pg_override_active": "A usar as suas definições editadas vs. as atuais",
-    "pg_history_intro": "Reproduza os seus ciclos recentes com o detetor e o comparador reais. Edite primeiro uma definição de deteção em Simular para ver aqui uma comparação antes/depois.",
     "pg_history_empty": "Prima Executar para reproduzir os seus ciclos.",
     "pg_history_summary": "{detected}/{total} detetados · {correct} reconhecidos corretamente",
     "pg_sweep_no_metric": "Dados insuficientes para pontuar este objetivo.",
@@ -1015,11 +1035,16 @@
     "hist_scan_failed": "A análise falhou.",
     "hist_scan_expired": "Essa análise já não está disponível. Analise novamente.",
     "hist_import_failed": "A importação falhou.",
-    "imported_history_readonly": "Detetado num histórico de potência importado. Influencia a correspondência de programas, mas não é contabilizado nas suas estatísticas e não pode ser cortado nem dividido. Rotule-o para indicar o programa."
+    "imported_history_readonly": "Detetado num histórico de potência importado. Influencia a correspondência de programas, mas não é contabilizado nas suas estatísticas e não pode ser cortado nem dividido. Rotule-o para indicar o programa.",
+    "odometer_intro": "Este total só aumenta. Eliminar o registo de um ciclo não o altera e continua a contar além do limite do histórico guardado, para que os lembretes de manutenção se mantenham corretos.",
+    "odometer_correct_hint": "Defina este valor se o WashData registou um ciclo que nunca aconteceu, ou se o eletrodoméstico já tinha realizado ciclos antes de o WashData ser instalado.",
+    "no_reminders_set": "Ainda não há lembretes de manutenção definidos.",
+    "toast_program_armed": "Programa preparado para o próximo ciclo: {program}"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Máquina de lavar louça: segundos de silêncio após a duração esperada antes de libertar a espera da descarga de fim de ciclo",
     "smart_termination_duration_ratio": "Fração da duração esperada do programa correspondente que um ciclo deve atingir antes de a Terminação inteligente o poder terminar mais cedo; reduza-a para máquinas que dependem da carga ou da temperatura",
+    "anti_crease_finalize_ratio": "Fração da duração esperada do programa correspondente que um ciclo deve atingir antes de a cauda de rotação anti-vincos poder ser finalizada; reduza-a em máquinas de secar com uma cauda de rotação longa, deixe as máquinas de lavar no valor predefinido",
     "anti_wrinkle_enabled": "Absorver os pulsos de rotação após a fase principal em vez de os ler como novos ciclos",
     "anti_wrinkle_exit_power": "A potência deve descer abaixo deste valor entre pulsos para que o modo anti-vincos permaneça ativo",
     "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de rotação antes de o modo anti-vincos terminar",
@@ -1039,13 +1064,14 @@
     "energy_weight": "Fase 4: o quanto a concordância de energia afeta a pontuação final (predefinição 0,22)",
     "profile_match_min_duration_ratio": "Fase 1: duração mínima do ciclo como fração da duração do perfil; predefinição 0,1 (10%)",
     "profile_match_max_duration_ratio": "Fase 1: duração máxima do ciclo como fração da duração do perfil; predefinição 1,5 (150%)",
-    "keep_min_score": "Fase 2: pontuação mínima para permanecer em jogo; a predefinição 0,1 admite candidatos fracos, as fases seguintes escolhem o melhor",
+    "keep_min_score": "Fase 2: pontuação mínima para permanecer na disputa; a predefinição 0,1 admite correspondências fracas, as fases seguintes escolhem a melhor",
     "dtw_blend": "Fase 3: 0 = apenas pontuação central, 1 = apenas pontuação DTW, 0,5 = mistura equilibrada (predefinição)",
     "dtw_ensemble_w": "Fase 3 (modo ensemble): peso em L1 escalado vs DTW derivativo; a predefinição 0,7 favorece a sensibilidade ao nível",
     "dtw_ddtw_scale": "Fase 3: distância de semissaturação DDTW; menor = maior sensibilidade à forma (predefinição 30)",
     "dtw_refine_top_n": "Fase 3: candidatos reavaliados pelo DTW; aumente para 7-9 se o perfil correto se classificar em 4.º-5.º (predefinição 5)",
     "duration_scale": "Fase 4: log-razão em que a concordância de duração é reduzida a metade; menor = penalidade mais severa (predefinição 0,175)",
-    "energy_scale": "Fase 4: log-razão em que a concordância de energia é reduzida a metade; menor = penalidade mais severa (predefinição 0,25)"
+    "energy_scale": "Fase 4: log-razão em que a concordância de energia é reduzida a metade; menor = penalidade mais severa (predefinição 0,25)",
+    "curve_preroll_seconds": "Segundos de leituras de tentativas de arranque abortadas incorporados no início da curva de um ciclo; 0 = desativado"
   },
   "phase_desc": {
     "anti_crease": "Rotações curtas ocasionais após a conclusão para reduzir vincos.",
@@ -1143,6 +1169,10 @@
       "label": "Libertação em silêncio da secagem passiva",
       "doc": "Assim que o ciclo ultrapassa a sua duração esperada, durante quanto tempo a máquina de lavar louça deve permanecer silenciosa (abaixo do Limiar de Paragem) antes de o WashData deixar de aguardar uma descarga final e terminar o ciclo. Aumente este valor se a sua máquina tiver uma longa fase de secagem silenciosa antes de uma descarga final tardia que está a ser ignorada - uma janela mais ampla permite que a duração aprendida acompanhe a variação sazonal (água de entrada mais fria = ciclos mais longos) em vez de se fixar na média antiga. Apenas encurta a espera face ao limite interno de 30 minutos para o pico de fim, nunca a prolonga."
     },
+    "anti_crease_finalize_ratio": {
+      "label": "Rácio de finalização anti-vincos",
+      "doc": "Até que ponto da duração esperada do programa correspondente um ciclo tem de ter chegado antes de o WashData poder concluir que a rotação lenta de baixa potência que está a observar é a cauda anti-vincos e terminar aí o ciclo. A duração esperada é a média do programa, pelo que numa máquina de secar cujo tempo de secagem por sonda acompanha a carga a maioria dos ciclos nunca atinge 98% dessa média e a cauda fica à espera até ao tempo limite de segurança, muitas vezes 15 a 40 minutos depois de a máquina ter realmente parado. Reduza este valor (por exemplo, 0,75) numa máquina de secar assim. Deixe as máquinas de lavar roupa no valor predefinido: uma máquina de lavar passa a maior parte do ciclo abaixo da Potência Máxima Anti-Vincos, pelo que esta fração é a única coisa que separa uma fase silenciosa a meio da lavagem da cauda, e baixá-la pode cortar uma lavagem a meio. Deixe vazio para o valor predefinido (0,98). Esta definição é distinta do Rácio de terminação inteligente, que condiciona uma verificação de fim antecipado separada."
+    },
     "anti_wrinkle_enabled": {
       "doc": "Reconheça os pulsos curtos de baixa potência que uma secadora emite após a fase de aquecimento principal e mantenha-os anexados ao ciclo finalizado, em vez de lê-los como novos ciclos.",
       "label": "Activar Detecção Anti-Vincos"
@@ -1164,7 +1194,7 @@
       "label": "Potência Máxima Anti-Vincos"
     },
     "auto_label_confidence": {
-      "doc": "Se a pontuação da partida no final do ciclo for igual ou superior a isso, o programa será rotulado automaticamente sem qualquer solicitação de confirmação. Aumente-o para exigir maior certeza antes da rotulagem automática; abaixe-o para automatizar mais. Funciona em conjunto com Learning Confidence abaixo dele.",
+      "doc": "Se a pontuação de correspondência no final do ciclo for igual ou superior a este valor, o programa é rotulado automaticamente sem qualquer pedido de confirmação. Aumente-o para exigir maior certeza antes da rotulagem automática; baixe-o para automatizar mais. Funciona em conjunto com a Confiança de Aprendizagem apresentada abaixo.",
       "label": "Confiança de Rotulagem Automática"
     },
     "auto_maintenance": {
@@ -1174,6 +1204,10 @@
     "completion_min_seconds": {
       "doc": "Ciclos mais curtos que isso são descartados como ciclos fantasmas (testes, abertura da porta para adicionar uma meia).",
       "label": "Duração Mínima do Ciclo"
+    },
+    "curve_preroll_seconds": {
+      "label": "Pré-arranque da curva",
+      "doc": "Quantos segundos de leituras provenientes de tentativas de arranque abortadas o WashData pode incorporar no início da curva de um ciclo. A curva de um ciclo começa normalmente na tentativa de arranque que acaba por ser bem-sucedida, pelo que numa máquina que tenta algumas vezes antes de arrancar mesmo (seleção do programa, bloqueio da porta, primeiro enchimento) faltam os primeiros minutos de atividade real em todas as curvas. Defina este valor um pouco acima do arranque prévio mais longo da sua máquina (300 s chegam e sobram na maioria dos casos). 0 desativa a função. Tenha em atenção que ativá-la antecipa o início registado, pelo que os ciclos registados antes e depois da alteração ficam com durações diferentes para o mesmo programa; as médias aprendidas vão derivar até os ciclos mais antigos saírem do histórico."
     },
     "delay_confirm_seconds": {
       "doc": "A energia deve permanecer na faixa de espera por esse tempo antes que o aparelho seja tratado como aguardando para iniciar, em vez de funcionar.",
@@ -1212,7 +1246,7 @@
       "label": "Contagem de Repetições de Fim"
     },
     "energy_price_entity": {
-      "doc": "Sensor com o preço atual da eletricidade por kWh (por exemplo, uma tarifa dinâmica). Tem precedência sobre o preço estático abaixo. Cada ciclo congela o preço em vigor quando termina.",
+      "doc": "Sensor com o preço atual da eletricidade por kWh (por exemplo, uma tarifa dinâmica). Tem de ser um preço, não a própria entidade de potência ou de energia da tomada: tem precedência sobre o preço estático abaixo, pelo que um contador de kWh aqui cobra cada ciclo à leitura do contador em vez da sua tarifa. Com o Custo Ponderado no Tempo ativado, cada ciclo é cobrado ao preço em vigor em cada momento em que decorreu; caso contrário, fica-lhe fixado o preço em vigor quando terminou.",
       "label": "Entidade de Preço de Energia"
     },
     "energy_price_static": {
@@ -1240,7 +1274,7 @@
       "label": "Inverter Gatilho Externo (activar em DESLIGADO)"
     },
     "learning_confidence": {
-      "doc": "Se a pontuação de correspondência estiver entre este valor e a Confiança do rótulo automático, uma notificação de feedback solicitará que você verifique o programa identificado. Abaixo desta pontuação, a partida é muito incerta para surgir. Deve ser mantido abaixo da Confiança da Etiqueta Automática.",
+      "doc": "Se a pontuação de correspondência estiver entre este valor e a Confiança de Rotulagem Automática, uma notificação de feedback pede-lhe para verificar o programa identificado. Abaixo desta pontuação, a correspondência é demasiado incerta para ser apresentada. Deve ser mantido abaixo da Confiança de Rotulagem Automática.",
       "label": "Confiança de Aprendizagem"
     },
     "linked_device": {
@@ -1308,7 +1342,7 @@
       "label": "Disparar Eventos HA para Notificações"
     },
     "notify_icon": {
-      "doc": "Ícone mdi opcional para a notificação (por exemplo, mdi:máquina de lavar). Deixe em branco para o padrão da plataforma.",
+      "doc": "O pequeno ícone apresentado na notificação (por exemplo, mdi:washing-machine). O Android desenha-o na barra de estado; o iOS mostra-o em vez do ícone da aplicação e requer a aplicação complementar 2026.8 ou mais recente. Deixe em branco para a predefinição da plataforma.",
       "label": "Ícone da Notificação"
     },
     "notify_live_chronometer": {
@@ -1408,7 +1442,7 @@
       "label": "Limiar de Correspondência"
     },
     "profile_unmatch_threshold": {
-      "doc": "Se uma partida ao vivo no meio do ciclo cair abaixo dessa pontuação, a identificação provisória será apagada. Mantenha-o um pouco abaixo do Limite de Correspondência para que uma breve queda na similaridade não reverta a exibição para incomparável.",
+      "doc": "Se uma correspondência em direto a meio do ciclo descer abaixo desta pontuação, a identificação provisória é apagada. Mantenha-o um pouco abaixo do Limiar de Correspondência para que uma breve queda na semelhança não faça a apresentação voltar a sem correspondência.",
       "label": "Limiar de Não Correspondência"
     },
     "progress_reset_delay": {
@@ -1418,10 +1452,6 @@
     "pump_stuck_duration": {
       "doc": "Segundos, uma bomba pode funcionar continuamente antes de ser sinalizada como possivelmente travada (dispara o evento de bomba travada).",
       "label": "Duração de Bomba Presa"
-    },
-    "running_dead_zone": {
-      "doc": "Após o início de um ciclo, as quedas de energia nesta janela são ignoradas. As máquinas de lavar enchem com água fria (caindo perto de 0 W antes do aquecimento) - sem esta proteção, a fase de enchimento parece um fim de ciclo. Isto NÃO ignora dados: o traço de potência total é registrado a partir de T=0. O mecanismo de sugestão mede o padrão de inicialização real da sua máquina e o dimensiona automaticamente.",
-      "label": "Zona Morta em Execução"
     },
     "sampling_interval": {
       "doc": "Tempo esperado entre as leituras do sensor - usado para dimensionar a janela de suavização e iniciar o debounce corretamente. Cada atualização do sensor é capturada independentemente deste valor; ele apenas calibra os cálculos posteriores. O mecanismo de sugestão mede a cadência real do seu sensor em ciclos anteriores e define isso automaticamente.",
@@ -1440,7 +1470,7 @@
       "label": "Janela de Suavização"
     },
     "start_duration_threshold": {
-      "doc": "A energia deve permanecer acima do limite de partida por tanto tempo para confirmar uma partida real, evitando que interruptores liga/desliga em frações de segundo iniciem um ciclo.",
+      "doc": "A potência deve permanecer acima do Limiar de Início durante este tempo para confirmar uma partida real, evitando que comutações liga/desliga em frações de segundo iniciem um ciclo.",
       "label": "Duração de Início"
     },
     "start_energy_threshold": {
@@ -1448,7 +1478,7 @@
       "label": "Energia de Início"
     },
     "start_threshold_w": {
-      "doc": "A potência deve subir acima deste nível para confirmar que um ciclo foi iniciado. Definir um valor muito baixo causa falsas partidas na energia de espera; programas muito altos e de início lento (enchimento a frio) são perdidos. O mecanismo de sugestão define isso logo acima da potência ativa mais baixa observada pela máquina.",
+      "doc": "A potência deve subir acima deste nível para confirmar que um ciclo foi iniciado. Defini-lo demasiado baixo causa falsas partidas a partir da energia em espera; defini-lo demasiado alto faz perder os programas de início lento (enchimento a frio). O mecanismo de sugestão define isto logo acima da potência ativa mais baixa observada na máquina.",
       "label": "Limiar de Início"
     },
     "stop_threshold_w": {
@@ -1520,7 +1550,7 @@
     },
     "keep_min_score": {
       "label": "Score mín de correspondência",
-      "doc": "Pontuação de similaridade mínima que um candidato precisa para permanecer em jogo. A predefinição 0,1 é deliberadamente permissiva - admite mesmo candidatos fracos e depende das fases seguintes para encontrar a melhor correspondência. Aumente para eliminar perfis improváveis mais cedo; reduza para ampliar o pool inicial de candidatos."
+      "doc": "Pontuação de similaridade mínima que um candidato precisa para permanecer na disputa pela correspondência. A predefinição 0,1 é deliberadamente permissiva - admite mesmo candidatos fracos e depende das fases seguintes para encontrar a melhor correspondência. Aumente para eliminar perfis improváveis mais cedo; reduza para ampliar o pool inicial de candidatos."
     },
     "dtw_blend": {
       "label": "Fusão Warp",
@@ -1550,13 +1580,17 @@
       "label": "Intervalo do Perfil de Potência",
       "doc": "Tamanho do intervalo para o atributo do sensor power_profile por perfil (o array plano de watts médios por slot consumido por planeadores externos como EMHASS e tibber_prices). Intervalos menores mantêm os picos de potência curtos nítidos; intervalos maiores suavizam a forma. Predefinição: 15 min. Apenas de leitura; não afeta a deteção."
     },
+    "notify_live_silent": {
+      "label": "Atualizações Silenciosas em Tempo Real",
+      "doc": "Apenas iOS. Atualiza o progresso em tempo real de forma discreta: cada atualização chega sem som nem vibração, com uma prioridade mais baixa que poupa bateria e que o iOS pode agrupar durante alguns instantes. A primeira atualização de um ciclo (a que inicia a Atividade em Direto) e as notificações de início e de fim continuam a alertar como habitualmente. Desative esta opção para ser alertado em cada atualização."
+    },
     "notify_live_sticky": {
       "label": "Manter a Notificação em Tempo Real ao Tocar",
       "doc": "Apenas Android. Torna a notificação de progresso em tempo real persistente (fixada) para que ao tocar nela não a dispense. Desativado mantém o comportamento padrão em que o toque a dispensa."
     },
     "notify_live_click_action": {
-      "label": "Destino ao Tocar na Notificação em Tempo Real",
-      "doc": "Apenas Android. Para onde abre o toque na notificação de progresso em tempo real (por exemplo, /lovelace/lavandaria, ou um URL completo) em vez da página inicial da aplicação. Deixe em branco para a predefinição."
+      "label": "Destino ao Tocar na Notificação",
+      "doc": "Para onde abre um toque numa notificação deste eletrodoméstico, no Android e no iOS. Em branco abre o painel WashData neste eletrodoméstico. Introduza o caminho de um painel (por exemplo, /lovelace/laundry) ou um URL completo para abrir outro destino, ou \"none\" para não abrir nada ao tocar."
     },
     "door_opens_at_end": {
       "label": "Porta Abre Automaticamente no Fim",
@@ -1569,6 +1603,10 @@
     "profile_evidence_sources": {
       "label": "Ciclos que moldam um programa",
       "doc": "Que ciclos são usados para construir a curva de potência de cada programa e para comparar um ciclo terminado com ela. Ao desmarcar um tipo, este deixa de moldar os seus programas sem que nada seja apagado - os ciclos permanecem na sua lista de Ciclos e podem continuar a ser rotulados ou removidos. Útil se não confiar nos dados importados. As estatísticas não são afetadas: contabilizam sempre apenas os ciclos que esta máquina realmente executou. Desmarcar tudo é ignorado, pois um programa sem ciclos por trás nunca poderia corresponder."
+    },
+    "energy_price_dynamic": {
+      "label": "Custo Ponderado no Tempo",
+      "doc": "Cobra cada ciclo ao preço em vigor em cada momento em que decorreu, em vez do preço único do instante em que terminou. Só se aplica a uma entidade de preço (um preço estático não pode variar). Não precisa de configuração adicional: o preço é acompanhado em direto enquanto o ciclo decorre e Processar histórico, em Diagnósticos, recalcula o custo dos ciclos antigos a partir do recorder. Desativado = o comportamento clássico, um preço fixado no fim."
     }
   },
   "setting_group": {
@@ -1680,7 +1718,8 @@
     "splitting": "A dividir…",
     "deleting": "A eliminar…",
     "imported": "Importado",
-    "preparing": "A preparar…"
+    "preparing": "A preparar…",
+    "unlabelling": "A remover rótulo…"
   },
   "tab": {
     "advanced": "Avançado",
@@ -1764,6 +1803,7 @@
     "recording_stopped": "Gravação parada",
     "review_saved": "Revisão guardada",
     "settings_conflicts": "Corrija os conflitos de definições destacados antes de guardar.",
+    "settings_no_changes": "Nenhuma alteração para guardar",
     "settings_reverted": "Definições revertidas; a integração está a recarregar",
     "settings_saved": "Definições guardadas; a integração está a recarregar",
     "suggestions_applied": "Sugestões aplicadas; a integração está a recarregar",
@@ -1818,7 +1858,11 @@
     "export_selective_done": "Exportação transferida",
     "import_selective_done": "Importados {profiles} perfil(is) e {cycles} ciclo(s)",
     "hist_csv_required": "Carregue primeiro um ficheiro CSV ou cole o respetivo conteúdo",
-    "file_read_failed": "Não foi possível ler esse ficheiro"
+    "file_read_failed": "Não foi possível ler esse ficheiro",
+    "unlabel_done": "Rótulo removido de {count} ciclo(s)",
+    "unlabel_failed": "Falha ao remover o rótulo: {error}",
+    "odometer_saved": "Total de ciclos guardado",
+    "odometer_save_failed": "Não foi possível guardar o total: {error}"
   },
   "suggestion": {
     "both_agree": "WashData recomenda",
@@ -1865,10 +1909,6 @@
         "higher": "Confirma apenas correspondências de alta confiança; mais ciclos ficam sem etiqueta",
         "lower": "Corresponde a mais ciclos; alguns podem estar ligeiramente errados"
       },
-      "running_dead_zone": {
-        "higher": "Ignora breves picos de potência em repouso – menos sensível ao ruído",
-        "lower": "Responde a impulsos mais curtos – deteta atividade transitória rápida"
-      },
       "start_threshold_w": {
         "higher": "Evita arranques falsos por breves picos de potência",
         "lower": "Deteta programas de baixa potência; pode ser ativado por ruído"
@@ -1893,6 +1933,8 @@
       "end_repeat_count": "{false}/{total} ciclos limpos ({pct}%) tiveram uma pausa interna >60s que foi retomada; exigir {val} confirmação(ões) de fim.",
       "learning_confidence": "Confiança p05 de {cycles} ciclos rotulados pelo utilizador ({p05}); abaixo disto, é pedida uma verificação.",
       "match_interval": "Com base na cadência de atualização observada (mediana={median}s) * 10.",
+      "match_interval_capped": "Limitado para que {persistence} correspondências consecutivas caibam em {pct}% do programa mais curto ({shortest}s); só a cadência de atualização (mediana={median}s) teria sugerido um intervalo mais longo.",
+      "match_interval_floored": "Só por si, o programa mais curto ({shortest}s) limitaria este valor a {cap}s, abaixo do mínimo de {minimum}s, pelo que fica nesse mínimo: {persistence} correspondências consecutivas demoram {budget}s, ou seja, mais de {pct}% desse programa. A correspondência só é executada quando chega uma leitura (mediana={median}s), pelo que o mínimo não tem custo.",
       "max_duration_ratio": "Com base nas durações dos ciclos rotulados (p95={p95}).",
       "min_active": "Com base na potência ativa mínima ({min}W) observada no último ciclo.",
       "min_duration_ratio": "Mantido o mais baixo possível para que um programa seja reconhecido cedo no ciclo; os limiares de confiança e ambiguidade evitam decisões prematuras.",
@@ -1950,10 +1992,11 @@
     "date_tip": "Data e hora de início do ciclo.",
     "duration_tip": "Tempo total de execução do ciclo, do início ao fim.",
     "energy_tip": "Energia total consumida (kWh). Calculada integrando a potência ao longo do tempo.",
-    "cost_tip": "Custo de energia deste ciclo, fixado na conclusão usando o preço então em vigor (energia x preço por kWh). Defina um preço nas Definições para o preencher.",
+    "cost_tip": "Custo de energia deste ciclo, fixado na conclusão. Com o Custo Ponderado no Tempo ativado, a curva de potência é cobrada ao preço em vigor em cada momento; caso contrário, energia x o preço único em vigor no fim. Defina um preço nas Definições para o preencher.",
     "confidence_tip": "Confiança de correspondência do perfil (0-100%). Quão próxima a curva de potência do ciclo correspondeu ao programa identificado.",
     "health_tip": "Saúde do ciclo por ML (mais alto = melhor). Clique num ciclo para o inspecionar e rever.",
-    "flags_tip": "Indicadores de revisão, anomalia e origem do ciclo. Passe o cursor sobre um ícone para ver o detalhe."
+    "flags_tip": "Indicadores de revisão, anomalia e origem do ciclo. Passe o cursor sobre um ícone para ver o detalhe.",
+    "cost_dynamic_tip": "Ponderado no tempo: cobrado ao preço em vigor durante o ciclo (preço efetivo {price} {cur}/kWh)."
   },
   "stat": {
     "avg": "méd.",
@@ -1980,9 +2023,9 @@
     "finished": "O ciclo atingiu um estado final e terminou."
   },
   "store": {
+    "search_ph2": "Pesquisar por marca ou modelo…",
     "your_model_tip": "Este é o electrodoméstico que declarou nas Definições",
     "your_model": "O seu",
-    "search_brand_ph": "Pesquisar por marca…",
     "programs_count": "Programas: {n}",
     "browse": "Explorar",
     "device": "Dispositivo",
@@ -2027,7 +2070,8 @@
       "golden": "Reprocessamento: marcação de ciclos de referência",
       "suggestions": "Reprocessamento: sugestões",
       "ml_training": "Reprocessamento: treino de ML",
-      "health": "Reprocessamento: saúde dos ciclos"
+      "health": "Reprocessamento: saúde dos ciclos",
+      "costs": "Reprocessamento: custos de energia"
     },
     "pg_sweep": {
       "optimize": "Otimizar: {param}"

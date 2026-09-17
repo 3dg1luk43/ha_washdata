@@ -48,6 +48,8 @@
         }
     },
     "badge": {
+        "quiet_tail_tip": "Afër fundit ky program bie në qetësi për rreth {mins} min, pastaj tërheq rreth {watts} W për {secs} s përpara se të përfundojë. Vërejtur në {seen}/{measured} cikle të matura: pajisja nuk e bën këtë në çdo nisje.",
+        "quiet_tail": "~{mins} min qetësi në fund",
         "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) – hapeni për t'i parë ato në grafik",
         "auto": "(zbuluar automatikisht)",
         "built_in_tag": "i integruar",
@@ -55,7 +57,7 @@
         "energy_low": "Energji më e ulët se zakonisht",
         "energy_spike": "Energji më e lartë se zakonisht",
         "fair_fit": "cilësi e pranueshme",
-        "fair_fit_tip": "Konsistencë e moderuar e ndeshjes – disa cikle të caktuara për këtë profil kanë rezultate më të ulëta besimi. Etiketoni më shumë cikle ose riregjistroni profilin për të përmirësuar saktësinë.",
+        "fair_fit_tip": "Konsistencë e moderuar e përputhjes – disa cikle të caktuara për këtë profil kanë rezultate më të ulëta besueshmërie. Etiketoni më shumë cikle ose riregjistroni profilin për të përmirësuar saktësinë.",
         "feedback_requested": "Kërkohet koment",
         "golden_cycle": "Cikli referues i regjistruar",
         "improving": "↗ në rritje",
@@ -63,7 +65,7 @@
         "needs_review": "Ka nevojë për rishikim",
         "overrun": "Zgjati më shumë se zakonisht",
         "poor_fit": "cilësi e keqe",
-        "poor_fit_tip": "Histori jokonsistente e ndeshjeve – merrni parasysh rindërtimin e këtij profili",
+        "poor_fit_tip": "Histori jokonsistente e përputhjeve – merrni parasysh rindërtimin e këtij profili",
         "restart_gap_tip": "{n} boshllëk rinisje të HA: gjurma e energjisë ka një vrimë",
         "reviewed": "Shqyrtuar",
         "steady": "→ i qëndrueshëm",
@@ -77,11 +79,14 @@
         "approved": "Miratuar",
         "awaiting": "Në pritje të miratimit",
         "imported_tip": "Importuar nga dyqani i komunitetit. Përdoret vetëm për përputhje, nuk llogaritet në statistika.",
+        "unmatchable": "s'mund të përputhet",
         "not_importable": "s'aplikohet këtu",
         "exists": "ekziston",
-        "backfilled_tip": "Zbuluar në historikun e importuar të fuqisë. Ndikon vetëm në përputhjen e programeve, nuk llogaritet në statistika."
+        "backfilled_tip": "Zbuluar në historikun e importuar të fuqisë. Ndikon vetëm në përputhjen e programeve, nuk llogaritet në statistika.",
+        "armed": "(zbatohet për ciklin tjetër)"
     },
     "btn": {
+        "reset_zoom": "Rivendos zmadhimin",
         "set_brand_model": "Cakto markën dhe modelin",
         "refresh_catalog": "Rifresko katalogun",
         "add_device": "+ Shto pajisje",
@@ -215,6 +220,8 @@
         "trim": "Prerje",
         "trim_split": "Prerje / Ndarje",
         "undo": "Zhbëj",
+        "unlabel_selected": "Hiq etiketën nga të zgjedhurat ({n})",
+        "unlabel_selected_tip": "Heq etiketën e profilit nga ciklet e zgjedhura. Ato mbeten në historikun tuaj dhe mund të etiketohen sërish më vonë - thjesht nuk e formësojnë më këtë profil.",
         "use": "Përdor",
         "wipe_all": "Fshi të gjitha të dhënat",
         "delete_selected": "Fshi të zgjedhurat ({n})",
@@ -222,7 +229,6 @@
         "pg_apply_best": "Zbato më të mirën",
         "pg_apply_to_settings": "Ruaj te cilësimet",
         "pg_apply_to_settings_tip": "Kopjo vlerat që redaktove këtu te cilësimet aktive të kësaj pajisjeje",
-        "search": "Kërko",
         "import": "Importo",
         "disconnect": "Shkëput",
         "connect_github": "Lidh GitHub",
@@ -249,7 +255,8 @@
         "hist_read_recorder": "Lexo nga Home Assistant",
         "hist_scan": "Kërko cikle",
         "hist_import_n": "Importo {n} cikle",
-        "hist_goto_cycles": "Shfaq ciklet"
+        "hist_goto_cycles": "Shfaq ciklet",
+        "save_total_cycles": "Ruaj totalin"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -291,6 +298,12 @@
         "power_off": {
             "stop": "Duhet të jetë mbi Pragun e Fikjes së Energjisë ({pot} W)",
             "threshold": "Duhet të jetë nën Pragun e Ndalimit ({stop} W) për të hyrë në fuqi"
+        },
+        "price_entity": {
+            "power_sensor": "Ky është Sensori i fuqisë i pajisjes, jo një çmim. Një entitet çmimi ka përparësi ndaj çmimit statik më poshtë, prandaj ciklet do të faturoheshin sikur vlera në vat të ishte çmimi për kWh - pastroni këtë fushë.",
+            "energy_sensor": "Ky është matësi i energjisë i pajisjes, jo një çmim. Një entitet çmimi ka përparësi ndaj çmimit statik më poshtë, prandaj ciklet do të faturoheshin sikur leximi i matësit të ishte çmimi për kWh - pastroni këtë fushë.",
+            "device_class": "Ky sensor mat {dc}, jo një çmim për kWh. Një entitet çmimi ka përparësi ndaj çmimit statik më poshtë - pastroni këtë fushë ose zgjidhni një sensor tarife.",
+            "unit": "Ky sensor lexon në {unit}, e cila nuk është çmim për kWh. Një entitet çmimi ka përparësi ndaj çmimit statik më poshtë - pastroni këtë fushë ose zgjidhni një sensor tarife."
         },
         "pump_stuck": {
             "duration": "Duhet të jetë më i vogël se Koha e Skadimit pa Përditësim ({to} s) kështu që alarmi i bllokimit të ndizet para se rojtari të vrasë ciklin",
@@ -349,7 +362,7 @@
         "pg_settings_source": "Burimi i cilësimeve",
         "phase_catalog": "Katalog fazash",
         "playground": "Zona e provave",
-        "process_history": "Historiku i procesit",
+        "process_history": "Proceso historinë",
         "settings_history": "Historiku i cilësimeve",
         "status": "Statusi",
         "status_graph": "Grafiku i statusit",
@@ -360,12 +373,12 @@
         "wipe_history": "Fshi historikun",
         "recommendations": "Rekomandime ({n})",
         "pg_detection_params": "Cilësimet e zbulimit",
-        "pg_timeline": "Kronologjia e ngjarjeve",
         "pg_outcome": "Rezultati i simulimit",
         "pg_across_cycles": "Në të gjithë ciklet tuaja",
         "community_store": "Dyqani i Komunitetit",
         "online_account": "Dyqani i Komunitetit dhe veçoritë online",
-        "import_power_history": "Importo historikun e fuqisë"
+        "import_power_history": "Importo historikun e fuqisë",
+        "service_status": "Statusi i mirëmbajtjes"
     },
     "health": {
         "fair": "Cilësi e pranueshme e profilit",
@@ -373,6 +386,10 @@
         "poor": "⚠ Cilësi e keqe e profilit"
     },
     "lbl": {
+        "envelope_position_tip": "Pozicioni në kurbën e regjistruar të vetë programit të përputhur, {pct}%. Matet duke përputhur këtë cikël me profilin në vend që të numërohet koha, prandaj mbetet i saktë kur një nisje është më e gjatë ose më e shkurtër se zakonisht. Freskohet ndërsa pajisja është e qetë, prandaj gjatë një faze aktive mund të mbetet prapa.",
+        "envelope_position": "kurba {pct}%",
+        "aria_playground_chart3": "Grafik interaktiv i fuqisë së ciklit: kaloni kursorin për të lexuar kohën/fuqinë, rrëshqitni ose zmadhoni me dy gishta, tërhiqni për të lëvizur",
+        "device_unresolved": "Pajisje e padisponueshme ({id})",
         "drag_to_resize": "Tërhiqni për të ndryshuar madhësinë",
         "actions": "Veprime",
         "activity": "Aktivitet",
@@ -508,7 +525,7 @@
         "profile_index": "indeksi i profilit →",
         "profile_name": "Emri i profilit",
         "program": "Program",
-        "program_tip": "Anuloni profilin që përputhet me ciklin aktual. Zbulimi automatik lejon integrimin të zgjedhë automatikisht përputhjen më të mirë. Fiksoni një program specifik për të detyruar përputhjen kur zbulimi automatik është i gabuar ose e dini çfarë po funksionon.",
+        "program_tip": "Anuloni profilin që përputhet me ciklin aktual. Zbulimi automatik lejon integrimin të zgjedhë automatikisht përputhjen më të mirë. Fiksoni një program specifik për të detyruar përputhjen kur zbulimi automatik është i gabuar ose e dini çfarë po funksionon. Zgjidhni një program para se të nisni pajisjen dhe do të zbatohet sapo të fillojë cikli tjetër.",
         "progress": "Progresi",
         "raw_socket": "Fole e papërpunuar",
         "read_only": "Vetëm lexim",
@@ -543,6 +560,7 @@
         "stage4": "Etapa 4 – përputhja",
         "status": "Statusi",
         "tail_trim": "Prerje në fund (s)",
+        "tap_to_dismiss": "trokit grafikun për ta mbyllur",
         "timer_auto_pause": "Auto-pauzë",
         "timer_min": "min",
         "timer_msg_placeholder": "Mesazh (opsionale, {device}/{program}/{minutes})",
@@ -579,9 +597,7 @@
         "pg_time_left_model": "Koha e mbetur (modeli)",
         "pg_time_left_model_tip": "Koha e mbetur e vlerësuar nga modeli (vlerësuesi i fazës + përzierje ML), jo një numërim mbrapsht statik",
         "phase": "Faza",
-        "pg_mode_simulate": "Simulo",
         "pg_mode_history": "Testo në histori",
-        "pg_mode_sweep": "Skanim",
         "pg_ev_detected": "U zbulua",
         "pg_ev_match": "Përputhja u përcaktua",
         "pg_ev_match_changed": "Përputhja ndryshoi",
@@ -617,14 +633,11 @@
         "pg_stress_idle_w_desc": "Anuloni vlerën minimale të gjendjes statike të zbuluar automatikisht (lini bosh për automatik).",
         "pg_stress_toggle": "Testo ndërprerjen me gjendje statike",
         "pg_stress_toggle_desc": "Simulon pajisjen që qëndron në nivelin e konsumit të gjendjes statike pas përfundimit të regjistrimit - tregon nëse dhe kur WashData ndalon ciklin.",
-        "pg_sweep_2d": "Hartë nxehtësie 2D",
-        "pg_sweep_param_y": "Parametri 2",
         "pg_obj_match": "Saktësia e përputhjes",
         "pg_obj_endtiming": "Saktësia e kohës së përfundimit",
         "pg_obj_falseend": "Shkalla e përfundimeve të rreme",
         "pg_obj_overrun": "Devijimi i kohëzgjatjes",
         "pg_obj_ambiguity": "Shkalla e paqartësisë",
-        "pg_best_combo": "kombinimi më i mirë",
         "pg_mode_optimize": "Optimizo",
         "pg_group_matching": "Përputhja e programeve",
         "pg_zoom_hint": "klikoni dy herë për të rivendosur zmadhimin",
@@ -706,7 +719,12 @@
         "task_history_import_apply": "Importim i cikleve",
         "evidence_real_cycles": "Ciklet që kreu kjo makinë",
         "evidence_reference_cycles": "Shkarkuar nga dyqani i komunitetit",
-        "evidence_backfill_cycles": "Gjetur në historikun e importuar të fuqisë"
+        "evidence_backfill_cycles": "Gjetur në historikun e importuar të fuqisë",
+        "zoom_hint_touch": "zmadho me dy gishta",
+        "zoom_hint_touch_zoomed": "zmadho me dy gishta · trokit dy herë për rivendosje",
+        "cycles_since_service": "{since} / {total} cikle",
+        "total_cycles_run": "cikle të kryera gjithsej",
+        "correct_total_cycles": "Korrigjo totalin"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -756,7 +774,7 @@
         "merge_cycles": "Bashko {n} cikle",
         "new_group": "Grup i ri profilesh",
         "new_phase": "Fazë e re",
-        "process_history_msg": "Riekzekutoni përputhjen, rifreskoni sugjerimet, stërvitni ML (nëse aktivizuara) dhe rillogaritni shëndetin e cikleve në të gjitha ciklet e ruajtura. Kjo mund të marrë pak kohë.",
+        "process_history_msg": "Riekzekutoni përputhjen, rifreskoni sugjerimet, ristërvitni ML (nëse është aktivizuar), rillogaritni koston e cikleve sipas çmimeve të regjistruara të energjisë dhe rillogaritni shëndetin e cikleve në të gjitha ciklet e ruajtura. Kjo mund të marrë pak kohë.",
         "process_history_ok": "Proceso",
         "process_history_title": "Proceso historinë",
         "process_recording": "Proceso regjistrimin",
@@ -789,6 +807,7 @@
         "history_import": "Importo historikun e fuqisë"
     },
     "msg": {
+        "pg_canvas_empty3": "Zgjidhni një cikël më sipër dhe shtypni Ekzekuto për ta simuluar. Pastaj kaloni kursorin për të lexuar vlerat, rrëshqitni ose zmadhoni me dy gishta dhe tërhiqni për të lëvizur.",
         "tail_trim_hint": "Hiqni kaq sekonda nga fundi",
         "store_sibling_hint": "Nuk ka asgjë të ndarë për modelin tuaj të saktë? Një model i afërt i të njëjtës markë është zakonisht një pikënisje e mirë.",
         "store_declare_appliance": "Përcaktoni në WashData pajisjen që zotëroni dhe kjo skedë shfaq konfigurimet që të tjerët kanë ndarë për të. Mund edhe të shkruani një markë më lart për t'i hedhur një sy katalogut.",
@@ -802,7 +821,7 @@
         "artifact_spike_detail": "Shkoi mbi brezin e zakonshëm të fuqisë për ~{n} s.",
         "auto_label_intro": "Cakto profile te ciklet e paetiketuara që besueshmëria e tyre e përputhjes tejkalon pragun.",
         "automations_intro": "WashData ndez ngjarje {start} / {end} dhe ekspozon entitete, kështu njoftimet dhe veprimet ndërtohen më mirë si automatizime normale të Home Assistant. Automatizimi që përdorin këtë pajisje shfaqen më poshtë.",
-        "cleanup_intro": "Çdo cikël i etiketuar mbivendosur. Shëno outlier-ët dhe fshi për të pastruar profilin.",
+        "cleanup_intro": "Çdo cikël i etiketuar është mbivendosur. Shëno outlier-ët, pastaj hiq etiketën e tyre (mbeten në historik, por nuk e formësojnë më këtë profil) ose fshiji përfundimisht.",
         "clear_debug_hint": "Hiqni të dhënat e ruajtura të korrigjimit për të liruar hapësirën.",
         "collecting_data": "Duke mbledhur të dhëna. Cikle që nevojiten para se të fillojë rregullimi i hollë: {need} ({current}/{min}).",
         "compare_overlay_profiles": "Mbivendos profilet (të zbetura)",
@@ -901,7 +920,7 @@
         "preferences_admin": "Preferencat, paneli dhe kontrolli i aksesit",
         "preferences_adv": "Preferencat",
         "prefs_personal": "Këto vlejnë vetëm për llogarinë tuaj të Asistentit në Shtëpi.",
-        "process_history_hint": "Riekzekutoni përputhjen në të gjitha ciklet e ruajtura, rifreskoni sugjerimet e sintonizimit, stërvitni modelet ML (nëse janë aktivizuara) dhe rillogaritni shëndetin e cikleve. Ekzekutoni këtë pas një grupi rishikimesh.",
+        "process_history_hint": "Riekzekutoni përputhjen në të gjitha ciklet e ruajtura, rifreskoni sugjerimet e sintonizimit, ristërvitni modelet ML (nëse janë aktivizuara), rillogaritni koston e cikleve sipas çmimeve të regjistruara të energjisë dhe rillogaritni shëndetin e cikleve. Ekzekutoni këtë pas një grupi rishikimesh.",
         "profile_deleted": "Profili u fshi",
         "profile_poor_health_detail": "Ciklet e caktuara për këtë profil kanë forma jokonsistente ose besim të ulët. Merrni parasysh rindërtimin e zarfit ose rishikimin e cikleve të etiketuara.",
         "profiles_intro": "Kliko një profil për statistika, faza dhe pastrim. Grupo programe pothuajse identike (të njëjtën formë/kohëzgjatje, temperaturë ose centrifugim të ndryshëm) kështu që përputhja zgjedh me besueshmëri ndërmjet tyre.",
@@ -984,9 +1003,10 @@
         "advisory_poor_health": "'{name}' ka një rezultat të ulët përputhjeje - ciklet e tij të fundit ndryshojnë shumë ose përputhen dobët. Rishikoni ciklet e tij ose regjistrojeni sërish profilin që njohja dhe vlerësimet e kohës të mbeten të sakta.",
         "advisory_shape_drift": "'{name}' ka devijuar ndjeshëm nga forma e tij fillestare e fuqisë. Sjellja e pajisjes mund të ketë ndryshuar me kalimin e kohës (p.sh. gëlqerëzim, konsumim). Merrni në konsideratë regjistrimin sërish të këtij profili me ciklet e fundit.",
         "advisory_shape_drift_corr": "'{name}' ka devijuar ndjeshëm nga forma e tij fillestare e fuqisë (korrelacioni {corr}). Sjellja e pajisjes mund të ketë ndryshuar me kalimin e kohës (p.sh. gëlqerëzim, konsumim). Merrni në konsideratë regjistrimin sërish të këtij profili me ciklet e fundit.",
+        "advisory_unmatchable": "'{name}' nuk mund të përputhet kurrë: pas tij nuk ka asnjë cikël me të dhëna të energjisë, kështu që WashData nuk ka me çfarë të krahasojë ciklin që ekzekutohet. Etiketoni një cikël të këtij programi (ose regjistroni një cikël të ri) për ta rikthyer në përputhje.",
+        "advisory_unmatchable_no_duration": "'{name}' nuk mund të përputhet kurrë: ka një cikël me të dhëna të energjisë, por pa një kohëzgjatje të përdorshme, kështu që WashData nuk ka asnjë kohëzgjatje mbi të cilën të masë një përputhje. Regjistrojeni sërish këtë program, ose caktoni kohëzgjatjen e tij të pritshme, për ta rikthyer në përputhje.",
         "pg_no_alerts": "Nuk u zbuluan probleme në këtë ekzekutim.",
         "pg_override_active": "Po përdoren cilësimet tuaja të redaktuara kundrejt atyre aktuale",
-        "pg_history_intro": "Riluani ciklet tuaja të fundit përmes zbuluesit dhe përputhësit të vërtetë. Redaktoni fillimisht një cilësim zbulimi te Simulo për të parë këtu një krahasim para/pas.",
         "pg_history_empty": "Shtypni Ekzekuto për të riluajtur ciklet tuaja.",
         "pg_history_summary": "{detected}/{total} u zbuluan · {correct} u përputhën saktë",
         "pg_sweep_no_metric": "Nuk ka mjaftueshëm të dhëna për të vlerësuar këtë objektiv.",
@@ -1063,7 +1083,11 @@
         "hist_scan_failed": "Skanimi dështoi.",
         "hist_scan_expired": "Ai skanim nuk është më i disponueshëm. Skanoni përsëri.",
         "hist_import_failed": "Importimi dështoi.",
-        "imported_history_readonly": "Zbuluar në historikun e importuar të fuqisë. Ndikon në përputhjen e programeve, por nuk llogaritet në statistikat tuaja dhe nuk mund të shkurtohet ose të ndahet. Etiketojeni për të emërtuar programin."
+        "imported_history_readonly": "Zbuluar në historikun e importuar të fuqisë. Ndikon në përputhjen e programeve, por nuk llogaritet në statistikat tuaja dhe nuk mund të shkurtohet ose të ndahet. Etiketojeni për të emërtuar programin.",
+        "odometer_intro": "Ky total vetëm rritet. Fshirja e regjistrimit të një cikli nuk e ndryshon dhe vazhdon të numërojë përtej kufirit të historikut të ruajtur, kështu që kujtesat e servisit mbeten të sakta.",
+        "odometer_correct_hint": "Vendosni këtë vlerë nëse WashData regjistroi një cikël që nuk ndodhi kurrë, ose nëse pajisja kishte kryer cikle përpara se WashData të instalohej.",
+        "no_reminders_set": "Nuk është caktuar ende asnjë kujtesë servisi.",
+        "toast_program_armed": "Programi u caktua për ciklin tjetër: {program}"
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1157,6 +1181,10 @@
         }
     },
     "setting": {
+        "anti_crease_finalize_ratio": {
+            "doc": "Sa larg brenda kohëzgjatjes së pritur të programit të përputhur duhet të ketë ecur një cikël përpara se WashData të mund të vendosë se rrotullimi i qetë që po sheh është bishti kundër rrudhave dhe ta mbyllë ciklin aty. Kohëzgjatja e pritur është mesatarja e programit, prandaj te një tharëse kohëzgjatja e së cilës me sensor lagështie varet nga ngarkesa, shumica e nisjeve nuk e arrijnë kurrë 98% të saj dhe bishti qëndron deri te afati rezervë - shpesh 15 deri në 40 minuta pasi makina ka ndaluar në të vërtetë. Uleni këtë vlerë (p.sh. 0.75) te një tharëse e tillë. Makinat larëse lërini në vlerën e parazgjedhur: një makinë larëse e kalon pjesën më të madhe të ciklit nën cilësimin Fuqia maks. kundër rrudhave, prandaj ky fraksion është e vetmja gjë që ndan një fazë të qetë në mes të larjes nga bishti, dhe ulja e tij mund ta përgjysmojë një larje. Lëreni bosh për vlerën e parazgjedhur (0.98). Ky është një cilësim tjetër nga Raporti i Përfundimit të Zgjuar, i cili kontrollon një verifikim të veçantë të përfundimit të hershëm.",
+            "label": "Raporti i finalizimit kundër rrudhave"
+        },
         "anti_wrinkle_enabled": {
             "doc": "Njihni pulset e shkurtra me fuqi të ulët që lëshon një tharëse pas fazës kryesore të nxehtësisë dhe mbajini të lidhura me ciklin e përfunduar në vend që t'i lexoni si cikle të reja.",
             "label": "Aktivizo zbulimin kundër rrudhave"
@@ -1178,7 +1206,7 @@
             "label": "Fuqia maks. kundër rrudhave"
         },
         "auto_label_confidence": {
-            "doc": "Nëse rezultati i ndeshjes në fund të ciklit është në ose mbi këtë, programi etiketohet automatikisht pa ndonjë kërkesë konfirmimi. Rriteni atë për të kërkuar siguri më të lartë përpara etiketimit automatik; uleni atë për të automatizuar më shumë. Funksionon në lidhje me besimin e të mësuarit nën të.",
+            "doc": "Nëse rezultati i përputhjes në fund të ciklit është në këtë nivel ose mbi të, programi etiketohet automatikisht pa asnjë kërkesë konfirmimi. Rriteni për të kërkuar siguri më të lartë përpara etiketimit automatik; uleni për të automatizuar më shumë. Funksionon së bashku me Besueshmërinë e të mësuarit menjëherë poshtë tij.",
             "label": "Besueshmëria e etiketimit automatik"
         },
         "auto_maintenance": {
@@ -1188,6 +1216,10 @@
         "completion_min_seconds": {
             "doc": "Ciklet më të shkurtra se kjo hidhen si cikle fantazmë (vrapime testimi, hapja e derës për të shtuar një çorape).",
             "label": "Kohëzgjatja min. e ciklit"
+        },
+        "curve_preroll_seconds": {
+            "doc": "Sa sekonda leximesh nga përpjekjet e ndërprera për nisje mund të bartë WashData në fillim të kurbës së një cikli. Kurba e një cikli normalisht fillon nga përpjekja e nisjes që më në fund ia del, prandaj te një makinë që provon disa herë përpara se të vendoset - zgjedhja e programit, bllokimi i derës, mbushja e parë me ujë - minutat e para të aktivitetit të vërtetë mungojnë në çdo kurbë. Vendoseni këtë vlerë pak mbi nisjen më të gjatë të tillë që ka makina juaj (300 s është më se e mjaftueshme për shumicën). 0 e çaktivizon. Kini parasysh se aktivizimi e zhvendos më herët fillimin e regjistruar, prandaj ciklet e regjistruara para dhe pas ndryshimit mbajnë kohëzgjatje të ndryshme për të njëjtin program; mesataret e mësuara do të zhvendosen derisa ciklet më të vjetra të dalin nga përdorimi.",
+            "label": "Sekondat hyrëse të kurbës"
         },
         "delay_confirm_seconds": {
             "doc": "Energjia duhet të qëndrojë në brezin e gatishmërisë për kaq shumë kohë përpara se pajisja të trajtohet si në pritje për të nisur në vend që të funksionojë.",
@@ -1226,7 +1258,7 @@
             "label": "Numri i përsëritjeve të fundit"
         },
         "energy_price_entity": {
-            "doc": "Sensori me çmimin aktual të energjisë elektrike për kWh (p.sh. një tarifë dinamike). Ka përparësi ndaj çmimit statik më poshtë. Çdo cikël ngrin çmimin në fuqi kur të përfundojë.",
+            "doc": "Sensori me çmimin aktual të energjisë elektrike për kWh (p.sh. një tarifë dinamike). Duhet të jetë një çmim, jo entiteti i fuqisë ose i energjisë së vetë prizës: ka përparësi ndaj çmimit statik më poshtë, prandaj një numërues kWh i vendosur këtu e faturon çdo cikël me leximin e matësit në vend të tarifës suaj. Kur është aktive Kosto e ponderuar sipas kohës, çdo cikël faturohet me çmimin në fuqi në çdo çast që ai punoi; përndryshe mbi të ngrihet çmimi në fuqi kur ai përfundoi.",
             "label": "Entiteta e çmimit të energjisë"
         },
         "energy_price_static": {
@@ -1238,7 +1270,7 @@
             "label": "Entiteti i matësit të energjisë"
         },
         "expose_debug_entities": {
-            "doc": "Publikoni entitete shtesë diagnostikuese HA (besimi i ndeshjes, paqartësia, të brendshmet e gjendjes). Off e mban listën e entiteteve të pastër për përdorim normal.",
+            "doc": "Publikoni entitete shtesë diagnostikuese HA (besueshmëria e përputhjes, paqartësia, të brendshmet e gjendjes). Joaktiv e mban listën e entiteteve të pastër për përdorim normal.",
             "label": "Ekspono entitetet e korrigjimit"
         },
         "external_end_trigger": {
@@ -1254,7 +1286,7 @@
             "label": "Invertoj aktivizuesin e jashtëm (aktivizoj kur FIKUR)"
         },
         "learning_confidence": {
-            "doc": "Nëse rezultati i ndeshjes bie midis kësaj dhe \"Konfidencës me etiketë automatike\", një njoftim reagimi ju kërkon të verifikoni programin e identifikuar. Poshtë këtij rezultati ndeshja është shumë e pasigurt për t'u shfaqur. Duhet të mbahet nën Besueshmërinë e Etiketës Automatike.",
+            "doc": "Nëse rezultati i përputhjes bie midis kësaj dhe Besueshmërisë së etiketimit automatik, një njoftim reagimi ju kërkon të verifikoni programin e identifikuar. Poshtë këtij rezultati përputhja është shumë e pasigurt për t'u shfaqur. Duhet të mbahet nën Besueshmërinë e etiketimit automatik.",
             "label": "Besueshmëria e të mësuarit"
         },
         "linked_device": {
@@ -1322,7 +1354,7 @@
             "label": "Aktivizo ngjarje HA për njoftime"
         },
         "notify_icon": {
-            "doc": "Ikona opsionale mdi për njoftimin (p.sh. mdi: makinë larëse). Lëreni bosh për parazgjedhjen e platformës.",
+            "doc": "Ikona e vogël që shfaqet në njoftim (p.sh. mdi:washing-machine). Android e vizaton në shiritin e statusit; iOS e shfaq në vend të ikonës së aplikacionit dhe kërkon aplikacionin shoqërues 2026.8 ose më të ri. Lëreni bosh për parazgjedhjen e platformës.",
             "label": "Ikona e njoftimit"
         },
         "notify_live_chronometer": {
@@ -1422,7 +1454,7 @@
             "label": "Pragu i përputhjes"
         },
         "profile_unmatch_threshold": {
-            "doc": "Nëse një ndeshje e drejtpërdrejtë në mes të ciklit bie nën këtë rezultat, identifikimi paraprak pastrohet. Mbajeni atë pak më poshtë Pragut të Përputhjes në mënyrë që një rënie e shkurtër në ngjashmëri të mos e kthejë ekranin përsëri në të pashoq.",
+            "doc": "Nëse një përputhje e drejtpërdrejtë në mes të ciklit bie nën këtë rezultat, identifikimi paraprak pastrohet. Mbajeni pak më poshtë Pragut të përputhjes, në mënyrë që një rënie e shkurtër e ngjashmërisë të mos e kthejë ekranin përsëri në gjendjen pa përputhje.",
             "label": "Pragu i mosperputhjeve"
         },
         "progress_reset_delay": {
@@ -1432,10 +1464,6 @@
         "pump_stuck_duration": {
             "doc": "Sekonda një pompë mund të funksionojë vazhdimisht përpara se të shënohet si e mundshme e mbërthyer (ndiz ngjarjen e pompës së mbërthyer).",
             "label": "Kohëzgjatja e pompës së bllokuar"
-        },
-        "running_dead_zone": {
-            "doc": "Pas fillimit të një cikli, uljet e energjisë brenda kësaj dritareje nuk merren parasysh. Makinat larëse mbushen me ujë të ftohtë (duke rënë afër 0 W para ngrohjes) - pa këtë mbrojtje, faza e mbushjes duket si një fund cikli. Kjo NUK kapërcen të dhënat: gjurma e plotë e fuqisë regjistrohet nga T=0. Motori i sugjerimeve mat modelin aktual të nisjes së makinës suaj dhe e përmason atë automatikisht.",
-            "label": "Zona e vdekur e ekzekutimit"
         },
         "sampling_interval": {
             "doc": "Koha e pritshme midis leximeve të sensorit - përdoret për madhësinë e dritares së zbutjes dhe fillimin e debouncimit në mënyrë korrekte. Çdo përditësim i sensorit kapet pavarësisht nga kjo vlerë; ai kalibron vetëm llogaritjet e rrjedhës së poshtme. Motori i sugjerimeve mat kadencën aktuale të sensorit tuaj nga ciklet e kaluara dhe e vendos këtë automatikisht.",
@@ -1564,13 +1592,17 @@
             "label": "Intervali i Profilit të Energjisë",
             "doc": "Madhësia e kovës për atributin e sensorit power_profile (vargu i sheshtë me vat mesatare për slot) të konsumuar nga planifikues të jashtëm si EMHASS dhe tibber_prices. Kova më të vogla mbajnë pikat e shkurtra të energjisë të mprehta; kova më të mëdha zbuten forma. Parazgjedhja 15 min. Vetëm për lexim; nuk ndikon zbulimin."
         },
+        "notify_live_silent": {
+            "label": "Përditësime live pa zë",
+            "doc": "Vetëm iOS. Rifreskoni progresin live në heshtje: çdo përditësim vjen pa zë dhe pa dridhje, me një përparësi më të ulët që kursen baterinë dhe që iOS mund ta grupojë për pak kohë. Përditësimi i parë i një cikli (ai që nis Live Activity), si dhe njoftimet e nisjes dhe të përfundimit, sinjalizojnë si zakonisht. Çaktivizojeni këtë për t'u njoftuar në çdo përditësim."
+        },
         "notify_live_sticky": {
             "label": "Mbaj njoftimin live pas trokitjes",
             "doc": "Vetëm Android. Bëni njoftimin e progresit live të vazhdueshëm (sticky) kështu që trokitja mbi të nuk e humb fijen e vazhdueshme. Off ruan sjelljen e parazgjedhur ku trokitja e humb atë."
         },
         "notify_live_click_action": {
-            "label": "Destinacioni i trokitjes së njoftimit live",
-            "doc": "Vetëm Android. Ku hap trokitja mbi njoftimin e progresit live (p.sh. /lovelace/laundry ose një URL e plotë) në vend të faqes kryesore të aplikacionit. Lëreni bosh për parazgjedhjen."
+            "label": "Destinacioni i trokitjes së njoftimit",
+            "doc": "Ku të çojë trokitja mbi një njoftim nga kjo pajisje, në Android dhe iOS. E lënë bosh, hap panelin WashData te kjo pajisje. Shkruani shtegun e një paneli kontrolli (p.sh. /lovelace/laundry) ose një URL të plotë për ta dërguar diku tjetër, ose \"none\" që të mos ketë fare destinacion trokitjeje."
         },
         "door_opens_at_end": {
             "label": "Dera hapet automatikisht në fund",
@@ -1587,6 +1619,10 @@
         "profile_evidence_sources": {
             "label": "Ciklet që formojnë një program",
             "doc": "Cilat cikle përdoren për të ndërtuar kurbën e fuqisë së secilit program dhe për të përputhur me të një cikël të përfunduar. Heqja e shenjës nga një lloj e ndalon atë të formojë programet tuaja pa fshirë asgjë - ciklet mbeten në listën Cikle dhe mund të etiketohen ose të hiqen si më parë. E dobishme nëse nuk i besoni të dhënave të importuara. Statistikat nuk preken: ato numërojnë gjithmonë vetëm ciklet që kjo makinë kreu vërtet. Heqja e shenjës nga të gjitha llojet shpërfillet, sepse një program pa cikle pas tij nuk mund të përputhej kurrë."
+        },
+        "energy_price_dynamic": {
+            "label": "Kosto e ponderuar sipas kohës",
+            "doc": "Çdo cikël faturohet me çmimin në fuqi në çdo çast që ai punoi, në vend të një çmimi të vetëm në fuqi kur ai përfundoi. Vlen vetëm për një entitet çmimi (një çmim statik nuk ndryshon). Nuk kërkon konfigurim shtesë: çmimi ndiqet drejtpërdrejt ndërsa cikli po punon, kurse veprimi Proceso historinë te Diagnostikimi rillogarit koston e cikleve më të vjetra nga recorder. Joaktiv = sjellja klasike, një çmim i vetëm i ngrirë në fund."
         }
     },
     "setting_group": {
@@ -1698,7 +1734,8 @@
         "splitting": "Po ndahet…",
         "deleting": "Po fshihet…",
         "imported": "Importuar",
-        "preparing": "Po përgatitet…"
+        "preparing": "Po përgatitet…",
+        "unlabelling": "Po hiqet etiketa…"
     },
     "tab": {
         "advanced": "I avancuar",
@@ -1778,6 +1815,7 @@
         "recording_stopped": "Regjistrimi u ndalua",
         "review_saved": "Rishikimi u ruajt",
         "settings_conflicts": "Korrigjoni konfliktet e theksuara të cilësimeve para ruajtjes.",
+        "settings_no_changes": "Nuk ka ndryshime për të ruajtur",
         "settings_reverted": "Cilësimet u rivendosën; integrimi po ringarkohet",
         "settings_saved": "Cilësimet u ruajtën; integrimi po ringarkohet",
         "suggestions_applied": "Sugjerimet u zbatuan; integrimi po ringarkohet",
@@ -1836,7 +1874,11 @@
         "export_selective_done": "Eksporti u shkarkua",
         "import_selective_done": "U importuan {profiles} profil(e) dhe {cycles} cikël(cikle)",
         "hist_csv_required": "Ngarkoni së pari një skedar CSV ose ngjitni përmbajtjen e tij",
-        "file_read_failed": "Skedari nuk mund të lexohej"
+        "file_read_failed": "Skedari nuk mund të lexohej",
+        "unlabel_done": "U hoq etiketa nga {count} cikël(e)",
+        "unlabel_failed": "Heqja e etiketës dështoi: {error}",
+        "odometer_saved": "Totali i cikleve u ruajt",
+        "odometer_save_failed": "Nuk u ruajt dot totali: {error}"
     },
     "suggestion": {
         "both_agree": "WashData rekomandon",
@@ -1883,10 +1925,6 @@
                 "higher": "Konfirmon vetëm përputhjet me besueshmëri të lartë; më shumë cikle mbeten pa etiketë",
                 "lower": "Përputhet me më shumë cikle; disa mund të jenë paksa të gabuara"
             },
-            "running_dead_zone": {
-                "higher": "Injoron kumbëzat e shkurtra të fuqisë gjatë pushimit – më pak e ndjeshme ndaj zhurmës",
-                "lower": "Reagron ndaj shpërthimeve më të shkurtra të fuqisë – kap aktivitetin kalimtar të shpejtë"
-            },
             "start_threshold_w": {
                 "higher": "Shmang startet false nga kumbëzat e shkurtra të fuqisë",
                 "lower": "Kap programet me fuqi të ulët; mund të aktivizohet nga zhurma"
@@ -1911,6 +1949,8 @@
             "end_repeat_count": "{false}/{total} cikle të pastra ({pct}%) patën një pauzë të brendshme >60s që vazhdoi; kërkohen {val} konfirmim(e) fundi.",
             "learning_confidence": "Besueshmëria p05 e {cycles} cikleve të etiketuara nga përdoruesi ({p05}); nën këtë vlerë, kërkohet verifikim.",
             "match_interval": "Bazuar në ritmin e vëzhguar të përditësimit (mesatarja={median}s) * 10.",
+            "match_interval_capped": "Kufizuar që {persistence} përputhje të njëpasnjëshme të hyjnë në {pct}% të programit më të shkurtër ({shortest}s); vetëm ritmi i përditësimit (mesatarja={median}s) do të kishte sugjeruar një interval më të gjatë.",
+            "match_interval_floored": "Vetëm programi më i shkurtër ({shortest}s) do ta kufizonte këtë në {cap}s, nën minimumin prej {minimum}s, prandaj mbahet te minimumi: {persistence} përputhje të njëpasnjëshme zgjasin {budget}s, që është më shumë se {pct}% e atij programi. Përputhja kryhet vetëm kur mbërrin një lexim i ri (mesatarja={median}s), ndaj minimumi nuk kushton asgjë.",
             "max_duration_ratio": "Bazuar në kohëzgjatjet e cikleve të etiketuara (p95={p95}).",
             "min_active": "Bazuar në fuqinë minimale aktive ({min}W) të vëzhguar në ciklin e fundit.",
             "min_duration_ratio": "Mbahet sa më i ulët që një program të njihet herët në cikël; pragjet e besueshmërisë dhe të paqartësisë parandalojnë konfirmimet e parakohshme.",
@@ -1990,7 +2030,9 @@
         "duration_scale": "Etapa 4: raporti logaritmik ku marrëveshja e kohëzgjatjes gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.175)",
         "energy_scale": "Etapa 4: raporti logaritmik ku marrëveshja e energjisë gjysmohet; më i vogël = ndëshkim më i rreptë (parazgjedhja 0.25)",
         "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda qetësie pas kohëzgjatjes së pritur para se të lirohet pritja e shkarkimit në fund të ciklit",
-        "smart_termination_duration_ratio": "Pjesa e kohëzgjatjes së pritur të programit të përputhur që një cikël duhet të arrijë përpara se Përfundimi i Zgjuar të mund ta mbyllë atë herët; uleni për makina që varen nga ngarkesa ose temperatura"
+        "smart_termination_duration_ratio": "Pjesa e kohëzgjatjes së pritur të programit të përputhur që një cikël duhet të arrijë përpara se Përfundimi i Zgjuar të mund ta mbyllë atë herët; uleni për makina që varen nga ngarkesa ose temperatura",
+        "anti_crease_finalize_ratio": "Pjesa e kohëzgjatjes së pritur të programit të përputhur që një cikël duhet të arrijë përpara se bishti i rrotullimit kundër rrudhave të mund të finalizohet; uleni te tharëset me bisht të gjatë rrotullimi, makinat larëse lërini në vlerën e parazgjedhur",
+        "curve_preroll_seconds": "Sekonda leximesh nga përpjekjet e ndërprera për nisje të bartura në fillim të kurbës së një cikli; 0 = joaktiv"
     },
     "col": {
         "profile_tip": "Emri i programit të përputhur. I paetiketuar do të thotë se asnjë profil nuk u përputh në fund të ciklit.",
@@ -1998,10 +2040,11 @@
         "date_tip": "Data dhe ora kur filloi cikli.",
         "duration_tip": "Koha e plotë e ekzekutimit të ciklit nga fillimi deri në fund.",
         "energy_tip": "Energjia e plotë e konsumuar (kWh). Llogaritur duke integruar fuqinë me kalimin e kohës.",
-        "cost_tip": "Kostoja e energjisë për këtë cikël, e ngrirë në përfundim duke përdorur çmimin në fuqi atëherë (energjia x çmimi për kWh). Vendos një çmim te Cilësimet për ta plotësuar.",
+        "cost_tip": "Kostoja e energjisë për këtë cikël, e ngrirë në përfundim. Kur është aktive Kosto e ponderuar sipas kohës, kurba e fuqisë faturohet me çmimin në fuqi në çdo çast; përndryshe energjia x çmimi i vetëm në fuqi në fund. Vendos një çmim te Cilësimet për ta plotësuar.",
         "confidence_tip": "Besueshmëria e përputhjes së profilit (0-100%). Sa afër përputhej kurba e fuqisë së ciklit me programin e identifikuar.",
         "health_tip": "Shëndeti ML i ciklit (më lart = më mirë). Kliko një cikël për ta inspektuar dhe shqyrtuar.",
-        "flags_tip": "Flamujt e rishikimit, anomalive dhe burimit për ciklin. Vendosni miun mbi ikonë për detaje."
+        "flags_tip": "Flamujt e rishikimit, anomalive dhe burimit për ciklin. Vendosni miun mbi ikonë për detaje.",
+        "cost_dynamic_tip": "E ponderuar sipas kohës: e faturuar me çmimin në fuqi gjatë ciklit (efektivisht {price} {cur}/kWh)."
     },
     "stat": {
         "avg": "mesatare",
@@ -2028,9 +2071,9 @@
         "finished": "Cikli arriti gjendjen përfundimtare dhe përfundoi."
     },
     "store": {
+        "search_ph2": "Kërko sipas markës ose modelit…",
         "your_model_tip": "Kjo është pajisja që deklaruat te Cilësimet",
         "your_model": "E juaja",
-        "search_brand_ph": "Kërko sipas markës…",
         "programs_count": "Programe: {n}",
         "browse": "Shfleto",
         "device": "Pajisja",
@@ -2076,7 +2119,8 @@
             "golden": "Ripërpunim: shënimi i cikleve referues",
             "suggestions": "Ripërpunim: sugjerime",
             "ml_training": "Ripërpunim: trajnimi i ML-së",
-            "health": "Ripërpunim: shëndeti i cikleve"
+            "health": "Ripërpunim: shëndeti i cikleve",
+            "costs": "Ripërpunim: kostot e energjisë"
         },
         "pg_sweep": {
             "optimize": "Optimizim: {param}"

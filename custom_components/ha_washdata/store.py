@@ -201,12 +201,12 @@ class StoreBridge:
 
     # ── catalog browse (reads) ───────────────────────────────────────────────────
 
-    async def list_brands(self, query: str | None = None, include_pending: bool = True) -> list[dict[str, Any]]:
+    async def list_brands(self, query: str | None = None, *, include_pending: bool = True) -> list[dict[str, Any]]:
         return await self._client.list_brands(query, include_pending=include_pending)
 
     async def search_devices(
         self, brand: str | None, appliance_type: str | None,
-        model_query: str | None = None, include_pending: bool = False,
+        model_query: str | None = None, *, include_pending: bool = False,
     ) -> list[dict[str, Any]]:
         return await self._client.search_devices(
             brand, appliance_type, model_query=model_query, include_pending=include_pending,
@@ -228,8 +228,11 @@ class StoreBridge:
         self._client.refresh_catalog()
         return {"ok": True}
 
-    async def get_profiles(self, device_id: str) -> list[dict[str, Any]]:
-        return await self._client.get_profiles(device_id)
+    async def get_profiles(self, device_id: str, *, include_pending: bool = True) -> list[dict[str, Any]]:
+        """Shared programs for a catalog appliance. Pending-inclusive, like the device
+        list this is opened from and like get_cycles below; passed explicitly so the
+        browse cannot silently drift back to approved-only (which showed nothing)."""
+        return await self._client.get_profiles(device_id, include_pending=include_pending)
 
     async def device_profiles(self, brand: str, model: str, appliance_type: str) -> dict[str, Any]:
         """Profiles for the appliance identified by brand/model/type (for the Share

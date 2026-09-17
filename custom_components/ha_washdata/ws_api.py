@@ -43,6 +43,10 @@ from .const import (
     CONF_DEVICE_TYPE,
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
     CONF_SMART_TERMINATION_DURATION_RATIO,
+    CONF_ANTI_CREASE_FINALIZE_RATIO,
+    ANTI_CREASE_FINALIZE_RATIO_MIN,
+    ANTI_CREASE_FINALIZE_RATIO_MAX,
+    CONF_CURVE_PREROLL_SECONDS,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
@@ -78,6 +82,9 @@ from .const import (
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
+    DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+    DEFAULT_CURVE_PREROLL_SECONDS,
+    CURVE_PREROLL_MAX_SECONDS,
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
     resolve_start_duration_default,
@@ -108,7 +115,11 @@ from .const import (
 from . import history_import
 from . import playground
 from . import task_registry
-from .cycle_detector import CycleDetectorConfig
+from .cycle_detector import (
+    CycleDetectorConfig,
+    effective_anticrease_finalize_ratio,
+    effective_curve_preroll_seconds,
+)
 from .options_utils import strip_null_options
 from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
@@ -540,6 +551,8 @@ _FULL_COMMANDS = frozenset({
     "get_export_inventory", "analyze_import", "export_config_selective", "import_config_selective",
     # Reverting on-device models / matcher tuning discards learned state -> full access.
     "revert_matching_config", "revert_ml_models",
+    # Rewrites the appliance's lifetime odometer, which drives maintenance schedules.
+    "set_lifetime_cycle_count",
     # Historical power-data import: ingests a whole power history and writes cycles.
     "history_import_begin", "history_import_chunk", "history_import_recorder",
     "start_history_import_scan", "apply_history_import",
@@ -1222,6 +1235,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_profile_groups, ws_save_profile_group, ws_rename_profile_group, ws_delete_profile_group,
         # Maintenance log (Group E)
         ws_get_maintenance_log, ws_add_maintenance_event, ws_delete_maintenance_event,
+        ws_set_lifetime_cycle_count,
         # Cycles
         ws_label_cycle, ws_delete_cycle, ws_auto_label_cycles,
         # Phase catalog
@@ -1340,6 +1354,12 @@ def ws_get_devices(
             "recording": False,
             "is_user_paused": False,
             "manual_program": False,
+            "armed_program": None,
+            # Defaulted here rather than only in the manager branch below: both are
+            # declared non-optional by DeviceInfo (ws_schema.py) and ws-types.d.ts,
+            # and the branch is skipped for a manager-less entry (mid-setup, stale,
+            # or a setup that failed) as well as short-circuited by its own except.
+            "envelope_position": None,
             "options": dict(entry.options),
             # Device-resolved defaults for the cadence/ratio fields (#396/#393) so the
             # device-list conflict/suggestion badges score an unset field against the
@@ -1361,16 +1381,28 @@ def ws_get_devices(
                     program = None
                 info["current_program"] = program
                 info["manual_program"] = bool(getattr(manager, "manual_program_active", False))
+                # A program pinned for the NEXT cycle (#411). Kept separate from
+                # current_program so an idle device does not claim to be running one.
+                info["armed_program"] = getattr(manager, "armed_program", None)
 
                 info["time_remaining_s"] = getattr(manager, "_time_remaining", None)
                 info["total_duration_s"] = getattr(manager, "_total_duration", None)
 
-                power = getattr(manager, "_current_power", None)
+                # Read through the property, not the raw cache (#409): it falls back
+                # to the sensor's live state so the panel can never show a power the
+                # sensor never reported.
+                power = getattr(manager, "current_power", None)
                 info["current_power_w"] = round(float(power), 2) if power is not None else None
 
                 progress = getattr(manager, "_cycle_progress", None)
                 if progress is not None:
                     info["cycle_progress_pct"] = round(float(progress), 1)
+
+                # Where the run maps onto the matched profile's own curve (item 269).
+                # Independent of elapsed time, so it stays meaningful when a cycle
+                # over- or under-runs; refreshed only during low-power phases, which
+                # the panel's tooltip says.
+                info["envelope_position"] = getattr(manager, "envelope_position", None)
 
                 store = getattr(manager, "profile_store", None)
                 if store is not None:
@@ -1518,6 +1550,10 @@ def _resolved_option_defaults(device_type: str) -> dict[str, Any]:
         CONF_SMART_TERMINATION_DURATION_RATIO: (
             resolve_smart_termination_duration_ratio_default(device_type)
         ),
+        # #429: deliberately NOT device-resolved (the safe value is a property of
+        # the individual machine), but the panel pre-populates it from the same
+        # payload, so it is published here rather than left to the JS default.
+        CONF_ANTI_CREASE_FINALIZE_RATIO: DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
     }
 
 
@@ -1535,7 +1571,14 @@ def ws_get_options(
     if not entry:
         connection.send_error(msg["id"], "not_found", f"Entry {msg['entry_id']!r} not found")
         return
-    options = {**entry.data, **entry.options}
+    # #422: the display name is carried by ``entry.title``, never by options -
+    # ``_merge_structural_options`` and ``_OPTIONS_IDENTITY_KEYS`` strip CONF_NAME
+    # back out on every save. ``entry.data[CONF_NAME]`` is therefore a fossil from
+    # ``async_create_entry`` that no rename path updates, and being data-only it is
+    # the one key nothing in options can shadow. Pin it to the title so Settings ->
+    # Basic shows the same name as the device list (which serves entry.title) and a
+    # save can never echo the creation-time name back over the current one.
+    options = {**entry.data, **entry.options, CONF_NAME: entry.title}
     # Device-resolved defaults for the cadence settings whose defaults vary by
     # device type (#396). The panel uses these as the render/conflict-check
     # fallback for an unset field so it shows (and validates against) the value the
@@ -1638,6 +1681,48 @@ async def ws_set_options(
                 )
             except (TypeError, ValueError):
                 new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+
+    # #429: the anti-crease finalise ratio is the same kind of value against the
+    # same kind of mean, and equally meaningless outside [0.50, 1.00]. An empty or
+    # non-numeric submission drops the key so DEFAULT_ANTI_CREASE_FINALIZE_RATIO
+    # applies again.
+    if CONF_ANTI_CREASE_FINALIZE_RATIO in new_options:
+        _raw_ac = new_options[CONF_ANTI_CREASE_FINALIZE_RATIO]
+        if _raw_ac in (None, ""):
+            new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
+        else:
+            try:
+                _ac = float(_raw_ac)
+                if not math.isfinite(_ac):
+                    raise ValueError("non-finite")
+                new_options[CONF_ANTI_CREASE_FINALIZE_RATIO] = min(
+                    ANTI_CREASE_FINALIZE_RATIO_MAX,
+                    max(ANTI_CREASE_FINALIZE_RATIO_MIN, _ac),
+                )
+            # OverflowError too (register item 194): json parses an integer literal
+            # of any length into an unbounded int, and float() on one of those raises
+            # rather than returning inf. Uncaught it becomes ERR_UNKNOWN_ERROR and
+            # the whole save fails, instead of this key falling back to its default.
+            except (TypeError, ValueError, OverflowError):
+                new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
+
+    # #430: seconds, 0 = off. Clamped to [0, CURVE_PREROLL_MAX_SECONDS] so a
+    # mistyped value cannot drag minutes of unrelated standby into a curve; empty
+    # or non-numeric drops the key and restores the default (off).
+    if CONF_CURVE_PREROLL_SECONDS in new_options:
+        _raw_pr = new_options[CONF_CURVE_PREROLL_SECONDS]
+        if _raw_pr in (None, ""):
+            new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
+        else:
+            try:
+                _pr = float(_raw_pr)
+                if not math.isfinite(_pr):
+                    raise ValueError("non-finite")
+                new_options[CONF_CURVE_PREROLL_SECONDS] = min(
+                    CURVE_PREROLL_MAX_SECONDS, max(0.0, _pr)
+                )
+            except (TypeError, ValueError, OverflowError):
+                new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
 
     # A None outside the clearable selectors means "not set", not a value: the
     # per-setting Revert sends the changelog's `old`, which is null for a setting
@@ -1856,12 +1941,33 @@ async def ws_get_profiles(
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
+        # How each programme ENDS, measured from its own cycles. Read-only: no
+        # detection path consults it, and `consistency` is there to be read first,
+        # because the event it describes is present in only some runs of the same
+        # programme (register item 238).
+        terminal: dict[str, Any] = {}
+        try:
+            for _profile in profiles:
+                # `profiles` is list_profiles(): a list of profile DICTS, not names.
+                # Passing the dict straight in compared it against each cycle's
+                # `profile_name` string, which can never match, so the feature
+                # returned {} for every device while raising nothing.
+                _name = _profile.get("name") if isinstance(_profile, dict) else None
+                if not _name:
+                    continue
+                _sig = manager.profile_store.compute_profile_terminal_signature(_name)
+                if _sig is not None:
+                    terminal[_name] = _sig
+        except Exception:  # pylint: disable=broad-exception-caught
+            terminal = {}
+
         return {
             "profiles": profiles,
             "profile_health": health,
             "profile_trends": trends,
             "coverage_gaps": coverage_gaps,
             "profile_advisories": advisories,
+            "profile_terminal": terminal,
         }
 
     stats = await hass.async_add_executor_job(_compute_stats)
@@ -2266,12 +2372,124 @@ async def ws_get_maintenance_log(
     cfg = manager.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
     if isinstance(cfg, dict):
         reminders.update(cfg)
+    store = manager.profile_store
     _send_result(connection, msg["id"], "get_maintenance_log", {
-        "log": manager.profile_store.get_maintenance_log(),
+        "log": store.get_maintenance_log(),
         "due": manager.maintenance_due,
         "event_types": list(MAINTENANCE_EVENT_TYPES),
         "reminders": reminders,
+        # Cycles run since each task was last done, and the odometer they are
+        # measured against (#414). Computed backend-side before this and never
+        # sent, so the panel could show "due" but never "how close".
+        "cycles_since": {
+            evt: store.cycles_since_maintenance(evt) for evt in MAINTENANCE_EVENT_TYPES
+        },
+        "lifetime_cycle_count": manager.lifetime_cycle_count,
     })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/set_lifetime_cycle_count",
+        vol.Required("entry_id"): str,
+        vol.Required("count"): vol.All(vol.Coerce(int), vol.Range(min=0, max=1000000)),
+    }
+)
+@websocket_api.async_response
+async def ws_set_lifetime_cycle_count(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Correct the appliance's lifetime cycle odometer (requires full access).
+
+    The one sanctioned way the count moves other than a cycle completing (#414).
+    It exists because WashData cannot always tell a real short run from an
+    artefact, and because an appliance may have run for years before WashData was
+    installed - rather than asking "was that a real cycle?" on every deletion, the
+    user corrects the total once. Recorded in the settings changelog.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        store = manager.profile_store
+        count = int(msg["count"])
+        # Serialize the whole read-check-mutate-save-rollback under the per-entry
+        # write lock. The rollback below restores the value read at the start, so two
+        # corrections that interleave across the save could see the earlier one's
+        # failure undo the later one's success (A reads 10, B reads and writes 4000
+        # successfully, A's save fails and A restores 10). Holding the lock across the
+        # await is the point; taking it only around the mutation would not help.
+        async with _entry_write_lock(hass, msg["entry_id"]):
+            previous = store.get_lifetime_cycle_count()
+            # A stored record is evidence of a run, so the odometer can never read below
+            # the number of records on hand - that floor is what get_lifetime_cycle_count
+            # applies. Without this check the setter accepted a lower value, the getter
+            # masked it while the history was long, and it then surfaced later once
+            # records were deleted: a correction that appeared to do nothing and took
+            # effect retroactively, i.e. the odometer regression #414 exists to prevent.
+            # Refused with the floor named rather than silently clamped, so the user is
+            # told why their number was not taken.
+            floor = len(store.get_past_cycles())
+            if count < floor:
+                connection.send_error(
+                    msg["id"],
+                    "invalid_format",
+                    f"Cannot set the lifetime count below the {floor} cycle records "
+                    f"currently stored; delete records first or choose {floor} or more",
+                )
+                return
+            store.set_lifetime_cycle_count(count, force=True)
+            try:
+                # ONE save for both mutations: async_record_settings_changes persists the
+                # store, and the new count is already staged in memory. Saving separately
+                # beforehand meant a changelog failure reported unknown_error on a
+                # correction that had in fact been written, and left `previous` reading
+                # the new value on a retry - recording old == new.
+                await store.async_record_settings_changes(
+                    [{"key": "lifetime_cycle_count", "old": previous, "new": count}]
+                )
+            except Exception:
+                # Undo only OUR write. A cycle completing during the await bumps the
+                # same counter (manager._async_process_cycle_end -> lifetime energy
+                # save), and that path deliberately does not take this lock: it lives
+                # in the manager, on the hot cycle-end path, and reaching into the WS
+                # layer's lock from there would invert the layering for a window this
+                # narrow. Compare-and-swap keeps the rollback honest without it - if
+                # the value is no longer what we wrote, someone else owns it now and
+                # restoring `previous` would discard their increment.
+                if store.get_lifetime_cycle_count() == count:
+                    store.set_lifetime_cycle_count(previous, force=True)
+                raise
+        # Re-validate the manager is still live after the awaited save: a reload
+        # during it detaches this manager (and its per-entry lock, which
+        # async_unload_entry pops), so notifying it would target stale state and
+        # reporting its store's count would show the panel a number from a store
+        # nothing reads any more. Mirrors the guard the recording-persist and import
+        # handlers use. Reported as success because the save itself did happen; the
+        # count comes from whatever store is live now.
+        current_manager = _get_manager(hass, entry_id)
+        if current_manager is not manager:
+            _LOGGER.warning(
+                "Manager replaced during lifetime-count correction for %s; "
+                "skipping notify", entry_id,
+            )
+        else:
+            manager.notify_update()
+        live_store = (
+            current_manager.profile_store if current_manager is not None else store
+        )
+        _send_result(
+            connection,
+            msg["id"],
+            "set_lifetime_cycle_count",
+            {"success": True, "lifetime_cycle_count": live_store.get_lifetime_cycle_count()},
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
 @websocket_api.websocket_command(
@@ -3025,7 +3243,7 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
             reg.finish(task, state=task_registry.STATE_CANCELLED)
             return
 
-        reg.update(task, total=5, done=0, label="Reprocessing: matching cycles",
+        reg.update(task, total=6, done=0, label="Reprocessing: matching cycles",
                    label_key="task.reprocess.matching")
         summary["count"] = await store.async_reprocess_all_data()
 
@@ -3071,7 +3289,21 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
             reg.finish(task, state=task_registry.STATE_CANCELLED, result=summary)
             return
 
-        reg.update(task, done=4, label="Reprocessing: cycle health",
+        reg.update(task, done=4, label="Reprocessing: energy costs",
+                   label_key="task.reprocess.costs")
+        # Recost stored cycles against the recorder's price history (#426). Cheap
+        # and a no-op unless a dynamic price entity is configured, so it runs
+        # unconditionally rather than behind yet another switch.
+        try:
+            summary["costs_recomputed"] = await manager.async_recompute_cycle_costs()
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("cost recompute failed for %s: %s", entry_id, exc)
+
+        if task.cancel_requested:
+            reg.finish(task, state=task_registry.STATE_CANCELLED, result=summary)
+            return
+
+        reg.update(task, done=5, label="Reprocessing: cycle health",
                    label_key="task.reprocess.health")
         # Recompute per-cycle health against the (possibly retrained) model.
         # Skip when training already recomputed it (a promotion refreshes health).
@@ -3081,7 +3313,7 @@ async def _reprocess_task(hass: HomeAssistant, task: Any, entry_id: str) -> None
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 _LOGGER.debug("health recompute failed for %s: %s", entry_id, exc)
 
-        reg.update(task, done=5)
+        reg.update(task, done=6)
         # Re-validate the manager is still live after a long chain of awaits; if the
         # entry was reloaded, the original manager is detached and must not notify.
         if _get_manager(hass, entry_id) is manager:
@@ -3112,7 +3344,8 @@ def ws_reprocess_history(
     """Kick off the full "Process history" pass as a detached, registry-tracked
     task; returns its id immediately. Runs, in order: reprocess (rematch + rebuild
     envelopes) -> backfill golden -> refresh suggestions -> on-device ML training
-    (when enabled) -> recompute cycle health. Progress + result via the registry."""
+    (when enabled) -> recost cycles from recorder price history -> recompute cycle
+    health. Progress + result via the registry."""
     entry_id: str = msg["entry_id"]
     if _get_manager(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)
@@ -3166,6 +3399,10 @@ async def ws_wipe_history(
 
     try:
         await manager.profile_store.clear_all_data()
+        # clear_all_data pops the persisted arm, but the manager's in-memory field is
+        # the authoritative one, so the pin has to be retired there too or the next
+        # cycle re-applies a program from before the wipe.
+        manager.clear_armed_program()
         manager.notify_update()
         _send_result(connection, msg["id"], "wipe_history", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -4481,8 +4718,16 @@ def ws_set_program(
         prog = msg.get("program")
         if not prog or prog in ("auto_detect", "__auto__", "none"):
             manager.clear_manual_program()
-        else:
-            manager.set_manual_program(prog)
+        elif not manager.set_manual_program(prog):
+            # Only a program that does not exist can fail now (#411). It used to
+            # fail for the far more common reason of no cycle being under way, and
+            # this line reported success anyway because the manager returned None
+            # either way, so the panel showed a confirmation and then quietly
+            # reverted the dropdown.
+            connection.send_error(
+                msg["id"], "not_found", f"No such program: {prog}"
+            )
+            return
         manager.notify_update()
         _send_result(connection, msg["id"], "set_program", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -5538,6 +5783,16 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
             resolve_smart_termination_duration_ratio_default(
                 str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
             ),
+        ),
+        # The same helpers the detector reads these through, not a bare float:
+        # this branch builds the sim config when the live detector is unavailable,
+        # and an imported or stale option would otherwise give the Playground a
+        # value production would have clamped (register items 244, 249).
+        anti_crease_finalize_ratio=effective_anticrease_finalize_ratio(
+            opts.get(CONF_ANTI_CREASE_FINALIZE_RATIO, DEFAULT_ANTI_CREASE_FINALIZE_RATIO)
+        ),
+        curve_preroll_seconds=effective_curve_preroll_seconds(
+            opts.get(CONF_CURVE_PREROLL_SECONDS, DEFAULT_CURVE_PREROLL_SECONDS)
         ),
         # Match the live detector's tuned gate, not the dataclass 0.4, so the sim's
         # Smart-Termination / anti-crease confidence checks reproduce production.

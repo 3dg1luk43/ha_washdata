@@ -424,7 +424,12 @@ def test_dishwasher_end_spike_finishes_soon_after(mock_callbacks):
 
     cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
     assert cycle_data["status"] == "completed"
-    assert cycle_data["duration"] == pytest.approx(6420, abs=40)
+    # Smart Termination fires at t=6420, but the appliance's last draw was the
+    # terminal pump-out at t=6360; the 60 s between them is standby the cycle no
+    # longer banks as runtime (#424, `_keep_tail_cap`). The cap sits at the later
+    # of that last active reading and the matched expected end (6200 s), i.e.
+    # 6360 s.
+    assert cycle_data["duration"] == pytest.approx(6360, abs=40)
 
 
 def test_dishwasher_unmatched_end_spike_caps_off_delay_at_1800s(mock_callbacks):

@@ -34,6 +34,7 @@ and why none does today.
 """
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from typing import Any
 
@@ -71,6 +72,74 @@ def strip_null_options(options: Mapping[str, Any]) -> dict[str, Any]:
         for k, v in options.items()
         if v is not None or k in NULL_MEANINGFUL_OPTION_KEYS
     }
+
+
+def option_float(value: Any, default: float) -> float:
+    """Coerce a stored option to ``float``, falling back to ``default``.
+
+    ``strip_null_options`` removes the ``None`` that broke setup in #389, but a
+    stored value can still be the wrong *type*: ``import_config`` and the legacy
+    import service write hand-editable option maps straight into ``entry.options``,
+    and ``ws_set_options`` validates the payload as a plain ``dict`` with no
+    per-key coercion. A non-numeric string then survives ``.get(key, DEFAULT)`` and
+    raises at whatever line first casts or compares it, which for an option read at
+    cycle end is inside a spawned task - the cycle is lost, not just the setting.
+
+    Falls back to the compiled default rather than to ``0.0``: these values are
+    thresholds, and zero is a meaningful setting ("accept anything"), so silently
+    substituting it would change behaviour instead of restoring it.
+
+    Non-finite results are rejected too. ``float()`` happily accepts ``"nan"``,
+    ``"inf"`` and ``"infinity"``, and either one is worse than a raise for a
+    threshold: every comparison against ``nan`` is False and every one against
+    ``inf`` is False for real confidences, so the feature the threshold gates goes
+    quietly dead instead of failing loudly.
+
+    ``OverflowError`` is caught alongside the type errors because ``json`` parses an
+    integer literal of any length into a Python ``int`` of unbounded size, and
+    ``float()`` on one of those raises rather than returning ``inf``. An import file
+    is hand-editable, so that lands in ``entry.options`` and would otherwise abort
+    setup - the same bricked-entry outcome this module exists to prevent.
+
+    A stored ``bool`` is rejected before the cast, because ``bool`` is a subclass of
+    ``int`` and ``float(True)`` is a perfectly good ``1.0``. No numeric option is
+    read through here as a boolean, so one can only arrive from a hand-edited import
+    or an untyped ``ws_set_options`` payload - and adopting it is the silent
+    behaviour change the fallback exists to avoid: ``True`` becomes the strictest
+    possible threshold (1.0, gating the feature off) and ``False`` becomes "accept
+    anything" (0.0), or 1 under an ``option_int`` floor. The default is the honest
+    answer to a value of the wrong type.
+    """
+    if isinstance(value, bool):
+        return float(default)
+    try:
+        result = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return float(default)
+    return result if math.isfinite(result) else float(default)
+
+
+def option_int(value: Any, default: int, minimum: int | None = None) -> int:
+    """Coerce a stored option to ``int``, falling back to ``default``.
+
+    The integer companion to :func:`option_float`, and it routes THROUGH it rather
+    than calling ``int(value)`` directly, because ``int()`` is not the whole test.
+    Python integers are arbitrary precision, so a JSON literal such as ``10**400``
+    survives ``int()`` intact and only raises ``OverflowError`` further downstream,
+    at whatever line first asks ``float()`` for it - a division, a ``timedelta``, a
+    log format. That is register item 278: the guard was in place and the value
+    still escaped it, one line later. Proving the value is representable as a float
+    here means the caller holds an int it can actually use.
+
+    ``minimum`` clamps the result for the settings where a zero or negative silently
+    DISABLES the gate it configures rather than tightening it. Pass it only where a
+    floor is already established elsewhere (a panel schema ``min``, or a sibling
+    reader's own clamp), so the two readers of one key cannot disagree.
+    """
+    result = int(option_float(value, default))
+    if minimum is not None and result < minimum:
+        return minimum
+    return result
 
 
 def has_null_options(options: Mapping[str, Any]) -> bool:
