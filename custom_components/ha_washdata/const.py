@@ -1156,6 +1156,33 @@ def resolve_watchdog_interval_default(device_type: str) -> int:
     return int(max(DEFAULT_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0))
 
 
+def resolve_min_off_gap_default(device_type: str) -> int:
+    """Device-resolved minimum off gap (#445).
+
+    Published to the panel so the number that actually governs the end of a cycle
+    is visible. ``CycleDetector`` waits
+    ``effective_off_delay = max(off_delay, min_off_gap)``, so an unset
+    ``min_off_gap`` silently raises a hand-lowered ``off_delay`` to this blind
+    per-device prior - 480 s on a washing machine, 3600 s on a dishwasher. The
+    #445 reporter set ``off_delay`` to 180 s, waited 6 minutes, and force-stopped
+    three cycles because nothing told them the real wait was 480 s.
+
+    Deliberately published rather than lowered. The prior is there because a long
+    quiet stretch inside a cycle must not split it in two, and that is real: a
+    corpus sweep over 15 devices' stored cycles found dishwasher quiet-and-resumed
+    stretches up to **6791 s**. Only 2 of those 15 devices left ``min_off_gap``
+    unset at all, so honouring the lowered ``off_delay`` would be a no-op almost
+    everywhere and a cycle-splitting risk on exactly the device class that needs
+    the bridge. Showing the number lets the user make that call per appliance.
+    """
+    return int(DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(device_type, DEFAULT_MIN_OFF_GAP))
+
+
+def resolve_off_delay_default(device_type: str) -> int:
+    """Device-resolved off delay (#445), published for the same reason."""
+    return int(DEFAULT_OFF_DELAY_BY_DEVICE.get(device_type, DEFAULT_OFF_DELAY))
+
+
 def resolve_start_duration_default(device_type: str) -> float:
     """Device-resolved start-debounce default (#396).
 
