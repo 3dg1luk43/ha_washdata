@@ -528,6 +528,42 @@ def _diff_option_changes(
     return changes
 
 
+async def _record_option_changes(
+    hass: HomeAssistant, entry: Any, updates: dict[str, Any], source: str
+) -> None:
+    """Record an option write in the settings changelog (#442).
+
+    ``ws_set_options`` did this inline and was the only writer that did, so every
+    other path that writes ``entry.options`` was invisible in the history and its
+    values could not be reverted per setting. The one the reporter hit is "Apply
+    all": nine tunables changed at once with nothing recorded, and the previous
+    values were only recoverable because they happened to have an older
+    diagnostics dump.
+
+    Must be awaited BEFORE ``async_update_entry``, which schedules a reload that
+    rebuilds the store. Never raises: a changelog failure must not cost the write
+    it is describing (same contract as the inline version).
+    """
+    if not updates:
+        return
+    try:
+        old_effective = {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
+        changes = _diff_option_changes(old_effective, updates)
+        if not changes:
+            return
+        manager = _get_manager(hass, entry.entry_id)
+        store = getattr(manager, "profile_store", None) if manager else None
+        if store is not None:
+            await store.async_record_settings_changes(changes)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug(
+            "Settings changelog recording failed for %s (%s): %s",
+            getattr(entry, "entry_id", "?"),
+            source,
+            exc,
+        )
+
+
 # ─── Panel config + RBAC ────────────────────────────────────────────────────────
 
 _PANEL_STORE_VERSION = 1
@@ -1188,6 +1224,7 @@ async def ws_store_download_device(hass, connection, msg):
         }
         entry = _get_entry(hass, msg["entry_id"])
         if filtered and entry is not None:
+            await _record_option_changes(hass, entry, filtered, "store_download")
             hass.config_entries.async_update_entry(entry, options={**entry.options, **filtered})
             settings_applied = len(filtered)
     res = {**res, "settings_applied": settings_applied}
@@ -3508,6 +3545,9 @@ async def ws_import_config(
                     new_options = strip_null_options(
                         {**entry.options, **entry_options_updates}
                     )
+                    await _record_option_changes(
+                        hass, entry, entry_options_updates, "import_config"
+                    )
                     hass.config_entries.async_update_entry(entry, options=new_options)
                 # NB: config_updates["entry_data"] is intentionally NOT written to
                 # entry.data. export_data ships the raw, un-redacted entry.data of
@@ -3735,6 +3775,9 @@ async def ws_import_config_selective(
                 for key in _OPTIONS_IDENTITY_KEYS:
                     filtered.pop(key, None)
                 if filtered:
+                    await _record_option_changes(
+                        hass, entry, filtered, "store_device_package"
+                    )
                     hass.config_entries.async_update_entry(
                         entry, options={**entry.options, **filtered}
                     )
@@ -3910,6 +3953,9 @@ async def ws_apply_suggestions(
             # reload that rebuilds the store, so persist the cleared state first.
             cycle_count = len(manager.profile_store.get_past_cycles())
             manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
+            # Record BEFORE clear_suggestions/async_update_entry: both persist, and
+            # the reload the latter schedules rebuilds the store (#442).
+            await _record_option_changes(hass, entry, updates, "apply_suggestions")
             await manager.profile_store.clear_suggestions()
             # Suggested values are all tunables -> layer them onto the existing
             # options; never spread entry.data into options.
