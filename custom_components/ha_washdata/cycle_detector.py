@@ -493,6 +493,15 @@ class CycleDetector:
         cannot triple the gate. Only these two gates read it - ``_p95_dt`` itself
         is left alone so every outage ceiling keeps the cadence snapshot it was
         tuned against (register items 213, 215).
+
+        The cap alone was not enough, and the reason is worth keeping: it is
+        computed over the same 20-interval window it is meant to protect. Once a
+        publish-on-change plug falls silent the watchdog's own 0 W keepalives are
+        the only readings left, so the median collapses onto the injection spacing
+        too and ``5 x median`` stops binding - the gate then grows with our
+        injection rate instead of the plug's. Fixed at the source (register item
+        289): ``process_reading`` no longer trains the cadence on synthetic
+        readings, so this window describes the sensor and nothing else.
         """
         if len(self._recent_dts) < 5:
             return self._p95_dt
@@ -1126,15 +1135,25 @@ class CycleDetector:
         ``synthetic=True`` marks a reading the *manager* injected rather than one
         the power sensor sent: the watchdog and anti-wrinkle keepalives, which
         exist to advance the quiet timers while a change-only plug says nothing.
-        They must keep doing exactly that, so this flag changes no timing here.
-        It is recorded only so that anything reasoning about what was OBSERVED can
-        tell the two apart. **Nothing consumes it yet**: it was added for
-        `_keep_tail_cap` (register item 238) and that use was implemented,
-        measured and reverted, because after `_last_active_time` every reading is
-        below the stop threshold anyway, so a plug still reporting cannot separate
-        a drying phase from standby - it only shows the plug is chatty. Kept
-        because the distinction is correct and cheap to carry; see item 260 for
-        the two other consumers that were measured and rejected.
+        They must keep doing exactly that, so this flag does not change the quiet
+        accumulators. What it does change is the two places that reason about what
+        the SENSOR did (#424):
+
+        * ``_update_cadence`` is skipped. The cadence estimate feeds
+          ``_gate_cadence`` and therefore the pause/end gates, so training it on
+          our own injections makes those gates a function of how often we inject -
+          see the note on ``_gate_cadence``.
+        * the gap-free tally treats the interval as observed. The watchdog
+          re-anchors on the sensor's live state (``_resync_power_from_state``)
+          before it injects, so a keepalive is by construction a moment we looked
+          rather than a hole in the record.
+
+        (The `_keep_tail_cap` use this flag was originally added for, register
+        item 238, was implemented, measured and reverted: after
+        ``_last_active_time`` every reading is below the stop threshold anyway, so
+        a plug still reporting cannot separate a drying phase from standby - it
+        only shows the plug is chatty. See item 260 for two more that were
+        measured and rejected.)
         """
         if not synthetic:
             self._last_real_reading_time = timestamp
@@ -1193,7 +1212,19 @@ class CycleDetector:
         # is supposed to catch it (a 120 s gap after a 10 s cadence lifts p95 to
         # ~15.5 s -> ceiling 155 s -> the gap counts as observed quiet).
         self._prior_p95_dt = self._p95_dt
-        self._update_cadence(dt)
+        # Only the SENSOR trains the cadence estimator (#424). The watchdog's 0 W
+        # keepalives exist because the plug fell silent, so once it does every
+        # interval left in `_recent_dts` is one we manufactured: p95 AND the
+        # median both collapse onto the injection spacing, the `5 x median` cap in
+        # `_gate_cadence` stops binding, and the pause/end gates - three times that
+        # cadence - grow with our own injection rate. Measured on the #424
+        # reporter's v0.5.6 cycle: the gate climbed 192 s -> 530 s on injected
+        # readings alone, taking the end gate to 1605 s and holding PAUSED for
+        # 1060 s. Skipping them leaves the estimate describing the plug, which is
+        # the only thing it is supposed to describe; the accumulators below still
+        # advance on every reading, synthetic or not.
+        if not synthetic:
+            self._update_cadence(dt)
         self._last_process_time = timestamp
 
         # 1b. Pre-roll buffer (#430): record every reading seen while no cycle is
@@ -1272,8 +1303,16 @@ class CycleDetector:
             # 3600)) but reuses the maintained p95 cadence to stay O(1) in this
             # per-reading hot path. Uses the cadence as it stood BEFORE this
             # reading, so a gap cannot widen its own acceptance threshold.
+            # A synthetic keepalive can never be an outage: the watchdog resyncs
+            # against the sensor's live state before injecting, so the interval it
+            # closes is observed by definition. This matters because the ceiling
+            # is derived from the p95 cadence, which synthetic readings no longer
+            # train - without this a 106 s keepalive on a 2 s-cadence plug would
+            # look like a 106 s hole and reset the tally on every single tick,
+            # starving the two consumers that can only ever SHORTEN the wait (the
+            # dishwasher end-spike quiet release and the ENDING hard finalize).
             outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
-            if dt > outage_ceiling:
+            if dt > outage_ceiling and not synthetic:
                 self._time_below_threshold_gapfree = 0.0
             else:
                 self._time_below_threshold_gapfree += dt

@@ -27,8 +27,21 @@ from ha_washdata.manager import WashDataManager
 from ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_POWER_SENSOR,
     CONF_OFF_DELAY, STATE_RUNNING, STATE_OFF, CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_DEVICE_TYPE,
+    CONF_DEVICE_TYPE, STATE_PAUSED, STATE_ENDING, STATE_FINISHED,
+    STATE_FORCE_STOPPED,
 )
+
+# The contract this file actually tests is "the watchdog must not kill or split a
+# long verified drying pause". RUNNING / PAUSED / ENDING are all *open* states -
+# the cycle is still being tracked and can still resume. Before register item 289
+# the detector happened to sit in RUNNING throughout, but only because each
+# injected keepalive trained the cadence estimator and inflated the pause gate
+# (one 600 s injection took a 30 s gate to 1800 s); now that synthetic readings no
+# longer train it, the detector notices the quiet promptly and reports PAUSED /
+# ENDING, which is what the power actually is. Verified with the assertions below
+# that the cycle neither ends nor splits in either version.
+_OPEN_STATES = (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+_CLOSED_STATES = (STATE_OFF, STATE_FINISHED, STATE_FORCE_STOPPED)
 from homeassistant.util import dt as dt_util
 
 @pytest.fixture
@@ -123,7 +136,10 @@ async def test_repro_long_drying_pause_split(mock_hass, mock_entry):
         t_silence = t_drying_start + timedelta(minutes=45)
         with patch("homeassistant.util.dt.now", return_value=t_silence):
             await manager._watchdog_check_stuck_cycle(t_silence)
-            assert detector.state == STATE_RUNNING, "Watchdog killed cycle too early (45m silence)"
+            assert detector.state in _OPEN_STATES, (
+                f"Watchdog killed cycle too early (45m silence): {detector.state}"
+            )
+            cycle_start_before = detector.current_cycle_start
             
         # 5. Advance 2 hours 10 minutes into drying (T=3h10m)
         # Total duration = 3h10m (11400s). Expected = 3h (10800s).
@@ -133,6 +149,15 @@ async def test_repro_long_drying_pause_split(mock_hass, mock_entry):
         with patch("homeassistant.util.dt.now", return_value=t_end_drying):
             # This is where we expect failure in the current version
             await manager._watchdog_check_stuck_cycle(t_end_drying)
-            
-            # If the bug exists, state will be OFF
-            assert detector.state == STATE_RUNNING, f"Cycle was killed by watchdog after {7800}s silence even though it's a verified pause"
+
+            # If the bug exists, state will be OFF / FINISHED.
+            assert detector.state not in _CLOSED_STATES, (
+                f"Cycle was killed by watchdog after {7800}s silence even though "
+                f"it's a verified pause (state={detector.state})"
+            )
+            assert detector.state in _OPEN_STATES, detector.state
+            # ...and it is still the SAME cycle: a split would have closed this one
+            # and opened a new one with a later start.
+            assert detector.current_cycle_start == cycle_start_before, (
+                "the drying pause split the cycle in two"
+            )
