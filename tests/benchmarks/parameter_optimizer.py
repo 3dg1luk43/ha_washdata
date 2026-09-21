@@ -103,15 +103,44 @@ class DataLoader:
             if isinstance(store_data, dict) and "past_cycles" in store_data:
                 past_cycles = store_data["past_cycles"]
 
-        if past_cycles is not None:
+        # Plain export format: data -> past_cycles. This is what ws_export_data
+        # writes and what every hand-collected file in cycle_data/ actually is.
+        if past_cycles is None:
+            inner = data.get("data")
+            if isinstance(inner, dict) and isinstance(inner.get("past_cycles"), list):
+                past_cycles = inner["past_cycles"]
+
+        # Reference cycles count as evidence, because that is what they are: the
+        # matcher pools them with observed cycles via iter_evidence_cycles, and
+        # devtools/store_harvest.py writes community-store downloads here. Without
+        # this the 427 harvested cycles sat in cycle_data/ and every benchmark
+        # silently skipped them. Tagged so a consumer that must separate observed
+        # from curated evidence still can.
+        reference_cycles: Optional[List[Dict[str, Any]]] = None
+        inner = data.get("data")
+        if isinstance(inner, dict) and isinstance(inner.get("reference_cycles"), list):
+            reference_cycles = inner["reference_cycles"]
+
+        loaded_any = False
+        if past_cycles:
             for cycle in past_cycles:
                 cycle["_source"] = str(file_path)
+                cycle["_evidence"] = "past"
                 self.cycles.append(cycle)
+            loaded_any = True
+        if reference_cycles:
+            for cycle in reference_cycles:
+                cycle["_source"] = str(file_path)
+                cycle["_evidence"] = "reference"
+                self.cycles.append(cycle)
+            loaded_any = True
+        if loaded_any or past_cycles is not None:
             return
 
         # Check if it's a single cycle dump (direct structure)
         if "power_data" in data and "start_time" in data:
             data["_source"] = str(file_path)
+            data["_evidence"] = "past"
             self.cycles.append(data)
 
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
