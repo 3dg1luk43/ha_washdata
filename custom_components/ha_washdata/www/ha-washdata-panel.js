@@ -4941,7 +4941,15 @@ class HaWashdataPanel extends HTMLElement {
       terminalBadge = `<span class="wd-badge" style="color:var(--secondary-text-color,#888)"`
         + ` title="${_esc(tTip)}">${this._t('badge.quiet_tail', {mins}, `~${mins}m quiet tail`)}</span>`;
     }
-    const badges = [unmatchableBadge, healthBadge, trendBadge, terminalBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
+    // Register item 304: cycles filed under this program that are too far from its
+    // usual length to ever match it. Not cosmetic - they also drag avg_duration, and
+    // with it every future time estimate for this program.
+    const durAdv = (this._profileAdvisories || []).find(a => a && a.profile === p.name && a.code === 'duration_outlier');
+    const durBadge = durAdv
+      ? `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.12)" title="${_esc(this._t(durAdv.message_key, durAdv.message_params, durAdv.message))}">\u26A0 ${this._t('badge.duration_outlier', {n: (durAdv.message_params || {}).n || 1}, `${(durAdv.message_params || {}).n || 1} odd-length cycle(s)`)}</span>`
+      : '';
+
+    const badges = [unmatchableBadge, durBadge, healthBadge, trendBadge, terminalBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
     // Mini power-signature curve: the profile's real average power shape (from its
     // envelope), so the card thumbnail matches the actual cycle. Painted after
     // render by _drawProfileSparklines. Needs ≥3 envelope points.
