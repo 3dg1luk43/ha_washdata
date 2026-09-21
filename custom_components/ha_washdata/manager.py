@@ -642,8 +642,19 @@ class WashDataManager:
         self._lifecycle_tag = f"ha_washdata_{self.entry_id}_lifecycle"
         self._lifecycle_pn_id = self._lifecycle_tag
         self._clean_tag = f"ha_washdata_{self.entry_id}_clean"
-        # Backwards-compatible alias for existing live-notification call sites/tests.
-        self._live_notification_tag = self._lifecycle_tag
+        # #446: the live progress updates need their OWN tag, because on iOS a Live
+        # Activity is a separate UI surface from the notification and is ended only
+        # by `clear_notification` with the activity's tag. While this was an alias
+        # for the lifecycle tag there was no way to end it: clearing would have
+        # dismissed the finished card that shares the tag, which is why the cycle-end
+        # path deliberately skipped the service clear - and so the activity was never
+        # ended at all. Reporter's lock screen sat frozen at 98% / 0:00 for an hour
+        # after the cycle finished, and on an earlier run the chronometer counted
+        # upward to 4:12:20; it survives until Apple's ~8 h expiry or a manual
+        # dismiss. Handover keeps the mobile app to one visible entry at a time: the
+        # first live tick clears the lifecycle tag (dropping the start alert), and
+        # cycle end clears this one after the finished alert has been delivered.
+        self._live_notification_tag = f"ha_washdata_{self.entry_id}_live"
         self._start_event_fired = False
         self._cycle_start_time: datetime | None = None
         # Per-cycle UUID used to key ranking snapshots; prevents cross-contamination
@@ -6114,10 +6125,13 @@ class WashDataManager:
                 },
             )
 
-        # Purge pending live entries and reset counters, but don't send a service-level
-        # clear: the finished notification below reuses the lifecycle tag and replaces
-        # the live card in place (sending a clear first would cause a dismiss/recreate
-        # flicker). The action-based clear marker still fires for action templates.
+        # Purge pending live entries and reset counters. No service-level clear
+        # here: the activity is ended below, AFTER the finished notification has
+        # been delivered, so the lock screen is never momentarily empty. The
+        # action-based clear marker still fires for action templates.
+        # _clear_live_progress_notification resets _live_activity_started, so the
+        # flag has to be read before it runs (#446).
+        live_activity_running = self._live_activity_started
         self._clear_live_progress_notification(clear_services=False)
 
         # Send notification if enabled
@@ -6182,10 +6196,20 @@ class WashDataManager:
                     # the live notification in place. No live_update/alert_once here,
                     # so the companion app surfaces it with sound.
                     "tag": self._lifecycle_tag,
-                    # C3: end the iOS Live Activity (mobile_app_* only downstream).
+                    # C3: retained, but it is NOT what ends the activity - there is
+                    # no `activity` key in the companion notification API and this
+                    # was never acted on (#446). Kept because it is inert and this
+                    # code cannot be exercised against a real device here; the
+                    # documented clear below is the mechanism that works.
                     "activity": "end",
                 },
             )
+
+        # #446: end the iOS Live Activity now that the finished alert has gone out.
+        # Only when one was actually started, so a device that never ran an activity
+        # gets no stray service call.
+        if live_activity_running:
+            self._end_live_activity()
 
         # C2: milestone (cycle-count achievement) notification. Fires at most once per
         # cycle, only when the cycle actually persisted (so the lifetime count is real)
@@ -7349,6 +7373,8 @@ class WashDataManager:
             )
             self._live_waiting_notification_sent = sent
             if sent:
+                if not self._live_activity_started:
+                    self._hand_over_lifecycle_to_live_activity()
                 self._live_activity_started = True
             return
 
@@ -7445,6 +7471,8 @@ class WashDataManager:
             extra_vars=extra_vars,
         )
         if sent:
+            if not self._live_activity_started:
+                self._hand_over_lifecycle_to_live_activity()
             self._live_activity_started = True
             if chronometer_overrun:
                 self._live_chronometer_overrun_sent = True
@@ -7452,16 +7480,56 @@ class WashDataManager:
                 self._live_notification_sent_count += 1
             self._last_live_notification_time = now
 
+    def _send_tag_clear(self, tag: str) -> None:
+        """Send the companion app's documented ``clear_notification`` for ``tag``.
+
+        This is the ONLY way to end an iOS Live Activity (HA companion docs, "Live
+        Activities and Live Updates"): an activity is started with
+        ``live_update: true``, updated by re-sending the same tag, and ended by
+        this. There is no ``activity`` key in that API - the one this integration
+        sent on the finished notification was never acted on, which is #446.
+        """
+        if not self._notify_live_services:
+            return
+        self._send_notification_service(
+            _CLEAR_NOTIFICATION_MARKER,
+            services=self._notify_live_services,
+            event_type=NOTIFY_EVENT_LIVE,
+            extra_vars={"tag": tag},
+        )
+
+    def _hand_over_lifecycle_to_live_activity(self) -> None:
+        """Drop the lifecycle-tagged card as the live activity takes over (#446).
+
+        Live updates used to share the lifecycle tag, so each one replaced the
+        start alert in place and the mobile app showed a single entry. With the
+        live activity on its own tag that replacement no longer happens, so clear
+        the lifecycle tag explicitly the first time an activity starts. Two things
+        fall out of it for free: an Android user still sees one entry rather than
+        a stale "cycle started" beside the live one, and a Live Activity left
+        running under the OLD shared tag by a pre-0.5.7 build is ended here, so
+        the upgrade heals a frozen card instead of stranding it.
+        """
+        self._send_tag_clear(self._lifecycle_tag)
+
+    def _end_live_activity(self) -> None:
+        """End the iOS Live Activity at cycle end (#446).
+
+        Called AFTER the finished notification has been dispatched, so the lock
+        screen is never momentarily empty: the finished alert lands on the
+        lifecycle tag, then the activity on its own tag goes away.
+        """
+        self._send_tag_clear(self._live_notification_tag)
+
     def _clear_live_progress_notification(self, clear_services: bool = True) -> None:
         """Clear active live/progress notifications and purge stale deferred alerts.
 
-        On cycle finish (``clear_services=False``) the finished notification carries
-        the same lifecycle tag and replaces the live notification in place, so we must
-        NOT also send a service-level ``clear_notification`` (it would briefly dismiss
-        then re-create the card). The pending-purge, the action-based clear marker
-        (kept for backward compatibility with custom action templates), and the state
-        reset still run. On shutdown (``clear_services=True``) no finished notification
-        follows, so the explicit service clear is required to dismiss the live card.
+        On cycle finish (``clear_services=False``) the caller ends the activity
+        itself, after the finished notification has been delivered - see
+        ``_end_live_activity`` (#446). Only the pending-purge, the action-based
+        clear marker (kept for backward compatibility with custom action templates)
+        and the state reset run here. On shutdown (``clear_services=True``) no
+        finished notification follows, so both tags are cleared outright.
         """
         # Purge queued live-progress entries and stale start/pre-complete entries
         # so a completed cycle cannot replay them later.
@@ -7509,18 +7577,10 @@ class WashDataManager:
         )
 
         if clear_services:
-            self._send_notification_service(
-                _CLEAR_NOTIFICATION_MARKER,
-                services=self._notify_live_services,
-                event_type=NOTIFY_EVENT_LIVE,
-                extra_vars={
-                    "tag": self._live_notification_tag,
-                    "live_update": True,
-                    "alert_once": True,
-                    # C3: iOS Live Activity end marker (mobile_app_* only downstream).
-                    "activity": "end",
-                },
-            )
+            # Shutdown / no finished notification follows: end the activity and
+            # drop the lifecycle card too, so nothing is left behind (#446).
+            self._send_tag_clear(self._live_notification_tag)
+            self._send_tag_clear(self._lifecycle_tag)
 
         # Reset live-update state flags and counters.
         self._reset_live_notification_state()
