@@ -1,5 +1,12 @@
 # 0.5.7 milestone plan
 
+> **Status: implemented.** Commits `428ff05`..`13bb4c4` on branch `0.5.7`. Every measured
+> figure below was re-verified against the shipped code; where implementation diverged from
+> this plan the reason is recorded inline and in register items 287-296. Two things planned
+> here were deliberately NOT done: auto-lowering `min_off_gap` (A3 part 2) and repairing the
+> `stop_threshold_w` suggestion (B2) - both measured, both shown unsafe or impossible from the
+> data available. See "Outcome" at the foot of this file.
+
 Eight issues. Evidence below is reproduced from the reporters' own exports, replayed through the
 real `CycleDetector` (see "Evidence" per item). Four of the eight are one small change each; the
 end-of-cycle cluster (#424 / #427 / #445) is three *distinct* root causes that were previously
@@ -329,3 +336,45 @@ end, i.e. #446.
 - `CHANGELOG.md`: re-cut the 0.5.7 `### TL;DR` as a whole once the set is known.
 - After any `www/*.js` edit: `node devtools/build_panel.mjs` and commit the artifacts in the same
   commit.
+
+
+---
+
+## Outcome (2026-09-21)
+
+| Issue | Before | After | How measured |
+|---|---|---|---|
+| #424 Beko dishwasher | 33.8 min late | **17.9 min** | reporter's v0.5.6 cycle `ed421c54164c`, real `CycleDetector` |
+| #427 AEG washer | 13.2 min late | **8.2 min** (= its configured 480 s) | reporter's v0.5.6 cycle `60fcbdc82f9a` |
+| #445 Miele, left idling | 91.5 min | **9.0 min** | reporter's cycle `ce36bfccb0af` |
+| #445 `off_delay` suggestion | 2033 s | **180 s**, then cadence fallback | reproduced byte-identically from the export |
+| #427 `off_delay` suggestion | 1150 s | none (zero real pauses) | 413 sub-threshold readings, none resumed |
+
+**Safety evidence.** 111 clean cycles replayed across the whole corpus for the standby-band
+gate change: no cycle that finished before finished differently, two that never closed now do.
+15 devices swept for the `min_off_gap` question. `dtw_ab_eval` top-1 **88.4%, unchanged**.
+Fast suite 2328 -> 2372 passing, slow 78 passed / 66 skipped throughout, E2E 589 on both the
+readable and minified builds.
+
+**Deliberately not done, with the measurement that decided it:**
+
+1. **A3 part 2, auto-lowering `min_off_gap`.** Honouring a hand-lowered `off_delay` would split
+   0 cycles on the 2 of 15 devices that leave `min_off_gap` unset - but the same sweep found
+   dishwasher quiet-and-resumed stretches of **6791 s** and 2051 s, so the prior guards a real
+   failure mode on exactly the device class that needs it. Disclosed in the UI instead.
+2. **B2, the `stop_threshold_w` suggestion that produced 2.56 W on an appliance idling at
+   3.2-3.5 W.** No trace-based rule can fix it: idle and lowest-active are the same level on
+   this machine and interleave mid-cycle, and `keep_tail=False` trims the idle tail away, so
+   the stored trace's last sample is by construction just above the *current* threshold and
+   says nothing about idle. Swept `0.02*peak` / `stop_threshold` / `start_threshold` /
+   `0.25*median_active` / `0.5*median_active` and a trailing-plateau strip: none separates
+   them. The usable signal is behavioural - cycles repeatedly needing a manual stop, now
+   captured by item 288's `user_stopped` code. **Designing that advisory is open.**
+3. **Capping the pause/end gates at a fraction of `effective_off_delay`** (the A6 residue).
+   Still the obvious next lever for the ~18 min the Beko has left; deferred as planned.
+
+**#417** needed no code: its silent-live-updates half shipped in 0.5.6, and its only open
+comment was #446. Close it referencing #446 once that ships.
+
+**Wiki:** `Notifications-and-Events.md` described the `activity` key as what dismisses the
+Live Activity. Corrected in `/root/ha_washdata_wiki`, **committed nowhere - not pushed.**
