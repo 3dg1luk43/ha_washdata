@@ -65,11 +65,34 @@ def stage4_energy_mode(device_type: str | None) -> str:
     return "integrated" if device_type in STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES else "mean"
 
 
-def _agreement(observed: float, expected: float, scale: float) -> float:
-    """1.0 when observed==expected, decaying with the |log-ratio| / scale."""
+def _agreement(
+    observed: float, expected: float, scale: float, gaussian: bool = False
+) -> float:
+    """1.0 when observed==expected, decaying with the log-ratio / scale.
+
+    Two kernels over the same log-ratio. The default is Lorentzian/Cauchy-like
+    (``1/(1+|x|)``), which decays slowly and so keeps a badly-sized candidate in
+    contention. ``gaussian`` (``exp(-x^2/2)``) decays fast and separates much
+    harder on size.
+
+    **This is a discrimination choice, not a density fit** (register item 307).
+    Measured on the corpus, the within-profile duration log-residual is decidedly
+    NOT normal - excess kurtosis 16.65, |z|>3 at 2.64% against the 0.27% a normal
+    predicts, and stripping the cycles that cannot match their own profile at all
+    (item 304) makes it heavier still, not lighter. The Gaussian nonetheless wins
+    at cycle end because those extreme cycles are unwinnable either way, so the
+    sharper penalty costs nothing on them and buys separation on the bulk.
+
+    The same sharpness is why it must NOT be used mid-cycle: there the observed
+    duration is a prefix, necessarily far below the profile mean, and a fast kernel
+    crushes the correct long candidate. The slow tail is what keeps it alive.
+    """
     if observed <= 0 or expected <= 0 or scale <= 0:
         return 0.0
-    return 1.0 / (1.0 + abs(np.log(observed / expected)) / scale)
+    ratio = np.log(observed / expected)
+    if gaussian:
+        return float(np.exp(-0.5 * (ratio / scale) ** 2))
+    return 1.0 / (1.0 + abs(ratio) / scale)
 
 _LOGGER = logging.getLogger(__name__)
 ALIGNMENT_CONTEXT_BUFFER = 50
@@ -547,7 +570,12 @@ def compute_matches_worker(
                 # rejected (see MATCH_DURATION_SCALE_OVERRUN in const.py).
                 dur_ag = _agreement(current_duration, prof_dur, dur_overrun_scale)
             else:
-                dur_ag = _agreement(current_duration, prof_dur, dur_scale)
+                # Gaussian only on a COMPLETED cycle, where the observed duration
+                # is the real one. Mid-cycle it is a prefix and the sharp kernel
+                # costs -6.4pp at 60% elapsed (item 307).
+                dur_ag = _agreement(
+                    current_duration, prof_dur, dur_scale, gaussian=not in_progress
+                )
             sample = cand.get("sample") or []
             if in_progress:
                 cand_mean, cand_span = prefix_mean(
