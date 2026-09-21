@@ -1056,6 +1056,8 @@
     "store_declare_appliance": "Tell WashData which appliance you own and this tab shows the setups other people have shared for it. You can also type a brand above to look around.",
     "store_download_device_intro": "Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.",
     "store_enable_hint": "Enable online features in Settings to browse and import community reference cycles.",
+    "standby_above_stop_title": "Still drawing {idle} W when the cycle ended",
+    "standby_above_stop_sub": "{n} of the last {total} cycles. The off delay only starts once power is below the Stop Threshold ({stop} W), so cycles finish late or need stopping by hand.",
     "store_picker_offline": "Enable online features in the settings gear to pick from the community catalog.",
     "store_share_device_intro": "Upload {brand} {model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.",
     "store_share_intro": "Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly.",
