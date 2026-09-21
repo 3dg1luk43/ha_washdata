@@ -1481,14 +1481,15 @@ class WashDataManager:
                 # for; those cases pick a shorter programme 46% of the time (vs 16.5%
                 # at large). Replaying all 594 cycles through this switching logic,
                 # the old rule was also **unreachable in practice** - its outcomes
-                # were identical to having no override at all, to every digit.
+                # land within 0.2pp of having no override at all.
                 #
                 # The margin is the signal that works: mid-cycle AUC 0.773 vs 0.535
                 # for the absolute score. Replayed, keying the bypass on it lifts
-                # end-of-cycle correctness 71.2% -> 74.4% (22 cycles better, 3 worse,
-                # McNemar p = 0.0002) for 0.16 displayed switches per cycle against
-                # 0.08. Sweep: 0.08 -> +3.5pp, 0.10 -> +3.2, 0.12 -> +3.2,
-                # 0.15 -> +2.4, 0.20 -> +1.3 (n.s.); 0.12 has the best win/loss ratio.
+                # end-of-cycle correctness 70.4% -> 72.6% (16 cycles better, 3 worse,
+                # McNemar p = 0.0044) for 0.14 displayed switches per cycle against
+                # 0.07. The sweep is monotone, so this is the conservative end of an
+                # accuracy/stability trade: 0.05 -> +6.7pp at 0.27 flips/cycle,
+                # 0.08 -> +5.1, 0.10 -> +3.0, 0.12 -> +2.2, 0.15 -> +1.7.
                 # The `> current_program_score` guard measured neutral (it never binds
                 # at this margin) and is kept because switching to something scoring
                 # below what is already displayed is never right.
