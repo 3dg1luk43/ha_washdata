@@ -22,7 +22,19 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, AsyncMock, patch
 from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager
-from custom_components.ha_washdata.const import STATE_RUNNING, STATE_OFF
+from custom_components.ha_washdata.const import (
+    STATE_RUNNING, STATE_OFF, STATE_PAUSED, STATE_ENDING, STATE_FINISHED,
+    STATE_FORCE_STOPPED,
+)
+
+# "Alive" for this file means the cycle is still being tracked and can still
+# resume - RUNNING, PAUSED and ENDING all qualify. See the note in
+# tests/repro/test_long_drying_pause.py: before register item 289 a single
+# injected keepalive inflated the pause gate 60x (30 s -> 1800 s) because
+# synthetic readings trained the cadence estimator, so the detector stayed in
+# RUNNING through ten minutes of 0 W. It now reports PAUSED, which is what the
+# power is; the cycle is equally open either way.
+_OPEN_STATES = (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
 
 @pytest.fixture
 def mock_hass():
@@ -95,7 +107,10 @@ async def test_watchdog_low_power_survival(mock_hass, mock_entry):
         
     # Assertions
     # Should NOT have ended
-    assert manager.detector.state == STATE_RUNNING, "Watchdog killed waiting cycle too early!"
+    assert manager.detector.state in _OPEN_STATES, (
+        f"Watchdog killed waiting cycle too early! (state={manager.detector.state})"
+    )
+    assert manager.detector.state not in (STATE_OFF, STATE_FINISHED, STATE_FORCE_STOPPED)
     
     # Check if we injected injection (logic: process_reading called with 0W)
     # We can check if _last_reading_time was updated to t_check
