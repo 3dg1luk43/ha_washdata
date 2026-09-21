@@ -621,8 +621,11 @@ MATCH_AMBIGUITY_MARGIN = 0.05
 # skip the persistence wait (register item 305). The absolute score is close to
 # useless for this mid-run (AUC 0.535, because a prefix of a long programme looks
 # like a finished short one); the top1-top2 margin reaches AUC 0.773. Replayed over
-# 594 cycles x 10 checkpoints: 71.2% -> 74.4% end-of-cycle correctness, 22 better /
-# 3 worse, McNemar p = 0.0002.
+# 594 cycles x 10 checkpoints: 70.4% -> 72.6% end-of-cycle correctness, 16 better /
+# 3 worse, McNemar p = 0.0044, at 0.14 displayed switches per cycle against 0.07.
+# The sweep is monotone (0.05 -> +6.7pp at 0.27 flips, 0.08 -> +5.1, 0.10 -> +3.0),
+# so this is the conservative end of an accuracy/stability trade. Do not retune it
+# in isolation: any Stage-2 scoring change rescales the margin along with it.
 MATCH_DECISIVE_MARGIN = 0.12
 # Smart Termination landscape guard: when a non-winning candidate is at least this
 # much longer than the matched profile AND has a decent shape score (before Stage-4
