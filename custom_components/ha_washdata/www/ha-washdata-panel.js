@@ -401,6 +401,29 @@ const _PG_MATCH_DEFAULTS = {
 // `ctx.stateOf(entity_id)` reaches the hass state for rules that need an entity's
 // attributes; every numeric rule ignores it.
 
+// ─── Setting notes (informational, not conflicts) ─────────────────────────────
+// Same shape as _SETTING_CONFLICTS, but these describe a value the integration
+// DERIVES from more than one setting. They are not violations - nothing here is
+// misconfigured - so they render as a neutral note rather than an error with a
+// fix button, and they never contribute to the section conflict dots.
+const _SETTING_NOTES = [
+  {
+    // #445: the detector waits max(off_delay, min_off_gap), so a min_off_gap
+    // above off_delay silently governs the end of the cycle. The reporter set
+    // off_delay to 180 s, waited 6 minutes and force-stopped three cycles,
+    // because the 480 s their washing machine actually waited was never shown.
+    keys: ['off_delay', 'min_off_gap'],
+    check: v => v.off_delay != null && v.min_off_gap != null && v.min_off_gap > v.off_delay,
+    fieldNotes: v => ({
+      off_delay: {
+        msgKey: 'note.off_delay.effective',
+        msgVars: { eff: v.min_off_gap, gap: v.min_off_gap, delay: v.off_delay },
+        msgFb: `A finished cycle actually waits ${v.min_off_gap} s, not ${v.off_delay} s: Min Off Gap (${v.min_off_gap} s) is longer and takes precedence.`,
+      },
+    }),
+  },
+];
+
 // Device classes and units that prove a sensor is not a price per kWh (#439).
 // Mirrors manager._NON_PRICE_DEVICE_CLASSES / _NON_PRICE_UNITS - keep in step.
 const _NON_PRICE_DEVICE_CLASSES = new Set(['energy', 'energy_storage', 'power', 'gas', 'water', 'current', 'voltage']);
@@ -835,6 +858,10 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 .wd-auto-pill-x { flex: 0 0 auto; border: none; background: transparent; color: var(--secondary-text-color); cursor: pointer; font-size: 1.15em; line-height: 1; padding: 0 5px; border-radius: 50%; }
 .wd-auto-pill-x:hover { background: var(--error-color, #f44336); color: var(--wd-white); }
 .wd-field-hint { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px; }
+/* Derived-value note (#445): informational, never an error - no red, no fix button. */
+.wd-setting-note { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px;
+  padding: 5px 9px; border-radius: var(--wd-radius-sm);
+  background: var(--secondary-background-color); border-left: 3px solid var(--primary-color); }
 /* Entity-pill multi-picker (compact chips + inline add input) */
 .wd-pillbox { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 5px 6px; min-height: 34px;
   border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); background: var(--card-background-color); }
@@ -1760,7 +1787,7 @@ function _field(f, value, extra) {
     const lockBtn = `<button type="button" class="wd-sug-lock" data-suglock="${key}" title="${lockTitle}" aria-label="${lockTitle}">🔕</button>`;
     sugHtml = sugHtml.replace(/<\/div>\s*$/, lockBtn + '</div>');
   }
-  return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${chgDot}${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div>${sugHtml}</div>`;
+  return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${chgDot}${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div><div class="wd-setting-note" data-cnote="${key}" hidden></div>${sugHtml}</div>`;
 }
 
 // Are two suggestion/option values effectively equal? Numeric-tolerant so an
@@ -13973,6 +14000,24 @@ class HaWashdataPanel extends HTMLElement {
         (keyErrors[key] = keyErrors[key] || []).push(errInfo);
       }
     }
+
+    // Derived-value notes (#445). Separate list, separate DOM slot: these are not
+    // violations, so they must not highlight the field or feed the section dots.
+    const keyNotes = {};
+    for (const rule of _SETTING_NOTES) {
+      if (!rule.check(vals, ctx)) continue;
+      for (const [key, info] of Object.entries(rule.fieldNotes(vals, ctx))) {
+        (keyNotes[key] = keyNotes[key] || []).push(info);
+      }
+    }
+    form.querySelectorAll('[data-cnote]').forEach(div => {
+      const notes = keyNotes[div.dataset.cnote];
+      if (!notes || !notes.length) { div.hidden = true; div.innerHTML = ''; return; }
+      div.hidden = false;
+      div.innerHTML = notes
+        .map(n => _esc(this._t(n.msgKey, n.msgVars, n.msgFb)))
+        .join('<br>');
+    });
 
     // Update the DOM: show/hide conflict error divs and field highlights.
     form.querySelectorAll('[data-cerr]').forEach(div => {

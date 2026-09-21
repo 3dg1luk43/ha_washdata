@@ -93,6 +93,8 @@ from .const import (
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_OFF_DELAY_BY_DEVICE,
+    resolve_min_off_gap_default,
+    resolve_off_delay_default,
     DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
@@ -1554,6 +1556,14 @@ def _resolved_option_defaults(device_type: str) -> dict[str, Any]:
         # the individual machine), but the panel pre-populates it from the same
         # payload, so it is published here rather than left to the JS default.
         CONF_ANTI_CREASE_FINALIZE_RATIO: DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+        # #445: the pair that decides when a cycle is allowed to end. The detector
+        # waits max(off_delay, min_off_gap), so an unset min_off_gap silently
+        # raises a hand-lowered off_delay to the per-device prior - and with the
+        # key absent here the panel rendered an empty field and the cross-field
+        # rule's `!= null` guard short-circuited, so nothing anywhere showed the
+        # number that was actually governing the wait.
+        CONF_MIN_OFF_GAP: resolve_min_off_gap_default(device_type),
+        CONF_OFF_DELAY: resolve_off_delay_default(device_type),
     }
 
 

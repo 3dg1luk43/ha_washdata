@@ -258,6 +258,11 @@
     "wipe_all": "Wipe All Data",
     "save_total_cycles": "Save total"
   },
+  "note": {
+    "off_delay": {
+      "effective": "A finished cycle actually waits {eff} s, not {delay} s: Min Off Gap ({gap} s) is longer and takes precedence."
+    }
+  },
   "conflict": {
     "anti_wrinkle_exit": {
       "exit": "Must be below Stop Threshold ({stop} W); otherwise the anti-wrinkle exit power is ignored",
