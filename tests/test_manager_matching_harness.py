@@ -192,37 +192,108 @@ async def test_profile_change_resets_persistence_counter(
 
 
 @pytest.mark.asyncio
-async def test_high_confidence_override_bypasses_persistence(
+async def test_decisive_margin_bypasses_persistence(
     manager: WashDataManager,
 ) -> None:
-    """A very high-confidence result for a different profile bypasses persistence.
+    """A winner far clear of the runner-up switches at once (item 305).
 
-    While committed to Cotton, a single Quick result with confidence > 0.8 and
-    score-gap > 0.15 must trigger an immediate mid-cycle switch (Case 2 path).
+    Committed to Cotton (0.70), one Quick result at 0.92 leaves a 0.22 margin over
+    the next candidate, well past MATCH_DECISIVE_MARGIN, so it takes over without
+    waiting for the persistence counter.
     """
     readings = _make_readings()
 
-    # Pre-commit Cotton by manual state setup (avoids 3-call warmup)
     manager._current_program = PROFILE_COTTON
     manager._matched_profile_duration = 3600.0
     manager._match_persistence_counter[PROFILE_COTTON] = 3
 
-    # Quick result: confidence=0.92, Cotton score=0.70 → gap=0.22 > 0.15
-    override_result = _make_result(
+    result = _make_result(
         profile=PROFILE_QUICK,
         confidence=0.92,
         candidates=[
-            {"name": PROFILE_COTTON, "score": 0.70},
             {"name": PROFILE_QUICK, "score": 0.92},
+            {"name": PROFILE_COTTON, "score": 0.70},
         ],
         duration=1800.0,
     )
-    manager.profile_store.async_match_profile = AsyncMock(return_value=override_result)
+    manager.profile_store.async_match_profile = AsyncMock(return_value=result)
 
     await manager._async_do_perform_matching(readings)
 
     assert manager._current_program == PROFILE_QUICK
     assert manager._matched_profile_duration == 1800.0
+
+
+@pytest.mark.asyncio
+async def test_high_confidence_narrow_margin_does_not_bypass(
+    manager: WashDataManager,
+) -> None:
+    """High confidence with a CROWDED field must not bypass persistence (item 305).
+
+    This is the case the old `confidence > 0.8` override got wrong. Quick scores
+    0.92 - comfortably over 0.8, and 0.22 clear of the displayed Cotton - so the old
+    rule switched immediately. But a third candidate sits at 0.85, so the winner is
+    only 0.07 clear of the field and the match is not actually decided. Mid-cycle a
+    high absolute score is close to meaningless (AUC 0.535) because a prefix of a
+    long programme looks like a finished short one; the margin is what carries the
+    signal (AUC 0.773). One hit must therefore not move the display.
+    """
+    readings = _make_readings()
+
+    manager._current_program = PROFILE_COTTON
+    manager._matched_profile_duration = 3600.0
+    manager._match_persistence_counter[PROFILE_COTTON] = 3
+
+    result = _make_result(
+        profile=PROFILE_QUICK,
+        confidence=0.92,
+        candidates=[
+            {"name": PROFILE_QUICK, "score": 0.92},
+            {"name": "Synthetics 40", "score": 0.85},
+            {"name": PROFILE_COTTON, "score": 0.70},
+        ],
+        duration=1800.0,
+    )
+    manager.profile_store.async_match_profile = AsyncMock(return_value=result)
+
+    await manager._async_do_perform_matching(readings)
+
+    assert manager._current_program == PROFILE_COTTON
+    assert manager._matched_profile_duration == 3600.0
+
+
+@pytest.mark.asyncio
+async def test_persistent_narrow_margin_still_switches(
+    manager: WashDataManager,
+) -> None:
+    """Not bypassing must not mean never switching (item 305).
+
+    The same crowded-field result, repeated until persistent and with a rising
+    score so `_analyze_trend` agrees, still takes over.
+    """
+    readings = _make_readings()
+
+    manager._current_program = PROFILE_COTTON
+    manager._matched_profile_duration = 3600.0
+    manager._match_persistence_counter[PROFILE_COTTON] = 3
+
+    for i in range(6):
+        conf = 0.80 + i * 0.02  # rising, so the trend check passes
+        manager.profile_store.async_match_profile = AsyncMock(
+            return_value=_make_result(
+                profile=PROFILE_QUICK,
+                confidence=conf,
+                candidates=[
+                    {"name": PROFILE_QUICK, "score": conf},
+                    {"name": "Synthetics 40", "score": conf - 0.07},
+                    {"name": PROFILE_COTTON, "score": 0.60},
+                ],
+                duration=1800.0,
+            )
+        )
+        await manager._async_do_perform_matching(readings)
+
+    assert manager._current_program == PROFILE_QUICK
 
 
 @pytest.mark.asyncio
