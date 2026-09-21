@@ -827,7 +827,17 @@ STANDBY_BAND_FINALIZE_DEVICE_TYPES = (
     DEVICE_TYPE_WASHER_DRYER,
     DEVICE_TYPE_DRYER,
 )
-STANDBY_BAND_MIN_RATIO = 2.0          # only past 2x the expected duration
+# Only past the programme's own expected duration (#445). Was 2.0, which on the
+# reporter's 91 min Miele meant 91.5 minutes of idle before the cycle closed:
+# that machine sits at 3.2-3.5 W after a programme ends, above its 2.56 W stop
+# threshold, so _time_below_threshold never accumulates and this is the ONLY
+# path that can end the cycle at all. Measured over 111 clean cycles from the
+# whole corpus at 2.0 vs 1.0: no cycle that finished under 2.0 finished any
+# differently, and two that never closed within their stored trace now close at
+# 103% and 94% of expected. The three plateau conditions below are what make it
+# safe - past expected AND >=10 min flat AND <=10% of the cycle's own peak is
+# an appliance that has finished, not one still working.
+STANDBY_BAND_MIN_RATIO = 1.0          # only past the expected duration
 STANDBY_BAND_WINDOW_S = 600.0         # require a >=10 min flat plateau
 STANDBY_BAND_MAX_FRACTION = 0.10      # plateau level <= 10% of the cycle's peak
 STANDBY_BAND_FLATNESS_FRACTION = 0.03  # window (max-min) <= 3% of the cycle's peak

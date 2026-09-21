@@ -2530,6 +2530,19 @@ class CycleDetector:
         current_duration = (timestamp - start).total_seconds()
         if current_duration < self._expected_duration * STANDBY_BAND_MIN_RATIO:
             return False
+        # #399 interaction, load-bearing since the gate above dropped from 2.0x to
+        # 1.0x expected (#445): a washer can sit quiet below anti_wrinkle_max_power
+        # for minutes BEFORE its final spin, and that quiet is a flat sub-10%-of-peak
+        # plateau like any other. Finalising there is exactly the failure #399 fixed
+        # - the spin then arrives and opens a second cycle record. Defer while the
+        # matched profile still owes this run its terminal high-power block. Shares
+        # the predicate with the anti-crease finalise so the two release together,
+        # and it fails open on every missing input (no profile block, non-terminal
+        # block, past the ANTI_CREASE_SPIN_WAIT_MAX_RATIO cap), so an appliance that
+        # never spins - the #445 Miele, which has no terminal block at all - is not
+        # delayed by it.
+        if self._anticrease_spin_pending(timestamp):
+            return False
         peak = float(self._cycle_max_power)
         if peak <= 0:
             return False
