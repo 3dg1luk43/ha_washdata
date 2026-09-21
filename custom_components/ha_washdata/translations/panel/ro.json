@@ -1976,7 +1976,7 @@
     "duration_weight": "Etapa 4: cât de puternic influențează acordul de durată scorul final (implicit 0.22)",
     "energy_weight": "Etapa 4: cât de puternic influențează acordul de energie scorul final (implicit 0.22)",
     "profile_match_min_duration_ratio": "Etapa 1: lungimea minimă a ciclului ca fracție din durata profilului; implicit 0.1 (10%)",
-    "profile_match_max_duration_ratio": "Etapa 1: lungimea maximă a ciclului ca fracție din durata profilului; implicit 1.5 (150%)",
+    "profile_match_max_duration_ratio": "Etapa 1: lungimea maximă a ciclului ca fracție din durata profilului; implicit 1.8 (180%)",
     "keep_min_score": "Etapa 2: prag minim de scor pentru a rămâne în cursă; implicit 0.1 admite potriviri slabe, etapele ulterioare aleg cel mai bun",
     "dtw_blend": "Etapa 3: 0 = doar scor de bază, 1 = doar scor DTW, 0.5 = amestec egal (implicit)",
     "dtw_ensemble_w": "Etapa 3 (modul ansamblu): ponderea pe L1 scalat față de DTW derivativ; implicit 0.7 favorizează nivelul de putere",

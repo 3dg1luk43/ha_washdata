@@ -2024,7 +2024,7 @@
     "duration_weight": "Fáza 4: ako silno zhoda dĺžky trvania ovplyvňuje výsledné skóre (predvolené 0,22)",
     "energy_weight": "Fáza 4: ako silno zhoda energie ovplyvňuje výsledné skóre (predvolené 0,22)",
     "profile_match_min_duration_ratio": "Fáza 1: minimálna dĺžka cyklu ako zlomok dĺžky trvania profilu; predvolené 0,1 (10 %)",
-    "profile_match_max_duration_ratio": "Fáza 1: maximálna dĺžka cyklu ako zlomok dĺžky trvania profilu; predvolené 1,5 (150 %)",
+    "profile_match_max_duration_ratio": "Fáza 1: maximálna dĺžka cyklu ako zlomok dĺžky trvania profilu; predvolené 1,8 (180 %)",
     "keep_min_score": "Fáza 2: minimálne skóre na zostanie v závode; predvolené 0,1 pripúšťa slabé zhody, neskoršie fázy vyberú najlepšie",
     "dtw_blend": "Fáza 3: 0 = iba základné skóre, 1 = iba skóre DTW, 0,5 = rovnaké miešanie (predvolené)",
     "dtw_ensemble_w": "Fáza 3 (režim kombinácie): váha škálovaného L1 oproti derivátneho DTW; predvolené 0,7 uprednostňuje úroveň",

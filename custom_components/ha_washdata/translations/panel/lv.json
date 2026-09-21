@@ -2024,7 +2024,7 @@
     "duration_weight": "4. posms: cik stipri ilguma atbilstība ietekmē galīgo rezultātu (noklusējums 0,22)",
     "energy_weight": "4. posms: cik stipri enerģijas atbilstība ietekmē galīgo rezultātu (noklusējums 0,22)",
     "profile_match_min_duration_ratio": "1. posms: īsākais cikls kā profila ilguma daļa; noklusējums 0,1 (10%)",
-    "profile_match_max_duration_ratio": "1. posms: garākais cikls kā profila ilguma daļa; noklusējums 1,5 (150%)",
+    "profile_match_max_duration_ratio": "1. posms: garākais cikls kā profila ilguma daļa; noklusējums 1,8 (180%)",
     "keep_min_score": "2. posms: zemākais rezultāts, lai paliktu sacensībā; noklusējums 0,1 pieļauj vājus kandidātus, vēlākie posmi izvēlas labāko",
     "dtw_blend": "3. posms: 0 = tikai pamatrezultāts, 1 = tikai DTW rezultāts, 0,5 = vienāds sajaukums (noklusējums)",
     "dtw_ensemble_w": "3. posms (ensemble režīms): skalētā L1 svars pret atvasinātās DTW; noklusējums 0,7 dod priekšroku līmeņapziņai",

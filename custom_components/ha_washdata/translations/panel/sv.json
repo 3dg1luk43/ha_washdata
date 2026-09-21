@@ -1105,7 +1105,7 @@
     "duration_weight": "Steg 4: hur starkt körtidsöverensstämmelse påverkar slutpoängen (standard 0,22)",
     "energy_weight": "Steg 4: hur starkt energiöverensstämmelse påverkar slutpoängen (standard 0,22)",
     "profile_match_min_duration_ratio": "Steg 1: lägsta cykellängd som andel av profilduration; standard 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Steg 1: högsta cykellängd som andel av profilduration; standard 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Steg 1: högsta cykellängd som andel av profilduration; standard 1,8 (180%)",
     "keep_min_score": "Steg 2: lägsta poäng för att gå vidare; standard 0,1 släpper igenom svaga matchningar, senare steg väljer den bästa",
     "dtw_blend": "Steg 3: 0 = bara kärnpoäng, 1 = bara DTW-poäng, 0,5 = lika blandning (standard)",
     "dtw_ensemble_w": "Steg 3 (ensemble-läge): vikt på skalad L1 kontra derivativ DTW; standard 0,7 gynnar nivåmedvetenhet",

@@ -1976,7 +1976,7 @@
     "duration_weight": "Etapa 4: o quanto a concordância de duração afeta a pontuação final (padrão 0,22)",
     "energy_weight": "Etapa 4: o quanto a concordância de energia afeta a pontuação final (padrão 0,22)",
     "profile_match_min_duration_ratio": "Etapa 1: duração mínima do ciclo como fração da duração do perfil; padrão 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Etapa 1: duração máxima do ciclo como fração da duração do perfil; padrão 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Etapa 1: duração máxima do ciclo como fração da duração do perfil; padrão 1,8 (180%)",
     "keep_min_score": "Etapa 2: pontuação mínima para permanecer na disputa; o padrão 0,1 admite candidatos fracos, etapas posteriores escolhem o melhor",
     "dtw_blend": "Etapa 3: 0 = apenas pontuação central, 1 = apenas pontuação DTW, 0,5 = mistura equilibrada (padrão)",
     "dtw_ensemble_w": "Etapa 3 (modo ensemble): peso em L1 escalado vs DTW derivativo; o padrão 0,7 favorece a sensibilidade ao nível",

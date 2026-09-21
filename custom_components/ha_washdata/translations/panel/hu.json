@@ -2023,7 +2023,7 @@
         "duration_weight": "4. szakasz: mennyire befolyásolja a futási idő egyezése a végső pontszámot (alapértelmezett 0.22)",
         "energy_weight": "4. szakasz: mennyire befolyásolja az energia-egyezés a végső pontszámot (alapértelmezett 0.22)",
         "profile_match_min_duration_ratio": "1. szakasz: minimális ciklushossz a profil időtartamának törtjeként; alapértelmezett 0.1 (10%)",
-        "profile_match_max_duration_ratio": "1. szakasz: maximális ciklushossz a profil időtartamának törtjeként; alapértelmezett 1.5 (150%)",
+        "profile_match_max_duration_ratio": "1. szakasz: maximális ciklushossz a profil időtartamának törtjeként; alapértelmezett 1.8 (180%)",
         "keep_min_score": "2. szakasz: minimális pontszám a versenyben maradáshoz; az alapértelmezett 0.1 gyenge egyezéseket is beenged, a következő szakaszok választják ki a legjobbat",
         "dtw_blend": "3. szakasz: 0 = csak alappontszám, 1 = csak DTW-pontszám, 0.5 = egyenlő keverék (alapértelmezett)",
         "dtw_ensemble_w": "3. szakasz (együttes mód): súly a skálázott-L1 és derivált DTW között; alapértelmezett 0.7 a szintfüggőt részesíti előnyben",

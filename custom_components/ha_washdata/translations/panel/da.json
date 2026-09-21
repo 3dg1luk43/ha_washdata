@@ -1105,7 +1105,7 @@
     "duration_weight": "Trin 4: hvor stærkt varighedsoverensstemmelse påvirker slutscoren (standard 0,22)",
     "energy_weight": "Trin 4: hvor stærkt energioverensstemmelse påvirker slutscoren (standard 0,22)",
     "profile_match_min_duration_ratio": "Trin 1: korteste cykellængde som brøkdel af profilvarighed; standard 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Trin 1: længste cykellængde som brøkdel af profilvarighed; standard 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Trin 1: længste cykellængde som brøkdel af profilvarighed; standard 1,8 (180%)",
     "keep_min_score": "Trin 2: minimumsscore for at komme videre; standard 0,1 tillader svage match, senere trin vælger det bedste",
     "dtw_blend": "Trin 3: 0 = kun kernescore, 1 = kun DTW-score, 0,5 = ligelig blanding (standard)",
     "dtw_ensemble_w": "Trin 3 (ensemble-tilstand): vægt på skaleret L1 kontra derivativ DTW; standard 0,7 foretrækker niveaubevidst",

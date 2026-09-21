@@ -1105,7 +1105,7 @@
     "duration_weight": "Þrep 4: hversu sterklega samræmi í keyrslulengd hefur áhrif á lokaskorið (sjálfgefið 0,22)",
     "energy_weight": "Þrep 4: hversu sterklega samræmi í orkunotkun hefur áhrif á lokaskorið (sjálfgefið 0,22)",
     "profile_match_min_duration_ratio": "Þrep 1: stysta lota sem hlutfall af lotulegð sniðs; sjálfgefið 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Þrep 1: lengsta lota sem hlutfall af lotulegð sniðs; sjálfgefið 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Þrep 1: lengsta lota sem hlutfall af lotulegð sniðs; sjálfgefið 1,8 (180%)",
     "keep_min_score": "Þrep 2: lægsta einkunn til að vera eftir í samsvöruninni; sjálfgefið 0,1 leyfir veika frambjóðendur, síðari þrep velja best",
     "dtw_blend": "Þrep 3: 0 = aðeins kjarnaskor, 1 = aðeins DTW-skor, 0,5 = jöfn blanda (sjálfgefið)",
     "dtw_ensemble_w": "Þrep 3 (ensemble-hamur): þunginn á skaluðum L1 gagnvart afleiðu-DTW; sjálfgefið 0,7 hlynnar að stiga-meðvitund",

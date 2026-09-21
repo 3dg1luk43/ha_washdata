@@ -1063,7 +1063,7 @@
     "duration_weight": "Étape 4 : force avec laquelle la concordance de durée affecte le score final (défaut 0,22)",
     "energy_weight": "Étape 4 : force avec laquelle la concordance d'énergie affecte le score final (défaut 0,22)",
     "profile_match_min_duration_ratio": "Étape 1 : durée de cycle minimale en fraction de la durée du profil ; défaut 0,1 (10 %)",
-    "profile_match_max_duration_ratio": "Étape 1 : durée de cycle maximale en fraction de la durée du profil ; défaut 1,5 (150 %)",
+    "profile_match_max_duration_ratio": "Étape 1 : durée de cycle maximale en fraction de la durée du profil ; défaut 1,8 (180 %)",
     "keep_min_score": "Étape 2 : score plancher pour rester en lice ; le défaut 0,1 admet les candidats faibles, les étapes suivantes sélectionnent le meilleur",
     "dtw_blend": "Étape 3 : 0 = score central uniquement, 1 = score DTW uniquement, 0,5 = mélange égal (défaut)",
     "dtw_ensemble_w": "Étape 3 (mode ensemble) : poids sur L1 normalisé vs DTW dérivé ; le défaut 0,7 favorise la sensibilité au niveau",

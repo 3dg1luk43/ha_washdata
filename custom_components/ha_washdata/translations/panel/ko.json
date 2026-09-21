@@ -1108,7 +1108,7 @@
         "duration_weight": "Stage 4: 실행 시간 일치가 최종 점수에 미치는 영향(기본값 0.22)",
         "energy_weight": "Stage 4: 에너지 일치가 최종 점수에 미치는 영향(기본값 0.22)",
         "profile_match_min_duration_ratio": "Stage 1: 프로파일 지속 시간의 분수로서 최소 사이클 길이; 기본값 0.1 (10%)",
-        "profile_match_max_duration_ratio": "Stage 1: 프로파일 지속 시간의 분수로서 최대 사이클 길이; 기본값 1.5 (150%)",
+        "profile_match_max_duration_ratio": "Stage 1: 프로파일 지속 시간의 분수로서 최대 사이클 길이; 기본값 1.8 (180%)",
         "keep_min_score": "Stage 2: 경쟁에 남기 위한 최소 점수; 기본값 0.1은 약한 후보도 허용하며, 이후 단계에서 최선을 선택",
         "dtw_blend": "Stage 3: 0 = 핵심 점수만, 1 = DTW 점수만, 0.5 = 동등 혼합(기본값)",
         "dtw_ensemble_w": "Stage 3 (앙상블 모드): 스케일 L1 대 도함수 DTW 가중치; 기본값 0.7은 수준 인식 방식을 선호",

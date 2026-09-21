@@ -322,7 +322,10 @@ Tuning provenance, A/B tables and measured accuracies are in reference 02 and
 `devtools/dtw_ab_eval.py` - not repeated here.
 
 - **Stage 1 - Fast Reject:** duration ratio outside `[min_duration_ratio, max_duration_ratio]`
-  (0.10x-1.5x, some device types override the min).
+  (0.10x-1.8x, some device types override the min). The **lower** gate is inert for ranking
+  (it never removed a true candidate on the corpus) but is kept because real cycles run as
+  short as 0.148x their profile mean; the **upper** one was 1.5x and deleted the true
+  candidate on 2.3% of folds (register item 311).
 - **Stage 2 - Core Similarity:** `MATCH_CORR_WEIGHT * max(0, corr) + (1 - MATCH_CORR_WEIGHT) * mae_score`
   (45% correlation / 55% MAE). The MAE is expressed **relative to the current cycle's peak**, so the
   same proportional error scores equally on low- and high-power appliances. Below
@@ -332,7 +335,10 @@ Tuning provenance, A/B tables and measured accuracies are in reference 02 and
   `MATCH_DTW_BLEND * core + (1 - blend) * dtw`. `dtw_mode`: `scaled` / `ddtw` / `ensemble` (default)
   / `legacy`.
 - **Stage 4 - duration/energy agreement:** `(1 - dur_w - en_w)*shape + dur_w*dur_agreement +
-  en_w*energy_agreement`, `agreement = 1/(1 + |ln(observed/expected)|/scale)`. Weight and scale move
+  en_w*energy_agreement`, `agreement = 1/(1 + |ln(observed/expected)|/scale)`. The **duration**
+  term instead uses a Gaussian `exp(-0.5 (ln r / scale)^2)` on a **completed** cycle
+  (register item 307); energy stays Lorentzian. **The scoping is load-bearing** - mid-cycle
+  the observed duration is a prefix, and the sharp kernel costs -6.4pp at 60% elapsed. Weight and scale move
   **together** (a sharper scale with higher weight separates near-duplicates; raising weight alone was
   net-negative). `energy_agreement` uses mean power by default, **integrated energy** for
   `washing_machine`/`washer_dryer` via `energy_mode`.
@@ -359,6 +365,16 @@ Tuning provenance, A/B tables and measured accuracies are in reference 02 and
 **Match confidence** = the top candidate's final blended pipeline score (`best["score"]`), 0-1. It is
 a similarity score, **not a calibrated probability**. **Ambiguity:**
 `is_ambiguous = (top1 - top2) < MATCH_AMBIGUITY_MARGIN`.
+
+**Prefer the margin over the confidence for any new gate** (register item 305): measured over
+the corpus, `confidence` predicts correctness at AUC 0.625 on completed cycles and only
+**0.535 mid-cycle**, where the margin reaches 0.792 / 0.773. Mid-run the absolute score is
+close to useless because a prefix of a long programme resembles a *finished* short one.
+Two constants already follow from this and are deliberately separate:
+`MATCH_DECISIVE_MARGIN` (0.12) lets a mid-cycle switch skip the persistence wait, and
+`MATCH_LABEL_MIN_MARGIN` (0.08) is required before a finished cycle is auto-labelled.
+`MATCH_AMBIGUITY_MARGIN` itself must stay at 0.05 because it also reaches the detector and
+gates Smart Termination - widening it defers cycle ends (item 306).
 
 **On a Stage-5 group win there are two confidences, and they are not interchangeable.**
 `MatchResult.confidence` stays the winning *group's* score, because the end-detection consumers are

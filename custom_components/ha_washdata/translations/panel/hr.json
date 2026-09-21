@@ -2024,7 +2024,7 @@
     "duration_weight": "Faza 4: koliko jako slaganje trajanja utječe na konačnu ocjenu (zadano 0,22)",
     "energy_weight": "Faza 4: koliko jako slaganje energije utječe na konačnu ocjenu (zadano 0,22)",
     "profile_match_min_duration_ratio": "Faza 1: minimalna duljina ciklusa kao udio trajanja profila; zadano 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Faza 1: maksimalna duljina ciklusa kao udio trajanja profila; zadano 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Faza 1: maksimalna duljina ciklusa kao udio trajanja profila; zadano 1,8 (180%)",
     "keep_min_score": "Faza 2: minimalna ocjena za ostanak u utrci; zadano 0,1 dopušta slabe podudarnosti, kasniji koraci biraju najboljeg",
     "dtw_blend": "Faza 3: 0 = samo osnovna ocjena, 1 = samo DTW ocjena, 0,5 = jednako miješanje (zadano)",
     "dtw_ensemble_w": "Faza 3 (kombinirani način): težina skaliranog L1 nasuprot derivatnog DTW; zadano 0,7 favorizira razinu",
