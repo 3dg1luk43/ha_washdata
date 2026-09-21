@@ -617,6 +617,13 @@ MATCH_DTW_ENSEMBLE_W = 0.7         # weight on L1 vs DDTW in "ensemble" mode
 MAX_ALIGN_GRID_POINTS = 2000
 # Ambiguity: top1-top2 score gap below this flags the match as ambiguous.
 MATCH_AMBIGUITY_MARGIN = 0.05
+# Gap between the best and second-best candidate at which a mid-cycle switch may
+# skip the persistence wait (register item 305). The absolute score is close to
+# useless for this mid-run (AUC 0.535, because a prefix of a long programme looks
+# like a finished short one); the top1-top2 margin reaches AUC 0.773. Replayed over
+# 594 cycles x 10 checkpoints: 71.2% -> 74.4% end-of-cycle correctness, 22 better /
+# 3 worse, McNemar p = 0.0002.
+MATCH_DECISIVE_MARGIN = 0.12
 # Smart Termination landscape guard: when a non-winning candidate is at least this
 # much longer than the matched profile AND has a decent shape score (before Stage-4
 # duration penalty), the current trace may be a *prefix* of that longer program
