@@ -1299,6 +1299,10 @@ TERMINAL_EVENT_PEAK_FRAC = 0.004
 TERMINAL_QUIET_MIN_S = 120.0
 # Below this many evidence cycles the medians describe noise, not the programme.
 TERMINAL_SIGNATURE_MIN_CYCLES = 3
+# Cycles a profile needs before one of them can be called a duration outlier
+# (register item 304). Below this there is no established 'usual length' to be
+# an outlier from, and calling a program's second cycle an error is nonsense.
+SELF_UNMATCHABLE_MIN_CYCLES = 3
 
 # Storage
 # v6: backfill ml_review.golden=True for manually-recorded cycles (recorded ==
