@@ -457,6 +457,63 @@ def select_clean_cycles(
     return clean, excluded
 
 
+def detect_standby_above_stop(
+    cycles: list[dict[str, Any]],
+    stop_threshold_w: float,
+    *,
+    recent: int = 8,
+    min_hits: int = 2,
+) -> dict[str, Any] | None:
+    """Does this appliance idle ABOVE its stop threshold? (#445 cause 1)
+
+    ``CycleDetector`` only counts a cycle as ending once power stays BELOW
+    ``stop_threshold_w``. An appliance whose standby draw sits above it can
+    therefore never end a cycle on its own, however long the off delay: the #445
+    reporter's Miele idles at 3.2-3.5 W against a 2.56 W threshold, and they
+    force-stopped four cycles before reporting it.
+
+    The evidence is in the stored cycles. A cycle that ended by timeout snaps back
+    to the last reading above the threshold, and one the user force-stopped keeps
+    its tail - so in both cases the LAST stored sample is the level the appliance
+    was actually sitting at when the cycle closed. If that is repeatedly above
+    ``stop_threshold_w``, the threshold is below the appliance's standby draw.
+
+    Returns None when there is no such pattern, else a summary carrying the
+    observed idle level so the UI can name a number rather than a symptom. Pure
+    statistics, never raises: this is read on the device-list path.
+    """
+    try:
+        if stop_threshold_w <= 0:
+            return None
+        finals: list[float] = []
+        for cycle in list(cycles)[-recent:]:
+            if not isinstance(cycle, dict):
+                continue
+            raw = cycle.get("power_data")
+            if not isinstance(raw, list) or not raw:
+                continue
+            last = raw[-1]
+            if not isinstance(last, (list, tuple)) or len(last) < 2:
+                continue
+            try:
+                finals.append(float(last[1]))
+            except (TypeError, ValueError):
+                continue
+        if len(finals) < min_hits:
+            return None
+        above = [f for f in finals if f > stop_threshold_w]
+        if len(above) < min_hits:
+            return None
+        return {
+            "cycles_above": len(above),
+            "cycles_checked": len(finals),
+            "idle_w": round(float(np.median(above)), 2),
+            "stop_threshold_w": round(float(stop_threshold_w), 2),
+        }
+    except Exception:  # noqa: BLE001 - a statistic must never break the device list
+        return None
+
+
 def _format_exclusions(excluded: dict[str, int]) -> str:
     """English exclusion note for the suggestion ``reason`` fallback string.
 

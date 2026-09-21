@@ -4391,6 +4391,15 @@ class HaWashdataPanel extends HTMLElement {
     // Logs, and the rest of the Advanced drawer). They open the gear drawer at
     // the relevant subtab so the merged 4-tab layout stays discoverable.
     const advCards = [];
+    // #445 cause 1: the appliance's standby draw sits ABOVE its Stop Threshold, so
+    // the off delay never starts and the cycle cannot finish on its own. Explains
+    // rather than proposes: where idle and working power are the same level no
+    // threshold value fixes it, and the standby detector closes the cycle instead.
+    const sas = dev.standby_above_stop;
+    if (sas && this._canEdit()) {
+      attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--warning-color,#ff9800)" data-action="goto-conflicts"><span class="wd-attn-icon">\u26A0</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--warning-color,#ff9800)">${this._t('msg.standby_above_stop_title', {idle: sas.idle_w, stop: sas.stop_threshold_w}, `Still drawing ${sas.idle_w} W when the cycle ended`)}</div><div class="wd-attn-sub">${this._t('msg.standby_above_stop_sub', {n: sas.cycles_above, total: sas.cycles_checked, stop: sas.stop_threshold_w}, `${sas.cycles_above} of the last ${sas.cycles_checked} cycles. The off delay only starts below the Stop Threshold (${sas.stop_threshold_w} W), so cycles finish late.`)}</div></div></button>`);
+    }
+
     if (this._canEdit()) advCards.push(`<button class="wd-attn-card" type="button" data-action="open-advanced" data-sub="diagnostics"><span class="wd-attn-icon">🩺</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('hdr.logs_diagnostics', {}, 'Diagnostics')}</div><div class="wd-attn-sub">${this._t('msg.storage_diagnostics', {}, 'Storage stats, maintenance, export/import')}</div></div></button>`);
     advCards.push(`<button class="wd-attn-card" type="button" data-action="open-settings"><span class="wd-attn-icon">⚙️</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('settings.gear.title', {}, 'Settings')}</div><div class="wd-attn-sub">${this._isAdmin() ? this._t('msg.preferences_admin', {}, 'Preferences, panel & access control') : this._t('msg.preferences_adv', {}, 'Preferences')}</div></div></button>`);
     const advHtml = `<div class="wd-card"><div class="wd-card-title">${this._t('hdr.tools_and_data', {}, 'Tools & Data')}</div><div class="wd-attn" style="margin-bottom:0;margin-top:12px">${advCards.join('')}</div></div>`;

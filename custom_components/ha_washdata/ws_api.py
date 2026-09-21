@@ -1471,6 +1471,30 @@ def ws_get_devices(
                     except Exception:  # pylint: disable=broad-exception-caught
                         pass
                     try:
+                        # #445 cause 1: an appliance whose standby draw sits ABOVE
+                        # stop_threshold_w can never finish a cycle on its own,
+                        # because the off delay only starts once power is below it.
+                        # Surfaced as its own attention card rather than folded into
+                        # a suggestion: no threshold value can fix the case where the
+                        # appliance's idle and working power are the same level, so
+                        # this explains rather than proposes.
+                        info["standby_above_stop"] = detect_standby_above_stop(
+                            store.get_past_cycles() or [],
+                            float(
+                                merged.get(
+                                    CONF_STOP_THRESHOLD_W,
+                                    getattr(
+                                        getattr(manager, "detector", None), "config", None
+                                    ).stop_threshold_w
+                                    if getattr(manager, "detector", None) is not None
+                                    else 0.0,
+                                )
+                                or 0.0
+                            ),
+                        )
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        pass
+                    try:
                         # Count only pending feedback whose cycle still exists, so the
                         # badge cannot outrun the review list after a cycle is deleted,
                         # merged or split (#362). Defense-in-depth on top of the prune in
@@ -5258,7 +5282,8 @@ def _build_settings_comparison(
     ``ENABLE_ML_SUGGESTIONS``.
     """
     try:
-        from .suggestion_engine import (  # pylint: disable=import-outside-toplevel
+        from .suggestion_engine import (
+    detect_standby_above_stop,  # pylint: disable=import-outside-toplevel
             MLSuggestionEngine,
             select_clean_cycles,
         )
