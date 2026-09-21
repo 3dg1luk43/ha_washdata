@@ -991,7 +991,14 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
   border: 1px solid var(--divider-color, rgba(0,0,0,.08)); cursor: pointer; transition: border-color .15s, transform .1s;
 }
 .wd-profile-card:hover { border-color: var(--primary-color); transform: translateY(-1px); }
-button.wd-attn-card, button.wd-profile-card { appearance: none; font: inherit; text-align: left; width: 100%; }
+/* #444: these are the only cards rendered as a button element, and resetting
+   font without color left them on the UA buttontext system color - which follows
+   the BROWSER/OS color scheme, not the HA theme. On a light HA theme served to a
+   dark-mode browser (Catppuccin Auto Latte Macchiato, the reporter's setup) the
+   profile titles came out near-white on a light card. Everything beside them was
+   readable because it names a theme token explicitly; only the inherited color
+   was wrong. (No backticks in this block: it lives inside a JS template literal.) */
+button.wd-attn-card, button.wd-profile-card { appearance: none; font: inherit; color: inherit; text-align: left; width: 100%; }
 button.wd-profile-card { display: block; }
 .wd-prof-wrap { position: relative; }
 .wd-profile-name { font-weight: 600; font-size: 1em; margin-bottom: 6px; }
@@ -3991,6 +3998,40 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  // Scroll preservation across a full re-render (#443). Keyed by selector rather
+  // than by element, because the elements themselves do not survive the swap.
+  _SCROLLERS = ['.wd-main', '.wd-modal'];
+
+  _captureScroll() {
+    const sr = this.shadowRoot;
+    if (!sr) return null;
+    const out = {};
+    for (const sel of this._SCROLLERS) {
+      const el = sr.querySelector(sel);
+      if (el && (el.scrollTop || el.scrollLeft)) {
+        out[sel] = { top: el.scrollTop, left: el.scrollLeft };
+      }
+    }
+    return out;
+  }
+
+  _restoreScroll(saved) {
+    if (!saved) return;
+    const sr = this.shadowRoot;
+    if (!sr) return;
+    for (const [sel, pos] of Object.entries(saved)) {
+      const el = sr.querySelector(sel);
+      if (!el) continue;
+      // Clamp: the new tree may be shorter (a section collapsed, a list filtered),
+      // in which case the browser would silently clamp anyway - do it explicitly so
+      // the value we write is the value we meant.
+      const maxTop = Math.max(0, el.scrollHeight - el.clientHeight);
+      const maxLeft = Math.max(0, el.scrollWidth - el.clientWidth);
+      el.scrollTop = Math.min(pos.top, maxTop);
+      el.scrollLeft = Math.min(pos.left, maxLeft);
+    }
+  }
+
   _render() {
     if (!this._container) return;
     // Sync the module-level date-display mode from the user's saved preference so
@@ -4008,8 +4049,18 @@ class HaWashdataPanel extends HTMLElement {
     // about to erase, so it would be left floating with stale numbers over the
     // new DOM. Drop it with the crosshair it describes.
     this._hideGraphTip();
+    // #443: the swap below destroys .wd-main - the element that actually scrolls,
+    // since the panel scrolls internally - and the replacement starts at
+    // scrollTop 0. Every re-render therefore threw the user back to the top, which
+    // the Playground surfaces worst because it re-renders on each input, but it
+    // applies to any tab whose controls re-render while scrolled. Focus is already
+    // carried across the swap a few lines up; scroll is the same problem and gets
+    // the same treatment. Captured for the open modal too, which is its own
+    // scroll container.
+    const scrollBefore = this._captureScroll();
     this._container.innerHTML = this._buildHtml();
     this._wire();
+    this._restoreScroll(scrollBefore);
     this._drawStatusCurve();
     this._drawModalCanvas();
     this._drawProfileSparklines();  // D2
@@ -4055,7 +4106,10 @@ class HaWashdataPanel extends HTMLElement {
         const active = sr.activeElement || (this.getRootNode() && this.getRootNode().activeElement) || null;
         if (!active || !modalEl.contains(active)) {
           const f = _focusableEls(modalEl);
-          try { (f[0] || modalEl).focus(); } catch (_) {}
+          // preventScroll (#443): the dialog is already on screen - this branch only
+          // reclaims focus the innerHTML swap dropped. Scrolling here would undo the
+          // modal's own restored scroll position.
+          try { (f[0] || modalEl).focus({ preventScroll: true }); } catch (_) {}
         }
       }
     } else if (this._modalFocusActive) {
@@ -10960,7 +11014,8 @@ class HaWashdataPanel extends HTMLElement {
           else this._pgParamOverrides[key] = val;
           this._render();
           const again = sr.querySelector(`input[data-pgkey="${key}"]`);
-          if (again) again.focus();
+          // preventScroll (#443): this element already had focus before the re-render, so re-focusing it is bookkeeping, not navigation. A plain .focus() scrolls the element into view and would override the scroll position _render just restored - which is the jump the Playground reporter recorded.
+          if (again) again.focus({ preventScroll: true });
           requestAnimationFrame(() => this._pgDrawCanvas());
           return;
         }
@@ -10987,7 +11042,8 @@ class HaWashdataPanel extends HTMLElement {
         const again = sr.querySelector(`input[data-pgkey="${key}"]`);
         if (again) {
           again.value = rawVal;   // restore raw text incl. trailing "." the browser strips
-          again.focus();
+          // preventScroll (#443): this element already had focus before the re-render, so re-focusing it is bookkeeping, not navigation. A plain .focus() scrolls the element into view and would override the scroll position _render just restored - which is the jump the Playground reporter recorded.
+          again.focus({ preventScroll: true });
           try { again.setSelectionRange(caret, caret); } catch (_) {}
         }
         requestAnimationFrame(() => this._pgDrawCanvas());
@@ -11087,7 +11143,8 @@ class HaWashdataPanel extends HTMLElement {
       this._cycleFilter.text = cycFT.value;
       this._render();
       const el = this.shadowRoot.getElementById('wd-cyc-filter-text');
-      if (el) { el.focus(); el.setSelectionRange(pos, pos); }
+      // See the Playground note above (#443): re-focus without scrolling.
+      if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(pos, pos); }
     });
     const setFT = sr.getElementById('wd-settings-search');
     if (setFT) setFT.addEventListener('input', e => {
@@ -11096,7 +11153,8 @@ class HaWashdataPanel extends HTMLElement {
       if (setFT.value.trim()) this._settingsSugOnly = false;
       this._render();
       const el = this.shadowRoot.getElementById('wd-settings-search');
-      if (el) { el.focus(); el.setSelectionRange(pos, pos); }
+      // See the Playground note above (#443): re-focus without scrolling.
+      if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(pos, pos); }
     });
     const cycFS = sr.getElementById('wd-cyc-filter-status');
     if (cycFS) cycFS.addEventListener('change', () => {
