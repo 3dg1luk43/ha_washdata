@@ -66,6 +66,8 @@ from .const import (
     ENDING_HARD_FINALIZE_RATIO,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
     GATE_CADENCE_MEDIAN_FACTOR,
+    END_GATE_LATE_RATIO,
+    END_GATE_LATE_SECONDS,
     STANDBY_BAND_FINALIZE_DEVICE_TYPES,
     STANDBY_BAND_MIN_RATIO,
     DEVICE_TYPE_DISHWASHER,
@@ -2156,6 +2158,41 @@ class CycleDetector:
                 # --- FALLBACK TIMEOUT CHECK ---
                 # Rule: To separate cycles, we must wait at least min_off_gap.
                 effective_off_delay = max(self._config.off_delay, self._config.min_off_gap)
+
+                # Progress-aware shortening (register item 306). `min_off_gap` is
+                # there to bridge mid-cycle soak periods; once the run is past the
+                # matched programme's OWN expected length there is no soak left to
+                # bridge, so continuing to wait out a blind per-device prior just
+                # reports the end late. Measured over 427 real cycles: washing
+                # machines 12.9 -> 7.5 min median lag, with early ends unchanged at
+                # 8.20% and cycle splits unchanged at 3.75%.
+                #
+                # Asymmetric and bounded, in the same spirit as _keep_tail_cap: it
+                # can only ever shorten, never fires before 1.05x expected, keeps the
+                # user's explicit `off_delay` as the floor (only the blind prior
+                # shrinks), and is inert when nothing matched.
+                # Gated on the SAME guards Smart Termination respects. The rule
+                # keys on `_expected_duration`, so it must not fire while the
+                # matcher says that duration is in doubt: `_match_prefix_ambiguous`
+                # means a much longer look-alike is still plausible, and then "past
+                # the expected end" may really be "mid-soak in a longer programme".
+                # Without this the fallback timeout walks straight through the
+                # prefix-landscape guard and re-opens the #288 split-cycle bug -
+                # caught by test_smart_termination_blocked_by_prefix_ambiguous,
+                # where a 450 s soak dip sits right at the short profile's end.
+                if (
+                    self._matched_profile
+                    and self._expected_duration > 0
+                    and self._current_cycle_start is not None
+                    and not self._match_prefix_ambiguous
+                    and not self._match_ambiguous
+                ):
+                    _elapsed = (timestamp - self._current_cycle_start).total_seconds()
+                    if _elapsed >= END_GATE_LATE_RATIO * self._expected_duration:
+                        effective_off_delay = max(
+                            self._config.off_delay,
+                            min(self._config.min_off_gap, END_GATE_LATE_SECONDS),
+                        )
 
                 # Energy gate always looks back off_delay seconds by default;
                 # overridden below for the dishwasher cap case so the window

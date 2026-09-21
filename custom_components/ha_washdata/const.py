@@ -616,6 +616,18 @@ MATCH_DTW_ENSEMBLE_W = 0.7         # weight on L1 vs DDTW in "ensemble" mode
 # in a single np.full, which OOM-kills Home Assistant (issue #388).
 MAX_ALIGN_GRID_POINTS = 2000
 # Ambiguity: top1-top2 score gap below this flags the match as ambiguous.
+# Once a matched cycle has run past its programme's own expected length by this
+# ratio, the fallback end gate stops waiting out the full `min_off_gap` and waits
+# only END_GATE_LATE_SECONDS of quiet (register item 306). `min_off_gap` exists to
+# bridge mid-cycle soak periods; past the end of the programme there is nothing
+# left to bridge, and its default is a blind per-device prior (480 s washer /
+# 600 s washer-dryer / 3600 s dishwasher) that almost nobody tunes - 12 of the 27
+# real user exports carry an effective end wait of 30-60 min because of it.
+# Shorten-only and bounded: the user's explicit `off_delay` stays the floor, so
+# only the blind prior shrinks, and it is inert on unmatched cycles.
+END_GATE_LATE_RATIO = 1.05
+END_GATE_LATE_SECONDS = 300.0
+
 MATCH_AMBIGUITY_MARGIN = 0.05
 # Gap between the best and second-best candidate at which a mid-cycle switch may
 # skip the persistence wait (register item 305). The absolute score is close to
