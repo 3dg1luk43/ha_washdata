@@ -36,37 +36,47 @@ from typing import Any
 import numpy as np
 
 from .. import analysis
+from ..signal_processing import resample_adaptive, resample_uniform
 
-_RESAMPLE_L = 150
+#: Matches the production matcher (``profile_store.async_match_profile``).
+_MIN_DT = 5.0
+_GAP_S = 21600.0
 
 
-def _powers(cycle: dict[str, Any]) -> list[float]:
+def _series(cycle: dict[str, Any]) -> tuple[np.ndarray, np.ndarray] | None:
+    """``(offsets_s, watts)`` from a stored cycle, or None if unusable.
+
+    The offsets matter: ``analysis.find_best_alignment`` compares the two curves
+    **index by index** (its ``dt`` argument is explicitly unused), so both sides
+    must be on the same seconds-per-sample grid or the MAE compares different
+    moments of the cycle. Dropping the offsets - as this module did until register
+    item 303 - makes that impossible to honour.
+    """
     pd = cycle.get("power_data") or []
-    out: list[float] = []
+    ts: list[float] = []
+    pw: list[float] = []
     for p in pd:
         try:
-            out.append(float(p[1]))
+            ts.append(float(p[0]))
+            pw.append(float(p[1]))
         except (TypeError, ValueError, IndexError):
-            pass
-    return out
+            continue
+    if len(pw) < 4:
+        return None
+    return np.asarray(ts, dtype=float), np.asarray(pw, dtype=float)
 
 
-def _resample(vals: list[float], n: int) -> np.ndarray:
-    a = np.asarray(vals, dtype=float)
-    if a.size == 0:
-        return np.zeros(n)
-    if a.size == n:
-        return a
-    return np.interp(np.linspace(0, 1, n), np.linspace(0, 1, a.size), a)
+def _longest(segments: list[Any]) -> Any | None:
+    return max(segments, key=lambda s: len(s.power)) if segments else None
 
 
 def _prep(cycles: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
-    """Group labelled cycles by profile, caching powers/duration/resampled curve."""
+    """Group labelled cycles by profile, keeping the raw time series."""
     by_profile: dict[str, list[dict[str, Any]]] = {}
     for c in cycles:
         name = c.get("profile_name")
-        pw = _powers(c)
-        if not name or len(pw) < 4:
+        series = _series(c)
+        if not name or series is None:
             continue
         try:
             dur = float(c.get("duration"))
@@ -78,27 +88,59 @@ def _prep(cycles: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
             # sample every 30-60 s. Real cycles always carry a 'duration', so this only
             # drops degenerate entries.
             continue
-        by_profile.setdefault(name, []).append(
-            {"pw": pw, "dur": dur, "rs": _resample(pw, _RESAMPLE_L)}
-        )
+        ts, pw = series
+        by_profile.setdefault(name, []).append({"ts": ts, "pw": pw, "dur": dur})
     return by_profile
 
 
-def _snaps(by_profile: dict[str, list[dict]], exclude: tuple[str, int] | None) -> list[dict[str, Any]]:
+def _regrid(item: dict[str, Any], dt: float, cache: dict) -> list[float] | None:
+    """One cycle's curve on a ``dt``-second grid, cached per (cycle, dt)."""
+    key = (id(item), round(float(dt), 2))
+    if key in cache:
+        return cache[key]
+    seg = _longest(resample_uniform(item["ts"], item["pw"], dt_s=dt, gap_s=_GAP_S))
+    out = seg.power.tolist() if seg is not None and len(seg.power) >= 2 else None
+    cache[key] = out
+    return out
+
+
+def _snaps(
+    by_profile: dict[str, list[dict]],
+    exclude: tuple[str, int] | None,
+    dt: float,
+    cache: dict,
+) -> list[dict[str, Any]]:
+    """One snapshot per profile, re-gridded to the QUERY's ``dt``.
+
+    Mirrors production: ``profile_store`` resamples the current cycle with
+    ``resample_adaptive`` and then re-grids every candidate to that same
+    ``used_dt`` via ``_get_cached_sample_segment``, so index *i* is the same
+    elapsed time on both sides.
+
+    The template is the training cycle whose duration is closest to the profile
+    mean, rather than an average of all of them - again mirroring production,
+    which matches against one representative sample cycle. (Measured difference
+    between the two choices on the full corpus: about -0.7 points, i.e. nil.)
+    """
     snaps = []
     for name, items in by_profile.items():
-        curves, durs = [], []
-        for idx, it in enumerate(items):
-            if exclude is not None and (name, idx) == exclude:
-                continue
-            curves.append(it["rs"])
-            durs.append(it["dur"])
-        if curves:
-            snaps.append({
-                "name": name,
-                "avg_duration": float(np.mean(durs)),
-                "sample_power": np.mean(np.array(curves), axis=0).tolist(),
-            })
+        pool = [
+            it for idx, it in enumerate(items)
+            if exclude is None or (name, idx) != exclude
+        ]
+        if not pool:
+            continue
+        durs = [it["dur"] for it in pool]
+        avg = float(np.mean(durs))
+        rep = min(pool, key=lambda it: abs(it["dur"] - avg))
+        curve = _regrid(rep, dt, cache)
+        if not curve:
+            continue
+        snaps.append({
+            "name": name,
+            "avg_duration": avg,
+            "sample_power": curve,
+        })
     return snaps
 
 
@@ -109,12 +151,22 @@ def _top1(by_profile: dict[str, list[dict]], targets: list[tuple[str, int]], cfg
         return 0.0
     correct = 0
     total = 0
+    cache: dict = {}
     for name, idx in targets:
         it = by_profile[name][idx]
-        snaps = _snaps(by_profile, exclude=(name, idx))
+        # The query defines the grid, exactly as in production.
+        segments, used_dt = resample_adaptive(
+            it["ts"], it["pw"], min_dt=_MIN_DT, gap_s=_GAP_S
+        )
+        seg = _longest(segments)
+        if seg is None or len(seg.power) < 4:
+            continue
+        snaps = _snaps(by_profile, (name, idx), used_dt, cache)
         if len(snaps) < 2:
             continue
-        cands = analysis.compute_matches_worker(it["pw"], it["dur"], snaps, cfg)
+        cands = analysis.compute_matches_worker(
+            seg.power.tolist(), it["dur"], snaps, cfg
+        )
         total += 1
         if cands and cands[0]["name"] == name:
             correct += 1
