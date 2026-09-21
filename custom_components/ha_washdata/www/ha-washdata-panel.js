@@ -5532,11 +5532,19 @@ class HaWashdataPanel extends HTMLElement {
   // but used to trigger the latter -- measured at 128 documents / 119 KB per open,
   // against a daily read budget the whole community shares.
 
+  // The appliance identity as the USER currently sees it: the saved options with the
+  // unsaved Settings edits laid over them (#447). `_opts` alone is the saved state, so
+  // reading it here would resolve the badge/device list against the previous brand
+  // while the picker shows the new one.
+  _applianceEdit() {
+    return Object.assign({}, this._opts, this._pendingSettings);
+  }
+
   // Which appliance the currently-rendered entry describes. Included in the key so a
   // device switch (or an edit to brand/model/type) re-resolves instead of showing the
   // previous appliance's badge.
   _catalogEntryKey() {
-    const o = this._opts || {};
+    const o = this._applianceEdit();
     return [
       (o.store_brand || '').trim().toLowerCase(),
       (o.store_model || '').trim().toLowerCase(),
@@ -5567,7 +5575,7 @@ class HaWashdataPanel extends HTMLElement {
 
   async _loadCatalogEntry(wantKey) {
     const dev = this._devices[this._selIdx];
-    const o = this._opts || {};
+    const o = this._applianceEdit();
     const brand = (o.store_brand || '').trim();
     const model = (o.store_model || '').trim();
     if (!dev || !this._onlineEnabled() || !brand || !model) {
@@ -5643,7 +5651,7 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
     if (optKey === 'store_model') {
-      const brand = String((this._opts || {}).store_brand || '').trim();
+      const brand = String(this._applianceEdit().store_brand || '').trim();
       if (!brand) return;
       if (this._catalog.forBrand !== brand || this._catalog.devices === undefined) {
         this._catalog.forBrand = brand;
@@ -8729,26 +8737,31 @@ class HaWashdataPanel extends HTMLElement {
       if (!dev) return;
       const eid = dev.entry_id;
       // A brand/device just created on the contribute page: preselect it + refresh.
+      // #447: the selection is PERSISTED, not just reflected locally. The popup runs on
+      // the store's own origin and knows nothing about this config entry, so without a
+      // set_options here the integration never learned the appliance the user had just
+      // contributed - the panel showed it, the backend had nothing, and sharing failed
+      // with no_appliance_declared.
       if (d.type === 'washdata-device-created') {
         const patch = {};
         if (d.brand) patch.store_brand = d.brand;
         if (d.model) patch.store_model = d.model;
-        this._opts = { ...this._opts, ...patch };
         this._catalog.brands = undefined; this._catalog.devices = undefined; this._catalog.forBrand = null;
         this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
         this._dropModelCandidates();
         this._catalogEntry = null;
         this._showToast(this._t('toast.appliance_added', {}, 'Appliance added - awaiting approval'));
+        if (Object.keys(patch).length) await this._saveStoreOptions(patch, { silent: true });
         this._render();
         return;
       }
       if (d.type === 'washdata-brand-created') {
-        if (d.brand) this._opts = { ...this._opts, store_brand: d.brand };
         this._catalog.brands = undefined;  // reload the brand catalog so it is pickable
         this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
         this._dropModelCandidates();
         this._catalogEntry = null;         // and re-resolve the badge for the new brand
         this._showToast(this._t('toast.brand_added', {}, 'Brand added - awaiting approval'));
+        if (d.brand) await this._saveStoreOptions({ store_brand: d.brand }, { silent: true });
         this._render();
         return;
       }
@@ -8779,14 +8792,22 @@ class HaWashdataPanel extends HTMLElement {
 
   // Persist a partial set of device options via the shared set_options command
   // (same path the Settings tab uses). Merges the patch into this._opts locally.
-  async _saveStoreOptions(patch) {
+  // `silent` suppresses the success toast for callers that already showed their own
+  // (the store contribute popup), but never the failure one.
+  async _saveStoreOptions(patch, { silent = false } = {}) {
     const dev = this._devices[this._selIdx];
     if (!dev) return false;
     const eid = dev.entry_id;
     try {
       await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: patch });
       this._opts = { ...this._opts, ...patch };
-      this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
+      // The value is saved now, so a stale pending copy must not shadow it on the
+      // next render of the Settings form.
+      for (const k of Object.keys(patch)) {
+        delete this._pendingSettings[k];
+        this._dirtyOptKeys.delete(k);
+      }
+      if (!silent) this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
       return true;
     } catch (e) {
       this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
@@ -10795,21 +10816,28 @@ class HaWashdataPanel extends HTMLElement {
     // on 'change' (blur / datalist pick) only, never mid-typing; the catalog loaders
     // patch the datalists in place so the dropdown is never rebuilt out from under
     // the user. Changing the brand reloads + enables the model field.
+    //
+    // #447: these stage into _pendingSettings, NOT _opts. `_opts` is the panel's copy
+    // of the SAVED options and is what `_changedOptions` diffs the form against before
+    // a save; writing the typed value there made the save see "unchanged" and drop
+    // brand/model from the set_options payload entirely ("No changes to save"). The
+    // panel then showed an appliance the backend had never stored, and every upload
+    // failed with no_appliance_declared. Marking them dirty is what lets
+    // _snapshotFormToPending keep them across a section switch.
+    const stageAppliance = (key, value) => {
+      this._pendingSettings[key] = value;
+      this._dirtyOptKeys.add(key);
+    };
     const brandInput = sr.getElementById('wd-store-brand');
     if (brandInput) brandInput.addEventListener('change', () => {
       const v = brandInput.value.trim();
-      this._opts = { ...this._opts, store_brand: v };
-      // _pendingSettings may hold a stale snapshot of store_brand from an earlier
-      // _snapshotFormToPending call; it would override _opts in the render since
-      // Object.assign merges pending last. Clear it so _opts wins.
-      delete this._pendingSettings.store_brand;
+      stageAppliance('store_brand', v);
       this._catalog.forBrand = v; this._catalog.devices = undefined;
       this._render();                 // enable + reset the model field (input has blurred)
     });
     const modelInput = sr.getElementById('wd-store-model');
     if (modelInput) modelInput.addEventListener('change', () => {
-      this._opts = { ...this._opts, store_model: modelInput.value.trim() };
-      delete this._pendingSettings.store_model;
+      stageAppliance('store_model', modelInput.value.trim());
       this._render();
     });
 
