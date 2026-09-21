@@ -4616,47 +4616,51 @@ class WashDataManager:
                 self._notify_update()
                 return
 
-            # 3. Injection Check (Keepalive)
-            # 3a. Honour the user-configured no_update_active_timeout for low-power silence.
-            # Publish-on-change sensors go completely silent once they stabilise at a low
-            # standby value (e.g. 1 W).  The existing off_delay-based injection fires
-            # every 2 watchdog ticks, which is fine with a short watchdog interval but can
-            # take many minutes with a larger one.  Respecting no_update_active_timeout
-            # here gives users a predictable upper bound on how long a cycle lingers after
-            # the appliance reaches standby, consistent with what the setting implies.
-            # Verified pauses (e.g. dishwasher drying confirmed by envelope) are excluded
-            # so that legitimate long silent phases are not prematurely terminated.
-            if (
-                not getattr(self.detector, "_verified_pause", False)
-                and time_since_real_update > self._no_update_active_timeout
-            ):
+            # 3. Injection Check (Keepalive) - on the WATCHDOG cadence (#427).
+            #
+            # This used to be two gates: real-update silence past
+            # `no_update_active_timeout`, else any-update silence past
+            # `off_delay`. Both are *stall-detection* timeouts, sized at roughly
+            # `p95_cadence * 20`; neither has anything to do with how fast the
+            # end accumulator should be advanced. A publish-on-change plug going
+            # quiet at standby is not a stall - it is the exact condition this
+            # keepalive exists for - and it was precisely then that nothing was
+            # injected for minutes at a time.
+            #
+            # Measured on the #427 reporter's v0.5.6 cycle (AEG L8FE74485,
+            # no_update_active_timeout 387 s, watchdog_interval 30 s): the
+            # accumulator froze twice, 383 s before PAUSED and ~390 s inside
+            # ENDING - about 13 of the reported ~20 minutes was nothing but "no
+            # reading arrived, so no gate was evaluated".
+            #
+            # This CANNOT end a cycle early. `_time_below_threshold` accumulates
+            # wall-clock `dt` between readings, so the total after N seconds of
+            # quiet is the same whether that arrived as one reading or twenty;
+            # injecting more often changes only how promptly a crossing is
+            # noticed, never the value compared against `effective_off_delay`.
+            # With the fix the reporter's cycle finishes 8.2 min after the last
+            # active reading, which is exactly their configured
+            # `max(off_delay 480, min_off_gap 480)`.
+            #
+            # A verified pause is no longer excluded, and that is not a loosening:
+            # the old 3b gate injected during verified pauses anyway (just on the
+            # slower off_delay cadence), and every guard that a verified pause is
+            # meant to hold off - the ENDING hard finalize, the terminal-drop
+            # finalize, the zombie killer - reads `_verified_pause` directly and
+            # is untouched by how often we sample.
+            if time_since_real_update > self._watchdog_interval:
                 self._logger.debug(
-                    "Watchdog: Low-power real-update silence (%.0fs) > no_update_active_timeout (%.0fs). "
-                    "Injecting 0W keepalive to advance accumulator.",
+                    "Watchdog: Low-power sensor silence (%.0fs > watchdog interval "
+                    "%ss). Injecting 0W keepalive to advance accumulator.",
                     time_since_real_update,
-                    self._no_update_active_timeout,
+                    self._watchdog_interval,
                 )
-                self.detector.process_reading(0.0, now, synthetic=True)
-                self._last_reading_time = now
-                self._current_power = 0.0
-                self._notify_update()
-                return
-
-            # 3b. Fallback: inject 0W when any-update silence exceeds off_delay.
-            # This keeps the accumulator moving even when no_update_active_timeout has
-            # not been exceeded (e.g. the user left it at the default 600 s).
-            if time_since_any_update > self._config.off_delay:
-                self._logger.debug(
-                    "Watchdog: Low power silence (%.0fs). Injecting 0W keepalive.",
-                    time_since_any_update
-                )
-                # Ensure we handle the injection cleanly
                 # Do NOT update _last_real_reading_time here, and tell the
                 # detector this reading is ours: it must still advance the
                 # quiet timers (that is the whole point of injecting it) but
-                # must not count as the sensor having reported (item 238).
+                # must not count as the sensor having reported (items 238, 289).
                 self.detector.process_reading(0.0, now, synthetic=True)
-                self._last_reading_time = now # Resets 'any' timer so we don't spam
+                self._last_reading_time = now
                 self._current_power = 0.0
                 self._notify_update()
                 return
