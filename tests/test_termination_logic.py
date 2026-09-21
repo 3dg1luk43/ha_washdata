@@ -22,6 +22,7 @@ from datetime import datetime, timedelta
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
 from custom_components.ha_washdata.const import (
     STATE_OFF, STATE_RUNNING, STATE_ENDING, STATE_PAUSED, STATE_FINISHED,
+    STATE_INTERRUPTED,
     STANDBY_BAND_MIN_RATIO,
 )
 
@@ -117,9 +118,17 @@ def test_long_drying_phase_cycle_continuation(base_config, mock_callbacks):
         assert detector.state in (STATE_ENDING, STATE_RUNNING, STATE_PAUSED)
 
 def test_manual_program_override_termination(base_config, mock_callbacks):
-    """
-    Test that a manual program (with 100% confidence) keeps cycle alive.
+    """A manual program keeps the cycle alive past off_delay, and a power cut
+    10 minutes in is recorded for what it is.
+
     Simulates wrapper return: ("ManualProfile", 1.0, 3600.0, "Manual", False)
+
+    The appliance draws power for 600 s and then nothing for 73 minutes. Before
+    register item 297 this was stored as a COMPLETED 3600 s cycle, because Smart
+    Termination banked its tail all the way to the matched profile's expected
+    end - fabricating 50 minutes of cycle and feeding them into that profile's
+    average. The cycle now ends at the last real activity, which puts it under
+    completion_min_seconds, so it is correctly recorded as interrupted.
     """
     mock_matcher = Mock()
     mock_matcher.side_effect = lambda readings: ("ManualProfile", 1.0, 3600.0, "Manual", False)
@@ -157,8 +166,16 @@ def test_manual_program_override_termination(base_config, mock_callbacks):
     # So we need to go beyond 4500 to ensure it finishes
     detector.process_reading(0.0, dt(5000))
     
-    # Should be OFF
-    assert detector.state == STATE_FINISHED
+    # Alive past off_delay (the point of the test), then closed out. A cycle whose
+    # appliance stopped after 600 s of a 3600 s programme is interrupted, not a
+    # completed 3600 s run.
+    assert detector.state == STATE_INTERRUPTED
+    cycle = mock_callbacks["on_cycle_end"].call_args[0][0]
+    assert cycle["status"] == "interrupted"
+    assert cycle["duration"] == pytest.approx(600.0, abs=30.0), (
+        f"stored {cycle['duration']:.0f}s for an appliance that ran 600s; the "
+        "expected-duration tail must not be banked"
+    )
 
 def test_ambiguous_match_stuck_in_ending_is_hard_finalized(base_config, mock_callbacks):
     """Duration-anchored backstop: an ambiguous match whose fallback energy gate is

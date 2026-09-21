@@ -102,9 +102,21 @@ async def test_smart_termination_with_manager(mock_hass, mock_entry, data_file):
         pytest.skip(f"Insufficient data in {data_file}")
 
     # Pick a long cycle to replay
-    target_cycle = next((c for c in past_cycles if c.get("duration", 0) > 1200), None)
+    # Must have a TRACE, not just a duration: trace retention
+    # (max_full_traces_per_profile) drops power_data from older cycles, so a real
+    # export routinely carries long cycles with no curve at all - 11 of 51 in one
+    # of them. Picking on duration alone made this a KeyError on whichever export
+    # happened to have one first.
+    target_cycle = next(
+        (
+            c
+            for c in past_cycles
+            if c.get("duration", 0) > 1200 and c.get("power_data")
+        ),
+        None,
+    )
     if not target_cycle:
-        pytest.skip(f"No suitable long cycle found in {data_file}")
+        pytest.skip(f"No suitable long cycle with a power trace found in {data_file}")
 
     profile_name = target_cycle.get("profile_name")
     if not profile_name:
