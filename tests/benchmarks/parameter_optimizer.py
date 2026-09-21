@@ -121,17 +121,31 @@ class DataLoader:
         if isinstance(inner, dict) and isinstance(inner.get("reference_cycles"), list):
             reference_cycles = inner["reference_cycles"]
 
+        # The declared device type, so consumers stop inferring it from the file
+        # path. Stage-4's energy mode is gated on it, and a path rule got it wrong
+        # on 95 folds: cycle_data/me/washdata_export_01KDMTAA.json declares
+        # dishwasher but the path says washing machine, and a "Waher-Dryer Combo"
+        # directory contains a declared washing_machine.
+        declared_type = None
+        for src in (data.get("entry_options"), data.get("entry_data"),
+                    data.get("device_fingerprint")):
+            if isinstance(src, dict) and src.get("device_type"):
+                declared_type = str(src["device_type"])
+                break
+
         loaded_any = False
         if past_cycles:
             for cycle in past_cycles:
                 cycle["_source"] = str(file_path)
                 cycle["_evidence"] = "past"
+                cycle["_device_type"] = declared_type
                 self.cycles.append(cycle)
             loaded_any = True
         if reference_cycles:
             for cycle in reference_cycles:
                 cycle["_source"] = str(file_path)
                 cycle["_evidence"] = "reference"
+                cycle["_device_type"] = declared_type
                 self.cycles.append(cycle)
             loaded_any = True
         if loaded_any or past_cycles is not None:

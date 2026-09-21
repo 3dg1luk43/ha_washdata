@@ -653,13 +653,22 @@ def _prefix_at(cycle: dict, frac: float) -> tuple[list[float], float] | None:
     return powers, cutoff
 
 
-def _device_type(source: str) -> str:
-    """Device type from the corpus path (cycle_data/ is organised by appliance).
+def _device_type(source: str, cycles: list | None = None) -> str:
+    """Device type for a corpus source: the DECLARED one when the export carries it.
 
-    The stored cycles carry no device_type, but the Stage-4 energy mode is gated on
-    it (item 100), so the mid-cycle table has to group by it or it averages two
-    different production configurations together.
+    The Stage-4 energy mode is gated on device type (item 100), so getting it wrong
+    silently scores those folds under the wrong production configuration. This used
+    to infer it from the path, which is wrong on 95 folds of the current corpus:
+    `cycle_data/me/washdata_export_01KDMTAA.json` declares `dishwasher` but matches
+    the path rule for a washing machine, and a `Waher-Dryer Combo/` directory holds
+    a declared `washing_machine`. The loader now carries `_device_type` from the
+    export, so use it and keep the path rule only for sources that lack one.
     """
+    if cycles:
+        for c in cycles:
+            declared = c.get("_device_type")
+            if declared:
+                return str(declared)
     s = source.lower()
     if "dishwash" in s:
         return "dishwasher"
@@ -687,7 +696,9 @@ def _run_checkpoints(by_source: dict) -> None:
     fracs = [i / 10 for i in range(1, 10)]
     res: dict[tuple[str, float], list[int]] = {}
     for source, by_profile in by_source.items():
-        dev = _device_type(source)
+        dev = _device_type(
+            source, [c for cs in by_profile.values() for c in cs]
+        )
         base = {
             **_BEST,
             "max_duration_ratio": 1.5,
