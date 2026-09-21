@@ -1084,6 +1084,14 @@ class WashDataManager:
                     False,
                     self.profile_store.profile_tail_power(self._current_program),
                     terminal_high,
+                    # Element 11 (register item 297): same reasoning as elements 9 and 10 - a
+                    # manual pin names its profile, so it must supply that
+                    # profile's own measurements rather than leaving the guard
+                    # inert. Without it a hand-picked program would still bank
+                    # Smart Termination's confirmation delay as cycle time.
+                    self.profile_store.profile_terminal_quiet_seconds(
+                        self._current_program
+                    ),
                 )
 
             if not readings:
@@ -1696,8 +1704,9 @@ class WashDataManager:
             # Element 8 is the narrow #288-only prefix verdict and element 9 the
             # matched profile's own tail power level, both for the #364 guards;
             # element 10 is its terminal high-power block for the #399 anti-crease
-            # guard. The detector tolerates shorter tuples, so other callers stay
-            # valid.
+            # guard; element 11 is its measured post-activity quiet span, which
+            # bounds the tail Smart Termination may bank (register item 297). The detector
+            # tolerates shorter tuples, so other callers stay valid.
             terminal_high = None
             if profile_name and self.detector.config.anti_wrinkle_enabled:
                 terminal_high = self.profile_store.profile_terminal_high_block(
@@ -1709,7 +1718,12 @@ class WashDataManager:
                  result.is_prefix_ambiguous,
                  result.is_prefix_ambiguous_full_shape,
                  self.profile_store.profile_tail_power(profile_name) if profile_name else None,
-                 terminal_high)
+                 terminal_high,
+                 # Element 11 (register item 297): the matched profile's measured post-activity
+                 # quiet span, which bounds how much of Smart Termination's
+                 # confirmation delay _keep_tail_cap may store as cycle time.
+                 self.profile_store.profile_terminal_quiet_seconds(profile_name)
+                 if profile_name else None)
             )
 
             # --- LOGGING (Unified) ---
@@ -2181,9 +2195,49 @@ class WashDataManager:
                 self._logger.info("Active cycle too stale (age=%.0fs), clearing", age)
             await self.profile_store.async_clear_active_cycle()
 
+    async def _async_repair_banked_tails(self) -> None:
+        """One-time repair of cycles that banked the end-of-cycle confirmation
+        delay as cycle time (register item 297).
+
+        Runs in the background after setup. Never raises: the store method already
+        swallows its own failures and leaves the history untouched, and this
+        wrapper exists only so a scheduling error cannot surface as an unhandled
+        task exception.
+        """
+        try:
+            result = await self.profile_store.async_repair_banked_tails(
+                float(self.detector.config.stop_threshold_w), self.device_type
+            )
+            if result.get("repaired"):
+                self._logger.info(
+                    "Repaired %d of %d stored cycles that had banked the "
+                    "end-of-cycle confirmation delay (%.0f min reclaimed); profile "
+                    "averages and envelopes rebuilt.",
+                    result["repaired"],
+                    result["examined"],
+                    result["reclaimed_s"] / 60.0,
+                )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            self._logger.warning("Banked-tail repair could not run: %s", exc)
+
     async def async_setup(self) -> None:
         """Set up the manager."""
         await self.profile_store.async_load()
+        # One-time repair of cycles that banked Smart Termination's confirmation
+        # delay as cycle time (register item 297). Flagged by the v12->v13 storage
+        # migration and done here rather than in the migration itself, because
+        # deciding where a cycle's real activity ended needs stop_threshold_w and
+        # that lives in entry.options. Idempotent, marked done in the store, and it
+        # never raises - a failed repair leaves the history untouched.
+        # `is True` rather than a truthiness check: the flag is written as a real
+        # bool by the migration, so anything else here is a stub or a hand-edited
+        # store and must not trigger a rewrite of the user's history.
+        if self.profile_store.banked_tail_repair_pending() is True:
+            # Backgrounded, not awaited. It walks up to 200 stored traces and
+            # rebuilds envelopes, and anything awaited inside async_setup is billed
+            # to the integration's reported startup time (register item 158 / #408).
+            # Nothing needs it before the first cycle ends.
+            self.hass.async_create_task(self._async_repair_banked_tails())
         try:
             _trans = await translation.async_get_translations(
                 self.hass, self.hass.config.language, "options", {DOMAIN}

@@ -45,6 +45,12 @@ from .const import (
     TERMINAL_EVENT_PEAK_FRAC,
     TERMINAL_QUIET_MIN_S,
     TERMINAL_SIGNATURE_MIN_CYCLES,
+    DEVICE_TYPE_DISHWASHER,
+    BANKED_TAIL_REPAIR_KEY,
+    BANKED_TAIL_REPAIR_MIN_S,
+    TERMINAL_QUIET_CAP_S,
+    TERMINAL_QUIET_MIN_CONSISTENCY,
+    TERMINAL_QUIET_MIN_OBSERVATIONS,
     MAINTENANCE_EVENT_TYPES,
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
@@ -197,6 +203,15 @@ def _flag_recorded_cycles_golden(cycles: list[dict[str, Any]]) -> int:
 def _empty_ranking() -> list[dict[str, Any]]:
     """Typed default factory for ranking entries."""
     return []
+
+
+def _safe_offset(value: Any) -> float | None:
+    """Coerce a stored power_data offset to float, or None when it is not one."""
+    try:
+        out = float(value)
+    except (TypeError, ValueError):
+        return None
+    return out if math.isfinite(out) else None
 
 
 def _parse_start_dt(value: Any) -> datetime | None:
@@ -905,6 +920,26 @@ class WashDataStore(Store[JSONDict]):
             # community-store templates, golden by construction). Additive + idempotent.
             _LOGGER.info("Migrating storage from v%s to v12", old_major_version)
             old_data.setdefault("backfill_cycles", [])
+
+        if old_major_version < 13:
+            # Marker-only bump (register item 297). Smart Termination stored its own
+            # confirmation delay as cycle time - measured at a median 12.6 min per
+            # smart-terminated cycle across 375 cycles from 16 devices, and washing
+            # machines at 22.7 min - so every profile learned from them carries an
+            # inflated avg_duration (mean +5.3%, worst +20.2 min). That average is
+            # also what drives the ETA and the Smart Termination gate, so the error
+            # feeds itself.
+            #
+            # The repair cannot happen HERE: deciding where a cycle's real activity
+            # ended requires `stop_threshold_w`, which lives in entry.options, and
+            # this function sees only the store payload. So flag it and let
+            # ProfileStore.async_repair_banked_tails do the work once the manager
+            # has the config entry - the same split as the v10->v11 bump.
+            _LOGGER.info(
+                "Migrating storage from v%s to v13 (banked-tail repair marker)",
+                old_major_version,
+            )
+            old_data.setdefault(BANKED_TAIL_REPAIR_KEY, True)
 
         return old_data
 
@@ -5464,6 +5499,169 @@ class ProfileStore:
                 return None
             return float(np.mean(tail))
         except Exception:  # noqa: BLE001
+            return None
+
+    def banked_tail_repair_pending(self) -> bool:
+        """Whether the one-time banked-tail repair still has to run."""
+        return bool(self._data.get(BANKED_TAIL_REPAIR_KEY))
+
+    async def async_repair_banked_tails(
+        self, stop_threshold_w: float, device_type: str
+    ) -> dict[str, Any]:
+        """Rewrite stored cycles that banked Smart Termination's confirmation delay.
+
+        One-time, idempotent, and marked done in the store so it cannot run twice.
+        Applies exactly the rule ``CycleDetector._keep_tail_cap`` now applies live,
+        so a repaired history and a freshly recorded one agree:
+
+        * every device type except a dishwasher ends on activity, so the cycle ends
+          at its last sample above ``stop_threshold_w``;
+        * a dishwasher may end in a passive drying phase, so it keeps up to its
+          profile's MEASURED quiet span past that sample - and is left untouched
+          when that span is not trustworthy, rather than truncating a real drying
+          phase on no evidence.
+
+        Only ``past_cycles`` is touched. ``reference_cycles`` are community
+        templates this device never recorded, and ``backfill_cycles`` were replayed
+        from raw history and never went through Smart Termination at all, so
+        neither can carry a banked tail.
+
+        Returns a summary for the log. Never raises: a failed repair must not cost
+        the user their history, so the store is left exactly as it was.
+        """
+        summary: dict[str, Any] = {"examined": 0, "repaired": 0, "reclaimed_s": 0.0}
+        try:
+            cycles = self._data.get("past_cycles")
+            if not isinstance(cycles, list):
+                self._data[BANKED_TAIL_REPAIR_KEY] = False
+                return summary
+            is_dishwasher = device_type == DEVICE_TYPE_DISHWASHER
+            touched: set[str] = set()
+            for cycle in cycles:
+                if not isinstance(cycle, dict):
+                    continue
+                summary["examined"] += 1
+                try:
+                    points = decompress_power_data(cycle)
+                except Exception:  # noqa: BLE001 - a bad trace is not repairable
+                    continue
+                if not points or len(points) < 2:
+                    continue
+                last_active = None
+                for offset, power in reversed(points):
+                    if power > stop_threshold_w:
+                        last_active = offset
+                        break
+                if last_active is None:
+                    continue  # never rose above the threshold; not ours to judge
+                allowance = 0.0
+                if is_dishwasher:
+                    quiet = self.profile_terminal_quiet_seconds(
+                        str(cycle.get("profile_name") or "")
+                    )
+                    if quiet is None:
+                        continue  # no trustworthy measurement -> leave it alone
+                    allowance = min(float(quiet), TERMINAL_QUIET_CAP_S)
+                new_duration = last_active + allowance
+                try:
+                    old_duration = float(cycle.get("duration") or 0.0)
+                except (TypeError, ValueError):
+                    continue
+                if old_duration - new_duration < BANKED_TAIL_REPAIR_MIN_S:
+                    continue
+                self._apply_repaired_duration(cycle, new_duration)
+                summary["repaired"] += 1
+                summary["reclaimed_s"] += old_duration - new_duration
+                name = cycle.get("profile_name")
+                if isinstance(name, str) and name:
+                    touched.add(name)
+
+            self._data[BANKED_TAIL_REPAIR_KEY] = False
+            if summary["repaired"]:
+                # avg_duration and the envelope are both derived from the cycles we
+                # just rewrote, so they have to be rebuilt or the repair fixes the
+                # history and leaves the number everything READS still inflated.
+                for name in touched:
+                    with contextlib.suppress(Exception):
+                        await self.async_rebuild_envelope(name)
+            await self.async_save()
+        except Exception as exc:  # noqa: BLE001 - never cost the user their history
+            self._logger.warning("Banked-tail repair aborted: %s", exc)
+        return summary
+
+    def _apply_repaired_duration(self, cycle: dict[str, Any], new_duration: float) -> None:
+        """Trim one cycle to ``new_duration`` seconds, trace included."""
+        cycle["duration"] = round(float(new_duration), 3)
+        start_raw = cycle.get("start_time")
+        start_dt = _parse_start_dt(start_raw) if start_raw else None
+        if start_dt is not None:
+            cycle["end_time"] = (
+                start_dt + timedelta(seconds=float(new_duration))
+            ).isoformat()
+        raw = cycle.get("power_data")
+        if isinstance(raw, list) and raw and isinstance(raw[0], (list, tuple)):
+            kept = [
+                pt
+                for pt in raw
+                if isinstance(pt, (list, tuple))
+                and len(pt) >= 2
+                and _safe_offset(pt[0]) is not None
+                and _safe_offset(pt[0]) <= new_duration + 1e-6
+            ]
+            # Never leave a cycle without a curve: a trace that cannot be trimmed
+            # sensibly keeps its samples and only the duration is corrected.
+            if len(kept) >= 2:
+                cycle["power_data"] = kept
+
+    def profile_terminal_quiet_seconds(self, profile_name: str) -> float | None:
+        """How long this programme is measured to stay quiet after its last real
+        activity, in seconds, or None when it has not been measured (register item 297).
+
+        Bounds how much post-activity time Smart Termination may bank into a
+        stored cycle. The number that bound used to use was the profile's own
+        ``avg_duration``, which is the mean of those same stored durations - so a
+        banked tail raised the average, the higher average allowed a longer tail,
+        and the cycle's reported end drifted later every run. Measured over 375
+        cycles from 16 devices, smart-terminated cycles banked a median 12.6 min
+        (washing machines 22.7 min) against ~0 for every other termination path,
+        and the profiles carried a mean +5.3% duration inflation as a result.
+
+        Taken from :meth:`compute_profile_terminal_signature`'s ``quiet_before_s``,
+        the median quiet span measured between a cycle's last activity and its
+        terminal event. That statistic is derived from the trace, not from the
+        stored duration, so it cannot be inflated by the tail it bounds - which is
+        the whole point of using it here.
+
+        Returns None (meaning "no opinion, keep the previous behaviour") when the
+        profile has too few cycles to measure or has never shown a quiet phase.
+        Never raises: this feeds a live match tuple.
+        """
+        try:
+            sig = self.compute_profile_terminal_signature(profile_name)
+            if not sig:
+                return None
+            quiet = sig.get("quiet_before_s")
+            if quiet is None:
+                return None
+            # Only report a span the profile has shown CONSISTENTLY. The
+            # signature's own docstring warns that the event's presence is
+            # informative and its absence is not, and the corpus bears that out:
+            # across 20 real profiles the two dishwashers measured their quiet
+            # phase in 20/20 and 17/17 cycles, while washing machines produced
+            # values from a SINGLE cycle out of 4-10 - one of them 2400 s, which
+            # as an allowance would have banked 40 min, worse than the bug. A
+            # median over one observation is not a measurement.
+            seen = int(sig.get("seen_in") or 0)
+            consistency = float(sig.get("consistency") or 0.0)
+            if seen < TERMINAL_QUIET_MIN_OBSERVATIONS:
+                return None
+            if consistency < TERMINAL_QUIET_MIN_CONSISTENCY:
+                return None
+            value = float(quiet)
+            if not math.isfinite(value) or value < 0:
+                return None
+            return value
+        except Exception:  # noqa: BLE001 - a statistic must never break matching
             return None
 
     def profile_terminal_high_block(

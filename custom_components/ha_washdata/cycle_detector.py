@@ -68,6 +68,8 @@ from .const import (
     GATE_CADENCE_MEDIAN_FACTOR,
     STANDBY_BAND_FINALIZE_DEVICE_TYPES,
     STANDBY_BAND_MIN_RATIO,
+    DEVICE_TYPE_DISHWASHER,
+    TERMINAL_QUIET_CAP_S,
     STANDBY_BAND_WINDOW_S,
     STANDBY_BAND_MAX_FRACTION,
     STANDBY_BAND_FLATNESS_FRACTION,
@@ -423,6 +425,11 @@ class CycleDetector:
         self._matched_terminal_high: (
             tuple[float, float] | tuple[float, float, float] | None
         ) = None
+        # Element 11 (register item 297): how long the matched profile is MEASURED to stay quiet
+        # after its last real activity. Bounds how much of Smart Termination's
+        # confirmation delay may be banked into the stored duration. None means the
+        # profile has not been measured, and the previous expected-end cap applies.
+        self._matched_terminal_quiet_s: float | None = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
         self._anticrease_spin_wait_logged: bool = False
@@ -647,6 +654,27 @@ class CycleDetector:
             )
             return self._SANITIZE_INVALID_SENTINEL
         return value
+
+    @staticmethod
+    def _sanitize_terminal_quiet(raw: Any) -> float | None:
+        """Coerce a measured post-activity quiet span into a finite, non-negative
+        float, else None (register item 297).
+
+        Same discipline as the two siblings: None means "no opinion", and
+        ``_keep_tail_cap`` then behaves exactly as it did before this element
+        existed. Bounded above by ``TERMINAL_QUIET_CAP_S`` so a corrupted or
+        hand-edited value cannot license an unbounded tail - the one thing this
+        field exists to prevent.
+        """
+        if raw is None:
+            return None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        if not math.isfinite(value) or value < 0:
+            return None
+        return min(value, TERMINAL_QUIET_CAP_S)
 
     @staticmethod
     def _sanitize_tail_power(raw: Any) -> float | None:
@@ -927,6 +955,14 @@ class CycleDetector:
             self._matched_terminal_high = (
                 self._sanitize_terminal_high(result_seq[9]) if len(result_seq) >= 10 else None
             )
+            # Element 11 (register item 297): cleared by a shorter tuple for the same reason as
+            # elements 9 and 10 - a newly matched programme must not inherit the
+            # previous one's tail.
+            self._matched_terminal_quiet_s = (
+                self._sanitize_terminal_quiet(result_seq[10])
+                if len(result_seq) >= 11
+                else None
+            )
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -940,6 +976,7 @@ class CycleDetector:
             self._match_prefix_ambiguous_full_shape = False
             self._matched_tail_power = None
             self._matched_terminal_high = None
+            self._matched_terminal_quiet_s = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -998,6 +1035,7 @@ class CycleDetector:
         self._match_prefix_ambiguous_full_shape = False
         self._matched_tail_power = None
         self._matched_terminal_high = None
+        self._matched_terminal_quiet_s = None
         self._anticrease_spin_wait_logged = False
         # Per-cycle diagnostic throttle (#346): the "Smart Termination not applied"
         # line only logs when the reason CHANGES. Carrying the previous cycle's
@@ -3159,19 +3197,59 @@ class CycleDetector:
         which delays the next Smart Termination further (the second reporter's
         profile had already drifted 63 -> 70.5 min).
 
-        So cap the kept tail at whichever is later: the last above-threshold
-        reading, or the matched profile's expected end. Time after *both* is time
-        the appliance drew nothing AND that lies beyond the known length of the
-        programme it matched, so nothing real can live there. Asymmetric -
-        shorten-only, and never earlier than the expected end, so a genuine
-        passive drying phase still lands inside the stored cycle. Returns None
-        for an unmatched cycle, which has no expected end to anchor against and
-        is left exactly as before.
+        The cap used to be the matched profile's **expected end**. That is the
+        mean of these same stored durations, so it moved with the thing it was
+        bounding: a banked tail raised ``avg_duration``, the higher average
+        allowed a longer tail, and the reported end drifted later every run.
+        Measured over 375 cycles from 16 devices, smart-terminated cycles banked a
+        median **12.6 min** of post-appliance time (washing machines **22.7 min**,
+        p90 40.4 min) against ~0 min for every other termination path, and the
+        profiles carried a mean **+5.3%** duration inflation as a result - on the
+        #427 reporter's washer, +20.2 min on a 108 min programme, which is also
+        why their ETA read 131 min for a ~105 min wash.
+
+        So anchor on the last real activity instead. Where a passive phase can
+        legitimately follow it, allow only what this programme has been
+        **measured** to do (``profile_terminal_quiet_seconds``, element 11) - a
+        statistic taken from the traces, not from the stored durations, so it
+        cannot be inflated by the tail it bounds, and gated on having been seen
+        repeatedly rather than once.
+
+        **Only a dishwasher has a passive terminal phase.** Every other type ends
+        on activity - a washer's spin, a dryer's drum - which ``_last_active_time``
+        already marks, so there is nothing legitimate to bank after it. That is
+        not a new assumption: the fallback-timeout path beside this one has always
+        read ``keep_tail = device_type == "dishwasher"``. Smart Termination was
+        the one path that kept a tail for every type, which is exactly where the
+        22.7 min washing-machine median came from.
+
+        Within the dishwasher case, two sub-cases, and the difference matters:
+
+        * the run produced its terminal pump-out (``_end_spike_seen``).
+          ``_last_active_time`` already sits on it, so that IS the end.
+        * it did not, so the programme ended in its passive drying phase. Allow up
+          to the profile's measured quiet span past the last activity.
+
+        Falls back to the old expected-end cap when that span has not been
+        measured, rather than truncating a drying phase on no evidence - the
+        measured corpus shows the pump-out missing in a substantial minority of
+        runs on some machines, and in those runs the drying IS the tail. Still
+        asymmetric and shorten-only; still None for an unmatched cycle.
         """
         if self._expected_duration <= 0:
             return None
         expected_end = start_time + timedelta(seconds=self._expected_duration)
-        return max(expected_end, self._last_active_time or expected_end)
+        last_active = self._last_active_time
+        if last_active is None:
+            return expected_end
+        if self._config.device_type != DEVICE_TYPE_DISHWASHER:
+            return last_active
+        if getattr(self, "_end_spike_seen", False):
+            return last_active
+        quiet = self._matched_terminal_quiet_s
+        if quiet is None:
+            return max(expected_end, last_active)
+        return last_active + timedelta(seconds=min(quiet, TERMINAL_QUIET_CAP_S))
 
     def _finish_cycle(
         self,
@@ -3339,6 +3417,7 @@ class CycleDetector:
             "match_prefix_ambiguous_full_shape": self._match_prefix_ambiguous_full_shape,
             "matched_tail_power": self._matched_tail_power,
             "matched_terminal_high": self._matched_terminal_high,
+            "matched_terminal_quiet_s": self._matched_terminal_quiet_s,
             "ml_defer_start_duration": self._ml_defer_start_duration,
         }
 
@@ -3411,6 +3490,9 @@ class CycleDetector:
             )
             self._matched_terminal_high = self._sanitize_terminal_high(
                 snapshot.get("matched_terminal_high")
+            )
+            self._matched_terminal_quiet_s = self._sanitize_terminal_quiet(
+                snapshot.get("matched_terminal_quiet_s")
             )
             self._ml_defer_start_duration = snapshot.get("ml_defer_start_duration")
 

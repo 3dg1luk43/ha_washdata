@@ -838,6 +838,32 @@ STANDBY_BAND_FINALIZE_DEVICE_TYPES = (
 # safe - past expected AND >=10 min flat AND <=10% of the cycle's own peak is
 # an appliance that has finished, not one still working.
 STANDBY_BAND_MIN_RATIO = 1.0          # only past the expected duration
+
+# Ceiling on the measured post-activity quiet span a stored cycle may bank
+# (register item 297). `profile_terminal_quiet_seconds` is a median over that profile's own
+# cycles, so it is already self-limiting; this is the guard against a corrupted
+# or hand-edited value licensing an unbounded tail - the one thing the field
+# exists to prevent. 30 min comfortably covers a dishwasher's passive drying
+# phase, measured at a median 11% of the cycle and reaching 43%.
+TERMINAL_QUIET_CAP_S = 1800.0
+# A measured quiet span is only trusted as a tail allowance when the profile has
+# actually shown it repeatedly (register item 297). Measured over 20 real profiles: the two
+# dishwashers, which genuinely end in a passive drying phase, scored 20/20 and
+# 17/17; every washing-machine profile that produced a value at all did so from
+# 1-4 cycles out of 4-12, one of them 2400 s. Below these floors the accessor
+# reports None and the caller keeps its previous behaviour.
+TERMINAL_QUIET_MIN_OBSERVATIONS = 3
+TERMINAL_QUIET_MIN_CONSISTENCY = 0.6
+# Store key set by the v12->v13 migration and cleared once the one-time repair
+# of banked cycle tails has run (register item 297). The repair itself cannot
+# live in the storage migration, which sees only the store payload: deciding
+# where a cycle's real activity ended needs `stop_threshold_w`, and that lives
+# in entry.options. Same split as the v10->v11 marker-only bump.
+BANKED_TAIL_REPAIR_KEY = "_banked_tail_repair_pending"
+# Don't churn a cycle for a few seconds of tail: only rewrite one whose banked
+# span is worth correcting. Measured median banking was 12.6 min, so this only
+# skips noise.
+BANKED_TAIL_REPAIR_MIN_S = 60.0
 STANDBY_BAND_WINDOW_S = 600.0         # require a >=10 min flat plateau
 STANDBY_BAND_MAX_FRACTION = 0.10      # plateau level <= 10% of the cycle's peak
 STANDBY_BAND_FLATNESS_FRACTION = 0.03  # window (max-min) <= 3% of the cycle's peak
@@ -1277,7 +1303,7 @@ TERMINAL_SIGNATURE_MIN_CYCLES = 3
 # training labels and the feedback queue, and is retention-evicted oldest-first) nor
 # `reference_cycles` (curated community-store templates, golden by construction).
 # Additive `setdefault`, so it is idempotent and loses nothing.
-STORAGE_VERSION = 12
+STORAGE_VERSION = 13
 STORAGE_KEY = "ha_washdata"
 
 # ─── Config-entry schema version (NOT the storage version above) ───────────────
