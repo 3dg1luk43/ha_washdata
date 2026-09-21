@@ -29,6 +29,7 @@ import numpy as np
 from homeassistant.core import HomeAssistant, callback
 
 from .const import (
+    TerminationReason,
     CONF_WATCHDOG_INTERVAL,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_OFF_DELAY,
@@ -221,6 +222,61 @@ def _resumed_low_runs(
     return out
 
 
+def _measured_quiet_span_s(
+    points: list[tuple[float, float]],
+    low_start_s: float,
+    resume_idx: int,
+    quiet_thr: float,
+) -> float:
+    """Longest quiet span inside a resumed low run, as the DETECTOR would time it.
+
+    ``_resumed_low_runs`` locates a pause by asking when the appliance went below
+    ``active_thr`` and when it came back - the right question for *whether* this
+    was a pause. It is the wrong measurement for ``off_delay``, because the run
+    is closed only by a *sustained* resume (``_MIN_RESUME_ACTIVE_S``, 120 s) and
+    any dip re-absorbs the blip. An appliance that works in bursts shorter than
+    that never closes a run: measured on the #445 reporter's Miele (10 s
+    sampling, ~110 W tumble for 20-60 s alternating with 3.4 W dips), the *first*
+    dip opened a run that stayed open for 2070 s until a long heating block
+    finally arrived - and that "pause" contains a 497.9 W peak. The p95 came out
+    at 1973 s, so the suggestion asked for ``off_delay`` 2033 s on a machine
+    whose real pauses are one sample long. Retuning ``active_thr`` does not help:
+    swept over ``0.02*peak`` / ``stop_threshold`` / ``start_threshold`` /
+    ``0.25*median_active`` / ``0.5*median_active``, that p95 stays 1944-1976 s.
+
+    So measure what ``CycleDetector._time_below_threshold`` would actually have
+    accumulated: it resets on *any* reading at or above ``stop_threshold_w``, so
+    the statistic is the longest run of consecutive below-threshold samples. A
+    run whose samples never go below it is not a pause the end gates could ever
+    have seen, and returns 0.0 for the caller to drop.
+
+    Timed like the accumulator too: the interval *preceding* the first
+    below-threshold sample is credited (the detector adds ``dt`` on the reading
+    that takes it below), so a span is ``t[last_below] - t[first_below - 1]``.
+    """
+    if resume_idx <= 0 or resume_idx > len(points):
+        return 0.0
+    best = 0.0
+    first_below: int | None = None
+    last_below: int | None = None
+    for i in range(resume_idx):
+        t, power = points[i]
+        if t < low_start_s:
+            continue
+        if power < quiet_thr:
+            if first_below is None:
+                first_below = i
+            last_below = i
+        elif first_below is not None and last_below is not None:
+            anchor_t = points[max(0, first_below - 1)][0]
+            best = max(best, points[last_below][0] - anchor_t)
+            first_below = last_below = None
+    if first_below is not None and last_below is not None:
+        anchor_t = points[max(0, first_below - 1)][0]
+        best = max(best, points[last_below][0] - anchor_t)
+    return max(0.0, best)
+
+
 def _cycle_readings(cycle: dict[str, Any]) -> list[tuple[float, float]]:
     """Normalise a cycle's power_data to [(offset_s, watts), ...]; [] on failure."""
     raw = cycle.get("power_data")
@@ -346,6 +402,18 @@ def select_clean_cycles(
         state = c.get("state")
         if status == "force_stopped":
             _bump("force_stopped")
+            continue
+        # A cycle the user cut short with "Force cycle end" is stored
+        # status="completed", termination_reason="user" (CycleDetector.user_stop),
+        # so the force_stopped check above never sees it (#445). Its tail is
+        # whatever the appliance happened to be doing when the button was pressed
+        # - usually minutes of standby the user got tired of waiting through - so
+        # every statistic derived from it (sampling cadence, lowest active power,
+        # clean-cycle duration, intra-cycle pauses) describes the user's patience,
+        # not the appliance. Excluded under its own code so the UI can say which
+        # of the two it was.
+        if c.get("termination_reason") == TerminationReason.USER:
+            _bump("user_stopped")
             continue
         if status == "interrupted" or state == "interrupted":
             _bump("interrupted")
@@ -1358,7 +1426,16 @@ class SuggestionEngine:
             # same sustained-resume + outage-gap gate used by the off_delay
             # heuristics (_suggest_off_delay_from_pauses / _scored_pauses).
             for low_start_s, resume_idx in _resumed_low_runs(readings, active_thr, max_gap_s):
-                if readings[resume_idx][0] - low_start_s >= 60.0:
+                # Same measurement correction as the off_delay heuristic (#445):
+                # a "false end" is quiet time the END GATES would have banked, so
+                # it is timed against stop_threshold_w, not against the
+                # 2%-of-peak activity floor that only decides whether this was a
+                # pause at all. Without it, an appliance that works in bursts
+                # scores a false end in every cycle and end_repeat_count is
+                # driven up on evidence the detector never saw.
+                if _measured_quiet_span_s(
+                    readings, low_start_s, resume_idx, stop_threshold_w
+                ) >= 60.0:
                     n_false_end += 1
                     break
 
@@ -1429,7 +1506,14 @@ class SuggestionEngine:
             # sustain is absorbed, and the trailing dead tail is skipped - so the
             # drying phase never inflates the p95 (see _resumed_low_runs).
             for low_start, resume_idx in _resumed_low_runs(readings, active_thr, max_gap_s):
-                run = readings[resume_idx][0] - low_start
+                # Measure the pause the way the end gates time it, not as the
+                # span between "went quiet" and "came back loud" (#445). See
+                # _measured_quiet_span_s: the sustained-resume rule merges an
+                # entire burst-driven wash phase into one multi-thousand-second
+                # "pause" on appliances whose working power dips between bursts.
+                run = _measured_quiet_span_s(
+                    readings, low_start, resume_idx, stop_threshold_w
+                )
                 if run > 0:
                     pause_durations.append(run)
 
@@ -2121,7 +2205,12 @@ class MLSuggestionEngine:
         # not sustain is not a pause).  ``resume_idx`` is the first active sample of
         # the resume, so the tail prefix ``points[:resume_idx]`` ends in the low run.
         for low_start_s, resume_idx in _resumed_low_runs(points, active_thr, max_gap_s):
-            dur = points[resume_idx - 1][0] - low_start_s
+            # Timed against stop_threshold_w like the classic heuristic (#445), so
+            # the ML-calibrated off_delay is fitted to the same quantity the end
+            # gates measure rather than to burst-phase spans.
+            dur = _measured_quiet_span_s(
+                points, low_start_s, resume_idx, stop_threshold_w
+            )
             if dur < 30.0:  # ignore motor micro-dips
                 continue
             score: float | None = None

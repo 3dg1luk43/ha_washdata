@@ -1874,6 +1874,7 @@
       "summary": "Excluded {total} mis-detected cycle(s): {parts}.",
       "reason": {
         "force_stopped": "force-stopped",
+        "user_stopped": "manually stopped",
         "interrupted": "interrupted",
         "incomplete": "incomplete",
         "noise": "noise",
