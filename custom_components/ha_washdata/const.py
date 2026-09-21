@@ -441,7 +441,25 @@ ENDING_HARD_FINALIZE_MIN_QUIET_S = 600.0  # continuous sub-threshold span floor
 # plausible jitter ratio for a regularly-reporting sensor (whose median equals
 # its p95, so the cap never binds and slow meters keep their wide gates) while
 # still rejecting the isolated multi-minute holes that caused both reports.
-GATE_CADENCE_MEDIAN_FACTOR = 5.0
+# Caps the pause/end gate cadence at this multiple of the MEDIAN interval
+# (items 213/215). Was 5.0; lowered to 2.0 on measurement (register item 300).
+#
+# The cap only ever binds when p95 >> median - a fast plug that went quiet -
+# which is exactly the case it was introduced for. A uniformly slow meter has
+# p95 ~= median, so its gate is set by p95 and this value is irrelevant to it:
+# a 300 s-cadence meter keeps its 900 s gate at 2.0 exactly as at 5.0, so the
+# original rationale is preserved intact. At 5.0 it was under-correcting the
+# case it existed for: on #424's dishwasher (median 38.5 s, p95 970 s) it still
+# yielded a 578 s pause gate, which was the single largest remaining component
+# of that cycle's 17.9 min late finish.
+#
+# Measured over 246 clean cycles from the whole corpus at 5.0 vs 2.0: 16 cycles
+# that never closed within their stored trace now close, ZERO went the other
+# way, and exactly one stored duration changed - 302 s shorter, away from the
+# un-evidenced expected-duration fallback it had been pinned to. #424 finishes
+# 17.9 -> 10.8 min after the appliance; #427 is unaffected (its gate never
+# reached the cap).
+GATE_CADENCE_MEDIAN_FACTOR = 2.0
 
 # NOTE: STANDBY_BAND_* constants live further down, after the DEVICE_TYPE_*
 # definitions they reference (search "Standby-band stuck-in-RUNNING finalize").
