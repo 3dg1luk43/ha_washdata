@@ -1105,7 +1105,7 @@
     "duration_weight": "Stufe 4: wie stark die Dauerübereinstimmung den Endscore beeinflusst (Standard 0,22)",
     "energy_weight": "Stufe 4: wie stark die Energieübereinstimmung den Endscore beeinflusst (Standard 0,22)",
     "profile_match_min_duration_ratio": "Stufe 1: minimale Zyklusdauer als Bruchteil der Profildauer; Standard 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Stufe 1: maximale Zyklusdauer als Bruchteil der Profildauer; Standard 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Stufe 1: maximale Zyklusdauer als Bruchteil der Profildauer; Standard 1,8 (180%)",
     "keep_min_score": "Stufe 2: Mindest-Score, um im Auswahlverfahren zu bleiben; Standard 0,1 lässt schwache Kandidaten zu, spätere Stufen wählen den besten",
     "dtw_blend": "Stufe 3: 0 = nur Kernscore, 1 = nur DTW-Score, 0,5 = gleiche Mischung (Standard)",
     "dtw_ensemble_w": "Stufe 3 (Ensemble-Modus): Gewicht auf skaliertem L1 gegenüber Ableitungs-DTW; Standard 0,7 bevorzugt pegelabhängige Erkennung",

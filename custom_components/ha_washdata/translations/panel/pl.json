@@ -2024,7 +2024,7 @@
     "duration_weight": "Etap 4: jak mocno zgodność czasu trwania wpływa na wynik końcowy (domyślnie 0,22)",
     "energy_weight": "Etap 4: jak mocno zgodność energii wpływa na wynik końcowy (domyślnie 0,22)",
     "profile_match_min_duration_ratio": "Etap 1: minimalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Etap 1: maksymalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Etap 1: maksymalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 1,8 (180%)",
     "keep_min_score": "Etap 2: minimalny wynik, by pozostać w wyścigu; domyślnie 0,1 dopuszcza słabe dopasowania, późniejsze etapy wybierają najlepsze",
     "dtw_blend": "Etap 3: 0 = tylko wynik główny, 1 = tylko wynik DTW, 0,5 = równe mieszanie (domyślnie)",
     "dtw_ensemble_w": "Etap 3 (tryb kombinacji): waga skalowanego L1 względem pochodnego DTW; domyślnie 0,7 faworyzuje poziom",

@@ -2024,7 +2024,7 @@
     "duration_weight": "4 etapas: kaip stipriai trukmės atitikimas veikia galutinį balą (numatytoji 0,22)",
     "energy_weight": "4 etapas: kaip stipriai energijos atitikimas veikia galutinį balą (numatytoji 0,22)",
     "profile_match_min_duration_ratio": "1 etapas: trumpiausias ciklas kaip profilio trukmės dalis; numatytoji 0,1 (10%)",
-    "profile_match_max_duration_ratio": "1 etapas: ilgiausias ciklas kaip profilio trukmės dalis; numatytoji 1,5 (150%)",
+    "profile_match_max_duration_ratio": "1 etapas: ilgiausias ciklas kaip profilio trukmės dalis; numatytoji 1,8 (180%)",
     "keep_min_score": "2 etapas: žemiausias balas likti lenktynėse; numatytoji 0,1 leidžia silpnus kandidatus, vėlesni etapai parenka geriausią",
     "dtw_blend": "3 etapas: 0 = tik pagrindinis balas, 1 = tik DTW balas, 0,5 = lygus mišinys (numatytoji)",
     "dtw_ensemble_w": "3 etapas (ansamblio režimas): skalieroto L1 svoris prieš išvestinės DTW; numatytoji 0,7 teikia pirmenybę lygio sąmoningumui",

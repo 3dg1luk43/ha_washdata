@@ -1063,7 +1063,7 @@
     "duration_weight": "Etapa 4: cuánto influye la concordancia de duración en la puntuación final (predeterminado 0,22)",
     "energy_weight": "Etapa 4: cuánto influye la concordancia de energía en la puntuación final (predeterminado 0,22)",
     "profile_match_min_duration_ratio": "Etapa 1: duración mínima del ciclo como fracción de la duración del perfil; predeterminado 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Etapa 1: duración máxima del ciclo como fracción de la duración del perfil; predeterminado 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Etapa 1: duración máxima del ciclo como fracción de la duración del perfil; predeterminado 1,8 (180%)",
     "keep_min_score": "Etapa 2: puntuación mínima para seguir en la carrera; el valor predeterminado 0,1 admite coincidencias débiles, las etapas posteriores seleccionan la mejor",
     "dtw_blend": "Etapa 3: 0 = solo puntuación central, 1 = solo puntuación DTW, 0,5 = mezcla igual (predeterminado)",
     "dtw_ensemble_w": "Etapa 3 (modo ensemble): peso en L1 escalado frente a DTW derivado; el predeterminado 0,7 favorece la sensibilidad al nivel",

@@ -1108,7 +1108,7 @@
         "duration_weight": "Aşama 4: çalışma süresi uyumunun nihai puanı ne kadar etkilediği (varsayılan 0.22)",
         "energy_weight": "Aşama 4: enerji uyumunun nihai puanı ne kadar etkilediği (varsayılan 0.22)",
         "profile_match_min_duration_ratio": "Aşama 1: profil süresinin bir kesri olarak minimum döngü uzunluğu; varsayılan 0.1 (%10)",
-        "profile_match_max_duration_ratio": "Aşama 1: profil süresinin bir kesri olarak maksimum döngü uzunluğu; varsayılan 1.5 (%150)",
+        "profile_match_max_duration_ratio": "Aşama 1: profil süresinin bir kesri olarak maksimum döngü uzunluğu; varsayılan 1.8 (%180)",
         "keep_min_score": "Aşama 2: yarışta kalmak için taban puan; varsayılan 0.1 zayıf eşleşmelere izin verir, sonraki aşamalar en iyisini seçer",
         "dtw_blend": "Aşama 3: 0 = yalnızca çekirdek puan, 1 = yalnızca DTW puanı, 0.5 = eşit karışım (varsayılan)",
         "dtw_ensemble_w": "Aşama 3 (topluluk modu): ölçeklendirilmiş-L1 ile türev DTW arasındaki ağırlık; varsayılan 0.7 düzey farkındalığını tercih eder",

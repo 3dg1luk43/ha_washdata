@@ -36,6 +36,12 @@ from typing import Any
 import numpy as np
 
 from .. import analysis
+from ..const import (
+    DEFAULT_DTW_BANDWIDTH,
+    DEFAULT_DTW_MODE,
+    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+)
 from ..signal_processing import resample_adaptive, resample_uniform
 
 #: Matches the production matcher (``profile_store.async_match_profile``).
@@ -173,7 +179,16 @@ def _top1(by_profile: dict[str, list[dict]], targets: list[tuple[str, int]], cfg
     return correct / total if total else 0.0
 
 
-_BASE_CFG = {"min_duration_ratio": 0.10, "max_duration_ratio": 1.5}
+# The full production matcher config. A PARTIAL config does not inherit the
+# production defaults - `compute_matches_worker` has its own fallbacks - so
+# omitting a key here would tune the weights against a pipeline that never
+# ships. `energy_mode` is added per device type at the call site.
+_BASE_CFG = {
+    "min_duration_ratio": DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+    "max_duration_ratio": DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    "dtw_bandwidth": DEFAULT_DTW_BANDWIDTH,
+    "dtw_mode": DEFAULT_DTW_MODE,
+}
 
 #: Bounded scoring weights the tuner may promote. All live in [0, 1], so a tuned
 #: config can only shift emphasis (shape vs level vs energy, and how much the DTW

@@ -1105,7 +1105,7 @@
     "duration_weight": "Stap 4: hoe sterk de duurovereenkomst de eindscore beïnvloedt (standaard 0,22)",
     "energy_weight": "Stap 4: hoe sterk de energieovereenkomst de eindscore beïnvloedt (standaard 0,22)",
     "profile_match_min_duration_ratio": "Stap 1: minimale cycluslengte als fractie van de profielduur; standaard 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Stap 1: maximale cycluslengte als fractie van de profielduur; standaard 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Stap 1: maximale cycluslengte als fractie van de profielduur; standaard 1,8 (180%)",
     "keep_min_score": "Stap 2: minimale score om in de race te blijven; standaard 0,1 laat zwakke kandidaten toe, latere stappen kiezen de beste",
     "dtw_blend": "Stap 3: 0 = alleen kernscore, 1 = alleen DTW-score, 0,5 = gelijke mix (standaard)",
     "dtw_ensemble_w": "Stap 3 (ensemble-modus): gewicht op geschaalde L1 vs afgeleid DTW; standaard 0,7 geeft voorkeur aan niveauafhankelijke herkenning",

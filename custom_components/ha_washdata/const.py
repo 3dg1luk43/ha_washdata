@@ -325,7 +325,16 @@ DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.10  # Allow match after 10% of expe
 # harness in devtools/dtw_ab_eval.py: widening 1.3->1.5 lifts commit-recall
 # 71.6%->73.4% for a negligible false-positive change; 1.3 was rejecting normal
 # longer-than-average runs (extended/anti-wrinkle variants).
-DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.5
+# Stage-1 upper duration gate (register item 311). Raised 1.5 -> 1.8 because at
+# 1.5 the gate deleted the TRUE candidate on 14 of 606 corpus folds (2.3%) - a
+# cycle that legitimately overran its programme was refused the chance to match
+# it at all. Measured against the item-307 kernel, which already penalises
+# far-off durations smoothly so the hard gate has less to do: +0.66pp top-1,
+# 4 devices better and 0 worse, cluster bootstrap [+0.15,+1.32] P(delta<=0)=0.017.
+# Costs ~8% more candidates to score (4.10 -> 4.44 per match, 37 -> 38 ms).
+# 2.5 measures slightly higher (+0.83pp) but regresses one device; 1.8 is the
+# point at which nothing gets worse.
+DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.8
 DEFAULT_MAX_PAST_CYCLES = 200
 DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
@@ -629,6 +638,25 @@ END_GATE_LATE_RATIO = 1.05
 END_GATE_LATE_SECONDS = 300.0
 
 MATCH_AMBIGUITY_MARGIN = 0.05
+# Separate, WIDER margin required before a finished cycle is auto-labelled
+# (register item 310). Deliberately NOT the same constant as
+# MATCH_AMBIGUITY_MARGIN: that one also gates Smart Termination via the
+# detector's `_match_ambiguous`, so widening it there would defer terminations
+# and undo the end-lag work of item 306. This one is consulted only where a
+# label is recorded.
+#
+# Auto-labelling is the asymmetric decision - a wrong label silently reshapes the
+# profile's avg_duration and therefore every future estimate, while a missed one
+# only asks the user. Measured over 606 completed folds (post-item-307):
+#   margin  coverage  precision  wrong labels
+#    0.05      84.3%      86.3%      69   <- confidence-only, the old behaviour
+#    0.08      77.3%      88.7%      52
+#    0.10      72.2%      90.0%      43
+# 0.08 is the argmax of right - 2 x wrong (a wrong label costing twice a missed
+# one) and was independently selected by grouped cross-validation in all five
+# held-out device groups. The absolute score is a much weaker guide here:
+# AUC 0.625 against the margin's 0.792.
+MATCH_LABEL_MIN_MARGIN = 0.08
 # Gap between the best and second-best candidate at which a mid-cycle switch may
 # skip the persistence wait (register item 305). The absolute score is close to
 # useless for this mid-run (AUC 0.535, because a prefix of a long programme looks

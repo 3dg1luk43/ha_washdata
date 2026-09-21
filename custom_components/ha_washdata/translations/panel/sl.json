@@ -2024,7 +2024,7 @@
     "duration_weight": "Stopnja 4: kako močno ujemanje trajanja vpliva na končno oceno (privzeto 0,22)",
     "energy_weight": "Stopnja 4: kako močno ujemanje energije vpliva na končno oceno (privzeto 0,22)",
     "profile_match_min_duration_ratio": "Stopnja 1: minimalna dolžina cikla kot del trajanja profila; privzeto 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Stopnja 1: maksimalna dolžina cikla kot del trajanja profila; privzeto 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Stopnja 1: maksimalna dolžina cikla kot del trajanja profila; privzeto 1,8 (180%)",
     "keep_min_score": "Stopnja 2: najnižja ocena za ostanek v izboru; privzeto 0,1 sprejme šibka ujemanja, kasnejše stopnje izberejo najboljše",
     "dtw_blend": "Stopnja 3: 0 = samo osnovna ocena, 1 = samo DTW ocena, 0,5 = enakomerno mešanje (privzeto)",
     "dtw_ensemble_w": "Stopnja 3 (kombinirani način): utež skaliranega L1 v primerjavi z izvedenim DTW; privzeto 0,7 daje prednost ravni",

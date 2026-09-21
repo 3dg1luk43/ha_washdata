@@ -246,6 +246,7 @@ from .const import (
     DEFAULT_MATCH_PERSISTENCE,
     DEFAULT_MATCH_REVERT_RATIO,
     MATCH_DECISIVE_MARGIN,
+    MATCH_LABEL_MIN_MARGIN,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_START_DURATION_THRESHOLD,
@@ -5938,12 +5939,32 @@ class WashDataManager:
                 # Recorded whether or not we label, so the panel can show what
                 # WashData suspected without the cycle claiming it as its program.
                 cycle_data["match_confidence"] = label_confidence
+            # How far clear of the runner-up the winner finished. The absolute
+            # score is a weak guide to being right (AUC 0.625) where this margin
+            # is a strong one (0.792), and labelling is the asymmetric decision:
+            # a wrong label reshapes avg_duration and every future estimate,
+            # while a missed one only asks the user. Register item 310.
+            #
+            # A separate constant from MATCH_AMBIGUITY_MARGIN on purpose - that
+            # one also gates Smart Termination, so widening it would defer
+            # cycle ends and undo item 306.
+            _margin = getattr(match_result, "ambiguity_margin", None)
+            _margin_ok = _margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN
             if manual_program:
                 cycle_data["profile_name"] = program
                 cycle_data["label_source"] = "manual"
-            elif label_confidence >= float(self._learning_confidence or 0.0):
+            elif label_confidence >= float(self._learning_confidence or 0.0) and _margin_ok:
                 cycle_data["profile_name"] = program
                 cycle_data["label_source"] = "auto_match"
+            elif label_confidence >= float(self._learning_confidence or 0.0):
+                self._logger.info(
+                    "Not labeling cycle as '%s': confident enough (%.2f) but only "
+                    "%.3f clear of the next candidate, under the %.2f a label needs. "
+                    "It stays unlabelled rather than reshaping that program's "
+                    "statistics on a coin flip.",
+                    program, label_confidence, float(_margin or 0.0),
+                    MATCH_LABEL_MIN_MARGIN,
+                )
             else:
                 self._logger.info(
                     "Not labeling cycle as '%s': match confidence %.2f is below the "

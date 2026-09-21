@@ -1119,7 +1119,7 @@
     "duration_weight": "Stage 4: how strongly run-length agreement affects the final score (default 0.22)",
     "energy_weight": "Stage 4: how strongly energy agreement affects the final score (default 0.22)",
     "profile_match_min_duration_ratio": "Stage 1: minimum cycle length as a fraction of profile duration; default 0.1 (10%)",
-    "profile_match_max_duration_ratio": "Stage 1: maximum cycle length as a fraction of profile duration; default 1.5 (150%)",
+    "profile_match_max_duration_ratio": "Stage 1: maximum cycle length as a fraction of profile duration; default 1.8 (180%)",
     "keep_min_score": "Stage 2: floor score to stay in the race; default 0.1 admits weak matches, later stages pick the best",
     "dtw_blend": "Stage 3: 0 = core score only, 1 = DTW score only, 0.5 = equal blend (default)",
     "dtw_ensemble_w": "Stage 3 (ensemble mode): weight on scaled-L1 vs derivative DTW; default 0.7 favours level-aware",

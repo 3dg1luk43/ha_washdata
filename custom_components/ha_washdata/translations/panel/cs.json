@@ -2024,7 +2024,7 @@
     "duration_weight": "Fáze 4: jak silně shoda délky trvání ovlivňuje výsledné skóre (výchozí 0,22)",
     "energy_weight": "Fáze 4: jak silně shoda energie ovlivňuje výsledné skóre (výchozí 0,22)",
     "profile_match_min_duration_ratio": "Fáze 1: minimální délka cyklu jako zlomek doby trvání profilu; výchozí 0,1 (10 %)",
-    "profile_match_max_duration_ratio": "Fáze 1: maximální délka cyklu jako zlomek doby trvání profilu; výchozí 1,5 (150 %)",
+    "profile_match_max_duration_ratio": "Fáze 1: maximální délka cyklu jako zlomek doby trvání profilu; výchozí 1,8 (180 %)",
     "keep_min_score": "Fáze 2: minimální skóre pro setrvání v závodu; výchozí 0,1 připouští slabé shody, pozdější fáze vyberou nejlepší",
     "dtw_blend": "Fáze 3: 0 = pouze základní skóre, 1 = pouze skóre DTW, 0,5 = rovnoměrné míchání (výchozí)",
     "dtw_ensemble_w": "Fáze 3 (režim kombinace): váha škálovaného L1 oproti derivátnímu DTW; výchozí 0,7 upřednostňuje úroveň",

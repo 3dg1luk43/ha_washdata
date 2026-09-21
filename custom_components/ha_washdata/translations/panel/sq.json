@@ -2021,7 +2021,7 @@
         "duration_weight": "Etapa 4: sa fortë ndikon marrëveshja e kohëzgjatjes në rezultatin final (parazgjedhja 0.22)",
         "energy_weight": "Etapa 4: sa fortë ndikon marrëveshja e energjisë në rezultatin final (parazgjedhja 0.22)",
         "profile_match_min_duration_ratio": "Etapa 1: gjatësia minimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 0.1 (10%)",
-        "profile_match_max_duration_ratio": "Etapa 1: gjatësia maksimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 1.5 (150%)",
+        "profile_match_max_duration_ratio": "Etapa 1: gjatësia maksimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 1.8 (180%)",
         "keep_min_score": "Etapa 2: rezultati minimal për të qëndruar në garë; parazgjedhja 0.1 pranon përputhje të dobëta, etapat e mëvonshme zgjedhin më të mirën",
         "dtw_blend": "Etapa 3: 0 = vetëm rezultati bazë, 1 = vetëm rezultati DTW, 0.5 = përzierje e barabartë (parazgjedhja)",
         "dtw_ensemble_w": "Etapa 3 (modaliteti ansambël): pesë për L1-e shkallëzuar kundrejt DTW derivativ; parazgjedhja 0.7 favorizon nivelin e fuqisë",

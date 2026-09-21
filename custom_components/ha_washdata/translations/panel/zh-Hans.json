@@ -1108,7 +1108,7 @@
         "duration_weight": "Stage 4: 运行时长一致性对最终得分的影响程度（默认 0.22）",
         "energy_weight": "Stage 4: 能耗一致性对最终得分的影响程度（默认 0.22）",
         "profile_match_min_duration_ratio": "Stage 1: 最短允许运行时长占档案时长的比例; 默认 0.1 (10%)",
-        "profile_match_max_duration_ratio": "Stage 1: 最长允许运行时长占档案时长的比例; 默认 1.5 (150%)",
+        "profile_match_max_duration_ratio": "Stage 1: 最长允许运行时长占档案时长的比例; 默认 1.8 (180%)",
         "keep_min_score": "Stage 2: 保留在竞争中的最低得分; 默认 0.1 接受弱候选，后续阶段选出最佳",
         "dtw_blend": "Stage 3: 0 = 仅核心得分，1 = 仅 DTW 得分，0.5 = 等权混合（默认）",
         "dtw_ensemble_w": "Stage 3 (集成模式): 缩放 L1 对导数 DTW 的权重; 默认 0.7 偏重水平感知",

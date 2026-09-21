@@ -23,6 +23,7 @@ from typing import Any, Optional
 import numpy as np
 
 from .const import (
+    DEFAULT_DTW_BANDWIDTH,
     DEFAULT_DTW_MODE,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
@@ -408,7 +409,12 @@ def compute_matches_worker(
 
     min_duration_ratio = config.get("min_duration_ratio", DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
     max_duration_ratio = config.get("max_duration_ratio", DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)
-    dtw_bandwidth = config.get("dtw_bandwidth", 0.1)
+    # Falls back to the OPTION default like every other key here. It used to be a
+    # literal 0.1, which silently ran a weaker Stage 3 than production for any
+    # caller that omitted the key - worth ~0.8pp of top-1, and it is what made
+    # the on-device matching tuner optimise against a pipeline nobody runs
+    # (register item 309).
+    dtw_bandwidth = config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH)
     dtw_mode = config.get("dtw_mode", DEFAULT_DTW_MODE)
     keep_min = float(config.get("keep_min_score", MATCH_KEEP_MIN_SCORE))
     corr_weight = float(config.get("corr_weight", MATCH_CORR_WEIGHT))

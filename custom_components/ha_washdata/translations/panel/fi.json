@@ -1112,7 +1112,7 @@
     "duration_weight": "Vaihe 4: kuinka vahvasti keston yhdenmukaisuus vaikuttaa lopullisiin pisteisiin (oletus 0,22)",
     "energy_weight": "Vaihe 4: kuinka vahvasti energian yhdenmukaisuus vaikuttaa lopullisiin pisteisiin (oletus 0,22)",
     "profile_match_min_duration_ratio": "Vaihe 1: lyhin sykli profiilinkeston murto-osana; oletus 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Vaihe 1: pisin sykli profiilinkeston murto-osana; oletus 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Vaihe 1: pisin sykli profiilinkeston murto-osana; oletus 1,8 (180%)",
     "keep_min_score": "Vaihe 2: alin pisteet pysyäkseen mukana; oletus 0,1 sallii heikot ehdokkaat, myöhemmät vaiheet valitsevat parhaan",
     "dtw_blend": "Vaihe 3: 0 = vain ydinpisteet, 1 = vain DTW-pisteet, 0,5 = tasainen sekoitus (oletus)",
     "dtw_ensemble_w": "Vaihe 3 (ensemble-tila): skaloidun L1 paino vs. derivatiivinen DTW; oletus 0,7 suosii tasonhavainnoivaa",

@@ -1063,7 +1063,7 @@
     "duration_weight": "Fase 4: quanto la concordanza di durata influisce sul punteggio finale (predefinito 0,22)",
     "energy_weight": "Fase 4: quanto la concordanza di energia influisce sul punteggio finale (predefinito 0,22)",
     "profile_match_min_duration_ratio": "Fase 1: durata minima del ciclo come frazione della durata del profilo; predefinito 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Fase 1: durata massima del ciclo come frazione della durata del profilo; predefinito 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Fase 1: durata massima del ciclo come frazione della durata del profilo; predefinito 1,8 (180%)",
     "keep_min_score": "Fase 2: punteggio minimo per restare in gara; il predefinito 0,1 ammette candidati deboli, le fasi successive scelgono il migliore",
     "dtw_blend": "Fase 3: 0 = solo punteggio centrale, 1 = solo punteggio DTW, 0,5 = mix equilibrato (predefinito)",
     "dtw_ensemble_w": "Fase 3 (modalità ensemble): peso su L1 scalato rispetto a DTW derivato; il predefinito 0,7 favorisce la sensibilità al livello",
