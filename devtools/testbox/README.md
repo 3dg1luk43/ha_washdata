@@ -185,7 +185,10 @@ Each of these is unreachable from a mocked Home Assistant:
 
 ## Current known state
 
-`./smoke.sh` reports **20 of 20**, and `./check_notify_actions.sh` passes. The whole notification lifecycle is proven
+`./smoke.sh` reports **20 of 20** on both device types - washing machine at
+60x, and `--type dishwasher --speedup 4` (a ~45 min run, which also exercises
+the pre-completion alert and closes through Smart Termination at 35.9 min of a
+36 min replay). `./check_notify_actions.sh` passes. The whole notification lifecycle is proven
 against a real service bus: start, a live update on its own tag, mobile-only
 routing, the lifecycle hand-over dismissal, the live-activity end, the finished
 alert delivered *before* that end, titles on every content notification, and a
