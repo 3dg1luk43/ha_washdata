@@ -1385,7 +1385,7 @@ STORAGE_KEY = "ha_washdata"
 # leaves an entry a version short, which then re-migrates on every start - and repeating
 # the literals in three places is what made that easy to do.
 CONFIG_ENTRY_VERSION = 3
-CONFIG_ENTRY_MINOR_VERSION = 10
+CONFIG_ENTRY_MINOR_VERSION = 11
 
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"

@@ -350,3 +350,51 @@ async def test_a_cycle_that_never_rose_above_the_threshold_is_skipped() -> None:
     res = await st.async_repair_banked_tails(2.0, "washing_machine")
     assert res["repaired"] == 0
     assert data["past_cycles"][0]["duration"] == pytest.approx(4200.0)
+
+
+@pytest.mark.asyncio
+async def test_repair_rebuilds_the_signature_from_the_kept_samples() -> None:
+    """The trace is trimmed, so the signature derived from it has to be rebuilt.
+
+    Left stale it would describe a duration and a power distribution taken from
+    samples the cycle no longer has, and the signature feeds candidate rejection.
+    The sibling trim and the merge path both already recompute it; this one did
+    not (found in the PR #448 review).
+    """
+    cyc = _cycle("a", 3000, 1200)
+    stale = {
+        "duration": 4200.0,
+        "total_energy": 999.0,
+        "max_power": 100.0,
+        "p05": 0.0,
+    }
+    cyc["signature"] = dict(stale)
+    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 1
+    sig = data["past_cycles"][0]["signature"]
+    assert sig is not None and sig != stale, "the signature still describes the old trace"
+    # It now agrees with the duration the repair wrote.
+    assert sig["duration"] == pytest.approx(
+        data["past_cycles"][0]["duration"], abs=31.0
+    )
+    # The dead tail is gone, so the power distribution no longer contains zeros.
+    assert sig["p05"] == pytest.approx(100.0)
+    assert sig["max_power"] == pytest.approx(100.0)
+
+
+@pytest.mark.asyncio
+async def test_a_cycle_the_repair_skips_keeps_its_signature() -> None:
+    """Only a trimmed trace needs a new signature; an untouched one must not move."""
+    cyc = _cycle("a", 3000, 10)  # tail below BANKED_TAIL_REPAIR_MIN_S
+    cyc["signature"] = {"duration": 3010.0, "max_power": 100.0}
+    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 0
+    assert data["past_cycles"][0]["signature"] == {"duration": 3010.0, "max_power": 100.0}

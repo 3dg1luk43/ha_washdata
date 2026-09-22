@@ -457,6 +457,13 @@ def select_clean_cycles(
     return clean, excluded
 
 
+# A final reading only counts as standby when it is at most this fraction of the
+# cycle's own peak. Sized to keep every real case in the corpus (the #445
+# reporter's 3.2 W idle against a ~2 kW peak is 0.16%) while rejecting a cycle
+# stopped by hand while the appliance was still working.
+_STANDBY_PEAK_FRACTION = 0.10
+
+
 def detect_standby_above_stop(
     cycles: list[dict[str, Any]],
     stop_threshold_w: float,
@@ -478,6 +485,16 @@ def detect_standby_above_stop(
     was actually sitting at when the cycle closed. If that is repeatedly above
     ``stop_threshold_w``, the threshold is below the appliance's standby draw.
 
+    User-stopped cycles are deliberately kept: on an appliance with this fault
+    they are often the ONLY way a cycle ever closes, and the #445 reporter
+    force-stopped four. What they need instead is a sanity check, because a cycle
+    stopped by hand mid-wash ends at WORKING power, not standby, and two of those
+    would otherwise be reported as "still drawing 500 W when the cycle ended". A
+    final sample only counts as standby when it is at most
+    ``_STANDBY_PEAK_FRACTION`` of that cycle's own peak: standby is by definition
+    a small fraction of working power (the reporter's 3.2 W against a 2 kW peak is
+    0.16%), so this keeps every genuine case and drops the mid-wash stop.
+
     Returns None when there is no such pattern, else a summary carrying the
     observed idle level so the UI can name a number rather than a symptom. Pure
     statistics, never raises: this is read on the device-list path.
@@ -496,9 +513,21 @@ def detect_standby_above_stop(
             if not isinstance(last, (list, tuple)) or len(last) < 2:
                 continue
             try:
-                finals.append(float(last[1]))
-            except (TypeError, ValueError):
+                final_w = float(last[1])
+            except (TypeError, ValueError, OverflowError):
                 continue
+            peak = 0.0
+            for pt in raw:
+                if isinstance(pt, (list, tuple)) and len(pt) >= 2:
+                    try:
+                        peak = max(peak, float(pt[1]))
+                    except (TypeError, ValueError, OverflowError):
+                        continue
+            # Idle-like or nothing: a cycle stopped by hand mid-wash ends at
+            # working power and says nothing about the standby draw.
+            if peak > 0 and final_w > peak * _STANDBY_PEAK_FRACTION:
+                continue
+            finals.append(final_w)
         if len(finals) < min_hits:
             return None
         above = [f for f in finals if f > stop_threshold_w]

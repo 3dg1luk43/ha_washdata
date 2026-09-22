@@ -5705,6 +5705,25 @@ class ProfileStore:
             # sensibly keeps its samples and only the duration is corrected.
             if len(kept) >= 2:
                 cycle["power_data"] = kept
+                # The signature is derived from the trace, so it has to be rebuilt
+                # from the kept samples - exactly as the sibling trim and the merge
+                # path already do. Left stale it would describe a duration and a
+                # power distribution taken from samples this cycle no longer has,
+                # and it feeds candidate rejection.
+                try:
+                    ts_arr = np.asarray([float(pt[0]) for pt in kept], dtype=float)
+                    p_arr = np.asarray([float(pt[1]) for pt in kept], dtype=float)
+                    cycle["signature"] = dataclasses.asdict(
+                        compute_signature(ts_arr, p_arr)
+                    )
+                except Exception:  # pylint: disable=broad-exception-caught
+                    # A stale signature beats an abandoned repair: the duration
+                    # correction is the point, and this is a derived statistic.
+                    self._logger.debug(
+                        "Banked-tail repair: signature recompute failed for cycle %s",
+                        cycle.get("id"),
+                        exc_info=True,
+                    )
 
     def profile_terminal_quiet_seconds(self, profile_name: str) -> float | None:
         """How long this programme is measured to stay quiet after its last real

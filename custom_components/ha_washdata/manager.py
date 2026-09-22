@@ -2291,8 +2291,10 @@ class WashDataManager:
             # Backgrounded, not awaited. It walks up to 200 stored traces and
             # rebuilds envelopes, and anything awaited inside async_setup is billed
             # to the integration's reported startup time (register item 158 / #408).
-            # Nothing needs it before the first cycle ends.
-            self.hass.async_create_task(self._async_repair_banked_tails())
+            # Nothing needs it before the first cycle ends. Tracked, because it
+            # writes to the ProfileStore: an untracked task would keep writing to
+            # the store a reload had already swapped out.
+            self._spawn_tracked(self._async_repair_banked_tails())
         try:
             _trans = await translation.async_get_translations(
                 self.hass, self.hass.config.language, "options", {DOMAIN}

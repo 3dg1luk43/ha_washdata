@@ -329,7 +329,7 @@ arrive via [GitLocalize](https://gitlocalize.com/repo/10819) as PRs; merge them 
 Deterministic and idempotent; never drop user data (cycles, labels, corrections); add tests with
 old-schema fixtures. **Two separate layers, tested separately:**
 
-1. **Config entry migration** - `async_migrate_entry` in `__init__.py`, schema v1->3.10. `VERSION` /
+1. **Config entry migration** - `async_migrate_entry` in `__init__.py`, schema v1->3.11. `VERSION` /
    `MINOR_VERSION` live on the flow class in `config_flow.py` and must be bumped with it. Tested in
    `tests/test_migration_harness.py`. The one-pass legacy path writes the current version directly, so
    a bump also means updating the `minor_version=` at the end of the bulk migration.
@@ -340,7 +340,7 @@ old-schema fixtures. **Two separate layers, tested separately:**
 
    ```python
    store = WashDataStore(_make_hass(), STORAGE_VERSION, f"{STORAGE_KEY}.test")
-   result = await store._async_migrate_func(13, 1, data)
+   result = await store._async_migrate_func(12, 1, data)
    ```
 
    Per-version steps are listed in reference 02 / the register. Recent: v9->v10 `reference_cycles`,

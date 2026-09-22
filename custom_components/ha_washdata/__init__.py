@@ -155,6 +155,13 @@ def _require_str(value: Any, name: str) -> str:
     return value
 
 
+# Options keys that no code reads any more, stripped by the 3.10 -> 3.11 step and
+# again by the one-pass legacy migration. Named once so the two cannot drift.
+_DEAD_ABRUPT_KEYS = frozenset(
+    {"abrupt_drop_ratio", "abrupt_drop_watts", "abrupt_high_load_factor"}
+)
+
+
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate config entry to the latest version while preserving settings."""
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
@@ -261,6 +268,22 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "Migrated WashData entry from 3.9 to 3.10 (healed seeded cadence "
             "defaults: %s)",
             _healed or "none",
+        )
+
+    # 3.10 -> 3.11: drop the abrupt-drop end-detection knobs from options. The bulk
+    # strip below reaches only entries still BELOW the current schema, because of the
+    # early return right under this block - so without a step of its own an entry
+    # created before 558e71e and since migrated to 3.10 keeps the dead keys forever.
+    # Same shape as the 3.7 -> 3.8 running_dead_zone retirement, for the same reason.
+    if version == 3 and minor_version == 10:
+        new_opts = {k: v for k, v in entry.options.items() if k not in _DEAD_ABRUPT_KEYS}
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=11
+        )
+        minor_version = 11
+        _log.debug(
+            "Migrated WashData entry from 3.10 to 3.11 (removed %s)",
+            sorted(set(entry.options) & _DEAD_ABRUPT_KEYS) or "nothing",
         )
 
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
@@ -399,11 +422,9 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # 7 full user configurations and read by no Python or panel code. The
     # surviving "abrupt end" in suggestion_engine is the cycle-artifact
     # classifier, which is unrelated hardcoded logic, not these tunables.
-    for k in (
-        "abrupt_drop_ratio",
-        "abrupt_drop_watts",
-        "abrupt_high_load_factor",
-    ):
+    # Entries already on the current schema are handled by the 3.10 -> 3.11 step
+    # above; this covers a one-pass legacy migration.
+    for k in _DEAD_ABRUPT_KEYS:
         options.pop(k, None)
 
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
