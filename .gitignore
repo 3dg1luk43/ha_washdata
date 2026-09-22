@@ -66,3 +66,8 @@ docs/internal/ISSUE_TRIAGE.md
 # file is actually being served (see frontend._ensure_gzip), never committed: a
 # checked-in .gz could out-live its source and be served as if it were current.
 custom_components/ha_washdata/www/*.gz
+# The test box's generated Home Assistant config dir: .storage, the recorder DB,
+# logs, the access token and the captured notifications. The scripts that build
+# the box ARE committed (see devtools/testbox/README.md); only its state is not.
+devtools/testbox/config/
+devtools/testbox/__pycache__

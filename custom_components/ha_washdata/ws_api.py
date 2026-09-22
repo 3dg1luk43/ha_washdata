@@ -71,6 +71,9 @@ from .const import (
     CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PUMP_STUCK_DURATION,
     CONF_POWER_OFF_THRESHOLD_W,
+    CONF_POWER_SENSOR,
+    CONF_ENERGY_PRICE_ENTITY,
+    CONF_NOTIFY_PEOPLE,
     CONF_SAMPLING_INTERVAL,
     CONF_SMOOTHING_WINDOW,
     CONF_START_DURATION_THRESHOLD,
@@ -487,6 +490,32 @@ _CHANGELOG_SKIP_KEYS = frozenset({CONF_NAME})
 # there and the manager resolves them options-first), so they are NOT listed
 # here; relocating them to entry.data would shadow the option-first reads.
 _OPTIONS_IDENTITY_KEYS = frozenset({CONF_NAME})
+
+# Option keys whose value names an entity or device on THIS Home Assistant.
+# They are ordinary tunables when the panel writes them (the user picks from a
+# selector listing their own entities), but an *imported* export carries the
+# SOURCE system's ids, and applying those re-points this device at entities that
+# do not exist here. ``power_sensor`` is the severe one: the integration goes
+# silently dead, state stuck at "off" and current_power at 0, with nothing in the
+# log but one INFO line. ``ws_import_config`` already refuses to write the
+# exporter's ``entry.data`` for exactly this reason - "blindly applying it would
+# hijack this device's sensor binding" - but the same keys live in entry.options
+# post-3.6, so they arrived through the other door. Found by the test box
+# (devtools/testbox) on its first run; see register item 317.
+#
+# Deliberately NOT here: the notify_*_services lists. They also name the source
+# user's targets, but they are shown plainly in the panel's Notifications
+# section, and carrying them is usually the point when migrating your own setup.
+_IMPORT_LOCAL_BINDING_KEYS = _OPTIONS_IDENTITY_KEYS | frozenset({
+    CONF_POWER_SENSOR,
+    CONF_ENERGY_SENSOR,
+    CONF_ENERGY_PRICE_ENTITY,
+    CONF_DOOR_SENSOR_ENTITY,
+    CONF_SWITCH_ENTITY,
+    CONF_EXTERNAL_END_TRIGGER,
+    CONF_LINKED_DEVICE,
+    CONF_NOTIFY_PEOPLE,
+})
 
 
 def _json_safe(value: Any) -> Any:
@@ -3555,9 +3584,12 @@ async def ws_import_config(
             if entry and config_updates:
                 entry_options_updates = dict(config_updates.get("entry_options", {}))
                 # Identity must never be persisted into options; the display name
-                # rides the entry title. device_type/power_sensor/min_power stay
-                # in options and are applied as tunables.
-                for key in _OPTIONS_IDENTITY_KEYS:
+                # rides the entry title. Local entity/device bindings are dropped
+                # too: they are tunables when the panel writes them, but an
+                # import carries the exporter's ids and would repoint this device
+                # at entities that do not exist here (item 317). device_type and
+                # min_power are genuinely portable and stay.
+                for key in _IMPORT_LOCAL_BINDING_KEYS:
                     entry_options_updates.pop(key, None)
                 if entry_options_updates:
                     # Apply the imported tunables on top of the current options;

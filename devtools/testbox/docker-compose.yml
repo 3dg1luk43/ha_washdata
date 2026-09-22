@@ -1,0 +1,38 @@
+# WashData test box: a disposable, real Home Assistant to run the integration in.
+#
+# Not a copy of production. The point is that everything here is the real thing -
+# real service bus, real config-entry flow, real entity registry, real storage
+# migrations, real notify platform schemas - so a payload Home Assistant would
+# reject fails here instead of being accepted by a MagicMock.
+#
+# Paths (all under devtools/testbox/, see README.md):
+#   config/            generated HA config dir  (gitignored, wiped by down.sh --wipe)
+#   support/custom_components/testbox_notify/  payload-capturing notify platform
+#   The integration itself is bind-mounted from the working tree, read-only, so
+#   the box always runs the code you are editing. Restart to reload it.
+name: washdata-testbox
+
+services:
+  ha:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: washdata-testbox-ha
+    restart: "no"
+    # Host networking is deliberately NOT used: the box must not be able to see
+    # the real Home Assistant, the real MQTT broker or the real appliances.
+    ports:
+      - "127.0.0.1:8321:8123"
+    environment:
+      TZ: Europe/Prague
+      # The integration is mounted read-only; without this HA tries to write
+      # __pycache__ into the working tree and logs a warning per module.
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - ./config:/config
+      - ../../custom_components/ha_washdata:/config/custom_components/ha_washdata:ro
+      - ./support/custom_components/testbox_notify:/config/custom_components/testbox_notify:ro
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8123/manifest.json', timeout=3).status==200 else 1)\""]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 20s

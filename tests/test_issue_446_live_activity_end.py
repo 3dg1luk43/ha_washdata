@@ -193,6 +193,12 @@ def test_cycle_end_orders_finish_before_the_activity_clear_in_source() -> None:
     pieces but not that _async_process_cycle_end wires them in that order. Read
     it out of the source so a later edit that moves the clear above the finished
     notification - re-opening #446's "lock screen momentarily empty" - fails here.
+
+    Reading source text is a poor substitute for observing delivery order, and it
+    is only here because a mocked service bus has no delivery order to observe.
+    The real check now lives in `devtools/testbox/assert_run.py`, against two
+    timestamped records in the box's notification capture; this stays as the cheap
+    canary that runs in 30 s without Docker.
     """
     import inspect
 

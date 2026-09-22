@@ -1205,6 +1205,19 @@ class CycleDetector:
 
         # Sanity check for negative dt
         if dt < 0:
+            # Logged because this is the one exit from process_reading that leaves
+            # NO trace: the accumulators do not advance, `_power_readings` does not
+            # grow, and every downstream gate therefore stays silent too. A cycle
+            # wedged behind it looks exactly like a cycle whose end gate is simply
+            # not satisfied - which is how much of register item 320 was spent.
+            self._logger.debug(
+                "Ignoring reading %.1fW: timestamp %s is %.1fs before the last "
+                "processed reading %s",
+                power,
+                timestamp,
+                -dt,
+                self._last_process_time,
+            )
             self._last_process_time = timestamp
             return
 
