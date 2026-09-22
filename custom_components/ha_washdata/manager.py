@@ -47,7 +47,10 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.const import STATE_UNAVAILABLE, STATE_HOME
 from homeassistant.util import dt as dt_util
+import voluptuous as vol
+
 import homeassistant.helpers.event as evt
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import script as script_helper
 from homeassistant.helpers import translation
 
@@ -7125,13 +7128,30 @@ class WashDataManager:
 
         if self._notify_script is None:
             try:
+                # Validate through cv.SCRIPT_SCHEMA before handing the sequence to
+                # Script, because that is what turns a templated `data` value into
+                # a Template: `cv.template_complex` converts the strings that look
+                # like templates, and at run time `render_complex` renders only
+                # Template instances and passes plain strings through untouched.
+                # Built straight from the stored options - as this did - every
+                # `{{ device }}` in a user's action was delivered to their phone
+                # as the literal text `{{ device }}`, which makes the documented
+                # notification variables useless. Found by the test box's
+                # check_notify_actions.sh; register item 323.
                 self._notify_script = script_helper.Script(
                     self.hass,
-                    actions,
+                    cv.SCRIPT_SCHEMA(actions),
                     name=f"{self.config_entry.title} notification",
                     domain=DOMAIN,
                     logger=_LOGGER,
                 )
+            except vol.Invalid as err:
+                self._logger.error(
+                    "Invalid notification action configuration for %s: %s",
+                    self.config_entry.title,
+                    err,
+                )
+                return False
             except (ValueError, TypeError, HomeAssistantError) as err:
                 self._logger.error(
                     "Invalid notification action configuration for %s: %s",

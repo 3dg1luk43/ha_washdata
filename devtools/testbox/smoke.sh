@@ -81,6 +81,11 @@ echo "== 3. options: notify targets + timings compressed by ${SPEEDUP}x"
 # interrupted_min_seconds is marked "internal use only" in const.py but has to be
 # compressed too: a cycle shorter than it is filed as "interrupted" and never
 # stored, which reads as a detection failure rather than a unit mismatch.
+#
+# profile_match_interval likewise: at its 300 s default the matcher never fires
+# inside a 76 s replay, so every live update stays on the "no profile matched
+# yet" branch and the matched payload (progress, chronometer, when) is never
+# exercised - which is exactly the payload users see for most of a cycle.
 $HACTL set-options "$ENTRY" \
   power_sensor=sensor.washdata_power \
   notify_start_services='["notify.mobile_app_testbox","notify.plain_testbox"]' \
@@ -89,6 +94,7 @@ $HACTL set-options "$ENTRY" \
   notify_live_interval_seconds=30 \
   notify_live_chronometer=true \
   notify_before_end_minutes=20 \
+  profile_match_interval=10 \
   sampling_interval=1 \
   watchdog_interval=5 \
   start_duration_threshold=1 \
@@ -127,6 +133,23 @@ for _ in $(seq 1 150); do
     finished|clean|off) break ;;
   esac
   sleep 5
+done
+
+echo
+echo "== 6b. settle"
+# The cycle-end notifications are dispatched a moment AFTER the state flips
+# (measured: 0.46 s), and the assertions read the capture file, so asserting the
+# instant the state changes is a race that loses the finish alert and the
+# live-activity clear. Wait for the capture to stop growing instead.
+SETTLE_PREV=-1
+for _ in $(seq 1 12); do
+  SETTLE_NOW=$(wc -l < "$HERE/config/notify_capture.jsonl")
+  if [ "$SETTLE_NOW" = "$SETTLE_PREV" ]; then
+    echo "   capture stable at $SETTLE_NOW notifications"
+    break
+  fi
+  SETTLE_PREV="$SETTLE_NOW"
+  sleep 3
 done
 
 echo

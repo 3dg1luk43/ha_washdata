@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Pytest fixtures for ha_washdata tests."""
+from typing import Any
+
 import pytest
 from unittest.mock import MagicMock
 
@@ -143,23 +145,41 @@ def _validate_recorded_service_calls(hass) -> None:
 
 @pytest.fixture(autouse=True)
 def _reject_unsendable_service_payloads():
-    """Validate the service calls of every manager built during a test.
+    """Validate every service call any manager makes during a test.
 
-    Hooks the manager's own send choke point rather than each test's fixture, so
-    it covers the modules that construct their hass by hand. Runs the real
-    function first, then checks what landed on the (usually mocked) service bus.
+    Two hooks, for two reasons:
+
+    * ``_send_notification_service`` is checked inline, so a bad notification
+      payload fails at the call that made it and the traceback points there;
+    * every manager's ``hass`` is also swept at teardown, so calls made from
+      ANY other path are covered too - the switch pause/resume services, and
+      whatever is added next. Hooking the constructor rather than each test's
+      fixture is what makes that automatic for the 93 modules that build their
+      hass by hand.
     """
     from custom_components.ha_washdata.manager import WashDataManager
 
-    original = WashDataManager._send_notification_service
+    original_send = WashDataManager._send_notification_service
+    original_init = WashDataManager.__init__
+    built: list[Any] = []
 
     def _checked(self, *args, **kwargs):
-        result = original(self, *args, **kwargs)
+        result = original_send(self, *args, **kwargs)
         _validate_recorded_service_calls(self.hass)
         return result
 
+    def _tracked_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        hass = getattr(self, "hass", None)
+        if hass is not None:
+            built.append(hass)
+
     WashDataManager._send_notification_service = _checked
+    WashDataManager.__init__ = _tracked_init
     try:
         yield
     finally:
-        WashDataManager._send_notification_service = original
+        WashDataManager._send_notification_service = original_send
+        WashDataManager.__init__ = original_init
+        for hass in built:
+            _validate_recorded_service_calls(hass)

@@ -46,6 +46,7 @@ Everything lives under `devtools/testbox/`:
 | `smoke.sh` | the end-to-end run: setup -> import -> replay -> assert |
 | `hactl.py` | the driver: REST, WebSocket, state pushing, replay, log reading |
 | `assert_run.py` | the acceptance checks, run by `smoke.sh` step 7 |
+| `check_notify_actions.sh` | the notification-ACTION delivery path, ~1 min, standalone |
 | `support/configuration.yaml` | baseline HA config, copied into `config/` on first start |
 | `config/.compressed_export.json` | the time-rescaled export `smoke.sh` seeds from |
 | `support/custom_components/testbox_notify/` | notify platform that records every payload |
@@ -116,6 +117,18 @@ full `data` dict, so the tag, `live_update`, `progress`, `chronometer` and the
 `clear_notification` markers can all be asserted after the fact. A payload that
 HA rejects never gets there - which is the entire point.
 
+### The action path
+
+WashData delivers a notification two ways: through the notify services, and
+through a user-supplied *action* - a YAML script run with the notification's
+variables bound. Every unit module that touches the second one mocks
+`script_helper.Script`, so nothing proved an action delivers anything;
+`./check_notify_actions.sh` does, in about a minute, by configuring a real action
+with **no** notify services so anything that arrives can only have come through
+it. That check is what found item 323: the templates were being delivered as
+literal `{{ device }}` text, because the sequence never went through
+`cv.SCRIPT_SCHEMA`.
+
 ### Time compression
 
 A 76 min cycle replayed at 60x takes 76 s, which is the only reason a full run
@@ -172,7 +185,7 @@ Each of these is unreachable from a mocked Home Assistant:
 
 ## Current known state
 
-`./smoke.sh` reports **16 of 16**. The whole notification lifecycle is proven
+`./smoke.sh` reports **20 of 20**, and `./check_notify_actions.sh` passes. The whole notification lifecycle is proven
 against a real service bus: start, a live update on its own tag, mobile-only
 routing, the lifecycle hand-over dismissal, the live-activity end, the finished
 alert delivered *before* that end, titles on every content notification, and a
