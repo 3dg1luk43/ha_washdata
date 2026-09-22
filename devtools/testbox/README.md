@@ -172,20 +172,18 @@ Each of these is unreachable from a mocked Home Assistant:
 
 ## Current known state
 
-`./smoke.sh` reports **13 of 15** checks. The two failures are one open finding,
-left visible rather than hidden:
+`./smoke.sh` reports **16 of 16**. The whole notification lifecycle is proven
+against a real service bus: start, a live update on its own tag, mobile-only
+routing, the lifecycle hand-over dismissal, the live-activity end, the finished
+alert delivered *before* that end, titles on every content notification, and a
+log with no rejected call, no `ha_washdata` ERROR and no traceback.
 
-- *a cycle was recorded* and *the live activity was ended at cycle end* fail
-  because the replayed cycle **does not leave ENDING**. Every configured gate is
-  satisfied (0 W for minutes, `off_delay=10`), the watchdog logs its keepalive
-  every 5 s, and yet `samples_recorded` stays frozen and no defer line is
-  logged - i.e. the detector is not processing those keepalives at all. This
-  symptom-matches #445, so it is being chased at unit level rather than papered
-  over here. Register item 320 has the evidence and the two candidate causes.
-
-Everything else passes, including the whole notification surface: start, live
-update on its own tag, mobile-only routing, the lifecycle hand-over dismissal,
-titles, and a clean log.
+One number is unaccounted for: the cycle closes about **7.5 min of wall clock**
+after the trace ends, while the configured gates are 10 s. At 60x that is 7.5 h
+of appliance time, so it is not obviously wrong, and the detector also detours
+`running -> paused -> ending` on the way. It has not been traced to a specific
+gate. If a real-time "cycle ends late" report ever needs reproducing, start
+there. Register item 320.
 
 ## Limits
 

@@ -76,7 +76,11 @@ echo "== 3. options: notify targets + timings compressed by ${SPEEDUP}x"
 # to exercise production behaviour, not a bespoke configuration.
 #
 # notify_live_interval_seconds is floored at 30 in the manager, so at 60x one
-# live update covers ~30 min of appliance time: a 144 min cycle yields ~4.
+# live update covers ~30 min of appliance time: a 76 min cycle yields ~2.
+#
+# interrupted_min_seconds is marked "internal use only" in const.py but has to be
+# compressed too: a cycle shorter than it is filed as "interrupted" and never
+# stored, which reads as a detection failure rather than a unit mismatch.
 $HACTL set-options "$ENTRY" \
   power_sensor=sensor.washdata_power \
   notify_start_services='["notify.mobile_app_testbox","notify.plain_testbox"]' \
@@ -90,14 +94,15 @@ $HACTL set-options "$ENTRY" \
   start_duration_threshold=1 \
   off_delay=10 \
   min_off_gap=10 \
-  completion_min_seconds=5 > /dev/null
+  completion_min_seconds=5 \
+  interrupted_min_seconds=5 > /dev/null
 echo "options written"
 
 echo
 echo "== 4. baseline"
 BASELINE="$HERE/config/.baseline.json"
 CYCLES_BEFORE=$($HACTL ws ha_washdata/get_device_cycles entry_id="$ENTRY" \
-  | $PY -c 'import json,sys; d=json.load(sys.stdin); print(len(d.get("cycles", d) if isinstance(d,dict) else d))')
+  | $PY -c 'import json,sys; d=json.load(sys.stdin); print(d.get("total", len(d.get("cycles", []))))')
 $PY - "$BASELINE" "$CYCLES_BEFORE" <<'EOF'
 import json, sys
 from datetime import datetime, timezone
@@ -115,7 +120,7 @@ echo "== 6. let the cycle close"
 # 0 W repeated does not fire a state_changed event (Home Assistant drops
 # unchanged states), which is exactly the report-on-change plug that #424/#427
 # were about: from here on the watchdog is the only thing driving the detector.
-for _ in $(seq 1 24); do
+for _ in $(seq 1 150); do
   STATE=$($HACTL state "sensor.${SLUG}_state" | $PY -c 'import json,sys; print(json.load(sys.stdin)["state"])')
   echo "   state: $STATE"
   case "$STATE" in
