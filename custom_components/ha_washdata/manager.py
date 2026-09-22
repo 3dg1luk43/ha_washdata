@@ -6010,7 +6010,22 @@ class WashDataManager:
             # win whose selected member scored below the sibling that set the group's
             # score (item 206). This is the highest-stakes gate of the three: it
             # labels without ever asking the user.
-            if res.best_profile and res.label_confidence >= self._auto_label_confidence:
+            # The SAME margin gate the live label gate applies (item 310). The
+            # comment above calls this pass "the better judge" because it sees the
+            # complete trace at a higher confidence threshold - but confidence is
+            # the weak axis (AUC 0.625 against the margin's 0.792), and this path
+            # runs precisely when the live gate declined, margin refusals included.
+            # Without it a cycle refused a label for finishing too close to the
+            # runner-up was relabelled here a few lines later, on the same data.
+            _post_margin = getattr(res, "ambiguity_margin", None)
+            _post_margin_ok = (
+                _post_margin is None or float(_post_margin) >= MATCH_LABEL_MIN_MARGIN
+            )
+            if (
+                res.best_profile
+                and res.label_confidence >= self._auto_label_confidence
+                and _post_margin_ok
+            ):
                 cycle_data["profile_name"] = res.best_profile
                 cycle_data["label_source"] = "auto_label_post"
                 cycle_data["match_confidence"] = float(res.label_confidence)
@@ -6025,6 +6040,16 @@ class WashDataManager:
                     "Post-cycle auto-labeled as '%s' (confidence: %.2f)",
                     res.best_profile,
                     res.label_confidence,
+                )
+            elif res.best_profile and res.label_confidence >= self._auto_label_confidence:
+                self._logger.info(
+                    "Not post-cycle labeling as '%s': confident enough (%.2f) but "
+                    "only %.3f clear of the next candidate, under the %.2f a label "
+                    "needs. It is offered for confirmation instead.",
+                    res.best_profile,
+                    res.label_confidence,
+                    float(_post_margin or 0.0),
+                    MATCH_LABEL_MIN_MARGIN,
                 )
 
         # Back-fill confirmed label on any ranking snapshots captured during this cycle
@@ -7251,6 +7276,10 @@ class WashDataManager:
                 else:
                     self._live_notification_sent_count += 1
                     self._last_live_notification_time = dt_util.now()
+                # The deferred entry carries the same `activity: "start"` the
+                # direct paths send, so the phone has a live activity either way
+                # and the cycle-end teardown has to know about it (#446).
+                self._record_live_activity_started()
 
     def _handle_noise_cycle(self, max_power: float) -> None:
         """Handle a detected noise cycle."""
@@ -7531,9 +7560,7 @@ class WashDataManager:
             )
             self._live_waiting_notification_sent = sent
             if sent:
-                if not self._live_activity_started:
-                    self._hand_over_lifecycle_to_live_activity()
-                self._live_activity_started = True
+                self._record_live_activity_started()
             return
 
         interval = max(30, int(self._notify_live_interval_seconds))
@@ -7629,9 +7656,7 @@ class WashDataManager:
             extra_vars=extra_vars,
         )
         if sent:
-            if not self._live_activity_started:
-                self._hand_over_lifecycle_to_live_activity()
-            self._live_activity_started = True
+            self._record_live_activity_started()
             if chronometer_overrun:
                 self._live_chronometer_overrun_sent = True
             else:
@@ -7655,6 +7680,21 @@ class WashDataManager:
             event_type=NOTIFY_EVENT_LIVE,
             extra_vars={"tag": tag},
         )
+
+    def _record_live_activity_started(self) -> None:
+        """Mark that a live activity is running, handing over the lifecycle card.
+
+        Three paths deliver the first live notification of a cycle - the waiting
+        card, the progress card, and ``_handle_notify_person_change`` releasing
+        either of them after presence gating deferred it - and all three have to
+        record it identically. The deferred one did not, so a cycle whose only
+        live delivery came through presence left ``_live_activity_started`` False,
+        the cycle-end path skipped ``_end_live_activity``, and the activity stayed
+        frozen on the phone: #446's own bug, reached from the other side.
+        """
+        if not self._live_activity_started:
+            self._hand_over_lifecycle_to_live_activity()
+        self._live_activity_started = True
 
     def _hand_over_lifecycle_to_live_activity(self) -> None:
         """Drop the lifecycle-tagged card as the live activity takes over (#446).

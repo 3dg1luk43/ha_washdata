@@ -301,3 +301,114 @@ def test_a_normal_notification_still_carries_its_title(
     )
     _domain, _service, payload = mock_hass.services.async_call.call_args[0]
     assert payload["title"] == "WashData"
+
+
+def _person_home_event(entity_id: str = "person.owner") -> Any:
+    """A state-change event that satisfies _handle_notify_person_change."""
+    state = MagicMock()
+    state.state = "home"
+    state.entity_id = entity_id
+    state.name = "Owner"
+    state.attributes = {}
+    event = MagicMock()
+    event.data = {"new_state": state}
+    return event
+
+
+def test_a_presence_deferred_live_update_still_records_the_activity(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Found in the PR #448 review: the third delivery path forgot to say so.
+
+    Presence gating queues the first live notification, and
+    ``_handle_notify_person_change`` later sends it - carrying the same
+    ``activity: "start"`` the direct paths send, so the phone has a live activity
+    either way. It set the counters but never ``_live_activity_started``, so the
+    cycle-end teardown read False, skipped ``_end_live_activity`` and left the
+    card frozen on the lock screen. #446's own bug, reached from the other side.
+    """
+    manager._dispatch_notification = MagicMock(return_value=True)
+    manager._pending_notifications = [
+        {
+            "message": "Washing, 40 minutes left",
+            "event_type": NOTIFY_EVENT_LIVE,
+            "extra_vars": {"tag": manager._live_notification_tag, "progress": 30,
+                           "activity": "start"},
+        }
+    ]
+
+    manager._handle_notify_person_change(_person_home_event())
+
+    assert manager._live_activity_started is True, (
+        "the deferred delivery started an activity the cycle end must be able to end"
+    )
+
+
+def test_a_presence_deferred_waiting_card_also_records_the_activity(
+    manager: WashDataManager,
+) -> None:
+    """The waiting card carries `activity: "start"` too, progress or not."""
+    manager._dispatch_notification = MagicMock(return_value=True)
+    manager._pending_notifications = [
+        {
+            "message": "Cycle started",
+            "event_type": NOTIFY_EVENT_LIVE,
+            "extra_vars": {"tag": manager._live_notification_tag,
+                           "activity": "start"},
+        }
+    ]
+
+    manager._handle_notify_person_change(_person_home_event())
+
+    assert manager._live_waiting_notification_sent is True
+    assert manager._live_activity_started is True
+
+
+def test_a_deferred_live_update_that_fails_to_send_starts_nothing(
+    manager: WashDataManager,
+) -> None:
+    """No delivery, no activity: the flag must not be set optimistically."""
+    manager._dispatch_notification = MagicMock(return_value=False)
+    manager._pending_notifications = [
+        {
+            "message": "Washing",
+            "event_type": NOTIFY_EVENT_LIVE,
+            "extra_vars": {"tag": manager._live_notification_tag, "progress": 30},
+        }
+    ]
+
+    manager._handle_notify_person_change(_person_home_event())
+
+    assert manager._live_activity_started is False
+
+
+def test_the_deferred_path_hands_the_lifecycle_card_over_exactly_once(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Same once-per-cycle contract the direct paths have."""
+    manager._dispatch_notification = MagicMock(return_value=True)
+    for _ in range(3):
+        manager._pending_notifications = [
+            {
+                "message": "Washing",
+                "event_type": NOTIFY_EVENT_LIVE,
+                "extra_vars": {"tag": manager._live_notification_tag, "progress": 30},
+            }
+        ]
+        manager._handle_notify_person_change(_person_home_event())
+
+    assert _clears(mock_hass) == [manager._lifecycle_tag]
+
+
+def test_a_deferred_non_live_notification_starts_no_activity(
+    manager: WashDataManager,
+) -> None:
+    """Only a live delivery is an activity; a deferred finish alert is not."""
+    manager._dispatch_notification = MagicMock(return_value=True)
+    manager._pending_notifications = [
+        {"message": "Cycle finished", "event_type": "finish", "extra_vars": {}}
+    ]
+
+    manager._handle_notify_person_change(_person_home_event())
+
+    assert manager._live_activity_started is False
