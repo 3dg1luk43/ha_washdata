@@ -1,0 +1,43 @@
+# Test box Home Assistant config. Copied to config/configuration.yaml by up.sh
+# (edit it there for throwaway experiments; edit it HERE to change the baseline).
+homeassistant:
+  name: WashData Test Box
+  latitude: 50.0755
+  longitude: 14.4378
+  elevation: 200
+  unit_system: metric
+  currency: CZK
+  country: CZ
+  time_zone: Europe/Prague
+
+# Deliberately not `default_config:`. Every entry below is something the
+# integration actually needs, so a failure points at WashData rather than at
+# cloud/bluetooth/zeroconf noise starting in a container.
+frontend:        # the WashData panel is registered against it
+http:
+api:
+websocket_api:   # ws_api.py: options, profiles, playground, tasks
+recorder:        # history import + long-term statistics paths
+  purge_keep_days: 2
+mobile_app:      # registers the mobile_app_notification_action event WashData listens for
+
+logger:
+  default: warning
+  logs:
+    homeassistant.core: info
+    homeassistant.components.websocket_api: info
+    custom_components.ha_washdata: debug
+    custom_components.testbox_notify: info
+
+# Two capture targets, named on purpose:
+#   mobile_app_testbox - WashData's `_is_mobile_notify_service` matches the
+#     `mobile_app_` prefix, and ONLY such targets receive live updates, tags and
+#     the mobile-only keys. A differently named target would skip exactly the
+#     paths worth testing.
+#   plain_testbox - a non-mobile target, so the "live updates must not be sent
+#     to non-mobile services" rule is observable rather than assumed.
+notify:
+  - platform: testbox_notify
+    name: mobile_app_testbox
+  - platform: testbox_notify
+    name: plain_testbox

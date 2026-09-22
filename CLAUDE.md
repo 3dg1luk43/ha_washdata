@@ -53,7 +53,31 @@ devtools/release_check.sh --fix         # regenerate artifacts instead of failin
 devtools/release_check.sh --full --tag v0.5.6
 
 python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG   # mock appliance
+
+cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its README.md)
+cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 15 checks (~4 min)
+cd devtools/testbox && ./hactl.py ws ha_washdata/get_profiles entry_id=<id>   # drive it
 ```
+
+### Two tiers of test, and what each can prove
+
+`run_tests.sh` is the fast, deterministic tier: frozen time, 606 recorded cycles, pure
+detection/matching/progress maths. It is where accuracy lives. But **93 of its 237 modules build
+Home Assistant with `MagicMock()`**, and a MagicMock accepts any service call - so code Home
+Assistant rejects outright used to pass every test (register item 316: `title: None` killed every
+`clear_notification` for months while all ten of the tests covering it passed). Two things close
+that gap; keep both working:
+
+- `tests/conftest.py` has an **autouse guard** that replays every recorded service call through
+  Home Assistant's real schemas. Do not "simplify" it away - reintroducing item 316 fails 13 tests
+  because of it. When adding a notification path, assert on the payload *and* let the guard run.
+- `devtools/testbox/` is a **real HA container** (2026.9.x, what users run; the in-process test HA
+  is pinned to 2026.2.3) with the working tree bind-mounted in and a notify platform that records
+  every delivered payload. It proves delivery, config flow, storage migration, WS API and entity
+  wiring - and found register item 317 on its first run. Timing there is compressed, so it proves
+  behaviour, never minute-accuracy. Read `devtools/testbox/README.md` before using it; the two
+  traps are the hardcoded 30 min dishwasher floor and the need to rescale a seeded export's clock
+  (both in item 319).
 
 ### Generated files - never hand-edit, always regenerate
 
