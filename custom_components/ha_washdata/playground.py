@@ -1137,6 +1137,7 @@ class _DetailSim:
         offset = (ts - self.base).total_seconds()
         if offset - self.last_sample_t < _SIM_SERIES_THROTTLE_S:
             return
+        prev_sample_t = self.last_sample_t
         self.last_sample_t = offset
         state = self.detector.state
         power = 0.0
@@ -1184,6 +1185,12 @@ class _DetailSim:
             result = progress_mod.compute_progress(
                 self.device_type, matched_dur, offset, self.smoothed["v"], phase_result, ml_pct,
                 phase_remaining_s=phase_remaining_s,
+                # Same time-scaled smoothing as live: the sim steps the estimator
+                # at its own throttle, so without this the replay would smooth
+                # over 30 s steps as if they were the manager's 5 s ones.
+                dt_seconds=(
+                    offset - prev_sample_t if prev_sample_t >= 0.0 else None
+                ),
             )
             if result is not None:
                 self.smoothed["v"] = result.smoothed

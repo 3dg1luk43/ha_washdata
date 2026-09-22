@@ -7075,7 +7075,17 @@ class WashDataManager:
                     if "." in notify_service
                     else ("notify", notify_service)
                 )
-                service_data = {"message": message, "title": title}
+                # `title` is OPTIONAL in notify's service schema but validated as a
+                # string, so passing it as None fails validation outright
+                # ("string value is None at 'title'") and the call never reaches the
+                # platform. _dispatch_notification always resolves a title, but the
+                # four dismiss-marker senders do not pass one - so every tag clear
+                # (live-activity end, lifecycle hand-over, clean reminder, timer
+                # pause) was rejected before delivery and nothing was ever
+                # dismissed on the phone (#446 follow-up).
+                service_data = {"message": message}
+                if title is not None:
+                    service_data["title"] = title
                 if svc_data:
                     service_data["data"] = svc_data
                 self.hass.async_create_task(
@@ -8008,9 +8018,10 @@ class WashDataManager:
             and bool(self._matched_profile_duration)
             and self._matched_profile_duration > 0
         )
+        prev_estimate_at = self._last_phase_estimate_time
         if (
-            self._last_phase_estimate_time
-            and (now - self._last_phase_estimate_time).total_seconds() < 5.0
+            prev_estimate_at
+            and (now - prev_estimate_at).total_seconds() < 5.0
             and not first_estimate_after_match
         ):
             return
@@ -8020,6 +8031,17 @@ class WashDataManager:
         # so that paused time is excluded from progress / remaining / total duration.
         duration_so_far = float(self.net_elapsed_seconds)
         self._check_cycle_timers(duration_so_far)
+
+        # An async match result can land AFTER the detector has closed the cycle:
+        # the cycle start is cleared by then, so elapsed reads 0 while the matched
+        # duration and the smoothed progress are still set. The back-calculation
+        # below would then publish a full fresh "remaining" (raw progress 0 damped
+        # against a ~90% EMA) over the finished cycle's terminal values - measured
+        # live: remaining jumped from 15 min to 28 min and total duration from
+        # 164 min to 28 min, 7 s before the finish notification. There is nothing to
+        # estimate without an open cycle, and the terminal values must stand.
+        if duration_so_far <= 0.0:
+            return
 
         if not (self._matched_profile_duration and self._matched_profile_duration > 0):
             # No profile matched - don't provide misleading time estimates.
@@ -8075,6 +8097,12 @@ class WashDataManager:
             ml_pct,
             self._logger,
             phase_remaining_s=phase_remaining_s,
+            # Real gap since the previous estimate, so the progress EMA keeps its
+            # time constant instead of its step count - a plug that reports every
+            # 30 s must not lag 6x further behind than one reporting every 5 s.
+            dt_seconds=(
+                (now - prev_estimate_at).total_seconds() if prev_estimate_at else None
+            ),
         )
 
         self._cycle_progress = result.progress

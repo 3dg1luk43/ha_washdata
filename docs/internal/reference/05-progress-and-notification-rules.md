@@ -271,10 +271,12 @@ else:
 
     smoothing_threshold = DEVICE_SMOOTHING_THRESHOLDS.get(device_type, 5.0)
     if phase_progress < prev_smoothed - smoothing_threshold:
-        # Backward-progress drop: heavy damping
+        # Backward-progress drop: heavy damping (NOT dt-scaled, by design)
         smoothed = prev_smoothed * 0.95 + phase_progress * 0.05
     else:
-        # Normal forward movement: standard EMA
+        # Normal forward movement: standard EMA, weight rescaled to the real
+        # interval since the previous estimate (register item 314)
+        alpha = _dt_scaled_alpha(alpha, dt_seconds)
         smoothed = prev_smoothed * (1 - alpha) + phase_progress * alpha
 
 smoothed = min(99.0, smoothed)
@@ -292,6 +294,13 @@ source = "phase"
 - Three alpha tiers: variance < 50W -> alpha=0.20, 50-100W -> alpha=0.10, > 100W -> alpha=0.05.
 - Backward-drop damping: EMA locked to 95/5 when phase drops more than `smoothing_threshold` pp below current.
 - Hard cap: progress never exceeds 99% live.
+- **Forward alphas are per SECOND, not per estimate** (`_dt_scaled_alpha`, item 314):
+  `alpha_dt = 1 - (1 - alpha) ** (dt / SMOOTHING_NOMINAL_DT_S)` with a nominal 5 s
+  (the manager's estimate throttle). The weights above were sized for that cadence,
+  but estimates are driven by power-sensor events, and a first-order filter trails a
+  ramp by `slope * (1 - a) / a` - so on a plug reporting every ~3 min the estimate sat
+  ~14pp behind and `remaining` never reached 0. `dt_seconds=None` keeps the nominal
+  weight, which is what the golden snapshot and the devtools evaluators pass.
 
 #### Branch B: Linear fallback (when `phase_result is None`)
 
@@ -307,7 +316,8 @@ if ml_pct is not None:
 
 # --- EMA smoothing ---
 if prev_smoothed > 0:
-    smoothed = prev_smoothed * 0.9 + progress * 0.1   # alpha fixed at 0.1
+    a = _dt_scaled_alpha(0.1, dt_seconds)   # nominal alpha 0.1, dt-rescaled
+    smoothed = prev_smoothed * (1 - a) + progress * a
 else:
     smoothed = progress
 
@@ -335,6 +345,7 @@ def compute_progress(
     ml_pct: float | None,
     logger: logging.Logger | None = None,
     phase_remaining_s: float | None = None,
+    dt_seconds: float | None = None,
 ) -> ProgressResult | None:
 ```
 

@@ -250,3 +250,48 @@ def test_pending_live_entries_are_still_purged_by_tag(
     manager._clear_live_progress_notification(clear_services=False)
     remaining = [n["event_type"] for n in manager._pending_notifications]
     assert NOTIFY_EVENT_LIVE not in remaining
+
+
+def test_every_clear_survives_home_assistants_notify_schema(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """The clears above were shaped right and still never reached the phone.
+
+    ``notify``'s service schema validates ``title`` as a string even though it is
+    optional, so a payload carrying ``title: None`` is rejected by
+    ``hass.services.async_call`` before any platform sees it ("string value is
+    None at 'title'"). Every dismiss-marker sender omits the title, and the call
+    is fire-and-forget, so all four surfaces failed silently: the live-activity
+    end, the lifecycle handover, the clean reminder and the timer-pause card. The
+    assertions in this module all pass with that payload, which is exactly why
+    this test validates against Home Assistant's own schema instead.
+    """
+    from homeassistant.components.notify.const import NOTIFY_SERVICE_SCHEMA
+
+    manager._live_activity_started = True
+    manager._end_live_activity()
+    manager._hand_over_lifecycle_to_live_activity()
+
+    payloads = [
+        call[0][2]
+        for call in mock_hass.services.async_call.call_args_list
+        if call[0][0] == "notify"
+    ]
+    assert payloads, "no notify call was made"
+    for payload in payloads:
+        assert "title" not in payload or payload["title"] is not None
+        NOTIFY_SERVICE_SCHEMA(payload)  # raises if HA would have rejected it
+
+
+def test_a_normal_notification_still_carries_its_title(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Dropping a None title must not drop a real one."""
+    manager._send_notification_service(
+        "Dishwasher finished",
+        services=["notify.mobile_app_iphone"],
+        title="WashData",
+        event_type="finish",
+    )
+    _domain, _service, payload = mock_hass.services.async_call.call_args[0]
+    assert payload["title"] == "WashData"
