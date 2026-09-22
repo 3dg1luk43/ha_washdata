@@ -106,10 +106,14 @@ async def main() -> int:
                 "ha_washdata/get_device_cycles", entry_id=args.entry_id
             )
         stored = cycles.get("cycles", cycles) if isinstance(cycles, dict) else cycles
+        # `total` is the device's whole cycle count; the `cycles` list is one page
+        # (limit defaults to 50), so counting the page compares two capped lists
+        # and never grows.
+        total = cycles.get("total", len(stored)) if isinstance(cycles, dict) else len(stored)
         before = baseline.get("cycle_count", 0)
         checks.check(
-            len(stored) > before,
-            f"a cycle was recorded ({before} -> {len(stored)})",
+            total > before,
+            f"a cycle was recorded ({before} -> {total})",
             "The replay ran but nothing was stored, so detection never completed.",
         )
         if stored:
@@ -212,10 +216,14 @@ async def main() -> int:
             r for r in clears
             if (r.get("data") or {}).get("tag", "").endswith("_live")
         ]
-        if live_clear and len(finish) > 1:
-            last_finish = max(r["ts"] for r in finish)
+        if live_clear and finish:
+            # Compare the EARLIEST of each: one dispatch fans out to every
+            # configured target as separate tasks, so the per-target delivery
+            # timestamps interleave with anything sent immediately after. What
+            # #446 requires is that the finished alert was dispatched first, and
+            # that is what the first delivery of each shows.
             checks.check(
-                last_finish <= min(r["ts"] for r in live_clear),
+                min(r["ts"] for r in finish) <= min(r["ts"] for r in live_clear),
                 "the finished alert was delivered before the activity ended",
                 "The activity was cleared first, so the lock screen went empty "
                 "before the finished notification arrived.",
