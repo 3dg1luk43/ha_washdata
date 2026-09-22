@@ -209,3 +209,130 @@ def test_the_standby_card_is_pushed_before_the_attention_html_is_built():
         "the standby_above_stop card is pushed onto `attn` after `attnHtml` has "
         "already been joined, so it never renders"
     )
+
+
+# --------------------------------------------------------------------------
+# Round 4: the duration and the score described different quiet spans
+# --------------------------------------------------------------------------
+def test_the_scored_span_is_the_span_whose_duration_is_reported():
+    """A low run split by mid-level readings holds several quiet spans.
+
+    ``_measured_quiet_span_s`` returns the LONGEST; ``points[:resume_idx]`` ends
+    on the LAST. Pairing one span's duration with another span's P(end) is what
+    let ``_ml_off_delay``'s ``score < 0.4`` filter keep the wrong durations.
+    """
+    from custom_components.ha_washdata.suggestion_engine import (
+        _measured_quiet_span,
+        _measured_quiet_span_s,
+    )
+
+    # 0-300 s: a long quiet span (the one worth measuring).
+    # 300-310 s: one 50 W reading, above stop (2.0) but below active_thr.
+    # 310-360 s: a short quiet span, the one nearest the resume.
+    pts: list[tuple[float, float]] = [(float(t), 0.5) for t in range(0, 310, 10)]
+    pts.append((310.0, 50.0))
+    pts += [(float(t), 0.5) for t in range(320, 370, 10)]
+
+    span, end_idx = _measured_quiet_span(pts, 0.0, len(pts), 2.0)
+    assert span == pytest.approx(_measured_quiet_span_s(pts, 0.0, len(pts), 2.0))
+    assert end_idx is not None
+    # The winning span is the long one, so its endpoint is the 300 s sample -
+    # not the 360 s one the old prefix ended on.
+    assert pts[end_idx][0] == pytest.approx(300.0)
+    assert span == pytest.approx(300.0)
+
+
+def test_a_single_unbroken_quiet_span_still_ends_where_it_ends():
+    from custom_components.ha_washdata.suggestion_engine import _measured_quiet_span
+
+    pts: list[tuple[float, float]] = [(0.0, 100.0)] + [
+        (float(t), 0.5) for t in range(10, 130, 10)
+    ]
+    span, end_idx = _measured_quiet_span(pts, 0.0, len(pts), 2.0)
+    assert span == pytest.approx(120.0)
+    assert end_idx == len(pts) - 1
+
+
+def test_no_quiet_span_reports_no_endpoint():
+    """A run that never goes below the stop threshold is not a pause at all."""
+    from custom_components.ha_washdata.suggestion_engine import _measured_quiet_span
+
+    pts: list[tuple[float, float]] = [(float(t), 50.0) for t in range(0, 200, 10)]
+    assert _measured_quiet_span(pts, 0.0, len(pts), 2.0) == (0.0, None)
+
+
+def test_the_scored_pause_prefix_ends_on_the_measured_span():
+    """End to end through _scored_pauses: the feature extractor is handed the
+    prefix that belongs to the duration it is scored against."""
+    from custom_components.ha_washdata.suggestion_engine import MLSuggestionEngine
+
+    seen: list[int] = []
+
+    def _feat(prefix, _expectation):
+        seen.append(len(prefix))
+        return [0.0]
+
+    pts: list[tuple[float, float]] = [(0.0, 1000.0)]
+    pts += [(float(t), 0.5) for t in range(10, 310, 10)]   # long quiet span
+    pts.append((310.0, 50.0))                               # splits the low run
+    pts += [(float(t), 0.5) for t in range(320, 370, 10)]   # short quiet span
+    pts += [(float(t), 1000.0) for t in range(370, 700, 10)]  # sustained resume
+
+    engine = MLSuggestionEngine.__new__(MLSuggestionEngine)
+    pauses = engine._scored_pauses(
+        pts, {"duration": 3600.0, "energy": 800.0, "peak": 1000.0}, 2.0,
+        lambda _f: 0.1, _feat,
+    )
+
+    assert pauses, "the long quiet span should be reported as a pause"
+    assert seen, "the feature extractor was never called"
+    # The prefix ends on the 300 s sample (index 30), so its length is 31 -
+    # it must not run on to the 360 s sample the resume follows.
+    assert seen[0] == 31, f"scored a prefix of {seen[0]} samples, expected 31"
+
+
+# --------------------------------------------------------------------------
+# Round 4: _safe_offset and the prefix bandwidth default
+# --------------------------------------------------------------------------
+def test_safe_offset_survives_an_unbounded_integer():
+    """It is reached from the banked-tail repair, whose caller aborts before
+    clearing the repair marker - so one bad row would re-fail on every setup."""
+    from custom_components.ha_washdata.profile_store import _safe_offset
+
+    assert _safe_offset(10**400) is None
+    assert _safe_offset(float("inf")) is None
+    assert _safe_offset("nope") is None
+    assert _safe_offset(12.5) == pytest.approx(12.5)
+
+
+def test_prefix_scoring_and_stage3_share_one_bandwidth_default():
+    """Both read the same unmutated config in one match (register item 309)."""
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "analysis.py"
+    ).read_text()
+    assert 'config.get("dtw_bandwidth", 0.1)' not in src
+    assert src.count('config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH)') == 2
+
+
+# --------------------------------------------------------------------------
+# Round 4: the setup-time presence flush is the same code as the event one
+# --------------------------------------------------------------------------
+def test_both_presence_flush_paths_go_through_one_body():
+    """They were two copies of the same loop and drifted: only one recorded that
+    a Live Activity had started, so a queued live card delivered at listener
+    (re-)attach left the activity frozen on the phone (#446)."""
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "manager.py"
+    ).read_text()
+    assert src.count("def _flush_pending_notifications") == 1
+    assert src.count("self._flush_pending_notifications(") == 2

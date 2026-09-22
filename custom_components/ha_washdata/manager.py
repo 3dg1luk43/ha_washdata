@@ -3422,20 +3422,7 @@ class WashDataManager:
                             "friendly_name", eid
                         )
                         break
-                pending = list(self._pending_notifications)
-                self._pending_notifications = []
-                for entry in pending:
-                    self._dispatch_notification(
-                        entry["message"],
-                        title=entry.get("title"),
-                        icon=entry.get("icon"),
-                        event_type=entry.get("event_type"),
-                        person_entity_id=person_entity_id,
-                        person_name=person_name,
-                        extra_vars=entry.get("extra_vars"),
-                        allow_deferral=False,
-                        allow_presence_deferral=False,
-                    )
+                self._flush_pending_notifications(person_entity_id, person_name)
         else:
             self._pending_notifications = []
 
@@ -7250,10 +7237,25 @@ class WashDataManager:
         if not self._pending_notifications:
             return
 
-        person_entity_id = new_state.entity_id
-        person_name = new_state.name or new_state.attributes.get(
-            "friendly_name", person_entity_id
+        self._flush_pending_notifications(
+            new_state.entity_id,
+            new_state.name
+            or new_state.attributes.get("friendly_name", new_state.entity_id),
         )
+
+    def _flush_pending_notifications(
+        self, person_entity_id: str | None, person_name: str | None
+    ) -> None:
+        """Deliver every notification presence gating queued, and record it.
+
+        Two callers reach this: a person arriving home, and the listener finding
+        somebody already home when it (re-)attaches after a reload. They were
+        two copies of the same loop and drifted - only one of them recorded that
+        a Live Activity had started, so a queued live card delivered by the other
+        left `_live_activity_started` False, the cycle-end tail skipped
+        `_end_live_activity()`, and the card stayed frozen on the phone (#446).
+        One body now, so they cannot disagree again.
+        """
         pending: list[dict[str, Any]] = list(self._pending_notifications)
         self._pending_notifications = []
         for entry in pending:
@@ -7276,9 +7278,9 @@ class WashDataManager:
                 else:
                     self._live_notification_sent_count += 1
                     self._last_live_notification_time = dt_util.now()
-                # The deferred entry carries the same `activity: "start"` the
-                # direct paths send, so the phone has a live activity either way
-                # and the cycle-end teardown has to know about it (#446).
+                # The queued entry carries the same `activity: "start"` the direct
+                # paths send, so the phone has a live activity either way and the
+                # cycle-end teardown has to know about it (#446).
                 self._record_live_activity_started()
 
     def _handle_noise_cycle(self, max_power: float) -> None:

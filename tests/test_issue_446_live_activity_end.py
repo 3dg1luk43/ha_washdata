@@ -412,3 +412,31 @@ def test_a_deferred_non_live_notification_starts_no_activity(
     manager._handle_notify_person_change(_person_home_event())
 
     assert manager._live_activity_started is False
+
+
+def test_the_setup_time_presence_flush_also_records_the_activity(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Found in the PR #448 round-4 review: the fourth delivery path.
+
+    The listener flushes queued notifications when somebody is already home at
+    (re-)attach time, which is what happens on a config reload. It was a second
+    copy of the person-change loop and had drifted - no `sent` check, no
+    activity recorded - so a live card queued while nobody was home and
+    delivered on reload left the Live Activity frozen on the phone.
+    """
+    manager._dispatch_notification = MagicMock(return_value=True)
+    manager._pending_notifications = [
+        {
+            "message": "Washing, 40 minutes left",
+            "event_type": NOTIFY_EVENT_LIVE,
+            "extra_vars": {"tag": manager._live_notification_tag, "progress": 30,
+                           "activity": "start"},
+        }
+    ]
+
+    manager._flush_pending_notifications("person.owner", "Owner")
+
+    assert manager._live_activity_started is True
+    assert manager._pending_notifications == []
+    assert manager._live_notification_sent_count == 1

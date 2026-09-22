@@ -207,10 +207,18 @@ def _empty_ranking() -> list[dict[str, Any]]:
 
 
 def _safe_offset(value: Any) -> float | None:
-    """Coerce a stored power_data offset to float, or None when it is not one."""
+    """Coerce a stored power_data offset to float, or None when it is not one.
+
+    ``OverflowError`` too: `json` keeps an oversized integer literal as an
+    unbounded ``int`` and ``float()`` on one raises rather than returning ``inf``,
+    so a non-finite filter alone does not cover it. It is reached from
+    ``_apply_repaired_duration``, whose caller aborts the whole banked-tail repair
+    before clearing ``BANKED_TAIL_REPAIR_KEY`` - one hand-edited row would make
+    every later setup retry and re-fail it.
+    """
     try:
         out = float(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     return out if math.isfinite(out) else None
 
