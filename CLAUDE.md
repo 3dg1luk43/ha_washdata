@@ -301,19 +301,20 @@ old-schema fixtures. **Two separate layers, tested separately:**
    `MINOR_VERSION` live on the flow class in `config_flow.py` and must be bumped with it. Tested in
    `tests/test_migration_harness.py`. The one-pass legacy path writes the current version directly, so
    a bump also means updating the `minor_version=` at the end of the bulk migration.
-2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->12
+2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->13
    (`STORAGE_VERSION` in `const.py`). Tested in `tests/test_migration_v032.py`. Call
    `_async_migrate_func(old_version, 1, data)` **directly** - do not go through
    `ProfileStore.async_load()` (needs file I/O).
 
    ```python
    store = WashDataStore(_make_hass(), STORAGE_VERSION, f"{STORAGE_KEY}.test")
-   result = await store._async_migrate_func(12, 1, data)
+   result = await store._async_migrate_func(13, 1, data)
    ```
 
    Per-version steps are listed in reference 02 / the register. Recent: v9->v10 `reference_cycles`,
    v10->v11 marker-only (phase-profile cache self-populates on next envelope rebuild), v11->v12
-   `backfill_cycles` (additive `setdefault`).
+   `backfill_cycles` (additive `setdefault`), v12->v13 marker-only
+   (`BANKED_TAIL_REPAIR_KEY` set so the one-time banked-tail duration repair runs once).
 
 ## Matching Pipeline
 
