@@ -212,6 +212,46 @@ async def test_migration_keeps_supported_device_type(hass: HomeAssistant) -> Non
 
 
 @pytest.mark.asyncio
+async def test_migration_strips_dead_abrupt_drop_knobs(
+    hass: HomeAssistant,
+) -> None:
+    """The abrupt-drop knobs removed in 558e71e are stripped on migration.
+
+    They were left behind when the option was deleted, so they still sit in the
+    options of entries created before it: present in 5 of the 7 full user
+    configurations in cycle_data/ and read by no Python or panel code.
+    """
+
+    def _apply_update(entry: DummyEntry, **kwargs: Any) -> None:
+        entry.data = kwargs["data"]
+        entry.options = kwargs["options"]
+        entry.version = kwargs["version"]
+        entry.minor_version = kwargs["minor_version"]
+
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
+    entry = DummyEntry(
+        version=3, minor_version=5,
+        data={},
+        options={
+            "abrupt_drop_ratio": 0.35,
+            "abrupt_drop_watts": 120.0,
+            "abrupt_high_load_factor": 2.5,
+            CONF_DEVICE_TYPE: "washing_machine",
+            CONF_MIN_POWER: 7.5,
+        },
+    )
+
+    migrated = await async_migrate_entry(hass, entry)
+
+    assert migrated is True
+    for dead in ("abrupt_drop_ratio", "abrupt_drop_watts", "abrupt_high_load_factor"):
+        assert dead not in entry.options
+    # Unrelated tuned options survive the strip.
+    assert entry.options[CONF_DEVICE_TYPE] == "washing_machine"
+    assert entry.options[CONF_MIN_POWER] == 7.5
+
+
+@pytest.mark.asyncio
 async def test_migration_strips_suppress_feedback_notifications(
     hass: HomeAssistant,
 ) -> None:

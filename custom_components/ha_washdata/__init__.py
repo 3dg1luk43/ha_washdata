@@ -392,6 +392,20 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # so the now-inert "suppress feedback notifications" toggle is stripped.
     options.pop("suppress_feedback_notifications", None)
 
+    # The abrupt-drop end-detection knobs were removed in 558e71e (the state
+    # machine reached the same decision from the energy gates), but nothing ever
+    # stripped them, so they still sit in the options of entries created before
+    # that. Measured across the real exports in cycle_data/: present in 5 of the
+    # 7 full user configurations and read by no Python or panel code. The
+    # surviving "abrupt end" in suggestion_engine is the cycle-artifact
+    # classifier, which is unrelated hardcoded logic, not these tunables.
+    for k in (
+        "abrupt_drop_ratio",
+        "abrupt_drop_watts",
+        "abrupt_high_load_factor",
+    ):
+        options.pop(k, None)
+
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
     # Remap any entry still on one of them to DEVICE_TYPE_OTHER (Threshold Device),
     # preserving all tuned options so no user data is lost.
