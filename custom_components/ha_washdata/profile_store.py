@@ -466,6 +466,22 @@ def _safe_file_size_kb(path: str) -> float:
         return 0.0
 
 
+def _envelope_y(raw: list[Any] | None) -> np.ndarray:
+    """The y column of a stored envelope curve.
+
+    Envelope curves persist as ``[[t, y], ...]``; tolerate a bare ``[y, ...]``
+    list so a hand-built or older envelope still reads.
+    """
+    if not raw:
+        return np.array([], dtype=float)
+    try:
+        return np.asarray(
+            [p[1] if isinstance(p, (list, tuple)) else p for p in raw], dtype=float
+        )
+    except (TypeError, ValueError, IndexError):
+        return np.array([], dtype=float)
+
+
 def decompress_power_data(cycle: CycleDict) -> list[tuple[float, float]]:
     """Return power data as ``[(offset_seconds, power), ...]`` for a cycle.
 
@@ -4651,12 +4667,55 @@ class ProfileStore:
                 )
         stats["rebuilt_envelopes"] = rebuilt
 
+        # 5. Refresh the frozen per-cycle artifact list. These are computed once at
+        # cycle end and then cached on the cycle, so they describe whatever the
+        # envelope looked like then - and step 4 just changed every envelope. They
+        # also drive the Cycles-list badge, not only the graph shading, so leaving
+        # them stale would keep showing markers the current bands no longer
+        # support (the whole back catalogue of the proportional-stretch false
+        # positives, register item 324). Recomputed together so badge and graph
+        # cannot disagree.
+        stats["refreshed_artifacts"] = await self.hass.async_add_executor_job(
+            self._refresh_cycle_artifacts_sync
+        )
+
         # 4. Save if any changes made (smart process saves internally if needed, but explicit save safe)
         if any(stats.values()):
             await self.async_save()
             self._logger.info("Maintenance completed: %s", stats)
 
         return stats
+
+    def _refresh_cycle_artifacts_sync(self) -> int:
+        """Recompute every stored cycle's cached ``artifacts`` against today's bands.
+
+        Returns the number of cycles whose list actually changed. Executor-safe
+        (pure NumPy over already-loaded data) and never raises: a maintenance
+        pass must not be abandoned over a display aid.
+        """
+        changed = 0
+        try:
+            for cycle in self.iter_stored_cycles():
+                name = cycle.get("profile_name")
+                if not name:
+                    # Unlabelled: there is no envelope to judge it against, so a
+                    # stale list from a label since removed has to go.
+                    if cycle.pop("artifacts", None):
+                        changed += 1
+                    continue
+                pairs = decompress_power_data(cycle)
+                if len(pairs) < 6:
+                    continue
+                fresh = self.detect_cycle_artifacts(str(name), pairs)
+                if fresh != (cycle.get("artifacts") or []):
+                    if fresh:
+                        cycle["artifacts"] = fresh
+                    else:
+                        cycle.pop("artifacts", None)
+                    changed += 1
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Artifact refresh failed", exc_info=True)
+        return changed
 
     def _reprocess_all_data_sync(self) -> int:
         """Synchronous implementation of reprocessing logic (run in executor)."""
@@ -6170,6 +6229,37 @@ class ProfileStore:
         except Exception:  # noqa: BLE001 - a statistic must never break the panel
             return None
 
+    def _align_to_envelope(
+        self,
+        env: dict[str, Any],
+        t_obs: np.ndarray,
+        p_obs: np.ndarray,
+    ) -> tuple[np.ndarray, bool]:
+        """Observed sample times mapped into one envelope's time base.
+
+        Single source of truth for "where on the envelope does this sample sit",
+        shared by :meth:`compute_envelope_conformance` and
+        :meth:`detect_cycle_artifacts` so the two can never disagree about the
+        same cycle. Delegates to :func:`analysis.align_trace_to_envelope`, which
+        re-derives the build's own DTW warp and degrades to the proportional
+        stretch when it cannot.
+
+        Warps onto ``avg``, the mean of the warped members, **not** onto the
+        pre-DTW reference the build itself warped onto. That looks like the
+        obvious choice and was tried: persisting the build's reference scored
+        slightly *worse* on the maintainer's 188-cycle corpus (conformance 0.695
+        vs 0.707, 6 vs 4 cycles under the auto-label floor) and no better on any
+        entry with more than 10 cycles, because that reference is the median of
+        *unwarped* absolute-time curves and so has blurred transitions, while
+        ``avg`` has sharp ones - and a sharp target aligns better. Do not
+        reintroduce the stored reference curve for this.
+        """
+        tg = np.asarray(env.get("time_grid") or [], dtype=float)
+        ref = _envelope_y(env.get("avg") or [])
+        return analysis.align_trace_to_envelope(
+            t_obs, p_obs, tg, ref if ref.size == tg.size else None, self.dtw_bandwidth
+        )
+
     def compute_envelope_conformance(
         self,
         profile_name: str,
@@ -6177,13 +6267,16 @@ class ProfileStore:
     ) -> dict[str, Any] | None:
         """Score how well the current power trace conforms to the profile envelope band.
 
-        Resamples ``points`` to the envelope's time grid (scaling by the ratio of
-        the current elapsed time to the envelope duration) and computes the fraction
-        of samples that land within the [lower, upper] band.  Returns a dict:
+        Places ``points`` on the envelope's time grid with
+        :meth:`_align_to_envelope` and computes the fraction of samples that land
+        within the [lower, upper] band.  Returns a dict:
 
           ``conformance``     – fraction of samples inside the envelope band (0–1)
           ``outside_frac``    – fraction outside the band (1 - conformance)
           ``samples``         – number of samples compared
+          ``aligned``         – True when the band comparison used the build's DTW
+            warp; False when it fell back to the proportional stretch, which
+            understates conformance (see ``align_trace_to_envelope``)
           ``envelope_name``   – profile_name used
 
         Returns ``None`` if the envelope or points are unavailable / too short.
@@ -6209,24 +6302,15 @@ class ProfileStore:
 
             tg = np.asarray(time_grid, dtype=float)
             # Envelope curves are stored as [[t, y], ...]; extract the y column.
-            lo = np.asarray(
-                [p[1] if isinstance(p, (list, tuple)) else p for p in lower_raw],
-                dtype=float,
-            )
-            hi = np.asarray(
-                [p[1] if isinstance(p, (list, tuple)) else p for p in upper_raw],
-                dtype=float,
-            )
-            env_duration = float(tg[-1]) if len(tg) > 1 else 1.0
+            lo = _envelope_y(lower_raw)
+            hi = _envelope_y(upper_raw)
 
-            # Normalise observed trace to [0, env_duration] time range
+            # Place the observed trace on the envelope's own time base the way
+            # the bands were built (DTW), not by stretching the axis.
             t_obs = np.asarray([t for t, _ in points], dtype=float)
             p_obs = np.asarray([p for _, p in points], dtype=float)
-            obs_duration = float(t_obs[-1]) if len(t_obs) > 1 else 1.0
-            t_scaled = t_obs * (env_duration / obs_duration) if obs_duration > 0 else t_obs
+            t_clamped, aligned = self._align_to_envelope(env, t_obs, p_obs)
 
-            # Interpolate envelope bounds at scaled observed time points (clamp ends)
-            t_clamped = np.clip(t_scaled, tg[0], tg[-1])
             lo_interp = np.interp(t_clamped, tg, lo)
             hi_interp = np.interp(t_clamped, tg, hi)
 
@@ -6238,9 +6322,63 @@ class ProfileStore:
                 "conformance": round(conformance, 3),
                 "outside_frac": round(1.0 - conformance, 3),
                 "samples": n,
+                "aligned": bool(aligned),
                 "envelope_name": profile_name,
             }
         except Exception:  # noqa: BLE001
+            return None
+
+    def expected_curve_for_cycle(
+        self,
+        profile_name: str,
+        points: list[tuple[float, float]],
+        at_times: list[float] | None = None,
+    ) -> list[list[float]] | None:
+        """The profile's expected curve on **this cycle's own** time axis.
+
+        The panel used to overlay ``envelope["avg"]`` at the envelope's absolute
+        times, which slides against the trace by however much the cycle's
+        duration differs from ``target_duration`` - so the overlay disagreed both
+        with the trace and with the artifact shading computed beside it, and read
+        as the profile being learned wrong. Sampling the envelope through the
+        same alignment the comparison uses puts all three on one axis.
+
+        Args:
+            profile_name: profile whose envelope to project.
+            points: the cycle's full ``[(offset_s, power), ...]`` trace - the
+                alignment needs the whole trace, not the thinned copy.
+            at_times: offsets to emit at (e.g. the downsampled x values the panel
+                actually plots). Defaults to every observed offset.
+
+        Returns ``[[offset_s, watts], ...]`` or ``None``. Never raises.
+        """
+        try:
+            if not profile_name or not points or len(points) < 4:
+                return None
+            env = self.get_envelope(profile_name)
+            if not env:
+                return None
+            tg = np.asarray(env.get("time_grid") or [], dtype=float)
+            avg = _envelope_y(env.get("avg") or [])
+            if tg.size < 2 or avg.size != tg.size:
+                return None
+
+            t_obs = np.asarray([t for t, _ in points], dtype=float)
+            p_obs = np.asarray([max(0.0, float(p)) for _, p in points], dtype=float)
+            t_scaled, _aligned = self._align_to_envelope(env, t_obs, p_obs)
+
+            out_t = (
+                np.asarray(at_times, dtype=float)
+                if at_times is not None and len(at_times) >= 2
+                else t_obs
+            )
+            # Observed axis -> envelope axis -> expected power.
+            expected = np.interp(np.interp(out_t, t_obs, t_scaled), tg, avg)
+            return [
+                [round(float(t), 1), round(float(y), 1)]
+                for t, y in zip(out_t, expected)
+            ]
+        except Exception:  # noqa: BLE001 - a display aid must never break the WS
             return None
 
     def _self_unmatchable_cycles(self) -> dict[str, list[dict[str, Any]]]:
@@ -6327,16 +6465,9 @@ class ProfileStore:
                 return []
             tg = np.asarray(env.get("time_grid") or [], dtype=float)
             # Envelope curves are stored as [[t, y], ...]; extract the y column.
-            def _extract_y(raw: list) -> np.ndarray:
-                if not raw:
-                    return np.array([], dtype=float)
-                return np.asarray(
-                    [p[1] if isinstance(p, (list, tuple)) else p for p in raw],
-                    dtype=float,
-                )
-            lo = _extract_y(env.get("min") or [])
-            hi = _extract_y(env.get("max") or [])
-            avg = _extract_y(env.get("avg") or [])
+            lo = _envelope_y(env.get("min") or [])
+            hi = _envelope_y(env.get("max") or [])
+            avg = _envelope_y(env.get("avg") or [])
             if tg.size < 2 or lo.size != tg.size or hi.size != tg.size:
                 return []
 
@@ -6347,9 +6478,11 @@ class ProfileStore:
             if obs_dur <= 0 or env_dur <= 0:
                 return []
 
-            # Map each observed time to the envelope grid (same scaling as
-            # compute_envelope_conformance) so the band is aligned to progress.
-            t_scaled = np.clip(t_obs * (env_dur / obs_dur), tg[0], tg[-1])
+            # Map each observed time onto the envelope grid the same way the
+            # bands were built (shared with compute_envelope_conformance). A
+            # proportional stretch here is what used to manufacture a
+            # spike/dip pair at every transition the two curves disagreed on.
+            t_scaled, _aligned = self._align_to_envelope(env, t_obs, p_obs)
             lo_i = np.interp(t_scaled, tg, lo)
             hi_i = np.interp(t_scaled, tg, hi)
             avg_i = np.interp(t_scaled, tg, avg) if avg.size == tg.size else (lo_i + hi_i) / 2.0
@@ -6359,9 +6492,9 @@ class ProfileStore:
             pause_thr = max(2.0, 0.03 * peak)    # observed effectively off
             margin = max(10.0, 0.12 * peak)      # band slack to ignore edge noise
 
-            # Pre-check: if the cycle's linear-resampled alignment is too poor
-            # (e.g. duration or phase structure doesn't match the profile), the
-            # envelope comparison produces unreliable artifacts.  Compute tight
+            # Pre-check: if the cycle does not sit on this envelope even after
+            # alignment (e.g. it is a different programme, or two merged cycles),
+            # the band comparison produces unreliable artifacts.  Compute tight
             # conformance (no margin) over the active region; bail out when more
             # than 45 % of expected-active samples are outside the raw band.
             active_mask = avg_i > active_thr
@@ -6374,6 +6507,12 @@ class ProfileStore:
                 if outside_tight / n_active > 0.45:
                     return []
 
+            # `expects_power` is load-bearing for pauses and must stay: dropping it
+            # in favour of a purely self-referential test ("ran before, resumes
+            # after") was tried and produced 757 pauses across the 188-cycle corpus
+            # instead of 41, because a dishwasher genuinely drops to ~0 W to drain
+            # and refill between phases. What makes a pause a pause is that the
+            # profile does NOT normally go quiet there.
             states: list[str] = []
             for i in range(len(p_obs)):
                 expects_power = avg_i[i] > active_thr

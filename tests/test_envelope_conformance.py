@@ -26,12 +26,17 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
+from custom_components.ha_washdata.const import DEFAULT_DTW_BANDWIDTH
 from custom_components.ha_washdata.profile_store import ProfileStore
 
 
 def _store_with_envelope(envelope: dict | None) -> ProfileStore:
     store = MagicMock(spec=ProfileStore)
     store.get_envelope.return_value = envelope
+    # Bind the real alignment helper: a MagicMock one returns a non-iterable and
+    # conformance would silently report None for every case below.
+    store.dtw_bandwidth = DEFAULT_DTW_BANDWIDTH
+    store._align_to_envelope = ProfileStore._align_to_envelope.__get__(store, ProfileStore)
     store.compute_envelope_conformance = ProfileStore.compute_envelope_conformance.__get__(
         store, ProfileStore
     )

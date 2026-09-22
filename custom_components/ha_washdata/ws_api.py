@@ -4167,6 +4167,20 @@ async def ws_get_cycle_power_data(
         _LOGGER.debug("Error getting cycle power data %s: %s", cycle_id, exc)
 
     _ds = _downsample(samples)
+    # The matched profile's expected curve, projected onto THIS cycle's time axis
+    # through the same alignment the artifact/conformance comparison used, so the
+    # overlay, the trace and the artifact shading all share one axis. Computed on
+    # the full trace but emitted at the thinned x values the panel plots.
+    if meta.get("profile_name") and len(_ds) >= 4 and len(samples) >= 4:
+        try:
+            meta["expected"] = await hass.async_add_executor_job(
+                manager.profile_store.expected_curve_for_cycle,
+                meta["profile_name"],
+                samples,
+                [float(p[0]) for p in _ds],
+            )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Expected curve for cycle %s failed: %s", cycle_id, exc)
     _send_result(connection, msg["id"], "get_cycle_power_data", {
             "cycle_id": cycle_id,
             "samples": _ds,

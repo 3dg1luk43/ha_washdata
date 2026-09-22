@@ -26,12 +26,18 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
+from custom_components.ha_washdata.const import DEFAULT_DTW_BANDWIDTH
 from custom_components.ha_washdata.profile_store import ProfileStore
 
 
 def _store(envelope):
     store = MagicMock(spec=ProfileStore)
     store.get_envelope.return_value = envelope
+    # Bind the real _align_to_envelope too: a MagicMock stand-in would return a
+    # non-iterable and the detector's broad except would swallow it into "no
+    # artifacts", so every test here would pass while detecting nothing.
+    store.dtw_bandwidth = DEFAULT_DTW_BANDWIDTH
+    store._align_to_envelope = ProfileStore._align_to_envelope.__get__(store, ProfileStore)
     store.detect_cycle_artifacts = ProfileStore.detect_cycle_artifacts.__get__(store, ProfileStore)
     return store
 
