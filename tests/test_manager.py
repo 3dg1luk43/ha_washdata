@@ -567,7 +567,13 @@ async def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, m
         matched_phase=None,
         candidates=[],
         is_ambiguous=False, 
-        ambiguity_margin=0.0
+        # What the matcher actually produces for an uncontested win: `_ambiguity`
+        # defaults the margin to 1.0 when there is one candidate
+        # (profile_store.py:1013). A 0.0 alongside an empty candidate list was an
+        # unreachable combination, and since item 310's margin gate now reaches
+        # this path too it is one the gate correctly refuses - see
+        # test_issue_400_label_provenance::test_the_post_cycle_auto_label_also_needs_a_decisive_margin.
+        ambiguity_margin=1.0
     )
     # Use AsyncMock for async_match_profile
     manager.profile_store.async_match_profile = AsyncMock(return_value=match_result)

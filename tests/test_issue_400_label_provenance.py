@@ -228,6 +228,9 @@ async def test_a_weak_match_falls_through_to_the_post_cycle_auto_label(
             confidence=0.95,
             # == confidence for a non-group match (item 206).
             label_confidence=0.95,
+            # Explicit: a bare MagicMock's __float__ is 1.0, which would clear the
+            # post-cycle margin gate by accident rather than by intent.
+            ambiguity_margin=0.40,
             ranking=[],
         )
     )
@@ -237,6 +240,95 @@ async def test_a_weak_match_falls_through_to_the_post_cycle_auto_label(
     await hass.async_block_till_done()
 
     assert cycle_data["profile_name"] == "Delicate 30C"
+    assert cycle_data["label_source"] == "auto_label_post"
+
+
+
+@pytest.mark.asyncio
+async def test_the_post_cycle_auto_label_also_needs_a_decisive_margin(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """Found in the PR #448 review: item 310's gate reached only one of two paths.
+
+    This path runs precisely when the live gate declined - margin refusals
+    included - so a cycle refused a label for finishing too close to the
+    runner-up was relabelled here a few lines later, on the same data, defeating
+    the fix. Confidence is the weak axis (AUC 0.625 against the margin's 0.792),
+    and a higher confidence threshold does not substitute for it.
+    """
+    manager._current_program = "Sportswear 30C"
+    manager._last_match_confidence = 0.52
+    manager._matched_profile_duration = 4080
+    manager.profile_store.async_match_profile = AsyncMock(
+        return_value=MagicMock(
+            best_profile="Delicate 30C",
+            confidence=0.95,
+            label_confidence=0.95,
+            ambiguity_margin=0.02,  # confident, but the runner-up is right behind
+            ranking=[],
+        )
+    )
+
+    cycle_data = _cycle_data()
+    await manager._async_process_cycle_end(cycle_data)
+    await hass.async_block_till_done()
+
+    assert "profile_name" not in cycle_data or not cycle_data["profile_name"], (
+        "a crowded field must leave the cycle unlabelled for the user to confirm"
+    )
+    assert cycle_data.get("label_source") != "auto_label_post"
+
+
+@pytest.mark.asyncio
+async def test_a_single_candidate_still_gets_its_post_cycle_label(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """An undefined margin (one candidate) must not block labelling - item 310."""
+    manager._current_program = "Sportswear 30C"
+    manager._last_match_confidence = 0.52
+    manager._matched_profile_duration = 4080
+    manager.profile_store.async_match_profile = AsyncMock(
+        return_value=MagicMock(
+            best_profile="Delicate 30C",
+            confidence=0.95,
+            label_confidence=0.95,
+            ambiguity_margin=None,
+            ranking=[],
+        )
+    )
+
+    cycle_data = _cycle_data()
+    await manager._async_process_cycle_end(cycle_data)
+    await hass.async_block_till_done()
+
+    assert cycle_data["profile_name"] == "Delicate 30C"
+    assert cycle_data["label_source"] == "auto_label_post"
+
+
+@pytest.mark.asyncio
+async def test_a_margin_exactly_at_the_bar_is_labelled(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """The boundary is inclusive, as in the live gate."""
+    from custom_components.ha_washdata.const import MATCH_LABEL_MIN_MARGIN
+
+    manager._current_program = "Sportswear 30C"
+    manager._last_match_confidence = 0.52
+    manager._matched_profile_duration = 4080
+    manager.profile_store.async_match_profile = AsyncMock(
+        return_value=MagicMock(
+            best_profile="Delicate 30C",
+            confidence=0.95,
+            label_confidence=0.95,
+            ambiguity_margin=MATCH_LABEL_MIN_MARGIN,
+            ranking=[],
+        )
+    )
+
+    cycle_data = _cycle_data()
+    await manager._async_process_cycle_end(cycle_data)
+    await hass.async_block_till_done()
+
     assert cycle_data["label_source"] == "auto_label_post"
 
 
