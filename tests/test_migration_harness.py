@@ -27,6 +27,7 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.ha_washdata import async_migrate_entry
 from custom_components.ha_washdata.const import (
+    CONFIG_ENTRY_MINOR_VERSION,
     CONF_DEVICE_TYPE,
     CONF_MIN_POWER,
     CONF_START_DURATION_THRESHOLD,
@@ -96,7 +97,7 @@ async def test_migration_with_harness_moves_and_preserves_fields(
     hass.config_entries.async_update_entry.assert_called_once()
 
     assert legacy_entry.version == 3
-    assert legacy_entry.minor_version == 10
+    assert legacy_entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
 
     assert legacy_entry.options[CONF_MIN_POWER] == 5.0
     assert legacy_entry.options[CONF_OFF_DELAY] == 120
@@ -154,7 +155,9 @@ async def test_migration_is_idempotent_after_first_run(
 @pytest.mark.asyncio
 async def test_migration_latest_version_is_noop(hass: HomeAssistant) -> None:
     """Entries already at the current schema should not trigger updates."""
-    entry = DummyEntry(version=3, minor_version=10, data={}, options={})
+    entry = DummyEntry(
+        version=3, minor_version=CONFIG_ENTRY_MINOR_VERSION, data={}, options={}
+    )
     hass.config_entries.async_update_entry = MagicMock()
 
     migrated = await async_migrate_entry(hass, entry)
@@ -188,7 +191,7 @@ async def test_migration_remaps_removed_device_types_to_other(
     assert entry.options[CONF_DEVICE_TYPE] == "other"
     # Tuned options are preserved through the remap.
     assert entry.options[CONF_MIN_POWER] == 7.0
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
 
 
 @pytest.mark.asyncio
@@ -282,7 +285,7 @@ async def test_migration_strips_suppress_feedback_notifications(
     # Unrelated tuned options survive the strip.
     assert entry.options[CONF_DEVICE_TYPE] == "dishwasher"
     assert entry.options[CONF_MIN_POWER] == 9.0
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
 
 
 @pytest.mark.asyncio
@@ -315,7 +318,7 @@ async def test_migrate_3_6_to_3_7_removes_initial_profile(hass: HomeAssistant) -
     assert entry.data["name"] == "Washer"
     assert entry.data["power_sensor"] == "sensor.power"
     assert entry.version == 3
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
 
 
 @pytest.mark.asyncio
@@ -340,7 +343,7 @@ async def test_migrate_3_6_to_3_7_no_initial_profile_is_noop(hass: HomeAssistant
 
     result = await async_migrate_entry(hass, entry)
     assert result is True
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert entry.data["name"] == "Washer"
     assert entry.data["power_sensor"] == "sensor.power"
 
@@ -371,7 +374,7 @@ async def test_migrate_3_7_to_3_8_removes_running_dead_zone(hass: HomeAssistant)
 
     result = await async_migrate_entry(hass, entry)
     assert result is True
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert CONF_RUNNING_DEAD_ZONE not in entry.options
     assert entry.options["off_delay"] == 120
     assert entry.options["min_power"] == 2.0
@@ -399,7 +402,7 @@ async def test_migrate_3_7_to_3_8_idempotent_no_dead_zone(hass: HomeAssistant) -
 
     result = await async_migrate_entry(hass, entry)
     assert result is True
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert entry.options["off_delay"] == 120
 
 
@@ -434,7 +437,7 @@ async def test_migrate_3_8_to_3_9_drops_null_options(hass: HomeAssistant) -> Non
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
 
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert "power_off_threshold_w" not in entry.options
     assert "power_off_delay" not in entry.options
     assert entry.options[CONF_MIN_POWER] == 2.0
@@ -490,9 +493,14 @@ async def test_migrate_3_8_to_3_9_keeps_clean_options_untouched(
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
 
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert entry.options == {CONF_OFF_DELAY: 120}
-    assert hass.config_entries.async_update_entry.call_count == 2
+    # One call per step in the remaining chain, derived rather than hardcoded so a
+    # future minor bump does not have to edit this number.
+    assert (
+        hass.config_entries.async_update_entry.call_count
+        == CONFIG_ENTRY_MINOR_VERSION - 8
+    )
 
 
 def _apply_opts_ver(e: DummyEntry, **kwargs: Any) -> None:
@@ -520,7 +528,7 @@ async def test_migrate_3_9_to_3_10_heals_seeded_cadence_on_coarse_device(
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
 
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert entry.options[CONF_WATCHDOG_INTERVAL] == 61
     assert entry.options[CONF_START_DURATION_THRESHOLD] == 30
 
@@ -540,7 +548,7 @@ async def test_migrate_3_9_to_3_10_noop_for_fast_device(hass: HomeAssistant) -> 
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
 
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert entry.options[CONF_WATCHDOG_INTERVAL] == 30
     assert entry.options[CONF_START_DURATION_THRESHOLD] == 5
 
@@ -555,7 +563,7 @@ async def test_migrate_3_9_to_3_10_leaves_absent_keys_absent(hass: HomeAssistant
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
 
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert CONF_WATCHDOG_INTERVAL not in entry.options
     assert CONF_START_DURATION_THRESHOLD not in entry.options
 
@@ -575,7 +583,7 @@ async def test_migrate_3_9_to_3_10_preserves_deliberate_values(hass: HomeAssista
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
 
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert entry.options[CONF_WATCHDOG_INTERVAL] == 90
     assert entry.options[CONF_START_DURATION_THRESHOLD] == 45
 
@@ -666,7 +674,7 @@ async def test_migrate_3_9_to_3_10_null_device_type_is_treated_as_washing_machin
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
 
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 10
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     # washing-machine resolves to the same 30/5, so no (wrong) coarse heal.
     assert entry.options[CONF_WATCHDOG_INTERVAL] == 30
     assert entry.options[CONF_START_DURATION_THRESHOLD] == 5
@@ -701,3 +709,54 @@ async def test_legacy_migration_null_device_type_seeds_washing_machine_defaults(
     assert entry.options[CONF_DEVICE_TYPE] == DEFAULT_DEVICE_TYPE
     assert entry.options[CONF_START_DURATION_THRESHOLD] == 5
     assert entry.options[CONF_WATCHDOG_INTERVAL] == 30
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_10_to_3_11_strips_the_dead_abrupt_keys(
+    hass: HomeAssistant,
+) -> None:
+    """An entry already on 3.10 must still lose the retired abrupt-drop knobs.
+
+    The bulk strip at the end of the migration only runs for entries BELOW the
+    current schema, because of the early return above it - so without a step of
+    its own an entry created before 558e71e and since migrated to 3.10 would keep
+    ``abrupt_drop_ratio`` / ``abrupt_drop_watts`` / ``abrupt_high_load_factor``
+    forever. Present in 5 of the 7 full user configurations in ``cycle_data/``.
+    """
+    entry = DummyEntry(
+        version=3,
+        minor_version=10,
+        data={},
+        options={
+            "abrupt_drop_ratio": 0.3,
+            "abrupt_drop_watts": 50,
+            "abrupt_high_load_factor": 2.0,
+            CONF_OFF_DELAY: 120,
+            CONF_MIN_POWER: 2.0,
+        },
+    )
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
+    assert "abrupt_drop_ratio" not in entry.options
+    assert "abrupt_drop_watts" not in entry.options
+    assert "abrupt_high_load_factor" not in entry.options
+    # Tuned options are untouched by the strip.
+    assert entry.options[CONF_OFF_DELAY] == 120
+    assert entry.options[CONF_MIN_POWER] == 2.0
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_10_to_3_11_is_a_version_bump_when_there_is_nothing_to_strip(
+    hass: HomeAssistant,
+) -> None:
+    """Idempotent: a clean 3.10 entry advances and keeps every option."""
+    entry = DummyEntry(
+        version=3, minor_version=10, data={}, options={CONF_OFF_DELAY: 120}
+    )
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
+    assert entry.options == {CONF_OFF_DELAY: 120}

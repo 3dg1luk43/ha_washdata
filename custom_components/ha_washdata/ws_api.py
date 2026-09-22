@@ -1500,6 +1500,13 @@ def ws_get_devices(
                     except Exception:  # pylint: disable=broad-exception-caught
                         pass
                     try:
+                        # Imported here rather than at module scope to keep the
+                        # ws_api import graph free of suggestion_engine, as every
+                        # other use in this file does.
+                        from .suggestion_engine import (  # pylint: disable=import-outside-toplevel
+                            detect_standby_above_stop,
+                        )
+
                         # #445 cause 1: an appliance whose standby draw sits ABOVE
                         # stop_threshold_w can never finish a cycle on its own,
                         # because the off delay only starts once power is below it.
@@ -1507,22 +1514,24 @@ def ws_get_devices(
                         # a suggestion: no threshold value can fix the case where the
                         # appliance's idle and working power are the same level, so
                         # this explains rather than proposes.
+                        # Resolved in steps, not as an inline `.get(key, default)`:
+                        # Python evaluates that default eagerly, so a detector
+                        # without a bound `config` raised AttributeError before the
+                        # option was even consulted - and the handler below turned
+                        # that into a silently absent advisory.
+                        _stop_w = merged.get(CONF_STOP_THRESHOLD_W)
+                        if _stop_w is None:
+                            _cfg = getattr(getattr(manager, "detector", None), "config", None)
+                            _stop_w = getattr(_cfg, "stop_threshold_w", 0.0)
                         info["standby_above_stop"] = detect_standby_above_stop(
                             store.get_past_cycles() or [],
-                            float(
-                                merged.get(
-                                    CONF_STOP_THRESHOLD_W,
-                                    getattr(
-                                        getattr(manager, "detector", None), "config", None
-                                    ).stop_threshold_w
-                                    if getattr(manager, "detector", None) is not None
-                                    else 0.0,
-                                )
-                                or 0.0
-                            ),
+                            float(_stop_w or 0.0),
                         )
                     except Exception:  # pylint: disable=broad-exception-caught
-                        pass
+                        # Logged, not swallowed silently: this advisory shipped dead
+                        # for a round because a NameError here was indistinguishable
+                        # from "no pattern found".
+                        _LOGGER.debug("standby_above_stop probe failed", exc_info=True)
                     try:
                         # Count only pending feedback whose cycle still exists, so the
                         # badge cannot outrun the review list after a cycle is deleted,
@@ -5328,8 +5337,7 @@ def _build_settings_comparison(
     ``ENABLE_ML_SUGGESTIONS``.
     """
     try:
-        from .suggestion_engine import (
-    detect_standby_above_stop,  # pylint: disable=import-outside-toplevel
+        from .suggestion_engine import (  # pylint: disable=import-outside-toplevel
             MLSuggestionEngine,
             select_clean_cycles,
         )

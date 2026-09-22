@@ -62,11 +62,18 @@ def _series(cycle: dict[str, Any]) -> tuple[np.ndarray, np.ndarray] | None:
     ts: list[float] = []
     pw: list[float] = []
     for p in pd:
+        # Both values are converted BEFORE either is appended: a row whose offset
+        # parses and whose power does not would otherwise leave `ts` one element
+        # longer than `pw`, and `resample_uniform` raises inside `np.interp` on
+        # unequal arrays - a tuning run lost to one malformed sample.
+        # OverflowError too: `json` keeps an oversized integer literal as an
+        # unbounded int, and `float()` on one raises rather than returning inf.
         try:
-            ts.append(float(p[0]))
-            pw.append(float(p[1]))
-        except (TypeError, ValueError, IndexError):
+            offset, watts = float(p[0]), float(p[1])
+        except (TypeError, ValueError, IndexError, OverflowError):
             continue
+        ts.append(offset)
+        pw.append(watts)
     if len(pw) < 4:
         return None
     return np.asarray(ts, dtype=float), np.asarray(pw, dtype=float)
