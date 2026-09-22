@@ -55,6 +55,10 @@ _LOGGER = logging.getLogger(__name__)
 # class constant of the same purpose).
 PROJECTION_MIN_PROGRESS = 3.0
 
+# The progress EMA weights below are per *estimate*, and were chosen against the
+# manager's 5 s estimate throttle. See :func:`_dt_scaled_alpha`.
+SMOOTHING_NOMINAL_DT_S = 5.0
+
 # Cache type for profile_end_expectation: (profile_name, base_expectation_dict).
 EndExpCache = tuple[str, dict[str, float]] | None
 
@@ -581,6 +585,36 @@ def estimate_phase_progress(
     return (best_progress, best_variance)
 
 
+def _dt_scaled_alpha(alpha: float, dt_s: float | None) -> float:
+    """Rescale a per-estimate EMA weight to the real interval between estimates.
+
+    A first-order filter trails a ramp by ``slope * (1 - a) / a`` per step, and
+    progress IS a ramp, so the steady-state lag is set by how much progress the
+    cycle makes between two estimates. Estimates are driven by power-sensor
+    events, not by a clock: a plug reporting every 30 s advances 6x more per step
+    than the 5 s throttle these weights were picked for, so the lag grows with it.
+    Measured on a 149 min dishwasher whose estimates landed ~3 min apart, the
+    linear branch sat ~14pp behind - back-calculated as ~20 min of remaining time
+    that never ran out, so the countdown stalled at "20 minutes left" through the
+    whole tail and the overrun handover (which waits for remaining to reach 0)
+    never fired. Replaying that cadence: 83.7% / 23.9 min left at the moment the
+    cycle ended, against 100% / 0 with the weight rescaled.
+
+    Rescaling holds the *time* constant instead of the step count::
+
+        alpha_dt = 1 - (1 - alpha) ** (dt / SMOOTHING_NOMINAL_DT_S)
+
+    ``dt_s`` of ``None`` (or <= 0) keeps the nominal weight, so every caller that
+    does not track its own cadence - and the golden snapshot - is unchanged.
+    """
+    if dt_s is None or not math.isfinite(dt_s) or dt_s <= 0.0:
+        return alpha
+    if alpha <= 0.0 or alpha >= 1.0:
+        return alpha
+    steps = float(dt_s) / SMOOTHING_NOMINAL_DT_S
+    return 1.0 - (1.0 - alpha) ** steps
+
+
 def _compute_progress_base(
     device_type: str,
     matched_duration: float,
@@ -589,6 +623,7 @@ def _compute_progress_base(
     phase_result: tuple[float, float] | None,
     ml_pct: float | None,
     logger: logging.Logger | None = None,
+    dt_seconds: float | None = None,
 ) -> ProgressResult | None:
     """The blend + EMA + monotonicity + back-calculation body of the estimate loop.
 
@@ -629,6 +664,8 @@ def _compute_progress_base(
 
             smoothing_threshold = DEVICE_SMOOTHING_THRESHOLDS.get(device_type, 5.0)
             if phase_progress < current_smoothed - smoothing_threshold:
+                # Backward step: damping here exists to resist regression, not to
+                # track, so it stays per-estimate (unscaled) on purpose.
                 smoothed = (current_smoothed * 0.95) + (phase_progress * 0.05)
                 logger.debug(
                     "Progress drop detected (%.1f%% < %.1f%% - %.1f%%), "
@@ -639,6 +676,7 @@ def _compute_progress_base(
                     device_type,
                 )
             else:
+                alpha = _dt_scaled_alpha(alpha, dt_seconds)
                 smoothed = (prev_smoothed * (1.0 - alpha)) + (phase_progress * alpha)
 
         smoothed = min(99.0, smoothed)
@@ -667,7 +705,8 @@ def _compute_progress_base(
         remaining = max(matched_dur * (1.0 - progress / 100.0), 0.0)
 
     if prev_smoothed > 0:
-        smoothed = (prev_smoothed * 0.9) + (progress * 0.1)
+        lin_alpha = _dt_scaled_alpha(0.1, dt_seconds)
+        smoothed = (prev_smoothed * (1.0 - lin_alpha)) + (progress * lin_alpha)
     else:
         smoothed = progress
 
@@ -691,6 +730,7 @@ def compute_progress(
     ml_pct: float | None,
     logger: logging.Logger | None = None,
     phase_remaining_s: float | None = None,
+    dt_seconds: float | None = None,
 ) -> ProgressResult | None:
     """Progress/remaining estimate, optionally blended with a phase-resolved ETA.
 
@@ -741,7 +781,7 @@ def compute_progress(
 
     base = _compute_progress_base(
         device_type, matched_duration, duration_so_far, prev_smoothed,
-        phase_result, ml_pct, logger,
+        phase_result, ml_pct, logger, dt_seconds,
     )
     if base is None or not blended:
         return base
