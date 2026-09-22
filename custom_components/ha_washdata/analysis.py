@@ -737,7 +737,11 @@ def prefix_shape_score(
     corr_weight = float(config.get("corr_weight", MATCH_CORR_WEIGHT))
     score, _metrics, _offset = find_best_alignment(a, b, 1.0, corr_weight=corr_weight)
 
-    dtw_bandwidth = float(config.get("dtw_bandwidth", 0.1))
+    # The SAME default as `compute_matches_worker` (register item 309). Both read
+    # the same unmutated `config` in one match, so a caller that omits the key
+    # would otherwise get DEFAULT_DTW_BANDWIDTH for Stage 3 and the old 0.1 here,
+    # and the two stages would disagree about which candidates look like a prefix.
+    dtw_bandwidth = float(config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH))
     if dtw_bandwidth > 0.0:
         dtw_score, _ = _stage3_dtw_score(
             a,

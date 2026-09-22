@@ -254,11 +254,40 @@ def _measured_quiet_span_s(
     below-threshold sample is credited (the detector adds ``dt`` on the reading
     that takes it below), so a span is ``t[last_below] - t[first_below - 1]``.
     """
+    return _measured_quiet_span(points, low_start_s, resume_idx, quiet_thr)[0]
+
+
+def _measured_quiet_span(
+    points: list[tuple[float, float]],
+    low_start_s: float,
+    resume_idx: int,
+    quiet_thr: float,
+) -> tuple[float, int | None]:
+    """:func:`_measured_quiet_span_s`, plus the index the winning span ends on.
+
+    The caller needs both, and they can disagree. The low run is bounded by
+    ``active_thr = max(stop_threshold_w, 0.05 * peak)``, so on any normal
+    appliance (peak 2 kW, stop threshold ~2.5 W) a reading anywhere between
+    those two levels splits the run into several below-threshold spans. This
+    function returns the LONGEST of them, while ``points[:resume_idx]`` ends on
+    the LAST one - so scoring that prefix described a different span from the
+    duration reported beside it, and ``_ml_off_delay``'s ``score < 0.4`` filter
+    admitted or rejected the wrong durations.
+    """
     if resume_idx <= 0 or resume_idx > len(points):
-        return 0.0
+        return 0.0, None
     best = 0.0
+    best_end: int | None = None
     first_below: int | None = None
     last_below: int | None = None
+
+    def _close(f: int, l: int) -> None:
+        nonlocal best, best_end
+        anchor_t = points[max(0, f - 1)][0]
+        span = points[l][0] - anchor_t
+        if span > best:
+            best, best_end = span, l
+
     for i in range(resume_idx):
         t, power = points[i]
         if t < low_start_s:
@@ -268,13 +297,11 @@ def _measured_quiet_span_s(
                 first_below = i
             last_below = i
         elif first_below is not None and last_below is not None:
-            anchor_t = points[max(0, first_below - 1)][0]
-            best = max(best, points[last_below][0] - anchor_t)
+            _close(first_below, last_below)
             first_below = last_below = None
     if first_below is not None and last_below is not None:
-        anchor_t = points[max(0, first_below - 1)][0]
-        best = max(best, points[last_below][0] - anchor_t)
-    return max(0.0, best)
+        _close(first_below, last_below)
+    return max(0.0, best), best_end
 
 
 def _cycle_readings(cycle: dict[str, Any]) -> list[tuple[float, float]]:
@@ -2294,14 +2321,21 @@ class MLSuggestionEngine:
             # Timed against stop_threshold_w like the classic heuristic (#445), so
             # the ML-calibrated off_delay is fitted to the same quantity the end
             # gates measure rather than to burst-phase spans.
-            dur = _measured_quiet_span_s(
+            dur, quiet_end = _measured_quiet_span(
                 points, low_start_s, resume_idx, stop_threshold_w
             )
             if dur < 30.0:  # ignore motor micro-dips
                 continue
             score: float | None = None
             try:
-                feat = end_feat_fn(points[:resume_idx], expectation)  # tail is the low run
+                # Score the prefix ending on the span `dur` was measured from, not
+                # merely the one before the resume: a low run split by readings
+                # between stop_threshold_w and active_thr holds several quiet
+                # spans, and pairing the longest span's duration with the last
+                # span's score is what made the `score < 0.4` filter keep the
+                # wrong pauses.
+                tail_end = resume_idx if quiet_end is None else quiet_end + 1
+                feat = end_feat_fn(points[:tail_end], expectation)
                 if feat is not None:
                     score = float(end_score_fn(feat))
             except Exception:  # pylint: disable=broad-exception-caught
