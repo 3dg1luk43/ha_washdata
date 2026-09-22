@@ -944,6 +944,11 @@ def compute_envelope_worker(
             warped onto. Min/max/avg/std bands are still built from all cycles.
     Returns:
         (time_grid, min_curve, max_curve, avg_curve, std_curve, target_duration) or None.
+
+        The bands are the pointwise extremes of the DTW-**warped** members, so
+        only a consumer that re-derives the same warp
+        (:func:`align_trace_to_envelope`) can compare an observed trace against
+        them honestly.
     """
     if not raw_cycles_data:
         return None
@@ -1155,6 +1160,112 @@ def compute_envelope_worker(
         std_curve.tolist(),
         float(target_duration)
     )
+
+
+def align_trace_to_envelope(
+    t_obs: list[float] | np.ndarray,
+    p_obs: list[float] | np.ndarray,
+    time_grid: list[float] | np.ndarray,
+    reference: list[float] | np.ndarray | None,
+    dtw_bandwidth: float,
+) -> tuple[np.ndarray, bool]:
+    """Map each observed sample's time onto an envelope's own time grid.
+
+    Uses the **same DTW warp** :func:`compute_envelope_worker` used to build that
+    envelope's bands, only reduced in the opposite direction (candidate index ->
+    mean reference index instead of reference index -> mean candidate index).
+    That matters: ``min``/``max`` are the pointwise extremes of the *warped*
+    member curves, so a consumer that re-derives the same warp sees every member
+    inside the band by construction, while a consumer that stretches time
+    proportionally does not.
+
+    A proportional stretch is not a cheap approximation of this, it is a worse
+    alignment: real programmes absorb their run-to-run duration variance in one
+    stretch of the cycle (a dishwasher's drying tail), not uniformly, so scaling
+    the whole axis *moves* the fixed-time features. Measured on the maintainer's
+    corpus (register item 324) the final heating block's placement error grew
+    from sd 2.5 min (no scaling at all) to sd 3.7 min under proportional scaling,
+    which is what fabricated the out-of-band ``spike``/``dip`` artifacts.
+
+    Args:
+        t_obs: observed sample offsets (seconds from cycle start, increasing).
+        p_obs: observed power values, parallel to ``t_obs``.
+        time_grid: the envelope's time grid.
+        reference: the curve to warp onto. Callers pass ``envelope["avg"]``; see
+            ``ProfileStore._align_to_envelope`` for why that beats the build's
+            own pre-DTW reference. ``None`` forces the proportional stretch.
+        dtw_bandwidth: Sakoe-Chiba band ratio, same value the build used.
+
+    Returns:
+        ``(envelope-space time per observed sample, used_dtw)``. ``used_dtw`` is
+        False when the warp was unavailable and the proportional stretch was
+        used instead, so callers can loosen any judgement they base on it.
+        Never raises: every failure degrades to the proportional stretch.
+    """
+    t_arr = np.asarray(t_obs, dtype=float)
+    p_arr = np.asarray(p_obs, dtype=float)
+    tg = np.asarray(time_grid, dtype=float)
+
+    def _proportional() -> np.ndarray:
+        if tg.size < 2 or t_arr.size < 1:
+            return t_arr
+        obs_dur = float(t_arr[-1])
+        env_dur = float(tg[-1])
+        if obs_dur <= 0 or env_dur <= 0:
+            return np.clip(t_arr, tg[0], tg[-1])
+        return np.clip(t_arr * (env_dur / obs_dur), tg[0], tg[-1])
+
+    try:
+        ref = np.asarray(reference, dtype=float) if reference is not None else None
+        if (
+            ref is None
+            or ref.size != tg.size
+            or tg.size < 2
+            or t_arr.size < 2
+            or t_arr.size != p_arr.size
+            or dtw_bandwidth <= 0
+        ):
+            return _proportional(), False
+
+        obs_dur = float(t_arr[-1])
+        env_dur = float(tg[-1])
+        if not (obs_dur > 0 and env_dur > 0):
+            return _proportional(), False
+
+        # Rebuild the per-cycle grid the same way the envelope build did: one
+        # point per grid step, so an index offset is a time offset on both axes
+        # and the Sakoe-Chiba band means the same span of minutes either side.
+        grid_dt = env_dur / (tg.size - 1)
+        if grid_dt <= 0:
+            return _proportional(), False
+        n_obs = int(min(MAX_ALIGN_GRID_POINTS, max(10, int(obs_dur / grid_dt))))
+        obs_grid = np.linspace(0.0, obs_dur, n_obs)
+        obs_array = np.interp(obs_grid, t_arr, p_arr)
+
+        path = compute_dtw_path(obs_array, ref, band_width_ratio=dtw_bandwidth)
+        if not path:
+            return _proportional(), False
+
+        path_arr = np.array(path)
+        obs_indices = path_arr[:, 0]
+        ref_indices = path_arr[:, 1]
+        # Average the reference indices a single observed index maps onto (DTW
+        # paths repeat indices wherever one axis is stretched).
+        unique_obs, inverse = np.unique(obs_indices, return_inverse=True)
+        mean_ref = np.zeros_like(unique_obs, dtype=float)
+        np.add.at(mean_ref, inverse, ref_indices)
+        mean_ref /= np.bincount(inverse)
+
+        env_idx = np.interp(
+            np.arange(n_obs), unique_obs, mean_ref, left=0, right=tg.size - 1
+        )
+        env_time_on_grid = env_idx * grid_dt
+        mapped = np.interp(t_arr, obs_grid, env_time_on_grid)
+        return np.clip(mapped, tg[0], tg[-1]), True
+    except Exception:  # pylint: disable=broad-exception-caught
+        # Alignment is a comparison aid, never a correctness gate: degrade.
+        return _proportional(), False
+
 
 def verify_profile_alignment_worker(
     current_power: list[float],

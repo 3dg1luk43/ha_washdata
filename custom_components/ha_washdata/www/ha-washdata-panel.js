@@ -10621,7 +10621,14 @@ class HaWashdataPanel extends HTMLElement {
     // compare the actual trace against what the labelled profile looks like
     // (faint orange, behind the live trace). Hidden during Trim/Split editing.
     const pe = m.profileEnv;
-    if ((m.mode === 'view' || m.mode === 'review') && pe && (pe.avg || []).length) {
+    if ((m.mode === 'view' || m.mode === 'review') && (cur.expected || []).length > 1) {
+      // Server-projected onto this cycle's own time axis via the same alignment
+      // the artifact shading was computed with, so the overlay, the trace and the
+      // shading agree. Do NOT extend `full` - it is already in cycle time.
+      series.push({ points: cur.expected, stroke: '#ff9800', width: 2, alpha: 0.45, name: `${this._t('lbl.expected', {}, 'Expected')} (${cur.profile_name || 'profile'})` });
+    } else if ((m.mode === 'view' || m.mode === 'review') && pe && (pe.avg || []).length) {
+      // Fallback (no stored envelope / projection failed): the envelope on its
+      // own absolute grid, which slides by (duration - target_duration).
       series.push({ points: pe.avg, stroke: '#ff9800', width: 2, alpha: 0.45, name: `${this._t('lbl.expected', {}, 'Expected')} (${cur.profile_name || 'profile'})` });
       full = Math.max(full, pe.target_duration || pe.avg[pe.avg.length - 1][0] || 0);
     }
