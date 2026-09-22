@@ -32,7 +32,7 @@ pip install -r requirements-dev.txt
 ./run_tests.sh                  # fast suite (default, ~30s - skips slow + benchmark)
 ./run_tests.sh --slow           # real-data replays, stress simulations
 ./run_tests.sh --bench          # benchmarks
-./run_tests.sh --e2e            # Playwright E2E (452 tests, chromium + mobile-chrome, ~90s)
+./run_tests.sh --e2e            # Playwright E2E (618 tests, chromium + mobile-chrome, ~2 min)
 ./run_tests.sh --e2e-min        # same E2E against the minified build (the bytes users download)
 ./run_tests.sh --all            # everything (~13 min)
 
@@ -55,7 +55,8 @@ devtools/release_check.sh --full --tag v0.5.6
 python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG   # mock appliance
 
 cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its README.md)
-cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 15 checks (~4 min)
+cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 20 checks (~12 min)
+cd devtools/testbox && ./check_notify_actions.sh   # the notification-ACTION delivery path (~1 min)
 cd devtools/testbox && ./hactl.py ws ha_washdata/get_profiles entry_id=<id>   # drive it
 ```
 
@@ -72,12 +73,19 @@ that gap; keep both working:
   Home Assistant's real schemas. Do not "simplify" it away - reintroducing item 316 fails 13 tests
   because of it. When adding a notification path, assert on the payload *and* let the guard run.
 - `devtools/testbox/` is a **real HA container** (2026.9.x, what users run; the in-process test HA
-  is pinned to 2026.2.3) with the working tree bind-mounted in and a notify platform that records
-  every delivered payload. It proves delivery, config flow, storage migration, WS API and entity
-  wiring - and found register item 317 on its first run. Timing there is compressed, so it proves
-  behaviour, never minute-accuracy. Read `devtools/testbox/README.md` before using it; the two
-  traps are the hardcoded 30 min dishwasher floor and the need to rescale a seeded export's clock
-  (both in item 319).
+  is pinned to 2026.2.3 - which is upstream's newest, so that gap cannot be closed from PyPI, item
+  322) with the working tree bind-mounted in and a notify platform that records every delivered
+  payload. It proves delivery, config flow, storage migration, WS API and entity wiring, and it
+  found three real bugs in its first hours (items 317, 323, and the corrected 320). Timing there is
+  compressed, so it proves behaviour, never minute-accuracy. Read `devtools/testbox/README.md`
+  first: the traps are the hardcoded 30 min dishwasher floor, `interrupted_min_seconds`,
+  `profile_match_interval` and rescaling a seeded export's clock (item 319).
+
+**When a mocked test would not have caught it, reach for the box.** Two classes are invisible to
+the unit tier by construction: anything Home Assistant validates (item 316) and anything that needs
+a real `hass` to work at all - notification-action templates only become `Template` objects via
+`cv.SCRIPT_SCHEMA`, whose `cv.template` resolves the running instance through `async_get_hass()`,
+so under a MagicMock the conversion cannot happen and the bug is unreachable (item 323).
 
 ### Generated files - never hand-edit, always regenerate
 

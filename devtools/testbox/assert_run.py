@@ -181,6 +181,43 @@ async def main() -> int:
                 f"tags seen: {tags}",
             )
 
+        # The MATCHED live payload, which is what a user sees for most of a
+        # cycle: the Android progress bar and countdown, and the iOS Live
+        # Activity's content_state. Until the matcher fires, live updates carry
+        # only the "no profile matched yet" text, so a run that never matched
+        # proves nothing about these keys.
+        matched_live = [
+            r for r in live
+            if "progress" in (r.get("data") or {})
+        ]
+        checks.check(
+            bool(matched_live),
+            f"a matched live update was delivered ({len(matched_live)})",
+            "Every live update was the pre-match placeholder, so the progress / "
+            "chronometer / content_state payload was never exercised. Check that "
+            "profile_match_interval is compressed for this run.",
+        )
+        for record in matched_live[:1]:
+            data = record["data"]
+            checks.check(
+                data.get("progress_max", 0) > 0
+                and 0 <= data.get("progress", -1) <= data["progress_max"],
+                "the progress bar is within its own maximum",
+                f"progress={data.get('progress')} max={data.get('progress_max')}",
+            )
+            checks.check(
+                data.get("chronometer") is True and int(data.get("when", 0)) > 0,
+                "the countdown carries a chronometer and an absolute end time",
+                f"chronometer={data.get('chronometer')} when={data.get('when')}",
+            )
+            checks.check(
+                int(data.get("time_remaining_seconds", -1)) >= 0
+                and int(data.get("cycle_seconds", 0)) > 0,
+                "remaining and total are both present and sane",
+                f"remaining={data.get('time_remaining_seconds')} "
+                f"total={data.get('cycle_seconds')}",
+            )
+
         clears = _clears(records)
         cleared_tags = {(r.get("data") or {}).get("tag") for r in clears}
         checks.check(
