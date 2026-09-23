@@ -1497,19 +1497,19 @@ class WashDataManager:
                 # The `> current_program_score` guard measured neutral (it never binds
                 # at this margin) and is kept because switching to something scoring
                 # below what is already displayed is never right.
-                # `_runner_up is not None` is what makes "decisive" mean what the
-                # paragraph above says. With a single surviving candidate there is
-                # no runner-up, so `match_margin` keeps its 1.0 sentinel and clears
-                # any threshold - and if the displayed program was the one Stage 1
-                # rejected it is absent from `candidates`, leaving
-                # `current_program_score` at 0.0 so the second guard is vacuous too.
-                # Any positive confidence then switched instantly, on margin
-                # evidence that was never computed. Such a cycle now falls through
-                # to the persistence path below, which still switches, just after
-                # the confirmations the bypass is meant to be earning its way out of.
+                # The 1.0 sentinel `match_margin` carries when nothing else scored
+                # is LOAD-BEARING, not a gap. Requiring a real runner-up here was
+                # tried (PR #448 round 6) and measured on
+                # `devtools/decisive_margin_eval.py` over 1977 mid-cycle
+                # checkpoints from the real corpus: a single surviving candidate
+                # occurs at 2.58% of them and is the **correct** programme
+                # **94.0% (47/50)** of the time, against **77.8% (669/860)** for
+                # the real-margin bypass it would have been held to. Stage 1/2
+                # rejecting every other profile is strong evidence, not absent
+                # evidence, so making those checkpoints wait for persistence
+                # delays the matcher's most reliable signal. Reverted.
                 if (
-                    _runner_up is not None
-                    and match_margin > MATCH_DECISIVE_MARGIN
+                    match_margin > MATCH_DECISIVE_MARGIN
                     and confidence > current_program_score
                 ):
                     should_switch = True

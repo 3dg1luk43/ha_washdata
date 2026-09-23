@@ -2193,24 +2193,29 @@ class CycleDetector:
                 # prefix-landscape guard and re-opens the #288 split-cycle bug -
                 # caught by test_smart_termination_blocked_by_prefix_ambiguous,
                 # where a 450 s soak dip sits right at the short profile's end.
-                # `_last_match_confidence` is part of "the SAME guards", and it is
-                # NOT redundant with the two ambiguity flags: a lone weak candidate
-                # has no runner-up, so its margin is 1.0 and neither flag fires,
-                # yet its `_expected_duration` is exactly the number this rule keys
-                # on. `update_match` stores whatever the matcher returned at any
-                # confidence, so without this a 0.2-confidence match to a shorter
-                # look-alike cut the gate to 300 s and a mid-wash soak longer than
-                # that (but inside the 480 s washer `min_off_gap` the prior exists
-                # to bridge) split the cycle - the #288/#364 failure this block's
-                # own comment says it is guarded against. Smart Termination, the
-                # more aggressive mechanism, has required it all along
-                # (`_smart_term_*`, and the ENDING gate at the top of this method).
+                # NOT also gated on `_last_match_confidence >=
+                # match_confidence_threshold`, and that is deliberate, not an
+                # oversight - the paragraph above says "the SAME guards Smart
+                # Termination respects" and means the two ambiguity flags.
+                # Smart Termination does check confidence, because it ENDS a cycle
+                # early on a prediction; this rule only shortens a wait that is
+                # already past the programme's own expected end, so the asymmetry
+                # is intended. Adding the check was tried (PR #448 round 6) and
+                # measured on `devtools/end_gate_eval.py` over 221 replayed real
+                # cycles: it moves **2 of them**, delaying one by 10.5 min and one
+                # by 21 min, while early ends (1.42% / 0.00% at the >1 and >5 min
+                # marks) and splits (3.32%) stay **exactly** where they were. It
+                # prevented no split and no early end - pure cost, so it was
+                # reverted. The corpus carries only 4 matched cycles under 0.4
+                # confidence, so it cannot prove the guard harmless either; the
+                # exposure is real (cycle `7c4598310016` is a 3h37m wash matched at
+                # 0.372 to a profile named "1:07", i.e. running the shortened gate
+                # for over two hours) and it still did not split. Re-run the
+                # harness before re-litigating this.
                 if (
                     self._matched_profile
                     and self._expected_duration > 0
                     and self._current_cycle_start is not None
-                    and self._last_match_confidence
-                    >= self._config.match_confidence_threshold
                     and not self._match_prefix_ambiguous
                     and not self._match_ambiguous
                 ):

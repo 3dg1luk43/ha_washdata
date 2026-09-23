@@ -52,6 +52,10 @@ devtools/release_check.sh               # release preflight (what CI runs)
 devtools/release_check.sh --fix         # regenerate artifacts instead of failing
 devtools/release_check.sh --full --tag v0.5.6
 
+python3 devtools/end_gate_eval.py            # ENDING fallback-gate lag/early-end/split (item 329)
+python3 devtools/decisive_margin_eval.py     # mid-cycle switch bypass, runner-up exposure
+python3 devtools/min_off_gap_eval.py         # min_off_gap split/merge bounds (replays UNMATCHED)
+
 python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG   # mock appliance
 
 cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its README.md)
@@ -353,6 +357,14 @@ old-schema fixtures. **Two separate layers, tested separately:**
 All scoring constants live in `const.py` under "Matching pipeline scoring constants" (`MATCH_*`).
 Tuning provenance, A/B tables and measured accuracies are in reference 02 and
 `devtools/dtw_ab_eval.py` - not repeated here.
+
+**Every harness a tuning claim rests on must be committed.** Item 306's 427-cycle end-lag
+measurement was not, so when a review round proposed tightening that same gate there was no way to
+judge it and the change shipped on reasoning alone (register item 329: re-measured, it was pure
+cost, and the sibling change to the mid-cycle switch bypass was measured actively *worse*).
+`dtw_ab_eval.py` scores **complete** cycles only, so it cannot judge the ENDING gate, the prefix
+guard, or the mid-cycle switch - a byte-identical result there is not evidence about any of them.
+Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for those.
 
 - **Stage 1 - Fast Reject:** duration ratio outside `[min_duration_ratio, max_duration_ratio]`
   (0.10x-1.8x, some device types override the min). The **lower** gate is inert for ranking
