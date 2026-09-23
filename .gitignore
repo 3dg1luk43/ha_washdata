@@ -71,4 +71,5 @@ custom_components/ha_washdata/www/*.gz
 # the box ARE committed (see devtools/testbox/README.md); only its state is not.
 devtools/testbox/config/
 devtools/testbox/__pycache__
-devtools/testbox/support/custom_components
+# The notify platform under support/ IS committed - ignore only its bytecode.
+devtools/testbox/support/**/__pycache__/
