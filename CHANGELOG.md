@@ -9,25 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### TL;DR
 
-- Cycles finish far closer to when the appliance actually does: measured 34 -> 18 min on one reporter's dishwasher, 13 -> 8 min on another's washing machine, and a further 13 -> 8 min across every recorded washing machine once a program has run its length.
-- The matched program stops being swapped mid-wash on a single strong-looking reading, which is exactly when the guess is least reliable.
-- Finished cycles are matched to the right program more often, most of all on washing machines.
-- A cycle is only labelled automatically when one program clearly wins, so fewer wrong labels quietly skew your time estimates.
-- Cycles are stored at the length they actually ran: the end-of-cycle confirmation wait is no longer counted as part of the wash, and existing programs are corrected once on upgrade.
-- Cycles that idle above their Stop Threshold, and cycles filed under a program they cannot possibly be, are now pointed out instead of quietly skewing your time estimates.
-- An appliance that idles above its stop threshold now closes in minutes instead of waiting out twice its programme length.
-- The suggested Off Delay is no longer sized from the wash itself: one appliance was being offered 34 minutes where its real pauses are seconds.
-- The wait that actually ends a cycle is shown in Settings, instead of silently overriding a lower Off Delay.
-- Cycles you stopped by hand no longer teach the suggestion analysis how your appliance behaves.
-- The appliance brand and model you set in Settings are actually saved, so the Community Store stops asking for them.
-- Live notifications are cleared when the cycle ends, instead of stacking up and sitting frozen on the lock screen.
-- The countdown runs out instead of stalling 20 minutes short on an appliance that reports power rarely.
-- Importing a configuration no longer points your appliance at somebody else's power sensor, which stopped detection dead.
-- Notification actions can finally use the variables they document: `{{ device }}` was being delivered as literal text.
-- "Apply all" and imports are recorded in the settings history, so they can be reverted per setting.
-- The expected curve on a cycle graph sits on the wash instead of drifting out of step with it.
-- The spurious "drew above the usual power band" markers are gone, and cycles stop being sent for confirmation over a mismatch that was never real.
-- The panel stays where you scrolled it, and profile card titles are readable on light themes.
+- Cycles end much closer to when the appliance actually does.
+- Better program matching, and auto-labels only on a clear winner.
+- No mid-wash program swap on one strong-looking reading.
+- Cycles stored at their real length; existing history corrected once.
+- An appliance idling above its Stop Threshold closes in minutes, and is flagged.
+- Saner Off Delay suggestions, and the real end wait shown in Settings.
+- Live notifications cleared at cycle end; the countdown reaches zero.
+- Notification actions render their variables; brand and model are saved.
+- Imports keep your own power sensor and are revertible per setting.
+- Cycle graphs line up, and the false out-of-band markers are gone.
 
 ### Fixes
 

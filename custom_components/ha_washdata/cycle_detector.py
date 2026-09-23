@@ -2193,10 +2193,24 @@ class CycleDetector:
                 # prefix-landscape guard and re-opens the #288 split-cycle bug -
                 # caught by test_smart_termination_blocked_by_prefix_ambiguous,
                 # where a 450 s soak dip sits right at the short profile's end.
+                # `_last_match_confidence` is part of "the SAME guards", and it is
+                # NOT redundant with the two ambiguity flags: a lone weak candidate
+                # has no runner-up, so its margin is 1.0 and neither flag fires,
+                # yet its `_expected_duration` is exactly the number this rule keys
+                # on. `update_match` stores whatever the matcher returned at any
+                # confidence, so without this a 0.2-confidence match to a shorter
+                # look-alike cut the gate to 300 s and a mid-wash soak longer than
+                # that (but inside the 480 s washer `min_off_gap` the prior exists
+                # to bridge) split the cycle - the #288/#364 failure this block's
+                # own comment says it is guarded against. Smart Termination, the
+                # more aggressive mechanism, has required it all along
+                # (`_smart_term_*`, and the ENDING gate at the top of this method).
                 if (
                     self._matched_profile
                     and self._expected_duration > 0
                     and self._current_cycle_start is not None
+                    and self._last_match_confidence
+                    >= self._config.match_confidence_threshold
                     and not self._match_prefix_ambiguous
                     and not self._match_ambiguous
                 ):
