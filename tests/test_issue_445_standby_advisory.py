@@ -23,10 +23,11 @@ snaps back to the last reading above the threshold and a force-stopped one keeps
 its tail, so in both cases the LAST stored sample is the level the appliance was
 sitting at when the cycle closed.
 
-Verified against all three reporters' real exports: #445's Miele 5/5 cycles at
-3.4 W against a 2.56 W threshold, #427's AEG 4/8 at 0.85 W against 0.6 W, and
-#424's Beko 4/8 at 1.3 W against 0.96 W - the last being exactly the 225 s of
-the Beko's late finish that no gate change could account for.
+Validated against the reporters' own exports (now in cycle_data/). Of nine real
+devices exactly one qualifies: #445's Miele, every cycle ending 3.2-7.5 W against
+a 2.56 W threshold. #427's AEG and #424's Beko were originally cited here as 4/8
+validations, but both reach 0 W regularly, so neither idles above its threshold -
+their late finishes were the keepalive cadence bug, fixed separately.
 """
 from __future__ import annotations
 
@@ -154,3 +155,42 @@ def test_a_consistent_level_with_one_zero_cycle_is_not_reported() -> None:
     """The single counter-example wins: seven consistent, one at zero."""
     cycles = [_trace(3.4, cid=f"c{i}") for i in range(7)] + [_trace(0.0, cid="z")]
     assert detect_standby_above_stop(cycles, 2.56) is None
+
+
+def test_the_reporters_real_exports_give_the_right_verdicts() -> None:
+    """The exports from #445/#427/#424, reduced to their last stored samples.
+
+    This is the check the feature never had: it was verified only against
+    devices believed to be faulty, so a statistic that is almost always true
+    looked like a discovery. Numbers below are the real ones.
+    """
+    # #445 Vize2012 Miele: never reaches 0 W, consistent level -> the real case.
+    miele = [_trace(w, cid=f"m{i}") for i, w in enumerate([4.1, 3.4, 7.5, 3.2, 3.4])]
+    res = detect_standby_above_stop(miele, 2.56)
+    assert res is not None, "the canonical true positive must still fire"
+    assert res["idle_w"] == pytest.approx(3.4, abs=0.1)
+
+    # #427 KoLSMS AEG: reaches 0 W in three of eight -> it can go below.
+    aeg = [
+        _trace(w, cid=f"a{i}")
+        for i, w in enumerate([0.0, 1.9, 0.1, 0.9, 0.8, 0.0, 0.0, 0.7])
+    ]
+    assert detect_standby_above_stop(aeg, 0.6) is None
+
+    # #424 KoLSMS Beko dishwasher: same, four of eight at or below 0.4 W.
+    beko = [
+        _trace(w, cid=f"b{i}")
+        for i, w in enumerate([1.2, 1.3, 1.3, 0.0, 0.3, 0.4, 0.2, 1.3])
+    ]
+    assert detect_standby_above_stop(beko, 0.96) is None
+
+
+def test_one_outlier_does_not_disqualify_a_real_standby_level() -> None:
+    """Why the consistency test is MAD and not min/max.
+
+    #445's own Miele has a 7.5 W reading among otherwise 3.2-4.1 W samples. On
+    min/max spread that scores 1.26 and the canonical true positive is rejected;
+    on MAD it scores 0.059.
+    """
+    miele = [_trace(w, cid=f"m{i}") for i, w in enumerate([4.1, 3.4, 7.5, 3.2, 3.4])]
+    assert detect_standby_above_stop(miele, 2.56) is not None

@@ -489,11 +489,15 @@ def select_clean_cycles(
 # reporter's 3.2 W idle against a ~2 kW peak is 0.16%) while rejecting a cycle
 # stopped by hand while the appliance was still working.
 _STANDBY_PEAK_FRACTION = 0.10
-# ...and the observed levels must agree with each other to this fraction of their
-# median. A standby draw is a LEVEL; a trimmed trace's last above-threshold
-# sample is just wherever the appliance happened to be, and across the corpus's
-# washing machines that ranges 6 W to 55 W within one device.
-_STANDBY_MAX_SPREAD = 0.5
+# ...and the observed levels must agree with each other, measured as the median
+# absolute deviation over the median. Outlier-ROBUST on purpose: min/max spread
+# was tried and rejected because #445's own Miele has one 7.5 W reading among
+# [4.1, 3.4, 7.5, 3.2, 3.4] and that single sample put it at 1.26, rejecting the
+# canonical true positive. On MAD the same device scores 0.059 while the corpus
+# washing machine that also passes the all-above test - [8.4, 7.7, 27.0, 8.8,
+# 55.0, 26.8, 6.0, 38.9], where the last stored sample is just wherever the drum
+# stopped - scores 0.548. 0.25 sits with ~4x margin on both sides.
+_STANDBY_MAX_MAD = 0.25
 
 
 def detect_standby_above_stop(
@@ -533,15 +537,27 @@ def detect_standby_above_stop(
     1. **Every** recent cycle must end above the threshold, not merely
        ``min_hits`` of them. One cycle that reached 0 W proves the appliance
        *can* go below, which is the whole question being asked.
-    2. The level must be **consistent** - spread within
-       ``_STANDBY_MAX_SPREAD`` of the median. A real standby draw is a level;
-       "wherever the drum happened to be" ranges from 6 W to 55 W across eight
-       cycles, which is what the corpus's washing machines actually look like.
+    2. The level must be **consistent**, as median-absolute-deviation over the
+       median, within ``_STANDBY_MAX_MAD``. A real standby draw is a level;
+       "wherever the drum happened to be" ranges 6 W to 55 W across eight cycles,
+       which is what the corpus's washing machines actually look like.
 
-    Together these are silent on all six corpus devices, where the first draft
-    fired on four. User-stopped cycles are still kept: on an appliance with this
-    fault they are often the ONLY way a cycle ever closes, and the #445 reporter
-    force-stopped four.
+    **Validated against the reporters' own exports, not just the corpus.** Of
+    nine real devices only one passes both tests: #445's Miele, every cycle
+    ending 3.2-7.5 W against a 2.56 W threshold (MAD 0.059). The corpus washing
+    machine that also never reaches 0 W is rejected on consistency (MAD 0.548).
+
+    **#427's AEG and #424's Beko are deliberately NOT reported**, though an
+    earlier version of this docstring cited them as validation at 4/8 each. Their
+    stored cycles end ``[0.0, 1.9, 0.1, 0.9, 0.8, 0.0, 0.0, 0.7]`` and
+    ``[1.2, 1.3, 1.3, 0.0, 0.3, 0.4, 0.2, 1.3]`` - both reach 0 W regularly, so
+    neither idles above its threshold. Their late finishes had a different cause
+    (the keepalive cadence bug, fixed separately), and counting them here was
+    reading a coincidence as a diagnosis.
+
+    User-stopped cycles are still kept: on an appliance with this fault they are
+    often the ONLY way a cycle ever closes, and the #445 reporter force-stopped
+    four.
 
     Returns None when there is no such pattern, else a summary carrying the
     observed idle level so the UI can name a number rather than a symptom. Pure
@@ -586,8 +602,9 @@ def detect_standby_above_stop(
         median = float(np.median(above))
         if median <= 0:
             return None
-        # Requirement 2: the levels agree with each other. See _STANDBY_MAX_SPREAD.
-        if (max(above) - min(above)) / median > _STANDBY_MAX_SPREAD:
+        # Requirement 2: the levels agree with each other. See _STANDBY_MAX_MAD.
+        mad = float(np.median([abs(f - median) for f in above]))
+        if mad / median > _STANDBY_MAX_MAD:
             return None
         return {
             "cycles_above": len(above),
