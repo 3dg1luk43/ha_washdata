@@ -455,6 +455,15 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     for k in _DEAD_ABRUPT_KEYS:
         options.pop(k, None)
 
+    # Same heal as the 3.10 -> 3.11 step, for the cohort that never reaches it:
+    # an entry below 3.6 (including v1/v2) takes this one-pass path instead of
+    # the chain, and the `setdefault` above preserves a stored 1.5 rather than
+    # replacing it. Without this those entries keep the pre-item-311 gate.
+    if options.get(CONF_PROFILE_MATCH_MAX_DURATION_RATIO) == _OLD_SEEDED_MAX_DURATION_RATIO:
+        options[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] = (
+            DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+        )
+
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
     # Remap any entry still on one of them to DEVICE_TYPE_OTHER (Threshold Device),
     # preserving all tuned options so no user data is lost.

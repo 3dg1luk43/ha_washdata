@@ -1506,12 +1506,18 @@ def ws_get_devices(
 
                 store = getattr(manager, "profile_store", None)
                 if store is not None:
+                    # Assigned per entry and OUTSIDE both probes. It used to be
+                    # set inside the suggestion-badge `try`, after
+                    # `store.get_suggestions()`: if that raised, `merged` kept
+                    # the PREVIOUS entry's options and the standby probe below
+                    # read another device's stop threshold - or, on the first
+                    # entry, raised NameError into a debug-level log.
+                    merged = {**entry.data, **entry.options}
                     try:
                         # Same filters as ws_get_suggestions (muted keys and
                         # no-op values dropped) so the device-pill badge can
                         # never disagree with the Settings tab banner.
                         raw = store.get_suggestions() or {}
-                        merged = {**entry.data, **entry.options}
                         try:
                             muted = set(store.get_locked_suggestions() or [])
                         except Exception:  # pylint: disable=broad-exception-caught

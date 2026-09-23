@@ -1103,7 +1103,12 @@ class _DetailSim:
             tail_power,
             terminal_high,
             terminal_quiet,
-            longest_candidate_duration(candidates),
+            # candidates[:5] to match the live contract: `MatchResult.candidates`
+            # is `candidates[:5]`, and the manager computes the ENDING-gate bound
+            # from that field. Passing the full list here would let a sixth-ranked
+            # longer profile raise the sim's bar above the live one, so an
+            # ambiguous cycle would end later in the Playground than in reality.
+            longest_candidate_duration(candidates[:5]),
         )
 
     def _price_at(self, offset_s: float) -> float | None:

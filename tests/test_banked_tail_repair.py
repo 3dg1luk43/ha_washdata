@@ -61,6 +61,11 @@ def _det(device_type="washing_machine", quiet=None, spike=False, last_active=300
     d._expected_duration = 3600.0
     d._matched_terminal_quiet_s = quiet
     d._end_spike_seen = spike
+    # WHEN the spike happened matters, not just that it did: only a spike at
+    # >= 90% of expected is the terminal pump-out, the same bar
+    # `_resolve_smart_ratio` uses. Below that it can be the pre-final-rinse
+    # drain with a passive Dry phase still to come.
+    d._end_spike_duration = last_active if spike else 0.0
     d._last_active_time = T0 + timedelta(seconds=last_active) if last_active else None
     return d
 
@@ -80,9 +85,27 @@ def test_a_washer_ends_at_its_last_activity() -> None:
 
 
 def test_a_dishwasher_that_pumped_out_ends_there_too() -> None:
-    """The pump-out IS the end; _last_active_time already sits on it."""
-    d = _det("dishwasher", quiet=600.0, spike=True)
-    assert _cap_offset(d) == pytest.approx(3000.0)
+    """The pump-out IS the end; _last_active_time already sits on it.
+
+    Late enough to be terminal: 3400 s of a 3600 s programme is 94%, past the
+    0.90 bar `_resolve_smart_ratio` uses for the same judgement.
+    """
+    d = _det("dishwasher", quiet=600.0, spike=True, last_active=3400.0)
+    assert _cap_offset(d) == pytest.approx(3400.0)
+
+
+def test_a_pre_rinse_drain_does_not_cut_the_drying_phase() -> None:
+    """Found in the PR #448 round-10 review.
+
+    `_end_spike_seen` is set from DISHWASHER_END_SPIKE_MIN_PROGRESS (0.85), but
+    a spike at 83% of expected is the pre-final-rinse drain, with the Dry phase
+    still to come. Capping at the drain cuts that drying off, which lowers
+    avg_duration, which makes the NEXT Smart Termination fire earlier - the
+    error compounds toward split cycles. Falls through to the measured quiet
+    span instead.
+    """
+    d = _det("dishwasher", quiet=600.0, spike=True, last_active=3000.0)  # 83%
+    assert _cap_offset(d) == pytest.approx(3600.0)  # 3000 + 600 measured quiet
 
 
 def test_a_dishwasher_without_its_pump_out_keeps_the_measured_drying() -> None:

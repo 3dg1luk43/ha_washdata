@@ -4101,7 +4101,13 @@ class HaWashdataPanel extends HTMLElement {
   // exactly as `navigated` does it for the page.
   _modalNavKey() {
     const m = this._modal;
-    return m ? [m.type, m.name || m.cycleId || '', m.tab || ''].join('|') : '';
+    // `tab` covers profile-panel and gear-settings, but cycle-detail keeps its
+    // Inspect/Trim/Split/Review view in `mode` and the import wizards keep their
+    // step in `step` - without those, switching view inside those dialogs kept
+    // the previous view's offset, which is the same bug one level down.
+    return m
+      ? [m.type, m.name || m.cycleId || '', m.tab || m.mode || m.step || ''].join('|')
+      : '';
   }
 
   _render() {
