@@ -185,10 +185,21 @@ Each of these is unreachable from a mocked Home Assistant:
 
 ## Current known state
 
-`./smoke.sh` reports **20 of 20** on both device types - washing machine at
-60x, and `--type dishwasher --speedup 4` (a ~45 min run, which also exercises
-the pre-completion alert and closes through Smart Termination at 35.9 min of a
-36 min replay). `./check_notify_actions.sh` passes. The whole notification lifecycle is proven
+**Run `./smoke.sh --fresh` between comparison runs.** `setup-device` reuses an
+entry by name and `--type X` names the device `Test X`, so a washing-machine run
+followed by a dishwasher run leaves **both** devices in the box, driven from the
+same power sensor. That cross-talk surfaces as unrelated assertion failures -
+two devices' live notifications land on two tags, so "live updates share one
+dedicated tag" fails for reasons that have nothing to do with the code.
+
+`./smoke.sh` reports **19 of 20** on a clean box at 60x for a washing machine;
+the one failure is the seeded export's own `notify.mobile_app_s24` target, which
+does not exist in the box and raises `ServiceNotFound`. `--type dishwasher`
+previously seeded the **washing-machine** export regardless of type - so the
+dishwasher path was being exercised against washing-machine profiles and the
+run matched programmes like "30 deg / 2:09 / 800rpm". The export now follows
+`--type`, and a dishwasher run takes ~30 min at any speedup for the reasons in
+*Time compression* above. `./check_notify_actions.sh` passes. The whole notification lifecycle is proven
 against a real service bus: start, a live update on its own tag, mobile-only
 routing, the lifecycle hand-over dismissal, the live-activity end, the finished
 alert delivered *before* that end, titles on every content notification, and a
