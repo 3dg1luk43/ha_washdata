@@ -26,7 +26,7 @@ NAME="Test Washer"
 SLUG="test_washer"
 TYPE="washing_machine"
 SPEEDUP=60
-EXPORT="$REPO/cycle_data/me/washdata_export_01KXGA3C.json"
+EXPORT=""
 CYCLE=0
 FRESH=0
 
@@ -41,6 +41,24 @@ while [ $# -gt 0 ]; do
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
 done
+
+# Resolved AFTER parsing, so --type picks matching data. This used to be a
+# single hardcoded washing-machine export, which meant `--type dishwasher`
+# created a dishwasher device and then seeded it with washing-machine
+# profiles - so the run matched programmes like "30 deg / 2:09 / 800rpm" and
+# the dishwasher-specific paths were never exercised against dishwasher data.
+if [ -z "$EXPORT" ]; then
+  case "$TYPE" in
+    dishwasher) EXPORT="$REPO/cycle_data/me/washdata_export_01KDMTAA.json"
+                [ "$CYCLE" = 0 ] && CYCLE=0 ;;
+    *)          EXPORT="$REPO/cycle_data/me/washdata_export_01KXGA3C.json" ;;
+  esac
+fi
+if [ ! -f "$EXPORT" ]; then
+  echo "export not found: $EXPORT" >&2
+  exit 2
+fi
+echo "seeding from $(basename "$EXPORT") for device type $TYPE"
 
 cd "$HERE"
 if [ "$FRESH" = 1 ]; then
