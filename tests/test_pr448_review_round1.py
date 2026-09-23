@@ -339,44 +339,18 @@ def test_both_presence_flush_paths_go_through_one_body():
 
 
 # --------------------------------------------------------------------------
-# Round 6: two gates that did not use the evidence their comments claimed
+# Round 6, re-measured: both proposed gate changes were measured worse
 # --------------------------------------------------------------------------
-def test_a_weak_match_cannot_shorten_the_fallback_end_gate():
-    """The item-306 gate said it used "the SAME guards Smart Termination respects".
+def test_the_end_gate_is_deliberately_not_gated_on_confidence():
+    """Adding the confidence check was tried and measured pure cost.
 
-    It omitted the confidence one, and that is not redundant with the two
-    ambiguity flags: a lone weak candidate has no runner-up, so its margin is
-    1.0 and neither flag fires - yet ``_expected_duration`` is exactly what the
-    rule keys on. Smart Termination, the more aggressive mechanism, has required
-    ``match_confidence_threshold`` all along.
+    ``devtools/end_gate_eval.py`` over 221 replayed real cycles: it moves 2 of
+    them (+10.5 min and +21 min of end lag) while early ends (1.42% / 0.00%) and
+    splits (3.32%) stay exactly where they were - no split prevented, no early
+    end prevented. Smart Termination checks confidence because it ENDS a cycle
+    on a prediction; this rule only shortens a wait already past the programme's
+    expected end. Pinned so the next review round does not re-add it silently.
     """
-    from custom_components.ha_washdata.const import (
-        END_GATE_LATE_RATIO,
-        END_GATE_LATE_SECONDS,
-    )
-
-    off_delay, min_off_gap, threshold = 180.0, 480.0, 0.4
-
-    def effective_gate(confidence: float, elapsed_ratio: float) -> float:
-        # The shipped condition, transcribed: a lone candidate is unambiguous.
-        gate = max(off_delay, min_off_gap)
-        if confidence >= threshold and elapsed_ratio >= END_GATE_LATE_RATIO:
-            gate = max(off_delay, min(min_off_gap, END_GATE_LATE_SECONDS))
-        return gate
-
-    # A confident, overrunning match still gets the shortened wait (item 306).
-    assert effective_gate(0.85, 1.2) == pytest.approx(300.0)
-    # A weak match to a shorter look-alike does not: the 480 s prior stays, so a
-    # mid-wash soak between 300 s and 480 s can no longer split the cycle.
-    assert effective_gate(0.20, 1.2) == pytest.approx(480.0)
-    # Right at the bar, inclusive.
-    assert effective_gate(0.40, 1.2) == pytest.approx(300.0)
-    # Before 1.05x expected nothing shortens, however confident.
-    assert effective_gate(0.99, 1.0) == pytest.approx(480.0)
-
-
-def test_the_end_gate_checks_confidence_in_the_source():
-    """Transcribed logic above is only as good as its transcription."""
     from pathlib import Path
 
     src = (
@@ -388,37 +362,37 @@ def test_the_end_gate_checks_confidence_in_the_source():
     block = src.split("--- FALLBACK TIMEOUT CHECK ---", 1)[1].split(
         "gate_window = self._config.off_delay", 1
     )[0]
-    assert "self._last_match_confidence" in block
-    assert "self._config.match_confidence_threshold" in block
+    condition = block.split("if (", 1)[1].split("):", 1)[0]
+    assert "match_confidence_threshold" not in condition, (
+        "the confidence check was measured as pure cost (2 cycles delayed, no "
+        "split or early end prevented) - see devtools/end_gate_eval.py"
+    )
+    # The guards that ARE load-bearing must stay.
+    assert "_match_prefix_ambiguous" in condition
+    assert "_match_ambiguous" in condition
 
 
-def test_the_decisive_margin_bypass_needs_a_real_runner_up():
-    """`match_margin` keeps a 1.0 sentinel when nothing else scored, which clears
-    any threshold - and if the displayed program was the one Stage 1 rejected it
-    is absent from `candidates`, so `current_program_score` stays 0.0 and the
-    second guard is vacuous too. The bypass then fired on margin evidence that
-    was never computed."""
+def test_a_sole_surviving_candidate_still_bypasses_persistence():
+    """Requiring a real runner-up was measured worse than the sentinel.
+
+    ``devtools/decisive_margin_eval.py`` over 1977 mid-cycle checkpoints: a
+    single surviving candidate occurs at 2.58% of them and is the correct
+    programme 94.0% (47/50) of the time, against 77.8% (669/860) for the
+    real-margin bypass it would have been held to. Stage 1/2 rejecting every
+    other profile is evidence, not the absence of it.
+    """
     from custom_components.ha_washdata.const import MATCH_DECISIVE_MARGIN
 
     def bypasses(runner_up: float | None, confidence: float, current: float) -> bool:
         margin = 1.0 if runner_up is None else confidence - runner_up
-        return (
-            runner_up is not None
-            and margin > MATCH_DECISIVE_MARGIN
-            and confidence > current
-        )
+        return margin > MATCH_DECISIVE_MARGIN and confidence > current
 
-    # A genuinely decisive win still bypasses persistence.
-    assert bypasses(0.40, 0.80, 0.50) is True
-    # A crowded field does not, as before.
-    assert bypasses(0.75, 0.80, 0.50) is False
-    # The sole surviving candidate no longer does: it falls through to the
-    # persistence path, which still switches, just after confirmation.
-    assert bypasses(None, 0.20, 0.0) is False
-    assert bypasses(None, 0.95, 0.0) is False
+    assert bypasses(0.40, 0.80, 0.50) is True   # genuinely decisive
+    assert bypasses(0.75, 0.80, 0.50) is False  # crowded field, unchanged
+    assert bypasses(None, 0.55, 0.0) is True    # sole survivor: 94% correct
 
 
-def test_the_decisive_margin_bypass_checks_the_runner_up_in_the_source():
+def test_the_decisive_margin_bypass_does_not_require_a_runner_up():
     from pathlib import Path
 
     src = (
@@ -428,4 +402,17 @@ def test_the_decisive_margin_bypass_checks_the_runner_up_in_the_source():
         / "manager.py"
     ).read_text()
     block = src.split("Decisive Margin Override", 1)[1].split("should_switch = True", 1)[0]
-    assert "_runner_up is not None" in block
+    assert "_runner_up is not None" not in block, (
+        "the sole-surviving-candidate case is 94% correct - see "
+        "devtools/decisive_margin_eval.py"
+    )
+
+
+def test_both_measurement_harnesses_are_checked_in():
+    """The whole reason these two were unmeasurable is that item 306's harness
+    was never committed. Do not let that happen again."""
+    from pathlib import Path
+
+    devtools = Path(__file__).resolve().parents[1] / "devtools"
+    assert (devtools / "end_gate_eval.py").is_file()
+    assert (devtools / "decisive_margin_eval.py").is_file()
