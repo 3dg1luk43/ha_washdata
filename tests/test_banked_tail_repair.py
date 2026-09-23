@@ -462,3 +462,59 @@ async def test_a_washer_repair_adds_no_spurious_terminal_sample() -> None:
     out = data["past_cycles"][0]
     assert len(out["power_data"]) == before, "no terminal point should have been added"
     assert out["power_data"][-1][1] == 100.0
+
+
+@pytest.mark.asyncio
+async def test_a_user_stopped_cycle_is_never_repaired() -> None:
+    """`user_stop` finishes with keep_tail=True and DELIBERATELY no tail_cap.
+
+    "User implies Done Now" (`cycle_detector.user_stop`), so its tail is the tail
+    the user asked to keep - not a banked Smart Termination confirmation delay.
+    Repairing it truncates real recorded history and rewrites the profile
+    statistics with the shortened value. Found in the PR #448 round-7 review.
+    """
+    cyc = _cycle("a", 3000, 1200)
+    cyc["termination_reason"] = "user"
+    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 0
+    assert data["past_cycles"][0]["duration"] == pytest.approx(4200.0)
+    assert not st.banked_tail_repair_pending(), "the marker must still be cleared"
+
+
+@pytest.mark.asyncio
+async def test_a_cycle_with_no_recorded_reason_is_left_alone() -> None:
+    """A one-time upgrade rewrite must not guess about history it cannot verify."""
+    cyc = _cycle("a", 3000, 1200)
+    cyc.pop("termination_reason", None)
+    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 0
+    assert data["past_cycles"][0]["duration"] == pytest.approx(4200.0)
+
+
+@pytest.mark.asyncio
+async def test_the_repair_still_examines_every_cycle_but_repairs_only_smart() -> None:
+    """Mixed history: only the Smart-terminated cycle moves."""
+    smart = _cycle("smart", 3000, 1200)
+    user = _cycle("user", 3000, 1200)
+    user["termination_reason"] = "user"
+    timeout = _cycle("timeout", 3000, 1200)
+    timeout["termination_reason"] = "timeout"
+    data = {"past_cycles": [smart, user, timeout], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["examined"] == 3
+    assert res["repaired"] == 1
+    by_id = {c["id"]: c for c in data["past_cycles"]}
+    assert by_id["smart"]["duration"] < 4200.0
+    assert by_id["user"]["duration"] == pytest.approx(4200.0)
+    assert by_id["timeout"]["duration"] == pytest.approx(4200.0)

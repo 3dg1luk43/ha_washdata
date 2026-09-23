@@ -84,6 +84,7 @@ from .const import (
     EVIDENCE_REFERENCE_CYCLES,
     PROFILE_EVIDENCE_SOURCES,
     DEFAULT_DTW_BANDWIDTH,
+    TerminationReason,
 )
 from .features import compute_signature
 from .signal_processing import resample_uniform, resample_adaptive, Segment, integrate_wh, energy_gap_threshold_s
@@ -5648,10 +5649,12 @@ class ProfileStore:
           when that span is not trustworthy, rather than truncating a real drying
           phase on no evidence.
 
-        Only ``past_cycles`` is touched. ``reference_cycles`` are community
-        templates this device never recorded, and ``backfill_cycles`` were replayed
-        from raw history and never went through Smart Termination at all, so
-        neither can carry a banked tail.
+        Only ``past_cycles`` is touched, and within it only cycles recorded as
+        ``TerminationReason.SMART``. ``reference_cycles`` are community templates
+        this device never recorded, and ``backfill_cycles`` were replayed from raw
+        history and never went through Smart Termination at all, so neither can
+        carry a banked tail; a user-stopped or unattributed cycle is left alone for
+        the reason given at the filter.
 
         Returns a summary for the log. Never raises: a failed repair must not cost
         the user their history, so the store is left exactly as it was.
@@ -5668,6 +5671,19 @@ class ProfileStore:
                 if not isinstance(cycle, dict):
                     continue
                 summary["examined"] += 1
+                # Only Smart Termination ever banked a confirmation delay, and it
+                # is the only live path that passes a `tail_cap` (`_keep_tail_cap`
+                # at cycle_detector.py:2133/2372/2394/3094). `user_stop` also
+                # finishes with `keep_tail=True` but DELIBERATELY uncapped - "User
+                # implies Done Now" - so repairing it would truncate a tail the
+                # user asked to keep, and rewrite the profile statistics with it.
+                # A cycle with no recorded reason is left alone too: it cannot be
+                # shown to have been Smart-terminated, and a one-time upgrade
+                # rewrite must never guess about history it cannot verify. This
+                # also matches what was measured (item 297): smart-terminated
+                # cycles banked a median 12.6 min, every other path ~0.
+                if cycle.get("termination_reason") != TerminationReason.SMART:
+                    continue
                 try:
                     points = decompress_power_data(cycle)
                 except Exception:  # noqa: BLE001 - a bad trace is not repairable

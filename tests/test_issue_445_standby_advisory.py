@@ -93,3 +93,64 @@ def test_malformed_input_is_never_fatal(cycles) -> None:
 def test_a_zero_threshold_reports_nothing() -> None:
     """stop_threshold_w unset/zero means the comparison is meaningless."""
     assert detect_standby_above_stop([_cycle(3.4), _cycle(3.4)], 0.0) is None
+
+
+# ── Round-7 review: the advisory fired on 4 of 6 real devices ────────────────
+#
+# Every non-dishwasher end path trims the trailing sub-threshold samples, so the
+# last stored sample is by construction the last sample ABOVE the threshold -
+# the moment the appliance was last working, not the level it settled at. The
+# first draft read that as a standby level and told a dishwasher whose last
+# stored samples are [0,0,0,0,0,0,62,23] that it "idles at 42.5 W".
+
+
+def _trace(final_w: float, peak: float = 2000.0, cid: str = "c") -> dict:
+    return {
+        "id": cid,
+        "duration": 3600.0,
+        "power_data": [[0.0, peak], [10.0, peak], [20.0, final_w]],
+    }
+
+
+def test_one_cycle_reaching_zero_disproves_idling_above_the_threshold() -> None:
+    """If the appliance CAN reach 0 W it does not idle above the threshold.
+
+    Corpus shape that used to fire: six cycles at 0 W and two at a low but
+    non-zero last-active reading.
+    """
+    cycles = [_trace(0.0, cid=f"z{i}") for i in range(6)] + [
+        _trace(62.0, cid="a"), _trace(23.0, cid="b"),
+    ]
+    assert detect_standby_above_stop(cycles, 1.5) is None
+
+
+def test_a_level_that_is_not_a_level_is_rejected() -> None:
+    """Every cycle above the threshold, but the values are all over the place.
+
+    This is what the corpus's washing machines look like: 6 W to 55 W across
+    eight cycles is where the drum stopped, not a standby draw.
+    """
+    cycles = [
+        _trace(w, cid=f"c{i}")
+        for i, w in enumerate([8.4, 7.7, 27.0, 8.8, 55.0, 26.8, 6.0, 38.9])
+    ]
+    assert detect_standby_above_stop(cycles, 5.0) is None
+
+
+def test_a_genuine_standby_draw_is_still_reported() -> None:
+    """#445's Miele: every cycle ends at a consistent 3.2-3.5 W against 2.56 W."""
+    cycles = [
+        _trace(w, cid=f"c{i}")
+        for i, w in enumerate([3.4, 3.2, 3.5, 3.3, 3.4, 3.2, 3.4, 3.3])
+    ]
+    res = detect_standby_above_stop(cycles, 2.56)
+    assert res is not None
+    assert res["cycles_above"] == 8
+    assert res["cycles_checked"] == 8
+    assert res["idle_w"] == pytest.approx(3.35, abs=0.1)
+
+
+def test_a_consistent_level_with_one_zero_cycle_is_not_reported() -> None:
+    """The single counter-example wins: seven consistent, one at zero."""
+    cycles = [_trace(3.4, cid=f"c{i}") for i in range(7)] + [_trace(0.0, cid="z")]
+    assert detect_standby_above_stop(cycles, 2.56) is None

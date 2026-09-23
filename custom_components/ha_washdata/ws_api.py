@@ -1721,179 +1721,192 @@ async def ws_set_options(
     if not entry:
         connection.send_error(msg["id"], "not_found", f"Entry {msg['entry_id']!r} not found")
         return
-    # Build the new options from the *existing* options plus the submitted
-    # values only. Never spread entry.data in: that would copy identity and
-    # data-only keys (name, initial_profile, stale creation-time identity) into
-    # options where they don't belong. Tunables (including device_type /
-    # power_sensor / min_power, which live in options post-3.6) are preserved
-    # from entry.options and overridden by the submission.
-    new_options = {**entry.options, **msg["options"]}
+    # Serialised per entry (#442 follow-up): the snapshot below, the changelog
+    # write and `async_update_entry` must be one critical section. Without it
+    # two concurrent writers both read the same `entry.options`, both record the
+    # same "old" value in the settings history, and the second update silently
+    # overwrites the first - so a later per-setting revert restores a value that
+    # was never current. The import handlers already hold this lock; the option
+    # writers did not. acquire/release rather than `async with` so the handler
+    # keeps its early-return validation paths.
+    lock = _entry_write_lock(hass, msg["entry_id"])
+    await lock.acquire()
+    try:
+        # Build the new options from the *existing* options plus the submitted
+        # values only. Never spread entry.data in: that would copy identity and
+        # data-only keys (name, initial_profile, stale creation-time identity) into
+        # options where they don't belong. Tunables (including device_type /
+        # power_sensor / min_power, which live in options post-3.6) are preserved
+        # from entry.options and overridden by the submission.
+        new_options = {**entry.options, **msg["options"]}
 
-    # Capture the submitted display name for the entry title before it is
-    # stripped out of options below.
-    submitted_name = new_options.get(CONF_NAME)
+        # Capture the submitted display name for the entry title before it is
+        # stripped out of options below.
+        submitted_name = new_options.get(CONF_NAME)
 
-    # Mirror the OptionsFlow save-time normalization so the panel can never
-    # persist stale or invalid values:
-    #  - a cleared selector (entity / linked device / trigger) becomes None so
-    #    the link or subscription is removed rather than left dangling;
-    #  - pump-only keys are dropped for non-pump device types;
-    #  - the transient "apply suggestions" flag is never stored.
-    for key in (
-        CONF_EXTERNAL_END_TRIGGER,
-        CONF_DOOR_SENSOR_ENTITY,
-        CONF_LINKED_DEVICE,
-        CONF_SWITCH_ENTITY,
-        CONF_ENERGY_SENSOR,
-    ):
-        if key in new_options and not new_options[key]:
-            new_options[key] = None
+        # Mirror the OptionsFlow save-time normalization so the panel can never
+        # persist stale or invalid values:
+        #  - a cleared selector (entity / linked device / trigger) becomes None so
+        #    the link or subscription is removed rather than left dangling;
+        #  - pump-only keys are dropped for non-pump device types;
+        #  - the transient "apply suggestions" flag is never stored.
+        for key in (
+            CONF_EXTERNAL_END_TRIGGER,
+            CONF_DOOR_SENSOR_ENTITY,
+            CONF_LINKED_DEVICE,
+            CONF_SWITCH_ENTITY,
+            CONF_ENERGY_SENSOR,
+        ):
+            if key in new_options and not new_options[key]:
+                new_options[key] = None
 
-    # Resolve the effective device type option-first (submission -> existing
-    # options -> data -> default) so the pump-only key is dropped correctly even
-    # when the submission omits device_type.
-    effective_device_type = new_options.get(
-        CONF_DEVICE_TYPE, entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
-    )
-    if effective_device_type != DEVICE_TYPE_PUMP:
-        new_options.pop(CONF_PUMP_STUCK_DURATION, None)
+        # Resolve the effective device type option-first (submission -> existing
+        # options -> data -> default) so the pump-only key is dropped correctly even
+        # when the submission omits device_type.
+        effective_device_type = new_options.get(
+            CONF_DEVICE_TYPE, entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+        )
+        if effective_device_type != DEVICE_TYPE_PUMP:
+            new_options.pop(CONF_PUMP_STUCK_DURATION, None)
 
-    # Numeric-finite validation for fields that the cycle-detector float()-casts at
-    # build time; coerce bad submissions to the compiled default so storage stays clean.
-    if CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE in new_options:
+        # Numeric-finite validation for fields that the cycle-detector float()-casts at
+        # build time; coerce bad submissions to the compiled default so storage stays clean.
+        if CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE in new_options:
+            try:
+                _qr = float(new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE])
+                if not math.isfinite(_qr):
+                    raise ValueError("non-finite")
+                new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = _qr
+            except (TypeError, ValueError):
+                new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = (
+                    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+                )
+
+        # Smart-Termination duration ratio (#393): fraction of expected duration, so it
+        # is meaningless outside [0.50, 1.00] - clamp valid submissions to the range.
+        # An empty or non-numeric value drops the key so the device-type default
+        # (resolved in the config builder, 0.99 dishwasher / 0.98 other) applies again;
+        # coercing to a single scalar default here would be wrong for dishwashers.
+        if CONF_SMART_TERMINATION_DURATION_RATIO in new_options:
+            _raw_str = new_options[CONF_SMART_TERMINATION_DURATION_RATIO]
+            if _raw_str in (None, ""):
+                new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+            else:
+                try:
+                    _str = float(_raw_str)
+                    if not math.isfinite(_str):
+                        raise ValueError("non-finite")
+                    new_options[CONF_SMART_TERMINATION_DURATION_RATIO] = min(
+                        1.0, max(0.5, _str)
+                    )
+                except (TypeError, ValueError):
+                    new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+
+        # #429: the anti-crease finalise ratio is the same kind of value against the
+        # same kind of mean, and equally meaningless outside [0.50, 1.00]. An empty or
+        # non-numeric submission drops the key so DEFAULT_ANTI_CREASE_FINALIZE_RATIO
+        # applies again.
+        if CONF_ANTI_CREASE_FINALIZE_RATIO in new_options:
+            _raw_ac = new_options[CONF_ANTI_CREASE_FINALIZE_RATIO]
+            if _raw_ac in (None, ""):
+                new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
+            else:
+                try:
+                    _ac = float(_raw_ac)
+                    if not math.isfinite(_ac):
+                        raise ValueError("non-finite")
+                    new_options[CONF_ANTI_CREASE_FINALIZE_RATIO] = min(
+                        ANTI_CREASE_FINALIZE_RATIO_MAX,
+                        max(ANTI_CREASE_FINALIZE_RATIO_MIN, _ac),
+                    )
+                # OverflowError too (register item 194): json parses an integer literal
+                # of any length into an unbounded int, and float() on one of those raises
+                # rather than returning inf. Uncaught it becomes ERR_UNKNOWN_ERROR and
+                # the whole save fails, instead of this key falling back to its default.
+                except (TypeError, ValueError, OverflowError):
+                    new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
+
+        # #430: seconds, 0 = off. Clamped to [0, CURVE_PREROLL_MAX_SECONDS] so a
+        # mistyped value cannot drag minutes of unrelated standby into a curve; empty
+        # or non-numeric drops the key and restores the default (off).
+        if CONF_CURVE_PREROLL_SECONDS in new_options:
+            _raw_pr = new_options[CONF_CURVE_PREROLL_SECONDS]
+            if _raw_pr in (None, ""):
+                new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
+            else:
+                try:
+                    _pr = float(_raw_pr)
+                    if not math.isfinite(_pr):
+                        raise ValueError("non-finite")
+                    new_options[CONF_CURVE_PREROLL_SECONDS] = min(
+                        CURVE_PREROLL_MAX_SECONDS, max(0.0, _pr)
+                    )
+                except (TypeError, ValueError, OverflowError):
+                    new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
+
+        # A None outside the clearable selectors means "not set", not a value: the
+        # per-setting Revert sends the changelog's `old`, which is null for a setting
+        # never saved before. Stored, it would survive options.get(key, DEFAULT) and
+        # break the float()/int() casts at setup, so drop the key and let the default
+        # apply again; this also cleans nulls persisted by earlier builds.
+        _pre_strip_keys = set(new_options)
+        new_options = strip_null_options(new_options)
+        dropped_null_keys = _pre_strip_keys - set(new_options)
+
+        # Partition identity out of options: the display name is carried by the
+        # entry title, never persisted in options (matches the config-flow invariant
+        # that CONF_NAME is absent from options).
+        for key in _OPTIONS_IDENTITY_KEYS:
+            new_options.pop(key, None)
+
+        update_kwargs: dict[str, Any] = {"options": new_options}
+        if isinstance(submitted_name, str) and submitted_name.strip():
+            update_kwargs["title"] = submitted_name.strip()
+
+        # Settings change history (D7): diff the pre-update effective options against
+        # the post-normalization values, but only for keys the user actually
+        # submitted, and persist BEFORE async_update_entry (which schedules a reload
+        # that rebuilds the store). A changelog failure must never block the save.
         try:
-            _qr = float(new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE])
-            if not math.isfinite(_qr):
-                raise ValueError("non-finite")
-            new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = _qr
-        except (TypeError, ValueError):
-            new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = (
-                DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+            old_effective = {**entry.data, **entry.options}
+            # Keys dropped by the null-strip above are recorded as a change to None
+            # ("reverted to unset") so the history still shows what happened; a
+            # None -> None no-op is skipped by _diff_option_changes.
+            submitted_post = {
+                k: new_options.get(k)
+                for k in msg["options"]
+                if k in new_options or k in dropped_null_keys
+            }
+            changes = _diff_option_changes(old_effective, submitted_post)
+            if changes:
+                manager = _get_manager(hass, msg["entry_id"])
+                store = getattr(manager, "profile_store", None) if manager else None
+                if store is not None:
+                    await store.async_record_settings_changes(changes)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug(
+                "Settings changelog recording failed for %s: %s", msg["entry_id"], exc
             )
 
-    # Smart-Termination duration ratio (#393): fraction of expected duration, so it
-    # is meaningless outside [0.50, 1.00] - clamp valid submissions to the range.
-    # An empty or non-numeric value drops the key so the device-type default
-    # (resolved in the config builder, 0.99 dishwasher / 0.98 other) applies again;
-    # coercing to a single scalar default here would be wrong for dishwashers.
-    if CONF_SMART_TERMINATION_DURATION_RATIO in new_options:
-        _raw_str = new_options[CONF_SMART_TERMINATION_DURATION_RATIO]
-        if _raw_str in (None, ""):
-            new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
-        else:
+        # When online features are disabled, clear the persisted store account so the
+        # user's identity isn't silently retained after they opt out.
+        from .const import CONF_ENABLE_ONLINE_FEATURES  # pylint: disable=import-outside-toplevel
+        was_online = bool(entry.options.get(CONF_ENABLE_ONLINE_FEATURES, False))
+        now_online = bool(new_options.get(CONF_ENABLE_ONLINE_FEATURES, False))
+        if was_online and not now_online:
             try:
-                _str = float(_raw_str)
-                if not math.isfinite(_str):
-                    raise ValueError("non-finite")
-                new_options[CONF_SMART_TERMINATION_DURATION_RATIO] = min(
-                    1.0, max(0.5, _str)
-                )
-            except (TypeError, ValueError):
-                new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+                manager = _get_manager(hass, msg["entry_id"])
+                store = getattr(manager, "profile_store", None) if manager else None
+                if store is not None:
+                    await store.clear_store_account()
+                    await store.async_save()
+            except Exception:  # pylint: disable=broad-exception-caught
+                pass
 
-    # #429: the anti-crease finalise ratio is the same kind of value against the
-    # same kind of mean, and equally meaningless outside [0.50, 1.00]. An empty or
-    # non-numeric submission drops the key so DEFAULT_ANTI_CREASE_FINALIZE_RATIO
-    # applies again.
-    if CONF_ANTI_CREASE_FINALIZE_RATIO in new_options:
-        _raw_ac = new_options[CONF_ANTI_CREASE_FINALIZE_RATIO]
-        if _raw_ac in (None, ""):
-            new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
-        else:
-            try:
-                _ac = float(_raw_ac)
-                if not math.isfinite(_ac):
-                    raise ValueError("non-finite")
-                new_options[CONF_ANTI_CREASE_FINALIZE_RATIO] = min(
-                    ANTI_CREASE_FINALIZE_RATIO_MAX,
-                    max(ANTI_CREASE_FINALIZE_RATIO_MIN, _ac),
-                )
-            # OverflowError too (register item 194): json parses an integer literal
-            # of any length into an unbounded int, and float() on one of those raises
-            # rather than returning inf. Uncaught it becomes ERR_UNKNOWN_ERROR and
-            # the whole save fails, instead of this key falling back to its default.
-            except (TypeError, ValueError, OverflowError):
-                new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
-
-    # #430: seconds, 0 = off. Clamped to [0, CURVE_PREROLL_MAX_SECONDS] so a
-    # mistyped value cannot drag minutes of unrelated standby into a curve; empty
-    # or non-numeric drops the key and restores the default (off).
-    if CONF_CURVE_PREROLL_SECONDS in new_options:
-        _raw_pr = new_options[CONF_CURVE_PREROLL_SECONDS]
-        if _raw_pr in (None, ""):
-            new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
-        else:
-            try:
-                _pr = float(_raw_pr)
-                if not math.isfinite(_pr):
-                    raise ValueError("non-finite")
-                new_options[CONF_CURVE_PREROLL_SECONDS] = min(
-                    CURVE_PREROLL_MAX_SECONDS, max(0.0, _pr)
-                )
-            except (TypeError, ValueError, OverflowError):
-                new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
-
-    # A None outside the clearable selectors means "not set", not a value: the
-    # per-setting Revert sends the changelog's `old`, which is null for a setting
-    # never saved before. Stored, it would survive options.get(key, DEFAULT) and
-    # break the float()/int() casts at setup, so drop the key and let the default
-    # apply again; this also cleans nulls persisted by earlier builds.
-    _pre_strip_keys = set(new_options)
-    new_options = strip_null_options(new_options)
-    dropped_null_keys = _pre_strip_keys - set(new_options)
-
-    # Partition identity out of options: the display name is carried by the
-    # entry title, never persisted in options (matches the config-flow invariant
-    # that CONF_NAME is absent from options).
-    for key in _OPTIONS_IDENTITY_KEYS:
-        new_options.pop(key, None)
-
-    update_kwargs: dict[str, Any] = {"options": new_options}
-    if isinstance(submitted_name, str) and submitted_name.strip():
-        update_kwargs["title"] = submitted_name.strip()
-
-    # Settings change history (D7): diff the pre-update effective options against
-    # the post-normalization values, but only for keys the user actually
-    # submitted, and persist BEFORE async_update_entry (which schedules a reload
-    # that rebuilds the store). A changelog failure must never block the save.
-    try:
-        old_effective = {**entry.data, **entry.options}
-        # Keys dropped by the null-strip above are recorded as a change to None
-        # ("reverted to unset") so the history still shows what happened; a
-        # None -> None no-op is skipped by _diff_option_changes.
-        submitted_post = {
-            k: new_options.get(k)
-            for k in msg["options"]
-            if k in new_options or k in dropped_null_keys
-        }
-        changes = _diff_option_changes(old_effective, submitted_post)
-        if changes:
-            manager = _get_manager(hass, msg["entry_id"])
-            store = getattr(manager, "profile_store", None) if manager else None
-            if store is not None:
-                await store.async_record_settings_changes(changes)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug(
-            "Settings changelog recording failed for %s: %s", msg["entry_id"], exc
-        )
-
-    # When online features are disabled, clear the persisted store account so the
-    # user's identity isn't silently retained after they opt out.
-    from .const import CONF_ENABLE_ONLINE_FEATURES  # pylint: disable=import-outside-toplevel
-    was_online = bool(entry.options.get(CONF_ENABLE_ONLINE_FEATURES, False))
-    now_online = bool(new_options.get(CONF_ENABLE_ONLINE_FEATURES, False))
-    if was_online and not now_online:
-        try:
-            manager = _get_manager(hass, msg["entry_id"])
-            store = getattr(manager, "profile_store", None) if manager else None
-            if store is not None:
-                await store.clear_store_account()
-                await store.async_save()
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
-
-    hass.config_entries.async_update_entry(entry, **update_kwargs)
-    _send_result(connection, msg["id"], "set_options", {"success": True})
+        hass.config_entries.async_update_entry(entry, **update_kwargs)
+        _send_result(connection, msg["id"], "set_options", {"success": True})
+    finally:
+        lock.release()
 
 
 @websocket_api.websocket_command(

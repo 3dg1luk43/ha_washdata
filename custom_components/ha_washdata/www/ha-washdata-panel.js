@@ -8817,6 +8817,13 @@ class HaWashdataPanel extends HTMLElement {
     const eid = dev.entry_id;
     try {
       await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: patch });
+      // The save landed on `eid`, but every write below is device-scoped state
+      // for whatever device is selected NOW. Switching device during the await
+      // would fold this patch into the new device's `_opts` - which is the
+      // SAVED-options baseline (#447), so `_changedOptions` would then drop
+      // those keys and a later save would never send them. Same entry guard the
+      // other post-await writers use.
+      if (!this._isActiveEntry(eid)) return true;
       this._opts = { ...this._opts, ...patch };
       // The value is saved now, so a stale pending copy must not shadow it on the
       // next render of the Settings form.
