@@ -784,3 +784,75 @@ async def test_migrate_3_10_to_3_11_logs_what_it_actually_removed(
 
     assert "abrupt_drop_ratio" in caplog.text
     assert "removed nothing" not in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_10_to_3_11_heals_the_seeded_max_duration_ratio(
+    hass: HomeAssistant,
+) -> None:
+    """Item 311 widened the Stage-1 upper gate 1.5 -> 1.8, and it reached nobody.
+
+    The legacy migration SEEDS the key with `setdefault(..., DEFAULT_...)`, so
+    every entry migrated before that change has a literal 1.5 in its options and
+    the manager reads it in preference to the new default. 13 of the 33 real
+    exports in cycle_data/ carry exactly 1.5. Found in the PR #448 round-9
+    review.
+    """
+    from custom_components.ha_washdata.const import (
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+        DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    )
+
+    entry = DummyEntry(
+        version=3,
+        minor_version=10,
+        data={},
+        options={CONF_PROFILE_MATCH_MAX_DURATION_RATIO: 1.5, CONF_OFF_DELAY: 120},
+    )
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.options[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] == pytest.approx(
+        DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+    )
+    assert entry.options[CONF_OFF_DELAY] == 120
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_10_to_3_11_leaves_a_tuned_ratio_alone(
+    hass: HomeAssistant,
+) -> None:
+    """Only the old seeded default is healed. A user who tuned this produced a
+    value like 1.44 or 1.51, not the old constant on the nose."""
+    from custom_components.ha_washdata.const import (
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+    )
+
+    for tuned in (1.44, 1.51, 1.2, 2.0):
+        entry = DummyEntry(
+            version=3,
+            minor_version=10,
+            data={},
+            options={CONF_PROFILE_MATCH_MAX_DURATION_RATIO: tuned},
+        )
+        hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+        assert await async_migrate_entry(hass, entry) is True
+        assert entry.options[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] == pytest.approx(
+            tuned
+        ), f"{tuned} is a deliberate value and must survive"
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_10_to_3_11_leaves_an_absent_ratio_absent(
+    hass: HomeAssistant,
+) -> None:
+    """A never-seeded entry must keep falling through to the runtime default."""
+    from custom_components.ha_washdata.const import (
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+    )
+
+    entry = DummyEntry(version=3, minor_version=10, data={}, options={CONF_OFF_DELAY: 120})
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+
+    assert await async_migrate_entry(hass, entry) is True
+    assert CONF_PROFILE_MATCH_MAX_DURATION_RATIO not in entry.options

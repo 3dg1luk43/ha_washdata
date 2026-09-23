@@ -4091,6 +4091,19 @@ class HaWashdataPanel extends HTMLElement {
     ].join('|');
   }
 
+  // Which dialog, and which of its tabs, is on screen. _navKey carries no modal
+  // state, and _captureScroll files the dialog's offset under the single key
+  // '.wd-modal|0/1' - identical for every dialog and every dialog tab. So
+  // switching pp-tab-* Overview -> Cleanup restored Overview's offset into
+  // Cleanup, gear-settings did the same, and _closeCycleDetail applied the
+  // cycle inspector's offset to the profile panel underneath it. Those are
+  // navigations the user asked for, so the modal's scrollers start at the top,
+  // exactly as `navigated` does it for the page.
+  _modalNavKey() {
+    const m = this._modal;
+    return m ? [m.type, m.name || m.cycleId || '', m.tab || ''].join('|') : '';
+  }
+
   _render() {
     if (!this._container) return;
     // Sync the module-level date-display mode from the user's saved preference so
@@ -4124,6 +4137,20 @@ class HaWashdataPanel extends HTMLElement {
     let scrollBefore = this._scrollCarry || this._captureScroll();
     // A navigation strip was clicked: landing at the top is the point (see _navKey).
     if (navigated) scrollBefore = this._scrollChromeOnly(scrollBefore);
+    // Same rule inside a dialog (see _modalNavKey): drop the modal-scoped keys
+    // when the dialog or its tab changes, so the new view is not opened partway
+    // down at the offset the previous one happened to be at.
+    const modalKey = this._modalNavKey();
+    if (
+      this._scrollModalKey !== undefined
+      && modalKey !== this._scrollModalKey
+      && scrollBefore
+    ) {
+      scrollBefore = Object.fromEntries(
+        Object.entries(scrollBefore).filter(([k]) => !k.startsWith('.wd-modal|')),
+      );
+    }
+    this._scrollModalKey = modalKey;
     this._container.innerHTML = this._buildHtml();
     this._wire();
     if (this._tabLoading) {

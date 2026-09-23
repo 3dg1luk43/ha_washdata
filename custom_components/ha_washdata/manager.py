@@ -4182,7 +4182,9 @@ class WashDataManager:
                     (now - last_real).total_seconds(),
                     self._off_delay,
                 )
-                self.detector.process_reading(0.0, now, synthetic=True)
+                self.detector.process_reading(
+                    0.0, now, synthetic=True, observed=self._sensor_is_readable()
+                )
                 self._notify_update()
             return
         if (
@@ -4442,6 +4444,18 @@ class WashDataManager:
             self.detector.state,
         )
         self._reset_terminal_to_off()
+
+    def _sensor_is_readable(self) -> bool:
+        """Can the power sensor's current state be read right now?
+
+        The watchdog injects a keepalive on silence alone, but
+        `_resync_power_from_state` returns early when the sensor is
+        unavailable / unknown / non-finite. Passing this to the detector as
+        `observed=` is what makes "a synthetic reading closes an observed
+        interval" true rather than assumed: during a real outage the quiet it
+        advances was never seen, and the gap-free tally must not count it.
+        """
+        return self._live_power_state() is not None
 
     def _live_power_state(self) -> tuple[float, datetime] | None:
         """Return ``(power, report_ts)`` from the power sensor's CURRENT state.
@@ -4785,7 +4799,9 @@ class WashDataManager:
                 # detector this reading is ours: it must still advance the
                 # quiet timers (that is the whole point of injecting it) but
                 # must not count as the sensor having reported (items 238, 289).
-                self.detector.process_reading(0.0, now, synthetic=True)
+                self.detector.process_reading(
+                    0.0, now, synthetic=True, observed=self._sensor_is_readable()
+                )
                 self._last_reading_time = now
                 self._current_power = 0.0
                 self._notify_update()
@@ -4802,7 +4818,9 @@ class WashDataManager:
         ):
             # Treating as start of low power wait
             self._logger.debug("Watchdog: Silence at low power (%.0fs). Injecting 0W.", time_since_any_update)
-            self.detector.process_reading(0.0, now, synthetic=True)
+            self.detector.process_reading(
+                0.0, now, synthetic=True, observed=self._sensor_is_readable()
+            )
             self._last_reading_time = now
             self._current_power = 0.0
             self._notify_update()
@@ -5957,8 +5975,28 @@ class WashDataManager:
             # A separate constant from MATCH_AMBIGUITY_MARGIN on purpose - that
             # one also gates Smart Termination, so widening it would defer
             # cycle ends and undo item 306.
+            #
+            # The margin describes the RESULT's own winner, and that is not
+            # always `program`. `match_result` is `_last_match_result`, which the
+            # live matcher overwrites on every run whether or not a switch
+            # commits, while `program` (`_current_program`) only moves through
+            # the persistence / decisive-margin / consistency paths. Inside a
+            # persistence window the newest result can have challenger X winning
+            # while P is still displayed - and then `ambiguity_margin` says how
+            # far X leads ITS runner-up, which may be P itself. Reading it as
+            # evidence for P inverts the gate: the more decisively X won, the
+            # more readily P got labelled. Require the margin's owner to be the
+            # programme being labelled. The post-cycle gate below has no such
+            # problem, because there `res.best_profile` is what it labels.
             _margin = getattr(match_result, "ambiguity_margin", None)
-            _margin_ok = _margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN
+            _margin_owner = (
+                getattr(match_result, "best_profile", None)
+                if match_result is not None
+                else program
+            )
+            _margin_ok = _margin_owner == program and (
+                _margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN
+            )
             if manual_program:
                 cycle_data["profile_name"] = program
                 cycle_data["label_source"] = "manual"

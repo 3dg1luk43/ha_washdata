@@ -157,6 +157,11 @@ def _require_str(value: Any, name: str) -> str:
 
 # Options keys that no code reads any more, stripped by the 3.10 -> 3.11 step and
 # again by the one-pass legacy migration. Named once so the two cannot drift.
+# The value `DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO` held before item 311
+# widened it. A stored option equal to this is the migration's own seed, not a
+# user's choice, and the 3.10 -> 3.11 step heals it.
+_OLD_SEEDED_MAX_DURATION_RATIO = 1.5
+
 _DEAD_ABRUPT_KEYS = frozenset(
     {"abrupt_drop_ratio", "abrupt_drop_watts", "abrupt_high_load_factor"}
 )
@@ -281,13 +286,32 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # is always empty and every migration would log "removed nothing".
         removed = sorted(set(entry.options) & _DEAD_ABRUPT_KEYS)
         new_opts = {k: v for k, v in entry.options.items() if k not in _DEAD_ABRUPT_KEYS}
+        # Heal the Stage-1 upper gate that item 311 widened 1.5 -> 1.8. The
+        # legacy migration SEEDS this key with `options.setdefault(...,
+        # DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)`, so every entry migrated
+        # before that change has a literal 1.5 frozen in its options and the
+        # manager reads it in preference to the new default - i.e. the widening
+        # reaches nobody who already had WashData installed. It is not rare:
+        # 13 of the 33 real exports in `cycle_data/` carry exactly 1.5.
+        #
+        # Replaced ONLY where it still equals the old seeded default, exactly as
+        # the 3.9 -> 3.10 cadence heal is scoped: a user who tuned this produced
+        # a value like 1.44 or 1.51, not the old constant on the nose. Item 311
+        # measured the wider gate as 4 appliances better and none worse.
+        healed: list[str] = []
+        if new_opts.get(CONF_PROFILE_MATCH_MAX_DURATION_RATIO) == _OLD_SEEDED_MAX_DURATION_RATIO:
+            new_opts[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] = (
+                DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+            )
+            healed.append(CONF_PROFILE_MATCH_MAX_DURATION_RATIO)
         hass.config_entries.async_update_entry(
             entry, options=new_opts, minor_version=11
         )
         minor_version = 11
         _log.debug(
-            "Migrated WashData entry from 3.10 to 3.11 (removed %s)",
+            "Migrated WashData entry from 3.10 to 3.11 (removed %s; healed %s)",
             removed or "nothing",
+            healed or "nothing",
         )
 
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:

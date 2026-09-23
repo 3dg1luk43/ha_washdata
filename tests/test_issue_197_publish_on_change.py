@@ -229,6 +229,13 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
     manager._last_real_reading_time = last_real
     manager._current_power = 1.0                    # 1 W: below stop_threshold (2 W)
     manager._current_program = "Tumble Cottons"
+    # A publish-on-change plug that has gone quiet is still AVAILABLE: its last
+    # report sits in hass.states, stamped when it was actually made. Without
+    # this the test simulated an OUTAGE rather than silence, which are the two
+    # cases `observed` now separates. Stubbed rather than `async_set`, because a
+    # freshly-stamped state would look like a missed real reading and
+    # `_resync_power_from_state` would feed it instead of the keepalive firing.
+    manager._live_power_state = MagicMock(return_value=(1.0, last_real))
     manager._low_power_no_update_timeout = 3600.0   # Default - should NOT be what closes the cycle
 
     # Wire detector mock: cycle is in RUNNING state, waiting in low-power.
@@ -252,7 +259,12 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
     # sensor reporting: `_keep_tail_cap` follows real readings past the expected
     # end, so a keepalive counted as real would bank silence as cycle time
     # (register item 238).
-    detector.process_reading.assert_called_once_with(0.0, now, synthetic=True)
+    # observed=True: the sensor is SILENT, not unavailable. hass.states still
+    # holds its last numeric report, so the interval the keepalive closes really
+    # was seen - which is what lets it skip the outage reset (#424/#427).
+    detector.process_reading.assert_called_once_with(
+        0.0, now, synthetic=True, observed=True
+    )
     # No force-end: the cycle should close gracefully, not be aborted.
     detector.force_end.assert_not_called()
 
