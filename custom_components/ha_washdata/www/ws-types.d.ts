@@ -130,6 +130,7 @@ export interface GetCyclePowerDataResponse {
   labelable?: boolean;
   editable?: boolean;
   cycle_origin?: string;
+  expected?: number[][] | null;
 }
 
 export interface GetDeviceCyclesResponse {

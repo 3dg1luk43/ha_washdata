@@ -304,6 +304,10 @@ class GetCyclePowerDataResponse(TypedDict, total=False):
     labelable: bool
     editable: bool
     cycle_origin: str
+    # Spread from `**meta` when the cycle has a matched profile and
+    # `expected_curve_for_cycle` succeeds, so it is optional rather than absent:
+    # the panel draws the expected curve from it.
+    expected: list[list[float]] | None
 
 
 class AnalyzeSplitResponse(TypedDict):

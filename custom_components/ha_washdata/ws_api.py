@@ -420,11 +420,36 @@ def _get_manager(hass: HomeAssistant, entry_id: str) -> Any | None:
 # hass.data (not module-global) so each lock is created inside — and bound to —
 # the running event loop, which keeps it correct across test event loops.
 _WS_WRITE_LOCKS_KEY = f"{DOMAIN}_ws_write_locks"
+_WS_OPTIONS_LOCKS_KEY = f"{DOMAIN}_ws_options_locks"
 
 
 def _entry_write_lock(hass: HomeAssistant, entry_id: str) -> asyncio.Lock:
     """Return the shared per-entry write lock, creating it on first use."""
     locks: dict[str, asyncio.Lock] = hass.data.setdefault(_WS_WRITE_LOCKS_KEY, {})
+    lock = locks.get(entry_id)
+    if lock is None:
+        lock = asyncio.Lock()
+        locks[entry_id] = lock
+    return lock
+
+
+def _entry_options_lock(hass: HomeAssistant, entry_id: str) -> asyncio.Lock:
+    """Per-entry lock for ``entry.options`` read-record-update sections only.
+
+    Deliberately NOT ``_entry_write_lock``. That one is held for the whole run
+    of the long detached tasks - ``_reprocess_task`` across rematching,
+    suggestions, ML training, recosting and health recompute;
+    ``_ml_training_task`` across a full training run; ``_rebuild_envelopes_task``
+    across every profile - so putting a Settings save behind it means the save
+    blocks for as long as the task takes, which on a slow host is minutes with
+    no feedback to the user. Serialising the option writers against each other
+    is all the race needs.
+
+    **Lock order where both are held: write lock first, then this one.** The
+    import handlers are the only place that happens, and they follow it, so the
+    pair cannot deadlock.
+    """
+    locks: dict[str, asyncio.Lock] = hass.data.setdefault(_WS_OPTIONS_LOCKS_KEY, {})
     lock = locks.get(entry_id)
     if lock is None:
         lock = asyncio.Lock()
@@ -1257,7 +1282,7 @@ async def ws_store_download_device(hass, connection, msg):
             # the options write have to be atomic per entry, or a concurrent
             # writer records the same "old" value and one of the two updates is
             # silently lost (#442 follow-up).
-            async with _entry_write_lock(hass, msg["entry_id"]):
+            async with _entry_options_lock(hass, msg["entry_id"]):
                 await _record_option_changes(hass, entry, filtered, "store_download")
                 hass.config_entries.async_update_entry(
                     entry, options={**entry.options, **filtered}
@@ -1735,8 +1760,10 @@ async def ws_set_options(
     # overwrites the first - so a later per-setting revert restores a value that
     # was never current. The import handlers already hold this lock; the option
     # writers did not. acquire/release rather than `async with` so the handler
-    # keeps its early-return validation paths.
-    lock = _entry_write_lock(hass, msg["entry_id"])
+    # keeps its early-return validation paths. The OPTIONS lock, not the write
+    # lock: see `_entry_options_lock` for why a save must not queue behind a
+    # reprocess or an ML training run.
+    lock = _entry_options_lock(hass, msg["entry_id"])
     await lock.acquire()
     try:
         # Build the new options from the *existing* options plus the submitted
@@ -3630,10 +3657,15 @@ async def ws_import_config(
                     new_options = strip_null_options(
                         {**entry.options, **entry_options_updates}
                     )
-                    await _record_option_changes(
-                        hass, entry, entry_options_updates, "import_config"
-                    )
-                    hass.config_entries.async_update_entry(entry, options=new_options)
+                    # Nested inside the write lock this handler already holds;
+                    # order is always write -> options, so no deadlock.
+                    async with _entry_options_lock(hass, entry_id):
+                        await _record_option_changes(
+                            hass, entry, entry_options_updates, "import_config"
+                        )
+                        hass.config_entries.async_update_entry(
+                            entry, options=new_options
+                        )
                 # NB: config_updates["entry_data"] is intentionally NOT written to
                 # entry.data. export_data ships the raw, un-redacted entry.data of
                 # the *source* device (its power_sensor and other identity), so
@@ -3860,12 +3892,15 @@ async def ws_import_config_selective(
                 for key in _OPTIONS_IDENTITY_KEYS:
                     filtered.pop(key, None)
                 if filtered:
-                    await _record_option_changes(
-                        hass, entry, filtered, "store_device_package"
-                    )
-                    hass.config_entries.async_update_entry(
-                        entry, options={**entry.options, **filtered}
-                    )
+                    # Nested inside the write lock this handler already holds;
+                    # order is always write -> options, so no deadlock.
+                    async with _entry_options_lock(hass, entry_id):
+                        await _record_option_changes(
+                            hass, entry, filtered, "store_device_package"
+                        )
+                        hass.config_entries.async_update_entry(
+                            entry, options={**entry.options, **filtered}
+                        )
                     settings_applied = len(filtered)
             summary = {**summary, "settings_applied": settings_applied}
 
@@ -4040,7 +4075,7 @@ async def ws_apply_suggestions(
             manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
             # Same critical section as ws_set_options (#442 follow-up): the
             # changelog snapshot and the options write must be atomic per entry.
-            async with _entry_write_lock(hass, entry_id):
+            async with _entry_options_lock(hass, entry_id):
                 # Record BEFORE clear_suggestions/async_update_entry: both persist,
                 # and the reload the latter schedules rebuilds the store (#442).
                 await _record_option_changes(hass, entry, updates, "apply_suggestions")

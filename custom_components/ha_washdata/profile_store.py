@@ -5667,6 +5667,17 @@ class ProfileStore:
                 return summary
             is_dishwasher = device_type == DEVICE_TYPE_DISHWASHER
             touched: set[str] = set()
+            # Memoised per profile, and that is correctness as well as cost.
+            # `profile_terminal_quiet_seconds` runs
+            # `compute_profile_terminal_signature`, which decompresses and scans
+            # every evidence cycle of the profile - quadratic over the loop, on
+            # the event loop, with up to `max_past_cycles` long dishwasher
+            # traces. Worse, calling it per cycle makes the result ORDER
+            # DEPENDENT: a cycle repaired earlier in this loop has a trimmed
+            # trace and an appended terminal sample, so later calls measure a
+            # history this very loop has been rewriting. One value per profile,
+            # taken from the pre-repair history, removes both.
+            quiet_by_profile: dict[str, float | None] = {}
             for cycle in cycles:
                 if not isinstance(cycle, dict):
                     continue
@@ -5699,9 +5710,12 @@ class ProfileStore:
                     continue  # never rose above the threshold; not ours to judge
                 allowance = 0.0
                 if is_dishwasher:
-                    quiet = self.profile_terminal_quiet_seconds(
-                        str(cycle.get("profile_name") or "")
-                    )
+                    pname = str(cycle.get("profile_name") or "")
+                    if pname not in quiet_by_profile:
+                        quiet_by_profile[pname] = self.profile_terminal_quiet_seconds(
+                            pname
+                        )
+                    quiet = quiet_by_profile[pname]
                     if quiet is None:
                         continue  # no trustworthy measurement -> leave it alone
                     allowance = min(float(quiet), TERMINAL_QUIET_CAP_S)
@@ -6483,6 +6497,14 @@ class ProfileStore:
             for cycle in self.iter_evidence_cycles():
                 name = cycle.get("profile_name")
                 if not name:
+                    continue
+                # The SAME status filter `async_rebuild_envelope._eligible` uses
+                # to build `avg_duration` (`:5183`). Without it an interrupted
+                # cycle is judged against an average it never contributed to -
+                # and being short it trips `min_duration_ratio`, so the advisory
+                # told the user to re-label or split a run that was merely cut
+                # off.
+                if cycle.get("status") not in ("completed", "force_stopped"):
                     continue
                 try:
                     dur = float(cycle.get("duration") or 0.0)

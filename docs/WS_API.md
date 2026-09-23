@@ -990,6 +990,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `labelable` | no | bool |
 | `editable` | no | bool |
 | `cycle_origin` | no | str |
+| `expected` | no | list[list[number]] \| null |
 
 ## `ha_washdata/trim_cycle`
 
