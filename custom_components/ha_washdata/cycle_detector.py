@@ -1407,8 +1407,15 @@ class CycleDetector:
             # through quiet nobody ever saw, which is exactly what that tally
             # exists not to count. The caller now says whether the sensor state
             # could actually be read, and an unread sensor is an outage.
+            # An unread sensor is an outage HOWEVER SHORT each keepalive step
+            # is, which is why this is its own clause and not a qualifier on the
+            # ceiling test. The watchdog injects once per `watchdog_interval`
+            # (floor 30 s, effective 30-60 s) and the ceiling is at least 60 s,
+            # so during a real outage every individual `dt` sits under the
+            # ceiling - qualifying the ceiling test left the tally accumulating
+            # exactly as before, which is the bug this is meant to fix.
             outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
-            if dt > outage_ceiling and not (synthetic and observed):
+            if (synthetic and not observed) or (dt > outage_ceiling and not synthetic):
                 self._time_below_threshold_gapfree = 0.0
             else:
                 self._time_below_threshold_gapfree += dt
@@ -3422,7 +3429,20 @@ class CycleDetector:
             return expected_end
         if self._config.device_type != DEVICE_TYPE_DISHWASHER:
             return last_active
-        if getattr(self, "_end_spike_seen", False):
+        # Only a spike LATE enough to be the terminal pump-out licenses snapping
+        # the stored end back to the last activity. `_end_spike_seen` is set from
+        # DISHWASHER_END_SPIKE_MIN_PROGRESS (0.85), but this file does not treat
+        # every such spike as terminal: `_resolve_smart_ratio` relaxes its gate
+        # only at `>= expected * 0.90`, because below that the spike can be the
+        # pre-final-rinse drain with a passive Dry phase still to come. Capping
+        # at `last_active` for an 87% drain cuts that drying off, which lowers
+        # `avg_duration`, which makes the NEXT Smart Termination fire earlier -
+        # the error compounds in the direction that splits cycles. Same 0.90
+        # test here, so a pre-rinse drain falls through to the measured quiet
+        # span or the expected-end fallback below.
+        if getattr(self, "_end_spike_seen", False) and getattr(
+            self, "_end_spike_duration", 0.0
+        ) >= self._expected_duration * 0.90:
             return last_active
         quiet = self._matched_terminal_quiet_s
         if quiet is None:

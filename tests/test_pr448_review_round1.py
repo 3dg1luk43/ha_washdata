@@ -578,17 +578,27 @@ def test_an_unobserved_keepalive_still_resets_the_gapfree_tally():
             d.process_reading(0.0, base + timedelta(seconds=i * 2))
         return d, base + timedelta(seconds=60)
 
-    # Observed keepalive after a long silence: the interval was seen, so the
-    # gap-free tally keeps accumulating (this is the #424/#427 behaviour).
-    det, t = _det()
-    before = det._time_below_threshold_gapfree
-    det.process_reading(0.0, t + timedelta(seconds=600), synthetic=True, observed=True)
-    assert det._time_below_threshold_gapfree > before
+    # The dt that MATTERS is a short one. The watchdog injects once per
+    # watchdog_interval (floor 30 s) and the outage ceiling is at least 60 s, so
+    # in a real outage every step sits UNDER the ceiling. An earlier version of
+    # this test used dt=600 s, which is over the ceiling, and so passed against
+    # a fix that did nothing in the case that actually occurs.
+    for dt_s in (30, 45, 600):
+        # Observed: the interval was seen, so the tally keeps accumulating
+        # (the #424/#427 behaviour the exemption exists for).
+        det, t = _det()
+        before = det._time_below_threshold_gapfree
+        det.process_reading(
+            0.0, t + timedelta(seconds=dt_s), synthetic=True, observed=True
+        )
+        assert det._time_below_threshold_gapfree > before, dt_s
 
-    # Same keepalive while the sensor could not be read: that is an outage.
-    det, t = _det()
-    det.process_reading(0.0, t + timedelta(seconds=600), synthetic=True, observed=False)
-    assert det._time_below_threshold_gapfree == 0.0
+        # Unread sensor: an outage at ANY step size, so the tally resets.
+        det, t = _det()
+        det.process_reading(
+            0.0, t + timedelta(seconds=dt_s), synthetic=True, observed=False
+        )
+        assert det._time_below_threshold_gapfree == 0.0, dt_s
 
 
 def test_a_real_reading_after_an_outage_still_resets_regardless_of_observed():
