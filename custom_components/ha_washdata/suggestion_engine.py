@@ -281,12 +281,22 @@ def _measured_quiet_span(
     first_below: int | None = None
     last_below: int | None = None
 
-    def _close(f: int, l: int) -> None:
+    def _close(f: int, last: int) -> None:
         nonlocal best, best_end
         anchor_t = points[max(0, f - 1)][0]
-        span = points[l][0] - anchor_t
+        # `_resumed_low_runs` drops a low run that straddles a gap bigger than
+        # `_MAX_PAUSE_GAP_H` and opens a new one at the first reading after it.
+        # If that reading is already below the threshold, anchoring at `f - 1`
+        # reaches back across the outage and folds the whole hole into the span
+        # - which then flows into the p95 that sizes `off_delay` in both
+        # `_suggest_off_delay_from_pauses` and `_ml_off_delay`, where three
+        # pauses are enough for one to dominate. That is precisely the inflation
+        # the `max_gap_s` guard exists to prevent, arriving by the back door.
+        if points[f][0] - anchor_t > _MAX_PAUSE_GAP_H * 3600:
+            anchor_t = points[f][0]
+        span = points[last][0] - anchor_t
         if span > best:
-            best, best_end = span, l
+            best, best_end = span, last
 
     for i in range(resume_idx):
         t, power = points[i]

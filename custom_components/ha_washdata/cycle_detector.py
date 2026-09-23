@@ -2306,7 +2306,22 @@ class CycleDetector:
                     if self._match_prefix_ambiguous or self._match_ambiguous:
                         if self._longest_candidate_duration > _bar:
                             _bar = self._longest_candidate_duration
-                        elif self._longest_candidate_duration <= 0.0:
+                        elif (
+                            self._longest_candidate_duration <= 0.0
+                            # `_match_prefix_ambiguity` is computed over the FULL
+                            # candidate list while `MatchResult.candidates` - and
+                            # so this bound - is `candidates[:5]`. A longer
+                            # candidate ranked sixth or lower therefore sets the
+                            # flag while staying invisible here, and a bound that
+                            # does not exceed the winner has simply not seen the
+                            # programme the flag is warning about. Prefix
+                            # ambiguity ASSERTS a longer candidate exists, so in
+                            # that case fall back to refusing. Plain
+                            # `_match_ambiguous` is different: it asserts no such
+                            # thing, and its winner may legitimately be the
+                            # longest candidate.
+                            or self._match_prefix_ambiguous
+                        ):
                             _blocked = True
                     if not _blocked and _elapsed >= END_GATE_LATE_RATIO * _bar:
                         effective_off_delay = max(
