@@ -52,8 +52,12 @@ class _Store(ProfileStore):
         return self._data["profiles"]
 
 
-def _c(cid: str, dur: float, name: str = "Cotton") -> dict:
-    return {"id": cid, "profile_name": name, "duration": dur}
+def _c(cid: str, dur: float, name: str = "Cotton", status: str = "completed") -> dict:
+    # `status` is explicit because the advisory now applies the SAME filter
+    # `async_rebuild_envelope._eligible` uses to build `avg_duration`: only
+    # completed / force_stopped cycles contribute, so only those can be judged
+    # against it. A status-less cycle is excluded from both, consistently.
+    return {"id": cid, "profile_name": name, "duration": dur, "status": status}
 
 
 def _store(durations, avg=3600.0, **kw):
@@ -128,3 +132,21 @@ def test_it_never_raises_on_a_broken_store() -> None:
     """This feeds the panel's profile list; it must not be able to break it."""
     st = _Store("not-a-list", {"Cotton": {"avg_duration": 3600.0}})
     assert st._self_unmatchable_cycles() == {}
+
+
+def test_an_interrupted_cycle_is_not_judged_against_an_average_it_never_joined() -> None:
+    """Found in the PR #448 round-8 review.
+
+    `avg_duration` is built only from completed / force_stopped cycles, so an
+    interrupted run never contributed to it. Being short, it would trip
+    `min_duration_ratio` and the advisory would tell the user to re-label or
+    split a cycle that was merely cut off.
+    """
+    cycles = [_c(f"c{i}", 3600) for i in range(3)]
+    cycles.append(_c("stub", 120, status="interrupted"))
+    assert _Store(cycles, {"Cotton": {"avg_duration": 3600.0}})._self_unmatchable_cycles() == {}
+
+    # The same stub recorded as a real completed cycle IS flagged.
+    cycles[-1] = _c("stub", 120, status="completed")
+    res = _Store(cycles, {"Cotton": {"avg_duration": 3600.0}})._self_unmatchable_cycles()
+    assert [o["id"] for o in res["Cotton"]] == ["stub"]

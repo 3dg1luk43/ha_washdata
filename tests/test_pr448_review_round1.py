@@ -449,3 +449,78 @@ def test_a_matched_dishwasher_profile_lowers_the_minimum_duration_floor():
     assert floor("Rapido", 2364.0) == DISHWASHER_MIN_CYCLE_DURATION_S
     # ...and a long one cannot raise it above the constant.
     assert floor("ECO", 13962.0) == DISHWASHER_MIN_CYCLE_DURATION_S
+
+
+# --------------------------------------------------------------------------
+# Round 8: my own lock fix put settings saves behind ML training
+# --------------------------------------------------------------------------
+def test_option_writers_do_not_queue_behind_the_long_background_tasks():
+    """`_entry_write_lock` is held for the WHOLE run of the detached tasks.
+
+    `_reprocess_task`, `_ml_training_task` and `_rebuild_envelopes_task` each
+    acquire it and hold it across their entire multi-await body. Putting a
+    Settings save behind that lock - which the round-7 fix did - makes the save
+    block for as long as the task runs, minutes on a slow host, with no
+    feedback. The option writers need mutual exclusion only against each other.
+    """
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "ws_api.py"
+    ).read_text()
+    assert "def _entry_options_lock(" in src
+    # The three option writers take the options lock, never the write lock.
+    for marker in (
+        'lock = _entry_options_lock(hass, msg["entry_id"])',   # ws_set_options
+        'async with _entry_options_lock(hass, entry_id):',      # ws_apply_suggestions
+        'async with _entry_options_lock(hass, msg["entry_id"]):',  # store_download
+    ):
+        assert marker in src, marker
+    # Lock ORDER where both are held must be write -> options. The import
+    # handlers are the only place both are taken; assert the options lock is
+    # acquired INSIDE their write-lock block, not around it.
+    for handler in ("async def ws_import_config(", "async def ws_import_config_selective("):
+        body = src.split(handler, 1)[1].split("\n@websocket_api", 1)[0]
+        w = body.find("_entry_write_lock(")
+        o = body.find("_entry_options_lock(")
+        assert w != -1 and o != -1, handler
+        assert w < o, f"{handler}: options lock must be nested inside the write lock"
+
+
+def test_the_self_unmatchable_advisory_uses_the_envelope_status_filter():
+    """`avg_duration` is built from completed/force_stopped cycles only.
+
+    Judging an interrupted cycle against an average it never contributed to
+    flags a merely-cut-off run as needing a re-label or a split.
+    """
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "profile_store.py"
+    ).read_text()
+    block = src.split("def _self_unmatchable_cycles", 1)[1].split("profiles = self.get_profiles()", 1)[0]
+    assert 'status' in block and '"completed", "force_stopped"' in block
+
+
+def test_the_banked_tail_repair_measures_each_profile_once():
+    """Per-cycle it is quadratic AND order-dependent: a cycle repaired earlier
+    in the loop changes the history later calls measure."""
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "profile_store.py"
+    ).read_text()
+    block = src.split("async def async_repair_banked_tails", 1)[1].split(
+        "def _apply_repaired_duration", 1
+    )[0]
+    assert "quiet_by_profile" in block
+    assert block.count("self.profile_terminal_quiet_seconds(") == 1
