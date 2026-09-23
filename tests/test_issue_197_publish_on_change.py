@@ -259,11 +259,18 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
     # sensor reporting: `_keep_tail_cap` follows real readings past the expected
     # end, so a keepalive counted as real would bank silence as cycle time
     # (register item 238).
+    # The keepalive carries the sensor's OWN last value (1.0 W here, set above
+    # as this machine's standby draw), not a fabricated 0.0. A synthetic reading
+    # is appended to the trace like any other, so injecting zero would write a
+    # sample the appliance never produced - and on a machine idling above its
+    # stop threshold that fabricates a quiet tail and defeats the #445 standby
+    # advisory, which reads exactly that final sample.
+    #
     # observed=True: the sensor is SILENT, not unavailable. hass.states still
     # holds its last numeric report, so the interval the keepalive closes really
     # was seen - which is what lets it skip the outage reset (#424/#427).
     detector.process_reading.assert_called_once_with(
-        0.0, now, synthetic=True, observed=True
+        1.0, now, synthetic=True, observed=True
     )
     # No force-end: the cycle should close gracefully, not be aborted.
     detector.force_end.assert_not_called()

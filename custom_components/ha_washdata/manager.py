@@ -4182,8 +4182,9 @@ class WashDataManager:
                     (now - last_real).total_seconds(),
                     self._off_delay,
                 )
+                _ka_w, _ka_obs = self._keepalive_reading()
                 self.detector.process_reading(
-                    0.0, now, synthetic=True, observed=self._sensor_is_readable()
+                    _ka_w, now, synthetic=True, observed=_ka_obs
                 )
                 self._notify_update()
             return
@@ -4445,17 +4446,28 @@ class WashDataManager:
         )
         self._reset_terminal_to_off()
 
-    def _sensor_is_readable(self) -> bool:
-        """Can the power sensor's current state be read right now?
+    def _keepalive_reading(self) -> tuple[float, bool]:
+        """The ``(power, observed)`` pair a watchdog keepalive should carry.
 
-        The watchdog injects a keepalive on silence alone, but
-        `_resync_power_from_state` returns early when the sensor is
-        unavailable / unknown / non-finite. Passing this to the detector as
-        `observed=` is what makes "a synthetic reading closes an observed
-        interval" true rather than assumed: during a real outage the quiet it
-        advances was never seen, and the gap-free tally must not count it.
+        Two things the watchdog used to get wrong, in one place because they
+        come from the same read:
+
+        * **The value.** A synthetic reading is appended to ``_power_readings``
+          like any other (there is no guard at the append sites), so it lands in
+          the stored ``power_data``. Injecting a hard ``0.0`` therefore writes a
+          sample the appliance never produced. On a machine that idles ABOVE its
+          stop threshold - the #445 pathology - that fabricates a quiet tail and
+          silently defeats ``detect_standby_above_stop``, which reads exactly
+          that final sample. The sensor's own last reported value is the honest
+          one, and for a machine that really is at 0 W it IS 0.0, so this only
+          differs where the old value was a lie.
+        * **Whether it was observed.** ``_resync_power_from_state`` returns
+          early when the sensor is unavailable / unknown / non-finite, but the
+          watchdog injects on the silence interval alone. An unread sensor is an
+          outage, and the gap-free tally must not count quiet nobody saw.
         """
-        return self._live_power_state() is not None
+        live = self._live_power_state()
+        return (live[0], True) if live is not None else (0.0, False)
 
     def _live_power_state(self) -> tuple[float, datetime] | None:
         """Return ``(power, report_ts)`` from the power sensor's CURRENT state.
@@ -4799,11 +4811,12 @@ class WashDataManager:
                 # detector this reading is ours: it must still advance the
                 # quiet timers (that is the whole point of injecting it) but
                 # must not count as the sensor having reported (items 238, 289).
+                _ka_w, _ka_obs = self._keepalive_reading()
                 self.detector.process_reading(
-                    0.0, now, synthetic=True, observed=self._sensor_is_readable()
+                    _ka_w, now, synthetic=True, observed=_ka_obs
                 )
                 self._last_reading_time = now
-                self._current_power = 0.0
+                self._current_power = _ka_w
                 self._notify_update()
                 return
 
@@ -4818,8 +4831,9 @@ class WashDataManager:
         ):
             # Treating as start of low power wait
             self._logger.debug("Watchdog: Silence at low power (%.0fs). Injecting 0W.", time_since_any_update)
+            _ka_w, _ka_obs = self._keepalive_reading()
             self.detector.process_reading(
-                0.0, now, synthetic=True, observed=self._sensor_is_readable()
+                _ka_w, now, synthetic=True, observed=_ka_obs
             )
             self._last_reading_time = now
             self._current_power = 0.0

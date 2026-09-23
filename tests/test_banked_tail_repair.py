@@ -541,3 +541,55 @@ async def test_the_repair_still_examines_every_cycle_but_repairs_only_smart() ->
     assert by_id["smart"]["duration"] < 4200.0
     assert by_id["user"]["duration"] == pytest.approx(4200.0)
     assert by_id["timeout"]["duration"] == pytest.approx(4200.0)
+
+
+@pytest.mark.asyncio
+async def test_a_terminal_pump_out_gets_no_drying_allowance() -> None:
+    """Found in the PR #448 round-11 review.
+
+    `quiet_before_s` is the quiet measured BEFORE the terminal event. When the
+    final above-threshold sample IS that pump-out, the drying already happened
+    before it, so adding the allowance on top counts the same quiet twice - and
+    the inflated `new_duration` can shrink the reclaim below
+    BANKED_TAIL_REPAIR_MIN_S, leaving the banked tail unrepaired.
+    """
+    # wash -> 600 s of drying -> a 60 s pump-out -> banked dead tail
+    pts = [[float(t), 100.0] for t in range(0, 2400, 30)]
+    pts += [[float(t), 0.0] for t in range(2400, 3000, 30)]      # drying
+    pts += [[float(t), 80.0] for t in range(3000, 3060, 30)]     # pump-out
+    pts += [[float(t), 0.0] for t in range(3060, 4800, 30)]      # banked tail
+    cyc = {
+        "id": "a", "profile_name": "Eco", "start_time": T0.isoformat(),
+        "duration": 4800.0, "termination_reason": "smart",
+        "sampling_interval": 30.0, "power_data": pts,
+    }
+    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+    st.profile_terminal_quiet_seconds = lambda _n: 600.0  # type: ignore[assignment]
+
+    res = await st.async_repair_banked_tails(2.0, "dishwasher")
+
+    assert res["repaired"] == 1
+    # Ends at the pump-out (3030 s, its last sample), NOT 3030 + 600.
+    assert float(data["past_cycles"][0]["duration"]) == pytest.approx(3030.0, abs=31.0)
+
+
+@pytest.mark.asyncio
+async def test_a_cycle_that_ends_in_drying_still_gets_its_allowance() -> None:
+    """The other half: no terminal event, so the tail IS the drying."""
+    pts = [[float(t), 100.0] for t in range(0, 3000, 30)]
+    pts.append([3000.0, 0.0])                                    # plug goes quiet
+    cyc = {
+        "id": "b", "profile_name": "Eco", "start_time": T0.isoformat(),
+        "duration": 6000.0, "termination_reason": "smart",
+        "sampling_interval": 30.0, "power_data": pts,
+    }
+    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+    st.profile_terminal_quiet_seconds = lambda _n: 600.0  # type: ignore[assignment]
+
+    res = await st.async_repair_banked_tails(2.0, "dishwasher")
+
+    assert res["repaired"] == 1
+    # last activity 2970 + 600 measured drying.
+    assert float(data["past_cycles"][0]["duration"]) == pytest.approx(3570.0, abs=31.0)

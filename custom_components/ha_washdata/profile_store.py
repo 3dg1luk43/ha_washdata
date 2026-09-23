@@ -207,6 +207,38 @@ def _empty_ranking() -> list[dict[str, Any]]:
     return []
 
 
+def _quiet_run_before(
+    points: list[tuple[float, float]], last_active: float, stop_threshold_w: float
+) -> float:
+    """Length of the sub-threshold run immediately preceding ``last_active``.
+
+    Used by the banked-tail repair to recognise a terminal pump-out from the
+    trace alone: if the final above-threshold sample is preceded by a long quiet
+    stretch, that sample is the event the drying led up to, not the last moment
+    of washing. Returns 0.0 when the sample before it is still active.
+    """
+    # The terminal event is a RUN of above-threshold samples, not one sample, so
+    # walk back to where that run starts before measuring the quiet in front of
+    # it. Measuring from `last_active` itself finds only the run's own width.
+    idx = [i for i, (o, _p) in enumerate(points) if o <= last_active]
+    if not idx:
+        return 0.0
+    i = idx[-1]
+    while i > 0 and points[i - 1][1] > stop_threshold_w:
+        i -= 1
+    run_start = points[i][0]
+    # Now the last above-threshold sample before that run, if any.
+    prev_active: float | None = None
+    for offset, power in points:
+        if offset >= run_start:
+            break
+        if power > stop_threshold_w:
+            prev_active = offset
+    if prev_active is None:
+        return 0.0
+    return max(0.0, run_start - prev_active)
+
+
 def _safe_offset(value: Any) -> float | None:
     """Coerce a stored power_data offset to float, or None when it is not one.
 
@@ -5719,6 +5751,24 @@ class ProfileStore:
                     if quiet is None:
                         continue  # no trustworthy measurement -> leave it alone
                     allowance = min(float(quiet), TERMINAL_QUIET_CAP_S)
+                    # ...unless `last_active` IS the terminal pump-out, in which
+                    # case the drying already happened BEFORE it and adding the
+                    # allowance on top counts the same quiet twice.
+                    # `quiet_before_s` is measured as the quiet *preceding* the
+                    # terminal event (`compute_profile_terminal_signature`), so
+                    # a cycle whose final above-threshold sample is that event
+                    # needs no allowance at all - which is exactly what
+                    # `CycleDetector._keep_tail_cap` does with `_end_spike_seen`.
+                    # The repair has no live detector state, so it asks the
+                    # trace the same question: is there already a quiet run of
+                    # comparable length immediately before `last_active`?
+                    # Double-counting here shrinks the reclaim below
+                    # BANKED_TAIL_REPAIR_MIN_S and leaves the banked tail in
+                    # place, so the bug hides itself.
+                    if _quiet_run_before(points, last_active, stop_threshold_w) >= (
+                        0.5 * float(quiet)
+                    ):
+                        allowance = 0.0
                 new_duration = last_active + allowance
                 try:
                     old_duration = float(cycle.get("duration") or 0.0)
