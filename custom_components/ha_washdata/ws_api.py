@@ -1253,8 +1253,15 @@ async def ws_store_download_device(hass, connection, msg):
         }
         entry = _get_entry(hass, msg["entry_id"])
         if filtered and entry is not None:
-            await _record_option_changes(hass, entry, filtered, "store_download")
-            hass.config_entries.async_update_entry(entry, options={**entry.options, **filtered})
+            # Same critical section as ws_set_options: the changelog snapshot and
+            # the options write have to be atomic per entry, or a concurrent
+            # writer records the same "old" value and one of the two updates is
+            # silently lost (#442 follow-up).
+            async with _entry_write_lock(hass, msg["entry_id"]):
+                await _record_option_changes(hass, entry, filtered, "store_download")
+                hass.config_entries.async_update_entry(
+                    entry, options={**entry.options, **filtered}
+                )
             settings_applied = len(filtered)
     res = {**res, "settings_applied": settings_applied}
     manager.notify_update()
@@ -4031,14 +4038,17 @@ async def ws_apply_suggestions(
             # reload that rebuilds the store, so persist the cleared state first.
             cycle_count = len(manager.profile_store.get_past_cycles())
             manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
-            # Record BEFORE clear_suggestions/async_update_entry: both persist, and
-            # the reload the latter schedules rebuilds the store (#442).
-            await _record_option_changes(hass, entry, updates, "apply_suggestions")
-            await manager.profile_store.clear_suggestions()
-            # Suggested values are all tunables -> layer them onto the existing
-            # options; never spread entry.data into options.
-            new_options = {**entry.options, **updates}
-            hass.config_entries.async_update_entry(entry, options=new_options)
+            # Same critical section as ws_set_options (#442 follow-up): the
+            # changelog snapshot and the options write must be atomic per entry.
+            async with _entry_write_lock(hass, entry_id):
+                # Record BEFORE clear_suggestions/async_update_entry: both persist,
+                # and the reload the latter schedules rebuilds the store (#442).
+                await _record_option_changes(hass, entry, updates, "apply_suggestions")
+                await manager.profile_store.clear_suggestions()
+                # Suggested values are all tunables -> layer them onto the existing
+                # options; never spread entry.data into options.
+                new_options = {**entry.options, **updates}
+                hass.config_entries.async_update_entry(entry, options=new_options)
             manager.notify_update()
 
         _send_result(connection, msg["id"], "apply_suggestions", {"success": True, "applied": list(updates.keys())}
