@@ -65,6 +65,7 @@ export interface DeviceInfo {
   armed_program: string | null;
   options: Record<string, unknown>;
   option_defaults: Record<string, unknown>;
+  standby_above_stop: Record<string, unknown> | null;
 }
 
 export interface DismissAllFeedbacksResponse {

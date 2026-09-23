@@ -1440,6 +1440,10 @@ def ws_get_devices(
             "title": entry.title,
             "detector_state": "unknown",
             "sub_state": None,
+            # Declared non-optional in DeviceInfo, so it is defaulted HERE rather
+            # than at each exit: a device with no loaded manager never reaches
+            # the probe at all, which is the case the contract test caught.
+            "standby_above_stop": None,
             "current_program": None,
             "time_remaining_s": None,
             "total_duration_s": None,
@@ -1570,6 +1574,7 @@ def ws_get_devices(
                         # for a round because a NameError here was indistinguishable
                         # from "no pattern found".
                         _LOGGER.debug("standby_above_stop probe failed", exc_info=True)
+                        # Key already defaulted to None where `info` is built.
                     try:
                         # Count only pending feedback whose cycle still exists, so the
                         # badge cannot outrun the review list after a cycle is deleted,
@@ -3660,12 +3665,20 @@ async def ws_import_config(
                     # one), and a persisted null survives options.get(key, DEFAULT)
                     # and breaks setup (#389), so the same write-boundary strip as
                     # ws_set_options applies here.
-                    new_options = strip_null_options(
-                        {**entry.options, **entry_options_updates}
-                    )
                     # Nested inside the write lock this handler already holds;
                     # order is always write -> options, so no deadlock.
                     async with _entry_options_lock(hass, entry_id):
+                        # Read INSIDE the lock. Built before it, `new_options`
+                        # is a snapshot of `entry.options` from before the
+                        # `async with` suspended - so a `ws_set_options` that
+                        # committed while we waited would be silently reverted
+                        # by this write, and the changelog would record the
+                        # post-save value as `old`. The other four option
+                        # writers already read inside their lock; this was the
+                        # one that did not.
+                        new_options = strip_null_options(
+                            {**entry.options, **entry_options_updates}
+                        )
                         await _record_option_changes(
                             hass, entry, entry_options_updates, "import_config"
                         )

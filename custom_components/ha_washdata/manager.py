@@ -288,7 +288,6 @@ from .profile_store import (
     ProfileStore,
     decompress_power_data,
     is_terminal_drop,
-    longest_candidate_duration,
     terminal_drop_baseline,
 )
 from .signal_processing import (
@@ -1795,7 +1794,10 @@ class WashDataManager:
                  # still in play across the candidates. The ENDING fallback gate
                  # raises its bar to this while the match is ambiguous, instead of
                  # refusing to shorten at all.
-                 longest_candidate_duration(getattr(result, "candidates", None)))
+                 # From the FULL candidate population, carried on the result -
+                 # `result.candidates` is `candidates[:5]` and would hide the
+                 # very programme `_match_prefix_ambiguous` is warning about.
+                 float(getattr(result, "longest_candidate_duration_s", 0.0) or 0.0))
             )
 
             # --- LOGGING (Unified) ---
@@ -4836,7 +4838,7 @@ class WashDataManager:
                 _ka_w, now, synthetic=True, observed=_ka_obs
             )
             self._last_reading_time = now
-            self._current_power = 0.0
+            self._current_power = _ka_w
             self._notify_update()
             return
 

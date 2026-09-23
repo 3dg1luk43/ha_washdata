@@ -10972,12 +10972,18 @@ class HaWashdataPanel extends HTMLElement {
       const v = brandInput.value.trim();
       stageAppliance('store_brand', v);
       this._catalog.forBrand = v; this._catalog.devices = undefined;
-      this._render();                 // enable + reset the model field (input has blurred)
+      // Preserving, not plain: since brand/model became PENDING edits rather
+      // than immediate saves, this re-render repaints the whole Basic section.
+      // Device Name / Minimum Power / Off Delay hold a typed value only in the
+      // DOM until _snapshotFormToPending runs, so a plain _render() repaints
+      // them from _opts and silently discards whatever the user had typed
+      // before reaching for the brand picker.
+      this._renderPreservingFormEdits();  // enable + reset the model field (input has blurred)
     });
     const modelInput = sr.getElementById('wd-store-model');
     if (modelInput) modelInput.addEventListener('change', () => {
       stageAppliance('store_model', modelInput.value.trim());
-      this._render();
+      this._renderPreservingFormEdits();
     });
 
     // F3: Playground canvas pointer interaction (threshold drag + scrub)
