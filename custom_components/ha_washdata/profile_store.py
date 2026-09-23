@@ -5712,6 +5712,18 @@ class ProfileStore:
             # Never leave a cycle without a curve: a trace that cannot be trimmed
             # sensibly keeps its samples and only the duration is corrected.
             if len(kept) >= 2:
+                # A dishwasher's allowance extends `new_duration` past the last
+                # ACTIVE sample, and a change-only plug reports nothing during
+                # passive drying - so without a terminal point the trace ends
+                # before the duration. `_reprocess_all_data_sync` treats that gap
+                # as drift and snaps duration/end_time back down to the trace
+                # (tolerance `max(5, 2 * sampling_interval)`, against an allowance
+                # of up to TERMINAL_QUIET_CAP_S), which would silently undo the
+                # measured drying this repair exists to keep. Same contract as
+                # `CycleDetector._finish_cycle`: the trace covers the duration.
+                last_off = _safe_offset(kept[-1][0])
+                if last_off is not None and last_off < float(new_duration) - 1e-6:
+                    kept.append([round(float(new_duration), 1), kept[-1][1]])
                 cycle["power_data"] = kept
                 # The signature is derived from the trace, so it has to be rebuilt
                 # from the kept samples - exactly as the sibling trim and the merge

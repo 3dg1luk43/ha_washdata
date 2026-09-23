@@ -398,3 +398,67 @@ async def test_a_cycle_the_repair_skips_keeps_its_signature() -> None:
 
     assert res["repaired"] == 0
     assert data["past_cycles"][0]["signature"] == {"duration": 3010.0, "max_power": 100.0}
+
+
+@pytest.mark.asyncio
+async def test_a_dishwasher_repair_leaves_the_trace_covering_its_duration() -> None:
+    """Found in the PR #448 round-6 review: the drying allowance was undone later.
+
+    A dishwasher keeps `allowance` seconds of measured drying past its last
+    ACTIVE sample, and a change-only plug reports nothing across it - so without
+    a terminal point the trace ends before the stored duration.
+    `_reprocess_all_data_sync` reads that gap as drift and snaps duration and
+    end_time back down to the trace end (tolerance `max(5, 2 * sampling_interval)`
+    against an allowance of up to TERMINAL_QUIET_CAP_S), silently removing the
+    drying the repair exists to keep - and dragging the profile average with it.
+    """
+    # A change-only plug: it reports the terminal drop and then NOTHING across
+    # the drying phase, so the trace simply stops. This is the shape that
+    # reproduces the bug - a trace padded with 0 W samples hides it, because the
+    # kept tail then already reaches new_duration.
+    pts = [[float(t), 100.0] for t in range(0, 3000, 30)]
+    pts.append([3000.0, 0.0])
+    cyc = {
+        "id": "a",
+        "profile_name": "Eco",
+        "start_time": T0.isoformat(),
+        "duration": 6000.0,  # banked: the confirmation wait counted as cycle time
+        "termination_reason": "smart",
+        "sampling_interval": 30.0,
+        "power_data": pts,
+    }
+    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+    st.profile_terminal_quiet_seconds = lambda _n: 600.0  # type: ignore[assignment]
+
+    res = await st.async_repair_banked_tails(2.0, "dishwasher")
+
+    assert res["repaired"] == 1
+    out = data["past_cycles"][0]
+    trace_end = float(out["power_data"][-1][0])
+    stored = float(out["duration"])
+    si = float(out.get("sampling_interval", 30.0) or 30.0)
+    # The invariant _reprocess_all_data_sync relies on, and the exact tolerance
+    # it applies: a reprocess must find nothing to snap.
+    assert abs(stored - trace_end) <= max(5.0, 2.0 * si), (
+        f"duration {stored} vs trace end {trace_end}: a reprocess would snap the "
+        "measured drying allowance back off"
+    )
+    # The allowance really is still there (last activity 2970s + 600s).
+    assert stored == pytest.approx(3570.0, abs=31.0)
+    assert trace_end == pytest.approx(3570.0, abs=31.0)
+
+
+@pytest.mark.asyncio
+async def test_a_washer_repair_adds_no_spurious_terminal_sample() -> None:
+    """With no allowance the trace already ends at the duration; nothing to add."""
+    data = {"past_cycles": [_cycle("a", 3000, 1200)], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+
+    before = len([p for p in data["past_cycles"][0]["power_data"] if p[0] <= 2970.0])
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 1
+    out = data["past_cycles"][0]
+    assert len(out["power_data"]) == before, "no terminal point should have been added"
+    assert out["power_data"][-1][1] == 100.0

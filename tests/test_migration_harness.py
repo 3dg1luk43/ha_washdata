@@ -760,3 +760,27 @@ async def test_migrate_3_10_to_3_11_is_a_version_bump_when_there_is_nothing_to_s
     assert await async_migrate_entry(hass, entry) is True
     assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert entry.options == {CONF_OFF_DELAY: 120}
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_10_to_3_11_logs_what_it_actually_removed(
+    hass: HomeAssistant, caplog: Any
+) -> None:
+    """async_update_entry replaces entry.options synchronously, so an
+    intersection taken after it is always empty and the step logged
+    "removed nothing" even when it removed three keys."""
+    import logging
+
+    entry = DummyEntry(
+        version=3,
+        minor_version=10,
+        data={},
+        options={"abrupt_drop_ratio": 0.3, CONF_OFF_DELAY: 120},
+    )
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+
+    with caplog.at_level(logging.DEBUG):
+        assert await async_migrate_entry(hass, entry) is True
+
+    assert "abrupt_drop_ratio" in caplog.text
+    assert "removed nothing" not in caplog.text

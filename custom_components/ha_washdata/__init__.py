@@ -276,6 +276,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # created before 558e71e and since migrated to 3.10 keeps the dead keys forever.
     # Same shape as the 3.7 -> 3.8 running_dead_zone retirement, for the same reason.
     if version == 3 and minor_version == 10:
+        # Computed BEFORE the update, like the 3.8 -> 3.9 step: async_update_entry
+        # replaces entry.options synchronously, so an intersection taken after it
+        # is always empty and every migration would log "removed nothing".
+        removed = sorted(set(entry.options) & _DEAD_ABRUPT_KEYS)
         new_opts = {k: v for k, v in entry.options.items() if k not in _DEAD_ABRUPT_KEYS}
         hass.config_entries.async_update_entry(
             entry, options=new_opts, minor_version=11
@@ -283,7 +287,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         minor_version = 11
         _log.debug(
             "Migrated WashData entry from 3.10 to 3.11 (removed %s)",
-            sorted(set(entry.options) & _DEAD_ABRUPT_KEYS) or "nothing",
+            removed or "nothing",
         )
 
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
