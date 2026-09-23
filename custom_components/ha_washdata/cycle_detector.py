@@ -407,6 +407,13 @@ class CycleDetector:
         self._last_match_time: datetime | None = None
         self._expected_duration: float = 0.0
         self._last_match_confidence: float = 0.0
+        # Element 12: the longest expected duration among the candidates the
+        # matcher still considers plausible. `_match_prefix_ambiguous` means one
+        # of them is materially longer than the winner, so "past the expected
+        # end" might be "mid-soak in that longer programme" - but only up to
+        # THIS duration. Past it there is no longer programme left to be mid-soak
+        # in, and the guard's own rationale is spent.
+        self._longest_candidate_duration: float = 0.0
         self._end_spike_seen: bool = False
         self._end_spike_duration: float = 0.0  # cycle duration (s) when _end_spike_seen was last set
         self._match_ambiguous: bool = False  # last live match was ambiguous (gates predictive end)
@@ -964,6 +971,23 @@ class CycleDetector:
                 self._sanitize_terminal_quiet(result_seq[10])
                 if len(result_seq) >= 11
                 else None
+            )
+            # Element 12: longest plausible candidate duration (see the attribute's
+            # own comment). A shorter tuple clears it, like elements 9-11, so a
+            # stale value can never license a shortening for a different match.
+            # Coerced quietly, not through _sanitize_expected_duration: 0.0 is a
+            # legitimate "no candidate durations to compare" here, and that helper
+            # logs it as invalid.
+            _lcd = result_seq[11] if len(result_seq) >= 12 else 0.0
+            try:
+                _lcd = float(_lcd or 0.0)
+            except (TypeError, ValueError, OverflowError):
+                _lcd = 0.0
+            self._longest_candidate_duration = (
+                _lcd
+                if math.isfinite(_lcd)
+                and 0.0 < _lcd <= self._SANITIZE_MAX_EXPECTED_DURATION
+                else 0.0
             )
         else:
             # Assume MatchResult object or similar (future proofing)
@@ -2216,11 +2240,49 @@ class CycleDetector:
                     self._matched_profile
                     and self._expected_duration > 0
                     and self._current_cycle_start is not None
-                    and not self._match_prefix_ambiguous
-                    and not self._match_ambiguous
                 ):
                     _elapsed = (timestamp - self._current_cycle_start).total_seconds()
-                    if _elapsed >= END_GATE_LATE_RATIO * self._expected_duration:
+                    # The bar this run has to clear. Normally the matched
+                    # programme's own expected end; while the matcher still thinks
+                    # a materially LONGER programme is plausible, that longer one's
+                    # end instead (register item 330).
+                    #
+                    # Blocking outright on the two ambiguity flags - which is what
+                    # this did until item 330 - was costing almost every cycle the
+                    # shortening. Measured on `devtools/end_gate_eval.py`: of the
+                    # 94 cycles that ever pass 1.05x their own expected duration,
+                    # **84 (89%) were blocked by an ambiguity flag**, so the rule
+                    # reached 4.7% of cycles (10 of 211) and the median cycle still
+                    # waited out the full `min_off_gap`.
+                    #
+                    # The flags are not wrong, they are too coarse. Both exist to
+                    # protect `_expected_duration` against "this is really a prefix
+                    # of something longer" (#288 / #364) - a statement about
+                    # DURATION, not about which label wins. Two programmes that
+                    # score within the ambiguity margin and run the same length
+                    # leave "past the expected end" true either way. So instead of
+                    # refusing, raise the bar to the longest duration still in
+                    # play: past THAT, no candidate is left for this to be a
+                    # mid-soak of, which is exactly the condition the guard was
+                    # standing in for.
+                    #
+                    # Absent information keeps the OLD refusal. A caller that does
+                    # not send element 12 (an older Playground, most tests, any
+                    # short tuple) leaves `_longest_candidate_duration` at 0.0,
+                    # and an ambiguous match with no candidate durations to
+                    # compare must block exactly as it did before - otherwise the
+                    # #288 split-cycle reproduction
+                    # `test_smart_termination_blocked_by_prefix_ambiguous` walks
+                    # straight through, which is how the first draft of this was
+                    # caught.
+                    _bar = self._expected_duration
+                    _blocked = False
+                    if self._match_prefix_ambiguous or self._match_ambiguous:
+                        if self._longest_candidate_duration > _bar:
+                            _bar = self._longest_candidate_duration
+                        elif self._longest_candidate_duration <= 0.0:
+                            _blocked = True
+                    if not _blocked and _elapsed >= END_GATE_LATE_RATIO * _bar:
                         effective_off_delay = max(
                             self._config.off_delay,
                             min(self._config.min_off_gap, END_GATE_LATE_SECONDS),
@@ -3080,14 +3142,23 @@ class CycleDetector:
         # dishwasher cycle should never end before it has crossed the minimum
         # reasonable programme duration.  This prevents a dip during the fill or
         # early wash phase from being read as the end of a complete cycle.
-        if (
-            self._config.device_type == "dishwasher"
-            and duration < DISHWASHER_MIN_CYCLE_DURATION_S
-        ):
+        #
+        # A MATCHED profile overrides the blanket constant with its own learned
+        # length, because the constant is a stand-in for exactly the knowledge a
+        # match supplies - as this comment's own "even without a matched profile"
+        # says. Blanket, it is wrong for real hardware: the community catalogue
+        # carries a 6.0 min Smeg "Delay- prewash", which a 30 min floor defers by
+        # half an hour. The floor still applies unmatched, and a matched profile
+        # can only ever LOWER it (`min`), never license a longer deferral - the
+        # 39.4 min Electrolux "Rapido" already clears it and is unaffected.
+        _dw_floor = DISHWASHER_MIN_CYCLE_DURATION_S
+        if self._matched_profile and self._expected_duration > 0:
+            _dw_floor = min(_dw_floor, float(self._expected_duration))
+        if self._config.device_type == "dishwasher" and duration < _dw_floor:
             self._logger.debug(
                 "Deferring dishwasher cycle end: elapsed %.0fs < minimum %.0fs",
                 duration,
-                DISHWASHER_MIN_CYCLE_DURATION_S,
+                _dw_floor,
             )
             return True
 

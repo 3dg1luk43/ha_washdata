@@ -362,14 +362,21 @@ def test_the_end_gate_is_deliberately_not_gated_on_confidence():
     block = src.split("--- FALLBACK TIMEOUT CHECK ---", 1)[1].split(
         "gate_window = self._config.off_delay", 1
     )[0]
-    condition = block.split("if (", 1)[1].split("):", 1)[0]
-    assert "match_confidence_threshold" not in condition, (
+    # Comments stripped: the block explains at length WHY the confidence check is
+    # absent, so a naive substring search finds it in the prose.
+    code = "\n".join(
+        ln for ln in block.splitlines() if not ln.lstrip().startswith("#")
+    )
+    assert "match_confidence_threshold" not in code, (
         "the confidence check was measured as pure cost (2 cycles delayed, no "
         "split or early end prevented) - see devtools/end_gate_eval.py"
     )
-    # The guards that ARE load-bearing must stay.
-    assert "_match_prefix_ambiguous" in condition
-    assert "_match_ambiguous" in condition
+    # The ambiguity guards are still consulted - since item 330 they raise the
+    # bar to the longest plausible candidate rather than refusing outright, and
+    # they still refuse when there is no candidate duration to compare.
+    assert "_match_prefix_ambiguous" in code
+    assert "_match_ambiguous" in code
+    assert "_longest_candidate_duration" in code
 
 
 def test_a_sole_surviving_candidate_still_bypasses_persistence():
@@ -416,3 +423,29 @@ def test_both_measurement_harnesses_are_checked_in():
     devtools = Path(__file__).resolve().parents[1] / "devtools"
     assert (devtools / "end_gate_eval.py").is_file()
     assert (devtools / "decisive_margin_eval.py").is_file()
+
+
+def test_a_matched_dishwasher_profile_lowers_the_minimum_duration_floor():
+    """The 1800 s floor is a stand-in for the knowledge a match supplies.
+
+    Blanket, it is wrong for real hardware: the community catalogue carries a
+    6.0 min Smeg "Delay- prewash", which a 30 min floor defers by half an hour.
+    A matched profile may only ever LOWER the floor, never raise it - the
+    39.4 min Electrolux "Rapido" already clears it and is unaffected.
+    """
+    from custom_components.ha_washdata.const import DISHWASHER_MIN_CYCLE_DURATION_S
+
+    def floor(matched: str | None, expected: float) -> float:
+        out = DISHWASHER_MIN_CYCLE_DURATION_S
+        if matched and expected > 0:
+            out = min(out, float(expected))
+        return out
+
+    # Unmatched: the blanket floor still applies.
+    assert floor(None, 0.0) == DISHWASHER_MIN_CYCLE_DURATION_S
+    # A programme shorter than the floor lowers it to its own length.
+    assert floor("Delay- prewash", 360.0) == 360.0
+    # One that already clears the floor is unaffected...
+    assert floor("Rapido", 2364.0) == DISHWASHER_MIN_CYCLE_DURATION_S
+    # ...and a long one cannot raise it above the constant.
+    assert floor("ECO", 13962.0) == DISHWASHER_MIN_CYCLE_DURATION_S
