@@ -6084,12 +6084,27 @@ class WashDataManager:
                 from .time_utils import power_data_to_offsets  # noqa: PLC0415
                 _pts = [(float(o), float(p)) for o, p in power_data_to_offsets(_pd, _start_iso)]
                 if len(_pts) >= 4:
-                    conformance_rec = self.profile_store.compute_envelope_conformance(_ep, _pts)
+                    # Offloaded: both reach `analysis.align_trace_to_envelope`,
+                    # which re-derives the envelope's DTW warp (item 324). The
+                    # cost matrix is vectorised and bounded, but a bounded NumPy
+                    # DTW is still CPU work and this runs on the event loop at
+                    # every cycle end. The WS twin `expected_curve_for_cycle`
+                    # already goes through the executor; these two did not.
+                    # One job, not two: they share `_pts` and must describe the
+                    # same alignment of the same cycle.
+                    def _conformance_and_artifacts() -> tuple[Any, Any]:
+                        return (
+                            self.profile_store.compute_envelope_conformance(_ep, _pts),
+                            self.profile_store.detect_cycle_artifacts(_ep, _pts),
+                        )
+
+                    conformance_rec, artifacts = await self.hass.async_add_executor_job(
+                        _conformance_and_artifacts
+                    )
                     if conformance_rec is not None:
                         cycle_data["envelope_conformance"] = conformance_rec.get("conformance")
                     # Transient artifacts (door-open pauses, out-of-band dips/spikes)
                     # for graph markers + a Cycles-list badge; [] when none.
-                    artifacts = self.profile_store.detect_cycle_artifacts(_ep, _pts)
                     if artifacts:
                         cycle_data["artifacts"] = artifacts
             except Exception:  # noqa: BLE001

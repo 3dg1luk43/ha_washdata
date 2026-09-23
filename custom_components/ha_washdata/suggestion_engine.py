@@ -489,6 +489,11 @@ def select_clean_cycles(
 # reporter's 3.2 W idle against a ~2 kW peak is 0.16%) while rejecting a cycle
 # stopped by hand while the appliance was still working.
 _STANDBY_PEAK_FRACTION = 0.10
+# ...and the observed levels must agree with each other to this fraction of their
+# median. A standby draw is a LEVEL; a trimmed trace's last above-threshold
+# sample is just wherever the appliance happened to be, and across the corpus's
+# washing machines that ranges 6 W to 55 W within one device.
+_STANDBY_MAX_SPREAD = 0.5
 
 
 def detect_standby_above_stop(
@@ -512,15 +517,31 @@ def detect_standby_above_stop(
     was actually sitting at when the cycle closed. If that is repeatedly above
     ``stop_threshold_w``, the threshold is below the appliance's standby draw.
 
-    User-stopped cycles are deliberately kept: on an appliance with this fault
-    they are often the ONLY way a cycle ever closes, and the #445 reporter
-    force-stopped four. What they need instead is a sanity check, because a cycle
-    stopped by hand mid-wash ends at WORKING power, not standby, and two of those
-    would otherwise be reported as "still drawing 500 W when the cycle ended". A
-    final sample only counts as standby when it is at most
-    ``_STANDBY_PEAK_FRACTION`` of that cycle's own peak: standby is by definition
-    a small fraction of working power (the reporter's 3.2 W against a 2 kW peak is
-    0.16%), so this keeps every genuine case and drops the mid-wash stop.
+    **Two requirements, and both are load-bearing** (PR #448 round 7). The first
+    draft asked only that ``min_hits`` of the recent cycles ended above the
+    threshold, and a peak-relative sanity check was added on top. Measured across
+    the whole corpus that still fired on **4 of 6 real devices** with plainly
+    wrong numbers - it told a dishwasher whose last stored samples are
+    ``[0, 0, 0, 0, 0, 0, 62, 23]`` that it "idles at 42.5 W". The reason is
+    structural: every non-dishwasher end path TRIMS the trailing sub-threshold
+    samples, so the last stored sample is by construction the last sample *above*
+    the threshold - the moment the appliance was last working, not the level it
+    settled at. On a machine that really reaches 0 W that number is meaningless.
+
+    So:
+
+    1. **Every** recent cycle must end above the threshold, not merely
+       ``min_hits`` of them. One cycle that reached 0 W proves the appliance
+       *can* go below, which is the whole question being asked.
+    2. The level must be **consistent** - spread within
+       ``_STANDBY_MAX_SPREAD`` of the median. A real standby draw is a level;
+       "wherever the drum happened to be" ranges from 6 W to 55 W across eight
+       cycles, which is what the corpus's washing machines actually look like.
+
+    Together these are silent on all six corpus devices, where the first draft
+    fired on four. User-stopped cycles are still kept: on an appliance with this
+    fault they are often the ONLY way a cycle ever closes, and the #445 reporter
+    force-stopped four.
 
     Returns None when there is no such pattern, else a summary carrying the
     observed idle level so the UI can name a number rather than a symptom. Pure
@@ -558,12 +579,20 @@ def detect_standby_above_stop(
         if len(finals) < min_hits:
             return None
         above = [f for f in finals if f > stop_threshold_w]
-        if len(above) < min_hits:
+        # Requirement 1: EVERY recent cycle ended above the threshold. One that
+        # reached it proves the appliance can, so it does not idle above it.
+        if len(above) != len(finals) or len(above) < min_hits:
+            return None
+        median = float(np.median(above))
+        if median <= 0:
+            return None
+        # Requirement 2: the levels agree with each other. See _STANDBY_MAX_SPREAD.
+        if (max(above) - min(above)) / median > _STANDBY_MAX_SPREAD:
             return None
         return {
             "cycles_above": len(above),
             "cycles_checked": len(finals),
-            "idle_w": round(float(np.median(above)), 2),
+            "idle_w": round(median, 2),
             "stop_threshold_w": round(float(stop_threshold_w), 2),
         }
     except Exception:  # noqa: BLE001 - a statistic must never break the device list
