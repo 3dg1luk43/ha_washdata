@@ -288,6 +288,7 @@ from .profile_store import (
     ProfileStore,
     decompress_power_data,
     is_terminal_drop,
+    longest_candidate_duration,
     terminal_drop_baseline,
 )
 from .signal_processing import (
@@ -1789,7 +1790,12 @@ class WashDataManager:
                  # quiet span, which bounds how much of Smart Termination's
                  # confirmation delay _keep_tail_cap may store as cycle time.
                  self.profile_store.profile_terminal_quiet_seconds(profile_name)
-                 if profile_name else None)
+                 if profile_name else None,
+                 # Element 12 (register item 330): the longest expected duration
+                 # still in play across the candidates. The ENDING fallback gate
+                 # raises its bar to this while the match is ambiguous, instead of
+                 # refusing to shorten at all.
+                 longest_candidate_duration(getattr(result, "candidates", None)))
             )
 
             # --- LOGGING (Unified) ---

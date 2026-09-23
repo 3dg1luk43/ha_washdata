@@ -968,6 +968,32 @@ class WashDataStore(Store[JSONDict]):
 
         return old_data
 
+def longest_candidate_duration(candidates: Any) -> float:
+    """Longest expected duration among the candidates still in play.
+
+    The ENDING fallback gate raises its bar to this while the matcher calls the
+    match ambiguous, instead of refusing to shorten at all: past the longest
+    plausible programme's own end there is no candidate left for the run to be a
+    mid-soak of, which is the condition the ambiguity flags were standing in for
+    (register item 330).
+
+    Returns 0.0 when there is nothing to compare, which leaves the gate on the
+    winner's own duration - the pre-330 behaviour. Shared by the manager and the
+    Playground sim so the replay cannot diverge from live on this input.
+    """
+    longest = 0.0
+    for cand in candidates or []:
+        if not isinstance(cand, dict):
+            continue
+        try:
+            dur = float(cand.get("profile_duration") or 0.0)
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if math.isfinite(dur) and dur > longest:
+            longest = dur
+    return longest
+
+
 def collapse_group_candidates(
     candidates: list[dict], group_members: dict[str, list[str]]
 ) -> list[dict]:

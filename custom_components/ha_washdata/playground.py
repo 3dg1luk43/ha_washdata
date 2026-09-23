@@ -135,6 +135,7 @@ from .profile_store import (
     _ambiguity_from_candidates,
     _match_prefix_ambiguity,
     collapse_group_candidates,
+    longest_candidate_duration,
     decompress_power_data,
 )
 
@@ -1078,6 +1079,18 @@ class _DetailSim:
                     )
                 except Exception:  # pylint: disable=broad-exception-caught
                     terminal_high = None
+        # Element 11 (item 297) and element 12 (item 330). Both were missing, so
+        # the sim's detector ran without the tail bound Smart Termination uses and
+        # without the longest-candidate bar the ENDING gate uses - i.e. the replay
+        # was NOT byte-identical to live on either, which is the sim's whole
+        # contract. `end_gate_eval.py` drives the detector through here, so a
+        # missing element silently measures the wrong gate.
+        terminal_quiet = None
+        if self.store is not None and raw_name:
+            try:
+                terminal_quiet = self.store.profile_terminal_quiet_seconds(raw_name)
+            except Exception:  # pylint: disable=broad-exception-caught
+                terminal_quiet = None
         return (
             raw_name,
             raw_conf,
@@ -1089,6 +1102,8 @@ class _DetailSim:
             bool(full_shape_hit),
             tail_power,
             terminal_high,
+            terminal_quiet,
+            longest_candidate_duration(candidates),
         )
 
     def _price_at(self, offset_s: float) -> float | None:
