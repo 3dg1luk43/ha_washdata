@@ -92,6 +92,10 @@ class DeviceInfo(TypedDict):
     # device type (#396/#393), so the device-list conflict/suggestion badges can score
     # an unset field against the value the integration would use (matches the Settings tab).
     option_defaults: dict[str, Any]
+    # Set by ws_get_devices whenever a manager is loaded: the #445 cause-1
+    # advisory, or None when there is no pattern (or the probe failed). Declared
+    # because the panel reads it; the handler always assigns one or the other.
+    standby_above_stop: dict[str, Any] | None
 
 
 class GetDevicesResponse(TypedDict):

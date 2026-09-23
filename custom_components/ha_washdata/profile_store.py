@@ -442,6 +442,14 @@ class MatchResult:
     # group wins, by up to 0.157 of score. So a *label* decision - which turns the
     # cycle into evidence for that one member - gets its own number.
     member_confidence: float | None = None
+    # Longest expected duration across the FULL candidate population, not the
+    # `candidates[:5]` this result carries. The ENDING fallback gate raises its
+    # bar to this while the match is ambiguous (register item 330), and
+    # `_match_prefix_ambiguity` - which decides whether it is ambiguous - also
+    # runs over the full list. Deriving the bound from the truncated one let a
+    # sixth-ranked longer candidate set the flag while staying invisible to the
+    # bar, so the gate shortened against a programme it had been warned about.
+    longest_candidate_duration_s: float = 0.0
 
     @property
     def label_confidence(self) -> float:
@@ -7161,6 +7169,9 @@ class ProfileStore:
             candidates, best_duration or 0.0
         )
         is_prefix_ambiguous = full_shape_hit or prefix_fit_hit
+        # From the SAME full population `_match_prefix_ambiguity` just judged,
+        # before the [:5] truncation below.
+        longest_candidate_s = longest_candidate_duration(candidates)
 
         return MatchResult(
             best_name,
@@ -7174,6 +7185,7 @@ class ProfileStore:
             is_prefix_ambiguous=is_prefix_ambiguous,
             is_prefix_ambiguous_full_shape=full_shape_hit,
             member_confidence=member_confidence,
+            longest_candidate_duration_s=longest_candidate_s,
         )
 
     async def async_verify_alignment(

@@ -1103,12 +1103,12 @@ class _DetailSim:
             tail_power,
             terminal_high,
             terminal_quiet,
-            # candidates[:5] to match the live contract: `MatchResult.candidates`
-            # is `candidates[:5]`, and the manager computes the ENDING-gate bound
-            # from that field. Passing the full list here would let a sixth-ranked
-            # longer profile raise the sim's bar above the live one, so an
-            # ambiguous cycle would end later in the Playground than in reality.
-            longest_candidate_duration(candidates[:5]),
+            # The FULL population, matching live: `async_match_profile` computes
+            # `MatchResult.longest_candidate_duration_s` from the same list
+            # `_match_prefix_ambiguity` judges, before the [:5] truncation. An
+            # earlier version of this line used `candidates[:5]` to match what
+            # live *then* did - and live was the thing that was wrong.
+            longest_candidate_duration(candidates),
         )
 
     def _price_at(self, offset_s: float) -> float | None:

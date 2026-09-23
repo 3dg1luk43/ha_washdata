@@ -3,10 +3,10 @@
   "assets": {
     "ha-washdata-panel.js": {
       "artifact": "ha-washdata-panel.min.js",
-      "source_sha256": "1efd9631331ff6268a7e67f56d6e39817599f33c9b9f7526ca80732e43ce8919",
-      "artifact_sha256": "ac8ba06d9ea212ff5fdfb0f044150ebb5e342a5c8cf55c628e731a565d8d7a4c",
-      "source_bytes": 934505,
-      "artifact_bytes": 602288
+      "source_sha256": "31012dee2d99c1c0c6ac37371151c72365ad645a9439a35f3a30b09a5b12c73b",
+      "artifact_sha256": "03ed7179317178b02cc0beda11f4fce1ec9d5acde41148df35e713e30671c9a5",
+      "source_bytes": 934966,
+      "artifact_bytes": 602326
     },
     "ha-washdata-card.js": {
       "artifact": "ha-washdata-card.min.js",

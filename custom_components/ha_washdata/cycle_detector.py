@@ -2226,9 +2226,18 @@ class CycleDetector:
                 # there to bridge mid-cycle soak periods; once the run is past the
                 # matched programme's OWN expected length there is no soak left to
                 # bridge, so continuing to wait out a blind per-device prior just
-                # reports the end late. Measured over 427 real cycles: washing
-                # machines 12.9 -> 7.5 min median lag, with early ends unchanged at
-                # 8.20% and cycle splits unchanged at 3.75%.
+                # reports the end late.
+                #
+                # Measured on `devtools/end_gate_eval.py`, which IS committed:
+                # over the 263-cycle corpus the shortening moves the median end
+                # lag with early ends and splits unmoved. Item 306's original
+                # figures (427 cycles, washing machines 12.9 -> 7.5 min, splits
+                # 3.75%) came from a harness that was never committed and **do
+                # not reproduce** - the same change measures 24.18 -> 20.50 min
+                # on the committed one. The safety half reproduces exactly.
+                # Treat the 427-cycle numbers as unverified; register item 329
+                # holds the reconciliation, and re-cut anything new with
+                # `end_gate_eval.py` rather than a throwaway script.
                 #
                 # Asymmetric and bounded, in the same spirit as _keep_tail_cap: it
                 # can only ever shorten, never fires before 1.05x expected, keeps the
@@ -2306,22 +2315,15 @@ class CycleDetector:
                     if self._match_prefix_ambiguous or self._match_ambiguous:
                         if self._longest_candidate_duration > _bar:
                             _bar = self._longest_candidate_duration
-                        elif (
-                            self._longest_candidate_duration <= 0.0
-                            # `_match_prefix_ambiguity` is computed over the FULL
-                            # candidate list while `MatchResult.candidates` - and
-                            # so this bound - is `candidates[:5]`. A longer
-                            # candidate ranked sixth or lower therefore sets the
-                            # flag while staying invisible here, and a bound that
-                            # does not exceed the winner has simply not seen the
-                            # programme the flag is warning about. Prefix
-                            # ambiguity ASSERTS a longer candidate exists, so in
-                            # that case fall back to refusing. Plain
-                            # `_match_ambiguous` is different: it asserts no such
-                            # thing, and its winner may legitimately be the
-                            # longest candidate.
-                            or self._match_prefix_ambiguous
-                        ):
+                        elif self._longest_candidate_duration <= 0.0:
+                            # No information: a caller that does not send element
+                            # 12 keeps the old refusal (see below). The bound
+                            # itself is now derived from the FULL candidate
+                            # population, the same one `_match_prefix_ambiguity`
+                            # judges, so a longer candidate ranked sixth or lower
+                            # can no longer set the flag while hiding from the
+                            # bar - which it could when this read
+                            # `MatchResult.candidates`, i.e. `candidates[:5]`.
                             _blocked = True
                     if not _blocked and _elapsed >= END_GATE_LATE_RATIO * _bar:
                         effective_off_delay = max(
