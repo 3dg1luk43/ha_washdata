@@ -2091,6 +2091,12 @@ class HaWashdataPanel extends HTMLElement {
     this._toolsSubtab = 'recording';
     this._loading = true;
     this._tabLoading = false;
+    // Scroll preservation state (#443, #449). _scrollNavKey is the _navKey() the last
+    // render was for, so _render can tell navigation from a background refresh without
+    // every navigation site having to say so. _scrollCarry holds the position across a
+    // _tabLoading placeholder render, which is too short to clamp against.
+    this._scrollNavKey = null;
+    this._scrollCarry = null;
     this._lastRefresh = null;
     this._powerHistory = [];   // [[elapsedSeconds, watts], ...]
     this._powerT0 = null;
@@ -3998,30 +4004,68 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
-  // Scroll preservation across a full re-render (#443). Keyed by selector rather
-  // than by element, because the elements themselves do not survive the swap.
-  _SCROLLERS = ['.wd-main', '.wd-modal'];
+  // Scroll preservation across a full re-render (#443, #449). Keyed by selector
+  // rather than by element, because the elements themselves do not survive the swap.
+  //
+  // Three questions decide what happens to a scroll position, and they are answered
+  // here rather than at the ~15 sites that trigger a render:
+  //
+  //  1. WHICH containers. The panel scrolls internally, so .wd-main is the page, but
+  //     it is not the only scroller: an open dialog, the log views, a wide table and
+  //     the horizontal tab strip all scroll on their own and all get destroyed by the
+  //     same swap. #443 carried the first two; the rest reset on every poll.
+  //  2. PRESERVE or go home. A re-render is not navigation. The Overview re-renders
+  //     every few seconds while a cycle runs (#449), and so do the background fetches
+  //     that fill a tab in behind its first paint - none of those is the user asking
+  //     to be somewhere else. Changing tab or device is, and only that.
+  //  3. CLAMP or carry. Clamping to the new tree's height is right when the tree
+  //     genuinely got shorter, and wrong when it is the _tabLoading placeholder: that
+  //     one is a spinner a few dozen pixels tall, so clamping against it destroys the
+  //     position a moment before the real tree comes back. Carry it instead.
+
+  // Reset on navigation, preserved across every other re-render.
+  _SCROLLERS = ['.wd-main', '.wd-modal', '.wd-logs', '.wd-log-drawer-body', '.wd-table-wrap', '.wd-sd-tree'];
+  // Navigation chrome: preserved across navigation too. Clicking a tab must not also
+  // scroll the strip the tab is in - on a narrow screen that strip overflows, and
+  // moving it is how the tab you just pressed ends up off-screen.
+  _SCROLLERS_CHROME = ['.wd-tabs'];
+
+  // `sel|i/n` rather than `sel`: several elements can match one selector (tables), and
+  // folding the match count into the key means a list that grew or shrank between
+  // renders simply misses instead of applying row 3's offset to a different table.
+  _eachScroller(sels, fn) {
+    const sr = this.shadowRoot;
+    if (!sr) return;
+    for (const sel of sels) {
+      const els = sr.querySelectorAll(sel);
+      els.forEach((el, i) => fn(el, `${sel}|${i}/${els.length}`));
+    }
+  }
 
   _captureScroll() {
-    const sr = this.shadowRoot;
-    if (!sr) return null;
+    if (!this.shadowRoot) return null;
     const out = {};
-    for (const sel of this._SCROLLERS) {
-      const el = sr.querySelector(sel);
-      if (el && (el.scrollTop || el.scrollLeft)) {
-        out[sel] = { top: el.scrollTop, left: el.scrollLeft };
-      }
+    this._eachScroller([...this._SCROLLERS, ...this._SCROLLERS_CHROME], (el, key) => {
+      if (el.scrollTop || el.scrollLeft) out[key] = { top: el.scrollTop, left: el.scrollLeft };
+    });
+    return out;
+  }
+
+  // Drop everything but the navigation chrome - what a tab or device change wants.
+  _scrollChromeOnly(saved) {
+    if (!saved) return saved;
+    const out = {};
+    for (const [key, pos] of Object.entries(saved)) {
+      if (this._SCROLLERS_CHROME.some(sel => key.startsWith(`${sel}|`))) out[key] = pos;
     }
     return out;
   }
 
   _restoreScroll(saved) {
-    if (!saved) return;
-    const sr = this.shadowRoot;
-    if (!sr) return;
-    for (const [sel, pos] of Object.entries(saved)) {
-      const el = sr.querySelector(sel);
-      if (!el) continue;
+    if (!saved || !this.shadowRoot) return;
+    this._eachScroller([...this._SCROLLERS, ...this._SCROLLERS_CHROME], (el, key) => {
+      const pos = saved[key];
+      if (!pos) return;
       // Clamp: the new tree may be shorter (a section collapsed, a list filtered),
       // in which case the browser would silently clamp anyway - do it explicitly so
       // the value we write is the value we meant.
@@ -4029,7 +4073,22 @@ class HaWashdataPanel extends HTMLElement {
       const maxLeft = Math.max(0, el.scrollWidth - el.clientWidth);
       el.scrollTop = Math.min(pos.top, maxTop);
       el.scrollLeft = Math.min(pos.left, maxLeft);
-    }
+    });
+  }
+
+  // "Where am I" as one string: the coordinates a *click on a navigation strip*
+  // changes, and nothing else. A change here is the user asking to be somewhere new,
+  // which is the only thing that outranks preserving the scroll position.
+  //
+  // Deliberately excluded: filters and searches (_settingsSearch, _cycleFilter) are
+  // not navigation, and neither is _pgAnalysisTab - the Playground flips that one
+  // itself when a background batch finishes, and jumping to the top for that is
+  // exactly the complaint in #449.
+  _navKey() {
+    return [
+      this._tab, this._selIdx, this._panelSubtab, this._profSubtab,
+      this._toolsSubtab, this._settingsSec, this._storeView,
+    ].join('|');
   }
 
   _render() {
@@ -4049,18 +4108,34 @@ class HaWashdataPanel extends HTMLElement {
     // about to erase, so it would be left floating with stale numbers over the
     // new DOM. Drop it with the crosshair it describes.
     this._hideGraphTip();
-    // #443: the swap below destroys .wd-main - the element that actually scrolls,
-    // since the panel scrolls internally - and the replacement starts at
-    // scrollTop 0. Every re-render therefore threw the user back to the top, which
-    // the Playground surfaces worst because it re-renders on each input, but it
-    // applies to any tab whose controls re-render while scrolled. Focus is already
-    // carried across the swap a few lines up; scroll is the same problem and gets
-    // the same treatment. Captured for the open modal too, which is its own
-    // scroll container.
-    const scrollBefore = this._captureScroll();
+    // #443/#449: the swap below destroys .wd-main - the element that actually
+    // scrolls, since the panel scrolls internally - and the replacement starts at
+    // scrollTop 0. Every re-render therefore threw the user back to the top. Focus is
+    // already carried across the swap a few lines up; scroll is the same problem and
+    // gets the same treatment. See the block above _SCROLLERS for what is preserved
+    // and when.
+    //
+    // A pending carry outranks a fresh capture: it exists precisely because the tree
+    // we are replacing is the _tabLoading placeholder, whose own offset is 0 and would
+    // otherwise overwrite the real position we are holding for it.
+    const navKey = this._navKey();
+    const navigated = this._scrollNavKey != null && this._scrollNavKey !== navKey;
+    this._scrollNavKey = navKey;
+    let scrollBefore = this._scrollCarry || this._captureScroll();
+    // A navigation strip was clicked: landing at the top is the point (see _navKey).
+    if (navigated) scrollBefore = this._scrollChromeOnly(scrollBefore);
     this._container.innerHTML = this._buildHtml();
     this._wire();
-    this._restoreScroll(scrollBefore);
+    if (this._tabLoading) {
+      // The placeholder is a spinner a few dozen pixels tall, so restoring into it
+      // would clamp the offset to ~0 and lose it for good. Hold it until the tab's
+      // real content is back (_fetchTabData's finally re-renders with the flag clear).
+      this._scrollCarry = scrollBefore;
+      this._restoreScroll(this._scrollChromeOnly(scrollBefore));
+    } else {
+      this._scrollCarry = null;
+      this._restoreScroll(scrollBefore);
+    }
     this._drawStatusCurve();
     this._drawModalCanvas();
     this._drawProfileSparklines();  // D2
