@@ -435,11 +435,33 @@ def test_a_matched_dishwasher_profile_lowers_the_minimum_duration_floor():
     """
     from custom_components.ha_washdata.const import DISHWASHER_MIN_CYCLE_DURATION_S
 
-    def floor(matched: str | None, expected: float) -> float:
+    def floor(
+        matched: str | None,
+        expected: float,
+        conf: float = 0.9,
+        ambiguous: bool = False,
+        prefix_ambiguous: bool = False,
+        threshold: float = 0.4,
+    ) -> float:
         out = DISHWASHER_MIN_CYCLE_DURATION_S
-        if matched and expected > 0:
+        if (
+            matched
+            and expected > 0
+            and conf >= threshold
+            and not ambiguous
+            and not prefix_ambiguous
+        ):
             out = min(out, float(expected))
         return out
+
+    # An UNTRUSTED match may not lower it: this is an anti-premature-end guard,
+    # and a weak match to a short look-alike is how a fill dip ends the cycle.
+    assert floor("Delay- prewash", 360.0, conf=0.2) == DISHWASHER_MIN_CYCLE_DURATION_S
+    assert floor("Delay- prewash", 360.0, ambiguous=True) == DISHWASHER_MIN_CYCLE_DURATION_S
+    assert (
+        floor("Delay- prewash", 360.0, prefix_ambiguous=True)
+        == DISHWASHER_MIN_CYCLE_DURATION_S
+    )
 
     # Unmatched: the blanket floor still applies.
     assert floor(None, 0.0) == DISHWASHER_MIN_CYCLE_DURATION_S
@@ -524,3 +546,65 @@ def test_the_banked_tail_repair_measures_each_profile_once():
     )[0]
     assert "quiet_by_profile" in block
     assert block.count("self.profile_terminal_quiet_seconds(") == 1
+
+
+# --------------------------------------------------------------------------
+# Round 9: a keepalive during a sensor outage is not observed quiet
+# --------------------------------------------------------------------------
+def test_an_unobserved_keepalive_still_resets_the_gapfree_tally():
+    """The synthetic exemption rests on "the watchdog resynced first".
+
+    `_resync_power_from_state` returns early when the sensor is unavailable,
+    unknown or non-finite, but the watchdog injects on the silence interval
+    alone - so during a real outage every keepalive was exempt and
+    `_time_below_threshold_gapfree` grew through quiet nobody saw. That tally
+    feeds the dishwasher end-spike quiet release and the ENDING hard finalize,
+    both of which can only SHORTEN the wait, so a plug dropping offline could
+    finalize a dishwasher before its terminal pump-out.
+    """
+    from datetime import datetime, timedelta, timezone
+
+    from custom_components.ha_washdata.cycle_detector import (
+        CycleDetector,
+        CycleDetectorConfig,
+    )
+
+    def _det():
+        cfg = CycleDetectorConfig(min_power=2.0, off_delay=60, stop_threshold_w=2.0)
+        d = CycleDetector(cfg, lambda a, b: None, lambda c: None)
+        base = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+        # A fast-cadence plug, so the outage ceiling is the 60 s floor.
+        for i in range(30):
+            d.process_reading(0.0, base + timedelta(seconds=i * 2))
+        return d, base + timedelta(seconds=60)
+
+    # Observed keepalive after a long silence: the interval was seen, so the
+    # gap-free tally keeps accumulating (this is the #424/#427 behaviour).
+    det, t = _det()
+    before = det._time_below_threshold_gapfree
+    det.process_reading(0.0, t + timedelta(seconds=600), synthetic=True, observed=True)
+    assert det._time_below_threshold_gapfree > before
+
+    # Same keepalive while the sensor could not be read: that is an outage.
+    det, t = _det()
+    det.process_reading(0.0, t + timedelta(seconds=600), synthetic=True, observed=False)
+    assert det._time_below_threshold_gapfree == 0.0
+
+
+def test_a_real_reading_after_an_outage_still_resets_regardless_of_observed():
+    """`observed` only ever qualifies the synthetic exemption; a genuine
+    sensor reading across a hole resets as it always did."""
+    from datetime import datetime, timedelta, timezone
+
+    from custom_components.ha_washdata.cycle_detector import (
+        CycleDetector,
+        CycleDetectorConfig,
+    )
+
+    cfg = CycleDetectorConfig(min_power=2.0, off_delay=60, stop_threshold_w=2.0)
+    det = CycleDetector(cfg, lambda a, b: None, lambda c: None)
+    base = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+    for i in range(30):
+        det.process_reading(0.0, base + timedelta(seconds=i * 2))
+    det.process_reading(0.0, base + timedelta(seconds=660))  # real, big hole
+    assert det._time_below_threshold_gapfree == 0.0

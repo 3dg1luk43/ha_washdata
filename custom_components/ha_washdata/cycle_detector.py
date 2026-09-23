@@ -1192,7 +1192,11 @@ class CycleDetector:
         return configured_ratio
 
     def process_reading(
-        self, power: float, timestamp: datetime, synthetic: bool = False
+        self,
+        power: float,
+        timestamp: datetime,
+        synthetic: bool = False,
+        observed: bool = True,
     ) -> None:
         """Process a new power reading using robust dt-aware logic.
 
@@ -1202,6 +1206,11 @@ class CycleDetector:
         They must keep doing exactly that, so this flag does not change the quiet
         accumulators. What it does change is the two places that reason about what
         the SENSOR did (#424):
+
+        ``observed=False`` additionally says the sensor state could NOT be read
+        when this keepalive was injected (unavailable / unknown / non-finite), so
+        the interval it closes is a genuine outage and must reset the gap-free
+        quiet tally like any other hole.
 
         * ``_update_cadence`` is skipped. The cadence estimate feeds
           ``_gate_cadence`` and therefore the pause/end gates, so training it on
@@ -1380,16 +1389,26 @@ class CycleDetector:
             # 3600)) but reuses the maintained p95 cadence to stay O(1) in this
             # per-reading hot path. Uses the cadence as it stood BEFORE this
             # reading, so a gap cannot widen its own acceptance threshold.
-            # A synthetic keepalive can never be an outage: the watchdog resyncs
-            # against the sensor's live state before injecting, so the interval it
-            # closes is observed by definition. This matters because the ceiling
-            # is derived from the p95 cadence, which synthetic readings no longer
-            # train - without this a 106 s keepalive on a 2 s-cadence plug would
-            # look like a 106 s hole and reset the tally on every single tick,
-            # starving the two consumers that can only ever SHORTEN the wait (the
-            # dishwasher end-spike quiet release and the ENDING hard finalize).
+            # A synthetic keepalive is normally not an outage: the watchdog
+            # resyncs against the sensor's live state before injecting, so the
+            # interval it closes IS observed. This matters because the ceiling is
+            # derived from the p95 cadence, which synthetic readings no longer
+            # train - without the exemption a 106 s keepalive on a 2 s-cadence
+            # plug would look like a 106 s hole and reset the tally on every
+            # tick, starving the two consumers that can only ever SHORTEN the
+            # wait (the dishwasher end-spike quiet release and the ENDING hard
+            # finalize).
+            #
+            # `observed` is what makes that premise true rather than assumed.
+            # `_resync_power_from_state` returns early when the sensor is
+            # unavailable / unknown / non-finite, but the watchdog injects anyway
+            # - it only checks the silence interval. So during a real telemetry
+            # outage every keepalive was exempt and the gap-free tally grew
+            # through quiet nobody ever saw, which is exactly what that tally
+            # exists not to count. The caller now says whether the sensor state
+            # could actually be read, and an unread sensor is an outage.
             outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
-            if dt > outage_ceiling and not synthetic:
+            if dt > outage_ceiling and not (synthetic and observed):
                 self._time_below_threshold_gapfree = 0.0
             else:
                 self._time_below_threshold_gapfree += dt
@@ -3151,8 +3170,27 @@ class CycleDetector:
         # half an hour. The floor still applies unmatched, and a matched profile
         # can only ever LOWER it (`min`), never license a longer deferral - the
         # 39.4 min Electrolux "Rapido" already clears it and is unaffected.
+        #
+        # Gated on a TRUSTED match, not merely a present one. This floor is an
+        # anti-premature-end guard, so the risk is the opposite way round from
+        # the ENDING fallback gate (item 329, where a confidence check measured
+        # as pure cost): getting this wrong ends a dishwasher during its fill or
+        # early-wash dip and records the rest of the programme as a second
+        # cycle, which is the expensive failure. A low-confidence match to a
+        # short look-alike is exactly how that happens, so it does not get to
+        # lower the bar. Uses the WIDER `_match_prefix_ambiguous`, not the
+        # narrow full-shape flag Smart Termination takes: a false block here
+        # only keeps the 30 min floor, where for the anti-crease finalize it can
+        # re-hang the cycle (#296). No-op on the whole corpus either way - every
+        # corpus dishwasher profile is over 90 minutes.
         _dw_floor = DISHWASHER_MIN_CYCLE_DURATION_S
-        if self._matched_profile and self._expected_duration > 0:
+        if (
+            self._matched_profile
+            and self._expected_duration > 0
+            and self._last_match_confidence >= self._config.match_confidence_threshold
+            and not self._match_ambiguous
+            and not self._match_prefix_ambiguous
+        ):
             _dw_floor = min(_dw_floor, float(self._expected_duration))
         if self._config.device_type == "dishwasher" and duration < _dw_floor:
             self._logger.debug(
