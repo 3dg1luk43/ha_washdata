@@ -2021,7 +2021,8 @@
     "unlabel_done": "Label verwijderd van {count} cyclus(sen)",
     "unlabel_failed": "Label verwijderen mislukt: {error}",
     "odometer_saved": "Totaal aantal cycli opgeslagen",
-    "odometer_save_failed": "Kan totaal niet opslaan: {error}"
+    "odometer_save_failed": "Kan totaal niet opslaan: {error}",
+    "contrib_device_changed": "Toegevoegd aan de communitystore, maar er is van apparaat gewisseld terwijl het formulier openstond. Selecteer het bij Instellingen."
   },
   "trend": {
     "down": "Trend naar beneden",

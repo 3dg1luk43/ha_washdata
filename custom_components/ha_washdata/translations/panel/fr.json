@@ -1839,6 +1839,7 @@
     "store_share_failed": "Échec du partage : {error}",
     "store_shared": "Partagé sur la boutique communautaire, en attente de révision.",
     "appliance_added": "Appareil ajouté, en attente d'approbation",
+    "contrib_device_changed": "Ajouté à la boutique communautaire, mais l'appareil sélectionné a changé pendant que le formulaire était ouvert. Sélectionnez-le dans les Paramètres.",
     "thanks_confirming": "Merci d'avoir confirmé",
     "device_approved": "Approuvé par la communauté",
     "rating_saved": "Évaluation de la qualité enregistrée",

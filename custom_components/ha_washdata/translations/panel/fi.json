@@ -1909,6 +1909,7 @@
   },
   "toast": {
     "catalog_refreshed": "Yhteisön luettelo päivitetty",
+    "contrib_device_changed": "Lisätty yhteisökauppaan, mutta valittu laite vaihtui lomakkeen ollessa auki. Valitse se asetuksista.",
     "access_saved": "Kulunvalvonta tallennettu",
     "all_wiped": "Kaikki tiedot pyyhitty",
     "analysis_complete_none": "Analyysi valmis: ei uusia ehdotuksia",

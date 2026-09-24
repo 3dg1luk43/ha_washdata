@@ -2021,7 +2021,8 @@
     "unlabel_done": "Märkningen togs bort från {count} cykler",
     "unlabel_failed": "Borttagning av märkning misslyckades: {error}",
     "odometer_saved": "Totalt antal cykler sparat",
-    "odometer_save_failed": "Kunde inte spara totalen: {error}"
+    "odometer_save_failed": "Kunde inte spara totalen: {error}",
+    "contrib_device_changed": "Tillagd i gemenskapsbutiken, men apparaten byttes medan formuläret var öppet. Välj den i Inställningar."
   },
   "trend": {
     "down": "Nedåtgående trend",

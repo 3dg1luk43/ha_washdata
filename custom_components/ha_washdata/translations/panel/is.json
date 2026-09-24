@@ -2021,7 +2021,8 @@
     "unlabel_done": "Fjarlægði merkingu af {count} lotu(m)",
     "unlabel_failed": "Fjarlæging merkingar mistókst: {error}",
     "odometer_saved": "Samtala lotna vistuð",
-    "odometer_save_failed": "Ekki tókst að vista samtöluna: {error}"
+    "odometer_save_failed": "Ekki tókst að vista samtöluna: {error}",
+    "contrib_device_changed": "Bætt við samfélagsverslunina, en skipt var um tæki meðan eyðublaðið var opið. Veldu það í Stillingum."
   },
   "trend": {
     "down": "Stefnir niður",

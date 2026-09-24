@@ -1965,6 +1965,7 @@
     "store_no_appliance": "Najprv nastavte značku a model spotrebiča v Nastaveniach.",
     "store_share_failed": "Zdieľanie zlyhalo: {error}",
     "store_shared": "Zdieľané do komunitného obchodu, čaká na kontrolu.",
+    "contrib_device_changed": "Pridané do komunitného obchodu, ale vybraný spotrebič sa zmenil, kým bol formulár otvorený. Vyberte ho v Nastaveniach.",
     "appliance_added": "Spotrebič pridaný, čaká na schválenie",
     "thanks_confirming": "Ďakujeme za potvrdenie",
     "device_approved": "Schválené komunitou",

@@ -1910,7 +1910,8 @@
         "unlabel_done": "已取消标记 {count} 个周期",
         "unlabel_failed": "取消标记失败：{error}",
         "odometer_saved": "已保存累计周期数",
-        "odometer_save_failed": "无法保存累计值：{error}"
+        "odometer_save_failed": "无法保存累计值：{error}",
+        "contrib_device_changed": "已添加到社区商店，但表单打开期间所选设备已更改。请在设置中选择。"
     },
     "suggestion": {
         "both_agree": "WashData建议",

@@ -1839,6 +1839,7 @@
     "store_share_failed": "Falha na partilha: {error}",
     "store_shared": "Partilhado na loja da comunidade, a aguardar revisão.",
     "appliance_added": "Electrodoméstico adicionado, a aguardar aprovação",
+    "contrib_device_changed": "Adicionado à loja da comunidade, mas o dispositivo seleccionado mudou enquanto o formulário estava aberto. Seleccione-o nas Definições.",
     "thanks_confirming": "Obrigado por confirmar",
     "device_approved": "Aprovado pela comunidade",
     "rating_saved": "Avaliação de qualidade guardada",

@@ -1766,6 +1766,7 @@
     },
     "toast": {
         "catalog_refreshed": "A közösségi katalógus frissítve",
+        "contrib_device_changed": "Hozzáadva a közösségi boltba, de a kiválasztott készülék megváltozott, amíg az űrlap nyitva volt. Válassza ki a Beállításokban.",
         "access_saved": "A hozzáférés-szabályozás mentve",
         "all_wiped": "Minden adat törölve",
         "analysis_complete_none": "Az elemzés kész: nincs új javaslat",

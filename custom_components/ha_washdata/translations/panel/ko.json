@@ -1910,7 +1910,8 @@
         "unlabel_done": "{count}개 사이클의 라벨을 해제했습니다",
         "unlabel_failed": "라벨 해제 실패: {error}",
         "odometer_saved": "누적 사이클 수가 저장되었습니다",
-        "odometer_save_failed": "누적 값을 저장할 수 없습니다: {error}"
+        "odometer_save_failed": "누적 값을 저장할 수 없습니다: {error}",
+        "contrib_device_changed": "커뮤니티 스토어에 추가했지만 입력 양식이 열려 있는 동안 기기가 변경되었습니다. 설정에서 선택하세요."
     },
     "suggestion": {
         "both_agree": "WashData 권장",

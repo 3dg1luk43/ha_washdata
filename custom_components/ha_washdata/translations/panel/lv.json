@@ -1766,6 +1766,7 @@
   },
   "toast": {
     "catalog_refreshed": "Kopienas katalogs atsvaidzināts",
+    "contrib_device_changed": "Pievienots kopienas veikalā, bet, kamēr veidlapa bija atvērta, mainījās atlasītā ierīce. Atlasiet to sadaļā Iestatījumi.",
     "access_saved": "Piekļuves kontrole saglabāta",
     "all_wiped": "Visi dati ir izdzēsti",
     "analysis_complete_none": "Analīze pabeigta: nav jaunu ieteikumu",

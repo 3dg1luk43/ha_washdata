@@ -1910,7 +1910,8 @@
         "unlabel_done": "{count} 件のサイクルのラベルを解除しました",
         "unlabel_failed": "ラベルの解除に失敗しました: {error}",
         "odometer_saved": "累計サイクル数を保存しました",
-        "odometer_save_failed": "累計を保存できませんでした: {error}"
+        "odometer_save_failed": "累計を保存できませんでした: {error}",
+        "contrib_device_changed": "コミュニティストアに追加しましたが、入力フォームを開いている間にデバイスが変更されました。設定で選択してください。"
     },
     "suggestion": {
         "both_agree": "WashDataの推奨",

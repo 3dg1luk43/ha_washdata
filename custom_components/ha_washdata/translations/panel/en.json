@@ -1934,6 +1934,7 @@
     "automation_deleted": "Automation deleted",
     "brand_added": "Brand added - awaiting approval",
     "catalog_refreshed": "Community catalog refreshed",
+    "contrib_device_changed": "Added to the community store, but the device changed while the form was open. Select it in Settings.",
     "correction_submitted": "Correction submitted",
     "cycle_deleted": "Cycle deleted",
     "cycle_force_stopped": "Cycle force-stopped",

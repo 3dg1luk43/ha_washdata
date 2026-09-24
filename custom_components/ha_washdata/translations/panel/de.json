@@ -2021,7 +2021,8 @@
     "unlabel_done": "Beschriftung von {count} Zyklen entfernt",
     "unlabel_failed": "Entfernen der Beschriftung fehlgeschlagen: {error}",
     "odometer_saved": "Gesamtzahl der Zyklen gespeichert",
-    "odometer_save_failed": "Gesamtzahl konnte nicht gespeichert werden: {error}"
+    "odometer_save_failed": "Gesamtzahl konnte nicht gespeichert werden: {error}",
+    "contrib_device_changed": "Zum Community-Store hinzugefügt, aber das Gerät wurde gewechselt, während das Formular offen war. Wählen Sie es in den Einstellungen aus."
   },
   "trend": {
     "down": "Abwärtstrend",
