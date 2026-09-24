@@ -666,3 +666,51 @@ def test_the_standby_card_opens_the_section_that_holds_its_setting():
     assert "a === 'goto-standby'" in src
     handler = src[src.index("a === 'goto-standby'"):][:900]
     assert "_settingsSec = 'detection'" in handler
+
+
+# --------------------------------------------------------------------------
+# Round 15 (deferred, then taken): the two panel findings
+# --------------------------------------------------------------------------
+def _panel_src() -> str:
+    from pathlib import Path
+
+    return (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "www"
+        / "ha-washdata-panel.js"
+    ).read_text()
+
+
+def test_scrollers_nested_in_a_dialog_are_keyed_apart_from_the_page():
+    """`_SCROLLERS` covers `.wd-table-wrap` and `.wd-sd-tree` as well as
+    `.wd-modal`, and `_eachScroller` keyed them from all shadow-root matches
+    with no dialog scope - so the Cleanup table, the history-import review
+    table and the export-select / import-wizard / store-share-device trees all
+    shared one offset across different dialogs.
+    """
+    src = _panel_src()
+    each = src[src.index("_eachScroller(sels, fn) {"):]
+    each = each[: each.index("\n  _captureScroll")]
+    assert "closest('.wd-modal')" in each, "modal-nested scrollers are not scoped"
+    assert "_MODAL_KEY_PREFIX" in each
+    # ...and the render-time drop must clear those scoped keys too, not just
+    # the '.wd-modal|' ones.
+    render = src[src.index("const modalKey = this._modalNavKey();"):][:800]
+    assert "_MODAL_KEY_PREFIX" in render
+
+
+def test_a_contributed_appliance_is_saved_to_the_device_that_asked_for_it():
+    """The contribute popup is user-paced, so the panel selection can move
+    while it is open. `_saveStoreOptions` targets whatever is selected NOW, so
+    an ungated save stamps the appliance identity onto another entry and
+    reloads it, while the device that asked gets nothing."""
+    src = _panel_src()
+    # Both popup-open sites record the originating entry...
+    assert src.count("this._storeContribEid = eid") == 2
+    # ...and both message handlers gate on it.
+    listener = src[src.index("washdata-device-created"):]
+    listener = listener[: listener.index("washdata-connect")]
+    assert listener.count("_storeContribEid") == 2
+    assert listener.count("_isActiveEntry") == 2
