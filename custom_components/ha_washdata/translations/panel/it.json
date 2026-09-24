@@ -1839,6 +1839,7 @@
     "store_share_failed": "Condivisione non riuscita: {error}",
     "store_shared": "Condiviso nello store della community, in attesa di revisione.",
     "appliance_added": "Elettrodomestico aggiunto, in attesa di approvazione",
+    "contrib_device_changed": "Aggiunto allo store della community, ma il dispositivo selezionato è cambiato mentre il modulo era aperto. Selezionalo nelle Impostazioni.",
     "thanks_confirming": "Grazie per la conferma",
     "device_approved": "Approvato dalla community",
     "rating_saved": "Valutazione della qualità salvata",

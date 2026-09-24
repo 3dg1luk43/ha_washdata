@@ -1807,6 +1807,7 @@
     "store_share_failed": "Partajarea a eșuat: {error}",
     "store_shared": "Partajat în magazinul comunității, în așteptarea examinării.",
     "appliance_added": "Aparat adăugat, în așteptarea aprobării",
+    "contrib_device_changed": "Adăugat în magazinul comunității, dar dispozitivul selectat s-a schimbat în timp ce formularul era deschis. Selectați-l în Setări.",
     "thanks_confirming": "Vă mulțumim pentru confirmare",
     "device_approved": "Aprobat de comunitate",
     "rating_saved": "Evaluarea calității a fost salvată",

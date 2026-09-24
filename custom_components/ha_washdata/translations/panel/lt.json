@@ -1766,6 +1766,7 @@
   },
   "toast": {
     "catalog_refreshed": "Bendruomenės katalogas atnaujintas",
+    "contrib_device_changed": "Pridėta į bendruomenės parduotuvę, bet, kol forma buvo atidaryta, pasikeitė pasirinktas prietaisas. Pasirinkite jį nustatymuose.",
     "access_saved": "Prieigos valdymas išsaugotas",
     "all_wiped": "Visi duomenys ištrinti",
     "analysis_complete_none": "Analizė baigta: jokių naujų pasiūlymų",

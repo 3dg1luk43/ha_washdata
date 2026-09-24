@@ -1798,6 +1798,7 @@
     },
     "toast": {
         "catalog_refreshed": "Topluluk kataloğu yenilendi",
+        "contrib_device_changed": "Topluluk mağazasına eklendi, ancak form açıkken seçili cihaz değişti. Bunu Ayarlar'dan seçin.",
         "access_saved": "Erişim denetimi kaydedildi",
         "all_wiped": "Tüm veriler silindi",
         "analysis_complete_none": "Analiz tamamlandı: yeni öneri yok",

@@ -903,3 +903,38 @@ def test_the_panel_and_python_agree_on_the_max_duration_ratio_default():
             f"stale panel default {raw}, Python says "
             f"{DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO}"
         )
+
+
+def test_the_contribute_popup_says_when_it_did_not_apply_the_appliance(tmp_path):
+    """Round 18, a follow-up on the round-15 guard.
+
+    The guard declines the save when the selection moved while the popup was
+    open, but the success toast fired unconditionally above it - so the user was
+    told the appliance had been applied to this device, nothing had been
+    written, and nothing said to pick it by hand. One toast, not two: the toast
+    slot is single and a second `_showToast` replaces the first.
+    """
+    import json
+    from pathlib import Path
+
+    src = _panel_src()
+    listener = src[src.index("washdata-device-created"):]
+    listener = listener[: listener.index("washdata-connect")]
+    # Both branches choose their message on the guard instead of announcing
+    # success regardless.
+    assert listener.count("toast.contrib_device_changed") == 2
+    for success in ("toast.appliance_added", "toast.brand_added"):
+        assert listener.count(success) == 1
+    # The key backs the fallback, per the panel-translation rule that English
+    # lives in en.json as the canonical source.
+    en = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "custom_components"
+            / "ha_washdata"
+            / "translations"
+            / "panel"
+            / "en.json"
+        ).read_text()
+    )
+    assert en["toast"]["contrib_device_changed"]

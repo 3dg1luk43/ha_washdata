@@ -2021,7 +2021,8 @@
     "unlabel_done": "Fjernede mærkning fra {count} cyklus(ser)",
     "unlabel_failed": "Fjernelse af mærkning mislykkedes: {error}",
     "odometer_saved": "Samlet antal cyklusser gemt",
-    "odometer_save_failed": "Kunne ikke gemme totalen: {error}"
+    "odometer_save_failed": "Kunne ikke gemme totalen: {error}",
+    "contrib_device_changed": "Tilføjet til fællesskabsbutikken, men apparatet blev skiftet, mens formularen var åben. Vælg det i Indstillinger."
   },
   "trend": {
     "down": "Trend nedad",

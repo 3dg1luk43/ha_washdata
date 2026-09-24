@@ -8897,7 +8897,6 @@ class HaWashdataPanel extends HTMLElement {
         this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
         this._dropModelCandidates();
         this._catalogEntry = null;
-        this._showToast(this._t('toast.appliance_added', {}, 'Appliance added - awaiting approval'));
         // Persist only if the device that OPENED the popup is still selected.
         // The popup is user-paced, so the selection can move while it is open,
         // and _saveStoreOptions targets whatever is selected NOW - which would
@@ -8905,7 +8904,18 @@ class HaWashdataPanel extends HTMLElement {
         // the device that asked for it gets nothing. Before these became real
         // saves the wrong-device case could not persist anything.
         const _contribEid = this._storeContribEid || eid;
-        if (Object.keys(patch).length && this._isActiveEntry(_contribEid)) {
+        const _hasPatch = Object.keys(patch).length > 0;
+        const _sameDevice = this._isActiveEntry(_contribEid);
+        // Say which happened. The success toast alone claimed the appliance had
+        // been applied here, when the guard had just declined to write it and
+        // nothing told the user to pick it by hand. One toast, not two: the
+        // toast slot is single and a second call replaces the first.
+        this._showToast(
+          _hasPatch && !_sameDevice
+            ? this._t('toast.contrib_device_changed', {}, 'Added to the community store, but the device changed while the form was open. Select it in Settings.')
+            : this._t('toast.appliance_added', {}, 'Appliance added - awaiting approval')
+        );
+        if (_hasPatch && _sameDevice) {
           await this._saveStoreOptions(patch, { silent: true });
         }
         this._render();
@@ -8916,9 +8926,14 @@ class HaWashdataPanel extends HTMLElement {
         this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
         this._dropModelCandidates();
         this._catalogEntry = null;         // and re-resolve the badge for the new brand
-        this._showToast(this._t('toast.brand_added', {}, 'Brand added - awaiting approval'));
-        // Same entry guard as washdata-device-created above.
-        if (d.brand && this._isActiveEntry(this._storeContribEid || eid)) {
+        // Same entry guard, and the same reporting, as washdata-device-created above.
+        const _brandSame = this._isActiveEntry(this._storeContribEid || eid);
+        this._showToast(
+          d.brand && !_brandSame
+            ? this._t('toast.contrib_device_changed', {}, 'Added to the community store, but the device changed while the form was open. Select it in Settings.')
+            : this._t('toast.brand_added', {}, 'Brand added - awaiting approval')
+        );
+        if (d.brand && _brandSame) {
           await this._saveStoreOptions({ store_brand: d.brand }, { silent: true });
         }
         this._render();

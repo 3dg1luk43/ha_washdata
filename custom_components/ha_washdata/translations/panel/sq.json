@@ -1766,6 +1766,7 @@
     },
     "toast": {
         "catalog_refreshed": "Katalogu i komunitetit u rifreskua",
+        "contrib_device_changed": "U shtua në dyqanin e komunitetit, por pajisja e zgjedhur ndryshoi ndërsa formulari ishte i hapur. Zgjidheni te Cilësimet.",
         "access_saved": "Kontrolli i aksesit u ruajt",
         "all_wiped": "Të gjitha të dhënat u fshien",
         "analysis_complete_none": "Analiza e plotë: asnjë sugjerim i ri",

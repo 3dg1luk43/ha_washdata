@@ -1965,6 +1965,7 @@
     "store_no_appliance": "Najpierw ustaw markę i model urządzenia w Ustawieniach.",
     "store_share_failed": "Udostępnianie nie powiodło się: {error}",
     "store_shared": "Udostępniono w sklepie społecznościowym, oczekuje na weryfikację.",
+    "contrib_device_changed": "Dodano do sklepu społecznościowego, ale wybrane urządzenie zmieniło się, gdy formularz był otwarty. Wybierz je w Ustawieniach.",
     "appliance_added": "Urządzenie dodane, oczekuje na zatwierdzenie",
     "thanks_confirming": "Dziękujemy za potwierdzenie",
     "device_approved": "Zatwierdzone przez społeczność",

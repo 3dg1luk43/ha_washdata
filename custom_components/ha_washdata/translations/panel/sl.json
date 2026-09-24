@@ -1965,6 +1965,7 @@
     "store_no_appliance": "Najprej nastavite znamko in model naprave v Nastavitvah.",
     "store_share_failed": "Deljenje ni uspelo: {error}",
     "store_shared": "Deljeno v skupnostno trgovino, čaka na pregled.",
+    "contrib_device_changed": "Dodano v skupnostno trgovino, vendar se je izbrana naprava spremenila, medtem ko je bil obrazec odprt. Izberite jo v Nastavitvah.",
     "appliance_added": "Naprava dodana, čaka na odobritev",
     "thanks_confirming": "Hvala za potrditev",
     "device_approved": "Odobreno s strani skupnosti",

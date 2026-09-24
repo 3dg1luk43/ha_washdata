@@ -1798,6 +1798,7 @@
   },
   "toast": {
     "catalog_refreshed": "Kogukonna kataloog on värskendatud",
+    "contrib_device_changed": "Lisatud kogukonna poodi, kuid valitud seade muutus, kui vorm oli avatud. Vali see seadetes.",
     "access_saved": "Juurdepääsukontroll on salvestatud",
     "all_wiped": "Kõik andmed on kustutatud",
     "analysis_complete_none": "Analüüs on lõpetatud: uusi ettepanekuid pole",

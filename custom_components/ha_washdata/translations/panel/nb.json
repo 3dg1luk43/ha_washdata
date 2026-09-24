@@ -2021,7 +2021,8 @@
     "unlabel_done": "Merking fjernet fra {count} syklus(er)",
     "unlabel_failed": "Fjerning av merking mislyktes: {error}",
     "odometer_saved": "Totalt antall sykluser lagret",
-    "odometer_save_failed": "Kunne ikke lagre totalen: {error}"
+    "odometer_save_failed": "Kunne ikke lagre totalen: {error}",
+    "contrib_device_changed": "Lagt til i fellesskapsbutikken, men apparatet ble byttet mens skjemaet var åpent. Velg det i Innstillinger."
   },
   "trend": {
     "down": "Trender nedover",
