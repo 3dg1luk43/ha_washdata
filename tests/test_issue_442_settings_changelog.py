@@ -190,8 +190,11 @@ async def test_helper_never_raises_without_a_manager() -> None:
 async def test_every_option_writer_is_wired_to_the_helper() -> None:
     """Guard against a fifth writer being added without a changelog call.
 
-    The count is the contract: ws_set_options records inline (it also handles the
-    null-strip and title), the other four go through the helper.
+    The count is the contract, and since the PR #448 round-15 review it is a
+    clean one: ALL five writers go through `_record_option_changes`.
+    `ws_set_options` used to keep its own inline copy of the snapshot/diff/record
+    sequence - which is two implementations of a history the per-setting Revert
+    trusts, and the helper's own docstring already claimed to have replaced it.
     """
     import inspect
 
@@ -199,4 +202,6 @@ async def test_every_option_writer_is_wired_to_the_helper() -> None:
     assert src.count("async_update_entry(") == 5, (
         "a new entry.options writer appeared; wire it to _record_option_changes"
     )
-    assert src.count("await _record_option_changes(") == 4
+    assert src.count("await _record_option_changes(") == 5, (
+        "every option writer records through the helper; no inline copies"
+    )
