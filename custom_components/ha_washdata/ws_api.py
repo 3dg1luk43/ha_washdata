@@ -86,6 +86,7 @@ from .const import (
     DEFAULT_SMART_TERMINATION_DURATION_RATIO,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
     DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_CURVE_PREROLL_SECONDS,
     CURVE_PREROLL_MAX_SECONDS,
     resolve_sampling_interval_default,
@@ -1703,6 +1704,15 @@ def _resolved_option_defaults(device_type: str) -> dict[str, Any]:
         # the individual machine), but the panel pre-populates it from the same
         # payload, so it is published here rather than left to the JS default.
         CONF_ANTI_CREASE_FINALIZE_RATIO: DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+        # Item 311 raised this to 1.8 in Python and the panel's schema literal
+        # stayed at 1.5, so an entry without the key rendered 1.5 while the
+        # matcher used 1.8. Not device-resolved either; published for the same
+        # reason as the line above, so the constant is the only source and the
+        # two cannot drift again. Round 17 removed the migration seed that had
+        # been hiding this for legacy entries.
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO: (
+            DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+        ),
         # #445: the pair that decides when a cycle is allowed to end. The detector
         # waits max(off_delay, min_off_gap), so an unset min_off_gap silently
         # raises a hand-lowered off_delay to the per-device prior - and with the

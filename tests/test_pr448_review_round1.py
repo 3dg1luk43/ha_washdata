@@ -855,3 +855,51 @@ def test_the_legacy_migration_no_longer_seeds_the_max_duration_ratio():
         "DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO\n"
         "    )"
     ) not in src
+
+
+def test_the_panel_and_python_agree_on_the_max_duration_ratio_default():
+    """Item 311 raised it to 1.8 in Python and the panel schema stayed at 1.5.
+
+    While the legacy migration seeded the key that never showed, because every
+    entry carried an explicit value. Removing the seed (round 17) exposes it:
+    an entry without the key would render 1.5 while the matcher uses 1.8. The
+    constant is published through ``_resolved_option_defaults`` now, and the JS
+    literals - the fallback when that payload is unavailable - have to agree.
+    """
+    from pathlib import Path
+
+    from custom_components.ha_washdata.const import (
+        DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    )
+
+    assert (
+        ws_api._resolved_option_defaults("washing_machine")[
+            "profile_match_max_duration_ratio"
+        ]
+        == DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+    )
+
+    panel = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "www"
+        / "ha-washdata-panel.js"
+    ).read_text()
+    import re
+
+    # Numeric literals only: the key also appears in the cross-field conflict
+    # rule, which carries no default.
+    literals = re.findall(
+        r"profile_match_max_duration_ratio:\s*([0-9]+(?:\.[0-9]+)?)\s*,", panel
+    ) + re.findall(
+        r"key: 'profile_match_max_duration_ratio'[^\n]*?\bdef:\s*"
+        r"([0-9]+(?:\.[0-9]+)?)",
+        panel,
+    )
+    assert literals, "no panel default found for the key"
+    for raw in literals:
+        assert float(raw) == DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO, (
+            f"stale panel default {raw}, Python says "
+            f"{DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO}"
+        )
