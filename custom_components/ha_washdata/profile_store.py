@@ -1328,6 +1328,27 @@ def _scan_data(data_dict: Any, entry_options: Any = None) -> dict[str, dict[str,
     return out
 
 
+def _export_predates_banked_tail_repair(meta: dict[str, Any]) -> bool:
+    """Does this import payload predate the v12 -> v13 banked-tail repair?
+
+    Only `WashDataStore._async_migrate_func` sets `BANKED_TAIL_REPAIR_KEY`, and
+    only on storage LOAD - the import paths assign `_data` directly and never run
+    it. So restoring a pre-0.5.7 backup left the marker absent,
+    `banked_tail_repair_pending()` returned False, `manager.async_setup` never
+    scheduled the repair, and the restored cycles kept their banked confirmation
+    delay permanently - feeding `avg_duration`, the ETA and the Smart Termination
+    gate, which is the drift item 297 exists to remove.
+
+    An unreadable version is treated as old: running an idempotent repair on an
+    already-repaired history costs one pass and changes nothing, while skipping
+    it on an unrepaired one is permanent.
+    """
+    try:
+        return int(meta.get("version") or 1) < 13
+    except (TypeError, ValueError, OverflowError):
+        return True
+
+
 def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]:
     """Normalize any supported export/import wrapper into ``(data_dict, meta)``.
 
@@ -8189,6 +8210,10 @@ class ProfileStore:
                 "Import payload contains no profiles or cycles — aborting to prevent data loss"
             )
         self._data = data_dict
+        # An import bypasses _async_migrate_func, so the repair marker has to be
+        # re-armed here for a payload old enough to carry banked tails.
+        if _export_predates_banked_tail_repair(meta):
+            self._data[BANKED_TAIL_REPAIR_KEY] = True
         self._cached_sample_segments = {}
         # Re-apply the odometer floor: an import can add or replace past_cycles
         # after async_load already healed it, and export_data copies the STORED
@@ -8386,6 +8411,17 @@ class ProfileStore:
         # O(N) id pools threaded through the bulk cycle adds so SHA-id uniqueness stays
         # O(1) amortized instead of rebuilding the id set from the growing destination on
         # every insert (previously O(N^2) for a large import, all on the event loop).
+        # Real cycles copied into past_cycles carry their own termination_reason,
+        # so an old payload brings banked tails with it. Same re-arm as the
+        # wholesale path: a selective import never runs _async_migrate_func
+        # either, and the repair is idempotent.
+        if (
+            "real_cycles" in cats
+            and cycle_destination == "real_history"
+            and _export_predates_banked_tail_repair(meta)
+        ):
+            self._data[BANKED_TAIL_REPAIR_KEY] = True
+
         ref_id_pool: set[Any] = {c.get("id") for c in self._data.get("reference_cycles", []) if isinstance(c, dict)}
         past_id_pool: set[Any] = {c.get("id") for c in self._data.get("past_cycles", []) if isinstance(c, dict)}
         def _bare_store_id(raw_id: Any) -> str:

@@ -618,3 +618,51 @@ def test_a_real_reading_after_an_outage_still_resets_regardless_of_observed():
         det.process_reading(0.0, base + timedelta(seconds=i * 2))
     det.process_reading(0.0, base + timedelta(seconds=660))  # real, big hole
     assert det._time_below_threshold_gapfree == 0.0
+
+
+# --------------------------------------------------------------------------
+# Round 14: an imported old backup never got the banked-tail repair
+# --------------------------------------------------------------------------
+def test_an_old_export_re_arms_the_banked_tail_repair():
+    """Only `_async_migrate_func` sets the marker, and imports bypass it.
+
+    A user restoring a pre-0.5.7 backup kept the banked confirmation delay
+    permanently: no marker, so `banked_tail_repair_pending()` is False and
+    `manager.async_setup` never schedules the repair. Those durations feed
+    avg_duration, the ETA and the Smart Termination gate.
+    """
+    from custom_components.ha_washdata.profile_store import (
+        _export_predates_banked_tail_repair,
+    )
+
+    assert _export_predates_banked_tail_repair({"version": 12}) is True
+    assert _export_predates_banked_tail_repair({"version": 1}) is True
+    assert _export_predates_banked_tail_repair({"version": 13}) is False
+    assert _export_predates_banked_tail_repair({"version": 14}) is False
+    # Unreadable version is treated as old: an idempotent repair on an already
+    # repaired history costs one pass, skipping it on an unrepaired one is
+    # permanent. (An oversized integer literal is NOT unreadable - Python ints
+    # are unbounded, so it parses and simply reads as a very new version.)
+    for bad in ({}, {"version": None}, {"version": "x"}, {"version": []}):
+        assert _export_predates_banked_tail_repair(bad) is True, bad
+    assert _export_predates_banked_tail_repair({"version": 10**400}) is False
+
+
+def test_the_standby_card_opens_the_section_that_holds_its_setting():
+    """The card names the Stop Threshold; `goto-conflicts` only flips the tab
+    and keeps whatever section was last open."""
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "www"
+        / "ha-washdata-panel.js"
+    ).read_text()
+    card = src[src.index("const sas = dev.standby_above_stop;"):]
+    card = card[: card.index("const attnHtml")]
+    assert 'data-action="goto-standby"' in card
+    assert "a === 'goto-standby'" in src
+    handler = src[src.index("a === 'goto-standby'"):][:900]
+    assert "_settingsSec = 'detection'" in handler
