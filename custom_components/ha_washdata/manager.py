@@ -6062,8 +6062,20 @@ class WashDataManager:
                 if match_result is not None
                 else program
             )
-            _margin_ok = _margin_owner == program and (
-                _margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN
+            # A result with NO winner is not a challenger. `best_profile is None`
+            # comes with `confidence` and `ambiguity_margin` both 0.0, so it
+            # carries no evidence about any programme - yet the owner check below
+            # treats it as "someone else won" and reports `%r` as None. The
+            # outcome is right either way (no label), the stated reason is not.
+            # Drop the margin too, so nothing downstream can read a
+            # no-winner 0.0 as a measured one; a real challenger keeps its margin.
+            _no_winner = match_result is not None and _margin_owner is None
+            if _no_winner:
+                _margin = None
+            _margin_ok = (
+                not _no_winner
+                and _margin_owner == program
+                and (_margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN)
             )
             if manual_program:
                 cycle_data["profile_name"] = program
@@ -6081,13 +6093,22 @@ class WashDataManager:
                 # be large, so that message reads "only 0.400 clear of the next
                 # candidate, under the 0.08 a label needs" - self-contradictory,
                 # and it hides the actual reason.
-                self._logger.info(
-                    "Not labeling cycle as '%s': the latest match was won by %r, "
-                    "so its margin is evidence about that program, not this one. "
-                    "It stays unlabelled rather than reshaping '%s' on a number "
-                    "that was never measured for it.",
-                    program, _margin_owner, program,
-                )
+                if _no_winner:
+                    self._logger.info(
+                        "Not labeling cycle as '%s': the latest match produced no "
+                        "winner at all, so there is no margin to judge it by. It "
+                        "stays unlabelled rather than reshaping '%s' on the "
+                        "confidence of an earlier tick.",
+                        program, program,
+                    )
+                else:
+                    self._logger.info(
+                        "Not labeling cycle as '%s': the latest match was won by "
+                        "%r, so its margin is evidence about that program, not "
+                        "this one. It stays unlabelled rather than reshaping '%s' "
+                        "on a number that was never measured for it.",
+                        program, _margin_owner, program,
+                    )
             elif label_confidence >= float(self._learning_confidence or 0.0):
                 self._logger.info(
                     "Not labeling cycle as '%s': confident enough (%.2f) but only "

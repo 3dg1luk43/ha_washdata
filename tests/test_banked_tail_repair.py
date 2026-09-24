@@ -143,6 +143,12 @@ class _Store(ProfileStore):
     def __init__(self, data):  # pylint: disable=super-init-not-called
         self._data = data
         self._logger = MagicMock()
+        # A real ProfileStore always has this, and `_apply_repaired_duration`
+        # clears the cycle's entries. Omitting it made every repair abort into
+        # `async_repair_banked_tails`'s broad `except` with repaired=0 - the same
+        # way a missing import once did (register item 340). A fixture that is
+        # not a real store hides real bugs.
+        self._cached_sample_segments = {}
 
     def iter_evidence_cycles(self):
         yield from (self._data.get("past_cycles") or [])
@@ -693,3 +699,98 @@ def test_the_live_cap_and_the_repair_use_one_helper() -> None:
 
     assert _cd.quiet_run_before is quiet_run_before
     assert _ps._quiet_run_before is quiet_run_before
+
+
+@pytest.mark.asyncio
+async def test_the_repair_drops_the_cycles_cached_sample_segment() -> None:
+    """Found in the PR #448 round-22 review.
+
+    `_cached_sample_segments` is keyed by `(cycle_id, dt)` and the repair does
+    not change the id, so a match that ran BEFORE the repair keeps serving the
+    pre-repair trace as `sample_power`. The repair rebuilds `avg_duration` from
+    the shortened cycles, so the template and its duration would describe
+    different traces until the next restart. `trim_cycle_power_data` already
+    clears these keys after its own rewrite.
+    """
+    data = {"past_cycles": [_cycle("a", 3000, 1200)], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+    st._cached_sample_segments = {
+        ("a", 5.0): "stale",
+        ("a", 10.0): "stale",
+        ("other", 5.0): "keep",
+    }
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 1
+    assert list(st._cached_sample_segments) == [("other", 5.0)], (
+        "the repaired cycle's cached segment still holds the banked tail"
+    )
+
+
+def _quiet_store(cycles):
+    st = _sig(_Store({"past_cycles": cycles}))
+    return st
+
+
+def test_the_terminal_quiet_span_is_cached_per_profile() -> None:
+    """Found in the PR #448 round-22 review.
+
+    It is element 11 of the live match tuple, so it runs on the event loop every
+    match tick, and it decompresses every evidence cycle of the profile.
+    Measured at 0.77 ms on the worst real export but **91 ms** at the 200-cycle
+    retention cap with long traces.
+    """
+    cycles = [
+        {"id": "a", "profile_name": "p", "duration": 100.0, "power_data": [[0, 1.0]]},
+        {"id": "b", "profile_name": "p", "duration": 100.0, "power_data": [[0, 1.0]]},
+    ]
+    st = _quiet_store(cycles)
+
+    for _ in range(5):
+        assert st.profile_terminal_quiet_seconds("p") == pytest.approx(600.0)
+
+    assert st.compute_profile_terminal_signature.call_count == 1
+
+
+def test_an_in_place_trim_invalidates_the_cached_span() -> None:
+    """The banked-tail repair and ``trim_cycle_power_data`` rewrite a cycle's
+    trace and duration in place, so the count and the last id do not move. A
+    stale span would bound ``_keep_tail_cap`` against a trace that is gone."""
+    cycles = [
+        {"id": "a", "profile_name": "p", "duration": 100.0, "power_data": [[0, 1.0]]},
+        {"id": "b", "profile_name": "p", "duration": 100.0, "power_data": [[0, 1.0]]},
+    ]
+    st = _quiet_store(cycles)
+    st.profile_terminal_quiet_seconds("p")
+
+    cycles[0]["duration"] = 60.0
+
+    st.profile_terminal_quiet_seconds("p")
+    assert st.compute_profile_terminal_signature.call_count == 2
+
+
+def test_adding_a_cycle_invalidates_the_cached_span() -> None:
+    cycles = [
+        {"id": "a", "profile_name": "p", "duration": 100.0, "power_data": [[0, 1.0]]},
+    ]
+    st = _quiet_store(cycles)
+    st.profile_terminal_quiet_seconds("p")
+
+    cycles.append(
+        {"id": "b", "profile_name": "p", "duration": 100.0, "power_data": [[0, 1.0]]}
+    )
+
+    st.profile_terminal_quiet_seconds("p")
+    assert st.compute_profile_terminal_signature.call_count == 2
+
+
+def test_a_failed_measurement_is_never_cached() -> None:
+    """A failure is not a measurement. Remembering one would pin "no opinion"
+    until the evidence happens to change."""
+    st = _Store({"past_cycles": []})
+    st.compute_profile_terminal_signature = MagicMock(side_effect=RuntimeError("boom"))
+
+    assert st.profile_terminal_quiet_seconds("p") is None
+    assert st.profile_terminal_quiet_seconds("p") is None
+    assert st.compute_profile_terminal_signature.call_count == 2

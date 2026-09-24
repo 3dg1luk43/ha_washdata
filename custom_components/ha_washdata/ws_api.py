@@ -1837,7 +1837,11 @@ async def ws_set_options(
                 if not math.isfinite(_qr):
                     raise ValueError("non-finite")
                 new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = _qr
-            except (TypeError, ValueError):
+            # OverflowError too, same reason as the anti-crease block below
+            # (register item 194): an unbounded int from JSON raises on float()
+            # rather than returning inf, and uncaught it fails the WHOLE save
+            # with unknown_error instead of dropping this one key.
+            except (TypeError, ValueError, OverflowError):
                 new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = (
                     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
                 )
@@ -1859,7 +1863,8 @@ async def ws_set_options(
                     new_options[CONF_SMART_TERMINATION_DURATION_RATIO] = min(
                         1.0, max(0.5, _str)
                     )
-                except (TypeError, ValueError):
+                # OverflowError too, see the anti-crease block below.
+                except (TypeError, ValueError, OverflowError):
                     new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
 
         # #429: the anti-crease finalise ratio is the same kind of value against the
