@@ -5767,11 +5767,24 @@ class ProfileStore:
           phase on no evidence.
 
         Only ``past_cycles`` is touched, and within it only cycles recorded as
-        ``TerminationReason.SMART``. ``reference_cycles`` are community templates
-        this device never recorded, and ``backfill_cycles`` were replayed from raw
-        history and never went through Smart Termination at all, so neither can
+        ``TerminationReason.SMART``. ``backfill_cycles`` were replayed from raw
+        history and never went through Smart Termination at all, so they cannot
         carry a banked tail; a user-stopped or unattributed cycle is left alone for
         the reason given at the filter.
+
+        **``reference_cycles`` are NOT all community templates, and this scope has
+        a known hole (register item 351, DEFERRED).** `async_import_data_selective`
+        defaults `cycle_destination` to ``"reference"``, so importing a pre-v13
+        export of a device's OWN history routes those cycles through
+        `_add_reference_cycle_nosave`, which takes `duration` from the trace span
+        and does not carry `termination_reason` across. A Smart-Terminated trace
+        includes its confirmation tail, because `_finish_cycle` appends a final
+        sample at `end_time` - so the reference cycle keeps the inflated duration,
+        is marked ``golden``, and feeds `avg_duration` / `target_duration` through
+        `async_rebuild_envelope`, while this repair never looks at it. Closing it
+        means carrying a marker across that conversion and repairing marked
+        reference cycles only; rewriting curated golden data is a decision for the
+        maintainer, not something to do unattended.
 
         Returns a summary for the log. Never raises: a failed repair must not cost
         the user their history, so the store is left exactly as it was.
