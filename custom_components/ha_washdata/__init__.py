@@ -377,9 +377,16 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(
         CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
     )
-    options.setdefault(
-        CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
-    )
+    # CONF_PROFILE_MATCH_MAX_DURATION_RATIO is deliberately NOT seeded here.
+    # Seeding it is what produced `_OLD_SEEDED_MAX_DURATION_RATIO` and the two
+    # heal sites above: entries took the then-default 1.5 as an explicit value,
+    # so item 311's widening to 1.8 reached none of them. Every reader resolves
+    # the key with `DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO` as its fallback
+    # and `ws_get_options` ships `defaults` alongside `options`, so an absent
+    # key behaves identically today and the next change to the default actually
+    # lands. The min ratio above keeps its seed because that gate is inert for
+    # ranking (it has never removed a true candidate on the corpus), so freezing
+    # it costs nothing.
     options.setdefault(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES)
     options.setdefault(
         CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE

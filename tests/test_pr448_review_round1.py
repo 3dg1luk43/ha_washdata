@@ -745,3 +745,113 @@ def test_the_banked_tail_repair_is_spawned_after_setup_rewrites_the_cycles():
         "await self._setup_maintenance_scheduler()",
     ):
         assert src.index(later) < spawn, f"{later} must run before the repair spawns"
+
+
+# --------------------------------------------------------------------------
+# cycle_detector: the longest-candidate bound outlived its match (round 17)
+# --------------------------------------------------------------------------
+def _det_with_bound(bound: float = 4200.0):
+    from custom_components.ha_washdata.cycle_detector import (
+        CycleDetector,
+        CycleDetectorConfig,
+    )
+
+    cfg = CycleDetectorConfig(min_power=2.0, off_delay=60, stop_threshold_w=2.0)
+    det = CycleDetector(cfg, lambda a, b: None, lambda c: None)
+    det._longest_candidate_duration = bound
+    det._match_ambiguous = True
+    det._expected_duration = 3600.0
+    return det
+
+
+def test_reset_clears_the_longest_candidate_bound():
+    """Element 12 belongs with elements 9-11, which ``reset`` already clears.
+
+    Its own comment claims a stale value can never license a shortening for a
+    different match, and that held only for the tuple path. The dangerous shape
+    is a SMALL positive bound: not greater than ``_expected_duration`` so the bar
+    is not raised, and not <= 0 so the "no information" refusal never fires.
+    """
+    from custom_components.ha_washdata.const import STATE_OFF
+
+    det = _det_with_bound(1200.0)
+    det.reset(STATE_OFF)
+    assert det._longest_candidate_duration == 0.0
+
+
+def test_the_bound_survives_a_snapshot_round_trip():
+    """``restore_state_snapshot`` restores the ambiguity flags the ENDING gate
+    reads, so leaving the bound alone pairs them with a previous cycle's value."""
+    det = _det_with_bound(4200.0)
+    snap = det.get_state_snapshot()
+    assert snap["longest_candidate_duration"] == 4200.0
+
+    other = _det_with_bound(999.0)
+    other.restore_state_snapshot(snap)
+    assert other._longest_candidate_duration == 4200.0
+
+
+def test_a_snapshot_without_the_bound_restores_no_information():
+    """A snapshot written before this key existed must land on 0.0 - the ENDING
+    gate reads a non-positive bound as "no information" and keeps the old
+    refusal, which is the safe direction. The stale in-memory value must not
+    survive in its place."""
+    det = _det_with_bound(4200.0)
+    snap = det.get_state_snapshot()
+    snap.pop("longest_candidate_duration")
+
+    other = _det_with_bound(999.0)
+    other.restore_state_snapshot(snap)
+    assert other._longest_candidate_duration == 0.0
+
+
+# --------------------------------------------------------------------------
+# profile_store: the artifact refresh mutated self._data from an executor
+# --------------------------------------------------------------------------
+def test_the_artifact_collector_does_not_mutate_in_the_executor():
+    """It runs in an executor over dicts inside ``self._data``. Another coroutine
+    can reach ``async_save`` while it is awaited, and adding or removing a key
+    from another thread mid-serialisation raises ``dictionary changed size
+    during iteration`` on an unrelated save. The worker now only computes.
+    """
+    from custom_components.ha_washdata.profile_store import ProfileStore
+
+    store = MagicMock()
+    store._logger = MagicMock()
+    stale = {"id": "c1", "profile_name": None, "artifacts": [{"type": "spike"}]}
+    store.iter_stored_cycles.return_value = [stale]
+    store._collect_cycle_artifact_updates = (
+        ProfileStore._collect_cycle_artifact_updates.__get__(store, ProfileStore)
+    )
+
+    pending = store._collect_cycle_artifact_updates()
+
+    assert pending == [(stale, [])]
+    assert "artifacts" in stale, "the worker mutated the cycle from the executor"
+    assert ProfileStore._apply_cycle_artifact_updates(pending) == 1
+    assert "artifacts" not in stale
+
+
+# --------------------------------------------------------------------------
+# __init__: the legacy migration seeded the max duration ratio (round 17)
+# --------------------------------------------------------------------------
+def test_the_legacy_migration_no_longer_seeds_the_max_duration_ratio():
+    """Seeding it is what produced ``_OLD_SEEDED_MAX_DURATION_RATIO`` and the two
+    heal sites: entries took the then-default 1.5 as an explicit value, so item
+    311's widening reached none of them. Left absent, every reader falls back to
+    the constant and the next change to it actually lands.
+    """
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "__init__.py"
+    ).read_text()
+    assert (
+        "options.setdefault(\n"
+        "        CONF_PROFILE_MATCH_MAX_DURATION_RATIO, "
+        "DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO\n"
+        "    )"
+    ) not in src
