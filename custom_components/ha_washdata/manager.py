@@ -8103,10 +8103,19 @@ class WashDataManager:
         )
 
         if clear_services:
-            # Shutdown / no finished notification follows: end the activity and
-            # drop the lifecycle card too, so nothing is left behind (#446).
+            # The live tag unconditionally: it carries a Live Activity with a
+            # chronometer that goes negative once nothing updates it, so a stale
+            # one is worse than none (#446).
             self._send_tag_clear(self._live_notification_tag)
-            self._send_tag_clear(self._lifecycle_tag)
+            # The lifecycle tag only while a cycle is actually running. The
+            # finished alert uses this SAME tag, so on the shutdown path - a HA
+            # restart or an entry unload after a cycle ended - clearing it
+            # unconditionally dismisses the finished card the user still wants.
+            # "No finished notification follows" is true of a cycle in progress
+            # and false of one already over; while the two tags were the same
+            # value this could not be distinguished, and now it can.
+            if self.detector.state in _CYCLE_IN_PROGRESS_STATES:
+                self._send_tag_clear(self._lifecycle_tag)
 
         # Reset live-update state flags and counters.
         self._reset_live_notification_state()
