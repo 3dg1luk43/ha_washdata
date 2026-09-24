@@ -8934,7 +8934,12 @@ class HaWashdataPanel extends HTMLElement {
             : this._t('toast.brand_added', {}, 'Brand added - awaiting approval')
         );
         if (d.brand && _brandSame) {
-          await this._saveStoreOptions({ store_brand: d.brand }, { silent: true });
+          // Clear the model for the same reason as the brand picker above: a
+          // brand the user just created cannot own the model saved under the
+          // previous one, and this path persists rather than staging.
+          await this._saveStoreOptions(
+            { store_brand: d.brand, store_model: '' }, { silent: true }
+          );
         }
         this._render();
         return;
@@ -11019,6 +11024,14 @@ class HaWashdataPanel extends HTMLElement {
     const brandInput = sr.getElementById('wd-store-brand');
     if (brandInput) brandInput.addEventListener('change', () => {
       const v = brandInput.value.trim();
+      // Drop the model with the brand it belonged to. _renderModelPicker reads
+      // store_model from _editedOpts(), so without this the previous brand's
+      // model stays in the field and the next save persists a brand/model pair
+      // that exists in no catalog. Only when the brand actually moved: a change
+      // event that re-picks the same brand must not wipe a chosen model.
+      if (v !== String(this._editedOpts().store_brand || '').trim()) {
+        stageAppliance('store_model', '');
+      }
       stageAppliance('store_brand', v);
       this._catalog.forBrand = v; this._catalog.devices = undefined;
       // Preserving, not plain: since brand/model became PENDING edits rather
