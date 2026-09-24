@@ -60,6 +60,7 @@
         "fair_fit_tip": "匹配一致性适中 – 分配给此配置文件的部分周期置信度较低。标记更多周期或重新录制配置文件以提高准确性。",
         "feedback_requested": "已请求反馈",
         "golden_cycle": "记录参考周期",
+        "duration_outlier": "{n} 个时长异常的周期",
         "improving": "↗ 提升中",
         "manual": "（手动选择）",
         "needs_review": "需要审查",
@@ -257,6 +258,11 @@
         "hist_import_n": "导入 {n} 个周期",
         "hist_goto_cycles": "查看这些周期",
         "save_total_cycles": "保存累计值"
+    },
+    "note": {
+        "off_delay": {
+            "effective": "已结束的周期实际等待 {eff} 秒，而不是 {delay} 秒：最小关闭间隔（{gap} 秒）更长，优先生效。"
+        }
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
         "imported_readonly": "从社区商店导入。用于参考和匹配。不计入您的统计，且无法编辑。",
         "merge_no_imports": "导入的录制无法合并到真实周期中。取消选择它们以进行合并。",
         "store_enable_hint": "在设置中启用在线功能，以浏览和导入社区参考周期。",
+        "advisory_duration_outlier": "标记为 '{name}' 的 {n} 个周期与该程序的常见时长相差太远，永远无法与之匹配（最差：{ratio}x）。它们可能被标记错了，或者一次录制包含了两次运行。请重新标记或拆分它们，以免继续扭曲该程序的时间估算。",
+        "standby_above_stop_title": "周期结束时仍在消耗 {idle} W",
+        "standby_above_stop_sub": "最近 {total} 个周期中有 {n} 个。关闭延迟只有在功率低于停止阈值（{stop} W）之后才开始计时，因此周期会结束过晚或需要手动停止。",
         "online_intro": "与其他 WashData 用户分享和下载参考周期。所有在线功能均为自愿加入，默认关闭。",
         "store_share_intro": "上传此参考周期，以便拥有相同家电的其他人使用。它会经过审核后才公开显示。",
         "online_intro_global": "与其他 WashData 用户浏览和分享参考录制，并确认家电条目。一次连接适用于您的整个 WashData 集成；家电品牌和型号在“基本配置”下按设备设置。所有在线功能均为自愿加入，默认关闭。",
@@ -2011,6 +2020,7 @@
             "summary": "已排除 {total} 个误检测周期：{parts}。",
             "reason": {
                 "force_stopped": "强制停止",
+                "user_stopped": "手动停止",
                 "interrupted": "中断",
                 "incomplete": "未完成",
                 "noise": "噪声",

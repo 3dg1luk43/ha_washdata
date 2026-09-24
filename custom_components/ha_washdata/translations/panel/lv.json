@@ -60,6 +60,7 @@
     "fair_fit_tip": "Mērena atbilstības konsekvence – dažiem šim profilam piešķirtajiem cikliem ir zemāki ticamības rādītāji. Iezīmējiet vairāk ciklu vai atkārtoti ierakstiet profilu, lai uzlabotu precizitāti.",
     "feedback_requested": "Pieprasītas atsauksmes",
     "golden_cycle": "Reģistrēts atskaites cikls",
+    "duration_outlier": "{n} neparasta garuma cikli",
     "improving": "↗ uzlabošanās",
     "manual": "(manuāli atlasīts)",
     "needs_review": "Nepieciešama pārskatīšana",
@@ -257,6 +258,11 @@
     "hist_import_n": "Importēt ciklus ({n})",
     "hist_goto_cycles": "Parādīt ciklus",
     "save_total_cycles": "Saglabāt kopējo skaitu"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Pabeigts cikls patiesībā gaida {eff} s, nevis {delay} s: Min. izslēgšanas atstarpe ({gap} s) ir garāka, un priekšroka ir tai."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Importēts no kopienas veikala. Tiek rādīts atsaucei un saskaņošanai. Tas netiek ieskaitīts jūsu statistikā, un to nevar rediģēt.",
     "merge_no_imports": "Importētos ierakstus nevar sapludināt ar īstu ciklu. Noņemiet to atzīmi, lai sapludinātu.",
     "store_enable_hint": "Iestatījumos iespējojiet tiešsaistes funkcijas, lai pārlūkotu un importētu kopienas atsauces ciklus.",
+    "advisory_duration_outlier": "{n} cikliem, kas marķēti kā '{name}', ilgums ir pārāk tālu no tā parastā garuma, lai tam jebkad atbilstu (sliktākais: {ratio}x). Tie, visticamāk, ir nepareizi marķēti vai arī viens ieraksts aptver divas darbības reizes. Pārmarķējiet vai sadaliet tos, lai tie vairs nekropļotu šīs programmas laika aplēsi.",
+    "standby_above_stop_title": "Ciklam beidzoties, joprojām patērē {idle} W",
+    "standby_above_stop_sub": "{n} no pēdējiem {total} cikliem. Izslēgšanas aizkave sākas tikai tad, kad jauda ir zem Apstāšanās sliekšņa ({stop} W), tāpēc cikli beidzas ar nokavēšanos vai tie jāaptur manuāli.",
     "online_intro": "Kopīgojiet un lejupielādējiet atsauces ciklus ar citiem WashData lietotājiem. Visas tiešsaistes funkcijas ir brīvprātīgas un pēc noklusējuma izslēgtas.",
     "store_share_intro": "Augšupielādējiet šo atsauces ciklu, lai to varētu izmantot citi ar to pašu ierīci. Pirms publiskošanas tas tiek pārskatīts.",
     "online_intro_global": "Pārlūkojiet un kopīgojiet atsauces ierakstus ar citiem WashData lietotājiem un apstipriniet ierīču ierakstus. Viens savienojums attiecas uz visu jūsu WashData integrāciju; ierīces zīmols un modelis tiek iestatīts katrai ierīcei atsevišķi sadaļā Pamatkonfigurācija. Visas tiešsaistes funkcijas ir brīvprātīgas un pēc noklusējuma izslēgtas.",
@@ -1979,6 +1988,7 @@
       "summary": "Izslēgti {total} kļūdaini atpazīti cikli: {parts}.",
       "reason": {
         "force_stopped": "piespiedu kārtā apturēti",
+        "user_stopped": "manuāli apturēti",
         "interrupted": "pārtraukti",
         "incomplete": "nepabeigti",
         "noise": "troksnis",

@@ -35,7 +35,8 @@
     "not_importable": "n/d qui",
     "exists": "esiste già",
     "backfilled_tip": "Rilevato in uno storico di potenza importato. Influenza solo la corrispondenza dei programmi, non conteggiato nelle statistiche.",
-    "armed": "(si applica al prossimo ciclo)"
+    "armed": "(si applica al prossimo ciclo)",
+    "duration_outlier": "{n} ciclo/i di durata anomala"
   },
   "btn": {
     "reset_zoom": "Reimposta zoom",
@@ -1039,7 +1040,10 @@
     "odometer_intro": "Questo totale può solo aumentare. L'eliminazione del record di un ciclo non lo modifica e continua a contare oltre il limite dello storico conservato, così i promemoria di servizio restano corretti.",
     "odometer_correct_hint": "Imposta questo valore se WashData ha registrato un ciclo che non è mai avvenuto, oppure se l'elettrodomestico aveva già eseguito dei cicli prima dell'installazione di WashData.",
     "no_reminders_set": "Non è ancora impostato alcun promemoria di servizio.",
-    "toast_program_armed": "Programma preimpostato per il prossimo ciclo: {program}"
+    "toast_program_armed": "Programma preimpostato per il prossimo ciclo: {program}",
+    "standby_above_stop_title": "Assorbe ancora {idle} W alla fine del ciclo",
+    "standby_above_stop_sub": "{n} degli ultimi {total} cicli. Il Ritardo spegnimento parte solo quando la potenza scende sotto la Soglia di arresto ({stop} W), quindi i cicli finiscono in ritardo o vanno fermati a mano.",
+    "advisory_duration_outlier": "{n} ciclo/i etichettati come '{name}' si discostano troppo dalla sua durata abituale per potergli mai corrispondere (caso peggiore: {ratio}x). Probabilmente sono etichettati male, oppure una registrazione ha catturato due esecuzioni. Rietichettali o dividili, così smettono di falsare la stima dei tempi di questo programma."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
@@ -1963,6 +1967,7 @@
       "summary": "Esclusi {total} cicli rilevati male: {parts}.",
       "reason": {
         "force_stopped": "arrestati forzatamente",
+        "user_stopped": "arrestati manualmente",
         "interrupted": "interrotti",
         "incomplete": "incompleti",
         "noise": "rumore",
@@ -2187,6 +2192,11 @@
       "tap_action": "Azione al tocco",
       "hold_action": "Azione alla pressione prolungata",
       "double_tap_action": "Azione al doppio tocco"
+    }
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Un ciclo terminato attende in realtà {eff} s, non {delay} s: l'Intervallo minimo di spegnimento ({gap} s) è più lungo e ha la precedenza."
     }
   }
 }

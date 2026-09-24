@@ -938,3 +938,75 @@ def test_the_contribute_popup_says_when_it_did_not_apply_the_appliance(tmp_path)
         ).read_text()
     )
     assert en["toast"]["contrib_device_changed"]
+
+
+# --------------------------------------------------------------------------
+# suggestion_engine: the standby probe rescanned every sample (round 19)
+# --------------------------------------------------------------------------
+def test_the_standby_probe_reads_the_stored_peak():
+    """It runs on the event loop inside the synchronous ``ws_get_devices``
+    callback, which the panel polls every 20 s per device, and it was rescanning
+    every sample of the last 8 cycles to recompute a peak the signature already
+    carries. Measured at 1.73 ms a call on the worst real export; 0.057 ms now.
+    The fallback has to stay: a cycle whose signature is missing or unusable
+    must behave exactly as before.
+    """
+    peak, final = 100.0, 5.0
+    trace = [[float(t), peak] for t in range(0, 600, 10)] + [[600.0, final]]
+
+    def _cycles(sig):
+        out = []
+        for i in range(4):
+            c = {"id": f"c{i}", "power_data": [list(p) for p in trace]}
+            if sig is not None:
+                c["signature"] = sig
+            out.append(c)
+        return out
+
+    good = detect_standby_above_stop(_cycles({"max_power": peak}), 2.0)
+    none = detect_standby_above_stop(_cycles(None), 2.0)
+    junk = detect_standby_above_stop(_cycles({"max_power": "nonsense"}), 2.0)
+    assert good is not None
+    assert good == none == junk, "the signature path must match the full scan"
+
+    # A signature low enough to make the final sample look like working power
+    # takes the idle-like skip, which is what proves the field is being read.
+    assert detect_standby_above_stop(_cycles({"max_power": 10.0}), 2.0) is None
+
+
+def test_every_english_panel_key_reaches_every_language():
+    """Panel strings are served straight from ``translations/panel/{lang}.json``
+    with no build step, so a key present only in en.json renders untranslated for
+    everyone else. Round 19 found six such keys from this PR at once, which is
+    why this is asserted rather than eyeballed per key.
+    """
+    import json
+    from pathlib import Path
+
+    root = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "translations"
+        / "panel"
+    )
+
+    def flat(d, p=""):
+        out = {}
+        for k, v in d.items():
+            kp = f"{p}.{k}" if p else k
+            if isinstance(v, dict):
+                out.update(flat(v, kp))
+            else:
+                out[kp] = v
+        return out
+
+    en = flat(json.loads((root / "en.json").read_text()))
+    gaps = {}
+    for path in sorted(root.glob("*.json")):
+        if path.name == "en.json":
+            continue
+        missing = sorted(set(en) - set(flat(json.loads(path.read_text()))))
+        if missing:
+            gaps[path.stem] = missing
+    assert not gaps, f"keys missing from other languages: {gaps}"

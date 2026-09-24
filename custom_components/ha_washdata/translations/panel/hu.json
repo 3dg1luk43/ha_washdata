@@ -60,6 +60,7 @@
         "fair_fit_tip": "Mérsékelt egyezési konzisztencia – néhány ehhez a profilhoz rendelt ciklus alacsonyabb megbízhatósági pontszámmal rendelkezik. Címkézz fel több ciklust, vagy rögzítsd újra a profilt a pontosság javítása érdekében.",
         "feedback_requested": "Visszajelzést kértünk",
         "golden_cycle": "Rögzített referenciaciklus",
+        "duration_outlier": "{n} szokatlan hosszúságú ciklus",
         "improving": "↗ javul",
         "manual": "(manuálisan kiválasztott)",
         "needs_review": "Felülvizsgálatra szorul",
@@ -257,6 +258,11 @@
         "hist_import_n": "{n} ciklus importálása",
         "hist_goto_cycles": "Ciklusok megjelenítése",
         "save_total_cycles": "Összesítés mentése"
+    },
+    "note": {
+        "off_delay": {
+            "effective": "A befejezett ciklus valójában {eff} s-ot vár, nem {delay} s-ot: a Min. kikapcsolási rés ({gap} s) hosszabb, és az élvez elsőbbséget."
+        }
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
         "imported_readonly": "A közösségi boltból importálva. Referenciaként és egyeztetéshez jelenik meg. Nem számít bele a statisztikákba, és nem szerkeszthető.",
         "merge_no_imports": "Az importált felvételek nem egyesíthetők valódi ciklussal. Az egyesítéshez szüntesse meg a kijelölésüket.",
         "store_enable_hint": "A közösségi referenciaciklusok böngészéséhez és importálásához engedélyezze az online funkciókat a Beállításokban.",
+        "advisory_duration_outlier": "A(z) '{name}' címkével ellátott {n} ciklus hossza túlságosan eltér a szokásos hosszától ahhoz, hogy valaha is illeszkedjen hozzá (a legrosszabb: {ratio}x). Valószínűleg rosszul vannak címkézve, vagy egy felvétel két futást rögzített. Címkézze át vagy vágja szét őket, hogy ne torzítsák ennek a programnak az időbecslését.",
+        "standby_above_stop_title": "A ciklus végén még mindig {idle} W-ot vett fel",
+        "standby_above_stop_sub": "Az utolsó {total} ciklusból {n}. A kikapcsolási késleltetés csak akkor indul el, amikor a teljesítmény a Leállítási küszöb ({stop} W) alá esik, így a ciklusok későn fejeződnek be, vagy kézzel kell leállítani őket.",
         "online_intro": "Ossza meg és töltsön le referenciaciklusokat más WashData-felhasználókkal. Minden online funkció opcionális és alapértelmezés szerint ki van kapcsolva.",
         "store_share_intro": "Töltse fel ezt a referenciaciklust, hogy az azonos készülékkel rendelkezők is használhassák. Nyilvános megjelenés előtt ellenőrzésre kerül.",
         "online_intro_global": "Böngésszen és osszon meg referenciafelvételeket más WashData-felhasználókkal, és erősítsen meg készülékbejegyzéseket. Egyetlen kapcsolat a teljes WashData-integrációra vonatkozik; a készülék márkája és modellje eszközönként, az Alapkonfiguráció szakaszban állítható be. Minden online funkció opcionális és alapértelmezés szerint ki van kapcsolva.",
@@ -1979,6 +1988,7 @@
             "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",
             "reason": {
                 "force_stopped": "kényszerrel leállított",
+                "user_stopped": "kézzel leállított",
                 "interrupted": "megszakított",
                 "incomplete": "befejezetlen",
                 "noise": "zaj",

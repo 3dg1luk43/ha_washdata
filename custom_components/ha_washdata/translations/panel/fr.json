@@ -35,7 +35,8 @@
     "not_importable": "n/a ici",
     "exists": "existe déjà",
     "backfilled_tip": "Détecté dans un historique de puissance importé. Influence uniquement la correspondance des programmes, non compté dans les statistiques.",
-    "armed": "(s'applique au prochain cycle)"
+    "armed": "(s'applique au prochain cycle)",
+    "duration_outlier": "{n} cycle(s) de durée anormale"
   },
   "btn": {
     "reset_zoom": "Réinitialiser le zoom",
@@ -1039,7 +1040,10 @@
     "odometer_intro": "Ce total ne fait qu'augmenter. Supprimer l'enregistrement d'un cycle ne le modifie pas, et il continue de compter au-delà de la limite d'historique conservé, afin que les rappels d'entretien restent exacts.",
     "odometer_correct_hint": "Renseignez cette valeur si WashData a enregistré un cycle qui n'a jamais eu lieu, ou si l'appareil avait déjà effectué des cycles avant l'installation de WashData.",
     "no_reminders_set": "Aucun rappel d'entretien n'est encore configuré.",
-    "toast_program_armed": "Programme prévu pour le prochain cycle : {program}"
+    "toast_program_armed": "Programme prévu pour le prochain cycle : {program}",
+    "standby_above_stop_title": "Consomme encore {idle} W à la fin du cycle",
+    "standby_above_stop_sub": "{n} des {total} derniers cycles. Le Délai d'arrêt ne démarre qu'une fois la puissance descendue sous le Seuil d'arrêt ({stop} W) : les cycles se terminent donc en retard ou doivent être arrêtés à la main.",
+    "advisory_duration_outlier": "{n} cycle(s) étiquetés '{name}' s'écartent trop de sa durée habituelle pour pouvoir un jour lui correspondre (pire cas : {ratio}x). Ils sont probablement mal étiquetés, ou un enregistrement a capté deux exécutions. Réétiquetez-les ou scindez-les pour qu'ils cessent de fausser l'estimation de temps de ce programme."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",
@@ -1963,6 +1967,7 @@
       "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",
       "reason": {
         "force_stopped": "arrêtés de force",
+        "user_stopped": "arrêtés manuellement",
         "interrupted": "interrompus",
         "incomplete": "incomplets",
         "noise": "bruit",
@@ -2187,6 +2192,11 @@
       "tap_action": "Action au toucher",
       "hold_action": "Action au maintien",
       "double_tap_action": "Action au double toucher"
+    }
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Un cycle terminé attend en réalité {eff} s, et non {delay} s : l'Intervalle d'arrêt minimal ({gap} s) est plus long et prime."
     }
   }
 }

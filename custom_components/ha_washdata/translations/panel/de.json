@@ -60,6 +60,7 @@
     "fair_fit_tip": "Mäßige Übereinstimmungskonsistenz – einige diesem Profil zugewiesene Zyklen weisen niedrigere Konfidenzwerte auf. Beschriften Sie weitere Zyklen oder zeichnen Sie das Profil neu auf, um die Genauigkeit zu verbessern.",
     "feedback_requested": "Feedback erbeten",
     "golden_cycle": "Aufgezeichneter Referenzzyklus",
+    "duration_outlier": "{n} Zyklus/Zyklen mit untypischer Dauer",
     "improving": "↗ Verbesserung",
     "manual": "(manuell ausgewählt)",
     "needs_review": "Muss überprüft werden",
@@ -257,6 +258,11 @@
     "hist_import_n": "{n} Zyklen importieren",
     "hist_goto_cycles": "Zeig mir die Zyklen",
     "save_total_cycles": "Gesamtzahl speichern"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Ein beendeter Zyklus wartet tatsächlich {eff} s statt {delay} s: Die Mindest-Aus-Lücke ({gap} s) ist länger und hat Vorrang."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Aus dem Community-Store importiert. Wird zur Referenz und zum Abgleich angezeigt. Zählt nicht in Ihre Statistik und kann nicht bearbeitet werden.",
     "merge_no_imports": "Importierte Aufnahmen können nicht mit einem echten Zyklus zusammengeführt werden. Heben Sie die Auswahl auf, um zusammenzuführen.",
     "store_enable_hint": "Aktivieren Sie die Onlinefunktionen in den Einstellungen, um Referenzzyklen der Community zu durchsuchen und zu importieren.",
+    "advisory_duration_outlier": "{n} Zyklus/Zyklen mit der Bezeichnung '{name}' weichen zu stark von dessen üblicher Dauer ab, um jemals zugeordnet werden zu können (schlimmster Fall: {ratio}x). Wahrscheinlich sind sie falsch beschriftet, oder eine Aufzeichnung hat zwei Durchläufe erfasst. Beschriften Sie sie neu oder teilen Sie sie auf, damit sie die Zeitschätzung dieses Programms nicht weiter verzerren.",
+    "standby_above_stop_title": "Zieht beim Zyklusende noch {idle} W",
+    "standby_above_stop_sub": "{n} der letzten {total} Zyklen. Die Abschaltverzögerung beginnt erst, wenn die Leistung unter den Stoppschwellenwert ({stop} W) fällt, daher enden Zyklen zu spät oder müssen von Hand gestoppt werden.",
     "online_intro": "Teilen Sie Referenzzyklen mit anderen WashData-Nutzern und laden Sie welche herunter. Alle Onlinefunktionen sind optional und standardmäßig deaktiviert.",
     "store_share_intro": "Laden Sie diesen Referenzzyklus hoch, damit andere mit demselben Gerät ihn nutzen können. Er wird geprüft, bevor er öffentlich erscheint.",
     "online_intro_global": "Durchsuchen und teilen Sie Referenzaufnahmen mit anderen WashData-Nutzern und bestätigen Sie Geräteeinträge. Eine Verbindung gilt für Ihre gesamte WashData-Integration; Gerätemarke und -modell werden pro Gerät unter Grundlegend festgelegt. Alle Onlinefunktionen sind optional und standardmäßig deaktiviert.",
@@ -1867,6 +1876,7 @@
       "summary": "{total} falsch erkannte Zyklen ausgeschlossen: {parts}.",
       "reason": {
         "force_stopped": "zwangsgestoppt",
+        "user_stopped": "manuell gestoppt",
         "interrupted": "unterbrochen",
         "incomplete": "unvollständig",
         "noise": "Rauschen",

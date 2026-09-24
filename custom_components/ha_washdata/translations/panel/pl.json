@@ -60,6 +60,7 @@
     "fair_fit_tip": "Umiarkowana spójność dopasowania – niektóre cykle przypisane do tego profilu mają niższy poziom pewności. Oznacz więcej cykli lub ponownie zapisz profil, aby poprawić dokładność.",
     "feedback_requested": "Poproszono o opinię",
     "golden_cycle": "Zarejestrowany cykl referencyjny",
+    "duration_outlier": "Cykle o nietypowej długości: {n}",
     "improving": "↗ poprawa",
     "manual": "(wybierane ręcznie)",
     "needs_review": "Wymaga recenzji",
@@ -257,6 +258,11 @@
     "hist_import_n": "Importuj cykle: {n}",
     "hist_goto_cycles": "Pokaż cykle",
     "save_total_cycles": "Zapisz łączną liczbę"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Zakończony cykl faktycznie czeka {eff} s, a nie {delay} s: Minimalna Przerwa Wyłączenia ({gap} s) jest dłuższa i ma pierwszeństwo."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1032,6 +1038,9 @@
     "imported_readonly": "Zaimportowano ze sklepu społecznościowego. Wyświetlane w celach referencyjnych i do dopasowywania. Nie liczy się do Twoich statystyk i nie można go edytować.",
     "merge_no_imports": "Zaimportowanych nagrań nie można scalić z rzeczywistym cyklem. Odznacz je, aby scalić.",
     "store_enable_hint": "Włącz funkcje online w Ustawieniach, aby przeglądać i importować cykle referencyjne społeczności.",
+    "advisory_duration_outlier": "Cykle oznaczone jako '{name}' ({n}) są zbyt odległe od jego zwykłej długości, aby kiedykolwiek mogły zostać z nim dopasowane (największe odchylenie: {ratio}x). Prawdopodobnie są błędnie oznaczone albo jedno nagranie objęło dwa uruchomienia. Oznacz je ponownie lub podziel, aby przestały zniekształcać szacowany czas tego programu.",
+    "standby_above_stop_title": "Nadal pobiera {idle} W w momencie zakończenia cyklu",
+    "standby_above_stop_sub": "{n} z ostatnich {total} cykli. Opóźnienie Wyłączenia zaczyna biec dopiero wtedy, gdy moc spadnie poniżej Progu Zatrzymania ({stop} W), więc cykle kończą się z opóźnieniem albo trzeba je zatrzymywać ręcznie.",
     "online_intro": "Udostępniaj i pobieraj cykle referencyjne z innymi użytkownikami WashData. Wszystkie funkcje online są dobrowolne i domyślnie wyłączone.",
     "store_share_intro": "Prześlij ten cykl referencyjny, aby inni z tym samym urządzeniem mogli go używać. Zostanie sprawdzony przed publicznym udostępnieniem.",
     "online_intro_global": "Przeglądaj i udostępniaj nagrania referencyjne innym użytkownikom WashData oraz potwierdzaj wpisy urządzeń. Jedno połączenie dotyczy całej integracji WashData; markę i model urządzenia ustawia się osobno dla każdego urządzenia w sekcji Podstawowe. Wszystkie funkcje online są dobrowolne i domyślnie wyłączone.",
@@ -1835,6 +1844,7 @@
       "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",
       "reason": {
         "force_stopped": "zatrzymane przymusowo",
+        "user_stopped": "zatrzymane ręcznie",
         "interrupted": "przerwane",
         "incomplete": "niekompletne",
         "noise": "hałas",

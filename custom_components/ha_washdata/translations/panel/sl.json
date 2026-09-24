@@ -60,6 +60,7 @@
     "fair_fit_tip": "Zmerna doslednost ujemanja – nekateri cikli, dodeljeni temu profilu, imajo nižje ocene zaupanja. Označite več ciklov ali znova posnemite profil, da izboljšate natančnost.",
     "feedback_requested": "Zahtevane povratne informacije",
     "golden_cycle": "Posneti referenčni cikel",
+    "duration_outlier": "Cikli nenavadne dolžine: {n}",
     "improving": "↗ se izboljšuje",
     "manual": "(ročno izbrano)",
     "needs_review": "Potrebuje pregled",
@@ -257,6 +258,11 @@
     "hist_import_n": "Uvozi cikle: {n}",
     "hist_goto_cycles": "Pokaži cikle",
     "save_total_cycles": "Shrani skupno število"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Končan cikel v resnici čaka {eff} s in ne {delay} s: Min. presledek izklopa ({gap} s) je daljši in ima prednost."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1032,6 +1038,9 @@
     "imported_readonly": "Uvoženo iz skupnostne trgovine. Prikazano za referenco in ujemanje. Ne šteje se v vašo statistiko in ga ni mogoče urejati.",
     "merge_no_imports": "Uvoženih posnetkov ni mogoče združiti z resničnim ciklom. Za združitev prekličite njihovo izbiro.",
     "store_enable_hint": "Omogočite spletne funkcije v Nastavitvah, da boste lahko brskali in uvažali referenčne cikle skupnosti.",
+    "advisory_duration_outlier": "Cikli, označeni kot '{name}' ({n}), so preveč oddaljeni od njegove običajne dolžine, da bi se z njim kdaj lahko ujemali (največje odstopanje: {ratio}x). Verjetno so napačno označeni ali pa je en posnetek zajel dva zagona. Znova jih označite ali jih razdelite, da nehajo popačiti oceno časa za ta program.",
+    "standby_above_stop_title": "Ob koncu cikla še vedno porablja {idle} W",
+    "standby_above_stop_sub": "{n} od zadnjih {total} ciklov. Zamuda izklopa se začne šteti šele, ko moč pade pod Prag zaustavitve ({stop} W), zato se cikli končajo z zamudo ali jih je treba ustaviti ročno.",
     "online_intro": "Delite in prenašajte referenčne cikle z drugimi uporabniki WashData. Vse spletne funkcije so prostovoljne in privzeto izklopljene.",
     "store_share_intro": "Naložite ta referenčni cikel, da ga bodo lahko uporabljali drugi z enako napravo. Pred javno objavo je pregledan.",
     "online_intro_global": "Brskajte in delite referenčne posnetke z drugimi uporabniki WashData ter potrjujte vnose naprav. Ena povezava velja za celotno integracijo WashData; znamka in model naprave se nastavita za vsako napravo posebej v razdelku Osnovno. Vse spletne funkcije so prostovoljne in privzeto izklopljene.",
@@ -1835,6 +1844,7 @@
       "summary": "Izključeno {total} napačno zaznanih ciklov: {parts}.",
       "reason": {
         "force_stopped": "prisilno ustavljeni",
+        "user_stopped": "ročno ustavljeni",
         "interrupted": "prekinjeni",
         "incomplete": "nepopolni",
         "noise": "šum",

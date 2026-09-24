@@ -35,7 +35,8 @@
     "not_importable": "n/a aici",
     "exists": "există deja",
     "backfilled_tip": "Detectat într-un istoric de putere importat. Influențează doar potrivirea programelor, nu este contabilizat în statistici.",
-    "armed": "(se aplică ciclului următor)"
+    "armed": "(se aplică ciclului următor)",
+    "duration_outlier": "{n} ciclu(ri) cu durată neobișnuită"
   },
   "btn": {
     "reset_zoom": "Resetați zoomul",
@@ -1039,7 +1040,10 @@
     "odometer_intro": "Acest total doar crește. Ștergerea înregistrării unui ciclu nu îl modifică și continuă să numere dincolo de limita istoricului păstrat, astfel încât mementourile de service rămân corecte.",
     "odometer_correct_hint": "Setați această valoare dacă WashData a înregistrat un ciclu care nu a avut loc niciodată sau dacă aparatul efectuase deja cicluri înainte de instalarea WashData.",
     "no_reminders_set": "Încă nu este setat niciun memento de service.",
-    "toast_program_armed": "Program pregătit pentru ciclul următor: {program}"
+    "toast_program_armed": "Program pregătit pentru ciclul următor: {program}",
+    "standby_above_stop_title": "Încă consumă {idle} W când ciclul s-a încheiat",
+    "standby_above_stop_sub": "{n} din ultimele {total} cicluri. Întârzierea la Oprire începe abia după ce puterea scade sub Pragul de Oprire ({stop} W), așa că ciclurile se termină târziu sau trebuie oprite manual.",
+    "advisory_duration_outlier": "{n} ciclu(ri) etichetate '{name}' sunt prea departe de durata sa obișnuită ca să se mai potrivească vreodată cu el (cel mai rău: {ratio}x). Probabil sunt etichetate greșit sau o înregistrare a surprins două rulări. Reetichetați-le sau împărțiți-le, ca să nu mai denatureze estimarea de timp a acestui program."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1931,6 +1935,7 @@
       "summary": "Excluse {total} cicluri detectate greșit: {parts}.",
       "reason": {
         "force_stopped": "oprite forțat",
+        "user_stopped": "oprite manual",
         "interrupted": "întrerupte",
         "incomplete": "incomplete",
         "noise": "zgomot",
@@ -2187,6 +2192,11 @@
       "tap_action": "Acțiune la atingere",
       "hold_action": "Acțiune la apăsare lungă",
       "double_tap_action": "Acțiune la atingere dublă"
+    }
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Un ciclu încheiat așteaptă de fapt {eff} s, nu {delay} s: Pauza Minimă de Oprire ({gap} s) este mai lungă și are prioritate."
     }
   }
 }

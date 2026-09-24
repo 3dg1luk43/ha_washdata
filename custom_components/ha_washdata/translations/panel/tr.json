@@ -60,6 +60,7 @@
         "fair_fit_tip": "Orta düzeyde eşleşme tutarlılığı – bu profile atanan bazı döngülerin güven puanları daha düşüktür. Doğruluğu artırmak için daha fazla döngü etiketleyin veya profili yeniden kaydedin.",
         "feedback_requested": "Geri bildirim istendi",
         "golden_cycle": "Kaydedilen referans döngüsü",
+        "duration_outlier": "{n} olağandışı uzunlukta döngü",
         "improving": "↗ iyileşiyor",
         "manual": "(manuel seçildi)",
         "needs_review": "İncelenmesi gerekiyor",
@@ -257,6 +258,11 @@
         "hist_import_n": "{n} döngüyü içe aktar",
         "hist_goto_cycles": "Döngüleri göster",
         "save_total_cycles": "Toplamı Kaydet"
+    },
+    "note": {
+        "off_delay": {
+            "effective": "Biten bir döngü gerçekte {delay} s değil {eff} s bekler: Min. Kapalı Aralık ({gap} s) daha uzun ve öncelik onundur."
+        }
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
         "imported_readonly": "Topluluk mağazasından içe aktarıldı. Referans ve eşleştirme için gösterilir. İstatistiklerinize sayılmaz ve düzenlenemez.",
         "merge_no_imports": "İçe aktarılan kayıtlar gerçek bir döngüye birleştirilemez. Birleştirmek için seçimlerini kaldırın.",
         "store_enable_hint": "Topluluk referans döngülerine göz atmak ve içe aktarmak için Ayarlar'da çevrimiçi özellikleri etkinleştirin.",
+        "advisory_duration_outlier": "'{name}' olarak etiketlenen {n} çevrimin süresi, bu programın olağan uzunluğuna hiç eşleşemeyecek kadar uzak (en kötüsü: {ratio}x). Muhtemelen yanlış etiketlenmişlerdir ya da tek bir kayıt iki çalışmayı birden içeriyordur. Bu programın süre tahminini bozmamaları için onları yeniden etiketleyin veya bölün.",
+        "standby_above_stop_title": "Döngü bittiğinde hâlâ {idle} W çekiyordu",
+        "standby_above_stop_sub": "Son {total} döngünün {n} tanesi. Kapatma Gecikmesi ancak güç Durdurma Eşiğinin ({stop} W) altına indiğinde başlar, bu yüzden döngüler geç biter veya elle durdurulmaları gerekir.",
         "online_intro": "Diğer WashData kullanıcılarıyla referans döngüleri paylaşın ve indirin. Tüm çevrimiçi özellikler isteğe bağlıdır ve varsayılan olarak kapalıdır.",
         "store_share_intro": "Aynı cihaza sahip diğerlerinin kullanabilmesi için bu referans döngüyü yükleyin. Herkese açık olmadan önce incelenir.",
         "online_intro_global": "Diğer WashData kullanıcılarıyla referans kayıtlarına göz atın ve paylaşın, cihaz girişlerini onaylayın. Tek bir bağlantı tüm WashData entegrasyonunuz için geçerlidir; cihaz markası ve modeli her cihaz için Temel bölümünde ayarlanır. Tüm çevrimiçi özellikler isteğe bağlıdır ve varsayılan olarak kapalıdır.",
@@ -2011,6 +2020,7 @@
             "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",
             "reason": {
                 "force_stopped": "zorla durdurulmuş",
+                "user_stopped": "elle durdurulmuş",
                 "interrupted": "kesintiye uğramış",
                 "incomplete": "tamamlanmamış",
                 "noise": "gürültü",

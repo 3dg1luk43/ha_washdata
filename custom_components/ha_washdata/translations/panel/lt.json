@@ -60,6 +60,7 @@
     "fair_fit_tip": "Vidutinis atitikties nuoseklumas – kai kurie šiam profiliui priskirti ciklai turi žemesnius patikimumo balus. Pažymėkite daugiau ciklų arba iš naujo įrašykite profilį, kad pagerintumėte tikslumą.",
     "feedback_requested": "Prašoma atsiliepimo",
     "golden_cycle": "Užregistruotas atskaitos ciklas",
+    "duration_outlier": "{n} neįprastos trukmės ciklų",
     "improving": "↗ tobulėjimas",
     "manual": "(rankiniu būdu pasirinkta)",
     "needs_review": "Reikia peržiūros",
@@ -257,6 +258,11 @@
     "hist_import_n": "Importuoti ciklus ({n})",
     "hist_goto_cycles": "Parodyti ciklus",
     "save_total_cycles": "Išsaugoti bendrą skaičių"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Pasibaigęs ciklas iš tikrųjų laukia {eff} s, o ne {delay} s: Min. išjungimo tarpas ({gap} s) yra ilgesnis ir turi pirmenybę."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Importuota iš bendruomenės parduotuvės. Rodoma kaip nuoroda ir atitikčiai nustatyti. Ji neįskaičiuojama į jūsų statistiką ir jos negalima redaguoti.",
     "merge_no_imports": "Importuotų įrašų negalima sujungti su tikru ciklu. Panaikinkite jų žymėjimą, kad galėtumėte sujungti.",
     "store_enable_hint": "Įjunkite interneto funkcijas nustatymuose, kad galėtumėte naršyti ir importuoti bendruomenės etaloninius ciklus.",
+    "advisory_duration_outlier": "{n} ciklų, pažymėtų '{name}', trukmė per daug skiriasi nuo įprastos šios programos trukmės, kad kada nors ją atitiktų (blogiausias: {ratio}x). Tikėtina, kad jie pažymėti neteisingai arba viename įraše užfiksuoti du paleidimai. Pažymėkite juos iš naujo arba padalykite, kad jie nebeiškraipytų šios programos laiko įverčio.",
+    "standby_above_stop_title": "Ciklui pasibaigus vis dar naudojama {idle} W",
+    "standby_above_stop_sub": "{n} iš paskutinių {total} ciklų. Išjungimo delsimas prasideda tik tada, kai galia nukrenta žemiau Sustabdymo slenksčio ({stop} W), todėl ciklai baigiasi pavėluotai arba juos tenka sustabdyti rankiniu būdu.",
     "online_intro": "Dalykitės ir atsisiųskite etaloninius ciklus su kitais WashData naudotojais. Visos interneto funkcijos yra pasirenkamos ir pagal numatytuosius nustatymus išjungtos.",
     "store_share_intro": "Įkelkite šį etaloninį ciklą, kad juo galėtų naudotis kiti tą patį prietaisą turintys naudotojai. Prieš paskelbiant viešai jis peržiūrimas.",
     "online_intro_global": "Naršykite ir bendrinkite etaloninius įrašus su kitais WashData naudotojais bei patvirtinkite prietaisų įrašus. Vienas prisijungimas taikomas visai jūsų WashData integracijai; prietaiso prekės ženklas ir modelis nustatomi kiekvienam prietaisui atskirai skiltyje Pagrindinė konfigūracija. Visos interneto funkcijos yra pasirenkamos ir pagal numatytuosius nustatymus išjungtos.",
@@ -1979,6 +1988,7 @@
       "summary": "Neįtraukta {total} klaidingai aptiktų ciklų: {parts}.",
       "reason": {
         "force_stopped": "priverstinai sustabdyti",
+        "user_stopped": "rankiniu būdu sustabdyti",
         "interrupted": "nutraukti",
         "incomplete": "nebaigti",
         "noise": "triukšmas",
