@@ -441,7 +441,11 @@ class CycleDetector:
         # Element 11 (register item 297): how long the matched profile is MEASURED to stay quiet
         # after its last real activity. Bounds how much of Smart Termination's
         # confirmation delay may be banked into the stored duration. None means the
-        # profile has not been measured, and the previous expected-end cap applies.
+        # profile has not been measured, and for a DISHWASHER the previous
+        # expected-end cap applies. Only a dishwasher gets that far: every other
+        # device type returns `_last_active_time` from `_keep_tail_cap` before
+        # this element is read at all, because nothing legitimate follows their
+        # last activity - so for them the cap can sit EARLIER than expected_end.
         self._matched_terminal_quiet_s: float | None = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
@@ -673,11 +677,13 @@ class CycleDetector:
         """Coerce a measured post-activity quiet span into a finite, non-negative
         float, else None (register item 297).
 
-        Same discipline as the two siblings: None means "no opinion", and
-        ``_keep_tail_cap`` then behaves exactly as it did before this element
-        existed. Bounded above by ``TERMINAL_QUIET_CAP_S`` so a corrupted or
-        hand-edited value cannot license an unbounded tail - the one thing this
-        field exists to prevent.
+        Same discipline as the two siblings: None means "no opinion", and for a
+        DISHWASHER ``_keep_tail_cap`` then behaves exactly as it did before this
+        element existed. Other device types never reach that branch - they are
+        capped at ``_last_active_time`` higher up - so None changes nothing for
+        them either way. Bounded above by ``TERMINAL_QUIET_CAP_S`` so a corrupted
+        or hand-edited value cannot license an unbounded tail - the one thing
+        this field exists to prevent.
         """
         if raw is None:
             return None
@@ -2793,6 +2799,19 @@ class CycleDetector:
         # block, past the ANTI_CREASE_SPIN_WAIT_MAX_RATIO cap), so an appliance that
         # never spins - the #445 Miele, which has no terminal block at all - is not
         # delayed by it.
+        #
+        # **Scope, and it is narrower than the paragraph above implies (register
+        # item 351, DEFERRED).** `_anticrease_spin_pending` needs element 10, and
+        # `manager._async_perform_combined_matching` only supplies that when
+        # `anti_wrinkle_enabled` is true - which DEFAULTS FALSE. So on a washer
+        # with anti-wrinkle off, `_matched_terminal_high` is None, this predicate
+        # returns False immediately, and the deferral described above does not
+        # happen at all. Making it independent means computing a terminal-high
+        # block against a threshold that is not `anti_wrinkle_max_power` (the
+        # obvious candidate being the same `STANDBY_BAND_MAX_FRACTION` share of
+        # peak this guard already uses), which changes WHEN cycles end and so
+        # wants measuring on `devtools/end_gate_eval.py` before it ships. Left to
+        # the maintainer rather than changed unattended.
         if self._anticrease_spin_pending(timestamp):
             return False
         peak = float(self._cycle_max_power)
@@ -3067,9 +3086,10 @@ class CycleDetector:
         if not self._anticrease_spin_wait_logged:
             self._anticrease_spin_wait_logged = True
             self._logger.debug(
-                "Anti-crease finalize held: '%s' ends with a %.0fs block above %.0fW "
-                "at %.0f%% of its run (scanning from %.0fs); this cycle has %.0fs of "
-                "it so far (elapsed %.0fs of %.0fs expected).",
+                "Finalize held, terminal high-power block still owed: '%s' ends "
+                "with a %.0fs block above %.0fW at %.0f%% of its run (scanning "
+                "from %.0fs); this cycle has %.0fs of it so far (elapsed %.0fs of "
+                "%.0fs expected).",
                 self._matched_profile,
                 block_seconds,
                 float(self._config.anti_wrinkle_max_power),
