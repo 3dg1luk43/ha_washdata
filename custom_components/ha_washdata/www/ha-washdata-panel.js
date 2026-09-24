@@ -4439,7 +4439,7 @@ class HaWashdataPanel extends HTMLElement {
     // threshold value fixes it, and the standby detector closes the cycle instead.
     const sas = dev.standby_above_stop;
     if (sas && this._canEdit()) {
-      attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--warning-color,#ff9800)" data-action="goto-conflicts"><span class="wd-attn-icon">\u26A0</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--warning-color,#ff9800)">${this._t('msg.standby_above_stop_title', {idle: sas.idle_w, stop: sas.stop_threshold_w}, `Still drawing ${sas.idle_w} W when the cycle ended`)}</div><div class="wd-attn-sub">${this._t('msg.standby_above_stop_sub', {n: sas.cycles_above, total: sas.cycles_checked, stop: sas.stop_threshold_w}, `${sas.cycles_above} of the last ${sas.cycles_checked} cycles. The off delay only starts below the Stop Threshold (${sas.stop_threshold_w} W), so cycles finish late.`)}</div></div></button>`);
+      attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--warning-color,#ff9800)" data-action="goto-standby"><span class="wd-attn-icon">\u26A0</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--warning-color,#ff9800)">${this._t('msg.standby_above_stop_title', {idle: sas.idle_w, stop: sas.stop_threshold_w}, `Still drawing ${sas.idle_w} W when the cycle ended`)}</div><div class="wd-attn-sub">${this._t('msg.standby_above_stop_sub', {n: sas.cycles_above, total: sas.cycles_checked, stop: sas.stop_threshold_w}, `${sas.cycles_above} of the last ${sas.cycles_checked} cycles. The off delay only starts below the Stop Threshold (${sas.stop_threshold_w} W), so cycles finish late.`)}</div></div></button>`);
     }
 
     const attnHtml = attn.length ? `<div class="wd-attn">${attn.join('')}</div>` : '';
@@ -12522,6 +12522,15 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'goto-suggestions') {
       this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
     } else if (a === 'goto-conflicts') {
+      this._tab = 'settings'; this._fetchTabData();
+    } else if (a === 'goto-standby') {
+      // The standby card names the Stop Threshold, so it has to LAND on the
+      // section that holds it. 'goto-conflicts' only flips the tab and keeps
+      // whatever _settingsSec was last open, so from Basic or Notifications the
+      // card opened a page with no Stop Threshold and no highlighted conflict -
+      // and this state is not a conflict, so nothing would have highlighted.
+      this._settingsSec = 'detection';
+      this._settingsSearch = ''; this._settingsSugOnly = false;
       this._tab = 'settings'; this._fetchTabData();
     } else if (a === 'conf-goto-section') {
       const confKeys = this._conflictKeysFromOpts();

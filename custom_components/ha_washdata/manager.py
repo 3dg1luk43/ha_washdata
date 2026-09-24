@@ -4168,7 +4168,8 @@ class WashDataManager:
         # one final 0 W reading and then go fully silent, so with no further events
         # the mode is pinned in ANTI_WRINKLE for hours. This timer keeps ticking, so
         # when the real sensor has been silent longer than off_delay we inject a
-        # synthetic 0 W reading, letting the detector's own logic exit the mode. Gate
+        # synthetic reading carrying the sensor's own last value, letting the
+        # detector's own logic exit the mode. Gate
         # on _last_real_reading_time (a genuine tumble pulse still resets the idle
         # timer via the normal handler) and never bump it here, so real silence stays
         # detectable and a still-reporting plug drives itself.
@@ -4178,13 +4179,16 @@ class WashDataManager:
                 last_real is not None
                 and (now - last_real).total_seconds() > self._off_delay
             ):
+                _ka_w, _ka_obs = self._keepalive_reading()
                 self._logger.debug(
                     "Anti-wrinkle keepalive: sensor silent for %.0fs (> off_delay %ss), "
-                    "injecting synthetic 0 W so the idle/2h-cap timer can advance",
+                    "injecting synthetic %.2fW (observed=%s) so the idle/2h-cap timer "
+                    "can advance",
                     (now - last_real).total_seconds(),
                     self._off_delay,
+                    _ka_w,
+                    _ka_obs,
                 )
-                _ka_w, _ka_obs = self._keepalive_reading()
                 self.detector.process_reading(
                     _ka_w, now, synthetic=True, observed=_ka_obs
                 )
@@ -4803,17 +4807,20 @@ class WashDataManager:
             # finalize, the zombie killer - reads `_verified_pause` directly and
             # is untouched by how often we sample.
             if time_since_real_update > self._watchdog_interval:
+                _ka_w, _ka_obs = self._keepalive_reading()
                 self._logger.debug(
                     "Watchdog: Low-power sensor silence (%.0fs > watchdog interval "
-                    "%ss). Injecting 0W keepalive to advance accumulator.",
+                    "%ss). Injecting %.2fW keepalive (observed=%s) to advance "
+                    "accumulator.",
                     time_since_real_update,
                     self._watchdog_interval,
+                    _ka_w,
+                    _ka_obs,
                 )
                 # Do NOT update _last_real_reading_time here, and tell the
                 # detector this reading is ours: it must still advance the
                 # quiet timers (that is the whole point of injecting it) but
                 # must not count as the sensor having reported (items 238, 289).
-                _ka_w, _ka_obs = self._keepalive_reading()
                 self.detector.process_reading(
                     _ka_w, now, synthetic=True, observed=_ka_obs
                 )
@@ -4832,8 +4839,12 @@ class WashDataManager:
             or time_since_real_update > self._no_update_active_timeout
         ):
             # Treating as start of low power wait
-            self._logger.debug("Watchdog: Silence at low power (%.0fs). Injecting 0W.", time_since_any_update)
             _ka_w, _ka_obs = self._keepalive_reading()
+            self._logger.debug(
+                "Watchdog: Silence at low power (%.0fs). Injecting %.2fW "
+                "(observed=%s).",
+                time_since_any_update, _ka_w, _ka_obs,
+            )
             self.detector.process_reading(
                 _ka_w, now, synthetic=True, observed=_ka_obs
             )

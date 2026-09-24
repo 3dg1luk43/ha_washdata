@@ -3128,12 +3128,18 @@ class CycleDetector:
             # The tumble tail itself is never cut into, which is why this is safe
             # here: an anti-crease baseline sits ABOVE stop_threshold
             # (const.py:811-812, a ~2.5-3.2 W draw against a ~1.2 W threshold), so
-            # every one of those readings refreshes `_last_active_time` and the cap
-            # - max(expected_end, _last_active_time) - lands at the last tumble. A
-            # real tail therefore loses only the trailing quiet gap between its last
-            # reading and this finalize, which is time the appliance drew nothing.
-            # A tail of genuinely-0 W readings is clipped back to the matched
-            # profile's expected end. Shorten-only, never earlier than expected_end.
+            # every one of those readings refreshes `_last_active_time`, and for a
+            # non-dishwasher `_keep_tail_cap` returns exactly that - the last
+            # tumble. A real tail therefore loses only the trailing quiet gap
+            # between its last reading and this finalize, which is time the
+            # appliance drew nothing, and a tail of genuinely-0 W readings is
+            # dropped at `_last_active_time`.
+            #
+            # NB: the cap is no longer `max(expected_end, _last_active_time)` and
+            # so is NOT bounded below by the expected end - on a washer or dryer
+            # the stored end can now land earlier than the matched profile's
+            # expected duration. Shorten-only still holds; "never earlier than
+            # expected_end" no longer does, and this paragraph used to claim it.
             tail_cap=self._keep_tail_cap(start_time),
         )
         return True
