@@ -205,7 +205,7 @@ def test_cycle_end_orders_finish_before_the_activity_clear_in_source() -> None:
     from custom_components.ha_washdata import manager as mgr_mod
 
     src = inspect.getsource(mgr_mod.WashDataManager._async_process_cycle_end)
-    i_capture = src.index("live_activity_running = self._live_activity_started")
+    i_capture = src.index("live_activity_running = _same_cycle and self._live_activity_started")
     i_purge = src.index("_clear_live_progress_notification(clear_services=False)")
     i_finish = src.index('event_type=NOTIFY_EVENT_FINISH')
     i_end = src.index("self._end_live_activity()")
@@ -215,6 +215,12 @@ def test_cycle_end_orders_finish_before_the_activity_clear_in_source() -> None:
     # ...and the activity must be ended only after the finished alert is dispatched.
     assert i_finish < i_end, "clearing before the finish empties the lock screen"
     assert "if live_activity_running:" in src
+    # Both the flag read and the purge are gated on the cycle token: this tail
+    # runs after several awaits, and a NEW cycle starting during them would
+    # otherwise have its live counters purged and its activity ended, since the
+    # live tag is per device rather than per cycle.
+    assert "_same_cycle = (" in src
+    assert "if _same_cycle:" in src
 
 
 def test_no_stray_clear_when_no_activity_ever_started(
@@ -440,3 +446,34 @@ def test_the_setup_time_presence_flush_also_records_the_activity(
     assert manager._live_activity_started is True
     assert manager._pending_notifications == []
     assert manager._live_notification_sent_count == 1
+
+
+def test_a_new_cycle_keeps_its_live_activity_when_the_old_tail_lands_late(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Found in the PR #448 round-13 review.
+
+    The cycle-end tail runs after the persistence / envelope / cost / lifetime
+    awaits. A new cycle starting during them resets the live state and its first
+    tick sets `_live_activity_started` again - so an ungated tail read the NEW
+    cycle's flag, purged its counters, and cleared `_live_notification_tag`,
+    which is per DEVICE. The new cycle's activity vanished and its start card
+    was cleared a second time.
+    """
+    # Cycle A finished; by the time its tail runs, cycle B owns the tokens.
+    manager._ranking_snapshot_cycle_id = "cycle-B"
+    manager._live_activity_started = True
+    manager._live_notification_sent_count = 3
+
+    same_cycle = (
+        "cycle-A" is None or manager._ranking_snapshot_cycle_id == "cycle-A"
+    )
+    assert same_cycle is False
+    live_activity_running = same_cycle and manager._live_activity_started
+    assert live_activity_running is False, (
+        "cycle A's tail must not end the activity cycle B is running"
+    )
+
+    # And with no token (legacy callers) the old unconditional behaviour holds.
+    same_cycle_legacy = True  # cycle_token is None
+    assert (same_cycle_legacy and manager._live_activity_started) is True

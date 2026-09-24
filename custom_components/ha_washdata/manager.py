@@ -6019,6 +6019,23 @@ class WashDataManager:
             elif label_confidence >= float(self._learning_confidence or 0.0) and _margin_ok:
                 cycle_data["profile_name"] = program
                 cycle_data["label_source"] = "auto_match"
+            elif (
+                label_confidence >= float(self._learning_confidence or 0.0)
+                and _margin_owner != program
+            ):
+                # Distinct branch: `_margin_ok` is False for two different
+                # reasons and the message below only describes one of them. When
+                # the owner differs, `_margin` is the CHALLENGER's lead and can
+                # be large, so that message reads "only 0.400 clear of the next
+                # candidate, under the 0.08 a label needs" - self-contradictory,
+                # and it hides the actual reason.
+                self._logger.info(
+                    "Not labeling cycle as '%s': the latest match was won by %r, "
+                    "so its margin is evidence about that program, not this one. "
+                    "It stays unlabelled rather than reshaping '%s' on a number "
+                    "that was never measured for it.",
+                    program, _margin_owner, program,
+                )
             elif label_confidence >= float(self._learning_confidence or 0.0):
                 self._logger.info(
                     "Not labeling cycle as '%s': confident enough (%.2f) but only "
@@ -6360,8 +6377,24 @@ class WashDataManager:
         # action-based clear marker still fires for action templates.
         # _clear_live_progress_notification resets _live_activity_started, so the
         # flag has to be read before it runs (#446).
-        live_activity_running = self._live_activity_started
-        self._clear_live_progress_notification(clear_services=False)
+        #
+        # Gated on the cycle token, the same test the terminal-state reset below
+        # uses. Everything here runs AFTER the persistence / envelope / cost /
+        # lifetime-energy awaits, and a new cycle can start during them: its
+        # `_on_state_change` calls `_reset_live_notification_state()` and its
+        # first live tick sets `_live_activity_started` again. Ungated, this tail
+        # then reads the NEW cycle's flag, purges the NEW cycle's live counters
+        # and pending start entries, and - because `_live_notification_tag` is
+        # per DEVICE, not per cycle - ends the activity the new cycle is running.
+        # The user watches it vanish and its start card get cleared a second
+        # time, and the next tick restarts it. If a newer cycle owns the tag,
+        # leave the activity alone: it continues on the same tag.
+        _same_cycle = (
+            cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token
+        )
+        live_activity_running = _same_cycle and self._live_activity_started
+        if _same_cycle:
+            self._clear_live_progress_notification(clear_services=False)
 
         # Send notification if enabled
         if self._notify_finish_services or self._notify_actions:
