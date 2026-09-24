@@ -116,7 +116,11 @@ ML_END_GUARD_MAX_DEFER_SECONDS = 1800.0  # cap the extra wait the guard may add 
 ML_PROVIDER_THROTTLE_SECONDS = 30.0
 if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
     raise ValueError("DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)")
-from .signal_processing import energy_gap_threshold_s, integrate_wh
+from .signal_processing import (
+    energy_gap_threshold_s,
+    integrate_wh,
+    quiet_run_before,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -3506,6 +3510,27 @@ class CycleDetector:
         quiet = self._matched_terminal_quiet_s
         if quiet is None:
             return max(expected_end, last_active)
+        # ...and if the drying ALREADY happened, adding the allowance on top
+        # counts the same quiet twice. The 0.90 test above only catches a spike
+        # late enough to be unambiguously terminal; a pump-out at 85-90% of
+        # expected falls through it, and on a machine that dries BEFORE its final
+        # drain that banks a second drying period into the stored duration, which
+        # feeds `avg_duration` - the exact drift item 297 exists to remove.
+        # `ProfileStore.async_repair_banked_tails` has always asked the trace this
+        # question; this path did not, so the same cycle got one duration live and
+        # another when the repair re-judged it. Same helper, same 0.5 bar, so the
+        # two cannot drift again (register item 347).
+        if self._current_cycle_start is not None and self._power_readings:
+            _start = self._current_cycle_start
+            _pts = [
+                ((ts - _start).total_seconds(), float(pw))
+                for ts, pw in self._power_readings
+            ]
+            _last_off = (last_active - _start).total_seconds()
+            if quiet_run_before(
+                _pts, _last_off, self._config.stop_threshold_w
+            ) >= 0.5 * float(quiet):
+                return last_active
         return last_active + timedelta(seconds=min(quiet, TERMINAL_QUIET_CAP_S))
 
     def _finish_cycle(

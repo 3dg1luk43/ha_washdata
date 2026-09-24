@@ -87,7 +87,14 @@ from .const import (
     TerminationReason,
 )
 from .features import compute_signature
-from .signal_processing import resample_uniform, resample_adaptive, Segment, integrate_wh, energy_gap_threshold_s
+from .signal_processing import (
+    resample_uniform,
+    resample_adaptive,
+    Segment,
+    integrate_wh,
+    energy_gap_threshold_s,
+    quiet_run_before as _quiet_run_before,
+)
 from . import analysis
 from .time_utils import (
     migrate_power_data_to_offsets,
@@ -207,36 +214,6 @@ def _empty_ranking() -> list[dict[str, Any]]:
     return []
 
 
-def _quiet_run_before(
-    points: list[tuple[float, float]], last_active: float, stop_threshold_w: float
-) -> float:
-    """Length of the sub-threshold run immediately preceding ``last_active``.
-
-    Used by the banked-tail repair to recognise a terminal pump-out from the
-    trace alone: if the final above-threshold sample is preceded by a long quiet
-    stretch, that sample is the event the drying led up to, not the last moment
-    of washing. Returns 0.0 when the sample before it is still active.
-    """
-    # The terminal event is a RUN of above-threshold samples, not one sample, so
-    # walk back to where that run starts before measuring the quiet in front of
-    # it. Measuring from `last_active` itself finds only the run's own width.
-    idx = [i for i, (o, _p) in enumerate(points) if o <= last_active]
-    if not idx:
-        return 0.0
-    i = idx[-1]
-    while i > 0 and points[i - 1][1] > stop_threshold_w:
-        i -= 1
-    run_start = points[i][0]
-    # Now the last above-threshold sample before that run, if any.
-    prev_active: float | None = None
-    for offset, power in points:
-        if offset >= run_start:
-            break
-        if power > stop_threshold_w:
-            prev_active = offset
-    if prev_active is None:
-        return 0.0
-    return max(0.0, run_start - prev_active)
 
 
 def _safe_offset(value: Any) -> float | None:
@@ -3946,19 +3923,43 @@ class ProfileStore:
         still refuses the name as a duplicate (#450).
 
         An empty ``device_type`` means "applies to every device" and is left
-        alone. Returns the number of phases re-scoped; idempotent, and saves only
-        when something actually changed.
+        alone. A phase whose name the target catalog ALREADY has is left alone
+        too: see the comment on ``taken`` below. Returns the number of phases
+        re-scoped; idempotent, and saves only when something actually changed.
         """
         target = str(device_type or "").strip()
         if not target:
             return 0
 
+        # Every name already reachable in the target catalog - built-ins plus the
+        # customs this entry can see, i.e. exactly what `async_create_custom_phase`
+        # refuses as a duplicate.
+        taken = {
+            str(p.get("name", "")).strip().casefold()
+            for p in self.list_phase_catalog(target)
+            if str(p.get("name", "")).strip()
+        }
+
         repaired = 0
         for phase in self._get_shared_custom_phases():
             current = str(phase.get("device_type", "")).strip()
-            if current and current != target:
-                phase["device_type"] = target
-                repaired += 1
+            if not current or current == target:
+                continue
+            name = str(phase.get("name", "")).strip().casefold()
+            # Re-scoping a name the target already has would put TWO entries with
+            # one name in the same catalog, and rename/delete propagate to profile
+            # assignments BY NAME (`async_delete_custom_phase` filters on
+            # `name.casefold()`), so a later edit of either would rewrite the
+            # assignments belonging to both. Leave it unreachable instead:
+            # invisible is recoverable, a phase deleted out from under the user's
+            # profiles is not. Updated as we go, so two stale phases sharing a
+            # name cannot collide with each other either.
+            if name and name in taken:
+                continue
+            phase["device_type"] = target
+            if name:
+                taken.add(name)
+            repaired += 1
 
         if repaired:
             await self.async_save()

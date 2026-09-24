@@ -262,3 +262,58 @@ async def test_repair_is_idempotent_and_saves_only_on_change(
 
     assert await store.async_repair_custom_phase_scope("") == 0
     store._store.async_save.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_repair_does_not_create_two_phases_with_one_name(
+    store: ProfileStore,
+) -> None:
+    """Found in the PR #448 round-21 review.
+
+    A user who changes device type, recreates the name under the new type and
+    then triggers the repair would get BOTH in one catalog. Rename and delete
+    propagate to profile assignments by NAME
+    (``async_delete_custom_phase`` filters on ``name.casefold()``), so deleting
+    either would strip the assignments belonging to both.
+    """
+    await store.async_create_custom_phase("washing_machine", "Klarspulen")
+    await store.async_create_custom_phase("dishwasher", "Klarspulen")
+
+    repaired = await store.async_repair_custom_phase_scope("dishwasher")
+
+    assert repaired == 0, "the stranded phase was re-scoped onto a name in use"
+    names = [p["name"] for p in store.list_phase_catalog("dishwasher")]
+    assert names.count("Klarspulen") == 1
+    # Left unreachable, NOT deleted: a phase the user cannot see is recoverable,
+    # one removed from under their profiles is not.
+    assert len(store._get_shared_custom_phases()) == 2
+
+
+@pytest.mark.asyncio
+async def test_repair_does_not_collide_two_stranded_phases(
+    store: ProfileStore,
+) -> None:
+    """The same guard has to hold within the batch, not just against what was
+    already in the target scope."""
+    await store.async_create_custom_phase("washing_machine", "Klarspulen")
+    await store.async_create_custom_phase("dryer", "klarspulen")
+
+    repaired = await store.async_repair_custom_phase_scope("dishwasher")
+
+    assert repaired == 1
+    names = [p["name"].casefold() for p in store.list_phase_catalog("dishwasher")]
+    assert names.count("klarspulen") == 1
+
+
+@pytest.mark.asyncio
+async def test_repair_does_not_shadow_a_universal_phase(store: ProfileStore) -> None:
+    """An unscoped phase is visible in every catalog, so a stranded phase with
+    that name must not be pulled in alongside it."""
+    await store.async_create_custom_phase("", "Vorspulen")
+    store._get_shared_custom_phases().append(
+        {"id": "x", "name": "Vorspulen", "description": "", "device_type": "dryer"}
+    )
+
+    assert await store.async_repair_custom_phase_scope("dishwasher") == 0
+    names = [p["name"] for p in store.list_phase_catalog("dishwasher")]
+    assert names.count("Vorspulen") == 1

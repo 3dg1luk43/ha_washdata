@@ -131,9 +131,26 @@ def _snaps(
     elapsed time on both sides.
 
     The template is the training cycle whose duration is closest to the profile
-    mean, rather than an average of all of them - again mirroring production,
-    which matches against one representative sample cycle. (Measured difference
-    between the two choices on the full corpus: about -0.7 points, i.e. nil.)
+    mean, rather than an average of all of them. (Measured difference between
+    those two choices on the full corpus: about -0.7 points, i.e. nil - but that
+    figure is an inline claim with no committed harness behind it, so treat it
+    the way register item 329 says to treat the 427-cycle numbers.)
+
+    **This is NOT what production scores against, and the gap is deliberate for
+    now (register item 347, deferred).** `ProfileStore.async_match_profile` picks
+    a template in three ways: a pinned golden cycle's own trace, else the
+    ENVELOPE AVERAGE once a profile has >= 2 confirmed cycles, else a single
+    sample cycle. Only the first and last resemble what this function builds, and
+    the middle one is the common case. So the tuner can favour weights that win
+    on a representative trace and lose on the curve live matching actually uses.
+
+    Making it faithful means rebuilding each profile's envelope once per
+    leave-one-out fold - DTW warping every member, O(folds x profiles) envelope
+    builds inside an on-device training job - and the cheap approximation
+    (averaging the pool's regridded curves) is the option already measured
+    WORSE above. The exposure is bounded meanwhile: `tune_matching_config` can
+    only move the bounded scoring weights, never structural matching behaviour,
+    promotion is gated on held-out AUC, and `revert_matching_config` undoes it.
     """
     snaps = []
     for name, items in by_profile.items():

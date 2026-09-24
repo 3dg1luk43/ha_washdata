@@ -631,3 +631,65 @@ async def test_the_terminal_point_never_carries_active_power() -> None:
     )
     # ...and the signature rebuilt from that trace agrees.
     assert float(out["signature"]["total_energy"]) < 100.0
+
+
+def _dw_det_with_trace(pts, quiet=600.0, spike_at=None, expected=3600.0):
+    """A dishwasher detector carrying a real trace, for `_keep_tail_cap`."""
+    cfg = CycleDetectorConfig(
+        min_power=2.0, off_delay=180, device_type="dishwasher", stop_threshold_w=2.0
+    )
+    d = CycleDetector(cfg, lambda a, b: None, lambda p: None)
+    d._current_cycle_start = T0
+    d._expected_duration = expected
+    d._matched_terminal_quiet_s = quiet
+    d._end_spike_seen = spike_at is not None
+    d._end_spike_duration = spike_at or 0.0
+    last_active = max(o for o, p in pts if p > 2.0)
+    d._last_active_time = T0 + timedelta(seconds=last_active)
+    d._power_readings = [(T0 + timedelta(seconds=o), p) for o, p in pts]
+    return d
+
+
+def test_the_live_cap_does_not_bank_drying_that_already_happened() -> None:
+    """Found in the PR #448 round-21 review.
+
+    `async_repair_banked_tails` asks the trace whether a quiet run of comparable
+    length already precedes `last_active`, and zeroes the allowance if so. The
+    live cap only had the `_end_spike_duration >= 0.90 * expected` test, so a
+    terminal pump-out at 85-90% of expected fell through it and still collected
+    `min(quiet, TERMINAL_QUIET_CAP_S)` on top of drying that was already over.
+    The same cycle then had one duration live and another after the repair.
+    """
+    # wash -> 700 s of drying -> terminal pump-out at 87% of expected.
+    pts = [(float(t), 100.0) for t in range(0, 2400, 30)]
+    pts += [(float(t), 0.0) for t in range(2400, 3100, 30)]
+    pts += [(float(t), 80.0) for t in range(3100, 3160, 30)]
+    det = _dw_det_with_trace(pts, quiet=600.0, spike_at=3132.0)
+
+    cap = _cap_offset(det)
+
+    assert cap == pytest.approx(3130.0, abs=31.0), (
+        "the allowance was added on top of drying that had already finished"
+    )
+
+
+def test_a_dishwasher_still_gets_its_allowance_when_drying_is_ahead() -> None:
+    """The other half: no quiet run before the last activity, so the tail really
+    is the drying phase and the allowance must survive."""
+    pts = [(float(t), 100.0) for t in range(0, 3000, 30)]
+    det = _dw_det_with_trace(pts, quiet=600.0, spike_at=None)
+
+    cap = _cap_offset(det)
+
+    # last activity 2970 + the measured 600 s.
+    assert cap == pytest.approx(3570.0, abs=31.0)
+
+
+def test_the_live_cap_and_the_repair_use_one_helper() -> None:
+    """They answer the same question, so they must not be able to drift."""
+    from custom_components.ha_washdata import cycle_detector as _cd
+    from custom_components.ha_washdata import profile_store as _ps
+    from custom_components.ha_washdata.signal_processing import quiet_run_before
+
+    assert _cd.quiet_run_before is quiet_run_before
+    assert _ps._quiet_run_before is quiet_run_before
