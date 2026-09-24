@@ -5281,7 +5281,7 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _htmlSettings() {
-    const o = Object.assign({}, this._opts, this._pendingSettings);
+    const o = this._editedOpts();
     if (!Object.keys(o).length)
       return `<div class="wd-empty"><div class="wd-icon">⚙️</div>${this._t('msg.loading_settings', {}, 'Loading settings…')}</div>`;
     const suggestionsErrorBanner = this._suggestionsError ? `<div class="wd-error-state"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-suggestions">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
@@ -5676,11 +5676,14 @@ class HaWashdataPanel extends HTMLElement {
   // but used to trigger the latter -- measured at 128 documents / 119 KB per open,
   // against a daily read budget the whole community shares.
 
-  // The appliance identity as the USER currently sees it: the saved options with the
-  // unsaved Settings edits laid over them (#447). `_opts` alone is the saved state, so
-  // reading it here would resolve the badge/device list against the previous brand
-  // while the picker shows the new one.
-  _applianceEdit() {
+  // The options as the USER currently sees them: the saved options with the unsaved
+  // Settings edits laid over them. `_opts` alone is the SAVED state (#447), so reading
+  // it directly resolves against the previous value while the form shows the new one -
+  // which is how the appliance badge and device list came to lag the brand picker.
+  // The single source for that overlay: three sites open-coded the same
+  // `Object.assign` and only one of them carried the reason, so a change to the
+  // overlay order could update one and miss the others.
+  _editedOpts() {
     return Object.assign({}, this._opts, this._pendingSettings);
   }
 
@@ -5688,7 +5691,7 @@ class HaWashdataPanel extends HTMLElement {
   // device switch (or an edit to brand/model/type) re-resolves instead of showing the
   // previous appliance's badge.
   _catalogEntryKey() {
-    const o = this._applianceEdit();
+    const o = this._editedOpts();
     return [
       (o.store_brand || '').trim().toLowerCase(),
       (o.store_model || '').trim().toLowerCase(),
@@ -5719,7 +5722,7 @@ class HaWashdataPanel extends HTMLElement {
 
   async _loadCatalogEntry(wantKey) {
     const dev = this._devices[this._selIdx];
-    const o = this._applianceEdit();
+    const o = this._editedOpts();
     const brand = (o.store_brand || '').trim();
     const model = (o.store_model || '').trim();
     if (!dev || !this._onlineEnabled() || !brand || !model) {
@@ -5795,7 +5798,7 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
     if (optKey === 'store_model') {
-      const brand = String(this._applianceEdit().store_brand || '').trim();
+      const brand = String(this._editedOpts().store_brand || '').trim();
       if (!brand) return;
       if (this._catalog.forBrand !== brand || this._catalog.devices === undefined) {
         this._catalog.forBrand = brand;
@@ -14214,9 +14217,7 @@ class HaWashdataPanel extends HTMLElement {
 
   // section-pill dots to surface saved-settings conflicts without needing the form.
   _conflictKeysFromOpts() {
-    return this._conflictKeysForOpts(
-      Object.assign({}, this._opts, this._pendingSettings), this._optDefaults
-    );
+    return this._conflictKeysForOpts(this._editedOpts(), this._optDefaults);
   }
 
   // Collect current numeric form values from DOM, falling back to saved opts (and

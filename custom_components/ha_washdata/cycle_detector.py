@@ -686,6 +686,24 @@ class CycleDetector:
         return min(value, TERMINAL_QUIET_CAP_S)
 
     @staticmethod
+    def _sanitize_longest_candidate(raw: Any) -> float:
+        """Coerce the longest plausible candidate duration to a usable bound.
+
+        Unlike the three siblings above, "no opinion" is ``0.0`` rather than
+        ``None``: the ENDING gate reads a non-positive bound as "no information"
+        and keeps the old refusal, which is the safe direction. Not routed
+        through ``_sanitize_expected_duration`` because 0.0 is legitimate here
+        and that helper logs it as invalid.
+        """
+        try:
+            value = float(raw or 0.0)
+        except (TypeError, ValueError, OverflowError):
+            return 0.0
+        if not math.isfinite(value):
+            return 0.0
+        return value if 0.0 < value <= CycleDetector._SANITIZE_MAX_EXPECTED_DURATION else 0.0
+
+    @staticmethod
     def _sanitize_tail_power(raw: Any) -> float | None:
         """Coerce ``raw`` into a finite, positive float, else None (#364).
 
@@ -978,16 +996,8 @@ class CycleDetector:
             # Coerced quietly, not through _sanitize_expected_duration: 0.0 is a
             # legitimate "no candidate durations to compare" here, and that helper
             # logs it as invalid.
-            _lcd = result_seq[11] if len(result_seq) >= 12 else 0.0
-            try:
-                _lcd = float(_lcd or 0.0)
-            except (TypeError, ValueError, OverflowError):
-                _lcd = 0.0
-            self._longest_candidate_duration = (
-                _lcd
-                if math.isfinite(_lcd)
-                and 0.0 < _lcd <= self._SANITIZE_MAX_EXPECTED_DURATION
-                else 0.0
+            self._longest_candidate_duration = self._sanitize_longest_candidate(
+                result_seq[11] if len(result_seq) >= 12 else 0.0
             )
         else:
             # Assume MatchResult object or similar (future proofing)
@@ -1062,6 +1072,14 @@ class CycleDetector:
         self._matched_tail_power = None
         self._matched_terminal_high = None
         self._matched_terminal_quiet_s = None
+        # Element 12 belongs with them: its own comment claims a stale value can
+        # never license a shortening for a different match, and that was only
+        # true of the tuple path. Left here across a reset, a small positive
+        # bound survives into the next cycle, where it is neither greater than
+        # `_expected_duration` (so the bar is not raised) nor <= 0 (so the "no
+        # information" refusal does not fire) - the one combination that lets an
+        # ambiguous match shorten `effective_off_delay` on no evidence.
+        self._longest_candidate_duration = 0.0
         self._anticrease_spin_wait_logged = False
         # Per-cycle diagnostic throttle (#346): the "Smart Termination not applied"
         # line only logs when the reason CHANGES. Carrying the previous cycle's
@@ -3640,6 +3658,7 @@ class CycleDetector:
             "matched_tail_power": self._matched_tail_power,
             "matched_terminal_high": self._matched_terminal_high,
             "matched_terminal_quiet_s": self._matched_terminal_quiet_s,
+            "longest_candidate_duration": self._longest_candidate_duration,
             "ml_defer_start_duration": self._ml_defer_start_duration,
         }
 
@@ -3715,6 +3734,14 @@ class CycleDetector:
             )
             self._matched_terminal_quiet_s = self._sanitize_terminal_quiet(
                 snapshot.get("matched_terminal_quiet_s")
+            )
+            # Unconditionally, because the hazard is the value already on the
+            # object, not the one in the snapshot: this restores the ambiguity
+            # flags the ENDING gate reads, so leaving the bound untouched pairs
+            # them with whatever a previous cycle left behind. A snapshot written
+            # before this key existed yields 0.0, i.e. the old refusal.
+            self._longest_candidate_duration = self._sanitize_longest_candidate(
+                snapshot.get("longest_candidate_duration")
             )
             self._ml_defer_start_duration = snapshot.get("ml_defer_start_duration")
 

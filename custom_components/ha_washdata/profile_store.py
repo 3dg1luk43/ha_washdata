@@ -4800,8 +4800,10 @@ class ProfileStore:
         # support (the whole back catalogue of the proportional-stretch false
         # positives, register item 324). Recomputed together so badge and graph
         # cannot disagree.
-        stats["refreshed_artifacts"] = await self.hass.async_add_executor_job(
-            self._refresh_cycle_artifacts_sync
+        stats["refreshed_artifacts"] = self._apply_cycle_artifact_updates(
+            await self.hass.async_add_executor_job(
+                self._collect_cycle_artifact_updates
+            )
         )
 
         # 4. Save if any changes made (smart process saves internally if needed, but explicit save safe)
@@ -4811,36 +4813,59 @@ class ProfileStore:
 
         return stats
 
-    def _refresh_cycle_artifacts_sync(self) -> int:
+    def _collect_cycle_artifact_updates(
+        self,
+    ) -> list[tuple[CycleDict, list[dict[str, Any]]]]:
         """Recompute every stored cycle's cached ``artifacts`` against today's bands.
 
-        Returns the number of cycles whose list actually changed. Executor-safe
-        (pure NumPy over already-loaded data) and never raises: a maintenance
-        pass must not be abandoned over a display aid.
+        Computes only; the caller applies the updates on the event loop. This
+        runs in an executor over dictionaries that live inside ``self._data``,
+        and while it is awaited any other coroutine can reach ``async_save`` -
+        which walks that same structure to serialise it. Adding or removing an
+        ``artifacts`` key from another thread mid-walk surfaces as
+        ``RuntimeError: dictionary changed size during iteration`` on a save
+        that has nothing to do with maintenance. Returning the work and applying
+        it on the loop removes the cross-thread mutation entirely.
+
+        An empty list means "remove the key". Still executor-safe (pure NumPy
+        over already-loaded data) and it never raises: a maintenance pass must
+        not be abandoned over a display aid.
         """
-        changed = 0
+        pending: list[tuple[CycleDict, list[dict[str, Any]]]] = []
         try:
             for cycle in self.iter_stored_cycles():
                 name = cycle.get("profile_name")
                 if not name:
                     # Unlabelled: there is no envelope to judge it against, so a
                     # stale list from a label since removed has to go.
-                    if cycle.pop("artifacts", None):
-                        changed += 1
+                    if cycle.get("artifacts") is not None:
+                        pending.append((cycle, []))
                     continue
                 pairs = decompress_power_data(cycle)
                 if len(pairs) < 6:
                     continue
                 fresh = self.detect_cycle_artifacts(str(name), pairs)
                 if fresh != (cycle.get("artifacts") or []):
-                    if fresh:
-                        cycle["artifacts"] = fresh
-                    else:
-                        cycle.pop("artifacts", None)
-                    changed += 1
+                    pending.append((cycle, fresh))
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.debug("Artifact refresh failed", exc_info=True)
-        return changed
+        return pending
+
+    @staticmethod
+    def _apply_cycle_artifact_updates(
+        pending: list[tuple[CycleDict, list[dict[str, Any]]]],
+    ) -> int:
+        """Write what ``_collect_cycle_artifact_updates`` found. Event loop only.
+
+        Its own method so the caller and the tests cannot drift on where the
+        mutation happens, which is the whole point of splitting the two.
+        """
+        for cycle, fresh in pending:
+            if fresh:
+                cycle["artifacts"] = fresh
+            else:
+                cycle.pop("artifacts", None)
+        return len(pending)
 
     def _reprocess_all_data_sync(self) -> int:
         """Synchronous implementation of reprocessing logic (run in executor)."""

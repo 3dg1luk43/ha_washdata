@@ -293,11 +293,15 @@ def test_maintenance_refreshes_stale_cached_artifacts():
     unlabelled = {"id": "c2", "profile_name": None, "artifacts": clean["artifacts"]}
     store.iter_stored_cycles.return_value = [clean, unlabelled]
     store._logger = MagicMock()
-    store._refresh_cycle_artifacts_sync = (
-        ProfileStore._refresh_cycle_artifacts_sync.__get__(store, ProfileStore)
+    store._collect_cycle_artifact_updates = (
+        ProfileStore._collect_cycle_artifact_updates.__get__(store, ProfileStore)
     )
 
-    changed = store._refresh_cycle_artifacts_sync()
+    # Collect in the executor, apply on the loop - the same two steps
+    # async_run_maintenance takes, so the split cannot drift here either.
+    changed = ProfileStore._apply_cycle_artifact_updates(
+        store._collect_cycle_artifact_updates()
+    )
 
     assert changed == 2
     assert "artifacts" not in clean          # a clean member has none
@@ -316,9 +320,11 @@ def test_artifact_refresh_keeps_a_real_one_and_never_raises():
     broken = {"id": "c2", "profile_name": "P", "power_data": "not a list"}
     store.iter_stored_cycles.return_value = [cycle, broken]
     store._logger = MagicMock()
-    store._refresh_cycle_artifacts_sync = (
-        ProfileStore._refresh_cycle_artifacts_sync.__get__(store, ProfileStore)
+    store._collect_cycle_artifact_updates = (
+        ProfileStore._collect_cycle_artifact_updates.__get__(store, ProfileStore)
     )
 
-    assert store._refresh_cycle_artifacts_sync() == 1
+    assert ProfileStore._apply_cycle_artifact_updates(
+        store._collect_cycle_artifact_updates()
+    ) == 1
     assert any(a["type"] == "pause" for a in cycle["artifacts"])
