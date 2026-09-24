@@ -960,7 +960,7 @@ WS_COMMANDS: dict[str, dict] = {
     "get_phase_catalog": {"params": [_entry(), _p("device_type", "str|null", False)]},
     "create_phase": {"params": [
         _entry(),
-        _p("device_type", "str"),
+        _p("device_type", "str", False),
         _p("name", "str"),
         _p("description", "str", False),
     ]},

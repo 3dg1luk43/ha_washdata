@@ -696,7 +696,7 @@ export interface GetPhaseCatalogRequest {
 
 export interface CreatePhaseRequest {
   entry_id: string;
-  device_type: string;
+  device_type?: string;
   name: string;
   description?: string;
 }
