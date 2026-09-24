@@ -60,6 +60,7 @@
     "fair_fit_tip": "Mõõdukas sobivuse järjepidevus – mõnel sellele profiilile määratud tsüklil on madalamad usaldusskoorid. Täpsuse parandamiseks märkige rohkem tsükleid või salvestage profiil uuesti.",
     "feedback_requested": "Soovitakse tagasisidet",
     "golden_cycle": "Salvestatud võrdlustsükkel",
+    "duration_outlier": "{n} ebatavalise pikkusega tsüklit",
     "improving": "↗ paraneb",
     "manual": "(käsitsi valitud)",
     "needs_review": "Vajab ülevaatamist",
@@ -257,6 +258,11 @@
     "hist_import_n": "Impordi tsüklid ({n})",
     "hist_goto_cycles": "Näita tsükleid",
     "save_total_cycles": "Salvesta koguarv"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Lõppenud tsükkel ootab tegelikult {eff} s, mitte {delay} s: Min Väljalülitumise Vahe ({gap} s) on pikem ja see kehtib."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Imporditud kogukonna poest. Kuvatakse viitena ja sobitamiseks. Seda ei arvestata sinu statistikas ega saa muuta.",
     "merge_no_imports": "Imporditud salvestisi ei saa päris tsükliga liita. Tühista nende valik, et liitmine õnnestuks.",
     "store_enable_hint": "Luba seadetes veebifunktsioonid, et sirvida ja importida kogukonna võrdlustsükleid.",
+    "advisory_duration_outlier": "'{name}' sildiga on {n} tsüklit, mille pikkus on selle tavapärasest kestusest liiga kaugel, et sellega üldse sobituda (halvim: {ratio}x). Tõenäoliselt on need valesti sildistatud või hõlmab üks salvestus kahte tsüklit. Sildista need ümber või jaga pooleks, et need ei moonutaks selle programmi ajahinnangut.",
+    "standby_above_stop_title": "Tsükli lõppedes tarbis endiselt {idle} W",
+    "standby_above_stop_sub": "{n} viimasest {total} tsüklist. Väljalülitumise viivitus hakkab kulgema alles siis, kui võimsus langeb alla Peatumise Läve ({stop} W), seega lõppevad tsüklid hiljaks jäädes või tuleb need käsitsi peatada.",
     "online_intro": "Jaga ja laadi alla võrdlustsükleid teiste WashData kasutajatega. Kõik veebifunktsioonid on vabatahtlikud ja vaikimisi välja lülitatud.",
     "store_share_intro": "Laadi see võrdlustsükkel üles, et teised sama seadmega kasutajad saaksid seda kasutada. See vaadatakse üle enne avalikuks muutumist.",
     "online_intro_global": "Sirvi ja jaga võrdlussalvestisi teiste WashData kasutajatega ning kinnita seadmekirjeid. Üks ühendus kehtib kogu su WashData integratsioonile; seadme bränd ja mudel määratakse seadmepõhiselt jaotises Põhiseaded. Kõik veebifunktsioonid on vabatahtlikud ja vaikimisi välja lülitatud.",
@@ -2011,6 +2020,7 @@
       "summary": "Välja jäetud {total} valesti tuvastatud tsüklit: {parts}.",
       "reason": {
         "force_stopped": "jõuga peatatud",
+        "user_stopped": "käsitsi peatatud",
         "interrupted": "katkestatud",
         "incomplete": "lõpetamata",
         "noise": "müra",

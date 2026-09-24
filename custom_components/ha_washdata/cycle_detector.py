@@ -2247,15 +2247,29 @@ class CycleDetector:
                 # bridge, so continuing to wait out a blind per-device prior just
                 # reports the end late.
                 #
-                # Measured on `devtools/end_gate_eval.py`, which IS committed:
-                # over the 263-cycle corpus the shortening moves the median end
-                # lag with early ends and splits unmoved. Item 306's original
-                # figures (427 cycles, washing machines 12.9 -> 7.5 min, splits
-                # 3.75%) came from a harness that was never committed and **do
-                # not reproduce** - the same change measures 24.18 -> 20.50 min
-                # on the committed one. The safety half reproduces exactly.
-                # Treat the 427-cycle numbers as unverified; register item 329
-                # holds the reconciliation, and re-cut anything new with
+                # Measured on `devtools/end_gate_eval.py`, which IS committed.
+                # **`cycle_data/` is not**, so every n below depends on the local
+                # corpus and two different counts get quoted: cycles REPLAYED,
+                # and the subset that reached an ENDING exit, which is the only
+                # one that yields a lag and is what the harness table's `n`
+                # column reports. Current corpus: 273 replayed, 263 measured.
+                # Figures attributed below to "211/221" predate the #445 / #427 /
+                # #424 reporter exports being added mid-PR-#448, when the same
+                # corpus was 221 replayed / 211 measured. They are the same
+                # harness over a smaller corpus, not a drift.
+                #
+                # Re-cut on the current corpus (`--no-shortening` vs shipped,
+                # paired over 273 cycles): median end lag 13.43 -> 12.00 min
+                # overall and 27.50 -> 26.00 for washing machines, dishwasher p90
+                # 33.50 -> 19.70, and early ends (1.14% / 0.00%) and splits
+                # (2.66%) **identical in every scope**. It moves 32 of 273
+                # cycles: it buys little because it reaches few, and it costs
+                # nothing. Item 306's original figures (427 cycles, washing
+                # machines 12.9 -> 7.5 min, splits 3.75%) came from a harness
+                # that was never committed and **do not reproduce**; the safety
+                # half reproduces exactly. Treat the 427-cycle numbers as
+                # unverified; register item 329 holds that reconciliation, taken
+                # on the 211-measured corpus. Re-cut anything new with
                 # `end_gate_eval.py` rather than a throwaway script.
                 #
                 # Asymmetric and bounded, in the same spirit as _keep_tail_cap: it
@@ -2280,9 +2294,11 @@ class CycleDetector:
                 # already past the programme's own expected end, so the asymmetry
                 # is intended. Adding the check was tried (PR #448 round 6) and
                 # measured on `devtools/end_gate_eval.py` over 221 replayed real
-                # cycles: it moves **2 of them**, delaying one by 10.5 min and one
-                # by 21 min, while early ends (1.42% / 0.00% at the >1 and >5 min
-                # marks) and splits (3.32%) stay **exactly** where they were. It
+                # cycles (211 of them measurable, the pre-reporter-export corpus
+                # described above): it moves **2 of them**, delaying one by 10.5
+                # min and one by 21 min, while early ends (1.42% / 0.00% at the >1
+                # and >5 min marks) and splits (3.32%) stay **exactly** where they
+                # were. It
                 # prevented no split and no early end - pure cost, so it was
                 # reverted. The corpus carries only 4 matched cycles under 0.4
                 # confidence, so it cannot prove the guard harmless either; the
@@ -2306,7 +2322,8 @@ class CycleDetector:
                     # shortening. Measured on `devtools/end_gate_eval.py`: of the
                     # 94 cycles that ever pass 1.05x their own expected duration,
                     # **84 (89%) were blocked by an ambiguity flag**, so the rule
-                    # reached 4.7% of cycles (10 of 211) and the median cycle still
+                    # reached 4.7% of cycles (10 of the 211 measurable on the
+                    # pre-reporter-export corpus) and the median cycle still
                     # waited out the full `min_off_gap`.
                     #
                     # The flags are not wrong, they are too coarse. Both exist to

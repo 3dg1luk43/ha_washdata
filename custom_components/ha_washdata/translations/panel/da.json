@@ -60,6 +60,7 @@
     "fair_fit_tip": "Moderat matchkonsistens - nogle cyklusser, der er tildelt denne profil, har lavere konfidensscore. Mærk flere cyklusser, eller optag profilen igen for at forbedre nøjagtigheden.",
     "feedback_requested": "Feedback anmodet",
     "golden_cycle": "Registreret referencecyklus",
+    "duration_outlier": "{n} cyklus(ser) med afvigende længde",
     "improving": "↗ forbedres",
     "manual": "(manuelt valgt)",
     "needs_review": "Trænger til gennemgang",
@@ -257,6 +258,11 @@
     "hist_import_n": "Importér {n} cyklusser",
     "hist_goto_cycles": "Vis mig cyklusserne",
     "save_total_cycles": "Gem total"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "En afsluttet cyklus venter reelt {eff} s, ikke {delay} s: Minimum slukket mellemrum ({gap} s) er længere og har forrang."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Importeret fra fællesskabsbutikken. Vises til reference og matchning. Tælles ikke med i din statistik og kan ikke redigeres.",
     "merge_no_imports": "Importerede optagelser kan ikke flettes ind i en rigtig cyklus. Fravælg dem for at flette.",
     "store_enable_hint": "Aktivér onlinefunktioner i Indstillinger for at gennemse og importere fællesskabets referencecyklusser.",
+    "advisory_duration_outlier": "{n} cyklus(ser) mærket '{name}' ligger for langt fra programmets sædvanlige længde til nogensinde at kunne matche det (værst: {ratio}x). De er sandsynligvis mærket forkert, eller én optagelse har fanget to kørsler. Mærk dem om, eller del dem op, så de ikke længere skævvrider tidsestimatet for dette program.",
+    "standby_above_stop_title": "Trak stadig {idle} W, da cyklussen sluttede",
+    "standby_above_stop_sub": "{n} af de sidste {total} cyklusser. Slukkeforsinkelsen starter først, når effekten er under Stoptærskel ({stop} W), så cyklusser slutter for sent eller skal stoppes manuelt.",
     "online_intro": "Del referencecyklusser med andre WashData-brugere, og download dem. Alle onlinefunktioner er valgfrie og slået fra som standard.",
     "store_share_intro": "Upload denne referencecyklus, så andre med samme apparat kan bruge den. Den gennemgås, før den vises offentligt.",
     "online_intro_global": "Gennemse og del referenceoptagelser med andre WashData-brugere, og bekræft apparatposter. Én forbindelse gælder for hele din WashData-integration; apparatets mærke og model angives pr. enhed under Grundlæggende. Alle onlinefunktioner er valgfrie og slået fra som standard.",
@@ -1867,6 +1876,7 @@
       "summary": "{total} fejldetekterede cyklus(ser) udelukket: {parts}.",
       "reason": {
         "force_stopped": "tvangsstoppet",
+        "user_stopped": "stoppet manuelt",
         "interrupted": "afbrudt",
         "incomplete": "ufuldstændig",
         "noise": "støj",

@@ -60,6 +60,7 @@
     "fair_fit_tip": "Střední konzistence shody – některé cykly přiřazené k tomuto profilu mají nižší skóre spolehlivosti. Označte více cyklů nebo znovu zaznamenejte profil, abyste zvýšili přesnost.",
     "feedback_requested": "Vyžádána zpětná vazba",
     "golden_cycle": "Zaznamenaný referenční cyklus",
+    "duration_outlier": "Cykly s neobvyklou délkou: {n}",
     "improving": "↗ zlepšování",
     "manual": "(vybráno ručně)",
     "needs_review": "Vyžaduje revizi",
@@ -257,6 +258,11 @@
     "hist_import_n": "Importovat cykly: {n}",
     "hist_goto_cycles": "Zobrazit cykly",
     "save_total_cycles": "Uložit celkový počet"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Dokončený cyklus ve skutečnosti čeká {eff} s, ne {delay} s: Min. mezera vypnutí ({gap} s) je delší a má přednost."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1032,6 +1038,9 @@
     "imported_readonly": "Importováno z komunitního obchodu. Zobrazuje se pro referenci a porovnávání. Nezapočítává se do vašich statistik a nelze jej upravovat.",
     "merge_no_imports": "Importované záznamy nelze sloučit se skutečným cyklem. Zrušte jejich výběr pro sloučení.",
     "store_enable_hint": "Povolte online funkce v Nastavení, abyste mohli procházet a importovat referenční cykly komunity.",
+    "advisory_duration_outlier": "Cykly označené jako '{name}' ({n}) jsou příliš daleko od jeho obvyklé délky, než aby se s ním kdy mohly shodovat (nejhorší: {ratio}x). Pravděpodobně jsou špatně označené, nebo jeden záznam zachytil dva běhy. Označte je znovu nebo je rozdělte, aby přestaly zkreslovat odhad času tohoto programu.",
+    "standby_above_stop_title": "Při ukončení cyklu stále odebírá {idle} W",
+    "standby_above_stop_sub": "{n} z posledních {total} cyklů. Zpoždění vypnutí se začne počítat až ve chvíli, kdy příkon klesne pod Práh zastavení ({stop} W), takže cykly končí pozdě nebo je nutné je zastavit ručně.",
     "online_intro": "Sdílejte a stahujte referenční cykly s ostatními uživateli WashData. Všechny online funkce jsou dobrovolné a ve výchozím nastavení vypnuté.",
     "store_share_intro": "Nahrajte tento referenční cyklus, aby jej mohli používat ostatní se stejným spotřebičem. Před zveřejněním bude zkontrolován.",
     "online_intro_global": "Procházejte a sdílejte referenční záznamy s ostatními uživateli WashData a potvrzujte záznamy spotřebičů. Jedno připojení platí pro celou vaši integraci WashData; značka a model spotřebiče se nastavují pro každé zařízení v sekci Základní. Všechny online funkce jsou dobrovolné a ve výchozím nastavení vypnuté.",
@@ -1835,6 +1844,7 @@
       "summary": "Vyloučeno {total} chybně detekovaných cyklů: {parts}.",
       "reason": {
         "force_stopped": "vynuceně zastavené",
+        "user_stopped": "ručně zastavené",
         "interrupted": "přerušené",
         "incomplete": "neúplné",
         "noise": "hluk",

@@ -35,7 +35,8 @@
     "not_importable": "n/d aquí",
     "exists": "ya existe",
     "backfilled_tip": "Detectado en un historial de potencia importado. Solo influye en la coincidencia de programas, no cuenta en las estadísticas.",
-    "armed": "(se aplica al siguiente ciclo)"
+    "armed": "(se aplica al siguiente ciclo)",
+    "duration_outlier": "{n} ciclo(s) de duración anómala"
   },
   "btn": {
     "reset_zoom": "Restablecer zoom",
@@ -1039,7 +1040,10 @@
     "odometer_intro": "Este total solo aumenta. Eliminar el registro de un ciclo no lo modifica y sigue contando más allá del límite del historial almacenado, de modo que los recordatorios de servicio siguen siendo correctos.",
     "odometer_correct_hint": "Ajuste este valor si WashData registró un ciclo que nunca ocurrió, o si el electrodoméstico ya había realizado ciclos antes de instalar WashData.",
     "no_reminders_set": "Aún no hay recordatorios de servicio configurados.",
-    "toast_program_armed": "Programa preparado para el siguiente ciclo: {program}"
+    "toast_program_armed": "Programa preparado para el siguiente ciclo: {program}",
+    "standby_above_stop_title": "Sigue consumiendo {idle} W cuando el ciclo ha terminado",
+    "standby_above_stop_sub": "{n} de los últimos {total} ciclos. El Retardo de apagado solo empieza cuando la potencia baja del Umbral de parada ({stop} W), así que los ciclos terminan tarde o hay que detenerlos a mano.",
+    "advisory_duration_outlier": "{n} ciclo(s) etiquetados como '{name}' se alejan demasiado de su duración habitual para poder coincidir alguna vez con él (el peor: {ratio}x). Probablemente estén mal etiquetados, o una grabación captó dos ejecuciones. Vuelve a etiquetarlos o divídelos para que dejen de distorsionar la estimación de tiempo de este programa."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
@@ -1963,6 +1967,7 @@
       "summary": "Excluido(s) {total} ciclo(s) mal detectado(s): {parts}.",
       "reason": {
         "force_stopped": "detenidos a la fuerza",
+        "user_stopped": "detenidos manualmente",
         "interrupted": "interrumpidos",
         "incomplete": "incompletos",
         "noise": "ruido",
@@ -2187,6 +2192,11 @@
       "tap_action": "Acción al tocar",
       "hold_action": "Acción al mantener pulsado",
       "double_tap_action": "Acción al tocar dos veces"
+    }
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Un ciclo terminado espera en realidad {eff} s, no {delay} s: la Brecha mínima de apagado ({gap} s) es mayor y tiene prioridad."
     }
   }
 }

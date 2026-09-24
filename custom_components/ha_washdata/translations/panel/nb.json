@@ -60,6 +60,7 @@
     "fair_fit_tip": "Moderat matchkonsistens – noen sykluser tilordnet denne profilen har lavere konfidensscore. Merk flere sykluser eller registrer profilen på nytt for å forbedre nøyaktigheten.",
     "feedback_requested": "Tilbakemelding forespurt",
     "golden_cycle": "Registrert referansesyklus",
+    "duration_outlier": "{n} syklus(er) med avvikende lengde",
     "improving": "↗ forbedres",
     "manual": "(valgt manuelt)",
     "needs_review": "Trenger gjennomgang",
@@ -257,6 +258,11 @@
     "hist_import_n": "Importer {n} sykluser",
     "hist_goto_cycles": "Vis meg syklusene",
     "save_total_cycles": "Lagre total"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "En fullført syklus venter i virkeligheten {eff} s, ikke {delay} s: Min. av-intervall ({gap} s) er lengre og har forrang."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Importert fra fellesskapsbutikken. Vises for referanse og matching. Telles ikke med i statistikken din og kan ikke redigeres.",
     "merge_no_imports": "Importerte opptak kan ikke slås sammen med en ekte syklus. Fjern merkingen for å slå sammen.",
     "store_enable_hint": "Aktiver nettfunksjoner i Innstillinger for å bla gjennom og importere fellesskapets referansesykluser.",
+    "advisory_duration_outlier": "{n} syklus(er) merket '{name}' ligger for langt fra programmets vanlige lengde til noen gang å kunne matche det (verst: {ratio}x). De er sannsynligvis feilmerket, eller ett opptak fanget to kjøringer. Merk dem på nytt, eller del dem opp, slik at de slutter å forskyve tidsestimatet for dette programmet.",
+    "standby_above_stop_title": "Trakk fortsatt {idle} W da syklusen ble avsluttet",
+    "standby_above_stop_sub": "{n} av de siste {total} syklusene. Av-forsinkelsen starter først når effekten er under Stoppterskel ({stop} W), så sykluser avsluttes for sent eller må stoppes for hånd.",
     "online_intro": "Del referansesykluser med andre WashData-brukere, og last dem ned. Alle nettfunksjoner er valgfrie og av som standard.",
     "store_share_intro": "Last opp denne referansesyklusen slik at andre med samme apparat kan bruke den. Den gjennomgås før den vises offentlig.",
     "online_intro_global": "Bla gjennom og del referanseopptak med andre WashData-brukere, og bekreft apparatoppføringer. Én tilkobling gjelder for hele WashData-integrasjonen din; apparatets merke og modell angis per enhet under Grunnleggende. Alle nettfunksjoner er valgfrie og av som standard.",
@@ -1867,6 +1876,7 @@
       "summary": "Ekskluderte {total} feildetekterte syklus(er): {parts}.",
       "reason": {
         "force_stopped": "tvangsstoppet",
+        "user_stopped": "stoppet manuelt",
         "interrupted": "avbrutt",
         "incomplete": "ufullstendig",
         "noise": "støy",

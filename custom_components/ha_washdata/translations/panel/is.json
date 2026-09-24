@@ -60,6 +60,7 @@
     "fair_fit_tip": "Í meðallagi samræmi við samsvörun - sumar lotur sem eru úthlutaðar þessum prófíl hafa lægri öryggisstig. Merktu fleiri lotur eða skráðu sniðið aftur til að bæta nákvæmni.",
     "feedback_requested": "Óskað er eftir umsögn",
     "golden_cycle": "Skráð viðmiðunarlota",
+    "duration_outlier": "{n} lota/lotur með óvenjulega lengd",
     "improving": "↗ batnar",
     "manual": "(handvirkt valið)",
     "needs_review": "Þarfnast endurskoðunar",
@@ -257,6 +258,11 @@
     "hist_import_n": "Flytja inn {n} lotur",
     "hist_goto_cycles": "Sýndu mér loturnar",
     "save_total_cycles": "Vista samtölu"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Lota sem er lokið bíður í raun {eff} s, ekki {delay} s: Lágm. slökkubil ({gap} s) er lengra og gengur fyrir."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Flutt inn úr samfélagsversluninni. Sýnt til viðmiðunar og samsvörunar. Það er ekki talið með í tölfræðinni þinni og ekki hægt að breyta því.",
     "merge_no_imports": "Ekki er hægt að sameina innfluttar upptökur við raunverulega lotu. Afveldu þær til að sameina.",
     "store_enable_hint": "Virkjaðu nettengda eiginleika í Stillingum til að skoða og flytja inn viðmiðunarlotur samfélagsins.",
+    "advisory_duration_outlier": "{n} lota/lotur merktar '{name}' eru of langt frá venjulegri lengd kerfisins til að geta nokkurn tíma fengið samsvörun við það (verst: {ratio}x). Þær eru líklega rangt merktar, eða ein upptaka náði tveimur keyrslum. Merktu þær aftur eða skiptu þeim upp svo þær skekki ekki lengur tímaáætlun þessa kerfis.",
+    "standby_above_stop_title": "Dró enn {idle} W þegar lotunni lauk",
+    "standby_above_stop_sub": "{n} af síðustu {total} lotum. Slökkviðráð fer ekki af stað fyrr en aflið er komið undir Stöðvunarþröskuld ({stop} W), svo lotur enda of seint eða þarf að stöðva handvirkt.",
     "online_intro": "Deildu viðmiðunarlotum með öðrum WashData-notendum og halaðu þeim niður. Allir nettengdir eiginleikar eru valfrjálsir og sjálfgefið óvirkir.",
     "store_share_intro": "Hladdu þessari viðmiðunarlotu upp svo aðrir með sama tæki geti notað hana. Hún er yfirfarin áður en hún birtist opinberlega.",
     "online_intro_global": "Skoðaðu og deildu viðmiðunarupptökum með öðrum WashData-notendum og staðfestu tækjafærslur. Ein tenging gildir fyrir alla WashData-samþættinguna þína; vörumerki og gerð tækis eru stillt fyrir hvert tæki undir Grunnstillingum. Allir nettengdir eiginleikar eru valfrjálsir og sjálfgefið óvirkir.",
@@ -1867,6 +1876,7 @@
       "summary": "Útilokaði {total} ranggreindar lotur: {parts}.",
       "reason": {
         "force_stopped": "þvingað stöðvaðar",
+        "user_stopped": "stöðvaðar handvirkt",
         "interrupted": "rofnar",
         "incomplete": "ókláraðar",
         "noise": "suð",

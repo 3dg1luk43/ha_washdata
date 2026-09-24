@@ -60,6 +60,7 @@
     "fair_fit_tip": "Måttlig matchkonsistens – vissa cykler tilldelade den här profilen har lägre konfidenspoäng. Märk fler cykler eller spela in profilen igen för att förbättra noggrannheten.",
     "feedback_requested": "Feedback begärd",
     "golden_cycle": "Inspelad referenscykel",
+    "duration_outlier": "{n} cykel/cykler med avvikande längd",
     "improving": "↗ förbättras",
     "manual": "(manuellt valt)",
     "needs_review": "Behöver granskning",
@@ -257,6 +258,11 @@
     "hist_import_n": "Importera {n} cykler",
     "hist_goto_cycles": "Visa mig cyklerna",
     "save_total_cycles": "Spara total"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "En avslutad cykel väntar i själva verket {eff} s, inte {delay} s: Min. avlucka ({gap} s) är längre och har företräde."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Importerad från gemenskapsbutiken. Visas för referens och matchning. Räknas inte in i din statistik och kan inte redigeras.",
     "merge_no_imports": "Importerade inspelningar kan inte slås samman med en riktig cykel. Avmarkera dem för att slå samman.",
     "store_enable_hint": "Aktivera onlinefunktioner i Inställningar för att bläddra bland och importera gemenskapens referenscykler.",
+    "advisory_duration_outlier": "{n} cykel/cykler märkta '{name}' ligger för långt från programmets vanliga längd för att någonsin kunna matcha det (värst: {ratio}x). De är troligen felmärkta, eller så fångade en inspelning två körningar. Märk om dem, eller dela upp dem, så att de slutar snedvrida tidsuppskattningen för det här programmet.",
+    "standby_above_stop_title": "Drog fortfarande {idle} W när cykeln avslutades",
+    "standby_above_stop_sub": "{n} av de senaste {total} cyklerna. Avfördröjningen startar först när effekten är under Stopptröskel ({stop} W), så cykler avslutas för sent eller måste stoppas för hand.",
     "online_intro": "Dela referenscykler med andra WashData-användare och ladda ner dem. Alla onlinefunktioner är frivilliga och avstängda som standard.",
     "store_share_intro": "Ladda upp den här referenscykeln så att andra med samma apparat kan använda den. Den granskas innan den visas offentligt.",
     "online_intro_global": "Bläddra bland och dela referensinspelningar med andra WashData-användare, och bekräfta apparatposter. En anslutning gäller för hela din WashData-integration; apparatens märke och modell anges per enhet under Grundläggande. Alla onlinefunktioner är frivilliga och avstängda som standard.",
@@ -1867,6 +1876,7 @@
       "summary": "Uteslöt {total} feldetekterade cykler: {parts}.",
       "reason": {
         "force_stopped": "tvångsstoppad",
+        "user_stopped": "stoppad manuellt",
         "interrupted": "avbruten",
         "incomplete": "ofullständig",
         "noise": "brus",

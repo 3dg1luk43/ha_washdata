@@ -35,7 +35,8 @@
     "not_importable": "n/d aqui",
     "exists": "já existe",
     "backfilled_tip": "Detectado em um histórico de potência importado. Influencia apenas a correspondência de programas, não é contabilizado nas estatísticas.",
-    "armed": "(aplica-se ao próximo ciclo)"
+    "armed": "(aplica-se ao próximo ciclo)",
+    "duration_outlier": "{n} ciclo(s) com duração incomum"
   },
   "btn": {
     "reset_zoom": "Redefinir zoom",
@@ -1039,7 +1040,10 @@
     "odometer_intro": "Este total só aumenta. Excluir o registro de um ciclo não o altera e ele continua contando além do limite do histórico armazenado, para que os lembretes de manutenção permaneçam corretos.",
     "odometer_correct_hint": "Defina este valor se o WashData registrou um ciclo que nunca aconteceu, ou se o eletrodoméstico já havia realizado ciclos antes de o WashData ser instalado.",
     "no_reminders_set": "Ainda não há lembretes de manutenção definidos.",
-    "toast_program_armed": "Programa preparado para o próximo ciclo: {program}"
+    "toast_program_armed": "Programa preparado para o próximo ciclo: {program}",
+    "standby_above_stop_title": "Ainda consumindo {idle} W quando o ciclo terminou",
+    "standby_above_stop_sub": "{n} dos últimos {total} ciclos. O Atraso de Desligamento só começa quando a potência fica abaixo do Limite de Parada ({stop} W), então os ciclos terminam tarde ou precisam ser parados na mão.",
+    "advisory_duration_outlier": "{n} ciclo(s) rotulados como '{name}' estão longe demais da duração habitual dele para algum dia corresponderem (pior caso: {ratio}x). Provavelmente estão rotulados errado, ou uma gravação capturou duas execuções. Rotule-os novamente ou divida-os para que parem de distorcer a estimativa de tempo deste programa."
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -1931,6 +1935,7 @@
       "summary": "Excluído(s) {total} ciclo(s) mal detectado(s): {parts}.",
       "reason": {
         "force_stopped": "parados forçadamente",
+        "user_stopped": "parados manualmente",
         "interrupted": "interrompidos",
         "incomplete": "incompletos",
         "noise": "ruído",
@@ -2187,6 +2192,11 @@
       "tap_action": "Ação ao tocar",
       "hold_action": "Ação ao manter pressionado",
       "double_tap_action": "Ação ao tocar duas vezes"
+    }
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Um ciclo concluído espera na verdade {eff} s, e não {delay} s: o Intervalo Mínimo de Desligamento ({gap} s) é maior e tem prioridade."
     }
   }
 }

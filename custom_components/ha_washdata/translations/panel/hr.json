@@ -60,6 +60,7 @@
     "fair_fit_tip": "Umjerena dosljednost podudaranja – neki ciklusi dodijeljeni ovom profilu imaju niže rezultate pouzdanosti. Označite više ciklusa ili ponovno snimite profil kako biste poboljšali točnost.",
     "feedback_requested": "Zatražene povratne informacije",
     "golden_cycle": "Snimljeni referentni ciklus",
+    "duration_outlier": "Ciklusi neobične duljine: {n}",
     "improving": "↗ poboljšanje",
     "manual": "(ručno odabrano)",
     "needs_review": "Potreban pregled",
@@ -257,6 +258,11 @@
     "hist_import_n": "Uvezi cikluse: {n}",
     "hist_goto_cycles": "Prikaži cikluse",
     "save_total_cycles": "Spremi ukupan broj"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Završen ciklus zapravo čeka {eff} s, a ne {delay} s: Min. razmak isključivanja ({gap} s) dulji je i ima prednost."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1032,6 +1038,9 @@
     "imported_readonly": "Uvezeno iz zajedničke trgovine. Prikazano za referencu i podudaranje. Ne broji se u vašu statistiku i ne može se uređivati.",
     "merge_no_imports": "Uvezene snimke ne mogu se spojiti sa stvarnim ciklusom. Poništite njihov odabir za spajanje.",
     "store_enable_hint": "Omogućite online značajke u Postavkama kako biste mogli pregledavati i uvoziti referentne cikluse zajednice.",
+    "advisory_duration_outlier": "Ciklusi označeni kao '{name}' ({n}) previše odstupaju od njegove uobičajene duljine da bi se ikada mogli podudariti s njim (najveće odstupanje: {ratio}x). Vjerojatno su pogrešno označeni ili je jedno snimanje obuhvatilo dva pokretanja. Ponovno ih označite ili ih podijelite kako bi prestali iskrivljavati procjenu vremena za ovaj program.",
+    "standby_above_stop_title": "Još uvijek povlači {idle} W kada je ciklus završio",
+    "standby_above_stop_sub": "{n} od posljednjih {total} ciklusa. Odgoda isključivanja počinje tek kada snaga padne ispod Praga zaustavljanja ({stop} W), pa ciklusi završavaju sa zakašnjenjem ili ih treba zaustaviti ručno.",
     "online_intro": "Dijelite i preuzimajte referentne cikluse s drugim korisnicima WashData. Sve online značajke su dobrovoljne i prema zadanome isključene.",
     "store_share_intro": "Prenesite ovaj referentni ciklus kako bi ga mogli koristiti drugi s istim uređajem. Pregledava se prije nego što postane javno dostupan.",
     "online_intro_global": "Pregledavajte i dijelite referentne snimke s drugim korisnicima WashData te potvrđujte unose uređaja. Jedna veza vrijedi za cijelu vašu WashData integraciju; marka i model uređaja postavljaju se za svaki uređaj u odjeljku Osnovno. Sve online značajke su dobrovoljne i prema zadanome isključene.",
@@ -1835,6 +1844,7 @@
       "summary": "Isključeno {total} pogrešno otkrivenih ciklusa: {parts}.",
       "reason": {
         "force_stopped": "prisilno zaustavljeni",
+        "user_stopped": "ručno zaustavljeni",
         "interrupted": "prekinuti",
         "incomplete": "nepotpuni",
         "noise": "buka",
