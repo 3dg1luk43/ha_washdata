@@ -1200,6 +1200,20 @@ def align_trace_to_envelope(
             own pre-DTW reference. ``None`` forces the proportional stretch.
         dtw_bandwidth: Sakoe-Chiba band ratio, same value the build used.
 
+    **Known limit, measured and accepted (register item 347).** The observed span
+    here is ``t_obs[-1]``, while ``_rebuild_envelope_sync`` builds each member
+    over ``manual_duration or max(last_offset, stored_duration)``. Where the
+    stored duration runs past the last sample the build covered a slightly longer
+    span than this re-derivation does, so the warp is not bit-for-bit the build's
+    own. Measured over the 703 stored cycles in the maintainer's corpus it
+    affects **7 of them (1.0%)**, median gap 8.2 s and worst 201 s on a 14040 s
+    cycle (1.4%) - all well inside one grid step. Closing it means threading the
+    authoritative duration through ``compute_envelope_conformance`` and
+    ``detect_cycle_artifacts``, whose signatures take points and no cycle, and
+    through their manager / ws_api / playground callers. Not done: that is a wide
+    change to alignment code whose current behaviour is measured (item 324), for
+    a sub-grid-step effect on 1% of cycles.
+
     Returns:
         ``(envelope-space time per observed sample, used_dtw)``. ``used_dtw`` is
         False when the warp was unavailable and the proportional stretch was
