@@ -6534,13 +6534,59 @@ class ProfileStore:
         except Exception:  # noqa: BLE001 - a display aid must never break the WS
             return None
 
+    def _stage1_duration_for(self, name: str, profile: dict[str, Any]) -> float:
+        """The duration Stage 1 actually divides by, for one profile.
+
+        Mirrors the precedence in `_build_match_snapshots`: a profile with a
+        pinned golden cycle keeps its own `avg_duration`, but otherwise an
+        envelope with `cycle_count >= 2` supplies `target_duration` FIRST -
+        which is the duration of the cycle nearest the median
+        (`compute_envelope_worker`), not the outlier-filtered mean.
+
+        `_self_unmatchable_cycles` used `profile["avg_duration"]` unconditionally
+        and claimed in its docstring to use "the same robust figure the matcher
+        sizes against". On the envelope path that was untrue, and the two can sit
+        far apart on exactly the profiles the advisory targets - ones mixing two
+        programmes - so it could flag a cycle Stage 1 accepts and miss one it
+        rejects. Returns 0.0 when nothing usable exists, which the caller skips.
+        """
+        try:
+            has_golden = any(
+                isinstance(c.get("ml_review"), dict)
+                and c["ml_review"].get("golden")
+                and c.get("power_data")
+                and c.get("profile_name") == name
+                for c in self.iter_evidence_cycles()
+            )
+            envelope = (self._data.get("envelopes") or {}).get(name)
+            if not has_golden and envelope and envelope.get("cycle_count", 0) >= 2:
+                env_avg = envelope.get("avg")
+                span = 0.0
+                if env_avg and len(env_avg) > 1:
+                    try:
+                        span = float(env_avg[-1][0]) - float(env_avg[0][0])
+                    except (TypeError, ValueError, IndexError):
+                        span = 0.0
+                return float(
+                    envelope.get("target_duration")
+                    or profile.get("avg_duration")
+                    or span
+                    or 0.0
+                )
+            return float(profile.get("avg_duration") or 0.0)
+        except Exception:  # pylint: disable=broad-exception-caught
+            return float(profile.get("avg_duration") or 0.0)
+
     def _self_unmatchable_cycles(self) -> dict[str, list[dict[str, Any]]]:
         """Labelled cycles that fall outside the duration gate for their OWN profile.
 
         Returns ``{profile_name: [{"id", "duration", "ratio"}, ...]}`` for profiles
-        that have at least one. Compared against the profile's outlier-filtered
-        ``avg_duration`` - the same robust figure the matcher sizes against - so one
-        bad cycle cannot move the bar far enough to hide itself.
+        that have at least one. Compared against whatever Stage 1 itself divides
+        by, resolved through :meth:`_stage1_duration_for` - which is NOT always
+        ``avg_duration``: an envelope with two or more cycles supplies
+        ``target_duration`` first. Judging against a denominator the matcher does
+        not use is how this advisory told users to re-label cycles Stage 1
+        accepts.
 
         Needs at least ``SELF_UNMATCHABLE_MIN_CYCLES`` cycles before judging: below
         that there is no "usual length" to be an outlier from, and calling the
@@ -6574,7 +6620,8 @@ class ProfileStore:
             for name, cycles in by_profile.items():
                 if len(cycles) < SELF_UNMATCHABLE_MIN_CYCLES:
                     continue
-                avg = float((profiles.get(name) or {}).get("avg_duration") or 0.0)
+                # The denominator Stage 1 itself uses, not `avg_duration` flat.
+                avg = self._stage1_duration_for(name, profiles.get(name) or {})
                 if avg <= 0:
                     durs = [float(c.get("duration") or 0.0) for c in cycles]
                     core = filter_duration_outliers([d for d in durs if d > 60])

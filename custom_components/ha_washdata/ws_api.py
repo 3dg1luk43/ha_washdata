@@ -1946,7 +1946,16 @@ async def ws_set_options(
                     await store.clear_store_account()
                     await store.async_save()
             except Exception:  # pylint: disable=broad-exception-caught
-                pass
+                # Warning, not a silent pass: the user asked for this identity to
+                # be removed, and a bare `pass` here leaves it in storage with no
+                # trace. A bare `pass` is also what hid the #445 standby advisory
+                # being dead for a whole review round (register item 325).
+                _LOGGER.warning(
+                    "Could not clear the store account for %s after online "
+                    "features were disabled; the stored identity may remain",
+                    msg["entry_id"],
+                    exc_info=True,
+                )
 
         hass.config_entries.async_update_entry(entry, **update_kwargs)
         _send_result(connection, msg["id"], "set_options", {"success": True})
