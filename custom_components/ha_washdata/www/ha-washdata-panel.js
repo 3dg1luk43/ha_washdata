@@ -171,7 +171,7 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Duration Gates', fields: [
       { key: 'profile_match_min_duration_ratio', label: 'Min Duration Ratio', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
         doc: 'Minimum cycle length relative to the profile. 0.9 means a cycle must be at least 90% of the profile duration to match.' },
-      { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.5,
+      { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.8,
         doc: 'Maximum cycle length relative to the profile. 1.5 means a cycle must be under 150% of the profile duration to match.' },
       { key: 'profile_duration_tolerance', label: 'Profile Duration Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.25,
         doc: 'The +/- band around a profile average duration used during matching. 0.25 means a 60 min profile matches 45-75 min cycles.' },
@@ -379,7 +379,7 @@ for (const sec of _SETTINGS_SECTIONS) {
 // options, so _FIELD_BY_KEY has no entry for them).
 const _PG_MATCH_DEFAULTS = {
   profile_match_min_duration_ratio: 0.1,
-  profile_match_max_duration_ratio: 1.5,
+  profile_match_max_duration_ratio: 1.8,
   corr_weight: 0.45,
   keep_min_score: 0.1,
   dtw_bandwidth: 0.2,
