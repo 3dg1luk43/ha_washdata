@@ -1537,6 +1537,7 @@ class ProfileStore:
 
         # Cache for resampled sample segments: key=(cycle_id, dt)
         self._cached_sample_segments: dict[tuple[str, float], Segment] = {}
+        self._terminal_quiet_cache: dict[str, tuple[tuple[int, str, int], float | None]] = {}
         # Cache for group cohesion scores to avoid re-running DTW on the event loop
         # every 5 minutes.  Keyed by sorted-members tuple; invalidated when profile_groups
         # content changes (tracked by a simple generation counter).
@@ -5881,8 +5882,23 @@ class ProfileStore:
         return summary
 
     def _apply_repaired_duration(self, cycle: dict[str, Any], new_duration: float) -> None:
-        """Trim one cycle to ``new_duration`` seconds, trace included."""
+        """Trim one cycle to ``new_duration`` seconds, trace included.
+
+        Drops this cycle's ``_cached_sample_segments`` entries, exactly as
+        ``trim_cycle_power_data`` does after its own rewrite. The cache is keyed
+        by ``(cycle_id, dt)`` and the id does not change here, so without this a
+        match that ran before the repair keeps serving the pre-repair trace as
+        ``sample_power`` - and since the repair rebuilds ``avg_duration`` from
+        the shortened cycles, the template and its duration would describe
+        different traces until the next restart.
+        """
         cycle["duration"] = round(float(new_duration), 3)
+        cycle_id = str(cycle.get("id") or "")
+        if cycle_id:
+            for key in [
+                k for k in self._cached_sample_segments if k[0] == cycle_id
+            ]:
+                del self._cached_sample_segments[key]
         start_raw = cycle.get("start_time")
         start_dt = _parse_start_dt(start_raw) if start_raw else None
         if start_dt is not None:
@@ -5987,12 +6003,39 @@ class ProfileStore:
         Never raises: this feeds a live match tuple.
         """
         try:
+            # Cached on an evidence fingerprint. `compute_profile_terminal_signature`
+            # decompresses and scans every evidence cycle of the profile, and this
+            # runs on the EVENT LOOP: it is element 11 of the live match tuple, so
+            # a match tick pays for it. Measured on the worst export in
+            # `cycle_data/` (20 cycles, 24172 samples) it is 0.77 ms, but at the
+            # 200-cycle retention cap with long dishwasher traces it is **91 ms**,
+            # which is a visible stall however rare the tick. The repair loop
+            # already memoises this per run for the same reason plus determinism.
+            #
+            # The fingerprint is deliberately not just a count: the banked-tail
+            # repair and `trim_cycle_power_data` rewrite a cycle's trace and
+            # duration IN PLACE, leaving the count and the last id untouched, and
+            # a stale span here would bound `_keep_tail_cap` against a trace that
+            # no longer exists. Summed durations move whenever either of those
+            # runs, and membership changes move the count and the last id.
+            cache = getattr(self, "_terminal_quiet_cache", None)
+            if cache is None:
+                cache = self._terminal_quiet_cache = {}
+            fingerprint = self._terminal_quiet_fingerprint(profile_name)
+            hit = cache.get(profile_name)
+            if hit is not None and hit[0] == fingerprint:
+                return hit[1]
+
+            def _remember(val: float | None) -> float | None:
+                cache[profile_name] = (fingerprint, val)
+                return val
+
             sig = self.compute_profile_terminal_signature(profile_name)
             if not sig:
-                return None
+                return _remember(None)
             quiet = sig.get("quiet_before_s")
             if quiet is None:
-                return None
+                return _remember(None)
             # Only report a span the profile has shown CONSISTENTLY. The
             # signature's own docstring warns that the event's presence is
             # informative and its absence is not, and the corpus bears that out:
@@ -6004,15 +6047,38 @@ class ProfileStore:
             seen = int(sig.get("seen_in") or 0)
             consistency = float(sig.get("consistency") or 0.0)
             if seen < TERMINAL_QUIET_MIN_OBSERVATIONS:
-                return None
+                return _remember(None)
             if consistency < TERMINAL_QUIET_MIN_CONSISTENCY:
-                return None
+                return _remember(None)
             value = float(quiet)
             if not math.isfinite(value) or value < 0:
-                return None
-            return value
+                return _remember(None)
+            return _remember(value)
         except Exception:  # noqa: BLE001 - a statistic must never break matching
+            # Deliberately NOT cached: a failure is not a measurement, and
+            # remembering one would pin "no opinion" until the evidence changes.
             return None
+
+    def _terminal_quiet_fingerprint(self, profile_name: str) -> tuple[int, str, int]:
+        """Cheap stand-in for "has this profile's evidence changed?".
+
+        Ids and durations only, no trace decompression, so it costs microseconds
+        against the tens of milliseconds it guards. See the caller for why the
+        summed duration is in here and a bare count is not enough.
+        """
+        count = 0
+        last_id = ""
+        total = 0.0
+        for cycle in self.iter_evidence_cycles():
+            if not isinstance(cycle, dict) or cycle.get("profile_name") != profile_name:
+                continue
+            count += 1
+            last_id = str(cycle.get("id") or "")
+            try:
+                total += float(cycle.get("duration") or 0.0)
+            except (TypeError, ValueError, OverflowError):
+                continue
+        return (count, last_id, int(total))
 
     def profile_terminal_high_block(
         self,
