@@ -280,6 +280,16 @@
           "description": "The WashData device to retrain models for."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Позначити як вивантажене",
+      "description": "Підтвердьте, що вміст завершеного циклу вийнято з пристрою WashData: стан «Чистий» і нагадування про вивантаження буде скинуто.",
+      "fields": {
+        "device_id": {
+          "name": "Пристрій",
+          "description": "Пристрій WashData, з якого вийнято вміст завершеного циклу."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Зупинити запис циклу"
+      },
+      "mark_unloaded": {
+        "name": "Позначити як вивантажене"
       }
     }
   },

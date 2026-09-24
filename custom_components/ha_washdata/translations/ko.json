@@ -280,6 +280,16 @@
           "description": "The WashData device to retrain models for."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "꺼냄으로 표시",
+      "description": "WashData 장치에서 완료된 내용물을 꺼냈음을 확인하여 깨끗한 상태와 모든 꺼내기 알림을 해제합니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "완료된 내용물을 꺼낸 WashData 장치입니다."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "사이클 기록 중지"
+      },
+      "mark_unloaded": {
+        "name": "꺼냄으로 표시"
       }
     }
   },

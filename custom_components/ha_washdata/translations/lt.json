@@ -280,6 +280,16 @@
           "description": "WashData įrenginys, kurio modelius reikia iš naujo apmokyti."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Pažymėti kaip iškrautą",
+      "description": "Patvirtinkite, kad baigto ciklo turinys išimtas iš „WashData“ įrenginio: būsena „Švarus“ ir iškrovimo priminimas bus panaikinti.",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "„WashData“ įrenginys, iš kurio išimtas baigto ciklo turinys."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Sustabdyti ciklo įrašymą"
+      },
+      "mark_unloaded": {
+        "name": "Pažymėti kaip iškrautą"
       }
     }
   },

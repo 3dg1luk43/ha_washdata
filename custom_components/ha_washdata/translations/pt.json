@@ -280,6 +280,16 @@
           "description": "O dispositivo WashData para retreinar modelos."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Marcar como descarregado",
+      "description": "Confirme que a carga terminada foi retirada de um dispositivo WashData, limpando o estado Limpo e qualquer lembrete de descarga.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "O dispositivo WashData cuja carga terminada foi retirada."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Parar gravação do ciclo"
+      },
+      "mark_unloaded": {
+        "name": "Marcar como descarregado"
       }
     }
   },

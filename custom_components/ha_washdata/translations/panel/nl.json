@@ -1455,8 +1455,8 @@
       "label": "Vertraging uitlaadherinnering"
     },
     "notify_unload_repeat": {
-      "doc": "Blijft de uitlaadherinnering elke \"Vertraging uitlaadherinnering\" minuten opnieuw verzenden totdat u de deur opent of in de melding op \"Stop met herinneren\" tikt. Vereist een Deursensorentiteit (de herinnering zelf ook). De sluitknop werkt bij meldingen van de Home Assistant companion-app (mobiel).",
-      "label": "Herhalen tot de deur opengaat"
+      "doc": "Blijft de uitlaadherinnering elke \"Vertraging uitlaadherinnering\" minuten opnieuw verzenden totdat het uitladen is bevestigd of u in de melding op \"Stop met herinneren\" tikt. Vereist een manier om het uitladen te bevestigen: een Deursensorentiteit, een Uitlaadbevestigingsentiteit of de optie \"Uitladen handmatig bevestigen\" hieronder. De sluitknop werkt bij meldingen van de Home Assistant companion-app (mobiel).",
+      "label": "Herhalen tot uitgeladen"
     },
     "off_delay": {
       "doc": "Tijd om te wachten nadat de stroom is uitgevallen voordat de cyclus als voltooid wordt verklaard. Als de stroom binnen dit venster wordt hervat, gaat de cyclus naadloos verder - dit overbrugt pauzes tussen wasfasen. Vaatwassers hebben lange droogfasen (uitschakeling gedurende 20-60 minuten), dus de uitschakelvertraging moet groter zijn dan die om de hele was+droogcyclus als één cyclus te laten verlopen.",
@@ -1664,6 +1664,14 @@
     "energy_price_dynamic": {
       "label": "Tijdgewogen kosten",
       "doc": "Reken elke cyclus af tegen de prijs die op elk moment van de cyclus gold, in plaats van tegen de ene prijs die gold toen hij klaar was. Geldt alleen voor een prijsentiteit (een statische prijs kan niet bewegen). Vraagt geen extra instellingen: tijdens de cyclus wordt de prijs live bijgehouden, en \"Geschiedenis verwerken\" onder Diagnostiek berekent de kosten van oudere cycli opnieuw uit de recorder. Uit = het klassieke gedrag, één prijs bevroren aan het eind."
+    },
+    "unload_confirm_entity": {
+      "label": "Uitlaadbevestigingsentiteit",
+      "doc": "Optionele entiteit waarvan de activering betekent dat de lading eruit is gehaald, voor machines die geen deursensor kunnen hebben. Elk type werkt: een Zigbee- of NFC-knop, een input_button-helper, een bewegingssensor voor de machine, een scène. Elke statuswijziging telt als bevestiging, behalve uitschakelen en niet beschikbaar worden. Door dit in te stellen wordt de uitlaadherinnering ook ingeschakeld op een apparaat zonder Deursensorentiteit."
+    },
+    "unload_track_without_door": {
+      "label": "Uitladen handmatig bevestigen",
+      "doc": "Voert de uitlaadherinnering uit op een apparaat zonder Deursensorentiteit en zonder Uitlaadbevestigingsentiteit, waarbij u het uitladen in plaats daarvan vanuit uw eigen automatisering bevestigt: druk op de knopentiteit \"Markeren als uitgeladen\" of roep de actie ha_washdata.mark_unloaded aan. Wordt genegeerd wanneer er een Deursensorentiteit is ingesteld, die het signaal al levert."
     }
   },
   "setting_group": {

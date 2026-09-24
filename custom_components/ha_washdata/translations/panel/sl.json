@@ -1423,8 +1423,8 @@
       "label": "Zamuda opomnika za raztovarjanje"
     },
     "notify_unload_repeat": {
-      "doc": "Znova pošilja opomnik za raztovarjanje vsakih \"Zamuda opomnika za raztovarjanje\" minut, dokler ne odprete vrat ali v obvestilu ne tapnete \"Nehaj opominjati\". Zahteva Entiteto senzorja vrat (tako kot sam opomnik). Gumb za opustitev deluje pri obvestilih mobilne aplikacije Home Assistant (companion app).",
-      "label": "Ponavljaj, dokler se vrata ne odprejo"
+      "doc": "Znova pošilja opomnik za raztovarjanje vsakih „Zamuda opomnika za raztovarjanje“ minut, dokler raztovarjanje ni potrjeno ali v obvestilu ne tapnete „Nehaj opominjati“. Potrebuje način za potrditev raztovarjanja: Entiteto senzorja vrat, Entiteto potrditve raztovarjanja ali spodnjo možnost „Ročna potrditev raztovarjanja“. Gumb za opustitev deluje pri obvestilih mobilne aplikacije Home Assistant (companion app).",
+      "label": "Ponavljaj do raztovarjanja"
     },
     "off_delay": {
       "doc": "Čas za čakanje po padcu moči, preden razglasite, da je cikel končan. Če se napajanje ponovno vzpostavi v tem oknu, se cikel nemoteno nadaljuje - to premosti premore med stopnjami pranja. Pomivalni stroji imajo dolge faze sušenja (izklop za 20–60 min), zato mora biti zakasnitev izklopa daljša od te, da ostane celotno pranje+sušenje kot en cikel.",
@@ -1632,6 +1632,14 @@
     "energy_price_dynamic": {
       "label": "Časovno tehtani stroški",
       "doc": "Vsak cikel obračuna po ceni, ki je veljala v vsakem trenutku njegovega teka, namesto po eni sami ceni ob zaključku. Velja samo za entiteto cene (statična cena se ne more spreminjati). Ne potrebuje dodatnih nastavitev: cena se med ciklom spremlja v živo, Obdelava zgodovine v Diagnostiki pa starejšim ciklom znova izračuna stroške iz recorderja. Izklopljeno = klasično vedenje, ena cena, zamrznjena ob koncu."
+    },
+    "unload_confirm_entity": {
+      "label": "Entiteta potrditve raztovarjanja",
+      "doc": "Izbirna entiteta, katere sprožitev pomeni, da je bila vsebina vzeta iz naprave, za stroje, na katere ni mogoče namestiti senzorja vrat. Deluje katera koli vrsta: gumb Zigbee ali NFC, pomočnik input_button, senzor gibanja pred strojem, scena. Kot potrditev šteje vsaka sprememba stanja, razen izklopa in prehoda v nedosegljivo stanje. Ta nastavitev omogoči opomnik za raztovarjanje tudi na napravi brez Entitete senzorja vrat."
+    },
+    "unload_track_without_door": {
+      "label": "Ročna potrditev raztovarjanja",
+      "doc": "Zažene opomnik za raztovarjanje na napravi brez Entitete senzorja vrat in brez Entitete potrditve raztovarjanja, raztovarjanje pa potrdite iz lastne avtomatizacije: pritisnite entiteto gumba „Označi kot raztovorjeno“ ali pokličite storitev ha_washdata.mark_unloaded. Prezrto, kadar je nastavljena Entiteta senzorja vrat, ki ta signal že zagotavlja."
     }
   },
   "setting_group": {

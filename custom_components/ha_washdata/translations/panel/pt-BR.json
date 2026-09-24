@@ -1370,8 +1370,8 @@
       "label": "Atraso de Lembrete de Descarga"
     },
     "notify_unload_repeat": {
-      "doc": "Continua reenviando o lembrete de descarga a cada \"Atraso de Lembrete de Descarga\" minutos até você abrir a porta ou tocar em \"Parar de lembrar\" na notificação. Requer uma Entidade do Sensor de Porta (o próprio lembrete a exige). O botão de dispensar funciona nas notificações do aplicativo complementar (móvel) do Home Assistant.",
-      "label": "Repetir Até a Porta Abrir"
+      "doc": "Continua reenviando o lembrete de descarga a cada \"Atraso de Lembrete de Descarga\" minutos até a descarga ser confirmada ou você tocar em \"Parar de lembrar\" na notificação. Requer uma forma de confirmar a descarga: uma Entidade do Sensor de Porta, uma Entidade de Confirmação de Descarga ou a opção \"Confirmar a Descarga Manualmente\" abaixo. O botão de dispensar funciona nas notificações do aplicativo complementar (móvel) do Home Assistant.",
+      "label": "Repetir Até Confirmar a Descarga"
     },
     "off_delay": {
       "doc": "Tempo de espera após a queda de energia antes de declarar o término do ciclo. Se a energia for retomada dentro desta janela, o ciclo continua perfeitamente - isso faz a ponte entre as etapas de lavagem. As máquinas de lavar louça têm longas fases de secagem (desligadas por 20-60 minutos), portanto o atraso no desligamento deve exceder esse valor para manter toda a lavagem + secagem em um único ciclo.",
@@ -1579,6 +1579,14 @@
     "energy_price_dynamic": {
       "label": "Custo Ponderado no Tempo",
       "doc": "Cobra cada ciclo pelo preço em vigor em cada momento em que ele rodou, em vez do preço único do instante em que terminou. Só vale para uma entidade de preço (um preço estático não muda). Não exige configuração extra: o preço é acompanhado ao vivo enquanto o ciclo roda, e Processar histórico, em Diagnósticos, recalcula o custo dos ciclos antigos a partir do recorder. Desativado = o comportamento clássico, um preço congelado no final."
+    },
+    "unload_confirm_entity": {
+      "label": "Entidade de Confirmação de Descarga",
+      "doc": "Entidade opcional cuja ativação significa que a carga foi retirada, para máquinas que não podem ter um sensor de porta. Serve qualquer tipo: um botão Zigbee ou NFC, um auxiliar input_button, um sensor de movimento na frente da máquina, uma cena. Qualquer mudança de estado conta como confirmação, exceto desligar e ficar indisponível. Definir isso também ativa o lembrete de descarga em um dispositivo sem Entidade do Sensor de Porta."
+    },
+    "unload_track_without_door": {
+      "label": "Confirmar a Descarga Manualmente",
+      "doc": "Executa o lembrete de descarga em um dispositivo sem Entidade do Sensor de Porta e sem Entidade de Confirmação de Descarga, e você confirma a descarga pela sua própria automação: pressione a entidade de botão \"Marcar como descarregado\" ou chame o serviço ha_washdata.mark_unloaded. É ignorado quando uma Entidade do Sensor de Porta está definida, pois ela já fornece o sinal."
     }
   },
   "setting_group": {

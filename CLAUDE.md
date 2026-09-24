@@ -61,6 +61,7 @@ python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG   # mock appli
 cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its README.md)
 cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 20 checks (~12 min)
 cd devtools/testbox && ./check_notify_actions.sh   # the notification-ACTION delivery path (~1 min)
+cd devtools/testbox && ./check_unload_confirm.sh  # unload confirmation button/service/entity (~3 min)
 cd devtools/testbox && ./hactl.py ws ha_washdata/get_profiles entry_id=<id>   # drive it
 ```
 

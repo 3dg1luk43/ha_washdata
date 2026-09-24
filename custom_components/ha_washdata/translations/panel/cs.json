@@ -1419,8 +1419,8 @@
       "label": "Zpoždění připomínky vyložení"
     },
     "notify_unload_repeat": {
-      "doc": "Znovu odesílá připomínku vyložení každých \"Zpoždění připomínky vyložení\" minut, dokud neotevřete dveře nebo v oznámení neklepnete na \"Přestat připomínat\". Vyžaduje Entitu senzoru dveří (stejně jako samotná připomínka). Tlačítko pro zrušení funguje u oznámení mobilní aplikace Home Assistant (companion app).",
-      "label": "Opakovat, dokud se neotevřou dveře"
+      "doc": "Znovu odesílá připomínku vyložení každých „Zpoždění připomínky vyložení“ minut, dokud není vyložení potvrzeno nebo v oznámení neklepnete na „Přestat připomínat“. Vyžaduje způsob, jak vyložení potvrdit: Entitu senzoru dveří, Entitu potvrzení vyložení nebo níže uvedenou možnost „Ruční potvrzení vyložení“. Tlačítko pro zrušení funguje u oznámení mobilní aplikace Home Assistant (companion app).",
+      "label": "Opakovat do vyložení"
     },
     "off_delay": {
       "doc": "Čas čekání po poklesu příkonu před vyhlášením ukončení cyklu. Pokud se příkon obnoví v tomto okně, cyklus plynule pokračuje – to přemostí pauzy mezi fázemi praní. Myčky nádobí mají dlouhé fáze sušení (příkon vypnut po dobu 20–60 minut), takže zpozdění vypnutí musí tuto dobu překročit, aby byl celkový cyklus mytí+sušení zachován jako jeden.",
@@ -1632,6 +1632,14 @@
     "curve_preroll_seconds": {
       "doc": "Kolik sekund odečtů z neúspěšných pokusů o spuštění může WashData přenést na začátek křivky cyklu. Křivka cyklu obvykle začíná u pokusu o spuštění, který nakonec uspěl, takže u stroje, který to před rozběhnutím několikrát zkusí - volba programu, zámek dveří, první napouštění - chybí v každé křivce první minuty skutečné činnosti. Nastavte tuto hodnotu o něco výše, než je nejdelší takový rozběh vašeho stroje (300 s většině bohatě stačí). 0 funkci vypne. Mějte na paměti, že zapnutí posune zaznamenaný začátek dříve, takže cykly zaznamenané před změnou a po ní nesou pro stejný program různé doby trvání; naučené průměry se budou posouvat, dokud starší cykly nevypadnou z historie.",
       "label": "Náběh křivky"
+    },
+    "unload_confirm_entity": {
+      "label": "Entita potvrzení vyložení",
+      "doc": "Volitelná entita, jejíž aktivace znamená, že náplň byla vyjmuta, pro spotřebiče, na které nelze umístit senzor dveří. Funguje jakýkoli typ: tlačítko Zigbee nebo NFC, pomocník input_button, senzor pohybu před spotřebičem, scéna. Za potvrzení se počítá každá změna stavu kromě vypnutí a přechodu do stavu nedostupný. Nastavení této možnosti také zapne připomínku vyložení na zařízení bez Entity senzoru dveří."
+    },
+    "unload_track_without_door": {
+      "label": "Ruční potvrzení vyložení",
+      "doc": "Spustí připomínku vyložení na zařízení bez Entity senzoru dveří a bez Entity potvrzení vyložení, přičemž vyložení potvrdíte z vlastní automatizace: stiskněte entitu tlačítka „Označit jako vyložené“ nebo zavolejte službu ha_washdata.mark_unloaded. Ignorováno, pokud je nastavena Entita senzoru dveří, která tento signál již poskytuje."
     }
   },
   "setting_group": {

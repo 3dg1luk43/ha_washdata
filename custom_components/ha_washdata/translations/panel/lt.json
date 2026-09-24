@@ -1423,8 +1423,8 @@
       "label": "Iškrovimo priminimo delsimas"
     },
     "notify_unload_repeat": {
-      "doc": "Iškrovimo priminimas pakartotinai siunčiamas kas \"Iškrovimo priminimo delsimas\" minučių, kol neatidarysite durų arba pranešime nepaliesite \"Nustoti priminti\". Reikalingas Durų jutiklio objektas (kaip ir pačiam priminimui). Atmetimo mygtukas veikia Home Assistant mobiliosios (companion) programėlės pranešimuose.",
-      "label": "Kartoti, kol atsidarys durys"
+      "doc": "Iškrovimo priminimas pakartotinai siunčiamas kas „Iškrovimo priminimo delsimas“ minučių, kol iškrovimas nebus patvirtintas arba pranešime nepaliesite „Nustoti priminti“. Reikalingas būdas patvirtinti iškrovimą: Durų jutiklio objektas, Iškrovimo patvirtinimo objektas arba žemiau esanti parinktis „Patvirtinti iškrovimą rankiniu būdu“. Atmetimo mygtukas veikia Home Assistant mobiliosios (companion) programėlės pranešimuose.",
+      "label": "Kartoti, kol bus iškrauta"
     },
     "off_delay": {
       "doc": "Laikas palaukti, kai nukrenta galia, prieš paskelbiant, kad ciklas baigtas. Jei maitinimas atnaujinamas šiame lange, ciklas tęsiasi sklandžiai – tai sujungia pauzes tarp plovimo etapų. Indaplovės turi ilgas džiovinimo fazes (maitinimas išjungiamas 20–60 min.), todėl išjungimo delsa turi būti didesnė už tą, kad visas plovimas+džiovinimas išliktų kaip vienas ciklas.",
@@ -1632,6 +1632,14 @@
     "energy_price_dynamic": {
       "label": "Pagal laiką svertinė kaina",
       "doc": "Kiekvienas ciklas įkainojamas pagal kainą, galiojusią kiekvieną jo veikimo akimirką, o ne pagal vieną kainą, galiojusią jam pasibaigus. Taikoma tik kainos objektui (statinė kaina nekinta). Papildomai nieko nustatyti nereikia: ciklui veikiant kaina sekama tiesiogiai, o skiltyje Diagnostika esantis veiksmas Apdoroti istoriją perskaičiuoja senesnių ciklų kainą pagal recorder duomenis. Išjungta = įprastas veikimas, viena kaina, užfiksuota pabaigoje."
+    },
+    "unload_confirm_entity": {
+      "label": "Iškrovimo patvirtinimo objektas",
+      "doc": "Pasirenkamas objektas, kurio suveikimas reiškia, kad turinys išimtas; skirtas mašinoms, prie kurių negalima pritaisyti durų jutiklio. Tinka bet koks: Zigbee ar NFC mygtukas, input_button pagalbininkas, judesio jutiklis priešais mašiną, scena. Patvirtinimu laikomas bet koks būsenos pasikeitimas, išskyrus išjungimą ir tapimą nepasiekiamu. Nustačius šį objektą, iškrovimo priminimas įjungiamas ir įrenginiui, kuris neturi Durų jutiklio objekto."
+    },
+    "unload_track_without_door": {
+      "label": "Patvirtinti iškrovimą rankiniu būdu",
+      "doc": "Naudoti iškrovimo priminimą įrenginyje, kuris neturi nei Durų jutiklio objekto, nei Iškrovimo patvirtinimo objekto, o iškrovimą patvirtinti sava automatika: paspauskite mygtuko objektą „Pažymėti kaip iškrautą“ arba iškvieskite paslaugą ha_washdata.mark_unloaded. Ignoruojama, kai nustatytas Durų jutiklio objektas, nes jis šį signalą jau teikia."
     }
   },
   "setting_group": {

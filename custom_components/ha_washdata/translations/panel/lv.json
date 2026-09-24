@@ -1423,8 +1423,8 @@
       "label": "Izkraušanas atgādinājuma aizkave"
     },
     "notify_unload_repeat": {
-      "doc": "Atkārtoti nosūta izkraušanas atgādinājumu ik pēc \"Izkraušanas atgādinājuma aizkave\" minūtēm, līdz atverat durvis vai paziņojumā pieskaraties \"Pārtraukt atgādināšanu\". Nepieciešama Durvju sensora entītija (tāpat kā pašam atgādinājumam). Atmešanas poga darbojas Home Assistant mobilās (companion) lietotnes paziņojumos.",
-      "label": "Atkārtot, līdz atveras durvis"
+      "doc": "Atkārtoti nosūta izkraušanas atgādinājumu ik pēc „Izkraušanas atgādinājuma aizkave“ minūtēm, līdz izkraušana tiek apstiprināta vai paziņojumā pieskaraties „Pārtraukt atgādināšanu“. Nepieciešams veids, kā apstiprināt izkraušanu: Durvju sensora entītija, Izkraušanas apstiprinājuma entītija vai zemāk esošā opcija „Apstiprināt izkraušanu manuāli“. Atmešanas poga darbojas Home Assistant mobilās (companion) lietotnes paziņojumos.",
+      "label": "Atkārtot, līdz izkrauts"
     },
     "off_delay": {
       "doc": "Laiks gaidīt, kad jauda samazinās, pirms tiek paziņots, ka cikls ir pabeigts. Ja šajā logā tiek atsākta barošana, cikls turpinās nemanāmi – tas pārslēdz pauzes starp mazgāšanas posmiem. Trauku mazgājamām mašīnām ir garas žāvēšanas fāzes (izslēdziet strāvu uz 20–60 minūtēm), tāpēc izslēgšanas aizkavei ir jābūt lielākai par to, lai visa mazgāšana un žāvēšana būtu viens cikls.",
@@ -1632,6 +1632,14 @@
     "energy_price_dynamic": {
       "label": "Laikā svērtās izmaksas",
       "doc": "Katra cikla izmaksas tiek rēķinātas pēc cenas, kas bija spēkā katrā tā darbības brīdī, nevis pēc vienas cenas, kas bija spēkā tā beigās. Darbojas tikai ar cenas entītiju (statiska cena nemainās). Papildu iestatīšana nav vajadzīga: cikla laikā cena tiek izsekota reāllaikā, bet sadaļā Diagnostika pieejamā funkcija Apstrādāt vēsturi pārrēķina vecāku ciklu izmaksas no recorder datiem. Izslēgts = klasiskā darbība, viena cena, kas fiksēta beigās."
+    },
+    "unload_confirm_entity": {
+      "label": "Izkraušanas apstiprinājuma entītija",
+      "doc": "Neobligāta entītija, kuras aktivizēšana nozīmē, ka saturs ir izņemts; paredzēta iekārtām, kurām nevar uzstādīt durvju sensoru. Der jebkura: Zigbee vai NFC poga, input_button palīgrīks, kustību sensors iekārtas priekšā, aina. Par apstiprinājumu tiek uzskatītas visas stāvokļa izmaiņas, izņemot izslēgšanu un kļūšanu nepieejamai. Šīs entītijas iestatīšana ieslēdz izkraušanas atgādinājumu arī ierīcei bez Durvju sensora entītijas."
+    },
+    "unload_track_without_door": {
+      "label": "Apstiprināt izkraušanu manuāli",
+      "doc": "Izmantot izkraušanas atgādinājumu ierīcei, kurai nav ne Durvju sensora entītijas, ne Izkraušanas apstiprinājuma entītijas, un apstiprināt izkraušanu ar savu automatizāciju: nospiediet pogas entītiju „Atzīmēt kā izkrautu“ vai izsauciet pakalpojumu ha_washdata.mark_unloaded. Tiek ignorēts, ja ir iestatīta Durvju sensora entītija, kas šo signālu jau nodrošina."
     }
   },
   "setting_group": {

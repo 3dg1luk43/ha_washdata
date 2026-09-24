@@ -266,8 +266,13 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Unload Reminder', fields: [
       { key: 'notify_unload_delay_minutes', label: 'Unload Nag Delay', unit: 'min', type: 'number', min: 0, def: 60, basic: true,
         doc: 'Minutes after a cycle ends before sending the still-waiting "unload the machine" reminder. Set 0 to disable the reminder.' },
-      { key: 'notify_unload_repeat', label: 'Repeat Until Door Opens', type: 'checkbox',
-        doc: 'Keep re-sending the unload reminder every "Unload Nag Delay" minutes until you open the door or tap "Stop reminding" on the notification. Requires a Door Sensor Entity (the reminder itself does). The dismiss button works on Home Assistant companion-app (mobile) notifications.' },
+      { key: 'notify_unload_repeat', label: 'Repeat Until Unloaded', type: 'checkbox',
+        doc: 'Keep re-sending the unload reminder every "Unload Nag Delay" minutes until the unload is confirmed or you tap "Stop reminding" on the notification. Needs a way to confirm the unload: a Door Sensor Entity, an Unload Confirmation Entity, or the "Confirm Unload Manually" option below. The dismiss button works on Home Assistant companion-app (mobile) notifications.' },
+      { key: 'unload_confirm_entity', label: 'Unload Confirmation Entity', type: 'entity',
+        domains: ['event', 'button', 'input_button', 'binary_sensor', 'sensor', 'input_boolean', 'switch', 'scene', 'tag'],
+        doc: 'Optional entity whose activation means the load has been taken out, for machines that cannot have a door sensor. Any kind works: a Zigbee or NFC button, an input_button helper, a motion sensor in front of the machine, a scene. Every state change counts as a confirmation except switching off and going unavailable. Setting this also enables the unload reminder on a device with no Door Sensor Entity.' },
+      { key: 'unload_track_without_door', label: 'Confirm Unload Manually', type: 'checkbox',
+        doc: 'Run the unload reminder on a device with no Door Sensor Entity and no Unload Confirmation Entity, and confirm the unload from your own automation instead: press the "Mark Unloaded" button entity, or call the ha_washdata.mark_unloaded service. Ignored when a Door Sensor Entity is set, which already provides the signal.' },
       { key: 'pump_stuck_duration', label: 'Pump Stuck Duration', unit: 's', type: 'number', min: 0, def: 1800,
         onlyDeviceType: 'pump', doc: 'Seconds a pump may run continuously before it is flagged as possibly stuck (fires the stuck-pump event).' },
     ] },
@@ -5461,7 +5466,7 @@ class HaWashdataPanel extends HTMLElement {
     else if (f.type === 'select') extra.opts = f.opts || [];
     else if (f.type === 'entity') {
       const states = this._hass && this._hass.states ? this._hass.states : {};
-      const domains = f.domain === 'binary_sensor' ? ['binary_sensor', 'sensor'] : (f.domain ? [f.domain] : null);
+      const domains = Array.isArray(f.domains) ? f.domains : (f.domain === 'binary_sensor' ? ['binary_sensor', 'sensor'] : (f.domain ? [f.domain] : null));
       // `notPrice` drops the plug's own power/energy entities from the Energy Price
       // picker (#439) - they are the entities users reach for, and picking one costs
       // every cycle at the meter reading per kWh. Typing one anyway still validates.

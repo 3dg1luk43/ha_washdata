@@ -225,6 +225,20 @@ CONF_NOTIFY_UNLOAD_MESSAGE = "notify_unload_message"  # Template for the clean-l
 # taps the notification's "stop reminding" action (opt-in, #374).
 CONF_NOTIFY_UNLOAD_REPEAT = "notify_unload_repeat"
 
+# Unload confirmation without a door sensor (#451). Not every machine can have a
+# contact sensor on its door (rented flat, steel door, no approval), and the Clean
+# state - plus the unload reminder that hangs off it - was reachable only through
+# one. Two additions give the same "the load has been taken out" signal:
+#   - an entity whose activation means unloaded (a Zigbee button as event.* /
+#     sensor.*, an input_button helper, a motion sensor, a scene), and
+#   - a plain opt-in for the Mark Unloaded button / ha_washdata.mark_unloaded
+#     service, for a setup that confirms from its own automation.
+# Either one on its own also enables the Clean state on a device with no door
+# sensor; with neither set, behaviour is exactly as before.
+CONF_UNLOAD_CONFIRM_ENTITY = "unload_confirm_entity"
+CONF_UNLOAD_TRACK_WITHOUT_DOOR = "unload_track_without_door"
+DEFAULT_UNLOAD_TRACK_WITHOUT_DOOR = False
+
 # Quiet hours (do-not-disturb window). Both hours 0-23; unset/None (or start==end)
 # = feature off. When configured, finish-type notifications (finish, clean-laundry
 # nag, pre-complete/reminder, milestone) that would fire inside the window are held

@@ -280,6 +280,16 @@
           "description": "The WashData device to retrain models for."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Marcați ca descărcat",
+      "description": "Confirmați că încărcătura terminată a fost scoasă dintr-un dispozitiv WashData, ștergând starea Curat și orice memento de descărcare.",
+      "fields": {
+        "device_id": {
+          "name": "Dispozitiv",
+          "description": "Dispozitivul WashData din care a fost scoasă încărcătura terminată."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Opriți înregistrarea ciclului"
+      },
+      "mark_unloaded": {
+        "name": "Marcați ca descărcat"
       }
     }
   },

@@ -1455,8 +1455,8 @@
       "label": "Purkamismuistutuksen viive"
     },
     "notify_unload_repeat": {
-      "doc": "Lähettää purkamismuistutuksen uudelleen \"Purkamismuistutuksen viive\" minuutin välein, kunnes avaat oven tai napautat ilmoituksen \"Lopeta muistuttaminen\" -painiketta. Vaatii ovianturin entiteetin (kuten itse muistutuskin). Hylkäyspainike toimii Home Assistant -kumppanisovelluksen (mobiili) ilmoituksissa.",
-      "label": "Toista kunnes ovi avautuu"
+      "doc": "Lähettää purkamismuistutuksen uudelleen ”Purkamismuistutuksen viive” minuutin välein, kunnes purkaminen on vahvistettu tai napautat ilmoituksen ”Lopeta muistuttaminen” -painiketta. Vaatii tavan vahvistaa purkaminen: ovianturin entiteetti, purkamisen vahvistusentiteetti tai alla oleva ”Vahvista purkaminen manuaalisesti” -asetus. Hylkäyspainike toimii Home Assistant -kumppanisovelluksen (mobiili) ilmoituksissa.",
+      "label": "Toista kunnes purettu"
     },
     "off_delay": {
       "doc": "Aika odottaa tehon putoamisen jälkeen ennen kuin sykli julistetaan päättyneeksi. Jos virta palaa tämän ikkunan sisällä, jakso jatkuu saumattomasti - tämä siltaa taukoja pesuvaiheiden välillä. Astianpesukoneissa on pitkät kuivausvaiheet (virta pois päältä 20-60 min), joten sammutusviiveen on oltava tätä suurempi, jotta koko pesu+kuivaus pysyy yhtenä jaksona.",
@@ -1664,6 +1664,14 @@
     "energy_price_dynamic": {
       "label": "Aikapainotettu kustannus",
       "doc": "Veloittaa kunkin syklin sillä hinnalla, joka oli voimassa jokaisella sen käyntihetkellä, yhden päättymishetken hinnan sijaan. Koskee vain hintaentiteettiä (kiinteä hinta ei voi muuttua). Ei vaadi lisäasetuksia: hintaa seurataan reaaliaikaisesti syklin käydessä, ja Diagnostiikan alla oleva toiminto Käsittele historia laskee vanhempien syklien kustannukset uudelleen recorderin tiedoista. Pois = perinteinen toiminta, yksi lopussa lukittu hinta."
+    },
+    "unload_confirm_entity": {
+      "label": "Purkamisen vahvistusentiteetti",
+      "doc": "Valinnainen entiteetti, jonka aktivoituminen tarkoittaa, että sisältö on otettu pois; tarkoitettu laitteille, joihin ei saa ovianturia. Mikä tahansa käy: Zigbee- tai NFC-painike, input_button-apuri, laitteen edessä oleva liiketunnistin, tilanne. Vahvistukseksi lasketaan jokainen tilan muutos paitsi sammuminen ja siirtyminen ei saatavissa -tilaan. Tämän asettaminen ottaa purkamismuistutuksen käyttöön myös laitteessa, jolla ei ole ovianturin entiteettiä."
+    },
+    "unload_track_without_door": {
+      "label": "Vahvista purkaminen manuaalisesti",
+      "doc": "Käytä purkamismuistutusta laitteessa, jolla ei ole ovianturin entiteettiä eikä purkamisen vahvistusentiteettiä, ja vahvista purkaminen omalla automaatiollasi: paina ”Merkitse puretuksi” -painike-entiteettiä tai kutsu palvelua ha_washdata.mark_unloaded. Ohitetaan, kun ovianturin entiteetti on asetettu, koska se antaa signaalin jo valmiiksi."
     }
   },
   "setting_group": {

@@ -280,6 +280,16 @@
           "description": "The WashData device to retrain models for."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Mark Unloaded",
+      "description": "Confirm the finished load has been taken out of a WashData device, clearing the Clean state and any unload reminder.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The WashData device whose finished load has been taken out."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Record Cycle Stop"
+      },
+      "mark_unloaded": {
+        "name": "Mark Unloaded"
       }
     }
   },

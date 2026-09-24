@@ -1414,8 +1414,8 @@
             "label": "Vonesë njoftimi për shkarkim"
         },
         "notify_unload_repeat": {
-            "doc": "Ridërgon kujtesën për shkarkim çdo \"Vonesë njoftimi për shkarkim\" minuta, derisa të hapni derën ose të prekni \"Ndalo kujtesat\" në njoftim. Kërkon Entitetin e sensorit të derës (ashtu si edhe vetë kujtesa). Butoni i largimit funksionon në njoftimet e aplikacionit-shoqërues (celular) të Home Assistant.",
-            "label": "Përsërit derisa të hapet dera"
+            "doc": "Ridërgon kujtesën për shkarkim çdo \"Vonesë njoftimi për shkarkim\" minuta, derisa shkarkimi të konfirmohet ose të prekni \"Ndalo kujtesat\" në njoftim. Nevojitet një mënyrë për të konfirmuar shkarkimin: Entiteti i sensorit të derës, Entiteti i konfirmimit të shkarkimit, ose opsioni \"Konfirmo shkarkimin manualisht\" më poshtë. Butoni i largimit funksionon në njoftimet e aplikacionit-shoqërues (celular) të Home Assistant.",
+            "label": "Përsërit derisa të shkarkohet"
         },
         "off_delay": {
             "doc": "Koha për të pritur pasi të bjerë energjia përpara se të deklaroni ciklin të përfunduar. Nëse rryma rifillon brenda kësaj dritareje, cikli vazhdon pa probleme - kjo lidh pauzat midis fazave të larjes. Enëlarëset kanë faza të gjata tharjeje (fikje për 20-60 min), kështu që vonesa e fikjes duhet ta kalojë atë për të mbajtur të gjithë larjen+tharjen si një cikël.",
@@ -1627,6 +1627,14 @@
         "energy_price_dynamic": {
             "label": "Kosto e ponderuar sipas kohës",
             "doc": "Çdo cikël faturohet me çmimin në fuqi në çdo çast që ai punoi, në vend të një çmimi të vetëm në fuqi kur ai përfundoi. Vlen vetëm për një entitet çmimi (një çmim statik nuk ndryshon). Nuk kërkon konfigurim shtesë: çmimi ndiqet drejtpërdrejt ndërsa cikli po punon, kurse veprimi Proceso historinë te Diagnostikimi rillogarit koston e cikleve më të vjetra nga recorder. Joaktiv = sjellja klasike, një çmim i vetëm i ngrirë në fund."
+        },
+        "unload_confirm_entity": {
+            "label": "Entiteti i konfirmimit të shkarkimit",
+            "doc": "Entitet opsional, aktivizimi i të cilit do të thotë se ngarkesa është hequr, për makinat që nuk mund të kenë sensor dere. Funksionon çdo lloj: një buton Zigbee ose NFC, një ndihmës input_button, një sensor lëvizjeje përpara makinës, një skenë. Çdo ndryshim i gjendjes llogaritet si konfirmim, përveç fikjes dhe kalimit në gjendje të padisponueshme. Vendosja e kësaj aktivizon gjithashtu kujtesën për shkarkim në një pajisje pa Entitetin e sensorit të derës."
+        },
+        "unload_track_without_door": {
+            "label": "Konfirmo shkarkimin manualisht",
+            "doc": "Ekzekuto kujtesën për shkarkim në një pajisje pa Entitetin e sensorit të derës dhe pa Entitetin e konfirmimit të shkarkimit, dhe konfirmo shkarkimin nga automatizimi yt: shtyp entitetin buton \"Shëno si të shkarkuar\", ose thirr shërbimin ha_washdata.mark_unloaded. Shpërfillet kur është vendosur një Entitet i sensorit të derës, i cili tashmë e jep këtë sinjal."
         }
     },
     "setting_group": {

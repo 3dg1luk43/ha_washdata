@@ -280,6 +280,16 @@
           "description": "Il dispositivo WashData di cui riaddestrare i modelli."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Segna come scaricato",
+      "description": "Confermare che il carico terminato è stato tolto da un dispositivo WashData, azzerando lo stato Pulito e ogni promemoria di scarico.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "Il dispositivo WashData da cui è stato tolto il carico terminato."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Interrompi registrazione ciclo"
+      },
+      "mark_unloaded": {
+        "name": "Segna come scaricato"
       }
     }
   },

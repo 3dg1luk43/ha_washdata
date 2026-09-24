@@ -1419,8 +1419,8 @@
       "label": "Opóźnienie Przypomnienia o Rozładunku"
     },
     "notify_unload_repeat": {
-      "doc": "Ponownie wysyła przypomnienie o rozładunku co \"Opóźnienie Przypomnienia o Rozładunku\" minut, dopóki nie otworzysz drzwi lub nie dotkniesz \"Przestań przypominać\" w powiadomieniu. Wymaga Encji Czujnika Drzwi (tak jak samo przypomnienie). Przycisk odrzucenia działa w powiadomieniach aplikacji mobilnej Home Assistant (companion app).",
-      "label": "Powtarzaj, aż otworzą się drzwi"
+      "doc": "Ponownie wysyła przypomnienie o rozładunku co „Opóźnienie Przypomnienia o Rozładunku” minut, dopóki rozładunek nie zostanie potwierdzony lub nie dotkniesz „Przestań przypominać” w powiadomieniu. Wymaga sposobu potwierdzenia rozładunku: Encji Czujnika Drzwi, Encji Potwierdzenia Rozładunku albo opcji „Ręczne potwierdzanie rozładunku” poniżej. Przycisk odrzucenia działa w powiadomieniach aplikacji mobilnej Home Assistant (companion app).",
+      "label": "Powtarzaj do rozładowania"
     },
     "off_delay": {
       "doc": "Czas oczekiwania po spadku mocy przed ogłoszeniem zakończenia cyklu. Jeżeli w tym oknie zasilanie zostanie przywrócone, cykl będzie przebiegał płynnie – eliminując przerwy pomiędzy etapami prania. Zmywarki mają długie fazy suszenia (wyłączenie zasilania na 20–60 minut), więc opóźnienie wyłączenia musi być dłuższe, aby całe pranie+suszenie trwało w jednym cyklu.",
@@ -1632,6 +1632,14 @@
     "curve_preroll_seconds": {
       "doc": "Ile sekund odczytów z przerwanych prób startu WashData może dołączyć na początku krzywej cyklu. Krzywa cyklu zwykle zaczyna się od tej próby startu, która ostatecznie się powiodła, więc w maszynie, która próbuje kilka razy, zanim się rozkręci - wybór programu, blokada drzwi, pierwsze napełnianie - w każdej krzywej brakuje pierwszych minut rzeczywistej pracy. Ustaw tę wartość nieco powyżej najdłuższego takiego rozbiegu Twojej maszyny (300 s w zupełności wystarczy w większości przypadków). 0 wyłącza tę funkcję. Pamiętaj, że jej włączenie przesuwa zapisany początek wcześniej, więc cykle zapisane przed zmianą i po niej mają różne czasy trwania dla tego samego programu; wyuczone średnie będą się przesuwać, dopóki starsze cykle nie wypadną z historii.",
       "label": "Wstępny zapis krzywej"
+    },
+    "unload_confirm_entity": {
+      "label": "Encja Potwierdzenia Rozładunku",
+      "doc": "Opcjonalna encja, której aktywacja oznacza, że wsad został wyjęty, dla maszyn, w których nie da się zamontować czujnika drzwi. Działa dowolny rodzaj: przycisk Zigbee lub NFC, pomocnik input_button, czujnik ruchu przed maszyną, scena. Każda zmiana stanu liczy się jako potwierdzenie, z wyjątkiem wyłączenia i przejścia w stan niedostępny. Ustawienie tej opcji włącza też przypomnienie o rozładunku na urządzeniu bez Encji Czujnika Drzwi."
+    },
+    "unload_track_without_door": {
+      "label": "Ręczne potwierdzanie rozładunku",
+      "doc": "Uruchamia przypomnienie o rozładunku na urządzeniu bez Encji Czujnika Drzwi i bez Encji Potwierdzenia Rozładunku, a rozładunek potwierdzasz z własnej automatyzacji: naciśnij encję przycisku „Oznacz jako rozładowane” lub wywołaj usługę ha_washdata.mark_unloaded. Ignorowane, gdy ustawiona jest Encja Czujnika Drzwi, która już dostarcza ten sygnał."
     }
   },
   "setting_group": {

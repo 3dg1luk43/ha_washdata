@@ -1415,8 +1415,8 @@
             "label": "Kirakodási emlékeztető késleltetése"
         },
         "notify_unload_repeat": {
-            "doc": "Újraküldi a kirakodási emlékeztetőt \"Kirakodási emlékeztető késleltetése\" percenként, amíg ki nem nyitja az ajtót, vagy meg nem érinti az \"Emlékeztetés leállítása\" gombot az értesítésen. Ajtóérzékelő entitást igényel (ahogyan maga az emlékeztető is). Az elvetés gomb a Home Assistant kísérőalkalmazás (mobil) értesítésein működik.",
-            "label": "Ismétlés az ajtó kinyitásáig"
+            "doc": "Újraküldi a kirakodási emlékeztetőt „Kirakodási emlékeztető késleltetése” percenként, amíg a kirakodás megerősítést nem kap, vagy meg nem érinti az „Emlékeztetés leállítása” gombot az értesítésen. Szükség van a kirakodás megerősítésének valamilyen módjára: Ajtóérzékelő entitás, Kirakodást megerősítő entitás vagy az alábbi „Kirakodás kézi megerősítése” beállítás. Az elvetés gomb a Home Assistant kísérőalkalmazás (mobil) értesítésein működik.",
+            "label": "Ismétlés kirakodásig"
         },
         "off_delay": {
             "doc": "Várakozási idő a teljesítmény csökkenése után, mielőtt befejezettnek nyilvánítaná a ciklust. Ha az áramellátás ezen az ablakon belül folytatódik, a ciklus zökkenőmentesen folytatódik – ez áthidalja a szüneteket a mosási fázisok között. A mosogatógépek hosszú szárítási fázisokkal rendelkeznek (20-60 percre kikapcsolva), így a kikapcsolási késleltetésnek meg kell haladnia ezt, hogy az egész mosás+szárítás egy ciklusban maradjon.",
@@ -1632,6 +1632,14 @@
         "curve_preroll_seconds": {
             "label": "Görbe előfutama",
             "doc": "Hány másodpercnyi leolvasás kerülhet a megszakadt indítási kísérletekből a ciklus görbéjének elejére. A ciklus görbéje általában azzal az indítási kísérlettel kezdődik, amelyik végül sikerül, ezért egy olyan gépnél, amely néhányszor próbálkozik, mielőtt beállna (programválasztás, ajtózár, első vízbeeresztés), minden görbéből hiányzik a tényleges működés első néhány perce. Állítsa ezt az értéket kicsivel a gépénél előforduló leghosszabb ilyen nekifutás fölé (300 mp a legtöbb géphez bőven elég). A 0 kikapcsolja. Vegye figyelembe, hogy bekapcsolva a rögzített kezdés korábbra kerül, így a változtatás előtt és után rögzített ciklusok ugyanahhoz a programhoz eltérő időtartamot hordoznak; a megtanult átlagok addig csúsznak el, amíg a régebbi ciklusok ki nem esnek."
+        },
+        "unload_confirm_entity": {
+            "label": "Kirakodást megerősítő entitás",
+            "doc": "Opcionális entitás, amelynek aktiválása azt jelenti, hogy az adagot kivették, olyan gépekhez, amelyekre nem szerelhető ajtóérzékelő. Bármilyen típus megfelel: Zigbee vagy NFC gomb, input_button segéd, a gép előtti mozgásérzékelő, jelenet. Minden állapotváltozás megerősítésnek számít, kivéve a kikapcsolást és az elérhetetlenné válást. Ennek beállítása bekapcsolja a kirakodási emlékeztetőt olyan eszközön is, amelyhez nincs Ajtóérzékelő entitás."
+        },
+        "unload_track_without_door": {
+            "label": "Kirakodás kézi megerősítése",
+            "doc": "Futtatja a kirakodási emlékeztetőt olyan eszközön, amelyhez nincs Ajtóérzékelő entitás és nincs Kirakodást megerősítő entitás, a kirakodást pedig saját automatizálásból erősíti meg: nyomja meg a „Megjelölés kirakodottként” gombentitást, vagy hívja meg a ha_washdata.mark_unloaded szolgáltatást. Figyelmen kívül marad, ha be van állítva Ajtóérzékelő entitás, mert az már megadja ezt a jelzést."
         }
     },
     "setting_group": {
