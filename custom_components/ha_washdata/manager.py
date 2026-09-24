@@ -2362,6 +2362,23 @@ class WashDataManager:
         except Exception:
             pass
 
+        # Re-scope custom phases stranded under another device type (#450). Cheap,
+        # idempotent and saves only on a change, so it runs on every setup rather
+        # than behind a one-shot marker: a reconfigure that changes device_type
+        # would otherwise strand the phases all over again.
+        try:
+            rescoped = await self.profile_store.async_repair_custom_phase_scope(
+                self.device_type
+            )
+            if rescoped:
+                self._logger.info(
+                    "Re-scoped %d custom phase(s) that were stored under another "
+                    "device type and could not be shown, edited or deleted.",
+                    rescoped,
+                )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.exception("Failed re-scoping custom phases for %s", self.entry_id)
+
         # Repair broken sample_cycle_id references (can happen after aggressive retention)
         try:
             stats = await self.profile_store.async_repair_profile_samples()
@@ -4182,15 +4199,26 @@ class WashDataManager:
                 _ka_w, _ka_obs = self._keepalive_reading()
                 self._logger.debug(
                     "Anti-wrinkle keepalive: sensor silent for %.0fs (> off_delay %ss), "
-                    "injecting synthetic %.2fW (observed=%s) so the idle/2h-cap timer "
-                    "can advance",
+                    "injecting 0 W (sensor last read %.2fW, observed=%s) so the "
+                    "idle/2h-cap timer can advance",
                     (now - last_real).total_seconds(),
                     self._off_delay,
                     _ka_w,
                     _ka_obs,
                 )
+                # 0 W here, NOT the sensor's last value - deliberately different
+                # from the two watchdog sites. This keepalive's whole contract is
+                # "silence means idle": the detector only advances
+                # `_anti_wrinkle_idle_time` while `power < effective_exit`
+                # (`cycle_detector.py:1499`), so injecting a stale tumble pulse
+                # freezes the timer this call exists to advance - and can start a
+                # new-cycle burst candidate on top. The round-11 argument for
+                # carrying the real value does not reach here either: appends to
+                # `_power_readings` happen in STARTING / RUNNING / PAUSED /
+                # ENDING only, so nothing from this site enters the stored trace
+                # and there is no fabricated sample to worry about.
                 self.detector.process_reading(
-                    _ka_w, now, synthetic=True, observed=_ka_obs
+                    0.0, now, synthetic=True, observed=_ka_obs
                 )
                 self._notify_update()
             return

@@ -1464,7 +1464,12 @@ def ws_get_devices(
             # and the branch is skipped for a manager-less entry (mid-setup, stale,
             # or a setup that failed) as well as short-circuited by its own except.
             "envelope_position": None,
-            "options": dict(entry.options),
+            # Merged data+options, matching ``ws_get_options`` and the
+            # options-first resolution in WashDataManager (#450). An entry added
+            # after its last schema migration carries the structural keys in
+            # ``entry.data`` only, so serving bare options handed the panel a
+            # device_type fallback that did not match the running manager.
+            "options": {**entry.data, **entry.options, CONF_NAME: entry.title},
             # Device-resolved defaults for the cadence/ratio fields (#396/#393) so the
             # device-list conflict/suggestion badges score an unset field against the
             # value the integration would actually use, matching the Settings tab.
@@ -1912,26 +1917,18 @@ async def ws_set_options(
         # the post-normalization values, but only for keys the user actually
         # submitted, and persist BEFORE async_update_entry (which schedules a reload
         # that rebuilds the store). A changelog failure must never block the save.
-        try:
-            old_effective = {**entry.data, **entry.options}
-            # Keys dropped by the null-strip above are recorded as a change to None
-            # ("reverted to unset") so the history still shows what happened; a
-            # None -> None no-op is skipped by _diff_option_changes.
-            submitted_post = {
-                k: new_options.get(k)
-                for k in msg["options"]
-                if k in new_options or k in dropped_null_keys
-            }
-            changes = _diff_option_changes(old_effective, submitted_post)
-            if changes:
-                manager = _get_manager(hass, msg["entry_id"])
-                store = getattr(manager, "profile_store", None) if manager else None
-                if store is not None:
-                    await store.async_record_settings_changes(changes)
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug(
-                "Settings changelog recording failed for %s: %s", msg["entry_id"], exc
-            )
+        # Through the shared helper, not a second copy of it. The per-setting
+        # Revert trusts this history, so the two writers have to follow one
+        # contract - and `_record_option_changes`'s own docstring already says it
+        # replaces the inline version that used to live here. Keys dropped by the
+        # null-strip above are still recorded as a change to None ("reverted to
+        # unset"); a None -> None no-op is skipped inside `_diff_option_changes`.
+        submitted_post = {
+            k: new_options.get(k)
+            for k in msg["options"]
+            if k in new_options or k in dropped_null_keys
+        }
+        await _record_option_changes(hass, entry, submitted_post, "set_options")
 
         # When online features are disabled, clear the persisted store account so the
         # user's identity isn't silently retained after they opt out.
@@ -2880,7 +2877,10 @@ def ws_get_phase_catalog(
     {
         vol.Required("type"): "ha_washdata/create_phase",
         vol.Required("entry_id"): str,
-        vol.Required("device_type"): str,
+        # Optional since #450: an omitted or empty device_type resolves to
+        # ``manager.device_type``, the exact value ``ws_get_phase_catalog``
+        # lists against, so create and list can never disagree about scope.
+        vol.Optional("device_type", default=""): str,
         vol.Required("name"): str,
         vol.Optional("description", default=""): str,
     }
@@ -2898,9 +2898,17 @@ async def ws_create_phase(
         _err_not_found(connection, msg["id"], entry_id)
         return
 
+    # #450: a panel served by an entry whose device_type lives only in
+    # ``entry.data`` used to send the ``'washing_machine'`` fallback here, so the
+    # phase was stored under a scope the catalog never lists - invisible, yet
+    # still tripping the duplicate check on the next attempt.
+    device_type = str(msg.get("device_type") or "").strip() or getattr(
+        manager, "device_type", ""
+    )
+
     try:
         await manager.profile_store.async_create_custom_phase(
-            msg["device_type"], msg["name"], msg.get("description", "")
+            device_type, msg["name"], msg.get("description", "")
         )
         _send_result(connection, msg["id"], "create_phase", {"success": True})
     except ValueError as exc:

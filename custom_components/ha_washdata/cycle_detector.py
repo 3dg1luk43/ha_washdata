@@ -1207,19 +1207,20 @@ class CycleDetector:
         accumulators. What it does change is the two places that reason about what
         the SENSOR did (#424):
 
-        ``observed=False`` additionally says the sensor state could NOT be read
-        when this keepalive was injected (unavailable / unknown / non-finite), so
-        the interval it closes is a genuine outage and must reset the gap-free
-        quiet tally like any other hole.
-
         * ``_update_cadence`` is skipped. The cadence estimate feeds
           ``_gate_cadence`` and therefore the pause/end gates, so training it on
           our own injections makes those gates a function of how often we inject -
           see the note on ``_gate_cadence``.
-        * the gap-free tally treats the interval as observed. The watchdog
-          re-anchors on the sensor's live state (``_resync_power_from_state``)
-          before it injects, so a keepalive is by construction a moment we looked
-          rather than a hole in the record.
+        * **with ``observed=True``**, the gap-free tally treats the interval as
+          observed, because the watchdog re-anchored on the sensor's live state
+          (``_resync_power_from_state``) before injecting - so the keepalive is a
+          moment we looked rather than a hole in the record.
+
+        ``observed=False`` says the sensor state could NOT be read when this
+        keepalive was injected (unavailable / unknown / non-finite). The second
+        bullet is then false: the interval it closes is a genuine outage, and the
+        gap-free tally is reset like any other hole - at ANY step size, since the
+        watchdog injects far more often than the outage ceiling.
 
         (The `_keep_tail_cap` use this flag was originally added for, register
         item 238, was implemented, measured and reverted: after
