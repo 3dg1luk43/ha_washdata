@@ -714,3 +714,34 @@ def test_a_contributed_appliance_is_saved_to_the_device_that_asked_for_it():
     listener = listener[: listener.index("washdata-connect")]
     assert listener.count("_storeContribEid") == 2
     assert listener.count("_isActiveEntry") == 2
+
+
+# --------------------------------------------------------------------------
+# manager: the banked-tail repair raced the rest of async_setup (round 16)
+# --------------------------------------------------------------------------
+def test_the_banked_tail_repair_is_spawned_after_setup_rewrites_the_cycles():
+    """Its cycle loop takes no awaits, but the envelope rebuild after it does.
+
+    Every await hands the loop back to the rest of ``async_setup``, which rewrites
+    the very cycles the repair is rebuilding from:
+    ``async_repair_profile_samples`` can drop a profile or re-point its sample,
+    and ``async_migrate_cycles_to_compressed`` replaces ``power_data`` wholesale.
+    Spawning last also means the legacy ISO-offset traces that migration converts
+    are trimmable by the time the repair sees them. Asserted on source order
+    because the race needs a fully built manager and real executor timing.
+    """
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "manager.py"
+    ).read_text()
+    spawn = src.index("self._spawn_tracked(self._async_repair_banked_tails())")
+    for later in (
+        "await self.profile_store.async_repair_profile_samples()",
+        "await self.profile_store.async_migrate_cycles_to_compressed()",
+        "await self._setup_maintenance_scheduler()",
+    ):
+        assert src.index(later) < spawn, f"{later} must run before the repair spawns"

@@ -5887,7 +5887,35 @@ class ProfileStore:
                 # `CycleDetector._finish_cycle`: the trace covers the duration.
                 last_off = _safe_offset(kept[-1][0])
                 if last_off is not None and last_off < float(new_duration) - 1e-6:
-                    kept.append([round(float(new_duration), 1), kept[-1][1]])
+                    # The terminal point must not carry ACTIVE power. When no raw
+                    # sample falls between the last active sample and
+                    # `new_duration` - a change-only plug reporting the drop late,
+                    # which is the very population this repair exists for -
+                    # `kept[-1]` IS that active sample, and copying its power makes
+                    # interpolation read the whole drying allowance (up to
+                    # TERMINAL_QUIET_CAP_S) as full draw. That lands in `signature`
+                    # below, in the rebuilt envelope, and in every conformance and
+                    # artifact check taken against it. `last_active` is the LAST
+                    # sample above `stop_threshold_w`, so every raw sample past
+                    # `new_duration` is quiet by construction: the first of them is
+                    # a real observation of the level this point should carry. Fall
+                    # back to `kept[-1]` only when the trace ends here.
+                    terminal_p = kept[-1][1]
+                    for pt in raw:
+                        if not (isinstance(pt, (list, tuple)) and len(pt) >= 2):
+                            continue
+                        off = _safe_offset(pt[0])
+                        if off is None or off <= float(new_duration) + 1e-6:
+                            continue
+                        # `_safe_offset` is a finite-float coercion, and this row
+                        # was only ever vetted on its offset: a hand-edited power
+                        # must not replace a usable fallback, nor reach the signature
+                        # recompute below and abort the whole repair.
+                        quiet_p = _safe_offset(pt[1])
+                        if quiet_p is not None:
+                            terminal_p = quiet_p
+                        break
+                    kept.append([round(float(new_duration), 1), terminal_p])
                 cycle["power_data"] = kept
                 # The signature is derived from the trace, so it has to be rebuilt
                 # from the kept samples - exactly as the sibling trim and the merge

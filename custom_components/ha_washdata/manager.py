@@ -2297,23 +2297,6 @@ class WashDataManager:
     async def async_setup(self) -> None:
         """Set up the manager."""
         await self.profile_store.async_load()
-        # One-time repair of cycles that banked Smart Termination's confirmation
-        # delay as cycle time (register item 297). Flagged by the v12->v13 storage
-        # migration and done here rather than in the migration itself, because
-        # deciding where a cycle's real activity ended needs stop_threshold_w and
-        # that lives in entry.options. Idempotent, marked done in the store, and it
-        # never raises - a failed repair leaves the history untouched.
-        # `is True` rather than a truthiness check: the flag is written as a real
-        # bool by the migration, so anything else here is a stub or a hand-edited
-        # store and must not trigger a rewrite of the user's history.
-        if self.profile_store.banked_tail_repair_pending() is True:
-            # Backgrounded, not awaited. It walks up to 200 stored traces and
-            # rebuilds envelopes, and anything awaited inside async_setup is billed
-            # to the integration's reported startup time (register item 158 / #408).
-            # Nothing needs it before the first cycle ends. Tracked, because it
-            # writes to the ProfileStore: an untracked task would keep writing to
-            # the store a reload had already swapped out.
-            self._spawn_tracked(self._async_repair_banked_tails())
         try:
             _trans = await translation.async_get_translations(
                 self.hass, self.hass.config.language, "options", {DOMAIN}
@@ -2488,6 +2471,35 @@ class WashDataManager:
         # survive HA restarts without requiring the user to re-save settings.
         await self._setup_maintenance_scheduler()
         self._setup_ml_training_scheduler()
+
+        # One-time repair of cycles that banked Smart Termination's confirmation
+        # delay as cycle time (register item 297). Flagged by the v12->v13 storage
+        # migration and done here rather than in the migration itself, because
+        # deciding where a cycle's real activity ended needs stop_threshold_w and
+        # that lives in entry.options. Idempotent, marked done in the store, and it
+        # never raises - a failed repair leaves the history untouched.
+        # `is True` rather than a truthiness check: the flag is written as a real
+        # bool by the migration, so anything else here is a stub or a hand-edited
+        # store and must not trigger a rewrite of the user's history.
+        #
+        # LAST in async_setup, deliberately. The repair's own cycle loop takes no
+        # awaits, but it then awaits an envelope rebuild per touched profile, and
+        # every await hands the loop back to the rest of setup - which rewrites the
+        # very cycles it is rebuilding from. `async_repair_profile_samples` can
+        # drop a profile or re-point its sample, and
+        # `async_migrate_cycles_to_compressed` replaces `power_data` wholesale.
+        # Running last also means those legacy ISO-offset traces are already
+        # converted and therefore trimmable: started earlier, such a cycle gets its
+        # duration corrected and its trace left as it was, because `_safe_offset`
+        # rejects an ISO string and `kept` comes back empty.
+        if self.profile_store.banked_tail_repair_pending() is True:
+            # Backgrounded, not awaited. It walks up to 200 stored traces and
+            # rebuilds envelopes, and anything awaited inside async_setup is billed
+            # to the integration's reported startup time (register item 158 / #408).
+            # Nothing needs it before the first cycle ends. Tracked, because it
+            # writes to the ProfileStore: an untracked task would keep writing to
+            # the store a reload had already swapped out.
+            self._spawn_tracked(self._async_repair_banked_tails())
 
     def _load_notify_services(self, config_entry: ConfigEntry) -> None:
         """Load notification service lists, migrating legacy single-service config."""
@@ -4185,8 +4197,9 @@ class WashDataManager:
         # one final 0 W reading and then go fully silent, so with no further events
         # the mode is pinned in ANTI_WRINKLE for hours. This timer keeps ticking, so
         # when the real sensor has been silent longer than off_delay we inject a
-        # synthetic reading carrying the sensor's own last value, letting the
-        # detector's own logic exit the mode. Gate
+        # synthetic 0 W reading, letting the detector's own logic exit the mode.
+        # 0 W and NOT the sensor's last value - unlike the two watchdog sites;
+        # the block comment at the injection site below has the reason. Gate
         # on _last_real_reading_time (a genuine tumble pulse still resets the idle
         # timer via the normal handler) and never bump it here, so real silence stays
         # detectable and a still-reporting plug drives itself.
