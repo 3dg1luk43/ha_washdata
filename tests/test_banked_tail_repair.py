@@ -593,3 +593,41 @@ async def test_a_cycle_that_ends_in_drying_still_gets_its_allowance() -> None:
     assert res["repaired"] == 1
     # last activity 2970 + 600 measured drying.
     assert float(data["past_cycles"][0]["duration"]) == pytest.approx(3570.0, abs=31.0)
+
+
+@pytest.mark.asyncio
+async def test_the_terminal_point_never_carries_active_power() -> None:
+    """Found in the PR #448 round-16 review.
+
+    The drying allowance pushes `new_duration` past the last ACTIVE sample. If
+    the plug reports the drop LATE - nothing at all between the last activity and
+    `new_duration` - then `kept[-1]` is that active sample, and copying its power
+    into the appended terminal point makes interpolation read the entire drying
+    span as full draw. That goes straight into the recomputed signature, the
+    rebuilt envelope, and every conformance/artifact check taken against it.
+    """
+    pts = [[float(t), 100.0] for t in range(0, 3000, 30)]
+    pts.append([5000.0, 0.0])  # the drop, reported well after new_duration
+    cyc = {
+        "id": "a", "profile_name": "Eco", "start_time": T0.isoformat(),
+        "duration": 6000.0, "termination_reason": "smart",
+        "sampling_interval": 30.0, "power_data": pts,
+    }
+    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+    st.profile_terminal_quiet_seconds = lambda _n: 600.0  # type: ignore[assignment]
+
+    res = await st.async_repair_banked_tails(2.0, "dishwasher")
+
+    assert res["repaired"] == 1
+    out = data["past_cycles"][0]
+    # last activity 2970 + the 600 s measured drying.
+    assert float(out["duration"]) == pytest.approx(3570.0, abs=31.0)
+    terminal = out["power_data"][-1]
+    assert float(terminal[0]) == pytest.approx(3570.0, abs=31.0)
+    assert float(terminal[1]) == pytest.approx(0.0), (
+        "the terminal point took the last ACTIVE sample's power, so the whole "
+        "drying phase now interpolates as full draw"
+    )
+    # ...and the signature rebuilt from that trace agrees.
+    assert float(out["signature"]["total_energy"]) < 100.0
