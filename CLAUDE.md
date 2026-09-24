@@ -91,6 +91,22 @@ a real `hass` to work at all - notification-action templates only become `Templa
 `cv.SCRIPT_SCHEMA`, whose `cv.template` resolves the running instance through `async_get_hass()`,
 so under a MagicMock the conversion cannot happen and the bug is unreachable (item 323).
 
+**If a change is worth the slow suite, ask whether it is also worth the box - and if it is, run it
+before pushing.** Not every change: the box is minutes, not seconds, and running it on pure maths or
+a panel string is waste. Run it when the change touches something only a real Home Assistant can
+reject or sequence, which is where "all green, still broken" comes from:
+
+- `async_setup` / `async_unload_entry` / `async_migrate_entry` ordering, or anything spawned from
+  them. Under a MagicMock every coroutine is fast and nothing else is competing for the loop.
+- A service call, notification payload, or entity attribute - anything HA validates against a schema
+  (item 316) or that needs `async_get_hass()` (item 323).
+- Config-flow steps, storage migration against a real `Store`, WS API handlers, entity wiring.
+- Anything whose failure mode is "the integration still loads, it just does nothing".
+
+`smoke.sh` (~12 min) is the default choice; `check_notify_actions.sh` (~1 min) when the change is
+only in the notification-action path. Say in the commit or the report that the box ran and what it
+proved - a slow-suite pass alone is not evidence about any of the above.
+
 ### Generated files - never hand-edit, always regenerate
 
 | File | Generator | Gate |
