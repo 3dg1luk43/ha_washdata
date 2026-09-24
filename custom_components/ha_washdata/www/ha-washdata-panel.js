@@ -4033,12 +4033,29 @@ class HaWashdataPanel extends HTMLElement {
   // `sel|i/n` rather than `sel`: several elements can match one selector (tables), and
   // folding the match count into the key means a list that grew or shrank between
   // renders simply misses instead of applying row 3's offset to a different table.
+  // Keys are index-based, so a scroller INSIDE a dialog has to be keyed apart
+  // from the page ones or the index shifts as dialogs open and close. It also
+  // has to be recognisable as modal-scoped, because _render drops the modal's
+  // keys when the dialog or its tab changes (see _modalNavKey): filtering only
+  // '.wd-modal|' missed '.wd-table-wrap' and '.wd-sd-tree', so the Cleanup
+  // table, the history-import review table and the export-select /
+  // import-wizard / store-share-device trees all carried one offset between
+  // different dialogs - scroll the export tree, close it, open the import
+  // wizard, and it opens part-way down.
+  _MODAL_KEY_PREFIX = 'modal:';
+
   _eachScroller(sels, fn) {
     const sr = this.shadowRoot;
     if (!sr) return;
     for (const sel of sels) {
-      const els = sr.querySelectorAll(sel);
-      els.forEach((el, i) => fn(el, `${sel}|${i}/${els.length}`));
+      const els = Array.from(sr.querySelectorAll(sel));
+      // '.wd-modal' is the dialog itself, not something nested in one.
+      const nested = el => sel !== '.wd-modal' && !!el.closest('.wd-modal');
+      for (const scoped of [false, true]) {
+        const group = els.filter(el => nested(el) === scoped);
+        const prefix = scoped ? this._MODAL_KEY_PREFIX : '';
+        group.forEach((el, i) => fn(el, `${prefix}${sel}|${i}/${group.length}`));
+      }
     }
   }
 
@@ -4153,7 +4170,9 @@ class HaWashdataPanel extends HTMLElement {
       && scrollBefore
     ) {
       scrollBefore = Object.fromEntries(
-        Object.entries(scrollBefore).filter(([k]) => !k.startsWith('.wd-modal|')),
+        Object.entries(scrollBefore).filter(
+          ([k]) => !k.startsWith('.wd-modal|') && !k.startsWith(this._MODAL_KEY_PREFIX),
+        ),
       );
     }
     this._scrollModalKey = modalKey;
@@ -8876,7 +8895,16 @@ class HaWashdataPanel extends HTMLElement {
         this._dropModelCandidates();
         this._catalogEntry = null;
         this._showToast(this._t('toast.appliance_added', {}, 'Appliance added - awaiting approval'));
-        if (Object.keys(patch).length) await this._saveStoreOptions(patch, { silent: true });
+        // Persist only if the device that OPENED the popup is still selected.
+        // The popup is user-paced, so the selection can move while it is open,
+        // and _saveStoreOptions targets whatever is selected NOW - which would
+        // stamp this appliance identity onto another entry and reload it, while
+        // the device that asked for it gets nothing. Before these became real
+        // saves the wrong-device case could not persist anything.
+        const _contribEid = this._storeContribEid || eid;
+        if (Object.keys(patch).length && this._isActiveEntry(_contribEid)) {
+          await this._saveStoreOptions(patch, { silent: true });
+        }
         this._render();
         return;
       }
@@ -8886,7 +8914,10 @@ class HaWashdataPanel extends HTMLElement {
         this._dropModelCandidates();
         this._catalogEntry = null;         // and re-resolve the badge for the new brand
         this._showToast(this._t('toast.brand_added', {}, 'Brand added - awaiting approval'));
-        if (d.brand) await this._saveStoreOptions({ store_brand: d.brand }, { silent: true });
+        // Same entry guard as washdata-device-created above.
+        if (d.brand && this._isActiveEntry(this._storeContribEid || eid)) {
+          await this._saveStoreOptions({ store_brand: d.brand }, { silent: true });
+        }
         this._render();
         return;
       }
@@ -12883,6 +12914,12 @@ class HaWashdataPanel extends HTMLElement {
         brand: (brandEl && brandEl.value) || this._opts.store_brand || '',
         model: (modelEl && modelEl.value) || this._opts.store_model || '', origin: location.origin,
       }).toString();
+      // Remember WHICH device asked. The popup is user-paced, so the panel's
+      // selection can change while it is open - and since these contributions
+      // became real saves via _saveStoreOptions, returning to a different
+      // device would write this appliance identity onto that entry and reload
+      // it, while the device that asked never gets it.
+      this._storeContribEid = eid;
       window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');
 
     } else if (a === 'store-add-brand') {
@@ -12893,6 +12930,7 @@ class HaWashdataPanel extends HTMLElement {
       const q = new URLSearchParams({
         mode: 'brand', brand: (brandEl && brandEl.value) || this._opts.store_brand || '', origin: location.origin,
       }).toString();
+      this._storeContribEid = eid;  // see store-add-appliance
       window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');
 
     } else if (a === 'store-confirm-device') {
