@@ -10,8 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### TL;DR
 
 - Cycles end much closer to when the appliance actually does.
-- Better program matching, and auto-labels only on a clear winner.
-- No mid-wash program swap on one strong-looking reading.
+- Better program matching: auto-labels only on a clear winner, and no mid-wash swap on one strong reading.
 - Cycles stored at their real length; existing history corrected once.
 - An appliance idling above its Stop Threshold closes in minutes, and is flagged.
 - Saner Off Delay suggestions, and the real end wait shown in Settings.
@@ -19,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notification actions render their variables; brand and model are saved.
 - Imports keep your own power sensor and are revertible per setting.
 - Cycle graphs line up, and the false out-of-band markers are gone.
+- A phase you create shows up in the list instead of vanishing.
 - The panel stays where you scrolled it, even while a cycle runs.
 
 ### Fixes
@@ -66,6 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **The panel stays where you scrolled it, including while a cycle is running** ([#449](https://github.com/3dg1luk43/ha_washdata/issues/449)): The Overview refreshes itself every few seconds while an appliance is running, and each refresh threw the page back to the top, so the lower half of it could not be read at all. The main fix shipped with #443 below; this is the rest of it. Four things it did not reach: the tab strip (which scrolls sideways on a narrow screen, so the later tabs were pushed back out of view every few seconds), both log views, and any tab that shows its loading spinner - the spinner is a few dozen pixels tall, so the position was measured against it and lost a moment before the real content came back. And because that loss was accidental rather than intended, switching to a sub-section landed at neither the top nor where you were, but wherever the half-built page happened to allow. There is now one rule: changing appliance, tab, sub-tab or settings section takes you to the top, and nothing else moves you. Thanks to @jurgen2005 for the report.
 
 - **The panel stays where you scrolled it** ([#443](https://github.com/3dg1luk43/ha_washdata/issues/443)): Changing any Playground setting jumped back to the top of the page, even for a control at the very bottom. The panel rebuilds its content on each change and the scroll position was lost with it. It is now preserved, along with the position inside an open dialog. Thanks to @Aaroneisele55 for the screen recording.
+
+- **A phase you create shows up in the list** ([#450](https://github.com/3dg1luk43/ha_washdata/issues/450)): The reporter added a phase to their dishwasher, it vanished from the list, and creating it again reported the name as a duplicate. Phases are stored per appliance type, and the panel was reading that type from the wrong place: it looks only at the settings you have changed, but for a device added recently the type is still recorded where it was first set and nothing has overwritten it, so the panel fell back to "washing machine" and filed the phase there. The catalogue then listed dishwasher phases and left it out, while the duplicate check still found it. The panel now gets the real appliance type, and the phase is filed against the device it was created on regardless of what the panel sends, so the two can no longer disagree. Phases already stranded this way are re-filed on the next restart, which makes them visible, editable and deletable again. Only devices added since their last upgrade were affected, which is why this took until now to surface. Thanks to @myxor for the report.
 
 - **Profile card titles are readable on light themes** ([#444](https://github.com/3dg1luk43/ha_washdata/issues/444)): On a light theme the titles on the Profiles tab were near-white and invisible, while everything else on the same card rendered correctly. Those cards are buttons, and their text colour was falling back to the browser's own default instead of the theme's, which shows up when Home Assistant serves a light theme to a device in dark mode. They now follow the theme. Thanks to @Vize2012 for the screenshots.
 

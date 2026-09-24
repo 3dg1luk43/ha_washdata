@@ -3935,6 +3935,35 @@ class ProfileStore:
         self._data["custom_phases"] = flattened
         return self._data["custom_phases"]
 
+    async def async_repair_custom_phase_scope(self, device_type: str) -> int:
+        """Re-scope custom phases stored under a device type this entry is not.
+
+        Each entry owns its own store file, so every custom phase in it was
+        created by (or imported into) this one device. A phase carrying some
+        OTHER concrete device type is therefore unreachable: ``list_custom_phases``
+        filters it out of every catalog this entry can ask for, so it renders
+        nowhere and cannot be edited or deleted - yet ``async_create_custom_phase``
+        still refuses the name as a duplicate (#450).
+
+        An empty ``device_type`` means "applies to every device" and is left
+        alone. Returns the number of phases re-scoped; idempotent, and saves only
+        when something actually changed.
+        """
+        target = str(device_type or "").strip()
+        if not target:
+            return 0
+
+        repaired = 0
+        for phase in self._get_shared_custom_phases():
+            current = str(phase.get("device_type", "")).strip()
+            if current and current != target:
+                phase["device_type"] = target
+                repaired += 1
+
+        if repaired:
+            await self.async_save()
+        return repaired
+
     def list_custom_phases(self, device_type: str) -> list[dict[str, Any]]:
         """Return shared custom phases relevant to the requested device type."""
 
