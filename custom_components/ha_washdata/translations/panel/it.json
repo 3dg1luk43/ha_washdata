@@ -1402,8 +1402,8 @@
       "label": "Ritardo promemoria scarico"
     },
     "notify_unload_repeat": {
-      "doc": "Continua a inviare il promemoria di scarico ogni \"Ritardo promemoria scarico\" minuti finché non apri la porta o tocchi \"Interrompi promemoria\" nella notifica. Richiede un'Entità sensore porta (il promemoria stesso la richiede). Il pulsante di chiusura funziona sulle notifiche dell'app complementare (mobile) di Home Assistant.",
-      "label": "Ripeti finché la porta non si apre"
+      "doc": "Continua a inviare il promemoria di scarico ogni \"Ritardo promemoria scarico\" minuti finché lo scarico non viene confermato o non tocchi \"Interrompi promemoria\" nella notifica. Richiede un modo per confermare lo scarico: un'Entità sensore porta, un'Entità di conferma scarico o l'opzione \"Conferma scarico manualmente\" qui sotto. Il pulsante di chiusura funziona sulle notifiche dell'app complementare (mobile) di Home Assistant.",
+      "label": "Ripeti fino alla conferma di scarico"
     },
     "off_delay": {
       "doc": "È tempo di attendere dopo l'interruzione della corrente prima di dichiarare terminato il ciclo. Se l'alimentazione viene ripristinata entro questo intervallo, il ciclo continua senza interruzioni, consentendo di colmare le pause tra le fasi di lavaggio. Le lavastoviglie hanno fasi di asciugatura lunghe (spegnimento per 20-60 minuti), quindi il ritardo di spegnimento deve superare quello per mantenere l'intero ciclo di lavaggio+asciugatura come un ciclo.",
@@ -1611,6 +1611,14 @@
     "energy_price_dynamic": {
       "label": "Costo ponderato nel tempo",
       "doc": "Addebita ogni ciclo al prezzo in vigore in ogni momento in cui è stato eseguito, invece dell'unico prezzo valido al termine. Vale solo per un'entità di prezzo (un prezzo statico non può variare). Non serve alcuna configurazione aggiuntiva: il prezzo viene seguito in tempo reale mentre il ciclo è in corso, e Elabora storico, in Diagnostica, ricalcola il costo dei cicli più vecchi a partire dal recorder. Disattivato = il comportamento classico, un unico prezzo fissato alla fine."
+    },
+    "unload_confirm_entity": {
+      "label": "Entità di conferma scarico",
+      "doc": "Entità facoltativa la cui attivazione indica che il carico è stato tolto, per le macchine che non possono avere un sensore porta. Va bene qualsiasi tipo: un pulsante Zigbee o NFC, un helper input_button, un sensore di movimento davanti alla macchina, una scena. Ogni cambio di stato conta come conferma, tranne lo spegnimento e il passaggio a non disponibile. Impostarla abilita anche il promemoria di scarico su un dispositivo senza Entità sensore porta."
+    },
+    "unload_track_without_door": {
+      "label": "Conferma scarico manualmente",
+      "doc": "Esegue il promemoria di scarico su un dispositivo senza Entità sensore porta e senza Entità di conferma scarico, e lo scarico lo confermi tu dalla tua automazione: premi l'entità pulsante \"Segna come scaricato\" oppure chiama il servizio ha_washdata.mark_unloaded. Ignorato quando è impostata un'Entità sensore porta, che fornisce già il segnale."
     }
   },
   "setting_group": {

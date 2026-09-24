@@ -1455,8 +1455,8 @@
       "label": "Forsinkelse for aflæsningspåmindelse"
     },
     "notify_unload_repeat": {
-      "doc": "Bliv ved med at gensende aflæsningspåmindelsen hvert \"Forsinkelse for aflæsningspåmindelse\" minutter, indtil du åbner døren eller trykker på \"Stop påmindelser\" i notifikationen. Kræver en Dørsensorenhed (det gør selve påmindelsen). Knappen til at afvise virker på notifikationer fra Home Assistant companion-appen (mobil).",
-      "label": "Gentag indtil døren åbnes"
+      "doc": "Bliv ved med at gensende aflæsningspåmindelsen hvert \"Forsinkelse for aflæsningspåmindelse\" minutter, indtil aflæsningen er bekræftet, eller du trykker på \"Stop påmindelser\" i notifikationen. Kræver en måde at bekræfte aflæsningen på: en Dørsensorenhed, en Aflæsningsbekræftelsesenhed eller indstillingen \"Bekræft aflæsning manuelt\" nedenfor. Knappen til at afvise virker på notifikationer fra Home Assistant companion-appen (mobil).",
+      "label": "Gentag indtil aflæsset"
     },
     "off_delay": {
       "doc": "Tid til at vente efter strømfald, før cyklussen erklæres afsluttet. Hvis strømmen genoptages inden for dette vindue, fortsætter cyklussen problemfrit - dette slår bro mellem pauser mellem vasketrinene. Opvaskemaskiner har lange tørrefaser (strøm fra i 20-60 min), så slukningsforsinkelsen skal overstige det for at holde hele vask+tør som én cyklus.",
@@ -1664,6 +1664,14 @@
     "energy_price_dynamic": {
       "label": "Tidsvægtede omkostninger",
       "doc": "Beregn hver cyklus til den pris, der gjaldt i hvert øjeblik, den kørte, i stedet for den ene pris, der gjaldt, da den sluttede. Gælder kun for en prisenhed (en statisk pris kan ikke ændre sig). Kræver ingen ekstra opsætning: prisen følges live, mens cyklussen kører, og \"Behandl historik\" under Diagnostik genberegner omkostningerne for ældre cyklusser ud fra recorderen. Fra = den klassiske adfærd, én pris frosset ved slutningen."
+    },
+    "unload_confirm_entity": {
+      "label": "Aflæsningsbekræftelsesenhed",
+      "doc": "Valgfri enhed, hvis aktivering betyder, at vasken er taget ud, til maskiner der ikke kan have en dørsensor. Alle typer virker: en Zigbee- eller NFC-knap, en input_button-hjælper, en bevægelsessensor foran maskinen, en scene. Enhver tilstandsændring tæller som en bekræftelse, bortset fra at blive slukket og at blive utilgængelig. Når denne indstilles, aktiveres aflæsningspåmindelsen også på en enhed uden Dørsensorenhed."
+    },
+    "unload_track_without_door": {
+      "label": "Bekræft aflæsning manuelt",
+      "doc": "Kør aflæsningspåmindelsen på en enhed uden Dørsensorenhed og uden Aflæsningsbekræftelsesenhed, og bekræft i stedet aflæsningen fra din egen automatisering: tryk på knapenheden \"Markér som aflæsset\", eller kald handlingen ha_washdata.mark_unloaded. Ignoreres, når en Dørsensorenhed er angivet, da den allerede leverer signalet."
     }
   },
   "setting_group": {

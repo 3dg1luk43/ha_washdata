@@ -280,6 +280,16 @@
           "description": "The WashData device to retrain models for."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Označi kao istovareno",
+      "description": "Potvrdite da je gotov sadržaj izvađen iz WashData uređaja, čime se briše stanje \"Čist\" i svaki podsjetnik za istovar.",
+      "fields": {
+        "device_id": {
+          "name": "Uređaj",
+          "description": "Uređaj WashData iz kojeg je izvađen gotov sadržaj."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Zaustavi snimanje ciklusa"
+      },
+      "mark_unloaded": {
+        "name": "Označi kao istovareno"
       }
     }
   },

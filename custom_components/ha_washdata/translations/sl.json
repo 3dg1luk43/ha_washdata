@@ -280,6 +280,16 @@
           "description": "Naprava WashData za prekvalificiranje modelov."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Označi kot raztovorjeno",
+      "description": "Potrdite, da je bila končana vsebina vzeta iz naprave WashData, s čimer se počisti stanje „čisto“ in morebitni opomnik za raztovarjanje.",
+      "fields": {
+        "device_id": {
+          "name": "Naprava",
+          "description": "Naprava WashData, iz katere je bila vzeta končana vsebina."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Ustavi snemanje cikla"
+      },
+      "mark_unloaded": {
+        "name": "Označi kot raztovorjeno"
       }
     }
   },

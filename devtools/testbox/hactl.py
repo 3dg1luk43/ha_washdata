@@ -257,6 +257,53 @@ async def _push_power(
     )
 
 
+async def cmd_set_state(args: argparse.Namespace) -> int:
+    """Push an arbitrary state, for entities that are not power readings.
+
+    ``set`` shapes its payload as a power sensor (W, device_class power), which
+    is wrong for the entities the unload confirmation option takes - an
+    ``event.*`` button writes a timestamp, an ``input_button`` the same. Pushing
+    the same value twice is a no-op in the state machine, so a second "press"
+    must carry a different value.
+    """
+    async with aiohttp.ClientSession() as session:
+        await rest(
+            session,
+            "POST",
+            f"/api/states/{args.entity}",
+            {"state": args.value, "attributes": _kv(args.attrs)},
+        )
+    return 0
+
+
+async def cmd_call(args: argparse.Namespace) -> int:
+    """Call any service on the real service bus, schema validation included."""
+    domain, _, service = args.service.partition(".")
+    if not service:
+        sys.exit("expected domain.service, e.g. ha_washdata.mark_unloaded")
+    async with aiohttp.ClientSession() as session:
+        result = await rest(
+            session, "POST", f"/api/services/{domain}/{service}", _kv(args.fields)
+        )
+    print(json.dumps(result, indent=2, default=str))
+    return 0
+
+
+async def cmd_device_id(args: argparse.Namespace) -> int:
+    """The device-registry id for an entry - what the device_id services take."""
+    async with aiohttp.ClientSession() as session:
+        entry = args.entry or await _entry_id(session, args.name)
+        if entry is None:
+            sys.exit("no ha_washdata config entry found")
+        async with WS(session) as ws:
+            devices = await ws.cmd("config/device_registry/list")
+    for device in devices or []:
+        if entry in (device.get("config_entries") or []):
+            print(device["id"])
+            return 0
+    sys.exit(f"no device registered for entry {entry}")
+
+
 async def cmd_ws(args: argparse.Namespace) -> int:
     async with aiohttp.ClientSession() as session, WS(session) as ws:
         result = await ws.cmd(args.type, **_kv(args.fields))
@@ -630,6 +677,22 @@ def main() -> int:
     p.add_argument("entity")
     p.add_argument("value")
     p.set_defaults(func=cmd_set)
+
+    p = sub.add_parser("set-state")
+    p.add_argument("entity")
+    p.add_argument("value")
+    p.add_argument("attrs", nargs="*")
+    p.set_defaults(func=cmd_set_state)
+
+    p = sub.add_parser("call")
+    p.add_argument("service")
+    p.add_argument("fields", nargs="*")
+    p.set_defaults(func=cmd_call)
+
+    p = sub.add_parser("device-id")
+    p.add_argument("--name", default=None)
+    p.add_argument("--entry", default=None)
+    p.set_defaults(func=cmd_device_id)
 
     p = sub.add_parser("ws")
     p.add_argument("type")

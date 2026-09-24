@@ -280,6 +280,16 @@
           "description": "The WashData device to retrain models for."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Boşaltıldı Olarak İşaretle",
+      "description": "Bir WashData cihazındaki tamamlanmış yükün çıkarıldığını onaylar, Temiz durumunu ve varsa boşaltma hatırlatıcısını temizler.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "Tamamlanmış yükü çıkarılan WashData cihazı."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Döngü Kaydını Durdur"
+      },
+      "mark_unloaded": {
+        "name": "Boşaltıldı Olarak İşaretle"
       }
     }
   },

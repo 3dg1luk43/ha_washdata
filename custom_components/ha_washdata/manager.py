@@ -215,6 +215,9 @@ from .const import (
     DEFAULT_NOTIFY_UNLOAD_MESSAGE,
     DEFAULT_NOTIFY_UNLOAD_REPEAT,
     NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS,
+    CONF_UNLOAD_CONFIRM_ENTITY,
+    CONF_UNLOAD_TRACK_WITHOUT_DOOR,
+    DEFAULT_UNLOAD_TRACK_WITHOUT_DOOR,
     CONF_NOTIFY_MILESTONES,
     CONF_NOTIFY_MILESTONE_MESSAGE,
     DEFAULT_NOTIFY_MILESTONES,
@@ -254,8 +257,7 @@ from .const import (
     DEFAULT_DEVICE_TYPE,
     DEFAULT_START_DURATION_THRESHOLD,
     DEFAULT_END_REPEAT_COUNT,
-    DEFAULT_MIN_OFF_GAP,
-    DEFAULT_MIN_OFF_GAP_BY_DEVICE,
+    resolve_min_off_gap_default,
     DEFAULT_UNMATCHED_WATCHDOG_CEILING,
     DEFAULT_UNMATCHED_WATCHDOG_CEILING_BY_DEVICE,
     DEFAULT_MAX_DEFERRAL_SECONDS,
@@ -609,6 +611,18 @@ class WashDataManager:
         )
         self._remove_door_end_dwell: Any = None
         self._remove_door_sensor_listener = None
+        # Unload confirmation without a door sensor (#451): an entity whose
+        # activation means "unloaded", and/or a plain opt-in for the Mark Unloaded
+        # button and the mark_unloaded service.
+        self._unload_confirm_entity: str | None = config_entry.options.get(
+            CONF_UNLOAD_CONFIRM_ENTITY
+        ) or None
+        self._unload_track_without_door: bool = bool(
+            config_entry.options.get(
+                CONF_UNLOAD_TRACK_WITHOUT_DOOR, DEFAULT_UNLOAD_TRACK_WITHOUT_DOOR
+            )
+        )
+        self._remove_unload_confirm_listener = None
         self._is_clean_state: bool = False
         self._clean_state_start: datetime | None = None
         self._notified_clean_laundry: bool = False
@@ -895,10 +909,16 @@ class WashDataManager:
             end_repeat_count=end_repeat_count,
             min_off_gap=int(
                 config_entry.options.get(
-                    CONF_MIN_OFF_GAP,
-                    DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(
-                        self.device_type, DEFAULT_MIN_OFF_GAP
-                    ),
+                    CONF_MIN_OFF_GAP, resolve_min_off_gap_default(self.device_type)
+                )
+            ),
+            # Read here as well as on reload (item 351): the reload path was the
+            # only writer, so until the user next saved a setting the detector ran
+            # a tolerance of 0.25 no matter what the panel showed - and the
+            # deferral ceiling in `_should_defer_finish` reads it live.
+            profile_duration_tolerance=float(
+                config_entry.options.get(
+                    CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE
                 )
             ),
             start_energy_threshold=float(
@@ -2460,6 +2480,9 @@ class WashDataManager:
         # Subscribe to door sensor (if configured)
         await self._setup_door_sensor_listener()
 
+        # Subscribe to the unload confirmation entity (if configured, #451)
+        await self._setup_unload_confirm_listener()
+
         # Subscribe to the dynamic energy price entity (if configured, #426)
         await self._setup_price_listener()
 
@@ -2608,6 +2631,14 @@ class WashDataManager:
             config_entry.options.get(CONF_MIN_POWER, DEFAULT_MIN_POWER)
         )
         new_off_delay = int(config_entry.options.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY))
+        # Device-resolved, like the constructor: the default is 8 min on a washing
+        # machine and an hour on a dishwasher, so falling back to the scalar would
+        # silently shorten the bridge on a reload.
+        new_min_off_gap = int(
+            config_entry.options.get(
+                CONF_MIN_OFF_GAP, resolve_min_off_gap_default(self.device_type)
+            )
+        )
         new_smoothing = int(
             config_entry.options.get(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
         )
@@ -2778,6 +2809,7 @@ class WashDataManager:
         self.detector.config.device_type = self.device_type
         self.detector.config.min_power = new_min_power
         self.detector.config.off_delay = new_off_delay
+        self.detector.config.min_off_gap = new_min_off_gap
         self.detector.config.smoothing_window = new_smoothing
         self.detector.config.interrupted_min_seconds = new_interrupted_min
         self.detector.config.completion_min_seconds = new_completion_min
@@ -2960,6 +2992,14 @@ class WashDataManager:
                 CONF_NOTIFY_UNLOAD_REPEAT, DEFAULT_NOTIFY_UNLOAD_REPEAT
             )
         )
+        self._unload_confirm_entity = config_entry.options.get(
+            CONF_UNLOAD_CONFIRM_ENTITY
+        ) or None
+        self._unload_track_without_door = bool(
+            config_entry.options.get(
+                CONF_UNLOAD_TRACK_WITHOUT_DOOR, DEFAULT_UNLOAD_TRACK_WITHOUT_DOOR
+            )
+        )
 
         # Re-subscribe to external cycle end trigger
         await self._setup_external_end_trigger()
@@ -2971,6 +3011,9 @@ class WashDataManager:
         self._cancel_door_end_dwell()
         await self._setup_door_sensor_listener()
         self._maybe_arm_door_end_dwell_if_open()
+
+        # Re-subscribe to the unload confirmation entity (#451).
+        await self._setup_unload_confirm_listener()
 
         # Re-subscribe to the dynamic energy price entity (#426). A changed entity
         # (or the toggle being turned off) takes effect from here on; the samples
@@ -3086,6 +3129,9 @@ class WashDataManager:
         if self._remove_door_sensor_listener:
             self._remove_door_sensor_listener()
             self._remove_door_sensor_listener = None
+        if self._remove_unload_confirm_listener:
+            self._remove_unload_confirm_listener()
+            self._remove_unload_confirm_listener = None
         if self._remove_price_listener:
             self._remove_price_listener()
             self._remove_price_listener = None
@@ -3182,6 +3228,27 @@ class WashDataManager:
         self._logger.info("Setting up door sensor listener: %s", entity_id)
         self._remove_door_sensor_listener = async_track_state_change_event(
             self.hass, [entity_id], self._handle_door_sensor_change
+        )
+
+    async def _setup_unload_confirm_listener(self) -> None:
+        """Subscribe to the optional unload confirmation entity (#451).
+
+        Deliberately domain-agnostic: the point of the option is that a door sensor
+        is not available, so whatever the user already has - a Zigbee button
+        (``event.*`` or a ``sensor.*`` action), an ``input_button`` helper, a motion
+        sensor, a scene - can say "the load has been taken out".
+        """
+        if self._remove_unload_confirm_listener:
+            self._remove_unload_confirm_listener()
+            self._remove_unload_confirm_listener = None
+
+        entity_id = self._unload_confirm_entity
+        if not entity_id:
+            return
+
+        self._logger.info("Setting up unload confirmation listener: %s", entity_id)
+        self._remove_unload_confirm_listener = async_track_state_change_event(
+            self.hass, [entity_id], self._handle_unload_confirm_change
         )
 
     async def _setup_price_listener(self) -> None:
@@ -3307,15 +3374,7 @@ class WashDataManager:
         if door_open:
             if self._is_clean_state:
                 # User opened the door after the cycle - laundry retrieved
-                self._logger.debug("Door opened: clearing Clean state")
-                self._is_clean_state = False
-                self._clean_state_start = None
-                self._notified_clean_laundry = False
-                self._reset_unload_nag_tracking()
-                # Dismiss a delivered clean reminder (and purge any queued ones)
-                # so it does not linger on the phone after the laundry is taken.
-                self._clear_clean_notification()
-                self._notify_update()
+                self.mark_unloaded("door opened")
             elif (
                 self._door_opens_at_end
                 and self.detector.state in (STATE_RUNNING, STATE_ENDING)
@@ -3348,6 +3407,72 @@ class WashDataManager:
                 self._logger.debug("Door closed before end dwell: cancelling finalize")
                 self._cancel_door_end_dwell()
                 self._notify_update()
+
+    @callback
+    def _handle_unload_confirm_change(self, event: Event[evt.EventStateChangedData]) -> None:
+        """Treat an activation of the unload confirmation entity as "unloaded" (#451).
+
+        Any change to a real state counts, because the entity is whatever the user
+        had to hand: an ``event.*`` button writes a fresh timestamp per press, an
+        ``input_button`` the same, a ``sensor.*`` action sensor writes "single" and
+        resets. Two kinds of change are excluded - a transition into or out of
+        unknown/unavailable (a restart or a flat battery is not a press) and a
+        transition *to* ``off`` or empty, which is the release half of a contact or
+        motion sensor rather than its trigger.
+        """
+        new_state = event.data.get("new_state")
+        old_state = event.data.get("old_state")
+
+        # No old state = the entity was just added or HA has just started. A button
+        # entity's restored last-press timestamp must not count as a press.
+        if new_state is None or old_state is None:
+            return
+
+        new_val = new_state.state
+        old_val = old_state.state
+        if new_val == old_val:
+            return
+        if new_val in ("unavailable", "unknown", "off", "") or old_val in (
+            "unavailable",
+            "unknown",
+        ):
+            return
+
+        self.mark_unloaded(f"{self._unload_confirm_entity} -> {new_val}")
+
+    def mark_unloaded(self, source: str = "manual") -> bool:
+        """Clear the Clean state: the load has been taken out (#153, #451).
+
+        Single owner of the "laundry retrieved" transition, shared by the door-open
+        handler, the unload confirmation entity, the Mark Unloaded button and the
+        ``mark_unloaded`` service, so the four can never drift on what clearing it
+        entails. Idempotent: a confirmation arriving when nothing is waiting is a
+        no-op, which is what an automation that fires on every button press needs.
+
+        Returns True when a Clean state was actually cleared.
+        """
+        if not self._is_clean_state:
+            return False
+
+        self._logger.debug("Unload confirmed (%s): clearing Clean state", source)
+        self._is_clean_state = False
+        self._clean_state_start = None
+        self._notified_clean_laundry = False
+        self._reset_unload_nag_tracking()
+        # Dismiss a delivered clean reminder (and purge any queued ones) so it does
+        # not linger on the phone after the laundry is taken.
+        self._clear_clean_notification()
+        self._notify_update()
+        return True
+
+    def _unload_confirmable_without_door(self) -> bool:
+        """Whether unload can be confirmed with no door sensor configured (#451).
+
+        Also the opt-in for entering the Clean state at all on such a device: with
+        neither option set there would be no way to clear it, so the reminder would
+        nag until the progress-reset window expired.
+        """
+        return bool(self._unload_confirm_entity) or self._unload_track_without_door
 
     def _maybe_arm_door_end_dwell_if_open(self) -> None:
         """Arm the end-dwell timer when in RUNNING or ENDING with the door already open.
@@ -6621,6 +6746,15 @@ class WashDataManager:
                 self._logger.debug(
                     "Cycle ended with door closed: entering Clean state"
                 )
+        elif self._unload_confirmable_without_door():
+            # No door sensor, but the user opted into confirming the unload some
+            # other way (#451): a button entity, or the Mark Unloaded button /
+            # service driven by their own automation.
+            self._is_clean_state = True
+            self._clean_state_start = dt_util.now()
+            self._logger.debug(
+                "Cycle ended, unload confirmation configured: entering Clean state"
+            )
 
         # Start progress reset timer to go back to 0% after user unload window
         self._start_state_expiry_timer()

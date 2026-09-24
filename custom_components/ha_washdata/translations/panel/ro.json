@@ -1370,8 +1370,8 @@
       "label": "Întârziere Reamintire Descărcare"
     },
     "notify_unload_repeat": {
-      "doc": "Continuă să retrimită mementoul de descărcare la fiecare \"Întârziere Reamintire Descărcare\" minute până când deschizi ușa sau atingi \"Oprește mementourile\" în notificare. Necesită o Entitate Senzor Ușă (mementoul în sine o necesită). Butonul de respingere funcționează pe notificările aplicației complementare (mobile) Home Assistant.",
-      "label": "Repetă Până la Deschiderea Ușii"
+      "doc": "Continuă să retrimită mementoul de descărcare la fiecare \"Întârziere Reamintire Descărcare\" minute până când descărcarea este confirmată sau atingi \"Oprește mementourile\" în notificare. Necesită o modalitate de a confirma descărcarea: o Entitate Senzor Ușă, o Entitate Confirmare Descărcare sau opțiunea \"Confirmă Descărcarea Manual\" de mai jos. Butonul de respingere funcționează pe notificările aplicației complementare (mobile) Home Assistant.",
+      "label": "Repetă Până la Confirmarea Descărcării"
     },
     "off_delay": {
       "doc": "Timp de așteptat după căderea energiei înainte de a declara ciclul încheiat. Dacă alimentarea se reia în această fereastră, ciclul continuă fără întreruperi - acest lucru face legătura între etapele de spălare. Mașinile de spălat vase au faze lungi de uscare (oprire pentru 20-60 de minute), așa că întârzierea de oprire trebuie să depășească aceasta pentru a menține întreaga spălare+uscare ca un singur ciclu.",
@@ -1579,6 +1579,14 @@
     "energy_price_dynamic": {
       "label": "Cost Ponderat în Timp",
       "doc": "Taxează fiecare ciclu la prețul în vigoare în fiecare moment în care a rulat, în loc de prețul unic din momentul în care s-a terminat. Se aplică doar unei entități de preț (un preț static nu poate varia). Nu necesită configurare suplimentară: prețul este urmărit în timp real cât timp ciclul rulează, iar Procesare istoric, din Diagnostice, recalculează costul ciclurilor mai vechi pornind de la recorder. Dezactivat = comportamentul clasic, un singur preț fixat la final."
+    },
+    "unload_confirm_entity": {
+      "label": "Entitate Confirmare Descărcare",
+      "doc": "Entitate opțională a cărei activare înseamnă că încărcătura a fost scoasă, pentru mașinile care nu pot avea un senzor de ușă. Merge orice tip: un buton Zigbee sau NFC, un ajutor input_button, un senzor de mișcare în fața mașinii, o scenă. Orice schimbare de stare contează ca o confirmare, cu excepția opririi și a trecerii în indisponibil. Setarea acesteia activează și mementoul de descărcare pe un dispozitiv fără Entitate Senzor Ușă."
+    },
+    "unload_track_without_door": {
+      "label": "Confirmă Descărcarea Manual",
+      "doc": "Rulează mementoul de descărcare pe un dispozitiv fără Entitate Senzor Ușă și fără Entitate Confirmare Descărcare, iar descărcarea o confirmi din propria automatizare: apasă entitatea buton \"Marcați ca descărcat\" sau apelează serviciul ha_washdata.mark_unloaded. Se ignoră când este setată o Entitate Senzor Ușă, care oferă deja semnalul."
     }
   },
   "setting_group": {

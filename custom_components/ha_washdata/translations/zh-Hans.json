@@ -280,6 +280,16 @@
           "description": "要重新训练模型的 WashData 设备。"
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "标记为已卸载",
+      "description": "确认已从 WashData 设备中取出完成的物品，清除干净状态和所有卸载提醒。",
+      "fields": {
+        "device_id": {
+          "name": "设备",
+          "description": "已取出完成物品的 WashData 设备。"
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "停止记录循环"
+      },
+      "mark_unloaded": {
+        "name": "标记为已卸载"
       }
     }
   },

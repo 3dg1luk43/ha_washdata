@@ -1402,8 +1402,8 @@
       "label": "Retardo del recordatorio de descarga"
     },
     "notify_unload_repeat": {
-      "doc": "Sigue reenviando el recordatorio de descarga cada \"Retardo del recordatorio de descarga\" minutos hasta que abras la puerta o toques \"Dejar de recordar\" en la notificación. Requiere una Entidad de sensor de puerta (el propio recordatorio la necesita). El botón de descarte funciona en las notificaciones de la aplicación complementaria (móvil) de Home Assistant.",
-      "label": "Repetir hasta que se abra la puerta"
+      "doc": "Sigue reenviando el recordatorio de descarga cada \"Retardo del recordatorio de descarga\" minutos hasta que se confirme la descarga o toques \"Dejar de recordar\" en la notificación. Necesita alguna forma de confirmar la descarga: una Entidad de sensor de puerta, una Entidad de confirmación de descarga o la opción \"Confirmar la descarga manualmente\" de abajo. El botón de descarte funciona en las notificaciones de la aplicación complementaria (móvil) de Home Assistant.",
+      "label": "Repetir hasta confirmar la descarga"
     },
     "off_delay": {
       "doc": "Es tiempo de esperar después de que se corte la energía antes de declarar finalizado el ciclo. Si la energía se reanuda dentro de esta ventana, el ciclo continúa sin problemas; esto salva las pausas entre las etapas de lavado. Los lavavajillas tienen fases de secado largas (apagado durante 20 a 60 minutos), por lo que el retraso de apagado debe exceder eso para mantener todo el lavado y secado como un solo ciclo.",
@@ -1611,6 +1611,14 @@
     "energy_price_dynamic": {
       "label": "Costo ponderado en el tiempo",
       "doc": "Cobra cada ciclo al precio vigente en cada momento de su ejecución, en vez de aplicarle el único precio del instante en que terminó. Solo se aplica a una entidad de precio (un precio estático no puede variar). No necesita configuración adicional: el precio se sigue en vivo mientras el ciclo avanza, y Procesar historial, en Diagnóstico, vuelve a calcular el costo de los ciclos antiguos a partir del recorder. Desactivado = el comportamiento clásico, un solo precio congelado al final."
+    },
+    "unload_confirm_entity": {
+      "label": "Entidad de confirmación de descarga",
+      "doc": "Entidad opcional cuya activación significa que se ha sacado la carga, para máquinas que no pueden tener un sensor de puerta. Sirve cualquier tipo: un botón Zigbee o NFC, un ayudante input_button, un sensor de movimiento delante de la máquina, una escena. Cualquier cambio de estado cuenta como confirmación, excepto apagarse o pasar a no disponible. Definir esto también activa el recordatorio de descarga en un dispositivo sin Entidad de sensor de puerta."
+    },
+    "unload_track_without_door": {
+      "label": "Confirmar la descarga manualmente",
+      "doc": "Ejecuta el recordatorio de descarga en un dispositivo sin Entidad de sensor de puerta ni Entidad de confirmación de descarga, y confirmas tú la descarga desde tu propia automatización: pulsa la entidad de botón \"Marcar como descargado\" o llama al servicio ha_washdata.mark_unloaded. Se ignora cuando hay una Entidad de sensor de puerta configurada, que ya proporciona la señal."
     }
   },
   "setting_group": {

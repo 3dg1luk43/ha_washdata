@@ -47,6 +47,7 @@ Everything lives under `devtools/testbox/`:
 | `hactl.py` | the driver: REST, WebSocket, state pushing, replay, log reading |
 | `assert_run.py` | the acceptance checks, run by `smoke.sh` step 7 |
 | `check_notify_actions.sh` | the notification-ACTION delivery path, ~1 min, standalone |
+| `check_unload_confirm.sh` | unload confirmation without a door sensor (#451): the button entity, the service and the confirmation-entity listener, ~3 min, standalone |
 | `support/configuration.yaml` | baseline HA config, copied into `config/` on first start |
 | `config/.compressed_export.json` | the time-rescaled export `smoke.sh` seeds from |
 | `support/custom_components/testbox_notify/` | notify platform that records every payload |

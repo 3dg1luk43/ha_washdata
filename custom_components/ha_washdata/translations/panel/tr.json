@@ -1443,8 +1443,8 @@
             "label": "Boşaltma Hatırlatıcısı Gecikmesi"
         },
         "notify_unload_repeat": {
-            "doc": "Kapıyı açana veya bildirimdeki \"Hatırlatmayı durdur\" düğmesine dokunana kadar boşaltma hatırlatıcısını \"Boşaltma Hatırlatıcısı Gecikmesi\" dakikada bir yeniden gönderir. Bir Kapı Sensörü Varlığı gerektirir (hatırlatıcının kendisi de gerektirir). Kapatma düğmesi Home Assistant refakatçi uygulaması (mobil) bildirimlerinde çalışır.",
-            "label": "Kapı Açılana Kadar Tekrarla"
+            "doc": "Boşaltma onaylanana veya bildirimdeki \"Hatırlatmayı durdur\" düğmesine dokunana kadar boşaltma hatırlatıcısını \"Boşaltma Hatırlatıcısı Gecikmesi\" dakikada bir yeniden gönderir. Boşaltmayı onaylamak için bir yola ihtiyaç duyar: bir Kapı Sensörü Varlığı, bir Boşaltma Onay Varlığı veya aşağıdaki \"Boşaltmayı Elle Onayla\" seçeneği. Kapatma düğmesi Home Assistant refakatçi uygulaması (mobil) bildirimlerinde çalışır.",
+            "label": "Boşaltılana Kadar Tekrarla"
         },
         "off_delay": {
             "doc": "Güç kesildikten sonra döngünün bittiğini bildirmeden önce beklenecek süre. Bu pencerede güç yeniden gelirse döngü sorunsuz bir şekilde devam eder; bu, yıkama aşamaları arasındaki duraklamaları köprüler. Bulaşık makinelerinin kurutma aşamaları uzundur (20-60 dakika boyunca güç kapalıdır), bu nedenle, tüm yıkama+kuruluğun tek bir döngüde tutulması için kapatma gecikmesinin bunu aşması gerekir.",
@@ -1664,6 +1664,14 @@
         "curve_preroll_seconds": {
             "label": "Eğri Ön Kaydı",
             "doc": "WashData'nın, iptal edilen başlatma denemelerinden gelen kaç saniyelik okumayı bir döngünün eğrisinin başına taşıyabileceği. Bir döngünün eğrisi normalde sonunda başarılı olan başlatma denemesiyle başlar; bu nedenle yerleşmeden önce birkaç kez yoklayan makinelerde (program seçimi, kapak kilidi, ilk su alma) gerçek etkinliğin ilk dakikaları her eğride eksik kalır. Bu değeri, makinenizdeki en uzun hazırlık aşamasının biraz üzerine ayarlayın (çoğu makine için 300 sn fazlasıyla yeter). 0 kapatır. Açmanın kaydedilen başlangıcı öne çektiğini unutmayın: değişiklikten önce ve sonra kaydedilen döngüler aynı program için farklı süreler taşır ve eski döngüler elenene kadar öğrenilen ortalamalar kayar."
+        },
+        "unload_confirm_entity": {
+            "label": "Boşaltma Onay Varlığı",
+            "doc": "Kapı sensörü takılamayan makineler için, etkinleşmesi yükün çıkarıldığı anlamına gelen isteğe bağlı varlık. Her türü çalışır: bir Zigbee veya NFC düğmesi, bir input_button yardımcısı, makinenin önündeki bir hareket sensörü, bir sahne. Kapanma ve kullanılamaz duruma geçme dışındaki her durum değişikliği onay sayılır. Bunu ayarlamak, Kapı Sensörü Varlığı olmayan bir cihazda da boşaltma hatırlatıcısını etkinleştirir."
+        },
+        "unload_track_without_door": {
+            "label": "Boşaltmayı Elle Onayla",
+            "doc": "Kapı Sensörü Varlığı ve Boşaltma Onay Varlığı bulunmayan bir cihazda boşaltma hatırlatıcısını çalıştırır ve boşaltmayı bunun yerine kendi otomasyonunuzdan onaylarsınız: \"Boşaltıldı Olarak İşaretle\" düğme varlığına basın veya ha_washdata.mark_unloaded servisini çağırın. Bir Kapı Sensörü Varlığı ayarlandığında yok sayılır, çünkü sinyali zaten o sağlar."
         }
     },
     "setting_group": {

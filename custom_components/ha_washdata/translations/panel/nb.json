@@ -1455,8 +1455,8 @@
       "label": "Utlastingspåminnelsesforsinkelse"
     },
     "notify_unload_repeat": {
-      "doc": "Fortsetter å sende utlastingspåminnelsen på nytt hvert \"Utlastingspåminnelsesforsinkelse\" minutt til du åpner døren eller trykker på \"Stopp påminnelser\" i varselet. Krever en Dørensorenhet (det gjør selve påminnelsen). Avvis-knappen fungerer på varsler fra Home Assistant companion-appen (mobil).",
-      "label": "Gjenta til døren åpnes"
+      "doc": "Fortsetter å sende utlastingspåminnelsen på nytt hvert \"Utlastingspåminnelsesforsinkelse\" minutt til utlastingen er bekreftet eller du trykker på \"Stopp påminnelser\" i varselet. Krever en måte å bekrefte utlastingen på: en Dørensorenhet, en Utlastingsbekreftelsesenhet eller alternativet \"Bekreft utlasting manuelt\" nedenfor. Avvis-knappen fungerer på varsler fra Home Assistant companion-appen (mobil).",
+      "label": "Gjenta til utlastet"
     },
     "off_delay": {
       "doc": "På tide å vente etter at strømmen faller før du erklærer at syklusen er fullført. Hvis strømmen gjenopptas innenfor dette vinduet, fortsetter syklusen sømløst - dette slår bro mellom pauser mellom vasketrinn. Oppvaskmaskiner har lange tørkefaser (strøm av i 20-60 min) så avslåingsforsinkelsen må overstige det for å holde hele vask+tørr som én syklus.",
@@ -1664,6 +1664,14 @@
     "energy_price_dynamic": {
       "label": "Tidsvektet kostnad",
       "doc": "Beregn hver syklus til prisen som gjaldt i hvert øyeblikk den kjørte, i stedet for den ene prisen som gjaldt da den var ferdig. Gjelder bare for en prisenhet (en statisk pris kan ikke endre seg). Krever ikke noe ekstra oppsett: prisen følges live mens syklusen kjører, og \"Behandle historikk\" under Diagnostikk beregner kostnaden for eldre sykluser på nytt fra recorderen. Av = den klassiske oppførselen, én pris frosset ved slutten."
+    },
+    "unload_confirm_entity": {
+      "label": "Utlastingsbekreftelsesenhet",
+      "doc": "Valgfri enhet der en aktivering betyr at vasken er tatt ut, for maskiner som ikke kan ha en dørsensor. Alle typer fungerer: en Zigbee- eller NFC-knapp, en input_button-hjelper, en bevegelsessensor foran maskinen, en scene. Enhver tilstandsendring teller som en bekreftelse, bortsett fra å bli slått av og å bli utilgjengelig. Å sette denne aktiverer også utlastingspåminnelsen på en enhet uten Dørensorenhet."
+    },
+    "unload_track_without_door": {
+      "label": "Bekreft utlasting manuelt",
+      "doc": "Kjør utlastingspåminnelsen på en enhet uten Dørensorenhet og uten Utlastingsbekreftelsesenhet, og bekreft utlastingen fra din egen automasjon i stedet: trykk på knappenheten \"Merk som utlastet\", eller kall handlingen ha_washdata.mark_unloaded. Ignoreres når en Dørensorenhet er angitt, siden den allerede gir signalet."
     }
   },
   "setting_group": {

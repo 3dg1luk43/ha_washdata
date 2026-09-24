@@ -1423,8 +1423,8 @@
       "label": "Odgoda podsjetnika za istovar"
     },
     "notify_unload_repeat": {
-      "doc": "Ponovno šalje podsjetnik za istovar svakih \"Odgoda podsjetnika za istovar\" minuta dok ne otvorite vrata ili ne dodirnete \"Prestani podsjećati\" na obavijesti. Zahtijeva Entitet senzora vrata (kao i sam podsjetnik). Gumb za odbacivanje radi na obavijestima mobilne aplikacije Home Assistant (companion app).",
-      "label": "Ponavljaj dok se vrata ne otvore"
+      "doc": "Ponovno šalje podsjetnik za istovar svakih \"Odgoda podsjetnika za istovar\" minuta dok se istovar ne potvrdi ili dok ne dodirnete \"Prestani podsjećati\" na obavijesti. Potreban je način za potvrdu istovara: Entitet senzora vrata, Entitet potvrde istovara ili opcija \"Ručno potvrdi istovar\" u nastavku. Gumb za odbacivanje radi na obavijestima mobilne aplikacije Home Assistant (companion app).",
+      "label": "Ponavljaj do istovara"
     },
     "off_delay": {
       "doc": "Vrijeme čekanja nakon pada struje prije nego što se proglasi da je ciklus završen. Ako se struja nastavi unutar ovog prozora, ciklus se nastavlja neprimjetno - ovo premošćuje pauze između faza pranja. Perilice posuđa imaju duge faze sušenja (isključivanje na 20-60 min) tako da odgoda isključivanja mora biti veća od te kako bi cijeli ciklus pranja+sušenja bio jedan ciklus.",
@@ -1632,6 +1632,14 @@
     "energy_price_dynamic": {
       "label": "Vremenski ponderiran trošak",
       "doc": "Naplaćuje svaki ciklus po cijeni koja je vrijedila u svakom trenutku njegova rada, umjesto po jednoj cijeni koja je vrijedila kada je završio. Odnosi se samo na entitet cijene (statična cijena se ne može mijenjati). Ne treba dodatno postavljanje: cijena se prati uživo dok ciklus traje, a Obrada povijesti u Dijagnostici ponovno obračunava starije cikluse iz recordera. Isključeno = klasično ponašanje, jedna cijena zamrznuta na kraju."
+    },
+    "unload_confirm_entity": {
+      "label": "Entitet potvrde istovara",
+      "doc": "Opcijski entitet čije aktiviranje znači da je sadržaj izvađen, za strojeve koji ne mogu imati senzor vrata. Radi bilo koja vrsta: Zigbee ili NFC gumb, input_button pomoćnik, senzor pokreta ispred stroja, scena. Svaka promjena stanja broji se kao potvrda, osim isključivanja i prelaska u nedostupno stanje. Postavljanjem ovoga ujedno se omogućuje podsjetnik za istovar na uređaju bez Entiteta senzora vrata."
+    },
+    "unload_track_without_door": {
+      "label": "Ručno potvrdi istovar",
+      "doc": "Pokrenite podsjetnik za istovar na uređaju bez Entiteta senzora vrata i bez Entiteta potvrde istovara te istovar potvrdite iz vlastite automatizacije: pritisnite entitet gumba \"Označi kao istovareno\" ili pozovite uslugu ha_washdata.mark_unloaded. Zanemaruje se kada je postavljen Entitet senzora vrata, koji već daje taj signal."
     }
   },
   "setting_group": {

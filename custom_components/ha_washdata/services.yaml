@@ -272,6 +272,18 @@ resume_cycle:
         device:
           integration: ha_washdata
 
+mark_unloaded:
+  name: Mark Unloaded
+  description: Confirm the finished load has been taken out, clearing the Clean state and any unload reminder. Does nothing when no load is waiting.
+  fields:
+    device_id:
+      name: Device
+      description: The WashData device whose finished load has been taken out.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+
 trigger_ml_training:
   name: Trigger ML Training
   description: Manually retrain the on-device ML models from this device's own labelled cycles (experimental; requires ML training enabled).

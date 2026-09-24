@@ -280,6 +280,16 @@
           "description": "WashData tækið til að endurþjálfa líkön fyrir."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Merkja sem losað",
+      "description": "Staðfestu að búið sé að taka fullunna þvottinn úr WashData tæki, sem hreinsar stöðuna \"Hreint\" og hvers kyns losunaráminningu.",
+      "fields": {
+        "device_id": {
+          "name": "Tæki",
+          "description": "WashData tækið sem búið er að taka fullunna þvottinn úr."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Stöðva upptöku hringrásar"
+      },
+      "mark_unloaded": {
+        "name": "Merkja sem losað"
       }
     }
   },

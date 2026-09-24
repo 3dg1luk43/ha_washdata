@@ -1455,8 +1455,8 @@
       "label": "Lossningspåminnelsefördröjning"
     },
     "notify_unload_repeat": {
-      "doc": "Fortsätter att skicka lossningspåminnelsen igen var \"Lossningspåminnelsefördröjning\" minut tills du öppnar dörren eller trycker på \"Sluta påminna\" i aviseringen. Kräver en Dörrsensorentitet (det gör själva påminnelsen). Avfärda-knappen fungerar på aviseringar från Home Assistant companion-appen (mobil).",
-      "label": "Upprepa tills dörren öppnas"
+      "doc": "Fortsätter att skicka lossningspåminnelsen igen var \"Lossningspåminnelsefördröjning\" minut tills lossningen har bekräftats eller du trycker på \"Sluta påminna\" i aviseringen. Kräver ett sätt att bekräfta lossningen: en Dörrsensorentitet, en Lossningsbekräftelse-entitet eller alternativet \"Bekräfta lossning manuellt\" nedan. Avfärda-knappen fungerar på aviseringar från Home Assistant companion-appen (mobil).",
+      "label": "Upprepa tills lossad"
     },
     "off_delay": {
       "doc": "Dags att vänta efter strömavbrott innan man förklarar att cykeln är avslutad. Om strömmen återupptas inom detta fönster fortsätter cykeln sömlöst - detta överbryggar pauser mellan tvättstegen. Diskmaskiner har långa torkningsfaser (ström av i 20-60 min) så avstängningsfördröjningen måste överstiga den för att hålla hela tvätten+torr som en cykel.",
@@ -1664,6 +1664,14 @@
     "energy_price_dynamic": {
       "label": "Tidsviktad kostnad",
       "doc": "Debitera varje cykel till det pris som gällde i varje ögonblick den kördes, i stället för det enda pris som gällde när den var klar. Gäller bara en prisentitet (ett statiskt pris kan inte röra sig). Kräver ingen extra inställning: priset följs live medan cykeln kör, och \"Bearbeta historik\" under Diagnostik räknar om kostnaden för äldre cykler från recordern. Av = det klassiska beteendet, ett pris fryst vid slutet."
+    },
+    "unload_confirm_entity": {
+      "label": "Lossningsbekräftelse-entitet",
+      "doc": "Valfri entitet vars aktivering betyder att tvätten har tagits ut, för maskiner som inte kan ha en dörrsensor. Alla typer fungerar: en Zigbee- eller NFC-knapp, en input_button-hjälpare, en rörelsesensor framför maskinen, en scen. Varje tillståndsändring räknas som en bekräftelse, utom att stängas av och att bli otillgänglig. Att ställa in den här aktiverar även lossningspåminnelsen på en enhet utan Dörrsensorentitet."
+    },
+    "unload_track_without_door": {
+      "label": "Bekräfta lossning manuellt",
+      "doc": "Kör lossningspåminnelsen på en enhet utan Dörrsensorentitet och utan Lossningsbekräftelse-entitet, och bekräfta lossningen från din egen automation i stället: tryck på knappentiteten \"Markera som lossad\", eller anropa åtgärden ha_washdata.mark_unloaded. Ignoreras när en Dörrsensorentitet är angiven, eftersom den redan ger signalen."
     }
   },
   "setting_group": {

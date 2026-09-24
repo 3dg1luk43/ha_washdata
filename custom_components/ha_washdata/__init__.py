@@ -1399,6 +1399,38 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.services.async_register(DOMAIN, "resume_cycle", handle_resume_cycle)
 
+    # Unload confirmation for a device with no door sensor (#451). Deliberately
+    # not an error when nothing is waiting: an automation wired to a physical
+    # button fires on every press, and "already emptied" is not a failure.
+    if not hass.services.has_service(DOMAIN, "mark_unloaded"):
+        async def handle_mark_unloaded(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="device_not_found",
+                )
+            entry_id = next(
+                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
+                None,
+            )
+            if not entry_id:
+                if any(eid for eid in device.config_entries):
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="integration_not_loaded",
+                    )
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="no_config_entry",
+                )
+
+            hass.data[DOMAIN][entry_id].mark_unloaded("mark_unloaded service")
+
+        hass.services.async_register(DOMAIN, "mark_unloaded", handle_mark_unloaded)
+
     return True
 
 

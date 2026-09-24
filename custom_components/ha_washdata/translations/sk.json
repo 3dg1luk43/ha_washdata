@@ -280,6 +280,16 @@
           "description": "The WashData device to retrain models for."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Označiť ako vyložené",
+      "description": "Potvrďte, že dokončená náplň bola vybratá zo zariadenia WashData, čím sa zruší stav „Čistý“ aj prípadná pripomienka vyloženia.",
+      "fields": {
+        "device_id": {
+          "name": "Zariadenie",
+          "description": "Zariadenie WashData, z ktorého bola vybratá dokončená náplň."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Zastaviť záznam cyklu"
+      },
+      "mark_unloaded": {
+        "name": "Označiť ako vyložené"
       }
     }
   },

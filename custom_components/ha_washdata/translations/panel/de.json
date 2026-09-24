@@ -1451,8 +1451,8 @@
       "label": "Verzögerung der Entladeerinnerung"
     },
     "notify_unload_repeat": {
-      "doc": "Die Entladeerinnerung wird alle \"Verzögerung der Entladeerinnerung\" Minuten erneut gesendet, bis Sie die Tür öffnen oder in der Benachrichtigung auf \"Nicht mehr erinnern\" tippen. Erfordert eine Türsensor-Entität (die Erinnerung selbst benötigt sie ohnehin). Die Schaltfläche zum Verwerfen funktioniert bei Benachrichtigungen der Home Assistant Companion-App (mobil).",
-      "label": "Wiederholen, bis die Tür geöffnet wird"
+      "doc": "Die Entladeerinnerung wird alle \"Verzögerung der Entladeerinnerung\" Minuten erneut gesendet, bis die Entladung bestätigt wird oder Sie in der Benachrichtigung auf \"Nicht mehr erinnern\" tippen. Erfordert eine Möglichkeit, die Entladung zu bestätigen: eine Türsensor-Entität, eine Entladebestätigungs-Entität oder die Option \"Entladung manuell bestätigen\" weiter unten. Die Schaltfläche zum Verwerfen funktioniert bei Benachrichtigungen der Home Assistant Companion-App (mobil).",
+      "label": "Wiederholen, bis entladen"
     },
     "off_delay": {
       "doc": "Zeit, die nach einem Stromausfall gewartet werden muss, bevor der Zyklus als beendet erklärt wird. Wenn die Stromversorgung innerhalb dieses Fensters wiederhergestellt wird, läuft der Zyklus nahtlos weiter – dies überbrückt Pausen zwischen den Waschphasen. Geschirrspüler haben lange Trocknungsphasen (Ausschalten für 20–60 Minuten), daher muss die Ausschaltverzögerung länger sein, damit der gesamte Spül- und Trockenvorgang als ein Zyklus erfolgt.",
@@ -1664,6 +1664,14 @@
     "energy_price_dynamic": {
       "label": "Zeitgewichtete Kosten",
       "doc": "Berechnet jeden Zyklus zu dem Preis, der in jedem Moment seines Laufs galt, statt zu dem einen Preis, der bei Zyklusende aktuell war. Gilt nur für eine Preis-Entität (ein statischer Preis kann sich nicht ändern). Erfordert keine zusätzliche Einrichtung: Während der Zyklus läuft, wird der Preis live mitverfolgt, und „Verlauf verarbeiten“ unter Diagnose berechnet die Kosten älterer Zyklen aus dem Recorder neu. Aus = das klassische Verhalten, ein einzelner am Ende eingefrorener Preis."
+    },
+    "unload_confirm_entity": {
+      "label": "Entladebestätigungs-Entität",
+      "doc": "Optionale Entität, deren Auslösung bedeutet, dass die Ladung entnommen wurde, für Maschinen ohne Türsensor. Jede Art funktioniert: ein Zigbee- oder NFC-Taster, ein input_button-Helfer, ein Bewegungsmelder vor der Maschine, eine Szene. Jede Zustandsänderung zählt als Bestätigung, außer dem Ausschalten und dem Wechsel auf nicht verfügbar. Diese Einstellung aktiviert die Entladeerinnerung auch auf einem Gerät ohne Türsensor-Entität."
+    },
+    "unload_track_without_door": {
+      "label": "Entladung manuell bestätigen",
+      "doc": "Führt die Entladeerinnerung auf einem Gerät ohne Türsensor-Entität und ohne Entladebestätigungs-Entität aus; die Entladung bestätigen Sie stattdessen aus Ihrer eigenen Automatisierung: die Schaltflächen-Entität \"Als entladen markieren\" drücken oder die Aktion ha_washdata.mark_unloaded aufrufen. Wird ignoriert, wenn eine Türsensor-Entität festgelegt ist, die das Signal bereits liefert."
     }
   },
   "setting_group": {

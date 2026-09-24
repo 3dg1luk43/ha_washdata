@@ -280,6 +280,16 @@
           "description": "Het WashData-apparaat waarvoor modellen hertraind moeten worden."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Markeren als uitgeladen",
+      "description": "Bevestig dat de voltooide lading uit een WashData-apparaat is gehaald, waarmee de staat \"Schoon\" en een eventuele uitlaadherinnering worden gewist.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Het WashData-apparaat waarvan de voltooide lading is uitgehaald."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Stop cyclusopname"
+      },
+      "mark_unloaded": {
+        "name": "Markeren als uitgeladen"
       }
     }
   },
