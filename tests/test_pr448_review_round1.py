@@ -1010,3 +1010,44 @@ def test_every_english_panel_key_reaches_every_language():
         if missing:
             gaps[path.stem] = missing
     assert not gaps, f"keys missing from other languages: {gaps}"
+
+
+# --------------------------------------------------------------------------
+# round 24: the ENDING bar read a list the group collapse had shortened
+# --------------------------------------------------------------------------
+def test_the_ending_bound_is_taken_before_the_group_collapse():
+    """``collapse_group_candidates`` keeps only the best sibling of each cohesive
+    family, so a LONGER sibling's duration leaves the list. Element 12 is the
+    ENDING gate's bar exactly while the match is ambiguous, which is when Stage
+    5's own safeguards say the selected member may be the wrong one, so reading
+    the collapsed list can end a cycle while a longer sibling is still plausible.
+    Asserted on source order in both the live matcher and the Playground mirror,
+    because reaching it needs a grouped profile and a full match run.
+    """
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1] / "custom_components" / "ha_washdata"
+    for mod in ("profile_store.py", "playground.py"):
+        src = (root / mod).read_text()
+        capture = src.index("pre_collapse_candidates = list(candidates)")
+        collapse = src.index("candidates = collapse_group_candidates(")
+        assert capture < collapse, f"{mod}: captured after the collapse"
+        assert "longest_candidate_duration(pre_collapse_candidates)" in src, mod
+        assert "longest_candidate_duration(candidates)" not in src, mod
+
+
+def test_changing_the_brand_clears_the_staged_model():
+    """``_renderModelPicker`` reads ``store_model`` from ``_editedOpts()``, so a
+    brand change that leaves it staged persists a brand/model pair that exists in
+    no catalog. The guard must not fire when the brand did not actually move.
+    """
+    src = _panel_src()
+    handler = src[src.index("if (brandInput) brandInput.addEventListener('change'"):]
+    handler = handler[: handler.index("const modelInput")]
+    assert "stageAppliance('store_model', '')" in handler
+    assert "this._editedOpts().store_brand" in handler, "clears even on a no-op change"
+
+    # ...and the brand-created popup handler persists, so it must clear too.
+    listener = src[src.index("washdata-brand-created"):]
+    listener = listener[: listener.index("washdata-profile-created")]
+    assert "store_model: ''" in listener

@@ -975,6 +975,10 @@ class _DetailSim:
         # Mirror of async_match_profile: members are scored individually, then each
         # cohesive family is collapsed to its best member before anything reads the
         # ranking (#400).
+        # Captured before the collapse for element 12, exactly as
+        # async_match_profile does: the collapse drops every sibling but the
+        # best, and a longer one leaving the list lowers the ENDING gate's bar.
+        pre_collapse_candidates = list(candidates)
         candidates = collapse_group_candidates(candidates, self.group_members or {})
         # Stage-5 safeguards #2 and #3, captured here and applied after the
         # top-level ambiguity call below so the ORDER matches async_match_profile.
@@ -1104,11 +1108,12 @@ class _DetailSim:
             terminal_high,
             terminal_quiet,
             # The FULL population, matching live: `async_match_profile` computes
-            # `MatchResult.longest_candidate_duration_s` from the same list
-            # `_match_prefix_ambiguity` judges, before the [:5] truncation. An
-            # earlier version of this line used `candidates[:5]` to match what
-            # live *then* did - and live was the thing that was wrong.
-            longest_candidate_duration(candidates),
+            # `MatchResult.longest_candidate_duration_s` from the candidates as
+            # they stood BEFORE the group collapse and before the [:5]
+            # truncation. An earlier version of this line used `candidates[:5]`
+            # to match what live *then* did - and live was the thing that was
+            # wrong, twice.
+            longest_candidate_duration(pre_collapse_candidates),
         )
 
     def _price_at(self, offset_s: float) -> float | None:

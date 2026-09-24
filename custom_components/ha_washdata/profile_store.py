@@ -7282,6 +7282,17 @@ class ProfileStore:
         # the selected member's own blended score still exists (see
         # MatchResult.label_confidence).
         scored_by_name = {str(c.get("name")): c for c in candidates}
+        # Element 12's population, captured here for a related reason. The
+        # collapse keeps only the best sibling of each cohesive family, so a
+        # LONGER sibling's duration leaves the list entirely - and element 12 is
+        # the ENDING gate's bar precisely while the match is ambiguous, which is
+        # when Stage 5's own safeguards (member-fit backstop, overrun guard) are
+        # saying the selected member may be the wrong one. Read from the
+        # collapsed list the bar can be the selected member's shorter duration,
+        # and the cycle ends while a longer sibling is still plausible - the
+        # split direction item 330 exists to avoid. A superset can only ever
+        # RAISE the bar, so this defers ends, never hastens them.
+        pre_collapse_candidates = list(candidates)
         candidates = collapse_group_candidates(candidates, group_members)
 
         best = candidates[0]
@@ -7386,9 +7397,10 @@ class ProfileStore:
             candidates, best_duration or 0.0
         )
         is_prefix_ambiguous = full_shape_hit or prefix_fit_hit
-        # From the SAME full population `_match_prefix_ambiguity` just judged,
-        # before the [:5] truncation below.
-        longest_candidate_s = longest_candidate_duration(candidates)
+        # From the pre-collapse population, not just before the [:5] truncation
+        # below: see `pre_collapse_candidates` above for why the collapse is the
+        # more dangerous of the two filters here.
+        longest_candidate_s = longest_candidate_duration(pre_collapse_candidates)
 
         return MatchResult(
             best_name,
