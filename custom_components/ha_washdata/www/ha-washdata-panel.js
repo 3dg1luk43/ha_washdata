@@ -11036,6 +11036,16 @@ class HaWashdataPanel extends HTMLElement {
       // event that re-picks the same brand must not wipe a chosen model.
       if (v !== String(this._editedOpts().store_brand || '').trim()) {
         stageAppliance('store_model', '');
+        // ...and the DOM with it. `_renderPreservingFormEdits` below snapshots
+        // the form BEFORE it renders, and `_snapshotFormToPending` only reads
+        // keys in `_dirtyOptKeys` - which `stageAppliance` has just put
+        // `store_model` into. The input is still in the DOM holding the previous
+        // brand's model, and `storemodel` has no branch there, so the default
+        // `this._pendingSettings[key] = el.value` writes that straight back over
+        // the value staged one line up. Staging alone is not just insufficient
+        // here, it is what arms the overwrite.
+        const staleModel = sr.getElementById('wd-store-model');
+        if (staleModel) staleModel.value = '';
       }
       stageAppliance('store_brand', v);
       this._catalog.forBrand = v; this._catalog.devices = undefined;

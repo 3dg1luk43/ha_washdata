@@ -1046,6 +1046,12 @@ def test_changing_the_brand_clears_the_staged_model():
     handler = handler[: handler.index("const modelInput")]
     assert "stageAppliance('store_model', '')" in handler
     assert "this._editedOpts().store_brand" in handler, "clears even on a no-op change"
+    # Staging alone is self-defeating (round 25): `_renderPreservingFormEdits`
+    # snapshots the form FIRST, `_snapshotFormToPending` reads every key in
+    # `_dirtyOptKeys`, and `stageAppliance` has just put `store_model` there -
+    # so the still-rendered input writes the old model back over the clear.
+    assert "getElementById('wd-store-model')" in handler
+    assert ".value = ''" in handler
 
     # ...and the brand-created popup handler persists, so it must clear too.
     listener = src[src.index("washdata-brand-created"):]

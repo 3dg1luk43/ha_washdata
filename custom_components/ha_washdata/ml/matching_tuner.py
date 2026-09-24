@@ -150,7 +150,13 @@ def _snaps(
     (averaging the pool's regridded curves) is the option already measured
     WORSE above. The exposure is bounded meanwhile: `tune_matching_config` can
     only move the bounded scoring weights, never structural matching behaviour,
-    promotion is gated on held-out AUC, and `revert_matching_config` undoes it.
+    `revert_matching_config` undoes it, and promotion is gated on **held-out
+    top-1 accuracy**: `tune_matching_config` promotes only when the tuned config
+    beats the baseline by `margin` on at least `min_wins` of `n_splits` held-out
+    subsamples (4 of 5) AND the mean held-out top-1 gain is itself >= `margin`.
+    Not AUC - no AUC is computed anywhere in this module. The AUC gate in
+    CLAUDE.md is `ML_TRAINING_AUC_MARGIN`, which governs the ml/ CLASSIFIERS in
+    `training_task.py` and has nothing to do with the matcher's scoring weights.
     """
     snaps = []
     for name, items in by_profile.items():

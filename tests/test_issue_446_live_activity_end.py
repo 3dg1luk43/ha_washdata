@@ -236,15 +236,36 @@ def test_no_stray_clear_when_no_activity_ever_started(
     assert _clears(mock_hass) == []
 
 
-def test_shutdown_clears_both_surfaces(
+def test_shutdown_mid_cycle_clears_both_surfaces(
     manager: WashDataManager, mock_hass: Any
 ) -> None:
-    """No finished notification follows a shutdown, so nothing may be left behind."""
+    """A cycle in progress has no finished card yet, so nothing may be left behind."""
+    from custom_components.ha_washdata.const import STATE_RUNNING
+
+    manager.detector.state = STATE_RUNNING
     manager._clear_live_progress_notification(clear_services=True)
     assert _clears(mock_hass) == [
         manager._live_notification_tag,
         manager._lifecycle_tag,
     ]
+
+
+def test_shutdown_after_a_cycle_keeps_the_finished_card(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Found in the PR #448 round-25 review.
+
+    The finished alert uses the lifecycle tag. A restart or unload AFTER a cycle
+    ended would otherwise dismiss the card the user still needs: "no finished
+    notification follows" is true of a cycle in progress and false of one already
+    over. The live tag still goes unconditionally, because its Live Activity
+    chronometer goes negative once nothing updates it.
+    """
+    from custom_components.ha_washdata.const import STATE_OFF
+
+    manager.detector.state = STATE_OFF
+    manager._clear_live_progress_notification(clear_services=True)
+    assert _clears(mock_hass) == [manager._live_notification_tag]
 
 
 def test_pending_live_entries_are_still_purged_by_tag(
