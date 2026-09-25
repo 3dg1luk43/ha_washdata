@@ -144,11 +144,25 @@ def _snaps(
     the middle one is the common case. So the tuner can favour weights that win
     on a representative trace and lose on the curve live matching actually uses.
 
-    Making it faithful means rebuilding each profile's envelope once per
-    leave-one-out fold - DTW warping every member, O(folds x profiles) envelope
-    builds inside an on-device training job - and the cheap approximation
-    (averaging the pool's regridded curves) is the option already measured
-    WORSE above. The exposure is bounded meanwhile: `tune_matching_config` can
+    Making it faithful is **cheaper than this docstring used to claim**, and the
+    claim is worth correcting because it was the stated reason for deferring. It
+    said "an envelope rebuild per fold, O(folds x profiles)". Two things make
+    that wrong: an envelope is built from traces, so it does not depend on the
+    config being tuned and survives the whole grid search; and leave-one-out
+    excludes ONE cycle, so only the target's OWN profile has a different
+    template - every other profile keeps the full-pool one, shared by every
+    target. Distinct templates are therefore `profiles + targets`, not
+    `folds x profiles`. Measured on the worst real export in `cycle_data/` (12
+    profiles with >= 2 cycles, 63 targets): **75 templates, ~5.9 s** of DTW at
+    79 ms a warp, against the 756 / ~60 s the old wording implied - affordable
+    inside a background training job.
+
+    What still argues for care rather than speed: the cheap approximation
+    (averaging the pool's regridded curves) is the option already measured WORSE
+    above, so a faithful version has to build the real warped envelope and honour
+    production's three-way template rule (pinned golden cycle, else envelope
+    average once >= 2 cycles are confirmed, else the single sample). The
+    exposure is bounded meanwhile: `tune_matching_config` can
     only move the bounded scoring weights, never structural matching behaviour,
     `revert_matching_config` undoes it, and promotion is gated on **held-out
     top-1 accuracy**: `tune_matching_config` promotes only when the tuned config
