@@ -742,9 +742,21 @@ class CycleDetector:
     @staticmethod
     def _sanitize_terminal_high(
         raw: Any,
-    ) -> tuple[float, float] | tuple[float, float, float] | None:
-        """Coerce ``raw`` into a ``(start_frac, seconds)`` pair or a
-        ``(start_frac, seconds, start_offset_s)`` triple, else None (#399).
+    ) -> (
+        tuple[float, float]
+        | tuple[float, float, float]
+        | tuple[float, float, float, float]
+        | None
+    ):
+        """Coerce ``raw`` into a ``(start_frac, seconds)`` pair, a
+        ``(start_frac, seconds, start_offset_s)`` triple, or a
+        ``(start_frac, seconds, start_offset_s, ceiling_w)`` quad, else None (#399).
+
+        The fourth element is the watts the block was MEASURED against (register
+        item 351). Anti-crease measures against ``anti_wrinkle_max_power`` and
+        sends a triple; the standby-band path measures against a share of the
+        cycle's own peak and must say so, because the live counter has to count
+        seconds above the same bar or the two halves compare different things.
 
         None means "no opinion", which leaves ``_anticrease_spin_pending`` inert and
         the anti-crease finalise exactly as it behaved before the guard existed.
@@ -769,7 +781,7 @@ class CycleDetector:
             values = list(raw)
         except TypeError:
             return None
-        if len(values) not in (2, 3):
+        if len(values) not in (2, 3, 4):
             return None
         try:
             start_frac = float(values[0])
@@ -790,7 +802,19 @@ class CycleDetector:
             return (start_frac, seconds)
         if not math.isfinite(start_offset) or start_offset < 0:
             return (start_frac, seconds)
-        return (start_frac, seconds, start_offset)
+        if len(values) == 3:
+            return (start_frac, seconds, start_offset)
+        try:
+            ceiling = float(values[3])
+        except (TypeError, ValueError, OverflowError):
+            return (start_frac, seconds, start_offset)
+        # A non-positive or non-finite ceiling degrades to the triple rather than
+        # to None: the triple still arms the guard against
+        # ``anti_wrinkle_max_power``, and this method must never be able to
+        # DISARM a guard that would otherwise arm.
+        if not math.isfinite(ceiling) or ceiling <= 0:
+            return (start_frac, seconds, start_offset)
+        return (start_frac, seconds, start_offset, ceiling)
 
     def _trailing_mean_power(self, timestamp: datetime, window_s: float) -> float | None:
         """Time-weighted mean power over the trailing ``window_s``, or None when
@@ -2800,18 +2824,30 @@ class CycleDetector:
         # never spins - the #445 Miele, which has no terminal block at all - is not
         # delayed by it.
         #
-        # **Scope, and it is narrower than the paragraph above implies (register
-        # item 351, DEFERRED).** `_anticrease_spin_pending` needs element 10, and
-        # `manager._async_perform_combined_matching` only supplies that when
-        # `anti_wrinkle_enabled` is true - which DEFAULTS FALSE. So on a washer
-        # with anti-wrinkle off, `_matched_terminal_high` is None, this predicate
-        # returns False immediately, and the deferral described above does not
-        # happen at all. Making it independent means computing a terminal-high
-        # block against a threshold that is not `anti_wrinkle_max_power` (the
-        # obvious candidate being the same `STANDBY_BAND_MAX_FRACTION` share of
-        # peak this guard already uses), which changes WHEN cycles end and so
-        # wants measuring on `devtools/end_gate_eval.py` before it ships. Left to
-        # the maintainer rather than changed unattended.
+        # **This used to be inert on the devices it exists for (register item
+        # 351).** `_anticrease_spin_pending` needs element 10, and the manager
+        # supplied it only when `anti_wrinkle_enabled` was true -
+        # `DEFAULT_ANTI_WRINKLE_ENABLED` is False, so on a washer the predicate
+        # returned False immediately and none of the above happened. Measured on
+        # the 273-cycle replay corpus: the band fired 14 times, 11 with the guard
+        # inert, and 6 of those 11 had a reading above `min_power` still ahead,
+        # i.e. would split. `manager._terminal_high_for_guards` now arms it for
+        # `STANDBY_BAND_FINALIZE_DEVICE_TYPES` against a share of the cycle's own
+        # peak - the same `STANDBY_BAND_MAX_FRACTION` used below, so the rule is
+        # "wait while the profile still owes a block above the plateau you are
+        # sitting on" and there is no new tunable. The bar travels WITH the block
+        # as element 4, because `_high_power_seconds_since` has to count live
+        # seconds above the same number.
+        #
+        # Measured end to end on `devtools/end_gate_eval.py`: washing-machine
+        # splits 4.49% -> 1.90%, median end lag 26.00 -> 24.74 min (it does not
+        # cost time - a cycle that used to split now finishes once), match rate
+        # 89.7% -> 92.4%, early ends unchanged at 0.00%, dishwashers identical.
+        # A ceiling of 0.15 caught the 6th split too but deferred 10 of the 11
+        # firings, and a deferral with no spin ahead waits out
+        # ANTI_CREASE_SPIN_WAIT_MAX_RATIO (1.25x expected, ~32 min on a 2:09
+        # wash), so it bought the last split for three long waits. 0.10 was the
+        # maintainer's call.
         if self._anticrease_spin_pending(timestamp):
             return False
         peak = float(self._cycle_max_power)
@@ -3080,7 +3116,11 @@ class CycleDetector:
         # exposure). The fallback keeps a pre-196 payload - an old state snapshot, the
         # Playground, older callers - behaving exactly as before.
         offset_s = float(block[2]) if len(block) >= 3 else start_frac * expected
-        seen = self._high_power_seconds_since(offset_s)
+        # Element 4, when the store sent one, is the watts the block was measured
+        # against. Count the live seconds above the SAME bar or the two halves
+        # describe different things (register item 351).
+        ceiling_w = float(block[3]) if len(block) >= 4 else None
+        seen = self._high_power_seconds_since(offset_s, ceiling_w=ceiling_w)
         if seen >= needed:
             return False
         if not self._anticrease_spin_wait_logged:
@@ -3092,7 +3132,11 @@ class CycleDetector:
                 "%.0fs expected).",
                 self._matched_profile,
                 block_seconds,
-                float(self._config.anti_wrinkle_max_power),
+                (
+                    float(self._config.anti_wrinkle_max_power)
+                    if ceiling_w is None
+                    else ceiling_w
+                ),
                 start_frac * 100.0,
                 offset_s,
                 seen,
@@ -3101,9 +3145,16 @@ class CycleDetector:
             )
         return True
 
-    def _high_power_seconds_since(self, offset_s: float) -> float:
-        """Seconds this cycle has spent above ``anti_wrinkle_max_power`` at or after
-        ``offset_s`` from its start (#399).
+    def _high_power_seconds_since(
+        self, offset_s: float, ceiling_w: float | None = None
+    ) -> float:
+        """Seconds this cycle has spent above ``ceiling_w`` at or after ``offset_s``
+        from its start (#399); ``anti_wrinkle_max_power`` when None.
+
+        The caller supplies the ceiling so both halves of the comparison use one
+        bar: the profile's block was measured against it too. The standby-band
+        path passes a share of the cycle's own peak (register item 351), the
+        anti-crease path passes nothing and keeps the dryer's tumble level.
 
         Walks the readings backwards and stops at the offset, so the scan is bounded
         by the tail of the trace rather than its whole length. Each reading covers
@@ -3129,7 +3180,11 @@ class CycleDetector:
         start = self._current_cycle_start
         if start is None or not self._power_readings:
             return 0.0
-        ceiling = float(self._config.anti_wrinkle_max_power)
+        ceiling = (
+            float(self._config.anti_wrinkle_max_power)
+            if ceiling_w is None
+            else float(ceiling_w)
+        )
         max_gap = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
         total = 0.0
         readings = self._power_readings

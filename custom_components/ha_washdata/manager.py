@@ -279,6 +279,8 @@ from .const import (
     STATE_PAUSED,
     STATE_USER_PAUSED,
     STATE_ENDING,
+    STANDBY_BAND_FINALIZE_DEVICE_TYPES,
+    STANDBY_BAND_MAX_FRACTION,
     STATE_ANTI_WRINKLE,
     STATE_DELAY_WAIT,
     STATE_IDLE,
@@ -1092,12 +1094,7 @@ class WashDataManager:
                 # before its terminal spin and record the spin as a second cycle.
                 # Elements 5-8 stay False: a manual pin is certain by definition,
                 # so there is no mismatch or ambiguity to report.
-                terminal_high = None
-                if self.detector.config.anti_wrinkle_enabled:
-                    terminal_high = self.profile_store.profile_terminal_high_block(
-                        self._current_program,
-                        self.detector.config.anti_wrinkle_max_power,
-                    )
+                terminal_high = self._terminal_high_for_guards(self._current_program)
                 return (
                     self._current_program,
                     1.0,
@@ -1793,11 +1790,7 @@ class WashDataManager:
             # guard; element 11 is its measured post-activity quiet span, which
             # bounds the tail Smart Termination may bank (register item 297). The detector
             # tolerates shorter tuples, so other callers stay valid.
-            terminal_high = None
-            if profile_name and self.detector.config.anti_wrinkle_enabled:
-                terminal_high = self.profile_store.profile_terminal_high_block(
-                    profile_name, self.detector.config.anti_wrinkle_max_power
-                )
+            terminal_high = self._terminal_high_for_guards(profile_name)
             self.detector.update_match(
                 (profile_name, confidence, matched_duration, phase_name,
                  result.is_confident_mismatch, result.is_ambiguous,
@@ -2313,6 +2306,55 @@ class WashDataManager:
                 )
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._logger.warning("Banked-tail repair could not run: %s", exc)
+
+
+    def _terminal_high_for_guards(self, profile_name: str | None) -> Any:
+        """Element 10: the matched profile's last high-power block, or None.
+
+        Two callers with two different bars, and the bar has to travel with the
+        block (register item 351):
+
+        * **anti-crease** (#399) measures against ``anti_wrinkle_max_power``, the
+          dryer's "a tumble is below this" level. Only meaningful while
+          anti-wrinkle is on, and it sends a triple.
+        * **the standby-band finalise** (#296 / #445) shares the same predicate,
+          and used to get nothing at all: element 10 was supplied ONLY when
+          anti-wrinkle was enabled, and `DEFAULT_ANTI_WRINKLE_ENABLED` is False,
+          so `_anticrease_spin_pending` returned False immediately and a washer
+          could finalise on the quiet plateau before its final spin - recording
+          that spin as a second cycle. Measured over the 273-cycle replay corpus:
+          the standby band fires on 14 cycles, 11 of them with the guard inert,
+          and 6 of those 11 have a reading above `min_power` still ahead, i.e.
+          would split. This arms it against a share of the cycle's own peak, the
+          same `STANDBY_BAND_MAX_FRACTION` the plateau test uses, which recovers
+          5 of the 6 for one extra bounded wait. Sent as a QUAD so
+          `_high_power_seconds_since` counts against that bar too.
+
+        Returns None when nothing applies, which leaves the guard exactly as
+        inert as it was - the fail-open direction every input here takes.
+        """
+        if not profile_name:
+            return None
+        detector = self.detector
+        if detector.config.anti_wrinkle_enabled:
+            return self.profile_store.profile_terminal_high_block(
+                profile_name, detector.config.anti_wrinkle_max_power
+            )
+        if detector.config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES:
+            return None
+        try:
+            ceiling = (
+                float(getattr(detector, "_cycle_max_power", 0.0) or 0.0)
+                * STANDBY_BAND_MAX_FRACTION
+            )
+        except (TypeError, ValueError):
+            return None
+        if ceiling <= 0:
+            return None
+        block = self.profile_store.profile_terminal_high_block(profile_name, ceiling)
+        if block is None:
+            return None
+        return (float(block[0]), float(block[1]), float(block[2]), ceiling)
 
     async def async_setup(self) -> None:
         """Set up the manager."""
