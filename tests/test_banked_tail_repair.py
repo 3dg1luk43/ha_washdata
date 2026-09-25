@@ -332,20 +332,59 @@ async def test_repair_takes_a_tail_at_the_floor() -> None:
 
 
 @pytest.mark.asyncio
-async def test_repair_ignores_reference_and_backfill_cycles() -> None:
-    """Community templates were never recorded here, and backfilled cycles never
-    went through Smart Termination, so neither can carry a banked tail."""
-    ref = [_cycle("r", 3000, 1200)]
-    back = [_cycle("b", 3000, 1200)]
+async def test_repair_ignores_a_community_template_and_backfill_cycles() -> None:
+    """A store download carries no ``termination_reason`` - `_add_reference_cycle_nosave`
+    only records one when the caller passes it, and only the real-history-to-reference
+    import does. Backfilled cycles never went through Smart Termination at all. So
+    neither is reachable by the SMART filter, which is what keeps curated data safe
+    by construction rather than by a rule someone could relax (register item 353)."""
+    ref = _cycle("r", 3000, 1200)
+    del ref["termination_reason"]          # exactly what a store download looks like
+    back = _cycle("b", 3000, 1200)
+    del back["termination_reason"]
     data = {
         "past_cycles": [],
-        "reference_cycles": ref,
-        "backfill_cycles": back,
+        "reference_cycles": [ref],
+        "backfill_cycles": [back],
         BANKED_TAIL_REPAIR_KEY: True,
     }
     st = _Store(data)
     await st.async_repair_banked_tails(2.0, "washing_machine")
     assert data["reference_cycles"][0]["duration"] == pytest.approx(4200.0)
+    assert data["backfill_cycles"][0]["duration"] == pytest.approx(4200.0)
+
+
+@pytest.mark.asyncio
+async def test_repair_fixes_a_reference_cycle_imported_from_real_history() -> None:
+    """Register item 353. `cycle_destination` DEFAULTS to "reference", so importing a
+    pre-v13 export of the device's own history rebases those cycles into
+    `reference_cycles` with `duration` taken from the trace span - tail included - and
+    marks them golden, where they feed `avg_duration`. The repair has to reach them."""
+    ref = _cycle("r", 3000, 1200)          # keeps termination_reason == "smart"
+    data = {
+        "past_cycles": [],
+        "reference_cycles": [ref],
+        BANKED_TAIL_REPAIR_KEY: True,
+    }
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 1
+    assert data["reference_cycles"][0]["duration"] == pytest.approx(2970.0, abs=31.0)
+
+
+@pytest.mark.asyncio
+async def test_a_backfill_cycle_is_never_repaired_even_if_it_claims_smart() -> None:
+    """Backfill is replayed from raw history and runs unmatched, so Smart Termination
+    is inert there; a `smart` reason on one is a fabrication, not a banked tail."""
+    back = _cycle("b", 3000, 1200)
+    data = {"past_cycles": [], "backfill_cycles": [back], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 0
     assert data["backfill_cycles"][0]["duration"] == pytest.approx(4200.0)
 
 

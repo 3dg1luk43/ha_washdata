@@ -2228,6 +2228,15 @@ class ProfileStore:
             # ignore a malformed sampling_interval rather than raise mid-import
             with contextlib.suppress(TypeError, ValueError):
                 cycle["sampling_interval"] = float(meta["sampling_interval"])
+        # Only the real-history-to-reference import supplies this (register item
+        # 353). A community-store download has no termination_reason and never
+        # gets one here, which is exactly what keeps
+        # `async_repair_banked_tails` off curated data: the repair looks for
+        # `TerminationReason.SMART`, so a store cycle is unreachable to it by
+        # construction rather than by a filter someone could later relax.
+        _reason = meta.get("termination_reason")
+        if isinstance(_reason, str) and _reason:
+            cycle["termination_reason"] = _reason
         # A reference cycle implies its program exists locally; create a minimal profile
         # entry if absent so the matcher iterates it and the rebuild can set its template.
         profiles = self._data.setdefault("profiles", {})
@@ -5772,27 +5781,36 @@ class ProfileStore:
         carry a banked tail; a user-stopped or unattributed cycle is left alone for
         the reason given at the filter.
 
-        **``reference_cycles`` are NOT all community templates, and this scope has
-        a known hole (register item 351, DEFERRED).** `async_import_data_selective`
-        defaults `cycle_destination` to ``"reference"``, so importing a pre-v13
-        export of a device's OWN history routes those cycles through
-        `_add_reference_cycle_nosave`, which takes `duration` from the trace span
-        and does not carry `termination_reason` across. A Smart-Terminated trace
-        includes its confirmation tail, because `_finish_cycle` appends a final
-        sample at `end_time` - so the reference cycle keeps the inflated duration,
-        is marked ``golden``, and feeds `avg_duration` / `target_duration` through
-        `async_rebuild_envelope`, while this repair never looks at it. Closing it
-        means carrying a marker across that conversion and repairing marked
-        reference cycles only; rewriting curated golden data is a decision for the
-        maintainer, not something to do unattended.
+        **``reference_cycles`` are NOT all community templates (register item
+        353).** `async_import_data_selective` defaults `cycle_destination` to
+        ``"reference"``, so importing a pre-v13 export of a device's OWN history
+        rebases those cycles into `reference_cycles` with `duration` taken from
+        the trace span - and a Smart-Terminated trace holds its confirmation tail,
+        because `_finish_cycle` appends a final sample at `end_time`. Marked
+        ``golden``, they feed `avg_duration` / `target_duration` through
+        `async_rebuild_envelope`, so the inflation this repair exists to remove
+        walked straight back in through the import door.
+
+        So both lists are scanned, and the SAME `TerminationReason.SMART` filter
+        decides. That filter is what keeps curated data safe, and it does so by
+        construction rather than by a rule someone could relax:
+        `_add_reference_cycle_nosave` only records `termination_reason` when the
+        caller passes one, and the only caller that does is the
+        real-history-to-reference import. A community-store download has no such
+        field and is therefore unreachable to this repair.
 
         Returns a summary for the log. Never raises: a failed repair must not cost
         the user their history, so the store is left exactly as it was.
         """
         summary: dict[str, Any] = {"examined": 0, "repaired": 0, "reclaimed_s": 0.0}
         try:
-            cycles = self._data.get("past_cycles")
-            if not isinstance(cycles, list):
+            past = self._data.get("past_cycles")
+            refs = self._data.get("reference_cycles")
+            cycles = [
+                *(past if isinstance(past, list) else []),
+                *(refs if isinstance(refs, list) else []),
+            ]
+            if not isinstance(past, list) and not isinstance(refs, list):
                 self._data[BANKED_TAIL_REPAIR_KEY] = False
                 return summary
             is_dishwasher = device_type == DEVICE_TYPE_DISHWASHER
@@ -8591,9 +8609,12 @@ class ProfileStore:
         # either, and the repair is idempotent.
         if (
             "real_cycles" in cats
-            and cycle_destination == "real_history"
             and _export_predates_banked_tail_repair(meta)
         ):
+            # Both destinations (item 353). `real_history` copies the cycles
+            # verbatim; `reference` - the DEFAULT - rebases them into
+            # `reference_cycles` with `duration` taken from the trace span, which
+            # includes the banked confirmation tail just the same.
             self._data[BANKED_TAIL_REPAIR_KEY] = True
 
         ref_id_pool: set[Any] = {c.get("id") for c in self._data.get("reference_cycles", []) if isinstance(c, dict)}
@@ -8686,7 +8707,17 @@ class ProfileStore:
                     _ensure_profile(target or "(imported)", c.get("duration") or 0)
                     cid = self._add_reference_cycle_nosave(
                         target or "(imported)", c.get("power_data") or [],
-                        {"store_cycle_id": _bare_store_id(raw_sid)}, id_pool=ref_id_pool,
+                        {
+                            "store_cycle_id": _bare_store_id(raw_sid),
+                            # Carried so the banked-tail repair can reach this
+                            # cycle (item 353). A Smart-Terminated trace holds
+                            # its confirmation tail, and `duration` here is the
+                            # trace span, so without this the tail is baked into
+                            # GOLDEN evidence that feeds avg_duration and nothing
+                            # ever corrects it.
+                            "termination_reason": c.get("termination_reason"),
+                        },
+                        id_pool=ref_id_pool,
                     )
                     if cid:
                         if dkey:

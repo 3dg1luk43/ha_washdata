@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cycles end much closer to when the appliance actually does.
 - A washing machine's final spin is no longer recorded as a second cycle.
 - Better program matching: auto-labels only on a clear winner, and no mid-wash swap on one strong reading.
-- Cycles stored at their real length; existing history corrected once.
+- Cycles stored at their real length; existing history corrected once, imports included.
 - An appliance idling above its Stop Threshold closes in minutes, and is flagged.
 - Saner Off Delay suggestions, and the real end wait shown in Settings.
 - Live notifications cleared at cycle end; the countdown reaches zero.
@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The panel stays where you scrolled it, even while a cycle runs.
 
 ### Fixes
+
+- **Importing your own earlier export no longer leaves inflated cycle lengths behind** (found while auditing the one-time history correction): WashData corrects cycles recorded before 0.5.7, which stored the end-of-cycle confirmation wait as part of the wash. Importing a backup of your own history files those cycles as reference recordings by default, and that path both took their length from the recorded trace, tail included, and lost the marker saying the wash had ended early - so the correction never reached them and the inflated lengths kept shaping the program averages and every time estimate from them. The marker is kept now, the correction covers imported recordings too, and it re-runs after an import. Community recordings downloaded from the store are untouched: they never carried that marker, so the correction cannot reach them. Verified on a real Home Assistant instance: imported cycles corrected from 70 to 49.5 minutes with the program average following, downloaded ones unchanged.
 
 - **A washing machine's final spin is no longer recorded as a second cycle** (found while auditing the cycle-end guards): a washer that sits at a low, flat draw above its Stop Threshold can never finish on its own, so WashData closes the cycle once it has run past its program's expected length and the draw has been flat for a while. Many machines idle like that for several minutes BEFORE their final spin, so the cycle was closed early and the spin that followed opened a second record, splitting one wash in two and feeding both halves into the program's statistics. A guard against exactly this already existed, but it was only given the information it needs when Anti-Wrinkle was switched on, and that is off by default, so on most washing machines it never ran. It is now armed from the program's own learned shape instead: if the program ends with a burst of power the current run has not produced yet, the close waits for it. Measured by replaying 273 recorded cycles, washing machines split on 1.9% of cycles instead of 4.5%, and the typical end is slightly earlier rather than later (26.0 to 24.7 minutes after the last activity), because a wash that used to split now finishes once. The wait is bounded and releases on its own, no cycle ends earlier than before, and dishwashers and dryers are unaffected.
 
