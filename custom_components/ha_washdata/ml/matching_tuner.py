@@ -102,7 +102,11 @@ def _prep(cycles: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
             # drops degenerate entries.
             continue
         ts, pw = series
-        by_profile.setdefault(name, []).append({"ts": ts, "pw": pw, "dur": dur})
+        review = c.get("ml_review")
+        golden = bool(review.get("golden")) if isinstance(review, dict) else False
+        by_profile.setdefault(name, []).append(
+            {"ts": ts, "pw": pw, "dur": dur, "golden": golden}
+        )
     return by_profile
 
 
@@ -116,6 +120,53 @@ def _regrid(item: dict[str, Any], dt: float, cache: dict) -> list[float] | None:
     cache[key] = out
     return out
 
+
+
+def _envelope_avg(
+    name: str, pool: list[dict[str, Any]], excluded: int | None, dt: float, cache: dict
+) -> list[float] | None:
+    """The pool's DTW-warped envelope average, re-gridded to the query's ``dt``.
+
+    This is what `ProfileStore.async_match_profile` scores against once a profile
+    has >= 2 confirmed cycles and no pinned golden cycle, i.e. the common case
+    (register item 347(e)).
+
+    Cheap enough to do honestly, which the deferral used to deny (item 354): an
+    envelope is built from traces, so it does not depend on the config being
+    tuned and survives the whole grid search, and leave-one-out changes only the
+    target's OWN profile - so the number of distinct envelopes is
+    ``profiles + targets``, not ``folds x profiles``. Both caches below are keyed
+    accordingly.
+    """
+    ekey = ("env", name, excluded)
+    built = cache.get(ekey)
+    if built is None:
+        raw = [
+            (it["ts"].tolist(), it["pw"].tolist(), float(it["dur"]))
+            for it in pool
+        ]
+        try:
+            built = analysis.compute_envelope_worker(raw, _BASE_CFG["dtw_bandwidth"])
+        except Exception:  # pylint: disable=broad-exception-caught
+            built = False  # cache the failure; do not retry per target
+        cache[ekey] = built
+    if not built:
+        return None
+    grid, _lo, _hi, avg, _std, _target = built
+    if len(grid) < 2 or len(avg) != len(grid):
+        return None
+    gkey = ("envgrid", name, excluded, round(float(dt), 2))
+    if gkey in cache:
+        return cache[gkey]
+    seg = _longest(
+        resample_uniform(
+            np.asarray(grid, dtype=float), np.asarray(avg, dtype=float),
+            dt_s=dt, gap_s=_GAP_S,
+        )
+    )
+    out = seg.power.tolist() if seg is not None and len(seg.power) >= 2 else None
+    cache[gkey] = out
+    return out
 
 def _snaps(
     by_profile: dict[str, list[dict]],
@@ -174,6 +225,7 @@ def _snaps(
     """
     snaps = []
     for name, items in by_profile.items():
+        excluded = exclude[1] if (exclude is not None and exclude[0] == name) else None
         pool = [
             it for idx, it in enumerate(items)
             if exclude is None or (name, idx) != exclude
@@ -182,8 +234,27 @@ def _snaps(
             continue
         durs = [it["dur"] for it in pool]
         avg = float(np.mean(durs))
-        rep = min(pool, key=lambda it: abs(it["dur"] - avg))
-        curve = _regrid(rep, dt, cache)
+        # Production's three-way template rule, in production's order
+        # (`ProfileStore.async_match_profile`). Getting this wrong is register
+        # item 347(e): scoring one representative cycle where live matching
+        # scores the envelope average can favour weights that lose on the curve
+        # that actually does the matching.
+        curve = None
+        golden = [it for it in pool if it.get("golden")]
+        if golden:
+            # 1. a pinned golden cycle keeps its own sharp trace; the average
+            #    smears the wash-phase peaks, which is why production prefers it.
+            curve = _regrid(golden[0], dt, cache)
+        elif len(pool) >= 2:
+            # 2. the common case: the DTW-warped envelope average.
+            curve = _envelope_avg(name, pool, excluded, dt, cache)
+        if not curve:
+            # 3. the single-sample fallback, and the safety net for a profile
+            #    whose envelope will not build (too few usable points, a trace
+            #    that resamples to nothing). Representative rather than
+            #    arbitrary: closest to the pool's mean duration.
+            rep = min(pool, key=lambda it: abs(it["dur"] - avg))
+            curve = _regrid(rep, dt, cache)
         if not curve:
             continue
         snaps.append({
@@ -194,14 +265,28 @@ def _snaps(
     return snaps
 
 
-def _top1(by_profile: dict[str, list[dict]], targets: list[tuple[str, int]], cfg: dict[str, Any]) -> float:
+def _top1(
+    by_profile: dict[str, list[dict]],
+    targets: list[tuple[str, int]],
+    cfg: dict[str, Any],
+    cache: dict | None = None,
+) -> float:
     """Fraction of the given (profile, idx) targets whose true profile ranks #1
-    under leave-one-out matching with the given config."""
+    under leave-one-out matching with the given config.
+
+    ``cache`` is shared ACROSS calls on purpose. Nothing in it depends on
+    ``cfg``: the re-gridded curves are keyed by (cycle, dt) and the envelopes by
+    (profile, excluded index), while ``cfg`` only changes the scoring weights.
+    Left per-call - as it was - the grid search rebuilds every envelope for each
+    of its ~59 configs, which measured 16 s -> 361 s on one real export. This is
+    what makes the `profiles + targets` cost in register item 354 real rather
+    than theoretical."""
     if not targets:
         return 0.0
     correct = 0
     total = 0
-    cache: dict = {}
+    if cache is None:
+        cache = {}
     for name, idx in targets:
         it = by_profile[name][idx]
         # The query defines the grid, exactly as in production.
@@ -322,10 +407,13 @@ def tune_matching_config(
     # so promoted weights are consistent with the live matcher.
     base = {**_BASE_CFG, "energy_mode": analysis.stage4_energy_mode(device_type)}
     # Candidate: the grid config with the best top-1 on the SEARCH pool only.
-    best_search = _top1(by_profile, search_pool, base)
+    # One cache for the entire run: the grid search and both holdout arms all
+    # reuse the same envelopes and re-gridded curves (see `_top1`).
+    shared: dict = {}
+    best_search = _top1(by_profile, search_pool, base, shared)
     best_cfg = base
     for extra in _grid():
-        acc = _top1(by_profile, search_pool, {**base, **extra})
+        acc = _top1(by_profile, search_pool, {**base, **extra}, shared)
         if acc > best_search:
             best_search, best_cfg = acc, {**base, **extra}
     override = {k: best_cfg[k] for k in OVERRIDE_KEYS if k in best_cfg}
@@ -342,8 +430,8 @@ def tune_matching_config(
         pool = list(holdout_pool)
         r.shuffle(pool)
         held = pool[: max(1, len(pool) // 2)]
-        bt = _top1(by_profile, held, base)
-        tt = _top1(by_profile, held, best_cfg)
+        bt = _top1(by_profile, held, base, shared)
+        tt = _top1(by_profile, held, best_cfg, shared)
         base_tests.append(bt)
         tuned_tests.append(tt)
         if tt - bt >= margin:
@@ -357,6 +445,21 @@ def tune_matching_config(
     if promoted:
         reason = f"beat baseline on {wins}/{n_splits} held-out subsamples"
     elif not has_override:
+        # AUDITED and correct (register item 356), because it fires on every real
+        # export in `cycle_data/` and that looks like a stuck mechanism. It is
+        # not. `_BASE_CFG` deliberately omits the four OVERRIDE_KEYS, so
+        # `compute_matches_worker` falls back to `MATCH_CORR_WEIGHT` /
+        # `MATCH_DURATION_WEIGHT` / `MATCH_ENERGY_WEIGHT` /
+        # `MATCH_DTW_ENSEMBLE_W` - the tuner's baseline IS production's default,
+        # not a partial config with different fallbacks. `override` is therefore
+        # empty exactly when no grid entry beat that baseline, which is what this
+        # string says. The weights do reach the scorer: on the least saturated
+        # real device (12 profiles, 63 targets, base top-1 0.635) the grid
+        # produces three distinct scores, all <= base. The grid also contains the
+        # exact default combination (0.45 / 0.22 / 0.22 / 0.70), so the defaults
+        # are evaluated on equal terms, and `acc > best_search` is strict so a tie
+        # keeps them. Consistent with the corpus result that matcher top-1 is
+        # near-saturated: there is nothing here for per-device tuning to win.
         reason = "defaults already optimal (no override)"
     elif not enough_wins:
         reason = f"only {wins}/{n_splits} held-out subsamples beat baseline by margin"
