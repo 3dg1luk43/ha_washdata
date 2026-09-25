@@ -22,6 +22,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from custom_components.ha_washdata.const import BANKED_TAIL_REPAIR_KEY
 from custom_components.ha_washdata.profile_store import ProfileStore
 
 
@@ -533,3 +534,46 @@ async def test_reference_import_rebuilds_envelope(store):
         payload, selection={"categories": ["profiles", "reference_cycles"]},
         local_device_type="washing_machine")
     assert store.get_envelope("Eco 50") is not None  # rebuilt from the imported cycle
+
+
+# ── register item 353: a real export imported as reference kept its banked tail ──
+
+@pytest.mark.asyncio
+async def test_real_history_to_reference_carries_the_termination_reason(store):
+    """`cycle_destination` defaults to "reference", so this is what importing an
+    export of the device's OWN history normally does. `duration` is taken from the
+    trace span, and a Smart-Terminated trace holds its confirmation tail, so
+    without the marker the inflation is baked into GOLDEN evidence that feeds
+    `avg_duration` and nothing ever corrects it.
+    """
+    cyc = _cyc("c1", "Eco", 500.0)
+    cyc["termination_reason"] = "smart"
+    payload = _payload(past=[cyc])
+
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["real_cycles"]},
+        local_device_type="washing_machine",
+    )
+
+    refs = store._data["reference_cycles"]
+    assert len(refs) == 1
+    assert refs[0]["termination_reason"] == "smart"
+    # ...and the repair is re-armed, since a pre-v13 export carries the tail.
+    assert store._data[BANKED_TAIL_REPAIR_KEY] is True
+
+
+@pytest.mark.asyncio
+async def test_a_store_download_never_gets_a_termination_reason(store):
+    """This is what keeps the banked-tail repair off curated data: it filters on
+    TerminationReason.SMART, and a community template has no such field, so it is
+    unreachable by construction rather than by a rule someone could relax."""
+    payload = _payload(refs=[_cyc("s1", "Eco", 500.0)])
+
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["reference_cycles"]},
+        local_device_type="washing_machine",
+    )
+
+    refs = store._data["reference_cycles"]
+    assert len(refs) == 1
+    assert "termination_reason" not in refs[0]
