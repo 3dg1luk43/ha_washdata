@@ -2172,9 +2172,9 @@ class CycleDetector:
                             # real pump-out at ~99% arms the end-spike first.  Takes the
                             # SOONER of the two anchors, so it can only ever shorten the
                             # wait, never extend it.
+                            _spike_wait = self._dishwasher_end_spike_wait_s()
                             past_wait_period = current_duration >= (
-                                self._expected_duration
-                                + DISHWASHER_END_SPIKE_WAIT_SECONDS
+                                self._expected_duration + _spike_wait
                             ) or (
                                 current_duration >= self._expected_duration
                                 and self._time_below_threshold_gapfree
@@ -2190,7 +2190,7 @@ class CycleDetector:
                                     "expected %.0fs + %.0fs wait)",
                                     current_duration,
                                     self._expected_duration,
-                                    DISHWASHER_END_SPIKE_WAIT_SECONDS,
+                                    _spike_wait,
                                 )
                                 return  # Don't finish yet, wait for spike
 
@@ -2226,7 +2226,7 @@ class CycleDetector:
                     # resetting the quiet timer) — asymmetric, shorten-only.  Not
                     # for user-paused cycles.
                     required_quiet = max(
-                        ENDING_HARD_FINALIZE_MIN_QUIET_S,
+                        self._ending_hard_finalize_quiet_s(),
                         float(max(self._config.off_delay, self._config.min_off_gap)),
                     )
                     # Require the required_quiet tail to be actually SAMPLED (no
@@ -3448,7 +3448,7 @@ class CycleDetector:
             and self._expected_duration > 0
             and not self._end_spike_seen
             and duration
-            < (self._expected_duration + DISHWASHER_END_SPIKE_WAIT_SECONDS)
+            < (self._expected_duration + self._dishwasher_end_spike_wait_s())
             and not quiet_released
         ):
             # Report the gap-free tally: that is what `quiet_released` above reads,
@@ -3460,7 +3460,7 @@ class CycleDetector:
                 "%.0fs of %.0fs needed, profile: %s)",
                 duration,
                 self._expected_duration,
-                DISHWASHER_END_SPIKE_WAIT_SECONDS,
+                self._dishwasher_end_spike_wait_s(),
                 self._time_below_threshold_gapfree,
                 self._config.dishwasher_end_spike_quiet_release,
                 self._matched_profile,
@@ -3506,6 +3506,40 @@ class CycleDetector:
 
         # Tertiary check: If duration exceeded max tolerance, allow finish (failsafe).
         return False
+
+    def _dishwasher_end_spike_wait_s(self) -> float:
+        """Grace past the expected end while waiting for the terminal pump-out.
+
+        Capped at the programme's OWN expected length - the same ``min()`` shape
+        register item 331 gave ``DISHWASHER_MIN_CYCLE_DURATION_S``, for the same
+        reason. A flat 1800 s is 20% of a 150 min ECO cycle but **five times** a
+        6 min Smeg "Delay- prewash", and the community catalogue carries exactly
+        that programme. Asymmetric: the cap can only ever SHORTEN the wait, never
+        extend it, so no cycle waits longer than it does today.
+
+        A no-op across the maintainer's corpus, where every dishwasher profile is
+        >90 min and the cap therefore never binds (register item 357). Unmatched
+        cycles keep the flat constant: with no expected duration there is nothing
+        to be proportional to.
+        """
+        expected = float(self._expected_duration or 0.0)
+        if expected <= 0:
+            return DISHWASHER_END_SPIKE_WAIT_SECONDS
+        return min(DISHWASHER_END_SPIKE_WAIT_SECONDS, expected)
+
+    def _ending_hard_finalize_quiet_s(self) -> float:
+        """Continuous sub-threshold span the ENDING backstop requires.
+
+        Same cap, same reason: 600 s of required quiet is a third of a 30 min
+        programme and longer than a 6 min one, which would disarm the backstop
+        entirely on a short programme - the opposite of what a safety net is for.
+        The ``off_delay`` / ``min_off_gap`` floor is applied by the caller and is
+        unaffected.
+        """
+        expected = float(self._expected_duration or 0.0)
+        if expected <= 0:
+            return ENDING_HARD_FINALIZE_MIN_QUIET_S
+        return min(ENDING_HARD_FINALIZE_MIN_QUIET_S, expected)
 
     def _keep_tail_cap(self, start_time: datetime) -> datetime | None:
         """Latest end time a *kept* tail may claim (#424).

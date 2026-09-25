@@ -154,6 +154,25 @@ wrong looks like a bug in the integration:
    default is therefore a washing machine; `--type dishwasher` needs
    `--speedup 4` or lower and takes ~35 min.
 
+   **Raising the speedup is self-defeating, not merely ineffective**, and this
+   is the real ceiling (register item 357). Item 331 made that floor drop to the
+   matched profile's own length, so in principle a compressed dishwasher should
+   pass it - but only *while it is matched*. Measured at 60x: the profiles
+   compress correctly to ~137 s, the cycle replays in ~144 s, and it stays
+   matchable until Stage 1's `max_duration_ratio` (1.8) rejects it at ~247 s.
+   The floor then holds the cycle open to 1800 s, which pushes elapsed to 7.3x
+   the profile, which is what killed the match in the first place. Deadlock:
+   `No profile match candidates ... duration ratio filter`, then
+   `elapsed 1003s < minimum 1800s`, forever. A 60x run takes 16 min and still
+   fails 2 of 19 checks (no cycle recorded).
+
+   So the floor is only relative for a cycle that stays matched, and a
+   compressed one cannot. Making it relative in the UNMATCHED case is not
+   possible - there is no expected duration to be relative to - and making it an
+   option would add a tunable that exists purely for tests. Use `--speedup 4`.
+   This is a compressed-replay artifact only: a real dishwasher runs past 30 min
+   anyway, so nothing here affects production.
+
 Two consequences worth knowing:
 
 - Absolute minute counts from a box run mean nothing. Behaviour does: a cycle
