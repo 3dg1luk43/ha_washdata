@@ -57,6 +57,8 @@ from .signal_processing import (
     integrate_wh,
 )
 from .const import (
+    STANDBY_BAND_FINALIZE_DEVICE_TYPES,
+    STANDBY_BAND_MAX_FRACTION,
     CONF_ANTI_WRINKLE_ENABLED,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
@@ -1073,14 +1075,40 @@ class _DetailSim:
                 tail_power = self.store.profile_tail_power(raw_name)
             except Exception:  # pylint: disable=broad-exception-caught
                 tail_power = None
-            # Element 10 (#399), guarded the same way: the anti-crease spin guard is
-            # only meaningful for a device that runs anti-wrinkle at all.
+            # Element 10 (#399), and the standby-band arm on top of it (register
+            # item 351). Mirrors `manager._terminal_high_for_guards` exactly: the
+            # anti-crease bar is `anti_wrinkle_max_power` and only meaningful
+            # while anti-wrinkle is on, but the standby-band finalise shares the
+            # same predicate and must not be inert just because anti-wrinkle is
+            # off (it defaults off). There the bar is a share of the cycle's own
+            # peak, sent as a QUAD so the detector counts live seconds above the
+            # same number. Kept in step with the manager by
+            # `test_the_playground_mirrors_the_standby_arm`.
             det = getattr(self, "detector", None)
-            if det is not None and det.config.anti_wrinkle_enabled:
+            if det is not None:
                 try:
-                    terminal_high = self.store.profile_terminal_high_block(
-                        raw_name, det.config.anti_wrinkle_max_power
-                    )
+                    if det.config.anti_wrinkle_enabled:
+                        terminal_high = self.store.profile_terminal_high_block(
+                            raw_name, det.config.anti_wrinkle_max_power
+                        )
+                    elif (
+                        det.config.device_type in STANDBY_BAND_FINALIZE_DEVICE_TYPES
+                    ):
+                        _ceiling = (
+                            float(getattr(det, "_cycle_max_power", 0.0) or 0.0)
+                            * STANDBY_BAND_MAX_FRACTION
+                        )
+                        if _ceiling > 0:
+                            _blk = self.store.profile_terminal_high_block(
+                                raw_name, _ceiling
+                            )
+                            if _blk is not None:
+                                terminal_high = (
+                                    float(_blk[0]),
+                                    float(_blk[1]),
+                                    float(_blk[2]),
+                                    _ceiling,
+                                )
                 except Exception:  # pylint: disable=broad-exception-caught
                     terminal_high = None
         # Element 11 (item 297) and element 12 (item 330). Both were missing, so

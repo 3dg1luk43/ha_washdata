@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### TL;DR
 
 - Cycles end much closer to when the appliance actually does.
+- A washing machine's final spin is no longer recorded as a second cycle.
 - Better program matching: auto-labels only on a clear winner, and no mid-wash swap on one strong reading.
 - Cycles stored at their real length; existing history corrected once.
 - An appliance idling above its Stop Threshold closes in minutes, and is flagged.
@@ -24,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The panel stays where you scrolled it, even while a cycle runs.
 
 ### Fixes
+
+- **A washing machine's final spin is no longer recorded as a second cycle** (found while auditing the cycle-end guards): a washer that sits at a low, flat draw above its Stop Threshold can never finish on its own, so WashData closes the cycle once it has run past its program's expected length and the draw has been flat for a while. Many machines idle like that for several minutes BEFORE their final spin, so the cycle was closed early and the spin that followed opened a second record, splitting one wash in two and feeding both halves into the program's statistics. A guard against exactly this already existed, but it was only given the information it needs when Anti-Wrinkle was switched on, and that is off by default, so on most washing machines it never ran. It is now armed from the program's own learned shape instead: if the program ends with a burst of power the current run has not produced yet, the close waits for it. Measured by replaying 273 recorded cycles, washing machines split on 1.9% of cycles instead of 4.5%, and the typical end is slightly earlier rather than later (26.0 to 24.7 minutes after the last activity), because a wash that used to split now finishes once. The wait is bounded and releases on its own, no cycle ends earlier than before, and dishwashers and dryers are unaffected.
 
 - **The expected curve on a cycle graph lines up with the cycle, and the false "above the usual power band" markers are gone** (reported from a cycle graph where the two curves were visibly out of step): WashData learns a program's shape by time-aligning your recorded cycles onto one another. Everything that later compared a finished cycle against that shape skipped the alignment and simply stretched the cycle's clock to fit, which is worse than not aligning at all: a dishwasher absorbs its run-to-run variation in the drying tail, so stretching the whole cycle moves the heating blocks that happen at a fixed time. Measured on 188 recorded cycles, a real 2.5-minute spread in where the final heating block sits became an error of -4.7 to +7.7 minutes. Comparisons now use the same alignment the learning does: 164 bogus "above the usual power band" markers become 3, 48 "below" become 0, 71 cycles wrongly reported as not fitting their own program become 4, and a genuine power spike is caught on 140 of 188 cycles instead of 92. The graph also draws the expected curve on the cycle's own clock. Matching and cycle detection are untouched.
 
