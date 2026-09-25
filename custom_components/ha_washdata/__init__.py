@@ -1267,6 +1267,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 )
                 manager._logger.info("Applied imported settings to config entry %s", entry_id)
 
+            # An old payload re-arms the one-time banked-tail repair. Nothing here
+            # reloads the entry unless the payload brought settings with it, so
+            # schedule it directly rather than leaving it for the next restart.
+            manager.async_schedule_banked_tail_repair()
+
             manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
 
         hass.services.async_register(DOMAIN, "import_config", handle_import_config)

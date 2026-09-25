@@ -5778,8 +5778,8 @@ class ProfileStore:
         Only ``past_cycles`` is touched, and within it only cycles recorded as
         ``TerminationReason.SMART``. ``backfill_cycles`` were replayed from raw
         history and never went through Smart Termination at all, so they cannot
-        carry a banked tail; a user-stopped or unattributed cycle is left alone for
-        the reason given at the filter.
+        carry a banked tail; a user-stopped, unattributed, or hand-corrected cycle
+        is left alone for the reasons given at the filter.
 
         **``reference_cycles`` are NOT all community templates (register item
         353).** `async_import_data_selective` defaults `cycle_destination` to
@@ -5842,6 +5842,20 @@ class ProfileStore:
                 # also matches what was measured (item 297): smart-terminated
                 # cycles banked a median 12.6 min, every other path ~0.
                 if cycle.get("termination_reason") != TerminationReason.SMART:
+                    continue
+                # A corrected duration is the same kind of statement `user_stop`
+                # is, and gets the same exemption. `manual_duration` is what the
+                # user answered when asked how long the cycle really ran, and
+                # `_rebuild_envelope_sync` prefers it over the stored duration
+                # (`final_dur = float(man_dur) if man_dur else authoritative_dur`),
+                # as does the no-envelope fallback in `async_rebuild_envelope`.
+                # The correction path writes BOTH fields, so `old_duration` here
+                # IS the corrected value - meaning the repair can only fire on a
+                # cycle the user made LONGER than its last activity, which is
+                # precisely the case it must not touch. Repairing it would trim
+                # the trace and rewrite `end_time` while the envelope carried on
+                # reading `manual_duration`: all of the cost, none of the effect.
+                if cycle.get("manual_duration"):
                     continue
                 try:
                     points = decompress_power_data(cycle)

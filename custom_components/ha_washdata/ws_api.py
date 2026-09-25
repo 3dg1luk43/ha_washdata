@@ -3726,6 +3726,11 @@ async def ws_import_config(
                 # blindly applying it would hijack this device's sensor binding.
                 # Identity changes must go through the reconfigure flow.
 
+            # An old payload re-arms the one-time banked-tail repair, and the
+            # options write above is the only thing here that could reload the
+            # entry - so an import that carries no options would otherwise leave
+            # the imported tails inflating avg_duration until the next restart.
+            manager.async_schedule_banked_tail_repair()
             manager.notify_update()
             _send_result(connection, msg["id"], "import_config", {"success": True})
         except json.JSONDecodeError as exc:
@@ -3958,6 +3963,11 @@ async def ws_import_config_selective(
                     settings_applied = len(filtered)
             summary = {**summary, "settings_applied": settings_applied}
 
+            # Same as the wholesale path: `apply_settings=False` (and any import
+            # whose settings subset comes back empty) skips the options write
+            # above, so nothing reloads the entry and the re-armed repair would
+            # wait for a restart.
+            manager.async_schedule_banked_tail_repair()
             manager.notify_update()
             _send_result(
                 connection, msg["id"], "import_config_selective",

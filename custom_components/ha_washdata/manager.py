@@ -703,6 +703,7 @@ class WashDataManager:
         self._sample_interval_stats: dict[str, Any] = {}
         self._matching_task: Task[Any] | None = None
         self._cycle_end_task: Task[Any] | None = None
+        self._banked_tail_repair_task: Task[Any] | None = None
         # Detached store-touching tasks (matching trigger, active-cycle clear,
         # post-cycle processing) tracked so async_shutdown can cancel them before a
         # reload/unload swaps the ProfileStore out from under them.
@@ -2307,6 +2308,33 @@ class WashDataManager:
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._logger.warning("Banked-tail repair could not run: %s", exc)
 
+    def async_schedule_banked_tail_repair(self) -> None:
+        """Run the one-time banked-tail repair now if the marker is armed.
+
+        `async_setup` is one caller, and covers the storage migration that arms
+        the marker at v12->v13. An **import** arms it too - both
+        `async_import_data` and `async_import_data_selective` set it for a payload
+        old enough to carry banked tails - and an import does not reliably reload
+        the entry: the WS handlers only call `async_update_entry` when the payload
+        brings options with it, so a cycles-only import, or any selective import
+        with `apply_settings=False`, left the marker set and the imported tails
+        feeding `avg_duration`, the ETA and Smart Termination until the next
+        restart.
+
+        Cheap when there is nothing to do - the marker is the whole test, and the
+        repair clears it. A second call while the first is still in flight is a
+        no-op rather than a second walk of the history: the repair only clears the
+        marker at the end, so the check alone would not stop two concurrent runs
+        from rebuilding the same envelopes.
+        """
+        if self.profile_store.banked_tail_repair_pending() is not True:
+            return
+        existing = self._banked_tail_repair_task
+        if existing is not None and not existing.done():
+            return
+        self._banked_tail_repair_task = self._spawn_tracked(
+            self._async_repair_banked_tails()
+        )
 
     def _terminal_high_for_guards(self, profile_name: str | None) -> Any:
         """Element 10: the matched profile's last high-power block, or None.
@@ -2557,14 +2585,13 @@ class WashDataManager:
         # converted and therefore trimmable: started earlier, such a cycle gets its
         # duration corrected and its trace left as it was, because `_safe_offset`
         # rejects an ISO string and `kept` comes back empty.
-        if self.profile_store.banked_tail_repair_pending() is True:
-            # Backgrounded, not awaited. It walks up to 200 stored traces and
-            # rebuilds envelopes, and anything awaited inside async_setup is billed
-            # to the integration's reported startup time (register item 158 / #408).
-            # Nothing needs it before the first cycle ends. Tracked, because it
-            # writes to the ProfileStore: an untracked task would keep writing to
-            # the store a reload had already swapped out.
-            self._spawn_tracked(self._async_repair_banked_tails())
+        # Backgrounded, not awaited. It walks up to 200 stored traces and rebuilds
+        # envelopes, and anything awaited inside async_setup is billed to the
+        # integration's reported startup time (register item 158 / #408). Nothing
+        # needs it before the first cycle ends. Tracked, because it writes to the
+        # ProfileStore: an untracked task would keep writing to the store a reload
+        # had already swapped out.
+        self.async_schedule_banked_tail_repair()
 
     def _load_notify_services(self, config_entry: ConfigEntry) -> None:
         """Load notification service lists, migrating legacy single-service config."""
