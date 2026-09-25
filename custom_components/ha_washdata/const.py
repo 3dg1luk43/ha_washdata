@@ -651,6 +651,9 @@ MAX_ALIGN_GRID_POINTS = 2000
 END_GATE_LATE_RATIO = 1.05
 END_GATE_LATE_SECONDS = 300.0
 
+# Device-resolved on a washing machine: see END_GATE_LATE_RATIO_BY_DEVICE
+# and resolve_end_gate_late_ratio below, next to the device-type constants.
+
 MATCH_AMBIGUITY_MARGIN = 0.05
 # Separate, WIDER margin required before a finished cycle is auto-labelled
 # (register item 310). Deliberately NOT the same constant as
@@ -1326,6 +1329,40 @@ DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE = {
 DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 0.99,
 }
+
+
+# ...except on a washing machine, where 1.05 is structurally out of reach
+# (register item 355). A washer's programme length is load-adaptive, so a run is
+# BELOW its profile's mean duration about half the time by definition: measured
+# over the `end_gate_eval.py` corpus the median washer reaches only 0.83 of the
+# bar before it stops, against 1.01 for a dishwasher, and the shortening fired on
+# 6.8% of washer cycles. That is what left washing machines waiting out the full
+# `min_off_gap` - a median 24.74 min after the last activity, against 6.89 for a
+# dishwasher. NOT an ambiguity problem, which is what the register used to say;
+# item 330 had already fixed that half.
+#
+# Scoped to the device class rather than lowered globally, because every early
+# end in the global sweep was a DISHWASHER: at 0.95 one dishwasher closed 5.58
+# min before its last activity (a 30 s 73 W blip after five dead-zero minutes),
+# while washing machines showed 0.00% early ends at every ratio tried. Measured
+# at 0.90, washers only: median end lag 24.74 -> 13.69 min, early ends 0.00%,
+# splits unchanged at 1.90%, dishwashers byte-identical. The cost is 2 cycles of
+# 158 losing their auto-label (92.4% -> 91.1%) because ending ~11 min sooner can
+# skip a final match tick; they are still stored and offered for confirmation,
+# which this codebase already treats as much cheaper than a wrong label (#325).
+END_GATE_LATE_RATIO_BY_DEVICE = {
+    DEVICE_TYPE_WASHING_MACHINE: 0.90,
+    DEVICE_TYPE_WASHER_DRYER: 0.90,
+}
+
+
+def resolve_end_gate_late_ratio(device_type: str) -> float:
+    """Device-resolved bar for the item-306 ENDING shortening.
+
+    Single source of truth for the detector and the Playground replay, so the
+    sim cannot diverge from live the way it did in item 352.
+    """
+    return END_GATE_LATE_RATIO_BY_DEVICE.get(device_type, END_GATE_LATE_RATIO)
 
 
 def resolve_smart_termination_duration_ratio_default(device_type: str) -> float:

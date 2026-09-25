@@ -43,7 +43,8 @@ arms are two states of the working tree:
     python3 devtools/end_gate_eval.py --json /tmp/after.json
     python3 devtools/end_gate_eval.py --compare /tmp/before.json /tmp/after.json
 
-``--no-shortening`` patches ``END_GATE_LATE_RATIO`` out of reach to give the
+``--no-shortening`` patches ``const.END_GATE_LATE_RATIO`` (and the per-device
+map) out of reach to give the
 pre-306 arm, which needs no checkout.
 
 Run from the repo root.
@@ -309,9 +310,16 @@ def main() -> int:
         return 0
 
     if args.no_shortening:
-        from custom_components.ha_washdata import cycle_detector as _cd
+        # Patch `const`, not `cycle_detector`. Since register item 355 the gate
+        # calls `resolve_end_gate_late_ratio(device_type)`, which reads these two
+        # names out of `const` at call time - rebinding the detector module's
+        # imported copy no longer reaches it, and this arm would silently stop
+        # disabling the shortening while still reporting itself as the pre-306
+        # baseline. Both names, because the per-device map wins for washers.
+        from custom_components.ha_washdata import const as _const
 
-        _cd.END_GATE_LATE_RATIO = 1e9
+        _const.END_GATE_LATE_RATIO = 1e9
+        _const.END_GATE_LATE_RATIO_BY_DEVICE = {}
 
     rows: list[dict[str, Any]] = []
     for path in sorted((REPO / "cycle_data").rglob("*.json")):
