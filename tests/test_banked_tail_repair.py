@@ -833,3 +833,46 @@ def test_a_failed_measurement_is_never_cached() -> None:
     assert st.profile_terminal_quiet_seconds("p") is None
     assert st.profile_terminal_quiet_seconds("p") is None
     assert st.compute_profile_terminal_signature.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_repair_leaves_a_hand_corrected_duration_alone() -> None:
+    """A `manual_duration` is the user's own answer to "how long did this run?",
+    and `_rebuild_envelope_sync` prefers it over the stored duration
+    (`final_dur = float(man_dur) if man_dur else authoritative_dur`). The
+    correction path writes BOTH fields, so the repair can only ever fire on a
+    cycle the user deliberately made LONGER than its last activity - and
+    repairing it would trim the trace and rewrite `end_time` while the envelope
+    carried on reading `manual_duration`. Same exemption `user_stop` gets."""
+    corrected = _cycle("m", 3000, 1200)
+    corrected["manual_duration"] = 4200.0
+
+    data = {"past_cycles": [corrected], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 0
+    assert data["past_cycles"][0]["duration"] == pytest.approx(4200.0)
+    assert data["past_cycles"][0]["manual_duration"] == pytest.approx(4200.0)
+    # The trace still covers the duration the user asserted.
+    assert data["past_cycles"][0]["power_data"][-1][0] == pytest.approx(4170.0)
+    # Still a one-time repair: the marker clears whether or not anything moved.
+    assert not st.banked_tail_repair_pending()
+
+
+@pytest.mark.asyncio
+async def test_an_uncorrected_sibling_is_still_repaired() -> None:
+    """The exemption is per cycle, not a reason to abandon the run."""
+    corrected = _cycle("m", 3000, 1200)
+    corrected["manual_duration"] = 4200.0
+    plain = _cycle("p", 3000, 1200)
+
+    data = {"past_cycles": [corrected, plain], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 1
+    assert data["past_cycles"][0]["duration"] == pytest.approx(4200.0)
+    assert data["past_cycles"][1]["duration"] == pytest.approx(2970.0, abs=31.0)

@@ -172,17 +172,28 @@ def test_the_banked_tail_repair_is_spawned_through_spawn_tracked():
     ``_spawn_tracked`` is what puts it there. Spawned bare, the repair would walk
     up to 200 stored traces still writing to the store setup had just replaced.
     Asserted on the source because reaching this line needs a fully built manager.
+
+    Pinned on the scheduler rather than on ``async_setup``: round 27 gave the
+    imports the same entry point (they re-arm the marker without reloading the
+    entry), so ``_spawn_tracked`` has to hold for every caller, not just setup.
     """
+    import inspect
+
+    from custom_components.ha_washdata.manager import WashDataManager
+
+    src = inspect.getsource(WashDataManager.async_schedule_banked_tail_repair)
+    assert "_spawn_tracked(" in src
+    assert "_async_repair_banked_tails()" in src
+
     from pathlib import Path
 
-    src = (
+    whole = (
         Path(__file__).resolve().parents[1]
         / "custom_components"
         / "ha_washdata"
         / "manager.py"
     ).read_text()
-    assert "self._spawn_tracked(self._async_repair_banked_tails())" in src
-    assert "async_create_task(self._async_repair_banked_tails" not in src
+    assert "async_create_task(self._async_repair_banked_tails" not in whole
 
 
 # --------------------------------------------------------------------------
@@ -738,7 +749,11 @@ def test_the_banked_tail_repair_is_spawned_after_setup_rewrites_the_cycles():
         / "ha_washdata"
         / "manager.py"
     ).read_text()
-    spawn = src.index("self._spawn_tracked(self._async_repair_banked_tails())")
+    # The call in `async_setup` is the only `self.`-qualified one in this module
+    # (the definition reads `def async_schedule_banked_tail_repair`), so this
+    # anchors on the setup site even though the scheduler now has other callers.
+    assert src.count("self.async_schedule_banked_tail_repair()") == 1
+    spawn = src.index("self.async_schedule_banked_tail_repair()")
     for later in (
         "await self.profile_store.async_repair_profile_samples()",
         "await self.profile_store.async_migrate_cycles_to_compressed()",
