@@ -67,6 +67,7 @@ from .const import (
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
     GATE_CADENCE_MEDIAN_FACTOR,
     END_GATE_LATE_RATIO,
+    resolve_end_gate_late_ratio,
     END_GATE_LATE_SECONDS,
     STANDBY_BAND_FINALIZE_DEVICE_TYPES,
     STANDBY_BAND_MIN_RATIO,
@@ -2395,7 +2396,13 @@ class CycleDetector:
                             # bar - which it could when this read
                             # `MatchResult.candidates`, i.e. `candidates[:5]`.
                             _blocked = True
-                    if not _blocked and _elapsed >= END_GATE_LATE_RATIO * _bar:
+                    # Device-resolved (register item 355): 1.05 is out of
+                    # reach for a load-adaptive washer, which reaches a
+                    # median 0.83 of this bar before it stops.
+                    _late_ratio = resolve_end_gate_late_ratio(
+                        self._config.device_type
+                    )
+                    if not _blocked and _elapsed >= _late_ratio * _bar:
                         effective_off_delay = max(
                             self._config.off_delay,
                             min(self._config.min_off_gap, END_GATE_LATE_SECONDS),

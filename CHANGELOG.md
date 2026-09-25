@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### TL;DR
 
-- Cycles end much closer to when the appliance actually does.
+- Cycles end much closer to when the appliance actually does, washing machines most of all.
 - A washing machine's final spin is no longer recorded as a second cycle.
 - Better program matching: auto-labels only on a clear winner, and no mid-wash swap on one strong reading.
 - Cycles stored at their real length; existing history corrected once, imports included.
@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The panel stays where you scrolled it, even while a cycle runs.
 
 ### Fixes
+
+- **A washing machine now finishes about twelve minutes sooner after the drum stops** (found while auditing why washers finished so much later than dishwashers): once a cycle has clearly run past its program's usual length, WashData stops waiting out the long Min Off Gap and asks for five minutes of quiet instead. That test compared the run against the program's average length plus a 5% margin, which a washing machine almost never reaches: wash programs adapt to the load, so an individual run comes in under its own average about half the time. Measured by replaying 273 recorded cycles, the shortcut reached only 7% of washing-machine cycles, and washers finished a median 24.7 minutes after the drum stopped against 6.9 for dishwashers. The margin is now judged per appliance type, and a washing machine qualifies a little before its average length rather than after: the median drops to 13.7 minutes, with no cycle ending early and no new split cycles. Dishwashers and dryers are unchanged, deliberately - they were the only appliances that ended early when this was loosened for everything at once. The trade is that about one washer cycle in eighty is no longer labelled automatically, because finishing sooner can skip a last check; those cycles are still recorded and offered for you to confirm.
 
 - **Importing your own earlier export no longer leaves inflated cycle lengths behind** (found while auditing the one-time history correction): WashData corrects cycles recorded before 0.5.7, which stored the end-of-cycle confirmation wait as part of the wash. Importing a backup of your own history files those cycles as reference recordings by default, and that path both took their length from the recorded trace, tail included, and lost the marker saying the wash had ended early - so the correction never reached them and the inflated lengths kept shaping the program averages and every time estimate from them. The marker is kept now, the correction covers imported recordings too, and it re-runs after an import. Community recordings downloaded from the store are untouched: they never carried that marker, so the correction cannot reach them. Verified on a real Home Assistant instance: imported cycles corrected from 70 to 49.5 minutes with the program average following, downloaded ones unchanged.
 
