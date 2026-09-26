@@ -1623,7 +1623,7 @@
     },
     "notify_icon_color": {
       "label": "Couleur de notification",
-      "doc": "Couleur d'accentuation des notifications de cet appareil, afin de distinguer d'un coup d'œil un lave-linge, un sèche-linge et un lave-vaisselle. Android colore la notification ; iOS colore l'icône ainsi que la barre de progression de l'activité en direct sur l'écran verrouillé et dans la Dynamic Island. Le format hexadécimal (par exemple #03A9F4) est compris par les deux. Laissez vide pour la valeur par défaut de la plateforme."
+      "doc": "Couleur d'accentuation des notifications de cet appareil, afin de distinguer d'un coup d'œil un lave-linge, un sèche-linge et un lave-vaisselle. iOS colore l'icône ainsi que la barre de progression de l'activité en direct sur l'écran verrouillé et dans la Dynamic Island. Android reçoit la même couleur, mais l'usage qu'il en fait dépend du téléphone : certains colorent l'icône, et beaucoup (Samsung One UI en particulier) l'ignorent totalement. Le format hexadécimal (par exemple #03A9F4) est compris par les deux. Laissez vide pour la valeur par défaut de la plateforme."
     }
   },
   "setting_group": {

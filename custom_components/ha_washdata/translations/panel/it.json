@@ -1623,7 +1623,7 @@
     },
     "notify_icon_color": {
       "label": "Colore notifica",
-      "doc": "Colore d'accento per le notifiche di questo elettrodomestico, così da distinguere a colpo d'occhio una lavatrice, un'asciugatrice e una lavastoviglie. Android colora la notifica; iOS colora l'icona e la barra di avanzamento dell'Attività in tempo reale sulla schermata di blocco e nella Dynamic Island. Il formato esadecimale (es. #03A9F4) è compreso da entrambi. Lascia vuoto per l'impostazione predefinita della piattaforma."
+      "doc": "Colore d'accento per le notifiche di questo elettrodomestico, così da distinguere a colpo d'occhio una lavatrice, un'asciugatrice e una lavastoviglie. iOS colora l'icona e la barra di avanzamento dell'Attività in tempo reale sulla schermata di blocco e nella Dynamic Island. Ad Android viene inviato lo stesso colore, ma ciò che ne fa dipende dal telefono: alcuni colorano l'icona e molti (in particolare Samsung One UI) lo ignorano del tutto. Il formato esadecimale (es. #03A9F4) è compreso da entrambi. Lascia vuoto per l'impostazione predefinita della piattaforma."
     }
   },
   "setting_group": {

@@ -1676,7 +1676,7 @@
     },
     "notify_icon_color": {
       "label": "Varselfarge",
-      "doc": "Aksentfarge for varslene fra dette apparatet, slik at en vaskemaskin, en tørketrommel og en oppvaskmaskin er lette å skille fra hverandre. Android farger varselet; iOS farger ikonet og fremdriftslinjen i Liveaktiviteten på låst skjerm og i Dynamic Island. Begge forstår hex-verdier (f.eks. #03A9F4). La stå tomt for plattformens standard."
+      "doc": "Aksentfarge for varslene fra dette apparatet, slik at en vaskemaskin, en tørketrommel og en oppvaskmaskin er lette å skille fra hverandre. iOS farger ikonet og fremdriftslinjen i Liveaktiviteten på låst skjerm og i Dynamic Island. Android får den samme fargen, men hva den gjør med den, er opp til telefonen: noen farger ikonet, og mange (særlig Samsung One UI) ignorerer den helt. Begge forstår hex-verdier (f.eks. #03A9F4). La stå tomt for plattformens standard."
     }
   },
   "setting_group": {

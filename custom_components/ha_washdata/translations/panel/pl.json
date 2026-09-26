@@ -1644,7 +1644,7 @@
     },
     "notify_icon_color": {
       "label": "Kolor Powiadomienia",
-      "doc": "Kolor akcentu powiadomień tego urządzenia, aby pralkę, suszarkę i zmywarkę można było odróżnić na pierwszy rzut oka. Android koloruje samo powiadomienie; iOS koloruje ikonę oraz pasek postępu Live Activity na ekranie blokady i w Dynamic Island. Obie platformy rozumieją Hex (np. #03A9F4). Pozostaw puste, aby użyć domyślnego koloru platformy."
+      "doc": "Kolor akcentu powiadomień tego urządzenia, aby pralkę, suszarkę i zmywarkę można było odróżnić na pierwszy rzut oka. iOS koloruje ikonę oraz pasek postępu Live Activity na ekranie blokady i w Dynamic Island. Android otrzymuje ten sam kolor, ale to telefon decyduje, co z nim zrobi: niektóre kolorują ikonę, a wiele (zwłaszcza Samsung One UI) całkowicie go ignoruje. Obie platformy rozumieją Hex (np. #03A9F4). Pozostaw puste, aby użyć domyślnego koloru platformy."
     }
   },
   "setting_group": {

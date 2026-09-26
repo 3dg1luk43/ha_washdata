@@ -1644,7 +1644,7 @@
     },
     "notify_icon_color": {
       "label": "Barva oznámení",
-      "doc": "Barva zvýraznění oznámení tohoto spotřebiče, aby se pračka, sušička a myčka nádobí daly na první pohled rozeznat. Android obarví samotné oznámení; iOS obarví ikonu a ukazatel průběhu Live Activity na zamčené obrazovce a v Dynamic Island. Obě platformy rozumí formátu Hex (např. #03A9F4). Nechte prázdné pro výchozí barvu platformy."
+      "doc": "Barva zvýraznění oznámení tohoto spotřebiče, aby se pračka, sušička a myčka nádobí daly na první pohled rozeznat. iOS obarví ikonu a ukazatel průběhu Live Activity na zamčené obrazovce a v Dynamic Island. Android dostane stejnou barvu, ale co s ní udělá, záleží na telefonu: některé obarví ikonu a mnohé (zejména Samsung One UI) ji zcela ignorují. Obě platformy rozumí formátu Hex (např. #03A9F4). Nechte prázdné pro výchozí barvu platformy."
     }
   },
   "setting_group": {

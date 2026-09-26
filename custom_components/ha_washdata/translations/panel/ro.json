@@ -1591,7 +1591,7 @@
     },
     "notify_icon_color": {
       "label": "Culoare Notificare",
-      "doc": "Culoare de accent pentru notificările acestui aparat, astfel încât o mașină de spălat rufe, un uscător și o mașină de spălat vase să poată fi deosebite dintr-o privire. Android colorează notificarea; iOS colorează pictograma și bara de progres a Activității live de pe ecranul blocat și din Dynamic Island. Formatul hexazecimal (de exemplu, #03A9F4) este înțeles de ambele. Lăsați necompletat pentru valoarea prestabilită a platformei."
+      "doc": "Culoare de accent pentru notificările acestui aparat, astfel încât o mașină de spălat rufe, un uscător și o mașină de spălat vase să poată fi deosebite dintr-o privire. iOS colorează pictograma și bara de progres a Activității live de pe ecranul blocat și din Dynamic Island. Android primește aceeași culoare, dar ce face cu ea depinde de telefon: unele colorează pictograma, iar multe (în special Samsung One UI) o ignoră complet. Formatul hexazecimal (de exemplu, #03A9F4) este înțeles de ambele. Lăsați necompletat pentru valoarea prestabilită a platformei."
     }
   },
   "setting_group": {

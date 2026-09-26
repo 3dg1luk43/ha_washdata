@@ -7535,6 +7535,14 @@ class WashDataManager:
             # bar (it falls back to notification_icon_color, but is set explicitly
             # so the two stay in step). Mobile-only, same as the icon above; unset
             # leaves the payload byte-identical to before.
+            #
+            # iOS is where this reliably shows. On Android the companion app does
+            # `builder.color = parseColor(notification_icon_color ?: color)` and
+            # never calls setColorized, so Android 12+ applies it per-OEM: a Pixel
+            # tints the icon, Samsung One UI shows nothing. Nothing we can send
+            # changes that, which is why the setting's help text says so (item 372).
+            # Note the app reads the iOS-named key FIRST - harmless only because
+            # both carry one value here, so do not let them diverge.
             if icon_color and self._is_mobile_notify_service(notify_service):
                 svc_data["color"] = icon_color
                 svc_data["notification_icon_color"] = icon_color

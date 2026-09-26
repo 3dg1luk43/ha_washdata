@@ -1676,7 +1676,7 @@
     },
     "notify_icon_color": {
       "label": "Tilkynningalitur",
-      "doc": "Áherslulitur fyrir tilkynningar frá þessu tæki, svo að þvottavél, þurrkari og uppþvottavél þekkist í sjónhendingu. Android litar tilkynninguna; iOS litar táknið og framvindustikuna í Live Activity á lásskjánum og í Dynamic Island. Bæði kerfin skilja hex-gildi (t.d. #03A9F4). Skildu eftir autt fyrir sjálfgefinn lit kerfisins."
+      "doc": "Áherslulitur fyrir tilkynningar frá þessu tæki, svo að þvottavél, þurrkari og uppþvottavél þekkist í sjónhendingu. iOS litar táknið og framvindustikuna í Live Activity á lásskjánum og í Dynamic Island. Android fær sama litinn sendan, en hvað síminn gerir við hann er undir honum komið: sum tæki lita táknið og mörg (einkum Samsung One UI) hunsa hann alveg. Bæði kerfin skilja hex-gildi (t.d. #03A9F4). Skildu eftir autt fyrir sjálfgefinn lit kerfisins."
     }
   },
   "setting_group": {

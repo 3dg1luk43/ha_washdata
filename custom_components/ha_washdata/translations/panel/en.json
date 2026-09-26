@@ -1471,7 +1471,7 @@
       "label": "Notification Icon"
     },
     "notify_icon_color": {
-      "doc": "Accent colour for this appliance's notifications, so a washer, a dryer and a dishwasher are tellable apart at a glance. Android tints the notification; iOS tints the icon and the Live Activity progress bar on the Lock Screen and in the Dynamic Island. Hex (e.g. #03A9F4) is understood by both. Leave blank for the platform default.",
+      "doc": "Accent colour for this appliance's notifications, so a washer, a dryer and a dishwasher are tellable apart at a glance. iOS tints the icon and the Live Activity progress bar on the Lock Screen and in the Dynamic Island. Android is sent the same colour, but what it does with it is up to the phone: some tint the icon, and many (Samsung One UI especially) ignore it entirely. Hex (e.g. #03A9F4) is understood by both. Leave blank for the platform default.",
       "label": "Notification Colour"
     },
     "notify_live_chronometer": {

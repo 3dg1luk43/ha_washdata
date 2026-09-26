@@ -1639,7 +1639,7 @@
         },
         "notify_icon_color": {
             "label": "Ngjyra e njoftimit",
-            "doc": "Ngjyrë theksuese për njoftimet e kësaj pajisjeje, që makina larëse, tharësja dhe pjatalarësja të dallohen me një shikim. Android e ngjyros njoftimin; iOS ngjyros ikonën dhe shiritin e progresit të Live Activity në ekranin e kyçjes dhe në Dynamic Island. Të dyja e kuptojnë kodin Hex (p.sh. #03A9F4). Lëreni bosh për parazgjedhjen e platformës."
+            "doc": "Ngjyrë theksuese për njoftimet e kësaj pajisjeje, që makina larëse, tharësja dhe pjatalarësja të dallohen me një shikim. iOS ngjyros ikonën dhe shiritin e progresit të Live Activity në ekranin e kyçjes dhe në Dynamic Island. Android-it i dërgohet e njëjta ngjyrë, por çfarë bën me të varet nga telefoni: disa e ngjyrosin ikonën, ndërsa shumë (veçanërisht Samsung One UI) e shpërfillin plotësisht. Të dyja e kuptojnë kodin Hex (p.sh. #03A9F4). Lëreni bosh për parazgjedhjen e platformës."
         }
     },
     "setting_group": {

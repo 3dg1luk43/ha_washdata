@@ -1676,7 +1676,7 @@
     },
     "notify_icon_color": {
       "label": "Meldingskleur",
-      "doc": "Accentkleur voor de meldingen van dit apparaat, zodat een wasmachine, een droger en een vaatwasser in één oogopslag te onderscheiden zijn. Android kleurt de melding; iOS kleurt het pictogram en de voortgangsbalk van de Live-activiteit op het toegangsscherm en in de Dynamic Island. Beide begrijpen hex-waarden (bijvoorbeeld #03A9F4). Laat dit leeg voor de platformstandaard."
+      "doc": "Accentkleur voor de meldingen van dit apparaat, zodat een wasmachine, een droger en een vaatwasser in één oogopslag te onderscheiden zijn. iOS kleurt het pictogram en de voortgangsbalk van de Live-activiteit op het toegangsscherm en in de Dynamic Island. Android krijgt dezelfde kleur doorgestuurd, maar wat ermee gebeurt, bepaalt de telefoon: sommige kleuren het pictogram en veel toestellen (zeker Samsung One UI) negeren de kleur volledig. Beide begrijpen hex-waarden (bijvoorbeeld #03A9F4). Laat dit leeg voor de platformstandaard."
     }
   },
   "setting_group": {

@@ -1676,7 +1676,7 @@
     },
     "notify_icon_color": {
       "label": "Benachrichtigungsfarbe",
-      "doc": "Akzentfarbe für die Benachrichtigungen dieses Geräts, damit Waschmaschine, Trockner und Geschirrspüler auf einen Blick unterscheidbar sind. Android färbt die Benachrichtigung ein; iOS färbt das Symbol und den Fortschrittsbalken der Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Beide verstehen Hex-Werte (z. B. #03A9F4). Für den Plattformstandard lassen Sie das Feld leer."
+      "doc": "Akzentfarbe für die Benachrichtigungen dieses Geräts, damit Waschmaschine, Trockner und Geschirrspüler auf einen Blick unterscheidbar sind. iOS färbt das Symbol und den Fortschrittsbalken der Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. An Android wird dieselbe Farbe gesendet, aber was damit geschieht, entscheidet das Telefon: manche färben das Symbol ein, viele (insbesondere Samsung One UI) ignorieren sie ganz. Beide verstehen Hex-Werte (z. B. #03A9F4). Für den Plattformstandard lassen Sie das Feld leer."
     }
   },
   "setting_group": {

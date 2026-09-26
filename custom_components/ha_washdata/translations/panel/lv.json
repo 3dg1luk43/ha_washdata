@@ -1644,7 +1644,7 @@
     },
     "notify_icon_color": {
       "label": "Paziņojuma krāsa",
-      "doc": "Akcenta krāsa šīs ierīces paziņojumiem, lai veļas mašīnu, žāvētāju un trauku mazgājamo mašīnu varētu atšķirt ar vienu acu uzmetienu. Android iekrāso paziņojumu; iOS iekrāso ikonu un Live Activity progresa joslu bloķēšanas ekrānā un Dynamic Island. Abas platformas saprot hex kodu (piem., #03A9F4). Atstājiet tukšu, lai izmantotu platformas noklusējuma krāsu."
+      "doc": "Akcenta krāsa šīs ierīces paziņojumiem, lai veļas mašīnu, žāvētāju un trauku mazgājamo mašīnu varētu atšķirt ar vienu acu uzmetienu. iOS iekrāso ikonu un Live Activity progresa joslu bloķēšanas ekrānā un Dynamic Island. Android tiek nosūtīta tā pati krāsa, taču tas, ko ar to izdara, ir atkarīgs no tālruņa: daži iekrāso ikonu, bet daudzi (jo īpaši Samsung One UI) to pilnībā ignorē. Abas platformas saprot hex kodu (piem., #03A9F4). Atstājiet tukšu, lai izmantotu platformas noklusējuma krāsu."
     }
   },
   "setting_group": {

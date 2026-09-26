@@ -1676,7 +1676,7 @@
     },
     "notify_icon_color": {
       "label": "Notifikationsfarve",
-      "doc": "Accentfarve til denne enheds notifikationer, så en vaskemaskine, en tørretumbler og en opvaskemaskine kan skelnes fra hinanden på et øjeblik. Android farver notifikationen; iOS farver ikonet og Liveaktivitetens fremdriftslinje på den låste skærm og i Dynamic Island. Begge forstår hex-værdier (f.eks. #03A9F4). Lad stå tomt for platformens standard."
+      "doc": "Accentfarve til denne enheds notifikationer, så en vaskemaskine, en tørretumbler og en opvaskemaskine kan skelnes fra hinanden på et øjeblik. iOS farver ikonet og Liveaktivitetens fremdriftslinje på den låste skærm og i Dynamic Island. Android får den samme farve sendt, men hvad telefonen bruger den til, er op til den: nogle farver ikonet, og mange (især Samsung One UI) ignorerer den helt. Begge forstår hex-værdier (f.eks. #03A9F4). Lad stå tomt for platformens standard."
     }
   },
   "setting_group": {

@@ -1623,7 +1623,7 @@
     },
     "notify_icon_color": {
       "label": "Color de notificación",
-      "doc": "Color de acento para las notificaciones de este electrodoméstico, para distinguir de un vistazo una lavadora, una secadora y un lavavajillas. Android tiñe la notificación; iOS tiñe el icono y la barra de progreso de la Actividad en vivo en la pantalla bloqueada y en la Dynamic Island. Ambos entienden el formato hexadecimal (por ejemplo, #03A9F4). Déjelo en blanco para el valor predeterminado de la plataforma."
+      "doc": "Color de acento para las notificaciones de este electrodoméstico, para distinguir de un vistazo una lavadora, una secadora y un lavavajillas. iOS tiñe el icono y la barra de progreso de la Actividad en vivo en la pantalla bloqueada y en la Dynamic Island. A Android se le envía el mismo color, pero lo que haga con él depende del teléfono: algunos tiñen el icono y muchos (Samsung One UI en especial) lo ignoran por completo. Ambos entienden el formato hexadecimal (por ejemplo, #03A9F4). Déjelo en blanco para el valor predeterminado de la plataforma."
     }
   },
   "setting_group": {

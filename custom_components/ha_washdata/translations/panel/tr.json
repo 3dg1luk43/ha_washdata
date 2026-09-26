@@ -1676,7 +1676,7 @@
         },
         "notify_icon_color": {
             "label": "Bildirim Rengi",
-            "doc": "Bu cihazın bildirimleri için vurgu rengi; böylece çamaşır makinesi, kurutma makinesi ve bulaşık makinesi bir bakışta ayırt edilebilir. Android bildirimi renklendirir; iOS ise simgeyi ve Canlı Etkinlik ilerleme çubuğunu Kilitli ekranda ve Dynamic Island'da renklendirir. Her ikisi de Hex kodunu (ör. #03A9F4) anlar. Platform varsayılanı için boş bırakın."
+            "doc": "Bu cihazın bildirimleri için vurgu rengi; böylece çamaşır makinesi, kurutma makinesi ve bulaşık makinesi bir bakışta ayırt edilebilir. iOS simgeyi ve Canlı Etkinlik ilerleme çubuğunu Kilitli ekranda ve Dynamic Island'da renklendirir. Android'e de aynı renk gönderilir, ancak bununla ne yapacağı telefona bağlıdır: bazıları simgeyi renklendirir, birçoğu ise (özellikle Samsung One UI) rengi tamamen yok sayar. Her ikisi de Hex kodunu (ör. #03A9F4) anlar. Platform varsayılanı için boş bırakın."
         }
     },
     "setting_group": {
