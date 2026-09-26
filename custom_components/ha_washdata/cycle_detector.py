@@ -2448,9 +2448,11 @@ class CycleDetector:
                     # caught.
                     _bar = self._expected_duration
                     _blocked = False
+                    _bar_raised = False
                     if self._match_prefix_ambiguous or self._match_ambiguous:
                         if self._longest_candidate_duration > _bar:
                             _bar = self._longest_candidate_duration
+                            _bar_raised = True
                         elif self._longest_candidate_duration <= 0.0:
                             # No information: a caller that does not send element
                             # 12 keeps the old refusal (see below). The bound
@@ -2461,11 +2463,27 @@ class CycleDetector:
                             # bar - which it could when this read
                             # `MatchResult.candidates`, i.e. `candidates[:5]`.
                             _blocked = True
-                    # Device-resolved (register item 355): 1.05 is out of
-                    # reach for a load-adaptive washer, which reaches a
-                    # median 0.83 of this bar before it stops.
-                    _late_ratio = resolve_end_gate_late_ratio(
-                        self._config.device_type
+                    # Device-resolved (register item 355): 1.05 is out of reach
+                    # for a load-adaptive washer, which reaches a median 0.83 of
+                    # its EXPECTED duration before it stops.
+                    #
+                    # **But never against a RAISED bar.** When the match is
+                    # ambiguous and a longer candidate exists, `_bar` is no longer
+                    # the expected duration - it is the longest plausible
+                    # programme, and it was raised precisely to say "a much longer
+                    # look-alike is still on the table, so past the expected end
+                    # does not mean done". Discounting that by 0.90 would shorten
+                    # the wait 10% BEFORE the candidate it represents could even
+                    # finish, and on the shipped washer defaults that drops the
+                    # wait from `min_off_gap` to `max(off_delay, 300)` - one quiet
+                    # interval away from finalising mid-programme and recording the
+                    # rest as a second cycle, which is #288. The item-355 measurement
+                    # was taken against the expected duration and says nothing about
+                    # this case, so a raised bar keeps the original 1.05.
+                    _late_ratio = (
+                        END_GATE_LATE_RATIO
+                        if _bar_raised
+                        else resolve_end_gate_late_ratio(self._config.device_type)
                     )
                     if not _blocked and _elapsed >= _late_ratio * _bar:
                         effective_off_delay = max(

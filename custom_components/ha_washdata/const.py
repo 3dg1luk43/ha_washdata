@@ -1345,7 +1345,7 @@ DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE = {
 # end in the global sweep was a DISHWASHER: at 0.95 one dishwasher closed 5.58
 # min before its last activity (a 30 s 73 W blip after five dead-zero minutes),
 # while washing machines showed 0.00% early ends at every ratio tried. Measured
-# at 0.90, washers only: median end lag 24.74 -> 13.69 min, early ends 0.00%,
+# at 0.90, washers only: median end lag 24.74 -> 16.92 min, early ends 0.00%,
 # splits unchanged at 1.90%, dishwashers byte-identical. The cost is 2 cycles of
 # 158 losing their auto-label (92.4% -> 91.1%) because ending ~11 min sooner can
 # skip a final match tick; they are still stored and offered for confirmation,

@@ -390,3 +390,36 @@ test('a background batch finishing is not navigation', async ({ page }) => {
 
   expect(await scrollerTop(page)).toBe(before);
 });
+
+test('typing a group name is not navigation (round 33)', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, { 'ha_washdata/get_devices': deviceRunning });
+
+  // `_modalNavKey` decides whether a re-render inside a dialog counts as the user
+  // asking to be elsewhere. It used to read `m.name`, which for a profile group is
+  // the text being typed: the name input writes every keystroke into the model
+  // without a render, and the member-checkbox handler copies it in again before
+  // calling `_render()`. So editing the name and then ticking a member looked like
+  // navigation, the modal scroll keys were dropped, and a long member list jumped
+  // back to the top - the same wrong reset this helper exists to prevent.
+  const keys = await page.evaluate(() => {
+    const el = document.getElementById('wd-panel') as unknown as {
+      _modal: Record<string, unknown> | null;
+      _modalNavKey: () => string;
+    };
+    el._modal = { type: 'profile-group', orig: 'Cotton 2:47', name: 'Cotton 2:47', members: [] };
+    const before = el._modalNavKey();
+    el._modal.name = 'Cotton 2:47 warm';   // what the input handler does per keystroke
+    const afterTyping = el._modalNavKey();
+    el._modal = { type: 'profile-group', orig: null, name: '', members: [] };
+    const newGroup = el._modalNavKey();
+    (el._modal as Record<string, unknown>).name = 'Brand new';
+    const newGroupTyped = el._modalNavKey();
+    return { before, afterTyping, newGroup, newGroupTyped };
+  });
+
+  expect(keys.afterTyping).toBe(keys.before);
+  // A brand-new group has orig === null, which is equally stable while it is open.
+  expect(keys.newGroupTyped).toBe(keys.newGroup);
+  expect(keys.newGroup).not.toBe(keys.before);
+});
