@@ -239,6 +239,23 @@ CONF_UNLOAD_CONFIRM_ENTITY = "unload_confirm_entity"
 CONF_UNLOAD_TRACK_WITHOUT_DOOR = "unload_track_without_door"
 DEFAULT_UNLOAD_TRACK_WITHOUT_DOOR = False
 
+# How long after SUBSCRIBING to the confirmation entity a transition out of
+# `unknown` is still treated as a replay rather than a press (register item 367).
+#
+# A fresh `event.*` / `button.*` / `input_button.*` sits at `unknown` until it is
+# first pressed, so excluding `unknown -> value` outright swallowed the first ever
+# press. Accepting it outright is not safe either: a z2m action sensor publishes
+# its action as a RETAINED MQTT message, which the broker replays on reconnect,
+# and that arrives as exactly the same transition. A restart is already covered by
+# the separate `old_state is None` guard, so this window only has to cover the gap
+# between our subscription and a late-arriving retained value.
+#
+# Measured against the reference point rather than guessed: the replay lands within
+# seconds of the MQTT connection, and the only cost of the window is a genuine press
+# in the first two minutes after subscribing - which is nearly always harmless,
+# because `mark_unloaded` is a no-op unless a Clean state is actually waiting.
+UNLOAD_CONFIRM_REPLAY_GRACE_S = 120.0
+
 # Quiet hours (do-not-disturb window). Both hours 0-23; unset/None (or start==end)
 # = feature off. When configured, finish-type notifications (finish, clean-laundry
 # nag, pre-complete/reminder, milestone) that would fire inside the window are held

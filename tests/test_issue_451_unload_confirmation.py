@@ -42,6 +42,7 @@ from custom_components.ha_washdata.const import (
     STATE_CLEAN,
     STATE_FINISHED,
 )
+from custom_components.ha_washdata.const import UNLOAD_CONFIRM_REPLAY_GRACE_S
 from custom_components.ha_washdata.manager import WashDataManager
 
 
@@ -233,7 +234,6 @@ async def test_confirmation_entity_activation_clears_the_clean_state(
         ("", "single"),  # action sensor resetting after a press
         ("unavailable", "on"),  # flat battery
         ("on", "unavailable"),  # coming back from one
-        ("on", "unknown"),  # first real state after a restart
         ("on", "on"),  # attribute-only change
         ("2026-05-01T09:00:00+00:00", None),  # entity added / state restored
     ],
@@ -241,7 +241,13 @@ async def test_confirmation_entity_activation_clears_the_clean_state(
 async def test_confirmation_entity_ignores_non_activations(
     hass: HomeAssistant, new: str, old: str | None
 ) -> None:
-    """A restart, a battery outage or a release edge is not somebody at the machine."""
+    """A restart, a battery outage or a release edge is not somebody at the machine.
+
+    ``("on", "unknown")`` used to sit in this list, labelled "first real state
+    after a restart". That label was wrong: a restart's first write has
+    ``old_state is None`` and is covered by the row below it. See the
+    replay-window tests at the end of this file for what that transition actually
+    means and when it is now accepted (register item 367)."""
     mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
     _put_in_clean_state(mgr)
 
@@ -367,3 +373,156 @@ async def test_mark_unloaded_button_tracks_the_clean_state(
     await button.async_press()
     assert mgr.is_clean_state is False
     assert button.available is False
+
+
+# ── register item 367: the first ever press, without trusting a retained replay ──
+
+def _armed(mgr: WashDataManager, seconds_ago: float) -> None:
+    """Pretend this HA process first subscribed `seconds_ago` seconds back.
+
+    The anchor is process-wide (`hass.data`), not per manager, so that a settings
+    save - which is a full entry reload here, building a NEW manager - does not
+    re-arm the window and cost the user a press for two minutes afterwards."""
+    from homeassistant.util import dt as dt_util
+
+    from custom_components.ha_washdata.manager import _UNLOAD_CONFIRM_ANCHOR_KEY
+
+    mgr.hass.data[_UNLOAD_CONFIRM_ANCHOR_KEY] = dt_util.now() - timedelta(
+        seconds=seconds_ago
+    )
+
+
+@pytest.mark.asyncio
+async def test_the_first_ever_press_of_a_fresh_button_is_accepted(
+    hass: HomeAssistant,
+) -> None:
+    """A fresh `event.*` / `button.*` / `input_button.*` sits at `unknown` until it
+    is first pressed, so excluding `unknown -> value` outright swallowed the FIRST
+    EVER press - which reads as "the feature does not work". Once we are past the
+    replay window, that transition is exactly what a press looks like."""
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
+    _put_in_clean_state(mgr)
+    _armed(mgr, seconds_ago=UNLOAD_CONFIRM_REPLAY_GRACE_S + 30)
+
+    mgr._handle_unload_confirm_change(_event("2026-05-01T09:00:00+00:00", "unknown"))
+
+    assert mgr.is_clean_state is False
+
+
+@pytest.mark.asyncio
+async def test_a_retained_replay_just_after_subscribing_is_ignored(
+    hass: HomeAssistant,
+) -> None:
+    """A z2m action sensor publishes its action as a RETAINED MQTT message, which
+    the broker replays on reconnect - arriving as the same `unknown -> value`
+    transition, seconds after we subscribe. That is not somebody at the machine."""
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "sensor.button_action"})
+    _put_in_clean_state(mgr)
+    _armed(mgr, seconds_ago=5)
+
+    mgr._handle_unload_confirm_change(_event("single", "unknown", entity="sensor.button_action"))
+
+    assert mgr.is_clean_state is True
+
+
+@pytest.mark.asyncio
+async def test_an_unknown_arm_time_fails_closed(hass: HomeAssistant) -> None:
+    """"We do not know when we subscribed" carries the same risk as "we just
+    subscribed", so the window must not open by default."""
+    from custom_components.ha_washdata.manager import _UNLOAD_CONFIRM_ANCHOR_KEY
+
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
+    _put_in_clean_state(mgr)
+    mgr.hass.data.pop(_UNLOAD_CONFIRM_ANCHOR_KEY, None)
+
+    mgr._handle_unload_confirm_change(_event("2026-05-01T09:00:00+00:00", "unknown"))
+
+    assert mgr.is_clean_state is True
+
+
+@pytest.mark.asyncio
+async def test_the_window_does_not_gate_an_ordinary_press(hass: HomeAssistant) -> None:
+    """The window is scoped to `unknown` only: a normal press moments after a
+    reload must still count, or the fix would trade one lost press for another."""
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
+    _put_in_clean_state(mgr)
+    _armed(mgr, seconds_ago=1)
+
+    mgr._handle_unload_confirm_change(
+        _event("2026-05-01T09:05:00+00:00", "2026-05-01T09:00:00+00:00")
+    )
+
+    assert mgr.is_clean_state is False
+
+
+@pytest.mark.asyncio
+async def test_a_battery_outage_is_still_never_a_press(hass: HomeAssistant) -> None:
+    """`unavailable -> value` stays excluded unconditionally: a device coming back
+    can restore a value at any time, not only just after we subscribe."""
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
+    _put_in_clean_state(mgr)
+    _armed(mgr, seconds_ago=UNLOAD_CONFIRM_REPLAY_GRACE_S + 3600)
+
+    mgr._handle_unload_confirm_change(_event("2026-05-01T09:00:00+00:00", "unavailable"))
+
+    assert mgr.is_clean_state is True
+
+
+@pytest.mark.asyncio
+async def test_subscribing_records_the_arm_time(hass: HomeAssistant) -> None:
+    """The window is measured from SUBSCRIPTION, not manager start: a retained
+    value arrives just after we subscribe, on an entry reload as well as a
+    restart. Without this the window would be keyed to the wrong moment."""
+    from custom_components.ha_washdata.manager import _UNLOAD_CONFIRM_ANCHOR_KEY
+
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
+    mgr.hass.data.pop(_UNLOAD_CONFIRM_ANCHOR_KEY, None)
+
+    await mgr._setup_unload_confirm_listener()
+
+    assert mgr.hass.data.get(_UNLOAD_CONFIRM_ANCHOR_KEY) is not None
+    assert mgr._in_unload_confirm_replay_window() is True
+
+
+@pytest.mark.asyncio
+async def test_no_configured_entity_leaves_the_arm_time_clear(
+    hass: HomeAssistant,
+) -> None:
+    from custom_components.ha_washdata.manager import _UNLOAD_CONFIRM_ANCHOR_KEY
+
+    mgr = _make_manager(hass, {})
+    mgr.hass.data.pop(_UNLOAD_CONFIRM_ANCHOR_KEY, None)
+
+    await mgr._setup_unload_confirm_listener()
+
+    assert mgr.hass.data.get(_UNLOAD_CONFIRM_ANCHOR_KEY) is None
+
+
+@pytest.mark.asyncio
+async def test_a_settings_save_does_not_re_arm_the_window(hass: HomeAssistant) -> None:
+    """Found on the real-HA box, not in the unit tier: a settings save here is a
+    FULL entry reload - the log shows a fresh `Manager init` - so anchoring the
+    window per manager (or per subscribe) re-armed it on every save, costing the
+    user a press for two minutes afterwards. That is the same lost-press bug the
+    window sits beside, just narrower.
+
+    An entry reload cannot produce a retained replay anyway: MQTT is not reloaded
+    with us, so the entity keeps its state and no `unknown -> value` occurs. The
+    risk tracks MQTT reconnect, i.e. HA start, so the anchor lives in `hass.data`
+    - cleared on restart, preserved across reloads."""
+    from custom_components.ha_washdata.manager import _UNLOAD_CONFIRM_ANCHOR_KEY
+
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
+    _armed(mgr, seconds_ago=UNLOAD_CONFIRM_REPLAY_GRACE_S + 60)
+    anchor_before = hass.data[_UNLOAD_CONFIRM_ANCHOR_KEY]
+
+    # A settings save rebuilds the manager and re-subscribes.
+    mgr2 = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
+    await mgr2._setup_unload_confirm_listener()
+
+    assert hass.data[_UNLOAD_CONFIRM_ANCHOR_KEY] == anchor_before
+    assert mgr2._in_unload_confirm_replay_window() is False
+
+    _put_in_clean_state(mgr2)
+    mgr2._handle_unload_confirm_change(_event("2026-05-01T09:00:00+00:00", "unknown"))
+    assert mgr2.is_clean_state is False, "a press after a settings save must count"
