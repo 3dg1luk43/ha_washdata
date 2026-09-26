@@ -208,3 +208,80 @@ def test_the_repair_docstring_admits_it_rewrites_reference_cycles() -> None:
     assert "Only ``past_cycles`` is touched" not in doc
     assert "reference_cycles" in doc
     assert "golden" in doc
+
+
+# --------------------------------------------------------------------------
+# round 29: one zero ratio wiped every advisory for every profile
+# --------------------------------------------------------------------------
+def _advisory_store(avg_duration: float):
+    """A store with one profile whose duration gate nothing can satisfy, plus a
+    second profile that is genuinely unmatchable so there is an advisory to lose."""
+    from unittest.mock import MagicMock as _MM
+
+    from custom_components.ha_washdata.profile_store import ProfileStore
+
+    st = ProfileStore.__new__(ProfileStore)
+    st._logger = _MM()
+    st._min_duration_ratio = 0.10
+    st._max_duration_ratio = 1.8
+    cycles = [
+        {
+            "id": f"c{i}",
+            "profile_name": "Long",
+            "status": "completed",
+            "duration": 120.0,
+            "power_data": [[0.0, 100.0], [60.0, 100.0], [120.0, 0.0]],
+        }
+        for i in range(6)
+    ]
+    st.iter_evidence_cycles = lambda: iter(cycles)
+    st.get_profiles = lambda: {"Long": {"avg_duration": avg_duration}}
+    st._stage1_duration_for = lambda name, prof: avg_duration
+    st.compute_profile_health = lambda: {}
+    st.compute_profile_trends = lambda: {}
+    st.unmatchable_profiles = lambda: {"Ghost": "no cycle with power data"}
+    return st
+
+
+def test_a_zero_ratio_does_not_wipe_every_advisory() -> None:
+    """`ratio` is `round(dur / avg, 3)`, so a hand-set duration over ~33 h rounds
+    it to exactly 0.0 against the 60 s floor. `math.log(0.0)` raised ValueError
+    into `compute_profile_advisories`'s broad `except`, which returns [] - so one
+    outlier cycle removed every advisory for every profile, the `unmatchable`
+    warnings included."""
+    st = _advisory_store(avg_duration=500_000.0)
+
+    out = st.compute_profile_advisories()
+
+    codes = {a["code"] for a in out}
+    assert "unmatchable" in codes, "the unrelated warning must survive"
+    assert "duration_outlier" in codes
+
+
+def test_the_zero_ratio_case_is_actually_reachable() -> None:
+    """Guards the test above against becoming vacuous: if the rounding ever stops
+    producing 0.0, the regression it pins is no longer being exercised."""
+    st = _advisory_store(avg_duration=500_000.0)
+
+    offenders = st._self_unmatchable_cycles()["Long"]
+
+    assert any(o["ratio"] == 0.0 for o in offenders)
+
+
+def test_a_normal_outlier_still_ranks_by_distance_from_one() -> None:
+    """The clamp must not disturb ordinary ranking."""
+    st = _advisory_store(avg_duration=1000.0)
+    st.iter_evidence_cycles = lambda: iter(
+        [
+            {"id": "near", "profile_name": "Long", "status": "completed", "duration": 120.0},
+            {"id": "far", "profile_name": "Long", "status": "completed", "duration": 90.0},
+        ]
+        + [
+            {"id": f"ok{i}", "profile_name": "Long", "status": "completed", "duration": 1000.0}
+            for i in range(4)
+        ]
+    )
+
+    out = [a for a in st.compute_profile_advisories() if a["code"] == "duration_outlier"]
+
+    assert out and out[0]["message_params"]["ratio"] == "0.1"
