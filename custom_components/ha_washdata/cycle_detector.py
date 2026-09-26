@@ -300,6 +300,61 @@ def trim_zero_readings(
     return readings[start_idx : end_idx + 1]
 
 
+def terminal_high_for_guards(
+    store: Any,
+    config: "CycleDetectorConfig",
+    cycle_max_power: Any,
+    profile_name: str | None,
+) -> tuple[float, ...] | None:
+    """Element 10 of the match tuple: the matched profile's last high-power block.
+
+    Two consumers with two different bars, and the bar has to travel with the
+    block (register item 351):
+
+    * **anti-crease** (#399) measures against ``anti_wrinkle_max_power``, the
+      dryer's "a tumble is below this" level. Only meaningful while anti-wrinkle
+      is on, and it returns a TRIPLE.
+    * **the standby-band finalise** (#296 / #445) shares the same predicate and
+      used to get nothing at all, because element 10 was supplied only when
+      anti-wrinkle was enabled and ``DEFAULT_ANTI_WRINKLE_ENABLED`` is False. So
+      on a washing machine ``_anticrease_spin_pending`` returned False at once
+      and the machine could finalise on the quiet plateau before its final spin,
+      recording that spin as a second cycle. The bar here is a share of the
+      cycle's own peak, and it is returned as a QUAD so
+      ``_high_power_seconds_since`` counts live seconds against the same number.
+
+    **This lives here, module level, because it had two copies.** The manager
+    builds the live match tuple and ``playground`` builds the sim's, and
+    ``end_gate_eval.py`` drives the detector through the Playground - so an arm
+    present in only one of them is invisible to every measurement made with that
+    harness, which is exactly how item 352 first measured as a no-op. The copies
+    had already drifted in their error handling before they were merged.
+
+    Total by construction: every failure path returns None, which leaves the
+    guard exactly as inert as it was. That is the fail-open direction every input
+    here takes, and it is also what lets ``playground`` call it directly while
+    keeping its own never-raise contract.
+    """
+    if not profile_name or store is None:
+        return None
+    try:
+        if config.anti_wrinkle_enabled:
+            return store.profile_terminal_high_block(
+                profile_name, config.anti_wrinkle_max_power
+            )
+        if config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES:
+            return None
+        ceiling = float(cycle_max_power or 0.0) * STANDBY_BAND_MAX_FRACTION
+        if ceiling <= 0:
+            return None
+        block = store.profile_terminal_high_block(profile_name, ceiling)
+        if block is None:
+            return None
+        return (float(block[0]), float(block[1]), float(block[2]), ceiling)
+    except Exception:  # noqa: BLE001 - a guard input must never break matching
+        return None
+
+
 class CycleDetector:
     """Detects washing machine cycles based on power usage.
 

@@ -279,14 +279,16 @@ from .const import (
     STATE_PAUSED,
     STATE_USER_PAUSED,
     STATE_ENDING,
-    STANDBY_BAND_FINALIZE_DEVICE_TYPES,
-    STANDBY_BAND_MAX_FRACTION,
     STATE_ANTI_WRINKLE,
     STATE_DELAY_WAIT,
     STATE_IDLE,
     STATE_UNKNOWN,
 )
-from .cycle_detector import CycleDetector, CycleDetectorConfig
+from .cycle_detector import (
+    CycleDetector,
+    CycleDetectorConfig,
+    terminal_high_for_guards,
+)
 from .learning import LearningManager
 from .profile_store import (
     ProfileStore,
@@ -2361,28 +2363,14 @@ class WashDataManager:
         Returns None when nothing applies, which leaves the guard exactly as
         inert as it was - the fail-open direction every input here takes.
         """
-        if not profile_name:
-            return None
-        detector = self.detector
-        if detector.config.anti_wrinkle_enabled:
-            return self.profile_store.profile_terminal_high_block(
-                profile_name, detector.config.anti_wrinkle_max_power
-            )
-        if detector.config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES:
-            return None
-        try:
-            ceiling = (
-                float(getattr(detector, "_cycle_max_power", 0.0) or 0.0)
-                * STANDBY_BAND_MAX_FRACTION
-            )
-        except (TypeError, ValueError):
-            return None
-        if ceiling <= 0:
-            return None
-        block = self.profile_store.profile_terminal_high_block(profile_name, ceiling)
-        if block is None:
-            return None
-        return (float(block[0]), float(block[1]), float(block[2]), ceiling)
+        # One implementation, shared with the Playground's sim tuple - see
+        # `cycle_detector.terminal_high_for_guards` for why it is not inlined here.
+        return terminal_high_for_guards(
+            self.profile_store,
+            self.detector.config,
+            getattr(self.detector, "_cycle_max_power", 0.0),
+            profile_name,
+        )
 
     async def async_setup(self) -> None:
         """Set up the manager."""
@@ -7655,6 +7643,34 @@ class WashDataManager:
         """
         pending: list[dict[str, Any]] = list(self._pending_notifications)
         self._pending_notifications = []
+
+        # The #446 handover has to run BEFORE the queue is delivered, not after
+        # the live entry inside it. It `_send_tag_clear`s `_lifecycle_tag`, and on
+        # this path entries that RIDE that tag are delivered first: a deferred
+        # LIVE entry replaces any earlier live one and is appended last (see
+        # `_dispatch_notification`), so a `pre_complete` reminder queued earlier in
+        # the cycle sits ahead of it. Flushed in order, the reminder was delivered
+        # and then dismissed off the phone a moment later by the handover - and it
+        # is a `priority: high` "nearly done" card, i.e. the one worth having.
+        # The direct path cannot hit this: there the first live tick happens early,
+        # long before any reminder exists. Only presence deferral can put the two
+        # in this order.
+        handover_done = False
+        if not self._live_activity_started and any(
+            entry.get("event_type") == NOTIFY_EVENT_LIVE for entry in pending
+        ):
+            self._hand_over_lifecycle_to_live_activity()
+            handover_done = True
+            # A queued START card is superseded by the activity about to render,
+            # and delivering it after the clear above is what the handover exists
+            # to prevent (#446: one entry, not a stale "cycle started" beside the
+            # live one). Dropped rather than delivered-then-cleared.
+            pending = [
+                entry
+                for entry in pending
+                if entry.get("event_type") != NOTIFY_EVENT_START
+            ]
+
         for entry in pending:
             sent = self._dispatch_notification(
                 entry["message"],
@@ -7677,8 +7693,14 @@ class WashDataManager:
                     self._last_live_notification_time = dt_util.now()
                 # The queued entry carries the same `activity: "start"` the direct
                 # paths send, so the phone has a live activity either way and the
-                # cycle-end teardown has to know about it (#446).
-                self._record_live_activity_started()
+                # cycle-end teardown has to know about it (#446). Recorded only
+                # once the dispatch actually SENT, which is why the flag is not set
+                # next to the hoisted handover above: a failed delivery would
+                # otherwise claim an activity that is not on the phone.
+                if handover_done:
+                    self._live_activity_started = True
+                else:
+                    self._record_live_activity_started()
 
     def _handle_noise_cycle(self, max_power: float) -> None:
         """Handle a detected noise cycle."""
@@ -8151,8 +8173,19 @@ class WashDataManager:
         itself, after the finished notification has been delivered - see
         ``_end_live_activity`` (#446). Only the pending-purge, the action-based
         clear marker (kept for backward compatibility with custom action templates)
-        and the state reset run here. On shutdown (``clear_services=True``) no
-        finished notification follows, so both tags are cleared outright.
+        and the state reset run here.
+
+        On shutdown (``clear_services=True``) the two tags are NOT treated alike,
+        and the difference is load-bearing (register item 350(c)). The live tag is
+        cleared unconditionally, because a Live Activity left behind counts its
+        chronometer into negative numbers once nothing updates it. The lifecycle
+        tag is cleared only while ``self.detector.state`` is in
+        ``_CYCLE_IN_PROGRESS_STATES``: it carries the FINISHED alert, so an unload
+        or a restart after a cycle ended used to dismiss the very card the user was
+        still reading. "No finished notification follows" is true of a cycle in
+        progress and false of one already over - while both tags shared a value
+        that could not be distinguished, and now it can. See the comment at the
+        clear itself before making this unconditional again.
         """
         # Purge queued live-progress entries and stale start/pre-complete entries
         # so a completed cycle cannot replay them later.
