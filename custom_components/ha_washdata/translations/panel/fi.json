@@ -257,7 +257,10 @@
     "hist_scan": "Etsi syklejä",
     "hist_import_n": "Tuo {n} sykliä",
     "hist_goto_cycles": "Näytä syklit",
-    "save_total_cycles": "Tallenna kokonaismäärä"
+    "save_total_cycles": "Tallenna kokonaismäärä",
+    "clear": "Tyhjennä",
+    "add_brand": "Lisää merkki",
+    "add_appliance": "Lisää laite"
   },
   "note": {
     "off_delay": {
@@ -384,7 +387,8 @@
     "community_store": "Yhteisökauppa",
     "online_account": "Yhteisökauppa ja verkkotoiminnot",
     "import_power_history": "Tuo tehohistoria",
-    "service_status": "Huollon tila"
+    "service_status": "Huollon tila",
+    "online_account_tab": "Verkko ja yhteisö"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -524,7 +528,8 @@
     "pg_tile_matched_tip": "Syklit, jotka on liitetty oikein tunnettuun ohjelmaan",
     "pg_time_left": "Aikaa jäljellä",
     "pg_weak_match": "Heikko osuma",
-    "phase_name": "Nimi",
+    "phase_name": "Vaiheen nimi",
+    "name": "Nimi",
     "phase_timeline": "Vaiheiden aikajana",
     "power": "Teho",
     "profile": "Profiili",
@@ -1096,7 +1101,9 @@
     "odometer_intro": "Tämä kokonaismäärä voi vain kasvaa. Syklitietueen poistaminen ei muuta sitä, ja laskenta jatkuu myös tallennetun historian rajan yli, jotta huoltomuistutukset pysyvät oikeina.",
     "odometer_correct_hint": "Aseta tämä, jos WashData kirjasi ajon, jota ei koskaan tapahtunut, tai jos laitteella oli jo ajettu syklejä ennen WashDatan asennusta.",
     "no_reminders_set": "Huoltomuistutuksia ei ole vielä asetettu.",
-    "toast_program_armed": "Ohjelma asetettu seuraavaa sykliä varten: {program}"
+    "toast_program_armed": "Ohjelma asetettu seuraavaa sykliä varten: {program}",
+    "toast_range_required": "Aseta kelvollinen Mistä/Mihin-alue.",
+    "no_profiles_option": "(ei vielä profiileja, lisää uusi)"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
@@ -1672,6 +1679,10 @@
     "unload_track_without_door": {
       "label": "Vahvista purkaminen manuaalisesti",
       "doc": "Käytä purkamismuistutusta laitteessa, jolla ei ole ovianturin entiteettiä eikä purkamisen vahvistusentiteettiä, ja vahvista purkaminen omalla automaatiollasi: paina ”Merkitse puretuksi” -painike-entiteettiä tai kutsu palvelua ha_washdata.mark_unloaded. Ohitetaan, kun ovianturin entiteetti on asetettu, koska se antaa signaalin jo valmiiksi."
+    },
+    "notify_icon_color": {
+      "label": "Ilmoituksen väri",
+      "doc": "Korostusväri tämän laitteen ilmoituksille, jotta pesukone, kuivausrumpu ja astianpesukone erottuvat toisistaan yhdellä silmäyksellä. iOS värittää kuvakkeen ja Liveseurannan edistymispalkin lukitulla näytöllä ja Dynamic Islandissa. Androidille lähetetään sama väri, mutta puhelin päättää, mitä se sillä tekee: jotkin värittävät kuvakkeen ja monet (erityisesti Samsung One UI) jättävät sen kokonaan huomiotta. Molemmat ymmärtävät heksakoodin (esim. #03A9F4). Jätä tyhjäksi alustan oletusta varten."
     }
   },
   "setting_group": {
@@ -2040,7 +2051,9 @@
     "unlabel_done": "{count} syklin merkintä poistettu",
     "unlabel_failed": "Merkinnän poisto epäonnistui: {error}",
     "odometer_saved": "Syklien kokonaismäärä tallennettu",
-    "odometer_save_failed": "Kokonaismäärän tallennus epäonnistui: {error}"
+    "odometer_save_failed": "Kokonaismäärän tallennus epäonnistui: {error}",
+    "store_pick_profile_share": "Valitse profiili, johon jaetaan",
+    "remove_failed": "Poisto epäonnistui: {error}"
   },
   "trend": {
     "down": "Trendikäs alaspäin",

@@ -257,7 +257,10 @@
     "hist_scan": "Ieškoti ciklų",
     "hist_import_n": "Importuoti ciklus ({n})",
     "hist_goto_cycles": "Parodyti ciklus",
-    "save_total_cycles": "Išsaugoti bendrą skaičių"
+    "save_total_cycles": "Išsaugoti bendrą skaičių",
+    "clear": "Išvalyti",
+    "add_brand": "Pridėti prekės ženklą",
+    "add_appliance": "Pridėti prietaisą"
   },
   "note": {
     "off_delay": {
@@ -384,7 +387,8 @@
     "community_store": "Bendruomenės parduotuvė",
     "online_account": "Bendruomenės parduotuvė ir interneto funkcijos",
     "import_power_history": "Galios istorijos importavimas",
-    "service_status": "Aptarnavimo būsena"
+    "service_status": "Aptarnavimo būsena",
+    "online_account_tab": "Internetas ir bendruomenė"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -524,7 +528,8 @@
     "pg_tile_matched_tip": "Ciklai, teisingai priskirti žinomai programai",
     "pg_time_left": "Likęs laikas",
     "pg_weak_match": "Silpna atitiktis",
-    "phase_name": "Vardas",
+    "phase_name": "Fazės pavadinimas",
+    "name": "Vardas",
     "phase_timeline": "Fazių laiko juosta",
     "power": "Galia",
     "profile": "Profilis",
@@ -1096,7 +1101,9 @@
     "odometer_intro": "Šis bendras skaičius tik didėja. Ciklo įrašo ištrynimas jo nepakeičia, o skaičiavimas tęsiamas ir pasiekus išsaugotos istorijos ribą, todėl aptarnavimo priminimai lieka tikslūs.",
     "odometer_correct_hint": "Nustatykite tai, jei WashData užregistravo ciklą, kurio iš tikrųjų nebuvo, arba jei prietaisas jau buvo atlikęs ciklus prieš WashData įdiegimą.",
     "no_reminders_set": "Kol kas nenustatyta jokių aptarnavimo priminimų.",
-    "toast_program_armed": "Programa nustatyta kitam ciklui: {program}"
+    "toast_program_armed": "Programa nustatyta kitam ciklui: {program}",
+    "toast_range_required": "Nustatykite tinkamą Nuo/Iki diapazoną.",
+    "no_profiles_option": "(profilių dar nėra, pridėkite)"
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1640,6 +1647,10 @@
     "unload_track_without_door": {
       "label": "Patvirtinti iškrovimą rankiniu būdu",
       "doc": "Naudoti iškrovimo priminimą įrenginyje, kuris neturi nei Durų jutiklio objekto, nei Iškrovimo patvirtinimo objekto, o iškrovimą patvirtinti sava automatika: paspauskite mygtuko objektą „Pažymėti kaip iškrautą“ arba iškvieskite paslaugą ha_washdata.mark_unloaded. Ignoruojama, kai nustatytas Durų jutiklio objektas, nes jis šį signalą jau teikia."
+    },
+    "notify_icon_color": {
+      "label": "Pranešimo spalva",
+      "doc": "Akcentinė spalva šio prietaiso pranešimams, kad skalbimo mašiną, džiovintuvą ir indaplovę būtų galima atskirti iš pirmo žvilgsnio. iOS nuspalvina piktogramą ir Live Activity eigos juostą užrakto ekrane bei Dynamic Island. Android siunčiama ta pati spalva, tačiau ką su ja daryti, sprendžia pats telefonas: vieni nuspalvina piktogramą, o daugelis (ypač Samsung One UI) ją visiškai ignoruoja. Abi platformos supranta hex kodą (pvz., #03A9F4). Palikite tuščią, kad būtų naudojama numatytoji platformos spalva."
     }
   },
   "setting_group": {
@@ -1733,7 +1744,7 @@
     "all_statuses": "Visos būsenos",
     "ambiguous": "Dviprasmiška",
     "auto_detect": "Automatinis aptikimas",
-    "clear": "Aišku",
+    "clear": "Vienareikšmiška",
     "completed": "Užbaigta",
     "fine_tuning": "patikslinu dabar...",
     "force_stopped": "Jėga sustojo",
@@ -1896,7 +1907,9 @@
     "unlabel_done": "Panaikintas žymėjimas ciklams: {count}",
     "unlabel_failed": "Nepavyko panaikinti žymėjimo: {error}",
     "odometer_saved": "Bendras ciklų skaičius išsaugotas",
-    "odometer_save_failed": "Nepavyko išsaugoti bendro skaičiaus: {error}"
+    "odometer_save_failed": "Nepavyko išsaugoti bendro skaičiaus: {error}",
+    "store_pick_profile_share": "Pasirinkite profilį, į kurį bendrinti",
+    "remove_failed": "Nepavyko pašalinti: {error}"
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",

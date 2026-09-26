@@ -57,7 +57,7 @@
     "auto_label_cycles_tip": "Attribuer automatiquement des noms de profil aux cycles sans étiquette dont la confiance de correspondance dépasse le seuil",
     "cancel": "Annuler",
     "clear_debug": "Effacer les données de débogage",
-    "clear_splits": "Clair",
+    "clear_splits": "Effacer",
     "close": "Fermer",
     "compare": "Comparer",
     "confirm": "Confirmer",
@@ -209,7 +209,10 @@
     "hist_scan": "Rechercher des cycles",
     "hist_import_n": "Importer {n} cycles",
     "hist_goto_cycles": "Voir les cycles",
-    "save_total_cycles": "Enregistrer le total"
+    "save_total_cycles": "Enregistrer le total",
+    "clear": "Effacer",
+    "add_brand": "Ajouter une marque",
+    "add_appliance": "Ajouter un appareil"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -331,7 +334,8 @@
     "community_store": "Boutique communautaire",
     "online_account": "Boutique communautaire et fonctionnalités en ligne",
     "import_power_history": "Importer l'historique de puissance",
-    "service_status": "État de l'entretien"
+    "service_status": "État de l'entretien",
+    "online_account_tab": "En ligne et communauté"
   },
   "health": {
     "fair": "Qualité de profil acceptable",
@@ -471,7 +475,8 @@
     "pg_tile_matched_tip": "Cycles correctement attribués à un programme connu",
     "pg_time_left": "Temps restant",
     "pg_weak_match": "Correspondance faible",
-    "phase_name": "Nom",
+    "phase_name": "Nom de la phase",
+    "name": "Nom",
     "phase_timeline": "Chronologie des phases",
     "power": "Puissance",
     "profile": "Profil",
@@ -1043,7 +1048,9 @@
     "toast_program_armed": "Programme prévu pour le prochain cycle : {program}",
     "standby_above_stop_title": "Consomme encore {idle} W à la fin du cycle",
     "standby_above_stop_sub": "{n} des {total} derniers cycles. Le Délai d'arrêt ne démarre qu'une fois la puissance descendue sous le Seuil d'arrêt ({stop} W) : les cycles se terminent donc en retard ou doivent être arrêtés à la main.",
-    "advisory_duration_outlier": "{n} cycle(s) étiquetés '{name}' s'écartent trop de sa durée habituelle pour pouvoir un jour lui correspondre (pire cas : {ratio}x). Ils sont probablement mal étiquetés, ou un enregistrement a capté deux exécutions. Réétiquetez-les ou scindez-les pour qu'ils cessent de fausser l'estimation de temps de ce programme."
+    "advisory_duration_outlier": "{n} cycle(s) étiquetés '{name}' s'écartent trop de sa durée habituelle pour pouvoir un jour lui correspondre (pire cas : {ratio}x). Ils sont probablement mal étiquetés, ou un enregistrement a capté deux exécutions. Réétiquetez-les ou scindez-les pour qu'ils cessent de fausser l'estimation de temps de ce programme.",
+    "toast_range_required": "Définissez une plage De/À valide",
+    "no_profiles_option": "(aucun profil, ajoutez-en un)"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",
@@ -1619,6 +1626,10 @@
     "unload_track_without_door": {
       "label": "Confirmer le déchargement manuellement",
       "doc": "Exécute le rappel de déchargement sur un appareil sans Entité capteur de porte ni Entité de confirmation de déchargement, et vous confirmez le déchargement depuis votre propre automatisation : appuyez sur l'entité bouton \"Marquer comme déchargé\" ou appelez le service ha_washdata.mark_unloaded. Ignoré lorsqu'une Entité capteur de porte est définie, car elle fournit déjà le signal."
+    },
+    "notify_icon_color": {
+      "label": "Couleur de notification",
+      "doc": "Couleur d'accentuation des notifications de cet appareil, afin de distinguer d'un coup d'œil un lave-linge, un sèche-linge et un lave-vaisselle. iOS colore l'icône ainsi que la barre de progression de l'activité en direct sur l'écran verrouillé et dans la Dynamic Island. Android reçoit la même couleur, mais l'usage qu'il en fait dépend du téléphone : certains colorent l'icône, et beaucoup (Samsung One UI en particulier) l'ignorent totalement. Le format hexadécimal (par exemple #03A9F4) est compris par les deux. Laissez vide pour la valeur par défaut de la plateforme."
     }
   },
   "setting_group": {
@@ -1712,7 +1723,7 @@
     "all_statuses": "Tous les statuts",
     "ambiguous": "Ambiguë",
     "auto_detect": "Détection automatique",
-    "clear": "Clair",
+    "clear": "Sans ambiguïté",
     "completed": "Complété",
     "fine_tuning": "peaufiner maintenant…",
     "force_stopped": "Forcer arrêté",
@@ -1875,7 +1886,9 @@
     "unlabel_done": "Étiquette retirée de {count} cycle(s)",
     "unlabel_failed": "Échec du retrait de l'étiquette : {error}",
     "odometer_saved": "Total des cycles enregistré",
-    "odometer_save_failed": "Impossible d'enregistrer le total : {error}"
+    "odometer_save_failed": "Impossible d'enregistrer le total : {error}",
+    "store_pick_profile_share": "Choisissez un profil dans lequel partager",
+    "remove_failed": "Échec du retrait : {error}"
   },
   "suggestion": {
     "both_agree": "WashData recommande",

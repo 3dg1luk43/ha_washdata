@@ -155,6 +155,10 @@ NOTIFY_EVENT_TIMER = "cycle_timer"  # User-configured mid-cycle countdown timer
 
 CONF_NOTIFY_TITLE = "notify_title"
 CONF_NOTIFY_ICON = "notify_icon"
+# Per-device accent colour (#454). One setting, three companion-app keys: `color`
+# (Android notification accent), `notification_icon_color` (iOS icon glyph tint) and
+# `progress_bar_color` (iOS Live Activity bar). Mobile-only, blank = platform default.
+CONF_NOTIFY_ICON_COLOR = "notify_icon_color"
 CONF_NOTIFY_START_MESSAGE = "notify_start_message"
 CONF_NOTIFY_FINISH_MESSAGE = "notify_finish_message"
 CONF_NOTIFY_PRE_COMPLETE_MESSAGE = "notify_pre_complete_message"

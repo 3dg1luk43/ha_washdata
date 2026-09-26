@@ -257,7 +257,10 @@
         "hist_scan": "サイクルを検索",
         "hist_import_n": "{n} サイクルをインポート",
         "hist_goto_cycles": "サイクルを表示",
-        "save_total_cycles": "累計を保存"
+        "save_total_cycles": "累計を保存",
+        "clear": "クリア",
+        "add_brand": "ブランドを追加",
+        "add_appliance": "家電を追加"
     },
     "note": {
         "off_delay": {
@@ -384,7 +387,8 @@
         "community_store": "コミュニティストア",
         "online_account": "コミュニティストアとオンライン機能",
         "import_power_history": "電力履歴のインポート",
-        "service_status": "メンテナンス状況"
+        "service_status": "メンテナンス状況",
+        "online_account_tab": "オンラインとコミュニティ"
     },
     "health": {
         "fair": "プロファイル品質: 普通",
@@ -524,7 +528,8 @@
         "pg_tile_matched_tip": "既知のプログラムに正しく割り当てられたサイクル",
         "pg_time_left": "残り時間",
         "pg_weak_match": "弱いマッチ",
-        "phase_name": "名前",
+        "phase_name": "フェーズ名",
+        "name": "名前",
         "phase_timeline": "フェーズタイムライン",
         "power": "電力",
         "profile": "プロファイル",
@@ -1096,7 +1101,9 @@
         "odometer_intro": "この累計は増える一方です。サイクルの記録を削除しても変わらず、保存される履歴の上限を超えてもカウントを続けるため、サービスリマインダーは正確なままです。",
         "odometer_correct_hint": "WashData が実際には行われていない稼働を記録した場合や、WashData を導入する前に家電がすでにサイクルを実行していた場合は、この値を設定してください。",
         "no_reminders_set": "サービスリマインダーはまだ設定されていません。",
-        "toast_program_armed": "次のサイクル用にプログラムを設定しました: {program}"
+        "toast_program_armed": "次のサイクル用にプログラムを設定しました: {program}",
+        "toast_range_required": "有効な開始/終了の範囲を設定してください。",
+        "no_profiles_option": "(プロファイルなし、追加してください)"
     },
     "pg_desc": {
         "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
@@ -1672,6 +1679,10 @@
         "unload_track_without_door": {
             "label": "取り出しを手動で確認",
             "doc": "ドアセンサーエンティティも取り出し確認エンティティもないデバイスで取り出しリマインダーを動作させ、代わりに自作のオートメーションから取り出しを確認します: \"取り出し済みとしてマーク\" ボタンエンティティを押すか、ha_washdata.mark_unloaded サービスを呼び出します。ドアセンサーエンティティが設定されている場合は、すでに信号が得られるため無視されます。"
+        },
+        "notify_icon_color": {
+            "label": "通知の色",
+            "doc": "この家電の通知に使うアクセントカラー。洗濯機、乾燥機、食器洗い機をひと目で見分けられます。iOS はアイコンと、ロック画面や Dynamic Island に表示されるライブアクティビティの進行状況バーに色を付けます。Android にも同じ色が送られますが、それをどう扱うかは端末次第で、アイコンに色を付けるものもあれば、まったく無視するもの（特に Samsung One UI）も多くあります。16 進数（例: #03A9F4）はどちらでも使えます。プラットフォームのデフォルトを使う場合は空欄のままにします。"
         }
     },
     "setting_group": {
@@ -1765,7 +1776,7 @@
         "all_statuses": "すべてのステータス",
         "ambiguous": "あいまい",
         "auto_detect": "自動検出",
-        "clear": "クリア",
+        "clear": "明確",
         "completed": "完了",
         "fine_tuning": "今微調整中…",
         "force_stopped": "強制停止",
@@ -1928,7 +1939,9 @@
         "unlabel_failed": "ラベルの解除に失敗しました: {error}",
         "odometer_saved": "累計サイクル数を保存しました",
         "odometer_save_failed": "累計を保存できませんでした: {error}",
-        "contrib_device_changed": "コミュニティストアに追加しましたが、入力フォームを開いている間にデバイスが変更されました。設定で選択してください。"
+        "contrib_device_changed": "コミュニティストアに追加しましたが、入力フォームを開いている間にデバイスが変更されました。設定で選択してください。",
+        "store_pick_profile_share": "共有先のプロファイルを選択してください",
+        "remove_failed": "削除に失敗しました: {error}"
     },
     "suggestion": {
         "both_agree": "WashDataの推奨",
