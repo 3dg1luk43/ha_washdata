@@ -1669,6 +1669,12 @@ function _valueAt(pts, x) {
 // Anything else the user types (a CSS name, a short #rgb) stays in the text box and
 // simply leaves the swatch showing the placeholder colour.
 const _COLOR_HEX_RE = /^#[0-9a-fA-F]{6}$/;
+// The swatch value for an UNSET colour field. The swatch cannot be empty, so it
+// falls back to the field's placeholder, which is what _field() renders initially.
+const _COLOR_SWATCH_FALLBACK = '#03A9F4';
+function _colorSwatchDefault(placeholder) {
+  return _COLOR_HEX_RE.test(String(placeholder || '')) ? String(placeholder) : _COLOR_SWATCH_FALLBACK;
+}
 
 // Build one form field group. `f` is a schema field; opts are resolved by caller.
 function _field(f, value, extra) {
@@ -1760,7 +1766,7 @@ function _field(f, value, extra) {
     // into it. Clearing the text box is how the user goes back to the platform
     // default. Only the text box carries data-opt, so the swatch is never collected.
     const ph = f.placeholder ? ` placeholder="${_esc(f.placeholder)}"` : '';
-    const swatch = _COLOR_HEX_RE.test(String(v)) ? String(v) : (f.placeholder || '#03A9F4');
+    const swatch = _COLOR_HEX_RE.test(String(v)) ? String(v) : _colorSwatchDefault(f.placeholder);
     const clearLbl = extra.t ? extra.t('btn.clear', {}, 'Clear') : 'Clear';
     input = `<div class="wd-colorfield">` +
       `<input type="color" class="wd-color-sw" value="${_esc(swatch)}" aria-label="${_esc(f.label)}" tabindex="-1">` +
@@ -9602,7 +9608,7 @@ class HaWashdataPanel extends HTMLElement {
     }
     if (wd.band) {
       const lo = _valueAt(wd.band.min, x), hi = _valueAt(wd.band.max, x);
-      if (lo != null && hi != null) lines.push(`${this._t('lbl.envelope', {}, 'Envelope')}: ${lo.toFixed(hi < 100 ? 1 : 0)}–${hi.toFixed(hi < 100 ? 1 : 0)} W`);
+      if (lo != null && hi != null) lines.push(`${this._t('lbl.envelope', {}, 'Envelope')}: ${lo.toFixed(lo < 100 ? 1 : 0)}–${hi.toFixed(hi < 100 ? 1 : 0)} W`);
     }
     // Anomaly detail when hovering inside a detected artifact span.
     (wd.artifacts || []).forEach(a => {
@@ -11956,6 +11962,12 @@ class HaWashdataPanel extends HTMLElement {
         const txt = btn.parentElement && btn.parentElement.querySelector('input[data-opt]');
         if (!txt) return;
         txt.value = '';
+        // The swatch cannot show "unset", so put it back to the same placeholder
+        // colour _field() renders for an empty value - otherwise it keeps showing
+        // the cleared colour until the next full re-render, which reads as the
+        // clear not having worked.
+        const sw = btn.parentElement.querySelector('.wd-color-sw');
+        if (sw) sw.value = _colorSwatchDefault(txt.placeholder);
         this._dirtyOptKeys.add(txt.dataset.opt);
         this._liveValidateSettings(sr);
       });

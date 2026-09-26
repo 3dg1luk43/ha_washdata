@@ -61,6 +61,22 @@ test('picking from the swatch fills the text box and saves that value', async ({
   expect(Object.keys(options).filter((k) => k.includes('color'))).toEqual(['notify_icon_color']);
 });
 
+test('clear resets the swatch as well as the text box', async ({ page }) => {
+  // The swatch cannot render "unset", so it must fall back to the placeholder.
+  // Leaving it on the cleared colour reads as the clear not having worked.
+  const field = await openNotificationColour(page);
+  const sw = field.locator('.wd-color-sw');
+  await sw.evaluate((el: HTMLInputElement) => {
+    el.value = '#26c6da';
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await expect(sw).toHaveValue('#26c6da');
+
+  await field.locator('.wd-color-clear').click();
+  await expect(field.locator('input[data-opt="notify_icon_color"]')).toHaveValue('');
+  await expect(sw).toHaveValue('#03a9f4');
+});
+
 test('clear puts a configured colour back to the platform default', async ({ page }) => {
   // Saving only sends what changed against the stored options (#447), so the
   // clear has to start from a colour that is actually persisted.
